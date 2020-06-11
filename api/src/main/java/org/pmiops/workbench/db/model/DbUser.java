@@ -27,6 +27,8 @@ import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Degree;
@@ -35,6 +37,8 @@ import org.pmiops.workbench.model.EmailVerificationStatus;
 @Entity
 @Table(name = "user")
 public class DbUser {
+
+  private static final String CLUSTER_NAME_PREFIX = "all-of-us-";
 
   /**
    * This is a Gson compatible class for encoding a JSON blob which is stored in MySQL. This
@@ -736,5 +740,35 @@ public class DbUser {
 
   public static int usernameHashCode(DbUser dbUser) {
     return (dbUser == null) ? 0 : Objects.hashCode(dbUser.getUsername());
+  }
+
+  /**
+   * Produce a succinct string for giving an administrator a heads-up in an alert or other text-only
+   * context.
+   */
+  @Transient
+  public String getAdminDescription() {
+    final String institutions =
+        getInstitutionalAffiliations().stream()
+            .map(DbInstitutionalAffiliation::getInstitution)
+            .collect(Collectors.joining(", "));
+    final Days accountAge =
+        Days.daysBetween(new DateTime(getCreationTime().toInstant()), DateTime.now());
+    return String.format(
+        "%s %s - Username: %s, Contact Email: %s\n"
+            + "user_id: %d, Institutions: [ %s ], Account Age: %d days",
+        getGivenName(),
+        getFamilyName(),
+        getUsername(),
+        getContactEmail(),
+        getUserId(),
+        institutions,
+        accountAge.getDays());
+  }
+
+  /** Returns a name for the VM / cluster to be created for this user. */
+  @Transient
+  public String getClusterName() {
+    return CLUSTER_NAME_PREFIX + getUserId();
   }
 }

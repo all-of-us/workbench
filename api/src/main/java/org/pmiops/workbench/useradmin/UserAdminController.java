@@ -10,7 +10,6 @@ import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.UserAuditLogQueryResponse;
 import org.pmiops.workbench.model.UserListResponse;
-import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.profile.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -35,15 +34,14 @@ public class UserAdminController implements UserAdminApiDelegate {
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<EmptyResponse> bypassAccessRequirement(
       Long userId, AccessBypassRequest bypassed) {
-    userAdminService.updateBypassTime(userId, bypassed);
+    userService.updateBypassTime(userId, bypassed);
     return ResponseEntity.noContent().build();
   }
 
   @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<UserListResponse> getAllUsers() {
-    return ResponseEntity.ok(
-        new UserListResponse().profileList(userAdminService.listAllProfiles()));
+    return ResponseEntity.ok(new UserListResponse().profileList(profileService.listAllProfiles()));
   }
 
   @Override
@@ -77,12 +75,5 @@ public class UserAdminController implements UserAdminApiDelegate {
         .orElseThrow(
             () ->
                 new NotFoundException(String.format("User with username %s not found", username)));
-  }
-
-  @Override
-  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
-  public ResponseEntity<EmptyResponse> updateVerifiedInstitutionalAffiliation(
-      Long userId, VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation) {
-    return null;
   }
 }

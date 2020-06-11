@@ -8,7 +8,6 @@ import org.pmiops.workbench.actionaudit.TargetType
 import org.pmiops.workbench.actionaudit.targetproperties.EgressEventCommentTargetProperty
 import org.pmiops.workbench.actionaudit.targetproperties.EgressEventTargetProperty
 import org.pmiops.workbench.actionaudit.targetproperties.TargetPropertyExtractor
-import org.pmiops.workbench.api.ClusterController
 import org.pmiops.workbench.db.dao.UserDao
 import org.pmiops.workbench.db.model.DbUser
 import org.pmiops.workbench.exceptions.BadRequestException
@@ -33,15 +32,6 @@ constructor(
 ) : EgressEventAuditor {
 
     /**
-     * Converts a DB-internal user ID to the corresponding VM name. Note: for now, we use the same
-     * logic used by ClusterController, but if that logic changes, we may want to adapt this code
-     * to support searching for VMs with both the older and newer naming scheme.
-     */
-    private fun dbUserToClusterName(dbUser: DbUser): String {
-        return ClusterController.clusterNameForUser(dbUser)
-    }
-
-    /**
      * Converts the AoU-chosen cluster name into the actual VM name as reported by Google Cloud's
      * flow logs. Empirically, an "-m" suffix is added to the VM name, due to Leo team's use
      * of Dataproc (see https://cloud.google.com/dataproc/docs/concepts/configuring-clusters/metadata).
@@ -50,7 +40,7 @@ constructor(
      * clusters!
      */
     private fun dbUserToVmName(dbUser: DbUser): String {
-        return dbUserToClusterName(dbUser) + DATAPROC_MASTER_NODE_SUFFIX
+        return dbUser.clusterName + DATAPROC_MASTER_NODE_SUFFIX
     }
 
     override fun fireEgressEvent(event: EgressEvent) {

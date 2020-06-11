@@ -5,14 +5,21 @@ import com.ifountain.opsgenie.client.swagger.ApiException;
 import com.ifountain.opsgenie.client.swagger.api.AlertApi;
 import com.ifountain.opsgenie.client.swagger.model.CreateAlertRequest;
 import com.ifountain.opsgenie.client.swagger.model.SuccessResponse;
+import java.util.Optional;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.EgressEvent;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAdminView;
+import org.pmiops.workbench.model.WorkspaceUserAdminView;
 import org.pmiops.workbench.workspaceadmin.WorkspaceAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,21 +27,25 @@ import org.springframework.stereotype.Service;
 @Service
 public class EgressEventServiceImpl implements EgressEventService {
   private static final Logger logger = Logger.getLogger(EgressEventServiceImpl.class.getName());
+  private static final Pattern VM_NAME_PATTERN = Pattern.compile("all-of-us-\\d+-m");
 
-  private EgressEventAuditor egressEventAuditor;
-  private Provider<AlertApi> alertApiProvider;
-  private Provider<WorkbenchConfig> workbenchConfigProvider;
-  private WorkspaceAdminService workspaceAdminService;
+  private final EgressEventAuditor egressEventAuditor;
+  private final Provider<AlertApi> alertApiProvider;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final UserService userService;
+  private final WorkspaceAdminService workspaceAdminService;
 
   @Autowired
   public EgressEventServiceImpl(
       EgressEventAuditor egressEventAuditor,
       Provider<AlertApi> alertApiProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
+      UserService userService,
       WorkspaceAdminService workspaceAdminService) {
     this.egressEventAuditor = egressEventAuditor;
     this.alertApiProvider = alertApiProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
+    this.userService = userService;
     this.workspaceAdminService = workspaceAdminService;
   }
 
@@ -100,6 +111,22 @@ public class EgressEventServiceImpl implements EgressEventService {
     final WorkspaceAdminView adminWorkspace =
         workspaceAdminService.getWorkspaceAdminView(egressEvent.getProjectName());
     final Workspace workspace = adminWorkspace.getWorkspace();
+    final String creatorDetails =
+        userService
+            .getByUsername(workspace.getCreator())
+            .map(DbUser::getAdminDescription)
+            .orElse("Creator not Found");
+
+    final Optional<DbUser> executor =
+        vmNameToUserDatabaseId(egressEvent.getVmName()).flatMap(userService::getByDatabaseId);
+
+    final String executorDetails =
+        executor.map(DbUser::getAdminDescription).orElse("Executing User not Found");
+
+    final String collaboratorDetails =
+        adminWorkspace.getCollaborators().stream()
+            .map(this::formatWorkspaceUserAdminView)
+            .collect(Collectors.joining("\n"));
 
     return String.format("Workspace \"%s\"", workspace.getName())
         + String.format(
@@ -109,9 +136,29 @@ public class EgressEventServiceImpl implements EgressEventService {
         + String.format(
             "Egress detected: %.2f Mib in %d secs\n\n",
             egressEvent.getEgressMib(), egressEvent.getTimeWindowDuration())
+        + String.format("Cluster Name: %s", executor.map(DbUser::getClusterName).orElse("unknown"))
+        + String.format("User Running Notebook: %s\n\n", executorDetails)
+        + String.format("Workspace Creator: %s\n\n", creatorDetails)
+        + String.format("Collaborators: %s\n\n", collaboratorDetails)
         + String.format(
             "Workspace Admin Console (Prod Admin User): %s/admin/workspaces/%s/\n",
             workbenchConfigProvider.get().server.uiBaseUrl, egressEvent.getProjectName())
         + "Playbook Entry: https://broad.io/aou-high-egress-event";
+  }
+
+  private String formatWorkspaceUserAdminView(WorkspaceUserAdminView userAdminView) {
+    final String userDetails =
+        userService
+            .getByDatabaseId(userAdminView.getUserDatabaseId())
+            .map(DbUser::getAdminDescription)
+            .orElse(
+                String.format(
+                    "Collaborator with user_id %d not Found", userAdminView.getUserDatabaseId()));
+    return String.format("%s: %s", userAdminView.getRole(), userDetails);
+  }
+
+  private Optional<Long> vmNameToUserDatabaseId(String vmName) {
+    Matcher matcher = VM_NAME_PATTERN.matcher(vmName);
+    return Optional.ofNullable(matcher.group(1)).map(Long::parseLong);
   }
 }

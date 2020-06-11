@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -27,7 +26,6 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
-import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbPageVisit;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -56,7 +54,7 @@ import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.InstitutionalAffiliation;
+import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.PageVisit;
@@ -100,27 +98,6 @@ public class ProfileController implements ProfileApiDelegate {
               result.setRole(billingProjectMembership.getRole());
               result.setStatus(
                   fcToWorkbenchBillingMap.get(billingProjectMembership.getCreationStatus()));
-              return result;
-            }
-          };
-  private static final Function<InstitutionalAffiliation, DbInstitutionalAffiliation>
-      FROM_CLIENT_INSTITUTIONAL_AFFILIATION =
-          new Function<InstitutionalAffiliation, DbInstitutionalAffiliation>() {
-            @Override
-            public DbInstitutionalAffiliation apply(
-                InstitutionalAffiliation institutionalAffiliation) {
-              DbInstitutionalAffiliation result = new DbInstitutionalAffiliation();
-              if (institutionalAffiliation.getInstitution() != null) {
-                result.setInstitution(institutionalAffiliation.getInstitution());
-              }
-              if (institutionalAffiliation.getNonAcademicAffiliation() != null) {
-                result.setNonAcademicAffiliationEnum(
-                    institutionalAffiliation.getNonAcademicAffiliation());
-              }
-
-              result.setRole(institutionalAffiliation.getRole());
-              result.setOther(institutionalAffiliation.getOther());
-
               return result;
             }
           };
@@ -251,24 +228,6 @@ public class ProfileController implements ProfileApiDelegate {
             .collect(Collectors.toList()));
   }
 
-  private void validateStringLength(String field, String fieldName, int max, int min) {
-    if (field == null) {
-      throw new BadRequestException(String.format("%s cannot be left blank!", fieldName));
-    }
-    if (field.length() > max) {
-      throw new BadRequestException(
-          String.format("%s length exceeds character limit. (%d)", fieldName, max));
-    }
-    if (field.length() < min) {
-      if (min == 1) {
-        throw new BadRequestException(String.format("%s cannot be left blank.", fieldName));
-      } else {
-        throw new BadRequestException(
-            String.format("%s is under character minimum. (%d)", fieldName, min));
-      }
-    }
-  }
-
   private DbUser saveUserWithConflictHandling(DbUser dbUser) {
     try {
       return userDao.save(dbUser);
@@ -385,7 +344,7 @@ public class ProfileController implements ProfileApiDelegate {
             demographicSurveyMapper.demographicSurveyToDbDemographicSurvey(
                 profile.getDemographicSurvey()),
             profile.getInstitutionalAffiliations().stream()
-                .map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
+                .map(institutionService::legacyInstitutionToDbInstitution)
                 .collect(Collectors.toList()),
             verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
                 profile.getVerifiedInstitutionalAffiliation(), institutionService));
@@ -615,41 +574,27 @@ public class ProfileController implements ProfileApiDelegate {
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
-  private void updateInstitutionalAffiliations(Profile updatedProfile, DbUser user) {
-    List<DbInstitutionalAffiliation> newAffiliations =
-        updatedProfile.getInstitutionalAffiliations().stream()
-            .map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
-            .collect(Collectors.toList());
-    int i = 0;
-    ListIterator<DbInstitutionalAffiliation> oldAffilations =
-        user.getInstitutionalAffiliations().listIterator();
-    boolean shouldAdd = false;
-    if (newAffiliations.size() == 0) {
-      shouldAdd = true;
+  @Override
+  public ResponseEntity<EmptyResponse> updateVerifiedInstitutionalAffiliation(
+      Long userId, VerifiedInstitutionalAffiliation verifiedAffiliation) {
+    DbUser dbUser = userDao.findUserByUserId(userId);
+    Profile updatedProfile = profileService.getProfile(dbUser);
+
+    if (verifiedAffiliation == null) {
+      throw new BadRequestException("Cannot delete Verified Institutional Affiliation.");
     }
-    for (DbInstitutionalAffiliation affiliation : newAffiliations) {
-      affiliation.setOrderIndex(i);
-      affiliation.setUser(user);
-      if (oldAffilations.hasNext()) {
-        DbInstitutionalAffiliation oldAffilation = oldAffilations.next();
-        if (!oldAffilation.getRole().equals(affiliation.getRole())
-            || !oldAffilation.getInstitution().equals(affiliation.getInstitution())) {
-          shouldAdd = true;
-        }
-      } else {
-        shouldAdd = true;
-      }
-      i++;
-    }
-    if (oldAffilations.hasNext()) {
-      shouldAdd = true;
-    }
-    if (shouldAdd) {
-      user.clearInstitutionalAffiliations();
-      for (DbInstitutionalAffiliation affiliation : newAffiliations) {
-        user.addInstitutionalAffiliation(affiliation);
-      }
-    }
+
+    final Optional<Institution> institution =
+        institutionService.getInstitution(verifiedAffiliation.getInstitutionShortName());
+    institution.ifPresent(i -> verifiedAffiliation.setInstitutionDisplayName(i.getDisplayName()));
+
+    updatedProfile.setVerifiedInstitutionalAffiliation(verifiedAffiliation);
+
+    Profile oldProfile = profileService.getProfile(dbUser);
+
+    profileService.updateProfileForUser(dbUser, updatedProfile, oldProfile);
+
+    return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override

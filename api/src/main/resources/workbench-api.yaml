@@ -1188,7 +1188,7 @@ paths:
     - "$ref": "#/parameters/userId"
     post:
       tags:
-      - userAdmin
+      - profile
       consumes:
       - application/json
       description: 'Updates a user''s verified institution. Requires ACCESS_CONTROL_ADMIN authority.

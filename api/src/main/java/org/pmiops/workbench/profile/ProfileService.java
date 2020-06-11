@@ -1,9 +1,17 @@
 package org.pmiops.workbench.profile;
 
 import java.sql.Timestamp;
+import java.time.Clock;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import javax.inject.Provider;
+import org.apache.commons.lang3.StringUtils;
+import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -11,6 +19,7 @@ import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbInstitution;
+import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
@@ -18,6 +27,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
+import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.Profile;
@@ -27,10 +37,17 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ProfileService {
+
+  private final AddressMapper addressMapper;
+  private final Clock clock;
+  private final DemographicSurveyMapper demographicSurveyMapper;
   private final FreeTierBillingService freeTierBillingService;
   private final InstitutionDao institutionDao;
   private final InstitutionService institutionService;
+  private final ProfileAuditor profileAuditor;
   private final ProfileMapper profileMapper;
+  private final Provider<DbUser> userProvider;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
   private final UserService userService;
   private final UserTermsOfServiceDao userTermsOfServiceDao;
@@ -39,20 +56,32 @@ public class ProfileService {
 
   @Autowired
   public ProfileService(
+      AddressMapper addressMapper,
+      Clock clock,
+      DemographicSurveyMapper demographicSurveyMapper,
       FreeTierBillingService freeTierBillingService,
       InstitutionDao institutionDao,
       InstitutionService institutionService,
+      ProfileAuditor profileAuditor,
       ProfileMapper profileMapper,
+      Provider<DbUser> userProvider,
+      Provider<WorkbenchConfig> workbenchConfigProvider,
       UserDao userDao,
       UserService userService,
       UserTermsOfServiceDao userTermsOfServiceDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
       VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper) {
+    this.addressMapper = addressMapper;
+    this.clock = clock;
+    this.demographicSurveyMapper = demographicSurveyMapper;
     this.freeTierBillingService = freeTierBillingService;
     this.institutionDao = institutionDao;
     this.institutionService = institutionService;
+    this.profileAuditor = profileAuditor;
     this.profileMapper = profileMapper;
+    this.workbenchConfigProvider = workbenchConfigProvider;
     this.userDao = userDao;
+    this.userProvider = userProvider;
     this.userService = userService;
     this.userTermsOfServiceDao = userTermsOfServiceDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
@@ -174,12 +203,12 @@ public class ProfileService {
 
     updateInstitutionalAffiliations(updatedProfile, user);
     if (workbenchConfigProvider.get().featureFlags.requireInstitutionalVerification) {
-      profileService.validateInstitutionalAffiliation(updatedProfile);
+      validateInstitutionalAffiliation(updatedProfile);
     }
 
     userService.updateUserWithConflictHandling(user);
 
-    final Profile appliedUpdatedProfile = profileService.getProfile(user);
+    final Profile appliedUpdatedProfile = getProfile(user);
     profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);
   }
 
@@ -200,5 +229,94 @@ public class ProfileService {
         Optional.ofNullable(profile.getInstitutionalAffiliations()).orElse(new ArrayList<>()));
     // We always store the username as all lowercase.
     profile.setUsername(profile.getUsername().toLowerCase());
+  }
+
+  private void updateInstitutionalAffiliations(Profile updatedProfile, DbUser user) {
+    List<DbInstitutionalAffiliation> newAffiliations =
+        updatedProfile.getInstitutionalAffiliations().stream()
+            .map(institutionService::legacyInstitutionToDbInstitution)
+            .collect(Collectors.toList());
+    int i = 0;
+    ListIterator<DbInstitutionalAffiliation> oldAffilations =
+        user.getInstitutionalAffiliations().listIterator();
+    boolean shouldAdd = false;
+    if (newAffiliations.size() == 0) {
+      shouldAdd = true;
+    }
+    for (DbInstitutionalAffiliation affiliation : newAffiliations) {
+      affiliation.setOrderIndex(i);
+      affiliation.setUser(user);
+      if (oldAffilations.hasNext()) {
+        DbInstitutionalAffiliation oldAffilation = oldAffilations.next();
+        if (!oldAffilation.getRole().equals(affiliation.getRole())
+            || !oldAffilation.getInstitution().equals(affiliation.getInstitution())) {
+          shouldAdd = true;
+        }
+      } else {
+        shouldAdd = true;
+      }
+      i++;
+    }
+    if (oldAffilations.hasNext()) {
+      shouldAdd = true;
+    }
+    if (shouldAdd) {
+      user.clearInstitutionalAffiliations();
+      for (DbInstitutionalAffiliation affiliation : newAffiliations) {
+        user.addInstitutionalAffiliation(affiliation);
+      }
+    }
+  }
+
+  private void validateUpdatedProfile(Profile updatedProfile, Profile prevProfile)
+      throws BadRequestException {
+    validateAndCleanProfile(updatedProfile);
+    if (StringUtils.isEmpty(updatedProfile.getAreaOfResearch())) {
+      throw new BadRequestException("Research background cannot be empty");
+    }
+    Optional.ofNullable(updatedProfile.getAddress())
+        .orElseThrow(() -> new BadRequestException("Address must not be empty"));
+
+    Address updatedProfileAddress = updatedProfile.getAddress();
+    if (StringUtils.isEmpty(updatedProfileAddress.getStreetAddress1())
+        || StringUtils.isEmpty(updatedProfileAddress.getCity())
+        || StringUtils.isEmpty(updatedProfileAddress.getState())
+        || StringUtils.isEmpty(updatedProfileAddress.getCountry())
+        || StringUtils.isEmpty(updatedProfileAddress.getZipCode())) {
+      throw new BadRequestException(
+          "Address cannot have empty street Address 1/city/state/country or Zip Code");
+    }
+    if (updatedProfile.getContactEmail() != null
+        && !updatedProfile.getContactEmail().equals(prevProfile.getContactEmail())) {
+      // See RW-1488.
+      throw new BadRequestException("Changing email is not currently supported");
+    }
+    if (updatedProfile.getUsername() != null
+        && !updatedProfile.getUsername().equals(prevProfile.getUsername())) {
+      // See RW-1488.
+      throw new BadRequestException("Changing username is not supported");
+    }
+  }
+
+  private void validateStringLength(String field, String fieldName, int max, int min) {
+    if (field == null) {
+      throw new BadRequestException(String.format("%s cannot be left blank!", fieldName));
+    }
+    if (field.length() > max) {
+      throw new BadRequestException(
+          String.format("%s length exceeds character limit. (%d)", fieldName, max));
+    }
+    if (field.length() < min) {
+      if (min == 1) {
+        throw new BadRequestException(String.format("%s cannot be left blank.", fieldName));
+      } else {
+        throw new BadRequestException(
+            String.format("%s is under character minimum. (%d)", fieldName, min));
+      }
+    }
+  }
+
+  public List<Profile> listAllProfiles() {
+    return userService.getAllUsers().stream().map(this::getProfile).collect(Collectors.toList());
   }
 }
