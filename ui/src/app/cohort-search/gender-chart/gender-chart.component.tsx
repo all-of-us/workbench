@@ -1,4 +1,3 @@
-import {Component, Input} from '@angular/core';
 import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import * as React from 'react';
@@ -107,17 +106,5 @@ export class GenderChart extends React.Component<Props, State> {
     return <div style={{minHeight: 200}}>
       {options && <HighchartsReact highcharts={highCharts} options={options} callback={getChartObj} />}
     </div>;
-  }
-}
-
-@Component({
-  selector: 'app-gender-chart',
-  template: '<div #root></div>'
-})
-export class GenderChartComponent extends ReactWrapperBase {
-  @Input('data') data: Props['data'];
-
-  constructor() {
-    super(GenderChart, ['data']);
   }
 }

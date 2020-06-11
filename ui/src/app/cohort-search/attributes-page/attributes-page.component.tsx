@@ -1,5 +1,4 @@
-import {Component, Input} from '@angular/core';
-import {AttrName, CriteriaSubType, DomainType, Operator} from 'generated/fetch';
+import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 
 import {PM_UNITS, PREDEFINED_ATTRIBUTES} from 'app/cohort-search/constant';
@@ -20,7 +19,7 @@ import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {Dropdown} from 'primereact/dropdown';
+import {AttrName, CriteriaSubType, DomainType, Operator} from 'generated/fetch';
 
 const styles = reactStyles({
   countPreview: {
@@ -575,17 +574,3 @@ export const AttributesPage = withCurrentWorkspace() (
     }
   }
 );
-
-@Component({
-  selector: 'crit-attributes-page',
-  template: '<div #root></div>'
-})
-export class AttributesPageComponent extends ReactWrapperBase {
-  @Input('close') close: Props['close'];
-  @Input('node') node: Props['node'];
-  @Input('select') select: Props['select'];
-
-  constructor() {
-    super(AttributesPage, ['close', 'node', 'select']);
-  }
-}

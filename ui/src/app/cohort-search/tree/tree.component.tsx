@@ -1,4 +1,3 @@
-import {Component, Input} from '@angular/core';
 import * as React from 'react';
 
 import {SearchBar} from 'app/cohort-search/search-bar/search-bar.component';
@@ -192,37 +191,3 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
     </React.Fragment>;
   }
 });
-
-@Component({
-  selector: 'crit-tree',
-  template: '<div #root style="display: inline"></div>'
-})
-export class CriteriaTreeComponent extends ReactWrapperBase {
-  @Input('autocompleteSelection') autocompleteSelection: Props['autocompleteSelection'];
-  @Input('back') back: Props['back'];
-  @Input('groupSelections') groupSelections: Props['groupSelections'];
-  @Input('node') node: Props['node'];
-  @Input('scrollToMatch') scrollToMatch: Props['scrollToMatch'];
-  @Input('searchTerms') searchTerms: Props['searchTerms'];
-  @Input('select') select: Props['select'];
-  @Input('selectedIds') selectedIds: Props['selectedIds'];
-  @Input('selectOption') selectOption: Props['selectOption'];
-  @Input('setAttributes') setAttributes: Props['setAttributes'];
-  @Input('setSearchTerms') setSearchTerms: Props['setSearchTerms'];
-
-  constructor() {
-    super(CriteriaTree, [
-      'autocompleteSelection',
-      'back',
-      'groupSelections',
-      'node',
-      'scrollToMatch',
-      'searchTerms',
-      'select',
-      'selectedIds',
-      'selectOption',
-      'setAttributes',
-      'setSearchTerms',
-    ]);
-  }
-}

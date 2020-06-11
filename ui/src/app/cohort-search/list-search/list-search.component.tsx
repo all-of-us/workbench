@@ -1,4 +1,3 @@
-import {Component, Input} from '@angular/core';
 import * as React from 'react';
 import {Key} from 'ts-key-enum';
 
@@ -401,18 +400,3 @@ export const ListSearch = withCurrentWorkspace()(
     }
   }
 );
-
-@Component ({
-  selector: 'crit-list-search',
-  template: '<div #root></div>'
-})
-export class ListSearchComponent extends ReactWrapperBase {
-  @Input('hierarchy') hierarchy: Props['hierarchy'];
-  @Input('searchContext') searchContext: Props['searchContext'];
-  @Input('select') select: Props['select'];
-  @Input('selectedIds') selectedIds: Props['selectedIds'];
-  @Input('setAttributes') setAttributes: Props['setAttributes'];
-  constructor() {
-    super(ListSearch, ['hierarchy', 'searchContext', 'select', 'selectedIds', 'setAttributes']);
-  }
-}

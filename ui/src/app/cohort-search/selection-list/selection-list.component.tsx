@@ -1,4 +1,3 @@
-import {Component, Input} from '@angular/core';
 import * as React from 'react';
 
 import {attributeDisplay, nameDisplay, typeDisplay} from 'app/cohort-search/utils';
@@ -199,24 +198,5 @@ export class SelectionList extends React.Component<Props> {
         </Button>
       </div>
     </div>;
-  }
-}
-
-@Component({
-  selector: 'crit-selection-list',
-  template: '<div #root style="height: 100%"></div>'
-})
-export class SelectionListComponent extends ReactWrapperBase {
-  @Input('back') back: Props['back'];
-  @Input('close') close: Props['close'];
-  @Input('disableFinish') disableFinish: Props['disableFinish'];
-  @Input('domain') domain: Props['domain'];
-  @Input('finish') finish: Props['finish'];
-  @Input('removeSelection') removeSelection: Props['removeSelection'];
-  @Input('selections') selections: Props['selections'];
-  @Input('setView') setView: Props['setView'];
-  @Input('view') view: Props['view'];
-  constructor() {
-    super(SelectionList, ['back', 'close', 'disableFinish', 'domain', 'finish', 'removeSelection', 'selections', 'setView', 'view']);
   }
 }

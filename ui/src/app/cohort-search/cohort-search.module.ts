@@ -7,17 +7,10 @@ import {CohortCommonModule} from 'app/cohort-common/module';
 import {NgxPopperModule} from 'ngx-popper';
 
 /* Components */
-import {AttributesPageComponent} from './attributes-page/attributes-page.component';
 import {CohortSearchComponent} from './cohort-search/cohort-search.component';
-import {DemographicsComponent} from './demographics/demographics.component';
-import {GenderChartComponent} from './gender-chart/gender-chart.component';
-import {ListSearchComponent} from './list-search/list-search.component';
 import {ModalComponent} from './modal/modal.component';
-import {ModifierPageComponent} from './modifier-page/modifier-page.component';
 import {OverviewComponent} from './overview/overview.component';
 import {SearchGroupListComponent} from './search-group-list/search-group-list.component';
-import {SelectionListComponent} from './selection-list/selection-list.component';
-import {CriteriaTreeComponent} from './tree/tree.component';
 
 import {BreadcrumbType} from 'app/utils/navigation';
 
@@ -51,17 +44,10 @@ const routes: Routes = [{
     CohortCommonModule,
   ],
   declarations: [
-    AttributesPageComponent,
     CohortSearchComponent,
-    CriteriaTreeComponent,
-    GenderChartComponent,
-    DemographicsComponent,
     ModalComponent,
-    ModifierPageComponent,
     OverviewComponent,
     SearchGroupListComponent,
-    ListSearchComponent,
-    SelectionListComponent,
     SafeHtmlPipe,
   ],
   providers: [TitleCasePipe]

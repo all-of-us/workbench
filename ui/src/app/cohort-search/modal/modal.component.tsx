@@ -4,7 +4,7 @@ import * as React from 'react';
 import {AttributesPage} from 'app/cohort-search/attributes-page/attributes-page.component';
 import {Demographics} from 'app/cohort-search/demographics/demographics.component';
 import {ListSearch} from 'app/cohort-search/list-search/list-search.component';
-import {ListModifierPage} from 'app/cohort-search/modifier-page/modifier-page.component';
+import {ModifierPage} from 'app/cohort-search/modifier-page/modifier-page.component';
 import {searchRequestStore} from 'app/cohort-search/search-state.service';
 import {SelectionList} from 'app/cohort-search/selection-list/selection-list.component';
 import {CriteriaTree} from 'app/cohort-search/tree/tree.component';
@@ -423,18 +423,20 @@ export class CBModal extends React.Component<Props, State> {
 
   selectDeceased() {
     const param = {
+      id: null,
+      parentId: null,
       parameterId: '',
       type: CriteriaType.DECEASED.toString(),
       name: 'Deceased',
       group: false,
-      domain: DomainType.PERSON.toString(),
-      hasHierarchy: false,
-      ancestorData: false,
-      standard: true,
+      domainId: DomainType.PERSON.toString(),
+      hasAttributes: false,
+      selectable: true,
       attributes: []
-    } as SearchParameter;
-    this.addSelection(param);
-    this.finish();
+    } as Selection;
+    // wrapping in a timeout here prevents 'ExpressionChangedAfterItHasBeenCheckedError' in the parent component
+    // TODO remove timeout once cohort-search component is converted to React
+    setTimeout(() => this.setState({selections: [param]}, () => this.finish()));
   }
 
   render() {
@@ -532,7 +534,7 @@ export class CBModal extends React.Component<Props, State> {
                     </div>
                     {/* Modifiers Page */}
                     <div style={this.panelLeftStyle('modifiers')}>
-                      {this.showModifiers && <ListModifierPage
+                      {this.showModifiers && <ModifierPage
                         disabled={this.modifiersFlag}
                         searchContext={searchContext}
                         selections={selections}

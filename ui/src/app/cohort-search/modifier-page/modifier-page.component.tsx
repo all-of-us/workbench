@@ -1,4 +1,8 @@
-import {Component, Input} from '@angular/core';
+import * as fp from 'lodash/fp';
+import * as moment from 'moment';
+import {Dropdown} from 'primereact/dropdown';
+import * as React from 'react';
+
 import {encountersStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, mapParameter} from 'app/cohort-search/utils';
 import {Button} from 'app/components/buttons';
@@ -12,10 +16,6 @@ import {triggerEvent} from 'app/utils/analytics';
 import {serverConfigStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Criteria, CriteriaType, DomainType, ModifierType, Operator} from 'generated/fetch';
-import * as fp from 'lodash/fp';
-import * as moment from 'moment';
-import {Dropdown} from 'primereact/dropdown';
-import * as React from 'react';
 
 const styles = reactStyles({
   header: {
@@ -198,7 +198,7 @@ interface State {
   loading: boolean;
 }
 
-export const ListModifierPage = withCurrentWorkspace()(
+export const ModifierPage = withCurrentWorkspace()(
   class extends React.Component<Props, State> {
     updateInput: Function;
     constructor(props: Props) {
@@ -558,18 +558,3 @@ export const ListModifierPage = withCurrentWorkspace()(
     }
   }
 );
-
-@Component({
-  selector: 'crit-list-modifier-page',
-  template: '<div #root></div>'
-})
-export class ModifierPageComponent extends ReactWrapperBase {
-  @Input('disabled') disabled: Props['disabled'];
-  @Input('searchContext') searchContext: Props['searchContext'];
-  @Input('selections') selections: Props['selections'];
-  @Input('setSearchContext') setSearchContext: Props['setSearchContext'];
-
-  constructor() {
-    super(ListModifierPage, ['disabled', 'searchContext', 'selections', 'setSearchContext']);
-  }
-}
