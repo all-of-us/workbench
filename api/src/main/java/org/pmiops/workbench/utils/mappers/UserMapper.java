@@ -2,7 +2,6 @@ package org.pmiops.workbench.utils.mappers;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.model.User;
@@ -20,7 +19,6 @@ public interface UserMapper {
 
   @Mapping(source = "contactEmail", target = "email")
   @Mapping(source = "userRole.email", target = "userName")
-  @Named("toUserApiModel")
   User toApiUser(UserRole userRole, String contactEmail);
 
   @Mapping(source = "contactEmail", target = "email")

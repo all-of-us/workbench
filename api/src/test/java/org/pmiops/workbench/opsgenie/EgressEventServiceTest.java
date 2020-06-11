@@ -14,8 +14,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.EgressEvent;
+import org.pmiops.workbench.workspaceadmin.WorkspaceAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -26,9 +28,9 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
-public class OpsGenieServiceTest {
+public class EgressEventServiceTest {
   private static WorkbenchConfig workbenchConfig;
-  private static final EgressEvent egressEvent =
+  private static final EgressEvent EGRESS_EVENT_1 =
       new EgressEvent()
           .projectName("aou-rw-test-c7dec260")
           .vmName("aou-rw-1")
@@ -37,11 +39,15 @@ public class OpsGenieServiceTest {
           .timeWindowDuration(600L);
 
   @MockBean private AlertApi mockAlertApi;
+  @MockBean private EgressEventAuditor egressEventAuditor;
+  @MockBean private WorkspaceAdminService workspaceAdminService;
+
   @Captor private ArgumentCaptor<CreateAlertRequest> alertRequestCaptor;
-  @Autowired private OpsGenieService opsGenieService;
+
+  @Autowired private EgressEventService egressEventService;
 
   @TestConfiguration
-  @Import({OpsGenieServiceImpl.class})
+  @Import({EgressEventServiceImpl.class})
   static class Configuration {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -60,7 +66,7 @@ public class OpsGenieServiceTest {
   public void createEgressEventAlert() throws ApiException {
     when(mockAlertApi.createAlert(any())).thenReturn(new SuccessResponse().requestId("12345"));
 
-    opsGenieService.createAlert(egressEvent);
+    egressEventService.handleEvent(EGRESS_EVENT_1);
     verify(mockAlertApi).createAlert(alertRequestCaptor.capture());
 
     CreateAlertRequest request = alertRequestCaptor.getValue();

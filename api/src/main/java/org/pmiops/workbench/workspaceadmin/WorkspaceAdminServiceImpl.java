@@ -10,28 +10,29 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import org.joda.time.DateTime;
+import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageService;
-import org.pmiops.workbench.model.AdminFederatedWorkspaceDetailsResponse;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.AdminWorkspaceResources;
 import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.ListClusterResponse;
 import org.pmiops.workbench.model.TimeSeriesPoint;
-import org.pmiops.workbench.model.User;
 import org.pmiops.workbench.model.UserRole;
+import org.pmiops.workbench.model.WorkspaceAdminView;
+import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 import org.pmiops.workbench.model.WorkspaceUserAdminView;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.NotebooksService;
@@ -46,6 +47,7 @@ import org.springframework.stereotype.Service;
 public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private static final Duration TRAILING_TIME_TO_QUERY = Duration.ofHours(6);
 
+  private ActionAuditQueryService actionAuditQueryService;
   private final CloudStorageService cloudStorageService;
   private final CohortDao cohortDao;
   private final CloudMonitoringService cloudMonitoringService;
@@ -63,6 +65,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
   @Autowired
   public WorkspaceAdminServiceImpl(
+      ActionAuditQueryService actionAuditQueryService,
       CloudStorageService cloudStorageService,
       CohortDao cohortDao,
       CloudMonitoringService cloudMonitoringService,
@@ -77,6 +80,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper,
       WorkspaceService workspaceService) {
+    this.actionAuditQueryService = actionAuditQueryService;
     this.cloudStorageService = cloudStorageService;
     this.cohortDao = cohortDao;
     this.cloudMonitoringService = cloudMonitoringService;
@@ -143,17 +147,18 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       }
     }
 
-    // Highcharts expects its data to be pre-sorted; we do this on the server side for convenience.
     response.getReceivedBytes().sort(Comparator.comparing(TimeSeriesPoint::getTimestamp));
-
     return response;
   }
 
   @Override
-  public AdminFederatedWorkspaceDetailsResponse getWorkspaceAdminView(String workspaceNamespace) {
+  public WorkspaceAdminView getWorkspaceAdminView(String workspaceNamespace) {
     final DbWorkspace dbWorkspace =
         getFirstWorkspaceByNamespace(workspaceNamespace)
-            .orElseThrow(() -> new NotFoundException(""));
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("No workspace found for namespace %s", workspaceNamespace)));
 
     final String workspaceFirecloudName = dbWorkspace.getFirecloudName();
 
@@ -185,10 +190,31 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             .getWorkspaceAsService(workspaceNamespace, workspaceFirecloudName)
             .getWorkspace();
 
-    return new AdminFederatedWorkspaceDetailsResponse()
+    return new WorkspaceAdminView()
         .workspace(workspaceMapper.toApiWorkspace(dbWorkspace, firecloudWorkspace))
         .collaborators(collaborators)
         .resources(adminWorkspaceResources);
+  }
+
+  @Override
+  public WorkspaceAuditLogQueryResponse getAuditLogEntries(
+      String workspaceNamespace,
+      Integer limit,
+      Long afterMillis,
+      @Nullable Long beforeMillisNullable) {
+    final long workspaceDatabaseId =
+        getFirstWorkspaceByNamespace(workspaceNamespace)
+            .map(DbWorkspace::getWorkspaceId)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format(
+                            "No workspace found with Firecloud namespace %s", workspaceNamespace)));
+    final DateTime after = new DateTime(afterMillis);
+    final DateTime before =
+        Optional.ofNullable(beforeMillisNullable).map(DateTime::new).orElse(DateTime.now());
+    return actionAuditQueryService.queryEventsForWorkspace(
+        workspaceDatabaseId, limit, after, before);
   }
 
   private int getNonNotebookFileCount(String bucketName) {
@@ -196,7 +222,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         cloudStorageService
             .getBlobListForPrefix(bucketName, NotebooksService.NOTEBOOKS_WORKSPACE_DIRECTORY)
             .stream()
-            .filter(blob -> !NotebooksService.NOTEBOOK_PATTERN.matcher(blob.getName()).matches())
+            .filter(b -> !notebooksService.isNotebookBlob(b))
             .count();
   }
 
@@ -206,24 +232,20 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         .reduce(0L, Long::sum);
   }
 
-  // TODO(jaycarlton): move to appropriate mapper
+  // This is somewhat awkward, as we want to tolerate collaborators who aren't in the database
+  // anymore.
+  // TODO(jaycarlton): is this really what we want, or can we make this return an Optional that's
+  // empty
+  // when the user isn't in the DB. The assumption is that the fields agree between the UserRole and
+  // the DbUser, but we don't check that here.
   private WorkspaceUserAdminView toWorkspaceUserAdminView(UserRole userRole) {
-    final Optional<DbUser> dbUserMaybe = userService.getByUsername(userRole.getEmail());
-    final User user = new User();
-    if (dbUserMaybe.isPresent()) {
-      final DbUser dbUser = dbUserMaybe.get();
-      user.email(dbUser.getUsername())
-          .givenName(dbUser.getGivenName())
-          .familyName(dbUser.getFamilyName())
-          .email(dbUser.getContactEmail());
-      return new WorkspaceUserAdminView()
-          .userModel(user)
-          .role(userRole.getRole())
-          .userDatabaseId(dbUser.getUserId())
-          .userAccountCreatedTime(DateTime.parse(dbUser.getCreationTime().toString()));
-
-    } else {
-      return new WorkspaceUserAdminView().userModel(userMapper.toApiUser(userRole, null));
-    }
+    return userService
+        .getByUsername(userRole.getEmail())
+        .map(u -> userMapper.toWorkspaceUserAdminView(u, userRole))
+        .orElse(
+            new WorkspaceUserAdminView() // the MapStruct-generated method won't handle a partial
+                // conversion
+                .role(userRole.getRole())
+                .userModel(userMapper.toApiUser(userRole, null)));
   }
 }

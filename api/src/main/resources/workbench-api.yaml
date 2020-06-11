@@ -11,7 +11,7 @@ x-aou-note: |
   If validation fails, gradle:generateWorkbenchApi fails claiming this file does not exist.
 
   For separate validation (with some false positives), do:
-  ./project.rb validate-swagger
+  ./project.rb validate-swagge
 info:
   version: 0.1.0
   title: AllOfUs Workbench API
@@ -1240,12 +1240,12 @@ paths:
       - workspaceAdmin
       description: 'Given a workspace namespace (Google Cloud Platform  Project ID),
         returns workspace details. Requires the RESEARCHER_DATA_VIEW authority.'
-      operationId: getFederatedWorkspaceDetails
+      operationId: getWorkspaceAdminView
       responses:
         200:
           description: Federated details about the workspace.
           schema:
-            "$ref": "#/definitions/AdminFederatedWorkspaceDetailsResponse"
+            "$ref": "#/definitions/WorkspaceAdminView"
         404:
           description: Workspace not found for namespace
           schema:
@@ -5766,7 +5766,7 @@ definitions:
         type: string
         description: 'The user''s detailed Institutional Role at this Institution,
           as text, if its enumerated type is OTHER'
-  AdminFederatedWorkspaceDetailsResponse:
+  WorkspaceAdminView:
     description: Admin-visible metadata about a workspace.
     type: object
     properties:

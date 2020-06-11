@@ -21,7 +21,7 @@ import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.EgressEvent;
 import org.pmiops.workbench.model.EgressEventRequest;
-import org.pmiops.workbench.opsgenie.OpsGenieService;
+import org.pmiops.workbench.opsgenie.EgressEventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -38,7 +38,7 @@ public class SumoLogicControllerTest {
 
   @MockBean private EgressEventAuditor mockEgressEventAuditor;
   @MockBean private CloudStorageService mockCloudStorageService;
-  @MockBean private OpsGenieService mockOpsGenieService;
+  @MockBean private EgressEventService mockOpsGenieService;
   private static WorkbenchConfig config;
 
   @Autowired private SumoLogicController sumoLogicController;
@@ -98,7 +98,7 @@ public class SumoLogicControllerTest {
   public void testLogsSingleEvent() {
     sumoLogicController.logEgressEvent(API_KEY, request);
     verify(mockEgressEventAuditor).fireEgressEvent(event);
-    verify(mockOpsGenieService).createEgressEventAlert(event);
+    verify(mockOpsGenieService).handleEvent(event);
   }
 
   @Test
@@ -107,6 +107,6 @@ public class SumoLogicControllerTest {
     request.setEventsJsonArray(mapper.writeValueAsString(Arrays.asList(event, event2)));
     sumoLogicController.logEgressEvent(API_KEY, request);
     verify(mockEgressEventAuditor, times(2)).fireEgressEvent(any());
-    verify(mockOpsGenieService, times(2)).createEgressEventAlert(any());
+    verify(mockOpsGenieService, times(2)).handleEvent(any());
   }
 }
