@@ -1,25 +1,16 @@
 import {Component as AComponent} from '@angular/core';
-import {AppRoute, AppRouter, Guard, ProtectedRoutes} from 'app/components/app-router';
+import {AppRoute, AppRouter, Guard, ProtectedRoutes, withFullHeight, withTitle} from 'app/components/app-router';
 import {DataUserCodeOfConduct} from 'app/pages/profile/data-user-code-of-conduct';
 import { ReactWrapperBase } from 'app/utils';
-import {authStore, routeDataStore, useStore} from 'app/utils/stores';
+import {authStore, useStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {CookiePolicyComponent} from './pages/cookie-policy';
 
 
 const signInGuard: Guard = {
-  checkGuard: (): boolean => authStore.get().isSignedIn,
+  allowed: (): boolean => authStore.get().isSignedIn,
   redirectPath: '/login'
-};
-
-const withTitle = WrappedComponent => ({title, ...props}) => {
-  routeDataStore.set({title});
-  return <WrappedComponent {...props}/>;
-};
-
-const withFullHeight = WrappedComponent => ({...props}) => {
-  return < div style={{height: '100%'}}><WrappedComponent {...props} /></div>;
 };
 
 const DUCC = fp.flow(withTitle, withFullHeight)(DataUserCodeOfConduct);

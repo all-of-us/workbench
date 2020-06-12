@@ -1,4 +1,5 @@
 import {navigate} from 'app/utils/navigation';
+import {routeDataStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import { BrowserRouter, Link, Redirect, Route, Switch, useHistory, useLocation, useParams, useRouteMatch} from 'react-router-dom';
@@ -6,13 +7,22 @@ import { BrowserRouter, Link, Redirect, Route, Switch, useHistory, useLocation, 
 const {Fragment} = React;
 
 export interface Guard {
-  checkGuard: () => boolean;
+  allowed: () => boolean;
   redirectPath: string;
 }
 
 export const usePath = () => {
   const {path} = useRouteMatch();
   return path;
+};
+
+export const withTitle = WrappedComponent => ({title, ...props}) => {
+  routeDataStore.set({title});
+  return <WrappedComponent {...props}/>;
+};
+
+export const withFullHeight = WrappedComponent => ({...props}) => {
+  return <div style={{height: '100%'}}><WrappedComponent {...props} /></div>;
 };
 
 export const SubRoute = ({children}): React.ReactElement => <Switch>{children}</Switch>;
@@ -39,7 +49,7 @@ export const AppRoute = ({path, data = {}, component: Component}): React.ReactEl
 
 export const ProtectedRoutes = (
   {guards, children}: {guards: Guard[], children: any }): React.ReactElement => {
-  const { redirectPath = null } = fp.find(({checkGuard}) => !checkGuard(), guards) || {};
+  const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
 
   return redirectPath ? <NavRedirect path={redirectPath}/>
   : <Fragment>{children}</Fragment>;

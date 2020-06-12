@@ -1,6 +1,18 @@
 import * as fp from 'lodash/fp';
 
-export const subscribable = () => {
+export interface Subscribable {
+  subscribe: (Function) => { unsubscribe: () => void};
+  next: (newValue: any, oldValue: any) => void;
+}
+
+export interface Atom {
+  get: () => any;
+  set: (any) => void;
+  subscribe: Subscribable['subscribe'];
+  reset: () => void;
+}
+
+export const subscribable = (): Subscribable => {
   let subscribers = [];
   return {
     subscribe: fn => {
@@ -17,12 +29,8 @@ export const subscribable = () => {
   };
 };
 
-/**
- * A simple state container inspired by clojure atoms. Method names were chosen based on similarity
- * to lodash and Immutable. (deref => get, reset! => set, swap! => update, reset to go back to initial value)
- * Implements the Store interface
- */
-export const atom = initialValue => {
+// A simple state container inspired by clojure atoms.
+export const atom = (initialValue): Atom => {
   let value = initialValue;
   const { subscribe, next } = subscribable();
   const get = () => value;
@@ -31,5 +39,5 @@ export const atom = initialValue => {
     value = newValue;
     next(newValue, oldValue);
   };
-  return { subscribe, get, set, update: fn => set(fn(get())), reset: () => set(initialValue) };
+  return { subscribe, get, set, reset: () => set(initialValue) };
 };
