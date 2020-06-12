@@ -29,13 +29,11 @@ import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
-import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.captcha.ApiException;
 import org.pmiops.workbench.captcha.CaptchaVerificationService;
-import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -105,59 +103,53 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ProfileControllerTest extends BaseControllerTest {
 
-  private static final Instant NOW = Instant.now();
-  private static final Timestamp TIMESTAMP = new Timestamp(NOW.toEpochMilli());
-  private static final long NONCE_LONG = 12345;
-  private static final String NONCE = Long.toString(NONCE_LONG);
-  private static final String USERNAME = "bob";
-  private static final String GIVEN_NAME = "Bob";
-  private static final String FAMILY_NAME = "Bobberson";
-  private static final String CONTACT_EMAIL = "bob@example.com";
-  private static final String INVITATION_KEY = "secretpassword";
-  private static final String CAPTCHA_TOKEN = "captchaToken";
-  private static final String WRONG_CAPTCHA_TOKEN = "WrongCaptchaToken";
-  private static final String PRIMARY_EMAIL = "bob@researchallofus.org";
-  private static final String STREET_ADDRESS = "1 Example Lane";
-  private static final String CITY = "Exampletown";
-  private static final String STATE = "EX";
-  private static final String COUNTRY = "Example";
-  private static final String ZIP_CODE = "12345";
-
-  private static final String ORGANIZATION = "Test";
-  private static final String CURRENT_POSITION = "Tester";
-  private static final String RESEARCH_PURPOSE = "To test things";
-
-  private static final double FREE_TIER_USAGE = 100D;
   private static final double FREE_TIER_LIMIT = 300D;
+  private static final double FREE_TIER_USAGE = 100D;
+  private static final FakeClock fakeClock = new FakeClock(Instant.parse("1995-06-05T00:00:00Z"));
+  private static final long NONCE_LONG = 12345;
+  private static final String CAPTCHA_TOKEN = "captchaToken";
+  private static final String CITY = "Exampletown";
+  private static final String CONTACT_EMAIL = "bob@example.com";
+  private static final String COUNTRY = "Example";
+  private static final String CURRENT_POSITION = "Tester";
+  private static final String FAMILY_NAME = "Bobberson";
+  private static final String GIVEN_NAME = "Bob";
+  private static final String INVITATION_KEY = "secretpassword";
+  private static final String NONCE = Long.toString(NONCE_LONG);
+  private static final String ORGANIZATION = "Test";
+  private static final String PRIMARY_EMAIL = "bob@researchallofus.org";
+  private static final String RESEARCH_PURPOSE = "To test things";
+  private static final String STATE = "EX";
+  private static final String STREET_ADDRESS = "1 Example Lane";
+  private static final String USERNAME = "bob";
+  private static final String WRONG_CAPTCHA_TOKEN = "WrongCaptchaToken";
+  private static final String ZIP_CODE = "12345";
+  private static final Timestamp TIMESTAMP = new Timestamp(fakeClock.millis());
 
-  @MockBean private FireCloudService fireCloudService;
-  @MockBean private DirectoryService directoryService;
+  @MockBean private CaptchaVerificationService captchaVerificationService;
   @MockBean private CloudStorageService cloudStorageService;
+  @MockBean private DirectoryService directoryService;
+  @MockBean private FireCloudService fireCloudService;
   @MockBean private FreeTierBillingService freeTierBillingService;
-  @MockBean private ComplianceService complianceTrainingService;
   @MockBean private MailService mailService;
   @MockBean private ProfileAuditor mockProfileAuditor;
-  @MockBean private UserServiceAuditor mockUserServiceAuditAdapter;
-  @MockBean private CaptchaVerificationService captchaVerificationService;
 
+  @Autowired private InstitutionService institutionService;
+  @Autowired private ProfileController profileController;
+  @Autowired private ProfileService profileService;
   @Autowired private UserDao userDao;
   @Autowired private UserDataUseAgreementDao userDataUseAgreementDao;
   @Autowired private UserService userService;
   @Autowired private UserTermsOfServiceDao userTermsOfServiceDao;
-  @Autowired private ProfileService profileService;
-  @Autowired private ProfileController profileController;
-  @Autowired private InstitutionService institutionService;
 
   private CreateAccountRequest createAccountRequest;
   private InvitationVerificationRequest invitationVerificationRequest;
   private com.google.api.services.directory.model.User googleUser;
-  private static FakeClock fakeClock = new FakeClock(NOW);
-
   private static DbUser dbUser;
 
   private int DUA_VERSION;
 
-  @Rule public final ExpectedException exception = ExpectedException.none();
+  @Rule private final ExpectedException exception = ExpectedException.none();
 
   @TestConfiguration
   @Import({
@@ -212,8 +204,6 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     // Most tests should run with institutional verification off by default.
     config.featureFlags.requireInstitutionalVerification = false;
-
-    fakeClock.setInstant(NOW);
 
     Profile profile = new Profile();
     profile.setContactEmail(CONTACT_EMAIL);
