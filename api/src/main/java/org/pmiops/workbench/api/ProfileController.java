@@ -29,11 +29,13 @@ import org.pmiops.workbench.captcha.CaptchaVerificationService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbPageVisit;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.EmailException;
@@ -207,6 +209,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
   private final UserService userService;
+  private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
   private final VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
 
   @Autowired
@@ -228,6 +231,7 @@ public class ProfileController implements ProfileApiDelegate {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserDao userDao,
       UserService userService,
+      VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
       VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper) {
     this.actionAuditQueryService = actionAuditQueryService;
     this.addressMapper = addressMapper;
@@ -245,6 +249,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.userDao = userDao;
     this.userProvider = userProvider;
     this.userService = userService;
+    this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
     this.verifiedInstitutionalAffiliationMapper = verifiedInstitutionalAffiliationMapper;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
@@ -705,11 +710,20 @@ public class ProfileController implements ProfileApiDelegate {
     user.setLastModifiedTime(now);
 
     updateInstitutionalAffiliations(updatedProfile, user);
-    if (workbenchConfigProvider.get().featureFlags.requireInstitutionalVerification) {
+    boolean requireInstitutionalVerification = workbenchConfigProvider.get().featureFlags.requireInstitutionalVerification;
+    if (requireInstitutionalVerification) {
       profileService.validateInstitutionalAffiliation(updatedProfile);
+
     }
 
-    userService.updateUserWithConflictHandling(user);
+    try {
+      userService.updateUserWithConflictHandling(user);
+      if (requireInstitutionalVerification) {
+        DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation = verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(updatedProfile.getVerifiedInstitutionalAffiliation(), institutionService);
+        dbVerifiedAffiliation.setUser(user);
+        this.verifiedInstitutionalAffiliationDao.save(dbVerifiedAffiliation);
+      }
+    }
 
     final Profile appliedUpdatedProfile = profileService.getProfile(user);
     profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);

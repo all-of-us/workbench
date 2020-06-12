@@ -12,7 +12,12 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {PubliclyDisplayed} from 'app/icons/publicly-displayed-icon';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
-import {commonStyles, TextInputWithLabel, WhyWillSomeInformationBePublic} from 'app/pages/login/account-creation/common';
+import {
+  commonStyles,
+  getRoleOptions,
+  TextInputWithLabel,
+  WhyWillSomeInformationBePublic
+} from 'app/pages/login/account-creation/common';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {isBlank, reactStyles} from 'app/utils';
@@ -311,24 +316,6 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
     return validate(this.state, validationCheck);
   }
 
-  getRoleOptions(): Array<{label: string, value: InstitutionalRole}> {
-    const {institutions, profile: {verifiedInstitutionalAffiliation: {institutionShortName}}} = this.state;
-    if (isBlank(institutionShortName)) {
-      return [];
-    }
-
-    const selectedOrgType = institutions.find(
-      inst => inst.shortName === institutionShortName).organizationTypeEnum;
-    const availableRoles: Array<InstitutionalRole> =
-      AccountCreationOptions.institutionalRolesByOrganizationType
-      .find(obj => obj.type === selectedOrgType)
-        .roles;
-
-    return AccountCreationOptions.institutionalRoleOptions.filter(option =>
-      availableRoles.includes(option.value)
-    );
-  }
-
   updateAffiliationValue(attribute: string, value) {
     this.setState(fp.set(['profile', 'verifiedInstitutionalAffiliation', attribute], value));
   }
@@ -427,9 +414,9 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
               <div>
                 <Dropdown data-test-id='role-dropdown'
                           style={styles.wideInputSize}
-                          placeholder={this.getRoleOptions() ?
+                          placeholder={getRoleOptions(institutions, institutionShortName) ?
                             '' : 'First select an institution above'}
-                          options={this.getRoleOptions()}
+                          options={getRoleOptions(institutions, institutionShortName)}
                           value={institutionalRoleEnum}
                           onChange={(e) => this.updateAffiliationValue('institutionalRoleEnum', e.value)}/>
               </div>

@@ -8,10 +8,11 @@ import {
   IndustryRole,
   InstitutionalRole,
   NonAcademicAffiliation,
-  OrganizationType,
+  OrganizationType, PublicInstitutionDetails,
   Race,
   SexAtBirth
 } from 'generated/fetch';
+import {isBlank} from "../../../utils";
 
 export const AccountCreationOptions = {
   degree: [

@@ -20,8 +20,9 @@ import {
 } from 'app/utils';
 
 import {navigate, serverConfigStore} from 'app/utils/navigation';
-import {Profile} from 'generated/fetch';
+import {InstitutionalRole, Profile, PublicInstitutionDetails} from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
+import {getRoleOptions} from "../login/account-creation/common";
 
 const styles = reactStyles({
   semiBold: {
@@ -43,12 +44,13 @@ const freeCreditLimitOptions = [
   {label: '$800', value: 800}
 ];
 
-const ReadonlyInputWithLabel = ({label, content, dataTestId, inputStyle = {}}) => {
+const TextInputWithLabel = ({label, content, dataTestId, onChange = (value) => {}, disabled=false, inputStyle = {}}) => {
   return <FlexColumn data-test-id={dataTestId} style={{marginTop: '1rem'}}>
     <label style={styles.semiBold}>{label}</label>
     <TextInput
         value={content || ''} // react yells at me if this is null
-        disabled
+        disabled={disabled}
+        onChange={(value) => onChange(value)}
         style={{
           backgroundColor: colorWithWhiteness(colors.primary, .95),
           opacity: '100%',
@@ -59,7 +61,7 @@ const ReadonlyInputWithLabel = ({label, content, dataTestId, inputStyle = {}}) =
   </FlexColumn>;
 };
 
-const DropdownWithLabel = ({label, options, initialValue, onChange, disabled, dataTestId, dropdownStyle = {}}) => {
+const DropdownWithLabel = ({label, options, initialValue, onChange, disabled=false, dataTestId, dropdownStyle = {}}) => {
   return <FlexColumn data-test-id={dataTestId} style={{marginTop: '1rem'}}>
     <label style={styles.semiBold}>{label}</label>
     <Dropdown
@@ -100,10 +102,12 @@ interface Props {
 interface State {
   institutionsLoadingError: string;
   loading: boolean;
-  profile: Profile;
+  oldProfile: Profile;
   profileLoadingError: string;
   saveDisabled: boolean;
-  verifiedInstitutionOptions: Array<{label: string, value: {displayName: string, shortName: string}}>;
+  updatedProfile: Profile;
+  verifiedInstitutionOptions: Array<PublicInstitutionDetails>;
+  verifiedInstitutionsByShortname: Map<String, PublicInstitutionDetails>;
 }
 
 
@@ -114,10 +118,12 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     this.state = {
       institutionsLoadingError: '',
       loading: true,
-      profile: null,
+      oldProfile: null,
       profileLoadingError: '',
       saveDisabled: true,
-      verifiedInstitutionOptions: []
+      updatedProfile: null,
+      verifiedInstitutionOptions: [],
+      verifiedInstitutionsByShortname: new Map()
     };
   }
 
@@ -136,7 +142,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     const {gsuiteDomain} = serverConfigStore.getValue();
     try {
       const profile = await profileApi().getUserByUsername(this.props.urlParams.usernameWithoutGsuiteDomain + '@' + gsuiteDomain);
-      this.setState({profile: profile});
+      this.setState({oldProfile: profile, updatedProfile: profile});
     } catch (error) {
       this.setState({profileLoadingError: 'Could not find user - please check spelling of username and try again'});
     }
@@ -144,24 +150,76 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
 
   async getInstitutions() {
     try {
-      const institutionsResponse = await institutionApi().getInstitutions();
-      const options = fp.map(
-        institution => {
-          return {
-            'label': institution.displayName ? institution.displayName : institution.shortName,
-            'value': {displayName: institution.displayName, shortName: institution.shortName}
-          };
-        },
-        institutionsResponse.institutions
-      );
-      this.setState({verifiedInstitutionOptions: options});
+      const institutionsResponse = await institutionApi().getPublicInstitutionDetails();
+      const institutions = institutionsResponse.institutions;
+      this.setState({
+        verifiedInstitutionOptions: fp.sortBy( institution => institution.displayName, institutions),
+        verifiedInstitutionsByShortname: institutions.reduce(
+            (accumulator, institution) => accumulator.set(institution.shortName, institution),
+            new Map<String, PublicInstitutionDetails>()
+        )
+      });
     } catch (error) {
       this.setState({institutionsLoadingError: 'Could not get list of verified institutions - please try again later'});
     }
   }
 
+  getRoleOptionsForProfile() {
+    const {updatedProfile: {verifiedInstitutionalAffiliation}, verifiedInstitutionOptions} = this.state;
+    const institutionShortName = verifiedInstitutionalAffiliation ? verifiedInstitutionalAffiliation.institutionShortName : "";
+    return getRoleOptions(verifiedInstitutionOptions, institutionShortName);
+  }
+
+  getInstitutionDropdownOptions() {
+    const {verifiedInstitutionOptions} = this.state;
+    return fp.map(
+        institution => {
+          return {label: institution.displayName, value: institution.shortName}
+        },
+        verifiedInstitutionOptions
+    );
+  }
+
+  isSaveEnabled() {
+    const {oldProfile, updatedProfile} = this.state;
+    const {verifiedInstitutionalAffiliation} = updatedProfile;
+    return fp.isEqual(oldProfile, updatedProfile)
+        && verifiedInstitutionalAffiliation
+        && !!verifiedInstitutionalAffiliation.institutionShortName
+        && (
+            verifiedInstitutionalAffiliation.institutionalRoleEnum !== InstitutionalRole.OTHER
+            || !!verifiedInstitutionalAffiliation.institutionalRoleOtherText
+        );
+  }
+
+  setVerifiedInstitutionOnProfile(institutionShortName: string) {
+    const {verifiedInstitutionsByShortname} = this.state;
+    this.setState(fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionShortName'], institutionShortName));
+    this.setState(fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionDisplayName'], verifiedInstitutionsByShortname.get(institutionShortName).displayName));
+    this.setState(fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionRoleEnum'], undefined));
+    this.setState(fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], undefined));
+  }
+
+  setInstitutionalRoleOnProfile(institutionalRoleEnum: InstitutionalRole) {
+    this.setState(fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleEnum'], institutionalRoleEnum));
+    this.setState(fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], undefined));
+  }
+
+  updateVerifiedInstitutionalAffiliation() {
+    const {updatedProfile} = this.state;
+    this.setState({loading: true});
+    profileApi().updateVerifiedInstitutionalAffiliation(updatedProfile.userId, updatedProfile.verifiedInstitutionalAffiliation).then(() => {
+      this.setState({loading: false});
+    });
+  }
+
   render() {
-    const {profile} = this.state;
+    const {
+      institutionsLoadingError,
+      profileLoadingError,
+      updatedProfile,
+      verifiedInstitutionOptions
+    } = this.state;
     return <FadeBox
         style={{
           margin: 'auto',
@@ -171,9 +229,9 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
           color: colors.primary
         }}
     >
-      {this.state.institutionsLoadingError && <div>{this.state.institutionsLoadingError}</div>}
-      {this.state.profileLoadingError && <div>{this.state.profileLoadingError}</div>}
-      {this.state.profile && <FlexColumn>
+      {institutionsLoadingError && <div>{institutionsLoadingError}</div>}
+      {profileLoadingError && <div>{profileLoadingError}</div>}
+      {updatedProfile && <FlexColumn>
         <FlexRow style={{alignItems: 'center'}}>
           <a onClick={() => navigate(['admin', 'users'])}>
             <ClrIcon
@@ -206,8 +264,8 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
               Account access
             </label>
             <Toggle
-                name={profile.disabled ? 'Disabled' : 'Enabled'}
-                checked={!profile.disabled}
+                name={updatedProfile.disabled ? 'Disabled' : 'Enabled'}
+                checked={!updatedProfile.disabled}
                 disabled={true}
                 data-test-id='account-access-toggle'
                 onToggle={() => this.setState({saveDisabled: false})}
@@ -216,42 +274,52 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
                 width={33}
             />
           </FlexRow>
-          <Button type='primary' disabled={this.state.saveDisabled}>
+          <Button
+              type='primary'
+              disabled={this.isSaveEnabled()}
+              onClick={() => this.updateVerifiedInstitutionalAffiliation()}
+          >
             Save
           </Button>
         </FlexRow>
         <FlexRow>
           <FlexColumn style={{width: '33%', marginRight: '1rem'}}>
-            <ReadonlyInputWithLabel
+            <TextInputWithLabel
                 label={'User name'}
-                content={profile.givenName + ' ' + profile.familyName}
+                content={updatedProfile.givenName + ' ' + updatedProfile.familyName}
                 dataTestId={'userFullName'}
+                disabled={true}
             />
-            <ReadonlyInputWithLabel
+            <TextInputWithLabel
                 label={'Registration state'}
-                content={fp.capitalize(profile.dataAccessLevel.toString())}
+                content={fp.capitalize(updatedProfile.dataAccessLevel.toString())}
                 dataTestId={'registrationState'}
+                disabled={true}
             />
-            <ReadonlyInputWithLabel
+            <TextInputWithLabel
                 label={'Registration date'}
-                content={profile.firstRegistrationCompletionTime ? displayDateWithoutHours(profile.firstRegistrationCompletionTime) : ''}
+                content={updatedProfile.firstRegistrationCompletionTime ? displayDateWithoutHours(updatedProfile.firstRegistrationCompletionTime) : ''}
                 dataTestId={'firstRegistrationCompletionTime'}
+                disabled={true}
             />
-            <ReadonlyInputWithLabel
+            <TextInputWithLabel
                 label={'Username'}
-                content={profile.username}
+                content={updatedProfile.username}
                 dataTestId={'username'}
+                disabled={true}
             />
-            <ReadonlyInputWithLabel
+            <TextInputWithLabel
                 label={'Contact email'}
-                content={profile.contactEmail}
+                content={updatedProfile.contactEmail}
                 dataTestId={'contactEmail'}
+                disabled={true}
             />
-            <ReadonlyInputWithLabel
+            <TextInputWithLabel
                 label={'Free credits used'}
-                content={profile.freeTierUsage}
+                content={updatedProfile.freeTierUsage}
                 inputStyle={{width: '6.5rem'}}
                 dataTestId={'freeTierUsage'}
+                disabled={true}
             />
           </FlexColumn>
           <FlexColumn style={{width: '33%'}}>
@@ -259,36 +327,58 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
                 label={'Free credit limit'}
                 options={freeCreditLimitOptions}
                 onChange={() => this.setState({saveDisabled: false})}
-                initialValue={profile.freeTierDollarQuota}
+                initialValue={updatedProfile.freeTierDollarQuota}
                 dropdownStyle={{width: '3rem'}}
                 disabled={true}
                 dataTestId={'freeTierDollarQuota'}
             />
-            {this.state.verifiedInstitutionOptions && <DropdownWithLabel
+            {verifiedInstitutionOptions && <DropdownWithLabel
                 label={'Verified institution'}
-                options={this.state.verifiedInstitutionOptions}
-                onChange={() => this.setState({saveDisabled: false})}
+                options={this.getInstitutionDropdownOptions()}
+                onChange={(event) => this.setVerifiedInstitutionOnProfile(event.value)}
                 initialValue={
-                  profile.verifiedInstitutionalAffiliation
-                      ? profile.verifiedInstitutionalAffiliation.institutionShortName
+                  updatedProfile.verifiedInstitutionalAffiliation
+                      ? updatedProfile.verifiedInstitutionalAffiliation.institutionShortName
                       : undefined
                 }
-                disabled={true}
                 dataTestId={'verifiedInstitution'}
             />}
+            {verifiedInstitutionOptions && updatedProfile.verifiedInstitutionalAffiliation && <DropdownWithLabel
+                label={'Institutional role'}
+                options={this.getRoleOptionsForProfile() || []}
+                onChange={(event) => this.setInstitutionalRoleOnProfile(event.value)}
+                initialValue={updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum
+                    ? updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum
+                    : undefined
+                }
+                dataTestId={'institutionalRole'}
+                disabled={!updatedProfile.verifiedInstitutionalAffiliation.institutionShortName}
+              />
+            }
+            {
+              verifiedInstitutionOptions
+              && updatedProfile.verifiedInstitutionalAffiliation
+              && updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum === InstitutionalRole.OTHER
+              && <TextInputWithLabel
+                label={'Institutional role description'}
+                content={updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleOtherText}
+                onChange={(value) => this.setState(fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], value))}
+                dataTestId={'institutionalRoleOtherText'}
+              />
+            }
             <div style={{marginTop: '1rem', width: '15rem'}}>
               <label style={{fontWeight: 600}}>Bypass access to:</label>
               <FlexRow style={{marginTop: '.5rem'}}>
                 <ToggleWithLabelAndToggledText
                     label={'2-factor auth'}
-                    initialValue={!!profile.twoFactorAuthBypassTime}
+                    initialValue={!!updatedProfile.twoFactorAuthBypassTime}
                     disabled={true}
                     onToggle={() => this.setState({saveDisabled: false})}
                     dataTestId={'twoFactorAuthBypassToggle'}
                 />
                 <ToggleWithLabelAndToggledText
                     label={'Compliance training'}
-                    initialValue={!!profile.complianceTrainingBypassTime}
+                    initialValue={!!updatedProfile.complianceTrainingBypassTime}
                     disabled={true}
                     onToggle={() => this.setState({saveDisabled: false})}
                     dataTestId={'complianceTrainingBypassToggle'}
@@ -297,14 +387,14 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
               <FlexRow style={{marginTop: '1rem'}}>
                 <ToggleWithLabelAndToggledText
                     label={'eRA Commons'}
-                    initialValue={!!profile.eraCommonsBypassTime}
+                    initialValue={!!updatedProfile.eraCommonsBypassTime}
                     disabled={true}
                     onToggle={(checked) => checked}
                     dataTestId={'eraCommonsBypassToggle'}
                 />
                 <ToggleWithLabelAndToggledText
                     label={'Data User Code of Conduct'}
-                    initialValue={!!profile.dataUseAgreementBypassTime}
+                    initialValue={!!updatedProfile.dataUseAgreementBypassTime}
                     disabled={true}
                     onToggle={() => this.setState({saveDisabled: false})}
                     dataTestId={'dataUseAgreementBypassToggle'}
