@@ -3,7 +3,6 @@ import HighchartsReact from 'highcharts-react-official';
 import * as React from 'react';
 
 import {getChartObj} from 'app/cohort-search/utils';
-import {ReactWrapperBase} from 'app/utils';
 
 highCharts.setOptions({
   lang: {

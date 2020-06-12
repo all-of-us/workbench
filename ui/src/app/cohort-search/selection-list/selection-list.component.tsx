@@ -5,7 +5,7 @@ import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase} from 'app/utils';
+import {reactStyles} from 'app/utils';
 import {Criteria, DomainType} from 'generated/fetch';
 
 const styles = reactStyles({

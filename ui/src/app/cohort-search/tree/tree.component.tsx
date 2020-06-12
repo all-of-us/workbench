@@ -6,7 +6,7 @@ import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {Criteria, CriteriaType, DomainType} from 'generated/fetch';
 

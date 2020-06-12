@@ -8,7 +8,7 @@ import {NumberInput} from 'app/components/inputs';
 import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase} from 'app/utils';
+import {reactStyles} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
 import {AttrName, CriteriaType, DomainType, Operator} from 'generated/fetch';

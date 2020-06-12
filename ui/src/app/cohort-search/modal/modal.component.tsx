@@ -16,7 +16,7 @@ import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {environment} from 'environments/environment';
-import {Criteria, CriteriaType, DomainType, SearchParameter, TemporalMention, TemporalTime} from 'generated/fetch';
+import {Criteria, CriteriaType, DomainType, TemporalMention, TemporalTime} from 'generated/fetch';
 
 const styles = reactStyles({
   footer: {

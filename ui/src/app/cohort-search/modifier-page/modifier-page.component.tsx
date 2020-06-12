@@ -11,7 +11,7 @@ import {DatePicker, NumberInput} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {serverConfigStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
