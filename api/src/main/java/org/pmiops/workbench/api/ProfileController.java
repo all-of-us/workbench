@@ -111,7 +111,10 @@ public class ProfileController implements ProfileApiDelegate {
               return result;
             }
           };
-  @Deprecated // refers to old-style Institutional Affiliations, to be deleted in RW-4362
+
+  // Deprecated because it refers to old-style Institutional Affiliations, to be deleted in RW-4362
+  // The new-style equivalent is VerifiedInstitutionalAffiliationMapper.modelToDbWithoutUser()
+  @Deprecated
   private static final Function<InstitutionalAffiliation, DbInstitutionalAffiliation>
       FROM_CLIENT_INSTITUTIONAL_AFFILIATION =
           new Function<InstitutionalAffiliation, DbInstitutionalAffiliation>() {
@@ -740,7 +743,9 @@ public class ProfileController implements ProfileApiDelegate {
     return ResponseEntity.ok(new EmptyResponse());
   }
 
-  @Deprecated // refers to old-style Institutional Affiliations, to be deleted in RW-4362
+  // Deprecated because it refers to old-style Institutional Affiliations, to be deleted in RW-4362
+  // The new-style equivalent is updateVerifiedInstitutionalAffiliation()
+  @Deprecated
   private void updateInstitutionalAffiliations(Profile updatedProfile, DbUser user) {
     List<DbInstitutionalAffiliation> newAffiliations =
         updatedProfile.getInstitutionalAffiliations().stream()
