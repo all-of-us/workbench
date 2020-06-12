@@ -12,7 +12,7 @@ import {
 } from 'app/pages/profile/data-user-code-of-conduct-styles';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {reactStyles, withUserProfile} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getLiveDataUseAgreementVersion} from 'app/utils/code-of-conduct';
 import {navigate, serverConfigStore} from 'app/utils/navigation';
