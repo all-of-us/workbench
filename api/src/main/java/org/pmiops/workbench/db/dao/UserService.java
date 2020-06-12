@@ -42,6 +42,7 @@ public interface UserService {
 
   DbUser updateUserWithConflictHandling(DbUser user);
 
+  // TODO(jaycarlton): Move compliance-related methods to a new UserComplianceService or similar
   DbUser submitDataUseAgreement(
       DbUser user, Integer dataUseAgreementSignedVersion, String initials);
 
@@ -59,8 +60,6 @@ public interface UserService {
   void setEraCommonsBypassTime(Long userId, Timestamp bypassTime);
 
   void setTwoFactorAuthBypassTime(Long userId, Timestamp bypassTime);
-
-  void setClusterRetryCount(int clusterRetryCount);
 
   DbUser setDisabledStatus(Long userId, boolean disabled);
 

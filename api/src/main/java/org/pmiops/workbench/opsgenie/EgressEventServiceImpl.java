@@ -167,6 +167,7 @@ public class EgressEventServiceImpl implements EgressEventService {
                     "Collaborator with user_id %d not Found", userAdminView.getUserDatabaseId()));
     return String.format("%s: %s", userAdminView.getRole(), userDetails);
   }
+
   /**
    * Produce a succinct string for giving an administrator a heads-up in an alert or other text-only
    * context.

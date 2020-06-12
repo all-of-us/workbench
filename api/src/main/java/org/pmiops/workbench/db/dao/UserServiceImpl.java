@@ -75,7 +75,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UserServiceImpl implements UserService, GaugeDataCollector {
 
-  private final int MAX_RETRIES = 3;
+  private static final int MAX_RETRIES = 3;
   private static final int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
 
   private final Provider<WorkbenchConfig> configProvider;
@@ -330,6 +330,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         null);
   }
 
+  // TODO: move this and the one above to UserMapper
   @Override
   public DbUser createUser(
       String givenName,
@@ -559,15 +560,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         dbUser.getUserId(),
         targetProperty,
         Optional.ofNullable(bypassTime).map(Timestamp::toInstant));
-  }
-
-  @Override
-  public void setClusterRetryCount(int clusterRetryCount) {
-    updateUserWithRetries(
-        (user) -> {
-          user.setClusterCreateRetries(clusterRetryCount);
-          return user;
-        });
   }
 
   @Override

@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,7 +39,7 @@ public class SumoLogicControllerTest {
 
   @MockBean private EgressEventAuditor mockEgressEventAuditor;
   @MockBean private CloudStorageService mockCloudStorageService;
-  @MockBean private EgressEventService mockOpsGenieService;
+  @MockBean private EgressEventService mockEgressEventService;
   private static WorkbenchConfig config;
 
   @Autowired private SumoLogicController sumoLogicController;
@@ -46,7 +47,7 @@ public class SumoLogicControllerTest {
   private EgressEventRequest request;
   private EgressEvent event;
 
-  private ObjectMapper mapper = new ObjectMapper();
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
   @TestConfiguration
   @Import({SumoLogicController.class})
@@ -72,7 +73,7 @@ public class SumoLogicControllerTest {
     event.setTimeWindowStart(Instant.now().toEpochMilli());
 
     request = new EgressEventRequest();
-    request.setEventsJsonArray(mapper.writeValueAsString(Arrays.asList(event)));
+    request.setEventsJsonArray(objectMapper.writeValueAsString(Collections.singletonList(event)));
 
     when(mockCloudStorageService.getCredentialsBucketString(
             SumoLogicController.SUMOLOGIC_KEY_FILENAME))
@@ -98,15 +99,15 @@ public class SumoLogicControllerTest {
   public void testLogsSingleEvent() {
     sumoLogicController.logEgressEvent(API_KEY, request);
     verify(mockEgressEventAuditor).fireEgressEvent(event);
-    verify(mockOpsGenieService).handleEvent(event);
+    verify(mockEgressEventService).handleEvent(event);
   }
 
   @Test
   public void testLogsMultipleEvents() throws JsonProcessingException {
     EgressEvent event2 = new EgressEvent();
-    request.setEventsJsonArray(mapper.writeValueAsString(Arrays.asList(event, event2)));
+    request.setEventsJsonArray(objectMapper.writeValueAsString(Arrays.asList(event, event2)));
     sumoLogicController.logEgressEvent(API_KEY, request);
     verify(mockEgressEventAuditor, times(2)).fireEgressEvent(any());
-    verify(mockOpsGenieService, times(2)).handleEvent(any());
+    verify(mockEgressEventService, times(2)).handleEvent(any());
   }
 }

@@ -18,6 +18,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
+import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.captcha.CaptchaVerificationService;
@@ -47,6 +48,7 @@ import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.Address;
+import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.CreateAccountRequest;
@@ -386,7 +388,9 @@ public class ProfileController implements ProfileApiDelegate {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     DbUser user = userProvider.get();
     if (user.getBetaAccessRequestTime() == null) {
-      log.log(Level.INFO, "Sending beta access request email.");
+      log.log(
+          Level.INFO,
+          String.format("Sending beta access request email to %s.", user.getContactEmail()));
       try {
         mailServiceProvider.get().sendBetaAccessRequestEmail(user.getUsername());
       } catch (MessagingException e) {
@@ -574,6 +578,7 @@ public class ProfileController implements ProfileApiDelegate {
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
+  @AuthorityRequired(Authority.ACCESS_CONTROL_ADMIN)
   @Override
   public ResponseEntity<EmptyResponse> updateVerifiedInstitutionalAffiliation(
       Long userId, VerifiedInstitutionalAffiliation verifiedAffiliation) {

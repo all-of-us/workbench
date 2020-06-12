@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SumoLogicController implements SumoLogicApiDelegate {
 
   public static final String SUMOLOGIC_KEY_FILENAME = "inbound-sumologic-keys.txt";
-  private static final Logger logger = Logger.getLogger(SumoLogicController.class.getName());
+  private static final Logger log = Logger.getLogger(SumoLogicController.class.getName());
 
   private final CloudStorageService cloudStorageService;
   private final EgressEventAuditor egressEventAuditor;
@@ -63,10 +63,10 @@ public class SumoLogicController implements SumoLogicApiDelegate {
       Arrays.stream(events).forEach(egressEventService::handleEvent);
       return ResponseEntity.noContent().build();
     } catch (IOException e) {
-      logger.severe(
+      log.severe(
           String.format(
               "Failed to parse SumoLogic egress event JSON: %s", request.getEventsJsonArray()));
-      logger.severe(e.getMessage());
+      log.severe(e.getMessage());
       this.egressEventAuditor.fireFailedToParseEgressEventRequest(request);
       throw new BadRequestException("Error parsing event details");
     }
@@ -95,7 +95,7 @@ public class SumoLogicController implements SumoLogicApiDelegate {
     try {
       Set<String> validApiKeys = getSumoLogicApiKeys();
       if (!validApiKeys.contains(apiKey)) {
-        logger.severe(
+        log.severe(
             String.format(
                 "Received SumoLogic egress event with bad API key in header: %s",
                 request.toString()));
@@ -103,10 +103,10 @@ public class SumoLogicController implements SumoLogicApiDelegate {
         throw new UnauthorizedException("Invalid API key");
       }
     } catch (IOException e) {
-      logger.severe(
+      log.severe(
           "Failed to load API keys for SumoLogic request authorization. "
               + "Allowing request to be processed.");
-      logger.severe(e.getMessage());
+      log.severe(e.getMessage());
     }
   }
 }
