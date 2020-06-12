@@ -57,8 +57,6 @@ import org.pmiops.workbench.institution.InstitutionServiceImpl;
 import org.pmiops.workbench.institution.InstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.AccessBypassRequest;
-import org.pmiops.workbench.model.AccessModule;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
@@ -1147,17 +1145,17 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(userDao.findUserByUsername(PRIMARY_EMAIL).getEraCommonsCompletionTime()).isNotNull();
   }
 
-  @Test
-  public void testBypassAccessModule() {
-    Profile profile = createUser();
-    profileController.bypassAccessRequirement(
-        profile.getUserId(),
-        new AccessBypassRequest().isBypassed(true).moduleName(AccessModule.DATA_USE_AGREEMENT));
-
-    DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
-    assertThat(dbUser.getDataUseAgreementBypassTime()).isNotNull();
-  }
-
+  //  @Test
+  //  public void testBypassAccessModule() {
+  //    Profile profile = createUser();
+  //    profileController.bypassAccessRequirement(
+  //        profile.getUserId(),
+  //        new AccessBypassRequest().isBypassed(true).moduleName(AccessModule.DATA_USE_AGREEMENT));
+  //
+  //    DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
+  //    assertThat(dbUser.getDataUseAgreementBypassTime()).isNotNull();
+  //  }
+  //
   @Test
   public void testDeleteProfile() {
     createUser();

@@ -5,21 +5,26 @@ import com.ifountain.opsgenie.client.swagger.ApiException;
 import com.ifountain.opsgenie.client.swagger.api.AlertApi;
 import com.ifountain.opsgenie.client.swagger.model.CreateAlertRequest;
 import com.ifountain.opsgenie.client.swagger.model.SuccessResponse;
+import java.time.Clock;
 import java.util.Optional;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import javax.persistence.Transient;
 import org.jetbrains.annotations.NotNull;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.EgressEvent;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceUserAdminView;
+import org.pmiops.workbench.utils.Matchers;
 import org.pmiops.workbench.workspaceadmin.WorkspaceAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,8 +32,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class EgressEventServiceImpl implements EgressEventService {
   private static final Logger logger = Logger.getLogger(EgressEventServiceImpl.class.getName());
-  private static final Pattern VM_NAME_PATTERN = Pattern.compile("all-of-us-\\d+-m");
+  private static final Pattern VM_NAME_PATTERN =
+      Pattern.compile("all\\-of\\-us\\-(?<userid>\\d+)\\-m");
 
+  private final Clock clock;
   private final EgressEventAuditor egressEventAuditor;
   private final Provider<AlertApi> alertApiProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
@@ -37,11 +44,13 @@ public class EgressEventServiceImpl implements EgressEventService {
 
   @Autowired
   public EgressEventServiceImpl(
+      Clock clock,
       EgressEventAuditor egressEventAuditor,
       Provider<AlertApi> alertApiProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserService userService,
       WorkspaceAdminService workspaceAdminService) {
+    this.clock = clock;
     this.egressEventAuditor = egressEventAuditor;
     this.alertApiProvider = alertApiProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
@@ -84,8 +93,6 @@ public class EgressEventServiceImpl implements EgressEventService {
   private CreateAlertRequest egressEventToOpsGenieAlert(EgressEvent egressEvent) {
     final CreateAlertRequest request = new CreateAlertRequest();
     request.setMessage(String.format("High-egress event (%s)", egressEvent.getProjectName()));
-    //    final DbWorkspace dbWorkspace =
-    // workspaceDao.findAllByWorkspaceNamespace(egressEvent.getVmName());
     request.setDescription(getDescription(egressEvent));
 
     // Add a note with some more specific details about the alerting criteria and threshold. Notes
@@ -114,19 +121,19 @@ public class EgressEventServiceImpl implements EgressEventService {
     final String creatorDetails =
         userService
             .getByUsername(workspace.getCreator())
-            .map(DbUser::getAdminDescription)
+            .map(this::getAdminDescription)
             .orElse("Creator not Found");
 
     final Optional<DbUser> executor =
         vmNameToUserDatabaseId(egressEvent.getVmName()).flatMap(userService::getByDatabaseId);
 
     final String executorDetails =
-        executor.map(DbUser::getAdminDescription).orElse("Executing User not Found");
+        executor.map(this::getAdminDescription).orElse("Executing User not Found");
 
     final String collaboratorDetails =
         adminWorkspace.getCollaborators().stream()
             .map(this::formatWorkspaceUserAdminView)
-            .collect(Collectors.joining("\n"));
+            .collect(Collectors.joining("\n\n"));
 
     return String.format("Workspace \"%s\"", workspace.getName())
         + String.format(
@@ -139,7 +146,7 @@ public class EgressEventServiceImpl implements EgressEventService {
         + String.format("Cluster Name: %s", executor.map(DbUser::getClusterName).orElse("unknown"))
         + String.format("User Running Notebook: %s\n\n", executorDetails)
         + String.format("Workspace Creator: %s\n\n", creatorDetails)
-        + String.format("Collaborators: %s\n\n", collaboratorDetails)
+        + String.format("Collaborators: \n%s\n", collaboratorDetails)
         + String.format(
             "Workspace Admin Console (Prod Admin User): %s/admin/workspaces/%s/\n",
             workbenchConfigProvider.get().server.uiBaseUrl, egressEvent.getProjectName())
@@ -150,15 +157,39 @@ public class EgressEventServiceImpl implements EgressEventService {
     final String userDetails =
         userService
             .getByDatabaseId(userAdminView.getUserDatabaseId())
-            .map(DbUser::getAdminDescription)
+            .map(this::getAdminDescription)
             .orElse(
                 String.format(
                     "Collaborator with user_id %d not Found", userAdminView.getUserDatabaseId()));
     return String.format("%s: %s", userAdminView.getRole(), userDetails);
   }
+  /**
+   * Produce a succinct string for giving an administrator a heads-up in an alert or other text-only
+   * context.
+   */
+  @Transient
+  public String getAdminDescription(DbUser dbUser) {
+    final String institutions =
+        dbUser.getInstitutionalAffiliations().stream()
+            .map(DbInstitutionalAffiliation::getInstitution)
+            .collect(Collectors.joining(", "));
+    final Days accountAge =
+        Days.daysBetween(new DateTime(dbUser.getCreationTime().getTime()),
+            new DateTime(clock.instant().toEpochMilli()));
+    return String.format(
+        "%s %s - Username: %s, Contact Email: %s\n"
+            + "user_id: %d, Institutions: [ %s ], Account Age: %d days",
+        dbUser.getGivenName(),
+        dbUser.getFamilyName(),
+        dbUser.getUsername(),
+        dbUser.getContactEmail(),
+        dbUser.getUserId(),
+        institutions,
+        accountAge.getDays());
+  }
+
 
   private Optional<Long> vmNameToUserDatabaseId(String vmName) {
-    Matcher matcher = VM_NAME_PATTERN.matcher(vmName);
-    return Optional.ofNullable(matcher.group(1)).map(Long::parseLong);
+    return Matchers.getGroup(VM_NAME_PATTERN, vmName, "userid").map(Long::parseLong);
   }
 }
