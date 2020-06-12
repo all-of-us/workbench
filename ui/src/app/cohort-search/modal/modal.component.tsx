@@ -31,7 +31,7 @@ const styles = reactStyles({
     left: '50%',
     overflowY: 'auto',
     transform: 'translate(-50%, -50%)',
-    backgroundColor: 'white',
+    backgroundColor: colors.white,
     borderRadius: '4px',
     display: 'flex',
     flexFlow: 'column nowrap',
@@ -100,7 +100,7 @@ const styles = reactStyles({
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
-    height: '59px',
+    height: '2.5rem',
     marginTop: '0.5rem',
   }
 });
@@ -214,7 +214,6 @@ export class CBModal extends React.Component<Props, State> {
 
   componentDidMount(): void {
     const {searchContext: {domain, item, standard, type}} = this.props;
-    // reset to default each time the modal is opened
     if (!this.state.open) {
       const selections = item.searchParameters;
       const selectedIds = selections.map(s => s.parameterId);
@@ -321,6 +320,7 @@ export class CBModal extends React.Component<Props, State> {
     }
     return {
       flex: `0 0 ${width}`,
+      height: '100%',
       maxWidth: width,
       position: 'relative',
     } as React.CSSProperties;
@@ -330,7 +330,6 @@ export class CBModal extends React.Component<Props, State> {
     const width = this.props.searchContext.domain === DomainType.PERSON ? '50%' : '33.33333%';
     return {
       flex: `0 0 ${width}`,
-      height: '100%',
       maxWidth: width,
       position: 'relative',
     } as React.CSSProperties;
@@ -497,7 +496,7 @@ export class CBModal extends React.Component<Props, State> {
                   <ClrIcon size='24' shape='close'/>
                 </Button>}
               </div>
-              <div style={(domain === DomainType.PERSON && type !== CriteriaType.AGE) ? {marginBottom: '3.5rem'} : {}}>
+              <div style={(domain === DomainType.PERSON && type !== CriteriaType.AGE) ? {marginBottom: '3.5rem'} : {height: 'calc(100% - 3.5rem)'}}>
                 {domain === DomainType.PERSON ? <div style={{flex: 1, overflow: 'auto'}}>
                   <Demographics
                     count={count}
@@ -508,7 +507,7 @@ export class CBModal extends React.Component<Props, State> {
                   </div>
                 : <React.Fragment>
                   {loadingSubtree && <SpinnerOverlay/>}
-                  <div id='tree' style={loadingSubtree ? {pointerEvents: 'none', opacity: 0.3} : {}}>
+                  <div style={loadingSubtree ? {height: '100%', pointerEvents: 'none', opacity: 0.3} : {height: '100%'}}>
                     {/* Tree View */}
                     <div style={this.panelLeftStyle('tree')}>
                       {hierarchyNode && <CriteriaTree
@@ -540,7 +539,7 @@ export class CBModal extends React.Component<Props, State> {
                         selections={selections}
                         setSearchContext={setSearchContext}/>}
                     </div>
-                       {/* Attributes Page */}
+                    {/* Attributes Page */}
                     <div style={this.panelLeftStyle('attributes')}>
                       {!!attributesNode && <AttributesPage
                         close={this.back}
