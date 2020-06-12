@@ -1,18 +1,18 @@
 import * as fp from 'lodash/fp';
 
-export interface Subscribable {
+export interface Subscribable<T> {
   subscribe: (Function) => { unsubscribe: () => void};
-  next: (newValue: any, oldValue: any) => void;
+  next: (newValue: T, oldValue: T) => void;
 }
 
-export interface Atom {
-  get: () => any;
-  set: (any) => void;
-  subscribe: Subscribable['subscribe'];
+export interface Atom<T> {
+  get: () => T;
+  set: (value: T) => void;
+  subscribe: Subscribable<T>['subscribe'];
   reset: () => void;
 }
 
-export const subscribable = (): Subscribable => {
+export function subscribable<T>(): Subscribable<T> {
   let subscribers = [];
   return {
     subscribe: fn => {
@@ -27,12 +27,12 @@ export const subscribable = (): Subscribable => {
       fp.forEach(fn => fn(...args), subscribers);
     }
   };
-};
+}
 
 // A simple state container inspired by clojure atoms.
-export const atom = (initialValue): Atom => {
+export function atom<T>(initialValue: T): Atom<T> {
   let value = initialValue;
-  const { subscribe, next } = subscribable();
+  const { subscribe, next } = subscribable<T>();
   const get = () => value;
   const set = newValue => {
     const oldValue = value;
@@ -40,4 +40,4 @@ export const atom = (initialValue): Atom => {
     next(newValue, oldValue);
   };
   return { subscribe, get, set, reset: () => set(initialValue) };
-};
+}
