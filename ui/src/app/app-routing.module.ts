@@ -339,12 +339,13 @@ const routes: Routes = [
         path: '**',
         component: AppRouting,
         data:  {}
-      },
+      }
     ]
   },
   {
     path: '**',
-    component: AppRouting
+    component: AppRouting,
+    data: {}
   }
 ];
 

@@ -5,6 +5,7 @@ import {Injectable, NgZone} from '@angular/core';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {setLoggedInState} from 'app/utils/analytics';
 import {signInStore} from 'app/utils/navigation';
+import {authStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {ConfigResponse} from 'generated';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
@@ -67,6 +68,7 @@ export class SignInService {
   private subscribeToAuth2User(): void {
     // The listen below only fires on changes, so we need an initial
     // check to handle the case where the user is already signed in.
+    authStore.set({...authStore.get(), authLoaded: true, isSignedIn: gapi.auth2.getAuthInstance().isSignedIn.get()});
     this.zone.run(() => {
       const isSignedIn = gapi.auth2.getAuthInstance().isSignedIn.get();
       this.isSignedIn.next(isSignedIn);
@@ -77,6 +79,7 @@ export class SignInService {
       setLoggedInState(isSignedIn);
     });
     gapi.auth2.getAuthInstance().isSignedIn.listen((isSignedIn: boolean) => {
+      authStore.set({...authStore.get(), isSignedIn});
       this.zone.run(() => {
         this.isSignedIn.next(isSignedIn);
         if (isSignedIn) {
