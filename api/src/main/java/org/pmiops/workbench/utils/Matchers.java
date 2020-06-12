@@ -11,7 +11,7 @@ public class Matchers {
   // Assuming there's a named group in the pattern, returns an optional string for the match.
   // This avoids some fairly irritating exceptions and branching.
   public static Optional<String> getGroup(Matcher matcher, String groupName) {
-    if (matcher.groupCount() > 1) {
+    if (matcher.find()) {
       return Optional.ofNullable(matcher.group(groupName));
     } else {
       return Optional.empty();

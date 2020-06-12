@@ -5,7 +5,10 @@ import com.ifountain.opsgenie.client.swagger.ApiException;
 import com.ifountain.opsgenie.client.swagger.api.AlertApi;
 import com.ifountain.opsgenie.client.swagger.model.CreateAlertRequest;
 import com.ifountain.opsgenie.client.swagger.model.SuccessResponse;
+import java.sql.Timestamp;
 import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -13,8 +16,6 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.persistence.Transient;
 import org.jetbrains.annotations.NotNull;
-import org.joda.time.DateTime;
-import org.joda.time.Days;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
@@ -32,9 +33,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class EgressEventServiceImpl implements EgressEventService {
   private static final Logger logger = Logger.getLogger(EgressEventServiceImpl.class.getName());
-  private static final Pattern VM_NAME_PATTERN =
-      Pattern.compile("all\\-of\\-us\\-(?<userid>\\d+)\\-m");
-
+  private static final Pattern VM_NAME_PATTERN = Pattern.compile("all-of-us-(?<userid>\\d+)-m");
+  private static final String USER_ID_GROUP_NAME = "userid";
   private final Clock clock;
   private final EgressEventAuditor egressEventAuditor;
   private final Provider<AlertApi> alertApiProvider;
@@ -135,15 +135,19 @@ public class EgressEventServiceImpl implements EgressEventService {
             .map(this::formatWorkspaceUserAdminView)
             .collect(Collectors.joining("\n\n"));
 
-    return String.format("Workspace \"%s\"", workspace.getName())
+    return String.format(
+            "Workspace \"%s\", Age = %d Days\n",
+            workspace.getName(),
+            getAgeInDays(Timestamp.from(Instant.ofEpochMilli(workspace.getCreationTime()))))
         + String.format(
             "GCP Billing Project/Firecloud Namespace: %s\n", egressEvent.getProjectName())
         + String.format("Notebook Jupyter VM name: %s\n", egressEvent.getVmName())
-        + String.format("MySQL workspace_id: %d", adminWorkspace.getWorkspaceDatabaseId())
+        + String.format("MySQL workspace_id: %d\n", adminWorkspace.getWorkspaceDatabaseId())
         + String.format(
             "Egress detected: %.2f Mib in %d secs\n\n",
             egressEvent.getEgressMib(), egressEvent.getTimeWindowDuration())
-        + String.format("Cluster Name: %s", executor.map(DbUser::getClusterName).orElse("unknown"))
+        + String.format(
+            "Cluster Name: %s\n", executor.map(DbUser::getClusterName).orElse("unknown"))
         + String.format("User Running Notebook: %s\n\n", executorDetails)
         + String.format("Workspace Creator: %s\n\n", creatorDetails)
         + String.format("Collaborators: \n%s\n", collaboratorDetails)
@@ -173,9 +177,6 @@ public class EgressEventServiceImpl implements EgressEventService {
         dbUser.getInstitutionalAffiliations().stream()
             .map(DbInstitutionalAffiliation::getInstitution)
             .collect(Collectors.joining(", "));
-    final Days accountAge =
-        Days.daysBetween(new DateTime(dbUser.getCreationTime().getTime()),
-            new DateTime(clock.instant().toEpochMilli()));
     return String.format(
         "%s %s - Username: %s, Contact Email: %s\n"
             + "user_id: %d, Institutions: [ %s ], Account Age: %d days",
@@ -185,11 +186,20 @@ public class EgressEventServiceImpl implements EgressEventService {
         dbUser.getContactEmail(),
         dbUser.getUserId(),
         institutions,
-        accountAge.getDays());
+        getAgeInDays(dbUser.getCreationTime()));
   }
 
+  private long getAgeInDays(Timestamp creationTime) {
+    return Duration.between(creationTime.toInstant(), clock.instant()).toDays();
+  }
 
+  //  private String formatAge(Timestamp creationTime) {
+  //    final Period period = new Period(Instant.ofEpochMilli(creationTime.getTime()),
+  // Instant.ofEpochMilli(clock.millis()));
+  //    return period.toString(AGE_FORMATTER);
+  //  }
+  //
   private Optional<Long> vmNameToUserDatabaseId(String vmName) {
-    return Matchers.getGroup(VM_NAME_PATTERN, vmName, "userid").map(Long::parseLong);
+    return Matchers.getGroup(VM_NAME_PATTERN, vmName, USER_ID_GROUP_NAME).map(Long::parseLong);
   }
 }
