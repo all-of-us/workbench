@@ -97,7 +97,6 @@ export class AppComponent implements OnInit {
     });
 
     routeDataStore.subscribe(({title}) => this.setTitleFromReactRoute(title));
-
     initializeAnalytics();
   }
 

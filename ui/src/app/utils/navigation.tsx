@@ -36,11 +36,9 @@ export const userProfileStore =
 export const signInStore =
   new BehaviorSubject<{
     signOut: Function,
-    isSignedIn: () => boolean,
     profileImage: string,
   }>({
     signOut: () => {},
-    isSignedIn: () => false,
     profileImage: {} as string,
   });
 

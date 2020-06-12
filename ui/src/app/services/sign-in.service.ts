@@ -114,7 +114,6 @@ export class SignInService {
   nextSignInStore() {
     signInStore.next({
       signOut: () => this.signOut(),
-      isSignedIn: () => gapi.auth2.getAuthInstance.isSignedIn.get(),
       profileImage: this.profileImage,
     });
   }
