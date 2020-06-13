@@ -82,6 +82,13 @@ export default class CohortParticipantsGroup {
     return modal;
   }
 
+  async includeEthnicity(): Promise<CohortCriteriaModal> {
+    await this.clickCriteriaMenuItems(['Ethnicity']);
+    const modal = new CohortCriteriaModal(this.page);
+    await modal.waitUntilVisible();
+    return modal;
+  }
+
   async getGroupCount(): Promise<string> {
     return waitForNumericalString(this.page, this.getGroupCountXpath());
   }

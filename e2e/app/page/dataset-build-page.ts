@@ -1,9 +1,12 @@
+import Table from 'app/component/table';
+import Button from 'app/element/button';
+import Checkbox from 'app/element/checkbox';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
-import Checkbox from 'app/element/checkbox';
-import Button from 'app/element/button';
-import Table from 'app/component/table';
+import {xPathOptionToXpath} from 'app/element/xpath-defaults';
+import {ElementType} from 'app/xpath-options';
 import AuthenticatedPage from './authenticated-page';
+import CohortBuildPage from './cohort-build-page';
 
 const PageTitle = 'Dataset Page';
 
@@ -28,6 +31,18 @@ export default class DatasetBuildPage extends AuthenticatedPage {
     }
   }
 
+  async getAddCohortsButton(): Promise<Button> {
+    const buttonXpath = xPathOptionToXpath({name: LabelAlias.SelectCohorts, ancestorLevel: 3, iconShape: 'is-solid'});
+    return new Button(this.page, buttonXpath);
+  }
+
+  async clickAddCohortsButton(): Promise<CohortBuildPage> {
+    const addCohortButton = await this.getAddCohortsButton();
+    await addCohortButton.clickAndWait();
+    const cohortPage = new CohortBuildPage(this.page);
+    return cohortPage.waitForLoad();
+  }
+
   async selectCohorts(cohortNames: string[]): Promise<void> {
     for (const cohortName of cohortNames) {
       const xpath = this.getCheckboxXpath(LabelAlias.SelectCohorts, cohortName);
@@ -47,8 +62,8 @@ export default class DatasetBuildPage extends AuthenticatedPage {
 
   async selectValues(selectAll: boolean = false, values?: string[]): Promise<void> {
     if (selectAll) {
-      const selectAllXpath = `//label[contains(normalize-space(), "${LabelAlias.SelectValues}")]/ancestor::node()[3]//input[@data-test-id="select-all"]`;
-      const selectAllCheckbox = new Checkbox(this.page, selectAllXpath);
+      const xpath = xPathOptionToXpath({name: LabelAlias.SelectValues, ancestorLevel: 3, type: ElementType.Checkbox});
+      const selectAllCheckbox = new Checkbox(this.page, xpath);
       await selectAllCheckbox.check();
     }
     for (const valueName of values) {

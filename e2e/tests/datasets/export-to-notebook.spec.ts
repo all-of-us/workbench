@@ -1,6 +1,5 @@
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import DataPage from 'app/page/data-page';
-import DatasetBuildPage from 'app/page/dataset-build-page';
 import DatasetSaveModal from 'app/page/dataset-save-modal';
 import {makeRandomName} from 'utils/str-utils';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
@@ -12,8 +11,8 @@ describe('Create Dataset', () => {
   });
 
    /**
-    * Create new Dataset, Export to Notebook with Python language
-    * Then delete Dataset.
+    * Create new Dataset, export to notebook in Python language
+    * Finally delete Dataset.
     */
   test('Export dataset to notebook in Python programming language', async () => {
     const workspaceCard = await findWorkspace(page);
@@ -21,12 +20,7 @@ describe('Create Dataset', () => {
 
       // Click Add Datasets button
     const dataPage = new DataPage(page);
-    const addDatasetButton = await dataPage.getAddDatasetButton();
-    await addDatasetButton.clickAndWait();
-
-      // Build new Dataset
-    const datasetPage = new DatasetBuildPage(page);
-    await datasetPage.waitForLoad();
+    const datasetPage = await dataPage.clickAddDatasetButton();
 
     await datasetPage.selectCohorts(['All Participants']);
     await datasetPage.selectConceptSets(['Demographics']);

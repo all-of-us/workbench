@@ -3,7 +3,6 @@ import {ButtonLabel} from 'app/component/dialog';
 import ClrIconLink from 'app/element/clr-icon-link';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import DataPage, {LabelAlias} from 'app/page/data-page';
-import DatasetBuildPage from 'app/page/dataset-build-page';
 import DatasetSaveModal from 'app/page/dataset-save-modal';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
@@ -25,12 +24,7 @@ describe('Create Dataset', () => {
 
     // Click Add Datasets button
     const dataPage = new DataPage(page);
-    const addDatasetButton = await dataPage.getAddDatasetButton();
-    await addDatasetButton.clickAndWait();
-
-    // Build new Dataset
-    const datasetPage = new DatasetBuildPage(page);
-    await datasetPage.waitForLoad();
+    const datasetPage = await dataPage.clickAddDatasetButton();
 
     await datasetPage.selectCohorts(['All Participants']);
     await datasetPage.selectConceptSets(['Demographics', 'All Surveys']);
@@ -98,11 +92,7 @@ describe('Create Dataset', () => {
     await dataPage.openTab(LabelAlias.Data);
 
     // Click Add Datasets button.
-    const addDatasetButton = await dataPage.getAddDatasetButton();
-    await addDatasetButton.clickAndWait();
-
-    // Build new Dataset.
-    const datasetPage = new DatasetBuildPage(page);
+    const datasetPage = await dataPage.clickAddDatasetButton();
 
     await datasetPage.selectCohorts([cohortName]);
     await datasetPage.selectConceptSets(['Demographics']);

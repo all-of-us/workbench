@@ -19,7 +19,7 @@ describe('User can create new Cohorts', () => {
 
   /**
    * Test:
-   * Create a new Workspace.
+   * Find an existing workspace or create a new workspace if none exists.
    * Add criteria in Group 1: Physical Measurements criteria => BMI (>= 30).
    * Add criteria in Group 2: Demographics => Deceased.
    * Checking counts.
@@ -32,10 +32,6 @@ describe('User can create new Cohorts', () => {
 
     // Wait for the Data page.
     const dataPage = new DataPage(page);
-
-    // No cohorts in new workspace.
-    const cardsCount = (await DataResourceCard.findAllCards(page)).length;
-    expect(cardsCount).toBe(0);
 
     // Click Add Cohorts button
     const addCohortsButton = await dataPage.getAddCohortsButton();

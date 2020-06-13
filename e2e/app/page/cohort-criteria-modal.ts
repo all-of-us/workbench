@@ -45,7 +45,7 @@ export default class CohortCriteriaModal extends Dialog {
   }
 
   async waitForPhysicalMeasurementCriteriaLink(criteriaType: PhysicalMeasurementsCriteria): Promise<ClrIconLink> {
-    return ClrIconLink.findByName(this.page, {type: ElementType.Icon, name: criteriaType, iconShape: 'slider', ancestorLevel: 2}, this);
+    return ClrIconLink.findByName(this.page, {name: criteriaType, iconShape: 'slider', ancestorLevel: 2}, this);
   }
 
   /**

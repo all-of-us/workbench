@@ -12,6 +12,7 @@ import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
 import {ElementType} from 'app/xpath-options';
 import CohortBuildPage from './cohort-build-page';
+import DatasetBuildPage from './dataset-build-page';
 
 export enum LabelAlias {
   Data = 'Data',
@@ -66,6 +67,19 @@ export default class DataPage extends AuthenticatedPage {
 
   async getAddCohortsButton(): Promise<ClrIconLink> {
     return ClrIconLink.findByName(this.page, {name: LabelAlias.Cohorts, iconShape: 'plus-circle'});
+  }
+
+  // Click Add Datasets button.
+  async clickAddDatasetButton(waitForDatasetBuildPage: boolean = true): Promise<DatasetBuildPage> {
+    const addDatasetButton = await this.getAddDatasetButton();
+    await addDatasetButton.clickAndWait();
+
+    const datasetPage = new DatasetBuildPage(this.page);
+    // wait for Dataset Build page load and ready.
+    if (waitForDatasetBuildPage) {
+      await datasetPage.waitForLoad();
+    }
+    return datasetPage;
   }
 
   /**
