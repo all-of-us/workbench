@@ -53,7 +53,7 @@ describe('Cohorts UI tests', () => {
     const exportButton = await cohortPage.getExportButton();
     expect(await exportButton.isDisabled()).toBe(true);
 
-    await dataPage.openTab(LabelAlias.About, {waitForPageLoad: false});
+    await dataPage.openTab(LabelAlias.About, {waitPageChange: false});
 
     // Don't save. Confirm Discard Changes
     const dialogContent = await cohortPage.discardChangesConfirmationDialog();

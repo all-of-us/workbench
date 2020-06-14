@@ -52,14 +52,14 @@ export default class DataPage extends AuthenticatedPage {
 
   /**
    * Select DATA, ANALYSIS or ABOUT page tab.
-   * @param tabName
+   * @param {LabelAlias} tabName
    */
-  async openTab(tabName: LabelAlias, opts: {waitForPageLoad?: boolean} = {}): Promise<void> {
-    const {waitForPageLoad = true} = opts;
+  async openTab(tabName: LabelAlias, opts: {waitPageChange?: boolean} = {}): Promise<void> {
+    const {waitPageChange = true} = opts;
     const selector = `//*[(@aria-selected | @tabindex) and @role="button" and text()="${tabName}"]`;
     const tab = await this.page.waitForXPath(selector, {visible: true});
     await tab.click();
-    if (waitForPageLoad) {
+    if (waitPageChange) {
       await this.waitForLoad();
     }
   }
