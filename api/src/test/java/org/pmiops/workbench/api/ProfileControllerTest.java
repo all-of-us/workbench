@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static junit.framework.TestCase.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
@@ -26,6 +25,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
@@ -48,6 +48,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.FirecloudJWTWrapper;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
@@ -86,6 +87,7 @@ import org.pmiops.workbench.profile.DemographicSurveyMapperImpl;
 import org.pmiops.workbench.profile.PageVisitMapperImpl;
 import org.pmiops.workbench.profile.ProfileMapperImpl;
 import org.pmiops.workbench.profile.ProfileService;
+import org.pmiops.workbench.shibboleth.ShibbolethService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
@@ -141,6 +143,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @MockBean private ProfileAuditor mockProfileAuditor;
   @MockBean private UserServiceAuditor mockUserServiceAuditAdapter;
   @MockBean private CaptchaVerificationService captchaVerificationService;
+  @MockBean private ShibbolethService shibbolethService;
 
   @Autowired private UserDao userDao;
   @Autowired private UserDataUseAgreementDao userDataUseAgreementDao;
@@ -1104,14 +1107,32 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testUpdateNihToken() {
-    when(fireCloudService.postNihCallback(any()))
-        .thenReturn(new FirecloudNihStatus().linkedNihUsername("test").linkExpireTime(500L));
-    try {
-      createUser();
-      profileController.updateNihToken(new NihToken().jwt("test"));
-    } catch (Exception e) {
-      fail();
-    }
+    config.featureFlags.useNewShibbolethService = false;
+
+    NihToken nihToken = new NihToken().jwt("test");
+    FirecloudJWTWrapper firecloudJwt = new FirecloudJWTWrapper().jwt("test");
+    createUser();
+    profileController.updateNihToken(nihToken);
+    verify(fireCloudService).postNihCallback(ArgumentMatchers.eq(firecloudJwt));
+  }
+
+  @Test(expected = ServerErrorException.class)
+  public void testUpdateNihToken_serverError() {
+    config.featureFlags.useNewShibbolethService = false;
+
+    doThrow(new ServerErrorException()).when(fireCloudService).postNihCallback(any());
+    profileController.updateNihToken(new NihToken().jwt("test"));
+  }
+
+  @Test
+  public void testUpdateNihToken_newShibbolethService() {
+    config.featureFlags.useNewShibbolethService = true;
+
+    NihToken nihToken = new NihToken().jwt("test");
+    String jwt = "test";
+    createUser();
+    profileController.updateNihToken(nihToken);
+    verify(shibbolethService).updateShibbolethToken(ArgumentMatchers.eq(jwt));
   }
 
   @Test(expected = BadRequestException.class)
@@ -1120,14 +1141,8 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test(expected = BadRequestException.class)
-  public void testUpdateNihToken_badRequest_2() {
+  public void testUpdateNihToken_badRequest_noJwt() {
     profileController.updateNihToken(new NihToken());
-  }
-
-  @Test(expected = ServerErrorException.class)
-  public void testUpdateNihToken_serverError() {
-    doThrow(new ServerErrorException()).when(fireCloudService).postNihCallback(any());
-    profileController.updateNihToken(new NihToken().jwt("test"));
   }
 
   @Test

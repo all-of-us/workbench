@@ -24,20 +24,22 @@ public class ConfigController implements ConfigApiDelegate {
         new ConfigResponse()
             .gsuiteDomain(config.googleDirectoryService.gSuiteDomain)
             .projectId(config.server.projectId)
+            .firecloudUrl(config.firecloud.baseUrl)
             .publicApiKeyForErrorReports(config.server.publicApiKeyForErrorReports)
+            .shibbolethUiBaseUrl(config.firecloud.shibbolethUiBaseUrl)
+            .defaultFreeCreditsDollarLimit(config.billing.defaultFreeCreditsDollarLimit)
             .enableComplianceTraining(config.access.enableComplianceTraining)
             .enableEraCommons(config.access.enableEraCommons)
             .enableDataUseAgreement(config.access.enableDataUseAgreement)
             .enableBetaAccess(config.access.enableBetaAccess)
             .unsafeAllowSelfBypass(config.access.unsafeAllowSelfBypass)
             .requireInvitationKey(config.access.requireInvitationKey)
-            .defaultFreeCreditsDollarLimit(config.billing.defaultFreeCreditsDollarLimit)
             .enableBillingLockout(config.featureFlags.enableBillingLockout)
             .enableBillingUpgrade(config.featureFlags.enableBillingUpgrade)
-            .firecloudURL(config.firecloud.baseUrl)
             .requireInstitutionalVerification(config.featureFlags.requireInstitutionalVerification)
             .enableCBAgeTypeOptions(config.featureFlags.enableCBAgeTypeOptions)
             .enableV3DataUserCodeOfConduct(config.featureFlags.enableV3DataUserCodeOfConduct)
-            .enableEventDateModifier(config.featureFlags.enableEventDateModifier));
+            .enableEventDateModifier(config.featureFlags.enableEventDateModifier)
+            .useNewShibbolethService(config.featureFlags.useNewShibbolethService));
   }
 }

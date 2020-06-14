@@ -111,7 +111,9 @@ public interface FireCloudService {
    */
   FirecloudNihStatus getNihStatus();
 
-  FirecloudNihStatus postNihCallback(FirecloudJWTWrapper wrapper);
+  // Submits a Shibboleth JWT for verification and update using the old-style Shibboleth service
+  // (via Firecloud Orchestration API).
+  void postNihCallback(FirecloudJWTWrapper wrapper);
 
   ApiClient getApiClientWithImpersonation(String email) throws IOException;
 }

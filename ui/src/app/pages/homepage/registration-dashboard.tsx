@@ -91,10 +91,18 @@ function redirectToTwoFactorSetup(): void {
 
 function redirectToNiH(): void {
   AnalyticsTracker.Registration.ERACommons();
-  const url = environment.shibbolethUrl + '/link-nih-account?redirect-url=' +
-          encodeURIComponent(
-            window.location.origin.toString() + '/nih-callback?token={token}');
-  window.open(url, '_blank');
+
+  if (serverConfigStore.getValue().useNewShibbolethService) {
+    const url = serverConfigStore.getValue().shibbolethUiBaseUrl + '/login?return-url=' +
+      encodeURIComponent(
+        window.location.origin.toString() + '/nih-callback?token={token}');
+    window.open(url, '_blank');
+  } else {
+    const url = environment.shibbolethUrl + '/link-nih-account?redirect-url=' +
+      encodeURIComponent(
+        window.location.origin.toString() + '/nih-callback?token={token}');
+    window.open(url, '_blank');
+  }
 }
 
 async function redirectToTraining() {
