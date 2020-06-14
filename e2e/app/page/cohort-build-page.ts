@@ -76,7 +76,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
   async deleteConfirmationDialog(): Promise<string> {
     const dialog = new Dialog(this.page);
     const contentText = await dialog.getContent();
-    const deleteButton = await Button.findByName(this.page, {type: ElementType.Button, normalizeSpace: 'Delete Cohort'}, dialog);
+    const deleteButton = await Button.findByName(this.page, {normalizeSpace: 'Delete Cohort'}, dialog);
     await Promise.all([
       deleteButton.click(),
       dialog.waitUntilDialogIsClosed(),

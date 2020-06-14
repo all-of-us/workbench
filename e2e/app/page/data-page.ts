@@ -10,7 +10,6 @@ import Dialog from 'app/component/dialog';
 import Button from 'app/element/button';
 import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
-import {ElementType} from 'app/xpath-options';
 import CohortBuildPage from './cohort-build-page';
 import DatasetBuildPage from './dataset-build-page';
 
@@ -55,10 +54,14 @@ export default class DataPage extends AuthenticatedPage {
    * Select DATA, ANALYSIS or ABOUT page tab.
    * @param tabName
    */
-  async openTab(tabName: LabelAlias): Promise<void> {
+  async openTab(tabName: LabelAlias, opts: {waitForPageLoad?: boolean} = {}): Promise<void> {
+    const {waitForPageLoad = true} = opts;
     const selector = `//*[(@aria-selected | @tabindex) and @role="button" and text()="${tabName}"]`;
     const tab = await this.page.waitForXPath(selector, {visible: true});
-    return tab.click();
+    await tab.click();
+    if (waitForPageLoad) {
+      await this.waitForLoad();
+    }
   }
 
   async getAddDatasetButton(): Promise<ClrIconLink> {
@@ -91,7 +94,7 @@ export default class DataPage extends AuthenticatedPage {
     const menu = cohortCard.getEllipsis();
     await menu.clickAction(EllipsisMenuAction.DELETE, false);
     const dialogContent = await (new CohortBuildPage(this.page)).deleteConfirmationDialog();
-    console.log(`Cohort "${cohortName}" deleted.`);
+    console.log(`Deleted Cohort "${cohortName}"`);
     return dialogContent;
   }
 
@@ -100,20 +103,20 @@ export default class DataPage extends AuthenticatedPage {
    * @param {string} datasetName
    */
   async deleteDataset(datasetName: string): Promise<string> {
-    const dataSetCard = await DataResourceCard.findCard(this.page, datasetName);
-    const menu = dataSetCard.getEllipsis();
+    const datasetCard = await DataResourceCard.findCard(this.page, datasetName);
+    const menu = datasetCard.getEllipsis();
     await menu.clickAction(EllipsisMenuAction.DELETE, false);
 
     const dialog = new Dialog(this.page);
     const dialogContentText = await dialog.getContent();
-    const deleteButton = await Button.findByName(this.page, {type: ElementType.Button, normalizeSpace: 'Delete Dataset'}, dialog);
+    const deleteButton = await Button.findByName(this.page, {normalizeSpace: 'Delete Dataset'}, dialog);
     await Promise.all([
       deleteButton.click(),
       dialog.waitUntilDialogIsClosed(),
     ]);
     await waitWhileLoading(this.page);
 
-    console.log(`Dataset "${datasetName}" deleted.`);
+    console.log(`Deleted Dataset "${datasetName}"`);
     return dialogContentText;
   }
 
@@ -138,7 +141,7 @@ export default class DataPage extends AuthenticatedPage {
     const renameButton = await Button.findByName(this.page, {normalizeSpace: 'Rename Dataset'}, dialog);
     await Promise.all([
       renameButton.click(),
-      dialog.waitUntilDialogIsClosed(120000), // Rename Dataset can be very slow sometimes.
+      dialog.waitUntilDialogIsClosed(),
     ]);
     return waitWhileLoading(this.page);
   }

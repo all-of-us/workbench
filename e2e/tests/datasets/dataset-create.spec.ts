@@ -87,7 +87,7 @@ describe('Create Dataset', () => {
     // Save new cohort.
     const cohortName = await cohortBuildPage.saveCohortAs();
     await waitForText(page, 'Cohort Saved Successfully');
-    console.log(`Cohort ${cohortName} created successfully.`);
+    console.log(`Created Cohort "${cohortName}"`);
 
     await dataPage.openTab(LabelAlias.Data);
 
@@ -117,7 +117,7 @@ describe('Create Dataset', () => {
     await datasetPage.clickAnalyzeButton();
 
     // Uncheck Export to Notebook button, then click Update button.
-    await saveModal.saveDataset({isExportToNotebook: false, isUpdate: true});
+    await saveModal.saveDataset({isExportToNotebook: false}, true);
     await dataPage.waitForLoad();
   });
 

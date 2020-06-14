@@ -60,16 +60,23 @@ export default class DatasetBuildPage extends AuthenticatedPage {
     }
   }
 
-  async selectValues(selectAll: boolean = false, values?: string[]): Promise<void> {
-    if (selectAll) {
-      const xpath = xPathOptionToXpath({name: LabelAlias.SelectValues, ancestorLevel: 3, type: ElementType.Checkbox});
-      const selectAllCheckbox = new Checkbox(this.page, xpath);
-      await selectAllCheckbox.check();
-    }
+  /**
+   * Check or uncheck the Select All checkbox.
+   * @param {boolean} selectAll
+   */
+  async selectAllValues(selectAll: boolean = false): Promise<void> {
+    const xpath = xPathOptionToXpath({name: LabelAlias.SelectValues, ancestorLevel: 3, type: ElementType.Checkbox});
+    const selectAllCheckbox = new Checkbox(this.page, xpath);
+    selectAll ? await selectAllCheckbox.check() : await selectAllCheckbox.unCheck();
+    await waitWhileLoading(this.page);
+  }
+
+  async selectValues(values?: string[]): Promise<void> {
     for (const valueName of values) {
       const xpath = this.getCheckboxXpath(LabelAlias.SelectValues, valueName);
       const checkbox = new Checkbox(this.page, xpath);
       await checkbox.check();
+      await waitWhileLoading(this.page);
     }
   }
 

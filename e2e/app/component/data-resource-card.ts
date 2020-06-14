@@ -3,7 +3,7 @@ import EllipsisMenu from 'app/component/ellipsis-menu';
 import * as fp from 'lodash/fp';
 
 const DataResourceCardSelector = {
-  cardRootXpath: '//*[child::*[@data-test-id="card"]]',
+  cardRootXpath: '//*[@data-test-id="card"]',
   cardNameXpath: '@data-test-id="card-name"',
   ellipsisXpath: './/clr-icon[@shape="ellipsis-vertical"]',
   cardTypeXpath: './/*[@data-test-id="card-type"]',
@@ -32,9 +32,9 @@ export default class DataResourceCard {
    * @param {Page} page
    * @throws TimeoutError if fails to find Card.
    */
-  static async findAllCards(page: Page): Promise<DataResourceCard[]> {
+  static async findAllCards(page: Page, timeOut: number = 2000): Promise<DataResourceCard[]> {
     try {
-      await page.waitForXPath(DataResourceCardSelector.cardRootXpath, {visible: true, timeout: 1000});
+      await page.waitForXPath(DataResourceCardSelector.cardRootXpath, {visible: true, timeout: timeOut});
     } catch (e) {
       return [];
     }

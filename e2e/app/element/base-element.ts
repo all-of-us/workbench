@@ -234,8 +234,8 @@ export default class BaseElement extends Container {
    */
   async clickAndWait(): Promise<void> {
     await Promise.all([
-      this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0']}),
       this.click(),
+      this.page.waitForNavigation({waitUntil: ['load', 'domcontentloaded', 'networkidle0']}),
     ]);
   }
 

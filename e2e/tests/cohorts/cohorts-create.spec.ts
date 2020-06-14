@@ -71,7 +71,7 @@ describe('User can create new Cohorts', () => {
 
     // Save new cohort.
     const cohortName = await cohortPage.saveCohortAs();
-    console.log(`Cohort ${cohortName} created successfully.`);
+    console.log(`Created Cohort "${cohortName}"`);
 
     // Open Cohort details.
     const cohortLink = await Link.findByName(page, {name: cohortName});
@@ -103,7 +103,7 @@ describe('User can create new Cohorts', () => {
     const dialogContent = await cohortPage.deleteCohort();
     // Verify dialog content text
     expect(dialogContent).toContain(`Are you sure you want to delete Cohort: ${cohortName}?`);
-    console.log(`Cohort "${cohortName}" deleted.`);
+    console.log(`Deleted Cohort "${cohortName}"`);
   });
 
   /**
@@ -179,7 +179,7 @@ describe('User can create new Cohorts', () => {
     // Save new cohort.
     const cohortName = await cohortBuildPage.saveCohortAs();
     await waitForText(page, 'Cohort Saved Successfully');
-    console.log(`Cohort ${cohortName} created successfully.`);
+    console.log(`Created Cohort "${cohortName}"`);
 
     // Open Workspace, search for created cohort.
     await page.goto(workspaceDataUrl);
