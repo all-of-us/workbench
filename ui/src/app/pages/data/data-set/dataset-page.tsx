@@ -801,7 +801,9 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
         includesAllParticipants: this.state.includesAllParticipants,
         cohortIds: this.state.selectedCohortIds,
         prePackagedConceptSet: this.getPrePackagedConceptSetApiEnum(),
-        values: this.state.selectedDomainValuePairs.map(domainValue => domainValue.value)
+        values: this.state.selectedDomainValuePairs
+            .filter(values => values.domain === domain)
+            .map( domainValue => domainValue.value)
       };
       let newPreviewInformation;
       try {
