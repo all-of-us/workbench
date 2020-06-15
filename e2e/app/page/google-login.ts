@@ -83,7 +83,7 @@ export default class GoogleLoginPage {
    */
   async submit() : Promise<void> {
     const button = await this.page.waitForXPath(FieldSelector.SubmitButton, {visible: true});
-    await (BaseElement.asBaseElement(this.page, button)).clickAndWait();
+    await (Button.asBaseElement(this.page, button)).clickAndWait();
   }
 
   /**
