@@ -6,14 +6,13 @@ import ClrIconLink from 'app/element/clr-icon-link';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
 
-export const PAGE = {
-  TITLE: 'Homepage',
-  HEADER: 'Workspaces',
-};
 
-export const LABEL_ALIAS = {
-  SEE_ALL_WORKSPACES: 'See all workspaces',
-  CREATE_NEW_WORKSPACE: 'Workspaces',
+export const PageTitle = 'Homepage';
+export const PageHeader  = 'Workspaces';
+
+export const LabelAlias = {
+  SeeAllWorkspaces: 'See all workspaces',
+  CreateNewWorkspace: 'Workspaces',
 };
 
 
@@ -26,7 +25,7 @@ export default class HomePage extends AuthenticatedPage {
   async isLoaded(): Promise<boolean> {
     try {
       await Promise.all([
-        waitForDocumentTitle(this.page, PAGE.TITLE, 60000),
+        waitForDocumentTitle(this.page, PageTitle, 60000),
         waitWhileLoading(this.page, 60000),
       ]);
       return true;
@@ -37,7 +36,7 @@ export default class HomePage extends AuthenticatedPage {
   }
 
   async getCreateNewWorkspaceLink(): Promise<ClrIconLink> {
-    return ClrIconLink.findByName(this.page, {name: LABEL_ALIAS.CREATE_NEW_WORKSPACE, iconShape: 'plus-circle'});
+    return ClrIconLink.findByName(this.page, {name: LabelAlias.CreateNewWorkspace, iconShape: 'plus-circle'});
   }
 
   /**
@@ -49,7 +48,7 @@ export default class HomePage extends AuthenticatedPage {
   }
 
   async getSeeAllWorkspacesLink(): Promise<Link> {
-    return Link.findByName(this.page, {name: LABEL_ALIAS.SEE_ALL_WORKSPACES});
+    return Link.findByName(this.page, {name: LabelAlias.SeeAllWorkspaces});
   }
 
 }

@@ -1,15 +1,17 @@
-import {Page} from 'puppeteer';
-import EllipsisMenu from 'app/component/ellipsis-menu';
-import {EllipsisMenuAction} from 'app/page-identifiers';
-import AuthenticatedPage from 'app/page/authenticated-page';
-import {waitWhileLoading} from 'utils/test-utils';
-import {waitForDocumentTitle} from 'utils/waits-utils';
-import ClrIconLink from 'app/element/clr-icon-link';
 import DataResourceCard from 'app/component/data-resource-card';
 import Dialog from 'app/component/dialog';
+import EllipsisMenu from 'app/component/ellipsis-menu';
 import Button from 'app/element/button';
+import ClrIconLink from 'app/element/clr-icon-link';
 import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
+import {EllipsisMenuAction} from 'app/page-identifiers';
+import AuthenticatedPage from 'app/page/authenticated-page';
+import {Page} from 'puppeteer';
+import {waitWhileLoading} from 'utils/test-utils';
+import {waitForDocumentTitle} from 'utils/waits-utils';
+import {xPathOptionToXpath} from 'app/element/xpath-defaults';
+import {ElementType} from 'app/xpath-options';
 import CohortBuildPage from './cohort-build-page';
 import DatasetBuildPage from './dataset-build-page';
 
@@ -56,7 +58,7 @@ export default class DataPage extends AuthenticatedPage {
    */
   async openTab(tabName: LabelAlias, opts: {waitPageChange?: boolean} = {}): Promise<void> {
     const {waitPageChange = true} = opts;
-    const selector = `//*[(@aria-selected | @tabindex) and @role="button" and text()="${tabName}"]`;
+    const selector = xPathOptionToXpath({name: tabName, type: ElementType.Tab});
     const tab = await this.page.waitForXPath(selector, {visible: true});
     await tab.click();
     if (waitPageChange) {

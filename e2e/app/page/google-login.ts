@@ -5,13 +5,13 @@ import {waitForDocumentTitle} from 'utils/waits-utils';
 import BaseElement from 'app/element/base-element';
 import Button from 'app/element/button';
 
-export const SELECTOR = {
-  loginButton: '//*[@role="button"]/*[contains(normalize-space(text()),"Sign In")]',
-  emailInput: '//input[@type="email"]',
-  NextButton: '//*[text()="Next" or @value="Next"]',
-  submitButton: '//*[@id="passwordNext" or @id="submit"]',
-  passwordInput: '//input[@type="password"]',
-};
+export enum FieldSelector {
+  LoginButton= '//*[@role="button"]/*[contains(normalize-space(text()),"Sign In")]',
+  EmailInput = '//input[@type="email"]',
+  NextButton = '//*[text()="Next" or @value="Next"]',
+  SubmitButton = '//*[@id="passwordNext" or @id="submit"]',
+  PasswordInput = '//input[@type="password"]',
+}
 
 
 export default class GoogleLoginPage {
@@ -23,21 +23,21 @@ export default class GoogleLoginPage {
    * Login email input field.
    */
   async email(): Promise<ElementHandle> {
-    return this.page.waitForXPath(SELECTOR.emailInput, {visible: true});
+    return this.page.waitForXPath(FieldSelector.EmailInput, {visible: true});
   }
 
   /**
    * Login password input field.
    */
   async password(): Promise<ElementHandle> {
-    return this.page.waitForXPath(SELECTOR.passwordInput, {visible: true});
+    return this.page.waitForXPath(FieldSelector.PasswordInput, {visible: true});
   }
 
   /**
    * Google login button.
    */
   async loginButton(): Promise<ElementHandle> {
-    return this.page.waitForXPath(SELECTOR.loginButton, {visible: true, timeout: 60000});
+    return this.page.waitForXPath(FieldSelector.LoginButton, {visible: true, timeout: 60000});
   }
 
   /**
@@ -48,7 +48,7 @@ export default class GoogleLoginPage {
     // Handle Google "Use another account" dialog if it exists
     const useAnotherAccountXpath = '//*[@role="link"]//*[text()="Use another account"]';
     const elemt1 = await Promise.race([
-      this.page.waitForXPath(SELECTOR.emailInput, {visible: true, timeout: 60000}),
+      this.page.waitForXPath(FieldSelector.EmailInput, {visible: true, timeout: 60000}),
       this.page.waitForXPath(useAnotherAccountXpath, {visible: true, timeout: 60000}),
     ]);
 
@@ -64,7 +64,7 @@ export default class GoogleLoginPage {
     await emailInput.focus();
     await emailInput.type(userEmail);
 
-    const nextButton = await this.page.waitForXPath(SELECTOR.NextButton);
+    const nextButton = await this.page.waitForXPath(FieldSelector.NextButton);
     await (BaseElement.asBaseElement(this.page, nextButton)).clickAndWait();
   }
 
@@ -82,7 +82,7 @@ export default class GoogleLoginPage {
    * Click Next button to submit login credential.
    */
   async submit() : Promise<void> {
-    const button = await this.page.waitForXPath(SELECTOR.submitButton, {visible: true});
+    const button = await this.page.waitForXPath(FieldSelector.SubmitButton, {visible: true});
     await (BaseElement.asBaseElement(this.page, button)).clickAndWait();
   }
 

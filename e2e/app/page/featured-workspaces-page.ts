@@ -1,12 +1,10 @@
 import {Page} from 'puppeteer';
 import AuthenticatedPage from 'app/page/authenticated-page';
-import {waitForText} from 'utils/waits-utils';
+import {waitForDocumentTitle, waitForText} from 'utils/waits-utils';
 import {waitWhileLoading} from 'utils/test-utils';
 
-export const PAGE = {
-  TITLE: 'Workspace Library',
-  HEADER: 'Researcher Workbench Workspace Library',
-};
+export const PageHeader = 'Researcher Workbench Workspace Library';
+export const PageTitle = 'Workspace Library';
 
 export default class FeaturedWorkspacesPage extends AuthenticatedPage {
 
@@ -17,7 +15,8 @@ export default class FeaturedWorkspacesPage extends AuthenticatedPage {
   async isLoaded(): Promise<boolean> {
     try {
       await Promise.all([
-        waitForText(this.page, PAGE.HEADER),
+        waitForDocumentTitle(this.page, PageTitle),
+        waitForText(this.page, PageHeader),
         waitWhileLoading(this.page),
       ]);
       return true;

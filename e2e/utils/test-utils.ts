@@ -4,7 +4,7 @@ import RadioButton from 'app/element/radiobutton';
 import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
 import GoogleLoginPage from 'app/page/google-login';
-import HomePage, {LABEL_ALIAS} from 'app/page/home-page';
+import HomePage, {LabelAlias} from 'app/page/home-page';
 import {XPathOptions, ElementType} from 'app/xpath-options';
 import * as fp from 'lodash/fp';
 import {JSHandle, Page} from 'puppeteer';
@@ -106,7 +106,7 @@ export async function newUserRegistrationSelfBypass(page: Page) {
   const selfBypassXpath = '//*[@data-test-id="self-bypass"]';
   await Promise.race([
     page.waitForXPath(selfBypassXpath, {visible: true, timeout: 60000}),
-    Link.findByName(page, {name: LABEL_ALIAS.SEE_ALL_WORKSPACES}),
+    Link.findByName(page, {name: LabelAlias.SeeAllWorkspaces}),
   ]);
 
   // check to see if it is the Self-Bypass link

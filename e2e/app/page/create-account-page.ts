@@ -37,7 +37,7 @@ export const EDUCATION_LEVEL_VALUE = {
   // other option values here
 };
 
-export const LABEL_ALIAS = {
+export const LabelAlias = {
   READ_PRIVACY_STATEMENT: 'I have read, understand, and agree to the All of Us Program Privacy Statement',
   READ_TERMS_OF_USE: 'I have read, understand, and agree to the Terms of Use described above',
   INSTITUTION_NAME: 'Institution Name',
@@ -48,20 +48,20 @@ export const LABEL_ALIAS = {
   INSTITUTION_EMAIL: 'Your institutional email address',
 };
 
-export const FIELD = {
+export const FieldSelector = {
   institutionEmailTextbox: {
     textOption: {
-      containsText: LABEL_ALIAS.INSTITUTION_EMAIL, ancestorLevel: 2
+      containsText: LabelAlias.INSTITUTION_EMAIL, ancestorLevel: 2
     }
   },
   educationLevelSelect: {
     textOption: {
-      type: ElementType.Dropdown, name: LABEL_ALIAS.EDUCATION_LEVEL, ancestorLevel: 2
+      type: ElementType.Dropdown, name: LabelAlias.EDUCATION_LEVEL, ancestorLevel: 2
     }
   },
   birthYearSelect: {
     textOption: {
-      type: ElementType.Dropdown, name: LABEL_ALIAS.YEAR_OF_BIRTH, ancestorLevel: 2
+      type: ElementType.Dropdown, name: LabelAlias.YEAR_OF_BIRTH, ancestorLevel: 2
     }
   },
   institutionSelect: {
@@ -117,19 +117,19 @@ export default class CreateAccountPage extends BasePage {
   }
 
   async getPrivacyStatementCheckbox(): Promise<Checkbox> {
-    return await Checkbox.findByName(this.page, {normalizeSpace: LABEL_ALIAS.READ_PRIVACY_STATEMENT});
+    return await Checkbox.findByName(this.page, {normalizeSpace: LabelAlias.READ_PRIVACY_STATEMENT});
   }
 
   async getTermsOfUseCheckbox(): Promise<Checkbox> {
-    return await Checkbox.findByName(this.page, {normalizeSpace: LABEL_ALIAS.READ_TERMS_OF_USE});
+    return await Checkbox.findByName(this.page, {normalizeSpace: LabelAlias.READ_TERMS_OF_USE});
   }
 
   async getInstitutionNameInput(): Promise<Textbox> {
-    return await Textbox.findByName(this.page, {name: LABEL_ALIAS.INSTITUTION_NAME});
+    return await Textbox.findByName(this.page, {name: LabelAlias.INSTITUTION_NAME});
   }
 
   async getResearchBackgroundTextarea(): Promise<Textarea> {
-    return await Textarea.findByName(this.page, {normalizeSpace: LABEL_ALIAS.RESEARCH_BACKGROUND});
+    return await Textarea.findByName(this.page, {normalizeSpace: LabelAlias.RESEARCH_BACKGROUND});
   }
 
   async getUsernameDomain(): Promise<unknown> {
@@ -153,24 +153,24 @@ export default class CreateAccountPage extends BasePage {
 
   // select Institution Affiliation from a dropdown
   async selectInstitution(selectTextValue: string) {
-    const dropdown = await SelectMenu.findByName(this.page, FIELD.institutionSelect.textOption);
+    const dropdown = await SelectMenu.findByName(this.page, FieldSelector.institutionSelect.textOption);
     await dropdown.clickMenuItem(selectTextValue);
   }
 
   async getInstitutionValue() {
-    const dropdown = await SelectMenu.findByName(this.page, FIELD.institutionSelect.textOption);
+    const dropdown = await SelectMenu.findByName(this.page, FieldSelector.institutionSelect.textOption);
     return await dropdown.getSelectedValue();
   }
 
   // select Education Level from a dropdown
   async selectEducationLevel(selectTextValue: string) {
-    const dropdown = await SelectMenu.findByName(this.page, FIELD.educationLevelSelect.textOption);
+    const dropdown = await SelectMenu.findByName(this.page, FieldSelector.educationLevelSelect.textOption);
     await dropdown.clickMenuItem(selectTextValue);
   }
 
   // select Year of Birth from a dropdown
   async selectYearOfBirth(year: string) {
-    const dropdown = await SelectMenu.findByName(this.page, FIELD.birthYearSelect.textOption);
+    const dropdown = await SelectMenu.findByName(this.page, FieldSelector.birthYearSelect.textOption);
     await dropdown.clickMenuItem(year);
   }
 
@@ -184,13 +184,13 @@ export default class CreateAccountPage extends BasePage {
     ]);
 
     await this.selectInstitution(INSTITUTION_VALUE.BROAD);
-    console.log(await this.getInstitutionValue());
-    const emailAddressTextbox = await Textbox.findByName(this.page, FIELD.institutionEmailTextbox.textOption);
+    await this.getInstitutionValue();
+    const emailAddressTextbox = await Textbox.findByName(this.page, FieldSelector.institutionEmailTextbox.textOption);
     await emailAddressTextbox.type(config.institutionContactEmail);
     await emailAddressTextbox.tabKey(); // tab out to start email validation
-    await ClrIconLink.findByName(this.page, {containsText: LABEL_ALIAS.INSTITUTION_EMAIL, ancestorLevel: 2, iconShape: 'success-standard'});
+    await ClrIconLink.findByName(this.page, {containsText: LabelAlias.INSTITUTION_EMAIL, ancestorLevel: 2, iconShape: 'success-standard'});
 
-    const roleSelect = await SelectMenu.findByName(this.page, FIELD.describeRole.textOption);
+    const roleSelect = await SelectMenu.findByName(this.page, FieldSelector.describeRole.textOption);
     await roleSelect.clickMenuItem(INSTITUTION_ROLE_VALUE.UNDERGRADUATE_STUDENT);
   }
 
