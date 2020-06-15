@@ -25,7 +25,7 @@ export default class Select extends BaseElement {
   }
 
   async selectOption(optionValue: string): Promise<string> {
-    this.selectedOption = await this.element.select(optionValue);
+    this.selectedOption = await (await this.asElementHandle()).select(optionValue);
     return this.selectedOption;
   }
 

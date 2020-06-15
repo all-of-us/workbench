@@ -4,6 +4,7 @@ import {ElementType} from 'app/xpath-options';
 import Button from 'app/element/button';
 import Textbox from 'app/element/textbox';
 import Textarea from 'app/element/textarea';
+import Checkbox from 'app/element/checkbox';
 
 export enum ButtonLabel {
   Confirm = 'Confirm',
@@ -13,6 +14,8 @@ export enum ButtonLabel {
   AddThis = 'ADD THIS',
   Finish = 'Finish',
   Rename = 'Rename',
+  Save = 'Save',
+  Update = 'Update',
 }
 
 const Selector = {
@@ -50,8 +53,12 @@ export default class Dialog extends Container {
     return Textarea.findByName(this.page, {name: textareaName}, this);
   }
 
-  async waitUntilDialogIsClosed(): Promise<void> {
-    await this.page.waitForXPath(this.xpath, {hidden: true});
+  async waitForCheckbox(checkboxName: string): Promise<Checkbox> {
+    return Checkbox.findByName(this.page, {name: checkboxName}, this);
+  }
+
+  async waitUntilDialogIsClosed(timeOut: number = 60000): Promise<void> {
+    await this.page.waitForXPath(this.xpath, {hidden: true, timeout: timeOut});
   }
 
   async waitUntilVisible(): Promise<void> {

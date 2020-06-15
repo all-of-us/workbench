@@ -18,7 +18,7 @@ export function xPathOptionToXpath(xOpts: XPathOptions, container?: Container): 
 
   let str = '';
   if (name !== undefined) {
-    str = `[text()="${name}" or @aria-label="${name}" or @placeholder="${name}"]`;
+    str = `[text()="${name}" or @aria-label="${name}" or @placeholder="${name}" or @value="${name}"]`;
   } else if (containsText !== undefined) {
     str = `[contains(text(),"${containsText}") or contains(@aria-label,"${containsText}") or contains(@placeholder,"${containsText}")]`;
   } else if (normalizeSpace !== undefined) {
@@ -47,7 +47,7 @@ export function xPathOptionToXpath(xOpts: XPathOptions, container?: Container): 
     selector = `${textExpr}//input[@type="${type}"]`;
     break;
   case ElementType.Link:
-    selector = `(${containerXpath}//a | ${containerXpath}//span | ${containerXpath}//*[@role='button'])${str}`;
+    selector = `(${containerXpath}//a | ${containerXpath}//span | ${containerXpath}//*[@role="button"])${str}`;
     break;
   case ElementType.Textarea:
   case ElementType.Select:

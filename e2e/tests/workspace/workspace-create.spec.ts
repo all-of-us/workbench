@@ -39,8 +39,8 @@ describe('Creating new workspaces', () => {
     // fill out new workspace name
     const newWorkspaceName = await workspacesPage.fillOutWorkspaceName();
 
-    // select Synthetic DataSet 2
-    await workspacesPage.selectDataSet('2');
+    // select the default Synthetic Dataset
+    await workspacesPage.selectDataset();
 
     // select Billing Account
     await workspacesPage.selectBillingAccount('Use All of Us free credits');

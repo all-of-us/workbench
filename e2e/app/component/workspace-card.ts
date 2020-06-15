@@ -2,6 +2,7 @@ import {ElementHandle, Page} from 'puppeteer';
 import {WorkspaceAccessLevel} from 'app/page-identifiers';
 import EllipsisMenu from 'app/component/ellipsis-menu';
 import * as fp from 'lodash/fp';
+import DataPage from 'app/page/data-page';
 
 const WorkspaceCardSelector = {
   cardRootXpath: '//*[child::*[@data-test-id="workspace-card"]]', // finds 'workspace-card' parent container node
@@ -127,13 +128,18 @@ export default class WorkspaceCard {
 
   /**
    * Click workspace name link in Workspace Card.
+   * @param {boolean} waitForDataPage Waiting for Data page load and ready after click on Workspace name link.
    */
-  async clickWorkspaceName(): Promise<void> {
+  async clickWorkspaceName(waitForDataPage: boolean = true): Promise<void> {
     const elemts = await this.asElementHandle().$x(`.//*[${WorkspaceCardSelector.cardNameXpath}]`);
     await Promise.all([
       this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0']}),
       elemts[0].click(),
     ]);
+    if (waitForDataPage) {
+      const dataPage = new DataPage(page);
+      await dataPage.waitForLoad();
+    }
   }
 
   private asCard(elementHandle: ElementHandle): WorkspaceCard {

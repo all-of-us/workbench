@@ -13,7 +13,7 @@ export default class BaseElement extends Container {
     return baseElement;
   }
 
-  protected element: ElementHandle;
+  private element: ElementHandle;
 
   constructor(protected readonly page: Page, xpath?: string) {
     super(page, xpath);
@@ -47,7 +47,7 @@ export default class BaseElement extends Container {
    * @param {string} descendantXpath Be sure to begin xpath with a dot. e.g. ".//div".
    */
   async findDescendant(descendantXpath: string): Promise<ElementHandle[]> {
-    return this.element.$x(descendantXpath);
+    return (await this.asElementHandle()).$x(descendantXpath);
   }
 
   /**
@@ -60,10 +60,7 @@ export default class BaseElement extends Container {
    *  return await handle.jsonValue();
    */
   async getProperty(propertyName: string): Promise<unknown> {
-    if (this.element == null) {
-      throw new Error('The element is undefined.');
-    }
-    const p = await this.element.asElement().getProperty(propertyName);
+    const p = await (await this.asElementHandle()).getProperty(propertyName);
     return p.jsonValue();
   }
 
@@ -72,10 +69,7 @@ export default class BaseElement extends Container {
    * @param attribute name
    */
   async getAttribute(attributeName: string): Promise<string | null> {
-    if (this.element == null) {
-      throw new Error('The element is undefined.');
-    }
-    const elem = this.element.asElement();
+    const elem = await this.asElementHandle();
     const attributeValue = await this.page.evaluate(
        (link, attr) => link.getAttribute(attr), elem, attributeName);
     return attributeValue;
@@ -87,9 +81,6 @@ export default class BaseElement extends Container {
    * @param attribute name
    */
   async hasAttribute(attributeName: string): Promise<boolean> {
-    if (this.element == null) {
-      throw new Error('The element is undefined.');
-    }
     const value = await this.getAttribute(attributeName);
     return value !== null;
   }
@@ -111,7 +102,7 @@ export default class BaseElement extends Container {
    * @param {ElementHandle} element
    */
   async isVisible(): Promise<boolean> {
-    const boxModel = await this.element.boxModel();
+    const boxModel = await (await this.asElementHandle()).boxModel();
     return boxModel !== null;
   }
 
@@ -119,14 +110,15 @@ export default class BaseElement extends Container {
    * Check both boxModel and style for visibility.
    */
   async isDisplayed() {
+    const elemt = await this.asElementHandle();
     const isVisibleHandle = await this.page.evaluateHandle((e) =>
     {
       const style = window.getComputedStyle(e);
       return (style && style.display !== 'none' &&
          style.visibility !== 'hidden' && style.opacity !== '0');
-    }, this.element);
+    }, elemt);
     const jValue = await isVisibleHandle.jsonValue();
-    const boxModelValue = await this.element.boxModel();
+    const boxModelValue = await elemt.boxModel();
     if (jValue && boxModelValue) {
       return true;
     }
@@ -134,17 +126,17 @@ export default class BaseElement extends Container {
   }
 
   async click(options?: ClickOptions): Promise<void> {
-    return this.element.asElement().click(options);
+    return (await this.asElementHandle()).click(options);
   }
 
   async type(text: string, options?: { delay: number }): Promise<void> {
     await this.focus();
     await this.clear();
-    return this.element.asElement().type(text, options);
+    return (await this.asElementHandle()).type(text, options);
   }
 
   async pressKeyboard(key: string, options?: { text?: string, delay?: number }): Promise<void> {
-    return this.element.asElement().press(key, options);
+    return (await this.asElementHandle()).press(key, options);
   }
 
   async pressReturnKey(): Promise<void> {
@@ -162,15 +154,15 @@ export default class BaseElement extends Container {
    * Clear value in textbox or textarea.
    */
   async clear(): Promise<void> {
-    await this.element.click({clickCount: 3});
-    await this.element.press('Backspace');
+    await (await this.asElementHandle()).click({clickCount: 3});
+    await (await this.asElementHandle()).press('Backspace');
   }
 
   /**
    * Calling focus() and hover() together.
    */
   async focus(): Promise<void> {
-    const handle = this.element.asElement();
+    const handle = await this.asElementHandle();
     await Promise.all([
       handle.focus(),
       handle.hover()
@@ -183,7 +175,7 @@ export default class BaseElement extends Container {
    * </pre>
    */
   async getTextContent(): Promise<string> {
-    const handle = await this.element.asElement();
+    const handle = await this.asElementHandle();
     return handle.evaluate(
        (element: HTMLElement) => (element.textContent ? element.textContent.trim() : ''), this.element,
     );
@@ -198,7 +190,7 @@ export default class BaseElement extends Container {
   }
 
   async getComputedStyle(styleName: string): Promise<unknown> {
-    const handle = this.element.asElement();
+    const handle = await this.asElementHandle();
     const attrStyle = await handle.evaluateHandle((e) => {
       const style = window.getComputedStyle(e);
       return style;
@@ -218,7 +210,7 @@ export default class BaseElement extends Container {
    * Finds element's size.
    */
   async getSize(): Promise<{ width: number; height: number }> {
-    const box = await this.element.boundingBox();
+    const box = await (await this.asElementHandle()).boundingBox();
     if (!box) {
       // if element is not visible, returns size of (0, 0).
       return { width: 0, height: 0 };
@@ -233,16 +225,17 @@ export default class BaseElement extends Container {
 
   // try this method when click() is not working
   async clickWithEval() {
+    await this.asElementHandle();
     return this.page.evaluate( elem => elem.click(), this.element );
   }
 
   /**
    * Click on element then wait for page navigation to finish.
    */
-  async clickAndWait() {
-    return Promise.all([
-      this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0']}),
+  async clickAndWait(): Promise<void> {
+    await Promise.all([
       this.click(),
+      this.page.waitForNavigation({waitUntil: ['load', 'domcontentloaded', 'networkidle0']}),
     ]);
   }
 
@@ -250,14 +243,15 @@ export default class BaseElement extends Container {
    * Paste texts instead type one char at a time. Very fast.
    * @param text
    */
-  async paste(text: string) {
-    await this.page.evaluate((elem, textValue) => {
+  async paste(text: string): Promise<void> {
+    const elemt = await this.asElementHandle();
+    return this.page.evaluate((elem, textValue) => {
       // Refer to https://stackoverflow.com/a/46012210/440432
       const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value').set;
       nativeInputValueSetter.call(elem, textValue);
       const event = new Event('input', {bubbles: true});
       elem.dispatchEvent(event);
-    }, this.element, text);
+    }, elemt, text);
   }
 
   /**

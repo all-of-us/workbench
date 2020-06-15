@@ -12,6 +12,7 @@ export enum EllipsisMenuAction {
    EDIT = 'Edit',
    SHARE = 'Share',
    REVIEW = 'Review',
+   RenameDataset = 'Rename Dataset',
 }
 
 export enum PageUrl {

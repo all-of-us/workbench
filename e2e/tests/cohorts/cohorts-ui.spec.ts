@@ -23,7 +23,6 @@ describe('Cohorts UI tests', () => {
 
     // Wait for the Data page.
     const dataPage = new DataPage(page);
-    await dataPage.waitForLoad();
 
     const addCohortsButton = await dataPage.getAddCohortsButton();
     await addCohortsButton.clickAndWait();
@@ -54,7 +53,7 @@ describe('Cohorts UI tests', () => {
     const exportButton = await cohortPage.getExportButton();
     expect(await exportButton.isDisabled()).toBe(true);
 
-    await dataPage.openTab(LabelAlias.About);
+    await dataPage.openTab(LabelAlias.About, {waitPageChange: false});
 
     // Don't save. Confirm Discard Changes
     const dialogContent = await cohortPage.discardChangesConfirmationDialog();

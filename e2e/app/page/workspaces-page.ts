@@ -88,8 +88,8 @@ export default class WorkspacesPage extends WorkspaceEditPage {
     await (await editPage.getWorkspaceNameTextbox()).type(workspaceName);
     await (await editPage.getWorkspaceNameTextbox()).tabKey();
 
-    // select Synthetic Data Set 3
-    await editPage.selectDataSet('3');
+    // select the default Synthetic Dataset
+    await editPage.selectDataset();
 
     // select Billing Account
     await editPage.selectBillingAccount(billingAccount);

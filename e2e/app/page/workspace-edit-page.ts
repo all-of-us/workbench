@@ -18,7 +18,7 @@ export const PAGE = {
 };
 
 export const LABEL_ALIAS = {
-  SYNTHETIC_DATASET: 'Workspace Name',  // select Synthetic DataSet
+  SYNTHETIC_DATASET: 'Workspace Name',  // select Synthetic Dataset
   SELECT_BILLING: 'Select account',   // select billing account
   CREATE_WORKSPACE: 'Create Workspace',  // button CREATE WORKSPACE on edit page
   DUPLICATE_WORKSPACE: 'Duplicate Workspace', // button DUPLICATE WORKSPACE on edit page
@@ -310,10 +310,10 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
   }
 
   /**
-   * Select Synthetic DataSet.
-   * @param {string} optionValue: 1 for "Synthetic DataSet 1". 2 for "Synthetic DataSet 2".
+   * Select Synthetic Dataset.
+   * @param {string} optionValue: 1 for "Synthetic Dataset 1". 2 for "Synthetic Dataset 2", so on.
    */
-  async selectDataSet(optionValue: string = '2') {
+  async selectDataset(optionValue: string = '3') {
     const dataSetSelect = await Select.findByName(this.page, FIELD.dataSetSelect.textOption);
     await dataSetSelect.selectOption(optionValue);
   }
