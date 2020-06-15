@@ -86,6 +86,7 @@ import org.pmiops.workbench.profile.DemographicSurveyMapperImpl;
 import org.pmiops.workbench.profile.PageVisitMapperImpl;
 import org.pmiops.workbench.profile.ProfileMapperImpl;
 import org.pmiops.workbench.profile.ProfileService;
+import org.pmiops.workbench.profile.ProfileServiceImpl;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
@@ -169,7 +170,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     DemographicSurveyMapperImpl.class,
     InstitutionalAffiliationMapperImpl.class,
     PageVisitMapperImpl.class,
-    ProfileService.class,
+    ProfileServiceImpl.class,
     ProfileController.class,
     ProfileMapperImpl.class,
     InstitutionServiceImpl.class,

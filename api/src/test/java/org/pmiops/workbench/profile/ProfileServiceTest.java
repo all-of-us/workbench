@@ -63,7 +63,7 @@ public class ProfileServiceTest {
     InstitutionalAffiliationMapperImpl.class,
     PageVisitMapperImpl.class,
     ProfileMapperImpl.class,
-    ProfileService.class,
+    ProfileServiceImpl.class,
     VerifiedInstitutionalAffiliationMapperImpl.class,
     CommonMappers.class
   })
