@@ -648,10 +648,30 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
     }
 
     selectCohort(cohort: Cohort): void {
-      this.setState({
-        dataSetTouched: true,
-        selectedCohortIds: toggleIncludes(cohort.id, this.state.selectedCohortIds)
-      });
+      const selectedCohortList = toggleIncludes(cohort.id, this.state.selectedCohortIds);
+      // If Workspace Cohort is selected, un-select Pre packaged cohort
+      if (selectedCohortList && selectedCohortList.length > 0) {
+        this.setState({
+          dataSetTouched: true,
+          selectedCohortIds: selectedCohortList,
+          includesAllParticipants: false
+        });
+      } else {
+        this.setState({
+          dataSetTouched: true,
+          selectedCohortIds: selectedCohortList
+        });
+      }
+
+    }
+
+    selectPrePackagedCohort(): void {
+      // Un-select any workspace Cohort if Pre Packaged cohort is selected
+      if (!this.state.includesAllParticipants) {
+        this.setState({includesAllParticipants: !this.state.includesAllParticipants, selectedCohortIds: []});
+      } else {
+        this.setState({includesAllParticipants: !this.state.includesAllParticipants});
+      }
     }
 
     selectDomainValue(domain: Domain, domainValue: DomainValue): void {
@@ -933,12 +953,10 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                 </BoxHeader>
                 <div style={{height: '9rem', overflowY: 'auto'}}>
                   <Subheader>Prepackaged Cohorts</Subheader>
-                  <ImmutableListItem name='All Participants' checked={includesAllParticipants}
+                  <ImmutableListItem name='All Participants' data-test-id='all-participant'
+                                     checked={includesAllParticipants}
                                      onChange={
-                                       () => this.setState({
-                                         includesAllParticipants: !includesAllParticipants,
-                                         dataSetTouched: true
-                                       })}/>
+                                       () => this.selectPrePackagedCohort()}/>
                   <Subheader>Workspace Cohorts</Subheader>
                   {!loadingResources && this.state.cohortList.map(cohort =>
                     <ImmutableListItem key={cohort.id} name={cohort.name}
