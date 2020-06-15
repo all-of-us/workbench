@@ -1,10 +1,23 @@
 import * as fp from 'lodash/fp';
 
+/**
+ * @name Subscribable
+ * @description A container allowing components and functions to subscribe to changes in the container's contents
+ * @function subscribe Add a subscription by passing a function
+ * @function subscribe Send the new value to all subscribers
+ **/
 export interface Subscribable<T> {
-  subscribe: (Function) => { unsubscribe: () => void};
+  subscribe: (fn: (newValue?: T, oldValue?: T) => void) => { unsubscribe: () => void};
   next: (newValue: T, oldValue: T) => void;
 }
 
+/** @name Atom
+ * @description A container that can store a value to be accessed and subscribed to globally
+ * @function get Returns the current value
+ * @function set Sets the value and triggers all subscribed functions with the old/new values
+ * @function subscribe Add a function to the subscribe list
+ * @function reset Resets the value to the initial value
+ */
 export interface Atom<T> {
   get: () => T;
   set: (value: T) => void;
@@ -17,7 +30,7 @@ export function subscribable<T>(): Subscribable<T> {
   type subscriber = ((newValue?: T, oldValue?: T) => void);
 
   return {
-    subscribe: (fn: subscriber) => {
+    subscribe: fn => {
       subscribers = fp.concat(subscribers, [fn]);
       return {
         unsubscribe: () => {
@@ -26,7 +39,7 @@ export function subscribable<T>(): Subscribable<T> {
       };
     },
     next: (newValue?: T, oldValue?: T) => {
-      fp.forEach(fn => setTimeout(() => fn(newValue, oldValue), 0), subscribers);
+      fp.forEach((fn: subscriber) => setTimeout(() => fn(newValue, oldValue), 0), subscribers);
     }
   };
 }
