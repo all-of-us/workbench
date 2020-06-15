@@ -27,7 +27,6 @@ beforeAll(async () => {
        || host === 'accounts.youtube.com'
        || host === 'static.zdassets.com'
        || host === 'play.google.com'
-       || host === 'static.zdassets.com'
        || request.url().endsWith('content-security-index-report')) {
       request.abort()
     } else {
