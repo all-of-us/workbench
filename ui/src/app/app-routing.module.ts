@@ -41,6 +41,7 @@ import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/com
 import {environment} from 'environments/environment';
 import {NOTEBOOK_HELP_CONTENT} from './components/help-sidebar';
 import {DisabledGuard} from './guards/disabled-guard.service';
+import {WorkspaceGuard} from './guards/workspace-guard.service';
 import {AdminInstitutionComponent} from './pages/admin/admin-institution';
 import {AdminInstitutionEditComponent} from './pages/admin/admin-institution-edit';
 import {InteractiveNotebookComponent} from './pages/analysis/interactive-notebook';
@@ -91,6 +92,7 @@ const routes: Routes = [
         data: {title: 'Workspace Library'}
       }, {
         path: 'workspaces',
+        canActivateChild: [WorkspaceGuard],
         children: [
           {
             path: '',
@@ -369,6 +371,7 @@ const routes: Routes = [
     DisabledGuard,
     RegistrationGuard,
     SignInGuard,
+    WorkspaceGuard
   ]
 })
 export class AppRoutingModule {

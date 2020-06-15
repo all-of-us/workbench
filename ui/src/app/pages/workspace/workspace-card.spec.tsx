@@ -97,4 +97,26 @@ describe('WorkspaceCard', () => {
     expect(wrapper.exists('[data-test-id="workspace-share-modal"]')).toBeFalsy();
   });
 
+  it('disables sharing for owners for workspaces that require review', async() => {
+    workspaceStubs[0].researchPurpose.researchPurposeReviewed = false;
+    const wrapper = component(WorkspaceAccessLevel.OWNER);
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(wrapper.exists('[data-test-id="workspace-share-modal"]')).toBeFalsy();
+
+    // Click the snowman menu.
+    wrapper.find('[data-test-id="workspace-card-menu"]').first().simulate('click');
+    const shareEl = wrapper.find('[data-test-id="Share-menu-item"]').first();
+
+    // Hover should show the disabled tooltip.
+    shareEl.simulate('mouseenter');
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.exists('[data-test-id="workspace-share-disabled-tooltip-researchPurpose"]')).toBeTruthy();
+
+    // The share modal should not open on click.
+    shareEl.simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.exists('[data-test-id="workspace-share-modal"]')).toBeFalsy();
+  });
+
 });

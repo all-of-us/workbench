@@ -2,12 +2,15 @@ import * as React from 'react';
 
 import {Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
+import {FlexColumn, FlexRow} from 'app/components/flex';
+import {ClrIcon} from 'app/components/icons';
 import {EditComponentReact} from 'app/icons/edit';
 import {
   disseminateFindings,
   researchOutcomes,
   researchPurposeQuestions
 } from 'app/pages/workspace/workspace-edit-text';
+import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {navigate} from 'app/utils/navigation';
@@ -51,8 +54,18 @@ const styles = reactStyles({
   sectionText: {
     fontSize: '14px', lineHeight: '24px', color: colors.primary, marginTop: '0.3rem'
   },
+  reviewPurposeReminder: {
+    paddingTop: '0.3rem', borderStyle: 'solid', height: '3rem', color: colors.primary,
+    borderColor: colors.warning, borderRadius: '0.5rem', backgroundColor: colors.resourceCardHighlights.cohort
+  }
 });
 
+function updateWorkspace(workspace) {
+  workspace.researchPurpose.researchPurposeReviewed = true;
+  workspacesApi().updateWorkspace(workspace.namespace, workspace.id, {workspace: workspace})
+    .then(workspace => window.location.reload(false));
+
+}
 
 export const ResearchPurpose = withCurrentWorkspace()(
   ({workspace}: {workspace: WorkspaceData}) => {
@@ -71,6 +84,19 @@ export const ResearchPurpose = withCurrentWorkspace()(
                               style={styles.editIcon}/>
         </Clickable>
       </div>
+      {isOwner && !workspace.researchPurpose.researchPurposeReviewed && <FlexRow style={styles.reviewPurposeReminder}>
+        <ClrIcon style={{color: colors.warning, paddingTop: '0.2rem'}} className='is-solid' shape='exclamation-triangle' size='22'/>
+        <FlexColumn style={{paddingRight: '0.5rem', paddingLeft: '0.5rem', color: colors.primary}}>
+          <label style={{fontWeight: 600, fontSize: '14px'}}>Please update or verify the following Research Purpose.</label>
+          Every 365 days you will need to update or verify the Research Purpose
+        </FlexColumn>
+        <div style={{paddingTop: '0.2rem', marginLeft: '0.8rem'}}>
+          <a style={{marginRight: '0.5rem'}} onClick={() => updateWorkspace(workspace)}>Looks Good</a>
+          |
+          <a style={{marginLeft: '0.5rem'}} onClick={() => navigate(
+                     ['workspaces',  workspace.namespace, workspace.id, 'edit'])}>Update</a>
+        </div>
+    </FlexRow>}
       <div style={styles.sectionContentContainer}>
         {selectedResearchPurposeItems && selectedResearchPurposeItems.length > 0 && <div
              style={styles.sectionSubHeader}>Research Purpose</div>

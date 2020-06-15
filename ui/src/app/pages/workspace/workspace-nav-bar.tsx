@@ -5,6 +5,7 @@ import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {NavStore} from 'app/utils/navigation';
 
+import {WorkspaceData} from 'app/utils/workspace-data';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
@@ -41,6 +42,10 @@ const tabs = [
 
 const navSeparator = <div style={styles.separator}/>;
 
+function restrictTab(workspace) {
+ return workspace && workspace.accessLevel === 'OWNER' && !workspace.researchPurpose.researchPurposeReviewed;
+}
+
 export const WorkspaceNavBarReact = fp.flow(
   withCurrentWorkspace(),
   withUrlParams(),
@@ -70,7 +75,8 @@ export const WorkspaceNavBarReact = fp.flow(
 
   return <div id='workspace-top-nav-bar' className='do-not-print' style={styles.container}>
     {activeTabIndex > 0 && navSeparator}
-    {fp.map(tab => navTab(tab), tabs)}
+    {restrictTab(props.workspace) && navTab(tabs[2])}
+    {!restrictTab(props.workspace) && fp.map(tab => navTab(tab), tabs)}
     <div style={{flexGrow: 1}}/>
   </div>;
 });

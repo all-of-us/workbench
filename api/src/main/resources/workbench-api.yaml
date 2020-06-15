@@ -1500,6 +1500,22 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
+
+  "/v1/cron/updateResearchPurposeReview":
+    get:
+      tags:
+      - offlineWorkspace
+      - cron
+      description: Updates each Workspace Research Purpose Review
+      operationId: updateResearchPurposeReview
+      security: []
+      responses:
+        204:
+          description: No content
+        500:
+          description: Internal Error
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/rename":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -4186,6 +4202,9 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/ResearchOutcomeEnum"
+      researchPurposeReviewed:
+        type: boolean
+        default: false
   SpecificPopulationEnum:
     type: string
     description: Short parsable descriptions of specific population categories

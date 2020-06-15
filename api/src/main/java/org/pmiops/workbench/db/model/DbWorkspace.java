@@ -125,6 +125,7 @@ public class DbWorkspace {
   private String billingAccountName;
   private Short billingAccountType =
       DbStorageEnums.billingAccountTypeToStorage(BillingAccountType.FREE_TIER);
+  private Short reviewResearchPurpose;
 
   public DbWorkspace() {
     setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
@@ -674,5 +675,23 @@ public class DbWorkspace {
 
   public void setBillingAccountType(BillingAccountType billingAccountType) {
     this.billingAccountType = DbStorageEnums.billingAccountTypeToStorage(billingAccountType);
+  }
+
+  @Column(name = "research_purpose_review")
+  public Short getReviewResearchPurpose() {
+    return reviewResearchPurpose;
+  }
+
+  public void setReviewResearchPurpose(Short reviewResearchPurpose) {
+    this.reviewResearchPurpose = reviewResearchPurpose;
+  }
+
+  @Transient
+  public Boolean getResearchPurposeReviewed() {
+    return reviewResearchPurpose == 1;
+  }
+
+  public void setResearchPurposeReviewed(Boolean reviewResearchPurpose) {
+    this.reviewResearchPurpose = (short)(reviewResearchPurpose ? 1: 0);
   }
 }

@@ -79,3 +79,10 @@ cron:
   schedule: every day 21:00
   timezone: America/Chicago
   target: api
+- description: >
+    Update Research Purpose Review for each workspace to true, if the workspace has been created for more than 17 or 365 days
+  url: /v1/cron/updateResearchPurposeReview
+  schedule: every day 21:00
+  timezone: America/Chicago
+  target: api
+
