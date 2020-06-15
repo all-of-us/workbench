@@ -312,4 +312,40 @@ describe('DataSetPage', () => {
     domains.sort(COMPARE_DOMAINS_FOR_DISPLAY);
     expect(domains).toEqual([Domain.PERSON, Domain.CONDITION, Domain.MEASUREMENT, Domain.SURVEY]);
   });
+
+  it('should deselect any workspace Cohort if PrePackaged is selected', async() => {
+    const wrapper = mount(<DataSetPage />);
+    await waitOneTickAndUpdate(wrapper);
+    // Select one cohort
+    wrapper.find('[data-test-id="cohort-list-item"]').first()
+      .find('input').first().simulate('change');
+
+    expect(wrapper.find('[data-test-id="cohort-list-item"]').first().props().checked).toBeTruthy();
+    expect(wrapper.find('[data-test-id="all-participant"]').props().checked).toBeFalsy();
+
+    wrapper.find('[data-test-id="all-participant"]').first()
+      .find('input').first().simulate('change');
+
+    expect(wrapper.find('[data-test-id="cohort-list-item"]').first().props().checked).toBeFalsy();
+    expect(wrapper.find('[data-test-id="all-participant"]').props().checked).toBeTruthy();
+  });
+
+  it('should deselect PrePackaged is selected if Workspace Cohort is selected', async() => {
+    const wrapper = mount(<DataSetPage />);
+    await waitOneTickAndUpdate(wrapper);
+
+    wrapper.find('[data-test-id="all-participant"]').first()
+        .find('input').first().simulate('change');
+
+    expect(wrapper.find('[data-test-id="cohort-list-item"]').first().props().checked).toBeFalsy();
+    expect(wrapper.find('[data-test-id="all-participant"]').props().checked).toBeTruthy();
+
+    // Select one cohort
+    wrapper.find('[data-test-id="cohort-list-item"]').first()
+        .find('input').first().simulate('change');
+
+    expect(wrapper.find('[data-test-id="cohort-list-item"]').first().props().checked).toBeTruthy();
+    expect(wrapper.find('[data-test-id="all-participant"]').props().checked).toBeFalsy();
+
+  });
 });
