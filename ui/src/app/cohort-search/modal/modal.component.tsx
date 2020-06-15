@@ -12,6 +12,7 @@ import {domainToTitle, generateId, stripHtml, typeToTitle} from 'app/cohort-sear
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {AoU} from 'app/components/text-wrappers';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
@@ -196,7 +197,7 @@ export class CBModal extends React.Component<Props, State> {
     this.state = {
       attributesNode: undefined,
       autocompleteSelection: undefined,
-      backMode: undefined,
+      backMode: 'list',
       conceptType: null,
       count: 0,
       disableFinish: false,
@@ -221,7 +222,8 @@ export class CBModal extends React.Component<Props, State> {
         this.selectDeceased();
       } else {
         const title = domain === DomainType.PERSON ? typeToTitle(type) : domainToTitle(domain);
-        let backMode, hierarchyNode, mode;
+        let {backMode, mode} = this.state;
+        let hierarchyNode;
         if (this.initTree) {
           hierarchyNode = {
             domainId: domain,
@@ -231,9 +233,6 @@ export class CBModal extends React.Component<Props, State> {
           };
           backMode = 'tree';
           mode = 'tree';
-        } else {
-          backMode = 'list';
-          mode = 'list';
         }
         this.setState({backMode, hierarchyNode, mode, open: true, selectedIds, selections, title});
       }
@@ -276,8 +275,7 @@ export class CBModal extends React.Component<Props, State> {
         }
       }
     } else {
-      const group = initGroup(role, item);
-      searchRequest[role].push(group);
+      searchRequest[role].push(initGroup(role, item));
     }
     searchRequestStore.next(searchRequest);
     this.props.closeSearch();
@@ -484,7 +482,7 @@ export class CBModal extends React.Component<Props, State> {
                       <a href='https://mor.nlm.nih.gov/RxNav/' target='_blank' rel='noopener noreferrer'>
                         Explore
                       </a>
-                      &nbsp;drugs by brand names outside of <i>All of Us</i>.
+                      &nbsp;drugs by brand names outside of <AoU/>.
                     </div>}
                     {this.showDataBrowserLink && <div>
                       Explore Source information on the&nbsp;
