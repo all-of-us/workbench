@@ -5,9 +5,9 @@ interface RouteDataStore {
   title?: string;
 }
 
-export const routeDataStore = atom <RouteDataStore>({});
+export const routeDataStore = atom<RouteDataStore>({});
 
-export interface AuthStore {
+interface AuthStore {
   authLoaded: boolean;
   isSignedIn: boolean;
 }
@@ -18,6 +18,6 @@ export function useStore<T>(theStore: Atom<T>) {
   const [value, setValue] = useState(theStore.get());
   useEffect(() => {
     return theStore.subscribe(v => setValue(v)).unsubscribe;
-  }, [theStore, setValue]);
+  }, [theStore]);
   return value;
 }

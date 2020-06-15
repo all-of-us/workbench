@@ -14,8 +14,10 @@ export interface Atom<T> {
 
 export function subscribable<T>(): Subscribable<T> {
   let subscribers = [];
+  type subscriber = ((newValue?: T, oldValue?: T) => void);
+
   return {
-    subscribe: fn => {
+    subscribe: (fn: subscriber) => {
       subscribers = fp.concat(subscribers, [fn]);
       return {
         unsubscribe: () => {
@@ -23,8 +25,8 @@ export function subscribable<T>(): Subscribable<T> {
         }
       };
     },
-    next: (...args) => {
-      fp.forEach(fn => fn(...args), subscribers);
+    next: (newValue?: T, oldValue?: T) => {
+      fp.forEach(fn => setTimeout(() => fn(newValue, oldValue), 0), subscribers);
     }
   };
 }
