@@ -313,7 +313,7 @@ describe('DataSetPage', () => {
     expect(domains).toEqual([Domain.PERSON, Domain.CONDITION, Domain.MEASUREMENT, Domain.SURVEY]);
   });
 
-  it('should deselect any workspace Cohort if PrePackaged is selected', async() => {
+  it('should unselect any workspace Cohort if PrePackaged is selected', async() => {
     const wrapper = mount(<DataSetPage />);
     await waitOneTickAndUpdate(wrapper);
     // Select one cohort
@@ -330,7 +330,7 @@ describe('DataSetPage', () => {
     expect(wrapper.find('[data-test-id="all-participant"]').props().checked).toBeTruthy();
   });
 
-  it('should deselect PrePackaged is selected if Workspace Cohort is selected', async() => {
+  it('should unselect PrePackaged cohort is selected if Workspace Cohort is selected', async() => {
     const wrapper = mount(<DataSetPage />);
     await waitOneTickAndUpdate(wrapper);
 

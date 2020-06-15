@@ -649,7 +649,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
 
     selectCohort(cohort: Cohort): void {
       const selectedCohortList = toggleIncludes(cohort.id, this.state.selectedCohortIds);
-      // If Workspace Cohort is selected, de-select Pre packaged cohort
+      // If Workspace Cohort is selected, un-select Pre packaged cohort
       if (selectedCohortList && selectedCohortList.length > 0) {
         this.setState({
           dataSetTouched: true,
@@ -666,7 +666,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
     }
 
     selectPrePackageCohort(): void {
-      // De-select any workspace Cohort if Pre Packaged cohort is selected
+      // Un-select any workspace Cohort if Pre Packaged cohort is selected
       if (!this.state.includesAllParticipants) {
         this.setState({includesAllParticipants: !this.state.includesAllParticipants, selectedCohortIds: []});
       } else {
