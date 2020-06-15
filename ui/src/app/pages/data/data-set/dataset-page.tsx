@@ -665,7 +665,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
 
     }
 
-    selectPrePackageCohort(): void {
+    selectPrePackagedCohort(): void {
       // Un-select any workspace Cohort if Pre Packaged cohort is selected
       if (!this.state.includesAllParticipants) {
         this.setState({includesAllParticipants: !this.state.includesAllParticipants, selectedCohortIds: []});
@@ -956,7 +956,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                   <ImmutableListItem name='All Participants' data-test-id='all-participant'
                                      checked={includesAllParticipants}
                                      onChange={
-                                       () => this.selectPrePackageCohort()}/>
+                                       () => this.selectPrePackagedCohort()}/>
                   <Subheader>Workspace Cohorts</Subheader>
                   {!loadingResources && this.state.cohortList.map(cohort =>
                     <ImmutableListItem key={cohort.id} name={cohort.name}
