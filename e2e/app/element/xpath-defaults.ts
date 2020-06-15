@@ -56,6 +56,9 @@ export function xPathOptionToXpath(xOpts: XPathOptions, container?: Container): 
   case ElementType.Dropdown:
     selector = `${textExpr}//*[contains(concat(" ", normalize-space(@class))," p-dropdown")]`;
     break;
+  case ElementType.Tab:
+    selector = `//*[(@aria-selected | @tabindex) and @role="button" and text()="${name}"]`;
+    break;
   default:
     console.debug(`Implement unhandled type: ${type}. 
     XPathOptions configuration: 

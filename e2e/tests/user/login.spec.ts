@@ -1,4 +1,4 @@
-import GoogleLoginPage, {SELECTOR} from 'app/page/google-login';
+import GoogleLoginPage, {FieldSelector} from 'app/page/google-login';
 import {config} from 'resources/workbench-config';
 import {waitForText} from 'utils/waits-utils';
 
@@ -25,7 +25,7 @@ describe('Login tests:', () => {
     await loginPage.enterEmail(config.userEmail);
     await loginPage.enterPassword(INCORRECT_PASSWORD);
 
-    const button = await page.waitForXPath(SELECTOR.NextButton, {visible: true});
+    const button = await page.waitForXPath(FieldSelector.NextButton, {visible: true});
     await button.click();
 
     const err = await waitForText(page, 'Wrong password. Try again');

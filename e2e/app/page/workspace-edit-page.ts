@@ -9,15 +9,13 @@ import {ElementType} from 'app/xpath-options';
 import {ElementHandle, Page} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
-import {xPathOptionToXpath} from '../element/xpath-defaults';
+import {xPathOptionToXpath} from 'app/element/xpath-defaults';
 
 const faker = require('faker/locale/en_US');
 
-export const PAGE = {
-  TITLE: 'Create Workspace',
-};
+export const PageTitle = 'Create Workspace';
 
-export const LABEL_ALIAS = {
+export const LabelAlias = {
   SYNTHETIC_DATASET: 'Workspace Name',  // select Synthetic Dataset
   SELECT_BILLING: 'Select account',   // select billing account
   CREATE_WORKSPACE: 'Create Workspace',  // button CREATE WORKSPACE on edit page
@@ -69,156 +67,156 @@ export const LABEL_ALIAS = {
 
 export const FIELD = {
   createWorkspaceButton: {
-    textOption: {name: LABEL_ALIAS.CREATE_WORKSPACE}
+    textOption: {name: LabelAlias.CREATE_WORKSPACE}
   },
   duplicateWorkspaceButton: {
-    textOption: {name: LABEL_ALIAS.DUPLICATE_WORKSPACE}
+    textOption: {name: LabelAlias.DUPLICATE_WORKSPACE}
   },
   cancelWorkspaceButton: {
-    textOption: {name: LABEL_ALIAS.CANCEL}
+    textOption: {name: LabelAlias.CANCEL}
   },
   workspaceNameTextbox: {
-    textOption: {name: LABEL_ALIAS.WORKSPACE_NAME, ancestorLevel: 2, type: ElementType.Textbox}
+    textOption: {name: LabelAlias.WORKSPACE_NAME, ancestorLevel: 2, type: ElementType.Textbox}
   },
   dataSetSelect: {
-    textOption: {name: LABEL_ALIAS.SYNTHETIC_DATASET, type: ElementType.Select}
+    textOption: {name: LabelAlias.SYNTHETIC_DATASET, type: ElementType.Select}
   },
   billingAccountSelect: {
-    textOption: {name: LABEL_ALIAS.SELECT_BILLING, type: ElementType.Select}
+    textOption: {name: LabelAlias.SELECT_BILLING, type: ElementType.Select}
   },
   shareWithCollaboratorsCheckbox: {
-    textOption: {name: LABEL_ALIAS.SHARE_WITH_COLLABORATORS, type: ElementType.Checkbox}
+    textOption: {name: LabelAlias.SHARE_WITH_COLLABORATORS, type: ElementType.Checkbox}
   },
   PRIMARY_PURPOSE: { // fields in question #1
     researchPurposeCheckbox: {
-      textOption: {name: LABEL_ALIAS.RESEARCH_PURPOSE, ancestorLevel: 3, type: ElementType.Checkbox}
+      textOption: {name: LabelAlias.RESEARCH_PURPOSE, ancestorLevel: 3, type: ElementType.Checkbox}
     },
     diseaseFocusedResearchCheckbox: {
-      textOption:  {name: LABEL_ALIAS.DISEASE_FOCUSED_RESEARCH, ancestorLevel: 2, type: ElementType.Checkbox},
+      textOption:  {name: LabelAlias.DISEASE_FOCUSED_RESEARCH, ancestorLevel: 2, type: ElementType.Checkbox},
       affiliated: ElementType.Textbox,
     },
     methodsDevelopmentValidationStudyCheckbox: {
-      textOption: {name: LABEL_ALIAS.METHODS_DEVELOPMENT, ancestorLevel: 2, type: ElementType.Checkbox}
+      textOption: {name: LabelAlias.METHODS_DEVELOPMENT, ancestorLevel: 2, type: ElementType.Checkbox}
     },
     researchControlCheckbox: {
-      textOption: {name: LABEL_ALIAS.RESEARCH_CONTROL, ancestorLevel: 2, type: ElementType.Checkbox}
+      textOption: {name: LabelAlias.RESEARCH_CONTROL, ancestorLevel: 2, type: ElementType.Checkbox}
     },
     geneticResearchCheckbox: {
-      textOption: {name: LABEL_ALIAS.GENETIC_RESEARCH, ancestorLevel: 2, type: ElementType.Checkbox}
+      textOption: {name: LabelAlias.GENETIC_RESEARCH, ancestorLevel: 2, type: ElementType.Checkbox}
     },
     socialBehavioralResearchCheckbox: {
-      textOption: {name: LABEL_ALIAS.SOCIAL_BEHAVIORAL_RESEARCH, ancestorLevel: 2, type: ElementType.Checkbox}
+      textOption: {name: LabelAlias.SOCIAL_BEHAVIORAL_RESEARCH, ancestorLevel: 2, type: ElementType.Checkbox}
     },
     populationHealthCheckbox: {
-      textOption: {name: LABEL_ALIAS.POPULATION_HEALTH, ancestorLevel: 2, type: ElementType.Checkbox}
+      textOption: {name: LabelAlias.POPULATION_HEALTH, ancestorLevel: 2, type: ElementType.Checkbox}
     },
     ethicalLegalSocialImplicationsResearchCheckbox: {
-      textOption: {name: LABEL_ALIAS.ETHICAL_LEGAL_SOCIAL_IMPLICATIONS, ancestorLevel: 2, type: ElementType.Checkbox}
+      textOption: {name: LabelAlias.ETHICAL_LEGAL_SOCIAL_IMPLICATIONS, ancestorLevel: 2, type: ElementType.Checkbox}
     },
     drugTherapeuticsDevelopmentResearchCheckbox: {
-      textOption:  {name: LABEL_ALIAS.DRUG_THERAPEUTIC_DEVELOPMENT, ancestorLevel: 2, type: ElementType.Checkbox}
+      textOption:  {name: LabelAlias.DRUG_THERAPEUTIC_DEVELOPMENT, ancestorLevel: 2, type: ElementType.Checkbox}
     },
     educationPurposeCheckbox: {
-      textOption: {name: LABEL_ALIAS.EDUCATION_PURPOSE, ancestorLevel: 2, type: ElementType.Checkbox}
+      textOption: {name: LabelAlias.EDUCATION_PURPOSE, ancestorLevel: 2, type: ElementType.Checkbox}
     },
     forProfitPurposeCheckbox: {
-      textOption: {name: LABEL_ALIAS.FOR_PROFIT_PURPOSE, ancestorLevel: 2, type: ElementType.Checkbox}
+      textOption: {name: LabelAlias.FOR_PROFIT_PURPOSE, ancestorLevel: 2, type: ElementType.Checkbox}
     },
     otherPurposeCheckbox: {
-      textOption: {name: LABEL_ALIAS.OTHER_PURPOSE, ancestorLevel: 2, type: ElementType.Checkbox},
+      textOption: {name: LabelAlias.OTHER_PURPOSE, ancestorLevel: 2, type: ElementType.Checkbox},
       affiliated: ElementType.Textarea
     }
   },
   RESEARCH_PURPOSE_SUMMARY: {  // fields in question #2
     scientificQuestionsIntentToStudyTextarea: {
-      textOption: {containsText: LABEL_ALIAS.INTENT_TO_STUDY, ancestorLevel: 3, type: ElementType.Textarea}
+      textOption: {containsText: LabelAlias.INTENT_TO_STUDY, ancestorLevel: 3, type: ElementType.Textarea}
     },
     scientificApproachesToUseTextarea: {
-      textOption: {containsText: LABEL_ALIAS.SCIENTIFIC_APPROACHES, ancestorLevel: 3, type: ElementType.Textarea}
+      textOption: {containsText: LabelAlias.SCIENTIFIC_APPROACHES, ancestorLevel: 3, type: ElementType.Textarea}
     },
     anticipatedFindingsFromStudyTextarea: {
-      textOption: {containsText: LABEL_ALIAS.ANTICIPATED_FINDINGS, ancestorLevel: 3, type: ElementType.Textarea}
+      textOption: {containsText: LabelAlias.ANTICIPATED_FINDINGS, ancestorLevel: 3, type: ElementType.Textarea}
     }
   },
   DISSEMINATE_RESEARCH_FINDINGS: {  // fields in question #3
     publicationInScientificJournalsCheckbox: {
-      textOption: {containsText: LABEL_ALIAS.PUBLICATION_IN_JOURNALS, ancestorLevel: 2, type: ElementType.Checkbox}
+      textOption: {containsText: LabelAlias.PUBLICATION_IN_JOURNALS, ancestorLevel: 2, type: ElementType.Checkbox}
     },
     socialMediaCheckbox: {
-      textOption: {containsText: LABEL_ALIAS.SOCIAL_MEDIA, ancestorLevel: 2, type: ElementType.Checkbox}
+      textOption: {containsText: LabelAlias.SOCIAL_MEDIA, ancestorLevel: 2, type: ElementType.Checkbox}
     },
     presentationAtScientificConferencesCheckbox: {
-      textOption: {containsText: LABEL_ALIAS.PRESENTATION_AT_CONFERENCES, ancestorLevel: 2, type: ElementType.Checkbox}
+      textOption: {containsText: LabelAlias.PRESENTATION_AT_CONFERENCES, ancestorLevel: 2, type: ElementType.Checkbox}
     },
     presentationAtCommunityForumsCheckbox: {
-      textOption: {containsText: LABEL_ALIAS.PRESENTATION_AT_COMMUNITY_FORUMS, ancestorLevel: 2, type: ElementType.Checkbox}
+      textOption: {containsText: LabelAlias.PRESENTATION_AT_COMMUNITY_FORUMS, ancestorLevel: 2, type: ElementType.Checkbox}
     },
     pressReleaseCheckbox: {
-      textOption: {containsText: LABEL_ALIAS.PRESS_RELEASE, ancestorLevel: 2, type: ElementType.Checkbox}
+      textOption: {containsText: LabelAlias.PRESS_RELEASE, ancestorLevel: 2, type: ElementType.Checkbox}
     },
     publicationInCommunityJournalsCheckbox: {
-      textOption: {containsText: LABEL_ALIAS.PUBLICATION_IN_COMMUNITY_JOURNALS, ancestorLevel: 2, type: ElementType.Checkbox}
+      textOption: {containsText: LabelAlias.PUBLICATION_IN_COMMUNITY_JOURNALS, ancestorLevel: 2, type: ElementType.Checkbox}
     },
     publicationInPersonalBlogCheckbox: {
-      textOption: {containsText: LABEL_ALIAS.PUBLICATION_IN_PERSONAL_BLOG, ancestorLevel: 2, type: ElementType.Checkbox}
+      textOption: {containsText: LabelAlias.PUBLICATION_IN_PERSONAL_BLOG, ancestorLevel: 2, type: ElementType.Checkbox}
     },
     otherCheckbox: {
-      textOption: {name: LABEL_ALIAS.OTHER, ancestorLevel: 2, type: ElementType.Checkbox},
+      textOption: {name: LabelAlias.OTHER, ancestorLevel: 2, type: ElementType.Checkbox},
       affiliated: ElementType.Textarea
     }
   },
   DESCRIBE_ANTICIPATED_OUTCOMES: {  // fields in question #4
     seeksIncreaseWellnessCheckbox: {
-      textOption: {containsText: LABEL_ALIAS.INCREASE_WELLNESS, ancestorLevel: 2, type: ElementType.Checkbox}
+      textOption: {containsText: LabelAlias.INCREASE_WELLNESS, ancestorLevel: 2, type: ElementType.Checkbox}
     },
     seeksToReduceHealthDisparitiesCheckbox: {
-      textOption: {containsText: LABEL_ALIAS.SEEKS_TO_REDUCE_HEALTH_DISPARITIES, ancestorLevel: 2, type: ElementType.Checkbox}
+      textOption: {containsText: LabelAlias.SEEKS_TO_REDUCE_HEALTH_DISPARITIES, ancestorLevel: 2, type: ElementType.Checkbox}
     },
     seeksToDevelopRiskAssessmentCheckbox: {
-      textOption: {containsText: LABEL_ALIAS.SEEKS_TO_DEVELOP_RISK_ASSESSMENT, ancestorLevel: 2, type: ElementType.Checkbox}
+      textOption: {containsText: LabelAlias.SEEKS_TO_DEVELOP_RISK_ASSESSMENT, ancestorLevel: 2, type: ElementType.Checkbox}
     },
     seeksToProvideEarlierDiagnosisCheckbox: {
-      textOption: {containsText: LABEL_ALIAS.SEEKS_TO_PROVIDE_ACCURATE_DIAGNOSIS, ancestorLevel: 2, type: ElementType.Checkbox}
+      textOption: {containsText: LabelAlias.SEEKS_TO_PROVIDE_ACCURATE_DIAGNOSIS, ancestorLevel: 2, type: ElementType.Checkbox}
     },
     seeksToReduceBurdenCheckbox: {
-      textOption: {containsText: LABEL_ALIAS.SEEKS_TO_REDUCE_BURDEN, ancestorLevel: 2, type: ElementType.Checkbox}
+      textOption: {containsText: LabelAlias.SEEKS_TO_REDUCE_BURDEN, ancestorLevel: 2, type: ElementType.Checkbox}
     }
   },
   POPULATION_OF_INTEREST: {  // fields in question #5
     yesRadiobutton: {
-      textOption: {containsText: LABEL_ALIAS.YES_FOCUS_ON_UNDERREPRESENTED_POPULATION, type: ElementType.RadioButton}
+      textOption: {containsText: LabelAlias.YES_FOCUS_ON_UNDERREPRESENTED_POPULATION, type: ElementType.RadioButton}
     },
     noRadiobutton: {
-      textOption: {containsText: LABEL_ALIAS.NO_FOCUS_ON_UNDERREPRESENTED_POPULATION, type: ElementType.RadioButton}
+      textOption: {containsText: LabelAlias.NO_FOCUS_ON_UNDERREPRESENTED_POPULATION, type: ElementType.RadioButton}
     },
     raceMultiAncestryCheckbox: {
-      textOption: {containsText: LABEL_ALIAS.RACE_MULTI_ANCESTRY, ancestorLevel: 2, type: ElementType.Checkbox}
+      textOption: {containsText: LabelAlias.RACE_MULTI_ANCESTRY, ancestorLevel: 2, type: ElementType.Checkbox}
     },
     ageGroupsAdolescentsCheckbox: {
-      textOption: {containsText: LABEL_ALIAS.AGE_GROUPS_ADOLESCENTS, ancestorLevel: 2, type: ElementType.Checkbox}
+      textOption: {containsText: LabelAlias.AGE_GROUPS_ADOLESCENTS, ancestorLevel: 2, type: ElementType.Checkbox}
     },
     sexAtBirthCheckbox: {
-      textOption: {containsText: LABEL_ALIAS.SEX_AT_BIRTH, ancestorLevel: 2, type: ElementType.Checkbox}
+      textOption: {containsText: LabelAlias.SEX_AT_BIRTH, ancestorLevel: 2, type: ElementType.Checkbox}
     },
     genderIdentityCheckbox: {
-      textOption: {containsText: LABEL_ALIAS.GENDER_IDENTITY, ancestorLevel: 2, type: ElementType.Checkbox}
+      textOption: {containsText: LabelAlias.GENDER_IDENTITY, ancestorLevel: 2, type: ElementType.Checkbox}
     },
     geographyRuralCheckbox: {
-      textOption: {containsText: LABEL_ALIAS.GEOGRAPHY_RURAL, ancestorLevel: 2, type: ElementType.Checkbox}
+      textOption: {containsText: LabelAlias.GEOGRAPHY_RURAL, ancestorLevel: 2, type: ElementType.Checkbox}
     },
     educationLevelHighSchoolCheckbox: {
-      textOption: {containsText: LABEL_ALIAS.EDUCATION_LEVEL_HIGHSCHOOL, ancestorLevel: 2, type: ElementType.Checkbox}
+      textOption: {containsText: LabelAlias.EDUCATION_LEVEL_HIGHSCHOOL, ancestorLevel: 2, type: ElementType.Checkbox}
     },
     disabilityStatusWithDisabilityCheckbox: {
-      textOption: {containsText: LABEL_ALIAS.DISABILITY_STATUS_WITH_DISABILITY, ancestorLevel: 2, type: ElementType.Checkbox}
+      textOption: {containsText: LabelAlias.DISABILITY_STATUS_WITH_DISABILITY, ancestorLevel: 2, type: ElementType.Checkbox}
     }
   },
   REQUEST_FOR_REVIEW: {  // fields in question #6
     yesRequestReviewRadiobutton: {
-      textOption: {containsText: LABEL_ALIAS.YES_REQUEST_REVIEW, type: ElementType.RadioButton}
+      textOption: {containsText: LabelAlias.YES_REQUEST_REVIEW, type: ElementType.RadioButton}
     },
     noRequestReviewRadiobutton: {
-      textOption: {containsText: LABEL_ALIAS.NO_REQUEST_REVIEW, type: ElementType.RadioButton}
+      textOption: {containsText: LabelAlias.NO_REQUEST_REVIEW, type: ElementType.RadioButton}
     }
   }
 
@@ -236,7 +234,7 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
     const select = new Select(this.page, selectXpath);
     try {
       await Promise.all([
-        waitForDocumentTitle(this.page, PAGE.TITLE),
+        waitForDocumentTitle(this.page, PageTitle),
         this.getWorkspaceNameTextbox(),
         select.getSelectedOption(),
         this.getCreateWorkspaceButton(),

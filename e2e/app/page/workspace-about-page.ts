@@ -1,11 +1,12 @@
 import {Page} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForAttributeEquality, waitForDocumentTitle} from 'utils/waits-utils';
+import {xPathOptionToXpath} from 'app/element/xpath-defaults';
+import {ElementType} from 'app/xpath-options';
 import AuthenticatedPage from './authenticated-page';
-import {LabelAlias} from './data-page';
+import {TabLabelAlias} from './data-page';
 
 export const PageTitle = 'View Workspace Details';
-export const AboutTabSelector = `//*[@id="workspace-top-nav-bar"]/*[@aria-selected="true" and @role="button" and text()="${LabelAlias.About}"]`
 
 export default class WorkspaceAboutPage extends AuthenticatedPage{
 
@@ -18,7 +19,7 @@ export default class WorkspaceAboutPage extends AuthenticatedPage{
       await Promise.all([
         waitForDocumentTitle(this.page, PageTitle, 60000),
         waitWhileLoading(this.page),
-        this.page.waitForXPath(AboutTabSelector, {timeout: 60000}),
+        this.page.waitForXPath(xPathOptionToXpath({name: TabLabelAlias.About, type: ElementType.Tab}), {timeout: 60000}),
       ]);
       return true;
     } catch (err) {
@@ -28,7 +29,8 @@ export default class WorkspaceAboutPage extends AuthenticatedPage{
   }
 
   async isOpen(): Promise<boolean> {
-    return waitForAttributeEquality(page, {xpath: AboutTabSelector}, 'aria-selected', 'true');
+    const selector = xPathOptionToXpath({name: TabLabelAlias.About, type: ElementType.Tab});
+    return waitForAttributeEquality(page, {xpath: selector}, 'aria-selected', 'true');
   }
 
 }

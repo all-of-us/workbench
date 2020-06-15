@@ -114,7 +114,7 @@ export default class WorkspaceCard {
     return this.page.waitForXPath(this.workspaceNameLinkSelector(workspaceName));
   }
 
-  async getWorkspaceMatchAccessLevel(level: WorkspaceAccessLevel = WorkspaceAccessLevel.OWNER): Promise<WorkspaceCard[]> {
+  async getWorkspaceMatchAccessLevel(level: WorkspaceAccessLevel = WorkspaceAccessLevel.Owner): Promise<WorkspaceCard[]> {
     const matchWorkspaceArray: WorkspaceCard[] = [];
     const allWorkspaceCards = await WorkspaceCard.findAllCards(this.page);
     for (const card of allWorkspaceCards) {
