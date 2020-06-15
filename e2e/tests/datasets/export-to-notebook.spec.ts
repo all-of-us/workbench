@@ -1,6 +1,6 @@
 import DataResourceCard, {CardType} from 'app/component/data-resource-card';
 import Link from 'app/element/link';
-import DataPage, {LabelAlias} from 'app/page/data-page';
+import DataPage, {TabLabelAlias} from 'app/page/data-page';
 import DatasetSaveModal from 'app/page/dataset-save-modal';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import AnalysisPage from 'app/page/analysis-page';
@@ -76,8 +76,8 @@ describe('Create Dataset', () => {
     expect(newCardsCount).toBe(origCardsCount - 1);
 
     // Delete Dataset.
-    await dataPage.openTab(LabelAlias.Data);
-    await dataPage.openTab(LabelAlias.Datasets);
+    await dataPage.openTab(TabLabelAlias.Data);
+    await dataPage.openTab(TabLabelAlias.Datasets);
     await dataPage.deleteDataset(newDatasetName);
 
   });

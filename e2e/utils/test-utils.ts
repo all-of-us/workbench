@@ -191,7 +191,7 @@ export async function findWorkspace(page: Page, createNew: boolean = false): Pro
   await workspacesPage.load();
 
   const workspaceCard = new WorkspaceCard(page);
-  let existingWorkspaces = await workspaceCard.getWorkspaceMatchAccessLevel(WorkspaceAccessLevel.OWNER);
+  let existingWorkspaces = await workspaceCard.getWorkspaceMatchAccessLevel(WorkspaceAccessLevel.Owner);
 
   if (existingWorkspaces.length === 0 || createNew) {
     // Create new workspace
@@ -199,7 +199,7 @@ export async function findWorkspace(page: Page, createNew: boolean = false): Pro
     await workspacesPage.createWorkspace(workspaceName);
 
     await workspacesPage.load();
-    existingWorkspaces = await workspaceCard.getWorkspaceMatchAccessLevel(WorkspaceAccessLevel.OWNER);
+    existingWorkspaces = await workspaceCard.getWorkspaceMatchAccessLevel(WorkspaceAccessLevel.Owner);
   }
 
   const oneWorkspaceCard = fp.shuffle(existingWorkspaces)[0];

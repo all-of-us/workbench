@@ -2,7 +2,7 @@ import DataResourceCard, {CardType} from 'app/component/data-resource-card';
 import {ButtonLabel} from 'app/component/dialog';
 import ClrIconLink from 'app/element/clr-icon-link';
 import CohortBuildPage from 'app/page/cohort-build-page';
-import DataPage, {LabelAlias} from 'app/page/data-page';
+import DataPage, {TabLabelAlias} from 'app/page/data-page';
 import DatasetSaveModal from 'app/page/dataset-save-modal';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
@@ -89,7 +89,7 @@ describe('Create Dataset', () => {
     await waitForText(page, 'Cohort Saved Successfully');
     console.log(`Created Cohort "${cohortName}"`);
 
-    await dataPage.openTab(LabelAlias.Data);
+    await dataPage.openTab(TabLabelAlias.Data);
 
     // Click Add Datasets button.
     const datasetPage = await dataPage.clickAddDatasetButton();
@@ -102,7 +102,7 @@ describe('Create Dataset', () => {
     const dataSetName = await saveModal.saveDataset();
 
     // Verify create successful.
-    await dataPage.openTab(LabelAlias.Datasets);
+    await dataPage.openTab(TabLabelAlias.Datasets);
     const resourceCard = new DataResourceCard(page);
     const dataSetExists = await resourceCard.cardExists(dataSetName, CardType.Dataset);
     expect(dataSetExists).toBe(true);
@@ -110,7 +110,7 @@ describe('Create Dataset', () => {
     // Edit the dataset to include "All Participants".
     await resourceCard.findCard(dataSetName)
     const menu = resourceCard.getEllipsis();
-    await menu.clickAction(EllipsisMenuAction.EDIT);
+    await menu.clickAction(EllipsisMenuAction.Edit);
     await waitWhileLoading(page);
 
     await datasetPage.selectCohorts(['All Participants']);

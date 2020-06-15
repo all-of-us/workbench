@@ -6,9 +6,7 @@ import ClrIconLink from 'app/element/clr-icon-link';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
 
-
 export const PageTitle = 'Homepage';
-export const PageHeader  = 'Workspaces';
 
 export const LabelAlias = {
   SeeAllWorkspaces: 'See all workspaces',
@@ -43,7 +41,7 @@ export default class HomePage extends AuthenticatedPage {
    * Load Home page and ensure page load is completed.
    */
   async load(): Promise<this> {
-    await this.loadPageUrl(PageUrl.HOME);
+    await this.loadPageUrl(PageUrl.Home);
     return this;
   }
 

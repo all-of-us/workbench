@@ -4,7 +4,7 @@ import ClrIconLink from 'app/element/clr-icon-link';
 import Link from 'app/element/link';
 import {EllipsisMenuAction} from 'app/page-identifiers';
 import CohortBuildPage, {FieldSelector} from 'app/page/cohort-build-page';
-import DataPage, {LabelAlias} from 'app/page/data-page';
+import DataPage, {TabLabelAlias} from 'app/page/data-page';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
 import DataResourceCard from 'app/component/data-resource-card';
@@ -192,14 +192,14 @@ describe('User can create new Cohorts', () => {
     await cohortBuildPage.waitForLoad();
     await waitWhileLoading(page);
 
-    await dataPage.openTab(LabelAlias.Data);
+    await dataPage.openTab(TabLabelAlias.Data);
     await waitWhileLoading(page);
 
     // Duplicate cohort using Ellipsis menu.
     const origCardsCount = (await DataResourceCard.findAllCards(page)).length;
     cohortCard = await DataResourceCard.findCard(page, cohortName);
     const menu = cohortCard.getEllipsis();
-    await menu.clickAction(EllipsisMenuAction.DUPLICATE, false);
+    await menu.clickAction(EllipsisMenuAction.Duplicate, false);
     await waitWhileLoading(page);
     const newCardsCount = (await DataResourceCard.findAllCards(page)).length;
     // cards count increase by 1.

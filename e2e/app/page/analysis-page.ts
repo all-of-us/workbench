@@ -35,7 +35,7 @@ export default class AnalysisPage extends AuthenticatedPage {
   async deleteNotebook(notebookName: string): Promise<string> {
     const resourceCard = await DataResourceCard.findCard(this.page, notebookName);
     const menu = resourceCard.getEllipsis();
-    await menu.clickAction(EllipsisMenuAction.DELETE, false);
+    await menu.clickAction(EllipsisMenuAction.Delete, false);
 
     const dialog = new Dialog(this.page);
     const dialogContentText = await dialog.getContent();

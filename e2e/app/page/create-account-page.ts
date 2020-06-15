@@ -15,61 +15,61 @@ import {waitForText} from 'utils/waits-utils';
 
 const faker = require('faker/locale/en_US');
 
-export const INSTITUTION_VALUE = {
-  VANDERBILT: 'Vanderbilt University Medical Center',
-  BROAD: 'Broad Institute',
-  VERILY: 'Verily LLC',
-  NATIONAL_INSTITUTE_HEALTH: 'National Institute of Health',
-  WONDROS: 'Wondros'
+export const InstitutionSelectValue = {
+  Vanderbilt: 'Vanderbilt University Medical Center',
+  Broad: 'Broad Institute',
+  Verily: 'Verily LLC',
+  NationalInstituteHealth: 'National Institute of Health',
+  Wondros: 'Wondros'
 };
 
-export const INSTITUTION_ROLE_VALUE = {
-  EARLY_CAREER_TENURE_TRACK_RESEARCHER: 'Early career tenure-track researcher',
-  UNDERGRADUATE_STUDENT: 'Undergraduate (Bachelor level) student',
-  INDUSTRY: 'Industry',
-  RESEARCH_ASSISTANT: 'Research Assistant (pre-doctoral)',
-  RESEARCH_ASSOCIATE: 'Research associate (post-doctoral; early/mid career)',
-  SENIOR_RESEARCHER: 'Senior Researcher (PI/Team Lead, senior scientist)',
+export const InstitutionRoleSelectValue = {
+  EarlyCareerTenureTrackResearcher: 'Early career tenure-track researcher',
+  UndergraduteStudent: 'Undergraduate (Bachelor level) student',
+  Industry: 'Industry',
+  ResearchAssistant: 'Research Assistant (pre-doctoral)',
+  ResearchAssociate: 'Research associate (post-doctoral; early/mid career)',
+  SeniorResearcher: 'Senior Researcher (PI/Team Lead, senior scientist)',
 };
 
-export const EDUCATION_LEVEL_VALUE = {
-  DOCTORATE: 'Doctorate',
+export const EducationLevelValue = {
+  Doctorate: 'Doctorate',
   // other option values here
 };
 
 export const LabelAlias = {
-  READ_PRIVACY_STATEMENT: 'I have read, understand, and agree to the All of Us Program Privacy Statement',
-  READ_TERMS_OF_USE: 'I have read, understand, and agree to the Terms of Use described above',
-  INSTITUTION_NAME: 'Institution Name',
-  ARE_YOU_AFFILIATED: 'Are you affiliated with an Academic Research Institution',
-  RESEARCH_BACKGROUND: 'Your research background, experience, and research interests',
-  EDUCATION_LEVEL: 'Highest Level of Education Completed', // Highest Level of Education Completed
-  YEAR_OF_BIRTH: 'Year of Birth',
-  INSTITUTION_EMAIL: 'Your institutional email address',
+  ReadPrivacyStatement: 'I have read, understand, and agree to the All of Us Program Privacy Statement',
+  ReadTermsOfUse: 'I have read, understand, and agree to the Terms of Use described above',
+  InstitutionName: 'Institution Name',
+  AreYouAffiliated: 'Are you affiliated with an Academic Research Institution',
+  ResearchBackground: 'Your research background, experience, and research interests',
+  EducationLevel: 'Highest Level of Education Completed', // Highest Level of Education Completed
+  YearOfBirth: 'Year of Birth',
+  InstitutionEmail: 'Your institutional email address',
 };
 
 export const FieldSelector = {
-  institutionEmailTextbox: {
+  InstitutionEmailTextbox: {
     textOption: {
-      containsText: LabelAlias.INSTITUTION_EMAIL, ancestorLevel: 2
+      containsText: LabelAlias.InstitutionEmail, ancestorLevel: 2
     }
   },
-  educationLevelSelect: {
+  EducationLevelSelect: {
     textOption: {
-      type: ElementType.Dropdown, name: LabelAlias.EDUCATION_LEVEL, ancestorLevel: 2
+      type: ElementType.Dropdown, name: LabelAlias.EducationLevel, ancestorLevel: 2
     }
   },
-  birthYearSelect: {
+  BirthYearSelect: {
     textOption: {
-      type: ElementType.Dropdown, name: LabelAlias.YEAR_OF_BIRTH, ancestorLevel: 2
+      type: ElementType.Dropdown, name: LabelAlias.YearOfBirth, ancestorLevel: 2
     }
   },
-  institutionSelect: {
+  InstitutionSelect: {
     textOption: {
       type:ElementType.Dropdown, name:'Select your institution', ancestorLevel:2
     }
   },
-  describeRole: {
+  DescribeRole: {
     textOption: {
       type: ElementType.Dropdown, containsText: 'describes your role', ancestorLevel: 2
     }
@@ -117,19 +117,19 @@ export default class CreateAccountPage extends BasePage {
   }
 
   async getPrivacyStatementCheckbox(): Promise<Checkbox> {
-    return await Checkbox.findByName(this.page, {normalizeSpace: LabelAlias.READ_PRIVACY_STATEMENT});
+    return await Checkbox.findByName(this.page, {normalizeSpace: LabelAlias.ReadPrivacyStatement});
   }
 
   async getTermsOfUseCheckbox(): Promise<Checkbox> {
-    return await Checkbox.findByName(this.page, {normalizeSpace: LabelAlias.READ_TERMS_OF_USE});
+    return await Checkbox.findByName(this.page, {normalizeSpace: LabelAlias.ReadTermsOfUse});
   }
 
   async getInstitutionNameInput(): Promise<Textbox> {
-    return await Textbox.findByName(this.page, {name: LabelAlias.INSTITUTION_NAME});
+    return await Textbox.findByName(this.page, {name: LabelAlias.InstitutionName});
   }
 
   async getResearchBackgroundTextarea(): Promise<Textarea> {
-    return await Textarea.findByName(this.page, {normalizeSpace: LabelAlias.RESEARCH_BACKGROUND});
+    return await Textarea.findByName(this.page, {normalizeSpace: LabelAlias.ResearchBackground});
   }
 
   async getUsernameDomain(): Promise<unknown> {
@@ -153,24 +153,24 @@ export default class CreateAccountPage extends BasePage {
 
   // select Institution Affiliation from a dropdown
   async selectInstitution(selectTextValue: string) {
-    const dropdown = await SelectMenu.findByName(this.page, FieldSelector.institutionSelect.textOption);
+    const dropdown = await SelectMenu.findByName(this.page, FieldSelector.InstitutionSelect.textOption);
     await dropdown.clickMenuItem(selectTextValue);
   }
 
   async getInstitutionValue() {
-    const dropdown = await SelectMenu.findByName(this.page, FieldSelector.institutionSelect.textOption);
+    const dropdown = await SelectMenu.findByName(this.page, FieldSelector.InstitutionSelect.textOption);
     return await dropdown.getSelectedValue();
   }
 
   // select Education Level from a dropdown
   async selectEducationLevel(selectTextValue: string) {
-    const dropdown = await SelectMenu.findByName(this.page, FieldSelector.educationLevelSelect.textOption);
+    const dropdown = await SelectMenu.findByName(this.page, FieldSelector.EducationLevelSelect.textOption);
     await dropdown.clickMenuItem(selectTextValue);
   }
 
   // select Year of Birth from a dropdown
   async selectYearOfBirth(year: string) {
-    const dropdown = await SelectMenu.findByName(this.page, FieldSelector.birthYearSelect.textOption);
+    const dropdown = await SelectMenu.findByName(this.page, FieldSelector.BirthYearSelect.textOption);
     await dropdown.clickMenuItem(year);
   }
 
@@ -183,15 +183,15 @@ export default class CreateAccountPage extends BasePage {
       waitWhileLoading(this.page, 60000),
     ]);
 
-    await this.selectInstitution(INSTITUTION_VALUE.BROAD);
+    await this.selectInstitution(InstitutionSelectValue.Broad);
     await this.getInstitutionValue();
-    const emailAddressTextbox = await Textbox.findByName(this.page, FieldSelector.institutionEmailTextbox.textOption);
+    const emailAddressTextbox = await Textbox.findByName(this.page, FieldSelector.InstitutionEmailTextbox.textOption);
     await emailAddressTextbox.type(config.institutionContactEmail);
     await emailAddressTextbox.tabKey(); // tab out to start email validation
-    await ClrIconLink.findByName(this.page, {containsText: LabelAlias.INSTITUTION_EMAIL, ancestorLevel: 2, iconShape: 'success-standard'});
+    await ClrIconLink.findByName(this.page, {containsText: LabelAlias.InstitutionEmail, ancestorLevel: 2, iconShape: 'success-standard'});
 
-    const roleSelect = await SelectMenu.findByName(this.page, FieldSelector.describeRole.textOption);
-    await roleSelect.clickMenuItem(INSTITUTION_ROLE_VALUE.UNDERGRADUATE_STUDENT);
+    const roleSelect = await SelectMenu.findByName(this.page, FieldSelector.DescribeRole.textOption);
+    await roleSelect.clickMenuItem(InstitutionRoleSelectValue.UndergraduteStudent);
   }
 
   // Step 3: Accepting Terms of Use and Privacy statement.
@@ -225,7 +225,7 @@ export default class CreateAccountPage extends BasePage {
       await ck.click();
     }
     await this.selectYearOfBirth('1955');
-    await this.selectEducationLevel(EDUCATION_LEVEL_VALUE.DOCTORATE);
+    await this.selectEducationLevel(EducationLevelValue.Doctorate);
   }
 
 }

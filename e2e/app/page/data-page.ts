@@ -15,7 +15,7 @@ import {ElementType} from 'app/xpath-options';
 import CohortBuildPage from './cohort-build-page';
 import DatasetBuildPage from './dataset-build-page';
 
-export enum LabelAlias {
+export enum TabLabelAlias {
   Data = 'Data',
   Analysis = 'Analysis',
   About = 'About',
@@ -54,9 +54,9 @@ export default class DataPage extends AuthenticatedPage {
 
   /**
    * Select DATA, ANALYSIS or ABOUT page tab.
-   * @param {LabelAlias} tabName
+   * @param {TabLabelAlias} tabName
    */
-  async openTab(tabName: LabelAlias, opts: {waitPageChange?: boolean} = {}): Promise<void> {
+  async openTab(tabName: TabLabelAlias, opts: {waitPageChange?: boolean} = {}): Promise<void> {
     const {waitPageChange = true} = opts;
     const selector = xPathOptionToXpath({name: tabName, type: ElementType.Tab});
     const tab = await this.page.waitForXPath(selector, {visible: true});
@@ -67,11 +67,11 @@ export default class DataPage extends AuthenticatedPage {
   }
 
   async getAddDatasetButton(): Promise<ClrIconLink> {
-    return ClrIconLink.findByName(this.page, {name: LabelAlias.Datasets, iconShape: 'plus-circle'});
+    return ClrIconLink.findByName(this.page, {name: TabLabelAlias.Datasets, iconShape: 'plus-circle'});
   }
 
   async getAddCohortsButton(): Promise<ClrIconLink> {
-    return ClrIconLink.findByName(this.page, {name: LabelAlias.Cohorts, iconShape: 'plus-circle'});
+    return ClrIconLink.findByName(this.page, {name: TabLabelAlias.Cohorts, iconShape: 'plus-circle'});
   }
 
   // Click Add Datasets button.
@@ -94,7 +94,7 @@ export default class DataPage extends AuthenticatedPage {
   async deleteCohort(cohortName: string): Promise<string> {
     const cohortCard = await DataResourceCard.findCard(this.page, cohortName);
     const menu = cohortCard.getEllipsis();
-    await menu.clickAction(EllipsisMenuAction.DELETE, false);
+    await menu.clickAction(EllipsisMenuAction.Delete, false);
     const dialogContent = await (new CohortBuildPage(this.page)).deleteConfirmationDialog();
     console.log(`Deleted Cohort "${cohortName}"`);
     return dialogContent;
@@ -107,7 +107,7 @@ export default class DataPage extends AuthenticatedPage {
   async deleteDataset(datasetName: string): Promise<string> {
     const datasetCard = await DataResourceCard.findCard(this.page, datasetName);
     const menu = datasetCard.getEllipsis();
-    await menu.clickAction(EllipsisMenuAction.DELETE, false);
+    await menu.clickAction(EllipsisMenuAction.Delete, false);
 
     const dialog = new Dialog(this.page);
     const dialogContentText = await dialog.getContent();
