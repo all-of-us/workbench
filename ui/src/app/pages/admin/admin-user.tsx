@@ -215,7 +215,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     const {updatedProfile} = this.state;
     this.setState({loading: true});
     profileApi().updateVerifiedInstitutionalAffiliation(updatedProfile.userId, updatedProfile.verifiedInstitutionalAffiliation).then(() => {
-      this.setState({loading: false});
+      this.setState({oldProfile: updatedProfile, loading: false});
     });
   }
 
