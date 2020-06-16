@@ -15,6 +15,7 @@ const defaultServerConfig: ConfigResponse = {
   requireInvitationKey: true,
   requireInstitutionalVerification: true,
   enableCBAgeTypeOptions: true,
+  useNewShibbolethService: false,
 };
 
 export default defaultServerConfig;
