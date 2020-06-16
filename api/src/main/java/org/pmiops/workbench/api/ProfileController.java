@@ -844,12 +844,8 @@ public class ProfileController implements ProfileApiDelegate {
       fireCloudService.postNihCallback(new FirecloudJWTWrapper().jwt(token.getJwt()));
     }
 
-    try {
-      userService.syncEraCommonsStatus();
-      return getProfileResponse(userProvider.get());
-    } catch (WorkbenchException e) {
-      throw e;
-    }
+    userService.syncEraCommonsStatus();
+    return getProfileResponse(userProvider.get());
   }
 
   private void updateBypass(long userId, AccessBypassRequest request) {
