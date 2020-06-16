@@ -11,7 +11,6 @@ import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {PubliclyDisplayed} from 'app/icons/publicly-displayed-icon';
-import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
 import {
   commonStyles,
   getRoleOptions,

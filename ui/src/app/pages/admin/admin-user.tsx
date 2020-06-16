@@ -19,13 +19,13 @@ import {
   withUrlParams
 } from 'app/utils';
 
+import {BulletAlignedUnorderedList} from 'app/components/lists';
+import {TooltipTrigger} from 'app/components/popups';
+import {getRoleOptions} from 'app/pages/login/account-creation/common';
 import {navigate, serverConfigStore} from 'app/utils/navigation';
 import {InstitutionalRole, Profile, PublicInstitutionDetails} from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
-import {getRoleOptions} from "../login/account-creation/common";
-import {TooltipTrigger} from "../../components/popups";
 import * as validate from 'validate.js';
-import {BulletAlignedUnorderedList} from "../../components/lists";
 
 const styles = reactStyles({
   semiBold: {
@@ -47,7 +47,7 @@ const freeCreditLimitOptions = [
   {label: '$800', value: 800}
 ];
 
-const TextInputWithLabel = ({label, content, dataTestId, onChange = (value) => {}, disabled=false, inputStyle = {}}) => {
+const TextInputWithLabel = ({label, content, dataTestId, onChange = (value) => {}, disabled= false, inputStyle = {}}) => {
   return <FlexColumn data-test-id={dataTestId} style={{marginTop: '1rem'}}>
     <label style={styles.semiBold}>{label}</label>
     <TextInput
@@ -55,7 +55,7 @@ const TextInputWithLabel = ({label, content, dataTestId, onChange = (value) => {
         disabled={disabled}
         onChange={(value) => onChange(value)}
         style={{
-          backgroundColor: colorWithWhiteness(colors.primary, .95),
+          backgroundColor: disabled ? colorWithWhiteness(colors.primary, .95) : colors.white,
           opacity: '100%',
           width: '17.5rem',
           ...inputStyle
@@ -64,7 +64,7 @@ const TextInputWithLabel = ({label, content, dataTestId, onChange = (value) => {
   </FlexColumn>;
 };
 
-const DropdownWithLabel = ({label, options, initialValue, onChange, disabled=false, dataTestId, dropdownStyle = {}}) => {
+const DropdownWithLabel = ({label, options, initialValue, onChange, disabled= false, dataTestId, dropdownStyle = {}}) => {
   return <FlexColumn data-test-id={dataTestId} style={{marginTop: '1rem'}}>
     <label style={styles.semiBold}>{label}</label>
     <Dropdown
@@ -158,8 +158,8 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
       this.setState({
         verifiedInstitutionOptions: fp.sortBy( institution => institution.displayName, institutions),
         verifiedInstitutionsByShortname: institutions.reduce(
-            (accumulator, institution) => accumulator.set(institution.shortName, institution),
-            new Map<String, PublicInstitutionDetails>()
+          (accumulator, institution) => accumulator.set(institution.shortName, institution),
+          new Map<String, PublicInstitutionDetails>()
         )
       });
     } catch (error) {
@@ -169,29 +169,39 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
 
   getRoleOptionsForProfile() {
     const {updatedProfile: {verifiedInstitutionalAffiliation}, verifiedInstitutionOptions} = this.state;
-    const institutionShortName = verifiedInstitutionalAffiliation ? verifiedInstitutionalAffiliation.institutionShortName : "";
+    const institutionShortName = verifiedInstitutionalAffiliation ? verifiedInstitutionalAffiliation.institutionShortName : '';
     return getRoleOptions(verifiedInstitutionOptions, institutionShortName);
   }
 
   getInstitutionDropdownOptions() {
     const {verifiedInstitutionOptions} = this.state;
     return fp.map(
-        institution => {
-          return {label: institution.displayName, value: institution.shortName}
-        },
-        verifiedInstitutionOptions
+      institution => {
+        return {label: institution.displayName, value: institution.shortName};
+      },
+      verifiedInstitutionOptions
     );
   }
 
   isSaveDisabled(errors) {
     const {oldProfile, updatedProfile} = this.state;
-    return fp.isEqual(oldProfile, updatedProfile) || errors
+    return fp.isEqual(oldProfile, updatedProfile) || errors;
   }
 
   setVerifiedInstitutionOnProfile(institutionShortName: string) {
     const {verifiedInstitutionsByShortname} = this.state;
-    this.setState(fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionShortName'], institutionShortName));
-    this.setState(fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionDisplayName'], verifiedInstitutionsByShortname.get(institutionShortName).displayName));
+    this.setState(
+      fp.set(
+          ['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionShortName'],
+        institutionShortName
+      )
+    );
+    this.setState(
+      fp.set(
+          ['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionDisplayName'],
+        verifiedInstitutionsByShortname.get(institutionShortName).displayName
+        )
+    );
     this.setState(fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionRoleEnum'], undefined));
     this.setState(fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], undefined));
   }
@@ -223,25 +233,25 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
   validateInstitutionShortname() {
     const {updatedProfile} = this.state;
     if (updatedProfile && updatedProfile.verifiedInstitutionalAffiliation) {
-        return updatedProfile.verifiedInstitutionalAffiliation.institutionShortName;
-      }
+      return updatedProfile.verifiedInstitutionalAffiliation.institutionShortName;
+    }
     return false;
   }
 
   validateInstitutionalRoleEnum() {
     const {updatedProfile} = this.state;
     if (updatedProfile && updatedProfile.verifiedInstitutionalAffiliation) {
-        return updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum;
-      }
+      return updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum;
+    }
     return false;
   }
 
   validateInstitutionalRoleOtherText() {
     const {updatedProfile} = this.state;
     if (updatedProfile && updatedProfile.verifiedInstitutionalAffiliation) {
-        return updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum !== InstitutionalRole.OTHER
+      return updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum !== InstitutionalRole.OTHER
             || !!updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleOtherText;
-      }
+    }
     return false;
   }
 
@@ -354,7 +364,11 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
             />
             <TextInputWithLabel
                 label={'Registration date'}
-                content={updatedProfile.firstRegistrationCompletionTime ? displayDateWithoutHours(updatedProfile.firstRegistrationCompletionTime) : ''}
+                content={
+                  updatedProfile.firstRegistrationCompletionTime
+                      ? displayDateWithoutHours(updatedProfile.firstRegistrationCompletionTime)
+                      : ''
+                }
                 dataTestId={'firstRegistrationCompletionTime'}
                 disabled={true}
             />
@@ -420,7 +434,6 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
                 content={updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleOtherText}
                 onChange={(value) => this.setState(fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], value))}
                 dataTestId={'institutionalRoleOtherText'}
-                inputStyle={{backgroundColor: colors.white}}
               />
             }
             <div style={{marginTop: '1rem', width: '15rem'}}>

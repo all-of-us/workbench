@@ -7,9 +7,9 @@ import {TextInput} from 'app/components/inputs';
 import {AouTitle} from 'app/components/text-wrappers';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {isBlank, reactStyles} from 'app/utils';
+import {InstitutionalRole, PublicInstitutionDetails} from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
-import {InstitutionalRole, PublicInstitutionDetails} from "../../../../generated/fetch";
-import {AccountCreationOptions} from "./account-creation-options";
+import {AccountCreationOptions} from './account-creation-options';
 
 // Contains style definitions shared across multiple account-creation form steps.
 export const commonStyles = reactStyles({
@@ -160,7 +160,8 @@ export const OptionalDropDownSection = (props) => {
   </DropDownSection>;
 };
 
-export const getRoleOptions = (institutions: Array<PublicInstitutionDetails>, institutionShortName: string): Array<{label: string, value: InstitutionalRole}> => {
+export const getRoleOptions = (institutions: Array<PublicInstitutionDetails>, institutionShortName: string):
+    Array<{label: string, value: InstitutionalRole}> => {
   if (isBlank(institutionShortName)) {
     return [];
   }
@@ -175,5 +176,5 @@ export const getRoleOptions = (institutions: Array<PublicInstitutionDetails>, in
   return AccountCreationOptions.institutionalRoleOptions.filter(option =>
       availableRoles.includes(option.value)
   );
-}
+};
 

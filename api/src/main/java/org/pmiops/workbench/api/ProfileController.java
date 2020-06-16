@@ -710,20 +710,23 @@ public class ProfileController implements ProfileApiDelegate {
     user.setLastModifiedTime(now);
 
     updateInstitutionalAffiliations(updatedProfile, user);
-    boolean requireInstitutionalVerification = workbenchConfigProvider.get().featureFlags.requireInstitutionalVerification;
+    boolean requireInstitutionalVerification =
+        workbenchConfigProvider.get().featureFlags.requireInstitutionalVerification;
     if (requireInstitutionalVerification) {
       profileService.validateInstitutionalAffiliation(updatedProfile);
-
     }
 
     userService.updateUserWithConflictHandling(user);
     if (requireInstitutionalVerification) {
-      DbVerifiedInstitutionalAffiliation updatedDbVerifiedAffiliation = verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(updatedProfile.getVerifiedInstitutionalAffiliation(), institutionService);
+      DbVerifiedInstitutionalAffiliation updatedDbVerifiedAffiliation =
+          verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
+              updatedProfile.getVerifiedInstitutionalAffiliation(), institutionService);
       updatedDbVerifiedAffiliation.setUser(user);
-      Optional<DbVerifiedInstitutionalAffiliation> dbVerifiedAffiliation = verifiedInstitutionalAffiliationDao.findFirstByUser(user);
+      Optional<DbVerifiedInstitutionalAffiliation> dbVerifiedAffiliation =
+          verifiedInstitutionalAffiliationDao.findFirstByUser(user);
       dbVerifiedAffiliation.ifPresent(
-          verifiedInstitutionalAffiliation -> updatedDbVerifiedAffiliation
-              .setVerifiedInstitutionalAffiliationId(
+          verifiedInstitutionalAffiliation ->
+              updatedDbVerifiedAffiliation.setVerifiedInstitutionalAffiliationId(
                   verifiedInstitutionalAffiliation.getVerifiedInstitutionalAffiliationId()));
       this.verifiedInstitutionalAffiliationDao.save(updatedDbVerifiedAffiliation);
     }
