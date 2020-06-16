@@ -180,16 +180,16 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     );
   }
 
-  isSaveEnabled() {
+  isSaveDisabled() {
     const {oldProfile, updatedProfile} = this.state;
     const {verifiedInstitutionalAffiliation} = updatedProfile;
     return fp.isEqual(oldProfile, updatedProfile)
-        && verifiedInstitutionalAffiliation
-        && !!verifiedInstitutionalAffiliation.institutionShortName
-        && (
-            verifiedInstitutionalAffiliation.institutionalRoleEnum !== InstitutionalRole.OTHER
-            || !!verifiedInstitutionalAffiliation.institutionalRoleOtherText
-        );
+        || !verifiedInstitutionalAffiliation
+        || !verifiedInstitutionalAffiliation.institutionShortName
+        || (
+            verifiedInstitutionalAffiliation.institutionalRoleEnum === InstitutionalRole.OTHER
+            && !verifiedInstitutionalAffiliation.institutionalRoleOtherText
+        )
   }
 
   setVerifiedInstitutionOnProfile(institutionShortName: string) {
@@ -276,7 +276,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
           </FlexRow>
           <Button
               type='primary'
-              disabled={this.isSaveEnabled()}
+              disabled={this.isSaveDisabled()}
               onClick={() => this.updateVerifiedInstitutionalAffiliation()}
           >
             Save
@@ -364,6 +364,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
                 content={updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleOtherText}
                 onChange={(value) => this.setState(fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], value))}
                 dataTestId={'institutionalRoleOtherText'}
+                inputStyle={{backgroundColor: colors.white}}
               />
             }
             <div style={{marginTop: '1rem', width: '15rem'}}>

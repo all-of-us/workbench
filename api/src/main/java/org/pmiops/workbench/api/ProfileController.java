@@ -716,13 +716,16 @@ public class ProfileController implements ProfileApiDelegate {
 
     }
 
-    try {
-      userService.updateUserWithConflictHandling(user);
-      if (requireInstitutionalVerification) {
-        DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation = verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(updatedProfile.getVerifiedInstitutionalAffiliation(), institutionService);
-        dbVerifiedAffiliation.setUser(user);
-        this.verifiedInstitutionalAffiliationDao.save(dbVerifiedAffiliation);
-      }
+    userService.updateUserWithConflictHandling(user);
+    if (requireInstitutionalVerification) {
+      DbVerifiedInstitutionalAffiliation updatedDbVerifiedAffiliation = verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(updatedProfile.getVerifiedInstitutionalAffiliation(), institutionService);
+      updatedDbVerifiedAffiliation.setUser(user);
+      Optional<DbVerifiedInstitutionalAffiliation> dbVerifiedAffiliation = verifiedInstitutionalAffiliationDao.findFirstByUser(user);
+      dbVerifiedAffiliation.ifPresent(
+          verifiedInstitutionalAffiliation -> updatedDbVerifiedAffiliation
+              .setVerifiedInstitutionalAffiliationId(
+                  verifiedInstitutionalAffiliation.getVerifiedInstitutionalAffiliationId()));
+      this.verifiedInstitutionalAffiliationDao.save(updatedDbVerifiedAffiliation);
     }
 
     final Profile appliedUpdatedProfile = profileService.getProfile(user);
