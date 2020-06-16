@@ -692,6 +692,6 @@ public class DbWorkspace {
   }
 
   public void setResearchPurposeReviewed(Boolean reviewResearchPurpose) {
-    this.reviewResearchPurpose = (short)(reviewResearchPurpose ? 1: 0);
+    this.reviewResearchPurpose = (short) (reviewResearchPurpose ? 1 : 0);
   }
 }

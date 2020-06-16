@@ -63,10 +63,6 @@ interface WorkspaceCardMenuProps {
   onDelete: Function;
 }
 
-function researchPurposeReviewRequired(accessLevel, workspace) {
-  return WorkspacePermissionsUtil.isOwner(accessLevel) && workspace.researchPurpose.researchPurposeReviewed;
-}
-
 const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
   disabled,
   workspace,
@@ -81,12 +77,7 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
     closeOnClick
     content={
       <React.Fragment>
-        <TooltipTrigger content={
-          <div data-test-id='workspace-copy-disabled-tooltip-researchPurpose'>
-          Requires Research Purpose Review</div>}
-           disabled={researchPurposeReviewRequired(accessLevel, workspace)}>
         <MenuItem icon='copy'
-                  disabled = {WorkspacePermissionsUtil.isOwner(accessLevel) && !workspace.researchPurpose.researchPurposeReviewed}
                   onClick={() => {
                     // Using workspace.published here to identify Featured Workspaces. At some point, we will need a separate property for
                     // this on the workspace object once users are able to publish their own workspaces
@@ -97,7 +88,6 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
                   }>
           Duplicate
         </MenuItem>
-        </TooltipTrigger>
         <TooltipTrigger content={<div>Requires Write Permission</div>}
                         disabled={WorkspacePermissionsUtil.canWrite(accessLevel)}>
           <MenuItem icon='pencil'
@@ -109,17 +99,14 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
             Edit
           </MenuItem>
         </TooltipTrigger>
-        <TooltipTrigger content={<div>
-          {!WorkspacePermissionsUtil.isOwner(accessLevel) && <div data-test-id='workspace-share-disabled-tooltip'>Requires Owner Permission</div>}
-          {!workspace.researchPurpose.researchPurposeReviewed && <div data-test-id='workspace-share-disabled-tooltip-researchPurpose'>Requires Research Purpose Review</div>}
-        </div>}
-                        disabled={researchPurposeReviewRequired(accessLevel, workspace)}>
+        <TooltipTrigger content={<div data-test-id='workspace-share-disabled-tooltip'>Requires Owner Permission</div>}
+                        disabled={WorkspacePermissionsUtil.isOwner(accessLevel)}>
           <MenuItem icon='pencil'
                     onClick={() => {
                       AnalyticsTracker.Workspaces.OpenShareModal('Card');
                       onShare();
                     }}
-                    disabled={!researchPurposeReviewRequired(accessLevel, workspace)}>
+                    disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
             Share
           </MenuItem>
         </TooltipTrigger>
@@ -130,7 +117,7 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
                       AnalyticsTracker.Workspaces.OpenDeleteModal('Card');
                       onDelete();
                     }}
-                    disabled={!researchPurposeReviewRequired(accessLevel, workspace)}>
+                    disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
             Delete
           </MenuItem>
         </TooltipTrigger>

@@ -63,7 +63,7 @@ const styles = reactStyles({
 function updateWorkspace(workspace) {
   workspace.researchPurpose.researchPurposeReviewed = true;
   workspacesApi().updateWorkspace(workspace.namespace, workspace.id, {workspace: workspace})
-    .then(workspace => window.location.reload(false));
+    .then(workspaceUpdate => navigate(['workspaces',  workspaceUpdate.namespace, workspaceUpdate.id, 'data']));
 
 }
 
