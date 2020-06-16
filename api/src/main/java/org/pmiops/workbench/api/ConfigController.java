@@ -24,7 +24,7 @@ public class ConfigController implements ConfigApiDelegate {
         new ConfigResponse()
             .gsuiteDomain(config.googleDirectoryService.gSuiteDomain)
             .projectId(config.server.projectId)
-            .firecloudUrl(config.firecloud.baseUrl)
+            .firecloudURL(config.firecloud.baseUrl)
             .publicApiKeyForErrorReports(config.server.publicApiKeyForErrorReports)
             .shibbolethUiBaseUrl(config.firecloud.shibbolethUiBaseUrl)
             .defaultFreeCreditsDollarLimit(config.billing.defaultFreeCreditsDollarLimit)
