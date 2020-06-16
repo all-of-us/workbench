@@ -8,7 +8,7 @@ import {
   FormValidationErrorMessage,
   RadioButton,
   styles as inputStyles, TextAreaWithLengthValidationMessage,
-  TextInput
+  TextInput, TextInputWithLabel
 } from 'app/components/inputs';
 
 import {TooltipTrigger} from 'app/components/popups';
@@ -35,7 +35,6 @@ import {AccountCreationOptions} from 'app/pages/login/account-creation/account-c
 import {
   commonStyles,
   Section,
-  TextInputWithLabel,
   WhyWillSomeInformationBePublic,
 } from 'app/pages/login/account-creation/common';
 import {isBlank, reactStyles} from 'app/utils';

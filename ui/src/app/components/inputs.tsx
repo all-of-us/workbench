@@ -11,6 +11,7 @@ import {PopupTrigger} from 'app/components/popups';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {withStyle} from 'app/utils/index';
 import {FlexRow} from './flex';
+import {commonStyles} from "../pages/login/account-creation/common";
 
 export const inputBorderColor = colorWithWhiteness(colors.dark, 0.6);
 
@@ -458,4 +459,35 @@ export class Toggle extends React.Component<ToggleProps>  {
       <span style={{marginLeft: '.5rem'}}>{name}</span>
     </label>;
   }
+}
+
+/**
+ * Creates a text input component with a label shown above it.
+ * @param props
+ * @constructor
+ */
+export function TextInputWithLabel(props) {
+  return <div style={{...props.containerStyle}}>
+    {props.labelContent}
+    {props.labelText && <label style={{
+      fontSize: 14,
+      color: colors.primary,
+      lineHeight: '22px',
+      fontWeight: 600,
+      ...props.labelStyle
+    }}>{props.labelText}</label>}
+    <div style={{marginTop: '0.1rem'}}>
+      <TextInput data-test-id={props.inputId}
+                 id={props.inputId}
+                 name={props.inputName}
+                 placeholder={props.placeholder}
+                 value={props.value}
+                 disabled={props.disabled}
+                 onChange={props.onChange}
+                 onBlur={props.onBlur}
+                 invalid={props.invalid ? props.invalid.toString() : undefined}
+                 style={{...commonStyles.sectionInput, ...props.inputStyle}}/>
+      {props.children}
+    </div>
+  </div>;
 }

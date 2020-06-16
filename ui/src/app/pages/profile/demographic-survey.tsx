@@ -1,7 +1,7 @@
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {FormSection} from 'app/components/forms';
-import {CheckBox, RadioButton} from 'app/components/inputs';
+import {CheckBox, RadioButton, TextInputWithLabel} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {TextColumn} from 'app/components/text-column';
@@ -9,8 +9,7 @@ import {AouTitle} from 'app/components/text-wrappers';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
 import {
   OptionalDropDownSection,
-  OptionalSection,
-  TextInputWithLabel
+  OptionalSection
 } from 'app/pages/login/account-creation/common';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, toggleIncludes} from 'app/utils';

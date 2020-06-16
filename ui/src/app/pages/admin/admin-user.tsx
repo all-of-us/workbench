@@ -8,7 +8,7 @@ import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {SmallHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
-import {TextInput, Toggle} from 'app/components/inputs';
+import {TextInput, TextInputWithLabel, Toggle} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {institutionApi, profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -21,15 +21,25 @@ import {
 
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
-import {getRoleOptions} from 'app/pages/login/account-creation/common';
 import {navigate, serverConfigStore} from 'app/utils/navigation';
 import {InstitutionalRole, Profile, PublicInstitutionDetails} from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
 import * as validate from 'validate.js';
+import {getRoleOptions} from "../../utils/institutions";
 
 const styles = reactStyles({
   semiBold: {
     fontWeight: 600
+  },
+  backgroundColorDark: {
+    backgroundColor: colorWithWhiteness(colors.primary, .95)
+  },
+  textInput: {
+    width: '17.5rem',
+    opacity: '100%',
+  },
+  textInputContainer: {
+    marginTop: '1rem'
   }
 });
 
@@ -46,23 +56,6 @@ const freeCreditLimitOptions = [
   {label: '$750', value: 750},
   {label: '$800', value: 800}
 ];
-
-const TextInputWithLabel = ({label, content, dataTestId, onChange = (value) => {}, disabled= false, inputStyle = {}}) => {
-  return <FlexColumn data-test-id={dataTestId} style={{marginTop: '1rem'}}>
-    <label style={styles.semiBold}>{label}</label>
-    <TextInput
-        value={content || ''} // react yells at me if this is null
-        disabled={disabled}
-        onChange={(value) => onChange(value)}
-        style={{
-          backgroundColor: disabled ? colorWithWhiteness(colors.primary, .95) : colors.white,
-          opacity: '100%',
-          width: '17.5rem',
-          ...inputStyle
-        }}
-    />
-  </FlexColumn>;
-};
 
 const DropdownWithLabel = ({label, options, initialValue, onChange, disabled= false, dataTestId, dropdownStyle = {}}) => {
   return <FlexColumn data-test-id={dataTestId} style={{marginTop: '1rem'}}>
@@ -351,45 +344,56 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
         <FlexRow>
           <FlexColumn style={{width: '33%', marginRight: '1rem'}}>
             <TextInputWithLabel
-                label={'User name'}
-                content={updatedProfile.givenName + ' ' + updatedProfile.familyName}
-                dataTestId={'userFullName'}
+                labelText={'User name'}
+                placeholder={updatedProfile.givenName + ' ' + updatedProfile.familyName}
+                inputId={'userFullName'}
                 disabled={true}
+                inputStyle={{...styles.textInput, ...styles.backgroundColorDark}}
+                containerStyle={styles.textInputContainer}
             />
             <TextInputWithLabel
-                label={'Registration state'}
-                content={fp.capitalize(updatedProfile.dataAccessLevel.toString())}
-                dataTestId={'registrationState'}
+                labelText={'Registration state'}
+                placeholder={fp.capitalize(updatedProfile.dataAccessLevel.toString())}
+                inputId={'registrationState'}
                 disabled={true}
+                inputStyle={{...styles.textInput, ...styles.backgroundColorDark}}
+                containerStyle={styles.textInputContainer}
             />
             <TextInputWithLabel
-                label={'Registration date'}
-                content={
+                labelText={'Registration date'}
+                placeholder={
                   updatedProfile.firstRegistrationCompletionTime
                       ? displayDateWithoutHours(updatedProfile.firstRegistrationCompletionTime)
                       : ''
                 }
-                dataTestId={'firstRegistrationCompletionTime'}
+                inputId={'firstRegistrationCompletionTime'}
                 disabled={true}
+                inputStyle={{...styles.textInput, ...styles.backgroundColorDark}}
+                containerStyle={styles.textInputContainer}
             />
             <TextInputWithLabel
-                label={'Username'}
-                content={updatedProfile.username}
-                dataTestId={'username'}
+                labelText={'Username'}
+                placeholder={updatedProfile.username}
+                inputId={'username'}
                 disabled={true}
+                inputStyle={{...styles.textInput, ...styles.backgroundColorDark}}
+                containerStyle={styles.textInputContainer}
             />
             <TextInputWithLabel
-                label={'Contact email'}
-                content={updatedProfile.contactEmail}
-                dataTestId={'contactEmail'}
+                labelText={'Contact email'}
+                placeholder={updatedProfile.contactEmail}
+                inputId={'contactEmail'}
                 disabled={true}
+                inputStyle={{...styles.textInput, ...styles.backgroundColorDark}}
+                containerStyle={styles.textInputContainer}
             />
             <TextInputWithLabel
-                label={'Free credits used'}
-                content={updatedProfile.freeTierUsage}
-                inputStyle={{width: '6.5rem'}}
-                dataTestId={'freeTierUsage'}
+                labelText={'Free credits used'}
+                placeholder={updatedProfile.freeTierUsage}
+                inputId={'freeTierUsage'}
                 disabled={true}
+                inputStyle={{width: '6.5rem', ...styles.backgroundColorDark}}
+                containerStyle={styles.textInputContainer}
             />
           </FlexColumn>
           <FlexColumn style={{width: '33%'}}>
@@ -430,10 +434,12 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
               && updatedProfile.verifiedInstitutionalAffiliation
               && updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum === InstitutionalRole.OTHER
               && <TextInputWithLabel
-                label={'Institutional role description'}
-                content={updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleOtherText}
+                labelText={'Institutional role description'}
+                placeholder={updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleOtherText}
                 onChange={(value) => this.setState(fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], value))}
                 dataTestId={'institutionalRoleOtherText'}
+                inputStyle={styles.textInput}
+                containerStyle={styles.textInputContainer}
               />
             }
             <div style={{marginTop: '1rem', width: '15rem'}}>

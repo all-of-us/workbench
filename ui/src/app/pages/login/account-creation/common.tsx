@@ -3,13 +3,10 @@ import * as React from 'react';
 import {Divider} from 'app/components/divider';
 import {flexStyle} from 'app/components/flex';
 import {FormSection} from 'app/components/forms';
-import {TextInput} from 'app/components/inputs';
 import {AouTitle} from 'app/components/text-wrappers';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {isBlank, reactStyles} from 'app/utils';
-import {InstitutionalRole, PublicInstitutionDetails} from 'generated/fetch';
+import {reactStyles} from 'app/utils';
 import {Dropdown} from 'primereact/dropdown';
-import {AccountCreationOptions} from './account-creation-options';
 
 // Contains style definitions shared across multiple account-creation form steps.
 export const commonStyles = reactStyles({
@@ -80,31 +77,6 @@ export const WhyWillSomeInformationBePublic: React.FunctionComponent = () => {
 };
 
 /**
- * Creates a text input component with a label shown above it.
- * @param props
- * @constructor
- */
-export function TextInputWithLabel(props) {
-  return <div style={{...props.containerStyle}}>
-    {props.labelContent}
-    {props.labelText && <label style={{...commonStyles.text, fontWeight: 600, ...props.labelStyle}}>{props.labelText}</label>}
-    <div style={{marginTop: '0.1rem'}}>
-      <TextInput data-test-id={props.inputId}
-                 id={props.inputId}
-                 name={props.inputName}
-                 placeholder={props.placeholder}
-                 value={props.value}
-                 disabled={props.disabled}
-                 onChange={props.onChange}
-                 onBlur={props.onBlur}
-                 invalid={props.invalid ? props.invalid.toString() : undefined}
-                 style={{...commonStyles.sectionInput, ...props.inputStyle}}/>
-      {props.children}
-    </div>
-  </div>;
-}
-
-/**
  * Creates a FormSection with custom base styling for account-creation pages.
  * @param props
  * @constructor
@@ -158,23 +130,5 @@ export const OptionalDropDownSection = (props) => {
   return <DropDownSection subHeader='(Optional)' subHeaderStyle={{fontStyle: 'italic'}} {...props}>
     {props.children}
   </DropDownSection>;
-};
-
-export const getRoleOptions = (institutions: Array<PublicInstitutionDetails>, institutionShortName: string):
-    Array<{label: string, value: InstitutionalRole}> => {
-  if (isBlank(institutionShortName)) {
-    return [];
-  }
-
-  const selectedOrgType = institutions.find(
-      inst => inst.shortName === institutionShortName).organizationTypeEnum;
-  const availableRoles: Array<InstitutionalRole> =
-      AccountCreationOptions.institutionalRolesByOrganizationType
-      .find(obj => obj.type === selectedOrgType)
-          .roles;
-
-  return AccountCreationOptions.institutionalRoleOptions.filter(option =>
-      availableRoles.includes(option.value)
-  );
 };
 

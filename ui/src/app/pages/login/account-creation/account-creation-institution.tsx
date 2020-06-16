@@ -6,15 +6,13 @@ import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {FormSection} from 'app/components/forms';
 import {ValidationIcon} from 'app/components/icons';
-import {Error as ErrorDiv, styles as inputStyles} from 'app/components/inputs';
+import {Error as ErrorDiv, styles as inputStyles, TextInputWithLabel} from 'app/components/inputs';
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {PubliclyDisplayed} from 'app/icons/publicly-displayed-icon';
 import {
   commonStyles,
-  getRoleOptions,
-  TextInputWithLabel,
   WhyWillSomeInformationBePublic
 } from 'app/pages/login/account-creation/common';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
@@ -30,6 +28,7 @@ import {
   PublicInstitutionDetails,
 } from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
+import {getRoleOptions} from "../../../utils/institutions";
 
 const styles = reactStyles({
   ...commonStyles,
