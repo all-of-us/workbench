@@ -188,27 +188,27 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     return fp.isEqual(oldProfile, updatedProfile) || errors;
   }
 
-  async setVerifiedInstitutionOnProfile(institutionShortName: string) {
+  setVerifiedInstitutionOnProfile(institutionShortName: string) {
     const {verifiedInstitutionsByShortname} = this.state;
-    await this.setState(
+    this.setState(
       fp.set(
           ['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionShortName'],
         institutionShortName
       )
     );
-    await this.setState(
+    this.setState(
       fp.set(
           ['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionDisplayName'],
         verifiedInstitutionsByShortname.get(institutionShortName).displayName
         )
     );
-    await this.setState(fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleEnum'], undefined));
-    await this.setState(fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], undefined));
+    this.setState(fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleEnum'], undefined));
+    this.setState(fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], undefined));
   }
 
-  async setInstitutionalRoleOnProfile(institutionalRoleEnum: InstitutionalRole) {
-    await this.setState(fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleEnum'], institutionalRoleEnum));
-    await this.setState(fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], undefined));
+  setInstitutionalRoleOnProfile(institutionalRoleEnum: InstitutionalRole) {
+    this.setState(fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleEnum'], institutionalRoleEnum));
+    this.setState(fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], undefined));
   }
 
   updateVerifiedInstitutionalAffiliation() {
@@ -405,7 +405,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
             {verifiedInstitutionOptions && <DropdownWithLabel
                 label={'Verified institution'}
                 options={this.getInstitutionDropdownOptions()}
-                onChange={async (event) => this.setVerifiedInstitutionOnProfile(event.value)}
+                onChange={(event) => this.setVerifiedInstitutionOnProfile(event.value)}
                 initialValue={
                   updatedProfile.verifiedInstitutionalAffiliation
                       ? updatedProfile.verifiedInstitutionalAffiliation.institutionShortName
@@ -416,7 +416,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
             {verifiedInstitutionOptions && updatedProfile.verifiedInstitutionalAffiliation && <DropdownWithLabel
                 label={'Institutional role'}
                 options={this.getRoleOptionsForProfile() || []}
-                onChange={async (event) => this.setInstitutionalRoleOnProfile(event.value)}
+                onChange={(event) => this.setInstitutionalRoleOnProfile(event.value)}
                 initialValue={updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum
                     ? updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum
                     : undefined
