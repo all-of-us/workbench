@@ -5,10 +5,11 @@ import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.shibboleth.api.ShibbolethApi;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.web.context.annotation.RequestScope;
 
-@org.springframework.context.annotation.Configuration
+@Configuration
 public class ShibbolethConfig {
   public static final String X_APP_ID_HEADER = "X-App-ID";
 

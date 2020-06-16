@@ -3,7 +3,9 @@ package org.pmiops.workbench.shibboleth;
 import javax.inject.Provider;
 import org.pmiops.workbench.shibboleth.api.ShibbolethApi;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class ShibbolethServiceImpl implements ShibbolethService {
 
   private final Provider<ShibbolethApi> shibbolethApiProvider;
