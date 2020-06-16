@@ -441,7 +441,7 @@ jobs:
       - manage_api_cache:
           save: true
 
-  ui-build-test:
+  ui-unit-test:
     <<: *defaults
     steps:
       - checkout_init_git
@@ -485,7 +485,7 @@ jobs:
     <<: *defaults
     steps:
       - checkout_init_git
-      # Use "ui-build-test" job's workspace here to avoid redoing the setup.
+      # Use "ui-unit-test" job's workspace here to avoid redoing the setup.
       - attach_workspace:
           at: .
       - install_ui_dependencies
@@ -594,7 +594,7 @@ workflows:
       # Note: by default tags are not picked up.
       - api-local-test
       - api-unit-test
-      - ui-build-test
+      - ui-unit-test
       - api-bigquery-test
       - api-integration-test
       # Disable e2e tests https://precisionmedicineinitiative.atlassian.net/browse/RW-5080 is resolved.
@@ -607,7 +607,7 @@ workflows:
       - ui-deploy-to-test:
           filters: *filter_only_master_branch
           requires:
-            - ui-build-test
+            - ui-unit-test
       # On master merges, run Puppeteer e2e tests after ui and api deployed to "test" env successfully.
       # - puppeteer-e2e-test:
           # filters: *filter_only_master_branch
@@ -621,7 +621,7 @@ workflows:
           filters: *filter_only_release_tags
       - api-unit-test:
           filters: *filter_only_release_tags
-      - ui-build-test:
+      - ui-unit-test:
           filters: *filter_only_release_tags
       # Run slower integration tests and dep checks on release tags only.
       - api-bigquery-test:
@@ -638,7 +638,7 @@ workflows:
             - api-bigquery-test
             - api-deps-check
             - api-integration-test
-            - ui-build-test
+            - ui-unit-test
       - deploy-perf:
           filters: *filter_only_release_tags
           requires:
@@ -647,7 +647,7 @@ workflows:
             - api-bigquery-test
             - api-deps-check
             - api-integration-test
-            - ui-build-test
+            - ui-unit-test
 
   nightly-tests:
     triggers:
