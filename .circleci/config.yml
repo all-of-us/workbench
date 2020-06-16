@@ -597,8 +597,7 @@ workflows:
       - ui-unit-test
       - api-bigquery-test
       - api-integration-test
-      # Disable e2e tests https://precisionmedicineinitiative.atlassian.net/browse/RW-5080 is resolved.
-      # - puppeteer-e2e-local-ui
+      - puppeteer-e2e-local-ui
       # Run deployment to "test" on master merges.
       - api-deploy-to-test:
           filters: *filter_only_master_branch
@@ -609,11 +608,11 @@ workflows:
           requires:
             - ui-unit-test
       # On master merges, run Puppeteer e2e tests after ui and api deployed to "test" env successfully.
-      # - puppeteer-e2e-test:
-          # filters: *filter_only_master_branch
-          # requires:
-            # - api-deploy-to-test
-            # - ui-deploy-to-test
+      - puppeteer-e2e-test:
+          filters: *filter_only_master_branch
+          requires:
+            - api-deploy-to-test
+            - ui-deploy-to-test
 
   deploy-staging:
     jobs:
