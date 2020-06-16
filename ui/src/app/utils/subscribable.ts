@@ -1,10 +1,14 @@
 import * as fp from 'lodash/fp';
 
+export const delay = ms => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+};
+
 /**
  * @name Subscribable
  * @description A container allowing components and functions to subscribe to changes in the container's contents
  * @function subscribe Add a subscription by passing a function
- * @function subscribe Send the new value to all subscribers
+ * @function next Send the new value to all subscribers
  **/
 export interface Subscribable<T> {
   subscribe: (fn: (newValue?: T, oldValue?: T) => void) => { unsubscribe: () => void};
