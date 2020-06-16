@@ -182,7 +182,7 @@ const NEW_ACL_DELAY_POLL_INTERVAL_MS = 10 * 1000;
 export enum WorkspaceEditMode { Create = 1, Edit = 2, Duplicate = 3 }
 
 function getDiseaseNames(keyword) {
-  const baseurl = serverConfigStore.getValue().firecloudUrl;
+  const baseurl = serverConfigStore.getValue().firecloudURL;
   const url = baseurl + '/duos/autocomplete/' + keyword;
   return fetch(encodeURI(url)).then((response) => {
     return response.json();
