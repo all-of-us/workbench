@@ -1,4 +1,3 @@
-import {Component, Input} from '@angular/core';
 import * as React from 'react';
 import {Key} from 'ts-key-enum';
 
@@ -10,7 +9,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CriteriaType, DomainType} from 'generated/fetch';
@@ -142,10 +141,10 @@ const styles = reactStyles({
 
 interface Props {
   hierarchy: Function;
+  searchContext: any;
   select: Function;
   selectedIds: Array<string>;
   setAttributes: Function;
-  wizard: any;
   workspace: WorkspaceData;
 }
 
@@ -179,7 +178,7 @@ export const ListSearch = withCurrentWorkspace()(
     handleInput = (event: any) => {
       const {key, target: {value}} = event;
       if (key === Key.Enter && value !== '') {
-        const {wizard: {domain}} = this.props;
+        const {searchContext: {domain}} = this.props;
         triggerEvent(`Cohort Builder Search - ${domainToTitle(domain)}`, 'Search', value);
         this.getResults(value);
       }
@@ -189,7 +188,7 @@ export const ListSearch = withCurrentWorkspace()(
       let sourceMatch;
       try {
         this.setState({data: null, error: false, loading: true, standardOnly: false});
-        const {wizard: {domain}, workspace: {cdrVersionId}} = this.props;
+        const {searchContext: {domain}, workspace: {cdrVersionId}} = this.props;
         const resp = await cohortBuilderApi().findCriteriaByDomainAndSearchTerm(+cdrVersionId, domain, value.trim());
         const data = resp.items;
         if (data.length && this.checkSource) {
@@ -213,7 +212,7 @@ export const ListSearch = withCurrentWorkspace()(
     }
 
     get checkSource() {
-      return [DomainType.CONDITION, DomainType.PROCEDURE].includes(this.props.wizard.domain);
+      return [DomainType.CONDITION, DomainType.PROCEDURE].includes(this.props.searchContext.domain);
     }
 
     selectItem = (row: any) => {
@@ -265,7 +264,7 @@ export const ListSearch = withCurrentWorkspace()(
     }
 
     trackEvent = (label: string) => {
-      const {wizard: {domain}} = this.props;
+      const {searchContext: {domain}} = this.props;
       triggerEvent('Cohort Builder Search', 'Click', `${label} - ${domainToTitle(domain)} - Cohort Builder Search`);
     }
 
@@ -319,7 +318,7 @@ export const ListSearch = withCurrentWorkspace()(
     }
 
     render() {
-      const {wizard: {domain}} = this.props;
+      const {searchContext: {domain}} = this.props;
       const {data, error, ingredients, loading, standardOnly, sourceMatch, standardData} = this.state;
       const listStyle = domain === DomainType.DRUG ? {...styles.listContainer, marginTop: '4.25rem'} : styles.listContainer;
       const showStandardOption = !standardOnly && !!standardData && standardData.length > 0;
@@ -401,18 +400,3 @@ export const ListSearch = withCurrentWorkspace()(
     }
   }
 );
-
-@Component ({
-  selector: 'crit-list-search',
-  template: '<div #root></div>'
-})
-export class ListSearchComponent extends ReactWrapperBase {
-  @Input('hierarchy') hierarchy: Props['hierarchy'];
-  @Input('select') select: Props['select'];
-  @Input('selectedIds') selectedIds: Props['selectedIds'];
-  @Input('setAttributes') setAttributes: Props['setAttributes'];
-  @Input('wizard') wizard: Props['wizard'];
-  constructor() {
-    super(ListSearch, ['hierarchy', 'select', 'selectedIds', 'setAttributes', 'wizard']);
-  }
-}

@@ -4,7 +4,7 @@ import {TieredMenu} from 'primereact/tieredmenu';
 import * as React from 'react';
 
 import {SearchGroupItem} from 'app/cohort-search/search-group-item/search-group-item.component';
-import {criteriaMenuOptionsStore, searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {criteriaMenuOptionsStore, searchRequestStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, generateId, mapGroup, typeToTitle} from 'app/cohort-search/utils';
 import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
@@ -195,6 +195,7 @@ function initItem(id: string, type: string, tempGroup: number) {
 interface Props {
   group: any;
   index: number;
+  setSearchContext: (context: any) => void;
   role: keyof SearchRequest;
   updated: number;
   updateRequest: Function;
@@ -376,9 +377,9 @@ export const SearchGroup = withCurrentWorkspace()(
       }
     }
 
-    launchWizard(criteria: any, temporalGroup: number) {
+    launchSearch(criteria: any, temporalGroup: number) {
       this.criteriaMenu.hide();
-      const {group, role} = this.props;
+      const {group, setSearchContext, role} = this.props;
       const {domain, type, standard} = criteria;
       if (temporalGroup === 1) {
         triggerEvent('Temporal', 'Click', `${domainToTitle(domain)} - Temporal - Cohort Builder`);
@@ -392,7 +393,7 @@ export const SearchGroup = withCurrentWorkspace()(
       const item = initItem(itemId, domain, temporalGroup);
       const groupId = group.id;
       const context = {item, domain, type, standard, role, groupId, itemId, temporalGroup};
-      wizardStore.next(context);
+      setSearchContext(context);
     }
 
     setGroupProperty(property: string, value: any) {
@@ -458,7 +459,7 @@ export const SearchGroup = withCurrentWorkspace()(
       if (!!domain.children) {
         return {label: domain.name, items: domain.children.map((dt) => this.mapCriteriaMenuItem(dt, temporalGroup))};
       }
-      return {label: domain.name, command: () => this.launchWizard(domain, temporalGroup)};
+      return {label: domain.name, command: () => this.launchSearch(domain, temporalGroup)};
     }
 
     get criteriaMenuItems() {
@@ -516,7 +517,7 @@ export const SearchGroup = withCurrentWorkspace()(
     }
 
     render() {
-      const {group: {id, items, mention, name, status, temporal, time, timeValue}, index, role} = this.props;
+      const {group: {id, items, mention, name, status, temporal, time, timeValue}, index, setSearchContext, role} = this.props;
       const {count, error, inputError, inputTouched, loading, overlayStyle, renaming} = this.state;
       const groupName = !!name ? name : `Group ${index + 1}`;
       const showGroupCount = !loading && !error && this.hasActiveItems && (!temporal || !this.temporalError) && count !== undefined;
@@ -553,6 +554,7 @@ export const SearchGroup = withCurrentWorkspace()(
               groupId={id}
               item={item}
               index={i}
+              setSearchContext={setSearchContext}
               updateGroup={() => this.update()}/>
             {status === 'active' && <div style={styles.itemOr}>OR</div>}
           </div>)}
@@ -594,6 +596,7 @@ export const SearchGroup = withCurrentWorkspace()(
                 groupId={id}
                 item={item}
                 index={i}
+                setSearchContext={setSearchContext}
                 updateGroup={() => this.update()}/>
               {status === 'active' && <div style={styles.itemOr}>OR</div>}
             </div>)}

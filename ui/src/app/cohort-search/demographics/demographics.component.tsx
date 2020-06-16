@@ -1,4 +1,3 @@
-import {Component, Input} from '@angular/core';
 import Nouislider from 'nouislider-react';
 import * as React from 'react';
 
@@ -9,7 +8,7 @@ import {NumberInput} from 'app/components/inputs';
 import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase} from 'app/utils';
+import {reactStyles} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
 import {AttrName, CriteriaType, DomainType, Operator} from 'generated/fetch';
@@ -573,21 +572,5 @@ export class Demographics extends React.Component<Props, State> {
           </div>}
         </div>}
       </React.Fragment>;
-  }
-}
-
-@Component({
-  selector: 'crit-demographics',
-  template: '<div #root></div>'
-})
-export class DemographicsComponent extends ReactWrapperBase {
-  @Input('count') count: Props['count'];
-  @Input('criteriaType') criteriaType: Props['criteriaType'];
-  @Input('select') select: Props['select'];
-  @Input('selectedIds') selectedIds: Props['selectedIds'];
-  @Input('selections') selections: Props['selections'];
-
-  constructor() {
-    super(Demographics, ['count', 'criteriaType', 'select', 'selectedIds', 'selections']);
   }
 }
