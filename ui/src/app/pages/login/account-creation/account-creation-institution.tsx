@@ -20,6 +20,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {isBlank, reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {isAbortError, reportError} from 'app/utils/errors';
+import {getRoleOptions} from 'app/utils/institutions';
 import {
   CheckEmailResponse,
   DuaType,
@@ -28,7 +29,6 @@ import {
   PublicInstitutionDetails,
 } from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
-import {getRoleOptions} from "../../../utils/institutions";
 
 const styles = reactStyles({
   ...commonStyles,

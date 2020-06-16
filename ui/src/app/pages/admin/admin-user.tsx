@@ -8,7 +8,7 @@ import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {SmallHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
-import {TextInput, TextInputWithLabel, Toggle} from 'app/components/inputs';
+import {TextInputWithLabel, Toggle} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {institutionApi, profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -21,11 +21,11 @@ import {
 
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
+import {getRoleOptions} from 'app/utils/institutions';
 import {navigate, serverConfigStore} from 'app/utils/navigation';
 import {InstitutionalRole, Profile, PublicInstitutionDetails} from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
 import * as validate from 'validate.js';
-import {getRoleOptions} from "../../utils/institutions";
 
 const styles = reactStyles({
   semiBold: {

@@ -831,14 +831,18 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     config.featureFlags.requireInstitutionalVerification = true;
 
-    VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation = createVerifiedInstitutionalAffiliation();
-    profileController.updateVerifiedInstitutionalAffiliation(dbUser.getUserId(), verifiedInstitutionalAffiliation);
+    VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
+        createVerifiedInstitutionalAffiliation();
+    profileController.updateVerifiedInstitutionalAffiliation(
+        dbUser.getUserId(), verifiedInstitutionalAffiliation);
 
     verifiedInstitutionalAffiliation.setInstitutionalRoleEnum(InstitutionalRole.ADMIN);
-    profileController.updateVerifiedInstitutionalAffiliation(dbUser.getUserId(), verifiedInstitutionalAffiliation);
+    profileController.updateVerifiedInstitutionalAffiliation(
+        dbUser.getUserId(), verifiedInstitutionalAffiliation);
 
     Profile updatedProfile = profileService.getProfile(dbUser);
-    assertThat(updatedProfile.getVerifiedInstitutionalAffiliation()).isEqualTo(verifiedInstitutionalAffiliation);
+    assertThat(updatedProfile.getVerifiedInstitutionalAffiliation())
+        .isEqualTo(verifiedInstitutionalAffiliation);
   }
 
   @Test(expected = BadRequestException.class)

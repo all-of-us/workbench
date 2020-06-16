@@ -1,6 +1,6 @@
-import {InstitutionalRole, PublicInstitutionDetails} from "../../generated/fetch";
-import {isBlank} from "./index";
-import {AccountCreationOptions} from "../pages/login/account-creation/account-creation-options";
+import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
+import {InstitutionalRole, PublicInstitutionDetails} from 'generated/fetch';
+import {isBlank} from './index';
 
 export const getRoleOptions = (institutions: Array<PublicInstitutionDetails>, institutionShortName: string):
     Array<{ label: string, value: InstitutionalRole }> => {

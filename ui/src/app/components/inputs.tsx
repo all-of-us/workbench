@@ -8,10 +8,10 @@ import Switch from 'react-switch';
 import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {PopupTrigger} from 'app/components/popups';
+import {commonStyles} from 'app/pages/login/account-creation/common';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {withStyle} from 'app/utils/index';
 import {FlexRow} from './flex';
-import {commonStyles} from "../pages/login/account-creation/common";
 
 export const inputBorderColor = colorWithWhiteness(colors.dark, 0.6);
 
