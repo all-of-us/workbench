@@ -77,6 +77,7 @@ import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.profile.AddressMapper;
 import org.pmiops.workbench.profile.DemographicSurveyMapper;
 import org.pmiops.workbench.profile.ProfileService;
+import org.pmiops.workbench.shibboleth.ShibbolethService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -209,6 +210,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final Provider<MailService> mailServiceProvider;
   private final Provider<UserAuthentication> userAuthenticationProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final ShibbolethService shibbolethService;
   private final UserDao userDao;
   private final UserService userService;
   private final VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
@@ -230,6 +232,7 @@ public class ProfileController implements ProfileApiDelegate {
       Provider<MailService> mailServiceProvider,
       Provider<UserAuthentication> userAuthenticationProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
+      ShibbolethService shibbolethService,
       UserDao userDao,
       UserService userService,
       VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper) {
@@ -245,6 +248,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.mailServiceProvider = mailServiceProvider;
     this.profileAuditor = profileAuditor;
     this.profileService = profileService;
+    this.shibbolethService = shibbolethService;
     this.userAuthenticationProvider = userAuthenticationProvider;
     this.userDao = userDao;
     this.userProvider = userProvider;
@@ -833,14 +837,15 @@ public class ProfileController implements ProfileApiDelegate {
     if (token == null || token.getJwt() == null) {
       throw new BadRequestException("Token is required.");
     }
-    FirecloudJWTWrapper wrapper = new FirecloudJWTWrapper().jwt(token.getJwt());
-    try {
-      fireCloudService.postNihCallback(wrapper);
-      userService.syncEraCommonsStatus();
-      return getProfileResponse(userProvider.get());
-    } catch (WorkbenchException e) {
-      throw e;
+
+    if (workbenchConfigProvider.get().featureFlags.useNewShibbolethService) {
+      shibbolethService.updateShibbolethToken(token.getJwt());
+    } else {
+      fireCloudService.postNihCallback(new FirecloudJWTWrapper().jwt(token.getJwt()));
     }
+
+    userService.syncEraCommonsStatus();
+    return getProfileResponse(userProvider.get());
   }
 
   private void updateBypass(long userId, AccessBypassRequest request) {

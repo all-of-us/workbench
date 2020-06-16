@@ -1,8 +1,8 @@
 package org.pmiops.workbench.firecloud;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -32,9 +32,11 @@ import org.pmiops.workbench.firecloud.api.StaticNotebooksApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsBillingProjectFullRequest;
+import org.pmiops.workbench.firecloud.model.FirecloudJWTWrapper;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudSystemStatus;
+import org.pmiops.workbench.shibboleth.api.ShibbolethApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -63,6 +65,7 @@ public class FireCloudServiceImplTest {
   @MockBean private NihApi nihApi;
   @MockBean private StatusApi statusApi;
   @MockBean private StaticNotebooksApi staticNotebooksApi;
+  @MockBean private ShibbolethApi shibbolethApi;
   @MockBean private ServiceAccountCredentials fireCloudCredentials;
   @MockBean private IamCredentialsClient iamCredentialsClient;
   @MockBean private HttpTransport httpTransport;
@@ -179,25 +182,21 @@ public class FireCloudServiceImplTest {
 
   @Test
   public void testNihCallback() throws Exception {
-    when(nihApi.nihCallback(any()))
-        .thenReturn(new FirecloudNihStatus().linkedNihUsername("test").linkExpireTime(500L));
-    try {
-      service.postNihCallback(any());
-    } catch (Exception e) {
-      fail();
-    }
+    FirecloudJWTWrapper jwt = new FirecloudJWTWrapper().jwt("asdf");
+    service.postNihCallback(jwt);
+    verify(nihApi, times(1)).nihCallback(jwt);
   }
 
   @Test(expected = BadRequestException.class)
   public void testNihCallbackBadRequest() throws Exception {
     when(nihApi.nihCallback(any())).thenThrow(new ApiException(400, "Bad Request"));
-    service.postNihCallback(any());
+    service.postNihCallback(new FirecloudJWTWrapper());
   }
 
   @Test(expected = ServerErrorException.class)
   public void testNihCallbackServerError() throws Exception {
     when(nihApi.nihCallback(any())).thenThrow(new ApiException(500, "Internal Server Error"));
-    service.postNihCallback(any());
+    service.postNihCallback(new FirecloudJWTWrapper());
   }
 
   @Test

@@ -55,6 +55,14 @@ public class ExceptionUtils {
     throw codeToException(e.getCode());
   }
 
+  public static WorkbenchException convertShibbolethException(
+      org.pmiops.workbench.shibboleth.ApiException e) {
+    if (isSocketTimeoutException(e.getCause())) {
+      throw new GatewayTimeoutException();
+    }
+    throw codeToException(e.getCode());
+  }
+
   public static boolean isServiceUnavailable(int code) {
     return code == HttpServletResponse.SC_SERVICE_UNAVAILABLE
         || code == HttpServletResponse.SC_BAD_GATEWAY;

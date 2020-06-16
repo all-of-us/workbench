@@ -138,6 +138,10 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
     clearTimeout(this.timer);
   }
 
+  // This method is part of the eRA Commons linkage flow. The "return-url" sent to the Shibboleth
+  // server is set to "nih-callback", which is configured in our router to point to the homepage
+  // component. If we reach this component with a 'token' query parameter, we will attempt to
+  // store that token in Terra.
   async validateNihToken() {
     const token = (new URL(window.location.href)).searchParams.get('token');
     if (token) {

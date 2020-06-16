@@ -3719,6 +3719,9 @@ definitions:
         description: |
           Stackdriver API key for error reporting, scoped to a particular
           domain. If unset, Stackdriver error reporting should be disabled.
+      shibbolethUiBaseUrl:
+        type: string
+        description: The base URL to use for client-side Shibboleth redirects.
       enableComplianceTraining:
         type: boolean
         default: false
@@ -3773,6 +3776,10 @@ definitions:
         type: boolean
         default: false
         description: Whether to show the Event Date modifier in cohort builder
+      useNewShibbolethService:
+        type: boolean
+        default: false
+        description: Whether to use the new Terra Shibboleth service.
   FeaturedWorkspacesConfigResponse:
     type: object
     properties:

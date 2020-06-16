@@ -13,7 +13,9 @@
     "vpcServicePerimeterName": "accessPolicies/228353087260/servicePerimeters/terra_perf_aou_perf",
     "timeoutInSeconds": 60,
     "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:0.0.1",
-    "welderDockerImage": "broadinstitute/welder-server:7ae1a62"
+    "welderDockerImage": "broadinstitute/welder-server:7ae1a62",
+    "shibbolethApiBaseUrl": "",
+    "shibbolethUiBaseUrl": ""
   },
   "billing": {
     "accountId": "00293C-5DEA2D-6887E7",
@@ -104,7 +106,8 @@
     "requireInstitutionalVerification": true,
     "enableCBAgeTypeOptions": false,
     "enableV3DataUserCodeOfConduct": true,
-    "enableEventDateModifier": false
+    "enableEventDateModifier": false,
+    "useNewShibbolethService": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-perf",
