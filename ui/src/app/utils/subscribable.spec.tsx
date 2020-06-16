@@ -4,23 +4,25 @@ export const delay = ms => {
   return new Promise(resolve => setTimeout(resolve, ms));
 };
 
-const flagPromise = () => {
-  let setter;
-  const promise = new Promise((resolve) => {
-    setter = value => value && resolve();
+const promiseComplete = () => {
+  let resolveHandler;
+  const promise = new Promise<void>((resolve) => {
+    resolveHandler = value => value && resolve();
   });
-  return {promise, setter};
+  return {promise, resolveHandler};
 };
 
-const makeSubscribeFn = (assertions) => {
-  const {promise, setter} = flagPromise();
-  const subscribeFn = (...args) => new Promise((resolve) => {
-    assertions.forEach(assertion => assertion(...args));
-    setter(true);
+const makeSubscribeFn = (assertions): [() => Promise<void>, (newValue: any, oldValue: any) => Promise<{}>] => {
+  const {promise, resolveHandler} = promiseComplete();
+  const promiseHandler = (): Promise<void> => promise;
+
+  const subscribeFn = (newValue, oldValue) => new Promise((resolve) => {
+    assertions.forEach(assertion => assertion(newValue, oldValue));
+    resolveHandler(true);
     resolve();
   });
 
-  return [() => promise, subscribeFn];
+  return [promiseHandler, subscribeFn];
 };
 
 describe('atom', () => {
@@ -50,7 +52,7 @@ describe('atom', () => {
     await complete();
   });
 
-  it('should call a multiple subscribed functions', async() => {
+  it('should call a multiple subscribed functions with new and old values', async() => {
     const testAtom = atom({value: 1});
     const assertions = [
       newValue => expect(newValue).toEqual({value: 10}),
@@ -72,34 +74,53 @@ describe('atom', () => {
     await complete3();
   });
 
-  // it('should not call an unsubscribed function', async() => {
-  //   const testAtom = atom({value: 1});
-  //   const assertions = [
-  //     newValue => expect(newValue).toEqual({value: 10}),
-  //     ({}, oldValue) => expect(oldValue).toEqual({value: 20})
-  //   ];
+  it('should not call an unsubscribed function', async() => {
+    const testAtom = atom({value: 1});
+    let value = 1;
+    const subscriber = [() => value += 1];
 
-  //   const [complete1, subscribeFn1] = makeSubscribeFn(assertions);
-  //   const [complete2, subscribeFn2] = makeSubscribeFn(assertions);
-  //   const [complete3, subscribeFn3] = makeSubscribeFn(assertions);
+    const [complete1, subscribeFn1] = makeSubscribeFn(subscriber);
+    const [, subscribeFn2] = makeSubscribeFn(subscriber);
+    const [complete3, subscribeFn3] = makeSubscribeFn(subscriber);
 
-  //   testAtom.set({value: 20});
-  //   testAtom.subscribe(subscribeFn1);
-  //   const {unsubscribe} = testAtom.subscribe(subscribeFn2);
-  //   testAtom.subscribe(subscribeFn3);
-  //   testAtom.set({value: 10});
+    testAtom.set({value: 20});
+    testAtom.subscribe(subscribeFn1);
 
-  //   unsubscribe();
+    const sub2 = testAtom.subscribe(subscribeFn2);
+    sub2.unsubscribe();
 
-  //   await complete1();
-  //   await complete2();
-  //   await complete3();
-  // });
+    testAtom.subscribe(subscribeFn3);
+    testAtom.set({value: 10});
 
-  // it('should not call any functions when all have unsubscribed', async() => {
-  //   const failedFunctionSpy = spyOn(functionStub, 'failedFunction').and.callThrough();
-  //   await apiCallWithGatewayTimeoutRetries(() => functionStub.failedFunction(), 3, 1).catch(() => {});
-  //   expect(failedFunctionSpy).toHaveBeenCalledTimes(4);
-  // });
+    await complete1();
+    await complete3();
+    await delay(50);
 
+    expect(value).toBe(3);
+  });
+
+  it('should not call any functions when all have unsubscribed', async() => {
+    const testAtom = atom({value: 1});
+    let value = 1;
+    const subscriber = [() => value += 1];
+
+    const [, subscribeFn1] = makeSubscribeFn(subscriber);
+    const [, subscribeFn2] = makeSubscribeFn(subscriber);
+    const [, subscribeFn3] = makeSubscribeFn(subscriber);
+
+    testAtom.set({value: 20});
+
+    const sub1 = testAtom.subscribe(subscribeFn1);
+    const sub2 = testAtom.subscribe(subscribeFn2);
+    const sub3 = testAtom.subscribe(subscribeFn3);
+
+    sub1.unsubscribe();
+    sub2.unsubscribe();
+    sub3.unsubscribe();
+
+    testAtom.set({value: 10});
+
+    await delay(50);
+    expect(value).toBe(1);
+  });
 });
