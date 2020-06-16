@@ -23,6 +23,9 @@ import {navigate, serverConfigStore} from 'app/utils/navigation';
 import {InstitutionalRole, Profile, PublicInstitutionDetails} from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
 import {getRoleOptions} from "../login/account-creation/common";
+import {TooltipTrigger} from "../../components/popups";
+import * as validate from 'validate.js';
+import {BulletAlignedUnorderedList} from "../../components/lists";
 
 const styles = reactStyles({
   semiBold: {
@@ -180,16 +183,9 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     );
   }
 
-  isSaveDisabled() {
+  isSaveDisabled(errors) {
     const {oldProfile, updatedProfile} = this.state;
-    const {verifiedInstitutionalAffiliation} = updatedProfile;
-    return fp.isEqual(oldProfile, updatedProfile)
-        || !verifiedInstitutionalAffiliation
-        || !verifiedInstitutionalAffiliation.institutionShortName
-        || (
-            verifiedInstitutionalAffiliation.institutionalRoleEnum === InstitutionalRole.OTHER
-            && !verifiedInstitutionalAffiliation.institutionalRoleOtherText
-        )
+    return fp.isEqual(oldProfile, updatedProfile) || errors
   }
 
   setVerifiedInstitutionOnProfile(institutionShortName: string) {
@@ -213,6 +209,42 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     });
   }
 
+  validateVerifiedInstitutionalAffiliation() {
+    const {updatedProfile} = this.state;
+    if (updatedProfile) {
+      if (updatedProfile.verifiedInstitutionalAffiliation) {
+        return updatedProfile.verifiedInstitutionalAffiliation;
+      }
+      return false;
+    }
+    return false;
+  }
+
+  validateInstitutionShortname() {
+    const {updatedProfile} = this.state;
+    if (updatedProfile && updatedProfile.verifiedInstitutionalAffiliation) {
+        return updatedProfile.verifiedInstitutionalAffiliation.institutionShortName;
+      }
+    return false;
+  }
+
+  validateInstitutionalRoleEnum() {
+    const {updatedProfile} = this.state;
+    if (updatedProfile && updatedProfile.verifiedInstitutionalAffiliation) {
+        return updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum;
+      }
+    return false;
+  }
+
+  validateInstitutionalRoleOtherText() {
+    const {updatedProfile} = this.state;
+    if (updatedProfile && updatedProfile.verifiedInstitutionalAffiliation) {
+        return updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum !== InstitutionalRole.OTHER
+            || !!updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleOtherText;
+      }
+    return false;
+  }
+
   render() {
     const {
       institutionsLoadingError,
@@ -220,6 +252,17 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
       updatedProfile,
       verifiedInstitutionOptions
     } = this.state;
+    const errors = validate({
+      'verifiedInstitutionalAffiliation': this.validateVerifiedInstitutionalAffiliation(),
+      'institutionShortName': this.validateInstitutionShortname(),
+      'institutionalRoleEnum': this.validateInstitutionalRoleEnum(),
+      'institutionalRoleOtherText': this.validateInstitutionalRoleOtherText()
+    }, {
+      verifiedInstitutionalAffiliation: {truthiness: true},
+      institutionShortName: {truthiness: true},
+      institutionalRoleEnum: {truthiness: true},
+      institutionalRoleOtherText: {truthiness: true}
+    });
     return <FadeBox
         style={{
           margin: 'auto',
@@ -274,13 +317,26 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
                 width={33}
             />
           </FlexRow>
-          <Button
-              type='primary'
-              disabled={this.isSaveDisabled()}
-              onClick={() => this.updateVerifiedInstitutionalAffiliation()}
+          <TooltipTrigger
+              data-test-id='user-admin-errors-tooltip'
+              content={
+                errors && this.isSaveDisabled(errors) &&
+                <BulletAlignedUnorderedList>
+                  {errors.verifiedInstitutionalAffiliation && <li>Verified institutional affiliation can't be unset or left blank</li>}
+                  {errors.institutionShortName && <li>You must choose an institution</li>}
+                  {errors.institutionalRoleEnum && <li>You must select the user's role at the institution</li>}
+                  {errors.institutionalRoleOtherText && <li>You must describe the user's role if you select Other</li>}
+                </BulletAlignedUnorderedList>
+              }
           >
-            Save
-          </Button>
+            <Button
+                type='primary'
+                disabled={this.isSaveDisabled(errors)}
+                onClick={() => this.updateVerifiedInstitutionalAffiliation()}
+            >
+              Save
+            </Button>
+          </TooltipTrigger>
         </FlexRow>
         <FlexRow>
           <FlexColumn style={{width: '33%', marginRight: '1rem'}}>
