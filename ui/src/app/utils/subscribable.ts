@@ -43,7 +43,16 @@ export function subscribable<T>(): Subscribable<T> {
       };
     },
     next: (newValue?: T, oldValue?: T) => {
-      fp.forEach((fn: subscriber) => setTimeout(() => fn(newValue, oldValue), 0), subscribers);
+      fp.forEach((fn: subscriber) => setTimeout(
+        () => {
+          try {
+            fn(newValue, oldValue);
+          } catch (e) {
+            // Ignore the error - ideally the supplied fn should
+            // supply its error handling
+          }
+        }
+        , 0), subscribers);
     }
   };
 }

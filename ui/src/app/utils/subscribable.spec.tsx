@@ -76,8 +76,8 @@ describe('atom', () => {
 
   it('should not call an unsubscribed function', async() => {
     const testAtom = atom({value: 1});
-    let value = 1;
-    const subscriber = [() => value += 1];
+    let numberOfCalledSubscriptions = 0;
+    const subscriber = [() => numberOfCalledSubscriptions += 1];
 
     const [complete1, subscribeFn1] = makeSubscribeFn(subscriber);
     const [, subscribeFn2] = makeSubscribeFn(subscriber);
@@ -96,13 +96,13 @@ describe('atom', () => {
     await complete3();
     await delay(50);
 
-    expect(value).toBe(3);
+    expect(numberOfCalledSubscriptions).toBe(2);
   });
 
   it('should not call any functions when all have unsubscribed', async() => {
     const testAtom = atom({value: 1});
-    let value = 1;
-    const subscriber = [() => value += 1];
+    let numberOfCalledSubscriptions = 0;
+    const subscriber = [() => numberOfCalledSubscriptions += 1];
 
     const [, subscribeFn1] = makeSubscribeFn(subscriber);
     const [, subscribeFn2] = makeSubscribeFn(subscriber);
@@ -121,6 +121,23 @@ describe('atom', () => {
     testAtom.set({value: 10});
 
     await delay(50);
-    expect(value).toBe(1);
+    expect(numberOfCalledSubscriptions).toBe(0);
+  });
+
+  it('should call remaining subscribers when one throws', async() => {
+    const testAtom = atom({value: 1});
+    let numberOfCalledSubscriptions = 0;
+    const subscriber = [() => numberOfCalledSubscriptions += 1];
+
+    const [, subscribeFn2] = makeSubscribeFn(subscriber);
+    const [, subscribeFn3] = makeSubscribeFn(subscriber);
+
+    testAtom.subscribe(() => {throw new Error('error'); });
+    testAtom.subscribe(subscribeFn2);
+    testAtom.subscribe(subscribeFn3);
+    testAtom.set({value: 10});
+
+    await delay(50);
+    expect(numberOfCalledSubscriptions).toBe(2);
   });
 });
