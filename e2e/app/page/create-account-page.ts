@@ -38,8 +38,6 @@ export const EducationLevelValue = {
 };
 
 export const LabelAlias = {
-  ReadPrivacyStatement: 'I have read, understand, and agree to the All of Us Program Privacy Statement',
-  ReadTermsOfUse: 'I have read, understand, and agree to the Terms of Use described above',
   InstitutionName: 'Institution Name',
   AreYouAffiliated: 'Are you affiliated with an Academic Research Institution',
   ResearchBackground: 'Your research background, experience, and research interests',
@@ -113,15 +111,17 @@ export default class CreateAccountPage extends BasePage {
     const iframe = await findIframe(this.page, 'terms of service agreement');
     const bodyHandle = await iframe.$('body');
     await iframe.evaluate(body =>  body.scrollTo(0, body.scrollHeight), bodyHandle);
-    return iframe;  
+    return iframe;
   }
 
-  async getPrivacyStatementCheckbox(): Promise<Checkbox> {
-    return await Checkbox.findByName(this.page, {normalizeSpace: LabelAlias.ReadPrivacyStatement});
+  getPrivacyStatementCheckbox(): Checkbox {
+    const selector = '//*[@id=//label[contains(normalize-space(), "All of Us Program Privacy Statement")]/@for]';
+    return new Checkbox(this.page, selector);
   }
 
-  async getTermsOfUseCheckbox(): Promise<Checkbox> {
-    return await Checkbox.findByName(this.page, {normalizeSpace: LabelAlias.ReadTermsOfUse});
+  getTermsOfUseCheckbox(): Checkbox {
+    const selector = '//*[@id=//label[contains(normalize-space(), "Terms of Use")]/@for]';
+    return new Checkbox(this.page, selector);
   }
 
   async getInstitutionNameInput(): Promise<Textbox> {
@@ -196,15 +196,14 @@ export default class CreateAccountPage extends BasePage {
 
   // Step 3: Accepting Terms of Use and Privacy statement.
   async acceptTermsOfUseAgreement() {
-    await this.getPrivacyStatementCheckbox();
-    await this.getTermsOfUseCheckbox();
-    await this.getNextButton();
+    const privacyStatementCheckbox = this.getPrivacyStatementCheckbox();
+    const termsOfUseCheckbox = this.getTermsOfUseCheckbox();
 
     await this.readAgreement();
 
     // check by click on label works
-    await (await this.getPrivacyStatementCheckbox()).check();
-    await (await this.getTermsOfUseCheckbox()).check();
+    await privacyStatementCheckbox.check();
+    await termsOfUseCheckbox.check();
   }
 
   // Step 3: Fill out user information with default values
