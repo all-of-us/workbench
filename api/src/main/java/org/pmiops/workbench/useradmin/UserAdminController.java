@@ -22,6 +22,8 @@ public class UserAdminController implements UserAdminApiDelegate {
   private final UserAdminService userAdminService;
   private final ProfileService profileService;
 
+  // TODO(jaycarlton): use RESEARCHER_DATA_VIEW authority instead of ACCESS_CONTROL_ADMIN for everything
+  //   except for bypassAccessRequirement(). This change will require updating user accounts.
   @Autowired
   public UserAdminController(
       UserService userService, UserAdminService userAdminService, ProfileService profileService) {

@@ -47,7 +47,7 @@ import org.springframework.stereotype.Service;
 public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private static final Duration TRAILING_TIME_TO_QUERY = Duration.ofHours(6);
 
-  private ActionAuditQueryService actionAuditQueryService;
+  private final ActionAuditQueryService actionAuditQueryService;
   private final CloudStorageService cloudStorageService;
   private final CohortDao cohortDao;
   private final CloudMonitoringService cloudMonitoringService;

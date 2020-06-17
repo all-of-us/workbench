@@ -126,12 +126,12 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final String ZIP_CODE = "12345";
   private static final Timestamp TIMESTAMP = new Timestamp(fakeClock.millis());
 
-  @MockBean private CaptchaVerificationService captchaVerificationService;
-  @MockBean private CloudStorageService cloudStorageService;
-  @MockBean private DirectoryService directoryService;
-  @MockBean private FireCloudService fireCloudService;
-  @MockBean private FreeTierBillingService freeTierBillingService;
-  @MockBean private MailService mailService;
+  @MockBean private CaptchaVerificationService mockCaptchaVerificationService;
+  @MockBean private CloudStorageService mockCloudStorageService;
+  @MockBean private DirectoryService mockDirectoryService;
+  @MockBean private FireCloudService mockFireCloudService;
+  @MockBean private FreeTierBillingService mockFreeTierBillingService;
+  @MockBean private MailService mockMailService;
   @MockBean private ProfileAuditor mockProfileAuditor;
 
   @Autowired private InstitutionService institutionService;
@@ -234,19 +234,19 @@ public class ProfileControllerTest extends BaseControllerTest {
     googleUser.setChangePasswordAtNextLogin(true);
     googleUser.setPassword("testPassword");
     googleUser.setIsEnrolledIn2Sv(true);
-    when(directoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
+    when(mockDirectoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
 
     DUA_VERSION = userService.getCurrentDuccVersion();
 
     try {
-      doNothing().when(mailService).sendBetaAccessRequestEmail(Mockito.any());
+      doNothing().when(mockMailService).sendBetaAccessRequestEmail(Mockito.any());
     } catch (MessagingException e) {
       e.printStackTrace();
     }
-    when(cloudStorageService.getCaptchaServerKey()).thenReturn("Server_Key");
+    when(mockCloudStorageService.getCaptchaServerKey()).thenReturn("Server_Key");
     try {
-      when(captchaVerificationService.verifyCaptcha(CAPTCHA_TOKEN)).thenReturn(true);
-      when(captchaVerificationService.verifyCaptcha(WRONG_CAPTCHA_TOKEN)).thenReturn(false);
+      when(mockCaptchaVerificationService.verifyCaptcha(CAPTCHA_TOKEN)).thenReturn(true);
+      when(mockCaptchaVerificationService.verifyCaptcha(WRONG_CAPTCHA_TOKEN)).thenReturn(false);
     } catch (ApiException e) {
       e.printStackTrace();
     }
@@ -254,28 +254,28 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void testCreateAccount_invitationKeyMismatch() {
-    createUser();
+    createProfile();
 
     config.access.requireInvitationKey = true;
-    when(cloudStorageService.readInvitationKey()).thenReturn("BLAH");
+    when(mockCloudStorageService.readInvitationKey()).thenReturn("BLAH");
     profileController.createAccount(createAccountRequest);
   }
 
   @Test(expected = BadRequestException.class)
   public void testCreateAccount_invalidCaptchaToken() {
-    createUser();
+    createProfile();
     createAccountRequest.setCaptchaVerificationToken(WRONG_CAPTCHA_TOKEN);
     profileController.createAccount(createAccountRequest);
   }
 
   @Test
   public void testCreateAccount_noRequireInvitationKey() {
-    createUser();
+    createProfile();
 
     // When invitation key verification is turned off, even a bad invitation key should
     // allow a user to be created.
     config.access.requireInvitationKey = false;
-    when(cloudStorageService.readInvitationKey()).thenReturn("BLAH");
+    when(mockCloudStorageService.readInvitationKey()).thenReturn("BLAH");
     profileController.createAccount(createAccountRequest);
   }
 
@@ -286,7 +286,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void testCreateAccount_MismatchEmailAddress() {
-    createUser();
+    createProfile();
     config.featureFlags.requireInstitutionalVerification = true;
     final Institution broad =
         new Institution()
@@ -310,7 +310,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void testCreateAccount_MismatchEmailDomain() {
-    createUser();
+    createProfile();
     config.featureFlags.requireInstitutionalVerification = true;
     final Institution broad =
         new Institution()
@@ -334,7 +334,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void testCreateAccount_MismatchEmailDomainNullDUA() {
-    createUser();
+    createProfile();
     config.featureFlags.requireInstitutionalVerification = true;
     final Institution broad =
         new Institution()
@@ -357,7 +357,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testCreateAccount_Success_RESTRICTEDDUA() {
-    createUser();
+    createProfile();
     config.featureFlags.requireInstitutionalVerification = true;
     final Institution broad =
         new Institution()
@@ -382,7 +382,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testCreateAccount_Success_MasterDUA() {
-    createUser();
+    createProfile();
     config.featureFlags.requireInstitutionalVerification = true;
     final Institution broad =
         new Institution()
@@ -407,7 +407,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testCreateAccount_Success_NULLDUA() {
-    createUser();
+    createProfile();
     config.featureFlags.requireInstitutionalVerification = true;
     final Institution broad =
         new Institution()
@@ -430,7 +430,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testCreateAccount_success() {
-    createUser();
+    createProfile();
     verify(mockProfileAuditor).fireCreateAction(any(Profile.class));
     final DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
     assertThat(dbUser).isNotNull();
@@ -440,7 +440,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Test
   public void testCreateAccount_withTosVersion() {
     createAccountRequest.setTermsOfServiceVersion(1);
-    createUser();
+    createProfile();
 
     final DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
     final List<DbUserTermsOfService> tosRows = Lists.newArrayList(userTermsOfServiceDao.findAll());
@@ -455,12 +455,12 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Test(expected = BadRequestException.class)
   public void testCreateAccount_withBadTosVersion() {
     createAccountRequest.setTermsOfServiceVersion(999);
-    createUser();
+    createProfile();
   }
 
   @Test
   public void testCreateAccount_invalidUser() {
-    when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
+    when(mockCloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
     CreateAccountRequest accountRequest = new CreateAccountRequest();
     accountRequest.setInvitationKey(INVITATION_KEY);
     accountRequest.setCaptchaVerificationToken(CAPTCHA_TOKEN);
@@ -475,7 +475,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testSubmitDataUseAgreement_success() {
-    createUser();
+    createProfile();
     String duaInitials = "NIH";
     assertThat(profileController.submitDataUseAgreement(DUA_VERSION, duaInitials).getStatusCode())
         .isEqualTo(HttpStatus.OK);
@@ -491,7 +491,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void testSubmitDataUseAgreement_wrongVersion() {
-    createUser();
+    createProfile();
     String duaInitials = "NIH";
     profileController.submitDataUseAgreement(DUA_VERSION - 1, duaInitials);
   }
@@ -502,7 +502,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     config.featureFlags.enableV3DataUserCodeOfConduct = false;
     final int previousDuaVersion = DUA_VERSION - 1;
 
-    final long userId = createUser().getUserId();
+    final long userId = createProfile().getUserId();
 
     // bypass the other access requirements
     final DbUser dbUser = userDao.findUserByUserId(userId);
@@ -540,7 +540,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void testMe_success() {
     config.featureFlags.requireInstitutionalVerification = false;
 
-    createUser();
+    createProfile();
     Profile profile = profileController.getMe().getBody();
     assertProfile(
         profile,
@@ -551,7 +551,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         DataAccessLevel.UNREGISTERED,
         TIMESTAMP,
         false);
-    verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
+    verify(mockFireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
     verify(mockProfileAuditor).fireLoginAction(dbUser);
 
     // feature flag is off: Verified InstitutionalAffiliation is not saved
@@ -560,7 +560,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testMe_userBeforeNotLoggedInSuccess() {
-    createUser();
+    createProfile();
     Profile profile = profileController.getMe().getBody();
     assertProfile(
         profile,
@@ -571,7 +571,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         DataAccessLevel.UNREGISTERED,
         TIMESTAMP,
         false);
-    verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
+    verify(mockFireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
 
     // An additional call to getMe() should have no effect.
     fakeClock.increment(1);
@@ -589,7 +589,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testMe_institutionalAffiliationsAlphabetical() {
-    createUser();
+    createProfile();
 
     Profile profile = profileController.getMe().getBody();
     ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<>();
@@ -612,7 +612,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testMe_institutionalAffiliationsNotAlphabetical() {
-    createUser();
+    createProfile();
 
     Profile profile = profileController.getMe().getBody();
     ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<>();
@@ -635,7 +635,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testMe_removeSingleInstitutionalAffiliation() {
-    createUser();
+    createProfile();
 
     Profile profile = profileController.getMe().getBody();
     ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<>();
@@ -660,7 +660,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testMe_removeAllInstitutionalAffiliations() {
-    createUser();
+    createProfile();
 
     Profile profile = profileController.getMe().getBody();
     ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<>();
@@ -692,7 +692,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         .getProfile()
         .setVerifiedInstitutionalAffiliation(verifiedInstitutionalAffiliation);
 
-    createUser();
+    createProfile();
     Profile profile = profileController.getMe().getBody();
     assertThat(profile.getVerifiedInstitutionalAffiliation())
         .isEqualTo(verifiedInstitutionalAffiliation);
@@ -701,7 +701,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Test(expected = BadRequestException.class)
   public void testMe_verifiedInstitutionalAffiliation_missing() {
     config.featureFlags.requireInstitutionalVerification = true;
-    createUser();
+    createProfile();
   }
 
   @Test(expected = NotFoundException.class)
@@ -728,7 +728,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         .getProfile()
         .setVerifiedInstitutionalAffiliation(verifiedInstitutionalAffiliation);
 
-    createUser();
+    createProfile();
   }
 
   @Test(expected = BadRequestException.class)
@@ -751,7 +751,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         .getProfile()
         .setVerifiedInstitutionalAffiliation(verifiedInstitutionalAffiliation);
 
-    createUser();
+    createProfile();
   }
 
   @Test(expected = BadRequestException.class)
@@ -779,7 +779,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         .setVerifiedInstitutionalAffiliation(verifiedInstitutionalAffiliation);
 
     // CONTACT_EMAIL is an @example.com
-    createUser();
+    createProfile();
   }
 
   @Test(expected = NotFoundException.class)
@@ -789,7 +789,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     final VerifiedInstitutionalAffiliation original = createVerifiedInstitutionalAffiliation();
 
     createAccountRequest.getProfile().setVerifiedInstitutionalAffiliation(original);
-    createUser();
+    createProfile();
 
     final Profile profile = profileController.getMe().getBody();
 
@@ -806,7 +806,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void updateVerifiedInstitutionalAffiliation() {
     // necessary to create a user without one
     config.featureFlags.requireInstitutionalVerification = false;
-    createUser();
+    createProfile();
 
     config.featureFlags.requireInstitutionalVerification = true;
 
@@ -821,7 +821,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     final VerifiedInstitutionalAffiliation original = createVerifiedInstitutionalAffiliation();
 
     createAccountRequest.getProfile().setVerifiedInstitutionalAffiliation(original);
-    createUser();
+    createProfile();
 
     final Profile profile = profileController.getMe().getBody();
     profile.setVerifiedInstitutionalAffiliation(null);
@@ -835,14 +835,14 @@ public class ProfileControllerTest extends BaseControllerTest {
     final VerifiedInstitutionalAffiliation original = createVerifiedInstitutionalAffiliation();
 
     createAccountRequest.getProfile().setVerifiedInstitutionalAffiliation(original);
-    createUser();
+    createProfile();
 
     profileController.updateVerifiedInstitutionalAffiliation(dbUser.getUserId(), null);
   }
 
   @Test
   public void updateContactEmail_forbidden() {
-    createUser();
+    createProfile();
     dbUser.setFirstSignInTime(TIMESTAMP);
     String originalEmail = dbUser.getContactEmail();
 
@@ -858,8 +858,8 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void updateContactEmail_badRequest() {
-    createUser();
-    when(directoryService.resetUserPassword(anyString())).thenReturn(googleUser);
+    createProfile();
+    when(mockDirectoryService.resetUserPassword(anyString())).thenReturn(googleUser);
     dbUser.setFirstSignInTime(null);
     String originalEmail = dbUser.getContactEmail();
 
@@ -875,9 +875,9 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void updateContactEmail_OK() {
-    createUser();
+    createProfile();
     dbUser.setFirstSignInTime(null);
-    when(directoryService.resetUserPassword(anyString())).thenReturn(googleUser);
+    when(mockDirectoryService.resetUserPassword(anyString())).thenReturn(googleUser);
 
     ResponseEntity<Void> response =
         profileController.updateContactEmail(
@@ -891,7 +891,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void updateName_alsoUpdatesDua() {
-    createUser();
+    createProfile();
     Profile profile = profileController.getMe().getBody();
     profile.setGivenName("OldGivenName");
     profile.setFamilyName("OldFamilyName");
@@ -907,7 +907,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void updateGivenName_badRequest() {
-    createUser();
+    createProfile();
     Profile profile = profileController.getMe().getBody();
     String newName =
         "obladidobladalifegoesonyalalalalalifegoesonobladioblada" + "lifegoesonrahlalalalifegoeson";
@@ -917,7 +917,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void updateProfile_badRequest_nullAddress() {
-    createUser();
+    createProfile();
     Profile profile = profileController.getMe().getBody();
     profile.setAddress(null);
     profileController.updateProfile(profile);
@@ -925,7 +925,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void updateProfile_badRequest_nullCountry() {
-    createUser();
+    createProfile();
     Profile profile = profileController.getMe().getBody();
     profile.getAddress().country(null);
     profileController.updateProfile(profile);
@@ -933,7 +933,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void updateProfile_badRequest_nullState() {
-    createUser();
+    createProfile();
     Profile profile = profileController.getMe().getBody();
     profile.getAddress().state(null);
     profileController.updateProfile(profile);
@@ -941,7 +941,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void updateProfile_badRequest_nullZipCode() {
-    createUser();
+    createProfile();
     Profile profile = profileController.getMe().getBody();
     profile.getAddress().zipCode(null);
     profileController.updateProfile(profile);
@@ -949,7 +949,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void updateProfile_badRequest_emptyReasonForResearch() {
-    createUser();
+    createProfile();
     Profile profile = profileController.getMe().getBody();
     profile.setAreaOfResearch("");
     profileController.updateProfile(profile);
@@ -957,7 +957,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void updateProfile_badRequest_UpdateUserName() {
-    createUser();
+    createProfile();
     Profile profile = profileController.getMe().getBody();
     profile.setUsername("newUserName@fakeDomain.com");
     profileController.updateProfile(profile);
@@ -965,7 +965,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void updateProfile_badRequest_UpdateContactEmail() {
-    createUser();
+    createProfile();
     Profile profile = profileController.getMe().getBody();
     profile.setContactEmail("newContact@fakeDomain.com");
     profileController.updateProfile(profile);
@@ -973,7 +973,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void updateFamilyName_badRequest() {
-    createUser();
+    createProfile();
     Profile profile = profileController.getMe().getBody();
     String newName =
         "obladidobladalifegoesonyalalalalalifegoesonobladioblada" + "lifegoesonrahlalalalifegoeson";
@@ -983,11 +983,11 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void resendWelcomeEmail_messagingException() throws MessagingException {
-    createUser();
+    createProfile();
     dbUser.setFirstSignInTime(null);
-    when(directoryService.resetUserPassword(anyString())).thenReturn(googleUser);
+    when(mockDirectoryService.resetUserPassword(anyString())).thenReturn(googleUser);
     doThrow(new MessagingException("exception"))
-        .when(mailService)
+        .when(mockMailService)
         .sendWelcomeEmail(any(), any(), any());
 
     ResponseEntity<Void> response =
@@ -995,23 +995,23 @@ public class ProfileControllerTest extends BaseControllerTest {
             new ResendWelcomeEmailRequest().username(dbUser.getUsername()).creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
     // called twice, once during account creation, once on resend
-    verify(mailService, times(2)).sendWelcomeEmail(any(), any(), any());
-    verify(directoryService, times(1)).resetUserPassword(anyString());
+    verify(mockMailService, times(2)).sendWelcomeEmail(any(), any(), any());
+    verify(mockDirectoryService, times(1)).resetUserPassword(anyString());
   }
 
   @Test
   public void resendWelcomeEmail_OK() throws MessagingException {
-    createUser();
-    when(directoryService.resetUserPassword(anyString())).thenReturn(googleUser);
-    doNothing().when(mailService).sendWelcomeEmail(any(), any(), any());
+    createProfile();
+    when(mockDirectoryService.resetUserPassword(anyString())).thenReturn(googleUser);
+    doNothing().when(mockMailService).sendWelcomeEmail(any(), any(), any());
 
     ResponseEntity<Void> response =
         profileController.resendWelcomeEmail(
             new ResendWelcomeEmailRequest().username(dbUser.getUsername()).creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     // called twice, once during account creation, once on resend
-    verify(mailService, times(2)).sendWelcomeEmail(any(), any(), any());
-    verify(directoryService, times(1)).resetUserPassword(anyString());
+    verify(mockMailService, times(2)).sendWelcomeEmail(any(), any(), any());
+    verify(mockDirectoryService, times(1)).resetUserPassword(anyString());
   }
 
   @Test
@@ -1025,11 +1025,11 @@ public class ProfileControllerTest extends BaseControllerTest {
         .getProfile()
         .setVerifiedInstitutionalAffiliation(verifiedInstitutionalAffiliation);
 
-    createUser();
-    verify(mailService).sendWelcomeEmail(any(), any(), any());
+    createProfile();
+    verify(mockMailService).sendWelcomeEmail(any(), any(), any());
 
     // don't send the user instructions email if there are no instructions
-    verifyNoMoreInteractions(mailService);
+    verifyNoMoreInteractions(mockMailService);
   }
 
   @Test
@@ -1058,9 +1058,9 @@ public class ProfileControllerTest extends BaseControllerTest {
             .instructions(rawInstructions);
     institutionService.setInstitutionUserInstructions(instructions);
 
-    createUser();
-    verify(mailService).sendWelcomeEmail(any(), any(), any());
-    verify(mailService).sendInstitutionUserInstructions(CONTACT_EMAIL, sanitizedInstructions);
+    createProfile();
+    verify(mockMailService).sendWelcomeEmail(any(), any(), any());
+    verify(mockMailService).sendInstitutionUserInstructions(CONTACT_EMAIL, sanitizedInstructions);
   }
 
   @Test
@@ -1083,19 +1083,19 @@ public class ProfileControllerTest extends BaseControllerTest {
     institutionService.deleteInstitutionUserInstructions(
         verifiedInstitutionalAffiliation.getInstitutionShortName());
 
-    createUser();
-    verify(mailService).sendWelcomeEmail(any(), any(), any());
+    createProfile();
+    verify(mockMailService).sendWelcomeEmail(any(), any(), any());
 
     // don't send the user instructions email if the instructions have been deleted
-    verifyNoMoreInteractions(mailService);
+    verifyNoMoreInteractions(mockMailService);
   }
 
   @Test
   public void testUpdateNihToken() {
-    when(fireCloudService.postNihCallback(any()))
+    when(mockFireCloudService.postNihCallback(any()))
         .thenReturn(new FirecloudNihStatus().linkedNihUsername("test").linkExpireTime(500L));
     try {
-      createUser();
+      createProfile();
       profileController.updateNihToken(new NihToken().jwt("test"));
     } catch (Exception e) {
       fail();
@@ -1114,7 +1114,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = ServerErrorException.class)
   public void testUpdateNihToken_serverError() {
-    doThrow(new ServerErrorException()).when(fireCloudService).postNihCallback(any());
+    doThrow(new ServerErrorException()).when(mockFireCloudService).postNihCallback(any());
     profileController.updateNihToken(new NihToken().jwt("test"));
   }
 
@@ -1124,9 +1124,9 @@ public class ProfileControllerTest extends BaseControllerTest {
     String linkedUsername = "linked";
     nihStatus.setLinkedNihUsername(linkedUsername);
     nihStatus.setLinkExpireTime(TIMESTAMP.getTime());
-    when(fireCloudService.getNihStatus()).thenReturn(nihStatus);
+    when(mockFireCloudService.getNihStatus()).thenReturn(nihStatus);
 
-    createUser();
+    createProfile();
 
     profileController.syncEraCommonsStatus();
     assertThat(userDao.findUserByUsername(PRIMARY_EMAIL).getEraCommonsLinkedNihUsername())
@@ -1135,20 +1135,10 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(userDao.findUserByUsername(PRIMARY_EMAIL).getEraCommonsCompletionTime()).isNotNull();
   }
 
-  //  @Test
-  //  public void testBypassAccessModule() {
-  //    Profile profile = createUser();
-  //    profileController.bypassAccessRequirement(
-  //        profile.getUserId(),
-  //        new AccessBypassRequest().isBypassed(true).moduleName(AccessModule.DATA_USE_AGREEMENT));
-  //
-  //    DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
-  //    assertThat(dbUser.getDataUseAgreementBypassTime()).isNotNull();
-  //  }
-  //
+
   @Test
   public void testDeleteProfile() {
-    createUser();
+    createProfile();
 
     profileController.deleteProfile();
     verify(mockProfileAuditor).fireDeleteAction(dbUser.getUserId(), dbUser.getUsername());
@@ -1156,11 +1146,11 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testFreeTierLimits() {
-    createUser();
+    createProfile();
     DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
 
-    when(freeTierBillingService.getCachedFreeTierUsage(dbUser)).thenReturn(FREE_TIER_USAGE);
-    when(freeTierBillingService.getUserFreeTierDollarLimit(dbUser)).thenReturn(FREE_TIER_LIMIT);
+    when(mockFreeTierBillingService.getCachedFreeTierUsage(dbUser)).thenReturn(FREE_TIER_USAGE);
+    when(mockFreeTierBillingService.getUserFreeTierDollarLimit(dbUser)).thenReturn(FREE_TIER_LIMIT);
 
     Profile profile = profileController.getMe().getBody();
     assertProfile(
@@ -1178,7 +1168,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testUpdateProfile_updateDemographicSurvey() {
-    createUser();
+    createProfile();
     Profile profile = profileController.getMe().getBody();
 
     DemographicSurvey demographicSurvey = profile.getDemographicSurvey();
@@ -1208,9 +1198,9 @@ public class ProfileControllerTest extends BaseControllerTest {
         false);
   }
 
-  private Profile createUser() {
-    when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
-    when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, CONTACT_EMAIL))
+  private Profile createProfile() {
+    when(mockCloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
+    when(mockDirectoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, CONTACT_EMAIL))
         .thenReturn(googleUser);
     Profile result = profileController.createAccount(createAccountRequest).getBody();
     dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);

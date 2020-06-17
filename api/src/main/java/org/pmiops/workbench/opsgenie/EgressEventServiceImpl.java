@@ -194,12 +194,6 @@ public class EgressEventServiceImpl implements EgressEventService {
     return Duration.between(creationTime.toInstant(), clock.instant()).toDays();
   }
 
-  //  private String formatAge(Timestamp creationTime) {
-  //    final Period period = new Period(Instant.ofEpochMilli(creationTime.getTime()),
-  // Instant.ofEpochMilli(clock.millis()));
-  //    return period.toString(AGE_FORMATTER);
-  //  }
-  //
   private Optional<Long> vmNameToUserDatabaseId(String vmName) {
     return Matchers.getGroup(VM_NAME_PATTERN, vmName, USER_ID_GROUP_NAME).map(Long::parseLong);
   }
