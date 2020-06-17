@@ -4,7 +4,7 @@ const fp = require('lodash/fp');
 require('jest-circus');
 
 // jest-circus retryTimes
-const retryTimes = 1;
+const retryTimes = 0;
 
 class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
   async setup() {
