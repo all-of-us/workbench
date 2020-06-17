@@ -145,11 +145,11 @@ describe('User can create new Cohorts', () => {
     // Next, search for condition EKG
     const search2ResultsTable = await modal.searchCondition('EKG');
     // Check cell value in column "Code" (column #2)
-    const codeValue = await search2ResultsTable.findCellValue(1, 2);
+    const codeValue = await search2ResultsTable.getCellValue(1, 2);
     expect(Number(codeValue)).not.toBeNaN();
 
     // Add the condition in first row. We don't know what the condition name is, so we get the cell value first.
-    const nameValue = await search2ResultsTable.findCellValue(1, 1);
+    const nameValue = await search2ResultsTable.getCellValue(1, 1);
     const addIcon = await ClrIconLink.findByName(page, {containsText: nameValue, iconShape: 'plus-circle'}, modal);
     await addIcon.click();
 

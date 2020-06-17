@@ -40,7 +40,7 @@ export function xPathOptionToXpath(xOpts: XPathOptions, container?: Container): 
     selector = `${textExpr}//${tag}[*[@role="img"]]`;
     break;
   case ElementType.Checkbox:
-    selector = `${textExpr}/input[@type="${type}"]`;
+    selector = `${textExpr}//input[@type="${type}"]`;
     break;
   case ElementType.RadioButton:
   case ElementType.Textbox:

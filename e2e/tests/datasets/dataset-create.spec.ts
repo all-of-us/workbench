@@ -76,7 +76,7 @@ describe('Create Dataset', () => {
     // Search for drug hydroxychloroquine
     const searchResultsTable = await modal.searchCondition('hydroxychloroquine');
     // Add drug in first row result
-    const nameValue = await searchResultsTable.findCellValue(1, 1);
+    const nameValue = await searchResultsTable.getCellValue(1, 1);
     const addIcon = await ClrIconLink.findByName(page, {containsText: nameValue, iconShape: 'plus-circle'}, modal);
     await addIcon.click();
 
