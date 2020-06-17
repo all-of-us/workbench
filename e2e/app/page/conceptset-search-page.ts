@@ -25,7 +25,7 @@ export default class ConceptsetSearchPage extends AuthenticatedPage{
       ]);
       return true;
     } catch (e) {
-      console.error(`ConceptsetPage isLoaded() encountered ${e}`);
+      console.error(`ConceptsetSearchPage isLoaded() encountered ${e}`);
       return false;
     }
   }
