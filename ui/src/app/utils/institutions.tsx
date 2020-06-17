@@ -1,3 +1,4 @@
+import * as fp from 'lodash/fp';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
 import {InstitutionalRole, PublicInstitutionDetails} from 'generated/fetch';
 import {isBlank} from './index';
@@ -8,11 +9,14 @@ export const getRoleOptions = (institutions: Array<PublicInstitutionDetails>, in
     return [];
   }
 
-  const selectedOrgType = institutions.find(
-      inst => inst.shortName === institutionShortName).organizationTypeEnum;
+  const institution = fp.find(institution => {
+    const {shortName} = institution;
+    return shortName === institutionShortName;
+  }, institutions);
+  const {organizationTypeEnum} = institution;
   const availableRoles: Array<InstitutionalRole> =
       AccountCreationOptions.institutionalRolesByOrganizationType
-      .find(obj => obj.type === selectedOrgType)
+      .find(obj => obj.type === organizationTypeEnum)
           .roles;
 
   return AccountCreationOptions.institutionalRoleOptions.filter(option =>

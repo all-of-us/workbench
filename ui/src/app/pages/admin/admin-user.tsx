@@ -100,7 +100,6 @@ interface State {
   loading: boolean;
   oldProfile: Profile;
   profileLoadingError: string;
-  saveDisabled: boolean;
   updatedProfile: Profile;
   verifiedInstitutionOptions: Array<PublicInstitutionDetails>;
   verifiedInstitutionsByShortname: Map<String, PublicInstitutionDetails>;
@@ -116,7 +115,6 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
       loading: true,
       oldProfile: null,
       profileLoadingError: '',
-      saveDisabled: true,
       updatedProfile: null,
       verifiedInstitutionOptions: [],
       verifiedInstitutionsByShortname: new Map()
@@ -149,7 +147,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
       const institutionsResponse = await institutionApi().getPublicInstitutionDetails();
       const institutions = institutionsResponse.institutions;
       this.setState({
-        verifiedInstitutionOptions: fp.sortBy( institution => institution.displayName, institutions),
+        verifiedInstitutionOptions: fp.sortBy( 'displayName', institutions),
         verifiedInstitutionsByShortname: institutions.reduce(
           (accumulator, institution) => accumulator.set(institution.shortName, institution),
           new Map<String, PublicInstitutionDetails>()
@@ -168,12 +166,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
 
   getInstitutionDropdownOptions() {
     const {verifiedInstitutionOptions} = this.state;
-    return fp.map(
-      institution => {
-        return {label: institution.displayName, value: institution.shortName};
-      },
-      verifiedInstitutionOptions
-    );
+    return fp.map(({displayName, shortName}) => ({label: displayName, value: shortName}), verifiedInstitutionOptions);
   }
 
   isSaveDisabled(errors) {
@@ -183,42 +176,37 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
 
   setVerifiedInstitutionOnProfile(institutionShortName: string) {
     const {verifiedInstitutionsByShortname} = this.state;
-    this.setState(
-      fp.set(
-          ['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionShortName'],
-        institutionShortName
-      )
-    );
-    this.setState(
-      fp.set(
-          ['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionDisplayName'],
-        verifiedInstitutionsByShortname.get(institutionShortName).displayName
-        )
-    );
-    this.setState(fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleEnum'], undefined));
-    this.setState(fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], undefined));
+    this.setState(fp.flow(
+        fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionShortName'],institutionShortName),
+        fp.set(
+            ['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionDisplayName'],
+          verifiedInstitutionsByShortname.get(institutionShortName).displayName
+        ),
+        fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionRoleEnum'], undefined),
+        fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], undefined)
+    ));
   }
 
   setInstitutionalRoleOnProfile(institutionalRoleEnum: InstitutionalRole) {
-    this.setState(fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleEnum'], institutionalRoleEnum));
-    this.setState(fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], undefined));
+    this.setState(fp.flow(
+      fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleEnum'], institutionalRoleEnum),
+      fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], undefined)
+    ));
   }
 
   updateVerifiedInstitutionalAffiliation() {
     const {updatedProfile} = this.state;
+    const {userId, verifiedInstitutionalAffiliation} = updatedProfile;
     this.setState({loading: true});
-    profileApi().updateVerifiedInstitutionalAffiliation(updatedProfile.userId, updatedProfile.verifiedInstitutionalAffiliation).then(() => {
+    profileApi().updateVerifiedInstitutionalAffiliation(userId, verifiedInstitutionalAffiliation).then(() => {
       this.setState({oldProfile: updatedProfile, loading: false});
     });
   }
 
   validateVerifiedInstitutionalAffiliation() {
     const {updatedProfile} = this.state;
-    if (updatedProfile) {
-      if (updatedProfile.verifiedInstitutionalAffiliation) {
+    if (updatedProfile && updatedProfile.verifiedInstitutionalAffiliation) {
         return updatedProfile.verifiedInstitutionalAffiliation;
-      }
-      return false;
     }
     return false;
   }
@@ -314,7 +302,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
                 checked={!updatedProfile.disabled}
                 disabled={true}
                 data-test-id='account-access-toggle'
-                onToggle={() => this.setState({saveDisabled: false})}
+                onToggle={() => {}}
                 style={{marginLeft: 'auto', paddingBottom: '0px'}}
                 height={18}
                 width={33}
@@ -400,7 +388,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
             <DropdownWithLabel
                 label={'Free credit limit'}
                 options={freeCreditLimitOptions}
-                onChange={() => this.setState({saveDisabled: false})}
+                onChange={() => {}}
                 initialValue={updatedProfile.freeTierDollarQuota}
                 dropdownStyle={{width: '3rem'}}
                 disabled={true}
@@ -449,14 +437,14 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
                     label={'2-factor auth'}
                     initialValue={!!updatedProfile.twoFactorAuthBypassTime}
                     disabled={true}
-                    onToggle={() => this.setState({saveDisabled: false})}
+                    onToggle={() => {}}
                     dataTestId={'twoFactorAuthBypassToggle'}
                 />
                 <ToggleWithLabelAndToggledText
                     label={'Compliance training'}
                     initialValue={!!updatedProfile.complianceTrainingBypassTime}
                     disabled={true}
-                    onToggle={() => this.setState({saveDisabled: false})}
+                    onToggle={() => {}}
                     dataTestId={'complianceTrainingBypassToggle'}
                 />
               </FlexRow>
@@ -472,7 +460,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
                     label={'Data User Code of Conduct'}
                     initialValue={!!updatedProfile.dataUseAgreementBypassTime}
                     disabled={true}
-                    onToggle={() => this.setState({saveDisabled: false})}
+                    onToggle={() => {}}
                     dataTestId={'dataUseAgreementBypassToggle'}
                 />
               </FlexRow>
