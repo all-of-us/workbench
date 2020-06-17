@@ -19,22 +19,18 @@ afterEach(async () => {
 // Runs this beforeAll() before test's beforeAll().
 beforeAll(async () => {
   await page.setRequestInterception(true);
-  page.on('request', async (request) => {
+  page.on('request', (request) => {
     const requestUrl = url.parse(request.url(), true);
     const host = requestUrl.hostname;
     // to improve page load performance, block requests if it is not for application functions.
-    try {
-      if (host === 'www.google-analytics.com'
+    if (host === 'www.google-analytics.com'
        || host === 'accounts.youtube.com'
        || host === 'static.zdassets.com'
        || host === 'play.google.com'
        || request.url().endsWith('content-security-index-report')) {
-        await request.abort()
-      } else {
-        await request.continue();
-      }
-    } catch (err) {
-      console.error(err);
+      request.abort()
+    } else {
+      request.continue();
     }
   });
 });

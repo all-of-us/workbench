@@ -31,6 +31,7 @@ const CI_SWITCHES = fp.concat(
   [
     '--disable-gpu', // https://bugs.chromium.org/p/chromium/issues/detail?id=737678#c10
     '--disable-setuid-sandbox',
+    '--enable-features=NetworkService',
   ]
 );
 
