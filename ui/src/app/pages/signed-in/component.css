@@ -43,3 +43,8 @@ body {
 .create-account__degree-select .p-multiselect-header {
   display: none;
 }
+
+/* Must be higher than the side helpbar index. See help-bar.tsx. */
+app-footer {
+  z-index: 201;
+}

@@ -23,5 +23,5 @@ export const testEnvironmentBase = {
   enablePublishedWorkspaces: false,
   enableProfileCapsFeatures: true,
   enableNewConceptTabs: false,
-  enableFooter: false
+  enableFooter: true
 };
