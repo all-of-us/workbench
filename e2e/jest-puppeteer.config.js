@@ -21,7 +21,7 @@ const NEW_CHROME_SWITCHES = [
 // Append to Puppeteer default chrome flags.
 // https://github.com/puppeteer/puppeteer/blob/33f1967072e07824c5bf6a8c1336f844d9efaabf/lib/Launcher.js#L261
 const DEFAULT_SWITCHES = fp.concat(
-  puppeteer.defaultArgs({devtools: false, headless: isHeadless, userDataDir: null}),
+  puppeteer.defaultArgs({devtools: false, headless: isHeadless, userDataDir: './data'}),
   NEW_CHROME_SWITCHES
 );
 
