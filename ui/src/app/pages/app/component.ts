@@ -18,6 +18,7 @@ import {
   serverConfigStore,
   urlParamsStore
 } from 'app/utils/navigation';
+import {routeDataStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 
 import outdatedBrowserRework from 'outdated-browser-rework';
@@ -95,6 +96,7 @@ export class AppComponent implements OnInit {
       }
     });
 
+    routeDataStore.subscribe(({title}) => this.setTitleFromReactRoute(title));
     initializeAnalytics();
   }
 
@@ -116,6 +118,17 @@ export class AppComponent implements OnInit {
           this.titleService.setTitle(`${routeTitle} | ${this.baseTitle}`);
         });
       }
+    }
+  }
+
+  private setTitleFromReactRoute(title: string): void {
+    const currentRoute = this.getLeafRoute();
+    if (currentRoute.outlet === 'primary') {
+      currentRoute.data.subscribe(value => {
+        const routeTitle = title ||
+          decodeURIComponent(currentRoute.params.getValue()[value.pathElementForTitle]);
+        this.titleService.setTitle(`${routeTitle} | ${this.baseTitle}`);
+      });
     }
   }
 

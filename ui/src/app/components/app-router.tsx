@@ -1,14 +1,14 @@
+import {navigate} from 'app/utils/navigation';
+import {routeDataStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import { BrowserRouter, Link, Redirect, Route, Switch, useHistory, useLocation, useParams, useRouteMatch} from 'react-router-dom';
 
 const {Fragment} = React;
 
-interface Guards {
-  [index: number]: {
-    checkGuard: () => boolean;
-    redirectPath: string;
-  };
+export interface Guard {
+  allowed: () => boolean;
+  redirectPath: string;
 }
 
 export const usePath = () => {
@@ -16,10 +16,27 @@ export const usePath = () => {
   return path;
 };
 
+export const withTitle = WrappedComponent => ({title, ...props}) => {
+  routeDataStore.set({title});
+  return <WrappedComponent {...props}/>;
+};
+
+export const withFullHeight = WrappedComponent => ({...props}) => {
+  return <div style={{height: '100%'}}><WrappedComponent {...props} /></div>;
+};
+
 export const SubRoute = ({children}): React.ReactElement => <Switch>{children}</Switch>;
 export const AppRouter = ({children}): React.ReactElement => <BrowserRouter><SubRoute>{children}</SubRoute></BrowserRouter>;
 
 export const RouteLink = ({path, style = {}, children}): React.ReactElement => <Link style={{...style}} to={path}>{children}</Link>;
+
+// To compensate for Angular, while keeping true to the declarative/componentized nature of the router
+// We will utilize a redirect component that uses the Angular navigation.
+// Upon completing the migration this can be replaced with a react-router Redirect component
+const NavRedirect = ({path}) => {
+  navigate([path]);
+  return null;
+};
 
 export const AppRoute = ({path, data = {}, component: Component}): React.ReactElement => {
   const routeParams = useParams();
@@ -31,12 +48,10 @@ export const AppRoute = ({path, data = {}, component: Component}): React.ReactEl
 };
 
 export const ProtectedRoutes = (
-  {path, guards, children}: {path: string, guards: Guards, children: React.ReactNode[] }): React.ReactElement => {
-  const { redirectPath } = fp.find(({checkGuard}) => checkGuard(), guards);
-  const location = useLocation();
-  return redirectPath ? <AppRoute
-      path={path}
-      component={() => <Redirect to={{pathname: redirectPath, state: {from: location} }}/>}/>
+  {guards, children}: {guards: Guard[], children: any }): React.ReactElement => {
+  const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
+
+  return redirectPath ? <NavRedirect path={redirectPath}/>
   : <Fragment>{children}</Fragment>;
 };
 
