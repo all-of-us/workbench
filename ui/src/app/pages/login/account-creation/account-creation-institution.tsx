@@ -19,8 +19,12 @@ import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {isBlank, reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {isAbortError, reportError} from 'app/utils/errors';
-import {getRoleOptions} from 'app/utils/institutions';
+import {reportError} from 'app/utils/errors';
+import {
+  getRoleOptions, MasterDuaEmailMismatchErrorMessage,
+  RestrictedDuaEmailMismatchErrorMessage,
+  validateEmail
+} from 'app/utils/institutions';
 import {
   CheckEmailResponse,
   DuaType,
@@ -173,16 +177,12 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
     }
 
     try {
-      const result = await institutionApi().checkEmail(institutionShortName, {contactEmail: contactEmail}, {signal: this.aborter.signal});
+      const result = await validateEmail(contactEmail, institutionShortName, this.aborter);
       this.setState({checkEmailResponse: result});
     } catch (e) {
-      if (isAbortError(e)) {
-        // Ignore abort errors.
-      } else {
-        this.setState({
-          checkEmailError: true
-        });
-      }
+      this.setState({
+        checkEmailError: true
+      });
     }
   }
 
@@ -253,15 +253,11 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
     const selectedInstitutionObj = fp.find((institution) =>
         institution.shortName === institutionShortName, institutions);
     if (selectedInstitutionObj.duaTypeEnum === DuaType.RESTRICTED) {
-      // Instution has signed Restricted agreement and the email is not in allowed emails list
-      return <div data-test-id='email-error-message' style={{color: colors.danger}}>
-        The institution has authorized access only to select members.<br/>
-        Please <a href='https://www.researchallofus.org/institutional-agreements' target='_blank'>
-        click here</a> to request to be added to the institution</div>;
+      // Institution has signed Restricted agreement and the email is not in allowed emails list
+      return <RestrictedDuaEmailMismatchErrorMessage/>
     } else {
       // Institution has MASTER or NULL agreement and the domain is not in the allowed list
-      return <div data-test-id='email-error-message' style={{color: colors.danger}}>
-          Your email does not match your institution</div>;
+      return <MasterDuaEmailMismatchErrorMessage/>
     }
   }
 

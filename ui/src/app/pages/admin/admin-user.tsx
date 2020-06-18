@@ -14,6 +14,7 @@ import {institutionApi, profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   displayDateWithoutHours,
+  isBlank,
   reactStyles,
   ReactWrapperBase,
   withUrlParams
@@ -21,9 +22,19 @@ import {
 
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
-import {getRoleOptions} from 'app/utils/institutions';
+import {
+  getRoleOptions, MasterDuaEmailMismatchErrorMessage,
+  RestrictedDuaEmailMismatchErrorMessage,
+  validateEmail
+} from 'app/utils/institutions';
 import {navigate, serverConfigStore} from 'app/utils/navigation';
-import {InstitutionalRole, Profile, PublicInstitutionDetails} from 'generated/fetch';
+import {
+  CheckEmailResponse,
+  DuaType,
+  InstitutionalRole,
+  Profile,
+  PublicInstitutionDetails
+} from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
 import * as validate from 'validate.js';
 
@@ -96,6 +107,8 @@ interface Props {
 }
 
 interface State {
+  checkEmailError: string;
+  checkEmailResponse: CheckEmailResponse;
   institutionsLoadingError: string;
   loading: boolean;
   oldProfile: Profile;
@@ -107,10 +120,15 @@ interface State {
 
 
 const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
+
+  private aborter: AbortController;
+
   constructor(props) {
     super(props);
 
     this.state = {
+      checkEmailError: '',
+      checkEmailResponse: null,
       institutionsLoadingError: '',
       loading: true,
       oldProfile: null,
@@ -129,6 +147,46 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
       ]);
     } finally {
       this.setState({loading: false});
+    }
+  }
+
+  componentWillUnmount(): void {
+    if (this.aborter) {
+      this.aborter.abort();
+    }
+  }
+
+  async checkEmail() {
+    const {
+      updatedProfile: {
+        contactEmail,
+        verifiedInstitutionalAffiliation: {institutionShortName}
+      }
+    } = this.state;
+
+    // Cancel any outstanding API calls.
+    if (this.aborter) {
+      this.aborter.abort();
+    }
+    this.aborter = new AbortController();
+    this.setState({checkEmailResponse: null});
+
+    // Early-exit with no result if either input is blank.
+    if (!institutionShortName || isBlank(contactEmail)) {
+      return;
+    }
+
+    try {
+      const result = await validateEmail(contactEmail, institutionShortName, this.aborter);
+      this.setState({
+        checkEmailError: '',
+        checkEmailResponse: result
+      });
+    } catch (e) {
+      this.setState({
+        checkEmailError: 'Error validating user email against institution - please refresh page and try again',
+        checkEmailResponse: null,
+      });
     }
   }
 
@@ -174,17 +232,41 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     return fp.isEqual(oldProfile, updatedProfile) || errors;
   }
 
-  setVerifiedInstitutionOnProfile(institutionShortName: string) {
+  renderCheckEmailResponse() {
+    const {checkEmailResponse, updatedProfile, verifiedInstitutionsByShortname} = this.state;
+    if (updatedProfile && updatedProfile.verifiedInstitutionalAffiliation) {
+      if (checkEmailResponse.isValidMember) {
+        return null;
+      }
+      else {
+        const {verifiedInstitutionalAffiliation} = updatedProfile;
+        const institution = verifiedInstitutionsByShortname.get(verifiedInstitutionalAffiliation.institutionShortName);
+        if (institution.duaTypeEnum === DuaType.RESTRICTED) {
+          // Institution has signed Restricted agreement and the email is not in allowed emails list
+          return <RestrictedDuaEmailMismatchErrorMessage/>
+        } else {
+          // Institution has MASTER or NULL agreement and the domain is not in the allowed list
+          return <MasterDuaEmailMismatchErrorMessage/>
+        }
+      }
+    }
+    return null;
+  }
+
+  async setVerifiedInstitutionOnProfile(institutionShortName: string) {
     const {verifiedInstitutionsByShortname} = this.state;
-    this.setState(fp.flow(
-        fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionShortName'],institutionShortName),
-        fp.set(
-            ['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionDisplayName'],
-          verifiedInstitutionsByShortname.get(institutionShortName).displayName
-        ),
-        fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionRoleEnum'], undefined),
-        fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], undefined)
-    ));
+    await this.setState({loading: true});
+    await this.setState(fp.flow(
+          fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionShortName'], institutionShortName),
+          fp.set(
+              ['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionDisplayName'],
+              verifiedInstitutionsByShortname.get(institutionShortName).displayName
+          ),
+          fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionRoleEnum'], undefined),
+          fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], undefined)
+      ));
+    await this.checkEmail();
+    await this.setState({loading: false});
   }
 
   setInstitutionalRoleOnProfile(institutionalRoleEnum: InstitutionalRole) {
@@ -201,6 +283,13 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     profileApi().updateVerifiedInstitutionalAffiliation(userId, verifiedInstitutionalAffiliation).then(() => {
       this.setState({oldProfile: updatedProfile, loading: false});
     });
+  }
+
+  validateCheckEmailResponse() {
+    const {checkEmailResponse} = this.state;
+    if (checkEmailResponse) {
+      return checkEmailResponse.isValidMember;
+    }
   }
 
   validateVerifiedInstitutionalAffiliation() {
@@ -238,6 +327,8 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
 
   render() {
     const {
+      checkEmailError,
+      checkEmailResponse,
       institutionsLoadingError,
       profileLoadingError,
       updatedProfile,
@@ -247,12 +338,14 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
       'verifiedInstitutionalAffiliation': this.validateVerifiedInstitutionalAffiliation(),
       'institutionShortName': this.validateInstitutionShortname(),
       'institutionalRoleEnum': this.validateInstitutionalRoleEnum(),
-      'institutionalRoleOtherText': this.validateInstitutionalRoleOtherText()
+      'institutionalRoleOtherText': this.validateInstitutionalRoleOtherText(),
+      'institutionMembership': this.validateCheckEmailResponse(),
     }, {
       verifiedInstitutionalAffiliation: {truthiness: true},
       institutionShortName: {truthiness: true},
       institutionalRoleEnum: {truthiness: true},
-      institutionalRoleOtherText: {truthiness: true}
+      institutionalRoleOtherText: {truthiness: true},
+      institutionMembership: {truthiness: true}
     });
     return <FadeBox
         style={{
@@ -263,6 +356,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
           color: colors.primary
         }}
     >
+      {checkEmailError && <div>{checkEmailError}</div>}
       {institutionsLoadingError && <div>{institutionsLoadingError}</div>}
       {profileLoadingError && <div>{profileLoadingError}</div>}
       {updatedProfile && <FlexColumn>
@@ -317,6 +411,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
                   {errors.institutionShortName && <li>You must choose an institution</li>}
                   {errors.institutionalRoleEnum && <li>You must select the user's role at the institution</li>}
                   {errors.institutionalRoleOtherText && <li>You must describe the user's role if you select Other</li>}
+                  {errors.institutionMembership && <li>The user's contact email does not match the selected institution</li>}
                 </BulletAlignedUnorderedList>
               }
           >
@@ -397,7 +492,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
             {verifiedInstitutionOptions && <DropdownWithLabel
                 label={'Verified institution'}
                 options={this.getInstitutionDropdownOptions()}
-                onChange={(event) => this.setVerifiedInstitutionOnProfile(event.value)}
+                onChange={async (event) => this.setVerifiedInstitutionOnProfile(event.value)}
                 initialValue={
                   updatedProfile.verifiedInstitutionalAffiliation
                       ? updatedProfile.verifiedInstitutionalAffiliation.institutionShortName
@@ -405,7 +500,12 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
                 }
                 dataTestId={'verifiedInstitution'}
             />}
-            {verifiedInstitutionOptions && updatedProfile.verifiedInstitutionalAffiliation && <DropdownWithLabel
+            {checkEmailResponse && !checkEmailResponse.isValidMember && this.renderCheckEmailResponse()}
+            {verifiedInstitutionOptions
+              && checkEmailResponse
+              && checkEmailResponse.isValidMember
+              && updatedProfile.verifiedInstitutionalAffiliation
+              && <DropdownWithLabel
                 label={'Institutional role'}
                 options={this.getRoleOptionsForProfile() || []}
                 onChange={(event) => this.setInstitutionalRoleOnProfile(event.value)}
@@ -421,6 +521,8 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
               verifiedInstitutionOptions
               && updatedProfile.verifiedInstitutionalAffiliation
               && updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum === InstitutionalRole.OTHER
+              && checkEmailResponse
+              && checkEmailResponse.isValidMember
               && <TextInputWithLabel
                 labelText={'Institutional role description'}
                 placeholder={updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleOtherText}
