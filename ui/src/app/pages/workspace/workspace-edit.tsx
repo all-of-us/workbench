@@ -839,16 +839,21 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       // TODO: This validation spec should include error messages which get
       // surfaced directly. Currently these constraints are entirely separate
       // from the user facing error strings we render.
+      const lengthMessages = (prefix = '') => ({
+        tooShort: `${prefix} cannot be blank`,
+        tooLong: `${prefix} cannot exceed %{count} characters`
+      });
+
       const constraints: object = {
         name: {
-          length: { minimum: 1, maximum: 80 }
+          length: { minimum: 1, maximum: 80, ...lengthMessages('Name')}
         },
         billingAccountName: { presence: true },
-        intendedStudy: { length: { minimum: 1, maximum: 1000 } },
+        intendedStudy: { length: { minimum: 1, maximum: 1000, ...lengthMessages() } },
         populationChecked: { presence: true },
-        anticipatedFindings: {length: { minimum: 1, maximum: 1000 }},
+        anticipatedFindings: {length: { minimum: 1, maximum: 1000, ...lengthMessages() }},
         reviewRequested: { presence: true },
-        scientificApproach: { length: { minimum: 1, maximum: 1000 } },
+        scientificApproach: { length: { minimum: 1, maximum: 1000, ...lengthMessages() } },
         researchOutcomeList: { presence: {allowEmpty: false} },
         disseminateResearchFindingList: { presence: {allowEmpty: false} },
         primaryPurpose: { truthiness: true }
@@ -858,11 +863,10 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       if (otherPurpose) {
         values = {...values, otherPurposeDetails};
         constraints['otherPurposeDetails'] = {
-          presence: {
-            allowEmpty: false
-          },
           length: {
-            maximum: 500
+            minimum: 1,
+            maximum: 500,
+            ...lengthMessages('Other primary purpose')
           }
         };
       }
@@ -876,22 +880,20 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           populationDetails.includes(SpecificPopulationEnum.OTHER)) {
         values = {...values, otherPopulationDetails};
         constraints['otherPopulationDetails'] = {
-          presence: {
-            allowEmpty: false
-          },
           length: {
-            maximum: 100
+            minimum: 1,
+            maximum: 100,
+            ...lengthMessages('Specific Population Other')
           }
         };
       }
       if (diseaseFocusedResearch) {
         values = {...values, diseaseOfFocus};
         constraints['diseaseOfFocus'] = {
-          presence: {
-            allowEmpty: false
-          },
           length: {
-            maximum: 80
+            minimum: 1,
+            maximum: 80,
+            ...lengthMessages('Disease Of Focus')
           }
         };
       }
@@ -899,15 +901,14 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           disseminateResearchFindingList.includes(DisseminateResearchEnum.OTHER)) {
         values = {...values, otherDisseminateResearchFindings};
         constraints['otherDisseminateResearchFindings'] = {
-          presence: {
-            allowEmpty: false
-          },
           length: {
-            maximum: 100
+            minimum: 1,
+            maximum: 100,
+            ...lengthMessages('Disseminate Research Findings Other')
           }
         };
       }
-      return validate(values, constraints);
+      return validate(values, constraints, {fullMessages: false});
     }
 
     render() {
@@ -1026,14 +1027,14 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                 <CheckBox
                   data-test-id='researchPurpose-checkbox'
                   manageOwnState={false}
-                  style={{...styles.checkboxStyle, marginLeft: '0.6rem', marginTop: '0.1rem'}}
+                  style={{...styles.checkboxStyle, margin: '0.1rem 0.25rem 0 0.6rem'}}
                   checked={this.researchPurposeCheck}
                   onChange={v => this.onResearchPurposeChange(v)}/>
-                  <div style={{...styles.shortDescription, marginLeft: '-0.5rem'}}>
+                  <div style={{...styles.shortDescription}}>
                     <button style={{...styles.shortDescription, border: 'none'}}
                             data-test-id='research-purpose-button'
                             onClick={() => this.setState({showResearchPurpose: !this.state.showResearchPurpose})}>
-                      <label style={{fontSize: 14, marginLeft: '0.2rem'}}>Research purpose</label>
+                      <label style={{fontSize: 14}}>Research purpose</label>
                       <i className={this.iconClass} style={{verticalAlign: 'middle'}}></i>
                      </button>
                   </div>
@@ -1250,23 +1251,22 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                   You must select a billing account</li>}
                 {errors.primaryPurpose && <li> You must choose at least one primary research
                   purpose (Question 1)</li>}
-                {errors.diseaseOfFocus && <li> You must specify a disease of focus and it should be at most 80 characters</li>}
-                {errors.otherPurposeDetails && <li> Other primary purpose should not be blank and should be at most 500 characters</li>}
+                {errors.diseaseOfFocus && <li>{errors.diseaseOfFocus}</li>}
+                {errors.otherPurposeDetails && <li>{errors.otherPurposeDetails}</li>}
                 {errors.intendedStudy && <li> Answer for<i>What are the specific scientific question(s) you intend to study
-                  (Question 2.1)</i> must be between 0 and 1000 characters</li>}
+                  (Question 2.1)</i> {errors.intendedStudy}</li>}
                 {errors.scientificApproach && <li> Answer for <i>What are the scientific
-                  approaches you plan to use for your study (Question 2.2)</i> must be between 0 and 1000 characters</li>}
+                  approaches you plan to use for your study (Question 2.2)</i> {errors.scientificApproach}</li>}
                 {errors.anticipatedFindings && <li> Answer for <i>What are the anticipated findings
-                  from the study? (Question 2.3)</i> must be between 0 and 1000 characters</li>}
+                  from the study? (Question 2.3)</i> {errors.anticipatedFindings}</li>}
                 {errors.disseminateResearchFindingList && <li>
                   You must specific how you plan to disseminate your research findings (Question 3)</li>}
                 {errors.otherDisseminateResearchFindings && <li>
-                    Disseminate Research Findings Other text should not be blank and should be at most 100 characters</li>}
+                    Disseminate Research Findings Other {errors.otherDisseminateResearchFindings}</li>}
                 {errors.researchOutcomeList && <li> You must specify the outcome of the research (Question 4)</li>}
                 {errors.populationChecked && <li>You must pick an answer Population of interest question (Question 5)</li>}
                 {errors.populationDetails && <li> You must specify a population of study (Question 5)</li>}
-                {errors.otherPopulationDetails && <li>
-                    Specific Population Other text should not be blank and should be at most 100 characters</li>}
+                {errors.otherPopulationDetails && <li>{errors.otherPopulationDetails}</li>}
                 {errors.reviewRequested && <li>You must pick an answer for review of stigmatizing research (Question 6)</li>}
               </BulletAlignedUnorderedList>
             } disabled={!errors}>
