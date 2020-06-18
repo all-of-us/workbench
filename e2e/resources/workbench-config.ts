@@ -26,7 +26,7 @@ const local = {
 
 // workbench test environment
 const dev = {
-  uiBaseUrl: process.env.TEST_LOGIN_URL || 'https://all-of-us-workbench-test.appspot.com',
+  uiBaseUrl: process.env.TEST_LOGIN_URL || 'https://all-of-us-workbench-test.appspot.com/login',
   apiBaseUrl: process.env.TEST_API_URL || 'https://api-dot-all-of-us-workbench-test.appspot.com/v1',
   userEmailDomain: '@fake-research-aou.org',
 };

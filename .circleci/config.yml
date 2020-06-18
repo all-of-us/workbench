@@ -567,7 +567,7 @@ jobs:
       <<: *e2e_env
       WORKBENCH_ENV: dev
     working_directory: ~/workbench
-    parallelism: 3
+    parallelism: 1
     steps:
       - checkout_init_git
       - halt_job_noncode_changes

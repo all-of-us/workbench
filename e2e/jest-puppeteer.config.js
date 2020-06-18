@@ -40,6 +40,7 @@ const SWITCHES = (process.env.CI === 'true') ? CI_SWITCHES : DEFAULT_SWITCHES;
 
 module.exports = {
   launch: {
+    userDataDir: './data',
     headless: isHeadless,
     slowMo: 10, // slow down creation of browser to free up heap memory. https://github.com/puppeteer/puppeteer/issues/4684#issuecomment-511255786
     defaultViewport: null,
