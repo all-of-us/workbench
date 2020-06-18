@@ -231,9 +231,6 @@ public class WorkbenchConfig {
     // Setting this to true will enable the use of Billing Accounts controlled by the user
     // See RW-4711.
     public boolean enableBillingUpgrade;
-    // Whether or not AoU should handle inbound SumoLogic high-egress event requests.
-    // See RW-2253.
-    public boolean enableSumoLogicEventHandling;
     // Causes the server to use an API-based method for generating delegated user credentials,
     // as opposed to reading service account private keys from GCS.
     // See RW-2840.

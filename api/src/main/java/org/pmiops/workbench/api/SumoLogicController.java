@@ -49,10 +49,6 @@ public class SumoLogicController implements SumoLogicApiDelegate {
 
   @Override
   public ResponseEntity<Void> logEgressEvent(String X_API_KEY, EgressEventRequest request) {
-    if (!workbenchConfigProvider.get().featureFlags.enableSumoLogicEventHandling) {
-      throw new BadRequestException("SumoLogic event handling is disabled in this environment.");
-    }
-
     authorizeRequest(X_API_KEY, request);
 
     try {
