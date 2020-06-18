@@ -115,7 +115,6 @@ interface State {
   profileLoadingError: string;
   updatedProfile: Profile;
   verifiedInstitutionOptions: Array<PublicInstitutionDetails>;
-  verifiedInstitutionsByShortname: Map<String, PublicInstitutionDetails>;
 }
 
 
@@ -135,7 +134,6 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
       profileLoadingError: '',
       updatedProfile: null,
       verifiedInstitutionOptions: [],
-      verifiedInstitutionsByShortname: new Map()
     };
   }
 
@@ -204,13 +202,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     try {
       const institutionsResponse = await institutionApi().getPublicInstitutionDetails();
       const institutions = institutionsResponse.institutions;
-      this.setState({
-        verifiedInstitutionOptions: fp.sortBy( 'displayName', institutions),
-        verifiedInstitutionsByShortname: institutions.reduce(
-          (accumulator, institution) => accumulator.set(institution.shortName, institution),
-          new Map<String, PublicInstitutionDetails>()
-        )
-      });
+      this.setState({verifiedInstitutionOptions: fp.sortBy( 'displayName', institutions)});
     } catch (error) {
       this.setState({institutionsLoadingError: 'Could not get list of verified institutions - please try again later'});
     }
@@ -233,13 +225,16 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
   }
 
   renderCheckEmailResponse() {
-    const {checkEmailResponse, updatedProfile, verifiedInstitutionsByShortname} = this.state;
+    const {checkEmailResponse, updatedProfile, verifiedInstitutionOptions} = this.state;
     if (updatedProfile && updatedProfile.verifiedInstitutionalAffiliation) {
       if (checkEmailResponse.isValidMember) {
         return null;
       } else {
         const {verifiedInstitutionalAffiliation} = updatedProfile;
-        const institution = verifiedInstitutionsByShortname.get(verifiedInstitutionalAffiliation.institutionShortName);
+        const institution = fp.find(
+            institution => institution.shortName === verifiedInstitutionalAffiliation.institutionShortName,
+            verifiedInstitutionOptions
+        );
         if (institution.duaTypeEnum === DuaType.RESTRICTED) {
           // Institution has signed Restricted agreement and the email is not in allowed emails list
           return <RestrictedDuaEmailMismatchErrorMessage/>;
@@ -253,13 +248,16 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
   }
 
   async setVerifiedInstitutionOnProfile(institutionShortName: string) {
-    const {verifiedInstitutionsByShortname} = this.state;
+    const {verifiedInstitutionOptions} = this.state;
     await this.setState({loading: true});
     await this.setState(fp.flow(
       fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionShortName'], institutionShortName),
       fp.set(
           ['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionDisplayName'],
-        verifiedInstitutionsByShortname.get(institutionShortName).displayName
+          verifiedInstitutionOptions.find(
+              institution => institution.shortName === institutionShortName,
+              verifiedInstitutionOptions
+          )
       ),
       fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionRoleEnum'], undefined),
       fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], undefined)
