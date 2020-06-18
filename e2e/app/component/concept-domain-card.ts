@@ -38,11 +38,7 @@ export default class ConceptDomainCard extends Container {
     */
   async getParticipantsCount(): Promise<string> {
     const selector = `${this.getXpath()}//*[contains(normalize-space(text()), "participants in domain")]`;
-    const elemt = await this.page.waitForXPath(selector, {visible: true});
-    const textContent = await elemt.getProperty('textContent');
-    const value = (await textContent.jsonValue()).toString();
-    const regex = new RegExp(/\d{1,3}(,?\d{3})*/); // Match numbers with comma
-    const num = (regex.exec(value))[0];
+    const num = await this.extractConceptsCount(selector);
     console.log(`Participants in this domain: ${num}`);
     return num;
   }
@@ -52,13 +48,17 @@ export default class ConceptDomainCard extends Container {
     */
   async getConceptsCount(): Promise<string> {
     const selector = `${this.getXpath()}//*[contains(normalize-space(text()), "concepts in this domain")]`;
+    const num = await this.extractConceptsCount(selector);
+    console.log(`Concepts in this domain: ${num}`);
+    return num;
+  }
+
+  private async extractConceptsCount(selector: string): Promise<string> {
     const elemt = await this.page.waitForXPath(selector, {visible: true});
     const textContent = await elemt.getProperty('textContent');
     const value = (await textContent.jsonValue()).toString();
     const regex = new RegExp(/\d{1,3}(,?\d{3})*/); // Match numbers with comma
-    const num = (regex.exec(value))[0];
-    console.log(`Concepts in this domain: ${num}`);
-    return num;
+    return (regex.exec(value))[0];
   }
 
   private async getSelectConceptButton(): Promise<Button> {
