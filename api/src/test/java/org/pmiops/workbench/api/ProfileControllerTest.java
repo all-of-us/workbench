@@ -2,9 +2,11 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -1397,6 +1399,30 @@ public class ProfileControllerTest extends BaseControllerTest {
         false);
     assertThat(profile.getFreeTierUsage()).isEqualTo(FREE_TIER_USAGE);
     assertThat(profile.getFreeTierDollarQuota()).isEqualTo(FREE_TIER_LIMIT);
+  }
+
+  // verify that setFreeTierDollarOverride() is called when the quota changes
+
+  @Test
+  public void adminUpdateProfile_setFreeTierDollarQuota() {
+    final Double newQuota = 123.4;
+
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+
+    profile.setFreeTierDollarQuota(newQuota);
+    profileController.adminUpdateProfile(dbUser, profile);
+    verify(freeTierBillingService).setFreeTierDollarOverride(dbUser, newQuota);
+  }
+
+  // verify that setFreeTierDollarOverride() is not called when the quota does not change
+
+  @Test
+  public void adminUpdateProfile_FreeTierDollarQuota_no_change() {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    profileController.adminUpdateProfile(dbUser, profile);
+    verify(freeTierBillingService, never()).setFreeTierDollarOverride(any(), anyDouble());
   }
 
   @Test

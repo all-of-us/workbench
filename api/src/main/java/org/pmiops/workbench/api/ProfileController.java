@@ -23,6 +23,7 @@ import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.captcha.CaptchaVerificationService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -130,6 +131,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final DemographicSurveyMapper demographicSurveyMapper;
   private final DirectoryService directoryService;
   private final FireCloudService fireCloudService;
+  private final FreeTierBillingService freeTierBillingService;
   private final InstitutionService institutionService;
   private final PageVisitMapper pageVisitMapper;
   private final ProfileAuditor profileAuditor;
@@ -152,6 +154,7 @@ public class ProfileController implements ProfileApiDelegate {
       DemographicSurveyMapper demographicSurveyMapper,
       DirectoryService directoryService,
       FireCloudService fireCloudService,
+      FreeTierBillingService freeTierBillingService,
       InstitutionService institutionService,
       PageVisitMapper pageVisitMapper,
       ProfileAuditor profileAuditor,
@@ -171,6 +174,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.demographicSurveyMapper = demographicSurveyMapper;
     this.directoryService = directoryService;
     this.fireCloudService = fireCloudService;
+    this.freeTierBillingService = freeTierBillingService;
     this.institutionService = institutionService;
     this.mailServiceProvider = mailServiceProvider;
     this.pageVisitMapper = pageVisitMapper;
@@ -543,6 +547,12 @@ public class ProfileController implements ProfileApiDelegate {
     profileService.validateUpdatedProfile(updatedProfile, previousProfile);
 
     profileService.adminUpdateProfile(updatedProfile);
+
+    // update the user's free-tier-active status, if this changes
+    if (!updatedProfile.getFreeTierDollarQuota().equals(previousProfile.getFreeTierDollarQuota())) {
+      freeTierBillingService.setFreeTierDollarOverride(
+          user, updatedProfile.getFreeTierDollarQuota());
+    }
 
     if (workbenchConfigProvider.get().featureFlags.requireInstitutionalVerification) {
       profileService.saveVerifiedInstitutionalAffiliation(user, updatedProfile);

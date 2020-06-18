@@ -295,4 +295,28 @@ public class FreeTierBillingService {
     return Optional.ofNullable(user.getFreeTierCreditsLimitDollarsOverride())
         .orElse(workbenchConfigProvider.get().billing.defaultFreeCreditsDollarLimit);
   }
+
+  /**
+   * Set a custom Free Tier dollar limit override for this user. If this is greater than the user's
+   * total cost, set their workspaces to active. Note: lowering the limit below total cost will not
+   * set the workspaces to inactive. checkFreeTierBillingUsage() will do this as part of the next
+   * cron run.
+   *
+   * @param user the user as represented in our database
+   * @return the US dollar amount, represented as a double
+   */
+  public boolean setFreeTierDollarOverride(DbUser user, double dollarLimit) {
+    // TODO: prevent setting this limit directly except in this method?
+    user.setFreeTierCreditsLimitDollarsOverride(dollarLimit);
+
+    // may be redundant: enable anyway
+    boolean enableWorkspaces =
+        Optional.ofNullable(getCachedFreeTierUsage(user))
+            .map(usage -> compareCosts(usage, dollarLimit) < 0)
+            .orElse(true);
+    if (enableWorkspaces) {
+      updateFreeTierWorkspacesStatus(user, BillingStatus.ACTIVE);
+    }
+    return enableWorkspaces;
+  }
 }

@@ -329,27 +329,45 @@ public class FreeTierBillingServiceTest {
   }
 
   @Test
-  public void checkFreeTierBillingUsage_override() throws MessagingException {
+  public void setFreeTierDollarOverride_above_usage() throws MessagingException {
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
-    doReturn(mockBQTableSingleResult(100.01)).when(bigQueryService).executeQuery(any());
+    doReturn(mockBQTableSingleResult(150.0)).when(bigQueryService).executeQuery(any());
 
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
     final DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
     freeTierBillingService.checkFreeTierBillingUsage();
     verify(mailService).alertUserFreeTierExpiration(eq(user));
+    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 150.0);
 
-    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 100.01);
-
-    user.setFreeTierCreditsLimitDollarsOverride(200.0);
-    userDao.save(user);
+    freeTierBillingService.setFreeTierDollarOverride(user, 200.0);
+    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.ACTIVE, 150.0);
 
     freeTierBillingService.checkFreeTierBillingUsage();
     verifyZeroInteractions(mailService);
+    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.ACTIVE, 150.0);
+  }
 
-    // we do not reset the workspace's state to ACTIVE
-    // that will be done by the override endpoint (TODO)
-    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 100.01);
+  // do not reactivate workspaces if the new dollar limit is still below the usage
+
+  @Test
+  public void setFreeTierDollarOverride_under_usage() throws MessagingException {
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    doReturn(mockBQTableSingleResult(300.0)).when(bigQueryService).executeQuery(any());
+
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    final DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+
+    freeTierBillingService.checkFreeTierBillingUsage();
+    verify(mailService).alertUserFreeTierExpiration(eq(user));
+    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 300.0);
+
+    freeTierBillingService.setFreeTierDollarOverride(user, 200.0);
+    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 300.0);
+
+    freeTierBillingService.checkFreeTierBillingUsage();
+    verifyZeroInteractions(mailService);
+    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 300.0);
   }
 
   @Test
@@ -519,15 +537,14 @@ public class FreeTierBillingServiceTest {
     DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
 
     final double freeTierCreditsDollarLimitOverride = 100.0;
-    user.setFreeTierCreditsLimitDollarsOverride(freeTierCreditsDollarLimitOverride);
-    user = userDao.save(user);
+    freeTierBillingService.setFreeTierDollarOverride(user, freeTierCreditsDollarLimitOverride);
     assertWithinBillingTolerance(
         freeTierBillingService.getUserFreeTierDollarLimit(user),
         freeTierCreditsDollarLimitOverride);
 
     final double doubleFreeTierCreditsDollarLimitOverride = 200.0;
-    user.setFreeTierCreditsLimitDollarsOverride(doubleFreeTierCreditsDollarLimitOverride);
-    user = userDao.save(user);
+    freeTierBillingService.setFreeTierDollarOverride(
+        user, doubleFreeTierCreditsDollarLimitOverride);
 
     assertWithinBillingTolerance(
         freeTierBillingService.getUserFreeTierDollarLimit(user),
