@@ -62,7 +62,7 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
       long workspaceDatabaseId, long limit, DateTime after, DateTime before) {
     final String whereClausePrefix =
         "jsonPayload.target_id = @workspace_db_id AND\n"
-            + "  jsonPayload.target_type = 'WORKSPACE' AND\n";
+            + "  jsonPayload.target_type = 'WORKSPACE'\n";
     final String queryString = String.format(QUERY_FORMAT, getTableName(), whereClausePrefix);
 
     final QueryJobConfiguration queryJobConfiguration =

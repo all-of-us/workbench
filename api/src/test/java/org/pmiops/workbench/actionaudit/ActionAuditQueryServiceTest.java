@@ -103,6 +103,8 @@ public class ActionAuditQueryServiceTest {
   private static final DateTime DEFAULT_BEFORE_EXCLUSIVE = DateTime.parse("2020-08-30T01:20+02:00");
   private static final long TIME_TOLERANCE_MILLIS = 500;
   private static final long USER_DB_ID = 11223344L;
+  private static final String WORKSPACE_QUERY_TEXT =
+      "SELECT   TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) as event_time,   jsonPayload.agent_type AS agent_type,   CAST(jsonPayload.agent_id AS INT64) AS agent_id,   jsonPayload.agent_email AS agent_username,   jsonPayload.action_id AS action_id,   jsonPayload.action_type AS action_type,   jsonPayload.target_type AS target_type,   CAST(jsonPayload.target_id AS INT64) AS target_id,   jsonPayload.target_property AS target_property,   jsonPayload.prev_value AS prev_value,   jsonPayload.new_value AS new_value FROM `null.action_audit_unit_test.null` WHERE jsonPayload.target_id = 101 AND   jsonPayload.target_type = 'WORKSPACE'  AND   TIMESTAMP '0205-02-13 23:20:00.000000+00:00' <= TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) AND   TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) < TIMESTAMP '2020-08-29 23:20:00.000000+00:00' ORDER BY event_time, agent_id, action_id LIMIT 1000";
 
   @MockBean private BigQueryService mockBigQueryService;
   @Autowired private ActionAuditQueryService actionAuditQueryService;
@@ -162,6 +164,8 @@ public class ActionAuditQueryServiceTest {
     assertThat(row2.getActionId()).isEqualTo(ACTION_ID_1);
     assertThat(row2.getTargetType()).isEqualTo("WORKSPACE");
     assertThat(row2.getPreviousValue()).isNull();
+
+    assertThat(response.getQuery()).isEqualTo(WORKSPACE_QUERY_TEXT);
   }
 
   @Test
