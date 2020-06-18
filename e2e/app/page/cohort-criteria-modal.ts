@@ -9,7 +9,7 @@ import Dialog, {ButtonLabel} from 'app/component/dialog';
 import SelectMenu from 'app/component/select-menu';
 import Table from 'app/component/table';
 
-const defaultXpath = '//*[contains(concat(" ", normalize-space(@class)), " crit-modal-container")]';
+const defaultXpath = '//*[@class="modal-container"]';
 
 export enum PhysicalMeasurementsCriteria {
   BloodPressure = 'Blood Pressure',

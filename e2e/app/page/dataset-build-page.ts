@@ -1,12 +1,14 @@
 import Table from 'app/component/table';
 import Button from 'app/element/button';
 import Checkbox from 'app/element/checkbox';
+import ClrIconLink from 'app/element/clr-icon-link';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
 import {xPathOptionToXpath} from 'app/element/xpath-defaults';
 import {ElementType} from 'app/xpath-options';
 import AuthenticatedPage from './authenticated-page';
 import CohortBuildPage from './cohort-build-page';
+import ConceptsetSearchPage from './conceptset-search-page';
 
 const PageTitle = 'Dataset Page';
 
@@ -61,11 +63,22 @@ export default class DatasetBuildPage extends AuthenticatedPage {
   }
 
   /**
+   * Click Add Concept Sets button, opened the Concept Sets page.
+   */
+  async clickAddConceptSetsButton(): Promise<ConceptsetSearchPage> {
+    const addConceptSetsButton = await ClrIconLink.findByName(this.page, {name: LabelAlias.SelectConceptSets, ancestorLevel: 3, iconShape: 'plus-circle'});
+    await addConceptSetsButton.clickAndWait();
+    await waitWhileLoading(this.page);
+    const conceptPage = new ConceptsetSearchPage(this.page);
+    return conceptPage;
+  }
+
+  /**
    * Check or uncheck the Select All checkbox.
    * @param {boolean} selectAll
    */
   async selectAllValues(selectAll: boolean = true): Promise<void> {
-    const xpath = xPathOptionToXpath({name: LabelAlias.SelectValues, ancestorLevel: 3, type: ElementType.Checkbox});
+    const xpath = xPathOptionToXpath({containsText: LabelAlias.SelectValues, ancestorLevel: 3, type: ElementType.Checkbox});
     const selectAllCheckbox = new Checkbox(this.page, xpath);
     selectAll ? await selectAllCheckbox.check() : await selectAllCheckbox.unCheck();
     await waitWhileLoading(this.page);

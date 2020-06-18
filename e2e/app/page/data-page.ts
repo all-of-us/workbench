@@ -148,4 +148,26 @@ export default class DataPage extends AuthenticatedPage {
     return waitWhileLoading(this.page);
   }
 
+  /**
+   * Delete ConceptSet thru Ellipsis menu located inside the Concept Set resource card.
+   * @param {string} conceptsetName
+   */
+  async deleteConceptSet(conceptsetName: string): Promise<string> {
+    const datasetCard = await DataResourceCard.findCard(this.page, conceptsetName);
+    const menu = datasetCard.getEllipsis();
+    await menu.clickAction(EllipsisMenuAction.Delete, false);
+
+    const dialog = new Dialog(this.page);
+    const dialogContentText = await dialog.getContent();
+    const deleteButton = await Button.findByName(this.page, {normalizeSpace: 'Delete Concept Set'}, dialog);
+    await Promise.all([
+      deleteButton.click(),
+      dialog.waitUntilDialogIsClosed(),
+    ]);
+    await waitWhileLoading(this.page);
+
+    console.log(`Deleted Concept Set "${conceptsetName}"`);
+    return dialogContentText;
+  }
+
 }
