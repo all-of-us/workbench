@@ -243,6 +243,9 @@ public class WorkbenchConfig {
     public boolean enableV3DataUserCodeOfConduct;
     // Flag to indicate whether to show the Event Date modifier in cohort builder
     public boolean enableEventDateModifier;
+    // Flag to indicate whether to show Update research purpose prompt after an year of workspace
+    // creation
+    public boolean enableResearchPurposePrompt;
   }
 
   public static class ActionAuditConfig {

@@ -344,13 +344,13 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
         <ModalBody style={{display: 'flex', flexDirection: 'column'}}>
           <div>
             Please review the workspace description to make sure it is current. To provide
-            transparency to <a href='https://www.researchallofus.org/research-projects-directory/'
-              target='_blank'><AouTitle/></a> participants, your answers below
-            will be made available publicly in the Research Hub Directory on our public website.
+            transparency to <AouTitle/> participants, your answers below
+            will be made available publicly in the <a href='https://www.researchallofus.org/research-projects-directory/'
+            target='_blank'>Research Hub Directory</a> on our public website.
           </div>
         </ModalBody>
         <ModalFooter>
-          <Button type='primary' style={{marginLeft: '1rem'}}
+          <Button type='primary' style={{marginLeft: '1rem', marginRight: '1rem'}}
                   onClick={() => this.handleReviewResearchPurpose()}>REVIEW NOW</Button>
           <Button type='secondary'
                   onClick={() => this.setState({showResearchPurposeReviewModal: false})}>REVIEW LATER</Button>

@@ -101,7 +101,8 @@
     "requireInstitutionalVerification": true,
     "enableCBAgeTypeOptions": false,
     "enableV3DataUserCodeOfConduct": true,
-    "enableEventDateModifier": false
+    "enableEventDateModifier": false,
+    "enableResearchPurposePrompt": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-staging",

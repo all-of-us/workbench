@@ -20,6 +20,7 @@ import {
 } from 'app/utils/research-purpose';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
+import {colorWithWhiteness} from "../../styles/colors";
 
 const styles = reactStyles({
   editIcon: {
@@ -55,16 +56,24 @@ const styles = reactStyles({
     fontSize: '14px', lineHeight: '24px', color: colors.primary, marginTop: '0.3rem'
   },
   reviewPurposeReminder: {
-    paddingTop: '0.3rem', borderStyle: 'solid', height: '3rem', color: colors.primary,
-    borderColor: colors.warning, borderRadius: '0.5rem', backgroundColor: colors.resourceCardHighlights.cohort
+    marginTop: '0.3rem',
+    borderStyle: 'solid',
+    height: '2.5rem',
+    color: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderColor: colors.warning,
+    borderRadius: '0.4rem',
+    borderWidth: '0.1rem',
+    backgroundColor: colorWithWhiteness(colors.highlight, 0.7)
   }
 });
 
 function updateWorkspace(workspace) {
   workspace.researchPurpose.researchPurposeReviewed = true;
   workspacesApi().updateWorkspace(workspace.namespace, workspace.id, {workspace: workspace})
-    .then(workspaceUpdate => navigate(['workspaces',  workspaceUpdate.namespace, workspaceUpdate.id, 'data']));
-
+    .then(workspaceUpdate =>
+        navigate(['workspaces', workspaceUpdate.namespace, workspaceUpdate.id, 'about']));
 }
 
 export const ResearchPurpose = withCurrentWorkspace()(
@@ -85,18 +94,20 @@ export const ResearchPurpose = withCurrentWorkspace()(
         </Clickable>
       </div>
       {isOwner && !workspace.researchPurpose.researchPurposeReviewed && <FlexRow style={styles.reviewPurposeReminder}>
-        <ClrIcon style={{color: colors.warning, paddingTop: '0.2rem'}} className='is-solid' shape='exclamation-triangle' size='22'/>
+        <ClrIcon style={{color: colors.warning, marginLeft: '0.3rem'}} className='is-solid'
+        shape='exclamation-triangle' size='25'/>
         <FlexColumn style={{paddingRight: '0.5rem', paddingLeft: '0.5rem', color: colors.primary}}>
-          <label style={{fontWeight: 600, fontSize: '14px'}}>Please update or verify the following Research Purpose.</label>
-          Every 365 days you will need to update or verify the Research Purpose
+        <label style={{fontWeight: 600, fontSize: '14px', flex: 1}}>
+        Please update or verify the following Research Purpose.</label>
         </FlexColumn>
-        <div style={{paddingTop: '0.2rem', marginLeft: '0.8rem'}}>
-          <a style={{marginRight: '0.5rem'}} onClick={() => updateWorkspace(workspace)}>Looks Good</a>
-          |
-          <a style={{marginLeft: '0.5rem'}} onClick={() => navigate(
-                     ['workspaces',  workspace.namespace, workspace.id, 'edit'])}>Update</a>
+        <div style={{marginLeft: 'auto', marginRight: '0.5rem'}}>
+        <a style={{marginRight: '0.5rem'}} onClick={() => updateWorkspace(workspace)}>Looks
+        Good</a>
+        |
+        <a style={{marginLeft: '0.5rem'}} onClick={() => navigate(
+          ['workspaces', workspace.namespace, workspace.id, 'edit'])}>Update</a>
         </div>
-    </FlexRow>}
+        </FlexRow>}
       <div style={styles.sectionContentContainer}>
         {selectedResearchPurposeItems && selectedResearchPurposeItems.length > 0 && <div
              style={styles.sectionSubHeader}>Research Purpose</div>

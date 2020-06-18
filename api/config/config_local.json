@@ -101,7 +101,8 @@
     "requireInstitutionalVerification": true,
     "enableCBAgeTypeOptions": true,
     "enableV3DataUserCodeOfConduct": true,
-    "enableEventDateModifier": false
+    "enableEventDateModifier": false,
+    "enableResearchPurposePrompt": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local",
