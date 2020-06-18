@@ -16,8 +16,8 @@ export const usePath = () => {
   return path;
 };
 
-export const withTitle = WrappedComponent => ({title, ...props}) => {
-  routeDataStore.set({title});
+export const withRouteData = WrappedComponent => ({routeData, ...props}) => {
+  routeDataStore.set(routeData);
   return <WrappedComponent {...props}/>;
 };
 

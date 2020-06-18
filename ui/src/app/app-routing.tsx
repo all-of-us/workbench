@@ -1,5 +1,5 @@
 import {Component as AComponent} from '@angular/core';
-import {AppRoute, AppRouter, Guard, ProtectedRoutes, withFullHeight, withTitle} from 'app/components/app-router';
+import {AppRoute, AppRouter, Guard, ProtectedRoutes, withFullHeight, withRouteData} from 'app/components/app-router';
 import {DataUserCodeOfConduct} from 'app/pages/profile/data-user-code-of-conduct';
 import { ReactWrapperBase } from 'app/utils';
 import {authStore, useStore} from 'app/utils/stores';
@@ -13,7 +13,7 @@ const signInGuard: Guard = {
   redirectPath: '/login'
 };
 
-const DUCC = fp.flow(withTitle, withFullHeight)(DataUserCodeOfConduct);
+const DUCC = fp.flow(withRouteData, withFullHeight)(DataUserCodeOfConduct);
 
 export const AppRoutingComponent: React.FunctionComponent = () => {
   const {authLoaded = false} = useStore(authStore);
@@ -23,7 +23,10 @@ export const AppRoutingComponent: React.FunctionComponent = () => {
     <ProtectedRoutes guards={[signInGuard]}>
         <AppRoute
         path='/data-code-of-conduct'
-        component={ () => <DUCC title='Data User Code of Conduct'/>}
+          component={ () => <DUCC routeData={{
+            title: 'Data User Code of Conduct',
+            minimizeChrome: true
+          }} />}
         />
     </ProtectedRoutes>
   </AppRouter>;

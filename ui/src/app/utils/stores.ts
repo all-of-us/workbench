@@ -3,6 +3,7 @@ import {atom, Atom} from './subscribable';
 
 interface RouteDataStore {
   title?: string;
+  minimizeChrome?: boolean;
 }
 
 export const routeDataStore = atom<RouteDataStore>({});

@@ -340,6 +340,7 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
 
 
   render() {
+    const showFooter = environment.enableFooter && this.state.currentStep !== SignInStep.TERMS_OF_SERVICE;
     const backgroundImages = StepToImageConfig.get(this.state.currentStep);
     return <FlexColumn style={styles.signInContainer} data-test-id='sign-in-container'>
       <FlexColumn data-test-id='sign-in-page'
@@ -348,7 +349,7 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
                   src={PUBLIC_HEADER_IMAGE}/></div>
         {this.renderSignInStep(this.state.currentStep)}
       </FlexColumn>
-      {environment.enableFooter && <Footer type={FooterTypeEnum.Registration} />}
+      {showFooter && <Footer type={FooterTypeEnum.Registration} />}
     </FlexColumn>;
   }
 }

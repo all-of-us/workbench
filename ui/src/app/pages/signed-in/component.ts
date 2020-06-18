@@ -10,6 +10,7 @@ import {cdrVersionsApi} from 'app/services/swagger-fetch-clients';
 import {FooterTypeEnum} from 'app/components/footer';
 import {debouncer, hasRegisteredAccessFetch} from 'app/utils';
 import {cdrVersionStore, navigateSignOut, routeConfigDataStore} from 'app/utils/navigation';
+import {routeDataStore} from 'app/utils/stores';
 import {initializeZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
 import {Profile as FetchProfile} from 'generated/fetch';
@@ -96,8 +97,16 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     });
     this.subscriptions.push(this.signOutNavigateSub);
 
+    // This handles detection of Angular-based routing data.
     this.subscriptions.push(routeConfigDataStore.subscribe(({minimizeChrome}) => {
       this.minimizeChrome = minimizeChrome;
+    }));
+
+    // This handles detection of React-based routing data. During migrations,
+    // we assume React routing data will be set deeper/later in the component
+    // hierarchy, therefore it will generally take precendence over React.
+    this.subscriptions.push(routeDataStore.subscribe(({minimizeChrome}) => {
+      this.minimizeChrome = !!minimizeChrome;
     }));
 
     // As a special case, if we determine the user is inactive immediately after

@@ -111,7 +111,7 @@ export class AccountCreationSuccess
           }}
           onClose={() => this.setState({updateModal: false})}
       />}
-      <div style={{paddingTop: '1rem'}}>
+      <div style={{marginBottom: '.5rem', paddingTop: '1rem'}}>
         <div style={styles.borderStyle}>
           Please note: For full access to the Research Workbench data and tools, you'll be required
           to complete the necessary registration steps.
