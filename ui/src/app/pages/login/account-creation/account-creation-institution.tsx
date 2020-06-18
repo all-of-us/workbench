@@ -254,10 +254,10 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
         institution.shortName === institutionShortName, institutions);
     if (selectedInstitutionObj.duaTypeEnum === DuaType.RESTRICTED) {
       // Institution has signed Restricted agreement and the email is not in allowed emails list
-      return <RestrictedDuaEmailMismatchErrorMessage/>
+      return <RestrictedDuaEmailMismatchErrorMessage/>;
     } else {
       // Institution has MASTER or NULL agreement and the domain is not in the allowed list
-      return <MasterDuaEmailMismatchErrorMessage/>
+      return <MasterDuaEmailMismatchErrorMessage/>;
     }
   }
 

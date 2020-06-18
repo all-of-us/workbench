@@ -237,16 +237,15 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     if (updatedProfile && updatedProfile.verifiedInstitutionalAffiliation) {
       if (checkEmailResponse.isValidMember) {
         return null;
-      }
-      else {
+      } else {
         const {verifiedInstitutionalAffiliation} = updatedProfile;
         const institution = verifiedInstitutionsByShortname.get(verifiedInstitutionalAffiliation.institutionShortName);
         if (institution.duaTypeEnum === DuaType.RESTRICTED) {
           // Institution has signed Restricted agreement and the email is not in allowed emails list
-          return <RestrictedDuaEmailMismatchErrorMessage/>
+          return <RestrictedDuaEmailMismatchErrorMessage/>;
         } else {
           // Institution has MASTER or NULL agreement and the domain is not in the allowed list
-          return <MasterDuaEmailMismatchErrorMessage/>
+          return <MasterDuaEmailMismatchErrorMessage/>;
         }
       }
     }
@@ -257,13 +256,13 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     const {verifiedInstitutionsByShortname} = this.state;
     await this.setState({loading: true});
     await this.setState(fp.flow(
-          fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionShortName'], institutionShortName),
-          fp.set(
-              ['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionDisplayName'],
-              verifiedInstitutionsByShortname.get(institutionShortName).displayName
-          ),
-          fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionRoleEnum'], undefined),
-          fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], undefined)
+      fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionShortName'], institutionShortName),
+      fp.set(
+          ['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionDisplayName'],
+        verifiedInstitutionsByShortname.get(institutionShortName).displayName
+      ),
+      fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionRoleEnum'], undefined),
+      fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], undefined)
       ));
     await this.checkEmail();
     await this.setState({loading: false});
@@ -295,7 +294,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
   validateVerifiedInstitutionalAffiliation() {
     const {updatedProfile} = this.state;
     if (updatedProfile && updatedProfile.verifiedInstitutionalAffiliation) {
-        return updatedProfile.verifiedInstitutionalAffiliation;
+      return updatedProfile.verifiedInstitutionalAffiliation;
     }
     return false;
   }
@@ -492,7 +491,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
             {verifiedInstitutionOptions && <DropdownWithLabel
                 label={'Verified institution'}
                 options={this.getInstitutionDropdownOptions()}
-                onChange={async (event) => this.setVerifiedInstitutionOnProfile(event.value)}
+                onChange={async(event) => this.setVerifiedInstitutionOnProfile(event.value)}
                 initialValue={
                   updatedProfile.verifiedInstitutionalAffiliation
                       ? updatedProfile.verifiedInstitutionalAffiliation.institutionShortName

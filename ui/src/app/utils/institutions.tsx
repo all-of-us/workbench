@@ -1,11 +1,11 @@
-import * as fp from 'lodash/fp';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
+import {institutionApi} from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
 import {InstitutionalRole, PublicInstitutionDetails} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+import {isAbortError} from './errors';
 import {isBlank} from './index';
-import {institutionApi} from "../services/swagger-fetch-clients";
-import {isAbortError} from "./errors";
-import colors from "app/styles/colors";
-import * as React from "react";
 
 /**
  * Checks that the entered email address is a valid member of the chosen institution.
@@ -40,11 +40,11 @@ export const getRoleOptions = (institutions: Array<PublicInstitutionDetails>, in
     return [];
   }
 
-  const institution = fp.find(institution => {
+  const matchedInstitution = fp.find(institution => {
     const {shortName} = institution;
     return shortName === institutionShortName;
   }, institutions);
-  const {organizationTypeEnum} = institution;
+  const {organizationTypeEnum} = matchedInstitution;
   const availableRoles: Array<InstitutionalRole> =
       AccountCreationOptions.institutionalRolesByOrganizationType
       .find(obj => obj.type === organizationTypeEnum)
