@@ -74,7 +74,6 @@ public class FreeTierBillingServiceTest {
 
   private static final String SINGLE_WORKSPACE_TEST_USER = "test@test.com";
   private static final String SINGLE_WORKSPACE_TEST_PROJECT = "aou-test-123";
-  private static final String FREE_TIER_BILLING_ACCOUNT_NAME = "free-tier";
 
   // An arbitrary timestamp to use as the anchor time for access module test cases.
   private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
@@ -101,7 +100,7 @@ public class FreeTierBillingServiceTest {
   public void setUp() {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.billing.freeTierCostAlertThresholds = new ArrayList<>(Doubles.asList(.5, .75));
-    workbenchConfig.billing.accountId = FREE_TIER_BILLING_ACCOUNT_NAME;
+    workbenchConfig.billing.accountId = "free-tier";
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 1000.0;
 
     // by default we have 0 spend
@@ -611,6 +610,33 @@ public class FreeTierBillingServiceTest {
     assertThat(freeTierBillingService.userHasRemainingFreeTierCredits(user1)).isTrue();
   }
 
+  @Test
+  public void test_disableOnlyFreeTierWorkspaces() throws MessagingException {
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    doReturn(mockBQTableSingleResult(100.01)).when(bigQueryService).executeQuery(any());
+
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    final DbWorkspace freeTierWorkspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+    final DbWorkspace userAccountWorkspace = new DbWorkspace();
+    userAccountWorkspace.setCreator(user);
+    userAccountWorkspace.setWorkspaceNamespace("some other namespace");
+    userAccountWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
+    userAccountWorkspace.setBillingAccountName("some other account");
+    userAccountWorkspace.setBillingStatus(BillingStatus.ACTIVE);
+    workspaceDao.save(userAccountWorkspace);
+
+    freeTierBillingService.checkFreeTierBillingUsage();
+    verify(mailService).alertUserFreeTierExpiration(eq(user));
+
+    assertSingleWorkspaceTestDbState(user, freeTierWorkspace, BillingStatus.INACTIVE, 100.01);
+
+    final DbWorkspace retrievedWorkspace =
+        workspaceDao.findOne(userAccountWorkspace.getWorkspaceId());
+    assertThat(retrievedWorkspace.getBillingStatus()).isEqualTo(BillingStatus.ACTIVE);
+    // TODO RW-5107
+    // assertThat(retrievedWorkspace.getBillingAccountType()).isEqualTo(BillingAccountType.USER_PROVIDED);
+  }
+
   private TableResult mockBQTableResult(final Map<String, Double> costMap) {
     Field idField = Field.of("id", LegacySQLTypeName.STRING);
     Field costField = Field.of("cost", LegacySQLTypeName.FLOAT);
@@ -665,7 +691,8 @@ public class FreeTierBillingServiceTest {
     workspace.setCreator(creator);
     workspace.setWorkspaceNamespace(namespace);
     workspace.setBillingMigrationStatusEnum(billingMigrationStatus);
-    workspace.setBillingAccountName(FREE_TIER_BILLING_ACCOUNT_NAME);
+    workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
+    workspace.setBillingAccountType(BillingAccountType.FREE_TIER);
     return workspaceDao.save(workspace);
   }
 
