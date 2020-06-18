@@ -42,7 +42,7 @@ const styles = reactStyles({
     backgroundColor: colors.primary,
     padding: '1rem',
     // Must be higher than the side helpbar index. See help-bar.tsx.
-    zIndex: 201
+    zIndex: 102
   },
   workbenchFooterItem: {
     width: '12rem',
@@ -73,7 +73,7 @@ const FooterTemplate = ({style = {}, ...props}) => {
         {props.children}
         <div style={{...styles.footerAside, marginTop: '20px'}}>
           The <AoU/> logo is a service mark of the&nbsp;
-          <NewTabFooterAnchorTag href="https://www.hhs.gov">
+          <NewTabFooterAnchorTag href='https://www.hhs.gov'>
             U.S. Department of Health and Human Services
           </NewTabFooterAnchorTag>.<br/>
           The <AoU/> platform is for research only and does not provide medical advice, diagnosis or treatment. Copyright 2020.
