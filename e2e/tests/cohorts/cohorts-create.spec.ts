@@ -1,5 +1,4 @@
 import {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/cohort-criteria-modal';
-import {ButtonLabel} from 'app/component/dialog';
 import ClrIconLink from 'app/element/clr-icon-link';
 import Link from 'app/element/link';
 import {EllipsisMenuAction} from 'app/page-identifiers';
@@ -162,7 +161,7 @@ describe('User can create new Cohorts', () => {
     await modal.addAgeModifier(FilterSign.GreaterThanOrEqualTo, 50);
 
     // Click FINISH button. Criteria dialog closes.
-    await modal.clickButton(ButtonLabel.Finish);
+    await modal.clickFinishButton();
 
     // Check Group 1 Count.
     const group1Count = await group1.getGroupCount();

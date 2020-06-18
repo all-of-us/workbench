@@ -5,6 +5,7 @@ export interface XPathOptions {
   normalizeSpace?: string;
   ancestorLevel?: number;
   iconShape?: string;
+  startsWith?: string;
 }
 
 export enum ElementType {

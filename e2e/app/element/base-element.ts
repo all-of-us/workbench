@@ -29,10 +29,16 @@ export default class BaseElement extends Container {
    * @param {WaitForSelectorOptions} waitOptions
    */
   async waitForXPath(waitOptions: WaitForSelectorOptions = {visible: true}): Promise<this> {
-    if (this.element === undefined) {
-      this.element = await this.page.waitForXPath(this.xpath, waitOptions);
+    try {
+      if (this.element === undefined) {
+        this.element = await this.page.waitForXPath(this.xpath, waitOptions);
+      }
+      return this;
+    } catch (err) {
+      // Debugging pause
+      // await jestPuppeteer.debug();
+      throw err;
     }
-    return this;
   }
 
   /**

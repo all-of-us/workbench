@@ -7,7 +7,7 @@ export function iframeXpath(label: string) {
 
 export function xPathOptionToXpath(xOpts: XPathOptions, container?: Container): string {
 
-  const  { type, name, containsText, normalizeSpace, ancestorLevel = 1, iconShape} = xOpts;
+  const  { type, name, containsText, normalizeSpace, ancestorLevel = 1, iconShape, startsWith} = xOpts;
 
   // optional function parameters check
   if (type === 'icon') {
@@ -20,15 +20,17 @@ export function xPathOptionToXpath(xOpts: XPathOptions, container?: Container): 
   if (name !== undefined) {
     str = `[text()="${name}" or @aria-label="${name}" or @placeholder="${name}" or @value="${name}"]`;
   } else if (containsText !== undefined) {
-    str = `[contains(text(),"${containsText}") or contains(@aria-label,"${containsText}") or contains(@placeholder,"${containsText}")]`;
+    str = `[contains(text(), "${containsText}") or contains(@aria-label, "${containsText}") or contains(@placeholder, "${containsText}")]`;
   } else if (normalizeSpace !== undefined) {
-    str = `[contains(normalize-space(),"${normalizeSpace}")]`;
+    str = `[contains(normalize-space(), "${normalizeSpace}")]`;
+  } else if (startsWith !== undefined) {
+    str = `[starts-with(normalize-space(), "${startsWith}")]`;
   }
 
-  const nodeLevel = `ancestor::node()[${ancestorLevel}]`;
+  const nodeLevel = (ancestorLevel === 0) ? '' : `/ancestor::node()[${ancestorLevel}]`;
   const containerXpath = (container === undefined) ? '' : container.getXpath();
   // empty str means element is not tied to a specific label.
-  const textExpr = (str === '') ? `${containerXpath}` : `(${containerXpath}//label | ${containerXpath}//*)${str}/${nodeLevel}`;
+  const textExpr = (str === '') ? `${containerXpath}` : `(${containerXpath}//label | ${containerXpath}//*)${str}${nodeLevel}`;
 
   let selector;
   switch (type) {

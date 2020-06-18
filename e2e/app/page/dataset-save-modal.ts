@@ -41,9 +41,10 @@ export default class DatasetSaveModal extends Dialog {
 
     if (isExportToNotebook) {
       // Export to notebook
-      const notebookNameTextbox = new Textbox(this.page, '//*[@data-test-id="notebook-name-input"]');
+      const notebookNameTextbox = new Textbox(this.page, `${this.getXpath()}//*[@data-test-id="notebook-name-input"]`);
       await notebookNameTextbox.type(notebookName);
-      const radioBtn = await RadioButton.findByName(this.page, {name: language});
+      console.log(`Notebook language: ` + language);
+      const radioBtn = await RadioButton.findByName(this.page, {name: language, ancestorLevel: 0}, this);
       await radioBtn.select();
     } else {
       // Not export to notebook

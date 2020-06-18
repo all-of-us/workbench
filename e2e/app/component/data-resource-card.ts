@@ -55,6 +55,8 @@ export default class DataResourceCard {
 
   static async findCard(page: Page, resourceName: string): Promise<DataResourceCard | null> {
     const selector = `.//*[${DataResourceCardSelector.cardNameXpath} and normalize-space(text())="${resourceName}"]`;
+    await page.waitForXPath(selector, {timeout: 60000});
+
     const allCards = await this.findAllCards(page);
     for (const card of allCards) {
       const handle = card.asElementHandle();

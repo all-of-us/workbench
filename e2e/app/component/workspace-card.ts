@@ -130,16 +130,19 @@ export default class WorkspaceCard {
    * Click workspace name link in Workspace Card.
    * @param {boolean} waitForDataPage Waiting for Data page load and ready after click on Workspace name link.
    */
-  async clickWorkspaceName(waitForDataPage: boolean = true): Promise<void> {
-    const elemts = await this.asElementHandle().$x(`.//*[${WorkspaceCardSelector.cardNameXpath}]`);
+  async clickWorkspaceName(waitForDataPage: boolean = true): Promise<string> {
+    const [elemt] = await this.asElementHandle().$x(`.//*[${WorkspaceCardSelector.cardNameXpath}]`);
+    const textProp = await elemt.getProperty('textContent');
+    const name = await textProp.jsonValue();
     await Promise.all([
       this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0']}),
-      elemts[0].click(),
+      elemt.click(),
     ]);
     if (waitForDataPage) {
       const dataPage = new DataPage(page);
       await dataPage.waitForLoad();
     }
+    return name.toString();
   }
 
   private asCard(elementHandle: ElementHandle): WorkspaceCard {
