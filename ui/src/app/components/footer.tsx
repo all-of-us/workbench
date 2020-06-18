@@ -73,7 +73,7 @@ const FooterTemplate = ({style = {}, ...props}) => {
         {props.children}
         <div style={{...styles.footerAside, marginTop: '20px'}}>
           The <AoU/> logo is a service mark of the&nbsp;
-          <NewTabFooterAnchorTag href="https://google.com/TODO">
+          <NewTabFooterAnchorTag href="https://www.hhs.gov">
             U.S. Department of Health and Human Services
           </NewTabFooterAnchorTag>.<br/>
           The <AoU/> platform is for research only and does not provide medical advice, diagnosis or treatment. Copyright 2020.
