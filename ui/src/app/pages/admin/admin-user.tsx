@@ -231,11 +231,11 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
         return null;
       } else {
         const {verifiedInstitutionalAffiliation} = updatedProfile;
-        const institution = fp.find(
-            institution => institution.shortName === verifiedInstitutionalAffiliation.institutionShortName,
-            verifiedInstitutionOptions
+        const selectedInstitution = fp.find(
+          institution => institution.shortName === verifiedInstitutionalAffiliation.institutionShortName,
+          verifiedInstitutionOptions
         );
-        if (institution.duaTypeEnum === DuaType.RESTRICTED) {
+        if (selectedInstitution.duaTypeEnum === DuaType.RESTRICTED) {
           // Institution has signed Restricted agreement and the email is not in allowed emails list
           return <RestrictedDuaEmailMismatchErrorMessage/>;
         } else {
@@ -254,7 +254,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
       fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionShortName'], institutionShortName),
       fp.set(
           ['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionDisplayName'],
-          verifiedInstitutionOptions.find(
+        verifiedInstitutionOptions.find(
               institution => institution.shortName === institutionShortName,
               verifiedInstitutionOptions
           ).displayName
