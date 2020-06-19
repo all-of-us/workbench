@@ -70,7 +70,7 @@ describe('Create Concept Sets from Domains', () => {
     await dataPage.openTab(TabLabelAlias.Data);
     await waitWhileLoading(page);
 
-    await dataPage.openTab(TabLabelAlias.ConceptSets);
+    await dataPage.openTab(TabLabelAlias.ConceptSets, {waitPageChange: false});
     await waitWhileLoading(page);
 
     const dialogTextContent = await dataPage.deleteConceptSet(conceptName);
@@ -157,7 +157,7 @@ describe('Create Concept Sets from Domains', () => {
     await dataPage.openTab(TabLabelAlias.Data);
     await waitWhileLoading(page);
 
-    await dataPage.openTab(TabLabelAlias.Datasets);
+    await dataPage.openTab(TabLabelAlias.Datasets, {waitPageChange: false});
     await waitWhileLoading(page);
 
     const resourceCard = new DataResourceCard(page);
@@ -169,7 +169,7 @@ describe('Create Concept Sets from Domains', () => {
     expect(textContent).toContain(`Are you sure you want to delete Dataset: ${datasetName}?`);
 
     // Delete Concept Set.
-    await dataPage.openTab(TabLabelAlias.ConceptSets);
+    await dataPage.openTab(TabLabelAlias.ConceptSets, {waitPageChange: false});
     await waitWhileLoading(page);
 
     await dataPage.deleteConceptSet(conceptName1);

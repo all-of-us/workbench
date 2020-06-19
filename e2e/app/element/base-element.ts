@@ -35,6 +35,7 @@ export default class BaseElement extends Container {
       }
       return this;
     } catch (err) {
+      console.error(`waitForXpath() encountered ${err}`);
       // Debugging pause
       // await jestPuppeteer.debug();
       throw err;

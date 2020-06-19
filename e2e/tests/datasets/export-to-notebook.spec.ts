@@ -81,16 +81,16 @@ describe('Create Dataset', () => {
     await dataPage.openTab(TabLabelAlias.Data);
     await waitWhileLoading(page);
 
-    await dataPage.openTab(TabLabelAlias.Datasets);
+    await dataPage.openTab(TabLabelAlias.Datasets, {waitPageChange: false});
     await waitWhileLoading(page);
 
     await dataPage.deleteDataset(newDatasetName);
   });
 
   /**
-   * Create new Cohort thru Dataset Build page.
-   * Create new Dataset with Cohort, export to notebook in R language
-   * Delete Cohort and Dataset.
+   * Create new Cohort thru Dataset Build page. Cohort built from demographics -> Ethnicity.
+   * Create new Dataset with Cohort, then export to notebook in R language.
+   * Delete Cohort, Dataset, and Notebook.
    */
   test('Export dataset to notebook in R programming language', async () => {
     const workspaceCard = await findWorkspace(page);
@@ -136,9 +136,6 @@ describe('Create Dataset', () => {
     const currentPageUrl = await page.url();
     expect(currentPageUrl).toContain(`notebooks/preview/${newNotebookName}.ipynb`);
 
-    const previewTextVisible = await waitForText(page, 'Preview (Read-Only)', {xpath: '//*[text()="Preview (Read-Only)"]'});
-    expect(previewTextVisible).toBe(true);
-
     const code = await notebookPreviewPage.getFormattedCode();
     expect(code).toContain('library(bigrquery)');
 
@@ -160,14 +157,14 @@ describe('Create Dataset', () => {
     await dataPage.openTab(TabLabelAlias.Data);
     await waitWhileLoading(page);
 
-    await dataPage.openTab(TabLabelAlias.Datasets);
+    await dataPage.openTab(TabLabelAlias.Datasets, {waitPageChange: false});
     await waitWhileLoading(page);
 
     const datasetDeleteDialogText = await dataPage.deleteDataset(newDatasetName);
     expect(datasetDeleteDialogText).toContain(`Are you sure you want to delete Dataset: ${newDatasetName}?`);
 
     // Delete Cohort
-    await dataPage.openTab(TabLabelAlias.Cohorts);
+    await dataPage.openTab(TabLabelAlias.Cohorts, {waitPageChange: false});
     await waitWhileLoading(page);
 
     const cohortDeleteDialogText = await dataPage.deleteCohort(newCohortName);

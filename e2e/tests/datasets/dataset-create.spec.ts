@@ -103,7 +103,7 @@ describe('Create Dataset', () => {
     const dataSetName = await saveModal.saveDataset();
 
     // Verify create successful.
-    await dataPage.openTab(TabLabelAlias.Datasets);
+    await dataPage.openTab(TabLabelAlias.Datasets, {waitPageChange: false});
     await waitWhileLoading(page);
 
     const resourceCard = new DataResourceCard(page);
