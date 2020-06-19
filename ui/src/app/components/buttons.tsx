@@ -21,11 +21,22 @@ export const styles = reactStyles({
     borderRadius: 5,
     boxSizing: 'border-box'
   },
+
+  slidingButtonContainer: {
+    // Use position sticky so the FAB does not continue past the page footer. We
+    // use a padding-bottom since when the FAB ignores margins in "fixed"
+    // positioning mode but respects them in "absolute" mode.
+    bottom: 0,
+    paddingBottom: '1rem',
+    position: 'sticky',
+
+    // We use a flex container with flex-end to pin the FAB to the right.
+    // To make this a client option, alternate this between flex-end/flex-start.
+    display: 'flex',
+    justifyContent: 'flex-end',
+  },
   slidingButton: {
     boxShadow: '0 2px 5px 0 rgba(0,0,0,0.26), 0 2px 10px 0 rgba(0,0,0,0.16)',
-    position: 'fixed',
-    bottom: '1rem',
-    right: '2.9rem',
     borderRadius: '3rem',
     backgroundColor: colors.accent,
     height: '1.8rem',
@@ -33,7 +44,7 @@ export const styles = reactStyles({
     cursor: 'pointer'
   },
 
-  slidingButtonContainer: {
+  slidingButtonContent: {
     color: colors.white,
     display: 'flex',
     alignItems: 'center',
@@ -330,22 +341,24 @@ export class SlidingFabReact extends React.Component<SlidingFabProps, SlidingFab
   render() {
     const {hovering} = this.state;
     const {expanded, disable, iconShape, tooltip, tooltipContent} = this.props;
-    return <div data-test-id='sliding-button'
-                style={disable ? {...styles.slidingButton,
-                  ...styles.slidingButtonDisable} : styles.slidingButton}
-                onMouseEnter={() => this.setState({hovering: true})}
-                onMouseLeave={() => this.setState({hovering: false})}
-                onClick={() => disable ? {} : this.props.submitFunction()}>
-      <TooltipTrigger content={tooltipContent} disabled={!tooltip}>
-        <div style={styles.slidingButtonContainer}>
-          <div style={hovering ? {...styles.slidingButtonText,
-            ...styles.slidingButtonHovering} : styles.slidingButtonText}>
-            {expanded}
+    return <div style={styles.slidingButtonContainer}>
+      <div data-test-id='sliding-button'
+           style={disable ? {...styles.slidingButton,
+             ...styles.slidingButtonDisable} : styles.slidingButton}
+           onMouseEnter={() => this.setState({hovering: true})}
+           onMouseLeave={() => this.setState({hovering: false})}
+           onClick={() => disable ? {} : this.props.submitFunction()}>
+        <TooltipTrigger content={tooltipContent} disabled={!tooltip}>
+          <div style={styles.slidingButtonContent}>
+            <div style={hovering ? {...styles.slidingButtonText,
+              ...styles.slidingButtonHovering} : styles.slidingButtonText}>
+              {expanded}
+            </div>
+            <ClrIcon shape={iconShape} style={{height: '1.5rem', width: '1.5rem',
+              marginRight: '.145rem'}}/>
           </div>
-          <ClrIcon shape={iconShape} style={{height: '1.5rem', width: '1.5rem',
-            marginRight: '.145rem'}}/>
-        </div>
-      </TooltipTrigger>
+        </TooltipTrigger>
+      </div>
     </div>;
   }
 }
