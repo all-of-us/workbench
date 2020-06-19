@@ -29,7 +29,7 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
     if (configProvider.get().featureFlags.enableResearchPurposePrompt) {
       List<DbWorkspace> workspaceList = workspaceDao.findAllByReviewResearchPurpose((short) 1);
 
-      // 1. Filter out workspace where creation date is 365 days or 17 days
+      // 1. Filter out workspace where creation date is 365 days or 15 days
       // 2. set Research Purpose Review to FALSE
       // 3. Update workspace
       workspaceList =
@@ -58,7 +58,8 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
     // True if
     // 1. Current date is creation Date + 1 year or
     // 2. Current date is 15 days after creation date or
-    // 3. Current Date is before current date (in case cron job did not run) and the Workspace has
+    // 3. Current Date is AFTER an year of creation date (in case cron job did not run/ missed
+    // picking the workspace) and the Workspace has
     // not been modified after 1 year of creation date.
     int compareCreationDatePlus1Year =
         DateTimeComparator.getDateOnlyInstance().compare(creationDatePlus1Year, null);

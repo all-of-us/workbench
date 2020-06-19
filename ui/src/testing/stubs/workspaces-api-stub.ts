@@ -70,6 +70,7 @@ function buildWorkspaceStub(suffix): Workspace {
       reviewRequested: false,
       socialBehavioral: false,
       reasonForAllOfUs: '',
+      researchPurposeReviewed: true
     },
     published: false,
     dataAccessLevel: DataAccessLevel.Registered,

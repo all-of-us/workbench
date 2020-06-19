@@ -5,7 +5,6 @@ import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {NavStore} from 'app/utils/navigation';
 
-import {WorkspaceData} from 'app/utils/workspace-data';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
@@ -32,9 +31,9 @@ const styles = reactStyles({
   separator: {
     background: 'rgba(255,255,255,0.15)', width: 1, height: 48, flexShrink: 0
   },
-   disabled: {
+  disabled: {
     color: colors.disabled
-   }
+  }
 });
 
 const tabs = [
@@ -62,13 +61,12 @@ export const WorkspaceNavBarReact = fp.flow(
     const {name, link} = currentTab;
     const selected = tabPath === link;
     const hideSeparator = selected || (activeTabIndex === tabs.indexOf(currentTab) + 1);
-    console.log(disabled + name);
     return <React.Fragment key={name}>
       <Clickable
         data-test-id={name}
         aria-selected={selected}
         disabled={disabled}
-        style={{...styles.tab, ...(selected ? styles.active : {}), ...(disabled ? styles.disabled: {})}}
+        style={{...styles.tab, ...(selected ? styles.active : {}), ...(disabled ? styles.disabled : {})}}
         hover={{color: styles.active.color}}
         onClick={() => NavStore.navigate(fp.compact(['/workspaces', namespace, id, link]))}
       >

@@ -339,7 +339,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
                                   onClose={() => this.handleShareDialogClose()} />}
       {bugReportOpen && <BugReportModal bugReportDescription={bugReportError}
                                         onClose={() => this.setState({bugReportOpen: false})}/>}
-      {showResearchPurposeReviewModal && <Modal>
+      {showResearchPurposeReviewModal && <Modal data-test-id='workspace-review-modal'>
         <ModalTitle>Please review Research Purpose for Workspace '{workspace.name}'</ModalTitle>
         <ModalBody style={{display: 'flex', flexDirection: 'column'}}>
           <div>

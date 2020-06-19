@@ -11,7 +11,7 @@ import {
   researchPurposeQuestions
 } from 'app/pages/workspace/workspace-edit-text';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {navigate} from 'app/utils/navigation';
 import {
@@ -20,7 +20,6 @@ import {
 } from 'app/utils/research-purpose';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
-import {colorWithWhiteness} from "../../styles/colors";
 
 const styles = reactStyles({
   editIcon: {
