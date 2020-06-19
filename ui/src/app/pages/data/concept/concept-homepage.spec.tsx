@@ -1,6 +1,7 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 
+import {SlidingFabReact} from 'app/components/buttons';
 import {ConceptHomepage} from 'app/pages/data/concept/concept-homepage';
 import {conceptsApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
@@ -185,8 +186,7 @@ describe('ConceptHomepage', () => {
     await waitOneTickAndUpdate(wrapper);
 
     // before anything is selected, the sliding button should be disabled
-    expect(wrapper.find('[data-test-id="sliding-button"]')
-      .parent().props()['disable']).toBeTruthy();
+    expect(wrapper.find(SlidingFabReact).props()['disable']).toBeTruthy();
 
     wrapper.find('span.p-checkbox-icon.p-clickable').at(1).simulate('click');
     await waitOneTickAndUpdate(wrapper);
