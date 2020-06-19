@@ -117,7 +117,7 @@ public class FreeTierBillingService {
       } catch (final MessagingException e) {
         logger.log(Level.WARNING, e.getMessage());
       }
-      setActiveStatusForCreatedWorkspaces(user, BillingStatus.INACTIVE);
+      updateFreeTierWorkspacesStatus(user, BillingStatus.INACTIVE);
     }
 
     final Set<DbUser> usersWithNonNullRegistration =
@@ -147,7 +147,7 @@ public class FreeTierBillingService {
         .equals(workbenchConfigProvider.get().billing.freeTierBillingAccountName());
   }
 
-  private void setActiveStatusForCreatedWorkspaces(final DbUser user, final BillingStatus status) {
+  private void updateFreeTierWorkspacesStatus(final DbUser user, final BillingStatus status) {
     workspaceDao.findAllByCreator(user).stream()
         .filter(this::isFreeTier)
         .map(DbWorkspace::getWorkspaceId)
