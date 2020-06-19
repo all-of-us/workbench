@@ -227,7 +227,7 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
   public void testMaterializeCohortICD9Group() {
     MaterializeCohortResponse response =
         cohortMaterializationService.materializeCohort(
-            null, SearchRequests.icd9Codes(), null, 0, makeRequest(1000));
+            null, SearchRequests.icd9CodesChildren(), null, 0, makeRequest(1000));
     assertPersonIds(response, 1L);
     assertThat(response.getNextPageToken()).isNull();
   }

@@ -34,7 +34,6 @@ import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbPageVisit;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.EmailException;
@@ -62,6 +61,7 @@ import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.NihToken;
@@ -77,6 +77,7 @@ import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.profile.AddressMapper;
 import org.pmiops.workbench.profile.DemographicSurveyMapper;
 import org.pmiops.workbench.profile.ProfileService;
+import org.pmiops.workbench.shibboleth.ShibbolethService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -111,6 +112,10 @@ public class ProfileController implements ProfileApiDelegate {
               return result;
             }
           };
+
+  // Deprecated because it refers to old-style Institutional Affiliations, to be deleted in RW-4362
+  // The new-style equivalent is VerifiedInstitutionalAffiliationMapper.modelToDbWithoutUser()
+  @Deprecated
   private static final Function<InstitutionalAffiliation, DbInstitutionalAffiliation>
       FROM_CLIENT_INSTITUTIONAL_AFFILIATION =
           new Function<InstitutionalAffiliation, DbInstitutionalAffiliation>() {
@@ -205,6 +210,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final Provider<MailService> mailServiceProvider;
   private final Provider<UserAuthentication> userAuthenticationProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final ShibbolethService shibbolethService;
   private final UserDao userDao;
   private final UserService userService;
   private final VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
@@ -226,6 +232,7 @@ public class ProfileController implements ProfileApiDelegate {
       Provider<MailService> mailServiceProvider,
       Provider<UserAuthentication> userAuthenticationProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
+      ShibbolethService shibbolethService,
       UserDao userDao,
       UserService userService,
       VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper) {
@@ -241,6 +248,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.mailServiceProvider = mailServiceProvider;
     this.profileAuditor = profileAuditor;
     this.profileService = profileService;
+    this.shibbolethService = shibbolethService;
     this.userAuthenticationProvider = userAuthenticationProvider;
     this.userDao = userDao;
     this.userProvider = userProvider;
@@ -324,13 +332,6 @@ public class ProfileController implements ProfileApiDelegate {
       // See RW-1488.
       throw new BadRequestException("Changing username is not supported");
     }
-    final VerifiedInstitutionalAffiliation updatedAffil =
-        updatedProfile.getVerifiedInstitutionalAffiliation();
-    final VerifiedInstitutionalAffiliation prevAffil =
-        prevProfile.getVerifiedInstitutionalAffiliation();
-    if (!Objects.equals(updatedAffil, prevAffil)) {
-      throw new BadRequestException("Cannot update Verified Institutional Affiliation");
-    }
   }
 
   private DbUser saveUserWithConflictHandling(DbUser dbUser) {
@@ -403,7 +404,7 @@ public class ProfileController implements ProfileApiDelegate {
     }
 
     if (workbenchConfigProvider.get().featureFlags.requireInstitutionalVerification) {
-      verifyInstitutionalAffiliation(request.getProfile());
+      profileService.validateInstitutionalAffiliation(request.getProfile());
     }
 
     final Profile profile = request.getProfile();
@@ -573,28 +574,6 @@ public class ProfileController implements ProfileApiDelegate {
     }
   }
 
-  private void verifyInstitutionalAffiliation(Profile profile) {
-    String userName = profile.getUsername();
-    String contactEmail = profile.getContactEmail();
-    DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation =
-        verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
-            profile.getVerifiedInstitutionalAffiliation(), institutionService);
-    if (!institutionService.validateAffiliation(dbVerifiedAffiliation, contactEmail)) {
-      final String msg =
-          Optional.ofNullable(dbVerifiedAffiliation)
-              .map(
-                  affiliation ->
-                      String.format(
-                          "Cannot create user %s: contact email %s is not a valid member of institution '%s'",
-                          userName, contactEmail, affiliation.getInstitution().getShortName()))
-              .orElse(
-                  String.format(
-                      "Cannot create user %s: contact email %s does not have a valid institutional affiliation",
-                      userName, contactEmail));
-      throw new BadRequestException(msg);
-    }
-  }
-
   private void checkUserCreationNonce(DbUser user, String nonce) {
     if (Strings.isNullOrEmpty(nonce)) {
       throw new BadRequestException("missing required creationNonce");
@@ -688,6 +667,20 @@ public class ProfileController implements ProfileApiDelegate {
     // That is, in the (rare, hopefully) condition that the old profile gives incorrect information,
     // the update will still work as well as it would have.
     final Profile previousProfile = profileService.getProfile(user);
+    final VerifiedInstitutionalAffiliation updatedAffil =
+        updatedProfile.getVerifiedInstitutionalAffiliation();
+    final VerifiedInstitutionalAffiliation prevAffil =
+        previousProfile.getVerifiedInstitutionalAffiliation();
+    if (!Objects.equals(updatedAffil, prevAffil)) {
+      throw new BadRequestException("Cannot update Verified Institutional Affiliation");
+    }
+
+    updateProfileForUser(user, updatedProfile, previousProfile);
+
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  private void updateProfileForUser(DbUser user, Profile updatedProfile, Profile previousProfile) {
     validateUpdatedProfile(updatedProfile, previousProfile);
 
     if (!userProvider.get().getGivenName().equalsIgnoreCase(updatedProfile.getGivenName())
@@ -720,15 +713,43 @@ public class ProfileController implements ProfileApiDelegate {
     user.setLastModifiedTime(now);
 
     updateInstitutionalAffiliations(updatedProfile, user);
+    if (workbenchConfigProvider.get().featureFlags.requireInstitutionalVerification) {
+      profileService.validateInstitutionalAffiliation(updatedProfile);
+    }
 
     userService.updateUserWithConflictHandling(user);
 
     final Profile appliedUpdatedProfile = profileService.getProfile(user);
     profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);
-
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
+  @AuthorityRequired(Authority.ACCESS_CONTROL_ADMIN)
+  @Override
+  public ResponseEntity<EmptyResponse> updateVerifiedInstitutionalAffiliation(
+      Long userId, VerifiedInstitutionalAffiliation verifiedAffiliation) {
+    DbUser dbUser = userDao.findUserByUserId(userId);
+    Profile updatedProfile = profileService.getProfile(dbUser);
+
+    if (verifiedAffiliation == null) {
+      throw new BadRequestException("Cannot delete Verified Institutional Affiliation.");
+    }
+
+    Optional<Institution> institution =
+        institutionService.getInstitution(verifiedAffiliation.getInstitutionShortName());
+    institution.ifPresent(i -> verifiedAffiliation.setInstitutionDisplayName(i.getDisplayName()));
+
+    updatedProfile.setVerifiedInstitutionalAffiliation(verifiedAffiliation);
+
+    Profile oldProfile = profileService.getProfile(dbUser);
+
+    this.updateProfileForUser(dbUser, updatedProfile, oldProfile);
+
+    return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  // Deprecated because it refers to old-style Institutional Affiliations, to be deleted in RW-4362
+  // The new-style equivalent is updateVerifiedInstitutionalAffiliation()
+  @Deprecated
   private void updateInstitutionalAffiliations(Profile updatedProfile, DbUser user) {
     List<DbInstitutionalAffiliation> newAffiliations =
         updatedProfile.getInstitutionalAffiliations().stream()
@@ -816,14 +837,15 @@ public class ProfileController implements ProfileApiDelegate {
     if (token == null || token.getJwt() == null) {
       throw new BadRequestException("Token is required.");
     }
-    FirecloudJWTWrapper wrapper = new FirecloudJWTWrapper().jwt(token.getJwt());
-    try {
-      fireCloudService.postNihCallback(wrapper);
-      userService.syncEraCommonsStatus();
-      return getProfileResponse(userProvider.get());
-    } catch (WorkbenchException e) {
-      throw e;
+
+    if (workbenchConfigProvider.get().featureFlags.useNewShibbolethService) {
+      shibbolethService.updateShibbolethToken(token.getJwt());
+    } else {
+      fireCloudService.postNihCallback(new FirecloudJWTWrapper().jwt(token.getJwt()));
     }
+
+    userService.syncEraCommonsStatus();
+    return getProfileResponse(userProvider.get());
   }
 
   private void updateBypass(long userId, AccessBypassRequest request) {

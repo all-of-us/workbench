@@ -461,7 +461,7 @@ public final class DbStorageEnums {
       CLIENT_TO_STORAGE_PRE_PACKAGED_CONCEPTSET =
           ImmutableBiMap.<PrePackagedConceptSetEnum, Short>builder()
               .put(PrePackagedConceptSetEnum.NONE, (short) 0)
-              .put(PrePackagedConceptSetEnum.DEMOGRAPHICS, (short) 1)
+              .put(PrePackagedConceptSetEnum.PERSON, (short) 1)
               .put(PrePackagedConceptSetEnum.SURVEY, (short) 2)
               .put(PrePackagedConceptSetEnum.BOTH, (short) 3)
               .build();

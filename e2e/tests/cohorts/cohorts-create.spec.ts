@@ -4,7 +4,7 @@ import ClrIconLink from 'app/element/clr-icon-link';
 import Link from 'app/element/link';
 import {EllipsisMenuAction} from 'app/page-identifiers';
 import CohortBuildPage, {FieldSelector} from 'app/page/cohort-build-page';
-import DataPage, {LabelAlias} from 'app/page/data-page';
+import DataPage, {TabLabelAlias} from 'app/page/data-page';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
 import DataResourceCard from 'app/component/data-resource-card';
@@ -19,7 +19,7 @@ describe('User can create new Cohorts', () => {
 
   /**
    * Test:
-   * Create a new Workspace.
+   * Find an existing workspace or create a new workspace if none exists.
    * Add criteria in Group 1: Physical Measurements criteria => BMI (>= 30).
    * Add criteria in Group 2: Demographics => Deceased.
    * Checking counts.
@@ -32,11 +32,6 @@ describe('User can create new Cohorts', () => {
 
     // Wait for the Data page.
     const dataPage = new DataPage(page);
-    await dataPage.waitForLoad();
-
-    // No cohorts in new workspace.
-    const cardsCount = (await DataResourceCard.findAllCards(page)).length;
-    expect(cardsCount).toBe(0);
 
     // Click Add Cohorts button
     const addCohortsButton = await dataPage.getAddCohortsButton();
@@ -76,7 +71,7 @@ describe('User can create new Cohorts', () => {
 
     // Save new cohort.
     const cohortName = await cohortPage.saveCohortAs();
-    console.log(`Cohort ${cohortName} created successfully.`);
+    console.log(`Created Cohort "${cohortName}"`);
 
     // Open Cohort details.
     const cohortLink = await Link.findByName(page, {name: cohortName});
@@ -108,7 +103,7 @@ describe('User can create new Cohorts', () => {
     const dialogContent = await cohortPage.deleteCohort();
     // Verify dialog content text
     expect(dialogContent).toContain(`Are you sure you want to delete Cohort: ${cohortName}?`);
-    console.log(`Cohort "${cohortName}" deleted.`);
+    console.log(`Deleted Cohort "${cohortName}"`);
   });
 
   /**
@@ -127,7 +122,7 @@ describe('User can create new Cohorts', () => {
 
     // Wait for the Data page.
     const dataPage = new DataPage(page);
-    await dataPage.waitForLoad();
+
     // Save url
     const workspaceDataUrl = await page.url();
 
@@ -150,11 +145,11 @@ describe('User can create new Cohorts', () => {
     // Next, search for condition EKG
     const search2ResultsTable = await modal.searchCondition('EKG');
     // Check cell value in column "Code" (column #2)
-    const codeValue = await search2ResultsTable.findCellValue(1, 2);
+    const codeValue = await search2ResultsTable.getCellValue(1, 2);
     expect(Number(codeValue)).not.toBeNaN();
 
     // Add the condition in first row. We don't know what the condition name is, so we get the cell value first.
-    const nameValue = await search2ResultsTable.findCellValue(1, 1);
+    const nameValue = await search2ResultsTable.getCellValue(1, 1);
     const addIcon = await ClrIconLink.findByName(page, {containsText: nameValue, iconShape: 'plus-circle'}, modal);
     await addIcon.click();
 
@@ -184,7 +179,7 @@ describe('User can create new Cohorts', () => {
     // Save new cohort.
     const cohortName = await cohortBuildPage.saveCohortAs();
     await waitForText(page, 'Cohort Saved Successfully');
-    console.log(`Cohort ${cohortName} created successfully.`);
+    console.log(`Created Cohort "${cohortName}"`);
 
     // Open Workspace, search for created cohort.
     await page.goto(workspaceDataUrl);
@@ -197,14 +192,14 @@ describe('User can create new Cohorts', () => {
     await cohortBuildPage.waitForLoad();
     await waitWhileLoading(page);
 
-    await dataPage.openTab(LabelAlias.Data);
+    await dataPage.openTab(TabLabelAlias.Data);
     await waitWhileLoading(page);
 
     // Duplicate cohort using Ellipsis menu.
     const origCardsCount = (await DataResourceCard.findAllCards(page)).length;
     cohortCard = await DataResourceCard.findCard(page, cohortName);
-    const menu = await cohortCard.getEllipsis();
-    await menu.clickAction(EllipsisMenuAction.DUPLICATE, false);
+    const menu = cohortCard.getEllipsis();
+    await menu.clickAction(EllipsisMenuAction.Duplicate, false);
     await waitWhileLoading(page);
     const newCardsCount = (await DataResourceCard.findAllCards(page)).length;
     // cards count increase by 1.

@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {HtmlViewer} from 'app/components/html-viewer';
@@ -13,7 +12,7 @@ import {
 } from 'app/pages/profile/data-user-code-of-conduct-styles';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {reactStyles, withUserProfile} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getLiveDataUseAgreementVersion} from 'app/utils/code-of-conduct';
 import {navigate, serverConfigStore} from 'app/utils/navigation';
@@ -26,6 +25,10 @@ const styles = reactStyles({
     margin: 'auto',
     color: colors.primary,
     height: '100%',
+    // The chrome is minimized on this page to increase scroll space. This has
+    // the unwanted side-effect of removing the app padding. Add this same padding back.
+    paddingLeft: '.6rem',
+    paddingRight: '.6rem'
   },
   dataUserCodeOfConductFooter: {
     backgroundColor: colors.white,
@@ -266,11 +269,3 @@ export const DataUserCodeOfConduct = withUserProfile()(
     }
   });
 
-@Component({
-  template: '<div #root style="height: 100%"></div>'
-})
-export class DataUserCodeOfConductComponent extends ReactWrapperBase {
-  constructor() {
-    super(DataUserCodeOfConduct, []);
-  }
-}

@@ -11,6 +11,9 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.pmiops.workbench.model.NonAcademicAffiliation;
 
+// Deprecated because it refers to old-style Institutional Affiliations, to be deleted in RW-4362
+// The new-style equivalent is DbVerifiedInstitutionalAffiliation
+@Deprecated
 @Entity
 @Table(name = "institutional_affiliation")
 public class DbInstitutionalAffiliation {

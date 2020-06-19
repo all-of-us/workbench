@@ -1,0 +1,63 @@
+# This is a Swagger representation of the Shibboleth API run by the Broad Institute. See
+# RW-4257 for documentation and links to the service source code.
+#
+# The Shibboleth service does not publish its own structured API, so this file was hand-crafted
+# to allow client API code to be auto-generated in this repo.
+swagger: '2.0'
+info:
+  title: Shibboleth
+  description: Workbench Shibboleth service
+  version: '1.0'
+host: "https://profile-dot-broad-shibboleth-prod.appspot.com/"
+basePath: /
+
+produces:
+  - application/json
+
+# The securityDefinitions and security stanzas are copied from notebooks.yaml. The intent is
+# to force the generated API client to pass along a Google access token when necessary.
+securityDefinitions:
+  googleoauth:
+    type: oauth2
+    authorizationUrl: 'https://accounts.google.com/o/oauth2/auth'
+    flow: implicit
+    scopes:
+      openid: open id authorization
+      email: email authorization
+      profile: profile authorization
+
+security:
+  - googleoauth:
+      - openid
+      - email
+      - profile
+
+paths:
+  '/shibboleth-token':
+    post:
+      summary: Update Terra eRA Commons linkage with a Shibboleth token.
+      description: |
+        Updates the linkage between a Terra user and eRA Commons user by parsing a Shibboleth
+        JWT and storing the contained eRA Commons username in the Terra profile service. The
+        linkge will be stored with an expiration time of 30 days.
+      operationId: postShibbolethToken
+      tags:
+        - shibboleth
+      consumes:
+        - text/plain
+      parameters:
+        - name: jwt
+          in: body
+          description: JWT returned from the Shibboleth browser-based login flow.
+          required: true
+          schema:
+            type: string
+    responses:
+      200:
+        description: OK
+      400:
+        description: Invalid or malformed JWT
+      401:
+        description: Unauthorized
+      500:
+        description: Internal Server Error

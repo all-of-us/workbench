@@ -3,7 +3,7 @@ import EllipsisMenu from 'app/component/ellipsis-menu';
 import * as fp from 'lodash/fp';
 
 const DataResourceCardSelector = {
-  cardRootXpath: '//*[child::*[@data-test-id="card"]]',
+  cardRootXpath: '//*[@data-test-id="card"]',
   cardNameXpath: '@data-test-id="card-name"',
   ellipsisXpath: './/clr-icon[@shape="ellipsis-vertical"]',
   cardTypeXpath: './/*[@data-test-id="card-type"]',
@@ -13,6 +13,7 @@ export enum CardType {
   Cohort = 'Cohort',
   ConceptSet = 'Concept Set',
   Notebook = 'Notebook',
+  Dataset = 'Dataset',
 }
 
 /**
@@ -31,9 +32,9 @@ export default class DataResourceCard {
    * @param {Page} page
    * @throws TimeoutError if fails to find Card.
    */
-  static async findAllCards(page: Page): Promise<DataResourceCard[]> {
+  static async findAllCards(page: Page, timeOut: number = 2000): Promise<DataResourceCard[]> {
     try {
-      await page.waitForXPath(DataResourceCardSelector.cardRootXpath, {visible: true, timeout: 1000});
+      await page.waitForXPath(DataResourceCardSelector.cardRootXpath, {visible: true, timeout: timeOut});
     } catch (e) {
       return [];
     }
@@ -100,7 +101,7 @@ export default class DataResourceCard {
   }
 
   /**
-   * Find card type: Cohort, DataSets or Concept Sets.
+   * Find card type: Cohort, Datasets or Concept Sets.
    */
   async getCardType() : Promise<unknown> {
     const [element] = await this.cardElement.$x(DataResourceCardSelector.cardTypeXpath);
@@ -136,6 +137,18 @@ export default class DataResourceCard {
       this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0']}),
       elemts[0].click(),
     ]);
+  }
+
+  /**
+   * Determine if resource card with specified name exists.
+   * @param {string} cardName
+   * @param {CardType} cardType
+   */
+  async cardExists(cardName: string, cardType: CardType):  Promise<boolean> {
+    const cards = await this.getResourceCard(cardType);
+    const names = await Promise.all(cards.map(item => item.getResourceName()));
+    const filterdList = names.filter(name => name === cardName);
+    return filterdList.length === 1;
   }
 
   private asCard(elementHandle: ElementHandle): DataResourceCard {

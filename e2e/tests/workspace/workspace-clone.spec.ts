@@ -17,7 +17,7 @@ describe('Clone workspace', () => {
       const workspaceCard = await findWorkspace(page);
       await workspaceCard.asElementHandle().hover();
       // click on Ellipsis "Duplicate"
-      await (workspaceCard.getEllipsis()).clickAction(EllipsisMenuAction.DUPLICATE);
+      await (workspaceCard.getEllipsis()).clickAction(EllipsisMenuAction.Duplicate);
 
       // fill out Workspace Name should be just enough for clone successfully
       const workspacesPage = new WorkspacesPage(page);
@@ -53,9 +53,7 @@ describe('Clone workspace', () => {
       await workspaceCard.clickWorkspaceName();
 
       const dataPage = new DataPage(page);
-      await dataPage.waitForLoad();
-
-      await dataPage.selectWorkspaceAction(EllipsisMenuAction.DUPLICATE);
+      await dataPage.selectWorkspaceAction(EllipsisMenuAction.Duplicate);
 
       const workspacesPage = new WorkspacesPage(page);
 

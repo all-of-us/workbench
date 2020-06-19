@@ -11,12 +11,10 @@ import java.util.StringJoiner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
-import org.pmiops.workbench.cohortbuilder.util.CriteriaLookupUtil;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.SearchGroup;
-import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,7 +28,7 @@ public class CohortQueryBuilder {
   private static final String COUNT_SQL_TEMPLATE =
       "select count(*) as count\n"
           + "from `${projectId}.${dataSetId}.cb_search_person` cb_search_person\n"
-          + "where\n";
+          + "where ";
 
   private static final String DEMO_CHART_INFO_SQL_TEMPLATE =
       "select ${genderOrSex} as name,\n"
@@ -41,7 +39,7 @@ public class CohortQueryBuilder {
           + "end as ageRange,\n"
           + "count(*) as count\n"
           + "from `${projectId}.${dataSetId}.cb_search_person` cb_search_person\n"
-          + "where\n";
+          + "where ";
 
   private static final String DEMO_CHART_INFO_SQL_GROUP_BY =
       "group by name, race, ageRange\n" + "order by name, race, ageRange\n";
@@ -215,24 +213,14 @@ public class CohortQueryBuilder {
             "Invalid SearchRequest: includes[] and excludes[] cannot both be empty");
       }
 
-      // produces a map of matching child concept ids.
-      Map<SearchParameter, Set<Long>> criteriaLookup = new HashMap<>();
-      try {
-        criteriaLookup = new CriteriaLookupUtil(cbCriteriaDao).buildCriteriaLookupMap(request);
-      } catch (IllegalArgumentException ex) {
-        log.log(Level.WARNING, "Unable to lookup criteria children", ex);
-        throw new BadRequestException("Bad Request: " + ex.getMessage());
-      }
-
       // build query for included search groups
-      StringJoiner joiner =
-          buildQuery(criteriaLookup, request.getIncludes(), mainTable, params, false);
+      StringJoiner joiner = buildQuery(request.getIncludes(), mainTable, params, false);
 
       // if includes is empty then don't add the excludes clause
       if (joiner.toString().isEmpty()) {
-        joiner.merge(buildQuery(criteriaLookup, request.getExcludes(), mainTable, params, false));
+        joiner.merge(buildQuery(request.getExcludes(), mainTable, params, false));
       } else {
-        joiner.merge(buildQuery(criteriaLookup, request.getExcludes(), mainTable, params, true));
+        joiner.merge(buildQuery(request.getExcludes(), mainTable, params, true));
       }
       Set<Long> participantIdsToExclude = participantCriteria.getParticipantIdsToExclude();
       if (!participantIdsToExclude.isEmpty()) {
@@ -246,7 +234,6 @@ public class CohortQueryBuilder {
   }
 
   private StringJoiner buildQuery(
-      Map<SearchParameter, Set<Long>> criteriaLookup,
       List<SearchGroup> groups,
       String mainTable,
       Map<String, QueryParameterValue> params,
@@ -254,7 +241,7 @@ public class CohortQueryBuilder {
     StringJoiner joiner = new StringJoiner("and ");
     List<String> queryParts = new ArrayList<>();
     for (SearchGroup includeGroup : groups) {
-      SearchGroupItemQueryBuilder.buildQuery(criteriaLookup, params, queryParts, includeGroup);
+      SearchGroupItemQueryBuilder.buildQuery(params, queryParts, includeGroup);
 
       if (excludeSQL) {
         joiner.add(

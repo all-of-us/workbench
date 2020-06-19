@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import {MODIFIERS_MAP} from 'app/cohort-search/constant';
-import {encountersStore, searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {encountersStore, searchRequestStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, getTypeAndStandard, mapGroupItem, typeToTitle} from 'app/cohort-search/utils';
 import {Button, Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
@@ -129,6 +129,7 @@ interface Props {
   groupId: string;
   item: ItemProp;
   index: number;
+  setSearchContext: (context: any) => void;
   role: keyof SearchRequest;
   updateGroup: Function;
   workspace: WorkspaceData;
@@ -253,15 +254,18 @@ export const SearchGroupItem = withCurrentWorkspace()(
       }
     }
 
-    launchWizard() {
+    launchSearch() {
       triggerEvent('Edit', 'Click', 'Snowman - Edit Criteria - Cohort Builder');
-      const {groupId, item, role} = this.props;
-      const _item = JSON.parse(JSON.stringify(item));
-      const {id, searchParameters} = _item;
-      const domain = _item.type;
-      const {type, standard} = getTypeAndStandard(searchParameters, domain);
-      const context = {item: _item, domain, type, role, groupId, itemId: id, standard, count: item.count};
-      wizardStore.next(context);
+      const {groupId, item, setSearchContext, role} = this.props;
+      // items of type 'DECEASED` cannot be edited
+      if (item.searchParameters[0].type !== CriteriaType.DECEASED.toString()) {
+        const _item = JSON.parse(JSON.stringify(item));
+        const {id, searchParameters} = _item;
+        const domain = _item.type;
+        const {type, standard} = getTypeAndStandard(searchParameters, domain);
+        const context = {item: _item, domain, type, role, groupId, itemId: id, standard, count: item.count};
+        setSearchContext(context);
+      }
     }
 
     modifierDisplay(mod: Modifier) {
@@ -298,7 +302,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
       const showCount = !loading && status !== 'hidden' && count !== undefined;
       const actionItems = [
         {label: 'Edit criteria name', command: () => this.setState({renaming: true})},
-        {label: 'Edit criteria', command: () => this.launchWizard()},
+        {label: 'Edit criteria', command: () => this.launchSearch()},
         {label: 'Suppress criteria from total count', command: () => this.suppress()},
         {label: 'Delete criteria', command: () => this.remove()},
       ];
@@ -310,7 +314,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
             <Clickable style={{display: 'inline-block', paddingRight: '0.5rem'}} onClick={(event) => this.actionsMenu.toggle(event)}>
               <ClrIcon shape='ellipsis-vertical' />
             </Clickable>
-            <span className='item-title' style={{...styles.codeText, paddingRight: '10px'}} onClick={() => this.launchWizard()}>
+            <span className='item-title' style={{...styles.codeText, paddingRight: '10px'}} onClick={() => this.launchSearch()}>
               {itemName}
             </span>
             {status !== 'hidden' && <span style={{...styles.codeText, paddingRight: '10px'}}>|</span>}
@@ -339,7 +343,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
         <div style={{...styles.parameterList, maxHeight: paramListOpen ? '15rem' : 0}}>
           {searchParameters.slice(0, 5).map((param, p) => <SearchGroupItemParameter key={p} parameter={param} />)}
           {searchParameters.length > 5 &&
-            <span style={status === 'active' ? styles.viewMore : styles.disabled} onClick={() => this.launchWizard()}>
+            <span style={status === 'active' ? styles.viewMore : styles.disabled} onClick={() => this.launchSearch()}>
               View/edit all criteria ({searchParameters.length - 5} more)
             </span>
           }

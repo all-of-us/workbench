@@ -3,7 +3,7 @@ import {PageUrl} from 'app/page-identifiers';
 import BasePage from 'app/page/base-page';
 import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
 
-const SELECTOR = {
+export const SELECTOR = {
   signedInIndicator: 'app-signed-in',
 };
 
@@ -14,7 +14,7 @@ const SELECTOR = {
  */
 export default abstract class AuthenticatedPage extends BasePage {
 
-  protected constructor(page: Page) {
+  constructor(page: Page) {
     super(page);
   }
 

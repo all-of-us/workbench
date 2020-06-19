@@ -15,5 +15,6 @@ describe('SelectionList', () => {
                                            selections={[]}
                                            setView={() => {}}
                                            view={''}/>);
+    expect(wrapper).toBeTruthy();
   });
 });

@@ -9,18 +9,16 @@ import {waitForDocumentTitle, waitForText} from 'utils/waits-utils';
 
 const faker = require('faker/locale/en_US');
 
-export const PAGE = {
-  TITLE: 'View Workspace',
+export const PageTitle = 'View Workspace';
+
+export const LabelAlias = {
+  CreateANewWorkspace: 'Create a New Workspace',
 };
 
-export const LABEL_ALIAS = {
-  CREATE_A_NEW_WORKSPACE: 'Create a New Workspace',
-};
-
-export const FIELD = {
-  createNewWorkspaceButton: {
+export const FieldSelector = {
+  CreateNewWorkspaceButton: {
     textOption: {
-      normalizeSpace: LABEL_ALIAS.CREATE_A_NEW_WORKSPACE
+      normalizeSpace: LabelAlias.CreateANewWorkspace
     }
   }
 };
@@ -34,7 +32,7 @@ export default class WorkspacesPage extends WorkspaceEditPage {
   async isLoaded(): Promise<boolean> {
     try {
       await Promise.all([
-        waitForDocumentTitle(this.page, PAGE.TITLE),
+        waitForDocumentTitle(this.page, PageTitle),
         this.page.waitForXPath('//a[text()="Workspaces"]', {visible: true}),
         this.page.waitForXPath('//h3[normalize-space(text())="Workspaces"]', {visible: true}),  // Texts above Filter By Select
         waitWhileLoading(this.page),
@@ -51,7 +49,7 @@ export default class WorkspacesPage extends WorkspaceEditPage {
    * Load 'Your Workspaces' page and ensure page load is completed.
    */
   async load(): Promise<this> {
-    await this.loadPageUrl(PageUrl.WORKSPACES);
+    await this.loadPageUrl(PageUrl.Workspaces);
     return this;
   }
 
@@ -66,7 +64,7 @@ export default class WorkspacesPage extends WorkspaceEditPage {
   * 4: return
   */
   async clickCreateNewWorkspace(): Promise<WorkspaceEditPage> {
-    const link = await Button.findByName(this.page, FIELD.createNewWorkspaceButton.textOption);
+    const link = await Button.findByName(this.page, FieldSelector.CreateNewWorkspaceButton.textOption);
     await link.clickAndWait();
     const workspaceEdit = new WorkspaceEditPage(this.page);
     await workspaceEdit.waitForLoad();
@@ -88,8 +86,8 @@ export default class WorkspacesPage extends WorkspaceEditPage {
     await (await editPage.getWorkspaceNameTextbox()).type(workspaceName);
     await (await editPage.getWorkspaceNameTextbox()).tabKey();
 
-    // select Synthetic Data Set 3
-    await editPage.selectDataSet('3');
+    // select the default Synthetic Dataset
+    await editPage.selectDataset();
 
     // select Billing Account
     await editPage.selectBillingAccount(billingAccount);

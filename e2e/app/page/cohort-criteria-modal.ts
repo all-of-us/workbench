@@ -9,7 +9,7 @@ import Dialog, {ButtonLabel} from 'app/component/dialog';
 import SelectMenu from 'app/component/select-menu';
 import Table from 'app/component/table';
 
-const defaultXpath = '//*[contains(concat(" ", normalize-space(@class)), " crit-modal-container")]';
+const defaultXpath = '//*[@class="modal-container"]';
 
 export enum PhysicalMeasurementsCriteria {
   BloodPressure = 'Blood Pressure',
@@ -45,7 +45,7 @@ export default class CohortCriteriaModal extends Dialog {
   }
 
   async waitForPhysicalMeasurementCriteriaLink(criteriaType: PhysicalMeasurementsCriteria): Promise<ClrIconLink> {
-    return ClrIconLink.findByName(this.page, {type: ElementType.Icon, name: criteriaType, iconShape: 'slider', ancestorLevel: 2}, this);
+    return ClrIconLink.findByName(this.page, {name: criteriaType, iconShape: 'slider', ancestorLevel: 2}, this);
   }
 
   /**
@@ -97,7 +97,7 @@ export default class CohortCriteriaModal extends Dialog {
   }
 
   async searchCondition(searchWord: string): Promise<Table> {
-    const searchFilterTextbox = await Textbox.findByName(this.page, {name: 'Search Conditions by code or description'}, this);
+    const searchFilterTextbox = await Textbox.findByName(this.page, {containsText: 'by code or description'}, this);
     await searchFilterTextbox.type(searchWord);
     await searchFilterTextbox.pressReturnKey();
     await waitWhileLoading(this.page);

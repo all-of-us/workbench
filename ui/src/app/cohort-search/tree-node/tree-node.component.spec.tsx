@@ -1,7 +1,6 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 
-import {wizardStore} from 'app/cohort-search/search-state.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {CohortBuilderApi} from 'generated/fetch';
@@ -32,7 +31,6 @@ describe('TreeNode', () => {
       ...workspaceDataStub,
       cdrVersionId: '1',
     });
-    wizardStore.next({});
   });
   it('should create', () => {
     const wrapper = mount(<TreeNode autocompleteSelection={undefined}

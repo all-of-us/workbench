@@ -19,7 +19,7 @@ const styles = reactStyles({
     position: 'absolute',
     top: '0',
     right: '0',
-    zIndex: 101,
+    zIndex: 103,
   }
 });
 

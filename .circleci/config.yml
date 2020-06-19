@@ -13,7 +13,7 @@ parameters:
     default: "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com"
   workbench_image:
     type: string
-    default: "allofustest/workbench:buildimage-0.0.17"
+    default: "allofustest/workbench:buildimage-0.0.18"
   mysql_image:
     type: string
     default: "circleci/mysql:5.7"
@@ -30,8 +30,8 @@ anchors:
     # In Feb 2017, this was set to 3G. But in Feb 2019 (RW-2194) we started seeing OOM errors,
     # so we bumped this down further to 2G.
     JAVA_TOOL_OPTIONS: -Xmx2g
-    # https://docs.gradle.org/6.3/userguide/gradle_daemon.html#sec:disabling_the_daemon
-    GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+    # See: https://support.circleci.com/hc/en-us/articles/360021812453-Common-Android-memory-issues
+    GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 -Dkotlin.incremental=false -Dkotlin.compiler.execution.strategy=in-process
     TERM: dumb
     MYSQL_ROOT_PASSWORD: ubuntu
 
@@ -186,18 +186,21 @@ commands:
           steps:
             - save_cache:
                 name: "save api gradle cache"
+                # See https://docs.gradle.org/current/userguide/directory_layout.html#dir:project_root
+                # Save Project-specific cache and Global cache (for everything that’s not project-specific).
                 paths:
+                  - .gradle
                   - ~/.gradle
-                key: v1-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
+                key: v2-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
       - when:
           condition: << parameters.restore >>
           steps:
             - restore_cache:
                 name: "restore api gradle cache"
                 keys:
-                  - v1-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
-                  - v1-gradle-cache-master
-                  - v1-gradle-cache-
+                  - v2-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
+                  - v2-gradle-cache-master
+                  - v2-gradle-cache-
 
   run_e2e_test:
     description: "Run puppeteer e2e integration tests"
@@ -223,7 +226,6 @@ commands:
           destination: logs
       - store_test_results:
           path: ~/workbench/e2e/logs
-
 
   start_local_api:
     description: "Start local API server"
@@ -284,10 +286,8 @@ commands:
 #        JOBS
 # -------------------------
 jobs:
-  api-build-test:
-    # We're hitting OOM failures as of 1 May 2020.  Increase to 6GB RAM by specifying a medium+ machine.
-    # Refers to https://circleci.com/docs/2.0/configuration-reference/#resource_class
-    resource_class: medium+
+  api-unit-test:
+    parallelism: 4
     <<: *java_defaults
     steps:
       - checkout_init_git
@@ -298,18 +298,51 @@ jobs:
       - run:
           name: Validate Swagger definitions
           working_directory: ~/workbench/api
-          command: ./project.rb validate-swagger --project-prop verboseTestLogging=yes
+          command: |
+            if [ "$CIRCLE_NODE_INDEX" == 0 ]; then
+              ./project.rb validate-swagger --project-prop verboseTestLogging=yes
+            fi
       - run:
           name: Run Java unit tests
           working_directory: ~/workbench/api
-          command: ./project.rb test
+          # See: https://circleci.com/docs/2.0/language-java/#sample-configuration
+          # "circleci tests split" command provides each CircleCI node with a list of fully qualified test names to execute.
+          #  JUnit XML test reports provide tests timing data. CircleCI partition tests based on timing data.
+          #
+          # Formatting fully qualified test names for gradle and running them with "gradle test" command. Short explanation on commands:
+          #   Find all unit tests recursively in "api/src/test/java/" directories.
+          #   Strips off "src/test/java/" substring;
+          #   Replaces all path separator "/" with ".";
+          #   Removes file extensions.
+          #   Append "--tests" in front of file name.
+          #
+          # Example of string before formatting:
+          #   src/test/java/org/pmiops/*********/monitoring/LogsBasedMetricsServiceTest.java src/test/java/org/pmiops/*********/monitoring/MonitoringServiceTest.java
+          # Example of Gradle command after formatting:
+          #   gradle test --tests org.pmiops.*********.monitoring.LogsBasedMetricsServiceTest --tests org.pmiops.*********.monitoring.MonitoringServiceTest
+          command: |
+            CLASSNAMES=$(circleci tests glob "src/test/java/**/*Test.java" "src/test/java/**/*Test.kt" \
+              | cut -c 1- \
+              | sed 's@src/test/java/@@' \
+              | sed 's@/@.@g' \
+              | sed 's/\.[^.]*$//' \
+              | circleci tests split --split-by=timings --timings-type=classname --index=$CIRCLE_NODE_INDEX)
+            GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) print "--tests", $i}')
+            gradle test $GRADLE_ARGS
       - run:
           # Lint last; it's more important to surface test failures early.
           name: Java linting
           working_directory: ~/workbench/api
-          command: ./gradlew spotlessCheck
+          command: |
+            if [ "$CIRCLE_NODE_INDEX" == 0 ]; then
+              ./gradlew spotlessCheck
+            fi
       - store_test_results:
            path: ~/workbench/api/build/test-results/test
+      # Save JUnit test results in artifacts because it provides the timing info on tests.
+      - store_artifacts:
+          path: ~/workbench/api/build/test-results/test
+          destination: JunitTestResult
       - manage_api_cache:
           save: true
 
@@ -367,6 +400,8 @@ jobs:
     <<: *java_defaults
     steps:
       - checkout_init_git
+      - manage_api_cache:
+          restore: true
       - run:
           name: Scan dependencies for vulnerabilities
           working_directory: ~/workbench/api
@@ -391,9 +426,6 @@ jobs:
           save: true
 
   api-bigquery-test:
-    # We're hitting OOM failures as of 13 May 2020.  Increase to 6GB RAM by specifying a medium+ machine.
-    # Refers to https://circleci.com/docs/2.0/configuration-reference/#resource_class
-    resource_class: medium+
     <<: *java_defaults
     steps:
       - checkout_init_git
@@ -409,7 +441,7 @@ jobs:
       - manage_api_cache:
           save: true
 
-  ui-build-test:
+  ui-unit-test:
     <<: *defaults
     steps:
       - checkout_init_git
@@ -453,7 +485,7 @@ jobs:
     <<: *defaults
     steps:
       - checkout_init_git
-      # Use "ui-build-test" job's workspace here to avoid redoing the setup.
+      # Use "ui-unit-test" job's workspace here to avoid redoing the setup.
       - attach_workspace:
           at: .
       - install_ui_dependencies
@@ -561,34 +593,35 @@ workflows:
       # Always run basic test/lint/compilation (open PRs, master merge).
       # Note: by default tags are not picked up.
       - api-local-test
-      - api-build-test
-      - ui-build-test
+      - api-unit-test
+      - ui-unit-test
       - api-bigquery-test
       - api-integration-test
-      - puppeteer-e2e-local-ui
+      # Disable e2e tests https://precisionmedicineinitiative.atlassian.net/browse/RW-5080 is resolved.
+      # - puppeteer-e2e-local-ui
       # Run deployment to "test" on master merges.
       - api-deploy-to-test:
           filters: *filter_only_master_branch
           requires:
-            - api-build-test
+            - api-unit-test
       - ui-deploy-to-test:
           filters: *filter_only_master_branch
           requires:
-            - ui-build-test
+            - ui-unit-test
       # On master merges, run Puppeteer e2e tests after ui and api deployed to "test" env successfully.
-      - puppeteer-e2e-test:
-          filters: *filter_only_master_branch
-          requires:
-            - api-deploy-to-test
-            - ui-deploy-to-test
+      # - puppeteer-e2e-test:
+          # filters: *filter_only_master_branch
+          # requires:
+            # - api-deploy-to-test
+            # - ui-deploy-to-test
 
   deploy-staging:
     jobs:
       - api-local-test:
           filters: *filter_only_release_tags
-      - api-build-test:
+      - api-unit-test:
           filters: *filter_only_release_tags
-      - ui-build-test:
+      - ui-unit-test:
           filters: *filter_only_release_tags
       # Run slower integration tests and dep checks on release tags only.
       - api-bigquery-test:
@@ -601,20 +634,20 @@ workflows:
           filters: *filter_only_release_tags
           requires:
             - api-local-test
-            - api-build-test
+            - api-unit-test
             - api-bigquery-test
             - api-deps-check
             - api-integration-test
-            - ui-build-test
+            - ui-unit-test
       - deploy-perf:
           filters: *filter_only_release_tags
           requires:
             - api-local-test
-            - api-build-test
+            - api-unit-test
             - api-bigquery-test
             - api-deps-check
             - api-integration-test
-            - ui-build-test
+            - ui-unit-test
 
   nightly-tests:
     triggers:

@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.institution.InstitutionalAffiliationMapper;
+import org.pmiops.workbench.institution.deprecated.InstitutionalAffiliationMapper;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.User;
 import org.pmiops.workbench.utils.mappers.CommonMappers;

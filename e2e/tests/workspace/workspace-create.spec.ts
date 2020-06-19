@@ -1,6 +1,6 @@
 import Link from 'app/element/link';
 import DataPage from 'app/page/data-page';
-import WorkspacesPage, {FIELD} from 'app/page/workspaces-page';
+import WorkspacesPage, {FieldSelector} from 'app/page/workspaces-page';
 import {signIn, performActions} from 'utils/test-utils';
 import Button from 'app/element/button';
 import * as testData from 'resources/data/workspace-data';
@@ -33,14 +33,14 @@ describe('Creating new workspaces', () => {
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();
 
-    const createNewWorkspaceButton  = await Button.findByName(page, FIELD.createNewWorkspaceButton.textOption );
+    const createNewWorkspaceButton  = await Button.findByName(page, FieldSelector.CreateNewWorkspaceButton.textOption );
     await createNewWorkspaceButton.clickAndWait();
 
     // fill out new workspace name
     const newWorkspaceName = await workspacesPage.fillOutWorkspaceName();
 
-    // select Synthetic DataSet 2
-    await workspacesPage.selectDataSet('2');
+    // select the default Synthetic Dataset
+    await workspacesPage.selectDataset();
 
     // select Billing Account
     await workspacesPage.selectBillingAccount('Use All of Us free credits');

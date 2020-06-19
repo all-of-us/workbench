@@ -5,6 +5,7 @@ const defaultServerConfig: ConfigResponse = {
   projectId: 'all-of-us-rw-prod',
   firecloudURL: 'https://firecloud.org',
   publicApiKeyForErrorReports: 'notasecret',
+  shibbolethUiBaseUrl: 'https://broad-shibboleth-prod.appspot.com/',
   enableComplianceTraining: true,
   enableDataUseAgreement: true,
   enableEraCommons: true,
@@ -14,6 +15,7 @@ const defaultServerConfig: ConfigResponse = {
   requireInvitationKey: true,
   requireInstitutionalVerification: true,
   enableCBAgeTypeOptions: true,
+  useNewShibbolethService: false,
 };
 
 export default defaultServerConfig;

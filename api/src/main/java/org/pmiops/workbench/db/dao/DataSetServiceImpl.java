@@ -1,8 +1,10 @@
 package org.pmiops.workbench.db.dao;
 
+import static com.google.cloud.bigquery.StandardSQLTypeName.ARRAY;
+import static org.pmiops.workbench.model.PrePackagedConceptSetEnum.SURVEY;
+
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import com.google.cloud.bigquery.StandardSQLTypeName;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
@@ -14,23 +16,25 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
-import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
+import org.pmiops.workbench.dataset.BigQueryDataSetTableInfo;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
@@ -40,6 +44,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
@@ -67,9 +72,14 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private static final String SELECT_ALL_FROM_DS_LINKING_WHERE_DOMAIN_MATCHES_LIST =
       "SELECT * FROM `${projectId}.${dataSetId}.ds_linking` "
           + "WHERE DOMAIN = @pDomain AND DENORMALIZED_NAME in unnest(@pValuesList)";
+
+  private static final String PREVIEW_QUERY =
+      "SELECT ${columns} FROM `${projectId}.${dataSetId}.${tableName}`";
+  private static final String LIMIT_20 = " LIMIT 20";
+
   private static final ImmutableSet<PrePackagedConceptSetEnum>
       CONCEPT_SETS_NEEDING_PREPACKAGED_SURVEY =
-          ImmutableSet.of(PrePackagedConceptSetEnum.SURVEY, PrePackagedConceptSetEnum.BOTH);
+          ImmutableSet.of(SURVEY, PrePackagedConceptSetEnum.BOTH);
 
   private static final String PERSON_ID_COLUMN_NAME = "PERSON_ID";
   private static final int DATA_SET_VERSION = 1;
@@ -237,6 +247,66 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           .build();
 
   @Override
+  public QueryJobConfiguration previewBigQueryJobConfig(DataSetPreviewRequest request) {
+    final Domain domain = request.getDomain();
+    final List<String> values = request.getValues();
+    Map<String, QueryParameterValue> mergedQueryParameterValues = new HashMap<>();
+
+    final List<String> domainValues =
+        bigQueryService.getTableFieldsFromDomain(domain).stream()
+            .map(field -> field.getName().toLowerCase())
+            .collect(Collectors.toList());
+
+    final List<String> filteredDomainColumns =
+        values.stream().distinct().filter(domainValues::contains).collect(Collectors.toList());
+
+    final StringBuilder queryBuilder =
+        new StringBuilder(
+            PREVIEW_QUERY
+                .replace("${columns}", String.join(", ", filteredDomainColumns))
+                .replace("${tableName}", BigQueryDataSetTableInfo.getTableName(domain)));
+
+    final List<Long> conceptIds =
+        SURVEY.equals(request.getPrePackagedConceptSet())
+            ? conceptBigQueryService.getSurveyQuestionConceptIds()
+            : conceptSetDao.findAllByConceptSetIdIn(request.getConceptSetIds()).stream()
+                .flatMap(cs -> cs.getConceptIds().stream())
+                .collect(Collectors.toList());
+
+    if (!domain.equals(Domain.PERSON)) {
+      mergedQueryParameterValues.put(
+          "conceptIds", QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
+      queryBuilder.append(" WHERE ").append(BigQueryDataSetTableInfo.getConceptIdIn(domain));
+    }
+
+    if (!request.getIncludesAllParticipants()) {
+      final ImmutableList<QueryAndParameters> queryMapEntries =
+          cohortDao.findAllByCohortIdIn(request.getCohortIds()).stream()
+              .map(this::getCohortQueryStringAndCollectNamedParameters)
+              .collect(ImmutableList.toImmutableList());
+
+      final String unionedCohortQuery =
+          queryMapEntries.stream()
+              .map(QueryAndParameters::getQuery)
+              .collect(Collectors.joining(" UNION DISTINCT "));
+      queryBuilder.append(
+          !domain.equals(Domain.PERSON)
+              ? " AND PERSON_ID in (" + unionedCohortQuery + ")"
+              : " WHERE PERSON_ID in (" + unionedCohortQuery + ")");
+
+      // now merge all the individual maps from each configuration
+      mergedQueryParameterValues.putAll(
+          queryMapEntries.stream()
+              .map(QueryAndParameters::getNamedParameterValues)
+              .flatMap(m -> m.entrySet().stream())
+              .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+    }
+    queryBuilder.append(LIMIT_20);
+
+    return buildQueryJobConfiguration(mergedQueryParameterValues, queryBuilder.toString());
+  }
+
+  @Override
   public Map<String, QueryJobConfiguration> domainToBigQueryConfig(DataSetRequest dataSetRequest) {
     final boolean includesAllParticipants =
         getBuiltinBooleanFromNullable(dataSetRequest.getIncludesAllParticipants());
@@ -333,13 +403,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     final SearchRequest searchRequest = new Gson().fromJson(cohortDefinition, SearchRequest.class);
     final QueryJobConfiguration participantIdQuery =
         cohortQueryBuilder.buildParticipantIdQuery(new ParticipantCriteria(searchRequest));
-    final QueryJobConfiguration participantQueryConfig =
-        bigQueryService.filterBigQueryConfig(participantIdQuery);
     final AtomicReference<String> participantQuery =
-        new AtomicReference<>(participantQueryConfig.getQuery());
+        new AtomicReference<>(participantIdQuery.getQuery());
     final ImmutableMap.Builder<String, QueryParameterValue> cohortNamedParametersBuilder =
         new ImmutableMap.Builder<>();
-    participantQueryConfig
+    participantIdQuery
         .getNamedParameters()
         .forEach(
             (npKey, npValue) -> {
@@ -685,42 +753,40 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   //    SELECT * FROM cdr.dataset.person WHERE criteria IN (1, 2, 3)
   private static String fillInQueryParams(
       String query, Map<String, QueryParameterValue> queryParameterValueMap) {
-    StringBuilder stringBuilder = new StringBuilder(query);
-    queryParameterValueMap.forEach(
-        (key, value) -> {
-          if (StandardSQLTypeName.ARRAY.equals(value.getType())) {
-            // This handles the replacement of array parameters.
-            // It finds the parameter (specified by `unnest(NAME)`)
-            String stringToReplace = "unnest(@".concat(key.concat(")"));
-            int startingIndex = stringBuilder.indexOf(stringToReplace);
-            stringBuilder.replace(
-                startingIndex,
-                startingIndex + stringToReplace.length(),
-                arraySqlFromQueryParameter(value));
-          } else {
-            // This handles the replacement of non-array parameters.
-            // getValue should always work, because it handles all value types except arrays and
-            // structs.
-            // We do not use structs.
-            String stringToReplace = "@".concat(key);
-            int startingIndex = stringBuilder.indexOf(stringToReplace);
-            Optional.ofNullable(value.getValue())
-                .ifPresent(
-                    v ->
-                        stringBuilder.replace(
-                            startingIndex, startingIndex + stringToReplace.length(), v));
-          }
-        });
-    return stringBuilder.toString();
+    return queryParameterValueMap.entrySet().stream()
+        .map(param -> (Function<String, String>) s -> replaceParameter(s, param))
+        .reduce(Function.identity(), Function::andThen)
+        .apply(query)
+        .replaceAll("unnest", "");
   }
 
-  @NotNull
-  private static String arraySqlFromQueryParameter(QueryParameterValue value) {
-    return String.format(
-        "(%s)",
-        nullableListToEmpty(value.getArrayValues()).stream()
-            .map(QueryParameterValue::getValue)
-            .collect(Collectors.joining(", ")));
+  private static String replaceParameter(
+      String s, Map.Entry<String, QueryParameterValue> parameter) {
+    String value =
+        ARRAY.equals(parameter.getValue().getType())
+            ? nullableListToEmpty(parameter.getValue().getArrayValues()).stream()
+                .map(DataSetServiceImpl::convertSqlTypeToString)
+                .collect(Collectors.joining(", "))
+            : convertSqlTypeToString(parameter.getValue());
+    String key = String.format("@%s", parameter.getKey());
+    return s.replaceAll(key, value);
+  }
+
+  private static String convertSqlTypeToString(QueryParameterValue parameter) {
+    switch (parameter.getType()) {
+      case BOOL:
+        return Boolean.valueOf(parameter.getValue()) ? "1" : "0";
+      case INT64:
+      case FLOAT64:
+      case NUMERIC:
+        return parameter.getValue();
+      case STRING:
+      case TIMESTAMP:
+      case DATE:
+        return String.format("'%s'", parameter.getValue());
+      default:
+        throw new RuntimeException();
+    }
   }
 
   private static String generateNotebookUserCode(

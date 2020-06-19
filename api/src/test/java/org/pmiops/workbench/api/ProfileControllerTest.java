@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static junit.framework.TestCase.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
@@ -26,6 +25,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
@@ -48,14 +48,15 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.FirecloudJWTWrapper;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionMapperImpl;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.InstitutionServiceImpl;
-import org.pmiops.workbench.institution.InstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperImpl;
+import org.pmiops.workbench.institution.deprecated.InstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.AccessModule;
@@ -86,6 +87,7 @@ import org.pmiops.workbench.profile.DemographicSurveyMapperImpl;
 import org.pmiops.workbench.profile.PageVisitMapperImpl;
 import org.pmiops.workbench.profile.ProfileMapperImpl;
 import org.pmiops.workbench.profile.ProfileService;
+import org.pmiops.workbench.shibboleth.ShibbolethService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
@@ -141,6 +143,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @MockBean private ProfileAuditor mockProfileAuditor;
   @MockBean private UserServiceAuditor mockUserServiceAuditAdapter;
   @MockBean private CaptchaVerificationService captchaVerificationService;
+  @MockBean private ShibbolethService shibbolethService;
 
   @Autowired private UserDao userDao;
   @Autowired private UserDataUseAgreementDao userDataUseAgreementDao;
@@ -767,7 +770,35 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test(expected = BadRequestException.class)
-  public void updateVerifiedInstitutionalAffiliation_changeForbidden() {
+  public void create_verifiedInstitutionalAffiliation_invalidDomain() {
+    config.featureFlags.requireInstitutionalVerification = true;
+
+    ArrayList<String> emailDomains = new ArrayList<>();
+    emailDomains.add("@broadinstitute.org");
+    emailDomains.add("@broad.org");
+
+    final Institution broad =
+        new Institution()
+            .shortName("Broad")
+            .displayName("The Broad Institute")
+            .emailDomains(emailDomains)
+            .duaTypeEnum(DuaType.MASTER);
+    institutionService.createInstitution(broad);
+
+    final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
+        new VerifiedInstitutionalAffiliation()
+            .institutionShortName(broad.getShortName())
+            .institutionalRoleEnum(InstitutionalRole.ADMIN);
+    createAccountRequest
+        .getProfile()
+        .setVerifiedInstitutionalAffiliation(verifiedInstitutionalAffiliation);
+
+    // CONTACT_EMAIL is an @example.com
+    createUser();
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void updateVerifiedInstitutionalAffiliation_noSuchInstitution() {
     config.featureFlags.requireInstitutionalVerification = true;
 
     final VerifiedInstitutionalAffiliation original = createVerifiedInstitutionalAffiliation();
@@ -783,21 +814,32 @@ public class ProfileControllerTest extends BaseControllerTest {
             .institutionDisplayName("The Narrow Institute?")
             .institutionalRoleEnum(InstitutionalRole.PRE_DOCTORAL);
 
-    profile.setVerifiedInstitutionalAffiliation(newAffil);
-    profileController.updateProfile(profile);
+    profileController.updateVerifiedInstitutionalAffiliation(dbUser.getUserId(), newAffil);
   }
 
-  @Test(expected = BadRequestException.class)
-  public void updateVerifiedInstitutionalAffiliation_addForbidden() {
+  @Test
+  public void updateVerifiedInstitutionalAffiliation() {
     // necessary to create a user without one
     config.featureFlags.requireInstitutionalVerification = false;
     createUser();
 
     config.featureFlags.requireInstitutionalVerification = true;
 
-    final Profile profile = profileController.getMe().getBody();
     final VerifiedInstitutionalAffiliation toAdd = createVerifiedInstitutionalAffiliation();
-    profile.setVerifiedInstitutionalAffiliation(toAdd);
+    profileController.updateVerifiedInstitutionalAffiliation(dbUser.getUserId(), toAdd);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void updateProfile_removeVerifiedInstitutionalAffiliationForbidden() {
+    config.featureFlags.requireInstitutionalVerification = true;
+
+    final VerifiedInstitutionalAffiliation original = createVerifiedInstitutionalAffiliation();
+
+    createAccountRequest.getProfile().setVerifiedInstitutionalAffiliation(original);
+    createUser();
+
+    final Profile profile = profileController.getMe().getBody();
+    profile.setVerifiedInstitutionalAffiliation(null);
     profileController.updateProfile(profile);
   }
 
@@ -810,9 +852,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createAccountRequest.getProfile().setVerifiedInstitutionalAffiliation(original);
     createUser();
 
-    final Profile profile = profileController.getMe().getBody();
-    profile.setVerifiedInstitutionalAffiliation(null);
-    profileController.updateProfile(profile);
+    profileController.updateVerifiedInstitutionalAffiliation(dbUser.getUserId(), null);
   }
 
   @Test
@@ -1067,14 +1107,32 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testUpdateNihToken() {
-    when(fireCloudService.postNihCallback(any()))
-        .thenReturn(new FirecloudNihStatus().linkedNihUsername("test").linkExpireTime(500L));
-    try {
-      createUser();
-      profileController.updateNihToken(new NihToken().jwt("test"));
-    } catch (Exception e) {
-      fail();
-    }
+    config.featureFlags.useNewShibbolethService = false;
+
+    NihToken nihToken = new NihToken().jwt("test");
+    FirecloudJWTWrapper firecloudJwt = new FirecloudJWTWrapper().jwt("test");
+    createUser();
+    profileController.updateNihToken(nihToken);
+    verify(fireCloudService).postNihCallback(ArgumentMatchers.eq(firecloudJwt));
+  }
+
+  @Test(expected = ServerErrorException.class)
+  public void testUpdateNihToken_serverError() {
+    config.featureFlags.useNewShibbolethService = false;
+
+    doThrow(new ServerErrorException()).when(fireCloudService).postNihCallback(any());
+    profileController.updateNihToken(new NihToken().jwt("test"));
+  }
+
+  @Test
+  public void testUpdateNihToken_newShibbolethService() {
+    config.featureFlags.useNewShibbolethService = true;
+
+    NihToken nihToken = new NihToken().jwt("test");
+    String jwt = "test";
+    createUser();
+    profileController.updateNihToken(nihToken);
+    verify(shibbolethService).updateShibbolethToken(ArgumentMatchers.eq(jwt));
   }
 
   @Test(expected = BadRequestException.class)
@@ -1083,14 +1141,8 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test(expected = BadRequestException.class)
-  public void testUpdateNihToken_badRequest_2() {
+  public void testUpdateNihToken_badRequest_noJwt() {
     profileController.updateNihToken(new NihToken());
-  }
-
-  @Test(expected = ServerErrorException.class)
-  public void testUpdateNihToken_serverError() {
-    doThrow(new ServerErrorException()).when(fireCloudService).postNihCallback(any());
-    profileController.updateNihToken(new NihToken().jwt("test"));
   }
 
   @Test

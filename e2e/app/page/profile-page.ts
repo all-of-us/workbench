@@ -2,24 +2,22 @@ import {Page} from 'puppeteer';
 import Textbox from 'app/element/textbox';
 import AuthenticatedPage from 'app/page/authenticated-page';
 import {waitWhileLoading} from 'utils/test-utils';
-import {waitForText, waitForUrl} from 'utils/waits-utils';
+import {waitForDocumentTitle, waitForUrl} from 'utils/waits-utils';
 
-export const PAGE = {
-  TITLE: 'Profile',
-};
+export const PageTitle = 'Profile';
 
-export const LABEL_ALIAS = {
-  FIRST_NAME: 'First Name',
-  LAST_NAME: 'Last Name',
-  CONTACT_EMAIL: 'Contact Email',
-  CURRENT_POSITION: 'Your Current Position',
-  ORGANIZATION: 'Your Organization',
-  CURRENT_RESEARCH_WORK: 'Current Research Work',
-  ABOUT_YOU: 'About You',
-  INSTITUTION: 'Institution',
-  ROLE: 'Role',
-  DISCARD_CHANGES: 'Discard Changes',
-  SAVE_PROFILE: 'Save Profile',
+export const LabelAlias = {
+  FirstName: 'First Name',
+  LastName: 'Last Name',
+  ContactEmail: 'Contact Email',
+  CurrentPosition: 'Your Current Position',
+  Organization: 'Your Organization',
+  CurrentResearchWork: 'Current Research Work',
+  AboutYou: 'About You',
+  Institution: 'Institution',
+  Role: 'Role',
+  DiscardChanges: 'Discard Changes',
+  SaveProfile: 'Save Profile',
 };
 
 export default class ProfilePage extends AuthenticatedPage {
@@ -32,7 +30,7 @@ export default class ProfilePage extends AuthenticatedPage {
     try {
       await Promise.all([
         waitForUrl(this.page, '/profile'),
-        waitForText(this.page, PAGE.TITLE),
+        waitForDocumentTitle(this.page, PageTitle),
         waitWhileLoading(this.page),
       ]);
       return true;
@@ -43,11 +41,11 @@ export default class ProfilePage extends AuthenticatedPage {
   }
 
   async getFirstName(): Promise<Textbox> {
-    return await Textbox.findByName(this.page, {name: LABEL_ALIAS.FIRST_NAME});
+    return await Textbox.findByName(this.page, {name: LabelAlias.FirstName});
   }
 
   async getLastName(): Promise<Textbox> {
-    return await Textbox.findByName(this.page, {name: LABEL_ALIAS.LAST_NAME});
+    return await Textbox.findByName(this.page, {name: LabelAlias.LastName});
   }
 
 }

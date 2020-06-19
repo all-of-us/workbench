@@ -1,20 +1,24 @@
 import {Component, Input} from '@angular/core';
 import { Link, StyledAnchorTag } from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
+import {SemiBoldHeader} from 'app/components/headers';
+import {AoU} from 'app/components/text-wrappers';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {openZendeskWidget} from 'app/utils/zendesk';
 import { environment } from 'environments/environment';
 import * as React from 'react';
 
+
 const styles = reactStyles({
   footerAnchor: {
-    color: colors.secondary
+    color: colors.secondary,
+    fontSize: 12,
   },
   footerAside: {
     color: colors.white,
     fontSize: 10,
-    lineHeight: '18px',
+    lineHeight: '22px',
     alignSelf: 'center'
   },
   footerImage: {
@@ -23,18 +27,28 @@ const styles = reactStyles({
   },
   footerSectionHeader: {
     color: colors.white,
-    borderBottom: `1px solid ${colors.white}`,
+    fontSize: 12,
+    marginTop: 0,
+    textTransform: 'uppercase',
     width: '100%'
+  },
+  footerSectionDivider: {
+    borderBottom: `1px solid ${colors.white}`,
+    marginBottom: '.2rem',
+    paddingBottom: '.2rem'
   },
   footerTemplate: {
     width: '100%',
-    height: '6.5rem',
     backgroundColor: colors.primary,
-    padding: '1rem'
+    padding: '1rem',
+    // Must be higher than the side helpbar index for now. See help-bar.tsx.
+    // Eventually the footer should be reflowed benetah this, per RW-5110. The footer
+    // should be beneath any other floating elements, such as modals.
+    zIndex: 102
   },
   workbenchFooterItem: {
-    width: '18rem',
-    marginRight: '2rem'
+    width: '12rem',
+    marginRight: '3rem'
   }
 });
 
@@ -57,8 +71,15 @@ const FooterTemplate = ({style = {}, ...props}) => {
         <img style={styles.footerImage} src='assets/images/all-of-us-logo-footer.svg'/>
         <img style={{...styles.footerImage, height: '1rem'}} src='assets/images/nih-logo-footer.png'/>
       </FlexColumn>
-      <div style={{marginLeft: '1.5rem', width: '100%', marginTop: '0.5rem'}}>
+      <div style={{marginLeft: '1.5rem', width: '100%'}}>
         {props.children}
+        <div style={{...styles.footerAside, marginTop: '20px'}}>
+          The <AoU/> logo is a service mark of the&nbsp;
+          <NewTabFooterAnchorTag href='https://www.hhs.gov'>
+            U.S. Department of Health and Human Services
+          </NewTabFooterAnchorTag>.<br/>
+          The <AoU/> platform is for research only and does not provide medical advice, diagnosis or treatment. Copyright 2020.
+        </div>
       </div>
     </FlexRow>
   </div>;
@@ -66,7 +87,9 @@ const FooterTemplate = ({style = {}, ...props}) => {
 
 const FooterSection = ({style = {}, header, ...props}) => {
   return <FlexColumn style={style}>
-    <div style={styles.footerSectionHeader}>{header}</div>
+    <SemiBoldHeader style={{
+      ...styles.footerSectionDivider,
+      ...styles.footerSectionHeader}}>{header}</SemiBoldHeader>
     <div>{props.children}</div>
   </FlexColumn>;
 };
@@ -88,13 +111,13 @@ const WorkbenchFooter = withUserProfile()(
 
     render() {
       return <FooterTemplate>
-        <FlexRow style={{justifyContent: 'flex-start', width: '100%', height: '100%'}}>
+        <FlexRow style={{justifyContent: 'flex-start', width: '100%'}}>
           <FooterSection style={styles.workbenchFooterItem} header='Quick Links'>
             <FlexRow>
               <FlexColumn style={{width: '50%'}}>
                 <FooterAnchorTag href='/'>Home</FooterAnchorTag>
                 <FooterAnchorTag href='library'>Featured Workspaces</FooterAnchorTag>
-                <FooterAnchorTag href='workspaces'>Your workspaces</FooterAnchorTag>
+                <FooterAnchorTag href='workspaces'>Your Workspaces</FooterAnchorTag>
               </FlexColumn>
               <FlexColumn style={{width: '50%'}}>
                 <NewTabFooterAnchorTag href={environment.publicUiUrl}>
@@ -136,12 +159,6 @@ const WorkbenchFooter = withUserProfile()(
               </FlexColumn>
             </FlexRow>
           </FooterSection>
-          <div style={{...styles.workbenchFooterItem, ...styles.footerAside, marginRight: 0}}>
-            The <i>All of Us</i> logo is a service mark of the
-            U.S. Department of Health and Human Services.
-            The <i>All of Us</i> platform is for research only and does
-            not provide medical advice, diagnosis or treatment. Copyright 2020.
-          </div>
         </FlexRow>
       </FooterTemplate>;
     }
@@ -152,23 +169,19 @@ const supportEmailAddress = 'support@researchallofus.org';
 const RegistrationFooter = ({style = {}, ...props}) => {
   return <FooterTemplate {...props}>
     <FlexColumn>
-      <FlexRow style={{...styles.footerSectionHeader, width: '25rem'}}>
+      <FlexRow style={{...styles.footerSectionDivider, color: colors.white, width: '25rem'}}>
         <NewTabFooterAnchorTag href={environment.publicUiUrl}>
           Data Browser
         </NewTabFooterAnchorTag>
         <NewTabFooterAnchorTag style={{marginLeft: '1.5rem'}} href='https://researchallofus.org'>
           Research Hub
         </NewTabFooterAnchorTag>
-        <div style={{marginLeft: '1.5rem'}}>
+        <div style={{fontSize: 12, marginLeft: '1.5rem'}}>
           Contact Us: <FooterAnchorTag href={'mailto:' + supportEmailAddress}>
             {supportEmailAddress}
           </FooterAnchorTag>
         </div>
       </FlexRow>
-      <div style={{...styles.footerAside, alignSelf: 'flex-start', marginTop: '1rem'}}>The All of Us logo is a service
-        mark of the U.S. Department of Health and Human Services.</div>
-      <div style={{...styles.footerAside, alignSelf: 'flex-start'}}>The All of Us platform is for research only and
-        does not provide medical advice, diagnosis or treatment. Copyright 2020.</div>
     </FlexColumn>
   </FooterTemplate>;
 };
@@ -206,4 +219,3 @@ export class FooterComponent extends ReactWrapperBase {
     ]);
   }
 }
-

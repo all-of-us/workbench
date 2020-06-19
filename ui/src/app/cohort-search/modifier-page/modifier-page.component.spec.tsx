@@ -1,12 +1,12 @@
 import {shallow} from 'enzyme';
 
 import * as React from 'react';
-import {ListModifierPage} from './modifier-page.component';
+import {ModifierPage} from './modifier-page.component';
 
 
 describe('ListModifierPage', () => {
   it('should render', () => {
-    const wrapper = shallow(<ListModifierPage disabled={() => {}} wizard={{}}/>);
+    const wrapper = shallow(<ModifierPage disabled={() => {}} wizard={{}}/>);
     expect(wrapper.exists()).toBeTruthy();
   });
 });

@@ -117,6 +117,17 @@ public class WorkbenchConfig {
     public String jupyterDockerImage;
     // The docker image that we use for our welder images
     public String welderDockerImage;
+    // Base URL for the Shibboleth API server, e.g.
+    // https://profile-dot-broad-shibboleth-prod.appspot.com
+    // See RW-4257 for more details on Terra's Shibboleth-specific API.
+    //
+    // Note that the Terra Shibboleth API server does not have a distinct App Engine service for
+    // dev environments. Instead, a /dev prefix should be added to this base URL.
+    public String shibbolethApiBaseUrl;
+    // Base URL for the Shibboleth UI service, e.g. https://broad-shibboleth-prod.appspot.com.
+    // This is the base URL that a browser client should be redirected to in order to complete
+    // an authentication round trip with eRA Commons.
+    public String shibbolethUiBaseUrl;
   }
 
   public static class AuthConfig {
@@ -243,6 +254,9 @@ public class WorkbenchConfig {
     public boolean enableV3DataUserCodeOfConduct;
     // Flag to indicate whether to show the Event Date modifier in cohort builder
     public boolean enableEventDateModifier;
+    // Whether the RW backend should call the new Shibboleth API service instead of the legacy
+    // Shibboleth endpoint that was part of Firecloud Orchestration.
+    public boolean useNewShibbolethService;
     // Flag to indicate whether to show Update research purpose prompt after an year of workspace
     // creation
     public boolean enableResearchPurposePrompt;

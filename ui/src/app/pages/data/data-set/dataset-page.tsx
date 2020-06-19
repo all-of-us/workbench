@@ -392,12 +392,12 @@ const BoxHeader = ({step = '', header =  '', subHeader = '', style = {}, ...prop
 
 // Enum values are the display values.
 enum PrepackagedConceptSet {
-  DEMOGRAPHICS = 'Demographics',
+  PERSON = 'Demographics',
   SURVEYS = 'All Surveys'
 }
 
 const PREPACKAGED_DOMAINS = {
-  [PrepackagedConceptSet.DEMOGRAPHICS]: Domain.PERSON,
+  [PrepackagedConceptSet.PERSON]: Domain.PERSON,
   [PrepackagedConceptSet.SURVEYS]: Domain.SURVEY
 };
 
@@ -648,10 +648,30 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
     }
 
     selectCohort(cohort: Cohort): void {
-      this.setState({
-        dataSetTouched: true,
-        selectedCohortIds: toggleIncludes(cohort.id, this.state.selectedCohortIds)
-      });
+      const selectedCohortList = toggleIncludes(cohort.id, this.state.selectedCohortIds);
+      // If Workspace Cohort is selected, un-select Pre packaged cohort
+      if (selectedCohortList && selectedCohortList.length > 0) {
+        this.setState({
+          dataSetTouched: true,
+          selectedCohortIds: selectedCohortList,
+          includesAllParticipants: false
+        });
+      } else {
+        this.setState({
+          dataSetTouched: true,
+          selectedCohortIds: selectedCohortList
+        });
+      }
+
+    }
+
+    selectPrePackagedCohort(): void {
+      // Un-select any workspace Cohort if Pre Packaged cohort is selected
+      if (!this.state.includesAllParticipants) {
+        this.setState({includesAllParticipants: !this.state.includesAllParticipants, selectedCohortIds: []});
+      } else {
+        this.setState({includesAllParticipants: !this.state.includesAllParticipants});
+      }
     }
 
     selectDomainValue(domain: Domain, domainValue: DomainValue): void {
@@ -735,9 +755,9 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
     apiEnumToPrePackageConceptSets(v: PrePackagedConceptSetEnum): Set<PrepackagedConceptSet> {
       switch (v) {
         case PrePackagedConceptSetEnum.BOTH:
-          return new Set([PrepackagedConceptSet.DEMOGRAPHICS, PrepackagedConceptSet.SURVEYS]);
-        case PrePackagedConceptSetEnum.DEMOGRAPHICS:
-          return new Set([PrepackagedConceptSet.DEMOGRAPHICS]);
+          return new Set([PrepackagedConceptSet.PERSON, PrepackagedConceptSet.SURVEYS]);
+        case PrePackagedConceptSetEnum.PERSON:
+          return new Set([PrepackagedConceptSet.PERSON]);
         case PrePackagedConceptSetEnum.SURVEY:
           return new Set([PrepackagedConceptSet.SURVEYS]);
         case PrePackagedConceptSetEnum.NONE:
@@ -748,13 +768,13 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
 
     getPrePackagedConceptSetApiEnum() {
       const {selectedPrepackagedConceptSets} = this.state;
-      if (selectedPrepackagedConceptSets.has(PrepackagedConceptSet.DEMOGRAPHICS) &&
+      if (selectedPrepackagedConceptSets.has(PrepackagedConceptSet.PERSON) &&
           selectedPrepackagedConceptSets.has(PrepackagedConceptSet.SURVEYS)) {
         return PrePackagedConceptSetEnum.BOTH;
       } else if (selectedPrepackagedConceptSets.has(PrepackagedConceptSet.SURVEYS)) {
         return PrePackagedConceptSetEnum.SURVEY;
-      } else if (selectedPrepackagedConceptSets.has(PrepackagedConceptSet.DEMOGRAPHICS)) {
-        return PrePackagedConceptSetEnum.DEMOGRAPHICS;
+      } else if (selectedPrepackagedConceptSets.has(PrepackagedConceptSet.PERSON)) {
+        return PrePackagedConceptSetEnum.PERSON;
       }
       return PrePackagedConceptSetEnum.NONE;
     }
@@ -781,7 +801,9 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
         includesAllParticipants: this.state.includesAllParticipants,
         cohortIds: this.state.selectedCohortIds,
         prePackagedConceptSet: this.getPrePackagedConceptSetApiEnum(),
-        values: this.state.selectedDomainValuePairs.map(domainValue => domainValue.value)
+        values: this.state.selectedDomainValuePairs
+            .filter(values => values.domain === domain)
+            .map( domainValue => domainValue.value)
       };
       let newPreviewInformation;
       try {
@@ -891,8 +913,11 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
       const domainDisplayed = formatDomain(this.state.selectedPreviewDomain);
       return <div style={styles.warningMessage}>
         {filteredPreviewData.isLoading ?
-          <div>Generating preview for {domainDisplayed}</div> :
-          <div>{filteredPreviewData.errorText}</div>
+          <div>Generating preview for {domainDisplayed}</div> : <div>
+            {filteredPreviewData.errorText && <div>{filteredPreviewData.errorText}</div>}
+            {/* If there is no error that means no data was return*/}
+            {!filteredPreviewData.errorText && <div>No Results found for {domainDisplayed}</div>}
+            </div>
         }
       </div>;
     }
@@ -933,12 +958,10 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                 </BoxHeader>
                 <div style={{height: '9rem', overflowY: 'auto'}}>
                   <Subheader>Prepackaged Cohorts</Subheader>
-                  <ImmutableListItem name='All Participants' checked={includesAllParticipants}
+                  <ImmutableListItem name='All Participants' data-test-id='all-participant'
+                                     checked={includesAllParticipants}
                                      onChange={
-                                       () => this.setState({
-                                         includesAllParticipants: !includesAllParticipants,
-                                         dataSetTouched: true
-                                       })}/>
+                                       () => this.selectPrePackagedCohort()}/>
                   <Subheader>Workspace Cohorts</Subheader>
                   {!loadingResources && this.state.cohortList.map(cohort =>
                     <ImmutableListItem key={cohort.id} name={cohort.name}

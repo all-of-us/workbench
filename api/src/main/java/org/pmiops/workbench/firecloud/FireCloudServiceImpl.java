@@ -61,9 +61,11 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<NihApi> nihApiProvider;
   private final Provider<WorkspacesApi> endUserWorkspacesApiProvider;
   private final Provider<WorkspacesApi> serviceAccountWorkspaceApiProvider;
+
   private final Provider<StatusApi> statusApiProvider;
   private final Provider<StaticNotebooksApi> staticNotebooksApiProvider;
   private final FirecloudRetryHandler retryHandler;
+
   private final Provider<ServiceAccountCredentials> fcAdminCredsProvider;
   private final IamCredentialsClient iamCredentialsClient;
   private final HttpTransport httpTransport;
@@ -484,9 +486,9 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public FirecloudNihStatus postNihCallback(FirecloudJWTWrapper wrapper) {
+  public void postNihCallback(FirecloudJWTWrapper wrapper) {
     NihApi nihApi = nihApiProvider.get();
-    return retryHandler.run(
+    retryHandler.run(
         (context) -> {
           return nihApi.nihCallback(wrapper);
         });
