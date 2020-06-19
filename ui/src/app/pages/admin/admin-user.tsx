@@ -257,7 +257,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
           verifiedInstitutionOptions.find(
               institution => institution.shortName === institutionShortName,
               verifiedInstitutionOptions
-          )
+          ).displayName
       ),
       fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionRoleEnum'], undefined),
       fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], undefined)
