@@ -821,8 +821,6 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void updateVerifiedInstitutionalAffiliation_create() {
     createUser();
 
-    assertThat(profileController.getMe().getBody().getVerifiedInstitutionalAffiliation()).isNull();
-
     config.featureFlags.requireInstitutionalVerification = true;
 
     final VerifiedInstitutionalAffiliation toAdd = createVerifiedInstitutionalAffiliation();
@@ -833,23 +831,23 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void adminUpdateProfile_updateVerifiedInstitutionalAffiliation() {
-    // necessary to create a user without one
-    config.featureFlags.requireInstitutionalVerification = false;
+  public void updateVerifiedInstitutionalAffiliation_update() {
     createUser();
-
-    Profile profile = profileService.getProfile(dbUser);
-    assertThat(profile.getVerifiedInstitutionalAffiliation()).isNull();
 
     config.featureFlags.requireInstitutionalVerification = true;
 
-    final VerifiedInstitutionalAffiliation toAdd = createVerifiedInstitutionalAffiliation();
+    VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
+        createVerifiedInstitutionalAffiliation();
+    profileController.updateVerifiedInstitutionalAffiliation(
+        dbUser.getUserId(), verifiedInstitutionalAffiliation);
 
-    profile.setVerifiedInstitutionalAffiliation(toAdd);
-    profileController.adminUpdateProfile(dbUser, profile);
+    verifiedInstitutionalAffiliation.setInstitutionalRoleEnum(InstitutionalRole.ADMIN);
+    profileController.updateVerifiedInstitutionalAffiliation(
+        dbUser.getUserId(), verifiedInstitutionalAffiliation);
 
-    profile = profileService.getProfile(dbUser);
-    assertThat(profile.getVerifiedInstitutionalAffiliation()).isEqualTo(toAdd);
+    Profile updatedProfile = profileService.getProfile(dbUser);
+    assertThat(updatedProfile.getVerifiedInstitutionalAffiliation())
+        .isEqualTo(verifiedInstitutionalAffiliation);
   }
 
   @Test(expected = BadRequestException.class)
