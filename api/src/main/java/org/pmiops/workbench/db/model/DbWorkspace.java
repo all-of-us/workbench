@@ -679,6 +679,7 @@ public class DbWorkspace {
 
   @Column(name = "research_purpose_review")
   public Short getReviewResearchPurpose() {
+    if (reviewRequested == null) return (short) 1;
     return reviewResearchPurpose;
   }
 
