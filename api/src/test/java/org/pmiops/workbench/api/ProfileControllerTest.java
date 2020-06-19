@@ -806,8 +806,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     createAccountRequest.getProfile().setVerifiedInstitutionalAffiliation(original);
     createUser();
 
-    final Profile profile = profileController.getMe().getBody();
-
     final VerifiedInstitutionalAffiliation newAffil =
         new VerifiedInstitutionalAffiliation()
             .institutionShortName("NotTheBroad")
@@ -818,15 +816,36 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void updateVerifiedInstitutionalAffiliation() {
-    // necessary to create a user without one
-    config.featureFlags.requireInstitutionalVerification = false;
+  public void updateVerifiedInstitutionalAffiliation_create() {
     createUser();
 
     config.featureFlags.requireInstitutionalVerification = true;
 
     final VerifiedInstitutionalAffiliation toAdd = createVerifiedInstitutionalAffiliation();
     profileController.updateVerifiedInstitutionalAffiliation(dbUser.getUserId(), toAdd);
+
+    Profile profile = profileService.getProfile(dbUser);
+    assertThat(profile.getVerifiedInstitutionalAffiliation()).isEqualTo(toAdd);
+  }
+
+  @Test
+  public void updateVerifiedInstitutionalAffiliation_update() {
+    createUser();
+
+    config.featureFlags.requireInstitutionalVerification = true;
+
+    VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
+        createVerifiedInstitutionalAffiliation();
+    profileController.updateVerifiedInstitutionalAffiliation(
+        dbUser.getUserId(), verifiedInstitutionalAffiliation);
+
+    verifiedInstitutionalAffiliation.setInstitutionalRoleEnum(InstitutionalRole.ADMIN);
+    profileController.updateVerifiedInstitutionalAffiliation(
+        dbUser.getUserId(), verifiedInstitutionalAffiliation);
+
+    Profile updatedProfile = profileService.getProfile(dbUser);
+    assertThat(updatedProfile.getVerifiedInstitutionalAffiliation())
+        .isEqualTo(verifiedInstitutionalAffiliation);
   }
 
   @Test(expected = BadRequestException.class)

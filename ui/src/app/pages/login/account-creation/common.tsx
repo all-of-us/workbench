@@ -3,7 +3,6 @@ import * as React from 'react';
 import {Divider} from 'app/components/divider';
 import {flexStyle} from 'app/components/flex';
 import {FormSection} from 'app/components/forms';
-import {TextInput} from 'app/components/inputs';
 import {AouTitle} from 'app/components/text-wrappers';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
@@ -76,31 +75,6 @@ export const WhyWillSomeInformationBePublic: React.FunctionComponent = () => {
     </div>
   </React.Fragment>;
 };
-
-/**
- * Creates a text input component with a label shown above it.
- * @param props
- * @constructor
- */
-export function TextInputWithLabel(props) {
-  return <div style={{...props.containerStyle}}>
-    {props.labelContent}
-    {props.labelText && <label style={{...commonStyles.text, fontWeight: 600, ...props.labelStyle}}>{props.labelText}</label>}
-    <div style={{marginTop: '0.1rem'}}>
-      <TextInput data-test-id={props.inputId}
-                 id={props.inputId}
-                 name={props.inputName}
-                 placeholder={props.placeholder}
-                 value={props.value}
-                 disabled={props.disabled}
-                 onChange={props.onChange}
-                 onBlur={props.onBlur}
-                 invalid={props.invalid ? props.invalid.toString() : undefined}
-                 style={{...commonStyles.sectionInput, ...props.inputStyle}}/>
-      {props.children}
-    </div>
-  </div>;
-}
 
 /**
  * Creates a FormSection with custom base styling for account-creation pages.

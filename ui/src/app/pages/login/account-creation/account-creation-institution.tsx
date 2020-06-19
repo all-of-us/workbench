@@ -6,18 +6,25 @@ import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {FormSection} from 'app/components/forms';
 import {ValidationIcon} from 'app/components/icons';
-import {Error as ErrorDiv, styles as inputStyles} from 'app/components/inputs';
+import {Error as ErrorDiv, styles as inputStyles, TextInputWithLabel} from 'app/components/inputs';
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {PubliclyDisplayed} from 'app/icons/publicly-displayed-icon';
-import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
-import {commonStyles, TextInputWithLabel, WhyWillSomeInformationBePublic} from 'app/pages/login/account-creation/common';
+import {
+  commonStyles,
+  WhyWillSomeInformationBePublic
+} from 'app/pages/login/account-creation/common';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {isBlank, reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {isAbortError, reportError} from 'app/utils/errors';
+import {reportError} from 'app/utils/errors';
+import {
+  getRoleOptions, MasterDuaEmailMismatchErrorMessage,
+  RestrictedDuaEmailMismatchErrorMessage,
+  validateEmail
+} from 'app/utils/institutions';
 import {
   CheckEmailResponse,
   DuaType,
@@ -170,16 +177,12 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
     }
 
     try {
-      const result = await institutionApi().checkEmail(institutionShortName, {contactEmail: contactEmail}, {signal: this.aborter.signal});
+      const result = await validateEmail(contactEmail, institutionShortName, this.aborter);
       this.setState({checkEmailResponse: result});
     } catch (e) {
-      if (isAbortError(e)) {
-        // Ignore abort errors.
-      } else {
-        this.setState({
-          checkEmailError: true
-        });
-      }
+      this.setState({
+        checkEmailError: true
+      });
     }
   }
 
@@ -250,15 +253,11 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
     const selectedInstitutionObj = fp.find((institution) =>
         institution.shortName === institutionShortName, institutions);
     if (selectedInstitutionObj.duaTypeEnum === DuaType.RESTRICTED) {
-      // Instution has signed Restricted agreement and the email is not in allowed emails list
-      return <div data-test-id='email-error-message' style={{color: colors.danger}}>
-        The institution has authorized access only to select members.<br/>
-        Please <a href='https://www.researchallofus.org/institutional-agreements' target='_blank'>
-        click here</a> to request to be added to the institution</div>;
+      // Institution has signed Restricted agreement and the email is not in allowed emails list
+      return <RestrictedDuaEmailMismatchErrorMessage/>;
     } else {
       // Institution has MASTER or NULL agreement and the domain is not in the allowed list
-      return <div data-test-id='email-error-message' style={{color: colors.danger}}>
-          Your email does not match your institution</div>;
+      return <MasterDuaEmailMismatchErrorMessage/>;
     }
   }
 
@@ -309,24 +308,6 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
     }
 
     return validate(this.state, validationCheck);
-  }
-
-  getRoleOptions(): Array<{label: string, value: InstitutionalRole}> {
-    const {institutions, profile: {verifiedInstitutionalAffiliation: {institutionShortName}}} = this.state;
-    if (isBlank(institutionShortName)) {
-      return [];
-    }
-
-    const selectedOrgType = institutions.find(
-      inst => inst.shortName === institutionShortName).organizationTypeEnum;
-    const availableRoles: Array<InstitutionalRole> =
-      AccountCreationOptions.institutionalRolesByOrganizationType
-      .find(obj => obj.type === selectedOrgType)
-        .roles;
-
-    return AccountCreationOptions.institutionalRoleOptions.filter(option =>
-      availableRoles.includes(option.value)
-    );
   }
 
   updateAffiliationValue(attribute: string, value) {
@@ -427,9 +408,9 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
               <div>
                 <Dropdown data-test-id='role-dropdown'
                           style={styles.wideInputSize}
-                          placeholder={this.getRoleOptions() ?
+                          placeholder={getRoleOptions(institutions, institutionShortName) ?
                             '' : 'First select an institution above'}
-                          options={this.getRoleOptions()}
+                          options={getRoleOptions(institutions, institutionShortName)}
                           value={institutionalRoleEnum}
                           onChange={(e) => this.updateAffiliationValue('institutionalRoleEnum', e.value)}/>
               </div>
