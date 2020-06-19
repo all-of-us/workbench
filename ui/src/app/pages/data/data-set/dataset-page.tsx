@@ -174,19 +174,12 @@ export const styles = reactStyles({
     width: '6.5rem',
     color: colors.secondary
   },
-  footer: {
-    display: 'block',
-    padding: '20px',
-    height: '60px',
-    width: '100%'
-  },
   stickyFooter: {
     backgroundColor: colors.white,
     borderTop: `1px solid ${colors.light}`,
     textAlign: 'right',
     padding: '3px 55px 50px 20px',
-    position: 'fixed',
-    left: '0',
+    position: 'sticky',
     bottom: '0',
     height: '60px',
     width: '100%'
@@ -1132,19 +1125,16 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
             }
           </div>
         </FadeBox>
-        <div>
-          <div style={styles.footer} />
-          <div style={styles.stickyFooter}>
-            <TooltipTrigger data-test-id='save-tooltip'
-              content='Requires Owner or Writer permission' disabled={this.canWrite}>
-            <Button style={{marginBottom: '2rem'}} data-test-id='save-button'
-              onClick ={() => this.setState({openSaveModal: true})}
-              disabled={this.disableSave() || !this.canWrite}>
-                {this.editing ? !(dataSetTouched && this.canWrite) ? 'Analyze' :
-                  'Update and Analyze' : 'Save and Analyze'}
-            </Button>
-            </TooltipTrigger>
-          </div>
+        <div style={styles.stickyFooter}>
+          <TooltipTrigger data-test-id='save-tooltip'
+            content='Requires Owner or Writer permission' disabled={this.canWrite}>
+          <Button style={{marginBottom: '2rem'}} data-test-id='save-button'
+            onClick ={() => this.setState({openSaveModal: true})}
+            disabled={this.disableSave() || !this.canWrite}>
+              {this.editing ? !(dataSetTouched && this.canWrite) ? 'Analyze' :
+                'Update and Analyze' : 'Save and Analyze'}
+          </Button>
+          </TooltipTrigger>
         </div>
         {openSaveModal && <NewDataSetModal includesAllParticipants={includesAllParticipants}
                                            selectedConceptSetIds={selectedConceptSetIds}
