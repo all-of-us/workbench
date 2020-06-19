@@ -861,12 +861,16 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
       // Conditionally include optional fields for validation.
       if (otherPurpose) {
+        const {tooShort, tooLong} = lengthMessages('Other primary purpose');
         values = {...values, otherPurposeDetails};
         constraints['otherPurposeDetails'] = {
+          presence: {
+            allowEmpty: false,
+            message: tooShort
+          },
           length: {
-            minimum: 1,
             maximum: 500,
-            ...lengthMessages('Other primary purpose')
+            tooLong
           }
         };
       }
@@ -878,33 +882,45 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       }
       if (populationDetails &&
           populationDetails.includes(SpecificPopulationEnum.OTHER)) {
+        const {tooShort, tooLong} = lengthMessages('Other Specific Population');
         values = {...values, otherPopulationDetails};
         constraints['otherPopulationDetails'] = {
+          presence: {
+            allowEmpty: false,
+            message: tooShort
+          },
           length: {
-            minimum: 1,
             maximum: 100,
-            ...lengthMessages('Specific Population Other')
+            tooLong
           }
         };
       }
       if (diseaseFocusedResearch) {
+        const {tooShort, tooLong} = lengthMessages('Disease of Focus');
         values = {...values, diseaseOfFocus};
         constraints['diseaseOfFocus'] = {
+          presence: {
+            allowEmpty: false,
+            message: tooShort
+          },
           length: {
-            minimum: 1,
             maximum: 80,
-            ...lengthMessages('Disease Of Focus')
+            tooLong
           }
         };
       }
       if (disseminateResearchFindingList &&
           disseminateResearchFindingList.includes(DisseminateResearchEnum.OTHER)) {
+        const {tooShort, tooLong} = lengthMessages('Other methods of disseminating research findings');
         values = {...values, otherDisseminateResearchFindings};
         constraints['otherDisseminateResearchFindings'] = {
+          presence: {
+            allowEmpty: false,
+            message: tooShort
+          },
           length: {
-            minimum: 1,
             maximum: 100,
-            ...lengthMessages('Disseminate Research Findings Other')
+            tooLong
           }
         };
       }
@@ -1261,8 +1277,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                   from the study? (Question 2.3)</i> {errors.anticipatedFindings}</li>}
                 {errors.disseminateResearchFindingList && <li>
                   You must specific how you plan to disseminate your research findings (Question 3)</li>}
-                {errors.otherDisseminateResearchFindings && <li>
-                    Disseminate Research Findings Other {errors.otherDisseminateResearchFindings}</li>}
+                {errors.otherDisseminateResearchFindings && <li>{errors.otherDisseminateResearchFindings}</li>}
                 {errors.researchOutcomeList && <li> You must specify the outcome of the research (Question 4)</li>}
                 {errors.populationChecked && <li>You must pick an answer Population of interest question (Question 5)</li>}
                 {errors.populationDetails && <li> You must specify a population of study (Question 5)</li>}
