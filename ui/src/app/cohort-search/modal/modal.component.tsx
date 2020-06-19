@@ -55,7 +55,7 @@ const styles = reactStyles({
     visibility: 'hidden',
     transform: 'scale(1.1)',
     transition: 'visibility 0.25s linear, opacity 0.25s 0s, transform 0.25s',
-    zIndex: 102,
+    zIndex: 105,
   },
   panelLeft: {
     display: 'none',

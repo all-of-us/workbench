@@ -10,6 +10,7 @@ const styles = {
     background: colors.dark,
     color: colors.white,
     padding: '0.5rem',
+    // Keep z-index in sync with modals.tsx.
     position: 'fixed', top: 0, left: 0, pointerEvents: 'none', zIndex: 105,
     maxWidth: 400, borderRadius: 4
   },
