@@ -679,7 +679,7 @@ public class DbWorkspace {
 
   @Column(name = "research_purpose_review")
   public Short getReviewResearchPurpose() {
-    if (reviewRequested == null) return (short) 1;
+    if (reviewResearchPurpose == null) return (short) 1;
     return reviewResearchPurpose;
   }
 
@@ -689,6 +689,9 @@ public class DbWorkspace {
 
   @Transient
   public Boolean getResearchPurposeReviewed() {
+    if (reviewResearchPurpose == null) {
+      return true;
+    }
     return reviewResearchPurpose == 1;
   }
 
