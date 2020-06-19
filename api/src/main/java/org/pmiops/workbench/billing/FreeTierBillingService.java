@@ -117,7 +117,7 @@ public class FreeTierBillingService {
       } catch (final MessagingException e) {
         logger.log(Level.WARNING, e.getMessage());
       }
-      deactivateUserWorkspaces(user);
+      updateFreeTierWorkspacesStatus(user, BillingStatus.INACTIVE);
     }
 
     final Set<DbUser> usersWithNonNullRegistration =
@@ -140,11 +140,18 @@ public class FreeTierBillingService {
     return compareCosts(currentCost, getUserFreeTierDollarLimit(user)) > 0;
   }
 
-  private void deactivateUserWorkspaces(final DbUser user) {
-    final Set<DbWorkspace> toDeactivate = workspaceDao.findAllByCreator(user);
-    for (final DbWorkspace workspace : toDeactivate) {
-      workspaceDao.updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.INACTIVE);
-    }
+  // TODO: move to DbWorkspace?  RW-5107
+  private boolean isFreeTier(final DbWorkspace workspace) {
+    return workspace
+        .getBillingAccountName()
+        .equals(workbenchConfigProvider.get().billing.freeTierBillingAccountName());
+  }
+
+  private void updateFreeTierWorkspacesStatus(final DbUser user, final BillingStatus status) {
+    workspaceDao.findAllByCreator(user).stream()
+        .filter(this::isFreeTier)
+        .map(DbWorkspace::getWorkspaceId)
+        .forEach(id -> workspaceDao.updateBillingStatus(id, status));
   }
 
   private void sendAlertsForCostThresholds(
