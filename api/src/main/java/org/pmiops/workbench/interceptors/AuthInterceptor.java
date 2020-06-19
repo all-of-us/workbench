@@ -24,6 +24,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.ErrorCode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +52,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
   private final UserService userService;
+  private final DirectoryService directoryService;
 
   @Autowired
   public AuthInterceptor(
@@ -58,12 +60,14 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       FireCloudService fireCloudService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserDao userDao,
-      UserService userService) {
+      UserService userService,
+      DirectoryService directoryService) {
     this.userInfoService = userInfoService;
     this.fireCloudService = fireCloudService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userDao = userDao;
     this.userService = userService;
+    this.directoryService = directoryService;
   }
 
   /**
@@ -110,11 +114,11 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     }
 
     final String token = authorizationHeader.substring("Bearer".length()).trim();
-    final Userinfoplus OAuth2Userinfo = userInfoService.getUserInfo(token);
+    final Userinfoplus userInfo = userInfoService.getUserInfo(token);
 
     // The Workbench considers the user's generated GSuite email to be their userName
     // Don't confuse this with the user's Contact Email, which is unrelated
-    String userName = OAuth2Userinfo.getEmail();
+    String userName = userInfo.getEmail();
 
     // TODO: check Google group membership to ensure user is in registered user group
 
@@ -129,7 +133,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       }
       SecurityContextHolder.getContext()
           .setAuthentication(
-              new UserAuthentication(user, OAuth2Userinfo, token, UserType.SERVICE_ACCOUNT));
+              new UserAuthentication(user, userInfo, token, UserType.SERVICE_ACCOUNT));
       log.log(Level.INFO, "{0} service account in use", userName);
       return true;
     }
@@ -139,7 +143,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       // corresponds to in FireCloud.
       SecurityContextHolder.getContext()
           .setAuthentication(
-              new UserAuthentication(null, OAuth2Userinfo, token, UserType.SERVICE_ACCOUNT));
+              new UserAuthentication(null, userInfo, token, UserType.SERVICE_ACCOUNT));
       // If the email isn't in our GSuite domain, try FireCloud; we could be dealing with a
       // pet service account. In both AofU and FireCloud, the pet SA is treated as if it were
       // the user it was created for.
@@ -155,8 +159,26 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     }
     DbUser user = userDao.findUserByUsername(userName);
     if (user == null) {
-      // TODO(danrodney): start populating contact email in Google account, use it here.
-      user = userService.createUser(OAuth2Userinfo);
+      log.info(
+          String.format(
+              "No User row found for username '%s'. "
+                  + "Re-creating user based on OAuth and G Suite data.",
+              userName));
+
+      String contactEmail = userInfo.getEmail();
+      try {
+        contactEmail = directoryService.getContactEmailAddress(userInfo.getEmail());
+      } catch (Exception e) {
+        // Since this flow is only meant to be used in local / test environments, and we expect
+        // some old G Suite accounts to perhaps not have a contact email present, we log a warning
+        // instead of failing hard.
+        log.warning(
+            String.format(
+                "Failed to lookup contact email from GSuite for user '%s'. The username will be "
+                    + "used instead for account re-initialization.",
+                userInfo.getEmail()));
+      }
+      user = userService.createUser(userInfo, contactEmail);
     } else {
       if (user.getDisabled()) {
         throw new ForbiddenException(
@@ -167,15 +189,14 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     }
 
     SecurityContextHolder.getContext()
-        .setAuthentication(
-            new UserAuthentication(user, OAuth2Userinfo, token, UserType.RESEARCHER));
+        .setAuthentication(new UserAuthentication(user, userInfo, token, UserType.RESEARCHER));
 
     // This log line is currently the the only reliable way to associate a particular App Engine
     // request log
     // with the authenticated user identity, which is critical information for debugging.
     // TODO(jaycarlton) replace this log line with a UserInfo entry in a dedicated Stackdriver Auth
     // log.
-    log.log(Level.INFO, "{0} logged in", OAuth2Userinfo.getEmail());
+    log.log(Level.INFO, "{0} logged in", userInfo.getEmail());
 
     if (!hasRequiredAuthority(method, user)) {
       response.sendError(HttpServletResponse.SC_FORBIDDEN);

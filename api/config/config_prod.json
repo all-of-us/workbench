@@ -87,6 +87,7 @@
     "enableDataUseAgreement": true,
     "enableBetaAccess": false,
     "unsafeAllowSelfBypass": false,
+    "unsafeAllowUserCreationFromOauthData": false,
     "requireInvitationKey": false
   },
   "featureFlags": {

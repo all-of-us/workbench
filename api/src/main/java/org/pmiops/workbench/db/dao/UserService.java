@@ -22,7 +22,7 @@ public interface UserService {
   DbUser createServiceAccountUser(String email);
 
   // version used by AuthInterceptor
-  DbUser createUser(Userinfoplus oAuth2Userinfo);
+  DbUser createUser(Userinfoplus oAuth2Userinfo, String contactEmail);
 
   DbUser createUser(
       String givenName,
