@@ -34,14 +34,16 @@ const styles = reactStyles({
   },
   footerSectionDivider: {
     borderBottom: `1px solid ${colors.white}`,
-    marginBottom: '5px',
-    paddingBottom: '5px'
+    marginBottom: '.2rem',
+    paddingBottom: '.2rem'
   },
   footerTemplate: {
     width: '100%',
     backgroundColor: colors.primary,
     padding: '1rem',
-    // Must be higher than the side helpbar index. See help-bar.tsx.
+    // Must be higher than the side helpbar index for now. See help-bar.tsx.
+    // Eventually the footer should be reflowed benetah this, per RW-5110. The footer
+    // should be beneath any other floating elements, such as modals.
     zIndex: 102
   },
   workbenchFooterItem: {
