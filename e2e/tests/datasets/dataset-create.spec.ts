@@ -120,7 +120,7 @@ describe('Create Dataset', () => {
     await datasetPage.clickAnalyzeButton();
 
     // Uncheck Export to Notebook button, then click Update button.
-    await saveModal.saveDataset({isExportToNotebook: false}, true);
+    await saveModal.saveDataset({exportToNotebook: false}, true);
     await dataPage.waitForLoad();
   });
 

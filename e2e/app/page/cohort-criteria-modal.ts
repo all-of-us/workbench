@@ -146,7 +146,7 @@ export default class CohortCriteriaModal extends Dialog {
   }
 
   async addEthnicity(ethnicities: Ethnicity[]): Promise<void> {
-    for  (const ethnicity of  ethnicities) {
+    for (const ethnicity of ethnicities) {
       const link = await this.waitForEthnicityCriteriaLink(ethnicity);
       await link.click();
     }

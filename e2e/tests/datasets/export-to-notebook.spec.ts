@@ -40,7 +40,7 @@ describe('Create Dataset', () => {
 
     const saveModal = new DatasetSaveModal(page);
     const newNotebookName = makeRandomName();
-    const newDatasetName = await saveModal.saveDataset({isExportToNotebook: true, notebookName: newNotebookName});
+    const newDatasetName = await saveModal.saveDataset({exportToNotebook: true, notebookName: newNotebookName});
     await waitWhileLoading(page);
 
     // Verify Notebook preview. Not going to start the Jupyter notebook.
@@ -127,7 +127,11 @@ describe('Create Dataset', () => {
 
     const newNotebookName = makeRandomName();
     const saveModal = new DatasetSaveModal(page);
-    const newDatasetName = await saveModal.saveDataset({isExportToNotebook: true, notebookName: newNotebookName, language: Language.R});
+    const newDatasetName = await saveModal.saveDataset({
+      exportToNotebook: true,
+      notebookName: newNotebookName,
+      lang: Language.R
+    });
     await waitWhileLoading(page);
 
     // Verify Notebook preview. Not going to start the Jupyter notebook.
@@ -149,9 +153,9 @@ describe('Create Dataset', () => {
     await dataPage.openTab(TabLabelAlias.Analysis);
     await waitWhileLoading(page);
 
-    const analysiPage = new AnalysisPage(page);
-    await analysiPage.waitForLoad();
-    await analysiPage.deleteNotebook(newNotebookName);
+    const analysisPage = new AnalysisPage(page);
+    await analysisPage.waitForLoad();
+    await analysisPage.deleteNotebook(newNotebookName);
 
     // Delete Dataset
     await dataPage.openTab(TabLabelAlias.Data);
