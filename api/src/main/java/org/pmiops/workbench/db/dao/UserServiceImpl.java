@@ -312,7 +312,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   @Override
-  public DbUser createUser(final Userinfoplus oAuth2Userinfo, final String contactEmail) {
+  public DbUser createUser(
+      final Userinfoplus oAuth2Userinfo,
+      final String contactEmail,
+      DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation) {
     return createUser(
         oAuth2Userinfo.getGivenName(),
         oAuth2Userinfo.getFamilyName(),
@@ -326,7 +329,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         null,
         null,
         null,
-        null);
+        dbVerifiedAffiliation);
   }
 
   @Override

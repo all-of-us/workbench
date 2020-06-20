@@ -3,6 +3,8 @@ package org.pmiops.workbench.interceptors;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -35,8 +37,8 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.firecloud.model.FirecloudUserInfo;
-import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.user.DevUserRegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -67,7 +69,7 @@ public class AuthInterceptorTest {
   @MockBean private FireCloudService fireCloudService;
   @MockBean private UserDao userDao;
   @MockBean private UserService userService;
-  @MockBean private DirectoryService directoryService;
+  @MockBean private DevUserRegistrationService devUserRegistrationService;
 
   private static WorkbenchConfig workbenchConfig;
 
@@ -213,6 +215,7 @@ public class AuthInterceptorTest {
 
   @Test
   public void preHandleGet_noUserRecord() throws Exception {
+    workbenchConfig.access.unsafeAllowUserCreationFromOauthData = true;
     // Tests the flow where userDao doesn't contain a row for the authorized user.
     // When this functionality is enabled, the auth interceptor will lazily create a new
     // user record when none is found for the given G Suite user.
@@ -220,25 +223,22 @@ public class AuthInterceptorTest {
     mockUserInfoSuccess();
     // Override the userDao mock to return a null record.
     when(userDao.findUserByUsername(eq("bob@fake-domain.org"))).thenReturn(null);
-    when(directoryService.getContactEmailAddress(eq("bob@fake-domain.org")))
-        .thenReturn("bob@gmail.com");
-    when(userService.createUser(any(), eq("bob@gmail.com"))).thenReturn(user);
 
     assertThat(interceptor.preHandle(request, response, handler)).isTrue();
+
+    verify(devUserRegistrationService, times(1)).createUserFromUserInfo(any());
   }
 
   @Test
-  public void preHandleGet_noUserRecordAndNoContactEmail() throws Exception {
+  public void preHandleGet_noUserRecordAndNoDevRegistration() throws Exception {
+    workbenchConfig.access.unsafeAllowUserCreationFromOauthData = false;
     mockGetCallWithBearerToken();
     mockUserInfoSuccess();
     when(userDao.findUserByUsername(eq("bob@fake-domain.org"))).thenReturn(null);
-    when(directoryService.getContactEmailAddress(eq("bob@fake-domain.org")))
-        .thenThrow(new NullPointerException());
-    // When GSuite doesn't have the contact email stored, we should fall back to the RW username
-    // as contact email address.s
-    when(userService.createUser(any(), eq("bob@fake-domain.org"))).thenReturn(user);
 
-    assertThat(interceptor.preHandle(request, response, handler)).isTrue();
+    assertThat(interceptor.preHandle(request, response, handler)).isFalse();
+
+    verify(devUserRegistrationService, never()).createUserFromUserInfo(any());
   }
 
   private Method getProfileApiMethod(String methodName) {

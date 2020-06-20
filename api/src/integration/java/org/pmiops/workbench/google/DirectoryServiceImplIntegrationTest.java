@@ -53,7 +53,12 @@ public class DirectoryServiceImplIntegrationTest extends BaseIntegrationTest {
                 });
     // Ensure our two custom schema fields are correctly set & re-fetched from GSuite.
     assertThat(aouMeta).containsEntry("Institution", "All of Us Research Workbench");
-    assertThat(service.getContactEmailAddress(userName)).isEqualTo("notasecret@gmail.com");
+    assertThat(service.getContactEmail(userName)).isEqualTo("notasecret@gmail.com");
+    assertThat(
+            service.getContactEmailFromGSuiteEmail(
+                userName + "@" + config.googleDirectoryService.gSuiteDomain))
+        .isEqualTo("notasecret@gmail.com");
+
     service.deleteUser(userName);
     assertThat(service.isUsernameTaken(userName)).isFalse();
   }

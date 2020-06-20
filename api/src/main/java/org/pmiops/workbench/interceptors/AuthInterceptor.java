@@ -24,9 +24,9 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.ErrorCode;
+import org.pmiops.workbench.user.DevUserRegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
@@ -52,7 +52,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
   private final UserService userService;
-  private final DirectoryService directoryService;
+  private final DevUserRegistrationService devUserRegistrationService;
 
   @Autowired
   public AuthInterceptor(
@@ -61,13 +61,13 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserDao userDao,
       UserService userService,
-      DirectoryService directoryService) {
+      DevUserRegistrationService devUserRegistrationService) {
     this.userInfoService = userInfoService;
     this.fireCloudService = fireCloudService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userDao = userDao;
     this.userService = userService;
-    this.directoryService = directoryService;
+    this.devUserRegistrationService = devUserRegistrationService;
   }
 
   /**
@@ -122,8 +122,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
 
     // TODO: check Google group membership to ensure user is in registered user group
 
-    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-    if (workbenchConfig.auth.serviceAccountApiUsers.contains(userName)) {
+    if (workbenchConfigProvider.get().auth.serviceAccountApiUsers.contains(userName)) {
       // Whitelisted service accounts are able to make API calls, too.
       // TODO: stop treating service accounts as normal users, have a separate table for them,
       // administrators.
@@ -137,7 +136,8 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       log.log(Level.INFO, "{0} service account in use", userName);
       return true;
     }
-    String gsuiteDomainSuffix = "@" + workbenchConfig.googleDirectoryService.gSuiteDomain;
+    String gsuiteDomainSuffix =
+        "@" + workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain;
     if (!userName.endsWith(gsuiteDomainSuffix)) {
       // Temporarily set the authentication with no user, so we can look up what user this
       // corresponds to in FireCloud.
@@ -159,26 +159,13 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     }
     DbUser user = userDao.findUserByUsername(userName);
     if (user == null) {
-      log.info(
-          String.format(
-              "No User row found for username '%s'. "
-                  + "Re-creating user based on OAuth and G Suite data.",
-              userName));
-
-      String contactEmail = userInfo.getEmail();
-      try {
-        contactEmail = directoryService.getContactEmailAddress(userInfo.getEmail());
-      } catch (Exception e) {
-        // Since this flow is only meant to be used in local / test environments, and we expect
-        // some old G Suite accounts to perhaps not have a contact email present, we log a warning
-        // instead of failing hard.
-        log.warning(
-            String.format(
-                "Failed to lookup contact email from GSuite for user '%s'. The username will be "
-                    + "used instead for account re-initialization.",
-                userInfo.getEmail()));
+      if (workbenchConfigProvider.get().access.unsafeAllowUserCreationFromOauthData) {
+        DbUser dbUser = devUserRegistrationService.createUserFromUserInfo(userInfo);
+        log.info(String.format("Dev user '%s' has been re-created.", dbUser.getUsername()));
+      } else {
+        log.severe(String.format("No User row exists for user '%s'", userName));
+        return false;
       }
-      user = userService.createUser(userInfo, contactEmail);
     } else {
       if (user.getDisabled()) {
         throw new ForbiddenException(

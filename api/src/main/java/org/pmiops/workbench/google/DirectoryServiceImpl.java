@@ -189,12 +189,26 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
   }
 
   // Returns a user's contact email address via the custom schema in the directory API.
-  public String getContactEmailAddress(String username) {
-    return (String)
-        getUserByUsername(username)
-            .getCustomSchemas()
-            .get(GSUITE_AOU_SCHEMA_NAME)
-            .get(GSUITE_FIELD_CONTACT_EMAIL);
+  public Optional<String> getContactEmail(String username) {
+    return Optional.ofNullable(getUserByUsername(username))
+        .map(
+            user ->
+                (String)
+                    user.getCustomSchemas()
+                        .get(GSUITE_AOU_SCHEMA_NAME)
+                        .get(GSUITE_FIELD_CONTACT_EMAIL));
+  }
+
+  private String gSuiteEmailToUsername(String gSuiteEmail) {
+    if (gSuiteEmail.indexOf("@" + gSuiteDomain()) >= 0) {
+      return gSuiteEmail.replace("@" + gSuiteDomain(), "");
+    } else {
+      throw new IllegalArgumentException("Input email address does not match the G Suite domain.");
+    }
+  }
+
+  public Optional<String> getContactEmailFromGSuiteEmail(String gSuiteEmail) {
+    return getContactEmail(gSuiteEmailToUsername(gSuiteEmail));
   }
 
   public static void addCustomSchemaAndEmails(User user, String primaryEmail, String contactEmail) {

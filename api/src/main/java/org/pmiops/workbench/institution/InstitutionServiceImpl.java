@@ -356,4 +356,10 @@ public class InstitutionServiceImpl implements InstitutionService {
               });
     }
   }
+
+  public Optional<Institution> getFirstMatchingInstitution(final String contactEmail) {
+    return getInstitutions().stream()
+        .filter(institution -> validateInstitutionalEmail(institution, contactEmail))
+        .findFirst();
+  }
 }
