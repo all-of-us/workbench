@@ -62,7 +62,7 @@ public interface FireCloudService {
    * that as the caller instead.
    */
   void removeOwnerFromBillingProject(
-      String projectName, String ownerEmailToRemove, Optional<String> callerAccessToken);
+      String ownerEmailToRemove, String projectName, Optional<String> callerAccessToken);
 
   /** Creates a new FC workspace. */
   FirecloudWorkspace createWorkspace(String projectName, String workspaceName);
