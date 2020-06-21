@@ -3,7 +3,7 @@ import DataResourceCard, {CardType} from 'app/component/data-resource-card';
 import ConceptsetActionsPage from 'app/page/conceptset-actions-page';
 import DataPage, {TabLabelAlias} from 'app/page/data-page';
 import DatasetSaveModal from 'app/page/dataset-save-modal';
-import {findWorkspace, signIn} from 'utils/test-utils';
+import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
 
 describe('Create Concept Sets from Domains', () => {
@@ -68,7 +68,10 @@ describe('Create Concept Sets from Domains', () => {
 
     // Delete Concept Set
     await dataPage.openTab(TabLabelAlias.Data);
-    await dataPage.openTab(TabLabelAlias.ConceptSets);
+    await waitWhileLoading(page);
+
+    await dataPage.openTab(TabLabelAlias.ConceptSets, {waitPageChange: false});
+    await waitWhileLoading(page);
 
     const dialogTextContent = await dataPage.deleteConceptSet(conceptName);
     expect(dialogTextContent).toContain(`Are you sure you want to delete Concept Set: ${conceptName}`);
@@ -152,7 +155,10 @@ describe('Create Concept Sets from Domains', () => {
 
     // Verify Dataset created successful.
     await dataPage.openTab(TabLabelAlias.Data);
-    await dataPage.openTab(TabLabelAlias.Datasets);
+    await waitWhileLoading(page);
+
+    await dataPage.openTab(TabLabelAlias.Datasets, {waitPageChange: false});
+    await waitWhileLoading(page);
 
     const resourceCard = new DataResourceCard(page);
     const dataSetExists = await resourceCard.cardExists(datasetName, CardType.Dataset);
@@ -163,7 +169,8 @@ describe('Create Concept Sets from Domains', () => {
     expect(textContent).toContain(`Are you sure you want to delete Dataset: ${datasetName}?`);
 
     // Delete Concept Set.
-    await dataPage.openTab(TabLabelAlias.ConceptSets);
+    await dataPage.openTab(TabLabelAlias.ConceptSets, {waitPageChange: false});
+    await waitWhileLoading(page);
 
     await dataPage.deleteConceptSet(conceptName1);
     await dataPage.deleteConceptSet(conceptName2);

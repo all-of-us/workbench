@@ -90,6 +90,7 @@ describe('Create Dataset', () => {
     console.log(`Created Cohort "${cohortName}"`);
 
     await dataPage.openTab(TabLabelAlias.Data);
+    await waitWhileLoading(page);
 
     // Click Add Datasets button.
     const datasetPage = await dataPage.clickAddDatasetButton();
@@ -102,7 +103,9 @@ describe('Create Dataset', () => {
     const dataSetName = await saveModal.saveDataset();
 
     // Verify create successful.
-    await dataPage.openTab(TabLabelAlias.Datasets);
+    await dataPage.openTab(TabLabelAlias.Datasets, {waitPageChange: false});
+    await waitWhileLoading(page);
+
     const resourceCard = new DataResourceCard(page);
     const dataSetExists = await resourceCard.cardExists(dataSetName, CardType.Dataset);
     expect(dataSetExists).toBe(true);
@@ -117,7 +120,7 @@ describe('Create Dataset', () => {
     await datasetPage.clickAnalyzeButton();
 
     // Uncheck Export to Notebook button, then click Update button.
-    await saveModal.saveDataset({isExportToNotebook: false}, true);
+    await saveModal.saveDataset({exportToNotebook: false}, true);
     await dataPage.waitForLoad();
   });
 

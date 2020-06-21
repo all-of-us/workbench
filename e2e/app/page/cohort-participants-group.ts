@@ -83,8 +83,8 @@ export default class CohortParticipantsGroup {
   }
 
   async includeEthnicity(): Promise<CohortCriteriaModal> {
-    await this.clickCriteriaMenuItems(['Ethnicity']);
-    const modal = new CohortCriteriaModal(this.page);
+    await this.clickCriteriaMenuItems(['Demographics', 'Ethnicity']);
+    const modal = new CohortCriteriaModal(this.page, '//*[@class="modal-container demographics"]');
     await modal.waitUntilVisible();
     return modal;
   }

@@ -1,9 +1,9 @@
 import {Page} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
-import ClrIconLink from 'app/element/clr-icon-link';
 import Textbox from 'app/element/textbox';
 import DataTable from 'app/component/data-table';
+import Button from 'app/element/button';
 import AuthenticatedPage from './authenticated-page';
 import ConceptsetSaveModal from './conceptset-save-modal';
 
@@ -35,8 +35,8 @@ export default class ConceptsetSearchPage extends AuthenticatedPage{
     return dialog.saveAndCloseDialog();
   }
 
-  async getAddToSetButton(): Promise<ClrIconLink> {
-    return ClrIconLink.findByName(this.page, {containsText: 'Add', iconShape: 'plus'});
+  async getAddToSetButton(): Promise<Button> {
+    return new Button(this.page, '//*[@data-test-id="sliding-button"]');
   }
 
   async clickAddToSetButton(): Promise<void> {

@@ -29,6 +29,14 @@ export enum PhysicalMeasurementsCriteria {
   WheelChairUser = 'Wheelchair user at enrollment',
 }
 
+export enum Ethnicity {
+  NotHispanicOrLatino = 'Not Hispanic or Latino',
+  HispanicOrLatino = 'Hispanic or Latino',
+  RaceEthnicityNoneOfThese = 'Race Ethnicity None Of These',
+  PreferNotToAnswer = 'Prefer Not To Answer',
+  Skip = 'Skip',
+}
+
 export enum FilterSign {
   Any = 'Any',
   AnyValue = 'Any value',
@@ -46,6 +54,10 @@ export default class CohortCriteriaModal extends Dialog {
 
   async waitForPhysicalMeasurementCriteriaLink(criteriaType: PhysicalMeasurementsCriteria): Promise<ClrIconLink> {
     return ClrIconLink.findByName(this.page, {name: criteriaType, iconShape: 'slider', ancestorLevel: 2}, this);
+  }
+
+  async waitForEthnicityCriteriaLink(criteriaType: Ethnicity): Promise<ClrIconLink> {
+    return ClrIconLink.findByName(this.page, {startsWith: criteriaType, iconShape: 'plus-circle', ancestorLevel: 0}, this);
   }
 
   /**
@@ -81,10 +93,15 @@ export default class CohortCriteriaModal extends Dialog {
     await this.page.waitForXPath(removeSelectedCriteriaIconSelector,{visible: true});
 
     // dialog close after click FINISH button.
-    await this.clickButton(ButtonLabel.Finish);
+    await this.clickFinishButton();
 
     // return participants count for comparing
     return participantResult;
+  }
+
+  // Click FINISH button.
+  async clickFinishButton(): Promise<void> {
+    return this.clickButton(ButtonLabel.Finish);
   }
 
   async waitForParticipantResult(): Promise<string> {
@@ -126,6 +143,13 @@ export default class CohortCriteriaModal extends Dialog {
     }
     console.debug(`Age Modifier: ${filterSign} ${filterValue}  => number of participants: ${participantResult}`);
     return participantResult;
+  }
+
+  async addEthnicity(ethnicities: Ethnicity[]): Promise<void> {
+    for (const ethnicity of ethnicities) {
+      const link = await this.waitForEthnicityCriteriaLink(ethnicity);
+      await link.click();
+    }
   }
 
 }

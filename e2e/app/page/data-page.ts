@@ -7,7 +7,7 @@ import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
 import {EllipsisMenuAction} from 'app/page-identifiers';
 import AuthenticatedPage from 'app/page/authenticated-page';
-import {Page} from 'puppeteer';
+import {Page, Response} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
 import {xPathOptionToXpath} from 'app/element/xpath-defaults';
@@ -55,15 +55,19 @@ export default class DataPage extends AuthenticatedPage {
   /**
    * Select DATA, ANALYSIS or ABOUT page tab.
    * @param {TabLabelAlias} tabName
+   * @param opts
    */
-  async openTab(tabName: TabLabelAlias, opts: {waitPageChange?: boolean} = {}): Promise<void> {
+  async openTab(tabName: TabLabelAlias, opts: {waitPageChange?: boolean} = {}): Promise<[void, Response] | void> {
     const {waitPageChange = true} = opts;
     const selector = xPathOptionToXpath({name: tabName, type: ElementType.Tab});
     const tab = await this.page.waitForXPath(selector, {visible: true});
-    await tab.click();
     if (waitPageChange) {
-      await this.waitForLoad();
+      return Promise.all<void, Response>([
+        tab.click(),
+        this.page.waitForNavigation({waitUntil: ['load', 'domcontentloaded', 'networkidle0']}),
+      ]);
     }
+    return tab.click();
   }
 
   async getAddDatasetButton(): Promise<ClrIconLink> {

@@ -33,13 +33,8 @@ export default class DatasetBuildPage extends AuthenticatedPage {
     }
   }
 
-  async getAddCohortsButton(): Promise<Button> {
-    const buttonXpath = xPathOptionToXpath({name: LabelAlias.SelectCohorts, ancestorLevel: 3, iconShape: 'is-solid'});
-    return new Button(this.page, buttonXpath);
-  }
-
   async clickAddCohortsButton(): Promise<CohortBuildPage> {
-    const addCohortButton = await this.getAddCohortsButton();
+    const addCohortButton = await ClrIconLink.findByName(this.page, {name: LabelAlias.SelectCohorts, ancestorLevel: 3, iconShape: 'plus-circle'});
     await addCohortButton.clickAndWait();
     const cohortPage = new CohortBuildPage(this.page);
     return cohortPage.waitForLoad();
@@ -70,6 +65,7 @@ export default class DatasetBuildPage extends AuthenticatedPage {
     await addConceptSetsButton.clickAndWait();
     await waitWhileLoading(this.page);
     const conceptPage = new ConceptsetSearchPage(this.page);
+    await conceptPage.waitForLoad();
     return conceptPage;
   }
 

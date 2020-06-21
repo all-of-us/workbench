@@ -22,15 +22,15 @@ export default class DatasetSaveModal extends Dialog {
    * @param {boolean} isUpdate If true, click Update button. If False, click Save button.
    *
    * <pre>
-   * {boolean} isExportToNotebook If True, select Export To Notebook checkbox.
+   * {boolean} exportToNotebook If True, select Export To Notebook checkbox.
    * {string} notebookName New notebook name to be created or select an existing notebook.
-   * {String} language Notebook programming language.
+   * {String} lang Notebook programming language.
    * </pre>
    */
-  async saveDataset(notebookOpts: { isExportToNotebook?: boolean, notebookName?: string, language?: Language} = {},
-                    isUpdate: boolean  = false): Promise<string> {
+  async saveDataset(notebookOpts: {exportToNotebook?: boolean, notebookName?: string, lang?: Language} = {},
+                    isUpdate: boolean = false): Promise<string> {
 
-    const {isExportToNotebook = false, notebookName, language = Language.Python} = notebookOpts;
+    const {exportToNotebook = false, notebookName, lang = Language.Python} = notebookOpts;
     const newDatasetName = makeRandomName();
 
     const nameTextbox = await this.waitForTextbox('Dataset Name');
@@ -39,11 +39,12 @@ export default class DatasetSaveModal extends Dialog {
     // Export to Notebook checkbox is checked by default
     const exportCheckbox = await this.waitForCheckbox('Export to notebook');
 
-    if (isExportToNotebook) {
+    if (exportToNotebook) {
       // Export to notebook
-      const notebookNameTextbox = new Textbox(this.page, '//*[@data-test-id="notebook-name-input"]');
+      const notebookNameTextbox = new Textbox(this.page, `${this.getXpath()}//*[@data-test-id="notebook-name-input"]`);
       await notebookNameTextbox.type(notebookName);
-      const radioBtn = await RadioButton.findByName(this.page, {name: language});
+      console.log(`Notebook language: ` + lang);
+      const radioBtn = await RadioButton.findByName(this.page, {name: lang, ancestorLevel: 0}, this);
       await radioBtn.select();
     } else {
       // Not export to notebook
@@ -57,7 +58,7 @@ export default class DatasetSaveModal extends Dialog {
     }
     await waitWhileLoading(this.page);
     console.log(`Created Dataset "${newDatasetName}"`);
-    if (isExportToNotebook) {
+    if (exportToNotebook) {
       console.log(`Created Notebook "${notebookName}"`);
     }
     return newDatasetName;

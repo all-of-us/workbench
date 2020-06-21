@@ -1,12 +1,14 @@
 import DataResourceCard, {CardType} from 'app/component/data-resource-card';
 import Link from 'app/element/link';
-import DataPage, {TabLabelAlias} from 'app/page/data-page';
-import DatasetSaveModal from 'app/page/dataset-save-modal';
-import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import AnalysisPage from 'app/page/analysis-page';
+import DataPage, {TabLabelAlias} from 'app/page/data-page';
+import DatasetSaveModal, {Language} from 'app/page/dataset-save-modal';
+import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
+import CohortActionsPage from 'app/page/cohort-actions-page';
+import {Ethnicity} from 'app/page/cohort-criteria-modal';
 
 describe('Create Dataset', () => {
 
@@ -38,7 +40,7 @@ describe('Create Dataset', () => {
 
     const saveModal = new DatasetSaveModal(page);
     const newNotebookName = makeRandomName();
-    const newDatasetName = await saveModal.saveDataset({isExportToNotebook: true, notebookName: newNotebookName});
+    const newDatasetName = await saveModal.saveDataset({exportToNotebook: true, notebookName: newNotebookName});
     await waitWhileLoading(page);
 
     // Verify Notebook preview. Not going to start the Jupyter notebook.
@@ -77,8 +79,100 @@ describe('Create Dataset', () => {
 
     // Delete Dataset.
     await dataPage.openTab(TabLabelAlias.Data);
-    await dataPage.openTab(TabLabelAlias.Datasets);
+    await waitWhileLoading(page);
+
+    await dataPage.openTab(TabLabelAlias.Datasets, {waitPageChange: false});
+    await waitWhileLoading(page);
+
     await dataPage.deleteDataset(newDatasetName);
+  });
+
+  /**
+   * Create new Cohort thru Dataset Build page. Cohort built from demographics -> Ethnicity.
+   * Create new Dataset with Cohort, then export to notebook in R language.
+   * Delete Cohort, Dataset, and Notebook.
+   */
+  test('Export dataset to notebook in R programming language', async () => {
+    const workspaceCard = await findWorkspace(page);
+    const workspaceName = await workspaceCard.clickWorkspaceName();
+
+    // Click Add Datasets button
+    const dataPage = new DataPage(page);
+    const datasetBuildPage = await dataPage.clickAddDatasetButton();
+    const cohortBuildPage = await datasetBuildPage.clickAddCohortsButton();
+
+    // Include Participants Group 1: Add Criteria: Ethnicity
+    const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
+    const modal = await group1.includeEthnicity();
+    await modal.addEthnicity([Ethnicity.HispanicOrLatino, Ethnicity.NotHispanicOrLatino]);
+    await modal.clickFinishButton();
+
+    // Check Group 1 Count.
+    const group1Count = await group1.getGroupCount();
+    const group1CountInt = Number(group1Count.replace(/,/g, ''));
+    expect(group1CountInt).toBeGreaterThan(1);
+    console.log('Include Participants Group 1: ' + group1CountInt);
+
+    // Save new Cohort.
+    const newCohortName = await cohortBuildPage.saveCohortAs();
+    await waitForText(page, 'Cohort Saved Successfully');
+    console.log(`Created Cohort "${newCohortName}"`);
+
+    const cohortActionsPage = new CohortActionsPage(page);
+    await cohortActionsPage.clickCreateDatasetButton();
+
+    await datasetBuildPage.selectCohorts([newCohortName]);
+    await datasetBuildPage.selectConceptSets(['Demographics']);
+    await datasetBuildPage.clickSaveAndAnalyzeButton();
+
+    const newNotebookName = makeRandomName();
+    const saveModal = new DatasetSaveModal(page);
+    const newDatasetName = await saveModal.saveDataset({
+      exportToNotebook: true,
+      notebookName: newNotebookName,
+      lang: Language.R
+    });
+    await waitWhileLoading(page);
+
+    // Verify Notebook preview. Not going to start the Jupyter notebook.
+    const notebookPreviewPage = new NotebookPreviewPage(page);
+    await notebookPreviewPage.waitForLoad();
+    const currentPageUrl = await page.url();
+    expect(currentPageUrl).toContain(`notebooks/preview/${newNotebookName}.ipynb`);
+
+    const code = await notebookPreviewPage.getFormattedCode();
+    expect(code).toContain('library(bigrquery)');
+
+    // Navigate to Workpace Data page.
+    const notebooksLink = await Link.findByName(page, {name: workspaceName});
+    await notebooksLink.clickAndWait();
+    await dataPage.waitForLoad();
+
+    // Delete test data sequence is: Delete Notebook, then Dataset, finally Cohort.
+    // Delete Notebook
+    await dataPage.openTab(TabLabelAlias.Analysis);
+    await waitWhileLoading(page);
+
+    const analysisPage = new AnalysisPage(page);
+    await analysisPage.waitForLoad();
+    await analysisPage.deleteNotebook(newNotebookName);
+
+    // Delete Dataset
+    await dataPage.openTab(TabLabelAlias.Data);
+    await waitWhileLoading(page);
+
+    await dataPage.openTab(TabLabelAlias.Datasets, {waitPageChange: false});
+    await waitWhileLoading(page);
+
+    const datasetDeleteDialogText = await dataPage.deleteDataset(newDatasetName);
+    expect(datasetDeleteDialogText).toContain(`Are you sure you want to delete Dataset: ${newDatasetName}?`);
+
+    // Delete Cohort
+    await dataPage.openTab(TabLabelAlias.Cohorts, {waitPageChange: false});
+    await waitWhileLoading(page);
+
+    const cohortDeleteDialogText = await dataPage.deleteCohort(newCohortName);
+    expect(cohortDeleteDialogText).toContain(`Are you sure you want to delete Cohort: ${newCohortName}?`);
 
   });
 
