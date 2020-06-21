@@ -412,7 +412,10 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
                     </h5>
                     <div data-test-id='collab-user-email'
                          style={styles.userName}>{user.email}</div>
+                    {/* Minimally, the z-index must be higher than that of the
+                        modal. See https://react-select.com/advanced#portaling */}
                     <Select value={user.role}
+                            styles={{menuPortal: base => ({ ...base, zIndex: 110 })}}
                             menuPortalTarget={document.getElementById('popup-root')}
                             isDisabled={user.email === this.props.userEmail}
                             classNamePrefix={this.cleanClassNameForSelect(user.email)}
