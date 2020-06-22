@@ -1,4 +1,3 @@
-import {Component, Input} from '@angular/core';
 import {TieredMenu} from 'primereact/tieredmenu';
 import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
@@ -10,7 +9,7 @@ import {domainToTitle, generateId, typeToTitle} from 'app/cohort-search/utils';
 import {ClrIcon} from 'app/components/icons';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase} from 'app/utils';
+import {reactStyles} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {DomainType, SearchRequest} from 'generated/fetch';
@@ -271,21 +270,5 @@ export class SearchGroupList extends React.Component<Props, State> {
         </div>
       </div>
     </React.Fragment>;
-  }
-}
-
-@Component({
-  selector: 'app-list-search-group-list',
-  template: '<div #root></div>'
-})
-export class SearchGroupListComponent extends ReactWrapperBase {
-  @Input('groups') groups: Props['groups'];
-  @Input('setSearchContext') setSearchContext: Props['setSearchContext'];
-  @Input('role') role: Props['role'];
-  @Input('updated') updated: Props['updated'];
-  @Input('updateRequest') updateRequest: Props['updateRequest'];
-
-  constructor() {
-    super(SearchGroupList, ['groups', 'setSearchContext', 'role', 'updated', 'updateRequest']);
   }
 }

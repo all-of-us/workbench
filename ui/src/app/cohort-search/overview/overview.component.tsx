@@ -1,4 +1,6 @@
-import {Component, Input} from '@angular/core';
+import {Menu} from 'primereact/menu';
+import * as React from 'react';
+
 import {ComboChart} from 'app/cohort-common/combo-chart/combo-chart.component';
 import {GenderChart} from 'app/cohort-search/gender-chart/gender-chart.component';
 import {searchRequestStore} from 'app/cohort-search/search-state.service';
@@ -17,8 +19,6 @@ import {triggerEvent} from 'app/utils/analytics';
 import {isAbortError} from 'app/utils/errors';
 import {currentWorkspaceStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
 import {AgeType, Cohort, GenderOrSexType, ResourceType, TemporalTime} from 'generated/fetch';
-import {Menu} from 'primereact/menu';
-import * as React from 'react';
 
 const COHORT_TYPE = 'AoU_Discover';
 
@@ -569,19 +569,3 @@ export const ListOverview = withCurrentWorkspace()(
     }
   }
 );
-
-@Component({
-  selector: 'app-list-overview',
-  template: '<div #root></div>',
-})
-export class OverviewComponent extends ReactWrapperBase {
-  @Input('cohort') cohort: Props['cohort'];
-  @Input('cohortChanged') cohortChanged: Props['cohortChanged'];
-  @Input('searchRequest') searchRequest: Props['searchRequest'];
-  @Input('updateCount') updateCount: Props['updateCount'];
-  @Input('updating') updating: Props['updating'];
-
-  constructor() {
-    super(ListOverview, ['cohort', 'cohortChanged', 'searchRequest', 'updateCount', 'updating']);
-  }
-}
