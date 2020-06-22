@@ -311,10 +311,11 @@ public class ClusterController implements ClusterApiDelegate {
   @Override
   @AuthorityRequired({Authority.DEVELOPER})
   public ResponseEntity<EmptyResponse> updateClusterConfig(UpdateClusterConfigRequest body) {
-    DbUser user = userDao.findUserByUsername(body.getUserEmail());
-    if (user == null) {
-      throw new NotFoundException("User '" + body.getUserEmail() + "' not found");
-    }
+    DbUser user =
+        userService
+            .getByUsername(body.getUserEmail())
+            .orElseThrow(
+                () -> new NotFoundException("User '" + body.getUserEmail() + "' not found"));
     String oldOverride = user.getClusterConfigDefaultRaw();
 
     final ClusterConfig override = body.getClusterConfig() != null ? new ClusterConfig() : null;

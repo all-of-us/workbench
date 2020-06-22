@@ -5,6 +5,7 @@ import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -44,7 +45,11 @@ public class AuthDomainController implements AuthDomainApiDelegate {
   @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<Void> updateUserDisabledStatus(UpdateUserDisabledRequest request) {
-    final DbUser targetDbUser = userDao.findUserByUsername(request.getEmail());
+    final DbUser targetDbUser =
+        userService
+            .getByUsername(request.getEmail())
+            .orElseThrow(
+                () -> new NotFoundException("User '" + request.getEmail() + "' not found"));
     final Boolean previousDisabled = targetDbUser.getDisabled();
     final DbUser updatedTargetUser =
         userService.setDisabledStatus(targetDbUser.getUserId(), request.getDisabled());
