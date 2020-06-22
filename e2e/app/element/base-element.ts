@@ -136,10 +136,11 @@ export default class BaseElement extends Container {
     return (await this.asElementHandle()).click(options);
   }
 
-  async type(text: string, options?: { delay: number }): Promise<void> {
+  async type(text: string, options?: { delay: number }): Promise<this> {
     await this.focus();
     await this.clear();
-    return (await this.asElementHandle()).type(text, options);
+    await this.asElementHandle().then((handle: ElementHandle) => handle.type(text, options));
+    return this;
   }
 
   async pressKeyboard(key: string, options?: { text?: string, delay?: number }): Promise<void> {

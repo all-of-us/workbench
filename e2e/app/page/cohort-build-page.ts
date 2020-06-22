@@ -36,6 +36,12 @@ export default class CohortBuildPage extends AuthenticatedPage {
     }
   }
 
+  async save(): Promise<void> {
+    const createCohortButton = await Button.findByName(this.page, {normalizeSpace: 'Save Cohort'});
+    await createCohortButton.waitUntilEnabled();
+    await createCohortButton.click();
+  }
+
   async saveCohortAs(cohortName?: string, description?: string): Promise<string> {
     const createCohortButton = await Button.findByName(this.page, {name: 'Create Cohort'});
     await createCohortButton.waitUntilEnabled();
