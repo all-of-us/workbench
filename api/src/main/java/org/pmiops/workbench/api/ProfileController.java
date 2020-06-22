@@ -540,6 +540,7 @@ public class ProfileController implements ProfileApiDelegate {
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
+  @AuthorityRequired(Authority.ACCESS_CONTROL_ADMIN)
   public ResponseEntity<Void> adminUpdateProfile(DbUser user, Profile updatedProfile) {
     // Save current profile for audit trail.
     final Profile previousProfile = profileService.getProfile(user);
