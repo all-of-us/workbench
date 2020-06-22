@@ -541,7 +541,15 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @AuthorityRequired(Authority.ACCESS_CONTROL_ADMIN)
-  public ResponseEntity<Void> adminUpdateProfile(DbUser user, Profile updatedProfile) {
+  @Override
+  public ResponseEntity<Profile> adminUpdateProfile(Profile updatedProfile) {
+    final String username = updatedProfile.getUsername();
+    final DbUser user =
+        userService
+            .getByUsername(username)
+            .orElseThrow(
+                () -> new NotFoundException("Could not find user account for " + username));
+
     // Save current profile for audit trail.
     final Profile previousProfile = profileService.getProfile(user);
 
@@ -562,7 +570,7 @@ public class ProfileController implements ProfileApiDelegate {
     final Profile appliedUpdatedProfile = profileService.getProfile(user);
     profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);
 
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    return ResponseEntity.ok(appliedUpdatedProfile);
   }
 
   @AuthorityRequired(Authority.ACCESS_CONTROL_ADMIN)

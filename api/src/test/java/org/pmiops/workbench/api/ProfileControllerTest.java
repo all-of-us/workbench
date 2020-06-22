@@ -875,7 +875,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     final Profile profile = profileController.getMe().getBody();
     profile.setVerifiedInstitutionalAffiliation(null);
-    profileController.adminUpdateProfile(dbUser, profile);
+    profileController.adminUpdateProfile(profile);
   }
 
   @Test(expected = BadRequestException.class)
@@ -890,6 +890,12 @@ public class ProfileControllerTest extends BaseControllerTest {
     profileController.updateVerifiedInstitutionalAffiliation(dbUser.getUserId(), null);
   }
 
+  @Test(expected = NotFoundException.class)
+  public void adminUpdateProfile_notFound() {
+    Profile profile = new Profile().username("unknown");
+    profileController.adminUpdateProfile(profile);
+  }
+
   @Test
   public void adminUpdateProfile_disable() {
     createUser();
@@ -897,8 +903,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(profile.getDisabled()).isFalse();
 
     profile.setDisabled(true);
-    profileController.adminUpdateProfile(dbUser, profile);
-    profile = profileController.getMe().getBody();
+
+    profile = profileController.adminUpdateProfile(profile).getBody();
     assertThat(profile.getDisabled()).isTrue();
   }
 
@@ -911,15 +917,15 @@ public class ProfileControllerTest extends BaseControllerTest {
     // first disable
 
     profile.setDisabled(true);
-    profileController.adminUpdateProfile(dbUser, profile);
-    profile = profileController.getMe().getBody();
+
+    profile = profileController.adminUpdateProfile(profile).getBody();
     assertThat(profile.getDisabled()).isTrue();
 
     // then re-enable
 
     profile.setDisabled(false);
-    profileController.adminUpdateProfile(dbUser, profile);
-    profile = profileController.getMe().getBody();
+
+    profile = profileController.adminUpdateProfile(profile).getBody();
     assertThat(profile.getDisabled()).isFalse();
   }
 
@@ -994,11 +1000,11 @@ public class ProfileControllerTest extends BaseControllerTest {
     Profile profile = profileController.getMe().getBody();
     profile.setGivenName("OldGivenName");
     profile.setFamilyName("OldFamilyName");
-    profileController.adminUpdateProfile(dbUser, profile);
+    profileController.adminUpdateProfile(profile);
     profileController.submitDataUseAgreement(DUA_VERSION, "O.O.");
     profile.setGivenName("NewGivenName");
     profile.setFamilyName("NewFamilyName");
-    profileController.adminUpdateProfile(dbUser, profile);
+    profileController.adminUpdateProfile(profile);
     List<DbUserDataUseAgreement> duas =
         userDataUseAgreementDao.findByUserIdOrderByCompletionTimeDesc(profile.getUserId());
     assertThat(duas.get(0).isUserNameOutOfDate()).isTrue();
@@ -1085,7 +1091,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createUser();
     Profile profile = profileController.getMe().getBody();
     profile.setAddress(null);
-    profileController.adminUpdateProfile(dbUser, profile);
+    profileController.adminUpdateProfile(profile);
   }
 
   @Test(expected = BadRequestException.class)
@@ -1093,7 +1099,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createUser();
     Profile profile = profileController.getMe().getBody();
     profile.getAddress().country(null);
-    profileController.adminUpdateProfile(dbUser, profile);
+    profileController.adminUpdateProfile(profile);
   }
 
   @Test(expected = BadRequestException.class)
@@ -1101,7 +1107,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createUser();
     Profile profile = profileController.getMe().getBody();
     profile.getAddress().state(null);
-    profileController.adminUpdateProfile(dbUser, profile);
+    profileController.adminUpdateProfile(profile);
   }
 
   @Test(expected = BadRequestException.class)
@@ -1109,7 +1115,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createUser();
     Profile profile = profileController.getMe().getBody();
     profile.getAddress().zipCode(null);
-    profileController.adminUpdateProfile(dbUser, profile);
+    profileController.adminUpdateProfile(profile);
   }
 
   @Test(expected = BadRequestException.class)
@@ -1117,15 +1123,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createUser();
     Profile profile = profileController.getMe().getBody();
     profile.setAreaOfResearch("");
-    profileController.adminUpdateProfile(dbUser, profile);
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void adminUpdateProfile_badRequest_UpdateUserName() {
-    createUser();
-    Profile profile = profileController.getMe().getBody();
-    profile.setUsername("newUserName@fakeDomain.com");
-    profileController.adminUpdateProfile(dbUser, profile);
+    profileController.adminUpdateProfile(profile);
   }
 
   @Test(expected = BadRequestException.class)
@@ -1133,7 +1131,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createUser();
     Profile profile = profileController.getMe().getBody();
     profile.setContactEmail("newContact@fakeDomain.com");
-    profileController.adminUpdateProfile(dbUser, profile);
+    profileController.adminUpdateProfile(profile);
   }
 
   @Test(expected = BadRequestException.class)
@@ -1143,7 +1141,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     String newName =
         "obladidobladalifegoesonyalalalalalifegoesonobladioblada" + "lifegoesonrahlalalalifegoeson";
     profile.setGivenName(newName);
-    profileController.adminUpdateProfile(dbUser, profile);
+    profileController.adminUpdateProfile(profile);
   }
 
   @Test(expected = BadRequestException.class)
@@ -1153,7 +1151,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     String newName =
         "obladidobladalifegoesonyalalalalalifegoesonobladioblada" + "lifegoesonrahlalalalifegoeson";
     profile.setFamilyName(newName);
-    profileController.adminUpdateProfile(dbUser, profile);
+    profileController.adminUpdateProfile(profile);
   }
 
   @Test
@@ -1340,9 +1338,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(profile.getDataUseAgreementBypassTime()).isNull();
 
     profile.setDataUseAgreementBypassTime(NOW.toEpochMilli());
-    profileController.adminUpdateProfile(dbUser, profile);
-
-    profile = profileService.getProfile(dbUser);
+    profile = profileController.adminUpdateProfile(profile).getBody();
     assertThat(profile.getDataUseAgreementBypassTime()).isNotNull();
   }
 
@@ -1355,17 +1351,13 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(profile.getDataUseAgreementBypassTime()).isNull();
 
     profile.setDataUseAgreementBypassTime(NOW.toEpochMilli());
-    profileController.adminUpdateProfile(dbUser, profile);
-
-    profile = profileService.getProfile(dbUser);
+    profile = profileController.adminUpdateProfile(profile).getBody();
     assertThat(profile.getDataUseAgreementBypassTime()).isNotNull();
 
     // then unbypass
 
     profile.setDataUseAgreementBypassTime(null);
-    profileController.adminUpdateProfile(dbUser, profile);
-
-    profile = profileService.getProfile(dbUser);
+    profile = profileController.adminUpdateProfile(profile).getBody();
     assertThat(profile.getDataUseAgreementBypassTime()).isNull();
   }
 
@@ -1409,7 +1401,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     Profile profile = profileService.getProfile(dbUser);
 
     profile.setFreeTierDollarQuota(newQuota);
-    profileController.adminUpdateProfile(dbUser, profile);
+    profileController.adminUpdateProfile(profile);
     verify(freeTierBillingService).setFreeTierDollarOverride(dbUser, newQuota);
   }
 
@@ -1419,7 +1411,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void adminUpdateProfile_FreeTierDollarQuota_no_change() {
     createUser();
     Profile profile = profileService.getProfile(dbUser);
-    profileController.adminUpdateProfile(dbUser, profile);
+    profileController.adminUpdateProfile(profile).getBody();
     verify(freeTierBillingService, never()).setFreeTierDollarOverride(any(), anyDouble());
   }
 
