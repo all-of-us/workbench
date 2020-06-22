@@ -836,18 +836,21 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         disseminateResearchFindingList,
         'primaryPurpose': this.primaryPurposeIsSelected
       };
-      // TODO: This validation spec should include error messages which get
-      // surfaced directly. Currently these constraints are entirely separate
-      // from the user facing error strings we render.
+
       const lengthMessages = (prefix = '') => ({
         tooShort: `${prefix} cannot be blank`,
         tooLong: `${prefix} cannot exceed %{count} characters`
       });
 
+      // TODO: This validation spec should include error messages which get
+      // surfaced directly. Currently these constraints are entirely separate
+      // from the user facing error strings we render.
       const constraints: object = {
         name: {
           length: { minimum: 1, maximum: 80, ...lengthMessages('Name')}
         },
+        // The prefix for these lengthMessages require HTML formatting
+        // The prefix string is omitted here and included in the React template below
         billingAccountName: { presence: true },
         intendedStudy: { length: { minimum: 1, maximum: 1000, ...lengthMessages() } },
         populationChecked: { presence: true },
