@@ -40,7 +40,7 @@ import {
 import {isBlank, reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {serverConfigStore} from 'app/utils/navigation';
-import {NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION} from "../../../utils/strings";
+import {NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION} from 'app/utils/strings';
 
 const styles = reactStyles({
   ...commonStyles,
