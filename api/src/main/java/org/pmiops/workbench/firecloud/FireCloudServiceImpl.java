@@ -6,6 +6,7 @@ import com.google.auth.oauth2.OAuth2Credentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.List;
@@ -271,6 +272,8 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   private void addRoleToBillingProject(String email, String projectName, String role) {
+    Preconditions.checkArgument(email.contains("@"));
+
     BillingApi billingApi = billingApiProvider.get();
     retryHandler.run(
         (context) -> {
@@ -286,7 +289,9 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   @Override
   public void removeOwnerFromBillingProject(
-      String projectName, String ownerEmailToRemove, Optional<String> callerAccessToken) {
+      String ownerEmailToRemove, String projectName, Optional<String> callerAccessToken) {
+    Preconditions.checkArgument(ownerEmailToRemove.contains("@"));
+
     final BillingApi scopedBillingApi;
 
     if (callerAccessToken.isPresent()) {

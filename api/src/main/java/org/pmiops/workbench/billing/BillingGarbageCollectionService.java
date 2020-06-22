@@ -143,8 +143,8 @@ public class BillingGarbageCollectionService {
       garbageCollectionCredentials.refresh();
 
       fireCloudService.removeOwnerFromBillingProject(
-          projectName,
           appEngineSA,
+          projectName,
           Optional.of(garbageCollectionCredentials.getAccessToken().getTokenValue()));
     } catch (final ExecutionException e) {
       final String msg =
