@@ -598,10 +598,7 @@ public class ProfileController implements ProfileApiDelegate {
       UpdateContactEmailRequest updateContactEmailRequest) {
     String username = updateContactEmailRequest.getUsername().toLowerCase();
     com.google.api.services.directory.model.User googleUser = directoryService.getUser(username);
-    DbUser user =
-        userService
-            .getByUsername(username)
-            .orElseThrow(() -> new NotFoundException("User '" + username + "' not found"));
+    DbUser user = userService.getByUsernameOrThrow(username);
     checkUserCreationNonce(user, updateContactEmailRequest.getCreationNonce());
     if (userHasEverLoggedIn(googleUser, user)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -621,10 +618,7 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Void> resendWelcomeEmail(ResendWelcomeEmailRequest resendRequest) {
     String username = resendRequest.getUsername().toLowerCase();
     com.google.api.services.directory.model.User googleUser = directoryService.getUser(username);
-    DbUser user =
-        userService
-            .getByUsername(username)
-            .orElseThrow(() -> new NotFoundException("User '" + username + "' not found"));
+    DbUser user = userService.getByUsernameOrThrow(username);
     checkUserCreationNonce(user, resendRequest.getCreationNonce());
     if (userHasEverLoggedIn(googleUser, user)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -835,10 +829,7 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<Profile> getUserByUsername(String username) {
-    DbUser user =
-        userService
-            .getByUsername(username)
-            .orElseThrow(() -> new NotFoundException("User '" + username + "' not found"));
+    DbUser user = userService.getByUsernameOrThrow(username);
     return ResponseEntity.ok(profileService.getProfile(user));
   }
 
@@ -944,10 +935,7 @@ public class ProfileController implements ProfileApiDelegate {
             "%s@%s",
             usernameWithoutGsuiteDomain,
             workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain);
-    final long userDatabaseId =
-        Optional.ofNullable(userDao.findUserByUsername(username))
-            .map(DbUser::getUserId)
-            .orElseThrow(() -> new NotFoundException(String.format("User %s not found", username)));
+    final long userDatabaseId = userService.getByUsernameOrThrow(username).getUserId();
     final DateTime after = new DateTime(afterMillis);
     final DateTime before =
         Optional.ofNullable(beforeMillisNullable).map(DateTime::new).orElse(DateTime.now());

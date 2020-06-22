@@ -98,4 +98,7 @@ public interface UserService {
   int getCurrentDuccVersion();
 
   Optional<DbUser> getByUsername(String username);
+
+  // same as the above, but throw NotFoundException if not found
+  DbUser getByUsernameOrThrow(String username);
 }
