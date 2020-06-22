@@ -955,4 +955,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   public Optional<DbUser> getByUsername(String username) {
     return Optional.ofNullable(userDao.findUserByUsername(username));
   }
+
+  @Override
+  public DbUser getByUsernameOrThrow(String username) {
+    return getByUsername(username)
+        .orElseThrow(() -> new NotFoundException("User '" + username + "' not found"));
+  }
 }
