@@ -1329,20 +1329,20 @@ public class ProfileControllerTest extends BaseControllerTest {
         profile.getUserId(),
         new AccessBypassRequest().isBypassed(true).moduleName(AccessModule.DATA_USE_AGREEMENT));
 
-    profile = profileController.getMe().getBody();
-    assertThat(profile.getDataUseAgreementBypassTime()).isNotNull();
+    DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
+    assertThat(dbUser.getDataUseAgreementBypassTime()).isNotNull();
   }
 
   @Test
   public void adminUpdateProfile_bypassAccessModule() {
     createUser();
-    Profile profile = profileController.getMe().getBody();
+    Profile profile = profileService.getProfile(dbUser);
     assertThat(profile.getDataUseAgreementBypassTime()).isNull();
 
     profile.setDataUseAgreementBypassTime(NOW.toEpochMilli());
     profileController.adminUpdateProfile(dbUser, profile);
 
-    profile = profileController.getMe().getBody();
+    profile = profileService.getProfile(dbUser);
     assertThat(profile.getDataUseAgreementBypassTime()).isNotNull();
   }
 
@@ -1351,13 +1351,13 @@ public class ProfileControllerTest extends BaseControllerTest {
     // first bypass
 
     createUser();
-    Profile profile = profileController.getMe().getBody();
+    Profile profile = profileService.getProfile(dbUser);
     assertThat(profile.getDataUseAgreementBypassTime()).isNull();
 
     profile.setDataUseAgreementBypassTime(NOW.toEpochMilli());
     profileController.adminUpdateProfile(dbUser, profile);
 
-    profile = profileController.getMe().getBody();
+    profile = profileService.getProfile(dbUser);
     assertThat(profile.getDataUseAgreementBypassTime()).isNotNull();
 
     // then unbypass
@@ -1365,7 +1365,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     profile.setDataUseAgreementBypassTime(null);
     profileController.adminUpdateProfile(dbUser, profile);
 
-    profile = profileController.getMe().getBody();
+    profile = profileService.getProfile(dbUser);
     assertThat(profile.getDataUseAgreementBypassTime()).isNull();
   }
 
@@ -1406,7 +1406,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     final Double newQuota = 123.4;
 
     createUser();
-    Profile profile = profileController.getMe().getBody();
+    Profile profile = profileService.getProfile(dbUser);
 
     profile.setFreeTierDollarQuota(newQuota);
     profileController.adminUpdateProfile(dbUser, profile);
@@ -1418,7 +1418,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Test
   public void adminUpdateProfile_FreeTierDollarQuota_no_change() {
     createUser();
-    Profile profile = profileController.getMe().getBody();
+    Profile profile = profileService.getProfile(dbUser);
     profileController.adminUpdateProfile(dbUser, profile);
     verify(freeTierBillingService, never()).setFreeTierDollarOverride(any(), anyDouble());
   }
