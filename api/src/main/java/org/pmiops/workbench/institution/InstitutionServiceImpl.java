@@ -18,6 +18,7 @@ import org.pmiops.workbench.db.dao.InstitutionUserInstructionsDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionUserInstructions;
+import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -25,6 +26,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
+import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.PublicInstitutionDetails;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -354,6 +356,25 @@ public class InstitutionServiceImpl implements InstitutionService {
                   throw new BadRequestException("Email Address is not valid");
                 }
               });
+    }
+  }
+
+  @Override
+  public DbInstitutionalAffiliation legacyInstitutionToDbInstitution(
+      InstitutionalAffiliation institutionalAffiliation) {
+    {
+      DbInstitutionalAffiliation result = new DbInstitutionalAffiliation();
+      if (institutionalAffiliation.getInstitution() != null) {
+        result.setInstitution(institutionalAffiliation.getInstitution());
+      }
+      if (institutionalAffiliation.getNonAcademicAffiliation() != null) {
+        result.setNonAcademicAffiliationEnum(institutionalAffiliation.getNonAcademicAffiliation());
+      }
+
+      result.setRole(institutionalAffiliation.getRole());
+      result.setOther(institutionalAffiliation.getOther());
+
+      return result;
     }
   }
 }

@@ -1,7 +1,7 @@
 package org.pmiops.workbench.notebooks;
 
+import com.google.cloud.storage.Blob;
 import java.util.List;
-import java.util.regex.Pattern;
 import org.json.JSONObject;
 import org.pmiops.workbench.model.FileDetail;
 
@@ -9,8 +9,6 @@ public interface NotebooksService {
 
   String NOTEBOOKS_WORKSPACE_DIRECTORY = "notebooks";
   String NOTEBOOK_EXTENSION = ".ipynb";
-  Pattern NOTEBOOK_PATTERN =
-      Pattern.compile(NOTEBOOKS_WORKSPACE_DIRECTORY + "/[^/]+(\\.(?i)(ipynb))$");
 
   static String withNotebookExtension(String notebookName) {
     return notebookName.endsWith(NOTEBOOK_EXTENSION)
@@ -26,6 +24,8 @@ public interface NotebooksService {
    * input value should be trusted.
    */
   List<FileDetail> getNotebooksAsService(String bucketName);
+
+  boolean isNotebookBlob(Blob blob);
 
   FileDetail copyNotebook(
       String fromWorkspaceNamespace,

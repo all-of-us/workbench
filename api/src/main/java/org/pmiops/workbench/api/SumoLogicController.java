@@ -14,7 +14,7 @@ import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.EgressEvent;
 import org.pmiops.workbench.model.EgressEventRequest;
-import org.pmiops.workbench.opsgenie.OpsGenieService;
+import org.pmiops.workbench.opsgenie.EgressEventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,22 +28,22 @@ import org.springframework.web.bind.annotation.RestController;
 public class SumoLogicController implements SumoLogicApiDelegate {
 
   public static final String SUMOLOGIC_KEY_FILENAME = "inbound-sumologic-keys.txt";
-
   private static final Logger log = Logger.getLogger(SumoLogicController.class.getName());
-  private final EgressEventAuditor egressEventAuditor;
+
   private final CloudStorageService cloudStorageService;
-  private final OpsGenieService opsGenieService;
+  private final EgressEventAuditor egressEventAuditor;
+  private final EgressEventService egressEventService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   SumoLogicController(
-      EgressEventAuditor egressEventAuditor,
       CloudStorageService cloudStorageService,
-      OpsGenieService opsGenieService,
+      EgressEventAuditor egressEventAuditor,
+      EgressEventService egressEventService,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
-    this.egressEventAuditor = egressEventAuditor;
     this.cloudStorageService = cloudStorageService;
-    this.opsGenieService = opsGenieService;
+    this.egressEventAuditor = egressEventAuditor;
+    this.egressEventService = egressEventService;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
@@ -60,7 +60,7 @@ public class SumoLogicController implements SumoLogicApiDelegate {
       // this out so we can work with each event as a model object.
       ObjectMapper mapper = new ObjectMapper();
       EgressEvent[] events = mapper.readValue(request.getEventsJsonArray(), EgressEvent[].class);
-      Arrays.stream(events).forEach(this::handleEgressEvent);
+      Arrays.stream(events).forEach(egressEventService::handleEvent);
       return ResponseEntity.noContent().build();
     } catch (IOException e) {
       log.severe(
@@ -108,14 +108,5 @@ public class SumoLogicController implements SumoLogicApiDelegate {
               + "Allowing request to be processed.");
       log.severe(e.getMessage());
     }
-  }
-
-  private void handleEgressEvent(EgressEvent event) {
-    log.warning(
-        String.format(
-            "Received an egress event from project %s (%.2fMib, VM %s)",
-            event.getProjectName(), event.getEgressMib(), event.getVmName()));
-    this.egressEventAuditor.fireEgressEvent(event);
-    this.opsGenieService.createEgressEventAlert(event);
   }
 }

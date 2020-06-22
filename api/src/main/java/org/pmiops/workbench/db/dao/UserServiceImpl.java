@@ -44,6 +44,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
@@ -74,7 +75,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UserServiceImpl implements UserService, GaugeDataCollector {
 
-  private final int MAX_RETRIES = 3;
+  private static final int MAX_RETRIES = 3;
   private static final int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
 
   private final Provider<WorkbenchConfig> configProvider;
@@ -329,6 +330,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         null);
   }
 
+  // TODO: move this and the one above to UserMapper
   @Override
   public DbUser createUser(
       String givenName,
@@ -558,15 +560,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         dbUser.getUserId(),
         targetProperty,
         Optional.ofNullable(bypassTime).map(Timestamp::toInstant));
-  }
-
-  @Override
-  public void setClusterRetryCount(int clusterRetryCount) {
-    updateUserWithRetries(
-        (user) -> {
-          user.setClusterCreateRetries(clusterRetryCount);
-          return user;
-        });
   }
 
   @Override
@@ -954,5 +947,63 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   @Override
   public Optional<DbUser> getByUsername(String username) {
     return Optional.ofNullable(userDao.findUserByUsername(username));
+  }
+
+  @Override
+  public Optional<DbUser> getByDatabaseId(long databaseId) {
+    return Optional.ofNullable(userDao.findUserByUserId(databaseId));
+  }
+
+  @Override
+  public void updateBypassTime(long userDatabaseId, AccessBypassRequest accessBypassRequest) {
+    final DbUser user =
+        getByDatabaseId(userDatabaseId)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("User with database ID %d not found", userDatabaseId)));
+
+    final Timestamp newBypassTime;
+    final Timestamp previousBypassTime;
+
+    final Boolean isBypassed = accessBypassRequest.getIsBypassed();
+    if (isBypassed) {
+      newBypassTime = new Timestamp(clock.instant().toEpochMilli());
+    } else {
+      newBypassTime = null;
+    }
+    switch (accessBypassRequest.getModuleName()) {
+      case DATA_USE_AGREEMENT:
+        previousBypassTime = user.getDataUseAgreementBypassTime();
+        setDataUseAgreementBypassTime(userDatabaseId, newBypassTime);
+        break;
+      case COMPLIANCE_TRAINING:
+        previousBypassTime = user.getComplianceTrainingBypassTime();
+        setComplianceTrainingBypassTime(userDatabaseId, newBypassTime);
+        break;
+      case BETA_ACCESS:
+        previousBypassTime = user.getBetaAccessBypassTime();
+        setBetaAccessBypassTime(userDatabaseId, newBypassTime);
+        break;
+      case ERA_COMMONS:
+        previousBypassTime = user.getEraCommonsBypassTime();
+        setEraCommonsBypassTime(userDatabaseId, newBypassTime);
+        break;
+      case TWO_FACTOR_AUTH:
+        previousBypassTime = user.getTwoFactorAuthBypassTime();
+        setTwoFactorAuthBypassTime(userDatabaseId, newBypassTime);
+        break;
+      default:
+        throw new BadRequestException(
+            "There is no access module named: " + accessBypassRequest.getModuleName().toString());
+    }
+    logAdminUserAction(
+        userDatabaseId,
+        "set bypass status for module "
+            + accessBypassRequest.getModuleName().toString()
+            + " to "
+            + isBypassed,
+        previousBypassTime,
+        newBypassTime);
   }
 }
