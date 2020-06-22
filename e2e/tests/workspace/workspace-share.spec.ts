@@ -27,6 +27,7 @@ describe('Share workspace', () => {
       let accessLevel = await aboutPage.findUserInCollaboratorList(config.collaboratorUsername);
       if (accessLevel !== null) {
         await (await aboutPage.openShareModal()).removeUser(config.collaboratorUsername);
+        waitWhileLoading(page);
       }
 
       let shareModal = await aboutPage.openShareModal();

@@ -32,7 +32,7 @@ export default class ShareModal extends Container {
     // This is pretty limited - here we assume that the first collab with "Reader"
     // is the user we care about, which may not be the case. Ideally we'd have a
     // cleaner selection here.
-    const roleInput = await this.waitForFirstReaderRoleDropdown();
+    const roleInput = await this.waitForRoleSelectorForUser(username);
     await roleInput.click();
 
     const ownerOpt = await this.waitForRoleOption(level);
@@ -44,12 +44,17 @@ export default class ShareModal extends Container {
 
   async removeUser(username: string): Promise<void> {
     const rmCollab = await this.page.waitForXPath(
-      `//*[contains(text(),"${username}")]/clr-icon[@shape="minus-circle"]`);
+      `${this.collabRowXPath(username)}//clr-icon[@shape="minus-circle"]`);
     await rmCollab.click();
 
     await this.clickButton(ButtonLabel.Save);
     await this.waitUntilDialogIsClosed();
     return;
+  }
+
+  private collabRowXPath(username: string): string {
+    return `//*[@data-test-id="collab-user-row" and .//div[` +
+        `@data-test-id="collab-user-email" and contains(text(),"${username}")]]`;
   }
 
   async clickButton(buttonLabel: ButtonLabel): Promise<void> {
@@ -70,15 +75,18 @@ export default class ShareModal extends Container {
     return ClrIcon.findByName(this.page, {iconShape: 'plus-circle'}, this);
   }
 
-  async waitForFirstReaderRoleDropdown(): Promise<Textbox> {
-    return Textbox.findByName(this.page, {name: 'Reader'}, this);
+  async waitForRoleSelectorForUser(username: string): Promise<Textbox> {
+    const box = new Textbox(
+      this.page, `${this.collabRowXPath(username)}//input[@type="text"]`);
+    await box.waitForXPath({visible: true});
+    return box;
   }
 
   async waitForRoleOption(level: WorkspaceAccessLevel): Promise<ElementHandle> {
     // The label in the select menu uses title case.
     const levelText =  level[0].toUpperCase() + level.substring(1).toLowerCase();
     return await this.page.waitForXPath(
-      `//*[starts-with(@id,"react-select")][text()="${levelText}"]`);
+      `//*[starts-with(@id,"react-select") and text()="${levelText}"]`);
   }
 
   async waitUntilDialogIsClosed(timeOut: number = 60000): Promise<void> {

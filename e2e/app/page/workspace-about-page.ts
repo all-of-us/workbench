@@ -46,7 +46,6 @@ export default class WorkspaceAboutPage extends AuthenticatedPage{
     for (const c of collabs) {
       let collabLine = await (await c.getProperty('textContent')).jsonValue() as string;
       collabLine = collabLine.toLowerCase().trim();
-      console.log(collabLine);
       if (collabLine.includes(username.toLowerCase())) {
         for (const level of [
           WorkspaceAccessLevel.Reader,
