@@ -29,9 +29,6 @@ export default class ShareModal extends Container {
     const addCollab = await this.waitForAddCollaboratorIcon();
     await addCollab.click();
 
-    // This is pretty limited - here we assume that the first collab with "Reader"
-    // is the user we care about, which may not be the case. Ideally we'd have a
-    // cleaner selection here.
     const roleInput = await this.waitForRoleSelectorForUser(username);
     await roleInput.click();
 
@@ -52,7 +49,13 @@ export default class ShareModal extends Container {
     return;
   }
 
+  /**
+   * Creates an xpath to a share "row" for a given user within the modal. This
+   * can be combined with a child selector to pull out a control for a user.
+   */
   private collabRowXPath(username: string): string {
+    // We dip into child contents to find the collab user row element parent.
+    // .//div filters by a relative path to the parent row.
     return `//*[@data-test-id="collab-user-row" and .//div[` +
         `@data-test-id="collab-user-email" and contains(text(),"${username}")]]`;
   }
