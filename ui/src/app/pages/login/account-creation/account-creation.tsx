@@ -40,6 +40,7 @@ import {
 import {isBlank, reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {serverConfigStore} from 'app/utils/navigation';
+import {NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION} from "../../../utils/strings";
 
 const styles = reactStyles({
   ...commonStyles,
@@ -635,6 +636,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
               onChange={(s: string) => this.updateProfileObject('areaOfResearch', s)}
               textBoxStyleOverrides={styles.textAreaStyleOverride}
               tooLongWarningCharacters={1900}
+              tooShortWarningCharacters={100}
+              tooShortWarning={NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION}
             />
           </Section>
           {/* TODO(RW-4361): remove after we switch to verified institutional affiliation */}

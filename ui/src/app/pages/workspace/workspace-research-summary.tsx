@@ -2,6 +2,7 @@ import {TextAreaWithLengthValidationMessage} from 'app/components/inputs';
 import * as React from 'react';
 import {WorkspaceEditSection} from './workspace-edit-section';
 import {ResearchPurposeQuestion} from './workspace-edit-text';
+import {NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION} from "../../utils/strings";
 
 
 interface Props {
@@ -26,10 +27,8 @@ export const WorkspaceResearchSummary = (props: Props) => {
           maxCharacters={1000}
           onChange={(s: string) => props.onChange(s)}
           tooLongWarningCharacters={950}
-          tooShortWarningCharacters={50}
-          tooShortWarning={'The description you entered seems too short. Please consider ' +
-            'adding more descriptive details to help the Program and your fellow Researchers ' +
-            'understand your work.'}
+          tooShortWarningCharacters={100}
+          tooShortWarning={NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION}
        />
     </WorkspaceEditSection>;
 };
