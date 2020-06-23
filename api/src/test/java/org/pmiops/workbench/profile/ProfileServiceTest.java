@@ -7,11 +7,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -31,11 +34,13 @@ import org.pmiops.workbench.institution.deprecated.InstitutionalAffiliationMappe
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
+import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -49,6 +54,8 @@ public class ProfileServiceTest {
 
   @MockBean
   private VerifiedInstitutionalAffiliationMapper mockVerifiedInstitutionalAffiliationMapper;
+
+  private static final FakeClock CLOCK = new FakeClock(Instant.parse("2000-01-01T00:00:00.00Z"));
 
   @Autowired ProfileService profileService;
   @Autowired UserDao userDao;
@@ -67,7 +74,14 @@ public class ProfileServiceTest {
     VerifiedInstitutionalAffiliationMapperImpl.class,
     CommonMappers.class
   })
-  static class Configuration {}
+  @MockBean({ProfileAuditor.class})
+  static class Configuration {
+
+    @Bean
+    public Clock getClock() {
+      return CLOCK;
+    }
+  }
 
   @Before
   public void setUp() {
