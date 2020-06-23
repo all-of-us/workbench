@@ -1,6 +1,5 @@
 import Container from 'app/container';
 import {Page} from 'puppeteer';
-import {ElementType} from 'app/xpath-options';
 import Button from 'app/element/button';
 import Textbox from 'app/element/textbox';
 import Textarea from 'app/element/textarea';
@@ -42,7 +41,7 @@ export default class Dialog extends Container {
   }
 
   async waitForButton(buttonLabel: ButtonLabel): Promise<Button> {
-    return Button.findByName(this.page, {containsText: buttonLabel, type: ElementType.Button}, this);
+    return Button.findByName(this.page, {containsText: buttonLabel}, this);
   }
 
   async waitForTextbox(textboxName: string): Promise<Textbox> {

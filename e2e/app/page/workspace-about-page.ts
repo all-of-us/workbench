@@ -30,7 +30,7 @@ export default class WorkspaceAboutPage extends AuthenticatedPage{
 
   async isOpen(): Promise<boolean> {
     const selector = xPathOptionToXpath({name: TabLabelAlias.About, type: ElementType.Tab});
-    return waitForAttributeEquality(page, {xpath: selector}, 'aria-selected', 'true');
+    return waitForAttributeEquality(this.page, {xpath: selector}, 'aria-selected', 'true');
   }
 
 }
