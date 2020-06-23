@@ -57,7 +57,7 @@ export default class DataPage extends AuthenticatedPage {
    * @param {TabLabelAlias} tabName
    * @param opts
    */
-  async openTab(tabName: TabLabelAlias, opts: {waitPageChange?: boolean} = {}): Promise<[void, Response] | void> {
+  async openTab(tabName: TabLabelAlias, opts: {waitPageChange?: boolean} = {}): Promise<void> {
     const {waitPageChange = true} = opts;
     const selector = xPathOptionToXpath({name: tabName, type: ElementType.Tab});
     const tab = await this.page.waitForXPath(selector, {visible: true});
@@ -66,9 +66,10 @@ export default class DataPage extends AuthenticatedPage {
         tab.click(),
         this.page.waitForNavigation({waitUntil: ['load', 'domcontentloaded', 'networkidle0']}),
       ]);
-      return waitWhileLoading(this.page);
+    } else {
+      await tab.click();
     }
-    return tab.click();
+    return waitWhileLoading(this.page);
   }
 
   async getAddDatasetButton(): Promise<ClrIconLink> {

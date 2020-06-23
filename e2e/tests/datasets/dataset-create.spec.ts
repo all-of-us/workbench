@@ -90,7 +90,6 @@ describe('Create Dataset', () => {
     console.log(`Created Cohort "${cohortName}"`);
 
     await dataPage.openTab(TabLabelAlias.Data);
-    await waitWhileLoading(page);
 
     // Click Add Datasets button.
     const datasetPage = await dataPage.clickAddDatasetButton();
@@ -104,7 +103,6 @@ describe('Create Dataset', () => {
 
     // Verify create successful.
     await dataPage.openTab(TabLabelAlias.Datasets, {waitPageChange: false});
-    await waitWhileLoading(page);
 
     const resourceCard = new DataResourceCard(page);
     const dataSetExists = await resourceCard.cardExists(dataSetName, CardType.Dataset);
