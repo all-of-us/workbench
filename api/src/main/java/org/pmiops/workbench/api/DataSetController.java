@@ -42,7 +42,6 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
-import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbConceptSet;
@@ -109,7 +108,6 @@ public class DataSetController implements DataSetApiDelegate {
   private final ConceptService conceptService;
   private final ConceptSetDao conceptSetDao;
   private final DataDictionaryEntryDao dataDictionaryEntryDao;
-  private final DataSetDao dataSetDao;
   private final DataSetMapper dataSetMapper;
   private final FireCloudService fireCloudService;
   private final NotebooksService notebooksService;
@@ -124,7 +122,6 @@ public class DataSetController implements DataSetApiDelegate {
       ConceptService conceptService,
       ConceptSetDao conceptSetDao,
       DataDictionaryEntryDao dataDictionaryEntryDao,
-      DataSetDao dataSetDao,
       DataSetMapper dataSetMapper,
       DataSetService dataSetService,
       FireCloudService fireCloudService,
@@ -140,7 +137,6 @@ public class DataSetController implements DataSetApiDelegate {
     this.conceptService = conceptService;
     this.conceptSetDao = conceptSetDao;
     this.dataDictionaryEntryDao = dataDictionaryEntryDao;
-    this.dataSetDao = dataSetDao;
     this.dataSetMapper = dataSetMapper;
     this.dataSetService = dataSetService;
     this.fireCloudService = fireCloudService;
@@ -508,8 +504,7 @@ public class DataSetController implements DataSetApiDelegate {
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    List<DbDataset> dataSets =
-        dataSetDao.findByWorkspaceIdAndInvalid(workspace.getWorkspaceId(), false);
+    List<DbDataset> dataSets = dataSetService.getInvalidDataSetsByWorkspace(workspace);
     DataSetListResponse response = new DataSetListResponse();
 
     response.setItems(
@@ -525,47 +520,33 @@ public class DataSetController implements DataSetApiDelegate {
       String workspaceNamespace, String workspaceId, MarkDataSetRequest markDataSetRequest) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    List<DbDataset> dbDataSetList = new ArrayList<>();
-    if (ResourceType.COHORT.equals(markDataSetRequest.getResourceType())) {
-      dbDataSetList = dataSetDao.findDataSetsByCohortIds(markDataSetRequest.getId());
-    } else if (ResourceType.CONCEPT_SET.equals(markDataSetRequest.getResourceType())) {
-      dbDataSetList = dataSetDao.findDataSetsByConceptSetIds(markDataSetRequest.getId());
-    }
-    dbDataSetList =
-        dbDataSetList.stream()
-            .map(
-                dataSet -> {
-                  dataSet.setInvalid(true);
-                  return dataSet;
-                })
-            .collect(Collectors.toList());
-    try {
-      dataSetDao.save(dbDataSetList);
-    } catch (OptimisticLockException e) {
-      throw new ConflictException("Failed due to concurrent data set modification");
-    }
-
+    dataSetService.markDirty(markDataSetRequest.getResourceType(), markDataSetRequest.getId());
     return ResponseEntity.ok(true);
   }
 
   @Override
   public ResponseEntity<EmptyResponse> deleteDataSet(
       String workspaceNamespace, String workspaceId, Long dataSetId) {
-    DbDataset dataSet =
-        getDbDataSet(workspaceNamespace, workspaceId, dataSetId, WorkspaceAccessLevel.WRITER);
-    dataSetDao.delete(dataSet.getDataSetId());
+    DbWorkspace workspace =
+        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+
+    dataSetService.deleteDataSet(workspace, dataSetId);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
   public ResponseEntity<DataSet> updateDataSet(
       String workspaceNamespace, String workspaceId, Long dataSetId, DataSetRequest request) {
-    DbDataset dbDataSet =
-        getDbDataSet(workspaceNamespace, workspaceId, dataSetId, WorkspaceAccessLevel.WRITER);
     if (Strings.isNullOrEmpty(request.getEtag())) {
       throw new BadRequestException("missing required update field 'etag'");
     }
+    DbWorkspace workspace =
+        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+
     int version = Etags.toVersion(request.getEtag());
+    DbDataset dbDataSet = dataSetService.getDbDataSet(workspace, dataSetId);
     if (dbDataSet.getVersion() != version) {
       throw new ConflictException("Attempted to modify outdated data set version");
     }
@@ -582,7 +563,7 @@ public class DataSetController implements DataSetApiDelegate {
             .map(this::getDataSetValuesFromDomainValueSet)
             .collect(Collectors.toList()));
     try {
-      dbDataSet = dataSetDao.save(dbDataSet);
+      dataSetService.saveDataSet(dbDataSet);
       // TODO: add recent resource entry for data sets
     } catch (OptimisticLockException e) {
       throw new ConflictException("Failed due to concurrent concept set modification");
@@ -596,8 +577,11 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<DataSet> getDataSet(
       String workspaceNamespace, String workspaceId, Long dataSetId) {
-    DbDataset dataSet =
-        getDbDataSet(workspaceNamespace, workspaceId, dataSetId, WorkspaceAccessLevel.READER);
+    DbWorkspace workspace =
+        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+
+    DbDataset dataSet = dataSetService.getDbDataSet(workspace, dataSetId);
     return ResponseEntity.ok(TO_CLIENT_DATA_SET.apply(dataSet));
   }
 
@@ -607,12 +591,7 @@ public class DataSetController implements DataSetApiDelegate {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    List<DbDataset> dbDataSets = new ArrayList<>();
-    if (ResourceType.COHORT.equals(resourceType)) {
-      dbDataSets = dataSetDao.findDataSetsByCohortIds(id);
-    } else if (ResourceType.CONCEPT_SET.equals(resourceType)) {
-      dbDataSets = dataSetDao.findDataSetsByConceptSetIds(id);
-    }
+    List<DbDataset> dbDataSets = dataSetService.getDataSets(resourceType, id);
     DataSetListResponse dataSetResponse =
         new DataSetListResponse()
             .items(dbDataSets.stream().map(TO_CLIENT_DATA_SET).collect(Collectors.toList()));
@@ -667,23 +646,5 @@ public class DataSetController implements DataSetApiDelegate {
         .put("execution_count", JSONObject.NULL)
         .put("outputs", new JSONArray())
         .put("source", new JSONArray().put(cellInformation));
-  }
-
-  private DbDataset getDbDataSet(
-      String workspaceNamespace,
-      String workspaceId,
-      Long dataSetId,
-      WorkspaceAccessLevel workspaceAccessLevel) {
-    final DbWorkspace workspace =
-        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, workspaceId, workspaceAccessLevel);
-
-    DbDataset dataSet = dataSetDao.findOne(dataSetId);
-    if (dataSet == null || workspace.getWorkspaceId() != dataSet.getWorkspaceId()) {
-      throw new NotFoundException(
-          String.format(
-              "No data set with ID %s in workspace %s.", dataSet, workspace.getFirecloudName()));
-    }
-    return dataSet;
   }
 }

@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import javax.persistence.OptimisticLockException;
 import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
@@ -42,6 +43,7 @@ import org.pmiops.workbench.db.model.DbDatasetValue;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.DataSetPreviewRequest;
@@ -50,6 +52,7 @@ import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
+import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
@@ -225,7 +228,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     dataSetModel.setValues(values);
     dataSetModel.setPrePackagedConceptSetEnum(prePackagedConceptSetEnum);
 
-    return dataSetDao.save(dataSetModel);
+    return saveDataSet(dataSetModel);
+  }
+
+  @Override
+  public DbDataset saveDataSet(DbDataset dataset) {
+    return dataSetDao.save(dataset);
   }
 
   // For domains for which we've assigned a base table in BigQuery, we keep a map here
@@ -674,6 +682,59 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   @Override
   public List<DbCohort> getCohortsForDataset(DbDataset dataSet) {
     return cohortDao.findAllByCohortIdIn(dataSetDao.findOne(dataSet.getDataSetId()).getCohortIds());
+  }
+
+  @Override
+  public List<DbDataset> getDataSets(ResourceType resourceType, long resourceId) {
+    List<DbDataset> dbDataSets = new ArrayList<>();
+    if (ResourceType.COHORT.equals(resourceType)) {
+      dbDataSets = dataSetDao.findDataSetsByCohortIds(resourceId);
+    } else if (ResourceType.CONCEPT_SET.equals(resourceType)) {
+      dbDataSets = dataSetDao.findDataSetsByConceptSetIds(resourceId);
+    }
+    return dbDataSets;
+  }
+
+  @Override
+  public List<DbDataset> getInvalidDataSetsByWorkspace(DbWorkspace dbWorkspace) {
+
+    return dataSetDao.findByWorkspaceIdAndInvalid(dbWorkspace.getWorkspaceId(), false);
+  }
+
+  @Override
+  public void deleteDataSet(DbWorkspace dbWorkspace, Long dataSetId) {
+    DbDataset dataSet = getDbDataSet(dbWorkspace, dataSetId);
+    dataSetDao.delete(dataSet.getDataSetId());
+  }
+
+  @Override
+  public DbDataset getDbDataSet(DbWorkspace dbWorkspace, Long dataSetId) {
+
+    DbDataset dataSet = dataSetDao.findOne(dataSetId);
+    if (dataSet == null || dbWorkspace.getWorkspaceId() != dataSet.getWorkspaceId()) {
+      throw new NotFoundException(
+          String.format(
+              "No data set with ID %s in workspace %s.", dataSet, dbWorkspace.getFirecloudName()));
+    }
+    return dataSet;
+  }
+
+  @Override
+  public void markDirty(ResourceType resourceType, long resourceId) {
+    List<DbDataset> dbDataSetList = getDataSets(resourceType, resourceId);
+    dbDataSetList =
+        dbDataSetList.stream()
+            .map(
+                dataSet -> {
+                  dataSet.setInvalid(true);
+                  return dataSet;
+                })
+            .collect(Collectors.toList());
+    try {
+      dataSetDao.save(dbDataSetList);
+    } catch (OptimisticLockException e) {
+      throw new ConflictException("Failed due to concurrent data set modification");
+    }
   }
 
   private String getColumnName(CdrBigQuerySchemaConfig.TableConfig config, String type) {

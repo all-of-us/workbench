@@ -14,6 +14,7 @@ import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
+import org.pmiops.workbench.model.ResourceType;
 
 public interface DataSetService {
   DbDataset saveDataSet(
@@ -27,6 +28,8 @@ public interface DataSetService {
       PrePackagedConceptSetEnum prePackagedConceptSetEnum,
       long creatorId,
       Timestamp creationTime);
+
+  DbDataset saveDataSet(DbDataset dataset);
 
   QueryJobConfiguration previewBigQueryJobConfig(DataSetPreviewRequest dataSetPreviewRequest);
 
@@ -46,4 +49,14 @@ public interface DataSetService {
   List<DbConceptSet> getConceptSetsForDataset(DbDataset dataSet);
 
   List<DbCohort> getCohortsForDataset(DbDataset dataSet);
+
+  List<DbDataset> getDataSets(ResourceType resourceType, long resourceId);
+
+  List<DbDataset> getInvalidDataSetsByWorkspace(DbWorkspace dbWorkspace);
+
+  void deleteDataSet(DbWorkspace dbWorkspace, Long dataSetId);
+
+  DbDataset getDbDataSet(DbWorkspace dbWorkspace, Long dataSetId);
+
+  void markDirty(ResourceType resourceType, long resourceId);
 }
