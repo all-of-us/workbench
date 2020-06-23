@@ -1,23 +1,12 @@
 package org.pmiops.workbench.workspaceadmin;
 
-import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
-import com.google.monitoring.v3.Point;
-import com.google.monitoring.v3.TimeInterval;
-import com.google.monitoring.v3.TimeSeries;
-import com.google.monitoring.v3.TypedValue;
-import com.google.protobuf.util.Timestamps;
-import java.time.Duration;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,6 +18,7 @@ import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetMapperImpl;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
@@ -37,12 +27,9 @@ import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.AuditLogEntry;
-import org.pmiops.workbench.model.CloudStorageTraffic;
-import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.NotebooksService;
@@ -57,8 +44,6 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -184,68 +169,13 @@ public class WorkspaceAdminControllerTest {
         .thenReturn(fcWorkspaceResponse);
   }
 
-  @Test
-  public void getFederatedWorkspaceDetails_404sWhenNotFound() {
-    ResponseEntity<WorkspaceAdminView> response =
-        workspaceAdminController.getWorkspaceAdminView(NONSENSE_NAMESPACE);
-    assertThat(response.getStatusCodeValue()).isEqualTo(404);
-  }
-
-  @Test
-  public void getCloudStorageTraffic_sortsPointsByTimestamp() {
-    TimeSeries timeSeries =
-        TimeSeries.newBuilder()
-            .addPoints(
-                Point.newBuilder()
-                    .setInterval(TimeInterval.newBuilder().setEndTime(Timestamps.fromMillis(2000)))
-                    .setValue(TypedValue.newBuilder().setDoubleValue(1234)))
-            .addPoints(
-                Point.newBuilder()
-                    .setInterval(TimeInterval.newBuilder().setEndTime(Timestamps.fromMillis(1000)))
-                    .setValue(TypedValue.newBuilder().setDoubleValue(1234)))
-            .build();
-
-    when(mockCloudMonitoringService.getCloudStorageReceivedBytes(anyString(), any(Duration.class)))
-        .thenReturn(Collections.singletonList(timeSeries));
-
-    CloudStorageTraffic cloudStorageTraffic =
-        workspaceAdminController.getCloudStorageTraffic(WORKSPACE_NAMESPACE).getBody();
-
-    assertThat(
-            cloudStorageTraffic.getReceivedBytes().stream()
-                .map(TimeSeriesPoint::getTimestamp)
-                .collect(Collectors.toList()))
-        .containsExactly(1000L, 2000L);
-  }
-
-  @Test
-  public void testGetAuditLogEntries() {
-    // Don't rely on exact DateTime match
-    doReturn(QUERY_RESPONSE)
-        .when(mockActionAuditQueryService)
-        .queryEventsForWorkspace(anyLong(), anyLong(), any(DateTime.class), any(DateTime.class));
-    final ResponseEntity<WorkspaceAuditLogQueryResponse> response =
-        workspaceAdminController.getAuditLogEntries(
-            WorkspaceAdminControllerTest.WORKSPACE_NAMESPACE,
-            QUERY_LIMIT,
-            DEFAULT_AFTER_INCLUSIVE.getMillis(),
-            DEFAULT_BEFORE_EXCLUSIVE.getMillis());
-    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-    assertThat(response.getBody()).isEqualTo(QUERY_RESPONSE);
-  }
-
-  @Test
-  public void testGetAuditLogEntries_noResults() {
-    doReturn(EMPTY_QUERY_RESPONSE)
-        .when(mockActionAuditQueryService)
-        .queryEventsForWorkspace(anyLong(), anyLong(), any(DateTime.class), any(DateTime.class));
-    final ResponseEntity<WorkspaceAuditLogQueryResponse> response =
-        workspaceAdminController.getAuditLogEntries(
-            WorkspaceAdminControllerTest.WORKSPACE_NAMESPACE,
-            QUERY_LIMIT,
-            DEFAULT_AFTER_INCLUSIVE.getMillis(),
-            DEFAULT_BEFORE_EXCLUSIVE.getMillis());
-    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-    assertThat(response.getBody()).isEqualTo(EMPTY_QUERY_RESPONSE);
+  @Test(expected = NotFoundException.class)
+  public void getWorkspaceAdminView_404sWhenNotFound() {
+    doThrow(
+            new NotFoundException(
+                String.format("No workspace found for namespace %s", NONSENSE_NAMESPACE)))
+        .when(mockWorkspaceAdminService)
+        .getWorkspaceAdminView(NONSENSE_NAMESPACE);
+    workspaceAdminController.getWorkspaceAdminView(NONSENSE_NAMESPACE);
   }
 }

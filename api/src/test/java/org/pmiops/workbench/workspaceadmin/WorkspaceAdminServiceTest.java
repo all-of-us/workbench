@@ -2,14 +2,23 @@ package org.pmiops.workbench.workspaceadmin;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.monitoring.v3.Point;
+import com.google.monitoring.v3.TimeInterval;
+import com.google.monitoring.v3.TimeSeries;
+import com.google.monitoring.v3.TypedValue;
+import com.google.protobuf.util.Timestamps;
+import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,7 +43,9 @@ import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.AdminWorkspaceResources;
+import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.ListClusterResponse;
+import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
@@ -59,6 +70,7 @@ public class WorkspaceAdminServiceTest {
   private static final String WORKSPACE_NAMESPACE = "aou-rw-12345";
   private static final String WORKSPACE_NAME = "Gone with the Wind";
 
+  @MockBean private CloudMonitoringService mockCloudMonitoringService;
   @MockBean private FireCloudService mockFirecloudService;
   @MockBean private NotebooksService mockNotebooksService;
   @MockBean private WorkspaceDao mockWorkspaceDao;
@@ -74,7 +86,6 @@ public class WorkspaceAdminServiceTest {
   })
   @MockBean({
     ActionAuditQueryService.class,
-    CloudMonitoringService.class,
     CloudStorageService.class,
     CohortDao.class,
     CohortReviewMapper.class,
@@ -113,6 +124,33 @@ public class WorkspaceAdminServiceTest {
     doReturn(Optional.of(dbWorkspace))
         .when(mockWorkspaceDao)
         .findFirstByWorkspaceNamespaceOrderByFirecloudNameAsc(WORKSPACE_NAMESPACE);
+  }
+
+  @Test
+  public void getCloudStorageTraffic_sortsPointsByTimestamp() {
+    TimeSeries timeSeries =
+        TimeSeries.newBuilder()
+            .addPoints(
+                Point.newBuilder()
+                    .setInterval(TimeInterval.newBuilder().setEndTime(Timestamps.fromMillis(2000)))
+                    .setValue(TypedValue.newBuilder().setDoubleValue(1234)))
+            .addPoints(
+                Point.newBuilder()
+                    .setInterval(TimeInterval.newBuilder().setEndTime(Timestamps.fromMillis(1000)))
+                    .setValue(TypedValue.newBuilder().setDoubleValue(1234)))
+            .build();
+
+    when(mockCloudMonitoringService.getCloudStorageReceivedBytes(anyString(), any(Duration.class)))
+        .thenReturn(Collections.singletonList(timeSeries));
+
+    final CloudStorageTraffic cloudStorageTraffic =
+        workspaceAdminService.getCloudStorageTraffic(WORKSPACE_NAMESPACE);
+
+    assertThat(
+            cloudStorageTraffic.getReceivedBytes().stream()
+                .map(TimeSeriesPoint::getTimestamp)
+                .collect(Collectors.toList()))
+        .containsExactly(1000L, 2000L);
   }
 
   @Test
