@@ -177,7 +177,7 @@ export default class DataPage extends AuthenticatedPage {
   }
 
   async renameCohort(cohortName: string, newCohortName: string): Promise<void> {
-    const cohortResourceCard = await DataResourceCard.findCard(page, cohortName);
+    const cohortResourceCard = await DataResourceCard.findCard(this.page, cohortName);
     const menu = cohortResourceCard.getEllipsis();
     await menu.clickAction(EllipsisMenuAction.Rename, false);
     const dialog = new Dialog(this.page);
