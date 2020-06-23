@@ -30,6 +30,9 @@ const styles = reactStyles({
   },
   separator: {
     background: 'rgba(255,255,255,0.15)', width: 1, height: 48, flexShrink: 0
+  },
+  disabled: {
+    color: colors.disabled
   }
 });
 
@@ -41,6 +44,11 @@ const tabs = [
 
 const navSeparator = <div style={styles.separator}/>;
 
+function restrictTab(workspace, tab) {
+  return workspace && workspace.accessLevel === 'OWNER'
+      && workspace.researchPurpose.needsReviewPrompt && tab.name !== 'About';
+}
+
 export const WorkspaceNavBarReact = fp.flow(
   withCurrentWorkspace(),
   withUrlParams(),
@@ -49,16 +57,16 @@ export const WorkspaceNavBarReact = fp.flow(
   const activeTabIndex = fp.findIndex(['link', tabPath], tabs);
 
 
-  const navTab = currentTab => {
+  const navTab = (currentTab, disabled) => {
     const {name, link} = currentTab;
     const selected = tabPath === link;
     const hideSeparator = selected || (activeTabIndex === tabs.indexOf(currentTab) + 1);
-
     return <React.Fragment key={name}>
       <Clickable
         data-test-id={name}
         aria-selected={selected}
-        style={{...styles.tab, ...(selected ? styles.active : {})}}
+        disabled={disabled}
+        style={{...styles.tab, ...(selected ? styles.active : {}), ...(disabled ? styles.disabled : {})}}
         hover={{color: styles.active.color}}
         onClick={() => NavStore.navigate(fp.compact(['/workspaces', namespace, id, link]))}
       >
@@ -70,7 +78,7 @@ export const WorkspaceNavBarReact = fp.flow(
 
   return <div id='workspace-top-nav-bar' className='do-not-print' style={styles.container}>
     {activeTabIndex > 0 && navSeparator}
-    {fp.map(tab => navTab(tab), tabs)}
+    {fp.map(tab => navTab(tab, restrictTab(props.workspace, tab)), tabs)}
     <div style={{flexGrow: 1}}/>
   </div>;
 });

@@ -732,6 +732,22 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
+  public ResponseEntity<Workspace> markResearchPurposeReviewed(
+      String workspaceNamespace, String workspaceId) {
+    DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+    dbWorkspace.setNeedsReviewPrompt(false);
+    try {
+      dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
+    } catch (Exception e) {
+      throw e;
+    }
+    return ResponseEntity.ok(
+        workspaceMapper.toApiWorkspace(
+            dbWorkspace,
+            fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getWorkspace()));
+  }
+
+  @Override
   public ResponseEntity<ReadOnlyNotebookResponse> readOnlyNotebook(
       String workspaceNamespace, String workspaceName, String notebookName) {
     ReadOnlyNotebookResponse response =

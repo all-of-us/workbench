@@ -11,6 +11,7 @@ import {ClrIcon, SnowmanIcon} from 'app/components/icons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {AouTitle} from 'app/components/text-wrappers';
 import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -139,6 +140,7 @@ interface WorkspaceCardState {
   // Whether this card is busy loading data specific to the workspace.
   loadingData: boolean;
   sharing: boolean;
+  showResearchPurposeReviewModal: boolean;
   // The list of user roles associated with this workspace. Lazily populated
   // only when the workspace share dialog is opened.
   userRoles?: UserRole[];
@@ -163,6 +165,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
       confirmDeleting: false,
       loadingData: false,
       sharing: false,
+      showResearchPurposeReviewModal: false,
       userRoles: null,
       workspaceDeletionError: false
     };
@@ -222,10 +225,28 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
     await this.props.reload();
   }
 
+  handleReviewResearchPurpose() {
+    const {workspace} = this.props;
+    navigate(['workspaces', workspace.namespace, workspace.id, 'about']);
+
+  }
+
+  onClick() {
+    const {workspace} = this.props;
+    if (workspace.researchPurpose.needsReviewPrompt) {
+      this.setState({showResearchPurposeReviewModal: true});
+    } else {
+      workspace.published ?
+          AnalyticsTracker.Workspaces.NavigateToFeatured(workspace.name) :
+          triggerEvent(EVENT_CATEGORY, 'navigate', 'Click on workspace name');
+      navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
+    }
+  }
+
   render() {
     const {userEmail, workspace, accessLevel} = this.props;
     const {bugReportError, bugReportOpen, confirmDeleting, loadingData,
-      sharing, userRoles, workspaceDeletionError} = this.state;
+      sharing, showResearchPurposeReviewModal, userRoles, workspaceDeletionError} = this.state;
 
     return <React.Fragment>
       <WorkspaceCardBase>
@@ -259,15 +280,9 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
                 <Clickable>
                   <div style={styles.workspaceName}
                        data-test-id='workspace-card-name'
-                       onClick={() => {
-                         // Using workspace.published here to identify Featured Workspaces. At some point, we will need a separate property
-                         // for this on the workspace object once users are able to publish their own workspaces
-                         workspace.published ?
-                          AnalyticsTracker.Workspaces.NavigateToFeatured(workspace.name) :
-                          triggerEvent(EVENT_CATEGORY, 'navigate', 'Click on workspace name');
-                         navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
-                       }}>
-                    {workspace.name}</div>
+                       onClick={() => this.onClick()}>
+                    {workspace.name}
+                  </div>
                 </Clickable>
               </FlexRow>
               {
@@ -324,6 +339,24 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
                                   onClose={() => this.handleShareDialogClose()} />}
       {bugReportOpen && <BugReportModal bugReportDescription={bugReportError}
                                         onClose={() => this.setState({bugReportOpen: false})}/>}
+      {showResearchPurposeReviewModal && <Modal data-test-id='workspace-review-modal'>
+        <ModalTitle>Please review Research Purpose for Workspace '{workspace.name}'</ModalTitle>
+        <ModalBody style={{display: 'flex', flexDirection: 'column'}}>
+          <div>
+            Now that you have had some time to explore the Researcher Workbench for your project,
+            please review your workspace description to make sure it is accurate. As a reminder,
+            project descriptions are publicly cataloged in the <AouTitle/>'s <a
+              href='https://www.researchallofus.org/research-projects-directory/' target='_blank'>
+            Research Project Directory</a> for participants and public to review.
+          </div>
+        </ModalBody>
+        <ModalFooter>
+          <Button type='primary' style={{marginLeft: '1rem', marginRight: '1rem'}}
+                  onClick={() => this.handleReviewResearchPurpose()}>REVIEW NOW</Button>
+          <Button type='secondary'
+                  onClick={() => this.setState({showResearchPurposeReviewModal: false})}>REVIEW LATER</Button>
+        </ModalFooter>
+      </Modal>}
     </React.Fragment>;
 
   }

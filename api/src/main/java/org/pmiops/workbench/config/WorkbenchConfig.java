@@ -254,6 +254,9 @@ public class WorkbenchConfig {
     // Whether the RW backend should call the new Shibboleth API service instead of the legacy
     // Shibboleth endpoint that was part of Firecloud Orchestration.
     public boolean useNewShibbolethService;
+    // Flag to indicate whether to show Update research purpose prompt after an year of workspace
+    // creation
+    public boolean enableResearchPurposePrompt;
   }
 
   public static class ActionAuditConfig {

@@ -125,6 +125,7 @@ public class DbWorkspace {
   private String billingAccountName;
   private Short billingAccountType =
       DbStorageEnums.billingAccountTypeToStorage(BillingAccountType.FREE_TIER);
+  private Short needsRPReviewPrompt;
 
   public DbWorkspace() {
     setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
@@ -674,5 +675,27 @@ public class DbWorkspace {
 
   public void setBillingAccountType(BillingAccountType billingAccountType) {
     this.billingAccountType = DbStorageEnums.billingAccountTypeToStorage(billingAccountType);
+  }
+
+  @Column(name = "needs_rp_review_prompt")
+  public Short getNeedsResearchPurposeReviewPrompt() {
+    if (needsRPReviewPrompt == null) return (short) 1;
+    return needsRPReviewPrompt;
+  }
+
+  public void setNeedsResearchPurposeReviewPrompt(Short needsReviewRPPrompt) {
+    this.needsRPReviewPrompt = needsReviewRPPrompt;
+  }
+
+  @Transient
+  public Boolean getNeedsReviewPrompt() {
+    if (needsRPReviewPrompt == null) {
+      return false;
+    }
+    return needsRPReviewPrompt == 0;
+  }
+
+  public void setNeedsReviewPrompt(Boolean needsReviewRPPrompt) {
+    this.needsRPReviewPrompt = (short) (needsReviewRPPrompt ? 0 : 1);
   }
 }

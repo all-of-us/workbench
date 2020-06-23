@@ -106,7 +106,8 @@
     "enableCBAgeTypeOptions": false,
     "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,
-    "useNewShibbolethService": true
+    "useNewShibbolethService": true,
+    "enableResearchPurposePrompt": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-perf",
