@@ -56,7 +56,7 @@ export default class DataResourceCard {
   static async findCard(page: Page, resourceName: string, timeOut: number = 60000): Promise<DataResourceCard | null> {
     const selector = `.//*[${DataResourceCardSelector.cardNameXpath} and normalize-space(text())="${resourceName}"]`;
     try {
-      await page.waitForXPath(selector, {timeout: timeOut});
+      await page.waitForXPath(selector, {visible: true, timeout: timeOut});
     } catch (err) {
       return null;
     }
