@@ -205,7 +205,11 @@ export class TextAreaWithLengthValidationMessage extends React.Component<
         {showTooShortWarning &&
           <label
               data-test-id='warning'
-              style={{color: colors.danger, justifyContent: 'flex-start'}}
+              style={{
+                color: colors.danger,
+                justifyContent: 'flex-start',
+                marginRight: '.25rem'
+              }}
           >
             {tooShortWarning}
           </label>
