@@ -338,11 +338,19 @@ public class ProfileService {
   }
 
   public void adminUpdateProfile(Profile updatedProfile) {
-    final int optimisticLockingVersion =
-        userDao.findUserByUserId(updatedProfile.getUserId()).getVersion();
-
     final DbUser user = profileMapper.profileToDbUser(updatedProfile);
-    user.setVersion(optimisticLockingVersion);
+
+    // TODO move to mapper or other common code
+    user.getPageVisits().forEach(dbPageVisit -> dbPageVisit.setUser(user));
+    user.getInstitutionalAffiliations().forEach(affiliation -> affiliation.setUser(user));
+    Optional.ofNullable(user.getDemographicSurvey()).ifPresent(survey -> survey.setUser(user));
+    Optional.ofNullable(user.getAddress()).ifPresent(addr -> addr.setUser(user));
+
+    // need to retain some DbUser fields which are not present in Profile
+    final DbUser existingUser = userDao.findUserByUserId(updatedProfile.getUserId());
+    user.setVersion(existingUser.getVersion());
+    user.setCreationTime(existingUser.getCreationTime());
+
     user.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
     userDao.save(user);
   }
