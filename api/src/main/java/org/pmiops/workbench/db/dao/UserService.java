@@ -13,6 +13,7 @@ import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.Degree;
 import org.springframework.data.domain.Sort;
 
@@ -41,6 +42,7 @@ public interface UserService {
 
   DbUser updateUserWithConflictHandling(DbUser user);
 
+  // TODO(jaycarlton): Move compliance-related methods to a new UserComplianceService or similar
   DbUser submitDataUseAgreement(
       DbUser user, Integer dataUseAgreementSignedVersion, String initials);
 
@@ -58,8 +60,6 @@ public interface UserService {
   void setEraCommonsBypassTime(Long userId, Timestamp bypassTime);
 
   void setTwoFactorAuthBypassTime(Long userId, Timestamp bypassTime);
-
-  void setClusterRetryCount(int clusterRetryCount);
 
   DbUser setDisabledStatus(Long userId, boolean disabled);
 
@@ -101,4 +101,8 @@ public interface UserService {
 
   // same as the above, but throw NotFoundException if not found
   DbUser getByUsernameOrThrow(String username);
+
+  Optional<DbUser> getByDatabaseId(long databaseId);
+
+  void updateBypassTime(long userDatabaseId, AccessBypassRequest accessBypassRequest);
 }

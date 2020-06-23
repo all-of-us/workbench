@@ -17,8 +17,8 @@ import {
   getSelectedPrimaryPurposeItems
 } from 'app/utils/research-purpose';
 import {
-  AdminFederatedWorkspaceDetailsResponse,
-  CloudStorageTraffic, ListClusterResponse,
+  CloudStorageTraffic,
+  ListClusterResponse, WorkspaceAdminView,
 } from 'generated/fetch';
 import {ReactFragment} from 'react';
 
@@ -40,7 +40,7 @@ const PurpleLabel = ({style = {}, children}) => {
 };
 
 interface State {
-  workspaceDetails?: AdminFederatedWorkspaceDetailsResponse;
+  workspaceDetails?: WorkspaceAdminView;
   cloudStorageTraffic?: CloudStorageTraffic;
   loadingData?: boolean;
   clusterToDelete?: ListClusterResponse;
@@ -71,7 +71,7 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
 
     try {
       // Fire off both requests in parallel
-      const workspaceDetailsPromise = workspaceAdminApi().getFederatedWorkspaceDetails(workspaceNamespace);
+      const workspaceDetailsPromise = workspaceAdminApi().getWorkspaceAdminView(workspaceNamespace);
       const cloudStorageTrafficPromise = workspaceAdminApi().getCloudStorageTraffic(workspaceNamespace);
       // Wait for both promises to complete before updating state.
       const workspaceDetails = await workspaceDetailsPromise;
@@ -228,9 +228,9 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
           </div>
           <h3>Collaborators</h3>
           <div className='collaborators' style={{marginTop: '1rem'}}>
-            {collaborators.map((userRole, i) =>
+            {collaborators.map((workspaceUserAdminView, i) =>
               <div key={i}>
-                {userRole.email + ': ' + userRole.role}
+                {workspaceUserAdminView.userModel.userName + ': ' + workspaceUserAdminView.role}
               </div>
             )}
           </div>

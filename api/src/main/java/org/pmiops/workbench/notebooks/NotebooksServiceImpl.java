@@ -31,6 +31,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class NotebooksServiceImpl implements NotebooksService {
 
+  private static final Pattern NOTEBOOK_PATTERN =
+      Pattern.compile(NOTEBOOKS_WORKSPACE_DIRECTORY + "/[^/]+(\\.(?i)(ipynb))$");
   // Experimentally determined that generating the preview HTML for a >11MB notebook results in
   // OOMs on a default F1 240MB GAE task. OOMs may still occur during concurrent requests. If this
   // issue persists, we can move preview processing onto the client (calling Calhoun), or fully
@@ -106,9 +108,14 @@ public class NotebooksServiceImpl implements NotebooksService {
   public List<FileDetail> getNotebooksAsService(String bucketName) {
     return cloudStorageService.getBlobListForPrefix(bucketName, NOTEBOOKS_WORKSPACE_DIRECTORY)
         .stream()
-        .filter(blob -> NOTEBOOK_PATTERN.matcher(blob.getName()).matches())
+        .filter(this::isNotebookBlob)
         .map(blob -> blobToFileDetail(blob, bucketName))
         .collect(Collectors.toList());
+  }
+
+  @Override
+  public boolean isNotebookBlob(Blob blob) {
+    return NOTEBOOK_PATTERN.matcher(blob.getName()).matches();
   }
 
   private FileDetail blobToFileDetail(Blob blob, String bucketName) {

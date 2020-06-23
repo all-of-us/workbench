@@ -15,7 +15,7 @@ import com.google.monitoring.v3.TimeSeries;
 import com.google.monitoring.v3.TypedValue;
 import com.google.protobuf.util.Timestamps;
 import java.time.Duration;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +37,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageService;
-import org.pmiops.workbench.model.AdminFederatedWorkspaceDetailsResponse;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.AdminWorkspaceResources;
@@ -46,9 +45,11 @@ import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.ClusterStatus;
 import org.pmiops.workbench.model.ListClusterResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
+import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.NotebooksService;
@@ -194,11 +195,11 @@ public class WorkspaceAdminControllerTest {
 
   @Test
   public void getFederatedWorkspaceDetails() {
-    ResponseEntity<AdminFederatedWorkspaceDetailsResponse> response =
-        workspaceAdminController.getFederatedWorkspaceDetails(WORKSPACE_NAMESPACE);
+    ResponseEntity<WorkspaceAdminView> response =
+        workspaceAdminController.getWorkspaceAdminView(WORKSPACE_NAMESPACE);
     assertThat(response.getStatusCodeValue()).isEqualTo(200);
 
-    AdminFederatedWorkspaceDetailsResponse workspaceDetailsResponse = response.getBody();
+    WorkspaceAdminView workspaceDetailsResponse = response.getBody();
     assertThat(workspaceDetailsResponse.getWorkspace().getNamespace())
         .isEqualTo(WORKSPACE_NAMESPACE);
     assertThat(workspaceDetailsResponse.getWorkspace().getName()).isEqualTo(WORKSPACE_NAME);
@@ -224,8 +225,8 @@ public class WorkspaceAdminControllerTest {
 
   @Test
   public void getFederatedWorkspaceDetails_404sWhenNotFound() {
-    ResponseEntity<AdminFederatedWorkspaceDetailsResponse> response =
-        workspaceAdminController.getFederatedWorkspaceDetails(NONSENSE_NAMESPACE);
+    ResponseEntity<WorkspaceAdminView> response =
+        workspaceAdminController.getWorkspaceAdminView(NONSENSE_NAMESPACE);
     assertThat(response.getStatusCodeValue()).isEqualTo(404);
   }
 
@@ -244,14 +245,14 @@ public class WorkspaceAdminControllerTest {
             .build();
 
     when(mockCloudMonitoringService.getCloudStorageReceivedBytes(anyString(), any(Duration.class)))
-        .thenReturn(Arrays.asList(timeSeries));
+        .thenReturn(Collections.singletonList(timeSeries));
 
     CloudStorageTraffic cloudStorageTraffic =
         workspaceAdminController.getCloudStorageTraffic(WORKSPACE_NAMESPACE).getBody();
 
     assertThat(
             cloudStorageTraffic.getReceivedBytes().stream()
-                .map(timeSeriesPoint -> timeSeriesPoint.getTimestamp())
+                .map(TimeSeriesPoint::getTimestamp)
                 .collect(Collectors.toList()))
         .containsExactly(1000L, 2000L);
   }
@@ -263,7 +264,7 @@ public class WorkspaceAdminControllerTest {
     dbWorkspace.setName(workspace.getName());
     dbWorkspace.setWorkspaceNamespace(workspace.getNamespace());
     // a.k.a. FirecloudWorkspace.name
-    dbWorkspace.setFirecloudName(workspace.getId()); // DB_WORKSPACE_FIRECLOUD_NAME);
+    dbWorkspace.setFirecloudName(workspace.getId()); // DB_WORKSPACE_FIRECLOUD_NAME
     ResearchPurpose researchPurpose = workspace.getResearchPurpose();
     dbWorkspace.setDiseaseFocusedResearch(researchPurpose.getDiseaseFocusedResearch());
     dbWorkspace.setDiseaseOfFocus(researchPurpose.getDiseaseOfFocus());

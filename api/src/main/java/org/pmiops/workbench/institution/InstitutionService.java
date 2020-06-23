@@ -4,9 +4,11 @@ import java.util.List;
 import java.util.Optional;
 import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.db.model.DbInstitution;
+import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
+import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.PublicInstitutionDetails;
 
 public interface InstitutionService {
@@ -106,4 +108,13 @@ public interface InstitutionService {
    * @return
    */
   boolean validateOperationalUser(DbInstitution institution);
+
+  /**
+   * @deprecated
+   * @param institutionalAffiliation
+   * @return
+   */
+  @Deprecated
+  DbInstitutionalAffiliation legacyInstitutionToDbInstitution(
+      InstitutionalAffiliation institutionalAffiliation);
 }

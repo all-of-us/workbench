@@ -1,47 +1,100 @@
 package org.pmiops.workbench.workspaceadmin;
 
 import com.google.cloud.storage.BlobInfo;
+import com.google.monitoring.v3.Point;
+import com.google.monitoring.v3.TimeSeries;
+import com.google.protobuf.util.Timestamps;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
+import org.joda.time.DateTime;
+import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
+import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
+import org.pmiops.workbench.model.AdminWorkspaceResources;
+import org.pmiops.workbench.model.CloudStorageTraffic;
+import org.pmiops.workbench.model.ListClusterResponse;
+import org.pmiops.workbench.model.TimeSeriesPoint;
+import org.pmiops.workbench.model.UserRole;
+import org.pmiops.workbench.model.WorkspaceAdminView;
+import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
+import org.pmiops.workbench.model.WorkspaceUserAdminView;
+import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.utils.mappers.FirecloudMapper;
+import org.pmiops.workbench.utils.mappers.UserMapper;
+import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
+  private static final Duration TRAILING_TIME_TO_QUERY = Duration.ofHours(6);
+
+  private final ActionAuditQueryService actionAuditQueryService;
   private final CloudStorageService cloudStorageService;
   private final CohortDao cohortDao;
+  private final CloudMonitoringService cloudMonitoringService;
   private final ConceptSetDao conceptSetDao;
   private final DataSetDao dataSetDao;
+  private final FirecloudMapper firecloudMapper;
   private final FireCloudService fireCloudService;
+  private final LeonardoNotebooksClient leonardoNotebooksClient;
   private final NotebooksService notebooksService;
+  private final UserMapper userMapper;
+  private final UserService userService;
   private final WorkspaceDao workspaceDao;
+  private final WorkspaceMapper workspaceMapper;
+  private final WorkspaceService workspaceService;
 
   @Autowired
   public WorkspaceAdminServiceImpl(
+      ActionAuditQueryService actionAuditQueryService,
       CloudStorageService cloudStorageService,
       CohortDao cohortDao,
+      CloudMonitoringService cloudMonitoringService,
       ConceptSetDao conceptSetDao,
       DataSetDao dataSetDao,
       FireCloudService fireCloudService,
+      FirecloudMapper firecloudMapper,
+      LeonardoNotebooksClient leonardoNotebooksClient,
       NotebooksService notebooksService,
-      WorkspaceDao workspaceDao) {
+      UserMapper userMapper,
+      UserService userService,
+      WorkspaceDao workspaceDao,
+      WorkspaceMapper workspaceMapper,
+      WorkspaceService workspaceService) {
+    this.actionAuditQueryService = actionAuditQueryService;
     this.cloudStorageService = cloudStorageService;
     this.cohortDao = cohortDao;
+    this.cloudMonitoringService = cloudMonitoringService;
     this.conceptSetDao = conceptSetDao;
     this.dataSetDao = dataSetDao;
     this.fireCloudService = fireCloudService;
+    this.firecloudMapper = firecloudMapper;
+    this.leonardoNotebooksClient = leonardoNotebooksClient;
     this.notebooksService = notebooksService;
+    this.userMapper = userMapper;
+    this.userService = userService;
     this.workspaceDao = workspaceDao;
+    this.workspaceMapper = workspaceMapper;
+    this.workspaceService = workspaceService;
   }
 
   @Override
@@ -79,17 +132,120 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         .storageBytesUsed(storageSizeBytes);
   }
 
+  @Override
+  public CloudStorageTraffic getCloudStorageTraffic(String workspaceNamespace) {
+    CloudStorageTraffic response = new CloudStorageTraffic().receivedBytes(new ArrayList<>());
+
+    for (TimeSeries timeSeries :
+        cloudMonitoringService.getCloudStorageReceivedBytes(
+            workspaceNamespace, TRAILING_TIME_TO_QUERY)) {
+      for (Point point : timeSeries.getPointsList()) {
+        response.addReceivedBytesItem(
+            new TimeSeriesPoint()
+                .timestamp(Timestamps.toMillis(point.getInterval().getEndTime()))
+                .value(point.getValue().getDoubleValue()));
+      }
+    }
+
+    response.getReceivedBytes().sort(Comparator.comparing(TimeSeriesPoint::getTimestamp));
+    return response;
+  }
+
+  @Override
+  public WorkspaceAdminView getWorkspaceAdminView(String workspaceNamespace) {
+    final DbWorkspace dbWorkspace =
+        getFirstWorkspaceByNamespace(workspaceNamespace)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("No workspace found for namespace %s", workspaceNamespace)));
+
+    final String workspaceFirecloudName = dbWorkspace.getFirecloudName();
+
+    final List<WorkspaceUserAdminView> collaborators =
+        workspaceService.getFirecloudUserRoles(workspaceNamespace, workspaceFirecloudName).stream()
+            .map(this::toWorkspaceUserAdminView)
+            .collect(Collectors.toList());
+
+    final AdminWorkspaceObjectsCounts adminWorkspaceObjects =
+        getAdminWorkspaceObjects(dbWorkspace.getWorkspaceId());
+
+    final AdminWorkspaceCloudStorageCounts adminWorkspaceCloudStorageCounts =
+        getAdminWorkspaceCloudStorageCounts(
+            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+
+    final List<ListClusterResponse> workbenchListClusterResponses =
+        leonardoNotebooksClient.listClustersByProjectAsService(workspaceNamespace).stream()
+            .map(firecloudMapper::toApiListClusterResponse)
+            .collect(Collectors.toList());
+
+    final AdminWorkspaceResources adminWorkspaceResources =
+        new AdminWorkspaceResources()
+            .workspaceObjects(adminWorkspaceObjects)
+            .cloudStorage(adminWorkspaceCloudStorageCounts)
+            .clusters(workbenchListClusterResponses);
+
+    final FirecloudWorkspace firecloudWorkspace =
+        fireCloudService
+            .getWorkspaceAsService(workspaceNamespace, workspaceFirecloudName)
+            .getWorkspace();
+
+    return new WorkspaceAdminView()
+        .workspace(workspaceMapper.toApiWorkspace(dbWorkspace, firecloudWorkspace))
+        .collaborators(collaborators)
+        .resources(adminWorkspaceResources);
+  }
+
+  @Override
+  public WorkspaceAuditLogQueryResponse getAuditLogEntries(
+      String workspaceNamespace,
+      Integer limit,
+      Long afterMillis,
+      @Nullable Long beforeMillisNullable) {
+    final long workspaceDatabaseId =
+        getFirstWorkspaceByNamespace(workspaceNamespace)
+            .map(DbWorkspace::getWorkspaceId)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format(
+                            "No workspace found with Firecloud namespace %s", workspaceNamespace)));
+    final DateTime after = new DateTime(afterMillis);
+    final DateTime before =
+        Optional.ofNullable(beforeMillisNullable).map(DateTime::new).orElse(DateTime.now());
+    return actionAuditQueryService.queryEventsForWorkspace(
+        workspaceDatabaseId, limit, after, before);
+  }
+
   private int getNonNotebookFileCount(String bucketName) {
-    return cloudStorageService
-        .getBlobListForPrefix(bucketName, NotebooksService.NOTEBOOKS_WORKSPACE_DIRECTORY).stream()
-        .filter(blob -> !NotebooksService.NOTEBOOK_PATTERN.matcher(blob.getName()).matches())
-        .collect(Collectors.toList())
-        .size();
+    return (int)
+        cloudStorageService
+            .getBlobListForPrefix(bucketName, NotebooksService.NOTEBOOKS_WORKSPACE_DIRECTORY)
+            .stream()
+            .filter(b -> !notebooksService.isNotebookBlob(b))
+            .count();
   }
 
   private long getStorageSizeBytes(String bucketName) {
     return cloudStorageService.getBlobList(bucketName).stream()
         .map(BlobInfo::getSize)
         .reduce(0L, Long::sum);
+  }
+
+  // This is somewhat awkward, as we want to tolerate collaborators who aren't in the database
+  // anymore.
+  // TODO(jaycarlton): is this really what we want, or can we make this return an Optional that's
+  // empty
+  // when the user isn't in the DB. The assumption is that the fields agree between the UserRole and
+  // the DbUser, but we don't check that here.
+  private WorkspaceUserAdminView toWorkspaceUserAdminView(UserRole userRole) {
+    return userService
+        .getByUsername(userRole.getEmail())
+        .map(u -> userMapper.toWorkspaceUserAdminView(u, userRole))
+        .orElse(
+            new WorkspaceUserAdminView() // the MapStruct-generated method won't handle a partial
+                // conversion
+                .role(userRole.getRole())
+                .userModel(userMapper.toApiUser(userRole, null)));
   }
 }
