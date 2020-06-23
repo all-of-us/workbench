@@ -3924,9 +3924,6 @@ definitions:
   PageVisit:
     type: object
     properties:
-      userId:
-        type: integer
-        format: int64
       page:
         type: string
       firstVisit:

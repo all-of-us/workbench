@@ -12,7 +12,6 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
     uses = {CommonMappers.class})
 public interface PageVisitMapper {
   @Mapping(target = "page", source = "pageId")
-  @Mapping(target = "userId", ignore = true) // set by ProfileService.getProfile
   PageVisit dbPageVisitToPageVisit(DbPageVisit dbPageVisit);
 
   @Mapping(target = "pageId", source = "page")
