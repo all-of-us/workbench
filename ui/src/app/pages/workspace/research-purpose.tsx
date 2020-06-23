@@ -99,7 +99,10 @@ export const ResearchPurpose = withCurrentWorkspace()(
         shape='exclamation-triangle' size='25'/>
         <FlexColumn style={{paddingRight: '0.5rem', paddingLeft: '0.5rem', color: colors.primary}}>
         <label style={{fontWeight: 600, fontSize: '14px', flex: 1}}>
-        Please update or verify the following Research Purpose.</label>
+          Please review your workspace description to make sure it is accurate.</label>
+          <label>Project descriptions are publicly cataloged in the <a
+              href='https://www.researchallofus.org/research-projects-directory/' target='_blank'>
+            Research Project Directory</a> for participants and public to review.</label>
         </FlexColumn>
         <div style={{marginLeft: 'auto', marginRight: '0.5rem'}}>
         <a style={{marginRight: '0.5rem'}} onClick={() => updateWorkspace(workspace)}>Looks

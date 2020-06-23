@@ -791,7 +791,7 @@ paths:
           schema:
             "$ref": "#/definitions/EmptyResponse"
 
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/researchPurposeReviewed":
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/markResearchPurposeReviewed":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"

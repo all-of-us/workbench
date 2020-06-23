@@ -732,7 +732,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Workspace> markResearchPurposeReviewed(String workspaceNamespace, String workspaceId) {
+  public ResponseEntity<Workspace> markResearchPurposeReviewed(
+      String workspaceNamespace, String workspaceId) {
     DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     dbWorkspace.setNeedsReviewPrompt(false);
     try {
@@ -741,7 +742,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw e;
     }
     return ResponseEntity.ok(
-        workspaceMapper.toApiWorkspace(dbWorkspace,  fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getWorkspace()));
+        workspaceMapper.toApiWorkspace(
+            dbWorkspace,
+            fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getWorkspace()));
   }
 
   @Override

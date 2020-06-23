@@ -343,10 +343,11 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
         <ModalTitle>Please review Research Purpose for Workspace '{workspace.name}'</ModalTitle>
         <ModalBody style={{display: 'flex', flexDirection: 'column'}}>
           <div>
-            Please review the workspace description to make sure it is current. To provide
-            transparency to <AouTitle/> participants, your answers below
-            will be made available publicly in the <a href='https://www.researchallofus.org/research-projects-directory/'
-            target='_blank'>Research Hub Directory</a> on our public website.
+            Now that you have had some time to explore the Researcher Workbench for your project,
+            please review your workspace description to make sure it is accurate. As a reminder,
+            project descriptions are publicly cataloged in the <AouTitle/>'s <a
+              href='https://www.researchallofus.org/research-projects-directory/' target='_blank'>
+            Research Project Directory</a> for participants and public to review.
           </div>
         </ModalBody>
         <ModalFooter>
