@@ -2,10 +2,10 @@ import {ElementHandle, Page} from 'puppeteer';
 import {FieldSelector} from 'app/page/cohort-build-page';
 import Dialog, {ButtonLabel} from 'app/component/dialog';
 import EllipsisMenu from 'app/component/ellipsis-menu';
-import {waitForNumericalString} from 'utils/waits-utils';
+import {waitForNumericalString, waitForText} from 'utils/waits-utils';
 import CohortCriteriaModal, {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/cohort-criteria-modal';
 import TieredMenu from 'app/component/tiered-menu';
-import {waitWhileLoading} from '../../utils/test-utils';
+import {waitWhileLoading} from 'utils/test-utils';
 
 export enum GroupAction {
    EditGroupName  = 'Edit group name',
@@ -64,6 +64,7 @@ export default class CohortParticipantsGroup {
   async deleteGroup(): Promise<ElementHandle[]> {
     const menu = this.getGroupEllipsisMenu();
     await menu.clickParticipantsGroupAction(GroupAction.DeleteGroup);
+    await waitForText(this.page, 'This group has been deleted');
     await waitWhileLoading(this.page);
     return this.getGroupCriteriasList();
   }
@@ -109,7 +110,9 @@ export default class CohortParticipantsGroup {
     await this.clickCriteriaMenuItems(['Demographics', 'Age']);
     const modal = new CohortCriteriaModal(this.page, '//*[@class="modal-container demographics age"]');
     await modal.waitUntilVisible();
-    return modal.addAge(minAge, maxAge);
+    const results = await modal.addAge(minAge, maxAge);
+    await waitWhileLoading(this.page);
+    return results;
   }
 
   private async clickCriteriaMenuItems(menuItemLinks: string[]): Promise<void> {

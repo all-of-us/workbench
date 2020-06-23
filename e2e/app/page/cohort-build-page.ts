@@ -6,6 +6,7 @@ import Dialog from 'app/component/dialog';
 import Button from 'app/element/button';
 import {ElementType} from 'app/xpath-options';
 import ClrIconLink from 'app/element/clr-icon-link';
+import TieredMenu from 'app/component/tiered-menu';
 import AuthenticatedPage from './authenticated-page';
 import CohortParticipantsGroup from './cohort-participants-group';
 const faker = require('faker/locale/en_US');
@@ -36,10 +37,16 @@ export default class CohortBuildPage extends AuthenticatedPage {
     }
   }
 
-  async save(): Promise<void> {
+  /**
+   * Save Cohort changes.
+   */
+  async saveChanges(): Promise<void> {
     const createCohortButton = await Button.findByName(this.page, {normalizeSpace: 'Save Cohort'});
     await createCohortButton.waitUntilEnabled();
-    await createCohortButton.click();
+    await createCohortButton.click(); // Click dropdown trigger to open menu
+    const menu =  new TieredMenu(this.page);
+    await menu.clickMenuItem(['Save']);
+    return waitWhileLoading(this.page);
   }
 
   async saveCohortAs(cohortName?: string, description?: string): Promise<string> {
