@@ -1,0 +1,8 @@
+.md
+.jpg
+.png
+.svg
+.mp4
+.log
+.pdf
+.gitignore

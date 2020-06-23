@@ -100,18 +100,19 @@ commands:
           name: Update git submodules
           command: git submodule update --init --recursive
 
-  halt_job_noncode_changes:
-    description: "Halt job and succeed early if no code changes on non-master branch"
+  halt_if_code_unchanged:
+    description: "Halt job if no code changed"
     steps:
       - run:
           command: |
-            if [ ${CIRCLE_BRANCH} != "" ] &&
-              [ ${CIRCLE_BRANCH} != "master" ] &&
-              ! git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep -qvE '(.md$)|(.pdf$)'; then
-                echo "No code changes on non-master branch. halting job."
-                circleci step halt
+            if ! git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep -qvFf .circleci/e2e-job-ignore-patterns.txt; then
+              echo "Application code have not changed. halting job."
+              circleci step halt
+            else
+              git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep -vFf .circleci/e2e-job-ignore-patterns.txt
+              echo "job continuing."
             fi
-          name: Halt job and succeed early if no code changes on non-master branch
+          name: Halt job if no code changed
 
   ensure_branch_has_changes:
     description: Halt job and succeed early if no code changes in << parameters.dir_name >> directory on non-master branch
@@ -559,7 +560,7 @@ jobs:
     parallelism: 3
     steps:
       - checkout_init_git
-      - halt_job_noncode_changes
+      - halt_if_code_unchanged
       - browser-tools/install-browser-tools
       - run_e2e_test
 
@@ -573,16 +574,11 @@ jobs:
     working_directory: ~/workbench
     parallelism: 1
     steps:
-      - run:
-          name: Skip job if this is not a pull request
-          command: |
-            echo "PR: $CI_PULL_REQUEST"
-            if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} == "master" ] ; then
-              echo "Not a PR, skipping Puppeteer tests"
-              circleci-agent step halt
-            fi
       - checkout_init_git
-      - halt_job_noncode_changes
+      - run:
+          name: Halt job if not a pull request
+          command: bash .circleci/pr-skip-ci.sh
+      - halt_if_code_unchanged
       - browser-tools/install-browser-tools
       - start_local_ui
       - run_e2e_test
@@ -597,7 +593,6 @@ workflows:
       - ui-unit-test
       - api-bigquery-test
       - api-integration-test
-      # Disable e2e tests https://precisionmedicineinitiative.atlassian.net/browse/RW-5080 is resolved.
       # - puppeteer-e2e-local-ui
       # Run deployment to "test" on master merges.
       - api-deploy-to-test:
