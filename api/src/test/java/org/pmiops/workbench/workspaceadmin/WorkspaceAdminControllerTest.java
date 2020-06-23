@@ -8,7 +8,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.monitoring.v3.Point;
 import com.google.monitoring.v3.TimeInterval;
 import com.google.monitoring.v3.TimeSeries;
@@ -16,9 +15,7 @@ import com.google.monitoring.v3.TypedValue;
 import com.google.protobuf.util.Timestamps;
 import java.time.Duration;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.joda.time.DateTime;
@@ -39,12 +36,8 @@ import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
-import org.pmiops.workbench.model.AdminWorkspaceResources;
 import org.pmiops.workbench.model.AuditLogEntry;
 import org.pmiops.workbench.model.CloudStorageTraffic;
-import org.pmiops.workbench.model.ClusterStatus;
-import org.pmiops.workbench.model.ListClusterResponse;
-import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
@@ -80,9 +73,6 @@ public class WorkspaceAdminControllerTest {
   private static final String NONSENSE_NAMESPACE = "wharrgarbl_wharrgarbl";
   private static final int QUERY_LIMIT = 50;
   private static final String ACTION_ID = "b937413e-ff66-4e7b-a639-f7947730b2c0";
-  private static final Map<String, String> QUERY_METADATA =
-      ImmutableMap.of(
-          "workspaceDatabaseId", Long.toString(DB_WORKSPACE_ID), "query", "select foo from bar");
   private static final WorkspaceAuditLogQueryResponse QUERY_RESPONSE =
       new WorkspaceAuditLogQueryResponse()
           .logEntries(
@@ -151,7 +141,8 @@ public class WorkspaceAdminControllerTest {
 
     final Workspace workspace =
         testMockFactory.createWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME);
-    final DbWorkspace dbWorkspace = createDbWorkspaceStub(workspace);
+    final DbWorkspace dbWorkspace =
+        TestMockFactory.createDbWorkspaceStub(workspace, DB_WORKSPACE_ID);
     when(mockWorkspaceAdminService.getFirstWorkspaceByNamespace(WORKSPACE_NAMESPACE))
         .thenReturn(Optional.of(dbWorkspace));
 
@@ -184,43 +175,13 @@ public class WorkspaceAdminControllerTest {
         .thenReturn(clusters);
 
     FirecloudWorkspace fcWorkspace =
-        testMockFactory.createFirecloudWorkspace(
+        TestMockFactory.createFirecloudWorkspace(
             WORKSPACE_NAMESPACE, DB_WORKSPACE_FIRECLOUD_NAME, FIRECLOUD_WORKSPACE_CREATOR_USERNAME);
     FirecloudWorkspaceResponse fcWorkspaceResponse =
         new FirecloudWorkspaceResponse().workspace(fcWorkspace);
     when(mockFirecloudService.getWorkspaceAsService(
             WORKSPACE_NAMESPACE, DB_WORKSPACE_FIRECLOUD_NAME))
         .thenReturn(fcWorkspaceResponse);
-  }
-
-  @Test
-  public void getFederatedWorkspaceDetails() {
-    ResponseEntity<WorkspaceAdminView> response =
-        workspaceAdminController.getWorkspaceAdminView(WORKSPACE_NAMESPACE);
-    assertThat(response.getStatusCodeValue()).isEqualTo(200);
-
-    WorkspaceAdminView workspaceDetailsResponse = response.getBody();
-    assertThat(workspaceDetailsResponse.getWorkspace().getNamespace())
-        .isEqualTo(WORKSPACE_NAMESPACE);
-    assertThat(workspaceDetailsResponse.getWorkspace().getName()).isEqualTo(WORKSPACE_NAME);
-
-    AdminWorkspaceResources resources = workspaceDetailsResponse.getResources();
-    AdminWorkspaceObjectsCounts objectsCounts = resources.getWorkspaceObjects();
-    assertThat(objectsCounts.getCohortCount()).isEqualTo(1);
-    assertThat(objectsCounts.getConceptSetCount()).isEqualTo(2);
-    assertThat(objectsCounts.getDatasetCount()).isEqualTo(3);
-
-    AdminWorkspaceCloudStorageCounts cloudStorageCounts = resources.getCloudStorage();
-    assertThat(cloudStorageCounts.getNotebookFileCount()).isEqualTo(1);
-    assertThat(cloudStorageCounts.getNonNotebookFileCount()).isEqualTo(2);
-    assertThat(cloudStorageCounts.getStorageBytesUsed()).isEqualTo(123456789L);
-
-    List<ListClusterResponse> clusters = resources.getClusters();
-    assertThat(clusters.size()).isEqualTo(1);
-    ListClusterResponse cluster = clusters.get(0);
-    assertThat(cluster.getClusterName()).isEqualTo("cluster");
-    assertThat(cluster.getGoogleProject()).isEqualTo("google-project");
-    assertThat(cluster.getStatus()).isEqualTo(ClusterStatus.STOPPED);
   }
 
   @Test
@@ -255,34 +216,6 @@ public class WorkspaceAdminControllerTest {
                 .map(TimeSeriesPoint::getTimestamp)
                 .collect(Collectors.toList()))
         .containsExactly(1000L, 2000L);
-  }
-
-  // TODO(jaycarlton) use  WorkspaceMapper.toDbWorkspace() once it's available RW 4803
-  private DbWorkspace createDbWorkspaceStub(Workspace workspace) {
-    DbWorkspace dbWorkspace = new DbWorkspace();
-    dbWorkspace.setWorkspaceId(DB_WORKSPACE_ID);
-    dbWorkspace.setName(workspace.getName());
-    dbWorkspace.setWorkspaceNamespace(workspace.getNamespace());
-    // a.k.a. FirecloudWorkspace.name
-    dbWorkspace.setFirecloudName(workspace.getId()); // DB_WORKSPACE_FIRECLOUD_NAME
-    ResearchPurpose researchPurpose = workspace.getResearchPurpose();
-    dbWorkspace.setDiseaseFocusedResearch(researchPurpose.getDiseaseFocusedResearch());
-    dbWorkspace.setDiseaseOfFocus(researchPurpose.getDiseaseOfFocus());
-    dbWorkspace.setMethodsDevelopment(researchPurpose.getMethodsDevelopment());
-    dbWorkspace.setControlSet(researchPurpose.getControlSet());
-    dbWorkspace.setAncestry(researchPurpose.getAncestry());
-    dbWorkspace.setCommercialPurpose(researchPurpose.getCommercialPurpose());
-    dbWorkspace.setSocialBehavioral(researchPurpose.getSocialBehavioral());
-    dbWorkspace.setPopulationHealth(researchPurpose.getPopulationHealth());
-    dbWorkspace.setEducational(researchPurpose.getEducational());
-    dbWorkspace.setDrugDevelopment(researchPurpose.getDrugDevelopment());
-
-    dbWorkspace.setSpecificPopulationsEnum(new HashSet<>(researchPurpose.getPopulationDetails()));
-    dbWorkspace.setAdditionalNotes(researchPurpose.getAdditionalNotes());
-    dbWorkspace.setReasonForAllOfUs(researchPurpose.getReasonForAllOfUs());
-    dbWorkspace.setIntendedStudy(researchPurpose.getIntendedStudy());
-    dbWorkspace.setAnticipatedFindings(researchPurpose.getAnticipatedFindings());
-    return dbWorkspace;
   }
 
   @Test

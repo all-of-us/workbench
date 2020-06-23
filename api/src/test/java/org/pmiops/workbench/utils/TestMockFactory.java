@@ -13,10 +13,12 @@ import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
@@ -172,5 +174,33 @@ public class TestMockFactory {
 
     doReturn(billingAccounts).when(cloudbilling).billingAccounts();
     return cloudbilling;
+  }
+
+  // TODO(jaycarlton) use  WorkspaceMapper.toDbWorkspace() once it's available RW 4803
+  public static DbWorkspace createDbWorkspaceStub(Workspace workspace, long workspaceDbId) {
+    DbWorkspace dbWorkspace = new DbWorkspace();
+    dbWorkspace.setWorkspaceId(workspaceDbId);
+    dbWorkspace.setName(workspace.getName());
+    dbWorkspace.setWorkspaceNamespace(workspace.getNamespace());
+    // a.k.a. FirecloudWorkspace.name
+    dbWorkspace.setFirecloudName(workspace.getId()); // DB_WORKSPACE_FIRECLOUD_NAME
+    ResearchPurpose researchPurpose = workspace.getResearchPurpose();
+    dbWorkspace.setDiseaseFocusedResearch(researchPurpose.getDiseaseFocusedResearch());
+    dbWorkspace.setDiseaseOfFocus(researchPurpose.getDiseaseOfFocus());
+    dbWorkspace.setMethodsDevelopment(researchPurpose.getMethodsDevelopment());
+    dbWorkspace.setControlSet(researchPurpose.getControlSet());
+    dbWorkspace.setAncestry(researchPurpose.getAncestry());
+    dbWorkspace.setCommercialPurpose(researchPurpose.getCommercialPurpose());
+    dbWorkspace.setSocialBehavioral(researchPurpose.getSocialBehavioral());
+    dbWorkspace.setPopulationHealth(researchPurpose.getPopulationHealth());
+    dbWorkspace.setEducational(researchPurpose.getEducational());
+    dbWorkspace.setDrugDevelopment(researchPurpose.getDrugDevelopment());
+
+    dbWorkspace.setSpecificPopulationsEnum(new HashSet<>(researchPurpose.getPopulationDetails()));
+    dbWorkspace.setAdditionalNotes(researchPurpose.getAdditionalNotes());
+    dbWorkspace.setReasonForAllOfUs(researchPurpose.getReasonForAllOfUs());
+    dbWorkspace.setIntendedStudy(researchPurpose.getIntendedStudy());
+    dbWorkspace.setAnticipatedFindings(researchPurpose.getAnticipatedFindings());
+    return dbWorkspace;
   }
 }
