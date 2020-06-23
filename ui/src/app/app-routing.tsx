@@ -1,4 +1,5 @@
 import {Component as AComponent} from '@angular/core';
+import {CohortSearch} from 'app/cohort-search/cohort-search/cohort-search.component';
 import {AppRoute, AppRouter, Guard, ProtectedRoutes, withFullHeight, withRouteData} from 'app/components/app-router';
 import {CookiePolicy} from 'app/pages/cookie-policy';
 import {DataUserCodeOfConduct} from 'app/pages/profile/data-user-code-of-conduct';
@@ -17,6 +18,7 @@ const signInGuard: Guard = {
 };
 
 const DUCC = fp.flow(withRouteData, withFullHeight)(DataUserCodeOfConduct);
+const CohortBuilder = fp.flow(withRouteData, withFullHeight)(CohortSearch);
 
 export const AppRoutingComponent: React.FunctionComponent<{signIn: Function}> = ({signIn}) => {
   const {authLoaded = false} = useStore(authStore);
@@ -33,6 +35,13 @@ export const AppRoutingComponent: React.FunctionComponent<{signIn: Function}> = 
           component={ () => <DUCC routeData={{
             title: 'Data User Code of Conduct',
             minimizeChrome: true
+          }} />}
+        />
+        <AppRoute
+          path={`/workspaces/:ns/:wsid/data/cohorts/build`}
+          component={ () => <CohortBuilder routeData={{
+            title: 'Build Cohort Test',
+            helpContentKey: 'cohortBuilder'
           }} />}
         />
     </ProtectedRoutes>

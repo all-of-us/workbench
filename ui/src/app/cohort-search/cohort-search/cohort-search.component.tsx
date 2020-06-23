@@ -23,6 +23,7 @@ interface State {
   criteria: SearchRequest;
   updateCount: number;
   cohort: Cohort;
+  minHeight: string;
   modalPromise: Promise<boolean> | null;
   modalOpen: boolean;
   updatingCohort: boolean;
@@ -37,6 +38,7 @@ export class CohortSearch extends React.Component<{}, State> {
 
   private subscription;
   resolve: Function;
+  searchWrapper: HTMLDivElement;
 
   constructor(props: any) {
     super(props);
@@ -46,6 +48,7 @@ export class CohortSearch extends React.Component<{}, State> {
       criteria: {includes: [], excludes: [], dataFilters: []},
       updateCount: 0,
       cohort: undefined,
+      minHeight: '10rem',
       modalPromise:  null,
       modalOpen: false,
       updatingCohort: false,
@@ -85,7 +88,7 @@ export class CohortSearch extends React.Component<{}, State> {
         updateGroupListsCount: this.state.updateGroupListsCount + 1
       });
     }));
-    // this.updateWrapperDimensions();
+    this.updateWrapperDimensions();
   }
 
   componentWillUnmount() {
@@ -113,13 +116,14 @@ export class CohortSearch extends React.Component<{}, State> {
   // onResize() {
   //   this.updateWrapperDimensions();
   // }
-  //
-  // updateWrapperDimensions() {
-  //   const wrapper = this.wrapper.nativeElement;
-  //
-  //   const {top} = wrapper.getBoundingClientRect();
-  //   wrapper.style.minHeight = pixel(window.innerHeight - top - ONE_REM);
-  // }
+
+  updateWrapperDimensions() {
+    console.dir(this.searchWrapper.getBoundingClientRect());
+    // const wrapper = this.wrapper.nativeElement;
+    //
+    // const {top} = wrapper.getBoundingClientRect();
+    // wrapper.style.minHeight = pixel(window.innerHeight - top - ONE_REM);
+  }
 
   updateRequest = () => {
     // timeout prevents Angular 'Expression changed after checked' error
@@ -129,7 +133,7 @@ export class CohortSearch extends React.Component<{}, State> {
   render() {
     const {cohort, cohortChanged, criteria, loading, modalOpen, overview, searchContext, updateCount, updateGroupListsCount} = this.state;
     return <React.Fragment>
-      <div id='wrapper' className='cohort-search-wrapper'>
+      <div ref={el => this.searchWrapper = el} className='cohort-search-wrapper'>
       <div className='row'>
         <div className='col-xl-8 col-lg-12'>
           <div className='row'>
