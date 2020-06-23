@@ -34,13 +34,13 @@ import javax.persistence.OptimisticLockException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetMapper;
+import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.dataset.DataSetMapper;
 import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.CohortDao;
-import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -104,23 +104,23 @@ public class DataSetController implements DataSetApiDelegate {
   private static final Logger log = Logger.getLogger(DataSetController.class.getName());
 
   private final CdrVersionDao cdrVersionDao;
-  private final CohortDao cohortDao;
   private final ConceptService conceptService;
-  private final ConceptSetDao conceptSetDao;
+  private final ConceptSetService conceptSetService;
   private final DataDictionaryEntryDao dataDictionaryEntryDao;
   private final DataSetMapper dataSetMapper;
   private final FireCloudService fireCloudService;
   private final NotebooksService notebooksService;
   private final ConceptSetMapper conceptSetMapper;
+  private final CohortService cohortService;
 
   @Autowired
   DataSetController(
       BigQueryService bigQueryService,
       Clock clock,
       CdrVersionDao cdrVersionDao,
-      CohortDao cohortDao,
+      CohortService cohortService,
       ConceptService conceptService,
-      ConceptSetDao conceptSetDao,
+      ConceptSetService conceptSetService,
       DataDictionaryEntryDao dataDictionaryEntryDao,
       DataSetMapper dataSetMapper,
       DataSetService dataSetService,
@@ -133,9 +133,9 @@ public class DataSetController implements DataSetApiDelegate {
     this.bigQueryService = bigQueryService;
     this.clock = clock;
     this.cdrVersionDao = cdrVersionDao;
-    this.cohortDao = cohortDao;
+    this.cohortService = cohortService;
     this.conceptService = conceptService;
-    this.conceptSetDao = conceptSetDao;
+    this.conceptSetService = conceptSetService;
     this.dataDictionaryEntryDao = dataDictionaryEntryDao;
     this.dataSetMapper = dataSetMapper;
     this.dataSetService = dataSetService;
@@ -220,7 +220,7 @@ public class DataSetController implements DataSetApiDelegate {
           }
           result.setConceptSets(
               StreamSupport.stream(
-                      conceptSetDao
+                      conceptSetService
                           .findAll(
                               dataSet.getConceptSetIds().stream()
                                   .filter(Objects::nonNull)
@@ -230,7 +230,7 @@ public class DataSetController implements DataSetApiDelegate {
                   .map(conceptSet -> toClientConceptSet(conceptSet))
                   .collect(Collectors.toList()));
           result.setCohorts(
-              StreamSupport.stream(cohortDao.findAll(dataSet.getCohortIds()).spliterator(), false)
+              cohortService.findAll(dataSet.getCohortIds()).stream()
                   .map(CohortsController.TO_CLIENT_COHORT)
                   .collect(Collectors.toList()));
           result.setDomainValuePairs(
@@ -606,7 +606,7 @@ public class DataSetController implements DataSetApiDelegate {
       throw new BadRequestException("Invalid CDR Version");
     }
 
-    String omopTable = conceptSetDao.DOMAIN_TO_TABLE_NAME.get(Domain.fromValue(domain));
+    String omopTable = conceptSetService.getOmpTable(domain);
     if (omopTable == null) {
       throw new BadRequestException("Invalid Domain");
     }
