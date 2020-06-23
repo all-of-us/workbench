@@ -61,7 +61,6 @@ public class SumoLogicControllerTest {
   @Before
   public void setUp() throws JsonProcessingException {
     config = WorkbenchConfig.createEmptyConfig();
-    config.featureFlags.enableSumoLogicEventHandling = true;
 
     event = new EgressEvent();
     event.setProjectName("aou-rw-test-c7dec260");
