@@ -46,7 +46,7 @@ const navSeparator = <div style={styles.separator}/>;
 
 function restrictTab(workspace, tab) {
   return workspace && workspace.accessLevel === 'OWNER'
-      && !workspace.researchPurpose.researchPurposeReviewed && tab.name !== 'About';
+      && workspace.researchPurpose.needsReviewPrompt && tab.name !== 'About';
 }
 
 export const WorkspaceNavBarReact = fp.flow(

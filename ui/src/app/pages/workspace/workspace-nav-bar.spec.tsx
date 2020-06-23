@@ -43,7 +43,7 @@ describe('WorkspaceNavBarComponent', () => {
   it('should disable Data and Analysis tab if workspace require review research purpose', () => {
     const navSpy = jest.fn();
     NavStore.navigate = navSpy;
-    workspaceDataStub.researchPurpose.researchPurposeReviewed = false;
+    workspaceDataStub.researchPurpose.needsReviewPrompt = true;
 
     const wrapper = component();
 

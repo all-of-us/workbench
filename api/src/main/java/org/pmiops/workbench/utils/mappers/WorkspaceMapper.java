@@ -123,7 +123,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "published", ignore = true)
   @Mapping(target = "researchOutcomeSet", ignore = true)
   @Mapping(target = "reviewRequested", ignore = true)
-  @Mapping(target = "reviewResearchPurpose", ignore = true)
+  @Mapping(target = "needsResearchPurposeReviewPrompt", ignore = true)
   @Mapping(target = "timeRequested", ignore = true)
   @Mapping(target = "version", ignore = true)
   @Mapping(target = "workspaceActiveStatusEnum", ignore = true)

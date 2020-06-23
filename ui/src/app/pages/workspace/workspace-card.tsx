@@ -233,7 +233,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
 
   onClick() {
     const {workspace} = this.props;
-    if (!workspace.researchPurpose.researchPurposeReviewed) {
+    if (workspace.researchPurpose.needsReviewPrompt) {
       this.setState({showResearchPurposeReviewModal: true});
     } else {
       workspace.published ?

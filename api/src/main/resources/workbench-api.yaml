@@ -790,6 +790,22 @@ paths:
           description: Workspace deletion request accepted
           schema:
             "$ref": "#/definitions/EmptyResponse"
+
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/researchPurposeReviewed":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    get:
+      tags:
+      - workspaces
+      description: Mark workspace owner has reviewed research purpose
+      operationId: markResearchPurposeReviewed
+      responses:
+        200:
+          description: The billing usage for a workspace
+          schema:
+            "$ref": "#/definitions/Workspace"
+
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/resources":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -1528,13 +1544,13 @@ paths:
           schema:
             "$ref": "#/definitions/ErrorResponse"
 
-  "/v1/cron/updateResearchPurposeReview":
+  "/v1/cron/updateResearchPurposeReviewPrompt":
     get:
       tags:
       - offlineWorkspace
       - cron
-      description: Updates each Workspace Research Purpose Review
-      operationId: updateResearchPurposeReview
+      description: Show review research prompt if Workspace has been created 15 days/an year earlier
+      operationId: updateResearchPurposeReviewPrompt
       security: []
       responses:
         204:
@@ -4236,7 +4252,7 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/ResearchOutcomeEnum"
-      researchPurposeReviewed:
+      needsReviewPrompt:
         type: boolean
         default: false
   SpecificPopulationEnum:

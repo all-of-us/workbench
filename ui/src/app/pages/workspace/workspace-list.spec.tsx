@@ -73,7 +73,7 @@ describe('WorkspaceList', () => {
 
   it('should show Research Purpose Review Modal if workspace require review', async() => {
     const workspace = workspaceStubs[0];
-    workspace.researchPurpose.researchPurposeReviewed = false;
+    workspace.researchPurpose.needsReviewPrompt = true;
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="workspace-card-name"]').first().simulate('click');

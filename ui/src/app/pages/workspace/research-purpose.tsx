@@ -69,10 +69,12 @@ const styles = reactStyles({
 });
 
 function updateWorkspace(workspace) {
-  workspace.researchPurpose.researchPurposeReviewed = true;
-  workspacesApi().updateWorkspace(workspace.namespace, workspace.id, {workspace: workspace})
-    .then(workspaceUpdate =>
-        navigate(['workspaces', workspaceUpdate.namespace, workspaceUpdate.id, 'about']));
+  workspacesApi().markResearchPurposeReviewed(workspace.namespace, workspace.id)
+    .then((markedWorkspace) => {
+      workspace.researchPurpose.needsReviewPrompt = false;
+      navigate(
+        ['workspaces',  markedWorkspace.namespace, markedWorkspace.id, 'about']);
+    });
 }
 
 export const ResearchPurpose = withCurrentWorkspace()(
@@ -92,7 +94,7 @@ export const ResearchPurpose = withCurrentWorkspace()(
                               style={styles.editIcon}/>
         </Clickable>
       </div>
-      {isOwner && !workspace.researchPurpose.researchPurposeReviewed && <FlexRow style={styles.reviewPurposeReminder}>
+      {isOwner && workspace.researchPurpose.needsReviewPrompt && <FlexRow style={styles.reviewPurposeReminder}>
         <ClrIcon style={{color: colors.warning, marginLeft: '0.3rem'}} className='is-solid'
         shape='exclamation-triangle' size='25'/>
         <FlexColumn style={{paddingRight: '0.5rem', paddingLeft: '0.5rem', color: colors.primary}}>

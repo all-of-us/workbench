@@ -17,7 +17,7 @@ export class WorkspaceGuard implements CanActivate, CanActivateChild {
         route.routeConfig.path === 'notebooks') {
       this.workspaceService.getWorkspace(route.params.ns, route.params.wsid).subscribe(workspace => {
         if (workspace.accessLevel === 'OWNER'
-            && !workspace.workspace.researchPurpose.researchPurposeReviewed) {
+            && workspace.workspace.researchPurpose.needsReviewPrompt) {
           this.router.navigate(
               ['workspaces/' + route.params.ns + '/' + route.params.wsid + '/about']);
         }

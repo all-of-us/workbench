@@ -99,7 +99,7 @@ public class WorkspaceAuditorTest {
     final ResearchPurpose researchPurpose1 = new ResearchPurpose();
     researchPurpose1.setIntendedStudy("stubbed toes");
     researchPurpose1.setAdditionalNotes("I really like the cloud.");
-    researchPurpose1.setResearchPurposeReviewed(true);
+    researchPurpose1.setNeedsReviewPrompt(false);
     final long now = System.currentTimeMillis();
 
     workspace1 = new Workspace();
@@ -127,7 +127,7 @@ public class WorkspaceAuditorTest {
     dbWorkspace2.setLastModifiedTime(new Timestamp(now));
     dbWorkspace2.setCreationTime(new Timestamp(now));
     dbWorkspace2.setCreator(user1);
-    dbWorkspace2.setResearchPurposeReviewed(false);
+    dbWorkspace2.setNeedsReviewPrompt(true);
 
     workspace2 = workspaceMapper.toApiWorkspace(dbWorkspace2, null);
 

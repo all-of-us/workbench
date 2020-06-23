@@ -4,9 +4,9 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
-  <changeSet author="nsaxena" id="changelog-136-workspace-add-researchpurpose-review">
+  <changeSet author="nsaxena" id="changelog-136-workspace-add-need-researchpurpose-review">
     <addColumn tableName="workspace">
-      <column name="research_purpose_review" type="tinyint" defaultValueNumeric="1">
+      <column name="needs_rp_review_prompt" type="tinyint" defaultValueNumeric="1">
         <constraints nullable="false"/>
       </column>
     </addColumn>

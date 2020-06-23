@@ -125,7 +125,7 @@ public class DbWorkspace {
   private String billingAccountName;
   private Short billingAccountType =
       DbStorageEnums.billingAccountTypeToStorage(BillingAccountType.FREE_TIER);
-  private Short reviewResearchPurpose;
+  private Short needsRPReviewPrompt;
 
   public DbWorkspace() {
     setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
@@ -677,25 +677,25 @@ public class DbWorkspace {
     this.billingAccountType = DbStorageEnums.billingAccountTypeToStorage(billingAccountType);
   }
 
-  @Column(name = "research_purpose_review")
-  public Short getReviewResearchPurpose() {
-    if (reviewResearchPurpose == null) return (short) 1;
-    return reviewResearchPurpose;
+  @Column(name = "needs_rp_review_prompt")
+  public Short getNeedsResearchPurposeReviewPrompt() {
+    if (needsRPReviewPrompt == null) return (short) 1;
+    return needsRPReviewPrompt;
   }
 
-  public void setReviewResearchPurpose(Short reviewResearchPurpose) {
-    this.reviewResearchPurpose = reviewResearchPurpose;
+  public void setNeedsResearchPurposeReviewPrompt(Short needsReviewRPPrompt) {
+    this.needsRPReviewPrompt = needsReviewRPPrompt;
   }
 
   @Transient
-  public Boolean getResearchPurposeReviewed() {
-    if (reviewResearchPurpose == null) {
-      return true;
+  public Boolean getNeedsReviewPrompt() {
+    if (needsRPReviewPrompt == null) {
+      return false;
     }
-    return reviewResearchPurpose == 1;
+    return needsRPReviewPrompt == 0;
   }
 
-  public void setResearchPurposeReviewed(Boolean reviewResearchPurpose) {
-    this.reviewResearchPurpose = (short) (reviewResearchPurpose ? 1 : 0);
+  public void setNeedsReviewPrompt(Boolean needsReviewRPPrompt) {
+    this.needsRPReviewPrompt = (short) (needsReviewRPPrompt ? 0 : 1);
   }
 }

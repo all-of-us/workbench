@@ -25,9 +25,9 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> updateResearchPurposeReview() {
+  public ResponseEntity<Void> updateResearchPurposeReviewPrompt() {
     if (configProvider.get().featureFlags.enableResearchPurposePrompt) {
-      List<DbWorkspace> workspaceList = workspaceDao.findAllByReviewResearchPurpose((short) 1);
+      List<DbWorkspace> workspaceList = workspaceDao.findAllByNeedsResearchPurposeReviewPrompt((short) 1);
 
       // 1. Filter out workspace where creation date is 365 days or 15 days
       // 2. set Research Purpose Review to FALSE
@@ -42,7 +42,7 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
                   })
               .map(
                   filteredWorkspace -> {
-                    filteredWorkspace.setResearchPurposeReviewed(false);
+                    filteredWorkspace.setNeedsReviewPrompt(true);
                     return filteredWorkspace;
                   })
               .collect(Collectors.toList());

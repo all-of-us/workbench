@@ -190,7 +190,7 @@ public class WorkspaceServiceTest {
     workspace.setWorkspaceActiveStatusEnum(activeStatus);
     workspace.setFirecloudName(name);
     workspace.setFirecloudUuid(Long.toString(dbId));
-    workspace.setResearchPurposeReviewed(true);
+    workspace.setNeedsReviewPrompt(false);
     return workspace;
   }
 
