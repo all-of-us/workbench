@@ -2239,6 +2239,10 @@ paths:
           description: The updated data set.
           schema:
             "$ref": "#/definitions/DataSet"
+        404:
+          description: Data set to update does not exist.
+          schema:
+            "$ref": "#/definitions/DataSet"
         409:
           description: Data Set with the same name already exists
           schema:
