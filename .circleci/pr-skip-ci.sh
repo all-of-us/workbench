@@ -3,10 +3,6 @@ set -e
 
 # This script makes CircleCI exit a non pull-request job.
 
-if [[ ${CIRCLE_PULL_REQUEST_DUMMY} ]]; then
-  echo "CIRCLE_PULL_REQUEST_DUMMY: ${CIRCLE_PULL_REQUEST_DUMMY}"
-fi
-
 if [[ ${CIRCLE_PULL_REQUEST} ]]; then
   echo "CIRCLE_PULL_REQUEST: ${CIRCLE_PULL_REQUEST}"
   regexp="[[:digit:]]\+$"
