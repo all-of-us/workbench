@@ -74,8 +74,7 @@ public class DevUserRegistrationServiceTest {
   @Test(expected = BadRequestException.class)
   public void testCreateUserFromUserInfo_NoMatchingInstitution() {
     // If no matching institution could be found, an exception is thrown.
-    when(directoryService.getContactEmailAddressFromGSuiteEmailAddress(
-            eq("gjordan@fake-research-aou.org")))
+    when(directoryService.getContactEmailFromGSuiteEmail(eq("gjordan@fake-research-aou.org")))
         .thenReturn(Optional.of("gregory.jordan.123@gmail.com"));
     when(institutionService.getFirstMatchingInstitution("gregory.jordan.123@gmail.com"))
         .thenReturn(Optional.empty());
