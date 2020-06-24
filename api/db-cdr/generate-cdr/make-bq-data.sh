@@ -62,7 +62,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 VALUES
 (19,0,'Condition','Conditions','Conditions are records of a Person suggesting the presence of a disease or medical condition stated as a diagnosis, a sign or a symptom, which is either observed by a Provider or reported by the patient.',0,0,0),
 (13,3,'Drug','Drug Exposures','Drugs biochemical substance formulated in such a way that when administered to a Person it will exert a certain physiological or biochemical effect. The drug exposure domain concepts capture records about the utilization of a Drug when ingested or otherwise introduced into the body.',0,0,0),
-(21,4,'Measurement','Labs andb Measurements','Labs andb Measurements',0,0,0),
+(21,4,'Measurement','Labs and Measurements','Labs and Measurements',0,0,0),
 (10,6,'Procedure','Procedures','Procedure',0,0,0),
 (27,5,'Observation','Observations','Observation',0,0,0),
 (0,10,'Physical Measurements','Physical Measurements','Participants have the option to provide a standard set of physical measurements as part of the enrollment process',0,0,0)"
