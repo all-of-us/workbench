@@ -160,19 +160,19 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     DbUser user = userDao.findUserByUsername(userName);
     if (user == null) {
       if (workbenchConfigProvider.get().access.unsafeAllowUserCreationFromGSuiteData) {
-        DbUser dbUser = devUserRegistrationService.createUserFromUserInfo(userInfo);
-        log.info(String.format("Dev user '%s' has been re-created.", dbUser.getUsername()));
+        user = devUserRegistrationService.createUserFromUserInfo(userInfo);
+        log.info(String.format("Dev user '%s' has been re-created.", user.getUsername()));
       } else {
         log.severe(String.format("No User row exists for user '%s'", userName));
         return false;
       }
-    } else {
-      if (user.getDisabled()) {
-        throw new ForbiddenException(
-            WorkbenchException.errorResponse(
-                "Rejecting request for disabled user account: " + user.getUsername(),
-                ErrorCode.USER_DISABLED));
-      }
+    }
+
+    if (user.getDisabled()) {
+      throw new ForbiddenException(
+          WorkbenchException.errorResponse(
+              "Rejecting request for disabled user account: " + user.getUsername(),
+              ErrorCode.USER_DISABLED));
     }
 
     SecurityContextHolder.getContext()

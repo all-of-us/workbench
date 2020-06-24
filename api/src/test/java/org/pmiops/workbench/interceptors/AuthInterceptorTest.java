@@ -72,9 +72,9 @@ public class AuthInterceptorTest {
 
   private static WorkbenchConfig workbenchConfig;
 
-  @Mock private HttpServletRequest request;
-  @Mock private HttpServletResponse response;
-  @Mock private HandlerMethod handler;
+  @Mock private HttpServletRequest mockRequest;
+  @Mock private HttpServletResponse mockResponse;
+  @Mock private HandlerMethod mockHandler;
   private DbUser user;
 
   @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
@@ -105,43 +105,43 @@ public class AuthInterceptorTest {
   }
 
   private void mockGetCallWithBearerToken() {
-    when(handler.getMethod()).thenReturn(getProfileApiMethod("getBillingProjects"));
-    when(request.getMethod()).thenReturn(HttpMethods.GET);
-    when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer foo");
+    when(mockHandler.getMethod()).thenReturn(getProfileApiMethod("getBillingProjects"));
+    when(mockRequest.getMethod()).thenReturn(HttpMethods.GET);
+    when(mockRequest.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer foo");
   }
 
   @Test
   public void preHandleOptions_OPTIONS() throws Exception {
-    when(request.getMethod()).thenReturn(HttpMethods.OPTIONS);
+    when(mockRequest.getMethod()).thenReturn(HttpMethods.OPTIONS);
 
-    assertThat(interceptor.preHandle(request, response, handler)).isTrue();
+    assertThat(interceptor.preHandle(mockRequest, mockResponse, mockHandler)).isTrue();
   }
 
   @Test
   public void preHandleOptions_publicEndpoint() throws Exception {
-    when(handler.getMethod()).thenReturn(getProfileApiMethod("isUsernameTaken"));
-    when(request.getMethod()).thenReturn(HttpMethods.GET);
+    when(mockHandler.getMethod()).thenReturn(getProfileApiMethod("isUsernameTaken"));
+    when(mockRequest.getMethod()).thenReturn(HttpMethods.GET);
 
-    assertThat(interceptor.preHandle(request, response, handler)).isTrue();
+    assertThat(interceptor.preHandle(mockRequest, mockResponse, mockHandler)).isTrue();
   }
 
   @Test
   public void preHandleGet_noAuthorization() throws Exception {
-    when(handler.getMethod()).thenReturn(getProfileApiMethod("getBillingProjects"));
-    when(request.getMethod()).thenReturn(HttpMethods.GET);
+    when(mockHandler.getMethod()).thenReturn(getProfileApiMethod("getBillingProjects"));
+    when(mockRequest.getMethod()).thenReturn(HttpMethods.GET);
 
-    assertThat(interceptor.preHandle(request, response, handler)).isFalse();
-    verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
+    assertThat(interceptor.preHandle(mockRequest, mockResponse, mockHandler)).isFalse();
+    verify(mockResponse).sendError(HttpServletResponse.SC_UNAUTHORIZED);
   }
 
   @Test
   public void preHandleGet_nonBearerAuthorization() throws Exception {
     mockGetCallWithBearerToken();
     // Override the auth header to be an invalid bearer token.
-    when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("blah");
+    when(mockRequest.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("blah");
 
-    assertThat(interceptor.preHandle(request, response, handler)).isFalse();
-    verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
+    assertThat(interceptor.preHandle(mockRequest, mockResponse, mockHandler)).isFalse();
+    verify(mockResponse).sendError(HttpServletResponse.SC_UNAUTHORIZED);
   }
 
   @Test(expected = NotFoundException.class)
@@ -149,7 +149,7 @@ public class AuthInterceptorTest {
     mockGetCallWithBearerToken();
     when(userInfoService.getUserInfo("foo")).thenThrow(new NotFoundException());
 
-    interceptor.preHandle(request, response, handler);
+    interceptor.preHandle(mockRequest, mockResponse, mockHandler);
   }
 
   @Test(expected = NotFoundException.class)
@@ -161,7 +161,7 @@ public class AuthInterceptorTest {
     when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
     when(fireCloudService.getMe()).thenThrow(new NotFoundException());
 
-    interceptor.preHandle(request, response, handler);
+    interceptor.preHandle(mockRequest, mockResponse, mockHandler);
   }
 
   @Test
@@ -177,7 +177,7 @@ public class AuthInterceptorTest {
     when(fireCloudService.getMe()).thenReturn(me);
     when(userDao.findUserByUsername("bob@fake-domain.org")).thenReturn(user);
 
-    assertThat(interceptor.preHandle(request, response, handler)).isTrue();
+    assertThat(interceptor.preHandle(mockRequest, mockResponse, mockHandler)).isTrue();
   }
 
   @Test
@@ -193,8 +193,8 @@ public class AuthInterceptorTest {
     when(fireCloudService.getMe()).thenReturn(me);
     when(userDao.findUserByUsername("bob@also-bad-domain.org")).thenReturn(null);
 
-    assertThat(interceptor.preHandle(request, response, handler)).isFalse();
-    verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
+    assertThat(interceptor.preHandle(mockRequest, mockResponse, mockHandler)).isFalse();
+    verify(mockResponse).sendError(HttpServletResponse.SC_UNAUTHORIZED);
   }
 
   private void mockUserInfoSuccess() {
@@ -209,7 +209,7 @@ public class AuthInterceptorTest {
     mockGetCallWithBearerToken();
     mockUserInfoSuccess();
 
-    assertThat(interceptor.preHandle(request, response, handler)).isTrue();
+    assertThat(interceptor.preHandle(mockRequest, mockResponse, mockHandler)).isTrue();
   }
 
   @Test
@@ -224,7 +224,7 @@ public class AuthInterceptorTest {
     when(userDao.findUserByUsername(eq("bob@fake-domain.org"))).thenReturn(null);
     when(devUserRegistrationService.createUserFromUserInfo(any())).thenReturn(user);
 
-    assertThat(interceptor.preHandle(request, response, handler)).isTrue();
+    assertThat(interceptor.preHandle(mockRequest, mockResponse, mockHandler)).isTrue();
   }
 
   @Test
@@ -234,7 +234,7 @@ public class AuthInterceptorTest {
     mockUserInfoSuccess();
     when(userDao.findUserByUsername(eq("bob@fake-domain.org"))).thenReturn(null);
 
-    assertThat(interceptor.preHandle(request, response, handler)).isFalse();
+    assertThat(interceptor.preHandle(mockRequest, mockResponse, mockHandler)).isFalse();
 
     verify(devUserRegistrationService, never()).createUserFromUserInfo(any());
   }
