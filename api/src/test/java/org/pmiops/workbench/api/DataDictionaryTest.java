@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -11,17 +12,14 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetMapper;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.dataset.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
-import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
@@ -40,15 +38,18 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class DataDictionaryTest {
 
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private DataDictionaryEntryDao dataDictionaryEntryDao;
   @Autowired private DataSetController dataSetController;
+  @Autowired private ConceptSetService conceptSetService;
 
   @Rule public ExpectedException expectedEx = ExpectedException.none();
 
@@ -59,14 +60,10 @@ public class DataDictionaryTest {
   @Import({DataSetController.class, DataSetMapperImpl.class, CommonMappers.class})
   @MockBean({
     BigQueryService.class,
-    CohortDao.class,
     CohortService.class,
-    ConceptDao.class,
     ConceptSetService.class,
     ConceptService.class,
-    ConceptSetDao.class,
     ConceptSetMapper.class,
-    DataSetDao.class,
     DataSetService.class,
     FireCloudService.class,
     NotebooksService.class,
@@ -103,6 +100,8 @@ public class DataDictionaryTest {
   public void testGetDataDictionaryEntry() {
     final Domain domain = Domain.DRUG;
     final String domainValue = "FIELD NAME / DOMAIN VALUE";
+
+    when(conceptSetService.getOmpTable(domain.toString())).thenReturn("drug_occurrence");
 
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersionDao.save(cdrVersion);
@@ -162,6 +161,7 @@ public class DataDictionaryTest {
 
   @Test
   public void testGetDataDictionaryEntry_notFound() {
+    when(conceptSetService.getOmpTable(Domain.DRUG.toString())).thenReturn("drug_occurrence");
     expectedEx.expect(NotFoundException.class);
 
     dataSetController.getDataDictionaryEntry(1L, Domain.DRUG.toString(), "random");
