@@ -841,6 +841,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     profileController.updateVerifiedInstitutionalAffiliation(
         dbUser.getUserId(), verifiedInstitutionalAffiliation);
 
+    // original is PROJECT_PERSONNEL
     verifiedInstitutionalAffiliation.setInstitutionalRoleEnum(InstitutionalRole.ADMIN);
     profileController.updateVerifiedInstitutionalAffiliation(
         dbUser.getUserId(), verifiedInstitutionalAffiliation);
@@ -848,6 +849,22 @@ public class ProfileControllerTest extends BaseControllerTest {
     Profile updatedProfile = profileService.getProfile(dbUser);
     assertThat(updatedProfile.getVerifiedInstitutionalAffiliation())
         .isEqualTo(verifiedInstitutionalAffiliation);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void updateProfile_changeVerifiedInstitutionalAffiliationForbidden() {
+    config.featureFlags.requireInstitutionalVerification = true;
+
+    final VerifiedInstitutionalAffiliation affiliation = createVerifiedInstitutionalAffiliation();
+    createAccountRequest.getProfile().setVerifiedInstitutionalAffiliation(affiliation);
+    createUser();
+
+    // original is PROJECT_PERSONNEL
+    affiliation.setInstitutionalRoleEnum(InstitutionalRole.ADMIN);
+
+    final Profile profile = profileController.getMe().getBody();
+    profile.setVerifiedInstitutionalAffiliation(affiliation);
+    profileController.updateProfile(profile);
   }
 
   @Test(expected = BadRequestException.class)
