@@ -1,5 +1,6 @@
 package org.pmiops.workbench.workspaceadmin;
 
+import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobInfo;
 import com.google.monitoring.v3.Point;
 import com.google.monitoring.v3.TimeSeries;
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.joda.time.DateTime;
@@ -222,7 +224,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         cloudStorageService
             .getBlobListForPrefix(bucketName, NotebooksService.NOTEBOOKS_WORKSPACE_DIRECTORY)
             .stream()
-            .filter(b -> !notebooksService.isNotebookBlob(b))
+            .filter(((Predicate<Blob>) notebooksService::isNotebookBlob).negate())
             .count();
   }
 

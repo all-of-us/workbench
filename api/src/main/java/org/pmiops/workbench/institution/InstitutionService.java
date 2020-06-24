@@ -110,6 +110,9 @@ public interface InstitutionService {
   boolean validateOperationalUser(DbInstitution institution);
 
   /**
+   * Deprecated because it refers to old-style Institutional Affiliations, to be deleted in RW-4362
+   * The new-style equivalent is VerifiedInstitutionalAffiliationMapper.modelToDbWithoutUser()
+   *
    * @deprecated
    * @param institutionalAffiliation
    * @return

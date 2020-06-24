@@ -35,7 +35,6 @@ import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbPageVisit;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.EmailException;
@@ -115,8 +114,6 @@ public class ProfileController implements ProfileApiDelegate {
             }
           };
 
-  // Deprecated because it refers to old-style Institutional Affiliations, to be deleted in RW-4362
-  // The new-style equivalent is VerifiedInstitutionalAffiliationMapper.modelToDbWithoutUser()
   @Deprecated
   private static final Function<InstitutionalAffiliation, DbInstitutionalAffiliation>
       FROM_CLIENT_INSTITUTIONAL_AFFILIATION =
@@ -680,67 +677,9 @@ public class ProfileController implements ProfileApiDelegate {
       throw new BadRequestException("Cannot update Verified Institutional Affiliation");
     }
 
-    updateProfileForUser(user, updatedProfile, previousProfile);
+    profileService.updateProfileForUser(user, updatedProfile, previousProfile);
 
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-  }
-
-  private void updateProfileForUser(DbUser user, Profile updatedProfile, Profile previousProfile) {
-    validateUpdatedProfile(updatedProfile, previousProfile);
-
-    if (!userProvider.get().getGivenName().equalsIgnoreCase(updatedProfile.getGivenName())
-        || !userProvider.get().getFamilyName().equalsIgnoreCase(updatedProfile.getFamilyName())) {
-      userService.setDataUseAgreementNameOutOfDate(
-          updatedProfile.getGivenName(), updatedProfile.getFamilyName());
-    }
-
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-
-    user.setGivenName(updatedProfile.getGivenName());
-    user.setFamilyName(updatedProfile.getFamilyName());
-    user.setAreaOfResearch(updatedProfile.getAreaOfResearch());
-    user.setProfessionalUrl(updatedProfile.getProfessionalUrl());
-    user.setAddress(addressMapper.addressToDbAddress(updatedProfile.getAddress()));
-    user.getAddress().setUser(user);
-    DbDemographicSurvey dbDemographicSurvey =
-        demographicSurveyMapper.demographicSurveyToDbDemographicSurvey(
-            updatedProfile.getDemographicSurvey());
-
-    if (user.getDemographicSurveyCompletionTime() == null && dbDemographicSurvey != null) {
-      user.setDemographicSurveyCompletionTime(now);
-    }
-
-    if (dbDemographicSurvey != null && dbDemographicSurvey.getUser() == null) {
-      dbDemographicSurvey.setUser(user);
-    }
-
-    user.setDemographicSurvey(dbDemographicSurvey);
-    user.setLastModifiedTime(now);
-
-    updateInstitutionalAffiliations(updatedProfile, user);
-    boolean requireInstitutionalVerification =
-        workbenchConfigProvider.get().featureFlags.requireInstitutionalVerification;
-    if (requireInstitutionalVerification) {
-      profileService.validateInstitutionalAffiliation(updatedProfile);
-    }
-
-    userService.updateUserWithConflictHandling(user);
-    if (requireInstitutionalVerification) {
-      DbVerifiedInstitutionalAffiliation updatedDbVerifiedAffiliation =
-          verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
-              updatedProfile.getVerifiedInstitutionalAffiliation(), institutionService);
-      updatedDbVerifiedAffiliation.setUser(user);
-      Optional<DbVerifiedInstitutionalAffiliation> dbVerifiedAffiliation =
-          verifiedInstitutionalAffiliationDao.findFirstByUser(user);
-      dbVerifiedAffiliation.ifPresent(
-          verifiedInstitutionalAffiliation ->
-              updatedDbVerifiedAffiliation.setVerifiedInstitutionalAffiliationId(
-                  verifiedInstitutionalAffiliation.getVerifiedInstitutionalAffiliationId()));
-      this.verifiedInstitutionalAffiliationDao.save(updatedDbVerifiedAffiliation);
-    }
-
-    final Profile appliedUpdatedProfile = profileService.getProfile(user);
-    profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);
   }
 
   @AuthorityRequired(Authority.ACCESS_CONTROL_ADMIN)
@@ -762,7 +701,7 @@ public class ProfileController implements ProfileApiDelegate {
 
     Profile oldProfile = profileService.getProfile(dbUser);
 
-    this.updateProfileForUser(dbUser, updatedProfile, oldProfile);
+    profileService.updateProfileForUser(dbUser, updatedProfile, oldProfile);
 
     return ResponseEntity.ok(new EmptyResponse());
   }
@@ -837,7 +776,7 @@ public class ProfileController implements ProfileApiDelegate {
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<EmptyResponse> bypassAccessRequirement(
       Long userId, AccessBypassRequest request) {
-    updateBypass(userId, request);
+    userService.updateBypassTime(userId, request);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -848,7 +787,7 @@ public class ProfileController implements ProfileApiDelegate {
       throw new ForbiddenException("Self bypass is disallowed in this environment.");
     }
     long userId = userProvider.get().getUserId();
-    updateBypass(userId, request);
+    userService.updateBypassTime(userId, request);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -866,48 +805,6 @@ public class ProfileController implements ProfileApiDelegate {
 
     userService.syncEraCommonsStatus();
     return getProfileResponse(userProvider.get());
-  }
-
-  private void updateBypass(long userId, AccessBypassRequest request) {
-    Timestamp valueToSet;
-    Timestamp previousValue;
-    Boolean bypassed = request.getIsBypassed();
-    DbUser user = userDao.findUserByUserId(userId);
-    if (bypassed) {
-      valueToSet = new Timestamp(clock.instant().toEpochMilli());
-    } else {
-      valueToSet = null;
-    }
-    switch (request.getModuleName()) {
-      case DATA_USE_AGREEMENT:
-        previousValue = user.getDataUseAgreementBypassTime();
-        userService.setDataUseAgreementBypassTime(userId, valueToSet);
-        break;
-      case COMPLIANCE_TRAINING:
-        previousValue = user.getComplianceTrainingBypassTime();
-        userService.setComplianceTrainingBypassTime(userId, valueToSet);
-        break;
-      case BETA_ACCESS:
-        previousValue = user.getBetaAccessBypassTime();
-        userService.setBetaAccessBypassTime(userId, valueToSet);
-        break;
-      case ERA_COMMONS:
-        previousValue = user.getEraCommonsBypassTime();
-        userService.setEraCommonsBypassTime(userId, valueToSet);
-        break;
-      case TWO_FACTOR_AUTH:
-        previousValue = user.getTwoFactorAuthBypassTime();
-        userService.setTwoFactorAuthBypassTime(userId, valueToSet);
-        break;
-      default:
-        throw new BadRequestException(
-            "There is no access module named: " + request.getModuleName().toString());
-    }
-    userService.logAdminUserAction(
-        userId,
-        "set bypass status for module " + request.getModuleName().toString() + " to " + bypassed,
-        previousValue,
-        valueToSet);
   }
 
   @Override

@@ -79,9 +79,9 @@ public class ProfileService {
     this.institutionService = institutionService;
     this.profileAuditor = profileAuditor;
     this.profileMapper = profileMapper;
+    this.userProvider = userProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userDao = userDao;
-    this.userProvider = userProvider;
     this.userService = userService;
     this.userTermsOfServiceDao = userTermsOfServiceDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
