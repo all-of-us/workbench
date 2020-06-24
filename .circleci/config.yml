@@ -593,7 +593,7 @@ workflows:
       - ui-unit-test
       - api-bigquery-test
       - api-integration-test
-      # - puppeteer-e2e-local-ui
+      - puppeteer-e2e-local-ui
       # Run deployment to "test" on master merges.
       - api-deploy-to-test:
           filters: *filter_only_master_branch
