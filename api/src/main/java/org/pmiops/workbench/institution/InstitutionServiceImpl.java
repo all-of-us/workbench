@@ -362,19 +362,17 @@ public class InstitutionServiceImpl implements InstitutionService {
   @Override
   public DbInstitutionalAffiliation legacyInstitutionToDbInstitution(
       InstitutionalAffiliation institutionalAffiliation) {
-    {
-      DbInstitutionalAffiliation result = new DbInstitutionalAffiliation();
-      if (institutionalAffiliation.getInstitution() != null) {
-        result.setInstitution(institutionalAffiliation.getInstitution());
-      }
-      if (institutionalAffiliation.getNonAcademicAffiliation() != null) {
-        result.setNonAcademicAffiliationEnum(institutionalAffiliation.getNonAcademicAffiliation());
-      }
-
-      result.setRole(institutionalAffiliation.getRole());
-      result.setOther(institutionalAffiliation.getOther());
-
-      return result;
+    DbInstitutionalAffiliation result = new DbInstitutionalAffiliation();
+    if (institutionalAffiliation.getInstitution() != null) {
+      result.setInstitution(institutionalAffiliation.getInstitution());
     }
+    if (institutionalAffiliation.getNonAcademicAffiliation() != null) {
+      result.setNonAcademicAffiliationEnum(institutionalAffiliation.getNonAcademicAffiliation());
+    }
+
+    result.setRole(institutionalAffiliation.getRole());
+    result.setOther(institutionalAffiliation.getOther());
+
+    return result;
   }
 }

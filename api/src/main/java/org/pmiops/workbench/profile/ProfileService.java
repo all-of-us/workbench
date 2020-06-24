@@ -202,11 +202,26 @@ public class ProfileService {
     user.setLastModifiedTime(now);
 
     updateInstitutionalAffiliations(updatedProfile, user);
-    if (workbenchConfigProvider.get().featureFlags.requireInstitutionalVerification) {
+    boolean requireInstitutionalVerification =
+        workbenchConfigProvider.get().featureFlags.requireInstitutionalVerification;
+    if (requireInstitutionalVerification) {
       validateInstitutionalAffiliation(updatedProfile);
     }
 
     userService.updateUserWithConflictHandling(user);
+    if (requireInstitutionalVerification) {
+      DbVerifiedInstitutionalAffiliation updatedDbVerifiedAffiliation =
+          verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
+              updatedProfile.getVerifiedInstitutionalAffiliation(), institutionService);
+      updatedDbVerifiedAffiliation.setUser(user);
+      Optional<DbVerifiedInstitutionalAffiliation> dbVerifiedAffiliation =
+          verifiedInstitutionalAffiliationDao.findFirstByUser(user);
+      dbVerifiedAffiliation.ifPresent(
+          verifiedInstitutionalAffiliation ->
+              updatedDbVerifiedAffiliation.setVerifiedInstitutionalAffiliationId(
+                  verifiedInstitutionalAffiliation.getVerifiedInstitutionalAffiliationId()));
+      this.verifiedInstitutionalAffiliationDao.save(updatedDbVerifiedAffiliation);
+    }
 
     final Profile appliedUpdatedProfile = getProfile(user);
     profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);
