@@ -131,6 +131,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   })
   @MockBean({
     CohortCloningService.class,
+    CohortService.class,
     ConceptService.class,
     ConceptSetMapperImpl.class,
     ConceptSetService.class,
