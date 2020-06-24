@@ -34,11 +34,11 @@ import javax.persistence.OptimisticLockException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetMapper;
 import org.pmiops.workbench.dataset.DataSetMapper;
 import org.pmiops.workbench.dataset.DatasetConfig;
-import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
@@ -104,7 +104,7 @@ public class DataSetController implements DataSetApiDelegate {
 
   private static final Logger log = Logger.getLogger(DataSetController.class.getName());
 
-  private final CdrVersionDao cdrVersionDao;
+  private final CdrVersionService cdrVersionService;
   private final CohortDao cohortDao;
   private final ConceptService conceptService;
   private final ConceptSetDao conceptSetDao;
@@ -119,7 +119,7 @@ public class DataSetController implements DataSetApiDelegate {
   DataSetController(
       BigQueryService bigQueryService,
       Clock clock,
-      CdrVersionDao cdrVersionDao,
+      CdrVersionService cdrVersionService,
       CohortDao cohortDao,
       ConceptService conceptService,
       ConceptSetDao conceptSetDao,
@@ -135,7 +135,7 @@ public class DataSetController implements DataSetApiDelegate {
       ConceptSetMapper conceptSetMapper) {
     this.bigQueryService = bigQueryService;
     this.clock = clock;
-    this.cdrVersionDao = cdrVersionDao;
+    this.cdrVersionService = cdrVersionService;
     this.cohortDao = cohortDao;
     this.conceptService = conceptService;
     this.conceptSetDao = conceptSetDao;
@@ -622,10 +622,13 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<DataDictionaryEntry> getDataDictionaryEntry(
       Long cdrVersionId, String domain, String domainValue) {
-    DbCdrVersion cdrVersion = cdrVersionDao.findByCdrVersionId(cdrVersionId);
-    if (cdrVersion == null) {
-      throw new BadRequestException("Invalid CDR Version");
-    }
+    DbCdrVersion cdrVersion =
+        cdrVersionService
+            .findByCdrVersionId(cdrVersionId)
+            .<BadRequestException>orElseThrow(
+                () -> {
+                  throw new BadRequestException("Invalid CDR Version");
+                });
 
     String omopTable = conceptSetDao.DOMAIN_TO_TABLE_NAME.get(Domain.fromValue(domain));
     if (omopTable == null) {

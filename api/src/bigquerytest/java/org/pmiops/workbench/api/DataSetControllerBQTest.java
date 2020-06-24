@@ -26,6 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortCloningService;
@@ -91,6 +92,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   private DataSetController controller;
   @Autowired private BigQueryService bigQueryService;
   @Autowired private CdrVersionDao cdrVersionDao;
+  @Autowired private CdrVersionService cdrVersionService;
   @Autowired private CohortDao cohortDao;
   @Autowired private ConceptService conceptService;
   @Autowired private ConceptSetDao conceptSetDao;
@@ -122,6 +124,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Import({
     BigQueryTestService.class,
     CdrBigQuerySchemaConfigService.class,
+    CdrVersionService.class,
     CohortQueryBuilder.class,
     ConceptBigQueryService.class,
     DataSetServiceImpl.class,
@@ -180,7 +183,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
             new DataSetController(
                 bigQueryService,
                 CLOCK,
-                cdrVersionDao,
+                cdrVersionService,
                 cohortDao,
                 conceptService,
                 conceptSetDao,
