@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.util.List;
+import java.util.Optional;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -114,5 +115,9 @@ public class CdrVersionService {
     }
     return cdrVersionDao.findByDataAccessLevelInOrderByCreationTimeDescDataAccessLevelDesc(
         visibleValues);
+  }
+
+  public Optional<DbCdrVersion> findByCdrVersionId(Long cdrVersionId) {
+    return Optional.ofNullable(cdrVersionDao.findByCdrVersionId(cdrVersionId));
   }
 }
