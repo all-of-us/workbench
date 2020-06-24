@@ -215,7 +215,7 @@ public class AuthInterceptorTest {
 
   @Test
   public void preHandleGet_noUserRecord() throws Exception {
-    workbenchConfig.access.unsafeAllowUserCreationFromOauthData = true;
+    workbenchConfig.access.unsafeAllowUserCreationFromGSuiteData = true;
     // Tests the flow where userDao doesn't contain a row for the authorized user.
     // When this functionality is enabled, the auth interceptor will lazily create a new
     // user record when none is found for the given G Suite user.
@@ -231,7 +231,7 @@ public class AuthInterceptorTest {
 
   @Test
   public void preHandleGet_noUserRecordAndNoDevRegistration() throws Exception {
-    workbenchConfig.access.unsafeAllowUserCreationFromOauthData = false;
+    workbenchConfig.access.unsafeAllowUserCreationFromGSuiteData = false;
     mockGetCallWithBearerToken();
     mockUserInfoSuccess();
     when(userDao.findUserByUsername(eq("bob@fake-domain.org"))).thenReturn(null);

@@ -159,7 +159,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     }
     DbUser user = userDao.findUserByUsername(userName);
     if (user == null) {
-      if (workbenchConfigProvider.get().access.unsafeAllowUserCreationFromOauthData) {
+      if (workbenchConfigProvider.get().access.unsafeAllowUserCreationFromGSuiteData) {
         DbUser dbUser = devUserRegistrationService.createUserFromUserInfo(userInfo);
         log.info(String.format("Dev user '%s' has been re-created.", dbUser.getUsername()));
       } else {

@@ -200,7 +200,7 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
   }
 
   private String gSuiteEmailToUsername(String gSuiteEmail) {
-    if (gSuiteEmail.indexOf("@" + gSuiteDomain()) >= 0) {
+    if (gSuiteEmail.contains("@" + gSuiteDomain())) {
       return gSuiteEmail.replace("@" + gSuiteDomain(), "");
     } else {
       throw new IllegalArgumentException("Input email address does not match the G Suite domain.");
