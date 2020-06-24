@@ -545,8 +545,9 @@ public class DataSetController implements DataSetApiDelegate {
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
+    DbDataset dbDataSet = dataSetService.getDbDataSet(workspace, dataSetId).get();
+
     int version = Etags.toVersion(request.getEtag());
-    DbDataset dbDataSet = dataSetService.getDbDataSet(workspace, dataSetId);
     if (dbDataSet.getVersion() != version) {
       throw new ConflictException("Attempted to modify outdated data set version");
     }
@@ -581,7 +582,7 @@ public class DataSetController implements DataSetApiDelegate {
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    DbDataset dataSet = dataSetService.getDbDataSet(workspace, dataSetId);
+    DbDataset dataSet = dataSetService.getDbDataSet(workspace, dataSetId).get();
     return ResponseEntity.ok(TO_CLIENT_DATA_SET.apply(dataSet));
   }
 

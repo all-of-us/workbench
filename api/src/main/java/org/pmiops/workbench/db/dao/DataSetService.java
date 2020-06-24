@@ -4,6 +4,7 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
@@ -56,7 +57,7 @@ public interface DataSetService {
 
   void deleteDataSet(DbWorkspace dbWorkspace, Long dataSetId);
 
-  DbDataset getDbDataSet(DbWorkspace dbWorkspace, Long dataSetId);
+  Optional<DbDataset> getDbDataSet(DbWorkspace dbWorkspace, Long dataSetId);
 
   void markDirty(ResourceType resourceType, long resourceId);
 }

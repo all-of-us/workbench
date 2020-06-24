@@ -687,10 +687,13 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   @Override
   public List<DbDataset> getDataSets(ResourceType resourceType, long resourceId) {
     List<DbDataset> dbDataSets = new ArrayList<>();
-    if (ResourceType.COHORT.equals(resourceType)) {
-      dbDataSets = dataSetDao.findDataSetsByCohortIds(resourceId);
-    } else if (ResourceType.CONCEPT_SET.equals(resourceType)) {
-      dbDataSets = dataSetDao.findDataSetsByConceptSetIds(resourceId);
+    switch (resourceType) {
+      case COHORT:
+        dbDataSets = dataSetDao.findDataSetsByCohortIds(resourceId);
+        break;
+      case CONCEPT_SET:
+        dbDataSets = dataSetDao.findDataSetsByConceptSetIds(resourceId);
+        break;
     }
     return dbDataSets;
   }
@@ -703,33 +706,19 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   @Override
   public void deleteDataSet(DbWorkspace dbWorkspace, Long dataSetId) {
-    DbDataset dataSet = getDbDataSet(dbWorkspace, dataSetId);
-    dataSetDao.delete(dataSet.getDataSetId());
+    long dbDataSetId = getDbDataSet(dbWorkspace, dataSetId).get().getDataSetId();
+    dataSetDao.delete(dbDataSetId);
   }
 
   @Override
-  public DbDataset getDbDataSet(DbWorkspace dbWorkspace, Long dataSetId) {
-
-    DbDataset dataSet = dataSetDao.findOne(dataSetId);
-    if (dataSet == null || dbWorkspace.getWorkspaceId() != dataSet.getWorkspaceId()) {
-      throw new NotFoundException(
-          String.format(
-              "No data set with ID %s in workspace %s.", dataSet, dbWorkspace.getFirecloudName()));
-    }
-    return dataSet;
+  public Optional<DbDataset> getDbDataSet(DbWorkspace dbWorkspace, Long dataSetId) {
+    return Optional.of(dataSetDao.findOne(dataSetId));
   }
 
   @Override
   public void markDirty(ResourceType resourceType, long resourceId) {
     List<DbDataset> dbDataSetList = getDataSets(resourceType, resourceId);
-    dbDataSetList =
-        dbDataSetList.stream()
-            .map(
-                dataSet -> {
-                  dataSet.setInvalid(true);
-                  return dataSet;
-                })
-            .collect(Collectors.toList());
+    dbDataSetList.forEach(dataSet -> dataSet.setInvalid(true));
     try {
       dataSetDao.save(dbDataSetList);
     } catch (OptimisticLockException e) {
