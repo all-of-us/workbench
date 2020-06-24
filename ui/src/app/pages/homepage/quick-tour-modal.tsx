@@ -74,7 +74,7 @@ export const panels = [
       <br/><br/>
       For example, if you want to select height, weight and blood pressure information
       (concepts) from your “diabetes cases” Cohort, you can search for the 3 concepts
-      from the “Measurements” domain and call it “biometrics” Concept Set. You can then
+      from the “Labs and Measurements” domain and call it “biometrics” Concept Set. You can then
       use Notebooks to extract that information from your cohort.</div>,
     image: '/assets/images/quick-tour/concept-sets.png'
   },

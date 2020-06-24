@@ -43,7 +43,7 @@ const tooltipContent = [
   <u>What is a concept set?</u><ul/>
     You can search for and save collections of concepts from a particular domain as a
     “Concept set”. For example, you can search for height, weight and blood pressure
-    concepts from “Measurements” domain and call it “biometrics” concept set.<p/>
+    concepts from “Labs and Measurements” domain and call it “biometrics” concept set.<p/>
   <u>How to use a concept set </u><ul/>
     You can use Notebooks to extract data defined in your “concept set” from your “cohort”.
     For example, you can launch a Notebook to import your “diabetes cases” cohort

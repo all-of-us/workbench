@@ -59,7 +59,7 @@ export function domainToTitle(domain: any): string {
       domain = 'Demographics';
       break;
     case DomainType.MEASUREMENT:
-      domain = 'Measurements';
+      domain = 'Labs and Measurements';
       break;
     case DomainType.PHYSICALMEASUREMENT:
       domain = 'Physical Measurements';
