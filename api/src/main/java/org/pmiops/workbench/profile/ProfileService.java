@@ -340,7 +340,8 @@ public class ProfileService {
   public void adminUpdateProfile(Profile updatedProfile) {
     final DbUser user = profileMapper.profileToDbUser(updatedProfile);
 
-    // TODO move to mapper or other common code
+    // TODO RW-5104: move these DB null fixes to mapper or other common code
+
     user.getPageVisits().forEach(dbPageVisit -> dbPageVisit.setUser(user));
     user.getInstitutionalAffiliations().forEach(affiliation -> affiliation.setUser(user));
     Optional.ofNullable(user.getDemographicSurvey()).ifPresent(survey -> survey.setUser(user));
