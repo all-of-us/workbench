@@ -79,10 +79,7 @@ describe('Create Dataset', () => {
 
     // Delete Dataset.
     await dataPage.openTab(TabLabelAlias.Data);
-    await waitWhileLoading(page);
-
     await dataPage.openTab(TabLabelAlias.Datasets, {waitPageChange: false});
-    await waitWhileLoading(page);
 
     await dataPage.deleteDataset(newDatasetName);
   });
@@ -151,7 +148,6 @@ describe('Create Dataset', () => {
     // Delete test data sequence is: Delete Notebook, then Dataset, finally Cohort.
     // Delete Notebook
     await dataPage.openTab(TabLabelAlias.Analysis);
-    await waitWhileLoading(page);
 
     const analysisPage = new AnalysisPage(page);
     await analysisPage.waitForLoad();
@@ -159,17 +155,13 @@ describe('Create Dataset', () => {
 
     // Delete Dataset
     await dataPage.openTab(TabLabelAlias.Data);
-    await waitWhileLoading(page);
-
     await dataPage.openTab(TabLabelAlias.Datasets, {waitPageChange: false});
-    await waitWhileLoading(page);
 
     const datasetDeleteDialogText = await dataPage.deleteDataset(newDatasetName);
     expect(datasetDeleteDialogText).toContain(`Are you sure you want to delete Dataset: ${newDatasetName}?`);
 
     // Delete Cohort
     await dataPage.openTab(TabLabelAlias.Cohorts, {waitPageChange: false});
-    await waitWhileLoading(page);
 
     const cohortDeleteDialogText = await dataPage.deleteCohort(newCohortName);
     expect(cohortDeleteDialogText).toContain(`Are you sure you want to delete Cohort: ${newCohortName}?`);

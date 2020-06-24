@@ -7,7 +7,7 @@ import GoogleLoginPage from 'app/page/google-login';
 import HomePage, {LabelAlias} from 'app/page/home-page';
 import {XPathOptions, ElementType} from 'app/xpath-options';
 import * as fp from 'lodash/fp';
-import {JSHandle, Page} from 'puppeteer';
+import {ElementHandle, JSHandle, Page} from 'puppeteer';
 import {waitForText} from 'utils/waits-utils';
 import WorkspaceCard from 'app/component/workspace-card';
 import {WorkspaceAccessLevel} from 'app/page-identifiers';
@@ -206,4 +206,26 @@ export async function findWorkspace(page: Page, createNew: boolean = false): Pro
   const workspaceCardName = await oneWorkspaceCard.getWorkspaceName();
   console.log(`Found a workspace: ${workspaceCardName}`);
   return oneWorkspaceCard;
+}
+
+export async function centerPoint(element: ElementHandle): Promise<[number, number]> {
+  const box = await element.boundingBox();
+  const { x, y, height, width } = box;
+  const cx = (x + x + width) / 2;
+  const cy = (y + y + height) / 2;
+  return [cx, cy];
+}
+
+export async function dragDrop(page: Page, element: ElementHandle, destinationPoint: {x, y}) {
+  const [x0, y0] = await centerPoint(element);
+  const {x, y} = destinationPoint;
+  const mouse = page.mouse;
+  await mouse.move(x0, y0);
+  await page.waitFor(100);
+  await mouse.down();
+  await page.waitFor(100);
+  await mouse.move(x, y, {steps: 10});
+  await page.waitFor(100);
+  await mouse.up();
+  await page.waitFor(1000);
 }

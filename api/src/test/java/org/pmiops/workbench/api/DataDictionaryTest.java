@@ -13,6 +13,8 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cohorts.CohortService;
+import org.pmiops.workbench.cdr.CdrVersionService;
+import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetMapper;
 import org.pmiops.workbench.conceptset.ConceptSetService;
@@ -57,7 +59,12 @@ public class DataDictionaryTest {
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
 
   @TestConfiguration
-  @Import({DataSetController.class, DataSetMapperImpl.class, CommonMappers.class})
+  @Import({
+    CdrVersionService.class,
+    DataSetController.class,
+    DataSetMapperImpl.class,
+    CommonMappers.class
+  })
   @MockBean({
     BigQueryService.class,
     CohortService.class,

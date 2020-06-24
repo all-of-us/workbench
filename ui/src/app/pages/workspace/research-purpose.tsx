@@ -2,13 +2,16 @@ import * as React from 'react';
 
 import {Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
+import {FlexColumn, FlexRow} from 'app/components/flex';
+import {ClrIcon} from 'app/components/icons';
 import {EditComponentReact} from 'app/icons/edit';
 import {
   disseminateFindings,
   researchOutcomes,
   researchPurposeQuestions
 } from 'app/pages/workspace/workspace-edit-text';
-import colors from 'app/styles/colors';
+import {workspacesApi} from 'app/services/swagger-fetch-clients';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {navigate} from 'app/utils/navigation';
 import {
@@ -51,8 +54,28 @@ const styles = reactStyles({
   sectionText: {
     fontSize: '14px', lineHeight: '24px', color: colors.primary, marginTop: '0.3rem'
   },
+  reviewPurposeReminder: {
+    marginTop: '0.3rem',
+    borderStyle: 'solid',
+    height: '2.5rem',
+    color: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderColor: colors.warning,
+    borderRadius: '0.4rem',
+    borderWidth: '0.1rem',
+    backgroundColor: colorWithWhiteness(colors.highlight, 0.7)
+  }
 });
 
+function updateWorkspace(workspace) {
+  workspacesApi().markResearchPurposeReviewed(workspace.namespace, workspace.id)
+    .then((markedWorkspace) => {
+      workspace.researchPurpose.needsReviewPrompt = false;
+      navigate(
+        ['workspaces',  markedWorkspace.namespace, markedWorkspace.id, 'about']);
+    });
+}
 
 export const ResearchPurpose = withCurrentWorkspace()(
   ({workspace}: {workspace: WorkspaceData}) => {
@@ -71,6 +94,24 @@ export const ResearchPurpose = withCurrentWorkspace()(
                               style={styles.editIcon}/>
         </Clickable>
       </div>
+      {isOwner && workspace.researchPurpose.needsReviewPrompt && <FlexRow style={styles.reviewPurposeReminder}>
+        <ClrIcon style={{color: colors.warning, marginLeft: '0.3rem'}} className='is-solid'
+        shape='exclamation-triangle' size='25'/>
+        <FlexColumn style={{paddingRight: '0.5rem', paddingLeft: '0.5rem', color: colors.primary}}>
+        <label style={{fontWeight: 600, fontSize: '14px', flex: 1}}>
+          Please review your workspace description to make sure it is accurate.</label>
+          <label>Project descriptions are publicly cataloged in the <a
+              href='https://www.researchallofus.org/research-projects-directory/' target='_blank'>
+            Research Project Directory</a> for participants and public to review.</label>
+        </FlexColumn>
+        <div style={{marginLeft: 'auto', marginRight: '0.5rem'}}>
+        <a style={{marginRight: '0.5rem'}} onClick={() => updateWorkspace(workspace)}>Looks
+        Good</a>
+        |
+        <a style={{marginLeft: '0.5rem'}} onClick={() => navigate(
+          ['workspaces', workspace.namespace, workspace.id, 'edit'])}>Update</a>
+        </div>
+        </FlexRow>}
       <div style={styles.sectionContentContainer}>
         {selectedResearchPurposeItems && selectedResearchPurposeItems.length > 0 && <div
              style={styles.sectionSubHeader}>Research Purpose</div>

@@ -192,7 +192,6 @@ describe('User can create new Cohorts', () => {
     await waitWhileLoading(page);
 
     await dataPage.openTab(TabLabelAlias.Data);
-    await waitWhileLoading(page);
 
     // Duplicate cohort using Ellipsis menu.
     const origCardsCount = (await DataResourceCard.findAllCards(page)).length;

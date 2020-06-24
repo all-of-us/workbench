@@ -1,13 +1,13 @@
-import {Page} from 'puppeteer';
-import ClrIconLink from 'app/element/clr-icon-link';
-import {ElementType} from 'app/xpath-options';
-import {waitForNumericalString} from 'utils/waits-utils';
-import {xPathOptionToXpath} from 'app/element/xpath-defaults';
-import {waitWhileLoading} from 'utils/test-utils';
-import Textbox from 'app/element/textbox';
 import Dialog, {ButtonLabel} from 'app/component/dialog';
 import SelectMenu from 'app/component/select-menu';
 import Table from 'app/component/table';
+import ClrIconLink from 'app/element/clr-icon-link';
+import Textbox from 'app/element/textbox';
+import {xPathOptionToXpath} from 'app/element/xpath-defaults';
+import {ElementType} from 'app/xpath-options';
+import {Page} from 'puppeteer';
+import {centerPoint, dragDrop, waitWhileLoading} from 'utils/test-utils';
+import {waitForNumericalString, waitForPropertyNotExists} from 'utils/waits-utils';
 
 const defaultXpath = '//*[@class="modal-container"]';
 
@@ -105,7 +105,7 @@ export default class CohortCriteriaModal extends Dialog {
   }
 
   async waitForParticipantResult(): Promise<string> {
-    const selector = `${this.xpath}//*[text()="Results"]/parent::*//span`;
+    const selector = `${this.xpath}//*[./*[contains(text(), "Results")]]/div[contains(text(), "Number")]`;
     return waitForNumericalString(this.page, selector);
   }
 
@@ -151,5 +151,49 @@ export default class CohortCriteriaModal extends Dialog {
       await link.click();
     }
   }
+
+  /**
+   * Type age lower and upper bounds.
+   * @param {number} minAge
+   * @param {number} maxAge
+   */
+  async addAge(minAge: number, maxAge: number): Promise<string> {
+    const selector = `${this.getXpath()}//input[@type="number"]`;
+    await this.page.waitForXPath(selector, {visible: true});
+
+    const [lowerNumberInput, upperNumberInput] = await this.page.$x(selector);
+    await (Textbox.asBaseElement(this.page, lowerNumberInput)).type(minAge.toString()).then(input => input.tabKey());
+    await (Textbox.asBaseElement(this.page, upperNumberInput)).type(maxAge.toString()).then(input => input.tabKey());
+
+    // Click Calculate button.
+    const button = await this.waitForButton(ButtonLabel.Calculate);
+    await waitForPropertyNotExists(this.page, button.getXpath(), 'disabled');
+    await button.click();
+
+    const calcuatedResult = await this.waitForParticipantResult();
+    console.log(`Age min: ${minAge}, max: ${maxAge} ==> number of participants: ${calcuatedResult}`);
+
+    // Click FINISH button. Dialog should close.
+    await this.clickFinishButton();
+    return calcuatedResult;
+  }
+
+  // Experimental
+  async drageAgeSlider(): Promise<void> {
+    const getXpath = (classValue: string) => {
+      return `${this.getXpath()}//*[text()="Age Range"]/ancestor::node()[1]//*[contains(@class,"${classValue}") and @role="slider"]`;
+    }
+
+    const lowerNumberInputHandle = await this.page.waitForXPath(getXpath('noUi-handle-lower'), {visible: true});
+    const upperNumberInputHandle = await this.page.waitForXPath(getXpath('noUi-handle-upper'), {visible: true});
+
+    const [x1, y1] = await centerPoint(lowerNumberInputHandle);
+    // drag lowerHandle slider horizontally: 50 pixels to the right.
+    await dragDrop(this.page, lowerNumberInputHandle, {x: x1+50, y: y1});
+    const [x2, y2] = await centerPoint(upperNumberInputHandle);
+    // drag upperHandle slider horizontally: 50 pixels to the left.
+    await dragDrop(this.page, upperNumberInputHandle, {x: x2-50, y: y2});
+  }
+
 
 }

@@ -139,7 +139,7 @@ export default class WorkspaceCard {
       elemt.click(),
     ]);
     if (waitForDataPage) {
-      const dataPage = new DataPage(page);
+      const dataPage = new DataPage(this.page);
       await dataPage.waitForLoad();
     }
     return name.toString();

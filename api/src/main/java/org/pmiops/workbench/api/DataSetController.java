@@ -35,12 +35,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.cohorts.CohortService;
+import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetMapper;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.dataset.DataSetMapper;
 import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.dao.CohortDao;
+import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -104,6 +107,8 @@ public class DataSetController implements DataSetApiDelegate {
   private static final Logger log = Logger.getLogger(DataSetController.class.getName());
 
   private final CdrVersionDao cdrVersionDao;
+  private final CdrVersionService cdrVersionService;
+  private final CohortDao cohortDao;
   private final ConceptService conceptService;
   private final ConceptSetService conceptSetService;
   private final DataDictionaryEntryDao dataDictionaryEntryDao;
@@ -119,6 +124,8 @@ public class DataSetController implements DataSetApiDelegate {
       Clock clock,
       CdrVersionDao cdrVersionDao,
       CohortService cohortService,
+      CdrVersionService cdrVersionService,
+      CohortDao cohortDao,
       ConceptService conceptService,
       ConceptSetService conceptSetService,
       DataDictionaryEntryDao dataDictionaryEntryDao,
@@ -134,6 +141,8 @@ public class DataSetController implements DataSetApiDelegate {
     this.clock = clock;
     this.cdrVersionDao = cdrVersionDao;
     this.cohortService = cohortService;
+    this.cdrVersionService = cdrVersionService;
+    this.cohortDao = cohortDao;
     this.conceptService = conceptService;
     this.conceptSetService = conceptSetService;
     this.dataDictionaryEntryDao = dataDictionaryEntryDao;
@@ -602,10 +611,13 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<DataDictionaryEntry> getDataDictionaryEntry(
       Long cdrVersionId, String domain, String domainValue) {
-    DbCdrVersion cdrVersion = cdrVersionDao.findByCdrVersionId(cdrVersionId);
-    if (cdrVersion == null) {
-      throw new BadRequestException("Invalid CDR Version");
-    }
+    DbCdrVersion cdrVersion =
+        cdrVersionService
+            .findByCdrVersionId(cdrVersionId)
+            .<BadRequestException>orElseThrow(
+                () -> {
+                  throw new BadRequestException("Invalid CDR Version");
+                });
 
     String omopTable = conceptSetService.getOmpTable(domain);
     if (omopTable == null) {

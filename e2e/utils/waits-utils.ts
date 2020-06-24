@@ -63,10 +63,10 @@ export async function waitForPropertyEquality(
    timeOut: number = 30000): Promise<boolean> {
 
   try {
-    const jsHandle = await page.waitForFunction(xpath => {
+    const jsHandle = await page.waitForFunction((xpath, prop, value) => {
       const element = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-      return element[propertyName] === propertyValue;
-    }, {timeout: timeOut}, xpathSelector);
+      return element[prop] === value;
+    }, {timeout: timeOut}, xpathSelector, propertyName, propertyValue);
     await jsHandle.jsonValue();
     return true;
   } catch (e) {
@@ -82,15 +82,32 @@ export async function waitForNumericalString(page: Page, xpath: string): Promise
     const node = document.evaluate(xpathSelector, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
     if (node !== null) {
       const txt = node.textContent.trim();
-      const re = new RegExp(/^\d{1,3}(,?\d{3})*$/);
+      const re = new RegExp(/\d{1,3}(,?\d{3})*/);
       if (re.test(txt)) { // Match only numbers with comma
-        return txt;
+        return re.exec(txt)[0];
       }
     }
     return false;
   }, {timeout: 30000}, xpath);
 
   return (await numbers.jsonValue()).toString();
+}
+
+export async function waitForPropertyNotExists(page: Page,
+                                            xpathSelector: string,
+                                            propertyName: string,
+                                            timeOut: number = 30000): Promise<boolean> {
+
+  try {
+    await page.waitForFunction((xpath, prop) => {
+      const element = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+      return !element[prop];
+    }, {timeout: timeOut}, xpathSelector, propertyName);
+    return true;
+  } catch (e) {
+    console.error(`Failed waiting element (XPath="${xpathSelector}") property: ${propertyName} not exists. ${e}`);
+    throw e;
+  }
 }
 
 // ************************************************************************

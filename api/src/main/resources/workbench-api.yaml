@@ -790,6 +790,22 @@ paths:
           description: Workspace deletion request accepted
           schema:
             "$ref": "#/definitions/EmptyResponse"
+
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/markResearchPurposeReviewed":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    get:
+      tags:
+      - workspaces
+      description: Mark workspace owner has reviewed research purpose
+      operationId: markResearchPurposeReviewed
+      responses:
+        200:
+          description: The billing usage for a workspace
+          schema:
+            "$ref": "#/definitions/Workspace"
+
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/resources":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -1519,6 +1535,22 @@ paths:
       - cron
       description: Trigger recording of all gauge metrics
       operationId: updateGaugeMetrics
+      security: []
+      responses:
+        204:
+          description: No content
+        500:
+          description: Internal Error
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+
+  "/v1/cron/updateResearchPurposeReviewPrompt":
+    get:
+      tags:
+      - offlineWorkspace
+      - cron
+      description: Show review research prompt if Workspace has been created 15 days/an year earlier
+      operationId: updateResearchPurposeReviewPrompt
       security: []
       responses:
         204:
@@ -3896,9 +3928,6 @@ definitions:
   PageVisit:
     type: object
     properties:
-      userId:
-        type: integer
-        format: int64
       page:
         type: string
       firstVisit:
@@ -4224,6 +4253,9 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/ResearchOutcomeEnum"
+      needsReviewPrompt:
+        type: boolean
+        default: false
   SpecificPopulationEnum:
     type: string
     description: Short parsable descriptions of specific population categories
