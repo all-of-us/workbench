@@ -18,7 +18,6 @@ import javax.inject.Provider;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
@@ -306,36 +305,6 @@ public class ProfileController implements ProfileApiDelegate {
     profile.setUsername(profile.getUsername().toLowerCase());
   }
 
-  private void validateUpdatedProfile(Profile updatedProfile, Profile prevProfile)
-      throws BadRequestException {
-    validateAndCleanProfile(updatedProfile);
-    if (StringUtils.isEmpty(updatedProfile.getAreaOfResearch())) {
-      throw new BadRequestException("Research background cannot be empty");
-    }
-    Optional.ofNullable(updatedProfile.getAddress())
-        .orElseThrow(() -> new BadRequestException("Address must not be empty"));
-
-    Address updatedProfileAddress = updatedProfile.getAddress();
-    if (StringUtils.isEmpty(updatedProfileAddress.getStreetAddress1())
-        || StringUtils.isEmpty(updatedProfileAddress.getCity())
-        || StringUtils.isEmpty(updatedProfileAddress.getState())
-        || StringUtils.isEmpty(updatedProfileAddress.getCountry())
-        || StringUtils.isEmpty(updatedProfileAddress.getZipCode())) {
-      throw new BadRequestException(
-          "Address cannot have empty street Address 1/city/state/country or Zip Code");
-    }
-    if (updatedProfile.getContactEmail() != null
-        && !updatedProfile.getContactEmail().equals(prevProfile.getContactEmail())) {
-      // See RW-1488.
-      throw new BadRequestException("Changing email is not currently supported");
-    }
-    if (updatedProfile.getUsername() != null
-        && !updatedProfile.getUsername().equals(prevProfile.getUsername())) {
-      // See RW-1488.
-      throw new BadRequestException("Changing username is not supported");
-    }
-  }
-
   private DbUser saveUserWithConflictHandling(DbUser dbUser) {
     try {
       return userDao.save(dbUser);
@@ -416,7 +385,7 @@ public class ProfileController implements ProfileApiDelegate {
     Optional.ofNullable(profile.getAddress())
         .orElseThrow(() -> new BadRequestException("Address must not be empty"));
 
-    validateAndCleanProfile(profile);
+    profileService.validateAndCleanProfile(profile);
 
     com.google.api.services.directory.model.User googleUser =
         directoryService.createUser(
