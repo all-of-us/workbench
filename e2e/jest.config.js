@@ -1,5 +1,6 @@
 module.exports = {
   "verbose": true,
+  "bail": 3,  // Stop running tests after `n` failures
   "preset": "jest-puppeteer",
   "testTimeout": 600000,
   "testRunner": "jest-circus/runner",
