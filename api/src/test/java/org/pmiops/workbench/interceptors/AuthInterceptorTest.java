@@ -4,7 +4,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -223,10 +222,9 @@ public class AuthInterceptorTest {
     mockUserInfoSuccess();
     // Override the userDao mock to return a null record.
     when(userDao.findUserByUsername(eq("bob@fake-domain.org"))).thenReturn(null);
+    when(devUserRegistrationService.createUserFromUserInfo(any())).thenReturn(user);
 
     assertThat(interceptor.preHandle(request, response, handler)).isTrue();
-
-    verify(devUserRegistrationService, times(1)).createUserFromUserInfo(any());
   }
 
   @Test
