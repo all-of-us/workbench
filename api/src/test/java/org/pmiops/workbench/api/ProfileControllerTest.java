@@ -881,8 +881,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     profileController.updateProfile(profile);
   }
 
-  // fail
-
   @Test(expected = BadRequestException.class)
   public void adminUpdateProfile_removeVerifiedInstitutionalAffiliationForbidden() {
     config.featureFlags.requireInstitutionalVerification = true;
@@ -997,8 +995,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(dbUser.getContactEmail()).isEqualTo("newContactEmail@whatever.com");
   }
 
-  // fail
-  
   @Test
   public void updateProfile_newNameAlsoUpdatesDua() {
     createUser();
@@ -1014,8 +1010,6 @@ public class ProfileControllerTest extends BaseControllerTest {
         userDataUseAgreementDao.findByUserIdOrderByCompletionTimeDesc(profile.getUserId());
     assertThat(duas.get(0).isUserNameOutOfDate()).isTrue();
   }
-
-  //fail
 
   @Test
   public void adminUpdateProfile_newNameAlsoUpdatesDua() {

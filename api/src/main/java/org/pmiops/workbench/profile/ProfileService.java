@@ -313,6 +313,17 @@ public class ProfileService {
       // See RW-1488.
       throw new BadRequestException("Changing username is not supported");
     }
+
+    if (updatedProfile.getVerifiedInstitutionalAffiliation() == null
+        && prevProfile.getVerifiedInstitutionalAffiliation() != null) {
+      throw new BadRequestException("Cannot delete Verified Institutional Affiliation.");
+    }
+
+    if (!prevProfile.getGivenName().equalsIgnoreCase(updatedProfile.getGivenName())
+        || !prevProfile.getFamilyName().equalsIgnoreCase(updatedProfile.getFamilyName())) {
+      userService.setDataUseAgreementNameOutOfDate(
+          updatedProfile.getGivenName(), updatedProfile.getFamilyName());
+    }
   }
 
   private void validateStringLength(String field, String fieldName, int max, int min) {
