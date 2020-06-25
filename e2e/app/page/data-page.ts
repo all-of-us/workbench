@@ -199,7 +199,7 @@ export default class DataPage extends AuthenticatedPage {
     await this.openTab(TabLabelAlias.Data);
     await this.openTab(TabLabelAlias.Cohorts, {waitPageChange: false});
     if (cohortName === undefined) {
-      // if cohort name isn't specified, find an existing cohort.
+      // if cohort name isn't specified, find any existing cohort.
       return DataResourceCard.findAnyCard(this.page);
     } else {
       // find cohort matching name.
@@ -220,7 +220,6 @@ export default class DataPage extends AuthenticatedPage {
     const modal = await group1.includeVisits();
     await modal.addVisits([Visits.OutpatientVisit]);
     await modal.clickFinishButton();
-    await modal.waitUntilDialogIsClosed();
     await waitWhileLoading(this.page);
     await cohortBuildPage.getTotalCount();
     const name = (cohortName === undefined) ? makeRandomName() : cohortName;

@@ -7,7 +7,7 @@ export function iframeXpath(label: string) {
 
 export function xPathOptionToXpath(xOpts: XPathOptions, container?: Container): string {
 
-  const  { type, name, containsText, normalizeSpace, ancestorLevel = 1, iconShape, startsWith} = xOpts;
+  const  { type, name, containsText, normalizeSpace, ancestorLevel = 1, iconShape, startsWith } = xOpts;
 
   // optional function parameters check
   if (type === 'icon') {

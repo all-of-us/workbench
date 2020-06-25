@@ -4,7 +4,7 @@ import Button from 'app/element/button';
 import Textbox from 'app/element/textbox';
 import Textarea from 'app/element/textarea';
 import Checkbox from 'app/element/checkbox';
-import {savePageToFile, takeScreenshot} from '../../utils/save-file-utils';
+import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
 
 export enum ButtonLabel {
   Confirm = 'Confirm',

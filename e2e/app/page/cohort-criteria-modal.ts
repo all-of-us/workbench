@@ -118,9 +118,15 @@ export default class CohortCriteriaModal extends Dialog {
     return participantResult;
   }
 
-  // Click FINISH button.
-  async clickFinishButton(): Promise<void> {
-    return this.clickButton(ButtonLabel.Finish);
+  /**
+   * Click FINISH button.
+   */
+  async clickFinishButton(opt: {waitUntilClosed?: boolean} = {}): Promise<void> {
+    const { waitUntilClosed = true } = opt
+    await this.clickButton(ButtonLabel.Finish);
+    if (waitUntilClosed) {
+      await this.waitUntilDialogIsClosed();
+    }
   }
 
   async waitForParticipantResult(): Promise<string> {

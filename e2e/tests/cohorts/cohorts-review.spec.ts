@@ -22,7 +22,7 @@ describe('Cohort review tests', () => {
    * Verify some UI.
    * Delete Cohort in Cohort Build page.
    */
-  test('Cohort - Create a review set for 100 participants', async () => {
+  test('Create Cohort and a Review Set for 100 participants', async () => {
     const reviewSetNumberOfParticipants = 100;
 
     await findWorkspace(page).then(card => card.clickWorkspaceName());
