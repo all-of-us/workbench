@@ -1,6 +1,5 @@
 import {findWorkspace, isValidDate, signIn, waitWhileLoading} from 'utils/test-utils';
-import {ButtonLabel} from 'app/component/dialog';
-import {EllipsisMenuAction} from 'app/page-identifiers';
+import {EllipsisMenuAction, LinkText} from 'app/page-identifiers';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import CohortParticipantDetailPage from 'app/page/cohort-participant-detail-page';
 import CohortReviewModal from 'app/page/cohort-review-modal';
@@ -36,7 +35,7 @@ describe('Cohort review tests', () => {
     await menu.clickAction(EllipsisMenuAction.Review);
     const modal = new CohortReviewModal(page);
     await modal.fillInNumberOfPartcipants(reviewSetNumberOfParticipants);
-    await modal.clickButton(ButtonLabel.CreateSet);
+    await modal.clickButton(LinkText.CreateSet);
     console.log(`Created Review Set with ${reviewSetNumberOfParticipants} participants.`);
 
     const cohortReviewPage = new CohortReviewPage(page);

@@ -2,6 +2,7 @@ import {Page} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
 import Button from 'app/element/button';
+import {LinkText} from 'app/page-identifiers';
 import AuthenticatedPage from './authenticated-page';
 import DatasetBuildPage from './dataset-build-page';
 
@@ -41,11 +42,11 @@ export default class ConceptsetActionsPage extends AuthenticatedPage {
   }
 
   async getCreateAnotherConceptSetButton(): Promise<Button> {
-    return Button.findByName(this.page, {name: 'Create another Concept Set'});
+    return Button.findByName(this.page, {name: LinkText.CreateAnotherConceptSet});
   }
 
   async getCreateDatasetButton(): Promise<Button> {
-    return Button.findByName(this.page, {name: 'Create a Dataset'});
+    return Button.findByName(this.page, {name: LinkText.CreateDataset});
   }
 
 }

@@ -1,9 +1,10 @@
 import {Page} from 'puppeteer';
-import Dialog, {ButtonLabel} from 'app/component/dialog';
+import Dialog from 'app/component/dialog';
 import {makeRandomName} from 'utils/str-utils';
 import {waitWhileLoading} from 'utils/test-utils';
 import RadioButton from 'app/element/radiobutton';
 import Textbox from 'app/element/textbox';
+import {LinkText} from 'app/page-identifiers';
 
 export enum Language {
   Python = 'Python',
@@ -52,9 +53,9 @@ export default class DatasetSaveModal extends Dialog {
     }
     await waitWhileLoading(this.page);
     if (isUpdate) {
-      await this.waitForButton(ButtonLabel.Update).then(btn => btn.clickAndWait());
+      await this.waitForButton(LinkText.Update).then(btn => btn.clickAndWait());
     } else {
-      await this.waitForButton(ButtonLabel.Save).then(btn => btn.clickAndWait());
+      await this.waitForButton(LinkText.Save).then(btn => btn.clickAndWait());
     }
     await waitWhileLoading(this.page);
     console.log(`Created Dataset "${newDatasetName}"`);

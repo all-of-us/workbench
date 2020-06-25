@@ -1,6 +1,6 @@
 import {ElementHandle, Page} from 'puppeteer';
 import {EllipsisMenuAction} from 'app/page-identifiers';
-import {GroupAction} from '../page/cohort-participants-group';
+import {GroupAction} from 'app/page/cohort-participants-group';
 import TieredMenu from './tiered-menu';
 
 export default class EllipsisMenu {

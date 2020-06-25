@@ -1,4 +1,4 @@
-import Dialog, {ButtonLabel} from 'app/component/dialog';
+import Dialog from 'app/component/dialog';
 import Button from 'app/element/button';
 import Checkbox from 'app/element/checkbox';
 import Select from 'app/element/select';
@@ -10,6 +10,7 @@ import {ElementHandle, Page} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
 import {xPathOptionToXpath} from 'app/element/xpath-defaults';
+import {LinkText} from 'app/page-identifiers';
 
 const faker = require('faker/locale/en_US');
 
@@ -18,9 +19,6 @@ export const PageTitle = 'Create Workspace';
 export const LabelAlias = {
   SYNTHETIC_DATASET: 'Workspace Name',  // select Synthetic Dataset
   SELECT_BILLING: 'Select account',   // select billing account
-  CREATE_WORKSPACE: 'Create Workspace',  // button CREATE WORKSPACE on edit page
-  DUPLICATE_WORKSPACE: 'Duplicate Workspace', // button DUPLICATE WORKSPACE on edit page
-  CANCEL: `Cancel`,  // button CANCEL on edit page
   WORKSPACE_NAME: 'Workspace Name',  // Workspace name input textbox
   RESEARCH_PURPOSE: 'Research purpose',
   EDUCATION_PURPOSE: 'Educational Purpose',
@@ -67,13 +65,13 @@ export const LabelAlias = {
 
 export const FIELD = {
   createWorkspaceButton: {
-    textOption: {name: LabelAlias.CREATE_WORKSPACE}
+    textOption: {name: LinkText.CreateWorkspace}
   },
   duplicateWorkspaceButton: {
-    textOption: {name: LabelAlias.DUPLICATE_WORKSPACE}
+    textOption: {name: LinkText.DuplicateWorkspace}
   },
   cancelWorkspaceButton: {
-    textOption: {name: LabelAlias.CANCEL}
+    textOption: {name: LinkText.Cancel}
   },
   workspaceNameTextbox: {
     textOption: {name: LabelAlias.WORKSPACE_NAME, ancestorLevel: 2, type: ElementType.Textbox}
@@ -390,7 +388,7 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
     const dialog = new Dialog(this.page);
     const dialogText = await dialog.getContent();
     await Promise.all([
-      dialog.clickButton(ButtonLabel.Confirm),
+      dialog.clickButton(LinkText.Confirm),
       dialog.waitUntilDialogIsClosed(),
       this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 60000}),
     ]);

@@ -1,6 +1,6 @@
 import {Page} from 'puppeteer';
 import Button from 'app/element/button';
-import {PageUrl} from 'app/page-identifiers';
+import {LinkText, PageUrl} from 'app/page-identifiers';
 import WorkspaceEditPage, {FIELD as EDIT_FIELD} from 'app/page/workspace-edit-page';
 import {makeWorkspaceName} from 'utils/str-utils';
 import RadioButton from 'app/element/radiobutton';
@@ -8,17 +8,12 @@ import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle, waitForText} from 'utils/waits-utils';
 
 const faker = require('faker/locale/en_US');
-
 export const PageTitle = 'View Workspace';
-
-export const LabelAlias = {
-  CreateANewWorkspace: 'Create a New Workspace',
-};
 
 export const FieldSelector = {
   CreateNewWorkspaceButton: {
     textOption: {
-      normalizeSpace: LabelAlias.CreateANewWorkspace
+      normalizeSpace: LinkText.CreateNewWorkspace
     }
   }
 };

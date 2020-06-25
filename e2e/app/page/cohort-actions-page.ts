@@ -2,6 +2,7 @@ import {Page} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
 import Button from 'app/element/button';
+import {LinkText} from 'app/page-identifiers';
 import AuthenticatedPage from './authenticated-page';
 import DatasetBuildPage from './dataset-build-page';
 
@@ -36,15 +37,15 @@ export default class CohortActionsPage extends AuthenticatedPage {
   }
 
   async getCreateAnotherCohortButton(): Promise<Button> {
-    return Button.findByName(this.page, {name: 'Create another Cohort'});
+    return Button.findByName(this.page, {name: LinkText.CreateAnotherCohort});
   }
 
   async getCreateReviewSetsButton(): Promise<Button> {
-    return Button.findByName(this.page, {name: 'Create Review Sets'});
+    return Button.findByName(this.page, {name: LinkText.CreateReviewSets});
   }
 
   async getCreateDatasetButton(): Promise<Button> {
-    return Button.findByName(this.page, {name: 'Create a Dataset'});
+    return Button.findByName(this.page, {name: LinkText.CreateDataset});
   }
 
 }

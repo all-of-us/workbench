@@ -1,13 +1,14 @@
-import Dialog, {ButtonLabel} from 'app/component/dialog';
+import {Page} from 'puppeteer';
+import Dialog from 'app/component/dialog';
 import SelectMenu from 'app/component/select-menu';
 import Table from 'app/component/table';
 import ClrIconLink from 'app/element/clr-icon-link';
 import Textbox from 'app/element/textbox';
 import {xPathOptionToXpath} from 'app/element/xpath-defaults';
 import {ElementType} from 'app/xpath-options';
-import {Page} from 'puppeteer';
 import {centerPoint, dragDrop, waitWhileLoading} from 'utils/test-utils';
 import {waitForNumericalString, waitForPropertyNotExists} from 'utils/waits-utils';
+import {LinkText} from 'app/page-identifiers';
 
 const defaultXpath = '//*[@class="modal-container"]';
 
@@ -98,7 +99,7 @@ export default class CohortCriteriaModal extends Dialog {
     const numberField = await this.page.waitForXPath(`${this.xpath}//input[@type="number"]`, {visible: true});
     await numberField.type(String(filterValue));
 
-    await this.clickButton(ButtonLabel.Calculate);
+    await this.clickButton(LinkText.Calculate);
     const participantResult = await this.waitForParticipantResult();
     console.debug(`Physical Measurements ${criteriaName}: ${filterSign} ${filterValue}  => number of participants: ${participantResult}`);
 
@@ -107,7 +108,7 @@ export default class CohortCriteriaModal extends Dialog {
     // Before add criteria, first check for nothing in Selected Criteria Content Box.
     await this.page.waitForXPath(removeSelectedCriteriaIconSelector,{hidden: true});
 
-    await this.clickButton(ButtonLabel.AddThis);
+    await this.clickButton(LinkText.AddThis);
     // After add criteria, look for X (remove) icon for indication that add succeeded.
     await this.page.waitForXPath(removeSelectedCriteriaIconSelector,{visible: true});
 
@@ -123,7 +124,7 @@ export default class CohortCriteriaModal extends Dialog {
    */
   async clickFinishButton(opt: {waitUntilClosed?: boolean} = {}): Promise<void> {
     const { waitUntilClosed = true } = opt
-    await this.clickButton(ButtonLabel.Finish);
+    await this.clickButton(LinkText.Finish);
     if (waitUntilClosed) {
       await this.waitUntilDialogIsClosed();
     }
@@ -158,12 +159,12 @@ export default class CohortCriteriaModal extends Dialog {
     await numberField.press('Tab', { delay: 200 });
 
     let participantResult;
-    await this.clickButton(ButtonLabel.Calculate);
+    await this.clickButton(LinkText.Calculate);
     try {
       participantResult = await this.waitForParticipantResult();
     } catch (e) {
       // Retry one more time.
-      await this.clickButton(ButtonLabel.Calculate);
+      await this.clickButton(LinkText.Calculate);
       participantResult = await this.waitForParticipantResult();
     }
     console.debug(`Age Modifier: ${filterSign} ${filterValue}  => number of participants: ${participantResult}`);
@@ -191,7 +192,7 @@ export default class CohortCriteriaModal extends Dialog {
     await (Textbox.asBaseElement(this.page, upperNumberInput)).type(maxAge.toString()).then(input => input.tabKey());
 
     // Click Calculate button.
-    const button = await this.waitForButton(ButtonLabel.Calculate);
+    const button = await this.waitForButton(LinkText.Calculate);
     await waitForPropertyNotExists(this.page, button.getXpath(), 'disabled');
     await button.click();
 

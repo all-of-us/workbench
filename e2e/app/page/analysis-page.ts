@@ -4,7 +4,7 @@ import {waitForDocumentTitle} from 'utils/waits-utils';
 import DataResourceCard from 'app/component/data-resource-card';
 import Dialog from 'app/component/dialog';
 import Button from 'app/element/button';
-import {EllipsisMenuAction} from 'app/page-identifiers';
+import {EllipsisMenuAction, LinkText} from 'app/page-identifiers';
 import AuthenticatedPage from './authenticated-page';
 
 const PageTitle = 'View Notebooks';
@@ -39,7 +39,7 @@ export default class AnalysisPage extends AuthenticatedPage {
 
     const dialog = new Dialog(this.page);
     const dialogContentText = await dialog.getContent();
-    const deleteButton = await Button.findByName(this.page, {normalizeSpace: 'Delete Notebook'}, dialog);
+    const deleteButton = await Button.findByName(this.page, {normalizeSpace: LinkText.DeleteNotebook}, dialog);
     await Promise.all([
       deleteButton.click(),
       dialog.waitUntilDialogIsClosed(),

@@ -1,12 +1,11 @@
 import DataResourceCard, {CardType} from 'app/component/data-resource-card';
-import {ButtonLabel} from 'app/component/dialog';
 import ClrIconLink from 'app/element/clr-icon-link';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import DataPage, {TabLabelAlias} from 'app/page/data-page';
 import DatasetSaveModal from 'app/page/dataset-save-modal';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
-import {EllipsisMenuAction} from 'app/page-identifiers';
+import {EllipsisMenuAction, LinkText} from 'app/page-identifiers';
 
 describe('Create Dataset', () => {
 
@@ -81,7 +80,7 @@ describe('Create Dataset', () => {
     await addIcon.click();
 
     // Click FINISH button. Criteria dialog closes.
-    await modal.clickButton(ButtonLabel.Finish);
+    await modal.clickButton(LinkText.Finish);
     await cohortBuildPage.getTotalCount();
 
     // Save new cohort.

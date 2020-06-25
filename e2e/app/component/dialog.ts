@@ -5,20 +5,8 @@ import Textbox from 'app/element/textbox';
 import Textarea from 'app/element/textarea';
 import Checkbox from 'app/element/checkbox';
 import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
+import {LinkText} from 'app/page-identifiers';
 
-export enum ButtonLabel {
-  Confirm = 'Confirm',
-  KeepEditing = 'Keep Editing',
-  Cancel = 'Cancel',
-  Calculate = 'Calculate',
-  AddThis = 'ADD THIS',
-  Finish = 'Finish',
-  Rename = 'Rename',
-  Save = 'Save',
-  Update = 'Update',
-  CreateSet = 'CREATE SET',
-  DiscardChanges = 'Discard Changes',
-}
 
 const Selector = {
   defaultDialog: '//*[@role="dialog"]',
@@ -50,13 +38,13 @@ export default class Dialog extends Container {
     return modalText.toString();
   }
 
-  async clickButton(buttonLabel: ButtonLabel): Promise<void> {
+  async clickButton(buttonLabel: LinkText): Promise<void> {
     const button = await this.waitForButton(buttonLabel);
     await button.waitUntilEnabled();
     return button.click();
   }
 
-  async waitForButton(buttonLabel: ButtonLabel): Promise<Button> {
+  async waitForButton(buttonLabel: LinkText): Promise<Button> {
     return Button.findByName(this.page, {containsText: buttonLabel}, this);
   }
 
