@@ -1019,25 +1019,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countParticipantsForSurveyWithAgeAtEventModifiers() {
-    SearchGroupItem icd9SGI =
-        new SearchGroupItem()
-            .type(DomainType.SURVEY.toString())
-            .addSearchParametersItem(icd9())
-            .temporalGroup(0)
-            .addModifiersItem(ageModifier());
+  public void countSubjectsForSurveyWithAgeModifiers() {
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.SURVEY.toString(), ImmutableList.of(survey()), Arrays.asList(ageModifier()));
 
-    // First Mention Of (ICD9 w/modifiers or Snomed) 5 Days After ICD10 w/modifiers
-    SearchGroup temporalGroup =
-        new SearchGroup()
-            .items(ImmutableList.of(icd9SGI))
-            .temporal(true)
-            .mention(TemporalMention.FIRST_MENTION)
-            .time(TemporalTime.X_DAYS_AFTER)
-            .timeValue(5L);
-
-    SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
-    // matches icd9SGI in group 0 and icd10SGI in group 1
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
