@@ -246,6 +246,9 @@ public class ProfileService {
     profile.setUsername(profile.getUsername().toLowerCase());
   }
 
+  // Deprecated because it refers to old-style Institutional Affiliations, to be deleted in RW-4362
+  // The new-style equivalent is VerifiedInstitutionalAffiliationMapper.modelToDbWithoutUser()
+  @Deprecated
   private void updateInstitutionalAffiliations(Profile updatedProfile, DbUser user) {
     List<DbInstitutionalAffiliation> newAffiliations =
         updatedProfile.getInstitutionalAffiliations().stream()

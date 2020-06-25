@@ -113,29 +113,6 @@ public class ProfileController implements ProfileApiDelegate {
             }
           };
 
-  @Deprecated
-  private static final Function<InstitutionalAffiliation, DbInstitutionalAffiliation>
-      FROM_CLIENT_INSTITUTIONAL_AFFILIATION =
-          new Function<InstitutionalAffiliation, DbInstitutionalAffiliation>() {
-            @Override
-            public DbInstitutionalAffiliation apply(
-                InstitutionalAffiliation institutionalAffiliation) {
-              DbInstitutionalAffiliation result = new DbInstitutionalAffiliation();
-              if (institutionalAffiliation.getInstitution() != null) {
-                result.setInstitution(institutionalAffiliation.getInstitution());
-              }
-              if (institutionalAffiliation.getNonAcademicAffiliation() != null) {
-                result.setNonAcademicAffiliationEnum(
-                    institutionalAffiliation.getNonAcademicAffiliation());
-              }
-
-              result.setRole(institutionalAffiliation.getRole());
-              result.setOther(institutionalAffiliation.getOther());
-
-              return result;
-            }
-          };
-
   private static final Function<Address, DbAddress> FROM_CLIENT_ADDRESS =
       new Function<Address, DbAddress>() {
         @Override
@@ -151,50 +128,9 @@ public class ProfileController implements ProfileApiDelegate {
         }
       };
 
-  private static final Function<DemographicSurvey, DbDemographicSurvey>
-      FROM_CLIENT_DEMOGRAPHIC_SURVEY =
-          new Function<DemographicSurvey, DbDemographicSurvey>() {
-            @Override
-            public DbDemographicSurvey apply(DemographicSurvey demographicSurvey) {
-              DbDemographicSurvey result = new DbDemographicSurvey();
-              if (demographicSurvey.getRace() != null) {
-                result.setRaceEnum(demographicSurvey.getRace());
-              }
-              if (demographicSurvey.getEthnicity() != null) {
-                result.setEthnicityEnum(demographicSurvey.getEthnicity());
-              }
-              if (demographicSurvey.getDisability() != null) {
-                result.setDisabilityEnum(
-                    demographicSurvey.getDisability() ? Disability.TRUE : Disability.FALSE);
-              }
-              if (demographicSurvey.getEducation() != null) {
-                result.setEducationEnum(demographicSurvey.getEducation());
-              }
-              result.setIdentifiesAsLgbtq(demographicSurvey.getIdentifiesAsLgbtq());
-              result.setLgbtqIdentity(demographicSurvey.getLgbtqIdentity());
-              if (demographicSurvey.getDisability() != null) {
-                result.setDisabilityEnum(
-                    demographicSurvey.getDisability() ? Disability.TRUE : Disability.FALSE);
-              }
-              if (demographicSurvey.getGenderIdentityList() != null) {
-                result.setGenderIdentityEnumList(demographicSurvey.getGenderIdentityList());
-              }
-              if (demographicSurvey.getSexAtBirth() != null) {
-                result.setSexAtBirthEnum(demographicSurvey.getSexAtBirth());
-              }
-              if (demographicSurvey.getYearOfBirth() != null) {
-                result.setYear_of_birth(demographicSurvey.getYearOfBirth().intValue());
-              }
-              return result;
-            }
-          };
-
   private static final Logger log = Logger.getLogger(ProfileController.class.getName());
 
-  private static final long MAX_BILLING_PROJECT_CREATION_ATTEMPTS = 5;
-
   private final ActionAuditQueryService actionAuditQueryService;
-  private final AddressMapper addressMapper;
   private final CaptchaVerificationService captchaVerificationService;
   private final Clock clock;
   private final CloudStorageService cloudStorageService;
@@ -211,13 +147,11 @@ public class ProfileController implements ProfileApiDelegate {
   private final ShibbolethService shibbolethService;
   private final UserDao userDao;
   private final UserService userService;
-  private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
   private final VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
 
   @Autowired
   ProfileController(
       ActionAuditQueryService actionAuditQueryService,
-      AddressMapper addressMapper,
       CaptchaVerificationService captchaVerificationService,
       Clock clock,
       CloudStorageService cloudStorageService,
@@ -234,10 +168,8 @@ public class ProfileController implements ProfileApiDelegate {
       ShibbolethService shibbolethService,
       UserDao userDao,
       UserService userService,
-      VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
       VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper) {
     this.actionAuditQueryService = actionAuditQueryService;
-    this.addressMapper = addressMapper;
     this.captchaVerificationService = captchaVerificationService;
     this.clock = clock;
     this.cloudStorageService = cloudStorageService;
@@ -253,7 +185,6 @@ public class ProfileController implements ProfileApiDelegate {
     this.userDao = userDao;
     this.userProvider = userProvider;
     this.userService = userService;
-    this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
     this.verifiedInstitutionalAffiliationMapper = verifiedInstitutionalAffiliationMapper;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
@@ -266,43 +197,6 @@ public class ProfileController implements ProfileApiDelegate {
         memberships.stream()
             .map(TO_CLIENT_BILLING_PROJECT_MEMBERSHIP)
             .collect(Collectors.toList()));
-  }
-
-  private void validateStringLength(String field, String fieldName, int max, int min) {
-    if (field == null) {
-      throw new BadRequestException(String.format("%s cannot be left blank!", fieldName));
-    }
-    if (field.length() > max) {
-      throw new BadRequestException(
-          String.format("%s length exceeds character limit. (%d)", fieldName, max));
-    }
-    if (field.length() < min) {
-      if (min == 1) {
-        throw new BadRequestException(String.format("%s cannot be left blank.", fieldName));
-      } else {
-        throw new BadRequestException(
-            String.format("%s is under character minimum. (%d)", fieldName, min));
-      }
-    }
-  }
-
-  private void validateAndCleanProfile(Profile profile) throws BadRequestException {
-    // Validation steps, which yield a BadRequestException if errors are found.
-    String userName = profile.getUsername();
-    if (userName == null || userName.length() < 3 || userName.length() > 64) {
-      throw new BadRequestException(
-          "Username should be at least 3 characters and not more than 64 characters");
-    }
-    validateStringLength(profile.getGivenName(), "Given Name", 80, 1);
-    validateStringLength(profile.getFamilyName(), "Family Name", 80, 1);
-
-    // Cleaning steps, which provide non-null fields or apply some cleanup / transformation.
-    profile.setDemographicSurvey(
-        Optional.ofNullable(profile.getDemographicSurvey()).orElse(new DemographicSurvey()));
-    profile.setInstitutionalAffiliations(
-        Optional.ofNullable(profile.getInstitutionalAffiliations()).orElse(new ArrayList<>()));
-    // We always store the username as all lowercase.
-    profile.setUsername(profile.getUsername().toLowerCase());
   }
 
   private DbUser saveUserWithConflictHandling(DbUser dbUser) {
@@ -421,7 +315,7 @@ public class ProfileController implements ProfileApiDelegate {
             demographicSurveyMapper.demographicSurveyToDbDemographicSurvey(
                 profile.getDemographicSurvey()),
             profile.getInstitutionalAffiliations().stream()
-                .map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
+                .map(institutionService::legacyInstitutionToDbInstitution)
                 .collect(Collectors.toList()),
             verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
                 profile.getVerifiedInstitutionalAffiliation(), institutionService));
@@ -681,7 +575,7 @@ public class ProfileController implements ProfileApiDelegate {
   private void updateInstitutionalAffiliations(Profile updatedProfile, DbUser user) {
     List<DbInstitutionalAffiliation> newAffiliations =
         updatedProfile.getInstitutionalAffiliations().stream()
-            .map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
+            .map(institutionService::legacyInstitutionToDbInstitution)
             .collect(Collectors.toList());
     int i = 0;
     ListIterator<DbInstitutionalAffiliation> oldAffilations =
