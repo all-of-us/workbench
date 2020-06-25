@@ -6,11 +6,15 @@ import java.util.Optional;
 /**
  * Google APIs for handling GSuite user accounts.
  *
- * <p>Terminology used by this service: * username: The GSuite primary email address, e.g.
- * "jdoe@researchallofus.org". This is consistent with most usage in RW, where `username` refers to
- * the full email address. * user prefix: The user-specific prefix of a GSuite email address, e.g.
- * "jdoe". * contact email: The user's specified contact email address, which is stored in GSuite as
- * well as the RW database.
+ * <p>Terminology used by this service:
+ *
+ * <p>username: The GSuite primary email address, e.g. "jdoe@researchallofus.org". This is
+ * consistent with most usage in RW, where `username` refers to the full email address.
+ *
+ * <p>user prefix: The user-specific prefix of a GSuite email address, e.g. "jdoe".
+ *
+ * <p>contact email: The user's specified contact email address, which is stored in GSuite as well
+ * as the RW database.
  */
 public interface DirectoryService {
   /** Returns whether the given user prefix corresponds to an existing GSuite user account. */
