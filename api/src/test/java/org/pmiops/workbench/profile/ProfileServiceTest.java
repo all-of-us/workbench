@@ -18,6 +18,8 @@ import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbInstitution;
@@ -58,11 +60,11 @@ public class ProfileServiceTest {
 
   @Autowired ProfileService profileService;
   @Autowired UserDao userDao;
+  @Autowired UserService userService;
 
   DbInstitution dbInstitution;
 
   @TestConfiguration
-  @MockBean({FreeTierBillingService.class, Clock.class})
   @Import({
     AddressMapperImpl.class,
     DemographicSurveyMapperImpl.class,
@@ -73,9 +75,13 @@ public class ProfileServiceTest {
     VerifiedInstitutionalAffiliationMapperImpl.class,
     CommonMappers.class
   })
-  @MockBean({ProfileAuditor.class})
+  @MockBean({
+    FreeTierBillingService.class,
+    Clock.class,
+    ProfileAuditor.class,
+    UserServiceImpl.class,
+  })
   static class Configuration {
-
     @Bean
     public Clock getClock() {
       return CLOCK;
