@@ -160,7 +160,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     DbUser user = userDao.findUserByUsername(userName);
     if (user == null) {
       if (workbenchConfigProvider.get().access.unsafeAllowUserCreationFromGSuiteData) {
-        user = devUserRegistrationService.createUserFromUserInfo(userInfo);
+        user = devUserRegistrationService.createUser(userInfo);
         log.info(String.format("Dev user '%s' has been re-created.", user.getUsername()));
       } else {
         log.severe(String.format("No User row exists for user '%s'", userName));

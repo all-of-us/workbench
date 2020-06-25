@@ -66,7 +66,7 @@ public class DevUserRegistrationServiceTest {
             eq(userInfo), eq("gregory.jordan.123@gmail.com"), dbAffiliationCaptor.capture()))
         .thenReturn(dbUser);
 
-    service.createUserFromUserInfo(userInfo);
+    service.createUser(userInfo);
 
     assertThat(dbAffiliationCaptor.getValue().getInstitution().getShortName()).isEqualTo("Google");
   }
@@ -79,6 +79,6 @@ public class DevUserRegistrationServiceTest {
     when(institutionService.getFirstMatchingInstitution("gregory.jordan.123@gmail.com"))
         .thenReturn(Optional.empty());
 
-    service.createUserFromUserInfo(userInfo);
+    service.createUser(userInfo);
   }
 }

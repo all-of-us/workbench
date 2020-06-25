@@ -222,7 +222,7 @@ public class AuthInterceptorTest {
     mockUserInfoSuccess();
     // Override the userDao mock to return a null record.
     when(userDao.findUserByUsername(eq("bob@fake-domain.org"))).thenReturn(null);
-    when(devUserRegistrationService.createUserFromUserInfo(any())).thenReturn(user);
+    when(devUserRegistrationService.createUser(any())).thenReturn(user);
 
     assertThat(interceptor.preHandle(mockRequest, mockResponse, mockHandler)).isTrue();
   }
@@ -236,7 +236,7 @@ public class AuthInterceptorTest {
 
     assertThat(interceptor.preHandle(mockRequest, mockResponse, mockHandler)).isFalse();
 
-    verify(devUserRegistrationService, never()).createUserFromUserInfo(any());
+    verify(devUserRegistrationService, never()).createUser(any());
   }
 
   private Method getProfileApiMethod(String methodName) {

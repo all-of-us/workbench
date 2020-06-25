@@ -39,7 +39,7 @@ public class DevUserRegistrationServiceImpl implements DevUserRegistrationServic
   }
 
   @Override
-  public DbUser createUserFromUserInfo(Userinfoplus userInfo) {
+  public DbUser createUser(Userinfoplus userInfo) {
     // We'll try to lookup the GSuite contact email if available. Otherwise, fall back to the
     // username email address (e.g. foobar@fake-research-aou.org).
     Optional<String> gSuiteContactEmail =
