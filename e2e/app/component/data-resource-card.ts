@@ -14,6 +14,7 @@ export enum CardType {
   ConceptSet = 'Concept Set',
   Notebook = 'Notebook',
   Dataset = 'Dataset',
+  CohortReview = 'Cohort Review',
 }
 
 /**
@@ -47,10 +48,9 @@ export default class DataResourceCard {
   static async findAnyCard(page: Page): Promise<DataResourceCard> {
     const cards = await this.findAllCards(page);
     if (cards.length === 0) {
-      throw new Error('FAILED to find any Data resource card on page.');
+      return null;
     }
-    const anyCard = fp.shuffle(cards)[0];
-    return anyCard;
+    return fp.shuffle(cards)[0];
   }
 
   static async findCard(page: Page, resourceName: string, timeOut: number = 60000): Promise<DataResourceCard | null> {

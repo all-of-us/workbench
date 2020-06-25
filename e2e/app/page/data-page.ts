@@ -12,7 +12,10 @@ import {ElementType} from 'app/xpath-options';
 import {Page, Response} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
+import {makeRandomName} from '../../utils/str-utils';
+import CohortActionsPage from './cohort-actions-page';
 import CohortBuildPage from './cohort-build-page';
+import {Visits} from './cohort-criteria-modal';
 import DatasetBuildPage from './dataset-build-page';
 
 export enum TabLabelAlias {
@@ -191,5 +194,39 @@ export default class DataPage extends AuthenticatedPage {
     await waitWhileLoading(this.page);
     console.log(`Cohort "${cohortName}" renamed to "${newCohortName}"`);
   }
+
+  async findCohortCard(cohortName?: string): Promise<DataResourceCard> {
+    await this.openTab(TabLabelAlias.Data);
+    await this.openTab(TabLabelAlias.Cohorts, {waitPageChange: false});
+    if (cohortName === undefined) {
+      // if cohort name isn't specified, find any existing cohort.
+      return DataResourceCard.findAnyCard(this.page);
+    } else {
+      // find cohort matching name.
+      return DataResourceCard.findCard(this.page, cohortName, 2000);
+    }
+  }
+
+  /**
+   * Create a simple Cohort from Out-Patient Visit criteria.
+   * @param {string} cohortName New Cohort name.
+   */
+  async createCohort(cohortName?: string): Promise<DataResourceCard> {
+    await this.getAddCohortsButton().then((butn) => butn.clickAndWait());
+    // Land on Build Cohort page.
+    const cohortBuildPage = new CohortBuildPage(this.page);
+    await cohortBuildPage.waitForLoad();
+    const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
+    const modal = await group1.includeVisits();
+    await modal.addVisits([Visits.OutpatientVisit]);
+    await modal.clickFinishButton();
+    await waitWhileLoading(this.page);
+    await cohortBuildPage.getTotalCount();
+    const name = (cohortName === undefined) ? makeRandomName() : cohortName;
+    await cohortBuildPage.saveCohortAs(name);
+    await (new CohortActionsPage(this.page)).waitForLoad();
+    return this.findCohortCard(name);
+  }
+
 
 }

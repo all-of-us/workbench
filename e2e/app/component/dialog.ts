@@ -4,6 +4,7 @@ import Button from 'app/element/button';
 import Textbox from 'app/element/textbox';
 import Textarea from 'app/element/textarea';
 import Checkbox from 'app/element/checkbox';
+import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
 
 export enum ButtonLabel {
   Confirm = 'Confirm',
@@ -15,6 +16,8 @@ export enum ButtonLabel {
   Rename = 'Rename',
   Save = 'Save',
   Update = 'Update',
+  CreateSet = 'CREATE SET',
+  DiscardChanges = 'Discard Changes',
 }
 
 const Selector = {
@@ -25,6 +28,19 @@ export default class Dialog extends Container {
 
   constructor(page: Page, xpath: string = Selector.defaultDialog) {
     super(page, xpath);
+  }
+
+  async waitForLoad(): Promise<this> {
+    try {
+      await this.page.waitForXPath(this.xpath, {visible: true});
+    } catch (e) {
+      await savePageToFile(this.page);
+      await takeScreenshot(this.page);
+      const title = await this.page.title();
+      console.error(`${title}: dialog waitForLoad() encountered ${e}`);
+      throw e;
+    }
+    return this;
   }
 
   async getContent(): Promise<string> {

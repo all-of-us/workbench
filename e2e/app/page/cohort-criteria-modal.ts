@@ -37,6 +37,21 @@ export enum Ethnicity {
   Skip = 'Skip',
 }
 
+export enum Visits {
+  AmbulanceVisit = 'Ambulance Visit',
+  AmbulatoryClinicCenter = 'Ambulatory Clinic/Center',
+  AmbulatoryRehabilitationVisit = 'Ambulatory Rehabilitation Visit',
+  EmergencyRoomVisit = 'Emergency Room Visit',
+  EmergencyRoomAndInpatientVisit = 'Emergency Room and Inpatient Visit',
+  HomeVisit = 'Home Visit',
+  InpatientVisit = 'Inpatient Visit',
+  LaboratoryVisit = 'Laboratory Visit',
+  NonhospitalInstitutionVisit = 'Non-hospital institution Visit',
+  OfficeVisit = 'Office Visit',
+  OutpatientVisit = 'Outpatient Visit',
+  PharmacyVisit = 'Pharmacy visit',
+}
+
 export enum FilterSign {
   Any = 'Any',
   AnyValue = 'Any value',
@@ -58,6 +73,10 @@ export default class CohortCriteriaModal extends Dialog {
 
   async waitForEthnicityCriteriaLink(criteriaType: Ethnicity): Promise<ClrIconLink> {
     return ClrIconLink.findByName(this.page, {startsWith: criteriaType, iconShape: 'plus-circle', ancestorLevel: 0}, this);
+  }
+
+  async waitForVisitsCriteriaLink(criteriaType: Visits): Promise<ClrIconLink> {
+    return ClrIconLink.findByName(this.page, {startsWith: criteriaType, iconShape: 'plus-circle', ancestorLevel: 1}, this);
   }
 
   /**
@@ -99,9 +118,15 @@ export default class CohortCriteriaModal extends Dialog {
     return participantResult;
   }
 
-  // Click FINISH button.
-  async clickFinishButton(): Promise<void> {
-    return this.clickButton(ButtonLabel.Finish);
+  /**
+   * Click FINISH button.
+   */
+  async clickFinishButton(opt: {waitUntilClosed?: boolean} = {}): Promise<void> {
+    const { waitUntilClosed = true } = opt
+    await this.clickButton(ButtonLabel.Finish);
+    if (waitUntilClosed) {
+      await this.waitUntilDialogIsClosed();
+    }
   }
 
   async waitForParticipantResult(): Promise<string> {
@@ -195,5 +220,10 @@ export default class CohortCriteriaModal extends Dialog {
     await dragDrop(this.page, upperNumberInputHandle, {x: x2-50, y: y2});
   }
 
+  async addVisits(visits: Visits[]): Promise<void> {
+    for (const visit of visits) {
+      await this.waitForVisitsCriteriaLink(visit).then((link) => link.click());
+    }
+  }
 
 }

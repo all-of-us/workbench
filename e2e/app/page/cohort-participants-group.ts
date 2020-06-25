@@ -115,6 +115,13 @@ export default class CohortParticipantsGroup {
     return results;
   }
 
+  async includeVisits(): Promise<CohortCriteriaModal> {
+    await this.clickCriteriaMenuItems(['Visits']);
+    const modal = new CohortCriteriaModal(this.page);
+    await modal.waitUntilVisible();
+    return modal;
+  }
+
   private async clickCriteriaMenuItems(menuItemLinks: string[]): Promise<void> {
     const menu = await this.openTieredMenu();
     return menu.clickMenuItem(menuItemLinks);
