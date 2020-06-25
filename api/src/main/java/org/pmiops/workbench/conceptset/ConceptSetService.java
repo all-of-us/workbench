@@ -7,6 +7,7 @@ import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.model.Domain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +36,10 @@ public class ConceptSetService {
 
   public Optional<DbConceptSet> findOne(Long conceptSetId) {
     return Optional.of(conceptSetDao.findOne(conceptSetId));
+  }
+
+  public List<DbConceptSet> findAll(List<Long> conceptSetIds) {
+    return (List<DbConceptSet>) conceptSetDao.findAll(conceptSetIds);
   }
 
   public DbConceptSet findOne(Long conceptSetId, DbWorkspace workspace) {
@@ -78,5 +83,9 @@ public class ConceptSetService {
     // Allows for fetching concept sets for a workspace once its collection is no longer
     // bound to a session.
     return conceptSetDao.findByWorkspaceId(workspace.getWorkspaceId());
+  }
+
+  public String getOmpTable(String domain) {
+    return conceptSetDao.DOMAIN_TO_TABLE_NAME.get(Domain.fromValue(domain));
   }
 }

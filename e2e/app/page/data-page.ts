@@ -1,17 +1,17 @@
 import DataResourceCard from 'app/component/data-resource-card';
-import Dialog from 'app/component/dialog';
+import Dialog, {ButtonLabel} from 'app/component/dialog';
 import EllipsisMenu from 'app/component/ellipsis-menu';
 import Button from 'app/element/button';
 import ClrIconLink from 'app/element/clr-icon-link';
 import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
+import {xPathOptionToXpath} from 'app/element/xpath-defaults';
 import {EllipsisMenuAction} from 'app/page-identifiers';
 import AuthenticatedPage from 'app/page/authenticated-page';
+import {ElementType} from 'app/xpath-options';
 import {Page, Response} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
-import {xPathOptionToXpath} from 'app/element/xpath-defaults';
-import {ElementType} from 'app/xpath-options';
 import CohortBuildPage from './cohort-build-page';
 import DatasetBuildPage from './dataset-build-page';
 
@@ -57,17 +57,19 @@ export default class DataPage extends AuthenticatedPage {
    * @param {TabLabelAlias} tabName
    * @param opts
    */
-  async openTab(tabName: TabLabelAlias, opts: {waitPageChange?: boolean} = {}): Promise<[void, Response] | void> {
+  async openTab(tabName: TabLabelAlias, opts: {waitPageChange?: boolean} = {}): Promise<void> {
     const {waitPageChange = true} = opts;
     const selector = xPathOptionToXpath({name: tabName, type: ElementType.Tab});
     const tab = await this.page.waitForXPath(selector, {visible: true});
     if (waitPageChange) {
-      return Promise.all<void, Response>([
+      await Promise.all<void, Response>([
         tab.click(),
         this.page.waitForNavigation({waitUntil: ['load', 'domcontentloaded', 'networkidle0']}),
       ]);
+    } else {
+      await tab.click();
     }
-    return tab.click();
+    return waitWhileLoading(this.page);
   }
 
   async getAddDatasetButton(): Promise<ClrIconLink> {
@@ -172,6 +174,22 @@ export default class DataPage extends AuthenticatedPage {
 
     console.log(`Deleted Concept Set "${conceptsetName}"`);
     return dialogContentText;
+  }
+
+  async renameCohort(cohortName: string, newCohortName: string): Promise<void> {
+    const cohortResourceCard = await DataResourceCard.findCard(this.page, cohortName);
+    const menu = cohortResourceCard.getEllipsis();
+    await menu.clickAction(EllipsisMenuAction.Rename, false);
+    const dialog = new Dialog(this.page);
+    await dialog.getContent();
+    const newNameInput = new Textbox(this.page, `${dialog.getXpath()}//*[@id="new-name"]`);
+    await newNameInput.type(newCohortName);
+    const descriptionTextarea = await Textarea.findByName(this.page, {containsText: 'Description:'}, dialog);
+    await descriptionTextarea.type('Puppeteer automation rename cohort.');
+    await dialog.clickButton(ButtonLabel.Rename);
+    await dialog.waitUntilDialogIsClosed();
+    await waitWhileLoading(this.page);
+    console.log(`Cohort "${cohortName}" renamed to "${newCohortName}"`);
   }
 
 }

@@ -68,6 +68,7 @@ import org.pmiops.workbench.model.UsernameTakenResponse;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.profile.DemographicSurveyMapper;
+import org.pmiops.workbench.profile.PageVisitMapper;
 import org.pmiops.workbench.profile.ProfileService;
 import org.pmiops.workbench.shibboleth.ShibbolethService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,6 +131,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final DirectoryService directoryService;
   private final FireCloudService fireCloudService;
   private final InstitutionService institutionService;
+  private final PageVisitMapper pageVisitMapper;
   private final ProfileAuditor profileAuditor;
   private final ProfileService profileService;
   private final Provider<DbUser> userProvider;
@@ -151,6 +153,7 @@ public class ProfileController implements ProfileApiDelegate {
       DirectoryService directoryService,
       FireCloudService fireCloudService,
       InstitutionService institutionService,
+      PageVisitMapper pageVisitMapper,
       ProfileAuditor profileAuditor,
       ProfileService profileService,
       Provider<DbUser> userProvider,
@@ -170,6 +173,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.fireCloudService = fireCloudService;
     this.institutionService = institutionService;
     this.mailServiceProvider = mailServiceProvider;
+    this.pageVisitMapper = pageVisitMapper;
     this.profileAuditor = profileAuditor;
     this.profileService = profileService;
     this.shibbolethService = shibbolethService;
@@ -505,11 +509,10 @@ public class ProfileController implements ProfileApiDelegate {
         dbUser.getPageVisits().stream()
             .noneMatch(v -> v.getPageId().equals(newPageVisit.getPage()));
     if (shouldAdd) {
-      final DbPageVisit firstPageVisit = new DbPageVisit();
-      firstPageVisit.setPageId(newPageVisit.getPage());
-      firstPageVisit.setUser(dbUser);
-      firstPageVisit.setFirstVisit(timestamp);
-      dbUser.getPageVisits().add(firstPageVisit);
+      final DbPageVisit dbPageVisit = pageVisitMapper.pageVisitToDbPageVisit(newPageVisit);
+      dbPageVisit.setUser(dbUser);
+      dbPageVisit.setFirstVisit(timestamp);
+      dbUser.getPageVisits().add(dbPageVisit);
       dbUser = userDao.save(dbUser);
     }
     return getProfileResponse(saveUserWithConflictHandling(dbUser));
@@ -629,7 +632,7 @@ public class ProfileController implements ProfileApiDelegate {
     }
     DbUser user = userProvider.get();
     log.log(Level.WARNING, "Deleting profile: user email: " + user.getUsername());
-    directoryService.deleteUser(user.getUsername().split("@")[0]);
+    directoryService.deleteUser(user.getUsername());
     userDao.delete(user.getUserId());
     profileAuditor.fireDeleteAction(user.getUserId(), user.getUsername());
 

@@ -197,6 +197,13 @@ public class WorkbenchConfig {
     // Allows a user to bypass their own access modules. This is used for testing purposes so that
     // We can give control over 3rd party access modules
     public boolean unsafeAllowSelfBypass;
+    // Indicates that the system should be allowed to re-create a DbUser row based on data from
+    // GSuite OAuth and directory data. This path is used primarily as a convenience for developers
+    // in their local environment. When a local database is wiped and a user logs into the Workbench
+    // with their RW-test @fake-research-aou.org credentials, the AuthInterceptor will lazily call
+    // createUser to allow continued Workbench access.
+    public boolean unsafeAllowUserCreationFromGSuiteData;
+
     // These booleans control whether each of our core access modules are enabled per environment.
     public boolean enableComplianceTraining;
     public boolean enableEraCommons;
@@ -231,9 +238,6 @@ public class WorkbenchConfig {
     // Setting this to true will enable the use of Billing Accounts controlled by the user
     // See RW-4711.
     public boolean enableBillingUpgrade;
-    // Whether or not AoU should handle inbound SumoLogic high-egress event requests.
-    // See RW-2253.
-    public boolean enableSumoLogicEventHandling;
     // Causes the server to use an API-based method for generating delegated user credentials,
     // as opposed to reading service account private keys from GCS.
     // See RW-2840.
@@ -257,6 +261,9 @@ public class WorkbenchConfig {
     // Whether the RW backend should call the new Shibboleth API service instead of the legacy
     // Shibboleth endpoint that was part of Firecloud Orchestration.
     public boolean useNewShibbolethService;
+    // Flag to indicate whether to show Update research purpose prompt after an year of workspace
+    // creation
+    public boolean enableResearchPurposePrompt;
   }
 
   public static class ActionAuditConfig {

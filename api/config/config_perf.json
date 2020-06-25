@@ -90,6 +90,7 @@
     "enableDataUseAgreement": true,
     "enableBetaAccess": false,
     "unsafeAllowSelfBypass": true,
+    "unsafeAllowUserCreationFromGSuiteData": false,
     "requireInvitationKey": false
   },
   "featureFlags": {
@@ -99,7 +100,6 @@
     "enableRdrExport": true,
     "enableBillingLockout": true,
     "enableBillingUpgrade": true,
-    "enableSumoLogicEventHandling": true,
     "useKeylessDelegatedCredentials": true,
     "sendFreeTierAlertEmails": true,
     "enableMoodleV2Api": true,
@@ -107,7 +107,8 @@
     "enableCBAgeTypeOptions": false,
     "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,
-    "useNewShibbolethService": true
+    "useNewShibbolethService": true,
+    "enableResearchPurposePrompt": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-perf",

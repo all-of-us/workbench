@@ -26,6 +26,7 @@ import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.ErrorCode;
+import org.pmiops.workbench.user.DevUserRegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
@@ -51,6 +52,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
   private final UserService userService;
+  private final DevUserRegistrationService devUserRegistrationService;
 
   @Autowired
   public AuthInterceptor(
@@ -58,12 +60,14 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       FireCloudService fireCloudService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserDao userDao,
-      UserService userService) {
+      UserService userService,
+      DevUserRegistrationService devUserRegistrationService) {
     this.userInfoService = userInfoService;
     this.fireCloudService = fireCloudService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userDao = userDao;
     this.userService = userService;
+    this.devUserRegistrationService = devUserRegistrationService;
   }
 
   /**
@@ -110,16 +114,15 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     }
 
     final String token = authorizationHeader.substring("Bearer".length()).trim();
-    final Userinfoplus OAuth2Userinfo = userInfoService.getUserInfo(token);
+    final Userinfoplus userInfo = userInfoService.getUserInfo(token);
 
     // The Workbench considers the user's generated GSuite email to be their userName
     // Don't confuse this with the user's Contact Email, which is unrelated
-    String userName = OAuth2Userinfo.getEmail();
+    String userName = userInfo.getEmail();
 
     // TODO: check Google group membership to ensure user is in registered user group
 
-    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-    if (workbenchConfig.auth.serviceAccountApiUsers.contains(userName)) {
+    if (workbenchConfigProvider.get().auth.serviceAccountApiUsers.contains(userName)) {
       // Whitelisted service accounts are able to make API calls, too.
       // TODO: stop treating service accounts as normal users, have a separate table for them,
       // administrators.
@@ -129,17 +132,18 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       }
       SecurityContextHolder.getContext()
           .setAuthentication(
-              new UserAuthentication(user, OAuth2Userinfo, token, UserType.SERVICE_ACCOUNT));
+              new UserAuthentication(user, userInfo, token, UserType.SERVICE_ACCOUNT));
       log.log(Level.INFO, "{0} service account in use", userName);
       return true;
     }
-    String gsuiteDomainSuffix = "@" + workbenchConfig.googleDirectoryService.gSuiteDomain;
+    String gsuiteDomainSuffix =
+        "@" + workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain;
     if (!userName.endsWith(gsuiteDomainSuffix)) {
       // Temporarily set the authentication with no user, so we can look up what user this
       // corresponds to in FireCloud.
       SecurityContextHolder.getContext()
           .setAuthentication(
-              new UserAuthentication(null, OAuth2Userinfo, token, UserType.SERVICE_ACCOUNT));
+              new UserAuthentication(null, userInfo, token, UserType.SERVICE_ACCOUNT));
       // If the email isn't in our GSuite domain, try FireCloud; we could be dealing with a
       // pet service account. In both AofU and FireCloud, the pet SA is treated as if it were
       // the user it was created for.
@@ -155,27 +159,31 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     }
     DbUser user = userDao.findUserByUsername(userName);
     if (user == null) {
-      // TODO(danrodney): start populating contact email in Google account, use it here.
-      user = userService.createUser(OAuth2Userinfo);
-    } else {
-      if (user.getDisabled()) {
-        throw new ForbiddenException(
-            WorkbenchException.errorResponse(
-                "Rejecting request for disabled user account: " + user.getUsername(),
-                ErrorCode.USER_DISABLED));
+      if (workbenchConfigProvider.get().access.unsafeAllowUserCreationFromGSuiteData) {
+        user = devUserRegistrationService.createUser(userInfo);
+        log.info(String.format("Dev user '%s' has been re-created.", user.getUsername()));
+      } else {
+        log.severe(String.format("No User row exists for user '%s'", userName));
+        return false;
       }
     }
 
+    if (user.getDisabled()) {
+      throw new ForbiddenException(
+          WorkbenchException.errorResponse(
+              "Rejecting request for disabled user account: " + user.getUsername(),
+              ErrorCode.USER_DISABLED));
+    }
+
     SecurityContextHolder.getContext()
-        .setAuthentication(
-            new UserAuthentication(user, OAuth2Userinfo, token, UserType.RESEARCHER));
+        .setAuthentication(new UserAuthentication(user, userInfo, token, UserType.RESEARCHER));
 
     // This log line is currently the the only reliable way to associate a particular App Engine
     // request log
     // with the authenticated user identity, which is critical information for debugging.
     // TODO(jaycarlton) replace this log line with a UserInfo entry in a dedicated Stackdriver Auth
     // log.
-    log.log(Level.INFO, "{0} logged in", OAuth2Userinfo.getEmail());
+    log.log(Level.INFO, "{0} logged in", userInfo.getEmail());
 
     if (!hasRequiredAuthority(method, user)) {
       response.sendError(HttpServletResponse.SC_FORBIDDEN);

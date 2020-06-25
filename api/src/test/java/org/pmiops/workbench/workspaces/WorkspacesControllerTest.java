@@ -88,6 +88,7 @@ import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
+import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
 import org.pmiops.workbench.conceptset.ConceptSetService;
@@ -314,6 +315,7 @@ public class WorkspacesControllerTest {
     CohortMaterializationService.class,
     CohortQueryBuilder.class,
     ConceptBigQueryService.class,
+    CohortService.class,
     ConceptService.class,
     FireCloudService.class,
     MailService.class,

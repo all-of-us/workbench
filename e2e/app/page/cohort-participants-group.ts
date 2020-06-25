@@ -1,10 +1,11 @@
-import {Page} from 'puppeteer';
+import {ElementHandle, Page} from 'puppeteer';
 import {FieldSelector} from 'app/page/cohort-build-page';
 import Dialog, {ButtonLabel} from 'app/component/dialog';
 import EllipsisMenu from 'app/component/ellipsis-menu';
-import {waitForNumericalString} from 'utils/waits-utils';
+import {waitForNumericalString, waitForText} from 'utils/waits-utils';
 import CohortCriteriaModal, {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/cohort-criteria-modal';
 import TieredMenu from 'app/component/tiered-menu';
+import {waitWhileLoading} from 'utils/test-utils';
 
 export enum GroupAction {
    EditGroupName  = 'Edit group name',
@@ -56,6 +57,18 @@ export default class CohortParticipantsGroup {
     await dialog.waitUntilDialogIsClosed();
   }
 
+  /**
+   * Delete Group.
+   * @return Returns array of criterias in this group.
+   */
+  async deleteGroup(): Promise<ElementHandle[]> {
+    const menu = this.getGroupEllipsisMenu();
+    await menu.clickParticipantsGroupAction(GroupAction.DeleteGroup);
+    await waitForText(this.page, 'This group has been deleted');
+    await waitWhileLoading(this.page);
+    return this.getGroupCriteriasList();
+  }
+
   async includePhysicalMeasurement(criteriaName: PhysicalMeasurementsCriteria, value: number): Promise<string> {
     await this.clickCriteriaMenuItems(['Physical Measurements']);
     const modal = new CohortCriteriaModal(this.page);
@@ -93,6 +106,15 @@ export default class CohortParticipantsGroup {
     return waitForNumericalString(this.page, this.getGroupCountXpath());
   }
 
+  async includeAge(minAge: number, maxAge: number): Promise<string> {
+    await this.clickCriteriaMenuItems(['Demographics', 'Age']);
+    const modal = new CohortCriteriaModal(this.page, '//*[@class="modal-container demographics age"]');
+    await modal.waitUntilVisible();
+    const results = await modal.addAge(minAge, maxAge);
+    await waitWhileLoading(this.page);
+    return results;
+  }
+
   private async clickCriteriaMenuItems(menuItemLinks: string[]): Promise<void> {
     const menu = await this.openTieredMenu();
     return menu.clickMenuItem(menuItemLinks);
@@ -104,5 +126,9 @@ export default class CohortParticipantsGroup {
     return new TieredMenu(this.page);
   }
 
+  async getGroupCriteriasList(): Promise<ElementHandle[]> {
+    const selector = `${this.rootXpath}//*[@data-test-id="item-list"]`;
+    return this.page.$x(selector);
+  }
 
 }

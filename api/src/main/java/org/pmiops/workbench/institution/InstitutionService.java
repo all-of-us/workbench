@@ -110,6 +110,15 @@ public interface InstitutionService {
   boolean validateOperationalUser(DbInstitution institution);
 
   /**
+   * Searches through all institutions and returns the first institution that matches the given
+   * contact email address, if any.
+   *
+   * @param contactEmail
+   * @return
+   */
+  Optional<Institution> getFirstMatchingInstitution(final String contactEmail);
+
+  /**
    * Deprecated because it refers to old-style Institutional Affiliations, to be deleted in RW-4362
    * The new-style equivalent is VerifiedInstitutionalAffiliationMapper.modelToDbWithoutUser()
    *
