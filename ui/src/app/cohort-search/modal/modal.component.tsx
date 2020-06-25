@@ -289,8 +289,7 @@ export class CBModal extends React.Component<Props, State> {
   get showModifiers() {
     const {searchContext: {domain}} = this.props;
     return domain !== DomainType.PHYSICALMEASUREMENT &&
-      domain !== DomainType.PERSON &&
-      domain !== DomainType.SURVEY;
+      domain !== DomainType.PERSON;
   }
 
   get initTree() {
