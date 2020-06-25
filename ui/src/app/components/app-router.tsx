@@ -1,7 +1,7 @@
+import {routeDataStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import { BrowserRouter, Link, Redirect, Route, Switch, useHistory, useLocation, useParams, useRouteMatch} from 'react-router-dom';
-import {routeDataStore} from 'app/utils/stores';
 
 const {Fragment} = React;
 
