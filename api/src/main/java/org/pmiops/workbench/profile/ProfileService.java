@@ -14,6 +14,7 @@ import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
@@ -45,10 +46,9 @@ public class ProfileService {
   private final InstitutionService institutionService;
   private final ProfileAuditor profileAuditor;
   private final ProfileMapper profileMapper;
-  private final Provider<DbUser> userProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
-  private final Clock clock;
+  private final UserService userService;
   private final UserTermsOfServiceDao userTermsOfServiceDao;
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
   private final VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
@@ -63,10 +63,9 @@ public class ProfileService {
       InstitutionService institutionService,
       ProfileAuditor profileAuditor,
       ProfileMapper profileMapper,
-      Provider<DbUser> userProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserDao userDao,
-      Clock clock,
+      UserService userService,
       UserTermsOfServiceDao userTermsOfServiceDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
       VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper) {
@@ -78,10 +77,9 @@ public class ProfileService {
     this.institutionService = institutionService;
     this.profileAuditor = profileAuditor;
     this.profileMapper = profileMapper;
-    this.userProvider = userProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userDao = userDao;
-    this.clock = clock;
+    this.userService = userService;
     this.userTermsOfServiceDao = userTermsOfServiceDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
     this.verifiedInstitutionalAffiliationMapper = verifiedInstitutionalAffiliationMapper;
@@ -197,7 +195,7 @@ public class ProfileService {
     boolean requireInstitutionalVerification =
         workbenchConfigProvider.get().featureFlags.requireInstitutionalVerification;
     if (requireInstitutionalVerification) {
-      profileService.validateInstitutionalAffiliation(updatedProfile);
+      validateInstitutionalAffiliation(updatedProfile);
     } else {
       updateInstitutionalAffiliations(updatedProfile, user);
     }
@@ -208,11 +206,11 @@ public class ProfileService {
       saveVerifiedInstitutionalAffiliation(user, updatedProfile);
     }
 
-    final Profile appliedUpdatedProfile = profileService.getProfile(user);
+    final Profile appliedUpdatedProfile = getProfile(user);
     profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);
   }
 
-  private void saveVerifiedInstitutionalAffiliation(DbUser user, Profile updatedProfile) {
+  public void saveVerifiedInstitutionalAffiliation(DbUser user, Profile updatedProfile) {
     DbVerifiedInstitutionalAffiliation updatedDbVerifiedAffiliation =
         verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
             updatedProfile.getVerifiedInstitutionalAffiliation(), institutionService);
@@ -287,7 +285,7 @@ public class ProfileService {
     }
   }
 
-  private void validateUpdatedProfile(Profile updatedProfile, Profile prevProfile)
+  public void validateUpdatedProfile(Profile updatedProfile, Profile prevProfile)
       throws BadRequestException {
     validateAndCleanProfile(updatedProfile);
     if (StringUtils.isEmpty(updatedProfile.getAreaOfResearch())) {

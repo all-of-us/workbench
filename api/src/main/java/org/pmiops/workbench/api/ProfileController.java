@@ -540,12 +540,12 @@ public class ProfileController implements ProfileApiDelegate {
     // Save current profile for audit trail.
     final Profile previousProfile = profileService.getProfile(user);
 
-    validateUpdatedProfile(updatedProfile, previousProfile);
+    profileService.validateUpdatedProfile(updatedProfile, previousProfile);
 
     profileService.adminUpdateProfile(updatedProfile);
 
     if (workbenchConfigProvider.get().featureFlags.requireInstitutionalVerification) {
-      saveVerifiedInstitutionalAffiliation(user, updatedProfile);
+      profileService.saveVerifiedInstitutionalAffiliation(user, updatedProfile);
     }
 
     final Profile appliedUpdatedProfile = profileService.getProfile(user);
