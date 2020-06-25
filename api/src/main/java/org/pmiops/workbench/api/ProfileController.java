@@ -6,7 +6,6 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -29,7 +28,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbAddress;
-import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbPageVisit;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -561,46 +559,6 @@ public class ProfileController implements ProfileApiDelegate {
     profileService.updateProfileForUser(dbUser, updatedProfile, oldProfile);
 
     return ResponseEntity.ok(new EmptyResponse());
-  }
-
-  // Deprecated because it refers to old-style Institutional Affiliations, to be deleted in RW-4362
-  // The new-style equivalent is updateVerifiedInstitutionalAffiliation()
-  @Deprecated
-  private void updateInstitutionalAffiliations(Profile updatedProfile, DbUser user) {
-    List<DbInstitutionalAffiliation> newAffiliations =
-        updatedProfile.getInstitutionalAffiliations().stream()
-            .map(institutionService::legacyInstitutionToDbInstitution)
-            .collect(Collectors.toList());
-    int i = 0;
-    ListIterator<DbInstitutionalAffiliation> oldAffilations =
-        user.getInstitutionalAffiliations().listIterator();
-    boolean shouldAdd = false;
-    if (newAffiliations.size() == 0) {
-      shouldAdd = true;
-    }
-    for (DbInstitutionalAffiliation affiliation : newAffiliations) {
-      affiliation.setOrderIndex(i);
-      affiliation.setUser(user);
-      if (oldAffilations.hasNext()) {
-        DbInstitutionalAffiliation oldAffilation = oldAffilations.next();
-        if (!oldAffilation.getRole().equals(affiliation.getRole())
-            || !oldAffilation.getInstitution().equals(affiliation.getInstitution())) {
-          shouldAdd = true;
-        }
-      } else {
-        shouldAdd = true;
-      }
-      i++;
-    }
-    if (oldAffilations.hasNext()) {
-      shouldAdd = true;
-    }
-    if (shouldAdd) {
-      user.clearInstitutionalAffiliations();
-      for (DbInstitutionalAffiliation affiliation : newAffiliations) {
-        user.addInstitutionalAffiliation(affiliation);
-      }
-    }
   }
 
   @Override
