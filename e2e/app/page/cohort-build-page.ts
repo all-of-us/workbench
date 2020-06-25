@@ -1,17 +1,25 @@
+import Dialog, {ButtonLabel as DialogButtonLabel} from 'app/component/dialog';
+import TieredMenu from 'app/component/tiered-menu';
+import Button from 'app/element/button';
+import ClrIconLink from 'app/element/clr-icon-link';
+import {ElementType} from 'app/xpath-options';
 import {Page} from 'puppeteer';
+import {makeRandomName} from 'utils/str-utils';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle, waitForNumericalString} from 'utils/waits-utils';
-import {makeRandomName} from 'utils/str-utils';
-import Dialog from 'app/component/dialog';
-import Button from 'app/element/button';
-import {ElementType} from 'app/xpath-options';
-import ClrIconLink from 'app/element/clr-icon-link';
-import TieredMenu from 'app/component/tiered-menu';
+import {xPathOptionToXpath} from 'app/element/xpath-defaults';
 import AuthenticatedPage from './authenticated-page';
 import CohortParticipantsGroup from './cohort-participants-group';
+
 const faker = require('faker/locale/en_US');
 
 const PageTitle = 'Build Cohort Criteria';
+
+enum ButtonLabel {
+  SaveCohort = 'Save Cohort',
+  CreateCohort = 'Create Cohort',
+  DeleteCohort = 'Delete Cohort',
+}
 
 export enum FieldSelector {
    TotalCount = '//*[contains(normalize-space(text()), "Total Count")]/parent::*//span',
@@ -41,7 +49,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
    * Save Cohort changes.
    */
   async saveChanges(): Promise<void> {
-    const createCohortButton = await Button.findByName(this.page, {normalizeSpace: 'Save Cohort'});
+    const createCohortButton = await Button.findByName(this.page, {normalizeSpace: ButtonLabel.SaveCohort});
     await createCohortButton.waitUntilEnabled();
     await createCohortButton.click(); // Click dropdown trigger to open menu
     const menu =  new TieredMenu(this.page);
@@ -50,7 +58,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
   }
 
   async saveCohortAs(cohortName?: string, description?: string): Promise<string> {
-    const createCohortButton = await Button.findByName(this.page, {name: 'Create Cohort'});
+    const createCohortButton = this.getCreateCohortButton();
     await createCohortButton.waitUntilEnabled();
     await createCohortButton.click();
 
@@ -68,7 +76,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
     const descriptionTextarea = await dialog.waitForTextarea('DESCRIPTION');
     await descriptionTextarea.type(description);
 
-    const saveButton = await Button.findByName(this.page, {name: 'Save'});
+    const saveButton = await Button.findByName(this.page, {name: DialogButtonLabel.Save});
     await saveButton.waitUntilEnabled();
     await saveButton.click();
     await dialog.waitUntilDialogIsClosed();
@@ -78,6 +86,8 @@ export default class CohortBuildPage extends AuthenticatedPage {
   }
 
   async deleteCohort(): Promise<string> {
+    const saveButton = this.getSaveCohortButton();
+    await saveButton.waitUntilEnabled();
     await this.getDeleteButton().then(b => b.click());
     return this.deleteConfirmationDialog();
   }
@@ -89,7 +99,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
   async deleteConfirmationDialog(): Promise<string> {
     const dialog = new Dialog(this.page);
     const contentText = await dialog.getContent();
-    const deleteButton = await Button.findByName(this.page, {normalizeSpace: 'Delete Cohort'}, dialog);
+    const deleteButton = await Button.findByName(this.page, {normalizeSpace: ButtonLabel.DeleteCohort}, dialog);
     await Promise.all([
       deleteButton.click(),
       dialog.waitUntilDialogIsClosed(),
@@ -105,7 +115,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
   async discardChangesConfirmationDialog(): Promise<string> {
     const dialog = new Dialog(this.page);
     const contentText = await dialog.getContent();
-    const deleteButton = await Button.findByName(this.page, {type: ElementType.Button, normalizeSpace: 'Discard Changes'}, dialog);
+    const deleteButton = await Button.findByName(this.page, {normalizeSpace: DialogButtonLabel.DiscardChanges}, dialog);
     await Promise.all([
       deleteButton.click(),
       dialog.waitUntilDialogIsClosed(),
@@ -117,10 +127,21 @@ export default class CohortBuildPage extends AuthenticatedPage {
 
   /**
    * Find the Cohort Total Count.
-   * @return {string} Total Count string.
+   * This function also can be used to wait until participants calculation has completed.
+   * @return {string} Total Count.
    */
   async getTotalCount(): Promise<string> {
     return waitForNumericalString(this.page, FieldSelector.TotalCount);
+  }
+
+  getSaveCohortButton(): Button {
+    const xpath = xPathOptionToXpath({type: ElementType.Button, normalizeSpace: ButtonLabel.SaveCohort});
+    return new Button(this.page, xpath);
+  }
+
+  getCreateCohortButton(): Button {
+    const xpath = xPathOptionToXpath({type: ElementType.Button, normalizeSpace: ButtonLabel.CreateCohort});
+    return new Button(this.page, xpath);
   }
 
   /**

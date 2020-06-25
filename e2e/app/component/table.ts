@@ -14,7 +14,7 @@ export enum TableColumn {
 
 export default class Table extends Container {
 
-  private trXpath: string = this.xpath + '/tbody/tr';
+  private trXpath: string = this.xpath + '//tbody/tr';
   private theadXpath: string = this.xpath + '/thead/tr/th';
 
   constructor(page: Page, xpath: string, container?: Container) {
@@ -72,6 +72,22 @@ export default class Table extends Container {
 
   async getColumnCount(): Promise<number> {
     return (await this.getColumns()).length;
+  }
+
+  /**
+   * Finds table column names. Returns in array of string.
+   * @returns {Array<string>}
+   */
+  async getColumnNames(): Promise<string[]> {
+    const columns = await this.getColumns();
+    const columnNames = [];
+    for (const column of columns) {
+      const textContent = await column.getProperty('innerText');
+      const value = await textContent.jsonValue();
+      columnNames.push(value.toString());
+      await column.dispose();
+    }
+    return columnNames;
   }
 
   async getColumnIndex(columName: string): Promise<number> {

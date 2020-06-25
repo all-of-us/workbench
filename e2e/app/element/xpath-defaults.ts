@@ -41,9 +41,8 @@ export function xPathOptionToXpath(xOpts: XPathOptions, container?: Container): 
     const tag = (iconShape === undefined) ? '*' : `clr-icon[@shape="${iconShape}"]`;
     selector = `${textExpr}//${tag}[*[@role="img"]]`;
     break;
+  case ElementType.Number:
   case ElementType.Checkbox:
-    selector = `${textExpr}//input[@type="${type}"]`;
-    break;
   case ElementType.RadioButton:
   case ElementType.Textbox:
     selector = `${textExpr}//input[@type="${type}"]`;
@@ -63,13 +62,13 @@ export function xPathOptionToXpath(xOpts: XPathOptions, container?: Container): 
     break;
   default:
     console.debug(`Implement unhandled type: ${type}. 
-    XPathOptions configuration: 
-      "type": ${type}, 
-      "name": ${name}, 
-      "containsText": ${containsText}, 
-      "normalizeSpace: ${normalizeSpace}, 
-      "ancestorLevel": ${ancestorLevel}, 
-      "iconShape": ${iconShape}`);
+      XPathOptions configuration: 
+        "type": ${type}, 
+        "name": ${name}, 
+        "containsText": ${containsText}, 
+        "normalizeSpace: ${normalizeSpace}, 
+        "ancestorLevel": ${ancestorLevel}, 
+        "iconShape": ${iconShape}`);
     throw new Error(`Implement unhandled type: ${type}`);
   }
 

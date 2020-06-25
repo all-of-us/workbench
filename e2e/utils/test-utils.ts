@@ -229,3 +229,21 @@ export async function dragDrop(page: Page, element: ElementHandle, destinationPo
   await mouse.up();
   await page.waitFor(1000);
 }
+
+/**
+ * Validate a date string.
+ * @param {string} date
+ */
+// See: https://stackoverflow.com/questions/18758772/how-do-i-validate-a-date-in-this-format-yyyy-mm-dd-using-jquery
+export function isValidDate(date: string) {
+  const regex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!date.match(regex)) {
+    return false;
+  }
+  const d = new Date(date);
+  const dNum = d.getTime();
+  if(!dNum && dNum !== 0) {
+    return false;
+  }
+  return d.toISOString().slice(0,10) === date;
+}

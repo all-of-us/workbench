@@ -33,10 +33,12 @@ export default class Button extends BaseElement {
   async waitUntilEnabled(selector?: string): Promise<JSHandle> {
     // works with either a xpath selector or a Element
     if (selector === undefined) {
-      return this.page.waitForFunction((e) => {
-        const style = window.getComputedStyle(e);
-        return style.getPropertyValue('cursor') === 'pointer';
-      }, {}, await this.asElementHandle());
+      return this.asElementHandle().then((elemt) => {
+        return this.page.waitForFunction((e) => {
+          const style = window.getComputedStyle(e);
+          return style.getPropertyValue('cursor') === 'pointer';
+        }, {}, elemt);
+      });
     }
 
     return this.page.waitForFunction(xpathSelector => {

@@ -19,4 +19,5 @@ export enum ElementType {
   Select = 'select',
   Dropdown = 'dropdown',
   Tab = 'Tab',
+  Number = 'number',
 }
