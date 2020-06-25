@@ -151,26 +151,21 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
     return String.format("%s.%s", parts[firstIndex], parts[firstIndex + 1]);
   }
 
-  @Override
-  public User getUserByUsername(String username) {
-    return getUser(username + "@" + gSuiteDomain());
-  }
-
   /**
    * Fetches a user by their GSuite email address.
    *
    * <p>If the user is not found, a null value will be returned (no exception is thrown).
    *
-   * @param email
+   * @param username
    * @return
    */
   @Override
-  public User getUser(String email) {
+  public User getUser(String username) {
     try {
       // We use the "full" projection to include custom schema fields in the Directory API response.
       return retryHandler.runAndThrowChecked(
           (context) ->
-              getGoogleDirectoryService().users().get(email).setProjection("full").execute());
+              getGoogleDirectoryService().users().get(username).setProjection("full").execute());
     } catch (GoogleJsonResponseException e) {
       // Handle the special case where we're looking for a not found user by returning
       // null.
@@ -184,20 +179,22 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
   }
 
   @Override
-  public boolean isUsernameTaken(String username) {
-    return getUserByUsername(username) != null;
+  public boolean isUsernameTaken(String userPrefix) {
+    return getUser(userPrefix + "@" + gSuiteDomain()) != null;
   }
 
   // Returns a user's contact email address via the custom schema in the directory API.
-  public String getContactEmailAddress(String username) {
-    return (String)
-        getUserByUsername(username)
-            .getCustomSchemas()
-            .get(GSUITE_AOU_SCHEMA_NAME)
-            .get(GSUITE_FIELD_CONTACT_EMAIL);
+  public Optional<String> getContactEmail(String username) {
+    return Optional.ofNullable(getUser(username))
+        .map(
+            user ->
+                (String)
+                    user.getCustomSchemas()
+                        .get(GSUITE_AOU_SCHEMA_NAME)
+                        .get(GSUITE_FIELD_CONTACT_EMAIL));
   }
 
-  public static void addCustomSchemaAndEmails(User user, String primaryEmail, String contactEmail) {
+  public static void addCustomSchemaAndEmails(User user, String username, String contactEmail) {
     // GSuite custom fields for Workbench user accounts.
     // See the Moodle integration doc (broad.io/aou-moodle) for more details, as this
     // was primarily set up for Moodle SSO integration.
@@ -217,8 +214,7 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
     // email address with type "home". This makes it show up nicely in GSuite admin as the
     // user's "Secondary email".
     List<UserEmail> emails =
-        Lists.newArrayList(
-            new UserEmail().setType("work").setAddress(primaryEmail).setPrimary(true));
+        Lists.newArrayList(new UserEmail().setType("work").setAddress(username).setPrimary(true));
     if (contactEmail != null) {
       emails.add(new UserEmail().setType("home").setAddress(contactEmail));
     }
@@ -230,29 +226,28 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
   @Override
   public User createUser(
       String givenName, String familyName, String username, String contactEmail) {
-    String primaryEmail = username + "@" + gSuiteDomain();
     String password = randomString();
 
     User user =
         new User()
-            .setPrimaryEmail(primaryEmail)
+            .setPrimaryEmail(username)
             .setPassword(password)
             .setName(new UserName().setGivenName(givenName).setFamilyName(familyName))
             .setChangePasswordAtNextLogin(true)
             .setOrgUnitPath(GSUITE_WORKBENCH_ORG_UNIT_PATH);
-    addCustomSchemaAndEmails(user, primaryEmail, contactEmail);
+    addCustomSchemaAndEmails(user, username, contactEmail);
 
     retryHandler.run((context) -> getGoogleDirectoryService().users().insert(user).execute());
     return user;
   }
 
   @Override
-  public User resetUserPassword(String email) {
-    User user = getUser(email);
+  public User resetUserPassword(String username) {
+    User user = getUser(username);
     String password = randomString();
     user.setPassword(password);
     retryHandler.run(
-        (context) -> getGoogleDirectoryService().users().update(email, user).execute());
+        (context) -> getGoogleDirectoryService().users().update(username, user).execute());
     return user;
   }
 
@@ -260,11 +255,7 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
   public void deleteUser(String username) {
     try {
       retryHandler.runAndThrowChecked(
-          (context) ->
-              getGoogleDirectoryService()
-                  .users()
-                  .delete(username + "@" + gSuiteDomain())
-                  .execute());
+          (context) -> getGoogleDirectoryService().users().delete(username).execute());
     } catch (GoogleJsonResponseException e) {
       if (e.getDetails().getCode() == HttpStatus.NOT_FOUND.value()) {
         // Deleting a user that doesn't exist will have no effect.

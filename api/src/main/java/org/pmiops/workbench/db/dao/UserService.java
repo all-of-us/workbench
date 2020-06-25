@@ -21,8 +21,11 @@ public interface UserService {
 
   DbUser createServiceAccountUser(String email);
 
-  // version used by AuthInterceptor
-  DbUser createUser(Userinfoplus oAuth2Userinfo);
+  // version used by DevUserRegistrationService
+  DbUser createUser(
+      Userinfoplus oAuth2Userinfo,
+      String contactEmail,
+      DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation);
 
   DbUser createUser(
       String givenName,

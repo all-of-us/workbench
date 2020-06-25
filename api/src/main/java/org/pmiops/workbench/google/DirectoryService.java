@@ -1,29 +1,34 @@
 package org.pmiops.workbench.google;
 
 import com.google.api.services.directory.model.User;
+import java.util.Optional;
 
-/** Encapsulate Googe APIs for handling GSuite user accounts. */
+/**
+ * Google APIs for handling GSuite user accounts.
+ *
+ * <p>Terminology used by this service:
+ *
+ * <p>username: The GSuite primary email address, e.g. "jdoe@researchallofus.org". This is
+ * consistent with most usage in RW, where `username` refers to the full email address.
+ *
+ * <p>user prefix: The user-specific prefix of a GSuite email address, e.g. "jdoe".
+ *
+ * <p>contact email: The user's specified contact email address, which is stored in GSuite as well
+ * as the RW database.
+ */
 public interface DirectoryService {
-  boolean isUsernameTaken(String username);
+  /** Returns whether the given user prefix corresponds to an existing GSuite user account. */
+  boolean isUsernameTaken(String userPrefix);
 
-  /** Returns a user via email address lookup. */
-  User getUser(String email);
+  /** Returns a user via username lookup. Returns null if no user was found. */
+  User getUser(String username);
 
-  /**
-   * Returns a user via username lookup (e.g. the user's GSuite email address without the domain
-   * suffix.
-   */
-  User getUserByUsername(String username);
-
-  /**
-   * Looks up a user by username and returns their stored contact email address. If no contact email
-   * is stored in G Suite, then null is returned.
-   */
-  String getContactEmailAddress(String username);
+  /** Looks up a user by username and returns their stored contact email address, if available. */
+  Optional<String> getContactEmail(String username);
 
   User createUser(String givenName, String familyName, String username, String contactEmail);
 
-  User resetUserPassword(String userName);
+  User resetUserPassword(String username);
 
   void deleteUser(String username);
 }

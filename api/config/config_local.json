@@ -87,6 +87,7 @@
     "enableDataUseAgreement": true,
     "enableBetaAccess": false,
     "unsafeAllowSelfBypass": true,
+    "unsafeAllowUserCreationFromGSuiteData": true,
     "requireInvitationKey": false
   },
   "featureFlags": {

@@ -920,7 +920,7 @@ public class ProfileController implements ProfileApiDelegate {
     }
     DbUser user = userProvider.get();
     log.log(Level.WARNING, "Deleting profile: user email: " + user.getUsername());
-    directoryService.deleteUser(user.getUsername().split("@")[0]);
+    directoryService.deleteUser(user.getUsername());
     userDao.delete(user.getUserId());
     profileAuditor.fireDeleteAction(user.getUserId(), user.getUsername());
 

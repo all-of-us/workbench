@@ -106,4 +106,13 @@ public interface InstitutionService {
    * @return
    */
   boolean validateOperationalUser(DbInstitution institution);
+
+  /**
+   * Searches through all institutions and returns the first institution that matches the given
+   * contact email address, if any.
+   *
+   * @param contactEmail
+   * @return
+   */
+  Optional<Institution> getFirstMatchingInstitution(final String contactEmail);
 }
