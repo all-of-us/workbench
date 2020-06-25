@@ -8,6 +8,7 @@ import {AppRouting} from './app-routing';
 
 import {DataPageComponent} from 'app/pages/data/data-page';
 import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
+import {DataUserCodeOfConductComponent} from 'app/pages/profile/data-user-code-of-conduct';
 import {UserDisabledComponent} from 'app/pages/user-disabled';
 import {AdminBannerComponent} from './pages/admin/admin-banner';
 import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
@@ -80,6 +81,10 @@ const routes: Routes = [
         path: 'nih-callback',
         component: HomepageComponent,
         data: {title: 'Homepage'},
+      }, {
+        path: 'data-code-of-conduct',
+        component: DataUserCodeOfConductComponent,
+        data: {title: 'Data User Code of Conduct'}
       }, {
         path: 'library',
         component: WorkspaceLibraryComponent,
@@ -348,18 +353,11 @@ const routes: Routes = [
         path: 'workspaces/build',
         component: WorkspaceEditComponent,
         data: {title: 'Create Workspace', mode: WorkspaceEditMode.Create}
-      },
-      {
-        path: '**',
-        component: AppRouting,
-        data:  {}
       }
     ]
-  },
-  {
+  }, {
     path: '**',
-    component: AppRouting,
-    data: {}
+    component: AppRouting
   }
 ];
 
