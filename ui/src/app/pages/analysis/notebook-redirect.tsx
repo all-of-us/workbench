@@ -7,6 +7,7 @@ import {urlParamsStore} from 'app/utils/navigation';
 import {fetchAbortableRetry} from 'app/utils/retry';
 
 import {Button} from 'app/components/buttons';
+import {FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {Spinner} from 'app/components/spinners';
@@ -70,7 +71,7 @@ const styles = reactStyles({
     textAlign: 'center', color: colors.black, fontSize: 14, lineHeight: '22px', marginTop: '10px'
   },
   reminderText: {
-    display: 'flex', flexDirection: 'row', marginTop: '1rem', fontSize: 14, color: colors.primary
+    marginTop: '1rem', fontSize: 14, color: colors.primary
   }
 });
 
@@ -406,15 +407,19 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
                                    creatingNewNotebook={creatingNewNotebook} progressComplete={progressComplete}/>;
             })}
           </div>
-          <div style={styles.reminderText}>
+          <FlexRow style={styles.reminderText}>
             <ReminderIcon
-              style={{height: '80px', width: '80px', marginRight: '0.5rem'}}/>
+              style={{width: '1.75rem', height: '1.75rem', marginRight: '0.5rem'}}/>
             <div>
-              It is <i>All of Us</i> data use policy that researchers should not make copies of
-              or download individual-level data (including taking screenshots or other means
-              of viewing individual-level data) outside of the <i>All of Us</i> research environment
-              without approval from <i>All of Us</i> Resource Access Board (RAB).
+              You are prohibited from taking screenshots or attempting in any way to remove participant-level data from the workbench.
             </div>
+          </FlexRow>
+          <div style={{marginLeft: '2rem', ...styles.reminderText}}>
+            You are also prohibited from publishing or otherwise distributing any data or aggregate statistics corresponding to fewer than
+            20 participants unless expressly permitted by our data use policies.
+          </div>
+          <div style={{marginLeft: '2rem', ...styles.reminderText}}>
+            For more information, please see our  <a href={'/data-code-of-conduct'}>Data Use Policies.</a>
           </div>
         </div> : <div style={{height: '100%'}}>
           <div style={{borderBottom: '5px solid #2691D0', width: '100%'}}/>

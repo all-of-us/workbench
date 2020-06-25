@@ -8,12 +8,10 @@ define([
     // File will be downloaded only if the user clicks OK else it will just close the dialog box and do nothing.
     $('#download_menu li a').click(function(e) {
       e.preventDefault();
-      return confirm("Policy Reminder" + "\n\n" +
-        "It is All of Us data use policy that researchers should not make copies of " +
-        "or download individual-level data (including taking screenshots or other means of viewing " +
-        "individual-level data) outside of the All of Us research environment without approval from " +
-        "All of Us Resource Access Board. So, please make sure that the output cells in the notebook " +
-        "you are downloading do not contain individual-level data.");
+      return confirm("Data Download Reminder" + "\n\n" +
+        "You are prohibited from taking screenshots or attempting in any way to remove participant-level data from the workbench. " +
+        "You are also prohibited from publishing or otherwise distributing any data or aggregate statistics corresponding to fewer than 20 participants unless expressly permitted by our data use policies. " +
+        "For more information, please see our Data Use Policies by visiting https://www.researchallofus.org/data-use-policies/.");
     });
   };
 
