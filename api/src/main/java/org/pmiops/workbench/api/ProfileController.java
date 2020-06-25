@@ -522,20 +522,34 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Void> updateProfile(Profile updatedProfile) {
     DbUser user = userProvider.get();
 
-    // Save current profile for audit trail. Continue to use the userProvider (instead
-    // of info on previousProfile) to ensure addition of audit system doesn't change behavior.
-    // That is, in the (rare, hopefully) condition that the old profile gives incorrect information,
-    // the update will still work as well as it would have.
+    // Save current profile for audit trail.
     final Profile previousProfile = profileService.getProfile(user);
-    final VerifiedInstitutionalAffiliation updatedAffil =
-        updatedProfile.getVerifiedInstitutionalAffiliation();
-    final VerifiedInstitutionalAffiliation prevAffil =
-        previousProfile.getVerifiedInstitutionalAffiliation();
-    if (!Objects.equals(updatedAffil, prevAffil)) {
+
+    if (!Objects.equals(
+        updatedProfile.getVerifiedInstitutionalAffiliation(),
+        previousProfile.getVerifiedInstitutionalAffiliation())) {
       throw new BadRequestException("Cannot update Verified Institutional Affiliation");
     }
 
     profileService.updateProfileForUser(user, updatedProfile, previousProfile);
+
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  public ResponseEntity<Void> adminUpdateProfile(DbUser user, Profile updatedProfile) {
+    // Save current profile for audit trail.
+    final Profile previousProfile = profileService.getProfile(user);
+
+    validateUpdatedProfile(updatedProfile, previousProfile);
+
+    profileService.adminUpdateProfile(updatedProfile);
+
+    if (workbenchConfigProvider.get().featureFlags.requireInstitutionalVerification) {
+      saveVerifiedInstitutionalAffiliation(user, updatedProfile);
+    }
+
+    final Profile appliedUpdatedProfile = profileService.getProfile(user);
+    profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);
 
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
@@ -550,6 +564,9 @@ public class ProfileController implements ProfileApiDelegate {
     if (verifiedAffiliation == null) {
       throw new BadRequestException("Cannot delete Verified Institutional Affiliation.");
     }
+
+    // if the Institution's Display Name differs from that of the VerifiedInstitutionalAffiliation
+    // passed in here, use the Institution's Display Name
 
     Optional<Institution> institution =
         institutionService.getInstitution(verifiedAffiliation.getInstitutionShortName());

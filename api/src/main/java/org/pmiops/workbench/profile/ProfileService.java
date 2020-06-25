@@ -14,7 +14,6 @@ import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
@@ -49,7 +48,7 @@ public class ProfileService {
   private final Provider<DbUser> userProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
-  private final UserService userService;
+  private final Clock clock;
   private final UserTermsOfServiceDao userTermsOfServiceDao;
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
   private final VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
@@ -67,7 +66,7 @@ public class ProfileService {
       Provider<DbUser> userProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserDao userDao,
-      UserService userService,
+      Clock clock,
       UserTermsOfServiceDao userTermsOfServiceDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
       VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper) {
@@ -82,7 +81,7 @@ public class ProfileService {
     this.userProvider = userProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userDao = userDao;
-    this.userService = userService;
+    this.clock = clock;
     this.userTermsOfServiceDao = userTermsOfServiceDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
     this.verifiedInstitutionalAffiliationMapper = verifiedInstitutionalAffiliationMapper;
@@ -172,12 +171,6 @@ public class ProfileService {
   public void updateProfileForUser(DbUser user, Profile updatedProfile, Profile previousProfile) {
     validateUpdatedProfile(updatedProfile, previousProfile);
 
-    if (!userProvider.get().getGivenName().equalsIgnoreCase(updatedProfile.getGivenName())
-        || !userProvider.get().getFamilyName().equalsIgnoreCase(updatedProfile.getFamilyName())) {
-      userService.setDataUseAgreementNameOutOfDate(
-          updatedProfile.getGivenName(), updatedProfile.getFamilyName());
-    }
-
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
     user.setGivenName(updatedProfile.getGivenName());
@@ -201,30 +194,38 @@ public class ProfileService {
     user.setDemographicSurvey(dbDemographicSurvey);
     user.setLastModifiedTime(now);
 
-    updateInstitutionalAffiliations(updatedProfile, user);
     boolean requireInstitutionalVerification =
         workbenchConfigProvider.get().featureFlags.requireInstitutionalVerification;
     if (requireInstitutionalVerification) {
-      validateInstitutionalAffiliation(updatedProfile);
+      profileService.validateInstitutionalAffiliation(updatedProfile);
+    } else {
+      updateInstitutionalAffiliations(updatedProfile, user);
     }
 
-    userService.updateUserWithConflictHandling(user);
+    user = userService.updateUserWithConflictHandling(user);
+
     if (requireInstitutionalVerification) {
-      DbVerifiedInstitutionalAffiliation updatedDbVerifiedAffiliation =
-          verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
-              updatedProfile.getVerifiedInstitutionalAffiliation(), institutionService);
-      updatedDbVerifiedAffiliation.setUser(user);
-      Optional<DbVerifiedInstitutionalAffiliation> dbVerifiedAffiliation =
-          verifiedInstitutionalAffiliationDao.findFirstByUser(user);
-      dbVerifiedAffiliation.ifPresent(
-          verifiedInstitutionalAffiliation ->
-              updatedDbVerifiedAffiliation.setVerifiedInstitutionalAffiliationId(
-                  verifiedInstitutionalAffiliation.getVerifiedInstitutionalAffiliationId()));
-      this.verifiedInstitutionalAffiliationDao.save(updatedDbVerifiedAffiliation);
+      saveVerifiedInstitutionalAffiliation(user, updatedProfile);
     }
 
-    final Profile appliedUpdatedProfile = getProfile(user);
+    final Profile appliedUpdatedProfile = profileService.getProfile(user);
     profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);
+  }
+
+  private void saveVerifiedInstitutionalAffiliation(DbUser user, Profile updatedProfile) {
+    DbVerifiedInstitutionalAffiliation updatedDbVerifiedAffiliation =
+        verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
+            updatedProfile.getVerifiedInstitutionalAffiliation(), institutionService);
+
+    updatedDbVerifiedAffiliation.setUser(user);
+
+    // set DB ID if present, to cause an update
+    verifiedInstitutionalAffiliationDao
+        .findFirstByUser(user)
+        .map(DbVerifiedInstitutionalAffiliation::getVerifiedInstitutionalAffiliationId)
+        .ifPresent(updatedDbVerifiedAffiliation::setVerifiedInstitutionalAffiliationId);
+
+    this.verifiedInstitutionalAffiliationDao.save(updatedDbVerifiedAffiliation);
   }
 
   public void validateAndCleanProfile(Profile profile) throws BadRequestException {
@@ -336,5 +337,15 @@ public class ProfileService {
 
   public List<Profile> listAllProfiles() {
     return userService.getAllUsers().stream().map(this::getProfile).collect(Collectors.toList());
+  }
+
+  public void adminUpdateProfile(Profile updatedProfile) {
+    final int optimisticLockingVersion =
+        userDao.findUserByUserId(updatedProfile.getUserId()).getVersion();
+
+    final DbUser user = profileMapper.profileToDbUser(updatedProfile);
+    user.setVersion(optimisticLockingVersion);
+    user.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
+    userDao.save(user);
   }
 }

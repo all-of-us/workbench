@@ -64,7 +64,7 @@ constructor(
                             agentIdMaybe = userProvider.get().userId,
                             agentEmailMaybe = userProvider.get().username,
                             targetType = TargetType.PROFILE,
-                            targetIdMaybe = userProvider.get().userId,
+                            targetIdMaybe = previousProfile.userId,
                             targetPropertyMaybe = it.key,
                             previousValueMaybe = it.value.previousValue,
                             newValueMaybe = it.value.newValue)

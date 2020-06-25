@@ -819,6 +819,8 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void updateVerifiedInstitutionalAffiliation_create() {
     createUser();
 
+    assertThat(profileController.getMe().getBody().getVerifiedInstitutionalAffiliation()).isNull();
+
     config.featureFlags.requireInstitutionalVerification = true;
 
     final VerifiedInstitutionalAffiliation toAdd = createVerifiedInstitutionalAffiliation();
@@ -829,23 +831,23 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void updateVerifiedInstitutionalAffiliation_update() {
+  public void adminUpdateProfile_updateVerifiedInstitutionalAffiliation() {
+    // necessary to create a user without one
+    config.featureFlags.requireInstitutionalVerification = false;
     createUser();
+
+    Profile profile = profileService.getProfile(dbUser);
+    assertThat(profile.getVerifiedInstitutionalAffiliation()).isNull();
 
     config.featureFlags.requireInstitutionalVerification = true;
 
-    VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
-        createVerifiedInstitutionalAffiliation();
-    profileController.updateVerifiedInstitutionalAffiliation(
-        dbUser.getUserId(), verifiedInstitutionalAffiliation);
+    final VerifiedInstitutionalAffiliation toAdd = createVerifiedInstitutionalAffiliation();
 
-    verifiedInstitutionalAffiliation.setInstitutionalRoleEnum(InstitutionalRole.ADMIN);
-    profileController.updateVerifiedInstitutionalAffiliation(
-        dbUser.getUserId(), verifiedInstitutionalAffiliation);
+    profile.setVerifiedInstitutionalAffiliation(toAdd);
+    profileController.adminUpdateProfile(dbUser, profile);
 
-    Profile updatedProfile = profileService.getProfile(dbUser);
-    assertThat(updatedProfile.getVerifiedInstitutionalAffiliation())
-        .isEqualTo(verifiedInstitutionalAffiliation);
+    profile = profileService.getProfile(dbUser);
+    assertThat(profile.getVerifiedInstitutionalAffiliation()).isEqualTo(toAdd);
   }
 
   @Test(expected = BadRequestException.class)
@@ -863,6 +865,20 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test(expected = BadRequestException.class)
+  public void adminUpdateProfile_removeVerifiedInstitutionalAffiliationForbidden() {
+    config.featureFlags.requireInstitutionalVerification = true;
+
+    final VerifiedInstitutionalAffiliation original = createVerifiedInstitutionalAffiliation();
+
+    createAccountRequest.getProfile().setVerifiedInstitutionalAffiliation(original);
+    createUser();
+
+    final Profile profile = profileController.getMe().getBody();
+    profile.setVerifiedInstitutionalAffiliation(null);
+    profileController.adminUpdateProfile(dbUser, profile);
+  }
+
+  @Test(expected = BadRequestException.class)
   public void updateVerifiedInstitutionalAffiliation_removeForbidden() {
     config.featureFlags.requireInstitutionalVerification = true;
 
@@ -872,6 +888,39 @@ public class ProfileControllerTest extends BaseControllerTest {
     createUser();
 
     profileController.updateVerifiedInstitutionalAffiliation(dbUser.getUserId(), null);
+  }
+
+  @Test
+  public void adminUpdateProfile_disable() {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    assertThat(profile.getDisabled()).isFalse();
+
+    profile.setDisabled(true);
+    profileController.adminUpdateProfile(dbUser, profile);
+    profile = profileController.getMe().getBody();
+    assertThat(profile.getDisabled()).isTrue();
+  }
+
+  @Test
+  public void adminUpdateProfile_reenable() {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    assertThat(profile.getDisabled()).isFalse();
+
+    // first disable
+
+    profile.setDisabled(true);
+    profileController.adminUpdateProfile(dbUser, profile);
+    profile = profileController.getMe().getBody();
+    assertThat(profile.getDisabled()).isTrue();
+
+    // then re-enable
+
+    profile.setDisabled(false);
+    profileController.adminUpdateProfile(dbUser, profile);
+    profile = profileController.getMe().getBody();
+    assertThat(profile.getDisabled()).isFalse();
   }
 
   @Test
@@ -924,7 +973,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void updateName_alsoUpdatesDua() {
+  public void updateProfile_newNameAlsoUpdatesDua() {
     createUser();
     Profile profile = profileController.getMe().getBody();
     profile.setGivenName("OldGivenName");
@@ -939,14 +988,20 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(duas.get(0).isUserNameOutOfDate()).isTrue();
   }
 
-  @Test(expected = BadRequestException.class)
-  public void updateGivenName_badRequest() {
+  @Test
+  public void adminUpdateProfile_newNameAlsoUpdatesDua() {
     createUser();
     Profile profile = profileController.getMe().getBody();
-    String newName =
-        "obladidobladalifegoesonyalalalalalifegoesonobladioblada" + "lifegoesonrahlalalalifegoeson";
-    profile.setGivenName(newName);
-    profileController.updateProfile(profile);
+    profile.setGivenName("OldGivenName");
+    profile.setFamilyName("OldFamilyName");
+    profileController.adminUpdateProfile(dbUser, profile);
+    profileController.submitDataUseAgreement(DUA_VERSION, "O.O.");
+    profile.setGivenName("NewGivenName");
+    profile.setFamilyName("NewFamilyName");
+    profileController.adminUpdateProfile(dbUser, profile);
+    List<DbUserDataUseAgreement> duas =
+        userDataUseAgreementDao.findByUserIdOrderByCompletionTimeDesc(profile.getUserId());
+    assertThat(duas.get(0).isUserNameOutOfDate()).isTrue();
   }
 
   @Test(expected = BadRequestException.class)
@@ -1006,13 +1061,99 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test(expected = BadRequestException.class)
-  public void updateFamilyName_badRequest() {
+  public void updateProfile_badRequest_givenName_long() {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    String newName =
+        "obladidobladalifegoesonyalalalalalifegoesonobladioblada" + "lifegoesonrahlalalalifegoeson";
+    profile.setGivenName(newName);
+    profileController.updateProfile(profile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void updateProfile_badRequest_familyName_long() {
     createUser();
     Profile profile = profileController.getMe().getBody();
     String newName =
         "obladidobladalifegoesonyalalalalalifegoesonobladioblada" + "lifegoesonrahlalalalifegoeson";
     profile.setFamilyName(newName);
     profileController.updateProfile(profile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void adminUpdateProfile_badRequest_nullAddress() {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    profile.setAddress(null);
+    profileController.adminUpdateProfile(dbUser, profile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void adminUpdateProfile_badRequest_nullCountry() {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    profile.getAddress().country(null);
+    profileController.adminUpdateProfile(dbUser, profile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void adminUpdateProfile_badRequest_nullState() {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    profile.getAddress().state(null);
+    profileController.adminUpdateProfile(dbUser, profile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void adminUpdateProfile_badRequest_nullZipCode() {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    profile.getAddress().zipCode(null);
+    profileController.adminUpdateProfile(dbUser, profile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void adminUpdateProfile_badRequest_emptyReasonForResearch() {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    profile.setAreaOfResearch("");
+    profileController.adminUpdateProfile(dbUser, profile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void adminUpdateProfile_badRequest_UpdateUserName() {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    profile.setUsername("newUserName@fakeDomain.com");
+    profileController.adminUpdateProfile(dbUser, profile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void adminUpdateProfile_badRequest_UpdateContactEmail() {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    profile.setContactEmail("newContact@fakeDomain.com");
+    profileController.adminUpdateProfile(dbUser, profile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void adminUpdateProfile_badRequest_givenName_long() {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    String newName =
+        "obladidobladalifegoesonyalalalalalifegoesonobladioblada" + "lifegoesonrahlalalalifegoeson";
+    profile.setGivenName(newName);
+    profileController.adminUpdateProfile(dbUser, profile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void adminUpdateProfile_badRequest_familyName_long() {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    String newName =
+        "obladidobladalifegoesonyalalalalalifegoesonobladioblada" + "lifegoesonrahlalalalifegoeson";
+    profile.setFamilyName(newName);
+    profileController.adminUpdateProfile(dbUser, profile);
   }
 
   @Test
@@ -1188,8 +1329,44 @@ public class ProfileControllerTest extends BaseControllerTest {
         profile.getUserId(),
         new AccessBypassRequest().isBypassed(true).moduleName(AccessModule.DATA_USE_AGREEMENT));
 
-    DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
-    assertThat(dbUser.getDataUseAgreementBypassTime()).isNotNull();
+    profile = profileController.getMe().getBody();
+    assertThat(profile.getDataUseAgreementBypassTime()).isNotNull();
+  }
+
+  @Test
+  public void adminUpdateProfile_bypassAccessModule() {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    assertThat(profile.getDataUseAgreementBypassTime()).isNull();
+
+    profile.setDataUseAgreementBypassTime(NOW.toEpochMilli());
+    profileController.adminUpdateProfile(dbUser, profile);
+
+    profile = profileController.getMe().getBody();
+    assertThat(profile.getDataUseAgreementBypassTime()).isNotNull();
+  }
+
+  @Test
+  public void adminUpdateProfile_unbypassAccessModule() {
+    // first bypass
+
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    assertThat(profile.getDataUseAgreementBypassTime()).isNull();
+
+    profile.setDataUseAgreementBypassTime(NOW.toEpochMilli());
+    profileController.adminUpdateProfile(dbUser, profile);
+
+    profile = profileController.getMe().getBody();
+    assertThat(profile.getDataUseAgreementBypassTime()).isNotNull();
+
+    // then unbypass
+
+    profile.setDataUseAgreementBypassTime(null);
+    profileController.adminUpdateProfile(dbUser, profile);
+
+    profile = profileController.getMe().getBody();
+    assertThat(profile.getDataUseAgreementBypassTime()).isNull();
   }
 
   @Test
