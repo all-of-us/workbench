@@ -313,13 +313,14 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   @Override
   public DbUser createUser(
-      final Userinfoplus oAuth2Userinfo,
+      final Userinfoplus userInfo,
       final String contactEmail,
       DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation) {
     return createUser(
-        oAuth2Userinfo.getGivenName(),
-        oAuth2Userinfo.getFamilyName(),
-        oAuth2Userinfo.getEmail(),
+        userInfo.getGivenName(),
+        userInfo.getFamilyName(),
+        // This GSuite primary email address is what RW refers to as `username`.
+        userInfo.getEmail(),
         contactEmail,
         null,
         null,
@@ -336,7 +337,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   public DbUser createUser(
       String givenName,
       String familyName,
-      String userName,
+      String username,
       String contactEmail,
       String currentPosition,
       String organization,
@@ -350,7 +351,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     DbUser dbUser = new DbUser();
     dbUser.setCreationNonce(Math.abs(random.nextLong()));
     dbUser.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
-    dbUser.setUsername(userName);
+    dbUser.setUsername(username);
     dbUser.setContactEmail(contactEmail);
     dbUser.setCurrentPosition(currentPosition);
     dbUser.setOrganization(organization);
@@ -399,7 +400,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         this.verifiedInstitutionalAffiliationDao.save(dbVerifiedAffiliation);
       }
     } catch (DataIntegrityViolationException e) {
-      dbUser = userDao.findUserByUsername(userName);
+      dbUser = userDao.findUserByUsername(username);
       if (dbUser == null) {
         throw e;
       }

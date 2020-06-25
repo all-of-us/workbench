@@ -35,9 +35,10 @@ public class DirectoryServiceImplIntegrationTest extends BaseIntegrationTest {
 
   @Test
   public void testCreateAndDeleteTestUser() {
-    String userName = String.format("integration.test.%d", Clock.systemUTC().millis());
-    service.createUser("Integration", "Test", userName, "notasecret@gmail.com");
-    assertThat(service.isUsernameTaken(userName)).isTrue();
+    String userPrefix = String.format("integration.test.%d", Clock.systemUTC().millis());
+    String username = userPrefix + "@" + config.googleDirectoryService.gSuiteDomain;
+    service.createUser("Integration", "Test", username, "notasecret@gmail.com");
+    assertThat(service.isUsernameTaken(userPrefix)).isTrue();
 
     // As of ~6/25/19, customSchemas are sometimes unavailable on the initial call to Gsuite. This
     // data is likely not written with strong consistency. Retry until it is available.
@@ -46,7 +47,7 @@ public class DirectoryServiceImplIntegrationTest extends BaseIntegrationTest {
             .execute(
                 c -> {
                   Map<String, Map<String, Object>> schemas =
-                      service.getUserByUsername(userName).getCustomSchemas();
+                      service.getUser(username).getCustomSchemas();
                   if (schemas == null) {
                     throw new RuntimeException("custom schemas is still null");
                   }
@@ -54,14 +55,10 @@ public class DirectoryServiceImplIntegrationTest extends BaseIntegrationTest {
                 });
     // Ensure our two custom schema fields are correctly set & re-fetched from GSuite.
     assertThat(aouMeta).containsEntry("Institution", "All of Us Research Workbench");
-    assertThat(service.getContactEmail(userName)).hasValue("notasecret@gmail.com");
-    assertThat(
-            service.getContactEmailFromGSuiteEmail(
-                userName + "@" + config.googleDirectoryService.gSuiteDomain))
-        .hasValue("notasecret@gmail.com");
+    assertThat(service.getContactEmail(username)).hasValue("notasecret@gmail.com");
 
-    service.deleteUser(userName);
-    assertThat(service.isUsernameTaken(userName)).isFalse();
+    service.deleteUser(username);
+    assertThat(service.isUsernameTaken(userPrefix)).isFalse();
   }
 
   private static RetryTemplate retryTemplate() {

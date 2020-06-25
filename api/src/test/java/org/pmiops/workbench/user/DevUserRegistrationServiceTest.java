@@ -57,7 +57,7 @@ public class DevUserRegistrationServiceTest {
     DbInstitution dbInstitution = new DbInstitution();
     dbInstitution.setShortName("Google");
 
-    when(directoryService.getContactEmailFromGSuiteEmail(eq("gjordan@fake-research-aou.org")))
+    when(directoryService.getContactEmail(eq("gjordan@fake-research-aou.org")))
         .thenReturn(Optional.of("gregory.jordan.123@gmail.com"));
     when(institutionService.getFirstMatchingInstitution("gregory.jordan.123@gmail.com"))
         .thenReturn(Optional.of(new Institution().shortName("Google")));
@@ -74,7 +74,7 @@ public class DevUserRegistrationServiceTest {
   @Test(expected = BadRequestException.class)
   public void testCreateUserFromUserInfo_NoMatchingInstitution() {
     // If no matching institution could be found, an exception is thrown.
-    when(directoryService.getContactEmailFromGSuiteEmail(eq("gjordan@fake-research-aou.org")))
+    when(directoryService.getContactEmail(eq("gjordan@fake-research-aou.org")))
         .thenReturn(Optional.of("gregory.jordan.123@gmail.com"));
     when(institutionService.getFirstMatchingInstitution("gregory.jordan.123@gmail.com"))
         .thenReturn(Optional.empty());

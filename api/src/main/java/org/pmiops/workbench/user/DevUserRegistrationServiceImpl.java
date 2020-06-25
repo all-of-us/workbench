@@ -1,7 +1,6 @@
 package org.pmiops.workbench.user;
 
 import com.google.api.services.oauth2.model.Userinfoplus;
-import java.util.Optional;
 import java.util.logging.Logger;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
@@ -42,9 +41,8 @@ public class DevUserRegistrationServiceImpl implements DevUserRegistrationServic
   public DbUser createUser(Userinfoplus userInfo) {
     // We'll try to lookup the GSuite contact email if available. Otherwise, fall back to the
     // username email address (e.g. foobar@fake-research-aou.org).
-    Optional<String> gSuiteContactEmail =
-        directoryService.getContactEmailFromGSuiteEmail(userInfo.getEmail());
-    String contactEmail = gSuiteContactEmail.orElse(userInfo.getEmail());
+    String contactEmail =
+        directoryService.getContactEmail(userInfo.getEmail()).orElse(userInfo.getEmail());
 
     log.info(
         String.format(
