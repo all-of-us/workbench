@@ -4,6 +4,7 @@ import static com.google.api.client.googleapis.util.Utils.getDefaultJsonFactory;
 
 import com.google.api.client.http.HttpTransport;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager;
+import com.google.api.services.cloudresourcemanager.CloudResourceManager.Builder;
 import com.google.api.services.cloudresourcemanager.CloudResourceManagerScopes;
 import com.google.api.services.cloudresourcemanager.model.ListProjectsResponse;
 import com.google.api.services.cloudresourcemanager.model.Project;
@@ -11,12 +12,12 @@ import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.OAuth2Credentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
-import com.google.common.base.Predicates;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import javax.inject.Provider;
 import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.DelegatedUserCredentials;
@@ -75,7 +76,7 @@ public class CloudResourceManagerServiceImpl implements CloudResourceManagerServ
     }
     delegatedCreds.refreshIfExpired();
 
-    return new CloudResourceManager.Builder(
+    return new Builder(
             httpTransport, getDefaultJsonFactory(), new HttpCredentialsAdapter(delegatedCreds))
         .setApplicationName(APPLICATION_NAME)
         .build();
@@ -101,7 +102,7 @@ public class CloudResourceManagerServiceImpl implements CloudResourceManagerServ
             // The API does not specify null or empty string; treat both as empty to be safe.
             pageToken =
                 Optional.ofNullable(resp.getNextPageToken())
-                    .filter(Predicates.not(String::isEmpty));
+                    .filter(((Predicate<String>) String::isEmpty).negate());
           } while (pageToken.isPresent());
           return projects;
         });

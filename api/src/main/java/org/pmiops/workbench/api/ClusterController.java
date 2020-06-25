@@ -198,8 +198,7 @@ public class ClusterController implements ClusterApiDelegate {
     workspaceService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
 
     org.pmiops.workbench.notebooks.model.Cluster firecloudCluster =
-        leonardoNotebooksClient.getCluster(
-            workspaceNamespace, clusterNameForUser(userProvider.get()));
+        leonardoNotebooksClient.getCluster(workspaceNamespace, userProvider.get().getClusterName());
 
     return ResponseEntity.ok(TO_ALL_OF_US_CLUSTER.apply(firecloudCluster));
   }
@@ -213,7 +212,7 @@ public class ClusterController implements ClusterApiDelegate {
 
     org.pmiops.workbench.notebooks.model.Cluster firecloudCluster =
         leonardoNotebooksClient.createCluster(
-            workspaceNamespace, clusterNameForUser(userProvider.get()), firecloudWorkspaceName);
+            workspaceNamespace, userProvider.get().getClusterName(), firecloudWorkspaceName);
 
     return ResponseEntity.ok(TO_ALL_OF_US_CLUSTER.apply(firecloudCluster));
   }
@@ -224,8 +223,7 @@ public class ClusterController implements ClusterApiDelegate {
     workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
 
-    leonardoNotebooksClient.deleteCluster(
-        workspaceNamespace, clusterNameForUser(userProvider.get()));
+    leonardoNotebooksClient.deleteCluster(workspaceNamespace, userProvider.get().getClusterName());
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -276,7 +274,7 @@ public class ClusterController implements ClusterApiDelegate {
 
     leonardoNotebooksClient.createStorageLink(
         workspaceNamespace,
-        clusterNameForUser(userProvider.get()),
+        userProvider.get().getClusterName(),
         new StorageLink()
             .cloudStorageDirectory(gcsNotebooksDir)
             .localBaseDirectory(editDir)
@@ -302,7 +300,7 @@ public class ClusterController implements ClusterApiDelegate {
     }
     log.info(localizeMap.toString());
     leonardoNotebooksClient.localize(
-        workspaceNamespace, clusterNameForUser(userProvider.get()), localizeMap);
+        workspaceNamespace, userProvider.get().getClusterName(), localizeMap);
 
     // This is the Jupyer-server-root-relative path, the style used by the Jupyter REST API.
     return ResponseEntity.ok(new ClusterLocalizeResponse().clusterLocalDirectory(targetDir));
@@ -329,16 +327,6 @@ public class ClusterController implements ClusterApiDelegate {
     userService.logAdminUserAction(
         user.getUserId(), "cluster config override", oldOverride, new Gson().toJson(override));
     return ResponseEntity.ok(new EmptyResponse());
-  }
-
-  /**
-   * Returns a name for the VM / cluster to be created for a given user in the workspace.
-   *
-   * @param user
-   * @return
-   */
-  public static String clusterNameForUser(DbUser user) {
-    return "all-of-us-" + user.getUserId();
   }
 
   private String jsonToDataUri(JSONObject json) {

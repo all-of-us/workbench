@@ -36,6 +36,8 @@ import org.pmiops.workbench.model.EmailVerificationStatus;
 @Table(name = "user")
 public class DbUser {
 
+  private static final String CLUSTER_NAME_PREFIX = "all-of-us-";
+
   /**
    * This is a Gson compatible class for encoding a JSON blob which is stored in MySQL. This
    * represents cluster configuration overrides we support on a per-user basis for their notebook
@@ -736,5 +738,11 @@ public class DbUser {
 
   public static int usernameHashCode(DbUser dbUser) {
     return (dbUser == null) ? 0 : Objects.hashCode(dbUser.getUsername());
+  }
+
+  /** Returns a name for the VM / cluster to be created for this user. */
+  @Transient
+  public String getClusterName() {
+    return CLUSTER_NAME_PREFIX + getUserId();
   }
 }

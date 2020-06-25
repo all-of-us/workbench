@@ -937,6 +937,7 @@ paths:
           description: success
           schema:
             "$ref": "#/definitions/EmptyResponse"
+
   "/v1/admin/workspaces/review":
     get:
       tags:
@@ -1255,12 +1256,12 @@ paths:
       - workspaceAdmin
       description: 'Given a workspace namespace (Google Cloud Platform  Project ID),
         returns workspace details. Requires the RESEARCHER_DATA_VIEW authority.'
-      operationId: getFederatedWorkspaceDetails
+      operationId: getWorkspaceAdminView
       responses:
         200:
           description: Federated details about the workspace.
           schema:
-            "$ref": "#/definitions/AdminFederatedWorkspaceDetailsResponse"
+            "$ref": "#/definitions/WorkspaceAdminView"
         404:
           description: Workspace not found for namespace
           schema:
@@ -4061,6 +4062,7 @@ definitions:
     properties:
       email:
         type: string
+        description: Username of the user
       givenName:
         type: string
       familyName:
@@ -5807,16 +5809,24 @@ definitions:
         type: string
         description: 'The user''s detailed Institutional Role at this Institution,
           as text, if its enumerated type is OTHER'
-  AdminFederatedWorkspaceDetailsResponse:
+  WorkspaceAdminView:
     description: Admin-visible metadata about a workspace.
     type: object
     properties:
       workspace:
         "$ref": "#/definitions/Workspace"
+      workspaceDatabaseId:
+        description: >
+          ID used in the workspace table in the MySQL database. Useful
+          for DB queries and Action Audit searches in Stackdriver Logging and
+          BigQuery.
+        type: integer
+        format: int64
       collaborators:
         type: array
+        description: List of users who own or collaborate on this workspace.
         items:
-          "$ref": "#/definitions/UserRole"
+          "$ref": "#/definitions/WorkspaceUserAdminView"
       resources:
         "$ref": "#/definitions/AdminWorkspaceResources"
   AdminWorkspaceResources:
@@ -7699,3 +7709,27 @@ definitions:
         type: string
       newValue:
         type: string
+  WorkspaceUserAdminView:
+    type: object
+    required:
+      - userModel
+      - role
+      - userDatabaseId
+    properties:
+      userModel:
+        description: User API model
+        "$ref": '#/definitions/User'
+      role:
+        description: User access level on an associated workspace
+        "$ref": '#/definitions/WorkspaceAccessLevel'
+      userDatabaseId:
+        description: >
+          user_id value in the user table in the MySQL database. Useful
+          for DB queries and Action Audit searches in Stackdriver Logging and
+          BigQuery.
+        type: integer
+        format: int64
+      userAccountCreatedTime:
+        description: Datetime at creation of this user's accont
+        type: string
+        format: date-time
