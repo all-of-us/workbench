@@ -1,12 +1,12 @@
-package org.pmiops.workbench.statusalerts;
+package org.pmiops.workbench.api;
 
 import java.util.Optional;
 import org.pmiops.workbench.annotations.AuthorityRequired;
-import org.pmiops.workbench.api.StatusAlertApiDelegate;
 import org.pmiops.workbench.db.dao.StatusAlertDao;
 import org.pmiops.workbench.db.model.DbStatusAlert;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.StatusAlert;
+import org.pmiops.workbench.statusalerts.StatusAlertConversionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;

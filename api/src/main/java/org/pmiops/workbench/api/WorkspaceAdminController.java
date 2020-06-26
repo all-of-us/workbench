@@ -1,12 +1,12 @@
-package org.pmiops.workbench.workspaceadmin;
+package org.pmiops.workbench.api;
 
 import javax.annotation.Nullable;
 import org.pmiops.workbench.annotations.AuthorityRequired;
-import org.pmiops.workbench.api.WorkspaceAdminApiDelegate;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
+import org.pmiops.workbench.workspaceadmin.WorkspaceAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
