@@ -22,6 +22,11 @@ public abstract class UserToAffiliate {
   String contactEmail;
   String userName;
 
+  // sometimes the CSVReader retains double quotes so we remove them manually
+  protected String clean(String input) {
+    return input.trim().replace("\"", "");
+  }
+
   // check data prerequisites which don't involve DB comparisons
   abstract void preCheck();
 

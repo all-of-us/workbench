@@ -39,12 +39,12 @@ class OpsUser extends UserToAffiliate {
   }
 
   private OpsUser(final String[] userLine) {
-    this.firstName = userLine[0].trim();
-    this.lastName = userLine[1].trim();
-    this.contactEmail = userLine[2].trim();
-    this.userName = userLine[3].trim();
-    this.operationalRole = userLine[4].trim();
-    this.action = userLine[5].trim();
+    this.firstName = clean(userLine[0]);
+    this.lastName = clean(userLine[1]);
+    this.contactEmail = clean(userLine[2]);
+    this.userName = clean(userLine[3]);
+    this.operationalRole = clean(userLine[4]);
+    this.action = clean(userLine[5]);
   }
 
   static List<UserToAffiliate> parseInput(final String filename) throws IOException {
