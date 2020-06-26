@@ -22,7 +22,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 public class UserServiceAuditorTest {
   @TestConfiguration
-  @Import({UserServiceAuditAdapterImpl.class, ActionAuditTestConfig.class})
+  @Import({UserServiceAuditorImpl.class, ActionAuditTestConfig.class})
   @MockBean(ActionAuditService.class)
   static class Configuration {}
 

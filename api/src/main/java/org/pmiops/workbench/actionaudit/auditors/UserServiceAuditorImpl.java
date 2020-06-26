@@ -20,9 +20,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserServiceAuditAdapterImpl implements UserServiceAuditor {
+public class UserServiceAuditorImpl implements UserServiceAuditor {
 
-  private static final Logger log = Logger.getLogger(UserServiceAuditAdapterImpl.class.getName());
+  private static final Logger log = Logger.getLogger(UserServiceAuditorImpl.class.getName());
 
   private final ActionAuditService actionAuditService;
   private final Clock clock;
@@ -30,7 +30,7 @@ public class UserServiceAuditAdapterImpl implements UserServiceAuditor {
   private Provider<String> actionIdProvider;
 
   @Autowired
-  public UserServiceAuditAdapterImpl(
+  public UserServiceAuditorImpl(
       ActionAuditService actionAuditService,
       Clock clock,
       Provider<DbUser> dbUserProvider,
