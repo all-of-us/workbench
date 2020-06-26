@@ -1,8 +1,8 @@
 import {ElementHandle, Page} from 'puppeteer';
 import {WorkspaceAccessLevel} from 'app/page-identifiers';
 import {ElementType} from 'app/xpath-options';
+import Dialog from 'app/component/dialog';
 import Button from 'app/element/button';
-import Dialog from 'app/element/dialog';
 import Textbox from 'app/element/textbox';
 import ClrIcon from 'app/element/clr-icon-link';
 
@@ -52,7 +52,7 @@ export default class ShareModal extends Dialog {
   private collabRowXPath(username: string): string {
     // We dip into child contents to find the collab user row element parent.
     // .//div filters by a relative path to the parent row.
-    return `{this.getXPath()}//*[@data-test-id="collab-user-row" and .//div[` +
+    return `${this.getXpath()}//*[@data-test-id="collab-user-row" and .//div[` +
         `@data-test-id="collab-user-email" and contains(text(),"${username}")]]`;
   }
 
