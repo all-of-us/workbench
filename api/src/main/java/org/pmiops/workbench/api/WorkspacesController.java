@@ -1,4 +1,4 @@
-package org.pmiops.workbench.workspaces;
+package org.pmiops.workbench.api;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
@@ -23,8 +23,6 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.annotations.AuthorityRequired;
-import org.pmiops.workbench.api.Etags;
-import org.pmiops.workbench.api.WorkspacesApiDelegate;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.EmptyBufferException;
 import org.pmiops.workbench.billing.FreeTierBillingService;
@@ -85,6 +83,7 @@ import org.pmiops.workbench.monitoring.views.DistributionMetric;
 import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;

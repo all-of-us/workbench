@@ -58,6 +58,22 @@ public class BillingGarbageCollectionService {
     this.credentialsLoadingCache = initializeCredentialsLoadingCache();
   }
 
+  public void deletedWorkspaceGarbageCollection() {
+    billingProjectBufferEntryDao
+        .findBillingProjectsForGarbageCollection()
+        .forEach(
+            projectName -> {
+              // determine whether this candidate for garbage collection
+              // has already been deleted or transferred by a process other than GC
+              if (appSAIsMemberOfProject(projectName)) {
+                transferOwnership(projectName);
+              } else {
+                // if it's in the DB as garbage-collected we won't try to do it again
+                recordGarbageCollection(projectName, "unknown");
+              }
+            });
+  }
+
   private LoadingCache<String, GoogleCredentials> initializeCredentialsLoadingCache() {
     return CacheBuilder.newBuilder()
         .expireAfterWrite(24, TimeUnit.HOURS)
@@ -161,20 +177,5 @@ public class BillingGarbageCollectionService {
     }
 
     recordGarbageCollection(projectName, garbageCollectionSA);
-  }
-
-  void deletedWorkspaceGarbageCollection() {
-    billingProjectBufferEntryDao.findBillingProjectsForGarbageCollection().stream()
-        .forEach(
-            projectName -> {
-              // determine whether this candidate for garbage collection
-              // has already been deleted or transferred by a process other than GC
-              if (appSAIsMemberOfProject(projectName)) {
-                transferOwnership(projectName);
-              } else {
-                // if it's in the DB as garbage-collected we won't try to do it again
-                recordGarbageCollection(projectName, "unknown");
-              }
-            });
   }
 }

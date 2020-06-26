@@ -1,7 +1,8 @@
-package org.pmiops.workbench.billing;
+package org.pmiops.workbench.api;
 
-import org.pmiops.workbench.api.OfflineBillingApiDelegate;
-import org.pmiops.workbench.monitoring.LogsBasedMetricService;
+import org.pmiops.workbench.billing.BillingGarbageCollectionService;
+import org.pmiops.workbench.billing.BillingProjectBufferService;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,18 +13,15 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
   private final FreeTierBillingService freeTierBillingService;
   private final BillingProjectBufferService billingProjectBufferService;
   private final BillingGarbageCollectionService billingGarbageCollectionService;
-  private LogsBasedMetricService logsBasedMetricService;
 
   @Autowired
   OfflineBillingController(
       FreeTierBillingService freeTierBillingService,
       BillingProjectBufferService billingProjectBufferService,
-      BillingGarbageCollectionService billingGarbageCollectionService,
-      LogsBasedMetricService logsBasedMetricService) {
+      BillingGarbageCollectionService billingGarbageCollectionService) {
     this.freeTierBillingService = freeTierBillingService;
     this.billingProjectBufferService = billingProjectBufferService;
     this.billingGarbageCollectionService = billingGarbageCollectionService;
-    this.logsBasedMetricService = logsBasedMetricService;
   }
 
   @Override

@@ -1,4 +1,4 @@
-package org.pmiops.workbench.statusalerts;
+package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 

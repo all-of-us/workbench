@@ -1,4 +1,4 @@
-package org.pmiops.workbench.workspaces;
+package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -63,13 +63,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
-import org.pmiops.workbench.api.BigQueryService;
-import org.pmiops.workbench.api.CohortAnnotationDefinitionController;
-import org.pmiops.workbench.api.CohortReviewController;
-import org.pmiops.workbench.api.CohortsController;
-import org.pmiops.workbench.api.ConceptSetsController;
-import org.pmiops.workbench.api.DataSetController;
-import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
@@ -187,6 +180,8 @@ import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
+import org.pmiops.workbench.workspaces.WorkspaceService;
+import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
