@@ -344,10 +344,6 @@ public class ProfileService {
     }
   }
 
-  public List<Profile> listAllProfiles() {
-    return userService.getAllUsers().stream().map(this::getProfile).collect(Collectors.toList());
-  }
-
   public void adminUpdateProfile(Profile updatedProfile) {
     final DbUser user = profileMapper.profileToDbUser(updatedProfile);
 
