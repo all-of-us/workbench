@@ -27,21 +27,21 @@ describe('Share workspace', () => {
       let accessLevel = await aboutPage.findUserInCollaboratorList(config.collaboratorUsername);
       if (accessLevel !== null) {
         await (await aboutPage.openShareModal()).removeUser(config.collaboratorUsername);
-        waitWhileLoading(page);
+        await waitWhileLoading(page);
       }
 
       let shareModal = await aboutPage.openShareModal();
       await shareModal.shareWithUser(
         config.collaboratorUsername, WorkspaceAccessLevel.Owner);
       // Collab list is refreshed.
-      waitWhileLoading(page);
+      await waitWhileLoading(page);
 
       accessLevel = await aboutPage.findUserInCollaboratorList(config.collaboratorUsername);
       expect(accessLevel).toBe(WorkspaceAccessLevel.Owner);
 
       shareModal = await aboutPage.openShareModal();
       await shareModal.removeUser(config.collaboratorUsername);
-      waitWhileLoading(page);
+      await waitWhileLoading(page);
 
       accessLevel = await aboutPage.findUserInCollaboratorList(config.collaboratorUsername);
       expect(accessLevel).toBeNull();

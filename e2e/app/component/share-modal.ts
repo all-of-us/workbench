@@ -1,8 +1,8 @@
-import Container from 'app/container';
 import {ElementHandle, Page} from 'puppeteer';
 import {WorkspaceAccessLevel} from 'app/page-identifiers';
 import {ElementType} from 'app/xpath-options';
 import Button from 'app/element/button';
+import Dialog from 'app/element/dialog';
 import Textbox from 'app/element/textbox';
 import ClrIcon from 'app/element/clr-icon-link';
 
@@ -12,13 +12,9 @@ export enum ButtonLabel {
   Save = 'Save'
 }
 
-const Selector = {
-  defaultDialog: '//*[@role="dialog"]',
-}
+export default class ShareModal extends Dialog {
 
-export default class ShareModal extends Container {
-
-  constructor(page: Page, xpath: string = Selector.defaultDialog) {
+  constructor(page: Page, xpath?: string) {
     super(page, xpath);
   }
 
@@ -56,7 +52,7 @@ export default class ShareModal extends Container {
   private collabRowXPath(username: string): string {
     // We dip into child contents to find the collab user row element parent.
     // .//div filters by a relative path to the parent row.
-    return `//*[@data-test-id="collab-user-row" and .//div[` +
+    return `{this.getXPath()}//*[@data-test-id="collab-user-row" and .//div[` +
         `@data-test-id="collab-user-email" and contains(text(),"${username}")]]`;
   }
 
@@ -91,17 +87,4 @@ export default class ShareModal extends Container {
     return await this.page.waitForXPath(
       `//*[starts-with(@id,"react-select") and text()="${levelText}"]`);
   }
-
-  async waitUntilDialogIsClosed(timeOut: number = 60000): Promise<void> {
-    await this.page.waitForXPath(this.xpath, {hidden: true, timeout: timeOut});
-  }
-
-  async waitUntilVisible(): Promise<void> {
-    await this.page.waitForXPath(this.xpath, {visible: true});
-  }
-
-  async exists(): Promise<boolean> {
-    return (await this.page.$x(this.xpath)).length > 0;
-  }
-
 }
