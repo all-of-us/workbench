@@ -5,7 +5,7 @@ import Textbox from 'app/element/textbox';
 import Textarea from 'app/element/textarea';
 import Checkbox from 'app/element/checkbox';
 import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
-import {LinkText} from 'app/page-identifiers';
+import {LinkText} from 'app/text-labels';
 
 
 const Selector = {

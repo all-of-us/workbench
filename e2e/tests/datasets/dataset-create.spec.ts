@@ -5,7 +5,7 @@ import DataPage, {TabLabelAlias} from 'app/page/data-page';
 import DatasetSaveModal from 'app/page/dataset-save-modal';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
-import {EllipsisMenuAction, LinkText} from 'app/page-identifiers';
+import {EllipsisMenuAction, LinkText} from 'app/text-labels';
 
 describe('Create Dataset', () => {
 

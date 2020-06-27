@@ -1,6 +1,6 @@
 import Container from 'app/container';
 import BaseElement from 'app/element/base-element';
-import {xPathOptionToXpath} from 'app/element/xpath-defaults';
+import {buildXPath} from 'app/xpath-builders';
 import {ElementType, XPathOptions} from 'app/xpath-options';
 import {Page} from 'puppeteer';
 
@@ -8,7 +8,7 @@ export default class SelectMenu extends Container {
 
   static async findByName(page: Page, xOpt: XPathOptions = {}, container?: Container): Promise<SelectMenu> {
     xOpt.type = ElementType.Dropdown;
-    const menuXpath = xPathOptionToXpath(xOpt, container);
+    const menuXpath = buildXPath(xOpt, container);
     const selectMenu = new SelectMenu(page, menuXpath);
     await page.waitForXPath(menuXpath, {visible: true});
     return selectMenu;

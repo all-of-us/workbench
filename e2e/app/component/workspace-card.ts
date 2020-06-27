@@ -1,5 +1,5 @@
 import {ElementHandle, Page} from 'puppeteer';
-import {WorkspaceAccessLevel} from 'app/page-identifiers';
+import {WorkspaceAccessLevel} from 'app/text-labels';
 import EllipsisMenu from 'app/component/ellipsis-menu';
 import * as fp from 'lodash/fp';
 import DataPage from 'app/page/data-page';

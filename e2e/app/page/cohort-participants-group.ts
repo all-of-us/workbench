@@ -6,7 +6,7 @@ import {waitForNumericalString, waitForText} from 'utils/waits-utils';
 import CohortCriteriaModal, {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/cohort-criteria-modal';
 import TieredMenu from 'app/component/tiered-menu';
 import {waitWhileLoading} from 'utils/test-utils';
-import {LinkText} from 'app/page-identifiers';
+import {LinkText} from 'app/text-labels';
 
 export enum GroupAction {
    EditGroupName  = 'Edit group name',

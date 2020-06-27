@@ -1,5 +1,5 @@
 import {Page} from 'puppeteer';
-import {PageUrl} from 'app/page-identifiers';
+import {PageUrl} from 'app/text-labels';
 import BasePage from 'app/page/base-page';
 import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
 

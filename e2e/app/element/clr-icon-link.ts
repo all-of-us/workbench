@@ -2,7 +2,7 @@ import {Page, WaitForSelectorOptions} from 'puppeteer';
 import Container from 'app/container';
 import {ElementType, XPathOptions} from 'app/xpath-options';
 import BaseElement from './base-element';
-import {xPathOptionToXpath} from './xpath-defaults';
+import {buildXPath} from 'app/xpath-builders';
 
 export default class ClrIconLink extends BaseElement {
 
@@ -13,7 +13,7 @@ export default class ClrIconLink extends BaseElement {
      waitOptions: WaitForSelectorOptions = {visible: true}): Promise<ClrIconLink> {
 
     xOpt.type = ElementType.Icon;
-    const iconXpath = xPathOptionToXpath(xOpt, container);
+    const iconXpath = buildXPath(xOpt, container);
     const iconLink = new ClrIconLink(page, iconXpath);
     await iconLink.waitForXPath(waitOptions);
     return iconLink;

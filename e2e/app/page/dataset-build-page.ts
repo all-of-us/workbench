@@ -4,7 +4,7 @@ import Checkbox from 'app/element/checkbox';
 import ClrIconLink from 'app/element/clr-icon-link';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
-import {xPathOptionToXpath} from 'app/element/xpath-defaults';
+import {buildXPath} from 'app/xpath-builders';
 import {ElementType} from 'app/xpath-options';
 import AuthenticatedPage from './authenticated-page';
 import CohortBuildPage from './cohort-build-page';
@@ -74,7 +74,7 @@ export default class DatasetBuildPage extends AuthenticatedPage {
    * @param {boolean} selectAll
    */
   async selectAllValues(selectAll: boolean = true): Promise<void> {
-    const xpath = xPathOptionToXpath({containsText: LabelAlias.SelectValues, ancestorLevel: 3, type: ElementType.Checkbox});
+    const xpath = buildXPath({containsText: LabelAlias.SelectValues, ancestorLevel: 3, type: ElementType.Checkbox});
     const selectAllCheckbox = new Checkbox(this.page, xpath);
     selectAll ? await selectAllCheckbox.check() : await selectAllCheckbox.unCheck();
     await waitWhileLoading(this.page);

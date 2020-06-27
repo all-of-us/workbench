@@ -1,5 +1,5 @@
 import {findWorkspace, isValidDate, signIn, waitWhileLoading} from 'utils/test-utils';
-import {EllipsisMenuAction, LinkText} from 'app/page-identifiers';
+import {EllipsisMenuAction, LinkText} from 'app/text-labels';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import CohortParticipantDetailPage from 'app/page/cohort-participant-detail-page';
 import CohortReviewModal from 'app/page/cohort-review-modal';

@@ -4,7 +4,7 @@ import {makeRandomName} from 'utils/str-utils';
 import RadioButton from 'app/element/radiobutton';
 import Textbox from 'app/element/textbox';
 import Textarea from 'app/element/textarea';
-import {LinkText} from 'app/page-identifiers';
+import {LinkText} from 'app/text-labels';
 import ConceptsetActionsPage from './conceptset-actions-page';
 
 const faker = require('faker/locale/en_US');

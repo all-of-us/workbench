@@ -2,7 +2,7 @@ import {Page, WaitForSelectorOptions} from 'puppeteer';
 import Container from 'app/container';
 import {ElementType, XPathOptions} from 'app/xpath-options';
 import BaseElement from './base-element';
-import {xPathOptionToXpath} from './xpath-defaults';
+import {buildXPath} from 'app/xpath-builders';
 
 export default class RadioButton extends BaseElement {
    
@@ -13,7 +13,7 @@ export default class RadioButton extends BaseElement {
      waitOptions: WaitForSelectorOptions = {visible: true}): Promise<RadioButton> {
 
     xOpt.type = ElementType.RadioButton;
-    const radioButtonXpath = xPathOptionToXpath(xOpt, container);
+    const radioButtonXpath = buildXPath(xOpt, container);
     const radioButton = new RadioButton(page, radioButtonXpath);
     await radioButton.waitForXPath(waitOptions);
     return radioButton;

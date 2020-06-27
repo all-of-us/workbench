@@ -4,7 +4,7 @@ import {waitForDocumentTitle} from 'utils/waits-utils';
 import DataResourceCard from 'app/component/data-resource-card';
 import Dialog from 'app/component/dialog';
 import Button from 'app/element/button';
-import {EllipsisMenuAction, LinkText} from 'app/page-identifiers';
+import {EllipsisMenuAction, LinkText} from 'app/text-labels';
 import AuthenticatedPage from './authenticated-page';
 
 const PageTitle = 'View Notebooks';

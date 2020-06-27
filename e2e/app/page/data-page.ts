@@ -5,8 +5,8 @@ import Button from 'app/element/button';
 import ClrIconLink from 'app/element/clr-icon-link';
 import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
-import {xPathOptionToXpath} from 'app/element/xpath-defaults';
-import {EllipsisMenuAction, LinkText} from 'app/page-identifiers';
+import {buildXPath} from 'app/xpath-builders';
+import {EllipsisMenuAction, LinkText} from 'app/text-labels';
 import AuthenticatedPage from 'app/page/authenticated-page';
 import {ElementType} from 'app/xpath-options';
 import {Page, Response} from 'puppeteer';
@@ -62,7 +62,7 @@ export default class DataPage extends AuthenticatedPage {
    */
   async openTab(tabName: TabLabelAlias, opts: {waitPageChange?: boolean} = {}): Promise<void> {
     const {waitPageChange = true} = opts;
-    const selector = xPathOptionToXpath({name: tabName, type: ElementType.Tab});
+    const selector = buildXPath({name: tabName, type: ElementType.Tab});
     const tab = await this.page.waitForXPath(selector, {visible: true});
     if (waitPageChange) {
       await Promise.all<void, Response>([

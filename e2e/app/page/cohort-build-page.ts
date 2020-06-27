@@ -7,8 +7,8 @@ import {ElementType} from 'app/xpath-options';
 import {makeRandomName} from 'utils/str-utils';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle, waitForNumericalString} from 'utils/waits-utils';
-import {xPathOptionToXpath} from 'app/element/xpath-defaults';
-import {LinkText} from 'app/page-identifiers';
+import {buildXPath} from 'app/xpath-builders';
+import {LinkText} from 'app/text-labels';
 import AuthenticatedPage from './authenticated-page';
 import CohortParticipantsGroup from './cohort-participants-group';
 
@@ -130,12 +130,12 @@ export default class CohortBuildPage extends AuthenticatedPage {
   }
 
   getSaveCohortButton(): Button {
-    const xpath = xPathOptionToXpath({type: ElementType.Button, normalizeSpace: LinkText.SaveCohort});
+    const xpath = buildXPath({type: ElementType.Button, normalizeSpace: LinkText.SaveCohort});
     return new Button(this.page, xpath);
   }
 
   getCreateCohortButton(): Button {
-    const xpath = xPathOptionToXpath({type: ElementType.Button, normalizeSpace: LinkText.CreateCohort});
+    const xpath = buildXPath({type: ElementType.Button, normalizeSpace: LinkText.CreateCohort});
     return new Button(this.page, xpath);
   }
 

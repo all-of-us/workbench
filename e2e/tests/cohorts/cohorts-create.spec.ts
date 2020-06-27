@@ -1,7 +1,7 @@
 import {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/cohort-criteria-modal';
 import ClrIconLink from 'app/element/clr-icon-link';
 import Link from 'app/element/link';
-import {EllipsisMenuAction, LinkText} from 'app/page-identifiers';
+import {EllipsisMenuAction, LinkText} from 'app/text-labels';
 import CohortBuildPage, {FieldSelector} from 'app/page/cohort-build-page';
 import DataPage, {TabLabelAlias} from 'app/page/data-page';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
