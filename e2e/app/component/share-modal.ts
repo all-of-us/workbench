@@ -34,9 +34,6 @@ export default class ShareModal extends Dialog {
     await roleInput.click();
 
     const ownerOpt = await this.waitForRoleOption(level);
-    // Hover is needed before clicking in headless mode. Presumably this relates
-    // to the dynamic repositioning of the menu.
-    await ownerOpt.hover();
     await ownerOpt.click();
 
     await this.clickButton(ButtonLabel.Save);
