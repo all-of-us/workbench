@@ -9,6 +9,9 @@ module.exports = {
     "<rootDir>/jest-circus.setup.ts",
     "<rootDir>/jest.test-setup.ts"
   ],
+  setupFiles: [
+    "dotenv/config"
+  ],
   "reporters": [
     "default",
     "jest-junit"

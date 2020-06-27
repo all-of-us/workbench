@@ -3,8 +3,8 @@ const fs = require('fs-extra');
 const fp = require('lodash/fp');
 require('jest-circus');
 
-// jest-circus retryTimes
-const retryTimes = 1;
+// jest-circus retryTimes. No retry on failed test if env DEBUG=true. e.g. "yarn test:debug"
+const retryTimes = process.env.DEBUG === 'true' ? 0 : 1;
 
 class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
   async setup() {
