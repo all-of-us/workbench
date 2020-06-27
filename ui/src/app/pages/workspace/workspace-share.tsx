@@ -404,7 +404,7 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
           <div style={{overflowY: this.state.dropDown ? 'hidden' : 'auto'}}>
             {this.state.userRoles.map((user, i) => {
               return <div key={user.email}>
-                <div style={styles.wrapper}>
+                <div data-test-id='collab-user-row' style={styles.wrapper}>
                   <div style={styles.box}>
                     <h5 data-test-id='collab-user-name'
                         style={{...styles.userName, ...styles.collabUser}}>
