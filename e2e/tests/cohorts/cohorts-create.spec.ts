@@ -1,7 +1,7 @@
 import {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/cohort-criteria-modal';
 import ClrIconLink from 'app/element/clr-icon-link';
 import Link from 'app/element/link';
-import {EllipsisMenuAction} from 'app/page-identifiers';
+import {EllipsisMenuAction, LinkText} from 'app/page-identifiers';
 import CohortBuildPage, {FieldSelector} from 'app/page/cohort-build-page';
 import DataPage, {TabLabelAlias} from 'app/page/data-page';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
@@ -153,7 +153,7 @@ describe('User can create new Cohorts', () => {
     await addIcon.click();
 
     // Click Next button to add modifier
-    const nextButton = await Button.findByName(page, {name: 'Next'}, modal);
+    const nextButton = await Button.findByName(page, {name: LinkText.Next}, modal);
     await nextButton.waitUntilEnabled();
     await nextButton.click();
 

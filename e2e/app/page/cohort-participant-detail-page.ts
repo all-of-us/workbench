@@ -1,7 +1,8 @@
 import {Page} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
-import Button from '../element/button';
+import Button from 'app/element/button';
+import {LinkText} from 'app/page-identifiers';
 import AuthenticatedPage from './authenticated-page';
 
 const PageTitle = 'Participant Detail';
@@ -26,7 +27,7 @@ export default class CohortParticipantDetailPage extends AuthenticatedPage {
   }
 
   async getBackToReviewSetButton(): Promise<Button> {
-    return Button.findByName(this.page, {name: 'Back to review set'});
+    return Button.findByName(this.page, {name: LinkText.BackToReviewSet});
   }
 
 }

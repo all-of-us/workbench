@@ -3,6 +3,7 @@ import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
 import DataTable from 'app/component/data-table';
 import Button from 'app/element/button';
+import {LinkText} from 'app/page-identifiers';
 import AuthenticatedPage from './authenticated-page';
 
 const PageTitle = 'Review Cohort Participants';
@@ -32,7 +33,7 @@ export default class CohortReviewPage extends AuthenticatedPage {
   }
 
   async getBackToCohortButton(): Promise<Button> {
-    return Button.findByName(this.page, {name: 'Back to cohort'});
+    return Button.findByName(this.page, {name: LinkText.BackToCohort});
   }
 
    /**

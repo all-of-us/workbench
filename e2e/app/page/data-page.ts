@@ -1,18 +1,18 @@
 import DataResourceCard from 'app/component/data-resource-card';
-import Dialog, {ButtonLabel} from 'app/component/dialog';
+import Dialog from 'app/component/dialog';
 import EllipsisMenu from 'app/component/ellipsis-menu';
 import Button from 'app/element/button';
 import ClrIconLink from 'app/element/clr-icon-link';
 import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
 import {xPathOptionToXpath} from 'app/element/xpath-defaults';
-import {EllipsisMenuAction} from 'app/page-identifiers';
+import {EllipsisMenuAction, LinkText} from 'app/page-identifiers';
 import AuthenticatedPage from 'app/page/authenticated-page';
 import {ElementType} from 'app/xpath-options';
 import {Page, Response} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
-import {makeRandomName} from '../../utils/str-utils';
+import {makeRandomName} from 'utils/str-utils';
 import CohortActionsPage from './cohort-actions-page';
 import CohortBuildPage from './cohort-build-page';
 import {Visits} from './cohort-criteria-modal';
@@ -120,7 +120,7 @@ export default class DataPage extends AuthenticatedPage {
 
     const dialog = new Dialog(this.page);
     const dialogContentText = await dialog.getContent();
-    const deleteButton = await Button.findByName(this.page, {normalizeSpace: 'Delete Dataset'}, dialog);
+    const deleteButton = await Button.findByName(this.page, {normalizeSpace: LinkText.DeleteDataset}, dialog);
     await Promise.all([
       deleteButton.click(),
       dialog.waitUntilDialogIsClosed(),
@@ -149,7 +149,7 @@ export default class DataPage extends AuthenticatedPage {
     const descriptionTextarea = await Textarea.findByName(this.page, {containsText: 'Description:'}, dialog);
     await descriptionTextarea.type('Puppeteer automation rename dataset.');
 
-    const renameButton = await Button.findByName(this.page, {normalizeSpace: 'Rename Dataset'}, dialog);
+    const renameButton = await Button.findByName(this.page, {normalizeSpace: LinkText.RenameDataset}, dialog);
     await Promise.all([
       renameButton.click(),
       dialog.waitUntilDialogIsClosed(),
@@ -168,7 +168,7 @@ export default class DataPage extends AuthenticatedPage {
 
     const dialog = new Dialog(this.page);
     const dialogContentText = await dialog.getContent();
-    const deleteButton = await Button.findByName(this.page, {normalizeSpace: 'Delete Concept Set'}, dialog);
+    const deleteButton = await Button.findByName(this.page, {normalizeSpace: LinkText.DeleteConceptSet}, dialog);
     await Promise.all([
       deleteButton.click(),
       dialog.waitUntilDialogIsClosed(),
@@ -189,7 +189,7 @@ export default class DataPage extends AuthenticatedPage {
     await newNameInput.type(newCohortName);
     const descriptionTextarea = await Textarea.findByName(this.page, {containsText: 'Description:'}, dialog);
     await descriptionTextarea.type('Puppeteer automation rename cohort.');
-    await dialog.clickButton(ButtonLabel.Rename);
+    await dialog.clickButton(LinkText.Rename);
     await dialog.waitUntilDialogIsClosed();
     await waitWhileLoading(this.page);
     console.log(`Cohort "${cohortName}" renamed to "${newCohortName}"`);

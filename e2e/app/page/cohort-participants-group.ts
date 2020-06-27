@@ -1,11 +1,12 @@
 import {ElementHandle, Page} from 'puppeteer';
 import {FieldSelector} from 'app/page/cohort-build-page';
-import Dialog, {ButtonLabel} from 'app/component/dialog';
+import Dialog from 'app/component/dialog';
 import EllipsisMenu from 'app/component/ellipsis-menu';
 import {waitForNumericalString, waitForText} from 'utils/waits-utils';
 import CohortCriteriaModal, {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/cohort-criteria-modal';
 import TieredMenu from 'app/component/tiered-menu';
 import {waitWhileLoading} from 'utils/test-utils';
+import {LinkText} from 'app/page-identifiers';
 
 export enum GroupAction {
    EditGroupName  = 'Edit group name',
@@ -53,7 +54,7 @@ export default class CohortParticipantsGroup {
     const dialog = new Dialog(this.page);
     const textbox = await dialog.waitForTextbox('New Name:');
     await textbox.type(newGroupName);
-    await dialog.waitForButton(ButtonLabel.Rename).then(b => b.click());
+    await dialog.waitForButton(LinkText.Rename).then(b => b.click());
     await dialog.waitUntilDialogIsClosed();
   }
 

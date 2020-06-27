@@ -1,9 +1,10 @@
 import {Page} from 'puppeteer';
-import Dialog, {ButtonLabel} from 'app/component/dialog';
+import Dialog from 'app/component/dialog';
 import {makeRandomName} from 'utils/str-utils';
 import RadioButton from 'app/element/radiobutton';
 import Textbox from 'app/element/textbox';
 import Textarea from 'app/element/textarea';
+import {LinkText} from 'app/page-identifiers';
 import ConceptsetActionsPage from './conceptset-actions-page';
 
 const faker = require('faker/locale/en_US');
@@ -29,7 +30,7 @@ export default class ConceptsetSaveModal extends Dialog {
     await descriptionTextarea.type(faker.lorem.words());
 
     // Click SAVE button.
-    await this.clickButton(ButtonLabel.Save);
+    await this.clickButton(LinkText.Save);
 
     const conceptActionPage = new ConceptsetActionsPage(this.page);
     await conceptActionPage.waitForLoad();

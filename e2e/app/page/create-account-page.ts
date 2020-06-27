@@ -12,6 +12,7 @@ import {defaultFieldValues} from 'resources/data/user-registration-data';
 import {config} from 'resources/workbench-config';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
+import {LinkText} from 'app/page-identifiers';
 
 const faker = require('faker/locale/en_US');
 
@@ -94,11 +95,11 @@ export default class CreateAccountPage extends BasePage {
   }
 
   async getSubmitButton(): Promise<Button> {
-    return await Button.findByName(this.page, {name: 'Submit'});
+    return await Button.findByName(this.page, {name: LinkText.Submit});
   }
 
   async getNextButton(): Promise<Button> {
-    return await Button.findByName(this.page, {name: 'Next'});
+    return await Button.findByName(this.page, {name: LinkText.Next});
   }
 
   async agreementLoaded(): Promise<boolean> {
