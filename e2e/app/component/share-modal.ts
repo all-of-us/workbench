@@ -19,6 +19,11 @@ export default class ShareModal extends Dialog {
   }
 
   async shareWithUser(username: string, level: WorkspaceAccessLevel): Promise<void> {
+    if (!this.page.viewport()) {
+      throw Error(
+        'testing of the share modal requires a viewport to be set on account ' +
+          'on odd rendering issues with the react-select component');
+    }
     const searchBox = await this.waitForSearchBox();
     await searchBox.type(username);
 
@@ -29,6 +34,9 @@ export default class ShareModal extends Dialog {
     await roleInput.click();
 
     const ownerOpt = await this.waitForRoleOption(level);
+    // Hover is needed before clicking in headless mode. Presumably this relates
+    // to the dynamic repositioning of the menu.
+    await ownerOpt.hover();
     await ownerOpt.click();
 
     await this.clickButton(ButtonLabel.Save);
@@ -85,6 +93,7 @@ export default class ShareModal extends Dialog {
     // The label in the select menu uses title case.
     const levelText =  level[0].toUpperCase() + level.substring(1).toLowerCase();
     return await this.page.waitForXPath(
-      `//*[starts-with(@id,"react-select") and text()="${levelText}"]`);
+      `//*[starts-with(@id,"react-select") and text()="${levelText}"]`,
+      {visible: true});
   }
 }
