@@ -60,15 +60,22 @@ class Researcher extends UserToAffiliate {
           .build();
 
   private Researcher(final String[] userLine) {
-    this.firstName = userLine[0].trim();
-    this.lastName = userLine[1].trim();
-    this.contactEmail = userLine[2].trim();
-    this.userName = userLine[3].trim();
-    this.institutionalRole = parseInstitutionalRole(userLine[4].trim());
-    this.institutionalRoleOther = parseInstitutionalRoleOther(userLine[4].trim());
-    this.institutionDisplayName = parseInstitutionDisplayName(userLine[5].trim());
-    this.duaSigned = userLine[6].trim();
-    this.redCapComplete = userLine[7].trim();
+    this.firstName = clean(userLine[0]);
+    this.lastName = clean(userLine[1]);
+    this.contactEmail = clean(userLine[2]);
+    this.userName = clean(userLine[3]);
+    this.institutionalRole = parseInstitutionalRole(clean(userLine[4]));
+    this.institutionalRoleOther = parseInstitutionalRoleOther(clean(userLine[4]));
+    this.institutionDisplayName = parseInstitutionDisplayName(clean(userLine[5]));
+    this.duaSigned = clean(userLine[6]);
+    this.redCapComplete = clean(userLine[7]);
+  }
+
+  // special case a few Other roles
+
+  private boolean isPreApprovedOtherRole(String rawRole) {
+    return rawRole.equals("Multispecialty Group Practice")
+        || rawRole.equals("Non-tenure track researcher");
   }
 
   private InstitutionalRole parseInstitutionalRole(final String rawRole) {
@@ -92,6 +99,10 @@ class Researcher extends UserToAffiliate {
       return InstitutionalRole.EARLY_CAREER;
     }
 
+    if (rawRole.startsWith("Late Career")) {
+      return InstitutionalRole.LATE_CAREER;
+    }
+
     if (rawRole.startsWith("Project Personnel")) {
       return InstitutionalRole.PROJECT_PERSONNEL;
     }
@@ -104,9 +115,12 @@ class Researcher extends UserToAffiliate {
       return InstitutionalRole.TRAINEE;
     }
 
-    // special case one particular user
-    // hopefully we will not need to add many such cases like this
-    if (rawRole.equals("Multispecialty Group Practice")) {
+    if (rawRole.startsWith("Data Analyst")) {
+      return InstitutionalRole.PROJECT_PERSONNEL;
+    }
+
+    // special case a few Other roles
+    if (isPreApprovedOtherRole(rawRole)) {
       return InstitutionalRole.OTHER;
     }
 
@@ -115,9 +129,8 @@ class Researcher extends UserToAffiliate {
   }
 
   private Optional<String> parseInstitutionalRoleOther(final String rawRole) {
-    // special case one particular user
-    // hopefully we will not need to add many such cases like this
-    if (rawRole.equals("Multispecialty Group Practice")) {
+    // special case a few Other roles
+    if (isPreApprovedOtherRole(rawRole)) {
       return Optional.of(rawRole);
     }
 
