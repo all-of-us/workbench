@@ -58,6 +58,8 @@ import org.pmiops.workbench.institution.InstitutionServiceImpl;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.institution.deprecated.InstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.model.AccessBypassRequest;
+import org.pmiops.workbench.model.AccessModule;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
@@ -797,8 +799,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     createAccountRequest.getProfile().setVerifiedInstitutionalAffiliation(original);
     createUser();
 
-    final Profile profile = profileController.getMe().getBody();
-
     final VerifiedInstitutionalAffiliation newAffil =
         new VerifiedInstitutionalAffiliation()
             .institutionShortName("NotTheBroad")
@@ -1180,6 +1180,17 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     profileController.deleteProfile();
     verify(mockProfileAuditor).fireDeleteAction(dbUser.getUserId(), dbUser.getUsername());
+  }
+
+  @Test
+  public void testBypassAccessModule() {
+    Profile profile = createUser();
+    profileController.bypassAccessRequirement(
+        profile.getUserId(),
+        new AccessBypassRequest().isBypassed(true).moduleName(AccessModule.DATA_USE_AGREEMENT));
+
+    DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
+    assertThat(dbUser.getDataUseAgreementBypassTime()).isNotNull();
   }
 
   @Test
