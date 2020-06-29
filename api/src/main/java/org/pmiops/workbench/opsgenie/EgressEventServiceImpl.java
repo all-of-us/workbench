@@ -179,8 +179,7 @@ public class EgressEventServiceImpl implements EgressEventService {
             .map(DbInstitutionalAffiliation::getInstitution)
             .collect(Collectors.joining(", "));
     return String.format(
-        "%s %s - Username: %s\n"
-            + "user_id: %d, Institutions: [ %s ], Account Age: %d days",
+        "%s %s - Username: %s\n" + "user_id: %d, Institutions: [ %s ], Account Age: %d days",
         dbUser.getGivenName(),
         dbUser.getFamilyName(),
         dbUser.getUsername(),

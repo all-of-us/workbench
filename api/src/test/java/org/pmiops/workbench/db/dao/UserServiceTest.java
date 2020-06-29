@@ -32,7 +32,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.AccessModule;
-import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV1;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
@@ -64,8 +63,8 @@ public class UserServiceTest {
   private static final long TIMESTAMP_SECS = START_INSTANT.getEpochSecond();
   private static final FakeClock PROVIDED_CLOCK = new FakeClock(START_INSTANT);
   private static final int CLOCK_INCREMENT_MILLIS = 1000;
-  private static final AccessBypassRequest ACCESS_BYPASS_REQUEST = new AccessBypassRequest().isBypassed(true).moduleName(
-      AccessModule.DATA_USE_AGREEMENT);
+  private static final AccessBypassRequest ACCESS_BYPASS_REQUEST =
+      new AccessBypassRequest().isBypassed(true).moduleName(AccessModule.DATA_USE_AGREEMENT);
   private static DbUser providedDbUser;
   private static WorkbenchConfig providedWorkbenchConfig;
 

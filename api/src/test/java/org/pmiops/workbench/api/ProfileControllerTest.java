@@ -176,8 +176,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     UserServiceImpl.class,
     UserServiceTestConfiguration.class,
   })
-  @MockBean({BigQueryService.class, UserServiceAuditorImpl.class
-  })
+  @MockBean({BigQueryService.class, UserServiceAuditorImpl.class})
   static class Configuration {
     @Bean
     @Primary
@@ -1174,7 +1173,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(userDao.findUserByUsername(PRIMARY_EMAIL).getEraCommonsLinkExpireTime()).isNotNull();
     assertThat(userDao.findUserByUsername(PRIMARY_EMAIL).getEraCommonsCompletionTime()).isNotNull();
   }
-
 
   @Test
   public void testDeleteProfile() {
