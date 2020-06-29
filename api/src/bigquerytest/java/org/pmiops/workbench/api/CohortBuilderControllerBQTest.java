@@ -1022,7 +1022,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsForSurveyWithAgeModifiers() {
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.SURVEY.toString(), ImmutableList.of(survey()), Arrays.asList(ageModifier()));
+            DomainType.SURVEY.toString(),
+            ImmutableList.of(survey()),
+            ImmutableList.of(ageModifier()));
 
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
