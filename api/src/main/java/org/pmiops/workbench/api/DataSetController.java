@@ -41,8 +41,6 @@ import org.pmiops.workbench.conceptset.ConceptSetMapper;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.dataset.DataSetMapper;
 import org.pmiops.workbench.dataset.DatasetConfig;
-import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -105,9 +103,7 @@ public class DataSetController implements DataSetApiDelegate {
 
   private static final Logger log = Logger.getLogger(DataSetController.class.getName());
 
-  private final CdrVersionDao cdrVersionDao;
   private final CdrVersionService cdrVersionService;
-  private final CohortDao cohortDao;
   private final ConceptService conceptService;
   private final ConceptSetService conceptSetService;
   private final DataDictionaryEntryDao dataDictionaryEntryDao;
@@ -121,10 +117,8 @@ public class DataSetController implements DataSetApiDelegate {
   DataSetController(
       BigQueryService bigQueryService,
       Clock clock,
-      CdrVersionDao cdrVersionDao,
       CohortService cohortService,
       CdrVersionService cdrVersionService,
-      CohortDao cohortDao,
       ConceptService conceptService,
       ConceptSetService conceptSetService,
       DataDictionaryEntryDao dataDictionaryEntryDao,
@@ -138,10 +132,8 @@ public class DataSetController implements DataSetApiDelegate {
       ConceptSetMapper conceptSetMapper) {
     this.bigQueryService = bigQueryService;
     this.clock = clock;
-    this.cdrVersionDao = cdrVersionDao;
     this.cohortService = cohortService;
     this.cdrVersionService = cdrVersionService;
-    this.cohortDao = cohortDao;
     this.conceptService = conceptService;
     this.conceptSetService = conceptSetService;
     this.dataDictionaryEntryDao = dataDictionaryEntryDao;
@@ -301,25 +293,6 @@ public class DataSetController implements DataSetApiDelegate {
         new DataSetCodeResponse().code(generatedCode).kernelType(kernelTypeEnum));
   }
 
-  // TODO (srubenst): Delete this method and make generate query take the composite parts.
-  private DataSetRequest generateDataSetRequestFromPreviewRequest(
-      DataSetPreviewRequest dataSetPreviewRequest) {
-    return new DataSetRequest()
-        .name("Does not matter")
-        .conceptSetIds(dataSetPreviewRequest.getConceptSetIds())
-        .cohortIds(dataSetPreviewRequest.getCohortIds())
-        .prePackagedConceptSet(dataSetPreviewRequest.getPrePackagedConceptSet())
-        .includesAllParticipants(dataSetPreviewRequest.getIncludesAllParticipants())
-        .domainValuePairs(
-            dataSetPreviewRequest.getValues().stream()
-                .map(
-                    value ->
-                        new DomainValuePair()
-                            .domain(dataSetPreviewRequest.getDomain())
-                            .value(value))
-                .collect(Collectors.toList()));
-  }
-
   @Override
   public ResponseEntity<DataSetPreviewResponse> previewDataSetByDomain(
       String workspaceNamespace, String workspaceId, DataSetPreviewRequest dataSetPreviewRequest) {
@@ -345,17 +318,13 @@ public class DataSetController implements DataSetApiDelegate {
       queryResponse
           .getValues()
           .forEach(
-              fieldValueList -> {
-                addFieldValuesFromBigQueryToPreviewList(valuePreviewList, fieldValueList);
-              });
+              fieldValueList ->
+                  addFieldValuesFromBigQueryToPreviewList(valuePreviewList, fieldValueList));
 
       queryResponse
           .getSchema()
           .getFields()
-          .forEach(
-              fields -> {
-                formatTimestampValues(valuePreviewList, fields);
-              });
+          .forEach(fields -> formatTimestampValues(valuePreviewList, fields));
 
       Collections.sort(
           valuePreviewList,
@@ -372,14 +341,13 @@ public class DataSetController implements DataSetApiDelegate {
       List<DataSetPreviewValueList> valuePreviewList, FieldValueList fieldValueList) {
     IntStream.range(0, fieldValueList.size())
         .forEach(
-            columnNumber -> {
-              valuePreviewList
-                  .get(columnNumber)
-                  .addQueryValueItem(
-                      Optional.ofNullable(fieldValueList.get(columnNumber).getValue())
-                          .map(Object::toString)
-                          .orElse(EMPTY_CELL_MARKER));
-            });
+            columnNumber ->
+                valuePreviewList
+                    .get(columnNumber)
+                    .addQueryValueItem(
+                        Optional.ofNullable(fieldValueList.get(columnNumber).getValue())
+                            .map(Object::toString)
+                            .orElse(EMPTY_CELL_MARKER)));
   }
 
   // Iterates through all values associated with a specific field, and converts all timestamps
