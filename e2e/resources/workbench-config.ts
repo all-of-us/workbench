@@ -1,4 +1,3 @@
-require('dotenv').config();
 import * as fp from 'lodash/fp';
 
 const env = process.env.WORKBENCH_ENV || 'dev';

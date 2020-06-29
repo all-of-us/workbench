@@ -6,8 +6,8 @@
   "private": true,
   "license": "BSD",
   "scripts": {
-    "test": "cross-env WORKBENCH_ENV=dev jest --maxWorkers=3",
-    "test:debug": "cross-env WORKBENCH_ENV=dev HEADLESS=false jest --detectOpenHandles",
+    "test": "cross-env jest --maxWorkers=3",
+    "test:debug": "cross-env HEADLESS=false DEBUG=true jest --detectOpenHandles",
     "test-local": "cross-env WORKBENCH_ENV=local jest --maxWorkers=2",
     "test:ci": "cross-env NODE_ENV=development CI=true jest --ci --maxWorkers=2",
     "lint": "tslint --project tsconfig.json",
