@@ -1019,6 +1019,18 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void countSubjectsForSurveyWithAgeModifiers() {
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.SURVEY.toString(),
+            ImmutableList.of(survey()),
+            ImmutableList.of(ageModifier()));
+
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
   public void firstMentionOfDrug5DaysBeforeICD10WithModifiers() {
     SearchGroupItem drugSGI =
         new SearchGroupItem()
