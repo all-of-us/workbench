@@ -101,9 +101,6 @@ const routes: Routes = [
                 }
               },
               {
-            /* TODO The children under ./views need refactoring to use the data
-             * provided by the route rather than double-requesting it.
-             */
                 path: ':ns/:wsid',
                 component: WorkspaceWrapperComponent,
                 runGuardsAndResolvers: 'always',
