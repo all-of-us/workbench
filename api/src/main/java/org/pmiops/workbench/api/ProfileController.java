@@ -353,7 +353,9 @@ public class ProfileController implements ProfileApiDelegate {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     DbUser user = userProvider.get();
     if (user.getBetaAccessRequestTime() == null) {
-      log.log(Level.INFO, "Sending beta access request email.");
+      log.log(
+          Level.INFO,
+          String.format("Sending beta access request email to %s.", user.getContactEmail()));
       try {
         mailServiceProvider.get().sendBetaAccessRequestEmail(user.getUsername());
       } catch (MessagingException e) {

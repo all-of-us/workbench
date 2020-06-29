@@ -29,13 +29,13 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
-import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
+import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditorImpl;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.captcha.ApiException;
 import org.pmiops.workbench.captcha.CaptchaVerificationService;
-import org.pmiops.workbench.compliance.ComplianceService;
+import org.pmiops.workbench.compliance.ComplianceServiceImpl;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -109,55 +109,49 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ProfileControllerTest extends BaseControllerTest {
 
-  private static final Instant NOW = Instant.now();
-  private static final Timestamp TIMESTAMP = new Timestamp(NOW.toEpochMilli());
-  private static final long NONCE_LONG = 12345;
-  private static final String NONCE = Long.toString(NONCE_LONG);
-  private static final String USERNAME = "bob";
-  private static final String GIVEN_NAME = "Bob";
-  private static final String FAMILY_NAME = "Bobberson";
-  private static final String CONTACT_EMAIL = "bob@example.com";
-  private static final String INVITATION_KEY = "secretpassword";
-  private static final String CAPTCHA_TOKEN = "captchaToken";
-  private static final String WRONG_CAPTCHA_TOKEN = "WrongCaptchaToken";
-  private static final String PRIMARY_EMAIL = "bob@researchallofus.org";
-  private static final String STREET_ADDRESS = "1 Example Lane";
-  private static final String CITY = "Exampletown";
-  private static final String STATE = "EX";
-  private static final String COUNTRY = "Example";
-  private static final String ZIP_CODE = "12345";
-
-  private static final String ORGANIZATION = "Test";
-  private static final String CURRENT_POSITION = "Tester";
-  private static final String RESEARCH_PURPOSE = "To test things";
-
-  private static final double FREE_TIER_USAGE = 100D;
   private static final double FREE_TIER_LIMIT = 300D;
+  private static final double FREE_TIER_USAGE = 100D;
+  private static final FakeClock fakeClock = new FakeClock(Instant.parse("1995-06-05T00:00:00Z"));
+  private static final long NONCE_LONG = 12345;
+  private static final String CAPTCHA_TOKEN = "captchaToken";
+  private static final String CITY = "Exampletown";
+  private static final String CONTACT_EMAIL = "bob@example.com";
+  private static final String COUNTRY = "Example";
+  private static final String CURRENT_POSITION = "Tester";
+  private static final String FAMILY_NAME = "Bobberson";
+  private static final String GIVEN_NAME = "Bob";
+  private static final String INVITATION_KEY = "secretpassword";
+  private static final String NONCE = Long.toString(NONCE_LONG);
+  private static final String ORGANIZATION = "Test";
+  private static final String PRIMARY_EMAIL = "bob@researchallofus.org";
+  private static final String RESEARCH_PURPOSE = "To test things";
+  private static final String STATE = "EX";
+  private static final String STREET_ADDRESS = "1 Example Lane";
+  private static final String USERNAME = "bob";
+  private static final String WRONG_CAPTCHA_TOKEN = "WrongCaptchaToken";
+  private static final String ZIP_CODE = "12345";
+  private static final Timestamp TIMESTAMP = new Timestamp(fakeClock.millis());
+  private static final double TIME_TOLERANCE_MILLIS = 100.0;
 
-  @MockBean private FireCloudService fireCloudService;
-  @MockBean private DirectoryService directoryService;
-  @MockBean private CloudStorageService cloudStorageService;
-  @MockBean private FreeTierBillingService freeTierBillingService;
-  @MockBean private ComplianceService complianceTrainingService;
-  @MockBean private MailService mailService;
+  @MockBean private CaptchaVerificationService mockCaptchaVerificationService;
+  @MockBean private CloudStorageService mockCloudStorageService;
+  @MockBean private DirectoryService mockDirectoryService;
+  @MockBean private FireCloudService mockFireCloudService;
+  @MockBean private FreeTierBillingService mockFreeTierBillingService;
+  @MockBean private MailService mockMailService;
   @MockBean private ProfileAuditor mockProfileAuditor;
-  @MockBean private UserServiceAuditor mockUserServiceAuditAdapter;
-  @MockBean private CaptchaVerificationService captchaVerificationService;
   @MockBean private ShibbolethService shibbolethService;
-
+  @Autowired private InstitutionService institutionService;
+  @Autowired private ProfileController profileController;
+  @Autowired private ProfileService profileService;
   @Autowired private UserDao userDao;
   @Autowired private UserDataUseAgreementDao userDataUseAgreementDao;
   @Autowired private UserService userService;
   @Autowired private UserTermsOfServiceDao userTermsOfServiceDao;
-  @Autowired private ProfileService profileService;
-  @Autowired private ProfileController profileController;
-  @Autowired private InstitutionService institutionService;
 
   private CreateAccountRequest createAccountRequest;
   private InvitationVerificationRequest invitationVerificationRequest;
   private com.google.api.services.directory.model.User googleUser;
-  private static FakeClock fakeClock = new FakeClock(NOW);
-
   private static DbUser dbUser;
 
   private int DUA_VERSION;
@@ -169,6 +163,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     ActionAuditQueryServiceImpl.class,
     AddressMapperImpl.class,
     AuditLogEntryMapperImpl.class,
+    ComplianceServiceImpl.class,
     DemographicSurveyMapperImpl.class,
     InstitutionalAffiliationMapperImpl.class,
     PageVisitMapperImpl.class,
@@ -183,7 +178,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     UserServiceImpl.class,
     UserServiceTestConfiguration.class,
   })
-  @MockBean({BigQueryService.class})
+  @MockBean({BigQueryService.class, UserServiceAuditorImpl.class})
   static class Configuration {
     @Bean
     @Primary
@@ -218,8 +213,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     // Most tests should run with institutional verification off by default.
     config.featureFlags.requireInstitutionalVerification = false;
 
-    fakeClock.setInstant(NOW);
-
     Profile profile = new Profile();
     profile.setContactEmail(CONTACT_EMAIL);
     profile.setFamilyName(FAMILY_NAME);
@@ -249,19 +242,19 @@ public class ProfileControllerTest extends BaseControllerTest {
     googleUser.setChangePasswordAtNextLogin(true);
     googleUser.setPassword("testPassword");
     googleUser.setIsEnrolledIn2Sv(true);
-    when(directoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
+    when(mockDirectoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
 
     DUA_VERSION = userService.getCurrentDuccVersion();
 
     try {
-      doNothing().when(mailService).sendBetaAccessRequestEmail(Mockito.any());
+      doNothing().when(mockMailService).sendBetaAccessRequestEmail(Mockito.any());
     } catch (MessagingException e) {
       e.printStackTrace();
     }
-    when(cloudStorageService.getCaptchaServerKey()).thenReturn("Server_Key");
+    when(mockCloudStorageService.getCaptchaServerKey()).thenReturn("Server_Key");
     try {
-      when(captchaVerificationService.verifyCaptcha(CAPTCHA_TOKEN)).thenReturn(true);
-      when(captchaVerificationService.verifyCaptcha(WRONG_CAPTCHA_TOKEN)).thenReturn(false);
+      when(mockCaptchaVerificationService.verifyCaptcha(CAPTCHA_TOKEN)).thenReturn(true);
+      when(mockCaptchaVerificationService.verifyCaptcha(WRONG_CAPTCHA_TOKEN)).thenReturn(false);
     } catch (ApiException e) {
       e.printStackTrace();
     }
@@ -272,7 +265,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createUser();
 
     config.access.requireInvitationKey = true;
-    when(cloudStorageService.readInvitationKey()).thenReturn("BLAH");
+    when(mockCloudStorageService.readInvitationKey()).thenReturn("BLAH");
     profileController.createAccount(createAccountRequest);
   }
 
@@ -290,7 +283,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     // When invitation key verification is turned off, even a bad invitation key should
     // allow a user to be created.
     config.access.requireInvitationKey = false;
-    when(cloudStorageService.readInvitationKey()).thenReturn("BLAH");
+    when(mockCloudStorageService.readInvitationKey()).thenReturn("BLAH");
     profileController.createAccount(createAccountRequest);
   }
 
@@ -475,7 +468,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testCreateAccount_invalidUser() {
-    when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
+    when(mockCloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
     CreateAccountRequest accountRequest = new CreateAccountRequest();
     accountRequest.setInvitationKey(INVITATION_KEY);
     accountRequest.setCaptchaVerificationToken(CAPTCHA_TOKEN);
@@ -566,7 +559,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         DataAccessLevel.UNREGISTERED,
         TIMESTAMP,
         false);
-    verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
+    verify(mockFireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
     verify(mockProfileAuditor).fireLoginAction(dbUser);
 
     // feature flag is off: Verified InstitutionalAffiliation is not saved
@@ -586,7 +579,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         DataAccessLevel.UNREGISTERED,
         TIMESTAMP,
         false);
-    verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
+    verify(mockFireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
 
     // An additional call to getMe() should have no effect.
     fakeClock.increment(1);
@@ -893,7 +886,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Test
   public void updateContactEmail_badRequest() {
     createUser();
-    when(directoryService.resetUserPassword(anyString())).thenReturn(googleUser);
+    when(mockDirectoryService.resetUserPassword(anyString())).thenReturn(googleUser);
     dbUser.setFirstSignInTime(null);
     String originalEmail = dbUser.getContactEmail();
 
@@ -911,7 +904,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void updateContactEmail_OK() {
     createUser();
     dbUser.setFirstSignInTime(null);
-    when(directoryService.resetUserPassword(anyString())).thenReturn(googleUser);
+    when(mockDirectoryService.resetUserPassword(anyString())).thenReturn(googleUser);
 
     ResponseEntity<Void> response =
         profileController.updateContactEmail(
@@ -1019,9 +1012,9 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void resendWelcomeEmail_messagingException() throws MessagingException {
     createUser();
     dbUser.setFirstSignInTime(null);
-    when(directoryService.resetUserPassword(anyString())).thenReturn(googleUser);
+    when(mockDirectoryService.resetUserPassword(anyString())).thenReturn(googleUser);
     doThrow(new MessagingException("exception"))
-        .when(mailService)
+        .when(mockMailService)
         .sendWelcomeEmail(any(), any(), any());
 
     ResponseEntity<Void> response =
@@ -1029,23 +1022,23 @@ public class ProfileControllerTest extends BaseControllerTest {
             new ResendWelcomeEmailRequest().username(dbUser.getUsername()).creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
     // called twice, once during account creation, once on resend
-    verify(mailService, times(2)).sendWelcomeEmail(any(), any(), any());
-    verify(directoryService, times(1)).resetUserPassword(anyString());
+    verify(mockMailService, times(2)).sendWelcomeEmail(any(), any(), any());
+    verify(mockDirectoryService, times(1)).resetUserPassword(anyString());
   }
 
   @Test
   public void resendWelcomeEmail_OK() throws MessagingException {
     createUser();
-    when(directoryService.resetUserPassword(anyString())).thenReturn(googleUser);
-    doNothing().when(mailService).sendWelcomeEmail(any(), any(), any());
+    when(mockDirectoryService.resetUserPassword(anyString())).thenReturn(googleUser);
+    doNothing().when(mockMailService).sendWelcomeEmail(any(), any(), any());
 
     ResponseEntity<Void> response =
         profileController.resendWelcomeEmail(
             new ResendWelcomeEmailRequest().username(dbUser.getUsername()).creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     // called twice, once during account creation, once on resend
-    verify(mailService, times(2)).sendWelcomeEmail(any(), any(), any());
-    verify(directoryService, times(1)).resetUserPassword(anyString());
+    verify(mockMailService, times(2)).sendWelcomeEmail(any(), any(), any());
+    verify(mockDirectoryService, times(1)).resetUserPassword(anyString());
   }
 
   @Test
@@ -1060,10 +1053,10 @@ public class ProfileControllerTest extends BaseControllerTest {
         .setVerifiedInstitutionalAffiliation(verifiedInstitutionalAffiliation);
 
     createUser();
-    verify(mailService).sendWelcomeEmail(any(), any(), any());
+    verify(mockMailService).sendWelcomeEmail(any(), any(), any());
 
     // don't send the user instructions email if there are no instructions
-    verifyNoMoreInteractions(mailService);
+    verifyNoMoreInteractions(mockMailService);
   }
 
   @Test
@@ -1093,8 +1086,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     institutionService.setInstitutionUserInstructions(instructions);
 
     createUser();
-    verify(mailService).sendWelcomeEmail(any(), any(), any());
-    verify(mailService).sendInstitutionUserInstructions(CONTACT_EMAIL, sanitizedInstructions);
+    verify(mockMailService).sendWelcomeEmail(any(), any(), any());
+    verify(mockMailService).sendInstitutionUserInstructions(CONTACT_EMAIL, sanitizedInstructions);
   }
 
   @Test
@@ -1118,10 +1111,10 @@ public class ProfileControllerTest extends BaseControllerTest {
         verifiedInstitutionalAffiliation.getInstitutionShortName());
 
     createUser();
-    verify(mailService).sendWelcomeEmail(any(), any(), any());
+    verify(mockMailService).sendWelcomeEmail(any(), any(), any());
 
     // don't send the user instructions email if the instructions have been deleted
-    verifyNoMoreInteractions(mailService);
+    verifyNoMoreInteractions(mockMailService);
   }
 
   @Test
@@ -1132,14 +1125,14 @@ public class ProfileControllerTest extends BaseControllerTest {
     FirecloudJWTWrapper firecloudJwt = new FirecloudJWTWrapper().jwt("test");
     createUser();
     profileController.updateNihToken(nihToken);
-    verify(fireCloudService).postNihCallback(ArgumentMatchers.eq(firecloudJwt));
+    verify(mockFireCloudService).postNihCallback(ArgumentMatchers.eq(firecloudJwt));
   }
 
   @Test(expected = ServerErrorException.class)
   public void testUpdateNihToken_serverError() {
     config.featureFlags.useNewShibbolethService = false;
 
-    doThrow(new ServerErrorException()).when(fireCloudService).postNihCallback(any());
+    doThrow(new ServerErrorException()).when(mockFireCloudService).postNihCallback(any());
     profileController.updateNihToken(new NihToken().jwt("test"));
   }
 
@@ -1170,7 +1163,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     String linkedUsername = "linked";
     nihStatus.setLinkedNihUsername(linkedUsername);
     nihStatus.setLinkExpireTime(TIMESTAMP.getTime());
-    when(fireCloudService.getNihStatus()).thenReturn(nihStatus);
+    when(mockFireCloudService.getNihStatus()).thenReturn(nihStatus);
 
     createUser();
 
@@ -1179,6 +1172,14 @@ public class ProfileControllerTest extends BaseControllerTest {
         .isEqualTo(linkedUsername);
     assertThat(userDao.findUserByUsername(PRIMARY_EMAIL).getEraCommonsLinkExpireTime()).isNotNull();
     assertThat(userDao.findUserByUsername(PRIMARY_EMAIL).getEraCommonsCompletionTime()).isNotNull();
+  }
+
+  @Test
+  public void testDeleteProfile() {
+    createUser();
+
+    profileController.deleteProfile();
+    verify(mockProfileAuditor).fireDeleteAction(dbUser.getUserId(), dbUser.getUsername());
   }
 
   @Test
@@ -1193,20 +1194,12 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testDeleteProfile() {
-    createUser();
-
-    profileController.deleteProfile();
-    verify(mockProfileAuditor).fireDeleteAction(dbUser.getUserId(), dbUser.getUsername());
-  }
-
-  @Test
   public void testFreeTierLimits() {
     createUser();
     DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
 
-    when(freeTierBillingService.getCachedFreeTierUsage(dbUser)).thenReturn(FREE_TIER_USAGE);
-    when(freeTierBillingService.getUserFreeTierDollarLimit(dbUser)).thenReturn(FREE_TIER_LIMIT);
+    when(mockFreeTierBillingService.getCachedFreeTierUsage(dbUser)).thenReturn(FREE_TIER_USAGE);
+    when(mockFreeTierBillingService.getUserFreeTierDollarLimit(dbUser)).thenReturn(FREE_TIER_LIMIT);
 
     Profile profile = profileController.getMe().getBody();
     assertProfile(
@@ -1255,8 +1248,8 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   private Profile createUser() {
-    when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
-    when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, CONTACT_EMAIL))
+    when(mockCloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
+    when(mockDirectoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, CONTACT_EMAIL))
         .thenReturn(googleUser);
     Profile result = profileController.createAccount(createAccountRequest).getBody();
     dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
@@ -1296,7 +1289,9 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(user.getFamilyName()).isEqualTo(familyName);
     assertThat(user.getGivenName()).isEqualTo(givenName);
     assertThat(user.getDataAccessLevelEnum()).isEqualTo(dataAccessLevel);
-    assertThat(user.getFirstSignInTime()).isEqualTo(firstSignInTime);
+    assertThat((double) user.getFirstSignInTime().getTime())
+        .isWithin(TIME_TOLERANCE_MILLIS)
+        .of(firstSignInTime.getTime());
     assertThat(user.getDataAccessLevelEnum()).isEqualTo(dataAccessLevel);
   }
 
