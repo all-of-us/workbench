@@ -5,7 +5,12 @@ export function iframeXpath(label: string) {
   return `//body[@id='body']//*[contains(@aria-label, '${label}')]//iframe`;
 }
 
-export function xPathOptionToXpath(xOpts: XPathOptions, container?: Container): string {
+/**
+ * Build a XPath expression from XPathOptions parameter.
+ * @param {XPathOptions} xOpts
+ * @param container
+ */
+export function buildXPath(xOpts: XPathOptions, container?: Container): string {
 
   const  { type, name, containsText, normalizeSpace, ancestorLevel = 1, iconShape, startsWith } = xOpts;
 

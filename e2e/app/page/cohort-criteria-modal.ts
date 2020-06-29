@@ -4,11 +4,11 @@ import SelectMenu from 'app/component/select-menu';
 import Table from 'app/component/table';
 import ClrIconLink from 'app/element/clr-icon-link';
 import Textbox from 'app/element/textbox';
-import {xPathOptionToXpath} from 'app/element/xpath-defaults';
+import {buildXPath} from 'app/xpath-builders';
 import {ElementType} from 'app/xpath-options';
 import {centerPoint, dragDrop, waitWhileLoading} from 'utils/test-utils';
 import {waitForNumericalString, waitForPropertyNotExists} from 'utils/waits-utils';
-import {LinkText} from 'app/page-identifiers';
+import {LinkText} from 'app/text-labels';
 
 const defaultXpath = '//*[@class="modal-container"]';
 
@@ -104,7 +104,7 @@ export default class CohortCriteriaModal extends Dialog {
     console.debug(`Physical Measurements ${criteriaName}: ${filterSign} ${filterValue}  => number of participants: ${participantResult}`);
 
     // Find criteria in Selected Criteria Content Box.
-    const removeSelectedCriteriaIconSelector = xPathOptionToXpath({type: ElementType.Icon, iconShape: 'times-circle'}, this);
+    const removeSelectedCriteriaIconSelector = buildXPath({type: ElementType.Icon, iconShape: 'times-circle'}, this);
     // Before add criteria, first check for nothing in Selected Criteria Content Box.
     await this.page.waitForXPath(removeSelectedCriteriaIconSelector,{hidden: true});
 

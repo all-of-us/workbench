@@ -9,8 +9,8 @@ import {ElementType} from 'app/xpath-options';
 import {ElementHandle, Page} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
-import {xPathOptionToXpath} from 'app/element/xpath-defaults';
-import {LinkText} from 'app/page-identifiers';
+import {buildXPath} from 'app/xpath-builders';
+import {LinkText} from 'app/text-labels';
 
 const faker = require('faker/locale/en_US');
 
@@ -228,7 +228,7 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    const selectXpath = xPathOptionToXpath(FIELD.billingAccountSelect.textOption);
+    const selectXpath = buildXPath(FIELD.billingAccountSelect.textOption);
     const select = new Select(this.page, selectXpath);
     try {
       await Promise.all([

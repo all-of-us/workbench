@@ -1,6 +1,6 @@
 import {Page} from 'puppeteer';
 import Button from 'app/element/button';
-import {LinkText, PageUrl} from 'app/page-identifiers';
+import {LinkText, PageUrl} from 'app/text-labels';
 import WorkspaceEditPage, {FIELD as EDIT_FIELD} from 'app/page/workspace-edit-page';
 import {makeWorkspaceName} from 'utils/str-utils';
 import RadioButton from 'app/element/radiobutton';

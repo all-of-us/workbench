@@ -1,6 +1,6 @@
 import Link from 'app/element/link';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
-import {WorkspaceAccessLevel} from 'app/page-identifiers';
+import {WorkspaceAccessLevel} from 'app/text-labels';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import {config} from 'resources/workbench-config';
 

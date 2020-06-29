@@ -1,6 +1,6 @@
 import WorkspacesPage from 'app/page/workspaces-page';
 import {findWorkspace, signIn} from 'utils/test-utils';
-import {EllipsisMenuAction} from 'app/page-identifiers';
+import {EllipsisMenuAction} from 'app/text-labels';
 import DataPage from 'app/page/data-page';
 
 describe('Clone workspace', () => {

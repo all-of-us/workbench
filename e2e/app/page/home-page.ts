@@ -1,5 +1,5 @@
 import {Page} from 'puppeteer';
-import {PageUrl} from 'app/page-identifiers';
+import {PageUrl} from 'app/text-labels';
 import Link from 'app/element/link';
 import AuthenticatedPage from 'app/page/authenticated-page';
 import ClrIconLink from 'app/element/clr-icon-link';

@@ -1,16 +1,11 @@
 import {ElementHandle, Page} from 'puppeteer';
-import {WorkspaceAccessLevel} from 'app/page-identifiers';
+import {LinkText, WorkspaceAccessLevel} from 'app/text-labels';
 import {ElementType} from 'app/xpath-options';
 import Dialog from 'app/component/dialog';
 import Button from 'app/element/button';
 import Textbox from 'app/element/textbox';
 import ClrIcon from 'app/element/clr-icon-link';
 
-
-export enum ButtonLabel {
-  Cancel = 'Cancel',
-  Save = 'Save'
-}
 
 export default class ShareModal extends Dialog {
 
@@ -36,7 +31,7 @@ export default class ShareModal extends Dialog {
     const ownerOpt = await this.waitForRoleOption(level);
     await ownerOpt.click();
 
-    await this.clickButton(ButtonLabel.Save);
+    await this.clickButton(LinkText.Save);
     await this.waitUntilDialogIsClosed();
   }
 
@@ -45,7 +40,7 @@ export default class ShareModal extends Dialog {
       `${this.collabRowXPath(username)}//clr-icon[@shape="minus-circle"]`);
     await rmCollab.click();
 
-    await this.clickButton(ButtonLabel.Save);
+    await this.clickButton(LinkText.Save);
     await this.waitUntilDialogIsClosed();
     return;
   }
@@ -61,13 +56,13 @@ export default class ShareModal extends Dialog {
         `@data-test-id="collab-user-email" and contains(text(),"${username}")]]`;
   }
 
-  async clickButton(buttonLabel: ButtonLabel): Promise<void> {
+  async clickButton(buttonLabel: LinkText): Promise<void> {
     const button = await this.waitForButton(buttonLabel);
     await button.waitUntilEnabled();
     return button.click();
   }
 
-  async waitForButton(buttonLabel: ButtonLabel): Promise<Button> {
+  async waitForButton(buttonLabel: LinkText): Promise<Button> {
     return Button.findByName(this.page, {containsText: buttonLabel, type: ElementType.Button}, this);
   }
 

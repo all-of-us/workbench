@@ -4,7 +4,7 @@ import {makeRandomName} from 'utils/str-utils';
 import {waitWhileLoading} from 'utils/test-utils';
 import RadioButton from 'app/element/radiobutton';
 import Textbox from 'app/element/textbox';
-import {LinkText} from 'app/page-identifiers';
+import {LinkText} from 'app/text-labels';
 
 export enum Language {
   Python = 'Python',

@@ -2,7 +2,7 @@ import {Page, WaitForSelectorOptions} from 'puppeteer';
 import Container from 'app/container';
 import {ElementType, XPathOptions} from 'app/xpath-options';
 import BaseElement from './base-element';
-import {xPathOptionToXpath} from './xpath-defaults';
+import {buildXPath} from 'app/xpath-builders';
 
 export default class Textarea extends BaseElement {
 
@@ -13,7 +13,7 @@ export default class Textarea extends BaseElement {
      waitOptions: WaitForSelectorOptions = { visible: true }): Promise<Textarea> {
 
     xOpt.type = ElementType.Textarea;
-    const textareaXpath = xPathOptionToXpath(xOpt, container);
+    const textareaXpath = buildXPath(xOpt, container);
     const textarea = new Textarea(page, textareaXpath);
     await textarea.waitForXPath(waitOptions);
     return textarea;

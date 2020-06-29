@@ -2,7 +2,7 @@ import {Page, WaitForSelectorOptions} from 'puppeteer';
 import Container from 'app/container';
 import {ElementType, XPathOptions} from 'app/xpath-options';
 import BaseElement from './base-element';
-import {xPathOptionToXpath} from './xpath-defaults';
+import {buildXPath} from 'app/xpath-builders';
 
 export default class Checkbox extends BaseElement {
    
@@ -13,7 +13,7 @@ export default class Checkbox extends BaseElement {
      waitOptions: WaitForSelectorOptions = {visible: true}): Promise<Checkbox> {
 
     xOpt.type = ElementType.Checkbox;
-    const checkboxXpath = xPathOptionToXpath(xOpt, container);
+    const checkboxXpath = buildXPath(xOpt, container);
     const checkbox = new Checkbox(page, checkboxXpath);
     await checkbox.waitForXPath(waitOptions);
     return checkbox;

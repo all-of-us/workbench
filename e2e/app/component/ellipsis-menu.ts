@@ -1,5 +1,5 @@
 import {ElementHandle, Page} from 'puppeteer';
-import {EllipsisMenuAction} from 'app/page-identifiers';
+import {EllipsisMenuAction} from 'app/text-labels';
 import {GroupAction} from 'app/page/cohort-participants-group';
 import TieredMenu from './tiered-menu';
 

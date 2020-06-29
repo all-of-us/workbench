@@ -2,7 +2,7 @@ import {Page, WaitForSelectorOptions} from 'puppeteer';
 import Container from 'app/container';
 import {ElementType, XPathOptions} from 'app/xpath-options';
 import BaseElement from './base-element';
-import {xPathOptionToXpath} from './xpath-defaults';
+import {buildXPath} from 'app/xpath-builders';
 
 /**
  * <select> element
@@ -18,7 +18,7 @@ export default class Select extends BaseElement {
      waitOptions: WaitForSelectorOptions = {visible: true}): Promise<Select> {
 
     xOpt.type = ElementType.Select;
-    const selectXpath = xPathOptionToXpath(xOpt, container);
+    const selectXpath = buildXPath(xOpt, container);
     const select = new Select(page, selectXpath);
     await select.waitForXPath(waitOptions);
     return select;

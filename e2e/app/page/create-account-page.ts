@@ -4,7 +4,7 @@ import Checkbox from 'app/element/checkbox';
 import ClrIconLink from 'app/element/clr-icon-link';
 import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
-import {findIframe} from 'app/element/xpath-finder';
+import {findIframe} from 'app/xpath-finder';
 import BasePage from 'app/page/base-page';
 import {ElementType} from 'app/xpath-options';
 import {Frame, Page} from 'puppeteer';
@@ -12,7 +12,7 @@ import {defaultFieldValues} from 'resources/data/user-registration-data';
 import {config} from 'resources/workbench-config';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
-import {LinkText} from 'app/page-identifiers';
+import {LinkText} from 'app/text-labels';
 
 const faker = require('faker/locale/en_US');
 

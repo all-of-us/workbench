@@ -1,8 +1,8 @@
 import {Page} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForAttributeEquality, waitForDocumentTitle} from 'utils/waits-utils';
-import {xPathOptionToXpath} from 'app/element/xpath-defaults';
-import {WorkspaceAccessLevel} from 'app/page-identifiers';
+import {buildXPath} from 'app/xpath-builders';
+import {WorkspaceAccessLevel} from 'app/text-labels';
 import {ElementType} from 'app/xpath-options';
 import AuthenticatedPage from './authenticated-page';
 import {TabLabelAlias} from './data-page';
@@ -22,7 +22,7 @@ export default class WorkspaceAboutPage extends AuthenticatedPage{
       await Promise.all([
         waitForDocumentTitle(this.page, PageTitle, 60000),
         waitWhileLoading(this.page),
-        this.page.waitForXPath(xPathOptionToXpath({name: TabLabelAlias.About, type: ElementType.Tab}), {timeout: 60000}),
+        this.page.waitForXPath(buildXPath({name: TabLabelAlias.About, type: ElementType.Tab}), {timeout: 60000}),
       ]);
       return true;
     } catch (err) {
@@ -32,7 +32,7 @@ export default class WorkspaceAboutPage extends AuthenticatedPage{
   }
 
   async isOpen(): Promise<boolean> {
-    const selector = xPathOptionToXpath({name: TabLabelAlias.About, type: ElementType.Tab});
+    const selector = buildXPath({name: TabLabelAlias.About, type: ElementType.Tab});
     return waitForAttributeEquality(this.page, {xpath: selector}, 'aria-selected', 'true');
   }
 

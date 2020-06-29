@@ -3,7 +3,7 @@ import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
 import DataTable from 'app/component/data-table';
 import Button from 'app/element/button';
-import {LinkText} from 'app/page-identifiers';
+import {LinkText} from 'app/text-labels';
 import AuthenticatedPage from './authenticated-page';
 
 const PageTitle = 'Review Cohort Participants';

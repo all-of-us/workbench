@@ -10,7 +10,7 @@ import * as fp from 'lodash/fp';
 import {ElementHandle, JSHandle, Page} from 'puppeteer';
 import {waitForText} from 'utils/waits-utils';
 import WorkspaceCard from 'app/component/workspace-card';
-import {WorkspaceAccessLevel} from 'app/page-identifiers';
+import {WorkspaceAccessLevel} from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
 import {makeWorkspaceName} from './str-utils';
 
