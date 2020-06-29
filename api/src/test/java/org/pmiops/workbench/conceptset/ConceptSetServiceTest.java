@@ -10,10 +10,12 @@ import java.util.stream.Stream;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
+import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -28,11 +30,17 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class ConceptSetServiceTest {
 
   @Autowired WorkspaceDao workspaceDao;
-
   @Autowired ConceptSetService conceptSetService;
+  @Autowired ConceptService conceptService;
+  @Autowired ConceptSetMapper conceptSetMapper;
 
   @TestConfiguration
-  @Import({ConceptSetService.class})
+  @Import({
+    ConceptSetService.class,
+    ConceptService.class,
+    CommonMappers.class,
+    ConceptSetMapperImpl.class
+  })
   @MockBean({ConceptBigQueryService.class})
   static class Configuration {}
 
