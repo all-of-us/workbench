@@ -1,4 +1,4 @@
-package org.pmiops.workbench.db.dao;
+package org.pmiops.workbench.dataset;
 
 import static com.google.cloud.bigquery.StandardSQLTypeName.ARRAY;
 import static org.pmiops.workbench.model.PrePackagedConceptSetEnum.SURVEY;
@@ -35,7 +35,9 @@ import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
-import org.pmiops.workbench.dataset.BigQueryDataSetTableInfo;
+import org.pmiops.workbench.db.dao.CohortDao;
+import org.pmiops.workbench.db.dao.ConceptSetDao;
+import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
@@ -59,6 +61,7 @@ import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -165,11 +168,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       this.namedParameterValues = namedParameterValues;
     }
 
-    String getQuery() {
+    public String getQuery() {
       return query;
     }
 
-    Map<String, QueryParameterValue> getNamedParameterValues() {
+    public Map<String, QueryParameterValue> getNamedParameterValues() {
       return namedParameterValues;
     }
   }
@@ -233,7 +236,13 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   @Override
   public DbDataset saveDataSet(DbDataset dataset) {
-    return dataSetDao.save(dataset);
+    try {
+      return dataSetDao.save(dataset);
+    } catch (OptimisticLockException e) {
+      throw new ConflictException("Failed due to concurrent concept set modification");
+    } catch (DataIntegrityViolationException ex) {
+      throw new ConflictException("Data set with the same name already exists");
+    }
   }
 
   // For domains for which we've assigned a base table in BigQuery, we keep a map here

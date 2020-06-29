@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 import javax.inject.Provider;
-import javax.persistence.OptimisticLockException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,9 +39,9 @@ import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetMapper;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.dataset.DataSetMapper;
+import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
-import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
@@ -80,7 +79,6 @@ import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -160,23 +158,19 @@ public class DataSetController implements DataSetApiDelegate {
         dataSetRequest.getDomainValuePairs().stream()
             .map(this::getDataSetValuesFromDomainValueSet)
             .collect(toImmutableList());
-    try {
-      DbDataset savedDataSet =
-          dataSetService.saveDataSet(
-              dataSetRequest.getName(),
-              dataSetRequest.getIncludesAllParticipants(),
-              dataSetRequest.getDescription(),
-              workspaceId,
-              dataSetRequest.getCohortIds(),
-              dataSetRequest.getConceptSetIds(),
-              dataSetValueList,
-              dataSetRequest.getPrePackagedConceptSet(),
-              userProvider.get().getUserId(),
-              now);
-      return ResponseEntity.ok(TO_CLIENT_DATA_SET.apply(savedDataSet));
-    } catch (DataIntegrityViolationException ex) {
-      throw new ConflictException("Data set with the same name already exists");
-    }
+    DbDataset savedDataSet =
+        dataSetService.saveDataSet(
+            dataSetRequest.getName(),
+            dataSetRequest.getIncludesAllParticipants(),
+            dataSetRequest.getDescription(),
+            workspaceId,
+            dataSetRequest.getCohortIds(),
+            dataSetRequest.getConceptSetIds(),
+            dataSetValueList,
+            dataSetRequest.getPrePackagedConceptSet(),
+            userProvider.get().getUserId(),
+            now);
+    return ResponseEntity.ok(TO_CLIENT_DATA_SET.apply(savedDataSet));
   }
 
   private DbDatasetValue getDataSetValuesFromDomainValueSet(DomainValuePair domainValuePair) {
@@ -539,14 +533,8 @@ public class DataSetController implements DataSetApiDelegate {
         request.getDomainValuePairs().stream()
             .map(this::getDataSetValuesFromDomainValueSet)
             .collect(Collectors.toList()));
-    try {
-      dataSetService.saveDataSet(dbDataSet);
-      // TODO: add recent resource entry for data sets
-    } catch (OptimisticLockException e) {
-      throw new ConflictException("Failed due to concurrent concept set modification");
-    } catch (DataIntegrityViolationException ex) {
-      throw new ConflictException("Data set with the same name already exists");
-    }
+
+    dataSetService.saveDataSet(dbDataSet);
 
     return ResponseEntity.ok(TO_CLIENT_DATA_SET.apply(dbDataSet));
   }
