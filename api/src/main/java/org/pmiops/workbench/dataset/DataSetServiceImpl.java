@@ -61,6 +61,7 @@ import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -235,7 +236,13 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   @Override
   public DbDataset saveDataSet(DbDataset dataset) {
-    return dataSetDao.save(dataset);
+    try {
+      return dataSetDao.save(dataset);
+    } catch (OptimisticLockException e) {
+      throw new ConflictException("Failed due to concurrent concept set modification");
+    } catch (DataIntegrityViolationException ex) {
+      throw new ConflictException("Data set with the same name already exists");
+    }
   }
 
   // For domains for which we've assigned a base table in BigQuery, we keep a map here
