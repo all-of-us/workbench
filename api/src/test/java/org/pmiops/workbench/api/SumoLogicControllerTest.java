@@ -97,7 +97,6 @@ public class SumoLogicControllerTest {
   @Test
   public void testLogsSingleEvent() {
     sumoLogicController.logEgressEvent(API_KEY, request);
-    verify(mockEgressEventAuditor).fireEgressEvent(event);
     verify(mockEgressEventService).handleEvent(event);
   }
 
@@ -106,7 +105,6 @@ public class SumoLogicControllerTest {
     EgressEvent event2 = new EgressEvent();
     request.setEventsJsonArray(objectMapper.writeValueAsString(Arrays.asList(event, event2)));
     sumoLogicController.logEgressEvent(API_KEY, request);
-    verify(mockEgressEventAuditor, times(2)).fireEgressEvent(any());
     verify(mockEgressEventService, times(2)).handleEvent(any());
   }
 }
