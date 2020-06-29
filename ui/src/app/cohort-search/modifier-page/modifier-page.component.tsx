@@ -251,7 +251,7 @@ export const ModifierPage = withCurrentWorkspace()(
 
     async componentDidMount() {
       const {workspace: {cdrVersionId}} = this.props;
-      let {formState} = this.state;
+      const formState = this.formState;
       if (serverConfigStore.getValue().enableEventDateModifier) {
         formState.push({
           name: ModifierType.EVENTDATE,
@@ -307,22 +307,20 @@ export const ModifierPage = withCurrentWorkspace()(
         formState.push(encounters);
         this.setState({visitCounts});
       }
-      formState = this.modifiersForSurvey;
       this.setState({formState});
       this.getExisting();
     }
 
-    get modifiersForSurvey() {
-      const {formState} = this.state;
+    get formState() {
       const {searchContext: {domain}} = this.props;
-      if (domain === DomainType.SURVEY) {
-        return formState.filter(form => SURVEY_MODIFIERS.indexOf(form.name) > -1);
-      }
-      return formState;
+      const {formState} = this.state;
+      return domain === DomainType.SURVEY ?
+        formState.filter(form => SURVEY_MODIFIERS.indexOf(form.name) > -1) : formState;
     }
+
     getExisting() {
       const {searchContext} = this.props;
-      const {formState} = this.state;
+      const formState = this.formState;
       // This reseeds the form state with existing data if we're editing an existing item
       searchContext.item.modifiers.forEach(existing => {
         const index = formState.findIndex(mod => existing.name === mod.name);
