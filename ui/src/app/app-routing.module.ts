@@ -312,7 +312,7 @@ const routes: Routes = [
       {
         path: 'data-code-of-conduct',
         component: DataUserCodeOfConductComponent,
-        data: {title: 'Data User Code of Conduct', minimizeChrome: false}
+        data: {title: 'Data User Code of Conduct'}
       },
       {
         path: 'admin',
