@@ -120,7 +120,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final String CURRENT_POSITION = "Tester";
   private static final String FAMILY_NAME = "Bobberson";
   private static final String GIVEN_NAME = "Bob";
-  private static final String GSUITE_DOMAIN = "Bob";
+  private static final String GSUITE_DOMAIN = "researchallofus.org";
   private static final String INVITATION_KEY = "secretpassword";
   private static final String NONCE = Long.toString(NONCE_LONG);
   private static final String ORGANIZATION = "Test";
