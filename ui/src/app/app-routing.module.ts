@@ -27,8 +27,6 @@ import {ConceptSetDetailsComponent} from './pages/data/concept/concept-set-detai
 import {HomepageComponent} from './pages/homepage/homepage';
 import {SignInComponent} from './pages/login/sign-in';
 import {ProfilePageComponent} from './pages/profile/profile-page';
-import {SessionExpiredComponent} from './pages/session-expired';
-import {SignInAgainComponent} from './pages/sign-in-again';
 import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './pages/workspace/workspace-edit';
@@ -53,15 +51,8 @@ const routes: Routes = [
     path: 'login',
     component: SignInComponent,
     data: {title: 'Sign In'}
-  }, {
-    path: 'session-expired',
-    component: SessionExpiredComponent,
-    data: {title: 'You have been signed out'}
-  }, {
-    path: 'sign-in-again',
-    component: SignInAgainComponent,
-    data: {title: 'You have been signed out'}
-  }, {
+  },
+  {
     path: '',
     component: SignedInComponent,
     canActivate: [SignInGuard],

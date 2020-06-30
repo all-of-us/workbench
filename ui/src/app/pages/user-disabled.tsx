@@ -9,7 +9,9 @@ import {buildPageTitleForEnvironment} from "app/utils/title";
 
 const supportUrl = 'support@researchallofus.org';
 
-export class UserDisabled extends React.Component<{}, {}> {
+export class UserDisabled extends React.Component {
+  // TODO: esteemed reviewer, please yell at me if I don't write a paper about a global wrapper that
+  // handles this sort of thing before turning this PR in for review
   componentDidMount() {
     document.title = buildPageTitleForEnvironment('Disabled')
   }

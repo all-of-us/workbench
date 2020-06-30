@@ -6,6 +6,7 @@ import {SignInService} from 'app/services/sign-in.service';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 import * as React from 'react';
+import {buildPageTitleForEnvironment} from "../utils/title";
 
 const styles = reactStyles({
   button: {
@@ -19,26 +20,18 @@ const styles = reactStyles({
   }
 });
 
-export const SessionExpired: React.FunctionComponent<{signIn: Function}> = ({signIn}) => {
-  return <PublicLayout>
-    <BoldHeader>You have been signed out</BoldHeader>
-    <section style={styles.textSection}>
-      You were automatically signed out of your session due to inactivity
-    </section>
-    <GoogleSignInButton signIn={signIn} />
-  </PublicLayout>;
-};
-
-@Component({
-  template: '<div #root></div>'
-})
-export class SessionExpiredComponent extends ReactWrapperBase {
-  constructor(private signInService: SignInService) {
-    super(SessionExpired, ['signIn']);
-    this.signIn = this.signIn.bind(this);
+export class SessionExpired extends React.Component<{signIn: Function}> {
+  componentDidMount() {
+    document.title = buildPageTitleForEnvironment('You have been signed out');
   }
 
-  signIn(): void {
-    this.signInService.signIn();
+  render() {
+    return <PublicLayout>
+      <BoldHeader>You have been signed out</BoldHeader>
+      <section style={styles.textSection}>
+        You were automatically signed out of your session due to inactivity
+      </section>
+      <GoogleSignInButton signIn={() => this.props.signIn()}/>
+    </PublicLayout>;
   }
 }
