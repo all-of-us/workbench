@@ -22,28 +22,23 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.StreamSupport;
 import javax.inject.Provider;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cohorts.CohortService;
-import org.pmiops.workbench.concept.ConceptService;
-import org.pmiops.workbench.conceptset.ConceptSetMapper;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.dataset.DataSetMapper;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
-import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbDatasetValue;
@@ -55,7 +50,6 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
-import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetCodeResponse;
@@ -102,13 +96,11 @@ public class DataSetController implements DataSetApiDelegate {
   private static final Logger log = Logger.getLogger(DataSetController.class.getName());
 
   private final CdrVersionService cdrVersionService;
-  private final ConceptService conceptService;
   private final ConceptSetService conceptSetService;
   private final DataDictionaryEntryDao dataDictionaryEntryDao;
   private final DataSetMapper dataSetMapper;
   private final FireCloudService fireCloudService;
   private final NotebooksService notebooksService;
-  private final ConceptSetMapper conceptSetMapper;
   private final CohortService cohortService;
 
   @Autowired
@@ -117,7 +109,6 @@ public class DataSetController implements DataSetApiDelegate {
       Clock clock,
       CohortService cohortService,
       CdrVersionService cdrVersionService,
-      ConceptService conceptService,
       ConceptSetService conceptSetService,
       DataDictionaryEntryDao dataDictionaryEntryDao,
       DataSetMapper dataSetMapper,
@@ -126,13 +117,11 @@ public class DataSetController implements DataSetApiDelegate {
       NotebooksService notebooksService,
       Provider<DbUser> userProvider,
       @Qualifier(DatasetConfig.DATASET_PREFIX_CODE) Provider<String> prefixProvider,
-      WorkspaceService workspaceService,
-      ConceptSetMapper conceptSetMapper) {
+      WorkspaceService workspaceService) {
     this.bigQueryService = bigQueryService;
     this.clock = clock;
     this.cohortService = cohortService;
     this.cdrVersionService = cdrVersionService;
-    this.conceptService = conceptService;
     this.conceptSetService = conceptSetService;
     this.dataDictionaryEntryDao = dataDictionaryEntryDao;
     this.dataSetMapper = dataSetMapper;
@@ -142,7 +131,6 @@ public class DataSetController implements DataSetApiDelegate {
     this.userProvider = userProvider;
     this.prefixProvider = prefixProvider;
     this.workspaceService = workspaceService;
-    this.conceptSetMapper = conceptSetMapper;
   }
 
   @Override
@@ -213,15 +201,8 @@ public class DataSetController implements DataSetApiDelegate {
             result.setLastModifiedTime(dataSet.getLastModifiedTime().getTime());
           }
           result.setConceptSets(
-              StreamSupport.stream(
-                      conceptSetService
-                          .findAll(
-                              dataSet.getConceptSetIds().stream()
-                                  .filter(Objects::nonNull)
-                                  .collect(Collectors.toList()))
-                          .spliterator(),
-                      false)
-                  .map(conceptSet -> toClientConceptSet(conceptSet))
+              conceptSetService.findAll(dataSet.getConceptSetIds()).stream()
+                  .map(conceptSet -> conceptSetService.toClientConceptSet(conceptSet))
                   .collect(Collectors.toList()));
           result.setCohorts(
               cohortService.findAll(dataSet.getCohortIds()).stream()
@@ -234,13 +215,6 @@ public class DataSetController implements DataSetApiDelegate {
           return result;
         }
       };
-
-  private ConceptSet toClientConceptSet(DbConceptSet dbConceptSet) {
-    ConceptSet result = conceptSetMapper.dbModelToClient(dbConceptSet);
-    return result.concepts(
-        conceptService.findAll(
-            dbConceptSet.getConceptIds(), ConceptSetsController.CONCEPT_NAME_ORDERING));
-  }
 
   // TODO(jaycarlton): move into helper methods in one or both of these classes
   private static final Function<DbDatasetValue, DomainValuePair> TO_CLIENT_DOMAIN_VALUE =

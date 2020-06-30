@@ -32,7 +32,6 @@ import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.concept.ConceptService;
-import org.pmiops.workbench.conceptset.ConceptSetMapper;
 import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
@@ -96,9 +95,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private CdrVersionService cdrVersionService;
   @Autowired private CohortDao cohortDao;
   @Autowired private ConceptSetDao conceptSetDao;
-  @Autowired private ConceptService conceptService;
   @Autowired private ConceptSetService conceptSetService;
-  @Autowired private ConceptSetMapper conceptSetMapper;
   @Autowired private DataDictionaryEntryDao dataDictionaryEntryDao;
   @Autowired private DataSetMapper dataSetMapper;
   @Autowired private DataSetService dataSetService;
@@ -187,7 +184,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                 CLOCK,
                 cohortService,
                 cdrVersionService,
-                conceptService,
                 conceptSetService,
                 dataDictionaryEntryDao,
                 dataSetMapper,
@@ -196,8 +192,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                 notebooksService,
                 userProvider,
                 prefixProvider,
-                workspaceService,
-                conceptSetMapper));
+                workspaceService));
 
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.name());

@@ -2,11 +2,14 @@ package org.pmiops.workbench.conceptset;
 
 import java.util.List;
 import java.util.Optional;
+import org.pmiops.workbench.api.ConceptSetsController;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
+import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.Domain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,12 +21,19 @@ public class ConceptSetService {
   private static final int CONCEPT_SET_VERSION = 1;
   private ConceptSetDao conceptSetDao;
   private ConceptBigQueryService conceptBigQueryService;
+  private ConceptService conceptService;
+  private ConceptSetMapper conceptSetMapper;
 
   @Autowired
   public ConceptSetService(
-      ConceptSetDao conceptSetDao, ConceptBigQueryService conceptBigQueryService) {
+      ConceptSetDao conceptSetDao,
+      ConceptBigQueryService conceptBigQueryService,
+      ConceptService conceptService,
+      ConceptSetMapper conceptSetMapper) {
     this.conceptSetDao = conceptSetDao;
     this.conceptBigQueryService = conceptBigQueryService;
+    this.conceptService = conceptService;
+    this.conceptSetMapper = conceptSetMapper;
   }
 
   public DbConceptSet save(DbConceptSet dbConceptSet) {
@@ -36,6 +46,13 @@ public class ConceptSetService {
 
   public Optional<DbConceptSet> findOne(Long conceptSetId) {
     return Optional.of(conceptSetDao.findOne(conceptSetId));
+  }
+
+  public ConceptSet toClientConceptSet(DbConceptSet dbConceptSet) {
+    ConceptSet result = conceptSetMapper.dbModelToClient(dbConceptSet);
+    return result.concepts(
+        conceptService.findAll(
+            dbConceptSet.getConceptIds(), ConceptSetsController.CONCEPT_NAME_ORDERING));
   }
 
   public List<DbConceptSet> findAll(List<Long> conceptSetIds) {
