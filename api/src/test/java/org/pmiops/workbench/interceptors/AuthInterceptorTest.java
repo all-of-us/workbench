@@ -104,8 +104,13 @@ public class AuthInterceptorTest {
     user.setDisabled(false);
   }
 
+  // the particular ProfileApiMethod used by most tests
+  private Method getTestMethod() {
+    return getProfileApiMethod("getMe");
+  }
+
   private void mockGetCallWithBearerToken() {
-    when(mockHandler.getMethod()).thenReturn(getProfileApiMethod("getBillingProjects"));
+    when(mockHandler.getMethod()).thenReturn(getTestMethod());
     when(mockRequest.getMethod()).thenReturn(HttpMethods.GET);
     when(mockRequest.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer foo");
   }
@@ -127,7 +132,7 @@ public class AuthInterceptorTest {
 
   @Test
   public void preHandleGet_noAuthorization() throws Exception {
-    when(mockHandler.getMethod()).thenReturn(getProfileApiMethod("getBillingProjects"));
+    when(mockHandler.getMethod()).thenReturn(getTestMethod());
     when(mockRequest.getMethod()).thenReturn(HttpMethods.GET);
 
     assertThat(interceptor.preHandle(mockRequest, mockResponse, mockHandler)).isFalse();
@@ -250,8 +255,7 @@ public class AuthInterceptorTest {
 
   @Test
   public void authorityCheckPermitsWithNoAnnotation() throws Exception {
-    Method method = getProfileApiMethod("getBillingProjects");
-    assertThat(interceptor.hasRequiredAuthority(method, new DbUser())).isTrue();
+    assertThat(interceptor.hasRequiredAuthority(getTestMethod(), new DbUser())).isTrue();
   }
 
   @Test
