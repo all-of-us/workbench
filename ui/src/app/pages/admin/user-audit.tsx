@@ -1,22 +1,23 @@
-import { ProfileApiFp } from 'generated/fetch';
+import {profileApi} from 'app/services/swagger-fetch-clients';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
+
 
 const {useEffect, useState} = React;
 
+const firstTen = fp.flow(fp.slice(0, 10), fp.map(JSON.stringify));
+
 export const UserAudit = () => {
-  const [actions, setActions] = useState();
-  const [busy, setBusy] = useState(true);
+  const [userActions, setUserActions] = useState();
 
   useEffect(() => {
     const getLogEntries = async() => {
-      const auditResponse = await ProfileApiFp().getAuditLogEntries('psantos');
-      console.log(auditResponse);
-      setActions(auditResponse);
-      setBusy(false);
+      const {actions} = await profileApi().getAuditLogEntries('psantos');
+      setUserActions(actions);
     };
 
     getLogEntries();
   }, []);
 
-  return <div>logEntries</div>;
+  return userActions ? <div>{firstTen(userActions)}</div> : <div>Loading Log Entries...</div>;
 };
