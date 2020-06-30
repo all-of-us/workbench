@@ -7,7 +7,6 @@ import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -55,7 +54,6 @@ public class ProfileController implements ProfileApiDelegate {
   private final Provider<DbUser> userProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final ShibbolethService shibbolethService;
-  private final UserDao userDao;
   private final UserService userService;
 
   @Autowired
@@ -68,7 +66,6 @@ public class ProfileController implements ProfileApiDelegate {
       Provider<DbUser> userProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       ShibbolethService shibbolethService,
-      UserDao userDao,
       UserService userService) {
     this.actionAuditQueryService = actionAuditQueryService;
     this.directoryService = directoryService;
@@ -76,7 +73,6 @@ public class ProfileController implements ProfileApiDelegate {
     this.profileAuditor = profileAuditor;
     this.profileService = profileService;
     this.shibbolethService = shibbolethService;
-    this.userDao = userDao;
     this.userProvider = userProvider;
     this.userService = userService;
     this.workbenchConfigProvider = workbenchConfigProvider;
@@ -216,7 +212,7 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<Profile> getUser(Long userId) {
-    DbUser user = userDao.findUserByUserId(userId);
+    DbUser user = userService.getByDatabaseIdOrThrow(userId);
     return ResponseEntity.ok(profileService.getProfile(user));
   }
 

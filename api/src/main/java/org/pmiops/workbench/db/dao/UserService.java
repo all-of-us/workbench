@@ -107,5 +107,8 @@ public interface UserService {
 
   Optional<DbUser> getByDatabaseId(long databaseId);
 
+  // same as the above, but throw NotFoundException if not found
+  DbUser getByDatabaseIdOrThrow(long databaseId);
+
   void updateBypassTime(long userDatabaseId, AccessBypassRequest accessBypassRequest);
 }

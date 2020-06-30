@@ -965,6 +965,12 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   @Override
+  public DbUser getByDatabaseIdOrThrow(long databaseId) {
+    return getByDatabaseId(databaseId)
+        .orElseThrow(() -> new NotFoundException("User with ID '" + databaseId + "' not found"));
+  }
+
+  @Override
   public void updateBypassTime(long userDatabaseId, AccessBypassRequest accessBypassRequest) {
     final DbUser user =
         getByDatabaseId(userDatabaseId)
