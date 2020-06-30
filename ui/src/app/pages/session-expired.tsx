@@ -20,7 +20,7 @@ const styles = reactStyles({
   }
 });
 
-export class SessionExpired extends React.Component<{signIn: Function}> {
+export class SessionExpired extends React.Component<{routeConfig: {signIn: Function}}> {
   componentDidMount() {
     document.title = buildPageTitleForEnvironment('You have been signed out');
   }
@@ -31,7 +31,7 @@ export class SessionExpired extends React.Component<{signIn: Function}> {
       <section style={styles.textSection}>
         You were automatically signed out of your session due to inactivity
       </section>
-      <GoogleSignInButton signIn={() => this.props.signIn()}/>
+      <GoogleSignInButton signIn={() => this.props.routeConfig.signIn()}/>
     </PublicLayout>;
   }
 }
