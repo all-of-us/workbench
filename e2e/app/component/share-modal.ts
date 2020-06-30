@@ -1,8 +1,6 @@
 import {ElementHandle, Page} from 'puppeteer';
 import {LinkText, WorkspaceAccessLevel} from 'app/text-labels';
-import {ElementType} from 'app/xpath-options';
 import Dialog from 'app/component/dialog';
-import Button from 'app/element/button';
 import Textbox from 'app/element/textbox';
 import ClrIcon from 'app/element/clr-icon-link';
 
@@ -14,11 +12,14 @@ export default class ShareModal extends Dialog {
   }
 
   async shareWithUser(username: string, level: WorkspaceAccessLevel): Promise<void> {
+    /*
     if (!this.page.viewport()) {
       throw Error(
         'testing of the share modal requires a viewport to be set on account ' +
           'on odd rendering issues with the react-select component');
     }
+    */
+
     const searchBox = await this.waitForSearchBox();
     await searchBox.type(username);
 
@@ -37,12 +38,11 @@ export default class ShareModal extends Dialog {
 
   async removeUser(username: string): Promise<void> {
     const rmCollab = await this.page.waitForXPath(
-      `${this.collabRowXPath(username)}//clr-icon[@shape="minus-circle"]`);
+      `${this.collabRowXPath(username)}//clr-icon[@shape="minus-circle"]`, {visible: true});
     await rmCollab.click();
 
     await this.clickButton(LinkText.Save);
-    await this.waitUntilDialogIsClosed();
-    return;
+    return this.waitUntilDialogIsClosed();
   }
 
   /**
@@ -54,16 +54,6 @@ export default class ShareModal extends Dialog {
     // .//div filters by a relative path to the parent row.
     return `${this.getXpath()}//*[@data-test-id="collab-user-row" and .//div[` +
         `@data-test-id="collab-user-email" and contains(text(),"${username}")]]`;
-  }
-
-  async clickButton(buttonLabel: LinkText): Promise<void> {
-    const button = await this.waitForButton(buttonLabel);
-    await button.waitUntilEnabled();
-    return button.click();
-  }
-
-  async waitForButton(buttonLabel: LinkText): Promise<Button> {
-    return Button.findByName(this.page, {containsText: buttonLabel, type: ElementType.Button}, this);
   }
 
   async waitForSearchBox(): Promise<Textbox> {
@@ -84,7 +74,7 @@ export default class ShareModal extends Dialog {
   async waitForRoleOption(level: WorkspaceAccessLevel): Promise<ElementHandle> {
     // The label in the select menu uses title case.
     const levelText =  level[0].toUpperCase() + level.substring(1).toLowerCase();
-    return await this.page.waitForXPath(
+    return this.page.waitForXPath(
       `//*[starts-with(@id,"react-select") and text()="${levelText}"]`,
       {visible: true});
   }
