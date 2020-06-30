@@ -120,6 +120,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final String CURRENT_POSITION = "Tester";
   private static final String FAMILY_NAME = "Bobberson";
   private static final String GIVEN_NAME = "Bob";
+  private static final String GSUITE_DOMAIN = "Bob";
   private static final String INVITATION_KEY = "secretpassword";
   private static final String NONCE = Long.toString(NONCE_LONG);
   private static final String ORGANIZATION = "Test";
@@ -127,7 +128,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final String RESEARCH_PURPOSE = "To test things";
   private static final String STATE = "EX";
   private static final String STREET_ADDRESS = "1 Example Lane";
-  private static final String USERNAME = "bob";
+  private static final String USER_PREFIX = "bob";
   private static final String WRONG_CAPTCHA_TOKEN = "WrongCaptchaToken";
   private static final String ZIP_CODE = "12345";
   private static final Timestamp TIMESTAMP = new Timestamp(fakeClock.millis());
@@ -212,12 +213,13 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     // Most tests should run with institutional verification off by default.
     config.featureFlags.requireInstitutionalVerification = false;
+    config.googleDirectoryService.gSuiteDomain = GSUITE_DOMAIN;
 
     Profile profile = new Profile();
     profile.setContactEmail(CONTACT_EMAIL);
     profile.setFamilyName(FAMILY_NAME);
     profile.setGivenName(GIVEN_NAME);
-    profile.setUsername(USERNAME);
+    profile.setUsername(USER_PREFIX);
     profile.setCurrentPosition(CURRENT_POSITION);
     profile.setOrganization(ORGANIZATION);
     profile.setAreaOfResearch(RESEARCH_PURPOSE);
@@ -1249,7 +1251,8 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   private Profile createUser() {
     when(mockCloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
-    when(mockDirectoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, CONTACT_EMAIL))
+    when(mockDirectoryService.createUser(
+            GIVEN_NAME, FAMILY_NAME, USER_PREFIX + "@" + GSUITE_DOMAIN, CONTACT_EMAIL))
         .thenReturn(googleUser);
     Profile result = profileController.createAccount(createAccountRequest).getBody();
     dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);

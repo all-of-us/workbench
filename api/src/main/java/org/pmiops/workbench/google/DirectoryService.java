@@ -26,6 +26,13 @@ public interface DirectoryService {
   /** Looks up a user by username and returns their stored contact email address, if available. */
   Optional<String> getContactEmail(String username);
 
+  /**
+   * @param givenName
+   * @param familyName
+   * @param username The full RW username, e.g. "jdoe@researchallofus.org"
+   * @param contactEmail The user's contact email address, e.g. "jdoe@gmail.com"
+   * @return
+   */
   User createUser(String givenName, String familyName, String username, String contactEmail);
 
   User resetUserPassword(String username);

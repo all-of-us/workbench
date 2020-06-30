@@ -5024,7 +5024,9 @@ definitions:
         type: integer
         format: int64
       username:
-        description: researchallofus username
+        description: 'The username prefix, e.g. "gjordan". Note that this is different
+          from the use of "username" elsewhere in the RW codebase, where username represents
+          the full email address.'
         type: string
       creationNonce:
         description: 'A value which can be used to secure API calls during the account
