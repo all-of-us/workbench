@@ -690,23 +690,6 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/billingProjects":
-    get:
-      tags:
-      - profile
-      operationId: getBillingProjects
-      summary: List billing projects for a user
-      responses:
-        200:
-          description: OK
-          schema:
-            type: array
-            items:
-              "$ref": "#/definitions/BillingProjectMembership"
-        404:
-          description: User Not Found
-        500:
-          description: Internal Server Error
   "/v1/workspaces":
     get:
       tags:
