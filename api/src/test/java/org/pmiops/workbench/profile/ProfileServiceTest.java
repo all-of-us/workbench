@@ -14,11 +14,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.pmiops.workbench.actionaudit.ActionAuditQueryServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
+import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.captcha.CaptchaVerificationService;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbInstitution;
@@ -27,14 +31,18 @@ import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
-import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.institution.deprecated.InstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
+import org.pmiops.workbench.shibboleth.ShibbolethService;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.utils.mappers.AuditLogEntryMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -63,18 +71,29 @@ public class ProfileServiceTest {
   DbInstitution dbInstitution;
 
   @TestConfiguration
-  @MockBean({FreeTierBillingService.class, UserService.class})
   @Import({
+    ActionAuditQueryServiceImpl.class,
     AddressMapperImpl.class,
+    AuditLogEntryMapperImpl.class,
+    CommonMappers.class,
     DemographicSurveyMapperImpl.class,
     InstitutionalAffiliationMapperImpl.class,
     PageVisitMapperImpl.class,
     ProfileMapperImpl.class,
     ProfileService.class,
-    VerifiedInstitutionalAffiliationMapperImpl.class,
-    CommonMappers.class
+    UserServiceImpl.class,
   })
-  @MockBean({ProfileAuditor.class})
+  @MockBean({
+    BigQueryService.class,
+    CaptchaVerificationService.class,
+    CloudStorageService.class,
+    DirectoryService.class,
+    FireCloudService.class,
+    FreeTierBillingService.class,
+    ProfileAuditor.class,
+    ShibbolethService.class,
+    UserService.class,
+  })
   static class Configuration {
 
     @Bean
@@ -184,7 +203,6 @@ public class ProfileServiceTest {
     when(mockInstitutionService.validateAffiliation(
             dbVerifiedInstitutionalAffiliation, "kibitz@broadinstitute.org"))
         .thenReturn(true);
-    ;
 
     profileService.validateInstitutionalAffiliation(profile);
 
