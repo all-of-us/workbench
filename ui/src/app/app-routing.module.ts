@@ -76,14 +76,14 @@ const routes: Routes = [
     children: [
       {
         path: '',
+        component: HomepageComponent,
+        data: {title: 'Homepage'}
+      },
+      {
+        path: '',
         canActivateChild: [RegistrationGuard],
         runGuardsAndResolvers: 'always',
         children: [
-          {
-            path: '',
-            component: HomepageComponent,
-            data: {title: 'Homepage'}
-          },
           {
             path: 'library',
             component: WorkspaceLibraryComponent,
