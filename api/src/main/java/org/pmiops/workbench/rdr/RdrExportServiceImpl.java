@@ -7,6 +7,7 @@ import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -31,7 +32,6 @@ import org.pmiops.workbench.rdr.api.RdrApi;
 import org.pmiops.workbench.rdr.model.RdrResearcher;
 import org.pmiops.workbench.rdr.model.RdrWorkspace;
 import org.pmiops.workbench.rdr.model.RdrWorkspaceUser;
-import org.pmiops.workbench.rdr.model.ResearcherAffiliation;
 import org.pmiops.workbench.rdr.model.ResearcherVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,7 +88,7 @@ public class RdrExportServiceImpl implements RdrExportService {
    */
   @Override
   public List<Long> findAllUserIdsToExport() {
-    List<Long> userIdList = new ArrayList<Long>();
+    List<Long> userIdList = new ArrayList<>();
     try {
       userIdList =
           rdrExportDao.findDbUserIdsToExport().stream()
@@ -110,7 +110,7 @@ public class RdrExportServiceImpl implements RdrExportService {
    */
   @Override
   public List<Long> findAllWorkspacesIdsToExport() {
-    List<Long> workspaceListToExport = new ArrayList<Long>();
+    List<Long> workspaceListToExport = new ArrayList<>();
     try {
       workspaceListToExport =
           rdrExportDao.findDbWorkspaceIdsToExport().stream()
@@ -242,14 +242,10 @@ public class RdrExportServiceImpl implements RdrExportService {
       researcher.setLgbtqIdentity(dbDemographicSurvey.getLgbtqIdentity());
       researcher.setIdentifiesAsLgbtq(dbDemographicSurvey.getIdentifiesAsLgbtq());
     }
-    researcher.setAffiliations(
-        dbUser.getInstitutionalAffiliations().stream()
-            .map(
-                inst ->
-                    new ResearcherAffiliation()
-                        .institution(inst.getInstitution())
-                        .role(inst.getRole()))
-            .collect(Collectors.toList()));
+
+    // Deprecated old-style institutional affiliations
+    // To be removed in RW-4362
+    researcher.setAffiliations(Collections.emptyList());
 
     verifiedInstitutionalAffiliationDao
         .findFirstByUser(dbUser)
@@ -287,7 +283,7 @@ public class RdrExportServiceImpl implements RdrExportService {
           workspaceService.getFirecloudUserRoles(
               dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
       // Initializing it to empty array if for any reason firecloud sends an empty array
-      rdrWorkspace.setWorkspaceUsers(new ArrayList<RdrWorkspaceUser>());
+      rdrWorkspace.setWorkspaceUsers(new ArrayList<>());
       // Since the USERS cannot be deleted from workbench yet, hence sending the the status of
       // COLLABORATOR as ACTIVE
       collaboratorsMap.forEach(
@@ -317,6 +313,7 @@ public class RdrExportServiceImpl implements RdrExportService {
    * @param entity
    * @param idList
    */
+  @Override
   @VisibleForTesting
   public void updateDbRdrExport(RdrEntity entity, List<Long> idList) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
