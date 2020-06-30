@@ -34,5 +34,5 @@ public interface DataSetMapper {
   }
 
   @Mapping(target = "cdrVersionId", source = "dbModel.cdrVersion.cdrVersionId")
-  DataDictionaryEntry toApi(DbDataDictionaryEntry dbModel);
+  DataDictionaryEntry dbModelToClient(DbDataDictionaryEntry dbModel);
 }

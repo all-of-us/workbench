@@ -560,7 +560,7 @@ public class DataSetController implements DataSetApiDelegate {
       throw new NotFoundException();
     }
 
-    return ResponseEntity.ok(dataSetMapper.toApi(dataDictionaryEntries.get(0)));
+    return ResponseEntity.ok(dataSetMapper.dbModelToClient(dataDictionaryEntries.get(0)));
   }
 
   @Override
