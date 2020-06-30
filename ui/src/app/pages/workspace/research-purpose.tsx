@@ -13,6 +13,7 @@ import {
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {navigate} from 'app/utils/navigation';
 import {
   getSelectedPopulations,
@@ -68,7 +69,7 @@ const styles = reactStyles({
   }
 });
 
-function updateWorkspace(workspace) {
+function updateWorkspaceRPReviewPrompt(workspace) {
   workspacesApi().markResearchPurposeReviewed(workspace.namespace, workspace.id)
     .then((markedWorkspace) => {
       workspace.researchPurpose.needsReviewPrompt = false;
@@ -76,6 +77,16 @@ function updateWorkspace(workspace) {
         ['workspaces',  markedWorkspace.namespace, markedWorkspace.id, 'about']);
     });
 }
+function looksGoodEvent(workspace) {
+  AnalyticsTracker.WorkspaceUpdatePrompt.LooksGood();
+  updateWorkspaceRPReviewPrompt(workspace);
+}
+
+function updateWorkspaceEvent(workspace) {
+  AnalyticsTracker.WorkspaceUpdatePrompt.UpdateWorkspace();
+  navigate(['workspaces', workspace.namespace, workspace.id, 'edit']);
+}
+
 
 export const ResearchPurpose = withCurrentWorkspace()(
   ({workspace}: {workspace: WorkspaceData}) => {
@@ -105,11 +116,10 @@ export const ResearchPurpose = withCurrentWorkspace()(
             Research Project Directory</a> for participants and public to review.</label>
         </FlexColumn>
         <div style={{marginLeft: 'auto', marginRight: '0.5rem'}}>
-        <a style={{marginRight: '0.5rem'}} onClick={() => updateWorkspace(workspace)}>Looks
+        <a style={{marginRight: '0.5rem'}} onClick={() => looksGoodEvent(workspace)}>Looks
         Good</a>
         |
-        <a style={{marginLeft: '0.5rem'}} onClick={() => navigate(
-          ['workspaces', workspace.namespace, workspace.id, 'edit'])}>Update</a>
+        <a style={{marginLeft: '0.5rem'}} onClick={() => updateWorkspaceEvent(workspace)}>Update</a>
         </div>
         </FlexRow>}
       <div style={styles.sectionContentContainer}>
