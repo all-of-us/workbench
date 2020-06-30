@@ -5,7 +5,8 @@ import { ReactWrapperBase } from 'app/utils';
 import {authStore, useStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {CookiePolicyComponent} from './pages/cookie-policy';
+import {CookiePolicy} from './pages/cookie-policy';
+import {UserDisabled} from "./pages/user-disabled";
 
 
 const signInGuard: Guard = {
@@ -19,7 +20,7 @@ export const AppRoutingComponent: React.FunctionComponent = () => {
   const {authLoaded = false} = useStore(authStore);
 
   return authLoaded && <AppRouter>
-    <AppRoute path='/cookie-policy' component={CookiePolicyComponent}/>
+    <AppRoute path='/cookie-policy' component={CookiePolicy}/>
     <ProtectedRoutes guards={[signInGuard]}>
         <AppRoute
         path='/data-code-of-conduct'
@@ -29,6 +30,7 @@ export const AppRoutingComponent: React.FunctionComponent = () => {
           }} />}
         />
     </ProtectedRoutes>
+    <AppRoute path='/user-disabled' component={UserDisabled}/>
   </AppRouter>;
 };
 

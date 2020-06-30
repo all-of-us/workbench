@@ -8,7 +8,6 @@ import {AppRouting} from './app-routing';
 
 import {DataPageComponent} from 'app/pages/data/data-page';
 import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
-import {UserDisabledComponent} from 'app/pages/user-disabled';
 import {AdminBannerComponent} from './pages/admin/admin-banner';
 import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
 import {AdminUserComponent} from './pages/admin/admin-user';
@@ -62,10 +61,6 @@ const routes: Routes = [
     path: 'sign-in-again',
     component: SignInAgainComponent,
     data: {title: 'You have been signed out'}
-  }, {
-    path: 'user-disabled',
-    component: UserDisabledComponent,
-    data: {title: 'Disabled'}
   }, {
     path: '',
     component: SignedInComponent,
