@@ -2,6 +2,7 @@ package org.pmiops.workbench.dataset;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbStorageEnums;
@@ -13,7 +14,7 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
 @Mapper(
     config = MapStructConfig.class,
-    uses = {CommonMappers.class})
+    uses = {CommonMappers.class, ConceptSetDao.class})
 public interface DataSetMapper {
 
   // This is a lightweight version of a client mapper that doesn't make any extra db calls for extra
@@ -28,6 +29,13 @@ public interface DataSetMapper {
   @Mapping(target = "etag", source = "version", qualifiedByName = "cdrVersionToEtag")
   // TODO (RW-4756): Define a DatasetLight type.
   DataSet dbModelToClientLight(DbDataset dbDataset);
+
+  @Mapping(target = "id", source = "dataSetId")
+  @Mapping(target = "conceptSets", source = "conceptSetIds")
+  @Mapping(target = "cohorts", ignore = true)
+  @Mapping(target = "domainValuePairs", ignore = true)
+  @Mapping(target = "etag", source = "version", qualifiedByName = "cdrVersionToEtag")
+  DataSet dbModelToClient(DbDataset dbDataset);
 
   default PrePackagedConceptSetEnum prePackagedConceptSetFromStorage(Short prePackagedConceptSet) {
     return DbStorageEnums.prePackagedConceptSetsFromStorage(prePackagedConceptSet);
