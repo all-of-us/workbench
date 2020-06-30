@@ -24,9 +24,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 public class DataSetMapperTest {
 
-  private DataSet clientDataSet;
   private DbDataset dbDataset;
-  private DataDictionaryEntry clientDataDictionaryEntry;
   private DbDataDictionaryEntry dbDataDictionaryEntry;
 
   @Autowired private DataSetMapper dataSetMapper;
@@ -38,16 +36,6 @@ public class DataSetMapperTest {
   @Before
   public void setUp() {
     long time = new Date().getTime();
-    clientDataSet =
-        new DataSet()
-            .etag("ETAG_ETAG")
-            .id(101L)
-            .name("All Blue-eyed Blondes")
-            .includesAllParticipants(false)
-            .description("All Blue-eyed Blondes")
-            .workspaceId(1L)
-            .lastModifiedTime(time)
-            .prePackagedConceptSet(PrePackagedConceptSetEnum.NONE);
 
     dbDataset =
         DbDataset.builder()
@@ -61,19 +49,6 @@ public class DataSetMapperTest {
             .addPrePackagedConceptSets(
                 DbStorageEnums.prePackagedConceptSetsToStorage(PrePackagedConceptSetEnum.NONE))
             .build();
-
-    clientDataDictionaryEntry =
-        new DataDictionaryEntry()
-            .cdrVersionId(1L)
-            .definedTime(time)
-            .relevantOmopTable("person")
-            .fieldName("field")
-            .omopCdmStandardOrCustomField("field")
-            .description("desc")
-            .fieldType("type")
-            .dataProvenance("p")
-            .sourcePpiModule("s")
-            .transformedByRegisteredTierPrivacyMethods(false);
 
     dbDataDictionaryEntry = new DbDataDictionaryEntry();
     DbCdrVersion cdrVersion = new DbCdrVersion();
