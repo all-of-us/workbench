@@ -345,6 +345,7 @@ public class ProfileService {
 
   /**
    * Validates a set of Profile changes by comparing the updated profile to the previous version.
+   * Only fields that have changed are subject to validation.
    *
    * <p>If the previous version is null, the updated profile is presumed to be a new profile and all
    * validation rules are run. If both versions are non-null, only changed fields are validated.
