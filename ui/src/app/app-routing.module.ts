@@ -75,6 +75,11 @@ const routes: Routes = [
     runGuardsAndResolvers: 'always',
     children: [
       {
+        path: 'user-audit',
+        component: AppRouting,
+        data: {}
+      },
+      {
         path: '',
         component: HomepageComponent,
         data: {title: 'Homepage'}
