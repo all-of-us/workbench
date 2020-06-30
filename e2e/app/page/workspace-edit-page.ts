@@ -346,7 +346,7 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
     const diseaseNameComponent = this.question1_diseaseFocusedResearch();
     await (await diseaseNameComponent.asCheckBox()).check();
     await (await diseaseNameComponent.asTextBox()).type(diseaseName);
-    await (await diseaseNameComponent.asTextBox()).tabKey();
+    await (await diseaseNameComponent.asTextBox()).pressTab();
   }
 
   /**

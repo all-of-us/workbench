@@ -7,8 +7,8 @@ import Container from 'app/container';
  */
 export default class BaseElement extends Container {
 
-  static asBaseElement(page: Page, elementHandle: ElementHandle): BaseElement {
-    const baseElement = new BaseElement(page);
+  static asBaseElement(page: Page, elementHandle: ElementHandle, xpath?: string): BaseElement {
+    const baseElement = new BaseElement(page, xpath);
     baseElement.setElementHandle(elementHandle);
     return baseElement;
   }
@@ -19,8 +19,8 @@ export default class BaseElement extends Container {
     super(page, xpath);
   }
 
-  protected setElementHandle(elementHandle: ElementHandle) {
-    this.element = elementHandle;
+  protected setElementHandle(element: ElementHandle) {
+    this.element = element;
   }
 
   /**
@@ -28,14 +28,12 @@ export default class BaseElement extends Container {
    * If there is no element matching xpath selector, null is returned.
    * @param {WaitForSelectorOptions} waitOptions
    */
-  async waitForXPath(waitOptions: WaitForSelectorOptions = {visible: true}): Promise<this> {
+  async waitForXPath(waitOptions: WaitForSelectorOptions = {visible: true}): Promise<ElementHandle> {
+    if (this.element !== undefined) return this.element.asElement();
     try {
-      if (this.element === undefined) {
-        this.element = await this.page.waitForXPath(this.xpath, waitOptions);
-      }
-      return this;
+      return this.page.waitForXPath(this.xpath, waitOptions).then(elemt => this.element = elemt.asElement());
     } catch (err) {
-      console.error(`waitForXpath() encountered ${err}`);
+      console.error(`waitForXpath('${this.xpath}') encountered ${err}`);
       // Debugging pause
       // await jestPuppeteer.debug();
       throw err;
@@ -54,7 +52,10 @@ export default class BaseElement extends Container {
    * @param {string} descendantXpath Be sure to begin xpath with a dot. e.g. ".//div".
    */
   async findDescendant(descendantXpath: string): Promise<ElementHandle[]> {
-    return (await this.asElementHandle()).$x(descendantXpath);
+    return this.asElementHandle()
+      .then(elemt => {
+        return elemt.$x(descendantXpath);
+      });
   }
 
   /**
@@ -67,8 +68,13 @@ export default class BaseElement extends Container {
    *  return await handle.jsonValue();
    */
   async getProperty(propertyName: string): Promise<unknown> {
-    const p = await (await this.asElementHandle()).getProperty(propertyName);
-    return p.jsonValue();
+    return this.asElementHandle()
+      .then(elemt => {
+        return elemt.getProperty(propertyName);
+      })
+      .then(prop => {
+        return prop.jsonValue();
+      });
   }
 
   /**
@@ -76,10 +82,10 @@ export default class BaseElement extends Container {
    * @param attribute name
    */
   async getAttribute(attributeName: string): Promise<string | null> {
-    const elem = await this.asElementHandle();
-    const attributeValue = await this.page.evaluate(
-       (link, attr) => link.getAttribute(attr), elem, attributeName);
-    return attributeValue;
+    return this.asElementHandle()
+      .then(elemt => {
+        return this.page.evaluate((link, attr) => link.getAttribute(attr), elemt, attributeName);
+      });
   }
 
   /**
@@ -88,8 +94,10 @@ export default class BaseElement extends Container {
    * @param attribute name
    */
   async hasAttribute(attributeName: string): Promise<boolean> {
-    const value = await this.getAttribute(attributeName);
-    return value !== null;
+    return this.getAttribute(attributeName)
+      .then(value => {
+        return value !== null;
+      });
   }
 
   /**
@@ -97,8 +105,10 @@ export default class BaseElement extends Container {
    * Disabled means element has `disabled` attribute.
    */
   async isDisabled(): Promise<boolean> {
-    const disabled = await this.getProperty('disabled');
-    return !!disabled;
+    return this.getProperty('disabled')
+       .then(disabled => {
+         return !!disabled;
+       });
   }
 
   /**
@@ -109,8 +119,13 @@ export default class BaseElement extends Container {
    * @param {ElementHandle} element
    */
   async isVisible(): Promise<boolean> {
-    const boxModel = await (await this.asElementHandle()).boxModel();
-    return boxModel !== null;
+    return this.asElementHandle()
+      .then(elemt => {
+        return elemt.boxModel();
+      })
+      .then(box => {
+        return box !== null;
+      })
   }
 
   /**
@@ -126,14 +141,14 @@ export default class BaseElement extends Container {
     }, elemt);
     const jValue = await isVisibleHandle.jsonValue();
     const boxModelValue = await elemt.boxModel();
-    if (jValue && boxModelValue) {
-      return true;
-    }
-    return false;
+    return jValue && boxModelValue;
   }
 
   async click(options?: ClickOptions): Promise<void> {
-    return (await this.asElementHandle()).click(options);
+    return this.asElementHandle()
+      .then(elemt => {
+        return elemt.click(options);
+      });
   }
 
   async type(text: string, options?: { delay: number }): Promise<this> {
@@ -144,17 +159,20 @@ export default class BaseElement extends Container {
   }
 
   async pressKeyboard(key: string, options?: { text?: string, delay?: number }): Promise<void> {
-    return (await this.asElementHandle()).press(key, options);
+    return this.asElementHandle()
+      .then(elemt => {
+        return elemt.press(key, options);
+      });
   }
 
-  async pressReturnKey(): Promise<void> {
+  async pressReturn(): Promise<void> {
     return this.pressKeyboard(String.fromCharCode(13));
   }
 
   /**
    * Press keyboard "tab".
    */
-  async tabKey(): Promise<void> {
+  async pressTab(): Promise<void> {
     return this.pressKeyboard('Tab', { delay: 100 });
   }
 
@@ -162,19 +180,22 @@ export default class BaseElement extends Container {
    * Clear value in textbox or textarea.
    */
   async clear(): Promise<void> {
-    await (await this.asElementHandle()).click({clickCount: 3});
-    await (await this.asElementHandle()).press('Backspace');
+    const elemt = await this.asElementHandle();
+    await elemt.click({ clickCount: 3 });
+    await elemt.press('Backspace');
   }
 
   /**
    * Calling focus() and hover() together.
    */
   async focus(): Promise<void> {
-    const handle = await this.asElementHandle();
-    await Promise.all([
-      handle.focus(),
-      handle.hover()
-    ]);
+    return this.asElementHandle()
+      .then(elemt => {
+        Promise.all([
+          elemt.focus(),
+          elemt.hover(),
+        ]);
+      });
   }
 
   /**
@@ -183,10 +204,10 @@ export default class BaseElement extends Container {
    * </pre>
    */
   async getTextContent(): Promise<string> {
-    const handle = await this.asElementHandle();
-    return handle.evaluate(
-       (element: HTMLElement) => (element.textContent ? element.textContent.trim() : ''), this.element,
-    );
+    return this.asElementHandle()
+      .then(elemt => {
+        return this.page.evaluate((element: HTMLElement) => (element.textContent ? element.textContent.trim() : ''), elemt,);
+      });
   }
 
   /**
@@ -210,16 +231,21 @@ export default class BaseElement extends Container {
    * Determine if cursor is disabled (== " not-allowed ") by checking style 'cursor' value.
    */
   async isCursorNotAllowed(): Promise<boolean> {
-    const cursor = await this.getComputedStyle('cursor');
-    return cursor === 'not-allowed';
+    return this.getComputedStyle('cursor')
+      .then(cursor => {
+        return cursor === 'not-allowed';
+      });
   }
 
   /**
-   * Finds element's size.
+   * Finds visible element's bounding box size.
    */
   async getSize(): Promise<{ width: number; height: number }> {
-    const box = await (await this.asElementHandle()).boundingBox();
-    if (!box) {
+    const box = await this.asElementHandle()
+      .then(elemt => {
+        return elemt.boundingBox();
+      })
+    if (box === null) {
       // if element is not visible, returns size of (0, 0).
       return { width: 0, height: 0 };
     }
@@ -232,9 +258,11 @@ export default class BaseElement extends Container {
   }
 
   // try this method when click() is not working
-  async clickWithEval() {
-    await this.asElementHandle();
-    return this.page.evaluate( elem => elem.click(), this.element );
+  async clickWithEval(): Promise<void> {
+    return this.asElementHandle()
+      .then(elemt => {
+        return this.page.evaluate( elem => elem.click(), elemt );
+      });
   }
 
   /**
@@ -242,8 +270,8 @@ export default class BaseElement extends Container {
    */
   async clickAndWait(): Promise<void> {
     await Promise.all([
+      this.page.waitForNavigation({ waitUntil: ['load', 'domcontentloaded', 'networkidle0'] }),
       this.click(),
-      this.page.waitForNavigation({waitUntil: ['load', 'domcontentloaded', 'networkidle0']}),
     ]);
   }
 
@@ -252,22 +280,23 @@ export default class BaseElement extends Container {
    * @param text
    */
   async paste(text: string): Promise<void> {
-    const elemt = await this.asElementHandle();
-    return this.page.evaluate((elem, textValue) => {
-      // Refer to https://stackoverflow.com/a/46012210/440432
-      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value').set;
-      nativeInputValueSetter.call(elem, textValue);
-      const event = new Event('input', {bubbles: true});
-      elem.dispatchEvent(event);
-    }, elemt, text);
+    return this.asElementHandle()
+      .then(element => {
+        return this.page.evaluate((elemt, textValue) => {
+          // Refer to https://stackoverflow.com/a/46012210/440432
+          const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value').set;
+          nativeInputValueSetter.call(elemt, textValue);
+          const event = new Event('input', { bubbles: true });
+          elemt.dispatchEvent(event);
+        }, element, text);
+      });
   }
 
   /**
    * Returns ElementHandle.
    */
-  async asElementHandle(): Promise<ElementHandle | null> {
-    await this.waitForXPath();
-    return this.element.asElement();
+  async asElementHandle(): Promise<ElementHandle> {
+    return this.waitForXPath();
   }
 
 }
