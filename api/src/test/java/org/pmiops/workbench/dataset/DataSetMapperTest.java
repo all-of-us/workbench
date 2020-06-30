@@ -3,7 +3,7 @@ package org.pmiops.workbench.dataset;
 import static com.google.common.truth.Truth.assertThat;
 
 import java.sql.Timestamp;
-import java.util.Date;
+import java.time.Instant;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,8 +35,6 @@ public class DataSetMapperTest {
 
   @Before
   public void setUp() {
-    long time = new Date().getTime();
-
     dbDataset =
         DbDataset.builder()
             .addVersion(1)
@@ -44,7 +42,7 @@ public class DataSetMapperTest {
             .addName("All Blue-eyed Blondes")
             .addIncludesAllParticipants(false)
             .addDescription("All Blue-eyed Blondes")
-            .addLastModifiedTime(new Timestamp(time))
+            .addLastModifiedTime(Timestamp.from(Instant.now()))
             .addWorkspaceId(1L)
             .addPrePackagedConceptSets(
                 DbStorageEnums.prePackagedConceptSetsToStorage(PrePackagedConceptSetEnum.NONE))
@@ -54,7 +52,7 @@ public class DataSetMapperTest {
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(1L);
     dbDataDictionaryEntry.setCdrVersion(cdrVersion);
-    dbDataDictionaryEntry.setDefinedTime(new Timestamp(time));
+    dbDataDictionaryEntry.setDefinedTime(Timestamp.from(Instant.now()));
     dbDataDictionaryEntry.setDataProvenance("p");
     dbDataDictionaryEntry.setRelevantOmopTable("person");
     dbDataDictionaryEntry.setFieldName("field");
