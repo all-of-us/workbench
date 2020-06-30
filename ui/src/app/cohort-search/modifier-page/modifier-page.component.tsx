@@ -174,6 +174,7 @@ const validatorFuncs = {
     return null;
   }
 };
+const SURVEY_MODIFIERS = [ModifierType.AGEATEVENT];
 
 interface Selection extends Criteria {
   parameterId: string;
@@ -250,7 +251,7 @@ export const ModifierPage = withCurrentWorkspace()(
 
     async componentDidMount() {
       const {workspace: {cdrVersionId}} = this.props;
-      const {formState} = this.state;
+      const formState = this.formState;
       if (serverConfigStore.getValue().enableEventDateModifier) {
         formState.push({
           name: ModifierType.EVENTDATE,
@@ -310,9 +311,16 @@ export const ModifierPage = withCurrentWorkspace()(
       this.getExisting();
     }
 
+    get formState() {
+      const {searchContext: {domain}} = this.props;
+      const {formState} = this.state;
+      return domain === DomainType.SURVEY ?
+        formState.filter(form => SURVEY_MODIFIERS.indexOf(form.name) > -1) : formState;
+    }
+
     getExisting() {
       const {searchContext} = this.props;
-      const {formState} = this.state;
+      const formState = this.formState;
       // This reseeds the form state with existing data if we're editing an existing item
       searchContext.item.modifiers.forEach(existing => {
         const index = formState.findIndex(mod => existing.name === mod.name);
@@ -511,7 +519,7 @@ export const ModifierPage = withCurrentWorkspace()(
         </div>}
         {formState.map((mod, i) => {
           const {label, name, options, operator} = mod;
-          return <div key={i} style={{marginTop: '0.75rem'}}>
+          return <div data-test-id={name} key={i} style={{marginTop: '0.75rem'}}>
             <label style={styles.label}>{label}</label>
             {name === ModifierType.EVENTDATE &&
               <TooltipTrigger content={<div>{tooltip}</div>}>
