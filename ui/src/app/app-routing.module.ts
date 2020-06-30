@@ -71,229 +71,248 @@ const routes: Routes = [
     path: '',
     component: SignedInComponent,
     canActivate: [SignInGuard],
-    canActivateChild: [SignInGuard, DisabledGuard, RegistrationGuard],
+    canActivateChild: [SignInGuard, DisabledGuard],
     runGuardsAndResolvers: 'always',
     children: [
       {
         path: '',
         component: HomepageComponent,
-        data: {title: 'Homepage'},
-      }, {
-        path: 'nih-callback',
-        component: HomepageComponent,
-        data: {title: 'Homepage'},
-      }, {
-        path: 'data-code-of-conduct',
-        component: DataUserCodeOfConductComponent,
-        data: {title: 'Data User Code of Conduct'}
-      }, {
-        path: 'library',
-        component: WorkspaceLibraryComponent,
-        data: {title: 'Workspace Library'}
-      }, {
-        path: 'workspaces',
-        canActivateChild: [WorkspaceGuard],
+        data: {title: 'Homepage'}
+      },
+      {
+        path: '',
+        canActivateChild: [RegistrationGuard],
+        runGuardsAndResolvers: 'always',
         children: [
           {
-            path: '',
-            component: WorkspaceListComponent,
-            data: {
-              title: 'View Workspaces',
-              breadcrumb: BreadcrumbType.Workspaces
-            }
-          },
-          {
+            path: 'library',
+            component: WorkspaceLibraryComponent,
+            data: {title: 'Workspace Library'}
+          }, {
+            path: 'workspaces',
+            canActivateChild: [WorkspaceGuard],
+            children: [
+              {
+                path: '',
+                component: WorkspaceListComponent,
+                data: {
+                  title: 'View Workspaces',
+                  breadcrumb: BreadcrumbType.Workspaces
+                }
+              },
+              {
             /* TODO The children under ./views need refactoring to use the data
              * provided by the route rather than double-requesting it.
              */
-            path: ':ns/:wsid',
-            component: WorkspaceWrapperComponent,
-            runGuardsAndResolvers: 'always',
-            children: [
-              {
-                path: 'about',
-                component: WorkspaceAboutComponent,
-                data: {
-                  title: 'View Workspace Details',
-                  breadcrumb: BreadcrumbType.Workspace,
-                  helpContentKey: 'about'
-                }
-              }, {
-                path: 'edit',
-                component: WorkspaceEditComponent,
-                data: {
-                  title: 'Edit Workspace',
-                  mode: WorkspaceEditMode.Edit,
-                  breadcrumb: BreadcrumbType.WorkspaceEdit,
-                  helpContentKey: 'edit'
-                }
-              }, {
-                path: 'duplicate',
-                component: WorkspaceEditComponent,
-                data: {
-                  title: 'Duplicate Workspace',
-                  mode: WorkspaceEditMode.Duplicate,
-                  breadcrumb: BreadcrumbType.WorkspaceDuplicate,
-                  helpContentKey: 'duplicate'
-                }
-              },
-              {
-                path: 'notebooks',
+                path: ':ns/:wsid',
+                component: WorkspaceWrapperComponent,
+                runGuardsAndResolvers: 'always',
                 children: [
                   {
-                    path: '',
-                    component: NotebookListComponent,
+                    path: 'about',
+                    component: WorkspaceAboutComponent,
                     data: {
-                      title: 'View Notebooks',
+                      title: 'View Workspace Details',
                       breadcrumb: BreadcrumbType.Workspace,
-                      helpContentKey: 'notebooks'
+                      helpContentKey: 'about'
                     }
                   }, {
-                    path: ':nbName',
-                    component: NotebookRedirectComponent,
+                    path: 'edit',
+                    component: WorkspaceEditComponent,
                     data: {
+                      title: 'Edit Workspace',
+                      mode: WorkspaceEditMode.Edit,
+                      breadcrumb: BreadcrumbType.WorkspaceEdit,
+                      helpContentKey: 'edit'
+                    }
+                  }, {
+                    path: 'duplicate',
+                    component: WorkspaceEditComponent,
+                    data: {
+                      title: 'Duplicate Workspace',
+                      mode: WorkspaceEditMode.Duplicate,
+                      breadcrumb: BreadcrumbType.WorkspaceDuplicate,
+                      helpContentKey: 'duplicate'
+                    }
+                  },
+                  {
+                    path: 'notebooks',
+                    children: [
+                      {
+                        path: '',
+                        component: NotebookListComponent,
+                        data: {
+                          title: 'View Notebooks',
+                          breadcrumb: BreadcrumbType.Workspace,
+                          helpContentKey: 'notebooks'
+                        }
+                      }, {
+                        path: ':nbName',
+                        component: NotebookRedirectComponent,
+                        data: {
                       // use the (urldecoded) captured value nbName
-                      pathElementForTitle: 'nbName',
-                      breadcrumb: BreadcrumbType.Notebook,
+                          pathElementForTitle: 'nbName',
+                          breadcrumb: BreadcrumbType.Notebook,
                       // The iframe we use to display the Jupyter notebook does something strange
                       // to the height calculation of the container, which is normally set to auto.
                       // Setting this flag sets the container to 100% so that no content is clipped.
-                      contentFullHeightOverride: true,
-                      helpContentKey: NOTEBOOK_HELP_CONTENT,
-                      notebookHelpSidebarStyles: true,
-                      minimizeChrome: true
-                    }
-                  }, {
-                    path: 'preview/:nbName',
-                    component: InteractiveNotebookComponent,
-                    data: {
-                      pathElementForTitle: 'nbName',
-                      breadcrumb: BreadcrumbType.Notebook,
-                      helpContentKey: NOTEBOOK_HELP_CONTENT,
-                      notebookHelpSidebarStyles: true,
-                      minimizeChrome: true
-                    }
-                  }
-                ]
-              },
-              {
-                path: 'data',
-                children: [
-                  {
-                    path: '',
-                    component: DataPageComponent,
-                    data: {
-                      title: 'Data Page',
-                      breadcrumb: BreadcrumbType.Workspace,
-                      helpContentKey: 'data'
-                    }
-                  },
-                  {
-                    path: 'data-sets',
-                    component: DataSetPageComponent,
-                    data: {
-                      title: 'Dataset Page',
-                      breadcrumb: BreadcrumbType.Dataset,
-                      helpContentKey: 'datasetBuilder'
-                    }
-                  },
-                  {
-                    path: 'data-sets/:dataSetId',
-                    component: DataSetPageComponent,
-                    data: {
-                      title: 'Edit Dataset',
-                      breadcrumb: BreadcrumbType.Dataset,
-                      helpContentKey: 'datasetBuilder'
-                    }
-                  }, {
-                    path: 'cohorts',
-                    children: [
-                      {
-                        path: ':cid/actions',
-                        component: CohortActionsComponent,
+                          contentFullHeightOverride: true,
+                          helpContentKey: NOTEBOOK_HELP_CONTENT,
+                          notebookHelpSidebarStyles: true,
+                          minimizeChrome: true
+                        }
+                      }, {
+                        path: 'preview/:nbName',
+                        component: InteractiveNotebookComponent,
                         data: {
-                          title: 'Cohort Actions',
-                          breadcrumb: BreadcrumbType.Cohort,
-                          helpContentKey: 'cohortBuilder'
-                        },
-                      },
-                      {
-                        path: 'build',
-                        loadChildren: './cohort-search/cohort-search.module#CohortSearchModule',
-                      },
-                      {
-                        path: ':cid/review',
-                        children: [
-                          {
-                            path: '',
-                            component: CohortReviewComponent,
-                            data: {
-                              title: 'Review Cohort Participants',
-                              breadcrumb: BreadcrumbType.Cohort,
-                              helpContentKey: 'reviewParticipants'
-                            }
-                          }, {
-                            path: 'participants',
-                            component: TablePage,
-                            data: {
-                              title: 'Review Cohort Participants',
-                              breadcrumb: BreadcrumbType.Cohort,
-                              helpContentKey: 'reviewParticipants'
-                            }
-                          }, {
-                            path: 'cohort-description',
-                            component: QueryReportComponent,
-                            data: {
-                              title: 'Review Cohort Description',
-                              breadcrumb: BreadcrumbType.Cohort,
-                              helpContentKey: 'cohortDescription'
-                            }
-                          }, {
-                            path: 'participants/:pid',
-                            component: DetailPageComponent,
-                            data: {
-                              title: 'Participant Detail',
-                              breadcrumb: BreadcrumbType.Participant,
-                              shouldReuse: true,
-                              helpContentKey: 'reviewParticipantDetail'
-                            }
-                          }
-                        ],
+                          pathElementForTitle: 'nbName',
+                          breadcrumb: BreadcrumbType.Notebook,
+                          helpContentKey: NOTEBOOK_HELP_CONTENT,
+                          notebookHelpSidebarStyles: true,
+                          minimizeChrome: true
+                        }
                       }
                     ]
                   },
                   {
-                    path: 'concepts',
-                    component: ConceptHomepageComponent,
-                    data: {
-                      title: 'Search Concepts',
-                      breadcrumb: BreadcrumbType.SearchConcepts,
-                      helpContentKey: 'conceptSets'
-                    }
-                  },
-                  {
-                    path: 'concepts/sets',
-                    children: [{
-                      path: ':csid',
-                      component: ConceptSetDetailsComponent,
-                      data: {
-                        title: 'Concept Set',
-                        breadcrumb: BreadcrumbType.ConceptSet,
-                        helpContentKey: 'conceptSets'
+                    path: 'data',
+                    children: [
+                      {
+                        path: '',
+                        component: DataPageComponent,
+                        data: {
+                          title: 'Data Page',
+                          breadcrumb: BreadcrumbType.Workspace,
+                          helpContentKey: 'data'
+                        }
                       },
-                    }, {
-                      path: ':csid/actions',
-                      component: ConceptSetActionsComponent,
-                      data: {
-                        title: 'Concept Set Actions',
-                        breadcrumb: BreadcrumbType.ConceptSet,
-                        helpContentKey: 'conceptSets'
+                      {
+                        path: 'data-sets',
+                        component: DataSetPageComponent,
+                        data: {
+                          title: 'Dataset Page',
+                          breadcrumb: BreadcrumbType.Dataset,
+                          helpContentKey: 'datasetBuilder'
+                        }
                       },
-                    }, ]
-                  }
-                ]
+                      {
+                        path: 'data-sets/:dataSetId',
+                        component: DataSetPageComponent,
+                        data: {
+                          title: 'Edit Dataset',
+                          breadcrumb: BreadcrumbType.Dataset,
+                          helpContentKey: 'datasetBuilder'
+                        }
+                      }, {
+                        path: 'cohorts',
+                        children: [
+                          {
+                            path: ':cid/actions',
+                            component: CohortActionsComponent,
+                            data: {
+                              title: 'Cohort Actions',
+                              breadcrumb: BreadcrumbType.Cohort,
+                              helpContentKey: 'cohortBuilder'
+                            },
+                          },
+                          {
+                            path: 'build',
+                            loadChildren: './cohort-search/cohort-search.module#CohortSearchModule',
+                          },
+                          {
+                            path: ':cid/review',
+                            children: [
+                              {
+                                path: '',
+                                component: CohortReviewComponent,
+                                data: {
+                                  title: 'Review Cohort Participants',
+                                  breadcrumb: BreadcrumbType.Cohort,
+                                  helpContentKey: 'reviewParticipants'
+                                }
+                              }, {
+                                path: 'participants',
+                                component: TablePage,
+                                data: {
+                                  title: 'Review Cohort Participants',
+                                  breadcrumb: BreadcrumbType.Cohort,
+                                  helpContentKey: 'reviewParticipants'
+                                }
+                              }, {
+                                path: 'cohort-description',
+                                component: QueryReportComponent,
+                                data: {
+                                  title: 'Review Cohort Description',
+                                  breadcrumb: BreadcrumbType.Cohort,
+                                  helpContentKey: 'cohortDescription'
+                                }
+                              }, {
+                                path: 'participants/:pid',
+                                component: DetailPageComponent,
+                                data: {
+                                  title: 'Participant Detail',
+                                  breadcrumb: BreadcrumbType.Participant,
+                                  shouldReuse: true,
+                                  helpContentKey: 'reviewParticipantDetail'
+                                }
+                              }
+                            ],
+                          }
+                        ]
+                      },
+                      {
+                        path: 'concepts',
+                        component: ConceptHomepageComponent,
+                        data: {
+                          title: 'Search Concepts',
+                          breadcrumb: BreadcrumbType.SearchConcepts,
+                          helpContentKey: 'conceptSets'
+                        }
+                      },
+                      {
+                        path: 'concepts/sets',
+                        children: [{
+                          path: ':csid',
+                          component: ConceptSetDetailsComponent,
+                          data: {
+                            title: 'Concept Set',
+                            breadcrumb: BreadcrumbType.ConceptSet,
+                            helpContentKey: 'conceptSets'
+                          },
+                        }, {
+                          path: ':csid/actions',
+                          component: ConceptSetActionsComponent,
+                          data: {
+                            title: 'Concept Set Actions',
+                            breadcrumb: BreadcrumbType.ConceptSet,
+                            helpContentKey: 'conceptSets'
+                          },
+                        }, ]
+                      }
+                    ]
+                  }]
               }]
-          }]
+          },
+          {
+            path: 'profile',
+            component: ProfilePageComponent,
+            data: {title: 'Profile'}
+          },
+          {
+            path: 'workspaces/build',
+            component: WorkspaceEditComponent,
+            data: {title: 'Create Workspace', mode: WorkspaceEditMode.Create}
+          }
+        ]},
+      {
+        path: 'nih-callback',
+        component: HomepageComponent,
+        data: {title: 'Homepage'},
+      },
+      {
+        path: 'data-code-of-conduct',
+        component: DataUserCodeOfConductComponent,
+        data: {title: 'Data User Code of Conduct'}
       },
       {
         path: 'admin',
@@ -345,16 +364,6 @@ const routes: Routes = [
             component: AdminInstitutionEditComponent,
             data: { title: 'Institution Admin'},
           }]
-      },
-      {
-        path: 'profile',
-        component: ProfilePageComponent,
-        data: {title: 'Profile'}
-      },
-      {
-        path: 'workspaces/build',
-        component: WorkspaceEditComponent,
-        data: {title: 'Create Workspace', mode: WorkspaceEditMode.Create}
       }
     ]
   }, {
