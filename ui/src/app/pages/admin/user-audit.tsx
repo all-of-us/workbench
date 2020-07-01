@@ -64,15 +64,25 @@ const AuditActionCard = (props: {action: AuditAction}) => {
 };
 
 const AuditActionCardListView = (props: {actions: AuditAction[]}) => {
+  const {actions} = props;
+  const timesMillis = actions.map(action => new Date(action.actionTime).getTime());
+  console.log("times:" + timesMillis);
+  const minTime = new Date(Math.min(...timesMillis)).toDateString();
+  const maxTime = new Date(Math.max(...timesMillis)).toDateString();
   return (
-      <dl>
-        {props.actions.map(action => (
-            <React.Fragment key={action.actionId}>
-              <dt>Action ID: {action.actionId}</dt>
-              <dd><AuditActionCard action={action}/></dd>
-            </React.Fragment>
-        ))}
-      </dl>
+      <table>
+        <thead>
+          <tr><th>{actions.length} Audit Actions from {minTime} to {maxTime}</th></tr>
+        </thead>
+        <tbody>
+          {actions.map(action => (
+              <tr key={action.actionId}>
+                <td><AuditActionCard action={action}/></td>
+              </tr>
+          ))}
+        </tbody>
+      </table>
+
   );
 
 };
