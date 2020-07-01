@@ -1,4 +1,4 @@
-import {Component, HostListener, ViewChild} from '@angular/core';
+import {Component} from '@angular/core';
 import * as React from 'react';
 import {Observable} from 'rxjs/Observable';
 
@@ -9,13 +9,22 @@ import {idsInUse, searchRequestStore} from 'app/cohort-search/search-state.servi
 import {mapRequest, parseCohortDefinition} from 'app/cohort-search/utils';
 import {Button} from 'app/components/buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
+import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import {ReactWrapperBase} from 'app/utils';
 import {currentCohortStore, currentWorkspaceStore, queryParamsStore} from 'app/utils/navigation';
 import {Cohort, SearchRequest} from 'generated/fetch';
 
-const pixel = (n: number) => `${n}px`;
-const ONE_REM = 24;  // value in pixels
+function colStyle(percentage: string) {
+  return {
+    flex: `0 0 ${percentage}%`,
+    maxWidth: `${percentage}%`,
+    minHeight: '1px',
+    padding: '0 0.5rem',
+    position: 'relative',
+    width: '100%'
+  } as React.CSSProperties;
+}
 
 interface State {
   loading: boolean;
@@ -33,9 +42,6 @@ interface State {
 }
 
 export class CohortSearch extends React.Component<{}, State> {
-
-  @ViewChild('wrapper') wrapper;
-
   private subscription;
   resolve: Function;
   searchWrapper: HTMLDivElement;
@@ -112,17 +118,11 @@ export class CohortSearch extends React.Component<{}, State> {
     this.resolve(res);
   }
 
-  // @HostListener('window:resize')
-  // onResize() {
-  //   this.updateWrapperDimensions();
-  // }
-
   updateWrapperDimensions() {
+    console.dir(this.searchWrapper);
     console.dir(this.searchWrapper.getBoundingClientRect());
-    // const wrapper = this.wrapper.nativeElement;
-    //
-    // const {top} = wrapper.getBoundingClientRect();
-    // wrapper.style.minHeight = pixel(window.innerHeight - top - ONE_REM);
+    const {top} = this.searchWrapper.getBoundingClientRect();
+    this.searchWrapper.style.minHeight = `${window.innerHeight - top - 24}px`;
   }
 
   updateRequest = () => {
@@ -133,21 +133,21 @@ export class CohortSearch extends React.Component<{}, State> {
   render() {
     const {cohort, cohortChanged, criteria, loading, modalOpen, overview, searchContext, updateCount, updateGroupListsCount} = this.state;
     return <React.Fragment>
-      <div ref={el => this.searchWrapper = el} className='cohort-search-wrapper'>
-      <div className='row'>
-        <div className='col-xl-8 col-lg-12'>
-          <div className='row'>
-            <div className='col-xs-12' style={{height: '1.5rem'}}>
-              {!!cohort && <span className='cohort-name'>{cohort.name}</span>}
+      <div ref={el => this.searchWrapper = el} style={{padding: '1rem 1rem 2rem'}}>
+      <div style={{display: 'flex', flexWrap: 'wrap', margin: '0 -0.5rem'}}>
+        <div style={colStyle('66.66667')}>
+          <div style={{display: 'flex', flexWrap: 'wrap', margin: '0 -0.5rem'}}>
+            <div style={{height: '1.5rem', padding: '0 0.5rem', width: '100%'}}>
+              {!!cohort && <h3 style={{marginTop: 0}}>{cohort.name}</h3>}
             </div>
-            <div className='col-xl-6 col-lg-12' id='list-include-groups'>
+            <div style={colStyle('50')}>
               <SearchGroupList groups={criteria.includes}
                                setSearchContext={(c) => this.setState({searchContext: c})}
                                role='includes'
                                updated={updateGroupListsCount}
                                updateRequest={() => this.updateRequest()}/>
               </div>
-              <div className='col-xl-6 col-lg-12' id='list-exclude-groups'>
+              <div style={colStyle('50')}>
                 {overview && <SearchGroupList groups={criteria.excludes}
                                  setSearchContext={(c) => this.setState({searchContext: c})}
                                  role='excludes'
@@ -156,7 +156,7 @@ export class CohortSearch extends React.Component<{}, State> {
               </div>
             </div>
           </div>
-          <div className='col-xl-4 col-lg-12' id='list-charts'>
+          <div style={colStyle('33.33333')}>
             {overview && <ListOverview
               cohort={cohort}
               cohortChanged={cohortChanged}
@@ -164,9 +164,7 @@ export class CohortSearch extends React.Component<{}, State> {
               updateCount={updateCount}
               updating={() => this.setState({updatingCohort: true})}/>}
           </div>
-              {loading && <div className='spinner root-spinner'>
-            Loading...
-          </div>}
+          {loading && <SpinnerOverlay/>}
         </div>
       </div>
       {searchContext && <CBModal
@@ -179,10 +177,10 @@ export class CohortSearch extends React.Component<{}, State> {
           Your cohort has not been saved. If you’d like to save your cohort criteria, please click CANCEL
           and {cohort && cohort.id ? 'use Save or Save As' : 'click CREATE COHORT'} to save your criteria.
         </ModalBody>
-        <div className='modal-footer'>
+        <ModalFooter>
           <Button type='link' onClick={() => this.getModalResponse(false)}>Cancel</Button>
           <Button type='primary' onClick={() => this.getModalResponse(true)}>Discard Changes</Button>
-        </div>
+        </ModalFooter>
       </Modal>}
     </React.Fragment>;
   }
@@ -190,7 +188,7 @@ export class CohortSearch extends React.Component<{}, State> {
 
 @Component({
   selector: 'app-cohort-search',
-  template: '<div #root></div>'
+  template: '<div #root style="margin-right: 45px; height: auto;"></div>'
 })
 export class CohortSearchComponent extends ReactWrapperBase {
   constructor() {
