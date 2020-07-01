@@ -164,7 +164,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
       showInstitution: true,
       showNonAcademicAffiliationRole: false,
       showNonAcademicAffiliationOther: false,
-      showMostInterestedInKnowingBlurb: false,
+      showMostInterestedInKnowingBlurb: false
     };
 
     // TODO(RW-4361): remove after we switch to verified institutional affiliation
@@ -351,7 +351,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           allowEmpty: false,
           message: '^Country cannot be blank'
         }
-      },
+      }
     };
 
     // The validation data for this form is *almost* the raw Profile, except for the additional
@@ -409,14 +409,22 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         };
       }
     }
-    return validate(validationData, validationCheck);
+
+    const urlResult = validationData.professionalUrl ? validate({website: validationData.professionalUrl}, {
+      website: {
+        url: {
+          message: '^Proffesional URL %{value} is not a valid URL'}
+      }
+    }) : {};
+
+    return {...validate(validationData, validationCheck), ...urlResult};
   }
 
   render() {
     const {
       profile: {
         givenName, familyName,
-        contactEmail, username, areaOfResearch, professionalUrl,
+        contactEmail, username, areaOfResearch, professionalUrl = '',
         address: {
           streetAddress1, streetAddress2, city, state, zipCode, country
         },
