@@ -1,23 +1,36 @@
 package org.pmiops.workbench.dataset;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.doReturn;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.Etags;
+import org.pmiops.workbench.cdr.ConceptBigQueryService;
+import org.pmiops.workbench.cohorts.CohortMapperImpl;
+import org.pmiops.workbench.cohorts.CohortService;
+import org.pmiops.workbench.concept.ConceptService;
+import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
+import org.pmiops.workbench.conceptset.ConceptSetService;
+import org.pmiops.workbench.db.dao.CohortDao;
+import org.pmiops.workbench.db.dao.ConceptSetDao;
+import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbStorageEnums;
+import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -28,9 +41,24 @@ public class DataSetMapperTest {
   private DbDataDictionaryEntry dbDataDictionaryEntry;
 
   @Autowired private DataSetMapper dataSetMapper;
+  @Autowired private ConceptSetDao mockConceptSetDao;
 
   @TestConfiguration
-  @Import({DataSetMapperImpl.class, CommonMappers.class})
+  @Import({
+    DataSetMapperImpl.class,
+    CommonMappers.class,
+    ConceptSetService.class,
+    ConceptSetMapperImpl.class,
+    CohortService.class,
+    CohortMapperImpl.class
+  })
+  @MockBean({
+    ConceptSetDao.class,
+    ConceptBigQueryService.class,
+    ConceptService.class,
+    CohortDao.class,
+    UserDao.class
+  })
   static class Configuration {}
 
   @Before
@@ -47,6 +75,9 @@ public class DataSetMapperTest {
             .addPrePackagedConceptSets(
                 DbStorageEnums.prePackagedConceptSetsToStorage(PrePackagedConceptSetEnum.NONE))
             .build();
+    doReturn(Arrays.asList(new ConceptSet()))
+        .when(mockConceptSetDao)
+        .findAll(dbDataset.getConceptSetIds());
 
     dbDataDictionaryEntry = new DbDataDictionaryEntry();
     DbCdrVersion cdrVersion = new DbCdrVersion();

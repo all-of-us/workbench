@@ -14,7 +14,9 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.cohortreview.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
+import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
+import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetMapperImpl;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -102,11 +104,13 @@ public class WorkspaceAdminControllerTest {
     DataSetMapperImpl.class,
     FirecloudMapperImpl.class,
     WorkspaceAdminController.class,
-    WorkspaceMapperImpl.class,
+    WorkspaceMapperImpl.class
   })
   @MockBean({
     CloudStorageService.class,
     NotebooksService.class,
+    ConceptSetService.class,
+    CohortService.class
   })
   static class Configuration {
     @Bean

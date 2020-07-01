@@ -2,15 +2,16 @@ package org.pmiops.workbench.conceptset;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.pmiops.workbench.api.ConceptSetsController;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.concept.ConceptService;
+import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.ConceptSet;
-import org.pmiops.workbench.model.Domain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,8 +56,11 @@ public class ConceptSetService {
             dbConceptSet.getConceptIds(), ConceptSetsController.CONCEPT_NAME_ORDERING));
   }
 
-  public List<DbConceptSet> findAll(List<Long> conceptSetIds) {
-    return (List<DbConceptSet>) conceptSetDao.findAll(conceptSetIds);
+  public List<ConceptSet> findAll(List<Long> conceptSetIds) {
+    return ((List<DbConceptSet>) conceptSetDao.findAll(conceptSetIds))
+        .stream()
+            .map(conceptSet -> conceptSetMapper.dbModelToClient(conceptSet))
+            .collect(Collectors.toList());
   }
 
   public DbConceptSet findOne(Long conceptSetId, DbWorkspace workspace) {
@@ -83,7 +87,7 @@ public class ConceptSetService {
       DbConceptSet conceptSet, DbWorkspace targetWorkspace, boolean cdrVersionChanged) {
     DbConceptSet dbConceptSet = new DbConceptSet(conceptSet);
     if (cdrVersionChanged) {
-      String omopTable = ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(conceptSet.getDomainEnum());
+      String omopTable = BigQueryTableInfo.getTableName(conceptSet.getDomainEnum());
       dbConceptSet.setParticipantCount(
           conceptBigQueryService.getParticipantCountForConcepts(
               conceptSet.getDomainEnum(), omopTable, conceptSet.getConceptIds()));
@@ -100,9 +104,5 @@ public class ConceptSetService {
     // Allows for fetching concept sets for a workspace once its collection is no longer
     // bound to a session.
     return conceptSetDao.findByWorkspaceId(workspace.getWorkspaceId());
-  }
-
-  public String getOmpTable(String domain) {
-    return conceptSetDao.DOMAIN_TO_TABLE_NAME.get(Domain.fromValue(domain));
   }
 }

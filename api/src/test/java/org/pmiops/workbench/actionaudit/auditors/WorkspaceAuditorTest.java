@@ -27,7 +27,9 @@ import org.pmiops.workbench.actionaudit.TargetType;
 import org.pmiops.workbench.actionaudit.targetproperties.AclTargetProperty;
 import org.pmiops.workbench.cohortreview.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
+import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
+import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -82,8 +84,9 @@ public class WorkspaceAuditorTest {
     FirecloudMapperImpl.class,
     WorkspaceAuditorImpl.class,
     WorkspaceMapperImpl.class,
+    ConceptSetService.class
   })
-  @MockBean({UserDao.class})
+  @MockBean({UserDao.class, ConceptSetService.class, CohortService.class})
   static class Config {
     @Bean
     WorkbenchConfig workbenchConfig() {

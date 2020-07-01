@@ -20,7 +20,7 @@ import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetMapper;
 import org.pmiops.workbench.conceptset.ConceptSetService;
-import org.pmiops.workbench.db.dao.ConceptSetDao;
+import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbStorageEnums;
@@ -269,7 +269,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     if (dbConceptSet.getConceptIds().isEmpty()) {
       dbConceptSet.setParticipantCount(0);
     } else {
-      String omopTable = ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(dbConceptSet.getDomainEnum());
+      String omopTable = BigQueryTableInfo.getTableName(dbConceptSet.getDomainEnum());
       dbConceptSet.setParticipantCount(
           conceptBigQueryService.getParticipantCountForConcepts(
               dbConceptSet.getDomainEnum(), omopTable, dbConceptSet.getConceptIds()));
@@ -394,7 +394,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     if (dbConceptSet.getConceptIds().size() > maxConceptsPerSet) {
       throw new BadRequestException("Exceeded " + maxConceptsPerSet + " in concept set");
     }
-    String omopTable = ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(request.getConceptSet().getDomain());
+    String omopTable = BigQueryTableInfo.getTableName(request.getConceptSet().getDomain());
     dbConceptSet.setParticipantCount(
         conceptBigQueryService.getParticipantCountForConcepts(
             dbConceptSet.getDomainEnum(), omopTable, dbConceptSet.getConceptIds()));
