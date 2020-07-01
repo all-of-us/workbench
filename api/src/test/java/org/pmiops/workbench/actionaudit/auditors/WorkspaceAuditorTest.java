@@ -83,8 +83,7 @@ public class WorkspaceAuditorTest {
     DataSetMapperImpl.class,
     FirecloudMapperImpl.class,
     WorkspaceAuditorImpl.class,
-    WorkspaceMapperImpl.class,
-    ConceptSetService.class
+    WorkspaceMapperImpl.class
   })
   @MockBean({UserDao.class, ConceptSetService.class, CohortService.class})
   static class Config {

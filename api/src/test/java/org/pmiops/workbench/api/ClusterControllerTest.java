@@ -127,7 +127,7 @@ public class ClusterControllerTest {
     WorkspaceMapperImpl.class,
     CommonMappers.class,
     PublicInstitutionDetailsMapperImpl.class,
-    UserServiceTestConfiguration.class
+    UserServiceTestConfiguration.class,
   })
   @MockBean({ConceptSetService.class, CohortService.class})
   static class Configuration {

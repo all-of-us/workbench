@@ -104,7 +104,7 @@ public class WorkspaceAdminControllerTest {
     DataSetMapperImpl.class,
     FirecloudMapperImpl.class,
     WorkspaceAdminController.class,
-    WorkspaceMapperImpl.class
+    WorkspaceMapperImpl.class,
   })
   @MockBean({
     CloudStorageService.class,
