@@ -31,8 +31,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.cdr.CdrVersionService;
-import org.pmiops.workbench.cohorts.CohortService;
-import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.dataset.DataSetMapper;
 import org.pmiops.workbench.dataset.DataSetService;
@@ -96,20 +94,16 @@ public class DataSetController implements DataSetApiDelegate {
   private static final Logger log = Logger.getLogger(DataSetController.class.getName());
 
   private final CdrVersionService cdrVersionService;
-  private final ConceptSetService conceptSetService;
   private final DataDictionaryEntryDao dataDictionaryEntryDao;
   private final DataSetMapper dataSetMapper;
   private final FireCloudService fireCloudService;
   private final NotebooksService notebooksService;
-  private final CohortService cohortService;
 
   @Autowired
   DataSetController(
       BigQueryService bigQueryService,
       Clock clock,
-      CohortService cohortService,
       CdrVersionService cdrVersionService,
-      ConceptSetService conceptSetService,
       DataDictionaryEntryDao dataDictionaryEntryDao,
       DataSetMapper dataSetMapper,
       DataSetService dataSetService,
@@ -120,9 +114,7 @@ public class DataSetController implements DataSetApiDelegate {
       WorkspaceService workspaceService) {
     this.bigQueryService = bigQueryService;
     this.clock = clock;
-    this.cohortService = cohortService;
     this.cdrVersionService = cdrVersionService;
-    this.conceptSetService = conceptSetService;
     this.dataDictionaryEntryDao = dataDictionaryEntryDao;
     this.dataSetMapper = dataSetMapper;
     this.dataSetService = dataSetService;
@@ -413,7 +405,7 @@ public class DataSetController implements DataSetApiDelegate {
 
     response.setItems(
         dataSets.stream()
-            .map(dbDataSet -> dataSetMapper.dbModelToClient(dbDataSet))
+            .map(dataSetMapper::dbModelToClient)
             .sorted(Comparator.comparing(DataSet::getName))
             .collect(Collectors.toList()));
     return ResponseEntity.ok(response);
@@ -495,7 +487,7 @@ public class DataSetController implements DataSetApiDelegate {
         new DataSetListResponse()
             .items(
                 dbDataSets.stream()
-                    .map(dbDataSet -> dataSetMapper.dbModelToClient(dbDataSet))
+                    .map(dataSetMapper::dbModelToClient)
                     .collect(Collectors.toList()));
     return ResponseEntity.ok(dataSetResponse);
   }

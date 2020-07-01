@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
@@ -33,6 +34,7 @@ public interface DataSetMapper {
   @Mapping(target = "domainValuePairs", ignore = true)
   @Mapping(target = "etag", source = "version", qualifiedByName = "cdrVersionToEtag")
   // TODO (RW-4756): Define a DatasetLight type.
+  @Named("dbModelToClientLight")
   DataSet dbModelToClientLight(DbDataset dbDataset);
 
   @Mapping(target = "id", source = "dataSetId")
