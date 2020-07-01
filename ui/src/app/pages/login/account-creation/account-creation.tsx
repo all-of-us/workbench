@@ -410,14 +410,18 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
       }
     }
 
-    const urlResult = validationData.professionalUrl ? validate({website: validationData.professionalUrl}, {
-      website: {
-        url: {
-          message: '^Proffesional URL %{value} is not a valid URL'}
-      }
-    }) : {};
+    const urlError = validationData.professionalUrl
+      ? validate({website: validationData.professionalUrl}, {
+        website: { url: { message: '^Professional URL %{value} is not a valid URL' } }
+      })
+      : undefined;
 
-    return {...validate(validationData, validationCheck), ...urlResult};
+    const errors = {
+      ...validate(validationData, validationCheck),
+      ...urlError
+    };
+
+    return fp.isEmpty(errors) ? undefined : errors;
   }
 
   render() {
