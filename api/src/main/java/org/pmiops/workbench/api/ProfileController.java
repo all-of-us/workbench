@@ -244,12 +244,8 @@ public class ProfileController implements ProfileApiDelegate {
 
     final Profile profile = request.getProfile();
 
-    // We don't include this check in validateAndCleanProfile since some existing user profiles
-    // may have empty addresses. So we only check this on user creation, not update.
-    Optional.ofNullable(profile.getAddress())
-        .orElseThrow(() -> new BadRequestException("Address must not be empty"));
-
-    profileService.validateAndCleanProfile(profile);
+    profileService.cleanProfile(profile);
+    profileService.validateNewProfile(profile);
 
     com.google.api.services.directory.model.User googleUser =
         directoryService.createUser(
