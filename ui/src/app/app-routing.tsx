@@ -1,7 +1,7 @@
 import {Component as AComponent} from '@angular/core';
 import {AppRoute, AppRouter, Guard, ProtectedRoutes, withFullHeight, withRouteData} from 'app/components/app-router';
-import {DataUserCodeOfConduct} from 'app/pages/profile/data-user-code-of-conduct';
 import {CookiePolicy} from 'app/pages/cookie-policy';
+import {DataUserCodeOfConduct} from 'app/pages/profile/data-user-code-of-conduct';
 import {SessionExpired} from 'app/pages/session-expired';
 import {SignInAgain} from 'app/pages/sign-in-again';
 import {UserDisabled} from 'app/pages/user-disabled';
