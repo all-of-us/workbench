@@ -314,7 +314,7 @@ public class ProfileServiceTest {
   public void validateProfile_emptyNewObject() {
     // The 'prevProfile' argument is null, so this is considered a new object and all validation
     // is executed. The empty Profile object is obviously rejected.
-    profileService.validateProfile(new Profile(), null);
+    profileService.validateNewProfile(new Profile());
   }
 
   @Test
@@ -324,7 +324,7 @@ public class ProfileServiceTest {
     when(mockInstitutionDao.findOneByShortName("Broad")).thenReturn(Optional.of(BROAD_INSTITUTION));
     when(mockInstitutionService.validateAffiliation(any(), eq(VALID_PROFILE.getContactEmail())))
         .thenReturn(true);
-    profileService.validateProfile(VALID_PROFILE, null);
+    profileService.validateNewProfile(VALID_PROFILE);
   }
 
   @Test(expected = BadRequestException.class)

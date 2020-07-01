@@ -1,5 +1,6 @@
 package org.pmiops.workbench.profile;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -383,7 +384,8 @@ public class ProfileService {
    * @param prevProfile
    * @throws BadRequestException
    */
-  private void validateProfile(@Nonnull Profile updatedProfile, @Nullable Profile prevProfile)
+  @VisibleForTesting
+  public void validateProfile(@Nonnull Profile updatedProfile, @Nullable Profile prevProfile)
       throws BadRequestException {
     boolean isNewObject = prevProfile == null;
     Diff diff = javers.compare(prevProfile, updatedProfile);
