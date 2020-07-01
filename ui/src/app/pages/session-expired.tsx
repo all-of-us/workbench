@@ -1,12 +1,10 @@
-import {Component} from '@angular/core';
 import {GoogleSignInButton} from 'app/components/google-sign-in';
 import {BoldHeader} from 'app/components/headers';
 import {PublicLayout} from 'app/components/public-layout';
-import {SignInService} from 'app/services/sign-in.service';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase} from 'app/utils';
+import {reactStyles} from 'app/utils';
+import {buildPageTitleForEnvironment} from 'app/utils/title';
 import * as React from 'react';
-import {buildPageTitleForEnvironment} from "../utils/title";
 
 const styles = reactStyles({
   button: {

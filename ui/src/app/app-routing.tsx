@@ -1,15 +1,15 @@
 import {Component as AComponent} from '@angular/core';
 import {AppRoute, AppRouter, Guard, ProtectedRoutes, withFullHeight, withRouteData} from 'app/components/app-router';
 import {DataUserCodeOfConduct} from 'app/pages/profile/data-user-code-of-conduct';
+import {CookiePolicy} from 'app/pages/cookie-policy';
+import {SessionExpired} from 'app/pages/session-expired';
+import {SignInAgain} from 'app/pages/sign-in-again';
+import {UserDisabled} from 'app/pages/user-disabled';
+import {SignInService} from 'app/services/sign-in.service';
 import { ReactWrapperBase } from 'app/utils';
 import {authStore, useStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {CookiePolicy} from 'app/pages/cookie-policy';
-import {UserDisabled} from "app/pages/user-disabled";
-import {SessionExpired} from "app/pages/session-expired";
-import {SignInAgain} from "app/pages/sign-in-again";
-import {SignInService} from "app/services/sign-in.service";
 
 const signInGuard: Guard = {
   allowed: (): boolean => authStore.get().isSignedIn,
