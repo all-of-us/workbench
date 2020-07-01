@@ -12,14 +12,6 @@ export default class ShareModal extends Dialog {
   }
 
   async shareWithUser(username: string, level: WorkspaceAccessLevel): Promise<void> {
-    /*
-    if (!this.page.viewport()) {
-      throw Error(
-        'testing of the share modal requires a viewport to be set on account ' +
-          'on odd rendering issues with the react-select component');
-    }
-    */
-
     const searchBox = await this.waitForSearchBox();
     await searchBox.type(username);
 

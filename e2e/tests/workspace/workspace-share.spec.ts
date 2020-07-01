@@ -13,7 +13,7 @@ import DataPage, {TabLabelAlias} from 'app/page/data-page';
 describe('Share workspace', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signIn(page, config.collaboratorUsername, config.userPassword);
   });
 
   // Assume there is at least one workspace preexist
@@ -97,12 +97,12 @@ describe('Share workspace', () => {
       // Share, Edit and Delete actions are not available for click.
       const menu2 = workspaceCard2.getEllipsis();
       await menu2.clickEllipsis();
-      expect(await menu2.isDisabled(EllipsisMenuAction.Share)).toBe(false);
-      expect(await menu2.isDisabled(EllipsisMenuAction.Edit)).toBe(false);
-      expect(await menu2.isDisabled(EllipsisMenuAction.Delete)).toBe(false);
+      expect(await menu2.isDisabled(EllipsisMenuAction.Share)).toBe(true);
+      expect(await menu2.isDisabled(EllipsisMenuAction.Edit)).toBe(true);
+      expect(await menu2.isDisabled(EllipsisMenuAction.Delete)).toBe(true);
 
       // Duplicate action is available for click.
-      expect(await menu2.isDisabled(EllipsisMenuAction.Duplicate)).toBe(true);
+      expect(await menu2.isDisabled(EllipsisMenuAction.Duplicate)).toBe(false);
 
       // Make sure the Search input-field in Share modal is disabled.
       await workspaceCard2.clickWorkspaceName();

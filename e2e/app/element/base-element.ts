@@ -224,7 +224,7 @@ export default class BaseElement extends Container {
       const style = window.getComputedStyle(e);
       return style;
     }, this.element);
-    return (await attrStyle.getProperty(styleName)).jsonValue()
+    return (await attrStyle.getProperty(styleName)).jsonValue();
   }
 
   /**
