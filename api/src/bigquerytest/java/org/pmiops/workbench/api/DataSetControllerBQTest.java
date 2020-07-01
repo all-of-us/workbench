@@ -182,9 +182,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
             new DataSetController(
                 bigQueryService,
                 CLOCK,
-                cohortService,
                 cdrVersionService,
-                conceptSetService,
                 dataDictionaryEntryDao,
                 dataSetMapper,
                 dataSetService,
