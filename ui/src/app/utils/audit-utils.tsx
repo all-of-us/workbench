@@ -24,7 +24,8 @@ export const eventBundleToString = (eventBundle: AuditEventBundle) => {
 };
 
 export const propertyChangeToString = (propChange: AuditTargetPropertyChange) => {
-  return `${propChange.targetProperty}: ${propChange.previousValue || ''} \- ${propChange.newValue}`;
+  const MISSING_VALUE = 'n/a';
+  return `${propChange.targetProperty}: ${propChange.previousValue || MISSING_VALUE} \-> ${propChange.newValue || MISSING_VALUE}`;
 };
 
 export const actionToString = (action: AuditAction) => {
@@ -34,6 +35,3 @@ export const actionToString = (action: AuditAction) => {
   return eventBundles.join('\n');
 };
 
-export const actionToHtml = (action: AuditAction) => {
-  return <div>{actionToString(action)}</div>; // DOES NOT WORK. GIVES [object Object]<br/>[object Object]<br/>[object Object]<br/>[object Object]<br/>[object Object]<br/>[object Object]<br/>[object Object]<br/>[object Object]<br/>[object Object]<br/>[object Object]<br/>[object Object]<br/>[object Object]<br/>[object Object]<br/>[object Object]<br/>[object Object]<br/>[object Object]<br/>[object Object]<br/>[object Object]<br/>[object Object]
-}
