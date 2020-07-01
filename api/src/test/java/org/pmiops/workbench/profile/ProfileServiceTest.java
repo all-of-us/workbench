@@ -18,6 +18,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -103,7 +104,8 @@ public class ProfileServiceTest {
     ProfileMapperImpl.class,
     ProfileService.class,
     VerifiedInstitutionalAffiliationMapperImpl.class,
-    CommonMappers.class
+    CommonMappers.class,
+    CommonConfig.class,
   })
   @MockBean({ProfileAuditor.class})
   static class Configuration {
@@ -351,7 +353,7 @@ public class ProfileServiceTest {
 
   @Test(expected = BadRequestException.class)
   public void validateProfile_givenNameTooShort() {
-    Profile newProfile = new Profile().givenName("B");
+    Profile newProfile = new Profile().givenName("");
     profileService.validateProfile(newProfile, new Profile());
   }
 
@@ -367,6 +369,22 @@ public class ProfileServiceTest {
     Profile oldProfile = new Profile().address(new Address().streetAddress1("asdf"));
     Profile newProfile = new Profile();
     profileService.validateProfile(newProfile, oldProfile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void validateProfile_addressRemoveZipCode() {
+    // Ensures we validate the address when only a subfield has changed.
+    Address oldAddress =
+        new Address()
+            .streetAddress1("asdf")
+            .city("asdf")
+            .state("asdf")
+            .country("asdf")
+            .zipCode("asdf");
+    Address newAddress =
+        new Address().streetAddress1("asdf").city("asdf").state("asdf").country("asdf");
+    profileService.validateProfile(
+        new Profile().address(newAddress), new Profile().address(oldAddress));
   }
 
   @Test(expected = BadRequestException.class)

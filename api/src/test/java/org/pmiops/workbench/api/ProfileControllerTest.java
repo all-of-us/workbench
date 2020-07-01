@@ -36,6 +36,7 @@ import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.captcha.ApiException;
 import org.pmiops.workbench.captcha.CaptchaVerificationService;
 import org.pmiops.workbench.compliance.ComplianceServiceImpl;
+import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -164,6 +165,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     ActionAuditQueryServiceImpl.class,
     AddressMapperImpl.class,
     AuditLogEntryMapperImpl.class,
+    CommonConfig.class,
     ComplianceServiceImpl.class,
     DemographicSurveyMapperImpl.class,
     InstitutionalAffiliationMapperImpl.class,

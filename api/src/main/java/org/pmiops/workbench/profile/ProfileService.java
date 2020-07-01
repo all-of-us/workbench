@@ -9,8 +9,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.apache.commons.lang3.StringUtils;
-import org.javers.core.JaversBuilder;
+import org.javers.core.Javers;
+import org.javers.core.diff.Change;
 import org.javers.core.diff.Diff;
+import org.javers.core.diff.changetype.PropertyChange;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -55,6 +57,7 @@ public class ProfileService {
   private final UserTermsOfServiceDao userTermsOfServiceDao;
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
   private final VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
+  private final Javers javers;
 
   @Autowired
   public ProfileService(
@@ -72,7 +75,8 @@ public class ProfileService {
       UserService userService,
       UserTermsOfServiceDao userTermsOfServiceDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
-      VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper) {
+      VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper,
+      Javers javers) {
     this.addressMapper = addressMapper;
     this.clock = clock;
     this.demographicSurveyMapper = demographicSurveyMapper;
@@ -88,6 +92,7 @@ public class ProfileService {
     this.userTermsOfServiceDao = userTermsOfServiceDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
     this.verifiedInstitutionalAffiliationMapper = verifiedInstitutionalAffiliationMapper;
+    this.javers = javers;
   }
 
   public Profile getProfile(DbUser user) {
@@ -344,6 +349,22 @@ public class ProfileService {
   }
 
   /**
+   * Returns a list of PropertyChange entries from a diff that match either a field or any of its
+   * subfields. For example, a pathPrefix of 'address' will match a field change for both 'address'
+   * and for 'address.zipCode'.
+   */
+  private List<Change> getChangesWithPrefix(final Diff diff, final String pathPrefix) {
+    return diff.getChanges(
+        change -> {
+          if (change instanceof PropertyChange) {
+            return ((PropertyChange) change).getPropertyNameWithPath().startsWith(pathPrefix);
+          } else {
+            return false;
+          }
+        });
+  }
+
+  /**
    * Validates a set of Profile changes by comparing the updated profile to the previous version.
    * Only fields that have changed are subject to validation.
    *
@@ -359,37 +380,37 @@ public class ProfileService {
     cleanProfile(updatedProfile);
 
     boolean isNewObject = prevProfile == null;
-    Diff diff = JaversBuilder.javers().build().compare(prevProfile, updatedProfile);
+    Diff diff = javers.compare(prevProfile, updatedProfile);
 
-    if (!diff.getPropertyChanges("username").isEmpty() || isNewObject) {
+    if (!getChangesWithPrefix(diff, "username").isEmpty() || isNewObject) {
       validateUsername(updatedProfile);
     }
-    if (!diff.getPropertyChanges("contactEmail").isEmpty() || isNewObject) {
+    if (!getChangesWithPrefix(diff, "contactEmail").isEmpty() || isNewObject) {
       validateContactEmail(updatedProfile);
     }
-    if (!diff.getPropertyChanges("givenName").isEmpty() || isNewObject) {
+    if (!getChangesWithPrefix(diff, "givenName").isEmpty() || isNewObject) {
       validateGivenName(updatedProfile);
     }
-    if (!diff.getPropertyChanges("familyName").isEmpty() || isNewObject) {
+    if (!getChangesWithPrefix(diff, "familyName").isEmpty() || isNewObject) {
       validateFamilyName(updatedProfile);
     }
-    if (!diff.getPropertyChanges("address").isEmpty() || isNewObject) {
+    if (!getChangesWithPrefix(diff, "address").isEmpty() || isNewObject) {
       validateAddress(updatedProfile);
     }
-    if (!diff.getPropertyChanges("areaOfResearch").isEmpty() || isNewObject) {
+    if (!getChangesWithPrefix(diff, "areaOfResearch").isEmpty() || isNewObject) {
       validateAreaOfResearch(updatedProfile);
     }
-    if (!diff.getPropertyChanges("verifiedInstitutionalAffiliation").isEmpty() || isNewObject) {
+    if (!getChangesWithPrefix(diff, "verifiedInstitutionalAffiliation").isEmpty() || isNewObject) {
       validateInstitutionalAffiliation(updatedProfile);
     }
 
     if (!isNewObject) {
-      // Protect against changes in certain fields.
-      if (!diff.getPropertyChanges("username").isEmpty()) {
+      // We disallow changes in certain fields.
+      if (!getChangesWithPrefix(diff, "username").isEmpty()) {
         // See RW-1488.
         throw new BadRequestException("Changing username is not supported");
       }
-      if (!diff.getPropertyChanges("contactEmail").isEmpty()) {
+      if (!getChangesWithPrefix(diff, "contactEmail").isEmpty()) {
         // See RW-1488.
         throw new BadRequestException("Changing contact email is not currently supported");
       }

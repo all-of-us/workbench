@@ -5,6 +5,8 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import java.security.SecureRandom;
 import java.time.Clock;
 import java.util.Random;
+import org.javers.core.Javers;
+import org.javers.core.JaversBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -23,5 +25,10 @@ public class CommonConfig {
   @Bean
   Random random() {
     return new SecureRandom();
+  }
+
+  @Bean
+  Javers javers() {
+    return JaversBuilder.javers().build();
   }
 }
