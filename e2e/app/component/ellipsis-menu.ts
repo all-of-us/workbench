@@ -31,8 +31,7 @@ export default class EllipsisMenu {
   async clickAction(action: EllipsisMenuAction, opt: { waitForNav?: boolean } = {}): Promise<void> {
     const { waitForNav = true } = opt;
     await this.clickEllipsis();
-    const selector = `${this.rootXpath}//*[@role='button' and text()='${action}']`;
-    const link = await this.page.waitForXPath(selector, {visible: true});
+    const link = this.ellipsisMenuitem(action);
     // Select a Workspace action starts page navigation event
     if (waitForNav) {
       await Promise.all([
@@ -74,9 +73,13 @@ export default class EllipsisMenu {
    * @param {EllipsisMenuAction} action ellipsis menuitem.
    */
   async isDisabled(action: EllipsisMenuAction): Promise<boolean> {
-    const selector = `${this.rootXpath}//*[@role='button' and text()='${action}']`;
-    const link = new Link(this.page, selector);
+    const link = this.ellipsisMenuitem(action);
     return link.isCursorNotAllowed();
+  }
+
+  ellipsisMenuitem(action: EllipsisMenuAction): Link {
+    const selector = `${this.rootXpath}//*[@role='button' and text()='${action}']`;
+    return new Link(this.page, selector);
   }
 
 }
