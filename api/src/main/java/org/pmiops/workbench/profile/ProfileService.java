@@ -191,11 +191,14 @@ public class ProfileService {
    * @param previousProfile
    */
   public void updateProfileForUser(DbUser user, Profile updatedProfile, Profile previousProfile) {
+    // Apply cleaning methods to both the previous and updated profile, to avoid false positive
+    // field diffs due to null-to-empty-object changes.
     cleanProfile(updatedProfile);
+    cleanProfile(previousProfile);
     validateProfile(updatedProfile, previousProfile);
 
-    if (!userProvider.get().getGivenName().equalsIgnoreCase(updatedProfile.getGivenName())
-        || !userProvider.get().getFamilyName().equalsIgnoreCase(updatedProfile.getFamilyName())) {
+    if (!user.getGivenName().equalsIgnoreCase(updatedProfile.getGivenName())
+        || !user.getFamilyName().equalsIgnoreCase(updatedProfile.getFamilyName())) {
       userService.setDataUseAgreementNameOutOfDate(
           updatedProfile.getGivenName(), updatedProfile.getFamilyName());
     }
@@ -227,7 +230,8 @@ public class ProfileService {
     userService.updateUserWithConflictHandling(user);
 
     if (workbenchConfigProvider.get().featureFlags.requireInstitutionalVerification) {
-      // Save the verified institutional affiliation in the DB.
+      // Save the verified institutional affiliation in the DB. The affiliation has already been
+      // verified as part of the `validateProfile` call.
       DbVerifiedInstitutionalAffiliation updatedDbVerifiedAffiliation =
           verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
               updatedProfile.getVerifiedInstitutionalAffiliation(), institutionService);
@@ -390,7 +394,7 @@ public class ProfileService {
       throws BadRequestException {
     boolean isNewObject = prevProfile == null;
     Diff diff = javers.compare(prevProfile, updatedProfile);
-
+    System.out.println(diff.toString());
     if (!getChangesWithPrefix(diff, "username").isEmpty() || isNewObject) {
       validateUsername(updatedProfile);
     }

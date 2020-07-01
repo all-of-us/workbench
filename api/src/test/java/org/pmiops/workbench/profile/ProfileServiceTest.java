@@ -24,6 +24,7 @@ import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
+import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
@@ -33,7 +34,6 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
-import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.institution.deprecated.InstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.InstitutionalRole;
@@ -65,22 +65,25 @@ public class ProfileServiceTest {
           .institutionDisplayName("The Broad Institute")
           .institutionalRoleEnum(InstitutionalRole.ADMIN);
 
-  private static final Profile VALID_PROFILE =
-      new Profile()
-          .username("jdoe123")
-          .contactEmail("jdoe123@gmail.com")
-          .address(
-              new Address()
-                  .streetAddress1("1 Example Lane")
-                  .city("Boston")
-                  .state("MA")
-                  .country("USA")
-                  .zipCode("12345"))
-          .givenName("Jane")
-          .familyName("Doe")
-          .professionalUrl("https://scholar.google.com/citations?user=asdf")
-          .areaOfResearch("asdfasdfasdf")
-          .verifiedInstitutionalAffiliation(BROAD_AFFILIATION);
+  private static Profile createValidProfile() {
+    return new Profile()
+        .username("jdoe123")
+        .contactEmail("jdoe123@gmail.com")
+        .address(
+            new Address()
+                .streetAddress1("1 Example Lane")
+                .city("Boston")
+                .state("MA")
+                .country("USA")
+                .zipCode("12345"))
+        .givenName("Jane")
+        .familyName("Doe")
+        .professionalUrl("https://scholar.google.com/citations?user=asdf")
+        .areaOfResearch("asdfasdfasdf")
+        .verifiedInstitutionalAffiliation(BROAD_AFFILIATION);
+  }
+
+  private static final Profile VALID_PROFILE = createValidProfile();
 
   @MockBean private InstitutionDao mockInstitutionDao;
   @MockBean private InstitutionService mockInstitutionService;
@@ -88,6 +91,8 @@ public class ProfileServiceTest {
 
   @MockBean
   private VerifiedInstitutionalAffiliationMapper mockVerifiedInstitutionalAffiliationMapper;
+
+  @MockBean private VerifiedInstitutionalAffiliationDao mockVerifiedInstitutionalAffiliationDao;
 
   @Autowired ProfileService profileService;
   @Autowired UserDao userDao;
@@ -103,7 +108,6 @@ public class ProfileServiceTest {
     PageVisitMapperImpl.class,
     ProfileMapperImpl.class,
     ProfileService.class,
-    VerifiedInstitutionalAffiliationMapperImpl.class,
     CommonMappers.class,
     CommonConfig.class,
   })
@@ -301,6 +305,42 @@ public class ProfileServiceTest {
         .thenReturn(dbVerifiedInstitutionalAffiliation);
 
     profileService.validateInstitutionalAffiliation(profile);
+  }
+
+  @Test
+  public void updateProfileForUser_affiliationChangeOnly() {
+    // Regression test for RW-5139
+
+    // Start with: a valid profile with a Broad affiliation but null Address.
+    Profile previousProfile = createValidProfile().address(null);
+
+    // Target state: new affiliation, still null address.
+    VerifiedInstitutionalAffiliation newAffiliation =
+        new VerifiedInstitutionalAffiliation()
+            .institutionShortName("Verily")
+            .institutionDisplayName("Verily LLC")
+            .institutionalRoleEnum(InstitutionalRole.ADMIN);
+    Profile updatedProfile =
+        createValidProfile().address(null).verifiedInstitutionalAffiliation(newAffiliation);
+
+    DbUser user = new DbUser();
+    user.setUserId(1);
+    user.setGivenName("John");
+    user.setFamilyName("Doe");
+
+    DbInstitution verilyInstitution =
+        new DbInstitution().setShortName("Verily").setDisplayName("Verily LLC");
+
+    when(mockInstitutionDao.findOneByShortName("Verily"))
+        .thenReturn(Optional.of(verilyInstitution));
+    when(mockInstitutionService.validateAffiliation(any(), any())).thenReturn(true);
+    DbVerifiedInstitutionalAffiliation dbVerifiedInstitutionalAffiliation =
+        new DbVerifiedInstitutionalAffiliation().setInstitution(BROAD_INSTITUTION);
+    when(mockVerifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
+            newAffiliation, mockInstitutionService))
+        .thenReturn(dbVerifiedInstitutionalAffiliation);
+
+    profileService.updateProfileForUser(user, updatedProfile, previousProfile);
   }
 
   @Test
