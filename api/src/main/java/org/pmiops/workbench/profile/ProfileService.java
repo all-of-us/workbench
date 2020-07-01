@@ -51,6 +51,7 @@ public class ProfileService {
   private final FreeTierBillingService freeTierBillingService;
   private final InstitutionDao institutionDao;
   private final InstitutionService institutionService;
+  private final Javers javers;
   private final ProfileAuditor profileAuditor;
   private final ProfileMapper profileMapper;
   private final Provider<DbUser> userProvider;
@@ -60,7 +61,6 @@ public class ProfileService {
   private final UserTermsOfServiceDao userTermsOfServiceDao;
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
   private final VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
-  private final Javers javers;
 
   @Autowired
   public ProfileService(
@@ -70,6 +70,7 @@ public class ProfileService {
       FreeTierBillingService freeTierBillingService,
       InstitutionDao institutionDao,
       InstitutionService institutionService,
+      Javers javers,
       ProfileAuditor profileAuditor,
       ProfileMapper profileMapper,
       Provider<DbUser> userProvider,
@@ -78,14 +79,14 @@ public class ProfileService {
       UserService userService,
       UserTermsOfServiceDao userTermsOfServiceDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
-      VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper,
-      Javers javers) {
+      VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper) {
     this.addressMapper = addressMapper;
     this.clock = clock;
     this.demographicSurveyMapper = demographicSurveyMapper;
     this.freeTierBillingService = freeTierBillingService;
     this.institutionDao = institutionDao;
     this.institutionService = institutionService;
+    this.javers = javers;
     this.profileAuditor = profileAuditor;
     this.profileMapper = profileMapper;
     this.userProvider = userProvider;
@@ -95,7 +96,6 @@ public class ProfileService {
     this.userTermsOfServiceDao = userTermsOfServiceDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
     this.verifiedInstitutionalAffiliationMapper = verifiedInstitutionalAffiliationMapper;
-    this.javers = javers;
   }
 
   public Profile getProfile(DbUser user) {
