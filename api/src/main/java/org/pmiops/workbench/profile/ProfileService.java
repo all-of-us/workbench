@@ -249,6 +249,7 @@ public class ProfileService {
     // Cleaning steps, which provide non-null fields or apply some cleanup / transformation.
     profile.setDemographicSurvey(
         Optional.ofNullable(profile.getDemographicSurvey()).orElse(new DemographicSurvey()));
+    profile.setAddress(Optional.ofNullable(profile.getAddress()).orElse(new Address()));
     profile.setInstitutionalAffiliations(
         Optional.ofNullable(profile.getInstitutionalAffiliations()).orElse(new ArrayList<>()));
     if (profile.getUsername() != null) {
