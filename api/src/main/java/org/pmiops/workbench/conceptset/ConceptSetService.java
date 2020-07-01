@@ -3,9 +3,7 @@ package org.pmiops.workbench.conceptset;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.pmiops.workbench.api.ConceptSetsController;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
-import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.model.DbConceptSet;
@@ -20,20 +18,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class ConceptSetService {
 
   private static final int CONCEPT_SET_VERSION = 1;
-  private ConceptSetDao conceptSetDao;
-  private ConceptBigQueryService conceptBigQueryService;
-  private ConceptService conceptService;
-  private ConceptSetMapper conceptSetMapper;
+  private final ConceptSetDao conceptSetDao;
+  private final ConceptBigQueryService conceptBigQueryService;
+  private final ConceptSetMapper conceptSetMapper;
 
   @Autowired
   public ConceptSetService(
       ConceptSetDao conceptSetDao,
       ConceptBigQueryService conceptBigQueryService,
-      ConceptService conceptService,
       ConceptSetMapper conceptSetMapper) {
     this.conceptSetDao = conceptSetDao;
     this.conceptBigQueryService = conceptBigQueryService;
-    this.conceptService = conceptService;
     this.conceptSetMapper = conceptSetMapper;
   }
 
@@ -49,18 +44,9 @@ public class ConceptSetService {
     return Optional.of(conceptSetDao.findOne(conceptSetId));
   }
 
-  public ConceptSet toClientConceptSet(DbConceptSet dbConceptSet) {
-    ConceptSet result = conceptSetMapper.dbModelToClient(dbConceptSet);
-    return result.concepts(
-        conceptService.findAll(
-            dbConceptSet.getConceptIds(), ConceptSetsController.CONCEPT_NAME_ORDERING));
-  }
-
   public List<ConceptSet> findAll(List<Long> conceptSetIds) {
     return ((List<DbConceptSet>) conceptSetDao.findAll(conceptSetIds))
-        .stream()
-            .map(conceptSet -> conceptSetMapper.dbModelToClient(conceptSet))
-            .collect(Collectors.toList());
+        .stream().map(conceptSetMapper::dbModelToClient).collect(Collectors.toList());
   }
 
   public DbConceptSet findOne(Long conceptSetId, DbWorkspace workspace) {

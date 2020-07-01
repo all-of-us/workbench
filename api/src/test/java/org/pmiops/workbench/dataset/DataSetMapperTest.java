@@ -3,9 +3,11 @@ package org.pmiops.workbench.dataset;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.doReturn;
 
+import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,12 +22,17 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
 import org.pmiops.workbench.db.model.DbDataset;
+import org.pmiops.workbench.db.model.DbDatasetValue;
 import org.pmiops.workbench.db.model.DbStorageEnums;
+import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSet;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +49,7 @@ public class DataSetMapperTest {
 
   @Autowired private DataSetMapper dataSetMapper;
   @Autowired private ConceptSetDao mockConceptSetDao;
+  @Autowired private CohortDao mockCohortDao;
 
   @TestConfiguration
   @Import({
@@ -74,14 +82,28 @@ public class DataSetMapperTest {
             .addWorkspaceId(1L)
             .addPrePackagedConceptSets(
                 DbStorageEnums.prePackagedConceptSetsToStorage(PrePackagedConceptSetEnum.NONE))
+            .addCohortIds(ImmutableList.of(1L))
+            .addConceptSetIds(ImmutableList.of(1L))
+            .addValues(
+                ImmutableList.of(
+                    new DbDatasetValue(
+                        DbStorageEnums.domainToStorage(Domain.CONDITION).toString(), "value")))
             .build();
-    doReturn(Arrays.asList(new ConceptSet()))
+    DbConceptSet dbConceptSet = new DbConceptSet();
+    dbConceptSet.setConceptSetId(1L);
+    DbCohort dbCohort = new DbCohort();
+    dbCohort.setCohortId(1L);
+
+    doReturn(Collections.singletonList(dbConceptSet))
         .when(mockConceptSetDao)
         .findAll(dbDataset.getConceptSetIds());
+    doReturn(Collections.singletonList(dbCohort))
+        .when(mockCohortDao)
+        .findAll(dbDataset.getCohortIds());
 
-    dbDataDictionaryEntry = new DbDataDictionaryEntry();
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(1L);
+    dbDataDictionaryEntry = new DbDataDictionaryEntry();
     dbDataDictionaryEntry.setCdrVersion(cdrVersion);
     dbDataDictionaryEntry.setDefinedTime(Timestamp.from(Instant.now()));
     dbDataDictionaryEntry.setDataProvenance("p");
@@ -101,10 +123,34 @@ public class DataSetMapperTest {
   }
 
   @Test
-  public void dbModelToClient() {
+  public void dbModelToClientDataSet() {
+    final DataSet toClientDataSet = dataSetMapper.dbModelToClient(dbDataset);
+    assertDbModelToClient(toClientDataSet, dbDataset);
+  }
+
+  @Test
+  public void dbModelToClientDataDictionaryEntry() {
     final DataDictionaryEntry toClientDataDictionaryEntry =
         dataSetMapper.dbModelToClient(dbDataDictionaryEntry);
     assertDbModelToClient(toClientDataDictionaryEntry, dbDataDictionaryEntry);
+  }
+
+  private void assertDbModelToClient(DataSet dataSet, DbDataset dbDataset) {
+    assertThat(dbDataset.getCohortIds())
+        .isEqualTo(dataSet.getCohorts().stream().map(Cohort::getId).collect(Collectors.toList()));
+    assertThat(dbDataset.getConceptSetIds())
+        .isEqualTo(
+            dataSet.getConceptSets().stream().map(ConceptSet::getId).collect(Collectors.toList()));
+    assertThat(dbDataset.getValues())
+        .isEqualTo(
+            dataSet.getDomainValuePairs().stream()
+                .map(
+                    dvp ->
+                        new DbDatasetValue(
+                            DbStorageEnums.domainToStorage(dvp.getDomain()).toString(),
+                            dvp.getValue()))
+                .collect(Collectors.toList()));
+    assertDbModelToClientLight(dataSet, dbDataset);
   }
 
   private void assertDbModelToClientLight(DataSet dataSet, DbDataset dbDataset) {

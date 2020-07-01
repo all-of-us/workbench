@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CohortService {
-  private CohortDao cohortDao;
-  private CohortMapper cohortMapper;
+  private final CohortDao cohortDao;
+  private final CohortMapper cohortMapper;
 
   @Autowired
   public CohortService(CohortDao cohortDao, CohortMapper cohortMapper) {

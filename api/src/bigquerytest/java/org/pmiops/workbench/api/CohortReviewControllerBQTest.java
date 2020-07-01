@@ -30,6 +30,7 @@ import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactory;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
+import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.dataset.DataSetMapperImpl;
@@ -112,6 +113,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   })
   @MockBean({
     CohortFactory.class,
+    CohortService.class,
     ConceptSetService.class,
     DataSetService.class,
     FireCloudService.class,
