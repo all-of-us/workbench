@@ -169,12 +169,12 @@ export async function performAction(
   case 'text':
     const textboxElement = await Textbox.findByName(page, identifier.textOption);
     await textboxElement.type(value, {delay: 0});
-    await textboxElement.tabKey();
+    await textboxElement.pressTab();
     break;
   case 'textarea':
     const textareaElement = await Textarea.findByName(page, identifier.textOption);
     await textareaElement.paste(value);
-    await textareaElement.tabKey();
+    await textareaElement.pressTab();
     break;
   default:
     throw new Error(`${identifier} is not recognized.`);

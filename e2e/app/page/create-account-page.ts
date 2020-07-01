@@ -143,7 +143,7 @@ export default class CreateAccountPage extends BasePage {
     for (const field of fields) {
       const textbox = await Textbox.findByName(this.page, {name: field.label});
       await textbox.type(field.value);
-      await textbox.tabKey();
+      await textbox.pressTab();
       if (field.label === 'New Username') {
         await ClrIconLink.findByName(this.page, {name: field.label, iconShape: 'success-standard'});
         newUserName = field.value; // store new username for return
@@ -188,7 +188,7 @@ export default class CreateAccountPage extends BasePage {
     await this.getInstitutionValue();
     const emailAddressTextbox = await Textbox.findByName(this.page, FieldSelector.InstitutionEmailTextbox.textOption);
     await emailAddressTextbox.type(config.institutionContactEmail);
-    await emailAddressTextbox.tabKey(); // tab out to start email validation
+    await emailAddressTextbox.pressTab(); // tab out to start email validation
     await ClrIconLink.findByName(this.page, {containsText: LabelAlias.InstitutionEmail, ancestorLevel: 2, iconShape: 'success-standard'});
 
     const roleSelect = await SelectMenu.findByName(this.page, FieldSelector.DescribeRole.textOption);

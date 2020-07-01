@@ -35,7 +35,7 @@ export default class Navigation {
     const findMenuItem = async (): Promise<ElementHandle | null> => {
       await Navigation.openNavMenu(page);
       const angleIconXpath = buildXPath({type: ElementType.Icon, iconShape: 'angle'});
-      await page.waitForXPath(angleIconXpath, {timeout: 2000});
+      await page.waitForXPath(angleIconXpath, {timeout: 2000, visible: true});
       const appLinkXpath = `//*[@role="button" and @tabindex="0"]//span[contains(., "${destinationApp}")]`;
          // Find link. If not found, determine if link should be found in a submenu: User or Admin
       const [applink] = await page.$x(appLinkXpath);
@@ -46,18 +46,19 @@ export default class Navigation {
                // Open User submenu if needed
           if (!applink) {
             await username.click();
-            return page.waitForXPath(appLinkXpath, {timeout: 2000});
+            return page.waitForXPath(appLinkXpath, {timeout: 2000, visible: true});
           }
         } else if (destinationApp === NavLink.USER_ADMIN) {
                // If it's a link under Admin submenu, open Admin submenu if needed
           if (!applink) {
             await admin.click();
-            return page.waitForXPath(appLinkXpath, {timeout: 2000});
+            return page.waitForXPath(appLinkXpath, {timeout: 2000, visible: true});
           }
         }
       } else {
         return applink;
       }
+      return null;
     }
 
     // find target sidenav link. If not found, return null.
