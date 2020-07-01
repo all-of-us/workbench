@@ -97,12 +97,12 @@ describe('Share workspace', () => {
       // Share, Edit and Delete actions are not available for click.
       const menu2 = workspaceCard2.getEllipsis();
       await menu2.clickEllipsis();
-      await menu2.isDisabled(EllipsisMenuAction.Share);
-      await menu2.isDisabled(EllipsisMenuAction.Edit);
-      await menu2.isDisabled(EllipsisMenuAction.Delete);
+      expect(await menu2.isDisabled(EllipsisMenuAction.Share)).toBe(false);
+      expect(await menu2.isDisabled(EllipsisMenuAction.Edit)).toBe(false);
+      expect(await menu2.isDisabled(EllipsisMenuAction.Delete)).toBe(false);
 
       // Duplicate action is available for click.
-      await menu2.isDisabled(EllipsisMenuAction.Duplicate);
+      expect(await menu2.isDisabled(EllipsisMenuAction.Duplicate)).toBe(true);
 
       // Make sure the Search input-field in Share modal is disabled.
       await workspaceCard2.clickWorkspaceName();
