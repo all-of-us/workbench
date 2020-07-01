@@ -133,10 +133,6 @@ public class ProfileService {
   }
 
   public void validateInstitutionalAffiliation(Profile profile) {
-    if (!workbenchConfigProvider.get().featureFlags.requireInstitutionalVerification) {
-      return;
-    }
-
     VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
         profile.getVerifiedInstitutionalAffiliation();
 
@@ -231,21 +227,19 @@ public class ProfileService {
 
     userService.updateUserWithConflictHandling(user);
 
-    if (workbenchConfigProvider.get().featureFlags.requireInstitutionalVerification) {
-      // Save the verified institutional affiliation in the DB. The affiliation has already been
-      // verified as part of the `validateProfile` call.
-      DbVerifiedInstitutionalAffiliation updatedDbVerifiedAffiliation =
-          verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
-              updatedProfile.getVerifiedInstitutionalAffiliation(), institutionService);
-      updatedDbVerifiedAffiliation.setUser(user);
-      Optional<DbVerifiedInstitutionalAffiliation> dbVerifiedAffiliation =
-          verifiedInstitutionalAffiliationDao.findFirstByUser(user);
-      dbVerifiedAffiliation.ifPresent(
-          verifiedInstitutionalAffiliation ->
-              updatedDbVerifiedAffiliation.setVerifiedInstitutionalAffiliationId(
-                  verifiedInstitutionalAffiliation.getVerifiedInstitutionalAffiliationId()));
-      this.verifiedInstitutionalAffiliationDao.save(updatedDbVerifiedAffiliation);
-    }
+    // Save the verified institutional affiliation in the DB. The affiliation has already been
+    // verified as part of the `validateProfile` call.
+    DbVerifiedInstitutionalAffiliation updatedDbVerifiedAffiliation =
+        verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
+            updatedProfile.getVerifiedInstitutionalAffiliation(), institutionService);
+    updatedDbVerifiedAffiliation.setUser(user);
+    Optional<DbVerifiedInstitutionalAffiliation> dbVerifiedAffiliation =
+        verifiedInstitutionalAffiliationDao.findFirstByUser(user);
+    dbVerifiedAffiliation.ifPresent(
+        verifiedInstitutionalAffiliation ->
+            updatedDbVerifiedAffiliation.setVerifiedInstitutionalAffiliationId(
+                verifiedInstitutionalAffiliation.getVerifiedInstitutionalAffiliationId()));
+    this.verifiedInstitutionalAffiliationDao.save(updatedDbVerifiedAffiliation);
 
     final Profile appliedUpdatedProfile = getProfile(user);
     profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);
