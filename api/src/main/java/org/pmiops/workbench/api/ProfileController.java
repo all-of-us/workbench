@@ -255,7 +255,9 @@ public class ProfileController implements ProfileApiDelegate {
         directoryService.createUser(
             profile.getGivenName(),
             profile.getFamilyName(),
-            profile.getUsername(),
+            profile.getUsername()
+                + "@"
+                + workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain,
             profile.getContactEmail());
 
     // Create a user that has no data access or FC user associated.
