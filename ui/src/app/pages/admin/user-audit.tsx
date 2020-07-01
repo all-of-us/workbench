@@ -1,37 +1,72 @@
 import {profileApi} from 'app/services/swagger-fetch-clients';
+import {
+  actionToString,
+  agentToString,
+  headerToString,
+  targetToString
+} from 'app/utils/audit-utils';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {
   AuditAction,
   AuditEventBundle,
-  AuditEventBundleHeader,
-  UserAuditLogQueryResponse
+  AuditEventBundleHeader, AuditTargetPropertyChange
 } from '../../../generated';
-import {actionToString, agentToString, headerToString, targetToString} from 'app/utils/audit-utils';
 
 const {useEffect, useState} = React;
+const AUDIT_TABLE_STYLE = {
+  border: 'border:1px red solid',
+  backgroundColor: 'light-grey',
+  align: 'left'
+} as React.CSSProperties;
+
+const PropertyChangeRow = (props: {propertyChange: AuditTargetPropertyChange}) => {
+  const {propertyChange} = props;
+  return (<React.Fragment>
+    <tr key = {propertyChange.targetProperty}>
+      <td>{propertyChange.targetProperty || '--'}</td>
+      <td>{propertyChange.previousValue || '--'}</td>
+      <td>{propertyChange.newValue || '--'}</td>
+    </tr>
+  </React.Fragment>);
+};
+
+const PropertyChangeListView = (props: {propertyChanges: AuditTargetPropertyChange[]}) => {
+  const {propertyChanges} = props;
+  return (
+      propertyChanges.length > 0 ?
+      <React.Fragment>
+        <table style={AUDIT_TABLE_STYLE}>
+            <thead>
+              <tr>
+                <th>Property</th>
+                <th>Previous Value</th>
+                <th>New Value</th>
+              </tr>
+            </thead>
+          <tbody>
+            {propertyChanges.map((propertyChange) =>
+               <PropertyChangeRow propertyChange={propertyChange}/>
+            )}
+        </tbody>
+      </table>
+      </React.Fragment> :
+      null);
+};
 
 const AuditEventBundleHeaderView = (props: {header: AuditEventBundleHeader}) => {
   const {header} = props;
   return (
-      // <dl>
-      //   <dt key="actionType">Action Type</dt>
-      //   <dd>{header.actionType}</dd>
-      //   <dt key="agent">Agent</dt>
-      //   <dd>{agentToString(header.agent)}</dd>
-      //   <dt key="target">Target</dt>
-      //   <dd>{targetToString(header.target)}</dd>
-      // </dl>
       <table>
         <thead>
-        <tr><th>{header.actionType}</th></tr>
+        <tr><th>{header.actionType} Action</th></tr>
         </thead>
         <tbody>
           <tr>
-            <td>Agent</td><td>{agentToString(header.agent)}</td>
+            <td>{header.agent.agentType} Agent</td><td>{agentToString(header.agent)}</td>
           </tr>
           <tr>
-            <td>Target</td><td>{targetToString(header.target)}</td>
+            <td>{header.target.targetType} Target</td><td>{targetToString(header.target)}</td>
           </tr>
         </tbody>
       </table>
@@ -40,7 +75,22 @@ const AuditEventBundleHeaderView = (props: {header: AuditEventBundleHeader}) => 
 
 const EventBundleView = (props: {eventBundle: AuditEventBundle}) => {
   const {eventBundle} = props;
-  return <AuditEventBundleHeaderView header={eventBundle.header} />;
+  return (
+      <table>
+        <thead>
+        <tr>
+          <th>
+            <AuditEventBundleHeaderView header={eventBundle.header} />
+          </th>
+        </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <PropertyChangeListView propertyChanges={eventBundle.propertyChanges}/>
+          </tr>
+        </tbody>
+      </table>
+  );
 };
 
 const AuditActionCard = (props: {action: AuditAction}) => {
@@ -50,7 +100,7 @@ const AuditActionCard = (props: {action: AuditAction}) => {
   // to format itself happily though.
   const time = new Date(action.actionTime).toISOString();
   return (
-      <table>
+      <table style={AUDIT_TABLE_STYLE}>
         <thead>
         <tr><th>{time}: {action.eventBundles.length} events</th></tr>
         </thead>
@@ -66,11 +116,10 @@ const AuditActionCard = (props: {action: AuditAction}) => {
 const AuditActionCardListView = (props: {actions: AuditAction[]}) => {
   const {actions} = props;
   const timesMillis = actions.map(action => new Date(action.actionTime).getTime());
-  console.log("times:" + timesMillis);
   const minTime = new Date(Math.min(...timesMillis)).toDateString();
   const maxTime = new Date(Math.max(...timesMillis)).toDateString();
   return (
-      <table>
+      <table style={AUDIT_TABLE_STYLE}>
         <thead>
           <tr><th>{actions.length} Audit Actions from {minTime} to {maxTime}</th></tr>
         </thead>
@@ -82,12 +131,9 @@ const AuditActionCardListView = (props: {actions: AuditAction[]}) => {
           ))}
         </tbody>
       </table>
-
   );
-
 };
 
-// fp.flow(fp.slice(0, 10), fp.map(JSON.stringify));
 export const UserAudit = () => {
   const [userActions, setUserActions] = useState();
   const usernameWithoutGsuiteDomain = 'jaycarlton';
@@ -95,8 +141,9 @@ export const UserAudit = () => {
   useEffect(() => {
     const getLogEntries = async() => {
       const limit = 50;
-      const {actions} = await profileApi().getAuditLogEntries(usernameWithoutGsuiteDomain, limit);
-      const renderedString = actions.map(action => actionToString(action)).join('<br/>');
+      const {actions, query} = await profileApi().getAuditLogEntries(usernameWithoutGsuiteDomain, limit);
+      console.log(query); // dont' think limit is working
+      const renderedString = actions.map(action => actionToString(action)).join('\n');
       console.log(renderedString);
       console.log(actions);
       setUserActions(actions);
@@ -119,10 +166,6 @@ export const UserAudit = () => {
 // stringifiers for AuditAgent, AuditTarget, ...AuditAction
 // verification in console
 // very rough rendering of strings
-
-// TODO for MVP
-// route parameterized on username in admin section (with approprriate guards)
-// fix page title (currently undefined)
 // CardListView component to hold cards in vertically scrollable container
 // AuditActionCard: card for an individual action
 //   - (common action ID & Date, i.e. a single AuditAction)
@@ -138,6 +181,10 @@ export const UserAudit = () => {
 //   - will likely want to specialize for cases of new property & deleted property (or no values at all)
 //   - we can   punt on this if  we have to and use a multi-line string, but I haven't found
 //     that to bev easeir so far.
+
+// TODO for MVP
+// route parameterized on username in admin section (with approprriate guards)
+// fix page title (currently undefined)
 // basic styling: just enough to tell the cards apart. BG color is one approach
 
 // TODO (extra credit)

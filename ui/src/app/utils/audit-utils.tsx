@@ -7,12 +7,14 @@ import {
 } from '../../generated';
 import * as React from 'react';
 
+// Type sold separately
 export const agentToString = (agent?: AuditAgent) => {
-  return `${agent.agentType} DB ID: ${agent.agentId} Username: ${agent.agentUsername}`;
+  return `ID: ${agent.agentId}, Username: ${agent.agentUsername}`;
 };
 
+// Type sold separately
 export const targetToString = (target?: AuditTarget) => {
-  return `${target.targetType} DB ID: ${target.targetId}`;
+  return `ID: ${target.targetId}`;
 };
 
 export const headerToString = (header?: AuditEventBundleHeader) => {
