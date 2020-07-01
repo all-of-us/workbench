@@ -13,7 +13,7 @@ import DataPage, {TabLabelAlias} from 'app/page/data-page';
 describe('Share workspace', () => {
 
   beforeEach(async () => {
-    await signIn(page, config.collaboratorUsername, config.userPassword);
+    await signIn(page);
   });
 
   // Assume there is at least one workspace preexist
