@@ -37,6 +37,11 @@ export const styles = reactStyles({
     ...baseStyles.card,
     width: '30%',
     height: '12rem'
+  },
+  actionAuditCardBase: {
+    ...baseStyles.card,
+    width: '30%',
+    height: '12rem'
   }
 });
 
@@ -44,3 +49,4 @@ export const WorkspaceCardBase = withStyle(styles.workspaceCard)('div');
 export const DomainCardBase = withStyle(styles.domainCard)('div');
 export const ResourceCardBase = withStyle(styles.resourceCard)('div');
 export const ActionCardBase = withStyle(styles.cohortActionCard)('div');
+export const ActionAuditCardBase = withStyle(styles.cohortActionCard)('div');
