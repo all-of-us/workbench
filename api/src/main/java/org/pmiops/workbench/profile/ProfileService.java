@@ -395,7 +395,7 @@ public class ProfileService {
       throws BadRequestException {
     boolean isNewObject = prevProfile == null;
     Diff diff = javers.compare(prevProfile, updatedProfile);
-    System.out.println(diff.toString());
+
     if (!getChangesWithPrefix(diff, "username").isEmpty() || isNewObject) {
       validateUsername(updatedProfile);
     }
