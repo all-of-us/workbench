@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.apache.commons.lang3.StringUtils;
 import org.javers.core.Javers;
@@ -180,8 +182,15 @@ public class ProfileService {
     }
   }
 
+  /**
+   * Updates a profile for a given user and persists all information to the database.
+   *
+   * @param user
+   * @param updatedProfile
+   * @param previousProfile
+   */
   public void updateProfileForUser(DbUser user, Profile updatedProfile, Profile previousProfile) {
-    // This applies all profile validation, including institutional affiliation verification.
+    cleanProfile(updatedProfile);
     validateProfile(updatedProfile, previousProfile);
 
     if (!userProvider.get().getGivenName().equalsIgnoreCase(updatedProfile.getGivenName())
@@ -235,7 +244,7 @@ public class ProfileService {
     profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);
   }
 
-  public void cleanProfile(Profile profile) throws BadRequestException {
+  public void cleanProfile(Profile profile) {
     // Cleaning steps, which provide non-null fields or apply some cleanup / transformation.
     profile.setDemographicSurvey(
         Optional.ofNullable(profile.getDemographicSurvey()).orElse(new DemographicSurvey()));
@@ -355,13 +364,9 @@ public class ProfileService {
    */
   private List<Change> getChangesWithPrefix(final Diff diff, final String pathPrefix) {
     return diff.getChanges(
-        change -> {
-          if (change instanceof PropertyChange) {
-            return ((PropertyChange) change).getPropertyNameWithPath().startsWith(pathPrefix);
-          } else {
-            return false;
-          }
-        });
+        change ->
+            change instanceof PropertyChange
+                && ((PropertyChange) change).getPropertyNameWithPath().startsWith(pathPrefix));
   }
 
   /**
@@ -371,14 +376,15 @@ public class ProfileService {
    * <p>If the previous version is null, the updated profile is presumed to be a new profile and all
    * validation rules are run. If both versions are non-null, only changed fields are validated.
    *
+   * <p>This method should only be called after calling `cleanProfile` on the updated Profile
+   * object.
+   *
    * @param updatedProfile
    * @param prevProfile
    * @throws BadRequestException
    */
-  public void validateProfile(Profile updatedProfile, Profile prevProfile)
+  private void validateProfile(@Nonnull Profile updatedProfile, @Nullable Profile prevProfile)
       throws BadRequestException {
-    cleanProfile(updatedProfile);
-
     boolean isNewObject = prevProfile == null;
     Diff diff = javers.compare(prevProfile, updatedProfile);
 
@@ -415,6 +421,16 @@ public class ProfileService {
         throw new BadRequestException("Changing contact email is not currently supported");
       }
     }
+  }
+
+  /**
+   * Validates a new Profile being created, by running all validation checks.
+   *
+   * @param profile
+   * @throws BadRequestException
+   */
+  public void validateNewProfile(Profile profile) throws BadRequestException {
+    validateProfile(profile, null);
   }
 
   public List<Profile> listAllProfiles() {

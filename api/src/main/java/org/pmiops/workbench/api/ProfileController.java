@@ -244,8 +244,8 @@ public class ProfileController implements ProfileApiDelegate {
 
     final Profile profile = request.getProfile();
 
-    // Run all profile validation by passing in a null 'previous' object.
-    profileService.validateProfile(profile, null);
+    profileService.cleanProfile(profile);
+    profileService.validateNewProfile(profile);
 
     com.google.api.services.directory.model.User googleUser =
         directoryService.createUser(
