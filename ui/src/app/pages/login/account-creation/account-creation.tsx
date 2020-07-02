@@ -96,6 +96,7 @@ export interface AccountCreationState {
   invalidEmail: boolean;
   profile: Profile;
   showAllFieldsRequiredError: boolean;
+  showMostInterestedInKnowingBlurb: boolean;
   usernameCheckInProgress: boolean;
   usernameConflictError: boolean;
 }
@@ -110,14 +111,14 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
 
   createInitialState(): AccountCreationState {
     const state: AccountCreationState = {
+      creatingAccount: false,
       errors: undefined,
+      invalidEmail: false,
       profile: this.props.profile,
+      showAllFieldsRequiredError: false,
+      showMostInterestedInKnowingBlurb: false,
       usernameCheckInProgress: false,
       usernameConflictError: false,
-      creatingAccount: false,
-      showAllFieldsRequiredError: false,
-      invalidEmail: false,
-      showMostInterestedInKnowingBlurb: false,
     };
 
     return state;
