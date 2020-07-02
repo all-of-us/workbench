@@ -32,6 +32,7 @@ import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
+import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
@@ -248,6 +249,7 @@ public class ConceptSetsControllerTest {
     CloudStorageService.class,
     ComplianceService.class,
     ConceptBigQueryService.class,
+    CohortService.class,
     DataSetService.class,
     DirectoryService.class,
     FireCloudService.class,

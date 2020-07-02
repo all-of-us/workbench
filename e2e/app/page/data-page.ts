@@ -103,7 +103,7 @@ export default class DataPage extends AuthenticatedPage {
   async deleteCohort(cohortName: string): Promise<string> {
     const cohortCard = await DataResourceCard.findCard(this.page, cohortName);
     const menu = cohortCard.getEllipsis();
-    await menu.clickAction(EllipsisMenuAction.Delete, false);
+    await menu.clickAction(EllipsisMenuAction.Delete, {waitForNav: false});
     const dialogContent = await (new CohortBuildPage(this.page)).deleteConfirmationDialog();
     console.log(`Deleted Cohort "${cohortName}"`);
     return dialogContent;
@@ -116,7 +116,7 @@ export default class DataPage extends AuthenticatedPage {
   async deleteDataset(datasetName: string): Promise<string> {
     const datasetCard = await DataResourceCard.findCard(this.page, datasetName);
     const menu = datasetCard.getEllipsis();
-    await menu.clickAction(EllipsisMenuAction.Delete, false);
+    await menu.clickAction(EllipsisMenuAction.Delete, {waitForNav: false});
 
     const dialog = new Dialog(this.page);
     const dialogContentText = await dialog.getContent();
@@ -139,7 +139,7 @@ export default class DataPage extends AuthenticatedPage {
   async renameDataset(datasetName: string, newDatasetName: string): Promise<void> {
     const card = await DataResourceCard.findCard(this.page, datasetName);
     const menu = card.getEllipsis();
-    await menu.clickAction(EllipsisMenuAction.RenameDataset, false);
+    await menu.clickAction(EllipsisMenuAction.RenameDataset, {waitForNav: false});
 
     const dialog = new Dialog(this.page);
 
@@ -164,7 +164,7 @@ export default class DataPage extends AuthenticatedPage {
   async deleteConceptSet(conceptsetName: string): Promise<string> {
     const datasetCard = await DataResourceCard.findCard(this.page, conceptsetName);
     const menu = datasetCard.getEllipsis();
-    await menu.clickAction(EllipsisMenuAction.Delete, false);
+    await menu.clickAction(EllipsisMenuAction.Delete, {waitForNav: false});
 
     const dialog = new Dialog(this.page);
     const dialogContentText = await dialog.getContent();
@@ -182,7 +182,7 @@ export default class DataPage extends AuthenticatedPage {
   async renameCohort(cohortName: string, newCohortName: string): Promise<void> {
     const cohortResourceCard = await DataResourceCard.findCard(this.page, cohortName);
     const menu = cohortResourceCard.getEllipsis();
-    await menu.clickAction(EllipsisMenuAction.Rename, false);
+    await menu.clickAction(EllipsisMenuAction.Rename, {waitForNav: false});
     const dialog = new Dialog(this.page);
     await dialog.getContent();
     const newNameInput = new Textbox(this.page, `${dialog.getXpath()}//*[@id="new-name"]`);

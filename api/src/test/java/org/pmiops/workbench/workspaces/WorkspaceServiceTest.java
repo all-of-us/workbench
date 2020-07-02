@@ -21,6 +21,7 @@ import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cohortreview.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
+import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -70,6 +71,7 @@ public class WorkspaceServiceTest {
   })
   @MockBean({
     ConceptSetService.class,
+    CohortService.class,
     CohortCloningService.class,
     DataSetService.class,
     FirecloudMapper.class,

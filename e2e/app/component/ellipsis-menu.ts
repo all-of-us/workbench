@@ -1,6 +1,7 @@
 import {ElementHandle, Page} from 'puppeteer';
 import {EllipsisMenuAction} from 'app/text-labels';
 import {GroupAction} from 'app/page/cohort-participants-group';
+import Link from 'app/element/link';
 import TieredMenu from './tiered-menu';
 
 export default class EllipsisMenu {
@@ -27,10 +28,10 @@ export default class EllipsisMenu {
     return actionTextsArray;
   }
 
-  async clickAction(action: EllipsisMenuAction, waitForNav: boolean = true): Promise<void> {
+  async clickAction(action: EllipsisMenuAction, opt: { waitForNav?: boolean } = {}): Promise<void> {
+    const { waitForNav = true } = opt;
     await this.clickEllipsis();
-    const selector = `${this.rootXpath}//*[@role='button' and text()='${action}']`;
-    const link = await this.page.waitForXPath(selector, {visible: true});
+    const link = this.ellipsisMenuitem(action);
     // Select a Workspace action starts page navigation event
     if (waitForNav) {
       await Promise.all([
@@ -53,7 +54,7 @@ export default class EllipsisMenu {
     return menu.clickMenuItem([action.toString()]);
   }
 
-  private async clickEllipsis(): Promise<void> {
+  async clickEllipsis(): Promise<void> {
     const element = await this.getEllipsisIcon();
     await element.click();
     await element.dispose();
@@ -65,6 +66,20 @@ export default class EllipsisMenu {
     }
     const [elemt] = await this.parentNode.$x(this.xpath);
     return elemt;
+  }
+
+  /**
+   * Determine if the ellipsis dropdown menuitem is disabled.
+   * @param {EllipsisMenuAction} action ellipsis menuitem.
+   */
+  async isDisabled(action: EllipsisMenuAction): Promise<boolean> {
+    const link = this.ellipsisMenuitem(action);
+    return link.isCursorNotAllowed();
+  }
+
+  ellipsisMenuitem(action: EllipsisMenuAction): Link {
+    const selector = `${this.rootXpath}//*[@role='button' and text()='${action}']`;
+    return new Link(this.page, selector);
   }
 
 }

@@ -79,7 +79,7 @@ export default class WorkspacesPage extends WorkspaceEditPage {
     await waitForText(this.page, 'Use All of Us free credits');
 
     await (await editPage.getWorkspaceNameTextbox()).type(workspaceName);
-    await (await editPage.getWorkspaceNameTextbox()).tabKey();
+    await (await editPage.getWorkspaceNameTextbox()).pressTab();
 
     // select the default Synthetic Dataset
     await editPage.selectDataset();
@@ -130,7 +130,7 @@ export default class WorkspacesPage extends WorkspaceEditPage {
   async fillOutWorkspaceName(): Promise<string> {
     const newWorkspaceName = makeWorkspaceName();
     await (await this.getWorkspaceNameTextbox()).type(newWorkspaceName);
-    await (await this.getWorkspaceNameTextbox()).tabKey();
+    await (await this.getWorkspaceNameTextbox()).pressTab();
     return newWorkspaceName;
   }
 

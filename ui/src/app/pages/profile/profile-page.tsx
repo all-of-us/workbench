@@ -7,6 +7,7 @@ import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {TextAreaWithLengthValidationMessage, TextInput, ValidationError} from 'app/components/inputs';
+import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -235,8 +236,13 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
     }
   }
 
-  get saveProfileErrorMessage() {
-    return 'You must correct errors before saving.';
+  saveProfileErrorMessage(errors) {
+    return <React.Fragment>
+      <div>You must correct errors before saving: </div>
+      <BulletAlignedUnorderedList>
+      {Object.keys(errors).map((key) => <li key={errors[key][0]}>{errors[key][0]}</li>)}
+      </BulletAlignedUnorderedList>
+    </React.Fragment>;
   }
 
   async saveProfile(profile: Profile): Promise<Profile> {
@@ -358,7 +364,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
     const {enableComplianceTraining, enableEraCommons, enableDataUseAgreement, requireInstitutionalVerification} =
       serverConfigStore.getValue();
     const {
-      givenName, familyName, areaOfResearch,
+      givenName, familyName, areaOfResearch, professionalUrl,
         address: {
         streetAddress1,
         streetAddress2,
@@ -368,22 +374,30 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             country
         }
     } = currentProfile;
-    const errors = validate({
-      givenName,
-      familyName, areaOfResearch,
-      streetAddress1,
-      streetAddress2,
-      zipCode,
-      city,
-      state,
-      country
-    }, validators, {
-      prettify: v => ({
-        givenName: 'First Name',
-        familyName: 'Last Name',
-        areaOfResearch: 'Current Research'
-      }[v] || validate.prettify(v))
-    });
+
+    const urlError = professionalUrl
+      ? validate({website: professionalUrl}, {website: {url: {message: '^Professional URL %{value} is not a valid URL'}}})
+      : undefined;
+    const errorMessages = {
+      ...urlError,
+      ...validate({
+        givenName,
+        familyName, areaOfResearch,
+        streetAddress1,
+        streetAddress2,
+        zipCode,
+        city,
+        state,
+        country
+      }, validators, {
+        prettify: v => ({
+          givenName: 'First Name',
+          familyName: 'Last Name',
+          areaOfResearch: 'Current Research'
+        }[v] || validate.prettify(v))
+      })
+    };
+    const errors = fp.isEmpty(errorMessages) ? undefined : errorMessages;
 
     const makeProfileInput = ({title, valueKey, isLong = false, ...props}) => {
       let errorText = profile && errors && errors[valueKey];
@@ -650,7 +664,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             </Button>
             <TooltipTrigger
               side='top'
-              content={!!errors && this.saveProfileErrorMessage}>
+              content={!!errors && this.saveProfileErrorMessage(errorMessages)}>
               <Button
                 data-test-id='save_profile'
                 type='purplePrimary'

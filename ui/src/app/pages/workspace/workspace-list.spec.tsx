@@ -18,7 +18,7 @@ import {WorkspaceList} from './workspace-list';
 
 // Mock the navigate function but not userProfileStore
 jest.mock('app/utils/navigation', () => ({
-  ...(require.requireActual('app/utils/navigation')),
+  ...(jest.requireActual('app/utils/navigation')),
   navigate: jest.fn()
 }));
 

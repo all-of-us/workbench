@@ -28,6 +28,7 @@ import org.pmiops.workbench.cdr.model.DbSurveyModule;
 import org.pmiops.workbench.cohortreview.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
+import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
 import org.pmiops.workbench.conceptset.ConceptSetService;
@@ -282,6 +283,7 @@ public class ConceptsControllerTest {
     FireCloudService.class,
     CohortCloningService.class,
     ConceptSetService.class,
+    CohortService.class,
     ConceptBigQueryService.class,
     Clock.class,
     DataSetService.class,

@@ -48,7 +48,7 @@ export default class ConceptsetSearchPage extends AuthenticatedPage{
   async searchConcepts(searchKeywords: string): Promise<void> {
     const searchInput = this.getSearchTextbox();
     await searchInput.type(searchKeywords);
-    await searchInput.pressReturnKey();
+    await searchInput.pressReturn();
     return waitWhileLoading(this.page);
   }
 

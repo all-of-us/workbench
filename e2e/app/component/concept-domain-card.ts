@@ -6,7 +6,7 @@ import Container from 'app/container';
 export enum Domain {
    Conditions = 'Conditions',
    DrugExposures = 'Drug Exposures',
-   Measurements = 'Measurements',
+   Measurements = 'Labs and Measurements',
    Observations =  'Observations',
    Procedures = 'Procedures',
 }

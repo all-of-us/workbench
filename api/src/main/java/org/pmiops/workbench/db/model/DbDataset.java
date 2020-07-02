@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -14,6 +15,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 
 @Entity
@@ -35,6 +37,23 @@ public class DbDataset {
   private List<Long> cohortIds;
   private List<DbDatasetValue> values;
   private short prePackagedConceptSet;
+
+  private DbDataset(DbDataset.Builder builder) {
+    setDataSetId(builder.dataSetId);
+    setWorkspaceId(builder.workspaceId);
+    setName(builder.name);
+    setVersion(builder.version);
+    setDescription(builder.description);
+    setCreatorId(builder.creatorId);
+    setCreationTime(builder.creationTime);
+    setLastModifiedTime(builder.lastModifiedTime);
+    setInvalid(builder.invalid);
+    setIncludesAllParticipants(builder.includesAllParticipants);
+    setConceptSetIds(builder.conceptSetIds);
+    setCohortIds(builder.cohortIds);
+    setValues(builder.values);
+    setPrePackagedConceptSet(builder.prePackagedConceptSet);
+  }
 
   public DbDataset() {
     setVersion(DbDataset.INITIAL_VERSION);
@@ -210,5 +229,149 @@ public class DbDataset {
 
   public void setPrePackagedConceptSetEnum(PrePackagedConceptSetEnum domain) {
     this.prePackagedConceptSet = DbStorageEnums.prePackagedConceptSetsToStorage(domain);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    DbDataset dbDataset = (DbDataset) o;
+    return workspaceId == dbDataset.workspaceId
+        && version == dbDataset.version
+        && creatorId == dbDataset.creatorId
+        && prePackagedConceptSet == dbDataset.prePackagedConceptSet
+        && Objects.equals(name, dbDataset.name)
+        && Objects.equals(description, dbDataset.description)
+        && Objects.equals(creationTime, dbDataset.creationTime)
+        && Objects.equals(lastModifiedTime, dbDataset.lastModifiedTime)
+        && Objects.equals(invalid, dbDataset.invalid)
+        && Objects.equals(includesAllParticipants, dbDataset.includesAllParticipants)
+        && Objects.equals(conceptSetIds, dbDataset.conceptSetIds)
+        && Objects.equals(cohortIds, dbDataset.cohortIds)
+        && Objects.equals(values, dbDataset.values);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(
+        workspaceId,
+        name,
+        version,
+        description,
+        creatorId,
+        creationTime,
+        lastModifiedTime,
+        invalid,
+        includesAllParticipants,
+        conceptSetIds,
+        cohortIds,
+        values,
+        prePackagedConceptSet);
+  }
+
+  @Override
+  public String toString() {
+    return ToStringBuilder.reflectionToString(this);
+  }
+
+  public static DbDataset.Builder builder() {
+    return new DbDataset.Builder();
+  }
+
+  public static class Builder {
+    private long dataSetId;
+    private long workspaceId;
+    private String name;
+    private int version;
+    private String description;
+    private long creatorId;
+    private Timestamp creationTime;
+    private Timestamp lastModifiedTime;
+    private Boolean invalid;
+    private Boolean includesAllParticipants;
+    private List<Long> conceptSetIds;
+    private List<Long> cohortIds;
+    private List<DbDatasetValue> values;
+    private short prePackagedConceptSet;
+
+    private Builder() {}
+
+    public DbDataset.Builder addDataSetId(long dataSetId) {
+      this.dataSetId = dataSetId;
+      return this;
+    }
+
+    public DbDataset.Builder addWorkspaceId(long workspaceId) {
+      this.workspaceId = workspaceId;
+      return this;
+    }
+
+    public DbDataset.Builder addName(String name) {
+      this.name = name;
+      return this;
+    }
+
+    public DbDataset.Builder addVersion(int version) {
+      this.version = version;
+      return this;
+    }
+
+    public DbDataset.Builder addDescription(String description) {
+      this.description = description;
+      return this;
+    }
+
+    public DbDataset.Builder addCreatorId(long creatorId) {
+      this.creatorId = creatorId;
+      return this;
+    }
+
+    public DbDataset.Builder addCreationTime(Timestamp creationTime) {
+      this.creationTime = creationTime;
+      return this;
+    }
+
+    public DbDataset.Builder addLastModifiedTime(Timestamp lastModifiedTime) {
+      this.lastModifiedTime = lastModifiedTime;
+      return this;
+    }
+
+    public DbDataset.Builder addInvalid(Boolean invalid) {
+      this.invalid = invalid;
+      return this;
+    }
+
+    public DbDataset.Builder addIncludesAllParticipants(Boolean includesAllParticipants) {
+      this.includesAllParticipants = includesAllParticipants;
+      return this;
+    }
+
+    public DbDataset.Builder addConceptSetIds(List<Long> conceptSetIds) {
+      this.conceptSetIds = conceptSetIds;
+      return this;
+    }
+
+    public DbDataset.Builder addCohortIds(List<Long> cohortIds) {
+      this.cohortIds = cohortIds;
+      return this;
+    }
+
+    public DbDataset.Builder addValues(List<DbDatasetValue> values) {
+      this.values = values;
+      return this;
+    }
+
+    public DbDataset.Builder addPrePackagedConceptSets(short prePackagedConceptSet) {
+      this.prePackagedConceptSet = prePackagedConceptSet;
+      return this;
+    }
+
+    public DbDataset build() {
+      return new DbDataset(this);
+    }
   }
 }

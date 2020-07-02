@@ -35,7 +35,8 @@ enum ANALYTICS_CATEGORIES {
   DATASET_BUILDER = 'Dataset Builder',
   NOTEBOOKS = 'Notebooks',
   SIDEBAR = 'Sidebar Menu',
-  HELP = 'Help'
+  HELP = 'Help',
+  WORKSPACE_UPDATE_PROMPT = 'Workspace update prompt'
 }
 
 export const AnalyticsTracker = {
@@ -53,7 +54,11 @@ export const AnalyticsTracker = {
     OpenShareModal: (suffix = '') => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Open Share Modal', getCurrentPageLabel(suffix)),
     Share: () => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Share', getCurrentPageLabel()),
     OpenDeleteModal: (suffix = '') => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Open Delete Modal', getCurrentPageLabel(suffix)),
-    Delete: () => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Delete', getCurrentPageLabel())
+    Delete: () => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Delete', getCurrentPageLabel()),
+  },
+  WorkspaceUpdatePrompt: {
+    LooksGood: () => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACE_UPDATE_PROMPT, 'Click \'Looks  Good\'', 'No Edits'),
+    UpdateWorkspace: () => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACE_UPDATE_PROMPT, 'Click \'Update\'', 'Edit Workspace')
   },
   DatasetBuilder: {
     OpenCreatePage: () => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Open Create Page'),

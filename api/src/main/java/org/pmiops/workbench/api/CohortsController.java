@@ -17,6 +17,7 @@ import javax.persistence.OptimisticLockException;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cohorts.CohortFactory;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
+import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -296,7 +297,7 @@ public class CohortsController implements CohortsApiDelegate {
                 "Couldn't find concept set with name %s in workspace %s/%s",
                 conceptSetName, workspace.getWorkspaceNamespace(), workspace.getWorkspaceId()));
       }
-      String tableName = ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(conceptSet.getDomainEnum());
+      String tableName = BigQueryTableInfo.getTableName(conceptSet.getDomainEnum());
       if (tableName == null) {
         throw new ServerErrorException(
             "Couldn't find table for domain: " + conceptSet.getDomainEnum());

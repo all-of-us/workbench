@@ -1,6 +1,6 @@
 package org.pmiops.workbench.utils.mappers;
 
-import static org.mapstruct.NullValuePropertyMappingStrategy.*;
+import static org.mapstruct.NullValuePropertyMappingStrategy.SET_TO_DEFAULT;
 
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
@@ -181,7 +181,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "workspaceFirecloudName", source = "dbWorkspace.firecloudName")
   @Mapping(target = "workspaceBillingStatus", source = "dbWorkspace.billingStatus")
   @Mapping(target = "permission", source = "accessLevel")
-  @Mapping(target = "dataSet", source = "dbDataset")
+  @Mapping(target = "dataSet", source = "dbDataset", qualifiedByName = "dbModelToClientLight")
   // All workspaceResources have one object and all others are null.
   @Mapping(target = "cohort", ignore = true)
   @Mapping(target = "cohortReview", ignore = true)

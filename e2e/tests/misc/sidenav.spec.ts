@@ -1,18 +1,9 @@
-import Button from 'app/element/button';
 import HomePage from 'app/page/home-page';
 import ProfilePage from 'app/page/profile-page';
 import WorkspacesPage from 'app/page/workspaces-page';
 import {signIn} from 'utils/test-utils';
 import Navigation, {NavLink} from 'app/component/navigation';
 import {waitForDocumentTitle} from 'utils/waits-utils';
-
-export const HELP_DESK = {
-  ASK_QUESTION: 'Ask a question about the Researcher Workbench',
-  REPORT_DATA_PRIVACY_CONCERN: 'Report a data privacy concern',
-  TELL_ABOUT_PUBLICATION: 'Tell us about an upcoming publication',
-  REQUEST_BILLING_CREDITS: 'Request additional billing credits',
-};
-
 
 describe('Sidebar Navigation', () => {
 
@@ -45,35 +36,6 @@ describe('Sidebar Navigation', () => {
     await Navigation.navMenu(page, NavLink.HOME);
     await homePage.waitForLoad();
     expect(await homePage.isLoaded()).toBe(true);
-  });
-
-  test('User can see the Contact Us form', async () => {
-    // Select Contact Us
-    await Navigation.navMenu(page, NavLink.CONTACT_US);
-
-    const iframeHandle: any = await page.waitForSelector('iframe[title="Find more information here"]', {visible: true});
-    const newIframe = await iframeHandle.contentFrame();
-
-    const askQuestionAboutButton = await Button.findByName(newIframe, {name: HELP_DESK.ASK_QUESTION});
-    expect(await askQuestionAboutButton.isVisible()).toBe(true);
-
-    const reportConcernButton = await Button.findByName(newIframe, {name: HELP_DESK.REPORT_DATA_PRIVACY_CONCERN});
-    expect(await reportConcernButton.isVisible()).toBe(true);
-    await reportConcernButton.dispose();
-
-    const tellAboutPublicationButton = await Button.findByName(newIframe, {name: HELP_DESK.TELL_ABOUT_PUBLICATION});
-    expect(await tellAboutPublicationButton.isVisible()).toBe(true);
-    await tellAboutPublicationButton.dispose();
-
-    const requestBillingCreditsButton = await Button.findByName(newIframe, {name: HELP_DESK.REQUEST_BILLING_CREDITS});
-    expect(await requestBillingCreditsButton.isVisible()).toBe(true);
-    await requestBillingCreditsButton.dispose();
-
-    const minimizeButton = await newIframe.$('button[aria-label="Minimize widget"]');
-    await minimizeButton.click();
-
-    expect(await askQuestionAboutButton.isVisible()).toBe(false);
-    await askQuestionAboutButton.dispose();
   });
 
   test('User can Sign Out', async () => {

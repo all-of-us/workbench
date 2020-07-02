@@ -142,7 +142,7 @@ export default class CohortCriteriaModal extends Dialog {
   async searchCondition(searchWord: string): Promise<Table> {
     const searchFilterTextbox = await Textbox.findByName(this.page, {containsText: 'by code or description'}, this);
     await searchFilterTextbox.type(searchWord);
-    await searchFilterTextbox.pressReturnKey();
+    await searchFilterTextbox.pressReturn();
     await waitWhileLoading(this.page);
     return this.getConditionSearchResultsTable();
   }
@@ -188,8 +188,8 @@ export default class CohortCriteriaModal extends Dialog {
     await this.page.waitForXPath(selector, {visible: true});
 
     const [lowerNumberInput, upperNumberInput] = await this.page.$x(selector);
-    await (Textbox.asBaseElement(this.page, lowerNumberInput)).type(minAge.toString()).then(input => input.tabKey());
-    await (Textbox.asBaseElement(this.page, upperNumberInput)).type(maxAge.toString()).then(input => input.tabKey());
+    await (Textbox.asBaseElement(this.page, lowerNumberInput)).type(minAge.toString()).then(input => input.pressTab());
+    await (Textbox.asBaseElement(this.page, upperNumberInput)).type(maxAge.toString()).then(input => input.pressTab());
 
     // Click Calculate button.
     const button = await this.waitForButton(LinkText.Calculate);

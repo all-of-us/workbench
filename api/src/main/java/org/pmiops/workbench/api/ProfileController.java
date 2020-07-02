@@ -39,7 +39,6 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMembership;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMembership.CreationStatusEnum;
 import org.pmiops.workbench.firecloud.model.FirecloudJWTWrapper;
 import org.pmiops.workbench.google.CloudStorageService;
@@ -50,7 +49,6 @@ import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.Authority;
-import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.EmailVerificationStatus;
@@ -91,20 +89,6 @@ public class ProfileController implements ProfileApiDelegate {
           .put(CreationStatusEnum.READY, BillingProjectStatus.READY)
           .put(CreationStatusEnum.ERROR, BillingProjectStatus.ERROR)
           .build();
-  private static final Function<FirecloudBillingProjectMembership, BillingProjectMembership>
-      TO_CLIENT_BILLING_PROJECT_MEMBERSHIP =
-          new Function<FirecloudBillingProjectMembership, BillingProjectMembership>() {
-            @Override
-            public BillingProjectMembership apply(
-                FirecloudBillingProjectMembership billingProjectMembership) {
-              BillingProjectMembership result = new BillingProjectMembership();
-              result.setProjectName(billingProjectMembership.getProjectName());
-              result.setRole(billingProjectMembership.getRole());
-              result.setStatus(
-                  fcToWorkbenchBillingMap.get(billingProjectMembership.getCreationStatus()));
-              return result;
-            }
-          };
 
   private static final Function<Address, DbAddress> FROM_CLIENT_ADDRESS =
       new Function<Address, DbAddress>() {
@@ -185,16 +169,6 @@ public class ProfileController implements ProfileApiDelegate {
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
-  @Override
-  public ResponseEntity<List<BillingProjectMembership>> getBillingProjects() {
-    List<FirecloudBillingProjectMembership> memberships =
-        fireCloudService.getBillingProjectMemberships();
-    return ResponseEntity.ok(
-        memberships.stream()
-            .map(TO_CLIENT_BILLING_PROJECT_MEMBERSHIP)
-            .collect(Collectors.toList()));
-  }
-
   private DbUser saveUserWithConflictHandling(DbUser dbUser) {
     try {
       return userDao.save(dbUser);
@@ -264,24 +238,20 @@ public class ProfileController implements ProfileApiDelegate {
       verifyInvitationKey(request.getInvitationKey());
     }
 
-    if (workbenchConfigProvider.get().featureFlags.requireInstitutionalVerification) {
-      profileService.validateInstitutionalAffiliation(request.getProfile());
-    }
+    profileService.validateInstitutionalAffiliation(request.getProfile());
 
     final Profile profile = request.getProfile();
 
-    // We don't include this check in validateAndCleanProfile since some existing user profiles
-    // may have empty addresses. So we only check this on user creation, not update.
-    Optional.ofNullable(profile.getAddress())
-        .orElseThrow(() -> new BadRequestException("Address must not be empty"));
-
-    profileService.validateAndCleanProfile(profile);
+    profileService.cleanProfile(profile);
+    profileService.validateNewProfile(profile);
 
     com.google.api.services.directory.model.User googleUser =
         directoryService.createUser(
             profile.getGivenName(),
             profile.getFamilyName(),
-            profile.getUsername(),
+            profile.getUsername()
+                + "@"
+                + workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain,
             profile.getContactEmail());
 
     // Create a user that has no data access or FC user associated.
@@ -328,19 +298,17 @@ public class ProfileController implements ProfileApiDelegate {
       throw new WorkbenchException(e);
     }
 
-    if (workbenchConfigProvider.get().featureFlags.requireInstitutionalVerification) {
-      institutionService
-          .getInstitutionUserInstructions(
-              profile.getVerifiedInstitutionalAffiliation().getInstitutionShortName())
-          .ifPresent(
-              instructions -> {
-                try {
-                  mail.sendInstitutionUserInstructions(profile.getContactEmail(), instructions);
-                } catch (MessagingException e) {
-                  throw new WorkbenchException(e);
-                }
-              });
-    }
+    institutionService
+        .getInstitutionUserInstructions(
+            profile.getVerifiedInstitutionalAffiliation().getInstitutionShortName())
+        .ifPresent(
+            instructions -> {
+              try {
+                mail.sendInstitutionUserInstructions(profile.getContactEmail(), instructions);
+              } catch (MessagingException e) {
+                throw new WorkbenchException(e);
+              }
+            });
 
     // Note: Avoid getProfileResponse() here as this is not an authenticated request.
     final Profile createdProfile = profileService.getProfile(user);

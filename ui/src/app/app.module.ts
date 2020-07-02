@@ -43,7 +43,6 @@ import {ConceptSetDetailsComponent} from './pages/data/concept/concept-set-detai
 import {HomepageComponent} from './pages/homepage/homepage';
 import {InitialErrorComponent} from './pages/initial-error/component';
 import {SignInComponent} from './pages/login/sign-in';
-import {DataUserCodeOfConductComponent} from './pages/profile/data-user-code-of-conduct';
 import {ProfilePageComponent} from './pages/profile/profile-page';
 import {SessionExpiredComponent} from './pages/session-expired';
 import {SignInAgainComponent} from './pages/sign-in-again';
@@ -154,7 +153,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     CreateReviewModalComponent,
     DataPageComponent,
     DataSetPageComponent,
-    DataUserCodeOfConductComponent,
     DetailPageComponent,
     FooterComponent,
     HelpSidebarComponent,

@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.model;
 
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Table;
@@ -51,5 +52,22 @@ public class DbDatasetValue {
   public boolean equals(DbDatasetValue dataSetValue) {
     return getValue().equals(dataSetValue.getValue())
         && getDomainEnum().equals(dataSetValue.getDomainEnum());
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    DbDatasetValue that = (DbDatasetValue) o;
+    return Objects.equals(domainId, that.domainId) && Objects.equals(value, that.value);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(domainId, value);
   }
 }

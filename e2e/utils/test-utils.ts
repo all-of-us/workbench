@@ -14,13 +14,29 @@ import {WorkspaceAccessLevel} from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
 import {makeWorkspaceName} from './str-utils';
 
-export async function signIn(page: Page): Promise<void> {
+export async function signIn(page: Page, userId?: string, passwd?: string): Promise<void> {
   const loginPage = new GoogleLoginPage(page);
-  await loginPage.login();
+  await loginPage.login(userId, passwd);
   // this element exists in DOM after user has logged in
   await page.waitFor(() => document.querySelector('app-signed-in') !== null);
   const homePage = new HomePage(page);
   await homePage.waitForLoad();
+}
+
+/**
+ * Login in new Incognito page.
+ * @param {string} userId
+ * @param {string} passwd
+ */
+export async function signInAs(userId: string, passwd: string): Promise<Page> {
+  await jestPuppeteer.resetBrowser();
+  const incognitoBrowser = await browser.createIncognitoBrowserContext();
+  const newPage = await incognitoBrowser.newPage();
+  const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36';
+  await newPage.setUserAgent(userAgent);
+  await newPage.setDefaultNavigationTimeout(90000);
+  await signIn(newPage, userId, passwd);
+  return newPage;
 }
 
 /**
@@ -169,12 +185,12 @@ export async function performAction(
   case 'text':
     const textboxElement = await Textbox.findByName(page, identifier.textOption);
     await textboxElement.type(value, {delay: 0});
-    await textboxElement.tabKey();
+    await textboxElement.pressTab();
     break;
   case 'textarea':
     const textareaElement = await Textarea.findByName(page, identifier.textOption);
     await textareaElement.paste(value);
-    await textareaElement.tabKey();
+    await textareaElement.pressTab();
     break;
   default:
     throw new Error(`${identifier} is not recognized.`);
@@ -191,20 +207,20 @@ export async function findWorkspace(page: Page, createNew: boolean = false): Pro
   await workspacesPage.load();
 
   const workspaceCard = new WorkspaceCard(page);
-  let existingWorkspaces = await workspaceCard.getWorkspaceMatchAccessLevel(WorkspaceAccessLevel.Owner);
+  const existingWorkspaces = await workspaceCard.getWorkspaceMatchAccessLevel(WorkspaceAccessLevel.Owner);
 
-  if (existingWorkspaces.length === 0 || createNew) {
+  if (createNew || existingWorkspaces.length === 0) {
     // Create new workspace
     const workspaceName = makeWorkspaceName();
     await workspacesPage.createWorkspace(workspaceName);
-
+    console.log(`Created workspace: "${workspaceName}"`);
     await workspacesPage.load();
-    existingWorkspaces = await workspaceCard.getWorkspaceMatchAccessLevel(WorkspaceAccessLevel.Owner);
+    return WorkspaceCard.findCard(page, workspaceName);
   }
 
   const oneWorkspaceCard = fp.shuffle(existingWorkspaces)[0];
   const workspaceCardName = await oneWorkspaceCard.getWorkspaceName();
-  console.log(`Found a workspace: ${workspaceCardName}`);
+  console.log(`Found existing workspace: "${workspaceCardName}"`);
   return oneWorkspaceCard;
 }
 

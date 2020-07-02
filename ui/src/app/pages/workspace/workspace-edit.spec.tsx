@@ -14,7 +14,7 @@ import {WorkspaceEdit, WorkspaceEditMode} from 'app/pages/workspace/workspace-ed
 import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
 
 jest.mock('app/utils/navigation', () => ({
-  ...(require.requireActual('app/utils/navigation')),
+  ...(jest.requireActual('app/utils/navigation')),
   navigate: jest.fn()
 }));
 

@@ -83,9 +83,6 @@ describe('Home page ui tests', () => {
     const cursor = await plusIcon.getComputedStyle('cursor');
     expect(cursor).toBe('pointer');
     expect(await plusIcon.isVisible()).toBe(true);
-
-    await plusIcon.dispose();
-    expect(await plusIcon.isVisible()).toBe(false);
   });
 
 
