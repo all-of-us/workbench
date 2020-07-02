@@ -963,6 +963,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void sendUserInstructions_none() throws MessagingException {
+    // default Institution in this test class has no instructions
     createAccountAndDbUserWithAffiliation();
     verify(mockMailService).sendWelcomeEmail(any(), any(), any());
 
