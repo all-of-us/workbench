@@ -18,10 +18,8 @@ const DUCC = fp.flow(withRouteData, withFullHeight)(DataUserCodeOfConduct);
 
 export const AppRoutingComponent: React.FunctionComponent = () => {
   const {authLoaded = false} = useStore(authStore);
-
   return authLoaded && <AppRouter>
     <AppRoute path='/cookie-policy' component={CookiePolicyComponent}/>
-    <AppRoute path='/user-audit' component={UserAudit}/>
     <ProtectedRoutes guards={[signInGuard]}>
         <AppRoute
         path='/data-code-of-conduct'
@@ -30,6 +28,7 @@ export const AppRoutingComponent: React.FunctionComponent = () => {
             minimizeChrome: true
           }} />}
         />
+        <AppRoute path='/user-audit' component={UserAudit}/>
     </ProtectedRoutes>
   </AppRouter>;
 };
