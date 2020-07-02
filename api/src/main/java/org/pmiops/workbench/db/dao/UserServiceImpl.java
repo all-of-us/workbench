@@ -391,16 +391,11 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
             finalDbUserReference.addInstitutionalAffiliation(affiliation);
           });
     }
-    // set via the newer Verified Institutional Affiliation flow
-    boolean requireInstitutionalVerification =
-        configProvider.get().featureFlags.requireInstitutionalVerification;
 
     try {
       dbUser = userDao.save(dbUser);
-      if (requireInstitutionalVerification) {
-        dbVerifiedAffiliation.setUser(dbUser);
-        this.verifiedInstitutionalAffiliationDao.save(dbVerifiedAffiliation);
-      }
+      dbVerifiedAffiliation.setUser(dbUser);
+      verifiedInstitutionalAffiliationDao.save(dbVerifiedAffiliation);
     } catch (DataIntegrityViolationException e) {
       dbUser = userDao.findUserByUsername(username);
       if (dbUser == null) {
