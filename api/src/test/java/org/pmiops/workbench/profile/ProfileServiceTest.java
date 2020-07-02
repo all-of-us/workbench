@@ -129,7 +129,6 @@ public class ProfileServiceTest {
   @Before
   public void setUp() {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
-    workbenchConfig.featureFlags.requireInstitutionalVerification = true;
   }
 
   @Test
@@ -220,7 +219,6 @@ public class ProfileServiceTest {
     when(mockInstitutionService.validateAffiliation(
             dbVerifiedInstitutionalAffiliation, "kibitz@broadinstitute.org"))
         .thenReturn(true);
-    ;
 
     profileService.validateInstitutionalAffiliation(profile);
 

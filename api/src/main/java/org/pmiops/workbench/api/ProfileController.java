@@ -238,9 +238,7 @@ public class ProfileController implements ProfileApiDelegate {
       verifyInvitationKey(request.getInvitationKey());
     }
 
-    if (workbenchConfigProvider.get().featureFlags.requireInstitutionalVerification) {
-      profileService.validateInstitutionalAffiliation(request.getProfile());
-    }
+    profileService.validateInstitutionalAffiliation(request.getProfile());
 
     final Profile profile = request.getProfile();
 
@@ -300,19 +298,17 @@ public class ProfileController implements ProfileApiDelegate {
       throw new WorkbenchException(e);
     }
 
-    if (workbenchConfigProvider.get().featureFlags.requireInstitutionalVerification) {
-      institutionService
-          .getInstitutionUserInstructions(
-              profile.getVerifiedInstitutionalAffiliation().getInstitutionShortName())
-          .ifPresent(
-              instructions -> {
-                try {
-                  mail.sendInstitutionUserInstructions(profile.getContactEmail(), instructions);
-                } catch (MessagingException e) {
-                  throw new WorkbenchException(e);
-                }
-              });
-    }
+    institutionService
+        .getInstitutionUserInstructions(
+            profile.getVerifiedInstitutionalAffiliation().getInstitutionShortName())
+        .ifPresent(
+            instructions -> {
+              try {
+                mail.sendInstitutionUserInstructions(profile.getContactEmail(), instructions);
+              } catch (MessagingException e) {
+                throw new WorkbenchException(e);
+              }
+            });
 
     // Note: Avoid getProfileResponse() here as this is not an authenticated request.
     final Profile createdProfile = profileService.getProfile(user);
