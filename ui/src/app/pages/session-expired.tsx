@@ -1,10 +1,9 @@
-import {Component} from '@angular/core';
 import {GoogleSignInButton} from 'app/components/google-sign-in';
 import {BoldHeader} from 'app/components/headers';
 import {PublicLayout} from 'app/components/public-layout';
-import {SignInService} from 'app/services/sign-in.service';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase} from 'app/utils';
+import {reactStyles} from 'app/utils';
+import {buildPageTitleForEnvironment} from 'app/utils/title';
 import * as React from 'react';
 
 const styles = reactStyles({
@@ -19,26 +18,18 @@ const styles = reactStyles({
   }
 });
 
-export const SessionExpired: React.FunctionComponent<{signIn: Function}> = ({signIn}) => {
-  return <PublicLayout>
-    <BoldHeader>You have been signed out</BoldHeader>
-    <section style={styles.textSection}>
-      You were automatically signed out of your session due to inactivity
-    </section>
-    <GoogleSignInButton signIn={signIn} />
-  </PublicLayout>;
-};
-
-@Component({
-  template: '<div #root></div>'
-})
-export class SessionExpiredComponent extends ReactWrapperBase {
-  constructor(private signInService: SignInService) {
-    super(SessionExpired, ['signIn']);
-    this.signIn = this.signIn.bind(this);
+export class SessionExpired extends React.Component<{routeConfig: {signIn: Function}}> {
+  componentDidMount() {
+    document.title = buildPageTitleForEnvironment('You have been signed out');
   }
 
-  signIn(): void {
-    this.signInService.signIn();
+  render() {
+    return <PublicLayout>
+      <BoldHeader>You have been signed out</BoldHeader>
+      <section style={styles.textSection}>
+        You were automatically signed out of your session due to inactivity
+      </section>
+      <GoogleSignInButton signIn={() => this.props.routeConfig.signIn()}/>
+    </PublicLayout>;
   }
 }
