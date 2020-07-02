@@ -244,16 +244,21 @@ public class ProfileControllerTest extends BaseControllerTest {
     googleUser.setChangePasswordAtNextLogin(true);
     googleUser.setPassword("testPassword");
     googleUser.setIsEnrolledIn2Sv(true);
-    when(mockDirectoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
 
     DUA_VERSION = userService.getCurrentDuccVersion();
+
+    when(mockDirectoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
+    when(mockCloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
+    when(mockDirectoryService.createUser(
+            GIVEN_NAME, FAMILY_NAME, USER_PREFIX + "@" + GSUITE_DOMAIN, CONTACT_EMAIL))
+        .thenReturn(googleUser);
+    when(mockCloudStorageService.getCaptchaServerKey()).thenReturn("Server_Key");
 
     try {
       doNothing().when(mockMailService).sendBetaAccessRequestEmail(Mockito.any());
     } catch (MessagingException e) {
       e.printStackTrace();
     }
-    when(mockCloudStorageService.getCaptchaServerKey()).thenReturn("Server_Key");
     try {
       when(mockCaptchaVerificationService.verifyCaptcha(CAPTCHA_TOKEN)).thenReturn(true);
       when(mockCaptchaVerificationService.verifyCaptcha(WRONG_CAPTCHA_TOKEN)).thenReturn(false);
@@ -264,7 +269,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void testCreateAccount_invitationKeyMismatch() {
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
 
     config.access.requireInvitationKey = true;
     when(mockCloudStorageService.readInvitationKey()).thenReturn("BLAH");
@@ -273,14 +278,14 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void testCreateAccount_invalidCaptchaToken() {
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
     createAccountRequest.setCaptchaVerificationToken(WRONG_CAPTCHA_TOKEN);
     profileController.createAccount(createAccountRequest);
   }
 
   @Test
   public void testCreateAccount_noRequireInvitationKey() {
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
 
     // When invitation key verification is turned off, even a bad invitation key should
     // allow a user to be created.
@@ -311,7 +316,7 @@ public class ProfileControllerTest extends BaseControllerTest {
             .institutionShortName("Broad")
             .institutionalRoleEnum(InstitutionalRole.STUDENT);
     createAccountRequest.getProfile().contactEmail("bob@broad.com");
-    createAccount(verifiedInstitutionalAffiliation);
+    createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
   }
 
   @Test(expected = BadRequestException.class)
@@ -331,7 +336,7 @@ public class ProfileControllerTest extends BaseControllerTest {
             .institutionShortName("Broad")
             .institutionalRoleEnum(InstitutionalRole.STUDENT);
     createAccountRequest.getProfile().contactEmail("bob@broad.com");
-    createAccount(verifiedInstitutionalAffiliation);
+    createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
   }
 
   @Test(expected = BadRequestException.class)
@@ -350,7 +355,7 @@ public class ProfileControllerTest extends BaseControllerTest {
             .institutionShortName("Broad")
             .institutionalRoleEnum(InstitutionalRole.STUDENT);
     createAccountRequest.getProfile().contactEmail("bob@broadInstitute.com");
-    createAccount(verifiedInstitutionalAffiliation);
+    createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
   }
 
   @Test
@@ -370,7 +375,7 @@ public class ProfileControllerTest extends BaseControllerTest {
             .institutionShortName("Broad")
             .institutionalRoleEnum(InstitutionalRole.STUDENT);
     createAccountRequest.getProfile().contactEmail(CONTACT_EMAIL);
-    createAccount(verifiedInstitutionalAffiliation);
+    createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
   }
 
   @Test
@@ -390,7 +395,7 @@ public class ProfileControllerTest extends BaseControllerTest {
             .institutionShortName("Broad")
             .institutionalRoleEnum(InstitutionalRole.STUDENT);
     createAccountRequest.getProfile().contactEmail("bob@example.com");
-    createAccount(verifiedInstitutionalAffiliation);
+    createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
   }
 
   @Test
@@ -408,12 +413,12 @@ public class ProfileControllerTest extends BaseControllerTest {
             .institutionShortName("Broad")
             .institutionalRoleEnum(InstitutionalRole.STUDENT);
     createAccountRequest.getProfile().contactEmail("bob@example.com");
-    createAccount(verifiedInstitutionalAffiliation);
+    createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
   }
 
   @Test
   public void testCreateAccount_success() {
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
     verify(mockProfileAuditor).fireCreateAction(any(Profile.class));
     final DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
     assertThat(dbUser).isNotNull();
@@ -423,7 +428,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Test
   public void testCreateAccount_withTosVersion() {
     createAccountRequest.setTermsOfServiceVersion(1);
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
 
     final DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
     final List<DbUserTermsOfService> tosRows = Lists.newArrayList(userTermsOfServiceDao.findAll());
@@ -438,7 +443,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Test(expected = BadRequestException.class)
   public void testCreateAccount_withBadTosVersion() {
     createAccountRequest.setTermsOfServiceVersion(999);
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
   }
 
   @Test
@@ -452,13 +457,13 @@ public class ProfileControllerTest extends BaseControllerTest {
     exception.expect(BadRequestException.class);
     exception.expectMessage(
         "Username should be at least 3 characters and not more than 64 characters");
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
     verify(mockProfileAuditor).fireCreateAction(any(Profile.class));
   }
 
   @Test
   public void testSubmitDataUseAgreement_success() {
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
     String duaInitials = "NIH";
     assertThat(profileController.submitDataUseAgreement(DUA_VERSION, duaInitials).getStatusCode())
         .isEqualTo(HttpStatus.OK);
@@ -474,7 +479,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void testSubmitDataUseAgreement_wrongVersion() {
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
     String duaInitials = "NIH";
     profileController.submitDataUseAgreement(DUA_VERSION - 1, duaInitials);
   }
@@ -485,7 +490,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     config.featureFlags.enableV3DataUserCodeOfConduct = false;
     final int previousDuaVersion = DUA_VERSION - 1;
 
-    final long userId = createUserWithVerifiedAffiliation().getUserId();
+    final long userId = createAccountAndDbUserWithAffiliation().getUserId();
 
     // bypass the other access requirements
     final DbUser dbUser = userDao.findUserByUserId(userId);
@@ -521,7 +526,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testMe_success() {
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
     Profile profile = profileController.getMe().getBody();
     assertProfile(
         profile,
@@ -538,7 +543,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testMe_userBeforeNotLoggedInSuccess() {
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
     Profile profile = profileController.getMe().getBody();
     assertProfile(
         profile,
@@ -568,7 +573,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Deprecated // to be removed in RW-4362
   @Test
   public void testMe_institutionalAffiliationsAlphabetical() {
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
 
     Profile profile = profileController.getMe().getBody();
     ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<>();
@@ -592,7 +597,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Deprecated // to be removed in RW-4362
   @Test
   public void testMe_institutionalAffiliationsNotAlphabetical() {
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
 
     Profile profile = profileController.getMe().getBody();
     ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<>();
@@ -616,7 +621,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Deprecated // to be removed in RW-4362
   @Test
   public void testMe_removeSingleInstitutionalAffiliation() {
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
 
     Profile profile = profileController.getMe().getBody();
     ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<>();
@@ -642,7 +647,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Deprecated // to be removed in RW-4362
   @Test
   public void testMe_removeAllInstitutionalAffiliations() {
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
 
     Profile profile = profileController.getMe().getBody();
     ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<>();
@@ -666,7 +671,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Test(expected = BadRequestException.class)
   public void testMe_verifiedInstitutionalAffiliation_missing() {
     final VerifiedInstitutionalAffiliation missing = null;
-    createAccount(missing);
+    createAccountAndDbUserWithAffiliation(missing);
   }
 
   @Test(expected = NotFoundException.class)
@@ -688,7 +693,7 @@ public class ProfileControllerTest extends BaseControllerTest {
             .institutionShortName(invalidInst)
             .institutionalRoleEnum(InstitutionalRole.STUDENT);
 
-    createAccount(verifiedInstitutionalAffiliation);
+    createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
   }
 
   @Test(expected = BadRequestException.class)
@@ -706,7 +711,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         new VerifiedInstitutionalAffiliation()
             .institutionShortName(broad.getShortName())
             .institutionalRoleEnum(InstitutionalRole.ADMIN);
-    createAccount(verifiedInstitutionalAffiliation);
+    createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
   }
 
   @Test(expected = BadRequestException.class)
@@ -730,13 +735,13 @@ public class ProfileControllerTest extends BaseControllerTest {
             .institutionalRoleEnum(InstitutionalRole.ADMIN);
 
     // CONTACT_EMAIL has the domain @example.com
-    createAccount(verifiedInstitutionalAffiliation);
+    createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
   }
 
   @Test(expected = NotFoundException.class)
   public void updateVerifiedInstitutionalAffiliation_noSuchInstitution() {
     final VerifiedInstitutionalAffiliation original = createVerifiedInstitutionalAffiliation();
-    createAccount(original);
+    createAccountAndDbUserWithAffiliation(original);
 
     final VerifiedInstitutionalAffiliation newAffil =
         new VerifiedInstitutionalAffiliation()
@@ -751,7 +756,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void updateVerifiedInstitutionalAffiliation_update() {
     VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
         createVerifiedInstitutionalAffiliation();
-    createAccount(verifiedInstitutionalAffiliation);
+    createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
 
     // original is PROJECT_PERSONNEL
     verifiedInstitutionalAffiliation.setInstitutionalRoleEnum(InstitutionalRole.ADMIN);
@@ -766,7 +771,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Test(expected = BadRequestException.class)
   public void updateProfile_removeVerifiedInstitutionalAffiliationForbidden() {
     final VerifiedInstitutionalAffiliation original = createVerifiedInstitutionalAffiliation();
-    createAccount(original);
+    createAccountAndDbUserWithAffiliation(original);
 
     final Profile profile = profileController.getMe().getBody();
     profile.setVerifiedInstitutionalAffiliation(null);
@@ -776,14 +781,14 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Test(expected = BadRequestException.class)
   public void updateVerifiedInstitutionalAffiliation_removeForbidden() {
     final VerifiedInstitutionalAffiliation original = createVerifiedInstitutionalAffiliation();
-    createAccount(original);
+    createAccountAndDbUserWithAffiliation(original);
 
     profileController.updateVerifiedInstitutionalAffiliation(dbUser.getUserId(), null);
   }
 
   @Test
   public void updateContactEmail_forbidden() {
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
     dbUser.setFirstSignInTime(TIMESTAMP);
     String originalEmail = dbUser.getContactEmail();
 
@@ -799,7 +804,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void updateContactEmail_badRequest() {
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
     when(mockDirectoryService.resetUserPassword(anyString())).thenReturn(googleUser);
     dbUser.setFirstSignInTime(null);
     String originalEmail = dbUser.getContactEmail();
@@ -816,7 +821,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void updateContactEmail_OK() {
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
     dbUser.setFirstSignInTime(null);
     when(mockDirectoryService.resetUserPassword(anyString())).thenReturn(googleUser);
 
@@ -832,7 +837,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void updateName_alsoUpdatesDua() {
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
     Profile profile = profileController.getMe().getBody();
     profile.setGivenName("OldGivenName");
     profile.setFamilyName("OldFamilyName");
@@ -848,7 +853,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void updateGivenName_badRequest() {
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
     Profile profile = profileController.getMe().getBody();
     String newName =
         "obladidobladalifegoesonyalalalalalifegoesonobladioblada" + "lifegoesonrahlalalalifegoeson";
@@ -858,7 +863,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void updateProfile_badRequest_nullAddress() {
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
     Profile profile = profileController.getMe().getBody();
     profile.setAddress(null);
     profileController.updateProfile(profile);
@@ -866,7 +871,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void updateProfile_badRequest_nullCountry() {
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
     Profile profile = profileController.getMe().getBody();
     profile.getAddress().country(null);
     profileController.updateProfile(profile);
@@ -874,7 +879,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void updateProfile_badRequest_nullState() {
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
     Profile profile = profileController.getMe().getBody();
     profile.getAddress().state(null);
     profileController.updateProfile(profile);
@@ -882,7 +887,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void updateProfile_badRequest_nullZipCode() {
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
     Profile profile = profileController.getMe().getBody();
     profile.getAddress().zipCode(null);
     profileController.updateProfile(profile);
@@ -890,7 +895,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void updateProfile_badRequest_emptyReasonForResearch() {
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
     Profile profile = profileController.getMe().getBody();
     profile.setAreaOfResearch("");
     profileController.updateProfile(profile);
@@ -898,7 +903,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void updateProfile_badRequest_UpdateUserName() {
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
     Profile profile = profileController.getMe().getBody();
     profile.setUsername("newUserName@fakeDomain.com");
     profileController.updateProfile(profile);
@@ -906,7 +911,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void updateProfile_badRequest_UpdateContactEmail() {
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
     Profile profile = profileController.getMe().getBody();
     profile.setContactEmail("newContact@fakeDomain.com");
     profileController.updateProfile(profile);
@@ -914,7 +919,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void updateFamilyName_badRequest() {
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
     Profile profile = profileController.getMe().getBody();
     String newName =
         "obladidobladalifegoesonyalalalalalifegoesonobladioblada" + "lifegoesonrahlalalalifegoeson";
@@ -924,7 +929,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void resendWelcomeEmail_messagingException() throws MessagingException {
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
     dbUser.setFirstSignInTime(null);
     when(mockDirectoryService.resetUserPassword(anyString())).thenReturn(googleUser);
     doThrow(new MessagingException("exception"))
@@ -942,7 +947,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void resendWelcomeEmail_OK() throws MessagingException {
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
     when(mockDirectoryService.resetUserPassword(anyString())).thenReturn(googleUser);
     doNothing().when(mockMailService).sendWelcomeEmail(any(), any(), any());
 
@@ -957,7 +962,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void sendUserInstructions_none() throws MessagingException {
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
     verify(mockMailService).sendWelcomeEmail(any(), any(), any());
 
     // don't send the user instructions email if there are no instructions
@@ -984,7 +989,7 @@ public class ProfileControllerTest extends BaseControllerTest {
             .instructions(rawInstructions);
     institutionService.setInstitutionUserInstructions(instructions);
 
-    createAccount(verifiedInstitutionalAffiliation);
+    createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
     verify(mockMailService).sendWelcomeEmail(any(), any(), any());
     verify(mockMailService).sendInstitutionUserInstructions(CONTACT_EMAIL, sanitizedInstructions);
   }
@@ -1003,7 +1008,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     institutionService.deleteInstitutionUserInstructions(
         verifiedInstitutionalAffiliation.getInstitutionShortName());
 
-    createAccount(verifiedInstitutionalAffiliation);
+    createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
     verify(mockMailService).sendWelcomeEmail(any(), any(), any());
 
     // don't send the user instructions email if the instructions have been deleted
@@ -1016,7 +1021,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     NihToken nihToken = new NihToken().jwt("test");
     FirecloudJWTWrapper firecloudJwt = new FirecloudJWTWrapper().jwt("test");
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
     profileController.updateNihToken(nihToken);
     verify(mockFireCloudService).postNihCallback(ArgumentMatchers.eq(firecloudJwt));
   }
@@ -1035,7 +1040,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     NihToken nihToken = new NihToken().jwt("test");
     String jwt = "test";
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
     profileController.updateNihToken(nihToken);
     verify(shibbolethService).updateShibbolethToken(ArgumentMatchers.eq(jwt));
   }
@@ -1058,7 +1063,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     nihStatus.setLinkExpireTime(TIMESTAMP.getTime());
     when(mockFireCloudService.getNihStatus()).thenReturn(nihStatus);
 
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
 
     profileController.syncEraCommonsStatus();
     assertThat(userDao.findUserByUsername(PRIMARY_EMAIL).getEraCommonsLinkedNihUsername())
@@ -1069,7 +1074,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testDeleteProfile() {
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
 
     profileController.deleteProfile();
     verify(mockProfileAuditor).fireDeleteAction(dbUser.getUserId(), dbUser.getUsername());
@@ -1077,7 +1082,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testBypassAccessModule() {
-    Profile profile = createUserWithVerifiedAffiliation();
+    Profile profile = createAccountAndDbUserWithAffiliation();
     profileController.bypassAccessRequirement(
         profile.getUserId(),
         new AccessBypassRequest().isBypassed(true).moduleName(AccessModule.DATA_USE_AGREEMENT));
@@ -1088,7 +1093,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testFreeTierLimits() {
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
     DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
 
     when(mockFreeTierBillingService.getCachedFreeTierUsage(dbUser)).thenReturn(FREE_TIER_USAGE);
@@ -1110,7 +1115,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testUpdateProfile_updateDemographicSurvey() {
-    createUserWithVerifiedAffiliation();
+    createAccountAndDbUserWithAffiliation();
     Profile profile = profileController.getMe().getBody();
 
     DemographicSurvey demographicSurvey = profile.getDemographicSurvey();
@@ -1140,12 +1145,8 @@ public class ProfileControllerTest extends BaseControllerTest {
         false);
   }
 
-  private Profile createAccount(VerifiedInstitutionalAffiliation verifiedAffiliation) {
-    when(mockCloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
-    when(mockDirectoryService.createUser(
-            GIVEN_NAME, FAMILY_NAME, USER_PREFIX + "@" + GSUITE_DOMAIN, CONTACT_EMAIL))
-        .thenReturn(googleUser);
-
+  private Profile createAccountAndDbUserWithAffiliation(
+      VerifiedInstitutionalAffiliation verifiedAffiliation) {
     createAccountRequest.getProfile().setVerifiedInstitutionalAffiliation(verifiedAffiliation);
 
     Profile result = profileController.createAccount(createAccountRequest).getBody();
@@ -1156,8 +1157,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     return result;
   }
 
-  private Profile createUserWithVerifiedAffiliation() {
-    return createAccount(createVerifiedInstitutionalAffiliation());
+  private Profile createAccountAndDbUserWithAffiliation() {
+    return createAccountAndDbUserWithAffiliation(createVerifiedInstitutionalAffiliation());
   }
 
   private void assertProfile(
