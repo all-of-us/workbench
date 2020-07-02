@@ -51,6 +51,7 @@ import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.CreateAccountRequest;
+import org.pmiops.workbench.model.EditUserInformationRequest;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.Institution;
@@ -529,7 +530,7 @@ public class ProfileController implements ProfileApiDelegate {
 
     Profile oldProfile = profileService.getProfile(dbUser);
 
-    profileService.updateProfileForUser(dbUser, updatedProfile, oldProfile);
+    profileService.adminUpdateProfileForUser(dbUser, updatedProfile, oldProfile);
 
     return ResponseEntity.ok(new EmptyResponse());
   }
@@ -577,6 +578,12 @@ public class ProfileController implements ProfileApiDelegate {
     long userId = userProvider.get().getUserId();
     userService.updateBypassTime(userId, request);
     return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @Override
+  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
+  public ResponseEntity<Profile> editUserInformation(EditUserInformationRequest request) {
+    return ResponseEntity.ok(profileService.editUserInformation(request));
   }
 
   @Override

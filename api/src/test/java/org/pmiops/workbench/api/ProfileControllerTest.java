@@ -2,14 +2,17 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -66,6 +69,7 @@ import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.model.DuaType;
+import org.pmiops.workbench.model.EditUserInformationRequest;
 import org.pmiops.workbench.model.Education;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.Ethnicity;
@@ -230,6 +234,9 @@ public class ProfileControllerTest extends BaseControllerTest {
             .state(STATE)
             .country(COUNTRY)
             .zipCode(ZIP_CODE));
+
+    // TODO: this needs to be set in createAccountAndDbUserWithAffiliation() instead of here.  Why?
+    // profile.setEmailVerificationStatus(EmailVerificationStatus.SUBSCRIBED);
 
     createAccountRequest = new CreateAccountRequest();
     createAccountRequest.setProfile(profile);
@@ -528,6 +535,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Test
   public void testMe_success() {
     createAccountAndDbUserWithAffiliation();
+
     Profile profile = profileController.getMe().getBody();
     assertProfile(
         profile,
@@ -1147,14 +1155,333 @@ public class ProfileControllerTest extends BaseControllerTest {
         false);
   }
 
+  @Test(expected = NotFoundException.class)
+  public void test_editUserInformation_null_user() {
+    profileService.editUserInformation(new EditUserInformationRequest());
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void test_editUserInformation_user_not_found() {
+    final EditUserInformationRequest request =
+        new EditUserInformationRequest().username("not found");
+    profileService.editUserInformation(request);
+  }
+
+  @Test
+  public void test_editUserInformation_no_change() {
+    final Profile original = createAccountAndDbUserWithAffiliation();
+
+    // valid user but no fields updated
+    final EditUserInformationRequest request =
+        new EditUserInformationRequest().username(PRIMARY_EMAIL);
+    final Profile retrieved = profileService.editUserInformation(request);
+
+    // RW-5257 Demo Survey completion time is incorrectly updated
+    retrieved.setDemographicSurveyCompletionTime(null);
+    assertThat(retrieved).isEqualTo(original);
+  }
+
+  @Test
+  public void test_editUserInformation_contactEmail() {
+    // pre-affiliate with an Institution which will validate the user's existing
+    // CONTACT_EMAIL and also a new one
+    final String newContactEmail = "eric.lander@broadinstitute.org";
+
+    final Institution broadPlus =
+        new Institution()
+            .shortName("Broad")
+            .displayName("The Broad Institute")
+            .emailAddresses(ImmutableList.of(CONTACT_EMAIL, newContactEmail))
+            .duaTypeEnum(DuaType.RESTRICTED)
+            .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
+    institutionService.createInstitution(broadPlus);
+
+    final VerifiedInstitutionalAffiliation affiliation =
+        new VerifiedInstitutionalAffiliation()
+            .institutionShortName(broadPlus.getShortName())
+            .institutionDisplayName(broadPlus.getDisplayName())
+            .institutionalRoleEnum(InstitutionalRole.PROJECT_PERSONNEL);
+
+    final Profile original = createAccountAndDbUserWithAffiliation(affiliation);
+    assertThat(original.getContactEmail()).isEqualTo(CONTACT_EMAIL);
+
+    final EditUserInformationRequest request =
+        new EditUserInformationRequest().username(PRIMARY_EMAIL).contactEmail(newContactEmail);
+    final Profile retrieved = profileService.editUserInformation(request);
+    assertThat(retrieved.getContactEmail()).isEqualTo(newContactEmail);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void test_editUserInformation_contactEmail_no_match() {
+    // the existing Institution for this user only matches the single CONTACT_EMAIL
+    createAccountAndDbUserWithAffiliation();
+
+    final String newContactEmail = "eric.lander@broadinstitute.org";
+    final EditUserInformationRequest request =
+        new EditUserInformationRequest().username(PRIMARY_EMAIL).contactEmail(newContactEmail);
+    profileService.editUserInformation(request);
+  }
+
+  @Test
+  public void test_editUserInformation_newAffiliation() {
+    final VerifiedInstitutionalAffiliation expectedOriginalAffiliation =
+        new VerifiedInstitutionalAffiliation()
+            .institutionShortName("Broad")
+            .institutionDisplayName("The Broad Institute")
+            .institutionalRoleEnum(InstitutionalRole.PROJECT_PERSONNEL);
+    final Profile original = createAccountAndDbUserWithAffiliation();
+
+    assertThat(original.getVerifiedInstitutionalAffiliation())
+        .isEqualTo(expectedOriginalAffiliation);
+
+    // define a new affiliation which will match the user's existing CONTACT_EMAIL
+
+    final Institution massGeneral =
+        new Institution()
+            .shortName("MGH123")
+            .displayName("Massachusetts General Hospital")
+            .emailAddresses(ImmutableList.of(CONTACT_EMAIL))
+            .duaTypeEnum(DuaType.RESTRICTED)
+            .organizationTypeEnum(OrganizationType.HEALTH_CENTER_NON_PROFIT);
+    institutionService.createInstitution(massGeneral);
+
+    final VerifiedInstitutionalAffiliation newAffiliation =
+        new VerifiedInstitutionalAffiliation()
+            .institutionShortName(massGeneral.getShortName())
+            .institutionDisplayName(massGeneral.getDisplayName())
+            .institutionalRoleEnum(InstitutionalRole.POST_DOCTORAL);
+
+    final EditUserInformationRequest request =
+        new EditUserInformationRequest()
+            .username(PRIMARY_EMAIL)
+            .verifiedInstitutionalAffiliation(newAffiliation);
+    final Profile retrieved = profileService.editUserInformation(request);
+    assertThat(retrieved.getVerifiedInstitutionalAffiliation()).isEqualTo(newAffiliation);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void test_editUserInformation_newAffiliation_no_match() {
+    createAccountAndDbUserWithAffiliation();
+
+    // define a new affiliation which will not match the user's CONTACT_EMAIL
+
+    final Institution massGeneral =
+        new Institution()
+            .shortName("MGH123")
+            .displayName("Massachusetts General Hospital")
+            .duaTypeEnum(DuaType.MASTER)
+            .emailDomains(ImmutableList.of("mgh.org", "massgeneral.hospital"))
+            .organizationTypeEnum(OrganizationType.HEALTH_CENTER_NON_PROFIT);
+    institutionService.createInstitution(massGeneral);
+
+    final VerifiedInstitutionalAffiliation newAffiliation =
+        new VerifiedInstitutionalAffiliation()
+            .institutionShortName(massGeneral.getShortName())
+            .institutionDisplayName(massGeneral.getDisplayName())
+            .institutionalRoleEnum(InstitutionalRole.POST_DOCTORAL);
+
+    final EditUserInformationRequest request =
+        new EditUserInformationRequest()
+            .username(PRIMARY_EMAIL)
+            .verifiedInstitutionalAffiliation(newAffiliation);
+    profileService.editUserInformation(request);
+  }
+
+  @Test
+  public void test_editUserInformation_contactEmail_newAffiliation_self_match() {
+    final VerifiedInstitutionalAffiliation expectedOriginalAffiliation =
+        new VerifiedInstitutionalAffiliation()
+            .institutionShortName("Broad")
+            .institutionDisplayName("The Broad Institute")
+            .institutionalRoleEnum(InstitutionalRole.PROJECT_PERSONNEL);
+
+    final Profile original = createAccountAndDbUserWithAffiliation();
+    assertThat(original.getContactEmail()).isEqualTo(CONTACT_EMAIL);
+    assertThat(original.getVerifiedInstitutionalAffiliation())
+        .isEqualTo(expectedOriginalAffiliation);
+
+    // update both the contact email and the affiliation, and validate against each other
+
+    final String newContactEmail = "doctor@mgh.org";
+
+    final Institution massGeneral =
+        new Institution()
+            .shortName("MGH123")
+            .displayName("Massachusetts General Hospital")
+            .duaTypeEnum(DuaType.MASTER)
+            .emailDomains(ImmutableList.of("mgh.org", "massgeneral.hospital"))
+            .organizationTypeEnum(OrganizationType.HEALTH_CENTER_NON_PROFIT);
+    institutionService.createInstitution(massGeneral);
+
+    final VerifiedInstitutionalAffiliation newAffiliation =
+        new VerifiedInstitutionalAffiliation()
+            .institutionShortName(massGeneral.getShortName())
+            .institutionDisplayName(massGeneral.getDisplayName())
+            .institutionalRoleEnum(InstitutionalRole.POST_DOCTORAL);
+
+    final EditUserInformationRequest request =
+        new EditUserInformationRequest()
+            .username(PRIMARY_EMAIL)
+            .contactEmail(newContactEmail)
+            .verifiedInstitutionalAffiliation(newAffiliation);
+    final Profile retrieved = profileService.editUserInformation(request);
+    assertThat(retrieved.getContactEmail()).isEqualTo(newContactEmail);
+    assertThat(retrieved.getVerifiedInstitutionalAffiliation()).isEqualTo(newAffiliation);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void test_editUserInformation_contactEmail_newAffiliation_no_match() {
+    final VerifiedInstitutionalAffiliation expectedOriginalAffiliation =
+        new VerifiedInstitutionalAffiliation()
+            .institutionShortName("Broad")
+            .institutionDisplayName("The Broad Institute")
+            .institutionalRoleEnum(InstitutionalRole.PROJECT_PERSONNEL);
+
+    final Profile original = createAccountAndDbUserWithAffiliation();
+    assertThat(original.getContactEmail()).isEqualTo(CONTACT_EMAIL);
+    assertThat(original.getVerifiedInstitutionalAffiliation())
+        .isEqualTo(expectedOriginalAffiliation);
+
+    // update both the contact email and the affiliation, and fail to validate against each other
+
+    final String newContactEmail = "notadoctor@hotmail.com";
+
+    final Institution massGeneral =
+        new Institution()
+            .shortName("MGH123")
+            .displayName("Massachusetts General Hospital")
+            .duaTypeEnum(DuaType.MASTER)
+            .emailDomains(ImmutableList.of("mgh.org", "massgeneral.hospital"))
+            .organizationTypeEnum(OrganizationType.HEALTH_CENTER_NON_PROFIT);
+    institutionService.createInstitution(massGeneral);
+
+    final VerifiedInstitutionalAffiliation newAffiliation =
+        new VerifiedInstitutionalAffiliation()
+            .institutionShortName(massGeneral.getShortName())
+            .institutionDisplayName(massGeneral.getDisplayName())
+            .institutionalRoleEnum(InstitutionalRole.POST_DOCTORAL);
+
+    final EditUserInformationRequest request =
+        new EditUserInformationRequest()
+            .username(PRIMARY_EMAIL)
+            .contactEmail(newContactEmail)
+            .verifiedInstitutionalAffiliation(newAffiliation);
+    profileService.editUserInformation(request);
+  }
+
+  @Test
+  public void test_editUserInformation_no_bypass_requests() {
+    final Profile original = createAccountAndDbUserWithAffiliation();
+
+    final EditUserInformationRequest request =
+        new EditUserInformationRequest()
+            .username(PRIMARY_EMAIL)
+            .accessBypassRequests(Collections.emptyList());
+    final Profile retrieved = profileService.editUserInformation(request);
+
+    // RW-5257 Demo Survey completion time is incorrectly updated
+    retrieved.setDemographicSurveyCompletionTime(null);
+    assertThat(retrieved).isEqualTo(original);
+  }
+
+  @Test
+  public void test_editUserInformation_bypass_requests() {
+    final Profile original = createAccountAndDbUserWithAffiliation();
+
+    // user has no bypasses at test start
+    assertThat(original.getDataUseAgreementBypassTime()).isNull();
+    assertThat(original.getComplianceTrainingBypassTime()).isNull();
+    assertThat(original.getBetaAccessBypassTime()).isNull();
+    assertThat(original.getEraCommonsBypassTime()).isNull();
+    assertThat(original.getTwoFactorAuthBypassTime()).isNull();
+
+    final List<AccessBypassRequest> bypasses1 =
+        ImmutableList.of(
+            new AccessBypassRequest().moduleName(AccessModule.DATA_USE_AGREEMENT).isBypassed(true),
+            new AccessBypassRequest().moduleName(AccessModule.COMPLIANCE_TRAINING).isBypassed(true),
+            // would un-bypass if a bypass had existed
+            new AccessBypassRequest().moduleName(AccessModule.BETA_ACCESS).isBypassed(false));
+
+    final EditUserInformationRequest request1 =
+        new EditUserInformationRequest().username(PRIMARY_EMAIL).accessBypassRequests(bypasses1);
+    final Profile retrieved1 = profileService.editUserInformation(request1);
+
+    // these two are now bypassed
+    assertThat(retrieved1.getDataUseAgreementBypassTime()).isNotNull();
+    assertThat(retrieved1.getComplianceTrainingBypassTime()).isNotNull();
+    // remains unbypassed because the flag was set to false
+    assertThat(retrieved1.getBetaAccessBypassTime()).isNull();
+    // unchanged: unbypassed
+    assertThat(retrieved1.getEraCommonsBypassTime()).isNull();
+    assertThat(retrieved1.getTwoFactorAuthBypassTime()).isNull();
+
+    final List<AccessBypassRequest> bypasses2 =
+        ImmutableList.of(
+            // un-bypass the previously bypassed
+            new AccessBypassRequest().moduleName(AccessModule.DATA_USE_AGREEMENT).isBypassed(false),
+            new AccessBypassRequest()
+                .moduleName(AccessModule.COMPLIANCE_TRAINING)
+                .isBypassed(false),
+            // bypass
+            new AccessBypassRequest().moduleName(AccessModule.ERA_COMMONS).isBypassed(true),
+            new AccessBypassRequest().moduleName(AccessModule.TWO_FACTOR_AUTH).isBypassed(true));
+
+    final EditUserInformationRequest request2 = request1.accessBypassRequests(bypasses2);
+    final Profile retrieved2 = profileService.editUserInformation(request2);
+
+    // these two are now unbypassed
+    assertThat(retrieved2.getDataUseAgreementBypassTime()).isNull();
+    assertThat(retrieved2.getComplianceTrainingBypassTime()).isNull();
+    // remains unbypassed
+    assertThat(retrieved2.getBetaAccessBypassTime()).isNull();
+    // the two are now bypassed
+    assertThat(retrieved2.getEraCommonsBypassTime()).isNotNull();
+    assertThat(retrieved2.getTwoFactorAuthBypassTime()).isNotNull();
+  }
+
+  // verify that setFreeTierDollarOverride() is called when the quota changes
+
+  @Test
+  public void test_editUserInformation_free_tier_quota() {
+    createAccountAndDbUserWithAffiliation();
+
+    final Double newQuota = 123.4;
+
+    final EditUserInformationRequest request =
+        new EditUserInformationRequest().username(PRIMARY_EMAIL).freeCreditsLimit(newQuota);
+    profileService.editUserInformation(request);
+    verify(mockFreeTierBillingService).setFreeTierDollarOverride(dbUser, newQuota);
+  }
+
+  // verify that setFreeTierDollarOverride() is not called when the quota does not change
+
+  @Test
+  public void test_editUserInformation_free_tier_quota_no_change() {
+    final Profile original = createAccountAndDbUserWithAffiliation();
+
+    final EditUserInformationRequest request =
+        new EditUserInformationRequest()
+            .username(PRIMARY_EMAIL)
+            .freeCreditsLimit(original.getFreeTierDollarQuota());
+    profileService.editUserInformation(request);
+
+    verify(mockFreeTierBillingService, never()).setFreeTierDollarOverride(any(), anyDouble());
+  }
+
   private Profile createAccountAndDbUserWithAffiliation(
       VerifiedInstitutionalAffiliation verifiedAffiliation) {
     createAccountRequest.getProfile().setVerifiedInstitutionalAffiliation(verifiedAffiliation);
 
     Profile result = profileController.createAccount(createAccountRequest).getBody();
+
+    // initialize the global test dbUser
     dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
+
+    // TODO: why is this necessary instead of initializing in setUp() ?
     dbUser.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
-    userDao.save(dbUser);
+    dbUser = userDao.save(dbUser);
+    // to match dbUser
+    result.setEmailVerificationStatus(EmailVerificationStatus.SUBSCRIBED);
 
     return result;
   }

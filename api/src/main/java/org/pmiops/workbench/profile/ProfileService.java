@@ -36,6 +36,7 @@ import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.DemographicSurvey;
+import org.pmiops.workbench.model.EditUserInformationRequest;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
@@ -159,6 +160,10 @@ public class ProfileService {
           "Institutional role description cannot be empty when institutional role is set to Other");
     }
 
+    validateInstitutionalAffiliationAgainstEmail(profile);
+  }
+
+  private void validateInstitutionalAffiliationAgainstEmail(Profile profile) {
     String contactEmail = profile.getContactEmail();
     DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation =
         verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
@@ -187,11 +192,28 @@ public class ProfileService {
    * @param previousProfile
    */
   public void updateProfileForUser(DbUser user, Profile updatedProfile, Profile previousProfile) {
+    updateProfileForUser(user, updatedProfile, previousProfile, false);
+  }
+
+  /**
+   * Updates a profile for a given user as Admin and persists all information to the database.
+   *
+   * @param user
+   * @param updatedProfile
+   * @param previousProfile
+   */
+  public void adminUpdateProfileForUser(
+      DbUser user, Profile updatedProfile, Profile previousProfile) {
+    updateProfileForUser(user, updatedProfile, previousProfile, true);
+  }
+
+  private void updateProfileForUser(
+      DbUser user, Profile updatedProfile, Profile previousProfile, boolean userIsAdmin) {
     // Apply cleaning methods to both the previous and updated profile, to avoid false positive
     // field diffs due to null-to-empty-object changes.
     cleanProfile(updatedProfile);
     cleanProfile(previousProfile);
-    validateProfile(updatedProfile, previousProfile);
+    validateProfile(updatedProfile, previousProfile, userIsAdmin);
 
     if (!user.getGivenName().equalsIgnoreCase(updatedProfile.getGivenName())
         || !user.getFamilyName().equalsIgnoreCase(updatedProfile.getFamilyName())) {
@@ -201,6 +223,7 @@ public class ProfileService {
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
+    user.setContactEmail(updatedProfile.getContactEmail());
     user.setGivenName(updatedProfile.getGivenName());
     user.setFamilyName(updatedProfile.getFamilyName());
     user.setAreaOfResearch(updatedProfile.getAreaOfResearch());
@@ -371,6 +394,17 @@ public class ProfileService {
   }
 
   /**
+   * Has this field changed?
+   *
+   * @param diff a Diff between two profiles
+   * @param field which field to check
+   * @return true if there are difference between the Profiles
+   */
+  private boolean fieldChanged(Diff diff, String field) {
+    return !getChangesWithPrefix(diff, field).isEmpty();
+  }
+
+  /**
    * Validates a set of Profile changes by comparing the updated profile to the previous version.
    * Only fields that have changed are subject to validation.
    *
@@ -381,47 +415,73 @@ public class ProfileService {
    * object.
    *
    * @param updatedProfile
-   * @param prevProfile
+   * @param previousProfile
    * @throws BadRequestException
    */
   @VisibleForTesting
-  public void validateProfile(@Nonnull Profile updatedProfile, @Nullable Profile prevProfile)
+  public void validateProfile(
+      @Nonnull Profile updatedProfile, @Nullable Profile previousProfile, boolean userIsAdmin) {
+
+    final boolean isNewProfile = previousProfile == null;
+    final Diff diff = javers.compare(previousProfile, updatedProfile);
+
+    validateProfileForCorrectness(updatedProfile, isNewProfile, diff);
+
+    if (userIsAdmin) {
+      validateChangesAllowedByAdmin(diff);
+    } else {
+      validateChangesAllowedByUser(diff);
+    }
+  }
+
+  private void validateProfileForCorrectness(Profile profile, boolean isNewProfile, Diff diff)
       throws BadRequestException {
-    boolean isNewObject = prevProfile == null;
-    Diff diff = javers.compare(prevProfile, updatedProfile);
+    if (isNewProfile || fieldChanged(diff, "username")) {
+      validateUsername(profile);
+    }
+    if (isNewProfile || fieldChanged(diff, "contactEmail")) {
+      validateContactEmail(profile);
 
-    if (!getChangesWithPrefix(diff, "username").isEmpty() || isNewObject) {
-      validateUsername(updatedProfile);
+      // only validate if the new profile has an affiliation - some older users do not
+      if (profile.getVerifiedInstitutionalAffiliation() != null) {
+        validateInstitutionalAffiliationAgainstEmail(profile);
+      }
     }
-    if (!getChangesWithPrefix(diff, "contactEmail").isEmpty() || isNewObject) {
-      validateContactEmail(updatedProfile);
+    if (isNewProfile || fieldChanged(diff, "givenName")) {
+      validateGivenName(profile);
     }
-    if (!getChangesWithPrefix(diff, "givenName").isEmpty() || isNewObject) {
-      validateGivenName(updatedProfile);
+    if (isNewProfile || fieldChanged(diff, "familyName")) {
+      validateFamilyName(profile);
     }
-    if (!getChangesWithPrefix(diff, "familyName").isEmpty() || isNewObject) {
-      validateFamilyName(updatedProfile);
+    if (isNewProfile || fieldChanged(diff, "address")) {
+      validateAddress(profile);
     }
-    if (!getChangesWithPrefix(diff, "address").isEmpty() || isNewObject) {
-      validateAddress(updatedProfile);
+    if (isNewProfile || fieldChanged(diff, "areaOfResearch")) {
+      validateAreaOfResearch(profile);
     }
-    if (!getChangesWithPrefix(diff, "areaOfResearch").isEmpty() || isNewObject) {
-      validateAreaOfResearch(updatedProfile);
+    if (isNewProfile || fieldChanged(diff, "verifiedInstitutionalAffiliation")) {
+      validateInstitutionalAffiliation(profile);
     }
-    if (!getChangesWithPrefix(diff, "verifiedInstitutionalAffiliation").isEmpty() || isNewObject) {
-      validateInstitutionalAffiliation(updatedProfile);
-    }
+  }
 
-    if (!isNewObject) {
-      // We disallow changes in certain fields.
-      if (!getChangesWithPrefix(diff, "username").isEmpty()) {
-        // See RW-1488.
-        throw new BadRequestException("Changing username is not supported");
-      }
-      if (!getChangesWithPrefix(diff, "contactEmail").isEmpty()) {
-        // See RW-1488.
-        throw new BadRequestException("Changing contact email is not currently supported");
-      }
+  private void validateChangesAllowedByUser(Diff diff) {
+    if (fieldChanged(diff, "username")) {
+      // See RW-1488.
+      throw new BadRequestException("Changing username is not supported");
+    }
+    if (fieldChanged(diff, "contactEmail")) {
+      // See RW-1488.
+      throw new BadRequestException("Changing contact email is not currently supported");
+    }
+    if (fieldChanged(diff, "verifiedInstitutionalAffiliation")) {
+      throw new BadRequestException("Changing Verified Institutional Affiliation is not supported");
+    }
+  }
+
+  private void validateChangesAllowedByAdmin(Diff diff) {
+    if (fieldChanged(diff, "username")) {
+      // See RW-1488.
+      throw new BadRequestException("Changing username is not supported");
     }
   }
 
@@ -432,10 +492,48 @@ public class ProfileService {
    * @throws BadRequestException
    */
   public void validateNewProfile(Profile profile) throws BadRequestException {
-    validateProfile(profile, null);
+    // unused, but this is the correct syntax for a "Diff" of a new object
+    final Diff dummyDiff = javers.compare(null, profile);
+    validateProfileForCorrectness(profile, true, dummyDiff);
   }
 
   public List<Profile> listAllProfiles() {
     return userService.getAllUsers().stream().map(this::getProfile).collect(Collectors.toList());
+  }
+
+  /**
+   * Updates the user metadata referenced by the fields of EditUserInformationRequest.
+   *
+   * @param request the fields to update. Fields left null here will not be updated. Contact Email
+   *     and Verified Institutional Affiliation updates will trigger a check for affiliation
+   *     validation.
+   * @return the Profile of the user, after updates
+   */
+  public Profile editUserInformation(EditUserInformationRequest request) {
+    final DbUser dbUser = userService.getByUsernameOrThrow(request.getUsername());
+    final Profile originalProfile = getProfile(dbUser);
+
+    Optional.ofNullable(request.getFreeCreditsLimit())
+        // only set override if it's different
+        .filter(newLimit -> !newLimit.equals(originalProfile.getFreeTierDollarQuota()))
+        .ifPresent(
+            freeCreditsLimit ->
+                freeTierBillingService.setFreeTierDollarOverride(dbUser, freeCreditsLimit));
+
+    Optional.ofNullable(request.getAccessBypassRequests())
+        .ifPresent(
+            requests ->
+                requests.forEach(
+                    bypass -> userService.updateBypassTime(dbUser.getUserId(), bypass)));
+
+    // refetch from the DB
+    Profile updatedProfile = getProfile(userService.getByUsernameOrThrow(request.getUsername()));
+    Optional.ofNullable(request.getContactEmail()).ifPresent(updatedProfile::setContactEmail);
+    Optional.ofNullable(request.getVerifiedInstitutionalAffiliation())
+        .ifPresent(updatedProfile::setVerifiedInstitutionalAffiliation);
+
+    adminUpdateProfileForUser(dbUser, updatedProfile, originalProfile);
+
+    return getProfile(dbUser);
   }
 }
