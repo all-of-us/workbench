@@ -7,10 +7,9 @@ import {Ethnicity, GenderIdentity, ProfileApi, Race, SexAtBirth} from 'generated
 import {createEmptyProfile} from 'app/pages/login/sign-in';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
-import {Profile} from "generated/fetch";
 
 let props: Props;
-const defaultConfig = {gsuiteDomain: 'researchallofus.org', requireInstitutionalVerification: false};
+const defaultConfig = {gsuiteDomain: 'researchallofus.org'};
 
 
 beforeEach(() => {
