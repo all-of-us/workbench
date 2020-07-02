@@ -21,8 +21,6 @@ public class CohortService {
 
   public List<Cohort> findAll(List<Long> cohortIds) {
     return ((List<DbCohort>) cohortDao.findAll(cohortIds))
-        .stream()
-            .map(dbCohort -> cohortMapper.dbModelToClient(dbCohort))
-            .collect(Collectors.toList());
+        .stream().map(cohortMapper::dbModelToClient).collect(Collectors.toList());
   }
 }
