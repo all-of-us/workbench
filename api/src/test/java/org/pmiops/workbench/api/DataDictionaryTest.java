@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -17,10 +16,10 @@ import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetMapper;
 import org.pmiops.workbench.conceptset.ConceptSetService;
+import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.dataset.DataSetMapperImpl;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
@@ -50,7 +49,6 @@ public class DataDictionaryTest {
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private DataDictionaryEntryDao dataDictionaryEntryDao;
   @Autowired private DataSetController dataSetController;
-  @Autowired private ConceptSetService conceptSetService;
 
   @Rule public ExpectedException expectedEx = ExpectedException.none();
 
@@ -90,7 +88,7 @@ public class DataDictionaryTest {
     DbDataDictionaryEntry dataDictionaryEntry = new DbDataDictionaryEntry();
     dataDictionaryEntry.setCdrVersion(cdrVersion);
     dataDictionaryEntry.setDefinedTime(new Timestamp(CLOCK.millis()));
-    dataDictionaryEntry.setRelevantOmopTable(ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(Domain.DRUG));
+    dataDictionaryEntry.setRelevantOmopTable(BigQueryTableInfo.getTableName(Domain.DRUG));
     dataDictionaryEntry.setFieldName("TEST FIELD");
     dataDictionaryEntry.setOmopCdmStandardOrCustomField("A");
     dataDictionaryEntry.setDescription("B");
@@ -107,15 +105,13 @@ public class DataDictionaryTest {
     final Domain domain = Domain.DRUG;
     final String domainValue = "FIELD NAME / DOMAIN VALUE";
 
-    when(conceptSetService.getOmpTable(domain.toString())).thenReturn("drug_occurrence");
-
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersionDao.save(cdrVersion);
 
     DbDataDictionaryEntry dataDictionaryEntry = new DbDataDictionaryEntry();
     dataDictionaryEntry.setCdrVersion(cdrVersion);
     dataDictionaryEntry.setDefinedTime(new Timestamp(CLOCK.millis()));
-    dataDictionaryEntry.setRelevantOmopTable(ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(domain));
+    dataDictionaryEntry.setRelevantOmopTable(BigQueryTableInfo.getTableName(domain));
     dataDictionaryEntry.setFieldName(domainValue);
     dataDictionaryEntry.setOmopCdmStandardOrCustomField("A");
     dataDictionaryEntry.setDescription("B");
@@ -167,7 +163,6 @@ public class DataDictionaryTest {
 
   @Test
   public void testGetDataDictionaryEntry_notFound() {
-    when(conceptSetService.getOmpTable(Domain.DRUG.toString())).thenReturn("drug_occurrence");
     expectedEx.expect(NotFoundException.class);
 
     dataSetController.getDataDictionaryEntry(1L, Domain.DRUG.toString(), "random");

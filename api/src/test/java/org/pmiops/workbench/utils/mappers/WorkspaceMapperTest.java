@@ -13,7 +13,9 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cohortreview.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
+import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
+import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -75,7 +77,7 @@ public class WorkspaceMapperTest {
     FirecloudMapperImpl.class,
     WorkspaceMapperImpl.class,
   })
-  @MockBean({UserDao.class, WorkspaceDao.class})
+  @MockBean({UserDao.class, WorkspaceDao.class, ConceptSetService.class, CohortService.class})
   static class Configuration {
     @Bean
     WorkbenchConfig workbenchConfig() {

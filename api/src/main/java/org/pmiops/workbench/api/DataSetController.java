@@ -23,7 +23,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -32,8 +31,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.cdr.CdrVersionService;
-import org.pmiops.workbench.cohorts.CohortService;
-import org.pmiops.workbench.conceptset.ConceptSetService;
+import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.dataset.DataSetMapper;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.dataset.DatasetConfig;
@@ -88,7 +86,7 @@ public class DataSetController implements DataSetApiDelegate {
   private final WorkspaceService workspaceService;
 
   // See https://cloud.google.com/appengine/articles/deadlineexceedederrors for details
-  private static long APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC = 55000l;
+  private static final long APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC = 55000L;
 
   private static final String DATE_FORMAT_STRING = "yyyy/MM/dd HH:mm:ss";
   public static final String EMPTY_CELL_MARKER = "";
@@ -96,20 +94,16 @@ public class DataSetController implements DataSetApiDelegate {
   private static final Logger log = Logger.getLogger(DataSetController.class.getName());
 
   private final CdrVersionService cdrVersionService;
-  private final ConceptSetService conceptSetService;
   private final DataDictionaryEntryDao dataDictionaryEntryDao;
   private final DataSetMapper dataSetMapper;
   private final FireCloudService fireCloudService;
   private final NotebooksService notebooksService;
-  private final CohortService cohortService;
 
   @Autowired
   DataSetController(
       BigQueryService bigQueryService,
       Clock clock,
-      CohortService cohortService,
       CdrVersionService cdrVersionService,
-      ConceptSetService conceptSetService,
       DataDictionaryEntryDao dataDictionaryEntryDao,
       DataSetMapper dataSetMapper,
       DataSetService dataSetService,
@@ -120,9 +114,7 @@ public class DataSetController implements DataSetApiDelegate {
       WorkspaceService workspaceService) {
     this.bigQueryService = bigQueryService;
     this.clock = clock;
-    this.cohortService = cohortService;
     this.cdrVersionService = cdrVersionService;
-    this.conceptSetService = conceptSetService;
     this.dataDictionaryEntryDao = dataDictionaryEntryDao;
     this.dataSetMapper = dataSetMapper;
     this.dataSetService = dataSetService;
@@ -158,7 +150,7 @@ public class DataSetController implements DataSetApiDelegate {
             dataSetRequest.getPrePackagedConceptSet(),
             userProvider.get().getUserId(),
             now);
-    return ResponseEntity.ok(TO_CLIENT_DATA_SET.apply(savedDataSet));
+    return ResponseEntity.ok(dataSetMapper.dbModelToClient(savedDataSet));
   }
 
   private DbDatasetValue getDataSetValuesFromDomainValueSet(DomainValuePair domainValuePair) {
@@ -184,46 +176,6 @@ public class DataSetController implements DataSetApiDelegate {
       throw new BadRequestException("Missing values");
     }
   }
-
-  private final Function<DbDataset, DataSet> TO_CLIENT_DATA_SET =
-      new Function<DbDataset, DataSet>() {
-        @Override
-        public DataSet apply(DbDataset dataSet) {
-          final DataSet result =
-              new DataSet()
-                  .name(dataSet.getName())
-                  .includesAllParticipants(dataSet.getIncludesAllParticipants())
-                  .id(dataSet.getDataSetId())
-                  .etag(Etags.fromVersion(dataSet.getVersion()))
-                  .description(dataSet.getDescription())
-                  .prePackagedConceptSet(dataSet.getPrePackagedConceptSetEnum());
-          if (dataSet.getLastModifiedTime() != null) {
-            result.setLastModifiedTime(dataSet.getLastModifiedTime().getTime());
-          }
-          result.setConceptSets(
-              conceptSetService.findAll(dataSet.getConceptSetIds()).stream()
-                  .map(conceptSet -> conceptSetService.toClientConceptSet(conceptSet))
-                  .collect(Collectors.toList()));
-          result.setCohorts(
-              cohortService.findAll(dataSet.getCohortIds()).stream()
-                  .map(CohortsController.TO_CLIENT_COHORT)
-                  .collect(Collectors.toList()));
-          result.setDomainValuePairs(
-              dataSet.getValues().stream()
-                  .map(TO_CLIENT_DOMAIN_VALUE)
-                  .collect(Collectors.toList()));
-          return result;
-        }
-      };
-
-  // TODO(jaycarlton): move into helper methods in one or both of these classes
-  private static final Function<DbDatasetValue, DomainValuePair> TO_CLIENT_DOMAIN_VALUE =
-      dataSetValue -> {
-        DomainValuePair domainValuePair = new DomainValuePair();
-        domainValuePair.setValue(dataSetValue.getValue());
-        domainValuePair.setDomain(dataSetValue.getDomainEnum());
-        return domainValuePair;
-      };
 
   @VisibleForTesting
   public String generateRandomEightCharacterQualifier() {
@@ -453,7 +405,7 @@ public class DataSetController implements DataSetApiDelegate {
 
     response.setItems(
         dataSets.stream()
-            .map(TO_CLIENT_DATA_SET)
+            .map(dataSetMapper::dbModelToClient)
             .sorted(Comparator.comparing(DataSet::getName))
             .collect(Collectors.toList()));
     return ResponseEntity.ok(response);
@@ -510,7 +462,7 @@ public class DataSetController implements DataSetApiDelegate {
 
     dataSetService.saveDataSet(dbDataSet);
 
-    return ResponseEntity.ok(TO_CLIENT_DATA_SET.apply(dbDataSet));
+    return ResponseEntity.ok(dataSetMapper.dbModelToClient(dbDataSet));
   }
 
   @Override
@@ -520,8 +472,8 @@ public class DataSetController implements DataSetApiDelegate {
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    DbDataset dataSet = dataSetService.getDbDataSet(workspace, dataSetId).get();
-    return ResponseEntity.ok(TO_CLIENT_DATA_SET.apply(dataSet));
+    DbDataset dbDataset = dataSetService.getDbDataSet(workspace, dataSetId).get();
+    return ResponseEntity.ok(dataSetMapper.dbModelToClient(dbDataset));
   }
 
   @Override
@@ -533,7 +485,10 @@ public class DataSetController implements DataSetApiDelegate {
     List<DbDataset> dbDataSets = dataSetService.getDataSets(resourceType, id);
     DataSetListResponse dataSetResponse =
         new DataSetListResponse()
-            .items(dbDataSets.stream().map(TO_CLIENT_DATA_SET).collect(Collectors.toList()));
+            .items(
+                dbDataSets.stream()
+                    .map(dataSetMapper::dbModelToClient)
+                    .collect(Collectors.toList()));
     return ResponseEntity.ok(dataSetResponse);
   }
 
@@ -548,7 +503,7 @@ public class DataSetController implements DataSetApiDelegate {
                   throw new BadRequestException("Invalid CDR Version");
                 });
 
-    String omopTable = conceptSetService.getOmpTable(domain);
+    String omopTable = BigQueryTableInfo.getTableName(Domain.fromValue(domain));
     if (omopTable == null) {
       throw new BadRequestException("Invalid Domain");
     }
@@ -560,7 +515,7 @@ public class DataSetController implements DataSetApiDelegate {
       throw new NotFoundException();
     }
 
-    return ResponseEntity.ok(dataSetMapper.toApi(dataDictionaryEntries.get(0)));
+    return ResponseEntity.ok(dataSetMapper.dbModelToClient(dataDictionaryEntries.get(0)));
   }
 
   @Override

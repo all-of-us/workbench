@@ -91,11 +91,9 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   private DataSetController controller;
   @Autowired private BigQueryService bigQueryService;
   @Autowired private CdrVersionDao cdrVersionDao;
-  @Autowired private CohortService cohortService;
   @Autowired private CdrVersionService cdrVersionService;
   @Autowired private CohortDao cohortDao;
   @Autowired private ConceptSetDao conceptSetDao;
-  @Autowired private ConceptSetService conceptSetService;
   @Autowired private DataDictionaryEntryDao dataDictionaryEntryDao;
   @Autowired private DataSetMapper dataSetMapper;
   @Autowired private DataSetService dataSetService;
@@ -182,9 +180,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
             new DataSetController(
                 bigQueryService,
                 CLOCK,
-                cohortService,
                 cdrVersionService,
-                conceptSetService,
                 dataDictionaryEntryDao,
                 dataSetMapper,
                 dataSetService,
