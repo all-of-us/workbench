@@ -6,9 +6,9 @@ import {ClrIcon, InfoIcon, ValidationIcon} from 'app/components/icons';
 import {
   ErrorMessage,
   FormValidationErrorMessage,
-  RadioButton,
-  styles as inputStyles, TextAreaWithLengthValidationMessage,
-  TextInput, TextInputWithLabel
+  styles as inputStyles,
+  TextAreaWithLengthValidationMessage,
+  TextInputWithLabel
 } from 'app/components/inputs';
 
 import {TooltipTrigger} from 'app/components/popups';
@@ -19,7 +19,6 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import colors from 'app/styles/colors';
 import {Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';
-import {Dropdown} from 'primereact/dropdown';
 import {MultiSelect} from 'primereact/multiselect';
 import * as React from 'react';
 import * as validate from 'validate.js';
@@ -257,7 +256,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     // 'usernameWithEmail' field we're adding, to be able to separate our validation on the
     // username itself from validation of the full email address. For this reason, we need to cast
     // the profile object to 'any'.
-    let validationData = {...this.state.profile} as any;
+    const validationData = {...this.state.profile} as any;
     validationData.usernameWithEmail = validationData.username + '@' + gsuiteDomain;
 
     if (!isBlank(validationData.username)) {
