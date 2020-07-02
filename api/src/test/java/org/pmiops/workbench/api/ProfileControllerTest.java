@@ -300,6 +300,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         new Institution()
             .shortName("Broad")
             .displayName("The Broad Institute")
+            .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
             .emailAddresses(Collections.singletonList(CONTACT_EMAIL))
             .emailDomains(Collections.singletonList("example.com"))
             .duaTypeEnum(DuaType.RESTRICTED);
@@ -318,6 +319,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         new Institution()
             .shortName("Broad")
             .displayName("The Broad Institute")
+            .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
             .emailAddresses(Collections.singletonList(CONTACT_EMAIL))
             .emailDomains(Collections.singletonList("example.com"))
             .duaTypeEnum(DuaType.MASTER);
@@ -337,6 +339,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         new Institution()
             .shortName("Broad")
             .displayName("The Broad Institute")
+            .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
             .emailAddresses(Collections.singletonList(CONTACT_EMAIL))
             .emailDomains(Collections.singletonList("example.com"));
     institutionService.createInstitution(broad);
@@ -693,6 +696,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         new Institution()
             .shortName("Broad")
             .displayName("The Broad Institute")
+            .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
             .emailAddresses(Collections.emptyList())
             .duaTypeEnum(DuaType.RESTRICTED);
     institutionService.createInstitution(broad);
@@ -714,6 +718,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         new Institution()
             .shortName("Broad")
             .displayName("The Broad Institute")
+            .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
             .emailDomains(emailDomains)
             .duaTypeEnum(DuaType.MASTER);
     institutionService.createInstitution(broad);
