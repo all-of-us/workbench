@@ -14,4 +14,6 @@ To load/update data dictionary follow the steps:
 2. To verify on local
   a) run the command 
      ./gradlew loadDataDictionary -PappArgs={true for dry_run else false}
+     NOTE:  For other environments : deploy command calls loadDataDictionary
   b) Confirm the new entries are added to table  data_dictionary_entry
+  
