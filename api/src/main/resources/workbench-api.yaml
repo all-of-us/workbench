@@ -3779,11 +3779,6 @@ definitions:
         type: boolean
         default: false
         description: Feature flag for billing upgrade
-      requireInstitutionalVerification:
-        type: boolean
-        default: false
-        description: 'Feature flag for verifying the institutional affiliation of
-          new users by validating their contact emails.'
       enableCBAgeTypeOptions:
         type: boolean
         default: false

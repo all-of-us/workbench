@@ -27,7 +27,6 @@ describe('SignInReact', () => {
   const defaultConfig = {
     gsuiteDomain: 'researchallofus.org',
     requireInvitationKey: true,
-    requireInstitutionalVerification: true,
   };
 
   beforeEach(() => {
