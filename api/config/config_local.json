@@ -100,7 +100,6 @@
     "useKeylessDelegatedCredentials": true,
     "sendFreeTierAlertEmails": true,
     "enableMoodleV2Api": true,
-    "requireInstitutionalVerification": true,
     "enableCBAgeTypeOptions": true,
     "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,

@@ -361,7 +361,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
   render() {
     const {profileState: {profile}} = this.props;
     const {currentProfile, saveProfileErrorResponse, updating, showDemographicSurveyModal} = this.state;
-    const {enableComplianceTraining, enableEraCommons, enableDataUseAgreement, requireInstitutionalVerification} =
+    const {enableComplianceTraining, enableEraCommons, enableDataUseAgreement} =
       serverConfigStore.getValue();
     const {
       givenName, familyName, areaOfResearch, professionalUrl,
@@ -461,7 +461,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
                   valueKey: 'verifiedInstitutionalAffiliation.institutionDisplayName',
                   disabled: true
                 })}
-                {requireInstitutionalVerification && !profile.verifiedInstitutionalAffiliation &&
+                {!profile.verifiedInstitutionalAffiliation &&
                   <div style={{color: colors.danger}}>
                     Institution cannot be empty. Please contact admin.
                   </div>}
