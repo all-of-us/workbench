@@ -310,6 +310,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         new VerifiedInstitutionalAffiliation()
             .institutionShortName("Broad")
             .institutionalRoleEnum(InstitutionalRole.STUDENT);
+    createAccountRequest.getProfile().contactEmail("bob@broad.com");
     createAccount(verifiedInstitutionalAffiliation);
   }
 
