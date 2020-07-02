@@ -102,15 +102,6 @@ it('should handle username validity if name is valid', () => {
   expect(wrapper.exists('#usernameError')).toBeFalsy();
 });
 
-it('should handle invalid Email', () => {
-  const wrapper = component();
-  expect(wrapper.exists('#contactEmail')).toBeTruthy();
-  expect(wrapper.exists('#invalidEmailError')).toBeFalsy();
-  wrapper.find('input#contactEmail').simulate('change',
-      {target: {value: 'username@'}});
-  expect(wrapper.exists('#invalidEmailError')).toBeFalsy();
-});
-
 it('should display characters over message if research purpose character length is more than 2000', () => {
   const wrapper = component();
 

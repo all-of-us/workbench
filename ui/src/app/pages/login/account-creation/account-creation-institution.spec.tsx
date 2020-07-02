@@ -2,7 +2,7 @@ import {mount, ReactWrapper, ShallowWrapper} from 'enzyme';
 import * as React from 'react';
 
 import {serverConfigStore} from 'app/utils/navigation';
-import {ConfigApi, Institution, InstitutionApi, Profile} from 'generated/fetch';
+import {ConfigApi, InstitutionApi, Profile} from 'generated/fetch';
 import {createEmptyProfile} from 'app/pages/login/sign-in';
 import {AccountCreationInstitution, Props} from './account-creation-institution';
 import {ConfigApiStub} from 'testing/stubs/config-api-stub';
@@ -65,7 +65,7 @@ beforeEach(() => {
   registerApiClient(InstitutionApi, new InstitutionApiStub());
 
   props = {
-    profile: createEmptyProfile(true),
+    profile: createEmptyProfile(),
     onComplete: (profile: Profile) => {},
     onPreviousClick: (profile: Profile) => {}
   };

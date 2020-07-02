@@ -134,7 +134,7 @@ interface SignInState {
   isPreviousStep: boolean;
 }
 
-export const createEmptyProfile = (requireInstitutionalVerification: boolean = false): Profile => {
+export const createEmptyProfile = (): Profile => {
   const profile: Profile = {
     // Note: We abuse the "username" field here by omitting "@domain.org". After
     // profile creation, this field is populated with the full email address.
@@ -158,27 +158,13 @@ export const createEmptyProfile = (requireInstitutionalVerification: boolean = f
     degrees: [] as Degree[],
   };
 
-  if (requireInstitutionalVerification) {
-    profile.verifiedInstitutionalAffiliation = {
-      institutionShortName: undefined,
-      institutionDisplayName: undefined,
-      institutionalRoleEnum: undefined,
-      institutionalRoleOtherText: undefined,
-    };
-  } else {
-    // initialize the institutional affiliations from the old unverified flow
-    // (the new flow does not require it)
-    profile.institutionalAffiliations = [
-      // We only allow entering a single institutional affiliation from the create account
-      // page, so we pre-fill a single empty entry which will be bound to the AccountCreation
-      // form.
-      {
-        institution: undefined,
-        nonAcademicAffiliation: undefined,
-        role: undefined,
-      },
-    ];
-  }
+  profile.verifiedInstitutionalAffiliation = {
+    institutionShortName: undefined,
+    institutionDisplayName: undefined,
+    institutionalRoleEnum: undefined,
+    institutionalRoleOtherText: undefined,
+  };
+
   return profile;
 };
 
@@ -197,7 +183,7 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
       // This defines the profile state for a new user flow. This will get passed to each
       // step component as a prop. When each sub-step completes, it will pass the updated Profile
       // data in its onComplete callback.
-      profile: createEmptyProfile(this.props.serverConfig.requireInstitutionalVerification),
+      profile: createEmptyProfile(),
       isPreviousStep: false
     };
   }
@@ -219,28 +205,17 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
    * Made visible for ease of unit-testing.
    */
   public getAccountCreationSteps(): Array<SignInStep> {
-    const {requireInvitationKey, requireInstitutionalVerification} = this.props.serverConfig;
+    const {requireInvitationKey} = this.props.serverConfig;
 
     let steps = [
       SignInStep.LANDING,
       SignInStep.INVITATION_KEY,
       SignInStep.TERMS_OF_SERVICE,
+      SignInStep.INSTITUTIONAL_AFFILIATION,
       SignInStep.ACCOUNT_DETAILS,
       SignInStep.DEMOGRAPHIC_SURVEY,
       SignInStep.SUCCESS_PAGE
     ];
-    if (requireInstitutionalVerification) {
-      steps = [
-        SignInStep.LANDING,
-        SignInStep.INVITATION_KEY,
-        SignInStep.TERMS_OF_SERVICE,
-        SignInStep.INSTITUTIONAL_AFFILIATION,
-        SignInStep.ACCOUNT_DETAILS,
-        SignInStep.DEMOGRAPHIC_SURVEY,
-        SignInStep.SUCCESS_PAGE
-      ];
-    }
-
 
     if (!requireInvitationKey) {
       steps = fp.remove(step => step === SignInStep.INVITATION_KEY, steps);

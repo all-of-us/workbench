@@ -285,8 +285,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
   render() {
     const {
       profile: {
-        givenName, familyName,
-        contactEmail, username, areaOfResearch, professionalUrl = '',
+        givenName, familyName, username, areaOfResearch, professionalUrl = '',
         address: {
           streetAddress1, streetAddress2, city, state, zipCode, country
         },

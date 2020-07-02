@@ -27,7 +27,7 @@ describe('SignInReact', () => {
   const defaultConfig = {
     gsuiteDomain: 'researchallofus.org',
     requireInvitationKey: true,
-    requireInstitutionalVerification: false,
+    requireInstitutionalVerification: true,
   };
 
   beforeEach(() => {
@@ -80,7 +80,7 @@ describe('SignInReact', () => {
     const templateImage = wrapper.find('[data-test-id="sign-in-page"]');
   });
 
-  it('should handle sign-up flow without institutional verification', () => {
+  it('should handle sign-up flow', () => {
     // This test is meant to validate the high-level flow through the sign-in component by checking
     // that each step of the user registration flow is correctly rendered in order.
     //
@@ -88,37 +88,7 @@ describe('SignInReact', () => {
     // we use Enzyme's shallow rendering to avoid needing to deal with the DOM-level details of
     // each of the sub-components. Tests within the 'account-creation' folder should cover those
     // details.
-    props.serverConfig = {...defaultConfig, requireInstitutionalVerification: false};
-    const requireInstitutionalVerification = false;
-
-    const wrapper = shallowComponent();
-
-    // To start, the landing page / login component should be shown.
-    expect(wrapper.exists(LoginReactComponent)).toBeTruthy();
-    // Simulate the "create account" button being clicked by firing the callback method.
-    wrapper.find(LoginReactComponent).props().onCreateAccount();
-
-    // Invitation key step is next.
-    expect(wrapper.exists(InvitationKey)).toBeTruthy();
-    wrapper.find(InvitationKey).props().onInvitationKeyVerified('asdf');
-
-    // Terms of Service is part of the new-style flow.
-    expect(wrapper.exists(AccountCreationTos)).toBeTruthy();
-    wrapper.find(AccountCreationTos).props().onComplete();
-
-    expect(wrapper.exists(AccountCreation)).toBeTruthy();
-    wrapper.find(AccountCreation).props().onComplete(createEmptyProfile(requireInstitutionalVerification));
-
-    // Account Creation Survey (e.g. demographics) is part of the new-style flow.
-    expect(wrapper.exists(AccountCreationSurvey)).toBeTruthy();
-    wrapper.find(AccountCreationSurvey).props().onComplete(createEmptyProfile(requireInstitutionalVerification));
-
-    expect(wrapper.exists(AccountCreationSuccess)).toBeTruthy();
-  });
-
-  it('should handle sign-up flow with institutional verification', () => {
-    props.serverConfig = {...defaultConfig, requireInstitutionalVerification: true};
-    const requireInstitutionalVerification = true;
+    props.serverConfig = {...defaultConfig};
 
     const wrapper = shallowComponent();
 
@@ -136,14 +106,14 @@ describe('SignInReact', () => {
     wrapper.find(AccountCreationTos).props().onComplete();
 
     expect(wrapper.exists(AccountCreationInstitution)).toBeTruthy();
-    wrapper.find(AccountCreationInstitution).props().onComplete(createEmptyProfile(requireInstitutionalVerification));
+    wrapper.find(AccountCreationInstitution).props().onComplete(createEmptyProfile());
 
     expect(wrapper.exists(AccountCreation)).toBeTruthy();
-    wrapper.find(AccountCreation).props().onComplete(createEmptyProfile(requireInstitutionalVerification));
+    wrapper.find(AccountCreation).props().onComplete(createEmptyProfile());
 
     // Account Creation Survey (e.g. demographics) is part of the new-style flow.
     expect(wrapper.exists(AccountCreationSurvey)).toBeTruthy();
-    wrapper.find(AccountCreationSurvey).props().onComplete(createEmptyProfile(requireInstitutionalVerification));
+    wrapper.find(AccountCreationSurvey).props().onComplete(createEmptyProfile());
 
     expect(wrapper.exists(AccountCreationSuccess)).toBeTruthy();
   });
@@ -161,6 +131,7 @@ describe('SignInReact', () => {
     expect(steps).toEqual([
       SignInStep.LANDING,
       SignInStep.TERMS_OF_SERVICE,
+      SignInStep.INSTITUTIONAL_AFFILIATION,
       SignInStep.ACCOUNT_DETAILS,
       SignInStep.DEMOGRAPHIC_SURVEY,
       SignInStep.SUCCESS_PAGE
