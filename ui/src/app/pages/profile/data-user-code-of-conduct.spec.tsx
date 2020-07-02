@@ -10,7 +10,7 @@ import {waitOneTickAndUpdate} from '../../../testing/react-test-helpers';
 
 const defaultConfig = {
   gsuiteDomain: 'researchallofus.org',
-  requireInstitutionalVerification: false,
+  requireInstitutionalVerification: true,
 };
 
 describe('DataUserCodeOfConduct', () => {

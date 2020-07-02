@@ -13,7 +13,6 @@ import {
 } from 'app/pages/login/account-creation/common';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, toggleIncludes} from 'app/utils';
-import {serverConfigStore} from 'app/utils/navigation';
 
 import {environment} from 'environments/environment';
 import {Profile} from 'generated/fetch';
