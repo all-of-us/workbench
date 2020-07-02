@@ -5,7 +5,7 @@ import Textbox from 'app/element/textbox';
 import DataTable from 'app/component/data-table';
 import Button from 'app/element/button';
 import AuthenticatedPage from './authenticated-page';
-import ConceptsetSaveModal from './conceptset-save-modal';
+import ConceptsetSaveModal, {SaveOption} from './conceptset-save-modal';
 
 const PageTitle = 'Search Concepts';
 
@@ -30,19 +30,21 @@ export default class ConceptsetSearchPage extends AuthenticatedPage{
     }
   }
 
-  async saveConceptDialog(): Promise<string> {
+  async saveConcept(saveOption?: SaveOption, existingConceptName?: string): Promise<string> {
     const dialog = new ConceptsetSaveModal(this.page);
-    return dialog.saveAndCloseDialog();
+    return dialog.fillOutSaveModal(saveOption, existingConceptName);
   }
 
   async getAddToSetButton(): Promise<Button> {
     return new Button(this.page, '//*[@data-test-id="sliding-button"]');
   }
 
-  async clickAddToSetButton(): Promise<void> {
+  async clickAddToSetButton(): Promise<string> {
     const addButton = await this.getAddToSetButton();
+    const textContent = addButton.getTextContent();
     await addButton.click();
-    return waitWhileLoading(this.page);
+    await waitWhileLoading(this.page);
+    return textContent;
   }
 
   async searchConcepts(searchKeywords: string): Promise<void> {
@@ -54,20 +56,41 @@ export default class ConceptsetSearchPage extends AuthenticatedPage{
 
   /**
    * Check Checkbox in specified row index
-   * @param {number} rowIndex
-   * @return {string} The Code value in same table row.
+   * @param {number} rowIndex Row index.
+   * @param {number} selctionColumnIndex Selection column index.
+   * @return {code: string; vocabulary: string; participantCount: string}
+   *  The Code, Vocabulary and Participant Count values in same table row.
    */
-  async dataTableSelectRow(rowIndex: number = 1): Promise<string> {
+  async dataTableSelectRow(rowIndex: number = 1,
+                           selctionColumnIndex = 1): Promise<{name: string, code: string; vocabulary: string; participantCount: string}> {
     const dataTable = this.getDataTable();
     const bodyTable = dataTable.getBodyTable();
 
-    const codeCell = await bodyTable.getCell(rowIndex, 2);
-    const textProp = await codeCell.getProperty('textContent');
-    const cellTextContent = await textProp.jsonValue();
-    const selectCheckCell = await bodyTable.getCell(rowIndex, 1);
-    const elemt = (await selectCheckCell.$x('//*[@role="checkbox"]'))[0];
+    // Name column #2
+    const nameCell = await bodyTable.getCell(rowIndex, 2);
+    let textProp = await nameCell.getProperty('textContent');
+    const nameText = (await textProp.jsonValue()).toString();
+
+    // Code column #3
+    const codeCell = await bodyTable.getCell(rowIndex, 3);
+    textProp = await codeCell.getProperty('textContent');
+    const codeText = (await textProp.jsonValue()).toString();
+
+    // Vocabulary column #4
+    const vocabularyCell = await bodyTable.getCell(rowIndex, 4);
+    textProp = await vocabularyCell.getProperty('textContent');
+    const vocabularyText = (await textProp.jsonValue()).toString();
+
+    // Participant Count column #5
+    const participantCountCell = await bodyTable.getCell(rowIndex, 5);
+    textProp = await participantCountCell.getProperty('textContent');
+    const participantCountText = (await textProp.jsonValue()).toString();
+
+    const selectCheckCell = await bodyTable.getCell(rowIndex, selctionColumnIndex);
+    const elemt = (await selectCheckCell.$x('.//*[@role="checkbox"]'))[0];
     await elemt.click();
-    return cellTextContent.toString();
+
+    return { name: nameText, code: codeText, vocabulary: vocabularyText, participantCount: participantCountText };
   }
 
   /**
@@ -78,7 +101,7 @@ export default class ConceptsetSearchPage extends AuthenticatedPage{
     const headerTable = dataTable.getHeaderTable();
 
     const selectCheckCell = await headerTable.getHeaderCell(1);
-    const elemt = (await selectCheckCell.$x('//*[@role="checkbox"]'))[0];
+    const elemt = (await selectCheckCell.$x('.//*[@role="checkbox"]'))[0];
     await elemt.click();
   }
 

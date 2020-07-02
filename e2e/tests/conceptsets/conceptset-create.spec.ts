@@ -55,7 +55,7 @@ describe('Create Concept Sets from Domains', () => {
     await conceptPage.clickAddToSetButton();
 
     // Save
-    const conceptName = await conceptPage.saveConceptDialog();
+    const conceptName = await conceptPage.saveConcept();
 
     // Verify Concept Set created successfully.
     const successMessage = `Concept Set Saved Successfully`;
@@ -117,7 +117,7 @@ describe('Create Concept Sets from Domains', () => {
     await conceptSearchPage.clickAddToSetButton();
 
     // Save
-    const conceptName1 = await conceptSearchPage.saveConceptDialog();
+    const conceptName1 = await conceptSearchPage.saveConcept();
     console.log(`Created Concept Set "${conceptName1}"`);
 
     // Start: Create new Concept Set 2
@@ -138,7 +138,7 @@ describe('Create Concept Sets from Domains', () => {
     await conceptSearchPage.clickAddToSetButton();
 
     // Save
-    const conceptName2 = await conceptSearchPage.saveConceptDialog();
+    const conceptName2 = await conceptSearchPage.saveConcept();
     console.log(`Created Concept Set "${conceptName2}"`);
 
     // Create new Dataset with two new Concept Sets

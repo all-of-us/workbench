@@ -1,6 +1,7 @@
 import {ElementHandle, Page} from 'puppeteer';
 import EllipsisMenu from 'app/component/ellipsis-menu';
 import * as fp from 'lodash/fp';
+import Link from '../element/link';
 
 const DataResourceCardSelector = {
   cardRootXpath: '//*[@data-test-id="card"]',
@@ -114,11 +115,10 @@ export default class DataResourceCard {
   }
 
   /**
-   * Find element with specified resource name on the page.
-   * @param {string} resourceName
+   * Find the resource name link in this card.
    */
-  async getLink(resourceName: string) : Promise<ElementHandle> {
-    return this.page.waitForXPath(this.workspaceNameLinkSelector(resourceName));
+  async getLink() : Promise<Link> {
+    return new Link(this.page, this.resourceNameLinkSelector());
   }
 
   async getResourceCard(cardType: CardType = CardType.Cohort): Promise<DataResourceCard[]> {
@@ -161,8 +161,8 @@ export default class DataResourceCard {
     return this;
   }
 
-  private workspaceNameLinkSelector(resourceName: string): string {
-    return `//*[@role='button'][./*[${DataResourceCardSelector.cardNameXpath} and normalize-space(text())="${resourceName}"]]`
+  private resourceNameLinkSelector(): string {
+    return `//*[@role='button'][./*[${DataResourceCardSelector.cardNameXpath} and @text()]]`
   }
 
 }
