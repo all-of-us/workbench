@@ -3,7 +3,7 @@
 ## Load Data Dictionary
 To load/update data dictionary follow the steps:
 
-1. Create 2 yaml files : one for PROD and  another for synthetic CDR version, under
+1. Create 2 yaml files : one for PROD and  another for synthetic CDR, under
     <em>/api/tools/src/main/resources/data_dictionary_exports</em> with the following fields:
     
     a) meta_data -> id, name, version, created_time, modified_time,
