@@ -92,7 +92,6 @@ export interface AccountCreationProps {
 export interface AccountCreationState {
   creatingAccount: boolean;
   errors: any;
-  invalidEmail: boolean;
   profile: Profile;
   showAllFieldsRequiredError: boolean;
   showMostInterestedInKnowingBlurb: boolean;
@@ -112,7 +111,6 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     const state: AccountCreationState = {
       creatingAccount: false,
       errors: undefined,
-      invalidEmail: false,
       profile: this.props.profile,
       showAllFieldsRequiredError: false,
       showMostInterestedInKnowingBlurb: false,
@@ -173,11 +171,6 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
 
   updateProfileObject(attribute: string, value) {
     this.setState(fp.set(['profile', attribute], value));
-  }
-
-  updateContactEmail(email: string) {
-    this.setState({invalidEmail: false});
-    this.setState(fp.set(['profile', 'contactEmail'], email));
   }
 
   updateAddress(attribute: string , value) {

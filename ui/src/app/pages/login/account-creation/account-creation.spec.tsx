@@ -6,7 +6,6 @@ import {serverConfigStore} from 'app/utils/navigation';
 import {Profile} from 'generated/fetch';
 import {createEmptyProfile} from 'app/pages/login/sign-in';
 import {AccountCreation, AccountCreationProps} from './account-creation';
-import {AccountCreationOptions} from './account-creation-options';
 import colors from 'app/styles/colors';
 
 let props: AccountCreationProps;
