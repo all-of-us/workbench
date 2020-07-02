@@ -1,3 +1,7 @@
+import {Navigate} from 'app/components/app-router';
+import {Button} from 'app/components/buttons';
+import {ActionAuditCardBase} from 'app/components/card';
+import {TextInput} from 'app/components/inputs';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import {
   actionToString,
@@ -6,12 +10,15 @@ import {
   targetToString
 } from 'app/utils/audit-utils';
 import * as fp from 'lodash/fp';
+import { cpuUsage } from 'process';
 import * as React from 'react';
+import {useParams} from 'react-router-dom';
 import {
   AuditAction,
   AuditEventBundle,
   AuditEventBundleHeader, AuditTargetPropertyChange
 } from '../../../generated';
+
 
 const {useEffect, useState} = React;
 const AUDIT_TABLE_STYLE = {
@@ -20,77 +27,46 @@ const AUDIT_TABLE_STYLE = {
   align: 'left'
 } as React.CSSProperties;
 
-const PropertyChangeRow = (props: {propertyChange: AuditTargetPropertyChange}) => {
-  const {propertyChange} = props;
-  return (<React.Fragment>
-    <tr key = {propertyChange.targetProperty}>
-      <td>{propertyChange.targetProperty || '--'}</td>
-      <td>{propertyChange.previousValue || '--'}</td>
-      <td>{propertyChange.newValue || '--'}</td>
-    </tr>
-  </React.Fragment>);
+
+const PropChanges = props => {
+  const {targetProperty, previousValue, newValue} = props;
+  return <React.Fragment>
+    <div>{targetProperty || '--'}</div>
+    <div>{previousValue || '--'}</div>
+    <div>{newValue || '--'}</div>
+  </React.Fragment>;
 };
 
 const PropertyChangeListView = (props: {propertyChanges: AuditTargetPropertyChange[]}) => {
   const {propertyChanges} = props;
-  return (
-      propertyChanges.length > 0 ?
-      <React.Fragment>
-        <table style={AUDIT_TABLE_STYLE}>
-            <thead>
-              <tr>
-                <th>Property</th>
-                <th>Previous Value</th>
-                <th>New Value</th>
-              </tr>
-            </thead>
-          <tbody>
-            {propertyChanges.map((propertyChange) =>
-               <PropertyChangeRow propertyChange={propertyChange}/>
-            )}
-        </tbody>
-      </table>
-      </React.Fragment> :
-      null);
+
+  return <div style={{margin: '0.25rem 0 0rem 1rem', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)'}}>
+    <div style={{fontWeight: 600}}>Property</div>
+    <div style={{fontWeight: 600}}>Previous Value</div>
+    <div style={{fontWeight: 600}}>New Value</div>
+    {propertyChanges.map((changes, index) => <PropChanges {...changes} key={index}/>)}
+  </div>;
 };
 
 const AuditEventBundleHeaderView = (props: {header: AuditEventBundleHeader}) => {
   const {header} = props;
-  return (
-      <table>
-        <thead>
-        <tr><th>{header.actionType} Action</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>{header.agent.agentType} Agent</td><td>{agentToString(header.agent)}</td>
-          </tr>
-          <tr>
-            <td>{header.target.targetType} Target</td><td>{targetToString(header.target)}</td>
-          </tr>
-        </tbody>
-      </table>
-  );
+  return <div>
+    <div style={{textAlign: 'left', fontWeight: 600}}>{header.actionType} Action</div>
+    <div style={{marginLeft: '1rem', display: 'grid', justifyItems: 'start', columnGap: '0.5rem', gridTemplateColumns: 'auto 1fr' }}>
+      <div style={{fontWeight: 600}}>{header.agent.agentType} Agent</div>
+      <div>{agentToString(header.agent)}</div>
+      <div style={{fontWeight: 600}}>{header.target.targetType} Target</div>
+      <div>{targetToString(header.target)}</div>
+    </div>
+  </div>;
 };
 
 const EventBundleView = (props: {eventBundle: AuditEventBundle}) => {
   const {eventBundle} = props;
-  return (
-      <table>
-        <thead>
-        <tr>
-          <th>
-            <AuditEventBundleHeaderView header={eventBundle.header} />
-          </th>
-        </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <PropertyChangeListView propertyChanges={eventBundle.propertyChanges}/>
-          </tr>
-        </tbody>
-      </table>
-  );
+  return <div style={{marginBottom: '1rem'}}>
+    <AuditEventBundleHeaderView header={eventBundle.header} />
+    <PropertyChangeListView propertyChanges={eventBundle.propertyChanges}/>
+  </div>;
 };
 
 const AuditActionCard = (props: {action: AuditAction}) => {
@@ -100,16 +76,10 @@ const AuditActionCard = (props: {action: AuditAction}) => {
   // to format itself happily though.
   const time = new Date(action.actionTime).toISOString();
   return (
-      <table style={AUDIT_TABLE_STYLE}>
-        <thead>
-        <tr><th>{time}: {action.eventBundles.length} events</th></tr>
-        </thead>
-        <tbody>
-        {action.eventBundles.map(eventBundle =>
-            <tr key={headerToString(eventBundle.header)}><td><EventBundleView eventBundle={eventBundle}/></td></tr>
-        )}
-        </tbody>
-      </table>
+    <ActionAuditCardBase>
+      <div style={{fontWeight:  600, textAlign: 'center', fontSize: '0.825rem'}}>{time}: {action.eventBundles.length} events</div>
+      {action.eventBundles.map((eventBundle, index) => <EventBundleView key={index} eventBundle={eventBundle}/>)}
+    </ActionAuditCardBase>
   );
 };
 
@@ -118,43 +88,68 @@ const AuditActionCardListView = (props: {actions: AuditAction[]}) => {
   const timesMillis = actions.map(action => new Date(action.actionTime).getTime());
   const minTime = new Date(Math.min(...timesMillis)).toDateString();
   const maxTime = new Date(Math.max(...timesMillis)).toDateString();
+
   return (
-      <table style={AUDIT_TABLE_STYLE}>
-        <thead>
-          <tr><th>{actions.length} Audit Actions from {minTime} to {maxTime}</th></tr>
-        </thead>
-        <tbody>
-          {actions.map(action => (
-              <tr key={action.actionId}>
-                <td><AuditActionCard action={action}/></td>
-              </tr>
-          ))}
-        </tbody>
-      </table>
+    <div style={{margin: '1rem', width: '30rem'}}>
+        {actions.map((action, index) => (<AuditActionCard key={index} action={action} />))}
+    </div>
   );
 };
 
 export const UserAudit = () => {
-  const [userActions, setUserActions] = useState();
+  const {username = ''} = useParams();
+  const [userActions, setUserActions] = useState([]);
+  const [nextUsername, setNextUsername] = useState('');
+  const [navigateTo, setNavigateTo] = useState(false);
+  const [loading, setLoading] = useState(true);
   const usernameWithoutGsuiteDomain = 'jaycarlton';
 
   useEffect(() => {
-    const getLogEntries = async() => {
-      const limit = 50;
-      const {actions, query} = await profileApi().getAuditLogEntries(usernameWithoutGsuiteDomain, limit);
-      console.log(query); // dont' think limit is working
-      const renderedString = actions.map(action => actionToString(action)).join('\n');
-      console.log(renderedString);
-      console.log(actions);
-      setUserActions(actions);
-    };
-
-    getLogEntries();
+    setNextUsername(username);
   }, []);
 
-  return userActions ?
-      <AuditActionCardListView actions={userActions}/> :
-      <div>Loading Audit Actions for user {usernameWithoutGsuiteDomain}...</div>;
+  useEffect(() => {
+    const getLogEntries = async() => {
+      setLoading(true);
+      const limit = 50;
+      try {
+        const {actions, query} = await profileApi().getAuditLogEntries(username, limit);
+        console.log(query); // dont' think limit is working
+        const renderedString = actions.map(action => actionToString(action)).join('\n');
+        console.log(renderedString);
+        console.log(actions);
+        setUserActions(actions);
+      } catch (e) {
+        setUserActions([]);
+      }
+      setLoading(false);
+    };
+
+    username.length && getLogEntries();
+  }, [username]);
+
+  useEffect(() => {
+    navigateTo && setNavigateTo(false);
+  }, [navigateTo]);
+
+  return !loading
+    ? <React.Fragment>
+        {navigateTo && <Navigate to={`/user-audit/${nextUsername}`}/>}
+        <TextInput
+          style={{
+            width: '15rem',
+            margin: '1rem'
+          }}
+          value = {nextUsername}
+          onChange = {setNextUsername}
+        />
+        <Button style={{height: '1.5rem', margin: '0.25rem 0.5rem'}}
+          onClick={() => setNavigateTo(true)}>
+          Submit
+        </Button>
+        <AuditActionCardListView actions={fp.slice(0, 10, userActions)}/>
+      </React.Fragment>
+    : <div>Loading Audit Actions for user {username}...</div>;
 };
 
 // Status:

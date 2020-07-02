@@ -29,6 +29,7 @@ export const AppRoutingComponent: React.FunctionComponent = () => {
           }} />}
         />
         <AppRoute path='/user-audit' component={UserAudit}/>
+        <AppRoute path='/user-audit/:username' component={UserAudit}/>
     </ProtectedRoutes>
   </AppRouter>;
 };

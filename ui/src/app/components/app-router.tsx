@@ -42,7 +42,7 @@ export const AppRoute = ({path, data = {}, component: Component}): React.ReactEl
   const routeParams = useParams();
   const routeHistory = useHistory();
 
-  return <Route path={path} >
+  return <Route exact={true} path={path} >
     <Component urlParams={routeParams} routeHistory={routeHistory} routeConfig={data}/>
   </Route>;
 };
