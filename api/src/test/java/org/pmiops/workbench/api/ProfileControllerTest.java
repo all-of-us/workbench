@@ -296,6 +296,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void testInvitationKeyVerification_invitationKeyMismatch() {
+    invitationVerificationRequest.setInvitationKey("wrong key");
     profileController.invitationKeyVerification(invitationVerificationRequest);
   }
 
