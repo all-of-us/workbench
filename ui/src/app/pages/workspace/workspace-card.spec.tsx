@@ -11,7 +11,7 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {WorkspaceCard} from './workspace-card';
 
 jest.mock('app/utils/navigation', () => ({
-  ...(require.requireActual('app/utils/navigation')),
+  ...(jest.requireActual('app/utils/navigation')),
   navigate: jest.fn()
 }));
 
