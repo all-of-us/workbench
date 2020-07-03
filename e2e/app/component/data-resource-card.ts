@@ -162,7 +162,7 @@ export default class DataResourceCard {
   }
 
   private resourceNameLinkSelector(): string {
-    return `//*[@role='button'][./*[${DataResourceCardSelector.cardNameXpath} and @text()]]`
+    return `//*[@role='button'][./*[${DataResourceCardSelector.cardNameXpath} and text()]]`
   }
 
 }

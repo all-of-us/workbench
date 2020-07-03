@@ -69,28 +69,28 @@ export default class ConceptsetSearchPage extends AuthenticatedPage{
     // Name column #2
     const nameCell = await bodyTable.getCell(rowIndex, 2);
     let textProp = await nameCell.getProperty('textContent');
-    const nameText = (await textProp.jsonValue()).toString();
+    const nameValue = (await textProp.jsonValue()).toString();
 
     // Code column #3
     const codeCell = await bodyTable.getCell(rowIndex, 3);
     textProp = await codeCell.getProperty('textContent');
-    const codeText = (await textProp.jsonValue()).toString();
+    const codeValue = (await textProp.jsonValue()).toString();
 
     // Vocabulary column #4
     const vocabularyCell = await bodyTable.getCell(rowIndex, 4);
     textProp = await vocabularyCell.getProperty('textContent');
-    const vocabularyText = (await textProp.jsonValue()).toString();
+    const vocabValue = (await textProp.jsonValue()).toString();
 
     // Participant Count column #5
     const participantCountCell = await bodyTable.getCell(rowIndex, 5);
     textProp = await participantCountCell.getProperty('textContent');
-    const participantCountText = (await textProp.jsonValue()).toString();
+    const partiCountValue = (await textProp.jsonValue()).toString();
 
     const selectCheckCell = await bodyTable.getCell(rowIndex, selctionColumnIndex);
     const elemt = (await selectCheckCell.$x('.//*[@role="checkbox"]'))[0];
     await elemt.click();
 
-    return { name: nameText, code: codeText, vocabulary: vocabularyText, participantCount: participantCountText };
+    return { name: nameValue, code: codeValue, vocabulary: vocabValue, participantCount: partiCountValue };
   }
 
   /**
