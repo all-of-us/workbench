@@ -150,6 +150,8 @@ describe('Editing and Copying Concept Sets', () => {
       const conceptCard = await conceptCards[0];
       conceptName = await conceptCard.getResourceName();
       const nameLink = await conceptCard.getLink();
+      const value = await (await nameLink.getProperty('textContent')).jsonValue();
+      expect(conceptName).toBe(value.toString());
       await nameLink.click();
     }
 
