@@ -48,9 +48,9 @@ describe('Create Concept Sets from Domains', () => {
 
     // Search by Code.
     await conceptPage.searchConcepts(conditionCode);
-    const codeInRow = await conceptPage.dataTableSelectRow();
+    const rowCells = await conceptPage.dataTableSelectRow();
     // Verify condition name from search result
-    expect(codeInRow).toBe(conditionName);
+    expect(rowCells.name).toBe(conditionName);
 
     await conceptPage.clickAddToSetButton();
 
