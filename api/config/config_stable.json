@@ -104,7 +104,8 @@
     "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,
     "useNewShibbolethService": true,
-    "enableResearchPurposePrompt": false
+    "enableResearchPurposePrompt": false,
+    "enableCohortBuilderV2": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-stable",
