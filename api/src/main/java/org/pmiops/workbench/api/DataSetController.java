@@ -451,7 +451,7 @@ public class DataSetController implements DataSetApiDelegate {
     dbDataSet.setName(request.getName());
     dbDataSet.setDescription(request.getDescription());
     dbDataSet.setLastModifiedTime(now);
-    if (request.getCohortIds() != null && request.getConceptSetIds() != null) {
+    if (request.getDomainValuePairs() != null) {
       dbDataSet.setIncludesAllParticipants(request.getIncludesAllParticipants());
       dbDataSet.setCohortIds(request.getCohortIds());
       dbDataSet.setConceptSetIds(request.getConceptSetIds());
