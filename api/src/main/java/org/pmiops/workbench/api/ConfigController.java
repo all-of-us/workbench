@@ -39,6 +39,7 @@ public class ConfigController implements ConfigApiDelegate {
             .enableCBAgeTypeOptions(config.featureFlags.enableCBAgeTypeOptions)
             .enableV3DataUserCodeOfConduct(config.featureFlags.enableV3DataUserCodeOfConduct)
             .enableEventDateModifier(config.featureFlags.enableEventDateModifier)
-            .useNewShibbolethService(config.featureFlags.useNewShibbolethService));
+            .useNewShibbolethService(config.featureFlags.useNewShibbolethService)
+            .enableCohortBuilderV2(config.featureFlags.enableCohortBuilderV2));
   }
 }

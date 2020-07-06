@@ -3795,6 +3795,10 @@ definitions:
         type: boolean
         default: false
         description: Whether to use the new Terra Shibboleth service.
+      enableCohortBuilderV2:
+        type: boolean
+        default: false
+        description: Whether to use the Cohort Builder UI.
   FeaturedWorkspacesConfigResponse:
     type: object
     properties:
