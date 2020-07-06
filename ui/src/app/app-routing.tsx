@@ -28,8 +28,8 @@ export const AppRoutingComponent: React.FunctionComponent = () => {
             minimizeChrome: true
           }} />}
         />
-        <AppRoute path='/user-audit' component={UserAudit}/>
-        <AppRoute path='/user-audit/:username' component={UserAudit}/>
+        <AppRoute path='/admin/user-audit' component={UserAudit}/>
+        <AppRoute path='/admin/user-audit/:username' component={UserAudit}/>
     </ProtectedRoutes>
   </AppRouter>;
 };

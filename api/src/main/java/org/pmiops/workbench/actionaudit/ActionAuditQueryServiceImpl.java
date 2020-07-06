@@ -124,7 +124,7 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
   private ImmutableMap.Builder<String, QueryParameterValue> getNamedParameterMapBuilder(
       long limit, DateTime after, DateTime before) {
     return ImmutableMap.<String, QueryParameterValue>builder()
-        .put("limit", QueryParameterValue.int64(Math.max(limit, MAX_QUERY_LIMIT)))
+        .put("limit", QueryParameterValue.int64(Math.min(limit, MAX_QUERY_LIMIT)))
         .put(
             "after", QueryParameterValue.timestamp(after.getMillis() * MICROSECONDS_IN_MILLISECOND))
         .put(
