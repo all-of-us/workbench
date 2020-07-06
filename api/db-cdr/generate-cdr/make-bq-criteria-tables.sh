@@ -137,6 +137,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
     is_standard             INT64
 )"
 
+# holds atc and rxnorm concept relationships for drugs
 echo "CREATE TABLES - prep_atc_rel_in_data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_atc_rel_in_data\`
@@ -151,6 +152,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
     domain_id       STRING
 )"
 
+# holds LOINC concept relationship data for measurements
 echo "CREATE TABLES - prep_loinc_rel_in_data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel_in_data\`
@@ -165,6 +167,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
     domain_id       STRING
 )"
 
+# holds standard snomed concept relationship data for conditions
 echo "CREATE TABLES - prep_snomed_rel_cm_in_data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_in_data\`
@@ -179,6 +182,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
     domain_id       STRING
 )"
 
+# holds source snomed concept relationship data for conditions
 echo "CREATE TABLES - prep_snomed_rel_cm_src_in_data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_src_in_data\`
@@ -193,6 +197,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
     domain_id       STRING
 )"
 
+# holds standard snomed concept relationship data for measurements
 echo "CREATE TABLES - prep_snomed_rel_meas_in_data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_meas_in_data\`
@@ -207,6 +212,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
     domain_id       STRING
 )"
 
+# holds standard snomed concept relationship data for procedures
 echo "CREATE TABLES - prep_snomed_rel_pcs_in_data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_in_data\`
@@ -221,6 +227,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
     domain_id       STRING
 )"
 
+# holds source snomed concept relationship data for procedures
 echo "CREATE TABLES - prep_snomed_rel_pcs_src_in_data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_src_in_data\`
@@ -405,7 +412,7 @@ WHERE cr.concept_id_1 = c1.concept_id
 ################################################
 # ICD9 - SOURCE
 ################################################
-echo "ICD9 - Source - add data (do not insert zero count children)"
+echo "ICD9 - SOURCE - add data (do not insert zero count children)"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
@@ -427,7 +434,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
         ,path
     )
 SELECT
-    a.id
+      a.id
     , a.parent_id
     , a.domain_id
     , a.is_standard
@@ -448,16 +455,19 @@ LEFT JOIN
     (
         SELECT *
         FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
+        -- for some reason there are two ICD9 codes = 92, this gets the one that is valid
         WHERE (vocabulary_id in ('ICD9CM', 'ICD9Proc') and concept_code != '92')
             OR (vocabulary_id = 'ICD9Proc' and concept_code = '92')
     ) b on a.concept_id = b.concept_id
 LEFT JOIN
     (
-        SELECT concept_id, count(distinct person_id) cnt
+        -- get the count of distinct patients coded with each concept
+        SELECT concept_id, COUNT(DISTINCT person_id) cnt
         FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
         WHERE is_standard = 0
             and concept_id in
                 (
+                    -- get all concepts that are selectable
                     SELECT concept_id
                     FROM \`$BQ_PROJECT.$BQ_DATASET.prep_criteria\`
                     WHERE type in ('ICD9CM', 'ICD9Proc')
@@ -467,9 +477,10 @@ LEFT JOIN
     ) c on b.concept_id = c.concept_id
 WHERE type in ('ICD9CM', 'ICD9Proc')
     AND
-      (
-          is_group = 1
-          OR
+        (
+            -- get all groups and get all children that have a count
+            is_group = 1
+            OR
             (
                 is_group = 0
                 AND is_selectable = 1
@@ -482,19 +493,21 @@ WHERE type in ('ICD9CM', 'ICD9Proc')
       )
 ORDER BY 1"
 
-echo "ICD9 - Source - generate parent rollup counts"
+echo "ICD9 - SOURCE - generate group rollup counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.rollup_count = y.cnt
     ,x.est_count = y.cnt
 FROM
     (
-        SELECT e.id, COUNT(distinct f.person_id) cnt
+        SELECT e.id, COUNT(DISTINCT f.person_id) cnt
         FROM
             (
-                SELECT *
+                -- for each group, get it and all items under each group
+                SELECT a.id, b.descendant_id
                 FROM
                     (
+                        -- get all groups that are selectable
                         SELECT id
                         FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
                         WHERE type in ('ICD9CM', 'ICD9Proc')
@@ -505,30 +518,33 @@ FROM
             ) e
         LEFT JOIN
             (
-                SELECT c.id, d.*
+                SELECT c.id, d.person_id, d.concept_id
                 FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c
                 JOIN
                     (
-                        SELECT a.person_id, a.concept_id
-                        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` a
-                        JOIN
+                        -- get all coded items for all selectable groups and children
+                        SELECT person_id, concept_id
+                        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+                        WHERE is_standard = 0
+                            AND concept_id IN
                             (
-                                SELECT concept_id, path
+                                -- get all selectable groups and children
+                                SELECT concept_id
                                 FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
                                 WHERE type in ('ICD9CM', 'ICD9Proc')
                                     and is_selectable = 1
-                            ) b on a.concept_id = b.concept_id
-                        WHERE is_standard = 0
+                            )
                     ) d on c.concept_id = d.concept_id
             ) f on e.descendant_id = f.id
         GROUP BY 1
     ) y
 WHERE x.id = y.id"
 
-echo "ICD9 - Source - delete zero count parents"
+echo "ICD9 - SOURCE - delete groups that have no count"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "DELETE
 FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 WHERE type in ('ICD9CM', 'ICD9Proc')
+    and is_group = 1
     and is_selectable = 1
     and (rollup_count is null or rollup_count = 0)"
