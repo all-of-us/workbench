@@ -8,7 +8,6 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useParams} from 'react-router-dom';
 
-
 const {useEffect, useState} = React;
 
 export const UserAudit = () => {
@@ -25,9 +24,9 @@ export const UserAudit = () => {
   useEffect(() => {
     const getLogEntries = async() => {
       setLoading(true);
-      const limit = 50;
+      const rowLimit = 500; // rows to fetch from BigQuery audit table. It's not possible to request a specific number of Actions.
       try {
-        const {actions, userDatabaseId, query} = await profileApi().getAuditLogEntries(username, limit);
+        const {actions, userDatabaseId, query} = await profileApi().getAuditLogEntries(username, rowLimit);
         console.log(query);
         setDbId(userDatabaseId);
         const renderedString = actions.map(action => actionToString(action)).join('\n');
@@ -47,10 +46,13 @@ export const UserAudit = () => {
     navigateTo && setNavigateTo(false);
   }, [navigateTo]);
 
-  const timesMillis = userActions.map(action => new Date(action.actionTime).getTime());
-  const minTime = new Date(Math.min(...timesMillis)).toDateString();
-  const maxTime = new Date(Math.max(...timesMillis)).toDateString();
-  const title = `User ${username} Audits from ${minTime} to ${maxTime}`
+  const getTitle = () => {
+    const timesMillis = userActions.map(action => new Date(action.actionTime).getTime());
+    const minTime = new Date(Math.min(...timesMillis)).toDateString();
+    const maxTime = new Date(Math.max(...timesMillis)).toDateString();
+    return `User ${username} ID ${dbId} Audits from ${minTime} to ${maxTime}`;
+  };
+
   return !loading
     ? <React.Fragment>
         {navigateTo && <Navigate to={`/admin/user-audit/${nextUsername}`}/>}
@@ -67,7 +69,7 @@ export const UserAudit = () => {
           onClick={() => setNavigateTo(true)}>
           Audit
         </Button>
-        <div>{title}</div>
+        <div>{getTitle()}</div>
         <AuditActionCardListView actions={fp.slice(0, 20, userActions)}/>
       </React.Fragment>
     : <div>Loading Audit for user {username}...</div>;

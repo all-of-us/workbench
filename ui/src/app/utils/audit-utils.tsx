@@ -1,24 +1,20 @@
+import * as React from 'react';
 import {
   AuditAction,
-  AuditAgent,
   AuditEventBundle,
   AuditEventBundleHeader,
-  AuditTarget, AuditTargetPropertyChange
+  AuditTarget,
+  AuditTargetPropertyChange
 } from '../../generated';
-import * as React from 'react';
 
 // Type sold separately
-export const agentToString = (agent?: AuditAgent) => {
-  return `ID: ${agent.agentId}, Username: ${agent.agentUsername}`;
-};
-
 // Type sold separately
-export const targetToString = (target?: AuditTarget) => {
-  return `ID: ${target.targetId}`;
+export const headerToBundleHeadline = (header?: AuditEventBundleHeader) => {
+  return `${header.agent.agentType} ${header.actionType} ${header.target.targetType}`;
 };
 
 export const headerToString = (header?: AuditEventBundleHeader) => {
-  return `${agentToString(header.agent)} \-> ${targetToString(header.target)}`;
+  return `ID: ${header.agent.agentId}, Username: ${header.agent.agentUsername} \-> ID: ${header.target.targetId}`;
 };
 
 export const eventBundleToString = (eventBundle: AuditEventBundle) => {

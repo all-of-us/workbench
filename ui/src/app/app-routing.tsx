@@ -5,6 +5,7 @@ import { ReactWrapperBase } from 'app/utils';
 import {authStore, useStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {domainToTitle} from './cohort-search/utils';
 import {UserAudit} from './pages/admin/user-audit';
 import {CookiePolicyComponent} from './pages/cookie-policy';
 
@@ -28,7 +29,7 @@ export const AppRoutingComponent: React.FunctionComponent = () => {
             minimizeChrome: true
           }} />}
         />
-        <AppRoute path='/admin/user-audit' component={UserAudit}/>
+        <AppRoute path='/admin/user-audit' component={UserAudit} data={{title: 'User Audit'}}/>
         <AppRoute path='/admin/user-audit/:username' component={UserAudit}/>
     </ProtectedRoutes>
   </AppRouter>;

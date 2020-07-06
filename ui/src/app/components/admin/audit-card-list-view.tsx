@@ -1,3 +1,4 @@
+import * as moment from 'moment';
 import * as React from 'react';
 import {
   AuditAction,
@@ -5,32 +6,28 @@ import {
   AuditEventBundleHeader,
   AuditTargetPropertyChange
 } from '../../../generated';
-import {agentToString, targetToString} from '../../utils/audit-utils';
 import {ActionAuditCardBase} from '../card';
-
-const hideableStyle = (content) => {
-  return {backgroundColor: content ? 'white' : 'lightGray'};
-};
+import {FlexColumn, FlexRow} from '../flex';
 
 const HidableCell = (props: {content: string}) => {
   const {content} = props;
-  return <div style={{backgroundColor: content ? 'white' : '#f0f3f5'}}>{content}</div>;
+  return <div style={{backgroundColor: content ? 'white' : '#f0f3f5',
+    border: '1px solid',
+    boxSizing: 'border-box'}}>{content}</div>;
 };
 
 const PropertyChangeListEntry = (props: {targetProperty?: string, previousValue?: string, newValue?: string}) => {
   const {targetProperty, previousValue, newValue} = props;
   return <React.Fragment>
-    {/*<div style={hideableStyle(targetProperty)}>{targetProperty}</div>*/}
-    {/*<div style={hideableStyle(previousValue)}>{previousValue}</div>*/}
-    {/*<div style={hideableStyle(newValue)}>{newValue}</div>*/}
-
     <HidableCell content={targetProperty}/>
     <HidableCell content={previousValue}/>
     <HidableCell content={newValue}/>
   </React.Fragment>;
 };
+
 const PropertyChangeListView = (props: { propertyChanges: AuditTargetPropertyChange[] }) => {
   const {propertyChanges} = props;
+  const propertyCellStyle = {fontWeight: 600, border: `1px solid`};
 
   return propertyChanges.length > 0 ?
   <div style={{
@@ -38,17 +35,32 @@ const PropertyChangeListView = (props: { propertyChanges: AuditTargetPropertyCha
     display: 'grid',
     gridTemplateColumns: 'repeat(3, 1fr)'
   }}>
-    <div style={{fontWeight: 600}}>Property</div>
-    <div style={{fontWeight: 600}}>Previous Value</div>
-    <div style={{fontWeight: 600}}>New Value</div>
-    {propertyChanges.map((changes, index) => <PropertyChangeListEntry {...changes} key={index}/>)}
+    <div style={propertyCellStyle}>Changed Property</div>
+    <div style={propertyCellStyle}>Previous Value</div>
+    <div style={propertyCellStyle}>New Value</div>
+    {propertyChanges.map((propertyChange, index) => <PropertyChangeListEntry {...propertyChange} key={index}/>)}
   </div> :
-      <div>No Property Changes</div>;
+      <div style={propertyCellStyle}>No Property Changes</div>;
 };
+
+const agentBackgroundnColor = 'lightBlue';
+const targetBackgroundColor = 'lightGreen';
+const agentTextColor = 'blue';
+const actionTextColor = 'black';
+const targetTextColor = 'green';
 const AuditEventBundleHeaderView = (props: { header: AuditEventBundleHeader }) => {
   const {header} = props;
   return <div>
-    <div style={{textAlign: 'left', fontWeight: 600}}>{header.actionType} Action</div>
+    <div style={{  margin: '30px',
+      display: 'flex',
+      flexDirection: 'row',
+      textAlign: 'center',
+      fontWeight: 600}}>
+      <div style={{color: agentTextColor, margin: '5px'}}>{header.agent.agentType}</div>
+      <div style={{color: actionTextColor, margin: '5px'}}>{header.actionType}</div>
+      <div style={{color: targetTextColor, margin: '5px'}}>{header.target.targetType}</div>
+    </div>
+    {/*<div style={{textAlign: 'left', fontWeight: 600}}>{ `${header.agent.agentType} ${header.actionType} ${header.target.targetType}`}</div>*/}
     <div style={{
       marginLeft: '1rem',
       display: 'grid',
@@ -56,10 +68,22 @@ const AuditEventBundleHeaderView = (props: { header: AuditEventBundleHeader }) =
       columnGap: '0.5rem',
       gridTemplateColumns: 'auto 1fr'
     }}>
-      <div style={{fontWeight: 600}}>{header.agent.agentType} Agent</div>
-      <div>{agentToString(header.agent)}</div>
-      <div style={{fontWeight: 600}}>{header.target.targetType} Target</div>
-      <div>{targetToString(header.target)}</div>
+      <FlexRow>
+        <div style={{fontWeight: 150, border: '1px solid', boxSizing: 'border-box', backgroundColor: agentBackgroundnColor, width: '100%'}}>
+          <FlexColumn>
+            <div>Agent</div>
+            <div>{`${header.agent.agentType} ${header.agent.agentId}`}</div>
+            <div>{`${header.agent.agentUsername}`}</div>
+          </FlexColumn>
+        </div>
+        <div style={{fontWeight: 150, border: '1px solid', boxSizing: 'border-box', backgroundColor: targetBackgroundColor}}>
+          <FlexColumn>
+          <div>Target</div>
+          <div>{`${header.target.targetType} ${header.target.targetId}`}</div>
+          <div></div>
+        </FlexColumn>
+        </div>
+      </FlexRow>
     </div>
   </div>;
 };
@@ -77,20 +101,22 @@ const AuditActionCard = (props: { action: AuditAction }) => {
   // Something in the codegen is wonky here. the actionTime field is typed as a Date,
   // but turns out to be a number for some reason here. In other contexts it appears
   // to format itself happily though.
-  const timeString = new Date(action.actionTime).toTimeString();
+  // yyyy-MM-dd HH:mm:ss.SSS
+  // SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+
+  const timeString = moment(new Date(action.actionTime)).format('YYYY-MM-DD h:mm:ss');
   const actionTypes = action.eventBundles.map((eventBundle) => {
     return eventBundle.header.actionType;
   }).join(' & ');
   return (
       <ActionAuditCardBase>
-        <div style={{
-          fontWeight: 600,
+        <FlexRow style={{
+          fontWeight: 200,
           textAlign: 'left',
           fontSize: '0.825rem',
-          backgroundColor: 'lightGrey'
-        }}>{timeString}
-        </div>
-        <div>{action.eventBundles.length} events: {actionTypes}</div>
+          padding: '5px'
+        }}><div>{timeString}</div><div>{actionTypes}</div>
+        </FlexRow>
         {action.eventBundles.map((eventBundle, index) =>
             <EventBundleView key={index} eventBundle={eventBundle}/>)}
       </ActionAuditCardBase>
