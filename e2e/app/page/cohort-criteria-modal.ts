@@ -191,17 +191,12 @@ export default class CohortCriteriaModal extends Dialog {
     await (Textbox.asBaseElement(this.page, lowerNumberInput)).type(minAge.toString()).then(input => input.pressTab());
     await (Textbox.asBaseElement(this.page, upperNumberInput)).type(maxAge.toString()).then(input => input.pressTab());
 
-    // Click Calculate button.
-    const button = await this.waitForButton(LinkText.Calculate);
-    await waitForPropertyNotExists(this.page, button.getXpath(), 'disabled');
-    await button.click();
-
-    const calcuatedResult = await this.waitForParticipantResult();
-    console.log(`Age min: ${minAge}, max: ${maxAge} ==> number of participants: ${calcuatedResult}`);
+    // Get count from slider badge
+    const count = waitForNumericalString(this.page, '//*[@id="age-count"]');
 
     // Click FINISH button. Dialog should close.
     await this.clickFinishButton();
-    return calcuatedResult;
+    return count;
   }
 
   // Experimental
