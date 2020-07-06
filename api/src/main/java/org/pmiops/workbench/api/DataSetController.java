@@ -448,17 +448,19 @@ public class DataSetController implements DataSetApiDelegate {
       throw new ConflictException("Attempted to modify outdated data set version");
     }
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    dbDataSet.setLastModifiedTime(now);
-    dbDataSet.setIncludesAllParticipants(request.getIncludesAllParticipants());
-    dbDataSet.setCohortIds(request.getCohortIds());
-    dbDataSet.setConceptSetIds(request.getConceptSetIds());
-    dbDataSet.setDescription(request.getDescription());
     dbDataSet.setName(request.getName());
-    dbDataSet.setPrePackagedConceptSetEnum(request.getPrePackagedConceptSet());
-    dbDataSet.setValues(
-        request.getDomainValuePairs().stream()
-            .map(this::getDataSetValuesFromDomainValueSet)
-            .collect(Collectors.toList()));
+    dbDataSet.setDescription(request.getDescription());
+    dbDataSet.setLastModifiedTime(now);
+    if (request.getCohortIds() != null && request.getConceptSetIds() != null) {
+      dbDataSet.setIncludesAllParticipants(request.getIncludesAllParticipants());
+      dbDataSet.setCohortIds(request.getCohortIds());
+      dbDataSet.setConceptSetIds(request.getConceptSetIds());
+      dbDataSet.setPrePackagedConceptSetEnum(request.getPrePackagedConceptSet());
+      dbDataSet.setValues(
+          request.getDomainValuePairs().stream()
+              .map(this::getDataSetValuesFromDomainValueSet)
+              .collect(Collectors.toList()));
+    }
 
     dataSetService.saveDataSet(dbDataSet);
 
