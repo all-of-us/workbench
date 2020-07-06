@@ -7,7 +7,7 @@ import Textbox from 'app/element/textbox';
 import {buildXPath} from 'app/xpath-builders';
 import {ElementType} from 'app/xpath-options';
 import {centerPoint, dragDrop, waitWhileLoading} from 'utils/test-utils';
-import {waitForNumericalString, waitForPropertyNotExists} from 'utils/waits-utils';
+import {waitForNumericalString} from 'utils/waits-utils';
 import {LinkText} from 'app/text-labels';
 
 const defaultXpath = '//*[@class="modal-container"]';
