@@ -69,7 +69,8 @@ describe('WorkspaceWrapperComponent', () => {
         {
           provide: ServerConfigService,
           useValue: new ServerConfigServiceStub({
-            gsuiteDomain: 'fake-research-aou.org'
+            gsuiteDomain: 'fake-research-aou.org',
+            enableResearchReviewPrompt: true
           })
         },
       ]
