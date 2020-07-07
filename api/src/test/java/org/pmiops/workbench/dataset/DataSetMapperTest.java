@@ -71,24 +71,22 @@ public class DataSetMapperTest {
 
   @Before
   public void setUp() {
-    dbDataset =
-        DbDataset.builder()
-            .addVersion(1)
-            .addDataSetId(101L)
-            .addName("All Blue-eyed Blondes")
-            .addIncludesAllParticipants(false)
-            .addDescription("All Blue-eyed Blondes")
-            .addLastModifiedTime(Timestamp.from(Instant.now()))
-            .addWorkspaceId(1L)
-            .addPrePackagedConceptSets(
-                DbStorageEnums.prePackagedConceptSetsToStorage(PrePackagedConceptSetEnum.NONE))
-            .addCohortIds(ImmutableList.of(1L))
-            .addConceptSetIds(ImmutableList.of(1L))
-            .addValues(
-                ImmutableList.of(
-                    new DbDatasetValue(
-                        DbStorageEnums.domainToStorage(Domain.CONDITION).toString(), "value")))
-            .build();
+    dbDataset = new DbDataset();
+    dbDataset.setVersion(1);
+    dbDataset.setDataSetId(101L);
+    dbDataset.setName("All Blue-eyed Blondes");
+    dbDataset.setIncludesAllParticipants(false);
+    dbDataset.setDescription("All Blue-eyed Blondes");
+    dbDataset.setLastModifiedTime(Timestamp.from(Instant.now()));
+    dbDataset.setWorkspaceId(1L);
+    dbDataset.setPrePackagedConceptSet(
+        DbStorageEnums.prePackagedConceptSetsToStorage(PrePackagedConceptSetEnum.NONE));
+    dbDataset.setCohortIds(ImmutableList.of(1L));
+    dbDataset.setConceptSetIds(ImmutableList.of(1L));
+    dbDataset.setValues(
+        ImmutableList.of(
+            new DbDatasetValue(
+                DbStorageEnums.domainToStorage(Domain.CONDITION).toString(), "value")));
     DbConceptSet dbConceptSet = new DbConceptSet();
     dbConceptSet.setConceptSetId(1L);
     DbCohort dbCohort = new DbCohort();

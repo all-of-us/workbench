@@ -1,7 +1,5 @@
 package org.pmiops.workbench.api;
 
-import static com.google.common.collect.ImmutableList.toImmutableList;
-
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldList;
 import com.google.cloud.bigquery.FieldValueList;
@@ -39,8 +37,6 @@ import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
 import org.pmiops.workbench.db.model.DbDataset;
-import org.pmiops.workbench.db.model.DbDatasetValue;
-import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -59,7 +55,6 @@ import org.pmiops.workbench.model.DataSetPreviewValueList;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValue;
-import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.DomainValuesResponse;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.KernelTypeEnum;
@@ -134,29 +129,13 @@ public class DataSetController implements DataSetApiDelegate {
         workspaceNamespace, workspaceFirecloudName, WorkspaceAccessLevel.WRITER);
     final long workspaceId =
         workspaceService.get(workspaceNamespace, workspaceFirecloudName).getWorkspaceId();
-    final ImmutableList<DbDatasetValue> dataSetValueList =
-        dataSetRequest.getDomainValuePairs().stream()
-            .map(this::getDataSetValuesFromDomainValueSet)
-            .collect(toImmutableList());
-    DbDataset savedDataSet =
-        dataSetService.saveDataSet(
-            dataSetRequest.getName(),
-            dataSetRequest.getIncludesAllParticipants(),
-            dataSetRequest.getDescription(),
-            workspaceId,
-            dataSetRequest.getCohortIds(),
-            dataSetRequest.getConceptSetIds(),
-            dataSetValueList,
-            dataSetRequest.getPrePackagedConceptSet(),
-            userProvider.get().getUserId(),
-            now);
+    dataSetRequest.setWorkspaceId(workspaceId);
+    DbDataset datasetToSave = dataSetMapper.dataSetRequestToDb(dataSetRequest);
+    datasetToSave.setCreationTime(now);
+    datasetToSave.setCreatorId(userProvider.get().getUserId());
+    datasetToSave.setInvalid(false);
+    DbDataset savedDataSet = dataSetService.saveDataSet(datasetToSave);
     return ResponseEntity.ok(dataSetMapper.dbModelToClient(savedDataSet));
-  }
-
-  private DbDatasetValue getDataSetValuesFromDomainValueSet(DomainValuePair domainValuePair) {
-    return new DbDatasetValue(
-        DbStorageEnums.domainToStorage(domainValuePair.getDomain()).toString(),
-        domainValuePair.getValue());
   }
 
   private void validateDataSetCreateRequest(DataSetRequest dataSetRequest) {
@@ -437,32 +416,27 @@ public class DataSetController implements DataSetApiDelegate {
     if (Strings.isNullOrEmpty(request.getEtag())) {
       throw new BadRequestException("missing required update field 'etag'");
     }
+    final Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     DbWorkspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-
+    request.setWorkspaceId(workspace.getWorkspaceId());
     DbDataset dbDataSet = dataSetService.getDbDataSet(workspace, dataSetId).get();
 
     int version = Etags.toVersion(request.getEtag());
     if (dbDataSet.getVersion() != version) {
       throw new ConflictException("Attempted to modify outdated data set version");
     }
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    dbDataSet.setLastModifiedTime(now);
-    dbDataSet.setIncludesAllParticipants(request.getIncludesAllParticipants());
-    dbDataSet.setCohortIds(request.getCohortIds());
-    dbDataSet.setConceptSetIds(request.getConceptSetIds());
-    dbDataSet.setDescription(request.getDescription());
-    dbDataSet.setName(request.getName());
-    dbDataSet.setPrePackagedConceptSetEnum(request.getPrePackagedConceptSet());
-    dbDataSet.setValues(
-        request.getDomainValuePairs().stream()
-            .map(this::getDataSetValuesFromDomainValueSet)
-            .collect(Collectors.toList()));
+    DbDataset dbMappingConvert = dataSetMapper.dataSetRequestToDb(request);
+    dbMappingConvert.setDataSetId(dbDataSet.getDataSetId());
+    dbMappingConvert.setInvalid(false);
+    dbMappingConvert.setCreatorId(dbDataSet.getCreatorId());
+    dbMappingConvert.setCreationTime(dbDataSet.getCreationTime());
+    dbMappingConvert.setLastModifiedTime(now);
 
-    dataSetService.saveDataSet(dbDataSet);
+    dataSetService.saveDataSet(dbMappingConvert);
 
-    return ResponseEntity.ok(dataSetMapper.dbModelToClient(dbDataSet));
+    return ResponseEntity.ok(dataSetMapper.dbModelToClient(dbMappingConvert));
   }
 
   @Override
