@@ -3,6 +3,7 @@ import {
   ActivatedRouteSnapshot, CanActivate, CanActivateChild, Router,
   RouterStateSnapshot
 } from '@angular/router';
+import {serverConfigStore} from 'app/utils/navigation';
 import {WorkspacesService} from 'generated';
 import {Observable} from 'rxjs/Observable';
 
@@ -13,7 +14,7 @@ export class WorkspaceGuard implements CanActivate, CanActivateChild {
     private router: Router) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
-    if (route.routeConfig.path === 'data' ||
+    if (serverConfigStore.getValue().enableResearchReviewPrompt && route.routeConfig.path === 'data' ||
         route.routeConfig.path === 'notebooks') {
       this.workspaceService.getWorkspace(route.params.ns, route.params.wsid).subscribe(workspace => {
         if (workspace.accessLevel === 'OWNER'

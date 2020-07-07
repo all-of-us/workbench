@@ -18,6 +18,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {displayDate, reactStyles} from 'app/utils';
 import {AnalyticsTracker, triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore, navigate} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/navigation';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 
 const EVENT_CATEGORY = 'Workspace list';
@@ -233,7 +234,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
 
   onClick() {
     const {workspace} = this.props;
-    if (workspace.researchPurpose.needsReviewPrompt) {
+    if (serverConfigStore.getValue().enableResearchReviewPrompt && workspace.researchPurpose.needsReviewPrompt) {
       this.setState({showResearchPurposeReviewModal: true});
     } else {
       workspace.published ?
