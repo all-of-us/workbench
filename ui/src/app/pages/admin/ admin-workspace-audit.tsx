@@ -24,7 +24,7 @@ const getNextAuditPath = (subject: string) => {
   return `/admin/workspace-audit/${subject}`;
 };
 
-export const WorkspaceAuditPage = (props) => {
+export const WorkspaceAuditPage = () => {
   const {workspaceNamespace = ''} = useParams();
   return <AuditPageComponent auditSubjectType='Workspace'
                              initialAuditSubject={workspaceNamespace}
