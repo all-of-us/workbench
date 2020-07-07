@@ -54,7 +54,7 @@ export async function waitWhileLoading(page: Page, timeOut: number = 90000): Pro
       return document.querySelectorAll(selector).length > 0
     }, {timeout: 1000}, spinSelector);
   } catch (err) {
-    console.info('waitUntilNoSpinner does not find any spin elements.');
+    console.info('waitWhileLoading does not find any spin elements.');
   }
   const jValue = await spinner.jsonValue();
 
@@ -66,8 +66,8 @@ export async function waitWhileLoading(page: Page, timeOut: number = 90000): Pro
       await page.waitFor((selector) => {
         return document.querySelectorAll(selector).length === 0;
       }, {timeout: timeOut}, spinAnimationSelector);
-      // 1 second to give page time finish rendering
-      await page.waitFor(1000);
+      // half second to give page time finish rendering
+      await page.waitFor(500);
     }
   } catch (err) {
     throw new Error(err);

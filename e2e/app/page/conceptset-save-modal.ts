@@ -9,25 +9,44 @@ import ConceptsetActionsPage from './conceptset-actions-page';
 
 const faker = require('faker/locale/en_US');
 
+export enum SaveOption {
+  CreateNewSet = 'Create new set',
+  ChooseExistingSet = 'Choose existing set',
+}
+
 export default class ConceptsetSaveModal extends Dialog {
 
   constructor(page: Page) {
     super(page);
   }
 
-  async saveAndCloseDialog(): Promise<string> {
-    // Even though the radiobutton is selected by default, select it explicitly to confirm existances and not readonly.
-    const createNewSetRadioButton = await RadioButton.findByName(this.page, {name: 'Create new set'}, this);
+  /**
+   *
+   * Save new Concept Set: Fill in Concept name and Description.
+   * @param {SaveOption} saveOption
+   * @return {string} Concept name.
+   */
+  async fillOutSaveModal(saveOption: SaveOption = SaveOption.CreateNewSet, existingConceptName: string = '0'): Promise<string> {
+    const createNewSetRadioButton = await RadioButton.findByName(this.page, {name: saveOption}, this);
     await createNewSetRadioButton.select();
 
-    // Generate a random name as new Concept name.
-    const newConceptName = makeRandomName();
-    const nameTextbox = await Textbox.findByName(this.page, {name: 'Name'}, this);
-    await nameTextbox.type(newConceptName);
+    let conceptName;
 
-    // Type in Description
-    const descriptionTextarea = await Textarea.findByName(this.page, {containsText: 'Description'}, this);
-    await descriptionTextarea.type(faker.lorem.words());
+    if (saveOption === SaveOption.CreateNewSet) {
+      // Generate a random name as new Concept name.
+      conceptName = makeRandomName();
+      const nameTextbox = await Textbox.findByName(this.page, {name: 'Name'}, this);
+      await nameTextbox.type(conceptName);
+
+      // Type in Description
+      const descriptionTextarea = await Textarea.findByName(this.page, {containsText: 'Description'}, this);
+      await descriptionTextarea.type(faker.lorem.words());
+    } else {
+      const [selectedValue] = await this.page.select('[data-test-id="add-to-existing"] select', existingConceptName);
+      const elem = await this.page.waitForSelector(`[data-test-id="add-to-existing"] select option[value="${selectedValue}"]`);
+      const value = await (await elem.getProperty('textContent')).jsonValue();
+      conceptName = value.toString();
+    }
 
     // Click SAVE button.
     await this.clickButton(LinkText.Save);
@@ -35,7 +54,7 @@ export default class ConceptsetSaveModal extends Dialog {
     const conceptActionPage = new ConceptsetActionsPage(this.page);
     await conceptActionPage.waitForLoad();
     
-    return newConceptName;
+    return conceptName;
   }
 
 }
