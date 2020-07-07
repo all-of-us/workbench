@@ -691,7 +691,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             });
           workspace = cloneWorkspace.workspace;
         } else {
-          workspace.researchPurpose.needsReviewPrompt = true;
+          workspace.researchPurpose.needsReviewPrompt = false;
           workspace = await workspacesApi()
               .updateWorkspace(this.state.workspace.namespace, this.state.workspace.id,
                   {workspace: this.state.workspace});
