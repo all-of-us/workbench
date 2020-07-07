@@ -128,9 +128,7 @@ export const DatasetResourceCard = fp.flow(
     const request = {
       ...dataset,
       name: name,
-      description: description,
-      conceptSetIds: dataset.conceptSets.map(concept => concept.id),
-      cohortIds: dataset.cohorts.map(cohort => cohort.id)
+      description: description
     };
 
     return dataSetApi().updateDataSet(

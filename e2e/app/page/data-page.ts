@@ -13,9 +13,11 @@ import {Page, Response} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
 import {makeRandomName} from 'utils/str-utils';
+import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
 import CohortActionsPage from './cohort-actions-page';
 import CohortBuildPage from './cohort-build-page';
 import {Visits} from './cohort-criteria-modal';
+import ConceptsetSearchPage from './conceptset-search-page';
 import DatasetBuildPage from './dataset-build-page';
 
 export enum TabLabelAlias {
@@ -102,6 +104,9 @@ export default class DataPage extends AuthenticatedPage {
    */
   async deleteCohort(cohortName: string): Promise<string> {
     const cohortCard = await DataResourceCard.findCard(this.page, cohortName);
+    if (cohortCard == null) {
+      throw new Error(`Failed to find Cohort: "${cohortName}".`);
+    }
     const menu = cohortCard.getEllipsis();
     await menu.clickAction(EllipsisMenuAction.Delete, {waitForNav: false});
     const dialogContent = await (new CohortBuildPage(this.page)).deleteConfirmationDialog();
@@ -115,6 +120,9 @@ export default class DataPage extends AuthenticatedPage {
    */
   async deleteDataset(datasetName: string): Promise<string> {
     const datasetCard = await DataResourceCard.findCard(this.page, datasetName);
+    if (datasetCard == null) {
+      throw new Error(`Failed to find Dataset: "${datasetName}".`);
+    }
     const menu = datasetCard.getEllipsis();
     await menu.clickAction(EllipsisMenuAction.Delete, {waitForNav: false});
 
@@ -137,8 +145,8 @@ export default class DataPage extends AuthenticatedPage {
    * @param {string} newDatasetName
    */
   async renameDataset(datasetName: string, newDatasetName: string): Promise<void> {
-    const card = await DataResourceCard.findCard(this.page, datasetName);
-    const menu = card.getEllipsis();
+    const datasetCard = await DataResourceCard.findCard(this.page, datasetName);
+    const menu = datasetCard.getEllipsis();
     await menu.clickAction(EllipsisMenuAction.RenameDataset, {waitForNav: false});
 
     const dialog = new Dialog(this.page);
@@ -162,8 +170,11 @@ export default class DataPage extends AuthenticatedPage {
    * @param {string} conceptsetName
    */
   async deleteConceptSet(conceptsetName: string): Promise<string> {
-    const datasetCard = await DataResourceCard.findCard(this.page, conceptsetName);
-    const menu = datasetCard.getEllipsis();
+    const conceptSetCard = await DataResourceCard.findCard(this.page, conceptsetName);
+    if (conceptSetCard == null) {
+      throw new Error(`Failed to find Concept Set: "${conceptsetName}".`);
+    }
+    const menu = conceptSetCard.getEllipsis();
     await menu.clickAction(EllipsisMenuAction.Delete, {waitForNav: false});
 
     const dialog = new Dialog(this.page);
@@ -180,8 +191,8 @@ export default class DataPage extends AuthenticatedPage {
   }
 
   async renameCohort(cohortName: string, newCohortName: string): Promise<void> {
-    const cohortResourceCard = await DataResourceCard.findCard(this.page, cohortName);
-    const menu = cohortResourceCard.getEllipsis();
+    const cohortCard = await DataResourceCard.findCard(this.page, cohortName);
+    const menu = cohortCard.getEllipsis();
     await menu.clickAction(EllipsisMenuAction.Rename, {waitForNav: false});
     const dialog = new Dialog(this.page);
     await dialog.getContent();
@@ -226,6 +237,26 @@ export default class DataPage extends AuthenticatedPage {
     await cohortBuildPage.saveCohortAs(name);
     await (new CohortActionsPage(this.page)).waitForLoad();
     return this.findCohortCard(name);
+  }
+
+  /**
+   * Click Add Dataset button.
+   * Click Add Concept Set button.
+   * Click Domain card.
+   * @param {Domain} domain
+   */
+  async openConceptSearch(domain: Domain): Promise<ConceptsetSearchPage> {
+    // Click Add Datasets button.
+    const datasetBuildPage = await this.clickAddDatasetButton();
+
+    // Click Add Concept Sets button.
+    const conceptSearchPage = await datasetBuildPage.clickAddConceptSetsButton();
+
+    // Add Concept Set in domain.
+    const procedures = await ConceptDomainCard.findDomainCard(this.page, domain);
+    await procedures.clickSelectConceptButton();
+
+    return conceptSearchPage;
   }
 
 

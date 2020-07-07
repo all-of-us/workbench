@@ -260,6 +260,8 @@ public class WorkbenchConfig {
     // Flag to indicate whether to show Update research purpose prompt after an year of workspace
     // creation
     public boolean enableResearchPurposePrompt;
+    // Flag to indicate whether to use the new UI for cohort builder
+    public boolean enableCohortBuilderV2;
   }
 
   public static class ActionAuditConfig {
