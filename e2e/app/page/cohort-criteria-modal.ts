@@ -192,7 +192,7 @@ export default class CohortCriteriaModal extends Dialog {
     await (Textbox.asBaseElement(this.page, upperNumberInput)).type(maxAge.toString()).then(input => input.pressTab());
 
     // Get count from slider badge
-    const count = waitForNumericalString(this.page, '//*[@id="age-count"]');
+    const count = await waitForNumericalString(this.page, `${this.xpath}//*[@id="age-count"]`);
 
     // Click FINISH button. Dialog should close.
     await this.clickFinishButton();
