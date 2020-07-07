@@ -71,17 +71,17 @@ services:
     <<: *api-defaults
     depends_on:
       - db
-    working_dir: /w/db-cdr
+    working_dir: /w/api/db-cdr
     env_file: db-cdr/vars.env
 
   db-cloudsql-import:
     <<: *api-defaults
-    working_dir: /w/db-cdr
+    working_dir: /w/api/db-cdr
     entrypoint: ["./generate-cdr/cloudsql-import.sh"]
 
   db-local-mysql-import:
     <<: *api-defaults
-    working_dir: /w/db-cdr
+    working_dir: /w/api/db-cdr
     entrypoint: ["./generate-cdr/local-mysql-import.sh"]
 
 volumes:
