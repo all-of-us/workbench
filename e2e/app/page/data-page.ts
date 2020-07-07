@@ -145,8 +145,8 @@ export default class DataPage extends AuthenticatedPage {
    * @param {string} newDatasetName
    */
   async renameDataset(datasetName: string, newDatasetName: string): Promise<void> {
-    const card = await DataResourceCard.findCard(this.page, datasetName);
-    const menu = card.getEllipsis();
+    const datasetCard = await DataResourceCard.findCard(this.page, datasetName);
+    const menu = datasetCard.getEllipsis();
     await menu.clickAction(EllipsisMenuAction.RenameDataset, {waitForNav: false});
 
     const dialog = new Dialog(this.page);
@@ -170,11 +170,11 @@ export default class DataPage extends AuthenticatedPage {
    * @param {string} conceptsetName
    */
   async deleteConceptSet(conceptsetName: string): Promise<string> {
-    const card = await DataResourceCard.findCard(this.page, conceptsetName);
-    if (card == null) {
+    const conceptSetCard = await DataResourceCard.findCard(this.page, conceptsetName);
+    if (conceptSetCard == null) {
       throw new Error(`Failed to find Concept Set: "${conceptsetName}".`);
     }
-    const menu = card.getEllipsis();
+    const menu = conceptSetCard.getEllipsis();
     await menu.clickAction(EllipsisMenuAction.Delete, {waitForNav: false});
 
     const dialog = new Dialog(this.page);
@@ -191,8 +191,8 @@ export default class DataPage extends AuthenticatedPage {
   }
 
   async renameCohort(cohortName: string, newCohortName: string): Promise<void> {
-    const cohortResourceCard = await DataResourceCard.findCard(this.page, cohortName);
-    const menu = cohortResourceCard.getEllipsis();
+    const cohortCard = await DataResourceCard.findCard(this.page, cohortName);
+    const menu = cohortCard.getEllipsis();
     await menu.clickAction(EllipsisMenuAction.Rename, {waitForNav: false});
     const dialog = new Dialog(this.page);
     await dialog.getContent();
