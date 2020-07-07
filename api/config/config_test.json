@@ -100,7 +100,7 @@
     "useKeylessDelegatedCredentials": true,
     "sendFreeTierAlertEmails": true,
     "enableMoodleV2Api": true,
-    "enableCBAgeTypeOptions": true,
+    "enableCBAgeTypeOptions": false,
     "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,
     "useNewShibbolethService": true,
