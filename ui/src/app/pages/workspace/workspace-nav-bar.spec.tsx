@@ -1,5 +1,5 @@
 import {WorkspaceNavBarReact} from 'app/pages/workspace/workspace-nav-bar';
-import {currentWorkspaceStore, NavStore, urlParamsStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, NavStore, serverConfigStore, urlParamsStore} from 'app/utils/navigation';
 import {mount} from 'enzyme';
 import * as React from 'react';
 import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
@@ -17,6 +17,8 @@ describe('WorkspaceNavBarComponent', () => {
 
     currentWorkspaceStore.next(workspaceDataStub);
     urlParamsStore.next({ns: workspaceDataStub.namespace, wsid: workspaceDataStub.id});
+    serverConfigStore.next({
+      gsuiteDomain: 'fake-research-aou.org', enableResearchReviewPrompt: true});
   });
 
   it('should render', () => {
