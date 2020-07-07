@@ -2,6 +2,7 @@ package org.pmiops.workbench.dataset;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 
+import com.google.common.base.Strings;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.mapstruct.Mapper;
@@ -59,7 +60,7 @@ public interface DataSetMapper {
   DataSet dbModelToClient(DbDataset dbDataset);
 
   default int etagToVersion(String eTag) {
-    return Etags.toVersion(eTag);
+    return Strings.isNullOrEmpty(eTag) ? 1 : Etags.toVersion(eTag);
   }
 
   default PrePackagedConceptSetEnum prePackagedConceptSetFromStorage(Short prePackagedConceptSet) {
