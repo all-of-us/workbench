@@ -14,7 +14,6 @@ export class WorkspaceGuard implements CanActivate, CanActivateChild {
     private router: Router) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
-    console.log(serverConfigStore.getValue().enableResearchReviewPrompt);
     if (serverConfigStore.getValue().enableResearchReviewPrompt && route.routeConfig.path === 'data' ||
         route.routeConfig.path === 'notebooks') {
       this.workspaceService.getWorkspace(route.params.ns, route.params.wsid).subscribe(workspace => {
