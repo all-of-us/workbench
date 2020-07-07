@@ -10,6 +10,8 @@ import {useParams} from 'react-router-dom';
 
 const {useEffect, useState} = React;
 
+// TODO(jaycarlton): make a reusable ActionAuditComponent that takes in
+//   - method to call to retrieve actions (taking in source ID, rowLimit
 export const UserAudit = () => {
   const {username = ''} = useParams();
   const [userActions, setUserActions] = useState([]);

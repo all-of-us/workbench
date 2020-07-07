@@ -207,6 +207,7 @@ export interface SideNavProps {
   profileActive: boolean;
   userAdminActive: boolean;
   userAuditActive: boolean;
+  workspaceAuditActive: boolean;
   workspacesActive: boolean;
 }
 
@@ -360,6 +361,14 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
             onToggleSideNav={() => this.props.onToggleSideNav()}
             href={'admin/workspaces'}
             active={this.props.workspaceAdminActive}
+        />
+      }
+      {
+        profile.authorities.includes(Authority.ACCESSCONTROLADMIN) && this.state.showAdminOptions && <SideNavItem
+            content={'Workspace Audit'}
+            onToggleSideNav={() => this.props.onToggleSideNav()}
+            href={'/admin/workspace-audit/'}
+            active={this.props.workspaceAuditActive}
         />
       }
       {
