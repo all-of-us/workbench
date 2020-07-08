@@ -18,21 +18,20 @@ const borderStyle = `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`;
 const styles = reactStyles({
   searchContainer: {
     position: 'absolute',
-    width: '95%',
+    width: '65%',
     padding: '0.4rem 0',
-    background: colors.white,
     zIndex: 10,
   },
   searchBar: {
-    height: '40px',
+    height: '2.1rem',
     width: '100%',
     padding: '7px 14px',
     borderRadius: '5px',
     backgroundColor: colorWithWhiteness(colors.secondary, 0.8),
   },
   searchInput: {
-    width: '85%',
-    height: '1rem',
+    width: '90%',
+    height: '1.5rem',
     marginLeft: '0.25rem',
     padding: '0',
     background: 'transparent',

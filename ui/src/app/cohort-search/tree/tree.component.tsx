@@ -40,11 +40,10 @@ const styles = reactStyles({
   },
   searchBarContainer: {
     position: 'absolute',
-    width: '95%',
+    width: '65%',
     marginTop: '-1px',
     display: 'flex',
     padding: '0.4rem 0',
-    backgroundColor: colors.white,
     zIndex: 1,
   },
   treeContainer: {

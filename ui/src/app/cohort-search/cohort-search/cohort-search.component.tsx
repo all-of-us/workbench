@@ -4,16 +4,14 @@ import * as React from 'react';
 import {AttributesPage} from 'app/cohort-search/attributes-page/attributes-page.component';
 import {Demographics} from 'app/cohort-search/demographics/demographics.component';
 import {ListSearch} from 'app/cohort-search/list-search/list-search.component';
-import {ModifierPage} from 'app/cohort-search/modifier-page/modifier-page.component';
 import {searchRequestStore} from 'app/cohort-search/search-state.service';
-import {SelectionList} from 'app/cohort-search/selection-list/selection-list.component';
 import {CriteriaTree} from 'app/cohort-search/tree/tree.component';
-import {domainToTitle, generateId, stripHtml, typeToTitle} from 'app/cohort-search/utils';
+import {domainToTitle, generateId, typeToTitle} from 'app/cohort-search/utils';
 import {Button, Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AoU} from 'app/components/text-wrappers';
-import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
+import colors, {addOpacity} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {environment} from 'environments/environment';
@@ -34,12 +32,6 @@ const styles = reactStyles({
     display: 'flex',
     justifyContent: 'flex-end',
   },
-  modalContent: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    height: '70vh',
-    width: '100%',
-  },
   panelLeft: {
     display: 'none',
     flex: 1,
@@ -50,23 +42,11 @@ const styles = reactStyles({
     height: '100%',
     padding: '0 0.4rem 0 1rem',
   },
-  panelLeftActive: {
-    animation: 'fadeEffect 1s',
-    display: 'block',
-  },
-  tabButton: {
-    borderRadius: 0,
-    fontSize: '14px',
-    height: '2.25rem',
-    letterSpacing: 'normal',
-    margin: '0 1rem',
-    padding: '0 0.5rem 0.25rem',
-  },
-  tabButtonActive: {
-    color: colors.accent,
-    borderBottom: `7px solid ${colors.accent}`,
-    fontWeight: 'bold',
-    padding: '0 0.5rem',
+  searchContainer: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    height: '70vh',
+    width: '100%',
   },
   titleBar: {
     marginBottom: '0.5rem',
@@ -103,14 +83,12 @@ interface Selection extends Criteria {
 interface Props {
   closeSearch: () => void;
   searchContext: any;
-  setSearchContext: (context: any) => void;
 }
 
 interface State {
   attributesNode: Criteria;
   autocompleteSelection: Criteria;
   backMode: string;
-  conceptType: string;
   count: number;
   disableFinish: boolean;
   groupSelections: Array<number>;
@@ -130,7 +108,6 @@ export class CohortSearch extends React.Component<Props, State> {
       attributesNode: undefined,
       autocompleteSelection: undefined,
       backMode: 'list',
-      conceptType: null,
       count: 0,
       disableFinish: false,
       groupSelections: [],
@@ -210,17 +187,6 @@ export class CohortSearch extends React.Component<Props, State> {
     this.props.closeSearch();
   }
 
-  get attributeTitle() {
-    const {attributesNode: {domainId, name}} = this.state;
-    return domainId === DomainType.PHYSICALMEASUREMENT.toString() ? stripHtml(name) : domainId + ' Detail';
-  }
-
-  get showModifiers() {
-    const {searchContext: {domain}} = this.props;
-    return domain !== DomainType.PHYSICALMEASUREMENT &&
-      domain !== DomainType.PERSON;
-  }
-
   get initTree() {
     const {searchContext: {domain}} = this.props;
     return domain === DomainType.PHYSICALMEASUREMENT
@@ -238,31 +204,7 @@ export class CohortSearch extends React.Component<Props, State> {
       && (mode === 'list' || mode === 'tree');
   }
 
-  get leftColumnStyle() {
-    const {searchContext: {domain, type}} = this.props;
-    let width = '66.66667%';
-    if (domain === DomainType.PERSON) {
-      width = type === CriteriaType.AGE ? '100%' : '50%';
-    }
-    return {
-      flex: `0 0 ${width}`,
-      height: '100%',
-      maxWidth: width,
-      position: 'relative',
-    } as React.CSSProperties;
-  }
-
-  get rightColumnStyle() {
-    const width = this.props.searchContext.domain === DomainType.PERSON ? '50%' : '33.33333%';
-    return {
-      display: 'none',
-      flex: `0 0 ${width}`,
-      maxWidth: width,
-      position: 'relative',
-    } as React.CSSProperties;
-  }
-
-  panelLeftStyle(mode: string) {
+  searchContentStyle(mode: string) {
     let style = {
       display: 'none',
       flex: 1,
@@ -277,23 +219,6 @@ export class CohortSearch extends React.Component<Props, State> {
       style = {...style, display: 'block', animation: 'fadeEffect 1s'};
     }
     return style;
-  }
-
-  setMode = (newMode: any) => {
-    const {searchContext: {domain}} = this.props;
-    const {mode} = this.state;
-    let {backMode} = this.state;
-    if (newMode === 'modifiers') {
-      triggerEvent(
-        'Cohort Builder Search',
-        'Click',
-        `Modifiers - ${domainToTitle(domain)} - Cohort Builder Search`
-      );
-    }
-    if (mode !== 'attributes') {
-      backMode = mode;
-    }
-    this.setState({backMode, mode: newMode});
   }
 
   showHierarchy = (criterion: Criteria) => {
@@ -337,16 +262,6 @@ export class CohortSearch extends React.Component<Props, State> {
     this.setState({groupSelections, selections, selectedIds});
   }
 
-  removeSelection = (param: any) => {
-    let {groupSelections, selectedIds, selections} = this.state;
-    selectedIds = selectedIds.filter(id => id !== param.parameterId);
-    selections = selections.filter(sel => sel.parameterId !== param.parameterId);
-    if (param.group) {
-      groupSelections = groupSelections.filter(id => id !== param.id);
-    }
-    this.setState({groupSelections, selections, selectedIds});
-  }
-
   selectDeceased() {
     const param = {
       id: null,
@@ -366,10 +281,10 @@ export class CohortSearch extends React.Component<Props, State> {
   }
 
   render() {
-    const {closeSearch, searchContext, searchContext: {domain, type}, setSearchContext} = this.props;
-    const {attributesNode, autocompleteSelection, conceptType, count, disableFinish, groupSelections, hierarchyNode, loadingSubtree, mode,
-      selectedIds, selections, title, treeSearchTerms} = this.state;
-    return !!searchContext ? <div style={styles.modalContent}>
+    const {closeSearch, searchContext, searchContext: {domain, type}} = this.props;
+    const {attributesNode, autocompleteSelection, count, groupSelections, hierarchyNode, loadingSubtree, mode, selectedIds, selections,
+      title, treeSearchTerms} = this.state;
+    return !!searchContext ? <div style={styles.searchContainer}>
       <div style={{height: '100%', width: '100%'}}>
         <div style={styles.titleBar}>
           <div style={{display: 'inline-flex', marginRight: '0.5rem'}}>
@@ -415,7 +330,7 @@ export class CohortSearch extends React.Component<Props, State> {
               {loadingSubtree && <SpinnerOverlay/>}
               <div style={loadingSubtree ? {height: '100%', pointerEvents: 'none', opacity: 0.3} : {height: '100%'}}>
                 {/* Tree View */}
-                <div style={this.panelLeftStyle('tree')}>
+                <div style={this.searchContentStyle('tree')}>
                   {hierarchyNode && <CriteriaTree
                       autocompleteSelection={autocompleteSelection}
                       back={this.back}
@@ -430,7 +345,7 @@ export class CohortSearch extends React.Component<Props, State> {
                       setSearchTerms={this.setTreeSearchTerms}/>}
                 </div>
                 {/* List View */}
-                <div style={this.panelLeftStyle('list')}>
+                <div style={this.searchContentStyle('list')}>
                   <ListSearch hierarchy={this.showHierarchy}
                               searchContext={searchContext}
                               select={this.addSelection}
@@ -438,21 +353,10 @@ export class CohortSearch extends React.Component<Props, State> {
                               setAttributes={this.setAttributes}/>
                 </div>
                 {/**
-                 Modifiers Page - This will no longer be rendered, leaving here temporarily for reference
-                 TODO move to sidebar in RW-4594
+                 Attributes Page - This will no longer be rendered here in the future, leaving temporarily for reference
+                 TODO Remove once AttributesPage is moved to the sidebar with RW-4595
                  **/}
-                <div style={this.panelLeftStyle('modifiers')}>
-                  {this.showModifiers && <ModifierPage
-                      disabled={this.modifiersFlag}
-                      searchContext={searchContext}
-                      selections={selections}
-                      setSearchContext={setSearchContext}/>}
-                </div>
-                {/**
-                 Attributes Page - This will no longer be rendered, leaving here temporarily for reference
-                 TODO move to sidebar in RW-4595
-                 **/}
-                <div style={this.panelLeftStyle('attributes')}>
+                <div style={this.searchContentStyle('attributes')}>
                   {!!attributesNode && <AttributesPage
                       close={this.back}
                       node={attributesNode}
@@ -474,24 +378,6 @@ export class CohortSearch extends React.Component<Props, State> {
           </div>}
         </div>
       </div>
-      {/**
-       Selection List - This will no longer be rendered, leaving here temporarily for reference
-       TODO move to sidebar in RW-5113
-     **/}
-      {type !== CriteriaType.AGE && <div style={this.rightColumnStyle}>
-        <div style={{height: '100%'}}>
-          <SelectionList
-              back={this.back}
-              close={closeSearch}
-              disableFinish={disableFinish}
-              domain={domain}
-              finish={this.finish}
-              removeSelection={this.removeSelection}
-              selections={selections}
-              setView={this.setMode}
-              view={mode}/>
-        </div>
-      </div>}
     </div> : '';
   }
 }
@@ -503,8 +389,7 @@ export class CohortSearch extends React.Component<Props, State> {
 export class CohortSearchComponent extends ReactWrapperBase {
   @Input('closeSearch') closeSearch: Props['closeSearch'];
   @Input('searchContext') searchContext: Props['searchContext'];
-  @Input('setSearchContext') setSearchContext: Props['setSearchContext'];
   constructor() {
-    super(CohortSearch, ['closeSearch', 'searchContext', 'setSearchContext']);
+    super(CohortSearch, ['closeSearch', 'searchContext']);
   }
 }
