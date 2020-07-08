@@ -9,7 +9,7 @@ import {buildXPath} from 'app/xpath-builders';
 import {EllipsisMenuAction, LinkText} from 'app/text-labels';
 import AuthenticatedPage from 'app/page/authenticated-page';
 import {ElementType} from 'app/xpath-options';
-import {Page, Response} from 'puppeteer';
+import {ElementHandle, Page, Response} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
 import {makeRandomName} from 'utils/str-utils';
@@ -43,6 +43,7 @@ export default class DataPage extends AuthenticatedPage {
     try {
       await Promise.all([
         waitForDocumentTitle(this.page, PageTitle),
+        this.imgDiagramLoaded(),
         waitWhileLoading(this.page),
       ]);
       return true;
@@ -50,6 +51,13 @@ export default class DataPage extends AuthenticatedPage {
       console.log(`DataPage isLoaded() encountered ${e}`);
       return false;
     }
+  }
+
+  async imgDiagramLoaded(): Promise<ElementHandle[]> {
+    return Promise.all<ElementHandle, ElementHandle>([
+      this.page.waitForXPath('//img[@src="/assets/images/dataset-diagram.svg"]', {visible: true}),
+      this.page.waitForXPath('//img[@src="/assets/images/cohort-diagram.svg"]', {visible: true}),
+    ]);
   }
 
   async selectWorkspaceAction(action: EllipsisMenuAction): Promise<void> {

@@ -9,11 +9,15 @@ describe('Clone workspace', () => {
     await signIn(page);
   });
 
-  // Assume there is at least one workspace preexist
+  /**
+   * Test:
+   * - Find an existing workspace. Create a new workspace if none exists.
+   * - Select "Duplicate" thru the Ellipsis menu located inside the Workspace card.
+   * - Enter a new workspace name and save the clone.
+   */
   describe('From "Your Workspaces" page using Workspace card ellipsis menu', () => {
 
     test('As OWNER, user can clone workspace', async () => {
-
       const workspaceCard = await findWorkspace(page);
       await workspaceCard.asElementHandle().hover();
       // click on Ellipsis "Duplicate"
@@ -48,7 +52,6 @@ describe('Clone workspace', () => {
   describe('From "Data" page using side ellipsis menu', () => {
 
     test('As OWNER, user can clone workspace', async () => {
-
       const workspaceCard = await findWorkspace(page);
       await workspaceCard.clickWorkspaceName();
 
