@@ -1,3 +1,4 @@
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import * as moment from 'moment';
 import * as React from 'react';
 import {
@@ -8,6 +9,7 @@ import {
 } from '../../../generated';
 import {ActionAuditCardBase} from '../card';
 import {FlexColumn, FlexRow} from '../flex';
+
 
 const HidableCell = (props: {content: string}) => {
   const {content} = props;
@@ -39,53 +41,42 @@ const PropertyChangeListView = (props: { propertyChanges: AuditTargetPropertyCha
     <div style={propertyCellStyle}>Previous Value</div>
     <div style={propertyCellStyle}>New Value</div>
     {propertyChanges.map((propertyChange, index) => <PropertyChangeListEntry {...propertyChange} key={index}/>)}
-  </div> :
-      <div style={propertyCellStyle}>No Property Changes</div>;
+  </div> : <div style={{margin: '0.25rem 0 0rem 1rem', fontStyle: 'italic'}}>No Property Changes</div>;
 };
 
-const agentBackgroundnColor = 'lightBlue';
-const targetBackgroundColor = 'lightGreen';
-const agentTextColor = 'blue';
 const actionTextColor = 'black';
 const targetTextColor = 'green';
+
 const AuditEventBundleHeaderView = (props: { header: AuditEventBundleHeader }) => {
   const {header} = props;
   return <div>
-    <div style={{  margin: '30px',
+    <div style={{  margin: '0',
       display: 'flex',
       flexDirection: 'row',
       textAlign: 'center',
       fontWeight: 600}}>
-      <div style={{color: agentTextColor, margin: '5px'}}>{header.agent.agentType}</div>
+      <div style={{color: colors.accent, margin: '5px'}}>{header.agent.agentType}</div>
       <div style={{color: actionTextColor, margin: '5px'}}>{header.actionType}</div>
       <div style={{color: targetTextColor, margin: '5px'}}>{header.target.targetType}</div>
     </div>
-    {/*<div style={{textAlign: 'left', fontWeight: 600}}>{ `${header.agent.agentType} ${header.actionType} ${header.target.targetType}`}</div>*/}
     <div style={{
       marginLeft: '1rem',
       display: 'grid',
       justifyItems: 'start',
       columnGap: '0.5rem',
-      gridTemplateColumns: 'auto 1fr'
+      gridTemplateColumns: 'auto 1fr',
+      gridTemplateRows: '1fr 1fr 1fr',
+      gridAutoFlow: 'column',
+      color: colors.accent
     }}>
-      <FlexRow>
-        <div style={{fontWeight: 150, border: '1px solid', boxSizing: 'border-box', backgroundColor: agentBackgroundnColor, width: '100%'}}>
-          <FlexColumn>
-            <div>Agent</div>
-            <div>{`${header.agent.agentType} ${header.agent.agentId}`}</div>
-            <div>{`${header.agent.agentUsername}`}</div>
-          </FlexColumn>
-        </div>
-        <div style={{fontWeight: 150, border: '1px solid', boxSizing: 'border-box', backgroundColor: targetBackgroundColor}}>
-          <FlexColumn>
-          <div>Target</div>
-          <div>{`${header.target.targetType} ${header.target.targetId}`}</div>
+          <div style={{fontWeight:  600}}>Agent</div>
+          <div>{`${header.agent.agentType} ${header.agent.agentId}`}</div>
+          <div>{`${header.agent.agentUsername}`}</div>
+          <div style={{fontWeight:  600, color: targetTextColor}}>Target</div>
+          <div style={{color: targetTextColor}}>{`${header.target.targetType} ${header.target.targetId || ''}`}</div>
           <div></div>
-        </FlexColumn>
-        </div>
-      </FlexRow>
     </div>
-  </div>;
+  </div >;
 };
 
 const EventBundleView = (props: { eventBundle: AuditEventBundle }) => {
@@ -115,7 +106,7 @@ const AuditActionCard = (props: { action: AuditAction }) => {
           textAlign: 'left',
           fontSize: '0.825rem',
           padding: '5px'
-        }}><div>{timeString}</div><div>{actionTypes}</div>
+        }}><div>{timeString}</div><div style={{marginLeft: 'auto'}}>{actionTypes}</div>
         </FlexRow>
         {action.eventBundles.map((eventBundle, index) =>
             <EventBundleView key={index} eventBundle={eventBundle}/>)}

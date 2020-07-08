@@ -1,7 +1,7 @@
 import {AuditActionCardListView} from 'app/components/admin/audit-card-list-view';
 import {Navigate} from 'app/components/app-router';
 import {Button} from 'app/components/buttons';
-import {TextInput} from 'app/components/inputs';
+import {TextInputWithLabel} from 'app/components/inputs';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import {actionToString} from 'app/utils/audit-utils';
 import * as fp from 'lodash/fp';
@@ -37,11 +37,11 @@ export interface GenericAuditQueryResult {
 // Assmptions: the path parameter is called initially with the audit API subject.
 //   (this will need revisiting for multi-subject queries)
 export interface AuditPageProps {
-  initialAuditSubject?: string,
-  auditSubjectType: string,
-  queryAuditLog: (subject: string) => Promise<GenericAuditQueryResult>,
-  getNextAuditPath: (subject: string) => string,
-  debug: boolean
+  initialAuditSubject?: string;
+  auditSubjectType: string;
+  queryAuditLog: (subject: string) => Promise<GenericAuditQueryResult>;
+  getNextAuditPath: (subject: string) => string;
+  debug: boolean;
 }
 
 export const AuditPageComponent = (props: AuditPageProps) => {
@@ -52,6 +52,7 @@ export const AuditPageComponent = (props: AuditPageProps) => {
   const [loading, setLoading] = useState(true);
   const [dbId, setDbId] = useState();
   const [bqAuditQery, setBqAuditQuery] = useState('');
+
   useEffect(() => {
     setNextAuditSubject(initialAuditSubject);
   }, []);
@@ -95,11 +96,13 @@ export const AuditPageComponent = (props: AuditPageProps) => {
   return !loading
       ? <React.Fragment>
         {navigateTo && <Navigate to={getNextAuditPath(nextAuditSubject)}/>}
-        <TextInput
+        <TextInputWithLabel
+            containerStyle={{display: 'inline-block'}}
             style={{
               width: '15rem',
               margin: '1rem'
             }}
+            labelText = {auditSubjectType}
             value = {nextAuditSubject}
             onChange = {setNextAuditSubject}
         />
