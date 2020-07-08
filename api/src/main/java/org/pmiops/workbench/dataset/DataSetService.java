@@ -53,8 +53,6 @@ public interface DataSetService {
 
   List<DbDataset> getDataSets(ResourceType resourceType, long resourceId);
 
-  List<DbDataset> getInvalidDataSetsByWorkspace(DbWorkspace dbWorkspace);
-
   void deleteDataSet(DbWorkspace dbWorkspace, Long dataSetId);
 
   Optional<DbDataset> getDbDataSet(DbWorkspace dbWorkspace, Long dataSetId);
