@@ -12,6 +12,13 @@ describe('Editing workspace thru workspace card ellipsis menu', () => {
     await signIn(page);
   });
 
+  /**
+   * Test:
+   * - Find an existing workspace. Create a new workspace if none exists.
+   * - Edit workspace: changing Question 2 answers.
+   * - Verify landing in DATA tab.
+   * - Verify Workspace Information in ABOUT tab.
+   */
   test('User as OWNER can edit workspace', async () => {
     const workspaceCard = await findWorkspace(page);
     await (workspaceCard.getEllipsis()).clickAction(EllipsisMenuAction.Edit);
