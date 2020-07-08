@@ -6,6 +6,7 @@ import DatasetSaveModal from 'app/page/dataset-save-modal';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
 import {EllipsisMenuAction, LinkText} from 'app/text-labels';
+import {makeRandomName} from 'utils/str-utils';
 
 describe('Create Dataset', () => {
 
@@ -14,8 +15,11 @@ describe('Create Dataset', () => {
   });
 
   /**
-   * Create new Dataset without Export to Notebook.
-   * Then Rename, Delete Dataset.
+   * Test:
+   * - Find an existing workspace. Create a new workspace if none exists.
+   * - Create a new Dataset from All Participants and All Surveys. Save dataset without Export to Notebook.
+   * - Rename dataset.
+   * - Delete Dataset.
    */
   test('Can create Dataset with defaults selections', async () => {
     const workspaceCard = await findWorkspace(page);
@@ -37,16 +41,13 @@ describe('Create Dataset', () => {
     const dataSetExists = await resourceCard.cardExists(datasetName, CardType.Dataset);
     expect(dataSetExists).toBe(true);
 
-    // BUG https://precisionmedicineinitiative.atlassian.net/browse/RW-5079
-    /*
     // Rename Dataset
     const newDatasetName = makeRandomName();
     await dataPage.renameDataset(datasetName, newDatasetName);
 
     // Verify rename successful
-    const newDatasetExists = await resourceCard.cardNameExists(newDatasetName, CardType.Dataset);
+    const newDatasetExists = await resourceCard.cardExists(newDatasetName, CardType.Dataset);
     expect(newDatasetExists).toBe(true);
-    */
 
     // Delete Dataset
     const textContent = await dataPage.deleteDataset(datasetName);
@@ -55,7 +56,13 @@ describe('Create Dataset', () => {
   });
 
   /**
-   * First, create a new Cohort. Then create a new Dataset with Cohort.
+   * Test:
+   * - Find an existing workspace. Create a new workspace if none exists.
+   * - Create a new Cohort from drug "hydroxychloroquine".
+   * - Create a new Dataset from All Participants and All Surveys. Save dataset without Export to Notebook.
+   * - Create a new Dataset from Cohort.
+   * - Edit dataset. Save dataset without Export to Notebook.
+   * - Delete Dataset.
    */
   test('Can create Dataset with user-defined cohort', async () => {
     const workspaceCard = await findWorkspace(page);
@@ -98,17 +105,17 @@ describe('Create Dataset', () => {
     await datasetPage.clickSaveAndAnalyzeButton();
 
     const saveModal = new DatasetSaveModal(page);
-    const dataSetName = await saveModal.saveDataset();
+    const datasetName = await saveModal.saveDataset();
 
     // Verify create successful.
     await dataPage.openTab(TabLabelAlias.Datasets, {waitPageChange: false});
 
     const resourceCard = new DataResourceCard(page);
-    const dataSetExists = await resourceCard.cardExists(dataSetName, CardType.Dataset);
+    const dataSetExists = await resourceCard.cardExists(datasetName, CardType.Dataset);
     expect(dataSetExists).toBe(true);
 
     // Edit the dataset to include "All Participants".
-    await resourceCard.findCard(dataSetName)
+    await resourceCard.findCard(datasetName)
     const menu = resourceCard.getEllipsis();
     await menu.clickAction(EllipsisMenuAction.Edit);
     await waitWhileLoading(page);
@@ -119,6 +126,8 @@ describe('Create Dataset', () => {
     // Uncheck Export to Notebook button, then click Update button.
     await saveModal.saveDataset({exportToNotebook: false}, true);
     await dataPage.waitForLoad();
+
+    await dataPage.deleteDataset(datasetName);
   });
 
 });
