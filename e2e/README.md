@@ -1,57 +1,49 @@
-# All-of-Us Test Automation with Puppeteer in Chrome or Chromium
+## All-of-Us Test Automation with Puppeteer in Chrome
+#####`e2e` end-to-end integration tests.
+##### Puppeteer run on the latest [maintenance LTS](https://github.com/nodejs/Release#release-schedule) version of Node.
 
-* Puppeteer `e2e` end-to-end integration tests.
-* See [Puppeteer API](https://github.com/puppeteer/puppeteer/blob/v5.0.0/docs/api.md). Puppeteer supports the latest [maintenance LTS](https://github.com/nodejs/Release#release-schedule) version of Node.
-* Use [jest-puppeteer](https://github.com/smooth-code/jest-puppeteer) preset to configure `jest` to run Pupppeteer tests.
-  Puppeteer `browser`, `context` and `page` variables are global variables exposed by jest-puppeteer preset.
-* AoU tests run in Chromium by default.
 
-## Set up project
-* Clone github project: `git clone git@github.com:all-of-us/workbench.git`
+#### Set up
+##### Clone github project
+- `git clone git@github.com:all-of-us/workbench.git`
 
-* Install required node libraries
-  - change to e2e dir `cd e2e`
-  - run cmd `yarn install`
-* Compile `yarn compile`
- 
-## Set up test user login credential (two ways)
-**The property file `.env` is used to store test user login credential. Test user must have 2FA-bypassed.**
+##### Install node libraries
+- change dir: `cd e2e`
+- run cmd `yarn` or `yarn install`
 
-1: Download latest `.env` file from All-of-Us workbench Google bucket
+##### Set up test user login credential (two ways)
+1: Download latest `.env` file from All-of-Us workbench Google bucket.
   
-   - `gcloud auth login` to your PMI account.
-   - In `workbench/` directory, run cmd: <div class="text-blue">`gsutil cp gs://all-of-us-workbench-test-credentials/puppeteer.local.env e2e/.env`</div>
+  - `gcloud auth login` to your PMI account.
+  - in `workbench/` directory, run command:
+  `gsutil cp gs://all-of-us-workbench-test-credentials/puppeteer.local.env e2e/.env`
 
-2: Alternatively, copy `.env.sample` file and name the new file as `.env`
-   - edit new `.env` file to provide your own user login credential.
- 
+2: Alternatively, copy `.env.sample` file and name the new file as `.env`.
+- edit new `.env` file to provide test user login credential.
+  
+  ** note: test user must have 2FA-bypassed to run tests.
 
-## Yarn
-**List preconfigured scripts and select a script to run**
+
+#### List all `yarn` tasks from `package.json`
 - `yarn run`
 
-### Few notable preconfigured scripts
-* Run all tests in parallel **in headless Chrome** on deployed AoU "test" environment <div class="text-blue">`yarn test`</div>
-* Run one test in headless Chrome with node `--inspect-brk` argument. It pauses test playback at breakpoints which is useful for debugging or/and writing new tests <div class="text-blue">`yarn test:debugTest [TEST_FILE]` </div>
-* Run one test on your local server <div class="text-blue">`yarn test:local [TEST_FILE]` </div>
-* Run one test on deployed AoU "test" environment <div class="text-blue">`yarn test:debug [TEST_FILE]` </div>
 
-## Few examples of how to run tests on localhost (from `e2e` directory)
-**Specify `USER_NAME` an `PASSWORD` environment variables in `yarn` command if don't use values from `.env` file.**
+#### Run e2e tests on localhost (from `e2e` directory)
+(Note: Specify `USER_NAME` an `PASSWORD` environment variables before `yarn` command for using your own userid and password)
 
-* Run "workspace-ui.spec.ts" test on "test" environment <div class="text-blue">`yarn test tests/workspace/workspace-ui.spec.ts`</div>
+##### \>> Run one test against "test" environment.
+- run cmd `yarn test tests/workspace/workspace-ui.spec.ts`
 
-* Run all tests on "test" environment <div class="text-blue">`yarn test`</div>
+##### \>> Run all tests against "test" environment.
+- run cmd `yarn test`
 
-* Run "login.spec.ts" test against the local server. Optionally specify your own userid and password <div class="text-blue">`USER_NAME=<YOUR_USERID> PASSWORD=<YOUR_USER_PASSWORD> yarn test:local tests/user/login.spec.ts`</div>
+##### \>> Run one test against your local server. Optionally specify your own userid and password.
+- run cmd `USER_NAME=<YOUR_USERID> PASSWORD=<YOUR_USER_PASSWORD> yarn test-local tests/user/login.spec.ts`
 
+##### \>> Run all tests against "test" environment.
+- run cmd `USER_NAME=<YOUR_USERID> PASSWORD=<YOUR_USER_PASSWORD> yarn test`
 
-
-## Suspends test execution during test playback. 
--  Insert one line of code <div class="text-blue">`await jestPuppeteer.debug();`</div>
-
+##### Suspends test execution during test playback in order to inspect the browser. 
+-  Insert one line of code: `await jestPuppeteer.debug();`
+ 
 (Refers to https://github.com/smooth-code/jest-puppeteer#put-in-debug-mode for details)
-
-## Features
-* One retry running failed test by [jest-circus](https://github.com/facebook/jest/blob/f45d1c939cbf55a71dbfdfc316d2be62b590197f/docs/JestObjectAPI.md#jestretrytimes).
-* Take screenshot and save the html page to `/log` directory if test fails.
