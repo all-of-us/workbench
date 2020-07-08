@@ -474,7 +474,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       List<DbConceptSet> conceptSetsSelected,
       String cohortQueries,
       CdrBigQuerySchemaConfig bigQuerySchemaConfig) {
-    //    validateConceptSetSelection(domain, conceptSetsSelected);
+    validateConceptSetSelection(domain, conceptSetsSelected);
 
     final StringBuilder queryBuilder = new StringBuilder("SELECT ");
     final String personIdQualified = getQualifiedColumnName(domain, PERSON_ID_COLUMN_NAME);
