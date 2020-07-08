@@ -255,6 +255,10 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
     return new Button(this.page, '//*[text()="Duplicate Workspace" and @role="button"]');
   }
 
+  async getUpdateWorkspaceButton(): Promise<Button> {
+    return new Button(this.page, '//*[text()="Update Workspace" and @role="button"]');
+  }
+
   async getCancelButton(): Promise<Button> {
     return Button.findByName(this.page, FIELD.cancelWorkspaceButton.textOption);
   }

@@ -69,4 +69,26 @@ export default class WorkspaceAboutPage extends AuthenticatedPage{
     await modal.waitUntilVisible();
     return modal;
   }
+
+  async getCdrVersion(): Promise<string> {
+    const cdrVerXpath = '//*[@data-test-id="cdrVersion"]';
+    const cdr = await this.page.waitForXPath(cdrVerXpath, {visible: true});
+    const cdrValue = await (await cdr.getProperty('innerText')).jsonValue();
+    return cdrValue.toString();
+  }
+
+  async getCreationDate(): Promise<string> {
+    const creationDateXpath = '//*[@data-test-id="creationDate"]/*[last()]';
+    const creationDate = await this.page.waitForXPath(creationDateXpath, {visible: true});
+    const dateValue = await (await creationDate.getProperty('innerText')).jsonValue();
+    return dateValue.toString();
+  }
+
+  async getLastUpdatedDate(): Promise<string> {
+    const lastUpdatedDateXpath = '//*[@data-test-id="lastUpdated"]/*[last()]';
+    const lastUpdatedDate = await this.page.waitForXPath(lastUpdatedDateXpath, {visible: true});
+    const dateValue = await (await lastUpdatedDate.getProperty('innerText')).jsonValue();
+    return dateValue.toString();
+  }
+
 }
