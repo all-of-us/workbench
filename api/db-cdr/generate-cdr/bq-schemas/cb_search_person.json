@@ -53,5 +53,10 @@
     "mode": "NULLABLE",
     "name": "has_physical_measurement_data",
     "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "is_deceased",
+    "type": "INTEGER"
   }
 ]
