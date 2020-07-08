@@ -120,8 +120,8 @@ export const AuditPageComponent = (props: AuditPageProps) => {
               lineHeight: '22px',
               fontWeight: 600,
               marginRight: '0.25rem'
-            }}>Number of Actions to Display</label>
-            <NumberInput value={displayNum} min={1} style={{width: '4rem'}} onChange={setDisplayNum}/>
+            }}>{`Number of Actions to Display (${actions.length} available)`}</label>
+            <NumberInput value={displayNum} min={1} max={actions.length} style={{width: '4rem'}} onChange={setDisplayNum}/>
           </div>
           <div>{getTitle()}</div>
         </div>
