@@ -92,8 +92,9 @@ const NumActions = ({onChange, totalActions}) => {
 
 export const AuditPageComponent = (props: AuditPageProps) => {
   const {initialAuditSubject, queryAuditLog, getNextAuditPath, debug, auditSubjectType} = props;
+  const emptyResult = {actions: [], logEntries: [], sourceId: 0, query: ''};
   const [loading, setLoading] = useState(true);
-  const [queryResult, setQueryResult] = useState<GenericAuditQueryResult>({actions: [], logEntries: [], sourceId: 0, query: ''});
+  const [queryResult, setQueryResult] = useState<GenericAuditQueryResult>(emptyResult);
   const [displayNum, setDisplayNum] = useState(20);
   const {actions, sourceId, query} = queryResult;
 
@@ -112,6 +113,7 @@ export const AuditPageComponent = (props: AuditPageProps) => {
       try {
         setQueryResult(await queryAuditLog(initialAuditSubject));
       } catch (e) {
+        setQueryResult(emptyResult);
         console.warn(`Error retrieving audit query results for ${initialAuditSubject}`);
       }
       setLoading(false);
