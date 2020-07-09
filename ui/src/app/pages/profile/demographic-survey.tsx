@@ -13,7 +13,6 @@ import {
 } from 'app/pages/login/account-creation/common';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, toggleIncludes} from 'app/utils';
-import {serverConfigStore} from 'app/utils/navigation';
 
 import {environment} from 'environments/environment';
 import {Profile} from 'generated/fetch';
@@ -116,7 +115,6 @@ export class DemographicSurvey extends React.Component<Props, State> {
 
   render() {
     const {profile: {demographicSurvey}, captcha, captchaToken, loading} = this.state;
-    const {requireInstitutionalVerification} = serverConfigStore.getValue();
 
     const errors = this.validateDemographicSurvey(demographicSurvey);
 
@@ -125,7 +123,7 @@ export class DemographicSurvey extends React.Component<Props, State> {
         <div style={{fontSize: 28, fontWeight: 400, marginBottom: '.8rem'}}>Optional Demographics Survey</div>
         {this.props.showStepCount &&
           <div style={{fontSize: 16, marginBottom: '.5rem'}}>
-            Please complete Step {requireInstitutionalVerification ? '3 of 3' : '2 of 2'}
+            Please complete Step '3 of 3'
           </div>
         }
         <div style={{

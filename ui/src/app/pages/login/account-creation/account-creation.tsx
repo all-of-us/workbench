@@ -6,9 +6,9 @@ import {ClrIcon, InfoIcon, ValidationIcon} from 'app/components/icons';
 import {
   ErrorMessage,
   FormValidationErrorMessage,
-  RadioButton,
-  styles as inputStyles, TextAreaWithLengthValidationMessage,
-  TextInput, TextInputWithLabel
+  styles as inputStyles,
+  TextAreaWithLengthValidationMessage,
+  TextInputWithLabel
 } from 'app/components/inputs';
 
 import {TooltipTrigger} from 'app/components/popups';
@@ -17,14 +17,8 @@ import {profileApi} from 'app/services/swagger-fetch-clients';
 
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import colors from 'app/styles/colors';
-import {
-  EducationalRole,
-  IndustryRole,
-  NonAcademicAffiliation,
-  Profile,
-} from 'generated/fetch';
+import {Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';
-import {Dropdown} from 'primereact/dropdown';
 import {MultiSelect} from 'primereact/multiselect';
 import * as React from 'react';
 import * as validate from 'validate.js';
@@ -98,82 +92,31 @@ export interface AccountCreationProps {
 export interface AccountCreationState {
   creatingAccount: boolean;
   errors: any;
-  invalidEmail: boolean;
   profile: Profile;
   showAllFieldsRequiredError: boolean;
+  showMostInterestedInKnowingBlurb: boolean;
   usernameCheckInProgress: boolean;
   usernameConflictError: boolean;
-  // TODO(RW-4361): remove all after this point, after we switch to verified institutional affiliation
-  rolesOptions: any;
-  showInstitution: boolean;
-  showNonAcademicAffiliationRole: boolean;
-  showNonAcademicAffiliationOther: boolean;
-  showMostInterestedInKnowingBlurb: boolean;
-  institutionName: string;
-  institutionRole: string;
-  nonAcademicAffiliation: string;
-  nonAcademicAffiliationRole: string;
-  nonAcademicAffiliationOther: string;
 }
 
 export class AccountCreation extends React.Component<AccountCreationProps, AccountCreationState> {
   private usernameCheckTimeout: NodeJS.Timer;
 
   constructor(props: AccountCreationProps) {
-    // What's going on with this assertion: the account creation form only edits a single
-    // institutional affiliation entry, even though it's a repeated field. This component has
-    // a convention of requiring the Profile set in props to have a single, empty institutional
-    // affiliation already populated, for editing by this form. See sign-in.tsx where the "empty"
-    // profile object is created.
-    // TODO(RW-4361): remove after we switch to verified institutional affiliation
-    if (!serverConfigStore.getValue().requireInstitutionalVerification &&
-      props.profile.institutionalAffiliations.length !== 1) {
-      throw new Error('Profile must be pre-allocated with 1 institutional affiliation.');
-    }
     super(props);
     this.state = this.createInitialState();
   }
 
-  async componentDidMount() {
-    // TODO(RW-4361): Remove after we switch to verified institutional affiliation
-    if (!serverConfigStore.getValue().requireInstitutionalVerification) {
-      this.updateNonAcademicAffiliationRoles(
-        this.state.profile.institutionalAffiliations[0].nonAcademicAffiliation);
-      this.selectNonAcademicAffiliationRoles(
-        this.state.profile.institutionalAffiliations[0].role);
-    }
-  }
-
   createInitialState(): AccountCreationState {
     const state: AccountCreationState = {
+      creatingAccount: false,
       errors: undefined,
       profile: this.props.profile,
+      showAllFieldsRequiredError: false,
+      showMostInterestedInKnowingBlurb: false,
       usernameCheckInProgress: false,
       usernameConflictError: false,
-      creatingAccount: false,
-      showAllFieldsRequiredError: false,
-      invalidEmail: false,
-      // TODO(RW-4361): remove all after this point, after we switch to verified institutional affiliation
-      rolesOptions: [],
-      institutionName: '',
-      institutionRole: '',
-      nonAcademicAffiliation: '',
-      nonAcademicAffiliationRole: '',
-      nonAcademicAffiliationOther: '',
-      // showInstitution defaults to true, since we expect most users coming in will be academics.
-      showInstitution: true,
-      showNonAcademicAffiliationRole: false,
-      showNonAcademicAffiliationOther: false,
-      showMostInterestedInKnowingBlurb: false
     };
-
-    // TODO(RW-4361): remove after we switch to verified institutional affiliation
-    if (!serverConfigStore.getValue().requireInstitutionalVerification) {
-      const institutionalAffiliation = this.props.profile.institutionalAffiliations[0];
-      if (institutionalAffiliation.institution) {
-        state.showInstitution = true;
-      }
-    }
 
     return state;
   }
@@ -230,64 +173,12 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     this.setState(fp.set(['profile', attribute], value));
   }
 
-  updateContactEmail(email: string) {
-    this.setState({invalidEmail: false});
-    this.setState(fp.set(['profile', 'contactEmail'], email));
-  }
-
   updateAddress(attribute: string , value) {
     this.setState(fp.set(['profile', 'address', attribute], value));
   }
 
-  updateInstitutionAffiliation(attribute: string, value) {
-    this.setState(fp.set(['profile', 'institutionalAffiliations', '0', attribute], value));
-  }
-
-  clearInstitutionAffiliation() {
-    this.setState(fp.set(['profile', 'institutionalAffiliations', '0'], {
-      nonAcademicAffiliation: null,
-      role: '',
-      institution: '',
-      other: ''
-    }));
-  }
-
-  // TODO remove after we switch to verified institutional affiliation
-  showInstitutionAffiliationFreeTextField(option) {
-    return option === NonAcademicAffiliation.FREETEXT ||
-      option === IndustryRole.FREETEXT ||
-      option === EducationalRole.FREETEXT;
-  }
-
-  // TODO(RW-4361): remove after we switch to verified institutional affiliation
-  updateNonAcademicAffiliationRoles(nonAcademicAffiliation) {
-    this.updateInstitutionAffiliation('nonAcademicAffiliation', nonAcademicAffiliation);
-    this.setState({showNonAcademicAffiliationRole: false, showNonAcademicAffiliationOther: false});
-    if (nonAcademicAffiliation === NonAcademicAffiliation.INDUSTRY) {
-      this.setState({rolesOptions: AccountCreationOptions.industryRole,
-        showNonAcademicAffiliationRole: true});
-    } else if (nonAcademicAffiliation === NonAcademicAffiliation.EDUCATIONALINSTITUTION) {
-      this.setState({rolesOptions: AccountCreationOptions.educationRole, showNonAcademicAffiliationRole: true});
-    } else if (this.showInstitutionAffiliationFreeTextField(nonAcademicAffiliation)) {
-      this.setState({showNonAcademicAffiliationOther: true});
-      return;
-    }
-    this.selectNonAcademicAffiliationRoles(this.state.nonAcademicAffiliationRole);
-  }
-
-  // TODO(RW-4361): remove after we switch to verified institutional affiliation
-  selectNonAcademicAffiliationRoles(role) {
-    if (this.showInstitutionAffiliationFreeTextField(role)) {
-      this.setState({nonAcademicAffiliationRole: role, showNonAcademicAffiliationOther: true});
-    } else {
-      this.setState({nonAcademicAffiliationRole: role, showNonAcademicAffiliationOther: false});
-    }
-    this.updateInstitutionAffiliation('role', role);
-  }
-
   validate(): {[key: string]: string} {
-    const {showInstitution} = this.state;
-    const {gsuiteDomain, requireInstitutionalVerification} = serverConfigStore.getValue();
+    const {gsuiteDomain} = serverConfigStore.getValue();
 
     const validationCheck = {
       'username': {
@@ -358,7 +249,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     // 'usernameWithEmail' field we're adding, to be able to separate our validation on the
     // username itself from validation of the full email address. For this reason, we need to cast
     // the profile object to 'any'.
-    let validationData = {...this.state.profile} as any;
+    const validationData = {...this.state.profile} as any;
     validationData.usernameWithEmail = validationData.username + '@' + gsuiteDomain;
 
     if (!isBlank(validationData.username)) {
@@ -367,47 +258,6 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           message: '^Username contains invalid characters'
         }
       };
-    }
-
-    // TODO(RW-4361): remove these checks after we switch to verified institutional affiliation
-    if (!requireInstitutionalVerification) {
-      validationData = {...validationData, ...this.state.profile.institutionalAffiliations[0]};
-
-      validationCheck['contactEmail'] = {
-        presence: {
-          allowEmpty: false,
-          message: '^Contact email cannot be blank'
-        },
-        email: {
-          message: '^Contact email is invalid'
-        }
-      };
-
-      if (showInstitution) {
-        validationCheck['institution'] = {
-          presence: {
-            allowEmpty: false,
-            message: '^Institution cannot be blank'
-          }
-        };
-      } else {
-        validationCheck['nonAcademicAffiliation'] = {
-          presence: {
-            allowEmpty: false,
-            message: '^Affiliation cannot be blank'
-          }
-        };
-      }
-
-      if (showInstitution ||
-        this.state.profile.institutionalAffiliations[0].nonAcademicAffiliation !== NonAcademicAffiliation.COMMUNITYSCIENTIST) {
-        validationCheck['role'] = {
-          presence: {
-            allowEmpty: false,
-            message: '^Role cannot be blank'
-          }
-        };
-      }
     }
 
     const urlError = validationData.professionalUrl
@@ -427,14 +277,13 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
   render() {
     const {
       profile: {
-        givenName, familyName,
-        contactEmail, username, areaOfResearch, professionalUrl = '',
+        givenName, familyName, username, areaOfResearch, professionalUrl = '',
         address: {
           streetAddress1, streetAddress2, city, state, zipCode, country
         },
       },
     } = this.state;
-    const {gsuiteDomain, requireInstitutionalVerification} = serverConfigStore.getValue();
+    const {gsuiteDomain} = serverConfigStore.getValue();
 
     const usernameLabelText =
       <div>New Username
@@ -463,7 +312,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
       <FlexRow>
         <FlexColumn style={{marginRight: '2rem'}}>
           <div style={{...styles.text, fontSize: 16, marginTop: '1rem'}}>
-            Please complete Step {requireInstitutionalVerification ? '2 of 3' : '1 of 2'}
+            Please complete Step 2 of 3
           </div>
           <div style={{...styles.text, fontSize: 12, marginTop: '0.3rem'}}>
             All fields required unless indicated as optional</div>
@@ -540,35 +389,15 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                   Last Name must be {nameLength} character or less.
                 </ErrorMessage>}
               </FlexRow>
-              {!requireInstitutionalVerification &&
-                <FlexRow style={{alignItems: 'left', marginTop: '1rem'}}>
-                  <TextInputWithLabel value={contactEmail}
-                                      inputId='contactEmail'
-                                      inputName='contactEmail'
-                                      placeholder='Email Address'
-                                      labelText='Email Address'
-                                      onChange={v => this.updateProfileObject('contactEmail', v)}/>
-                  <MultiSelectWithLabel placeholder={'Select one or more'}
-                                        options={AccountCreationOptions.degree}
-                                        containerStyle={styles.multiInputSpacing}
-                                        value={this.state.profile.degrees}
-                                        labelText={<div>Your degrees <span style={styles.optionalText}>
-                                          (optional)</span></div>}
-                                        onChange={(e) => this.setState(fp.set(['profile', 'degrees'], e.value))}
-                                        />
-                </FlexRow>
-              }
-              {requireInstitutionalVerification &&
-                <div style={{marginTop: '1rem'}}>
-                  <MultiSelectWithLabel placeholder={'Select one or more'}
-                                        options={AccountCreationOptions.degree}
-                                        value={this.state.profile.degrees}
-                                        labelText={<div>Your degrees <span style={styles.optionalText}>
-                                          (optional)</span></div>}
-                                        onChange={(e) => this.setState(fp.set(['profile', 'degrees'], e.value))}
-                  />
-                </div>
-              }
+              <div style={{marginTop: '1rem'}}>
+                <MultiSelectWithLabel placeholder={'Select one or more'}
+                                      options={AccountCreationOptions.degree}
+                                      value={this.state.profile.degrees}
+                                      labelText={<div>Your degrees <span style={styles.optionalText}>
+                                        (optional)</span></div>}
+                                      onChange={(e) => this.setState(fp.set(['profile', 'degrees'], e.value))}
+                />
+              </div>
             </FlexColumn>
           </Section>
           <Section
@@ -652,69 +481,6 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
               tooShortWarning={NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION}
             />
           </Section>
-          {/* TODO(RW-4361): remove after we switch to verified institutional affiliation */}
-          {!requireInstitutionalVerification && <React.Fragment>
-            <Section header='Institutional Affiliation'>
-              <label style={{color: colors.primary, fontSize: 16}}>
-                Are you affiliated with an Academic Research Institution?
-              </label>
-              <div style={{paddingTop: '0.5rem'}}>
-                <RadioButton id='show-institution-yes'
-                             data-test-id='show-institution-yes'
-                             onChange={() => {
-                               this.clearInstitutionAffiliation();
-                               this.setState({showInstitution: true});
-                             }}
-                             checked={this.state.showInstitution === true}
-                             style={{marginRight: '0.5rem'}}/>
-                <label htmlFor='show-institution-yes' style={{paddingRight: '3rem', color: colors.primary}}>
-                  Yes
-                </label>
-                <RadioButton id='show-institution-no'
-                             data-test-id='show-institution-no'
-                             onChange={() => {
-                               this.clearInstitutionAffiliation();
-                               this.setState({showInstitution: false});
-                             }}
-                             checked={this.state.showInstitution === false} style={{marginRight: '0.5rem'}}/>
-                <label htmlFor='show-institution-no' style={{color: colors.primary}}>No</label>
-              </div>
-            </Section>
-            {this.state.showInstitution &&
-            <FlexColumn style={{justifyContent: 'space-between'}}>
-              <TextInput data-test-id='institution-name'
-                         style={{width: '16rem', marginBottom: '0.5rem', marginTop: '0.5rem'}}
-                         value={this.state.profile.institutionalAffiliations[0].institution}
-                         placeholder='Institution Name'
-                         onChange={value => this.updateInstitutionAffiliation('institution', value)}
-              />
-              <Dropdown data-test-id='institutionRole'
-                        value={this.state.profile.institutionalAffiliations[0].role}
-                        onChange={e => this.updateInstitutionAffiliation('role', e.value)}
-                        placeholder='Which of the following describes your role'
-                        style={{width: '16rem'}} options={AccountCreationOptions.roles}/>
-            </FlexColumn>}
-            {!this.state.showInstitution &&
-            <FlexColumn style={{justifyContent: 'space-between'}}>
-              <Dropdown data-test-id='affiliation'
-                        style={{width: '18rem', marginBottom: '0.5rem', marginTop: '0.5rem'}}
-                        value={this.state.profile.institutionalAffiliations[0].nonAcademicAffiliation}
-                        options={AccountCreationOptions.nonAcademicAffiliations}
-                        onChange={e => this.updateNonAcademicAffiliationRoles(e.value)}
-                        placeholder='Which of the following better describes your affiliation?'/>
-              {this.state.showNonAcademicAffiliationRole &&
-              <Dropdown data-test-id='affiliationrole'
-                        placeholder='Which of the following describes your role'
-                        options={this.state.rolesOptions}
-                        value={this.state.profile.institutionalAffiliations[0].role}
-                        onChange={e => this.selectNonAcademicAffiliationRoles(e.value)}
-                        style={{width: '18rem'}}/>}
-              {this.state.showNonAcademicAffiliationOther &&
-              <TextInput value={this.state.profile.institutionalAffiliations[0].other}
-                         onChange={value => this.updateInstitutionAffiliation('other', value)}
-                         style={{marginTop: '1rem', width: '18rem'}}/>}
-            </FlexColumn>}
-          </React.Fragment>}
           <Section
             header={<React.Fragment>
               <FlexRow style={{alignItems: 'flex-start'}}>

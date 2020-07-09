@@ -408,8 +408,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   /**
-   * Save updated dbUser object if requireInstitutionalVerification is enabled: Get the existing
-   * dbExistingVerifiedInstitutionalAffiliation and update it with Institution role and other text
+   * Save updated dbUser object and transform ObjectOptimisticLockingFailureException into
+   * ConflictException
    *
    * @param dbUser
    * @return

@@ -45,8 +45,9 @@ const PropertyChangeListView = (props: { propertyChanges: AuditTargetPropertyCha
   </div> : <div style={{margin: '0.25rem 0 0rem 1rem', fontStyle: 'italic'}}>No Property Changes</div>;
 };
 
-const actionTextColor = 'black';
-const targetTextColor = 'green';
+const typeTextColor   = colors.primary;
+const actionTextColor = colors.success;
+const targetTextColor = colors.accent;
 
 const AuditEventBundleHeaderView = (props: { header: AuditEventBundleHeader }) => {
   const {header} = props;
@@ -56,7 +57,7 @@ const AuditEventBundleHeaderView = (props: { header: AuditEventBundleHeader }) =
       flexDirection: 'row',
       textAlign: 'center',
       fontWeight: 600}}>
-      <div style={{color: colors.accent, margin: '5px'}}>{header.agent.agentType}</div>
+      <div style={{color: typeTextColor, margin: '5px'}}>{header.agent.agentType}</div>
       <div style={{color: actionTextColor, margin: '5px'}}>{header.actionType}</div>
       <div style={{color: targetTextColor, margin: '5px'}}>{header.target.targetType}</div>
     </div>
@@ -68,7 +69,7 @@ const AuditEventBundleHeaderView = (props: { header: AuditEventBundleHeader }) =
       gridTemplateColumns: 'auto 1fr',
       gridTemplateRows: '1fr 1fr 1fr',
       gridAutoFlow: 'column',
-      color: colors.accent
+      color: typeTextColor
     }}>
           <div style={{fontWeight:  600}}>Agent</div>
           <div>{`${header.agent.agentType} ${header.agent.agentId}`}</div>

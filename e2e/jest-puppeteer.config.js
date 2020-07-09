@@ -5,7 +5,7 @@
 
 const fp = require('lodash/fp');
 const puppeteer = require('puppeteer');
-const isHeadless = process.env.HEADLESS !== 'false';
+const isHeadless = (process.env.HEADLESS || 'true') === 'true';
 const slowMotion = process.env.SLOWMO || 10;
 
 const NEW_CHROME_SWITCHES = [

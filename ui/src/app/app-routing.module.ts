@@ -8,7 +8,6 @@ import {AppRouting} from './app-routing';
 
 import {DataPageComponent} from 'app/pages/data/data-page';
 import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
-import {UserDisabledComponent} from 'app/pages/user-disabled';
 import {AdminBannerComponent} from './pages/admin/admin-banner';
 import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
 import {AdminUserComponent} from './pages/admin/admin-user';
@@ -28,8 +27,6 @@ import {ConceptSetDetailsComponent} from './pages/data/concept/concept-set-detai
 import {HomepageComponent} from './pages/homepage/homepage';
 import {SignInComponent} from './pages/login/sign-in';
 import {ProfilePageComponent} from './pages/profile/profile-page';
-import {SessionExpiredComponent} from './pages/session-expired';
-import {SignInAgainComponent} from './pages/sign-in-again';
 import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './pages/workspace/workspace-edit';
@@ -54,19 +51,8 @@ const routes: Routes = [
     path: 'login',
     component: SignInComponent,
     data: {title: 'Sign In'}
-  }, {
-    path: 'session-expired',
-    component: SessionExpiredComponent,
-    data: {title: 'You have been signed out'}
-  }, {
-    path: 'sign-in-again',
-    component: SignInAgainComponent,
-    data: {title: 'You have been signed out'}
-  }, {
-    path: 'user-disabled',
-    component: UserDisabledComponent,
-    data: {title: 'Disabled'}
-  }, {
+  },
+  {
     path: '',
     component: SignedInComponent,
     canActivate: [SignInGuard],

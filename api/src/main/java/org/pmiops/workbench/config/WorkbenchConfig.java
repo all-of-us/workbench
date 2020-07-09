@@ -248,10 +248,6 @@ public class WorkbenchConfig {
     // Flag to indicate whether to use the new Moodle badges API
     // https://precisionmedicineinitiative.atlassian.net/browse/RW-2957
     public boolean enableMoodleV2Api;
-    // Do we require new users to have a contact email with a verified institutional affiliation,
-    // enforced by pattern-matching the user's contact email against the institution's
-    // set of whitelisted email domains or addresses
-    public boolean requireInstitutionalVerification;
     // Flag to indicate whether to use the new age type options in cohort builder age wizard
     public boolean enableCBAgeTypeOptions;
     // Flag to indicate whether to use the V2 Data User Code of Conduct
@@ -264,6 +260,8 @@ public class WorkbenchConfig {
     // Flag to indicate whether to show Update research purpose prompt after an year of workspace
     // creation
     public boolean enableResearchPurposePrompt;
+    // Flag to indicate whether to use the new UI for cohort builder
+    public boolean enableCohortBuilderV2;
   }
 
   public static class ActionAuditConfig {
