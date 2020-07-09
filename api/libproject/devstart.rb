@@ -1330,9 +1330,10 @@ def fix_desynchronized_billing_project_owners(cmd_name, *args)
   domain = get_config(op.opts.project)["googleDirectoryService"]["gSuiteDomain"]
   flags = ([
       ["--fc-base-url", fc_config["baseUrl"]],
-      ["--billing-project-ids", op.opts.billing_project_ids],
       ["--researcher-domain", domain]
-  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+    ] + (op.opts.billing_project_ids ?
+         ["--billing-project-ids", op.opts.billing_project_ids] : [])
+    ).map { |kv| "#{kv[0]}=#{kv[1]}" }
   if op.opts.dry_run
     flags += ["--dry-run"]
   end
