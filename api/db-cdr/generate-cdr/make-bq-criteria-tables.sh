@@ -462,7 +462,7 @@ SELECT
 FROM \`$BQ_PROJECT.$BQ_DATASET.prep_criteria\` a
 LEFT JOIN
     (
-        SELECT b.concept_id, b.concept_name
+        SELECT concept_id, concept_name
         FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
         -- there are two ICD9 codes = 92, this gets the one that is valid
         WHERE (vocabulary_id in ('ICD9CM', 'ICD9Proc') and concept_code != '92')
@@ -601,7 +601,7 @@ SELECT
 FROM \`$BQ_PROJECT.$BQ_DATASET.prep_criteria\` a
 LEFT JOIN
     (
-        SELECT b.concept_id, b.concept_name
+        SELECT concept_id, concept_name
         FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
         WHERE vocabulary_id = 'ICD10CM'
     ) b on a.concept_id = b.concept_id
@@ -738,7 +738,7 @@ SELECT
 FROM \`$BQ_PROJECT.$BQ_DATASET.prep_criteria\` a
 LEFT JOIN
     (
-        SELECT b.concept_id, b.concept_name
+        SELECT concept_id, concept_name
         FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
         WHERE vocabulary_id = 'ICD10PCS'
     ) b on a.concept_id = b.concept_id
@@ -857,8 +857,15 @@ SELECT
     , a.concept_id
     , a.code
     , CASE WHEN b.concept_id is not null THEN b.concept_name ELSE a.name END AS name
-    , CASE WHEN a.is_selectable = 1 THEN 0 ELSE null END AS rollup_count
-    , CASE WHEN a.is_selectable = 1 THEN c.cnt ELSE null END AS item_count
+    , CASE WHEN a.parent_id != 0 THEN 0 ELSE null END AS rollup_count
+    , CASE
+        WHEN a.parent_id != 0 THEN
+            CASE
+                WHEN c.cnt is null THEN 0
+                ELSE c.cnt
+            END
+        ELSE null
+      END AS item_count
     , CASE WHEN a.is_group = 0 and a.is_selectable = 1 THEN c.cnt ELSE null END AS est_count
     , a.is_group
     , a.is_selectable
@@ -868,7 +875,7 @@ SELECT
 FROM \`$BQ_PROJECT.$BQ_DATASET.prep_criteria\` a
 LEFT JOIN
     (
-        SELECT *
+        SELECT concept_id, concept_name
         FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
         WHERE vocabulary_id = 'CPT4'
     ) b on a.concept_id = b.concept_id
@@ -916,11 +923,11 @@ FROM
         SELECT e.id, COUNT(DISTINCT f.person_id) cnt
         FROM
             (
-                -- for each group, get it and all items under each group
+                -- for each group, get it and all items under it
                 SELECT a.id, b.descendant_id
                 FROM
                     (
-                        -- get all groups that are selectable
+                        -- get all groups except the top level
                         SELECT id
                         FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
                         WHERE type = 'CPT4'
@@ -934,11 +941,11 @@ FROM
                 SELECT c.id, d.person_id, d.concept_id
                 FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c
                 JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` d on c.concept_id = d.concept_id
-                WHERE c.type type = 'CPT4'
+                WHERE c.type = 'CPT4'
                     and c.is_selectable = 1
                     and d.is_standard = 0
             ) f on e.descendant_id = f.id
-        group by 1
+        GROUP BY 1
     ) y
 WHERE x.id = y.id"
 
@@ -947,18 +954,14 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "DELETE
 FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 WHERE type = 'CPT4'
+    and is_group = 1
     and
-    (
-        (parent_id != 0 and (rollup_count is null or rollup_count = 0))
-        or
-            (
-              is_group = 1
-              and id not in
+        (
+            (parent_id != 0 and rollup_count = 0)
+            or id not in
                 (
                     SELECT parent_id
                     FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
                     WHERE type = 'CPT4'
-                        and rollup_count is not null
                 )
-            )
-		)"
+        )"
