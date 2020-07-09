@@ -86,7 +86,7 @@ const NumActions = ({onChange, totalActions}) => {
       fontWeight: 600,
       marginRight: '0.25rem'
     }}>{`Number of Actions to Display (${totalActions} available)`}</label>
-    <NumberInput value={displayNum} min={1} max={totalActions} style={{width: '4rem'}} onChange={setDisplayNum}/>
+    <NumberInput value={Math.min(displayNum, totalActions)} min={1} max={totalActions} style={{width: '4rem'}} onChange={setDisplayNum}/>
   </div>;
 };
 
