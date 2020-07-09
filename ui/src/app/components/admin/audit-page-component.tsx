@@ -69,6 +69,27 @@ const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath}) =>
   </React.Fragment>;
 };
 
+const NumActions = ({onChange, totalActions}) => {
+  const [displayNum, setDisplayNum] = useState(20);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => onChange(displayNum), 250);
+    return () => clearTimeout(timeoutId);
+  }, [displayNum]);
+
+  return <div>
+    <label style={{
+      fontSize: 14,
+      display: 'block',
+      color: colors.primary,
+      lineHeight: '22px',
+      fontWeight: 600,
+      marginRight: '0.25rem'
+    }}>{`Number of Actions to Display (${totalActions} available)`}</label>
+    <NumberInput value={displayNum} min={1} max={totalActions} style={{width: '4rem'}} onChange={setDisplayNum}/>
+  </div>;
+};
+
 export const AuditPageComponent = (props: AuditPageProps) => {
   const {initialAuditSubject, queryAuditLog, getNextAuditPath, debug, auditSubjectType} = props;
   const [loading, setLoading] = useState(true);
@@ -112,17 +133,7 @@ export const AuditPageComponent = (props: AuditPageProps) => {
     ? <React.Fragment>
         <div style={{marginLeft: '1rem'}}>
           <UserInput initialAuditSubject={initialAuditSubject} auditSubjectType={auditSubjectType} getNextAuditPath={getNextAuditPath}/>
-          <div>
-            <label style={{
-              fontSize: 14,
-              display: 'block',
-              color: colors.primary,
-              lineHeight: '22px',
-              fontWeight: 600,
-              marginRight: '0.25rem'
-            }}>{`Number of Actions to Display (${actions.length} available)`}</label>
-            <NumberInput value={displayNum} min={1} max={actions.length} style={{width: '4rem'}} onChange={setDisplayNum}/>
-          </div>
+          <NumActions onChange={setDisplayNum} totalActions={actions.length}/>
           <div>{getTitle()}</div>
         </div>
         <AuditActionCardListView actions={fp.slice(0, displayNum, actions)}/>
