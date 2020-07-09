@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
@@ -93,8 +94,6 @@ public class ExportWorkspaceData {
 
   private static Options options = new Options().addOption(exportFilenameOpt);
 
-  private static SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
-
   // Short circuit the DI wiring here with a "mock" WorkspaceService
   // Importing the real one requires importing a large subtree of dependencies
   @Bean
@@ -123,6 +122,7 @@ public class ExportWorkspaceData {
   private UserDao userDao;
   private WorkspacesApi workspacesApi;
   private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+  private SimpleDateFormat dateFormat;
 
   @Bean
   public CommandLineRunner run(
@@ -144,6 +144,10 @@ public class ExportWorkspaceData {
     this.userDao = userDao;
     this.workspacesApi = workspacesApi;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
+    this.dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+    // Just pick a consistent Time Zone. Most of the reporting is handled in Central Time, so we
+    // just use that here.
+    this.dateFormat.setTimeZone(TimeZone.getTimeZone("CST"));
 
     return (args) -> {
       CommandLine opts = new DefaultParser().parse(options, args);
