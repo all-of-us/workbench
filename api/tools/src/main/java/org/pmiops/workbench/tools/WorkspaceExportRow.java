@@ -73,7 +73,7 @@ public class WorkspaceExportRow {
     this.twoFactorAuthCompletionDate = twoFactorAuthCompletionDate;
   }
 
-  @CsvBindByName(column = "2fa Completion Date")
+  @CsvBindByName(column = "2fa Completion Time (CST)")
   @CsvBindByPosition(position = 5)
   private String twoFactorAuthCompletionDate;
 
@@ -85,7 +85,7 @@ public class WorkspaceExportRow {
     this.eraCompletionDate = eraCompletionDate;
   }
 
-  @CsvBindByName(column = "eRA Completion Date")
+  @CsvBindByName(column = "eRA Completion Time (CST)")
   @CsvBindByPosition(position = 6)
   private String eraCompletionDate;
 
@@ -97,7 +97,7 @@ public class WorkspaceExportRow {
     this.trainingCompletionDate = trainingCompletionDate;
   }
 
-  @CsvBindByName(column = "Training Completion Date")
+  @CsvBindByName(column = "Training Completion Time (CST)")
   @CsvBindByPosition(position = 7)
   private String trainingCompletionDate;
 
@@ -109,7 +109,7 @@ public class WorkspaceExportRow {
     this.duccCompletionDate = duccCompletionDate;
   }
 
-  @CsvBindByName(column = "DUCC Completion Date")
+  @CsvBindByName(column = "DUCC Completion Time (CST)")
   @CsvBindByPosition(position = 8)
   private String duccCompletionDate;
 
@@ -145,7 +145,7 @@ public class WorkspaceExportRow {
     this.createdDate = createdDate;
   }
 
-  @CsvBindByName(column = "Workspace Created Date")
+  @CsvBindByName(column = "Workspace Created Time (CST)")
   @CsvBindByPosition(position = 11)
   private String createdDate;
 
@@ -289,7 +289,7 @@ public class WorkspaceExportRow {
     this.workspaceLastUpdatedDate = workspaceLastUpdatedDate;
   }
 
-  @CsvBindByName(column = "Workspace Last Updated Date")
+  @CsvBindByName(column = "Workspace Last Updated Time (CST)")
   @CsvBindByPosition(position = 23)
   private String workspaceLastUpdatedDate;
 
