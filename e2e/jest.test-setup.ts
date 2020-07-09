@@ -1,7 +1,13 @@
 const url = require('url');
 const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36';
 
-
+/**
+ * Set up page common properties:
+ * - Page view port
+ * - Page user-agent
+ * - Page navigation timeout
+ * - waitFor functions timeout
+ */
 beforeAll(async () => {
   await page.setViewport({ width: 0, height: 0 });
   await page.setUserAgent(userAgent);
@@ -10,6 +16,10 @@ beforeAll(async () => {
   await page.setDefaultTimeout(60000);
 });
 
+/**
+ * Enable network interception.
+ * - Block unwanted requests.
+ */
 beforeEach(async () => {
   await page.setRequestInterception(true);
   page.on('request', async (request) => {
@@ -32,6 +42,11 @@ beforeEach(async () => {
   });
 });
 
+/**
+ * Disable network interception.
+ * Delete broswer cookies.
+ * Reset global page and browser variables.
+ */
 afterEach(async () => {
   await page.setRequestInterception(false);
   await page.deleteCookie(...await page.cookies());
