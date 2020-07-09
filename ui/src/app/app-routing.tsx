@@ -1,5 +1,7 @@
 import {Component as AComponent} from '@angular/core';
 import {AppRoute, AppRouter, Guard, ProtectedRoutes, withFullHeight, withRouteData} from 'app/components/app-router';
+import {WorkspaceAuditPage} from 'app/pages/admin/admin-workspace-auditing';
+import {UserAuditPage} from 'app/pages/admin/user-audit';
 import {CookiePolicy} from 'app/pages/cookie-policy';
 import {DataUserCodeOfConduct} from 'app/pages/profile/data-user-code-of-conduct';
 import {SessionExpired} from 'app/pages/session-expired';
@@ -10,8 +12,6 @@ import { ReactWrapperBase } from 'app/utils';
 import {authStore, useStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {WorkspaceAuditPage} from './pages/admin/ admin-workspace-audit';
-import {UserAuditPage} from './pages/admin/user-audit';
 
 
 const signInGuard: Guard = {
@@ -20,6 +20,8 @@ const signInGuard: Guard = {
 };
 
 const DUCC = fp.flow(withRouteData, withFullHeight)(DataUserCodeOfConduct);
+const UserAudit = withRouteData(UserAuditPage);
+const WorkspaceAudit = withRouteData(WorkspaceAuditPage);
 
 export const AppRoutingComponent: React.FunctionComponent<{signIn: Function}> = ({signIn}) => {
   const {authLoaded = false} = useStore(authStore);
@@ -37,10 +39,10 @@ export const AppRoutingComponent: React.FunctionComponent<{signIn: Function}> = 
             minimizeChrome: true
           }} />}
         />
-        <AppRoute path='/admin/user-audit' component={UserAuditPage} data={{title: 'User Audit'}}/>
-        <AppRoute path='/admin/user-audit/:username' component={UserAuditPage} data={{title: 'Workspace Audit'}}/>
-        <AppRoute path='/admin/workspace-audit' component={WorkspaceAuditPage} data={{title: 'Workspace Audit'}}/>
-        <AppRoute path='/admin/workspace-audit/:workspaceNamespace' component={WorkspaceAuditPage} data={{title: 'Workspace Audit'}}/>
+        <AppRoute path='/admin/user-audit' component={() => <UserAudit routeData={{title: 'User Audit'}}/>}/>
+        <AppRoute path='/admin/user-audit/:username' component={() => <UserAudit routeData={{title: 'User Audit'}}/>}/>
+        <AppRoute path='/admin/workspace-audit' component={() => <WorkspaceAudit routeData={{title: 'Workspace Audit'}}/>}/>
+        <AppRoute path='/admin/workspace-audit/:workspaceNamespace' component={() => <WorkspaceAudit routeData={{title: 'Workspace Audit'}}/>}/>
     </ProtectedRoutes>
   </AppRouter>;
 };
