@@ -1,11 +1,11 @@
 import {ElementHandle, Page} from 'puppeteer';
 import {LinkText, WorkspaceAccessLevel} from 'app/text-labels';
-import Dialog from 'app/component/dialog';
+import Modal from 'app/component/modal';
 import Textbox from 'app/element/textbox';
 import ClrIcon from 'app/element/clr-icon-link';
 
 
-export default class ShareModal extends Dialog {
+export default class ShareModal extends Modal {
 
   constructor(page: Page, xpath?: string) {
     super(page, xpath);
@@ -25,7 +25,7 @@ export default class ShareModal extends Dialog {
     await ownerOpt.click();
 
     await this.clickButton(LinkText.Save);
-    await this.waitUntilDialogIsClosed();
+    await this.waitUntilClose();
   }
 
   async removeUser(username: string): Promise<void> {
@@ -34,7 +34,7 @@ export default class ShareModal extends Dialog {
     await rmCollab.click();
 
     await this.clickButton(LinkText.Save);
-    return this.waitUntilDialogIsClosed();
+    return this.waitUntilClose();
   }
 
   /**

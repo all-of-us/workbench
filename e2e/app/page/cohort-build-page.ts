@@ -1,5 +1,5 @@
 import {Page} from 'puppeteer';
-import Dialog from 'app/component/dialog';
+import Modal from 'app/component/modal';
 import TieredMenu from 'app/component/tiered-menu';
 import Button from 'app/element/button';
 import ClrIconLink from 'app/element/clr-icon-link';
@@ -64,17 +64,17 @@ export default class CohortBuildPage extends AuthenticatedPage {
       description = faker.lorem.words(10);
     }
 
-    const dialog = new Dialog(this.page);
-    const nameTextbox = await dialog.waitForTextbox('COHORT NAME');
+    const modal = new Modal(this.page);
+    const nameTextbox = await modal.waitForTextbox('COHORT NAME');
     await nameTextbox.type(cohortName);
 
-    const descriptionTextarea = await dialog.waitForTextarea('DESCRIPTION');
+    const descriptionTextarea = await modal.waitForTextarea('DESCRIPTION');
     await descriptionTextarea.type(description);
 
     const saveButton = await Button.findByName(this.page, {name: LinkText.Save});
     await saveButton.waitUntilEnabled();
     await saveButton.click();
-    await dialog.waitUntilDialogIsClosed();
+    await modal.waitUntilClose();
     await waitWhileLoading(this.page);
 
     return cohortName;
@@ -92,12 +92,12 @@ export default class CohortBuildPage extends AuthenticatedPage {
    * @return {string} Dialog textContent.
    */
   async deleteConfirmationDialog(): Promise<string> {
-    const dialog = new Dialog(this.page);
-    const contentText = await dialog.getContent();
-    const deleteButton = await Button.findByName(this.page, {normalizeSpace: LinkText.DeleteCohort}, dialog);
+    const modal = new Modal(this.page);
+    const contentText = await modal.getContent();
+    const deleteButton = await Button.findByName(this.page, {normalizeSpace: LinkText.DeleteCohort}, modal);
     await Promise.all([
       deleteButton.click(),
-      dialog.waitUntilDialogIsClosed(),
+      modal.waitUntilClose(),
     ]);
     await waitWhileLoading(this.page);
     return contentText;
@@ -108,12 +108,12 @@ export default class CohortBuildPage extends AuthenticatedPage {
    * @return {string} Dialog textContent.
    */
   async discardChangesConfirmationDialog(): Promise<string> {
-    const dialog = new Dialog(this.page);
-    const contentText = await dialog.getContent();
-    const deleteButton = await Button.findByName(this.page, {normalizeSpace: LinkText.DiscardChanges}, dialog);
+    const modal = new Modal(this.page);
+    const contentText = await modal.getContent();
+    const deleteButton = await Button.findByName(this.page, {normalizeSpace: LinkText.DiscardChanges}, modal);
     await Promise.all([
       deleteButton.click(),
-      dialog.waitUntilDialogIsClosed(),
+      modal.waitUntilClose(),
       this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 60000}),
     ]);
     await waitWhileLoading(this.page);

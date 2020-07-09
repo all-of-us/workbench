@@ -1,5 +1,5 @@
 import DataResourceCard from 'app/component/data-resource-card';
-import Dialog from 'app/component/dialog';
+import Modal from 'app/component/modal';
 import EllipsisMenu from 'app/component/ellipsis-menu';
 import Button from 'app/element/button';
 import ClrIconLink from 'app/element/clr-icon-link';
@@ -117,9 +117,9 @@ export default class DataPage extends AuthenticatedPage {
     }
     const menu = cohortCard.getEllipsis();
     await menu.clickAction(EllipsisMenuAction.Delete, {waitForNav: false});
-    const dialogContent = await (new CohortBuildPage(this.page)).deleteConfirmationDialog();
+    const modalContent = await (new CohortBuildPage(this.page)).deleteConfirmationDialog();
     console.log(`Deleted Cohort "${cohortName}"`);
-    return dialogContent;
+    return modalContent;
   }
 
   /**
@@ -134,17 +134,17 @@ export default class DataPage extends AuthenticatedPage {
     const menu = datasetCard.getEllipsis();
     await menu.clickAction(EllipsisMenuAction.Delete, {waitForNav: false});
 
-    const dialog = new Dialog(this.page);
-    const dialogContentText = await dialog.getContent();
-    const deleteButton = await Button.findByName(this.page, {normalizeSpace: LinkText.DeleteDataset}, dialog);
+    const modal = new Modal(this.page);
+    const modalContentText = await modal.getContent();
+    const deleteButton = await Button.findByName(this.page, {normalizeSpace: LinkText.DeleteDataset}, modal);
     await Promise.all([
       deleteButton.click(),
-      dialog.waitUntilDialogIsClosed(),
+      modal.waitUntilClose(),
     ]);
     await waitWhileLoading(this.page);
 
     console.log(`Deleted Dataset "${datasetName}"`);
-    return dialogContentText;
+    return modalContentText;
   }
 
   /**
@@ -156,18 +156,18 @@ export default class DataPage extends AuthenticatedPage {
     const datasetCard = await DataResourceCard.findCard(this.page, datasetName);
     await datasetCard.getEllipsis().clickAction(EllipsisMenuAction.RenameDataset, {waitForNav: false});
 
-    const dialog = new Dialog(this.page);
+    const modal = new Modal(this.page);
 
-    const newNameTextbox = new Textbox(this.page, `${dialog.getXpath()}//*[@id="new-name"]`);
+    const newNameTextbox = new Textbox(this.page, `${modal.getXpath()}//*[@id="new-name"]`);
     await newNameTextbox.type(newDatasetName);
 
-    const descriptionTextarea = await Textarea.findByName(this.page, {containsText: 'Description:'}, dialog);
+    const descriptionTextarea = await Textarea.findByName(this.page, {containsText: 'Description:'}, modal);
     await descriptionTextarea.type('Puppeteer automation rename dataset.');
 
-    const renameButton = await Button.findByName(this.page, {normalizeSpace: LinkText.RenameDataset}, dialog);
+    const renameButton = await Button.findByName(this.page, {normalizeSpace: LinkText.RenameDataset}, modal);
     await Promise.all([
       renameButton.click(),
-      dialog.waitUntilDialogIsClosed(),
+      modal.waitUntilClose(),
     ]);
     await waitWhileLoading(this.page);
 
@@ -186,31 +186,31 @@ export default class DataPage extends AuthenticatedPage {
     const menu = conceptSetCard.getEllipsis();
     await menu.clickAction(EllipsisMenuAction.Delete, {waitForNav: false});
 
-    const dialog = new Dialog(this.page);
-    const dialogContentText = await dialog.getContent();
-    const deleteButton = await Button.findByName(this.page, {normalizeSpace: LinkText.DeleteConceptSet}, dialog);
+    const modal = new Modal(this.page);
+    const modalTextContent = await modal.getContent();
+    const deleteButton = await Button.findByName(this.page, {normalizeSpace: LinkText.DeleteConceptSet}, modal);
     await Promise.all([
       deleteButton.click(),
-      dialog.waitUntilDialogIsClosed(),
+      modal.waitUntilClose(),
     ]);
     await waitWhileLoading(this.page);
 
     console.log(`Deleted Concept Set "${conceptsetName}"`);
-    return dialogContentText;
+    return modalTextContent;
   }
 
   async renameCohort(cohortName: string, newCohortName: string): Promise<void> {
     const cohortCard = await DataResourceCard.findCard(this.page, cohortName);
     const menu = cohortCard.getEllipsis();
     await menu.clickAction(EllipsisMenuAction.Rename, {waitForNav: false});
-    const dialog = new Dialog(this.page);
-    await dialog.getContent();
-    const newNameInput = new Textbox(this.page, `${dialog.getXpath()}//*[@id="new-name"]`);
+    const modal = new Modal(this.page);
+    await modal.getContent();
+    const newNameInput = new Textbox(this.page, `${modal.getXpath()}//*[@id="new-name"]`);
     await newNameInput.type(newCohortName);
-    const descriptionTextarea = await Textarea.findByName(this.page, {containsText: 'Description:'}, dialog);
+    const descriptionTextarea = await Textarea.findByName(this.page, {containsText: 'Description:'}, modal);
     await descriptionTextarea.type('Puppeteer automation rename cohort.');
-    await dialog.clickButton(LinkText.Rename);
-    await dialog.waitUntilDialogIsClosed();
+    await modal.clickButton(LinkText.Rename);
+    await modal.waitUntilClose();
     await waitWhileLoading(this.page);
     console.log(`Cohort "${cohortName}" renamed to "${newCohortName}"`);
   }

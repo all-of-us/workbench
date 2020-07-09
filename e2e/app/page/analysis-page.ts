@@ -2,7 +2,7 @@ import {Page} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
 import DataResourceCard from 'app/component/data-resource-card';
-import Dialog from 'app/component/dialog';
+import Modal from 'app/component/modal';
 import Button from 'app/element/button';
 import {EllipsisMenuAction, LinkText} from 'app/text-labels';
 import AuthenticatedPage from './authenticated-page';
@@ -37,17 +37,17 @@ export default class AnalysisPage extends AuthenticatedPage {
     const menu = resourceCard.getEllipsis();
     await menu.clickAction(EllipsisMenuAction.Delete, {waitForNav: false});
 
-    const dialog = new Dialog(this.page);
-    const dialogContentText = await dialog.getContent();
-    const deleteButton = await Button.findByName(this.page, {normalizeSpace: LinkText.DeleteNotebook}, dialog);
+    const modal = new Modal(this.page);
+    const modalContentText = await modal.getContent();
+    const deleteButton = await Button.findByName(this.page, {normalizeSpace: LinkText.DeleteNotebook}, modal);
     await Promise.all([
       deleteButton.click(),
-      dialog.waitUntilDialogIsClosed(),
+      modal.waitUntilClose(),
     ]);
     await waitWhileLoading(this.page);
 
     console.log(`Deleted Notebook "${notebookName}"`);
-    return dialogContentText;
+    return modalContentText;
   }
 
 }
