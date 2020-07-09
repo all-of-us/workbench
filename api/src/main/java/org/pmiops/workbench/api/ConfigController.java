@@ -36,10 +36,11 @@ public class ConfigController implements ConfigApiDelegate {
             .requireInvitationKey(config.access.requireInvitationKey)
             .enableBillingLockout(config.featureFlags.enableBillingLockout)
             .enableBillingUpgrade(config.featureFlags.enableBillingUpgrade)
-            .requireInstitutionalVerification(config.featureFlags.requireInstitutionalVerification)
             .enableCBAgeTypeOptions(config.featureFlags.enableCBAgeTypeOptions)
             .enableV3DataUserCodeOfConduct(config.featureFlags.enableV3DataUserCodeOfConduct)
             .enableEventDateModifier(config.featureFlags.enableEventDateModifier)
-            .useNewShibbolethService(config.featureFlags.useNewShibbolethService));
+            .useNewShibbolethService(config.featureFlags.useNewShibbolethService)
+            .enableCohortBuilderV2(config.featureFlags.enableCohortBuilderV2)
+            .enableResearchReviewPrompt(config.featureFlags.enableResearchPurposePrompt));
   }
 }

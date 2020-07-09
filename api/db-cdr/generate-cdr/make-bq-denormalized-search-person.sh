@@ -50,21 +50,51 @@ bq --quiet --project=$BQ_PROJECT mk --schema=$schema_path/cb_search_person.json 
 echo "Inserting person data into cb_search_person"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\`
-  (person_id, gender, sex_at_birth, race, ethnicity, dob)
-SELECT p.person_id,
-  case when p.gender_concept_id = 0 then 'Unknown' else g.concept_name end as gender,
-  case when p.sex_at_birth_concept_id = 0 then 'Unknown' else s.concept_name end as sex_at_birth,
-  case when p.race_concept_id = 0 then 'Unknown' else regexp_replace(r.concept_name, r'^.+:\s', '') end as race,
-  case when e.concept_name is null then 'Unknown' else regexp_replace(e.concept_name, r'^.+:\s', '') end as ethnicity,
-  date(birth_datetime) as dob
+    (
+          person_id
+        , gender
+        , sex_at_birth
+        , race
+        , ethnicity
+        , dob
+        , is_deceased
+    )
+SELECT
+      p.person_id
+    , CASE
+        WHEN p.gender_concept_id = 0 THEN 'Unknown'
+        ELSE g.concept_name
+      END as gender
+    , CASE
+        WHEN p.sex_at_birth_concept_id = 0 THEN 'Unknown'
+        ELSE s.concept_name
+      END as sex_at_birth
+    , CASE
+        WHEN p.race_concept_id = 0 THEN 'Unknown'
+        ELSE regexp_replace(r.concept_name, r'^.+:\s', '')
+      END as race
+    , CASE
+        WHEN e.concept_name is null THEN 'Unknown'
+        ELSE regexp_replace(e.concept_name, r'^.+:\s', '')
+      END as ethnicity
+    , date(birth_datetime) as dob
+    , CASE
+        WHEN d.death_date is null THEN 0
+        ELSE 1
+      END is_deceased
 FROM \`$BQ_PROJECT.$BQ_DATASET.person\` p
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` g on (p.gender_concept_id = g.concept_id)
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` s on (p.sex_at_birth_concept_id = s.concept_id)
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` r on (p.race_concept_id = r.concept_id)
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on (p.ethnicity_concept_id = e.concept_id)"
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on (p.ethnicity_concept_id = e.concept_id)
+LEFT JOIN
+    (
+        SELECT DISTINCT person_id, death_date
+        FROM \`$BQ_PROJECT.$BQ_DATASET.death\`
+    ) d on (p.person_id = d.person_id) "
 
 ################################################
-# set age_at_consent and age_at_cdr to each subject
+# calculate age_at_consent and age_at_cdr
 ################################################
 # To get date_of_consent, we first try to find a consent date, if none, we fall back to Street Address: PII State
 # If that does not exist, we fall back to the MINIMUM date of The Basics Survey

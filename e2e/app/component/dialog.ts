@@ -45,7 +45,7 @@ export default class Dialog extends Container {
   }
 
   async waitForButton(buttonLabel: LinkText): Promise<Button> {
-    return Button.findByName(this.page, {containsText: buttonLabel}, this);
+    return Button.findByName(this.page, {normalizeSpace: buttonLabel}, this);
   }
 
   async waitForTextbox(textboxName: string): Promise<Textbox> {

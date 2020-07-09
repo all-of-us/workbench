@@ -6,9 +6,8 @@ import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
-import {ServerConfigService} from 'app/services/server-config.service';
 import {registerApiClient, workspacesApi} from 'app/services/swagger-fetch-clients';
-import {urlParamsStore} from 'app/utils/navigation';
+import {serverConfigStore, urlParamsStore} from 'app/utils/navigation';
 
 import {BugReportComponent} from 'app/components/bug-report';
 import {ConfirmDeleteModalComponent} from 'app/components/confirm-delete-modal';
@@ -21,7 +20,6 @@ import {UserService, WorkspaceAccessLevel} from 'generated';
 import {WorkspacesApi} from 'generated/fetch';
 
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
-import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {UserServiceStub} from 'testing/stubs/user-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {WorkspacesApiStub, WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
@@ -66,12 +64,6 @@ describe('WorkspaceWrapperComponent', () => {
       providers: [
         {provide: ProfileStorageService, useValue: new ProfileStorageServiceStub()},
         {provide: UserService, useValue: new UserServiceStub()},
-        {
-          provide: ServerConfigService,
-          useValue: new ServerConfigServiceStub({
-            gsuiteDomain: 'fake-research-aou.org'
-          })
-        },
       ]
     }).compileComponents().then(() => {
       registerApiClient(WorkspacesApi, new WorkspacesApiStub());
@@ -82,6 +74,8 @@ describe('WorkspaceWrapperComponent', () => {
         ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
         wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
       });
+      serverConfigStore.next({gsuiteDomain: 'fake-research-aou.org',
+        enableResearchReviewPrompt: true});
     });
   }));
 

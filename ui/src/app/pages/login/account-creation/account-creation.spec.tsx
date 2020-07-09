@@ -6,7 +6,6 @@ import {serverConfigStore} from 'app/utils/navigation';
 import {Profile} from 'generated/fetch';
 import {createEmptyProfile} from 'app/pages/login/sign-in';
 import {AccountCreation, AccountCreationProps} from './account-creation';
-import {AccountCreationOptions} from './account-creation-options';
 import colors from 'app/styles/colors';
 
 let props: AccountCreationProps;
@@ -100,81 +99,6 @@ it('should handle username validity if name is valid', () => {
   expect(wrapper.exists('#usernameError')).toBeFalsy();
   wrapper.find('input#username').simulate('change', {target: {value: 'username'}});
   expect(wrapper.exists('#usernameError')).toBeFalsy();
-});
-
-it('should handle invalid Email', () => {
-  const wrapper = component();
-  expect(wrapper.exists('#contactEmail')).toBeTruthy();
-  expect(wrapper.exists('#invalidEmailError')).toBeFalsy();
-  wrapper.find('input#contactEmail').simulate('change',
-      {target: {value: 'username@'}});
-  expect(wrapper.exists('#invalidEmailError')).toBeFalsy();
-});
-
-// TODO remove after we switch to verified institutional affiliation
-it('should display Institution name and role option by default', () => {
-  serverConfigStore.next({...defaultConfig, requireInstitutionalVerification: false});
-  const wrapper = component();
-  const institutionName = wrapper.find('[data-test-id="institutionname"]');
-  expect(institutionName).toBeTruthy();
-  const institutionRole = wrapper.find('[data-test-id="institutionRole"]');
-  expect(institutionRole).toBeTruthy();
-  expect(institutionRole.find('li').length).toBe(AccountCreationOptions.roles.length);
-  expect(institutionRole.find('li').get(0).props.children).toBe(AccountCreationOptions.roles[0].label);
-});
-
-// TODO remove after we switch to verified institutional affiliation
-it('should display Affiliation information if No is selected', () => {
-  serverConfigStore.next({...defaultConfig, requireInstitutionalVerification: false});
-  const wrapper = component();
-  const institutionAffilationOption = wrapper.find('[data-test-id="show-institution-no"]')
-    .find('input');
-  expect(institutionAffilationOption).toBeTruthy();
-  institutionAffilationOption.simulate('click');
-  const affiliationDropDown = wrapper.find('Dropdown');
-  const affiliationOptions = affiliationDropDown.find('DropdownItem');
-  expect(affiliationOptions.length).toBe(AccountCreationOptions.nonAcademicAffiliations.length);
-  expect(affiliationOptions.find('li').get(0).props.children)
-    .toBe(AccountCreationOptions.nonAcademicAffiliations[0].label);
-});
-
-// TODO remove after we switch to verified institutional affiliation
-it('should display Affiliation Roles should change as per affiliation', () => {
-  serverConfigStore.next({...defaultConfig, requireInstitutionalVerification: false});
-  const wrapper = component();
-  const institutionAffilationOption = wrapper.find('[data-test-id="show-institution-no"]')
-    .find('input');
-  expect(institutionAffilationOption).toBeTruthy();
-  institutionAffilationOption.simulate('click');
-  const affiliationDropDown = wrapper.find('Dropdown');
-  affiliationDropDown.simulate('click');
-  const affiliationOptions = affiliationDropDown.find('DropdownItem');
-
-  // Industry affiliation
-  affiliationOptions.find('DropdownItem').find('li').first().simulate('click');
-  // affiliationOptions.childAt(0).simulate('click');
-  let affilationRoleDropDowns = wrapper.find('[data-test-id="affiliationrole"]');
-  expect(affilationRoleDropDowns).toBeTruthy();
-  expect(affilationRoleDropDowns.find('li').length).toBe(AccountCreationOptions.industryRole.length);
-
-  expect(affilationRoleDropDowns.find('li').get(0).props.children)
-    .toBe(AccountCreationOptions.industryRole[0].label);
-
-  // Education affiliation
-  affiliationOptions.find('DropdownItem').find('li').at(1).simulate('click');
-  // affiliationOptions.childAt(0).simulate('click');
-  affilationRoleDropDowns = wrapper.find('[data-test-id="affiliationrole"]');
-  expect(affilationRoleDropDowns).toBeTruthy();
-  expect(affilationRoleDropDowns.find('li').length).toBe(AccountCreationOptions.educationRole.length);
-
-  expect(affilationRoleDropDowns.find('li').get(0).props.children)
-    .toBe(AccountCreationOptions.educationRole[0].label);
-
-  // Community Scientist
-  affiliationOptions.find('DropdownItem').find('li').at(2).simulate('click');
-  // affiliationOptions.childAt(0).simulate('click');
-  affilationRoleDropDowns = wrapper.find('[data-test-id="affiliationrole"]');
-  expect(affilationRoleDropDowns.length).toBe(0);
 });
 
 it('should display characters over message if research purpose character length is more than 2000', () => {

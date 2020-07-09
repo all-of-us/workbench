@@ -15,6 +15,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {navigate} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/navigation';
 import {
   getSelectedPopulations,
   getSelectedResearchPurposeItems
@@ -105,7 +106,8 @@ export const ResearchPurpose = withCurrentWorkspace()(
                               style={styles.editIcon}/>
         </Clickable>
       </div>
-      {isOwner && workspace.researchPurpose.needsReviewPrompt && <FlexRow style={styles.reviewPurposeReminder}>
+      {serverConfigStore.getValue().enableResearchReviewPrompt && isOwner
+        && workspace.researchPurpose.needsReviewPrompt && <FlexRow style={styles.reviewPurposeReminder}>
         <ClrIcon style={{color: colors.warning, marginLeft: '0.3rem'}} className='is-solid'
         shape='exclamation-triangle' size='25'/>
         <FlexColumn style={{paddingRight: '0.5rem', paddingLeft: '0.5rem', color: colors.primary}}>

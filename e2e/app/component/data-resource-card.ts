@@ -114,11 +114,11 @@ export default class DataResourceCard {
   }
 
   /**
-   * Find element with specified resource name on the page.
-   * @param {string} resourceName
+   * Find the resource name link in this card.
    */
-  async getLink(resourceName: string) : Promise<ElementHandle> {
-    return this.page.waitForXPath(this.workspaceNameLinkSelector(resourceName));
+  async getLink() : Promise<ElementHandle> {
+    const [element] = await this.cardElement.$x(this.resourceNameLinkSelector());
+    return element;
   }
 
   async getResourceCard(cardType: CardType = CardType.Cohort): Promise<DataResourceCard[]> {
@@ -161,8 +161,8 @@ export default class DataResourceCard {
     return this;
   }
 
-  private workspaceNameLinkSelector(resourceName: string): string {
-    return `//*[@role='button'][./*[${DataResourceCardSelector.cardNameXpath} and normalize-space(text())="${resourceName}"]]`
+  private resourceNameLinkSelector(): string {
+    return `.//*[@role='button'][./*[${DataResourceCardSelector.cardNameXpath} and text()]]`
   }
 
 }

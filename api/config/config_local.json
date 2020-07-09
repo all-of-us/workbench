@@ -100,12 +100,12 @@
     "useKeylessDelegatedCredentials": true,
     "sendFreeTierAlertEmails": true,
     "enableMoodleV2Api": true,
-    "requireInstitutionalVerification": true,
     "enableCBAgeTypeOptions": true,
     "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,
     "useNewShibbolethService": true,
-    "enableResearchPurposePrompt": true
+    "enableResearchPurposePrompt": true,
+    "enableCohortBuilderV2": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local",
