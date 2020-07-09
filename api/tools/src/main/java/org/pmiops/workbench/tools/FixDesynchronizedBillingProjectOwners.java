@@ -2,6 +2,7 @@ package org.pmiops.workbench.tools;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -13,7 +14,6 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.elasticsearch.common.util.set.Sets;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.api.BillingApi;
@@ -134,7 +134,7 @@ public class FixDesynchronizedBillingProjectOwners {
       // ShareWorkspace first updates the Workspace ACL, then the billing project role. For this
       // reason, the workspace ACL is the source of truth, as it will have been set properly in the
       // event of a partial sharing failure.
-      for (String user : Sets.difference(billingProjectOwners, workspaceOwners)) {
+      for (String user : Sets.symmetricDifference(billingProjectOwners, workspaceOwners)) {
         dryLog(
             dryRun,
             String.format(
