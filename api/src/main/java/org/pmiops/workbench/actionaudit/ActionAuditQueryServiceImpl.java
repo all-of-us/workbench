@@ -41,7 +41,7 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
           + "WHERE %s AND\n"
           + "  @after <= TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) AND\n"
           + "  TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) < @before\n"
-          + "ORDER BY event_time, agent_id, action_id\n"
+          + "ORDER BY event_time DESC, agent_id, action_id\n"
           + "LIMIT @limit;";
 
   private final AuditLogEntryMapper auditLogEntryMapper;
