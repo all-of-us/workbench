@@ -1,6 +1,6 @@
 import {Component as AComponent} from '@angular/core';
 import {AppRoute, AppRouter, Guard, ProtectedRoutes, withFullHeight, withRouteData} from 'app/components/app-router';
-import {WorkspaceAuditPage} from 'app/pages/admin/admin-workspace-auditing';
+import {WorkspaceAuditPage} from 'app/pages/admin/admin-workspace-audit';
 import {UserAuditPage} from 'app/pages/admin/user-audit';
 import {CookiePolicy} from 'app/pages/cookie-policy';
 import {DataUserCodeOfConduct} from 'app/pages/profile/data-user-code-of-conduct';
