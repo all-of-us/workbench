@@ -2,7 +2,7 @@ const url = require('url');
 const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36';
 
 /**
- * Set up page common properties:
+ * Before starting any test, set up page common properties:
  * - Page view port
  * - Page user-agent
  * - Page navigation timeout
@@ -17,8 +17,7 @@ beforeAll(async () => {
 });
 
 /**
- * Enable network interception.
- * - Block unwanted requests.
+ * Before start of each test, enable network interception in new page and block unwanted requests.
  */
 beforeEach(async () => {
   await page.setRequestInterception(true);
@@ -43,9 +42,10 @@ beforeEach(async () => {
 });
 
 /**
- * Disable network interception.
- * Delete broswer cookies.
- * Reset global page and browser variables.
+ * At the end of each test completion, do:
+ * - Disable network interception.
+ * - Delete broswer cookies.
+ * - Reset global page and browser variables.
  */
 afterEach(async () => {
   await page.setRequestInterception(false);
