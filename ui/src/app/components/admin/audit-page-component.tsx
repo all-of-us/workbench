@@ -44,12 +44,12 @@ export interface AuditPageProps {
   queryAuditLog: (subject: string) => Promise<GenericAuditQueryResult>;
   getNextAuditPath: (subject: string) => string;
   debug: boolean;
+  buttonLabel?: string;
 }
 
-const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath}) => {
+const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath, buttonLabel}) => {
   const [auditSubject, setAuditSubject] = useState(initialAuditSubject);
   const [loadNextSubject, setLoadNextSubject] = useState(false);
-
   useEffect(() => {
     loadNextSubject && setLoadNextSubject(false);
   }, [loadNextSubject]);
@@ -59,7 +59,7 @@ const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath}) =>
     <TextInputWithLabel
       containerStyle={{display: 'inline-block'}}
       style={{width: '15rem', margin: '1rem'}}
-      labelText = {auditSubjectType}
+      labelText = {buttonLabel || auditSubjectType}
       value = {auditSubject}
       onChange = {setAuditSubject}
     />
@@ -91,7 +91,7 @@ const NumActions = ({onChange, totalActions}) => {
 };
 
 export const AuditPageComponent = (props: AuditPageProps) => {
-  const {initialAuditSubject, queryAuditLog, getNextAuditPath, debug, auditSubjectType} = props;
+  const {initialAuditSubject, queryAuditLog, getNextAuditPath, debug, auditSubjectType, buttonLabel} = props;
   const emptyResult = {actions: [], logEntries: [], sourceId: 0, query: ''};
   const [loading, setLoading] = useState(true);
   const [queryResult, setQueryResult] = useState<GenericAuditQueryResult>(emptyResult);
@@ -134,7 +134,7 @@ export const AuditPageComponent = (props: AuditPageProps) => {
   return !loading
     ? <React.Fragment>
         <div style={{marginLeft: '1rem'}}>
-          <UserInput initialAuditSubject={initialAuditSubject} auditSubjectType={auditSubjectType} getNextAuditPath={getNextAuditPath}/>
+          <UserInput initialAuditSubject={initialAuditSubject} auditSubjectType={auditSubjectType} getNextAuditPath={getNextAuditPath} buttonLabel={buttonLabel}/>
           <NumActions onChange={setDisplayNum} totalActions={actions.length}/>
           <div>{getTitle()}</div>
         </div>

@@ -38,6 +38,7 @@ const getNextAuditPath = (subject: string) => {
 export const UserAuditPage = () => {
   const {username = ''} = useParams();
   return <AuditPageComponent auditSubjectType='User'
+                             buttonLabel='Username without domain'
                              initialAuditSubject={username}
                              debug={true}
                              getNextAuditPath={getNextAuditPath}
