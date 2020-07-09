@@ -140,6 +140,6 @@ export const AuditPageComponent = (props: AuditPageProps) => {
         </div>
         <AuditActionCardListView actions={fp.slice(0, displayNum, actions)}/>
       </React.Fragment>
-    : <div>Loading Audit for {auditSubjectType} {nextAuditSubject}...</div>;
+    : <div>Loading Audit for {auditSubjectType} {initialAuditSubject}...</div>;
 };
 
