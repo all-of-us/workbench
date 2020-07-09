@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
@@ -322,6 +323,54 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       // just return it.
     }
     return dbUser;
+  }
+
+  /**
+   * Save updated dbUser object and transform ObjectOptimisticLockingFailureException into
+   * ConflictException
+   *
+   * @param dbUser
+   * @param dbVerifiedAffiliation
+   * @return
+   */
+  @Override
+  public DbUser updateUserWithConflictHandling(
+      DbUser dbUser, DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation) {
+    try {
+      dbUser = userDao.save(dbUser);
+      updateVerifiedInstitutionalAffiliation(dbUser, dbVerifiedAffiliation);
+    } catch (ObjectOptimisticLockingFailureException e) {
+      log.log(Level.WARNING, "version conflict for user update", e);
+      throw new ConflictException("Failed due to concurrent modification");
+    }
+    return dbUser;
+  }
+
+  private void updateVerifiedInstitutionalAffiliation(
+      DbUser dbUser, DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation) {
+
+    // if we get to this point, the Affiliation should exist
+    DbVerifiedInstitutionalAffiliation dbExistingVerifiedInstitutionalAffiliation =
+        verifiedInstitutionalAffiliationDao.findFirstByUser(dbUser).get();
+
+    if (!Objects.equals(dbVerifiedAffiliation, dbExistingVerifiedInstitutionalAffiliation)) {
+      // cannot change the Institution in the Affiliation
+      if (!dbExistingVerifiedInstitutionalAffiliation
+          .getInstitution()
+          .equals(dbVerifiedAffiliation.getInstitution())) {
+        throw new BadRequestException(
+            "Cannot update the Institution in a Verified Institutional Affiliation");
+      }
+
+      // update the role in the existing Affiliation and save
+
+      dbExistingVerifiedInstitutionalAffiliation.setInstitutionalRoleEnum(
+          dbVerifiedAffiliation.getInstitutionalRoleEnum());
+      dbExistingVerifiedInstitutionalAffiliation.setInstitutionalRoleOtherText(
+          dbVerifiedAffiliation.getInstitutionalRoleOtherText());
+
+      this.verifiedInstitutionalAffiliationDao.save(dbExistingVerifiedInstitutionalAffiliation);
+    }
   }
 
   @Override

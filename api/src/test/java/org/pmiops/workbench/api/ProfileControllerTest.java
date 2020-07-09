@@ -722,6 +722,68 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
+  public void updateVerifiedInstitutionalAffiliation_change_forbidden() {
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          final VerifiedInstitutionalAffiliation original =
+              createVerifiedInstitutionalAffiliation();
+          createAccountAndDbUserWithAffiliation(original);
+
+          Profile profile = profileController.getMe().getBody();
+          assertThat(profile.getVerifiedInstitutionalAffiliation()).isEqualTo(original);
+
+          final VerifiedInstitutionalAffiliation newAffil =
+              new VerifiedInstitutionalAffiliation()
+                  .institutionShortName("NotTheBroad")
+                  .institutionDisplayName("The Narrow Institute?")
+                  .institutionalRoleEnum(InstitutionalRole.PRE_DOCTORAL);
+
+          profile.setVerifiedInstitutionalAffiliation(newAffil);
+          profileController.updateProfile(profile);
+        });
+  }
+
+  @Test
+  public void updateVerifiedInstitutionalAffiliation_role_change_OK() {
+    final VerifiedInstitutionalAffiliation original = createVerifiedInstitutionalAffiliation();
+    createAccountAndDbUserWithAffiliation(original);
+
+    Profile profile = profileController.getMe().getBody();
+    assertThat(profile.getVerifiedInstitutionalAffiliation()).isEqualTo(original);
+
+    final VerifiedInstitutionalAffiliation newAffil =
+        new VerifiedInstitutionalAffiliation()
+            .institutionShortName(original.getInstitutionShortName())
+            .institutionDisplayName(original.getInstitutionDisplayName())
+            // original has PROJECT_PERSONNEL
+            .institutionalRoleEnum(InstitutionalRole.PRE_DOCTORAL);
+
+    profile.setVerifiedInstitutionalAffiliation(newAffil);
+    profileController.updateProfile(profile);
+
+    assertThat(profileController.getMe().getBody().getVerifiedInstitutionalAffiliation())
+        .isEqualTo(newAffil);
+  }
+
+  @Test
+  public void updateVerifiedInstitutionalAffiliation_remove_forbidden() {
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          final VerifiedInstitutionalAffiliation original =
+              createVerifiedInstitutionalAffiliation();
+          createAccountAndDbUserWithAffiliation(original);
+
+          Profile profile = profileController.getMe().getBody();
+          assertThat(profile.getVerifiedInstitutionalAffiliation()).isEqualTo(original);
+
+          profile.setVerifiedInstitutionalAffiliation(null);
+          profileController.updateProfile(profile);
+        });
+  }
+
+  @Test
   public void updateContactEmail_forbidden() {
     createAccountAndDbUserWithAffiliation();
     dbUser.setFirstSignInTime(TIMESTAMP);
