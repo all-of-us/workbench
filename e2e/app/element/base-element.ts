@@ -157,8 +157,8 @@ export default class BaseElement extends Container {
    * @param options The typing options.
    */
   async type(textValue: string, options?: { delay: number }): Promise<this> {
+
     const clearAndType =  async (txt: string, opts?: { delay: number }): Promise<string> => {
-      await this.click();
       await this.clear();
       await this.asElementHandle().then((handle: ElementHandle) => handle.type(txt, opts));
       return (await this.getProperty('value')).toString().trim();
@@ -174,7 +174,7 @@ export default class BaseElement extends Container {
         throw new Error(`Type "${textValue}" failed.`);
       }
       maxRetries--;
-      return await this.page.waitFor(2000).then(typeAndCheck); // two seconds pause and retry type
+      return await this.page.waitFor(1000).then(typeAndCheck); // one second pause and retry type
     };
 
     await typeAndCheck();
@@ -211,15 +211,15 @@ export default class BaseElement extends Container {
 
   async clearTextInput(): Promise<void> {
     return this.asElementHandle()
-    .then(element => {
-      return this.page.evaluate((elemt, textValue) => {
-        // Refer to https://stackoverflow.com/a/46012210/440432
-        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
-        nativeInputValueSetter.call(elemt, textValue);
-        const event = new Event('input', { bubbles: true });
-        elemt.dispatchEvent(event);
-      }, element, '');
-    });
+      .then(element => {
+        return this.page.evaluate((elemt, textValue) => {
+          // Refer to https://stackoverflow.com/a/46012210/440432
+          const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+          nativeInputValueSetter.call(elemt, textValue);
+          const event = new Event('input', { bubbles: true });
+          elemt.dispatchEvent(event);
+        }, element, '');
+      });
   }
 
   /**
