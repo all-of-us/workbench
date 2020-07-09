@@ -111,19 +111,7 @@ export const AuditPageComponent = (props: AuditPageProps) => {
           Audit
         </Button>
         <div>{getTitle()}</div>
-        <AuditActionCardListView actions={fp.slice(0, 20, actions)}/>
+        <AuditActionCardListView actions={fp.slice(0, 100, actions)}/>
       </React.Fragment>
-      : <div>Loading Audit for {nextAuditSubject} {nextAuditSubject}...</div>;
+      : <div>Loading Audit for {auditSubjectType} {nextAuditSubject}...</div>;
 };
-
-// TODO (extra credit)
-// - make all cards in the CardListView  collapsible to a summary, e.g. time + a list of action types
-// - make the list of AuditPropertyChangeCards collapsible locally (expand/collapse all would  be nice too)
-// - add a filter on  ActionType to all the cards in the view. All selected actions must be present
-//   in a card for it to render. I.e. we don't want to hide individual EventBundleCards I dont' think.
-// - pagination based on the `before` property in the API.
-//     * first fetch the 20 (say) most recent actions (limit = 20, after = null,  before = null)
-//     * Take timeestamp of the eoldest card reeturned, set `before` to that value and call again
-//     - repeat until no results
-// - make a generic CardListView
-// - use common card style stuff like React.FunctionComponent<WorkspaceCardMenuProps>

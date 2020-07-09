@@ -1,6 +1,8 @@
-import {profileApi, workspaceAdminApi} from 'app/services/swagger-fetch-clients';
+import {profileApi} from 'app/services/swagger-fetch-clients';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useParams} from 'react-router-dom';
+import {AuditAction, AuditEventBundle} from '../../../generated';
 import {AuditPageComponent} from '../../components/admin/audit-page-component';
 
 const getAuditLog = (subject: string) => {
@@ -10,11 +12,21 @@ const getAuditLog = (subject: string) => {
 
 const queryAuditLog = (subject: string) => {
   return getAuditLog(subject).then((queryResult) => {
+    console.log(queryResult.query);
     return {
       actions: queryResult.actions,
       sourceId: queryResult.userDatabaseId,
       query: queryResult.query,
       logEntries: queryResult.logEntries
+    };
+  }).then(genericQueryResult => {
+    // TODO(jaycarlton): This is a workaround for LOGIN event issues on the backend. Can be removed when that patch is in.
+    const filteredActions = fp.filter((action: AuditAction) => fp.negate(fp.any((eventBundle: AuditEventBundle) => 'LOGIN' === eventBundle.header.actionType))(action.eventBundles))(genericQueryResult.actions);
+    return {
+      actions: filteredActions,
+      sourceId: genericQueryResult.sourceId,
+      query: genericQueryResult.query,
+      logEntries: genericQueryResult.logEntries
     };
   });
 };

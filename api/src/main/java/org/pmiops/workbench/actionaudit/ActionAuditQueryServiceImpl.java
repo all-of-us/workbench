@@ -42,7 +42,7 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
           + "  @after <= TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) AND\n"
           + "  TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) < @before\n"
           + "ORDER BY event_time, agent_id, action_id\n"
-          + "LIMIT @limit";
+          + "LIMIT @limit;";
 
   private final AuditLogEntryMapper auditLogEntryMapper;
   private final BigQueryService bigQueryService;
@@ -97,9 +97,11 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
   public UserAuditLogQueryResponse queryEventsForUser(
       long userDatabaseId, long limit, DateTime after, DateTime before) {
 
+    // Workaround for
     final String whereClausePrefix =
         "((jsonPayload.target_id = @user_db_id AND jsonPayload.target_type = 'USER') OR\n"
-            + "  (jsonPayload.agent_id = @user_db_id AND jsonPayload.agent_type = 'USER'))";
+            + "  (jsonPayload.agent_id = @user_db_id AND jsonPayload.agent_type = 'USER')) AND\n"
+            + "  jsonPayload.action_type != 'LOGIN'";
     final String queryString = String.format(QUERY_FORMAT, getTableName(), whereClausePrefix);
 
     final QueryJobConfiguration queryJobConfiguration =

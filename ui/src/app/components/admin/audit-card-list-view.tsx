@@ -1,4 +1,5 @@
-import colors, {colorWithWhiteness} from 'app/styles/colors';
+import colors from 'app/styles/colors';
+import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import * as React from 'react';
 import {
@@ -8,7 +9,7 @@ import {
   AuditTargetPropertyChange
 } from '../../../generated';
 import {ActionAuditCardBase} from '../card';
-import {FlexColumn, FlexRow} from '../flex';
+import {FlexRow} from '../flex';
 
 
 const HidableCell = (props: {content: string}) => {
@@ -115,10 +116,15 @@ const AuditActionCard = (props: { action: AuditAction }) => {
 };
 export const AuditActionCardListView = (props: { actions: AuditAction[]}) => {
   const {actions} = props;
+  console.log(`actions length ${actions.length}`);
+
+  const actionsSorted = actions.sort((a, b) => {
+    return new Date(b.actionTime).getTime() - new Date(a.actionTime).getTime();
+  });
 
   return (
       <div style={{margin: '1rem', width: '30rem'}}>
-        {actions.map((action, index) => (<AuditActionCard key={index} action={action}/>))}
+        {actionsSorted.map((action, index) => (<AuditActionCard key={index} action={action}/>))}
       </div>
   );
 };
