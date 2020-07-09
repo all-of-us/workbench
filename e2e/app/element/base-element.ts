@@ -151,10 +151,33 @@ export default class BaseElement extends Container {
       });
   }
 
-  async type(text: string, options?: { delay: number }): Promise<this> {
-    await this.focus();
-    await this.clear();
-    await this.asElementHandle().then((handle: ElementHandle) => handle.type(text, options));
+  /**
+   * Clear existing value in textbox then type new text value.
+   * @param {string} The texts string.
+   * @param options The typing options.
+   */
+  async type(textValue: string, options?: { delay: number }): Promise<this> {
+    const clearAndType =  async (txt: string, opts?: { delay: number }): Promise<string> => {
+      await this.click();
+      await this.clear();
+      await this.asElementHandle().then((handle: ElementHandle) => handle.type(txt, opts));
+      return (await this.getProperty('value')).toString().trim();
+    }
+
+    let maxRetries = 1;
+    const typeAndCheck = async () => {
+      const actualValue = await clearAndType(textValue, options);
+      if (actualValue === textValue) {
+        return; // success
+      }
+      if (maxRetries <= 0) {
+        throw new Error(`Type "${textValue}" failed.`);
+      }
+      maxRetries--;
+      return await this.page.waitFor(2000).then(typeAndCheck); // two seconds pause and retry type
+    };
+
+    await typeAndCheck();
     return this;
   }
 
@@ -177,12 +200,26 @@ export default class BaseElement extends Container {
   }
 
   /**
-   * Clear value in textbox or textarea.
+   * Clear value in textbox.
    */
-  async clear(): Promise<void> {
+  async clear(options: ClickOptions = { clickCount: 3 }): Promise<void> {
     const elemt = await this.asElementHandle();
-    await elemt.click({ clickCount: 3 });
-    await elemt.press('Backspace');
+    await elemt.focus();
+    await elemt.click(options);
+    await this.page.keyboard.press('Backspace');
+  }
+
+  async clearTextInput(): Promise<void> {
+    return this.asElementHandle()
+    .then(element => {
+      return this.page.evaluate((elemt, textValue) => {
+        // Refer to https://stackoverflow.com/a/46012210/440432
+        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+        nativeInputValueSetter.call(elemt, textValue);
+        const event = new Event('input', { bubbles: true });
+        elemt.dispatchEvent(event);
+      }, element, '');
+    });
   }
 
   /**
@@ -276,7 +313,7 @@ export default class BaseElement extends Container {
   }
 
   /**
-   * Paste texts instead type one char at a time. Very fast.
+   * Paste texts in textarea instead type one char at a time. Very fast.
    * @param text
    */
   async paste(text: string): Promise<void> {
@@ -290,6 +327,13 @@ export default class BaseElement extends Container {
           elemt.dispatchEvent(event);
         }, element, text);
       });
+  }
+
+  /**
+   * Clear texts in textarea.
+   */
+  async clearTextArea(): Promise<void> {
+    return this.paste('');
   }
 
   /**

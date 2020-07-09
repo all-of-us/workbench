@@ -5,6 +5,7 @@ import {waitWhileLoading} from 'utils/test-utils';
 import RadioButton from 'app/element/radiobutton';
 import Textbox from 'app/element/textbox';
 import {LinkText} from 'app/text-labels';
+import Button from 'app/element/button';
 
 export enum Language {
   Python = 'Python',
@@ -35,6 +36,7 @@ export default class DatasetSaveModal extends Dialog {
     const newDatasetName = makeRandomName();
 
     const nameTextbox = await this.waitForTextbox('Dataset Name');
+    await nameTextbox.clearTextInput();
     await nameTextbox.type(newDatasetName);
 
     // Export to Notebook checkbox is checked by default
@@ -52,13 +54,22 @@ export default class DatasetSaveModal extends Dialog {
       await exportCheckbox.unCheck();
     }
     await waitWhileLoading(this.page);
+
+    let finishButton: Button;
     if (isUpdate) {
-      await this.waitForButton(LinkText.Update).then(btn => btn.clickAndWait());
+      finishButton = await this.waitForButton(LinkText.Update);
     } else {
-      await this.waitForButton(LinkText.Save).then(btn => btn.clickAndWait());
+      finishButton = await this.waitForButton(LinkText.Save);
     }
+    await finishButton.waitUntilEnabled();
+    await finishButton.clickAndWait();
     await waitWhileLoading(this.page);
-    console.log(`Created Dataset "${newDatasetName}"`);
+
+    if (isUpdate) {
+      console.log(`Updated Dataset "${newDatasetName}"`);
+    } else {
+      console.log(`Created Dataset "${newDatasetName}"`);
+    }
     if (exportToNotebook) {
       console.log(`Created Notebook "${notebookName}"`);
     }

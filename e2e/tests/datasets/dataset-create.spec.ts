@@ -3,10 +3,10 @@ import ClrIconLink from 'app/element/clr-icon-link';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import DataPage, {TabLabelAlias} from 'app/page/data-page';
 import DatasetSaveModal from 'app/page/dataset-save-modal';
-import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
-import {waitForText} from 'utils/waits-utils';
 import {EllipsisMenuAction, LinkText} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
+import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
+import {waitForText} from 'utils/waits-utils';
 
 describe('Create Dataset', () => {
 
@@ -45,13 +45,18 @@ describe('Create Dataset', () => {
     const newDatasetName = makeRandomName();
     await dataPage.renameDataset(datasetName, newDatasetName);
 
+    await dataPage.openTab(TabLabelAlias.Datasets, {waitPageChange: false});
+
     // Verify rename successful
     const newDatasetExists = await resourceCard.cardExists(newDatasetName, CardType.Dataset);
     expect(newDatasetExists).toBe(true);
 
+    const oldDatasetExists = await resourceCard.cardExists(datasetName, CardType.Dataset);
+    expect(oldDatasetExists).toBe(false);
+
     // Delete Dataset
-    const textContent = await dataPage.deleteDataset(datasetName);
-    expect(textContent).toContain(`Are you sure you want to delete Dataset: ${datasetName}?`);
+    const textContent = await dataPage.deleteDataset(newDatasetName);
+    expect(textContent).toContain(`Are you sure you want to delete Dataset: ${newDatasetName}?`);
 
   });
 
@@ -60,7 +65,6 @@ describe('Create Dataset', () => {
    * - Find an existing workspace. Create a new workspace if none exists.
    * - Create a new Cohort from drug "hydroxychloroquine".
    * - Create a new Dataset from All Participants and All Surveys. Save dataset without Export to Notebook.
-   * - Create a new Dataset from Cohort.
    * - Edit dataset. Save dataset without Export to Notebook.
    * - Delete Dataset.
    */
@@ -105,7 +109,7 @@ describe('Create Dataset', () => {
     await datasetPage.clickSaveAndAnalyzeButton();
 
     const saveModal = new DatasetSaveModal(page);
-    const datasetName = await saveModal.saveDataset();
+    let datasetName = await saveModal.saveDataset({exportToNotebook: false});
 
     // Verify create successful.
     await dataPage.openTab(TabLabelAlias.Datasets, {waitPageChange: false});
@@ -123,10 +127,11 @@ describe('Create Dataset', () => {
     await datasetPage.selectCohorts(['All Participants']);
     await datasetPage.clickAnalyzeButton();
 
-    // Uncheck Export to Notebook button, then click Update button.
-    await saveModal.saveDataset({exportToNotebook: false}, true);
+    // Save Dataset in a new name.
+    datasetName = await saveModal.saveDataset({exportToNotebook: false}, true);
     await dataPage.waitForLoad();
 
+    await dataPage.openTab(TabLabelAlias.Datasets, {waitPageChange: false});
     await dataPage.deleteDataset(datasetName);
   });
 

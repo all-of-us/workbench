@@ -154,12 +154,11 @@ export default class DataPage extends AuthenticatedPage {
    */
   async renameDataset(datasetName: string, newDatasetName: string): Promise<void> {
     const datasetCard = await DataResourceCard.findCard(this.page, datasetName);
-    const menu = datasetCard.getEllipsis();
-    await menu.clickAction(EllipsisMenuAction.RenameDataset, {waitForNav: false});
+    await datasetCard.getEllipsis().clickAction(EllipsisMenuAction.RenameDataset, {waitForNav: false});
 
     const dialog = new Dialog(this.page);
 
-    const newNameTextbox = new Textbox(this.page, '//*[@id="new-name"]');
+    const newNameTextbox = new Textbox(this.page, `${dialog.getXpath()}//*[@id="new-name"]`);
     await newNameTextbox.type(newDatasetName);
 
     const descriptionTextarea = await Textarea.findByName(this.page, {containsText: 'Description:'}, dialog);
@@ -170,7 +169,9 @@ export default class DataPage extends AuthenticatedPage {
       renameButton.click(),
       dialog.waitUntilDialogIsClosed(),
     ]);
-    return waitWhileLoading(this.page);
+    await waitWhileLoading(this.page);
+
+    console.log(`Renamed Dataset "${datasetName}" to "${newDatasetName}"`);
   }
 
   /**
