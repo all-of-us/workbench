@@ -194,16 +194,6 @@ export class CohortSearch extends React.Component<Props, State> {
       || domain === DomainType.VISIT;
   }
 
-  get showDataBrowserLink() {
-    const {searchContext: {domain}} = this.props;
-    const {mode} = this.state;
-    return (domain === DomainType.CONDITION
-      || domain === DomainType.PROCEDURE
-      || domain === DomainType.MEASUREMENT
-      || domain === DomainType.DRUG)
-      && (mode === 'list' || mode === 'tree');
-  }
-
   searchContentStyle(mode: string) {
     let style = {
       display: 'none',
@@ -294,20 +284,6 @@ export class CohortSearch extends React.Component<Props, State> {
             <h2 style={{color: colors.primary, lineHeight: '1.5rem', margin: '0 0 0 0.75rem'}}>
               {title}
             </h2>
-          </div>
-          <div style={{display: 'table', height: '100%'}}>
-            <div style={{display: 'table-cell', height: '100%', verticalAlign: 'middle'}}>
-              {domain === DomainType.DRUG && <div>
-                <a href='https://mor.nlm.nih.gov/RxNav/' target='_blank' rel='noopener noreferrer'>
-                  Explore
-                </a>
-                &nbsp;drugs by brand names outside of <AoU/>.
-              </div>}
-              {this.showDataBrowserLink && <div>
-                Explore Source information on the&nbsp;
-                <a href={environment.publicUiUrl} target='_blank' rel='noopener noreferrer'>Data Browser.</a>
-              </div>}
-            </div>
           </div>
           {mode === 'attributes' && <Button type='link' onClick={this.back}>
             <ClrIcon size='24' shape='close'/>

@@ -2,22 +2,23 @@ import * as React from 'react';
 import {Key} from 'ts-key-enum';
 
 import {domainToTitle} from 'app/cohort-search/utils';
-import {Clickable} from 'app/components/buttons';
+import {Button, Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
+import {AoU} from 'app/components/text-wrappers';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {WorkspaceData} from 'app/utils/workspace-data';
+import {environment} from 'environments/environment';
 import {CriteriaType, DomainType} from 'generated/fetch';
 
 const borderStyle = `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`;
 const styles = reactStyles({
   searchContainer: {
-    position: 'absolute',
     width: '65%',
     padding: '0.4rem 0',
     zIndex: 10,
@@ -39,7 +40,6 @@ const styles = reactStyles({
     outline: 'none',
   },
   drugsText: {
-    fontSize: '12px',
     marginTop: '0.25rem',
     lineHeight: '0.75rem'
   },
@@ -78,7 +78,7 @@ const styles = reactStyles({
   },
   listContainer: {
     width: '99%',
-    margin: '2.75rem 0 1rem',
+    margin: '0.5rem 0 1rem',
     fontSize: '12px',
     color: colors.primary,
   },
@@ -93,25 +93,22 @@ const styles = reactStyles({
     tableLayout: 'fixed',
   },
   columnHeader: {
-    padding: 0,
+    padding: '0 0 0 0.25rem',
     background: colorWithWhiteness(colors.dark, 0.93),
     color: colors.primary,
     border: 0,
     borderBottom: borderStyle,
-    borderLeft: borderStyle,
     fontWeight: 600,
-    textAlign: 'center',
+    textAlign: 'left',
     verticalAlign: 'middle',
     lineHeight: '0.75rem'
   },
   columnBody: {
     background: colors.white,
     verticalAlign: 'middle',
-    textAlign: 'center',
     padding: 0,
     border: 0,
     borderBottom: borderStyle,
-    borderLeft: borderStyle,
     color: colors.primary,
     lineHeight: '0.8rem',
   },
@@ -135,6 +132,13 @@ const styles = reactStyles({
     color: colors.white,
     fontSize: '12px',
     borderRadius: '5px',
+  },
+  helpText: {
+    display: 'table-cell',
+    height: '100%',
+    lineHeight: '0.75rem',
+    verticalAlign: 'middle',
+    width: '50%'
   }
 });
 
@@ -208,6 +212,11 @@ export const ListSearch = withCurrentWorkspace()(
     showStandardResults() {
       this.trackEvent('Standard Vocab Hyperlink');
       this.setState({standardOnly: true});
+    }
+
+    get showDataBrowserLink() {
+      return [DomainType.CONDITION, DomainType.PROCEDURE, DomainType.MEASUREMENT, DomainType.DRUG]
+        .includes(this.props.searchContext.domain);
     }
 
     get checkSource() {
@@ -319,7 +328,6 @@ export const ListSearch = withCurrentWorkspace()(
     render() {
       const {searchContext: {domain}} = this.props;
       const {data, error, ingredients, loading, standardOnly, sourceMatch, standardData} = this.state;
-      const listStyle = domain === DomainType.DRUG ? {...styles.listContainer, marginTop: '4.25rem'} : styles.listContainer;
       const showStandardOption = !standardOnly && !!standardData && standardData.length > 0;
       const displayData = standardOnly ? standardData : data;
       return <div style={{overflow: 'auto'}}>
@@ -330,30 +338,46 @@ export const ListSearch = withCurrentWorkspace()(
               placeholder={`Search ${domainToTitle(domain)} by code or description`}
               onKeyPress={this.handleInput} />
           </div>
-          {domain === DomainType.DRUG && <div style={styles.drugsText}>
-            Your search may bring back brand names, generics and ingredients. Only ingredients may be added to your search criteria.
-          </div>}
         </div>
-        {!loading && !!displayData && <div style={listStyle}>
-          {sourceMatch && !standardOnly && <div style={{marginBottom: '0.75rem'}}>
-            There are {sourceMatch.count.toLocaleString()} participants with source code {sourceMatch.code}.
-            {showStandardOption && <span> For more results, browse
-              &nbsp;<Clickable style={styles.vocabLink} onClick={() => this.showStandardResults()}>Standard Vocabulary</Clickable>.
+        <div style={{display: 'table', height: '100%', width: '100%'}}>
+          <div style={styles.helpText}>
+            {sourceMatch && !standardOnly && <div>
+              There are {sourceMatch.count.toLocaleString()} participants with source code {sourceMatch.code}.
+              {showStandardOption && <span> For more results, browse
+                &nbsp;<Clickable style={styles.vocabLink} onClick={() => this.showStandardResults()}>Standard Vocabulary</Clickable>.
             </span>}
-          </div>}
-          {standardOnly && <div style={{marginBottom: '0.75rem'}}>
-            {!!displayData.length && <span>
+            </div>}
+            {standardOnly && <div>
+              {!!displayData.length && <span>
               There are {displayData[0].count.toLocaleString()} participants for the standard version of the code you searched.
             </span>}
-            {!displayData.length && <span>
+              {!displayData.length && <span>
               There are no standard matches for source code {sourceMatch.code}.
             </span>}
-            &nbsp;<Clickable style={styles.vocabLink}
-              onMouseDown={() => this.trackEvent('Source Vocab Hyperlink')}
-              onClick={() => this.setState({standardOnly: false})}>
+              &nbsp;<Clickable style={styles.vocabLink}
+                               onMouseDown={() => this.trackEvent('Source Vocab Hyperlink')}
+                               onClick={() => this.setState({standardOnly: false})}>
               Return to source code
             </Clickable>.
-          </div>}
+            </div>}
+            {domain === DomainType.DRUG && <div style={styles.drugsText}>
+              Your search may bring back brand names, generics and ingredients. Only ingredients may be added to your search criteria.
+            </div>}
+          </div>
+          <div style={{...styles.helpText, textAlign: 'right'}}>
+            {domain === DomainType.DRUG && <div>
+              <a href='https://mor.nlm.nih.gov/RxNav/' target='_blank' rel='noopener noreferrer'>
+                Explore
+              </a>
+              &nbsp;drugs by brand names outside of <AoU/>.
+            </div>}
+            {this.showDataBrowserLink && <div>
+              Explore Source information on the&nbsp;
+              <a href={environment.publicUiUrl} target='_blank' rel='noopener noreferrer'>Data Browser.</a>
+            </div>}
+          </div>
+        </div>
+        {!loading && !!displayData && <div style={styles.listContainer}>
           {!!displayData.length && <table className='p-datatable' style={styles.table}>
             <thead className='p-datatable-thead'>
               <tr style={{height: '2rem'}}>
@@ -386,6 +410,7 @@ export const ListSearch = withCurrentWorkspace()(
             </tbody>
           </table>}
           {!standardOnly && !displayData.length && <div>No results found</div>}
+          <Button type='primary' style={{borderRadius: '5px', float: 'right', marginTop: '1rem'}}>Finish & Review</Button>
         </div>}
         {loading && <SpinnerOverlay/>}
         {error && <div style={{...styles.error, ...(domain === DomainType.DRUG ? {marginTop: '3.75rem'} : {})}}>
