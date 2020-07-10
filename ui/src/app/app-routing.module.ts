@@ -242,11 +242,6 @@ const routes: Routes = [
                                 }
                               }
                             ],
-                          },
-                          {
-                            path: '**',
-                            component: AppRouting,
-                            data:  {}
                           }
                         ]
                       },
