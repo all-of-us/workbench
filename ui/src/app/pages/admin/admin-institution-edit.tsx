@@ -133,13 +133,13 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
     this.setState(fp.set(['institution', 'emailDomains'], emailDomainsWithNoEmptyString));
 
     emailDomainsWithNoEmptyString.map(emailDomain => {
-      const dummyAddress = 'dummy@' + emailDomain;
+      const testAddress = 'test@' + emailDomain;
       const errors = validate({
-        dummyAddress
+        testAddress
       }, {
-        dummyAddress: {email: true}
+        testAddress: {email: true}
       });
-      if (errors && errors.dummyAddress && errors.dummyAddress.length > 0) {
+      if (errors && errors.testAddress && errors.testAddress.length > 0) {
         invalidEmailDomain.push(emailDomain);
       }
     });
