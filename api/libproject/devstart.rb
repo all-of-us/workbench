@@ -980,6 +980,7 @@ Must be run once when a new cdr is released",
 })
 
 def generate_cb_criteria_tables(cmd_name, *args)
+  ensure_docker_sync()
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.data_browser = false
   op.opts.dry_run = false
