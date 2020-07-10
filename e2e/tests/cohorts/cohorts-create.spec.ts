@@ -75,8 +75,6 @@ describe('User can create new Cohorts', () => {
     // Open Cohort details.
     const cohortLink = await Link.findByName(page, {name: cohortName});
     await cohortLink.clickAndWait();
-    // Wait for page ready
-    await waitWhileLoading(page);
     await waitForText(page, newTotalCount, {xpath: FieldSelector.TotalCount});
 
     // Modify Cohort: Edit Group 1 name successfully.
@@ -99,9 +97,9 @@ describe('User can create new Cohorts', () => {
     expect(newTotalCountInt2).toBe(newTotalCountInt);
 
     // Clean up: delete cohort
-    const dialogContent = await cohortPage.deleteCohort();
+    const modalContent = await cohortPage.deleteCohort();
     // Verify dialog content text
-    expect(dialogContent).toContain(`Are you sure you want to delete Cohort: ${cohortName}?`);
+    expect(modalContent).toContain(`Are you sure you want to delete Cohort: ${cohortName}?`);
     console.log(`Deleted Cohort "${cohortName}"`);
   });
 
@@ -204,12 +202,12 @@ describe('User can create new Cohorts', () => {
     expect(newCardsCount).toBe(origCardsCount + 1);
 
     // Delete duplicated cohort.
-    let dialogContent = await dataPage.deleteCohort(`Duplicate of ${cohortName}`);
-    expect(dialogContent).toContain(`Are you sure you want to delete Cohort: Duplicate of ${cohortName}?`);
+    let modalTextContent = await dataPage.deleteCohort(`Duplicate of ${cohortName}`);
+    expect(modalTextContent).toContain(`Are you sure you want to delete Cohort: Duplicate of ${cohortName}?`);
 
     // Delete new cohort.
-    dialogContent = await dataPage.deleteCohort(cohortName);
-    expect(dialogContent).toContain(`Are you sure you want to delete Cohort: ${cohortName}?`);
+    modalTextContent = await dataPage.deleteCohort(cohortName);
+    expect(modalTextContent).toContain(`Are you sure you want to delete Cohort: ${cohortName}?`);
 
   });
 

@@ -63,7 +63,6 @@ export default class DatasetBuildPage extends AuthenticatedPage {
   async clickAddConceptSetsButton(): Promise<ConceptsetSearchPage> {
     const addConceptSetsButton = await ClrIconLink.findByName(this.page, {name: LabelAlias.SelectConceptSets, ancestorLevel: 3, iconShape: 'plus-circle'});
     await addConceptSetsButton.clickAndWait();
-    await waitWhileLoading(this.page);
     const conceptPage = new ConceptsetSearchPage(this.page);
     await conceptPage.waitForLoad();
     return conceptPage;

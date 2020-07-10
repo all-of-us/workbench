@@ -1,6 +1,6 @@
 import {ElementHandle, Page} from 'puppeteer';
 import {FieldSelector} from 'app/page/cohort-build-page';
-import Dialog from 'app/component/dialog';
+import Modal from 'app/component/modal';
 import EllipsisMenu from 'app/component/ellipsis-menu';
 import {waitForNumericalString, waitForText} from 'utils/waits-utils';
 import CohortCriteriaModal, {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/cohort-criteria-modal';
@@ -51,11 +51,11 @@ export default class CohortParticipantsGroup {
   async editGroupName(newGroupName: string): Promise<void> {
     const menu = this.getGroupEllipsisMenu();
     await menu.clickParticipantsGroupAction(GroupAction.EditGroupName);
-    const dialog = new Dialog(this.page);
-    const textbox = await dialog.waitForTextbox('New Name:');
+    const modal = new Modal(this.page);
+    const textbox = await modal.waitForTextbox('New Name:');
     await textbox.type(newGroupName);
-    await dialog.waitForButton(LinkText.Rename).then(b => b.click());
-    await dialog.waitUntilDialogIsClosed();
+    await modal.waitForButton(LinkText.Rename).then(b => b.click());
+    await modal.waitUntilClose();
   }
 
   /**

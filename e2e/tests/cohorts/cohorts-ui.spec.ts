@@ -56,10 +56,10 @@ describe('Cohorts UI tests', () => {
     await dataPage.openTab(TabLabelAlias.About, {waitPageChange: false});
 
     // Don't save. Confirm Discard Changes
-    const dialogContent = await cohortPage.discardChangesConfirmationDialog();
+    const modalTextContent = await cohortPage.discardChangesConfirmationDialog();
     // Verify dialog content text
-    expect(dialogContent).toContain(`Your cohort has not been saved.`);
-    expect(dialogContent).toContain(`please click CANCEL and click CREATE COHORT to save your criteria.`);
+    expect(modalTextContent).toContain(`Your cohort has not been saved.`);
+    expect(modalTextContent).toContain(`please click CANCEL and click CREATE COHORT to save your criteria.`);
 
     // Check ABOUT tab is open
     const aboutPage = new WorkspaceAboutPage(page);

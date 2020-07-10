@@ -1,5 +1,5 @@
 import {Page} from 'puppeteer';
-import Dialog from 'app/component/dialog';
+import Modal from 'app/component/modal';
 import {makeRandomName} from 'utils/str-utils';
 import RadioButton from 'app/element/radiobutton';
 import Textbox from 'app/element/textbox';
@@ -14,7 +14,7 @@ export enum SaveOption {
   ChooseExistingSet = 'Choose existing set',
 }
 
-export default class ConceptsetSaveModal extends Dialog {
+export default class ConceptsetSaveModal extends Modal {
 
   constructor(page: Page) {
     super(page);

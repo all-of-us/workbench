@@ -70,8 +70,8 @@ describe('Create Concept Sets from Domains', () => {
     await dataPage.openTab(TabLabelAlias.Data);
     await dataPage.openTab(TabLabelAlias.ConceptSets, {waitPageChange: false});
 
-    const dialogTextContent = await dataPage.deleteConceptSet(conceptName);
-    expect(dialogTextContent).toContain(`Are you sure you want to delete Concept Set: ${conceptName}`);
+    const modalTextContent = await dataPage.deleteConceptSet(conceptName);
+    expect(modalTextContent).toContain(`Are you sure you want to delete Concept Set: ${conceptName}`);
   });
 
   /**

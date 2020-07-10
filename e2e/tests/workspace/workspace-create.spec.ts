@@ -18,13 +18,13 @@ describe('Creating new workspaces', () => {
     await workspacesPage.load();
 
     // create workspace with "No Review Requested" radiobutton selected
-    const dialogTextContent = await workspacesPage.createWorkspace(newWorkspaceName);
+    const modalTextContent = await workspacesPage.createWorkspace(newWorkspaceName);
 
     // Pick out few sentenses to verify
-    expect(dialogTextContent).toContain('Primary purpose of your project (Question 1)');
-    expect(dialogTextContent).toContain('Summary of research purpose (Question 2)');
-    expect(dialogTextContent).toContain('Will be displayed publicly to inform All of Us research participants.');
-    expect(dialogTextContent).toContain('You can also make changes to your answers after you create your workspace.');
+    expect(modalTextContent).toContain('Primary purpose of your project (Question 1)');
+    expect(modalTextContent).toContain('Summary of research purpose (Question 2)');
+    expect(modalTextContent).toContain('Will be displayed publicly to inform All of Us research participants.');
+    expect(modalTextContent).toContain('You can also make changes to your answers after you create your workspace.');
 
     await verifyWorkspaceLinkOnDataPage(newWorkspaceName);
   });
