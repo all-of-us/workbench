@@ -965,3 +965,198 @@ WHERE type = 'CPT4'
                     WHERE type = 'CPT4'
                 )
         )"
+
+
+################################################
+# PPI PHYSICAL MEASUREMENTS (PM)
+################################################
+echo "PM - insert data"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (
+          id
+        , parent_id
+        , domain_id
+        , is_standard
+        , type
+        , subtype
+        , concept_id
+        , name
+        , value
+        , item_count
+        , est_count
+        , is_group
+        , is_selectable
+        , has_attribute
+        , has_hierarchy
+    )
+SELECT
+      id
+    , parent_id
+    , domain_id
+    , is_standard
+    , type
+    , subtype
+    , concept_id
+    , name
+    , value
+    , CASE WHEN is_selectable = 1 THEN 0 ELSE null END as item_count
+    , CASE WHEN is_selectable = 1 THEN 0 ELSE null END as est_count
+    , is_group
+    , is_selectable
+    , has_attribute
+    , has_hierarchy
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_criteria\`
+WHERE domain_id = 'PHYSICAL_MEASUREMENT'
+ORDER BY 1"
+
+echo "PM - counts for Heart Rate, Height, Weight, BMI, Waist Circumference, Hip Circumference"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
+SET x.item_count = y.cnt
+    , x.est_count = y.cnt
+FROM
+    (
+        SELECT
+              concept_id
+            , COUNT(DISTINCT person_id) as cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+        WHERE concept_id in (903126,903133,903121,903124,903135,903136)
+            and is_standard = 0
+        GROUP BY 1
+    ) y
+WHERE x.domain_id = 'PHYSICAL_MEASUREMENT'
+    and x.concept_id = y.concept_id"
+
+echo "PM - counts for heart rhythm, pregnancy, wheelchair use"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
+SET x.item_count = y.cnt
+    , x.est_count = y.cnt
+FROM
+    (
+        SELECT
+              concept_id
+            , CAST(value_as_concept_id as STRING) as value
+            , COUNT(DISTINCT person_id) as cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+        WHERE concept_id IN (1586218, 903120, 903111)
+            and is_standard = 0
+        GROUP BY 1,2
+    ) y
+WHERE x.domain_id = 'PHYSICAL_MEASUREMENT'
+    and x.concept_id = y.concept_id
+    and x.value = y.value"
+
+#----- BLOOD PRESSURE -----
+echo "PM - blood pressure - hypotensive"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+SET item_count =
+        (
+            SELECT COUNT(DISTINCT person_id)
+            FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+            WHERE concept_id in (903115, 903118)
+                and systolic <= 90
+                and diastolic <= 60
+        )
+    , est_count =
+        (
+            SELECT COUNT(DISTINCT person_id)
+            FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+            WHERE concept_id in (903115, 903118)
+                and systolic <= 90
+                and diastolic <= 60
+        )
+WHERE domain_id = 'PHYSICAL_MEASUREMENT'
+    and subtype = 'BP'
+    and name LIKE 'Hypotensive%'"
+
+echo "PM - blood pressure - normal"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+SET item_count =
+        (
+            SELECT COUNT(DISTINCT person_id)
+            FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+            WHERE concept_id in (903115, 903118)
+                and systolic <= 120
+                and diastolic <= 80
+        )
+    , est_count =
+        (
+            SELECT COUNT(DISTINCT person_id)
+            FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+            WHERE concept_id in (903115, 903118)
+                and systolic <= 120
+                and diastolic <= 80
+        )
+WHERE domain_id = 'PHYSICAL_MEASUREMENT'
+    and subtype = 'BP'
+    and name LIKE 'Normal%'"
+
+echo "PM - blood pressure - pre-hypertensive"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+SET item_count =
+        (
+            SELECT COUNT(DISTINCT person_id)
+            FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+            WHERE concept_id in (903115, 903118)
+                and systolic BETWEEN 120 AND 139
+                and diastolic BETWEEN 81 AND 89
+        )
+    , est_count =
+        (
+            SELECT COUNT(DISTINCT person_id)
+            FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+            WHERE concept_id in (903115, 903118)
+                and systolic BETWEEN 120 AND 139
+                and diastolic BETWEEN 81 AND 89
+        )
+WHERE domain_id = 'PHYSICAL_MEASUREMENT'
+    and subtype = 'BP'
+    and name LIKE 'Pre-Hypertensive%'"
+
+echo "PM - blood pressure  - hypertensive"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+SET item_count =
+        (
+            SELECT COUNT(DISTINCT person_id)
+            FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+            WHERE concept_id in (903115, 903118)
+                and systolic >= 140
+                and diastolic >= 90
+        )
+    , est_count =
+        (
+            SELECT COUNT(DISTINCT person_id)
+            FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+            WHERE concept_id in (903115, 903118)
+                and systolic >= 140
+                and diastolic >= 90
+        )
+WHERE domain_id = 'PHYSICAL_MEASUREMENT'
+    and subtype = 'BP'
+    and name LIKE 'Hypertensive%'"
+
+echo "PM - blood pressure  - detail"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+SET item_count =
+        (
+            SELECT COUNT(DISTINCT person_id)
+            FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+            WHERE concept_id in (903115, 903118)
+        )
+    , est_count =
+        (
+            SELECT COUNT(DISTINCT person_id)
+            FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+            WHERE concept_id in (903115, 903118)
+        )
+WHERE domain_id = 'PHYSICAL_MEASUREMENT'
+    and subtype = 'BP'
+    and name = 'Blood Pressure'
+    and is_selectable = 1"
