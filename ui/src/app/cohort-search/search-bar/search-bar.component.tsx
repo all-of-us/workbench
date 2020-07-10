@@ -16,23 +16,24 @@ import {Key} from 'ts-key-enum';
 
 const styles = reactStyles({
   searchContainer: {
+    background: colors.white,
     width: '100%',
     zIndex: 10,
   },
   searchBar: {
     backgroundColor: colorWithWhiteness(colors.secondary, 0.8),
     borderRadius: '5px',
-    height: '2.1rem',
+    height: '1.67rem',
     padding: '0.3rem 0.58rem',
   },
   searchInput: {
     background: 'transparent',
     border: 0,
-    height: '1.5rem',
+    height: '1rem',
     marginLeft: '0.25rem',
     outline: 'none',
     padding: '0',
-    width: '90%',
+    width: '85%',
   },
   dropdownMenu: {
     position: 'absolute',

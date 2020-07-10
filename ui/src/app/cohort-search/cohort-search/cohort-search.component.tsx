@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import {AttributesPage} from 'app/cohort-search/attributes-page/attributes-page.component';
 import {Demographics} from 'app/cohort-search/demographics/demographics.component';
-import {ListSearch} from 'app/cohort-search/list-search/list-search.component';
+import {ListSearchV2} from 'app/cohort-search/list-search-v2/list-search-v2.component';
 import {searchRequestStore} from 'app/cohort-search/search-state.service';
 import {CriteriaTree} from 'app/cohort-search/tree/tree.component';
 import {domainToTitle, generateId, typeToTitle} from 'app/cohort-search/utils';
@@ -318,9 +318,9 @@ export class CohortSearch extends React.Component<Props, State> {
                       setAttributes={this.setAttributes}
                       setSearchTerms={this.setTreeSearchTerms}/>}
                 </div>
-                {/* List View */}
+                {/* List View (using duplicated version of ListSearch) */}
                 <div style={this.searchContentStyle('list')}>
-                  <ListSearch hierarchy={this.showHierarchy}
+                  <ListSearchV2 hierarchy={this.showHierarchy}
                               searchContext={searchContext}
                               select={this.addSelection}
                               selectedIds={selectedIds}
