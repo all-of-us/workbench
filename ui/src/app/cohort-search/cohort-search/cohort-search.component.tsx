@@ -26,6 +26,12 @@ function colStyle(percentage: string) {
   } as React.CSSProperties;
 }
 
+interface Props {
+  setCohortChanged: (cohortChanged: boolean) => void;
+  setUpdatingCohort: (updatingCohort: boolean) => void;
+  setShowWarningModal: (showWarningModal: () => Promise<boolean>) => void;
+}
+
 interface State {
   loading: boolean;
   overview: boolean;
@@ -35,13 +41,12 @@ interface State {
   minHeight: string;
   modalPromise: Promise<boolean> | null;
   modalOpen: boolean;
-  updatingCohort: boolean;
   updateGroupListsCount: number;
   cohortChanged: boolean;
   searchContext: any;
 }
 
-export class CohortSearch extends React.Component<{}, State> {
+export class CohortSearch extends React.Component<Props, State> {
   private subscription;
   resolve: Function;
   searchWrapper: HTMLDivElement;
@@ -57,11 +62,11 @@ export class CohortSearch extends React.Component<{}, State> {
       minHeight: '10rem',
       modalPromise:  null,
       modalOpen: false,
-      updatingCohort: false,
       updateGroupListsCount: 0,
       cohortChanged: false,
       searchContext: undefined
     };
+    this.showWarningModal = this.showWarningModal.bind(this);
   }
 
   componentDidMount() {
@@ -87,14 +92,17 @@ export class CohortSearch extends React.Component<{}, State> {
     });
 
     this.subscription.add(searchRequestStore.subscribe(sr => {
+      const cohortChanged = !!this.state.cohort && this.state.cohort.criteria !== JSON.stringify(mapRequest(sr));
+      this.props.setCohortChanged(cohortChanged);
       this.setState({
         criteria: sr,
         overview: sr.includes.length > 0 || sr.excludes.length > 0,
-        cohortChanged: !!this.state.cohort && this.state.cohort.criteria !== JSON.stringify(mapRequest(sr)),
+        cohortChanged,
         updateGroupListsCount: this.state.updateGroupListsCount + 1
       });
     }));
     this.updateWrapperDimensions();
+    this.props.setShowWarningModal(this.showWarningModal);
   }
 
   componentWillUnmount() {
@@ -102,10 +110,6 @@ export class CohortSearch extends React.Component<{}, State> {
     idsInUse.next(new Set());
     currentCohortStore.next(undefined);
     searchRequestStore.next({includes: [], excludes: [], dataFilters: []} as SearchRequest);
-  }
-
-  canDeactivate(): Promise<boolean> | boolean {
-    return !this.state.cohortChanged || this.state.updatingCohort || this.showWarningModal();
   }
 
   async showWarningModal() {
@@ -119,8 +123,6 @@ export class CohortSearch extends React.Component<{}, State> {
   }
 
   updateWrapperDimensions() {
-    console.dir(this.searchWrapper);
-    console.dir(this.searchWrapper.getBoundingClientRect());
     const {top} = this.searchWrapper.getBoundingClientRect();
     this.searchWrapper.style.minHeight = `${window.innerHeight - top - 24}px`;
   }
@@ -162,7 +164,7 @@ export class CohortSearch extends React.Component<{}, State> {
               cohortChanged={cohortChanged}
               searchRequest={criteria}
               updateCount={updateCount}
-              updating={() => this.setState({updatingCohort: true})}/>}
+              updating={() => this.props.setUpdatingCohort(true)}/>}
           </div>
           {loading && <SpinnerOverlay/>}
         </div>
@@ -191,7 +193,31 @@ export class CohortSearch extends React.Component<{}, State> {
   template: '<div #root style="margin-right: 45px; height: auto;"></div>'
 })
 export class CohortSearchComponent extends ReactWrapperBase {
+  // The functions and variables here are a temporary workaround to keep the unsaved changes warning until we can move this route to the
+  // new React router (RW-5256)
+  cohortChanged: boolean;
+  updatingCohort: boolean;
+  showWarningModal: () => Promise<boolean>;
   constructor() {
-    super(CohortSearch, []);
+    super(CohortSearch, ['setCohortChanged', 'setUpdatingCohort', 'setShowWarningModal']);
+    this.setCohortChanged = this.setCohortChanged.bind(this);
+    this.setUpdatingCohort = this.setUpdatingCohort.bind(this);
+    this.setShowWarningModal = this.setShowWarningModal.bind(this);
+  }
+
+  setCohortChanged(cohortChanged: boolean): void {
+    this.cohortChanged = cohortChanged;
+  }
+
+  setUpdatingCohort(updatingCohort: boolean): void {
+    this.updatingCohort = updatingCohort;
+  }
+
+  setShowWarningModal(showWarningModal: () => Promise<boolean>): void {
+    this.showWarningModal = showWarningModal;
+  }
+
+  canDeactivate(): Promise<boolean> | boolean {
+    return !this.cohortChanged || this.updatingCohort || this.showWarningModal();
   }
 }
