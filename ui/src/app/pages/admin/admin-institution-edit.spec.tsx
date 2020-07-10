@@ -121,6 +121,7 @@ describe('AdminInstitutionEditSpec', () => {
           value:
             'invalidEmail@domain@org,\n' +
             'correctEmail@someDomain.org,\n' +
+            'correctEmail.123.hello@someDomain567.org.com\n' +
             ' invalidEmail   ,\n' +
             ' justDomain.org,\n' +
             'someEmail@broadinstitute.org'
