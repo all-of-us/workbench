@@ -144,6 +144,7 @@
     <include file="changelog/db.changelog-134-institution-data-user-agreement.xml"/>
     <include file="changelog/db.changelog-135-institution-unique-display-name.xml"/>
     <include file="changelog/db.changelog-136-workspace-need-researchpurpose-review.xml"/>
+    <include file="changelog/db.changelog-137-create-view-test.xml"/>
 
     <!--
      Note: to update the DB locally, do the following:
