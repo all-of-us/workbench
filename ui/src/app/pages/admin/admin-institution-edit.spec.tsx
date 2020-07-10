@@ -121,16 +121,17 @@ describe('AdminInstitutionEditSpec', () => {
           value:
             'invalidEmail@domain@org,\n' +
             'correctEmail@someDomain.org,\n' +
-            'correctEmail.123.hello@someDomain567.org.com\n' +
+            ' correctEmail.123.hello@someDomain567.org.com   \n' +
             ' invalidEmail   ,\n' +
             ' justDomain.org,\n' +
-            'someEmail@broadinstitute.org'
+            'someEmail@broadinstitute.org\n' +
+            'nope@just#plain#wrong'
         }
       });
     wrapper.find('[data-test-id="emailAddressInput"]').first().simulate('blur');
     emailAddressError = wrapper.find('[data-test-id="emailAddressError"]');
     expect(emailAddressError.first().props().children)
-      .toBe('Following Email Addresses are not valid : invalidEmail@domain@org , invalidEmail , justDomain.org');
+      .toBe('Following Email Addresses are not valid : invalidEmail@domain@org , invalidEmail , justDomain.org , nope@just#plain#wrong');
 
     // Single correct format Email Address entries
     wrapper.find('[data-test-id="emailAddressInput"]').first()
@@ -164,8 +165,12 @@ describe('AdminInstitutionEditSpec', () => {
     wrapper.find('[data-test-id="emailDomainInput"]').first()
       .simulate('change', {
         target: {
-          value: 'someEmailAddress@domain@org,' +
-            '\nsomeDomain123.org.com,\n justSomeText,\njustDomain.org,\nbroadinstitute.org#wrongTest'
+          value:
+            'someEmailAddress@domain@org,\n' +
+            'someDomain123.org.com        ,\n' +
+            ' justSomeText,\n' +
+            ' justDomain.org,\n' +
+            'broadinstitute.org#wrongTest'
         }
       });
     wrapper.find('[data-test-id="emailDomainInput"]').first().simulate('blur');
