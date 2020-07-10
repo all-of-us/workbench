@@ -111,7 +111,7 @@ describe('AdminInstitutionEditSpec', () => {
     // Multiple Email Address entries with a mix of correct (someEmail@broadinstitute.org') and incorrect format
     wrapper.find('[data-test-id="emailAddressInput"]').first()
       .simulate('change', {target: {value: 'invalidEmail@domain@org,' +
-        '\ncorrectEmail@someDomain.org.com,\n invalidEmail,\n justDomain.org,' +
+        '\ncorrectEmail.123.hello@someDomain567.org.com,\n invalidEmail,\n justDomain.org,' +
         '\nsomeEmail@broadinstitute.org'}});
     wrapper.find('[data-test-id="emailAddressInput"]').first().simulate('blur');
     emailAddressError = wrapper.find('[data-test-id="emailAddressError"]');
@@ -149,7 +149,7 @@ describe('AdminInstitutionEditSpec', () => {
     // Multiple Entries with correct and incorrect Email Domain format
     wrapper.find('[data-test-id="emailDomainInput"]').first()
       .simulate('change', {target: {value: 'someEmailAddress@domain@org,' +
-        '\nsomeDomain.org.com,\n justSomeText,\njustDomain.org,\nbroadinstitute.org#wrongTest'}});
+        '\nsomeDomain123.org.com,\n justSomeText,\njustDomain.org,\nbroadinstitute.org#wrongTest'}});
     wrapper.find('[data-test-id="emailDomainInput"]').first().simulate('blur');
     emailAddressError = wrapper.find('[data-test-id="emailDomainError"]');
     expect(emailAddressError.first().props().children)
