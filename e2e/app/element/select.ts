@@ -1,4 +1,4 @@
-import {Page, WaitForSelectorOptions} from 'puppeteer';
+import {Page} from 'puppeteer';
 import Container from 'app/container';
 import {ElementType, XPathOptions} from 'app/xpath-options';
 import BaseElement from './base-element';
@@ -11,17 +11,15 @@ export default class Select extends BaseElement {
 
   private selectedOption;
    
-  static async findByName(
-     page: Page,
-     xOpt: XPathOptions,
-     container?: Container,
-     waitOptions: WaitForSelectorOptions = {visible: true}): Promise<Select> {
-
+  static async findByName(page: Page, xOpt: XPathOptions, container?: Container): Promise<Select> {
     xOpt.type = ElementType.Select;
     const selectXpath = buildXPath(xOpt, container);
     const select = new Select(page, selectXpath);
-    await select.waitForXPath(waitOptions);
     return select;
+  }
+
+  constructor(page: Page, xpath?: string) {
+    super(page, xpath);
   }
 
   async selectOption(optionValue: string): Promise<string> {

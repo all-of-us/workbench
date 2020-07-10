@@ -28,6 +28,7 @@ export default class ConceptDomainCard extends Container {
 
   async clickSelectConceptButton(): Promise<void> {
     const selectConceptButton = await this.getSelectConceptButton();
+    await selectConceptButton.waitUntilEnabled();
     await selectConceptButton.click();
     await this.page.waitForXPath('//*[@data-test-id="conceptTable"]', {visible: true});
     await waitWhileLoading(this.page);

@@ -1,7 +1,7 @@
 import Link from 'app/element/link';
 import CohortBuildPage, {FieldSelector} from 'app/page/cohort-build-page';
 import DataPage, {TabLabelAlias} from 'app/page/data-page';
-import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
+import {findWorkspace, signIn} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
 import DataResourceCard from 'app/component/data-resource-card';
 import {makeRandomName} from 'utils/str-utils';
@@ -72,7 +72,6 @@ describe('User can create, modify, rename and delete Cohort', () => {
     // Click cohort link. Open cohort build page.
     const cohortLink = await Link.findByName(page, {name: cohortName});
     await cohortLink.clickAndWait();
-    await waitWhileLoading(page);
     await waitForText(page, totalCount, {xpath: FieldSelector.TotalCount});
 
     // Remove Exclude Group 3.
@@ -97,10 +96,10 @@ describe('User can create, modify, rename and delete Cohort', () => {
     expect(await DataResourceCard.findCard(page, newCohortName)).toBeTruthy();
 
     // Delete cohort.
-    const dialogContent = await dataPage.deleteCohort(newCohortName);
+    const modalTextContent = await dataPage.deleteCohort(newCohortName);
 
     // Verify Delete dialog content text
-    expect(dialogContent).toContain(`Are you sure you want to delete Cohort: ${newCohortName}?`);
+    expect(modalTextContent).toContain(`Are you sure you want to delete Cohort: ${newCohortName}?`);
 
     // Verify Delete successful.
     expect(await DataResourceCard.findCard(page, newCohortName, 5000)).toBeFalsy();

@@ -1,5 +1,5 @@
 import {Page} from 'puppeteer';
-import Dialog from 'app/component/dialog';
+import Modal from 'app/component/modal';
 import {makeRandomName} from 'utils/str-utils';
 import {waitWhileLoading} from 'utils/test-utils';
 import RadioButton from 'app/element/radiobutton';
@@ -12,7 +12,7 @@ export enum Language {
   R = 'R',
 }
 
-export default class DatasetSaveModal extends Dialog {
+export default class DatasetSaveModal extends Modal {
 
   constructor(page: Page) {
     super(page);

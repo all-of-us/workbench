@@ -12,7 +12,7 @@ const Selector = {
   defaultDialog: '//*[@role="dialog"]',
 }
 
-export default class Dialog extends Container {
+export default class Modal extends Container {
 
   constructor(page: Page, xpath: string = Selector.defaultDialog) {
     super(page, xpath);
@@ -25,16 +25,16 @@ export default class Dialog extends Container {
       await savePageToFile(this.page);
       await takeScreenshot(this.page);
       const title = await this.page.title();
-      console.error(`${title}: dialog waitForLoad() encountered ${e}`);
+      console.error(`${title}: modal waitForLoad() encountered ${e}`);
       throw e;
     }
     return this;
   }
 
   async getContent(): Promise<string> {
-    const dialog = await this.page.waitForXPath(this.xpath, {visible: true});
-    const modalText = await (await dialog.getProperty('innerText')).jsonValue();
-    console.debug('dialog: \n' + modalText);
+    const modal = await this.page.waitForXPath(this.xpath, {visible: true});
+    const modalText = await (await modal.getProperty('innerText')).jsonValue();
+    console.debug('Modal: \n' + modalText);
     return modalText.toString();
   }
 
@@ -60,7 +60,7 @@ export default class Dialog extends Container {
     return Checkbox.findByName(this.page, {name: checkboxName}, this);
   }
 
-  async waitUntilDialogIsClosed(timeOut: number = 60000): Promise<void> {
+  async waitUntilClose(timeOut: number = 60000): Promise<void> {
     await this.page.waitForXPath(this.xpath, {hidden: true, timeout: timeOut});
   }
 

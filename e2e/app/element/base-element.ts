@@ -1,6 +1,7 @@
 import {ClickOptions, ElementHandle, Page, WaitForSelectorOptions} from 'puppeteer';
 import Container from 'app/container';
 
+
 /**
  * BaseElement represents a web element in the DOM.
  * It implements useful methods for querying and interacting with this element.
@@ -15,7 +16,7 @@ export default class BaseElement extends Container {
 
   private element: ElementHandle;
 
-  constructor(protected readonly page: Page, xpath?: string) {
+  constructor(protected readonly page: Page, protected readonly xpath?: string) {
     super(page, xpath);
   }
 

@@ -1,10 +1,10 @@
-import Dialog from 'app/component/dialog';
+import Modal from 'app/component/modal';
 import Textbox from 'app/element/textbox';
 import {LinkText} from 'app/text-labels';
 import {ElementHandle, Page} from 'puppeteer';
 
 
-export default class ConceptsetCopyModal extends Dialog {
+export default class ConceptsetCopyModal extends Modal {
 
   constructor(page: Page, xpath?: string) {
     super(page, xpath);
