@@ -141,7 +141,6 @@ public class DataSetMapperTest {
     request.setName("New Name");
     request.setPrePackagedConceptSet(PrePackagedConceptSetEnum.SURVEY);
     final DbDataset toDataSet = dataSetMapper.dataSetRequestToDb(request, dbDataset);
-    assertThat(dbDataset.getDataSetId()).isEqualTo(toDataSet.getDataSetId());
     assertThat(toDataSet.getName()).isEqualTo("New Name");
     assertThat(toDataSet.getCohortIds()).isEqualTo(dbDataset.getCohortIds());
     assertThat(toDataSet.getIncludesAllParticipants())
@@ -164,7 +163,6 @@ public class DataSetMapperTest {
     request.setIncludesAllParticipants(false);
     request.setPrePackagedConceptSet(PrePackagedConceptSetEnum.NONE);
     final DbDataset toDataSet = dataSetMapper.dataSetRequestToDb(request, null);
-    assertThat(dbDataset.getDataSetId()).isEqualTo(toDataSet.getDataSetId());
     assertThat(toDataSet.getName()).isEqualTo("New Name");
     assertThat(toDataSet.getCohortIds()).isEqualTo(dbDataset.getCohortIds());
     assertThat(toDataSet.getIncludesAllParticipants()).isFalse();
