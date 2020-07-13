@@ -65,6 +65,11 @@ We are working towards abstracting styles (and possibly components) where it mak
     - Declare all exports at the bottom of the file so there is one place to look at to determine what a file is exposing versus having to scan the file for export statements
     - Only export something when it must be referenced by something externally. Try to limit what gets exported.
     - Use aliases to keep variables namespaced appropriately to their scope. Ex. Props can just be Props in this file but can be prefixed with the class name when it is exposed publicly.
+    - Prefer function components for simple, stateless components: [example](
+      https://github.com/all-of-us/workbench/blob/8e926e6a7300eb572b3c42b74e4c4f06a2d2de87/ui/src/app/pages/session-expired.tsx#L22-L30).
+    - All application React component names should be CamelCased, including function
+      components. React recommends reserving lower case component names
+      [for built-ins](https://reactjs.org/blog/2015/09/10/react-v0.14-rc1.html#notable-bug-fixes).
 
 
 ## Links:
