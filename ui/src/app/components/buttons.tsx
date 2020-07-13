@@ -303,13 +303,16 @@ export const Link = ({disabled = false, style = {}, children, ...props}) => {
   >{children}</Clickable>;
 };
 
-export const StyledAnchorTag = ({href, style = {}, children, ...props}) => {
+export const StyledAnchorTag = ({href, analyticsFn, style = {}, children, ...props}) => {
   const inlineAnchor = {
     display: 'inline-block',
     color: colors.accent
   };
   return <a href={href}
             onClick={e => {
+              if (analyticsFn) {
+                analyticsFn();
+              }
               // This does same page navigation iff there is no key pressed and target is not set.
               if (props.target === undefined && !href.startsWith('https://') && !href.startsWith('http://')) {
                 navigateAndPreventDefaultIfNoKeysPressed(e, href);
