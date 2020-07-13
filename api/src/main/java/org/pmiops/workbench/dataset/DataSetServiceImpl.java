@@ -714,12 +714,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   @Override
-  public List<DbDataset> getInvalidDataSetsByWorkspace(DbWorkspace dbWorkspace) {
-
-    return dataSetDao.findByWorkspaceIdAndInvalid(dbWorkspace.getWorkspaceId(), false);
-  }
-
-  @Override
   public void deleteDataSet(DbWorkspace dbWorkspace, Long dataSetId) {
     long dbDataSetId = getDbDataSet(dbWorkspace, dataSetId).get().getDataSetId();
     dataSetDao.delete(dbDataSetId);

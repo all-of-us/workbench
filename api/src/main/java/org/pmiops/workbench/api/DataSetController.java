@@ -394,24 +394,6 @@ public class DataSetController implements DataSetApiDelegate {
   }
 
   @Override
-  public ResponseEntity<DataSetListResponse> getDataSetsInWorkspace(
-      String workspaceNamespace, String workspaceId) {
-    DbWorkspace workspace =
-        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-
-    List<DbDataset> dataSets = dataSetService.getInvalidDataSetsByWorkspace(workspace);
-    DataSetListResponse response = new DataSetListResponse();
-
-    response.setItems(
-        dataSets.stream()
-            .map(dataSetMapper::dbModelToClient)
-            .sorted(Comparator.comparing(DataSet::getName))
-            .collect(Collectors.toList()));
-    return ResponseEntity.ok(response);
-  }
-
-  @Override
   public ResponseEntity<Boolean> markDirty(
       String workspaceNamespace, String workspaceId, MarkDataSetRequest markDataSetRequest) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
