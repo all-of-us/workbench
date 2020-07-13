@@ -67,7 +67,7 @@ public interface DataSetMapper {
   DataSet dbModelToClient(DbDataset dbDataset);
 
   @AfterMapping
-  default void populateFromAuxTables(
+  default void populateFromSourceDbObject(
       @MappingTarget DbDataset targetDb, @Context DbDataset dbDataSet) {
     if (dbDataSet != null
         && (targetDb.getConceptSetIds() == null || targetDb.getConceptSetIds().size() == 0)) {
