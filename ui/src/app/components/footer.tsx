@@ -63,7 +63,21 @@ const NewTabFooterAnchorTag = ({style = {}, href, ...props}) => {
   return <FooterAnchorTag style={style} href={href} target='_blank' {...props}>{props.children}</FooterAnchorTag>;
 };
 
+const DataBrowserLink = (props) => (
+  <NewTabFooterAnchorTag href={environment.publicUiUrl}
+                         analyticsFn={AnalyticsTracker.Footer.DataBrowser}
+                         {...props}>
+    Data Browser
+  </NewTabFooterAnchorTag>
+);
 
+const ResearchHubLink = (props) => (
+  <NewTabFooterAnchorTag href='https://researchallofus.org'
+                         analyticsFn={AnalyticsTracker.Footer.ResearchHub}
+                         {...props}>
+    Research Hub
+  </NewTabFooterAnchorTag>
+);
 
 const FooterTemplate = ({style = {}, ...props}) => {
   return <div style={{...styles.footerTemplate, ...style}} {...props}>
@@ -176,22 +190,6 @@ const WorkbenchFooter = withUserProfile()(
       </FooterTemplate>;
     }
   });
-
-const DataBrowserLink = (props) => (
-  <NewTabFooterAnchorTag href={environment.publicUiUrl}
-                         analyticsFn={AnalyticsTracker.Footer.DataBrowser}
-                         {...props}>
-    Data Browser
-  </NewTabFooterAnchorTag>
-);
-
-const ResearchHubLink = (props) => (
-  <NewTabFooterAnchorTag href='https://researchallofus.org'
-                         analyticsFn={AnalyticsTracker.Footer.ResearchHub}
-                         {...props}>
-    Research Hub
-  </NewTabFooterAnchorTag>
-);
 
 const supportEmailAddress = 'support@researchallofus.org';
 
