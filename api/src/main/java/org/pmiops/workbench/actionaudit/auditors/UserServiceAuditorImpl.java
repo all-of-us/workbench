@@ -67,7 +67,8 @@ public class UserServiceAuditorImpl implements UserServiceAuditor {
   public void fireAdministrativeBypassTime(
       long userId,
       BypassTimeTargetProperty bypassTimeTargetProperty,
-      Optional<Instant> bypassTime) {
+      Optional<Instant> bypassTime,
+      Optional<Instant> previousBypassTime) {
     DbUser adminUser = dbUserProvider.get();
     ActionAuditEvent.Builder eventBuilder =
         ActionAuditEvent.builder()
@@ -81,6 +82,8 @@ public class UserServiceAuditorImpl implements UserServiceAuditor {
             .targetPropertyMaybe(bypassTimeTargetProperty.getPropertyName())
             .targetIdMaybe(userId);
     bypassTime.ifPresent(i -> eventBuilder.newValueMaybe(String.valueOf(i.toEpochMilli())));
+    previousBypassTime.ifPresent(
+        i -> eventBuilder.previousValueMaybe(String.valueOf(i.toEpochMilli())));
 
     actionAuditService.send(eventBuilder.build());
   }

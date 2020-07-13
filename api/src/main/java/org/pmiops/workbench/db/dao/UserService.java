@@ -54,15 +54,17 @@ public interface UserService {
 
   void setDataUseAgreementNameOutOfDate(String newGivenName, String newFamilyName);
 
-  void setDataUseAgreementBypassTime(Long userId, Timestamp bypassTime);
+  void setDataUseAgreementBypassTime(
+      Long userId, Timestamp bypassTime, Timestamp previousBypassTime);
 
-  void setComplianceTrainingBypassTime(Long userId, Timestamp bypassTime);
+  void setComplianceTrainingBypassTime(
+      Long userId, Timestamp bypassTime, Timestamp previousBypassTime);
 
-  void setBetaAccessBypassTime(Long userId, Timestamp bypassTime);
+  void setBetaAccessBypassTime(Long userId, Timestamp bypassTime, Timestamp previousBypassTime);
 
-  void setEraCommonsBypassTime(Long userId, Timestamp bypassTime);
+  void setEraCommonsBypassTime(Long userId, Timestamp bypassTime, Timestamp previousBypassTime);
 
-  void setTwoFactorAuthBypassTime(Long userId, Timestamp bypassTime);
+  void setTwoFactorAuthBypassTime(Long userId, Timestamp bypassTime, Timestamp previousBypassTime);
 
   DbUser setDisabledStatus(Long userId, boolean disabled);
 

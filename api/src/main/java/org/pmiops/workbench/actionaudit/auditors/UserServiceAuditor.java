@@ -15,7 +15,10 @@ public interface UserServiceAuditor {
       Agent agent);
 
   void fireAdministrativeBypassTime(
-      long userId, BypassTimeTargetProperty bypassTimeTargetProperty, Optional<Instant> bypassTime);
+      long userId,
+      BypassTimeTargetProperty bypassTimeTargetProperty,
+      Optional<Instant> bypassTime,
+      Optional<Instant> previousBypassTime);
 
   void fireAcknowledgeTermsOfService(DbUser targetUser, Integer termsOfServiceVersion);
 }

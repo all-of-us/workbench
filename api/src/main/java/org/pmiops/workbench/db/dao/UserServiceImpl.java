@@ -482,46 +482,56 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   @Override
-  public void setDataUseAgreementBypassTime(Long userId, Timestamp bypassTime) {
+  public void setDataUseAgreementBypassTime(
+      Long userId, Timestamp bypassTime, Timestamp previousBypassTime) {
     setBypassTimeWithRetries(
         userId,
         bypassTime,
+        previousBypassTime,
         DbUser::setDataUseAgreementBypassTime,
         BypassTimeTargetProperty.DATA_USE_AGREEMENT_BYPASS_TIME);
   }
 
   @Override
-  public void setComplianceTrainingBypassTime(Long userId, Timestamp bypassTime) {
+  public void setComplianceTrainingBypassTime(
+      Long userId, Timestamp bypassTime, Timestamp previousBypassTime) {
     setBypassTimeWithRetries(
         userId,
         bypassTime,
+        previousBypassTime,
         DbUser::setComplianceTrainingBypassTime,
         BypassTimeTargetProperty.COMPLIANCE_TRAINING_BYPASS_TIME);
   }
 
   @Override
-  public void setBetaAccessBypassTime(Long userId, Timestamp bypassTime) {
+  public void setBetaAccessBypassTime(
+      Long userId, Timestamp bypassTime, Timestamp previousBypassTime) {
     setBypassTimeWithRetries(
         userId,
         bypassTime,
+        previousBypassTime,
         DbUser::setBetaAccessBypassTime,
         BypassTimeTargetProperty.BETA_ACCESS_BYPASS_TIME);
   }
 
   @Override
-  public void setEraCommonsBypassTime(Long userId, Timestamp bypassTime) {
+  public void setEraCommonsBypassTime(
+      Long userId, Timestamp bypassTime, Timestamp previousBypassTime) {
     setBypassTimeWithRetries(
         userId,
         bypassTime,
+        previousBypassTime,
         DbUser::setEraCommonsBypassTime,
         BypassTimeTargetProperty.ERA_COMMONS_BYPASS_TIME);
   }
 
   @Override
-  public void setTwoFactorAuthBypassTime(Long userId, Timestamp bypassTime) {
+  public void setTwoFactorAuthBypassTime(
+      Long userId, Timestamp bypassTime, Timestamp previousBypassTime) {
     setBypassTimeWithRetries(
         userId,
         bypassTime,
+        previousBypassTime,
         DbUser::setTwoFactorAuthBypassTime,
         BypassTimeTargetProperty.TWO_FACTOR_AUTH_BYPASS_TIME);
   }
@@ -530,7 +540,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    * Functional bypass time column setter, using retry logic.
    *
    * @param userId id of user getting bypassed
-   * @param bypassTime type of bypass
+   * @param bypassTime time of bypass
+   * @param previousBypassTime time of bypass, before update
    * @param setter void-returning method to call to set the particular bypass field. Should
    *     typically be a method reference on DbUser, e.g.
    * @param targetProperty BypassTimeTargetProperty enum value, for auditing
@@ -538,14 +549,17 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private void setBypassTimeWithRetries(
       long userId,
       Timestamp bypassTime,
+      Timestamp previousBypassTime,
       BiConsumer<DbUser, Timestamp> setter,
       BypassTimeTargetProperty targetProperty) {
-    setBypassTimeWithRetries(userDao.findUserByUserId(userId), bypassTime, targetProperty, setter);
+    setBypassTimeWithRetries(
+        userDao.findUserByUserId(userId), bypassTime, previousBypassTime, targetProperty, setter);
   }
 
   private void setBypassTimeWithRetries(
       DbUser dbUser,
       Timestamp bypassTime,
+      Timestamp previousBypassTime,
       BypassTimeTargetProperty targetProperty,
       BiConsumer<DbUser, Timestamp> setter) {
     updateUserWithRetries(
@@ -558,7 +572,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     userServiceAuditor.fireAdministrativeBypassTime(
         dbUser.getUserId(),
         targetProperty,
-        Optional.ofNullable(bypassTime).map(Timestamp::toInstant));
+        Optional.ofNullable(bypassTime).map(Timestamp::toInstant),
+        Optional.ofNullable(previousBypassTime).map(Timestamp::toInstant));
   }
 
   @Override
@@ -961,13 +976,15 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   @Override
   public void updateBypassTime(long userDatabaseId, AccessBypassRequest accessBypassRequest) {
-    getByDatabaseId(userDatabaseId)
-        .orElseThrow(
-            () ->
-                new NotFoundException(
-                    String.format("User with database ID %d not found", userDatabaseId)));
+    final DbUser user =
+        getByDatabaseId(userDatabaseId)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("User with database ID %d not found", userDatabaseId)));
 
     final Timestamp newBypassTime;
+    final Timestamp previousBypassTime;
 
     final Boolean isBypassed = accessBypassRequest.getIsBypassed();
     if (isBypassed) {
@@ -975,22 +992,26 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     } else {
       newBypassTime = null;
     }
-
     switch (accessBypassRequest.getModuleName()) {
       case DATA_USE_AGREEMENT:
-        setDataUseAgreementBypassTime(userDatabaseId, newBypassTime);
+        previousBypassTime = user.getDataUseAgreementBypassTime();
+        setDataUseAgreementBypassTime(userDatabaseId, newBypassTime, previousBypassTime);
         break;
       case COMPLIANCE_TRAINING:
-        setComplianceTrainingBypassTime(userDatabaseId, newBypassTime);
+        previousBypassTime = user.getComplianceTrainingBypassTime();
+        setComplianceTrainingBypassTime(userDatabaseId, newBypassTime, previousBypassTime);
         break;
       case BETA_ACCESS:
-        setBetaAccessBypassTime(userDatabaseId, newBypassTime);
+        previousBypassTime = user.getBetaAccessBypassTime();
+        setBetaAccessBypassTime(userDatabaseId, newBypassTime, previousBypassTime);
         break;
       case ERA_COMMONS:
-        setEraCommonsBypassTime(userDatabaseId, newBypassTime);
+        previousBypassTime = user.getEraCommonsBypassTime();
+        setEraCommonsBypassTime(userDatabaseId, newBypassTime, previousBypassTime);
         break;
       case TWO_FACTOR_AUTH:
-        setTwoFactorAuthBypassTime(userDatabaseId, newBypassTime);
+        previousBypassTime = user.getTwoFactorAuthBypassTime();
+        setTwoFactorAuthBypassTime(userDatabaseId, newBypassTime, previousBypassTime);
         break;
       default:
         throw new BadRequestException(
