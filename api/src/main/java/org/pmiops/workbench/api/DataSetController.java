@@ -130,7 +130,7 @@ public class DataSetController implements DataSetApiDelegate {
     final long workspaceId =
         workspaceService.get(workspaceNamespace, workspaceFirecloudName).getWorkspaceId();
     dataSetRequest.setWorkspaceId(workspaceId);
-    DbDataset datasetToSave = dataSetMapper.dataSetRequestToDb(dataSetRequest);
+    DbDataset datasetToSave = dataSetMapper.dataSetRequestToDb(dataSetRequest, null);
     datasetToSave.setCreationTime(now);
     datasetToSave.setCreatorId(userProvider.get().getUserId());
     datasetToSave.setInvalid(false);
@@ -427,13 +427,12 @@ public class DataSetController implements DataSetApiDelegate {
     if (dbDataSet.getVersion() != version) {
       throw new ConflictException("Attempted to modify outdated data set version");
     }
-    DbDataset dbMappingConvert = dataSetMapper.dataSetRequestToDb(request);
-    dbMappingConvert.setDataSetId(dbDataSet.getDataSetId());
-    dbMappingConvert.setInvalid(false);
+    DbDataset dbMappingConvert = dataSetMapper.dataSetRequestToDb(request, dbDataSet);
     dbMappingConvert.setCreatorId(dbDataSet.getCreatorId());
     dbMappingConvert.setCreationTime(dbDataSet.getCreationTime());
+    dbMappingConvert.setInvalid(false);
+    dbMappingConvert.setDataSetId(dbDataSet.getDataSetId());
     dbMappingConvert.setLastModifiedTime(now);
-
     dataSetService.saveDataSet(dbMappingConvert);
 
     return ResponseEntity.ok(dataSetMapper.dbModelToClient(dbMappingConvert));
