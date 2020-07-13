@@ -38,11 +38,13 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
           + "  jsonPayload.prev_value AS prev_value,\n"
           + "  jsonPayload.new_value AS new_value\n"
           + "FROM %s\n"
-          + "WHERE %s AND\n"
-          + "  @after <= TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) AND\n"
-          + "  TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) < @before\n"
+          + "WHERE %s\n"
+          + "  AND @after <= TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64))\n"
+          + "  AND TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) < @before\n"
+          + "  AND @after <= _PARTITIONTIME\n"
+          + "  AND _PARTITIONTIME < @before\n"
           + "ORDER BY event_time, agent_id, action_id\n"
-          + "LIMIT @limit";
+          + "LIMIT @limit;";
 
   private final AuditLogEntryMapper auditLogEntryMapper;
   private final BigQueryService bigQueryService;

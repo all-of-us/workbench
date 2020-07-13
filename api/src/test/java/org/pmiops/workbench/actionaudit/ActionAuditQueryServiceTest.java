@@ -103,11 +103,8 @@ public class ActionAuditQueryServiceTest {
   private static final DateTime DEFAULT_BEFORE_EXCLUSIVE = DateTime.parse("2020-08-30T01:20+02:00");
   private static final long TIME_TOLERANCE_MILLIS = 500;
   private static final long USER_DB_ID = 11223344L;
-  private static final String WORKSPACE_WHERE_CLAUSE =
-      " WHERE jsonPayload.target_id = 101 AND   jsonPayload.target_type = 'WORKSPACE'  AND   "
-          + "TIMESTAMP '0205-02-13 23:20:00.000000+00:00' <= TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) AND   "
-          + "TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) < TIMESTAMP '2020-08-29 23:20:00.000000+00:00'";
-
+  private static final String WORKSPACE_QUERY_SNIPPET_1 =
+      " WHERE jsonPayload.target_id = 101 AND   jsonPayload.target_type = 'WORKSPACE'";
   @MockBean private BigQueryService mockBigQueryService;
   @Autowired private ActionAuditQueryService actionAuditQueryService;
 
@@ -167,7 +164,7 @@ public class ActionAuditQueryServiceTest {
     assertThat(row2.getTargetType()).isEqualTo("WORKSPACE");
     assertThat(row2.getPreviousValue()).isNull();
 
-    assertThat(response.getQuery()).contains(WORKSPACE_WHERE_CLAUSE);
+    assertThat(response.getQuery()).contains(WORKSPACE_QUERY_SNIPPET_1);
   }
 
   @Test
