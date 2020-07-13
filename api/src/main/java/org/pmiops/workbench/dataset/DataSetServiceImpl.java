@@ -12,7 +12,6 @@ import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -41,7 +40,6 @@ import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
-import org.pmiops.workbench.db.model.DbDatasetValue;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -203,35 +201,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     this.conceptSetDao = conceptSetDao;
     this.cohortQueryBuilder = cohortQueryBuilder;
     this.dataSetDao = dataSetDao;
-  }
-
-  @Override
-  public DbDataset saveDataSet(
-      String name,
-      Boolean includesAllParticipants,
-      String description,
-      long workspaceId,
-      List<Long> cohortIdList,
-      List<Long> conceptIdList,
-      List<DbDatasetValue> values,
-      PrePackagedConceptSetEnum prePackagedConceptSetEnum,
-      long creatorId,
-      Timestamp creationTime) {
-    final DbDataset dataSetModel = new DbDataset();
-    dataSetModel.setName(name);
-    dataSetModel.setVersion(DATA_SET_VERSION);
-    dataSetModel.setIncludesAllParticipants(includesAllParticipants);
-    dataSetModel.setDescription(description);
-    dataSetModel.setWorkspaceId(workspaceId);
-    dataSetModel.setInvalid(false);
-    dataSetModel.setCreatorId(creatorId);
-    dataSetModel.setCreationTime(creationTime);
-    dataSetModel.setCohortIds(cohortIdList);
-    dataSetModel.setConceptSetIds(conceptIdList);
-    dataSetModel.setValues(values);
-    dataSetModel.setPrePackagedConceptSetEnum(prePackagedConceptSetEnum);
-
-    return saveDataSet(dataSetModel);
   }
 
   @Override
