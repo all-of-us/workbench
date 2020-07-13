@@ -5,6 +5,7 @@ import RadioButton from 'app/element/radiobutton';
 import Textbox from 'app/element/textbox';
 import Textarea from 'app/element/textarea';
 import {LinkText} from 'app/text-labels';
+import {waitWhileLoading} from '../../utils/test-utils';
 import ConceptsetActionsPage from './conceptset-actions-page';
 
 const faker = require('faker/locale/en_US');
@@ -50,6 +51,10 @@ export default class ConceptsetSaveModal extends Modal {
 
     // Click SAVE button.
     await this.clickButton(LinkText.Save);
+    await Promise.all([
+      waitWhileLoading(this.page),
+      this.waitUntilClose(),
+    ]);
 
     const conceptActionPage = new ConceptsetActionsPage(this.page);
     await conceptActionPage.waitForLoad();
