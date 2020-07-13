@@ -165,7 +165,7 @@ public class DataSetMapperTest {
     assertThat(toDataSet.getName()).isEqualTo("New Name");
     assertThat(toDataSet.getCohortIds()).isEqualTo(cohortIds);
     assertThat(toDataSet.getIncludesAllParticipants()).isFalse();
-    assertThat(toDataSet.getConceptSetIds()).isEqualTo(cohortIds);
+    assertThat(toDataSet.getConceptSetIds()).isEqualTo(conceptIds);
     assertThat(toDataSet.getPrePackagedConceptSet()).isEqualTo((short) 0);
   }
 
