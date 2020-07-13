@@ -69,14 +69,6 @@ export class DataSetApiStub extends DataSetApi {
     });
   }
 
-  getDataSetsInWorkspace(
-    workspaceNamespace: string,
-    workspaceId: string): Promise<DataSetListResponse> {
-    return new Promise<DataSetListResponse>(resolve => {
-      resolve({items: DataSetApiStub.stubDataSets()});
-    });
-  }
-
   getDataDictionaryEntry(cdrVersionId: number, domain: string, domainValue: string): Promise<DataDictionaryEntry> {
     return Promise.resolve({
       description: 'datadictionary description',
