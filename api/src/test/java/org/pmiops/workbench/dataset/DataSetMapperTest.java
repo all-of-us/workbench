@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,6 +33,7 @@ import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSet;
+import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -131,6 +133,40 @@ public class DataSetMapperTest {
     final DataDictionaryEntry toClientDataDictionaryEntry =
         dataSetMapper.dbModelToClient(dbDataDictionaryEntry);
     assertDbModelToClient(toClientDataDictionaryEntry, dbDataDictionaryEntry);
+  }
+
+  @Test
+  public void testDataSetRequestToDb() {
+    DataSetRequest request = new DataSetRequest();
+    request.setName("New Name");
+    final DbDataset toDataSet = dataSetMapper.dataSetRequestToDb(request, dbDataset);
+    assertThat(dbDataset.getDataSetId()).isEqualTo(toDataSet.getDataSetId());
+    assertThat(toDataSet.getName()).isEqualTo("New Name");
+    assertThat(toDataSet.getCohortIds()).isEqualTo(dbDataset.getCohortIds());
+    assertThat(toDataSet.getIncludesAllParticipants())
+        .isEqualTo(dbDataset.getIncludesAllParticipants());
+    assertThat(toDataSet.getConceptSetIds()).isEqualTo(dbDataset.getConceptSetIds());
+    assertThat(toDataSet.getValues()).isEqualTo(dbDataset.getValues());
+    assertThat(toDataSet.getWorkspaceId()).isEqualTo(dbDataset.getWorkspaceId());
+  }
+
+  @Test
+  public void testDataSetRequestToDbWithNullSourceDB() {
+    List<Long> conceptIds = ImmutableList.of(4l, 5l, 6l);
+    List<Long> cohortIds = ImmutableList.of(1l, 2l, 3l);
+
+    DataSetRequest request = new DataSetRequest();
+    request.setName("New Name");
+    request.setCohortIds(cohortIds);
+    request.setConceptSetIds(conceptIds);
+    request.setIncludesAllParticipants(false);
+    final DbDataset toDataSet = dataSetMapper.dataSetRequestToDb(request, null);
+    assertThat(dbDataset.getDataSetId()).isEqualTo(toDataSet.getDataSetId());
+    assertThat(toDataSet.getName()).isEqualTo("New Name");
+    assertThat(toDataSet.getCohortIds()).isEqualTo(dbDataset.getCohortIds());
+    assertThat(toDataSet.getIncludesAllParticipants()).isFalse();
+    assertThat(toDataSet.getConceptSetIds()).isEqualTo(cohortIds);
+    assertThat(toDataSet.getConceptSetIds()).isEqualTo(conceptIds);
   }
 
   private void assertDbModelToClient(DataSet dataSet, DbDataset dbDataset) {
