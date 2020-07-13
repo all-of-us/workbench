@@ -108,12 +108,13 @@ public class DataSetController implements DataSetApiDelegate {
       String workspaceNamespace, String workspaceFirecloudName, DataSetRequest dataSetRequest) {
     validateDataSetCreateRequest(dataSetRequest);
     final long workspaceId =
-      workspaceService
-        .getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-          workspaceNamespace, workspaceFirecloudName, WorkspaceAccessLevel.WRITER)
-        .getWorkspaceId();
+        workspaceService
+            .getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+                workspaceNamespace, workspaceFirecloudName, WorkspaceAccessLevel.WRITER)
+            .getWorkspaceId();
     dataSetRequest.setWorkspaceId(workspaceId);
-    return ResponseEntity.ok(dataSetService.saveDataSet(dataSetRequest, userProvider.get().getUserId()));
+    return ResponseEntity.ok(
+        dataSetService.saveDataSet(dataSetRequest, userProvider.get().getUserId()));
   }
 
   private void validateDataSetCreateRequest(DataSetRequest dataSetRequest) {
@@ -375,9 +376,12 @@ public class DataSetController implements DataSetApiDelegate {
     if (Strings.isNullOrEmpty(request.getEtag())) {
       throw new BadRequestException("missing required update field 'etag'");
     }
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-
+    long dataSetWorkspaceId =
+        workspaceService
+            .getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+                workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER)
+            .getWorkspaceId();
+    request.setWorkspaceId(dataSetWorkspaceId);
     return ResponseEntity.ok(dataSetService.updateDataSet(request, dataSetId));
   }
 

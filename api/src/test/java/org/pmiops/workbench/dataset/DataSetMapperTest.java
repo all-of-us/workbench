@@ -161,7 +161,7 @@ public class DataSetMapperTest {
     request.setConceptSetIds(conceptIds);
     request.setIncludesAllParticipants(false);
     request.setPrePackagedConceptSet(PrePackagedConceptSetEnum.NONE);
-    final DbDataset toDataSet = dataSetMapper.dataSetRequestToDb(request, null);
+    final DbDataset toDataSet = dataSetMapper.dataSetRequestToDb(request, dbDataset);
     assertThat(toDataSet.getName()).isEqualTo("New Name");
     assertThat(toDataSet.getCohortIds()).isEqualTo(cohortIds);
     assertThat(toDataSet.getIncludesAllParticipants()).isFalse();

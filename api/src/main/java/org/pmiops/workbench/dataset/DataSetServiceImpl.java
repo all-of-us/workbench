@@ -46,6 +46,7 @@ import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
 import org.pmiops.workbench.db.model.DbDataset;
+import org.pmiops.workbench.db.model.DbDatasetValue;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -222,7 +223,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   @Override
   public DataSet saveDataSet(DataSetRequest dataSetRequest, Long userId) {
     final Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    DbDataset dbDataset = dataSetMapper.dataSetRequestToDb(dataSetRequest);
+    DbDataset dbDataset = dataSetMapper.dataSetRequestToDb(dataSetRequest, null);
     dbDataset.setCreationTime(now);
     dbDataset.setCreatorId(userId);
     dbDataset.setInvalid(false);
@@ -249,20 +250,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       throw new ConflictException("Attempted to modify outdated data set version");
     }
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    dbDataSet.setName(request.getName());
-    dbDataSet.setDescription(request.getDescription());
-    dbDataSet.setLastModifiedTime(now);
-    if (request.getDomainValuePairs() != null) {
-      dbDataSet.setIncludesAllParticipants(request.getIncludesAllParticipants());
-      dbDataSet.setCohortIds(request.getCohortIds());
-      dbDataSet.setConceptSetIds(request.getConceptSetIds());
-      dbDataSet.setPrePackagedConceptSetEnum(request.getPrePackagedConceptSet());
-      dbDataSet.setValues(
-          request.getDomainValuePairs().stream()
-              .map(this::getDataSetValuesFromDomainValueSet)
-              .collect(Collectors.toList()));
-    }
-    return saveDataSet(dbDataSet);
+    DbDataset dbMappingConvert = dataSetMapper.dataSetRequestToDb(request, dbDataSet);
+    dbMappingConvert.setCreatorId(dbDataSet.getCreatorId());
+    dbMappingConvert.setCreationTime(dbDataSet.getCreationTime());
+    dbMappingConvert.setDataSetId(dbDataSet.getDataSetId());
+    dbMappingConvert.setLastModifiedTime(now);
+    return saveDataSet(dbMappingConvert);
   }
 
   // For domains for which we've assigned a base table in BigQuery, we keep a map here

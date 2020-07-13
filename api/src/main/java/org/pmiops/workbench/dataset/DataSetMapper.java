@@ -2,8 +2,6 @@ package org.pmiops.workbench.dataset;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 
-import static com.google.common.collect.ImmutableList.toImmutableList;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,17 +47,17 @@ public interface DataSetMapper {
 
   @Mapping(target = "dataSetId", ignore = true)
   @Mapping(
-    target = "version",
-    source = "etag",
-    qualifiedByName = "etagToCdrVersion",
-    nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+      target = "version",
+      source = "etag",
+      qualifiedByName = "etagToCdrVersion",
+      nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
   @Mapping(target = "creatorId", ignore = true)
   @Mapping(target = "creationTime", ignore = true)
   @Mapping(target = "invalid", ignore = true)
   @Mapping(target = "lastModifiedTime", ignore = true)
   @Mapping(target = "prePackagedConceptSetEnum", ignore = true)
   @Mapping(target = "values", source = "domainValuePairs")
-  DbDataset dataSetRequestToDb(DataSetRequest dataSetRequest);
+  DbDataset dataSetRequestToDb(DataSetRequest dataSetRequest, @Context DbDataset dbDataSet);
 
   @Mapping(target = "id", source = "dataSetId")
   @Mapping(target = "conceptSets", source = "conceptSetIds")
@@ -71,13 +69,14 @@ public interface DataSetMapper {
   @AfterMapping
   default void populateFromSourceDbObject(
       @MappingTarget DbDataset targetDb, @Context DbDataset dbDataSet) {
-    if (dbDataSet != null
-        && (targetDb.getConceptSetIds() == null || targetDb.getConceptSetIds().size() == 0)) {
+    targetDb.setInvalid(dbDataSet == null ? false : dbDataSet.getInvalid());
+    if (targetDb.getValues().isEmpty()) {
       // In case of rename, dataSetRequest does not have cohort/Concept ID information
       targetDb.setConceptSetIds(dbDataSet.getConceptSetIds());
       targetDb.setCohortIds(dbDataSet.getCohortIds());
       targetDb.setValues(dbDataSet.getValues());
       targetDb.setIncludesAllParticipants(dbDataSet.getIncludesAllParticipants());
+      targetDb.setPrePackagedConceptSet(dbDataSet.getPrePackagedConceptSet());
     }
   }
 
