@@ -7,6 +7,7 @@ import {SearchGroupList} from 'app/cohort-search/search-group-list/search-group-
 import {idsInUse, searchRequestStore} from 'app/cohort-search/search-state.service';
 import {mapRequest, parseCohortDefinition} from 'app/cohort-search/utils';
 import {Button} from 'app/components/buttons';
+import {FlexRowWrap} from 'app/components/flex';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
@@ -136,14 +137,14 @@ export const CohortSearch = withCurrentWorkspace() (
       const {cohort, cohortChanged, criteria, loading, modalOpen, overview, searchContext, updateCount, updateGroupListsCount} = this.state;
       return <React.Fragment>
         <div ref={el => this.searchWrapper = el} style={{padding: '1rem 1rem 2rem'}}>
-        <div style={{display: 'flex', flexWrap: 'wrap', margin: '0 -0.5rem'}}>
-          <div style={colStyle('66.66667')}>
-            <div style={{display: 'flex', flexWrap: 'wrap', margin: '0 -0.5rem'}}>
-              <div style={{height: '1.5rem', padding: '0 0.5rem', width: '100%'}}>
-                {!!cohort && <h3 style={{marginTop: 0}}>{cohort.name}</h3>}
-              </div>
-              <div id='list-include-groups' style={colStyle('50')}>
-                <SearchGroupList groups={criteria.includes}
+          <FlexRowWrap style={{margin: '0 -0.5rem'}}>
+            <div style={colStyle('66.66667')}>
+              <FlexRowWrap style={{margin: '0 -0.5rem'}}>
+                <div style={{height: '1.5rem', padding: '0 0.5rem', width: '100%'}}>
+                  {!!cohort && <h3 style={{marginTop: 0}}>{cohort.name}</h3>}
+                </div>
+                <div id='list-include-groups' style={colStyle('50')}>
+                  <SearchGroupList groups={criteria.includes}
                                  setSearchContext={(c) => this.setState({searchContext: c})}
                                  role='includes'
                                  updated={updateGroupListsCount}
@@ -156,7 +157,7 @@ export const CohortSearch = withCurrentWorkspace() (
                                    updated={updateGroupListsCount}
                                    updateRequest={() => this.updateRequest()}/>}
                 </div>
-              </div>
+              </FlexRowWrap>
             </div>
             <div style={colStyle('33.33333')}>
               {overview && <ListOverview
@@ -167,7 +168,7 @@ export const CohortSearch = withCurrentWorkspace() (
                 updating={() => this.props.setUpdatingCohort(true)}/>}
             </div>
             {loading && <SpinnerOverlay/>}
-          </div>
+          </FlexRowWrap>
         </div>
         {searchContext && <CBModal
           closeSearch={() => this.setState({searchContext: undefined})}
@@ -191,7 +192,7 @@ export const CohortSearch = withCurrentWorkspace() (
 
 @Component({
   selector: 'app-cohort-search',
-  template: '<div #root style="margin-right: 45px; height: auto;"></div>'
+  template: '<div #root></div>'
 })
 export class CohortSearchComponent extends ReactWrapperBase {
   // The functions and variables here are a temporary workaround to keep the unsaved changes warning until we can move this route to the
