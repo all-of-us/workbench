@@ -1089,6 +1089,8 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void testUpdateProfile_updateDemographicSurvey() {
     createAccountAndDbUserWithAffiliation();
     Profile profile = profileController.getMe().getBody();
+    assertThat(profile.getDemographicSurvey()).isNull();
+    assertThat(profile.getDemographicSurveyCompletionTime()).isNull();
 
     DemographicSurvey demographicSurvey = profile.getDemographicSurvey();
     demographicSurvey.addRaceItem(Race.AA);
@@ -1107,6 +1109,8 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     Profile updatedProfile = profileController.getMe().getBody();
     assertProfile(updatedProfile);
+    assertThat(profile.getDemographicSurvey()).isEqualTo(demographicSurvey);
+    assertThat(profile.getDemographicSurveyCompletionTime()).isNotNull();
   }
 
   @Test
