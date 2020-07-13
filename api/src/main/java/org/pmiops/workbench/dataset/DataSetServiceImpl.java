@@ -12,6 +12,8 @@ import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
+import java.sql.Timestamp;
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -29,6 +31,7 @@ import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.pmiops.workbench.api.BigQueryService;
+import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
@@ -36,9 +39,12 @@ import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
+import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
+import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -46,6 +52,8 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.model.DataDictionaryEntry;
+import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
@@ -86,7 +94,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           ImmutableSet.of(SURVEY, PrePackagedConceptSetEnum.BOTH);
 
   private static final String PERSON_ID_COLUMN_NAME = "PERSON_ID";
-  private static final int DATA_SET_VERSION = 1;
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
@@ -183,6 +190,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private final DataSetDao dataSetDao;
   private final ConceptSetDao conceptSetDao;
   private final CohortDao cohortDao;
+  private final DataDictionaryEntryDao dataDictionaryEntryDao;
+  private final DataSetMapper dataSetMapper;
+  private final Clock clock;
 
   @Autowired
   @VisibleForTesting
@@ -193,25 +203,66 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       ConceptBigQueryService conceptBigQueryService,
       ConceptSetDao conceptSetDao,
       CohortQueryBuilder cohortQueryBuilder,
-      DataSetDao dataSetDao) {
+      DataDictionaryEntryDao dataDictionaryEntryDao,
+      DataSetDao dataSetDao,
+      DataSetMapper dataSetMapper,
+      Clock clock) {
     this.bigQueryService = bigQueryService;
     this.cdrBigQuerySchemaConfigService = cdrBigQuerySchemaConfigService;
     this.cohortDao = cohortDao;
     this.conceptBigQueryService = conceptBigQueryService;
     this.conceptSetDao = conceptSetDao;
     this.cohortQueryBuilder = cohortQueryBuilder;
+    this.dataDictionaryEntryDao = dataDictionaryEntryDao;
     this.dataSetDao = dataSetDao;
+    this.dataSetMapper = dataSetMapper;
+    this.clock = clock;
   }
 
   @Override
-  public DbDataset saveDataSet(DbDataset dataset) {
+  public DataSet saveDataSet(DataSetRequest dataSetRequest, Long userId) {
+    final Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    DbDataset dbDataset = dataSetMapper.dataSetRequestToDb(dataSetRequest);
+    dbDataset.setCreationTime(now);
+    dbDataset.setCreatorId(userId);
+    dbDataset.setInvalid(false);
+    return saveDataSet(dbDataset);
+  }
+
+  @Override
+  public DataSet saveDataSet(DbDataset dataset) {
     try {
-      return dataSetDao.save(dataset);
+      return dataSetMapper.dbModelToClient(dataSetDao.save(dataset));
     } catch (OptimisticLockException e) {
       throw new ConflictException("Failed due to concurrent concept set modification");
     } catch (DataIntegrityViolationException ex) {
       throw new ConflictException("Data set with the same name already exists");
     }
+  }
+
+  @Override
+  public DataSet updateDataSet(DataSetRequest request, Long dataSetId) {
+    DbDataset dbDataSet = dataSetDao.findOne(dataSetId);
+
+    int version = Etags.toVersion(request.getEtag());
+    if (dbDataSet.getVersion() != version) {
+      throw new ConflictException("Attempted to modify outdated data set version");
+    }
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    dbDataSet.setName(request.getName());
+    dbDataSet.setDescription(request.getDescription());
+    dbDataSet.setLastModifiedTime(now);
+    if (request.getDomainValuePairs() != null) {
+      dbDataSet.setIncludesAllParticipants(request.getIncludesAllParticipants());
+      dbDataSet.setCohortIds(request.getCohortIds());
+      dbDataSet.setConceptSetIds(request.getConceptSetIds());
+      dbDataSet.setPrePackagedConceptSetEnum(request.getPrePackagedConceptSet());
+      dbDataSet.setValues(
+          request.getDomainValuePairs().stream()
+              .map(this::getDataSetValuesFromDomainValueSet)
+              .collect(Collectors.toList()));
+    }
+    return saveDataSet(dbDataSet);
   }
 
   // For domains for which we've assigned a base table in BigQuery, we keep a map here
@@ -443,7 +494,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       List<DbConceptSet> conceptSetsSelected,
       String cohortQueries,
       CdrBigQuerySchemaConfig bigQuerySchemaConfig) {
-    //    validateConceptSetSelection(domain, conceptSetsSelected);
+    validateConceptSetSelection(domain, conceptSetsSelected);
 
     final StringBuilder queryBuilder = new StringBuilder("SELECT ");
     final String personIdQualified = getQualifiedColumnName(domain, PERSON_ID_COLUMN_NAME);
@@ -668,8 +719,13 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     return cohortDao.findAllByCohortIdIn(dataSetDao.findOne(dataSet.getDataSetId()).getCohortIds());
   }
 
-  @Override
-  public List<DbDataset> getDataSets(ResourceType resourceType, long resourceId) {
+  public List<DataSet> getDataSets(ResourceType resourceType, long resourceId) {
+    return getDbDataSets(resourceType, resourceId).stream()
+        .map(dataSetMapper::dbModelToClient)
+        .collect(Collectors.toList());
+  }
+
+  public List<DbDataset> getDbDataSets(ResourceType resourceType, long resourceId) {
     List<DbDataset> dbDataSets = new ArrayList<>();
     switch (resourceType) {
       case COHORT:
@@ -683,25 +739,39 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   @Override
-  public void deleteDataSet(DbWorkspace dbWorkspace, Long dataSetId) {
-    long dbDataSetId = getDbDataSet(dbWorkspace, dataSetId).get().getDataSetId();
-    dataSetDao.delete(dbDataSetId);
+  public void deleteDataSet(Long dataSetId) {
+    dataSetDao.delete(dataSetId);
   }
 
   @Override
-  public Optional<DbDataset> getDbDataSet(DbWorkspace dbWorkspace, Long dataSetId) {
-    return Optional.of(dataSetDao.findOne(dataSetId));
+  public Optional<DataSet> getDbDataSet(Long dataSetId) {
+    return Optional.of(dataSetMapper.dbModelToClient(dataSetDao.findOne(dataSetId)));
   }
 
   @Override
   public void markDirty(ResourceType resourceType, long resourceId) {
-    List<DbDataset> dbDataSetList = getDataSets(resourceType, resourceId);
+    List<DbDataset> dbDataSetList = getDbDataSets(resourceType, resourceId);
     dbDataSetList.forEach(dataSet -> dataSet.setInvalid(true));
     try {
       dataSetDao.save(dbDataSetList);
     } catch (OptimisticLockException e) {
       throw new ConflictException("Failed due to concurrent data set modification");
     }
+  }
+
+  @Override
+  public DataDictionaryEntry findDataDictionaryEntry(String fieldName, DbCdrVersion cdrVersion) {
+    List<DbDataDictionaryEntry> dataDictionaryEntries =
+        dataDictionaryEntryDao.findByFieldNameAndCdrVersion(fieldName, cdrVersion);
+
+    if (dataDictionaryEntries.isEmpty()) {
+      throw new NotFoundException(
+          "No Data Dictionary Entry found for domain: "
+              + fieldName
+              + " cdr version: "
+              + cdrVersion);
+    }
+    return dataSetMapper.dbModelToClient(dataDictionaryEntries.get(0));
   }
 
   private String getColumnName(CdrBigQuerySchemaConfig.TableConfig config, String type) {
@@ -899,5 +969,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     surveyConceptSet.setDomain(DbStorageEnums.domainToStorage(Domain.SURVEY));
     surveyConceptSet.setConceptIds(ImmutableSet.copyOf(conceptIds));
     return surveyConceptSet;
+  }
+
+  private DbDatasetValue getDataSetValuesFromDomainValueSet(DomainValuePair domainValuePair) {
+    return new DbDatasetValue(
+        DbStorageEnums.domainToStorage(domainValuePair.getDomain()).toString(),
+        domainValuePair.getValue());
   }
 }

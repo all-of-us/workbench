@@ -2,6 +2,8 @@ package org.pmiops.workbench.dataset;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,17 +49,17 @@ public interface DataSetMapper {
 
   @Mapping(target = "dataSetId", ignore = true)
   @Mapping(
-      target = "version",
-      source = "etag",
-      qualifiedByName = "etagToCdrVersion",
-      nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+    target = "version",
+    source = "etag",
+    qualifiedByName = "etagToCdrVersion",
+    nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
   @Mapping(target = "creatorId", ignore = true)
   @Mapping(target = "creationTime", ignore = true)
   @Mapping(target = "invalid", ignore = true)
   @Mapping(target = "lastModifiedTime", ignore = true)
   @Mapping(target = "prePackagedConceptSetEnum", ignore = true)
   @Mapping(target = "values", source = "domainValuePairs")
-  DbDataset dataSetRequestToDb(DataSetRequest dataSetRequest, @Context DbDataset dbDataSet);
+  DbDataset dataSetRequestToDb(DataSetRequest dataSetRequest);
 
   @Mapping(target = "id", source = "dataSetId")
   @Mapping(target = "conceptSets", source = "conceptSetIds")

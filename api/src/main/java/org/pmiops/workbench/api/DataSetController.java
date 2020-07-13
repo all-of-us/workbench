@@ -10,10 +10,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import java.sql.Date;
-import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,17 +28,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.dataset.BigQueryTableInfo;
-import org.pmiops.workbench.dataset.DataSetMapper;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.dataset.DatasetConfig;
-import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
-import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
-import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
@@ -73,7 +65,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class DataSetController implements DataSetApiDelegate {
 
   private BigQueryService bigQueryService;
-  private final Clock clock;
   private DataSetService dataSetService;
 
   private Provider<DbUser> userProvider;
@@ -89,18 +80,13 @@ public class DataSetController implements DataSetApiDelegate {
   private static final Logger log = Logger.getLogger(DataSetController.class.getName());
 
   private final CdrVersionService cdrVersionService;
-  private final DataDictionaryEntryDao dataDictionaryEntryDao;
-  private final DataSetMapper dataSetMapper;
   private final FireCloudService fireCloudService;
   private final NotebooksService notebooksService;
 
   @Autowired
   DataSetController(
       BigQueryService bigQueryService,
-      Clock clock,
       CdrVersionService cdrVersionService,
-      DataDictionaryEntryDao dataDictionaryEntryDao,
-      DataSetMapper dataSetMapper,
       DataSetService dataSetService,
       FireCloudService fireCloudService,
       NotebooksService notebooksService,
@@ -108,10 +94,7 @@ public class DataSetController implements DataSetApiDelegate {
       @Qualifier(DatasetConfig.DATASET_PREFIX_CODE) Provider<String> prefixProvider,
       WorkspaceService workspaceService) {
     this.bigQueryService = bigQueryService;
-    this.clock = clock;
     this.cdrVersionService = cdrVersionService;
-    this.dataDictionaryEntryDao = dataDictionaryEntryDao;
-    this.dataSetMapper = dataSetMapper;
     this.dataSetService = dataSetService;
     this.fireCloudService = fireCloudService;
     this.notebooksService = notebooksService;
@@ -124,18 +107,13 @@ public class DataSetController implements DataSetApiDelegate {
   public ResponseEntity<DataSet> createDataSet(
       String workspaceNamespace, String workspaceFirecloudName, DataSetRequest dataSetRequest) {
     validateDataSetCreateRequest(dataSetRequest);
-    final Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceFirecloudName, WorkspaceAccessLevel.WRITER);
     final long workspaceId =
-        workspaceService.get(workspaceNamespace, workspaceFirecloudName).getWorkspaceId();
+      workspaceService
+        .getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+          workspaceNamespace, workspaceFirecloudName, WorkspaceAccessLevel.WRITER)
+        .getWorkspaceId();
     dataSetRequest.setWorkspaceId(workspaceId);
-    DbDataset datasetToSave = dataSetMapper.dataSetRequestToDb(dataSetRequest, null);
-    datasetToSave.setCreationTime(now);
-    datasetToSave.setCreatorId(userProvider.get().getUserId());
-    datasetToSave.setInvalid(false);
-    DbDataset savedDataSet = dataSetService.saveDataSet(datasetToSave);
-    return ResponseEntity.ok(dataSetMapper.dbModelToClient(savedDataSet));
+    return ResponseEntity.ok(dataSetService.saveDataSet(dataSetRequest, userProvider.get().getUserId()));
   }
 
   private void validateDataSetCreateRequest(DataSetRequest dataSetRequest) {
@@ -384,11 +362,10 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteDataSet(
       String workspaceNamespace, String workspaceId, Long dataSetId) {
-    DbWorkspace workspace =
-        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
-    dataSetService.deleteDataSet(workspace, dataSetId);
+    dataSetService.deleteDataSet(dataSetId);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -398,37 +375,26 @@ public class DataSetController implements DataSetApiDelegate {
     if (Strings.isNullOrEmpty(request.getEtag())) {
       throw new BadRequestException("missing required update field 'etag'");
     }
-    final Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    DbWorkspace workspace =
-        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    request.setWorkspaceId(workspace.getWorkspaceId());
-    DbDataset dbDataSet = dataSetService.getDbDataSet(workspace, dataSetId).get();
+    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
-    int version = Etags.toVersion(request.getEtag());
-    if (dbDataSet.getVersion() != version) {
-      throw new ConflictException("Attempted to modify outdated data set version");
-    }
-    DbDataset dbMappingConvert = dataSetMapper.dataSetRequestToDb(request, dbDataSet);
-    dbMappingConvert.setCreatorId(dbDataSet.getCreatorId());
-    dbMappingConvert.setCreationTime(dbDataSet.getCreationTime());
-    dbMappingConvert.setInvalid(false);
-    dbMappingConvert.setDataSetId(dbDataSet.getDataSetId());
-    dbMappingConvert.setLastModifiedTime(now);
-    dataSetService.saveDataSet(dbMappingConvert);
-
-    return ResponseEntity.ok(dataSetMapper.dbModelToClient(dbMappingConvert));
+    return ResponseEntity.ok(dataSetService.updateDataSet(request, dataSetId));
   }
 
   @Override
   public ResponseEntity<DataSet> getDataSet(
       String workspaceNamespace, String workspaceId, Long dataSetId) {
-    DbWorkspace workspace =
-        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    DbDataset dbDataset = dataSetService.getDbDataSet(workspace, dataSetId).get();
-    return ResponseEntity.ok(dataSetMapper.dbModelToClient(dbDataset));
+    DataSet dataSet =
+        dataSetService
+            .getDbDataSet(dataSetId)
+            .<BadRequestException>orElseThrow(
+                () -> {
+                  throw new NotFoundException("No DataSet found for dataSetId: " + dataSetId);
+                });
+    return ResponseEntity.ok(dataSet);
   }
 
   @Override
@@ -437,14 +403,8 @@ public class DataSetController implements DataSetApiDelegate {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    List<DbDataset> dbDataSets = dataSetService.getDataSets(resourceType, id);
-    DataSetListResponse dataSetResponse =
-        new DataSetListResponse()
-            .items(
-                dbDataSets.stream()
-                    .map(dataSetMapper::dbModelToClient)
-                    .collect(Collectors.toList()));
-    return ResponseEntity.ok(dataSetResponse);
+    return ResponseEntity.ok(
+        new DataSetListResponse().items(dataSetService.getDataSets(resourceType, id)));
   }
 
   @Override
@@ -458,19 +418,11 @@ public class DataSetController implements DataSetApiDelegate {
                   throw new BadRequestException("Invalid CDR Version");
                 });
 
-    String omopTable = BigQueryTableInfo.getTableName(Domain.fromValue(domain));
-    if (omopTable == null) {
+    if (BigQueryTableInfo.getTableName(Domain.fromValue(domain)) == null) {
       throw new BadRequestException("Invalid Domain");
     }
 
-    List<DbDataDictionaryEntry> dataDictionaryEntries =
-        dataDictionaryEntryDao.findByFieldNameAndCdrVersion(domainValue, cdrVersion);
-
-    if (dataDictionaryEntries.isEmpty()) {
-      throw new NotFoundException();
-    }
-
-    return ResponseEntity.ok(dataSetMapper.dbModelToClient(dataDictionaryEntries.get(0)));
+    return ResponseEntity.ok(dataSetService.findDataDictionaryEntry(domainValue, cdrVersion));
   }
 
   @Override

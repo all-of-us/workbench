@@ -5,10 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.model.DataDictionaryEntry;
+import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.KernelTypeEnum;
@@ -16,7 +19,11 @@ import org.pmiops.workbench.model.ResourceType;
 
 public interface DataSetService {
 
-  DbDataset saveDataSet(DbDataset dataset);
+  DataSet saveDataSet(DataSetRequest dataSetRequest, Long userId);
+
+  DataSet saveDataSet(DbDataset dataset);
+
+  DataSet updateDataSet(DataSetRequest dataSetRequest, Long DataSetId);
 
   QueryJobConfiguration previewBigQueryJobConfig(DataSetPreviewRequest dataSetPreviewRequest);
 
@@ -37,11 +44,13 @@ public interface DataSetService {
 
   List<DbCohort> getCohortsForDataset(DbDataset dataSet);
 
-  List<DbDataset> getDataSets(ResourceType resourceType, long resourceId);
+  List<DataSet> getDataSets(ResourceType resourceType, long resourceId);
 
-  void deleteDataSet(DbWorkspace dbWorkspace, Long dataSetId);
+  void deleteDataSet(Long dataSetId);
 
-  Optional<DbDataset> getDbDataSet(DbWorkspace dbWorkspace, Long dataSetId);
+  Optional<DataSet> getDbDataSet(Long dataSetId);
 
   void markDirty(ResourceType resourceType, long resourceId);
+
+  DataDictionaryEntry findDataDictionaryEntry(String fieldName, DbCdrVersion cdrVersion);
 }

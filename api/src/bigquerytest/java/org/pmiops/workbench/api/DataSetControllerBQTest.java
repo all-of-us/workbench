@@ -35,7 +35,6 @@ import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
-import org.pmiops.workbench.dataset.DataSetMapper;
 import org.pmiops.workbench.dataset.DataSetMapperImpl;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.dataset.DataSetServiceImpl;
@@ -43,7 +42,6 @@ import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
-import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
@@ -94,8 +92,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private CdrVersionService cdrVersionService;
   @Autowired private CohortDao cohortDao;
   @Autowired private ConceptSetDao conceptSetDao;
-  @Autowired private DataDictionaryEntryDao dataDictionaryEntryDao;
-  @Autowired private DataSetMapper dataSetMapper;
   @Autowired private DataSetService dataSetService;
   @Autowired private FireCloudService fireCloudService;
   @Autowired private NotebooksService notebooksService;
@@ -179,10 +175,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         spy(
             new DataSetController(
                 bigQueryService,
-                CLOCK,
                 cdrVersionService,
-                dataDictionaryEntryDao,
-                dataSetMapper,
                 dataSetService,
                 fireCloudService,
                 notebooksService,
