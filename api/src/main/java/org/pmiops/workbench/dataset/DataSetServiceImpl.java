@@ -474,7 +474,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       List<DbConceptSet> conceptSetsSelected,
       String cohortQueries,
       CdrBigQuerySchemaConfig bigQuerySchemaConfig) {
-    validateConceptSetSelection(domain, conceptSetsSelected);
+    //    validateConceptSetSelection(domain, conceptSetsSelected);
 
     final StringBuilder queryBuilder = new StringBuilder("SELECT ");
     final String personIdQualified = getQualifiedColumnName(domain, PERSON_ID_COLUMN_NAME);
@@ -516,15 +516,21 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
       // This adds the where clauses for cohorts and concept sets.
       conceptSetSqlInClauseMaybe.ifPresent(
-          clause ->
+          clause -> {
+            queryBuilder
+                .append(" WHERE \n(")
+                .append(domainConceptIdInfo.getStandardConceptIdColumn())
+                .append(clause);
+            if (Domain.SURVEY.equals(domain)) {
+              queryBuilder.append(")");
+            } else {
               queryBuilder
-                  .append(" WHERE \n(")
-                  .append(domainConceptIdInfo.getStandardConceptIdColumn())
-                  .append(clause)
                   .append(" OR \n")
                   .append(domainConceptIdInfo.getSourceConceptIdColumn())
                   .append(clause)
-                  .append(")"));
+                  .append(")");
+            }
+          });
 
       if (!includesAllParticipants) {
         queryBuilder
