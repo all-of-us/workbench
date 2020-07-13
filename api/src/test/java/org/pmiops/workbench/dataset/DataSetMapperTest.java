@@ -169,6 +169,7 @@ public class DataSetMapperTest {
     assertThat(toDataSet.getPrePackagedConceptSet()).isEqualTo((short) 0);
   }
 
+  
   private void assertDbModelToClient(DataSet dataSet, DbDataset dbDataset) {
     assertThat(dbDataset.getCohortIds())
         .isEqualTo(dataSet.getCohorts().stream().map(Cohort::getId).collect(Collectors.toList()));
