@@ -121,11 +121,11 @@ export const AnalyticsTracker = {
     FeaturedWorkspaces: () => triggerEvent(AnalyticsCategory.FOOTER, 'Featured workspaces', 'Featured workspaces'),
     ResearchHub: () => triggerEvent(AnalyticsCategory.FOOTER, 'Research Hub', 'Research Hub'),
     YourWorkspaces: () => triggerEvent(AnalyticsCategory.FOOTER, 'Your workspaces', 'Your workspaces'),
-    GettingStarted: () => triggerEvent(AnalyticsCategory.FOOTER, 'Getting started', 'Support-Getting started'),
-    SupportDocs: () => triggerEvent(AnalyticsCategory.FOOTER, 'Documentation', 'Support-Documentation'),
-    CommunityForum: () => triggerEvent(AnalyticsCategory.FOOTER, 'Community forum', 'Support-Community forum'),
-    SupportFAQ: () => triggerEvent(AnalyticsCategory.FOOTER, 'FAQ', 'Support-FAQ'),
-    ContactUs: () => triggerEvent(AnalyticsCategory.FOOTER, 'Contact Us', 'Support-Contact Us'),
+    GettingStarted: () => triggerEvent(AnalyticsCategory.FOOTER, 'Getting started', 'Support - Getting started'),
+    SupportDocs: () => triggerEvent(AnalyticsCategory.FOOTER, 'Documentation', 'Support - Documentation'),
+    CommunityForum: () => triggerEvent(AnalyticsCategory.FOOTER, 'Community forum', 'Support - Community forum'),
+    SupportFAQ: () => triggerEvent(AnalyticsCategory.FOOTER, 'FAQ', 'Support - FAQ'),
+    ContactUs: (suffix) => triggerEvent(AnalyticsCategory.FOOTER, 'Contact Us', `Support - Contact Us - ${suffix}`),
     HHS: () => triggerEvent(AnalyticsCategory.FOOTER, 'US Dept of Health & Human Svcs', 'hhs.gov')
   }
 };

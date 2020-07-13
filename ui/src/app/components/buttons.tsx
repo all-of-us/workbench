@@ -303,7 +303,7 @@ export const Link = ({disabled = false, style = {}, children, ...props}) => {
   >{children}</Clickable>;
 };
 
-export const StyledAnchorTag = ({href, analyticsFn, style = {}, children, ...props}) => {
+export const StyledAnchorTag = ({href, children, analyticsFn = null, style = {}, ...props}) => {
   const inlineAnchor = {
     display: 'inline-block',
     color: colors.accent
