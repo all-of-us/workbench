@@ -8,13 +8,25 @@ import {idsInUse, searchRequestStore} from 'app/cohort-search/search-state.servi
 import {mapRequest, parseCohortDefinition} from 'app/cohort-search/utils';
 import {Button} from 'app/components/buttons';
 import {FlexRowWrap} from 'app/components/flex';
+import {ClrIcon} from 'app/components/icons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
-import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import colors from 'app/styles/colors';
+import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {currentCohortStore, queryParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort, SearchRequest} from 'generated/fetch';
+
+const styles = reactStyles({
+  cohortError: {
+    background: colors.warning,
+    color: colors.white,
+    padding: '0.25rem 0.5rem',
+    borderRadius: '5px',
+    marginBottom: '0.5rem'
+  }
+});
 
 function colStyle(percentage: string) {
   return {
@@ -40,6 +52,7 @@ interface State {
   criteria: SearchRequest;
   updateCount: number;
   cohort: Cohort;
+  cohortError: boolean;
   minHeight: string;
   modalPromise: Promise<boolean> | null;
   modalOpen: boolean;
@@ -62,6 +75,7 @@ export const CohortSearch = withCurrentWorkspace() (
         criteria: {includes: [], excludes: [], dataFilters: []},
         updateCount: 0,
         cohort: undefined,
+        cohortError: false,
         minHeight: '10rem',
         modalPromise:  null,
         modalOpen: false,
@@ -75,29 +89,33 @@ export const CohortSearch = withCurrentWorkspace() (
     componentDidMount() {
       const {workspace: {id, namespace}} = this.props;
       this.subscription = queryParamsStore.subscribe(params => {
-        /* If a cohort id is given in the route, we initialize state with
-         * it */
-        const cohortId = params.cohortId;
+        /* If a cohort id is given in the route, we initialize state with it */
+        const {cohortId} = params;
         if (cohortId) {
           this.setState({loading: true});
-          cohortsApi().getCohort(namespace, id, cohortId).then(cohort => {
-            this.setState({cohort, loading: false});
-            currentCohortStore.next(cohort);
-            if (cohort.criteria) {
-              searchRequestStore.next(parseCohortDefinition(cohort.criteria));
-            }
-          });
+          cohortsApi().getCohort(namespace, id, cohortId)
+            .then(cohort => {
+              this.setState({cohort, loading: false});
+              currentCohortStore.next(cohort);
+              if (cohort.criteria) {
+                searchRequestStore.next(parseCohortDefinition(cohort.criteria));
+              }
+            })
+            .catch(error => {
+              console.error(error);
+              this.setState({cohortError: true, loading: false});
+            });
         } else {
           this.setState({cohort: {criteria: `{'includes':[],'excludes':[],'dataFilters':[]}`, name: '', type: ''}});
         }
       });
 
-      this.subscription.add(searchRequestStore.subscribe(sr => {
-        const cohortChanged = !!this.state.cohort && this.state.cohort.criteria !== JSON.stringify(mapRequest(sr));
+      this.subscription.add(searchRequestStore.subscribe(searchRequest => {
+        const cohortChanged = !!this.state.cohort && this.state.cohort.criteria !== JSON.stringify(mapRequest(searchRequest));
         this.props.setCohortChanged(cohortChanged);
         this.setState({
-          criteria: sr,
-          overview: sr.includes.length > 0 || sr.excludes.length > 0,
+          criteria: searchRequest,
+          overview: searchRequest.includes.length > 0 || searchRequest.excludes.length > 0,
           cohortChanged,
           updateGroupListsCount: this.state.updateGroupListsCount + 1
         });
@@ -134,41 +152,48 @@ export const CohortSearch = withCurrentWorkspace() (
     }
 
     render() {
-      const {cohort, cohortChanged, criteria, loading, modalOpen, overview, searchContext, updateCount, updateGroupListsCount} = this.state;
+      const {cohort, cohortChanged, cohortError, criteria, loading, modalOpen, overview, searchContext, updateCount, updateGroupListsCount}
+        = this.state;
       return <React.Fragment>
         <div ref={el => this.searchWrapper = el} style={{padding: '1rem 1rem 2rem'}}>
-          <FlexRowWrap style={{margin: '0 -0.5rem'}}>
-            <div style={colStyle('66.66667')}>
-              <FlexRowWrap style={{margin: '0 -0.5rem'}}>
-                <div style={{height: '1.5rem', padding: '0 0.5rem', width: '100%'}}>
-                  {!!cohort && <h3 style={{marginTop: 0}}>{cohort.name}</h3>}
-                </div>
-                <div id='list-include-groups' style={colStyle('50')}>
-                  <SearchGroupList groups={criteria.includes}
-                                 setSearchContext={(c) => this.setState({searchContext: c})}
-                                 role='includes'
-                                 updated={updateGroupListsCount}
-                                 updateRequest={() => this.updateRequest()}/>
-                </div>
-                <div id='list-exclude-groups' style={colStyle('50')}>
-                  {overview && <SearchGroupList groups={criteria.excludes}
+          {cohortError
+            ? <div style={styles.cohortError}>
+              <ClrIcon className='is-solid' shape='exclamation-triangle' size={22} />
+              Sorry, the cohort could not be loaded. Please try again or contact Support in the left hand navigation.
+            </div>
+            : <FlexRowWrap style={{margin: '0 -0.5rem'}}>
+              <div style={colStyle('66.66667')}>
+                <FlexRowWrap style={{margin: '0 -0.5rem'}}>
+                  <div style={{height: '1.5rem', padding: '0 0.5rem', width: '100%'}}>
+                    {!!cohort && <h3 style={{marginTop: 0}}>{cohort.name}</h3>}
+                  </div>
+                  <div id='list-include-groups' style={colStyle('50')}>
+                    <SearchGroupList groups={criteria.includes}
                                    setSearchContext={(c) => this.setState({searchContext: c})}
-                                   role='excludes'
+                                   role='includes'
                                    updated={updateGroupListsCount}
-                                   updateRequest={() => this.updateRequest()}/>}
-                </div>
-              </FlexRowWrap>
-            </div>
-            <div style={colStyle('33.33333')}>
-              {overview && <ListOverview
-                cohort={cohort}
-                cohortChanged={cohortChanged}
-                searchRequest={criteria}
-                updateCount={updateCount}
-                updating={() => this.props.setUpdatingCohort(true)}/>}
-            </div>
-            {loading && <SpinnerOverlay/>}
-          </FlexRowWrap>
+                                   updateRequest={() => this.updateRequest()}/>
+                  </div>
+                  <div id='list-exclude-groups' style={colStyle('50')}>
+                    {overview && <SearchGroupList groups={criteria.excludes}
+                                     setSearchContext={(c) => this.setState({searchContext: c})}
+                                     role='excludes'
+                                     updated={updateGroupListsCount}
+                                     updateRequest={() => this.updateRequest()}/>}
+                  </div>
+                </FlexRowWrap>
+              </div>
+              <div style={colStyle('33.33333')}>
+                {overview && <ListOverview
+                  cohort={cohort}
+                  cohortChanged={cohortChanged}
+                  searchRequest={criteria}
+                  updateCount={updateCount}
+                  updating={() => this.props.setUpdatingCohort(true)}/>}
+              </div>
+              {loading && <SpinnerOverlay/>}
+            </FlexRowWrap>
+          }
         </div>
         {searchContext && <CBModal
           closeSearch={() => this.setState({searchContext: undefined})}
