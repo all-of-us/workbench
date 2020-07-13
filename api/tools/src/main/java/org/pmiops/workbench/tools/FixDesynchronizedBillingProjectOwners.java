@@ -97,7 +97,7 @@ public class FixDesynchronizedBillingProjectOwners {
         workspacesApi.listWorkspaces(FIRECLOUD_LIST_WORKSPACES_REQUIRED_FIELDS);
     log.info(String.format("found %d workspaces", workspaces.size()));
 
-    // 1PPW workspaces still exist and need to be filtered out - this script depends on the
+    // Non-1PPW workspaces still exist and need to be filtered out - this script depends on the
     // assumption that workspace ACLs are synchronized to project ACLs, which doesn't hold when
     // there are multiple workspaces per project.
     Set<String> singleWorkspaceProjects =
