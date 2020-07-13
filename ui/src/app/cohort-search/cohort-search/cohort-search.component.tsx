@@ -142,14 +142,14 @@ export const CohortSearch = withCurrentWorkspace() (
               <div style={{height: '1.5rem', padding: '0 0.5rem', width: '100%'}}>
                 {!!cohort && <h3 style={{marginTop: 0}}>{cohort.name}</h3>}
               </div>
-              <div style={colStyle('50')}>
+              <div id='list-include-groups' style={colStyle('50')}>
                 <SearchGroupList groups={criteria.includes}
                                  setSearchContext={(c) => this.setState({searchContext: c})}
                                  role='includes'
                                  updated={updateGroupListsCount}
                                  updateRequest={() => this.updateRequest()}/>
                 </div>
-                <div style={colStyle('50')}>
+                <div id='list-exclude-groups' style={colStyle('50')}>
                   {overview && <SearchGroupList groups={criteria.excludes}
                                    setSearchContext={(c) => this.setState({searchContext: c})}
                                    role='excludes'
