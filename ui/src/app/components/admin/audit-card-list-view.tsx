@@ -1,18 +1,16 @@
+import {ActionAuditCardBase} from 'app/components/card';
+import {FlexRow} from 'app/components/flex';
 import colors from 'app/styles/colors';
-import * as fp from 'lodash/fp';
-import * as moment from 'moment';
-import * as React from 'react';
 import {
   AuditAction,
   AuditEventBundle,
   AuditEventBundleHeader,
   AuditTargetPropertyChange
-} from '../../../generated';
-import {ActionAuditCardBase} from '../card';
-import {FlexRow} from '../flex';
+} from 'generated';
+import * as moment from 'moment';
+import * as React from 'react';
 
-
-const HidableCell = (props: {content: string}) => {
+const HideableCell = (props: {content: string}) => {
   const {content} = props;
   return <div style={{backgroundColor: content ? 'white' : '#f0f3f5',
     border: '1px solid',
@@ -22,9 +20,9 @@ const HidableCell = (props: {content: string}) => {
 const PropertyChangeListEntry = (props: {targetProperty?: string, previousValue?: string, newValue?: string}) => {
   const {targetProperty, previousValue, newValue} = props;
   return <React.Fragment>
-    <HidableCell content={targetProperty}/>
-    <HidableCell content={previousValue}/>
-    <HidableCell content={newValue}/>
+    <HideableCell content={targetProperty}/>
+    <HideableCell content={previousValue}/>
+    <HideableCell content={newValue}/>
   </React.Fragment>;
 };
 
@@ -115,6 +113,7 @@ const AuditActionCard = (props: { action: AuditAction }) => {
       </ActionAuditCardBase>
   );
 };
+
 export const AuditActionCardListView = (props: { actions: AuditAction[]}) => {
   const {actions} = props;
   console.log(`actions length ${actions.length}`);
