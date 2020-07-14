@@ -242,7 +242,7 @@ export class SearchGroupList extends React.Component<Props, State> {
           {role === 'excludes' && <span>And</span>} {role.slice(0, -1)} Participants
         </h2>
       </div>
-      {groups.map((group, g) => <div key={g}>
+      {groups.map((group, g) => <div key={g} data-test-id={`${role}-search-group`}>
         <SearchGroup group={group}
                      index={g + index}
                      setSearchContext={setSearchContext}

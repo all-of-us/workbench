@@ -1,3 +1,4 @@
+import {queryParamsStore} from 'app/utils/navigation';
 import {convertToResources, ConvertToResourcesArgs} from 'app/utils/resourceActions';
 import {
   Cohort,
@@ -20,7 +21,7 @@ export const exampleCohortStubs = [
     id: DEFAULT_COHORT_ID,
     name: 'sample name',
     description: 'sample description',
-    criteria: '',
+    criteria: '{"includes":[{"temporal": false,"items":[]},{"temporal": false,"items":[]}],"excludes":[],"dataFilters":[]}',
     type: '',
     workspaceId: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
     creationTime: new Date().getTime(),
@@ -30,7 +31,7 @@ export const exampleCohortStubs = [
     id: DEFAULT_COHORT_ID_2,
     name: 'sample name 2',
     description: 'sample description 2',
-    criteria: '',
+    criteria: '{"includes":[{"temporal": false,"items":[]},{"temporal": false,"items":[]}],"excludes":[{"temporal": false,"items":[]}],"dataFilters":[]}',
     type: '',
     workspaceId: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
     creationTime: new Date().getTime(),
@@ -144,7 +145,9 @@ export class CohortsApiStub extends CohortsApi {
   }
 
   getCohort(): Promise<Cohort> {
-    return new Promise<Cohort>(resolve => resolve(this.cohorts[0]));
+    const {cohortId} = queryParamsStore.getValue();
+    const cohort = this.cohorts.find(c => c.id === cohortId) || this.cohorts[0];
+    return new Promise<Cohort>(resolve => resolve(cohort));
   }
 
   getCohortAnnotations(): Promise<CohortAnnotationsResponse> {
