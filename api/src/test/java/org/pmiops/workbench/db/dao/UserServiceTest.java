@@ -397,8 +397,7 @@ public class UserServiceTest {
             dbUser.getUserId(),
             BypassTimeTargetProperty.DATA_USE_AGREEMENT_BYPASS_TIME,
             Optional.empty(),
-            nullableTimestampToOptionalInstant(duaBypassTime)
-        );
+            nullableTimestampToOptionalInstant(duaBypassTime));
     assertThat(dbUser.getDataUseAgreementBypassTime()).isEqualTo(duaBypassTime);
 
     userService.setDataUseAgreementBypassTime(dbUser.getUserId(), duaBypassTime, null);
@@ -407,8 +406,7 @@ public class UserServiceTest {
             dbUser.getUserId(),
             BypassTimeTargetProperty.DATA_USE_AGREEMENT_BYPASS_TIME,
             nullableTimestampToOptionalInstant(duaBypassTime),
-            Optional.empty()
-        );
+            Optional.empty());
     assertThat(dbUser.getDataUseAgreementBypassTime()).isNull();
 
     final Timestamp complianceTrainingBypassTime =
@@ -420,8 +418,7 @@ public class UserServiceTest {
             dbUser.getUserId(),
             BypassTimeTargetProperty.COMPLIANCE_TRAINING_BYPASS_TIME,
             Optional.empty(),
-            nullableTimestampToOptionalInstant(complianceTrainingBypassTime)
-        );
+            nullableTimestampToOptionalInstant(complianceTrainingBypassTime));
     assertThat(dbUser.getComplianceTrainingBypassTime()).isEqualTo(complianceTrainingBypassTime);
 
     final Timestamp betaAccessBypassTime = Timestamp.from(Instant.parse("2002-01-01T00:00:00.00Z"));
@@ -431,8 +428,7 @@ public class UserServiceTest {
             dbUser.getUserId(),
             BypassTimeTargetProperty.BETA_ACCESS_BYPASS_TIME,
             Optional.empty(),
-            nullableTimestampToOptionalInstant(betaAccessBypassTime)
-        );
+            nullableTimestampToOptionalInstant(betaAccessBypassTime));
     assertThat(dbUser.getBetaAccessBypassTime()).isEqualTo(betaAccessBypassTime);
 
     final Timestamp eraCommonsBypassTime = Timestamp.from(Instant.parse("2003-01-01T00:00:00.00Z"));
@@ -442,8 +438,7 @@ public class UserServiceTest {
             dbUser.getUserId(),
             BypassTimeTargetProperty.ERA_COMMONS_BYPASS_TIME,
             Optional.empty(),
-            nullableTimestampToOptionalInstant(eraCommonsBypassTime)
-        );
+            nullableTimestampToOptionalInstant(eraCommonsBypassTime));
     assertThat(dbUser.getEraCommonsBypassTime()).isEqualTo(eraCommonsBypassTime);
 
     final Timestamp twoFactorBypassTime = Timestamp.from(Instant.parse("2004-01-01T00:00:00.00Z"));
@@ -453,8 +448,7 @@ public class UserServiceTest {
             dbUser.getUserId(),
             BypassTimeTargetProperty.TWO_FACTOR_AUTH_BYPASS_TIME,
             Optional.empty(),
-            nullableTimestampToOptionalInstant(twoFactorBypassTime)
-        );
+            nullableTimestampToOptionalInstant(twoFactorBypassTime));
     assertThat(dbUser.getTwoFactorAuthBypassTime()).isEqualTo(twoFactorBypassTime);
   }
 

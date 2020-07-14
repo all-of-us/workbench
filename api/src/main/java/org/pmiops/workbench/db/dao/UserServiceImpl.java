@@ -538,11 +538,12 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   /**
    * Functional bypass time column setter, using retry logic.
-   *  @param userId id of user getting bypassed
+   *
+   * @param userId id of user getting bypassed
    * @param previousBypassTime time of bypass, before update
    * @param newBypassTime time of bypass
    * @param setter void-returning method to call to set the particular bypass field. Should
-*     typically be a method reference on DbUser, e.g.
+   *     typically be a method reference on DbUser, e.g.
    * @param targetProperty BypassTimeTargetProperty enum value, for auditing
    */
   private void setBypassTimeWithRetries(
@@ -552,7 +553,11 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       BiConsumer<DbUser, Timestamp> setter,
       BypassTimeTargetProperty targetProperty) {
     setBypassTimeWithRetries(
-        userDao.findUserByUserId(userId), previousBypassTime, newBypassTime, targetProperty, setter);
+        userDao.findUserByUserId(userId),
+        previousBypassTime,
+        newBypassTime,
+        targetProperty,
+        setter);
   }
 
   private void setBypassTimeWithRetries(
@@ -572,8 +577,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         dbUser.getUserId(),
         targetProperty,
         Optional.ofNullable(previousBypassTime).map(Timestamp::toInstant),
-        Optional.ofNullable(newBypassTime).map(Timestamp::toInstant)
-    );
+        Optional.ofNullable(newBypassTime).map(Timestamp::toInstant));
   }
 
   @Override

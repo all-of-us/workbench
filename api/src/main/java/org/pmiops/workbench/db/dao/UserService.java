@@ -64,7 +64,8 @@ public interface UserService {
 
   void setEraCommonsBypassTime(Long userId, Timestamp previousBypassTime, Timestamp newBypassTime);
 
-  void setTwoFactorAuthBypassTime(Long userId, Timestamp previousBypassTime, Timestamp newBypassTime);
+  void setTwoFactorAuthBypassTime(
+      Long userId, Timestamp previousBypassTime, Timestamp newBypassTime);
 
   DbUser setDisabledStatus(Long userId, boolean disabled);
 
