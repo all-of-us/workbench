@@ -35,6 +35,7 @@ import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,6 +81,7 @@ public class DataSetMapperTest {
     dbDataset.setIncludesAllParticipants(false);
     dbDataset.setDescription("All Blue-eyed Blondes");
     dbDataset.setLastModifiedTime(Timestamp.from(Instant.now()));
+    dbDataset.setInvalid(false);
     dbDataset.setWorkspaceId(1L);
     dbDataset.setPrePackagedConceptSet(
         DbStorageEnums.prePackagedConceptSetsToStorage(PrePackagedConceptSetEnum.NONE));
@@ -147,7 +149,7 @@ public class DataSetMapperTest {
         .isEqualTo(dbDataset.getIncludesAllParticipants());
     assertThat(toDataSet.getConceptSetIds()).isEqualTo(dbDataset.getConceptSetIds());
     assertThat(toDataSet.getValues()).isEqualTo(dbDataset.getValues());
-    assertThat(toDataSet.getPrePackagedConceptSet()).isEqualTo((short) 2);
+    assertThat(toDataSet.getPrePackagedConceptSet()).isEqualTo((short) 0);
   }
 
   @Test
@@ -155,18 +157,24 @@ public class DataSetMapperTest {
     List<Long> conceptIds = ImmutableList.of(4l, 5l, 6l);
     List<Long> cohortIds = ImmutableList.of(1l, 2l, 3l);
 
+    DomainValuePair domainValuePair = new DomainValuePair();
+    domainValuePair.setDomain(Domain.PERSON);
+    domainValuePair.setValue("person_id");
+
     DataSetRequest request = new DataSetRequest();
     request.setName("New Name");
     request.setCohortIds(cohortIds);
     request.setConceptSetIds(conceptIds);
     request.setIncludesAllParticipants(false);
     request.setPrePackagedConceptSet(PrePackagedConceptSetEnum.NONE);
+    request.setDomainValuePairs(ImmutableList.of(domainValuePair));
     final DbDataset toDataSet = dataSetMapper.dataSetRequestToDb(request, dbDataset);
     assertThat(toDataSet.getName()).isEqualTo("New Name");
     assertThat(toDataSet.getCohortIds()).isEqualTo(cohortIds);
     assertThat(toDataSet.getIncludesAllParticipants()).isFalse();
     assertThat(toDataSet.getConceptSetIds()).isEqualTo(conceptIds);
     assertThat(toDataSet.getPrePackagedConceptSet()).isEqualTo((short) 0);
+    assertThat(toDataSet.getValues().get(0).getDomainEnum()).isEqualTo(Domain.PERSON);
   }
 
   private void assertDbModelToClient(DataSet dataSet, DbDataset dbDataset) {
