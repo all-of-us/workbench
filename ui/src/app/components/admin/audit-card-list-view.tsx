@@ -1,10 +1,11 @@
 import {ActionAuditCardBase} from 'app/components/card';
 import {FlexRow} from 'app/components/flex';
 import colors from 'app/styles/colors';
+import {reactStyles} from 'app/utils';
 import {
-  AuditAction,
+  AuditAction, AuditAgent,
   AuditEventBundle,
-  AuditEventBundleHeader,
+  AuditEventBundleHeader, AuditTarget,
   AuditTargetPropertyChange
 } from 'generated';
 import * as moment from 'moment';
@@ -12,10 +13,19 @@ import * as React from 'react';
 
 const HideableCell = (props: {content: string}) => {
   const {content} = props;
-  return <div style={{backgroundColor: content ? 'white' : '#f0f3f5',
-    border: '1px solid',
-    boxSizing: 'border-box'}}>{content}</div>;
+  return <div
+      style={{backgroundColor: content ? 'white' : '#f0f3f5',
+        border: '1px solid',
+        boxSizing: 'border-box'
+      }}>{content}</div>;
 };
+
+const styles = reactStyles({
+  propertyCell: {
+    fontWeight: 600,
+    border: '1px solid'
+  }
+});
 
 const PropertyChangeListEntry = (props: {targetProperty?: string, previousValue?: string, newValue?: string}) => {
   const {targetProperty, previousValue, newValue} = props;
@@ -28,36 +38,55 @@ const PropertyChangeListEntry = (props: {targetProperty?: string, previousValue?
 
 const PropertyChangeListView = (props: { propertyChanges: AuditTargetPropertyChange[] }) => {
   const {propertyChanges} = props;
-  const propertyCellStyle = {fontWeight: 600, border: `1px solid`};
 
-  return propertyChanges.length > 0 ?
-  <div style={{
-    margin: '0.25rem 0 0rem 1rem',
-    display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)'
-  }}>
-    <div style={propertyCellStyle}>Changed Property</div>
-    <div style={propertyCellStyle}>Previous Value</div>
-    <div style={propertyCellStyle}>New Value</div>
-    {propertyChanges.map((propertyChange, index) => <PropertyChangeListEntry {...propertyChange} key={index}/>)}
-  </div> : <div style={{margin: '0.25rem 0 0rem 1rem', fontStyle: 'italic'}}>No Property Changes</div>;
+  return propertyChanges.length > 0
+      ? <div style={{
+        marginTop: '0.25rem',
+        marginLeft: '1rem',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)'
+      }}>
+    <div style={styles.propertyCell}>Changed Property</div>
+    <div style={styles.propertyCell}>Previous Value</div>
+    <div style={styles.propertyCell}>New Value</div>
+    {propertyChanges.map((propertyChange, index) =>
+        <PropertyChangeListEntry {...propertyChange} key={index}/>)}
+  </div>
+      : <div style={{margin: '0.25rem 0 0rem 1rem', fontStyle: 'italic'}}>No Property Changes</div>;
 };
 
-const typeTextColor   = colors.primary;
-const actionTextColor = colors.success;
-const targetTextColor = colors.accent;
+const AgentHeader = (props: {agent: AuditAgent}) => {
+  const {agent} = props;
+  return <React.Fragment>
+    <div style={{fontWeight: 600}}>Agent</div>
+    <div>{`${agent.agentType} ${agent.agentId}`}</div>
+    <div>{agent.agentUsername}</div>
+  </React.Fragment>;
+};
+
+const TargetHeader = (props: {target: AuditTarget}) => {
+  const {target} = props;
+  return <React.Fragment>
+  <div style={{fontWeight: 600, color: colors.accent}}>Target</div>
+  <div
+      style={{color: colors.accent}}>{`${target.targetType} ${target.targetId || ''}`}</div>
+  <div/>
+  </React.Fragment>;
+};
 
 const AuditEventBundleHeaderView = (props: { header: AuditEventBundleHeader }) => {
   const {header} = props;
   return <div>
-    <div style={{  margin: '0',
+    <div style={{
+      margin: '0',
       display: 'flex',
       flexDirection: 'row',
       textAlign: 'center',
-      fontWeight: 600}}>
-      <div style={{color: typeTextColor, margin: '5px'}}>{header.agent.agentType}</div>
-      <div style={{color: actionTextColor, margin: '5px'}}>{header.actionType}</div>
-      <div style={{color: targetTextColor, margin: '5px'}}>{header.target.targetType}</div>
+      fontWeight: 600
+    }}>
+      <div style={{color: colors.primary, margin: '5px'}}>{header.agent.agentType}</div>
+      <div style={{color: colors.success, margin: '5px'}}>{header.actionType}</div>
+      <div style={{color: colors.accent, margin: '5px'}}>{header.target.targetType}</div>
     </div>
     <div style={{
       marginLeft: '1rem',
@@ -67,16 +96,12 @@ const AuditEventBundleHeaderView = (props: { header: AuditEventBundleHeader }) =
       gridTemplateColumns: 'auto 1fr',
       gridTemplateRows: '1fr 1fr 1fr',
       gridAutoFlow: 'column',
-      color: typeTextColor
+      color: colors.primary
     }}>
-          <div style={{fontWeight:  600}}>Agent</div>
-          <div>{`${header.agent.agentType} ${header.agent.agentId}`}</div>
-          <div>{`${header.agent.agentUsername}`}</div>
-          <div style={{fontWeight:  600, color: targetTextColor}}>Target</div>
-          <div style={{color: targetTextColor}}>{`${header.target.targetType} ${header.target.targetId || ''}`}</div>
-          <div></div>
+      <AgentHeader agent={header.agent}/>
+      <TargetHeader target={header.target}/>
     </div>
-  </div >;
+  </div>;
 };
 
 const EventBundleView = (props: { eventBundle: AuditEventBundle }) => {
