@@ -8,6 +8,7 @@ import {searchRequestStore} from 'app/cohort-search/search-state.service';
 import {CriteriaTree} from 'app/cohort-search/tree/tree.component';
 import {domainToTitle, generateId, typeToTitle} from 'app/cohort-search/utils';
 import {Button, Clickable} from 'app/components/buttons';
+import {FlexRowWrap} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import colors, {addOpacity} from 'app/styles/colors';
@@ -29,6 +30,10 @@ const styles = reactStyles({
     padding: '0.45rem 0rem',
     display: 'flex',
     justifyContent: 'flex-end',
+  },
+  footerButton: {
+    height: '1.5rem',
+    margin: '0.25rem 0.5rem'
   },
   panelLeft: {
     display: 'none',
@@ -272,7 +277,7 @@ export class CohortSearch extends React.Component<Props, State> {
     const {closeSearch, searchContext, searchContext: {domain, type}} = this.props;
     const {attributesNode, autocompleteSelection, count, groupSelections, hierarchyNode, loadingSubtree, mode, selectedIds, selections,
       title, treeSearchTerms} = this.state;
-    return !!searchContext ? <div style={styles.searchContainer}>
+    return !!searchContext && <FlexRowWrap style={styles.searchContainer}>
       <div style={{height: '100%', width: '100%'}}>
         <div style={styles.titleBar}>
           <div style={{display: 'inline-flex', marginRight: '0.5rem'}}>
@@ -339,12 +344,12 @@ export class CohortSearch extends React.Component<Props, State> {
               </div>
             </React.Fragment>}
           {type === CriteriaType.AGE && <div style={styles.footer}>
-            <Button style={{height: '1.5rem', margin: '0.25rem 0.5rem'}}
+            <Button style={styles.footerButton}
                     type='link'
                     onClick={closeSearch}>
               Cancel
             </Button>
-            <Button style={{height: '1.5rem', margin: '0.25rem 0.5rem'}}
+            <Button style={styles.footerButton}
                     type='primary'
                     onClick={this.finish}>
               Finish
@@ -352,7 +357,7 @@ export class CohortSearch extends React.Component<Props, State> {
           </div>}
         </div>
       </div>
-    </div> : '';
+    </FlexRowWrap>;
   }
 }
 
