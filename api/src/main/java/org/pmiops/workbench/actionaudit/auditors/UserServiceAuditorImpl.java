@@ -44,8 +44,8 @@ public class UserServiceAuditorImpl implements UserServiceAuditor {
   @Override
   public void fireUpdateDataAccessAction(
       DbUser targetUser,
-      DataAccessLevel dataAccessLevel,
       DataAccessLevel previousDataAccessLevel,
+      DataAccessLevel newDataAccessLevel,
       Agent agent) {
     actionAuditService.send(
         ActionAuditEvent.builder()
@@ -59,7 +59,7 @@ public class UserServiceAuditorImpl implements UserServiceAuditor {
             .targetPropertyMaybe(AccountTargetProperty.REGISTRATION_STATUS.getPropertyName())
             .targetIdMaybe(targetUser.getUserId())
             .previousValueMaybe(previousDataAccessLevel.toString())
-            .newValueMaybe(dataAccessLevel.toString())
+            .newValueMaybe(newDataAccessLevel.toString())
             .build());
   }
 
@@ -67,8 +67,8 @@ public class UserServiceAuditorImpl implements UserServiceAuditor {
   public void fireAdministrativeBypassTime(
       long userId,
       BypassTimeTargetProperty bypassTimeTargetProperty,
-      Optional<Instant> bypassTime,
-      Optional<Instant> previousBypassTime) {
+      Optional<Instant> previousBypassTime,
+      Optional<Instant> newBypassTime) {
     DbUser adminUser = dbUserProvider.get();
     ActionAuditEvent.Builder eventBuilder =
         ActionAuditEvent.builder()
@@ -81,9 +81,10 @@ public class UserServiceAuditorImpl implements UserServiceAuditor {
             .targetType(TargetType.ACCOUNT)
             .targetPropertyMaybe(bypassTimeTargetProperty.getPropertyName())
             .targetIdMaybe(userId);
-    bypassTime.ifPresent(i -> eventBuilder.newValueMaybe(String.valueOf(i.toEpochMilli())));
+
     previousBypassTime.ifPresent(
         i -> eventBuilder.previousValueMaybe(String.valueOf(i.toEpochMilli())));
+    newBypassTime.ifPresent(i -> eventBuilder.newValueMaybe(String.valueOf(i.toEpochMilli())));
 
     actionAuditService.send(eventBuilder.build());
   }

@@ -42,7 +42,7 @@ public class UserServiceAuditorTest {
   public void testFireUpdateDataAccessAction_userAgent() {
     DbUser user = createUser();
     userServiceAuditor.fireUpdateDataAccessAction(
-        user, DataAccessLevel.UNREGISTERED, DataAccessLevel.REGISTERED, Agent.asUser(user));
+        user, DataAccessLevel.REGISTERED, DataAccessLevel.UNREGISTERED, Agent.asUser(user));
     verify(mockActionAuditService).send(eventArg.capture());
 
     ActionAuditEvent event = eventArg.getValue();
@@ -54,7 +54,7 @@ public class UserServiceAuditorTest {
   @Test
   public void testFireUpdateDataAccessAction_systemAgent() {
     userServiceAuditor.fireUpdateDataAccessAction(
-        createUser(), DataAccessLevel.UNREGISTERED, DataAccessLevel.REGISTERED, Agent.asSystem());
+        createUser(), DataAccessLevel.REGISTERED, DataAccessLevel.UNREGISTERED, Agent.asSystem());
     verify(mockActionAuditService).send(eventArg.capture());
 
     ActionAuditEvent event = eventArg.getValue();
