@@ -25,14 +25,14 @@ export interface GenericAuditQueryResult {
   query: string;
   /**
    * ID in the MySQL database and BigQuery Audit Database for the this qyery. Currently either
-   * a userId or workspaceId as appropriate. This may be needed for situations (such as workspacd audit)
+   * a userId or workspaceId as appropriate. This may be needed for situations (such as workspace audit)
    * where it's not obvious in the responses which workspace is the one you audited.
    */
   sourceId: number;
 }
 
 // Common properties for User & Workspace (and similar future pages).
-// Assmptions: the path parameter is called initially with the audit API subject.
+// Assumptions: the path parameter is called initially with the audit API subject.
 //   (this will need revisiting for multi-subject queries)
 export interface AuditPageProps {
   initialAuditSubject?: string;

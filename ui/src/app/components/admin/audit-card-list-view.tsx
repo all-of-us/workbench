@@ -8,6 +8,7 @@ import {
   AuditEventBundleHeader, AuditTarget,
   AuditTargetPropertyChange
 } from 'generated';
+import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import * as React from 'react';
 
@@ -104,8 +105,7 @@ const AuditEventBundleHeaderView = (props: { header: AuditEventBundleHeader }) =
   </div>;
 };
 
-const EventBundleView = (props: { eventBundle: AuditEventBundle }) => {
-  const {eventBundle} = props;
+const EventBundleView = (eventBundle: AuditEventBundle) => {
   return <div style={{marginBottom: '1rem'}}>
     <AuditEventBundleHeaderView header={eventBundle.header}/>
     <PropertyChangeListView propertyChanges={eventBundle.propertyChanges}/>
@@ -117,13 +117,12 @@ const AuditActionCard = (props: { action: AuditAction }) => {
   // Something in the codegen is wonky here. the actionTime field is typed as a Date,
   // but turns out to be a number for some reason here. In other contexts it appears
   // to format itself happily though.
-  // yyyy-MM-dd HH:mm:ss.SSS
-  // SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-
   const timeString = moment(new Date(action.actionTime)).format('YYYY-MM-DD h:mm:ss');
-  const actionTypes = action.eventBundles.map((eventBundle) => {
-    return eventBundle.header.actionType;
-  }).join(' & ');
+  const actionTypes = fp.flow(
+    fp.map(fp.get('header.actionType')),
+    s => s.join(' & '))
+  (action.eventBundles);
+
   return (
       <ActionAuditCardBase>
         <FlexRow style={{
@@ -131,18 +130,22 @@ const AuditActionCard = (props: { action: AuditAction }) => {
           textAlign: 'left',
           fontSize: '0.825rem',
           padding: '5px'
-        }}><div>{timeString}</div><div style={{marginLeft: 'auto'}}>{actionTypes}</div>
+        }}>
+          <div>{timeString}</div>
+          <div style={{marginLeft: 'auto'}}>{actionTypes}</div>
         </FlexRow>
         {action.eventBundles.map((eventBundle, index) =>
-            <EventBundleView key={index} eventBundle={eventBundle}/>)}
+            <EventBundleView key={index}
+                             header={eventBundle.header}
+                             propertyChanges={eventBundle.propertyChanges}/>)}
       </ActionAuditCardBase>
   );
 };
 
 export const AuditActionCardListView = (props: { actions: AuditAction[]}) => {
   const {actions} = props;
-  console.log(`actions length ${actions.length}`);
 
+  // Temporary workaround for sort order in the APIs, fixed in RW-4999.
   const actionsSorted = actions.sort((a, b) => {
     return new Date(b.actionTime).getTime() - new Date(a.actionTime).getTime();
   });

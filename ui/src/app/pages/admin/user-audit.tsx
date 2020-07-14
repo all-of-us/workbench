@@ -20,7 +20,7 @@ const queryAuditLog = (subject: string) => {
       logEntries: queryResult.logEntries
     };
   }).then(genericQueryResult => {
-    // TODO(jaycarlton): This is a workaround for LOGIN event issues on the backend. Can be removed when that patch is in.
+    // TODO(jaycarlton): This is a workaround for spammy LOGIN events on the backend (RW-5249).
     const filteredActions = fp.filter(
       (action: AuditAction) => fp.negate(
         fp.any((eventBundle: AuditEventBundle) => 'LOGIN' === eventBundle.header.actionType))

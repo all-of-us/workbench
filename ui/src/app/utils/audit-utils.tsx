@@ -4,7 +4,7 @@ import {
   AuditEventBundleHeader,
   AuditTargetPropertyChange
 } from 'generated';
-import {fp} from 'lodash/fp';
+import * as fp from 'lodash/fp';
 
 export const headerToString = (header?: AuditEventBundleHeader) => {
   return `ID: ${header.agent.agentId}, Username: ${header.agent.agentUsername} \-> ID: ${header.target.targetId}`;
