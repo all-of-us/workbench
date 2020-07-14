@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+@Deprecated // use or create an auditor in org.pmiops.workbench.actionaudit.auditors instead
 @Entity
 @Table(name = "admin_action_history")
 public class DbAdminActionHistory {

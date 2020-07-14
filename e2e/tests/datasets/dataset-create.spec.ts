@@ -3,9 +3,10 @@ import ClrIconLink from 'app/element/clr-icon-link';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import DataPage, {TabLabelAlias} from 'app/page/data-page';
 import DatasetSaveModal from 'app/page/dataset-save-modal';
+import {EllipsisMenuAction, LinkText} from 'app/text-labels';
+import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
-import {EllipsisMenuAction, LinkText} from 'app/text-labels';
 
 describe('Create Dataset', () => {
 
@@ -14,8 +15,11 @@ describe('Create Dataset', () => {
   });
 
   /**
-   * Create new Dataset without Export to Notebook.
-   * Then Rename, Delete Dataset.
+   * Test:
+   * - Find an existing workspace. Create a new workspace if none exists.
+   * - Create a new Dataset from All Participants and All Surveys. Save dataset without Export to Notebook.
+   * - Rename dataset.
+   * - Delete Dataset.
    */
   test('Can create Dataset with defaults selections', async () => {
     const workspaceCard = await findWorkspace(page);
@@ -37,25 +41,32 @@ describe('Create Dataset', () => {
     const dataSetExists = await resourceCard.cardExists(datasetName, CardType.Dataset);
     expect(dataSetExists).toBe(true);
 
-    // BUG https://precisionmedicineinitiative.atlassian.net/browse/RW-5079
-    /*
     // Rename Dataset
     const newDatasetName = makeRandomName();
     await dataPage.renameDataset(datasetName, newDatasetName);
 
+    await dataPage.openTab(TabLabelAlias.Datasets, {waitPageChange: false});
+
     // Verify rename successful
-    const newDatasetExists = await resourceCard.cardNameExists(newDatasetName, CardType.Dataset);
+    const newDatasetExists = await resourceCard.cardExists(newDatasetName, CardType.Dataset);
     expect(newDatasetExists).toBe(true);
-    */
+
+    const oldDatasetExists = await resourceCard.cardExists(datasetName, CardType.Dataset);
+    expect(oldDatasetExists).toBe(false);
 
     // Delete Dataset
-    const textContent = await dataPage.deleteDataset(datasetName);
-    expect(textContent).toContain(`Are you sure you want to delete Dataset: ${datasetName}?`);
+    const textContent = await dataPage.deleteDataset(newDatasetName);
+    expect(textContent).toContain(`Are you sure you want to delete Dataset: ${newDatasetName}?`);
 
   });
 
   /**
-   * First, create a new Cohort. Then create a new Dataset with Cohort.
+   * Test:
+   * - Find an existing workspace. Create a new workspace if none exists.
+   * - Create a new Cohort from drug "hydroxychloroquine".
+   * - Create a new Dataset from All Participants and All Surveys. Save dataset without Export to Notebook.
+   * - Edit dataset. Save dataset without Export to Notebook.
+   * - Delete Dataset.
    */
   test('Can create Dataset with user-defined cohort', async () => {
     const workspaceCard = await findWorkspace(page);
@@ -98,17 +109,17 @@ describe('Create Dataset', () => {
     await datasetPage.clickSaveAndAnalyzeButton();
 
     const saveModal = new DatasetSaveModal(page);
-    const dataSetName = await saveModal.saveDataset();
+    let datasetName = await saveModal.saveDataset({exportToNotebook: false});
 
     // Verify create successful.
     await dataPage.openTab(TabLabelAlias.Datasets, {waitPageChange: false});
 
     const resourceCard = new DataResourceCard(page);
-    const dataSetExists = await resourceCard.cardExists(dataSetName, CardType.Dataset);
+    const dataSetExists = await resourceCard.cardExists(datasetName, CardType.Dataset);
     expect(dataSetExists).toBe(true);
 
     // Edit the dataset to include "All Participants".
-    await resourceCard.findCard(dataSetName)
+    await resourceCard.findCard(datasetName)
     const menu = resourceCard.getEllipsis();
     await menu.clickAction(EllipsisMenuAction.Edit);
     await waitWhileLoading(page);
@@ -116,9 +127,12 @@ describe('Create Dataset', () => {
     await datasetPage.selectCohorts(['All Participants']);
     await datasetPage.clickAnalyzeButton();
 
-    // Uncheck Export to Notebook button, then click Update button.
-    await saveModal.saveDataset({exportToNotebook: false}, true);
+    // Save Dataset in a new name.
+    datasetName = await saveModal.saveDataset({exportToNotebook: false}, true);
     await dataPage.waitForLoad();
+
+    await dataPage.openTab(TabLabelAlias.Datasets, {waitPageChange: false});
+    await dataPage.deleteDataset(datasetName);
   });
 
 });

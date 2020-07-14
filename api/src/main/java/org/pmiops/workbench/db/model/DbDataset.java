@@ -38,23 +38,6 @@ public class DbDataset {
   private List<DbDatasetValue> values;
   private short prePackagedConceptSet;
 
-  private DbDataset(DbDataset.Builder builder) {
-    setDataSetId(builder.dataSetId);
-    setWorkspaceId(builder.workspaceId);
-    setName(builder.name);
-    setVersion(builder.version);
-    setDescription(builder.description);
-    setCreatorId(builder.creatorId);
-    setCreationTime(builder.creationTime);
-    setLastModifiedTime(builder.lastModifiedTime);
-    setInvalid(builder.invalid);
-    setIncludesAllParticipants(builder.includesAllParticipants);
-    setConceptSetIds(builder.conceptSetIds);
-    setCohortIds(builder.cohortIds);
-    setValues(builder.values);
-    setPrePackagedConceptSet(builder.prePackagedConceptSet);
-  }
-
   public DbDataset() {
     setVersion(DbDataset.INITIAL_VERSION);
   }
@@ -276,102 +259,5 @@ public class DbDataset {
   @Override
   public String toString() {
     return ToStringBuilder.reflectionToString(this);
-  }
-
-  public static DbDataset.Builder builder() {
-    return new DbDataset.Builder();
-  }
-
-  public static class Builder {
-    private long dataSetId;
-    private long workspaceId;
-    private String name;
-    private int version;
-    private String description;
-    private long creatorId;
-    private Timestamp creationTime;
-    private Timestamp lastModifiedTime;
-    private Boolean invalid;
-    private Boolean includesAllParticipants;
-    private List<Long> conceptSetIds;
-    private List<Long> cohortIds;
-    private List<DbDatasetValue> values;
-    private short prePackagedConceptSet;
-
-    private Builder() {}
-
-    public DbDataset.Builder addDataSetId(long dataSetId) {
-      this.dataSetId = dataSetId;
-      return this;
-    }
-
-    public DbDataset.Builder addWorkspaceId(long workspaceId) {
-      this.workspaceId = workspaceId;
-      return this;
-    }
-
-    public DbDataset.Builder addName(String name) {
-      this.name = name;
-      return this;
-    }
-
-    public DbDataset.Builder addVersion(int version) {
-      this.version = version;
-      return this;
-    }
-
-    public DbDataset.Builder addDescription(String description) {
-      this.description = description;
-      return this;
-    }
-
-    public DbDataset.Builder addCreatorId(long creatorId) {
-      this.creatorId = creatorId;
-      return this;
-    }
-
-    public DbDataset.Builder addCreationTime(Timestamp creationTime) {
-      this.creationTime = creationTime;
-      return this;
-    }
-
-    public DbDataset.Builder addLastModifiedTime(Timestamp lastModifiedTime) {
-      this.lastModifiedTime = lastModifiedTime;
-      return this;
-    }
-
-    public DbDataset.Builder addInvalid(Boolean invalid) {
-      this.invalid = invalid;
-      return this;
-    }
-
-    public DbDataset.Builder addIncludesAllParticipants(Boolean includesAllParticipants) {
-      this.includesAllParticipants = includesAllParticipants;
-      return this;
-    }
-
-    public DbDataset.Builder addConceptSetIds(List<Long> conceptSetIds) {
-      this.conceptSetIds = conceptSetIds;
-      return this;
-    }
-
-    public DbDataset.Builder addCohortIds(List<Long> cohortIds) {
-      this.cohortIds = cohortIds;
-      return this;
-    }
-
-    public DbDataset.Builder addValues(List<DbDatasetValue> values) {
-      this.values = values;
-      return this;
-    }
-
-    public DbDataset.Builder addPrePackagedConceptSets(short prePackagedConceptSet) {
-      this.prePackagedConceptSet = prePackagedConceptSet;
-      return this;
-    }
-
-    public DbDataset build() {
-      return new DbDataset(this);
-    }
   }
 }

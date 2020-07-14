@@ -103,7 +103,38 @@ paths:
           - email
           - profile
           - https://www.googleapis.com/auth/cloud-billing
-
+  /api/billing/{projectId}/members:
+    get:
+      tags:
+        - Billing
+      summary: list members of billing project the caller owns
+      operationId: listBillingProjectMembers
+      parameters:
+        - name: projectId
+          in: path
+          description: Project ID
+          required: true
+          type: string
+      responses:
+        200:
+          description: Success
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/BillingProjectMember'
+        403:
+          description: You must be a project owner to view the members of a project
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        500:
+          description: FireCloud Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+      security:
+        - googleoauth:
+            - openid
+            - email
+            - profile
   /api/billing/{projectId}/{role}/{email}:
       put:
         responses:
@@ -777,6 +808,18 @@ parameters:
 ##########################################################################################
 definitions:
 
+  BillingProjectMember:
+    required:
+      - email
+      - role
+    type: object
+    properties:
+      email:
+        type: string
+        description: the email of the user
+      role:
+        type: string
+        description: the role of the user in the project
   BillingProjectMembership:
     description: ''
     required:

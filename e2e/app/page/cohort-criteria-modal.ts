@@ -1,5 +1,5 @@
 import {Page} from 'puppeteer';
-import Dialog from 'app/component/dialog';
+import Modal from 'app/component/modal';
 import SelectMenu from 'app/component/select-menu';
 import Table from 'app/component/table';
 import ClrIconLink from 'app/element/clr-icon-link';
@@ -62,7 +62,7 @@ export enum FilterSign {
   Between = 'Between',
 }
 
-export default class CohortCriteriaModal extends Dialog {
+export default class CohortCriteriaModal extends Modal {
 
   constructor(page: Page, xpath: string = defaultXpath) {
     super(page, xpath);
@@ -126,7 +126,7 @@ export default class CohortCriteriaModal extends Dialog {
     const { waitUntilClosed = true } = opt
     await this.clickButton(LinkText.Finish);
     if (waitUntilClosed) {
-      await this.waitUntilDialogIsClosed();
+      await this.waitUntilClose();
     }
   }
 

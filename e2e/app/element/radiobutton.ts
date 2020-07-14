@@ -1,4 +1,4 @@
-import {Page, WaitForSelectorOptions} from 'puppeteer';
+import {Page} from 'puppeteer';
 import Container from 'app/container';
 import {ElementType, XPathOptions} from 'app/xpath-options';
 import BaseElement from './base-element';
@@ -6,17 +6,15 @@ import {buildXPath} from 'app/xpath-builders';
 
 export default class RadioButton extends BaseElement {
    
-  static async findByName(
-     page: Page,
-     xOpt: XPathOptions,
-     container?: Container,
-     waitOptions: WaitForSelectorOptions = {visible: true}): Promise<RadioButton> {
-
+  static async findByName(page: Page, xOpt: XPathOptions, container?: Container): Promise<RadioButton> {
     xOpt.type = ElementType.RadioButton;
     const radioButtonXpath = buildXPath(xOpt, container);
     const radioButton = new RadioButton(page, radioButtonXpath);
-    await radioButton.waitForXPath(waitOptions);
     return radioButton;
+  }
+
+  constructor(page: Page, xpath?: string) {
+    super(page, xpath);
   }
 
   async isSelected(): Promise<boolean> {

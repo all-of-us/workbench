@@ -980,6 +980,7 @@ Must be run once when a new cdr is released",
 })
 
 def generate_cb_criteria_tables(cmd_name, *args)
+  ensure_docker_sync()
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.data_browser = false
   op.opts.dry_run = false
@@ -1300,7 +1301,7 @@ Common.register_command({
     :fn => ->(*args) { create_auth_domain("create-auth-domain", args) }
 })
 
-def backfill_billing_project_owners(cmd_name, *args)
+def fix_desynchronized_billing_project_owners(cmd_name, *args)
   common = Common.new
   ensure_docker cmd_name, args
 
@@ -1313,6 +1314,10 @@ def backfill_billing_project_owners(cmd_name, *args)
       TrueClass,
       ->(opts, v) { opts.dry_run = v},
       "When true, print debug lines instead of performing writes. Defaults to true.")
+  op.add_option(
+      "--billing-project-ids [project_id1,...]",
+      ->(opts, v) { opts.billing_project_ids = v},
+      "Optional billing projects IDs to update. By default all projects are considered")
 
   gcc = GcloudContextV2.new(op)
   op.parse.validate
@@ -1323,10 +1328,13 @@ def backfill_billing_project_owners(cmd_name, *args)
   end
 
   fc_config = get_fc_config(op.opts.project)
+  domain = get_config(op.opts.project)["googleDirectoryService"]["gSuiteDomain"]
   flags = ([
       ["--fc-base-url", fc_config["baseUrl"]],
-      ["--billing-project-prefix", get_billing_project_prefix(op.opts.project)]
-  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+      ["--researcher-domain", domain]
+    ] + (op.opts.billing_project_ids ?
+         ["--billing-project-ids", op.opts.billing_project_ids] : [])
+    ).map { |kv| "#{kv[0]}=#{kv[1]}" }
   if op.opts.dry_run
     flags += ["--dry-run"]
   end
@@ -1334,15 +1342,15 @@ def backfill_billing_project_owners(cmd_name, *args)
   flags.map! { |f| "'#{f}'" }
   ServiceAccountContext.new(gcc.project).run do
     common.run_inline %W{
-        gradle backfillBillingProjectOwners
+        gradle fixDesynchronizedBillingProjectOwners
        -PappArgs=[#{flags.join(',')}]}
   end
 end
 
 Common.register_command({
-    :invocation => "backfill-billing-project-owners",
-    :description => "Backfills billing project owner role for owners",
-    :fn => ->(*args) {backfill_billing_project_owners("backfill-billing-project-owners", *args)}
+    :invocation => "fix-desynchronized-billing-project-owners",
+    :description => "Fixes desynchronized billing project owners",
+    :fn => ->(*args) {fix_desynchronized_billing_project_owners("fix-desynchronized-billing-project-owners", *args)}
 })
 
 def update_user_disabled_status(cmd_name, args)
@@ -2215,19 +2223,21 @@ def migrate_database(dry_run = false)
   end
 end
 
-def get_fc_config(project)
+def get_config(project)
   config_json = must_get_env_value(project, :config_json)
-  return JSON.parse(File.read("config/#{config_json}"))["firecloud"]
+  return JSON.parse(File.read("config/#{config_json}"))
+end
+
+def get_fc_config(project)
+  return get_config(project)["firecloud"]
 end
 
 def get_billing_config(project)
-  config_json = must_get_env_value(project, :config_json)
-  return JSON.parse(File.read("config/#{config_json}"))["billing"]
+  return get_config(project)["billing"]
 end
 
 def get_server_config(project)
-  config_json = must_get_env_value(project, :config_json)
-  return JSON.parse(File.read("config/#{config_json}"))["server"]
+  return get_config(project)["server"]
 end
 
 def get_billing_project_prefix(project)
