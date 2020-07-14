@@ -54,22 +54,27 @@ public interface UserService {
 
   void setDataUseAgreementNameOutOfDate(String newGivenName, String newFamilyName);
 
-  void setDataUseAgreementBypassTime(Long userId, Timestamp bypassTime);
+  void setDataUseAgreementBypassTime(
+      Long userId, Timestamp previousBypassTime, Timestamp newBypassTime);
 
-  void setComplianceTrainingBypassTime(Long userId, Timestamp bypassTime);
+  void setComplianceTrainingBypassTime(
+      Long userId, Timestamp previousBypassTime, Timestamp newBypassTime);
 
-  void setBetaAccessBypassTime(Long userId, Timestamp bypassTime);
+  void setBetaAccessBypassTime(Long userId, Timestamp previousBypassTime, Timestamp newBypassTime);
 
-  void setEraCommonsBypassTime(Long userId, Timestamp bypassTime);
+  void setEraCommonsBypassTime(Long userId, Timestamp previousBypassTime, Timestamp newBypassTime);
 
-  void setTwoFactorAuthBypassTime(Long userId, Timestamp bypassTime);
+  void setTwoFactorAuthBypassTime(
+      Long userId, Timestamp previousBypassTime, Timestamp newBypassTime);
 
   DbUser setDisabledStatus(Long userId, boolean disabled);
 
   List<DbUser> getAllUsers();
 
+  @Deprecated // use or create an auditor in org.pmiops.workbench.actionaudit.auditors
   void logAdminUserAction(long targetUserId, String targetAction, Object oldValue, Object newValue);
 
+  @Deprecated // use or create an auditor in org.pmiops.workbench.actionaudit.auditors
   void logAdminWorkspaceAction(
       long targetWorkspaceId, String targetAction, Object oldValue, Object newValue);
 

@@ -56,10 +56,5 @@ public class AuthDomainController implements AuthDomainApiDelegate {
       UpdateUserDisabledRequest request, Boolean previousDisabled, DbUser updatedTargetUser) {
     authDomainAuditAdapter.fireSetAccountDisabledStatus(
         updatedTargetUser.getUserId(), request.getDisabled(), previousDisabled);
-    userService.logAdminUserAction(
-        updatedTargetUser.getUserId(),
-        "updated user disabled state",
-        previousDisabled,
-        request.getDisabled());
   }
 }
