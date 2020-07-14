@@ -524,6 +524,10 @@ dependencies {
   compile "org.apache.commons:commons-lang3:3.6"
   compile "org.apache.commons:commons-text:1.8"
 
+  // Genomics dependencies
+  compile "org.broadinstitute:gatk:4.1.8.0"
+  compile "com.github.broadinstitute:picard:2.22.8"
+
   // Elasticsearch client
   compile "org.elasticsearch.client:elasticsearch-rest-high-level-client:$project.ext.ELASTICSEARCH_VERSION"
   compile "org.elasticsearch:elasticsearch:$project.ext.ELASTICSEARCH_VERSION"
