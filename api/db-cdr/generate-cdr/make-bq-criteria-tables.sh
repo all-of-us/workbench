@@ -1420,3 +1420,204 @@ FROM
     ) y
 WHERE x.domain_id = 'SURVEY'
     and x.concept_id = y.ancestor_concept_id"
+
+
+################################################
+# DEMOGRAPHICS
+################################################
+echo "DEMO - Deceased"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (
+          id
+        , parent_id
+        , domain_id
+        , is_standard
+        , type
+        , name
+        , item_count
+        , est_count
+        , is_group
+        , is_selectable
+        , has_attribute
+        , has_hierarchy
+    )
+SELECT
+    (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 AS id
+    , 0
+    , 'PERSON'
+    , 1
+    , 'DECEASED'
+    , 'Deceased'
+    , COUNT(DISTINCT person_id)
+    , COUNT(DISTINCT person_id)
+    , 0
+    , 1
+    , 0
+    , 0
+FROM \`$BQ_PROJECT.$BQ_DATASET.death\`"
+
+echo "DEMO - Gender Identity"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (
+          id
+        , parent_id
+        , domain_id
+        , is_standard
+        , type
+        , concept_id
+        , name
+        , item_count
+        , est_count
+        , is_group
+        , is_selectable
+        , has_attribute
+        , has_hierarchy
+    )
+SELECT
+    ROW_NUMBER() OVER(ORDER BY concept_id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id
+    , 0
+    , 'PERSON'
+    , 1
+    , 'GENDER'
+    , concept_id
+    , CASE WHEN b.concept_id = 0 THEN 'Unknown' ELSE b.concept_name END as name
+    , a.cnt
+    , a.cnt
+    , 0
+    , 1
+    , 0
+    , 0
+FROM
+    (
+        SELECT gender_concept_id, COUNT(DISTINCT person_id) cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.person\`
+        GROUP BY 1
+    ) a
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.gender_concept_id = b.concept_id"
+
+echo "DEMO - Sex at Birth"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (
+          id
+        , parent_id
+        , domain_id
+        , is_standard
+        , type
+        , concept_id
+        , name
+        , item_count
+        , est_count
+        , is_group
+        , is_selectable
+        , has_attribute
+        , has_hierarchy
+    )
+SELECT
+    ROW_NUMBER() OVER(ORDER BY concept_id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id
+    , 0
+    , 'PERSON'
+    , 1
+    , 'SEX'
+    , concept_id
+    , CASE WHEN b.concept_id = 0 THEN 'Unknown' ELSE b.concept_name END as name
+    , a.cnt
+    , a.cnt
+    , 0
+    , 1
+    , 0
+    , 0
+FROM
+    (
+        SELECT sex_at_birth_concept_id, COUNT(DISTINCT person_id) cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.person\`
+        GROUP BY 1
+    ) a
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.sex_at_birth_concept_id = b.concept_id"
+
+echo "DEMO - Race"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (
+          id
+        , parent_id
+        , domain_id
+        , is_standard
+        , type
+        , concept_id
+        , name
+        , item_count
+        , est_count
+        , is_group
+        , is_selectable
+        , has_attribute
+        , has_hierarchy
+    )
+SELECT
+    ROW_NUMBER() OVER(ORDER BY concept_id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id
+    , 0
+    , 'PERSON'
+    , 1
+    , 'RACE'
+    , concept_id
+    , CASE
+        WHEN a.race_concept_id = 0 THEN 'Unknown'
+        ELSE regexp_replace(b.concept_name, r'^.+:\s', '')
+      END as name
+    , a.cnt
+    , a.cnt
+    , 0
+    , 1
+    , 0
+    , 0
+FROM
+    (
+        SELECT race_concept_id, COUNT(DISTINCT person_id) cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.person\`
+        GROUP BY 1
+    ) a
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.race_concept_id = b.concept_id
+WHERE b.concept_id is not null"
+
+echo "DEMO - Ethnicity"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (
+          id
+        , parent_id
+        , domain_id
+        , is_standard
+        , type
+        , concept_id
+        , name
+        , item_count
+        , est_count
+        , is_group
+        , is_selectable
+        , has_attribute
+        , has_hierarchy
+    )
+SELECT
+    ROW_NUMBER() OVER(ORDER BY concept_id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id
+    , 0
+    , 'PERSON'
+    , 1
+    , 'ETHNICITY'
+    , concept_id
+    , regexp_replace(b.concept_name, r'^.+:\s', '')
+    , a.cnt
+    , a.cnt
+    , 0
+    , 1
+    , 0
+    , 0
+FROM
+    (
+        SELECT ethnicity_concept_id, COUNT(DISTINCT person_id) cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.person\`
+        GROUP BY 1
+    ) a
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.ethnicity_concept_id = b.concept_id
+WHERE b.concept_id is not null"
