@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import * as React from 'react';
 
-import {CohortSearch} from 'app/cohort-search/cohort-search.component';
+import {CohortSearch} from 'app/cohort-search/cohort-search/cohort-search.component';
 import {CBModal} from 'app/cohort-search/modal/modal.component';
 import {ListOverview} from 'app/cohort-search/overview/overview.component';
 import {SearchGroupList} from 'app/cohort-search/search-group-list/search-group-list.component';
@@ -233,13 +233,13 @@ export const CohortPage = withCurrentWorkspace() (
                       updating={() => this.props.setUpdatingCohort(true)}/>}
                 </div>
                 {loading && <SpinnerOverlay/>}
+                {searchContext && <CBModal
+                    closeSearch={() => this.setState({searchContext: undefined})}
+                    searchContext={searchContext}
+                    setSearchContext={(c) => this.setState({searchContext: c})}/>}
               </FlexRowWrap>
           }
         </div>
-        {searchContext && <CBModal
-            closeSearch={() => this.setState({searchContext: undefined})}
-            searchContext={searchContext}
-            setSearchContext={(c) => this.setState({searchContext: c})}/>}
         {modalOpen && <Modal>
           <ModalTitle>Warning! </ModalTitle>
           <ModalBody>
