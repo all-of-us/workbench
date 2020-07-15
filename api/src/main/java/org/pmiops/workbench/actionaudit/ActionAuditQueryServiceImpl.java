@@ -5,11 +5,14 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.StandardSQLTypeName;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableMap;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
-import org.joda.time.DateTime;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.ActionAuditConfig;
@@ -41,14 +44,15 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
           + "WHERE %s\n"
           + "  AND @after <= TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64))\n"
           + "  AND TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) < @before\n"
-          + "  AND @after <= _PARTITIONTIME\n"
-          + "  AND _PARTITIONTIME < @before\n"
+          + "  AND @after_partition_time <= _PARTITIONTIME\n"
+          + "  AND _PARTITIONTIME < @before_partition_time\n"
           + "ORDER BY event_time, agent_id, action_id\n"
           + "LIMIT @limit;";
 
   private final AuditLogEntryMapper auditLogEntryMapper;
   private final BigQueryService bigQueryService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private static final Duration PARTITION_BUFFER = Duration.ofDays(1);
 
   public ActionAuditQueryServiceImpl(
       AuditLogEntryMapper auditLogEntryMapper,
@@ -61,7 +65,7 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
 
   @Override
   public WorkspaceAuditLogQueryResponse queryEventsForWorkspace(
-      long workspaceDatabaseId, long limit, DateTime after, DateTime before) {
+      long workspaceDatabaseId, long limit, Instant after, Instant before) {
     final String whereClausePrefix =
         "jsonPayload.target_id = @workspace_db_id AND\n"
             + "  jsonPayload.target_type = 'WORKSPACE'\n";
@@ -97,7 +101,7 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
 
   @Override
   public UserAuditLogQueryResponse queryEventsForUser(
-      long userDatabaseId, long limit, DateTime after, DateTime before) {
+      long userDatabaseId, long limit, Instant after, Instant before) {
 
     final String whereClausePrefix =
         "((jsonPayload.target_id = @user_db_id AND jsonPayload.target_type = 'USER') OR\n"
@@ -124,33 +128,67 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
   }
 
   private ImmutableMap.Builder<String, QueryParameterValue> getNamedParameterMapBuilder(
-      long limit, DateTime after, DateTime before) {
+      long limit, Instant after, Instant before) {
+    final Instant afterPartitionTime = after.minus(PARTITION_BUFFER);
+    final Instant beforePartitionTime = before.plus(PARTITION_BUFFER);
+
     return ImmutableMap.<String, QueryParameterValue>builder()
         .put("limit", QueryParameterValue.int64(Math.max(limit, MAX_QUERY_LIMIT)))
-        .put(
-            "after", QueryParameterValue.timestamp(after.getMillis() * MICROSECONDS_IN_MILLISECOND))
-        .put(
-            "before",
-            QueryParameterValue.timestamp(before.getMillis() * MICROSECONDS_IN_MILLISECOND));
+        .put("after", toQueryParameterValue(after))
+        .put("before", toQueryParameterValue(before))
+        .put("after_partition_time", toQueryParameterValue(afterPartitionTime))
+        .put("before_partition_time", toQueryParameterValue(beforePartitionTime));
+  }
+
+  private QueryParameterValue toQueryParameterValue(Instant instant) {
+    return QueryParameterValue.timestamp(instant.toEpochMilli() * MICROSECONDS_IN_MILLISECOND);
   }
 
   private String getReplacedQueryText(QueryJobConfiguration queryJobConfiguration) {
-    String result = queryJobConfiguration.getQuery();
+    String result = "-- reconstructed query text\n" + queryJobConfiguration.getQuery();
+    final Map<String, QueryParameterValue> keyToNamedParameter =
+        queryJobConfiguration.getNamedParameters().entrySet().stream()
+            .collect(Collectors.toMap(e -> decorateParameterName(e.getKey()), Entry::getValue));
 
-    for (Map.Entry<String, QueryParameterValue> entry :
-        queryJobConfiguration.getNamedParameters().entrySet()) {
-      String parameterName = "@" + entry.getKey();
-      final QueryParameterValue parameterValue = entry.getValue();
-      final String rawStringValue = Optional.ofNullable(parameterValue.getValue()).orElse("NULL");
-      final String replacement;
-      if (parameterValue.getType() == StandardSQLTypeName.TIMESTAMP) {
-        replacement = String.format("TIMESTAMP '%s'", rawStringValue);
-      } else {
-        replacement = rawStringValue;
-      }
-      result = result.replace(parameterName, replacement);
+    // Sort in reverse lenght order so we don't partially replace any parameter names (e.g. replace
+    // "@foo" before "@foo_bar").
+    final List<String> keysByLengthDesc =
+        keyToNamedParameter.keySet().stream()
+            .sorted((a, b) -> b.length() - a.length())
+            .collect(Collectors.toList());
+
+    final Map<String, String> keyToStringValue =
+        keysByLengthDesc.stream()
+            .collect(Collectors.toMap(k -> k, k -> getReplacementString(k, keyToNamedParameter)));
+
+    for (String key : keysByLengthDesc) {
+      result = result.replace(key, keyToStringValue.getOrDefault(key, "NULL"));
     }
     result = result.replace("\n", " ");
     return result;
+  }
+
+  private String decorateParameterName(String parameterName) {
+    return "@" + parameterName;
+  }
+
+  private String getReplacementString(
+      String key, Map<String, QueryParameterValue> keyToNamedParameter) {
+    final QueryParameterValue parameterValue = keyToNamedParameter.get(key);
+    final String rawStringValue =
+        Optional.ofNullable(parameterValue).map(QueryParameterValue::getValue).orElse("NULL");
+
+    final StandardSQLTypeName typeName =
+        Optional.ofNullable(parameterValue)
+            .map(QueryParameterValue::getType)
+            .orElse(StandardSQLTypeName.STRING);
+
+    final String replacement;
+    if (typeName == StandardSQLTypeName.TIMESTAMP) {
+      replacement = String.format("TIMESTAMP '%s'", rawStringValue);
+    } else {
+      replacement = rawStringValue;
+    }
+    return replacement;
   }
 }

@@ -13,9 +13,10 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.Schema;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableList;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
-import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryService;
@@ -56,8 +57,8 @@ public class ActionAuditQueryServiceTest {
   private static final long AGENT_ID = 202L;
   private static final String ACTION_ID_1 = "abfcb9ed-fa65-4e98-acb2-08b0d8b30000";
   private static final String USERNAME = "jay@unit-test-aou.org";
-  private static final DateTime EVENT_DATETIME = DateTime.parse("2010-06-30T01:20+02:00");
-  public static final long EVENT_TIME_SECONDS = EVENT_DATETIME.getMillis() / 1000;
+  private static final Instant EVENT_INSTANT = Instant.parse("2010-06-30T01:20:00.00Z");
+  public static final long EVENT_TIME_SECONDS = EVENT_INSTANT.getEpochSecond();
   private static final List<FieldValueList> WORKSPACE_RESULT_ROWS =
       ImmutableList.of(
           FieldValues.buildFieldValueList(
@@ -99,8 +100,8 @@ public class ActionAuditQueryServiceTest {
           WORKSPACE_QUERY_SCHEMA, WORKSPACE_RESULT_ROWS.size(), WORKSPACE_QUERY_RESULT_PAGE);
   private static final TableResult EMPTY_RESULT = new EmptyTableResult();
   private static final long DEFAULT_LIMIT = 100L;
-  private static final DateTime DEFAULT_AFTER_INCLUSIVE = DateTime.parse("205-02-14T01:20+02:00");
-  private static final DateTime DEFAULT_BEFORE_EXCLUSIVE = DateTime.parse("2020-08-30T01:20+02:00");
+  private static final Instant DEFAULT_AFTER = Instant.parse("2005-02-14T01:20:00.02Z");
+  private static final Instant DEFAULT_BEFORE = Instant.parse("2020-08-30T01:20:00.02Z");
   private static final long TIME_TOLERANCE_MILLIS = 500;
   private static final long USER_DB_ID = 11223344L;
   private static final String WORKSPACE_QUERY_SNIPPET_1 =
@@ -126,10 +127,7 @@ public class ActionAuditQueryServiceTest {
     doReturn(EMPTY_RESULT).when(mockBigQueryService).executeQuery(any(QueryJobConfiguration.class));
     final WorkspaceAuditLogQueryResponse response =
         actionAuditQueryService.queryEventsForWorkspace(
-            WORKSPACE_DATABASE_ID,
-            DEFAULT_LIMIT,
-            DEFAULT_AFTER_INCLUSIVE,
-            DEFAULT_BEFORE_EXCLUSIVE);
+            WORKSPACE_DATABASE_ID, DEFAULT_LIMIT, DEFAULT_AFTER, DEFAULT_BEFORE);
 
     assertThat(response.getLogEntries()).isEmpty();
     assertThat(response.getWorkspaceDatabaseId()).isEqualTo(WORKSPACE_DATABASE_ID);
@@ -144,10 +142,7 @@ public class ActionAuditQueryServiceTest {
 
     final WorkspaceAuditLogQueryResponse response =
         actionAuditQueryService.queryEventsForWorkspace(
-            WORKSPACE_DATABASE_ID,
-            DEFAULT_LIMIT,
-            DEFAULT_AFTER_INCLUSIVE,
-            DEFAULT_BEFORE_EXCLUSIVE);
+            WORKSPACE_DATABASE_ID, DEFAULT_LIMIT, DEFAULT_AFTER, DEFAULT_BEFORE);
     assertThat(response.getLogEntries()).hasSize(WORKSPACE_RESULT_ROWS.size());
 
     final AuditLogEntry row1 = response.getLogEntries().get(0);
@@ -157,7 +152,7 @@ public class ActionAuditQueryServiceTest {
     assertThat(row1.getAgentId()).isEqualTo(AGENT_ID);
     assertThat((double) row1.getEventTime().getMillis())
         .isWithin(TIME_TOLERANCE_MILLIS)
-        .of(EVENT_DATETIME.getMillis());
+        .of(EVENT_INSTANT.toEpochMilli());
 
     final AuditLogEntry row2 = response.getLogEntries().get(1);
     assertThat(row2.getActionId()).isEqualTo(ACTION_ID_1);
@@ -173,9 +168,27 @@ public class ActionAuditQueryServiceTest {
 
     final UserAuditLogQueryResponse response =
         actionAuditQueryService.queryEventsForUser(
-            USER_DB_ID, DEFAULT_LIMIT, DEFAULT_AFTER_INCLUSIVE, DEFAULT_BEFORE_EXCLUSIVE);
+            USER_DB_ID, DEFAULT_LIMIT, DEFAULT_AFTER, DEFAULT_BEFORE);
     assertThat(response.getLogEntries()).isEmpty();
     assertThat(response.getUserDatabaseId()).isEqualTo(USER_DB_ID);
     assertThat(response.getQuery()).contains("SELECT");
+  }
+
+  @Test
+  public void testPartitionTimeBuffer() {
+    doReturn(EMPTY_RESULT).when(mockBigQueryService).executeQuery(any(QueryJobConfiguration.class));
+    final Instant after = Instant.parse("2020-03-10T09:30:00.00Z");
+    final Instant before = after.plus(Duration.ofDays(5));
+
+    final UserAuditLogQueryResponse response =
+        actionAuditQueryService.queryEventsForUser(USER_DB_ID, DEFAULT_LIMIT, after, before);
+
+    final String query = response.getQuery();
+    assertThat(query)
+        .containsMatch(
+            "AND\\s+_PARTITIONTIME\\s+<\\s+TIMESTAMP\\s+'2020-03-16 09:30:00\\.\\d{6}\\+00:00'");
+    assertThat(query)
+        .containsMatch(
+            "TIMESTAMP\\s+'2020-03-09 09:30:00\\.\\d{6}\\+00:00'\\s+<=\\s+_PARTITIONTIME");
   }
 }
