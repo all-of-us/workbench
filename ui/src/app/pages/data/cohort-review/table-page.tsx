@@ -9,7 +9,7 @@ import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {NumberInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {cohortReviewStore, filterStateStore, getVocabOptions, multiOptions, vocabOptions} from 'app/services/review-state.service';
+import {cohortReviewStore, filterStateStore, getVocabOptions, vocabOptions} from 'app/services/review-state.service';
 import {cohortBuilderApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {datatableStyles} from 'app/styles/datatable';
@@ -187,7 +187,7 @@ const idColumn = {
   ...styles.columnBody,
   color: '#2691D0'
 };
-let multiFilters: any = {
+const defaultDemoFilters: any = {
   DECEASED: [
     {name: 'Yes', value: '1'},
     {name: 'No', value: '0'},
@@ -225,6 +225,7 @@ interface State {
   total: number;
   filters: any;
   error: boolean;
+  demoFilters: any;
 }
 
 export const ParticipantsTable = withCurrentWorkspace()(
@@ -241,6 +242,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
         total: null,
         filters: filterStateStore.getValue().participants,
         error: false,
+        demoFilters: defaultDemoFilters
       };
       this.filterInput = fp.debounce(300, () => {
         this.setState({loading: true, error: false});
@@ -250,6 +252,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
 
     async componentDidMount() {
       const {filters} = this.state;
+      let {demoFilters} = this.state;
       const {cdrVersionId} = this.props.workspace;
       const promises = [];
       const {ns, wsid} = urlParamsStore.getValue();
@@ -270,43 +273,37 @@ export const ParticipantsTable = withCurrentWorkspace()(
       } else {
         this.setState({data: review.participantCohortStatuses.map(this.mapData), page: review.page, total: review.queryResultSize});
       }
-      if (!multiOptions.getValue()) {
-        promises.push(
-          cohortBuilderApi().findParticipantDemographics(+cdrVersionId).then(data => {
-            const extract = (arr, _type?) => fp.uniq([
-              ...arr.map(i => {
-                filters[_type].push(i.conceptId.toString());
-                return {
-                  name: i.conceptName,
-                  value: i.conceptId.toString()
-                };
-              }),
-              {name: 'Select All', value: 'Select All'}
-            ]) as string[];
-            multiFilters = {
-              ...multiFilters,
-              RACE: extract(data.raceList, Columns.RACE),
-              GENDER: extract(data.genderList, Columns.GENDER),
-              ETHNICITY: extract(data.ethnicityList, Columns.ETHNICITY)
-            };
-            multiOptions.next(multiFilters);
-            this.setState({filters});
-          }, error => {
-            console.error(error);
-            multiFilters = {
-              ...multiFilters,
-              RACE: [{name: 'Select All', value: 'Select All'}],
-              GENDER: [{name: 'Select All', value: 'Select All'}],
-              ETHNICITY: [{name: 'Select All', value: 'Select All'}]
-            };
-          })
-        );
-      } else {
-        multiFilters = multiOptions.getValue();
-      }
-      if (promises.length) {
-        await Promise.all(promises);
-      }
+      promises.push(
+        cohortBuilderApi().findParticipantDemographics(+cdrVersionId).then(data => {
+          const extract = (arr, _type?) => fp.uniq([
+            ...arr.map(i => {
+              filters[_type].push(i.conceptId.toString());
+              return {
+                name: i.conceptName,
+                value: i.conceptId.toString()
+              };
+            }),
+            {name: 'Select All', value: 'Select All'}
+          ]) as string[];
+          demoFilters = {
+            ...demoFilters,
+            RACE: extract(data.raceList, Columns.RACE),
+            GENDER: extract(data.genderList, Columns.GENDER),
+            ETHNICITY: extract(data.ethnicityList, Columns.ETHNICITY)
+          };
+          this.setState({demoFilters, filters});
+        }, error => {
+          console.error(error);
+          demoFilters = {
+            ...demoFilters,
+            RACE: [{name: 'Select All', value: 'Select All'}],
+            GENDER: [{name: 'Select All', value: 'Select All'}],
+            ETHNICITY: [{name: 'Select All', value: 'Select All'}]
+          };
+          this.setState({demoFilters});
+        })
+      );
+      await Promise.all(promises);
       this.setState({loading: false});
     }
 
@@ -461,12 +458,12 @@ export const ParticipantsTable = withCurrentWorkspace()(
     }
 
     filterTemplate(column: string) {
-      const {data, filters, loading} = this.state;
+      const {data, demoFilters, filters, loading} = this.state;
       if (!data) {
         return '';
       }
       const colType = reverseColumnEnum[column];
-      const options = multiFilters[colType];
+      const options = demoFilters[colType];
       const filtered = (column === 'participantId' && filters.PARTICIPANTID)
         || (column !== 'participantId' && !filters[colType].includes('Select All'));
       let fl: any, ip: any;
@@ -509,10 +506,10 @@ export const ParticipantsTable = withCurrentWorkspace()(
     }
 
     onCheckboxChange = (event, column) => {
-      const {filters} = this.state;
+      const {demoFilters, filters} = this.state;
       const {checked, value} = event.target;
       if (checked) {
-        const options = multiFilters[column].map(opt => opt.value);
+        const options = demoFilters[column].map(opt => opt.value);
         if (value === 'Select All') {
           filters[column] = options;
         } else {
