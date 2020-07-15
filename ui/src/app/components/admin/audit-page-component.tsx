@@ -3,6 +3,7 @@ import {Navigate} from 'app/components/app-router';
 import {Button} from 'app/components/buttons';
 import {NumberInput, TextInputWithLabel} from 'app/components/inputs';
 import colors from 'app/styles/colors';
+import { useDebounce } from 'app/utils';
 import {actionToString} from 'app/utils/audit-utils';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -72,10 +73,7 @@ const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath, but
 const NumActions = ({onChange, totalActions}) => {
   const [displayNum, setDisplayNum] = useState(20);
 
-  useEffect(() => {
-    const timeoutId = setTimeout(() => onChange(displayNum), 250);
-    return () => clearTimeout(timeoutId);
-  }, [displayNum]);
+  useDebounce(() => onChange(displayNum), [displayNum]);
 
   return <div>
     <label style={{
