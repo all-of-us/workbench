@@ -2156,16 +2156,6 @@ paths:
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
     - "$ref": "#/parameters/workspaceId"
-    get:
-      tags:
-      - dataSet
-      description: Returns all data sets in a workspace
-      operationId: getDataSetsInWorkspace
-      responses:
-        200:
-          description: A list of data sets.
-          schema:
-            "$ref": "#/definitions/DataSetListResponse"
     post:
       tags:
       - dataSet

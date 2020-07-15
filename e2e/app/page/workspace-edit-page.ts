@@ -1,4 +1,4 @@
-import Dialog from 'app/component/dialog';
+import Modal from 'app/component/modal';
 import Button from 'app/element/button';
 import Checkbox from 'app/element/checkbox';
 import Select from 'app/element/select';
@@ -388,16 +388,16 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
     await button.focus(); // bring into viewport
     await button.click();
 
-    // confirm create in pop-up dialog
-    const dialog = new Dialog(this.page);
-    const dialogText = await dialog.getContent();
+    // confirm create in pop-up modal
+    const modal = new Modal(this.page);
+    const modalTextContent = await modal.getContent();
     await Promise.all([
-      dialog.clickButton(LinkText.Confirm),
-      dialog.waitUntilDialogIsClosed(),
+      modal.clickButton(LinkText.Confirm),
+      modal.waitUntilClose(),
       this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 60000}),
     ]);
     await waitWhileLoading(this.page);
-    return dialogText;
+    return modalTextContent;
   }
 
   async clickShareWithCollaboratorsCheckbox() {

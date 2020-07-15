@@ -75,7 +75,7 @@ export async function waitForPropertyEquality(
   }
 }
 
-export async function waitForNumericalString(page: Page, xpath: string): Promise<string> {
+export async function waitForNumericalString(page: Page, xpath: string, timeOut: number = 30000): Promise<string> {
   await page.waitForXPath(xpath, {visible: true});
 
   const numbers =  await page.waitForFunction( xpathSelector => {
@@ -88,7 +88,7 @@ export async function waitForNumericalString(page: Page, xpath: string): Promise
       }
     }
     return false;
-  }, {timeout: 30000}, xpath);
+  }, {timeout: timeOut}, xpath);
 
   return (await numbers.jsonValue()).toString();
 }

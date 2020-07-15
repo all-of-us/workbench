@@ -560,7 +560,6 @@ jobs:
     parallelism: 3
     steps:
       - checkout_init_git
-      - halt_if_code_unchanged
       - browser-tools/install-browser-tools
       - run_e2e_test
 

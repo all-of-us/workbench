@@ -71,6 +71,12 @@
       "namespace": "aou-rw-269aaeea",
       "id": "demophewassmoking",
       "category": "DEMO_PROJECTS"
+    },
+    {
+      "name": "Demo - Cardiovascular Risk Scoring",
+      "namespace": "aou-rw-6b2c20d6",
+      "id": "democardiovascularriskscoring",
+      "category": "DEMO_PROJECTS"
     }
   ]
 }

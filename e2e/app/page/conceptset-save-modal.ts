@@ -1,10 +1,11 @@
 import {Page} from 'puppeteer';
-import Dialog from 'app/component/dialog';
+import Modal from 'app/component/modal';
 import {makeRandomName} from 'utils/str-utils';
 import RadioButton from 'app/element/radiobutton';
 import Textbox from 'app/element/textbox';
 import Textarea from 'app/element/textarea';
 import {LinkText} from 'app/text-labels';
+import {waitWhileLoading} from '../../utils/test-utils';
 import ConceptsetActionsPage from './conceptset-actions-page';
 
 const faker = require('faker/locale/en_US');
@@ -14,7 +15,7 @@ export enum SaveOption {
   ChooseExistingSet = 'Choose existing set',
 }
 
-export default class ConceptsetSaveModal extends Dialog {
+export default class ConceptsetSaveModal extends Modal {
 
   constructor(page: Page) {
     super(page);
@@ -50,6 +51,10 @@ export default class ConceptsetSaveModal extends Dialog {
 
     // Click SAVE button.
     await this.clickButton(LinkText.Save);
+    await Promise.all([
+      waitWhileLoading(this.page),
+      this.waitUntilClose(),
+    ]);
 
     const conceptActionPage = new ConceptsetActionsPage(this.page);
     await conceptActionPage.waitForLoad();

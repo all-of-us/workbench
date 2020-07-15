@@ -39,10 +39,14 @@ export const AppRoutingComponent: React.FunctionComponent<{signIn: Function}> = 
             minimizeChrome: true
           }} />}
         />
-        <AppRoute path='/admin/user-audit' component={() => <UserAudit routeData={{title: 'User Audit'}}/>}/>
-        <AppRoute path='/admin/user-audit/:username' component={() => <UserAudit routeData={{title: 'User Audit'}}/>}/>
-        <AppRoute path='/admin/workspace-audit' component={() => <WorkspaceAudit routeData={{title: 'Workspace Audit'}}/>}/>
-        <AppRoute path='/admin/workspace-audit/:workspaceNamespace' component={() => <WorkspaceAudit routeData={{title: 'Workspace Audit'}}/>}/>
+        <AppRoute path='/admin/user-audit'
+                  component={() => <UserAudit routeData={{title: 'User Audit'}}/>}/>
+        <AppRoute path='/admin/user-audit/:username'
+                  component={() => <UserAudit routeData={{title: 'User Audit'}}/>}/>
+        <AppRoute path='/admin/workspace-audit'
+                  component={() => <WorkspaceAudit routeData={{title: 'Workspace Audit'}}/>}/>
+        <AppRoute path='/admin/workspace-audit/:workspaceNamespace'
+                  component={() => <WorkspaceAudit routeData={{title: 'Workspace Audit'}}/>}/>
     </ProtectedRoutes>
   </AppRouter>;
 };

@@ -1,10 +1,17 @@
 package org.pmiops.workbench.dataset;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.mapstruct.AfterMapping;
+import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
+import org.mapstruct.NullValueCheckStrategy;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
@@ -13,6 +20,7 @@ import org.pmiops.workbench.db.model.DbDatasetValue;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSet;
+import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -37,6 +45,20 @@ public interface DataSetMapper {
   @Named("dbModelToClientLight")
   DataSet dbModelToClientLight(DbDataset dbDataset);
 
+  @Mapping(target = "dataSetId", ignore = true)
+  @Mapping(
+      target = "version",
+      source = "etag",
+      qualifiedByName = "etagToCdrVersion",
+      nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+  @Mapping(target = "creatorId", ignore = true)
+  @Mapping(target = "creationTime", ignore = true)
+  @Mapping(target = "invalid", ignore = true)
+  @Mapping(target = "lastModifiedTime", ignore = true)
+  @Mapping(target = "prePackagedConceptSetEnum", ignore = true)
+  @Mapping(target = "values", source = "domainValuePairs")
+  DbDataset dataSetRequestToDb(DataSetRequest dataSetRequest, @Context DbDataset dbDataSet);
+
   @Mapping(target = "id", source = "dataSetId")
   @Mapping(target = "conceptSets", source = "conceptSetIds")
   @Mapping(target = "cohorts", source = "cohortIds")
@@ -44,8 +66,40 @@ public interface DataSetMapper {
   @Mapping(target = "etag", source = "version", qualifiedByName = "cdrVersionToEtag")
   DataSet dbModelToClient(DbDataset dbDataset);
 
+  @AfterMapping
+  default void populateFromSourceDbObject(
+      @MappingTarget DbDataset targetDb, @Context DbDataset dbDataSet) {
+    if (dbDataSet != null
+        && (targetDb.getConceptSetIds() == null || targetDb.getConceptSetIds().size() == 0)) {
+      // In case of rename, dataSetRequest does not have cohort/Concept ID information
+      targetDb.setConceptSetIds(dbDataSet.getConceptSetIds());
+      targetDb.setCohortIds(dbDataSet.getCohortIds());
+      targetDb.setValues(dbDataSet.getValues());
+      targetDb.setIncludesAllParticipants(dbDataSet.getIncludesAllParticipants());
+    }
+  }
+
   default PrePackagedConceptSetEnum prePackagedConceptSetFromStorage(Short prePackagedConceptSet) {
     return DbStorageEnums.prePackagedConceptSetsFromStorage(prePackagedConceptSet);
+  }
+
+  default Short toDBPrePackagedConceptSet(PrePackagedConceptSetEnum prePackagedConceptSetEnum) {
+    return DbStorageEnums.prePackagedConceptSetsToStorage(prePackagedConceptSetEnum);
+  }
+
+  default List<DbDatasetValue> toDbDomainValuePairs(List<DomainValuePair> domainValuePairs) {
+    if (domainValuePairs != null) {
+      return domainValuePairs.stream()
+          .map(this::getDataSetValuesFromDomainValueSet)
+          .collect(toImmutableList());
+    }
+    return new ArrayList<DbDatasetValue>();
+  }
+
+  default DbDatasetValue getDataSetValuesFromDomainValueSet(DomainValuePair domainValuePair) {
+    return new DbDatasetValue(
+        DbStorageEnums.domainToStorage(domainValuePair.getDomain()).toString(),
+        domainValuePair.getValue());
   }
 
   default List<DomainValuePair> copyDomainValuePairsToClient(List<DbDatasetValue> values) {

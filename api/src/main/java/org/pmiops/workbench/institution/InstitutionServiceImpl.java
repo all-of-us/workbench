@@ -2,6 +2,7 @@ package org.pmiops.workbench.institution;
 
 import com.google.common.base.Strings;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -81,6 +82,7 @@ public class InstitutionServiceImpl implements InstitutionService {
   public List<Institution> getInstitutions() {
     return StreamSupport.stream(institutionDao.findAll().spliterator(), false)
         .map(this::toModel)
+        .sorted(Comparator.comparing(institution -> institution.getDisplayName()))
         .collect(Collectors.toList());
   }
 

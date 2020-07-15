@@ -4,7 +4,6 @@ import {
   DataSetApi,
   DataSetCodeResponse,
   DataSetExportRequest,
-  DataSetListResponse,
   DataSetPreviewRequest,
   DataSetPreviewResponse,
   DataSetRequest, DomainValuesResponse,
@@ -66,14 +65,6 @@ export class DataSetApiStub extends DataSetApi {
         {value: 'Value1', queryValue: ['blah']},
         {value: 'Value2', queryValue: ['blah2']}
       ]
-    });
-  }
-
-  getDataSetsInWorkspace(
-    workspaceNamespace: string,
-    workspaceId: string): Promise<DataSetListResponse> {
-    return new Promise<DataSetListResponse>(resolve => {
-      resolve({items: DataSetApiStub.stubDataSets()});
     });
   }
 

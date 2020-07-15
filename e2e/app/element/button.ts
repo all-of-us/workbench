@@ -1,4 +1,4 @@
-import {JSHandle, Page, WaitForSelectorOptions} from 'puppeteer';
+import {JSHandle, Page} from 'puppeteer';
 import Container from 'app/container';
 import {ElementType, XPathOptions} from 'app/xpath-options';
 import BaseElement from './base-element';
@@ -12,17 +12,15 @@ export default class Button extends BaseElement {
    * @param {Container} container Parent node if one exists. Normally, it is a Dialog or Modal window.
    * @param {WaitForSelectorOptions} waitOptions.
    */
-  static async findByName(
-     page: Page,
-     xOpt: XPathOptions,
-     container?: Container,
-     waitOptions: WaitForSelectorOptions = {visible: true}): Promise<Button> {
-
+  static async findByName(page: Page, xOpt: XPathOptions, container?: Container): Promise<Button> {
     xOpt.type = ElementType.Button;
     const butnXpath = buildXPath(xOpt, container);
     const button = new Button(page, butnXpath);
-    await button.waitForXPath(waitOptions);
     return button;
+  }
+
+  constructor(page: Page, xpath?: string) {
+    super(page, xpath);
   }
 
   /**

@@ -31,8 +31,8 @@ export default class ConceptsetSearchPage extends AuthenticatedPage{
   }
 
   async saveConcept(saveOption?: SaveOption, existingConceptName?: string): Promise<string> {
-    const dialog = new ConceptsetSaveModal(this.page);
-    return dialog.fillOutSaveModal(saveOption, existingConceptName);
+    const modal = new ConceptsetSaveModal(this.page);
+    return modal.fillOutSaveModal(saveOption, existingConceptName);
   }
 
   async getAddToSetButton(): Promise<Button> {

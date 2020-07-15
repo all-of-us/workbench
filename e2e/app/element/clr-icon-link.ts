@@ -1,4 +1,4 @@
-import {Page, WaitForSelectorOptions} from 'puppeteer';
+import {Page} from 'puppeteer';
 import Container from 'app/container';
 import {ElementType, XPathOptions} from 'app/xpath-options';
 import BaseElement from './base-element';
@@ -6,17 +6,15 @@ import {buildXPath} from 'app/xpath-builders';
 
 export default class ClrIconLink extends BaseElement {
 
-  static async findByName(
-     page: Page,
-     xOpt: XPathOptions,
-     container?: Container,
-     waitOptions: WaitForSelectorOptions = {visible: true}): Promise<ClrIconLink> {
-
+  static async findByName(page: Page, xOpt: XPathOptions, container?: Container): Promise<ClrIconLink> {
     xOpt.type = ElementType.Icon;
     const iconXpath = buildXPath(xOpt, container);
     const iconLink = new ClrIconLink(page, iconXpath);
-    await iconLink.waitForXPath(waitOptions);
     return iconLink;
+  }
+
+  constructor(page: Page, xpath?: string) {
+    super(page, xpath);
   }
 
   /**
