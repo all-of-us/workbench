@@ -5,6 +5,7 @@ import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
+import {withCurrentCohortCriteria} from 'app/utils';
 import {reactStyles} from 'app/utils';
 import {Criteria, DomainType} from 'generated/fetch';
 
@@ -72,7 +73,7 @@ const styles = reactStyles({
   }
 });
 
-interface Selection extends Criteria {
+export interface Selection extends Criteria {
   parameterId: string;
 }
 
@@ -144,9 +145,10 @@ interface Props {
   selections: Array<Selection>;
   setView: Function;
   view: string;
+  criteria?: Array<Selection>;
 }
 
-export class SelectionList extends React.Component<Props> {
+export const SelectionList = withCurrentCohortCriteria()(class extends React.Component<Props> {
   constructor(props: Props) {
     super(props);
   }
@@ -164,17 +166,17 @@ export class SelectionList extends React.Component<Props> {
   }
 
   render() {
-    const {back, close, disableFinish, finish, removeSelection, selections, setView} = this.props;
+    const {back, close, disableFinish, finish, removeSelection, criteria, setView} = this.props;
     return <div style={styles.selectionPanel}>
       <h5 style={styles.selectionTitle}>Selected Criteria</h5>
-      <div style={styles.selectionContainer}>
-        {selections.map((selection, s) =>
+      {criteria && <div style={styles.selectionContainer}>
+        {criteria.map((selection, s) =>
           <SelectionInfo key={s}
             index={s}
             selection={selection}
             removeSelection={() => removeSelection(selection)}/>
         )}
-      </div>
+      </div>}
       <div style={styles.buttonContainer}>
         <Button type='link'
           style={{...styles.button, color: colors.dark, fontSize: '14px'}}
@@ -183,7 +185,7 @@ export class SelectionList extends React.Component<Props> {
         </Button>
         {this.showNext && <Button type='primary' onClick={() => setView('modifiers')}
           style={styles.button}
-          disabled={selections.length === 0}>
+          disabled={!criteria || criteria.length === 0}>
           Next
         </Button>}
         {this.showBack && <Button type='primary'
@@ -193,10 +195,10 @@ export class SelectionList extends React.Component<Props> {
         </Button>}
         <Button type='primary' onClick={() => finish()}
           style={styles.button}
-          disabled={selections.length === 0 || disableFinish}>
+          disabled={!criteria || criteria.length === 0 || disableFinish}>
           Finish
         </Button>
       </div>
     </div>;
   }
-}
+});

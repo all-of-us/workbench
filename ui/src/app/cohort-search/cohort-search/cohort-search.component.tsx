@@ -5,16 +5,19 @@ import {AttributesPage} from 'app/cohort-search/attributes-page/attributes-page.
 import {Demographics} from 'app/cohort-search/demographics/demographics.component';
 import {ListSearchV2} from 'app/cohort-search/list-search-v2/list-search-v2.component';
 import {searchRequestStore} from 'app/cohort-search/search-state.service';
+import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {CriteriaTree} from 'app/cohort-search/tree/tree.component';
 import {domainToTitle, generateId, typeToTitle} from 'app/cohort-search/utils';
 import {Button, Clickable} from 'app/components/buttons';
 import {FlexRowWrap} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
-import colors, {addOpacity} from 'app/styles/colors';
+import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
+import {currentCohortCriteriaStore} from 'app/utils/navigation';
 import {Criteria, CriteriaType, DomainType, TemporalMention, TemporalTime} from 'generated/fetch';
+import {Messages} from 'primereact/messages';
 
 const styles = reactStyles({
   backArrow: {
@@ -79,13 +82,10 @@ function initGroup(role: string, item: any) {
   };
 }
 
-interface Selection extends Criteria {
-  parameterId: string;
-}
-
 interface Props {
   closeSearch: () => void;
   searchContext: any;
+  selections?: Array<Selection>;
 }
 
 interface State {
@@ -104,7 +104,50 @@ interface State {
   treeSearchTerms: string;
 }
 
+const css = `
+  .p-messages {
+     position: relative;
+     height: 29px;
+     width: 7rem;
+     background-color: ` + colorWithWhiteness(colors.success, 0.6) + `;
+     line-height:1.2rem;
+   }
+
+  .p-messages::before {
+    content:"";
+    position: absolute;
+    right: 100%;
+    top:0px;
+    width:0px;
+    height:0px;
+    border-top:0.6rem solid transparent;
+    border-right:0.6rem solid transparent;
+    border-bottom:0.6rem solid transparent;
+  }
+  .p-messages:after {
+    content:"";
+    position: absolute;
+    left: 100%;
+    top:0px;
+    width:0px;
+    height:0px;
+    border-top:0.6rem solid transparent;
+    border-left:0.8rem solid ` + colorWithWhiteness(colors.success, 0.6) + `;
+    border-bottom:0.6rem solid transparent;
+   }
+   .p-messages.p-messages-success {
+     background-color: ` + colorWithWhiteness(colors.success, 0.6) + `!important;
+   }
+   .p-messages-wrapper {
+     padding: 0rem !important;
+     background-color: ` + colorWithWhiteness(colors.success, 0.6) + `!important;
+     margin-left: 0.3rem;
+   }
+ `;
+
 export class CohortSearch extends React.Component<Props, State> {
+
+  message: any;
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -120,8 +163,12 @@ export class CohortSearch extends React.Component<Props, State> {
       selectedIds: [],
       selections: [],
       title: '',
-      treeSearchTerms: '',
+      treeSearchTerms: ''
     };
+  }
+
+  componentWillUnmount() {
+    currentCohortCriteriaStore.next(undefined);
   }
 
   componentDidMount(): void {
@@ -146,6 +193,7 @@ export class CohortSearch extends React.Component<Props, State> {
       }
       this.setState({backMode, hierarchyNode, mode, selectedIds, selections, title});
     }
+    currentCohortCriteriaStore.next([]);
   }
 
   setScroll = (id: string) => {
@@ -252,6 +300,9 @@ export class CohortSearch extends React.Component<Props, State> {
       }
     }
     selections = [...selections, param];
+    this.message.show({ severity: 'success', detail: 'Criteria Added', closable: false, life: 2000});
+
+    currentCohortCriteriaStore.next(selections);
     this.setState({groupSelections, selections, selectedIds});
   }
 
@@ -278,6 +329,12 @@ export class CohortSearch extends React.Component<Props, State> {
     const {attributesNode, autocompleteSelection, count, groupSelections, hierarchyNode, loadingSubtree, mode, selectedIds, selections,
       title, treeSearchTerms} = this.state;
     return !!searchContext && <FlexRowWrap style={styles.searchContainer}>
+      <div style={{position: 'absolute', paddingLeft: '83%', marginTop: '-1rem'}}>
+        <style>
+          {css}
+        </style>
+        <Messages ref={(el) => this.message = el}></Messages>
+      </div>
       <div style={{height: '100%', width: '100%'}}>
         <div style={styles.titleBar}>
           <div style={{display: 'inline-flex', marginRight: '0.5rem'}}>
@@ -288,6 +345,7 @@ export class CohortSearch extends React.Component<Props, State> {
               {title}
             </h2>
           </div>
+
           {mode === 'attributes' && <Button type='link' onClick={this.back}>
             <ClrIcon size='24' shape='close'/>
           </Button>}
