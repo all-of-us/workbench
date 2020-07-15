@@ -69,13 +69,14 @@ public interface DataSetMapper {
   @AfterMapping
   default void populateFromSourceDbObject(
       @MappingTarget DbDataset targetDb, @Context DbDataset dbDataSet) {
-    if (dbDataSet != null
-        && (targetDb.getConceptSetIds() == null || targetDb.getConceptSetIds().size() == 0)) {
+    targetDb.setInvalid(dbDataSet == null ? false : dbDataSet.getInvalid());
+    if (targetDb.getValues().isEmpty()) {
       // In case of rename, dataSetRequest does not have cohort/Concept ID information
       targetDb.setConceptSetIds(dbDataSet.getConceptSetIds());
       targetDb.setCohortIds(dbDataSet.getCohortIds());
       targetDb.setValues(dbDataSet.getValues());
       targetDb.setIncludesAllParticipants(dbDataSet.getIncludesAllParticipants());
+      targetDb.setPrePackagedConceptSet(dbDataSet.getPrePackagedConceptSet());
     }
   }
 

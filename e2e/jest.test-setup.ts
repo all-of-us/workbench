@@ -9,7 +9,6 @@ const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/5
  * - waitFor functions timeout
  */
 beforeEach(async () => {
-  await page.setViewport({ width: 0, height: 0 });
   await page.setUserAgent(userAgent);
   // See https://github.com/puppeteer/puppeteer/blob/master/docs/api.md#pagesetdefaultnavigationtimeouttimeout
   await page.setDefaultNavigationTimeout(90000);
