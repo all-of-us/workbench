@@ -2,18 +2,14 @@ package org.pmiops.workbench.actionaudit;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import com.google.cloud.bigquery.StandardSQLTypeName;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableMap;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.api.BigQueryService;
+import org.pmiops.workbench.cohortbuilder.util.BQParameterUtil;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.ActionAuditConfig;
 import org.pmiops.workbench.model.AuditLogEntry;
@@ -25,7 +21,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
 
-  private static final int MICROSECONDS_IN_MILLISECOND = 1000;
   private static final long MAX_QUERY_LIMIT = 1000L;
   private static final String QUERY_FORMAT =
       "SELECT\n"
@@ -85,7 +80,7 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
 
     return new WorkspaceAuditLogQueryResponse()
         .logEntries(logEntries)
-        .query(getReplacedQueryText(queryJobConfiguration))
+        .query(BQParameterUtil.getReplacedQueryText(queryJobConfiguration))
         .workspaceDatabaseId(workspaceDatabaseId)
         .actions(auditLogEntryMapper.logEntriesToActions(logEntries));
   }
@@ -123,7 +118,7 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
     return new UserAuditLogQueryResponse()
         .actions(auditLogEntryMapper.logEntriesToActions(logEntries))
         .logEntries(logEntries)
-        .query(getReplacedQueryText(queryJobConfiguration))
+        .query(BQParameterUtil.getReplacedQueryText(queryJobConfiguration))
         .userDatabaseId(userDatabaseId);
   }
 
@@ -134,61 +129,9 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
 
     return ImmutableMap.<String, QueryParameterValue>builder()
         .put("limit", QueryParameterValue.int64(Math.max(limit, MAX_QUERY_LIMIT)))
-        .put("after", toQueryParameterValue(after))
-        .put("before", toQueryParameterValue(before))
-        .put("after_partition_time", toQueryParameterValue(afterPartitionTime))
-        .put("before_partition_time", toQueryParameterValue(beforePartitionTime));
-  }
-
-  private QueryParameterValue toQueryParameterValue(Instant instant) {
-    return QueryParameterValue.timestamp(instant.toEpochMilli() * MICROSECONDS_IN_MILLISECOND);
-  }
-
-  private String getReplacedQueryText(QueryJobConfiguration queryJobConfiguration) {
-    String result = "-- reconstructed query text\n" + queryJobConfiguration.getQuery();
-    final Map<String, QueryParameterValue> keyToNamedParameter =
-        queryJobConfiguration.getNamedParameters().entrySet().stream()
-            .collect(Collectors.toMap(e -> decorateParameterName(e.getKey()), Entry::getValue));
-
-    // Sort in reverse lenght order so we don't partially replace any parameter names (e.g. replace
-    // "@foo" before "@foo_bar").
-    final List<String> keysByLengthDesc =
-        keyToNamedParameter.keySet().stream()
-            .sorted((a, b) -> b.length() - a.length())
-            .collect(Collectors.toList());
-
-    final Map<String, String> keyToStringValue =
-        keysByLengthDesc.stream()
-            .collect(Collectors.toMap(k -> k, k -> getReplacementString(k, keyToNamedParameter)));
-
-    for (String key : keysByLengthDesc) {
-      result = result.replace(key, keyToStringValue.getOrDefault(key, "NULL"));
-    }
-    result = result.replace("\n", " ");
-    return result;
-  }
-
-  private String decorateParameterName(String parameterName) {
-    return "@" + parameterName;
-  }
-
-  private String getReplacementString(
-      String key, Map<String, QueryParameterValue> keyToNamedParameter) {
-    final QueryParameterValue parameterValue = keyToNamedParameter.get(key);
-    final String rawStringValue =
-        Optional.ofNullable(parameterValue).map(QueryParameterValue::getValue).orElse("NULL");
-
-    final StandardSQLTypeName typeName =
-        Optional.ofNullable(parameterValue)
-            .map(QueryParameterValue::getType)
-            .orElse(StandardSQLTypeName.STRING);
-
-    final String replacement;
-    if (typeName == StandardSQLTypeName.TIMESTAMP) {
-      replacement = String.format("TIMESTAMP '%s'", rawStringValue);
-    } else {
-      replacement = rawStringValue;
-    }
-    return replacement;
+        .put("after", BQParameterUtil.instantToQPValue(after))
+        .put("before", BQParameterUtil.instantToQPValue(before))
+        .put("after_partition_time", BQParameterUtil.instantToQPValue(afterPartitionTime))
+        .put("before_partition_time", BQParameterUtil.instantToQPValue(beforePartitionTime));
   }
 }
