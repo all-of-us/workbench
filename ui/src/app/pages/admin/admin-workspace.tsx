@@ -118,7 +118,7 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
 
   renderHighChart(cloudStorageTraffic: CloudStorageTraffic): ReactFragment {
     HighCharts.setOptions({
-      global: {
+      time: {
         useUTC: false,
       },
       lang: {

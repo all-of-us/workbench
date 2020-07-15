@@ -29,66 +29,67 @@ export function triggerEvent(
   }
 }
 
-enum ANALYTICS_CATEGORIES {
+enum AnalyticsCategory {
   WORKSPACES = 'Workspaces',
   FEATURED_WORKSPACES = 'Featured Workspaces',
   DATASET_BUILDER = 'Dataset Builder',
   NOTEBOOKS = 'Notebooks',
   SIDEBAR = 'Sidebar Menu',
+  FOOTER = 'Footer',
   HELP = 'Help',
   WORKSPACE_UPDATE_PROMPT = 'Workspace update prompt'
 }
 
 export const AnalyticsTracker = {
   Workspaces: {
-    OpenCreatePage: () => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Open Create Page', getCurrentPageLabel()),
-    Create: () => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Create'),
-    OpenDuplicatePage: (suffix = '') => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Open Duplicate Page', getCurrentPageLabel(suffix)),
-    Duplicate: () => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Duplicate'),
+    OpenCreatePage: () => triggerEvent(AnalyticsCategory.WORKSPACES, 'Open Create Page', getCurrentPageLabel()),
+    Create: () => triggerEvent(AnalyticsCategory.WORKSPACES, 'Create'),
+    OpenDuplicatePage: (suffix = '') => triggerEvent(AnalyticsCategory.WORKSPACES, 'Open Duplicate Page', getCurrentPageLabel(suffix)),
+    Duplicate: () => triggerEvent(AnalyticsCategory.WORKSPACES, 'Duplicate'),
     DuplicateFeatured: (name) =>
-      triggerEvent(ANALYTICS_CATEGORIES.FEATURED_WORKSPACES, 'Click', `Featured Workspace - Tile - Duplicate - ${name}`),
+      triggerEvent(AnalyticsCategory.FEATURED_WORKSPACES, 'Click', `Featured Workspace - Tile - Duplicate - ${name}`),
     NavigateToFeatured: (name) =>
-      triggerEvent(ANALYTICS_CATEGORIES.FEATURED_WORKSPACES, 'Click', `Featured Workspace - Tile - ${name}`),
-    OpenEditPage: (suffix = '') => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Open Edit Page', getCurrentPageLabel(suffix)),
-    Edit: () => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Edit'),
-    OpenShareModal: (suffix = '') => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Open Share Modal', getCurrentPageLabel(suffix)),
-    Share: () => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Share', getCurrentPageLabel()),
-    OpenDeleteModal: (suffix = '') => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Open Delete Modal', getCurrentPageLabel(suffix)),
-    Delete: () => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Delete', getCurrentPageLabel()),
+      triggerEvent(AnalyticsCategory.FEATURED_WORKSPACES, 'Click', `Featured Workspace - Tile - ${name}`),
+    OpenEditPage: (suffix = '') => triggerEvent(AnalyticsCategory.WORKSPACES, 'Open Edit Page', getCurrentPageLabel(suffix)),
+    Edit: () => triggerEvent(AnalyticsCategory.WORKSPACES, 'Edit'),
+    OpenShareModal: (suffix = '') => triggerEvent(AnalyticsCategory.WORKSPACES, 'Open Share Modal', getCurrentPageLabel(suffix)),
+    Share: () => triggerEvent(AnalyticsCategory.WORKSPACES, 'Share', getCurrentPageLabel()),
+    OpenDeleteModal: (suffix = '') => triggerEvent(AnalyticsCategory.WORKSPACES, 'Open Delete Modal', getCurrentPageLabel(suffix)),
+    Delete: () => triggerEvent(AnalyticsCategory.WORKSPACES, 'Delete', getCurrentPageLabel()),
   },
   WorkspaceUpdatePrompt: {
-    LooksGood: () => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACE_UPDATE_PROMPT, 'Click \'Looks  Good\'', 'No Edits'),
-    UpdateWorkspace: () => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACE_UPDATE_PROMPT, 'Click \'Update\'', 'Edit Workspace')
+    LooksGood: () => triggerEvent(AnalyticsCategory.WORKSPACE_UPDATE_PROMPT, 'Click \'Looks  Good\'', 'No Edits'),
+    UpdateWorkspace: () => triggerEvent(AnalyticsCategory.WORKSPACE_UPDATE_PROMPT, 'Click \'Update\'', 'Edit Workspace')
   },
   DatasetBuilder: {
-    OpenCreatePage: () => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Open Create Page'),
-    Save: () => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Save'),
-    SaveAndAnalyze: (suffix) => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Save and Analyze', suffix),
-    OpenEditPage: (suffix) => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Open Edit Page', suffix),
-    Update: () => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Update'),
-    UpdateAndAnalyze: (suffix) => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Update and Analyze', suffix),
-    SeeCodePreview: () => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'See Code Preview'),
-    OpenRenameModal: () => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Open Rename Modal'),
-    Rename: () => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Rename'),
-    OpenExportModal: () => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Open Export Modal'),
-    Export: (suffix) => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Export', suffix),
-    OpenDeleteModal: () => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Open Delete Modal'),
-    Delete: () => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Delete'),
-    ViewPreviewTable: () => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'View Preview Table')
+    OpenCreatePage: () => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Open Create Page'),
+    Save: () => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Save'),
+    SaveAndAnalyze: (suffix) => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Save and Analyze', suffix),
+    OpenEditPage: (suffix) => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Open Edit Page', suffix),
+    Update: () => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Update'),
+    UpdateAndAnalyze: (suffix) => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Update and Analyze', suffix),
+    SeeCodePreview: () => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'See Code Preview'),
+    OpenRenameModal: () => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Open Rename Modal'),
+    Rename: () => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Rename'),
+    OpenExportModal: () => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Open Export Modal'),
+    Export: (suffix) => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Export', suffix),
+    OpenDeleteModal: () => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Open Delete Modal'),
+    Delete: () => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Delete'),
+    ViewPreviewTable: () => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'View Preview Table')
   },
   Notebooks: {
-    OpenCreateModal: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Open Create Modal'),
-    Create: (suffix) => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Create', suffix),
-    OpenRenameModal: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Open Rename Modal'),
-    Rename: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Rename'),
-    Duplicate: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Duplicate'),
-    OpenCopyModal: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Open Copy Modal'),
-    Copy: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Copy'),
-    OpenDeleteModal: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Open Delete Modal'),
-    Delete: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Delete'),
-    Preview: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Preview'),
-    Edit: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Edit'),
-    Run: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Run (Playground Mode)')
+    OpenCreateModal: () => triggerEvent(AnalyticsCategory.NOTEBOOKS, 'Open Create Modal'),
+    Create: (suffix) => triggerEvent(AnalyticsCategory.NOTEBOOKS, 'Create', suffix),
+    OpenRenameModal: () => triggerEvent(AnalyticsCategory.NOTEBOOKS, 'Open Rename Modal'),
+    Rename: () => triggerEvent(AnalyticsCategory.NOTEBOOKS, 'Rename'),
+    Duplicate: () => triggerEvent(AnalyticsCategory.NOTEBOOKS, 'Duplicate'),
+    OpenCopyModal: () => triggerEvent(AnalyticsCategory.NOTEBOOKS, 'Open Copy Modal'),
+    Copy: () => triggerEvent(AnalyticsCategory.NOTEBOOKS, 'Copy'),
+    OpenDeleteModal: () => triggerEvent(AnalyticsCategory.NOTEBOOKS, 'Open Delete Modal'),
+    Delete: () => triggerEvent(AnalyticsCategory.NOTEBOOKS, 'Delete'),
+    Preview: () => triggerEvent(AnalyticsCategory.NOTEBOOKS, 'Preview'),
+    Edit: () => triggerEvent(AnalyticsCategory.NOTEBOOKS, 'Edit'),
+    Run: () => triggerEvent(AnalyticsCategory.NOTEBOOKS, 'Run (Playground Mode)')
   },
   Registration: {
     SignIn: () => triggerEvent('Registration', 'Click sign-in', 'Sign in'),
@@ -109,10 +110,23 @@ export const AnalyticsTracker = {
     TutorialVideo: () => triggerEvent('Home Page', 'Clicked on a tutorial video', 'Tutorial videos'),
   },
   Sidebar: {
-    OpenSidebar: (suffix) => triggerEvent(ANALYTICS_CATEGORIES.SIDEBAR, 'Click', suffix),
-    Search: (suffix) => triggerEvent(ANALYTICS_CATEGORIES.HELP, 'Search', `Help - Search - ${suffix}`),
-    ContactUs: (suffix) => triggerEvent(ANALYTICS_CATEGORIES.HELP, 'Click', `Help - Contact Us - ${suffix}`),
-    UserSupport: (suffix) => triggerEvent(ANALYTICS_CATEGORIES.HELP, 'Click', `Help - User Support - ${suffix}`)
+    OpenSidebar: (suffix) => triggerEvent(AnalyticsCategory.SIDEBAR, 'Click', suffix),
+    Search: (suffix) => triggerEvent(AnalyticsCategory.HELP, 'Search', `Help - Search - ${suffix}`),
+    ContactUs: (suffix) => triggerEvent(AnalyticsCategory.HELP, 'Click', `Help - Contact Us - ${suffix}`),
+    UserSupport: (suffix) => triggerEvent(AnalyticsCategory.HELP, 'Click', `Help - User Support - ${suffix}`)
+  },
+  Footer: {
+    Home: () => triggerEvent(AnalyticsCategory.FOOTER, 'Home', 'Home'),
+    DataBrowser: () => triggerEvent(AnalyticsCategory.FOOTER, 'Data Browser', 'Data Browser'),
+    FeaturedWorkspaces: () => triggerEvent(AnalyticsCategory.FOOTER, 'Featured workspaces', 'Featured workspaces'),
+    ResearchHub: () => triggerEvent(AnalyticsCategory.FOOTER, 'Research Hub', 'Research Hub'),
+    YourWorkspaces: () => triggerEvent(AnalyticsCategory.FOOTER, 'Your workspaces', 'Your workspaces'),
+    GettingStarted: () => triggerEvent(AnalyticsCategory.FOOTER, 'Getting started', 'Support - Getting started'),
+    SupportDocs: () => triggerEvent(AnalyticsCategory.FOOTER, 'Documentation', 'Support - Documentation'),
+    CommunityForum: () => triggerEvent(AnalyticsCategory.FOOTER, 'Community forum', 'Support - Community forum'),
+    SupportFAQ: () => triggerEvent(AnalyticsCategory.FOOTER, 'FAQ', 'Support - FAQ'),
+    ContactUs: (suffix) => triggerEvent(AnalyticsCategory.FOOTER, 'Contact Us', `Support - Contact Us - ${suffix}`),
+    HHS: () => triggerEvent(AnalyticsCategory.FOOTER, 'US Dept of Health & Human Svcs', 'hhs.gov')
   }
 };
 

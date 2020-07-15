@@ -5,6 +5,7 @@ import {SemiBoldHeader} from 'app/components/headers';
 import {AoU} from 'app/components/text-wrappers';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {openZendeskWidget} from 'app/utils/zendesk';
 import { environment } from 'environments/environment';
 import * as React from 'react';
@@ -62,7 +63,21 @@ const NewTabFooterAnchorTag = ({style = {}, href, ...props}) => {
   return <FooterAnchorTag style={style} href={href} target='_blank' {...props}>{props.children}</FooterAnchorTag>;
 };
 
+const DataBrowserLink = (props) => (
+  <NewTabFooterAnchorTag href={environment.publicUiUrl}
+                         analyticsFn={AnalyticsTracker.Footer.DataBrowser}
+                         {...props}>
+    Data Browser
+  </NewTabFooterAnchorTag>
+);
 
+const ResearchHubLink = (props) => (
+  <NewTabFooterAnchorTag href='https://researchallofus.org'
+                         analyticsFn={AnalyticsTracker.Footer.ResearchHub}
+                         {...props}>
+    Research Hub
+  </NewTabFooterAnchorTag>
+);
 
 const FooterTemplate = ({style = {}, ...props}) => {
   return <div style={{...styles.footerTemplate, ...style}} {...props}>
@@ -75,7 +90,9 @@ const FooterTemplate = ({style = {}, ...props}) => {
         {props.children}
         <div style={{...styles.footerAside, marginTop: '20px'}}>
           The <AoU/> logo is a service mark of the&nbsp;
-          <NewTabFooterAnchorTag href='https://www.hhs.gov'>
+          <NewTabFooterAnchorTag
+              href='https://www.hhs.gov'
+              analyticsFn={AnalyticsTracker.Footer.HHS}>
             U.S. Department of Health and Human Services
           </NewTabFooterAnchorTag>.<br/>
           The <AoU/> platform is for research only and does not provide medical advice, diagnosis or treatment. Copyright 2020.
@@ -110,43 +127,53 @@ const WorkbenchFooter = withUserProfile()(
     }
 
     render() {
+      const tracker = AnalyticsTracker.Footer;
       return <FooterTemplate>
         <FlexRow style={{justifyContent: 'flex-start', width: '100%'}}>
           <FooterSection style={styles.workbenchFooterItem} header='Quick Links'>
             <FlexRow>
               <FlexColumn style={{width: '50%'}}>
-                <FooterAnchorTag href='/'>Home</FooterAnchorTag>
-                <FooterAnchorTag href='library'>Featured Workspaces</FooterAnchorTag>
-                <FooterAnchorTag href='workspaces'>Your Workspaces</FooterAnchorTag>
+                <FooterAnchorTag href='/'
+                                 analyticsFn={tracker.Home}>
+                  Home
+                </FooterAnchorTag>
+                <FooterAnchorTag href='library'
+                                 analyticsFn={tracker.FeaturedWorkspaces}>
+                  Featured Workspaces
+                </FooterAnchorTag>
+                <FooterAnchorTag href='workspaces'
+                                 analyticsFn={tracker.YourWorkspaces}>
+                  Your Workspaces
+                </FooterAnchorTag>
               </FlexColumn>
               <FlexColumn style={{width: '50%'}}>
-                <NewTabFooterAnchorTag href={environment.publicUiUrl}>
-                  Data Browser
-                </NewTabFooterAnchorTag>
-                <NewTabFooterAnchorTag href='https://researchallofus.org'>
-                  Research Hub
-                </NewTabFooterAnchorTag>
+                <DataBrowserLink />
+                <ResearchHubLink />
               </FlexColumn>
             </FlexRow>
           </FooterSection>
           <FooterSection style={styles.workbenchFooterItem} header='User Support'>
             <FlexRow>
               <FlexColumn style={{width: '50%'}}>
-                <NewTabFooterAnchorTag href={gettingStartedUrl}>
+                <NewTabFooterAnchorTag href={gettingStartedUrl} analyticsFn={tracker.GettingStarted}>
                   Getting Started
                 </NewTabFooterAnchorTag>
-                <NewTabFooterAnchorTag href={documentationUrl}>
+                <NewTabFooterAnchorTag href={documentationUrl}
+                                       analyticsFn={tracker.SupportDocs}>
                   Documentation
                 </NewTabFooterAnchorTag>
-                <NewTabFooterAnchorTag href={communityForumUrl}>
+                <NewTabFooterAnchorTag href={communityForumUrl}
+                                       analyticsFn={tracker.CommunityForum}>
                   Community Forum
                 </NewTabFooterAnchorTag>
               </FlexColumn>
               <FlexColumn style={{width: '50%'}}>
-                <NewTabFooterAnchorTag href={faqUrl}>
+                <NewTabFooterAnchorTag href={faqUrl}
+                                       analyticsFn={tracker.SupportFAQ}>
                   FAQs
                 </NewTabFooterAnchorTag>
                 <Link style={styles.footerAnchor} onClick={() => {
+                  tracker.ContactUs('Zendesk');
                   openZendeskWidget(
                     this.props.profileState.profile.givenName,
                     this.props.profileState.profile.familyName,
@@ -170,14 +197,11 @@ const RegistrationFooter = ({style = {}, ...props}) => {
   return <FooterTemplate {...props}>
     <FlexColumn>
       <FlexRow style={{...styles.footerSectionDivider, color: colors.white, width: '25rem'}}>
-        <NewTabFooterAnchorTag href={environment.publicUiUrl}>
-          Data Browser
-        </NewTabFooterAnchorTag>
-        <NewTabFooterAnchorTag style={{marginLeft: '1.5rem'}} href='https://researchallofus.org'>
-          Research Hub
-        </NewTabFooterAnchorTag>
+        <DataBrowserLink />
+        <ResearchHubLink style={{marginLeft: '1.5rem'}} />
         <div style={{fontSize: 12, marginLeft: '1.5rem'}}>
-          Contact Us: <FooterAnchorTag href={'mailto:' + supportEmailAddress}>
+          Contact Us: <FooterAnchorTag href={'mailto:' + supportEmailAddress}
+                                       analyticsFn={() => AnalyticsTracker.Footer.ContactUs('Email')}>
             {supportEmailAddress}
           </FooterAnchorTag>
         </div>
