@@ -5,11 +5,11 @@ import {cohortReviewStore} from 'app/services/review-state.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentCohortCriteriaStore, currentWorkspaceStore} from 'app/utils/navigation';
 import {CohortAnnotationDefinitionApi, CohortReviewApi} from 'generated/fetch';
+import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CohortAnnotationDefinitionServiceStub} from 'testing/stubs/cohort-annotation-definition-service-stub';
 import {CohortReviewServiceStub, cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 import {HelpSidebar} from './help-sidebar';
-import {waitOneTickAndUpdate} from 'app/testing/react-test-helpers';
 
 const sidebarContent = require('assets/json/help-sidebar.json');
 
