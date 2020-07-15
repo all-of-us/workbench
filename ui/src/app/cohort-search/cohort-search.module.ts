@@ -3,6 +3,7 @@ import {RouterModule, Routes} from '@angular/router';
 import {CohortCommonModule} from 'app/cohort-common/module';
 
 /* Components */
+import {CohortPageComponent} from './cohort-page/cohort-page.component';
 import {CohortSearchComponent} from './cohort-search/cohort-search.component';
 
 import {BreadcrumbType} from 'app/utils/navigation';
@@ -13,7 +14,7 @@ import {CanDeactivateGuard} from 'app/guards/can-deactivate-guard.service';
 
 const routes: Routes = [{
   path: '',
-  component: CohortSearchComponent,
+  component: CohortPageComponent,
   canDeactivate: [CanDeactivateGuard],
   data: {
     title: 'Build Cohort Criteria',
@@ -31,6 +32,7 @@ const routes: Routes = [{
     CohortCommonModule,
   ],
   declarations: [
+    CohortPageComponent,
     CohortSearchComponent,
   ],
   providers: []
