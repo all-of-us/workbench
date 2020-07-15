@@ -12,13 +12,16 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.CdrVersionService;
+import org.pmiops.workbench.cdr.ConceptBigQueryService;
+import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetMapper;
 import org.pmiops.workbench.conceptset.ConceptSetService;
+import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.dataset.DataSetMapperImpl;
-import org.pmiops.workbench.dataset.DataSetService;
+import org.pmiops.workbench.dataset.DataSetServiceImpl;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -58,17 +61,20 @@ public class DataDictionaryTest {
   @TestConfiguration
   @Import({
     CdrVersionService.class,
+    CommonMappers.class,
     DataSetController.class,
-    DataSetMapperImpl.class,
-    CommonMappers.class
+    DataSetServiceImpl.class,
+    DataSetMapperImpl.class
   })
   @MockBean({
     BigQueryService.class,
+    CdrBigQuerySchemaConfigService.class,
     CohortService.class,
+    CohortQueryBuilder.class,
+    ConceptBigQueryService.class,
     ConceptSetService.class,
     ConceptService.class,
     ConceptSetMapper.class,
-    DataSetService.class,
     FireCloudService.class,
     NotebooksService.class,
     WorkspaceService.class
