@@ -1,4 +1,3 @@
-import {Component, Input} from '@angular/core';
 import * as React from 'react';
 
 import {AttributesPage} from 'app/cohort-search/attributes-page/attributes-page.component';
@@ -14,7 +13,7 @@ import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AoU} from 'app/components/text-wrappers';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase} from 'app/utils';
+import {reactStyles} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {environment} from 'environments/environment';
 import {Criteria, CriteriaType, DomainType, TemporalMention, TemporalTime} from 'generated/fetch';
@@ -577,18 +576,5 @@ export class CBModal extends React.Component<Props, State> {
         </div>
       </div>
     </React.Fragment> : '';
-  }
-}
-
-@Component({
-  selector: 'app-list-modal',
-  template: '<div #root></div>'
-})
-export class ModalComponent extends ReactWrapperBase {
-  @Input('closeSearch') closeSearch: Props['closeSearch'];
-  @Input('searchContext') searchContext: Props['searchContext'];
-  @Input('setSearchContext') setSearchContext: Props['setSearchContext'];
-  constructor() {
-    super(CBModal, ['closeSearch', 'searchContext', 'setSearchContext']);
   }
 }
