@@ -263,7 +263,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
         filteredContent: undefined,
         participant: undefined,
         searchTerm: '',
-        tooltipId: undefined,
+        tooltipId: undefined
       };
     }
 
@@ -288,8 +288,6 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
             this.setState({activeIcon: undefined});
           }
         }, 300);
-      }
-      if (this.props.criteria !== prevProps.criteria && this.props.criteria && this.props.criteria.length > 0) {
       }
     }
 
@@ -388,7 +386,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
       return <PopupTrigger
           side='left'
           closeOnClick
-          style={{height: '-webkit-fill-available'}}
+          style={{height: '-webkit-fill-available'}} // Will need to update Popuptrigger to use style passed in Props
       content={<SelectionList back={() => {}}/>}><div data-test-id='criteria-icon' style={{...styles.icon, height: '2rem', paddingBottom: '0.2rem'}}>
         <span data-test-id = 'criteria-count' style={styles.criteriaCount}>{criteria.length}</span>
         <FontAwesomeIcon icon={faInbox} style={{fontSize: '1.1rem'}}/>

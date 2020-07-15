@@ -163,7 +163,7 @@ export class CohortSearch extends React.Component<Props, State> {
       selectedIds: [],
       selections: [],
       title: '',
-      treeSearchTerms: ''
+      treeSearchTerms: '',
     };
   }
 
@@ -301,7 +301,6 @@ export class CohortSearch extends React.Component<Props, State> {
     }
     selections = [...selections, param];
     this.message.show({ severity: 'success', detail: 'Criteria Added', closable: false, life: 2000});
-
     currentCohortCriteriaStore.next(selections);
     this.setState({groupSelections, selections, selectedIds});
   }
@@ -345,7 +344,6 @@ export class CohortSearch extends React.Component<Props, State> {
               {title}
             </h2>
           </div>
-
           {mode === 'attributes' && <Button type='link' onClick={this.back}>
             <ClrIcon size='24' shape='close'/>
           </Button>}
