@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.pmiops.workbench.utils.Matchers;
 
 public final class BQParameterUtil {
@@ -30,7 +31,7 @@ public final class BQParameterUtil {
   // Since BigQuery doesn't expose the literal query string built from a QueryJobConfiguration,
   // this method does the next best thing. Useful for diagnostics, logging, testing, etc.
   // headerComment should be newline-delimeted but not include any comment characters
-  public static String getReplacedQueryText(
+  public static String replaceNamedParameters(
       QueryJobConfiguration queryJobConfiguration, String headerComment) {
     String result =
         String.format("%s\n\n%s", getSqlComment(headerComment), queryJobConfiguration.getQuery());
@@ -47,6 +48,10 @@ public final class BQParameterUtil {
     return Arrays.stream(headerComment.split("\n"))
         .map(s -> "-- " + s)
         .collect(Collectors.joining("\n"));
+  }
+
+  public static String formatQuery(String query) {
+    return new BasicFormatterImpl().format(query);
   }
 
   // use lookbehind for non-word character, since "'"(@" or " @" don't represent left-side word
