@@ -7711,3 +7711,34 @@ definitions:
         description: Datetime at creation of this user's accont
         type: string
         format: date-time
+  ReportingResearcher:
+    description: >
+      Payload for the researcher table in the BigQuery reporting dataset.
+    type: object
+    properties:
+      username:
+        description: Username (GSuite)
+        type: string
+      firstName:
+        description: First name for the researcher
+        type: string
+      researcherId:
+        description: ID (PK) for this researcher.
+        type: integer
+        format: int64
+      isDisabled:
+        description: true if this researcher has a disabled account
+        type: boolean
+  ReportingSnapshot:
+    description: >
+      Payload for upload to BigQuery reporting dataset.
+    type: object
+    properties:
+      captureTimestamp:
+        description: Time at which snapshot is retrieved.
+        type: string
+        format: date-time
+      researchers:
+        type: array
+        items:
+          "$ref": "#/definitions/ReportingResearcher"

@@ -25,7 +25,6 @@ public class CommonMappers {
     if (timestamp != null) {
       return timestamp.getTime();
     }
-
     return null;
   }
 
