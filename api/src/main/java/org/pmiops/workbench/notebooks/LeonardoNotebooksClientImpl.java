@@ -106,6 +106,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
         .enableWelder(true)
         .machineConfig(
             new MachineConfig()
+                .numberOfWorkers(2)
                 .masterDiskSize(
                     Optional.ofNullable(clusterOverride.masterDiskSize)
                         .orElse(config.firecloud.clusterDefaultDiskSizeGb))
