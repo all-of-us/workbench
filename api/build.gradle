@@ -733,6 +733,14 @@ def commandLineSpringProperties = [
   'spring.datasource.password': System.getenv("WORKBENCH_DB_PASSWORD")
 ]
 
+task randomizeVcf(type: JavaExec) {
+  classpath = sourceSets.main.runtimeClasspath
+  main = "org.pmiops.workbench.genomics.RandomizeVcfEntryPoint"
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}
+
 // See project.rb command: load-es-index
 task elasticSearchIndexer(type: JavaExec) {
   classpath = sourceSets.__tools__.runtimeClasspath

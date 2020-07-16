@@ -11,10 +11,8 @@ import htsjdk.variant.variantcontext.writer.VariantContextWriter;
 import htsjdk.variant.vcf.VCFHeader;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.broadinstitute.barclay.argparser.Argument;
 import org.broadinstitute.barclay.argparser.CommandLineProgramProperties;
@@ -36,14 +34,11 @@ public class RandomizeVcf extends VariantWalker {
       shortName = StandardArgumentDefinitions.OUTPUT_SHORT_NAME)
   protected File outputVcf;
 
-  @VisibleForTesting
-  protected static Allele[] alleleBank = {
-      Allele.ALT_A,
-      Allele.ALT_C,
-      Allele.ALT_G,
-      Allele.ALT_T,
-      Allele.NO_CALL
-  };
+  @Argument(doc = "Sample name suffix.",
+      fullName = "SAMPLE_NAME_SUFFIX",
+      shortName = "S"
+  )
+  protected static String sampleNameSuffix;
 
   static Random random = new Random();
 
@@ -77,23 +72,11 @@ public class RandomizeVcf extends VariantWalker {
 
     List<Genotype> randomizedGenotypes = variant.getGenotypes()
         .stream()
-        .map(genotype -> randomizeGenotype(genotype, variant.getReference()))
+        .map(genotype -> randomizeGenotype(variant, genotype))
         .collect(Collectors.toList());
     GenotypesContext randomizedGenotypesContext = GenotypesContext.create(new ArrayList<>(randomizedGenotypes));
 
-    Set<Allele> randomizedAllelesInGenotype = randomizedGenotypesContext
-        .stream()
-        .flatMap(genotype -> genotype.getAlleles().stream())
-        .collect(Collectors.toSet());
-    // Can't have duplicate alleles in a VariantContext, so we have to remove the reference from this set
-    randomizedAllelesInGenotype.remove(variant.getReference());
-
-    List<Allele> randomizedAlleles = new ArrayList<>();
-    randomizedAlleles.add(variant.getReference());
-    randomizedAlleles.addAll(randomizedAllelesInGenotype);
-
     variantContextBuilder.genotypes(randomizedGenotypesContext);
-    variantContextBuilder.alleles(randomizedAlleles);
 
     // We want kind of random error. If there's no error, have no error for the new variant as well.
     // If there's error, fuzz the error.
@@ -104,28 +87,30 @@ public class RandomizeVcf extends VariantWalker {
     return variantContextBuilder.make();
   }
 
-  protected static Genotype randomizeGenotype(Genotype genotype, Allele reference) {
+  protected static Genotype randomizeGenotype(VariantContext variantContext, Genotype genotype) {
     GenotypeBuilder genotypeBuilder = new GenotypeBuilder();
     genotypeBuilder.copy(genotype);
-    genotypeBuilder.alleles(randomizeAlleles(genotype.getAlleles(), reference));
+    genotypeBuilder.name(appendSuffixToSampleName(genotype.getSampleName()));
+    genotypeBuilder.alleles(randomizeAlleles(variantContext, genotype.getAlleles()));
     return genotypeBuilder.make();
   }
 
   @VisibleForTesting
-  protected static List<Allele> randomizeAlleles(List<Allele> alleles, Allele reference) {
-    // Don't want to accidentally use the reference or else it wouldn't be a snp
-    List<Allele> alleleBankMinusReference = Arrays
-        .stream(alleleBank)
-        .filter(allele -> !allele.basesMatch(reference))
-        .collect(Collectors.toList());
+  protected static List<Allele> randomizeAlleles(VariantContext variantContext, List<Allele> genotypeAlleles) {
+    // The alleles list on the VariantContext has first the reference and then all possible alternates.
+    // For each genotype, we pick from among those possible alternates (or we put a no-call.)
     // We don't want to just stick no-calls everywhere, which we would if no-call was given equal chance
     // of occurring to all the other alleles, so we only use a no-call if the original had a no-call.
-    final int max = alleles.contains(Allele.NO_CALL)
-        ? alleleBankMinusReference.size() - 1
-        : alleleBankMinusReference.size() - 2;
-    // for each allele, pick a random allele from the allele bank
-    return alleles.stream()
-        .map(allele -> alleleBankMinusReference.get(random.nextInt(max)))
+    List<Allele> possibleAlleles = new ArrayList<>(variantContext.getAlleles());
+    if (genotypeAlleles.contains(Allele.NO_CALL)) {
+      possibleAlleles.add(Allele.NO_CALL);
+    }
+    return genotypeAlleles.stream()
+        .map(allele -> possibleAlleles.get(random.nextInt(possibleAlleles.size())))
         .collect(Collectors.toList());
+  }
+
+  private static String appendSuffixToSampleName(String sampleName) {
+    return sampleName + "." + sampleNameSuffix;
   }
 }
