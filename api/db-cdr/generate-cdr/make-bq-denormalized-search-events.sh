@@ -169,12 +169,12 @@ FROM
 WHERE meas.person_id = sad.person_id
     and meas.measurement_datetime = sad.entry_datetime
     and sad.is_standard = 0
-    and sad.concept_id = 903118"
+    and sad.concept_id = 903115"
 
 #####################################################################
 #   update source systolic pressure data into cb_search_all_events
 #####################################################################
-echo "Updating diastolic pressure data into cb_search_all_events"
+echo "Updating systolic pressure data into cb_search_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` sad
 SET sad.systolic = meas.systolic
@@ -189,7 +189,7 @@ FROM
 WHERE meas.person_id = sad.person_id
     and meas.measurement_datetime = sad.entry_datetime
     and sad.is_standard = 0
-    and sad.concept_id = 903115"
+    and sad.concept_id = 903118"
 
 ################################################################
 #   insert standard measurement data into cb_search_all_events
@@ -238,12 +238,12 @@ FROM
 WHERE meas.person_id = sad.person_id
     and meas.measurement_datetime = sad.entry_datetime
     and sad.is_standard = 1
-    and sad.concept_id = 903118"
+    and sad.concept_id = 903115"
 
 #######################################################################
-#   update standard diastolic pressure data into cb_search_all_events
+#   update standard systolic pressure data into cb_search_all_events
 #######################################################################
-echo "Updating diastolic pressure data into cb_search_all_events"
+echo "Updating systolic pressure data into cb_search_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` sad
 SET sad.systolic = meas.systolic
@@ -259,7 +259,7 @@ FROM
 WHERE meas.person_id = sad.person_id
     and meas.measurement_datetime = sad.entry_datetime
     and sad.is_standard = 1
-    and sad.concept_id = 903115"
+    and sad.concept_id = 903118"
 
 ##############################################################
 #   insert source observation data into cb_search_all_events
