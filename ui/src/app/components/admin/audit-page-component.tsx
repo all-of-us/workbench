@@ -2,11 +2,13 @@ import {AuditActionCardListView} from 'app/components/admin/audit-card-list-view
 import {Navigate} from 'app/components/app-router';
 import {Button} from 'app/components/buttons';
 import {NumberInput, TextInputWithLabel} from 'app/components/inputs';
+import {TooltipTrigger} from 'app/components/popups';
 import colors from 'app/styles/colors';
 import { useDebounce } from 'app/utils';
-import {actionToString} from 'app/utils/audit-utils';
+import {actionToString, downloadTextFile} from 'app/utils/audit-utils';
 import {AuditAction, AuditLogEntry} from 'generated';
 import * as fp from 'lodash/fp';
+import * as moment from 'moment';
 import * as React from 'react';
 
 const {useEffect, useState} = React;
@@ -32,6 +34,8 @@ export interface GenericAuditQueryResult {
   sourceId: number;
 }
 
+const EMPTY_AUDIT_RESULT: GenericAuditQueryResult = {actions: [], logEntries: [], sourceId: 0, query: ''};
+
 // Common properties for User & Workspace (and similar future pages).
 // Assumptions: the path parameter is called initially with the audit API subject.
 //   (this will need revisiting for multi-subject queries)
@@ -40,18 +44,50 @@ export interface AuditPageProps {
   auditSubjectType: string;
   queryAuditLog: (subject: string) => Promise<GenericAuditQueryResult>;
   getNextAuditPath: (subject: string) => string;
-  logVerbose: boolean;
   buttonLabel?: string;
 }
 
-const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath, buttonLabel}) => {
+
+const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath, buttonLabel, queryText}) => {
   const [auditSubject, setAuditSubject] = useState(initialAuditSubject);
   const [loadNextSubject, setLoadNextSubject] = useState(false);
+  const [downloadSqlFile, setDownloadSqlFile] = useState(false);
+
   useEffect(() =>  {
     if (loadNextSubject) {
       setLoadNextSubject(false);
     }
   }, [loadNextSubject]);
+
+  useEffect(() => {
+    if (downloadSqlFile && !fp.isEmpty(queryText)) {
+      const sqlFileName = `audit_query_${auditSubject}_${moment().toISOString()}.sql`;
+      downloadTextFile(sqlFileName, queryText);
+    }
+  }, [queryText, downloadSqlFile]);
+
+  const buttonStyle = {height: '1.5rem', margin: '0.25rem 0.5rem'};
+
+  const onAuditClick = () => {
+    setAuditSubject(auditSubject.toLowerCase().trim());
+    setLoadNextSubject(true);
+  };
+
+  const getBigQueryConsoleUrl = () => {
+    // TODO(jaycarlton): use actual config endpoint to create correct link
+    const props = {
+      bigQueryConsoleUrl: 'https://console.cloud.google.com/bigquery',
+      gcpProject: 'all-of-us-workbench-test',
+      auditDataset: 'workbench_action_audit_test',
+      auditTable: 'workbench_action_audit_test'
+    };
+    return `${props.bigQueryConsoleUrl}`
+        + `?project=${props.gcpProject}`
+        + `&p=${props.gcpProject}`
+        + `&d=${props.auditDataset}`
+        + `&t=${props.auditTable}`
+        + '&page=table';
+  };
 
   return <React.Fragment>
     {loadNextSubject && <Navigate to={getNextAuditPath(auditSubject)}/>}
@@ -62,11 +98,25 @@ const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath, but
       value = {auditSubject}
       onChange = {setAuditSubject}
     />
-    <Button style={{height: '1.5rem', margin: '0.25rem 0.5rem'}}
-            disabled={fp.isEmpty(auditSubject)}
-            onClick={() => setLoadNextSubject(true)}>
-    Audit
+    <TooltipTrigger content={`Retrieve the audit trail for selected ${auditSubjectType}.`}>
+      <Button style={buttonStyle}
+              disabled={fp.isEmpty(auditSubject)}
+              onClick={onAuditClick}>
+      Audit
+      </Button>
+    </TooltipTrigger>
+    <TooltipTrigger content={'Download actual SQL query for BigQuery Action Audit table. Useful' +
+    ' for developers or analysts interested in basing other ad hoc queries off' +
+    ' this audit query in the BigQuery console or bq tool.'}>
+    <Button style={buttonStyle}
+            disabled={fp.isEmpty(queryText)}
+            onClick={() => setDownloadSqlFile(true)}>
+      Download SQL
     </Button>
+  </TooltipTrigger>
+    <TooltipTrigger content={'BigQuery Console page (use pmi-ops.org account)'}>
+      <a href={getBigQueryConsoleUrl()}>BigQuery Console</a>
+    </TooltipTrigger>
   </React.Fragment>;
 };
 
@@ -82,35 +132,27 @@ const NumActions = ({onChange, totalActions}) => {
       color: colors.primary,
       lineHeight: '22px',
       fontWeight: 600,
-      marginRight: '0.25rem'
-    }}>{`Number of Actions to Display (${totalActions} available)`}</label>
+      marginRight: '0.25rem'}}>{`Number of Actions to Display (${totalActions} available)`}</label>
     <NumberInput value={Math.min(displayNum, totalActions)} min={1} max={totalActions} style={{width: '4rem'}} onChange={setDisplayNum}/>
   </div>;
 };
 
 export const AuditPageComponent = (props: AuditPageProps) => {
-  const {initialAuditSubject, queryAuditLog, getNextAuditPath, logVerbose, auditSubjectType, buttonLabel} = props;
-  const emptyResult = {actions: [], logEntries: [], sourceId: 0, query: ''};
+  const {initialAuditSubject, queryAuditLog, getNextAuditPath, auditSubjectType, buttonLabel} = props;
+
   const [loading, setLoading] = useState(true);
-  const [queryResult, setQueryResult] = useState<GenericAuditQueryResult>(emptyResult);
+  const [queryResult, setQueryResult] = useState<GenericAuditQueryResult>(EMPTY_AUDIT_RESULT);
   const [displayNum, setDisplayNum] = useState(20);
   const {actions, sourceId, query} = queryResult;
 
   useEffect(() => {
-    if (logVerbose) {
-      console.log(fp.map(actionToString)(actions).join('\n'));
-      console.log(actions);
-      console.log(query);
-    }
-  }, [logVerbose, queryResult]);
-
-  useEffect(() => {
     const getLogEntries = async() => {
       setLoading(true);
+      setQueryResult(EMPTY_AUDIT_RESULT);
       try {
-        setQueryResult(await queryAuditLog(initialAuditSubject));
+        await queryAuditLog(initialAuditSubject)
+          .then(setQueryResult);
       } catch (e) {
-        setQueryResult(emptyResult);
         console.warn(`Error retrieving audit query results for ${initialAuditSubject}`);
       }
       setLoading(false);
@@ -134,7 +176,8 @@ export const AuditPageComponent = (props: AuditPageProps) => {
           <UserInput initialAuditSubject={initialAuditSubject}
                      auditSubjectType={auditSubjectType}
                      getNextAuditPath={getNextAuditPath}
-                     buttonLabel={buttonLabel}/>
+                     buttonLabel={buttonLabel}
+                     queryText={query}/>
           <NumActions onChange={setDisplayNum} totalActions={actions.length}/>
           <div>{getTitle()}</div>
         </div>

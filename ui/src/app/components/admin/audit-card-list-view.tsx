@@ -105,7 +105,8 @@ const AuditEventBundleHeaderView = (props: { header: AuditEventBundleHeader }) =
   </div>;
 };
 
-const EventBundleView = (eventBundle: AuditEventBundle) => {
+const EventBundleView = (props: {eventBundle: AuditEventBundle}) => {
+  const {eventBundle} = props;
   return <div style={{marginBottom: '1rem'}}>
     <AuditEventBundleHeaderView header={eventBundle.header}/>
     <PropertyChangeListView propertyChanges={eventBundle.propertyChanges}/>
@@ -136,8 +137,7 @@ const AuditActionCard = (props: { action: AuditAction }) => {
         </FlexRow>
         {action.eventBundles.map((eventBundle, index) =>
             <EventBundleView key={index}
-                             header={eventBundle.header}
-                             propertyChanges={eventBundle.propertyChanges}/>)}
+                             eventBundle={eventBundle}/>)}
       </ActionAuditCardBase>
   );
 };

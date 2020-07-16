@@ -12,7 +12,6 @@ const getAuditLog = (subject: string) => {
 
 const queryAuditLog = (subject: string) => {
   return getAuditLog(subject).then((queryResult) => {
-    console.log(queryResult.query);
     return {
       actions: queryResult.actions,
       sourceId: queryResult.userDatabaseId,
@@ -44,7 +43,6 @@ export const UserAuditPage = () => {
   return <AuditPageComponent auditSubjectType='User'
                              buttonLabel='Username without domain'
                              initialAuditSubject={username}
-                             logVerbose={false}
                              getNextAuditPath={getNextAuditPath}
                              queryAuditLog={queryAuditLog}/>;
 };

@@ -30,7 +30,6 @@ export const WorkspaceAuditPage = () => {
   return <AuditPageComponent auditSubjectType='Workspace'
                              buttonLabel='Workspace namespace (begins with aou-rw-)'
                              initialAuditSubject={workspaceNamespace}
-                             logVerbose={false}
                              getNextAuditPath={getNextAuditPath}
                              queryAuditLog={queryAuditLog}/>;
 };

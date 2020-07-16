@@ -23,3 +23,15 @@ export const eventBundleToString = (eventBundle: AuditEventBundle) => {
 export const actionToString = (action: AuditAction) => {
   return fp.map(eventBundleToString)(action.eventBundles).join('\n');
 };
+
+// based on https://stackoverflow.com/a/44661948. Use the browser's native user-driven file
+// download mechanism.
+export const downloadTextFile = (fileName, contents) => {
+  const file = new Blob([contents], {type: 'text/plain'});
+  const element = document.createElement('a');
+  element.href = URL.createObjectURL(file);
+  element.download = fileName;
+  document.body.appendChild(element); // Required for this to work in FireFox
+  element.click();
+  document.body.removeChild(element);
+};
