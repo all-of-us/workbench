@@ -1,5 +1,6 @@
 package org.pmiops.workbench.utils;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,5 +21,13 @@ public class Matchers {
 
   public static Optional<String> getGroup(Pattern pattern, String input, String groupName) {
     return getGroup(pattern.matcher(input), groupName);
+  }
+
+  public static String replaceAllInMap(Map<Pattern, String> patternToReplacement, String source) {
+    String result = source;
+    for (Map.Entry<Pattern, String> entry : patternToReplacement.entrySet()) {
+      result = entry.getKey().matcher(result).replaceAll(entry.getValue());
+    }
+    return result;
   }
 }

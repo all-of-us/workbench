@@ -4,11 +4,12 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.StandardSQLTypeName;
 import java.time.Instant;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.pmiops.workbench.utils.Matchers;
 
 public final class BQParameterUtil {
   private static final int MICROSECONDS_IN_MILLISECOND = 1000;
@@ -28,51 +29,50 @@ public final class BQParameterUtil {
 
   // Since BigQuery doesn't expose the literal query string built from a QueryJobConfiguration,
   // this method does the next best thing. Useful for diagnostics, logging, testing, etc.
-  public static String getReplacedQueryText(QueryJobConfiguration queryJobConfiguration) {
-    String result = "-- reconstructed query text\n" + queryJobConfiguration.getQuery();
-    final Map<String, QueryParameterValue> keyToNamedParameter =
+  // headerComment should be newline-delimeted but not include any comment characters
+  public static String getReplacedQueryText(
+      QueryJobConfiguration queryJobConfiguration, String headerComment) {
+    String result =
+        String.format("%s\n\n%s", getSqlComment(headerComment), queryJobConfiguration.getQuery());
+    final Map<Pattern, String> patternToReplacement =
         queryJobConfiguration.getNamedParameters().entrySet().stream()
-            .collect(Collectors.toMap(e -> decorateParameterName(e.getKey()), Entry::getValue));
+            .collect(
+                Collectors.toMap(
+                    e -> buildParameterRegex(e.getKey()), e -> getReplacementString(e.getValue())));
 
-    // Sort in reverse lenght order so we don't partially replace any parameter names (e.g. replace
-    // "@foo" before "@foo_bar").
-    final List<String> keysByLengthDesc =
-        keyToNamedParameter.keySet().stream()
-            .sorted((a, b) -> b.length() - a.length())
-            .collect(Collectors.toList());
+    return Matchers.replaceAllInMap(patternToReplacement, result);
+  }
 
-    final Map<String, String> keyToStringValue =
-        keysByLengthDesc.stream()
-            .collect(Collectors.toMap(k -> k, k -> getReplacementString(k, keyToNamedParameter)));
+  public static String getSqlComment(String headerComment) {
+    return Arrays.stream(headerComment.split("\n"))
+        .map(s -> "-- " + s)
+        .collect(Collectors.joining("\n"));
+  }
 
-    for (String key : keysByLengthDesc) {
-      result = result.replace(key, keyToStringValue.getOrDefault(key, "NULL"));
-    }
-    result = result.replace("\n", " ");
-    return result;
+  // use lookbehind for non-word character, since "'"(@" or " @" don't represent left-side word
+  // boundaries.
+  private static Pattern buildParameterRegex(String parameterName) {
+    return Pattern.compile(String.format("(?<=\\W)%s\\b", decorateParameterName(parameterName)));
   }
 
   public static String decorateParameterName(String parameterName) {
     return "@" + parameterName;
   }
 
-  private static String getReplacementString(
-      String key, Map<String, QueryParameterValue> keyToNamedParameter) {
-    final QueryParameterValue parameterValue = keyToNamedParameter.get(key);
-    final String rawStringValue =
+  private static String getReplacementString(QueryParameterValue parameterValue) {
+    final String value =
         Optional.ofNullable(parameterValue).map(QueryParameterValue::getValue).orElse("NULL");
 
-    final StandardSQLTypeName typeName =
+    final boolean isTimestamp =
         Optional.ofNullable(parameterValue)
             .map(QueryParameterValue::getType)
-            .orElse(StandardSQLTypeName.STRING);
+            .map(t -> t == StandardSQLTypeName.TIMESTAMP)
+            .orElse(false);
 
-    final String replacement;
-    if (typeName == StandardSQLTypeName.TIMESTAMP) {
-      replacement = String.format("TIMESTAMP '%s'", rawStringValue);
+    if (isTimestamp) {
+      return String.format("TIMESTAMP '%s'", value);
     } else {
-      replacement = rawStringValue;
+      return value;
     }
-    return replacement;
   }
 }

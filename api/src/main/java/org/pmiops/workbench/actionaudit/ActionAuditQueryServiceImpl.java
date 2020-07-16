@@ -77,10 +77,14 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
     final TableResult tableResult = bigQueryService.executeQuery(queryJobConfiguration);
 
     final List<AuditLogEntry> logEntries = auditLogEntryMapper.tableResultToLogEntries(tableResult);
+    final String queryHeader =
+        String.format(
+            "Audit trail for workspace DB ID %d, after %s and before %s",
+            workspaceDatabaseId, after.toString(), before.toString());
 
     return new WorkspaceAuditLogQueryResponse()
         .logEntries(logEntries)
-        .query(BQParameterUtil.getReplacedQueryText(queryJobConfiguration))
+        .query(BQParameterUtil.getReplacedQueryText(queryJobConfiguration, queryHeader))
         .workspaceDatabaseId(workspaceDatabaseId)
         .actions(auditLogEntryMapper.logEntriesToActions(logEntries));
   }
@@ -114,11 +118,14 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
     final TableResult tableResult = bigQueryService.executeQuery(queryJobConfiguration);
 
     final List<AuditLogEntry> logEntries = auditLogEntryMapper.tableResultToLogEntries(tableResult);
-
+    final String queryHeader =
+        String.format(
+            "Audit trail for user DB ID %d, after %s and before %s",
+            userDatabaseId, after.toString(), before.toString());
     return new UserAuditLogQueryResponse()
         .actions(auditLogEntryMapper.logEntriesToActions(logEntries))
         .logEntries(logEntries)
-        .query(BQParameterUtil.getReplacedQueryText(queryJobConfiguration))
+        .query(BQParameterUtil.getReplacedQueryText(queryJobConfiguration, queryHeader))
         .userDatabaseId(userDatabaseId);
   }
 

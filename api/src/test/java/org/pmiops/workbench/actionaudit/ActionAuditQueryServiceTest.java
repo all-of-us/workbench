@@ -104,8 +104,6 @@ public class ActionAuditQueryServiceTest {
   private static final Instant DEFAULT_BEFORE = Instant.parse("2020-08-30T01:20:00.02Z");
   private static final long TIME_TOLERANCE_MILLIS = 500;
   private static final long USER_DB_ID = 11223344L;
-  private static final String WORKSPACE_QUERY_SNIPPET_1 =
-      " WHERE jsonPayload.target_id = 101 AND   jsonPayload.target_type = 'WORKSPACE'";
   @MockBean private BigQueryService mockBigQueryService;
   @Autowired private ActionAuditQueryService actionAuditQueryService;
 
@@ -159,7 +157,9 @@ public class ActionAuditQueryServiceTest {
     assertThat(row2.getTargetType()).isEqualTo("WORKSPACE");
     assertThat(row2.getPreviousValue()).isNull();
 
-    assertThat(response.getQuery()).contains(WORKSPACE_QUERY_SNIPPET_1);
+    assertThat(response.getQuery())
+        .containsMatch(
+            "WHERE\\s+jsonPayload\\.target_id\\s+=\\s+101\\s+AND\\s+jsonPayload.target_type\\s+=\\s+'WORKSPACE'");
   }
 
   @Test
