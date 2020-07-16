@@ -23,6 +23,9 @@ import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -36,6 +39,8 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
+import org.pmiops.workbench.dataset.DataSetMapper;
+import org.pmiops.workbench.dataset.DataSetMapperImpl;
 import org.pmiops.workbench.dataset.DataSetServiceImpl;
 import org.pmiops.workbench.dataset.DataSetServiceImpl.QueryAndParameters;
 import org.pmiops.workbench.db.model.DbCohort;
@@ -46,11 +51,13 @@ import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -71,6 +78,8 @@ public class DataSetServiceTest {
   private static final String TEST_CDR_PROJECT_ID = "all-of-us-ehr-dev";
   private static final String TEST_CDR_DATA_SET_ID = "synthetic_cdr20180606";
   private static final String TEST_CDR_TABLE = TEST_CDR_PROJECT_ID + "." + TEST_CDR_DATA_SET_ID;
+  private static final Instant NOW = Instant.now();
+  private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
 
   @Autowired private BigQueryService bigQueryService;
   @Autowired private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
@@ -78,7 +87,9 @@ public class DataSetServiceTest {
   @Autowired private ConceptSetDao conceptSetDao;
   @Autowired private ConceptBigQueryService conceptBigQueryService;
   @Autowired private CohortQueryBuilder cohortQueryBuilder;
+  @Autowired private DataDictionaryEntryDao dataDictionaryEntryDao;
   @Autowired private DataSetDao dataSetDao;
+  @Autowired private DataSetMapper dataSetMapper;
 
   @MockBean private BigQueryService mockBigQueryService;
   @MockBean private CohortDao mockCohortDao;
@@ -90,10 +101,16 @@ public class DataSetServiceTest {
     CdrBigQuerySchemaConfigService.class,
     ConceptBigQueryService.class,
     ConceptSetDao.class,
+    DataSetMapperImpl.class,
     CohortQueryBuilder.class,
     DataSetDao.class
   })
-  static class Configuration {}
+  static class Configuration {
+    @Bean
+    Clock clock() {
+      return CLOCK;
+    }
+  }
 
   @Before
   public void setUp() {
@@ -105,7 +122,10 @@ public class DataSetServiceTest {
             conceptBigQueryService,
             conceptSetDao,
             cohortQueryBuilder,
-            dataSetDao);
+            dataDictionaryEntryDao,
+            dataSetDao,
+            dataSetMapper,
+            CLOCK);
 
     final DbCohort cohort = buildSimpleCohort();
     when(cohortDao.findCohortByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(cohort);

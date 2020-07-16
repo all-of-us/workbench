@@ -3,6 +3,7 @@ package org.pmiops.workbench.utils.mappers;
 import java.sql.Timestamp;
 import java.util.Optional;
 import javax.inject.Provider;
+import joptsimple.internal.Strings;
 import org.mapstruct.Named;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -65,7 +66,7 @@ public class CommonMappers {
 
   @Named("etagToCdrVersion")
   public int etagToCdrVersion(String etag) {
-    return Etags.toVersion(etag);
+    return Strings.isNullOrEmpty(etag) ? 1 : Etags.toVersion(etag);
   }
 
   public BillingStatus checkBillingFeatureFlag(BillingStatus billingStatus) {
