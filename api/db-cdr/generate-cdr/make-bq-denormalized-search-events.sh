@@ -169,7 +169,8 @@ FROM
 WHERE meas.person_id = sad.person_id
     and meas.measurement_datetime = sad.entry_datetime
     and sad.is_standard = 0
-    and sad.concept_id = 903115"
+    -- this is intentional as we want to update diastolic on the systolic row
+    and sad.concept_id = 903118"
 
 #####################################################################
 #   update source systolic pressure data into cb_search_all_events
@@ -189,7 +190,8 @@ FROM
 WHERE meas.person_id = sad.person_id
     and meas.measurement_datetime = sad.entry_datetime
     and sad.is_standard = 0
-    and sad.concept_id = 903118"
+    -- this is intentional as we want to update systolic on the diastolic row
+    and sad.concept_id = 903115"
 
 ################################################################
 #   insert standard measurement data into cb_search_all_events
@@ -238,7 +240,8 @@ FROM
 WHERE meas.person_id = sad.person_id
     and meas.measurement_datetime = sad.entry_datetime
     and sad.is_standard = 1
-    and sad.concept_id = 903115"
+    -- this is intentional as we want to update diastolic on the systolic row
+    and sad.concept_id = 903118"
 
 #######################################################################
 #   update standard systolic pressure data into cb_search_all_events
@@ -259,7 +262,8 @@ FROM
 WHERE meas.person_id = sad.person_id
     and meas.measurement_datetime = sad.entry_datetime
     and sad.is_standard = 1
-    and sad.concept_id = 903118"
+    -- this is intentional as we want to update systolic on the diastolic row
+    and sad.concept_id = 903115"
 
 ##############################################################
 #   insert source observation data into cb_search_all_events
