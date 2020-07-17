@@ -1,4 +1,69 @@
 import {ElementRef} from '@angular/core';
+import {environment} from 'environments/environment';
+
+interface ZendeskUrls {
+  billing: string,
+  communityForum: string,
+  createBillingAccount: string,
+  dataDictionary: string,
+  faq: string,
+  gettingStarted: string,
+  tableOfContents: string,
+  researchPurpose: string,
+}
+
+/**
+ * A set of support URLs for the current environment. These need to be
+ * parameterized per environment since the Zendesk support content IDs are not
+ * stable across the prod and sandbox Zendesk instances.
+ */
+export const supportUrls: ZendeskUrls = ((baseUrl) => {
+  // We'll fallback to prod, if parsing fails. We don't want to throw here,
+  // since this is evaluated statically.
+  let host;
+  try {
+    host = new URL(baseUrl).host;
+  } catch (e) {
+    console.error('failed to parse zendesk support URL from env - assuming prod', e);
+  }
+
+  const prodHost = 'aousupporthelp.zendesk.com';
+  const article = (id) => `${baseUrl}/articles/${id}`;
+  const category = (id) => `${baseUrl}/categories/${id}`;
+  const section = (id) => `${baseUrl}/sections/${id}`;
+  const commonUrls = {
+    // This link in particular needs the "en-us" infix. The other urls will
+    // redirect according to detected locale, which is preferred.
+    communityForum: `${baseUrl}/en-us/community/topics`
+  };
+  const urls: {[key: string]: ZendeskUrls} = {
+    [prodHost]: {
+      ...commonUrls,
+      billing: section('360008099991'),
+      createBillingAccount: article('360039539411'),
+      dataDictionary: article('360033200232'),
+      faq: category('360002157532'),
+      gettingStarted: category('360002157352'),
+      tableOfContents: category('360002625291'),
+      researchPurpose: article('360042673211'),
+    },
+    'aousupporthelp1580753096.zendesk.com': {
+      ...commonUrls,
+      billing: section('360009142932'),
+      createBillingAccount: article('360044792211'),
+      dataDictionary: article('360044793611'),
+      faq: category('360003453651'),
+      gettingStarted: category('360003430652'),
+      tableOfContents: category('360003430672'),
+      researchPurpose: article('360044334652'),
+    }
+  };
+  if (!urls[host]) {
+    console.error(`no article IDs for Zendesk host ${host}, defaulting to prod`);
+    return urls[prodHost];
+  }
+  return urls[host];
+})(environment.zendeskHelpCenterUrl);
 
 // ideally this initialization would be done by including <script> tags in
 // the component template html file.  However, Angular does not allow this.

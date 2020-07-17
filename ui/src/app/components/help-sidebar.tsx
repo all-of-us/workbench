@@ -15,13 +15,12 @@ import {highlightSearchTerm, reactStyles, ReactWrapperBase, withCurrentWorkspace
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {NavStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {openZendeskWidget} from 'app/utils/zendesk';
+import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
 import {ParticipantCohortStatus, WorkspaceAccessLevel} from 'generated/fetch';
 import {MenuItem, StyledAnchorTag} from './buttons';
 import {PopupTrigger} from './popups';
 
-const dataDictionaryUrl = 'https://aousupporthelp.zendesk.com/hc/en-us/articles/360033200232-Data-dictionary-for-Registered-Tier-Curated-Data-Repository-CDR-';
 const proIcons = {
   thunderstorm: '/assets/icons/thunderstorm-solid.svg'
 };
@@ -450,7 +449,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
                        onMouseOver={() => this.setState({tooltipId: i})}
                        onMouseOut={() => this.setState({tooltipId: undefined})}>
                     {icon.id === 'dataDictionary'
-                      ? <a href={dataDictionaryUrl} target='_blank'>
+                      ? <a href={supportUrls.dataDictionary} target='_blank'>
                           <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + i} icon={icon.faIcon} style={icon.style} />
                         </a>
                       : icon.faIcon === null
