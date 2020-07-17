@@ -4,7 +4,6 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.StandardSQLTypeName;
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -30,23 +29,14 @@ public final class QueryParameterValues {
 
   // Since BigQuery doesn't expose the literal query string built from a QueryJobConfiguration,
   // this method does the next best thing. Useful for diagnostics, logging, testing, etc.
-  // headerComment should be newline-delimeted but not include any comment characters
-  public static String replaceNamedParameters(
-      QueryJobConfiguration queryJobConfiguration, String headerComment) {
+  public static String replaceNamedParameters(QueryJobConfiguration queryJobConfiguration) {
     String result = queryJobConfiguration.getQuery();
     final Map<Pattern, String> patternToReplacement =
         queryJobConfiguration.getNamedParameters().entrySet().stream()
             .collect(
                 Collectors.toMap(
                     e -> buildParameterRegex(e.getKey()), e -> getReplacementString(e.getValue())));
-    final String populatedQuery = Matchers.replaceAllInMap(patternToReplacement, result);
-    return String.format("%s\n%s", getSqlComment(headerComment), populatedQuery);
-  }
-
-  public static String getSqlComment(String headerComment) {
-    return Arrays.stream(headerComment.split("\n"))
-        .map(s -> "-- " + s)
-        .collect(Collectors.joining("\n"));
+    return Matchers.replaceAllInMap(patternToReplacement, result);
   }
 
   public static String formatQuery(String query) {

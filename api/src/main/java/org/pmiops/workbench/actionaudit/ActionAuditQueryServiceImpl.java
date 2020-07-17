@@ -84,7 +84,7 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
 
     return new WorkspaceAuditLogQueryResponse()
         .logEntries(logEntries)
-        .query(QueryParameterValues.replaceNamedParameters(queryJobConfiguration, queryHeader))
+        .query(QueryParameterValues.replaceNamedParameters(queryJobConfiguration))
         .workspaceDatabaseId(workspaceDatabaseId)
         .actions(auditLogEntryMapper.logEntriesToActions(logEntries));
   }
@@ -127,7 +127,7 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
             userDatabaseId, after.toString(), before.toString());
     final String formattedQuery =
         QueryParameterValues.formatQuery(
-            QueryParameterValues.replaceNamedParameters(queryJobConfiguration, queryHeader));
+            QueryParameterValues.replaceNamedParameters(queryJobConfiguration));
 
     return new UserAuditLogQueryResponse()
         .actions(auditLogEntryMapper.logEntriesToActions(logEntries))
