@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
 import org.jetbrains.annotations.Nullable;
+import org.pmiops.workbench.actionaudit.auditors.FreeTierAuditor;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -37,13 +38,12 @@ import org.springframework.stereotype.Service;
 public class FreeTierBillingService {
 
   private final BigQueryService bigQueryService;
+  private final FreeTierAuditor freeTierAuditor;
   private final MailService mailService;
-
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
-
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   private static final Logger logger = Logger.getLogger(FreeTierBillingService.class.getName());
 
@@ -54,17 +54,19 @@ public class FreeTierBillingService {
   @Autowired
   public FreeTierBillingService(
       BigQueryService bigQueryService,
+      FreeTierAuditor freeTierAuditor,
       MailService mailService,
+      Provider<WorkbenchConfig> workbenchConfigProvider,
       UserDao userDao,
       WorkspaceDao workspaceDao,
-      WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao,
-      Provider<WorkbenchConfig> workbenchConfigProvider) {
+      WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao) {
     this.bigQueryService = bigQueryService;
+    this.freeTierAuditor = freeTierAuditor;
     this.mailService = mailService;
     this.userDao = userDao;
+    this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceDao = workspaceDao;
     this.workspaceFreeTierUsageDao = workspaceFreeTierUsageDao;
-    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   public double getWorkspaceFreeTierBillingUsage(DbWorkspace dbWorkspace) {
@@ -306,6 +308,8 @@ public class FreeTierBillingService {
    * @return whether the user's total cost is now below their limit
    */
   public boolean setFreeTierDollarOverride(DbUser user, double dollarLimit) {
+    final Double previousLimitMaybe = user.getFreeTierCreditsLimitDollarsOverride();
+
     // TODO: prevent setting this limit directly except in this method?
     user.setFreeTierCreditsLimitDollarsOverride(dollarLimit);
     user = userDao.save(user);
@@ -316,6 +320,9 @@ public class FreeTierBillingService {
       // may be redundant: enable anyway
       updateFreeTierWorkspacesStatus(user, BillingStatus.ACTIVE);
     }
+
+    freeTierAuditor.fireFreeTierDollarQuotaAction(
+        user.getUserId(), previousLimitMaybe, dollarLimit);
     return underLimit;
   }
 }

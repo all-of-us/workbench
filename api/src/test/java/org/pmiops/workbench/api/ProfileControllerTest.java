@@ -3,7 +3,9 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -28,11 +30,12 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryServiceImpl;
+import org.pmiops.workbench.actionaudit.auditors.FreeTierAuditor;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
-import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditorImpl;
+import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
+import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.billing.FreeTierBillingService;
@@ -114,8 +117,6 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ProfileControllerTest extends BaseControllerTest {
 
-  private static final double FREE_TIER_LIMIT = 300D;
-  private static final double FREE_TIER_USAGE = 100D;
   private static final FakeClock fakeClock = new FakeClock(Instant.parse("1995-06-05T00:00:00Z"));
   private static final long NONCE_LONG = 12345;
   private static final String CAPTCHA_TOKEN = "captchaToken";
@@ -143,10 +144,13 @@ public class ProfileControllerTest extends BaseControllerTest {
   @MockBean private CloudStorageService mockCloudStorageService;
   @MockBean private DirectoryService mockDirectoryService;
   @MockBean private FireCloudService mockFireCloudService;
-  @MockBean private FreeTierBillingService mockFreeTierBillingService;
+  @MockBean private FreeTierAuditor mockFreeTierAuditor;
   @MockBean private MailService mockMailService;
   @MockBean private ProfileAuditor mockProfileAuditor;
   @MockBean private ShibbolethService shibbolethService;
+  @MockBean private UserServiceAuditor mockUserServiceAuditor;
+
+  @Autowired private FreeTierBillingService freeTierBillingService;
   @Autowired private InstitutionService institutionService;
   @Autowired private ProfileController profileController;
   @Autowired private ProfileService profileService;
@@ -184,8 +188,9 @@ public class ProfileControllerTest extends BaseControllerTest {
     CaptchaVerificationService.class,
     UserServiceImpl.class,
     UserServiceTestConfiguration.class,
+    FreeTierBillingService.class,
   })
-  @MockBean({BigQueryService.class, UserServiceAuditorImpl.class})
+  @MockBean({BigQueryService.class})
   static class Configuration {
     @Bean
     @Primary
@@ -1033,7 +1038,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     FirecloudJWTWrapper firecloudJwt = new FirecloudJWTWrapper().jwt("test");
     createAccountAndDbUserWithAffiliation();
     profileController.updateNihToken(nihToken);
-    verify(mockFireCloudService).postNihCallback(ArgumentMatchers.eq(firecloudJwt));
+    verify(mockFireCloudService).postNihCallback(eq(firecloudJwt));
   }
 
   @Test(expected = ServerErrorException.class)
@@ -1052,7 +1057,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     String jwt = "test";
     createAccountAndDbUserWithAffiliation();
     profileController.updateNihToken(nihToken);
-    verify(shibbolethService).updateShibbolethToken(ArgumentMatchers.eq(jwt));
+    verify(shibbolethService).updateShibbolethToken(eq(jwt));
   }
 
   @Test(expected = BadRequestException.class)
@@ -1099,28 +1104,6 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
     assertThat(dbUser.getDataUseAgreementBypassTime()).isNotNull();
-  }
-
-  @Test
-  public void testFreeTierLimits() {
-    createAccountAndDbUserWithAffiliation();
-    DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
-
-    when(mockFreeTierBillingService.getCachedFreeTierUsage(dbUser)).thenReturn(FREE_TIER_USAGE);
-    when(mockFreeTierBillingService.getUserFreeTierDollarLimit(dbUser)).thenReturn(FREE_TIER_LIMIT);
-
-    Profile profile = profileController.getMe().getBody();
-    assertProfile(
-        profile,
-        PRIMARY_EMAIL,
-        CONTACT_EMAIL,
-        FAMILY_NAME,
-        GIVEN_NAME,
-        DataAccessLevel.UNREGISTERED,
-        TIMESTAMP,
-        false);
-    assertThat(profile.getFreeTierUsage()).isEqualTo(FREE_TIER_USAGE);
-    assertThat(profile.getFreeTierDollarQuota()).isEqualTo(FREE_TIER_LIMIT);
   }
 
   @Test
@@ -1209,6 +1192,8 @@ public class ProfileControllerTest extends BaseControllerTest {
         new EditUserInformationRequest().username(PRIMARY_EMAIL).contactEmail(newContactEmail);
     final Profile retrieved = profileService.editUserInformation(request);
     assertThat(retrieved.getContactEmail()).isEqualTo(newContactEmail);
+
+    verify(mockProfileAuditor).fireUpdateAction(original, retrieved);
   }
 
   @Test(expected = BadRequestException.class)
@@ -1257,6 +1242,8 @@ public class ProfileControllerTest extends BaseControllerTest {
             .verifiedInstitutionalAffiliation(newAffiliation);
     final Profile retrieved = profileService.editUserInformation(request);
     assertThat(retrieved.getVerifiedInstitutionalAffiliation()).isEqualTo(newAffiliation);
+
+    verify(mockProfileAuditor).fireUpdateAction(original, retrieved);
   }
 
   @Test(expected = BadRequestException.class)
@@ -1327,6 +1314,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     final Profile retrieved = profileService.editUserInformation(request);
     assertThat(retrieved.getContactEmail()).isEqualTo(newContactEmail);
     assertThat(retrieved.getVerifiedInstitutionalAffiliation()).isEqualTo(newAffiliation);
+    verify(mockProfileAuditor).fireUpdateAction(original, retrieved);
   }
 
   @Test(expected = BadRequestException.class)
@@ -1437,23 +1425,66 @@ public class ProfileControllerTest extends BaseControllerTest {
     // the two are now bypassed
     assertThat(retrieved2.getEraCommonsBypassTime()).isNotNull();
     assertThat(retrieved2.getTwoFactorAuthBypassTime()).isNotNull();
-  }
 
-  // verify that setFreeTierDollarOverride() is called when the quota changes
+    verify(mockProfileAuditor).fireUpdateAction(original, retrieved1);
+    verify(mockProfileAuditor).fireUpdateAction(retrieved1, retrieved2);
+
+    // DUA and COMPLIANCE x2, one for each request
+
+    verify(mockUserServiceAuditor, times(2))
+        .fireAdministrativeBypassTime(
+            eq(dbUser.getUserId()),
+            eq(BypassTimeTargetProperty.DATA_USE_AGREEMENT_BYPASS_TIME),
+            any(),
+            any());
+    verify(mockUserServiceAuditor, times(2))
+        .fireAdministrativeBypassTime(
+            eq(dbUser.getUserId()),
+            eq(BypassTimeTargetProperty.COMPLIANCE_TRAINING_BYPASS_TIME),
+            any(),
+            any());
+
+    // BETA once in request 1
+
+    verify(mockUserServiceAuditor)
+        .fireAdministrativeBypassTime(
+            eq(dbUser.getUserId()),
+            eq(BypassTimeTargetProperty.BETA_ACCESS_BYPASS_TIME),
+            any(),
+            any());
+
+    // ERA and 2FA once in request 2
+
+    verify(mockUserServiceAuditor)
+        .fireAdministrativeBypassTime(
+            eq(dbUser.getUserId()),
+            eq(BypassTimeTargetProperty.ERA_COMMONS_BYPASS_TIME),
+            any(),
+            any());
+    verify(mockUserServiceAuditor)
+        .fireAdministrativeBypassTime(
+            eq(dbUser.getUserId()),
+            eq(BypassTimeTargetProperty.TWO_FACTOR_AUTH_BYPASS_TIME),
+            any(),
+            any());
+  }
 
   @Test
   public void test_editUserInformation_free_tier_quota() {
     createAccountAndDbUserWithAffiliation();
 
+    final Double originalQuota = dbUser.getFreeTierCreditsLimitDollarsOverride();
     final Double newQuota = 123.4;
 
     final EditUserInformationRequest request =
         new EditUserInformationRequest().username(PRIMARY_EMAIL).freeCreditsLimit(newQuota);
-    profileService.editUserInformation(request);
-    verify(mockFreeTierBillingService).setFreeTierDollarOverride(dbUser, newQuota);
-  }
 
-  // verify that setFreeTierDollarOverride() is not called when the quota does not change
+    final Profile retrieved = profileService.editUserInformation(request);
+    assertThat(retrieved.getFreeTierDollarQuota()).isWithin(0.01).of(newQuota);
+
+    verify(mockFreeTierAuditor)
+        .fireFreeTierDollarQuotaAction(dbUser.getUserId(), originalQuota, newQuota);
+  }
 
   @Test
   public void test_editUserInformation_free_tier_quota_no_change() {
@@ -1465,7 +1496,8 @@ public class ProfileControllerTest extends BaseControllerTest {
             .freeCreditsLimit(original.getFreeTierDollarQuota());
     profileService.editUserInformation(request);
 
-    verify(mockFreeTierBillingService, never()).setFreeTierDollarOverride(any(), anyDouble());
+    verify(mockFreeTierAuditor, never())
+        .fireFreeTierDollarQuotaAction(anyLong(), anyDouble(), anyDouble());
   }
 
   private Profile createAccountAndDbUserWithAffiliation(
