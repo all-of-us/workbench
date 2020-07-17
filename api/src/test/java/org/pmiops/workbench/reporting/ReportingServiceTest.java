@@ -7,12 +7,18 @@ import com.google.common.collect.ImmutableList;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.ReportingSnapshot;
+import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.utils.TestMockFactory;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -34,13 +40,20 @@ public class ReportingServiceTest {
   private static final String CURRENT_POSITION = "Tester";
   private static final String RESEARCH_PURPOSE = "To test things";
   private static final long NOW_EPOCH_MILLI = 1594404482000L;
+
   @MockBean private UserService mockUserService;
+  @MockBean private WorkspaceService mockWorkspaceService;
+
   @Autowired private ReportingService reportingService;
+
+  private static final TestMockFactory TEST_MOCK_FACTORY = new TestMockFactory();
 
   @TestConfiguration
   @Import({
-      ReportingMapperImpl.class,
-      ReportingServiceImpl.class})
+    CommonMappers.class,
+    ReportingMapperImpl.class,
+    ReportingServiceImpl.class,
+  })
   public static class config {
     @Bean
     public Clock getClock() {
@@ -48,28 +61,42 @@ public class ReportingServiceTest {
     }
   }
 
+  @Before
+  public void setup() {}
+
+  public void mockWorkspaces() {
+    final DbWorkspace dbWorkspace1 = stubDbWorkspace("aou-rw-123456", "A Tale of Two Cities", 101L);
+    final DbWorkspace dbWorkspace2 = stubDbWorkspace("aou-rw-789", "Moby Dick", 202L);
+
+    doReturn(ImmutableList.of(dbWorkspace1, dbWorkspace2))
+        .when(mockWorkspaceService)
+        .getAllActiveWorkspaces();
+  }
+
   @Test
   public void testGetSnapshot_noEntries() {
     final ReportingSnapshot snapshot = reportingService.getSnapshot();
-    assertThat(snapshot.getCaptureTimestamp())
-        .isEqualTo(NOW_EPOCH_MILLI * 1000);
+    assertThat(snapshot.getCaptureTimestamp()).isEqualTo(NOW_EPOCH_MILLI * 1000);
   }
 
   @Test
-  public void testGetSnapshot_twoUsers() {
+  public void testGetSnapshot_someEntries() {
     mockUsers();
+    mockWorkspaces();
+
     final ReportingSnapshot snapshot = reportingService.getSnapshot();
-    assertThat(snapshot.getCaptureTimestamp().getMillis())
-        .isEqualTo(NOW_EPOCH_MILLI);
+    assertThat(snapshot.getCaptureTimestamp().getMillis()).isEqualTo(NOW_EPOCH_MILLI);
     assertThat(snapshot.getResearchers()).hasSize(2);
     assertThat(snapshot.getResearchers().get(0).getResearcherId()).isEqualTo(101);
     assertThat(snapshot.getResearchers().get(0).getIsDisabled()).isFalse();
+
+    assertThat(snapshot.getWorkspaces()).hasSize(2);
   }
 
   private void mockUsers() {
-    final List<DbUser> users = ImmutableList.of(
-        createFakeUser("Marge", false, 101L),
-        createFakeUser("Homer", false, 102L));
+    final List<DbUser> users =
+        ImmutableList.of(
+            createFakeUser("Marge", false, 101L), createFakeUser("Homer", false, 102L));
     doReturn(users).when(mockUserService).getAllUsers();
   }
 
@@ -85,5 +112,12 @@ public class ReportingServiceTest {
     user.setAreaOfResearch(RESEARCH_PURPOSE);
     user.setDisabled(disabled);
     return user;
+  }
+
+  private DbWorkspace stubDbWorkspace(
+      String workspaceNamespace, String workspaceName, long workspaceId) {
+    final Workspace workspace1 =
+        TEST_MOCK_FACTORY.createWorkspace(workspaceNamespace, workspaceName);
+    return TestMockFactory.createDbWorkspaceStub(workspace1, workspaceId);
   }
 }

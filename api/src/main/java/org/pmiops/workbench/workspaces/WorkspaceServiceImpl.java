@@ -65,7 +65,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseL
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.BillingStatus;
-import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -804,7 +803,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   }
 
   @Override
-  public List<ReportingWorkspace> getReportingWorkspaces() {
-    return workspaceDao.getReportingWorkspaces();
+  public List<DbWorkspace> getAllActiveWorkspaces() {
+    return workspaceDao.findAllByActiveStatusIn(WorkspaceActiveStatus.ACTIVE);
   }
 }

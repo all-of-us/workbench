@@ -2,9 +2,11 @@ package org.pmiops.workbench.reporting;
 
 import java.time.Clock;
 import java.util.List;
+import java.util.logging.Logger;
 import org.joda.time.DateTime;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.ReportingResearcher;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingWorkspace;
@@ -20,10 +22,11 @@ public class ReportingServiceImpl implements ReportingService {
   private final UserService userService;
   private final WorkspaceService workspaceService;
 
-  public ReportingServiceImpl(Clock clock,
-        ReportingMapper reportingMapper,
-        UserService userService,
-        WorkspaceService workspaceService) {
+  public ReportingServiceImpl(
+      Clock clock,
+      ReportingMapper reportingMapper,
+      UserService userService,
+      WorkspaceService workspaceService) {
     this.clock = clock;
     this.reportingMapper = reportingMapper;
     this.userService = userService;
@@ -44,13 +47,18 @@ public class ReportingServiceImpl implements ReportingService {
         .workspaces(getWorkspaces());
   }
 
+  @Override
+  public void uploadSnapshot() {
+    final ReportingSnapshot snapshot = getSnapshot();
+  }
+
   private List<ReportingResearcher> getResearchers() {
     final List<DbUser> users = userService.getAllUsers();
-    return reportingMapper.toModel(users);
+    return reportingMapper.toReportingResearcherList(users);
   }
 
   private List<ReportingWorkspace> getWorkspaces() {
-    return workspaceService.getReportingWorkspaces();
+    final List<DbWorkspace> workspaces = workspaceService.getAllActiveWorkspaces();
+    return reportingMapper.toReportingWorkspaceList(workspaces);
   }
 }
-
