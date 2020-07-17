@@ -17,6 +17,8 @@ describe('SideNav', () => {
     profileActive: false,
     userAdminActive: false,
     workspacesActive: false,
+    userAuditActive: false,
+    workspaceAuditActive: false
   };
   const component = () => mount(<SideNav {...props}/>);
   it('should render', () => {
