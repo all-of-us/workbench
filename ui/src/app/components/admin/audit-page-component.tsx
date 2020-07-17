@@ -5,7 +5,7 @@ import {NumberInput, TextInputWithLabel} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import colors from 'app/styles/colors';
 import { useDebounce } from 'app/utils';
-import {actionToString, downloadTextFile} from 'app/utils/audit-utils';
+import {downloadTextFile} from 'app/utils/audit-utils';
 import {AuditAction, AuditLogEntry} from 'generated';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
@@ -74,7 +74,8 @@ const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath, but
   };
 
   const getBigQueryConsoleUrl = () => {
-    // TODO(jaycarlton): use actual config endpoint to create correct link
+    // TODO(jaycarlton): use actual config endpoint to create correct link RW-5283. This only
+    // works for the test env right now.
     const props = {
       bigQueryConsoleUrl: 'https://console.cloud.google.com/bigquery',
       gcpProject: 'all-of-us-workbench-test',
