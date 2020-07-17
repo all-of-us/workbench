@@ -120,26 +120,24 @@ public class MailServiceImpl implements MailService {
             user.getUsername(), threshold, currentUsage, remainingBalance);
     log.info(logMsg);
 
-    if (workbenchConfig.featureFlags.sendFreeTierAlertEmails) {
-      final String msgHtml =
-          buildHtml(
-              FREE_TIER_DOLLAR_THRESHOLD_RESOURCE,
-              freeTierDollarThresholdSubstitutionMap(user, currentUsage, remainingBalance));
-      final String subject =
-          String.format(
-              "Reminder - %s Free credit usage in All of Us Researcher Workbench",
-              formatPercentage(threshold));
+    final String msgHtml =
+        buildHtml(
+            FREE_TIER_DOLLAR_THRESHOLD_RESOURCE,
+            freeTierDollarThresholdSubstitutionMap(user, currentUsage, remainingBalance));
+    final String subject =
+        String.format(
+            "Reminder - %s Free credit usage in All of Us Researcher Workbench",
+            formatPercentage(threshold));
 
-      final MandrillMessage msg =
-          new MandrillMessage()
-              .to(Collections.singletonList(validatedRecipient(user.getContactEmail())))
-              .html(msgHtml)
-              .subject(subject)
-              .fromEmail(workbenchConfig.mandrill.fromEmail);
+    final MandrillMessage msg =
+        new MandrillMessage()
+            .to(Collections.singletonList(validatedRecipient(user.getContactEmail())))
+            .html(msgHtml)
+            .subject(subject)
+            .fromEmail(workbenchConfig.mandrill.fromEmail);
 
-      sendWithRetries(
-          msg, String.format("User %s passed a free tier dollar threshold", user.getUsername()));
-    }
+    sendWithRetries(
+        msg, String.format("User %s passed a free tier dollar threshold", user.getUsername()));
   }
 
   @Override
@@ -150,22 +148,20 @@ public class MailServiceImpl implements MailService {
         String.format("Free credits have expired for User %s", user.getUsername());
     log.info(logMsg);
 
-    if (workbenchConfig.featureFlags.sendFreeTierAlertEmails) {
-      final String msgHtml =
-          buildHtml(FREE_TIER_EXPIRATION_RESOURCE, freeTierExpirationSubstitutionMap(user));
+    final String msgHtml =
+        buildHtml(FREE_TIER_EXPIRATION_RESOURCE, freeTierExpirationSubstitutionMap(user));
 
-      final String subject = "Alert - Free credit expiration in All of Us Researcher Workbench";
+    final String subject = "Alert - Free credit expiration in All of Us Researcher Workbench";
 
-      final MandrillMessage msg =
-          new MandrillMessage()
-              .to(Collections.singletonList(validatedRecipient(user.getContactEmail())))
-              .html(msgHtml)
-              .subject(subject)
-              .fromEmail(workbenchConfig.mandrill.fromEmail);
+    final MandrillMessage msg =
+        new MandrillMessage()
+            .to(Collections.singletonList(validatedRecipient(user.getContactEmail())))
+            .html(msgHtml)
+            .subject(subject)
+            .fromEmail(workbenchConfig.mandrill.fromEmail);
 
-      sendWithRetries(
-          msg, String.format("Free tier credits have expired for user %s", user.getUsername()));
-    }
+    sendWithRetries(
+        msg, String.format("Free tier credits have expired for user %s", user.getUsername()));
   }
 
   @Override
