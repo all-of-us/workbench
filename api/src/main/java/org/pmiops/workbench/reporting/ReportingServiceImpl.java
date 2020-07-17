@@ -2,7 +2,6 @@ package org.pmiops.workbench.reporting;
 
 import java.time.Clock;
 import java.util.List;
-import java.util.logging.Logger;
 import org.joda.time.DateTime;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
@@ -50,6 +49,7 @@ public class ReportingServiceImpl implements ReportingService {
   @Override
   public void uploadSnapshot() {
     final ReportingSnapshot snapshot = getSnapshot();
+    // TODO: upload to BigQuery (or kick off task to upload).
   }
 
   private List<ReportingResearcher> getResearchers() {
