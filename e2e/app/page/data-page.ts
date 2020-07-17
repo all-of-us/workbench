@@ -94,16 +94,14 @@ export default class DataPage extends AuthenticatedPage {
   }
 
   // Click Add Datasets button.
-  async clickAddDatasetButton(waitForDatasetBuildPage: boolean = true): Promise<DatasetBuildPage> {
+  async clickAddDatasetButton(): Promise<DatasetBuildPage> {
     const addDatasetButton = await this.getAddDatasetButton();
     await addDatasetButton.clickAndWait();
     await waitWhileLoading(this.page);
 
-    const datasetPage = new DatasetBuildPage(this.page);
     // wait for Dataset Build page load and ready.
-    if (waitForDatasetBuildPage) {
-      await datasetPage.waitForLoad();
-    }
+    const datasetPage = new DatasetBuildPage(this.page);
+    await datasetPage.waitForLoad();
     return datasetPage;
   }
 
