@@ -18,5 +18,10 @@
     "mode": "NULLABLE",
     "name": "age_at_cdr",
     "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "is_deceased",
+    "type": "INTEGER"
   }
 ]
