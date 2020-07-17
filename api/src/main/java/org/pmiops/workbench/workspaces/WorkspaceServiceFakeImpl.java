@@ -12,6 +12,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
+import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceResponse;
@@ -174,5 +175,10 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
   @Override
   public boolean maybeDeleteRecentWorkspace(long workspaceId) {
     return false;
+  }
+
+  @Override
+  public List<ReportingWorkspace> getReportingWorkspaces() {
+    return null;
   }
 }

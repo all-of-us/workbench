@@ -1528,6 +1528,23 @@ paths:
           schema:
             "$ref": "#/definitions/ErrorResponse"
 
+  "/v1/cron/uploadReportingSnapshot":
+    get:
+      tags:
+        - offlineReporting
+        - cron
+      description: >
+        Capture a reporting snapshot and beging the upload task to BigQuery reporting dataset.
+      operationId: uploadReportingSnapshot
+      security: []
+      responses:
+        204:
+          description: No content
+        500:
+          description: Internal Error
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+
   "/v1/cron/updateResearchPurposeReviewPrompt":
     get:
       tags:
@@ -1543,6 +1560,7 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
+
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/rename":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -7742,3 +7760,29 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/ReportingResearcher"
+      workspaces:
+        type: array
+        items:
+          "$ref": "#/definitions/ReportingWorkspace"
+  ReportingWorkspace:
+    description: >
+      Workspace information for reporting.
+    type: object
+    properties:
+      creatorId:
+        description: FK researcher ID for creator of workspace.
+        type: integer
+        format: int64
+      name:
+        description: user-generated name for workspace
+        type: string
+      fakeSize:
+        description: >
+          Fake numerical quantity for smoke testing.
+        type: integer
+        format: int64
+      creationTime:
+        description: >
+          timestamp (epoch millis) at workspace creation
+        type: integer
+        format: int64

@@ -12,6 +12,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
+import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceResponse;
@@ -106,4 +107,6 @@ public interface WorkspaceService {
   DbUserRecentWorkspace updateRecentWorkspaces(DbWorkspace workspace);
 
   boolean maybeDeleteRecentWorkspace(long workspaceId);
+
+  List<ReportingWorkspace> getReportingWorkspaces();
 }
