@@ -1,5 +1,7 @@
 import {Component as AComponent} from '@angular/core';
 import {AppRoute, AppRouter, Guard, ProtectedRoutes, withFullHeight, withRouteData} from 'app/components/app-router';
+import {WorkspaceAuditPage} from 'app/pages/admin/admin-workspace-audit';
+import {UserAuditPage} from 'app/pages/admin/user-audit';
 import {CookiePolicy} from 'app/pages/cookie-policy';
 import {DataUserCodeOfConduct} from 'app/pages/profile/data-user-code-of-conduct';
 import {SessionExpired} from 'app/pages/session-expired';
@@ -11,16 +13,18 @@ import {authStore, useStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
+
 const signInGuard: Guard = {
   allowed: (): boolean => authStore.get().isSignedIn,
   redirectPath: '/login'
 };
 
 const DUCC = fp.flow(withRouteData, withFullHeight)(DataUserCodeOfConduct);
+const UserAudit = withRouteData(UserAuditPage);
+const WorkspaceAudit = withRouteData(WorkspaceAuditPage);
 
 export const AppRoutingComponent: React.FunctionComponent<{signIn: Function}> = ({signIn}) => {
   const {authLoaded = false} = useStore(authStore);
-
   return authLoaded && <AppRouter>
     <AppRoute path='/cookie-policy' component={CookiePolicy}/>
     <AppRoute path='/session-expired' data={{signIn: signIn}} component={SessionExpired}/>
@@ -35,6 +39,14 @@ export const AppRoutingComponent: React.FunctionComponent<{signIn: Function}> = 
             minimizeChrome: true
           }} />}
         />
+        <AppRoute path='/admin/user-audit'
+                  component={() => <UserAudit routeData={{title: 'User Audit'}}/>}/>
+        <AppRoute path='/admin/user-audit/:username'
+                  component={() => <UserAudit routeData={{title: 'User Audit'}}/>}/>
+        <AppRoute path='/admin/workspace-audit'
+                  component={() => <WorkspaceAudit routeData={{title: 'Workspace Audit'}}/>}/>
+        <AppRoute path='/admin/workspace-audit/:workspaceNamespace'
+                  component={() => <WorkspaceAudit routeData={{title: 'Workspace Audit'}}/>}/>
     </ProtectedRoutes>
   </AppRouter>;
 };

@@ -74,6 +74,8 @@ export interface Props {
   libraryActive: boolean;
   profileActive: boolean;
   userAdminActive: boolean;
+  userAuditActive: boolean;
+  workspaceAuditActive: boolean;
 }
 
 export interface State {
@@ -242,6 +244,8 @@ export const NavBar = withUserProfile()(
             onToggleSideNav={this.onToggleSideNav}
             profileActive={this.props.profileActive}
             userAdminActive={this.props.userAdminActive}
+            userAuditActive={this.props.userAuditActive}
+            workspaceAuditActive={this.props.workspaceAuditActive}
             workspaceAdminActive={this.props.workspaceAdminActive}
             workspacesActive={this.props.workspacesActive}
           />
@@ -280,6 +284,8 @@ export class NavBarComponent extends ReactWrapperBase {
       'libraryActive',
       'profileActive',
       'userAdminActive',
+      'userAuditActive',
+      'workspaceAuditActive'
     ]);
   }
 }

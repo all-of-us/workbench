@@ -104,6 +104,7 @@ const styles = reactStyles({
     padding: '3px 5px'
   },
   menuButton: {
+    background: colors.white,
     border: `1px solid ${colorWithWhiteness(colors.black, .8)}`,
     borderRadius: '0.125rem',
     color: colors.primary,

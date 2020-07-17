@@ -87,8 +87,8 @@ VALUES
 echo "Inserting cb_person"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_person\`
-(person_id, dob, age_at_consent, age_at_cdr)
-SELECT person_id, dob, age_at_consent, age_at_cdr
+(person_id, dob, age_at_consent, age_at_cdr, is_deceased)
+SELECT person_id, dob, age_at_consent, age_at_cdr, is_deceased
 FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\`"
 
 # Populate cb_data_filter table

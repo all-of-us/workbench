@@ -33,15 +33,14 @@ public final class QueryParameterValues {
   // headerComment should be newline-delimeted but not include any comment characters
   public static String replaceNamedParameters(
       QueryJobConfiguration queryJobConfiguration, String headerComment) {
-    String result =
-        String.format("%s\n\n%s", getSqlComment(headerComment), queryJobConfiguration.getQuery());
+    String result = queryJobConfiguration.getQuery();
     final Map<Pattern, String> patternToReplacement =
         queryJobConfiguration.getNamedParameters().entrySet().stream()
             .collect(
                 Collectors.toMap(
                     e -> buildParameterRegex(e.getKey()), e -> getReplacementString(e.getValue())));
-
-    return Matchers.replaceAllInMap(patternToReplacement, result);
+    final String populatedQuery = Matchers.replaceAllInMap(patternToReplacement, result);
+    return String.format("%s\n%s", getSqlComment(headerComment), populatedQuery);
   }
 
   public static String getSqlComment(String headerComment) {

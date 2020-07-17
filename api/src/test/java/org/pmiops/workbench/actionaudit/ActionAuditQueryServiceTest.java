@@ -115,7 +115,8 @@ public class ActionAuditQueryServiceTest {
     public WorkbenchConfig workbenchConfig() {
       final WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
       workbenchConfig.actionAudit.bigQueryDataset = "action_audit_unit_test";
-      workbenchConfig.actionAudit.bigQueryDataset = "action_audit_unit_test";
+      workbenchConfig.actionAudit.bigQueryTable = "action_audit_unit_test";
+      workbenchConfig.server.projectId = "rw-wb-unit-test";
       return workbenchConfig;
     }
   }

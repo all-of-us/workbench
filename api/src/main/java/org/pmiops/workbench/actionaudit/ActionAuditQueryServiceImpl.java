@@ -41,7 +41,7 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
           + "  AND TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) < @before\n"
           + "  AND @after_partition_time <= _PARTITIONTIME\n"
           + "  AND _PARTITIONTIME < @before_partition_time\n"
-          + "ORDER BY event_time, agent_id, action_id\n"
+          + "ORDER BY event_time DESC, agent_id, action_id\n"
           + "LIMIT @limit;";
 
   private final AuditLogEntryMapper auditLogEntryMapper;
@@ -102,9 +102,12 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
   public UserAuditLogQueryResponse queryEventsForUser(
       long userDatabaseId, long limit, Instant after, Instant before) {
 
+    // Workaround RW-5289 by omitting all LOGIN events from the result set. Otherwise
+    // they crowd out all the real events.
     final String whereClausePrefix =
         "((jsonPayload.target_id = @user_db_id AND jsonPayload.target_type = 'USER') OR\n"
-            + "  (jsonPayload.agent_id = @user_db_id AND jsonPayload.agent_type = 'USER'))";
+            + "  (jsonPayload.agent_id = @user_db_id AND jsonPayload.agent_type = 'USER')) AND\n"
+            + "  jsonPayload.action_type != 'LOGIN'";
     final String queryString = String.format(QUERY_FORMAT, getTableName(), whereClausePrefix);
 
     final QueryJobConfiguration queryJobConfiguration =
@@ -139,7 +142,7 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
     final Instant beforePartitionTime = before.plus(PARTITION_BUFFER);
 
     return ImmutableMap.<String, QueryParameterValue>builder()
-        .put("limit", QueryParameterValue.int64(Math.max(limit, MAX_QUERY_LIMIT)))
+        .put("limit", QueryParameterValue.int64(Math.min(limit, MAX_QUERY_LIMIT)))
         .put("after", QueryParameterValues.instantToQPValue(after))
         .put("before", QueryParameterValues.instantToQPValue(before))
         .put("after_partition_time", QueryParameterValues.instantToQPValue(afterPartitionTime))
