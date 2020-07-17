@@ -186,9 +186,9 @@ public class ActionAuditQueryServiceTest {
     final String query = response.getQuery();
     assertThat(query)
         .containsMatch(
-            "AND\\s+_PARTITIONTIME\\s+<\\s+TIMESTAMP\\s+'2020-03-16 09:30:00\\.\\d{6}\\+00:00'");
+            "TIMESTAMP\\s+'2020-03-09 09:30:00\\.\\d{6}\\+00:00'\\s+<=\\s+_PARTITIONTIME");
     assertThat(query)
         .containsMatch(
-            "TIMESTAMP\\s+'2020-03-09 09:30:00\\.\\d{6}\\+00:00'\\s+<=\\s+_PARTITIONTIME");
+            "AND\\s+_PARTITIONTIME\\s+<\\s+TIMESTAMP\\s+'2020-03-16 09:30:00\\.\\d{6}\\+00:00'");
   }
 }

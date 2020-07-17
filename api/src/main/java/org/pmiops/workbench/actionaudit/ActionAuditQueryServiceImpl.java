@@ -9,7 +9,7 @@ import java.time.Instant;
 import java.util.List;
 import javax.inject.Provider;
 import org.pmiops.workbench.api.BigQueryService;
-import org.pmiops.workbench.cohortbuilder.util.BQParameterUtil;
+import org.pmiops.workbench.cohortbuilder.util.QueryParameterValues;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.ActionAuditConfig;
 import org.pmiops.workbench.model.AuditLogEntry;
@@ -84,7 +84,7 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
 
     return new WorkspaceAuditLogQueryResponse()
         .logEntries(logEntries)
-        .query(BQParameterUtil.replaceNamedParameters(queryJobConfiguration, queryHeader))
+        .query(QueryParameterValues.replaceNamedParameters(queryJobConfiguration, queryHeader))
         .workspaceDatabaseId(workspaceDatabaseId)
         .actions(auditLogEntryMapper.logEntriesToActions(logEntries));
   }
@@ -123,8 +123,8 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
             "Audit trail for user DB ID %d\nafter %s and before %s",
             userDatabaseId, after.toString(), before.toString());
     final String formattedQuery =
-        BQParameterUtil.formatQuery(
-            BQParameterUtil.replaceNamedParameters(queryJobConfiguration, queryHeader));
+        QueryParameterValues.formatQuery(
+            QueryParameterValues.replaceNamedParameters(queryJobConfiguration, queryHeader));
 
     return new UserAuditLogQueryResponse()
         .actions(auditLogEntryMapper.logEntriesToActions(logEntries))
@@ -140,9 +140,9 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
 
     return ImmutableMap.<String, QueryParameterValue>builder()
         .put("limit", QueryParameterValue.int64(Math.max(limit, MAX_QUERY_LIMIT)))
-        .put("after", BQParameterUtil.instantToQPValue(after))
-        .put("before", BQParameterUtil.instantToQPValue(before))
-        .put("after_partition_time", BQParameterUtil.instantToQPValue(afterPartitionTime))
-        .put("before_partition_time", BQParameterUtil.instantToQPValue(beforePartitionTime));
+        .put("after", QueryParameterValues.instantToQPValue(after))
+        .put("before", QueryParameterValues.instantToQPValue(before))
+        .put("after_partition_time", QueryParameterValues.instantToQPValue(afterPartitionTime))
+        .put("before_partition_time", QueryParameterValues.instantToQPValue(beforePartitionTime));
   }
 }

@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.pmiops.workbench.utils.Matchers;
 
-public final class BQParameterUtil {
+public final class QueryParameterValues {
   private static final int MICROSECONDS_IN_MILLISECOND = 1000;
 
   /** Generate a unique parameter name and add it to the parameter map provided. */

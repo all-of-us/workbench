@@ -34,7 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
-import org.pmiops.workbench.cohortbuilder.util.BQParameterUtil;
+import org.pmiops.workbench.cohortbuilder.util.QueryParameterValues;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.DomainType;
@@ -273,7 +273,7 @@ public class ReviewQueryBuilder {
           stringJoiner
               .add(addLowerColumnName(filter))
               .add(OperatorUtils.getSqlOperator(filter.getOperator()))
-              .add(BQParameterUtil.buildParameter(params, buildQueryParameterValue(filter, 0)))
+              .add(QueryParameterValues.buildParameter(params, buildQueryParameterValue(filter, 0)))
               .add(NEW_LINE);
           break;
         case IN:
@@ -282,7 +282,7 @@ public class ReviewQueryBuilder {
               .add(OperatorUtils.getSqlOperator(filter.getOperator()))
               .add(UNNEST)
               .add(OPEN_PAREN)
-              .add(BQParameterUtil.buildParameter(params, buildQueryParameterValue(filter)))
+              .add(QueryParameterValues.buildParameter(params, buildQueryParameterValue(filter)))
               .add(CLOSE_PAREN)
               .add(NEW_LINE);
           break;
@@ -290,9 +290,9 @@ public class ReviewQueryBuilder {
           stringJoiner
               .add(filter.getProperty().toString())
               .add(OperatorUtils.getSqlOperator(filter.getOperator()))
-              .add(BQParameterUtil.buildParameter(params, buildQueryParameterValue(filter, 0)))
+              .add(QueryParameterValues.buildParameter(params, buildQueryParameterValue(filter, 0)))
               .add(AND)
-              .add(BQParameterUtil.buildParameter(params, buildQueryParameterValue(filter, 1)))
+              .add(QueryParameterValues.buildParameter(params, buildQueryParameterValue(filter, 1)))
               .add(NEW_LINE);
           break;
         default:
