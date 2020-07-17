@@ -41,8 +41,8 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
           + "WHERE %s AND\n"
           + "  @after <= TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) AND\n"
           + "  TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) < @before\n"
-          + "ORDER BY event_time, agent_id, action_id\n"
-          + "LIMIT @limit";
+          + "ORDER BY event_time DESC, agent_id, action_id\n"
+          + "LIMIT @limit;";
 
   private final AuditLogEntryMapper auditLogEntryMapper;
   private final BigQueryService bigQueryService;
@@ -97,9 +97,12 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
   public UserAuditLogQueryResponse queryEventsForUser(
       long userDatabaseId, long limit, DateTime after, DateTime before) {
 
+    // Workaround RW-5289 by omitting all LOGIN events from the result set. Otherwise
+    // they crowd out all the real events.
     final String whereClausePrefix =
         "((jsonPayload.target_id = @user_db_id AND jsonPayload.target_type = 'USER') OR\n"
-            + "  (jsonPayload.agent_id = @user_db_id AND jsonPayload.agent_type = 'USER'))";
+            + "  (jsonPayload.agent_id = @user_db_id AND jsonPayload.agent_type = 'USER')) AND\n"
+            + "  jsonPayload.action_type != 'LOGIN'";
     final String queryString = String.format(QUERY_FORMAT, getTableName(), whereClausePrefix);
 
     final QueryJobConfiguration queryJobConfiguration =
@@ -124,7 +127,7 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
   private ImmutableMap.Builder<String, QueryParameterValue> getNamedParameterMapBuilder(
       long limit, DateTime after, DateTime before) {
     return ImmutableMap.<String, QueryParameterValue>builder()
-        .put("limit", QueryParameterValue.int64(Math.max(limit, MAX_QUERY_LIMIT)))
+        .put("limit", QueryParameterValue.int64(Math.min(limit, MAX_QUERY_LIMIT)))
         .put(
             "after", QueryParameterValue.timestamp(after.getMillis() * MICROSECONDS_IN_MILLISECOND))
         .put(
