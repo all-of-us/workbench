@@ -21,6 +21,7 @@ import {WorkbenchRouteReuseStrategy} from './utils/navigation';
 
 import {AppRouting} from './app-routing';
 import {BugReportComponent} from './components/bug-report';
+import {ConfirmDeleteModalComponent} from './components/confirm-delete-modal';
 import {HelpSidebarComponent} from './components/help-sidebar';
 import {RoutingSpinnerComponent} from './components/routing-spinner/component';
 import {AdminBannerComponent} from './pages/admin/admin-banner';
@@ -54,7 +55,6 @@ import {WorkspaceShareComponent} from './pages/workspace/workspace-share';
 
 /* Our Modules */
 import {AppRoutingModule} from './app-routing.module';
-import {CohortCommonModule} from './cohort-common/module';
 import {IconsModule} from './icons/icons.module';
 import {FetchModule} from './services/fetch.module';
 
@@ -125,7 +125,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     HttpModule,
     ReactiveFormsModule,
 
-    CohortCommonModule,
     FetchModule,
     IconsModule,
     ClarityModule,
@@ -147,6 +146,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ConceptSetActionsComponent,
     ConceptSetDetailsComponent,
     ConceptHomepageComponent,
+    ConfirmDeleteModalComponent,
     CreateReviewModalComponent,
     DataPageComponent,
     DataSetPageComponent,
