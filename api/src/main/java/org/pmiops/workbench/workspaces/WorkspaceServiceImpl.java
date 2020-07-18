@@ -187,10 +187,10 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Override
   public List<WorkspaceResponse> getWorkspacesAndPublicWorkspaces() {
-    Map<String, FirecloudWorkspaceResponse> fcWorkspaces =
-        getFirecloudWorkspaces(ImmutableList.of("accessLevel", "workspace.workspaceId"));
+    Map<String, FirecloudWorkspaceResponse> fcWorkspaces = getFirecloudWorkspaces();
     List<DbWorkspace> dbWorkspaces = workspaceDao.findAllByFirecloudUuidIn(fcWorkspaces.keySet());
 
+    System.out.println(fcWorkspaces.values().iterator().next().getWorkspace().getBucketName());
     return dbWorkspaces.stream()
         .filter(DbWorkspace::isActive)
         .map(
@@ -242,10 +242,10 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     return workspaceResponse;
   }
 
-  private Map<String, FirecloudWorkspaceResponse> getFirecloudWorkspaces(List<String> fields) {
+  private Map<String, FirecloudWorkspaceResponse> getFirecloudWorkspaces() {
     // fields must include at least "workspace.workspaceId", otherwise
     // the map creation will fail
-    return fireCloudService.getWorkspaces(fields).stream()
+    return fireCloudService.getWorkspaces().stream()
         .collect(
             Collectors.toMap(
                 fcWorkspace -> fcWorkspace.getWorkspace().getWorkspaceId(),

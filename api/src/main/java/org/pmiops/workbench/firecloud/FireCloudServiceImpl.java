@@ -93,7 +93,7 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   // All options are defined in this document:
   // https://docs.google.com/document/d/1YS95Q7ViRztaCSfPK-NS6tzFPrVpp5KUo0FaWGx7VHw/edit#
-  public static final List<String> FIRECLOUD_GET_WORKSPACE_REQUIRED_FIELDS =
+  public static final List<String> FIRECLOUD_WORKSPACE_REQUIRED_FIELDS =
       ImmutableList.of(
           "accessLevel",
           "workspace.workspaceId",
@@ -377,7 +377,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     return retryHandler.run(
         (context) ->
             workspacesApi.getWorkspace(
-                projectName, workspaceName, FIRECLOUD_GET_WORKSPACE_REQUIRED_FIELDS));
+                projectName, workspaceName, FIRECLOUD_WORKSPACE_REQUIRED_FIELDS));
   }
 
   @Override
@@ -387,7 +387,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     return retryHandler.run(
         (context) ->
             workspacesApi.getWorkspace(
-                projectName, workspaceName, FIRECLOUD_GET_WORKSPACE_REQUIRED_FIELDS));
+                projectName, workspaceName, FIRECLOUD_WORKSPACE_REQUIRED_FIELDS));
   }
 
   @Override
@@ -410,9 +410,10 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public List<FirecloudWorkspaceResponse> getWorkspaces(List<String> fields)
-      throws WorkbenchException {
-    return retryHandler.run((context) -> endUserWorkspacesApiProvider.get().listWorkspaces(fields));
+  public List<FirecloudWorkspaceResponse> getWorkspaces() throws WorkbenchException {
+    return retryHandler.run(
+        (context) ->
+            endUserWorkspacesApiProvider.get().listWorkspaces(FIRECLOUD_WORKSPACE_REQUIRED_FIELDS));
   }
 
   @Override

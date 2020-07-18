@@ -6,6 +6,7 @@ import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.factory.Mappers;
 import org.pmiops.workbench.cohortreview.CohortReviewMapper;
 import org.pmiops.workbench.cohorts.CohortMapper;
 import org.pmiops.workbench.conceptset.ConceptSetMapper;
@@ -61,10 +62,14 @@ public interface WorkspaceMapper {
   @Mapping(target = "researchPurpose", source = "dbWorkspace")
   Workspace toApiWorkspace(DbWorkspace dbWorkspace);
 
-  @Mapping(target = "workspace", source = "dbWorkspace")
-  @Mapping(target = "accessLevel", source = "firecloudWorkspaceResponse")
-  WorkspaceResponse toApiWorkspaceResponse(
-      DbWorkspace dbWorkspace, FirecloudWorkspaceResponse firecloudWorkspaceResponse);
+  default WorkspaceResponse toApiWorkspaceResponse(
+      DbWorkspace dbWorkspace, FirecloudWorkspaceResponse firecloudWorkspaceResponse) {
+    FirecloudMapper fcMapper = Mappers.getMapper(FirecloudMapper.class);
+    return new WorkspaceResponse()
+        .accessLevel(
+            fcMapper.fcWorkspaceResponseToApiWorkspaceAccessLevel(firecloudWorkspaceResponse))
+        .workspace(toApiWorkspace(dbWorkspace, firecloudWorkspaceResponse.getWorkspace()));
+  };
 
   @Mapping(target = "timeReviewed", ignore = true)
   @Mapping(target = "populationDetails", source = "specificPopulationsEnum")
