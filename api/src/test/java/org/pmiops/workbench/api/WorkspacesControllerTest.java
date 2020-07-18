@@ -503,9 +503,9 @@ public class WorkspacesControllerTest {
     doReturn(fcResponse)
         .when(fireCloudService)
         .getWorkspace(fcWorkspace.getNamespace(), fcWorkspace.getName());
-    List<FirecloudWorkspaceResponse> workspaceResponses = fireCloudService.getWorkspaces(any());
+    List<FirecloudWorkspaceResponse> workspaceResponses = fireCloudService.getWorkspaces();
     workspaceResponses.add(fcResponse);
-    doReturn(workspaceResponses).when(fireCloudService).getWorkspaces(any());
+    doReturn(workspaceResponses).when(fireCloudService).getWorkspaces();
   }
 
   /**
@@ -594,7 +594,7 @@ public class WorkspacesControllerTest {
         testMockFactory.createFirecloudWorkspace(
             workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
-    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces(any());
+    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
 
     assertThat(workspacesController.getWorkspaces().getBody().getItems().size()).isEqualTo(1);
   }
@@ -2467,7 +2467,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testEmptyFireCloudWorkspaces() {
-    when(fireCloudService.getWorkspaces(any())).thenReturn(new ArrayList<>());
+    when(fireCloudService.getWorkspaces()).thenReturn(new ArrayList<>());
     try {
       ResponseEntity<org.pmiops.workbench.model.WorkspaceResponseListResponse> response =
           workspacesController.getWorkspaces();
@@ -2753,7 +2753,7 @@ public class WorkspacesControllerTest {
         testMockFactory.createFirecloudWorkspace(
             workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
-    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces(any());
+    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
 
     assertThat(workspacesController.getPublishedWorkspaces().getBody().getItems().size())
         .isEqualTo(1);
@@ -2773,7 +2773,7 @@ public class WorkspacesControllerTest {
         testMockFactory.createFirecloudWorkspace(
             workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
-    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces(any());
+    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
 
     assertThat(workspacesController.getWorkspaces().getBody().getItems().size()).isEqualTo(1);
   }
@@ -2792,7 +2792,7 @@ public class WorkspacesControllerTest {
         testMockFactory.createFirecloudWorkspace(
             workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.WRITER.toString());
-    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces(any());
+    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
 
     assertThat(workspacesController.getWorkspaces().getBody().getItems().size()).isEqualTo(1);
   }
@@ -2811,7 +2811,7 @@ public class WorkspacesControllerTest {
         testMockFactory.createFirecloudWorkspace(
             workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.READER.toString());
-    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces(any());
+    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
 
     assertThat(workspacesController.getWorkspaces().getBody().getItems().size()).isEqualTo(0);
   }
