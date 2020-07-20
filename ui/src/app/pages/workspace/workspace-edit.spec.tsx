@@ -217,13 +217,16 @@ describe('WorkspaceEdit', () => {
   });
 
   // regression test for RW-5132
-  it('prevents multiple clicks of the Confirm save button', async() => {
+  it('prevents multiple Workspace creations via the same confirmation dialog', async() => {
     routeConfigDataStore.next({mode: WorkspaceEditMode.Duplicate});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
     const numBefore = workspacesApi.workspaces.length;
     wrapper.find('[data-test-id="workspace-save-btn"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
+    wrapper.find('[data-test-id="workspace-confirm-save-btn"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
 
     wrapper.find('[data-test-id="workspace-confirm-save-btn"]').first().simulate('click');
