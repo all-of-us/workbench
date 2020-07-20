@@ -175,4 +175,9 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
   public boolean maybeDeleteRecentWorkspace(long workspaceId) {
     return false;
   }
+
+  @Override
+  public List<DbWorkspace> getAllActiveWorkspaces() {
+    return null;
+  }
 }

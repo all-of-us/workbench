@@ -801,4 +801,9 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
                     .build())
         .collect(ImmutableList.toImmutableList());
   }
+
+  @Override
+  public List<DbWorkspace> getAllActiveWorkspaces() {
+    return workspaceDao.findAllByActiveStatusIn(WorkspaceActiveStatus.ACTIVE);
+  }
 }
