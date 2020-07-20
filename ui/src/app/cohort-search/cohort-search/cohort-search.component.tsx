@@ -17,7 +17,7 @@ import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentCohortCriteriaStore} from 'app/utils/navigation';
 import {Criteria, CriteriaType, DomainType, TemporalMention, TemporalTime} from 'generated/fetch';
-import {Messages} from 'primereact/messages';
+import {Growl} from 'primereact/growl';
 
 const styles = reactStyles({
   backArrow: {
@@ -105,40 +105,41 @@ interface State {
 }
 
 const css = `
-  .p-messages {
-     position: relative;
+  .p-growl.p-growl-topright {
      height: 29px;
      width: 7rem;
-     background-color: ` + colorWithWhiteness(colors.success, 0.6) + `;
-     line-height:1.2rem;
+     padding-top: 6rem;
+     line-hieght: 1rem;
+     margin-right: 3rem;
+
    }
 
-  .p-messages::before {
+  .p-growl-item-container::before {
     content:"";
     position: absolute;
     right: 100%;
     top:0px;
     width:0px;
     height:0px;
-    border-top:0.6rem solid transparent;
-    border-right:0.6rem solid transparent;
-    border-bottom:0.6rem solid transparent;
+    border-top:0.8rem solid transparent;
+    border-right:0.8rem solid transparent;
+    border-bottom:0.8rem solid transparent;
   }
-  .p-messages:after {
+  .p-growl-item-container:after {
     content:"";
     position: absolute;
     left: 100%;
     top:0px;
     width:0px;
     height:0px;
-    border-top:0.6rem solid transparent;
+    border-top:0.8rem solid transparent;
     border-left:0.8rem solid ` + colorWithWhiteness(colors.success, 0.6) + `;
-    border-bottom:0.6rem solid transparent;
+    border-bottom:0.8rem solid transparent;
    }
-   .p-messages.p-messages-success {
+   .p-growl-item-container {
      background-color: ` + colorWithWhiteness(colors.success, 0.6) + `!important;
    }
-   .p-messages-wrapper {
+   .p-growl-item {
      padding: 0rem !important;
      background-color: ` + colorWithWhiteness(colors.success, 0.6) + `!important;
      margin-left: 0.3rem;
@@ -147,7 +148,7 @@ const css = `
 
 export class CohortSearch extends React.Component<Props, State> {
 
-  message: any;
+  growl: any;
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -300,7 +301,7 @@ export class CohortSearch extends React.Component<Props, State> {
       }
     }
     selections = [...selections, param];
-    this.message.show({ severity: 'success', detail: 'Criteria Added', closable: false, life: 2000});
+    this.growl.show({ severity: 'success', detail: 'Criteria Added', closable: false, life: 2000});
     currentCohortCriteriaStore.next(selections);
     this.setState({groupSelections, selections, selectedIds});
   }
@@ -328,13 +329,14 @@ export class CohortSearch extends React.Component<Props, State> {
     const {attributesNode, autocompleteSelection, count, groupSelections, hierarchyNode, loadingSubtree, mode, selectedIds, selections,
       title, treeSearchTerms} = this.state;
     return !!searchContext && <FlexRowWrap style={styles.searchContainer}>
-      <div style={{position: 'absolute', paddingLeft: '83%', marginTop: '-1rem'}}>
-        <style>
-          {css}
-        </style>
-        <Messages ref={(el) => this.message = el}></Messages>
-      </div>
+
       <div style={{height: '100%', width: '100%'}}>
+        <div style={{position: 'absolute', paddingLeft: '83%', marginTop: '-1rem'}}>
+          <style>
+            {css}
+          </style>
+          <Growl ref={(el) => this.growl = el}></Growl>
+        </div>
         <div style={styles.titleBar}>
           <div style={{display: 'inline-flex', marginRight: '0.5rem'}}>
             <Clickable style={styles.backArrow} onClick={() => closeSearch()}>
