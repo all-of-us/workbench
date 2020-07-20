@@ -7732,10 +7732,11 @@ definitions:
   ReportingResearcher:
     description: >
       Payload for the researcher table in the BigQuery reporting dataset.
+      Internal use only (not part of the API).
     type: object
     properties:
       username:
-        description: Username (GSuite)
+        description: full Username (GSuite)
         type: string
       firstName:
         description: First name for the researcher
@@ -7749,7 +7750,7 @@ definitions:
         type: boolean
   ReportingSnapshot:
     description: >
-      Payload for upload to BigQuery reporting dataset.
+      Payload for upload to BigQuery reporting dataset. Internal use only (not part of the API).
     type: object
     properties:
       captureTimestamp:
@@ -7766,7 +7767,7 @@ definitions:
           "$ref": "#/definitions/ReportingWorkspace"
   ReportingWorkspace:
     description: >
-      Workspace information for reporting.
+      Workspace information for reporting.  Internal use only (not part of the API).
     type: object
     properties:
       creatorId:

@@ -85,9 +85,7 @@ public class ReportingServiceTest {
     mockWorkspaces();
 
     final ReportingSnapshot snapshot = reportingService.getSnapshot();
-    assertThat((double) snapshot.getCaptureTimestamp())
-        .isWithin(100.0)
-        .of(NOW_EPOCH_MILLI);
+    assertThat((double) snapshot.getCaptureTimestamp()).isWithin(100.0).of(NOW_EPOCH_MILLI);
     assertThat(snapshot.getResearchers()).hasSize(2);
     assertThat(snapshot.getResearchers().get(0).getResearcherId()).isEqualTo(101);
     assertThat(snapshot.getResearchers().get(0).getIsDisabled()).isFalse();

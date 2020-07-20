@@ -2,7 +2,6 @@ package org.pmiops.workbench.reporting;
 
 import java.time.Clock;
 import java.util.List;
-import org.joda.time.DateTime;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
