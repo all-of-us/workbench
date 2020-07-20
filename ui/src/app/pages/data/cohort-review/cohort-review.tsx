@@ -8,7 +8,7 @@ import {CreateReviewModal} from 'app/pages/data/cohort-review/create-review-moda
 import {cohortReviewStore, visitsFilterOptions} from 'app/services/review-state.service';
 import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withCurrentCohortCriteria} from 'app/utils';
+import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {Cohort, CriteriaType, DomainType, ReviewStatus, SortOrder, WorkspaceAccessLevel} from 'generated/fetch';
 
@@ -26,7 +26,7 @@ interface State {
   readonly: boolean;
 }
 
-export const CohortReview = withCurrentCohortCriteria()(class extends React.Component<{}, State> {
+export class CohortReview extends React.Component<{}, State> {
   constructor(props: any) {
     super(props);
     this.state = {
@@ -94,7 +94,7 @@ export const CohortReview = withCurrentCohortCriteria()(class extends React.Comp
       </React.Fragment>}
     </React.Fragment>;
   }
-});
+}
 
 @Component({
   selector: 'app-cohort-review',

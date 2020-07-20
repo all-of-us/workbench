@@ -193,7 +193,7 @@ export class CohortSearch extends React.Component<Props, State> {
       }
       this.setState({backMode, hierarchyNode, mode, selectedIds, selections, title});
     }
-    currentCohortCriteriaStore.next([]);
+    currentCohortCriteriaStore.next(selections);
   }
 
   setScroll = (id: string) => {
