@@ -1391,14 +1391,14 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             <ModalFooter>
               <Button
                   type='secondary'
-                  disabled={loading}
+                  disabled={errors || loading}
                   style={{marginRight: '1rem'}}
                   onClick={() => this.setState({showConfirmationModal: false})}>
                 Keep Editing
               </Button>
               <Button
                   type='primary'
-                  disabled={loading}
+                  disabled={errors || loading}
                   onClick={() => this.onSaveClick()}
                   data-test-id='workspace-confirm-save-btn'>
                 Confirm
