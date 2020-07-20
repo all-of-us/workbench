@@ -6,6 +6,7 @@ import com.google.monitoring.v3.Point;
 import com.google.monitoring.v3.TimeSeries;
 import com.google.protobuf.util.Timestamps;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -13,7 +14,6 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import org.joda.time.DateTime;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
@@ -212,9 +212,9 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
                     new NotFoundException(
                         String.format(
                             "No workspace found with Firecloud namespace %s", workspaceNamespace)));
-    final DateTime after = new DateTime(afterMillis);
-    final DateTime before =
-        Optional.ofNullable(beforeMillisNullable).map(DateTime::new).orElse(DateTime.now());
+    final Instant after = Instant.ofEpochMilli(afterMillis);
+    final Instant before =
+        Optional.ofNullable(beforeMillisNullable).map(Instant::ofEpochMilli).orElse(Instant.now());
     return actionAuditQueryService.queryEventsForWorkspace(
         workspaceDatabaseId, limit, after, before);
   }

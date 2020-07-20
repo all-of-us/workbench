@@ -1,13 +1,13 @@
 package org.pmiops.workbench.actionaudit;
 
-import org.joda.time.DateTime;
+import java.time.Instant;
 import org.pmiops.workbench.model.UserAuditLogQueryResponse;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 
 public interface ActionAuditQueryService {
   WorkspaceAuditLogQueryResponse queryEventsForWorkspace(
-      long workspaceDatabaseId, long limit, DateTime after, DateTime before);
+      long workspaceDatabaseId, long limit, Instant after, Instant before);
 
   UserAuditLogQueryResponse queryEventsForUser(
-      long userDatabaseId, long limit, DateTime after, DateTime before);
+      long userDatabaseId, long limit, Instant after, Instant before);
 }

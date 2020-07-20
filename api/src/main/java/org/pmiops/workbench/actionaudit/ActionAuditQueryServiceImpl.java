@@ -2,15 +2,14 @@ package org.pmiops.workbench.actionaudit;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import com.google.cloud.bigquery.StandardSQLTypeName;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableMap;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import javax.inject.Provider;
-import org.joda.time.DateTime;
 import org.pmiops.workbench.api.BigQueryService;
+import org.pmiops.workbench.cohortbuilder.util.QueryParameterValues;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.ActionAuditConfig;
 import org.pmiops.workbench.model.AuditLogEntry;
@@ -22,7 +21,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
 
-  private static final int MICROSECONDS_IN_MILLISECOND = 1000;
   private static final long MAX_QUERY_LIMIT = 1000L;
   private static final String QUERY_FORMAT =
       "SELECT\n"
@@ -38,15 +36,18 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
           + "  jsonPayload.prev_value AS prev_value,\n"
           + "  jsonPayload.new_value AS new_value\n"
           + "FROM %s\n"
-          + "WHERE %s AND\n"
-          + "  @after <= TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) AND\n"
-          + "  TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) < @before\n"
+          + "WHERE %s\n"
+          + "  AND @after <= TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64))\n"
+          + "  AND TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) < @before\n"
+          + "  AND @after_partition_time <= _PARTITIONTIME\n"
+          + "  AND _PARTITIONTIME < @before_partition_time\n"
           + "ORDER BY event_time DESC, agent_id, action_id\n"
           + "LIMIT @limit;";
 
   private final AuditLogEntryMapper auditLogEntryMapper;
   private final BigQueryService bigQueryService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private static final Duration PARTITION_BUFFER = Duration.ofDays(1);
 
   public ActionAuditQueryServiceImpl(
       AuditLogEntryMapper auditLogEntryMapper,
@@ -59,7 +60,7 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
 
   @Override
   public WorkspaceAuditLogQueryResponse queryEventsForWorkspace(
-      long workspaceDatabaseId, long limit, DateTime after, DateTime before) {
+      long workspaceDatabaseId, long limit, Instant after, Instant before) {
     final String whereClausePrefix =
         "jsonPayload.target_id = @workspace_db_id AND\n"
             + "  jsonPayload.target_type = 'WORKSPACE'\n";
@@ -76,10 +77,14 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
     final TableResult tableResult = bigQueryService.executeQuery(queryJobConfiguration);
 
     final List<AuditLogEntry> logEntries = auditLogEntryMapper.tableResultToLogEntries(tableResult);
+    final String queryHeader =
+        String.format(
+            "Audit trail for workspace DB ID %d\nafter %s and before %s",
+            workspaceDatabaseId, after.toString(), before.toString());
 
     return new WorkspaceAuditLogQueryResponse()
         .logEntries(logEntries)
-        .query(getReplacedQueryText(queryJobConfiguration))
+        .query(QueryParameterValues.replaceNamedParameters(queryJobConfiguration))
         .workspaceDatabaseId(workspaceDatabaseId)
         .actions(auditLogEntryMapper.logEntriesToActions(logEntries));
   }
@@ -95,7 +100,7 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
 
   @Override
   public UserAuditLogQueryResponse queryEventsForUser(
-      long userDatabaseId, long limit, DateTime after, DateTime before) {
+      long userDatabaseId, long limit, Instant after, Instant before) {
 
     // Workaround RW-5289 by omitting all LOGIN events from the result set. Otherwise
     // they crowd out all the real events.
@@ -116,42 +121,31 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
     final TableResult tableResult = bigQueryService.executeQuery(queryJobConfiguration);
 
     final List<AuditLogEntry> logEntries = auditLogEntryMapper.tableResultToLogEntries(tableResult);
+    final String queryHeader =
+        String.format(
+            "Audit trail for user DB ID %d\nafter %s and before %s",
+            userDatabaseId, after.toString(), before.toString());
+    final String formattedQuery =
+        QueryParameterValues.formatQuery(
+            QueryParameterValues.replaceNamedParameters(queryJobConfiguration));
 
     return new UserAuditLogQueryResponse()
         .actions(auditLogEntryMapper.logEntriesToActions(logEntries))
         .logEntries(logEntries)
-        .query(getReplacedQueryText(queryJobConfiguration))
+        .query(formattedQuery)
         .userDatabaseId(userDatabaseId);
   }
 
   private ImmutableMap.Builder<String, QueryParameterValue> getNamedParameterMapBuilder(
-      long limit, DateTime after, DateTime before) {
+      long limit, Instant after, Instant before) {
+    final Instant afterPartitionTime = after.minus(PARTITION_BUFFER);
+    final Instant beforePartitionTime = before.plus(PARTITION_BUFFER);
+
     return ImmutableMap.<String, QueryParameterValue>builder()
         .put("limit", QueryParameterValue.int64(Math.min(limit, MAX_QUERY_LIMIT)))
-        .put(
-            "after", QueryParameterValue.timestamp(after.getMillis() * MICROSECONDS_IN_MILLISECOND))
-        .put(
-            "before",
-            QueryParameterValue.timestamp(before.getMillis() * MICROSECONDS_IN_MILLISECOND));
-  }
-
-  private String getReplacedQueryText(QueryJobConfiguration queryJobConfiguration) {
-    String result = queryJobConfiguration.getQuery();
-
-    for (Map.Entry<String, QueryParameterValue> entry :
-        queryJobConfiguration.getNamedParameters().entrySet()) {
-      String parameterName = "@" + entry.getKey();
-      final QueryParameterValue parameterValue = entry.getValue();
-      final String rawStringValue = Optional.ofNullable(parameterValue.getValue()).orElse("NULL");
-      final String replacement;
-      if (parameterValue.getType() == StandardSQLTypeName.TIMESTAMP) {
-        replacement = String.format("TIMESTAMP '%s'", rawStringValue);
-      } else {
-        replacement = rawStringValue;
-      }
-      result = result.replace(parameterName, replacement);
-    }
-    result = result.replace("\n", " ");
-    return result;
+        .put("after", QueryParameterValues.instantToQPValue(after))
+        .put("before", QueryParameterValues.instantToQPValue(before))
+        .put("after_partition_time", QueryParameterValues.instantToQPValue(afterPartitionTime))
+        .put("before_partition_time", QueryParameterValues.instantToQPValue(beforePartitionTime));
   }
 }

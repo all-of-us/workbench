@@ -1,7 +1,11 @@
 package org.pmiops.workbench.utils;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
+import com.google.common.collect.ImmutableMap;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import org.junit.Test;
@@ -40,5 +44,37 @@ public class MatchersTest {
     final Optional<String> suffix =
         Matchers.getGroup(VM_NAME_PATTERN, "all-of-us-2222-m", "userid");
     assertThat(suffix).hasValue("2222");
+  }
+
+  @Test
+  public void testReplaceAll() {
+    final String input = "food is good for you!   2food3.";
+    final Map<Pattern, String> patternToReplacement =
+        ImmutableMap.of(
+            Pattern.compile("\\bfood\\b"), "exercise",
+            Pattern.compile("\\s+"), "_",
+            Pattern.compile("\\dfood\\d\\."), "<3");
+    final String updated = Matchers.replaceAllInMap(patternToReplacement, input);
+    assertThat(updated).contains("exercise_is_good_for_you!_<3");
+  }
+
+  @Test
+  public void testReplaceAll_parameters() {
+    final String input = "AND @after <= TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64))";
+    final Map<Pattern, String> patternToReplacement =
+        ImmutableMap.of(
+            Pattern.compile("(?<=\\W)@after\\b"), "TIMESTAMP 'WHENEVER'",
+            Pattern.compile("\\bAS\\b"), "AS IF");
+    final String updated = Matchers.replaceAllInMap(patternToReplacement, input);
+    assertThat(updated)
+        .isEqualTo(
+            "AND TIMESTAMP 'WHENEVER' <= TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS IF INT64))");
+  }
+
+  @Test
+  public void testReplaceAll_emptyMap() {
+    final String input = "food is good for you!   2food3.";
+    final String updated = Matchers.replaceAllInMap(Collections.emptyMap(), input);
+    assertThat(updated).isEqualTo(input);
   }
 }

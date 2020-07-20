@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +18,6 @@ import javax.inject.Provider;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import org.joda.time.DateTime;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.annotations.AuthorityRequired;
@@ -621,9 +621,9 @@ public class ProfileController implements ProfileApiDelegate {
             usernameWithoutGsuiteDomain,
             workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain);
     final long userDatabaseId = userService.getByUsernameOrThrow(username).getUserId();
-    final DateTime after = new DateTime(afterMillis);
-    final DateTime before =
-        Optional.ofNullable(beforeMillisNullable).map(DateTime::new).orElse(DateTime.now());
+    final Instant after = Instant.ofEpochMilli(afterMillis);
+    final Instant before =
+        Optional.ofNullable(beforeMillisNullable).map(Instant::ofEpochMilli).orElse(Instant.now());
     return ResponseEntity.ok(
         actionAuditQueryService.queryEventsForUser(userDatabaseId, limit, after, before));
   }
