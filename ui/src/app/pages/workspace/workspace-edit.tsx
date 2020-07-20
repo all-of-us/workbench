@@ -1374,12 +1374,18 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               <div>You can also make changes to your answers after you create your workspace.</div>
             </ModalBody>
             <ModalFooter>
-              <Button type='secondary' style={{marginRight: '1rem'}}
-                onClick={() => this.setState({showConfirmationModal: false})}>
+              <Button
+                  type='secondary'
+                  disabled={this.state.loading}
+                  style={{marginRight: '1rem'}}
+                  onClick={() => this.setState({showConfirmationModal: false})}>
                 Keep Editing
               </Button>
-              <Button type='primary' onClick={() => this.onSaveClick()}
-                data-test-id='workspace-confirm-save-btn'>
+              <Button
+                  type='primary'
+                  disabled={this.state.loading}
+                  onClick={() => this.onSaveClick()}
+                  data-test-id='workspace-confirm-save-btn'>
                 Confirm
               </Button>
             </ModalFooter>
