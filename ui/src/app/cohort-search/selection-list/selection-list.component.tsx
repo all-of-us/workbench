@@ -194,7 +194,7 @@ export const SelectionList = withCurrentCohortCriteria()(class extends React.Com
         </Button>
         {this.showNext && <Button type='primary' onClick={() => setView('modifiers')}
           style={styles.button}
-          disabled={!criteria || criteria.length === 0}>
+          disabled={!selections || selections.length === 0}>
           Next
         </Button>}
         {this.showBack && <Button type='primary'
@@ -204,7 +204,7 @@ export const SelectionList = withCurrentCohortCriteria()(class extends React.Com
         </Button>}
         <Button type='primary' onClick={() => finish()}
           style={styles.button}
-          disabled={!criteria || criteria.length === 0 || disableFinish}>
+          disabled={!selections || selections.length === 0 || disableFinish}>
           Finish
         </Button>
       </div>}

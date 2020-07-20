@@ -194,7 +194,7 @@ const icons = (helpContentKey: string) => {
     faIcon: helpContentKey === NOTEBOOK_HELP_CONTENT ? faFolderOpen : faInfoCircle,
     label: helpContentKey === NOTEBOOK_HELP_CONTENT ? 'Storage Icon' : 'Help Icon',
     page: null,
-    style: {fontSize: '1.1rem'},
+    style: {fontSize: '21px'},
     tooltip: helpContentKey === NOTEBOOK_HELP_CONTENT ? 'Workspace Storage' : 'Help Tips',
 // }, {
 //   id: 'thunderstorm',
