@@ -41,7 +41,7 @@ public class ReportingServiceImpl implements ReportingService {
   @Override
   public ReportingSnapshot getSnapshot() {
     return new ReportingSnapshot()
-        .captureTimestamp(new DateTime(clock.millis()))
+        .captureTimestamp(clock.millis())
         .researchers(getResearchers())
         .workspaces(getWorkspaces());
   }

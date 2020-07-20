@@ -7753,9 +7753,9 @@ definitions:
     type: object
     properties:
       captureTimestamp:
-        description: Time at which snapshot is retrieved.
-        type: string
-        format: date-time
+        description: Time at which snapshot is retrieved. Epoch millis.
+        type: integer
+        format: int64
       researchers:
         type: array
         items:

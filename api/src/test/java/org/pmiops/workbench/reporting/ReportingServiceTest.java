@@ -1,6 +1,6 @@
 package org.pmiops.workbench.reporting;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.doReturn;
 
 import com.google.common.collect.ImmutableList;
@@ -76,7 +76,7 @@ public class ReportingServiceTest {
   @Test
   public void testGetSnapshot_noEntries() {
     final ReportingSnapshot snapshot = reportingService.getSnapshot();
-    assertThat(snapshot.getCaptureTimestamp()).isEqualTo(NOW_EPOCH_MILLI * 1000);
+    assertThat(snapshot.getCaptureTimestamp()).isEqualTo(NOW_EPOCH_MILLI);
   }
 
   @Test
@@ -85,7 +85,9 @@ public class ReportingServiceTest {
     mockWorkspaces();
 
     final ReportingSnapshot snapshot = reportingService.getSnapshot();
-    assertThat(snapshot.getCaptureTimestamp().getMillis()).isEqualTo(NOW_EPOCH_MILLI);
+    assertThat((double) snapshot.getCaptureTimestamp())
+        .isWithin(100.0)
+        .of(NOW_EPOCH_MILLI);
     assertThat(snapshot.getResearchers()).hasSize(2);
     assertThat(snapshot.getResearchers().get(0).getResearcherId()).isEqualTo(101);
     assertThat(snapshot.getResearchers().get(0).getIsDisabled()).isFalse();
