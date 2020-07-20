@@ -934,13 +934,29 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     render() {
       const {enableBillingUpgrade} = serverConfigStore.getValue();
       const {
-        populationChecked,
         workspace: {
+          billingAccountName,
+          cdrVersionId,
+          name,
           researchPurpose: {
+            anticipatedFindings,
+            intendedStudy,
+            scientificApproach,
+            otherPopulationDetails,
+            populationDetails,
             reviewRequested
           }
         },
-        showConfirmationModal
+        cdrVersionItems,
+        loading,
+        populationChecked,
+        showConfirmationModal,
+        showCreateBillingAccountModal,
+        showResearchPurpose,
+        workspaceCreationConflictError,
+        workspaceCreationError,
+        workspaceCreationErrorMessage,
+        workspaceNewAclDelayed
       } = this.state;
       const {freeTierDollarQuota, freeTierUsage} = this.props.profileState.profile;
       const freeTierCreditsBalance = freeTierDollarQuota - freeTierUsage;
@@ -950,13 +966,13 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       const errors = this.validate();
       return <FadeBox  style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
         <div style={{width: '1120px'}}>
-          {this.state.loading && <SpinnerOverlay overrideStylesOverlay={styles.spinner}/>}
+          {loading && <SpinnerOverlay overrideStylesOverlay={styles.spinner}/>}
           <WorkspaceEditSection header={this.renderHeader()} tooltip={toolTipText.header}
                                 style={{marginTop: '24px'}} largeHeader
                                 required={!this.isMode(WorkspaceEditMode.Duplicate)}>
           <FlexRow style={{alignItems: 'baseline'}}>
             <TextInput type='text' style={styles.textInput} autoFocus placeholder='Workspace Name'
-              value = {this.state.workspace.name}
+              value = {name}
               onChange={v => this.setState(fp.set(['workspace', 'name'], v))}/>
             <TooltipTrigger
                 content='To use a different dataset version, duplicate or create a new workspace.'
@@ -964,12 +980,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               <div style={styles.select}>
                 <select style={{borderColor: 'rgb(151, 151, 151)', borderRadius: '6px',
                   height: '1.5rem', width: '12rem'}}
-                  value={this.state.workspace.cdrVersionId}
+                  value={cdrVersionId}
                   onChange={(v: React.FormEvent<HTMLSelectElement>) => {
                     this.setState(fp.set(['workspace', 'cdrVersionId'], v.currentTarget.value));
                   }}
                   disabled={this.isMode(WorkspaceEditMode.Edit)}>
-                    {this.state.cdrVersionItems.map((version, i) => (
+                    {cdrVersionItems.map((version, i) => (
                       <option key={version.cdrVersionId} value={version.cdrVersionId}>
                         {version.name}
                       </option>
@@ -1004,7 +1020,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             </OverlayPanel>
             <FlexRow>
               <Dropdown style={{width: '14rem'}}
-                        value={this.state.workspace.billingAccountName}
+                        value={billingAccountName}
                         options={this.buildBillingAccountOptions()}
                         disabled={(freeTierCreditsBalance < 0.0) && !enableBillingUpgrade}
                         onChange={e => {
@@ -1053,13 +1069,13 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                   <div style={{...styles.shortDescription}}>
                     <button style={{...styles.shortDescription, border: 'none'}}
                             data-test-id='research-purpose-button'
-                            onClick={() => this.setState({showResearchPurpose: !this.state.showResearchPurpose})}>
+                            onClick={() => this.setState({showResearchPurpose: !showResearchPurpose})}>
                       <label style={{fontSize: 14}}>Research purpose</label>
                       <i className={this.iconClass} style={{verticalAlign: 'middle'}}></i>
                      </button>
                   </div>
                 </FlexRow>
-                  {this.state.showResearchPurpose && <FlexColumn data-test-id='research-purpose-categories'>
+                  {showResearchPurpose && <FlexColumn data-test-id='research-purpose-categories'>
                     <div style={{...styles.text, marginLeft: '1.9rem'}}>
                       Choose options below to describe your research purpose
                     </div>
@@ -1081,7 +1097,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             {/* TextBox: scientific question(s) researcher intend to study Section*/}
             <WorkspaceResearchSummary
                 researchPurpose={researchPurposeQuestions[2]}
-                researchValue={this.state.workspace.researchPurpose.intendedStudy}
+                researchValue={intendedStudy}
                 onChange={v => this.updateResearchPurpose('intendedStudy', v)}
                 index='2.1'
                 id='intendedStudyText'
@@ -1090,7 +1106,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             {/* TextBox: scientific approaches section*/}
             <WorkspaceResearchSummary
                 researchPurpose={researchPurposeQuestions[3]}
-                researchValue={this.state.workspace.researchPurpose.scientificApproach}
+                researchValue={scientificApproach}
                 onChange={v => this.updateResearchPurpose('scientificApproach', v)}
                 index='2.2'
                 id='scientificApproachText'
@@ -1098,7 +1114,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             {/*TextBox: anticipated findings from the study section*/}
             <WorkspaceResearchSummary
                 researchPurpose={researchPurposeQuestions[4]}
-                researchValue={this.state.workspace.researchPurpose.anticipatedFindings}
+                researchValue={anticipatedFindings}
                 onChange={v => this.updateResearchPurpose('anticipatedFindings', v)}
                 index='2.3'
                 id='anticipatedFindingsText'
@@ -1168,9 +1184,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                     disabled={!populationChecked}
                 />
                 <TextInput type='text' autoFocus placeholder='Please specify'
-                           value={this.state.workspace.researchPurpose.otherPopulationDetails}
-                           disabled={!fp.includes(SpecificPopulationEnum.OTHER,
-                             this.state.workspace.researchPurpose.populationDetails)}
+                           value={otherPopulationDetails}
+                           disabled={!fp.includes(SpecificPopulationEnum.OTHER, populationDetails)}
                            data-test-id='other-specialPopulation-text'
                            onChange={v => this.setState(fp.set(
                              ['workspace', 'researchPurpose', 'otherPopulationDetails'], v))}/>
@@ -1291,18 +1306,18 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             } disabled={!errors}>
               <Button type='primary'
                       onClick={() => this.setState({showConfirmationModal: true})}
-                      disabled={errors || this.state.loading}
+                      disabled={errors || loading}
                       data-test-id='workspace-save-btn'>
                 {this.renderButtonText()}
               </Button>
             </TooltipTrigger>
           </FlexRow>
         </div>
-        {this.state.workspaceCreationError &&
+        {workspaceCreationError &&
         <Modal>
           <ModalTitle>Error:</ModalTitle>
           <ModalBody>
-            { this.state.workspaceCreationErrorMessage }
+            { workspaceCreationErrorMessage }
           </ModalBody>
           <ModalFooter>
             <Button onClick = {() => this.props.cancel()}
@@ -1315,15 +1330,15 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           </ModalFooter>
         </Modal>
         }
-        {this.state.showCreateBillingAccountModal &&
+        {showCreateBillingAccountModal &&
           <CreateBillingAccountModal onClose={() => this.setState({showCreateBillingAccountModal: false})} />}
-        {this.state.workspaceCreationConflictError &&
+        {workspaceCreationConflictError &&
         <Modal>
           <ModalTitle>{this.props.routeConfigData.mode === WorkspaceEditMode.Create ?
               'Error: ' : 'Conflicting update:'}</ModalTitle>
           <ModalBody>
             {this.props.routeConfigData.mode === WorkspaceEditMode.Create ?
-              'You already have a workspace named ' + this.state.workspace.name +
+              'You already have a workspace named ' + name +
               ' Please choose another name' :
               'Another client has modified this workspace since the beginning of this editing ' +
               'session. Please reload to avoid overwriting those changes.'}
@@ -1335,7 +1350,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           </ModalFooter>
         </Modal>
         }
-        {this.state.workspaceNewAclDelayed &&
+        {workspaceNewAclDelayed &&
         <Modal>
           <ModalTitle>Workspace permissions delay</ModalTitle>
           <ModalBody>
@@ -1374,12 +1389,18 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               <div>You can also make changes to your answers after you create your workspace.</div>
             </ModalBody>
             <ModalFooter>
-              <Button type='secondary' style={{marginRight: '1rem'}}
-                onClick={() => this.setState({showConfirmationModal: false})}>
+              <Button
+                  type='secondary'
+                  disabled={errors || loading}
+                  style={{marginRight: '1rem'}}
+                  onClick={() => this.setState({showConfirmationModal: false})}>
                 Keep Editing
               </Button>
-              <Button type='primary' onClick={() => this.onSaveClick()}
-                data-test-id='workspace-confirm-save-btn'>
+              <Button
+                  type='primary'
+                  disabled={errors || loading}
+                  onClick={() => this.onSaveClick()}
+                  data-test-id='workspace-confirm-save-btn'>
                 Confirm
               </Button>
             </ModalFooter>
