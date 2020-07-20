@@ -3,15 +3,15 @@ import {environment} from 'environments/environment';
 import {ZendeskEnv} from 'environments/environment-type';
 
 interface ZendeskUrls {
-  billing: string,
-  communityForum: string,
-  createBillingAccount: string,
-  dataDictionary: string,
-  faq: string,
-  gettingStarted: string,
-  helpCenter: string,
-  tableOfContents: string,
-  researchPurpose: string,
+  billing: string;
+  communityForum: string;
+  createBillingAccount: string;
+  dataDictionary: string;
+  faq: string;
+  gettingStarted: string;
+  helpCenter: string;
+  tableOfContents: string;
+  researchPurpose: string;
 }
 
 const zendeskConfigs = {
@@ -23,7 +23,7 @@ const zendeskConfigs = {
     baseUrl: 'https://aousupporthelp1580753096.zendesk.com/hc',
     widgetKey: 'df0a2e39-f8a8-482b-baf5-af82e14d38f9'
   }
-}
+};
 
 /**
  * A set of support URLs for the current environment. These need to be

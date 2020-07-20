@@ -20,9 +20,9 @@ import {getRegistrationTasksMap, RegistrationDashboard} from 'app/pages/homepage
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity} from 'app/styles/colors';
 import {hasRegisteredAccessFetch, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
-import {supportUrls} from 'app/utils/zendesk';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
+import {supportUrls} from 'app/utils/zendesk';
 import {
   Profile,
 } from 'generated/fetch';
