@@ -1,5 +1,6 @@
 import {ActivatedRouteSnapshot, DetachedRouteHandle, RouteReuseStrategy} from '@angular/router';
 
+import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConfigResponse} from 'generated';
 import {CdrVersionListResponse, Cohort, ConceptSet, ErrorResponse, Profile} from 'generated/fetch';
@@ -27,6 +28,7 @@ export const urlParamsStore = new BehaviorSubject<any>({});
 export const queryParamsStore = new BehaviorSubject<any>({});
 export const routeConfigDataStore = new BehaviorSubject<any>({});
 export const serverConfigStore = new BehaviorSubject<ConfigResponse>(undefined);
+export const currentCohortCriteriaStore = new BehaviorSubject<Array<Selection>>(undefined);
 export const userProfileStore =
   new BehaviorSubject<{ profile: Profile, reload: Function, updateCache: Function }>({
     profile: {} as Profile,

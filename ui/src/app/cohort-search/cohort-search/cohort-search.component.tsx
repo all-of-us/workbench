@@ -5,16 +5,19 @@ import {AttributesPage} from 'app/cohort-search/attributes-page/attributes-page.
 import {Demographics} from 'app/cohort-search/demographics/demographics.component';
 import {ListSearchV2} from 'app/cohort-search/list-search-v2/list-search-v2.component';
 import {searchRequestStore} from 'app/cohort-search/search-state.service';
+import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {CriteriaTree} from 'app/cohort-search/tree/tree.component';
 import {domainToTitle, generateId, typeToTitle} from 'app/cohort-search/utils';
 import {Button, Clickable} from 'app/components/buttons';
 import {FlexRowWrap} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
-import colors, {addOpacity} from 'app/styles/colors';
+import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
+import {currentCohortCriteriaStore} from 'app/utils/navigation';
 import {Criteria, CriteriaType, DomainType, TemporalMention, TemporalTime} from 'generated/fetch';
+import {Growl} from 'primereact/growl';
 
 const styles = reactStyles({
   backArrow: {
@@ -79,13 +82,10 @@ function initGroup(role: string, item: any) {
   };
 }
 
-interface Selection extends Criteria {
-  parameterId: string;
-}
-
 interface Props {
   closeSearch: () => void;
   searchContext: any;
+  selections?: Array<Selection>;
 }
 
 interface State {
@@ -104,7 +104,51 @@ interface State {
   treeSearchTerms: string;
 }
 
+const css = `
+  .p-growl.p-growl-topright {
+     height: 29px;
+     width: 7rem;
+     padding-top: 6rem;
+     line-hieght: 1rem;
+     margin-right: 3rem;
+
+   }
+
+  .p-growl-item-container::before {
+    content:"";
+    position: absolute;
+    right: 100%;
+    top:0px;
+    width:0px;
+    height:0px;
+    border-top:0.8rem solid transparent;
+    border-right:0.8rem solid transparent;
+    border-bottom:0.8rem solid transparent;
+  }
+  .p-growl-item-container:after {
+    content:"";
+    position: absolute;
+    left: 100%;
+    top:0px;
+    width:0px;
+    height:0px;
+    border-top:0.8rem solid transparent;
+    border-left:0.8rem solid ` + colorWithWhiteness(colors.success, 0.6) + `;
+    border-bottom:0.8rem solid transparent;
+   }
+   .p-growl-item-container {
+     background-color: ` + colorWithWhiteness(colors.success, 0.6) + `!important;
+   }
+   .p-growl-item {
+     padding: 0rem !important;
+     background-color: ` + colorWithWhiteness(colors.success, 0.6) + `!important;
+     margin-left: 0.3rem;
+   }
+ `;
+
 export class CohortSearch extends React.Component<Props, State> {
+
+  growl: any;
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -122,6 +166,10 @@ export class CohortSearch extends React.Component<Props, State> {
       title: '',
       treeSearchTerms: '',
     };
+  }
+
+  componentWillUnmount() {
+    currentCohortCriteriaStore.next(undefined);
   }
 
   componentDidMount(): void {
@@ -146,6 +194,7 @@ export class CohortSearch extends React.Component<Props, State> {
       }
       this.setState({backMode, hierarchyNode, mode, selectedIds, selections, title});
     }
+    currentCohortCriteriaStore.next(selections);
   }
 
   setScroll = (id: string) => {
@@ -252,6 +301,8 @@ export class CohortSearch extends React.Component<Props, State> {
       }
     }
     selections = [...selections, param];
+    this.growl.show({ severity: 'success', detail: 'Criteria Added', closable: false, life: 2000});
+    currentCohortCriteriaStore.next(selections);
     this.setState({groupSelections, selections, selectedIds});
   }
 
@@ -278,7 +329,14 @@ export class CohortSearch extends React.Component<Props, State> {
     const {attributesNode, autocompleteSelection, count, groupSelections, hierarchyNode, loadingSubtree, mode, selectedIds, selections,
       title, treeSearchTerms} = this.state;
     return !!searchContext && <FlexRowWrap style={styles.searchContainer}>
+
       <div style={{height: '100%', width: '100%'}}>
+        <div style={{position: 'absolute', paddingLeft: '83%', marginTop: '-1rem'}}>
+          <style>
+            {css}
+          </style>
+          <Growl ref={(el) => this.growl = el}></Growl>
+        </div>
         <div style={styles.titleBar}>
           <div style={{display: 'inline-flex', marginRight: '0.5rem'}}>
             <Clickable style={styles.backArrow} onClick={() => closeSearch()}>

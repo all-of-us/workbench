@@ -1,16 +1,21 @@
 import {Component, Input} from '@angular/core';
 import {faEdit} from '@fortawesome/free-regular-svg-icons';
-import {faBook, faEllipsisV, faFolderOpen, faInfoCircle} from '@fortawesome/free-solid-svg-icons';
+import {
+  faBook, faEllipsisV, faFolderOpen, faInbox,
+  faInfoCircle
+} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
 
+import {SelectionList} from 'app/cohort-search/selection-list/selection-list.component';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {SidebarContent} from 'app/pages/data/cohort-review/sidebar-content.component';
 import {participantStore} from 'app/services/review-state.service';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
+import {withCurrentCohortCriteria} from 'app/utils';
 import {highlightSearchTerm, reactStyles, ReactWrapperBase, withCurrentWorkspace, withUserProfile} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {NavStore} from 'app/utils/navigation';
@@ -144,6 +149,18 @@ const styles = reactStyles({
     height: 27,
     opacity: 0.65,
     marginRight: 16
+  },
+  criteriaCount: {
+    position: 'absolute',
+    height: '0.8rem',
+    width: '0.8rem',
+    top: '1rem',
+    left: '0.55rem',
+    textAlign: 'center',
+    backgroundColor: colors.danger,
+    borderRadius: '50%',
+    display: 'inline-block',
+    fontSize: '0.4rem'
   }
 });
 
@@ -226,6 +243,7 @@ interface Props {
   sidebarOpen: boolean;
   notebookStyles: boolean;
   workspace: WorkspaceData;
+  criteria: Array<Selection>;
 }
 
 interface State {
@@ -235,7 +253,7 @@ interface State {
   searchTerm: string;
   tooltipId: number;
 }
-export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
+export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), withCurrentCohortCriteria())(
   class extends React.Component<Props, State> {
     subscription: Subscription;
     constructor(props: Props) {
@@ -363,6 +381,18 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
       }
     }
 
+    renderCriteria() {
+      const {criteria} = this.props;
+      return <PopupTrigger
+          side='left'
+          closeOnClick
+          style={{height: '-webkit-fill-available'}} // Will need to update Popuptrigger to use style passed in Props
+      content={<SelectionList back={() => {}}/>}><div data-test-id='criteria-icon' style={{...styles.icon, height: '2rem', paddingBottom: '0.2rem'}}>
+        <span data-test-id = 'criteria-count' style={styles.criteriaCount}>{criteria.length}</span>
+        <FontAwesomeIcon icon={faInbox} style={{fontSize: '1.1rem'}}/>
+      </div></PopupTrigger>;
+    }
+
     renderWorkspaceMenu() {
       const {deleteFunction, shareFunction, workspace, workspace: {accessLevel, id, namespace}} = this.props;
       const isNotOwner = !workspace || accessLevel !== WorkspaceAccessLevel.OWNER;
@@ -424,7 +454,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
     }
 
     render() {
-      const {helpContentKey, setSidebarState, notebookStyles, sidebarOpen} = this.props;
+      const {criteria, helpContentKey, setSidebarState, notebookStyles, sidebarOpen} = this.props;
       const {activeIcon, filteredContent, participant, searchTerm, tooltipId} = this.state;
       const displayContent = filteredContent !== undefined ? filteredContent : sidebarContent[helpContentKey];
 
@@ -436,7 +466,8 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
       });
       return <React.Fragment>
         <div style={notebookStyles ? {...styles.iconContainer, ...styles.notebookOverrides} : {...styles.iconContainer}}>
-          {this.renderWorkspaceMenu()}
+          {!criteria && this.renderWorkspaceMenu()}
+          {criteria && this.renderCriteria()}
           {icons(helpContentKey).map((icon, i) =>
             (!icon.page || icon.page === helpContentKey) &&
               <div key={i} style={{display: 'table'}}>

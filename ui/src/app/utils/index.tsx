@@ -24,6 +24,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
+import {currentCohortCriteriaStore} from './navigation';
 
 const {useEffect} =  React;
 
@@ -351,6 +352,11 @@ export const withCurrentWorkspace = () => {
 // HOC that provides a 'cohort' prop with current Cohort
 export const withCurrentCohort = () => {
   return connectBehaviorSubject(currentCohortStore, 'cohort');
+};
+
+// HOC that provides a 'criteria' prop with current Cohort
+export const withCurrentCohortCriteria = () => {
+  return connectBehaviorSubject(currentCohortCriteriaStore, 'criteria');
 };
 
 // HOC that provides a 'conceptSet' prop with current ConceptSet
