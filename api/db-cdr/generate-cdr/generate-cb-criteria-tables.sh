@@ -1068,7 +1068,7 @@ FROM
 LEFT JOIN
     (
         SELECT
-            CAST(FLOOR(DATE_DIFF(CURRENT_DATE(), DATE(birth_datetime), MONTH)/12) as INT64) as age
+            DATE_DIFF(CURRENT_DATE,DATE(birth_datetime), YEAR) - IF(EXTRACT(MONTH FROM DATE(birth_datetime))*100 + EXTRACT(DAY FROM DATE(birth_datetime)) > EXTRACT(MONTH FROM CURRENT_DATE)*100 + EXTRACT(DAY FROM CURRENT_DATE),1,0) as age
             ,COUNT(*) as cnt
         FROM \`$BQ_PROJECT.$BQ_DATASET.person\`
         WHERE person_id NOT IN
