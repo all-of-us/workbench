@@ -16,7 +16,9 @@ const styles = reactStyles({
     padding: '0.5rem 1rem',
     borderTop: `7px solid ${colors.secondary}`,
     bottom: 0,
-    backgroundColor: colors.light
+    backgroundColor: colors.light,
+    // Above the footer, under modals / popups.
+    zIndex: 103
   },
   iconStyles: {
     height: 24,
