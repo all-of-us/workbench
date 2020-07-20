@@ -157,9 +157,8 @@ public final class SearchGroupItemQueryBuilder {
       "select person_id\n" + "from `${projectId}.${dataSetId}.person` p\nwhere\n";
   private static final String AGE_SQL =
       "select person_id\n"
-          + "from `${projectId}.${dataSetId}.cb_search_person` p\nwhere %s %s %s\n"
-          + "and not "
-          + DEC_SQL;
+          + "from `${projectId}.${dataSetId}.cb_search_person` p\nwhere %s %s %s\n";
+  private static final String AGE_DEC_SQL = "and not " + DEC_SQL;
   private static final String DEMO_IN_SQL = "%s in unnest(%s)\n";
 
   /** Build the inner most sql using search parameters, modifiers and attributes. */
@@ -252,20 +251,22 @@ public final class SearchGroupItemQueryBuilder {
     switch (CriteriaType.valueOf(param.getType())) {
       case AGE:
         Attribute attribute = param.getAttributes().get(0);
-        String ageNamedParameter1 =
+        String ageNamedParameter =
             QueryParameterUtil.addQueryParameterValue(
                 queryParams, QueryParameterValue.int64(new Long(attribute.getOperands().get(0))));
         if (attribute.getOperands().size() > 1) {
           String ageNamedParameter2 =
               QueryParameterUtil.addQueryParameterValue(
                   queryParams, QueryParameterValue.int64(new Long(attribute.getOperands().get(1))));
-          ageNamedParameter1 = ageNamedParameter1 + AND + ageNamedParameter2;
+          ageNamedParameter = ageNamedParameter + AND + ageNamedParameter2;
         }
-        return String.format(
-            AGE_SQL,
-            AGE_COLUMN_SQL_MAP.get(attribute.getName()),
-            OperatorUtils.getSqlOperator(attribute.getOperator()),
-            ageNamedParameter1);
+        String ageSql =
+            String.format(
+                AGE_SQL,
+                AGE_COLUMN_SQL_MAP.get(attribute.getName()),
+                OperatorUtils.getSqlOperator(attribute.getOperator()),
+                ageNamedParameter);
+        return AttrName.AGE_AT_CONSENT.equals(attribute.getName()) ? ageSql : ageSql + AGE_DEC_SQL;
       case GENDER:
       case SEX:
       case ETHNICITY:
