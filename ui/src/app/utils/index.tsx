@@ -26,6 +26,8 @@ import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
 import {currentCohortCriteriaStore} from './navigation';
 
+const {useEffect} =  React;
+
 export const WINDOW_REF = 'window-ref';
 
 export function isBlank(toTest: String): boolean {
@@ -533,3 +535,9 @@ export function renderUSD(value: number) {
   }
 }
 
+export const useDebounce = (fn: Function, updateList = [], ms = 250) => {
+  useEffect(() => {
+    const timeoutId = setTimeout(fn, ms);
+    return () => clearTimeout(timeoutId);
+  }, updateList);
+};

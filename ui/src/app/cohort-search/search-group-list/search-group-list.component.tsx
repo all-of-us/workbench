@@ -72,9 +72,11 @@ const styles = reactStyles({
     width: 'auto'
   },
   menuButton: {
+    background: colors.white,
     border: `1px solid ${colorWithWhiteness(colors.black, 0.75)}`,
     borderRadius: '0.125rem',
     color: colorWithWhiteness(colors.black, 0.45),
+    cursor: 'pointer',
     fontSize: '12px',
     fontWeight: 100,
     height: '1.5rem',

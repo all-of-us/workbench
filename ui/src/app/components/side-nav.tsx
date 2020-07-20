@@ -206,6 +206,8 @@ export interface SideNavProps {
   onToggleSideNav: Function;
   profileActive: boolean;
   userAdminActive: boolean;
+  userAuditActive: boolean;
+  workspaceAuditActive: boolean;
   workspacesActive: boolean;
 }
 
@@ -338,6 +340,14 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         />
       }
       {
+        profile.authorities.includes(Authority.ACCESSCONTROLADMIN) && this.state.showAdminOptions && <SideNavItem
+            content={'User Audit'}
+            onToggleSideNav={() => this.props.onToggleSideNav()}
+            href={'/admin/user-audit/'}
+            active={this.props.userAuditActive}
+        />
+      }
+      {
         profile.authorities.includes(Authority.COMMUNICATIONSADMIN) && this.state.showAdminOptions && <SideNavItem
             content={'Service Banners'}
             onToggleSideNav={() => this.props.onToggleSideNav()}
@@ -351,6 +361,14 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
             onToggleSideNav={() => this.props.onToggleSideNav()}
             href={'admin/workspaces'}
             active={this.props.workspaceAdminActive}
+        />
+      }
+      {
+        profile.authorities.includes(Authority.ACCESSCONTROLADMIN) && this.state.showAdminOptions && <SideNavItem
+            content={'Workspace Audit'}
+            onToggleSideNav={() => this.props.onToggleSideNav()}
+            href={'/admin/workspace-audit/'}
+            active={this.props.workspaceAuditActive}
         />
       }
       {

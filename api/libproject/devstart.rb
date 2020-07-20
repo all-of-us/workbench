@@ -761,6 +761,7 @@ Common.register_command({
 })
 
 def make_bq_denormalized_tables(cmd_name, *args)
+  ensure_docker_sync()
   op = WbOptionsParser.new(cmd_name, args)
   date = Time.new
   date = date.year.to_s + "-" + date.month.to_s + "-" + date.day.to_s
@@ -807,6 +808,7 @@ Generates big query denormalized tables for search and review. Used by cohort bu
 })
 
 def make_bq_denormalized_review(cmd_name, *args)
+  ensure_docker_sync()
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.dry_run = false
   op.add_option(
@@ -839,6 +841,7 @@ Generates big query denormalized tables for review. Used by cohort builder. Must
 })
 
 def make_bq_denormalized_search_events(cmd_name, *args)
+  ensure_docker_sync()
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.data_browser = false
   op.opts.dry_run = false
@@ -877,6 +880,7 @@ Generates big query denormalized search. Used by cohort builder. Must be run onc
 })
 
 def make_bq_denormalized_search_person(cmd_name, *args)
+  ensure_docker_sync()
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.data_browser = false
   op.opts.dry_run = false
@@ -915,6 +919,7 @@ Generates big query denormalized search. Used by cohort builder. Must be run onc
 })
 
 def make_bq_denormalized_dataset(cmd_name, *args)
+  ensure_docker_sync()
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.dry_run = false
   op.add_option(
@@ -947,6 +952,7 @@ Generates big query denormalized dataset tables. Used by Data Set Builder. Must 
 })
 
 def make_bq_dataset_linking(cmd_name, *args)
+  ensure_docker_sync()
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.dry_run = false
   op.add_option(
@@ -1019,6 +1025,7 @@ Generates the criteria table in big query. Used by cohort builder. Must be run o
 })
 
 def generate_private_cdr_counts(cmd_name, *args)
+  ensure_docker_sync()
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
     "--bq-project [bq-project]",
@@ -1063,6 +1070,7 @@ Generates databases in bigquery with data from a de-identified cdr that will be 
 })
 
 def copy_bq_tables(cmd_name, *args)
+  ensure_docker_sync()
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
     "--sa-project [sa-project]",
