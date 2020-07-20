@@ -6,7 +6,6 @@ import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.factory.Mappers;
 import org.pmiops.workbench.cohortreview.CohortReviewMapper;
 import org.pmiops.workbench.cohorts.CohortMapper;
 import org.pmiops.workbench.conceptset.ConceptSetMapper;
@@ -62,13 +61,13 @@ public interface WorkspaceMapper {
   @Mapping(target = "researchPurpose", source = "dbWorkspace")
   Workspace toApiWorkspace(DbWorkspace dbWorkspace);
 
+  WorkspaceResponse toApiWorkspaceResponse(Workspace workspace, String accessLevel);
+
   default WorkspaceResponse toApiWorkspaceResponse(
       DbWorkspace dbWorkspace, FirecloudWorkspaceResponse firecloudWorkspaceResponse) {
-    FirecloudMapper fcMapper = Mappers.getMapper(FirecloudMapper.class);
-    return new WorkspaceResponse()
-        .accessLevel(
-            fcMapper.fcWorkspaceResponseToApiWorkspaceAccessLevel(firecloudWorkspaceResponse))
-        .workspace(toApiWorkspace(dbWorkspace, firecloudWorkspaceResponse.getWorkspace()));
+    return toApiWorkspaceResponse(
+        toApiWorkspace(dbWorkspace, firecloudWorkspaceResponse.getWorkspace()),
+        firecloudWorkspaceResponse.getAccessLevel());
   };
 
   @Mapping(target = "timeReviewed", ignore = true)
