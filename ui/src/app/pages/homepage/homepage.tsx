@@ -20,9 +20,9 @@ import {getRegistrationTasksMap, RegistrationDashboard} from 'app/pages/homepage
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity} from 'app/styles/colors';
 import {hasRegisteredAccessFetch, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {supportUrls} from 'app/utils/zendesk';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
-import {environment} from 'environments/environment';
 import {
   Profile,
 } from 'generated/fetch';
@@ -369,7 +369,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
                                         the left hand panel to browse through example workspaces.
                                       </CustomBulletListItem>
                                       <CustomBulletListItem bullet='→'>
-                                        Browse through our <StyledAnchorTag href={environment.zendeskHelpCenterUrl}
+                                        Browse through our <StyledAnchorTag href={supportUrls.helpCenter}
                                           target='_blank'>support materials</StyledAnchorTag> and forum topics.
                                       </CustomBulletListItem>
                                     </CustomBulletList>

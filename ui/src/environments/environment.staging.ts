@@ -1,4 +1,4 @@
-import {Environment} from 'environments/environment-type';
+import {Environment, ZendeskEnv} from 'environments/environment-type';
 
 export const environment: Environment = {
   displayTag: 'Staging',
@@ -13,8 +13,7 @@ export const environment: Environment = {
   gaUserAgentDimension: 'dimension1',
   gaLoggedInDimension: 'dimension2',
   trainingUrl: 'https://aoudev.nnlm.gov',
-  zendeskHelpCenterUrl: 'https://aousupporthelp1580753096.zendesk.com/hc',
-  zendeskWidgetKey: 'df0a2e39-f8a8-482b-baf5-af82e14d38f9',
+  zendeskEnv: ZendeskEnv.Sandbox,
   shibbolethUrl: 'https://shibboleth.dsde-prod.broadinstitute.org',
   inactivityTimeoutSeconds: 30 * 60,
   inactivityWarningBeforeSeconds: 5 * 60,

@@ -16,7 +16,6 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {NavStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
-import {environment} from 'environments/environment';
 import {ParticipantCohortStatus, WorkspaceAccessLevel} from 'generated/fetch';
 import {MenuItem, StyledAnchorTag} from './buttons';
 import {PopupTrigger} from './popups';
@@ -501,7 +500,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
             <div style={styles.footer}>
               <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
               <p style={styles.contentItem}>
-                Visit our <StyledAnchorTag href={environment.zendeskHelpCenterUrl}
+                Visit our <StyledAnchorTag href={supportUrls.helpCenter}
                                            target='_blank' onClick={() => this.analyticsEvent('UserSupport')}> User Support
                 </StyledAnchorTag> page or <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
               </p>
