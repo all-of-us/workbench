@@ -104,7 +104,7 @@
     "enableEventDateModifier": false,
     "useNewShibbolethService": true,
     "enableResearchPurposePrompt": true,
-    "enableCohortBuilderV2": false
+    "enableCohortBuilderV2": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local",
