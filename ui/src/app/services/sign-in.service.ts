@@ -14,6 +14,11 @@ import 'rxjs/Rx';
 
 declare const gapi: any;
 
+// for e2e tests: use the SA's token to sign in here instead of interacting with Google's Capcha
+declare global {
+  interface Window { clientSuppliedToken: string; useToken: (token: string) => void; }
+}
+
 @Injectable()
 export class SignInService {
   // Expose "current user details" as an Observable
@@ -25,6 +30,11 @@ export class SignInService {
   constructor(private zone: NgZone,
     serverConfigService: ServerConfigService) {
     this.zone = zone;
+
+    window.useToken = (token: string) => {
+      window.clientSuppliedToken = token;
+      this.isSignedIn.next(true);
+    };
 
     serverConfigService.getConfig().subscribe((config) => {
       this.makeAuth2(config);
@@ -91,7 +101,9 @@ export class SignInService {
   }
 
   public get currentAccessToken() {
-    if (!gapi.auth2) {
+    if (window.clientSuppliedToken) {
+      return window.clientSuppliedToken;
+    } else if (!gapi.auth2) {
       return null;
     } else {
       const authResponse = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse(true);
