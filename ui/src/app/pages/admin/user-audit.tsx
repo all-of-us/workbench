@@ -38,11 +38,17 @@ const getNextAuditPath = (subject: string) => {
   return `/admin/user-audit/${subject}`;
 };
 
+// Single-user admin page isn't available yet, so go to the main users list page.
+const getAdminPageUrl = (subject: string) => {
+  return `/admin/user/`;
+};
+
 export const UserAuditPage = () => {
   const {username = ''} = useParams();
   return <AuditPageComponent auditSubjectType='User'
                              buttonLabel='Username without domain'
                              initialAuditSubject={username}
                              getNextAuditPath={getNextAuditPath}
-                             queryAuditLog={queryAuditLog}/>;
+                             queryAuditLog={queryAuditLog}
+                             getAdminPageUrl={getAdminPageUrl}/>;
 };

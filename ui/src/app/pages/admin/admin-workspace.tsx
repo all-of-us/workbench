@@ -225,6 +225,7 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
               'Workspace Published',
               workspace.published ? 'Yes' : 'No'
             )}
+            {this.workspaceInfoField('Audit', <a href={`/admin/workspace-audit/${workspace.namespace}`}>Audit History</a>)}
           </div>
           <h3>Collaborators</h3>
           <div className='collaborators' style={{marginTop: '1rem'}}>
