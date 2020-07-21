@@ -74,7 +74,7 @@ public class RandomizeVcf extends VariantWalker {
   protected static VariantContext randomizeVariant(VariantContext variant) {
     // This initializes most of the VariantContextBuilder fields to what they were in the original
     // variant.
-    // We just want to change the alleles, genotypes, and quality score.
+    // We just want to change the genotypes and quality score.
     VariantContextBuilder variantContextBuilder = new VariantContextBuilder(variant);
     variantContextBuilder.alleles(variant.getAlleles());
 
@@ -111,8 +111,7 @@ public class RandomizeVcf extends VariantWalker {
     // alternates.
     // For each genotype, we pick from among those possible alternates (or we put a no-call.)
     // We don't want to just stick no-calls everywhere, which we would if no-call was given equal
-    // chance
-    // of occurring to all the other alleles, so we only use a no-call if the original had a
+    // chance of occurring to all the other alleles, so we only use a no-call if the original had a
     // no-call.
     List<Allele> possibleAlleles = new ArrayList<>(variantContext.getAlleles());
     if (genotypeAlleles.contains(Allele.NO_CALL)) {
