@@ -77,13 +77,17 @@ export default class DataResourceCard {
 
   }
 
-  async findCard(resourceName: string): Promise<DataResourceCard | null> {
+  async findCard(resourceName: string, cardType?: CardType): Promise<DataResourceCard | null> {
     const selector = `.//*[${DataResourceCardSelector.cardNameXpath} and normalize-space(text())="${resourceName}"]`;
-    await this.page.waitForXPath(DataResourceCardSelector.cardRootXpath, {visible: true});
-    const elements = await this.page.$x(DataResourceCardSelector.cardRootXpath);
+    let elements: DataResourceCard[];
+    if (cardType === undefined) {
+      elements = await DataResourceCard.findAllCards(this.page);
+    } else {
+      elements = await this.getResourceCard(cardType);
+    }
     for (const elem of elements) {
-      if ((await elem.$x(selector)).length > 0) {
-        return this.asCard(elem);
+      if ((await elem.asElementHandle().$x(selector)).length > 0) {
+        return elem;
       }
     }
     return null;

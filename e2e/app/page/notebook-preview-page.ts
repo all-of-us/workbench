@@ -1,6 +1,8 @@
 import {ElementHandle, Frame, Page, WaitForSelectorOptions} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
+import {waitForNumberElements} from 'utils/waits-utils';
 import AuthenticatedPage from './authenticated-page';
+import NotebookPage from './notebook-page';
 
 export default class NotebookPreviewPage extends AuthenticatedPage {
 
@@ -19,6 +21,22 @@ export default class NotebookPreviewPage extends AuthenticatedPage {
       console.error(`NotebookPreviewPage isLoaded() encountered ${e}`);
       throw new Error(e);
     }
+  }
+
+  /**
+   * Click Edit link.
+   */
+  async edit(notebookName: string): Promise<NotebookPage> {
+    const selector = '//div[normalize-space(text())="Edit"]';
+    const link = await this.page.waitForXPath(selector, {visible: true});
+    await link.click();
+    // wait for Connecting to Notebook Server icon.
+    await waitForNumberElements(this.page, 'clr-icon[shape="sync"]', 1);
+    // wait until Connecting to Notebook Server icon disappear.
+    await waitForNumberElements(this.page, 'clr-icon[shape="sync"]', 0, 120000);
+    const notebookPage = new NotebookPage(this.page, notebookName);
+    await notebookPage.waitForLoad();
+    return notebookPage;
   }
 
   async getFormattedCode(): Promise<string> {
