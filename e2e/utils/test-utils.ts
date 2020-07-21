@@ -10,7 +10,7 @@ import * as fp from 'lodash/fp';
 import {ElementHandle, Page} from 'puppeteer';
 import {waitForText, waitWhileLoading} from 'utils/waits-utils';
 import WorkspaceCard from 'app/component/workspace-card';
-import {WorkspaceAccessLevel} from 'app/text-labels';
+import {PageUrl, WorkspaceAccessLevel} from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
 import Navigation, {NavLink} from 'app/component/navigation';
 import {makeWorkspaceName} from './str-utils';
@@ -46,6 +46,47 @@ export async function signInAs(userId: string, passwd: string, opts: {reset?: bo
 export async function signOut(page: Page) {
   await Navigation.navMenu(page, NavLink.SIGN_OUT);
   await page.waitForTimeout(1000);
+}
+
+export async function experimentalTestSignIn(page: Page): Promise<void> {
+  const homePage = new HomePage(page);
+  await homePage.gotoUrl(PageUrl.Home.toString());
+
+  // generate this token manually via:
+  // gcloud auth application-default login --no-launch-browser
+  // gcloud auth application-default print-access-token
+
+  // gcloud auth login user-email WILL NOT WORK
+
+  const actualToken = '[redacted]';
+  const cmd = 'window.useToken(\'' + actualToken + '\')';
+  await page.evaluate(cmd);
+
+  await homePage.gotoUrl(PageUrl.Home.toString());
+  await homePage.waitForLoad();
+}
+
+/**
+ * <pre>
+ * Wait while the page is loading (spinner is spinning and visible). Waiting stops when spinner stops spinning or when timed out.
+ * It usually indicates the page is ready for user interaction.
+ * </pre>
+ */
+export async function waitWhileLoading(page: Page, timeOut?: number): Promise<void> {
+  const notBlankPageSelector = '[data-test-id="sign-in-container"], title:not(empty), div.spinner, svg[viewBox]';
+  const spinElementsSelector = '[style*="running spin"], .spinner:empty, [style*="running rotation"]';
+
+  await Promise.race([
+    // To prevent checking on blank page, wait for elements exist in DOM.
+    page.waitForSelector(notBlankPageSelector),
+    page.waitForSelector(spinElementsSelector),
+  ]);
+
+  // Wait for spinners stop and gone.
+  await page.waitForFunction((css) => {
+    const elements = document.querySelectorAll(css);
+    return elements && elements.length === 0;
+  }, {polling: 'mutation', timeout: timeOut}, spinElementsSelector);
 }
 
 
