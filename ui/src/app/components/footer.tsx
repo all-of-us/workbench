@@ -6,7 +6,7 @@ import {AoU} from 'app/components/text-wrappers';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {openZendeskWidget} from 'app/utils/zendesk';
+import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import { environment } from 'environments/environment';
 import * as React from 'react';
 
@@ -111,11 +111,6 @@ const FooterSection = ({style = {}, header, ...props}) => {
   </FlexColumn>;
 };
 
-const gettingStartedUrl = 'https://aousupporthelp.zendesk.com/hc/en-us/categories/360002157352-Getting-Started';
-const documentationUrl = 'https://aousupporthelp.zendesk.com/hc/en-us/categories/360002625291-Documentation';
-const communityForumUrl = 'https://aousupporthelp.zendesk.com/hc/en-us/community/topics';
-const faqUrl = 'https://aousupporthelp.zendesk.com/hc/en-us/categories/360002157532-Frequently-Asked-Questions';
-
 interface WorkbenchFooterProps {
   profileState;
 }
@@ -155,20 +150,20 @@ const WorkbenchFooter = withUserProfile()(
           <FooterSection style={styles.workbenchFooterItem} header='User Support'>
             <FlexRow>
               <FlexColumn style={{width: '50%'}}>
-                <NewTabFooterAnchorTag href={gettingStartedUrl} analyticsFn={tracker.GettingStarted}>
+                <NewTabFooterAnchorTag href={supportUrls.gettingStarted} analyticsFn={tracker.GettingStarted}>
                   Getting Started
                 </NewTabFooterAnchorTag>
-                <NewTabFooterAnchorTag href={documentationUrl}
+                <NewTabFooterAnchorTag href={supportUrls.tableOfContents}
                                        analyticsFn={tracker.SupportDocs}>
                   Documentation
                 </NewTabFooterAnchorTag>
-                <NewTabFooterAnchorTag href={communityForumUrl}
+                <NewTabFooterAnchorTag href={supportUrls.communityForum}
                                        analyticsFn={tracker.CommunityForum}>
                   Community Forum
                 </NewTabFooterAnchorTag>
               </FlexColumn>
               <FlexColumn style={{width: '50%'}}>
-                <NewTabFooterAnchorTag href={faqUrl}
+                <NewTabFooterAnchorTag href={supportUrls.faq}
                                        analyticsFn={tracker.SupportFAQ}>
                   FAQs
                 </NewTabFooterAnchorTag>

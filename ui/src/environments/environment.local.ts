@@ -1,4 +1,4 @@
-import {Environment} from 'environments/environment-type';
+import {Environment, ZendeskEnv} from 'environments/environment-type';
 import {testEnvironmentBase} from 'environments/test-env-base';
 
 // This file is used for a local UI server pointed at a local API server
@@ -15,9 +15,7 @@ export const environment: Environment = {
   gaId: 'UA-112406425-5',
   gaUserAgentDimension: 'dimension1',
   gaLoggedInDimension: 'dimension2',
-  zendeskHelpCenterUrl: 'https://aousupporthelp1580753096.zendesk.com/hc',
-  createBillingAccountHelpUrl: 'https://aousupporthelp1580753096.zendesk.com/hc/en-us/articles/360039550031-Instructions-to-Create-a-Billing-Account',
-  zendeskWidgetKey: 'df0a2e39-f8a8-482b-baf5-af82e14d38f9',
+  zendeskEnv: ZendeskEnv.Sandbox,
   shibbolethUrl: 'http://mock-nih.dev.test.firecloud.org',
   inactivityTimeoutSeconds: 99999999999,
   inactivityWarningBeforeSeconds: 5 * 60,

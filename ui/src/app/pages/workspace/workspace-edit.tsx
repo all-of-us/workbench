@@ -47,7 +47,7 @@ import {reportError} from 'app/utils/errors';
 import {currentWorkspaceStore, navigate, nextWorkspaceWarmupStore, serverConfigStore} from 'app/utils/navigation';
 import {getBillingAccountInfo} from 'app/utils/workbench-gapi-client';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {openZendeskWidget} from 'app/utils/zendesk';
+import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {
   ArchivalStatus,
   BillingAccount,
@@ -444,8 +444,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     renderBillingDescription() {
       return <div>
         The <AouTitle/> provides $300 in free credits per user. Please refer to
-        <StyledAnchorTag href={'https://aousupporthelp.zendesk.com/hc/en-us/sections' +
-        '/360008099991-Questions-About-Billing'} target='_blank'> &nbsp;this article
+        <StyledAnchorTag href={supportUrls.billing} target='_blank'> &nbsp;this article
         </StyledAnchorTag> to learn more about the free credit
         program and how it can be used. Once you have used up your free credits, you can request
         additional credits by <span style={styles.link} onClick={() => this.openContactWidget()}>
@@ -1041,7 +1040,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         <hr style={{marginTop: '1rem'}}/>
         <WorkspaceEditSection header={<FlexRow style={{alignItems: 'center'}}>
           <div>Research Use Statement Questions</div>
-          <StyledAnchorTag href='https://aousupporthelp.zendesk.com/hc/en-us/articles/360042673211-Examples-of-research-purpose-descriptions-'
+          <StyledAnchorTag href={supportUrls.researchPurpose}
                            target='_blank' style={{marginLeft: '1rem', fontSize: 14, lineHeight: '18px', fontWeight: 400}}>
             Best practices for Research Use Statement questions
           </StyledAnchorTag>

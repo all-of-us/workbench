@@ -1,3 +1,10 @@
+// The Zendesk environment instance. Note that sandbox is a mirror which has
+// different content IDs and separate SAML integration. See also app/utils/zendesk.ts.
+export enum ZendeskEnv {
+  Prod = 'prod',
+  Sandbox = 'sandbox'
+}
+
 export interface Environment {
   // Permanent environment variables.
   //
@@ -40,13 +47,8 @@ export interface Environment {
   // The url for Moodle integration
   // Example value: https://aoudev.nnlm.gov
   trainingUrl: string;
-  // The base URL for the Zendesk help center / user forum.
-  // Example value: https://aousupporthelp.zendesk.com/hc/
-  zendeskHelpCenterUrl: string;
-  createBillingAccountHelpUrl: string;
-  // Zendesk Widget API key from the Zendesk admin console.
-  zendeskWidgetKey: string;
-
+  // The Zendesk environment corresponding to this deployment.
+  zendeskEnv: ZendeskEnv;
   inactivityTimeoutSeconds: number;
   inactivityWarningBeforeSeconds: number;
   // Whether users should be able to see the Published Workspaces

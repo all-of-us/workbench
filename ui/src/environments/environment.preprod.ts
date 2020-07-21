@@ -1,4 +1,4 @@
-import {Environment} from 'environments/environment-type';
+import {Environment, ZendeskEnv} from 'environments/environment-type';
 
 export const environment: Environment = {
   displayTag: 'preprod',
@@ -12,9 +12,7 @@ export const environment: Environment = {
   gaId: 'UA-112406425-7',
   gaUserAgentDimension: 'dimension1',
   gaLoggedInDimension: 'dimension2',
-  zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
-  createBillingAccountHelpUrl: 'https://aousupporthelp.zendesk.com/hc/en-us/articles/360039539411-How-to-Create-a-Billing-Account',
-  zendeskWidgetKey: '5a7d70b9-37f9-443b-8d0e-c3bd3c2a55e3',
+  zendeskEnv: ZendeskEnv.Prod,
   shibbolethUrl: 'https://shibboleth.dsde-prod.broadinstitute.org',
   trainingUrl: 'https://aou.nnlm.gov',
   inactivityTimeoutSeconds: 30 * 60,

@@ -28,7 +28,7 @@ import {currentWorkspaceStore, navigateAndPreventDefaultIfNoKeysPressed} from 'a
 import {apiCallWithGatewayTimeoutRetries} from 'app/utils/retry';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
-import {openZendeskWidget} from 'app/utils/zendesk';
+import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {
   BillingStatus,
   Cohort,
@@ -1039,8 +1039,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                     width: '100%', height: '1.375rem', backgroundColor: colorWithWhiteness(colors.dark, 0.9),
                     color: colors.primary, paddingLeft: '0.4rem', fontSize: '13px', lineHeight: '16px',
                     alignItems: 'center'}}>
-                    <StyledAnchorTag href={'https://aousupporthelp.zendesk.com/hc/en-us/articles/' +
-                    '360033200232-Data-Dictionary-for-Registered-Tier-CDR'} target='_blank'>
+                    <StyledAnchorTag href={supportUrls.dataDictionary} target='_blank'>
                       Learn more
                     </StyledAnchorTag>&nbsp;in the data dictionary
                   </FlexRow>}
