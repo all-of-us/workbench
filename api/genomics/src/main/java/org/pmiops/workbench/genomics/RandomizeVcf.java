@@ -26,18 +26,15 @@ import picard.cmdline.programgroups.VariantManipulationProgramGroup;
 @CommandLineProgramProperties(
     summary = "Generates random variant alleles at the same contigs as an example VCF",
     oneLineSummary = "Randomizes a VCF",
-    programGroup = VariantManipulationProgramGroup.class
-)
+    programGroup = VariantManipulationProgramGroup.class)
 public class RandomizeVcf extends VariantWalker {
-  @Argument(doc = "Output vcf name.",
+  @Argument(
+      doc = "Output vcf name.",
       fullName = StandardArgumentDefinitions.OUTPUT_LONG_NAME,
       shortName = StandardArgumentDefinitions.OUTPUT_SHORT_NAME)
   protected File outputVcf;
 
-  @Argument(doc = "Sample name suffix.",
-      fullName = "SAMPLE_NAME_SUFFIX",
-      shortName = "S"
-  )
+  @Argument(doc = "Sample name suffix.", fullName = "SAMPLE_NAME_SUFFIX", shortName = "S")
   protected static String sampleNameSuffix;
 
   static Random random = new Random();
@@ -45,41 +42,48 @@ public class RandomizeVcf extends VariantWalker {
   private VariantContextWriter vcfWriter;
 
   @Override
-  public void apply(VariantContext variant, ReadsContext readsContext,
-      ReferenceContext referenceContext, FeatureContext featureContext) {
+  public void apply(
+      VariantContext variant,
+      ReadsContext readsContext,
+      ReferenceContext referenceContext,
+      FeatureContext featureContext) {
     vcfWriter.add(randomizeVariant(variant));
   }
 
   @Override
   public void onTraversalStart() {
     final VCFHeader inputHeader = getHeaderForVariants();
-    final List<String> newSampleNames = inputHeader.getSampleNamesInOrder().stream()
-        .map(RandomizeVcf::appendSuffixToSampleName)
-        .collect(Collectors.toList());
-    final VCFHeader outputHeader = new VCFHeader(inputHeader.getMetaDataInInputOrder(), newSampleNames);
+    final List<String> newSampleNames =
+        inputHeader.getSampleNamesInOrder().stream()
+            .map(RandomizeVcf::appendSuffixToSampleName)
+            .collect(Collectors.toList());
+    final VCFHeader outputHeader =
+        new VCFHeader(inputHeader.getMetaDataInInputOrder(), newSampleNames);
     vcfWriter = this.createVCFWriter(outputVcf);
     vcfWriter.writeHeader(outputHeader);
   }
 
   @Override
   public void closeTool() {
-    if ( vcfWriter != null ) {
+    if (vcfWriter != null) {
       vcfWriter.close();
     }
   }
 
   @VisibleForTesting
   protected static VariantContext randomizeVariant(VariantContext variant) {
-    // This initializes most of the VariantContextBuilder fields to what they were in the original variant.
+    // This initializes most of the VariantContextBuilder fields to what they were in the original
+    // variant.
     // We just want to change the alleles, genotypes, and quality score.
     VariantContextBuilder variantContextBuilder = new VariantContextBuilder(variant);
     variantContextBuilder.alleles(variant.getAlleles());
 
-    List<Genotype> randomizedGenotypes = variant.getGenotypes()
-        .stream()
-        .map(genotype -> randomizeGenotype(variant, genotype))
-        .collect(Collectors.toList());
-    GenotypesContext randomizedGenotypesContext = GenotypesContext.create(new ArrayList<>(randomizedGenotypes));
+    List<Genotype> randomizedGenotypes =
+        variant.getGenotypes().stream()
+            .map(genotype -> randomizeGenotype(variant, genotype))
+            .collect(Collectors.toList());
+    GenotypesContext randomizedGenotypesContext =
+        GenotypesContext.create(new ArrayList<>(randomizedGenotypes));
 
     variantContextBuilder.genotypes(randomizedGenotypesContext);
 
@@ -101,11 +105,15 @@ public class RandomizeVcf extends VariantWalker {
   }
 
   @VisibleForTesting
-  protected static List<Allele> randomizeAlleles(VariantContext variantContext, List<Allele> genotypeAlleles) {
-    // The alleles list on the VariantContext has first the reference and then all possible alternates.
+  protected static List<Allele> randomizeAlleles(
+      VariantContext variantContext, List<Allele> genotypeAlleles) {
+    // The alleles list on the VariantContext has first the reference and then all possible
+    // alternates.
     // For each genotype, we pick from among those possible alternates (or we put a no-call.)
-    // We don't want to just stick no-calls everywhere, which we would if no-call was given equal chance
-    // of occurring to all the other alleles, so we only use a no-call if the original had a no-call.
+    // We don't want to just stick no-calls everywhere, which we would if no-call was given equal
+    // chance
+    // of occurring to all the other alleles, so we only use a no-call if the original had a
+    // no-call.
     List<Allele> possibleAlleles = new ArrayList<>(variantContext.getAlleles());
     if (genotypeAlleles.contains(Allele.NO_CALL)) {
       possibleAlleles.add(Allele.NO_CALL);
