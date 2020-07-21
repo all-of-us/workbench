@@ -524,10 +524,6 @@ dependencies {
   compile "org.apache.commons:commons-lang3:3.6"
   compile "org.apache.commons:commons-text:1.8"
 
-  // Genomics dependencies
-  compile "org.broadinstitute:gatk:4.1.8.0"
-  compile "com.github.broadinstitute:picard:2.22.8"
-
   // Elasticsearch client
   compile "org.elasticsearch.client:elasticsearch-rest-high-level-client:$project.ext.ELASTICSEARCH_VERSION"
   compile "org.elasticsearch:elasticsearch:$project.ext.ELASTICSEARCH_VERSION"
@@ -732,14 +728,6 @@ def commandLineSpringProperties = [
   'spring.datasource.username': System.getenv("WORKBENCH_DB_USER"),
   'spring.datasource.password': System.getenv("WORKBENCH_DB_PASSWORD")
 ]
-
-task randomizeVcf(type: JavaExec) {
-  classpath = sourceSets.main.runtimeClasspath
-  main = "org.pmiops.workbench.genomics.RandomizeVcfEntryPoint"
-  if (project.hasProperty("appArgs")) {
-    args Eval.me(appArgs)
-  }
-}
 
 // See project.rb command: load-es-index
 task elasticSearchIndexer(type: JavaExec) {
