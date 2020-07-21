@@ -274,7 +274,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
       resource.setWorkspaceBillingStatus(BillingStatus.ACTIVE);
     }
     resource.setPermission(
-        firecloudMapper.fcWorkspaceResponseToApiWorkspaceAccessLevel(workspaceDetails).toString());
+        firecloudMapper.fcToApiWorkspaceAccessLevel(workspaceDetails.getAccessLevel()).toString());
     resource.setWorkspaceNamespace(workspaceDetails.getWorkspace().getNamespace());
     resource.setWorkspaceFirecloudName(workspaceDetails.getWorkspace().getName());
     return resource;
