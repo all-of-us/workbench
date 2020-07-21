@@ -255,10 +255,10 @@ public final class SearchGroupItemQueryBuilder {
             QueryParameterUtil.addQueryParameterValue(
                 queryParams, QueryParameterValue.int64(new Long(attribute.getOperands().get(0))));
         if (attribute.getOperands().size() > 1) {
-          String ageNamedParameter2 =
+          String ageNamedParameter1 =
               QueryParameterUtil.addQueryParameterValue(
                   queryParams, QueryParameterValue.int64(new Long(attribute.getOperands().get(1))));
-          ageNamedParameter = ageNamedParameter + AND + ageNamedParameter2;
+          ageNamedParameter = ageNamedParameter + AND + ageNamedParameter1;
         }
         String ageSql =
             String.format(
