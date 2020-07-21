@@ -7,6 +7,7 @@ import Button from 'app/element/button';
 
 export enum FieldSelector {
   LoginButton= '//*[@role="button"]/*[contains(normalize-space(text()),"Sign In")]',
+  CookiePolicyLink = '//a[text()="Cookie Policy"]',
   EmailInput = '//input[@type="email"]',
   NextButton = '//*[text()="Next" or @value="Next"]',
   SubmitButton = '//*[@id="passwordNext" or @id="submit"]',
@@ -38,6 +39,10 @@ export default class GoogleLoginPage {
    */
   async loginButton(): Promise<ElementHandle> {
     return this.page.waitForXPath(FieldSelector.LoginButton, {visible: true, timeout: 60000});
+  }
+
+  async cookiePolicyLink(): Promise<ElementHandle> {
+    return this.page.waitForXPath(FieldSelector.CookiePolicyLink, {visible: true, timeout: 60000});
   }
 
   /**
@@ -151,6 +156,4 @@ export default class GoogleLoginPage {
     const button = await Button.findByName(this.page, {name: 'Create Account'});
     await button.clickWithEval();
   }
-
-
 }
