@@ -53,8 +53,12 @@ public class RandomizeVcf extends VariantWalker {
   @Override
   public void onTraversalStart() {
     final VCFHeader inputHeader = getHeaderForVariants();
+    final List<String> newSampleNames = inputHeader.getSampleNamesInOrder().stream()
+        .map(RandomizeVcf::appendSuffixToSampleName)
+        .collect(Collectors.toList());
+    final VCFHeader outputHeader = new VCFHeader(inputHeader.getMetaDataInInputOrder(), newSampleNames);
     vcfWriter = this.createVCFWriter(outputVcf);
-    vcfWriter.writeHeader(inputHeader);
+    vcfWriter.writeHeader(outputHeader);
   }
 
   @Override
@@ -69,6 +73,7 @@ public class RandomizeVcf extends VariantWalker {
     // This initializes most of the VariantContextBuilder fields to what they were in the original variant.
     // We just want to change the alleles, genotypes, and quality score.
     VariantContextBuilder variantContextBuilder = new VariantContextBuilder(variant);
+    variantContextBuilder.alleles(variant.getAlleles());
 
     List<Genotype> randomizedGenotypes = variant.getGenotypes()
         .stream()

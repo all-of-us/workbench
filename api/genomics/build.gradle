@@ -17,3 +17,11 @@ task randomizeVcf(type: JavaExec) {
         args Eval.me(appArgs)
     }
 }
+
+task combineVcfs(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = "org.pmiops.workbench.genomics.CombineGenotypingArrayVcfsEntryPoint"
+    if (project.hasProperty("appArgs")) {
+        args Eval.me(appArgs)
+    }
+}
