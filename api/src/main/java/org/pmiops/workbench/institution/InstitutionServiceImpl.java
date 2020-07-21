@@ -20,6 +20,7 @@ import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionUserInstructions;
 import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -82,7 +83,7 @@ public class InstitutionServiceImpl implements InstitutionService {
   public List<Institution> getInstitutions() {
     return StreamSupport.stream(institutionDao.findAll().spliterator(), false)
         .map(this::toModel)
-        .sorted(Comparator.comparing(institution -> institution.getDisplayName()))
+        .sorted(Comparator.comparing(Institution::getDisplayName))
         .collect(Collectors.toList());
   }
 
@@ -272,6 +273,13 @@ public class InstitutionServiceImpl implements InstitutionService {
   public boolean validateOperationalUser(DbInstitution institution) {
     return institution != null
         && institution.getShortName().equals(OPERATIONAL_USER_INSTITUTION_SHORT_NAME);
+  }
+
+  @Override
+  public Optional<Institution> getByUser(DbUser user) {
+    return verifiedInstitutionalAffiliationDao.findFirstByUser(user)
+        .map(DbVerifiedInstitutionalAffiliation::getInstitution)
+        .map(dbi -> institutionMapper.dbToModel(dbi, this));
   }
 
   private Institution toModel(DbInstitution dbInstitution) {

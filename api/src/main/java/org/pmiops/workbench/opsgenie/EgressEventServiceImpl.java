@@ -21,7 +21,9 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.EgressEvent;
+import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceUserAdminView;
@@ -37,6 +39,7 @@ public class EgressEventServiceImpl implements EgressEventService {
   private static final String USER_ID_GROUP_NAME = "userid";
   private final Clock clock;
   private final EgressEventAuditor egressEventAuditor;
+  private final InstitutionService institutionService;
   private final Provider<AlertApi> alertApiProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserService userService;
@@ -46,12 +49,14 @@ public class EgressEventServiceImpl implements EgressEventService {
   public EgressEventServiceImpl(
       Clock clock,
       EgressEventAuditor egressEventAuditor,
+      InstitutionService institutionService,
       Provider<AlertApi> alertApiProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserService userService,
       WorkspaceAdminService workspaceAdminService) {
     this.clock = clock;
     this.egressEventAuditor = egressEventAuditor;
+    this.institutionService = institutionService;
     this.alertApiProvider = alertApiProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userService = userService;
@@ -174,17 +179,16 @@ public class EgressEventServiceImpl implements EgressEventService {
    */
   @Transient
   public String getAdminDescription(DbUser dbUser) {
-    final String institutions =
-        dbUser.getInstitutionalAffiliations().stream()
-            .map(DbInstitutionalAffiliation::getInstitution)
-            .collect(Collectors.joining(", "));
+    final String institution = institutionService.getByUser(dbUser)
+        .map(Institution::getDisplayName)
+        .orElse("not found");
     return String.format(
-        "%s %s - Username: %s\n" + "user_id: %d, Institutions: [ %s ], Account Age: %d days",
+        "%s %s - Username: %s\n" + "user_id: %d, Institution: %s, Account Age: %d days",
         dbUser.getGivenName(),
         dbUser.getFamilyName(),
         dbUser.getUsername(),
         dbUser.getUserId(),
-        institutions,
+        institution,
         getAgeInDays(dbUser.getCreationTime()));
   }
 
