@@ -2,14 +2,14 @@ import DataPage, {TabLabelAlias} from 'app/page/data-page';
 import WorkspacesPage from 'app/page/workspaces-page';
 import {EllipsisMenuAction} from 'app/text-labels';
 import * as testData from 'resources/data/workspace-data';
-import {findWorkspace, performActions, signIn} from 'utils/test-utils';
+import {findWorkspace, performActions, experimentalTestSignIn} from 'utils/test-utils';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 
 
 describe('Editing workspace thru workspace card ellipsis menu', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await experimentalTestSignIn(page);
   });
 
   /**

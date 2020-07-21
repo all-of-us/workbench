@@ -10,7 +10,7 @@ import * as fp from 'lodash/fp';
 import {ElementHandle, Page} from 'puppeteer';
 import {waitForText} from 'utils/waits-utils';
 import WorkspaceCard from 'app/component/workspace-card';
-import {WorkspaceAccessLevel} from 'app/text-labels';
+import {PageUrl, WorkspaceAccessLevel} from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
 import {makeWorkspaceName} from './str-utils';
 
@@ -37,6 +37,24 @@ export async function signInAs(userId: string, passwd: string): Promise<Page> {
   await newPage.setDefaultNavigationTimeout(90000);
   await signIn(newPage, userId, passwd);
   return newPage;
+}
+
+export async function experimentalTestSignIn(page: Page): Promise<void> {
+  const homePage = new HomePage(page);
+  await homePage.gotoUrl(PageUrl.Home.toString());
+
+  // generate this token manually via:
+  // gcloud auth application-default login --no-launch-browser
+  // gcloud auth application-default print-access-token
+
+  // gcloud auth login user-email WILL NOT WORK
+
+  const actualToken = '[redacted]';
+  const cmd = 'window.useToken(\'' + actualToken + '\')';
+  await page.evaluate(cmd);
+
+  await homePage.gotoUrl(PageUrl.Home.toString());
+  await homePage.waitForLoad();
 }
 
 /**
