@@ -3,7 +3,7 @@ import {ActivatedRouteSnapshot, DetachedRouteHandle, RouteReuseStrategy} from '@
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConfigResponse} from 'generated';
-import {CdrVersionListResponse, Cohort, ConceptSet, ErrorResponse, Profile} from 'generated/fetch';
+import {CdrVersionListResponse, Cohort, ConceptSet, Criteria, ErrorResponse, Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
@@ -29,6 +29,7 @@ export const queryParamsStore = new BehaviorSubject<any>({});
 export const routeConfigDataStore = new BehaviorSubject<any>({});
 export const serverConfigStore = new BehaviorSubject<ConfigResponse>(undefined);
 export const currentCohortCriteriaStore = new BehaviorSubject<Array<Selection>>(undefined);
+export const attributesSelectionStore = new BehaviorSubject<Criteria>(undefined);
 export const userProfileStore =
   new BehaviorSubject<{ profile: Profile, reload: Function, updateCache: Function }>({
     profile: {} as Profile,

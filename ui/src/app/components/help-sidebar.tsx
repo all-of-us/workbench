@@ -9,6 +9,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
 
+import {AttributesPageV2} from 'app/cohort-search/attributes-page-v2/attributes-page-v2.component';
 import {SelectionList} from 'app/cohort-search/selection-list/selection-list.component';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
@@ -18,10 +19,11 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {withCurrentCohortCriteria} from 'app/utils';
 import {highlightSearchTerm, reactStyles, ReactWrapperBase, withCurrentWorkspace, withUserProfile} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {NavStore} from 'app/utils/navigation';
+import {attributesSelectionStore, NavStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
-import {ParticipantCohortStatus, WorkspaceAccessLevel} from 'generated/fetch';
+import {environment} from 'environments/environment';
+import {Criteria, ParticipantCohortStatus, WorkspaceAccessLevel} from 'generated/fetch';
 import {Button, MenuItem, StyledAnchorTag} from './buttons';
 import {PopupTrigger} from './popups';
 
@@ -266,6 +268,7 @@ interface Props {
 
 interface State {
   activeIcon: string;
+  attributesSelection: Criteria;
   filteredContent: Array<any>;
   participant: ParticipantCohortStatus;
   searchTerm: string;
@@ -279,6 +282,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
       super(props);
       this.state = {
         activeIcon: props.sidebarOpen ? 'help' : undefined,
+        attributesSelection: undefined,
         filteredContent: undefined,
         participant: undefined,
         searchTerm: '',
@@ -297,6 +301,13 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
 
     componentDidMount(): void {
       this.subscription = participantStore.subscribe(participant => this.setState({participant}));
+      this.subscription.add(attributesSelectionStore.subscribe(attributesSelection => {
+        this.setState({attributesSelection});
+        if (!!attributesSelection) {
+          this.setState({activeIcon: 'criteria'});
+          this.props.setSidebarState(true);
+        }
+      }));
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
@@ -479,7 +490,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
 
     render() {
       const {criteria, helpContentKey, setSidebarState, notebookStyles, sidebarOpen} = this.props;
-      const {activeIcon, filteredContent, participant, searchTerm, tooltipId} = this.state;
+      const {activeIcon, attributesSelection, filteredContent, participant, searchTerm, tooltipId} = this.state;
       const displayContent = filteredContent !== undefined ? filteredContent : sidebarContent[helpContentKey];
 
       const contentStyle = (tab: string) => ({
@@ -553,7 +564,11 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
               {participant && <SidebarContent />}
             </div>
             <div style={contentStyle('criteria')}>
-              {criteria && <div>
+              {!!attributesSelection
+                ? <AttributesPageV2 close={() => this.setState({attributesSelection: undefined})}
+                                    node={attributesSelection}
+                />
+                : <div>
                 <div style={{display: 'block', height: 'calc(100% - 5rem)', overflow: 'auto', padding: '0.5rem 0.5rem 0rem'}}>
                   <h3 style={{...styles.sectionTitle, marginTop: 0}}>Add selected criteria to cohort</h3>
                   <SelectionList back={() => {}}/>

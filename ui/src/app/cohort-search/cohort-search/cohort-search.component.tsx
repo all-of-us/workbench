@@ -384,18 +384,7 @@ export class CohortSearch extends React.Component<Props, State> {
                   <ListSearchV2 hierarchy={this.showHierarchy}
                               searchContext={searchContext}
                               select={this.addSelection}
-                              selectedIds={selectedIds}
-                              setAttributes={this.setAttributes}/>
-                </div>
-                {/**
-                 Attributes Page - This will no longer be rendered here in the future, leaving temporarily for reference
-                 TODO Remove once AttributesPage is moved to the sidebar with RW-4595
-                 **/}
-                <div style={this.searchContentStyle('attributes')}>
-                  {!!attributesNode && <AttributesPage
-                      close={this.back}
-                      node={attributesNode}
-                      select={this.addSelection}/>}
+                              selectedIds={selectedIds}/>
                 </div>
               </div>
             </React.Fragment>}
