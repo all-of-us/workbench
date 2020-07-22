@@ -1,8 +1,8 @@
 const url = require('url');
 const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36';
 
-const navTimeOut = parseInt(process.env.NAVIGATION_TIMEOUT, 10) || 90000;
-const timeOut = parseInt(process.env.TIMEOUT, 10) || 90000;
+const navTimeOut = parseInt(process.env.PUPPETEER_NAVIGATION_TIMEOUT, 10) || 90000;
+const timeOut = parseInt(process.env.PUPPETEER_TIMEOUT, 10) || 90000;
 
 
 /**
