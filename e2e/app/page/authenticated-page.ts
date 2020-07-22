@@ -19,13 +19,8 @@ export default abstract class AuthenticatedPage extends BasePage {
   }
 
   protected async isSignedIn(): Promise<boolean> {
-    try {
-      await this.page.waitForSelector(SELECTOR.signedInIndicator);
-      return true;
-    } catch (err) {
-      console.log(`AuthenticatedPage isSignedIn() encountered ${err}`);
-      return false;
-    }
+    return this.page.waitForSelector(SELECTOR.signedInIndicator)
+      .then( (elemt) => elemt.asElement() !== null);
   }
 
   /**
@@ -38,15 +33,18 @@ export default abstract class AuthenticatedPage extends BasePage {
    * Wait until current page is loaded and without spinners spinning.
    */
   async waitForLoad(): Promise<this> {
-    const isSignedIn = await this.isSignedIn();
-    const isPageLoaded = await this.isLoaded();
-    if (!isSignedIn || !isPageLoaded) {
+    try {
+      await Promise.all([
+        this.isSignedIn(),
+        this.isLoaded(),
+      ]);
+      return this;
+    } catch (e) {
       await savePageToFile(this.page);
       await takeScreenshot(this.page);
       const title = await this.page.title();
-      throw new Error(`${title}: page not loaded correctly.`);
+      throw new Error(`"${title}" page waitForLoad() encountered ${e}.`);
     }
-    return this;
   }
 
   /**
