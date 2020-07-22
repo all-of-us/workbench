@@ -107,19 +107,60 @@ public class RandomizeVcf extends VariantWalker {
   @VisibleForTesting
   protected static List<Allele> randomizeAlleles(
       VariantContext variantContext, List<Allele> genotypeAlleles) {
-    // The alleles list on the VariantContext has first the reference and then all possible
-    // alternates.
-    // For each genotype, we pick from among those possible alternates (or we put a no-call.)
-    // We don't want to just stick no-calls everywhere, which we would if no-call was given equal
-    // chance of occurring to all the other alleles, so we only use a no-call if the original had a
-    // no-call.
-    List<Allele> possibleAlleles = new ArrayList<>(variantContext.getAlleles());
-    if (genotypeAlleles.contains(Allele.NO_CALL)) {
-      possibleAlleles.add(Allele.NO_CALL);
+    /*
+     * NA12878 was run on the All of Us genotyping array in order to get an example of a VCF run
+     * on this array. Here are the genotypes from that run and how often they appear:
+     * 27629    ./.
+     * 1518493  0/0
+     * 106755   0/1
+     * 117349   1/0
+     * 138615   1/1
+     * 1123     2/2
+     * 1909964  total
+     *
+     * Percentage wise, this comes out to:
+     * .0145 ./.
+     * .7950 0/0
+     * .0559 0/1
+     * .0614 1/0
+     * .0726 1/1
+     * .0006 2/2
+     *
+     * We're going to pick from those GTs, weighted by frequency of appearance.
+     */
+    List<Allele> alleles = new ArrayList<>();
+    double genotypeTypeIndex = random.nextDouble();
+    if (genotypeTypeIndex < .0145) {
+      // double no-call
+      return alleles;
+    } else if (genotypeTypeIndex < .8095) {
+      // homref
+      alleles.add(variantContext.getReference());
+      alleles.add(variantContext.getReference());
+    } else if (genotypeTypeIndex < .8654) {
+      // 0/1 het
+      alleles.add(variantContext.getReference());
+      alleles.add(variantContext.getAlternateAllele(0));
+    } else if (genotypeTypeIndex < .9268) {
+      // 1/0 het
+      alleles.add(variantContext.getAlternateAllele(0));
+      alleles.add(variantContext.getReference());
+    } else if (
+        genotypeTypeIndex < .9994
+        || (
+            genotypeTypeIndex >= .9994
+            && variantContext.getAlternateAlleles().size() == 1
+        )
+    ) {
+      // homvar
+      alleles.add(variantContext.getAlternateAllele(0));
+      alleles.add(variantContext.getAlternateAllele(0));
+    } else {
+      // homvar, but the rarer alt
+      alleles.add(variantContext.getAlternateAllele(1));
+      alleles.add(variantContext.getAlternateAllele(1));
     }
-    return genotypeAlleles.stream()
-        .map(allele -> possibleAlleles.get(random.nextInt(possibleAlleles.size())))
-        .collect(Collectors.toList());
+    return alleles;
   }
 
   private static String appendSuffixToSampleName(String sampleName) {
