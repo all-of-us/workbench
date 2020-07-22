@@ -8,7 +8,7 @@ import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {AdminUserBypass} from 'app/pages/admin/admin-user-bypass';
 import {authDomainApi, profileApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
-import {navigate, serverConfigStore} from 'app/utils/navigation';
+import {navigate, navigateByUrl, serverConfigStore} from 'app/utils/navigation';
 import {
   Profile,
 } from 'generated/fetch';
@@ -133,17 +133,18 @@ export const AdminUsers = withUserProfile()(class extends React.Component<
   }
 
   convertProfilesToFields(profiles: Profile[]) {
-
+    const usernameWithoutDomain = p => p.username.substring(0, p.username.indexOf('@'));
     return profiles.map(p => ({
       ...p,
-      name: <a onClick={() => navigate(['admin', 'users', p.username.substring(0, p.username.indexOf('@'))])}>
+      name: <a onClick={() => navigate(['admin', 'users', usernameWithoutDomain(p)])}>
         {p.familyName + ', ' + p.givenName}
       </a>,
       betaAccessRequestTime: this.convertDate(p.betaAccessRequestTime),
       bypass: <AdminUserBypass profile={p}/>, disabled: p.disabled.toString(),
       userLockout: <LockoutButton disabled={this.state.reloadingProfile === p}
         profileDisabled={p.disabled}
-        onClick={() => this.updateUserDisabledStatus(!p.disabled, p)}/>
+        onClick={() => this.updateUserDisabledStatus(!p.disabled, p)}/>,
+      audit: <a href={`/admin/user-audit/${usernameWithoutDomain(p)}`}>🕵️</a>
     }));
   }
 
@@ -167,6 +168,8 @@ export const AdminUsers = withUserProfile()(class extends React.Component<
           <Column field='userLockout' header='User Lockout'
                   bodyStyle={{...styles.colStyle, width: '10%'}} headerStyle={{width: '10%'}}/>
           <Column field='bypass' header='Bypass'
+                  bodyStyle={{...styles.colStyle, width: '10%'}} headerStyle={{width: '10%'}}/>
+          <Column field='audit' header='Audit'
                   bodyStyle={{...styles.colStyle, width: '10%'}} headerStyle={{width: '10%'}}/>
         </DataTable> :
         <div>
