@@ -1,14 +1,81 @@
 import {ElementRef} from '@angular/core';
+import {environment} from 'environments/environment';
+import {ZendeskEnv} from 'environments/environment-type';
+
+interface ZendeskUrls {
+  billing: string;
+  communityForum: string;
+  createBillingAccount: string;
+  dataDictionary: string;
+  faq: string;
+  gettingStarted: string;
+  helpCenter: string;
+  tableOfContents: string;
+  researchPurpose: string;
+}
+
+const zendeskConfigs = {
+  [ZendeskEnv.Prod]: {
+    baseUrl: 'https://aousupporthelp.zendesk.com/hc',
+    widgetKey: '5a7d70b9-37f9-443b-8d0e-c3bd3c2a55e3'
+  },
+  [ZendeskEnv.Sandbox]: {
+    baseUrl: 'https://aousupporthelp1580753096.zendesk.com/hc',
+    widgetKey: 'df0a2e39-f8a8-482b-baf5-af82e14d38f9'
+  }
+};
+
+/**
+ * A set of support URLs for the current environment. These need to be
+ * parameterized per environment since the Zendesk support content IDs are not
+ * stable across the prod and sandbox Zendesk instances.
+ */
+export const supportUrls: ZendeskUrls = ((env) => {
+  const baseUrl = zendeskConfigs[env].baseUrl;
+
+  const article = (id) => `${baseUrl}/articles/${id}`;
+  const category = (id) => `${baseUrl}/categories/${id}`;
+  const section = (id) => `${baseUrl}/sections/${id}`;
+  const commonUrls = {
+    // This link in particular needs the "en-us" infix. The other urls will
+    // redirect according to detected locale, which is preferred.
+    communityForum: `${baseUrl}/en-us/community/topics`,
+    helpCenter: baseUrl
+  };
+  const urls: {[key: string]: ZendeskUrls} = {
+    [ZendeskEnv.Prod]: {
+      ...commonUrls,
+      billing: section('360008099991'),
+      createBillingAccount: article('360039539411'),
+      dataDictionary: article('360033200232'),
+      faq: category('360002157532'),
+      gettingStarted: category('360002157352'),
+      tableOfContents: category('360002625291'),
+      researchPurpose: article('360042673211'),
+    },
+    [ZendeskEnv.Sandbox]: {
+      ...commonUrls,
+      billing: section('360009142932'),
+      createBillingAccount: article('360044792211'),
+      dataDictionary: article('360044793611'),
+      faq: category('360003453651'),
+      gettingStarted: category('360003430652'),
+      tableOfContents: category('360003430672'),
+      researchPurpose: article('360044334652'),
+    }
+  };
+  return urls[env];
+})(environment.zendeskEnv);
 
 // ideally this initialization would be done by including <script> tags in
 // the component template html file.  However, Angular does not allow this.
 // TODO: investigate whether this will be possible after we migrate to React
 
-export function initializeZendeskWidget(
-  elementRef: ElementRef, accessKey: string): void {
+export function initializeZendeskWidget(elementRef: ElementRef): void {
+  const accessKey = zendeskConfigs[environment.zendeskEnv].widgetKey;
+
   // This external script loads the Zendesk web widget, connected to our
-  // production Zendesk account. If we ever get a test Zendesk account, the key
-  // should be templated in using an environment variable.
+  // production Zendesk account.
   const s = document.createElement('script');
   s.type = 'text/javascript';
   s.id = 'ze-snippet';

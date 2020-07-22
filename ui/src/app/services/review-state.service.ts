@@ -98,7 +98,6 @@ export const cohortReviewStore = new BehaviorSubject<CohortReview>(undefined);
 export const visitsFilterOptions = new BehaviorSubject<Array<any>>(null);
 export const filterStateStore = new BehaviorSubject<any>(JSON.parse(JSON.stringify(initialFilterState)));
 export const vocabOptions = new BehaviorSubject<any>(null);
-export const multiOptions = new BehaviorSubject<any>(null);
 export const participantStore = new BehaviorSubject<ParticipantCohortStatus>(null);
 
 export function getVocabOptions(workspaceNamespace: string, workspaceId: string, cohortReviewId: number) {

@@ -1402,7 +1402,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             DomainType.PERSON.toString(), ImmutableList.of(demo), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 2);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 3);
   }
 
   @Test

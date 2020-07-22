@@ -3,8 +3,7 @@ import {ClrIcon} from 'app/components/icons';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {hasRegisteredAccessFetch, reactStyles} from 'app/utils';
 import {navigate, navigateSignOut, signInStore} from 'app/utils/navigation';
-import {openZendeskWidget} from 'app/utils/zendesk';
-import {environment} from 'environments/environment';
+import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {Authority, Profile} from 'generated/fetch';
 import * as React from 'react';
 
@@ -238,7 +237,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
   }
 
   redirectToZendesk() {
-    window.open(environment.zendeskHelpCenterUrl, '_blank');
+    window.open(supportUrls.helpCenter, '_blank');
   }
 
   openContactWidget() {

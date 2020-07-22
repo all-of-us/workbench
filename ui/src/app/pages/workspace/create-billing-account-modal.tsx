@@ -6,7 +6,7 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TextColumn} from 'app/components/text-column';
 import colors from 'app/styles/colors';
 import {withUserProfile} from 'app/utils';
-import {environment} from 'environments/environment';
+import {supportUrls} from 'app/utils/zendesk';
 import {Profile} from 'generated/fetch';
 import * as React from 'react';
 
@@ -34,7 +34,7 @@ export const CreateBillingAccountModal = withUserProfile() (
 
             <Button type='primary'
                     style={{fontWeight: 400, padding: '0 18px', height: '40px'}}
-                    onClick={() => window.open(environment.createBillingAccountHelpUrl, '_blank')}>
+                    onClick={() => window.open(supportUrls.createBillingAccount, '_blank')}>
               Read Instructions
             </Button>
           </FlexColumn>

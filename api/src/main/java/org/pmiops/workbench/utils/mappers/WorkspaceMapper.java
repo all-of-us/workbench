@@ -61,10 +61,14 @@ public interface WorkspaceMapper {
   @Mapping(target = "researchPurpose", source = "dbWorkspace")
   Workspace toApiWorkspace(DbWorkspace dbWorkspace);
 
-  @Mapping(target = "workspace", source = "dbWorkspace")
-  @Mapping(target = "accessLevel", source = "firecloudWorkspaceResponse")
-  WorkspaceResponse toApiWorkspaceResponse(
-      DbWorkspace dbWorkspace, FirecloudWorkspaceResponse firecloudWorkspaceResponse);
+  WorkspaceResponse toApiWorkspaceResponse(Workspace workspace, String accessLevel);
+
+  default WorkspaceResponse toApiWorkspaceResponse(
+      DbWorkspace dbWorkspace, FirecloudWorkspaceResponse firecloudWorkspaceResponse) {
+    return toApiWorkspaceResponse(
+        toApiWorkspace(dbWorkspace, firecloudWorkspaceResponse.getWorkspace()),
+        firecloudWorkspaceResponse.getAccessLevel());
+  };
 
   @Mapping(target = "timeReviewed", ignore = true)
   @Mapping(target = "populationDetails", source = "specificPopulationsEnum")

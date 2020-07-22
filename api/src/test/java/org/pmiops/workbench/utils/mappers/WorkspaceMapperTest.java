@@ -25,13 +25,16 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.Workspace;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.model.WorkspaceResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -173,6 +176,24 @@ public class WorkspaceMapperTest {
 
     assertThat(ws.getCreationTime()).isEqualTo(DB_CREATION_TIMESTAMP.toInstant().toEpochMilli());
     assertThat(ws.getPublished()).isEqualTo(sourceDbWorkspace.getPublished());
+  }
+
+  @Test
+  public void testConvertsFirecloudResponseToApiResponse() {
+    final WorkspaceResponse resp =
+        workspaceMapper.toApiWorkspaceResponse(
+            sourceDbWorkspace,
+            new FirecloudWorkspaceResponse()
+                .workspace(sourceFirecloudWorkspace)
+                .accessLevel("PROJECT_OWNER"));
+
+    assertThat(resp.getAccessLevel()).isEqualTo(WorkspaceAccessLevel.OWNER);
+
+    // Verify data came from the DB workspace.
+    assertThat(resp.getWorkspace().getBillingAccountName()).isEqualTo(BILLING_ACCOUNT_NAME);
+
+    // Verify data came from the Firecloud workspace.
+    assertThat(resp.getWorkspace().getGoogleBucketName()).isEqualTo(FIRECLOUD_BUCKET_NAME);
   }
 
   private void assertResearchPurposeMatches(ResearchPurpose rp) {

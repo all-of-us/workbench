@@ -22,6 +22,7 @@ import colors, {addOpacity} from 'app/styles/colors';
 import {hasRegisteredAccessFetch, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
+import {supportUrls} from 'app/utils/zendesk';
 import {
   Profile,
 } from 'generated/fetch';
@@ -368,7 +369,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
                                         the left hand panel to browse through example workspaces.
                                       </CustomBulletListItem>
                                       <CustomBulletListItem bullet='→'>
-                                        Browse through our <StyledAnchorTag href='https://aousupporthelp.zendesk.com/hc/en-us'
+                                        Browse through our <StyledAnchorTag href={supportUrls.helpCenter}
                                           target='_blank'>support materials</StyledAnchorTag> and forum topics.
                                       </CustomBulletListItem>
                                     </CustomBulletList>

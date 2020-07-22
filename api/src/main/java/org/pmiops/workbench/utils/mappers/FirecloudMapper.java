@@ -2,7 +2,6 @@ package org.pmiops.workbench.utils.mappers;
 
 import org.mapstruct.Mapper;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.ClusterStatus;
 import org.pmiops.workbench.model.ListClusterResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -23,12 +22,11 @@ public interface FirecloudMapper {
     return WorkspaceAccessLevel.fromValue(acl.getAccessLevel());
   }
 
-  default WorkspaceAccessLevel fcWorkspaceResponseToApiWorkspaceAccessLevel(
-      FirecloudWorkspaceResponse fcResponse) {
-    if (fcResponse.getAccessLevel().equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
+  default WorkspaceAccessLevel fcToApiWorkspaceAccessLevel(String accessLevel) {
+    if (WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL.equals(accessLevel)) {
       return WorkspaceAccessLevel.OWNER;
     } else {
-      return WorkspaceAccessLevel.fromValue(fcResponse.getAccessLevel());
+      return WorkspaceAccessLevel.fromValue(accessLevel);
     }
   }
 }
