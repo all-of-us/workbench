@@ -98,10 +98,10 @@ public class RandomizeVcf extends VariantWalker {
 
   @VisibleForTesting
   protected Genotype randomizeGenotype(VariantContext variantContext, Genotype genotype) {
-    GenotypeBuilder genotypeBuilder = new GenotypeBuilder();
-    genotypeBuilder.copy(genotype);
-    genotypeBuilder.name(appendSuffixToSampleName(genotype.getSampleName()));
-    genotypeBuilder.alleles(randomizeAlleles(variantContext, genotype.getAlleles()));
+    GenotypeBuilder genotypeBuilder = new GenotypeBuilder()
+      .copy(genotype)
+      .name(appendSuffixToSampleName(genotype.getSampleName()))
+      .alleles(randomizeAlleles(variantContext, genotype.getAlleles()));
     return genotypeBuilder.make();
   }
 
