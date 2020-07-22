@@ -21,7 +21,7 @@ constructor(
     private val clock: Clock,
     @Qualifier("ACTION_ID") private val actionIdProvider: Provider<String>
 ) : FreeTierAuditor {
-    override fun fireFreeTierDollarQuotaAction(userId: Long, previousDollarQuota: Double?, newDollarQuota: Double?) {
+    override fun fireFreeTierDollarQuotaAction(targetUserId: Long, previousDollarQuota: Double?, newDollarQuota: Double?) {
         actionAuditService.send(ActionAuditEvent(
                 timestamp = clock.millis(),
                 actionId = actionIdProvider.get(),
@@ -30,7 +30,7 @@ constructor(
                 agentIdMaybe = userProvider.get().userId,
                 agentEmailMaybe = userProvider.get().username,
                 targetType = TargetType.USER,
-                targetIdMaybe = userId,
+                targetIdMaybe = targetUserId,
                 targetPropertyMaybe = ProfileTargetProperty.FREE_TIER_DOLLAR_QUOTA.name,
                 previousValueMaybe = previousDollarQuota?.toString(),
                 newValueMaybe = newDollarQuota?.toString()))

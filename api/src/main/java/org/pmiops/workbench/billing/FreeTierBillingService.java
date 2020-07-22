@@ -323,6 +323,7 @@ public class FreeTierBillingService {
 
     freeTierAuditor.fireFreeTierDollarQuotaAction(
         user.getUserId(), previousLimitMaybe, dollarLimit);
+
     return underLimit;
   }
 }

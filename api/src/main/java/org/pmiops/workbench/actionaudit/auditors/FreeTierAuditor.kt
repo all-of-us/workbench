@@ -1,5 +1,5 @@
 package org.pmiops.workbench.actionaudit.auditors
 
 interface FreeTierAuditor {
-    fun fireFreeTierDollarQuotaAction(userId: Long, previousDollarQuota: Double?, newDollarQuota: Double?)
+    fun fireFreeTierDollarQuotaAction(targetUserId: Long, previousDollarQuota: Double?, newDollarQuota: Double?)
 }
