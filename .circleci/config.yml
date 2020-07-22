@@ -321,15 +321,17 @@ jobs:
           #   src/test/java/org/pmiops/*********/monitoring/LogsBasedMetricsServiceTest.java src/test/java/org/pmiops/*********/monitoring/MonitoringServiceTest.java
           # Example of Gradle command after formatting:
           #   gradle test --tests org.pmiops.*********.monitoring.LogsBasedMetricsServiceTest --tests org.pmiops.*********.monitoring.MonitoringServiceTest
+          # command: |
+          #   CLASSNAMES=$(circleci tests glob "src/test/java/**/*Test.java" "src/test/java/**/*Test.kt" \
+          #     | cut -c 1- \
+          #     | sed 's@src/test/java/@@' \
+          #     | sed 's@/@.@g' \
+          #     | sed 's/\.[^.]*$//' \
+          #     | circleci tests split --split-by=timings --timings-type=classname --index=$CIRCLE_NODE_INDEX)
+          #   GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) print "--tests", $i}')
+          #   gradle test $GRADLE_ARGS
           command: |
-            CLASSNAMES=$(circleci tests glob "src/test/java/**/*Test.java" "src/test/java/**/*Test.kt" \
-              | cut -c 1- \
-              | sed 's@src/test/java/@@' \
-              | sed 's@/@.@g' \
-              | sed 's/\.[^.]*$//' \
-              | circleci tests split --split-by=timings --timings-type=classname --index=$CIRCLE_NODE_INDEX)
-            GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) print "--tests", $i}')
-            gradle test $GRADLE_ARGS
+            gradle test
       - run:
           # Lint last; it's more important to surface test failures early.
           name: Java linting
