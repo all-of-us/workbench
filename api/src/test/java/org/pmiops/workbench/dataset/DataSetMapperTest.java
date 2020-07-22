@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,10 +39,12 @@ import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
+import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -54,7 +57,8 @@ public class DataSetMapperTest {
   @Autowired private DataSetMapper dataSetMapper;
   @Autowired private ConceptSetDao mockConceptSetDao;
   @Autowired private CohortDao mockCohortDao;
-  @Autowired private Clock clock;
+  private static final Instant NOW = Instant.now();
+  private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
 
   @TestConfiguration
   @Import({
@@ -66,13 +70,19 @@ public class DataSetMapperTest {
     CohortMapperImpl.class
   })
   @MockBean({
+    Clock.class,
     ConceptSetDao.class,
     ConceptBigQueryService.class,
     ConceptService.class,
     CohortDao.class,
     UserDao.class
   })
-  static class Configuration {}
+  static class Configuration {
+    @Bean
+    Clock clock() {
+      return CLOCK;
+    }
+  }
 
   @Before
   public void setUp() {
@@ -144,7 +154,7 @@ public class DataSetMapperTest {
     DataSetRequest request = new DataSetRequest();
     request.setName("New Name");
     request.setPrePackagedConceptSet(PrePackagedConceptSetEnum.SURVEY);
-    final DbDataset toDataSet = dataSetMapper.dataSetRequestToDb(request, dbDataset, clock);
+    final DbDataset toDataSet = dataSetMapper.dataSetRequestToDb(request, dbDataset, CLOCK);
     assertThat(toDataSet.getName()).isEqualTo("New Name");
     assertThat(toDataSet.getCohortIds()).isEqualTo(dbDataset.getCohortIds());
     assertThat(toDataSet.getIncludesAllParticipants())
@@ -156,8 +166,6 @@ public class DataSetMapperTest {
     assertThat(toDataSet.getDataSetId()).isEqualTo(dbDataset.getDataSetId());
     assertThat(toDataSet.getCreationTime()).isEqualTo(dbDataset.getCreationTime());
     assertThat(toDataSet.getCreatorId()).isEqualTo(dbDataset.getCreatorId());
-    assertThat(toDataSet.getLastModifiedTime())
-        .isAtMost(new Timestamp(clock.instant().toEpochMilli()));
   }
 
   @Test
@@ -176,7 +184,7 @@ public class DataSetMapperTest {
     request.setIncludesAllParticipants(false);
     request.setPrePackagedConceptSet(PrePackagedConceptSetEnum.NONE);
     request.setDomainValuePairs(ImmutableList.of(domainValuePair));
-    final DbDataset toDataSet = dataSetMapper.dataSetRequestToDb(request, dbDataset, clock);
+    final DbDataset toDataSet = dataSetMapper.dataSetRequestToDb(request, dbDataset, CLOCK);
     assertThat(toDataSet.getName()).isEqualTo("New Name");
     assertThat(toDataSet.getCohortIds()).isEqualTo(cohortIds);
     assertThat(toDataSet.getIncludesAllParticipants()).isFalse();
@@ -184,9 +192,6 @@ public class DataSetMapperTest {
     assertThat(toDataSet.getPrePackagedConceptSet()).isEqualTo((short) 0);
     assertThat(toDataSet.getValues().get(0).getDomainEnum()).isEqualTo(Domain.PERSON);
     assertThat(toDataSet.getInvalid()).isFalse();
-    assertThat(toDataSet.getCreationTime()).isAtMost(new Timestamp(clock.instant().toEpochMilli()));
-    assertThat(toDataSet.getLastModifiedTime())
-        .isAtMost(new Timestamp(clock.instant().toEpochMilli()));
   }
 
   private void assertDbModelToClient(DataSet dataSet, DbDataset dbDataset) {
