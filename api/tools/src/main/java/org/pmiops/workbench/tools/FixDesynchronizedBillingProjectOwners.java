@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -91,8 +92,27 @@ public class FixDesynchronizedBillingProjectOwners {
       throws ApiException {
     int ownersRemoved = 0;
     int ownersAdded = 0;
-    for (FirecloudWorkspaceResponse resp :
-        workspacesApi.listWorkspaces(FIRECLOUD_LIST_WORKSPACES_REQUIRED_FIELDS)) {
+
+    List<FirecloudWorkspaceResponse> workspaces =
+        workspacesApi.listWorkspaces(FIRECLOUD_LIST_WORKSPACES_REQUIRED_FIELDS);
+    log.info(String.format("found %d workspaces", workspaces.size()));
+
+    // Non-1PPW workspaces still exist and need to be filtered out - this script depends on the
+    // assumption that workspace ACLs are synchronized to project ACLs, which doesn't hold when
+    // there are multiple workspaces per project.
+    Set<String> singleWorkspaceProjects =
+        workspaces.stream()
+            // Count entries by billing project ID.
+            .map(w -> w.getWorkspace().getNamespace())
+            .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+            .entrySet()
+            .stream()
+            // Only take projects which conform to 1PPW.
+            .filter(e -> e.getValue() == 1)
+            .map(Entry::getKey)
+            .collect(Collectors.toSet());
+
+    for (FirecloudWorkspaceResponse resp : workspaces) {
       FirecloudWorkspace w = resp.getWorkspace();
       if (!billingProjectIds.isEmpty() && !billingProjectIds.contains(w.getNamespace())) {
         continue;
@@ -104,6 +124,11 @@ public class FixDesynchronizedBillingProjectOwners {
             String.format(
                 "service account has '%s' access to workspace '%s'; skipping",
                 resp.getAccessLevel(), id));
+        continue;
+      }
+
+      if (!singleWorkspaceProjects.contains(w.getNamespace())) {
+        log.info(String.format("skipping workspace '%s', doesn't conform to 1PPW", id));
         continue;
       }
 

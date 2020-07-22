@@ -1327,6 +1327,7 @@ def fix_desynchronized_billing_project_owners(cmd_name, *args)
       ->(opts, v) { opts.billing_project_ids = v},
       "Optional billing projects IDs to update. By default all projects are considered")
 
+  op.opts.billing_project_ids = ''
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate()
@@ -1340,8 +1341,7 @@ def fix_desynchronized_billing_project_owners(cmd_name, *args)
   flags = ([
       ["--fc-base-url", fc_config["baseUrl"]],
       ["--researcher-domain", domain]
-    ] + (op.opts.billing_project_ids ?
-         ["--billing-project-ids", op.opts.billing_project_ids] : [])
+    ] + op.opts.billing_project_ids.split(',').map{ |bp| ["--billing-project-ids", bp] }
     ).map { |kv| "#{kv[0]}=#{kv[1]}" }
   if op.opts.dry_run
     flags += ["--dry-run"]
