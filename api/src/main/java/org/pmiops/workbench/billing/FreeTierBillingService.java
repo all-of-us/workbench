@@ -108,7 +108,7 @@ public class FreeTierBillingService {
 
     final Set<DbUser> expiredUsers =
         userCosts.entrySet().stream()
-            .filter(e -> expiredByCost(e.getKey(), e.getValue()))
+            .filter(e -> costAboveLimit(e.getKey(), e.getValue()))
             .map(Entry::getKey)
             .collect(Collectors.toSet());
 
@@ -138,7 +138,7 @@ public class FreeTierBillingService {
     return DoubleMath.fuzzyCompare(a, b, COST_FRACTION_TOLERANCE);
   }
 
-  private boolean expiredByCost(final DbUser user, final double currentCost) {
+  private boolean costAboveLimit(final DbUser user, final double currentCost) {
     return compareCosts(currentCost, getUserFreeTierDollarLimit(user)) > 0;
   }
 
@@ -282,7 +282,7 @@ public class FreeTierBillingService {
    */
   public boolean userHasRemainingFreeTierCredits(DbUser user) {
     final double usage = Optional.ofNullable(getCachedFreeTierUsage(user)).orElse(0.0);
-    return compareCosts(getUserFreeTierDollarLimit(user), usage) > 0;
+    return !costAboveLimit(user, usage);
   }
 
   /**
