@@ -19,7 +19,6 @@ import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.EgressEvent;
@@ -179,9 +178,8 @@ public class EgressEventServiceImpl implements EgressEventService {
    */
   @Transient
   public String getAdminDescription(DbUser dbUser) {
-    final String institution = institutionService.getByUser(dbUser)
-        .map(Institution::getDisplayName)
-        .orElse("not found");
+    final String institution =
+        institutionService.getByUser(dbUser).map(Institution::getDisplayName).orElse("not found");
     return String.format(
         "%s %s - Username: %s\n" + "user_id: %d, Institution: %s, Account Age: %d days",
         dbUser.getGivenName(),

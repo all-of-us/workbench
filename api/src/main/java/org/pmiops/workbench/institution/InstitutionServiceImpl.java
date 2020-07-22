@@ -277,7 +277,8 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   @Override
   public Optional<Institution> getByUser(DbUser user) {
-    return verifiedInstitutionalAffiliationDao.findFirstByUser(user)
+    return verifiedInstitutionalAffiliationDao
+        .findFirstByUser(user)
         .map(DbVerifiedInstitutionalAffiliation::getInstitution)
         .map(dbi -> institutionMapper.dbToModel(dbi, this));
   }
