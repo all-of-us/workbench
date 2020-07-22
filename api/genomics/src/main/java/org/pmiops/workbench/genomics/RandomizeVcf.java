@@ -73,8 +73,7 @@ public class RandomizeVcf extends VariantWalker {
   @VisibleForTesting
   protected VariantContext randomizeVariant(VariantContext variant) {
     // This initializes most of the VariantContextBuilder fields to what they were in the original
-    // variant.
-    // We just want to change the genotypes and quality score.
+    // variant. We just want to change the genotypes and quality score.
     VariantContextBuilder variantContextBuilder = new VariantContextBuilder(variant);
     variantContextBuilder.alleles(variant.getAlleles());
 
