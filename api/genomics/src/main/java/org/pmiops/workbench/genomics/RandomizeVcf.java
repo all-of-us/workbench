@@ -35,9 +35,9 @@ public class RandomizeVcf extends VariantWalker {
   protected File outputVcf;
 
   @Argument(doc = "Sample name suffix.", fullName = "SAMPLE_NAME_SUFFIX", shortName = "S")
-  protected static String sampleNameSuffix;
+  protected String sampleNameSuffix;
 
-  static Random random = new Random();
+  private Random random = new Random();
 
   private VariantContextWriter vcfWriter;
 
@@ -55,7 +55,7 @@ public class RandomizeVcf extends VariantWalker {
     final VCFHeader inputHeader = getHeaderForVariants();
     final List<String> newSampleNames =
         inputHeader.getSampleNamesInOrder().stream()
-            .map(RandomizeVcf::appendSuffixToSampleName)
+            .map(this::appendSuffixToSampleName)
             .collect(Collectors.toList());
     final VCFHeader outputHeader =
         new VCFHeader(inputHeader.getMetaDataInInputOrder(), newSampleNames);
@@ -71,7 +71,7 @@ public class RandomizeVcf extends VariantWalker {
   }
 
   @VisibleForTesting
-  protected static VariantContext randomizeVariant(VariantContext variant) {
+  protected VariantContext randomizeVariant(VariantContext variant) {
     // This initializes most of the VariantContextBuilder fields to what they were in the original
     // variant.
     // We just want to change the genotypes and quality score.
@@ -96,7 +96,8 @@ public class RandomizeVcf extends VariantWalker {
     return variantContextBuilder.make();
   }
 
-  protected static Genotype randomizeGenotype(VariantContext variantContext, Genotype genotype) {
+  @VisibleForTesting
+  protected Genotype randomizeGenotype(VariantContext variantContext, Genotype genotype) {
     GenotypeBuilder genotypeBuilder = new GenotypeBuilder();
     genotypeBuilder.copy(genotype);
     genotypeBuilder.name(appendSuffixToSampleName(genotype.getSampleName()));
@@ -105,7 +106,7 @@ public class RandomizeVcf extends VariantWalker {
   }
 
   @VisibleForTesting
-  protected static List<Allele> randomizeAlleles(
+  protected List<Allele> randomizeAlleles(
       VariantContext variantContext, List<Allele> genotypeAlleles) {
     /*
      * NA12878 was run on the All of Us genotyping array in order to get an example of a VCF run
@@ -158,7 +159,7 @@ public class RandomizeVcf extends VariantWalker {
     return alleles;
   }
 
-  private static String appendSuffixToSampleName(String sampleName) {
-    return sampleName + "." + sampleNameSuffix.trim();
+  private String appendSuffixToSampleName(String sampleName) {
+    return sampleName + "." + this.sampleNameSuffix.trim();
   }
 }

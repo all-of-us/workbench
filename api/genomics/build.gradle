@@ -11,7 +11,7 @@ dependencies {
     compile "com.github.broadinstitute:picard:2.22.8"
     compile "com.github.samtools:htsjdk:2.1.1"
     compile "com.google.guava:guava:26.0-jre"
-    testCompile 'com.google.truth:truth:0.42'
+    testCompile "com.google.truth:truth:0.42"
 }
 
 task randomizeVcf(type: JavaExec) {
