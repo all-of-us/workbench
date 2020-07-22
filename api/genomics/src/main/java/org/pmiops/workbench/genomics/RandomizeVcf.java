@@ -145,13 +145,8 @@ public class RandomizeVcf extends VariantWalker {
       // 1/0 het
       alleles.add(variantContext.getAlternateAllele(0));
       alleles.add(variantContext.getReference());
-    } else if (
-        genotypeTypeIndex < .9994
-        || (
-            genotypeTypeIndex >= .9994
-            && variantContext.getAlternateAlleles().size() == 1
-        )
-    ) {
+    } else if (genotypeTypeIndex < .9994
+        || (genotypeTypeIndex >= .9994 && variantContext.getAlternateAlleles().size() == 1)) {
       // homvar
       alleles.add(variantContext.getAlternateAllele(0));
       alleles.add(variantContext.getAlternateAllele(0));
