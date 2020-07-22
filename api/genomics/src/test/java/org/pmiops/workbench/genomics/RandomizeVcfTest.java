@@ -26,21 +26,24 @@ public class RandomizeVcfTest {
   public void TestRandomizeVariant() {
     VariantContext randomizedVariant = randomizeVcf.randomizeVariant(variantContext);
     // For each sample/GT in the variant...
-    randomizedVariant.getGenotypes().forEach(
-        genotype -> {
-          // For each allele in the genotype...
-          genotype.getAlleles().forEach(
-              allele -> {
-                // ...is that allele from the bank of possible alleles at that position? ignoring
-                // ref/var
-                assertThat(
-                    variantContext.getAlleles().stream()
-                        .anyMatch(vcAllele -> vcAllele.basesMatch(allele))
-                ).isTrue();
-              }
-          );
-        }
-    );
+    randomizedVariant
+        .getGenotypes()
+        .forEach(
+            genotype -> {
+              // For each allele in the genotype...
+              genotype
+                  .getAlleles()
+                  .forEach(
+                      allele -> {
+                        // ...is that allele from the bank of possible alleles at that position?
+                        // ignoring
+                        // ref/var
+                        assertThat(
+                                variantContext.getAlleles().stream()
+                                    .anyMatch(vcAllele -> vcAllele.basesMatch(allele)))
+                            .isTrue();
+                      });
+            });
   }
 
   @Test
