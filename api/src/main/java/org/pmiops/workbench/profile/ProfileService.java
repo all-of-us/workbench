@@ -401,7 +401,7 @@ public class ProfileService {
    * @return true if there are difference between the Profiles
    */
   private boolean fieldChanged(Diff diff, String field) {
-    return !getChangesWithPrefix(diff, field).isEmpty();
+    return getChangesWithPrefix(diff, field).size() > 0;
   }
 
   /**
