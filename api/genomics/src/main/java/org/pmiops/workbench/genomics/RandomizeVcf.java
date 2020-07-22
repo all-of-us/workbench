@@ -159,6 +159,6 @@ public class RandomizeVcf extends VariantWalker {
   }
 
   private static String appendSuffixToSampleName(String sampleName) {
-    return sampleName + "." + sampleNameSuffix;
+    return sampleName + "." + sampleNameSuffix.trim();
   }
 }
