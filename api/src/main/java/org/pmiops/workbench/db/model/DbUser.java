@@ -21,6 +21,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.OrderColumn;
@@ -112,6 +113,7 @@ public class DbUser {
   private Timestamp twoFactorAuthBypassTime;
   private DbDemographicSurvey demographicSurvey;
   private DbAddress address;
+  private DbVerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -335,9 +337,7 @@ public class DbUser {
     }
     return this.degrees.stream()
         .map(
-            (degreeObject) -> {
-              return DbStorageEnums.degreeFromStorage(degreeObject);
-            })
+            DbStorageEnums::degreeFromStorage)
         .collect(Collectors.toList());
   }
 
@@ -345,9 +345,7 @@ public class DbUser {
     this.degrees =
         degreeList.stream()
             .map(
-                (degree) -> {
-                  return DbStorageEnums.degreeToStorage(degree);
-                })
+                DbStorageEnums::degreeToStorage)
             .collect(Collectors.toList());
   }
 
@@ -744,5 +742,18 @@ public class DbUser {
   @Transient
   public String getClusterName() {
     return CLUSTER_NAME_PREFIX + getUserId();
+  }
+
+  @ManyToOne(
+      fetch = FetchType.EAGER,
+      cascade = CascadeType.ALL // is this what I want?
+  )
+  public DbVerifiedInstitutionalAffiliation getVerifiedInstitutionalAffiliation() {
+    return verifiedInstitutionalAffiliation;
+  }
+
+  public void setVerifiedInstitutionalAffiliation(
+      DbVerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation) {
+    this.verifiedInstitutionalAffiliation = verifiedInstitutionalAffiliation;
   }
 }

@@ -11,7 +11,8 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 
 @Mapper(
-    config = MapStructConfig.class,
+//    config = MapStructConfig.class,
+    componentModel = "spring",
     uses = {
       AddressMapper.class,
       CommonMappers.class,

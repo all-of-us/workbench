@@ -24,12 +24,18 @@ import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
+import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.model.DuaType;
+import org.pmiops.workbench.model.InstitutionalRole;
+import org.pmiops.workbench.model.OrganizationType;
+import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV1;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
@@ -57,7 +63,6 @@ public class UserServiceTest {
 
   // An arbitrary timestamp to use as the anchor time for access module test cases.
   private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
-  @Deprecated private static final long TIMESTAMP_MSECS = START_INSTANT.toEpochMilli();
   private static final long TIMESTAMP_SECS = START_INSTANT.getEpochSecond();
   private static final FakeClock PROVIDED_CLOCK = new FakeClock(START_INSTANT);
   private static final int CLOCK_INCREMENT_MILLIS = 1000;
@@ -72,6 +77,8 @@ public class UserServiceTest {
 
   @Autowired private UserService userService;
   @Autowired private UserDao userDao;
+  @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+  @Autowired private InstitutionDao institutionDao;
 
   @Import(UserServiceTestConfiguration.class)
   @TestConfiguration
@@ -114,6 +121,27 @@ public class UserServiceTest {
     // but it was injecting null clocks giving NPEs long after construction, and so far this
     // is the only working approach I've seen.
     PROVIDED_CLOCK.setInstant(START_INSTANT);
+
+    final DbInstitution dbInstitution = buildInstitution();
+    final DbVerifiedInstitutionalAffiliation dbAffiliation = buildAffiliation(dbInstitution);
+  }
+
+  public DbVerifiedInstitutionalAffiliation buildAffiliation(DbInstitution dbInstitution) {
+    final DbVerifiedInstitutionalAffiliation dbAffiliation = new DbVerifiedInstitutionalAffiliation();
+    dbAffiliation.setInstitution(dbInstitution);
+    dbAffiliation.setUser(providedDbUser);
+    dbAffiliation.setInstitutionalRoleEnum(InstitutionalRole.FELLOW);
+    return verifiedInstitutionalAffiliationDao.save(dbAffiliation);
+  }
+
+  public DbInstitution buildInstitution() {
+    final DbInstitution dbInstitution = new DbInstitution();
+    dbInstitution.setDisplayName("Disney World");
+    dbInstitution.setDuaTypeEnum(DuaType.MASTER);
+    dbInstitution.setOrganizationTypeEnum(OrganizationType.OTHER);
+    dbInstitution.setOrganizationTypeOtherText("Happiest place on earth.");
+    dbInstitution.setShortName("disney");
+    return institutionDao.save(dbInstitution);
   }
 
   @Test
@@ -134,7 +162,7 @@ public class UserServiceTest {
     // The user should be updated in the database with a non-empty completion and expiration time.
     DbUser user = userDao.findUserByUsername(USERNAME);
     assertThat(user.getComplianceTrainingCompletionTime())
-        .isEqualTo(new Timestamp(TIMESTAMP_MSECS));
+        .isEqualTo(new Timestamp(START_INSTANT.toEpochMilli()));
     assertThat(user.getComplianceTrainingExpirationTime())
         .isEqualTo(Timestamp.from(Instant.ofEpochMilli(expiry)));
 
@@ -463,5 +491,11 @@ public class UserServiceTest {
 
     verify(mockUserTermsOfServiceDao).save(any(DbUserTermsOfService.class));
     verify(mockUserServiceAuditAdapter).fireAcknowledgeTermsOfService(any(DbUser.class), eq(1));
+  }
+
+  @Test
+  public void testAffiliationField() {
+    final DbUser user = userDao.findUserByUsername(USERNAME);
+    assertThat(user.getVerifiedInstitutionalAffiliation()).isNotNull();
   }
 }
