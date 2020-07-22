@@ -8,7 +8,7 @@ import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {AdminUserBypass} from 'app/pages/admin/admin-user-bypass';
 import {authDomainApi, profileApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
-import {navigate, navigateByUrl, serverConfigStore} from 'app/utils/navigation';
+import {navigate, serverConfigStore} from 'app/utils/navigation';
 import {
   Profile,
 } from 'generated/fetch';

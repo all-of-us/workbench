@@ -28,7 +28,7 @@ const getNextAuditPath = (subject: string) => {
 
 const getAdminPageUrl = (subject: string) => {
   return `/admin/workspaces/${subject}`;
-}
+};
 
 export const WorkspaceAuditPage = () => {
   const {workspaceNamespace = ''} = useParams();

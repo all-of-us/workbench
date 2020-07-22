@@ -6,11 +6,11 @@ import {TooltipTrigger} from 'app/components/popups';
 import colors from 'app/styles/colors';
 import { useDebounce } from 'app/utils';
 import {downloadTextFile} from 'app/utils/audit-utils';
+import {navigateByUrl} from 'app/utils/navigation';
 import {AuditAction, AuditLogEntry} from 'generated';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import * as React from 'react';
-import {navigateByUrl} from '../../utils/navigation';
 
 const {useEffect, useState} = React;
 
