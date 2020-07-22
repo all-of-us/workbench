@@ -140,7 +140,7 @@ export async function newUserRegistrationSelfBypass(page: Page) {
     // wait more if 60 seconds wait time wasn't enough.
     await waitWhileLoading(page, 120000);
   }
-  await waitForText(page, 'Bypass action is complete. Reload the page to continue.', {css: '[data-test-id="self-bypass"]'}, 60000);
+  await waitForText(page, 'Bypass action is complete. Reload the page to continue.', {css: '[data-test-id="self-bypass"]'});
   await page.reload({waitUntil: ['networkidle0', 'domcontentloaded']});
   await waitWhileLoading(page);
 }

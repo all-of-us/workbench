@@ -15,7 +15,25 @@
 * Compile `yarn compile`
  
 ## Set up test user login credential (two ways)
-**The property file `.env` is used to store test user login credential. Test user must have 2FA-bypassed.**
+**The environment property file `.env` is used to store test user login credential and Puppeteer global settings. Test user must have 2FA-bypassed.**
+
+```
+# .env
+
+# Login user email
+USER_NAME=********
+# Login password
+PASSWORD=********
+
+# Puppeteer env
+PUPPETEER_HEADLESS=true
+# Slows down test playback speed in milliseconds
+PUPPETEER_SLOWMO=10
+# Time out in milliseconds
+NAVIGATION_TIMEOUT=90000
+TIMEOUT=90000
+
+```
 
 1: Download latest `.env` file from All-of-Us workbench Google bucket
   

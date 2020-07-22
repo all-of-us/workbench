@@ -1,6 +1,10 @@
 const url = require('url');
 const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36';
 
+const navTimeOut = parseInt(process.env.NAVIGATION_TIMEOUT, 10) || 90000;
+const timeOut = parseInt(process.env.TIMEOUT, 10) || 90000;
+
+
 /**
  * Set up page common properties:
  * - Page view port
@@ -11,8 +15,8 @@ const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/5
 beforeEach(async () => {
   await page.setUserAgent(userAgent);
   // See https://github.com/puppeteer/puppeteer/blob/master/docs/api.md#pagesetdefaultnavigationtimeouttimeout
-  await page.setDefaultNavigationTimeout(90000);
-  await page.setDefaultTimeout(60000);
+  await page.setDefaultNavigationTimeout(navTimeOut);
+  await page.setDefaultTimeout(timeOut);
 });
 
 /**
@@ -32,7 +36,7 @@ afterEach(async () => {
  */
 beforeAll(async () => {
   await page.setRequestInterception(true);
-  page.on('request', async (request) => {
+  page.on('request', (request) => {
     const requestUrl = url.parse(request.url(), true);
     const host = requestUrl.hostname;
     // to improve page load performance, block network requests unrelated to application.
@@ -42,9 +46,9 @@ beforeAll(async () => {
          || host === 'static.zdassets.com'
          || host === 'play.google.com'
          || request.url().endsWith('content-security-index-report')) {
-        await request.abort();
+        request.abort();
       } else {
-        await request.continue();
+        request.continue();
       }
     } catch (err) {
       console.error(err);
