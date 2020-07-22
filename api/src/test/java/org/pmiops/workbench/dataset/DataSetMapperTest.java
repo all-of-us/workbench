@@ -5,6 +5,7 @@ import static org.mockito.Mockito.doReturn;
 
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
@@ -53,6 +54,7 @@ public class DataSetMapperTest {
   @Autowired private DataSetMapper dataSetMapper;
   @Autowired private ConceptSetDao mockConceptSetDao;
   @Autowired private CohortDao mockCohortDao;
+  @Autowired private Clock clock;
 
   @TestConfiguration
   @Import({
@@ -142,7 +144,7 @@ public class DataSetMapperTest {
     DataSetRequest request = new DataSetRequest();
     request.setName("New Name");
     request.setPrePackagedConceptSet(PrePackagedConceptSetEnum.SURVEY);
-    final DbDataset toDataSet = dataSetMapper.dataSetRequestToDb(request, dbDataset);
+    final DbDataset toDataSet = dataSetMapper.dataSetRequestToDb(request, dbDataset, clock);
     assertThat(toDataSet.getName()).isEqualTo("New Name");
     assertThat(toDataSet.getCohortIds()).isEqualTo(dbDataset.getCohortIds());
     assertThat(toDataSet.getIncludesAllParticipants())
@@ -150,6 +152,12 @@ public class DataSetMapperTest {
     assertThat(toDataSet.getConceptSetIds()).isEqualTo(dbDataset.getConceptSetIds());
     assertThat(toDataSet.getValues()).isEqualTo(dbDataset.getValues());
     assertThat(toDataSet.getPrePackagedConceptSet()).isEqualTo((short) 0);
+    assertThat(toDataSet.getInvalid()).isEqualTo(dbDataset.getInvalid());
+    assertThat(toDataSet.getDataSetId()).isEqualTo(dbDataset.getDataSetId());
+    assertThat(toDataSet.getCreationTime()).isEqualTo(dbDataset.getCreationTime());
+    assertThat(toDataSet.getCreatorId()).isEqualTo(dbDataset.getCreatorId());
+    assertThat(toDataSet.getLastModifiedTime())
+        .isAtMost(new Timestamp(clock.instant().toEpochMilli()));
   }
 
   @Test
@@ -168,13 +176,17 @@ public class DataSetMapperTest {
     request.setIncludesAllParticipants(false);
     request.setPrePackagedConceptSet(PrePackagedConceptSetEnum.NONE);
     request.setDomainValuePairs(ImmutableList.of(domainValuePair));
-    final DbDataset toDataSet = dataSetMapper.dataSetRequestToDb(request, dbDataset);
+    final DbDataset toDataSet = dataSetMapper.dataSetRequestToDb(request, dbDataset, clock);
     assertThat(toDataSet.getName()).isEqualTo("New Name");
     assertThat(toDataSet.getCohortIds()).isEqualTo(cohortIds);
     assertThat(toDataSet.getIncludesAllParticipants()).isFalse();
     assertThat(toDataSet.getConceptSetIds()).isEqualTo(conceptIds);
     assertThat(toDataSet.getPrePackagedConceptSet()).isEqualTo((short) 0);
     assertThat(toDataSet.getValues().get(0).getDomainEnum()).isEqualTo(Domain.PERSON);
+    assertThat(toDataSet.getInvalid()).isFalse();
+    assertThat(toDataSet.getCreationTime()).isAtMost(new Timestamp(clock.instant().toEpochMilli()));
+    assertThat(toDataSet.getLastModifiedTime())
+        .isAtMost(new Timestamp(clock.instant().toEpochMilli()));
   }
 
   private void assertDbModelToClient(DataSet dataSet, DbDataset dbDataset) {
