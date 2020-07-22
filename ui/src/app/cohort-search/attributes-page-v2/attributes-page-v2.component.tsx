@@ -10,6 +10,7 @@ import {
   subTypeToTitle
 } from 'app/cohort-search/utils';
 import {Button} from 'app/components/buttons';
+import {FlexRowWrap} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox, NumberInput} from 'app/components/inputs';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
@@ -23,12 +24,9 @@ import {AttrName, CriteriaSubType, DomainType, Operator} from 'generated/fetch';
 
 const styles = reactStyles({
   countPreview: {
-    backgroundColor: '#E4F3FC',
-    padding: '0.5rem',
+    borderTop: `1px solid ${colorWithWhiteness(colors.black, 0.59)}`,
     marginTop: '1rem',
-    position: 'absolute',
-    width: '93%',
-    bottom: '1rem',
+    paddingTop: '1rem',
   },
   row: {
     display: 'flex',
@@ -36,17 +34,17 @@ const styles = reactStyles({
   },
   label: {
     color: colors.primary,
-    padding: '0.5rem',
-    fontWeight: 500,
+    fontWeight: 600,
     display: 'flex',
   },
   orCircle: {
-    backgroundColor: '#e2e2e9',
+    backgroundColor: colors.primary,
     borderRadius: '50%',
-    width: '2.25rem',
-    height: '2.25rem',
-    margin: '0.75rem 3rem 0.25rem',
-    lineHeight: '2.25rem',
+    color: colors.white,
+    width: '1.25rem',
+    height: '1.25rem',
+    margin: '0.75rem auto 0.25rem',
+    lineHeight: '1.35rem',
     textAlign: 'center',
     fontSize: '0.45rem',
   },
@@ -54,7 +52,6 @@ const styles = reactStyles({
     display: 'flex',
     marginLeft: 'auto',
     marginRight: 'auto',
-    padding: '0.2rem 0.5rem 0',
   },
   dropdown: {
     width: '12rem',
@@ -77,16 +74,22 @@ const styles = reactStyles({
     verticalAlign: 'middle',
     alignItems: 'center',
   },
-  buttonContainer: {
-    flex: '0 0 25%',
-    maxWidth: '25%',
-    padding: '0 0.5rem',
+  addButtonContainer: {
+    bottom: '1rem',
+    position: 'absolute',
+    right: '1rem'
   },
-  button: {
-    height: '1.75rem',
-    margin: '.25rem .5rem .25rem 0',
-    borderRadius: '4px',
+  addButton: {
+    height: '2rem',
+    borderRadius: '5px',
     fontWeight: 600
+  },
+  calculateButton: {
+    height: '1.75rem',
+    border: `1px solid`,
+    borderColor: colors.accent,
+    borderRadius: '2px',
+    fontWeight: 100
   },
   spinner: {
     marginRight: '0.25rem',
@@ -95,10 +98,7 @@ const styles = reactStyles({
   resultsContainer: {
     flex: '0 0 50%',
     maxWidth: '50%',
-    padding: '0.3rem 0.5rem 0',
     color: colors.primary,
-    fontSize: '14px',
-    lineHeight: '20px'
   },
   error: {
     background: colors.warning,
@@ -482,7 +482,7 @@ export const AttributesPageV2 = withCurrentWorkspace() (
     }
 
     render() {
-      const {node} = this.props;
+      const {node: {domainId, name, parentId, subtype}} = this.props;
       const {calculating, count, countError, form, loading, options} = this.state;
       const {formErrors, formValid} = this.validateForm();
       const disableAdd = calculating || !formValid;
@@ -490,6 +490,9 @@ export const AttributesPageV2 = withCurrentWorkspace() (
       return (loading ?
         <SpinnerOverlay/> :
         <div style={{margin: '0.5rem 0 1.5rem'}}>
+          <h3 style={{fontWeight: 600, margin: '0 0 0.5rem'}}>
+            {domainId === DomainType.PHYSICALMEASUREMENT.toString() ? name : 'Measurement Detail'}
+          </h3>
           {countError && <div style={styles.error}>
             <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
               shape='exclamation-triangle' size='22'/>
@@ -502,14 +505,13 @@ export const AttributesPageV2 = withCurrentWorkspace() (
           </div>}
           {this.isMeasurement && <div>
             <div style={styles.label}>{this.displayName}</div>
-            <CheckBox style={{marginLeft: '0.5rem'}}
-              onChange={(v) => this.toggleCheckbox(v)}/> Any value (lab exists)
+            <CheckBox onChange={(v) => this.toggleCheckbox(v)}/> Any value (lab exists)
             {!form.exists && form.num.length > 0 && <div style={styles.orCircle}>OR</div>}
           </div>}
           {!form.exists && <React.Fragment>
             {form.num.map((attr, a) => <div key={a}>
               {this.isMeasurement && <div style={styles.label}>Numeric Values</div>}
-              {this.isSurvey && <div style={styles.label}>{ppiQuestions.getValue()[node.parentId].name}</div>}
+              {this.isSurvey && <div style={styles.label}>{ppiQuestions.getValue()[parentId].name}</div>}
               {this.isBloodPressure && <div style={styles.label}>{attr.name}</div>}
               <div style={styles.container}>
                 <div style={styles.dropdown}>
@@ -521,7 +523,7 @@ export const AttributesPageV2 = withCurrentWorkspace() (
                     value={attr.operands[0] || ''}
                     min={attr.MIN} max={attr.MAX}
                     onChange={(v) => this.inputChange(v, a, 0)}/>
-                  {this.hasUnits && <span> {PM_UNITS[node.subtype]}</span>}
+                  {this.hasUnits && <span> {PM_UNITS[subtype]}</span>}
                 </div>}
                 {attr.operator === Operator.BETWEEN && <React.Fragment>
                   <div style={{padding: '0.2rem 1.5rem 0 1rem'}}>and</div>
@@ -530,7 +532,7 @@ export const AttributesPageV2 = withCurrentWorkspace() (
                       value={attr.operands[1] || ''}
                       min={attr.MIN} max={attr.MAX}
                       onChange={(v) => this.inputChange(v, a, 1)}/>
-                    {this.hasUnits && <span> {PM_UNITS[node.subtype]}</span>}
+                    {this.hasUnits && <span> {PM_UNITS[subtype]}</span>}
                   </div>
                 </React.Fragment>}
                 {this.hasRange && ![null, 'ANY'].includes(attr.operator) &&
@@ -551,23 +553,26 @@ export const AttributesPageV2 = withCurrentWorkspace() (
               </div>
             </React.Fragment>}
           </React.Fragment>}
-          <div style={styles.countPreview}>
-            <div style={styles.row}>
-              <div style={styles.buttonContainer}>
-                <Button type='primary' disabled={disableCalculate} style={styles.button} onClick={() => this.requestPreview()}>
-                  {calculating && <Spinner size={16} style={styles.spinner}/>} Calculate
-                </Button>
-              </div>
-              <div style={styles.resultsContainer}>
-                <div style={{fontWeight: 'bold'}}>Results</div>
-                <div>Number Participants: <span> {count === null ? '--' : count.toLocaleString()} </span></div>
-              </div>
-              <div style={styles.buttonContainer}>
-                <Button type='primary' disabled={disableAdd} style={styles.button} onClick={() => this.addParameterToSearchItem()}>
-                  ADD THIS
-                </Button>
-              </div>
+          <FlexRowWrap style={styles.countPreview}>
+            <div style={styles.resultsContainer}>
+              <Button type='secondaryLight'
+                      disabled={disableCalculate}
+                      style={{...styles.calculateButton, ...(disableCalculate ? {borderColor: colorWithWhiteness(colors.dark, 0.6)} : {})}}
+                      onClick={() => this.requestPreview()}>
+                {calculating && <Spinner size={16} style={styles.spinner}/>} Calculate
+              </Button>
             </div>
+            <div style={styles.resultsContainer}>
+              <div style={{fontWeight: 600}}>Number of Participants: <span> {count === null ? '--' : count.toLocaleString()} </span></div>
+            </div>
+          </FlexRowWrap>
+          <div style={styles.addButtonContainer}>
+            <Button type='primary'
+                    disabled={disableAdd}
+                    style={styles.addButton}
+                    onClick={() => this.addParameterToSearchItem()}>
+              ADD THIS
+            </Button>
           </div>
         </div>
       );
