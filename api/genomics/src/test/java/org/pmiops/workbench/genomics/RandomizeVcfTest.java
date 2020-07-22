@@ -32,8 +32,7 @@ public class RandomizeVcfTest {
           genotype.getAlleles().forEach(
               allele -> {
                 // ...is that allele from the bank of possible alleles at that position? ignoring
-                // ref/varus
-
+                // ref/var
                 assertThat(
                     variantContext.getAlleles().stream()
                         .anyMatch(vcAllele -> vcAllele.basesMatch(allele))
