@@ -98,7 +98,6 @@
     "enableBillingLockout": true,
     "enableBillingUpgrade": true,
     "useKeylessDelegatedCredentials": true,
-    "sendFreeTierAlertEmails": true,
     "enableMoodleV2Api": true,
     "enableCBAgeTypeOptions": true,
     "enableV3DataUserCodeOfConduct": true,

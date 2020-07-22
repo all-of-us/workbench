@@ -242,8 +242,6 @@ public class WorkbenchConfig {
     // as opposed to reading service account private keys from GCS.
     // See RW-2840.
     public boolean useKeylessDelegatedCredentials;
-    // Deprecated. Removal pending: RW-4319.
-    public boolean sendFreeTierAlertEmails;
     // Flag to indicate whether to use the new Moodle badges API
     // https://precisionmedicineinitiative.atlassian.net/browse/RW-2957
     public boolean enableMoodleV2Api;
