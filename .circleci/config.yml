@@ -322,7 +322,7 @@ jobs:
           # Example of Gradle command after formatting:
           #   gradle test --tests org.pmiops.*********.monitoring.LogsBasedMetricsServiceTest --tests org.pmiops.*********.monitoring.MonitoringServiceTest
           command: |
-            CLASSNAMES=$(circleci tests glob "src/test/java/**/*Test.java" "src/test/java/**/*Test.kt" \
+            CLASSNAMES=$(circleci tests glob "src/test/java/**/*Test.java" "src/test/java/**/*Test.kt" "genomics/src/test/**/*Test.java" \
               | cut -c 1- \
               | sed 's@src/test/java/@@' \
               | sed 's@/@.@g' \
