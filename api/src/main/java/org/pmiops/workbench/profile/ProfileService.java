@@ -520,11 +520,9 @@ public class ProfileService {
             freeCreditsLimit ->
                 freeTierBillingService.setFreeTierDollarOverride(dbUser, freeCreditsLimit));
 
-    Optional.ofNullable(request.getAccessBypassRequests())
-        .ifPresent(
-            requests ->
-                requests.forEach(
-                    bypass -> userService.updateBypassTime(dbUser.getUserId(), bypass)));
+    request
+        .getAccessBypassRequests()
+        .forEach(bypass -> userService.updateBypassTime(dbUser.getUserId(), bypass));
 
     // refetch from the DB
     Profile updatedProfile = getProfile(userService.getByUsernameOrThrow(request.getUsername()));

@@ -7821,6 +7821,7 @@ definitions:
     type: object
     required:
       - username
+      - accessBypassRequests
     properties:
       username:
         description: The full system-assigned ID of a user, including email domain
@@ -7836,7 +7837,7 @@ definitions:
         description: When set, replaces the user's verified institutional email.  Must validate against the user's contact email.
         "$ref": '#/definitions/VerifiedInstitutionalAffiliation'
       accessBypassRequests:
-        description: When set, updates the user's bypass status for one or more access modules.
+        description: Updates the user's bypass status for the given access modules.
         type: array
         items:
           "$ref": '#/definitions/AccessBypassRequest'
