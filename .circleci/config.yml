@@ -322,13 +322,14 @@ jobs:
           # Example of Gradle command after formatting:
           #   gradle test --tests org.pmiops.*********.monitoring.LogsBasedMetricsServiceTest --tests org.pmiops.*********.monitoring.MonitoringServiceTest
           command: |
-            CLASSNAMES=$(circleci tests glob "src/test/java/**/*Test.java" "src/test/java/**/*Test.kt" "genomics/src/test/**/*Test.java" \
+            CLASSNAMES=$(circleci tests glob "src/test/java/**/*Test.java" "src/test/java/**/*Test.kt" \
               | cut -c 1- \
               | sed 's@src/test/java/@@' \
               | sed 's@/@.@g' \
               | sed 's/\.[^.]*$//' \
               | circleci tests split --split-by=timings --timings-type=classname --index=$CIRCLE_NODE_INDEX)
             GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) print "--tests", $i}')
+            echo $GRADLE_ARGS
             gradle test $GRADLE_ARGS
       - run:
           # Lint last; it's more important to surface test failures early.
