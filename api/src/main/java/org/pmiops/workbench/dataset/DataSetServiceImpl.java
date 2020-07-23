@@ -12,7 +12,6 @@ import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
-import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -222,11 +221,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   @Override
   public DataSet saveDataSet(DataSetRequest dataSetRequest, Long userId) {
-    final Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    DbDataset dbDataset = dataSetMapper.dataSetRequestToDb(dataSetRequest, null);
-    dbDataset.setCreationTime(now);
+    DbDataset dbDataset = dataSetMapper.dataSetRequestToDb(dataSetRequest, null, clock);
     dbDataset.setCreatorId(userId);
-    dbDataset.setInvalid(false);
     return saveDataSet(dbDataset);
   }
 
@@ -249,12 +245,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     if (dbDataSet.getVersion() != version) {
       throw new ConflictException("Attempted to modify outdated data set version");
     }
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    DbDataset dbMappingConvert = dataSetMapper.dataSetRequestToDb(request, dbDataSet);
-    dbMappingConvert.setCreatorId(dbDataSet.getCreatorId());
-    dbMappingConvert.setCreationTime(dbDataSet.getCreationTime());
-    dbMappingConvert.setDataSetId(dbDataSet.getDataSetId());
-    dbMappingConvert.setLastModifiedTime(now);
+    DbDataset dbMappingConvert = dataSetMapper.dataSetRequestToDb(request, dbDataSet, clock);
     return saveDataSet(dbMappingConvert);
   }
 
