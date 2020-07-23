@@ -18,7 +18,6 @@ import org.javers.core.diff.Diff;
 import org.javers.core.diff.changetype.PropertyChange;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -35,6 +34,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.model.Address;
+import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.model.EditUserInformationRequest;
 import org.pmiops.workbench.model.InstitutionalRole;
@@ -56,7 +56,6 @@ public class ProfileService {
   private final ProfileAuditor profileAuditor;
   private final ProfileMapper profileMapper;
   private final Provider<DbUser> userProvider;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
   private final UserService userService;
   private final UserTermsOfServiceDao userTermsOfServiceDao;
@@ -75,7 +74,6 @@ public class ProfileService {
       ProfileAuditor profileAuditor,
       ProfileMapper profileMapper,
       Provider<DbUser> userProvider,
-      Provider<WorkbenchConfig> workbenchConfigProvider,
       UserDao userDao,
       UserService userService,
       UserTermsOfServiceDao userTermsOfServiceDao,
@@ -91,7 +89,6 @@ public class ProfileService {
     this.profileAuditor = profileAuditor;
     this.profileMapper = profileMapper;
     this.userProvider = userProvider;
-    this.workbenchConfigProvider = workbenchConfigProvider;
     this.userDao = userDao;
     this.userService = userService;
     this.userTermsOfServiceDao = userTermsOfServiceDao;
@@ -192,28 +189,11 @@ public class ProfileService {
    * @param previousProfile
    */
   public void updateProfileForUser(DbUser user, Profile updatedProfile, Profile previousProfile) {
-    updateProfileForUser(user, updatedProfile, previousProfile, false);
-  }
-
-  /**
-   * Updates a profile for a given user as Admin and persists all information to the database.
-   *
-   * @param user
-   * @param updatedProfile
-   * @param previousProfile
-   */
-  public void adminUpdateProfileForUser(
-      DbUser user, Profile updatedProfile, Profile previousProfile) {
-    updateProfileForUser(user, updatedProfile, previousProfile, true);
-  }
-
-  private void updateProfileForUser(
-      DbUser user, Profile updatedProfile, Profile previousProfile, boolean userIsAdmin) {
     // Apply cleaning methods to both the previous and updated profile, to avoid false positive
     // field diffs due to null-to-empty-object changes.
     cleanProfile(updatedProfile);
     cleanProfile(previousProfile);
-    validateProfile(updatedProfile, previousProfile, userIsAdmin);
+    validateProfile(updatedProfile, previousProfile);
 
     if (!user.getGivenName().equalsIgnoreCase(updatedProfile.getGivenName())
         || !user.getFamilyName().equalsIgnoreCase(updatedProfile.getFamilyName())) {
@@ -419,15 +399,14 @@ public class ProfileService {
    * @throws BadRequestException
    */
   @VisibleForTesting
-  public void validateProfile(
-      @Nonnull Profile updatedProfile, @Nullable Profile previousProfile, boolean userIsAdmin) {
+  public void validateProfile(@Nonnull Profile updatedProfile, @Nullable Profile previousProfile) {
 
     final boolean isNewProfile = previousProfile == null;
     final Diff diff = javers.compare(previousProfile, updatedProfile);
 
     validateProfileForCorrectness(updatedProfile, isNewProfile, diff);
 
-    if (userIsAdmin) {
+    if (userProvider.get().hasAuthority(Authority.ACCESS_CONTROL_ADMIN)) {
       validateChangesAllowedByAdmin(diff);
     } else {
       validateChangesAllowedByUser(diff);
@@ -530,7 +509,7 @@ public class ProfileService {
     Optional.ofNullable(request.getVerifiedInstitutionalAffiliation())
         .ifPresent(updatedProfile::setVerifiedInstitutionalAffiliation);
 
-    adminUpdateProfileForUser(dbUser, updatedProfile, originalProfile);
+    updateProfileForUser(dbUser, updatedProfile, originalProfile);
 
     return getProfile(dbUser);
   }

@@ -5,12 +5,14 @@ import static com.google.common.truth.Truth.assertThat;
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.dao.UserDao.UserCountGaugeLabelsAndValue;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -111,5 +113,28 @@ public class UserDaoTest {
       resultList.add(userDao.save(user));
     }
     return resultList.build();
+  }
+
+  @Test
+  public void test_hasAuthorities() {
+    DbUser user = new DbUser();
+    user.setAuthoritiesEnum(Collections.singleton(Authority.ACCESS_CONTROL_ADMIN));
+    user = userDao.save(user);
+
+    assertThat(user.hasAuthority(Authority.ACCESS_CONTROL_ADMIN)).isTrue();
+    assertThat(user.hasAuthority(Authority.INSTITUTION_ADMIN)).isFalse();
+  }
+
+  // DEVELOPER Authority includes all of the others
+
+  @Test
+  public void test_hasAuthorities_DEVELOPER() {
+    DbUser user = new DbUser();
+    user.setAuthoritiesEnum(Collections.singleton(Authority.DEVELOPER));
+    user = userDao.save(user);
+
+    for (Authority auth : Authority.values()) {
+      assertThat(user.hasAuthority(auth)).isTrue();
+    }
   }
 }

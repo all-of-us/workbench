@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
@@ -19,7 +20,6 @@ import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.config.CommonConfig;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -36,6 +36,7 @@ import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.institution.deprecated.InstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.model.Address;
+import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
@@ -92,32 +93,34 @@ public class ProfileServiceTest {
   @MockBean
   private VerifiedInstitutionalAffiliationMapper mockVerifiedInstitutionalAffiliationMapper;
 
-  @MockBean private VerifiedInstitutionalAffiliationDao mockVerifiedInstitutionalAffiliationDao;
-
   @Autowired ProfileService profileService;
   @Autowired UserDao userDao;
 
-  private static WorkbenchConfig workbenchConfig;
+  // enables access to the logged in user
+  private static DbUser loggedInUser;
 
   @TestConfiguration
   @MockBean({FreeTierBillingService.class, UserService.class})
   @Import({
     AddressMapperImpl.class,
+    CommonConfig.class,
+    CommonMappers.class,
     DemographicSurveyMapperImpl.class,
     InstitutionalAffiliationMapperImpl.class,
     PageVisitMapperImpl.class,
     ProfileMapperImpl.class,
     ProfileService.class,
-    CommonMappers.class,
-    CommonConfig.class,
   })
-  @MockBean({ProfileAuditor.class})
+  @MockBean({
+    ProfileAuditor.class,
+    VerifiedInstitutionalAffiliationDao.class,
+  })
   static class Configuration {
 
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public WorkbenchConfig getWorkbenchConfig() {
-      return workbenchConfig;
+    public DbUser getLoggedInUser() {
+      return loggedInUser;
     }
 
     @Bean
@@ -126,9 +129,16 @@ public class ProfileServiceTest {
     }
   }
 
+  private void grantAdminAuthorityToLoggedInUser() {
+    loggedInUser.setAuthoritiesEnum(Collections.singleton(Authority.ACCESS_CONTROL_ADMIN));
+    loggedInUser = userDao.save(loggedInUser);
+  }
+
   @Before
   public void setUp() {
-    workbenchConfig = WorkbenchConfig.createEmptyConfig();
+    loggedInUser = new DbUser();
+    loggedInUser.setUserId(1000);
+    loggedInUser = userDao.save(loggedInUser);
   }
 
   @Test
@@ -306,7 +316,7 @@ public class ProfileServiceTest {
   }
 
   @Test
-  public void adminUpdateProfileForUser_affiliationChangeOnly() {
+  public void updateProfileForUser_affiliationChangeOnly_asAdmin() {
     // Regression test for RW-5139
 
     // Start with: a valid profile with a Broad affiliation but null Address.
@@ -322,7 +332,7 @@ public class ProfileServiceTest {
         createValidProfile().address(null).verifiedInstitutionalAffiliation(newAffiliation);
 
     DbUser user = new DbUser();
-    user.setUserId(1);
+    user.setUserId(10);
     user.setGivenName("John");
     user.setFamilyName("Doe");
 
@@ -338,7 +348,8 @@ public class ProfileServiceTest {
             newAffiliation, mockInstitutionService))
         .thenReturn(dbVerifiedInstitutionalAffiliation);
 
-    profileService.adminUpdateProfileForUser(user, updatedProfile, previousProfile);
+    grantAdminAuthorityToLoggedInUser();
+    profileService.updateProfileForUser(user, updatedProfile, previousProfile);
   }
 
   @Test(expected = BadRequestException.class)
@@ -347,7 +358,7 @@ public class ProfileServiceTest {
     Profile updatedProfile = createValidProfile().contactEmail("other-researcher@nih.gov");
 
     DbUser user = new DbUser();
-    user.setUserId(1);
+    user.setUserId(10);
     user.setGivenName("John");
     user.setFamilyName("Doe");
 
@@ -355,7 +366,7 @@ public class ProfileServiceTest {
   }
 
   @Test
-  public void adminUpdateProfileForUser_can_change_contactEmail() {
+  public void updateProfileForUser_can_change_contactEmail_asAdmin() {
     DbInstitution verilyInstitution =
         new DbInstitution().setShortName("Verily").setDisplayName("Verily LLC");
 
@@ -384,14 +395,15 @@ public class ProfileServiceTest {
                 "other-researcher@verily.com") // note: the mock in this test matches everything
             .verifiedInstitutionalAffiliation(verilyAffiliation);
 
-    DbUser user = new DbUser();
-    user.setUserId(1);
-    user.setGivenName("John");
-    user.setFamilyName("Doe");
+    DbUser targetUser = new DbUser();
+    targetUser.setUserId(10);
+    targetUser.setGivenName("John");
+    targetUser.setFamilyName("Doe");
 
-    profileService.adminUpdateProfileForUser(user, updatedProfile, previousProfile);
+    grantAdminAuthorityToLoggedInUser();
+    profileService.updateProfileForUser(targetUser, updatedProfile, previousProfile);
 
-    assertThat(profileService.getProfile(user).getContactEmail())
+    assertThat(profileService.getProfile(targetUser).getContactEmail())
         .isEqualTo("other-researcher@verily.com");
   }
 
@@ -399,7 +411,7 @@ public class ProfileServiceTest {
   public void validateProfile_noChangesOnEmptyProfile() {
     // This is a synthetic test case: we never expect to be updating an empty Profile object, but
     // technically this passes validation since no fields have changed.
-    profileService.validateProfile(new Profile(), new Profile(), false);
+    profileService.validateProfile(new Profile(), new Profile());
   }
 
   @Test(expected = BadRequestException.class)
@@ -422,56 +434,52 @@ public class ProfileServiceTest {
   @Test(expected = BadRequestException.class)
   public void validateProfile_usernameChanged_user() {
     // Username changes are disallowed for users
-    profileService.validateProfile(
-        new Profile().username("new"), new Profile().username("old"), false);
+    profileService.validateProfile(new Profile().username("new"), new Profile().username("old"));
   }
 
   @Test(expected = BadRequestException.class)
   public void validateProfile_usernameChanged_admin() {
     // Username changes are disallowed for admins
-    profileService.validateProfile(
-        new Profile().username("new"), new Profile().username("old"), true);
+    grantAdminAuthorityToLoggedInUser();
+    profileService.validateProfile(new Profile().username("new"), new Profile().username("old"));
   }
 
   @Test(expected = BadRequestException.class)
   public void validateProfile_usernameTooShort() {
-    profileService.validateProfile(new Profile().username("ab"), new Profile(), false);
+    profileService.validateProfile(new Profile().username("ab"), new Profile());
   }
 
   @Test(expected = BadRequestException.class)
   public void validateProfile_usernameTooLong() {
     profileService.validateProfile(
-        new Profile().username(StringUtils.repeat("asdf", 30)), new Profile(), false);
+        new Profile().username(StringUtils.repeat("asdf", 30)), new Profile());
   }
 
   @Test(expected = BadRequestException.class)
   public void validateProfile_contactEmailChanged_user() {
     // Contact email changes are disallowed for users.
     profileService.validateProfile(
-        new Profile().contactEmail("new@gmail.com"),
-        new Profile().contactEmail("old@gmail.com"),
-        false);
+        new Profile().contactEmail("new@gmail.com"), new Profile().contactEmail("old@gmail.com"));
   }
 
   @Test
   public void validateProfile_contactEmailChanged_admin() {
     // Contact email changes are allowed for admins
+    grantAdminAuthorityToLoggedInUser();
     profileService.validateProfile(
-        new Profile().contactEmail("new@gmail.com"),
-        new Profile().contactEmail("old@gmail.com"),
-        true);
+        new Profile().contactEmail("new@gmail.com"), new Profile().contactEmail("old@gmail.com"));
   }
 
   @Test(expected = BadRequestException.class)
   public void validateProfile_givenNameTooShort() {
     Profile newProfile = new Profile().givenName("");
-    profileService.validateProfile(newProfile, new Profile(), false);
+    profileService.validateProfile(newProfile, new Profile());
   }
 
   @Test(expected = BadRequestException.class)
   public void validateProfile_FamilyNameTooLong() {
     Profile newProfile = new Profile().familyName(StringUtils.repeat("123", 30));
-    profileService.validateProfile(newProfile, new Profile(), false);
+    profileService.validateProfile(newProfile, new Profile());
   }
 
   @Test(expected = BadRequestException.class)
@@ -479,7 +487,7 @@ public class ProfileServiceTest {
     // Ensures we validate the address when the field has been removed entirely.
     Profile oldProfile = new Profile().address(new Address().streetAddress1("asdf"));
     Profile newProfile = new Profile();
-    profileService.validateProfile(newProfile, oldProfile, false);
+    profileService.validateProfile(newProfile, oldProfile);
   }
 
   @Test(expected = BadRequestException.class)
@@ -495,19 +503,19 @@ public class ProfileServiceTest {
     Address newAddress =
         new Address().streetAddress1("asdf").city("asdf").state("asdf").country("asdf");
     profileService.validateProfile(
-        new Profile().address(newAddress), new Profile().address(oldAddress), false);
+        new Profile().address(newAddress), new Profile().address(oldAddress));
   }
 
   @Test(expected = BadRequestException.class)
   public void validateProfile_addressIncomplete() {
     Profile newProfile = new Profile().address(new Address().streetAddress1("asdf"));
-    profileService.validateProfile(newProfile, new Profile(), false);
+    profileService.validateProfile(newProfile, new Profile());
   }
 
   @Test(expected = BadRequestException.class)
   public void validateProfile_EmptyAreaOfResearch() {
     Profile newProfile = new Profile().areaOfResearch("");
-    profileService.validateProfile(newProfile, new Profile(), false);
+    profileService.validateProfile(newProfile, new Profile());
   }
 
   @Test(expected = BadRequestException.class)
@@ -520,6 +528,6 @@ public class ProfileServiceTest {
     when(mockInstitutionDao.findOneByShortName("Broad")).thenReturn(Optional.of(BROAD_INSTITUTION));
     when(mockInstitutionService.validateAffiliation(any(), any())).thenReturn(false);
 
-    profileService.validateProfile(newProfile, new Profile(), false);
+    profileService.validateProfile(newProfile, new Profile());
   }
 }

@@ -530,7 +530,7 @@ public class ProfileController implements ProfileApiDelegate {
 
     Profile oldProfile = profileService.getProfile(dbUser);
 
-    profileService.adminUpdateProfileForUser(dbUser, updatedProfile, oldProfile);
+    profileService.updateProfileForUser(dbUser, updatedProfile, oldProfile);
 
     return ResponseEntity.ok(new EmptyResponse());
   }

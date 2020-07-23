@@ -302,6 +302,13 @@ public class DbUser {
   }
 
   @Transient
+  public boolean hasAuthority(Authority required) {
+    // DEVELOPER is the super-authority which subsumes all others
+    return getAuthoritiesEnum().contains(Authority.DEVELOPER)
+        || getAuthoritiesEnum().contains(required);
+  }
+
+  @Transient
   public Set<Authority> getAuthoritiesEnum() {
     Set<Short> from = getAuthorities();
     if (from == null) {
