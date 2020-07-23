@@ -61,22 +61,19 @@ export default class WorkspaceAnalysisPage extends AuthenticatedPage {
    * @param {Language} language Notebook language.
    */
   async createNotebook(notebookName: string, language: Language): Promise<void> {
-    const link = await Link.findByName(this.page, {normalizeSpace: LinkText.CreateNewNotebook});
+    const link = await this.createNewNotebookLink();
     await link.click();
     const modal = new NewNotebookModal(this.page);
     await modal.waitForLoad();
     await modal.fillInModal(notebookName, language);
 
-    console.log('Waiting for notebook server to start ...');
-    // Wait for some displayed UI elements after modal closed.
-    await Promise.all([
-      this.page.waitForXPath('//div[text()="Authenticating with the notebook server"]', {visible: true}),
-      this.page.waitForXPath('//div[text()="Redirecting to the notebook server"]', {visible: true}),
-      this.page.waitForXPath('//*[@shape="success-standard"]', {visible: true}),
-    ]);
-    // Waiting up to 10 minutes
-    await waitWhileLoading(this.page, 60 * 10 * 1000);
+    // Waiting up to 15 minutes
+    console.log(`Waiting for "${notebookName}" notebook server to start ...`);
+    await waitWhileLoading(this.page, 60 * 15 * 1000);
   }
 
+  async createNewNotebookLink(): Promise<Link> {
+    return Link.findByName(this.page, {normalizeSpace: LinkText.CreateNewNotebook});
+  }
 
 }

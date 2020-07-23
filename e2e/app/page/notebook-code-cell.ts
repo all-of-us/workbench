@@ -11,7 +11,7 @@ export default class CodeCell {
   constructor(private readonly page: Frame) {}
 
   async selectCell(index: number = 1, code?: string): Promise<void> {
-    const cell = await this.findCell(index);
+    const cell = await this.findCellInput(index);
     await cell.click({delay: 20}); // focus
     if (code !== undefined) await cell.type(code);
     console.log(`code cell [${index}]: \n ${code}`);
@@ -25,7 +25,7 @@ export default class CodeCell {
    * @param {number} index Code cell index.
    * @param {number} timeOut
    */
-  async waitForOutput(index: number, timeOut: number = 30000): Promise<string> {
+  async findCellOutput(index: number, timeOut?: number): Promise<string> {
     const outputText = await Promise.race([
       this.getOutputTexts(index, timeOut),
       this.getOutputError(index, timeOut),
@@ -39,7 +39,7 @@ export default class CodeCell {
    * Warning: This is not the number shown in cell_prompt: "In [1]" or "Out [1]".
    * @param {number} index Cell index.
    */
-  async findCell(index: number): Promise<ElementHandle> {
+  async findCellInput(index: number): Promise<ElementHandle> {
     const selector = `${this.getCellSelector(index)} .CodeMirror-code`;
     return this.page.waitForSelector(selector, {visible: true});
   }
@@ -65,7 +65,7 @@ export default class CodeCell {
    * Gets cell output. Output is asynchronous.
    * @param {number} index Code cell index.
    */
-  private async findOutputArea(index: number, timeOut: number): Promise<ElementHandle> {
+  private async findOutputArea(index: number, timeOut?: number): Promise<ElementHandle> {
     const selector = `${this.getCellSelector(index)} .output_subarea:not(.output_error)`;
     return this.page.waitForSelector(selector, {visible: true, timeout: timeOut});
   }

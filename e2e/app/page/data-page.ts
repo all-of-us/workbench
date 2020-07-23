@@ -1,24 +1,26 @@
+import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
 import DataResourceCard from 'app/component/data-resource-card';
-import Modal from 'app/component/modal';
 import EllipsisMenu from 'app/component/ellipsis-menu';
+import Modal from 'app/component/modal';
 import Button from 'app/element/button';
 import ClrIconLink from 'app/element/clr-icon-link';
 import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
-import {buildXPath} from 'app/xpath-builders';
-import {EllipsisMenuAction, LinkText} from 'app/text-labels';
 import AuthenticatedPage from 'app/page/authenticated-page';
+import {EllipsisMenuAction, Language, LinkText} from 'app/text-labels';
+import {buildXPath} from 'app/xpath-builders';
 import {ElementType} from 'app/xpath-options';
 import {ElementHandle, Page, Response} from 'puppeteer';
+import {makeRandomName} from 'utils/str-utils';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
-import {makeRandomName} from 'utils/str-utils';
-import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
 import CohortActionsPage from './cohort-actions-page';
 import CohortBuildPage from './cohort-build-page';
 import {Visits} from './cohort-criteria-modal';
 import ConceptsetSearchPage from './conceptset-search-page';
 import DatasetBuildPage from './dataset-build-page';
+import NotebookPage from './notebook-page';
+import WorkspaceAnalysisPage from './workspace-analysis-page';
 
 export enum TabLabelAlias {
   Data = 'Data',
@@ -267,5 +269,23 @@ export default class DataPage extends AuthenticatedPage {
     return conceptSearchPage;
   }
 
+  /**
+   * Create a new empty notebook. Wait for Notebook server start.
+   * - Open Analysis tab.
+   * - Click "Create a New Notebook" link.
+   * - Fill out New Notebook modal.
+   * @param notebookName The notebook name.
+   * @param {Language} lang The notebook language.
+   */
+  async createNotebook(notebookName: string, lang: Language = Language.Python): Promise<NotebookPage> {
+    await this.openTab(TabLabelAlias.Analysis);
+
+    const analysisPage = new WorkspaceAnalysisPage(this.page);
+    await analysisPage.createNotebook(notebookName, lang);
+
+    const notebook = new NotebookPage(this.page, notebookName);
+    await notebook.waitForLoad();
+    return notebook;
+  }
 
 }

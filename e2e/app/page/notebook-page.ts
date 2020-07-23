@@ -1,8 +1,10 @@
 import {ElementHandle, Frame, Page} from 'puppeteer';
 import {waitForDocumentTitle} from 'utils/waits-utils';
 import {getPropValue} from 'utils/element-utils';
+import {waitWhileLoading} from 'utils/test-utils';
 import AuthenticatedPage from './authenticated-page';
 import CodeCell, {Selector as CodeCellSelector} from './notebook-code-cell';
+import WorkspaceAnalysisPage from './workspace-analysis-page';
 
 // CSS selectors
 enum CssSelector {
@@ -38,16 +40,29 @@ export default class NotebookPage extends AuthenticatedPage {
       this.codeCell = new CodeCell(frame);
       // Wait up to 2 minutes.
       await Promise.all([
-        waitForDocumentTitle(this.page, this.documentTitle, 120000),
-        frame.waitForSelector(CssSelector.runCellButton, {visible: true, timeout: 120000}),
-        frame.waitForSelector(CodeCellSelector.codeCell, {visible: true, timeout: 120000}),
-        frame.waitForSelector(CssSelector.kernelIcon, {visible: true, timeout: 120000})
+        waitForDocumentTitle(this.page, this.documentTitle),
+        frame.waitForSelector(CssSelector.runCellButton, {visible: true}),
+        frame.waitForSelector(CodeCellSelector.codeCell, {visible: true}),
+        frame.waitForSelector(CssSelector.kernelIcon, {visible: true})
       ]);
       return true;
     } catch (e) {
       console.log(`NotebookPage isLoaded() encountered ${e}`);
       return false;
     }
+  }
+
+  /**
+   * Click "Notebook" link, goto Workspace Analysis tab. This function does not handle Unsaved Changes confirmation.
+   */
+  async goBackAnalysisPage(): Promise<WorkspaceAnalysisPage> {
+    const navPromise = this.page.waitForNavigation({ waitUntil: ['load', 'domcontentloaded', 'networkidle0'] });
+    await this.notebookLink().then( (link) => link.click());
+    await navPromise;
+    await waitWhileLoading(this.page);
+    const analysisPage = new WorkspaceAnalysisPage(page);
+    await analysisPage.waitForLoad();
+    return analysisPage;
   }
 
   async notebookLink(): Promise<ElementHandle> {
@@ -76,7 +91,7 @@ export default class NotebookPage extends AuthenticatedPage {
   /**
    * Wait for notebook kernel becomes ready (idle).
    */
-  async waitForKernelIdle(timeOut: number = 60000): Promise<boolean> {
+  async waitForKernelIdle(timeOut?: number): Promise<boolean> {
     const iconSelector = `${CssSelector.kernelIcon}.kernel_idle_icon`;
     const notifSelector = '#notification_kernel';
     const frame = await this.frame();
@@ -122,9 +137,19 @@ export default class NotebookPage extends AuthenticatedPage {
     await this.runButton();
     await Promise.all([
       this.waitForKernelIdle(opts.timeOut),
-      this.codeCell.waitForOutput(cellIndex, opts.timeOut),
+      this.codeCell.findCellOutput(cellIndex, opts.timeOut),
     ]);
-    return this.codeCell.waitForOutput(cellIndex);
+    return this.codeCell.findCellOutput(cellIndex);
+  }
+
+  async findCodeCellInput(cellIndex: number) {
+    const codeCell = new CodeCell(await this.frame());
+    await codeCell.findCellInput(cellIndex);
+  }
+
+  async findCodeCellOutput(cellIndex: number) {
+    const codeCell = new CodeCell(await this.frame());
+    await codeCell.findCellOutput(cellIndex);
   }
 
 
@@ -148,10 +173,7 @@ export default class NotebookPage extends AuthenticatedPage {
    * Shortcut explanation: Shift+Enter run cells and select below.
    */
   async runCellShiftEnter(): Promise<void> {
-    await this.page.bringToFront();
-    await this.page.keyboard.down('Shift');
-    await this.page.keyboard.press('Enter', {delay: 20});
-    await this.page.keyboard.up('Shift');
+    return this.runCommand('Shift');
   }
 
   /**
@@ -159,10 +181,7 @@ export default class NotebookPage extends AuthenticatedPage {
    * Shortcut explanation: Ctrl+Enter run selected cells.
    */
   async runCellCtrlEnter(): Promise<void> {
-    await this.page.bringToFront();
-    await this.page.keyboard.down('Control');
-    await this.page.keyboard.press('Enter', {delay: 20});
-    await this.page.keyboard.up('Control');
+    return this.runCommand('Control');
   }
 
   /**
@@ -170,10 +189,14 @@ export default class NotebookPage extends AuthenticatedPage {
    * Shortcut explanation: Alt+Enter run cells and insert below.
    */
   async runCellAltEnter(): Promise<void> {
+    return this.runCommand('Alt');
+  }
+
+  private async runCommand(keyboardCommand: string): Promise<void> {
     await this.page.bringToFront();
-    await this.page.keyboard.down('Alt');
+    await this.page.keyboard.down(keyboardCommand);
     await this.page.keyboard.press('Enter', {delay: 20});
-    await this.page.keyboard.up('Alt');
+    await this.page.keyboard.up(keyboardCommand);
   }
 
   private async frame(): Promise<Frame> {

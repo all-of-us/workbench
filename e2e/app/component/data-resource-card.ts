@@ -1,6 +1,7 @@
 import {ElementHandle, Page} from 'puppeteer';
 import EllipsisMenu from 'app/component/ellipsis-menu';
 import * as fp from 'lodash/fp';
+import {waitWhileLoading} from 'utils/test-utils';
 
 const DataResourceCardSelector = {
   cardRootXpath: '//*[@data-test-id="card"]',
@@ -146,6 +147,7 @@ export default class DataResourceCard {
       this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0']}),
       elemts[0].click(),
     ]);
+    await waitWhileLoading(this.page);
   }
 
   /**

@@ -9,6 +9,7 @@ import {ElementType} from 'app/xpath-options';
 import {centerPoint, dragDrop, waitWhileLoading} from 'utils/test-utils';
 import {waitForNumericalString, waitForPropertyNotExists} from 'utils/waits-utils';
 import {LinkText} from 'app/text-labels';
+import {waitUntilChanged} from 'utils/element-utils';
 
 const defaultXpath = '//*[@class="modal-container"]';
 
@@ -135,16 +136,22 @@ export default class CohortCriteriaModal extends Modal {
     return waitForNumericalString(this.page, selector);
   }
 
-  async getConditionSearchResultsTable(): Promise<Table> {
+  getConditionSearchResultsTable(): Table {
     return new Table(this.page, '//table[@class="p-datatable"]', this);
   }
 
   async searchCondition(searchWord: string): Promise<Table> {
+    const resultsTable = this.getConditionSearchResultsTable();
+    const exists = await resultsTable.exists();
     const searchFilterTextbox = await Textbox.findByName(this.page, {containsText: 'by code or description'}, this);
     await searchFilterTextbox.type(searchWord);
     await searchFilterTextbox.pressReturn();
+    if (exists) {
+      // New search triggers new request to fetch new results. Need to wait for the old table detached from DOM.
+      await waitUntilChanged(this.page, await resultsTable.asElement());
+    }
     await waitWhileLoading(this.page);
-    return this.getConditionSearchResultsTable();
+    return resultsTable;
   }
 
   async addAgeModifier(filterSign: FilterSign, filterValue: number): Promise<string> {

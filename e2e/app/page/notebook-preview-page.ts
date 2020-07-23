@@ -1,8 +1,13 @@
 import {ElementHandle, Frame, Page, WaitForSelectorOptions} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
-import {waitForNumberElements} from 'utils/waits-utils';
+import Link from 'app/element/link';
 import AuthenticatedPage from './authenticated-page';
 import NotebookPage from './notebook-page';
+
+const Selector = {
+  editButton: '//div[normalize-space(text())="Edit"]',
+  playgroundButton: '//div[normalize-space(text())="Run (Playground Mode)"]',
+}
 
 export default class NotebookPreviewPage extends AuthenticatedPage {
 
@@ -13,7 +18,8 @@ export default class NotebookPreviewPage extends AuthenticatedPage {
   async isLoaded(): Promise<boolean> {
     try {
       await Promise.all([
-        this.waitForCssSelector('#notebook'),
+        this.page.waitForXPath(Selector.editButton),
+        this.page.waitForXPath(Selector.playgroundButton),
         waitWhileLoading(this.page),
       ]);
       return true;
@@ -24,16 +30,16 @@ export default class NotebookPreviewPage extends AuthenticatedPage {
   }
 
   /**
-   * Click Edit link.
+   * Click "Edit" link to open notebook in Edit mode.
    */
-  async edit(notebookName: string): Promise<NotebookPage> {
-    const selector = '//div[normalize-space(text())="Edit"]';
-    const link = await this.page.waitForXPath(selector, {visible: true});
-    await link.click();
-    // wait for Connecting to Notebook Server icon.
-    await waitForNumberElements(this.page, 'clr-icon[shape="sync"]', 1);
-    // wait until Connecting to Notebook Server icon disappear.
-    await waitForNumberElements(this.page, 'clr-icon[shape="sync"]', 0, 120000);
+  async openEditMode(notebookName: string): Promise<NotebookPage> {
+    const link = new Link(this.page, Selector.editButton);
+    await link.clickAndWait();
+
+    // Restarting notebook server may take a while.
+    await this.page.waitForXPath('clr-icon[shape="sync"]', {visible: true, timeout: 60 * 15 * 1000});
+    await waitWhileLoading(this.page, 60 * 15 * 1000);
+
     const notebookPage = new NotebookPage(this.page, notebookName);
     await notebookPage.waitForLoad();
     return notebookPage;
