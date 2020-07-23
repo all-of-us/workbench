@@ -32,7 +32,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryServiceImpl;
-import org.pmiops.workbench.actionaudit.auditors.FreeTierAuditor;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
@@ -144,13 +143,11 @@ public class ProfileControllerTest extends BaseControllerTest {
   @MockBean private CloudStorageService mockCloudStorageService;
   @MockBean private DirectoryService mockDirectoryService;
   @MockBean private FireCloudService mockFireCloudService;
-  @MockBean private FreeTierAuditor mockFreeTierAuditor;
   @MockBean private MailService mockMailService;
   @MockBean private ProfileAuditor mockProfileAuditor;
   @MockBean private ShibbolethService shibbolethService;
   @MockBean private UserServiceAuditor mockUserServiceAuditor;
 
-  @Autowired private FreeTierBillingService freeTierBillingService;
   @Autowired private InstitutionService institutionService;
   @Autowired private ProfileController profileController;
   @Autowired private ProfileService profileService;
@@ -1482,7 +1479,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     final Profile retrieved = profileService.editUserInformation(request);
     assertThat(retrieved.getFreeTierDollarQuota()).isWithin(0.01).of(newQuota);
 
-    verify(mockFreeTierAuditor)
+    verify(mockUserServiceAuditor)
         .fireFreeTierDollarQuotaAction(dbUser.getUserId(), originalQuota, newQuota);
   }
 
@@ -1496,7 +1493,7 @@ public class ProfileControllerTest extends BaseControllerTest {
             .freeCreditsLimit(original.getFreeTierDollarQuota());
     profileService.editUserInformation(request);
 
-    verify(mockFreeTierAuditor, never())
+    verify(mockUserServiceAuditor, never())
         .fireFreeTierDollarQuotaAction(anyLong(), anyDouble(), anyDouble());
   }
 

@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.logging.Logger;
+import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
@@ -13,6 +14,7 @@ import org.pmiops.workbench.actionaudit.AgentType;
 import org.pmiops.workbench.actionaudit.TargetType;
 import org.pmiops.workbench.actionaudit.targetproperties.AccountTargetProperty;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
+import org.pmiops.workbench.actionaudit.targetproperties.ProfileTargetProperty;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,5 +106,31 @@ public class UserServiceAuditorImpl implements UserServiceAuditor {
             .targetIdMaybe(targetUser.getUserId())
             .newValueMaybe(String.valueOf(termsOfServiceVersion))
             .build());
+  }
+
+  @Override
+  public void fireFreeTierDollarQuotaAction(
+      Long targetUserId, @Nullable Double previousDollarQuota, @Nullable Double newDollarQuota) {
+    DbUser adminUser = dbUserProvider.get();
+    ActionAuditEvent.Builder builder =
+        ActionAuditEvent.builder()
+            .timestamp(clock.millis())
+            .agentType(AgentType.ADMINISTRATOR)
+            .agentIdMaybe(adminUser.getUserId())
+            .agentEmailMaybe(adminUser.getUsername())
+            .actionId(actionIdProvider.get())
+            .actionType(ActionType.FREE_TIER_DOLLAR_OVERRIDE)
+            .targetType(TargetType.ACCOUNT)
+            .targetPropertyMaybe(ProfileTargetProperty.FREE_TIER_DOLLAR_QUOTA.getPropertyName())
+            .targetIdMaybe(targetUserId);
+
+    if (previousDollarQuota != null) {
+      builder.setPreviousValueMaybe(previousDollarQuota.toString());
+    }
+    if (newDollarQuota != null) {
+      builder.setNewValueMaybe(newDollarQuota.toString());
+    }
+
+    actionAuditService.send(builder.build());
   }
 }

@@ -32,7 +32,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.actionaudit.auditors.FreeTierAuditor;
+import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -63,7 +63,7 @@ public class FreeTierBillingServiceTest {
 
   private static final double DEFAULT_PERCENTAGE_TOLERANCE = 0.000001;
 
-  @MockBean private FreeTierAuditor mockFreeTierAuditor;
+  @MockBean private UserServiceAuditor mockUserServiceAuditor;
 
   @Autowired BigQueryService bigQueryService;
   @Autowired FreeTierBillingService freeTierBillingService;
@@ -355,7 +355,7 @@ public class FreeTierBillingServiceTest {
     verifyZeroInteractions(mailService);
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.ACTIVE, 150.0);
 
-    verify(mockFreeTierAuditor).fireFreeTierDollarQuotaAction(user.getUserId(), null, 200.0);
+    verify(mockUserServiceAuditor).fireFreeTierDollarQuotaAction(user.getUserId(), null, 200.0);
   }
 
   // do not reactivate workspaces if the new dollar limit is still below the usage
@@ -384,7 +384,7 @@ public class FreeTierBillingServiceTest {
     verifyZeroInteractions(mailService);
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 300.0);
 
-    verify(mockFreeTierAuditor).fireFreeTierDollarQuotaAction(user.getUserId(), null, 200.0);
+    verify(mockUserServiceAuditor).fireFreeTierDollarQuotaAction(user.getUserId(), null, 200.0);
   }
 
   @Test

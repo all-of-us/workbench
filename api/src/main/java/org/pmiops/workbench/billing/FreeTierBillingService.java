@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
 import org.jetbrains.annotations.Nullable;
-import org.pmiops.workbench.actionaudit.auditors.FreeTierAuditor;
+import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -38,10 +38,10 @@ import org.springframework.stereotype.Service;
 public class FreeTierBillingService {
 
   private final BigQueryService bigQueryService;
-  private final FreeTierAuditor freeTierAuditor;
   private final MailService mailService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
+  private final UserServiceAuditor userServiceAuditor;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
 
@@ -54,14 +54,14 @@ public class FreeTierBillingService {
   @Autowired
   public FreeTierBillingService(
       BigQueryService bigQueryService,
-      FreeTierAuditor freeTierAuditor,
       MailService mailService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserDao userDao,
+      UserServiceAuditor userServiceAuditor,
       WorkspaceDao workspaceDao,
       WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao) {
     this.bigQueryService = bigQueryService;
-    this.freeTierAuditor = freeTierAuditor;
+    this.userServiceAuditor = userServiceAuditor;
     this.mailService = mailService;
     this.userDao = userDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
@@ -321,7 +321,7 @@ public class FreeTierBillingService {
       updateFreeTierWorkspacesStatus(user, BillingStatus.ACTIVE);
     }
 
-    freeTierAuditor.fireFreeTierDollarQuotaAction(
+    userServiceAuditor.fireFreeTierDollarQuotaAction(
         user.getUserId(), previousLimitMaybe, dollarLimit);
 
     return underLimit;
