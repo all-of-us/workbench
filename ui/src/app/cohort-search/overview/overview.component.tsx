@@ -1,11 +1,11 @@
 import {Menu} from 'primereact/menu';
 import * as React from 'react';
 
-import {ComboChart} from 'app/cohort-common/combo-chart/combo-chart.component';
 import {GenderChart} from 'app/cohort-search/gender-chart/gender-chart.component';
 import {searchRequestStore} from 'app/cohort-search/search-state.service';
 import {ageTypeToText, genderOrSexTypeToText, mapRequest} from 'app/cohort-search/utils';
 import {Button, Clickable} from 'app/components/buttons';
+import {ComboChart} from 'app/components/combo-chart.component';
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {ClrIcon} from 'app/components/icons';
 import {TextArea, TextInput} from 'app/components/inputs';

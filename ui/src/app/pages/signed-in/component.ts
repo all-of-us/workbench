@@ -207,9 +207,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    // If we ever get a test Zendesk account,
-    // the key should be templated in using an environment variable.
-    initializeZendeskWidget(this.elementRef, environment.zendeskWidgetKey);
+    initializeZendeskWidget(this.elementRef);
   }
 
   ngOnDestroy() {

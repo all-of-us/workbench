@@ -106,4 +106,6 @@ public interface WorkspaceService {
   DbUserRecentWorkspace updateRecentWorkspaces(DbWorkspace workspace);
 
   boolean maybeDeleteRecentWorkspace(long workspaceId);
+
+  List<DbWorkspace> getAllActiveWorkspaces();
 }

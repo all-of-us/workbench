@@ -1,4 +1,3 @@
-import {Component, Input} from '@angular/core';
 import * as React from 'react';
 
 import {AttributesPage} from 'app/cohort-search/attributes-page/attributes-page.component';
@@ -13,7 +12,7 @@ import {FlexRowWrap} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase} from 'app/utils';
+import {reactStyles} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentCohortCriteriaStore} from 'app/utils/navigation';
 import {Criteria, CriteriaType, DomainType, TemporalMention, TemporalTime} from 'generated/fetch';
@@ -104,14 +103,16 @@ interface State {
   treeSearchTerms: string;
 }
 
-const css = `
+const css = ` 
+  .p-growl {
+    position: sticky;
+  }
   .p-growl.p-growl-topright {
      height: 1rem;
      width: 6.4rem;
-     padding-top: 6rem;
+     padding-top: 0.4rem;
      line-hieght: 0.7rem;
      margin-right: 3rem;
-
    }
    .p-growl .p-growl-item-container .p-growl-item .p-growl-image {
      font-size: 1rem !important;
@@ -139,7 +140,7 @@ const css = `
     border-top:0.5rem solid transparent;
     border-left:0.5rem solid ` + colorWithWhiteness(colors.success, 0.6) + `;
     border-bottom:0.5rem solid transparent;
-   }
+  }
    .p-growl-item-container {
      background-color: ` + colorWithWhiteness(colors.success, 0.6) + `!important;
    }
@@ -148,6 +149,7 @@ const css = `
      background-color: ` + colorWithWhiteness(colors.success, 0.6) + `!important;
      margin-left: 0.3rem;
    }
+
    .p-growl-message {
      margin-left: 0.5em
    }
@@ -423,17 +425,5 @@ export class CohortSearch extends React.Component<Props, State> {
         </div>
       </div>
     </FlexRowWrap>;
-  }
-}
-
-@Component({
-  selector: 'app-cohort-search',
-  template: '<div #root></div>'
-})
-export class CohortSearchComponent extends ReactWrapperBase {
-  @Input('closeSearch') closeSearch: Props['closeSearch'];
-  @Input('searchContext') searchContext: Props['searchContext'];
-  constructor() {
-    super(CohortSearch, ['closeSearch', 'searchContext']);
   }
 }

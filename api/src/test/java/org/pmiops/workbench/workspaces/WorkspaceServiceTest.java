@@ -1,7 +1,6 @@
 package org.pmiops.workbench.workspaces;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
@@ -155,7 +154,7 @@ public class WorkspaceServiceTest {
         WorkspaceAccessLevel.OWNER,
         WorkspaceActiveStatus.ACTIVE);
 
-    doReturn(firecloudWorkspaceResponses).when(mockFireCloudService).getWorkspaces(any());
+    doReturn(firecloudWorkspaceResponses).when(mockFireCloudService).getWorkspaces();
 
     currentUser = new DbUser();
     currentUser.setUsername(DEFAULT_USERNAME);

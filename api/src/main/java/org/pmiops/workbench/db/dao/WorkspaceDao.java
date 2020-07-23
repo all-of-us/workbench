@@ -9,6 +9,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.model.BillingStatus;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -75,6 +76,8 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
       "SELECT activeStatus, dataAccessLevel, COUNT(workspaceId) FROM DbWorkspace "
           + "GROUP BY activeStatus, dataAccessLevel ORDER BY activeStatus, dataAccessLevel")
   List<ActiveStatusAndDataAccessLevelToCountResult> getActiveStatusAndDataAccessLevelToCount();
+
+  List<DbWorkspace> findAllByActiveStatusIn(WorkspaceActiveStatus workspaceActiveStatus);
 
   interface ActiveStatusAndDataAccessLevelToCountResult {
     Short getWorkspaceActiveStatus();
