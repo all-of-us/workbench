@@ -17,6 +17,9 @@ import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -31,7 +34,7 @@ import org.pmiops.workbench.model.EmailVerificationStatus;
 
 @Entity
 @Table(name = "user")
-public class DbUser extends DbUserBase {
+public class DbUser {
 
   private static final String CLUSTER_NAME_PREFIX = "all-of-us-";
 
@@ -109,7 +112,17 @@ public class DbUser extends DbUserBase {
   private Timestamp twoFactorAuthBypassTime;
   private DbDemographicSurvey demographicSurvey;
   private DbAddress address;
-  private DbVerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation;
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "user_id")
+  public long getUserId() {
+    return userId;
+  }
+
+  public void setUserId(long userId) {
+    this.userId = userId;
+  }
 
   @Version
   @Column(name = "version")
@@ -321,13 +334,21 @@ public class DbUser extends DbUserBase {
       return null;
     }
     return this.degrees.stream()
-        .map(DbStorageEnums::degreeFromStorage)
+        .map(
+            (degreeObject) -> {
+              return DbStorageEnums.degreeFromStorage(degreeObject);
+            })
         .collect(Collectors.toList());
   }
 
   public void setDegreesEnum(List<Degree> degreeList) {
     this.degrees =
-        degreeList.stream().map(DbStorageEnums::degreeToStorage).collect(Collectors.toList());
+        degreeList.stream()
+            .map(
+                (degree) -> {
+                  return DbStorageEnums.degreeToStorage(degree);
+                })
+            .collect(Collectors.toList());
   }
 
   @OneToMany(
@@ -724,24 +745,4 @@ public class DbUser extends DbUserBase {
   public String getClusterName() {
     return CLUSTER_NAME_PREFIX + getUserId();
   }
-
-  //  // Table workbench.user_verified_institutional_affiliation is now 1:1  w/r/t the user table,
-  //  // but we haven't migrrated  it back in. Thus we can't simply use a join column relationship
-  // but
-  //  // require a JoinTable
-  //  @OneToOne()
-  ////  @JoinColumn(name = "verified_institutional_affiliation_id")
-  //  @JoinTable(name = "user_verified_institutional_affiliation",
-  //    foreignKey = @ForeignKey(name="user_verified_institutional_affiliation_id"),
-  //    joinColumns = {@JoinColumn(name="user_id")},
-  //    inverseJoinColumns = @JoinColumn(name="user_verified_institutional_affiliation_id", nullable
-  // = true))
-  //  public DbVerifiedInstitutionalAffiliation getVerifiedInstitutionalAffiliation() {
-  //    return verifiedInstitutionalAffiliation;
-  //  }
-  //
-  //  public void setVerifiedInstitutionalAffiliation(
-  //      DbVerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation) {
-  //    this.verifiedInstitutionalAffiliation = verifiedInstitutionalAffiliation;
-  //  }
 }
