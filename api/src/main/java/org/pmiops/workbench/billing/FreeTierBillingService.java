@@ -295,4 +295,8 @@ public class FreeTierBillingService {
     return Optional.ofNullable(user.getFreeTierCreditsLimitDollarsOverride())
         .orElse(workbenchConfigProvider.get().billing.defaultFreeCreditsDollarLimit);
   }
+
+  public Map<Long, Double> getUserIdToTotalCost() {
+    return workspaceFreeTierUsageDao.getUserIdToTotalCost();
+  }
 }

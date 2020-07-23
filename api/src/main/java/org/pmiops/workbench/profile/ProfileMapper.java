@@ -4,8 +4,11 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserTermsOfService;
+import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.institution.deprecated.InstitutionalAffiliationMapper;
 import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 import org.pmiops.workbench.utils.mappers.UserMapper;
@@ -24,18 +27,16 @@ import org.pmiops.workbench.utils.mappers.UserMapper;
     })
 public interface ProfileMapper {
   @Mapping(target = "contactEmailFailure", ignore = true) // I don't think we actually use this
-  @Mapping(target = "freeTierDollarQuota", ignore = true) // handled by ProfileService.getProfile
-  @Mapping(target = "freeTierUsage", ignore = true) // handled by ProfileService.getProfile
-  @Mapping(
-      target = "latestTermsOfServiceTime",
-      ignore = true) // handled by ProfileService.getProfile
-  @Mapping(
-      target = "latestTermsOfServiceVersion",
-      ignore = true) // handled by ProfileService.getProfile
-  @Mapping(
-      target = "verifiedInstitutionalAffiliation",
-      ignore = true) // handled by ProfileService.getProfile
-  Profile dbUserToProfile(DbUser dbUser);
+  @Mapping(source = "latestTermsOfService.tosVersion", target = "latestTermsOfServiceVersion")
+  @Mapping(source = "latestTermsOfService.agreementTime", target = "latestTermsOfServiceTime")
+  @Mapping(source = "dbUser.userId", target = "userId")
+  @Mapping(target = "institutionalAffiliations", ignore = true) // deprecated
+  Profile toModel(
+      DbUser dbUser,
+      VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation,
+      DbUserTermsOfService latestTermsOfService,
+      Double freeTierUsage,
+      Double freeTierDollarQuota);
 
   @Mapping(target = "authoritiesEnum", ignore = true) // derived property
   @Mapping(target = "billingProjectRetries", ignore = true) // I don't think we actually use this

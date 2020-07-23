@@ -1,16 +1,24 @@
 package org.pmiops.workbench.profile;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
+import javax.validation.constraints.Null;
 import org.apache.commons.lang3.StringUtils;
 import org.javers.core.Javers;
 import org.javers.core.diff.Change;
@@ -108,28 +116,17 @@ public class ProfileService {
       user = userWithAuthoritiesAndPageVisits;
     }
 
-    Profile profile = profileMapper.dbUserToProfile(user);
+    // TODO: avoid all these queries
+    final @Nullable Double freeTierUsage = freeTierBillingService.getCachedFreeTierUsage(user);
+    final @Nullable Double freeTierDollarQuota = freeTierBillingService.getUserFreeTierDollarLimit(user);
+    final @Nullable VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
+        verifiedInstitutionalAffiliationDao.findFirstByUser(user)
+          .map(verifiedInstitutionalAffiliationMapper::dbToModel)
+          .orElse(null);
 
-    profile.setFreeTierUsage(freeTierBillingService.getCachedFreeTierUsage(user));
-    profile.setFreeTierDollarQuota(freeTierBillingService.getUserFreeTierDollarLimit(user));
-
-    verifiedInstitutionalAffiliationDao
-        .findFirstByUser(user)
-        .ifPresent(
-            verifiedInstitutionalAffiliation ->
-                profile.setVerifiedInstitutionalAffiliation(
-                    verifiedInstitutionalAffiliationMapper.dbToModel(
-                        verifiedInstitutionalAffiliation)));
-
-    Optional<DbUserTermsOfService> latestTermsOfServiceMaybe =
-        userTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(user.getUserId());
-    if (latestTermsOfServiceMaybe.isPresent()) {
-      profile.setLatestTermsOfServiceVersion(latestTermsOfServiceMaybe.get().getTosVersion());
-      profile.setLatestTermsOfServiceTime(
-          latestTermsOfServiceMaybe.get().getAgreementTime().getTime());
-    }
-
-    return profile;
+    final @Nullable DbUserTermsOfService latestTermsOfService =
+        userTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(user.getUserId()).orElse(null);
+    return profileMapper.toModel(user, verifiedInstitutionalAffiliation, latestTermsOfService, freeTierUsage, freeTierDollarQuota);
   }
 
   public void validateInstitutionalAffiliation(Profile profile) {
@@ -440,7 +437,32 @@ public class ProfileService {
     validateProfile(profile, null);
   }
 
+  // Get all the profiles. Best we can do without surgery on the entity classes is to do one query
+  // per table and join them in code.
   public List<Profile> listAllProfiles() {
-    return userService.getAllUsers().stream().map(this::getProfile).collect(Collectors.toList());
+    final List<DbUser> usersHeavy = userService.findAllUsersWithAuthoritiesAndPageVisits();
+    final Map<Long, VerifiedInstitutionalAffiliation> userIdToAffiliationModel = StreamSupport.stream(verifiedInstitutionalAffiliationDao.findAll().spliterator(), false)
+        .map(a -> new AbstractMap.SimpleImmutableEntry<>(
+            a.getUser().getUserId(), verifiedInstitutionalAffiliationMapper.dbToModel(a)))
+        .collect(ImmutableMap.toImmutableMap(Entry::getKey, Entry::getValue)));
+
+    final Map<Long, DbUserTermsOfService> userIdToTermsOfService =  StreamSupport.stream(userTermsOfServiceDao.findAll().spliterator(), false)
+        .collect(ImmutableMap.toImmutableMap(DbUserTermsOfService::getUserId, Function.identity()));
+
+    // The cached free tier usage aka total cost for each user, by ID
+    final Map<Long, Double> userIdToFreeTierUsage = freeTierBillingService.getUserIdToTotalCost();
+
+    final Map<Long, Double> userIdToQuota = usersHeavy.stream()
+        .collect(ImmutableMap.toImmutableMap(DbUser::getUserId, freeTierBillingService::getUserFreeTierDollarLimit));
+
+    return usersHeavy.stream()
+        .map(dbUser -> profileMapper.toModel(
+            dbUser,
+            userIdToAffiliationModel.get(dbUser.getUserId()),
+            userIdToTermsOfService.get(dbUser.getUserId()),
+            userIdToFreeTierUsage.get(dbUser.getUserId()),
+            userIdToQuota.get(dbUser.getUserId())
+        ))
+        .collect(ImmutableList.toImmutableList());
   }
 }

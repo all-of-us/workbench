@@ -1022,4 +1022,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
             "There is no access module named: " + accessBypassRequest.getModuleName().toString());
     }
   }
+
+  @Override
+  public List<DbUser> findAllUsersWithAuthoritiesAndPageVisits() {
+    return userDao.findAllUsersWithAuthoritiesAndPageVisits();
+  }
 }

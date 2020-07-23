@@ -113,4 +113,6 @@ public interface UserService {
   Optional<DbUser> getByDatabaseId(long databaseId);
 
   void updateBypassTime(long userDatabaseId, AccessBypassRequest accessBypassRequest);
+
+  List<DbUser> findAllUsersWithAuthoritiesAndPageVisits();
 }
