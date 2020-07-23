@@ -160,10 +160,10 @@ public class ProfileService {
           "Institutional role description cannot be empty when institutional role is set to Other");
     }
 
-    validateInstitutionalAffiliationAgainstEmail(profile);
+    validateAffiliation(profile);
   }
 
-  private void validateInstitutionalAffiliationAgainstEmail(Profile profile) {
+  private void validateAffiliation(Profile profile) {
     String contactEmail = profile.getContactEmail();
     DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation =
         verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
@@ -444,7 +444,7 @@ public class ProfileService {
 
       // only validate if the new profile has an affiliation - some older users do not
       if (profile.getVerifiedInstitutionalAffiliation() != null) {
-        validateInstitutionalAffiliationAgainstEmail(profile);
+        validateAffiliation(profile);
       }
     }
     if (isNewProfile || fieldChanged(diff, "givenName")) {
