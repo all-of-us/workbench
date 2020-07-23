@@ -1024,6 +1024,11 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   @Override
+  public Optional<DbUser> findUserWithAuthoritiesAndPageVisits(long userId) {
+    return Optional.ofNullable(userDao.findUserWithAuthoritiesAndPageVisits(userId));
+  }
+
+  @Override
   public List<DbUser> findAllUsersWithAuthoritiesAndPageVisits() {
     return userDao.findAllUsersWithAuthoritiesAndPageVisits();
   }

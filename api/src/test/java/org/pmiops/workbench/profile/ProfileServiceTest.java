@@ -4,12 +4,16 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
@@ -34,9 +38,12 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
+import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.institution.deprecated.InstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.model.Address;
+import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.InstitutionalRole;
+import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.test.FakeClock;
@@ -85,14 +92,15 @@ public class ProfileServiceTest {
 
   private static final Profile VALID_PROFILE = createValidProfile();
 
+  @MockBean private FreeTierBillingService mockFreeTierBillingService;
   @MockBean private InstitutionDao mockInstitutionDao;
   @MockBean private InstitutionService mockInstitutionService;
+  @MockBean private UserService mockUserService;
   @MockBean private UserTermsOfServiceDao mockUserTermsOfServiceDao;
+  @MockBean private VerifiedInstitutionalAffiliationDao mockVerifiedInstitutionalAffiliationDao;
 
   @MockBean
   private VerifiedInstitutionalAffiliationMapper mockVerifiedInstitutionalAffiliationMapper;
-
-  @MockBean private VerifiedInstitutionalAffiliationDao mockVerifiedInstitutionalAffiliationDao;
 
   @Autowired ProfileService profileService;
   @Autowired UserDao userDao;
@@ -100,16 +108,17 @@ public class ProfileServiceTest {
   private static WorkbenchConfig workbenchConfig;
 
   @TestConfiguration
-  @MockBean({FreeTierBillingService.class, UserService.class})
+  @MockBean({FreeTierBillingService.class})
   @Import({
     AddressMapperImpl.class,
+    CommonConfig.class,
+    CommonMappers.class,
     DemographicSurveyMapperImpl.class,
     InstitutionalAffiliationMapperImpl.class,
     PageVisitMapperImpl.class,
     ProfileMapperImpl.class,
     ProfileService.class,
-    CommonMappers.class,
-    CommonConfig.class,
+    VerifiedInstitutionalAffiliationMapperImpl.class
   })
   @MockBean({ProfileAuditor.class})
   static class Configuration {
@@ -448,5 +457,102 @@ public class ProfileServiceTest {
     when(mockInstitutionService.validateAffiliation(any(), any())).thenReturn(false);
 
     profileService.validateProfile(newProfile, new Profile());
+  }
+
+  @Test
+  public void testListAllProfiles_noUsers() {
+    final List<Profile> profiles = profileService.listAllProfiles();
+    assertThat(profiles).isEmpty();
+  }
+
+  @Test
+  public void testListAllProfiles_someUsers() {
+    final DbUser user1 = new DbUser();
+    user1.setUserId(101L);
+    user1.setUsername("jay@aou.biz");
+    user1.setDisabled(false);
+    user1.setAboutYou("Just a test user");
+
+    final DbUser user2 = new DbUser();
+    user2.setUserId(102l);
+    user2.setUsername("fred@aou.biz");
+    user2.setDisabled(true);
+    user2.setAboutYou("a disabled user account");
+
+    final DbUser user3 = new DbUser();
+    user3.setUserId(103l);
+    user3.setUsername("betty@aou.biz");
+    user3.setDisabled(true);
+    user3.setAboutYou("where to begin...");
+
+    doReturn(ImmutableList.of(user1, user2, user3))
+        .when(mockUserService)
+        .findAllUsersWithAuthoritiesAndPageVisits();
+
+    doReturn(
+            ImmutableMap.of(
+                user1.getUserId(), 1.75,
+                user2.getUserId(), 67.53,
+                user3.getUserId(), 0.00))
+        .when(mockFreeTierBillingService)
+        .getUserIdToTotalCost();
+
+    doReturn(100.00).when(mockFreeTierBillingService).getUserFreeTierDollarLimit(user1);
+    doReturn(200.00).when(mockFreeTierBillingService).getUserFreeTierDollarLimit(user2);
+    doReturn(50.00).when(mockFreeTierBillingService).getUserFreeTierDollarLimit(user3);
+
+    final DbUserTermsOfService dbTos1 = new DbUserTermsOfService();
+    dbTos1.setUserTermsOfServiceId(1L);
+    dbTos1.setUserId(user1.getUserId());
+    dbTos1.setTosVersion(1);
+    dbTos1.setAgreementTime(Timestamp.from(CLOCK.instant()));
+
+    final DbUserTermsOfService dbTos2 = new DbUserTermsOfService();
+    dbTos2.setUserTermsOfServiceId(2L);
+    dbTos2.setUserId(user2.getUserId());
+    dbTos2.setTosVersion(2);
+    dbTos2.setAgreementTime(Timestamp.from(CLOCK.instant().plusSeconds(3600L)));
+
+    doReturn(ImmutableList.of(dbTos1, dbTos2)).when(mockUserTermsOfServiceDao).findAll();
+
+    final DbInstitution dbInstitution1 = new DbInstitution();
+    dbInstitution1.setShortName("caltech");
+    dbInstitution1.setDisplayName("California Institute of Technology");
+    dbInstitution1.setOrganizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
+    dbInstitution1.setDuaTypeEnum(DuaType.MASTER);
+    dbInstitution1.setInstitutionId(1L);
+
+    final DbVerifiedInstitutionalAffiliation dbAffiliation1 =
+        new DbVerifiedInstitutionalAffiliation();
+    dbAffiliation1.setVerifiedInstitutionalAffiliationId(1L);
+    dbAffiliation1.setUser(user1);
+    dbAffiliation1.setInstitution(dbInstitution1);
+    doReturn(ImmutableList.of(dbAffiliation1))
+        .when(mockVerifiedInstitutionalAffiliationDao)
+        .findAll();
+
+    // The VerifiedInstitutionalAffiliationMapper is already injected as a mock for purposes of
+    // other test cases
+    // so I have to mock this method (even though the generated code would do what I want). The way
+    // the Application
+    // Context works here, I can't easily use the mock in some methods and the real class in others.
+    final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation1 =
+        new VerifiedInstitutionalAffiliation()
+            .institutionShortName(dbInstitution1.getShortName())
+            .institutionDisplayName(dbInstitution1.getDisplayName())
+            .institutionalRoleOtherText(dbInstitution1.getOrganizationTypeOtherText());
+    doReturn(verifiedInstitutionalAffiliation1)
+        .when(mockVerifiedInstitutionalAffiliationMapper)
+        .dbToModel(dbAffiliation1);
+
+    final List<Profile> profiles = profileService.listAllProfiles();
+    assertThat(profiles).hasSize(3);
+    assertThat(profiles.get(1).getUserId()).isEqualTo(user2.getUserId());
+    assertThat(profiles.get(1).getFreeTierDollarQuota()).isWithin(0.02).of(200.00);
+    assertThat(profiles.get(0).getVerifiedInstitutionalAffiliation().getInstitutionDisplayName())
+        .isEqualTo(dbInstitution1.getDisplayName());
+
+    assertThat(profiles.get(2).getVerifiedInstitutionalAffiliation()).isNull();
+    assertThat(profiles.get(2).getFreeTierUsage()).isWithin(0.02).of(0.00);
   }
 }

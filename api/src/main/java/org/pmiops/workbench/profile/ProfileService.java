@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.inject.Provider;
 import org.apache.commons.lang3.StringUtils;
 import org.javers.core.Javers;
 import org.javers.core.diff.Change;
@@ -25,9 +24,7 @@ import org.javers.core.diff.Diff;
 import org.javers.core.diff.changetype.PropertyChange;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.InstitutionDao;
-import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
@@ -61,9 +58,6 @@ public class ProfileService {
   private final Javers javers;
   private final ProfileAuditor profileAuditor;
   private final ProfileMapper profileMapper;
-  private final Provider<DbUser> userProvider;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
-  private final UserDao userDao;
   private final UserService userService;
   private final UserTermsOfServiceDao userTermsOfServiceDao;
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
@@ -80,9 +74,6 @@ public class ProfileService {
       Javers javers,
       ProfileAuditor profileAuditor,
       ProfileMapper profileMapper,
-      Provider<DbUser> userProvider,
-      Provider<WorkbenchConfig> workbenchConfigProvider,
-      UserDao userDao,
       UserService userService,
       UserTermsOfServiceDao userTermsOfServiceDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
@@ -96,26 +87,18 @@ public class ProfileService {
     this.javers = javers;
     this.profileAuditor = profileAuditor;
     this.profileMapper = profileMapper;
-    this.userProvider = userProvider;
-    this.workbenchConfigProvider = workbenchConfigProvider;
-    this.userDao = userDao;
     this.userService = userService;
     this.userTermsOfServiceDao = userTermsOfServiceDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
     this.verifiedInstitutionalAffiliationMapper = verifiedInstitutionalAffiliationMapper;
   }
 
-  public Profile getProfile(DbUser user) {
+  // TODO: avoid all these separate queries by appropriate ORM mappings
+  public Profile getProfile(DbUser userLite) {
     // Fetch the user's authorities, since they aren't loaded during normal request interception.
-    DbUser userWithAuthoritiesAndPageVisits =
-        userDao.findUserWithAuthoritiesAndPageVisits(user.getUserId());
-    if (userWithAuthoritiesAndPageVisits != null) {
-      // If the user is already written to the database, use it and whatever authorities and page
-      // visits are there.
-      user = userWithAuthoritiesAndPageVisits;
-    }
+    final DbUser user =
+        userService.findUserWithAuthoritiesAndPageVisits(userLite.getUserId()).orElse(userLite);
 
-    // TODO: avoid all these queries
     final @Nullable Double freeTierUsage = freeTierBillingService.getCachedFreeTierUsage(user);
     final @Nullable Double freeTierDollarQuota =
         freeTierBillingService.getUserFreeTierDollarLimit(user);
