@@ -328,8 +328,8 @@ jobs:
               | sed 's@/@.@g' \
               | sed 's/\.[^.]*$//' \
               | circleci tests split --split-by=timings --timings-type=classname --index=$CIRCLE_NODE_INDEX)
-            GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) if($i !~ /genomics/) { print "--tests", $i } }')
-            gradle test $GRADLE_ARGS
+            GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) print "--tests", $i }')
+            gradle test -x :genomics $GRADLE_ARGS
       - run:
           # Lint last; it's more important to surface test failures early.
           name: Java linting
