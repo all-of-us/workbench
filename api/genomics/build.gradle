@@ -7,6 +7,7 @@ repositories {
 
 dependencies {
     // Genomics dependencies
+    compile "org.apache.logging.log4j:log4j-api:2.5"
     compile "org.broadinstitute:gatk:4.1.8.0"
     compile "com.github.broadinstitute:picard:2.22.8"
     compile "com.github.samtools:htsjdk:2.1.1"
