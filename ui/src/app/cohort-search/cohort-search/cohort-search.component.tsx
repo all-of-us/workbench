@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import {AttributesPage} from 'app/cohort-search/attributes-page/attributes-page.component';
 import {Demographics} from 'app/cohort-search/demographics/demographics.component';
 import {ListSearchV2} from 'app/cohort-search/list-search-v2/list-search-v2.component';
 import {searchRequestStore} from 'app/cohort-search/search-state.service';

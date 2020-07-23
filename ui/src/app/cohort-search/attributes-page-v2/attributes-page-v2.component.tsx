@@ -1,8 +1,10 @@
+import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 
 import {PM_UNITS, PREDEFINED_ATTRIBUTES} from 'app/cohort-search/constant';
 import {ppiQuestions} from 'app/cohort-search/search-state.service';
+import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {
   mapParameter,
   sanitizeNumericalInput,
@@ -16,9 +18,9 @@ import {CheckBox, NumberInput} from 'app/components/inputs';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, withCurrentCohortCriteria, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {currentWorkspaceStore} from 'app/utils/navigation';
+import {currentCohortCriteriaStore, currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {AttrName, CriteriaSubType, DomainType, Operator} from 'generated/fetch';
 
@@ -58,8 +60,7 @@ const styles = reactStyles({
     marginRight: '1rem',
   },
   categorical: {
-    width: '25%',
-    float: 'left',
+    width: '100%',
     marginBottom: '0.25rem'
   },
   badge: {
@@ -82,7 +83,8 @@ const styles = reactStyles({
   addButton: {
     height: '2rem',
     borderRadius: '5px',
-    fontWeight: 600
+    fontWeight: 600,
+    marginRight: '0.5rem'
   },
   calculateButton: {
     height: '1.75rem',
@@ -141,8 +143,8 @@ interface AttributeForm {
 
 interface Props {
   close: Function;
+  criteria: Array<Selection>;
   node: any;
-  select: Function;
   workspace: WorkspaceData;
 }
 
@@ -154,7 +156,7 @@ interface State {
   loading: boolean;
   options: any;
 }
-export const AttributesPageV2 = withCurrentWorkspace() (
+export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohortCriteria()) (
   class extends React.Component<Props, State> {
     constructor(props: Props) {
       super(props);
@@ -434,13 +436,15 @@ export const AttributesPageV2 = withCurrentWorkspace() (
     }
 
     addParameterToSearchItem() {
-      const {close, select} = this.props;
+      const {close} = this.props;
+      let {criteria} = this.props;
       const param = this.paramWithAttributes;
       // TODO remove condition to only track PM criteria for 'Phase 2' of CB Google Analytics
       if (this.isPhysicalMeasurement) {
         this.trackEvent(param.subtype, 'Add');
       }
-      select(param);
+      criteria = criteria.filter(crit => crit.parameterId !== param.parameterId);
+      currentCohortCriteriaStore.next([...criteria, param]);
       close();
     }
 
@@ -482,7 +486,7 @@ export const AttributesPageV2 = withCurrentWorkspace() (
     }
 
     render() {
-      const {node: {domainId, name, parentId, subtype}} = this.props;
+      const {close, node: {domainId, name, parentId, subtype}} = this.props;
       const {calculating, count, countError, form, loading, options} = this.state;
       const {formErrors, formValid} = this.validateForm();
       const disableAdd = calculating || !formValid;
@@ -513,32 +517,33 @@ export const AttributesPageV2 = withCurrentWorkspace() (
               {this.isMeasurement && <div style={styles.label}>Numeric Values</div>}
               {this.isSurvey && <div style={styles.label}>{ppiQuestions.getValue()[parentId].name}</div>}
               {this.isBloodPressure && <div style={styles.label}>{attr.name}</div>}
-              <div style={styles.container}>
-                <div style={styles.dropdown}>
-                  <Dropdown style={{width: '100%'}} value={attr.operator} options={options}
-                    placeholder='Select Operator' onChange={(e) => this.selectChange(a, e.value)}/>
-                </div>
-                {![null, 'ANY'].includes(attr.operator) && <div>
-                  <NumberInput style={{padding: '0 0.25rem', width: '3rem'}}
-                    value={attr.operands[0] || ''}
-                    min={attr.MIN} max={attr.MAX}
-                    onChange={(v) => this.inputChange(v, a, 0)}/>
+              <Dropdown style={{marginBottom: '0.5rem', width: '100%'}}
+                        value={attr.operator}
+                        options={options}
+                        placeholder='Select Operator'
+                        onChange={(e) => this.selectChange(a, e.value)}/>
+              <FlexRowWrap>
+                {![null, 'ANY'].includes(attr.operator) && <div style={{width: '33%'}}>
+                  <NumberInput style={{padding: '0 0.25rem'}}
+                               value={attr.operands[0] || ''}
+                               min={attr.MIN} max={attr.MAX}
+                               onChange={(v) => this.inputChange(v, a, 0)}/>
                   {this.hasUnits && <span> {PM_UNITS[subtype]}</span>}
                 </div>}
                 {attr.operator === Operator.BETWEEN && <React.Fragment>
                   <div style={{padding: '0.2rem 1.5rem 0 1rem'}}>and</div>
-                  <div>
-                    <NumberInput style={{padding: '0 0.25rem', width: '3rem'}}
-                      value={attr.operands[1] || ''}
-                      min={attr.MIN} max={attr.MAX}
-                      onChange={(v) => this.inputChange(v, a, 1)}/>
+                  <div style={{width: '33%'}}>
+                    <NumberInput style={{padding: '0 0.25rem'}}
+                                 value={attr.operands[1] || ''}
+                                 min={attr.MIN} max={attr.MAX}
+                                 onChange={(v) => this.inputChange(v, a, 1)}/>
                     {this.hasUnits && <span> {PM_UNITS[subtype]}</span>}
                   </div>
                 </React.Fragment>}
-                {this.hasRange && ![null, 'ANY'].includes(attr.operator) &&
-                  <span style={{paddingTop: '0.2rem'}}>&nbsp;Range: {attr.MIN.toLocaleString()} - {attr.MAX.toLocaleString()}</span>
-                }
-              </div>
+              </FlexRowWrap>
+              {this.hasRange && ![null, 'ANY'].includes(attr.operator) && <div style={{paddingTop: '0.2rem'}}>
+                Range: {attr.MIN.toLocaleString()} - {attr.MAX.toLocaleString()}
+              </div>}
             </div>)}
             {form.cat.length > 0 && <React.Fragment>
               <div style={styles.orCircle}>OR</div>
@@ -566,14 +571,19 @@ export const AttributesPageV2 = withCurrentWorkspace() (
               <div style={{fontWeight: 600}}>Number of Participants: <span> {count === null ? '--' : count.toLocaleString()} </span></div>
             </div>
           </FlexRowWrap>
-          <div style={styles.addButtonContainer}>
+          <FlexRowWrap style={{flexDirection: 'row-reverse', marginTop: '2rem'}}>
             <Button type='primary'
                     disabled={disableAdd}
                     style={styles.addButton}
                     onClick={() => this.addParameterToSearchItem()}>
               ADD THIS
             </Button>
-          </div>
+            <Button type='link'
+                    style={{color: colors.primary, marginRight: '0.5rem'}}
+                    onClick={() => close()}>
+              BACK
+            </Button>
+          </FlexRowWrap>
         </div>
       );
     }

@@ -565,9 +565,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
             </div>
             <div style={contentStyle('criteria')}>
               {!!attributesSelection
-                ? <AttributesPageV2 close={() => this.setState({attributesSelection: undefined})}
-                                    node={attributesSelection}
-                />
+                ? <AttributesPageV2 close={() => attributesSelectionStore.next(undefined)} node={attributesSelection}/>
                 : <div>
                 <div style={{display: 'block', height: 'calc(100% - 5rem)', overflow: 'auto', padding: '0.5rem 0.5rem 0rem'}}>
                   <h3 style={{...styles.sectionTitle, marginTop: 0}}>Add selected criteria to cohort</h3>
