@@ -41,6 +41,16 @@ public class RandomizeVcf extends VariantWalker {
 
   private VariantContextWriter vcfWriter;
 
+  public RandomizeVcf() {
+    super();
+  }
+
+  @VisibleForTesting
+  protected RandomizeVcf(String sampleNameSuffix) {
+    super();
+    this.sampleNameSuffix = sampleNameSuffix;
+  }
+
   @Override
   public void apply(
       VariantContext variant,
