@@ -23,7 +23,7 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {openZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
 import {ParticipantCohortStatus, WorkspaceAccessLevel} from 'generated/fetch';
-import {MenuItem, StyledAnchorTag} from './buttons';
+import {Button, MenuItem, StyledAnchorTag} from './buttons';
 import {PopupTrigger} from './popups';
 
 const dataDictionaryUrl = 'https://aousupporthelp.zendesk.com/hc/en-us/articles/360033200232-Data-dictionary-for-Registered-Tier-Curated-Data-Repository-CDR-';
@@ -161,6 +161,17 @@ const styles = reactStyles({
     borderRadius: '50%',
     display: 'inline-block',
     fontSize: '0.4rem'
+  },
+  buttons: {
+    paddingTop: '1rem',
+    paddingLeft: '9rem',
+    position: 'absolute'
+  },
+  backButton: {
+    border: '0px',
+    backgroundColor: 'none',
+    color: colors.accent,
+    marginRight: '1rem'
   }
 });
 
@@ -251,6 +262,7 @@ interface State {
   filteredContent: Array<any>;
   participant: ParticipantCohortStatus;
   searchTerm: string;
+  showCriteria: boolean;
   tooltipId: number;
 }
 export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), withCurrentCohortCriteria())(
@@ -263,6 +275,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
         filteredContent: undefined,
         participant: undefined,
         searchTerm: '',
+        showCriteria: false,
         tooltipId: undefined
       };
     }
@@ -383,14 +396,30 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
 
     renderCriteria() {
       const {criteria} = this.props;
-      return <PopupTrigger
-          side='left'
-          closeOnClick
-          style={{height: '-webkit-fill-available'}} // Will need to update Popuptrigger to use style passed in Props
-      content={<SelectionList back={() => {}}/>}><div data-test-id='criteria-icon' style={{...styles.icon, height: '2rem', paddingBottom: '0.2rem'}}>
-        <span data-test-id = 'criteria-count' style={styles.criteriaCount}>{criteria.length}</span>
-        <FontAwesomeIcon icon={faInbox} style={{fontSize: '1.1rem'}}/>
-      </div></PopupTrigger>;
+      const {showCriteria} = this.state;
+      return <div>
+        {showCriteria &&  <div style={{transition: 'margin-right 0.8s ease-out',  zIndex: -1}}>
+          <div style={{...styles.sidebar, ...styles.sidebarOpen, width: '20rem'}} >
+            <ClrIcon shape='times' size={22} style={styles.closeIcon} onClick={() => this.setState({showCriteria: false})} />
+            <div style={{display: 'block', height: 'calc(100% - 5rem)', overflow: 'auto', padding: '0.5rem 0.5rem 0rem'}}>
+              <h3 style={{...styles.sectionTitle, marginTop: 0}}>Add selected criteria to cohort</h3>
+              <SelectionList back={() => {}}/>
+            </div>
+            <div style={styles.buttons}>
+              <Button style={styles.backButton} onClick={() => this.setState({showCriteria: false})}>
+                Back
+              </Button>
+              <Button class='primary' style={{right: 0}}>Save Criteria</Button>
+            </div>
+          </div>
+
+        </div>}
+        <TooltipTrigger content={<div>Criteria</div>} side='left'>
+        <div style={styles.icon} onClick={() => this.setState({showCriteria: !this.state.showCriteria})}>
+          <span data-test-id = 'criteria-count' style={styles.criteriaCount}>{criteria.length}</span>
+          <FontAwesomeIcon icon={faInbox} style={{fontSize: '21px'}}/>
+        </div>
+      </TooltipTrigger></div>;
     }
 
     renderWorkspaceMenu() {

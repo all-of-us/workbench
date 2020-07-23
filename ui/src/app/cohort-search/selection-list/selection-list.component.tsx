@@ -2,13 +2,14 @@ import * as React from 'react';
 
 import {attributeDisplay, nameDisplay, typeDisplay} from 'app/cohort-search/utils';
 import {Button} from 'app/components/buttons';
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
-import colors, {colorWithWhiteness} from 'app/styles/colors';
+import colors from 'app/styles/colors';
 import {withCurrentCohortCriteria} from 'app/utils';
 import {reactStyles} from 'app/utils';
-import {serverConfigStore} from 'app/utils/navigation';
 import {Criteria, DomainType} from 'generated/fetch';
+import * as fp from 'lodash/fp';
 
 const styles = reactStyles({
   buttonContainer: {
@@ -31,7 +32,8 @@ const styles = reactStyles({
     flex: 1,
     display: 'flex',
     flexFlow: 'row nowrap',
-    justifyContent: 'flex-start'
+    justifyContent: 'flex-start',
+    color: colors.accent
   },
   itemName: {
     flex: 1,
@@ -52,6 +54,7 @@ const styles = reactStyles({
     border: `2px solid ${colors.primary}`,
     borderRadius: '5px',
     height: 'calc(100% - 150px)',
+    minHeight: 'calc(100vh - 136px)',
     overflowX: 'hidden',
     overflowY: 'auto',
     width: '95%',
@@ -59,13 +62,13 @@ const styles = reactStyles({
   selectionItem: {
     display: 'flex',
     fontSize: '14px',
-    padding: '0.2rem 0.5rem 0',
+    padding: '0',
     width: '100%',
+    color: 'rgb(38, 34, 98)'
   },
   selectionPanel: {
-    background: colorWithWhiteness(colors.black, 0.95),
-    height: '100%',
-    padding: '0.5rem 0 0 1rem',
+    height: '35rem',
+    paddingTop: '0.5rem',
   },
   selectionTitle: {
     color: colors.primary,
@@ -88,7 +91,7 @@ interface SelectionInfoState {
   truncated: boolean;
 }
 
-export class SelectionInfo extends React.Component<SelectionInfoProps, SelectionInfoState> {
+export class SelectionInfoModal extends React.Component<SelectionInfoProps, SelectionInfoState> {
   name: HTMLDivElement;
   constructor(props: SelectionInfoProps) {
     super(props);
@@ -128,6 +131,7 @@ export class SelectionInfo extends React.Component<SelectionInfoProps, Selection
         {!!selection.group && <span>Group&nbsp;</span>}
         <TooltipTrigger disabled={!this.state.truncated} content={itemName}>
           <div style={styles.itemName} ref={(e) => this.name = e}>
+            Group
             {itemName}
           </div>
         </TooltipTrigger>
@@ -136,6 +140,55 @@ export class SelectionInfo extends React.Component<SelectionInfoProps, Selection
   }
 }
 
+export class SelectionInfo extends React.Component<SelectionInfoProps, SelectionInfoState> {
+  name: HTMLDivElement;
+  constructor(props: SelectionInfoProps) {
+    super(props);
+    this.state = {truncated: false};
+  }
+
+  componentDidMount(): void {
+    const {offsetWidth, scrollWidth} = this.name;
+    this.setState({truncated: scrollWidth > offsetWidth});
+  }
+
+  get showType() {
+    return ![
+      DomainType.PHYSICALMEASUREMENT.toString(),
+      DomainType.DRUG.toString(),
+      DomainType.SURVEY.toString()
+    ].includes(this.props.selection.domainId);
+  }
+
+  get showOr() {
+    const {index, selection} = this.props;
+    return index > 0 && selection.domainId !== DomainType.PERSON.toString();
+  }
+
+  render() {
+    const {selection, removeSelection} = this.props;
+    const itemName = <React.Fragment>
+      {this.showType && <strong>{typeDisplay(selection)}&nbsp;</strong>}
+      {nameDisplay(selection)} {attributeDisplay(selection)}
+    </React.Fragment>;
+    return <FlexColumn style={styles.selectionItem}>
+      {this.showOr && <div style={{padding: '0.3rem 0rem 0.3rem 1rem'}}>OR&nbsp;</div>}
+      <FlexRow style={{alignItems: 'baseline'}}>
+      <button style={styles.removeSelection} onClick={() => removeSelection()}>
+        <ClrIcon shape='times-circle'/>
+      </button>
+      <FlexColumn>
+        <div>Group</div>
+        <TooltipTrigger disabled={!this.state.truncated} content={itemName}>
+          <div style={styles.itemName} ref={(e) => this.name = e}>
+            {itemName}
+          </div>
+        </TooltipTrigger>
+      </FlexColumn>
+      </FlexRow>
+    </FlexColumn>;
+  }
+}
 interface Props {
   back: Function;
   close: Function;
@@ -147,6 +200,61 @@ interface Props {
   setView: Function;
   view: string;
   criteria?: Array<Selection>;
+}
+
+export class SelectionListModalVersion extends React.Component<Props> {
+  constructor(props: Props) {
+    super(props);
+  }
+
+  get showModifiers() {
+    return ![DomainType.PHYSICALMEASUREMENT, DomainType.PERSON, DomainType.SURVEY].includes(this.props.domain);
+  }
+
+  get showNext() {
+    return this.showModifiers && this.props.view !== 'modifiers';
+  }
+
+  get showBack() {
+    return this.showModifiers && this.props.view === 'modifiers';
+  }
+
+  render() {
+    const {back, close, disableFinish, finish, removeSelection, selections, setView} = this.props;
+    return <div style={styles.selectionPanel}>
+      <h5 style={styles.selectionTitle}>Selected Criteria</h5>
+      <div style={styles.selectionContainer}>
+        {selections.map((selection, s) =>
+            <SelectionInfoModal key={s}
+                           index={s}
+                           selection={selection}
+                           removeSelection={() => removeSelection(selection)}/>
+        )}
+      </div>
+      <div style={styles.buttonContainer}>
+        <Button type='link'
+          style={{...styles.button, color: colors.dark, fontSize: '14px'}}
+          onClick={() => close()}>
+          Cancel
+        </Button>
+        {this.showNext && <Button type='primary' onClick={() => setView('modifiers')}
+          style={styles.button}
+          disabled={!selections || selections.length === 0}>
+          Next
+        </Button>}
+        {this.showBack && <Button type='primary'
+          style={styles.button}
+          onClick={() => back()}>
+          Back
+        </Button>}
+        <Button type='primary' onClick={() => finish()}
+          style={styles.button}
+          disabled={!selections || selections.length === 0 || disableFinish}>
+          Finish
+        </Button>
+      </div>
+    </div>;
+  }
 }
 
 export const SelectionList = withCurrentCohortCriteria()(class extends React.Component<Props> {
@@ -166,47 +274,39 @@ export const SelectionList = withCurrentCohortCriteria()(class extends React.Com
     return this.showModifiers && this.props.view === 'modifiers';
   }
 
+  showOr(index, selection) {
+    return index > 0 && selection.domainId !== DomainType.PERSON.toString();
+  }
+
+  renderCriteria() {
+    const {criteria} = this.props;
+    const g = fp.groupBy('isStandard', criteria);
+    return <div style={{paddingLeft: '0.5rem'}}>
+      {this.renderCriteriaGroup(g['true'] , 'Standard Groups')}
+      {this.renderCriteriaGroup(g['false'], 'Source code Groups')}
+    </div>;
+  }
+
+  renderCriteriaGroup(criteriaGroup, header) {
+    return  <React.Fragment>
+      <h3> {header}</h3>
+      <hr style={{marginRight: '0.5rem'}}/>
+      {criteriaGroup && criteriaGroup.map((criteria, index) =>
+        <SelectionInfo key={index}
+                       index={index}
+                       selection={criteria}
+                       removeSelection={() => {
+                       }}/>
+
+      )}
+    </React.Fragment> ;
+  }
+
   render() {
-    const {back, close, disableFinish, finish, removeSelection, criteria, selections, setView} = this.props;
+    const {criteria} = this.props;
     return <div style={styles.selectionPanel}>
-      <h5 style={styles.selectionTitle}>Selected Criteria</h5>
-      {serverConfigStore.getValue().enableCohortBuilderV2 && criteria && <div style={styles.selectionContainer}>
-        {criteria.map((selection, s) =>
-          <SelectionInfo key={s}
-            index={s}
-            selection={selection}
-            removeSelection={() => removeSelection(selection)}/>
-        )}
-      </div>}
-      {!serverConfigStore.getValue().enableCohortBuilderV2 && <div style={styles.selectionContainer}>
-        {selections.map((selection, s) =>
-            <SelectionInfo key={s}
-                           index={s}
-                           selection={selection}
-                           removeSelection={() => removeSelection(selection)}/>
-        )}
-      </div>}
-      {!serverConfigStore.getValue().enableCohortBuilderV2 && <div style={styles.buttonContainer}>
-        <Button type='link'
-          style={{...styles.button, color: colors.dark, fontSize: '14px'}}
-          onClick={() => close()}>
-          Cancel
-        </Button>
-        {this.showNext && <Button type='primary' onClick={() => setView('modifiers')}
-          style={styles.button}
-          disabled={!criteria || criteria.length === 0}>
-          Next
-        </Button>}
-        {this.showBack && <Button type='primary'
-          style={styles.button}
-          onClick={() => back()}>
-          Back
-        </Button>}
-        <Button type='primary' onClick={() => finish()}
-          style={styles.button}
-          disabled={!criteria || criteria.length === 0 || disableFinish}>
-          Finish
-        </Button>
+      {criteria && <div style={styles.selectionContainer}>
+        {this.renderCriteria()}
       </div>}
     </div>;
   }

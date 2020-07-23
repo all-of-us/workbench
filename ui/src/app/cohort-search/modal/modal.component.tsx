@@ -5,7 +5,7 @@ import {Demographics} from 'app/cohort-search/demographics/demographics.componen
 import {ListSearch} from 'app/cohort-search/list-search/list-search.component';
 import {ModifierPage} from 'app/cohort-search/modifier-page/modifier-page.component';
 import {searchRequestStore} from 'app/cohort-search/search-state.service';
-import {SelectionList} from 'app/cohort-search/selection-list/selection-list.component';
+import {SelectionListModalVersion} from 'app/cohort-search/selection-list/selection-list.component';
 import {CriteriaTree} from 'app/cohort-search/tree/tree.component';
 import {domainToTitle, generateId, stripHtml, typeToTitle} from 'app/cohort-search/utils';
 import {Button} from 'app/components/buttons';
@@ -560,7 +560,7 @@ export class CBModal extends React.Component<Props, State> {
             </div>
             {type !== CriteriaType.AGE && <div style={this.rightColumnStyle}>
               <div style={{height: '100%'}}>
-                <SelectionList
+                <SelectionListModalVersion
                   back={this.back}
                   close={closeSearch}
                   disableFinish={disableFinish}

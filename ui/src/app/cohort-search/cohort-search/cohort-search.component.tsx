@@ -106,35 +106,39 @@ interface State {
 
 const css = `
   .p-growl.p-growl-topright {
-     height: 29px;
-     width: 7rem;
+     height: 1rem;
+     width: 6.4rem;
      padding-top: 6rem;
-     line-hieght: 1rem;
+     line-hieght: 0.7rem;
      margin-right: 3rem;
 
+   }
+   .p-growl .p-growl-item-container .p-growl-item .p-growl-image {
+     font-size: 1rem !important;
+     margin-top: 0.19rem
    }
 
   .p-growl-item-container::before {
     content:"";
     position: absolute;
     right: 100%;
-    top:0px;
+    top:0.17rem;
     width:0px;
     height:0px;
-    border-top:0.8rem solid transparent;
-    border-right:0.8rem solid transparent;
-    border-bottom:0.8rem solid transparent;
+    border-top:0.6rem solid transparent;
+    border-right:0.6rem solid transparent;
+    border-bottom:0.6rem solid transparent;
   }
   .p-growl-item-container:after {
     content:"";
     position: absolute;
     left: 100%;
-    top:0px;
+    top:0.15rem;
     width:0px;
     height:0px;
-    border-top:0.8rem solid transparent;
-    border-left:0.8rem solid ` + colorWithWhiteness(colors.success, 0.6) + `;
-    border-bottom:0.8rem solid transparent;
+    border-top:0.5rem solid transparent;
+    border-left:0.5rem solid ` + colorWithWhiteness(colors.success, 0.6) + `;
+    border-bottom:0.5rem solid transparent;
    }
    .p-growl-item-container {
      background-color: ` + colorWithWhiteness(colors.success, 0.6) + `!important;
@@ -143,6 +147,9 @@ const css = `
      padding: 0rem !important;
      background-color: ` + colorWithWhiteness(colors.success, 0.6) + `!important;
      margin-left: 0.3rem;
+   }
+   .p-growl-message {
+     margin-left: 0.5em
    }
  `;
 
