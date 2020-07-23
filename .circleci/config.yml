@@ -334,7 +334,7 @@ jobs:
           name: Run Java genomics unit tests
           working_directory: ~/workbench/api
           command: |
-            CLASSNAMES=$(circleci tests glob "genomics/src/test/java/**/*.Test.java") \
+            CLASSNAMES=$(circleci tests glob "genomics/src/test/java/**/*.Test.java" \
               | cut -c 1- \
               | sed 's@src/test/java/@@' \
               | sed 's@/@.@g' \
