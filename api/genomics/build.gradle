@@ -16,7 +16,7 @@ dependencies {
 
 task randomizeVcf(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
-    main = "org.pmiops.workbench.genomics.RandomizeVcfEntryPoint"
+    main = "org.pmiops.workbench.genomics.RandomizeVcf"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }

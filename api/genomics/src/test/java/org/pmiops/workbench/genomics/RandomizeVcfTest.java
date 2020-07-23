@@ -8,13 +8,15 @@ import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.vcf.VCFFileReader;
 import java.io.File;
 import java.util.List;
+import java.util.Random;
 import org.junit.Test;
 
 public class RandomizeVcfTest {
   private static final VCFFileReader reader =
       new VCFFileReader(new File("src/test/resources/NA12878_204126160130_R01C01.toy.vcf.gz"));
+  private static final Random random = new Random(0);
   private static final VariantContext variantContext = reader.iterator().next();
-  private static final RandomizeVcf randomizeVcf = new RandomizeVcf("0");
+  private static final RandomizeVcf randomizeVcf = new RandomizeVcf("0", random);
 
   @Test
   public void testRandomizeVariant() {

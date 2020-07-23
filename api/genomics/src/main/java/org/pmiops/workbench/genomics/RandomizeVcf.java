@@ -41,14 +41,19 @@ public class RandomizeVcf extends VariantWalker {
 
   private VariantContextWriter vcfWriter;
 
+  public static void main(String[] argv) {
+    new RandomizeVcf().instanceMain(argv);
+  }
+
   public RandomizeVcf() {
     super();
   }
 
   @VisibleForTesting
-  protected RandomizeVcf(String sampleNameSuffix) {
+  protected RandomizeVcf(String sampleNameSuffix, Random random) {
     super();
     this.sampleNameSuffix = sampleNameSuffix;
+    this.random = random;
   }
 
   @Override
@@ -95,12 +100,6 @@ public class RandomizeVcf extends VariantWalker {
         GenotypesContext.create(new ArrayList<>(randomizedGenotypes));
 
     variantContextBuilder.genotypes(randomizedGenotypesContext);
-
-    // We want kind of random error. If there's no error, have no error for the new variant as well.
-    // If there's error, fuzz the error.
-    if (variant.hasLog10PError()) {
-      variantContextBuilder.log10PError(random.nextDouble() * variant.getLog10PError());
-    }
 
     return variantContextBuilder.make();
   }
