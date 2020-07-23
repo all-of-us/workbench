@@ -133,7 +133,6 @@ export class SelectionInfoModal extends React.Component<SelectionInfoProps, Sele
         {!!selection.group && <span>Group&nbsp;</span>}
         <TooltipTrigger disabled={!this.state.truncated} content={itemName}>
           <div style={styles.itemName} ref={(e) => this.name = e}>
-            Group
             {itemName}
           </div>
         </TooltipTrigger>
