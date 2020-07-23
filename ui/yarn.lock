@@ -4520,10 +4520,10 @@ hash.js@^1.0.0, hash.js@^1.0.3:
     inherits "^2.0.3"
     minimalistic-assert "^1.0.1"
 
-highcharts-react-official@2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/highcharts-react-official/-/highcharts-react-official-2.0.0.tgz#3e4a8a2cd9a894a55f72ff7967b6573e47ec30c1"
-  integrity sha512-pEf1HBCmkJlIY6lAkjKXjjxaqZWUwcNcKrEIM2CFhXtLcl5VntiSgiVXe/pkDXyZG94mM90c72Z+8rnJ8ua6Dw==
+highcharts-react-official@3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/highcharts-react-official/-/highcharts-react-official-3.0.0.tgz#f2e81ed59d299c3473a0dd5ba5df24028875226a"
+  integrity sha512-VefJgDY2hkT9gfppsQGrRF2g5u8d9dtfHGcx2/xqiP+PkZXCqalw9xOeKVCRvJKTOh0coiDFwvVjOvB7KaGl4A==
 
 highcharts@^5.0.7:
   version "5.0.15"
