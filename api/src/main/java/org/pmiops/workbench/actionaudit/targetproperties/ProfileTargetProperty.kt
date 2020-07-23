@@ -21,5 +21,4 @@ constructor(override val propertyName: String, override val extractor: (Profile)
             { it.institutionalAffiliations?.joinToString(", ") }),
     DEMOGRAPHIC_SURVEY("demographic_survey", { it.demographicSurvey?.toString() }),
     ADDRESS("address", { it.address?.toString() }),
-    FREE_TIER_DOLLAR_QUOTA("free_tier_dollar_quota", { it.freeTierDollarQuota?.toString() });
 }

@@ -14,7 +14,6 @@ import org.pmiops.workbench.actionaudit.AgentType;
 import org.pmiops.workbench.actionaudit.TargetType;
 import org.pmiops.workbench.actionaudit.targetproperties.AccountTargetProperty;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
-import org.pmiops.workbench.actionaudit.targetproperties.ProfileTargetProperty;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,9 +118,9 @@ public class UserServiceAuditorImpl implements UserServiceAuditor {
             .agentIdMaybe(adminUser.getUserId())
             .agentEmailMaybe(adminUser.getUsername())
             .actionId(actionIdProvider.get())
-            .actionType(ActionType.FREE_TIER_DOLLAR_OVERRIDE)
+            .actionType(ActionType.EDIT)
             .targetType(TargetType.ACCOUNT)
-            .targetPropertyMaybe(ProfileTargetProperty.FREE_TIER_DOLLAR_QUOTA.getPropertyName())
+            .targetPropertyMaybe(AccountTargetProperty.FREE_TIER_DOLLAR_QUOTA.getPropertyName())
             .targetIdMaybe(targetUserId);
 
     if (previousDollarQuota != null) {

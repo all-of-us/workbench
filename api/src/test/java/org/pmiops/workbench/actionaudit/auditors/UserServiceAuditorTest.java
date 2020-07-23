@@ -13,7 +13,7 @@ import org.pmiops.workbench.actionaudit.ActionType;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.AgentType;
 import org.pmiops.workbench.actionaudit.TargetType;
-import org.pmiops.workbench.actionaudit.targetproperties.ProfileTargetProperty;
+import org.pmiops.workbench.actionaudit.targetproperties.AccountTargetProperty;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,12 +73,12 @@ public class UserServiceAuditorTest {
     verify(mockActionAuditService).send(eventArg.capture());
 
     ActionAuditEvent eventSent = eventArg.getValue();
-    assertThat(eventSent.getActionType()).isEqualTo(ActionType.FREE_TIER_DOLLAR_OVERRIDE);
+    assertThat(eventSent.getActionType()).isEqualTo(ActionType.EDIT);
     assertThat(eventSent.getAgentType()).isEqualTo(AgentType.ADMINISTRATOR);
     assertThat(eventSent.getTargetType()).isEqualTo(TargetType.ACCOUNT);
     assertThat(eventSent.getTargetIdMaybe()).isEqualTo(user.getUserId());
     assertThat(eventSent.getTargetPropertyMaybe())
-        .isEqualTo(ProfileTargetProperty.FREE_TIER_DOLLAR_QUOTA.getPropertyName());
+        .isEqualTo(AccountTargetProperty.FREE_TIER_DOLLAR_QUOTA.getPropertyName());
     assertThat(eventSent.getPreviousValueMaybe()).isNull();
     assertThat(eventSent.getNewValueMaybe()).isEqualTo("123.45");
   }
@@ -90,12 +90,12 @@ public class UserServiceAuditorTest {
     verify(mockActionAuditService).send(eventArg.capture());
 
     ActionAuditEvent eventSent = eventArg.getValue();
-    assertThat(eventSent.getActionType()).isEqualTo(ActionType.FREE_TIER_DOLLAR_OVERRIDE);
+    assertThat(eventSent.getActionType()).isEqualTo(ActionType.EDIT);
     assertThat(eventSent.getAgentType()).isEqualTo(AgentType.ADMINISTRATOR);
     assertThat(eventSent.getTargetType()).isEqualTo(TargetType.ACCOUNT);
     assertThat(eventSent.getTargetIdMaybe()).isEqualTo(user.getUserId());
     assertThat(eventSent.getTargetPropertyMaybe())
-        .isEqualTo(ProfileTargetProperty.FREE_TIER_DOLLAR_QUOTA.getPropertyName());
+        .isEqualTo(AccountTargetProperty.FREE_TIER_DOLLAR_QUOTA.getPropertyName());
     assertThat(eventSent.getPreviousValueMaybe()).isEqualTo("123.45");
     assertThat(eventSent.getNewValueMaybe()).isEqualTo("500.0");
   }
