@@ -28,6 +28,7 @@ import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.RdrEntity;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.UserRole;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.rdr.api.RdrApi;
 import org.pmiops.workbench.rdr.model.RdrResearcher;
 import org.pmiops.workbench.rdr.model.RdrWorkspace;
@@ -276,32 +277,32 @@ public class RdrExportServiceImpl implements RdrExportService {
     if (dbWorkspace.getSpecificPopulationsEnum().contains(SpecificPopulationEnum.OTHER)) {
       rdrWorkspace.getWorkspaceDemographic().setOthers(dbWorkspace.getOtherPopulationDetails());
     }
-
-    try {
-      // Call Firecloud to get a list of Collaborators
-      List<UserRole> collaboratorsMap =
-          workspaceService.getFirecloudUserRoles(
-              dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
-      // Initializing it to empty array if for any reason firecloud sends an empty array
-      rdrWorkspace.setWorkspaceUsers(new ArrayList<>());
-      // Since the USERS cannot be deleted from workbench yet, hence sending the the status of
-      // COLLABORATOR as ACTIVE
-      collaboratorsMap.forEach(
-          (userRole) -> {
-            RdrWorkspaceUser workspaceUserMap = new RdrWorkspaceUser();
-            workspaceUserMap.setUserId(
-                (int) userDao.findUserByUsername(userRole.getEmail()).getUserId());
-            workspaceUserMap.setRole(
-                RdrWorkspaceUser.RoleEnum.fromValue(userRole.getRole().toString()));
-            workspaceUserMap.setStatus(RdrWorkspaceUser.StatusEnum.ACTIVE);
-            rdrWorkspace.addWorkspaceUsersItem(workspaceUserMap);
-          });
-    } catch (Exception ex) {
-      log.warning(
-          String.format(
-              "Exception while retrieving workspace collaborators for workspace id %s, skipping this workspace for RDR Export",
-              rdrWorkspace.getWorkspaceId()));
-      return null;
+    rdrWorkspace.setWorkspaceUsers(new ArrayList<>());
+    if (dbWorkspace.getWorkspaceActiveStatusEnum().equals(WorkspaceActiveStatus.ACTIVE)) {
+      try {
+        // Call Firecloud to get a list of Collaborators
+        List<UserRole> collaboratorsMap =
+            workspaceService.getFirecloudUserRoles(
+                dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+        // Since the USERS cannot be deleted from workbench yet, hence sending the the status of
+        // COLLABORATOR as ACTIVE
+        collaboratorsMap.forEach(
+            (userRole) -> {
+              RdrWorkspaceUser workspaceUserMap = new RdrWorkspaceUser();
+              workspaceUserMap.setUserId(
+                  (int) userDao.findUserByUsername(userRole.getEmail()).getUserId());
+              workspaceUserMap.setRole(
+                  RdrWorkspaceUser.RoleEnum.fromValue(userRole.getRole().toString()));
+              workspaceUserMap.setStatus(RdrWorkspaceUser.StatusEnum.ACTIVE);
+              rdrWorkspace.addWorkspaceUsersItem(workspaceUserMap);
+            });
+      } catch (Exception ex) {
+        log.warning(
+            String.format(
+                "Exception while retrieving workspace collaborators for workspace id %s, skipping this workspace for RDR Export",
+                rdrWorkspace.getWorkspaceId()));
+        return null;
+      }
     }
     return rdrWorkspace;
   }
