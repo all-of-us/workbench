@@ -5,8 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -537,8 +535,7 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<UserListResponse> getAllUsers() {
-    return ResponseEntity.ok(new UserListResponse()
-      .profileList(profileService.listAllProfiles()));
+    return ResponseEntity.ok(new UserListResponse().profileList(profileService.listAllProfiles()));
   }
 
   @Override

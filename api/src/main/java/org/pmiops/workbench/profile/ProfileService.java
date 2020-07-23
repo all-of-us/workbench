@@ -18,7 +18,6 @@ import java.util.stream.StreamSupport;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
-import javax.validation.constraints.Null;
 import org.apache.commons.lang3.StringUtils;
 import org.javers.core.Javers;
 import org.javers.core.diff.Change;
@@ -118,15 +117,22 @@ public class ProfileService {
 
     // TODO: avoid all these queries
     final @Nullable Double freeTierUsage = freeTierBillingService.getCachedFreeTierUsage(user);
-    final @Nullable Double freeTierDollarQuota = freeTierBillingService.getUserFreeTierDollarLimit(user);
+    final @Nullable Double freeTierDollarQuota =
+        freeTierBillingService.getUserFreeTierDollarLimit(user);
     final @Nullable VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
-        verifiedInstitutionalAffiliationDao.findFirstByUser(user)
-          .map(verifiedInstitutionalAffiliationMapper::dbToModel)
-          .orElse(null);
+        verifiedInstitutionalAffiliationDao
+            .findFirstByUser(user)
+            .map(verifiedInstitutionalAffiliationMapper::dbToModel)
+            .orElse(null);
 
     final @Nullable DbUserTermsOfService latestTermsOfService =
         userTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(user.getUserId()).orElse(null);
-    return profileMapper.toModel(user, verifiedInstitutionalAffiliation, latestTermsOfService, freeTierUsage, freeTierDollarQuota);
+    return profileMapper.toModel(
+        user,
+        verifiedInstitutionalAffiliation,
+        latestTermsOfService,
+        freeTierUsage,
+        freeTierDollarQuota);
   }
 
   public void validateInstitutionalAffiliation(Profile profile) {
@@ -224,7 +230,6 @@ public class ProfileService {
 
     userService.updateUserWithConflictHandling(user);
 
-
     // FIXME: why not do a getOrCreateAffiliation() here and then update that object & save?
 
     // Save the verified institutional affiliation in the DB. The affiliation has already been
@@ -232,13 +237,15 @@ public class ProfileService {
     DbVerifiedInstitutionalAffiliation newAffiliation =
         verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
             updatedProfile.getVerifiedInstitutionalAffiliation(), institutionService);
-    newAffiliation.setUser(user); // Why are we calling a non-user mapping function and then adding a user?
+    newAffiliation.setUser(
+        user); // Why are we calling a non-user mapping function and then adding a user?
 
     // This is 1:1 in terms of our current usage, but not modelled that way (aside from the unique
     // constraint on user_id).
 
     // If this user already has an affiliation, replace the ID of hte
-    verifiedInstitutionalAffiliationDao.findFirstByUser(user)
+    verifiedInstitutionalAffiliationDao
+        .findFirstByUser(user)
         .map(DbVerifiedInstitutionalAffiliation::getVerifiedInstitutionalAffiliationId)
         .ifPresent(newAffiliation::setVerifiedInstitutionalAffiliationId);
     this.verifiedInstitutionalAffiliationDao.save(newAffiliation);
@@ -441,28 +448,38 @@ public class ProfileService {
   // per table and join them in code.
   public List<Profile> listAllProfiles() {
     final List<DbUser> usersHeavy = userService.findAllUsersWithAuthoritiesAndPageVisits();
-    final Map<Long, VerifiedInstitutionalAffiliation> userIdToAffiliationModel = StreamSupport.stream(verifiedInstitutionalAffiliationDao.findAll().spliterator(), false)
-        .map(a -> new AbstractMap.SimpleImmutableEntry<>(
-            a.getUser().getUserId(), verifiedInstitutionalAffiliationMapper.dbToModel(a)))
-        .collect(ImmutableMap.toImmutableMap(Entry::getKey, Entry::getValue)));
+    final Map<Long, VerifiedInstitutionalAffiliation> userIdToAffiliationModel =
+        StreamSupport.stream(verifiedInstitutionalAffiliationDao.findAll().spliterator(), false)
+            .map(
+                dbAffiliation ->
+                    new AbstractMap.SimpleImmutableEntry<>(
+                        dbAffiliation.getUser().getUserId(),
+                        verifiedInstitutionalAffiliationMapper.dbToModel(dbAffiliation)))
+            .collect(ImmutableMap.toImmutableMap(Entry::getKey, Entry::getValue));
 
-    final Map<Long, DbUserTermsOfService> userIdToTermsOfService =  StreamSupport.stream(userTermsOfServiceDao.findAll().spliterator(), false)
-        .collect(ImmutableMap.toImmutableMap(DbUserTermsOfService::getUserId, Function.identity()));
+    final Map<Long, DbUserTermsOfService> userIdToTermsOfService =
+        StreamSupport.stream(userTermsOfServiceDao.findAll().spliterator(), false)
+            .collect(
+                ImmutableMap.toImmutableMap(DbUserTermsOfService::getUserId, Function.identity()));
 
     // The cached free tier usage aka total cost for each user, by ID
     final Map<Long, Double> userIdToFreeTierUsage = freeTierBillingService.getUserIdToTotalCost();
 
-    final Map<Long, Double> userIdToQuota = usersHeavy.stream()
-        .collect(ImmutableMap.toImmutableMap(DbUser::getUserId, freeTierBillingService::getUserFreeTierDollarLimit));
+    final Map<Long, Double> userIdToQuota =
+        usersHeavy.stream()
+            .collect(
+                ImmutableMap.toImmutableMap(
+                    DbUser::getUserId, freeTierBillingService::getUserFreeTierDollarLimit));
 
     return usersHeavy.stream()
-        .map(dbUser -> profileMapper.toModel(
-            dbUser,
-            userIdToAffiliationModel.get(dbUser.getUserId()),
-            userIdToTermsOfService.get(dbUser.getUserId()),
-            userIdToFreeTierUsage.get(dbUser.getUserId()),
-            userIdToQuota.get(dbUser.getUserId())
-        ))
+        .map(
+            dbUser ->
+                profileMapper.toModel(
+                    dbUser,
+                    userIdToAffiliationModel.get(dbUser.getUserId()),
+                    userIdToTermsOfService.get(dbUser.getUserId()),
+                    userIdToFreeTierUsage.get(dbUser.getUserId()),
+                    userIdToQuota.get(dbUser.getUserId())))
         .collect(ImmutableList.toImmutableList());
   }
 }

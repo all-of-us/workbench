@@ -5,16 +5,14 @@ import org.mapstruct.Mapping;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
-import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.institution.deprecated.InstitutionalAffiliationMapper;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
-import org.pmiops.workbench.utils.mappers.MapStructConfig;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 
 @Mapper(
-//    config = MapStructConfig.class,
+    //    config = MapStructConfig.class,
     componentModel = "spring",
     uses = {
       AddressMapper.class,
@@ -67,6 +65,5 @@ public interface ProfileMapper {
       target = "moodleId",
       ignore = true) // handled by UserService.syncComplianceTraining[V1|V2]
   @Mapping(target = "version", ignore = true)
-  @Mapping(target = "verifiedInstitutionalAffiliation", ignore = true)
   DbUser profileToDbUser(Profile profile);
 }

@@ -50,5 +50,4 @@ public interface WorkspaceFreeTierUsageDao extends CrudRepository<DbWorkspaceFre
     return totalCostByUser().stream()
         .collect(Collectors.toMap(p -> p.getUser().getUserId(), UserCostPair::getCost));
   }
-
 }

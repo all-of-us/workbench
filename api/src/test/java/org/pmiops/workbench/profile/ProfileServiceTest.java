@@ -61,6 +61,7 @@ public class ProfileServiceTest {
 
   private static final VerifiedInstitutionalAffiliation BROAD_AFFILIATION =
       new VerifiedInstitutionalAffiliation()
+          .institutionalRoleOtherText("")
           .institutionShortName("Broad")
           .institutionDisplayName("The Broad Institute")
           .institutionalRoleEnum(InstitutionalRole.ADMIN);

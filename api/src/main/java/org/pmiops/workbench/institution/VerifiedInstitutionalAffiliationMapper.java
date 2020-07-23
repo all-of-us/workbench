@@ -5,8 +5,6 @@ import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.Named;
-import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
@@ -41,8 +39,6 @@ public interface VerifiedInstitutionalAffiliationMapper {
   }
 
   @Mapping(target = "institutionShortName", source = "institution.shortName")
-  @Mapping(
-      target = "institutionDisplayName",
-      source = "institution.displayName")
+  @Mapping(target = "institutionDisplayName", source = "institution.displayName")
   VerifiedInstitutionalAffiliation dbToModel(DbVerifiedInstitutionalAffiliation dbObject);
 }

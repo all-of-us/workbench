@@ -10,6 +10,7 @@ import javax.persistence.MappedSuperclass;
 @MappedSuperclass
 public class DbUserBase {
   private long userId;
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "user_id")
@@ -20,5 +21,4 @@ public class DbUserBase {
   public void setUserId(long userId) {
     this.userId = userId;
   }
-
 }

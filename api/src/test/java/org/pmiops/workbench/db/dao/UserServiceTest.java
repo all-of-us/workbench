@@ -35,7 +35,6 @@ import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.OrganizationType;
-import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV1;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
@@ -128,7 +127,8 @@ public class UserServiceTest {
   }
 
   public DbVerifiedInstitutionalAffiliation buildAffiliation(DbInstitution dbInstitution) {
-    final DbVerifiedInstitutionalAffiliation dbAffiliation = new DbVerifiedInstitutionalAffiliation();
+    final DbVerifiedInstitutionalAffiliation dbAffiliation =
+        new DbVerifiedInstitutionalAffiliation();
     dbAffiliation.setVerifiedInstitutionalAffiliationId(101L);
     dbAffiliation.setInstitution(dbInstitution);
     dbAffiliation.setUser(providedDbUser);
@@ -493,12 +493,5 @@ public class UserServiceTest {
 
     verify(mockUserTermsOfServiceDao).save(any(DbUserTermsOfService.class));
     verify(mockUserServiceAuditAdapter).fireAcknowledgeTermsOfService(any(DbUser.class), eq(1));
-  }
-
-  @Test
-  public void testAffiliationField() {
-    final DbUser user = userDao.findUserByUsername(USERNAME);
-    assertThat(user.getVerifiedInstitutionalAffiliation().getInstitution())
-        .isEqualTo(dbInstitution);
   }
 }

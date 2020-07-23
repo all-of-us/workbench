@@ -17,13 +17,7 @@ import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.OrderColumn;
@@ -116,7 +110,6 @@ public class DbUser extends DbUserBase {
   private DbDemographicSurvey demographicSurvey;
   private DbAddress address;
   private DbVerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation;
-
 
   @Version
   @Column(name = "version")
@@ -328,17 +321,13 @@ public class DbUser extends DbUserBase {
       return null;
     }
     return this.degrees.stream()
-        .map(
-            DbStorageEnums::degreeFromStorage)
+        .map(DbStorageEnums::degreeFromStorage)
         .collect(Collectors.toList());
   }
 
   public void setDegreesEnum(List<Degree> degreeList) {
     this.degrees =
-        degreeList.stream()
-            .map(
-                DbStorageEnums::degreeToStorage)
-            .collect(Collectors.toList());
+        degreeList.stream().map(DbStorageEnums::degreeToStorage).collect(Collectors.toList());
   }
 
   @OneToMany(
@@ -736,21 +725,23 @@ public class DbUser extends DbUserBase {
     return CLUSTER_NAME_PREFIX + getUserId();
   }
 
-  // Table workbench.user_verified_institutional_affiliation is now 1:1  w/r/t the user table,
-  // but we haven't migrrated  it back in. Thus we can't simply use a join column relationship but
-  // require a JoinTable
-  @OneToOne()
-//  @JoinColumn(name = "verified_institutional_affiliation_id")
-  @JoinTable(name = "user_verified_institutional_affiliation",
-    foreignKey = @ForeignKey(name="user_verified_institutional_affiliation_id"),
-    joinColumns = {@JoinColumn(name="user_id")},
-    inverseJoinColumns = @JoinColumn(name="user_verified_institutional_affiliation_id", nullable = true))
-  public DbVerifiedInstitutionalAffiliation getVerifiedInstitutionalAffiliation() {
-    return verifiedInstitutionalAffiliation;
-  }
-
-  public void setVerifiedInstitutionalAffiliation(
-      DbVerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation) {
-    this.verifiedInstitutionalAffiliation = verifiedInstitutionalAffiliation;
-  }
+  //  // Table workbench.user_verified_institutional_affiliation is now 1:1  w/r/t the user table,
+  //  // but we haven't migrrated  it back in. Thus we can't simply use a join column relationship
+  // but
+  //  // require a JoinTable
+  //  @OneToOne()
+  ////  @JoinColumn(name = "verified_institutional_affiliation_id")
+  //  @JoinTable(name = "user_verified_institutional_affiliation",
+  //    foreignKey = @ForeignKey(name="user_verified_institutional_affiliation_id"),
+  //    joinColumns = {@JoinColumn(name="user_id")},
+  //    inverseJoinColumns = @JoinColumn(name="user_verified_institutional_affiliation_id", nullable
+  // = true))
+  //  public DbVerifiedInstitutionalAffiliation getVerifiedInstitutionalAffiliation() {
+  //    return verifiedInstitutionalAffiliation;
+  //  }
+  //
+  //  public void setVerifiedInstitutionalAffiliation(
+  //      DbVerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation) {
+  //    this.verifiedInstitutionalAffiliation = verifiedInstitutionalAffiliation;
+  //  }
 }
