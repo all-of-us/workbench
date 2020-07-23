@@ -103,7 +103,7 @@ interface State {
   treeSearchTerms: string;
 }
 
-const css = ` 
+const css = `
   .p-growl {
     position: sticky;
   }

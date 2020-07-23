@@ -413,7 +413,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
 
         </div>}
         <TooltipTrigger content={<div>Criteria</div>} side='left'>
-        <div style={styles.icon} onClick={() => this.setState({showCriteria: !this.state.showCriteria})}>
+        <div style={styles.icon} data-test-id ='criteria-icon' onClick={() => this.setState({showCriteria: !this.state.showCriteria})}>
           <span data-test-id = 'criteria-count' style={styles.criteriaCount}>{criteria.length}</span>
           <FontAwesomeIcon icon={faInbox} style={{fontSize: '21px'}}/>
         </div>
