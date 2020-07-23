@@ -176,18 +176,32 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
     }
 
     componentDidMount() {
-      const {node: {subtype}} = this.props;
-      const{form, options} = this.state;
+      const{options} = this.state;
       if (!this.isMeasurement) {
         options.unshift({label: optionUtil.ANY.display, value: AttrName[AttrName.ANY]});
+        this.setState({options}, () => this.initAttributeForm());
+      } else {
+        this.initAttributeForm();
       }
+    }
+
+    componentDidUpdate(prevProps: Readonly<Props>): void {
+      if (this.props.node !== prevProps.node) {
+        this.setState({loading: true});
+        this.initAttributeForm();
+      }
+    }
+
+    initAttributeForm() {
+      const {node: {subtype}} = this.props;
+      const{form} = this.state;
       if (this.hasRange) {
         this.getAttributes();
       } else {
         form.num = subtype === CriteriaSubType[CriteriaSubType.BP]
           ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
           : [{name: subtype, operator: 'ANY', operands: []}];
-        this.setState({form, options, count: this.nodeCount, loading: false});
+        this.setState({form, count: this.nodeCount, loading: false});
       }
     }
 
