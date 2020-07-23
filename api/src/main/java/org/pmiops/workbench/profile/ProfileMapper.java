@@ -66,5 +66,6 @@ public interface ProfileMapper {
       target = "moodleId",
       ignore = true) // handled by UserService.syncComplianceTraining[V1|V2]
   @Mapping(target = "version", ignore = true)
+  @Mapping(target = "verifiedInstitutionalAffiliation", ignore = true)
   DbUser profileToDbUser(Profile profile);
 }

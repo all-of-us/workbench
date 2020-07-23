@@ -68,6 +68,7 @@ public class UserServiceTest {
   private static final int CLOCK_INCREMENT_MILLIS = 1000;
   private static DbUser providedDbUser;
   private static WorkbenchConfig providedWorkbenchConfig;
+  private DbInstitution dbInstitution;
 
   @MockBean private FireCloudService mockFireCloudService;
   @MockBean private ComplianceService mockComplianceService;
@@ -122,12 +123,13 @@ public class UserServiceTest {
     // is the only working approach I've seen.
     PROVIDED_CLOCK.setInstant(START_INSTANT);
 
-    final DbInstitution dbInstitution = buildInstitution();
+    dbInstitution = buildInstitution();
     final DbVerifiedInstitutionalAffiliation dbAffiliation = buildAffiliation(dbInstitution);
   }
 
   public DbVerifiedInstitutionalAffiliation buildAffiliation(DbInstitution dbInstitution) {
     final DbVerifiedInstitutionalAffiliation dbAffiliation = new DbVerifiedInstitutionalAffiliation();
+    dbAffiliation.setVerifiedInstitutionalAffiliationId(101L);
     dbAffiliation.setInstitution(dbInstitution);
     dbAffiliation.setUser(providedDbUser);
     dbAffiliation.setInstitutionalRoleEnum(InstitutionalRole.FELLOW);
@@ -496,6 +498,7 @@ public class UserServiceTest {
   @Test
   public void testAffiliationField() {
     final DbUser user = userDao.findUserByUsername(USERNAME);
-    assertThat(user.getVerifiedInstitutionalAffiliation()).isNotNull();
+    assertThat(user.getVerifiedInstitutionalAffiliation().getInstitution())
+        .isEqualTo(dbInstitution);
   }
 }

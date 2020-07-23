@@ -17,10 +17,12 @@ import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -35,7 +37,7 @@ import org.pmiops.workbench.model.EmailVerificationStatus;
 
 @Entity
 @Table(name = "user")
-public class DbUser {
+public class DbUser extends DbUserBase {
 
   private static final String CLUSTER_NAME_PREFIX = "all-of-us-";
 
@@ -115,16 +117,6 @@ public class DbUser {
   private DbAddress address;
   private DbVerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation;
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "user_id")
-  public long getUserId() {
-    return userId;
-  }
-
-  public void setUserId(long userId) {
-    this.userId = userId;
-  }
 
   @Version
   @Column(name = "version")
@@ -744,10 +736,15 @@ public class DbUser {
     return CLUSTER_NAME_PREFIX + getUserId();
   }
 
-  @ManyToOne(
-      fetch = FetchType.EAGER,
-      cascade = CascadeType.ALL // is this what I want?
-  )
+  // Table workbench.user_verified_institutional_affiliation is now 1:1  w/r/t the user table,
+  // but we haven't migrrated  it back in. Thus we can't simply use a join column relationship but
+  // require a JoinTable
+  @OneToOne()
+//  @JoinColumn(name = "verified_institutional_affiliation_id")
+  @JoinTable(name = "user_verified_institutional_affiliation",
+    foreignKey = @ForeignKey(name="user_verified_institutional_affiliation_id"),
+    joinColumns = {@JoinColumn(name="user_id")},
+    inverseJoinColumns = @JoinColumn(name="user_verified_institutional_affiliation_id", nullable = true))
   public DbVerifiedInstitutionalAffiliation getVerifiedInstitutionalAffiliation() {
     return verifiedInstitutionalAffiliation;
   }
