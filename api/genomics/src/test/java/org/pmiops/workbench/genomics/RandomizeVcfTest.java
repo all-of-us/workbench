@@ -25,16 +25,14 @@ public class RandomizeVcfTest {
     // For each allele in the genotype...
     // ...is that allele from the bank of possible alleles at that position?
     // ignoring ref/var
-    randomizedVariant.getGenotypes()
-        .stream()
+    randomizedVariant.getGenotypes().stream()
         .flatMap(genotype -> genotype.getAlleles().stream())
-        .forEach(allele ->
-            assertThat(
-              variantContext.getAlleles()
-                .stream()
-                .anyMatch(vcAllele -> vcAllele.basesMatch(allele)))
-            .isTrue()
-        );
+        .forEach(
+            allele ->
+                assertThat(
+                        variantContext.getAlleles().stream()
+                            .anyMatch(vcAllele -> vcAllele.basesMatch(allele)))
+                    .isTrue());
   }
 
   @Test
