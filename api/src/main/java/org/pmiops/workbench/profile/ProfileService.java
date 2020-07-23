@@ -227,19 +227,24 @@ public class ProfileService {
 
     userService.updateUserWithConflictHandling(user);
 
+
+    // FIXME: why not do a getOrCreateAffiliation() here and then update that object & save?
+
     // Save the verified institutional affiliation in the DB. The affiliation has already been
     // verified as part of the `validateProfile` call.
-    DbVerifiedInstitutionalAffiliation updatedDbVerifiedAffiliation =
+    DbVerifiedInstitutionalAffiliation newAffiliation =
         verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
             updatedProfile.getVerifiedInstitutionalAffiliation(), institutionService);
-    updatedDbVerifiedAffiliation.setUser(user);
-    Optional<DbVerifiedInstitutionalAffiliation> dbVerifiedAffiliation =
-        verifiedInstitutionalAffiliationDao.findFirstByUser(user);
-    dbVerifiedAffiliation.ifPresent(
-        verifiedInstitutionalAffiliation ->
-            updatedDbVerifiedAffiliation.setVerifiedInstitutionalAffiliationId(
-                verifiedInstitutionalAffiliation.getVerifiedInstitutionalAffiliationId()));
-    this.verifiedInstitutionalAffiliationDao.save(updatedDbVerifiedAffiliation);
+    newAffiliation.setUser(user); // Why are we calling a non-user mapping function and then adding a user?
+
+    // This is 1:1 in terms of our current usage, but not modelled that way (aside from the unique
+    // constraint on user_id).
+
+    // If this user already has an affiliation, replace the ID of hte
+    verifiedInstitutionalAffiliationDao.findFirstByUser(user)
+        .map(DbVerifiedInstitutionalAffiliation::getVerifiedInstitutionalAffiliationId)
+        .ifPresent(newAffiliation::setVerifiedInstitutionalAffiliationId);
+    this.verifiedInstitutionalAffiliationDao.save(newAffiliation);
 
     final Profile appliedUpdatedProfile = getProfile(user);
     profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);

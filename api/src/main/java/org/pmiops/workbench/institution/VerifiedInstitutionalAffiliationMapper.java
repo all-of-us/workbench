@@ -40,20 +40,9 @@ public interface VerifiedInstitutionalAffiliationMapper {
         institutionService.getDbInstitutionOrThrow(modelObject.getInstitutionShortName()));
   }
 
-  @Mapping(target = "institutionShortName", source = "institution", qualifiedByName = "shortName")
+  @Mapping(target = "institutionShortName", source = "institution.shortName")
   @Mapping(
       target = "institutionDisplayName",
-      source = "institution",
-      qualifiedByName = "displayName")
+      source = "institution.displayName")
   VerifiedInstitutionalAffiliation dbToModel(DbVerifiedInstitutionalAffiliation dbObject);
-
-  @Named("shortName")
-  default String toShortName(DbInstitution institution) {
-    return institution.getShortName();
-  }
-
-  @Named("displayName")
-  default String toDisplayName(DbInstitution institution) {
-    return institution.getDisplayName();
-  }
 }
