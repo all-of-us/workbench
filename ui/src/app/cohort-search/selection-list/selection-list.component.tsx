@@ -92,6 +92,7 @@ interface SelectionInfoState {
   truncated: boolean;
 }
 
+// Delete once enableCohortBuilderV2 flag is removed
 export class SelectionInfoModal extends React.Component<SelectionInfoProps, SelectionInfoState> {
   name: HTMLDivElement;
   constructor(props: SelectionInfoProps) {
