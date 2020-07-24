@@ -7833,8 +7833,8 @@ definitions:
       contactEmail:
         description: When set, replaces the user's contact email.  Must validate against the user's Institutional Affiliation, if one exists.
         type: string
-      verifiedInstitutionalAffiliation:
-        description: When set, replaces the user's verified institutional email.  Must validate against the user's contact email.
+      affiliation:
+        description: When set, replaces the user's verified institutional affiliation.  Must validate against the user's contact email.
         "$ref": '#/definitions/VerifiedInstitutionalAffiliation'
       accessBypassRequests:
         description: Updates the user's bypass status for the given access modules.

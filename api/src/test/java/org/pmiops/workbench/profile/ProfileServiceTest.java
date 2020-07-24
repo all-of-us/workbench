@@ -191,7 +191,7 @@ public class ProfileServiceTest {
             dbVerifiedInstitutionalAffiliation, "kibitz@broadinstitute.org"))
         .thenReturn(true);
 
-    profileService.validateInstitutionalAffiliation(profile);
+    profileService.validateAffiliation(profile);
 
     ArgumentCaptor<DbVerifiedInstitutionalAffiliation> affiliationSpy =
         ArgumentCaptor.forClass(DbVerifiedInstitutionalAffiliation.class);
@@ -230,7 +230,7 @@ public class ProfileServiceTest {
             dbVerifiedInstitutionalAffiliation, "kibitz@broadinstitute.org"))
         .thenReturn(true);
 
-    profileService.validateInstitutionalAffiliation(profile);
+    profileService.validateAffiliation(profile);
 
     ArgumentCaptor<DbVerifiedInstitutionalAffiliation> affiliationSpy =
         ArgumentCaptor.forClass(DbVerifiedInstitutionalAffiliation.class);
@@ -243,7 +243,7 @@ public class ProfileServiceTest {
 
   @Test(expected = BadRequestException.class)
   public void validateInstitutionalAffiliation_noAffiliation() {
-    profileService.validateInstitutionalAffiliation(new Profile());
+    profileService.validateAffiliation(new Profile());
   }
 
   @Test(expected = NotFoundException.class)
@@ -252,7 +252,7 @@ public class ProfileServiceTest {
 
     when(mockInstitutionDao.findOneByShortName("Broad")).thenReturn(Optional.empty());
 
-    profileService.validateInstitutionalAffiliation(profile);
+    profileService.validateAffiliation(profile);
   }
 
   @Test(expected = BadRequestException.class)
@@ -266,7 +266,7 @@ public class ProfileServiceTest {
 
     when(mockInstitutionDao.findOneByShortName("Broad")).thenReturn(Optional.of(BROAD_INSTITUTION));
 
-    profileService.validateInstitutionalAffiliation(profile);
+    profileService.validateAffiliation(profile);
   }
 
   @Test(expected = BadRequestException.class)
@@ -281,7 +281,7 @@ public class ProfileServiceTest {
 
     when(mockInstitutionDao.findOneByShortName("Broad")).thenReturn(Optional.of(BROAD_INSTITUTION));
 
-    profileService.validateInstitutionalAffiliation(profile);
+    profileService.validateAffiliation(profile);
   }
 
   @Test(expected = BadRequestException.class)
@@ -312,7 +312,7 @@ public class ProfileServiceTest {
             affiliation, mockInstitutionService))
         .thenReturn(dbVerifiedInstitutionalAffiliation);
 
-    profileService.validateInstitutionalAffiliation(profile);
+    profileService.validateAffiliation(profile);
   }
 
   @Test

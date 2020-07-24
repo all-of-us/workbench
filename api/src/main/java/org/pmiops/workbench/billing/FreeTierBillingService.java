@@ -298,32 +298,26 @@ public class FreeTierBillingService {
   }
 
   /**
-   * Set a custom Free Tier dollar limit override for this user. If this is greater than the user's
+   * Set a Free Tier dollar limit override value for this user. If this is greater than the user's
    * total cost, set their workspaces to active. Note: lowering the limit below total cost will not
    * set the workspaces to inactive. checkFreeTierBillingUsage() will do this as part of the next
    * cron run.
    *
    * @param user the user as represented in our database
    * @param dollarLimit the US dollar amount, represented as a double
-   * @return whether the user's total cost is now below their limit
    */
-  public boolean setFreeTierDollarOverride(DbUser user, double dollarLimit) {
+  public void setDollarLimitOverride(DbUser user, double dollarLimit) {
     final Double previousLimitMaybe = user.getFreeTierCreditsLimitDollarsOverride();
 
     // TODO: prevent setting this limit directly except in this method?
     user.setFreeTierCreditsLimitDollarsOverride(dollarLimit);
     user = userDao.save(user);
 
-    // accounts for the newly-set override
-    boolean underLimit = userHasRemainingFreeTierCredits(user);
-    if (underLimit) {
+    if (userHasRemainingFreeTierCredits(user)) {
       // may be redundant: enable anyway
       updateFreeTierWorkspacesStatus(user, BillingStatus.ACTIVE);
     }
 
-    userServiceAuditor.fireFreeTierDollarQuotaAction(
-        user.getUserId(), previousLimitMaybe, dollarLimit);
-
-    return underLimit;
+    userServiceAuditor.fireFreeTierDollarQuotaAction(user.getUserId(), previousLimitMaybe, dollarLimit);
   }
 }

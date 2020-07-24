@@ -347,7 +347,7 @@ public class FreeTierBillingServiceTest {
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 150.0);
     assertWithinBillingTolerance(freeTierBillingService.getCachedFreeTierUsage(user), 150.0);
 
-    freeTierBillingService.setFreeTierDollarOverride(user, 200.0);
+    freeTierBillingService.setDollarLimitOverride(user, 200.0);
     assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 200.0);
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.ACTIVE, 150.0);
 
@@ -376,7 +376,7 @@ public class FreeTierBillingServiceTest {
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 300.0);
     assertWithinBillingTolerance(freeTierBillingService.getCachedFreeTierUsage(user), 300.0);
 
-    freeTierBillingService.setFreeTierDollarOverride(user, 200.0);
+    freeTierBillingService.setDollarLimitOverride(user, 200.0);
     assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 200.0);
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 300.0);
 
@@ -554,13 +554,13 @@ public class FreeTierBillingServiceTest {
     DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
 
     final double freeTierCreditsDollarLimitOverride = 100.0;
-    freeTierBillingService.setFreeTierDollarOverride(user, freeTierCreditsDollarLimitOverride);
+    freeTierBillingService.setDollarLimitOverride(user, freeTierCreditsDollarLimitOverride);
     assertWithinBillingTolerance(
         freeTierBillingService.getUserFreeTierDollarLimit(user),
         freeTierCreditsDollarLimitOverride);
 
     final double doubleFreeTierCreditsDollarLimitOverride = 200.0;
-    freeTierBillingService.setFreeTierDollarOverride(
+    freeTierBillingService.setDollarLimitOverride(
         user, doubleFreeTierCreditsDollarLimitOverride);
 
     assertWithinBillingTolerance(

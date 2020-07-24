@@ -130,7 +130,7 @@ public class ProfileService {
     return profile;
   }
 
-  public void validateInstitutionalAffiliation(Profile profile) {
+  public void validateAffiliation(Profile profile) {
     VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
         profile.getVerifiedInstitutionalAffiliation();
 
@@ -157,10 +157,10 @@ public class ProfileService {
           "Institutional role description cannot be empty when institutional role is set to Other");
     }
 
-    validateAffiliation(profile);
+    validateAffiliationEmail(profile);
   }
 
-  private void validateAffiliation(Profile profile) {
+  private void validateAffiliationEmail(Profile profile) {
     String contactEmail = profile.getContactEmail();
     DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation =
         verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
@@ -423,7 +423,7 @@ public class ProfileService {
 
       // only validate if the new profile has an affiliation - some older users do not
       if (profile.getVerifiedInstitutionalAffiliation() != null) {
-        validateAffiliation(profile);
+        validateAffiliationEmail(profile);
       }
     }
     if (isNewProfile || fieldChanged(diff, "givenName")) {
@@ -439,7 +439,7 @@ public class ProfileService {
       validateAreaOfResearch(profile);
     }
     if (isNewProfile || fieldChanged(diff, "verifiedInstitutionalAffiliation")) {
-      validateInstitutionalAffiliation(profile);
+      validateAffiliation(profile);
     }
   }
 
@@ -497,7 +497,7 @@ public class ProfileService {
         .filter(newLimit -> !newLimit.equals(originalProfile.getFreeTierDollarQuota()))
         .ifPresent(
             freeCreditsLimit ->
-                freeTierBillingService.setFreeTierDollarOverride(dbUser, freeCreditsLimit));
+                freeTierBillingService.setDollarLimitOverride(dbUser, freeCreditsLimit));
 
     request
         .getAccessBypassRequests()
@@ -506,7 +506,7 @@ public class ProfileService {
     // refetch from the DB
     Profile updatedProfile = getProfile(userService.getByUsernameOrThrow(request.getUsername()));
     Optional.ofNullable(request.getContactEmail()).ifPresent(updatedProfile::setContactEmail);
-    Optional.ofNullable(request.getVerifiedInstitutionalAffiliation())
+    Optional.ofNullable(request.getAffiliation())
         .ifPresent(updatedProfile::setVerifiedInstitutionalAffiliation);
 
     updateProfileForUser(dbUser, updatedProfile, originalProfile);

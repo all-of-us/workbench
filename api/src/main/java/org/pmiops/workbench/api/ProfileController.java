@@ -239,7 +239,7 @@ public class ProfileController implements ProfileApiDelegate {
       verifyInvitationKey(request.getInvitationKey());
     }
 
-    profileService.validateInstitutionalAffiliation(request.getProfile());
+    profileService.validateAffiliation(request.getProfile());
 
     final Profile profile = request.getProfile();
 

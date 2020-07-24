@@ -1263,7 +1263,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     final AccountPropertyUpdate request =
         new AccountPropertyUpdate()
             .username(PRIMARY_EMAIL)
-            .verifiedInstitutionalAffiliation(newAffiliation);
+            .affiliation(newAffiliation);
     final Profile retrieved = profileService.updateAccountProperties(request);
     assertThat(retrieved.getVerifiedInstitutionalAffiliation()).isEqualTo(newAffiliation);
 
@@ -1298,7 +1298,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     final AccountPropertyUpdate request =
         new AccountPropertyUpdate()
             .username(PRIMARY_EMAIL)
-            .verifiedInstitutionalAffiliation(newAffiliation);
+            .affiliation(newAffiliation);
     profileService.updateAccountProperties(request);
   }
 
@@ -1342,7 +1342,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         new AccountPropertyUpdate()
             .username(PRIMARY_EMAIL)
             .contactEmail(newContactEmail)
-            .verifiedInstitutionalAffiliation(newAffiliation);
+            .affiliation(newAffiliation);
     final Profile retrieved = profileService.updateAccountProperties(request);
     assertThat(retrieved.getContactEmail()).isEqualTo(newContactEmail);
     assertThat(retrieved.getVerifiedInstitutionalAffiliation()).isEqualTo(newAffiliation);
@@ -1389,7 +1389,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         new AccountPropertyUpdate()
             .username(PRIMARY_EMAIL)
             .contactEmail(newContactEmail)
-            .verifiedInstitutionalAffiliation(newAffiliation);
+            .affiliation(newAffiliation);
     profileService.updateAccountProperties(request);
   }
 
