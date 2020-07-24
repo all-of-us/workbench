@@ -11,6 +11,7 @@ import {Subscription} from 'rxjs/Subscription';
 
 import {AttributesPageV2} from 'app/cohort-search/attributes-page-v2/attributes-page-v2.component';
 import {SelectionList} from 'app/cohort-search/selection-list/selection-list.component';
+import {FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {SidebarContent} from 'app/pages/data/cohort-review/sidebar-content.component';
@@ -24,11 +25,13 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
 import {Criteria, ParticipantCohortStatus, WorkspaceAccessLevel} from 'generated/fetch';
-import {Button, MenuItem, StyledAnchorTag} from './buttons';
+import {Button, Clickable, MenuItem, StyledAnchorTag} from './buttons';
 import {PopupTrigger} from './popups';
 
 const proIcons = {
-  thunderstorm: '/assets/icons/thunderstorm-solid.svg'
+  arrowLeft: '/assets/icons/arrow-left-regular.svg',
+  thunderstorm: '/assets/icons/thunderstorm-solid.svg',
+  times: '/assets/icons/times-light.svg'
 };
 const sidebarContent = require('assets/json/help-sidebar.json');
 
@@ -87,13 +90,10 @@ const styles = reactStyles({
     transition: 'background 0.2s linear',
     verticalAlign: 'middle'
   },
-  closeIcon: {
-    color: colorWithWhiteness(colors.primary, 0.4),
-    cursor: 'pointer',
+  navIcons: {
     position: 'absolute',
-    right: '0.25rem',
-    top: '0.25rem',
-    verticalAlign: 'top'
+    right: '0',
+    top: '0.75rem',
   },
   sectionTitle: {
     marginTop: '0.5rem',
@@ -529,7 +529,20 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
         </div>
         <div style={this.sidebarContainerStyles(activeIcon, notebookStyles)}>
           <div style={sidebarOpen ? {...styles.sidebar, ...styles.sidebarOpen} : styles.sidebar} data-test-id='sidebar-content'>
-            <ClrIcon shape='times' size={22} style={styles.closeIcon} onClick={() => setSidebarState(false)} />
+            <FlexRow style={styles.navIcons}>
+              {attributesSelection && <Clickable style={{marginRight: '1rem'}}
+                  onClick={() => this.setState({attributesSelection: undefined})}>
+                <img src={proIcons.arrowLeft}
+                     style={{height: '21px', width: '18px'}}
+                     alt='Go back'/>
+              </Clickable>}
+              <Clickable style={{marginRight: '1rem'}}
+                  onClick={() => setSidebarState(false)}>
+                <img src={proIcons.times}
+                     style={{height: '27px', width: '17px'}}
+                     alt='Close'/>
+              </Clickable>
+            </FlexRow>
             <div style={contentStyle('help')}>
               <h3 style={{...styles.sectionTitle, marginTop: 0}}>{helpContentKey === NOTEBOOK_HELP_CONTENT ? 'Workspace storage' : 'Help Tips'}</h3>
               {helpContentKey !== NOTEBOOK_HELP_CONTENT &&
