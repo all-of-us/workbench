@@ -8,6 +8,7 @@ import {EllipsisMenuAction, Language, LinkText} from 'app/text-labels';
 import {Page} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
+import {getPropValue} from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
 
 const PageTitle = 'View Notebooks';
@@ -68,8 +69,35 @@ export default class WorkspaceAnalysisPage extends AuthenticatedPage {
     await modal.waitForLoad();
     await modal.fillInModal(notebookName, language);
 
+    // Log page heading.
+    const pageHeadingXpath = '//*[@data-test-id="notebook-redirect"]/h2';
+    const pageHeading = await this.page.waitForXPath(pageHeadingXpath, {visible: true});
+    console.log(await getPropValue(pageHeading, 'textContent'));
+
+    // Wait for existances of important messages.
+    const warningTexts = 'You are prohibited from taking screenshots or attempting in any way to remove participant-level data from the workbench.';
+    const warningTextsXpath = `//*[contains(normalize-space(text()), "${warningTexts}")]`
+
+    const progressXpath = '//*[@data-test-id="current-progress-card"]';
+
+    const authenticateTexts = 'Authenticating with the notebook server';
+    const authenticateTextsXpath = `//*[@data-test-id and contains(normalize-space(), "${authenticateTexts}")]`;
+
+    const creatingTexts = 'Creating the new notebook';
+    const creatingTextsXpath = `//*[@data-test-id and contains(normalize-space(), "${creatingTexts}")]`
+
+    const redirectingTexts = 'Redirecting to the notebook server';
+    const redirectingTextsXpath = `//*[@data-test-id and contains(normalize-space(), "${redirectingTexts}")]`;
+
+    await Promise.all([
+      this.page.waitForXPath(warningTextsXpath, {visible: true}),
+      this.page.waitForXPath(progressXpath, {visible: true}),
+      this.page.waitForXPath(authenticateTextsXpath, {visible: true}),
+      this.page.waitForXPath(creatingTextsXpath, {visible: true}),
+      this.page.waitForXPath(redirectingTextsXpath, {visible: true}),
+    ]);
+
     // Waiting up to 15 minutes
-    console.log(`Waiting for "${notebookName}" notebook server to start ...`);
     await waitWhileLoading(this.page, 60 * 15 * 1000);
   }
 

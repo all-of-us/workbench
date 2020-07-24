@@ -135,21 +135,22 @@ export default class NotebookPage extends AuthenticatedPage {
   async runCodeCell(cellIndex: number, opts: { code?: string, timeOut?: number }): Promise<string> {
     await this.codeCell.selectCell(cellIndex, opts.code);
     await this.runButton();
-    await Promise.all([
-      this.waitForKernelIdle(opts.timeOut),
+    const [output] = await Promise.all([
       this.codeCell.findCellOutput(cellIndex, opts.timeOut),
+      this.waitForKernelIdle(opts.timeOut),
     ]);
-    return this.codeCell.findCellOutput(cellIndex);
+    return output;
   }
 
-  async findCodeCellInput(cellIndex: number) {
+  async findCodeCellInput(cellIndex: number): Promise<string> {
     const codeCell = new CodeCell(await this.frame());
-    await codeCell.findCellInput(cellIndex);
+    const elemt = await codeCell.findCellInput(cellIndex);
+    return getPropValue(elemt, 'outerText');
   }
 
-  async findCodeCellOutput(cellIndex: number) {
+  async findCodeCellOutput(cellIndex: number): Promise<string> {
     const codeCell = new CodeCell(await this.frame());
-    await codeCell.findCellOutput(cellIndex);
+    return codeCell.findCellOutput(cellIndex);
   }
 
 
@@ -201,8 +202,7 @@ export default class NotebookPage extends AuthenticatedPage {
 
   private async frame(): Promise<Frame> {
     const iframe = await this.page.waitForSelector('iframe[src*="notebooks"]');
-    const frameContents = await iframe.contentFrame();
-    return frameContents;
+    return iframe.contentFrame();
   }
 
 }

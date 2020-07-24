@@ -37,13 +37,13 @@ describe('Jupyter notebook tests', () => {
            'age <- c(1, 10, 20)\n' +
            'data <- data.frame(name, age)\n' +
            'print(max(data$age))';
-      const result1 = await notebook.runCodeCell(1, {code: code1});
-      expect(result1).toMatch(/20/);
+      const code1Output = await notebook.runCodeCell(1, {code: code1});
+      expect(code1Output).toMatch(/20/);
 
       const code2 = 'sessionInfo()';
-      const result2 = await notebook.runCodeCell(2, {code: code2});
+      const code2Output = await notebook.runCodeCell(2, {code: code2});
       // R version is 3.6.2 at time of this writing. It can change.
-      expect(result2).toMatch(/R version 3.6.2/);
+      expect(code2Output).toMatch(/R version 3.6.2/);
 
       // Delete R notebook
       const analysisPage = await notebook.goBackAnalysisPage();

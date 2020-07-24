@@ -18,7 +18,7 @@ export async function signIn(page: Page, userId?: string, passwd?: string): Prom
   const loginPage = new GoogleLoginPage(page);
   await loginPage.login(userId, passwd);
   // this element exists in DOM after user has logged in
-  await page.waitFor(() => document.querySelector('app-signed-in') !== null);
+  await page.waitForFunction(() => !!document.querySelector('app-signed-in'));
   const homePage = new HomePage(page);
   await homePage.waitForLoad();
 }

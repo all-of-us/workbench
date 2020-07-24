@@ -19,9 +19,9 @@ export default class CohortActionsPage extends AuthenticatedPage {
       await Promise.all([
         waitForDocumentTitle(this.page, PageTitle),
         waitWhileLoading(this.page),
-        this.getCreateAnotherCohortButton(),
-        this.getCreateReviewSetsButton(),
-        this.getCreateDatasetButton(),
+        this.getCreateAnotherCohortButton().then(elemt => elemt.asElementHandle()),
+        this.getCreateReviewSetsButton().then(elemt => elemt.asElementHandle()),
+        this.getCreateDatasetButton().then(elemt => elemt.asElementHandle()),
       ]);
       return true;
     } catch (e) {

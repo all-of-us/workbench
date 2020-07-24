@@ -20,14 +20,14 @@ export default abstract class BasePage {
    * Reload current page.
    */
   async reloadPage(): Promise<Response> {
-    return await this.page.reload( { waitUntil: ['networkidle0', 'domcontentloaded'] } );
+    return await this.page.reload( { waitUntil: ['networkidle0', 'load'] } );
   }
 
   /**
    * Load a URL.
    */
   async gotoUrl(url: string): Promise<void> {
-    await this.page.goto(url, {waitUntil: ['domcontentloaded','networkidle0']});
+    await this.page.goto(url, {waitUntil: ['networkidle0', 'load']});
   }
 
   /**

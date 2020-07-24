@@ -10,10 +10,11 @@ import AuthenticatedPage from 'app/page/authenticated-page';
 import {EllipsisMenuAction, Language, LinkText} from 'app/text-labels';
 import {buildXPath} from 'app/xpath-builders';
 import {ElementType} from 'app/xpath-options';
-import {ElementHandle, Page, Response} from 'puppeteer';
+import {ElementHandle, Page} from 'puppeteer';
 import {makeRandomName} from 'utils/str-utils';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
+import Link from 'app/element/link';
 import CohortActionsPage from './cohort-actions-page';
 import CohortBuildPage from './cohort-build-page';
 import {Visits} from './cohort-criteria-modal';
@@ -75,15 +76,13 @@ export default class DataPage extends AuthenticatedPage {
   async openTab(tabName: TabLabelAlias, opts: {waitPageChange?: boolean} = {}): Promise<void> {
     const {waitPageChange = true} = opts;
     const selector = buildXPath({name: tabName, type: ElementType.Tab});
-    const tab = await this.page.waitForXPath(selector, {visible: true});
+    const tab = new Link(this.page, selector);
     if (waitPageChange) {
-      await Promise.all<void, Response>([
-        tab.click(),
-        this.page.waitForNavigation({waitUntil: ['load', 'domcontentloaded', 'networkidle0']}),
-      ]);
+      await tab.clickAndWait();
     } else {
       await tab.click();
     }
+    await tab.dispose();
     return waitWhileLoading(this.page);
   }
 

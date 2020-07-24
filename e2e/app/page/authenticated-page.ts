@@ -2,7 +2,6 @@ import {Page} from 'puppeteer';
 import {PageUrl} from 'app/text-labels';
 import BasePage from 'app/page/base-page';
 import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
-import {waitWhileLoading} from 'utils/test-utils';
 
 const signedInIndicator = 'app-signed-in';
 
@@ -51,7 +50,6 @@ export default abstract class AuthenticatedPage extends BasePage {
    */
   async loadPageUrl(url: PageUrl): Promise<void> {
     await this.gotoUrl(url.toString());
-    await waitWhileLoading(this.page);
     await this.waitForLoad();
   }
 

@@ -37,7 +37,6 @@ export default class NotebookPreviewPage extends AuthenticatedPage {
     await link.clickAndWait();
 
     // Restarting notebook server may take a while.
-    await this.page.waitForXPath('clr-icon[shape="sync"]', {visible: true, timeout: 60 * 15 * 1000});
     await waitWhileLoading(this.page, 60 * 15 * 1000);
 
     const notebookPage = new NotebookPage(this.page, notebookName);
