@@ -435,8 +435,8 @@ export class CBModal extends React.Component<Props, State> {
   }
 
   render() {
-    const {closeSearch, searchContext, searchContext: {domain, type}, setSearchContext} = this.props;
-    const {attributesNode, autocompleteSelection, conceptType, count, disableFinish, groupSelections, hierarchyNode, loadingSubtree, mode,
+    const {closeSearch, searchContext, searchContext: {count, domain, type}, setSearchContext} = this.props;
+    const {attributesNode, autocompleteSelection, conceptType, disableFinish, groupSelections, hierarchyNode, loadingSubtree, mode,
       open, selectedIds, selections, title, treeSearchTerms} = this.state;
     return !!searchContext ? <React.Fragment>
       <style>{css}</style>
