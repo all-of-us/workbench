@@ -1530,6 +1530,37 @@ public class ProfileControllerTest extends BaseControllerTest {
         .fireFreeTierDollarQuotaAction(anyLong(), anyDouble(), anyDouble());
   }
 
+  // don't set an override if the value to set is equal to the system default
+  // and observe that the user's limit tracks with the default
+
+  @Test
+  public void test_updateAccountProperties_free_tier_quota_no_override() {
+    config.billing.defaultFreeCreditsDollarLimit = 123.45;
+
+    final Profile original = createAccountAndDbUserWithAffiliation();
+    assertThat(original.getFreeTierDollarQuota()).isWithin(0.01).of(123.45);
+
+    // update the default - the user's profile also updates
+
+    config.billing.defaultFreeCreditsDollarLimit = 234.56;
+    assertThat(profileService.getProfile(dbUser).getFreeTierDollarQuota()).isWithin(0.01).of(234.56);
+
+    // setting a Free Credits Limit equal to the default will not override
+
+    final AccountPropertyUpdate request =
+        new AccountPropertyUpdate()
+            .username(PRIMARY_EMAIL)
+            .freeCreditsLimit(config.billing.defaultFreeCreditsDollarLimit);
+    profileService.updateAccountProperties(request);
+    verify(mockUserServiceAuditor, never())
+        .fireFreeTierDollarQuotaAction(anyLong(), anyDouble(), anyDouble());
+
+    // the user's profile continues to track default changes
+
+    config.billing.defaultFreeCreditsDollarLimit = 345.67;
+    assertThat(profileService.getProfile(dbUser).getFreeTierDollarQuota()).isWithin(0.01).of(345.67);
+  }
+
   private Profile createAccountAndDbUserWithAffiliation(
       VerifiedInstitutionalAffiliation verifiedAffiliation, boolean grantAdminAuthority) {
 

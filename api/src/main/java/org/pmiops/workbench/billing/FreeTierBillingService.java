@@ -298,27 +298,39 @@ public class FreeTierBillingService {
   }
 
   /**
-   * Set a Free Tier dollar limit override value for this user. If this is greater than the user's
-   * total cost, set their workspaces to active. Note: lowering the limit below total cost will not
-   * set the workspaces to inactive. checkFreeTierBillingUsage() will do this as part of the next
-   * cron run.
+   * Set a Free Tier dollar limit override value for this user, but only if the value to set differs
+   * from the system default or the user has an existing override. If the user has no override and
+   * the value to set it equal to the system default, retain the system default so this user's quota
+   * continues to track it.
+   *
+   * <p>If this is greater than the user's total cost, set their workspaces to active. Note:
+   * lowering the limit below total cost will NOT set the workspaces to inactive.
+   * checkFreeTierBillingUsage() will do this as part of the next cron run.
    *
    * @param user the user as represented in our database
-   * @param dollarLimit the US dollar amount, represented as a double
+   * @param newDollarLimit the US dollar amount, represented as a double
+   * @return whether an override was set
    */
-  public void setDollarLimitOverride(DbUser user, double dollarLimit) {
+  public boolean maybeSetDollarLimitOverride(DbUser user, double newDollarLimit) {
     final Double previousLimitMaybe = user.getFreeTierCreditsLimitDollarsOverride();
+    final boolean newLimitDiffersFromSystemDefault =
+        compareCosts(workbenchConfigProvider.get().billing.defaultFreeCreditsDollarLimit, newDollarLimit) != 0;
 
-    // TODO: prevent setting this limit directly except in this method?
-    user.setFreeTierCreditsLimitDollarsOverride(dollarLimit);
-    user = userDao.save(user);
+    if (newLimitDiffersFromSystemDefault || (previousLimitMaybe != null)) {
+      // TODO: prevent setting this limit directly except in this method?
+      user.setFreeTierCreditsLimitDollarsOverride(newDollarLimit);
+      user = userDao.save(user);
 
-    if (userHasRemainingFreeTierCredits(user)) {
-      // may be redundant: enable anyway
-      updateFreeTierWorkspacesStatus(user, BillingStatus.ACTIVE);
+      if (userHasRemainingFreeTierCredits(user)) {
+        // may be redundant: enable anyway
+        updateFreeTierWorkspacesStatus(user, BillingStatus.ACTIVE);
+      }
+
+      userServiceAuditor.fireFreeTierDollarQuotaAction(
+          user.getUserId(), previousLimitMaybe, newDollarLimit);
+      return true;
     }
 
-    userServiceAuditor.fireFreeTierDollarQuotaAction(
-        user.getUserId(), previousLimitMaybe, dollarLimit);
+    return false;
   }
 }
