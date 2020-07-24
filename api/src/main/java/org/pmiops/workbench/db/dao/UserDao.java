@@ -41,8 +41,8 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
           + " FROM DbUser user"
           + " LEFT JOIN FETCH user.authorities"
           + " LEFT JOIN FETCH user.pageVisits"
-          + " ORDER BY user.id")
-  List<DbUser> findAllUsersWithAuthoritiesAndPageVisits();
+          + " ORDER BY NULL")
+  Set<DbUser> findAllUsersWithAuthoritiesAndPageVisits();
 
   /** Find users matching the user's name or email */
   @Query(

@@ -9,11 +9,11 @@ import org.pmiops.workbench.institution.deprecated.InstitutionalAffiliationMappe
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.MapStructConfig;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 
 @Mapper(
-    //    config = MapStructConfig.class,
-    componentModel = "spring",
+    config = MapStructConfig.class,
     uses = {
       AddressMapper.class,
       CommonMappers.class,
