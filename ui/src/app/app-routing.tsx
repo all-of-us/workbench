@@ -12,9 +12,9 @@ import { ReactWrapperBase } from 'app/utils';
 import {authStore, useStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {SignIn} from "./pages/login/sign-in";
-import {AnalyticsTracker} from "./utils/analytics";
-import {Redirect} from "react-router";
+import {Redirect} from 'react-router';
+import {SignIn} from './pages/login/sign-in';
+import {AnalyticsTracker} from './utils/analytics';
 
 
 const signInGuard: Guard = {

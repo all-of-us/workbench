@@ -1,5 +1,3 @@
-import {Component} from '@angular/core';
-import {Router} from '@angular/router';
 import * as fp from 'lodash/fp';
 
 import {PUBLIC_HEADER_IMAGE} from 'app/components/public-layout';
@@ -9,11 +7,9 @@ import {AccountCreationSurvey} from 'app/pages/login/account-creation/account-cr
 import {AccountCreationTos} from 'app/pages/login/account-creation/account-creation-tos';
 import {InvitationKey} from 'app/pages/login/invitation-key';
 import {LoginReactComponent} from 'app/pages/login/login';
-import {SignInService} from 'app/services/sign-in.service';
 import colors from 'app/styles/colors';
 import {
   reactStyles,
-  ReactWrapperBase,
   ServerConfigProps,
   WindowSizeProps,
   withServerConfig,
@@ -28,7 +24,6 @@ import {Footer, FooterTypeEnum} from 'app/components/footer';
 import {AccountCreationInstitution} from 'app/pages/login/account-creation/account-creation-institution';
 import {environment} from 'environments/environment';
 import * as React from 'react';
-import {Navigate} from "../../components/app-router";
 
 // A template function which returns the appropriate style config based on window size and
 // background images.

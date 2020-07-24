@@ -25,7 +25,6 @@ import {ConceptHomepageComponent} from './pages/data/concept/concept-homepage';
 import {ConceptSetActionsComponent} from './pages/data/concept/concept-set-actions';
 import {ConceptSetDetailsComponent} from './pages/data/concept/concept-set-details';
 import {HomepageComponent} from './pages/homepage/homepage';
-import {SignInComponent} from './pages/login/sign-in';
 import {ProfilePageComponent} from './pages/profile/profile-page';
 import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
