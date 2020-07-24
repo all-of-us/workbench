@@ -553,18 +553,13 @@ public class FreeTierBillingServiceTest {
 
     DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
 
-    final double freeTierCreditsDollarLimitOverride = 100.0;
-    freeTierBillingService.setDollarLimitOverride(user, freeTierCreditsDollarLimitOverride);
-    assertWithinBillingTolerance(
-        freeTierBillingService.getUserFreeTierDollarLimit(user),
-        freeTierCreditsDollarLimitOverride);
+    final double limit1 = 100.0;
+    freeTierBillingService.setDollarLimitOverride(user, limit1);
+    assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), limit1);
 
-    final double doubleFreeTierCreditsDollarLimitOverride = 200.0;
-    freeTierBillingService.setDollarLimitOverride(user, doubleFreeTierCreditsDollarLimitOverride);
-
-    assertWithinBillingTolerance(
-        freeTierBillingService.getUserFreeTierDollarLimit(user),
-        doubleFreeTierCreditsDollarLimitOverride);
+    final double limit2 = 200.0;
+    freeTierBillingService.setDollarLimitOverride(user, limit2);
+    assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), limit2);
   }
 
   @Test
