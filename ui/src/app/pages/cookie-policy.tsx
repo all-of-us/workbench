@@ -5,7 +5,6 @@ import {Header, SmallHeader} from 'app/components/headers';
 import {PublicLayout} from 'app/components/public-layout';
 import {AouTitle} from 'app/components/text-wrappers';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {buildPageTitleForEnvironment} from 'app/utils/title';
 import * as React from 'react';
 
 const styles = {
