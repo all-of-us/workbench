@@ -1155,8 +1155,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = NotFoundException.class)
   public void test_updateAccountProperties_user_not_found() {
-    final AccountPropertyUpdate request =
-        new AccountPropertyUpdate().username("not found");
+    final AccountPropertyUpdate request = new AccountPropertyUpdate().username("not found");
     profileService.updateAccountProperties(request);
   }
 
@@ -1165,8 +1164,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     final Profile original = createAccountAndDbUserWithAffiliation();
 
     // valid user but no fields updated
-    final AccountPropertyUpdate request =
-        new AccountPropertyUpdate().username(PRIMARY_EMAIL);
+    final AccountPropertyUpdate request = new AccountPropertyUpdate().username(PRIMARY_EMAIL);
     final Profile retrieved = profileService.updateAccountProperties(request);
 
     // RW-5257 Demo Survey completion time is incorrectly updated
@@ -1261,9 +1259,7 @@ public class ProfileControllerTest extends BaseControllerTest {
             .institutionalRoleEnum(InstitutionalRole.POST_DOCTORAL);
 
     final AccountPropertyUpdate request =
-        new AccountPropertyUpdate()
-            .username(PRIMARY_EMAIL)
-            .affiliation(newAffiliation);
+        new AccountPropertyUpdate().username(PRIMARY_EMAIL).affiliation(newAffiliation);
     final Profile retrieved = profileService.updateAccountProperties(request);
     assertThat(retrieved.getVerifiedInstitutionalAffiliation()).isEqualTo(newAffiliation);
 
@@ -1296,9 +1292,7 @@ public class ProfileControllerTest extends BaseControllerTest {
             .institutionalRoleEnum(InstitutionalRole.POST_DOCTORAL);
 
     final AccountPropertyUpdate request =
-        new AccountPropertyUpdate()
-            .username(PRIMARY_EMAIL)
-            .affiliation(newAffiliation);
+        new AccountPropertyUpdate().username(PRIMARY_EMAIL).affiliation(newAffiliation);
     profileService.updateAccountProperties(request);
   }
 

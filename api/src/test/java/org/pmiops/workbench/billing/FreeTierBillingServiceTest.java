@@ -560,8 +560,7 @@ public class FreeTierBillingServiceTest {
         freeTierCreditsDollarLimitOverride);
 
     final double doubleFreeTierCreditsDollarLimitOverride = 200.0;
-    freeTierBillingService.setDollarLimitOverride(
-        user, doubleFreeTierCreditsDollarLimitOverride);
+    freeTierBillingService.setDollarLimitOverride(user, doubleFreeTierCreditsDollarLimitOverride);
 
     assertWithinBillingTolerance(
         freeTierBillingService.getUserFreeTierDollarLimit(user),

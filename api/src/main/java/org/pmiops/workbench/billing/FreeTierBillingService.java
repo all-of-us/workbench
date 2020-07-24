@@ -318,6 +318,7 @@ public class FreeTierBillingService {
       updateFreeTierWorkspacesStatus(user, BillingStatus.ACTIVE);
     }
 
-    userServiceAuditor.fireFreeTierDollarQuotaAction(user.getUserId(), previousLimitMaybe, dollarLimit);
+    userServiceAuditor.fireFreeTierDollarQuotaAction(
+        user.getUserId(), previousLimitMaybe, dollarLimit);
   }
 }
