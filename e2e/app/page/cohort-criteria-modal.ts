@@ -7,7 +7,7 @@ import Textbox from 'app/element/textbox';
 import {buildXPath} from 'app/xpath-builders';
 import {ElementType} from 'app/xpath-options';
 import {centerPoint, dragDrop, waitWhileLoading} from 'utils/test-utils';
-import {waitForNumericalString, waitForPropertyNotExists} from 'utils/waits-utils';
+import {waitForNumericalString} from 'utils/waits-utils';
 import {LinkText} from 'app/text-labels';
 
 const defaultXpath = '//*[@class="modal-container"]';
@@ -191,17 +191,13 @@ export default class CohortCriteriaModal extends Modal {
     await (Textbox.asBaseElement(this.page, lowerNumberInput)).type(minAge.toString()).then(input => input.pressTab());
     await (Textbox.asBaseElement(this.page, upperNumberInput)).type(maxAge.toString()).then(input => input.pressTab());
 
-    // Click Calculate button.
-    const button = await this.waitForButton(LinkText.Calculate);
-    await waitForPropertyNotExists(this.page, button.getXpath(), 'disabled');
-    await button.click();
-
-    const calcuatedResult = await this.waitForParticipantResult();
-    console.log(`Age min: ${minAge}, max: ${maxAge} ==> number of participants: ${calcuatedResult}`);
+    // Get count from slider badge
+    const count = await waitForNumericalString(this.page, `${this.xpath}//*[@id="age-count"]`);
+    console.log(`Age min: ${minAge}, max: ${maxAge} ==> number of participants: ${count}`);
 
     // Click FINISH button. Dialog should close.
     await this.clickFinishButton();
-    return calcuatedResult;
+    return count;
   }
 
   // Experimental
