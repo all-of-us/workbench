@@ -20,9 +20,9 @@ export default class WorkspaceAboutPage extends AuthenticatedPage{
   async isLoaded(): Promise<boolean> {
     try {
       await Promise.all([
-        waitForDocumentTitle(this.page, PageTitle, 60000),
+        waitForDocumentTitle(this.page, PageTitle),
         waitWhileLoading(this.page),
-        this.page.waitForXPath(buildXPath({name: TabLabelAlias.About, type: ElementType.Tab}), {timeout: 60000}),
+        this.page.waitForXPath(buildXPath({name: TabLabelAlias.About, type: ElementType.Tab})),
       ]);
       return true;
     } catch (err) {

@@ -104,7 +104,7 @@ export default class CohortParticipantsGroup {
   }
 
   async getGroupCount(): Promise<string> {
-    return waitForNumericalString(this.page, this.getGroupCountXpath(), 60000);
+    return waitForNumericalString(this.page, this.getGroupCountXpath());
   }
 
   async includeAge(minAge: number, maxAge: number): Promise<string> {

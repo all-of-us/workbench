@@ -18,6 +18,7 @@ public class DbPerson {
   private Date dob;
   private int ageAtConsent;
   private int ageAtCdr;
+  private Boolean isDeceased;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -57,6 +58,15 @@ public class DbPerson {
     this.ageAtCdr = ageAtCdr;
   }
 
+  @Column(name = "is_deceased")
+  public Boolean getIsDeceased() {
+    return isDeceased;
+  }
+
+  public void setIsDeceased(Boolean isDeceased) {
+    this.isDeceased = isDeceased;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -68,12 +78,13 @@ public class DbPerson {
     DbPerson dbPerson = (DbPerson) o;
     return ageAtConsent == dbPerson.ageAtConsent
         && ageAtCdr == dbPerson.ageAtCdr
+        && isDeceased == dbPerson.isDeceased
         && Objects.equals(dob, dbPerson.dob);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(dob, ageAtConsent, ageAtCdr);
+    return Objects.hash(dob, ageAtConsent, ageAtCdr, isDeceased);
   }
 
   @Override
@@ -83,6 +94,7 @@ public class DbPerson {
         .add("dob=" + dob)
         .add("ageAtConsent=" + ageAtConsent)
         .add("ageAtCdr=" + ageAtCdr)
+        .add("isDeceased=" + isDeceased)
         .toString();
   }
 
@@ -95,6 +107,7 @@ public class DbPerson {
     private Date dob;
     private int ageAtConsent;
     private int ageAtCdr;
+    private Boolean isDeceased;
 
     private Builder() {}
 
@@ -118,12 +131,18 @@ public class DbPerson {
       return this;
     }
 
+    public Builder addIsDeceased(Boolean isDeceased) {
+      this.isDeceased = isDeceased;
+      return this;
+    }
+
     public DbPerson build() {
       DbPerson dbPerson = new DbPerson();
       dbPerson.setPersonId(this.personId);
       dbPerson.setDob(this.dob);
       dbPerson.setAgeAtConsent(this.ageAtConsent);
       dbPerson.setAgeAtCdr(this.ageAtCdr);
+      dbPerson.setIsDeceased(this.isDeceased);
       return dbPerson;
     }
   }

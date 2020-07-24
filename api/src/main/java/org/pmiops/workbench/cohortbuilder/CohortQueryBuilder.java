@@ -283,7 +283,7 @@ public class CohortQueryBuilder {
   private static String getAgeRangeSql(int lo, int hi, AgeType ageType) {
     String ageSql =
         AgeType.AGE.equals(ageType)
-            ? "CAST(FLOOR(DATE_DIFF(CURRENT_DATE, cb_search_person.dob, MONTH)/12) as INT64)"
+            ? "DATE_DIFF(CURRENT_DATE,dob, YEAR) - IF(EXTRACT(MONTH FROM dob)*100 + EXTRACT(DAY FROM dob) > EXTRACT(MONTH FROM CURRENT_DATE)*100 + EXTRACT(DAY FROM CURRENT_DATE),1,0)"
             : ageType.toString();
     return "when " + ageSql + " >= " + lo + " and " + ageSql + " <= " + hi + " then '" + lo + "-"
         + hi + "'";

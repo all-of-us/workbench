@@ -23,8 +23,8 @@ export default class HomePage extends AuthenticatedPage {
   async isLoaded(): Promise<boolean> {
     try {
       await Promise.all([
-        waitForDocumentTitle(this.page, PageTitle, 60000),
-        waitWhileLoading(this.page, 60000),
+        waitForDocumentTitle(this.page, PageTitle),
+        waitWhileLoading(this.page),
       ]);
       return true;
     } catch (err) {

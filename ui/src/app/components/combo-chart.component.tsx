@@ -1,10 +1,8 @@
-import {Component, Input} from '@angular/core';
 import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import * as React from 'react';
 
 import {getChartObj} from 'app/cohort-search/utils';
-import {ReactWrapperBase} from 'app/utils';
 
 interface Props {
   mode: string;
@@ -116,18 +114,6 @@ export class ComboChart extends React.Component<Props, State> {
     return <div style={{minHeight: 200}}>
       {options && <HighchartsReact highcharts={highCharts} options={options} callback={getChartObj} />}
     </div>;
-  }
-}
-
-@Component ({
-  selector: 'app-combo-chart',
-  template: '<div #root></div>'
-})
-export class ComboChartComponent extends ReactWrapperBase {
-  @Input('mode') mode: Props['mode'];
-  @Input('data') data: Props['data'];
-  constructor() {
-    super(ComboChart, ['mode', 'data']);
   }
 }
 

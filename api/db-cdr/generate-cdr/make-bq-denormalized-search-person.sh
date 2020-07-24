@@ -107,8 +107,8 @@ FROM
     (
         SELECT person_id
             ,date_of_birth
-            ,CAST(FLOOR(DATE_DIFF(date_of_consent, date_of_birth, month)/12) as INT64) as age_at_consent
-            ,CAST(FLOOR(DATE_DIFF(date_of_cdr, date_of_birth, month)/12) as INT64) as age_at_cdr
+            ,DATE_DIFF(date_of_consent,date_of_birth, YEAR) - IF(EXTRACT(MONTH FROM date_of_birth)*100 + EXTRACT(DAY FROM date_of_birth) > EXTRACT(MONTH FROM date_of_consent)*100 + EXTRACT(DAY FROM date_of_consent),1,0) as age_at_consent
+            ,DATE_DIFF(date_of_cdr,date_of_birth, YEAR) - IF(EXTRACT(MONTH FROM date_of_birth)*100 + EXTRACT(DAY FROM date_of_birth) > EXTRACT(MONTH FROM date_of_cdr)*100 + EXTRACT(DAY FROM date_of_cdr),1,0) as age_at_cdr
         FROM
         (
             SELECT a.person_id
