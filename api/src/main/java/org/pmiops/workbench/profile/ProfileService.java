@@ -18,7 +18,6 @@ import org.javers.core.diff.Diff;
 import org.javers.core.diff.changetype.PropertyChange;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -57,7 +56,6 @@ public class ProfileService {
   private final ProfileAuditor profileAuditor;
   private final ProfileMapper profileMapper;
   private final Provider<DbUser> userProvider;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
   private final UserService userService;
   private final UserTermsOfServiceDao userTermsOfServiceDao;
@@ -76,7 +74,6 @@ public class ProfileService {
       ProfileAuditor profileAuditor,
       ProfileMapper profileMapper,
       Provider<DbUser> userProvider,
-      Provider<WorkbenchConfig> workbenchConfigProvider,
       UserDao userDao,
       UserService userService,
       UserTermsOfServiceDao userTermsOfServiceDao,
@@ -97,7 +94,6 @@ public class ProfileService {
     this.userTermsOfServiceDao = userTermsOfServiceDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
     this.verifiedInstitutionalAffiliationMapper = verifiedInstitutionalAffiliationMapper;
-    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   public Profile getProfile(DbUser user) {
@@ -497,7 +493,8 @@ public class ProfileService {
     final Profile originalProfile = getProfile(dbUser);
 
     Optional.ofNullable(request.getFreeCreditsLimit())
-        .ifPresent(newLimit -> freeTierBillingService.maybeSetDollarLimitOverride(dbUser, newLimit));
+        .ifPresent(
+            newLimit -> freeTierBillingService.maybeSetDollarLimitOverride(dbUser, newLimit));
 
     request
         .getAccessBypassRequests()

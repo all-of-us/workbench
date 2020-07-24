@@ -1543,7 +1543,9 @@ public class ProfileControllerTest extends BaseControllerTest {
     // update the default - the user's profile also updates
 
     config.billing.defaultFreeCreditsDollarLimit = 234.56;
-    assertThat(profileService.getProfile(dbUser).getFreeTierDollarQuota()).isWithin(0.01).of(234.56);
+    assertThat(profileService.getProfile(dbUser).getFreeTierDollarQuota())
+        .isWithin(0.01)
+        .of(234.56);
 
     // setting a Free Credits Limit equal to the default will not override
 
@@ -1558,7 +1560,9 @@ public class ProfileControllerTest extends BaseControllerTest {
     // the user's profile continues to track default changes
 
     config.billing.defaultFreeCreditsDollarLimit = 345.67;
-    assertThat(profileService.getProfile(dbUser).getFreeTierDollarQuota()).isWithin(0.01).of(345.67);
+    assertThat(profileService.getProfile(dbUser).getFreeTierDollarQuota())
+        .isWithin(0.01)
+        .of(345.67);
   }
 
   private Profile createAccountAndDbUserWithAffiliation(

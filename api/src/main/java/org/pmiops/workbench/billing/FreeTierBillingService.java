@@ -142,6 +142,10 @@ public class FreeTierBillingService {
     return compareCosts(currentCost, getUserFreeTierDollarLimit(user)) > 0;
   }
 
+  private boolean costsDiffer(final double a, final double b) {
+    return compareCosts(a, b) != 0;
+  }
+
   // TODO: move to DbWorkspace?  RW-5107
   private boolean isFreeTier(final DbWorkspace workspace) {
     return workspace
@@ -313,10 +317,11 @@ public class FreeTierBillingService {
    */
   public boolean maybeSetDollarLimitOverride(DbUser user, double newDollarLimit) {
     final Double previousLimitMaybe = user.getFreeTierCreditsLimitDollarsOverride();
-    final boolean newLimitDiffersFromSystemDefault =
-        compareCosts(workbenchConfigProvider.get().billing.defaultFreeCreditsDollarLimit, newDollarLimit) != 0;
 
-    if (newLimitDiffersFromSystemDefault || (previousLimitMaybe != null)) {
+    if (previousLimitMaybe != null
+        || costsDiffer(
+            newDollarLimit, workbenchConfigProvider.get().billing.defaultFreeCreditsDollarLimit)) {
+
       // TODO: prevent setting this limit directly except in this method?
       user.setFreeTierCreditsLimitDollarsOverride(newDollarLimit);
       user = userDao.save(user);

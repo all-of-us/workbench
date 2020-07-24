@@ -2,8 +2,11 @@ package org.pmiops.workbench.billing;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -332,7 +335,40 @@ public class FreeTierBillingServiceTest {
   }
 
   @Test
-  public void setFreeTierDollarOverride_above_usage() throws MessagingException {
+  public void maybeSetDollarLimitOverride_true() {
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+
+    assertThat(freeTierBillingService.maybeSetDollarLimitOverride(user, 200.0)).isTrue();
+    verify(mockUserServiceAuditor).fireFreeTierDollarQuotaAction(user.getUserId(), null, 200.0);
+    assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 200.0);
+
+    assertThat(freeTierBillingService.maybeSetDollarLimitOverride(user, 100.0)).isTrue();
+    verify(mockUserServiceAuditor).fireFreeTierDollarQuotaAction(user.getUserId(), 200.0, 100.0);
+    assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 100.0);
+  }
+
+  @Test
+  public void maybeSetDollarLimitOverride_false() {
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+
+    assertThat(freeTierBillingService.maybeSetDollarLimitOverride(user, 100.0)).isFalse();
+    verify(mockUserServiceAuditor, never())
+        .fireFreeTierDollarQuotaAction(anyLong(), anyDouble(), anyDouble());
+    assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 100.0);
+
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 200.0;
+    assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 200.0);
+
+    assertThat(freeTierBillingService.maybeSetDollarLimitOverride(user, 200.0)).isFalse();
+    verify(mockUserServiceAuditor, never())
+        .fireFreeTierDollarQuotaAction(anyLong(), anyDouble(), anyDouble());
+    assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 200.0);
+  }
+
+  @Test
+  public void maybeSetDollarLimitOverride_above_usage() throws MessagingException {
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
     doReturn(mockBQTableSingleResult(150.0)).when(bigQueryService).executeQuery(any());
 
@@ -348,14 +384,13 @@ public class FreeTierBillingServiceTest {
     assertWithinBillingTolerance(freeTierBillingService.getCachedFreeTierUsage(user), 150.0);
 
     freeTierBillingService.maybeSetDollarLimitOverride(user, 200.0);
+    verify(mockUserServiceAuditor).fireFreeTierDollarQuotaAction(user.getUserId(), null, 200.0);
     assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 200.0);
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.ACTIVE, 150.0);
 
     freeTierBillingService.checkFreeTierBillingUsage();
     verifyZeroInteractions(mailService);
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.ACTIVE, 150.0);
-
-    verify(mockUserServiceAuditor).fireFreeTierDollarQuotaAction(user.getUserId(), null, 200.0);
   }
 
   // do not reactivate workspaces if the new dollar limit is still below the usage
@@ -377,6 +412,7 @@ public class FreeTierBillingServiceTest {
     assertWithinBillingTolerance(freeTierBillingService.getCachedFreeTierUsage(user), 300.0);
 
     freeTierBillingService.maybeSetDollarLimitOverride(user, 200.0);
+    verify(mockUserServiceAuditor).fireFreeTierDollarQuotaAction(user.getUserId(), null, 200.0);
     assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 200.0);
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 300.0);
 
@@ -555,10 +591,12 @@ public class FreeTierBillingServiceTest {
 
     final double limit1 = 100.0;
     freeTierBillingService.maybeSetDollarLimitOverride(user, limit1);
+    verify(mockUserServiceAuditor).fireFreeTierDollarQuotaAction(user.getUserId(), null, limit1);
     assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), limit1);
 
     final double limit2 = 200.0;
     freeTierBillingService.maybeSetDollarLimitOverride(user, limit2);
+    verify(mockUserServiceAuditor).fireFreeTierDollarQuotaAction(user.getUserId(), limit1, limit2);
     assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), limit2);
   }
 
