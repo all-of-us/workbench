@@ -38,7 +38,7 @@ const getNextAuditPath = (subject: string) => {
   return `/admin/user-audit/${subject}`;
 };
 
-export const UserAuditPage = () => {
+export const UserAudit = () => {
   const {username = ''} = useParams();
   return <AuditPageComponent auditSubjectType='User'
                              buttonLabel='Username without domain'

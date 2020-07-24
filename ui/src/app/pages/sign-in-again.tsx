@@ -4,7 +4,6 @@ import {BoldHeader} from 'app/components/headers';
 import {PublicLayout} from 'app/components/public-layout';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {buildPageTitleForEnvironment} from 'app/utils/title';
 import * as React from 'react';
 
 const styles = reactStyles({
@@ -27,10 +26,6 @@ const styles = reactStyles({
 const supportUrl = 'support@researchallofus.org';
 
 export class SignInAgain extends React.Component<{routeConfig: {signIn: Function}}> {
-  componentDidMount() {
-    document.title = buildPageTitleForEnvironment('You have been signed out');
-  }
-
   render() {
     return <PublicLayout contentStyle={{width: '500px'}}>
       <BoldHeader>You have been signed out</BoldHeader>

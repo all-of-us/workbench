@@ -1,7 +1,7 @@
 import {Component as AComponent} from '@angular/core';
 import {AppRoute, AppRouter, Guard, ProtectedRoutes, withFullHeight, withRouteData} from 'app/components/app-router';
-import {WorkspaceAuditPage} from 'app/pages/admin/admin-workspace-audit';
-import {UserAuditPage} from 'app/pages/admin/user-audit';
+import {WorkspaceAudit} from 'app/pages/admin/admin-workspace-audit';
+import {UserAudit} from 'app/pages/admin/user-audit';
 import {CookiePolicy} from 'app/pages/cookie-policy';
 import {DataUserCodeOfConduct} from 'app/pages/profile/data-user-code-of-conduct';
 import {SessionExpired} from 'app/pages/session-expired';
@@ -19,34 +19,52 @@ const signInGuard: Guard = {
   redirectPath: '/login'
 };
 
-const DUCC = fp.flow(withRouteData, withFullHeight)(DataUserCodeOfConduct);
-const UserAudit = withRouteData(UserAuditPage);
-const WorkspaceAudit = withRouteData(WorkspaceAuditPage);
+const CookiePolicyPage = withRouteData(CookiePolicy);
+const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight)(DataUserCodeOfConduct);
+const SessionExpiredPage = withRouteData(SessionExpired);
+const SignInAgainPage = withRouteData(SignInAgain);
+const UserAuditPage = withRouteData(UserAudit);
+const UserDisabledPage = withRouteData(UserDisabled);
+const WorkspaceAuditPage = withRouteData(WorkspaceAudit);
 
 export const AppRoutingComponent: React.FunctionComponent<{signIn: Function}> = ({signIn}) => {
   const {authLoaded = false} = useStore(authStore);
   return authLoaded && <AppRouter>
-    <AppRoute path='/cookie-policy' component={CookiePolicy}/>
-    <AppRoute path='/session-expired' data={{signIn: signIn}} component={SessionExpired}/>
-    <AppRoute path='/sign-in-again' data={{signIn: signIn}} component={SignInAgain}/>
-    <AppRoute path='/user-disabled' component={UserDisabled}/>
+    <AppRoute
+        path='/cookie-policy'
+        component={() => <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>}
+    />
+    <AppRoute
+        path='/session-expired'
+        data={{signIn: signIn}}
+        component={() => <SessionExpiredPage routeData={{title: 'You have been signed out'}}/>}
+    />
+    <AppRoute
+        path='/sign-in-again'
+        data={{signIn: signIn}}
+        component={() => <SignInAgainPage routeData={{title: 'You have been signed out'}}/>}
+    />
+    <AppRoute
+        path='/user-disabled'
+        component={() => <UserDisabledPage routeData={{title: 'Disabled'}}/>}
+    />
 
     <ProtectedRoutes guards={[signInGuard]}>
         <AppRoute
-        path='/data-code-of-conduct'
-          component={ () => <DUCC routeData={{
+          path='/data-code-of-conduct'
+          component={ () => <DataUserCodeOfConductPage routeData={{
             title: 'Data User Code of Conduct',
             minimizeChrome: true
           }} />}
         />
         <AppRoute path='/admin/user-audit'
-                  component={() => <UserAudit routeData={{title: 'User Audit'}}/>}/>
+                  component={() => <UserAuditPage routeData={{title: 'User Audit'}}/>}/>
         <AppRoute path='/admin/user-audit/:username'
-                  component={() => <UserAudit routeData={{title: 'User Audit'}}/>}/>
+                  component={() => <UserAuditPage routeData={{title: 'User Audit'}}/>}/>
         <AppRoute path='/admin/workspace-audit'
-                  component={() => <WorkspaceAudit routeData={{title: 'Workspace Audit'}}/>}/>
+                  component={() => <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>}/>
         <AppRoute path='/admin/workspace-audit/:workspaceNamespace'
-                  component={() => <WorkspaceAudit routeData={{title: 'Workspace Audit'}}/>}/>
+                  component={() => <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>}/>
     </ProtectedRoutes>
   </AppRouter>;
 };
