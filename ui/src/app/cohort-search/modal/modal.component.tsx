@@ -177,7 +177,6 @@ interface State {
   autocompleteSelection: Criteria;
   backMode: string;
   conceptType: string;
-  count: number;
   disableFinish: boolean;
   groupSelections: Array<number>;
   hierarchyNode: Criteria;
@@ -198,7 +197,6 @@ export class CBModal extends React.Component<Props, State> {
       autocompleteSelection: undefined,
       backMode: 'list',
       conceptType: null,
-      count: 0,
       disableFinish: false,
       groupSelections: [],
       hierarchyNode: undefined,
