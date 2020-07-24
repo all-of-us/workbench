@@ -66,13 +66,13 @@ import org.pmiops.workbench.institution.deprecated.InstitutionalAffiliationMappe
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.AccessModule;
+import org.pmiops.workbench.model.AccountPropertyUpdate;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.model.DuaType;
-import org.pmiops.workbench.model.EditUserInformationRequest;
 import org.pmiops.workbench.model.Education;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.Ethnicity;
@@ -1149,25 +1149,25 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test(expected = NotFoundException.class)
-  public void test_editUserInformation_null_user() {
-    profileService.editUserInformation(new EditUserInformationRequest());
+  public void test_updateAccountProperties_null_user() {
+    profileService.updateAccountProperties(new AccountPropertyUpdate());
   }
 
   @Test(expected = NotFoundException.class)
-  public void test_editUserInformation_user_not_found() {
-    final EditUserInformationRequest request =
-        new EditUserInformationRequest().username("not found");
-    profileService.editUserInformation(request);
+  public void test_updateAccountProperties_user_not_found() {
+    final AccountPropertyUpdate request =
+        new AccountPropertyUpdate().username("not found");
+    profileService.updateAccountProperties(request);
   }
 
   @Test
-  public void test_editUserInformation_no_change() {
+  public void test_updateAccountProperties_no_change() {
     final Profile original = createAccountAndDbUserWithAffiliation();
 
     // valid user but no fields updated
-    final EditUserInformationRequest request =
-        new EditUserInformationRequest().username(PRIMARY_EMAIL);
-    final Profile retrieved = profileService.editUserInformation(request);
+    final AccountPropertyUpdate request =
+        new AccountPropertyUpdate().username(PRIMARY_EMAIL);
+    final Profile retrieved = profileService.updateAccountProperties(request);
 
     // RW-5257 Demo Survey completion time is incorrectly updated
     retrieved.setDemographicSurveyCompletionTime(null);
@@ -1175,8 +1175,8 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void test_editUserInformation_contactEmail() {
-    // ProfileController.editUserInformation() is gated on ACCESS_CONTROL_ADMIN Authority
+  public void test_updateAccountProperties_contactEmail() {
+    // ProfileController.updateAccountProperties() is gated on ACCESS_CONTROL_ADMIN Authority
     // which is also checked in ProfileService.validateProfile()
     boolean grantAdminAuthority = true;
 
@@ -1203,18 +1203,18 @@ public class ProfileControllerTest extends BaseControllerTest {
         createAccountAndDbUserWithAffiliation(affiliation, grantAdminAuthority);
     assertThat(original.getContactEmail()).isEqualTo(CONTACT_EMAIL);
 
-    final EditUserInformationRequest request =
-        new EditUserInformationRequest().username(PRIMARY_EMAIL).contactEmail(newContactEmail);
+    final AccountPropertyUpdate request =
+        new AccountPropertyUpdate().username(PRIMARY_EMAIL).contactEmail(newContactEmail);
 
-    final Profile retrieved = profileService.editUserInformation(request);
+    final Profile retrieved = profileService.updateAccountProperties(request);
     assertThat(retrieved.getContactEmail()).isEqualTo(newContactEmail);
 
     verify(mockProfileAuditor).fireUpdateAction(original, retrieved);
   }
 
   @Test(expected = BadRequestException.class)
-  public void test_editUserInformation_contactEmail_no_match() {
-    // ProfileController.editUserInformation() is gated on ACCESS_CONTROL_ADMIN Authority
+  public void test_updateAccountProperties_contactEmail_no_match() {
+    // ProfileController.updateAccountProperties() is gated on ACCESS_CONTROL_ADMIN Authority
     // which is also checked in ProfileService.validateProfile()
     boolean grantAdminAuthority = true;
 
@@ -1222,14 +1222,14 @@ public class ProfileControllerTest extends BaseControllerTest {
     createAccountAndDbUserWithAffiliation(grantAdminAuthority);
 
     final String newContactEmail = "eric.lander@broadinstitute.org";
-    final EditUserInformationRequest request =
-        new EditUserInformationRequest().username(PRIMARY_EMAIL).contactEmail(newContactEmail);
-    profileService.editUserInformation(request);
+    final AccountPropertyUpdate request =
+        new AccountPropertyUpdate().username(PRIMARY_EMAIL).contactEmail(newContactEmail);
+    profileService.updateAccountProperties(request);
   }
 
   @Test
-  public void test_editUserInformation_newAffiliation() {
-    // ProfileController.editUserInformation() is gated on ACCESS_CONTROL_ADMIN Authority
+  public void test_updateAccountProperties_newAffiliation() {
+    // ProfileController.updateAccountProperties() is gated on ACCESS_CONTROL_ADMIN Authority
     // which is also checked in ProfileService.validateProfile()
     boolean grantAdminAuthority = true;
 
@@ -1260,19 +1260,19 @@ public class ProfileControllerTest extends BaseControllerTest {
             .institutionDisplayName(massGeneral.getDisplayName())
             .institutionalRoleEnum(InstitutionalRole.POST_DOCTORAL);
 
-    final EditUserInformationRequest request =
-        new EditUserInformationRequest()
+    final AccountPropertyUpdate request =
+        new AccountPropertyUpdate()
             .username(PRIMARY_EMAIL)
             .verifiedInstitutionalAffiliation(newAffiliation);
-    final Profile retrieved = profileService.editUserInformation(request);
+    final Profile retrieved = profileService.updateAccountProperties(request);
     assertThat(retrieved.getVerifiedInstitutionalAffiliation()).isEqualTo(newAffiliation);
 
     verify(mockProfileAuditor).fireUpdateAction(original, retrieved);
   }
 
   @Test(expected = BadRequestException.class)
-  public void test_editUserInformation_newAffiliation_no_match() {
-    // ProfileController.editUserInformation() is gated on ACCESS_CONTROL_ADMIN Authority
+  public void test_updateAccountProperties_newAffiliation_no_match() {
+    // ProfileController.updateAccountProperties() is gated on ACCESS_CONTROL_ADMIN Authority
     // which is also checked in ProfileService.validateProfile()
     boolean grantAdminAuthority = true;
 
@@ -1295,16 +1295,16 @@ public class ProfileControllerTest extends BaseControllerTest {
             .institutionDisplayName(massGeneral.getDisplayName())
             .institutionalRoleEnum(InstitutionalRole.POST_DOCTORAL);
 
-    final EditUserInformationRequest request =
-        new EditUserInformationRequest()
+    final AccountPropertyUpdate request =
+        new AccountPropertyUpdate()
             .username(PRIMARY_EMAIL)
             .verifiedInstitutionalAffiliation(newAffiliation);
-    profileService.editUserInformation(request);
+    profileService.updateAccountProperties(request);
   }
 
   @Test
-  public void test_editUserInformation_contactEmail_newAffiliation_self_match() {
-    // ProfileController.editUserInformation() is gated on ACCESS_CONTROL_ADMIN Authority
+  public void test_updateAccountProperties_contactEmail_newAffiliation_self_match() {
+    // ProfileController.updateAccountProperties() is gated on ACCESS_CONTROL_ADMIN Authority
     // which is also checked in ProfileService.validateProfile()
     boolean grantAdminAuthority = true;
 
@@ -1338,20 +1338,20 @@ public class ProfileControllerTest extends BaseControllerTest {
             .institutionDisplayName(massGeneral.getDisplayName())
             .institutionalRoleEnum(InstitutionalRole.POST_DOCTORAL);
 
-    final EditUserInformationRequest request =
-        new EditUserInformationRequest()
+    final AccountPropertyUpdate request =
+        new AccountPropertyUpdate()
             .username(PRIMARY_EMAIL)
             .contactEmail(newContactEmail)
             .verifiedInstitutionalAffiliation(newAffiliation);
-    final Profile retrieved = profileService.editUserInformation(request);
+    final Profile retrieved = profileService.updateAccountProperties(request);
     assertThat(retrieved.getContactEmail()).isEqualTo(newContactEmail);
     assertThat(retrieved.getVerifiedInstitutionalAffiliation()).isEqualTo(newAffiliation);
     verify(mockProfileAuditor).fireUpdateAction(original, retrieved);
   }
 
   @Test(expected = BadRequestException.class)
-  public void test_editUserInformation_contactEmail_newAffiliation_no_match() {
-    // ProfileController.editUserInformation() is gated on ACCESS_CONTROL_ADMIN Authority
+  public void test_updateAccountProperties_contactEmail_newAffiliation_no_match() {
+    // ProfileController.updateAccountProperties() is gated on ACCESS_CONTROL_ADMIN Authority
     // which is also checked in ProfileService.validateProfile()
     boolean grantAdminAuthority = true;
 
@@ -1385,23 +1385,23 @@ public class ProfileControllerTest extends BaseControllerTest {
             .institutionDisplayName(massGeneral.getDisplayName())
             .institutionalRoleEnum(InstitutionalRole.POST_DOCTORAL);
 
-    final EditUserInformationRequest request =
-        new EditUserInformationRequest()
+    final AccountPropertyUpdate request =
+        new AccountPropertyUpdate()
             .username(PRIMARY_EMAIL)
             .contactEmail(newContactEmail)
             .verifiedInstitutionalAffiliation(newAffiliation);
-    profileService.editUserInformation(request);
+    profileService.updateAccountProperties(request);
   }
 
   @Test
-  public void test_editUserInformation_no_bypass_requests() {
+  public void test_updateAccountProperties_no_bypass_requests() {
     final Profile original = createAccountAndDbUserWithAffiliation();
 
-    final EditUserInformationRequest request =
-        new EditUserInformationRequest()
+    final AccountPropertyUpdate request =
+        new AccountPropertyUpdate()
             .username(PRIMARY_EMAIL)
             .accessBypassRequests(Collections.emptyList());
-    final Profile retrieved = profileService.editUserInformation(request);
+    final Profile retrieved = profileService.updateAccountProperties(request);
 
     // RW-5257 Demo Survey completion time is incorrectly updated
     retrieved.setDemographicSurveyCompletionTime(null);
@@ -1409,7 +1409,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void test_editUserInformation_bypass_requests() {
+  public void test_updateAccountProperties_bypass_requests() {
     final Profile original = createAccountAndDbUserWithAffiliation();
 
     // user has no bypasses at test start
@@ -1426,9 +1426,9 @@ public class ProfileControllerTest extends BaseControllerTest {
             // would un-bypass if a bypass had existed
             new AccessBypassRequest().moduleName(AccessModule.BETA_ACCESS).isBypassed(false));
 
-    final EditUserInformationRequest request1 =
-        new EditUserInformationRequest().username(PRIMARY_EMAIL).accessBypassRequests(bypasses1);
-    final Profile retrieved1 = profileService.editUserInformation(request1);
+    final AccountPropertyUpdate request1 =
+        new AccountPropertyUpdate().username(PRIMARY_EMAIL).accessBypassRequests(bypasses1);
+    final Profile retrieved1 = profileService.updateAccountProperties(request1);
 
     // these two are now bypassed
     assertThat(retrieved1.getDataUseAgreementBypassTime()).isNotNull();
@@ -1450,8 +1450,8 @@ public class ProfileControllerTest extends BaseControllerTest {
             new AccessBypassRequest().moduleName(AccessModule.ERA_COMMONS).isBypassed(true),
             new AccessBypassRequest().moduleName(AccessModule.TWO_FACTOR_AUTH).isBypassed(true));
 
-    final EditUserInformationRequest request2 = request1.accessBypassRequests(bypasses2);
-    final Profile retrieved2 = profileService.editUserInformation(request2);
+    final AccountPropertyUpdate request2 = request1.accessBypassRequests(bypasses2);
+    final Profile retrieved2 = profileService.updateAccountProperties(request2);
 
     // these two are now unbypassed
     assertThat(retrieved2.getDataUseAgreementBypassTime()).isNull();
@@ -1506,16 +1506,16 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void test_editUserInformation_free_tier_quota() {
+  public void test_updateAccountProperties_free_tier_quota() {
     createAccountAndDbUserWithAffiliation();
 
     final Double originalQuota = dbUser.getFreeTierCreditsLimitDollarsOverride();
     final Double newQuota = 123.4;
 
-    final EditUserInformationRequest request =
-        new EditUserInformationRequest().username(PRIMARY_EMAIL).freeCreditsLimit(newQuota);
+    final AccountPropertyUpdate request =
+        new AccountPropertyUpdate().username(PRIMARY_EMAIL).freeCreditsLimit(newQuota);
 
-    final Profile retrieved = profileService.editUserInformation(request);
+    final Profile retrieved = profileService.updateAccountProperties(request);
     assertThat(retrieved.getFreeTierDollarQuota()).isWithin(0.01).of(newQuota);
 
     verify(mockUserServiceAuditor)
@@ -1523,14 +1523,14 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void test_editUserInformation_free_tier_quota_no_change() {
+  public void test_updateAccountProperties_free_tier_quota_no_change() {
     final Profile original = createAccountAndDbUserWithAffiliation();
 
-    final EditUserInformationRequest request =
-        new EditUserInformationRequest()
+    final AccountPropertyUpdate request =
+        new AccountPropertyUpdate()
             .username(PRIMARY_EMAIL)
             .freeCreditsLimit(original.getFreeTierDollarQuota());
-    profileService.editUserInformation(request);
+    profileService.updateAccountProperties(request);
 
     verify(mockUserServiceAuditor, never())
         .fireFreeTierDollarQuotaAction(anyLong(), anyDouble(), anyDouble());

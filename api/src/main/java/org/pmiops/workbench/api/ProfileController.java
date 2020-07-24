@@ -47,11 +47,11 @@ import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
+import org.pmiops.workbench.model.AccountPropertyUpdate;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.CreateAccountRequest;
-import org.pmiops.workbench.model.EditUserInformationRequest;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.Institution;
@@ -582,8 +582,8 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
-  public ResponseEntity<Profile> editUserInformation(EditUserInformationRequest request) {
-    return ResponseEntity.ok(profileService.editUserInformation(request));
+  public ResponseEntity<Profile> updateAccountProperties(AccountPropertyUpdate request) {
+    return ResponseEntity.ok(profileService.updateAccountProperties(request));
   }
 
   @Override

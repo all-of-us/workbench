@@ -1128,20 +1128,20 @@ paths:
           description: No module exists with name submitted
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/admin/users/edit":
+  "/v1/admin/users/updateAccount":
     post:
       tags:
         - profile
       consumes:
         - application/json
-      description: 'Updates a subset of a user''s metadata, as defined by the EditUserInformationRequest object.  Requires ACCESS_CONTROL_ADMIN authority.'
+      description: 'Updates a subset of a user''s account metadata, as defined by the AccountPropertyUpdate object.  Requires ACCESS_CONTROL_ADMIN authority.'
       parameters:
         - in: body
           name: request
           description: The admin edit request to perform on a user
           schema:
-            "$ref": "#/definitions/EditUserInformationRequest"
-      operationId: editUserInformation
+            "$ref": "#/definitions/AccountPropertyUpdate"
+      operationId: updateAccountProperties
       responses:
         200:
           description: 'The user''s updated profile'
@@ -7814,7 +7814,7 @@ definitions:
           timestamp (epoch millis) at workspace creation
         type: integer
         format: int64
-  EditUserInformationRequest:
+  AccountPropertyUpdate:
     description: >
       A group of changes an admin can make to a user in the Edit Information card of the individual-user admin page.
       Updates to the contact email or the institutional affiliation will be rejected if they do not validate.

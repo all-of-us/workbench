@@ -33,10 +33,10 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
+import org.pmiops.workbench.model.AccountPropertyUpdate;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.DemographicSurvey;
-import org.pmiops.workbench.model.EditUserInformationRequest;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
@@ -481,14 +481,14 @@ public class ProfileService {
   }
 
   /**
-   * Updates the user metadata referenced by the fields of EditUserInformationRequest.
+   * Updates the user metadata referenced by the fields of AccountPropertyUpdate.
    *
    * @param request the fields to update. Fields left null here will not be updated. Contact Email
    *     and Verified Institutional Affiliation updates will trigger a check for affiliation
    *     validation.
    * @return the Profile of the user, after updates
    */
-  public Profile editUserInformation(EditUserInformationRequest request) {
+  public Profile updateAccountProperties(AccountPropertyUpdate request) {
     final DbUser dbUser = userService.getByUsernameOrThrow(request.getUsername());
     final Profile originalProfile = getProfile(dbUser);
 
