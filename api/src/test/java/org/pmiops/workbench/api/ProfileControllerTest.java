@@ -67,6 +67,7 @@ import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.AccessModule;
 import org.pmiops.workbench.model.Address;
+import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DemographicSurvey;
@@ -1163,6 +1164,10 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void test_editUserInformation_contactEmail() {
+    // ProfileController.editUserInformation() is gated on ACCESS_CONTROL_ADMIN Authority
+    // which is also checked in ProfileService.validateProfile()
+    boolean grantAdminAuthority = true;
+
     // pre-affiliate with an Institution which will validate the user's existing
     // CONTACT_EMAIL and also a new one
     final String newContactEmail = "eric.lander@broadinstitute.org";
@@ -1182,11 +1187,13 @@ public class ProfileControllerTest extends BaseControllerTest {
             .institutionDisplayName(broadPlus.getDisplayName())
             .institutionalRoleEnum(InstitutionalRole.PROJECT_PERSONNEL);
 
-    final Profile original = createAccountAndDbUserWithAffiliation(affiliation);
+    final Profile original =
+        createAccountAndDbUserWithAffiliation(affiliation, grantAdminAuthority);
     assertThat(original.getContactEmail()).isEqualTo(CONTACT_EMAIL);
 
     final EditUserInformationRequest request =
         new EditUserInformationRequest().username(PRIMARY_EMAIL).contactEmail(newContactEmail);
+
     final Profile retrieved = profileService.editUserInformation(request);
     assertThat(retrieved.getContactEmail()).isEqualTo(newContactEmail);
 
@@ -1498,7 +1505,8 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   private Profile createAccountAndDbUserWithAffiliation(
-      VerifiedInstitutionalAffiliation verifiedAffiliation) {
+      VerifiedInstitutionalAffiliation verifiedAffiliation, boolean grantAdminAuthority) {
+
     createAccountRequest.getProfile().setVerifiedInstitutionalAffiliation(verifiedAffiliation);
 
     Profile result = profileController.createAccount(createAccountRequest).getBody();
@@ -1508,11 +1516,25 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     // TODO: why is this necessary instead of initializing in setUp() ?
     dbUser.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
+
+    if (grantAdminAuthority) {
+      dbUser.setAuthoritiesEnum(Collections.singleton(Authority.ACCESS_CONTROL_ADMIN));
+    }
+
     dbUser = userDao.save(dbUser);
-    // to match dbUser
-    result.setEmailVerificationStatus(EmailVerificationStatus.SUBSCRIBED);
+
+    // match dbUser updates
+
+    result.setEmailVerificationStatus(dbUser.getEmailVerificationStatusEnum());
+    result.setAuthorities(Lists.newArrayList(dbUser.getAuthoritiesEnum()));
 
     return result;
+  }
+
+  private Profile createAccountAndDbUserWithAffiliation(
+      VerifiedInstitutionalAffiliation verifiedAffiliation) {
+    boolean grantAdminAuthority = false;
+    return createAccountAndDbUserWithAffiliation(verifiedAffiliation, grantAdminAuthority);
   }
 
   private Profile createAccountAndDbUserWithAffiliation() {
