@@ -28,6 +28,7 @@ import {Footer, FooterTypeEnum} from 'app/components/footer';
 import {AccountCreationInstitution} from 'app/pages/login/account-creation/account-creation-institution';
 import {environment} from 'environments/environment';
 import * as React from 'react';
+import {Navigate} from "../../components/app-router";
 
 // A template function which returns the appropriate style config based on window size and
 // background images.
@@ -117,7 +118,7 @@ export const StepToImageConfig: Map<SignInStep, BackgroundImageConfig> = new Map
 
 export interface SignInProps extends ServerConfigProps, WindowSizeProps {
   initialStep?: SignInStep;
-  onInit: () => void;
+  onSignIn: () => void;
   signIn: () => void;
 }
 
@@ -168,12 +169,7 @@ export const createEmptyProfile = (): Profile => {
   return profile;
 };
 
-/**
- * The inner / implementation SignIn component. This class should only be rendered via the
- * SignInReact method, which wraps this with the expected higher-order components.
- */
-export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
-
+export const SignIn = fp.flow(withServerConfig(), withWindowSize())(class extends React.Component<SignInProps, SignInState> {
   constructor(props: SignInProps) {
     super(props);
     this.state = {
@@ -190,7 +186,7 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
 
   componentDidMount() {
     document.body.style.backgroundColor = colors.light;
-    this.props.onInit();
+    this.props.onSignIn();
   }
 
   componentDidUpdate(prevProps: SignInProps, prevState: SignInState, snapshot) {
@@ -327,32 +323,4 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
       {showFooter && <Footer type={FooterTypeEnum.Registration} />}
     </FlexColumn>;
   }
-}
-
-export const SignInReact = fp.flow(withServerConfig(), withWindowSize())(SignInReactImpl);
-
-@Component({
-  template: '<div #root></div>'
-})
-export class SignInComponent extends ReactWrapperBase {
-
-  constructor(private signInService: SignInService, private router: Router) {
-    super(SignInReact, ['onInit', 'signIn']);
-    this.onInit = this.onInit.bind(this);
-    this.signIn = this.signIn.bind(this);
-  }
-
-  onInit(): void {
-    this.signInService.isSignedIn$.subscribe((signedIn) => {
-      if (signedIn) {
-        this.router.navigateByUrl('/');
-      }
-    });
-  }
-
-  signIn(): void {
-    AnalyticsTracker.Registration.SignIn();
-    this.signInService.signIn();
-  }
-
-}
+});

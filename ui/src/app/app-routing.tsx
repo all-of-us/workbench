@@ -12,6 +12,9 @@ import { ReactWrapperBase } from 'app/utils';
 import {authStore, useStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {SignIn} from "./pages/login/sign-in";
+import {AnalyticsTracker} from "./utils/analytics";
+import {Redirect} from "react-router";
 
 
 const signInGuard: Guard = {
@@ -23,11 +26,17 @@ const CookiePolicyPage = withRouteData(CookiePolicy);
 const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight)(DataUserCodeOfConduct);
 const SessionExpiredPage = withRouteData(SessionExpired);
 const SignInAgainPage = withRouteData(SignInAgain);
+const SignInPage = withRouteData(SignIn);
 const UserAuditPage = withRouteData(UserAudit);
 const UserDisabledPage = withRouteData(UserDisabled);
 const WorkspaceAuditPage = withRouteData(WorkspaceAudit);
 
-export const AppRoutingComponent: React.FunctionComponent<{signIn: Function}> = ({signIn}) => {
+interface RoutingProps {
+  onSignIn: () => void;
+  signIn: () => void;
+}
+
+export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSignIn, signIn}) => {
   const {authLoaded = false} = useStore(authStore);
   return authLoaded && <AppRouter>
     <AppRoute
@@ -35,14 +44,16 @@ export const AppRoutingComponent: React.FunctionComponent<{signIn: Function}> = 
         component={() => <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>}
     />
     <AppRoute
+        path='/login'
+        component={() => <SignInPage routeData={{title: 'Sign In'}} onSignIn={onSignIn} signIn={signIn}/>}
+    />
+    <AppRoute
         path='/session-expired'
-        data={{signIn: signIn}}
-        component={() => <SessionExpiredPage routeData={{title: 'You have been signed out'}}/>}
+        component={() => <SessionExpiredPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>}
     />
     <AppRoute
         path='/sign-in-again'
-        data={{signIn: signIn}}
-        component={() => <SignInAgainPage routeData={{title: 'You have been signed out'}}/>}
+        component={() => <SignInAgainPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>}
     />
     <AppRoute
         path='/user-disabled'
@@ -74,11 +85,21 @@ export const AppRoutingComponent: React.FunctionComponent<{signIn: Function}> = 
 })
 export class AppRouting extends ReactWrapperBase {
   constructor(private signInService: SignInService) {
-    super(AppRoutingComponent, ['signIn']);
+    super(AppRoutingComponent, ['onSignIn', 'signIn']);
+    this.onSignIn = this.onSignIn.bind(this);
     this.signIn = this.signIn.bind(this);
   }
 
+  onSignIn(): void {
+    this.signInService.isSignedIn$.subscribe((signedIn) => {
+      if (signedIn) {
+        return <Redirect to='/'/>;
+      }
+    });
+  }
+
   signIn(): void {
+    AnalyticsTracker.Registration.SignIn();
     this.signInService.signIn();
   }
 }
