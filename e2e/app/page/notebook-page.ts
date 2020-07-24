@@ -60,7 +60,7 @@ export default class NotebookPage extends AuthenticatedPage {
     await this.notebookLink().then( (link) => link.click());
     await navPromise;
     await waitWhileLoading(this.page);
-    const analysisPage = new WorkspaceAnalysisPage(page);
+    const analysisPage = new WorkspaceAnalysisPage(this.page);
     await analysisPage.waitForLoad();
     return analysisPage;
   }

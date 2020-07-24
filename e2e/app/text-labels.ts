@@ -53,6 +53,7 @@ export enum LinkText {
    Next = 'Next',
    Rename = 'Rename',
    RenameDataset = 'Rename Dataset',
+   RenameNotebook = 'Rename Notebook',
    Save = 'Save',
    SaveCohort = 'Save Cohort',
    StayHere = 'Stay Here',

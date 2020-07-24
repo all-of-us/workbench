@@ -1,12 +1,13 @@
+import DataResourceCard, {CardType} from 'app/component/data-resource-card';
+import Modal from 'app/component/modal';
+import NewNotebookModal from 'app/component/new-notebook-modal';
+import Button from 'app/element/button';
+import Link from 'app/element/link';
+import Textbox from 'app/element/textbox';
+import {EllipsisMenuAction, Language, LinkText} from 'app/text-labels';
 import {Page} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
-import DataResourceCard from 'app/component/data-resource-card';
-import Modal from 'app/component/modal';
-import Button from 'app/element/button';
-import {EllipsisMenuAction, Language, LinkText} from 'app/text-labels';
-import NewNotebookModal from 'app/component/new-notebook-modal';
-import Link from 'app/element/link';
 import AuthenticatedPage from './authenticated-page';
 
 const PageTitle = 'View Notebooks';
@@ -74,6 +75,33 @@ export default class WorkspaceAnalysisPage extends AuthenticatedPage {
 
   async createNewNotebookLink(): Promise<Link> {
     return Link.findByName(this.page, {normalizeSpace: LinkText.CreateNewNotebook});
+  }
+
+  async renameNotebook(notebookName: string, newNotebookName: string): Promise<string> {
+    const notebookCard = await DataResourceCard.findCard(this.page, notebookName);
+    const menu = notebookCard.getEllipsis();
+    await menu.clickAction(EllipsisMenuAction.Rename, {waitForNav: false});
+    const modal = new Modal(this.page);
+    const modalTextContents = await modal.getContent();
+    const newNameInput = new Textbox(this.page, `${modal.getXpath()}//*[@id="new-name"]`);
+    await newNameInput.type(newNotebookName);
+    await modal.clickButton(LinkText.RenameNotebook);
+    await modal.waitUntilClose();
+    await waitWhileLoading(this.page);
+    console.log(`Notebook "${notebookName}" renamed to "${newNotebookName}"`);
+    return modalTextContents;
+  }
+
+  /**
+   * Duplicate notebook using Ellipsis menu in Workspace Analysis page.
+   * @param {string} notebookName The notebook name to clone from.
+   */
+  async duplicateNotebook(notebookName: string): Promise<void> {
+    const resourceCard = new DataResourceCard(this.page);
+    const notebookCard = await resourceCard.findCard(notebookName, CardType.Notebook);
+    const menu = notebookCard.getEllipsis();
+    await menu.clickAction(EllipsisMenuAction.Duplicate, {waitForNav: false});
+    await waitWhileLoading(this.page);
   }
 
 }

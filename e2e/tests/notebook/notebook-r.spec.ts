@@ -15,14 +15,13 @@ describe('Jupyter notebook tests', () => {
 
   describe('Create new notebooks', () => {
 
-    // Bug in R notebook UI. See https://precisionmedicineinitiative.atlassian.net/browse/RW-5303
     test('R notebook', async () => {
       expect.assertions(5);
 
       const workspaceCard = await findWorkspace(page);
       await workspaceCard.clickWorkspaceName();
 
-      const notebookName = makeRandomName('test-notebook-');
+      const notebookName = makeRandomName('test-notebook');
       const dataPage = new DataPage(page);
       const notebook = await dataPage.createNotebook(notebookName, Language.R);
 

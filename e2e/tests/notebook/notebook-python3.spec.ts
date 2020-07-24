@@ -27,7 +27,7 @@ describe('Jupyter notebook tests', () => {
       const dataPage = new DataPage(page);
       await dataPage.openTab(TabLabelAlias.Analysis);
 
-      const notebookName = makeRandomName('test-notebook-');
+      const notebookName = makeRandomName('test-notebook');
       const analysisPage = new WorkspaceAnalysisPage(page);
 
       // Verify important messages in UI.
