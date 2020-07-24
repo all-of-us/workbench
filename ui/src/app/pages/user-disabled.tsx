@@ -9,10 +9,6 @@ import {buildPageTitleForEnvironment} from 'app/utils/title';
 const supportUrl = 'support@researchallofus.org';
 
 export class UserDisabled extends React.Component {
-  componentDidMount() {
-    document.title = buildPageTitleForEnvironment('Disabled');
-  }
-
   render() {
     return <PublicLayout>
       <BoldHeader>Your account has been disabled</BoldHeader>

@@ -48,10 +48,6 @@ const GOOGLE_PRIVACY_LINK = 'https://policies.google.com/privacy';
 const ZENDESK_PRIVACY_LINK = 'https://www.zendesk.com/company/customers-partners/privacy-policy/';
 
 export class CookiePolicy extends React.Component<{}, {}> {
-  componentDidMount() {
-    document.title = buildPageTitleForEnvironment('Cookie Policy');
-  }
-
   render() {
     return <PublicLayout>
       <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '100%', color: colors.primary}}>

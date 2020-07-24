@@ -27,10 +27,6 @@ const styles = reactStyles({
 const supportUrl = 'support@researchallofus.org';
 
 export class SignInAgain extends React.Component<{routeConfig: {signIn: Function}}> {
-  componentDidMount() {
-    document.title = buildPageTitleForEnvironment('You have been signed out');
-  }
-
   render() {
     return <PublicLayout contentStyle={{width: '500px'}}>
       <BoldHeader>You have been signed out</BoldHeader>
