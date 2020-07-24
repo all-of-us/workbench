@@ -13,6 +13,7 @@ cron-emulator-err.log
 /api/.docker-sync/
 /api/.project/common/
 /api/.swagger-codegen/*
+/api/genomics/out/*
 /api/out/*
 /api/sa-key.json
 /api/src/main/generated/
@@ -25,9 +26,7 @@ cron-emulator-err.log
 /api/src/generated
 /api/tools/build/*
 /api/bin
-/common-api/.swagger-codegen/*
-/common-api/bin
-/common-api/src/generated
+/appengine-cron-emulator/out/*
 /ui/package-lock.json
 /ui/coverage
 /ui/**/*.map
