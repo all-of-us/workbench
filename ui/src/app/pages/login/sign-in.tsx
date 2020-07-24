@@ -164,7 +164,14 @@ export const createEmptyProfile = (): Profile => {
   return profile;
 };
 
-export const SignIn = fp.flow(withServerConfig(), withWindowSize())(class extends React.Component<SignInProps, SignInState> {
+/**
+ * The inner / implementation SignIn component. This class should only be rendered via the
+ * SignInReact method, which wraps this with the expected higher-order components.
+ *
+ * This impl is separated out for testing purposes.
+ */
+
+export class SignInImpl extends React.Component<SignInProps, SignInState> {
   constructor(props: SignInProps) {
     super(props);
     this.state = {
@@ -318,4 +325,6 @@ export const SignIn = fp.flow(withServerConfig(), withWindowSize())(class extend
       {showFooter && <Footer type={FooterTypeEnum.Registration} />}
     </FlexColumn>;
   }
-});
+}
+
+export const SignIn = fp.flow(withServerConfig(), withWindowSize())(SignInImpl);

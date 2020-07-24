@@ -32,7 +32,7 @@ describe('SignInReact', () => {
   beforeEach(() => {
     window.scrollTo = () => {};
     props = {
-      onInit: () => {},
+      onSignIn: () => {},
       signIn: signIn,
       windowSize: {width: 1700, height: 0},
       serverConfig: defaultConfig
