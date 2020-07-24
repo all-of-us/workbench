@@ -4,6 +4,7 @@ import {waitForDocumentTitle} from 'utils/waits-utils';
 import Textbox from 'app/element/textbox';
 import DataTable from 'app/component/data-table';
 import Button from 'app/element/button';
+import {waitUntilChanged} from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
 import ConceptsetSaveModal, {SaveOption} from './conceptset-save-modal';
 
@@ -48,9 +49,11 @@ export default class ConceptsetSearchPage extends AuthenticatedPage{
   }
 
   async searchConcepts(searchKeywords: string): Promise<void> {
+    const dataTable = await (this.getDataTable()).asElement();
     const searchInput = this.getSearchTextbox();
     await searchInput.type(searchKeywords);
     await searchInput.pressReturn();
+    await waitUntilChanged(this.page, dataTable);
     return waitWhileLoading(this.page);
   }
 

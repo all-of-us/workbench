@@ -21,10 +21,14 @@ export default class Table extends Container {
     super(page, (container === undefined) ? xpath : `${container.getXpath()}${xpath}`);
   }
 
+  async asElement(): Promise<ElementHandle> {
+    return this.page.waitForXPath(this.xpath, {timeout: 1000, visible: true})
+      .then( (elemt) => elemt.asElement());
+  }
+
   async exists(): Promise<boolean> {
     try {
-      await this.page.waitForXPath(this.xpath, {timeout: 1000, visible: true});
-      return true;
+      return (await this.asElement()) !== null;
     } catch (e) {
       return false;
     }
@@ -36,7 +40,7 @@ export default class Table extends Container {
 
   async getCell(rowIndex: number, columnIndex: number): Promise<ElementHandle> {
     const cellXpath = this.getCellXpath(rowIndex, columnIndex);
-    return this.page.waitForXPath(cellXpath);
+    return this.page.waitForXPath(cellXpath, {visible: true});
   }
 
   async getCellValue(rowIndex: number, columnIndex: number): Promise<string> {
@@ -100,7 +104,7 @@ export default class Table extends Container {
 
   async getHeaderCell(columnIndex: number): Promise<ElementHandle> {
     const cellXpath = this.getHeaderXpath(columnIndex);
-    return this.page.waitForXPath(cellXpath);
+    return this.page.waitForXPath(cellXpath, {visible: true});
   }
 
   getCellXpath(rowIndex: number, columnIndex: number): string {
