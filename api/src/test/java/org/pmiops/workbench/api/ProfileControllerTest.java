@@ -753,8 +753,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Test(expected = NotFoundException.class)
   public void updateVerifiedInstitutionalAffiliation_noSuchInstitution() {
     // ProfileController.updateVerifiedInstitutionalAffiliation() is gated on ACCESS_CONTROL_ADMIN
-    // Authority
-    // which is also checked in ProfileService.validateProfile()
+    // Authority which is also checked in ProfileService.validateProfile()
     boolean grantAdminAuthority = true;
 
     final VerifiedInstitutionalAffiliation original = createVerifiedInstitutionalAffiliation();
@@ -772,8 +771,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Test
   public void updateVerifiedInstitutionalAffiliation_update() {
     // ProfileController.updateVerifiedInstitutionalAffiliation() is gated on ACCESS_CONTROL_ADMIN
-    // Authority
-    // which is also checked in ProfileService.validateProfile()
+    // Authority which is also checked in ProfileService.validateProfile()
     boolean grantAdminAuthority = true;
 
     VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
@@ -803,8 +801,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Test(expected = BadRequestException.class)
   public void updateVerifiedInstitutionalAffiliation_removeForbidden() {
     // ProfileController.updateVerifiedInstitutionalAffiliation() is gated on ACCESS_CONTROL_ADMIN
-    // Authority
-    // which is also checked in ProfileService.validateProfile()
+    // Authority which is also checked in ProfileService.validateProfile()
     boolean grantAdminAuthority = true;
 
     final VerifiedInstitutionalAffiliation original = createVerifiedInstitutionalAffiliation();
