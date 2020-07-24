@@ -752,8 +752,13 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = NotFoundException.class)
   public void updateVerifiedInstitutionalAffiliation_noSuchInstitution() {
+    // ProfileController.updateVerifiedInstitutionalAffiliation() is gated on ACCESS_CONTROL_ADMIN
+    // Authority
+    // which is also checked in ProfileService.validateProfile()
+    boolean grantAdminAuthority = true;
+
     final VerifiedInstitutionalAffiliation original = createVerifiedInstitutionalAffiliation();
-    createAccountAndDbUserWithAffiliation(original);
+    createAccountAndDbUserWithAffiliation(original, grantAdminAuthority);
 
     final VerifiedInstitutionalAffiliation newAffil =
         new VerifiedInstitutionalAffiliation()
@@ -766,9 +771,14 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void updateVerifiedInstitutionalAffiliation_update() {
+    // ProfileController.updateVerifiedInstitutionalAffiliation() is gated on ACCESS_CONTROL_ADMIN
+    // Authority
+    // which is also checked in ProfileService.validateProfile()
+    boolean grantAdminAuthority = true;
+
     VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
         createVerifiedInstitutionalAffiliation();
-    createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
+    createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation, grantAdminAuthority);
 
     // original is PROJECT_PERSONNEL
     verifiedInstitutionalAffiliation.setInstitutionalRoleEnum(InstitutionalRole.ADMIN);
@@ -792,8 +802,13 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void updateVerifiedInstitutionalAffiliation_removeForbidden() {
+    // ProfileController.updateVerifiedInstitutionalAffiliation() is gated on ACCESS_CONTROL_ADMIN
+    // Authority
+    // which is also checked in ProfileService.validateProfile()
+    boolean grantAdminAuthority = true;
+
     final VerifiedInstitutionalAffiliation original = createVerifiedInstitutionalAffiliation();
-    createAccountAndDbUserWithAffiliation(original);
+    createAccountAndDbUserWithAffiliation(original, grantAdminAuthority);
 
     profileController.updateVerifiedInstitutionalAffiliation(dbUser.getUserId(), null);
   }
@@ -1202,8 +1217,12 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void test_editUserInformation_contactEmail_no_match() {
+    // ProfileController.editUserInformation() is gated on ACCESS_CONTROL_ADMIN Authority
+    // which is also checked in ProfileService.validateProfile()
+    boolean grantAdminAuthority = true;
+
     // the existing Institution for this user only matches the single CONTACT_EMAIL
-    createAccountAndDbUserWithAffiliation();
+    createAccountAndDbUserWithAffiliation(grantAdminAuthority);
 
     final String newContactEmail = "eric.lander@broadinstitute.org";
     final EditUserInformationRequest request =
@@ -1213,12 +1232,16 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void test_editUserInformation_newAffiliation() {
+    // ProfileController.editUserInformation() is gated on ACCESS_CONTROL_ADMIN Authority
+    // which is also checked in ProfileService.validateProfile()
+    boolean grantAdminAuthority = true;
+
     final VerifiedInstitutionalAffiliation expectedOriginalAffiliation =
         new VerifiedInstitutionalAffiliation()
             .institutionShortName("Broad")
             .institutionDisplayName("The Broad Institute")
             .institutionalRoleEnum(InstitutionalRole.PROJECT_PERSONNEL);
-    final Profile original = createAccountAndDbUserWithAffiliation();
+    final Profile original = createAccountAndDbUserWithAffiliation(grantAdminAuthority);
 
     assertThat(original.getVerifiedInstitutionalAffiliation())
         .isEqualTo(expectedOriginalAffiliation);
@@ -1252,7 +1275,11 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void test_editUserInformation_newAffiliation_no_match() {
-    createAccountAndDbUserWithAffiliation();
+    // ProfileController.editUserInformation() is gated on ACCESS_CONTROL_ADMIN Authority
+    // which is also checked in ProfileService.validateProfile()
+    boolean grantAdminAuthority = true;
+
+    createAccountAndDbUserWithAffiliation(grantAdminAuthority);
 
     // define a new affiliation which will not match the user's CONTACT_EMAIL
 
@@ -1280,13 +1307,17 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void test_editUserInformation_contactEmail_newAffiliation_self_match() {
+    // ProfileController.editUserInformation() is gated on ACCESS_CONTROL_ADMIN Authority
+    // which is also checked in ProfileService.validateProfile()
+    boolean grantAdminAuthority = true;
+
     final VerifiedInstitutionalAffiliation expectedOriginalAffiliation =
         new VerifiedInstitutionalAffiliation()
             .institutionShortName("Broad")
             .institutionDisplayName("The Broad Institute")
             .institutionalRoleEnum(InstitutionalRole.PROJECT_PERSONNEL);
 
-    final Profile original = createAccountAndDbUserWithAffiliation();
+    final Profile original = createAccountAndDbUserWithAffiliation(grantAdminAuthority);
     assertThat(original.getContactEmail()).isEqualTo(CONTACT_EMAIL);
     assertThat(original.getVerifiedInstitutionalAffiliation())
         .isEqualTo(expectedOriginalAffiliation);
@@ -1323,13 +1354,17 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void test_editUserInformation_contactEmail_newAffiliation_no_match() {
+    // ProfileController.editUserInformation() is gated on ACCESS_CONTROL_ADMIN Authority
+    // which is also checked in ProfileService.validateProfile()
+    boolean grantAdminAuthority = true;
+
     final VerifiedInstitutionalAffiliation expectedOriginalAffiliation =
         new VerifiedInstitutionalAffiliation()
             .institutionShortName("Broad")
             .institutionDisplayName("The Broad Institute")
             .institutionalRoleEnum(InstitutionalRole.PROJECT_PERSONNEL);
 
-    final Profile original = createAccountAndDbUserWithAffiliation();
+    final Profile original = createAccountAndDbUserWithAffiliation(grantAdminAuthority);
     assertThat(original.getContactEmail()).isEqualTo(CONTACT_EMAIL);
     assertThat(original.getVerifiedInstitutionalAffiliation())
         .isEqualTo(expectedOriginalAffiliation);
@@ -1539,6 +1574,11 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   private Profile createAccountAndDbUserWithAffiliation() {
     return createAccountAndDbUserWithAffiliation(createVerifiedInstitutionalAffiliation());
+  }
+
+  private Profile createAccountAndDbUserWithAffiliation(boolean grantAdminAuthority) {
+    return createAccountAndDbUserWithAffiliation(
+        createVerifiedInstitutionalAffiliation(), grantAdminAuthority);
   }
 
   private void assertProfile(
