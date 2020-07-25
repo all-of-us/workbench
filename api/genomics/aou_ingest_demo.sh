@@ -3,6 +3,8 @@
 ### It's more of a scratchpad and history of what I ran to get the ingest working on my machine.
 ### All the commands should be valid but many of the arguments will have to be substituted.
 ###
+### The "script" assumes you are in the root level directory of the broadinstitute/variantstore repository 
+###
 ### The tools I ran should be sufficient to unblock the next step of genomics work
 ### which is uploading 100~1000 synthetic samples into the test VPC-SC project.
 ### There shouldn't be much to do if we are OK with a manual process but converting
@@ -10,6 +12,7 @@
 ### Notably, we would have to figure out how to build or run a non-master version of GATK.
 ### One possible solution is to create a docker image that contains all the necessary tools
 ### like the branched GATK, bcftools, etc. 
+###
 ###
 
 PROJECT_ID=all-of-us-workbench-test
