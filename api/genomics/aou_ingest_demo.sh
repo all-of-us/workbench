@@ -64,23 +64,6 @@ bcftools view -Ov -s 204126160130_R01C01.2 -o 204126160130_R01C01.2.subset.vcf N
 gsutil cp metadata_000_204126160130_R01C01.2.tsv gs://all-of-us-workbench-test-genomics/eric/import/2/ready/
 gsutil cp raw_000_204126160130_R01C01.2.tsv gs://all-of-us-workbench-test-genomics/eric/import/2/ready/
 
-# TODO - Uploads all files in import/2 into arrays_002
+# Uploads all files in import/2 into arrays_002
 cd ingest
 ./bq_ingest_arrays.sh $PROJECT_ID $DATASET_NAME gs://all-of-us-workbench-test-genomics/eric/import 2 
-
-# At this point, the VCF data should be loaded into BigQuery. The following, I believe, is a way to test the dataset by grabbing it from BQ and regenerating the VCF
-# I haven't ran the following successfully yet. I believe I need to grab the same ref the kristian used
-OUTPUT_VCF="kris.aou.1.vcf"
-REF="/Users/kcibul/seq/references//hg19/v0/Homo_sapiens_assembly19.fasta"
-
-#EXTRACT_PROBE_CLAUSE="--probe-info-table $PROJECT_ID.$DATASET_NAME.probe_info"
-EXTRACT_PROBE_CLAUSE="--probe-info-csv probe_info.csv"
-
-./gatk ArrayExtractCohort -R "${REF}" \
-   -O $OUTPUT_VCF \
-   --use-compressed-data "true" \
-   --cohort-extract-table $PROJECT_ID.$DATASET_NAME.arrays_001 \
-   --local-sort-max-records-in-ram 10000000 \
-   --sample-info-table $PROJECT_ID.$DATASET_NAME.sample_list \
-   $EXTRACT_PROBE_CLAUSE \
-   --project-id $PROJECT_ID
