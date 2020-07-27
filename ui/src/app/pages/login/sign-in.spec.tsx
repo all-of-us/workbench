@@ -11,18 +11,18 @@ import {AccountCreationTos} from 'app/pages/login/account-creation/account-creat
 import InvitationKey from 'app/pages/login/invitation-key';
 import LoginReactComponent from 'app/pages/login/login';
 import {serverConfigStore} from 'app/utils/navigation';
-import {createEmptyProfile, SignInProps, SignInReact, SignInReactImpl, SignInStep} from './sign-in';
+import {createEmptyProfile, SignInProps, SignIn, SignInImpl, SignInStep} from './sign-in';
 
 describe('SignInReact', () => {
   let props: SignInProps;
 
   const signIn = jest.fn();
 
-  const component = () => mount(<SignInReact {...props}/>);
+  const component = () => mount(<SignIn {...props}/>);
 
   // To correctly shallow-render this component wrapped by two HOCs, we need to add two extra
   // .shallow() calls at the end.
-  const shallowComponent = () => shallow(<SignInReact {...props}/>).shallow().shallow();
+  const shallowComponent = () => shallow(<SignIn {...props}/>).shallow().shallow();
 
   const defaultConfig = {
     gsuiteDomain: 'researchallofus.org',
@@ -32,7 +32,7 @@ describe('SignInReact', () => {
   beforeEach(() => {
     window.scrollTo = () => {};
     props = {
-      onInit: () => {},
+      onSignIn: () => {},
       signIn: signIn,
       windowSize: {width: 1700, height: 0},
       serverConfig: defaultConfig
@@ -125,7 +125,7 @@ describe('SignInReact', () => {
     props.serverConfig = {...defaultConfig, requireInvitationKey: false};
 
     const wrapper = shallowComponent();
-    const signInImpl = wrapper.instance() as SignInReactImpl;
+    const signInImpl = wrapper.instance() as SignInImpl;
     const steps = signInImpl.getAccountCreationSteps();
     expect(steps).toEqual([
       SignInStep.LANDING,
