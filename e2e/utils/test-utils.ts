@@ -18,7 +18,7 @@ export async function signIn(page: Page, userId?: string, passwd?: string): Prom
   const loginPage = new GoogleLoginPage(page);
   await loginPage.login(userId, passwd);
   // this element exists in DOM after user has logged in
-  await page.waitForFunction(() => !!document.querySelector('app-signed-in'));
+  await page.waitForFunction(() => {return document.querySelector('app-signed-in') !== null}, {polling: 'mutation'});
   const homePage = new HomePage(page);
   await homePage.waitForLoad();
 }
@@ -203,7 +203,7 @@ export async function findWorkspace(page: Page, createNew: boolean = false): Pro
     await workspacesPage.createWorkspace(workspaceName);
     console.log(`Created workspace: "${workspaceName}"`);
     await workspacesPage.load();
-    return WorkspaceCard.findCard(page, workspaceName);
+    return workspaceCard.findCard(workspaceName);
   }
 
   const oneWorkspaceCard = fp.shuffle(existingWorkspaces)[0];

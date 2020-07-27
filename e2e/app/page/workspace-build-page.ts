@@ -221,9 +221,9 @@ export const FIELD = {
 };
 
 
-export default class WorkspaceEditPage extends AuthenticatedPage {
+export default abstract class WorkspaceBuildPage extends AuthenticatedPage {
 
-  constructor(page: Page) {
+  protected constructor(page: Page) {
     super(page);
   }
 
@@ -236,7 +236,6 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
         this.getWorkspaceNameTextbox(),
         select.getSelectedOption(),
         this.getCreateWorkspaceButton(),
-        waitWhileLoading(this.page),
       ]);
       return true;
     } catch (err) {
@@ -264,7 +263,7 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
   }
 
   async getWorkspaceNameTextbox(): Promise<Textbox> {
-    return await Textbox.findByName(this.page, FIELD.workspaceNameTextbox.textOption);
+    return Textbox.findByName(this.page, FIELD.workspaceNameTextbox.textOption);
   }
 
   question1_researchPurpose(): WebComponent {

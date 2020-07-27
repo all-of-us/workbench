@@ -32,6 +32,11 @@ export default class BaseElement extends Container {
   async waitForXPath(waitOptions: WaitForSelectorOptions = {visible: true}): Promise<ElementHandle> {
     if (this.element !== undefined) return this.element.asElement();
     try {
+      // Wait for page document stops changing/mutating.
+      await this.page.waitForFunction(selector => {
+        return document.evaluate(selector, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue !== null;
+      }, {polling: 'mutation'}, this.xpath);
+      // Wait for element to be visible.
       return this.page.waitForXPath(this.xpath, waitOptions).then(elemt => this.element = elemt.asElement());
     } catch (err) {
       console.error(`waitForXpath('${this.xpath}') encountered ${err}`);

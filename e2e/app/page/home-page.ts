@@ -3,8 +3,8 @@ import {PageUrl} from 'app/text-labels';
 import Link from 'app/element/link';
 import AuthenticatedPage from 'app/page/authenticated-page';
 import ClrIconLink from 'app/element/clr-icon-link';
-import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
+import {waitWhileLoading} from 'utils/test-utils';
 
 export const PageTitle = 'Homepage';
 
@@ -25,6 +25,12 @@ export default class HomePage extends AuthenticatedPage {
       await Promise.all([
         waitForDocumentTitle(this.page, PageTitle),
         waitWhileLoading(this.page),
+        this.getSeeAllWorkspacesLink().then( (element) => element.asElementHandle()),
+        // Look for either a workspace card or welcome texts.
+        Promise.race([
+          this.page.waitForXPath('//*[@data-test-id="workspace-card"]', {visible: true}),
+          this.page.waitForXPath('//text()[contains(., "Create your first workspace")]', {visible: true}),
+        ]),
       ]);
       return true;
     } catch (err) {

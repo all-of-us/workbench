@@ -1,5 +1,5 @@
 import {makeString} from 'utils/str-utils';
-import {FIELD} from 'app/page/workspace-edit-page';
+import {FIELD} from 'app/page/workspace-build-page';
 
 // Question #1: What is the primary purpose of your project?
 export const defaultAnswersPrimaryPurpose = [

@@ -1,7 +1,6 @@
 import BaseElement from 'app/element/base-element';
 import HomePage from 'app/page/home-page';
 import WorkspaceCard from 'app/component/workspace-card';
-import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import WorkspacesPage from 'app/page/workspaces-page';
 import {signIn} from 'utils/test-utils';
 
@@ -59,10 +58,10 @@ describe('Home page ui tests', () => {
    // Click Create New Workspace link => Opens Create Workspace page
   test('Click on Create New Workspace link', async () => {
     const home = new HomePage(page);
-    await home.getCreateNewWorkspaceLink().then((link) => link.click());
+    const createLink = await home.getCreateNewWorkspaceLink();
+    await createLink.clickAndWait();
 
-    const workspaceEdit = new WorkspaceEditPage(page);
-    await workspaceEdit.waitForLoad();
+    const workspaceEdit = new WorkspacesPage(page);
     // expect Workspace name Input textfield exists
     const workspaceNameTextbox = await workspaceEdit.getWorkspaceNameTextbox();
     expect(await workspaceNameTextbox.isVisible()).toBe(true);

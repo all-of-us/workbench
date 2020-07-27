@@ -6,7 +6,7 @@
   "private": true,
   "license": "BSD",
   "scripts": {
-    "test": "cross-env jest --maxWorkers=3",
+    "test": "cross-env jest",
     "test:debugTest": "cross-env PUPPETEER_HEADLESS=false DEBUG=true node --inspect-brk node_modules/.bin/jest",
     "test:debug": "cross-env PUPPETEER_HEADLESS=false DEBUG=true jest --detectOpenHandles",
     "test-local": "cross-env WORKBENCH_ENV=local DEBUG=true jest --maxWorkers=2",

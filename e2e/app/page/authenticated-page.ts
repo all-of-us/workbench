@@ -12,7 +12,7 @@ const signedInIndicator = 'app-signed-in';
  */
 export default abstract class AuthenticatedPage extends BasePage {
 
-  constructor(page: Page) {
+  protected constructor(page: Page) {
     super(page);
   }
 

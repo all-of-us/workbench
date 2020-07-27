@@ -1,7 +1,7 @@
 import {Page} from 'puppeteer';
 import Button from 'app/element/button';
 import {Language, LinkText, PageUrl} from 'app/text-labels';
-import WorkspaceEditPage, {FIELD as EDIT_FIELD} from 'app/page/workspace-edit-page';
+import WorkspaceBuildPage, {FIELD as EDIT_FIELD} from 'app/page/workspace-build-page';
 import {makeWorkspaceName} from 'utils/str-utils';
 import RadioButton from 'app/element/radiobutton';
 import {findWorkspace, waitWhileLoading} from 'utils/test-utils';
@@ -20,7 +20,7 @@ export const FieldSelector = {
   }
 };
 
-export default class WorkspacesPage extends WorkspaceEditPage {
+export default class WorkspacesPage extends WorkspaceBuildPage {
 
   constructor(page: Page) {
     super(page);
@@ -60,12 +60,12 @@ export default class WorkspacesPage extends WorkspaceEditPage {
   * 3: wait until Edit page is loaded and ready
   * 4: return
   */
-  async clickCreateNewWorkspace(): Promise<WorkspaceEditPage> {
+  async clickCreateNewWorkspace(): Promise<WorkspacesPage> {
     const link = await Button.findByName(this.page, FieldSelector.CreateNewWorkspaceButton.textOption);
     await link.clickAndWait();
-    const workspaceEdit = new WorkspaceEditPage(this.page);
-    await workspaceEdit.waitForLoad();
-    return workspaceEdit;
+    await waitWhileLoading(this.page);
+    await super.isLoaded();
+    return this;
   }
 
   /**
