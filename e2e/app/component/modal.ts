@@ -39,10 +39,35 @@ export default class Modal extends Container {
     return modalText.toString();
   }
 
-  async clickButton(buttonLabel: LinkText): Promise<void> {
+  /**
+   * Click a button.
+   * @param {string} buttonLabel The button text label.
+   * @param waitOptions Wait for navigation or/and modal close after click button.
+   */
+  async clickButton(buttonLabel: LinkText, waitOptions: {waitForNav?: boolean, waitForClose?: boolean} = {}): Promise<void> {
+    const { waitForNav = false, waitForClose = false } = waitOptions;
     const button = await this.waitForButton(buttonLabel);
     await button.waitUntilEnabled();
-    return button.click();
+    if (waitForClose && waitForNav) {
+      await Promise.all([
+        this.waitUntilClose(),
+        this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0']}),
+        button.click(),
+      ]);
+    } else if (waitForClose) {
+      await Promise.all([
+        this.waitUntilClose(),
+        button.click(),
+      ]);
+    } else if (waitForNav) {
+      await Promise.all([
+        this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0']}),
+        button.click(),
+      ]);
+    } else {
+      return button.click();
+    }
+    
   }
 
   async waitForButton(buttonLabel: LinkText): Promise<Button> {

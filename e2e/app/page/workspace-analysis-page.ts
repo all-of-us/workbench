@@ -1,7 +1,6 @@
 import DataResourceCard, {CardType} from 'app/component/data-resource-card';
 import Modal from 'app/component/modal';
 import NewNotebookModal from 'app/component/new-notebook-modal';
-import Button from 'app/element/button';
 import Link from 'app/element/link';
 import Textbox from 'app/element/textbox';
 import {EllipsisMenuAction, Language, LinkText} from 'app/text-labels';
@@ -43,11 +42,7 @@ export default class WorkspaceAnalysisPage extends AuthenticatedPage {
 
     const modal = new Modal(this.page);
     const modalContentText = await modal.getContent();
-    const deleteButton = await Button.findByName(this.page, {normalizeSpace: LinkText.DeleteNotebook}, modal);
-    await Promise.all([
-      deleteButton.click(),
-      modal.waitUntilClose(),
-    ]);
+    await modal.clickButton(LinkText.DeleteNotebook, {waitForClose: true});
     await waitWhileLoading(this.page);
 
     console.log(`Deleted Notebook "${notebookName}"`);
@@ -113,8 +108,7 @@ export default class WorkspaceAnalysisPage extends AuthenticatedPage {
     const modalTextContents = await modal.getContent();
     const newNameInput = new Textbox(this.page, `${modal.getXpath()}//*[@id="new-name"]`);
     await newNameInput.type(newNotebookName);
-    await modal.clickButton(LinkText.RenameNotebook);
-    await modal.waitUntilClose();
+    await modal.clickButton(LinkText.RenameNotebook, {waitForClose: true});
     await waitWhileLoading(this.page);
     console.log(`Notebook "${notebookName}" renamed to "${newNotebookName}"`);
     return modalTextContents;

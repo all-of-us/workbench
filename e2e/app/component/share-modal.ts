@@ -24,17 +24,14 @@ export default class ShareModal extends Modal {
     const ownerOpt = await this.waitForRoleOption(level);
     await ownerOpt.click();
 
-    await this.clickButton(LinkText.Save);
-    await this.waitUntilClose();
+    await this.clickButton(LinkText.Save, {waitForClose: true});
   }
 
   async removeUser(username: string): Promise<void> {
     const rmCollab = await this.page.waitForXPath(
       `${this.collabRowXPath(username)}//clr-icon[@shape="minus-circle"]`, {visible: true});
     await rmCollab.click();
-
-    await this.clickButton(LinkText.Save);
-    return this.waitUntilClose();
+    await this.clickButton(LinkText.Save, {waitForClose: true});
   }
 
   /**
