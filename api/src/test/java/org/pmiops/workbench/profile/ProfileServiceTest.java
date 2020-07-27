@@ -316,7 +316,7 @@ public class ProfileServiceTest {
   }
 
   @Test
-  public void updateProfileForUser_affiliationChangeOnly_asAdmin() {
+  public void updateProfile_affiliationChangeOnly_asAdmin() {
     // Regression test for RW-5139
 
     // Start with: a valid profile with a Broad affiliation but null Address.
@@ -349,11 +349,11 @@ public class ProfileServiceTest {
         .thenReturn(dbVerifiedInstitutionalAffiliation);
 
     grantAdminAuthorityToLoggedInUser();
-    profileService.updateProfileForUser(user, updatedProfile, previousProfile);
+    profileService.updateProfile(user, updatedProfile, previousProfile);
   }
 
   @Test(expected = BadRequestException.class)
-  public void updateProfileForUser_cant_change_contactEmail() {
+  public void updateProfile_cant_change_contactEmail() {
     Profile previousProfile = createValidProfile().contactEmail("researcher@nih.gov");
     Profile updatedProfile = createValidProfile().contactEmail("other-researcher@nih.gov");
 
@@ -362,11 +362,11 @@ public class ProfileServiceTest {
     user.setGivenName("John");
     user.setFamilyName("Doe");
 
-    profileService.updateProfileForUser(user, updatedProfile, previousProfile);
+    profileService.updateProfile(user, updatedProfile, previousProfile);
   }
 
   @Test
-  public void updateProfileForUser_can_change_contactEmail_asAdmin() {
+  public void updateProfile_can_change_contactEmail_asAdmin() {
     DbInstitution verilyInstitution =
         new DbInstitution().setShortName("Verily").setDisplayName("Verily LLC");
 
@@ -401,7 +401,7 @@ public class ProfileServiceTest {
     targetUser.setFamilyName("Doe");
 
     grantAdminAuthorityToLoggedInUser();
-    profileService.updateProfileForUser(targetUser, updatedProfile, previousProfile);
+    profileService.updateProfile(targetUser, updatedProfile, previousProfile);
 
     assertThat(profileService.getProfile(targetUser).getContactEmail())
         .isEqualTo("other-researcher@verily.com");

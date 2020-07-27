@@ -506,7 +506,7 @@ public class ProfileController implements ProfileApiDelegate {
       throw new BadRequestException("Cannot update Verified Institutional Affiliation");
     }
 
-    profileService.updateProfileForUser(user, updatedProfile, previousProfile);
+    profileService.updateProfile(user, updatedProfile, previousProfile);
 
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
@@ -530,7 +530,7 @@ public class ProfileController implements ProfileApiDelegate {
 
     Profile oldProfile = profileService.getProfile(dbUser);
 
-    profileService.updateProfileForUser(dbUser, updatedProfile, oldProfile);
+    profileService.updateProfile(dbUser, updatedProfile, oldProfile);
 
     return ResponseEntity.ok(new EmptyResponse());
   }

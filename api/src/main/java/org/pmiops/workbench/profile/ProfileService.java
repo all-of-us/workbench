@@ -188,7 +188,7 @@ public class ProfileService {
    * @param updatedProfile
    * @param previousProfile
    */
-  public void updateProfileForUser(DbUser user, Profile updatedProfile, Profile previousProfile) {
+  public void updateProfile(DbUser user, Profile updatedProfile, Profile previousProfile) {
     // Apply cleaning methods to both the previous and updated profile, to avoid false positive
     // field diffs due to null-to-empty-object changes.
     cleanProfile(updatedProfile);
@@ -506,7 +506,7 @@ public class ProfileService {
     Optional.ofNullable(request.getAffiliation())
         .ifPresent(updatedProfile::setVerifiedInstitutionalAffiliation);
 
-    updateProfileForUser(dbUser, updatedProfile, originalProfile);
+    updateProfile(dbUser, updatedProfile, originalProfile);
 
     return getProfile(dbUser);
   }
