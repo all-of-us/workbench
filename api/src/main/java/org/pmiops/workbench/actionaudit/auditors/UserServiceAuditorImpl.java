@@ -108,7 +108,7 @@ public class UserServiceAuditorImpl implements UserServiceAuditor {
   }
 
   @Override
-  public void fireFreeTierDollarQuotaAction(
+  public void fireSetFreeTierDollarLimitOverride(
       Long targetUserId, @Nullable Double previousDollarQuota, @Nullable Double newDollarQuota) {
     DbUser adminUser = dbUserProvider.get();
     ActionAuditEvent.Builder builder =

@@ -1513,7 +1513,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(retrieved.getFreeTierDollarQuota()).isWithin(0.01).of(newQuota);
 
     verify(mockUserServiceAuditor)
-        .fireFreeTierDollarQuotaAction(dbUser.getUserId(), originalQuota, newQuota);
+        .fireSetFreeTierDollarLimitOverride(dbUser.getUserId(), originalQuota, newQuota);
   }
 
   @Test
@@ -1527,7 +1527,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     profileService.updateAccountProperties(request);
 
     verify(mockUserServiceAuditor, never())
-        .fireFreeTierDollarQuotaAction(anyLong(), anyDouble(), anyDouble());
+        .fireSetFreeTierDollarLimitOverride(anyLong(), anyDouble(), anyDouble());
   }
 
   // don't set an override if the value to set is equal to the system default
@@ -1555,7 +1555,7 @@ public class ProfileControllerTest extends BaseControllerTest {
             .freeCreditsLimit(config.billing.defaultFreeCreditsDollarLimit);
     profileService.updateAccountProperties(request);
     verify(mockUserServiceAuditor, never())
-        .fireFreeTierDollarQuotaAction(anyLong(), anyDouble(), anyDouble());
+        .fireSetFreeTierDollarLimitOverride(anyLong(), anyDouble(), anyDouble());
 
     // the user's profile continues to track default changes
 

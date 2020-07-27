@@ -69,7 +69,7 @@ public class UserServiceAuditorTest {
   @Test
   public void testSetFreeTierDollarQuota_initial() {
     DbUser user = createUser();
-    userServiceAuditor.fireFreeTierDollarQuotaAction(user.getUserId(), null, 123.45);
+    userServiceAuditor.fireSetFreeTierDollarLimitOverride(user.getUserId(), null, 123.45);
     verify(mockActionAuditService).send(eventArg.capture());
 
     ActionAuditEvent eventSent = eventArg.getValue();
@@ -86,7 +86,7 @@ public class UserServiceAuditorTest {
   @Test
   public void testSetFreeTierDollarQuota_chnge() {
     DbUser user = createUser();
-    userServiceAuditor.fireFreeTierDollarQuotaAction(user.getUserId(), 123.45, 500.0);
+    userServiceAuditor.fireSetFreeTierDollarLimitOverride(user.getUserId(), 123.45, 500.0);
     verify(mockActionAuditService).send(eventArg.capture());
 
     ActionAuditEvent eventSent = eventArg.getValue();

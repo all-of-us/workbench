@@ -23,6 +23,6 @@ public interface UserServiceAuditor {
 
   void fireAcknowledgeTermsOfService(DbUser targetUser, Integer termsOfServiceVersion);
 
-  void fireFreeTierDollarQuotaAction(
+  void fireSetFreeTierDollarLimitOverride(
       Long targetUserId, @Nullable Double previousDollarQuota, @Nullable Double newDollarQuota);
 }

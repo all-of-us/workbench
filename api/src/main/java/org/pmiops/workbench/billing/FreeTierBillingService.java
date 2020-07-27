@@ -331,7 +331,7 @@ public class FreeTierBillingService {
         updateFreeTierWorkspacesStatus(user, BillingStatus.ACTIVE);
       }
 
-      userServiceAuditor.fireFreeTierDollarQuotaAction(
+      userServiceAuditor.fireSetFreeTierDollarLimitOverride(
           user.getUserId(), previousLimitMaybe, newDollarLimit);
       return true;
     }
