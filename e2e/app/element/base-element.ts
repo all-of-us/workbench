@@ -1,5 +1,6 @@
 import {ClickOptions, ElementHandle, Page, WaitForSelectorOptions} from 'puppeteer';
 import Container from 'app/container';
+import {click} from 'utils/element-utils';
 
 
 /**
@@ -151,11 +152,11 @@ export default class BaseElement extends Container {
     return jValue && boxModelValue;
   }
 
-  async click(options?: ClickOptions): Promise<void> {
-    return this.asElementHandle()
-      .then(elemt => {
-        return elemt.click(options);
-      });
+  async click(): Promise<void> {
+    if (this.getXpath() === undefined) {
+      return this.element.click();
+    }
+    return click(this.page, {xpath: this.getXpath()});
   }
 
   /**
@@ -299,14 +300,6 @@ export default class BaseElement extends Container {
 
   async dispose(): Promise<void> {
     return this.element.dispose();
-  }
-
-  // try this method when click() is not working
-  async clickWithEval(): Promise<void> {
-    return this.asElementHandle()
-      .then(elemt => {
-        return this.page.evaluate( elem => elem.click(), elemt );
-      });
   }
 
   /**

@@ -87,8 +87,7 @@ export default class GoogleLoginPage {
    * Click Next button to submit login credential.
    */
   async submit() : Promise<void> {
-    const button = await this.page.waitForXPath(FieldSelector.SubmitButton, {visible: true});
-    await (Button.asBaseElement(this.page, button)).clickAndWait();
+    return (new Button(this.page, FieldSelector.SubmitButton)).clickAndWait();
   }
 
   /**
@@ -154,6 +153,6 @@ export default class GoogleLoginPage {
 
   async clickCreateAccountButton(): Promise<void> {
     const button = await Button.findByName(this.page, {name: 'Create Account'});
-    await button.clickWithEval();
+    await button.click();
   }
 }

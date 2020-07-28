@@ -31,7 +31,7 @@ export default class Checkbox extends BaseElement {
     const is = await this.isChecked();
     if (!is) {
       await this.focus();
-      await this.clickWithEval();
+      await this.click();
       await this.page.waitFor(500);
     }
     // check and retry ??
@@ -44,7 +44,7 @@ export default class Checkbox extends BaseElement {
     const is = await this.isChecked();
     if (is) {
       await this.focus();
-      await this.clickWithEval();
+      await this.click();
       await this.page.waitFor(500);
     }
   }
@@ -55,7 +55,7 @@ export default class Checkbox extends BaseElement {
    */
   async toggle(checked?: boolean): Promise<void> {
     if (checked === undefined) {
-      return this.clickWithEval();
+      return this.click();
     }
     if (checked) {
       return this.check();
