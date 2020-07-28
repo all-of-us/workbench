@@ -424,7 +424,7 @@ public class ProfileService {
 
     validateProfileForCorrectness(diff, updatedProfile);
 
-    if (userProvider.get().hasAuthority(Authority.ACCESS_CONTROL_ADMIN)) {
+    if (userService.hasAuthority(userProvider.get().getUserId(), Authority.ACCESS_CONTROL_ADMIN)) {
       validateChangesAllowedByAdmin(diff);
     } else {
       validateChangesAllowedByUser(diff);

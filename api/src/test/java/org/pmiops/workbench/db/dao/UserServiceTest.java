@@ -30,6 +30,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV1;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
@@ -463,5 +464,28 @@ public class UserServiceTest {
 
     verify(mockUserTermsOfServiceDao).save(any(DbUserTermsOfService.class));
     verify(mockUserServiceAuditAdapter).fireAcknowledgeTermsOfService(any(DbUser.class), eq(1));
+  }
+
+  @Test
+  public void test_hasAuthority() {
+    DbUser user = new DbUser();
+    user.setAuthoritiesEnum(Collections.singleton(Authority.ACCESS_CONTROL_ADMIN));
+    user = userDao.save(user);
+
+    assertThat(userService.hasAuthority(user.getUserId(), Authority.ACCESS_CONTROL_ADMIN)).isTrue();
+    assertThat(userService.hasAuthority(user.getUserId(), Authority.INSTITUTION_ADMIN)).isFalse();
+  }
+
+  // DEVELOPER Authority includes all of the others
+
+  @Test
+  public void test_hasAuthority_DEVELOPER() {
+    DbUser user = new DbUser();
+    user.setAuthoritiesEnum(Collections.singleton(Authority.DEVELOPER));
+    user = userDao.save(user);
+
+    for (Authority auth : Authority.values()) {
+      assertThat(userService.hasAuthority(user.getUserId(), auth)).isTrue();
+    }
   }
 }
