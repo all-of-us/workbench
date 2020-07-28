@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -15,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.javers.core.Javers;
 import org.javers.core.diff.Change;
 import org.javers.core.diff.Diff;
+import org.javers.core.diff.changetype.NewObject;
 import org.javers.core.diff.changetype.PropertyChange;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
@@ -374,14 +376,32 @@ public class ProfileService {
   }
 
   /**
-   * Has this field changed?
+   * Has this Profile field changed?
    *
-   * @param diff a Diff between two profiles
+   * @param diff a Diff between two Profiles
    * @param field which field to check
    * @return true if there are difference between the Profiles
    */
   private boolean fieldChanged(Diff diff, String field) {
     return getChangesWithPrefix(diff, field).size() > 0;
+  }
+
+  /**
+   * Is this a new Profile?
+   *
+   * @param diff a Diff between two profiles
+   * @return true if the Profile is new
+   */
+  private boolean isNewProfile(Diff diff) {
+    final Predicate<Change> newProfilePred =
+        change ->
+            change instanceof NewObject
+                && change
+                    .getAffectedGlobalId()
+                    .getTypeName()
+                    .equals(Profile.class.getCanonicalName());
+
+    return diff.getChanges(newProfilePred).size() > 0;
   }
 
   /**
@@ -400,11 +420,9 @@ public class ProfileService {
    */
   @VisibleForTesting
   public void validateProfile(@Nonnull Profile updatedProfile, @Nullable Profile previousProfile) {
-
-    final boolean isNewProfile = previousProfile == null;
     final Diff diff = javers.compare(previousProfile, updatedProfile);
 
-    validateProfileForCorrectness(updatedProfile, isNewProfile, diff);
+    validateProfileForCorrectness(diff, updatedProfile);
 
     if (userProvider.get().hasAuthority(Authority.ACCESS_CONTROL_ADMIN)) {
       validateChangesAllowedByAdmin(diff);
@@ -413,12 +431,20 @@ public class ProfileService {
     }
   }
 
-  private void validateProfileForCorrectness(Profile profile, boolean isNewProfile, Diff diff)
+  private void validateProfileForCorrectness(
+      @Nullable Profile previousProfile, @Nonnull Profile profile) throws BadRequestException {
+
+    final Diff diff = javers.compare(previousProfile, profile);
+    validateProfileForCorrectness(diff, profile);
+  }
+
+  private void validateProfileForCorrectness(Diff diff, @Nonnull Profile profile)
       throws BadRequestException {
-    if (isNewProfile || fieldChanged(diff, "username")) {
+
+    if (isNewProfile(diff) || fieldChanged(diff, "username")) {
       validateUsername(profile);
     }
-    if (isNewProfile || fieldChanged(diff, "contactEmail")) {
+    if (isNewProfile(diff) || fieldChanged(diff, "contactEmail")) {
       validateContactEmail(profile);
 
       // only validate if the new profile has an affiliation - some older users do not
@@ -426,19 +452,19 @@ public class ProfileService {
         validateAffiliationEmail(profile);
       }
     }
-    if (isNewProfile || fieldChanged(diff, "givenName")) {
+    if (isNewProfile(diff) || fieldChanged(diff, "givenName")) {
       validateGivenName(profile);
     }
-    if (isNewProfile || fieldChanged(diff, "familyName")) {
+    if (isNewProfile(diff) || fieldChanged(diff, "familyName")) {
       validateFamilyName(profile);
     }
-    if (isNewProfile || fieldChanged(diff, "address")) {
+    if (isNewProfile(diff) || fieldChanged(diff, "address")) {
       validateAddress(profile);
     }
-    if (isNewProfile || fieldChanged(diff, "areaOfResearch")) {
+    if (isNewProfile(diff) || fieldChanged(diff, "areaOfResearch")) {
       validateAreaOfResearch(profile);
     }
-    if (isNewProfile || fieldChanged(diff, "verifiedInstitutionalAffiliation")) {
+    if (fieldChanged(diff, "verifiedInstitutionalAffiliation")) {
       validateAffiliation(profile);
     }
   }
@@ -471,9 +497,8 @@ public class ProfileService {
    * @throws BadRequestException
    */
   public void validateNewProfile(Profile profile) throws BadRequestException {
-    // unused, but this is the correct syntax for a "Diff" of a new object
-    final Diff dummyDiff = javers.compare(null, profile);
-    validateProfileForCorrectness(profile, true, dummyDiff);
+    final Profile dummyProfile = null;
+    validateProfileForCorrectness(dummyProfile, profile);
   }
 
   public List<Profile> listAllProfiles() {
