@@ -32,17 +32,18 @@ export default class BaseElement extends Container {
   async waitForXPath(waitOptions: WaitForSelectorOptions = {visible: true}): Promise<ElementHandle> {
     if (this.element !== undefined) return this.element.asElement();
     try {
-      // Wait for page document stops changing/mutating.
+      // Wait for element to be visible.
+      const element = await this.page.waitForXPath(this.xpath, waitOptions).then(elemt => this.element = elemt.asElement());
+      // Wait for html document stops changing/mutating.
       await this.page.waitForFunction(selector => {
         return document.evaluate(selector, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue !== null;
-      }, {polling: 'mutation'}, this.xpath);
-      // Wait for element to be visible.
-      return this.page.waitForXPath(this.xpath, waitOptions).then(elemt => this.element = elemt.asElement());
+      }, {polling: 'raf'}, this.xpath);
+      return element;
     } catch (err) {
       console.error(`waitForXpath('${this.xpath}') encountered ${err}`);
       // Debugging pause
       // await jestPuppeteer.debug();
-      throw err;
+      throw new Error(err);
     }
   }
 
