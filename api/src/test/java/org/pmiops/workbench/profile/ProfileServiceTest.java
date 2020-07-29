@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
@@ -88,6 +87,7 @@ public class ProfileServiceTest {
 
   @MockBean private InstitutionDao mockInstitutionDao;
   @MockBean private InstitutionService mockInstitutionService;
+  @MockBean private UserService mockUserService;
   @MockBean private UserTermsOfServiceDao mockUserTermsOfServiceDao;
 
   @MockBean
@@ -100,7 +100,6 @@ public class ProfileServiceTest {
   private static DbUser loggedInUser;
 
   @TestConfiguration
-  @MockBean({FreeTierBillingService.class, UserService.class})
   @Import({
     AddressMapperImpl.class,
     CommonConfig.class,
@@ -112,6 +111,7 @@ public class ProfileServiceTest {
     ProfileService.class,
   })
   @MockBean({
+    FreeTierBillingService.class,
     ProfileAuditor.class,
     VerifiedInstitutionalAffiliationDao.class,
   })
@@ -127,11 +127,6 @@ public class ProfileServiceTest {
     public Clock getClock() {
       return CLOCK;
     }
-  }
-
-  private void grantAdminAuthorityToLoggedInUser() {
-    loggedInUser.setAuthoritiesEnum(Collections.singleton(Authority.ACCESS_CONTROL_ADMIN));
-    loggedInUser = userDao.save(loggedInUser);
   }
 
   @Before
@@ -319,6 +314,10 @@ public class ProfileServiceTest {
   public void updateProfile_affiliationChangeOnly_asAdmin() {
     // Regression test for RW-5139
 
+    // grant admin authority to loggedInUser
+    when(mockUserService.hasAuthority(loggedInUser.getUserId(), Authority.ACCESS_CONTROL_ADMIN))
+        .thenReturn(true);
+
     // Start with: a valid profile with a Broad affiliation but null Address.
     Profile previousProfile = createValidProfile().address(null);
 
@@ -348,7 +347,6 @@ public class ProfileServiceTest {
             newAffiliation, mockInstitutionService))
         .thenReturn(dbVerifiedInstitutionalAffiliation);
 
-    grantAdminAuthorityToLoggedInUser();
     profileService.updateProfile(user, updatedProfile, previousProfile);
   }
 
@@ -367,6 +365,11 @@ public class ProfileServiceTest {
 
   @Test
   public void updateProfile_can_change_contactEmail_asAdmin() {
+
+    // grant admin authority to loggedInUser
+    when(mockUserService.hasAuthority(loggedInUser.getUserId(), Authority.ACCESS_CONTROL_ADMIN))
+        .thenReturn(true);
+
     DbInstitution verilyInstitution =
         new DbInstitution().setShortName("Verily").setDisplayName("Verily LLC");
 
@@ -400,7 +403,6 @@ public class ProfileServiceTest {
     targetUser.setGivenName("John");
     targetUser.setFamilyName("Doe");
 
-    grantAdminAuthorityToLoggedInUser();
     profileService.updateProfile(targetUser, updatedProfile, previousProfile);
 
     assertThat(profileService.getProfile(targetUser).getContactEmail())
@@ -439,8 +441,10 @@ public class ProfileServiceTest {
 
   @Test(expected = BadRequestException.class)
   public void validateProfile_usernameChanged_admin() {
-    // Username changes are disallowed for admins
-    grantAdminAuthorityToLoggedInUser();
+    // Username changes are still disallowed for admins
+    when(mockUserService.hasAuthority(loggedInUser.getUserId(), Authority.ACCESS_CONTROL_ADMIN))
+        .thenReturn(true);
+
     profileService.validateProfile(new Profile().username("new"), new Profile().username("old"));
   }
 
@@ -465,7 +469,9 @@ public class ProfileServiceTest {
   @Test
   public void validateProfile_contactEmailChanged_admin() {
     // Contact email changes are allowed for admins
-    grantAdminAuthorityToLoggedInUser();
+    when(mockUserService.hasAuthority(loggedInUser.getUserId(), Authority.ACCESS_CONTROL_ADMIN))
+        .thenReturn(true);
+
     profileService.validateProfile(
         new Profile().contactEmail("new@gmail.com"), new Profile().contactEmail("old@gmail.com"));
   }
