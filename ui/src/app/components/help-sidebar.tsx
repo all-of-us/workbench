@@ -306,9 +306,6 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
         if (!!attributesSelection) {
           this.setState({activeIcon: 'criteria'});
           this.props.setSidebarState(true);
-        } else if (this.state.activeIcon === 'criteria' && !this.props.criteria) {
-          // this.setState({activeIcon: undefined});
-          // this.props.setSidebarState(false);
         }
       }));
     }
@@ -502,7 +499,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
     }
 
     render() {
-      const {criteria, helpContentKey, setSidebarState, notebookStyles, sidebarOpen} = this.props;
+      const {criteria, helpContentKey, notebookStyles, sidebarOpen} = this.props;
       const {activeIcon, attributesSelection, filteredContent, participant, searchTerm, tooltipId} = this.state;
       const displayContent = filteredContent !== undefined ? filteredContent : sidebarContent[helpContentKey];
 

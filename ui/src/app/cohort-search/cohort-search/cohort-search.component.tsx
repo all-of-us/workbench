@@ -8,7 +8,6 @@ import {CriteriaTree} from 'app/cohort-search/tree/tree.component';
 import {domainToTitle, generateId, typeToTitle} from 'app/cohort-search/utils';
 import {Button, Clickable} from 'app/components/buttons';
 import {FlexRowWrap} from 'app/components/flex';
-import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
@@ -205,7 +204,7 @@ export class CohortSearch extends React.Component<Props, State> {
     if (this.state.mode === 'tree') {
       this.setState({autocompleteSelection: undefined, backMode: 'list', hierarchyNode: undefined, mode: 'list'});
     } else {
-      attributesSelectionStore.next(undefined)
+      attributesSelectionStore.next(undefined);
       this.setState({mode: this.state.backMode});
     }
   }
@@ -318,8 +317,8 @@ export class CohortSearch extends React.Component<Props, State> {
 
   render() {
     const {closeSearch, searchContext, searchContext: {domain, type}} = this.props;
-    const {autocompleteSelection, count, groupSelections, hierarchyNode, loadingSubtree, mode, selectedIds, selections,
-      title, treeSearchTerms} = this.state;
+    const {autocompleteSelection, count, groupSelections, hierarchyNode, loadingSubtree, selectedIds, selections, title, treeSearchTerms}
+      = this.state;
     return !!searchContext && <FlexRowWrap style={styles.searchContainer}>
 
       <div style={{height: '100%', width: '100%'}}>
@@ -338,9 +337,6 @@ export class CohortSearch extends React.Component<Props, State> {
               {title}
             </h2>
           </div>
-          {mode === 'attributes' && <Button type='link' onClick={this.back}>
-            <ClrIcon size='24' shape='close'/>
-          </Button>}
         </div>
         <div style={
           (domain === DomainType.PERSON && type !== CriteriaType.AGE)
