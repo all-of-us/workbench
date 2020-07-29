@@ -13,7 +13,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {currentCohortCriteriaStore} from 'app/utils/navigation';
+import {attributesSelectionStore, currentCohortCriteriaStore} from 'app/utils/navigation';
 import {Criteria, CriteriaType, DomainType, TemporalMention, TemporalTime} from 'generated/fetch';
 import {Growl} from 'primereact/growl';
 
@@ -87,7 +87,6 @@ interface Props {
 }
 
 interface State {
-  attributesNode: Criteria;
   autocompleteSelection: Criteria;
   backMode: string;
   count: number;
@@ -149,7 +148,6 @@ export class CohortSearch extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      attributesNode: undefined,
       autocompleteSelection: undefined,
       backMode: 'list',
       count: 0,
@@ -207,7 +205,8 @@ export class CohortSearch extends React.Component<Props, State> {
     if (this.state.mode === 'tree') {
       this.setState({autocompleteSelection: undefined, backMode: 'list', hierarchyNode: undefined, mode: 'list'});
     } else {
-      this.setState({attributesNode: undefined, mode: this.state.backMode});
+      attributesSelectionStore.next(undefined)
+      this.setState({mode: this.state.backMode});
     }
   }
 
@@ -283,10 +282,6 @@ export class CohortSearch extends React.Component<Props, State> {
     this.setState({loadingSubtree: true, autocompleteSelection: selection});
   }
 
-  setAttributes = (criterion: Criteria) => {
-    this.setState({attributesNode: criterion, backMode: this.state.mode, mode: 'attributes'});
-  }
-
   addSelection = (param: any) => {
     let {groupSelections, selectedIds, selections} = this.state;
     if (selectedIds.includes(param.parameterId)) {
@@ -323,7 +318,7 @@ export class CohortSearch extends React.Component<Props, State> {
 
   render() {
     const {closeSearch, searchContext, searchContext: {domain, type}} = this.props;
-    const {attributesNode, autocompleteSelection, count, groupSelections, hierarchyNode, loadingSubtree, mode, selectedIds, selections,
+    const {autocompleteSelection, count, groupSelections, hierarchyNode, loadingSubtree, mode, selectedIds, selections,
       title, treeSearchTerms} = this.state;
     return !!searchContext && <FlexRowWrap style={styles.searchContainer}>
 
@@ -375,7 +370,7 @@ export class CohortSearch extends React.Component<Props, State> {
                       select={this.addSelection}
                       selectedIds={selectedIds}
                       selectOption={this.setAutocompleteSelection}
-                      setAttributes={this.setAttributes}
+                      setAttributes={() => {}} // setAttributes no longer needed in V2
                       setSearchTerms={this.setTreeSearchTerms}/>}
                 </div>
                 {/* List View (using duplicated version of ListSearch) */}

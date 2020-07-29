@@ -10,7 +10,7 @@ import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {highlightSearchTerm, reactStyles} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {currentWorkspaceStore} from 'app/utils/navigation';
+import {attributesSelectionStore, currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
 import {AttrName, Criteria, CriteriaSubType, CriteriaType, DomainType, Operator} from 'generated/fetch';
 
 const styles = reactStyles({
@@ -277,6 +277,15 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     }
   }
 
+  setAttributes(node: NodeProp) {
+    if (serverConfigStore.getValue().enableCohortBuilderV2) {
+      delete node.children;
+      attributesSelectionStore.next(node);
+    } else {
+      this.props.setAttributes(node);
+    }
+  }
+
   render() {
     const {autocompleteSelection, groupSelections, node,
       node: {code, count, domainId, id, group, hasAttributes, name, parentId, selectable}, scrollToMatch, searchTerms, select, selectedIds,
@@ -303,7 +312,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
             {hasAttributes
               ? <ClrIcon style={{color: colors.accent}}
                   shape='slider' dir='right' size='20'
-                  onClick={() => setAttributes(node)}/>
+                  onClick={() => this.setAttributes(node)}/>
               : selected
                 ? <ClrIcon style={{...styles.selectIcon, ...styles.selected}}
                     shape='check-circle' size='20'/>

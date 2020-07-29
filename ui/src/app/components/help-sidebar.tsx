@@ -306,6 +306,9 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
         if (!!attributesSelection) {
           this.setState({activeIcon: 'criteria'});
           this.props.setSidebarState(true);
+        } else if (this.state.activeIcon === 'criteria' && !this.props.criteria) {
+          // this.setState({activeIcon: undefined});
+          // this.props.setSidebarState(false);
         }
       }));
     }
@@ -319,6 +322,9 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
             this.setState({activeIcon: undefined});
           }
         }, 300);
+      }
+      if (!this.props.criteria && !!prevProps.criteria) {
+        this.props.setSidebarState(false);
       }
     }
 
@@ -368,6 +374,13 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
         this.analyticsEvent('OpenSidebar', `Sidebar - ${label}`);
       } else {
         setSidebarState(false);
+      }
+    }
+
+    onCloseClick() {
+      this.props.setSidebarState(false);
+      if (this.state.attributesSelection) {
+        setTimeout(() => this.setState({attributesSelection: undefined}), 500);
       }
     }
 
@@ -497,7 +510,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
         display: activeIcon === tab ? 'block' : 'none',
         height: 'calc(100% - 1rem)',
         overflow: 'auto',
-        padding: '0.5rem 0.5rem 5.5rem',
+        padding: '0.5rem 0.5rem ' + (tab === 'criteria' ? '0' : '5.5rem'),
       });
       return <React.Fragment>
         <div style={notebookStyles ? {...styles.iconContainer, ...styles.notebookOverrides} : {...styles.iconContainer}}>
@@ -530,14 +543,14 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
         <div style={this.sidebarContainerStyles(activeIcon, notebookStyles)}>
           <div style={sidebarOpen ? {...styles.sidebar, ...styles.sidebarOpen} : styles.sidebar} data-test-id='sidebar-content'>
             <FlexRow style={styles.navIcons}>
-              {attributesSelection && <Clickable style={{marginRight: '1rem'}}
+              {activeIcon === 'criteria' && attributesSelection && <Clickable style={{marginRight: '1rem'}}
                   onClick={() => this.setState({attributesSelection: undefined})}>
                 <img src={proIcons.arrowLeft}
                      style={{height: '21px', width: '18px'}}
                      alt='Go back'/>
               </Clickable>}
               <Clickable style={{marginRight: '1rem'}}
-                  onClick={() => setSidebarState(false)}>
+                  onClick={() => this.onCloseClick()}>
                 <img src={proIcons.times}
                      style={{height: '27px', width: '17px'}}
                      alt='Close'/>

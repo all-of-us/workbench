@@ -187,8 +187,11 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
       if (this.props.node !== prevProps.node) {
-        this.setState({loading: true});
-        this.initAttributeForm();
+        // A different node has been selected, so we reset the form and load the new attributes
+        this.setState({
+          form: {exists: false, num: [], cat: []},
+          loading: true
+        }, () => this.initAttributeForm());
       }
     }
 
@@ -507,9 +510,9 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
       const disableCalculate = disableAdd || form.exists || form.num.every(attr => attr.operator === 'ANY');
       return (loading ?
         <SpinnerOverlay/> :
-        <div style={{margin: '0.5rem 0 1.5rem'}}>
+        <div style={{marginTop: '0.5rem'}}>
           <h3 style={{fontWeight: 600, margin: '0 0 0.5rem'}}>
-            {domainId === DomainType.PHYSICALMEASUREMENT.toString() ? name : 'Measurement Detail'}
+            {domainId === DomainType.PHYSICALMEASUREMENT.toString() ? name : 'Measurement'} Detail
           </h3>
           {countError && <div style={styles.error}>
             <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
@@ -526,7 +529,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
             <CheckBox onChange={(v) => this.toggleCheckbox(v)}/> Any value (lab exists)
             {!form.exists && form.num.length > 0 && <div style={styles.orCircle}>OR</div>}
           </div>}
-          {!form.exists && <React.Fragment>
+          {!form.exists && <div style={{minHeight: '10rem'}}>
             {form.num.map((attr, a) => <div key={a}>
               {this.isMeasurement && <div style={styles.label}>Numeric Values</div>}
               {this.isSurvey && <div style={styles.label}>{ppiQuestions.getValue()[parentId].name}</div>}
@@ -538,7 +541,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
                         onChange={(e) => this.selectChange(a, e.value)}/>
               <FlexRowWrap>
                 {![null, 'ANY'].includes(attr.operator) && <div style={{width: '33%'}}>
-                  <NumberInput style={{padding: '0 0.25rem'}}
+                  <NumberInput style={{padding: '0 0.25rem', ...(this.hasUnits ? {width: '70%'} : {})}}
                                value={attr.operands[0] || ''}
                                min={attr.MIN} max={attr.MAX}
                                onChange={(v) => this.inputChange(v, a, 0)}/>
@@ -547,7 +550,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
                 {attr.operator === Operator.BETWEEN && <React.Fragment>
                   <div style={{padding: '0.2rem 1.5rem 0 1rem'}}>and</div>
                   <div style={{width: '33%'}}>
-                    <NumberInput style={{padding: '0 0.25rem'}}
+                    <NumberInput style={{padding: '0 0.25rem', ...(this.hasUnits ? {width: '70%'} : {})}}
                                  value={attr.operands[1] || ''}
                                  min={attr.MIN} max={attr.MAX}
                                  onChange={(v) => this.inputChange(v, a, 1)}/>
@@ -571,7 +574,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
                 </div>)}
               </div>
             </React.Fragment>}
-          </React.Fragment>}
+          </div>}
           <FlexRowWrap style={styles.countPreview}>
             <div style={styles.resultsContainer}>
               <Button type='secondaryLight'
