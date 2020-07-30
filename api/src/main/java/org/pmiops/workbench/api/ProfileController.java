@@ -47,6 +47,7 @@ import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
+import org.pmiops.workbench.model.AccountPropertyUpdate;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectStatus;
@@ -238,7 +239,7 @@ public class ProfileController implements ProfileApiDelegate {
       verifyInvitationKey(request.getInvitationKey());
     }
 
-    profileService.validateInstitutionalAffiliation(request.getProfile());
+    profileService.validateAffiliation(request.getProfile());
 
     final Profile profile = request.getProfile();
 
@@ -505,7 +506,7 @@ public class ProfileController implements ProfileApiDelegate {
       throw new BadRequestException("Cannot update Verified Institutional Affiliation");
     }
 
-    profileService.updateProfileForUser(user, updatedProfile, previousProfile);
+    profileService.updateProfile(user, updatedProfile, previousProfile);
 
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
@@ -529,7 +530,7 @@ public class ProfileController implements ProfileApiDelegate {
 
     Profile oldProfile = profileService.getProfile(dbUser);
 
-    profileService.updateProfileForUser(dbUser, updatedProfile, oldProfile);
+    profileService.updateProfile(dbUser, updatedProfile, oldProfile);
 
     return ResponseEntity.ok(new EmptyResponse());
   }
@@ -577,6 +578,12 @@ public class ProfileController implements ProfileApiDelegate {
     long userId = userProvider.get().getUserId();
     userService.updateBypassTime(userId, request);
     return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @Override
+  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
+  public ResponseEntity<Profile> updateAccountProperties(AccountPropertyUpdate request) {
+    return ResponseEntity.ok(profileService.updateAccountProperties(request));
   }
 
   @Override

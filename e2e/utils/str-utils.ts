@@ -11,7 +11,7 @@ export function makeString(charLimit?: number) {
   if (loremStr.length > charLimit) {
     loremStr = loremStr.slice(0, charLimit);
   }
-  return loremStr
+  return loremStr;
 }
 
 /**
@@ -24,11 +24,12 @@ export function makeDateTimeStr(namePrefix: string) {
 }
 
 export function makeWorkspaceName() {
-  return `aoutest-${Math.floor(Math.random() * 1000)}-${Math.floor(Date.now() / 1000)}`;
+  return `aoutest-${Math.floor(Math.random() * 100000)}${Math.floor(Date.now() / 1000)}`;
 }
 
-export function makeRandomName() {
-  return `aoutest-${Math.floor(Math.random() * 100000)}`;
+export function makeRandomName(prefix?: string) {
+  prefix = prefix || 'aoutest-';
+  return `${prefix}-${Math.floor(Math.random() * 10000000)}`;
 }
 
 export const extractPageName = async (page: Page): Promise<string> => {

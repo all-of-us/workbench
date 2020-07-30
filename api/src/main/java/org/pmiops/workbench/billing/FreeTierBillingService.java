@@ -4,6 +4,8 @@ import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.common.collect.Sets;
 import com.google.common.math.DoubleMath;
+import java.sql.Timestamp;
+import java.time.Clock;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
 import org.jetbrains.annotations.Nullable;
+import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -37,13 +40,13 @@ import org.springframework.stereotype.Service;
 public class FreeTierBillingService {
 
   private final BigQueryService bigQueryService;
+  private final Clock clock;
   private final MailService mailService;
-
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
+  private final UserServiceAuditor userServiceAuditor;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
-
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   private static final Logger logger = Logger.getLogger(FreeTierBillingService.class.getName());
 
@@ -54,17 +57,21 @@ public class FreeTierBillingService {
   @Autowired
   public FreeTierBillingService(
       BigQueryService bigQueryService,
+      Clock clock,
       MailService mailService,
+      Provider<WorkbenchConfig> workbenchConfigProvider,
       UserDao userDao,
+      UserServiceAuditor userServiceAuditor,
       WorkspaceDao workspaceDao,
-      WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao,
-      Provider<WorkbenchConfig> workbenchConfigProvider) {
+      WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao) {
     this.bigQueryService = bigQueryService;
+    this.clock = clock;
+    this.userServiceAuditor = userServiceAuditor;
     this.mailService = mailService;
     this.userDao = userDao;
+    this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceDao = workspaceDao;
     this.workspaceFreeTierUsageDao = workspaceFreeTierUsageDao;
-    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   public double getWorkspaceFreeTierBillingUsage(DbWorkspace dbWorkspace) {
@@ -106,7 +113,7 @@ public class FreeTierBillingService {
 
     final Set<DbUser> expiredUsers =
         userCosts.entrySet().stream()
-            .filter(e -> expiredByCost(e.getKey(), e.getValue()))
+            .filter(e -> costAboveLimit(e.getKey(), e.getValue()))
             .map(Entry::getKey)
             .collect(Collectors.toSet());
 
@@ -136,8 +143,12 @@ public class FreeTierBillingService {
     return DoubleMath.fuzzyCompare(a, b, COST_FRACTION_TOLERANCE);
   }
 
-  private boolean expiredByCost(final DbUser user, final double currentCost) {
+  private boolean costAboveLimit(final DbUser user, final double currentCost) {
     return compareCosts(currentCost, getUserFreeTierDollarLimit(user)) > 0;
+  }
+
+  private boolean costsDiffer(final double a, final double b) {
+    return compareCosts(a, b) != 0;
   }
 
   // TODO: move to DbWorkspace?  RW-5107
@@ -279,9 +290,8 @@ public class FreeTierBillingService {
    * @return whether the user has remaining credits
    */
   public boolean userHasRemainingFreeTierCredits(DbUser user) {
-    return Optional.ofNullable(getCachedFreeTierUsage(user))
-        .map(usage -> compareCosts(getUserFreeTierDollarLimit(user), usage) > 0)
-        .orElse(true);
+    final double usage = Optional.ofNullable(getCachedFreeTierUsage(user)).orElse(0.0);
+    return !costAboveLimit(user, usage);
   }
 
   /**
@@ -294,5 +304,44 @@ public class FreeTierBillingService {
   public double getUserFreeTierDollarLimit(DbUser user) {
     return Optional.ofNullable(user.getFreeTierCreditsLimitDollarsOverride())
         .orElse(workbenchConfigProvider.get().billing.defaultFreeCreditsDollarLimit);
+  }
+
+  /**
+   * Set a Free Tier dollar limit override value for this user, but only if the value to set differs
+   * from the system default or the user has an existing override. If the user has no override and
+   * the value to set it equal to the system default, retain the system default so this user's quota
+   * continues to track it.
+   *
+   * <p>If this is greater than the user's total cost, set their workspaces to active. Note:
+   * lowering the limit below total cost will NOT set the workspaces to inactive.
+   * checkFreeTierBillingUsage() will do this as part of the next cron run.
+   *
+   * @param user the user as represented in our database
+   * @param newDollarLimit the US dollar amount, represented as a double
+   * @return whether an override was set
+   */
+  public boolean maybeSetDollarLimitOverride(DbUser user, double newDollarLimit) {
+    final Double previousLimitMaybe = user.getFreeTierCreditsLimitDollarsOverride();
+
+    if (previousLimitMaybe != null
+        || costsDiffer(
+            newDollarLimit, workbenchConfigProvider.get().billing.defaultFreeCreditsDollarLimit)) {
+
+      // TODO: prevent setting this limit directly except in this method?
+      user.setFreeTierCreditsLimitDollarsOverride(newDollarLimit);
+      user.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
+      user = userDao.save(user);
+
+      if (userHasRemainingFreeTierCredits(user)) {
+        // may be redundant: enable anyway
+        updateFreeTierWorkspacesStatus(user, BillingStatus.ACTIVE);
+      }
+
+      userServiceAuditor.fireSetFreeTierDollarLimitOverride(
+          user.getUserId(), previousLimitMaybe, newDollarLimit);
+      return true;
+    }
+
+    return false;
   }
 }

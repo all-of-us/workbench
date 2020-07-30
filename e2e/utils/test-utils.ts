@@ -7,7 +7,7 @@ import GoogleLoginPage from 'app/page/google-login';
 import HomePage, {LabelAlias} from 'app/page/home-page';
 import {XPathOptions, ElementType} from 'app/xpath-options';
 import * as fp from 'lodash/fp';
-import {ElementHandle, JSHandle, Page} from 'puppeteer';
+import {ElementHandle, Page} from 'puppeteer';
 import {waitForText} from 'utils/waits-utils';
 import WorkspaceCard from 'app/component/workspace-card';
 import {WorkspaceAccessLevel} from 'app/text-labels';
@@ -18,7 +18,7 @@ export async function signIn(page: Page, userId?: string, passwd?: string): Prom
   const loginPage = new GoogleLoginPage(page);
   await loginPage.login(userId, passwd);
   // this element exists in DOM after user has logged in
-  await page.waitFor(() => document.querySelector('app-signed-in') !== null);
+  await page.waitForFunction(() => !!document.querySelector('app-signed-in'));
   const homePage = new HomePage(page);
   await homePage.waitForLoad();
 }
@@ -45,35 +45,23 @@ export async function signInAs(userId: string, passwd: string): Promise<Page> {
  * It usually indicates the page is ready for user interaction.
  * </pre>
  */
-export async function waitWhileLoading(page: Page, timeOut: number = 90000): Promise<void> {
-  // wait maximum 1 second for either spinner to show up
-  const spinSelector = '.spinner, svg';
-  let spinner: JSHandle;
-  try {
-    spinner = await page.waitFor((selector) => {
-      return document.querySelectorAll(selector).length > 0
-    }, {timeout: 1000}, spinSelector);
-  } catch (err) {
-    console.info('waitWhileLoading does not find any spin elements.');
-  }
-  const jValue = await spinner.jsonValue();
+export async function waitWhileLoading(page: Page, timeOut?: number): Promise<void> {
+  const notBlankPageSelector = '[data-test-id="sign-in-container"], title:not(empty), div.spinner, svg[viewBox]';
+  const spinElementsSelector = '[style*="running spin"], .spinner:empty, [style*="running rotation"]';
 
-  // wait maximum 90 seconds for spinner disappear if spinner existed
-  const spinAnimationSelector = 'svg[style*="spin"], .spinner:empty';
-  // const startTime = performance.now();
-  try {
-    if (jValue) {
-      await page.waitFor((selector) => {
-        return document.querySelectorAll(selector).length === 0;
-      }, {timeout: timeOut}, spinAnimationSelector);
-      // half second to give page time finish rendering
-      await page.waitFor(500);
-    }
-  } catch (err) {
-    throw new Error(err);
-  }
+  await Promise.race([
+    // To prevent checking on blank page, wait for elements exist in DOM.
+    page.waitForSelector(notBlankPageSelector),
+    page.waitForSelector(spinElementsSelector),
+  ]);
 
+  // Wait for spinners stop and gone.
+  await page.waitForFunction((css) => {
+    const elements = document.querySelectorAll(css);
+    return elements && elements.length === 0;
+  }, {polling: 'mutation', timeout: timeOut}, spinElementsSelector);
 }
+
 
 export async function clickEvalXpath(page: Page, xpathSelector: string) {
   return page.evaluate((selector) => {
@@ -138,9 +126,9 @@ export async function newUserRegistrationSelfBypass(page: Page) {
     await waitWhileLoading(page);
   } catch (timeouterr) {
     // wait more if 60 seconds wait time wasn't enough.
-    await waitWhileLoading(page, 120000);
+    await waitWhileLoading(page);
   }
-  await waitForText(page, 'Bypass action is complete. Reload the page to continue.', {css: '[data-test-id="self-bypass"]'}, 60000);
+  await waitForText(page, 'Bypass action is complete. Reload the page to continue.', {css: '[data-test-id="self-bypass"]'});
   await page.reload({waitUntil: ['networkidle0', 'domcontentloaded']});
   await waitWhileLoading(page);
 }

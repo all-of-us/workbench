@@ -1,4 +1,3 @@
-import {Component, Input} from '@angular/core';
 import * as React from 'react';
 import {validate} from 'validate.js';
 
@@ -8,7 +7,7 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {Spinner} from 'app/components/spinners';
 import {cohortReviewStore} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
-import {reactStyles, ReactWrapperBase, summarizeErrors, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {navigate} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -150,16 +149,3 @@ export const CreateReviewModal = withCurrentWorkspace()(
     }
   }
 );
-
-@Component({
-  selector: 'app-create-review-modal',
-  template: '<div #root></div>'
-})
-export class CreateReviewModalComponent extends ReactWrapperBase {
-  @Input('canceled') canceled: Props['canceled'];
-  @Input('cohort') cohort: Props['cohort'];
-  @Input('created') created: Props['created'];
-  constructor() {
-    super(CreateReviewModal, ['canceled', 'cohort', 'created']);
-  }
-}

@@ -30,7 +30,7 @@ const getAdminPageUrl = (subject: string) => {
   return `/admin/workspaces/${subject}`;
 };
 
-export const WorkspaceAuditPage = () => {
+export const WorkspaceAudit = () => {
   const {workspaceNamespace = ''} = useParams();
   return <AuditPageComponent auditSubjectType='Workspace'
                              buttonLabel='Workspace namespace (begins with aou-rw-)'

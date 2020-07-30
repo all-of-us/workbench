@@ -1,6 +1,7 @@
 import {ElementHandle, Page} from 'puppeteer';
 import EllipsisMenu from 'app/component/ellipsis-menu';
 import * as fp from 'lodash/fp';
+import {waitWhileLoading} from 'utils/test-utils';
 
 const DataResourceCardSelector = {
   cardRootXpath: '//*[@data-test-id="card"]',
@@ -77,13 +78,17 @@ export default class DataResourceCard {
 
   }
 
-  async findCard(resourceName: string): Promise<DataResourceCard | null> {
+  async findCard(resourceName: string, cardType?: CardType): Promise<DataResourceCard | null> {
     const selector = `.//*[${DataResourceCardSelector.cardNameXpath} and normalize-space(text())="${resourceName}"]`;
-    await this.page.waitForXPath(DataResourceCardSelector.cardRootXpath, {visible: true});
-    const elements = await this.page.$x(DataResourceCardSelector.cardRootXpath);
+    let elements: DataResourceCard[];
+    if (cardType === undefined) {
+      elements = await DataResourceCard.findAllCards(this.page);
+    } else {
+      elements = await this.getResourceCard(cardType);
+    }
     for (const elem of elements) {
-      if ((await elem.$x(selector)).length > 0) {
-        return this.asCard(elem);
+      if ((await elem.asElementHandle().$x(selector)).length > 0) {
+        return elem;
       }
     }
     return null;
@@ -142,6 +147,7 @@ export default class DataResourceCard {
       this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0']}),
       elemts[0].click(),
     ]);
+    await waitWhileLoading(this.page);
   }
 
   /**

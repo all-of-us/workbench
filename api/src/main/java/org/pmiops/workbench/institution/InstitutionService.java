@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
@@ -118,6 +119,7 @@ public interface InstitutionService {
    */
   Optional<Institution> getFirstMatchingInstitution(final String contactEmail);
 
+  Optional<Institution> getByUser(DbUser user);
   /**
    * Deprecated because it refers to old-style Institutional Affiliations, to be deleted in RW-4362
    * The new-style equivalent is VerifiedInstitutionalAffiliationMapper.modelToDbWithoutUser()

@@ -1,4 +1,3 @@
-import {Component, Input} from '@angular/core';
 import * as React from 'react';
 
 import {AttributesPage} from 'app/cohort-search/attributes-page/attributes-page.component';
@@ -13,7 +12,7 @@ import {FlexRowWrap} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase} from 'app/utils';
+import {reactStyles} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentCohortCriteriaStore} from 'app/utils/navigation';
 import {Criteria, CriteriaType, DomainType, TemporalMention, TemporalTime} from 'generated/fetch';
@@ -416,17 +415,5 @@ export class CohortSearch extends React.Component<Props, State> {
         </div>
       </div>
     </FlexRowWrap>;
-  }
-}
-
-@Component({
-  selector: 'app-cohort-search',
-  template: '<div #root></div>'
-})
-export class CohortSearchComponent extends ReactWrapperBase {
-  @Input('closeSearch') closeSearch: Props['closeSearch'];
-  @Input('searchContext') searchContext: Props['searchContext'];
-  constructor() {
-    super(CohortSearch, ['closeSearch', 'searchContext']);
   }
 }

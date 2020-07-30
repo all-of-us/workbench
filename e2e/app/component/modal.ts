@@ -20,18 +20,19 @@ export default class Modal extends Container {
 
   async waitForLoad(): Promise<this> {
     try {
-      await this.page.waitForXPath(this.xpath, {visible: true});
+      await this.waitUntilVisible();
     } catch (e) {
       await savePageToFile(this.page);
       await takeScreenshot(this.page);
       const title = await this.page.title();
-      console.error(`${title}: modal waitForLoad() encountered ${e}`);
-      throw e;
+      throw new Error(`"${title}" modal waitForLoad() encountered ${e}`);
     }
     return this;
   }
 
   async getContent(): Promise<string> {
+    // xpath that excludes button labels and spans
+    // '//*[@role="dialog"]//div[normalize-space(text()) and not(@role="button")]'
     const modal = await this.page.waitForXPath(this.xpath, {visible: true});
     const modalText = await (await modal.getProperty('innerText')).jsonValue();
     console.debug('Modal: \n' + modalText);
@@ -60,8 +61,8 @@ export default class Modal extends Container {
     return Checkbox.findByName(this.page, {name: checkboxName}, this);
   }
 
-  async waitUntilClose(timeOut: number = 60000): Promise<void> {
-    await this.page.waitForXPath(this.xpath, {hidden: true, timeout: timeOut});
+  async waitUntilClose(): Promise<void> {
+    await this.page.waitForXPath(this.xpath, {hidden: true});
   }
 
   async waitUntilVisible(): Promise<void> {

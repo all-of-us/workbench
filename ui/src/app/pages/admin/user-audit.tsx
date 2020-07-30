@@ -43,7 +43,7 @@ const getAdminPageUrl = (subject: string) => {
   return `/admin/user/`;
 };
 
-export const UserAuditPage = () => {
+export const UserAudit = () => {
   const {username = ''} = useParams();
   return <AuditPageComponent auditSubjectType='User'
                              buttonLabel='Username without domain'

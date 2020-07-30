@@ -1,10 +1,8 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
-import {CohortCommonModule} from 'app/cohort-common/module';
 
 /* Components */
 import {CohortPageComponent} from './cohort-page/cohort-page.component';
-import {CohortSearchComponent} from './cohort-search/cohort-search.component';
 
 import {BreadcrumbType} from 'app/utils/navigation';
 
@@ -25,16 +23,8 @@ const routes: Routes = [{
 
 
 @NgModule({
-  imports: [
-    // Angular
-    RouterModule.forChild(routes),
-    // Ours
-    CohortCommonModule,
-  ],
-  declarations: [
-    CohortPageComponent,
-    CohortSearchComponent,
-  ],
+  imports: [RouterModule.forChild(routes)],
+  declarations: [CohortPageComponent],
   providers: []
 })
 export class CohortSearchModule {}

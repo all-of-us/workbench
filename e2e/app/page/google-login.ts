@@ -133,8 +133,8 @@ export default class GoogleLoginPage {
     // Sometimes, user is prompted with "Enter Recovery Email" page. Handle the page if found.
     const recoverEmailXpath = '//input[@type="email" and @aria-label="Enter recovery email address"]';
     await Promise.race([
-      waitForDocumentTitle(this.page, 'Homepage', 30000),
-      this.page.waitForXPath(recoverEmailXpath, {visible: true, timeout: 30000})
+      waitForDocumentTitle(this.page, 'Homepage'),
+      this.page.waitForXPath(recoverEmailXpath, {visible: true})
     ]);
     const elementHandles = await this.page.$x(recoverEmailXpath);
     if (elementHandles.length > 0) {
@@ -143,7 +143,7 @@ export default class GoogleLoginPage {
         this.page.waitForNavigation(),
         this.page.keyboard.press(String.fromCharCode(13)), // press Enter key
       ]);
-      await waitForDocumentTitle(this.page, 'Homepage', 30000);
+      await waitForDocumentTitle(this.page, 'Homepage');
     }
 
   }

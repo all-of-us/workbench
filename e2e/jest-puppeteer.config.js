@@ -5,8 +5,8 @@
 
 const fp = require('lodash/fp');
 const puppeteer = require('puppeteer');
-const isHeadless = (process.env.HEADLESS || 'true') === 'true';
-const slowMotion = process.env.SLOWMO || 10;
+const isHeadless = (process.env.PUPPETEER_HEADLESS || 'true') === 'true';
+const slowMotion = parseInt(process.env.PUPPETEER_SLOWMO, 10) || 10;
 
 const NEW_CHROME_SWITCHES = [
   // Reduce cpu and memory usage. Disables one-site-per-process security policy, dedicated processes for site origins.
@@ -15,7 +15,7 @@ const NEW_CHROME_SWITCHES = [
   // https://codereview.chromium.org/2384163002
   '--no-zygote',
   '--no-sandbox', // required for --no-zygote flag
-  '--safebrowsing-disable-auto-update',
+  '--safebrowsing-disable-auto-update'
 ];
 
 // Append to Puppeteer default chrome flags.
@@ -46,5 +46,5 @@ module.exports = {
   },
   browser: 'chromium',
   browserContext: (process.env.INCOGNITO || true) ? 'incognito' : 'default',
-  exitOnPageError: true,
+  exitOnPageError: false,
 };
