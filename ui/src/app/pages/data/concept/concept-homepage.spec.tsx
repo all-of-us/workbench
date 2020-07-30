@@ -137,6 +137,25 @@ describe('ConceptHomepage', () => {
 
   });
 
+  it('should show warning and not search if restricted characters have been enters', async() => {
+    const conceptSpy = jest.spyOn(conceptsApi(), 'searchConcepts');
+    const countSpy = jest.spyOn(conceptsApi(), 'domainCounts');
+    const surveySpy = jest.spyOn(conceptsApi(), 'searchSurveys');
+    const wrapper = mount(<ConceptHomepage />);
+    await waitOneTickAndUpdate(wrapper);
+    const termWithRestrictedChars = defaultSearchTerm + '@';
+    searchTable(termWithRestrictedChars, wrapper);
+    await waitOneTickAndUpdate(wrapper);
+
+    // Test that it doesn't make any api calls
+    expect(countSpy).toHaveBeenCalledTimes(0);
+    expect(conceptSpy).toHaveBeenCalledTimes(0);
+    expect(surveySpy).toHaveBeenCalledTimes(0);
+
+    // Test that the forbidden character alert is displayed
+    expect(wrapper.find('[data-test-id="forbidden-character-alert"]').length).toBe(1);
+  });
+
   it('should change search criteria when standard only not checked', async() => {
     const spy = jest.spyOn(conceptsApi(), 'searchConcepts');
     const selectedDomain = DomainStubVariables.STUB_DOMAINS[1];

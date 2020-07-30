@@ -588,7 +588,9 @@ export const ConceptHomepage = withCurrentWorkspace()(
                         onChange={() => this.handleCheckboxChange()}/>
             </div>
             {forbiddenCharactersEntered && <AlertDanger style={styles.inputAlert}>
-                The following characters are not allowed: ~ - @ ( ) [ ] | &lt; &gt;
+                <span data-test-id='forbidden-character-alert'>
+                  The following characters are not allowed: ~ - @ ( ) [ ] | &lt; &gt;
+                </span>
             </AlertDanger>}
             {showSearchError && <AlertDanger style={styles.inputAlert}>
                 Minimum concept search length is three characters.
