@@ -3,8 +3,9 @@ import * as React from 'react';
 
 import {cohortReviewStore} from 'app/services/review-state.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {currentCohortCriteriaStore, currentWorkspaceStore} from 'app/utils/navigation';
+import {currentCohortCriteriaStore, currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
 import {CohortAnnotationDefinitionApi, CohortReviewApi} from 'generated/fetch';
+import defaultServerConfig from 'testing/default-server-config';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CohortAnnotationDefinitionServiceStub} from 'testing/stubs/cohort-annotation-definition-service-stub';
 import {CohortReviewServiceStub, cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
@@ -31,6 +32,10 @@ describe('HelpSidebar', () => {
     registerApiClient(CohortAnnotationDefinitionApi, new CohortAnnotationDefinitionServiceStub());
     currentWorkspaceStore.next(workspaceDataStub);
     cohortReviewStore.next(cohortReviewStubs[0]);
+    serverConfigStore.next({
+      ...defaultServerConfig,
+      enableCohortBuilderV2: false
+    });
   });
 
   it('should render', () => {
@@ -78,7 +83,7 @@ describe('HelpSidebar', () => {
     wrapper.find({'data-test-id': 'Share-menu-item'}).first().simulate('click');
     expect(shareSpy).toHaveBeenCalled();
   });
-  it('should hide workspace icon if on critera search page', async () => {
+  it('should hide workspace icon if on critera search page', async() => {
     const wrapper = component();
     currentCohortCriteriaStore.next([]);
     await waitOneTickAndUpdate(wrapper);

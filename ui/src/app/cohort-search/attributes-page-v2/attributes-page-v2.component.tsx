@@ -215,6 +215,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
       cohortBuilderApi().findCriteriaAttributeByConceptId(+cdrVersionId, conceptId).then(resp => {
         resp.items.forEach(attr => {
           if (attr.type === AttrName[AttrName.NUM]) {
+            // NUM attributes set the min and max range for the number inputs in the attributes form
             if (!form.num.length) {
               form.num.push({
                 name: AttrName.NUM,
@@ -227,6 +228,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
               form.num[0][attr.conceptName] = parseInt(attr.estCount, 10);
             }
           } else {
+            // CAT attributes are displayed as checkboxes in the attributes form
             if (parseInt(attr.estCount, 10) > 0) {
               attr['checked'] = false;
               form.cat.push(attr);
@@ -511,8 +513,8 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
       return (loading ?
         <SpinnerOverlay/> :
         <div style={{marginTop: '0.5rem'}}>
-          <h3 style={{fontWeight: 600, margin: '0 0 0.5rem'}}>
-            {domainId === DomainType.PHYSICALMEASUREMENT.toString() ? name : 'Measurement'} Detail
+          <h3 style={{fontWeight: 600, margin: '0 0 0.5rem', textTransform: 'capitalize'}}>
+            {domainId === DomainType.PHYSICALMEASUREMENT.toString() ? name : domainId.toString().toLowerCase()} Detail
           </h3>
           {countError && <div style={styles.error}>
             <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'

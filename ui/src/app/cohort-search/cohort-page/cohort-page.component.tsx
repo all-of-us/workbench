@@ -200,8 +200,9 @@ export const CohortPage = withCurrentWorkspace() (
                 {searchContext && <CohortSearch
                     closeSearch={() => {
                       this.setState({searchContext: undefined});
-                      setTimeout(() => attributesSelectionStore.next(undefined), 500);
                       currentCohortCriteriaStore.next(undefined);
+                      // Delay hiding attributes page until sidebar is closed
+                      setTimeout(() => attributesSelectionStore.next(undefined), 500);
                     }}
                     searchContext={searchContext}/>}
               </React.Fragment>
