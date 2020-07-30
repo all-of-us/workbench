@@ -23,7 +23,6 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {attributesSelectionStore, NavStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
-import {environment} from 'environments/environment';
 import {Criteria, ParticipantCohortStatus, WorkspaceAccessLevel} from 'generated/fetch';
 import {Button, Clickable, MenuItem, StyledAnchorTag} from './buttons';
 import {PopupTrigger} from './popups';
