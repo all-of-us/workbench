@@ -117,9 +117,8 @@ public interface UserService {
   void updateBypassTime(long userDatabaseId, AccessBypassRequest accessBypassRequest);
 
   boolean hasAuthority(long userId, Authority required);
-  
+
   Set<DbUser> findAllUsersWithAuthoritiesAndPageVisits();
 
   Optional<DbUser> findUserWithAuthoritiesAndPageVisits(long userId);
-
 }

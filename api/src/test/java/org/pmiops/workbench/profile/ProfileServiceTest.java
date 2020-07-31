@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -573,7 +574,7 @@ public class ProfileServiceTest {
     user3.setDisabled(true);
     user3.setAboutYou("where to begin...");
 
-    doReturn(ImmutableList.of(user1, user2, user3))
+    doReturn(ImmutableSet.of(user1, user2, user3))
         .when(mockUserService)
         .findAllUsersWithAuthoritiesAndPageVisits();
 

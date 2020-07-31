@@ -28,7 +28,9 @@ public interface ProfileMapper {
   @Mapping(source = "latestTermsOfService.tosVersion", target = "latestTermsOfServiceVersion")
   @Mapping(source = "latestTermsOfService.agreementTime", target = "latestTermsOfServiceTime")
   @Mapping(source = "dbUser.userId", target = "userId")
-  @Mapping(target = "institutionalAffiliations", ignore = true) // deprecated
+  @Mapping(
+      source = "dbUser.institutionalAffiliations",
+      target = "institutionalAffiliations") // deprecated
   Profile toModel(
       DbUser dbUser,
       VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation,

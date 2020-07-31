@@ -14,7 +14,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.annotation.Nonnull;
@@ -399,13 +398,15 @@ public class ProfileService {
    */
   private boolean isNewProfile(Diff diff) {
 
-    return diff.getChanges(change ->
-        change instanceof NewObject
-            && change
-                .getAffectedGlobalId()
-                .getTypeName()
-                .equals(Profile.class.getCanonicalName()))
-        .size() > 0;
+    return diff.getChanges(
+                change ->
+                    change instanceof NewObject
+                        && change
+                            .getAffectedGlobalId()
+                            .getTypeName()
+                            .equals(Profile.class.getCanonicalName()))
+            .size()
+        > 0;
   }
 
   /**
