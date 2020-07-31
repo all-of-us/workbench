@@ -25,7 +25,6 @@ import {ConceptHomepageComponent} from './pages/data/concept/concept-homepage';
 import {ConceptSetActionsComponent} from './pages/data/concept/concept-set-actions';
 import {ConceptSetDetailsComponent} from './pages/data/concept/concept-set-details';
 import {HomepageComponent} from './pages/homepage/homepage';
-import {SignInComponent} from './pages/login/sign-in';
 import {ProfilePageComponent} from './pages/profile/profile-page';
 import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
@@ -47,16 +46,15 @@ import {BreadcrumbType, NavStore} from './utils/navigation';
 declare let gtag: Function;
 
 const routes: Routes = [
-  {
-    path: 'login',
-    component: SignInComponent,
-    data: {title: 'Sign In'}
-  },
   // TODO(RW-5302): Reconcile react routes with angular guards, we cannot
   // have both ** under the sign in guard and ** in the signed out context.
   // Hardcoding all signed out paths here is a stop-gap.
   {
     path: 'cookie-policy',
+    component: AppRouting
+  },
+  {
+    path: 'login',
     component: AppRouting
   },
   {

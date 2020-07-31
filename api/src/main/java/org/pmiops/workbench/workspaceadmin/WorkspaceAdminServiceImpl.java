@@ -194,6 +194,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
     return new WorkspaceAdminView()
         .workspace(workspaceMapper.toApiWorkspace(dbWorkspace, firecloudWorkspace))
+        .workspaceDatabaseId(dbWorkspace.getWorkspaceId())
         .collaborators(collaborators)
         .resources(adminWorkspaceResources);
   }

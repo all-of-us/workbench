@@ -7,8 +7,9 @@ import Textbox from 'app/element/textbox';
 import {buildXPath} from 'app/xpath-builders';
 import {ElementType} from 'app/xpath-options';
 import {centerPoint, dragDrop, waitWhileLoading} from 'utils/test-utils';
-import {waitForNumericalString, waitForPropertyNotExists} from 'utils/waits-utils';
+import {waitForNumericalString} from 'utils/waits-utils';
 import {LinkText} from 'app/text-labels';
+import {waitUntilChanged} from 'utils/element-utils';
 
 const defaultXpath = '//*[@class="modal-container"]';
 
@@ -135,16 +136,22 @@ export default class CohortCriteriaModal extends Modal {
     return waitForNumericalString(this.page, selector);
   }
 
-  async getConditionSearchResultsTable(): Promise<Table> {
+  getConditionSearchResultsTable(): Table {
     return new Table(this.page, '//table[@class="p-datatable"]', this);
   }
 
   async searchCondition(searchWord: string): Promise<Table> {
+    const resultsTable = this.getConditionSearchResultsTable();
+    const exists = await resultsTable.exists();
     const searchFilterTextbox = await Textbox.findByName(this.page, {containsText: 'by code or description'}, this);
     await searchFilterTextbox.type(searchWord);
     await searchFilterTextbox.pressReturn();
+    if (exists) {
+      // New search triggers new request to fetch new results. Need to wait for the old table detached from DOM.
+      await waitUntilChanged(this.page, await resultsTable.asElement());
+    }
     await waitWhileLoading(this.page);
-    return this.getConditionSearchResultsTable();
+    return resultsTable;
   }
 
   async addAgeModifier(filterSign: FilterSign, filterValue: number): Promise<string> {
@@ -191,17 +198,13 @@ export default class CohortCriteriaModal extends Modal {
     await (Textbox.asBaseElement(this.page, lowerNumberInput)).type(minAge.toString()).then(input => input.pressTab());
     await (Textbox.asBaseElement(this.page, upperNumberInput)).type(maxAge.toString()).then(input => input.pressTab());
 
-    // Click Calculate button.
-    const button = await this.waitForButton(LinkText.Calculate);
-    await waitForPropertyNotExists(this.page, button.getXpath(), 'disabled');
-    await button.click();
-
-    const calcuatedResult = await this.waitForParticipantResult();
-    console.log(`Age min: ${minAge}, max: ${maxAge} ==> number of participants: ${calcuatedResult}`);
+    // Get count from slider badge
+    const count = await waitForNumericalString(this.page, `${this.xpath}//*[@id="age-count"]`);
+    console.log(`Age min: ${minAge}, max: ${maxAge} ==> number of participants: ${count}`);
 
     // Click FINISH button. Dialog should close.
     await this.clickFinishButton();
-    return calcuatedResult;
+    return count;
   }
 
   // Experimental

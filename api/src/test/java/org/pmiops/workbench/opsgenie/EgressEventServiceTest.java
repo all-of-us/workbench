@@ -15,9 +15,8 @@ import com.ifountain.opsgenie.client.swagger.model.SuccessResponse;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.Collection;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.regex.Pattern;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,9 +26,10 @@ import org.mockito.Captor;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.EgressEvent;
+import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.User;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -52,6 +52,7 @@ public class EgressEventServiceTest {
 
   private static final Instant NOW =
       Instant.ofEpochMilli(DateTime.parse("2020-06-11T01:30+02:00").getMillis());
+  private static final String INSTITUTION_2_NAME = "Auburn University";
   private static WorkbenchConfig workbenchConfig;
   private static final EgressEvent EGRESS_EVENT_1 =
       new EgressEvent()
@@ -64,6 +65,7 @@ public class EgressEventServiceTest {
 
   @MockBean private AlertApi mockAlertApi;
   @MockBean private EgressEventAuditor egressEventAuditor;
+  @MockBean private InstitutionService mockInstitutionService;
   @MockBean private UserService mockUserService;
   @MockBean private WorkspaceAdminService mockWorkspaceAdminService;
 
@@ -85,9 +87,8 @@ public class EgressEventServiceTest {
           .userModel(USER_1)
           .userAccountCreatedTime(DateTime.parse("2018-08-30T01:20+02:00"));
 
-  private static final DbUser DB_USER_1 =
-      workspaceAdminUserViewToUser(
-          ADMIN_VIEW_1, ImmutableList.of("Caltech", "Verily Life Sciences"));
+  private static final String INSTITUTION_1_NAME = "Verily Life Sciences";
+  private static final DbUser DB_USER_1 = workspaceAdminUserViewToUser(ADMIN_VIEW_1);
 
   private static final User USER_2 =
       new User()
@@ -101,8 +102,7 @@ public class EgressEventServiceTest {
           .userDatabaseId(222L)
           .userModel(USER_2)
           .userAccountCreatedTime(DateTime.parse("2019-03-25T10:30+02:00"));
-  private static final DbUser DB_USER_2 =
-      workspaceAdminUserViewToUser(ADMIN_VIEW_2, ImmutableList.of("Auburn University"));
+  private static final DbUser DB_USER_2 = workspaceAdminUserViewToUser(ADMIN_VIEW_2);
 
   @TestConfiguration
   @Import({EgressEventServiceImpl.class})
@@ -139,6 +139,13 @@ public class EgressEventServiceTest {
 
     doReturn(Optional.of(DB_USER_2)).when(mockUserService).getByDatabaseId(DB_USER_2.getUserId());
     doReturn(Optional.of(DB_USER_2)).when(mockUserService).getByUsername(DB_USER_2.getUsername());
+
+    final Institution institution1 = new Institution().displayName(INSTITUTION_1_NAME);
+    doReturn(Optional.of(institution1)).when(mockInstitutionService).getByUser(DB_USER_1);
+
+    final Institution institution2 = new Institution().displayName(INSTITUTION_2_NAME);
+
+    doReturn(Optional.of(institution2)).when(mockInstitutionService).getByUser(DB_USER_2);
   }
 
   @Test
@@ -154,13 +161,36 @@ public class EgressEventServiceTest {
         .contains("GCP Billing Project/Firecloud Namespace: aou-rw-test-c7dec260");
     assertThat(request.getDescription())
         .contains("https://workbench.researchallofus.org/admin/workspaces/aou-rw-test-c7dec260/");
+    assertThat(request.getDescription())
+        .containsMatch(
+            Pattern.compile(
+                "user_id:\\s+111,\\s+Institution:\\s+Verily\\s+Life\\s+Sciences,\\s+Account\\s+Age:\\s+651\\s+days"));
+    assertThat(request.getAlias()).isEqualTo("aou-rw-test-c7dec260 | all-of-us-111-m");
+  }
+
+  @Test
+  public void testCreateEgressEventAlert_institutionNotFound() throws ApiException {
+    when(mockAlertApi.createAlert(any())).thenReturn(new SuccessResponse().requestId("12345"));
+    doReturn(Optional.empty()).when(mockInstitutionService).getByUser(any(DbUser.class));
+
+    egressEventService.handleEvent(EGRESS_EVENT_1);
+    verify(mockAlertApi).createAlert(alertRequestCaptor.capture());
+
+    final CreateAlertRequest request = alertRequestCaptor.getValue();
+    assertThat(request.getDescription())
+        .contains("GCP Billing Project/Firecloud Namespace: aou-rw-test-c7dec260");
+    assertThat(request.getDescription())
+        .contains("https://workbench.researchallofus.org/admin/workspaces/aou-rw-test-c7dec260/");
+    assertThat(request.getDescription())
+        .containsMatch(
+            Pattern.compile(
+                "user_id:\\s+111,\\s+Institution:\\s+not\\s+found,\\s+Account\\s+Age:\\s+651\\s+days"));
     assertThat(request.getAlias()).isEqualTo("aou-rw-test-c7dec260 | all-of-us-111-m");
   }
 
   // I thought about adding this to a mapper, but it's such a backwards, test-only conversion,
   // and there are 20 unmapped properties, so it's not worth it.
-  private static DbUser workspaceAdminUserViewToUser(
-      WorkspaceUserAdminView adminView, Collection<String> institutionNames) {
+  private static DbUser workspaceAdminUserViewToUser(WorkspaceUserAdminView adminView) {
     final User userModel = adminView.getUserModel();
     final DbUser result = new DbUser();
     result.setUserId(adminView.getUserDatabaseId());
@@ -169,16 +199,6 @@ public class EgressEventServiceTest {
     result.setUsername(userModel.getUserName());
     result.setContactEmail(userModel.getEmail());
     result.setCreationTime(new Timestamp(adminView.getUserAccountCreatedTime().getMillis()));
-    result.setInstitutionalAffiliations(
-        institutionNames.stream()
-            .map(EgressEventServiceTest::institutionNameToAffiliation)
-            .collect(Collectors.toList()));
-    return result;
-  }
-
-  private static DbInstitutionalAffiliation institutionNameToAffiliation(String name) {
-    DbInstitutionalAffiliation result = new DbInstitutionalAffiliation();
-    result.setInstitution(name);
     return result;
   }
 }

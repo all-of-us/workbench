@@ -31,6 +31,8 @@ export default class Modal extends Container {
   }
 
   async getContent(): Promise<string> {
+    // xpath that excludes button labels and spans
+    // '//*[@role="dialog"]//div[normalize-space(text()) and not(@role="button")]'
     const modal = await this.page.waitForXPath(this.xpath, {visible: true});
     const modalText = await (await modal.getProperty('innerText')).jsonValue();
     console.debug('Modal: \n' + modalText);

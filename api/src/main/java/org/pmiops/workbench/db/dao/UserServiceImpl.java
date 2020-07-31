@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -45,6 +46,7 @@ import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.AccessBypassRequest;
+import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
@@ -1024,12 +1026,21 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   @Override
+  public boolean hasAuthority(long userId, Authority required) {
+    final Set<Authority> userAuthorities =
+        userDao.findUserWithAuthorities(userId).getAuthoritiesEnum();
+
+    // DEVELOPER is the super-authority which subsumes all others
+    return userAuthorities.contains(Authority.DEVELOPER) || userAuthorities.contains(required);
+  }
+
+  @Override
   public Optional<DbUser> findUserWithAuthoritiesAndPageVisits(long userId) {
     return Optional.ofNullable(userDao.findUserWithAuthoritiesAndPageVisits(userId));
   }
 
   @Override
-  public List<DbUser> findAllUsersWithAuthoritiesAndPageVisits() {
+  public Set<DbUser> findAllUsersWithAuthoritiesAndPageVisits() {
     return userDao.findAllUsersWithAuthoritiesAndPageVisits();
   }
 }

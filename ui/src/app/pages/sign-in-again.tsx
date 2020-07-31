@@ -4,7 +4,6 @@ import {BoldHeader} from 'app/components/headers';
 import {PublicLayout} from 'app/components/public-layout';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {buildPageTitleForEnvironment} from 'app/utils/title';
 import * as React from 'react';
 
 const styles = reactStyles({
@@ -26,18 +25,14 @@ const styles = reactStyles({
 
 const supportUrl = 'support@researchallofus.org';
 
-export class SignInAgain extends React.Component<{routeConfig: {signIn: Function}}> {
-  componentDidMount() {
-    document.title = buildPageTitleForEnvironment('You have been signed out');
-  }
-
+export class SignInAgain extends React.Component<{signIn: Function}> {
   render() {
     return <PublicLayout contentStyle={{width: '500px'}}>
       <BoldHeader>You have been signed out</BoldHeader>
       <section style={styles.textSection}>
         You’ve been away for a while and we could not verify whether your session was still active.
       </section>
-      <GoogleSignInButton signIn={() => this.props.routeConfig.signIn()}/>
+      <GoogleSignInButton signIn={() => this.props.signIn()}/>
       <section style={styles.noteSection}>
         <strong>Note</strong>: You may have been redirected to this page immediately after attempting to sign in,
         if you did not explicitly sign out of your most recent session. If, after signing in

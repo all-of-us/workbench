@@ -35,7 +35,9 @@ export enum LinkText {
    CreateAnotherConceptSet = 'Create another Concept Set',
    CreateCohort = 'Create Cohort',
    CreateDataset = 'Create a Dataset',
+   CreateNewNotebook = 'New Notebook',
    CreateNewWorkspace = 'Create a New Workspace',
+   CreateNotebook = 'Create Notebook',
    CreateReviewSets = 'Create Review Sets',
    CreateSet = 'CREATE SET',
    CreateWorkspace = 'Create Workspace',
@@ -51,9 +53,15 @@ export enum LinkText {
    Next = 'Next',
    Rename = 'Rename',
    RenameDataset = 'Rename Dataset',
+   RenameNotebook = 'Rename Notebook',
    Save = 'Save',
    SaveCohort = 'Save Cohort',
    StayHere = 'Stay Here',
    Submit = 'Submit',
    Update = 'Update',
+}
+
+export enum Language {
+   Python = 'Python',
+   R = 'R',
 }

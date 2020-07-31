@@ -1,14 +1,15 @@
 import DataResourceCard, {CardType} from 'app/component/data-resource-card';
 import Link from 'app/element/link';
-import AnalysisPage from 'app/page/analysis-page';
+import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import DataPage, {TabLabelAlias} from 'app/page/data-page';
-import DatasetSaveModal, {Language} from 'app/page/dataset-save-modal';
+import DatasetSaveModal from 'app/page/dataset-save-modal';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
 import CohortActionsPage from 'app/page/cohort-actions-page';
 import {Ethnicity} from 'app/page/cohort-criteria-modal';
+import {Language} from 'app/text-labels';
 
 describe('Create Dataset', () => {
 
@@ -60,7 +61,7 @@ describe('Create Dataset', () => {
     const notebooksLink = await Link.findByName(page, {name: 'Notebooks'});
     await notebooksLink.clickAndWait();
 
-    const analysiPage = new AnalysisPage(page);
+    const analysiPage = new WorkspaceAnalysisPage(page);
     await analysiPage.waitForLoad();
 
     // Verify new notebook exists.
@@ -149,7 +150,7 @@ describe('Create Dataset', () => {
     // Delete Notebook
     await dataPage.openTab(TabLabelAlias.Analysis);
 
-    const analysisPage = new AnalysisPage(page);
+    const analysisPage = new WorkspaceAnalysisPage(page);
     await analysisPage.waitForLoad();
     await analysisPage.deleteNotebook(newNotebookName);
 

@@ -260,6 +260,8 @@ public class WorkspacesControllerTest {
   @Autowired private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   @Autowired private WorkspacesController workspacesController;
 
+  @MockBean FreeTierBillingService mockFreeTierBillingService;
+
   @Qualifier(END_USER_CLOUD_BILLING)
   @Autowired
   private Provider<Cloudbilling> endUserCloudbillingProvider;
@@ -292,7 +294,6 @@ public class WorkspacesControllerTest {
     DataSetMapperImpl.class,
     DataSetServiceImpl.class,
     FirecloudMapperImpl.class,
-    FreeTierBillingService.class,
     LogsBasedMetricServiceFakeImpl.class,
     NotebooksServiceImpl.class,
     ReviewQueryBuilder.class,
@@ -374,7 +375,6 @@ public class WorkspacesControllerTest {
   @Autowired UserRecentResourceService userRecentResourceService;
   @Autowired CohortReviewController cohortReviewController;
   @Autowired ConceptBigQueryService conceptBigQueryService;
-  @SpyBean @Autowired FreeTierBillingService freeTierBillingService;
   @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
 
   private DbCdrVersion cdrVersion;
@@ -823,7 +823,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     doReturn(false)
-        .when(freeTierBillingService)
+        .when(mockFreeTierBillingService)
         .userHasRemainingFreeTierCredits(
             argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
     // Creating the workspace with a user provided billing account
@@ -845,7 +845,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     doReturn(false)
-        .when(freeTierBillingService)
+        .when(mockFreeTierBillingService)
         .userHasRemainingFreeTierCredits(
             argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
 
@@ -872,7 +872,7 @@ public class WorkspacesControllerTest {
             DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     doReturn(true)
-        .when(freeTierBillingService)
+        .when(mockFreeTierBillingService)
         .userHasRemainingFreeTierCredits(
             argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
 
@@ -2984,16 +2984,12 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testGetBillingUsage() {
-    Double cost = new Double(150.50d);
+    Double cost = 150.50;
     Workspace ws = createWorkspace();
-    ws = workspacesController.createWorkspace(ws).getBody();
-    DbWorkspace dbWorkspace =
-        workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
-            ws.getNamespace(),
-            ws.getId(),
-            DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
-    workspaceFreeTierUsageDao.updateCost(dbWorkspace, cost);
+
     stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.OWNER);
+    when(mockFreeTierBillingService.getWorkspaceFreeTierBillingUsage(any())).thenReturn(cost);
+
     WorkspaceBillingUsageResponse workspaceBillingUsageResponse =
         workspacesController.getBillingUsage(ws.getNamespace(), ws.getId()).getBody();
     assertThat(workspaceBillingUsageResponse.getCost()).isEqualTo(cost);

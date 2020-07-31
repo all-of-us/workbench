@@ -23,7 +23,6 @@ import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.config.CommonConfig;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -41,6 +40,7 @@ import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.institution.deprecated.InstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.model.Address;
+import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.OrganizationType;
@@ -105,10 +105,10 @@ public class ProfileServiceTest {
   @Autowired ProfileService profileService;
   @Autowired UserDao userDao;
 
-  private static WorkbenchConfig workbenchConfig;
+  // enables access to the logged in user
+  private static DbUser loggedInUser;
 
   @TestConfiguration
-  @MockBean({FreeTierBillingService.class})
   @Import({
     AddressMapperImpl.class,
     CommonConfig.class,
@@ -120,13 +120,17 @@ public class ProfileServiceTest {
     ProfileService.class,
     VerifiedInstitutionalAffiliationMapperImpl.class
   })
-  @MockBean({ProfileAuditor.class})
+  @MockBean({
+    FreeTierBillingService.class,
+    ProfileAuditor.class,
+    VerifiedInstitutionalAffiliationDao.class,
+  })
   static class Configuration {
 
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public WorkbenchConfig getWorkbenchConfig() {
-      return workbenchConfig;
+    public DbUser getLoggedInUser() {
+      return loggedInUser;
     }
 
     @Bean
@@ -137,7 +141,9 @@ public class ProfileServiceTest {
 
   @Before
   public void setUp() {
-    workbenchConfig = WorkbenchConfig.createEmptyConfig();
+    loggedInUser = new DbUser();
+    loggedInUser.setUserId(1000);
+    loggedInUser = userDao.save(loggedInUser);
   }
 
   @Test
@@ -190,7 +196,7 @@ public class ProfileServiceTest {
             dbVerifiedInstitutionalAffiliation, "kibitz@broadinstitute.org"))
         .thenReturn(true);
 
-    profileService.validateInstitutionalAffiliation(profile);
+    profileService.validateAffiliation(profile);
 
     ArgumentCaptor<DbVerifiedInstitutionalAffiliation> affiliationSpy =
         ArgumentCaptor.forClass(DbVerifiedInstitutionalAffiliation.class);
@@ -229,7 +235,7 @@ public class ProfileServiceTest {
             dbVerifiedInstitutionalAffiliation, "kibitz@broadinstitute.org"))
         .thenReturn(true);
 
-    profileService.validateInstitutionalAffiliation(profile);
+    profileService.validateAffiliation(profile);
 
     ArgumentCaptor<DbVerifiedInstitutionalAffiliation> affiliationSpy =
         ArgumentCaptor.forClass(DbVerifiedInstitutionalAffiliation.class);
@@ -242,7 +248,7 @@ public class ProfileServiceTest {
 
   @Test(expected = BadRequestException.class)
   public void validateInstitutionalAffiliation_noAffiliation() {
-    profileService.validateInstitutionalAffiliation(new Profile());
+    profileService.validateAffiliation(new Profile());
   }
 
   @Test(expected = NotFoundException.class)
@@ -251,7 +257,7 @@ public class ProfileServiceTest {
 
     when(mockInstitutionDao.findOneByShortName("Broad")).thenReturn(Optional.empty());
 
-    profileService.validateInstitutionalAffiliation(profile);
+    profileService.validateAffiliation(profile);
   }
 
   @Test(expected = BadRequestException.class)
@@ -265,7 +271,7 @@ public class ProfileServiceTest {
 
     when(mockInstitutionDao.findOneByShortName("Broad")).thenReturn(Optional.of(BROAD_INSTITUTION));
 
-    profileService.validateInstitutionalAffiliation(profile);
+    profileService.validateAffiliation(profile);
   }
 
   @Test(expected = BadRequestException.class)
@@ -280,7 +286,7 @@ public class ProfileServiceTest {
 
     when(mockInstitutionDao.findOneByShortName("Broad")).thenReturn(Optional.of(BROAD_INSTITUTION));
 
-    profileService.validateInstitutionalAffiliation(profile);
+    profileService.validateAffiliation(profile);
   }
 
   @Test(expected = BadRequestException.class)
@@ -311,12 +317,16 @@ public class ProfileServiceTest {
             affiliation, mockInstitutionService))
         .thenReturn(dbVerifiedInstitutionalAffiliation);
 
-    profileService.validateInstitutionalAffiliation(profile);
+    profileService.validateAffiliation(profile);
   }
 
   @Test
-  public void updateProfileForUser_affiliationChangeOnly() {
+  public void updateProfile_affiliationChangeOnly_asAdmin() {
     // Regression test for RW-5139
+
+    // grant admin authority to loggedInUser
+    when(mockUserService.hasAuthority(loggedInUser.getUserId(), Authority.ACCESS_CONTROL_ADMIN))
+        .thenReturn(true);
 
     // Start with: a valid profile with a Broad affiliation but null Address.
     Profile previousProfile = createValidProfile().address(null);
@@ -331,7 +341,7 @@ public class ProfileServiceTest {
         createValidProfile().address(null).verifiedInstitutionalAffiliation(newAffiliation);
 
     DbUser user = new DbUser();
-    user.setUserId(1);
+    user.setUserId(10);
     user.setGivenName("John");
     user.setFamilyName("Doe");
 
@@ -347,7 +357,66 @@ public class ProfileServiceTest {
             newAffiliation, mockInstitutionService))
         .thenReturn(dbVerifiedInstitutionalAffiliation);
 
-    profileService.updateProfileForUser(user, updatedProfile, previousProfile);
+    profileService.updateProfile(user, updatedProfile, previousProfile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void updateProfile_cant_change_contactEmail() {
+    Profile previousProfile = createValidProfile().contactEmail("researcher@nih.gov");
+    Profile updatedProfile = createValidProfile().contactEmail("other-researcher@nih.gov");
+
+    DbUser user = new DbUser();
+    user.setUserId(10);
+    user.setGivenName("John");
+    user.setFamilyName("Doe");
+
+    profileService.updateProfile(user, updatedProfile, previousProfile);
+  }
+
+  @Test
+  public void updateProfile_can_change_contactEmail_asAdmin() {
+
+    // grant admin authority to loggedInUser
+    when(mockUserService.hasAuthority(loggedInUser.getUserId(), Authority.ACCESS_CONTROL_ADMIN))
+        .thenReturn(true);
+
+    DbInstitution verilyInstitution =
+        new DbInstitution().setShortName("Verily").setDisplayName("Verily LLC");
+
+    VerifiedInstitutionalAffiliation verilyAffiliation =
+        new VerifiedInstitutionalAffiliation()
+            .institutionShortName(verilyInstitution.getShortName())
+            .institutionDisplayName(verilyInstitution.getDisplayName())
+            .institutionalRoleEnum(InstitutionalRole.ADMIN);
+
+    when(mockInstitutionDao.findOneByShortName("Verily"))
+        .thenReturn(Optional.of(verilyInstitution));
+    when(mockInstitutionService.validateAffiliation(any(), any())).thenReturn(true);
+    DbVerifiedInstitutionalAffiliation dbVerilyAffiliation =
+        new DbVerifiedInstitutionalAffiliation().setInstitution(verilyInstitution);
+    when(mockVerifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
+            verilyAffiliation, mockInstitutionService))
+        .thenReturn(dbVerilyAffiliation);
+
+    Profile previousProfile =
+        createValidProfile()
+            .contactEmail("researcher@verily.com") // note: the mock in this test matches everything
+            .verifiedInstitutionalAffiliation(verilyAffiliation);
+    Profile updatedProfile =
+        createValidProfile()
+            .contactEmail(
+                "other-researcher@verily.com") // note: the mock in this test matches everything
+            .verifiedInstitutionalAffiliation(verilyAffiliation);
+
+    DbUser targetUser = new DbUser();
+    targetUser.setUserId(10);
+    targetUser.setGivenName("John");
+    targetUser.setFamilyName("Doe");
+
+    profileService.updateProfile(targetUser, updatedProfile, previousProfile);
+
+    assertThat(profileService.getProfile(targetUser).getContactEmail())
+        .isEqualTo("other-researcher@verily.com");
   }
 
   @Test
@@ -375,8 +444,17 @@ public class ProfileServiceTest {
   }
 
   @Test(expected = BadRequestException.class)
-  public void validateProfile_usernameChanged() {
-    // Username changes are disallowed.
+  public void validateProfile_usernameChanged_user() {
+    // Username changes are disallowed for users
+    profileService.validateProfile(new Profile().username("new"), new Profile().username("old"));
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void validateProfile_usernameChanged_admin() {
+    // Username changes are still disallowed for admins
+    when(mockUserService.hasAuthority(loggedInUser.getUserId(), Authority.ACCESS_CONTROL_ADMIN))
+        .thenReturn(true);
+
     profileService.validateProfile(new Profile().username("new"), new Profile().username("old"));
   }
 
@@ -392,8 +470,18 @@ public class ProfileServiceTest {
   }
 
   @Test(expected = BadRequestException.class)
-  public void validateProfile_contactEmailChanged() {
-    // Contact email changes are disallowed.
+  public void validateProfile_contactEmailChanged_user() {
+    // Contact email changes are disallowed for users.
+    profileService.validateProfile(
+        new Profile().contactEmail("new@gmail.com"), new Profile().contactEmail("old@gmail.com"));
+  }
+
+  @Test
+  public void validateProfile_contactEmailChanged_admin() {
+    // Contact email changes are allowed for admins
+    when(mockUserService.hasAuthority(loggedInUser.getUserId(), Authority.ACCESS_CONTROL_ADMIN))
+        .thenReturn(true);
+
     profileService.validateProfile(
         new Profile().contactEmail("new@gmail.com"), new Profile().contactEmail("old@gmail.com"));
   }

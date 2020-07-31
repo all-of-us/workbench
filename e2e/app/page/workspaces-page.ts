@@ -1,11 +1,13 @@
 import {Page} from 'puppeteer';
 import Button from 'app/element/button';
-import {LinkText, PageUrl} from 'app/text-labels';
+import {Language, LinkText, PageUrl} from 'app/text-labels';
 import WorkspaceEditPage, {FIELD as EDIT_FIELD} from 'app/page/workspace-edit-page';
 import {makeWorkspaceName} from 'utils/str-utils';
 import RadioButton from 'app/element/radiobutton';
-import {waitWhileLoading} from 'utils/test-utils';
+import {findWorkspace, waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle, waitForText} from 'utils/waits-utils';
+import DataPage from './data-page';
+import WorkspaceAnalysisPage from './workspace-analysis-page';
 
 const faker = require('faker/locale/en_US');
 export const PageTitle = 'View Workspace';
@@ -132,6 +134,22 @@ export default class WorkspacesPage extends WorkspaceEditPage {
     await (await this.getWorkspaceNameTextbox()).type(newWorkspaceName);
     await (await this.getWorkspaceNameTextbox()).pressTab();
     return newWorkspaceName;
+  }
+
+  /**
+   * Create a new notebook in a randomly selected workspace.
+   * @param notebookName
+   * @param lang
+   */
+  async createNotebook(notebookName: string, lang?: Language): Promise<WorkspaceAnalysisPage> {
+    const workspaceCard = await findWorkspace(this.page);
+    await workspaceCard.clickWorkspaceName();
+
+    const dataPage = new DataPage(this.page);
+    const notebookPage = await dataPage.createNotebook(notebookName, lang); // Python 3 is the default
+
+    // Do not run any code. Simply returns to the Workspace Analysis tab.
+    return notebookPage.goBackAnalysisPage();
   }
 
 }

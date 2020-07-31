@@ -1,5 +1,3 @@
-import {Component} from '@angular/core';
-import {Router} from '@angular/router';
 import * as fp from 'lodash/fp';
 
 import {PUBLIC_HEADER_IMAGE} from 'app/components/public-layout';
@@ -9,11 +7,9 @@ import {AccountCreationSurvey} from 'app/pages/login/account-creation/account-cr
 import {AccountCreationTos} from 'app/pages/login/account-creation/account-creation-tos';
 import {InvitationKey} from 'app/pages/login/invitation-key';
 import {LoginReactComponent} from 'app/pages/login/login';
-import {SignInService} from 'app/services/sign-in.service';
 import colors from 'app/styles/colors';
 import {
   reactStyles,
-  ReactWrapperBase,
   ServerConfigProps,
   WindowSizeProps,
   withServerConfig,
@@ -117,7 +113,7 @@ export const StepToImageConfig: Map<SignInStep, BackgroundImageConfig> = new Map
 
 export interface SignInProps extends ServerConfigProps, WindowSizeProps {
   initialStep?: SignInStep;
-  onInit: () => void;
+  onSignIn: () => void;
   signIn: () => void;
 }
 
@@ -171,9 +167,11 @@ export const createEmptyProfile = (): Profile => {
 /**
  * The inner / implementation SignIn component. This class should only be rendered via the
  * SignInReact method, which wraps this with the expected higher-order components.
+ *
+ * This impl is separated out for testing purposes.
  */
-export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
 
+export class SignInImpl extends React.Component<SignInProps, SignInState> {
   constructor(props: SignInProps) {
     super(props);
     this.state = {
@@ -190,7 +188,7 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
 
   componentDidMount() {
     document.body.style.backgroundColor = colors.light;
-    this.props.onInit();
+    this.props.onSignIn();
   }
 
   componentDidUpdate(prevProps: SignInProps, prevState: SignInState, snapshot) {
@@ -329,30 +327,4 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
   }
 }
 
-export const SignInReact = fp.flow(withServerConfig(), withWindowSize())(SignInReactImpl);
-
-@Component({
-  template: '<div #root></div>'
-})
-export class SignInComponent extends ReactWrapperBase {
-
-  constructor(private signInService: SignInService, private router: Router) {
-    super(SignInReact, ['onInit', 'signIn']);
-    this.onInit = this.onInit.bind(this);
-    this.signIn = this.signIn.bind(this);
-  }
-
-  onInit(): void {
-    this.signInService.isSignedIn$.subscribe((signedIn) => {
-      if (signedIn) {
-        this.router.navigateByUrl('/');
-      }
-    });
-  }
-
-  signIn(): void {
-    AnalyticsTracker.Registration.SignIn();
-    this.signInService.signIn();
-  }
-
-}
+export const SignIn = fp.flow(withServerConfig(), withWindowSize())(SignInImpl);

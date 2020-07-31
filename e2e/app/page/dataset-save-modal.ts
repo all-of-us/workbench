@@ -4,13 +4,8 @@ import {makeRandomName} from 'utils/str-utils';
 import {waitWhileLoading} from 'utils/test-utils';
 import RadioButton from 'app/element/radiobutton';
 import Textbox from 'app/element/textbox';
-import {LinkText} from 'app/text-labels';
+import {Language, LinkText} from 'app/text-labels';
 import Button from 'app/element/button';
-
-export enum Language {
-  Python = 'Python',
-  R = 'R',
-}
 
 export default class DatasetSaveModal extends Modal {
 
