@@ -50,7 +50,7 @@ describe('HelpSidebar', () => {
     props = {helpContentKey: 'notebookStorage', sidebarOpen: true};
     const wrapper = component();
     expect(wrapper.find('[data-test-id="section-title-0"]').text()).toBe(sidebarContent.notebookStorage[0].title);
-    expect(wrapper.find('[data-test-id="help-sidebar-icon-0"]').get(0).props.icon.iconName).toBe('folder-open');
+    expect(wrapper.find('[data-test-id="help-sidebar-icon-1"]').get(0).props.icon.iconName).toBe('folder-open');
   });
 
   it('should update marginRight style when sidebarOpen prop changes', () => {
