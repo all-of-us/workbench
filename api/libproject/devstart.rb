@@ -2604,15 +2604,14 @@ def randomize_vcf(cmd_name, *args)
       "How many random vcfs to generate."
   )
   op.add_option(
-      "--output-dir [out]",
+      "--output-path [out]",
       -> (opts, o) {opts.out = o},
-      "Output dir in which to put randomized vcf"
+      "Output path at which to put randomized vcf"
   )
   op.parse.validate
 
   basename = File.basename(op.opts.vcf, ".vcf.gz")
-  out = "#{op.opts.out}#{basename}.combined.vcf"
-  app_args = "-PappArgs=['-V#{op.opts.vcf}','-O#{out}','-N#{op.opts.n}']"
+  app_args = "-PappArgs=['-V#{op.opts.vcf}','-O#{op.opts.out}','-N#{op.opts.n}']"
   Common.new.run_inline %W{./gradlew -p genomics randomizeVcf} + [app_args]
 end
 

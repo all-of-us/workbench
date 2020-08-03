@@ -35,9 +35,6 @@ public class RandomizeVcf extends VariantWalker {
       shortName = StandardArgumentDefinitions.OUTPUT_SHORT_NAME)
   protected File outputVcf;
 
-  //  @Argument(doc = "Sample name suffix.", fullName = "SAMPLE_NAME_SUFFIX", shortName = "S")
-  //  protected String sampleNameSuffix;
-
   @Argument(doc = "Number of samples to generate.", fullName = "NUM_SAMPLES", shortName = "N")
   protected int samples;
 
