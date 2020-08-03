@@ -2,7 +2,6 @@ import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
 import DataResourceCard from 'app/component/data-resource-card';
 import EllipsisMenu from 'app/component/ellipsis-menu';
 import Modal from 'app/component/modal';
-import Button from 'app/element/button';
 import ClrIconLink from 'app/element/clr-icon-link';
 import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
@@ -136,11 +135,7 @@ export default class DataPage extends AuthenticatedPage {
 
     const modal = new Modal(this.page);
     const modalContentText = await modal.getContent();
-    const deleteButton = await Button.findByName(this.page, {normalizeSpace: LinkText.DeleteDataset}, modal);
-    await Promise.all([
-      deleteButton.click(),
-      modal.waitUntilClose(),
-    ]);
+    await modal.clickButton(LinkText.DeleteDataset, {waitForClose: true});
     await waitWhileLoading(this.page);
 
     console.log(`Deleted Dataset "${datasetName}"`);
@@ -164,11 +159,7 @@ export default class DataPage extends AuthenticatedPage {
     const descriptionTextarea = await Textarea.findByName(this.page, {containsText: 'Description:'}, modal);
     await descriptionTextarea.type('Puppeteer automation rename dataset.');
 
-    const renameButton = await Button.findByName(this.page, {normalizeSpace: LinkText.RenameDataset}, modal);
-    await Promise.all([
-      renameButton.click(),
-      modal.waitUntilClose(),
-    ]);
+    await modal.clickButton(LinkText.RenameDataset, {waitForClose: true});
     await waitWhileLoading(this.page);
 
     console.log(`Renamed Dataset "${datasetName}" to "${newDatasetName}"`);
@@ -188,11 +179,7 @@ export default class DataPage extends AuthenticatedPage {
 
     const modal = new Modal(this.page);
     const modalTextContent = await modal.getContent();
-    const deleteButton = await Button.findByName(this.page, {normalizeSpace: LinkText.DeleteConceptSet}, modal);
-    await Promise.all([
-      deleteButton.click(),
-      modal.waitUntilClose(),
-    ]);
+    await modal.clickButton(LinkText.DeleteConceptSet, {waitForClose: true});
     await waitWhileLoading(this.page);
 
     console.log(`Deleted Concept Set "${conceptsetName}"`);
@@ -209,8 +196,7 @@ export default class DataPage extends AuthenticatedPage {
     await newNameInput.type(newCohortName);
     const descriptionTextarea = await Textarea.findByName(this.page, {containsText: 'Description:'}, modal);
     await descriptionTextarea.type('Puppeteer automation rename cohort.');
-    await modal.clickButton(LinkText.Rename);
-    await modal.waitUntilClose();
+    await modal.clickButton(LinkText.Rename, {waitForClose: true});
     await waitWhileLoading(this.page);
     console.log(`Cohort "${cohortName}" renamed to "${newCohortName}"`);
   }

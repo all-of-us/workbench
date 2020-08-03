@@ -42,8 +42,8 @@ describe('Jupyter notebook tests', () => {
       expect(disabledButton).toBe(true);
 
       // Click "Cancel" button.
-      await modal.waitForButton(LinkText.Cancel).then( (butn) => butn.click());
-      await modal.waitUntilClose();
+      await modal.clickButton(LinkText.Cancel, {waitForClose: true});
+
       const modalExists = await modal.exists();
       expect(modalExists).toBe(false);
       // Page remain unchanged, still should be the Analysis page.

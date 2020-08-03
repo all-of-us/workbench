@@ -43,7 +43,7 @@ describe('Jupyter notebook tests', () => {
       const code2 = 'sessionInfo()';
       const code2Output = await notebook.runCodeCell(2, {code: code2});
       // R version is 3.6.2 at time of this writing. It can change.
-      expect(code2Output).toMatch(/R version 3.6.2/);
+      expect(code2Output).toMatch(/R version 4.0.2/);
 
       // Delete R notebook
       const analysisPage = await notebook.goBackAnalysisPage();
