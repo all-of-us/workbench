@@ -401,34 +401,6 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
       }
     }
 
-    renderCriteria() {
-      const {criteria} = this.props;
-      const {showCriteria} = this.state;
-      return <div>
-        {showCriteria &&  <div style={{transition: 'margin-right 0.8s ease-out',  zIndex: -1}}>
-          <div style={{...styles.sidebar, ...styles.sidebarOpen, width: '20rem'}} >
-            <ClrIcon shape='times' size={22} style={styles.closeIcon} onClick={() => this.setState({showCriteria: false})} />
-            <div style={{display: 'block', height: 'calc(100% - 5rem)', overflow: 'auto', padding: '0.5rem 0.5rem 0rem'}}>
-              <h3 style={{...styles.sectionTitle, marginTop: 0}}>Add selected criteria to cohort</h3>
-              <SelectionList back={() => {}}/>
-            </div>
-            <div style={styles.buttons}>
-              <Button style={styles.backButton} onClick={() => this.setState({showCriteria: false})}>
-                Back
-              </Button>
-              <Button class='primary' style={{right: 0}}>Save Criteria</Button>
-            </div>
-          </div>
-
-        </div>}
-        <TooltipTrigger content={<div>Criteria</div>} side='left'>
-        <div style={styles.icon} data-test-id ='criteria-icon' onClick={() => this.setState({showCriteria: !this.state.showCriteria})}>
-          <span data-test-id = 'criteria-count' style={styles.criteriaCount}>{criteria.length}</span>
-          <FontAwesomeIcon icon={faInbox} style={{fontSize: '21px'}}/>
-        </div>
-      </TooltipTrigger></div>;
-    }
-
     renderWorkspaceMenu() {
       const {deleteFunction, shareFunction, workspace, workspace: {accessLevel, id, namespace}} = this.props;
       const isNotOwner = !workspace || accessLevel !== WorkspaceAccessLevel.OWNER;
@@ -517,7 +489,6 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
       return <React.Fragment>
         <div style={notebookStyles ? {...styles.iconContainer, ...styles.notebookOverrides} : {...styles.iconContainer}}>
           {!criteria && this.renderWorkspaceMenu()}
-          {/*{criteria && this.renderCriteria()}*/}
           {icons(helpContentKey).map((icon, i) =>
           this.showIcon(icon) && <div key={i} style={{display: 'table'}}>
                 <TooltipTrigger content={<div>{tooltipId === i && icon.tooltip}</div>} side='left'>
