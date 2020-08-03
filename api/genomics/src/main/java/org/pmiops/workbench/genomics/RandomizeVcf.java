@@ -35,8 +35,8 @@ public class RandomizeVcf extends VariantWalker {
       shortName = StandardArgumentDefinitions.OUTPUT_SHORT_NAME)
   protected File outputVcf;
 
-//  @Argument(doc = "Sample name suffix.", fullName = "SAMPLE_NAME_SUFFIX", shortName = "S")
-//  protected String sampleNameSuffix;
+  //  @Argument(doc = "Sample name suffix.", fullName = "SAMPLE_NAME_SUFFIX", shortName = "S")
+  //  protected String sampleNameSuffix;
 
   @Argument(doc = "Number of samples to generate.", fullName = "NUM_SAMPLES", shortName = "N")
   protected int samples;
@@ -72,8 +72,10 @@ public class RandomizeVcf extends VariantWalker {
   @Override
   public void onTraversalStart() {
     final VCFHeader inputHeader = getHeaderForVariants();
-    final List<String> newSampleNames = this.generateNSampleNames(inputHeader.getSampleNamesInOrder().get(0));
-    final VCFHeader outputHeader = new VCFHeader(inputHeader.getMetaDataInInputOrder(), newSampleNames);
+    final List<String> newSampleNames =
+        this.generateNSampleNames(inputHeader.getSampleNamesInOrder().get(0));
+    final VCFHeader outputHeader =
+        new VCFHeader(inputHeader.getMetaDataInInputOrder(), newSampleNames);
     vcfWriter = this.createVCFWriter(outputVcf);
     vcfWriter.writeHeader(outputHeader);
   }
@@ -92,9 +94,10 @@ public class RandomizeVcf extends VariantWalker {
     VariantContextBuilder variantContextBuilder = new VariantContextBuilder(variant);
     variantContextBuilder.alleles(variant.getAlleles());
 
-    List<Genotype> randomizedGenotypes = IntStream.rangeClosed(1, this.samples)
-        .mapToObj(i -> randomizeGenotype(variant, variant.getGenotype(0), i))
-        .collect(Collectors.toList());
+    List<Genotype> randomizedGenotypes =
+        IntStream.rangeClosed(1, this.samples)
+            .mapToObj(i -> randomizeGenotype(variant, variant.getGenotype(0), i))
+            .collect(Collectors.toList());
     GenotypesContext randomizedGenotypesContext =
         GenotypesContext.create(new ArrayList<>(randomizedGenotypes));
 
@@ -104,7 +107,8 @@ public class RandomizeVcf extends VariantWalker {
   }
 
   @VisibleForTesting
-  protected Genotype randomizeGenotype(VariantContext variantContext, Genotype genotype, int sample) {
+  protected Genotype randomizeGenotype(
+      VariantContext variantContext, Genotype genotype, int sample) {
     GenotypeBuilder genotypeBuilder =
         new GenotypeBuilder()
             .copy(genotype)
@@ -187,7 +191,8 @@ public class RandomizeVcf extends VariantWalker {
 
   private List<String> generateNSampleNames(String sampleName) {
     List<String> sampleNames = new ArrayList<>();
-    IntStream.rangeClosed(1, this.samples).forEach(i -> sampleNames.add(appendSuffixToSampleName(sampleName, i)));
+    IntStream.rangeClosed(1, this.samples)
+        .forEach(i -> sampleNames.add(appendSuffixToSampleName(sampleName, i)));
     return sampleNames;
   }
 

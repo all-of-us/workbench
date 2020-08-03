@@ -45,8 +45,7 @@ public class RandomizeVcfTest {
 
   @Test
   public void testRandomizeAlleles() {
-    List<Allele> alleles =
-        randomizeVcf.randomizeAlleles(variantContext);
+    List<Allele> alleles = randomizeVcf.randomizeAlleles(variantContext);
     assertThat(alleles.size()).isEqualTo(2); // humans ought to be diploid.
     alleles.forEach(allele -> assertThat(variantContext.getAlleles()).contains(allele));
   }
