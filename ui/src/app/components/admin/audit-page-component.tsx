@@ -6,7 +6,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import colors from 'app/styles/colors';
 import { useDebounce } from 'app/utils';
 import {downloadTextFile} from 'app/utils/audit-utils';
-import {navigateByUrl} from 'app/utils/navigation';
+import {navigate, navigateByUrl} from 'app/utils/navigation';
 import {AuditAction, AuditLogEntry} from 'generated';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
@@ -46,7 +46,7 @@ export interface AuditPageProps {
   queryAuditLog: (subject: string) => Promise<GenericAuditQueryResult>;
   getNextAuditPath: (subject: string) => string;
   buttonLabel?: string;
-  getAdminPageUrl: (subject: string) => string;
+   getAdminPageUrl: (subject: string) => string[];
 }
 
 
@@ -133,7 +133,7 @@ const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath, but
     <TooltipTrigger content={`Admin Page for ${auditSubjectType} ${auditSubject || 'n/a'}`}>
       <Button style={buttonStyle}
               disabled={fp.isEmpty(auditSubject)}
-              onClick={() => navigateByUrl(getAdminPageUrl(auditSubject))}>
+              onClick={() => navigate(getAdminPageUrl(auditSubject))}>
         {auditSubjectType} Admin
       </Button>
     </TooltipTrigger>

@@ -12,6 +12,7 @@ import {navigate, serverConfigStore} from 'app/utils/navigation';
 import {
   Profile,
 } from 'generated/fetch';
+import {usernameWithoutDomain} from '../../utils/audit-utils';
 
 const styles = reactStyles({
   colStyle: {
@@ -133,10 +134,9 @@ export const AdminUsers = withUserProfile()(class extends React.Component<
   }
 
   convertProfilesToFields(profiles: Profile[]) {
-    const usernameWithoutDomain = p => p.username.substring(0, p.username.indexOf('@'));
     return profiles.map(p => ({
       ...p,
-      name: <a onClick={() => navigate(['admin', 'users', usernameWithoutDomain(p)])}>
+      name: <a onClick={() => navigate(['admin', 'users', usernameWithoutDomain(p.username)])}>
         {p.familyName + ', ' + p.givenName}
       </a>,
       betaAccessRequestTime: this.convertDate(p.betaAccessRequestTime),
@@ -144,7 +144,7 @@ export const AdminUsers = withUserProfile()(class extends React.Component<
       userLockout: <LockoutButton disabled={this.state.reloadingProfile === p}
         profileDisabled={p.disabled}
         onClick={() => this.updateUserDisabledStatus(!p.disabled, p)}/>,
-      audit: <a href={`/admin/user-audit/${usernameWithoutDomain(p)}`}>🕵️</a>
+      audit: <a href={`/admin/user-audit/${usernameWithoutDomain(p.username)}`}>🕵️</a>
     }));
   }
 

@@ -4,6 +4,7 @@ import {AuditAction, AuditEventBundle} from 'generated';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useParams} from 'react-router-dom';
+import {Navigate} from '../../components/app-router';
 
 const getAuditLog = (subject: string) => {
   const bqRowLimit = 1000; // Workspaces take many rows because of the Research Purpose fields
@@ -18,19 +19,6 @@ const queryAuditLog = (subject: string) => {
       query: queryResult.query,
       logEntries: queryResult.logEntries
     };
-  }).then(genericQueryResult => {
-    // TODO(jaycarlton): This is a workaround for spammy LOGIN events on the backend (RW-5249).
-    const filteredActions = fp.filter(
-      (action: AuditAction) => fp.negate(
-        fp.any((eventBundle: AuditEventBundle) => 'LOGIN' === eventBundle.header.actionType))
-      (action.eventBundles))
-    (genericQueryResult.actions);
-    return {
-      actions: filteredActions,
-      sourceId: genericQueryResult.sourceId,
-      query: genericQueryResult.query,
-      logEntries: genericQueryResult.logEntries
-    };
   });
 };
 
@@ -40,7 +28,7 @@ const getNextAuditPath = (subject: string) => {
 
 // Single-user admin page isn't available yet, so go to the main users list page.
 const getAdminPageUrl = (subject: string) => {
-  return `/admin/user/`;
+  return ['admin', 'user'];
 };
 
 export const UserAudit = () => {

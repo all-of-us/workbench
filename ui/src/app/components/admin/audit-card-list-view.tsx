@@ -4,9 +4,11 @@ import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {usernameWithoutDomain} from 'app/utils/audit-utils';
 import {
-  AuditAction, AuditAgent,
+  AuditAction,
+  AuditAgent,
   AuditEventBundle,
-  AuditEventBundleHeader, AuditTarget,
+  AuditEventBundleHeader,
+  AuditTarget,
   AuditTargetPropertyChange
 } from 'generated';
 import * as fp from 'lodash/fp';
@@ -51,8 +53,8 @@ const PossibleLinkCell = (props: {targetType?: string, targetProperty?: string, 
   }
 };
 
-function isRealPropertyChange(newValue: string, previousValue: string) {
-  return fp.isEmpty(newValue) && fp.isEmpty(previousValue);
+function isUserDrivenChange(newValue: string, previousValue: string) {
+  return !(fp.isEmpty(newValue) && fp.isEmpty(previousValue));
 }
 
 const PropertyChangeListEntry = (props: {targetProperty?: string, previousValue?: string,
@@ -60,23 +62,21 @@ const PropertyChangeListEntry = (props: {targetProperty?: string, previousValue?
   const {targetProperty, previousValue, newValue, targetType} = props;
   // On the backend, fields are initialized to null but sometimes re-initialized to
   // empty strings. Since it's not a user-driven change, I'm dropping those rows from the output.
-  const isFalseChange = isRealPropertyChange(newValue, previousValue);
-  return isFalseChange
-      ? null
-      : <React.Fragment>
-    <HideableCell content={targetProperty}/>
-    <HideableCell content={previousValue}/>
-    <PossibleLinkCell targetType={targetType}
-                      targetProperty={targetProperty}
-                      value={newValue}/>
-  </React.Fragment>;
+  return isUserDrivenChange(newValue, previousValue)
+      && <React.Fragment>
+      <HideableCell content={targetProperty}/>
+      <HideableCell content={previousValue}/>
+      <PossibleLinkCell targetType={targetType}
+                        targetProperty={targetProperty}
+                        value={newValue}/>
+    </React.Fragment>;
 };
 
 const PropertyChangeListView = (props: { eventBundle: AuditEventBundle }) => {
   const {header, propertyChanges} = props.eventBundle;
 
   return (propertyChanges.length > 0)
-    && fp.any((p: AuditTargetPropertyChange) => isRealPropertyChange(p.newValue, p.previousValue))(propertyChanges)
+    && fp.any((p: AuditTargetPropertyChange) => isUserDrivenChange(p.newValue, p.previousValue))(propertyChanges)
       ? <div style={{
         marginTop: '0.25rem',
         marginLeft: '1rem',
@@ -86,12 +86,16 @@ const PropertyChangeListView = (props: { eventBundle: AuditEventBundle }) => {
     <div style={styles.propertyCell}>Changed Property</div>
     <div style={styles.propertyCell}>Previous Value</div>
     <div style={styles.propertyCell}>New Value</div>
-    {propertyChanges.map((propertyChange, index) =>
-        <PropertyChangeListEntry targetProperty={propertyChange.targetProperty}
-                                 previousValue={propertyChange.previousValue}
-                                 newValue={propertyChange.newValue}
-                                 targetType={header.target.targetType}
-                                 key={index}/>)}
+        {fp.flow(
+          fp.toPairs,
+          fp.map(([index, {targetProperty, newValue, previousValue}]) =>
+              <PropertyChangeListEntry targetProperty={targetProperty}
+                previousValue={previousValue}
+                newValue={newValue}
+                targetType={header.target.targetType}
+                key={index}/>
+            ))(propertyChanges)
+        }
   </div>
       : <div style={{margin: '0.25rem 0 0rem 1rem', fontStyle: 'italic'}}>No Property Changes</div>;
 };
