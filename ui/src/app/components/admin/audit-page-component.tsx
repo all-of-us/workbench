@@ -51,7 +51,7 @@ export interface AuditPageProps {
 const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath, buttonLabel, queryText}) => {
   const [auditSubject, setAuditSubject] = useState(initialAuditSubject);
   const [downloadSqlFile, setDownloadSqlFile] = useState(false);
-  const [navSubject, setNavSubject] = useNavigation();
+  const [nextSubjectRequested, setNextSubjectRequested] = useNavigation();
 
   useEffect(() => {
     if (downloadSqlFile && !fp.isEmpty(queryText)) {
@@ -64,7 +64,7 @@ const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath, but
 
   const onAuditClick = () => {
     setAuditSubject(auditSubject.toLowerCase().trim());
-    setNavSubject(true);
+    setNextSubjectRequested(true);
   };
 
   const getBigQueryConsoleUrl = () => {
@@ -85,7 +85,7 @@ const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath, but
   };
 
   return <React.Fragment>
-    {navSubject && <Navigate to={getNextAuditPath(auditSubject)}/>}
+    {nextSubjectRequested && <Navigate to={getNextAuditPath(auditSubject)}/>}
     <TextInputWithLabel
       containerStyle={{display: 'inline-block'}}
       style={{width: '15rem', margin: '1rem'}}
