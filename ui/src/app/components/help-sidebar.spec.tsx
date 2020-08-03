@@ -83,13 +83,12 @@ describe('HelpSidebar', () => {
     currentCohortCriteriaStore.next([]);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find({'data-test-id': 'workspace-menu-button'}).length).toBe(0);
-    expect(wrapper.find({'data-test-id': 'criteria-icon'}).length).toBe(1);
+    expect(wrapper.find({'data-test-id': 'criteria-count'}).length).toBe(1);
   });
   it('should update count if criteria is added', async() => {
     const wrapper = component();
     currentCohortCriteriaStore.next([criteria1, criteria2]);
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find({'data-test-id': 'criteria-icon'}).length).toBe(1);
     expect(wrapper.find({'data-test-id': 'criteria-count'}).first().props().children).toBe(2);
   });
 });

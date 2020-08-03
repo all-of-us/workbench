@@ -111,7 +111,7 @@ const css = `
      height: 1rem;
      width: 6.4rem;
      padding-top: 0.4rem;
-     line-hieght: 0.7rem;
+     line-height: 0.7rem;
      margin-right: 3rem;
    }
    .p-growl .p-growl-item-container .p-growl-item .p-growl-image {

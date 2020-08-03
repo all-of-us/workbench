@@ -469,10 +469,12 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
     displayIcon(icon, i) {
       const {criteria} = this.props;
 
-      return (criteria && icon.page === 'criteria') ?   <div style={styles.icon} data-test-id ='criteria-icon'>
-            <span data-test-id = 'criteria-count' style={styles.criteriaCount}>{criteria.length}</span>
+      return <React.Fragment>
+        {(criteria && icon.page === 'criteria') && <span data-test-id='criteria-count'
+                                                         style={styles.criteriaCount}>
+          {criteria.length}</span>}
             <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + i} icon={icon.faIcon} style={icon.style} />
-          </div> : <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + i} icon={icon.faIcon} style={icon.style} />;
+          </React.Fragment> ;
     }
 
     render() {
