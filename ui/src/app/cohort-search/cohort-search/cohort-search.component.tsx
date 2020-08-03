@@ -329,7 +329,7 @@ export class CohortSearch extends React.Component<Props, State> {
     return !!searchContext && <FlexRowWrap style={styles.searchContainer}>
 
       <div style={{height: '100%', width: '100%'}}>
-        <div style={{position: 'absolute', paddingLeft: '83%', marginTop: '-1rem'}}>
+        <div style={{position: 'absolute', right: '0', marginTop: '-1rem'}}>
           <style>
             {css}
           </style>
