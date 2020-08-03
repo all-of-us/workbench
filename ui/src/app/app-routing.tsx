@@ -27,7 +27,7 @@ const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight)(DataUse
 const SessionExpiredPage = withRouteData(SessionExpired);
 const SignInAgainPage = withRouteData(SignInAgain);
 const SignInPage = withRouteData(SignIn);
-const UserAuditPage = withRouteData({routeData: UserAudit, props: {title: 'User Audit'}});
+const UserAuditPage = withRouteData(UserAudit);
 const UserDisabledPage = withRouteData(UserDisabled);
 const WorkspaceAuditPage = withRouteData(WorkspaceAudit);
 

@@ -27,7 +27,7 @@ const getNextAuditPath = (subject: string) => {
 
 
 const getAdminPageUrl = (subject: string) => {
-  return ['admin', 'workspaces', subject];
+  return [`/admin/workspaces/${subject}`];
 };
 
 export const WorkspaceAudit = () => {

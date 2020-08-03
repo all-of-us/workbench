@@ -6,7 +6,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import colors from 'app/styles/colors';
 import { useDebounce } from 'app/utils';
 import {downloadTextFile} from 'app/utils/audit-utils';
-import {navigate, navigateByUrl} from 'app/utils/navigation';
+import {navigate} from 'app/utils/navigation';
 import {AuditAction, AuditLogEntry} from 'generated';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
@@ -28,7 +28,7 @@ export interface GenericAuditQueryResult {
    */
   query: string;
   /**
-   * ID in the MySQL database and BigQuery Audit Database for the this qyery. Currently either
+   * ID in the MySQL database and BigQuery Audit Database for the this query. Currently either
    * a userId or workspaceId as appropriate. This may be needed for situations (such as workspace audit)
    * where it's not obvious in the responses which workspace is the one you audited.
    */
@@ -46,9 +46,8 @@ export interface AuditPageProps {
   queryAuditLog: (subject: string) => Promise<GenericAuditQueryResult>;
   getNextAuditPath: (subject: string) => string;
   buttonLabel?: string;
-   getAdminPageUrl: (subject: string) => string[];
+  getAdminPageUrl: (subject: string) => string[];
 }
-
 
 const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath, buttonLabel, queryText, getAdminPageUrl}) => {
   const [auditSubject, setAuditSubject] = useState(initialAuditSubject);
@@ -126,7 +125,7 @@ const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath, but
     </TooltipTrigger>
     <TooltipTrigger content={'BigQuery Console page (use pmi-ops.org account)'}>
       <Button style={buttonStyle}
-              onClick={() => navigateByUrl(getBigQueryConsoleUrl())}>
+              onClick={() => navigate([getBigQueryConsoleUrl()])}>
         BigQuery Console
       </Button>
     </TooltipTrigger>

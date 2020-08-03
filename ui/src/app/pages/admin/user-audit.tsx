@@ -1,10 +1,7 @@
 import {AuditPageComponent} from 'app/components/admin/audit-page-component';
 import {profileApi} from 'app/services/swagger-fetch-clients';
-import {AuditAction, AuditEventBundle} from 'generated';
-import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useParams} from 'react-router-dom';
-import {Navigate} from '../../components/app-router';
 
 const getAuditLog = (subject: string) => {
   const bqRowLimit = 1000; // Workspaces take many rows because of the Research Purpose fields
@@ -28,7 +25,7 @@ const getNextAuditPath = (subject: string) => {
 
 // Single-user admin page isn't available yet, so go to the main users list page.
 const getAdminPageUrl = (subject: string) => {
-  return ['admin', 'user'];
+  return ['/admin/user'];
 };
 
 export const UserAudit = () => {

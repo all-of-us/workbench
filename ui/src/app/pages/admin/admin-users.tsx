@@ -8,11 +8,11 @@ import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {AdminUserBypass} from 'app/pages/admin/admin-user-bypass';
 import {authDomainApi, profileApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {usernameWithoutDomain} from 'app/utils/audit-utils';
 import {navigate, serverConfigStore} from 'app/utils/navigation';
 import {
   Profile,
 } from 'generated/fetch';
-import {usernameWithoutDomain} from '../../utils/audit-utils';
 
 const styles = reactStyles({
   colStyle: {
