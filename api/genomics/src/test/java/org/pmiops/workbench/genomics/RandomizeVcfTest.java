@@ -16,7 +16,7 @@ public class RandomizeVcfTest {
       new VCFFileReader(new File("src/test/resources/NA12878_204126160130_R01C01.toy.vcf.gz"));
   private static final Random random = new Random(0);
   private static final VariantContext variantContext = reader.iterator().next();
-  private static final RandomizeVcf randomizeVcf = new RandomizeVcf("0", random);
+  private static final RandomizeVcf randomizeVcf = new RandomizeVcf(2, random);
 
   @Test
   public void testRandomizeVariant() {
@@ -25,6 +25,7 @@ public class RandomizeVcfTest {
     // For each allele in the genotype...
     // ...is that allele from the bank of possible alleles at that position?
     // ignoring ref/var
+    assertThat(randomizedVariant.getGenotypes().size()).isEqualTo(2);
     randomizedVariant.getGenotypes().stream()
         .flatMap(genotype -> genotype.getAlleles().stream())
         .forEach(
@@ -38,14 +39,14 @@ public class RandomizeVcfTest {
   @Test
   public void testRandomizeGenotypes() {
     Genotype genotype = variantContext.getGenotype(0);
-    Genotype randomizedGenotype = randomizeVcf.randomizeGenotype(variantContext, genotype);
+    Genotype randomizedGenotype = randomizeVcf.randomizeGenotype(variantContext, genotype, 0);
     assertThat(randomizedGenotype.getSampleName()).isNotEqualTo(genotype.getSampleName());
   }
 
   @Test
   public void testRandomizeAlleles() {
     List<Allele> alleles =
-        randomizeVcf.randomizeAlleles(variantContext, variantContext.getGenotype(0).getAlleles());
+        randomizeVcf.randomizeAlleles(variantContext);
     assertThat(alleles.size()).isEqualTo(2); // humans ought to be diploid.
     alleles.forEach(allele -> assertThat(variantContext.getAlleles()).contains(allele));
   }

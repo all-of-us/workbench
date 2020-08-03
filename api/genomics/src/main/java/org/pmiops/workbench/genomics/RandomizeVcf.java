@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.broadinstitute.barclay.argparser.Argument;
 import org.broadinstitute.barclay.argparser.CommandLineProgramProperties;
 import org.broadinstitute.hellbender.cmdline.StandardArgumentDefinitions;
@@ -34,8 +35,11 @@ public class RandomizeVcf extends VariantWalker {
       shortName = StandardArgumentDefinitions.OUTPUT_SHORT_NAME)
   protected File outputVcf;
 
-  @Argument(doc = "Sample name suffix.", fullName = "SAMPLE_NAME_SUFFIX", shortName = "S")
-  protected String sampleNameSuffix;
+//  @Argument(doc = "Sample name suffix.", fullName = "SAMPLE_NAME_SUFFIX", shortName = "S")
+//  protected String sampleNameSuffix;
+
+  @Argument(doc = "Number of samples to generate.", fullName = "NUM_SAMPLES", shortName = "N")
+  protected int samples;
 
   private Random random = new Random();
 
@@ -50,9 +54,9 @@ public class RandomizeVcf extends VariantWalker {
   }
 
   @VisibleForTesting
-  protected RandomizeVcf(String sampleNameSuffix, Random random) {
+  protected RandomizeVcf(int samples, Random random) {
     super();
-    this.sampleNameSuffix = sampleNameSuffix;
+    this.samples = samples;
     this.random = random;
   }
 
@@ -68,12 +72,8 @@ public class RandomizeVcf extends VariantWalker {
   @Override
   public void onTraversalStart() {
     final VCFHeader inputHeader = getHeaderForVariants();
-    final List<String> newSampleNames =
-        inputHeader.getSampleNamesInOrder().stream()
-            .map(this::appendSuffixToSampleName)
-            .collect(Collectors.toList());
-    final VCFHeader outputHeader =
-        new VCFHeader(inputHeader.getMetaDataInInputOrder(), newSampleNames);
+    final List<String> newSampleNames = this.generateNSampleNames(inputHeader.getSampleNamesInOrder().get(0));
+    final VCFHeader outputHeader = new VCFHeader(inputHeader.getMetaDataInInputOrder(), newSampleNames);
     vcfWriter = this.createVCFWriter(outputVcf);
     vcfWriter.writeHeader(outputHeader);
   }
@@ -92,10 +92,9 @@ public class RandomizeVcf extends VariantWalker {
     VariantContextBuilder variantContextBuilder = new VariantContextBuilder(variant);
     variantContextBuilder.alleles(variant.getAlleles());
 
-    List<Genotype> randomizedGenotypes =
-        variant.getGenotypes().stream()
-            .map(genotype -> randomizeGenotype(variant, genotype))
-            .collect(Collectors.toList());
+    List<Genotype> randomizedGenotypes = IntStream.rangeClosed(1, this.samples)
+        .mapToObj(i -> randomizeGenotype(variant, variant.getGenotype(0), i))
+        .collect(Collectors.toList());
     GenotypesContext randomizedGenotypesContext =
         GenotypesContext.create(new ArrayList<>(randomizedGenotypes));
 
@@ -105,18 +104,17 @@ public class RandomizeVcf extends VariantWalker {
   }
 
   @VisibleForTesting
-  protected Genotype randomizeGenotype(VariantContext variantContext, Genotype genotype) {
+  protected Genotype randomizeGenotype(VariantContext variantContext, Genotype genotype, int sample) {
     GenotypeBuilder genotypeBuilder =
         new GenotypeBuilder()
             .copy(genotype)
-            .name(appendSuffixToSampleName(genotype.getSampleName()))
-            .alleles(randomizeAlleles(variantContext, genotype.getAlleles()));
+            .name(appendSuffixToSampleName(genotype.getSampleName(), sample))
+            .alleles(randomizeAlleles(variantContext));
     return genotypeBuilder.make();
   }
 
   @VisibleForTesting
-  protected List<Allele> randomizeAlleles(
-      VariantContext variantContext, List<Allele> genotypeAlleles) {
+  protected List<Allele> randomizeAlleles(VariantContext variantContext) {
     /*
      * NA12878 was run on the All of Us genotyping array in order to get an example of a VCF run
      * on this array. Here are the genotypes from that run and how often they appear:
@@ -187,7 +185,13 @@ public class RandomizeVcf extends VariantWalker {
     return alleles;
   }
 
-  private String appendSuffixToSampleName(String sampleName) {
-    return sampleName + "." + this.sampleNameSuffix.trim();
+  private List<String> generateNSampleNames(String sampleName) {
+    List<String> sampleNames = new ArrayList<>();
+    IntStream.rangeClosed(1, this.samples).forEach(i -> sampleNames.add(appendSuffixToSampleName(sampleName, i)));
+    return sampleNames;
+  }
+
+  private String appendSuffixToSampleName(String sampleName, int sampleIndex) {
+    return sampleName + "." + sampleIndex;
   }
 }
