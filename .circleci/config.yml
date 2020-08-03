@@ -575,6 +575,9 @@ jobs:
     parallelism: 3
     steps:
       - checkout_init_git
+      - run:
+          description: Install extra browser packages.
+          command: sudo apt-get install -y libgbm-dev
       - browser-tools/install-browser-tools:
           install-firefox: false
       - run_e2e_test
@@ -594,6 +597,9 @@ jobs:
           name: Halt job if not a pull request
           command: bash .circleci/pr-skip-ci.sh
       - halt_if_code_unchanged
+      - run:
+          description: Install extra browser packages.
+          command: sudo apt-get install -y libgbm-dev
       - browser-tools/install-browser-tools:
           install-firefox: false
       - start_local_ui
