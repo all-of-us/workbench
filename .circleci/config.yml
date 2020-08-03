@@ -1,9 +1,5 @@
 version: 2.1
 
-# https://circleci.com/orbs/registry/
-orbs:
-  browser-tools: circleci/browser-tools@1.0.1
-
 # -------------------------
 #   PARAMETERS
 # -------------------------
@@ -568,6 +564,8 @@ jobs:
   # Run Puppeteer e2e UI tests on deployed "test" environment.
   puppeteer-e2e-test:
     <<: *defaults
+    docker:
+      - image: circleci/node:13.14.0-browsers
     environment:
       <<: *e2e_env
       WORKBENCH_ENV: dev
@@ -575,13 +573,13 @@ jobs:
     parallelism: 3
     steps:
       - checkout_init_git
-      - browser-tools/install-chrome
-      - browser-tools/install-firefox
       - run_e2e_test
 
   # Deploy UI local server then run Puppeteer e2e tests on deployed "local" environment.
   puppeteer-e2e-local-ui:
     <<: *defaults
+    docker:
+      - image: circleci/node:13.14.0-browsers
     environment:
       <<: *e2e_env
       WORKBENCH_ENV: local
@@ -594,8 +592,6 @@ jobs:
           name: Halt job if not a pull request
           command: bash .circleci/pr-skip-ci.sh
       - halt_if_code_unchanged
-      - browser-tools/install-chrome
-      - browser-tools/install-firefox
       - start_local_ui
       - run_e2e_test
 
