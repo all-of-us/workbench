@@ -576,7 +576,7 @@ jobs:
     steps:
       - checkout_init_git
       - browser-tools/install-chrome
-      - browser-tools/install-chromedriver
+      - browser-tools/install-firefox
       - run_e2e_test
 
   # Deploy UI local server then run Puppeteer e2e tests on deployed "local" environment.
@@ -595,7 +595,7 @@ jobs:
           command: bash .circleci/pr-skip-ci.sh
       - halt_if_code_unchanged
       - browser-tools/install-chrome
-      - browser-tools/install-chromedriver
+      - browser-tools/install-firefox
       - start_local_ui
       - run_e2e_test
 
