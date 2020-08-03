@@ -60,6 +60,7 @@ export const Navigate = ({to}): React.ReactElement => {
   return <Redirect to={{pathname: to, state: {from: location}}}/>;
 };
 
+// Resets the state after change to prevent a navigation loop
 export const useNavigation = (): [boolean, Function] => {
   const [navigation, setNavigation] = useState(false);
 
