@@ -1,5 +1,5 @@
 import {AuditActionCardListView} from 'app/components/admin/audit-card-list-view';
-import {Navigate} from 'app/components/app-router';
+import {Navigate, useNavigation} from 'app/components/app-router';
 import {Button} from 'app/components/buttons';
 import {NumberInput, TextInputWithLabel} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
@@ -50,14 +50,8 @@ export interface AuditPageProps {
 
 const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath, buttonLabel, queryText}) => {
   const [auditSubject, setAuditSubject] = useState(initialAuditSubject);
-  const [loadNextSubject, setLoadNextSubject] = useState(false);
   const [downloadSqlFile, setDownloadSqlFile] = useState(false);
-
-  useEffect(() =>  {
-    if (loadNextSubject) {
-      setLoadNextSubject(false);
-    }
-  }, [loadNextSubject]);
+  const [navSubject, setNavSubject] = useNavigation();
 
   useEffect(() => {
     if (downloadSqlFile && !fp.isEmpty(queryText)) {
@@ -70,7 +64,7 @@ const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath, but
 
   const onAuditClick = () => {
     setAuditSubject(auditSubject.toLowerCase().trim());
-    setLoadNextSubject(true);
+    setNavSubject(true);
   };
 
   const getBigQueryConsoleUrl = () => {
@@ -91,7 +85,7 @@ const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath, but
   };
 
   return <React.Fragment>
-    {loadNextSubject && <Navigate to={getNextAuditPath(auditSubject)}/>}
+    {navSubject && <Navigate to={getNextAuditPath(auditSubject)}/>}
     <TextInputWithLabel
       containerStyle={{display: 'inline-block'}}
       style={{width: '15rem', margin: '1rem'}}

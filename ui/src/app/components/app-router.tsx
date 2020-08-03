@@ -4,7 +4,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import { BrowserRouter, Link, Redirect, Route, Switch, useHistory, useLocation, useParams, useRouteMatch} from 'react-router-dom';
 
-const {Fragment} = React;
+const {Fragment, useState, useEffect} = React;
 
 export interface Guard {
   allowed: () => boolean;
@@ -58,4 +58,16 @@ export const ProtectedRoutes = (
 export const Navigate = ({to}): React.ReactElement => {
   const location = useLocation();
   return <Redirect to={{pathname: to, state: {from: location}}}/>;
+};
+
+export const useNavigation = (): [boolean, Function] => {
+  const [navigation, setNavigation] = useState(false);
+
+  useEffect(() => {
+    if (navigation) {
+      setNavigation(false);
+    }
+  }, [navigation]);
+
+  return [navigation, setNavigation];
 };
