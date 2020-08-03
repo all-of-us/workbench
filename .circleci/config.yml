@@ -575,7 +575,7 @@ jobs:
     parallelism: 3
     steps:
       - checkout_init_git
-      - browser-tools/install-browser-tools
+      - browser-tools/install-browser-tools:
           firefox-version: "78.0" # https://github.com/CircleCI-Public/browser-tools-orb/issues/14
       - run_e2e_test
 
@@ -594,7 +594,7 @@ jobs:
           name: Halt job if not a pull request
           command: bash .circleci/pr-skip-ci.sh
       - halt_if_code_unchanged
-      - browser-tools/install-browser-tools
+      - browser-tools/install-browser-tools:
           firefox-version: "78.0" # https://github.com/CircleCI-Public/browser-tools-orb/issues/14
       - start_local_ui
       - run_e2e_test
