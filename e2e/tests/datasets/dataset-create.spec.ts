@@ -119,8 +119,8 @@ describe('Create Dataset', () => {
     expect(dataSetExists).toBe(true);
 
     // Edit the dataset to include "All Participants".
-    await resourceCard.findCard(datasetName)
-    const menu = resourceCard.getEllipsis();
+    const datasetCard = await resourceCard.findCard(datasetName)
+    const menu = datasetCard.getEllipsis();
     await menu.clickAction(EllipsisMenuAction.Edit);
     await waitWhileLoading(page);
 

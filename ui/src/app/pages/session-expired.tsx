@@ -3,7 +3,6 @@ import {BoldHeader} from 'app/components/headers';
 import {PublicLayout} from 'app/components/public-layout';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {buildPageTitleForEnvironment} from 'app/utils/title';
 import * as React from 'react';
 
 const styles = reactStyles({
@@ -18,18 +17,14 @@ const styles = reactStyles({
   }
 });
 
-export class SessionExpired extends React.Component<{routeConfig: {signIn: Function}}> {
-  componentDidMount() {
-    document.title = buildPageTitleForEnvironment('You have been signed out');
-  }
-
+export class SessionExpired extends React.Component<{signIn: Function}> {
   render() {
     return <PublicLayout>
       <BoldHeader>You have been signed out</BoldHeader>
       <section style={styles.textSection}>
         You were automatically signed out of your session due to inactivity
       </section>
-      <GoogleSignInButton signIn={() => this.props.routeConfig.signIn()}/>
+      <GoogleSignInButton signIn={() => this.props.signIn()}/>
     </PublicLayout>;
   }
 }

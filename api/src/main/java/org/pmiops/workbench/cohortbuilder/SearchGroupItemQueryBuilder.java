@@ -48,7 +48,8 @@ public final class SearchGroupItemQueryBuilder {
 
   private static final ImmutableMap<AttrName, String> AGE_COLUMN_SQL_MAP =
       ImmutableMap.of(
-          AttrName.AGE, "CAST(FLOOR(DATE_DIFF(CURRENT_DATE, dob, MONTH)/12) as INT64)",
+          AttrName.AGE,
+              "DATE_DIFF(CURRENT_DATE,dob, YEAR) - IF(EXTRACT(MONTH FROM dob)*100 + EXTRACT(DAY FROM dob) > EXTRACT(MONTH FROM CURRENT_DATE)*100 + EXTRACT(DAY FROM CURRENT_DATE),1,0)",
           AttrName.AGE_AT_CONSENT, "age_at_consent",
           AttrName.AGE_AT_CDR, "age_at_cdr");
 

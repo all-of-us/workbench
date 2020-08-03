@@ -177,7 +177,6 @@ interface State {
   autocompleteSelection: Criteria;
   backMode: string;
   conceptType: string;
-  count: number;
   disableFinish: boolean;
   groupSelections: Array<number>;
   hierarchyNode: Criteria;
@@ -198,7 +197,6 @@ export class CBModal extends React.Component<Props, State> {
       autocompleteSelection: undefined,
       backMode: 'list',
       conceptType: null,
-      count: 0,
       disableFinish: false,
       groupSelections: [],
       hierarchyNode: undefined,
@@ -435,8 +433,8 @@ export class CBModal extends React.Component<Props, State> {
   }
 
   render() {
-    const {closeSearch, searchContext, searchContext: {domain, type}, setSearchContext} = this.props;
-    const {attributesNode, autocompleteSelection, conceptType, count, disableFinish, groupSelections, hierarchyNode, loadingSubtree, mode,
+    const {closeSearch, searchContext, searchContext: {count, domain, type}, setSearchContext} = this.props;
+    const {attributesNode, autocompleteSelection, conceptType, disableFinish, groupSelections, hierarchyNode, loadingSubtree, mode,
       open, selectedIds, selections, title, treeSearchTerms} = this.state;
     return !!searchContext ? <React.Fragment>
       <style>{css}</style>

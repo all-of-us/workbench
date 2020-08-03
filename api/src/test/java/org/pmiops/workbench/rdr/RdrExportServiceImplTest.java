@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyShort;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -271,7 +272,7 @@ public class RdrExportServiceImplTest {
     when(rdrMapper.toRdrModel(mockDeletedWorkspace)).thenReturn(rdrWorkspace);
 
     rdrExportService.exportWorkspaces(workspaceID);
-    verify(mockWorkspaceService)
+    verify(mockWorkspaceService, never())
         .getFirecloudUserRoles(
             mockDeletedWorkspace.getWorkspaceNamespace(), mockDeletedWorkspace.getFirecloudName());
     verify(rdrExportDao, times(1)).save(anyList());

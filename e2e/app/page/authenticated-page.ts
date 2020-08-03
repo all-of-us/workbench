@@ -3,9 +3,7 @@ import {PageUrl} from 'app/text-labels';
 import BasePage from 'app/page/base-page';
 import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
 
-export const SELECTOR = {
-  signedInIndicator: 'app-signed-in',
-};
+const signedInIndicator = 'app-signed-in';
 
 
 /**
@@ -19,7 +17,7 @@ export default abstract class AuthenticatedPage extends BasePage {
   }
 
   protected async isSignedIn(): Promise<boolean> {
-    return this.page.waitForSelector(SELECTOR.signedInIndicator)
+    return this.page.waitForSelector(signedInIndicator)
       .then( (elemt) => elemt.asElement() !== null);
   }
 

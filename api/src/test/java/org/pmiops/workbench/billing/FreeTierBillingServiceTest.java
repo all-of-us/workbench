@@ -2,8 +2,11 @@ package org.pmiops.workbench.billing;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -32,6 +35,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -62,6 +66,8 @@ public class FreeTierBillingServiceTest {
 
   private static final double DEFAULT_PERCENTAGE_TOLERANCE = 0.000001;
 
+  @MockBean private UserServiceAuditor mockUserServiceAuditor;
+
   @Autowired BigQueryService bigQueryService;
   @Autowired FreeTierBillingService freeTierBillingService;
   @Autowired MailService mailService;
@@ -75,7 +81,7 @@ public class FreeTierBillingServiceTest {
   private static final String SINGLE_WORKSPACE_TEST_USER = "test@test.com";
   private static final String SINGLE_WORKSPACE_TEST_PROJECT = "aou-test-123";
 
-  // An arbitrary timestamp to use as the anchor time for access module test cases.
+  // An arbitrary timestamp to use as the anchor time for tests.
   private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
   private static final FakeClock CLOCK = new FakeClock(START_INSTANT);
 
@@ -329,27 +335,112 @@ public class FreeTierBillingServiceTest {
   }
 
   @Test
-  public void checkFreeTierBillingUsage_override() throws MessagingException {
+  public void maybeSetDollarLimitOverride_true() {
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
-    doReturn(mockBQTableSingleResult(100.01)).when(bigQueryService).executeQuery(any());
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    assertThat(user.getLastModifiedTime()).isNull();
+
+    // we update the user and should see this last modified time
+    final Instant time2 = START_INSTANT.plusSeconds(1000);
+    CLOCK.setInstant(time2);
+
+    assertThat(freeTierBillingService.maybeSetDollarLimitOverride(user, 200.0)).isTrue();
+    verify(mockUserServiceAuditor)
+        .fireSetFreeTierDollarLimitOverride(user.getUserId(), null, 200.0);
+    assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 200.0);
+    assertThat(userDao.findUserByUserId(user.getUserId()).getLastModifiedTime())
+        .isEqualTo(new Timestamp(time2.toEpochMilli()));
+
+    // we update the user again and should see this new last modified time
+    final Instant time3 = START_INSTANT.plusSeconds(2000);
+    CLOCK.setInstant(time3);
+
+    assertThat(freeTierBillingService.maybeSetDollarLimitOverride(user, 100.0)).isTrue();
+    verify(mockUserServiceAuditor)
+        .fireSetFreeTierDollarLimitOverride(user.getUserId(), 200.0, 100.0);
+    assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 100.0);
+    assertThat(userDao.findUserByUserId(user.getUserId()).getLastModifiedTime())
+        .isEqualTo(new Timestamp(time3.toEpochMilli()));
+  }
+
+  @Test
+  public void maybeSetDollarLimitOverride_false() {
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+
+    assertThat(freeTierBillingService.maybeSetDollarLimitOverride(user, 100.0)).isFalse();
+    verify(mockUserServiceAuditor, never())
+        .fireSetFreeTierDollarLimitOverride(anyLong(), anyDouble(), anyDouble());
+    assertThat(user.getLastModifiedTime()).isNull();
+    assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 100.0);
+
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 200.0;
+    assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 200.0);
+
+    assertThat(freeTierBillingService.maybeSetDollarLimitOverride(user, 200.0)).isFalse();
+    verify(mockUserServiceAuditor, never())
+        .fireSetFreeTierDollarLimitOverride(anyLong(), anyDouble(), anyDouble());
+    assertThat(user.getLastModifiedTime()).isNull();
+    assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 200.0);
+  }
+
+  @Test
+  public void maybeSetDollarLimitOverride_above_usage() throws MessagingException {
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    doReturn(mockBQTableSingleResult(150.0)).when(bigQueryService).executeQuery(any());
 
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
     final DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
+    assertThat(freeTierBillingService.getCachedFreeTierUsage(user)).isNull();
+    assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 100.0);
+
     freeTierBillingService.checkFreeTierBillingUsage();
     verify(mailService).alertUserFreeTierExpiration(eq(user));
+    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 150.0);
+    assertWithinBillingTolerance(freeTierBillingService.getCachedFreeTierUsage(user), 150.0);
 
-    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 100.01);
-
-    user.setFreeTierCreditsLimitDollarsOverride(200.0);
-    userDao.save(user);
+    freeTierBillingService.maybeSetDollarLimitOverride(user, 200.0);
+    verify(mockUserServiceAuditor)
+        .fireSetFreeTierDollarLimitOverride(user.getUserId(), null, 200.0);
+    assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 200.0);
+    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.ACTIVE, 150.0);
 
     freeTierBillingService.checkFreeTierBillingUsage();
     verifyZeroInteractions(mailService);
+    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.ACTIVE, 150.0);
+  }
 
-    // we do not reset the workspace's state to ACTIVE
-    // that will be done by the override endpoint (TODO)
-    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 100.01);
+  // do not reactivate workspaces if the new dollar limit is still below the usage
+
+  @Test
+  public void setFreeTierDollarOverride_under_usage() throws MessagingException {
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    doReturn(mockBQTableSingleResult(300.0)).when(bigQueryService).executeQuery(any());
+
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    final DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+
+    assertThat(freeTierBillingService.getCachedFreeTierUsage(user)).isNull();
+    assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 100.0);
+
+    freeTierBillingService.checkFreeTierBillingUsage();
+    verify(mailService).alertUserFreeTierExpiration(eq(user));
+    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 300.0);
+    assertWithinBillingTolerance(freeTierBillingService.getCachedFreeTierUsage(user), 300.0);
+
+    freeTierBillingService.maybeSetDollarLimitOverride(user, 200.0);
+    verify(mockUserServiceAuditor)
+        .fireSetFreeTierDollarLimitOverride(user.getUserId(), null, 200.0);
+    assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 200.0);
+    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 300.0);
+
+    freeTierBillingService.checkFreeTierBillingUsage();
+    verifyZeroInteractions(mailService);
+    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 300.0);
+
+    verify(mockUserServiceAuditor)
+        .fireSetFreeTierDollarLimitOverride(user.getUserId(), null, 200.0);
   }
 
   @Test
@@ -518,20 +609,17 @@ public class FreeTierBillingServiceTest {
 
     DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
 
-    final double freeTierCreditsDollarLimitOverride = 100.0;
-    user.setFreeTierCreditsLimitDollarsOverride(freeTierCreditsDollarLimitOverride);
-    user = userDao.save(user);
-    assertWithinBillingTolerance(
-        freeTierBillingService.getUserFreeTierDollarLimit(user),
-        freeTierCreditsDollarLimitOverride);
+    final double limit1 = 100.0;
+    freeTierBillingService.maybeSetDollarLimitOverride(user, limit1);
+    verify(mockUserServiceAuditor)
+        .fireSetFreeTierDollarLimitOverride(user.getUserId(), null, limit1);
+    assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), limit1);
 
-    final double doubleFreeTierCreditsDollarLimitOverride = 200.0;
-    user.setFreeTierCreditsLimitDollarsOverride(doubleFreeTierCreditsDollarLimitOverride);
-    user = userDao.save(user);
-
-    assertWithinBillingTolerance(
-        freeTierBillingService.getUserFreeTierDollarLimit(user),
-        doubleFreeTierCreditsDollarLimitOverride);
+    final double limit2 = 200.0;
+    freeTierBillingService.maybeSetDollarLimitOverride(user, limit2);
+    verify(mockUserServiceAuditor)
+        .fireSetFreeTierDollarLimitOverride(user.getUserId(), limit1, limit2);
+    assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), limit2);
   }
 
   @Test

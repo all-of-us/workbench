@@ -25,7 +25,7 @@ const getNextAuditPath = (subject: string) => {
   return `/admin/workspace-audit/${subject}`;
 };
 
-export const WorkspaceAuditPage = () => {
+export const WorkspaceAudit = () => {
   const {workspaceNamespace = ''} = useParams();
   return <AuditPageComponent auditSubjectType='Workspace'
                              buttonLabel='Workspace namespace (begins with aou-rw-)'

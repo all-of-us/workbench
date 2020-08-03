@@ -12,7 +12,7 @@
     "xAppIdValue": "preprod-AoU-RW",
     "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_preprod",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:0.0.1",
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.0.4",
     "welderDockerImage": "broadinstitute/welder-server:7ae1a62",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com"
@@ -99,7 +99,7 @@
     "enableBillingUpgrade": false,
     "useKeylessDelegatedCredentials": true,
     "enableMoodleV2Api": true,
-    "enableCBAgeTypeOptions": false,
+    "enableCBAgeTypeOptions": true,
     "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,
     "useNewShibbolethService": true,
@@ -107,7 +107,7 @@
     "enableCohortBuilderV2": false
   },
   "actionAudit": {
-    "logName":"workbench-action-audit-preprod",
+    "logName": "workbench-action-audit-preprod",
     "bigQueryDataset": "workbench_action_audit_prepropd",
     "bigQueryTable": "workbench_action_audit_prepropd"
   },

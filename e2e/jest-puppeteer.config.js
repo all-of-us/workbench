@@ -46,5 +46,5 @@ module.exports = {
   },
   browser: 'chromium',
   browserContext: (process.env.INCOGNITO || true) ? 'incognito' : 'default',
-  exitOnPageError: true,
+  exitOnPageError: false,
 };

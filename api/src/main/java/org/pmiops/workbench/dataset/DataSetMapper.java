@@ -2,6 +2,8 @@ package org.pmiops.workbench.dataset;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 
+import java.sql.Timestamp;
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -57,7 +59,8 @@ public interface DataSetMapper {
   @Mapping(target = "lastModifiedTime", ignore = true)
   @Mapping(target = "prePackagedConceptSetEnum", ignore = true)
   @Mapping(target = "values", source = "domainValuePairs")
-  DbDataset dataSetRequestToDb(DataSetRequest dataSetRequest, @Context DbDataset dbDataSet);
+  DbDataset dataSetRequestToDb(
+      DataSetRequest dataSetRequest, @Context DbDataset dbDataSet, @Context Clock clock);
 
   @Mapping(target = "id", source = "dataSetId")
   @Mapping(target = "conceptSets", source = "conceptSetIds")
@@ -68,8 +71,19 @@ public interface DataSetMapper {
 
   @AfterMapping
   default void populateFromSourceDbObject(
-      @MappingTarget DbDataset targetDb, @Context DbDataset dbDataSet) {
+      @MappingTarget DbDataset targetDb, @Context DbDataset dbDataSet, @Context Clock clock) {
     targetDb.setInvalid(dbDataSet == null ? false : dbDataSet.getInvalid());
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    if (dbDataSet == null) {
+      targetDb.setInvalid(false);
+      targetDb.setCreationTime(now);
+      targetDb.setLastModifiedTime(now);
+    } else {
+      targetDb.setCreationTime(dbDataSet.getCreationTime());
+      targetDb.setDataSetId(dbDataSet.getDataSetId());
+      targetDb.setCreatorId(dbDataSet.getCreatorId());
+      targetDb.setLastModifiedTime(now);
+    }
     if (targetDb.getValues().isEmpty()) {
       // In case of rename, dataSetRequest does not have cohort/Concept ID information
       targetDb.setConceptSetIds(dbDataSet.getConceptSetIds());
