@@ -4,7 +4,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import { BrowserRouter, Link, Redirect, Route, Switch, useHistory, useLocation, useParams, useRouteMatch} from 'react-router-dom';
 
-const {Fragment, useState, useEffect} = React;
+const {Fragment} = React;
 
 export interface Guard {
   allowed: () => boolean;
@@ -60,18 +60,3 @@ export const Navigate = ({to}): React.ReactElement => {
   return <Redirect to={{pathname: to, state: {from: location}}}/>;
 };
 
-// This is essentially a setState for navigation.
-// When the navigation state is set to true it will trigger a render.
-// At this point the state should be used to render the 'Navigate' component, triggering a route change
-// This hook will automatically set the state back to false, preventing the need for an additional 'useEffect' per nav item
-export const useNavigationState = (): [boolean, Function] => {
-  const [navigation, setNavigation] = useState(false);
-
-  useEffect(() => {
-    if (navigation) {
-      setNavigation(false);
-    }
-  }, [navigation]);
-
-  return [navigation, setNavigation];
-};
