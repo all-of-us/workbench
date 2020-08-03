@@ -64,7 +64,7 @@ export const Navigate = ({to}): React.ReactElement => {
 // When the navigation state is set to true it will trigger a render.
 // At this point the state should be used to render the 'Navigate' component, triggering a route change
 // This hook will automatically set the state back to false, preventing the need for an additional 'useEffect' per nav item
-export const useNavigation = (): [boolean, Function] => {
+export const useNavigationState = (): [boolean, Function] => {
   const [navigation, setNavigation] = useState(false);
 
   useEffect(() => {

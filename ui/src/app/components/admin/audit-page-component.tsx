@@ -1,5 +1,5 @@
 import {AuditActionCardListView} from 'app/components/admin/audit-card-list-view';
-import {Navigate, useNavigation} from 'app/components/app-router';
+import {Navigate, useNavigationState} from 'app/components/app-router';
 import {Button} from 'app/components/buttons';
 import {NumberInput, TextInputWithLabel} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
@@ -51,7 +51,7 @@ export interface AuditPageProps {
 const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath, buttonLabel, queryText}) => {
   const [auditSubject, setAuditSubject] = useState(initialAuditSubject);
   const [downloadSqlFile, setDownloadSqlFile] = useState(false);
-  const [nextSubjectRequested, setNextSubjectRequested] = useNavigation();
+  const [nextSubjectRequested, setNextSubjectRequested] = useNavigationState();
 
   useEffect(() => {
     if (downloadSqlFile && !fp.isEmpty(queryText)) {
