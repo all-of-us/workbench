@@ -46,9 +46,10 @@ import {BreadcrumbType, NavStore} from './utils/navigation';
 declare let gtag: Function;
 
 const routes: Routes = [
-  // TODO(RW-5302): Reconcile react routes with angular guards, we cannot
-  // have both ** under the sign in guard and ** in the signed out context.
-  // Hardcoding all signed out paths here is a stop-gap.
+  // For now, all publicly accessible React routes must kept in sync between here
+  // and AppRouting, as we cannot use an Angular ** route to send to AppRouting
+  // under both the sign in guard and the signed out context. All signed out paths
+  // should be hardcoded here until the full React router migration is complete.
   {
     path: 'cookie-policy',
     component: AppRouting
