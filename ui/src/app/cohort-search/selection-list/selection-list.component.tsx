@@ -8,7 +8,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import colors from 'app/styles/colors';
 import {withCurrentCohortCriteria} from 'app/utils';
 import {reactStyles} from 'app/utils';
-import {serverConfigStore} from 'app/utils/navigation';
+import {currentCohortCriteriaStore, serverConfigStore} from 'app/utils/navigation';
 import {Criteria, DomainType} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 
@@ -233,14 +233,6 @@ export class SelectionListModalVersion extends React.Component<Props> {
                            removeSelection={() => removeSelection(selection)}/>
         )}
       </div>}
-      {!serverConfigStore.getValue().enableCohortBuilderV2 && <div style={styles.selectionContainer}>
-        {selections.map((selection, s) =>
-            <SelectionInfo key={s}
-                           index={s}
-                           selection={selection}
-                           removeSelection={() => removeSelection(selection)}/>
-        )}
-      </div>}
       {!serverConfigStore.getValue().enableCohortBuilderV2 && <div style={styles.buttonContainer}>
         <Button type='link'
           style={{...styles.button, color: colors.dark, fontSize: '14px'}}
@@ -297,6 +289,12 @@ export const SelectionList = withCurrentCohortCriteria()(class extends React.Com
     </div>;
   }
 
+  removeCriteria(criteriaToDel) {
+    const updateList =  fp.remove(
+      (selection) => selection.parameterId === criteriaToDel.parameterId, this.props.criteria);
+    currentCohortCriteriaStore.next(updateList);
+  }
+
   renderCriteriaGroup(criteriaGroup, header) {
     return  <React.Fragment>
       <h3> {header}</h3>
@@ -305,8 +303,7 @@ export const SelectionList = withCurrentCohortCriteria()(class extends React.Com
         <SelectionInfo key={index}
                        index={index}
                        selection={criteria}
-                       removeSelection={() => {
-                       }}/>
+                       removeSelection={() => this.removeCriteria(criteria)}/>
 
       )}
     </React.Fragment> ;

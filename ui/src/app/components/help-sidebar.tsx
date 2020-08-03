@@ -198,13 +198,22 @@ export const NOTEBOOK_HELP_CONTENT = 'notebookStorage';
 // icon on the sidebar and different tooltip, etc.
 const icons = (helpContentKey: string) => {
   return [{
-    id: 'help',
+    id: 'criteria',
     disabled: false,
-    faIcon: helpContentKey === NOTEBOOK_HELP_CONTENT ? faFolderOpen : faInfoCircle,
-    label: helpContentKey === NOTEBOOK_HELP_CONTENT ? 'Storage Icon' : 'Help Icon',
-    page: null,
+    faIcon: faInbox,
+    label: 'Selected Criteria',
+    page: 'criteria',
     style: {fontSize: '21px'},
-    tooltip: helpContentKey === NOTEBOOK_HELP_CONTENT ? 'Workspace Storage' : 'Help Tips',
+    tooltip: 'Selected Criteria'
+  },
+    {
+      id: 'help',
+      disabled: false,
+      faIcon: helpContentKey === NOTEBOOK_HELP_CONTENT ? faFolderOpen : faInfoCircle,
+      label: helpContentKey === NOTEBOOK_HELP_CONTENT ? 'Storage Icon' : 'Help Icon',
+      page: null,
+      style: {fontSize: '21px'},
+      tooltip: helpContentKey === NOTEBOOK_HELP_CONTENT ? 'Workspace Storage' : 'Help Tips',
 // }, {
 //   id: 'thunderstorm',
 //   disabled: true,
@@ -213,23 +222,23 @@ const icons = (helpContentKey: string) => {
 //   page: null,
 //   style: {height: '22px', width: '22px', marginTop: '0.25rem', opacity: 0.5},
 //   tooltip: 'Compute Configuration',
-  }, {
-    id: 'dataDictionary',
-    disabled: false,
-    faIcon: faBook,
-    label: 'Data Dictionary Icon',
-    page: null,
-    style: {color: colors.white, fontSize: '20px', marginTop: '5px'},
-    tooltip: 'Data Dictionary',
-  }, {
-    id: 'annotations',
-    disabled: false,
-    faIcon: faEdit,
-    label: 'Annotations Icon',
-    page: 'reviewParticipantDetail',
-    style: {fontSize: '20px', marginLeft: '3px'},
-    tooltip: 'Annotations',
-  }];
+    }, {
+      id: 'dataDictionary',
+      disabled: false,
+      faIcon: faBook,
+      label: 'Data Dictionary Icon',
+      page: null,
+      style: {color: colors.white, fontSize: '20px', marginTop: '5px'},
+      tooltip: 'Data Dictionary',
+    }, {
+      id: 'annotations',
+      disabled: false,
+      faIcon: faEdit,
+      label: 'Annotations Icon',
+      page: 'reviewParticipantDetail',
+      style: {fontSize: '20px', marginLeft: '3px'},
+      tooltip: 'Annotations',
+    }];
 };
 
 const analyticsLabels = {
@@ -480,6 +489,20 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
       </PopupTrigger>;
     }
 
+    showIcon(icon) {
+      const {criteria, helpContentKey} = this.props;
+      return !icon.page || icon.page === helpContentKey || (criteria && icon.page === 'criteria');
+    }
+
+    displayIcon(icon, i) {
+      const {criteria} = this.props;
+
+      return (criteria && icon.page === 'criteria') ?   <div style={styles.icon} data-test-id ='criteria-icon'>
+            <span data-test-id = 'criteria-count' style={styles.criteriaCount}>{criteria.length}</span>
+            <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + i} icon={icon.faIcon} style={icon.style} />
+          </div> : <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + i} icon={icon.faIcon} style={icon.style} />;
+    }
+
     render() {
       const {criteria, helpContentKey, setSidebarState, notebookStyles, sidebarOpen} = this.props;
       const {activeIcon, filteredContent, participant, searchTerm, tooltipId} = this.state;
@@ -494,10 +517,9 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
       return <React.Fragment>
         <div style={notebookStyles ? {...styles.iconContainer, ...styles.notebookOverrides} : {...styles.iconContainer}}>
           {!criteria && this.renderWorkspaceMenu()}
-          {criteria && this.renderCriteria()}
+          {/*{criteria && this.renderCriteria()}*/}
           {icons(helpContentKey).map((icon, i) =>
-            (!icon.page || icon.page === helpContentKey) &&
-              <div key={i} style={{display: 'table'}}>
+          this.showIcon(icon) && <div key={i} style={{display: 'table'}}>
                 <TooltipTrigger content={<div>{tooltipId === i && icon.tooltip}</div>} side='left'>
                   <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
                        onClick={() => {
@@ -513,7 +535,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
                         </a>
                       : icon.faIcon === null
                         ? <img src={proIcons[icon.id]} style={icon.style} />
-                        : <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + i} icon={icon.faIcon} style={icon.style} />
+                        : this.displayIcon(icon, i)
                     }
                   </div>
                 </TooltipTrigger>
@@ -557,13 +579,29 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
             <div style={contentStyle('annotations')}>
               {participant && <SidebarContent />}
             </div>
+            <div style={contentStyle('criteria')}>
+              {criteria && <div>
+                <div style={{display: 'block', height: 'calc(100% - 5rem)', overflow: 'auto', padding: '0.5rem 0.5rem 0rem'}}>
+                  <h3 style={{...styles.sectionTitle, marginTop: 0}}>Add selected criteria to cohort</h3>
+                  <SelectionList back={() => {}}/>
+                </div>
+              </div>
+              }
+            </div>
             <div style={styles.footer}>
+              {criteria && activeIcon === 'criteria' ?  <div>
+                <Button style={styles.backButton} onClick={() => setSidebarState(false)}>
+                  Back
+                </Button>
+                <Button class='primary' style={{right: 0}}>Save Criteria</Button>
+              </div>
+              : <React.Fragment>
               <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
               <p style={styles.contentItem}>
                 Visit our <StyledAnchorTag href={supportUrls.helpCenter}
                                            target='_blank' onClick={() => this.analyticsEvent('UserSupport')}> User Support
                 </StyledAnchorTag> page or <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
-              </p>
+              </p></React.Fragment>}
             </div>
           </div>
         </div>

@@ -119,17 +119,6 @@ const css = `
      margin-top: 0.19rem
    }
 
-  .p-growl-item-container::before {
-    content:"";
-    position: absolute;
-    right: 100%;
-    top:0.17rem;
-    width:0px;
-    height:0px;
-    border-top:0.6rem solid transparent;
-    border-right:0.6rem solid transparent;
-    border-bottom:0.6rem solid transparent;
-  }
   .p-growl-item-container:after {
     content:"";
     position: absolute;
@@ -344,7 +333,7 @@ export class CohortSearch extends React.Component<Props, State> {
           <style>
             {css}
           </style>
-          <Growl ref={(el) => this.growl = el}></Growl>
+          <Growl ref={(el) => this.growl = el}/>
         </div>
         <div style={styles.titleBar}>
           <div style={{display: 'inline-flex', marginRight: '0.5rem'}}>
