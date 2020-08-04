@@ -50,7 +50,7 @@ describe('HelpSidebar', () => {
     props = {helpContentKey: 'notebookStorage', sidebarOpen: true};
     const wrapper = component();
     expect(wrapper.find('[data-test-id="section-title-0"]').text()).toBe(sidebarContent.notebookStorage[0].title);
-    expect(wrapper.find('[data-test-id="help-sidebar-icon-0"]').get(0).props.icon.iconName).toBe('folder-open');
+    expect(wrapper.find('[data-test-id="help-sidebar-icon-1"]').get(0).props.icon.iconName).toBe('folder-open');
   });
 
   it('should update marginRight style when sidebarOpen prop changes', () => {
@@ -83,13 +83,12 @@ describe('HelpSidebar', () => {
     currentCohortCriteriaStore.next([]);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find({'data-test-id': 'workspace-menu-button'}).length).toBe(0);
-    expect(wrapper.find({'data-test-id': 'criteria-icon'}).length).toBe(1);
+    expect(wrapper.find({'data-test-id': 'criteria-count'}).length).toBe(1);
   });
   it('should update count if criteria is added', async() => {
     const wrapper = component();
     currentCohortCriteriaStore.next([criteria1, criteria2]);
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find({'data-test-id': 'criteria-icon'}).length).toBe(1);
     expect(wrapper.find({'data-test-id': 'criteria-count'}).first().props().children).toBe(2);
   });
 });
