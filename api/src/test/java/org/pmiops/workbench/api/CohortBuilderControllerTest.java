@@ -27,11 +27,13 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DomainType;
+import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
@@ -497,7 +499,7 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void getDrugBrandOrIngredientByName() {
+  public void findDrugBrandOrIngredientByName() {
     DbCriteria drugATCCriteria =
         DbCriteria.builder()
             .addDomainId(DomainType.DRUG.toString())
@@ -574,6 +576,57 @@ public class CohortBuilderControllerTest {
             .getItems();
     assertTrue(attrs.contains(createResponseCriteriaAttribute(criteriaAttributeMin)));
     assertTrue(attrs.contains(createResponseCriteriaAttribute(criteriaAttributeMax)));
+  }
+
+  @Test
+  public void findParticipantDemographics() {
+    cbCriteriaDao.save(
+        DbCriteria.builder()
+            .addDomainId(DomainType.PERSON.toString())
+            .addType(CriteriaType.GENDER.toString())
+            .addName("Male")
+            .addStandard(true)
+            .addConceptId("1")
+            .addParentId(1)
+            .build());
+    cbCriteriaDao.save(
+        DbCriteria.builder()
+            .addDomainId(DomainType.PERSON.toString())
+            .addType(CriteriaType.RACE.toString())
+            .addName("African American")
+            .addStandard(true)
+            .addConceptId("2")
+            .addParentId(1)
+            .build());
+    cbCriteriaDao.save(
+        DbCriteria.builder()
+            .addDomainId(DomainType.PERSON.toString())
+            .addType(CriteriaType.ETHNICITY.toString())
+            .addName("Not Hispanic or Latino")
+            .addStandard(true)
+            .addConceptId("3")
+            .addParentId(1)
+            .build());
+    cbCriteriaDao.save(
+        DbCriteria.builder()
+            .addDomainId(DomainType.PERSON.toString())
+            .addType(CriteriaType.SEX.toString())
+            .addName("Male")
+            .addStandard(true)
+            .addConceptId("4")
+            .addParentId(1)
+            .build());
+    ParticipantDemographics demos = controller.findParticipantDemographics(1L).getBody();
+    assertEquals(
+        new ConceptIdName().conceptId(1L).conceptName("Male"), demos.getGenderList().get(0));
+    assertEquals(
+        new ConceptIdName().conceptId(2L).conceptName("African American"),
+        demos.getRaceList().get(0));
+    assertEquals(
+        new ConceptIdName().conceptId(3L).conceptName("Not Hispanic or Latino"),
+        demos.getEthnicityList().get(0));
+    assertEquals(
+        new ConceptIdName().conceptId(4L).conceptName("Male"), demos.getSexAtBirthList().get(0));
   }
 
   @Test

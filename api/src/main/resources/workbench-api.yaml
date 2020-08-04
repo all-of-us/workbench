@@ -6452,6 +6452,7 @@ definitions:
     - BIRTHDATE
     - RACE
     - ETHNICITY
+    - SEX_AT_BIRTH
     - DECEASED
     - START_DATETIME
     - STANDARD_CODE
@@ -7493,6 +7494,7 @@ definitions:
     - genderList
     - raceList
     - ethnicityList
+    - sexAtBirthList
     properties:
       genderList:
         type: array
@@ -7503,6 +7505,10 @@ definitions:
         items:
           "$ref": "#/definitions/ConceptIdName"
       ethnicityList:
+        type: array
+        items:
+          "$ref": "#/definitions/ConceptIdName"
+      sexAtBirthList:
         type: array
         items:
           "$ref": "#/definitions/ConceptIdName"
