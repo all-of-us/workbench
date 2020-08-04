@@ -323,7 +323,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         TO_CLIENT_COHORTREVIEW_WITH_PAGING.apply(cohortReview, pageRequest);
     responseReview.setParticipantCohortStatuses(
         paginatedPCS.stream()
-            .map(pcs -> TO_CLIENT_PARTICIPANT.apply(pcs, getGenderRaceEthnicityMap()))
+            .map(pcs -> TO_CLIENT_PARTICIPANT.apply(pcs, getAllDemographicsMap()))
             .collect(Collectors.toList()));
     return ResponseEntity.ok(responseReview);
   }
@@ -507,7 +507,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     DbParticipantCohortStatus status =
         cohortReviewService.findParticipantCohortStatus(review.getCohortReviewId(), participantId);
-    return ResponseEntity.ok(TO_CLIENT_PARTICIPANT.apply(status, getGenderRaceEthnicityMap()));
+    return ResponseEntity.ok(TO_CLIENT_PARTICIPANT.apply(status, getAllDemographicsMap()));
   }
 
   /**
@@ -547,7 +547,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         TO_CLIENT_COHORTREVIEW_WITH_PAGING.apply(cohortReview, pageRequest);
     responseReview.setParticipantCohortStatuses(
         participantCohortStatuses.stream()
-            .map(pcs -> TO_CLIENT_PARTICIPANT.apply(pcs, getGenderRaceEthnicityMap()))
+            .map(pcs -> TO_CLIENT_PARTICIPANT.apply(pcs, getAllDemographicsMap()))
             .collect(Collectors.toList()));
     responseReview.setQueryResultSize(queryResultSize);
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
@@ -712,7 +712,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     cohortReviewService.saveCohortReview(cohortReview);
 
     return ResponseEntity.ok(
-        TO_CLIENT_PARTICIPANT.apply(participantCohortStatus, getGenderRaceEthnicityMap()));
+        TO_CLIENT_PARTICIPANT.apply(participantCohortStatus, getAllDemographicsMap()));
   }
 
   /**
@@ -814,9 +814,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .creator(creator);
   }
 
-  /** Build a map that contains all gender/race/ethnicity names with the concept id as the key. */
-  private Map<Long, String> getGenderRaceEthnicityMap() {
-    return cbCriteriaDao.findGenderRaceEthnicity().stream()
+  /**
+   * Build a map that contains all gender/race/ethnicity/sex_at_birth names with the concept id as
+   * the key.
+   */
+  private Map<Long, String> getAllDemographicsMap() {
+    return cbCriteriaDao.findAllDemographics().stream()
         .collect(
             Collectors.toMap(
                 DbCriteria::getLongConceptId,

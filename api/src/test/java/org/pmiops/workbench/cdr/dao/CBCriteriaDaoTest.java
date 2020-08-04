@@ -39,6 +39,9 @@ public class CBCriteriaDaoTest {
   private DbCriteria raceParent;
   private DbCriteria raceAsian;
   private DbCriteria raceWhite;
+  private DbCriteria gender;
+  private DbCriteria ethnicity;
+  private DbCriteria sexAtBirth;
 
   @Before
   public void setUp() {
@@ -133,6 +136,33 @@ public class CBCriteriaDaoTest {
                 .addName("White")
                 .addStandard(true)
                 .addParentId(raceParent.getId())
+                .build());
+    gender =
+        cbCriteriaDao.save(
+            DbCriteria.builder()
+                .addDomainId(DomainType.PERSON.toString())
+                .addType(CriteriaType.GENDER.toString())
+                .addName("Male")
+                .addStandard(true)
+                .addParentId(1)
+                .build());
+    ethnicity =
+        cbCriteriaDao.save(
+            DbCriteria.builder()
+                .addDomainId(DomainType.PERSON.toString())
+                .addType(CriteriaType.ETHNICITY.toString())
+                .addName("Not Hispanic or Latino")
+                .addStandard(true)
+                .addParentId(1)
+                .build());
+    sexAtBirth =
+        cbCriteriaDao.save(
+            DbCriteria.builder()
+                .addDomainId(DomainType.PERSON.toString())
+                .addType(CriteriaType.SEX.toString())
+                .addName("Male")
+                .addStandard(true)
+                .addParentId(1)
                 .build());
   }
 
@@ -260,9 +290,9 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findGenderRaceEthnicity() {
-    List<DbCriteria> criteriaList = cbCriteriaDao.findGenderRaceEthnicity();
-    assertThat(criteriaList).containsExactly(raceAsian, raceWhite);
+  public void findParticipantDemographics() {
+    List<DbCriteria> criteriaList = cbCriteriaDao.findAllDemographics();
+    assertThat(criteriaList).containsExactly(gender, sexAtBirth, ethnicity, raceAsian, raceWhite);
   }
 
   @Test
@@ -306,12 +336,27 @@ public class CBCriteriaDaoTest {
 
     DbMenuOption option5 = options.get(4);
     assertThat(option5.getDomain()).isEqualTo(DomainType.PERSON.toString());
-    assertThat(option5.getType()).isEqualTo("RACE");
+    assertThat(option5.getType()).isEqualTo("ETHNICITY");
     assertThat(option5.getStandard()).isTrue();
 
     DbMenuOption option6 = options.get(5);
-    assertThat(option6.getDomain()).isEqualTo(DomainType.SURVEY.toString());
-    assertThat(option6.getType()).isEqualTo("PPI");
-    assertThat(option6.getStandard()).isFalse();
+    assertThat(option6.getDomain()).isEqualTo(DomainType.PERSON.toString());
+    assertThat(option6.getType()).isEqualTo("GENDER");
+    assertThat(option6.getStandard()).isTrue();
+
+    DbMenuOption option7 = options.get(6);
+    assertThat(option7.getDomain()).isEqualTo(DomainType.PERSON.toString());
+    assertThat(option7.getType()).isEqualTo("RACE");
+    assertThat(option7.getStandard()).isTrue();
+
+    DbMenuOption option8 = options.get(7);
+    assertThat(option8.getDomain()).isEqualTo(DomainType.PERSON.toString());
+    assertThat(option8.getType()).isEqualTo("SEX");
+    assertThat(option8.getStandard()).isTrue();
+
+    DbMenuOption option9 = options.get(8);
+    assertThat(option9.getDomain()).isEqualTo(DomainType.SURVEY.toString());
+    assertThat(option9.getType()).isEqualTo("PPI");
+    assertThat(option9.getStandard()).isFalse();
   }
 }
