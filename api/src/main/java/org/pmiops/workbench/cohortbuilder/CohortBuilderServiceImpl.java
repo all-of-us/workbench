@@ -260,7 +260,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   @Override
   public ParticipantDemographics findParticipantDemographics() {
-    List<DbCriteria> criteriaList = cbCriteriaDao.findGenderRaceEthnicitySexAtBirth();
+    List<DbCriteria> criteriaList = cbCriteriaDao.findParticipantDemographics();
     return new ParticipantDemographics()
         .genderList(buildConceptIdNameList(criteriaList, GENDER))
         .raceList(buildConceptIdNameList(criteriaList, RACE))

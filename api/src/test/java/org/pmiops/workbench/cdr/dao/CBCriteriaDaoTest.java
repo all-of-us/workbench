@@ -290,8 +290,8 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findGenderRaceEthnicitySexAtBirth() {
-    List<DbCriteria> criteriaList = cbCriteriaDao.findGenderRaceEthnicitySexAtBirth();
+  public void findParticipantDemographics() {
+    List<DbCriteria> criteriaList = cbCriteriaDao.findParticipantDemographics();
     assertThat(criteriaList).containsExactly(gender, sexAtBirth, ethnicity, raceAsian, raceWhite);
   }
 
