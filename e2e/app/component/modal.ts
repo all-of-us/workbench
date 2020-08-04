@@ -6,6 +6,8 @@ import Textarea from 'app/element/textarea';
 import Checkbox from 'app/element/checkbox';
 import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
 import {LinkText} from 'app/text-labels';
+import {getPropValue} from 'utils/element-utils';
+
 import * as fp from 'lodash/fp';
 
 const Selector = {
@@ -34,7 +36,7 @@ export default class Modal extends Container {
     // xpath that excludes button labels and spans
     // '//*[@role="dialog"]//div[normalize-space(text()) and not(@role="button")]'
     const modal = await this.waitUntilVisible();
-    const modalText = await (await modal.getProperty('innerText')).jsonValue();
+    const modalText = await getPropValue<string>(modal, 'innerText');
     console.debug('Modal: \n' + modalText);
     return modalText.toString();
   }

@@ -122,7 +122,7 @@ xdescribe('User can create new Cohorts', () => {
     const dataPage = new DataPage(page);
 
     // Save url
-    const workspaceDataUrl = await page.url();
+    const workspaceDataUrl = page.url();
 
     // Click Add Cohorts button
     const addCohortsButton = await dataPage.getAddCohortsButton();

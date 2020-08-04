@@ -15,8 +15,8 @@ const timeOut = parseInt(process.env.PUPPETEER_TIMEOUT, 10) || 90000;
 beforeEach(async () => {
   await page.setUserAgent(userAgent);
   // See https://github.com/puppeteer/puppeteer/blob/master/docs/api.md#pagesetdefaultnavigationtimeouttimeout
-  await page.setDefaultNavigationTimeout(navTimeOut);
-  await page.setDefaultTimeout(timeOut);
+  page.setDefaultNavigationTimeout(navTimeOut);
+  page.setDefaultTimeout(timeOut);
 });
 
 /**

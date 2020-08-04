@@ -13,6 +13,7 @@ import {config} from 'resources/workbench-config';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
 import {LinkText} from 'app/text-labels';
+import {getPropValue} from 'utils/element-utils';
 
 const faker = require('faker/locale/en_US');
 
@@ -133,9 +134,9 @@ export default class CreateAccountPage extends BasePage {
     return await Textarea.findByName(this.page, {normalizeSpace: LabelAlias.ResearchBackground});
   }
 
-  async getUsernameDomain(): Promise<unknown> {
+  async getUsernameDomain(): Promise<string> {
     const elem = await this.page.waitForXPath('//*[./input[@id="username"]]/i');
-    return await (await elem.getProperty('innerText')).jsonValue();
+    return getPropValue<string>(elem, 'innerText');
   }
 
   async fillInFormFields(fields: { label: string; value: string; }[]): Promise<string> {
