@@ -147,9 +147,7 @@ export default class BaseElement extends Container {
 
   async click(): Promise<void> {
     const elemt = await this.asElementHandle()
-    await this.page.evaluate((el) => {
-      return el.click()
-    }, elemt);
+    await this.page.evaluate((el) => el.click(), elemt);
   }
 
   /**
