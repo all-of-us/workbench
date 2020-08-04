@@ -11,7 +11,8 @@ import {findWorkspace, signIn} from 'utils/test-utils';
 import Link from 'app/element/link';
 
 
-describe('Editing and Copying Concept Sets', () => {
+// TODO(RW-5345): Fix and re-enable.
+xdescribe('Editing and Copying Concept Sets', () => {
 
   beforeEach(async () => {
     await signIn(page);
