@@ -108,7 +108,7 @@ export default class GoogleLoginPage {
   async login(email?: string, paswd?: string) {
     const user = email || config.userEmail;
     const pwd = paswd || config.userPassword;
-
+    console.log(user);
     try {
       await this.load(); // load the Google Sign In page
       const googleLoginButton = await this.loginButton().catch((err) => {
