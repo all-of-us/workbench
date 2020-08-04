@@ -7,7 +7,7 @@ import {ElementHandle, JSHandle, Page} from 'puppeteer';
  * @param {string} attribute Attribute name.
  */
 export const getAttrValue = async (page: Page, element: ElementHandle, attribute: string): Promise<string> => {
-  return page.evaluate((link, attr) => {return link.getAttribute(attr)}, element, attribute);
+  return page.evaluate((elemt, attr) => {return elemt.getAttribute(attr)}, element, attribute);
 }
 
 /**
@@ -25,6 +25,6 @@ export async function getPropValue<T> (element: ElementHandle, property: string)
  * @param {Page} page Instance of Puppeteer page object.
  * @param {ElementHandle} element Element.
  */
-export const waitUntilChanged = async (page: Page, element: ElementHandle): Promise<JSHandle> => {
+export async function waitUntilChanged (page: Page, element: ElementHandle): Promise<JSHandle> {
   return page.waitForFunction(elemt => !elemt.ownerDocument.contains(elemt), {polling: 'raf'}, element);
 }
