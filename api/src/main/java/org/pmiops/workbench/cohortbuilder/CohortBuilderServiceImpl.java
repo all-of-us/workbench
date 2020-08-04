@@ -311,7 +311,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   private List<ConceptIdName> buildConceptIdNameList(
       List<DbCriteria> criteriaList, FilterColumns columnName) {
     return criteriaList.stream()
-        .filter(c -> c.getType().equals(columnName.toString()))
+        .filter(c -> columnName.toString().startsWith(c.getType()))
         .map(
             c -> new ConceptIdName().conceptId(new Long(c.getConceptId())).conceptName(c.getName()))
         .collect(Collectors.toList());

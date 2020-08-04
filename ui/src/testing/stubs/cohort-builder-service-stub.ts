@@ -70,7 +70,7 @@ export class CohortBuilderServiceStub extends CohortBuilderApi {
   }
 
   findParticipantDemographics(): Promise<ParticipantDemographics> {
-    return new Promise<ParticipantDemographics>(resolve => resolve({genderList: [], ethnicityList: [], raceList: []}));
+    return new Promise<ParticipantDemographics>(resolve => resolve({genderList: [], ethnicityList: [], raceList: [], sexAtBirthList: []}));
   }
 
   findCriteriaMenuOptions(): Promise<CriteriaMenuOptionsListResponse> {
