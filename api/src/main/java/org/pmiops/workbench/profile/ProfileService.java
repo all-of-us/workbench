@@ -1,14 +1,21 @@
 package org.pmiops.workbench.profile;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.function.Predicate;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
@@ -98,38 +105,29 @@ public class ProfileService {
     this.verifiedInstitutionalAffiliationMapper = verifiedInstitutionalAffiliationMapper;
   }
 
-  public Profile getProfile(DbUser user) {
+  // TODO: avoid all these separate queries by appropriate ORM mappings
+  public Profile getProfile(DbUser userLite) {
     // Fetch the user's authorities, since they aren't loaded during normal request interception.
-    DbUser userWithAuthoritiesAndPageVisits =
-        userDao.findUserWithAuthoritiesAndPageVisits(user.getUserId());
-    if (userWithAuthoritiesAndPageVisits != null) {
-      // If the user is already written to the database, use it and whatever authorities and page
-      // visits are there.
-      user = userWithAuthoritiesAndPageVisits;
-    }
+    final DbUser user =
+        userService.findUserWithAuthoritiesAndPageVisits(userLite.getUserId()).orElse(userLite);
 
-    Profile profile = profileMapper.dbUserToProfile(user);
+    final @Nullable Double freeTierUsage = freeTierBillingService.getCachedFreeTierUsage(user);
+    final @Nullable Double freeTierDollarQuota =
+        freeTierBillingService.getUserFreeTierDollarLimit(user);
+    final @Nullable VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
+        verifiedInstitutionalAffiliationDao
+            .findFirstByUser(user)
+            .map(verifiedInstitutionalAffiliationMapper::dbToModel)
+            .orElse(null);
 
-    profile.setFreeTierUsage(freeTierBillingService.getCachedFreeTierUsage(user));
-    profile.setFreeTierDollarQuota(freeTierBillingService.getUserFreeTierDollarLimit(user));
-
-    verifiedInstitutionalAffiliationDao
-        .findFirstByUser(user)
-        .ifPresent(
-            verifiedInstitutionalAffiliation ->
-                profile.setVerifiedInstitutionalAffiliation(
-                    verifiedInstitutionalAffiliationMapper.dbToModel(
-                        verifiedInstitutionalAffiliation)));
-
-    Optional<DbUserTermsOfService> latestTermsOfServiceMaybe =
-        userTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(user.getUserId());
-    if (latestTermsOfServiceMaybe.isPresent()) {
-      profile.setLatestTermsOfServiceVersion(latestTermsOfServiceMaybe.get().getTosVersion());
-      profile.setLatestTermsOfServiceTime(
-          latestTermsOfServiceMaybe.get().getAgreementTime().getTime());
-    }
-
-    return profile;
+    final @Nullable DbUserTermsOfService latestTermsOfService =
+        userTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(user.getUserId()).orElse(null);
+    return profileMapper.toModel(
+        user,
+        verifiedInstitutionalAffiliation,
+        latestTermsOfService,
+        freeTierUsage,
+        freeTierDollarQuota);
   }
 
   public void validateAffiliation(Profile profile) {
@@ -232,19 +230,25 @@ public class ProfileService {
 
     userService.updateUserWithConflictHandling(user);
 
+    // FIXME: why not do a getOrCreateAffiliation() here and then update that object & save?
+
     // Save the verified institutional affiliation in the DB. The affiliation has already been
     // verified as part of the `validateProfile` call.
-    DbVerifiedInstitutionalAffiliation updatedDbVerifiedAffiliation =
+    DbVerifiedInstitutionalAffiliation newAffiliation =
         verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
             updatedProfile.getVerifiedInstitutionalAffiliation(), institutionService);
-    updatedDbVerifiedAffiliation.setUser(user);
-    Optional<DbVerifiedInstitutionalAffiliation> dbVerifiedAffiliation =
-        verifiedInstitutionalAffiliationDao.findFirstByUser(user);
-    dbVerifiedAffiliation.ifPresent(
-        verifiedInstitutionalAffiliation ->
-            updatedDbVerifiedAffiliation.setVerifiedInstitutionalAffiliationId(
-                verifiedInstitutionalAffiliation.getVerifiedInstitutionalAffiliationId()));
-    this.verifiedInstitutionalAffiliationDao.save(updatedDbVerifiedAffiliation);
+    newAffiliation.setUser(
+        user); // Why are we calling a non-user mapping function and then adding a user?
+
+    // This is 1:1 in terms of our current usage, but not modelled that way (aside from the unique
+    // constraint on user_id).
+
+    // If this user already has an affiliation, replace the ID of hte
+    verifiedInstitutionalAffiliationDao
+        .findFirstByUser(user)
+        .map(DbVerifiedInstitutionalAffiliation::getVerifiedInstitutionalAffiliationId)
+        .ifPresent(newAffiliation::setVerifiedInstitutionalAffiliationId);
+    this.verifiedInstitutionalAffiliationDao.save(newAffiliation);
 
     final Profile appliedUpdatedProfile = getProfile(user);
     profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);
@@ -393,15 +397,16 @@ public class ProfileService {
    * @return true if the Profile is new
    */
   private boolean isNewProfile(Diff diff) {
-    final Predicate<Change> newProfilePred =
-        change ->
-            change instanceof NewObject
-                && change
-                    .getAffectedGlobalId()
-                    .getTypeName()
-                    .equals(Profile.class.getCanonicalName());
 
-    return diff.getChanges(newProfilePred).size() > 0;
+    return diff.getChanges(
+                change ->
+                    change instanceof NewObject
+                        && change
+                            .getAffectedGlobalId()
+                            .getTypeName()
+                            .equals(Profile.class.getCanonicalName()))
+            .size()
+        > 0;
   }
 
   /**
@@ -501,10 +506,44 @@ public class ProfileService {
     validateProfileForCorrectness(dummyProfile, profile);
   }
 
+  // Get all the profiles. Best we can do without surgery on the entity classes is to do one query
+  // per table and join them in code.
   public List<Profile> listAllProfiles() {
-    return userService.getAllUsers().stream().map(this::getProfile).collect(Collectors.toList());
-  }
+    final Set<DbUser> usersHeavy = userService.findAllUsersWithAuthoritiesAndPageVisits();
+    final Map<Long, VerifiedInstitutionalAffiliation> userIdToAffiliationModel =
+        StreamSupport.stream(verifiedInstitutionalAffiliationDao.findAll().spliterator(), false)
+            .map(
+                dbAffiliation ->
+                    new AbstractMap.SimpleImmutableEntry<>(
+                        dbAffiliation.getUser().getUserId(),
+                        verifiedInstitutionalAffiliationMapper.dbToModel(dbAffiliation)))
+            .collect(ImmutableMap.toImmutableMap(Entry::getKey, Entry::getValue));
 
+    final Map<Long, DbUserTermsOfService> userIdToTermsOfService =
+        StreamSupport.stream(userTermsOfServiceDao.findAll().spliterator(), false)
+            .collect(
+                ImmutableMap.toImmutableMap(DbUserTermsOfService::getUserId, Function.identity()));
+
+    // The cached free tier usage aka total cost for each user, by ID
+    final Map<Long, Double> userIdToFreeTierUsage = freeTierBillingService.getUserIdToTotalCost();
+
+    final Map<Long, Double> userIdToQuota =
+        usersHeavy.stream()
+            .collect(
+                ImmutableMap.toImmutableMap(
+                    DbUser::getUserId, freeTierBillingService::getUserFreeTierDollarLimit));
+
+    return usersHeavy.stream()
+        .map(
+            dbUser ->
+                profileMapper.toModel(
+                    dbUser,
+                    userIdToAffiliationModel.get(dbUser.getUserId()),
+                    userIdToTermsOfService.get(dbUser.getUserId()),
+                    userIdToFreeTierUsage.get(dbUser.getUserId()),
+                    userIdToQuota.get(dbUser.getUserId())))
+        .collect(ImmutableList.toImmutableList());
+  }
   /**
    * Updates the user metadata referenced by the fields of AccountPropertyUpdate.
    *

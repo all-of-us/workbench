@@ -344,4 +344,8 @@ public class FreeTierBillingService {
 
     return false;
   }
+
+  public Map<Long, Double> getUserIdToTotalCost() {
+    return workspaceFreeTierUsageDao.getUserIdToTotalCost();
+  }
 }

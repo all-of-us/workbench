@@ -1033,4 +1033,14 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     // DEVELOPER is the super-authority which subsumes all others
     return userAuthorities.contains(Authority.DEVELOPER) || userAuthorities.contains(required);
   }
+
+  @Override
+  public Optional<DbUser> findUserWithAuthoritiesAndPageVisits(long userId) {
+    return Optional.ofNullable(userDao.findUserWithAuthoritiesAndPageVisits(userId));
+  }
+
+  @Override
+  public Set<DbUser> findAllUsersWithAuthoritiesAndPageVisits() {
+    return userDao.findAllUsersWithAuthoritiesAndPageVisits();
+  }
 }

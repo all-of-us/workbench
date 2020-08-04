@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.db.model.DbAddress;
@@ -116,4 +117,8 @@ public interface UserService {
   void updateBypassTime(long userDatabaseId, AccessBypassRequest accessBypassRequest);
 
   boolean hasAuthority(long userId, Authority required);
+
+  Set<DbUser> findAllUsersWithAuthoritiesAndPageVisits();
+
+  Optional<DbUser> findUserWithAuthoritiesAndPageVisits(long userId);
 }
