@@ -43,7 +43,7 @@ cb_cri_anc_table_check=\\bcb_criteria_ancestor\\b
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
-create_tables=(concept concept_relationship cb_criteria cb_criteria_attribute cb_criteria_relationship cb_criteria_ancestor domain_info survey_module domain vocabulary concept_synonym cb_person cb_data_filter)
+create_tables=(concept cb_criteria cb_criteria_attribute cb_criteria_relationship cb_criteria_ancestor domain_info survey_module domain vocabulary concept_synonym cb_person cb_data_filter)
 
 for t in "${create_tables[@]}"
 do
@@ -543,16 +543,6 @@ FROM
         GROUP BY 1
     ) y
 WHERE x.concept_id = y.ancestor_concept_id"
-
-########################
-# concept_relationship #
-########################
-echo "Inserting concept_relationship"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept_relationship\`
- (concept_id_1, concept_id_2, relationship_id)
-SELECT c.concept_id_1, c.concept_id_2, c.relationship_id
-FROM \`$BQ_PROJECT.$BQ_DATASET.concept_relationship\` c"
 
 ########################
 # concept_synonym #
