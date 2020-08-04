@@ -2,10 +2,13 @@ import {ActionAuditCardBase} from 'app/components/card';
 import {FlexRow} from 'app/components/flex';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
+import {usernameWithoutDomain} from 'app/utils/audit-utils';
 import {
-  AuditAction, AuditAgent,
+  AuditAction,
+  AuditAgent,
   AuditEventBundle,
-  AuditEventBundleHeader, AuditTarget,
+  AuditEventBundleHeader,
+  AuditTarget,
   AuditTargetPropertyChange
 } from 'generated';
 import * as fp from 'lodash/fp';
@@ -21,6 +24,15 @@ const HideableCell = (props: {content: string}) => {
       }}>{content}</div>;
 };
 
+const HideableLinkCell = (props: {url: string, content: string}) => {
+  const {content, url} = props;
+  return <a
+      style={{backgroundColor: content ? 'white' : '#f0f3f5',
+        border: '1px solid',
+        boxSizing: 'border-box'}}
+        href={url}>{content}</a>;
+};
+
 const styles = reactStyles({
   propertyCell: {
     fontWeight: 600,
@@ -28,19 +40,43 @@ const styles = reactStyles({
   }
 });
 
-const PropertyChangeListEntry = (props: {targetProperty?: string, previousValue?: string, newValue?: string}) => {
-  const {targetProperty, previousValue, newValue} = props;
-  return <React.Fragment>
-    <HideableCell content={targetProperty}/>
-    <HideableCell content={previousValue}/>
-    <HideableCell content={newValue}/>
-  </React.Fragment>;
+const isWorkspaceNamespace = (targetType?: string, targetProperty?: string) => {
+  return targetType === 'WORKSPACE' && targetProperty === 'namespace';
 };
 
-const PropertyChangeListView = (props: { propertyChanges: AuditTargetPropertyChange[] }) => {
-  const {propertyChanges} = props;
+const PossibleLinkCell = (props: {targetType?: string, targetProperty?: string, value?: string}) => {
+  const {targetType, targetProperty, value} = props;
+  if (isWorkspaceNamespace(targetType, targetProperty)) {
+    return <HideableLinkCell url={`/admin/workspace-audit/${value}`} content={value}/>;
+  } else {
+    return <HideableCell content={value}/>;
+  }
+};
 
-  return propertyChanges.length > 0
+function isUserDrivenChange(newValue: string, previousValue: string) {
+  return !(fp.isEmpty(newValue) && fp.isEmpty(previousValue));
+}
+
+const PropertyChangeListEntry = (props: {targetProperty?: string, previousValue?: string,
+  newValue?: string, targetType?: string}) => {
+  const {targetProperty, previousValue, newValue, targetType} = props;
+  // On the backend, fields are initialized to null but sometimes re-initialized to
+  // empty strings. Since it's not a user-driven change, I'm dropping those rows from the output.
+  return isUserDrivenChange(newValue, previousValue)
+      && <React.Fragment>
+      <HideableCell content={targetProperty}/>
+      <HideableCell content={previousValue}/>
+      <PossibleLinkCell targetType={targetType}
+                        targetProperty={targetProperty}
+                        value={newValue}/>
+    </React.Fragment>;
+};
+
+const PropertyChangeListView = (props: { eventBundle: AuditEventBundle }) => {
+  const {header, propertyChanges} = props.eventBundle;
+
+  return (propertyChanges.length > 0)
+    && fp.any((p: AuditTargetPropertyChange) => isUserDrivenChange(p.newValue, p.previousValue))(propertyChanges)
       ? <div style={{
         marginTop: '0.25rem',
         marginLeft: '1rem',
@@ -50,10 +86,25 @@ const PropertyChangeListView = (props: { propertyChanges: AuditTargetPropertyCha
     <div style={styles.propertyCell}>Changed Property</div>
     <div style={styles.propertyCell}>Previous Value</div>
     <div style={styles.propertyCell}>New Value</div>
-    {propertyChanges.map((propertyChange, index) =>
-        <PropertyChangeListEntry {...propertyChange} key={index}/>)}
+        {fp.flow(
+          fp.toPairs,
+          fp.map(([index, {targetProperty, newValue, previousValue}]) =>
+              <PropertyChangeListEntry targetProperty={targetProperty}
+                previousValue={previousValue}
+                newValue={newValue}
+                targetType={header.target.targetType}
+                key={index}/>
+            ))(propertyChanges)
+        }
   </div>
       : <div style={{margin: '0.25rem 0 0rem 1rem', fontStyle: 'italic'}}>No Property Changes</div>;
+};
+
+const AgentUsernameCell = (props: {agent: AuditAgent}) => {
+  const {agentType, agentUsername} = props.agent;
+  return agentType === 'USER'
+      ? <div><a href={`/admin/user-audit/${usernameWithoutDomain(agentUsername)}`}>{agentUsername}</a></div>
+      : <div>agentUsername</div>;
 };
 
 const AgentHeader = (props: {agent: AuditAgent}) => {
@@ -61,7 +112,7 @@ const AgentHeader = (props: {agent: AuditAgent}) => {
   return <React.Fragment>
     <div style={{fontWeight: 600}}>Agent</div>
     <div>{`${agent.agentType} ${agent.agentId}`}</div>
-    <div>{agent.agentUsername}</div>
+    <AgentUsernameCell agent={agent}/>
   </React.Fragment>;
 };
 
@@ -109,7 +160,7 @@ const EventBundleView = (props: {eventBundle: AuditEventBundle}) => {
   const {eventBundle} = props;
   return <div style={{marginBottom: '1rem'}}>
     <AuditEventBundleHeaderView header={eventBundle.header}/>
-    <PropertyChangeListView propertyChanges={eventBundle.propertyChanges}/>
+    <PropertyChangeListView eventBundle={eventBundle}/>
   </div>;
 };
 
