@@ -48,6 +48,7 @@ export default class Modal extends Container {
     const { waitForNav = false, waitForClose = false } = waitOptions;
     const button = await this.waitForButton(buttonLabel);
     await button.waitUntilEnabled();
+    await button.focus();
     await Promise.all( fp.flow(
        fp.filter<{shouldWait: boolean, waitFn: () => Promise<void>}>('shouldWait'),
        fp.map(item => item.waitFn()),
