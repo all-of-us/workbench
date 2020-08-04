@@ -5,7 +5,7 @@ import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
-import colors from 'app/styles/colors';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {withCurrentCohortCriteria} from 'app/utils';
 import {reactStyles} from 'app/utils';
 import {currentCohortCriteriaStore, serverConfigStore} from 'app/utils/navigation';
@@ -33,8 +33,7 @@ const styles = reactStyles({
     flex: 1,
     display: 'flex',
     flexFlow: 'row nowrap',
-    justifyContent: 'flex-start',
-    color: colors.accent
+    justifyContent: 'flex-start'
   },
   itemName: {
     flex: 1,
@@ -75,7 +74,28 @@ const styles = reactStyles({
     color: colors.primary,
     margin: 0,
     padding: '0.5rem 0'
-  }
+  },
+  // Remove the following styles once enableCohortBuilderV2 is set to true
+  selectionContainerModal: {
+    background: colors.white,
+    border: `2px solid ${colors.primary}`,
+    borderRadius: '5px',
+    height: 'calc(100% - 150px)',
+    overflowX: 'hidden',
+    overflowY: 'auto',
+    width: '95%',
+  },
+  selectionPanelModal: {
+    background: colorWithWhiteness(colors.black, 0.95),
+    height: '100%',
+    padding: '0.5rem 0 0 1rem',
+  },
+  selectionItemModal: {
+    display: 'flex',
+    fontSize: '14px',
+    padding: '0.2rem 0.5rem 0',
+    width: '100%',
+  },
 });
 
 export interface Selection extends Criteria {
@@ -124,7 +144,7 @@ export class SelectionInfoModal extends React.Component<SelectionInfoProps, Sele
       {this.showType && <strong>{typeDisplay(selection)}&nbsp;</strong>}
       {nameDisplay(selection)} {attributeDisplay(selection)}
     </React.Fragment>;
-    return <div style={styles.selectionItem}>
+    return <div style={styles.selectionItemModal}>
       <button style={styles.removeSelection} onClick={() => removeSelection()}>
         <ClrIcon shape='times-circle'/>
       </button>
@@ -223,16 +243,16 @@ export class SelectionListModalVersion extends React.Component<Props> {
 
   render() {
     const {back, close, disableFinish, finish, removeSelection, selections, setView} = this.props;
-    return <div style={styles.selectionPanel}>
+    return <div style={styles.selectionPanelModal}>
       <h5 style={styles.selectionTitle}>Selected Criteria</h5>
-      <div style={styles.selectionContainer}>
+      <div style={styles.selectionContainerModal}>
         {selections.map((selection, s) =>
             <SelectionInfoModal key={s}
                            index={s}
                            selection={selection}
                            removeSelection={() => removeSelection(selection)}/>
         )}
-      </div>}
+      </div>
       {!serverConfigStore.getValue().enableCohortBuilderV2 && <div style={styles.buttonContainer}>
         <Button type='link'
           style={{...styles.button, color: colors.dark, fontSize: '14px'}}
