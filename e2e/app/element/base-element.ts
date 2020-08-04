@@ -1,5 +1,6 @@
 import {ClickOptions, ElementHandle, Page, WaitForSelectorOptions} from 'puppeteer';
 import Container from 'app/container';
+import {getPropValue} from '../../utils/element-utils';
 
 
 /**
@@ -146,7 +147,9 @@ export default class BaseElement extends Container {
   }
 
   async click(): Promise<void> {
-    const elemt = await this.asElementHandle()
+    const elemt = await this.asElementHandle();
+    const txxt = await getPropValue(elemt, 'textContent');
+    console.log(txxt);
     await this.page.evaluate((el) => el.click(), elemt);
   }
 
