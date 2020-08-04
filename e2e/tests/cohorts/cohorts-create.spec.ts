@@ -10,7 +10,8 @@ import DataResourceCard from 'app/component/data-resource-card';
 import Button from 'app/element/button';
 
 
-describe('User can create new Cohorts', () => {
+// TODO(RW-5345): Fix and re-enable.
+xdescribe('User can create new Cohorts', () => {
 
   beforeEach(async () => {
     await signIn(page);
