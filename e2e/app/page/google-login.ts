@@ -67,6 +67,7 @@ export default class GoogleLoginPage {
 
     const emailInput = await this.email();
     await emailInput.focus();
+    console.log(userEmail);
     await emailInput.type(userEmail);
 
     const nextButton = await this.page.waitForXPath(FieldSelector.NextButton);
@@ -108,7 +109,7 @@ export default class GoogleLoginPage {
   async login(email?: string, paswd?: string) {
     const user = email || config.userEmail;
     const pwd = paswd || config.userPassword;
-    console.log(user);
+
     try {
       await this.load(); // load the Google Sign In page
       const googleLoginButton = await this.loginButton().catch((err) => {
