@@ -1,5 +1,6 @@
 import {ElementHandle, Page} from 'puppeteer';
 import Container from 'app/container';
+import {getPropValue} from 'utils/element-utils';
 
 // Table column names
 export enum TableColumn {
@@ -45,8 +46,7 @@ export default class Table extends Container {
 
   async getCellValue(rowIndex: number, columnIndex: number): Promise<string> {
     const handle = await this.getCell(rowIndex, columnIndex);
-    const prop = await handle.getProperty('innerText')
-    return (await prop.jsonValue()).toString();
+    return getPropValue<string>(handle, 'innerText');
   }
 
   async getRows(): Promise<ElementHandle[]> {
@@ -86,9 +86,8 @@ export default class Table extends Container {
     const columns = await this.getColumns();
     const columnNames = [];
     for (const column of columns) {
-      const textContent = await column.getProperty('innerText');
-      const value = await textContent.jsonValue();
-      columnNames.push(value.toString());
+      const textContent = await getPropValue<string>(column, 'innerText');
+      columnNames.push(textContent);
       await column.dispose();
     }
     return columnNames;

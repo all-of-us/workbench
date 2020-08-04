@@ -2,6 +2,7 @@ import {ElementHandle, Page} from 'puppeteer';
 import EllipsisMenu from 'app/component/ellipsis-menu';
 import * as fp from 'lodash/fp';
 import {waitWhileLoading} from 'utils/test-utils';
+import {getPropValue} from 'utils/element-utils';
 
 const DataResourceCardSelector = {
   cardRootXpath: '//*[@data-test-id="card"]',
@@ -96,10 +97,7 @@ export default class DataResourceCard {
 
   async getResourceName(): Promise<string> {
     const elemt = await this.cardElement.$x(`.//*[${DataResourceCardSelector.cardNameXpath}]`);
-    const jHandle = await elemt[0].getProperty('innerText');
-    const name = await jHandle.jsonValue();
-    await jHandle.dispose();
-    return name.toString();
+    return getPropValue<string>(elemt[0], 'innerText');
   }
 
   asElementHandle(): ElementHandle {
@@ -113,9 +111,9 @@ export default class DataResourceCard {
   /**
    * Find card type: Cohort, Datasets or Concept Sets.
    */
-  async getCardType() : Promise<unknown> {
+  async getCardType() : Promise<string> {
     const [element] = await this.cardElement.$x(DataResourceCardSelector.cardTypeXpath);
-    return (await element.getProperty('innerText')).jsonValue();
+    return getPropValue<string>(element, 'innerText');
   }
 
   /**

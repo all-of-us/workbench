@@ -4,6 +4,7 @@ import {waitForAttributeEquality, waitForDocumentTitle} from 'utils/waits-utils'
 import {buildXPath} from 'app/xpath-builders';
 import {WorkspaceAccessLevel} from 'app/text-labels';
 import {ElementType} from 'app/xpath-options';
+import {getPropValue} from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
 import {TabLabelAlias} from './data-page';
 import Button from 'app/element/button';
@@ -44,7 +45,7 @@ export default class WorkspaceAboutPage extends AuthenticatedPage{
     // Fetch all of the collabs so we can string match and parse text content.
     const collabs = await this.page.$x(collabXPath);
     for (const c of collabs) {
-      let collabLine = await (await c.getProperty('textContent')).jsonValue() as string;
+      let collabLine = await getPropValue<string>(c, 'textContent');
       collabLine = collabLine.toLowerCase().trim();
       if (collabLine.includes(username.toLowerCase())) {
         for (const level of [
@@ -73,22 +74,19 @@ export default class WorkspaceAboutPage extends AuthenticatedPage{
   async getCdrVersion(): Promise<string> {
     const cdrVerXpath = '//*[@data-test-id="cdrVersion"]';
     const cdr = await this.page.waitForXPath(cdrVerXpath, {visible: true});
-    const cdrValue = await (await cdr.getProperty('innerText')).jsonValue();
-    return cdrValue.toString();
+    return getPropValue<string>(cdr, 'innerText');
   }
 
   async getCreationDate(): Promise<string> {
     const creationDateXpath = '//*[@data-test-id="creationDate"]/*[last()]';
     const creationDate = await this.page.waitForXPath(creationDateXpath, {visible: true});
-    const dateValue = await (await creationDate.getProperty('innerText')).jsonValue();
-    return dateValue.toString();
+    return getPropValue<string>(creationDate, 'innerText');
   }
 
   async getLastUpdatedDate(): Promise<string> {
     const lastUpdatedDateXpath = '//*[@data-test-id="lastUpdated"]/*[last()]';
     const lastUpdatedDate = await this.page.waitForXPath(lastUpdatedDateXpath, {visible: true});
-    const dateValue = await (await lastUpdatedDate.getProperty('innerText')).jsonValue();
-    return dateValue.toString();
+    return getPropValue<string>(lastUpdatedDate, 'innerText');
   }
 
 }

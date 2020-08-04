@@ -4,6 +4,7 @@ import {waitForDocumentTitle} from 'utils/waits-utils';
 import DataTable from 'app/component/data-table';
 import Button from 'app/element/button';
 import {LinkText} from 'app/text-labels';
+import {getPropValue} from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
 
 const PageTitle = 'Review Cohort Participants';
@@ -45,11 +46,10 @@ export default class CohortReviewPage extends AuthenticatedPage {
     const dataTable = this.getDataTable();
     const bodyTable = dataTable.getBodyTable();
     const cell = await bodyTable.getCell(rowIndex, colIndex);
-    const textProp = await cell.getProperty('textContent');
-    const cellTextContent = await textProp.jsonValue();
+    const textContent = await getPropValue<string>(cell, 'textContent');
     await cell.click();
     await waitWhileLoading(this.page);
-    return cellTextContent.toString();
+    return textContent;
   }
 
 }

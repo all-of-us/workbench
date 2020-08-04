@@ -2,6 +2,7 @@ import {Page} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import Button from 'app/element/button';
 import Container from 'app/container';
+import {getPropValue} from 'utils/element-utils';
 
 export enum Domain {
    Conditions = 'Conditions',
@@ -56,10 +57,9 @@ export default class ConceptDomainCard extends Container {
 
   private async extractConceptsCount(selector: string): Promise<string> {
     const elemt = await this.page.waitForXPath(selector, {visible: true});
-    const textContent = await elemt.getProperty('textContent');
-    const value = (await textContent.jsonValue()).toString();
+    const textContent = await getPropValue<string>(elemt, 'textContent');
     const regex = new RegExp(/\d{1,3}(,?\d{3})*/); // Match numbers with comma
-    return (regex.exec(value))[0];
+    return (regex.exec(textContent))[0];
   }
 
   private async getSelectConceptButton(): Promise<Button> {

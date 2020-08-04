@@ -7,6 +7,7 @@ import {ElementType} from 'app/xpath-options';
 import {EllipsisMenuAction} from 'app/text-labels';
 import Button from 'app/element/button';
 import Textbox from 'app/element/textbox';
+import {getPropValue} from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
 import ConceptsetCopyModal from './conceptset-copy-modal';
 
@@ -47,8 +48,7 @@ export default class ConceptsetPage extends AuthenticatedPage {
   async getConceptName(): Promise<string> {
     const xpath = `//*[@data-test-id="concept-set-title"]`;
     const title = await this.page.waitForXPath(xpath, {visible: true});
-    const value = await (await title.getProperty('innerText')).jsonValue();
-    return value.toString();
+    return getPropValue<string>(title, 'innerText');
   }
 
   async edit(newConceptName?: string, newDescription?: string): Promise<void> {

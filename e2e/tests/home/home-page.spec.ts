@@ -72,7 +72,7 @@ describe('Home page ui tests', () => {
     const homePage = new HomePage(page);
     const plusIcon = await homePage.getCreateNewWorkspaceLink();
     expect(plusIcon).toBeTruthy();
-    const classname = await plusIcon.getProperty('className');
+    const classname = await plusIcon.getProperty<string>('className');
     expect(classname).toBe('is-solid');
     const shape = await plusIcon.getAttribute('shape');
     expect(shape).toBe('plus-circle');

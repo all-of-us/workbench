@@ -1,5 +1,6 @@
 import {Page} from 'puppeteer';
 import Container from 'app/container';
+import {getPropValue} from 'utils/element-utils';
 import Table from './table';
 
 
@@ -34,17 +35,16 @@ export default class DataTable extends Table {
 
   async getNumRecords(): Promise<number[]> {
     const selector = `${this.getPaginatorXpath()}/*[@class="p-paginator-current"]`;
-    let value;
+    let textContent;
     try {
       const elemt = await this.page.waitForXPath(selector);
-      const textContent = await elemt.getProperty('textContent');
-      value = await textContent.jsonValue();
+      textContent = await getPropValue<string>(elemt, 'textContent');
     } catch (e) {
       return [0, 0, 0];
     }
 
     // parse for total records. expected string format is "76 - 100 of 100 records".
-    const [start, end, total] = value.toString().match(/\d+/g);
+    const [start, end, total] = textContent.match(/\d+/g);
     return [start, end, total];
   }
 

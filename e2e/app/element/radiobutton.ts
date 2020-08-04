@@ -19,8 +19,7 @@ export default class RadioButton extends BaseElement {
 
   async isSelected(): Promise<boolean> {
     await this.focus();
-    const is = await this.getProperty('checked');
-    return !!is;
+    return this.getProperty<boolean>('checked');
   }
 
   /**

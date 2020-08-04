@@ -3,6 +3,7 @@ import {WorkspaceAccessLevel} from 'app/text-labels';
 import EllipsisMenu from 'app/component/ellipsis-menu';
 import * as fp from 'lodash/fp';
 import DataPage from 'app/page/data-page';
+import {getPropValue} from 'utils/element-utils';
 
 const WorkspaceCardSelector = {
   cardRootXpath: '//*[child::*[@data-test-id="workspace-card"]]', // finds 'workspace-card' parent container node
@@ -83,10 +84,7 @@ export default class WorkspaceCard {
 
   async getWorkspaceName(): Promise<string> {
     const workspaceNameElemt = await this.cardElement.$x(`.//*[${WorkspaceCardSelector.cardNameXpath}]`);
-    const jHandle = await workspaceNameElemt[0].getProperty('innerText');
-    const name = await jHandle.jsonValue();
-    await jHandle.dispose();
-    return name.toString();
+    return getPropValue<string>(workspaceNameElemt[0], 'innerText');
   }
 
   asElementHandle(): ElementHandle {
@@ -101,9 +99,9 @@ export default class WorkspaceCard {
    * Find workspace access level.
    * @param workspaceName
    */
-  async getWorkspaceAccessLevel() : Promise<unknown> {
+  async getWorkspaceAccessLevel() : Promise<string> {
     const [element] = await this.cardElement.$x(WorkspaceCardSelector.accessLevelXpath);
-    return (await element.getProperty('innerText')).jsonValue();
+    return getPropValue<string>(element, 'innerText');
   }
 
   /**
@@ -132,8 +130,7 @@ export default class WorkspaceCard {
    */
   async clickWorkspaceName(waitForDataPage: boolean = true): Promise<string> {
     const [elemt] = await this.asElementHandle().$x(`.//*[${WorkspaceCardSelector.cardNameXpath}]`);
-    const textProp = await elemt.getProperty('textContent');
-    const name = await textProp.jsonValue();
+    const name = await getPropValue<string>(elemt, 'textContent');
     await Promise.all([
       this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0']}),
       elemt.click(),
@@ -142,7 +139,7 @@ export default class WorkspaceCard {
       const dataPage = new DataPage(this.page);
       await dataPage.waitForLoad();
     }
-    return name.toString();
+    return name;
   }
 
   private asCard(elementHandle: ElementHandle): WorkspaceCard {

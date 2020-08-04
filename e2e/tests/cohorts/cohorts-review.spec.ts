@@ -6,6 +6,7 @@ import CohortReviewModal from 'app/page/cohort-review-modal';
 import CohortReviewPage from 'app/page/cohort-review-page';
 import DataPage from 'app/page/data-page';
 import {waitForText} from 'utils/waits-utils';
+import {getPropValue} from 'utils/element-utils';
 
 describe('Cohort review tests', () => {
 
@@ -46,9 +47,9 @@ describe('Cohort review tests', () => {
     const participantsTable = cohortReviewPage.getDataTable();
     const records = await participantsTable.getNumRecords();
     // Table records page numbering is in "1 - 25 of 100 records" format.
-    expect(Number(records[0])).toBe(1);
-    expect(Number(records[1])).toBe(25);
-    expect(Number(records[2])).toBe(reviewSetNumberOfParticipants);
+    expect(Number(records[0])).toEqual(1);
+    expect(Number(records[1])).toEqual(25);
+    expect(Number(records[2])).toEqual(reviewSetNumberOfParticipants);
 
     // Verify table column names match.
     const columns = ['Participant ID', 'Date of Birth', 'Deceased', 'Gender', 'Race', 'Ethnicity', 'Status'];
@@ -58,9 +59,9 @@ describe('Cohort review tests', () => {
 
     // Get Date of Birth in row 2.
     const dobCell = await participantsTable.getCell(2, 2);
-    const cellValue = await (await dobCell.getProperty('textContent')).jsonValue();
+    const cellValue = await getPropValue<string>(dobCell, 'textContent');
     // Check birth date is valid format.
-    isValidDate(cellValue.toString());
+    isValidDate(cellValue);
 
     // Check table row link navigation works. Click ParticipantId link in the second row.
     await cohortReviewPage.clickParticipantLink(2);
