@@ -24,7 +24,7 @@ import {attributesSelectionStore, NavStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {Criteria, ParticipantCohortStatus, WorkspaceAccessLevel} from 'generated/fetch';
-import {Button, Clickable, MenuItem, StyledAnchorTag} from './buttons';
+import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
 import {PopupTrigger} from './popups';
 
 const proIcons = {
@@ -498,7 +498,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
     }
 
     render() {
-      const {criteria, helpContentKey, notebookStyles, sidebarOpen} = this.props;
+      const {criteria, helpContentKey, notebookStyles, setSidebarState, sidebarOpen} = this.props;
       const {activeIcon, attributesSelection, filteredContent, participant, searchTerm, tooltipId} = this.state;
       const displayContent = filteredContent !== undefined ? filteredContent : sidebarContent[helpContentKey];
 
@@ -591,26 +591,19 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
                 : <div>
                 <div style={{display: 'block', height: 'calc(100% - 5rem)', overflow: 'auto', padding: '0.5rem 0.5rem 0rem'}}>
                   <h3 style={{...styles.sectionTitle, marginTop: 0}}>Add selected criteria to cohort</h3>
-                  <SelectionList back={() => {}} selections={[]}/>
+                  <SelectionList back={() => setSidebarState(false)} selections={[]}/>
                 </div>
               </div>
               }
             </div>
-            <div style={styles.footer}>
-              {criteria && activeIcon === 'criteria' ?  <div>
-                <Button style={styles.backButton} onClick={() => setSidebarState(false)}>
-                  Back
-                </Button>
-                <Button class='primary' style={{right: 0}}>Save Criteria</Button>
-              </div>
-              : <React.Fragment>
+            {activeIcon !== 'criteria' && <div style={styles.footer}>
               <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
               <p style={styles.contentItem}>
                 Visit our <StyledAnchorTag href={supportUrls.helpCenter}
                                            target='_blank' onClick={() => this.analyticsEvent('UserSupport')}> User Support
                 </StyledAnchorTag> page or <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
-              </p></React.Fragment>}
-            </div>
+              </p>
+            </div>}
           </div>
         </div>
       </React.Fragment>;
