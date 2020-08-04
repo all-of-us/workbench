@@ -232,7 +232,7 @@ export class SelectionListModalVersion extends React.Component<Props> {
                            selection={selection}
                            removeSelection={() => removeSelection(selection)}/>
         )}
-      </div>}
+      </div>
       {!serverConfigStore.getValue().enableCohortBuilderV2 && <div style={styles.buttonContainer}>
         <Button type='link'
           style={{...styles.button, color: colors.dark, fontSize: '14px'}}
