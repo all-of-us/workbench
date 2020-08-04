@@ -7,7 +7,6 @@ import Textarea from 'app/element/textarea';
 import {LinkText} from 'app/text-labels';
 import {getPropValue} from 'utils/element-utils';
 import {waitWhileLoading} from 'utils/test-utils';
-import ConceptsetActionsPage from './conceptset-actions-page';
 
 const faker = require('faker/locale/en_US');
 
@@ -52,9 +51,6 @@ export default class ConceptsetSaveModal extends Modal {
     // Click SAVE button.
     await this.clickButton(LinkText.Save, {waitForClose: true});
     await waitWhileLoading(this.page);
-
-    const conceptActionPage = new ConceptsetActionsPage(this.page);
-    await conceptActionPage.waitForLoad();
     
     return conceptName;
   }
