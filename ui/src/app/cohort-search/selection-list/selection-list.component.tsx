@@ -33,8 +33,7 @@ const styles = reactStyles({
     flex: 1,
     display: 'flex',
     flexFlow: 'row nowrap',
-    justifyContent: 'flex-start',
-    color: colors.accent
+    justifyContent: 'flex-start'
   },
   itemName: {
     flex: 1,
@@ -90,7 +89,13 @@ const styles = reactStyles({
     background: colorWithWhiteness(colors.black, 0.95),
     height: '100%',
     padding: '0.5rem 0 0 1rem',
-  }
+  },
+  selectionItemModal: {
+    display: 'flex',
+    fontSize: '14px',
+    padding: '0.2rem 0.5rem 0',
+    width: '100%',
+  },
 });
 
 export interface Selection extends Criteria {
@@ -139,7 +144,7 @@ export class SelectionInfoModal extends React.Component<SelectionInfoProps, Sele
       {this.showType && <strong>{typeDisplay(selection)}&nbsp;</strong>}
       {nameDisplay(selection)} {attributeDisplay(selection)}
     </React.Fragment>;
-    return <div style={styles.selectionItem}>
+    return <div style={styles.selectionItemModal}>
       <button style={styles.removeSelection} onClick={() => removeSelection()}>
         <ClrIcon shape='times-circle'/>
       </button>
