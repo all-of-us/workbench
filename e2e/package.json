@@ -12,6 +12,7 @@
     "test-local": "cross-env WORKBENCH_ENV=local DEBUG=true jest --maxWorkers=2",
     "test-local:debug": "cross-env WORKBENCH_ENV=local PUPPETEER_HEADLESS=false DEBUG=true jest --maxWorkers=2",
     "test:ci": "cross-env NODE_ENV=development CI=true jest --ci --maxWorkers=2",
+    "test:ci:debug": "cross-env NODE_ENV=development CI=true jest --ci --debug --maxWorkers=1",
     "lint": "tslint --project tsconfig.json",
     "lint:fix": "yarn compile && yarn run lint --fix",
     "tsc-build": "tsc --build --clean && tsc --skipLibCheck --project tsconfig.json",
