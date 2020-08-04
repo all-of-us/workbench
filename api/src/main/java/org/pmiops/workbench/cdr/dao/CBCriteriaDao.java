@@ -235,7 +235,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
       value =
           "select * from cb_criteria where domain_id = 'PERSON' and type in ('GENDER', 'RACE', 'ETHNICITY', 'SEX') and parent_id != 0 order by name asc",
       nativeQuery = true)
-  List<DbCriteria> findParticipantDemographics();
+  List<DbCriteria> findAllDemographics();
 
   List<DbCriteria> findByDomainIdAndTypeAndParentIdNotIn(
       @Param("domainId") String domainId,
