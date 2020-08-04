@@ -4,7 +4,7 @@ import {Button} from 'app/components/buttons';
 import {NumberInput, TextInputWithLabel} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import colors from 'app/styles/colors';
-import { useDebounce } from 'app/utils';
+import { useDebounce, useToggle } from 'app/utils';
 import {downloadTextFile} from 'app/utils/audit-utils';
 import {AuditAction, AuditLogEntry} from 'generated';
 import * as fp from 'lodash/fp';
@@ -50,14 +50,8 @@ export interface AuditPageProps {
 
 const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath, buttonLabel, queryText}) => {
   const [auditSubject, setAuditSubject] = useState(initialAuditSubject);
-  const [loadNextSubject, setLoadNextSubject] = useState(false);
   const [downloadSqlFile, setDownloadSqlFile] = useState(false);
-
-  useEffect(() =>  {
-    if (loadNextSubject) {
-      setLoadNextSubject(false);
-    }
-  }, [loadNextSubject]);
+  const [subjectRequested, setSubjectRequested] = useToggle();
 
   useEffect(() => {
     if (downloadSqlFile && !fp.isEmpty(queryText)) {
@@ -70,7 +64,7 @@ const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath, but
 
   const onAuditClick = () => {
     setAuditSubject(auditSubject.toLowerCase().trim());
-    setLoadNextSubject(true);
+    setSubjectRequested(true);
   };
 
   const getBigQueryConsoleUrl = () => {
@@ -91,7 +85,7 @@ const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath, but
   };
 
   return <React.Fragment>
-    {loadNextSubject && <Navigate to={getNextAuditPath(auditSubject)}/>}
+    {subjectRequested && <Navigate to={getNextAuditPath(auditSubject)}/>}
     <TextInputWithLabel
       containerStyle={{display: 'inline-block'}}
       style={{width: '15rem', margin: '1rem'}}

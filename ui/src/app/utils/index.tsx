@@ -26,7 +26,7 @@ import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
 import {currentCohortCriteriaStore} from './navigation';
 
-const {useEffect} =  React;
+const {useEffect, useState} =  React;
 
 export const WINDOW_REF = 'window-ref';
 
@@ -540,4 +540,18 @@ export const useDebounce = (fn: Function, updateList = [], ms = 250) => {
     const timeoutId = setTimeout(fn, ms);
     return () => clearTimeout(timeoutId);
   }, updateList);
+};
+
+// Allows the state to be set to true, triggering a render. This hook will automatically set the state back to false.
+// initial use case: rendering the Navigation component
+export const useToggle = (): [boolean, Function] => {
+  const [state, setState] = useState(false);
+
+  useEffect(() => {
+    if (state) {
+      setState(false);
+    }
+  }, [state]);
+
+  return [state, setState];
 };
