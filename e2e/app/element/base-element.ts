@@ -145,11 +145,9 @@ export default class BaseElement extends Container {
     return jValue && boxModelValue;
   }
 
-  async click(options?: ClickOptions): Promise<void> {
-    return this.asElementHandle()
-      .then(elemt => {
-        return elemt.click(options);
-      });
+  async click(): Promise<void> {
+    const elem = await this.asElementHandle()
+    await this.page.evaluateHandle(e => e.click(), elem);
   }
 
   /**
