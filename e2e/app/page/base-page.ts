@@ -1,4 +1,4 @@
-import {ElementHandle, Page, Response} from 'puppeteer';
+import {Page, Response} from 'puppeteer';
 
 /**
  * All Page Object classes will extends the BasePage.
@@ -50,44 +50,5 @@ export default abstract class BasePage {
     return indx !== -1;
   }
 
-  /**
-   * <pre>
-   * Get the value of a particular property for a particular element
-   * </pre>
-   * @param {ElementHandle} element - The web element to get the property value for
-   * @param {string} property - The property to look for
-   * @returns {string} value - The property value
-   */
-  async getProperty(element: ElementHandle, property: string): Promise<string> {
-    // Alternative: return element.getProperty(property).then((elem) => elem.jsonValue());
-    const handle = await this.page.evaluateHandle((elem, prop) => {
-      return elem[prop];
-    }, element, property);
-    return (await handle.jsonValue()).toString();
-  }
-
-  /**
-   * Get the element attribute value.
-   * @param {ElementHandle} element
-   * @param {string} attribute
-   */
-  async getAttribute(element: ElementHandle, attribute: string): Promise<string> {
-    const handle = await this.page.evaluateHandle((elem, attr) => {
-      return elem.getAttribute(attr);
-    }, element, attribute);
-    return (await handle.jsonValue()).toString();
-  }
-
-  /**
-   * <pre>
-   * Check whether a web element exist. Visibility is not checked.
-   * </pre>
-   * @param {ElementHandle} element: The web element to check
-   */
-  async exists(element: ElementHandle): Promise<boolean> {
-    return await this.page.evaluate(elem => {
-      return elem !== null;
-    }, element);
-  }
 
 }

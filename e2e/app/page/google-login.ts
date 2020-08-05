@@ -87,8 +87,7 @@ export default class GoogleLoginPage {
    * Click Next button to submit login credential.
    */
   async submit() : Promise<void> {
-    const button = await this.page.waitForXPath(FieldSelector.SubmitButton, {visible: true});
-    await (Button.asBaseElement(this.page, button)).clickAndWait();
+    return (new Button(this.page, FieldSelector.SubmitButton)).clickAndWait();
   }
 
   /**
