@@ -38,6 +38,7 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
           + "birth_date as birthDate,\n"
           + "race_concept_id as raceConceptId,\n"
           + "ethnicity_concept_id as ethnicityConceptId,\n"
+          + "sex_at_birth_concept_id as sexAtBirthConceptId,\n"
           + "deceased as deceased\n"
           + "from participant_cohort_status pcs\n";
 

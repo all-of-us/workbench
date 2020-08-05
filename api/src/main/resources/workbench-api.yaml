@@ -6550,6 +6550,11 @@ definitions:
         format: int64
       ethnicity:
         type: string
+      sexAtBirthConceptId:
+        type: integer
+        format: int64
+      sexAtBirth:
+        type: string
       deceased:
         type: boolean
         default: false

@@ -20,7 +20,6 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
@@ -152,7 +151,8 @@ public class CohortReviewControllerTest {
     FEMALE("FEMALE", 8532),
     NOT_HISPANIC("Not Hispanic or Latino", 38003564),
     PREFER_NOT_TO_ANSWER_RACE("I Prefer not to answer", 1177221),
-    PREFER_NOT_TO_ANSWER_ETH("I Prefer not to answer", 1177221);
+    PREFER_NOT_TO_ANSWER_ETH("I Prefer not to answer", 1177221),
+    SEX_AT_BIRTH("MALE", 45880669);
 
     private final String name;
     private final long conceptId;
@@ -332,6 +332,7 @@ public class CohortReviewControllerTest {
                 .genderConceptId(TestConcepts.MALE.getConceptId())
                 .raceConceptId(TestConcepts.ASIAN.getConceptId())
                 .ethnicityConceptId(TestConcepts.NOT_HISPANIC.getConceptId())
+                .sexAtBirthConceptId(TestConcepts.SEX_AT_BIRTH.getConceptId())
                 .birthDate(new java.sql.Date(today.getTime()))
                 .deceased(false));
 
@@ -343,6 +344,7 @@ public class CohortReviewControllerTest {
                 .genderConceptId(TestConcepts.FEMALE.getConceptId())
                 .raceConceptId(TestConcepts.WHITE.getConceptId())
                 .ethnicityConceptId(TestConcepts.NOT_HISPANIC.getConceptId())
+                .sexAtBirthConceptId(TestConcepts.SEX_AT_BIRTH.getConceptId())
                 .birthDate(new java.sql.Date(today.getTime()))
                 .deceased(false));
 
@@ -780,6 +782,8 @@ public class CohortReviewControllerTest {
     assertThat(response.getRaceConceptId()).isEqualTo(participantCohortStatus1.getRaceConceptId());
     assertThat(response.getGenderConceptId())
         .isEqualTo(participantCohortStatus1.getGenderConceptId());
+    assertThat(response.getSexAtBirthConceptId())
+        .isEqualTo(participantCohortStatus1.getSexAtBirthConceptId());
   }
 
   @Test
@@ -1001,13 +1005,10 @@ public class CohortReviewControllerTest {
   private void stubBigQueryCohortCalls() {
     TableResult queryResult = mock(TableResult.class);
     Iterable testIterable =
-        new Iterable() {
-          @Override
-          public Iterator iterator() {
-            List<FieldValue> list = new ArrayList<>();
-            list.add(null);
-            return list.iterator();
-          }
+        () -> {
+          List<FieldValue> list = new ArrayList<>();
+          list.add(null);
+          return list.iterator();
         };
     Map<String, Integer> rm =
         ImmutableMap.<String, Integer>builder()
