@@ -197,7 +197,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
 
     initAttributeForm() {
       const {node: {subtype}} = this.props;
-      const{form} = this.state;
+      const {form} = this.state;
       if (this.hasRange) {
         this.getAttributes();
       } else {
@@ -514,7 +514,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
         <SpinnerOverlay/> :
         <div style={{marginTop: '0.5rem'}}>
           <h3 style={{fontWeight: 600, margin: '0 0 0.5rem', textTransform: 'capitalize'}}>
-            {domainId === DomainType.PHYSICALMEASUREMENT.toString() ? name : domainId.toString().toLowerCase()} Detail
+            {this.isPhysicalMeasurement ? name : domainId.toString().toLowerCase()} Detail
           </h3>
           {countError && <div style={styles.error}>
             <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'

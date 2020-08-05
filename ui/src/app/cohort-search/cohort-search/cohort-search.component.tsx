@@ -366,7 +366,6 @@ export class CohortSearch extends React.Component<Props, State> {
                       select={this.addSelection}
                       selectedIds={selectedIds}
                       selectOption={this.setAutocompleteSelection}
-                      setAttributes={() => {}} // setAttributes no longer needed in V2
                       setSearchTerms={this.setTreeSearchTerms}/>}
                 </div>
                 {/* List View (using duplicated version of ListSearch) */}
