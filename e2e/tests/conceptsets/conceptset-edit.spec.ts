@@ -12,8 +12,7 @@ import Link from 'app/element/link';
 import {getPropValue} from 'utils/element-utils';
 
 
-// TODO(RW-5345): Fix and re-enable.
-xdescribe('Editing and Copying Concept Sets', () => {
+describe('Editing and Copying Concept Sets', () => {
 
   beforeEach(async () => {
     await signIn(page);

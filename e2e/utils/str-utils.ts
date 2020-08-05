@@ -28,7 +28,7 @@ export function makeWorkspaceName() {
 }
 
 export function makeRandomName(prefix?: string) {
-  prefix = prefix || 'aoutest-';
+  prefix = prefix || 'aoutest';
   return `${prefix}-${Math.floor(Math.random() * 10000000)}`;
 }
 
