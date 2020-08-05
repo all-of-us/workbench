@@ -13,7 +13,7 @@ parameters:
     default: "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com"
   workbench_image:
     type: string
-    default: "allofustest/workbench:buildimage-0.0.18"
+    default: "allofustest/workbench:buildimage-0.0.19"
   mysql_image:
     type: string
     default: "circleci/mysql:5.7"
