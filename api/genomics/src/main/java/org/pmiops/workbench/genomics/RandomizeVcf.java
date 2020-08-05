@@ -140,7 +140,27 @@ public class RandomizeVcf extends VariantWalker {
      */
     List<Allele> alleles = new ArrayList<>();
     double genotypeTypeIndex = random.nextDouble();
-    if (variantContext.getAlternateAlleles().size() == 1) {
+    if (variantContext.getAlternateAlleles().size() == 2) {
+      // sum of probabilities of bi-allelic no-call / homref
+      if (genotypeTypeIndex < .8240) {
+        // double no-call (or ref, if we're at a tri-allelic site, but we don't differentiate)
+        alleles.add(Allele.NO_CALL);
+        alleles.add(Allele.NO_CALL);
+        return alleles;
+      } else if (genotypeTypeIndex < .8654) {
+        // 1/2 het
+        alleles.add(variantContext.getAlternateAllele(0));
+        alleles.add(variantContext.getAlternateAllele(1));
+      } else if (genotypeTypeIndex < .9268) {
+        // 2/1 het
+        alleles.add(variantContext.getAlternateAllele(1));
+        alleles.add(variantContext.getAlternateAllele(0));
+      } else {
+        // homvar, but the rarer alt
+        alleles.add(variantContext.getAlternateAllele(1));
+        alleles.add(variantContext.getAlternateAllele(1));
+      }
+    } else {
       if (genotypeTypeIndex < .0145) {
         // double no-call
         alleles.add(Allele.NO_CALL);
@@ -162,26 +182,6 @@ public class RandomizeVcf extends VariantWalker {
         // homvar
         alleles.add(variantContext.getAlternateAllele(0));
         alleles.add(variantContext.getAlternateAllele(0));
-      }
-    } else {
-      // sum of probabilities of bi-allelic no-call / homref
-      if (genotypeTypeIndex < .8240) {
-        // double no-call (or ref, if we're at a tri-allelic site, but we don't differentiate)
-        alleles.add(Allele.NO_CALL);
-        alleles.add(Allele.NO_CALL);
-        return alleles;
-      } else if (genotypeTypeIndex < .8654) {
-        // 1/2 het
-        alleles.add(variantContext.getAlternateAllele(0));
-        alleles.add(variantContext.getAlternateAllele(1));
-      } else if (genotypeTypeIndex < .9268) {
-        // 2/1 het
-        alleles.add(variantContext.getAlternateAllele(1));
-        alleles.add(variantContext.getAlternateAllele(0));
-      } else {
-        // homvar, but the rarer alt
-        alleles.add(variantContext.getAlternateAllele(1));
-        alleles.add(variantContext.getAlternateAllele(1));
       }
     }
     return alleles;
