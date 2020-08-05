@@ -3,17 +3,18 @@ package org.pmiops.workbench.profile;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.annotation.Nonnull;
@@ -512,17 +513,26 @@ public class ProfileService {
     final Set<DbUser> usersHeavy = userService.findAllUsersWithAuthoritiesAndPageVisits();
     final Map<Long, VerifiedInstitutionalAffiliation> userIdToAffiliationModel =
         StreamSupport.stream(verifiedInstitutionalAffiliationDao.findAll().spliterator(), false)
-            .map(
-                dbAffiliation ->
-                    new AbstractMap.SimpleImmutableEntry<>(
-                        dbAffiliation.getUser().getUserId(),
-                        verifiedInstitutionalAffiliationMapper.dbToModel(dbAffiliation)))
-            .collect(ImmutableMap.toImmutableMap(Entry::getKey, Entry::getValue));
-
-    final Map<Long, DbUserTermsOfService> userIdToTermsOfService =
-        StreamSupport.stream(userTermsOfServiceDao.findAll().spliterator(), false)
             .collect(
-                ImmutableMap.toImmutableMap(DbUserTermsOfService::getUserId, Function.identity()));
+                ImmutableMap.toImmutableMap(
+                    (DbVerifiedInstitutionalAffiliation a) -> a.getUser().getUserId(),
+                    verifiedInstitutionalAffiliationMapper::dbToModel));
+
+    // A user may have signed the TOS many times. Pick only the latest.
+    final Multimap<Long, DbUserTermsOfService> userIdToTosRecords =
+        Multimaps.index(userTermsOfServiceDao.findAll(), DbUserTermsOfService::getUserId);
+
+    final Map<Long, DbUserTermsOfService> userIdToMostRecentTos =
+        userIdToTosRecords.asMap().entrySet().stream()
+            .collect(
+                ImmutableMap.toImmutableMap(
+                    Entry::getKey,
+                    e ->
+                        e.getValue().stream()
+                            .max(Comparator.comparing(DbUserTermsOfService::getAgreementTime))
+                            .orElse(
+                                null))); // not reachable since  Multimaps.index() will always give
+    // a non-empty value set
 
     // The cached free tier usage aka total cost for each user, by ID
     final Map<Long, Double> userIdToFreeTierUsage = freeTierBillingService.getUserIdToTotalCost();
@@ -539,7 +549,7 @@ public class ProfileService {
                 profileMapper.toModel(
                     dbUser,
                     userIdToAffiliationModel.get(dbUser.getUserId()),
-                    userIdToTermsOfService.get(dbUser.getUserId()),
+                    userIdToMostRecentTos.get(dbUser.getUserId()),
                     userIdToFreeTierUsage.get(dbUser.getUserId()),
                     userIdToQuota.get(dbUser.getUserId())))
         .collect(ImmutableList.toImmutableList());
