@@ -250,32 +250,6 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 ################################################
 # CREATE VIEWS
 ################################################
-echo "CREATE VIEWS - v_loinc_rel"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"CREATE OR REPLACE VIEW \`$BQ_PROJECT.$BQ_DATASET.v_loinc_rel\` AS
-SELECT DISTINCT c1.concept_id AS p_concept_id
-    , c1.concept_code AS p_concept_code
-    , c1.concept_name AS p_concept_name
-    , c2.concept_id
-    , c2.concept_code
-    , c2.concept_name
-FROM \`$BQ_PROJECT.$BQ_DATASET.concept_relationship\` cr,
-    \`$BQ_PROJECT.$BQ_DATASET.concept\` c1,
-    \`$BQ_PROJECT.$BQ_DATASET.concept\` c2,
-    \`$BQ_PROJECT.$BQ_DATASET.relationship\` r
-WHERE cr.concept_id_1 = c1.concept_id
-    AND cr.concept_id_2 = c2.concept_id
-    AND cr.relationship_id = r.relationship_id
-    AND cr.relationship_id = 'Subsumes'
-    AND r.is_hierarchical = '1'
-    AND r.defines_ancestry = '1'
-    AND c1.vocabulary_id = 'LOINC'
-    AND c2.vocabulary_id = 'LOINC'
-    AND c1.standard_concept IN ('S','C')
-    AND c2.standard_concept IN ('S','C')
-    AND c1.concept_class_id IN ('LOINC Hierarchy', 'Lab Test')
-    AND c2.concept_class_id IN ('LOINC Hierarchy', 'Lab Test')"
-
 echo "CREATE VIEWS - v_snomed_rel_cm"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE VIEW \`$BQ_PROJECT.$BQ_DATASET.v_snomed_rel_cm\` AS
@@ -2570,7 +2544,7 @@ SET x.rollup_count = y.cnt
     , x.est_count = y.cnt
 FROM
     (
-        select ancestor_concept_id as concept_id
+        SELECT ancestor_concept_id as concept_id
             , COUNT(DISTINCT person_id) cnt
         FROM
             (
@@ -2597,3 +2571,580 @@ WHERE x.concept_id = y.concept_id
     and x.type = 'SNOMED'
     and x.is_standard = 1
     and x.is_group = 1"
+
+
+################################################
+# MEASUREMENT - Clinical - STANDARD LOINC
+################################################
+echo "MEASUREMENT - Clinical - STANDARD LOINC - add root"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (
+          id
+        , parent_id
+        , domain_id
+        , is_standard
+        , type
+        , subtype
+        , concept_id
+        , code
+        , name
+        , is_group
+        , is_selectable
+        , has_attribute
+        , has_hierarchy
+        , path
+    )
+SELECT (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 as id
+    , 0
+    , 'MEASUREMENT'
+    , 1
+    , 'LOINC'
+    , 'CLIN'
+    , 36207527
+    , 'LP248771-0'
+    , 'Clinical'
+    , 1
+    , 0
+    , 0
+    , 1
+    , CAST((SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 AS STRING)"
+
+echo "MEASUREMENT - Clinical - STANDARD LOINC - add parents"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (
+          id
+        , parent_id
+        , domain_id
+        , is_standard
+        , type
+        , subtype
+        , name
+        , is_group
+        , is_selectable
+        , has_attribute
+        , has_hierarchy
+        , path
+    )
+SELECT ROW_NUMBER() OVER(ORDER BY name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as id
+    , (SELECT id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'CLIN') as parent_id
+    , 'MEASUREMENT'
+    , 1
+    , 'LOINC'
+    , 'CLIN'
+    , name
+    , 1
+    , 0
+    , 0
+    , 1
+    , CONCAT( (SELECT id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'CLIN'), '.',
+        CAST(ROW_NUMBER() OVER(ORDER BY name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS STRING) )
+FROM
+    (
+        SELECT DISTINCT parent as name
+        FROM \`$BQ_PROJECT.$BQ_DATASET.prep_clinical_terms_nc\` a
+        JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b using (concept_id)
+        WHERE b.concept_id in
+            (
+                SELECT DISTINCT measurement_concept_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\`
+            )
+    ) c"
+
+# this will add all clinical items that have been categorized and added into prep_clinical_terms_nc
+echo "MEASUREMENT - Clinical - STANDARD LOINC - add children"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (
+          id
+        , parent_id
+        , domain_id
+        , is_standard
+        , type
+        , subtype
+        , concept_id
+        , code
+        , name
+        , rollup_count
+        , item_count
+        , est_count
+        , is_group
+        , is_selectable
+        , has_attribute
+        , has_hierarchy
+        , path
+    )
+SELECT
+    ROW_NUMBER() OVER(ORDER BY parent_id, concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as id
+    , parent_id
+    , 'MEASUREMENT'
+    , 1
+    , 'LOINC'
+    , 'CLIN'
+    , concept_id
+    , concept_code
+    , concept_name
+    , 0
+    , cnt
+    , cnt
+    , 0
+    , 1
+    , 0
+    , 1
+    , CONCAT(parent_path, '.',
+        CAST(ROW_NUMBER() OVER(ORDER BY parent_id, concept_name) +
+        (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS STRING))
+FROM
+    (
+        SELECT
+              b.concept_name
+            , b.concept_id
+            , b.concept_code
+            , d.id as parent_id
+            , d.path as parent_path
+            , COUNT(DISTINCT a.person_id) cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\` a
+        JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.measurement_concept_id = b.concept_id
+        JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_clinical_terms_nc\` c on b.concept_id = c.concept_id
+        JOIN
+            (
+                SELECT id, name, path
+                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                WHERE type = 'LOINC'
+                    and subtype = 'CLIN'
+                    and is_group = 1
+            ) d on c.parent = d.name
+        WHERE standard_concept = 'S'
+            and domain_id = 'Measurement'
+            and vocabulary_id = 'LOINC'
+        GROUP BY 1,2,3, 4, 5
+    ) e"
+
+
+################################################
+# MEASUREMENT - Labs - STANDARD LOINC
+################################################
+echo "MEASUREMENT - Labs - STANDARD LOINC - create prep_loinc_rel"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel\` AS
+SELECT DISTINCT c1.concept_id AS p_concept_id
+    , c1.concept_code AS p_concept_code
+    , c1.concept_name AS p_concept_name
+    , c2.concept_id
+    , c2.concept_code
+    , c2.concept_name
+FROM \`$BQ_PROJECT.$BQ_DATASET.concept_relationship\` cr,
+    \`$BQ_PROJECT.$BQ_DATASET.concept\` c1,
+    \`$BQ_PROJECT.$BQ_DATASET.concept\` c2,
+    \`$BQ_PROJECT.$BQ_DATASET.relationship\` r
+WHERE cr.concept_id_1 = c1.concept_id
+    AND cr.concept_id_2 = c2.concept_id
+    AND cr.relationship_id = r.relationship_id
+    AND cr.relationship_id = 'Subsumes'
+    AND r.is_hierarchical = '1'
+    AND r.defines_ancestry = '1'
+    AND c1.vocabulary_id = 'LOINC'
+    AND c2.vocabulary_id = 'LOINC'
+    AND c1.standard_concept IN ('S','C')
+    AND c2.standard_concept IN ('S','C')
+    AND c1.concept_class_id IN ('LOINC Hierarchy', 'Lab Test')
+    AND c2.concept_class_id IN ('LOINC Hierarchy', 'Lab Test')"
+
+echo "MEASUREMENT - Labs - STANDARD LOINC - load temp table 0"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel_in_data\`
+    (
+          p_concept_id
+        , p_concept_code
+        , p_concept_name
+        , concept_id
+        , concept_code
+        , concept_name
+    )
+SELECT *
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel\` a
+WHERE concept_id in
+    (
+        SELECT DISTINCT measurement_concept_id
+        FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\` a
+        JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.measurement_concept_id = b.concept_id
+        WHERE measurement_concept_id != 0
+            and b.vocabulary_id = 'LOINC'
+            and b.standard_concept = 'S'
+            and b.domain_id = 'Measurement'
+    )"
+
+# currently, there are only 4 levels, but we run it 5 times to be safe
+for i in {1..5};
+do
+    echo "MEASUREMENT - Labs - STANDARD LOINC - load temp table $i"
+    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel_in_data\`
+        (
+              p_concept_id
+            , p_concept_code
+            , p_concept_name
+            , concept_id
+            , concept_code
+            , concept_name
+        )
+    SELECT *
+    FROM \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel\` a
+    WHERE concept_id in
+        (
+            SELECT p_concept_id
+            FROM \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel_in_data\`
+        )
+        and concept_id not in
+            (
+                SELECT concept_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel_in_data\`
+            )"
+done
+
+echo "MEASUREMENT - Labs - STANDARD LOINC - add root"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (
+          id
+        , parent_id
+        , domain_id
+        , is_standard
+        , type
+        , subtype
+        , concept_id
+        , code
+        , name
+        , is_group
+        , is_selectable
+        , has_attribute
+        , has_hierarchy
+        , path
+    )
+SELECT (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 as id
+    , 0
+    , 'MEASUREMENT'
+    , 1
+    , 'LOINC'
+    , 'LAB'
+    , 36206173
+    , 'LP29693-6'
+    , 'Lab'
+    , 1
+    , 0
+    , 0
+    , 1
+    , CAST((SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 AS STRING)"
+
+# add items directly under the root item in the above query
+echo "MEASUREMENT - Labs - STANDARD LOINC - add level 0"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (
+          id
+        , parent_id
+        , domain_id
+        , is_standard
+        , type
+        , subtype
+        , concept_id
+        , code
+        , name
+        , item_count
+        , is_group
+        , is_selectable
+        , has_attribute
+        , has_hierarchy
+        , path
+    )
+SELECT
+      ROW_NUMBER() OVER (ORDER BY p.id, c.concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)
+    , p.id
+    , 'MEASUREMENT'
+    , 1
+    , 'LOINC'
+    , 'LAB'
+    , c.concept_id
+    , c.concept_code
+    , c.concept_name
+    , 0
+    , 1
+    , 0
+    , 0
+    , 1
+    , CONCAT( p.path, '.',
+        CAST(ROW_NUMBER() OVER (ORDER BY p.id, c.concept_name) +
+        (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS STRING) )
+FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` p
+JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel_in_data\` c on p.code = c.p_concept_code
+WHERE p.type = 'LOINC'
+    and p.subtype = 'LAB'
+    and p.id not in
+        (
+            SELECT parent_id
+            FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+        )
+    and c.concept_id in
+        (
+            SELECT p_concept_id
+            FROM \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel_in_data\`
+        )"
+
+# for each loop, add all items (children/parents) directly under the items that were previously added
+# currently, there are only 11 levels, but we run it 12 times to be safe
+# if this number is changed, you will need to change the number of JOINS in the query below
+for i in {1..12};
+do
+    echo "MEASUREMENT - Labs - STANDARD LOINC - add level $i"
+    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+        (
+              id
+            , parent_id
+            , domain_id
+            , is_standard
+            , type
+            , subtype
+            , concept_id
+            , code
+            , name
+            , rollup_count
+            , item_count
+            , est_count
+            , is_group
+            , is_selectable
+            , has_attribute
+            , has_hierarchy
+            , path
+        )
+    SELECT
+          ROW_NUMBER() OVER (ORDER BY p.id, c.concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)
+        , p.id
+        , 'MEASUREMENT'
+        , 1
+        , 'LOINC'
+        , 'LAB'
+        , c.concept_id
+        , c.concept_code
+        , c.concept_name
+        , 0
+        , CASE WHEN l.concept_code is null THEN 0 ELSE m.cnt END as item_count
+        , CASE WHEN l.concept_code is null THEN null ELSE m.cnt END as est_count
+        , CASE WHEN l.concept_code is null THEN 1 ELSE 0 END as is_group
+        , CASE WHEN l.concept_code is null THEN 0 ELSE 1 END as is_selectable
+        , 0
+        , 1
+        , CONCAT( p.path, '.',
+            CAST(ROW_NUMBER() OVER (ORDER BY p.id, c.concept_name) +
+            (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS STRING) )
+    FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` p
+    JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel_in_data\` c on p.code = c.p_concept_code
+    LEFT JOIN
+        (
+            SELECT DISTINCT a.concept_code
+            FROM \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel_in_data\` a
+            LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel_in_data\` b on a.concept_id = b.p_concept_id
+            WHERE b.concept_id is null
+        ) l on c.concept_code = l.concept_code
+    LEFT JOIN
+        (
+            SELECT measurement_concept_id, COUNT(DISTINCT person_id) cnt
+            FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\`
+            GROUP BY 1
+        ) m on c.concept_id = m.measurement_concept_id
+    WHERE p.type = 'LOINC'
+        and p.subtype = 'LAB'
+        and p.id not in
+            (
+                SELECT parent_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+            )"
+done
+
+echo "MEASUREMENT - Labs - STANDARD LOINC - add parent for un-categorized labs"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (
+          id
+        , parent_id
+        , domain_id
+        , is_standard
+        , type
+        , subtype
+        , name
+        , item_count
+        , is_group
+        , is_selectable
+        , has_attribute
+        , has_hierarchy
+        , path
+    )
+SELECT
+      (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 as id
+    , a.id as parent_id
+    , 'MEASUREMENT'
+    , 1
+    , 'LOINC'
+    , 'LAB'
+    , 'Uncategorized'
+    , 0
+    , 1
+    , 0
+    , 0
+    , 1
+    , CONCAT(a.path, '.', CAST((SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 AS STRING))
+FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` a
+WHERE type = 'LOINC'
+    and subtype = 'LAB'
+    and parent_id = 0"
+
+echo "MEASUREMENT - Labs - STANDARD LOINC - add uncategorized labs"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (
+          id
+        , parent_id
+        , domain_id
+        , is_standard
+        , type
+        , subtype
+        , concept_id
+        , code
+        , name
+        , rollup_count
+        , item_count
+        , est_count
+        , is_group
+        , is_selectable
+        , has_attribute
+        , has_hierarchy
+        , path
+    )
+SELECT ROW_NUMBER() OVER (ORDER BY concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as id
+    , (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as parent_id
+    , 'MEASUREMENT'
+    , 1
+    , 'LOINC'
+    , 'LAB'
+    , concept_id
+    , concept_code
+    , concept_name
+    , 0
+    , cnt
+    , cnt
+    , 0
+    , 1
+    , 0
+    , 1
+    , CONCAT(
+        (SELECT path FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+        WHERE type = 'LOINC' and subtype = 'LAB' and name = 'Uncategorized'), '.',
+        CAST(ROW_NUMBER() OVER (ORDER BY concept_name) +
+        (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS STRING) )
+FROM
+    (
+        SELECT concept_id, concept_code, concept_name, COUNT(DISTINCT person_id) cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\` a
+        JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.measurement_concept_id = b.concept_id
+        WHERE standard_concept = 'S'
+            and domain_id = 'Measurement'
+            and vocabulary_id = 'LOINC'
+            and measurement_concept_id not in
+                (
+                    SELECT concept_id
+                    FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                    WHERE type = 'LOINC'
+                        and concept_id is not null
+                )
+        GROUP BY 1,2,3
+    ) x"
+
+# if loop count above is changed, the number of JOINS below must be updated
+echo "MEASUREMENT - Labs - STANDARD LOINC - add data into ancestor table"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
+    (
+          ancestor_concept_id
+        , descendant_concept_id
+        , is_standard
+    )
+SELECT DISTINCT a.concept_id as ancestor_concept_id
+    , COALESCE(m.concept_id, k.concept_id, j.concept_id, i.concept_id, h.concept_id, g.concept_id, f.concept_id, e.concept_id, d.concept_id, c.concept_id, b.concept_id) as descendant_concept_id
+    , 1
+FROM
+    (SELECT id, parent_id, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB' and is_group = 1 and parent_id != 0 and concept_id is not null) a
+    JOIN (SELECT id, parent_id, concept_id from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB') b on a.id = b.parent_id
+    LEFT JOIN (SELECT id, parent_id, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB') c on b.id = c.parent_id
+    LEFT JOIN (SELECT id, parent_id, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB') d on c.id = d.parent_id
+    LEFT JOIN (SELECT id, parent_id, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB') e on d.id = e.parent_id
+    LEFT JOIN (SELECT id, parent_id, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB') f on e.id = f.parent_id
+    LEFT JOIN (SELECT id, parent_id, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB') g on f.id = g.parent_id
+    LEFT JOIN (SELECT id, parent_id, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB') h on g.id = h.parent_id
+    LEFT JOIN (SELECT id, parent_id, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB') i on h.id = i.parent_id
+    LEFT JOIN (SELECT id, parent_id, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB') j on i.id = j.parent_id
+    LEFT JOIN (SELECT id, parent_id, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB') k on j.id = k.parent_id
+    LEFT JOIN (SELECT id, parent_id, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB') m on k.id = m.parent_id"
+
+echo "MEASUREMENT - Labs - STANDARD LOINC - generate parent counts"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
+SET x.rollup_count = y.cnt
+    , x.est_count = y.cnt
+FROM
+    (
+        SELECT ancestor_concept_id as concept_id
+            , COUNT(DISTINCT person_id) cnt
+        FROM
+            (
+                SELECT ancestor_concept_id
+                    , descendant_concept_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
+                WHERE ancestor_concept_id in
+                    (
+                        SELECT DISTINCT concept_id
+                        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                        WHERE type = 'LOINC'
+                            and subtype = 'LAB'
+                            and is_standard = 1
+                            and is_group = 1
+                            and parent_id != 0
+                    )
+                    and is_standard = 1
+            ) a
+        JOIN \`$BQ_PROJECT.$BQ_DATASET.measurement\` b on a.descendant_concept_id = b.measurement_concept_id
+        GROUP BY 1
+    ) y
+WHERE x.concept_id = y.concept_id
+    and x.type = 'LOINC'
+    and subtype = 'LAB'
+    and x.is_standard = 1
+    and x.is_group = 1"
+
+echo "MEASUREMENT - Labs - STANDARD LOINC - generate count for Uncategorized parent"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
+SET x.rollup_count = y.cnt
+    , x.est_count = y.cnt
+FROM
+    (
+        SELECT COUNT(DISTINCT person_id) cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\`
+        WHERE measurement_concept_id IN
+            (
+                SELECT concept_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                WHERE parent_id IN
+                    (
+                        SELECT id
+                        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                        WHERE type = 'LOINC'
+                            and subtype = 'LAB'
+                            and name = 'Uncategorized'
+                    )
+            )
+    ) y
+WHERE x.type = 'LOINC'
+    and x.subtype = 'LAB'
+    and x.name = 'Uncategorized'"
+
