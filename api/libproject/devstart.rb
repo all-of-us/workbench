@@ -2604,18 +2604,15 @@ def randomize_vcf(cmd_name, *args)
       "How many random vcfs to generate."
   )
   op.add_option(
-      "--output-dir [out]",
+      "--output-path [out]",
       -> (opts, o) {opts.out = o},
-      "Output dir in which to put randomized vcfs"
+      "Output path at which to put randomized vcf"
   )
   op.parse.validate
 
-  for i in 1..op.opts.n.chomp.to_i
-    basename = File.basename(op.opts.vcf, ".vcf.gz")
-    out = "#{op.opts.out}#{basename}.#{i}.vcf"
-    app_args = "-PappArgs=['-V#{op.opts.vcf}','-O#{out}','-S#{i}']"
-    Common.new.run_inline %W{./gradlew -p genomics randomizeVcf} + [app_args]
-  end
+  basename = File.basename(op.opts.vcf, ".vcf.gz")
+  app_args = "-PappArgs=['-V#{op.opts.vcf}','-O#{op.opts.out}','-N#{op.opts.n}']"
+  Common.new.run_inline %W{./gradlew -p genomics randomizeVcf} + [app_args]
 end
 
 Common.register_command({
@@ -2623,36 +2620,4 @@ Common.register_command({
   :description => "Given an example vcf and a number of copies to make, generates that many " +
     "random copies in a given output directory",
   :fn => ->(*args) { randomize_vcf("randomize-vcf", *args) }
-})
-
-def combine_vcfs(cmd_name, *args)
-  op = WbOptionsParser.new(cmd_name, args)
-  op.add_option(
-      "--dir [dir]",
-      -> (opts, d) {opts.dir = d},
-      "Dir with vcfs to combine. vcfs should have corresponding index files in the same " +
-          "folder."
-  )
-  op.add_option(
-      "--output [output]",
-      -> (opts, o) {opts.output = o},
-      "Path to output the combined vcf"
-  )
-  op.parse.validate
-
-  app_args = "-PappArgs=["
-  for file in Dir["#{op.opts.dir}*"]
-    if File.extname(file) == ".vcf"
-      app_args += "'I=#{file}',"
-    end
-  end
-  app_args += "'O=#{op.opts.output}']"
-  Common.new.run_inline %W{./gradlew -p genomics combineVcfs} + [app_args]
-end
-
-Common.register_command({
-    :invocation => "combine-vcfs",
-    :description => "Given a directory containing a number of vcf files run on the same array " +
-        "chip, combine them into one multisample vcf",
-    :fn => ->(*args) { combine_vcfs("combine-vcfs", *args) }
 })
