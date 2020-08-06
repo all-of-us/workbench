@@ -300,26 +300,26 @@ public class ExportWorkspaceData {
     row.setDegrees(
         Optional.ofNullable(user.getDegreesEnum()).orElse(ImmutableList.of()).stream()
             .map(Degree::toString)
-            .collect(Collectors.joining(",")));
+            .collect(Collectors.joining(",\n")));
     DbDemographicSurvey demo = user.getDemographicSurvey();
     if (includeDemographics && demo != null) {
       row.setRace(
           Optional.ofNullable(demo.getRaceEnum()).orElse(ImmutableList.of()).stream()
               .map(Race::toString)
-              .collect(Collectors.joining(",")));
+              .collect(Collectors.joining(",\n")));
       row.setEthnicity(
           Optional.ofNullable(demo.getEthnicityEnum()).map(Ethnicity::toString).orElse(""));
       row.setGenderIdentity(
           Optional.ofNullable(demo.getGenderIdentityEnumList()).orElse(ImmutableList.of()).stream()
               .map(GenderIdentity::toString)
-              .collect(Collectors.joining(",")));
+              .collect(Collectors.joining(",\n")));
       row.setIdentifyAsLgbtq(
           Optional.ofNullable(demo.getIdentifiesAsLgbtq()).map(this::toYesNo).orElse(""));
       row.setLgbtqIdentity(Optional.ofNullable(demo.getLgbtqIdentity()).orElse(""));
       row.setSexAtBirth(
           Optional.ofNullable(demo.getSexAtBirthEnum()).orElse(ImmutableList.of()).stream()
               .map(SexAtBirth::toString)
-              .collect(Collectors.joining(",")));
+              .collect(Collectors.joining(",\n")));
       row.setYearOfBirth(
           Optional.ofNullable(demo.getYear_of_birth())
               .filter(i -> i > 0)
