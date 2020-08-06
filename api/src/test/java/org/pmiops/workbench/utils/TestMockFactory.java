@@ -11,6 +11,7 @@ import com.google.api.services.cloudbilling.model.BillingAccount;
 import com.google.api.services.cloudbilling.model.ListBillingAccountsResponse;
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -59,6 +60,7 @@ public class TestMockFactory {
         .billingAccountType(BillingAccountType.FREE_TIER)
         .creationTime(1588097211621L)
         .creator("jay@unit-test-research-aou.org")
+        .creationTime(Instant.parse("2000-01-01T00:00:00.00Z").toEpochMilli())
         .lastModifiedTime(1588097211621L)
         .published(false)
         .researchPurpose(

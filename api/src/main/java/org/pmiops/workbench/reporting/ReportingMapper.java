@@ -22,8 +22,8 @@ public interface ReportingMapper {
 
   List<ReportingResearcher> toReportingResearcherList(Collection<DbUser> dbUsers);
 
-  @Mapping(source = "creator", target = "creatorId")
-  @Mapping(target = "fakeSize", ignore = true) // not defined yet
+  @Mapping(source = "creator.userId", target = "creatorId")
+  @Mapping(target = "fakeSize", ignore = true) // temp column for testing; not in mapper
   ReportingWorkspace toModel(DbWorkspace dbWorkspace);
 
   List<ReportingWorkspace> toReportingWorkspaceList(Collection<DbWorkspace> dbWorkspace);

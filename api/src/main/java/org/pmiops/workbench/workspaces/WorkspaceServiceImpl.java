@@ -803,6 +803,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Override
   public List<DbWorkspace> getAllActiveWorkspaces() {
-    return workspaceDao.findAllByActiveStatusIn(WorkspaceActiveStatus.ACTIVE);
+    return workspaceDao.findAllByActiveStatusIn(
+        DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
   }
 }

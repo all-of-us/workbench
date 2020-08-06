@@ -7805,9 +7805,12 @@ definitions:
           "$ref": "#/definitions/ReportingWorkspace"
   ReportingWorkspace:
     description: >
-      Workspace information for reporting.  Internal use only (not part of the API).
     type: object
     properties:
+      workspaceId:
+        description: PK for workspace table.
+        type: integer
+        format: int64
       creatorId:
         description: FK researcher ID for creator of workspace.
         type: integer
