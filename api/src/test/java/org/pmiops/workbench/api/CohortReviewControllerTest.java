@@ -1025,8 +1025,9 @@ public class CohortReviewControllerTest {
             .put("gender_concept_id", 2)
             .put("race_concept_id", 3)
             .put("ethnicity_concept_id", 4)
-            .put("count", 5)
-            .put("deceased", 6)
+            .put("sex_at_birth_concept_id", 5)
+            .put("count", 6)
+            .put("deceased", 7)
             .build();
 
     when(bigQueryService.filterBigQueryConfig(null)).thenReturn(null);
@@ -1040,6 +1041,7 @@ public class CohortReviewControllerTest {
     when(bigQueryService.getLong(null, 3)).thenReturn(0L);
     when(bigQueryService.getLong(null, 4)).thenReturn(0L);
     when(bigQueryService.getLong(null, 5)).thenReturn(0L);
+    when(bigQueryService.getLong(null, 6)).thenReturn(0L);
   }
 
   private CohortReview createCohortReview(
