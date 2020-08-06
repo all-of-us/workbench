@@ -93,6 +93,11 @@ const styles = reactStyles({
     marginTop: '0.25rem',
     padding: '8px',
   },
+  inputAlert: {
+    justifyContent: 'space-between',
+    padding: '0.2rem',
+    width: '64.3%',
+  }
 });
 
 interface ConceptCacheItem {
@@ -186,6 +191,8 @@ interface State {
   domainErrors: Domain[];
   // True if the getDomainInfo call fails
   domainInfoError: boolean;
+  // List of error messages to display if the search input is invalid
+  inputErrors: Array<string>;
   // If concept metadata is still being gathered for any domain
   loadingDomains: boolean;
   // If we are still searching concepts and should show a spinner on the table
@@ -233,6 +240,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
         currentSearchString: '',
         domainErrors: [],
         domainInfoError: false,
+        inputErrors: [],
         loadingDomains: true,
         countsLoading: false,
         searching: false,
@@ -310,14 +318,69 @@ export const ConceptHomepage = withCurrentWorkspace()(
       }
     }
 
+    validateInputForMySQL() {
+      const {currentInputString} = this.state;
+      const inputErrors = new Set(); // use Set to prevent duplicate messages
+      let openParensCount = 0;
+      let unclosedQuotes = false;
+      for (let i = 0; i < currentInputString.length; i++) {
+        const character = currentInputString[i];
+        if (character === '"') {
+          unclosedQuotes = !unclosedQuotes;
+          continue;
+        }
+        if (unclosedQuotes) {
+          // inside a quote, no need to validate further
+          continue;
+        }
+        // Check for characters that break search
+        if ('~@[]|<>'.indexOf(character) > -1) {
+          inputErrors.add('The following characters are not allowed in the search string: ~ @ [ ] | < >');
+          continue;
+        }
+        // Check for trailing + or -
+        if ('+-'.indexOf(character) > -1 && (currentInputString[i + 1] === ' ' || currentInputString[i + 1] === undefined)) {
+          inputErrors.add(`Trailing ${character} characters are not allowed in the search string`);
+          continue;
+        }
+        const parenPosition = '()'.indexOf(character);
+        if (parenPosition === -1) {
+          // Parens are the last character check, so we can continue if it's something else
+          continue;
+        }
+        if (parenPosition === 0) {
+          openParensCount++; // increment the number of unclosed parens
+        } else {
+          if (openParensCount === 0) {
+            // too many closing parens
+            inputErrors.add('There are too many ) characters in the search string');
+            continue;
+          }
+          openParensCount--; // decrement the number of unclosed parens
+        }
+      }
+      if (openParensCount > 0) {
+        // unclosed paren
+        inputErrors.add('There is an unclosed ( in the search string');
+      }
+      if (unclosedQuotes) {
+        // unclosed quote
+        inputErrors.add('There is an unclosed " in the search string');
+      }
+      this.setState({inputErrors: Array.from(inputErrors)});
+      return inputErrors.size === 0; // return true if no errors
+    }
+
     handleSearchKeyPress(e) {
       const {currentInputString} = this.state;
-      // search on enter key
+      // search on enter key if no forbidden characters are present
       if (e.key === Key.Enter) {
         if (currentInputString.trim().length < 3) {
           this.setState({showSearchError: true});
         } else {
-          this.setState({currentSearchString: currentInputString, showSearchError: false}, () => this.searchConcepts());
+          if (this.validateInputForMySQL()) {
+            this.setState({currentSearchString: currentInputString, showSearchError: false}, () => this.searchConcepts());
+          }
         }
       }
     }
@@ -412,6 +475,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
         activeDomainTab: conceptDomainCounts[0],
         currentInputString: '',
         currentSearchString: '',
+        inputErrors: [],
         selectedDomain: undefined,
         selectedSurvey: '',
         showSearchError: false,
@@ -422,20 +486,26 @@ export const ConceptHomepage = withCurrentWorkspace()(
     browseDomain(domain: DomainInfo) {
       const {conceptDomainCounts} = this.state;
       const activeDomainTab = conceptDomainCounts.find(domainCount => domainCount.domain === domain.domain);
-      this.setState(
-        {activeDomainTab: activeDomainTab, currentInputString: '', currentSearchString: '', selectedDomain: domain.domain, selectedSurvey: ''},
-        () => this.searchConcepts()
-      );
+      this.setState({
+        activeDomainTab: activeDomainTab,
+        currentInputString: '',
+        currentSearchString: '',
+        inputErrors: [],
+        selectedDomain: domain.domain,
+        selectedSurvey: ''
+      }, () => this.searchConcepts());
     }
 
     browseSurvey(surveyName) {
       this.setState({
+        activeDomainTab: {domain: Domain.SURVEY, name: 'Surveys', conceptCount: 0},
         currentInputString: '',
         currentSearchString: '',
-        activeDomainTab: {domain: Domain.SURVEY, name: 'Surveys', conceptCount: 0},
+        inputErrors: [],
         selectedDomain: Domain.SURVEY,
         selectedSurvey: surveyName,
-        standardConceptsOnly: false}, () => this.searchConcepts());
+        standardConceptsOnly: false
+      }, () => this.searchConcepts());
     }
 
     domainLoading(domain) {
@@ -540,8 +610,9 @@ export const ConceptHomepage = withCurrentWorkspace()(
 
     render() {
       const {activeDomainTab, browsingSurvey, conceptAddModalOpen, conceptDomainList, conceptsSavedText, conceptSurveysList,
-        currentInputString, currentSearchString, domainInfoError, loadingDomains, surveyInfoError, standardConceptsOnly, showSearchError,
-        searching, selectedDomain, selectedSurvey, selectedConceptDomainMap, selectedSurveyQuestions, surveyAddModalOpen} = this.state;
+        currentInputString, currentSearchString, domainInfoError, inputErrors, loadingDomains, surveyInfoError,
+        standardConceptsOnly, showSearchError, searching, selectedDomain, selectedSurvey, selectedConceptDomainMap, selectedSurveyQuestions,
+        surveyAddModalOpen} = this.state;
       return <React.Fragment>
         <FadeBox style={{margin: 'auto', paddingTop: '1rem', width: '95.7%'}}>
           <Header style={{fontSize: '20px', marginTop: 0, fontWeight: 600}}>
@@ -568,9 +639,10 @@ export const ConceptHomepage = withCurrentWorkspace()(
                         manageOwnState={false}
                         onChange={() => this.handleCheckboxChange()}/>
             </div>
-            {showSearchError &&
-            <AlertDanger style={{width: '64.3%', marginLeft: '1%',
-              justifyContent: 'space-between'}}>
+            {inputErrors.map((error, e) => <AlertDanger key={e} style={styles.inputAlert}>
+              <span data-test-id='input-error-alert'>{error}</span>
+            </AlertDanger>)}
+            {showSearchError && <AlertDanger style={styles.inputAlert}>
                 Minimum concept search length is three characters.
                 <AlertClose style={{width: 'unset'}}
                             onClick={() => this.setState({showSearchError: false})}/>
