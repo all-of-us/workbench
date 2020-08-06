@@ -110,8 +110,7 @@ const styles = reactStyles({
     textAlign: 'left',
     border: '1px solid #ebafa6',
     borderRadius: '5px',
-    margin: '0.25rem 0.5rem',
-    padding: '8px',
+    margin: '0.25rem 0',
   },
   errors: {
     background: colorWithWhiteness(colors.danger, .7),
@@ -119,7 +118,7 @@ const styles = reactStyles({
     fontSize: '11px',
     border: '1px solid #ebafa6',
     borderRadius: '3px',
-    margin: '0.25rem 0.5rem',
+    margin: '0.25rem 0',
     padding: '3px 5px'
   },
   errorItem: {
