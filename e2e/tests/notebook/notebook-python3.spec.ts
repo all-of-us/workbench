@@ -47,7 +47,7 @@ describe('Jupyter notebook tests', () => {
            'print(sys.version)';
       const code1Output = await notebook.runCodeCell(1, {code: code1});
       // Python version is 3.7.6 at time of this writing. It can change.
-      expect(code1Output).toEqual(expect.stringContaining('3.7.8'));
+      expect(code1Output).toEqual(expect.stringContaining('3.7.6'));
 
       const code2 = '!jupyter kernelspec list';
       const code2Output = await notebook.runCodeCell(2, {code: code2});
