@@ -768,6 +768,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
               .genderConceptId(bigQueryService.getLong(row, rm.get("gender_concept_id")))
               .raceConceptId(bigQueryService.getLong(row, rm.get("race_concept_id")))
               .ethnicityConceptId(bigQueryService.getLong(row, rm.get("ethnicity_concept_id")))
+              .sexAtBirthConceptId(bigQueryService.getLong(row, rm.get("sex_at_birth_concept_id")))
               .deceased(bigQueryService.getBoolean(row, rm.get("deceased"))));
     }
     return participantCohortStatuses;

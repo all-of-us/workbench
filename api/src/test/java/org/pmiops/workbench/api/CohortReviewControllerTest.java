@@ -274,6 +274,14 @@ public class CohortReviewControllerTest {
             .addConceptId(String.valueOf(TestConcepts.PREFER_NOT_TO_ANSWER_ETH.conceptId))
             .addName(TestConcepts.PREFER_NOT_TO_ANSWER_ETH.name)
             .build());
+    cbCriteriaDao.save(
+        DbCriteria.builder()
+            .addDomainId(DomainType.PERSON.toString())
+            .addType(CriteriaType.SEX.toString())
+            .addParentId(1L)
+            .addConceptId(String.valueOf(TestConcepts.SEX_AT_BIRTH.conceptId))
+            .addName(TestConcepts.SEX_AT_BIRTH.name)
+            .build());
 
     cdrVersion = new DbCdrVersion();
     cdrVersion.setBigqueryDataset("dataSetId");
@@ -1064,16 +1072,18 @@ public class CohortReviewControllerTest {
 
   private ParticipantCohortStatus dbParticipantCohortStatusToApi(
       DbParticipantCohortStatus dbStatus) {
-    Map<Long, String> genderRaceEthnicityMap = TestConcepts.asMap();
+    Map<Long, String> demographicsMap = TestConcepts.asMap();
     return new ParticipantCohortStatus()
         .birthDate(dbStatus.getBirthDate().toString())
         .ethnicityConceptId(dbStatus.getEthnicityConceptId())
-        .ethnicity(genderRaceEthnicityMap.get(dbStatus.getEthnicityConceptId()))
+        .ethnicity(demographicsMap.get(dbStatus.getEthnicityConceptId()))
         .genderConceptId(dbStatus.getGenderConceptId())
-        .gender(genderRaceEthnicityMap.get(dbStatus.getGenderConceptId()))
+        .gender(demographicsMap.get(dbStatus.getGenderConceptId()))
         .participantId(dbStatus.getParticipantKey().getParticipantId())
         .raceConceptId(dbStatus.getRaceConceptId())
-        .race(genderRaceEthnicityMap.get(dbStatus.getRaceConceptId()))
+        .race(demographicsMap.get(dbStatus.getRaceConceptId()))
+        .sexAtBirthConceptId(dbStatus.getSexAtBirthConceptId())
+        .sexAtBirth(demographicsMap.get(dbStatus.getSexAtBirthConceptId()))
         .status(dbStatus.getStatusEnum())
         .deceased(dbStatus.getDeceased());
   }

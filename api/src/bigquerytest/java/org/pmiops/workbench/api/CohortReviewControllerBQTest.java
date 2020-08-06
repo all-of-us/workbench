@@ -160,8 +160,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Autowired private UserDao userDao;
 
-  private DbCohort cohortWithoutEHRData;
-  private DbCohort cohortWithEHRData;
   private DbCohortReview reviewWithoutEHRData;
   private DbCohortReview reviewWithEHRData;
   private static DbUser currentUser;
@@ -209,57 +207,47 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     stubMockFirecloudGetWorkspaceAcl();
 
     Gson gson = new Gson();
-    cohortWithoutEHRData = new DbCohort();
+    DbCohort cohortWithoutEHRData = new DbCohort();
     cohortWithoutEHRData.setWorkspaceId(workspace.getWorkspaceId());
     cohortWithoutEHRData.setCriteria(gson.toJson(SearchRequests.males()));
     cohortWithoutEHRData = cohortDao.save(cohortWithoutEHRData);
 
-    cohortWithEHRData = new DbCohort();
+    DbCohort cohortWithEHRData = new DbCohort();
     cohortWithEHRData.setWorkspaceId(workspace.getWorkspaceId());
     cohortWithEHRData.setCriteria(gson.toJson(SearchRequests.malesWithEHRData()));
     cohortWithEHRData = cohortDao.save(cohortWithEHRData);
 
-    reviewWithoutEHRData =
-        new DbCohortReview()
-            .cdrVersionId(cdrVersion.getCdrVersionId())
-            .matchedParticipantCount(212)
-            .creationTime(new Timestamp(new Date().getTime()))
-            .lastModifiedTime(new Timestamp(new Date().getTime()))
-            .cohortId(cohortWithoutEHRData.getCohortId());
-    reviewWithoutEHRData = cohortReviewDao.save(reviewWithoutEHRData);
+    reviewWithoutEHRData = createCohortReview(cohortWithoutEHRData);
 
-    DbParticipantCohortStatusKey key =
-        new DbParticipantCohortStatusKey()
-            .participantId(PARTICIPANT_ID)
-            .cohortReviewId(reviewWithoutEHRData.getCohortReviewId());
-    participantCohortStatusDao.save(new DbParticipantCohortStatus().participantKey(key));
+    participantCohortStatusDao.save(
+        new DbParticipantCohortStatus()
+            .participantKey(
+                new DbParticipantCohortStatusKey()
+                    .participantId(PARTICIPANT_ID)
+                    .cohortReviewId(reviewWithoutEHRData.getCohortReviewId())));
 
-    DbParticipantCohortStatusKey key2 =
-        new DbParticipantCohortStatusKey()
-            .participantId(PARTICIPANT_ID2)
-            .cohortReviewId(reviewWithoutEHRData.getCohortReviewId());
-    participantCohortStatusDao.save(new DbParticipantCohortStatus().participantKey(key2));
+    participantCohortStatusDao.save(
+        new DbParticipantCohortStatus()
+            .participantKey(
+                new DbParticipantCohortStatusKey()
+                    .participantId(PARTICIPANT_ID2)
+                    .cohortReviewId(reviewWithoutEHRData.getCohortReviewId())));
 
-    reviewWithEHRData =
-        new DbCohortReview()
-            .cdrVersionId(cdrVersion.getCdrVersionId())
-            .matchedParticipantCount(212)
-            .creationTime(new Timestamp(new Date().getTime()))
-            .lastModifiedTime(new Timestamp(new Date().getTime()))
-            .cohortId(cohortWithEHRData.getCohortId());
-    reviewWithEHRData = cohortReviewDao.save(reviewWithEHRData);
+    reviewWithEHRData = createCohortReview(cohortWithEHRData);
 
-    DbParticipantCohortStatusKey key3 =
-        new DbParticipantCohortStatusKey()
-            .participantId(PARTICIPANT_ID)
-            .cohortReviewId(reviewWithEHRData.getCohortReviewId());
-    participantCohortStatusDao.save(new DbParticipantCohortStatus().participantKey(key3));
+    participantCohortStatusDao.save(
+        new DbParticipantCohortStatus()
+            .participantKey(
+                new DbParticipantCohortStatusKey()
+                    .participantId(PARTICIPANT_ID)
+                    .cohortReviewId(reviewWithEHRData.getCohortReviewId())));
 
-    DbParticipantCohortStatusKey key4 =
-        new DbParticipantCohortStatusKey()
-            .participantId(PARTICIPANT_ID2)
-            .cohortReviewId(reviewWithEHRData.getCohortReviewId());
-    participantCohortStatusDao.save(new DbParticipantCohortStatus().participantKey(key4));
+    participantCohortStatusDao.save(
+        new DbParticipantCohortStatus()
+            .participantKey(
+                new DbParticipantCohortStatusKey()
+                    .participantId(PARTICIPANT_ID2)
+                    .cohortReviewId(reviewWithEHRData.getCohortReviewId())));
   }
 
   @After
@@ -806,6 +794,16 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       assertThat(actualData).isEqualTo(expected);
       assertThat(actualData.getItemDate()).isEqualTo(expected.getItemDate());
     }
+  }
+
+  private DbCohortReview createCohortReview(DbCohort dbCohort) {
+    return cohortReviewDao.save(
+        new DbCohortReview()
+            .cdrVersionId(cdrVersion.getCdrVersionId())
+            .matchedParticipantCount(212)
+            .creationTime(new Timestamp(new Date().getTime()))
+            .lastModifiedTime(new Timestamp(new Date().getTime()))
+            .cohortId(dbCohort.getCohortId()));
   }
 
   private void stubMockFirecloudGetWorkspace() {
