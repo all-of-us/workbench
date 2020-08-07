@@ -1495,6 +1495,12 @@ def export_workspace_data(cmd_name, *args)
       String,
       ->(opts, v) { opts.export_filename = v},
       "Filename of export file to write to")
+  op.add_typed_option(
+      "--include-demographics=[include-demographics]",
+      TrueClass,
+      ->(opts, v) { opts.include_demographics = v},
+      "Whether to include sensitive researcher demographics in the export. Default is false"
+  )
 
   # Create a cloud context and apply the DB connection variables to the environment.
   # These will be read by Gradle and passed as Spring Boot properties to the command-line.
@@ -1505,6 +1511,9 @@ def export_workspace_data(cmd_name, *args)
   flags = ([
       ["--export-filename", op.opts.export_filename]
   ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+  if op.opts.include_demographics
+    flags += [ "--include-demographics" ]
+  end
   flags.map! { |f| "'#{f}'" }
 
   with_cloud_proxy_and_db(gcc) do
