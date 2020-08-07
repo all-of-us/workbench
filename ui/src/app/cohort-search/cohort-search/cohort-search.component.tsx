@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {Subscription} from 'rxjs/Subscription';
 
 import {Demographics} from 'app/cohort-search/demographics/demographics.component';
 import {ListSearchV2} from 'app/cohort-search/list-search-v2/list-search-v2.component';
@@ -12,7 +13,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {attributesSelectionStore, currentCohortCriteriaStore} from 'app/utils/navigation';
+import {attributesSelectionStore, currentCohortCriteriaStore, serverConfigStore} from 'app/utils/navigation';
 import {Criteria, CriteriaType, DomainType, TemporalMention, TemporalTime} from 'generated/fetch';
 import {Growl} from 'primereact/growl';
 
@@ -142,7 +143,7 @@ const css = `
  `;
 
 export class CohortSearch extends React.Component<Props, State> {
-
+  subscription: Subscription;
   growl: any;
   constructor(props: Props) {
     super(props);
@@ -163,7 +164,10 @@ export class CohortSearch extends React.Component<Props, State> {
   }
 
   componentWillUnmount() {
-    currentCohortCriteriaStore.next(undefined);
+    if (serverConfigStore.getValue().enableCohortBuilderV2) {
+      this.subscription.unsubscribe();
+      currentCohortCriteriaStore.next(undefined);
+    }
   }
 
   componentDidMount(): void {
@@ -188,7 +192,16 @@ export class CohortSearch extends React.Component<Props, State> {
       }
       this.setState({backMode, hierarchyNode, mode, selectedIds, selections, title});
     }
-    currentCohortCriteriaStore.next(selections);
+    if (serverConfigStore.getValue().enableCohortBuilderV2) {
+      currentCohortCriteriaStore.next(selections);
+      this.subscription = currentCohortCriteriaStore.subscribe(newSelections => {
+        this.setState({
+          groupSelections: newSelections.filter(s => s.group).map(s => s.id),
+          selectedIds: newSelections.map(s => s.parameterId),
+          selections: newSelections
+        });
+      });
+    }
   }
 
   setScroll = (id: string) => {

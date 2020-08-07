@@ -10,7 +10,7 @@ import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {highlightSearchTerm, reactStyles} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {attributesSelectionStore, currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
+import {attributesSelectionStore, currentCohortCriteriaStore, currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
 import {AttrName, Criteria, CriteriaSubType, CriteriaType, DomainType, Operator} from 'generated/fetch';
 
 const styles = reactStyles({
@@ -292,7 +292,9 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
       setAttributes} = this.props;
     const {children, error, expanded, hover, loading, searchMatch} = this.state;
     const nodeChildren = domainId === DomainType.PHYSICALMEASUREMENT.toString() ? node.children : children;
-    const selected = selectedIds.includes(this.paramId) || groupSelections.includes(parentId);
+    const selected = serverConfigStore.getValue().enableCohortBuilderV2
+      ? currentCohortCriteriaStore.getValue().some(crit => crit.parameterId === this.paramId)
+      : selectedIds.includes(this.paramId) || groupSelections.includes(parentId);
     const displayName = domainId === DomainType.PHYSICALMEASUREMENT.toString() && !!searchTerms
       ? highlightSearchTerm(searchTerms, name, colors.success)
       : name;

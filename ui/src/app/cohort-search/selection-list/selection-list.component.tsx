@@ -354,8 +354,9 @@ export const SelectionList = withCurrentCohortCriteria()(class extends React.Com
   }
 
   removeCriteria(criteriaToDel) {
-    const updateList =  fp.remove(
+    const updateList = fp.remove(
       (selection) => selection.parameterId === criteriaToDel.parameterId, this.props.criteria);
+    console.log(updateList);
     currentCohortCriteriaStore.next(updateList);
   }
 
