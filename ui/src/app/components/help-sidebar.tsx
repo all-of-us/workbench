@@ -9,7 +9,9 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
 
+import {AttributesPageV2} from 'app/cohort-search/attributes-page-v2/attributes-page-v2.component';
 import {SelectionList} from 'app/cohort-search/selection-list/selection-list.component';
+import {FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {SidebarContent} from 'app/pages/data/cohort-review/sidebar-content.component';
@@ -18,15 +20,17 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {withCurrentCohortCriteria} from 'app/utils';
 import {highlightSearchTerm, reactStyles, ReactWrapperBase, withCurrentWorkspace, withUserProfile} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {NavStore} from 'app/utils/navigation';
+import {attributesSelectionStore, NavStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
-import {ParticipantCohortStatus, WorkspaceAccessLevel} from 'generated/fetch';
-import {Button, MenuItem, StyledAnchorTag} from './buttons';
+import {Criteria, ParticipantCohortStatus, WorkspaceAccessLevel} from 'generated/fetch';
+import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
 import {PopupTrigger} from './popups';
 
 const proIcons = {
-  thunderstorm: '/assets/icons/thunderstorm-solid.svg'
+  arrowLeft: '/assets/icons/arrow-left-regular.svg',
+  thunderstorm: '/assets/icons/thunderstorm-solid.svg',
+  times: '/assets/icons/times-light.svg'
 };
 const sidebarContent = require('assets/json/help-sidebar.json');
 
@@ -85,13 +89,10 @@ const styles = reactStyles({
     transition: 'background 0.2s linear',
     verticalAlign: 'middle'
   },
-  closeIcon: {
-    color: colorWithWhiteness(colors.primary, 0.4),
-    cursor: 'pointer',
+  navIcons: {
     position: 'absolute',
-    right: '0.25rem',
-    top: '0.25rem',
-    verticalAlign: 'top'
+    right: '0',
+    top: '0.75rem',
   },
   sectionTitle: {
     marginTop: '0.5rem',
@@ -266,6 +267,7 @@ interface Props {
 
 interface State {
   activeIcon: string;
+  attributesSelection: Criteria;
   filteredContent: Array<any>;
   participant: ParticipantCohortStatus;
   searchTerm: string;
@@ -279,6 +281,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
       super(props);
       this.state = {
         activeIcon: props.sidebarOpen ? 'help' : undefined,
+        attributesSelection: undefined,
         filteredContent: undefined,
         participant: undefined,
         searchTerm: '',
@@ -297,6 +300,13 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
 
     componentDidMount(): void {
       this.subscription = participantStore.subscribe(participant => this.setState({participant}));
+      this.subscription.add(attributesSelectionStore.subscribe(attributesSelection => {
+        this.setState({attributesSelection});
+        if (!!attributesSelection) {
+          this.setState({activeIcon: 'criteria'});
+          this.props.setSidebarState(true);
+        }
+      }));
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
@@ -308,6 +318,9 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
             this.setState({activeIcon: undefined});
           }
         }, 300);
+      }
+      if (!this.props.criteria && !!prevProps.criteria) {
+        this.props.setSidebarState(false);
       }
     }
 
@@ -357,6 +370,13 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
         this.analyticsEvent('OpenSidebar', `Sidebar - ${label}`);
       } else {
         setSidebarState(false);
+      }
+    }
+
+    onCloseClick() {
+      this.props.setSidebarState(false);
+      if (this.state.attributesSelection) {
+        setTimeout(() => this.setState({attributesSelection: undefined}), 500);
       }
     }
 
@@ -478,15 +498,15 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
     }
 
     render() {
-      const {criteria, helpContentKey, setSidebarState, notebookStyles, sidebarOpen} = this.props;
-      const {activeIcon, filteredContent, participant, searchTerm, tooltipId} = this.state;
+      const {criteria, helpContentKey, notebookStyles, setSidebarState, sidebarOpen} = this.props;
+      const {activeIcon, attributesSelection, filteredContent, participant, searchTerm, tooltipId} = this.state;
       const displayContent = filteredContent !== undefined ? filteredContent : sidebarContent[helpContentKey];
 
       const contentStyle = (tab: string) => ({
         display: activeIcon === tab ? 'block' : 'none',
         height: 'calc(100% - 1rem)',
         overflow: 'auto',
-        padding: '0.5rem 0.5rem 5.5rem',
+        padding: '0.5rem 0.5rem ' + (tab === 'criteria' ? '0' : '5.5rem'),
       });
       return <React.Fragment>
         <div style={notebookStyles ? {...styles.iconContainer, ...styles.notebookOverrides} : {...styles.iconContainer}}>
@@ -518,7 +538,20 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
         </div>
         <div style={this.sidebarContainerStyles(activeIcon, notebookStyles)}>
           <div style={sidebarOpen ? {...styles.sidebar, ...styles.sidebarOpen} : styles.sidebar} data-test-id='sidebar-content'>
-            <ClrIcon shape='times' size={22} style={styles.closeIcon} onClick={() => setSidebarState(false)} />
+            <FlexRow style={styles.navIcons}>
+              {activeIcon === 'criteria' && attributesSelection && <Clickable style={{marginRight: '1rem'}}
+                  onClick={() => this.setState({attributesSelection: undefined})}>
+                <img src={proIcons.arrowLeft}
+                     style={{height: '21px', width: '18px'}}
+                     alt='Go back'/>
+              </Clickable>}
+              <Clickable style={{marginRight: '1rem'}}
+                  onClick={() => this.onCloseClick()}>
+                <img src={proIcons.times}
+                     style={{height: '27px', width: '17px'}}
+                     alt='Close'/>
+              </Clickable>
+            </FlexRow>
             <div style={contentStyle('help')}>
               <h3 style={{...styles.sectionTitle, marginTop: 0}}>{helpContentKey === NOTEBOOK_HELP_CONTENT ? 'Workspace storage' : 'Help Tips'}</h3>
               {helpContentKey !== NOTEBOOK_HELP_CONTENT &&
@@ -553,29 +586,24 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
               {participant && <SidebarContent />}
             </div>
             <div style={contentStyle('criteria')}>
-              {criteria && <div>
+              {!!attributesSelection
+                ? <AttributesPageV2 close={() => attributesSelectionStore.next(undefined)} node={attributesSelection}/>
+                : <div>
                 <div style={{display: 'block', height: 'calc(100% - 5rem)', overflow: 'auto', padding: '0.5rem 0.5rem 0rem'}}>
                   <h3 style={{...styles.sectionTitle, marginTop: 0}}>Add selected criteria to cohort</h3>
-                  <SelectionList back={() => {}}/>
+                  <SelectionList back={() => setSidebarState(false)} selections={[]}/>
                 </div>
               </div>
               }
             </div>
-            <div style={styles.footer}>
-              {criteria && activeIcon === 'criteria' ?  <div>
-                <Button style={styles.backButton} onClick={() => setSidebarState(false)}>
-                  Back
-                </Button>
-                <Button class='primary' style={{right: 0}}>Save Criteria</Button>
-              </div>
-              : <React.Fragment>
+            {activeIcon !== 'criteria' && <div style={styles.footer}>
               <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
               <p style={styles.contentItem}>
                 Visit our <StyledAnchorTag href={supportUrls.helpCenter}
                                            target='_blank' onClick={() => this.analyticsEvent('UserSupport')}> User Support
                 </StyledAnchorTag> page or <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
-              </p></React.Fragment>}
-            </div>
+              </p>
+            </div>}
           </div>
         </div>
       </React.Fragment>;
