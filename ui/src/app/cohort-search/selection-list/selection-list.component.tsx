@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import {attributeDisplay, nameDisplay, typeDisplay} from 'app/cohort-search/utils';
 import {Button} from 'app/components/buttons';
-import {FlexColumn, FlexRow} from 'app/components/flex';
+import {FlexColumn, FlexRow, FlexRowWrap} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -48,6 +48,12 @@ const styles = reactStyles({
     cursor: 'pointer',
     marginRight: '0.25rem',
     padding: 0
+  },
+  saveButton: {
+    height: '2rem',
+    borderRadius: '5px',
+    fontWeight: 600,
+    marginRight: '0.5rem'
   },
   selectionContainer: {
     background: colors.white,
@@ -330,11 +336,21 @@ export const SelectionList = withCurrentCohortCriteria()(class extends React.Com
   }
 
   render() {
-    const {criteria} = this.props;
-    return <div style={styles.selectionPanel}>
-      {criteria && <div style={styles.selectionContainer}>
-        {this.renderCriteria()}
-      </div>}
+    const {back, criteria} = this.props;
+    return <div>
+      <div style={{paddingTop: '0.5rem'}}>
+        {criteria && <div style={styles.selectionContainer}>
+          {this.renderCriteria()}
+        </div>}
+      </div>
+      <FlexRowWrap style={{flexDirection: 'row-reverse', marginTop: '2rem'}}>
+        <Button type='primary' style={styles.saveButton}>Save Criteria</Button>
+        <Button type='link'
+                style={{color: colors.primary, marginRight: '0.5rem'}}
+                onClick={() => back()}>
+          Back
+        </Button>
+      </FlexRowWrap>
     </div>;
   }
 });
