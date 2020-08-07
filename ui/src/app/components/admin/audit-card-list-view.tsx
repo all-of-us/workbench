@@ -3,7 +3,7 @@ import {FlexRow} from 'app/components/flex';
 import {CheckBox} from 'app/components/inputs';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {usernameWithoutDomain} from 'app/utils/audit-utils';
+import {actionToString, usernameWithoutDomain} from 'app/utils/audit-utils';
 import {
   AuditAction,
   AuditAgent,
@@ -15,7 +15,7 @@ import {
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import * as React from 'react';
-import {useEffect, useState} from 'react';
+import {useState} from 'react';
 
 
 const toTitleCase = (text: String) => {
@@ -184,11 +184,11 @@ const AuditActionCard = (props: { action: AuditAction, show: (AuditAction) => bo
   // to format itself happily though.
   const timeString = moment(new Date(action.actionTime)).format('YYYY-MM-DD h:mm:ss');
   const actionTypes = fp.flow(
-    fp.map(
-      fp.flow(
-        fp.get('header.actionType'),
-        toTitleCase)),
-    s => s ? s.join(' & ') : 'n/a')
+    fp.map(fp.get('header.actionType')),
+    fp.sortedUniq,
+    fp.join(', '),
+    toTitleCase,
+    s => s || 'n/a')
   (action.eventBundles);
 
   return (show(action) &&
@@ -215,8 +215,12 @@ interface FilterEntry {
   isActive: boolean;
 }
 
+interface FilterState {
+  [key: string]: FilterEntry;
+}
+
 const ActionTypeFilter = (props: {
-  activeActionTypes: { [key: string]: FilterEntry },
+  activeActionTypes: FilterState,
   updateFilter: (actionType: string, isActive: boolean) => void }) => {
 
   const {activeActionTypes, updateFilter} = props;
@@ -228,73 +232,81 @@ const ActionTypeFilter = (props: {
   return (
       <React.Fragment>
         <div style={{
-          margin: '0',
+          marginLeft: '0',
+          padding: '2px',
           display: 'flex',
           flexDirection: 'column',
           textAlign: 'left',
-          border: '1px solid',
-          borderColor: colors.secondary,
+          border: `1px solid ${colors.secondary}`,
           width: 'fit-content'
         }}>
         <div style={{fontWeight: 600, color: colors.accent}}>Action Types</div>
-        {fp.entries(activeActionTypes).map((actionTypeValuePair: [string, FilterEntry], index) =>
-          <CheckBox
-            key={index}
-            id={`${actionTypeValuePair[0]}_active`}
-            onChange={() => toggleSelectedAction(actionTypeValuePair[0])}
-            label={actionTypeValuePair[1].displayName}
-            checked={actionTypeValuePair[1].isActive}
-            style={{margin: '0.25rem'}}/>)}
+          {
+            fp.flow(
+              fp.toPairs,
+              fp.toPairs,
+              fp.map(([index, [id, entry]]: [number, [string, FilterEntry]]) =>
+                    <CheckBox
+                        key={index}
+                        id={`${id}_active`}
+                        onChange={() => toggleSelectedAction(id)}
+                        label={entry.displayName}
+                        checked={entry.isActive}
+                        style={{margin: '0.25rem'}}/>)
+            )(activeActionTypes)
+          }
         </div>
     </React.Fragment>);
 };
 
 export const AuditActionCardListView = (props: { actions:  AuditAction[]}) => {
+  console.log('render AuditActionCardListView');
   const {actions} = props;
-  const [actionTypes, setActionTypes] = useState([]);
-  const [activeActionTypes, setActiveActionTypes] = useState({});
-  const [actionTypeToCardCount, setActionTypeToCardCount] = useState({});
+  const initialFilterState: FilterState = {};
+  const [activeActionTypes, setActiveActionTypes] = useState(initialFilterState);
 
-  useEffect(() => {
-    const result = (fp.flow(
-      fp.flatMap((action: AuditAction) => action.eventBundles),
-      fp.map((eventBundle) => eventBundle.header.actionType),
-      fp.sortBy(a => a),
-      fp.sortedUniq)(actions));
-    setActionTypes(result);
-  }, [actions]);
+  // FIXME: handle situation when one card has the same action multiple times
+  const actionTypeToCardCount: {[key: string]: number} = fp.flow(
+    fp.flatMap(fp.get('eventBundles')),
+    fp.map(fp.get('header.actionType')),
+    fp.countBy(fp.identity),
+    fp.map((count, actionType) => ({actionType, count})),
+    fp.fromPairs)
+  (actions);
 
-  useEffect(() => {
-    const actionTypeToShow: Object = {};
-    fp.forEach((propertyPath: string) => {
-      // TODO: figure out why I can't make this work using fp.set()
-      actionTypeToShow[propertyPath] = {
-        isActive: true,
-        displayName: `${toTitleCase(propertyPath)} (${actionTypeToCardCount[propertyPath] || 0})`
-      };
-    })(actionTypes);
-    setActiveActionTypes(actionTypeToShow);
-  }, [actionTypes]);
+  console.log('actionTypeToCardCount:' + JSON.stringify(actionTypeToCardCount));
 
-  useEffect(() => {
-    const result: { [key: string]: number } = {};
-    fp.forEach(action => {
-      fp.forEach((actionType: string) => {
-        result[actionType] = (result[actionType] || 0) + 1;
-      })(getActionTypes(action));
-      setActionTypeToCardCount(result);
-    })(actions);
-  }, [actions]);
+  const actionTypes: string[] = fp.flow(
+    fp.flatMap((action: AuditAction) => action.eventBundles),
+    fp.map((eventBundle) => eventBundle.header.actionType),
+    fp.sortedUniq)
+      (actions);
+  console.log('actionTypes: ' + JSON.stringify(actionTypes));
 
-  const updateFilterCallback = (actionType: string, isActive: boolean) => {
-    const newActiveActionTypes = fp.clone(activeActionTypes);
-    newActiveActionTypes[actionType].isActive = isActive;
-    setActiveActionTypes(newActiveActionTypes);
+  const newActiveActionTypes: FilterState = {};
+  fp.forEach((propertyPath: string) => {
+    // TODO: figure out why I can't make this work using fp.set()
+    newActiveActionTypes[propertyPath] = {
+      isActive: true,
+      displayName: `${toTitleCase(propertyPath)} (${actionTypeToCardCount && actionTypeToCardCount[propertyPath] || 0})`
+    };
+  })(actionTypes);
+  console.log('setting  initial activeActionTypes = '  + JSON.stringify(newActiveActionTypes));
+  setActiveActionTypes(newActiveActionTypes);
+  console.log(JSON.stringify(activeActionTypes));
+
+  const getActionTypes = (action1: AuditAction) => {
+    console.log(`getActionTypes for ${actionToString(action1)}`);
+    return fp.map((e: AuditEventBundle) => e.header.actionType)(action1.eventBundles);
   };
 
-  function getActionTypes(action: AuditAction) {
-    return fp.map((e: AuditEventBundle) => e.header.actionType)(action.eventBundles);
-  }
+
+  const updateFilter = (actionType: string, isActive: boolean) => {
+    console.log(`set ${actionType} to ${isActive}`);
+    const newActiveActionTypes2 = fp.clone(activeActionTypes);
+    newActiveActionTypes2[actionType].isActive = isActive;
+    setActiveActionTypes(newActiveActionTypes2);
+  };
 
   // An action card should be shown only iff all action types
   // in its bundles are active (checked). Arguably this could be a simple boolean
@@ -309,7 +321,7 @@ export const AuditActionCardListView = (props: { actions:  AuditAction[]}) => {
   return (
       <React.Fragment>
         <ActionTypeFilter activeActionTypes={activeActionTypes}
-                          updateFilter={updateFilterCallback}
+                          updateFilter={updateFilter}
         />
         <div style={{margin: '1rem', width: '30rem'}}>
           {fp.any(shouldShowAction)(actions)
