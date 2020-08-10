@@ -5,7 +5,6 @@ import static org.pmiops.workbench.model.PrePackagedConceptSetEnum.SURVEY;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import com.google.cloud.bigquery.TableResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
@@ -24,7 +23,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import javax.persistence.OptimisticLockException;
 import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
@@ -32,6 +30,8 @@ import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
+import org.pmiops.workbench.cdr.dao.DSLinkingDao;
+import org.pmiops.workbench.cdr.model.DbDSLinking;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
@@ -191,6 +191,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private final ConceptSetDao conceptSetDao;
   private final CohortDao cohortDao;
   private final DataDictionaryEntryDao dataDictionaryEntryDao;
+  private final DSLinkingDao dsLinkingDao;
   private final DataSetMapper dataSetMapper;
   private final Clock clock;
 
@@ -205,6 +206,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       CohortQueryBuilder cohortQueryBuilder,
       DataDictionaryEntryDao dataDictionaryEntryDao,
       DataSetDao dataSetDao,
+      DSLinkingDao dsLinkingDao,
       DataSetMapper dataSetMapper,
       Clock clock) {
     this.bigQueryService = bigQueryService;
@@ -215,6 +217,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     this.cohortQueryBuilder = cohortQueryBuilder;
     this.dataDictionaryEntryDao = dataDictionaryEntryDao;
     this.dataSetDao = dataSetDao;
+    this.dsLinkingDao = dsLinkingDao;
     this.dataSetMapper = dataSetMapper;
     this.clock = clock;
   }
@@ -785,30 +788,19 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     final String domainName = domainMaybe.get().toString();
     final String domainFirstCharacterCapitalized = capitalizeFirstCharacterOnly(domainName);
 
-    final ImmutableMap<String, QueryParameterValue> queryParameterValuesByDomain =
-        ImmutableMap.of(
-            "pDomain", QueryParameterValue.string(domainFirstCharacterCapitalized),
-            "pValuesList",
-                QueryParameterValue.array(
-                    valuesUppercaseBuilder.build().toArray(new String[0]), String.class));
-
-    final TableResult valuesLinkingTableResult =
-        bigQueryService.executeQuery(
-            buildAndFilterQueryJobConfiguration(
-                queryParameterValuesByDomain,
-                SELECT_ALL_FROM_DS_LINKING_WHERE_DOMAIN_MATCHES_LIST));
+    final List<DbDSLinking> valuesLinkingTableResult =
+        dsLinkingDao.findByDomainAndDenormalizedNameIn(
+            domainFirstCharacterCapitalized, valuesUppercaseBuilder.build());
 
     final ImmutableList<String> valueSelects =
-        StreamSupport.stream(valuesLinkingTableResult.getValues().spliterator(), false)
-            .filter(
-                fieldValue ->
-                    !fieldValue.get("OMOP_SQL").getStringValue().equals("CORE_TABLE_FOR_DOMAIN"))
-            .map(fieldValue -> fieldValue.get("OMOP_SQL").getStringValue())
+        valuesLinkingTableResult.stream()
+            .filter(fieldValue -> !fieldValue.getOmopSql().equals("CORE_TABLE_FOR_DOMAIN"))
+            .map(fieldValue -> fieldValue.getOmopSql())
             .collect(ImmutableList.toImmutableList());
 
     final ImmutableList<String> valueJoins =
-        StreamSupport.stream(valuesLinkingTableResult.getValues().spliterator(), false)
-            .map(fieldValue -> fieldValue.get(ValuesLinkingPair.JOIN_VALUE_KEY).getStringValue())
+        valuesLinkingTableResult.stream()
+            .map(fieldValue -> fieldValue.getJoinValue())
             .collect(ImmutableList.toImmutableList());
 
     return new ValuesLinkingPair(valueSelects, valueJoins);

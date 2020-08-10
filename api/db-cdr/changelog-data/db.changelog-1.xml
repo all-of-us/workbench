@@ -26,6 +26,7 @@
     <delete tableName="cb_criteria_ancestor"/>
     <delete tableName="cb_person"/>
     <delete tableName="cb_data_filter"/>
+    <delete tableName="ds_linking"/>
 
     <loadData tableName="domain_info" file="csv/domain_info.csv" encoding="UTF-8" quotchar='"'>
       <column name="concept_id" type="NUMERIC"/>
@@ -292,6 +293,15 @@
       <column name="data_filter_id" type="NUMERIC"/>
       <column name="display_name" type="STRING"/>
       <column name="name" type="STRING"/>
+    </loadData>
+
+    <loadData tableName="ds_linking" file="csv/ds_linking.csv" encoding="UTF-8"
+      quotchar='"'>
+      <column name="id" type="NUMERIC"/>
+      <column name="denormalized_name" type="STRING"/>
+      <column name="omop_sql" type="STRING"/>
+      <column name="join_value" type="STRING"/>
+      <column name="domain" type="STRING"/>
     </loadData>
 
   </changeSet>

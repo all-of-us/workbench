@@ -43,7 +43,7 @@ cb_cri_anc_table_check=\\bcb_criteria_ancestor\\b
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
-create_tables=(concept cb_criteria cb_criteria_attribute cb_criteria_relationship cb_criteria_ancestor domain_info survey_module domain vocabulary concept_synonym cb_person cb_data_filter)
+create_tables=(concept cb_criteria cb_criteria_attribute cb_criteria_relationship cb_criteria_ancestor ds_linking domain_info survey_module domain vocabulary concept_synonym cb_person cb_data_filter)
 
 for t in "${create_tables[@]}"
 do
@@ -99,6 +99,14 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 VALUES
 (1,'Only include participants with EHR data','has_ehr_data'),
 (2,'Only include participants with Physical Measurements','has_physical_measurement_data')"
+
+# Populate ds_linking table
+echo "Inserting ds_linking"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.ds_linking\`
+(ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+SELECT ROW_NUMBER() OVER() ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN
+FROM \`$BQ_PROJECT.$BQ_DATASET.ds_linking\`"
 
 # Populate some tables from cdr data
 ###############
