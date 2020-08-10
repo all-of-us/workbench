@@ -59,7 +59,7 @@ const styles = reactStyles({
   reviewPurposeReminder: {
     marginTop: '0.3rem',
     borderStyle: 'solid',
-    height: '2.5rem',
+    height: '3.75rem',
     color: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
@@ -67,6 +67,12 @@ const styles = reactStyles({
     borderRadius: '0.4rem',
     borderWidth: '0.1rem',
     backgroundColor: colorWithWhiteness(colors.highlight, 0.7)
+  },
+  reminderText: {
+    paddingRight: '0.5rem',
+    paddingLeft: '0.5rem',
+    color: colors.primary,
+    width: '70%'
   }
 });
 
@@ -110,7 +116,7 @@ export const ResearchPurpose = withCurrentWorkspace()(
         && workspace.researchPurpose.needsReviewPrompt && <FlexRow style={styles.reviewPurposeReminder}>
         <ClrIcon style={{color: colors.warning, marginLeft: '0.3rem'}} className='is-solid'
         shape='exclamation-triangle' size='25'/>
-        <FlexColumn style={{paddingRight: '0.5rem', paddingLeft: '0.5rem', color: colors.primary}}>
+        <FlexColumn style={styles.reminderText}>
         <label style={{fontWeight: 600, fontSize: '14px', flex: 1}}>
           Please review your workspace description to make sure it is accurate.</label>
           <label>Project descriptions are publicly cataloged in the <a
