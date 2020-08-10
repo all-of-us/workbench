@@ -187,8 +187,9 @@ const AuditActionCard = (props: { action: AuditAction }) => {
   const actionTypes = fp.flow(
     fp.map(fp.get('header.actionType')),
     fp.sortedUniq,
+    fp.join(', '),
     toTitleCase,
-    fp.join(', '))
+    s => s || 'n/a')
   (action.eventBundles);
 
   return (<ActionAuditCardBase>
@@ -221,7 +222,7 @@ interface FilterState {
 const ActionTypeFilter = (props: {
   activeActionTypes: FilterState,
   updateFilter: (actionType: string, isActive: boolean) => void }) => {
-  console.log('render ActionTypeFilter');
+
   const {activeActionTypes, updateFilter} = props;
 
   const toggleSelectedAction = (actionType) => {
