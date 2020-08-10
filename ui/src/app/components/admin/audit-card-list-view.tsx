@@ -186,9 +186,8 @@ const AuditActionCard = (props: { action: AuditAction, show: (AuditAction) => bo
   const actionTypes = fp.flow(
     fp.map(fp.get('header.actionType')),
     fp.sortedUniq,
-    fp.join(', '),
     toTitleCase,
-    s => s || 'n/a')
+    fp.join(', '))
   (action.eventBundles);
 
   return (show(action) &&
