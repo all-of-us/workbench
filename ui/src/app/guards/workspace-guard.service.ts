@@ -16,10 +16,11 @@ export class WorkspaceGuard implements CanActivate, CanActivateChild {
     if (serverConfigStore.getValue().enableResearchReviewPrompt && route.routeConfig.path === 'data' ||
         route.routeConfig.path === 'notebooks') {
       currentWorkspaceStore.subscribe(workspace => {
-        if (workspace) {
-          if (workspace.accessLevel === WorkspaceAccessLevel.OWNER && workspace.researchPurpose.needsReviewPrompt) {
-            this.router.navigate(['workspaces/' + route.params.ns + '/' + route.params.wsid + '/about']);
-          }
+        if (workspace &&
+            workspace.accessLevel === WorkspaceAccessLevel.OWNER &&
+            workspace.researchPurpose.needsReviewPrompt) {
+          this.router.navigate(
+            ['workspaces/' + route.params.ns + '/' + route.params.wsid + '/about']);
         }
       });
     }
