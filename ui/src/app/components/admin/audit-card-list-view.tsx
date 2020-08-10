@@ -3,7 +3,7 @@ import {FlexRow} from 'app/components/flex';
 import {CheckBox} from 'app/components/inputs';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {actionToString, usernameWithoutDomain} from 'app/utils/audit-utils';
+import {usernameWithoutDomain} from 'app/utils/audit-utils';
 import {
   AuditAction,
   AuditAgent,
@@ -17,6 +17,7 @@ import * as moment from 'moment';
 import * as React from 'react';
 import {useState} from 'react';
 
+const {useEffect} = React;
 
 const toTitleCase = (text: String) => {
   return text
@@ -177,8 +178,8 @@ const EventBundleView = (props: {eventBundle: AuditEventBundle}) => {
   </div>;
 };
 
-const AuditActionCard = (props: { action: AuditAction, show: (AuditAction) => boolean }) => {
-  const {action, show} = props;
+const AuditActionCard = (props: { action: AuditAction }) => {
+  const {action} = props;
   // Something in the codegen is wonky here. the actionTime field is typed as a Date,
   // but turns out to be a number for some reason here. In other contexts it appears
   // to format itself happily though.
@@ -191,8 +192,7 @@ const AuditActionCard = (props: { action: AuditAction, show: (AuditAction) => bo
     s => s || 'n/a')
   (action.eventBundles);
 
-  return (show(action) &&
-      <ActionAuditCardBase>
+  return (<ActionAuditCardBase>
         <FlexRow style={{
           fontWeight: 200,
           textAlign: 'left',
@@ -260,52 +260,33 @@ const ActionTypeFilter = (props: {
 };
 
 export const AuditActionCardListView = (props: { actions:  AuditAction[]}) => {
-  console.log('render AuditActionCardListView');
   const {actions} = props;
-  const initialFilterState: FilterState = {};
-  const [activeActionTypes, setActiveActionTypes] = useState(initialFilterState);
+  const [activeActionTypes, setActiveActionTypes] = useState({});
 
-  // FIXME: handle situation when one card has the same action multiple times
-  const actionTypeToCardCount: {[key: string]: number} = fp.flow(
-    fp.flatMap(fp.get('eventBundles')),
-    fp.map(fp.get('header.actionType')),
-    fp.countBy(fp.identity),
-    fp.map((count, actionType) => ({actionType, count})),
-    fp.fromPairs)
-  (actions);
+  const getActionTypes = (action: AuditAction) => fp.map((e: AuditEventBundle) => e.header.actionType)(action.eventBundles);
 
-  console.log('actionTypeToCardCount:' + JSON.stringify(actionTypeToCardCount));
+  const actionTypeToCardCount = fp.flow(
+    fp.flatMap(getActionTypes),
+    fp.countBy(fp.identity)
+  )(actions);
 
-  const actionTypes: string[] = fp.flow(
-    fp.flatMap((action: AuditAction) => action.eventBundles),
-    fp.map((eventBundle) => eventBundle.header.actionType),
-    fp.sortedUniq)
-      (actions);
-  console.log('actionTypes: ' + JSON.stringify(actionTypes));
+  useEffect(() => {
+    const actionTypeToShow = fp.flow(
+      fp.keys,
+      fp.map((propertyPath: string) => [propertyPath, {
+        isActive: true,
+        displayName: `${toTitleCase(propertyPath)} (${actionTypeToCardCount[propertyPath] || 0})`
+      }]),
+      fp.fromPairs
+    )(actionTypeToCardCount);
 
-  const newActiveActionTypes: FilterState = {};
-  fp.forEach((propertyPath: string) => {
-    // TODO: figure out why I can't make this work using fp.set()
-    newActiveActionTypes[propertyPath] = {
-      isActive: true,
-      displayName: `${toTitleCase(propertyPath)} (${actionTypeToCardCount && actionTypeToCardCount[propertyPath] || 0})`
-    };
-  })(actionTypes);
-  console.log('setting  initial activeActionTypes = '  + JSON.stringify(newActiveActionTypes));
-  setActiveActionTypes(newActiveActionTypes);
-  console.log(JSON.stringify(activeActionTypes));
+    setActiveActionTypes(actionTypeToShow);
+  }, [actions]);
 
-  const getActionTypes = (action1: AuditAction) => {
-    console.log(`getActionTypes for ${actionToString(action1)}`);
-    return fp.map((e: AuditEventBundle) => e.header.actionType)(action1.eventBundles);
-  };
-
-
-  const updateFilter = (actionType: string, isActive: boolean) => {
-    console.log(`set ${actionType} to ${isActive}`);
-    const newActiveActionTypes2 = fp.clone(activeActionTypes);
-    newActiveActionTypes2[actionType].isActive = isActive;
-    setActiveActionTypes(newActiveActionTypes2);
+  const updateFilterCallback = (actionType: string, isActive: boolean) => {
+    const newActiveActionTypes = fp.clone(activeActionTypes);
+    newActiveActionTypes[actionType].isActive = isActive;
+    setActiveActionTypes(newActiveActionTypes);
   };
 
   // An action card should be shown only iff all action types
@@ -318,18 +299,19 @@ export const AuditActionCardListView = (props: { actions:  AuditAction[]}) => {
         fp.get(`${actionType}.isActive`)(activeActionTypes))(cardActionTypes);
   };
 
+  const filteredActions = fp.flow(
+    fp.toPairs,
+    fp.map(([index, action]) => shouldShowAction(action) && <AuditActionCard key={index} action={action}/>),
+    fp.without([false])
+  )(actions);
+
   return (
       <React.Fragment>
         <ActionTypeFilter activeActionTypes={activeActionTypes}
-                          updateFilter={updateFilter}
+                          updateFilter={updateFilterCallback}
         />
         <div style={{margin: '1rem', width: '30rem'}}>
-          {fp.any(shouldShowAction)(actions)
-            ? actions.map((action, index) => (
-              <AuditActionCard key={index}
-                               action={action}
-                               show={shouldShowAction}/>))
-              : <div  style={infoMessageStyle}>All cards filtered out.</div>}
+          {filteredActions.length ? filteredActions : <div  style={infoMessageStyle}>All cards filtered out.</div>}
         </div>
       </React.Fragment>
   );
