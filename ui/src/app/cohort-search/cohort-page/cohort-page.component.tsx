@@ -182,7 +182,7 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
               <ClrIcon className='is-solid' shape='exclamation-triangle' size={22} />
               Sorry, the cohort could not be loaded. Please try again or contact Support in the left hand navigation.
             </div>
-            : !serverConfigStore.getValue().enableCohortBuilderV2
+            : serverConfigStore.getValue().enableCohortBuilderV2
               /* Cohort Builder V2 UI - behind enableCohortBuilderV2 feature flag */
               ? <React.Fragment>
                 <FlexRowWrap style={{margin: '0 -0.5rem', ...(!!searchContext ? {display: 'none'} : {})}}>
