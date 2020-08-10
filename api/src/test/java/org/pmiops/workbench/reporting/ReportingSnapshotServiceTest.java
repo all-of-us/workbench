@@ -18,7 +18,9 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.model.ReportingResearcher;
 import org.pmiops.workbench.model.ReportingSnapshot;
+import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -44,6 +46,9 @@ public class ReportingSnapshotServiceTest {
   private static final String CURRENT_POSITION = "Tester";
   private static final String RESEARCH_PURPOSE = "To test things";
   private static final long NOW_EPOCH_MILLI = 1594404482000L;
+  private static final String USER_GIVEN_NAME_1 = "Marge";
+  private static final boolean USER_DISABLED_1 = false;
+  private static final long USER_ID_1 = 101L;
 
   @MockBean private Random mockRandom;
   @MockBean private UserService mockUserService;
@@ -108,16 +113,25 @@ public class ReportingSnapshotServiceTest {
     final ReportingSnapshot snapshot = reportingSnapshotService.takeSnapshot();
     assertThat((double) snapshot.getCaptureTimestamp()).isWithin(100.0).of(NOW_EPOCH_MILLI);
     assertThat(snapshot.getResearchers()).hasSize(2);
-    assertThat(snapshot.getResearchers().get(0).getResearcherId()).isEqualTo(101);
-    assertThat(snapshot.getResearchers().get(0).getIsDisabled()).isFalse();
+    final ReportingResearcher researcher1 = snapshot.getResearchers().get(0);
+    assertThat(researcher1.getResearcherId()).isEqualTo(USER_ID_1);
+    assertThat(researcher1.getIsDisabled()).isEqualTo(USER_DISABLED_1);
+    assertThat(researcher1.getFirstName()).isEqualTo(USER_GIVEN_NAME_1);
+    assertThat(researcher1.getUsername()).isEqualTo(PRIMARY_EMAIL);
 
     assertThat(snapshot.getWorkspaces()).hasSize(2);
+    final ReportingWorkspace workspace1 = snapshot.getWorkspaces().get(0);
+    assertThat(workspace1.getWorkspaceId()).isEqualTo(101L);
+    assertThat(workspace1.getName()).isEqualTo("A Tale of Two Cities");
+    assertThat(workspace1.getFakeSize()).isEqualTo(100L);
+    assertThat(workspace1.getCreatorId()).isNull(); // not stubbed
   }
 
   private void mockUsers() {
     final List<DbUser> users =
         ImmutableList.of(
-            createFakeUser("Marge", false, 101L), createFakeUser("Homer", false, 102L));
+            createFakeUser(USER_GIVEN_NAME_1, USER_DISABLED_1, USER_ID_1),
+            createFakeUser("Homer", false, 102L));
     doReturn(users).when(mockUserService).getAllUsers();
   }
 
