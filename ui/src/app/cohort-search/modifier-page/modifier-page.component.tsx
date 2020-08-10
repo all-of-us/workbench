@@ -255,7 +255,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
       if (this.addEncounters) {
         let encountersOptions = encountersStore.getValue();
         if (!encountersOptions) {
-            // get options for visit modifier from api
+          // get options for visit modifier from api
           const res = await cohortBuilderApi().findCriteriaBy(
             +cdrVersionId, DomainType[DomainType.VISIT], CriteriaType[CriteriaType.VISIT]);
           encountersOptions = res.items;
@@ -294,13 +294,13 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
       const {cohortContext: {domain}} = this.props;
       const {formState} = this.state;
       return domain === DomainType.SURVEY ?
-            formState.filter(form => SURVEY_MODIFIERS.indexOf(form.name) > -1) : formState;
+        formState.filter(form => SURVEY_MODIFIERS.indexOf(form.name) > -1) : formState;
     }
 
     getExisting() {
       const {cohortContext} = this.props;
       const formState = this.formState;
-        // This reseeds the form state with existing data if we're editing an existing item
+      // This reseeds the form state with existing data if we're editing an existing item
       cohortContext.item.modifiers.forEach(existing => {
         const index = formState.findIndex(mod => existing.name === mod.name);
         if (index > -1) {
@@ -381,10 +381,10 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
 
     calculate = async() => {
       const {
-          selections,
-          cohortContext: {domain, item: {modifiers}, role},
-          workspace: {cdrVersionId}
-        } = this.props;
+        selections,
+        cohortContext: {domain, item: {modifiers}, role},
+        workspace: {cdrVersionId}
+      } = this.props;
       this.trackEvent('Calculate');
       console.log(modifiers.length);
       try {
@@ -415,7 +415,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
         'Cohort Builder Search',
         'Click',
         `Modifiers - ${label} - ${domainToTitle(domain)} - Cohort Builder Search`
-        );
+      );
     }
 
     validateValues() {
@@ -452,9 +452,9 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
       }
       const {visitCounts} = this.state;
       return <div className='p-clearfix'>
-            {opt.label}
+        {opt.label}
       &nbsp;<span style={styles.count}>{visitCounts[opt.value].toLocaleString()}</span>
-        </div>;
+      </div>;
     }
 
     renderInput(index: string, field: string, type) {
@@ -462,15 +462,15 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
       switch (type) {
         case 'number':
           return <NumberInput style={{padding: '0 0.25rem', width: '3rem'}} value={values[field]}
-        onChange={v => this.inputChange(index, field, v)}/>;
+            onChange={v => this.inputChange(index, field, v)}/>;
         case 'date':
           return <div style={styles.date}>
-        <DatePicker
-            value={values[field]}
-        placeholder='YYYY-MM-DD'
-        onChange={e => this.inputChange(index, field, e)}
-        maxDate={new Date()}
-        />
+            <DatePicker
+              value={values[field]}
+              placeholder='YYYY-MM-DD'
+              onChange={e => this.inputChange(index, field, e)}
+              maxDate={new Date()}
+            />
         </div>;
       }
     }
