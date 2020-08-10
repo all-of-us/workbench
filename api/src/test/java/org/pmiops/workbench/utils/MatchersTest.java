@@ -72,6 +72,15 @@ public class MatchersTest {
   }
 
   @Test
+  public void testReplaceAll_multipleOccurrences() {
+    final String input = "And she'll have fun fun fun til her daddy takes the T-bird away.";
+    final Map<Pattern, String> patternToReplacement =
+        ImmutableMap.of(Pattern.compile("\\bfun\\b"), "cat");
+    final String updated = Matchers.replaceAllInMap(patternToReplacement, input);
+    assertThat(updated).contains("have cat cat cat");
+  }
+
+  @Test
   public void testReplaceAll_emptyMap() {
     final String input = "food is good for you!   2food3.";
     final String updated = Matchers.replaceAllInMap(Collections.emptyMap(), input);
