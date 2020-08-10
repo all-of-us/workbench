@@ -3,6 +3,7 @@ import HighchartsReact from 'highcharts-react-official';
 import * as React from 'react';
 
 import {getChartObj} from 'app/cohort-search/utils';
+import colors from 'app/styles/colors';
 
 highCharts.setOptions({
   lang: {
@@ -80,7 +81,6 @@ export class GenderChart extends React.Component<Props, State> {
       'F': 'Female',
       'No matching concept': 'Unknown'
     };
-    const colors = ['#a8385d', '#7aa3e5', '#a27ea8', '#aae3f5'];
     const chartData = data.reduce((acc, datum) => {
       const gender = !!genderCodes[datum.name] ? genderCodes[datum.name] : datum.name;
       if (!acc.categories.includes(gender)) {
@@ -90,7 +90,7 @@ export class GenderChart extends React.Component<Props, State> {
       if (index > -1) {
         acc.data[index].y += datum.count;
       } else {
-        acc.data.push({y: datum.count, name: gender, color: colors[acc.data.length]});
+        acc.data.push({y: datum.count, name: gender, color: colors.chartColors[acc.data.length]});
       }
       return acc;
     }, {categories: [], data: []});
