@@ -177,7 +177,7 @@ const EventBundleView = (props: {eventBundle: AuditEventBundle}) => {
   </div>;
 };
 
-const AuditActionCard = (props: { action: AuditAction, show: (AuditAction) => boolean }) => {
+const AuditActionCard = (props: { action: AuditAction) => {
   const {action, show} = props;
   // Something in the codegen is wonky here. the actionTime field is typed as a Date,
   // but turns out to be a number for some reason here. In other contexts it appears
@@ -190,7 +190,7 @@ const AuditActionCard = (props: { action: AuditAction, show: (AuditAction) => bo
     fp.join(', '))
   (action.eventBundles);
 
-  return (show(action) &&
+  return (
       <ActionAuditCardBase>
         <FlexRow style={{
           fontWeight: 200,
@@ -221,7 +221,7 @@ interface FilterState {
 const ActionTypeFilter = (props: {
   activeActionTypes: FilterState,
   updateFilter: (actionType: string, isActive: boolean) => void }) => {
-
+  console.log('render ActionTypeFilter');
   const {activeActionTypes, updateFilter} = props;
 
   const toggleSelectedAction = (actionType) => {
@@ -268,6 +268,7 @@ export const AuditActionCardListView = (props: { actions:  AuditAction[]}) => {
   const actionTypeToCardCount: {[key: string]: number} = fp.flow(
     fp.flatMap(fp.get('eventBundles')),
     fp.map(fp.get('header.actionType')),
+    // fp.uniq,
     fp.countBy(fp.identity),
     fp.map((count, actionType) => ({actionType, count})),
     fp.fromPairs)
@@ -284,24 +285,24 @@ export const AuditActionCardListView = (props: { actions:  AuditAction[]}) => {
 
   const newActiveActionTypes: FilterState = {};
   fp.forEach((propertyPath: string) => {
-    // TODO: figure out why I can't make this work using fp.set()
     newActiveActionTypes[propertyPath] = {
       isActive: true,
       displayName: `${toTitleCase(propertyPath)} (${actionTypeToCardCount && actionTypeToCardCount[propertyPath] || 0})`
     };
   })(actionTypes);
-  console.log('setting  initial activeActionTypes = '  + JSON.stringify(newActiveActionTypes));
+  console.log('setting initial activeActionTypes = '  + JSON.stringify(newActiveActionTypes));
   setActiveActionTypes(newActiveActionTypes);
   console.log(JSON.stringify(activeActionTypes));
 
   const getActionTypes = (action1: AuditAction) => {
     console.log(`getActionTypes for ${actionToString(action1)}`);
-    return fp.map((e: AuditEventBundle) => e.header.actionType)(action1.eventBundles);
+    return fp.flow(fp.map((e: AuditEventBundle) => e.header.actionType),
+      fp.sortedUniq)
+    (action1.eventBundles);
   };
 
-
   const updateFilter = (actionType: string, isActive: boolean) => {
-    console.log(`set ${actionType} to ${isActive}`);
+    console.log(`updateFilter: set ${actionType} to ${isActive}`);
     const newActiveActionTypes2 = fp.clone(activeActionTypes);
     newActiveActionTypes2[actionType].isActive = isActive;
     setActiveActionTypes(newActiveActionTypes2);
@@ -325,9 +326,9 @@ export const AuditActionCardListView = (props: { actions:  AuditAction[]}) => {
         <div style={{margin: '1rem', width: '30rem'}}>
           {fp.any(shouldShowAction)(actions)
             ? actions.map((action, index) => (
-              <AuditActionCard key={index}
+                shouldShowAction(action) && <AuditActionCard key={index}
                                action={action}
-                               show={shouldShowAction}/>))
+                               />))
               : <div  style={infoMessageStyle}>All cards filtered out.</div>}
         </div>
       </React.Fragment>
