@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import {ModifierPage} from 'app/cohort-search/modifier-page/modifier-page.component';
 import {attributeDisplay, nameDisplay, typeDisplay} from 'app/cohort-search/utils';
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow, FlexRowWrap} from 'app/components/flex';
@@ -59,8 +60,8 @@ const styles = reactStyles({
     background: colors.white,
     border: `2px solid ${colors.primary}`,
     borderRadius: '5px',
-    height: 'calc(100% - 150px)',
-    minHeight: 'calc(100vh - 136px)',
+    height: 'calc(100% - 15rem)',
+    minHeight: 'calc(100vh - 13rem)',
     overflowX: 'hidden',
     overflowY: 'auto',
     width: '95%',
@@ -102,6 +103,17 @@ const styles = reactStyles({
     padding: '0.2rem 0.5rem 0',
     width: '100%',
   },
+  backButton: {
+    border: '0px',
+    backgroundColor: 'none',
+    color: colors.accent,
+    marginRight: '1rem'
+  },
+  sectionTitle: {
+    marginTop: '0.5rem',
+    fontWeight: 600,
+    color: colors.primary
+  }
 });
 
 export interface Selection extends Criteria {
@@ -229,6 +241,11 @@ interface Props {
   criteria?: Array<Selection>;
 }
 
+interface State {
+  modifierButtonText: string;
+  showModifiersSlide: boolean;
+}
+
 
 export class SelectionListModalVersion extends React.Component<Props> {
   constructor(props: Props) {
@@ -285,9 +302,13 @@ export class SelectionListModalVersion extends React.Component<Props> {
   }
 }
 
-export const SelectionList = withCurrentCohortCriteria()(class extends React.Component<Props> {
+export const SelectionList = withCurrentCohortCriteria()(class extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
+    this.state = {
+      modifierButtonText: 'APPLY MODIFIERS',
+      showModifiersSlide: false
+    };
   }
 
   get showModifiers() {
@@ -310,8 +331,8 @@ export const SelectionList = withCurrentCohortCriteria()(class extends React.Com
     const {criteria} = this.props;
     const g = fp.groupBy('isStandard', criteria);
     return <div style={{paddingLeft: '0.5rem'}}>
-      {this.renderCriteriaGroup(g['true'] , 'Standard Groups')}
-      {this.renderCriteriaGroup(g['false'], 'Source code Groups')}
+      {g['true'] && g['true'].length > 0 && this.renderCriteriaGroup(g['true'] , 'Standard Groups')}
+      {g['false'] && g['false'].length > 0 && this.renderCriteriaGroup(g['false'], 'Source code Groups')}
     </div>;
   }
 
@@ -335,22 +356,42 @@ export const SelectionList = withCurrentCohortCriteria()(class extends React.Com
     </React.Fragment> ;
   }
 
+  applyModifier(modifiers) {
+    if (modifiers) {
+      const modifierButtonText = '(' + modifiers.length + ')  MODIFIERS APPLIED';
+      this.setState({showModifiersSlide: false, modifierButtonText: modifierButtonText});
+    } else {
+      this.setState({showModifiersSlide: false, modifierButtonText: 'APPLY MODIFIERS'});
+    }
+
+  }
+
   render() {
     const {back, criteria} = this.props;
+    const {modifierButtonText, showModifiersSlide} = this.state;
     return <div>
-      <div style={{paddingTop: '0.5rem'}}>
-        {criteria && <div style={styles.selectionContainer}>
+        {!showModifiersSlide && criteria &&  <React.Fragment>
+          <h3 style={{...styles.sectionTitle, marginTop: 0}}>Add selected criteria to cohort</h3>
+        <div style={{paddingTop: '0.5rem'}}>
+          <div style={styles.selectionContainer}>
           {this.renderCriteria()}
-        </div>}
-      </div>
-      <FlexRowWrap style={{flexDirection: 'row-reverse', marginTop: '2rem'}}>
+          <div style = {{padding: '1rem 0 1.2rem 1.2rem'}}>
+        <Button style={{backgroundColor: colors.white, border: '0.1rem solid' + colors.accent, color: colors.accent}}
+                onClick = {() => this.setState({showModifiersSlide: true})}>
+        {modifierButtonText}
+        </Button>
+        </div>
+        </div></div>
+        </React.Fragment>}
+        {showModifiersSlide && <ModifierPage selections={criteria} applyModifiers={(modifier) => this.applyModifier(modifier)}/>}
+       {!showModifiersSlide && <FlexRowWrap style={{flexDirection: 'row-reverse', marginTop: '2rem'}}>
         <Button type='primary' style={styles.saveButton}>Save Criteria</Button>
         <Button type='link'
                 style={{color: colors.primary, marginRight: '0.5rem'}}
                 onClick={() => back()}>
           Back
         </Button>
-      </FlexRowWrap>
+      </FlexRowWrap>}
     </div>;
   }
 });

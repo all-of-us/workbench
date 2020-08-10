@@ -126,6 +126,24 @@ const styles = reactStyles({
   },
 });
 
+export const CalculateFooter = (props) => {
+  return <FlexRowWrap style={styles.countPreview}>
+     <div style={styles.resultsContainer}>
+     <Button type='secondaryLight'
+    disabled={props.disabled}
+    style={{...styles.calculateButton, ...(props.disabled ? {borderColor: colorWithWhiteness(colors.dark, 0.6)} : {})}}
+    onClick={() => props.calculate()}>
+    {props.calculating && <Spinner size={16} style={styles.spinner}/>} Calculate
+    </Button>
+    </div>
+    <div style={styles.resultsContainer}>
+      <div style={{fontWeight: 600}}>Number of Participants:
+        <span> {props.count === null ? '--' : props.count.toLocaleString()} </span>
+      </div>
+    </div>
+  </FlexRowWrap>;
+};
+
 const optionUtil = {
   ANY: {display: 'Any value', code: 'Any'},
   EQUAL: {display: '= ', code: '01'},
@@ -576,19 +594,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
               </div>
             </React.Fragment>}
           </div>}
-          <FlexRowWrap style={styles.countPreview}>
-            <div style={styles.resultsContainer}>
-              <Button type='secondaryLight'
-                      disabled={disableCalculate}
-                      style={{...styles.calculateButton, ...(disableCalculate ? {borderColor: colorWithWhiteness(colors.dark, 0.6)} : {})}}
-                      onClick={() => this.requestPreview()}>
-                {calculating && <Spinner size={16} style={styles.spinner}/>} Calculate
-              </Button>
-            </div>
-            <div style={styles.resultsContainer}>
-              <div style={{fontWeight: 600}}>Number of Participants: <span> {count === null ? '--' : count.toLocaleString()} </span></div>
-            </div>
-          </FlexRowWrap>
+          <CalculateFooter disabled={disableCalculate} calculating={calculating} calculate={() => this.requestPreview()} count={count}/>
           <FlexRowWrap style={{flexDirection: 'row-reverse', marginTop: '2rem'}}>
             <Button type='primary'
                     disabled={disableAdd}

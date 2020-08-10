@@ -57,7 +57,7 @@ const styles = reactStyles({
     top: 0,
     right: '45px',
     height: '100%',
-    width: '14rem',
+    width: '14.5rem',
     overflow: 'auto',
     marginRight: 'calc(-14rem - 40px)',
     background: colorWithWhiteness(colors.primary, .87),
@@ -590,7 +590,6 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
                 ? <AttributesPageV2 close={() => attributesSelectionStore.next(undefined)} node={attributesSelection}/>
                 : <div>
                 <div style={{display: 'block', height: 'calc(100% - 5rem)', overflow: 'auto', padding: '0.5rem 0.5rem 0rem'}}>
-                  <h3 style={{...styles.sectionTitle, marginTop: 0}}>Add selected criteria to cohort</h3>
                   <SelectionList back={() => setSidebarState(false)} selections={[]}/>
                 </div>
               </div>

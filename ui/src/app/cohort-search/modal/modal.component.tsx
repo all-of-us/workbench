@@ -3,7 +3,7 @@ import * as React from 'react';
 import {AttributesPage} from 'app/cohort-search/attributes-page/attributes-page.component';
 import {Demographics} from 'app/cohort-search/demographics/demographics.component';
 import {ListSearch} from 'app/cohort-search/list-search/list-search.component';
-import {ModifierPage} from 'app/cohort-search/modifier-page/modifier-page.component';
+import {ModifierPageModal} from 'app/cohort-search/modifier-page/modifier-page-modal.component';
 import {searchRequestStore} from 'app/cohort-search/search-state.service';
 import {SelectionListModalVersion} from 'app/cohort-search/selection-list/selection-list.component';
 import {CriteriaTree} from 'app/cohort-search/tree/tree.component';
@@ -527,7 +527,7 @@ export class CBModal extends React.Component<Props, State> {
                     </div>
                     {/* Modifiers Page */}
                     <div style={this.panelLeftStyle('modifiers')}>
-                      {this.showModifiers && <ModifierPage
+                      {this.showModifiers && <ModifierPageModal
                         disabled={this.modifiersFlag}
                         searchContext={searchContext}
                         selections={selections}

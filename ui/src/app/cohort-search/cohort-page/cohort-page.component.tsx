@@ -1,6 +1,8 @@
 import {Component} from '@angular/core';
 import * as React from 'react';
 
+import * as fp from 'lodash/fp';
+
 import {CohortSearch} from 'app/cohort-search/cohort-search/cohort-search.component';
 import {CBModal} from 'app/cohort-search/modal/modal.component';
 import {ListOverview} from 'app/cohort-search/overview/overview.component';
@@ -14,8 +16,20 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
-import {attributesSelectionStore, currentCohortCriteriaStore, currentCohortStore, queryParamsStore, serverConfigStore} from 'app/utils/navigation';
+import {
+  reactStyles,
+  ReactWrapperBase,
+  withCurrentCohortSearchContext,
+  withCurrentWorkspace
+} from 'app/utils';
+import {
+  attributesSelectionStore,
+  currentCohortCriteriaStore,
+  currentCohortSearchContextStore,
+  currentCohortStore,
+  queryParamsStore,
+  serverConfigStore
+} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort, SearchRequest} from 'generated/fetch';
 
@@ -45,6 +59,7 @@ interface Props {
   setUpdatingCohort: (updatingCohort: boolean) => void;
   setShowWarningModal: (showWarningModal: () => Promise<boolean>) => void;
   workspace: WorkspaceData;
+  searchContext: any;
 }
 
 interface State {
@@ -62,7 +77,7 @@ interface State {
   searchContext: any;
 }
 
-export const CohortPage = withCurrentWorkspace() (
+export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearchContext()) (
   class extends React.Component<Props, State> {
     private subscription;
     resolve: Function;
@@ -152,6 +167,11 @@ export const CohortPage = withCurrentWorkspace() (
       setTimeout(() => this.setState({updateCount: this.state.updateCount + 1}));
     }
 
+    setSearchContext(context) {
+      currentCohortSearchContextStore.next(context);
+      this.setState({searchContext: context});
+    }
+
     render() {
       const {cohort, cohortChanged, cohortError, criteria, loading, modalOpen, overview, searchContext, updateCount, updateGroupListsCount}
         = this.state;
@@ -162,7 +182,7 @@ export const CohortPage = withCurrentWorkspace() (
               <ClrIcon className='is-solid' shape='exclamation-triangle' size={22} />
               Sorry, the cohort could not be loaded. Please try again or contact Support in the left hand navigation.
             </div>
-            : serverConfigStore.getValue().enableCohortBuilderV2
+            : !serverConfigStore.getValue().enableCohortBuilderV2
               /* Cohort Builder V2 UI - behind enableCohortBuilderV2 feature flag */
               ? <React.Fragment>
                 <FlexRowWrap style={{margin: '0 -0.5rem', ...(!!searchContext ? {display: 'none'} : {})}}>
@@ -173,14 +193,14 @@ export const CohortPage = withCurrentWorkspace() (
                       </div>
                       <div id='list-include-groups-v2' style={colStyle('50')}>
                         <SearchGroupList groups={criteria.includes}
-                                         setSearchContext={(c) => this.setState({searchContext: c})}
+                                         setSearchContext={(c) => this.setSearchContext(c)}
                                          role='includes'
                                          updated={updateGroupListsCount}
                                          updateRequest={() => this.updateRequest()}/>
                       </div>
                       <div id='list-exclude-groups-v2' style={colStyle('50')}>
                         {overview && <SearchGroupList groups={criteria.excludes}
-                                                      setSearchContext={(c) => this.setState({searchContext: c})}
+                                                      setSearchContext={(c) => this.setSearchContext(c)}
                                                       role='excludes'
                                                       updated={updateGroupListsCount}
                                                       updateRequest={() => this.updateRequest()}/>}
@@ -215,14 +235,14 @@ export const CohortPage = withCurrentWorkspace() (
                     </div>
                     <div id='list-include-groups' style={colStyle('50')}>
                       <SearchGroupList groups={criteria.includes}
-                                       setSearchContext={(c) => this.setState({searchContext: c})}
+                                       setSearchContext={(c) => this.setSearchContext(c)}
                                        role='includes'
                                        updated={updateGroupListsCount}
                                        updateRequest={() => this.updateRequest()}/>
                     </div>
                     <div id='list-exclude-groups' style={colStyle('50')}>
                       {overview && <SearchGroupList groups={criteria.excludes}
-                                                    setSearchContext={(c) => this.setState({searchContext: c})}
+                                                    setSearchContext={(c) => this.setSearchContext(c)}
                                                     role='excludes'
                                                     updated={updateGroupListsCount}
                                                     updateRequest={() => this.updateRequest()}/>}
@@ -239,9 +259,9 @@ export const CohortPage = withCurrentWorkspace() (
                 </div>
                 {loading && <SpinnerOverlay/>}
                 {searchContext && <CBModal
-                    closeSearch={() => this.setState({searchContext: undefined})}
+                    closeSearch={() => this.setSearchContext(undefined)}
                     searchContext={searchContext}
-                    setSearchContext={(c) => this.setState({searchContext: c})}/>}
+                    setSearchContext={(c) => this.setSearchContext(c)}/>}
               </FlexRowWrap>
           }
         </div>
