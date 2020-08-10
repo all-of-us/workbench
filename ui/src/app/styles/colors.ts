@@ -32,7 +32,8 @@ export default {
     'OWNER': '#4996A2',
     'READER': '#8F8E8F',
     'WRITER': '#92B572'
-  }
+  },
+  chartColors: ['#216FB4', '#6CACE4', '#8BC990', '#F8C954', '#F7981C', '#F0718B', '#F38D7A', '#A27DB7', '#CAB2D6']
 };
 
 class Rgba {
