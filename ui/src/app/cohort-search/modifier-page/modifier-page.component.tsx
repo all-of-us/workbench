@@ -453,7 +453,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
       const {visitCounts} = this.state;
       return <div className='p-clearfix'>
         {opt.label}
-      &nbsp;<span style={styles.count}>{visitCounts[opt.value].toLocaleString()}</span>
+        &nbsp;<span style={styles.count}>{visitCounts[opt.value].toLocaleString()}</span>
       </div>;
     }
 
@@ -471,7 +471,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
               onChange={e => this.inputChange(index, field, e)}
               maxDate={new Date()}
             />
-        </div>;
+          </div>;
       }
     }
 
