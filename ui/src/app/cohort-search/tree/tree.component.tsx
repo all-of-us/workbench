@@ -7,7 +7,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
-import {currentWorkspaceStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
 import {Criteria, CriteriaType, DomainType} from 'generated/fetch';
 
 const styles = reactStyles({
@@ -157,13 +157,17 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
       setSearchTerms} = this.props;
     const {children, error, ingredients, loading} = this.state;
     return <React.Fragment>
-      {node.domainId !== DomainType.VISIT.toString() && <div style={styles.searchBarContainer}>
-        <SearchBar node={node}
-                   searchTerms={searchTerms}
-                   selectOption={selectOption}
-                   setIngredients={(i) => this.setState({ingredients: i})}
-                   setInput={(v) => setSearchTerms(v)}/>
-      </div>}
+      {node.domainId !== DomainType.VISIT.toString() &&
+        <div style={serverConfigStore.getValue().enableCohortBuilderV2
+          ? {...styles.searchBarContainer, backgroundColor: 'transparent', width: '65%'}
+          : styles.searchBarContainer}>
+          <SearchBar node={node}
+                     searchTerms={searchTerms}
+                     selectOption={selectOption}
+                     setIngredients={(i) => this.setState({ingredients: i})}
+                     setInput={(v) => setSearchTerms(v)}/>
+        </div>
+      }
       {!loading && <div style={this.showHeader
         ? {...styles.treeContainer, border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`}
         : styles.treeContainer}>
