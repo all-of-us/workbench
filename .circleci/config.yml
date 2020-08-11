@@ -192,16 +192,16 @@ commands:
                 paths:
                   - .gradle
                   - ~/.gradle
-                key: v2-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
+                key: v3-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
       - when:
           condition: << parameters.restore >>
           steps:
             - restore_cache:
                 name: "restore api gradle cache"
                 keys:
-                  - v2-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
-                  - v2-gradle-cache-master
-                  - v2-gradle-cache-
+                  - v3-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
+                  - v3-gradle-cache-master
+                  - v3-gradle-cache-
 
   run_e2e_test:
     description: "Run puppeteer e2e integration tests"
