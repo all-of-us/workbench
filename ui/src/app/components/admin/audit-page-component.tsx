@@ -4,8 +4,9 @@ import {Button} from 'app/components/buttons';
 import {NumberInput, TextInputWithLabel} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import colors from 'app/styles/colors';
-import { useDebounce } from 'app/utils';
+import { useDebounce, useToggle } from 'app/utils';
 import {downloadTextFile} from 'app/utils/audit-utils';
+import {navigate} from 'app/utils/navigation';
 import {AuditAction, AuditLogEntry} from 'generated';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
@@ -27,7 +28,7 @@ export interface GenericAuditQueryResult {
    */
   query: string;
   /**
-   * ID in the MySQL database and BigQuery Audit Database for the this qyery. Currently either
+   * ID in the MySQL database and BigQuery Audit Database for the this query. Currently either
    * a userId or workspaceId as appropriate. This may be needed for situations (such as workspace audit)
    * where it's not obvious in the responses which workspace is the one you audited.
    */
@@ -45,19 +46,13 @@ export interface AuditPageProps {
   queryAuditLog: (subject: string) => Promise<GenericAuditQueryResult>;
   getNextAuditPath: (subject: string) => string;
   buttonLabel?: string;
+  getAdminPageUrl: (subject: string) => string[];
 }
 
-
-const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath, buttonLabel, queryText}) => {
+const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath, buttonLabel, queryText, getAdminPageUrl}) => {
   const [auditSubject, setAuditSubject] = useState(initialAuditSubject);
-  const [loadNextSubject, setLoadNextSubject] = useState(false);
   const [downloadSqlFile, setDownloadSqlFile] = useState(false);
-
-  useEffect(() =>  {
-    if (loadNextSubject) {
-      setLoadNextSubject(false);
-    }
-  }, [loadNextSubject]);
+  const [subjectRequested, setSubjectRequested] = useToggle();
 
   useEffect(() => {
     if (downloadSqlFile && !fp.isEmpty(queryText)) {
@@ -70,7 +65,7 @@ const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath, but
 
   const onAuditClick = () => {
     setAuditSubject(auditSubject.toLowerCase().trim());
-    setLoadNextSubject(true);
+    setSubjectRequested(true);
   };
 
   const getBigQueryConsoleUrl = () => {
@@ -91,7 +86,7 @@ const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath, but
   };
 
   return <React.Fragment>
-    {loadNextSubject && <Navigate to={getNextAuditPath(auditSubject)}/>}
+    {subjectRequested && <Navigate to={getNextAuditPath(auditSubject)}/>}
     <TextInputWithLabel
       containerStyle={{display: 'inline-block'}}
       style={{width: '15rem', margin: '1rem'}}
@@ -106,18 +101,36 @@ const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath, but
       Audit
       </Button>
     </TooltipTrigger>
+    <div style={{
+      margin: '0',
+      display: 'flex',
+      flexDirection: 'row',
+      textAlign: 'center',
+      fontWeight: 600
+    }}>
     <TooltipTrigger content={'Download actual SQL query for BigQuery Action Audit table. Useful' +
-    ' for developers or analysts interested in basing other ad hoc queries off' +
-    ' this audit query in the BigQuery console or bq tool.'}>
-    <Button style={buttonStyle}
-            disabled={fp.isEmpty(queryText)}
-            onClick={() => setDownloadSqlFile(true)}>
-      Download SQL
-    </Button>
-  </TooltipTrigger>
-    <TooltipTrigger content={'BigQuery Console page (use pmi-ops.org account)'}>
-      <a href={getBigQueryConsoleUrl()}>BigQuery Console</a>
+      ' for developers or analysts interested in basing other ad hoc queries off' +
+      ' this audit query in the BigQuery console or bq tool.'}>
+      <Button style={buttonStyle}
+              disabled={fp.isEmpty(queryText)}
+              onClick={() => setDownloadSqlFile(true)}>
+        Download SQL
+      </Button>
     </TooltipTrigger>
+    <TooltipTrigger content={'BigQuery Console page (use pmi-ops.org account)'}>
+      <Button style={buttonStyle}
+              onClick={() => navigate([getBigQueryConsoleUrl()])}>
+        BigQuery Console
+      </Button>
+    </TooltipTrigger>
+    <TooltipTrigger content={`Admin Page for ${auditSubjectType} ${auditSubject || 'n/a'}`}>
+      <Button style={buttonStyle}
+              disabled={fp.isEmpty(auditSubject)}
+              onClick={() => navigate(getAdminPageUrl(auditSubject))}>
+        {auditSubjectType} Admin
+      </Button>
+    </TooltipTrigger>
+    </div>
   </React.Fragment>;
 };
 
@@ -139,7 +152,7 @@ const NumActions = ({onChange, totalActions}) => {
 };
 
 export const AuditPageComponent = (props: AuditPageProps) => {
-  const {initialAuditSubject, queryAuditLog, getNextAuditPath, auditSubjectType, buttonLabel} = props;
+  const {initialAuditSubject, queryAuditLog, getNextAuditPath, auditSubjectType, buttonLabel, getAdminPageUrl} = props;
 
   const [loading, setLoading] = useState(true);
   const [queryResult, setQueryResult] = useState<GenericAuditQueryResult>(EMPTY_AUDIT_RESULT);
@@ -178,7 +191,8 @@ export const AuditPageComponent = (props: AuditPageProps) => {
                      auditSubjectType={auditSubjectType}
                      getNextAuditPath={getNextAuditPath}
                      buttonLabel={buttonLabel}
-                     queryText={query}/>
+                     queryText={query}
+                     getAdminPageUrl={getAdminPageUrl}/>
           <NumActions onChange={setDisplayNum} totalActions={actions.length}/>
           <div>{getTitle()}</div>
         </div>

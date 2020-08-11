@@ -71,10 +71,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
     const descriptionTextarea = await modal.waitForTextarea('DESCRIPTION');
     await descriptionTextarea.type(description);
 
-    const saveButton = await Button.findByName(this.page, {name: LinkText.Save});
-    await saveButton.waitUntilEnabled();
-    await saveButton.click();
-    await modal.waitUntilClose();
+    await modal.clickButton(LinkText.Save, {waitForClose: true});
     await waitWhileLoading(this.page);
 
     return cohortName;
@@ -94,11 +91,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
   async deleteConfirmationDialog(): Promise<string> {
     const modal = new Modal(this.page);
     const contentText = await modal.getContent();
-    const deleteButton = await Button.findByName(this.page, {normalizeSpace: LinkText.DeleteCohort}, modal);
-    await Promise.all([
-      deleteButton.click(),
-      modal.waitUntilClose(),
-    ]);
+    await modal.clickButton(LinkText.DeleteCohort, {waitForClose: true});
     await waitWhileLoading(this.page);
     return contentText;
   }
@@ -110,12 +103,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
   async discardChangesConfirmationDialog(): Promise<string> {
     const modal = new Modal(this.page);
     const contentText = await modal.getContent();
-    const deleteButton = await Button.findByName(this.page, {normalizeSpace: LinkText.DiscardChanges}, modal);
-    await Promise.all([
-      deleteButton.click(),
-      modal.waitUntilClose(),
-      this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 60000}),
-    ]);
+    await modal.clickButton(LinkText.DiscardChanges, {waitForNav: true, waitForClose: true});
     await waitWhileLoading(this.page);
     return contentText;
   }

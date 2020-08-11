@@ -9,7 +9,9 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
 
+import {AttributesPageV2} from 'app/cohort-search/attributes-page-v2/attributes-page-v2.component';
 import {SelectionList} from 'app/cohort-search/selection-list/selection-list.component';
+import {FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {SidebarContent} from 'app/pages/data/cohort-review/sidebar-content.component';
@@ -18,15 +20,17 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {withCurrentCohortCriteria} from 'app/utils';
 import {highlightSearchTerm, reactStyles, ReactWrapperBase, withCurrentWorkspace, withUserProfile} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {NavStore} from 'app/utils/navigation';
+import {attributesSelectionStore, NavStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
-import {ParticipantCohortStatus, WorkspaceAccessLevel} from 'generated/fetch';
-import {MenuItem, StyledAnchorTag} from './buttons';
+import {Criteria, ParticipantCohortStatus, WorkspaceAccessLevel} from 'generated/fetch';
+import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
 import {PopupTrigger} from './popups';
 
 const proIcons = {
-  thunderstorm: '/assets/icons/thunderstorm-solid.svg'
+  arrowLeft: '/assets/icons/arrow-left-regular.svg',
+  thunderstorm: '/assets/icons/thunderstorm-solid.svg',
+  times: '/assets/icons/times-light.svg'
 };
 const sidebarContent = require('assets/json/help-sidebar.json');
 
@@ -85,13 +89,10 @@ const styles = reactStyles({
     transition: 'background 0.2s linear',
     verticalAlign: 'middle'
   },
-  closeIcon: {
-    color: colorWithWhiteness(colors.primary, 0.4),
-    cursor: 'pointer',
+  navIcons: {
     position: 'absolute',
-    right: '0.25rem',
-    top: '0.25rem',
-    verticalAlign: 'top'
+    right: '0',
+    top: '0.75rem',
   },
   sectionTitle: {
     marginTop: '0.5rem',
@@ -159,6 +160,17 @@ const styles = reactStyles({
     borderRadius: '50%',
     display: 'inline-block',
     fontSize: '0.4rem'
+  },
+  buttons: {
+    paddingTop: '1rem',
+    paddingLeft: '9rem',
+    position: 'absolute'
+  },
+  backButton: {
+    border: '0px',
+    backgroundColor: 'none',
+    color: colors.accent,
+    marginRight: '1rem'
   }
 });
 
@@ -187,13 +199,22 @@ export const NOTEBOOK_HELP_CONTENT = 'notebookStorage';
 // icon on the sidebar and different tooltip, etc.
 const icons = (helpContentKey: string) => {
   return [{
-    id: 'help',
+    id: 'criteria',
     disabled: false,
-    faIcon: helpContentKey === NOTEBOOK_HELP_CONTENT ? faFolderOpen : faInfoCircle,
-    label: helpContentKey === NOTEBOOK_HELP_CONTENT ? 'Storage Icon' : 'Help Icon',
-    page: null,
+    faIcon: faInbox,
+    label: 'Selected Criteria',
+    page: 'criteria',
     style: {fontSize: '21px'},
-    tooltip: helpContentKey === NOTEBOOK_HELP_CONTENT ? 'Workspace Storage' : 'Help Tips',
+    tooltip: 'Selected Criteria'
+  },
+    {
+      id: 'help',
+      disabled: false,
+      faIcon: helpContentKey === NOTEBOOK_HELP_CONTENT ? faFolderOpen : faInfoCircle,
+      label: helpContentKey === NOTEBOOK_HELP_CONTENT ? 'Storage Icon' : 'Help Icon',
+      page: null,
+      style: {fontSize: '21px'},
+      tooltip: helpContentKey === NOTEBOOK_HELP_CONTENT ? 'Workspace Storage' : 'Help Tips',
 // }, {
 //   id: 'thunderstorm',
 //   disabled: true,
@@ -202,23 +223,23 @@ const icons = (helpContentKey: string) => {
 //   page: null,
 //   style: {height: '22px', width: '22px', marginTop: '0.25rem', opacity: 0.5},
 //   tooltip: 'Compute Configuration',
-  }, {
-    id: 'dataDictionary',
-    disabled: false,
-    faIcon: faBook,
-    label: 'Data Dictionary Icon',
-    page: null,
-    style: {color: colors.white, fontSize: '20px', marginTop: '5px'},
-    tooltip: 'Data Dictionary',
-  }, {
-    id: 'annotations',
-    disabled: false,
-    faIcon: faEdit,
-    label: 'Annotations Icon',
-    page: 'reviewParticipantDetail',
-    style: {fontSize: '20px', marginLeft: '3px'},
-    tooltip: 'Annotations',
-  }];
+    }, {
+      id: 'dataDictionary',
+      disabled: false,
+      faIcon: faBook,
+      label: 'Data Dictionary Icon',
+      page: null,
+      style: {color: colors.white, fontSize: '20px', marginTop: '5px'},
+      tooltip: 'Data Dictionary',
+    }, {
+      id: 'annotations',
+      disabled: false,
+      faIcon: faEdit,
+      label: 'Annotations Icon',
+      page: 'reviewParticipantDetail',
+      style: {fontSize: '20px', marginLeft: '3px'},
+      tooltip: 'Annotations',
+    }];
 };
 
 const analyticsLabels = {
@@ -246,9 +267,11 @@ interface Props {
 
 interface State {
   activeIcon: string;
+  attributesSelection: Criteria;
   filteredContent: Array<any>;
   participant: ParticipantCohortStatus;
   searchTerm: string;
+  showCriteria: boolean;
   tooltipId: number;
 }
 export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), withCurrentCohortCriteria())(
@@ -258,9 +281,11 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
       super(props);
       this.state = {
         activeIcon: props.sidebarOpen ? 'help' : undefined,
+        attributesSelection: undefined,
         filteredContent: undefined,
         participant: undefined,
         searchTerm: '',
+        showCriteria: false,
         tooltipId: undefined
       };
     }
@@ -275,6 +300,13 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
 
     componentDidMount(): void {
       this.subscription = participantStore.subscribe(participant => this.setState({participant}));
+      this.subscription.add(attributesSelectionStore.subscribe(attributesSelection => {
+        this.setState({attributesSelection});
+        if (!!attributesSelection) {
+          this.setState({activeIcon: 'criteria'});
+          this.props.setSidebarState(true);
+        }
+      }));
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
@@ -286,6 +318,9 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
             this.setState({activeIcon: undefined});
           }
         }, 300);
+      }
+      if (!this.props.criteria && !!prevProps.criteria) {
+        this.props.setSidebarState(false);
       }
     }
 
@@ -338,6 +373,13 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
       }
     }
 
+    onCloseClick() {
+      this.props.setSidebarState(false);
+      if (this.state.attributesSelection) {
+        setTimeout(() => this.setState({attributesSelection: undefined}), 500);
+      }
+    }
+
     onInputChange(value: string) {
       this.setState({searchTerm: value});
       this.debounceInput(value);
@@ -377,18 +419,6 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
           return {...styles.sidebarContainer};
         }
       }
-    }
-
-    renderCriteria() {
-      const {criteria} = this.props;
-      return <PopupTrigger
-          side='left'
-          closeOnClick
-          style={{height: '-webkit-fill-available'}} // Will need to update Popuptrigger to use style passed in Props
-      content={<SelectionList back={() => {}}/>}><div data-test-id='criteria-icon' style={{...styles.icon, height: '2rem', paddingBottom: '0.2rem'}}>
-        <span data-test-id = 'criteria-count' style={styles.criteriaCount}>{criteria.length}</span>
-        <FontAwesomeIcon icon={faInbox} style={{fontSize: '1.1rem'}}/>
-      </div></PopupTrigger>;
     }
 
     renderWorkspaceMenu() {
@@ -451,24 +481,38 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
       </PopupTrigger>;
     }
 
+    showIcon(icon) {
+      const {criteria, helpContentKey} = this.props;
+      return !icon.page || icon.page === helpContentKey || (criteria && icon.page === 'criteria');
+    }
+
+    displayIcon(icon, i) {
+      const {criteria} = this.props;
+
+      return <React.Fragment>
+        {(criteria && icon.page === 'criteria') && <span data-test-id='criteria-count'
+                                                         style={styles.criteriaCount}>
+          {criteria.length}</span>}
+            <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + i} icon={icon.faIcon} style={icon.style} />
+          </React.Fragment> ;
+    }
+
     render() {
-      const {criteria, helpContentKey, setSidebarState, notebookStyles, sidebarOpen} = this.props;
-      const {activeIcon, filteredContent, participant, searchTerm, tooltipId} = this.state;
+      const {criteria, helpContentKey, notebookStyles, setSidebarState, sidebarOpen} = this.props;
+      const {activeIcon, attributesSelection, filteredContent, participant, searchTerm, tooltipId} = this.state;
       const displayContent = filteredContent !== undefined ? filteredContent : sidebarContent[helpContentKey];
 
       const contentStyle = (tab: string) => ({
         display: activeIcon === tab ? 'block' : 'none',
         height: 'calc(100% - 1rem)',
         overflow: 'auto',
-        padding: '0.5rem 0.5rem 5.5rem',
+        padding: '0.5rem 0.5rem ' + (tab === 'criteria' ? '0' : '5.5rem'),
       });
       return <React.Fragment>
         <div style={notebookStyles ? {...styles.iconContainer, ...styles.notebookOverrides} : {...styles.iconContainer}}>
           {!criteria && this.renderWorkspaceMenu()}
-          {criteria && this.renderCriteria()}
           {icons(helpContentKey).map((icon, i) =>
-            (!icon.page || icon.page === helpContentKey) &&
-              <div key={i} style={{display: 'table'}}>
+          this.showIcon(icon) && <div key={i} style={{display: 'table'}}>
                 <TooltipTrigger content={<div>{tooltipId === i && icon.tooltip}</div>} side='left'>
                   <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
                        onClick={() => {
@@ -484,7 +528,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
                         </a>
                       : icon.faIcon === null
                         ? <img src={proIcons[icon.id]} style={icon.style} />
-                        : <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + i} icon={icon.faIcon} style={icon.style} />
+                        : this.displayIcon(icon, i)
                     }
                   </div>
                 </TooltipTrigger>
@@ -494,7 +538,20 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
         </div>
         <div style={this.sidebarContainerStyles(activeIcon, notebookStyles)}>
           <div style={sidebarOpen ? {...styles.sidebar, ...styles.sidebarOpen} : styles.sidebar} data-test-id='sidebar-content'>
-            <ClrIcon shape='times' size={22} style={styles.closeIcon} onClick={() => setSidebarState(false)} />
+            <FlexRow style={styles.navIcons}>
+              {activeIcon === 'criteria' && attributesSelection && <Clickable style={{marginRight: '1rem'}}
+                  onClick={() => this.setState({attributesSelection: undefined})}>
+                <img src={proIcons.arrowLeft}
+                     style={{height: '21px', width: '18px'}}
+                     alt='Go back'/>
+              </Clickable>}
+              <Clickable style={{marginRight: '1rem'}}
+                  onClick={() => this.onCloseClick()}>
+                <img src={proIcons.times}
+                     style={{height: '27px', width: '17px'}}
+                     alt='Close'/>
+              </Clickable>
+            </FlexRow>
             <div style={contentStyle('help')}>
               <h3 style={{...styles.sectionTitle, marginTop: 0}}>{helpContentKey === NOTEBOOK_HELP_CONTENT ? 'Workspace storage' : 'Help Tips'}</h3>
               {helpContentKey !== NOTEBOOK_HELP_CONTENT &&
@@ -528,14 +585,25 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
             <div style={contentStyle('annotations')}>
               {participant && <SidebarContent />}
             </div>
-            <div style={styles.footer}>
+            <div style={contentStyle('criteria')}>
+              {!!attributesSelection
+                ? <AttributesPageV2 close={() => attributesSelectionStore.next(undefined)} node={attributesSelection}/>
+                : <div>
+                <div style={{display: 'block', height: 'calc(100% - 5rem)', overflow: 'auto', padding: '0.5rem 0.5rem 0rem'}}>
+                  <h3 style={{...styles.sectionTitle, marginTop: 0}}>Add selected criteria to cohort</h3>
+                  <SelectionList back={() => setSidebarState(false)} selections={[]}/>
+                </div>
+              </div>
+              }
+            </div>
+            {activeIcon !== 'criteria' && <div style={styles.footer}>
               <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
               <p style={styles.contentItem}>
                 Visit our <StyledAnchorTag href={supportUrls.helpCenter}
                                            target='_blank' onClick={() => this.analyticsEvent('UserSupport')}> User Support
                 </StyledAnchorTag> page or <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
               </p>
-            </div>
+            </div>}
           </div>
         </div>
       </React.Fragment>;

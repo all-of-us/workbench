@@ -3,6 +3,7 @@ import BaseElement from 'app/element/base-element';
 import {buildXPath} from 'app/xpath-builders';
 import {ElementType, XPathOptions} from 'app/xpath-options';
 import {Page} from 'puppeteer';
+import {getPropValue} from 'utils/element-utils';
 
 export default class SelectMenu extends Container {
 
@@ -57,11 +58,10 @@ export default class SelectMenu extends Container {
   /**
    * Returns selected value in Select.
    */
-  async getSelectedValue(): Promise<unknown> {
+  async getSelectedValue(): Promise<string> {
     const selector = this.xpath + '/label';
     const displayedValue = await this.page.waitForXPath(selector, { visible: true });
-    const innerText = await displayedValue.getProperty('innerText');
-    return await innerText.jsonValue();
+    return getPropValue<string>(displayedValue, 'innerText');
   }
 
   /**
@@ -92,11 +92,11 @@ export default class SelectMenu extends Container {
     await dropdownTrigger.dispose();
   }
 
-  private async isOpen() {
+  private async isOpen(): Promise<boolean> {
     const selector = this.xpath + '/*[contains(concat(" ", normalize-space(@class), " "), " p-dropdown-panel ")]';
     try {
       const panel = await this.page.waitForXPath(selector);
-      const classNameString = await (await panel.getProperty('className')).jsonValue();
+      const classNameString = await getPropValue<string>(panel, 'className');
       const splits = classNameString.toString().split(' ');
       await panel.dispose();
       return splits.includes('p-input-overlay-visible');

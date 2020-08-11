@@ -47,7 +47,7 @@ describe('Create Dataset', () => {
     // Verify Notebook preview. Not going to start the Jupyter notebook.
     const notebookPreviewPage = new NotebookPreviewPage(page);
     await notebookPreviewPage.waitForLoad();
-    const currentPageUrl = await page.url();
+    const currentPageUrl = page.url();
     expect(currentPageUrl).toContain(`notebooks/preview/${newNotebookName}.ipynb`);
 
     const previewTextVisible = await waitForText(page, 'Preview (Read-Only)', {xpath: '//*[text()="Preview (Read-Only)"]'});
@@ -135,7 +135,7 @@ describe('Create Dataset', () => {
     // Verify Notebook preview. Not going to start the Jupyter notebook.
     const notebookPreviewPage = new NotebookPreviewPage(page);
     await notebookPreviewPage.waitForLoad();
-    const currentPageUrl = await page.url();
+    const currentPageUrl = page.url();
     expect(currentPageUrl).toContain(`notebooks/preview/${newNotebookName}.ipynb`);
 
     const code = await notebookPreviewPage.getFormattedCode();

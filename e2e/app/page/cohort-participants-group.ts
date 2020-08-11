@@ -54,8 +54,7 @@ export default class CohortParticipantsGroup {
     const modal = new Modal(this.page);
     const textbox = await modal.waitForTextbox('New Name:');
     await textbox.type(newGroupName);
-    await modal.waitForButton(LinkText.Rename).then(b => b.click());
-    await modal.waitUntilClose();
+    await modal.clickButton(LinkText.Rename, {waitForClose: true});
   }
 
   /**

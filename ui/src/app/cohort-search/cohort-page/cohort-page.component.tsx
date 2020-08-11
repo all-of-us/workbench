@@ -15,7 +15,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
-import {currentCohortStore, queryParamsStore, serverConfigStore} from 'app/utils/navigation';
+import {attributesSelectionStore, currentCohortCriteriaStore, currentCohortStore, queryParamsStore, serverConfigStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort, SearchRequest} from 'generated/fetch';
 
@@ -198,7 +198,12 @@ export const CohortPage = withCurrentWorkspace() (
                   {loading && <SpinnerOverlay/>}
                 </FlexRowWrap>
                 {searchContext && <CohortSearch
-                    closeSearch={() => this.setState({searchContext: undefined})}
+                    closeSearch={() => {
+                      this.setState({searchContext: undefined});
+                      currentCohortCriteriaStore.next(undefined);
+                      // Delay hiding attributes page until sidebar is closed
+                      setTimeout(() => attributesSelectionStore.next(undefined), 500);
+                    }}
                     searchContext={searchContext}/>}
               </React.Fragment>
               /* Current Cohort Builder UI - not behind enableCohortBuilderV2 feature flag */

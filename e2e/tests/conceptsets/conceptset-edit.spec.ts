@@ -9,6 +9,7 @@ import {LinkText, WorkspaceAccessLevel} from 'app/text-labels';
 import {makeRandomName, makeString} from 'utils/str-utils';
 import {findWorkspace, signIn} from 'utils/test-utils';
 import Link from 'app/element/link';
+import {getPropValue} from 'utils/element-utils';
 
 
 describe('Editing and Copying Concept Sets', () => {
@@ -150,8 +151,8 @@ describe('Editing and Copying Concept Sets', () => {
       const conceptCard = await conceptCards[0];
       conceptName = await conceptCard.getResourceName();
       const nameLink = await conceptCard.getLink();
-      const value = await (await nameLink.getProperty('textContent')).jsonValue();
-      expect(conceptName).toBe(value.toString());
+      const value = await getPropValue<string>(nameLink, 'textContent');
+      expect(conceptName).toEqual(value);
       await nameLink.click();
     }
 
@@ -170,7 +171,7 @@ describe('Editing and Copying Concept Sets', () => {
     // Verify GoTo works
     await dataPage.waitForLoad();
 
-    const url = await page.url();
+    const url = page.url();
     expect(url).toContain(copyToWorkspace.replace(/-/g, ''));
 
     const resourceCard = new DataResourceCard(page);

@@ -36,14 +36,14 @@ describe('Clone workspace', () => {
       const dataPage = new DataPage(page);
       await dataPage.waitForLoad();
       // save Data page URL for comparison
-      const workspaceDataUrl1 = await page.url();
+      const workspaceDataUrl1 = page.url();
 
       // verify new workspace was created and now can be opened successfully
       await workspacesPage.load();
       const workspaceLink = await workspaceCard.getWorkspaceNameLink(cloneWorkspaceName);
       await workspaceLink.click();
       await dataPage.waitForLoad();
-      const workspaceDataUrl2 = await page.url();
+      const workspaceDataUrl2 = page.url();
 
       expect(workspaceDataUrl1).toEqual(workspaceDataUrl2);
     });
@@ -73,7 +73,7 @@ describe('Clone workspace', () => {
       // wait for Data page
       await dataPage.waitForLoad();
       // save Data page URL for comparison after sign out then sign in back
-      const workspaceDataUrl = await page.url();
+      const workspaceDataUrl = page.url();
       // strips out dash from workspace name
       expect(workspaceDataUrl).toContain(cloneWorkspaceName.replace(/-/g, ''));
 

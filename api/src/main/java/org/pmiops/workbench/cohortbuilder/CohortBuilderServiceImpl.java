@@ -3,6 +3,7 @@ package org.pmiops.workbench.cohortbuilder;
 import static org.pmiops.workbench.model.FilterColumns.ETHNICITY;
 import static org.pmiops.workbench.model.FilterColumns.GENDER;
 import static org.pmiops.workbench.model.FilterColumns.RACE;
+import static org.pmiops.workbench.model.FilterColumns.SEX_AT_BIRTH;
 
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
@@ -260,11 +261,12 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   @Override
   public ParticipantDemographics findParticipantDemographics() {
-    List<DbCriteria> criteriaList = cbCriteriaDao.findGenderRaceEthnicity();
+    List<DbCriteria> criteriaList = cbCriteriaDao.findAllDemographics();
     return new ParticipantDemographics()
         .genderList(buildConceptIdNameList(criteriaList, GENDER))
         .raceList(buildConceptIdNameList(criteriaList, RACE))
-        .ethnicityList(buildConceptIdNameList(criteriaList, ETHNICITY));
+        .ethnicityList(buildConceptIdNameList(criteriaList, ETHNICITY))
+        .sexAtBirthList(buildConceptIdNameList(criteriaList, SEX_AT_BIRTH));
   }
 
   @Override
@@ -309,7 +311,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   private List<ConceptIdName> buildConceptIdNameList(
       List<DbCriteria> criteriaList, FilterColumns columnName) {
     return criteriaList.stream()
-        .filter(c -> c.getType().equals(columnName.toString()))
+        .filter(c -> columnName.toString().startsWith(c.getType()))
         .map(
             c -> new ConceptIdName().conceptId(new Long(c.getConceptId())).conceptName(c.getName()))
         .collect(Collectors.toList());

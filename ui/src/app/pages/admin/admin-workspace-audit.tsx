@@ -25,11 +25,17 @@ const getNextAuditPath = (subject: string) => {
   return `/admin/workspace-audit/${subject}`;
 };
 
+
+const getAdminPageUrl = (subject: string) => {
+  return [`/admin/workspaces/${subject}`];
+};
+
 export const WorkspaceAudit = () => {
   const {workspaceNamespace = ''} = useParams();
   return <AuditPageComponent auditSubjectType='Workspace'
                              buttonLabel='Workspace namespace (begins with aou-rw-)'
                              initialAuditSubject={workspaceNamespace}
                              getNextAuditPath={getNextAuditPath}
-                             queryAuditLog={queryAuditLog}/>;
+                             queryAuditLog={queryAuditLog}
+                             getAdminPageUrl={getAdminPageUrl}/>;
 };

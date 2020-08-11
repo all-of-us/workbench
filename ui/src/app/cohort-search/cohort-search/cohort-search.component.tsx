@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import {AttributesPage} from 'app/cohort-search/attributes-page/attributes-page.component';
 import {Demographics} from 'app/cohort-search/demographics/demographics.component';
 import {ListSearchV2} from 'app/cohort-search/list-search-v2/list-search-v2.component';
 import {searchRequestStore} from 'app/cohort-search/search-state.service';
@@ -9,12 +8,11 @@ import {CriteriaTree} from 'app/cohort-search/tree/tree.component';
 import {domainToTitle, generateId, typeToTitle} from 'app/cohort-search/utils';
 import {Button, Clickable} from 'app/components/buttons';
 import {FlexRowWrap} from 'app/components/flex';
-import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {currentCohortCriteriaStore} from 'app/utils/navigation';
+import {attributesSelectionStore, currentCohortCriteriaStore} from 'app/utils/navigation';
 import {Criteria, CriteriaType, DomainType, TemporalMention, TemporalTime} from 'generated/fetch';
 import {Growl} from 'primereact/growl';
 
@@ -88,7 +86,6 @@ interface Props {
 }
 
 interface State {
-  attributesNode: Criteria;
   autocompleteSelection: Criteria;
   backMode: string;
   count: number;
@@ -104,37 +101,32 @@ interface State {
 }
 
 const css = `
+  .p-growl {
+    position: sticky;
+  }
   .p-growl.p-growl-topright {
-     height: 29px;
-     width: 7rem;
-     padding-top: 6rem;
-     line-hieght: 1rem;
+     height: 1rem;
+     width: 6.4rem;
+     padding-top: 0.4rem;
+     line-height: 0.7rem;
      margin-right: 3rem;
-
+   }
+   .p-growl .p-growl-item-container .p-growl-item .p-growl-image {
+     font-size: 1rem !important;
+     margin-top: 0.19rem
    }
 
-  .p-growl-item-container::before {
-    content:"";
-    position: absolute;
-    right: 100%;
-    top:0px;
-    width:0px;
-    height:0px;
-    border-top:0.8rem solid transparent;
-    border-right:0.8rem solid transparent;
-    border-bottom:0.8rem solid transparent;
-  }
   .p-growl-item-container:after {
     content:"";
     position: absolute;
     left: 100%;
-    top:0px;
+    top:0.15rem;
     width:0px;
     height:0px;
-    border-top:0.8rem solid transparent;
-    border-left:0.8rem solid ` + colorWithWhiteness(colors.success, 0.6) + `;
-    border-bottom:0.8rem solid transparent;
-   }
+    border-top:0.5rem solid transparent;
+    border-left:0.5rem solid ` + colorWithWhiteness(colors.success, 0.6) + `;
+    border-bottom:0.5rem solid transparent;
+  }
    .p-growl-item-container {
      background-color: ` + colorWithWhiteness(colors.success, 0.6) + `!important;
    }
@@ -142,6 +134,10 @@ const css = `
      padding: 0rem !important;
      background-color: ` + colorWithWhiteness(colors.success, 0.6) + `!important;
      margin-left: 0.3rem;
+   }
+
+   .p-growl-message {
+     margin-left: 0.5em
    }
  `;
 
@@ -151,7 +147,6 @@ export class CohortSearch extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      attributesNode: undefined,
       autocompleteSelection: undefined,
       backMode: 'list',
       count: 0,
@@ -209,7 +204,8 @@ export class CohortSearch extends React.Component<Props, State> {
     if (this.state.mode === 'tree') {
       this.setState({autocompleteSelection: undefined, backMode: 'list', hierarchyNode: undefined, mode: 'list'});
     } else {
-      this.setState({attributesNode: undefined, mode: this.state.backMode});
+      attributesSelectionStore.next(undefined);
+      this.setState({mode: this.state.backMode});
     }
   }
 
@@ -285,10 +281,6 @@ export class CohortSearch extends React.Component<Props, State> {
     this.setState({loadingSubtree: true, autocompleteSelection: selection});
   }
 
-  setAttributes = (criterion: Criteria) => {
-    this.setState({attributesNode: criterion, backMode: this.state.mode, mode: 'attributes'});
-  }
-
   addSelection = (param: any) => {
     let {groupSelections, selectedIds, selections} = this.state;
     if (selectedIds.includes(param.parameterId)) {
@@ -325,16 +317,16 @@ export class CohortSearch extends React.Component<Props, State> {
 
   render() {
     const {closeSearch, searchContext, searchContext: {domain, type}} = this.props;
-    const {attributesNode, autocompleteSelection, count, groupSelections, hierarchyNode, loadingSubtree, mode, selectedIds, selections,
-      title, treeSearchTerms} = this.state;
+    const {autocompleteSelection, count, groupSelections, hierarchyNode, loadingSubtree, selectedIds, selections, title, treeSearchTerms}
+      = this.state;
     return !!searchContext && <FlexRowWrap style={styles.searchContainer}>
 
       <div style={{height: '100%', width: '100%'}}>
-        <div style={{position: 'absolute', paddingLeft: '83%', marginTop: '-1rem'}}>
+        <div style={{position: 'absolute', right: '0', marginTop: '-1rem'}}>
           <style>
             {css}
           </style>
-          <Growl ref={(el) => this.growl = el}></Growl>
+          <Growl ref={(el) => this.growl = el}/>
         </div>
         <div style={styles.titleBar}>
           <div style={{display: 'inline-flex', marginRight: '0.5rem'}}>
@@ -345,9 +337,6 @@ export class CohortSearch extends React.Component<Props, State> {
               {title}
             </h2>
           </div>
-          {mode === 'attributes' && <Button type='link' onClick={this.back}>
-            <ClrIcon size='24' shape='close'/>
-          </Button>}
         </div>
         <div style={
           (domain === DomainType.PERSON && type !== CriteriaType.AGE)
@@ -377,7 +366,6 @@ export class CohortSearch extends React.Component<Props, State> {
                       select={this.addSelection}
                       selectedIds={selectedIds}
                       selectOption={this.setAutocompleteSelection}
-                      setAttributes={this.setAttributes}
                       setSearchTerms={this.setTreeSearchTerms}/>}
                 </div>
                 {/* List View (using duplicated version of ListSearch) */}
@@ -385,18 +373,7 @@ export class CohortSearch extends React.Component<Props, State> {
                   <ListSearchV2 hierarchy={this.showHierarchy}
                               searchContext={searchContext}
                               select={this.addSelection}
-                              selectedIds={selectedIds}
-                              setAttributes={this.setAttributes}/>
-                </div>
-                {/**
-                 Attributes Page - This will no longer be rendered here in the future, leaving temporarily for reference
-                 TODO Remove once AttributesPage is moved to the sidebar with RW-4595
-                 **/}
-                <div style={this.searchContentStyle('attributes')}>
-                  {!!attributesNode && <AttributesPage
-                      close={this.back}
-                      node={attributesNode}
-                      select={this.addSelection}/>}
+                              selectedIds={selectedIds}/>
                 </div>
               </div>
             </React.Fragment>}

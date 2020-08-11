@@ -3,6 +3,7 @@ import HighchartsReact from 'highcharts-react-official';
 import * as React from 'react';
 
 import {getChartObj} from 'app/cohort-search/utils';
+import colors from 'app/styles/colors';
 
 interface Props {
   mode: string;
@@ -59,7 +60,7 @@ export class ComboChart extends React.Component<Props, State> {
           text: ''
         }
       },
-      colors: ['#adcded', '#aae3f5', '#a27ea8', '#7aa3e5', '#a8385d'],
+      colors: colors.chartColors,
       legend: {
         enabled: false
       },

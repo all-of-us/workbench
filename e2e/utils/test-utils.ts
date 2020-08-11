@@ -203,7 +203,8 @@ export async function findWorkspace(page: Page, createNew: boolean = false): Pro
     await workspacesPage.createWorkspace(workspaceName);
     console.log(`Created workspace: "${workspaceName}"`);
     await workspacesPage.load();
-    return WorkspaceCard.findCard(page, workspaceName);
+    await waitWhileLoading(page);
+    return workspaceCard.findCard(workspaceName);
   }
 
   const oneWorkspaceCard = fp.shuffle(existingWorkspaces)[0];

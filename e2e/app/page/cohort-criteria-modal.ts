@@ -123,12 +123,8 @@ export default class CohortCriteriaModal extends Modal {
   /**
    * Click FINISH button.
    */
-  async clickFinishButton(opt: {waitUntilClosed?: boolean} = {}): Promise<void> {
-    const { waitUntilClosed = true } = opt
-    await this.clickButton(LinkText.Finish);
-    if (waitUntilClosed) {
-      await this.waitUntilClose();
-    }
+  async clickFinishButton(): Promise<void> {
+    return this.clickButton(LinkText.Finish, {waitForClose: true});
   }
 
   async waitForParticipantResult(): Promise<string> {

@@ -391,11 +391,7 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
     // confirm create in pop-up modal
     const modal = new Modal(this.page);
     const modalTextContent = await modal.getContent();
-    await Promise.all([
-      modal.clickButton(LinkText.Confirm),
-      modal.waitUntilClose(),
-      this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 60000}),
-    ]);
+    await modal.clickButton(LinkText.Confirm, {waitForClose: true, waitForNav: true});
     await waitWhileLoading(this.page);
     return modalTextContent;
   }

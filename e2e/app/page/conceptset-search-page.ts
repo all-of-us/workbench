@@ -4,7 +4,7 @@ import {waitForDocumentTitle} from 'utils/waits-utils';
 import Textbox from 'app/element/textbox';
 import DataTable from 'app/component/data-table';
 import Button from 'app/element/button';
-import {waitUntilChanged} from 'utils/element-utils';
+import {getPropValue, waitUntilChanged} from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
 import ConceptsetSaveModal, {SaveOption} from './conceptset-save-modal';
 
@@ -71,23 +71,19 @@ export default class ConceptsetSearchPage extends AuthenticatedPage{
 
     // Name column #2
     const nameCell = await bodyTable.getCell(rowIndex, 2);
-    let textProp = await nameCell.getProperty('textContent');
-    const nameValue = (await textProp.jsonValue()).toString();
+    const nameValue = await getPropValue<string>(nameCell, 'textContent');
 
     // Code column #3
     const codeCell = await bodyTable.getCell(rowIndex, 3);
-    textProp = await codeCell.getProperty('textContent');
-    const codeValue = (await textProp.jsonValue()).toString();
+    const codeValue = await getPropValue<string>(codeCell, 'textContent');
 
     // Vocabulary column #4
     const vocabularyCell = await bodyTable.getCell(rowIndex, 4);
-    textProp = await vocabularyCell.getProperty('textContent');
-    const vocabValue = (await textProp.jsonValue()).toString();
+    const vocabValue = await getPropValue<string>(vocabularyCell, 'textContent');
 
     // Participant Count column #5
     const participantCountCell = await bodyTable.getCell(rowIndex, 5);
-    textProp = await participantCountCell.getProperty('textContent');
-    const partiCountValue = (await textProp.jsonValue()).toString();
+    const partiCountValue = await getPropValue<string>(participantCountCell, 'textContent');
 
     const selectCheckCell = await bodyTable.getCell(rowIndex, selctionColumnIndex);
     const elemt = (await selectCheckCell.$x('.//*[@role="checkbox"]'))[0];

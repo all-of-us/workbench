@@ -3,8 +3,9 @@ import * as React from 'react';
 
 import {cohortReviewStore} from 'app/services/review-state.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {currentCohortCriteriaStore, currentWorkspaceStore} from 'app/utils/navigation';
+import {currentCohortCriteriaStore, currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
 import {CohortAnnotationDefinitionApi, CohortReviewApi} from 'generated/fetch';
+import defaultServerConfig from 'testing/default-server-config';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CohortAnnotationDefinitionServiceStub} from 'testing/stubs/cohort-annotation-definition-service-stub';
 import {CohortReviewServiceStub, cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
@@ -31,6 +32,10 @@ describe('HelpSidebar', () => {
     registerApiClient(CohortAnnotationDefinitionApi, new CohortAnnotationDefinitionServiceStub());
     currentWorkspaceStore.next(workspaceDataStub);
     cohortReviewStore.next(cohortReviewStubs[0]);
+    serverConfigStore.next({
+      ...defaultServerConfig,
+      enableCohortBuilderV2: false
+    });
   });
 
   it('should render', () => {
@@ -50,7 +55,7 @@ describe('HelpSidebar', () => {
     props = {helpContentKey: 'notebookStorage', sidebarOpen: true};
     const wrapper = component();
     expect(wrapper.find('[data-test-id="section-title-0"]').text()).toBe(sidebarContent.notebookStorage[0].title);
-    expect(wrapper.find('[data-test-id="help-sidebar-icon-0"]').get(0).props.icon.iconName).toBe('folder-open');
+    expect(wrapper.find('[data-test-id="help-sidebar-icon-1"]').get(0).props.icon.iconName).toBe('folder-open');
   });
 
   it('should update marginRight style when sidebarOpen prop changes', () => {
@@ -78,18 +83,17 @@ describe('HelpSidebar', () => {
     wrapper.find({'data-test-id': 'Share-menu-item'}).first().simulate('click');
     expect(shareSpy).toHaveBeenCalled();
   });
-  it('should hide workspace icon if on critera search page', async () => {
+  it('should hide workspace icon if on critera search page', async() => {
     const wrapper = component();
     currentCohortCriteriaStore.next([]);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find({'data-test-id': 'workspace-menu-button'}).length).toBe(0);
-    expect(wrapper.find({'data-test-id': 'criteria-icon'}).length).toBe(1);
+    expect(wrapper.find({'data-test-id': 'criteria-count'}).length).toBe(1);
   });
   it('should update count if criteria is added', async() => {
     const wrapper = component();
     currentCohortCriteriaStore.next([criteria1, criteria2]);
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find({'data-test-id': 'criteria-icon'}).length).toBe(1);
     expect(wrapper.find({'data-test-id': 'criteria-count'}).first().props().children).toBe(2);
   });
 });

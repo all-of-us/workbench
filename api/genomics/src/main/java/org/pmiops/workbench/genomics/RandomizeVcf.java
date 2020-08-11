@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.broadinstitute.barclay.argparser.Argument;
 import org.broadinstitute.barclay.argparser.CommandLineProgramProperties;
 import org.broadinstitute.hellbender.cmdline.StandardArgumentDefinitions;
@@ -34,8 +35,8 @@ public class RandomizeVcf extends VariantWalker {
       shortName = StandardArgumentDefinitions.OUTPUT_SHORT_NAME)
   protected File outputVcf;
 
-  @Argument(doc = "Sample name suffix.", fullName = "SAMPLE_NAME_SUFFIX", shortName = "S")
-  protected String sampleNameSuffix;
+  @Argument(doc = "Number of samples to generate.", fullName = "NUM_SAMPLES", shortName = "N")
+  protected int samples;
 
   private Random random = new Random();
 
@@ -50,9 +51,9 @@ public class RandomizeVcf extends VariantWalker {
   }
 
   @VisibleForTesting
-  protected RandomizeVcf(String sampleNameSuffix, Random random) {
+  protected RandomizeVcf(int samples, Random random) {
     super();
-    this.sampleNameSuffix = sampleNameSuffix;
+    this.samples = samples;
     this.random = random;
   }
 
@@ -69,9 +70,7 @@ public class RandomizeVcf extends VariantWalker {
   public void onTraversalStart() {
     final VCFHeader inputHeader = getHeaderForVariants();
     final List<String> newSampleNames =
-        inputHeader.getSampleNamesInOrder().stream()
-            .map(this::appendSuffixToSampleName)
-            .collect(Collectors.toList());
+        this.generateNSampleNames(inputHeader.getSampleNamesInOrder().get(0));
     final VCFHeader outputHeader =
         new VCFHeader(inputHeader.getMetaDataInInputOrder(), newSampleNames);
     vcfWriter = this.createVCFWriter(outputVcf);
@@ -93,8 +92,8 @@ public class RandomizeVcf extends VariantWalker {
     variantContextBuilder.alleles(variant.getAlleles());
 
     List<Genotype> randomizedGenotypes =
-        variant.getGenotypes().stream()
-            .map(genotype -> randomizeGenotype(variant, genotype))
+        IntStream.rangeClosed(1, this.samples)
+            .mapToObj(i -> randomizeGenotype(variant, variant.getGenotype(0), i))
             .collect(Collectors.toList());
     GenotypesContext randomizedGenotypesContext =
         GenotypesContext.create(new ArrayList<>(randomizedGenotypes));
@@ -105,18 +104,18 @@ public class RandomizeVcf extends VariantWalker {
   }
 
   @VisibleForTesting
-  protected Genotype randomizeGenotype(VariantContext variantContext, Genotype genotype) {
+  protected Genotype randomizeGenotype(
+      VariantContext variantContext, Genotype genotype, int sample) {
     GenotypeBuilder genotypeBuilder =
         new GenotypeBuilder()
             .copy(genotype)
-            .name(appendSuffixToSampleName(genotype.getSampleName()))
-            .alleles(randomizeAlleles(variantContext, genotype.getAlleles()));
+            .name(appendSuffixToSampleName(genotype.getSampleName(), sample))
+            .alleles(randomizeAlleles(variantContext));
     return genotypeBuilder.make();
   }
 
   @VisibleForTesting
-  protected List<Allele> randomizeAlleles(
-      VariantContext variantContext, List<Allele> genotypeAlleles) {
+  protected List<Allele> randomizeAlleles(VariantContext variantContext) {
     /*
      * NA12878 was run on the All of Us genotyping array in order to get an example of a VCF run
      * on this array. Here are the genotypes from that run and how often they appear:
@@ -140,35 +139,61 @@ public class RandomizeVcf extends VariantWalker {
      */
     List<Allele> alleles = new ArrayList<>();
     double genotypeTypeIndex = random.nextDouble();
-    if (genotypeTypeIndex < .0145) {
-      // double no-call
-      return alleles;
-    } else if (genotypeTypeIndex < .8095) {
-      // homref
-      alleles.add(variantContext.getReference());
-      alleles.add(variantContext.getReference());
-    } else if (genotypeTypeIndex < .8654) {
-      // 0/1 het
-      alleles.add(variantContext.getReference());
-      alleles.add(variantContext.getAlternateAllele(0));
-    } else if (genotypeTypeIndex < .9268) {
-      // 1/0 het
-      alleles.add(variantContext.getAlternateAllele(0));
-      alleles.add(variantContext.getReference());
-    } else if (genotypeTypeIndex < .9994
-        || (genotypeTypeIndex >= .9994 && variantContext.getAlternateAlleles().size() == 1)) {
-      // homvar
-      alleles.add(variantContext.getAlternateAllele(0));
-      alleles.add(variantContext.getAlternateAllele(0));
+    if (variantContext.getAlternateAlleles().size() == 2) {
+      // sum of probabilities of bi-allelic no-call / homref
+      if (genotypeTypeIndex < .8240) {
+        // double no-call (or ref, if we're at a tri-allelic site, but we don't differentiate)
+        alleles.add(Allele.NO_CALL);
+        alleles.add(Allele.NO_CALL);
+        return alleles;
+      } else if (genotypeTypeIndex < .8654) {
+        // 1/2 het
+        alleles.add(variantContext.getAlternateAllele(0));
+        alleles.add(variantContext.getAlternateAllele(1));
+      } else if (genotypeTypeIndex < .9268) {
+        // 2/1 het
+        alleles.add(variantContext.getAlternateAllele(1));
+        alleles.add(variantContext.getAlternateAllele(0));
+      } else {
+        // homvar, but the rarer alt
+        alleles.add(variantContext.getAlternateAllele(1));
+        alleles.add(variantContext.getAlternateAllele(1));
+      }
     } else {
-      // homvar, but the rarer alt
-      alleles.add(variantContext.getAlternateAllele(1));
-      alleles.add(variantContext.getAlternateAllele(1));
+      if (genotypeTypeIndex < .0145) {
+        // double no-call
+        alleles.add(Allele.NO_CALL);
+        alleles.add(Allele.NO_CALL);
+        return alleles;
+      } else if (genotypeTypeIndex < .8095) {
+        // homref
+        alleles.add(variantContext.getReference());
+        alleles.add(variantContext.getReference());
+      } else if (genotypeTypeIndex < .8654) {
+        // 0/1 het
+        alleles.add(variantContext.getReference());
+        alleles.add(variantContext.getAlternateAllele(0));
+      } else if (genotypeTypeIndex < .9268) {
+        // 1/0 het
+        alleles.add(variantContext.getAlternateAllele(0));
+        alleles.add(variantContext.getReference());
+      } else {
+        // homvar
+        alleles.add(variantContext.getAlternateAllele(0));
+        alleles.add(variantContext.getAlternateAllele(0));
+      }
     }
     return alleles;
   }
 
-  private String appendSuffixToSampleName(String sampleName) {
-    return sampleName + "." + this.sampleNameSuffix.trim();
+  private List<String> generateNSampleNames(String sampleName) {
+    List<String> sampleNames = new ArrayList<>();
+    IntStream.rangeClosed(1, this.samples)
+        .forEach(i -> sampleNames.add(appendSuffixToSampleName(sampleName, i)));
+    return sampleNames;
+  }
+
+  private String appendSuffixToSampleName(String sampleName, int sampleIndex) {
+    return sampleName + "." + sampleIndex;
   }
 }

@@ -68,7 +68,7 @@ interface Props {
   select: Function;
   selectedIds: Array<string>;
   selectOption: Function;
-  setAttributes: Function;
+  setAttributes?: Function;
   setSearchTerms: Function;
 }
 

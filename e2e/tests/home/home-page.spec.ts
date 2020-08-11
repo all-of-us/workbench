@@ -59,7 +59,7 @@ describe('Home page ui tests', () => {
    // Click Create New Workspace link => Opens Create Workspace page
   test('Click on Create New Workspace link', async () => {
     const home = new HomePage(page);
-    await home.getCreateNewWorkspaceLink().then((link) => link.click());
+    await home.getCreateNewWorkspaceLink().then((link) => link.clickAndWait());
 
     const workspaceEdit = new WorkspaceEditPage(page);
     await workspaceEdit.waitForLoad();
@@ -72,7 +72,7 @@ describe('Home page ui tests', () => {
     const homePage = new HomePage(page);
     const plusIcon = await homePage.getCreateNewWorkspaceLink();
     expect(plusIcon).toBeTruthy();
-    const classname = await plusIcon.getProperty('className');
+    const classname = await plusIcon.getProperty<string>('className');
     expect(classname).toBe('is-solid');
     const shape = await plusIcon.getAttribute('shape');
     expect(shape).toBe('plus-circle');

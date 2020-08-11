@@ -2,6 +2,7 @@ import {Page} from 'puppeteer';
 import {PageUrl} from 'app/text-labels';
 import BasePage from 'app/page/base-page';
 import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
+import {getPropValue} from 'utils/element-utils';
 
 const signedInIndicator = 'app-signed-in';
 
@@ -57,12 +58,10 @@ export default abstract class AuthenticatedPage extends BasePage {
   /**
    * Find the actual displayed User name string in sidenav dropdown.
    */
-  async getUsername(): Promise<unknown> {
+  async getUsername(): Promise<string> {
     const xpath = `//*[child::clr-icon[@shape="angle"]/*[@role="img"]]`;
     const username = (await this.page.$x(xpath))[0];
-    const p = await username.getProperty('innerText');
-    const value = await p.jsonValue();
-    return value;
+    return getPropValue<string>(username, 'innerText');
   }
 
 

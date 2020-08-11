@@ -1,6 +1,7 @@
 import {ElementHandle, Frame, Page, WaitForSelectorOptions} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import Link from 'app/element/link';
+import {getPropValue} from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
 import NotebookPage from './notebook-page';
 
@@ -46,8 +47,7 @@ export default class NotebookPreviewPage extends AuthenticatedPage {
 
   async getFormattedCode(): Promise<string> {
     const codeContent = await this.waitForCssSelector('#notebook-container pre');
-    const textContentProperty = await codeContent.getProperty('textContent');
-    return (await textContentProperty.jsonValue()).toString();
+    return getPropValue<string>(codeContent, 'textContent');
   }
 
   private async waitForCssSelector(selector: string, options?: WaitForSelectorOptions): Promise<ElementHandle> {

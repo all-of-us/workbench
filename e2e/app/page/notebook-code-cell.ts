@@ -85,7 +85,7 @@ export default class CodeCell {
    */
   private async getOutputTexts(index: number, timeOut: number): Promise<string> {
     const outputElement = await this.findOutputArea(index, timeOut);
-    const value = await getPropValue(outputElement, 'innerHTML');
+    const value = await getPropValue<string>(outputElement, 'innerHTML');
     await outputElement.dispose();
     return value;
   }
@@ -96,7 +96,7 @@ export default class CodeCell {
    */
   private async getOutputError(index: number, timeOut: number): Promise<string> {
     const outputElement = await this.findOutputAreaError(index, timeOut);
-    const value = await getPropValue(outputElement, 'innerHTML');
+    const value = await getPropValue<string>(outputElement, 'innerHTML');
     await outputElement.dispose();
     return value;
   }

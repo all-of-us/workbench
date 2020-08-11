@@ -1,12 +1,14 @@
 import Container from 'app/container';
-import {Page} from 'puppeteer';
+import {ElementHandle, Page} from 'puppeteer';
 import Button from 'app/element/button';
 import Textbox from 'app/element/textbox';
 import Textarea from 'app/element/textarea';
 import Checkbox from 'app/element/checkbox';
 import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
 import {LinkText} from 'app/text-labels';
+import {getPropValue} from 'utils/element-utils';
 
+import * as fp from 'lodash/fp';
 
 const Selector = {
   defaultDialog: '//*[@role="dialog"]',
@@ -33,16 +35,29 @@ export default class Modal extends Container {
   async getContent(): Promise<string> {
     // xpath that excludes button labels and spans
     // '//*[@role="dialog"]//div[normalize-space(text()) and not(@role="button")]'
-    const modal = await this.page.waitForXPath(this.xpath, {visible: true});
-    const modalText = await (await modal.getProperty('innerText')).jsonValue();
+    const modal = await this.waitUntilVisible();
+    const modalText = await getPropValue<string>(modal, 'innerText');
     console.debug('Modal: \n' + modalText);
     return modalText.toString();
   }
 
-  async clickButton(buttonLabel: LinkText): Promise<void> {
+  /**
+   * Click a button.
+   * @param {string} buttonLabel The button text label.
+   * @param waitOptions Wait for navigation or/and modal close after click button.
+   */
+  async clickButton(buttonLabel: LinkText, waitOptions: {waitForNav?: boolean, waitForClose?: boolean} = {}): Promise<void> {
+    const { waitForNav = false, waitForClose = false } = waitOptions;
     const button = await this.waitForButton(buttonLabel);
     await button.waitUntilEnabled();
-    return button.click();
+    await Promise.all( fp.flow(
+       fp.filter<{shouldWait: boolean, waitFn: () => Promise<void>}>('shouldWait'),
+       fp.map(item => item.waitFn()),
+       fp.concat([button.click()])
+    )([
+      {shouldWait: waitForNav, waitFn: () => this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0']})},
+      {shouldWait: waitForClose, waitFn: () => this.waitUntilClose()}
+    ]));
   }
 
   async waitForButton(buttonLabel: LinkText): Promise<Button> {
@@ -65,8 +80,8 @@ export default class Modal extends Container {
     await this.page.waitForXPath(this.xpath, {hidden: true});
   }
 
-  async waitUntilVisible(): Promise<void> {
-    await this.page.waitForXPath(this.xpath, {visible: true});
+  async waitUntilVisible(): Promise<ElementHandle> {
+    return this.page.waitForXPath(this.xpath, {visible: true});
   }
 
   /**

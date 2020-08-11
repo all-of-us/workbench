@@ -2,6 +2,7 @@ import {ElementHandle, Page} from 'puppeteer';
 import {EllipsisMenuAction} from 'app/text-labels';
 import {GroupAction} from 'app/page/cohort-participants-group';
 import Link from 'app/element/link';
+import {getPropValue} from 'utils/element-utils';
 import TieredMenu from './tiered-menu';
 
 export default class EllipsisMenu {
@@ -22,7 +23,7 @@ export default class EllipsisMenu {
     const elements = await this.page.$x(selector);
     const actionTextsArray = [];
     for (const elem of elements) {
-      actionTextsArray.push(await (await elem.getProperty('textContent')).jsonValue());
+      actionTextsArray.push(await getPropValue<string>(elem, 'textContent'));
       await elem.dispose();
     }
     return actionTextsArray;

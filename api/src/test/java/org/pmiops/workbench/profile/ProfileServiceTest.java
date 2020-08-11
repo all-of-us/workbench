@@ -13,6 +13,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -602,7 +603,15 @@ public class ProfileServiceTest {
     dbTos2.setTosVersion(2);
     dbTos2.setAgreementTime(Timestamp.from(CLOCK.instant().plusSeconds(3600L)));
 
-    doReturn(ImmutableList.of(dbTos1, dbTos2)).when(mockUserTermsOfServiceDao).findAll();
+    // Test the case where a given user has more than one TOS record.
+    final DbUserTermsOfService dbTos3 = new DbUserTermsOfService();
+    dbTos3.setUserTermsOfServiceId(3L);
+    dbTos3.setUserId(user2.getUserId());
+    dbTos3.setTosVersion(2);
+    final Timestamp tos3time = Timestamp.from(CLOCK.instant().plus(Duration.ofDays(30)));
+    dbTos3.setAgreementTime(tos3time);
+
+    doReturn(ImmutableList.of(dbTos1, dbTos2, dbTos3)).when(mockUserTermsOfServiceDao).findAll();
 
     final DbInstitution dbInstitution1 = new DbInstitution();
     dbInstitution1.setShortName("caltech");
@@ -636,10 +645,15 @@ public class ProfileServiceTest {
 
     final List<Profile> profiles = profileService.listAllProfiles();
     assertThat(profiles).hasSize(3);
-    assertThat(profiles.get(1).getUserId()).isEqualTo(user2.getUserId());
-    assertThat(profiles.get(1).getFreeTierDollarQuota()).isWithin(0.02).of(200.00);
+
     assertThat(profiles.get(0).getVerifiedInstitutionalAffiliation().getInstitutionDisplayName())
         .isEqualTo(dbInstitution1.getDisplayName());
+
+    assertThat(profiles.get(1).getUserId()).isEqualTo(user2.getUserId());
+    assertThat(profiles.get(1).getFreeTierDollarQuota()).isWithin(0.02).of(200.00);
+    assertThat((double) profiles.get(1).getLatestTermsOfServiceTime())
+        .isWithin(500.0)
+        .of(tos3time.getTime());
 
     assertThat(profiles.get(2).getVerifiedInstitutionalAffiliation()).isNull();
     assertThat(profiles.get(2).getFreeTierUsage()).isWithin(0.02).of(0.00);

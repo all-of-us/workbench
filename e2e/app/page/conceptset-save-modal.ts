@@ -5,8 +5,8 @@ import RadioButton from 'app/element/radiobutton';
 import Textbox from 'app/element/textbox';
 import Textarea from 'app/element/textarea';
 import {LinkText} from 'app/text-labels';
-import {waitWhileLoading} from '../../utils/test-utils';
-import ConceptsetActionsPage from './conceptset-actions-page';
+import {getPropValue} from 'utils/element-utils';
+import {waitWhileLoading} from 'utils/test-utils';
 
 const faker = require('faker/locale/en_US');
 
@@ -31,7 +31,7 @@ export default class ConceptsetSaveModal extends Modal {
     const createNewSetRadioButton = await RadioButton.findByName(this.page, {name: saveOption}, this);
     await createNewSetRadioButton.select();
 
-    let conceptName;
+    let conceptName: string;
 
     if (saveOption === SaveOption.CreateNewSet) {
       // Generate a random name as new Concept name.
@@ -45,19 +45,12 @@ export default class ConceptsetSaveModal extends Modal {
     } else {
       const [selectedValue] = await this.page.select('[data-test-id="add-to-existing"] select', existingConceptName);
       const elem = await this.page.waitForSelector(`[data-test-id="add-to-existing"] select option[value="${selectedValue}"]`);
-      const value = await (await elem.getProperty('textContent')).jsonValue();
-      conceptName = value.toString();
+      conceptName = await getPropValue<string>(elem, 'textContent');
     }
 
     // Click SAVE button.
-    await this.clickButton(LinkText.Save);
-    await Promise.all([
-      waitWhileLoading(this.page),
-      this.waitUntilClose(),
-    ]);
-
-    const conceptActionPage = new ConceptsetActionsPage(this.page);
-    await conceptActionPage.waitForLoad();
+    await this.clickButton(LinkText.Save, {waitForClose: true});
+    await waitWhileLoading(this.page);
     
     return conceptName;
   }

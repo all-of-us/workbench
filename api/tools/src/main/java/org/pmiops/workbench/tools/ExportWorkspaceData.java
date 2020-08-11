@@ -1,5 +1,6 @@
 package org.pmiops.workbench.tools;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
 import com.opencsv.bean.BeanField;
 import com.opencsv.bean.ColumnPositionMappingStrategy;
@@ -16,6 +17,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javax.persistence.EntityManagerFactory;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
@@ -35,7 +37,9 @@ import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
+import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -44,7 +48,14 @@ import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.pmiops.workbench.firecloud.FirecloudRetryHandler;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
+import org.pmiops.workbench.model.Degree;
+import org.pmiops.workbench.model.Disability;
+import org.pmiops.workbench.model.Education;
+import org.pmiops.workbench.model.Ethnicity;
 import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.model.GenderIdentity;
+import org.pmiops.workbench.model.Race;
+import org.pmiops.workbench.model.SexAtBirth;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceImpl;
 import org.pmiops.workbench.monitoring.MonitoringServiceImpl;
 import org.pmiops.workbench.monitoring.MonitoringSpringConfiguration;
@@ -62,6 +73,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
+import org.springframework.orm.jpa.EntityManagerHolder;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /** A tool that will generate a CSV export of our workspace data */
 @Configuration
@@ -91,8 +104,14 @@ public class ExportWorkspaceData {
           .required()
           .hasArg()
           .build();
+  private static Option includeDemographicsOpt =
+      Option.builder()
+          .longOpt("include-demographics")
+          .desc("Whether to include researcher demographics in the export (sensitive)")
+          .build();
 
-  private static Options options = new Options().addOption(exportFilenameOpt);
+  private static Options options =
+      new Options().addOption(exportFilenameOpt).addOption(includeDemographicsOpt);
 
   // Short circuit the DI wiring here with a "mock" WorkspaceService
   // Importing the real one requires importing a large subtree of dependencies
@@ -126,6 +145,7 @@ public class ExportWorkspaceData {
 
   @Bean
   public CommandLineRunner run(
+      @Qualifier("entityManagerFactory") EntityManagerFactory emf,
       WorkspaceDao workspaceDao,
       CohortDao cohortDao,
       ConceptSetDao conceptSetDao,
@@ -150,7 +170,13 @@ public class ExportWorkspaceData {
     this.dateFormat.setTimeZone(TimeZone.getTimeZone("CST"));
 
     return (args) -> {
+      // Binding the EntityManager allows us to use lazy lookups. This simulates what is done on
+      // the server, where an entity manager is bound for the duration of a request.
+      EntityManagerHolder emHolder = new EntityManagerHolder(emf.createEntityManager());
+      TransactionSynchronizationManager.bindResource(emf, emHolder);
+
       CommandLine opts = new DefaultParser().parse(options, args);
+      boolean includeDemographics = opts.hasOption(includeDemographicsOpt.getLongOpt());
 
       log.info("collecting all users");
       List<WorkspaceExportRow> rows = new ArrayList<>();
@@ -159,7 +185,7 @@ public class ExportWorkspaceData {
 
       log.info("collecting / converting all workspaces");
       for (DbWorkspace workspace : this.workspaceDao.findAll()) {
-        rows.add(toWorkspaceExportRow(workspace));
+        rows.add(toWorkspaceExportRow(workspace, includeDemographics));
         usersWithoutWorkspaces.remove(workspace.getCreator());
 
         if (rows.size() % 10 == 0) {
@@ -169,7 +195,7 @@ public class ExportWorkspaceData {
 
       log.info("converting users without workspaces");
       for (DbUser user : usersWithoutWorkspaces) {
-        rows.add(toWorkspaceExportRow(user));
+        rows.add(toWorkspaceExportRow(user, includeDemographics));
       }
 
       final CustomMappingStrategy mappingStrategy = new CustomMappingStrategy();
@@ -186,11 +212,12 @@ public class ExportWorkspaceData {
     };
   }
 
-  private WorkspaceExportRow toWorkspaceExportRow(DbWorkspace workspace) {
-    WorkspaceExportRow row = toWorkspaceExportRow(workspace.getCreator());
+  private WorkspaceExportRow toWorkspaceExportRow(
+      DbWorkspace workspace, boolean includeDemographics) {
+    WorkspaceExportRow row = toWorkspaceExportRow(workspace.getCreator(), includeDemographics);
 
     row.setProjectId(workspace.getWorkspaceNamespace());
-    row.setName(workspace.getName());
+    row.setWorkspaceName(workspace.getName());
     row.setCreatedDate(dateFormat.format(workspace.getCreationTime()));
 
     try {
@@ -241,17 +268,18 @@ public class ExportWorkspaceData {
     return row;
   }
 
-  private WorkspaceExportRow toWorkspaceExportRow(DbUser user) {
-    String verifiedInstitutionName =
-        verifiedInstitutionalAffiliationDao
-            .findFirstByUser(user)
-            .map(via -> via.getInstitution().getDisplayName())
-            .orElse("");
+  private WorkspaceExportRow toWorkspaceExportRow(DbUser user, boolean includeDemographics) {
+    Optional<DbVerifiedInstitutionalAffiliation> verifiedAffiliation =
+        verifiedInstitutionalAffiliationDao.findFirstByUser(user);
 
     WorkspaceExportRow row = new WorkspaceExportRow();
     row.setCreatorContactEmail(user.getContactEmail());
     row.setCreatorUsername(user.getUsername());
-    row.setInstitution(verifiedInstitutionName);
+    row.setName(formatName(user));
+    row.setInstitution(
+        verifiedAffiliation.map(via -> via.getInstitution().getDisplayName()).orElse(""));
+    row.setInstitutionalRole(
+        verifiedAffiliation.map(via -> via.getInstitutionalRoleEnum().toString()).orElse(""));
     row.setCreatorFirstSignIn(
         Optional.ofNullable(user.getFirstSignInTime()).map(dateFormat::format).orElse(""));
     row.setTwoFactorAuthCompletionDate(
@@ -269,6 +297,39 @@ public class ExportWorkspaceData {
             .map(dateFormat::format)
             .orElse(""));
     row.setCreatorRegistrationState(user.getDataAccessLevelEnum().toString());
+    row.setDegrees(
+        Optional.ofNullable(user.getDegreesEnum()).orElse(ImmutableList.of()).stream()
+            .map(Degree::toString)
+            .collect(Collectors.joining(",\n")));
+    DbDemographicSurvey demo = user.getDemographicSurvey();
+    if (includeDemographics && demo != null) {
+      row.setRace(
+          Optional.ofNullable(demo.getRaceEnum()).orElse(ImmutableList.of()).stream()
+              .map(Race::toString)
+              .collect(Collectors.joining(",\n")));
+      row.setEthnicity(
+          Optional.ofNullable(demo.getEthnicityEnum()).map(Ethnicity::toString).orElse(""));
+      row.setGenderIdentity(
+          Optional.ofNullable(demo.getGenderIdentityEnumList()).orElse(ImmutableList.of()).stream()
+              .map(GenderIdentity::toString)
+              .collect(Collectors.joining(",\n")));
+      row.setIdentifyAsLgbtq(
+          Optional.ofNullable(demo.getIdentifiesAsLgbtq()).map(this::toYesNo).orElse(""));
+      row.setLgbtqIdentity(Optional.ofNullable(demo.getLgbtqIdentity()).orElse(""));
+      row.setSexAtBirth(
+          Optional.ofNullable(demo.getSexAtBirthEnum()).orElse(ImmutableList.of()).stream()
+              .map(SexAtBirth::toString)
+              .collect(Collectors.joining(",\n")));
+      row.setYearOfBirth(
+          Optional.ofNullable(demo.getYear_of_birth())
+              .filter(i -> i > 0)
+              .map(i -> Integer.toString(i))
+              .orElse(""));
+      row.setDisability(
+          Optional.ofNullable(demo.getDisabilityEnum()).map(Disability::toString).orElse(""));
+      row.setHighestEducation(
+          Optional.ofNullable(demo.getEducationEnum()).map(Education::toString).orElse(""));
+    }
 
     return row;
   }
@@ -279,6 +340,12 @@ public class ExportWorkspaceData {
 
   private String toYesNo(boolean b) {
     return b ? "Yes" : "No";
+  }
+
+  private String formatName(DbUser user) {
+    return Optional.ofNullable(user.getFamilyName()).orElse("")
+        + ", "
+        + Optional.ofNullable(user.getGivenName()).orElse("");
   }
 }
 

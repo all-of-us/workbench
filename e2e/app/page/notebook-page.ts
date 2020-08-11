@@ -108,7 +108,7 @@ export default class NotebookPage extends AuthenticatedPage {
 
   async kernelStatus(): Promise<KernelStatus | null> {
     const elemt = await this.frame().then( (frame) => frame.waitForSelector(CssSelector.kernelIcon, {visible: true}));
-    const value = await getPropValue(elemt, 'title');
+    const value = await getPropValue<string>(elemt, 'title');
     await elemt.dispose();
     Object.keys(KernelStatus).forEach(key => {
       if (KernelStatus[key] === value) {
@@ -121,7 +121,7 @@ export default class NotebookPage extends AuthenticatedPage {
   async getKernelName(): Promise<string> {
     const frame = await this.frame();
     const elemt = await frame.waitForSelector(CssSelector.kernelName, {visible: true});
-    const value = await getPropValue(elemt, 'textContent');
+    const value = await getPropValue<string>(elemt, 'textContent');
     await elemt.dispose();
     return value;
   }
@@ -145,7 +145,7 @@ export default class NotebookPage extends AuthenticatedPage {
   async findCodeCellInput(cellIndex: number): Promise<string> {
     const codeCell = new CodeCell(await this.frame());
     const elemt = await codeCell.findCellInput(cellIndex);
-    return getPropValue(elemt, 'outerText');
+    return getPropValue<string>(elemt, 'outerText');
   }
 
   async findCodeCellOutput(cellIndex: number): Promise<string> {

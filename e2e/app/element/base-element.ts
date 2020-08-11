@@ -1,5 +1,6 @@
 import {ClickOptions, ElementHandle, Page, WaitForSelectorOptions} from 'puppeteer';
 import Container from 'app/container';
+import {getAttrValue, getPropValue} from 'utils/element-utils';
 
 
 /**
@@ -66,15 +67,12 @@ export default class BaseElement extends Container {
    *  const handle = await page.evaluateHandle((elem, prop) => {
    *    return elem[prop];
    *  }, element, property);
-   *  return await handle.jsonValue();
+   *  return (await handle.jsonValue()).toString();
    */
-  async getProperty(propertyName: string): Promise<unknown> {
+  async getProperty<T>(propertyName: string): Promise<T> {
     return this.asElementHandle()
-      .then(elemt => {
-        return elemt.getProperty(propertyName);
-      })
-      .then(prop => {
-        return prop.jsonValue();
+      .then(element => {
+        return getPropValue<T>(element, propertyName);
       });
   }
 
@@ -82,10 +80,10 @@ export default class BaseElement extends Container {
    * Finds the value of an attribute
    * @param attribute name
    */
-  async getAttribute(attributeName: string): Promise<string | null> {
+  async getAttribute(attributeName: string): Promise<string> {
     return this.asElementHandle()
-      .then(elemt => {
-        return this.page.evaluate((link, attr) => link.getAttribute(attr), elemt, attributeName);
+      .then(element => {
+        return getAttrValue(this.page, element, attributeName);
       });
   }
 
@@ -103,13 +101,10 @@ export default class BaseElement extends Container {
 
   /**
    * Is element disabled or readonly?
-   * Disabled means element has `disabled` attribute.
+   * Disabled means element has `disabled` attribute but without a value.
    */
   async isDisabled(): Promise<boolean> {
-    return this.getProperty('disabled')
-       .then(disabled => {
-         return !!disabled;
-       });
+    return this.getProperty<boolean>('disabled');
   }
 
   /**
@@ -132,7 +127,7 @@ export default class BaseElement extends Container {
   /**
    * Check both boxModel and style for visibility.
    */
-  async isDisplayed() {
+  async isDisplayed(): Promise<boolean> {
     const elemt = await this.asElementHandle();
     const isVisibleHandle = await this.page.evaluateHandle((e) =>
     {
@@ -142,7 +137,7 @@ export default class BaseElement extends Container {
     }, elemt);
     const jValue = await isVisibleHandle.jsonValue();
     const boxModelValue = await elemt.boxModel();
-    return jValue && boxModelValue;
+    return jValue && boxModelValue !== null;
   }
 
   async click(options?: ClickOptions): Promise<void> {
@@ -162,17 +157,17 @@ export default class BaseElement extends Container {
     const clearAndType =  async (txt: string, opts?: { delay: number }): Promise<string> => {
       await this.clear();
       await this.asElementHandle().then((handle: ElementHandle) => handle.type(txt, opts));
-      return (await this.getProperty('value')).toString().trim();
+      return this.getProperty<string>('value');
     }
 
     let maxRetries = 1;
     const typeAndCheck = async () => {
-      const actualValue = await clearAndType(textValue, options);
+      const actualValue = (await clearAndType(textValue, options)).trim();
       if (actualValue === textValue) {
         return; // success
       }
       if (maxRetries <= 0) {
-        throw new Error(`Type "${textValue}" failed.`);
+        throw new Error(`Type "${textValue}" failed. Actual text: ${actualValue}`);
       }
       maxRetries--;
       return await this.page.waitFor(1000).then(typeAndCheck); // one second pause and retry type
@@ -252,17 +247,18 @@ export default class BaseElement extends Container {
    * Get the value of property 'value' for this element.
    * Alternative: await page.evaluate(elem => elem.value, element);
    */
-  async getValue(): Promise<unknown> {
-    return this.getProperty('value');
+  async getValue(): Promise<string> {
+    return this.getProperty<string>('value');
   }
 
-  async getComputedStyle(styleName: string): Promise<unknown> {
+  async getComputedStyle(styleName: string): Promise<string> {
     const handle = await this.asElementHandle();
     const attrStyle = await handle.evaluateHandle((e) => {
       const style = window.getComputedStyle(e);
       return style;
     }, this.element);
-    return (await attrStyle.getProperty(styleName)).jsonValue();
+    const propValue = await attrStyle.getProperty(styleName);
+    return (await propValue.jsonValue()).toString();
   }
 
   /**

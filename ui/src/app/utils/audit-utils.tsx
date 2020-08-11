@@ -35,3 +35,7 @@ export const downloadTextFile = (fileName, contents) => {
   element.click();
   document.body.removeChild(element);
 };
+
+export const usernameWithoutDomain = (username: string) => {
+  return username ? username.substring(0, username.indexOf('@')) : '';
+};

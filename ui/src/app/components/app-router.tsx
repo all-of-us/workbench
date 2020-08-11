@@ -59,3 +59,4 @@ export const Navigate = ({to}): React.ReactElement => {
   const location = useLocation();
   return <Redirect to={{pathname: to, state: {from: location}}}/>;
 };
+
