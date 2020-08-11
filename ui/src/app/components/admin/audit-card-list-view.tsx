@@ -1,5 +1,6 @@
 import {ActionAuditCardBase} from 'app/components/card';
 import {FlexRow} from 'app/components/flex';
+import {CheckBox} from 'app/components/inputs';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {usernameWithoutDomain} from 'app/utils/audit-utils';
@@ -14,6 +15,18 @@ import {
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import * as React from 'react';
+import {useState} from 'react';
+
+const {useEffect} = React;
+
+const toTitleCase = (text: String) => {
+  return text
+    .split('_')
+    .join(' ')
+    .replace(/\w\S*/g, (txt) => {
+      return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+    });
+};
 
 const HideableCell = (props: {content: string}) => {
   const {content} = props;
@@ -72,6 +85,7 @@ const PropertyChangeListEntry = (props: {targetProperty?: string, previousValue?
     </React.Fragment>;
 };
 
+const infoMessageStyle = {margin: '0.25rem 0 0rem 1rem', fontStyle: 'italic'};
 const PropertyChangeListView = (props: { eventBundle: AuditEventBundle }) => {
   const {header, propertyChanges} = props.eventBundle;
 
@@ -97,7 +111,7 @@ const PropertyChangeListView = (props: { eventBundle: AuditEventBundle }) => {
             ))(propertyChanges)
         }
   </div>
-      : <div style={{margin: '0.25rem 0 0rem 1rem', fontStyle: 'italic'}}>No Property Changes</div>;
+      : <div style={infoMessageStyle}>No Property Changes</div>;
 };
 
 const AgentUsernameCell = (props: {agent: AuditAgent}) => {
@@ -111,7 +125,7 @@ const AgentHeader = (props: {agent: AuditAgent}) => {
   const {agent} = props;
   return <React.Fragment>
     <div style={{fontWeight: 600}}>Agent</div>
-    <div>{`${agent.agentType} ${agent.agentId}`}</div>
+    <div>{`${toTitleCase(agent.agentType)} ${agent.agentId}`}</div>
     <AgentUsernameCell agent={agent}/>
   </React.Fragment>;
 };
@@ -121,7 +135,7 @@ const TargetHeader = (props: {target: AuditTarget}) => {
   return <React.Fragment>
   <div style={{fontWeight: 600, color: colors.accent}}>Target</div>
   <div
-      style={{color: colors.accent}}>{`${target.targetType} ${target.targetId || ''}`}</div>
+      style={{color: colors.accent}}>{`${toTitleCase(target.targetType)} ${target.targetId || ''}`}</div>
   <div/>
   </React.Fragment>;
 };
@@ -172,16 +186,19 @@ const AuditActionCard = (props: { action: AuditAction }) => {
   const timeString = moment(new Date(action.actionTime)).format('YYYY-MM-DD h:mm:ss');
   const actionTypes = fp.flow(
     fp.map(fp.get('header.actionType')),
-    s => s.join(' & '))
+    fp.sortedUniq,
+    fp.join(', '),
+    toTitleCase,
+    s => s || 'n/a')
   (action.eventBundles);
 
-  return (
-      <ActionAuditCardBase>
+  return (<ActionAuditCardBase>
         <FlexRow style={{
           fontWeight: 200,
           textAlign: 'left',
           fontSize: '0.825rem',
-          padding: '5px'
+          padding: '5px',
+          animation: 'fadeEffect 0.5s'
         }}>
           <div>{timeString}</div>
           <div style={{marginLeft: 'auto'}}>{actionTypes}</div>
@@ -193,17 +210,109 @@ const AuditActionCard = (props: { action: AuditAction }) => {
   );
 };
 
-export const AuditActionCardListView = (props: { actions: AuditAction[]}) => {
-  const {actions} = props;
+interface FilterEntry {
+  displayName?: string;
+  isActive: boolean;
+}
 
-  // Temporary workaround for sort order in the APIs, fixed in RW-4999.
-  const actionsSorted = actions.sort((a, b) => {
-    return new Date(b.actionTime).getTime() - new Date(a.actionTime).getTime();
-  });
+interface FilterState {
+  [key: string]: FilterEntry;
+}
+
+const ActionTypeFilter = (props: {
+  activeActionTypes: FilterState,
+  updateFilter: (actionType: string, isActive: boolean) => void }) => {
+
+  const {activeActionTypes, updateFilter} = props;
+
+  const toggleSelectedAction = (actionType) => {
+    updateFilter(actionType, !fp.get(`${actionType}.isActive`)(activeActionTypes));
+  };
 
   return (
-      <div style={{margin: '1rem', width: '30rem'}}>
-        {actionsSorted.map((action, index) => (<AuditActionCard key={index} action={action}/>))}
-      </div>
+      <React.Fragment>
+        <div style={{
+          marginLeft: '0',
+          padding: '2px',
+          display: 'flex',
+          flexDirection: 'column',
+          textAlign: 'left',
+          border: `1px solid ${colors.secondary}`,
+          width: 'fit-content'
+        }}>
+        <div style={{fontWeight: 600, color: colors.accent}}>Action Types</div>
+          {
+            fp.flow(
+              fp.toPairs,
+              fp.toPairs,
+              fp.map(([index, [id, entry]]: [number, [string, FilterEntry]]) =>
+                    <CheckBox
+                        key={index}
+                        id={`${id}_active`}
+                        onChange={() => toggleSelectedAction(id)}
+                        label={entry.displayName}
+                        checked={entry.isActive}
+                        style={{margin: '0.25rem'}}/>)
+            )(activeActionTypes)
+          }
+        </div>
+    </React.Fragment>);
+};
+
+export const AuditActionCardListView = (props: { actions:  AuditAction[]}) => {
+  const {actions} = props;
+  const [activeActionTypes, setActiveActionTypes] = useState({});
+
+  const getActionTypes = (action: AuditAction) => fp.flow(
+    fp.map((e: AuditEventBundle) => e.header.actionType),
+    fp.uniq
+  )(action.eventBundles);
+
+  useEffect(() => {
+    const actionTypeToShow = fp.flow(
+      fp.flatMap(getActionTypes),
+      fp.countBy(fp.identity),
+      fp.toPairs,
+      fp.map(([actionName, count]: [string, number]) => [actionName, {
+        isActive: true,
+        displayName: `${toTitleCase(actionName)} (${count || 0})`
+      }]),
+      fp.fromPairs
+    )(actions);
+
+    setActiveActionTypes(actionTypeToShow);
+  }, [actions]);
+
+  const updateFilterCallback = (actionType: string, isActive: boolean) => {
+    const newActiveActionTypes = fp.clone(activeActionTypes);
+    newActiveActionTypes[actionType].isActive = isActive;
+    setActiveActionTypes(newActiveActionTypes);
+  };
+
+  // An action card should be shown only iff all action types
+  // in its bundles are active (checked). Arguably this could be a simple boolean
+  // property on the card, but then we'd have to manage that from a parent component
+  // and use a callback, so it's not a big win.
+  const shouldShowAction = (action: AuditAction) => {
+    const cardActionTypes = getActionTypes(action);
+    return fp.all((actionType: string) =>
+        fp.get(`${actionType}.isActive`)(activeActionTypes))(cardActionTypes);
+  };
+
+  const filteredActions = fp.flow(
+    fp.toPairs,
+    fp.map(([index, action]) => shouldShowAction(action) && <AuditActionCard key={index} action={action}/>),
+    fp.without([false])
+  )(actions);
+
+  return (
+      <React.Fragment>
+        <ActionTypeFilter activeActionTypes={activeActionTypes}
+                          updateFilter={updateFilterCallback}
+        />
+        <div style={{margin: '1rem', width: '30rem'}}>
+          {filteredActions.length ? filteredActions : <div  style={infoMessageStyle}>All cards filtered out.</div>}
+        </div>
+      </React.Fragment>
   );
 };
