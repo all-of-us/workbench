@@ -8,6 +8,7 @@ import {ReplaySubject} from 'rxjs/ReplaySubject';
 
 import {Profile} from 'generated';
 import {ProfileService} from 'generated';
+import {profileStore} from "../utils/stores";
 
 
 @Injectable()
@@ -54,10 +55,12 @@ export class ProfileStorageService {
     this.profileService.getMe()
       .retryWhen(ProfileStorageService.conflictRetryPolicy())
       .subscribe((profile) => {
+        profileStore.set({...profileStore.get(), profile: profile});
         this.profile.next(profile);
         this.nextUserProfileStore(profile);
         this.activeCall = false;
       }, (err) => {
+        profileStore.set({...profileStore.get(), profile: null});
         this.profile.error(err);
         this.activeCall = false;
       });

@@ -87,10 +87,6 @@ const routes: Routes = [
         runGuardsAndResolvers: 'always',
         children: [
           {
-            path: 'library',
-            component: AppRouting
-          },
-          {
             path: 'workspaces',
             canActivateChild: [WorkspaceGuard],
             children: [

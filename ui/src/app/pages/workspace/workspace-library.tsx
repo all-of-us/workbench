@@ -284,12 +284,3 @@ export const WorkspaceLibrary = withUserProfile()
     </FlexRow>;
   }
 });
-
-@Component({
-  template: '<div #root style="height: 100%"></div>'
-})
-export class WorkspaceLibraryComponent extends ReactWrapperBase {
-  constructor() {
-    super(WorkspaceLibrary, []);
-  }
-}

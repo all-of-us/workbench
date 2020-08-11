@@ -8,15 +8,14 @@ import {SessionExpired} from 'app/pages/session-expired';
 import {SignInAgain} from 'app/pages/sign-in-again';
 import {UserDisabled} from 'app/pages/user-disabled';
 import {SignInService} from 'app/services/sign-in.service';
-import { ReactWrapperBase } from 'app/utils';
-import {authStore, useStore} from 'app/utils/stores';
+import {hasRegisteredAccess, ReactWrapperBase} from 'app/utils';
+import {authStore, profileStore, useStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Redirect} from 'react-router';
 import {SignIn} from './pages/login/sign-in';
 import {AnalyticsTracker} from './utils/analytics';
 import {WorkspaceLibrary} from "./pages/workspace/workspace-library";
-import {RegistrationGuard} from "./guards/registration-guard.service";
 
 
 const signInGuard: Guard = {
@@ -25,8 +24,7 @@ const signInGuard: Guard = {
 };
 
 const registrationGuard: Guard = {
-  // TODO lol
-  allowed: (): boolean => true,
+  allowed: (): boolean => hasRegisteredAccess(profileStore.get().profile.dataAccessLevel),
   redirectPath: '/login'
 };
 
@@ -70,14 +68,22 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
     />
 
     <ProtectedRoutes guards={[signInGuard]}>
-        <AppRoute path='/admin/user-audit'
-                  component={() => <UserAuditPage routeData={{title: 'User Audit'}}/>}/>
-      <AppRoute path='/admin/user-audit/:username'
-                  component={() => <UserAuditPage routeData={{title: 'User Audit'}}/>}/>
-      <AppRoute path='/admin/workspace-audit'
-                  component={() => <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>}/>
-      <AppRoute path='/admin/workspace-audit/:workspaceNamespace'
-                  component={() => <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>}/>
+      <AppRoute
+          path='/admin/user-audit'
+          component={() => <UserAuditPage routeData={{title: 'User Audit'}}/>}
+      />
+      <AppRoute
+          path='/admin/user-audit/:username'
+          component={() => <UserAuditPage routeData={{title: 'User Audit'}}/>}
+      />
+      <AppRoute
+          path='/admin/workspace-audit'
+          component={() => <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>}
+      />
+      <AppRoute
+          path='/admin/workspace-audit/:workspaceNamespace'
+          component={() => <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>}
+      />
       <AppRoute
           path='/data-code-of-conduct'
           component={ () => <DataUserCodeOfConductPage routeData={{
@@ -88,7 +94,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
       <ProtectedRoutes guards={[registrationGuard]}>
         <AppRoute
             path='/library'
-            component={() => <WorkspaceLibraryPage routeData={{title: 'Workspace Library'}}/>}
+            component={() => <WorkspaceLibraryPage routeData={{title: 'Workspace Library', minimizeChrome: false}}/>}
         />
       </ProtectedRoutes>
     </ProtectedRoutes>
