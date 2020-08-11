@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -22,7 +23,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -111,7 +111,7 @@ public class DbUser {
   private Timestamp lastModifiedTime;
   private Timestamp twoFactorAuthBypassTime;
   private DbDemographicSurvey demographicSurvey;
-  private DbAddress address;
+  private Set<DbAddress> addresses;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -147,8 +147,6 @@ public class DbUser {
    * Returns the user's full G Suite email address, e.g. "joe@researchallofus.org". This is named
    * "username" in this entity class to distinguish it from getContactEmail, which is the user's
    * designated contact email address.
-   *
-   * @return
    */
   @Column(name = "email")
   public String getUsername() {
@@ -161,8 +159,6 @@ public class DbUser {
 
   /**
    * Returns the user's designated contact email address, e.g. "joe@gmail.com".
-   *
-   * @return
    */
   @Column(name = "contact_email")
   public String getContactEmail() {
@@ -335,9 +331,7 @@ public class DbUser {
     }
     return this.degrees.stream()
         .map(
-            (degreeObject) -> {
-              return DbStorageEnums.degreeFromStorage(degreeObject);
-            })
+            DbStorageEnums::degreeFromStorage)
         .collect(Collectors.toList());
   }
 
@@ -345,9 +339,7 @@ public class DbUser {
     this.degrees =
         degreeList.stream()
             .map(
-                (degree) -> {
-                  return DbStorageEnums.degreeToStorage(degree);
-                })
+                DbStorageEnums::degreeToStorage)
             .collect(Collectors.toList());
   }
 
@@ -356,7 +348,6 @@ public class DbUser {
       orphanRemoval = true,
       fetch = FetchType.LAZY,
       mappedBy = "user")
-  @Column(name = "page_id")
   public Set<DbPageVisit> getPageVisits() {
     return pageVisits;
   }
@@ -437,7 +428,7 @@ public class DbUser {
   }
 
   @OneToMany(
-      fetch = FetchType.EAGER,
+      fetch = FetchType.LAZY,
       orphanRemoval = true,
       mappedBy = "user",
       cascade = CascadeType.ALL)
@@ -674,15 +665,25 @@ public class DbUser {
     this.twoFactorAuthBypassTime = twoFactorAuthBypassTime;
   }
 
-  @OneToOne(
+  @OneToMany(
       cascade = CascadeType.ALL,
       orphanRemoval = true,
       fetch = FetchType.LAZY,
       mappedBy = "user")
+  public Set<DbDemographicSurvey> getDemographicSurveys() {
+    return Collections.singleton(demographicSurvey);
+  }
+
+  public void setDemographicSurveys(Set<DbDemographicSurvey> demographicSurveys) {
+    this.demographicSurvey = demographicSurveys.stream().findAny().orElse(null);
+  }
+
+  @Transient
   public DbDemographicSurvey getDemographicSurvey() {
     return demographicSurvey;
   }
 
+  @Transient
   public void setDemographicSurvey(DbDemographicSurvey demographicSurvey) {
     this.demographicSurvey = demographicSurvey;
   }
@@ -714,17 +715,37 @@ public class DbUser {
     this.professionalUrl = professionalUrl;
   }
 
-  @OneToOne(
+  @Deprecated
+  @OneToMany(
       cascade = CascadeType.ALL,
       orphanRemoval = true,
       fetch = FetchType.LAZY,
       mappedBy = "user")
-  public DbAddress getAddress() {
-    return address;
+  public Set<DbAddress> getAddresses() {
+    return addresses;
   }
 
+  @Deprecated
+  public void setAddresses(Set<DbAddress> addresses) {
+    this.addresses = addresses;
+  }
+
+  @Transient
+  public DbAddress getAddress() {
+    if (addresses == null) {
+      return null;
+    } else {
+      return addresses.stream().findFirst().orElse(null);
+    }
+  }
+
+  // Mock single-value semantics (which is how we use this anyway.
   public void setAddress(DbAddress address) {
-    this.address = address;
+    if (address == null) {
+      this.addresses = Collections.emptySet();
+    } else {
+      this.addresses = Collections.singleton(address);
+    }
   }
 
   // null-friendly versions of equals() and hashCode() for DbVerifiedInstitutionalAffiliation

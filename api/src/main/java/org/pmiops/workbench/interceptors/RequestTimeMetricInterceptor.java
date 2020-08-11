@@ -5,8 +5,10 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
@@ -18,7 +20,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 @Service
 public class RequestTimeMetricInterceptor extends HandlerInterceptorAdapter {
-
+  private static final Logger log = Logger.getLogger(RequestTimeMetricInterceptor.class.getName());
   private final LogsBasedMetricService logsBasedMetricService;
   private Clock clock;
 
@@ -34,6 +36,7 @@ public class RequestTimeMetricInterceptor extends HandlerInterceptorAdapter {
       return true;
     }
     request.setAttribute(RequestAttribute.START_INSTANT.toString(), clock.instant());
+    log.info(String.format("method %s", getMethodName((HandlerMethod) handler)));
     return true;
   }
 
@@ -60,7 +63,7 @@ public class RequestTimeMetricInterceptor extends HandlerInterceptorAdapter {
       return;
     }
 
-    final String methodName = ((HandlerMethod) handler).getMethod().getName();
+    final String methodName = getMethodName((HandlerMethod) handler);
 
     // If we recorded the START_INSTANT property, find the time between then and now,
     // build a measurement bundle with that value, add the method name as a label, and record.
@@ -75,5 +78,10 @@ public class RequestTimeMetricInterceptor extends HandlerInterceptorAdapter {
                         .addMeasurement(DistributionMetric.API_METHOD_TIME, elapsedMillis)
                         .addTag(MetricLabel.METHOD_NAME, methodName)
                         .build()));
+  }
+
+  @NotNull
+  public String getMethodName(HandlerMethod handler) {
+    return handler.getMethod().getName();
   }
 }
