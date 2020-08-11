@@ -269,24 +269,22 @@ export const AuditActionCardListView = (props: { actions:  AuditAction[]}) => {
   )(action.eventBundles);
 
   useEffect(() => {
-    const actionTypeToShow = fp.flow(
+    const actionTypeToActive = fp.flow(
       fp.flatMap(getActionTypes),
       fp.countBy(fp.identity),
       fp.toPairs,
-      fp.map(([actionName, count]: [string, number]) => [actionName, {
+      fp.map(([actionType, count]: [string, number]) => [actionType, {
         isActive: true,
-        displayName: `${toTitleCase(actionName)} (${count || 0})`
+        displayName: `${toTitleCase(actionType)} (${count || 0})`
       }]),
       fp.fromPairs
     )(actions);
 
-    setActiveActionTypes(actionTypeToShow);
+    setActiveActionTypes(actionTypeToActive);
   }, [actions]);
 
   const updateFilterCallback = (actionType: string, isActive: boolean) => {
-    const newActiveActionTypes = fp.clone(activeActionTypes);
-    newActiveActionTypes[actionType].isActive = isActive;
-    setActiveActionTypes(newActiveActionTypes);
+    setActiveActionTypes(fp.set([actionType, 'isActive'], isActive, activeActionTypes));
   };
 
   // An action card should be shown only iff all action types
