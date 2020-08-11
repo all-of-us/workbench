@@ -219,35 +219,13 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
     reviewWithoutEHRData = createCohortReview(cohortWithoutEHRData);
 
-    participantCohortStatusDao.save(
-        new DbParticipantCohortStatus()
-            .participantKey(
-                new DbParticipantCohortStatusKey()
-                    .participantId(PARTICIPANT_ID)
-                    .cohortReviewId(reviewWithoutEHRData.getCohortReviewId())));
-
-    participantCohortStatusDao.save(
-        new DbParticipantCohortStatus()
-            .participantKey(
-                new DbParticipantCohortStatusKey()
-                    .participantId(PARTICIPANT_ID2)
-                    .cohortReviewId(reviewWithoutEHRData.getCohortReviewId())));
+    saveParticipantCohortStatus(PARTICIPANT_ID, reviewWithoutEHRData.getCohortReviewId());
+    saveParticipantCohortStatus(PARTICIPANT_ID2, reviewWithoutEHRData.getCohortReviewId());
 
     reviewWithEHRData = createCohortReview(cohortWithEHRData);
 
-    participantCohortStatusDao.save(
-        new DbParticipantCohortStatus()
-            .participantKey(
-                new DbParticipantCohortStatusKey()
-                    .participantId(PARTICIPANT_ID)
-                    .cohortReviewId(reviewWithEHRData.getCohortReviewId())));
-
-    participantCohortStatusDao.save(
-        new DbParticipantCohortStatus()
-            .participantKey(
-                new DbParticipantCohortStatusKey()
-                    .participantId(PARTICIPANT_ID2)
-                    .cohortReviewId(reviewWithEHRData.getCohortReviewId())));
+    saveParticipantCohortStatus(PARTICIPANT_ID, reviewWithEHRData.getCohortReviewId());
+    saveParticipantCohortStatus(PARTICIPANT_ID2, reviewWithEHRData.getCohortReviewId());
   }
 
   @After
@@ -782,6 +760,15 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     assertEquals(
         new Vocabulary().type("Source").domain("ALL_EVENTS").vocabulary("ICD9CM"),
         response.getItems().get(2));
+  }
+
+  private void saveParticipantCohortStatus(Long participantId, Long reviewId) {
+    participantCohortStatusDao.save(
+        new DbParticipantCohortStatus()
+            .participantKey(
+                new DbParticipantCohortStatusKey()
+                    .participantId(participantId)
+                    .cohortReviewId(reviewId)));
   }
 
   private void assertResponse(
