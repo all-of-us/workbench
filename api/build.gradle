@@ -898,8 +898,10 @@ compileTestKotlin {
 //   specified for property 'compileGeneratedKotlinOutputClasses' does not exist.
 // """
 task prepareKotlinGeneratedDir() {
+  ext.out_path = "$projectDir/build/classes/kotlin/generated"
+  outputs.dir file(ext.out_path)
   doLast {
-    mkdir "$projectDir/build/classes/kotlin/generated"
+    mkdir ext.out_path
   }
 }
 compileGeneratedKotlin.dependsOn 'prepareKotlinGeneratedDir'
