@@ -24,7 +24,6 @@ import {CohortActionsComponent} from './pages/data/cohort/cohort-actions';
 import {ConceptHomepageComponent} from './pages/data/concept/concept-homepage';
 import {ConceptSetActionsComponent} from './pages/data/concept/concept-set-actions';
 import {ConceptSetDetailsComponent} from './pages/data/concept/concept-set-details';
-import {HomepageComponent} from './pages/homepage/homepage';
 import {ProfilePageComponent} from './pages/profile/profile-page';
 import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
@@ -76,11 +75,6 @@ const routes: Routes = [
     canActivateChild: [SignInGuard, DisabledGuard],
     runGuardsAndResolvers: 'always',
     children: [
-      {
-        path: '',
-        component: HomepageComponent,
-        data: {title: 'Homepage'}
-      },
       {
         path: '',
         canActivateChild: [RegistrationGuard],
@@ -302,11 +296,6 @@ const routes: Routes = [
             data: {title: 'Create Workspace', mode: WorkspaceEditMode.Create}
           }
         ]},
-      {
-        path: 'nih-callback',
-        component: HomepageComponent,
-        data: {title: 'Homepage'},
-      },
       {
         path: 'admin',
         children: [

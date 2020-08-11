@@ -434,12 +434,3 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
   }
 
 });
-
-@Component({
-  template: '<div #root style="height: 100%"></div>'
-})
-export class HomepageComponent extends ReactWrapperBase {
-  constructor() {
-    super(Homepage, []);
-  }
-}

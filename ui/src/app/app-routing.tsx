@@ -16,6 +16,7 @@ import {Redirect} from 'react-router';
 import {SignIn} from './pages/login/sign-in';
 import {AnalyticsTracker} from './utils/analytics';
 import {WorkspaceLibrary} from "./pages/workspace/workspace-library";
+import {Homepage} from "./pages/homepage/homepage";
 
 
 const signInGuard: Guard = {
@@ -30,6 +31,7 @@ const registrationGuard: Guard = {
 
 const CookiePolicyPage = withRouteData(CookiePolicy);
 const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight)(DataUserCodeOfConduct);
+const HomepagePage = withRouteData(Homepage); // this name is bad i am sorry
 const SessionExpiredPage = withRouteData(SessionExpired);
 const SignInAgainPage = withRouteData(SignInAgain);
 const SignInPage = withRouteData(SignIn);
@@ -69,6 +71,10 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
 
     <ProtectedRoutes guards={[signInGuard]}>
       <AppRoute
+          path='/'
+          component={() => <HomepagePage routeData={{title: 'Homepage'}}/>}
+      />
+      <AppRoute
           path='/admin/user-audit'
           component={() => <UserAuditPage routeData={{title: 'User Audit'}}/>}
       />
@@ -91,6 +97,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
             minimizeChrome: true
           }} />}
       />
+      <AppRoute path='/nih-callback' component={() => <HomepagePage routeData={{title: 'Homepage'}}/>} />
       <ProtectedRoutes guards={[registrationGuard]}>
         <AppRoute
             path='/library'
