@@ -130,17 +130,19 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   private static final BiFunction<
           DbParticipantCohortStatus, Map<Long, String>, ParticipantCohortStatus>
       TO_CLIENT_PARTICIPANT =
-          (participant, genderRaceEthMap) ->
+          (participant, demographicsMap) ->
               new ParticipantCohortStatus()
                   .participantId(participant.getParticipantKey().getParticipantId())
                   .status(participant.getStatusEnum())
                   .birthDate(participant.getBirthDate().toString())
                   .ethnicityConceptId(participant.getEthnicityConceptId())
-                  .ethnicity(genderRaceEthMap.get(participant.getEthnicityConceptId()))
+                  .ethnicity(demographicsMap.get(participant.getEthnicityConceptId()))
                   .genderConceptId(participant.getGenderConceptId())
-                  .gender(genderRaceEthMap.get(participant.getGenderConceptId()))
+                  .gender(demographicsMap.get(participant.getGenderConceptId()))
                   .raceConceptId(participant.getRaceConceptId())
-                  .race(genderRaceEthMap.get(participant.getRaceConceptId()))
+                  .race(demographicsMap.get(participant.getRaceConceptId()))
+                  .sexAtBirthConceptId(participant.getSexAtBirthConceptId())
+                  .sexAtBirth(demographicsMap.get(participant.getSexAtBirthConceptId()))
                   .deceased(participant.getDeceased());
 
   /**
@@ -766,6 +768,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
               .genderConceptId(bigQueryService.getLong(row, rm.get("gender_concept_id")))
               .raceConceptId(bigQueryService.getLong(row, rm.get("race_concept_id")))
               .ethnicityConceptId(bigQueryService.getLong(row, rm.get("ethnicity_concept_id")))
+              .sexAtBirthConceptId(bigQueryService.getLong(row, rm.get("sex_at_birth_concept_id")))
               .deceased(bigQueryService.getBoolean(row, rm.get("deceased"))));
     }
     return participantCohortStatuses;

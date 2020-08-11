@@ -61,6 +61,7 @@ public class ParticipantCohortStatusDaoTest {
             .birthDate(birthDate)
             .raceConceptId(8515L)
             .ethnicityConceptId(38003564L)
+            .sexAtBirthConceptId(8507L)
             .deceased(false);
     participantCohortStatusDao.save(status1);
 
@@ -75,6 +76,7 @@ public class ParticipantCohortStatusDaoTest {
             .birthDate(birthDate)
             .raceConceptId(8515L)
             .ethnicityConceptId(38003564L)
+            .sexAtBirthConceptId(8507L)
             .deceased(false);
     participantCohortStatusDao.save(status2);
 
@@ -597,6 +599,7 @@ public class ParticipantCohortStatusDaoTest {
         .statusEnum(status)
         .ethnicityConceptId(38003564L)
         .genderConceptId(8507L)
-        .raceConceptId(8515L);
+        .raceConceptId(8515L)
+        .sexAtBirthConceptId(8507L);
   }
 }
