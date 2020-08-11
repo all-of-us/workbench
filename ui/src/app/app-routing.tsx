@@ -15,10 +15,18 @@ import * as React from 'react';
 import {Redirect} from 'react-router';
 import {SignIn} from './pages/login/sign-in';
 import {AnalyticsTracker} from './utils/analytics';
+import {WorkspaceLibrary} from "./pages/workspace/workspace-library";
+import {RegistrationGuard} from "./guards/registration-guard.service";
 
 
 const signInGuard: Guard = {
   allowed: (): boolean => authStore.get().isSignedIn,
+  redirectPath: '/login'
+};
+
+const registrationGuard: Guard = {
+  // TODO lol
+  allowed: (): boolean => true,
   redirectPath: '/login'
 };
 
@@ -30,6 +38,7 @@ const SignInPage = withRouteData(SignIn);
 const UserAuditPage = withRouteData(UserAudit);
 const UserDisabledPage = withRouteData(UserDisabled);
 const WorkspaceAuditPage = withRouteData(WorkspaceAudit);
+const WorkspaceLibraryPage = withRouteData(WorkspaceLibrary);
 
 interface RoutingProps {
   onSignIn: () => void;
@@ -61,21 +70,27 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
     />
 
     <ProtectedRoutes guards={[signInGuard]}>
-        <AppRoute
+        <AppRoute path='/admin/user-audit'
+                  component={() => <UserAuditPage routeData={{title: 'User Audit'}}/>}/>
+      <AppRoute path='/admin/user-audit/:username'
+                  component={() => <UserAuditPage routeData={{title: 'User Audit'}}/>}/>
+      <AppRoute path='/admin/workspace-audit'
+                  component={() => <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>}/>
+      <AppRoute path='/admin/workspace-audit/:workspaceNamespace'
+                  component={() => <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>}/>
+      <AppRoute
           path='/data-code-of-conduct'
           component={ () => <DataUserCodeOfConductPage routeData={{
             title: 'Data User Code of Conduct',
             minimizeChrome: true
           }} />}
+      />
+      <ProtectedRoutes guards={[registrationGuard]}>
+        <AppRoute
+            path='/library'
+            component={() => <WorkspaceLibraryPage routeData={{title: 'Workspace Library'}}/>}
         />
-        <AppRoute path='/admin/user-audit'
-                  component={() => <UserAuditPage routeData={{title: 'User Audit'}}/>}/>
-        <AppRoute path='/admin/user-audit/:username'
-                  component={() => <UserAuditPage routeData={{title: 'User Audit'}}/>}/>
-        <AppRoute path='/admin/workspace-audit'
-                  component={() => <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>}/>
-        <AppRoute path='/admin/workspace-audit/:workspaceNamespace'
-                  component={() => <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>}/>
+      </ProtectedRoutes>
     </ProtectedRoutes>
   </AppRouter>;
 };

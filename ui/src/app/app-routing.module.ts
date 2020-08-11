@@ -29,7 +29,6 @@ import {ProfilePageComponent} from './pages/profile/profile-page';
 import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './pages/workspace/workspace-edit';
-import {WorkspaceLibraryComponent} from './pages/workspace/workspace-library';
 import {WorkspaceListComponent} from './pages/workspace/workspace-list';
 import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/component';
 
@@ -89,9 +88,9 @@ const routes: Routes = [
         children: [
           {
             path: 'library',
-            component: WorkspaceLibraryComponent,
-            data: {title: 'Workspace Library'}
-          }, {
+            component: AppRouting
+          },
+          {
             path: 'workspaces',
             canActivateChild: [WorkspaceGuard],
             children: [
