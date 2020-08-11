@@ -263,22 +263,22 @@ export const AuditActionCardListView = (props: { actions:  AuditAction[]}) => {
   const {actions} = props;
   const [activeActionTypes, setActiveActionTypes] = useState({});
 
-  const getActionTypes = (action: AuditAction) => fp.map((e: AuditEventBundle) => e.header.actionType)(action.eventBundles);
-
-  const actionTypeCount = fp.flow(
-    fp.flatMap(getActionTypes),
-    fp.countBy(fp.identity)
-  )(actions);
+  const getActionTypes = (action: AuditAction) => fp.flow(
+    fp.map((e: AuditEventBundle) => e.header.actionType),
+    fp.uniq
+  )(action.eventBundles);
 
   useEffect(() => {
     const actionTypeToShow = fp.flow(
-      fp.keys,
-      fp.map((propertyPath: string) => [propertyPath, {
+      fp.flatMap(getActionTypes),
+      fp.countBy(fp.identity),
+      fp.toPairs,
+      fp.map(([actionName, count]: [string, number]) => [actionName, {
         isActive: true,
-        displayName: `${toTitleCase(propertyPath)} (${actionTypeCount[propertyPath] || 0})`
+        displayName: `${toTitleCase(actionName)} (${count || 0})`
       }]),
       fp.fromPairs
-    )(actionTypeCount);
+    )(actions);
 
     setActiveActionTypes(actionTypeToShow);
   }, [actions]);
