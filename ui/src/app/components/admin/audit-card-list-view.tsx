@@ -183,7 +183,7 @@ const AuditActionCard = (props: { action: AuditAction }) => {
   // Something in the codegen is wonky here. the actionTime field is typed as a Date,
   // but turns out to be a number for some reason here. In other contexts it appears
   // to format itself happily though.
-  const timeString = moment(new Date(action.actionTime)).format('YYYY-MM-DD h:mm:ss');
+  const timeString = moment(new Date(action.actionTime)).format('YYYY-MM-DD hh:mm:ss');
   const actionTypes = fp.flow(
     fp.map(fp.get('header.actionType')),
     fp.sortedUniq,
