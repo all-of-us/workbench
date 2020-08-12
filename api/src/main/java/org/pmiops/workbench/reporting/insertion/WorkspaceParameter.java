@@ -7,6 +7,7 @@ import org.pmiops.workbench.model.ReportingWorkspace;
 public enum WorkspaceParameter implements QueryParameterColumn<ReportingWorkspace> {
   WORKSPACE_ID("workspace_id", w -> QueryParameterValue.int64(w.getWorkspaceId())),
   CREATOR_ID("creator_id", w -> QueryParameterValue.int64(w.getCreatorId())),
+  NAME("name", w -> QueryParameterValue.string(w.getName())),
   FAKE_SIZE("fake_size", w -> QueryParameterValue.int64(w.getFakeSize())),
   CREATION_TIME(
       "creation_time",

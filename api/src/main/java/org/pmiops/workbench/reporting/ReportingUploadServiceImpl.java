@@ -4,7 +4,9 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -26,6 +28,7 @@ import org.springframework.stereotype.Service;
 public class ReportingUploadServiceImpl implements ReportingUploadService {
   private static final Logger logger = Logger.getLogger("ReportingUploadServiceInsertQueryImpl");
   private static final long MAX_WAIT_TIME = 10000;
+  private static final int INSERT_ROW_COUNT = 500;
 
   private final BigQueryService bigQueryService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
@@ -61,11 +64,20 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
 
   private List<QueryJobConfiguration> getJobs(ReportingSnapshot reportingSnapshot) {
     final QueryParameterValue snapshotTimestamp = getTimestampValue(reportingSnapshot);
-    return ImmutableList.of(
-        researcherJobBuilder.build(
-            qualifyTableName("researcher"), reportingSnapshot.getResearchers(), snapshotTimestamp),
-        workspaceJobBuilder.build(
-            qualifyTableName("workspace"), reportingSnapshot.getWorkspaces(), snapshotTimestamp));
+    final ImmutableList.Builder<QueryJobConfiguration> resultBuilder = new Builder<>();
+    Lists.partition(reportingSnapshot.getResearchers(), INSERT_ROW_COUNT).stream()
+        .map(
+            researchers ->
+                researcherJobBuilder.build(
+                    qualifyTableName("researcher"), researchers, snapshotTimestamp))
+        .forEach(resultBuilder::add);
+    Lists.partition(reportingSnapshot.getWorkspaces(), INSERT_ROW_COUNT).stream()
+        .map(
+            workrspaces ->
+                workspaceJobBuilder.build(
+                    qualifyTableName("workrspace"), workrspaces, snapshotTimestamp))
+        .forEach(resultBuilder::add);
+    return resultBuilder.build();
   }
 
   private QueryParameterValue getTimestampValue(ReportingSnapshot reportingSnapshot) {

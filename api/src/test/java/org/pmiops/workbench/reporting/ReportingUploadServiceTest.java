@@ -13,6 +13,7 @@ import com.google.common.collect.ImmutableList;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
+import java.util.stream.IntStream;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,7 +38,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class ReportingUploadServiceInsertQueryImplTest {
+public class ReportingUploadServiceTest {
 
   private static final Instant NOW = Instant.parse("2000-01-01T00:00:00.00Z");
   private static final Instant THEN = Instant.parse("1989-02-17T00:00:00.00Z");
@@ -127,5 +128,45 @@ public class ReportingUploadServiceInsertQueryImplTest {
         QueryParameterValues.formatQuery(QueryParameterValues.replaceNamedParameters(job0));
 
     assertThat(expandedQuery).containsMatch("INSERT\\s+INTO");
+  }
+
+  @Test
+  public void testUploadSnapshot_batchInserts() {
+    final ReportingSnapshot largeSnapshot =
+        new ReportingSnapshot().captureTimestamp(NOW.toEpochMilli());
+    // It's certainly possible to make the batch size an environment configuration value and
+    // inject it so that we don't need this many rows in the test, but I didn't think that was
+    // necessarily a good enoughh reason to add configurable state.
+    final List<ReportingResearcher> researchers =
+        IntStream.range(0, 2001)
+            .mapToObj(
+                id ->
+                    new ReportingResearcher()
+                        .username("bill@aou.biz")
+                        .firstName("Bill")
+                        .isDisabled(false)
+                        .researcherId((long) id))
+            .collect(ImmutableList.toImmutableList());
+    largeSnapshot.setResearchers(researchers);
+    largeSnapshot.setWorkspaces(
+        ImmutableList.of(
+            new ReportingWorkspace()
+                .name("Circle K")
+                .creationTime(THEN.toEpochMilli())
+                .fakeSize(4444L)
+                .creatorId(101L)));
+
+    reportingUploadService.uploadSnapshot(largeSnapshot);
+    verify(mockBigQueryService, times(6))
+        .executeQuery(queryJobConfigurationCaptor.capture(), anyLong());
+
+    final List<QueryJobConfiguration> jobs = queryJobConfigurationCaptor.getAllValues();
+    assertThat(jobs).hasSize(6);
+    final int researcherColumnCount = 4;
+    final int workspaceColumnCount = 5;
+
+    assertThat(jobs.get(0).getNamedParameters()).hasSize(researcherColumnCount * 500 + 1);
+    assertThat(jobs.get(4).getNamedParameters()).hasSize(researcherColumnCount + 1);
+    assertThat(jobs.get(5).getNamedParameters()).hasSize(workspaceColumnCount + 1);
   }
 }

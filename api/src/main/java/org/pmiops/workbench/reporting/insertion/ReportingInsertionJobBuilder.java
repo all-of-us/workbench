@@ -34,7 +34,7 @@ public interface ReportingInsertionJobBuilder<T> {
             + " (snapshot_timestamp, "
             + getColumnNameList()
             + ")\n"
-            + createNamedParameterGridForInsertion(models.size(), columnNames)
+            + createNamedParameterValuesListKeys(models.size(), columnNames)
             + ";";
     final Map<String, QueryParameterValue> keyToParameterValue =
         getKeyToParameterValue(models, snapshotTimestamp);
@@ -42,7 +42,7 @@ public interface ReportingInsertionJobBuilder<T> {
     return QueryJobConfiguration.newBuilder(query).setNamedParameters(keyToParameterValue).build();
   }
 
-  default String createNamedParameterGridForInsertion(int rowCount, List<String> columnNames) {
+  default String createNamedParameterValuesListKeys(int rowCount, List<String> columnNames) {
     return "VALUES\n"
         + IntStream.range(0, rowCount)
             .mapToObj(row -> writeNamedParameterValuesRow(row, columnNames))
