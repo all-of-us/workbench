@@ -166,8 +166,7 @@ public class ReportingUploadServiceTest {
     final int workspaceColumnCount = 5;
 
     assertThat(jobs.get(0).getNamedParameters()).hasSize(researcherColumnCount * 500 + 1);
-    assertThat(jobs.get(4).getNamedParameters()).hasSize(researcherColumnCount * 1 + 1);
-
-    assertThat(jobs.get(4).getNamedParameters()).hasSize(workspaceColumnCount * 1 + 1);
+    assertThat(jobs.get(4).getNamedParameters()).hasSize(researcherColumnCount + 1);
+    assertThat(jobs.get(5).getNamedParameters()).hasSize(workspaceColumnCount + 1);
   }
 }
