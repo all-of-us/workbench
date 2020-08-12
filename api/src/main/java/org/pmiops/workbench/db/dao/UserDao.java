@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.dao;
 
 import java.util.List;
 import java.util.Set;
+import org.pmiops.workbench.db.dto.DtoUser;
 import org.pmiops.workbench.db.model.DbUser;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
@@ -71,4 +72,28 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
 
     Long getUserCount();
   }
+
+  @Query(
+  "SELECT userId, version, creationNonce, username, contactEmail, dataAccessLevel, givenName,\n"
+      + "familyName, phoneNumber, currentPosition, organization, freeTierCreditsLimitDollarsOverride,\n"
+      + "freeTierCreditsLimitDaysOverride, lastFreeTierCreditsTimeCheck, firstSignInTime, firstRegistrationCompletionTime,\n"
+      + "idVerificationIsValid, clusterConfigDefaultRaw, demographicSurveyCompletionTime, disabled, emailVerificationStatus,\n"
+      + "aboutYou, areaOfResearch, clusterCreateRetries, billingProjectRetries, betaAccessRequestTime, moodleId,\n"
+      + "eraCommonsLinkedNihUsername, eraCommonsLinkExpireTime, eraCommonsCompletionTime, dataUseAgreementCompletionTime,\n"
+      + "dataUseAgreementBypassTime, dataUseAgreementSignedVersion, complianceTrainingCompletionTime, complianceTrainingBypassTime,\n"
+      + "complianceTrainingExpirationTime, betaAccessBypassTime, emailVerificationCompletionTime, emailVerificationBypassTime,\n"
+      + "eraCommonsBypassTime, idVerificationCompletionTime, idVerificationBypassTime, twoFactorAuthCompletionTime,\n"
+      + "twoFactorAuthBypassTime, lastModifiedTime, creationTime, professionalUrl\n"
+      + "FROM DbUser\n"
+      + "ORDER BY null")
+  List<DtoUser> findAllUsersReadOnly();
+
+  public interface DtoUserCore {
+    long getUserId();
+    String getUsername();
+  }
+
+  @Query("SELECT userId, username FROM DbUser ORDER BY null")
+//  @Query(nativeQuery = true, value = "SELECT user_id, email AS username FROM user")
+  List<DtoUserCore> getUserCoresReadOnly();
 }

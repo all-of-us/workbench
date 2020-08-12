@@ -5,7 +5,6 @@ import com.google.gson.Gson;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -27,7 +26,7 @@ import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
-import org.pmiops.workbench.db.dto.UserDto;
+import org.pmiops.workbench.db.dto.DtoUser;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Degree;
@@ -35,7 +34,7 @@ import org.pmiops.workbench.model.EmailVerificationStatus;
 
 @Entity
 @Table(name = "user")
-public class DbUser implements UserDto {
+public class DbUser implements DtoUser {
 
   private static final String CLUSTER_NAME_PREFIX = "all-of-us-";
 

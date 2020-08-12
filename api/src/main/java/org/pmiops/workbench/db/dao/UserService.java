@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import org.pmiops.workbench.actionaudit.Agent;
+import org.pmiops.workbench.db.dto.DtoUser;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
@@ -121,4 +122,6 @@ public interface UserService {
   Set<DbUser> findAllUsersWithAuthoritiesAndPageVisits();
 
   Optional<DbUser> findUserWithAuthoritiesAndPageVisits(long userId);
+
+  List<DtoUser> findAllUsersReadOnly();
 }

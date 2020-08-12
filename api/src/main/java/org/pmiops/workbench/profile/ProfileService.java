@@ -33,6 +33,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
+import org.pmiops.workbench.db.dto.DtoUser;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
@@ -510,6 +511,7 @@ public class ProfileService {
   // Get all the profiles. Best we can do without surgery on the entity classes is to do one query
   // per table and join them in code.
   public List<Profile> listAllProfiles() {
+//    final List<DtoUser> usersLight = userService.findAllUsersReadOnly();
     final Set<DbUser> usersHeavy = userService.findAllUsersWithAuthoritiesAndPageVisits();
     final Map<Long, VerifiedInstitutionalAffiliation> userIdToAffiliationModel =
         StreamSupport.stream(verifiedInstitutionalAffiliationDao.findAll().spliterator(), false)

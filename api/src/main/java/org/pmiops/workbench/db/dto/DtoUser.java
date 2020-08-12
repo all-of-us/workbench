@@ -8,11 +8,9 @@ import java.sql.Timestamp;
 // MapStruct.
 // See https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#projections.interfaces.open
 // Any joined columns will be declared in a DTO extending this one.
-public interface UserDto {
-  long getUserId();
+public interface DtoUser extends DtoUserCore {
   int getVersion();
   Long getCreationNonce();
-  String getUsername();
   String getContactEmail();
   Short getDataAccessLevel();
   String getGivenName();

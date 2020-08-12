@@ -8,14 +8,17 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 import javax.annotation.Nullable;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,6 +27,8 @@ import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.UserDao.DtoUserCore;
+import org.pmiops.workbench.db.dto.DtoUser;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -36,6 +41,7 @@ import org.pmiops.workbench.moodle.model.BadgeDetailsV1;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -487,5 +493,25 @@ public class UserServiceTest {
     for (Authority auth : Authority.values()) {
       assertThat(userService.hasAuthority(user.getUserId(), auth)).isTrue();
     }
+  }
+
+  @Test
+  public void testFindAllUsersReadOnly() {
+    DbUser user1 = new DbUser();
+    user1.setUserId(101L);
+    user1.setUsername("jay@aou.biz");
+    user1.setDisabled(false);
+    user1.setAboutYou("Just a test user");
+    user1.setAuthoritiesEnum(ImmutableSet.of(Authority.ACCESS_CONTROL_ADMIN, Authority.INSTITUTION_ADMIN));
+    user1 = userDao.save(user1);
+
+    final List<DtoUser> users = userService.findAllUsersReadOnly();
+    assertThat(users).hasSize(2);
+  }
+
+  @Test
+  public void testGetUserCoresReadOnly() {
+    final List<DtoUserCore> userCores = userDao.getUserCoresReadOnly();
+    assertThat(userCores).hasSize(1);
   }
 }
