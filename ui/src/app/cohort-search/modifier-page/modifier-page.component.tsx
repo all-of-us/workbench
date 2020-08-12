@@ -287,7 +287,6 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
       }
       this.setState({formState});
       this.getExisting();
-        // this.setState({searchContext: this.props.cohortContext});
     }
 
     get formState() {
