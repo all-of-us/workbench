@@ -27,6 +27,7 @@ import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
+import org.pmiops.workbench.db.dto.UserDto;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Degree;
@@ -34,7 +35,7 @@ import org.pmiops.workbench.model.EmailVerificationStatus;
 
 @Entity
 @Table(name = "user")
-public class DbUser {
+public class DbUser implements UserDto {
 
   private static final String CLUSTER_NAME_PREFIX = "all-of-us-";
 
@@ -110,12 +111,13 @@ public class DbUser {
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
   private Timestamp twoFactorAuthBypassTime;
-  private DbDemographicSurvey demographicSurvey;
+  private Set<DbDemographicSurvey> demographicSurveys;
   private Set<DbAddress> addresses;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "user_id")
+  @Override
   public long getUserId() {
     return userId;
   }
@@ -126,6 +128,8 @@ public class DbUser {
 
   @Version
   @Column(name = "version")
+  @Deprecated
+  @Override
   public int getVersion() {
     return version;
   }
@@ -149,6 +153,7 @@ public class DbUser {
    * designated contact email address.
    */
   @Column(name = "email")
+  @Override
   public String getUsername() {
     return username;
   }
@@ -188,6 +193,7 @@ public class DbUser {
   }
 
   @Column(name = "given_name")
+  @Override
   public String getGivenName() {
     return givenName;
   }
@@ -197,6 +203,7 @@ public class DbUser {
   }
 
   @Column(name = "family_name")
+  @Override
   public String getFamilyName() {
     return familyName;
   }
@@ -207,6 +214,7 @@ public class DbUser {
 
   // TODO: consider dropping this (do we want researcher phone numbers?)
   @Column(name = "phone_number")
+  @Override
   public String getPhoneNumber() {
     return phoneNumber;
   }
@@ -225,6 +233,7 @@ public class DbUser {
   }
 
   @Column(name = "organization")
+  @Override
   public String getOrganization() {
     return organization;
   }
@@ -234,6 +243,7 @@ public class DbUser {
   }
 
   @Column(name = "free_tier_credits_limit_dollars_override")
+  @Override
   public Double getFreeTierCreditsLimitDollarsOverride() {
     return freeTierCreditsLimitDollarsOverride;
   }
@@ -244,6 +254,7 @@ public class DbUser {
 
   @Deprecated
   @Column(name = "free_tier_credits_limit_days_override")
+  @Override
   public Short getFreeTierCreditsLimitDaysOverride() {
     return freeTierCreditsLimitDaysOverride;
   }
@@ -254,6 +265,7 @@ public class DbUser {
 
   @Deprecated
   @Column(name = "last_free_tier_credits_time_check")
+  @Override
   public Timestamp getLastFreeTierCreditsTimeCheck() {
     return lastFreeTierCreditsTimeCheck;
   }
@@ -263,6 +275,7 @@ public class DbUser {
   }
 
   @Column(name = "first_sign_in_time")
+  @Override
   public Timestamp getFirstSignInTime() {
     return firstSignInTime;
   }
@@ -272,6 +285,7 @@ public class DbUser {
   }
 
   @Column(name = "first_registration_completion_time")
+  @Override
   public Timestamp getFirstRegistrationCompletionTime() {
     return firstRegistrationCompletionTime;
   }
@@ -357,6 +371,7 @@ public class DbUser {
   }
 
   @Column(name = "id_verification_is_valid")
+  @Override
   public Boolean getIdVerificationIsValid() {
     return idVerificationIsValid;
   }
@@ -366,6 +381,7 @@ public class DbUser {
   }
 
   @Column(name = "cluster_config_default")
+  @Override
   public String getClusterConfigDefaultRaw() {
     return clusterConfigDefault;
   }
@@ -391,6 +407,7 @@ public class DbUser {
   }
 
   @Column(name = "demographic_survey_completion_time")
+  @Override
   public Timestamp getDemographicSurveyCompletionTime() {
     return demographicSurveyCompletionTime;
   }
@@ -400,6 +417,7 @@ public class DbUser {
   }
 
   @Column(name = "disabled")
+  @Override
   public boolean getDisabled() {
     return disabled;
   }
@@ -409,6 +427,7 @@ public class DbUser {
   }
 
   @Column(name = "email_verification_status")
+  @Override
   public Short getEmailVerificationStatus() {
     return emailVerificationStatus;
   }
@@ -451,6 +470,7 @@ public class DbUser {
   }
 
   @Column(name = "about_you")
+  @Override
   public String getAboutYou() {
     return aboutYou;
   }
@@ -469,6 +489,7 @@ public class DbUser {
   }
 
   @Column(name = "cluster_create_retries")
+  @Override
   public Integer getClusterCreateRetries() {
     return clusterCreateRetries;
   }
@@ -478,6 +499,7 @@ public class DbUser {
   }
 
   @Column(name = "billing_project_retries")
+  @Override
   public Integer getBillingProjectRetries() {
     return billingProjectRetries;
   }
@@ -487,6 +509,7 @@ public class DbUser {
   }
 
   @Column(name = "beta_access_request_time")
+  @Override
   public Timestamp getBetaAccessRequestTime() {
     return betaAccessRequestTime;
   }
@@ -496,6 +519,7 @@ public class DbUser {
   }
 
   @Column(name = "moodle_id")
+  @Override
   public Integer getMoodleId() {
     return moodleId;
   }
@@ -505,6 +529,7 @@ public class DbUser {
   }
 
   @Column(name = "era_commons_linked_nih_username")
+  @Override
   public String getEraCommonsLinkedNihUsername() {
     return eraCommonsLinkedNihUsername;
   }
@@ -514,6 +539,7 @@ public class DbUser {
   }
 
   @Column(name = "era_commons_link_expire_time")
+  @Override
   public Timestamp getEraCommonsLinkExpireTime() {
     return eraCommonsLinkExpireTime;
   }
@@ -523,6 +549,7 @@ public class DbUser {
   }
 
   @Column(name = "era_commons_completion_time")
+  @Override
   public Timestamp getEraCommonsCompletionTime() {
     return eraCommonsCompletionTime;
   }
@@ -532,6 +559,7 @@ public class DbUser {
   }
 
   @Column(name = "data_use_agreement_completion_time")
+  @Override
   public Timestamp getDataUseAgreementCompletionTime() {
     return dataUseAgreementCompletionTime;
   }
@@ -541,6 +569,7 @@ public class DbUser {
   }
 
   @Column(name = "data_use_agreement_bypass_time")
+  @Override
   public Timestamp getDataUseAgreementBypassTime() {
     return dataUseAgreementBypassTime;
   }
@@ -550,6 +579,7 @@ public class DbUser {
   }
 
   @Column(name = "data_use_agreement_signed_version")
+  @Override
   public Integer getDataUseAgreementSignedVersion() {
     return dataUseAgreementSignedVersion;
   }
@@ -559,6 +589,7 @@ public class DbUser {
   }
 
   @Column(name = "compliance_training_completion_time")
+  @Override
   public Timestamp getComplianceTrainingCompletionTime() {
     return complianceTrainingCompletionTime;
   }
@@ -572,6 +603,7 @@ public class DbUser {
   }
 
   @Column(name = "compliance_training_bypass_time")
+  @Override
   public Timestamp getComplianceTrainingBypassTime() {
     return complianceTrainingBypassTime;
   }
@@ -581,6 +613,7 @@ public class DbUser {
   }
 
   @Column(name = "compliance_training_expiration_time")
+  @Override
   public Timestamp getComplianceTrainingExpirationTime() {
     return complianceTrainingExpirationTime;
   }
@@ -594,6 +627,7 @@ public class DbUser {
   }
 
   @Column(name = "beta_access_bypass_time")
+  @Override
   public Timestamp getBetaAccessBypassTime() {
     return betaAccessBypassTime;
   }
@@ -603,6 +637,7 @@ public class DbUser {
   }
 
   @Column(name = "email_verification_completion_time")
+  @Override
   public Timestamp getEmailVerificationCompletionTime() {
     return emailVerificationCompletionTime;
   }
@@ -612,6 +647,7 @@ public class DbUser {
   }
 
   @Column(name = "email_verification_bypass_time")
+  @Override
   public Timestamp getEmailVerificationBypassTime() {
     return emailVerificationBypassTime;
   }
@@ -621,6 +657,7 @@ public class DbUser {
   }
 
   @Column(name = "era_commons_bypass_time")
+  @Override
   public Timestamp getEraCommonsBypassTime() {
     return eraCommonsBypassTime;
   }
@@ -630,6 +667,7 @@ public class DbUser {
   }
 
   @Column(name = "id_verification_completion_time")
+  @Override
   public Timestamp getIdVerificationCompletionTime() {
     return idVerificationCompletionTime;
   }
@@ -639,6 +677,7 @@ public class DbUser {
   }
 
   @Column(name = "id_verification_bypass_time")
+  @Override
   public Timestamp getIdVerificationBypassTime() {
     return idVerificationBypassTime;
   }
@@ -648,6 +687,7 @@ public class DbUser {
   }
 
   @Column(name = "two_factor_auth_completion_time")
+  @Override
   public Timestamp getTwoFactorAuthCompletionTime() {
     return twoFactorAuthCompletionTime;
   }
@@ -671,24 +711,29 @@ public class DbUser {
       fetch = FetchType.LAZY,
       mappedBy = "user")
   public Set<DbDemographicSurvey> getDemographicSurveys() {
-    return Collections.singleton(demographicSurvey);
+    return demographicSurveys;
   }
 
   public void setDemographicSurveys(Set<DbDemographicSurvey> demographicSurveys) {
-    this.demographicSurvey = demographicSurveys.stream().findAny().orElse(null);
+    // Somehow Hibernate is giving me a set with a single null element. This
+    // little trick is probably not a great idea long term, but I don't want to
+    // run any migrations just yet.
+    this.demographicSurveys = demographicSurveys;
   }
 
   @Transient
   public DbDemographicSurvey getDemographicSurvey() {
-    return demographicSurvey;
+    return demographicSurveys.stream().findFirst().orElse(null);
   }
 
   @Transient
   public void setDemographicSurvey(DbDemographicSurvey demographicSurvey) {
-    this.demographicSurvey = demographicSurvey;
+    this.demographicSurveys.clear();
+    this.demographicSurveys.add(demographicSurvey);
   }
 
   @Column(name = "last_modified_time")
+  @Override
   public Timestamp getLastModifiedTime() {
     return lastModifiedTime;
   }
@@ -698,6 +743,7 @@ public class DbUser {
   }
 
   @Column(name = "creation_time")
+  @Override
   public Timestamp getCreationTime() {
     return creationTime;
   }
@@ -707,6 +753,7 @@ public class DbUser {
   }
 
   @Column(name = "professional_url")
+  @Override
   public String getProfessionalUrl() {
     return professionalUrl;
   }
@@ -739,12 +786,11 @@ public class DbUser {
     }
   }
 
-  // Mock single-value semantics (which is how we use this anyway.
+  // Mock single-value semantics (which is how we use this anyway).
   public void setAddress(DbAddress address) {
-    if (address == null) {
-      this.addresses = Collections.emptySet();
-    } else {
-      this.addresses = Collections.singleton(address);
+    this.addresses.clear();
+    if (address != null) {
+      this.addresses.add(address);
     }
   }
 
