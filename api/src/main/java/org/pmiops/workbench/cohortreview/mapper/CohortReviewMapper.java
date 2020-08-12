@@ -1,4 +1,4 @@
-package org.pmiops.workbench.cohortreview;
+package org.pmiops.workbench.cohortreview.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
