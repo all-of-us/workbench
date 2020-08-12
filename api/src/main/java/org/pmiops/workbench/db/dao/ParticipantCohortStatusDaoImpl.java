@@ -38,6 +38,7 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
           + "birth_date as birthDate,\n"
           + "race_concept_id as raceConceptId,\n"
           + "ethnicity_concept_id as ethnicityConceptId,\n"
+          + "sex_at_birth_concept_id as sexAtBirthConceptId,\n"
           + "deceased as deceased\n"
           + "from participant_cohort_status pcs\n";
 
@@ -52,10 +53,10 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
 
   private static final String INSERT_SQL_TEMPLATE =
       "insert into participant_cohort_status("
-          + "birth_date, ethnicity_concept_id, gender_concept_id, race_concept_id, "
+          + "birth_date, ethnicity_concept_id, gender_concept_id, race_concept_id, sex_at_birth_concept_id,"
           + "status, cohort_review_id, participant_id, deceased) "
           + "values";
-  private static final String NEXT_INSERT = " (%s, %d, %d, %d, %d, %d, %d, %s)";
+  private static final String NEXT_INSERT = " (%s, %d, %d, %d, %d, %d, %d, %d, %s)";
   private static final int BATCH_SIZE = 50;
 
   @Autowired private JdbcTemplate jdbcTemplate;
@@ -88,6 +89,7 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
                 pcs.getEthnicityConceptId(),
                 pcs.getGenderConceptId(),
                 pcs.getRaceConceptId(),
+                pcs.getSexAtBirthConceptId(),
                 // this represents NOT_REVIEWED
                 3,
                 pcs.getParticipantKey().getCohortReviewId(),
