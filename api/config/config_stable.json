@@ -122,6 +122,7 @@
     "useTestCaptcha": false
   },
   "reporting": {
-    "dataset": "reporting_stable"
+    "dataset": "reporting_stable",
+    "maxRowsPerInsert": 200
   }
 }

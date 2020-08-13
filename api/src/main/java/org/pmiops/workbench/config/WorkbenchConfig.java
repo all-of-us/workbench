@@ -300,5 +300,6 @@ public class WorkbenchConfig {
 
   public static class ReportingConfig {
     public String dataset;
+    public Integer maxRowsPerInsert;
   }
 }

@@ -117,6 +117,7 @@
     "useTestCaptcha": false
   },
   "reporting": {
-    "dataset": "reporting_preprod"
+    "dataset": "reporting_preprod",
+    "maxRowsPerInsert": 200
   }
 }

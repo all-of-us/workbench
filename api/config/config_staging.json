@@ -122,6 +122,7 @@
     "useTestCaptcha": true
   },
   "reporting": {
-    "dataset": "reporting_staging"
+    "dataset": "reporting_staging",
+    "maxRowsPerInsert": 200
   }
 }
