@@ -319,6 +319,15 @@ export const SelectionList = withCurrentCohortCriteria()(class extends React.Com
     };
   }
 
+  componentDidUpdate(prevProps: Readonly<Props>): void {
+    if (!this.props.criteria && !!prevProps.criteria) {
+      this.setState({
+        modifierButtonText: 'APPLY MODIFIERS',
+        showModifiersSlide: false
+      });
+    }
+  }
+
   get showModifiers() {
     return ![DomainType.PHYSICALMEASUREMENT, DomainType.PERSON, DomainType.SURVEY].includes(this.props.domain);
   }
