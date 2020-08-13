@@ -122,6 +122,7 @@
     "useTestCaptcha": true
   },
   "reporting": {
-    "dataset": "reporting_local"
+    "dataset": "reporting_local",
+    "maxRowsPerInsert": 200
   }
 }

@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -27,8 +28,7 @@ import org.springframework.stereotype.Service;
 @Primary
 public class ReportingUploadServiceImpl implements ReportingUploadService {
   private static final Logger logger = Logger.getLogger("ReportingUploadServiceInsertQueryImpl");
-  private static final long MAX_WAIT_TIME = 10000;
-  private static final int INSERT_ROW_COUNT = 500;
+  private static final long MAX_WAIT_TIME = Duration.ofSeconds(60).toMillis();
 
   private final BigQueryService bigQueryService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
@@ -65,17 +65,18 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
   private List<QueryJobConfiguration> getJobs(ReportingSnapshot reportingSnapshot) {
     final QueryParameterValue snapshotTimestamp = getTimestampValue(reportingSnapshot);
     final ImmutableList.Builder<QueryJobConfiguration> resultBuilder = new Builder<>();
-    Lists.partition(reportingSnapshot.getResearchers(), INSERT_ROW_COUNT).stream()
+    final int partitionSize = workbenchConfigProvider.get().reporting.maxRowsPerInsert;
+
+    Lists.partition(reportingSnapshot.getResearchers(), partitionSize).stream()
         .map(
-            researchers ->
+            batch ->
                 researcherJobBuilder.build(
-                    qualifyTableName("researcher"), researchers, snapshotTimestamp))
+                    qualifyTableName("researcher"), batch, snapshotTimestamp))
         .forEach(resultBuilder::add);
-    Lists.partition(reportingSnapshot.getWorkspaces(), INSERT_ROW_COUNT).stream()
+    Lists.partition(reportingSnapshot.getWorkspaces(), partitionSize).stream()
         .map(
-            workrspaces ->
-                workspaceJobBuilder.build(
-                    qualifyTableName("workrspace"), workrspaces, snapshotTimestamp))
+            batch ->
+                workspaceJobBuilder.build(qualifyTableName("workspace"), batch, snapshotTimestamp))
         .forEach(resultBuilder::add);
     return resultBuilder.build();
   }

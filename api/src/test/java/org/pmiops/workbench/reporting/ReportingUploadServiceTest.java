@@ -62,6 +62,7 @@ public class ReportingUploadServiceTest {
     public WorkbenchConfig workbenchConfig() {
       final WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
       workbenchConfig.reporting.dataset = "wb_reporting";
+      workbenchConfig.reporting.maxRowsPerInsert = 5;
       workbenchConfig.server.projectId = "rw-wb-unit-test";
       return workbenchConfig;
     }
@@ -138,7 +139,7 @@ public class ReportingUploadServiceTest {
     // inject it so that we don't need this many rows in the test, but I didn't think that was
     // necessarily a good enoughh reason to add configurable state.
     final List<ReportingResearcher> researchers =
-        IntStream.range(0, 2001)
+        IntStream.range(0, 21)
             .mapToObj(
                 id ->
                     new ReportingResearcher()
@@ -165,7 +166,7 @@ public class ReportingUploadServiceTest {
     final int researcherColumnCount = 4;
     final int workspaceColumnCount = 5;
 
-    assertThat(jobs.get(0).getNamedParameters()).hasSize(researcherColumnCount * 500 + 1);
+    assertThat(jobs.get(0).getNamedParameters()).hasSize(researcherColumnCount * 5 + 1);
     assertThat(jobs.get(4).getNamedParameters()).hasSize(researcherColumnCount + 1);
     assertThat(jobs.get(5).getNamedParameters()).hasSize(workspaceColumnCount + 1);
   }

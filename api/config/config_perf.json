@@ -125,6 +125,7 @@
     "useTestCaptcha": true
   },
   "reporting": {
-    "dataset": "reporting_perf"
+    "dataset": "reporting_perf",
+    "maxRowsPerInsert": 200
   }
 }
