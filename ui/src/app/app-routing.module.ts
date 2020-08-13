@@ -44,10 +44,12 @@ import {BreadcrumbType, NavStore} from './utils/navigation';
 declare let gtag: Function;
 
 const routes: Routes = [
-  // For now, all publicly accessible React routes must kept in sync between here
-  // and AppRouting, as we cannot use an Angular ** route to send to AppRouting
-  // under both the sign in guard and the signed out context. All signed out paths
-  // should be hardcoded here until the full React router migration is complete.
+  // VERY BIG CAVEAT:
+  // We cannot use an Angular ** route to send to AppRouting in multiple places (e.g. under
+  // the sign-in guard and the signed-out context). Our one Angular ** route is under both the
+  // signed-in and registered guards, where the bulk of our routes are. For now, all other
+  // routes must be kept in sync between here and AppRouting until the full React router migration
+  // is complete.
   {
     path: 'cookie-policy',
     component: AppRouting
@@ -75,6 +77,12 @@ const routes: Routes = [
     canActivateChild: [SignInGuard, DisabledGuard],
     runGuardsAndResolvers: 'always',
     children: [
+      // legacy / duplicated routes go HERE
+      {
+        path: 'data-code-of-conduct',
+        component: AppRouting
+      },
+      // non-migrated routes go HERE
       {
         path: '',
         canActivateChild: [RegistrationGuard],
@@ -294,11 +302,35 @@ const routes: Routes = [
             path: 'workspaces/build',
             component: WorkspaceEditComponent,
             data: {title: 'Create Workspace', mode: WorkspaceEditMode.Create}
+          },
+          {
+            path: '**',
+            component: AppRouting,
+            data: {}
           }
-        ]},
+        ]
+      },
       {
         path: 'admin',
         children: [
+          // legacy / duplicated routes go HERE
+          {
+            path: 'user-audit',
+            component: AppRouting
+          },
+          {
+            path: 'user-audit/:username',
+            component: AppRouting
+          },
+          {
+            path: 'workspaceAudit',
+            component: AppRouting
+          },
+          {
+            path: 'workspaceAudit/:workspaceNamespace',
+            component: AppRouting
+          },
+          // non-migrated routes go HERE
           {
             path: 'review-workspace',
             component: AdminReviewWorkspaceComponent,
@@ -345,12 +377,8 @@ const routes: Routes = [
             path: 'institution/edit/:institutionId',
             component: AdminInstitutionEditComponent,
             data: { title: 'Institution Admin'},
-          }]
-      },
-      {
-        path: '**',
-        component: AppRouting,
-        data: {}
+          }
+        ]
       }
     ]
   }

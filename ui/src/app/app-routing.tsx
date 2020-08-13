@@ -71,7 +71,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
 
     <ProtectedRoutes guards={[signInGuard]}>
       <AppRoute
-          path='/'
+        path='/'
           component={() => <HomepagePage routeData={{title: 'Homepage'}}/>}
       />
       <AppRoute
