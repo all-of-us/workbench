@@ -1,4 +1,4 @@
-package org.pmiops.workbench.conceptset;
+package org.pmiops.workbench.conceptset.mapper;
 
 import static com.google.common.truth.Truth.assertThat;
 

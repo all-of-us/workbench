@@ -1,4 +1,4 @@
-package org.pmiops.workbench.cohortbuilder.mappers;
+package org.pmiops.workbench.cohortbuilder.mapper;
 
 import static com.google.common.truth.Truth.assertThat;
 

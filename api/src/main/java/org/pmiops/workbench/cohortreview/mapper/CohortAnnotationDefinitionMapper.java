@@ -1,4 +1,4 @@
-package org.pmiops.workbench.cohortreview.mappers;
+package org.pmiops.workbench.cohortreview.mapper;
 
 import java.util.List;
 import java.util.SortedSet;

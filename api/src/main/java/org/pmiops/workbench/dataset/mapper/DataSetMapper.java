@@ -1,4 +1,4 @@
-package org.pmiops.workbench.dataset;
+package org.pmiops.workbench.dataset.mapper;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 

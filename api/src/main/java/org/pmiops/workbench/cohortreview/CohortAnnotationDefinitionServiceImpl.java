@@ -2,7 +2,7 @@ package org.pmiops.workbench.cohortreview;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import org.pmiops.workbench.cohortreview.mappers.CohortAnnotationDefinitionMapper;
+import org.pmiops.workbench.cohortreview.mapper.CohortAnnotationDefinitionMapper;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.DbCohortAnnotationEnumValue;

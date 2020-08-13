@@ -1,4 +1,4 @@
-package org.pmiops.workbench.conceptset;
+package org.pmiops.workbench.conceptset.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
