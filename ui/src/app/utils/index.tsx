@@ -3,6 +3,8 @@ import {ElementRef, OnChanges, OnDestroy, OnInit, ViewChild} from '@angular/core
 import {colorWithWhiteness} from 'app/styles/colors';
 import {
   cdrVersionStore,
+  currentCohortCriteriaStore,
+  currentCohortSearchContextStore,
   currentCohortStore,
   currentConceptSetStore,
   currentWorkspaceStore,
@@ -24,7 +26,6 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
-import {currentCohortCriteriaStore} from './navigation';
 
 const {useEffect, useState} =  React;
 
@@ -357,6 +358,10 @@ export const withCurrentCohort = () => {
 // HOC that provides a 'criteria' prop with current Cohort
 export const withCurrentCohortCriteria = () => {
   return connectBehaviorSubject(currentCohortCriteriaStore, 'criteria');
+};
+
+export const withCurrentCohortSearchContext = () => {
+  return connectBehaviorSubject(currentCohortSearchContextStore, 'cohortContext');
 };
 
 // HOC that provides a 'conceptSet' prop with current ConceptSet

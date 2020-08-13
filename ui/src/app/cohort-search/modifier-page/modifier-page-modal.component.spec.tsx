@@ -12,7 +12,7 @@ import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stu
 import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
 import {WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
 import {workspaceDataStub, WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import {ModifierPage} from './modifier-page.component';
+import {ModifierPageModal} from './modifier-page-modal.component';
 
 
 describe('ListModifierPage', () => {
@@ -35,13 +35,13 @@ describe('ListModifierPage', () => {
   });
 
   it('should render', () => {
-    const wrapper = shallow(<ModifierPage disabled={() => {}} wizard={{}}/>);
+    const wrapper = shallow(<ModifierPageModal disabled={() => {}} wizard={{}}/>);
     expect(wrapper.exists()).toBeTruthy();
   });
 
   it('should display Only Age Event modifier for SURVEY', async() => {
     const survey = DomainType.SURVEY;
-    const wrapper = mount(<ModifierPage disabled={() => {
+    const wrapper = mount(<ModifierPageModal disabled={() => {
     }} wizard={{}}
                                         searchContext={{domain: survey, item: {modifiers: []}}}/>);
     await waitOneTickAndUpdate(wrapper);
