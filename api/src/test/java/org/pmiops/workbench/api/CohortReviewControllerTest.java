@@ -1066,6 +1066,7 @@ public class CohortReviewControllerTest {
 
     return new CohortReview()
         .cohortReviewId(actualReview.getCohortReviewId())
+        .etag(Etags.fromVersion(actualReview.getVersion()))
         .cohortId(actualReview.getCohortId())
         .cdrVersionId(actualReview.getCdrVersionId())
         .creationTime(actualReview.getCreationTime().toString())

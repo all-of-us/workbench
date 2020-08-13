@@ -23,7 +23,7 @@ public interface ParticipantCohortAnnotationMapper {
   ParticipantCohortAnnotation dbModelToClient(
       DbParticipantCohortAnnotation dbParticipantCohortAnnotation);
 
-  @Mapping(target = "cohortAnnotationEnumValue.name", source = "annotationValueEnum")
+  @Mapping(target = "cohortAnnotationEnumValue", ignore = true)
   @Mapping(target = "annotationValueDateString", source = "annotationValueDate")
   @Mapping(target = "annotationValueDate", ignore = true)
   DbParticipantCohortAnnotation clientToDbModel(

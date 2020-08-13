@@ -77,6 +77,8 @@ import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohortreview.mapper.CohortAnnotationDefinitionMapperImpl;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
+import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortAnnotationMapperImpl;
+import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortStatusMapperImpl;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
@@ -296,12 +298,14 @@ public class WorkspacesControllerTest {
     FirecloudMapperImpl.class,
     LogsBasedMetricServiceFakeImpl.class,
     NotebooksServiceImpl.class,
+    ParticipantCohortAnnotationMapperImpl.class,
+    ParticipantCohortStatusMapperImpl.class,
     ReviewQueryBuilder.class,
     UserMapperImpl.class,
     WorkspaceMapperImpl.class,
     WorkspaceResourcesServiceImpl.class,
     WorkspacesController.class,
-    WorkspaceServiceImpl.class,
+    WorkspaceServiceImpl.class
   })
   @MockBean({
     BigQueryService.class,
