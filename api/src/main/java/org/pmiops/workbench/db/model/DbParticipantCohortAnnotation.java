@@ -221,7 +221,10 @@ public class DbParticipantCohortAnnotation {
         .append("cohortReviewId", cohortReviewId)
         .append("participantId", participantId)
         .append("annotationValueString", annotationValueString)
+        .append("cohortAnnotationEnumValue", cohortAnnotationEnumValue)
+        .append("annotationValueEnum", annotationValueEnum)
         .append("annotationValueDate", annotationValueDate)
+        .append("annotationValueDateString", annotationValueDateString)
         .append("annotationValueBoolean", annotationValueBoolean)
         .append("annotationValueInteger", annotationValueInteger)
         .toString();

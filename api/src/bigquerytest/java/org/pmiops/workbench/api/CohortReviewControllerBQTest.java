@@ -27,6 +27,8 @@ import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
+import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortAnnotationMapperImpl;
+import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortStatusMapperImpl;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactory;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
@@ -109,7 +111,11 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     SearchGroupItemQueryBuilder.class,
     UserMapperImpl.class,
     WorkspaceMapperImpl.class,
-    WorkspaceServiceImpl.class
+    WorkspaceServiceImpl.class,
+    ParticipantCohortStatusMapperImpl.class,
+    CohortReviewMapperImpl.class,
+    ParticipantCohortAnnotationMapperImpl.class,
+    CommonMappers.class
   })
   @MockBean({
     CohortFactory.class,
