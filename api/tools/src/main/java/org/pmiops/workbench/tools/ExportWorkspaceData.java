@@ -12,9 +12,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManagerFactory;
@@ -56,6 +58,7 @@ import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.GenderIdentity;
 import org.pmiops.workbench.model.Race;
 import org.pmiops.workbench.model.SexAtBirth;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceImpl;
 import org.pmiops.workbench.monitoring.MonitoringServiceImpl;
 import org.pmiops.workbench.monitoring.MonitoringSpringConfiguration;
@@ -180,22 +183,26 @@ public class ExportWorkspaceData {
 
       log.info("collecting all users");
       List<WorkspaceExportRow> rows = new ArrayList<>();
-      Set<DbUser> usersWithoutWorkspaces =
-          Streams.stream(userDao.findAll()).collect(Collectors.toSet());
+      Map<Long, DbUser> usersById =
+          Streams.stream(userDao.findAll())
+              .collect(Collectors.toMap(DbUser::getUserId, Function.identity()));
+
+      Set<Long> userIdsWithoutWorkspaces = usersById.keySet();
 
       log.info("collecting / converting all workspaces");
       for (DbWorkspace workspace : this.workspaceDao.findAll()) {
         rows.add(toWorkspaceExportRow(workspace, includeDemographics));
-        usersWithoutWorkspaces.remove(workspace.getCreator());
+        userIdsWithoutWorkspaces.remove(workspace.getCreator().getUserId());
 
         if (rows.size() % 10 == 0) {
           log.info("Processed " + rows.size() + "/" + this.workspaceDao.count() + " rows");
         }
       }
 
-      log.info("converting users without workspaces");
-      for (DbUser user : usersWithoutWorkspaces) {
-        rows.add(toWorkspaceExportRow(user, includeDemographics));
+      log.info(
+          String.format("converting %s users without workspaces", userIdsWithoutWorkspaces.size()));
+      for (long userId : userIdsWithoutWorkspaces) {
+        rows.add(toWorkspaceExportRow(usersById.get(userId), includeDemographics));
       }
 
       final CustomMappingStrategy mappingStrategy = new CustomMappingStrategy();
@@ -247,16 +254,21 @@ public class ExportWorkspaceData {
         datasets.stream().map(DbDataset::getName).collect(Collectors.joining(",\n")));
     row.setDatasetCount(String.valueOf(datasets.size()));
 
-    try {
-      Collection<FileDetail> notebooks =
-          notebooksService.getNotebooks(
-              workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
-      row.setNotebookNames(
-          notebooks.stream().map(FileDetail::getName).collect(Collectors.joining(",\n")));
-      row.setNotebooksCount(String.valueOf(notebooks.size()));
-    } catch (NotFoundException e) {
-      row.setNotebookNames("Error: Not Found");
+    if (workspace.getWorkspaceActiveStatusEnum() == WorkspaceActiveStatus.DELETED) {
+      row.setNotebookNames("N/A");
       row.setNotebooksCount("N/A");
+    } else {
+      try {
+        Collection<FileDetail> notebooks =
+            notebooksService.getNotebooks(
+                workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
+        row.setNotebookNames(
+            notebooks.stream().map(FileDetail::getName).collect(Collectors.joining(",\n")));
+        row.setNotebooksCount(String.valueOf(notebooks.size()));
+      } catch (NotFoundException e) {
+        row.setNotebookNames("Error: Not Found");
+        row.setNotebooksCount("N/A");
+      }
     }
 
     DbWorkspaceFreeTierUsage usage = workspaceFreeTierUsageDao.findOneByWorkspace(workspace);
