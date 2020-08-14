@@ -323,7 +323,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
                     onClick={(e) => this.select(e)}/>
             }
           </button>}
-          <div style={styles.code}>{code}</div>
+          {(!!code && code !== name) && <div style={styles.code}>{code}</div>}
           <TooltipTrigger content={<div>{displayName}</div>} disabled={!this.state.truncated}>
             <div style={styles.name} ref={(e) => this.name = e}>
               <span style={searchMatch ? styles.searchMatch : {}}>{displayName}</span>
