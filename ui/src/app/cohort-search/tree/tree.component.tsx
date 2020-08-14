@@ -7,8 +7,9 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
-import {currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, openSidebarWithActiveIconStore, serverConfigStore} from 'app/utils/navigation';
 import {Criteria, CriteriaType, DomainType} from 'generated/fetch';
+import {Button} from '../../components/buttons';
 
 const styles = reactStyles({
   error: {
@@ -190,6 +191,12 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
                                                             select={(s) => select(s)}
                                                             selectedIds={selectedIds}
                                                             setAttributes={setAttributes}/>)}
+        <Button type='primary'
+                style={{borderRadius: '5px', float: 'right', marginTop: '1rem'}}
+                disabled={selectedIds.length === 0}
+                onClick={() => openSidebarWithActiveIconStore.next('criteria')}>
+          Finish & Review
+        </Button>
       </div>}
       {loading && !this.showHeader && <SpinnerOverlay/>}
     </React.Fragment>;

@@ -20,7 +20,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {withCurrentCohortCriteria} from 'app/utils';
 import {highlightSearchTerm, reactStyles, ReactWrapperBase, withCurrentWorkspace, withUserProfile} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {attributesSelectionStore, NavStore} from 'app/utils/navigation';
+import {attributesSelectionStore, NavStore, openSidebarWithActiveIconStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {Criteria, ParticipantCohortStatus, WorkspaceAccessLevel} from 'generated/fetch';
@@ -307,6 +307,12 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
           this.props.setSidebarState(true);
         }
       }));
+      this.subscription.add(openSidebarWithActiveIconStore
+        .filter(activeIcon => !!activeIcon)
+        .subscribe(activeIcon => {
+          this.setState({activeIcon});
+          this.props.setSidebarState(true);
+        }));
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
