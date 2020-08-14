@@ -22,6 +22,7 @@ import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AgeTypeCountListResponse;
 import org.pmiops.workbench.model.CriteriaAttributeListResponse;
 import org.pmiops.workbench.model.CriteriaListResponse;
+import org.pmiops.workbench.model.CriteriaListWithCountResponse;
 import org.pmiops.workbench.model.CriteriaMenuOptionsListResponse;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
@@ -120,14 +121,13 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<CriteriaListResponse> findCriteriaByDomainAndSearchTerm(
+  public ResponseEntity<CriteriaListWithCountResponse> findCriteriaByDomainAndSearchTerm(
       Long cdrVersionId, String domain, String term, Integer limit) {
     cdrVersionService.setCdrVersion(cdrVersionId);
     validateDomain(domain);
     validateTerm(term);
     return ResponseEntity.ok(
-        new CriteriaListResponse()
-            .items(cohortBuilderService.findCriteriaByDomainAndSearchTerm(domain, term, limit)));
+        cohortBuilderService.findCriteriaByDomainAndSearchTerm(domain, term, limit));
   }
 
   @Override
