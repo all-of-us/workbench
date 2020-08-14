@@ -223,15 +223,15 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
     }
     if (serverConfigStore.getValue().enableCohortBuilderV2) {
       currentCohortCriteriaStore.next(selections);
-      this.subscription = currentCohortCriteriaStore
-        .filter(newSelections => !!newSelections)
-        .subscribe(newSelections => {
+      this.subscription = currentCohortCriteriaStore.subscribe(newSelections => {
+        if (!!newSelections) {
           this.setState({
             groupSelections: newSelections.filter(s => s.group).map(s => s.id),
             selectedIds: newSelections.map(s => s.parameterId),
             selections: newSelections
           });
-        });
+        }
+      });
     }
   }
 

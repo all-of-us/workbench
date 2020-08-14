@@ -297,12 +297,12 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
 
     componentDidMount(): void {
       this.subscription = participantStore.subscribe(participant => this.setState({participant}));
-      this.subscription.add(setSidebarActiveIconStore
-        .filter(activeIcon => activeIcon !== null)
-        .subscribe(activeIcon => {
+      this.subscription.add(setSidebarActiveIconStore.subscribe(activeIcon => {
+        if (activeIcon !== null) {
           this.setState({activeIcon});
           this.props.setSidebarState(!!activeIcon);
-        }));
+        }
+      }));
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
