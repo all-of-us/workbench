@@ -17,8 +17,7 @@ import {
   attributesSelectionStore,
   currentCohortCriteriaStore,
   currentCohortSearchContextStore,
-  openSidebarWithActiveIconStore,
-  serverConfigStore
+  serverConfigStore,
 } from 'app/utils/navigation';
 import {Criteria, CriteriaType, DomainType, TemporalMention, TemporalTime} from 'generated/fetch';
 import {Growl} from 'primereact/growl';

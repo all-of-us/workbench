@@ -12,7 +12,7 @@ import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {attributesSelectionStore, openSidebarWithActiveIconStore} from 'app/utils/navigation';
+import {attributesSelectionStore, setSidebarActiveIconStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {environment} from 'environments/environment';
 import {CriteriaType, DomainType} from 'generated/fetch';
@@ -414,7 +414,7 @@ export const ListSearchV2 = withCurrentWorkspace()(
           <Button type='primary'
                   style={{borderRadius: '5px', float: 'right', marginTop: '1rem'}}
                   disabled={selectedIds.length === 0}
-                  onClick={() => openSidebarWithActiveIconStore.next('criteria')}>
+                  onClick={() => setSidebarActiveIconStore.next('criteria')}>
             Finish & Review
           </Button>
         </div>}

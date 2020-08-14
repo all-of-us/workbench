@@ -2,14 +2,14 @@ import * as React from 'react';
 
 import {SearchBar} from 'app/cohort-search/search-bar/search-bar.component';
 import {TreeNode} from 'app/cohort-search/tree-node/tree-node.component';
+import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
-import {currentWorkspaceStore, openSidebarWithActiveIconStore, serverConfigStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, serverConfigStore, setSidebarActiveIconStore} from 'app/utils/navigation';
 import {Criteria, CriteriaType, DomainType} from 'generated/fetch';
-import {Button} from '../../components/buttons';
 
 const styles = reactStyles({
   error: {
@@ -194,7 +194,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
         <Button type='primary'
                 style={{borderRadius: '5px', float: 'right', marginTop: '1rem'}}
                 disabled={selectedIds.length === 0}
-                onClick={() => openSidebarWithActiveIconStore.next('criteria')}>
+                onClick={() => setSidebarActiveIconStore.next('criteria')}>
           Finish & Review
         </Button>
       </div>}

@@ -1,17 +1,29 @@
 import * as React from 'react';
+import {Subscription} from 'rxjs/Subscription';
 
+import {AttributesPageV2} from 'app/cohort-search/attributes-page-v2/attributes-page-v2.component';
 import {saveCriteria} from 'app/cohort-search/cohort-search/cohort-search.component';
 import {ModifierPage} from 'app/cohort-search/modifier-page/modifier-page.component';
 import {attributeDisplay, nameDisplay, typeDisplay} from 'app/cohort-search/utils';
-import {Button} from 'app/components/buttons';
+import {Button, Clickable} from 'app/components/buttons';
 import {FlexColumn, FlexRow, FlexRowWrap} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentCohortCriteria, withCurrentCohortSearchContext} from 'app/utils';
-import {currentCohortCriteriaStore, serverConfigStore} from 'app/utils/navigation';
+import {
+  attributesSelectionStore,
+  currentCohortCriteriaStore,
+  serverConfigStore,
+  setSidebarActiveIconStore
+} from 'app/utils/navigation';
 import {Criteria, DomainType} from 'generated/fetch';
 import * as fp from 'lodash/fp';
+
+const proIcons = {
+  arrowLeft: '/assets/icons/arrow-left-regular.svg',
+  times: '/assets/icons/times-light.svg'
+};
 
 const styles = reactStyles({
   buttonContainer: {
@@ -121,7 +133,12 @@ const styles = reactStyles({
     marginTop: '0.5rem',
     fontWeight: 600,
     color: colors.primary
-  }
+  },
+  navIcons: {
+    position: 'absolute',
+    right: '0',
+    top: '0.75rem',
+  },
 });
 
 export interface Selection extends Criteria {
@@ -251,6 +268,7 @@ interface Props {
 }
 
 interface State {
+  attributesSelection: Criteria;
   modifierButtonText: string;
   showModifiersSlide: boolean;
 }
@@ -313,12 +331,23 @@ export class SelectionListModalVersion extends React.Component<Props> {
 
 export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCohortSearchContext())(
   class extends React.Component<Props, State> {
+    subscription: Subscription;
     constructor(props: Props) {
       super(props);
       this.state = {
+        attributesSelection: undefined,
         modifierButtonText: 'APPLY MODIFIERS',
         showModifiersSlide: false
       };
+    }
+
+    componentDidMount(): void {
+      this.subscription = attributesSelectionStore.subscribe(attributesSelection => {
+        this.setState({attributesSelection});
+        if (!!attributesSelection) {
+          setSidebarActiveIconStore.next('criteria');
+        }
+      });
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
@@ -392,9 +421,25 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
 
     render() {
       const {back, criteria} = this.props;
-      const {modifierButtonText, showModifiersSlide} = this.state;
+      const {attributesSelection, modifierButtonText, showModifiersSlide} = this.state;
       return <div>
-          {!showModifiersSlide ?  <React.Fragment>
+        <FlexRow style={styles.navIcons}>
+          {(attributesSelection || showModifiersSlide) &&
+            <Clickable style={{marginRight: '1rem'}}
+                       onClick={() => this.setState({attributesSelection: undefined})}>
+              <img src={proIcons.arrowLeft}
+                   style={{height: '21px', width: '18px'}}
+                   alt='Go back'/>
+            </Clickable>
+          }
+          <Clickable style={{marginRight: '1rem'}}
+                     onClick={() => setSidebarActiveIconStore.next(undefined)}>
+            <img src={proIcons.times}
+                 style={{height: '27px', width: '17px'}}
+                 alt='Close'/>
+          </Clickable>
+        </FlexRow>
+          {!(attributesSelection || showModifiersSlide) && <React.Fragment>
             <h3 style={{...styles.sectionTitle, marginTop: 0}}>Add selected criteria to cohort</h3>
             <div style={{paddingTop: '0.5rem', position: 'relative'}}>
               <div style={styles.selectionContainer}>
@@ -417,7 +462,9 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
                 Back
               </Button>
             </FlexRowWrap>
-          </React.Fragment> : <ModifierPage selections={criteria} applyModifiers={(modifier) => this.applyModifier(modifier)}/>}
+          </React.Fragment>}
+          {showModifiersSlide && <ModifierPage selections={criteria} applyModifiers={(modifier) => this.applyModifier(modifier)}/>}
+          {!!attributesSelection && <AttributesPageV2 close={() => attributesSelectionStore.next(undefined)} node={attributesSelection}/>}
       </div>;
     }
   }
