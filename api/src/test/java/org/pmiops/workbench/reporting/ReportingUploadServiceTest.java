@@ -114,16 +114,19 @@ public class ReportingUploadServiceTest {
             .workspaces(
                 ImmutableList.of(
                     new ReportingWorkspace()
+                        .workspaceId(201L)
                         .name("Circle K")
                         .creationTime(THEN.toEpochMilli())
                         .fakeSize(4444L)
                         .creatorId(101L),
                     new ReportingWorkspace()
+                        .workspaceId(202L)
                         .name("Wyld Stallyns")
                         .creationTime(THEN.toEpochMilli())
                         .fakeSize(4444L)
                         .creatorId(101L),
                     new ReportingWorkspace()
+                        .workspaceId(203L)
                         .name("You-us said what we-us are saying right now.")
                         .creationTime(THEN.toEpochMilli())
                         .fakeSize(4444L)

@@ -5,21 +5,22 @@ import java.util.function.Function;
 import org.pmiops.workbench.model.ReportingWorkspace;
 
 public enum WorkspaceParameter implements QueryParameterColumn<ReportingWorkspace> {
-  WORKSPACE_ID("workspace_id", w -> QueryParameterValue.int64(w.getWorkspaceId())),
-  CREATOR_ID("creator_id", w -> QueryParameterValue.int64(w.getCreatorId())),
-  NAME("name", w -> QueryParameterValue.string(w.getName())),
-  FAKE_SIZE("fake_size", w -> QueryParameterValue.int64(w.getFakeSize())),
-  CREATION_TIME(
-      "creation_time",
-      w -> QueryParameterValue.timestamp(w.getCreationTime() * MICROSECODNS_IN_MILLISECOND));
+  WORKSPACE_ID("workspace_id", ReportingWorkspace::getWorkspaceId, QPVFn.INT64),
+  CREATOR_ID("creator_id", ReportingWorkspace::getCreatorId, QPVFn.INT64),
+  NAME("name", ReportingWorkspace::getName, QPVFn.STRING),
+  FAKE_SIZE("fake_size", ReportingWorkspace::getFakeSize, QPVFn.INT64),
+  CREATION_TIME("creation_time", ReportingWorkspace::getCreationTime, QPVFn.TIMESTAMP_MILLIS);
 
   private final String parameterName;
-  private final Function<ReportingWorkspace, QueryParameterValue> parameterValueFunction;
+  private final Function<ReportingWorkspace, Object> objectValueFunction;
+  private final Function<Object, QueryParameterValue> parameterValueFunction;
 
   WorkspaceParameter(
       String parameterName,
-      Function<ReportingWorkspace, QueryParameterValue> parameterValueFunction) {
+      Function<ReportingWorkspace, Object> objectValueFunction,
+      Function<Object, QueryParameterValue> parameterValueFunction) {
     this.parameterName = parameterName;
+    this.objectValueFunction = objectValueFunction;
     this.parameterValueFunction = parameterValueFunction;
   };
 
@@ -29,7 +30,12 @@ public enum WorkspaceParameter implements QueryParameterColumn<ReportingWorkspac
   }
 
   @Override
-  public Function<ReportingWorkspace, QueryParameterValue> getQueryParameterValueFunction() {
+  public Function<ReportingWorkspace, Object> getObjectValueFunction() {
+    return objectValueFunction;
+  }
+
+  @Override
+  public Function<Object, QueryParameterValue> getQueryParameterValueFunction() {
     return parameterValueFunction;
   }
 }

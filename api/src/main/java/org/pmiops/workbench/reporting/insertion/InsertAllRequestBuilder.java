@@ -29,13 +29,13 @@ public interface InsertAllRequestBuilder<T> extends ColumnDrivenBuilder<T> {
 
   default RowToInsert modelToRow(T model, Map<String, Object> fixedValues) {
     final ImmutableMap.Builder<String, Object> builder = new ImmutableMap.Builder<>();
+    // First N columns are same for all rows (e.g. a partition key column)
     builder.putAll(fixedValues);
-    ImmutableMap.copyOf(fixedValues);
-    Arrays.stream(getQueryParameterColumns())
-        .forEach(
-            c -> {
-              builder.put(c.getParameterName(), c.getQueryParameterValueFunction().apply(model));
-            });
+    builder.putAll(
+        Arrays.stream(getQueryParameterColumns())
+            .collect(
+                ImmutableMap.toImmutableMap(
+                    QueryParameterColumn::getParameterName, c -> c.getObjectValue(model))));
     return RowToInsert.of(generateInsertId(), builder.build());
   }
 

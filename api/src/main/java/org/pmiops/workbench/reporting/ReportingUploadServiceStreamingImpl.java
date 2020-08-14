@@ -56,14 +56,17 @@ public class ReportingUploadServiceStreamingImpl implements ReportingUploadServi
         ImmutableMap.of("snapshot_timestamp", reportingSnapshot.getCaptureTimestamp());
 
     return ImmutableList.of(
-        researcherRequestBuilder.build(
-            TableId.of(projectId, dataset, "researcher"),
-            reportingSnapshot.getResearchers(),
-            fixedValues),
-        workspaceRequestBuilder.build(
-            TableId.of(projectId, dataset, "workspace"),
-            reportingSnapshot.getWorkspaces(),
-            fixedValues));
+            researcherRequestBuilder.build(
+                TableId.of(projectId, dataset, "researcher"),
+                reportingSnapshot.getResearchers(),
+                fixedValues),
+            workspaceRequestBuilder.build(
+                TableId.of(projectId, dataset, "workspace"),
+                reportingSnapshot.getWorkspaces(),
+                fixedValues))
+        .stream()
+        .filter(r -> 0 < r.getRows().size())
+        .collect(ImmutableList.toImmutableList());
   }
 
   private ReportingJobResult computeOverallResult(

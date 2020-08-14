@@ -5,18 +5,21 @@ import java.util.function.Function;
 import org.pmiops.workbench.model.ReportingResearcher;
 
 public enum ResearcherParameter implements QueryParameterColumn<ReportingResearcher> {
-  RESEARCHER_ID("researcher_id", r -> QueryParameterValue.int64(r.getResearcherId())),
-  USERNAME("username", r -> QueryParameterValue.string(r.getUsername())),
-  FIRST_NAME("first_name", r -> QueryParameterValue.string(r.getFirstName())),
-  IS_DISABLED("is_disabled", r -> QueryParameterValue.bool(r.getIsDisabled()));
+  RESEARCHER_ID("researcher_id", ReportingResearcher::getResearcherId, QPVFn.INT64),
+  USERNAME("username", ReportingResearcher::getUsername, QPVFn.STRING),
+  FIRST_NAME("first_name", ReportingResearcher::getFirstName, QPVFn.STRING),
+  IS_DISABLED("is_disabled", ReportingResearcher::getIsDisabled, QPVFn.BOOLEAN);
 
   private final String parameterName;
-  private final Function<ReportingResearcher, QueryParameterValue> parameterValueFunction;
+  private final Function<ReportingResearcher, Object> objectValueFunction;
+  private final Function<Object, QueryParameterValue> parameterValueFunction;
 
   ResearcherParameter(
       String parameterName,
-      Function<ReportingResearcher, QueryParameterValue> parameterValueFunction) {
+      Function<ReportingResearcher, Object> objectValueFunction,
+      Function<Object, QueryParameterValue> parameterValueFunction) {
     this.parameterName = parameterName;
+    this.objectValueFunction = objectValueFunction;
     this.parameterValueFunction = parameterValueFunction;
   }
 
@@ -26,7 +29,12 @@ public enum ResearcherParameter implements QueryParameterColumn<ReportingResearc
   }
 
   @Override
-  public Function<ReportingResearcher, QueryParameterValue> getQueryParameterValueFunction() {
+  public Function<ReportingResearcher, Object> getObjectValueFunction() {
+    return objectValueFunction;
+  }
+
+  @Override
+  public Function<Object, QueryParameterValue> getQueryParameterValueFunction() {
     return parameterValueFunction;
   }
 }
