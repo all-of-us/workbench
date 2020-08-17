@@ -186,7 +186,7 @@ public class CBCriteriaDaoTest {
 
   @Test
   public void findCriteriaByDomainAndTypeAndCode() {
-    PageRequest page = new PageRequest(0, 2);
+    PageRequest page = new PageRequest(0, 10);
     List<DbCriteria> criteriaList =
         cbCriteriaDao
             .findCriteriaByDomainAndTypeAndCode(
