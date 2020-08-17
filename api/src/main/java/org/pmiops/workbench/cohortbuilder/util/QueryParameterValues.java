@@ -29,13 +29,15 @@ public final class QueryParameterValues {
   public static QueryParameterValue instantToQPValue(Instant instant) {
     return QueryParameterValue.timestamp(instant.toEpochMilli() * MICROSECONDS_IN_MILLISECOND);
   }
+
   public static Optional<Instant> timestampToInstant(QueryParameterValue timestamp) {
     if (timestamp.getType() != StandardSQLTypeName.TIMESTAMP
         || Strings.isNullOrEmpty(timestamp.getValue())) {
       return Optional.empty();
     }
-    final ZonedDateTime zonedDateTime = ZonedDateTime.parse(timestamp.getValue(),
-        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSSxxx"));
+    final ZonedDateTime zonedDateTime =
+        ZonedDateTime.parse(
+            timestamp.getValue(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSSxxx"));
     return Optional.of(zonedDateTime.toInstant());
   }
 
@@ -81,6 +83,4 @@ public final class QueryParameterValues {
       return value;
     }
   }
-
-
 }

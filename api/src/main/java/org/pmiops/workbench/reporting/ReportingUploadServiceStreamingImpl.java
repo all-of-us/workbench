@@ -36,7 +36,8 @@ public class ReportingUploadServiceStreamingImpl implements ReportingUploadServi
   private final Provider<Stopwatch> stopwatchProvider;
 
   public ReportingUploadServiceStreamingImpl(
-      BigQueryService bigQueryService, Provider<WorkbenchConfig> configProvider,
+      BigQueryService bigQueryService,
+      Provider<WorkbenchConfig> configProvider,
       Provider<Stopwatch> stopwatchProvider) {
     this.bigQueryService = bigQueryService;
     this.configProvider = configProvider;
@@ -53,9 +54,10 @@ public class ReportingUploadServiceStreamingImpl implements ReportingUploadServi
       final InsertAllResponse currentResponse = bigQueryService.insertAll(request);
       responseMapBuilder.put(request.getTable(), currentResponse);
       stopwatch.stop();
-      logDuration(stopwatch.elapsed(), String.format("Stream %d rows into %s",
-          request.getRows().size(),
-          request.getTable().getTable()));
+      logDuration(
+          stopwatch.elapsed(),
+          String.format(
+              "Stream %d rows into %s", request.getRows().size(), request.getTable().getTable()));
       stopwatch.reset();
     }
     return computeOverallResult(responseMapBuilder.build());
@@ -63,10 +65,7 @@ public class ReportingUploadServiceStreamingImpl implements ReportingUploadServi
 
   public void logDuration(Duration duration, String description) {
     final long millis = duration.toMillis();
-    log.info(String.format("%s: %d.%d seconds",
-        description,
-        millis / 1000,
-        millis % 1000));
+    log.info(String.format("%s: %d.%d seconds", description, millis / 1000, millis % 1000));
   }
 
   private List<InsertAllRequest> getInsertAllRequests(ReportingSnapshot reportingSnapshot) {

@@ -12,7 +12,6 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.ReportingResearcher;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingWorkspace;
-import org.pmiops.workbench.monitoring.LogsBasedMetricServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -54,12 +53,13 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
     final TransactionTemplate template = new TransactionTemplate(platformTransactionManager);
     template.setName("Reporting Snapshot");
     template.setReadOnly(true);
-    final ReportingSnapshot result = template.execute(
-        t ->
-            new ReportingSnapshot()
-                .captureTimestamp(clock.millis())
-                .researchers(getResearchers())
-                .workspaces(getWorkspaces()));
+    final ReportingSnapshot result =
+        template.execute(
+            t ->
+                new ReportingSnapshot()
+                    .captureTimestamp(clock.millis())
+                    .researchers(getResearchers())
+                    .workspaces(getWorkspaces()));
     stopwatch.stop();
     log.info(String.format("Snapshot created in %s", stopwatch.elapsed().toString()));
     return result;
