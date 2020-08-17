@@ -26,7 +26,7 @@ const signInGuard: Guard = {
 
 const registrationGuard: Guard = {
   allowed: (): boolean => hasRegisteredAccess(profileStore.get().profile.dataAccessLevel),
-  redirectPath: '/login'
+  redirectPath: '/'
 };
 
 const CookiePolicyPage = withRouteData(CookiePolicy);
@@ -98,12 +98,13 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           }} />}
       />
       <AppRoute path='/nih-callback' component={() => <HomepagePage routeData={{title: 'Homepage'}}/>} />
-      <ProtectedRoutes guards={[registrationGuard]}>
-        <AppRoute
-            path='/library'
-            component={() => <WorkspaceLibraryPage routeData={{title: 'Workspace Library', minimizeChrome: false}}/>}
-        />
-      </ProtectedRoutes>
+    </ProtectedRoutes>
+
+    <ProtectedRoutes guards={[signInGuard, registrationGuard]}>
+      <AppRoute
+          path='/library'
+          component={() => <WorkspaceLibraryPage routeData={{title: 'Workspace Library', minimizeChrome: false}}/>}
+      />
     </ProtectedRoutes>
   </AppRouter>;
 };
