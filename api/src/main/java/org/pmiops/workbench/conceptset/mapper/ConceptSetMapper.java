@@ -103,6 +103,7 @@ public interface ConceptSetMapper {
       throw new BadRequestException(
           String.format("Concepts [%s] are not in domain %s", mismatchedConceptIds, domainEnum));
     }
+    dbConceptSet.getConceptIds().addAll(source.getAddedIds());
     String omopTable = BigQueryTableInfo.getTableName(source.getConceptSet().getDomain());
     dbConceptSet.setParticipantCount(
         conceptBigQueryService.getParticipantCountForConcepts(
