@@ -3140,7 +3140,7 @@ paths:
         200:
           description: A collection of criteria
           schema:
-            "$ref": "#/definitions/CriteriaListResponse"
+            "$ref": "#/definitions/CriteriaListWithCountResponse"
   "/v1/cohortbuilder/{cdrVersionId}/criteria/{domain}/{conceptId}":
     parameters:
     - "$ref": "#/parameters/cdrVersionId"
@@ -6908,6 +6908,19 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/Criteria"
+  CriteriaListWithCountResponse:
+    type: object
+    required:
+    - items
+    - totalCount
+    properties:
+      items:
+        type: array
+        items:
+          "$ref": "#/definitions/Criteria"
+      totalCount:
+        type: integer
+        format: int64
   CriteriaMenuOptionsListResponse:
     type: object
     required:

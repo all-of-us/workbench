@@ -5,6 +5,7 @@ import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AgeTypeCount;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
+import org.pmiops.workbench.model.CriteriaListWithCountResponse;
 import org.pmiops.workbench.model.CriteriaMenuOption;
 import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DemoChartInfo;
@@ -25,7 +26,8 @@ public interface CohortBuilderService {
 
   List<Criteria> findCriteriaBy(String domain, String type, Boolean standard, Long parentId);
 
-  List<Criteria> findCriteriaByDomainAndSearchTerm(String domain, String term, Integer limit);
+  CriteriaListWithCountResponse findCriteriaByDomainAndSearchTerm(
+      String domain, String term, Integer limit);
 
   List<CriteriaMenuOption> findCriteriaMenuOptions();
 
