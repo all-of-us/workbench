@@ -11,6 +11,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class UpdateReviewDemographics {
 
+  private static final String DISTINCT_CONCEPT_IDS =
+      "select distinct sex_at_birth_concept_id FROM `${}.${}.person`";
+
   @Bean
   public CommandLineRunner run(
       BigQueryService bigQueryService,
