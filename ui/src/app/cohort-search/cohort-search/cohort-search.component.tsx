@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {Subscription} from 'rxjs/Subscription';
 
 import {Demographics} from 'app/cohort-search/demographics/demographics.component';
 import {ListSearchV2} from 'app/cohort-search/list-search-v2/list-search-v2.component';
@@ -10,9 +11,14 @@ import {Button, Clickable} from 'app/components/buttons';
 import {FlexRowWrap} from 'app/components/flex';
 import {SpinnerOverlay} from 'app/components/spinners';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles} from 'app/utils';
+import {reactStyles, withCurrentCohortSearchContext} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {attributesSelectionStore, currentCohortCriteriaStore} from 'app/utils/navigation';
+import {
+  attributesSelectionStore,
+  currentCohortCriteriaStore,
+  currentCohortSearchContextStore,
+  serverConfigStore,
+} from 'app/utils/navigation';
 import {Criteria, CriteriaType, DomainType, TemporalMention, TemporalTime} from 'generated/fetch';
 import {Growl} from 'primereact/growl';
 
@@ -79,9 +85,33 @@ function initGroup(role: string, item: any) {
   };
 }
 
+export function saveCriteria(selections?: Array<Selection>) {
+  const {domain, groupId, item, role, type} = currentCohortSearchContextStore.getValue();
+  if (domain === DomainType.PERSON) {
+    triggerEvent('Cohort Builder Search', 'Click', `Demo - ${typeToTitle(type)} - Finish`);
+  }
+  const searchRequest = searchRequestStore.getValue();
+  item.searchParameters = selections || currentCohortCriteriaStore.getValue();
+  if (groupId) {
+    const groupIndex = searchRequest[role].findIndex(grp => grp.id === groupId);
+    if (groupIndex > -1) {
+      const itemIndex = searchRequest[role][groupIndex].items.findIndex(it => it.id === item.id);
+      if (itemIndex > -1) {
+        searchRequest[role][groupIndex].items[itemIndex] = item;
+      } else {
+        searchRequest[role][groupIndex].items.push(item);
+      }
+    }
+  } else {
+    searchRequest[role].push(initGroup(role, item));
+  }
+  searchRequestStore.next(searchRequest);
+  currentCohortSearchContextStore.next(undefined);
+  currentCohortCriteriaStore.next(undefined);
+}
+
 interface Props {
-  closeSearch: () => void;
-  searchContext: any;
+  cohortContext: any;
   selections?: Array<Selection>;
 }
 
@@ -141,8 +171,8 @@ const css = `
    }
  `;
 
-export class CohortSearch extends React.Component<Props, State> {
-
+export const CohortSearch = withCurrentCohortSearchContext()(class extends React.Component<Props, State> {
+  subscription: Subscription;
   growl: any;
   constructor(props: Props) {
     super(props);
@@ -163,11 +193,14 @@ export class CohortSearch extends React.Component<Props, State> {
   }
 
   componentWillUnmount() {
-    currentCohortCriteriaStore.next(undefined);
+    if (serverConfigStore.getValue().enableCohortBuilderV2) {
+      this.subscription.unsubscribe();
+      currentCohortCriteriaStore.next(undefined);
+    }
   }
 
   componentDidMount(): void {
-    const {searchContext: {domain, item, standard, type}} = this.props;
+    const {cohortContext: {domain, item, standard, type}} = this.props;
     const selections = item.searchParameters;
     const selectedIds = selections.map(s => s.parameterId);
     if (type === CriteriaType.DECEASED) {
@@ -188,7 +221,18 @@ export class CohortSearch extends React.Component<Props, State> {
       }
       this.setState({backMode, hierarchyNode, mode, selectedIds, selections, title});
     }
-    currentCohortCriteriaStore.next(selections);
+    if (serverConfigStore.getValue().enableCohortBuilderV2) {
+      currentCohortCriteriaStore.next(selections);
+      this.subscription = currentCohortCriteriaStore.subscribe(newSelections => {
+        if (!!newSelections) {
+          this.setState({
+            groupSelections: newSelections.filter(s => s.group).map(s => s.id),
+            selectedIds: newSelections.map(s => s.parameterId),
+            selections: newSelections
+          });
+        }
+      });
+    }
   }
 
   setScroll = (id: string) => {
@@ -209,33 +253,15 @@ export class CohortSearch extends React.Component<Props, State> {
     }
   }
 
-  finish = () => {
-    const {searchContext: {domain, groupId, item, role, type}} = this.props;
-    const {selections} = this.state;
-    if (domain === DomainType.PERSON) {
-      triggerEvent('Cohort Builder Search', 'Click', `Demo - ${typeToTitle(type)} - Finish`);
-    }
-    const searchRequest = searchRequestStore.getValue();
-    item.searchParameters = selections;
-    if (groupId) {
-      const groupIndex = searchRequest[role].findIndex(grp => grp.id === groupId);
-      if (groupIndex > -1) {
-        const itemIndex = searchRequest[role][groupIndex].items.findIndex(it => it.id === item.id);
-        if (itemIndex > -1) {
-          searchRequest[role][groupIndex].items[itemIndex] = item;
-        } else {
-          searchRequest[role][groupIndex].items.push(item);
-        }
-      }
-    } else {
-      searchRequest[role].push(initGroup(role, item));
-    }
-    searchRequestStore.next(searchRequest);
-    this.props.closeSearch();
+  closeSearch() {
+    currentCohortSearchContextStore.next(undefined);
+    currentCohortCriteriaStore.next(undefined);
+    // Delay hiding attributes page until sidebar is closed
+    setTimeout(() => attributesSelectionStore.next(undefined), 500);
   }
 
   get initTree() {
-    const {searchContext: {domain}} = this.props;
+    const {cohortContext: {domain}} = this.props;
     return domain === DomainType.PHYSICALMEASUREMENT
       || domain === DomainType.SURVEY
       || domain === DomainType.VISIT;
@@ -310,16 +336,14 @@ export class CohortSearch extends React.Component<Props, State> {
       selectable: true,
       attributes: []
     } as Selection;
-    // wrapping in a timeout here prevents 'ExpressionChangedAfterItHasBeenCheckedError' in the parent component
-    // TODO remove timeout once cohort-search component is converted to React
-    setTimeout(() => this.setState({selections: [param]}, () => this.finish()));
+    saveCriteria([param]);
   }
 
   render() {
-    const {closeSearch, searchContext, searchContext: {domain, type}} = this.props;
+    const {cohortContext} = this.props;
     const {autocompleteSelection, count, groupSelections, hierarchyNode, loadingSubtree, selectedIds, selections, title, treeSearchTerms}
       = this.state;
-    return !!searchContext && <FlexRowWrap style={styles.searchContainer}>
+    return !!cohortContext && <FlexRowWrap style={styles.searchContainer}>
 
       <div style={{height: '100%', width: '100%'}}>
         <div style={{position: 'absolute', right: '0', marginTop: '-1rem'}}>
@@ -330,7 +354,7 @@ export class CohortSearch extends React.Component<Props, State> {
         </div>
         <div style={styles.titleBar}>
           <div style={{display: 'inline-flex', marginRight: '0.5rem'}}>
-            <Clickable style={styles.backArrow} onClick={() => closeSearch()}>
+            <Clickable style={styles.backArrow} onClick={() => this.closeSearch()}>
               <img src={arrowIcon} style={{height: '21px', width: '18px'}} alt='Go back' />
             </Clickable>
             <h2 style={{color: colors.primary, lineHeight: '1.5rem', margin: '0 0 0 0.75rem'}}>
@@ -339,14 +363,14 @@ export class CohortSearch extends React.Component<Props, State> {
           </div>
         </div>
         <div style={
-          (domain === DomainType.PERSON && type !== CriteriaType.AGE)
+          (cohortContext.domain === DomainType.PERSON && cohortContext.type !== CriteriaType.AGE)
             ? {marginBottom: '3.5rem'}
             : {height: 'calc(100% - 3.5rem)'}
         }>
-          {domain === DomainType.PERSON ? <div style={{flex: 1, overflow: 'auto'}}>
+          {cohortContext.domain === DomainType.PERSON ? <div style={{flex: 1, overflow: 'auto'}}>
               <Demographics
                 count={count}
-                criteriaType={type}
+                criteriaType={cohortContext.type}
                 select={this.addSelection}
                 selectedIds={selectedIds}
                 selections={selections}/>
@@ -371,21 +395,21 @@ export class CohortSearch extends React.Component<Props, State> {
                 {/* List View (using duplicated version of ListSearch) */}
                 <div style={this.searchContentStyle('list')}>
                   <ListSearchV2 hierarchy={this.showHierarchy}
-                              searchContext={searchContext}
+                              searchContext={cohortContext}
                               select={this.addSelection}
                               selectedIds={selectedIds}/>
                 </div>
               </div>
             </React.Fragment>}
-          {type === CriteriaType.AGE && <div style={styles.footer}>
+          {cohortContext.type === CriteriaType.AGE && <div style={styles.footer}>
             <Button style={styles.footerButton}
                     type='link'
-                    onClick={closeSearch}>
+                    onClick={() => this.closeSearch()}>
               Cancel
             </Button>
             <Button style={styles.footerButton}
                     type='primary'
-                    onClick={this.finish}>
+                    onClick={() => saveCriteria()}>
               Finish
             </Button>
           </div>}
@@ -393,4 +417,4 @@ export class CohortSearch extends React.Component<Props, State> {
       </div>
     </FlexRowWrap>;
   }
-}
+});

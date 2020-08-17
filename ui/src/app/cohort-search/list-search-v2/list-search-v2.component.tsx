@@ -12,7 +12,7 @@ import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {attributesSelectionStore} from 'app/utils/navigation';
+import {attributesSelectionStore, setSidebarActiveIconStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {environment} from 'environments/environment';
 import {CriteriaType, DomainType} from 'generated/fetch';
@@ -327,7 +327,7 @@ export const ListSearchV2 = withCurrentWorkspace()(
     }
 
     render() {
-      const {searchContext: {domain}} = this.props;
+      const {searchContext: {domain}, selectedIds} = this.props;
       const {data, error, ingredients, loading, standardOnly, sourceMatch, standardData} = this.state;
       const showStandardOption = !standardOnly && !!standardData && standardData.length > 0;
       const displayData = standardOnly ? standardData : data;
@@ -411,7 +411,12 @@ export const ListSearchV2 = withCurrentWorkspace()(
             </tbody>
           </table>}
           {!standardOnly && !displayData.length && <div>No results found</div>}
-          <Button type='primary' style={{borderRadius: '5px', float: 'right', marginTop: '1rem'}}>Finish & Review</Button>
+          <Button type='primary'
+                  style={{borderRadius: '5px', float: 'right', marginTop: '1rem'}}
+                  disabled={!!selectedIds && selectedIds.length === 0}
+                  onClick={() => setSidebarActiveIconStore.next('criteria')}>
+            Finish & Review
+          </Button>
         </div>}
         {loading && <SpinnerOverlay/>}
         {error && <div style={{...styles.error, ...(domain === DomainType.DRUG ? {marginTop: '3.75rem'} : {})}}>

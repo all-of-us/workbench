@@ -9,7 +9,6 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
 
-import {AttributesPageV2} from 'app/cohort-search/attributes-page-v2/attributes-page-v2.component';
 import {SelectionList} from 'app/cohort-search/selection-list/selection-list.component';
 import {FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
@@ -20,10 +19,10 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {withCurrentCohortCriteria} from 'app/utils';
 import {highlightSearchTerm, reactStyles, ReactWrapperBase, withCurrentWorkspace, withUserProfile} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {attributesSelectionStore, NavStore} from 'app/utils/navigation';
+import {NavStore, setSidebarActiveIconStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
-import {Criteria, ParticipantCohortStatus, WorkspaceAccessLevel} from 'generated/fetch';
+import {ParticipantCohortStatus, WorkspaceAccessLevel} from 'generated/fetch';
 import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
 import {PopupTrigger} from './popups';
 
@@ -267,7 +266,6 @@ interface Props {
 
 interface State {
   activeIcon: string;
-  attributesSelection: Criteria;
   filteredContent: Array<any>;
   participant: ParticipantCohortStatus;
   searchTerm: string;
@@ -281,7 +279,6 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
       super(props);
       this.state = {
         activeIcon: props.sidebarOpen ? 'help' : undefined,
-        attributesSelection: undefined,
         filteredContent: undefined,
         participant: undefined,
         searchTerm: '',
@@ -300,11 +297,10 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
 
     componentDidMount(): void {
       this.subscription = participantStore.subscribe(participant => this.setState({participant}));
-      this.subscription.add(attributesSelectionStore.subscribe(attributesSelection => {
-        this.setState({attributesSelection});
-        if (!!attributesSelection) {
-          this.setState({activeIcon: 'criteria'});
-          this.props.setSidebarState(true);
+      this.subscription.add(setSidebarActiveIconStore.subscribe(activeIcon => {
+        if (activeIcon !== null) {
+          this.setState({activeIcon});
+          this.props.setSidebarState(!!activeIcon);
         }
       }));
     }
@@ -370,13 +366,6 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
         this.analyticsEvent('OpenSidebar', `Sidebar - ${label}`);
       } else {
         setSidebarState(false);
-      }
-    }
-
-    onCloseClick() {
-      this.props.setSidebarState(false);
-      if (this.state.attributesSelection) {
-        setTimeout(() => this.setState({attributesSelection: undefined}), 500);
       }
     }
 
@@ -499,7 +488,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
 
     render() {
       const {criteria, helpContentKey, notebookStyles, setSidebarState, sidebarOpen} = this.props;
-      const {activeIcon, attributesSelection, filteredContent, participant, searchTerm, tooltipId} = this.state;
+      const {activeIcon, filteredContent, participant, searchTerm, tooltipId} = this.state;
       const displayContent = filteredContent !== undefined ? filteredContent : sidebarContent[helpContentKey];
 
       const contentStyle = (tab: string) => ({
@@ -538,20 +527,14 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
         </div>
         <div style={this.sidebarContainerStyles(activeIcon, notebookStyles)}>
           <div style={sidebarOpen ? {...styles.sidebar, ...styles.sidebarOpen} : styles.sidebar} data-test-id='sidebar-content'>
-            <FlexRow style={styles.navIcons}>
-              {activeIcon === 'criteria' && attributesSelection && <Clickable style={{marginRight: '1rem'}}
-                  onClick={() => this.setState({attributesSelection: undefined})}>
-                <img src={proIcons.arrowLeft}
-                     style={{height: '21px', width: '18px'}}
-                     alt='Go back'/>
-              </Clickable>}
+            {activeIcon !== 'criteria' && <FlexRow style={styles.navIcons}>
               <Clickable style={{marginRight: '1rem'}}
-                  onClick={() => this.onCloseClick()}>
+                         onClick={() => setSidebarState(false)}>
                 <img src={proIcons.times}
                      style={{height: '27px', width: '17px'}}
                      alt='Close'/>
               </Clickable>
-            </FlexRow>
+            </FlexRow>}
             <div style={contentStyle('help')}>
               <h3 style={{...styles.sectionTitle, marginTop: 0}}>{helpContentKey === NOTEBOOK_HELP_CONTENT ? 'Workspace storage' : 'Help Tips'}</h3>
               {helpContentKey !== NOTEBOOK_HELP_CONTENT &&
@@ -586,14 +569,9 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
               {participant && <SidebarContent />}
             </div>
             <div style={contentStyle('criteria')}>
-              {!!attributesSelection
-                ? <AttributesPageV2 close={() => attributesSelectionStore.next(undefined)} node={attributesSelection}/>
-                : <div>
-                <div style={{display: 'block', height: 'calc(100% - 5rem)', overflow: 'auto', padding: '0.5rem 0.5rem 0rem'}}>
-                  <SelectionList back={() => setSidebarState(false)} selections={[]}/>
-                </div>
+              <div style={{display: 'block', overflow: 'auto', padding: '0.5rem 0.5rem 0rem'}}>
+                <SelectionList back={() => setSidebarState(false)} selections={[]}/>
               </div>
-              }
             </div>
             {activeIcon !== 'criteria' && <div style={styles.footer}>
               <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
