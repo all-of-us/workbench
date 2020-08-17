@@ -202,21 +202,10 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     dbWorkspace.setFirecloudName(WORKSPACE_NAME);
     dbWorkspace.setCdrVersion(dbCdrVersion);
     dbWorkspace = workspaceDao.save(dbWorkspace);
-
     dbConditionConceptSet =
-        conceptSetDao.save(
-            DbConceptSet.builder()
-                .addDomain(DbStorageEnums.domainToStorage(Domain.CONDITION))
-                .addConceptIds(new HashSet<>(Collections.singletonList(1L)))
-                .addWorkspaceId(dbWorkspace.getWorkspaceId())
-                .build());
+        conceptSetDao.save(createMockConceptSet(Domain.CONDITION, dbWorkspace.getWorkspaceId()));
     dbProcedureConceptSet =
-        conceptSetDao.save(
-            DbConceptSet.builder()
-                .addDomain(DbStorageEnums.domainToStorage(Domain.PROCEDURE))
-                .addConceptIds(new HashSet<>(Collections.singletonList(1L)))
-                .addWorkspaceId(dbWorkspace.getWorkspaceId())
-                .build());
+        conceptSetDao.save(createMockConceptSet(Domain.PROCEDURE, dbWorkspace.getWorkspaceId()));
 
     dbCohort1 = new DbCohort();
     dbCohort1.setWorkspaceId(dbWorkspace.getWorkspaceId());
@@ -229,6 +218,13 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     dbCohort2 = cohortDao.save(dbCohort2);
 
     when(controller.generateRandomEightCharacterQualifier()).thenReturn("00000000");
+  }
+
+  private DbConceptSet createMockConceptSet(Domain domain, long workspaceId) {
+    DbConceptSet mockConceptSet = new DbConceptSet();
+    mockConceptSet.setDomain(DbStorageEnums.domainToStorage(domain));
+    mockConceptSet.setConceptSetId(new HashSet<>(Collections.singletonList(1L)));
+    mockConceptSet.setWorkspaceId(workspaceId);
   }
 
   @After
