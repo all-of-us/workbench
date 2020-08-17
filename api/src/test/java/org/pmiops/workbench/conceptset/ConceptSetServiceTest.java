@@ -35,13 +35,8 @@ public class ConceptSetServiceTest {
   @Autowired ConceptSetMapper conceptSetMapper;
 
   @TestConfiguration
-  @Import({
-    ConceptSetService.class,
-    ConceptService.class,
-    CommonMappers.class,
-    ConceptSetMapperImpl.class
-  })
-  @MockBean({ConceptBigQueryService.class})
+  @Import({ConceptSetService.class, ConceptService.class, ConceptSetMapperImpl.class})
+  @MockBean({CommonMappers.class, ConceptBigQueryService.class})
   static class Configuration {}
 
   @Test

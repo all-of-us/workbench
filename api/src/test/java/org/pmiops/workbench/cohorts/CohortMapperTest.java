@@ -5,6 +5,7 @@ import static org.mockito.Mockito.doReturn;
 
 import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
+import java.time.Clock;
 import java.time.Instant;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,7 +33,7 @@ public class CohortMapperTest {
 
   @TestConfiguration
   @Import({CohortMapperImpl.class, CommonMappers.class})
-  @MockBean({UserDao.class})
+  @MockBean({UserDao.class, Clock.class})
   static class Configuration {}
 
   @Before

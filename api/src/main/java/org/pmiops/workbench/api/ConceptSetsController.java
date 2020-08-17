@@ -9,7 +9,6 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -97,7 +96,14 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     if (request.getAddedIds() == null || request.getAddedIds().size() == 0) {
       throw new BadRequestException("Cannot create a concept set with no concepts");
     }
-    DbConceptSet dbConceptSet = fromClientConceptSet(request, workspace.getWorkspaceId());
+    DbConceptSet dbConceptSet =
+        validateConceptSize(
+            conceptSetMapper.clientToDbModel(
+                request,
+                workspace.getWorkspaceId(),
+                userProvider.get(),
+                conceptService,
+                conceptBigQueryService));
 
     try {
       dbConceptSet = conceptSetService.save(dbConceptSet);
@@ -369,35 +375,11 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
         conceptService.findAll(dbConceptSet.getConceptIds(), CONCEPT_NAME_ORDERING));
   }
 
-  private DbConceptSet fromClientConceptSet(CreateConceptSetRequest request, long workspaceId) {
-    ConceptSet conceptSet = request.getConceptSet();
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    DbConceptSet dbConceptSet = new DbConceptSet();
-    dbConceptSet.setDomainEnum(conceptSet.getDomain());
-    if (conceptSet.getSurvey() != null) {
-      dbConceptSet.setSurveysEnum(conceptSet.getSurvey());
-    }
-    if (dbConceptSet.getDomainEnum() == null) {
-      throw new BadRequestException(
-          "Domain " + conceptSet.getDomain() + " is not allowed for concept sets");
-    }
-    Optional.ofNullable(conceptSet.getEtag())
-        .ifPresent(etag -> dbConceptSet.setVersion(Etags.toVersion(etag)));
-    dbConceptSet.setDescription(conceptSet.getDescription());
-    dbConceptSet.setName(conceptSet.getName());
-    dbConceptSet.setCreator(userProvider.get());
-    dbConceptSet.setWorkspaceId(workspaceId);
-    dbConceptSet.setCreationTime(now);
-    dbConceptSet.setLastModifiedTime(now);
-    dbConceptSet.setVersion(INITIAL_VERSION);
-    addConceptsToSet(dbConceptSet, request.getAddedIds());
-    if (dbConceptSet.getConceptIds().size() > maxConceptsPerSet) {
+  private DbConceptSet validateConceptSize(DbConceptSet requestDbConceptSet) {
+    requestDbConceptSet.setVersion(INITIAL_VERSION);
+    if (requestDbConceptSet.getConceptIds().size() > maxConceptsPerSet) {
       throw new BadRequestException("Exceeded " + maxConceptsPerSet + " in concept set");
     }
-    String omopTable = BigQueryTableInfo.getTableName(request.getConceptSet().getDomain());
-    dbConceptSet.setParticipantCount(
-        conceptBigQueryService.getParticipantCountForConcepts(
-            dbConceptSet.getDomainEnum(), omopTable, dbConceptSet.getConceptIds()));
-    return dbConceptSet;
+    return requestDbConceptSet;
   }
 }

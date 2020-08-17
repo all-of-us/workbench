@@ -78,17 +78,13 @@ public class WorkspaceAdminServiceTest {
   @Autowired private WorkspaceAdminService workspaceAdminService;
 
   @TestConfiguration
-  @Import({
-    CohortMapperImpl.class,
-    CommonMappers.class,
-    WorkspaceAdminServiceImpl.class,
-    WorkspaceMapperImpl.class
-  })
+  @Import({CohortMapperImpl.class, WorkspaceAdminServiceImpl.class, WorkspaceMapperImpl.class})
   @MockBean({
     ActionAuditQueryService.class,
     CloudStorageService.class,
     CohortDao.class,
     CohortReviewMapper.class,
+    CommonMappers.class,
     ConceptSetDao.class,
     ConceptSetMapper.class,
     DataSetDao.class,

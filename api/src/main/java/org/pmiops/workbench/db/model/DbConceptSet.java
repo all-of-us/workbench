@@ -56,6 +56,29 @@ public class DbConceptSet {
     setVersion(DbConceptSet.INITIAL_VERSION);
   }
 
+  public DbConceptSet(
+      String name,
+      int version,
+      short domain,
+      Short survey,
+      String description,
+      long workspaceId,
+      DbUser creator,
+      Timestamp creationTime,
+      Timestamp lastModifiedTime,
+      int participantCount) {
+    setVersion(version);
+    setName(name);
+    setDomain(domain);
+    setSurvey(survey);
+    setDescription(description);
+    setWorkspaceId(workspaceId);
+    setCreator(creator);
+    setCreationTime(creationTime);
+    setLastModifiedTime(lastModifiedTime);
+    setParticipantCount(participantCount);
+  }
+
   public DbConceptSet(DbConceptSet cs) {
     setDescription(cs.getDescription());
     setName(cs.getName());
@@ -204,9 +227,9 @@ public class DbConceptSet {
     this.conceptIds = conceptIds;
   }
 
-  public static Builder builder() {
-    return new Builder();
-  }
+  //  public static Builder builder() {
+  //    return new Builder();
+  //  }
 
   public static class Builder {
     private long conceptSetId;
