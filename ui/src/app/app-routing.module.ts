@@ -77,8 +77,18 @@ const routes: Routes = [
     children: [
       // legacy / duplicated routes go HERE
       {
+        path: '',
+        component: AppRouting,
+        data: {}
+      },
+      {
         path: 'data-code-of-conduct',
         component: AppRouting
+      },
+      {
+        path: 'nih-callback',
+        component: AppRouting,
+        data: {}
       },
       // non-migrated routes go HERE
       {
@@ -88,17 +98,7 @@ const routes: Routes = [
         children: [
           // legacy / duplicated routes go HERE
           {
-            path: '',
-            component: AppRouting,
-            data: {}
-          },
-          {
             path: 'library',
-            component: AppRouting,
-            data: {}
-          },
-          {
-            path: 'nih-callback',
             component: AppRouting,
             data: {}
           },
