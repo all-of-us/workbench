@@ -1,7 +1,9 @@
 package org.pmiops.workbench.api;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Ordering;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -13,6 +15,7 @@ import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
+import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper;
@@ -30,6 +33,7 @@ import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.ConceptSetListResponse;
 import org.pmiops.workbench.model.CopyRequest;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.Surveys;
 import org.pmiops.workbench.model.UpdateConceptSetRequest;
@@ -201,6 +205,35 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       throw new ConflictException("Failed due to concurrent concept set modification");
     }
     return ResponseEntity.ok(toHydratedConceptSet(dbConceptSet));
+  }
+
+  private void addConceptsToSet(DbConceptSet dbConceptSet, List<Long> addedIds) {
+    Domain domainEnum = dbConceptSet.getDomainEnum();
+    Iterable<DbConcept> concepts = conceptService.findAll(addedIds);
+    List<DbConcept> mismatchedConcepts =
+        ImmutableList.copyOf(concepts).stream()
+            .filter(concept -> !concept.getConceptClassId().equals(CONCEPT_CLASS_ID_QUESTION))
+            .filter(
+                concept -> {
+                  Domain domain =
+                      Domain.PHYSICALMEASUREMENT.equals(domainEnum)
+                          ? Domain.PHYSICALMEASUREMENT
+                          : DbStorageEnums.domainIdToDomain(concept.getDomainId());
+                  return !domainEnum.equals(domain);
+                })
+            .collect(Collectors.toList());
+    if (!mismatchedConcepts.isEmpty()) {
+      String mismatchedConceptIds =
+          Joiner.on(", ")
+              .join(
+                  mismatchedConcepts.stream()
+                      .map(DbConcept::getConceptId)
+                      .collect(Collectors.toList()));
+      throw new BadRequestException(
+          String.format("Concepts [%s] are not in domain %s", mismatchedConceptIds, domainEnum));
+    }
+
+    dbConceptSet.getConceptIds().addAll(addedIds);
   }
 
   @Override
