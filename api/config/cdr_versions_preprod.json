@@ -9,7 +9,7 @@
     "creationTime": "2019-10-21 00:00:00Z",
     "releaseNumber": 3,
     "numParticipants": 224143,
-    "cdrDbName": "r_2020q1_2"
+    "cdrDbName": "r_2020q3_1"
   },
   {
     "cdrVersionId": 2,
@@ -21,7 +21,7 @@
     "creationTime": "2020-04-16 00:00:00Z",
     "releaseNumber": 4,
     "numParticipants": 224001,
-    "cdrDbName": "r_2020q1_1"
+    "cdrDbName": "r_2020q3_2"
   },
   {
     "cdrVersionId": 3,
@@ -32,6 +32,6 @@
     "creationTime": "2019-09-30 00:00:00Z",
     "releaseNumber": 3,
     "numParticipants": 234525,
-    "cdrDbName": "synth_r_2019q4_3"
+    "cdrDbName": "synth_r_2019q4_5"
   }
 ]
