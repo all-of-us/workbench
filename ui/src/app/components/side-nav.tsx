@@ -138,61 +138,61 @@ export class SideNavItem extends React.Component<SideNavItemProps, SideNavItemSt
 
   render() {
     return <Clickable
-        // data-test-id is the text within the SideNavItem, with whitespace removed
-        // and appended with '-menu-item'
-        data-test-id={this.props.content.toString().replace(/\s/g, '') + '-menu-item'}
-        style={this.getStyles(this.props.active, this.state.hovering, this.props.disabled)}
-        onClick={() => {
-          if (this.props.parentOnClick && !this.props.disabled) {
-            this.props.parentOnClick();
-          }
-          this.onClick();
+      // data-test-id is the text within the SideNavItem, with whitespace removed
+      // and appended with '-menu-item'
+      data-test-id={this.props.content.toString().replace(/\s/g, '') + '-menu-item'}
+      style={this.getStyles(this.props.active, this.state.hovering, this.props.disabled)}
+      onClick={() => {
+        if (this.props.parentOnClick && !this.props.disabled) {
+          this.props.parentOnClick();
+        }
+        this.onClick();
+      }}
+      onMouseEnter={() => this.setState({hovering: true})}
+      onMouseLeave={() => this.setState({hovering: false})}
+    >
+      <div
+        style={{...styles.flex,
+          flex: '1 0 auto'
         }}
-        onMouseEnter={() => this.setState({hovering: true})}
-        onMouseLeave={() => this.setState({hovering: false})}
       >
-        <div
-          style={{...styles.flex,
-            flex: '1 0 auto'
-          }}
+        <span
+          style={
+            this.props.icon || this.props.hasProfileImage
+              ? {...styles.flex}
+              : {...styles.noIconMargin}
+          }
         >
-          <span
-            style={
-              this.props.icon || this.props.hasProfileImage
-                ? {...styles.flex}
-                : {...styles.noIconMargin}
-            }
-          >
-            {
-              this.props.icon && <ClrIcon
-                shape={this.props.icon}
-                className={'is-solid'}
-                style={styles.navIcon}
-                size={this.iconSize}
-              />
-            }
-            {
-              this.props.hasProfileImage && <img
-                src={signInStore.getValue().profileImage}
-                style={styles.profileImage}
-              />
-            }
-            {this.props.content}
-          </span>
           {
-            this.props.containsSubItems
-            && <ClrIcon
-              shape='angle'
-              style={
-                this.state.subItemsOpen
-                  ? {...styles.dropdownIcon, ...styles.dropdownIconOpen}
-                  : styles.dropdownIcon
-              }
+            this.props.icon && <ClrIcon
+              shape={this.props.icon}
+              className={'is-solid'}
+              style={styles.navIcon}
               size={this.iconSize}
             />
           }
-        </div>
-      </Clickable>;
+          {
+            this.props.hasProfileImage && <img
+              src={signInStore.getValue().profileImage}
+              style={styles.profileImage}
+            />
+          }
+          {this.props.content}
+        </span>
+        {
+          this.props.containsSubItems
+          && <ClrIcon
+            shape='angle'
+            style={
+              this.state.subItemsOpen
+                ? {...styles.dropdownIcon, ...styles.dropdownIconOpen}
+                : styles.dropdownIcon
+            }
+            size={this.iconSize}
+          />
+        }
+      </div>
+    </Clickable>;
   }
 }
 
