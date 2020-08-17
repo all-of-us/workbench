@@ -3,7 +3,6 @@ package org.pmiops.workbench.cohortreview.mapper;
 import static com.google.common.truth.Truth.assertThat;
 
 import java.sql.Timestamp;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.Etags;
@@ -24,9 +23,6 @@ public class CohortReviewMapperTest {
   @TestConfiguration
   @Import({CohortReviewMapperImpl.class, CommonMappers.class})
   static class Configuration {}
-
-  @Before
-  public void setUp() throws Exception {}
 
   @Test
   public void dbModelToClient() {
