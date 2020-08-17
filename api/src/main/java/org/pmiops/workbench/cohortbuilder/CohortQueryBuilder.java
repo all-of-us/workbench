@@ -57,7 +57,7 @@ public class CohortQueryBuilder {
           + "limit ${limit}\n";
 
   private static final String RANDOM_SQL_TEMPLATE =
-      "select rand() as x, person.person_id, race_concept_id, gender_concept_id, ethnicity_concept_id, birth_datetime, case when death.person_id is null then false else true end as deceased\n"
+      "select rand() as x, person.person_id, race_concept_id, gender_concept_id, ethnicity_concept_id, sex_at_birth_concept_id, birth_datetime, case when death.person_id is null then false else true end as deceased\n"
           + "from `${projectId}.${dataSetId}.person` person\n"
           + "left join `${projectId}.${dataSetId}.death` death on (person.person_id = death.person_id)\n"
           + "where person.person_id in (${innerSql})";

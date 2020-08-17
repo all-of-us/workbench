@@ -30,6 +30,8 @@ export const routeConfigDataStore = new BehaviorSubject<any>({});
 export const serverConfigStore = new BehaviorSubject<ConfigResponse>(undefined);
 export const currentCohortCriteriaStore = new BehaviorSubject<Array<Selection>>(undefined);
 export const attributesSelectionStore = new BehaviorSubject<Criteria>(undefined);
+export const currentCohortSearchContextStore = new BehaviorSubject<any>(undefined);
+
 export const userProfileStore =
   new BehaviorSubject<{ profile: Profile, reload: Function, updateCache: Function }>({
     profile: {} as Profile,

@@ -27,6 +27,7 @@ public class WorkbenchConfig {
   public ActionAuditConfig actionAudit;
   public RdrExportConfig rdrExport;
   public CaptchaConfig captcha;
+  public ReportingConfig reporting;
 
   /** Creates a config with non-null-but-empty member variables, for use in testing. */
   public static WorkbenchConfig createEmptyConfig() {
@@ -50,6 +51,7 @@ public class WorkbenchConfig {
     config.actionAudit = new ActionAuditConfig();
     config.rdrExport = new RdrExportConfig();
     config.captcha = new CaptchaConfig();
+    config.reporting = new ReportingConfig();
     return config;
   }
 
@@ -259,6 +261,8 @@ public class WorkbenchConfig {
     public boolean enableResearchPurposePrompt;
     // Flag to indicate whether to use the new UI for cohort builder
     public boolean enableCohortBuilderV2;
+    // If true, reporting cron job will write data to configured BigQuery reporting dataset.
+    public boolean enableReportingUploadCron;
   }
 
   public static class ActionAuditConfig {
@@ -292,5 +296,10 @@ public class WorkbenchConfig {
   public static class CaptchaConfig {
     public boolean enableCaptcha;
     public boolean useTestCaptcha;
+  }
+
+  public static class ReportingConfig {
+    public String dataset;
+    public Integer maxRowsPerInsert;
   }
 }

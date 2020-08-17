@@ -3,24 +3,27 @@ import * as moment from 'moment';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 
+import {CalculateFooter} from 'app/cohort-search/attributes-page-v2/attributes-page-v2.component';
 import {encountersStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, mapParameter} from 'app/cohort-search/utils';
 import {Button} from 'app/components/buttons';
+import {FlexRowWrap} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {DatePicker, NumberInput} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
-import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
-import {reactStyles, withCurrentWorkspace} from 'app/utils';
+import colors from 'app/styles/colors';
+import {reactStyles, withCurrentCohortSearchContext, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {serverConfigStore} from 'app/utils/navigation';
+import {currentCohortSearchContextStore, serverConfigStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {Criteria, CriteriaType, DomainType, ModifierType, Operator} from 'generated/fetch';
+import {  Criteria, CriteriaType, DomainType, ModifierType, Operator} from 'generated/fetch';
+
 
 const styles = reactStyles({
   header: {
     color: '#262262',
-    fontWeight: 500,
+    fontWeight: 600,
     fontSize: '16px',
     borderBottom: '1px solid #262262',
     paddingBottom: '0.5rem'
@@ -70,10 +73,7 @@ const styles = reactStyles({
     marginLeft: '0.25rem',
   },
   footer: {
-    background: '#e4f3fc',
-    padding: '0.5rem',
     position: 'absolute',
-    width: '93%',
     bottom: '1rem'
   },
   row: {
@@ -110,34 +110,13 @@ const styles = reactStyles({
     marginTop: '0.25rem',
     padding: '8px',
   },
+  addButton: {
+    height: '2rem',
+    borderRadius: '5px',
+    fontWeight: 600,
+    marginRight: '0.5rem'
+  }
 });
-
-const button = {
-  active: {
-    ...styles.button,
-    background: '#2691d0',
-    border: '1px solid #0077b7',
-  },
-  disabled: {
-    ...styles.button,
-    background: '#c3c3c3',
-    border: 'transparent',
-    opacity: 0.3,
-  }
-};
-
-const columns = {
-  col3: {
-    ...styles.col,
-    flex: '0 0 25%',
-    maxWidth: '25%'
-  },
-  col8: {
-    ...styles.col,
-    flex: '0 0 67.66667%',
-    maxWidth: '67.66667%'
-  }
-};
 
 const validatorFuncs = {
   AGE_AT_EVENT: (value) => {
@@ -181,11 +160,10 @@ interface Selection extends Criteria {
 }
 
 interface Props {
-  disabled: Function;
-  searchContext: any;
   selections: Array<Selection>;
-  setSearchContext: (context: any) => void;
+  applyModifiers: Function;
   workspace: WorkspaceData;
+  cohortContext: any;
 }
 
 interface State {
@@ -199,7 +177,7 @@ interface State {
   loading: boolean;
 }
 
-export const ModifierPage = withCurrentWorkspace()(
+export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearchContext())(
   class extends React.Component<Props, State> {
     updateInput: Function;
     constructor(props: Props) {
@@ -312,17 +290,17 @@ export const ModifierPage = withCurrentWorkspace()(
     }
 
     get formState() {
-      const {searchContext: {domain}} = this.props;
+      const {cohortContext: {domain}} = this.props;
       const {formState} = this.state;
       return domain === DomainType.SURVEY ?
         formState.filter(form => SURVEY_MODIFIERS.indexOf(form.name) > -1) : formState;
     }
 
     getExisting() {
-      const {searchContext} = this.props;
+      const {cohortContext} = this.props;
       const formState = this.formState;
       // This reseeds the form state with existing data if we're editing an existing item
-      searchContext.item.modifiers.forEach(existing => {
+      cohortContext.item.modifiers.forEach(existing => {
         const index = formState.findIndex(mod => existing.name === mod.name);
         if (index > -1) {
           const mod = formState[index];
@@ -371,9 +349,9 @@ export const ModifierPage = withCurrentWorkspace()(
     }
 
     updateMods() {
-      const {searchContext, setSearchContext} = this.props;
+      const {cohortContext} = this.props;
       const {formState} = this.state;
-      searchContext.item.modifiers = formState.reduce((acc, mod) => {
+      cohortContext.item.modifiers = formState.reduce((acc, mod) => {
         const {name, operator, values} = mod;
         if (operator) {
           switch (name) {
@@ -392,21 +370,22 @@ export const ModifierPage = withCurrentWorkspace()(
         return acc;
       }, []);
       this.validateValues();
-      setSearchContext(searchContext);
+      currentCohortSearchContextStore.next(cohortContext);
     }
 
     get addEncounters() {
-      const {searchContext: {domain}} = this.props;
+      const {cohortContext: {domain}} = this.props;
       return ![DomainType.PHYSICALMEASUREMENT, DomainType.VISIT].includes(domain);
     }
 
     calculate = async() => {
       const {
         selections,
-        searchContext: {domain, item: {modifiers}, role},
+        cohortContext: {domain, item: {modifiers}, role},
         workspace: {cdrVersionId}
       } = this.props;
       this.trackEvent('Calculate');
+      console.log(modifiers.length);
       try {
         this.setState({loading: true, count: null, calculateError: false});
         const request = {
@@ -430,7 +409,7 @@ export const ModifierPage = withCurrentWorkspace()(
     }
 
     trackEvent = (label: string) => {
-      const {searchContext: {domain}} = this.props;
+      const {cohortContext: {domain}} = this.props;
       triggerEvent(
         'Cohort Builder Search',
         'Click',
@@ -463,8 +442,6 @@ export const ModifierPage = withCurrentWorkspace()(
         }
         return acc;
       }, new Set());
-      const disableFinish = errors.length > 0 || untouched;
-      this.props.disabled(disableFinish);
       this.setState({formErrors: Array.from(errors), formUntouched: untouched, initialFormState: initialState});
     }
 
@@ -503,66 +480,64 @@ export const ModifierPage = withCurrentWorkspace()(
       by a time period of up to 364 days backwards to de-identify patient data.
       The date shift differs across participants.`;
       const disableCalculate = formErrors.length > 0 || formUntouched || initialFormState;
-      return <div style={{marginTop: '1rem'}}>
-        <div style={styles.header}>
-          The following modifiers are optional and apply to all selected criteria
-        </div>
-        {calculateError && <div style={styles.error}>
-          <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
-            shape='exclamation-triangle' size='22'/>
-          Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
-        </div>}
-        {formErrors.length > 0 && <div style={styles.errors}>
-          {formErrors.map((err, e) => <div key={e} style={styles.errorItem}>
-            {err}
-          </div>)}
-        </div>}
-        {formState.map((mod, i) => {
-          const {label, name, options, operator} = mod;
-          return <div data-test-id={name} key={i} style={{marginTop: '0.75rem'}}>
-            <label style={styles.label}>{label}</label>
-            {name === ModifierType.EVENTDATE &&
+      return <div>
+        <h3 style={{...styles.header, marginTop: 0}}>Apply optional Modifiers</h3>
+        <div style={{marginTop: '1rem'}}>
+          <div>
+            The following modifiers are optional and apply to all selected criteria
+          </div>
+          {calculateError && <div style={styles.error}>
+            <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
+                     shape='exclamation-triangle' size='22'/>
+            Sorry, the request cannot be completed. Please try again or contact Support in the left
+            hand navigation.
+          </div>}
+          {formErrors.length > 0 && <div style={styles.errors}>
+            {formErrors.map((err, e) => <div key={e} style={styles.errorItem}>
+              {err}
+            </div>)}
+          </div>}
+          {formState.map((mod, i) => {
+            const {label, name, options, operator} = mod;
+            return <div data-test-id={name} key={i} style={{marginTop: '0.75rem'}}>
+              <label style={styles.label}>{label}</label>
+              {name === ModifierType.EVENTDATE &&
               <TooltipTrigger content={<div>{tooltip}</div>}>
                 <ClrIcon style={styles.info} className='is-solid' shape='info-standard'/>
               </TooltipTrigger>
-            }
-            <div style={styles.modifier}>
-              <Dropdown value={operator}
-                style={styles.select}
-                onChange={(e) => this.selectChange(e.value, i)}
-                options={options}
-                optionValue='value'
-                itemTemplate={(e) => this.optionTemplate(e, name)}/>
-              {operator && name !== ModifierType.ENCOUNTERS && <React.Fragment>
-                {this.renderInput(i, '0', mod.type)}
-                {operator === Operator.BETWEEN && <React.Fragment>
-                  <span style={{margin: '0 0.25rem'}}>and</span>
-                  {this.renderInput(i, '1', mod.type)}
-                </React.Fragment>}
-              </React.Fragment>}
-            </div>
-          </div>;
-        })}
-        <div style={styles.footer}>
-          <div style={styles.row}>
-            <div style={columns.col3}>
-              <Button type='primary' style={disableCalculate ? button.disabled : button.active}
-                disabled={disableCalculate} onClick={() => this.calculate()}>
-                {loading &&
-                  <Spinner size={16} style={{marginRight: '0.25rem', marginLeft: '-0.25rem'}}/>
-                }
-                Calculate
-              </Button>
-            </div>
-            {!loading && count !== null && <div style={columns.col8}>
-              <div style={{color: '#262262'}}>Results</div>
-              {!loading && <div>
-                Number Participants: <span style={styles.previewCount}>{count.toLocaleString()}</span>
-              </div>}
-            </div>}
-          </div>
+              }
+              <div style={styles.modifier}>
+                <Dropdown value={operator}
+                          style={styles.select}
+                          onChange={(e) => this.selectChange(e.value, i)}
+                          options={options}
+                          optionValue='value'
+                          itemTemplate={(e) => this.optionTemplate(e, name)}/>
+                {operator && name !== ModifierType.ENCOUNTERS && <div style={{paddingTop: '1rem'}}>
+                  {this.renderInput(i, '0', mod.type)}
+                  {operator === Operator.BETWEEN && <React.Fragment>
+                    <span style={{margin: '0 0.25rem'}}>and</span>
+                    {this.renderInput(i, '1', mod.type)}
+                  </React.Fragment>}
+                </div>}
+              </div>
+            </div>;
+          })}
+          <CalculateFooter disabled={disableCalculate} calculating={loading}
+                           calculate={() => this.calculate()} count={count}/>
+          <FlexRowWrap style={{flexDirection: 'row-reverse', marginTop: '2rem'}}>
+            <Button type='primary'
+                    style={styles.addButton}
+                    onClick={() => this.props.applyModifiers(this.props.cohortContext.item.modifiers)}>
+              APPLY MODIFIERS
+            </Button>
+            <Button type='link'
+                    style={{color: colors.primary, marginRight: '0.5rem'}}
+                    onClick={() => this.props.applyModifiers(undefined)}>
+              BACK
+            </Button>
+          </FlexRowWrap>
         </div>
       </div>;
     }
-  }
-);
+  });

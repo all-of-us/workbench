@@ -20,7 +20,6 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
@@ -152,7 +151,8 @@ public class CohortReviewControllerTest {
     FEMALE("FEMALE", 8532),
     NOT_HISPANIC("Not Hispanic or Latino", 38003564),
     PREFER_NOT_TO_ANSWER_RACE("I Prefer not to answer", 1177221),
-    PREFER_NOT_TO_ANSWER_ETH("I Prefer not to answer", 1177221);
+    PREFER_NOT_TO_ANSWER_ETH("I Prefer not to answer", 1177221),
+    SEX_AT_BIRTH("MALE", 45880669);
 
     private final String name;
     private final long conceptId;
@@ -274,6 +274,14 @@ public class CohortReviewControllerTest {
             .addConceptId(String.valueOf(TestConcepts.PREFER_NOT_TO_ANSWER_ETH.conceptId))
             .addName(TestConcepts.PREFER_NOT_TO_ANSWER_ETH.name)
             .build());
+    cbCriteriaDao.save(
+        DbCriteria.builder()
+            .addDomainId(DomainType.PERSON.toString())
+            .addType(CriteriaType.SEX.toString())
+            .addParentId(1L)
+            .addConceptId(String.valueOf(TestConcepts.SEX_AT_BIRTH.conceptId))
+            .addName(TestConcepts.SEX_AT_BIRTH.name)
+            .build());
 
     cdrVersion = new DbCdrVersion();
     cdrVersion.setBigqueryDataset("dataSetId");
@@ -332,6 +340,7 @@ public class CohortReviewControllerTest {
                 .genderConceptId(TestConcepts.MALE.getConceptId())
                 .raceConceptId(TestConcepts.ASIAN.getConceptId())
                 .ethnicityConceptId(TestConcepts.NOT_HISPANIC.getConceptId())
+                .sexAtBirthConceptId(TestConcepts.SEX_AT_BIRTH.getConceptId())
                 .birthDate(new java.sql.Date(today.getTime()))
                 .deceased(false));
 
@@ -343,6 +352,7 @@ public class CohortReviewControllerTest {
                 .genderConceptId(TestConcepts.FEMALE.getConceptId())
                 .raceConceptId(TestConcepts.WHITE.getConceptId())
                 .ethnicityConceptId(TestConcepts.NOT_HISPANIC.getConceptId())
+                .sexAtBirthConceptId(TestConcepts.SEX_AT_BIRTH.getConceptId())
                 .birthDate(new java.sql.Date(today.getTime()))
                 .deceased(false));
 
@@ -780,6 +790,8 @@ public class CohortReviewControllerTest {
     assertThat(response.getRaceConceptId()).isEqualTo(participantCohortStatus1.getRaceConceptId());
     assertThat(response.getGenderConceptId())
         .isEqualTo(participantCohortStatus1.getGenderConceptId());
+    assertThat(response.getSexAtBirthConceptId())
+        .isEqualTo(participantCohortStatus1.getSexAtBirthConceptId());
   }
 
   @Test
@@ -1001,13 +1013,10 @@ public class CohortReviewControllerTest {
   private void stubBigQueryCohortCalls() {
     TableResult queryResult = mock(TableResult.class);
     Iterable testIterable =
-        new Iterable() {
-          @Override
-          public Iterator iterator() {
-            List<FieldValue> list = new ArrayList<>();
-            list.add(null);
-            return list.iterator();
-          }
+        () -> {
+          List<FieldValue> list = new ArrayList<>();
+          list.add(null);
+          return list.iterator();
         };
     Map<String, Integer> rm =
         ImmutableMap.<String, Integer>builder()
@@ -1016,8 +1025,9 @@ public class CohortReviewControllerTest {
             .put("gender_concept_id", 2)
             .put("race_concept_id", 3)
             .put("ethnicity_concept_id", 4)
-            .put("count", 5)
-            .put("deceased", 6)
+            .put("sex_at_birth_concept_id", 5)
+            .put("count", 6)
+            .put("deceased", 7)
             .build();
 
     when(bigQueryService.filterBigQueryConfig(null)).thenReturn(null);
@@ -1031,6 +1041,7 @@ public class CohortReviewControllerTest {
     when(bigQueryService.getLong(null, 3)).thenReturn(0L);
     when(bigQueryService.getLong(null, 4)).thenReturn(0L);
     when(bigQueryService.getLong(null, 5)).thenReturn(0L);
+    when(bigQueryService.getLong(null, 6)).thenReturn(0L);
   }
 
   private CohortReview createCohortReview(
@@ -1063,16 +1074,18 @@ public class CohortReviewControllerTest {
 
   private ParticipantCohortStatus dbParticipantCohortStatusToApi(
       DbParticipantCohortStatus dbStatus) {
-    Map<Long, String> genderRaceEthnicityMap = TestConcepts.asMap();
+    Map<Long, String> demographicsMap = TestConcepts.asMap();
     return new ParticipantCohortStatus()
         .birthDate(dbStatus.getBirthDate().toString())
         .ethnicityConceptId(dbStatus.getEthnicityConceptId())
-        .ethnicity(genderRaceEthnicityMap.get(dbStatus.getEthnicityConceptId()))
+        .ethnicity(demographicsMap.get(dbStatus.getEthnicityConceptId()))
         .genderConceptId(dbStatus.getGenderConceptId())
-        .gender(genderRaceEthnicityMap.get(dbStatus.getGenderConceptId()))
+        .gender(demographicsMap.get(dbStatus.getGenderConceptId()))
         .participantId(dbStatus.getParticipantKey().getParticipantId())
         .raceConceptId(dbStatus.getRaceConceptId())
-        .race(genderRaceEthnicityMap.get(dbStatus.getRaceConceptId()))
+        .race(demographicsMap.get(dbStatus.getRaceConceptId()))
+        .sexAtBirthConceptId(dbStatus.getSexAtBirthConceptId())
+        .sexAtBirth(demographicsMap.get(dbStatus.getSexAtBirthConceptId()))
         .status(dbStatus.getStatusEnum())
         .deceased(dbStatus.getDeceased());
   }

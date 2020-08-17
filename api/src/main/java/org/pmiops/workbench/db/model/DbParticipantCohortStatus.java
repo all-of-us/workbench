@@ -23,6 +23,7 @@ public class DbParticipantCohortStatus {
   private Date birthDate;
   private Long raceConceptId;
   private Long ethnicityConceptId;
+  private Long sexAtBirthConceptId;
   private boolean deceased;
 
   @EmbeddedId
@@ -126,6 +127,20 @@ public class DbParticipantCohortStatus {
     return this;
   }
 
+  @Column(name = "sex_at_birth_concept_id")
+  public Long getSexAtBirthConceptId() {
+    return sexAtBirthConceptId;
+  }
+
+  public void setSexAtBirthConceptId(Long sexAtBirthConceptId) {
+    this.sexAtBirthConceptId = sexAtBirthConceptId;
+  }
+
+  public DbParticipantCohortStatus sexAtBirthConceptId(Long sexAtBirthConceptId) {
+    this.sexAtBirthConceptId = sexAtBirthConceptId;
+    return this;
+  }
+
   @Column(name = "deceased")
   public boolean getDeceased() {
     return deceased;
@@ -149,12 +164,14 @@ public class DbParticipantCohortStatus {
         && Objects.equals(genderConceptId, that.genderConceptId)
         && Objects.equals(birthDate, that.birthDate)
         && Objects.equals(raceConceptId, that.raceConceptId)
-        && Objects.equals(ethnicityConceptId, that.ethnicityConceptId);
+        && Objects.equals(ethnicityConceptId, that.ethnicityConceptId)
+        && Objects.equals(sexAtBirthConceptId, that.sexAtBirthConceptId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(status, genderConceptId, birthDate, raceConceptId, ethnicityConceptId);
+    return Objects.hash(
+        status, genderConceptId, birthDate, raceConceptId, ethnicityConceptId, sexAtBirthConceptId);
   }
 
   @Override
@@ -166,6 +183,7 @@ public class DbParticipantCohortStatus {
         .append("birthDate", birthDate)
         .append("raceConceptId", raceConceptId)
         .append("ethnicityConceptId", ethnicityConceptId)
+        .append("sexAtBirthConceptId", sexAtBirthConceptId)
         .toString();
   }
 }

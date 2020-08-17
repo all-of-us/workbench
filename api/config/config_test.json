@@ -104,7 +104,8 @@
     "enableEventDateModifier": false,
     "useNewShibbolethService": true,
     "enableResearchPurposePrompt": true,
-    "enableCohortBuilderV2": false
+    "enableCohortBuilderV2": false,
+    "enableReportingUploadCron": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-test",
@@ -119,5 +120,9 @@
   "captcha": {
     "enableCaptcha": true,
     "useTestCaptcha": true
+  },
+  "reporting": {
+    "dataset": "reporting_test",
+    "maxRowsPerInsert": 200
   }
 }
