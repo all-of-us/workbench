@@ -1,6 +1,7 @@
 package org.pmiops.workbench.reporting;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
@@ -13,11 +14,18 @@ import com.google.cloud.bigquery.InsertAllRequest;
 import com.google.cloud.bigquery.InsertAllRequest.RowToInsert;
 import com.google.cloud.bigquery.InsertAllResponse;
 import com.google.cloud.bigquery.QueryJobConfiguration;
+import com.google.cloud.bigquery.QueryParameterValue;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.IntStream;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,6 +38,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.ReportingResearcher;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingWorkspace;
+import org.pmiops.workbench.reporting.insertion.WorkspaceParameter;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -50,13 +59,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ReportingUploadServiceTest {
-
   private static final Instant NOW = Instant.parse("2000-01-01T00:00:00.00Z");
   private static final Instant THEN = Instant.parse("1989-02-17T00:00:00.00Z");
 
   private ReportingSnapshot reportingSnapshot;
 
   @MockBean private BigQueryService mockBigQueryService;
+  @MockBean private Stopwatch mockStopwatch;
 
   @Autowired
   @Qualifier("REPORTING_UPLOAD_SERVICE_DML_IMPL")
@@ -73,6 +82,7 @@ public class ReportingUploadServiceTest {
 
   @TestConfiguration
   @Import({ReportingUploadServiceDmlImpl.class, ReportingUploadServiceStreamingImpl.class})
+  @MockBean(Stopwatch.class)
   public static class config {
     @Bean
     public Clock getClock() {
@@ -134,6 +144,7 @@ public class ReportingUploadServiceTest {
     doReturn(new EmptyTableResult())
         .when(mockBigQueryService)
         .executeQuery(any(QueryJobConfiguration.class), anyLong());
+    doReturn(Duration.ofMillis(250L)).when(mockStopwatch).elapsed();
   }
 
   @Test
@@ -191,6 +202,11 @@ public class ReportingUploadServiceTest {
     assertThat(jobs.get(0).getNamedParameters()).hasSize(RESEARCHER_COLUMN_COUNT * 5 + 1);
     assertThat(jobs.get(4).getNamedParameters()).hasSize(RESEARCHER_COLUMN_COUNT + 1);
     assertThat(jobs.get(5).getNamedParameters()).hasSize(WORKSPACE_COLUMN_COUNT + 1);
+
+    final QueryParameterValue creationTime = jobs.get(5).getNamedParameters().get("creation_time__0");
+    assertThat(creationTime).isNotNull();
+    final Instant instant = QueryParameterValues.timestampToInstant(creationTime).orElseThrow(() -> new IllegalStateException("Failed to convert to instant."));
+    assertThat((double) instant.toEpochMilli()).isWithin(500.0).of(THEN.toEpochMilli());
   }
 
   @Test
@@ -212,5 +228,13 @@ public class ReportingUploadServiceTest {
     assertThat(researcherRows).hasSize(3);
     assertThat(researcherRows.get(0).getId()).hasLength(16);
     assertThat(researcherRows.get(0).getContent()).hasSize(RESEARCHER_COLUMN_COUNT + 1);
+
+    final List<RowToInsert> workspace1Rows = requests.get(1).getRows();
+    final Map<String, Object> workspaceColumnValues = workspace1Rows.get(0).getContent();
+    assertThat(workspaceColumnValues.get(WorkspaceParameter.WORKSPACE_ID.getParameterName())).isEqualTo(201L);
+    assertThat(((Long) workspaceColumnValues.get(WorkspaceParameter.CREATION_TIME.getParameterName())).doubleValue())
+        .isWithin(500.0)
+        .of(THEN.toEpochMilli() * 1000);
+    assertThat(workspaceColumnValues.get(WorkspaceParameter.CREATOR_ID.getParameterName())).isEqualTo(101L);
   }
 }

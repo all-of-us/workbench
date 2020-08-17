@@ -3,7 +3,10 @@ package org.pmiops.workbench.cohortbuilder.util;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.StandardSQLTypeName;
+import com.google.common.base.Strings;
 import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -25,6 +28,15 @@ public final class QueryParameterValues {
 
   public static QueryParameterValue instantToQPValue(Instant instant) {
     return QueryParameterValue.timestamp(instant.toEpochMilli() * MICROSECONDS_IN_MILLISECOND);
+  }
+  public static Optional<Instant> timestampToInstant(QueryParameterValue timestamp) {
+    if (timestamp.getType() != StandardSQLTypeName.TIMESTAMP
+        || Strings.isNullOrEmpty(timestamp.getValue())) {
+      return Optional.empty();
+    }
+    final ZonedDateTime zonedDateTime = ZonedDateTime.parse(timestamp.getValue(),
+        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSSxxx"));
+    return Optional.of(zonedDateTime.toInstant());
   }
 
   // Since BigQuery doesn't expose the literal query string built from a QueryJobConfiguration,
@@ -69,4 +81,6 @@ public final class QueryParameterValues {
       return value;
     }
   }
+
+
 }

@@ -33,7 +33,7 @@ public interface QueryParameterColumn<T> {
     INT64(obj -> QueryParameterValue.int64((Long) obj)),
     STRING(obj -> QueryParameterValue.string((String) obj)),
     BOOLEAN(obj -> QueryParameterValue.bool((Boolean) obj)),
-    TIMESTAMP_MILLIS(w -> QueryParameterValue.timestamp(MICROSECODNS_IN_MILLISECOND * (Long) w));
+    TIMESTAMP_MICROS(w -> QueryParameterValue.timestamp((Long) w));
 
     private final Function<Object, QueryParameterValue> fromObjectFunction;
 

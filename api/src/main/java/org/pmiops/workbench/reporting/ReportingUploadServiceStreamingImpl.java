@@ -4,8 +4,10 @@ import com.google.cloud.bigquery.BigQueryError;
 import com.google.cloud.bigquery.InsertAllRequest;
 import com.google.cloud.bigquery.InsertAllResponse;
 import com.google.cloud.bigquery.TableId;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -31,22 +33,40 @@ public class ReportingUploadServiceStreamingImpl implements ReportingUploadServi
 
   private final BigQueryService bigQueryService;
   private final Provider<WorkbenchConfig> configProvider;
+  private final Provider<Stopwatch> stopwatchProvider;
 
   public ReportingUploadServiceStreamingImpl(
-      BigQueryService bigQueryService, Provider<WorkbenchConfig> configProvider) {
+      BigQueryService bigQueryService, Provider<WorkbenchConfig> configProvider,
+      Provider<Stopwatch> stopwatchProvider) {
     this.bigQueryService = bigQueryService;
     this.configProvider = configProvider;
+    this.stopwatchProvider = stopwatchProvider;
   }
 
   @Override
   public ReportingJobResult uploadSnapshot(ReportingSnapshot reportingSnapshot) {
+    final Stopwatch stopwatch = stopwatchProvider.get();
     final ImmutableMap.Builder<TableId, InsertAllResponse> responseMapBuilder =
         ImmutableMap.builder();
     for (InsertAllRequest request : getInsertAllRequests(reportingSnapshot)) {
+      stopwatch.start();
       final InsertAllResponse currentResponse = bigQueryService.insertAll(request);
       responseMapBuilder.put(request.getTable(), currentResponse);
+      stopwatch.stop();
+      logDuration(stopwatch.elapsed(), String.format("Stream %d rows into %s",
+          request.getRows().size(),
+          request.getTable().getTable()));
+      stopwatch.reset();
     }
     return computeOverallResult(responseMapBuilder.build());
+  }
+
+  public void logDuration(Duration duration, String description) {
+    final long millis = duration.toMillis();
+    log.info(String.format("%s: %d.%d seconds",
+        description,
+        millis / 1000,
+        millis % 1000));
   }
 
   private List<InsertAllRequest> getInsertAllRequests(ReportingSnapshot reportingSnapshot) {

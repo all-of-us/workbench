@@ -9,7 +9,7 @@ public enum WorkspaceParameter implements QueryParameterColumn<ReportingWorkspac
   CREATOR_ID("creator_id", ReportingWorkspace::getCreatorId, QPVFn.INT64),
   NAME("name", ReportingWorkspace::getName, QPVFn.STRING),
   FAKE_SIZE("fake_size", ReportingWorkspace::getFakeSize, QPVFn.INT64),
-  CREATION_TIME("creation_time", ReportingWorkspace::getCreationTime, QPVFn.TIMESTAMP_MILLIS);
+  CREATION_TIME("creation_time", w -> 1000 * w.getCreationTime(), QPVFn.TIMESTAMP_MICROS);
 
   private final String parameterName;
   private final Function<ReportingWorkspace, Object> objectValueFunction;
