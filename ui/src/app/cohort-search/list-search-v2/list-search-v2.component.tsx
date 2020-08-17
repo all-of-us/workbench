@@ -413,7 +413,7 @@ export const ListSearchV2 = withCurrentWorkspace()(
           {!standardOnly && !displayData.length && <div>No results found</div>}
           <Button type='primary'
                   style={{borderRadius: '5px', float: 'right', marginTop: '1rem'}}
-                  disabled={selectedIds.length === 0}
+                  disabled={!!selectedIds && selectedIds.length === 0}
                   onClick={() => setSidebarActiveIconStore.next('criteria')}>
             Finish & Review
           </Button>

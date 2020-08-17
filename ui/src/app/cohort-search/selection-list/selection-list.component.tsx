@@ -419,12 +419,17 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
         && criteria[0].domainId !== DomainType.PERSON.toString();
     }
 
+    get showAttributesOrModifiers() {
+      const {attributesSelection, showModifiersSlide} = this.state;
+      return attributesSelection || showModifiersSlide;
+    }
+
     render() {
       const {back, criteria} = this.props;
       const {attributesSelection, modifierButtonText, showModifiersSlide} = this.state;
       return <div>
         <FlexRow style={styles.navIcons}>
-          {(attributesSelection || showModifiersSlide) &&
+          {this.showAttributesOrModifiers &&
             <Clickable style={{marginRight: '1rem'}}
                        onClick={() => this.setState({attributesSelection: undefined})}>
               <img src={proIcons.arrowLeft}
@@ -439,7 +444,7 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
                  alt='Close'/>
           </Clickable>
         </FlexRow>
-          {!(attributesSelection || showModifiersSlide) && <React.Fragment>
+          {!this.showAttributesOrModifiers && <React.Fragment>
             <h3 style={{...styles.sectionTitle, marginTop: 0}}>Add selected criteria to cohort</h3>
             <div style={{paddingTop: '0.5rem', position: 'relative'}}>
               <div style={styles.selectionContainer}>

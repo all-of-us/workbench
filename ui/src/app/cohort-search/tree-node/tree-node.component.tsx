@@ -293,8 +293,13 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     const {children, error, expanded, hover, loading, searchMatch} = this.state;
     const nodeChildren = domainId === DomainType.PHYSICALMEASUREMENT.toString() ? node.children : children;
     const selected = serverConfigStore.getValue().enableCohortBuilderV2
-      ? currentCohortCriteriaStore.getValue().some(crit => crit.parameterId === this.paramId)
-      : selectedIds.includes(this.paramId) || groupSelections.includes(parentId);
+      ? currentCohortCriteriaStore.getValue()
+        .some(crit =>
+          crit.parameterId === this.paramId ||
+          parentId.toString() === this.paramId
+        )
+      : selectedIds.includes(this.paramId) ||
+        groupSelections.includes(parentId);
     const displayName = domainId === DomainType.PHYSICALMEASUREMENT.toString() && !!searchTerms
       ? highlightSearchTerm(searchTerms, name, colors.success)
       : name;

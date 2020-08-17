@@ -603,7 +603,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
               ADD THIS
             </Button>
             <Button type='link'
-                    style={{color: colors.primary, marginRight: '0.5rem'}}
+                    style={{color: colors.primary, marginRight: '0.75rem'}}
                     onClick={() => close()}>
               BACK
             </Button>
