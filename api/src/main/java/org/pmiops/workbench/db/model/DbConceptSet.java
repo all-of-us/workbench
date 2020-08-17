@@ -227,10 +227,6 @@ public class DbConceptSet {
     this.conceptIds = conceptIds;
   }
 
-  //  public static Builder builder() {
-  //    return new Builder();
-  //  }
-
   public static class Builder {
     private long conceptSetId;
     private int version;
