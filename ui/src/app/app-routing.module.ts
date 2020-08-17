@@ -44,12 +44,10 @@ import {BreadcrumbType, NavStore} from './utils/navigation';
 declare let gtag: Function;
 
 const routes: Routes = [
-  // VERY BIG CAVEAT:
-  // We cannot use an Angular ** route to send to AppRouting in multiple places (e.g. under
-  // the sign-in guard and the signed-out context). Our one Angular ** route is under both the
-  // signed-in and registered guards, where the bulk of our routes are. For now, all other
-  // routes must be kept in sync between here and AppRouting until the full React router migration
-  // is complete.
+  // NOTE: Instead of using Angular wildcard routes, which short-circuit further route
+  // discovery and behave strangely with the Angular router anyways, we're going to explicitly
+  // list each React route here with component: AppRouting and just delete the entire file
+  // when we migrate away from Angular.
   {
     path: 'cookie-policy',
     component: AppRouting
@@ -88,6 +86,23 @@ const routes: Routes = [
         canActivateChild: [RegistrationGuard],
         runGuardsAndResolvers: 'always',
         children: [
+          // legacy / duplicated routes go HERE
+          {
+            path: '',
+            component: AppRouting,
+            data: {}
+          },
+          {
+            path: 'library',
+            component: AppRouting,
+            data: {}
+          },
+          {
+            path: 'nih-callback',
+            component: AppRouting,
+            data: {}
+          },
+          // non-migrated routes go HERE
           {
             path: 'workspaces',
             canActivateChild: [WorkspaceGuard],
@@ -302,11 +317,6 @@ const routes: Routes = [
             path: 'workspaces/build',
             component: WorkspaceEditComponent,
             data: {title: 'Create Workspace', mode: WorkspaceEditMode.Create}
-          },
-          {
-            path: '**',
-            component: AppRouting,
-            data: {}
           }
         ]
       },
@@ -316,19 +326,23 @@ const routes: Routes = [
           // legacy / duplicated routes go HERE
           {
             path: 'user-audit',
-            component: AppRouting
+            component: AppRouting,
+            data: {}
           },
           {
             path: 'user-audit/:username',
-            component: AppRouting
+            component: AppRouting,
+            data: {}
           },
           {
             path: 'workspaceAudit',
-            component: AppRouting
+            component: AppRouting,
+            data: {}
           },
           {
             path: 'workspaceAudit/:workspaceNamespace',
-            component: AppRouting
+            component: AppRouting,
+            data: {}
           },
           // non-migrated routes go HERE
           {
@@ -379,7 +393,7 @@ const routes: Routes = [
             data: { title: 'Institution Admin'},
           }
         ]
-      }
+      },
     ]
   }
 ];

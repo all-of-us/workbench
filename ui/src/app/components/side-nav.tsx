@@ -105,11 +105,8 @@ export class SideNavItem extends React.Component<SideNavItemProps, SideNavItemSt
 
   onClick() {
     if (this.props.href && !this.props.disabled) {
-      navigate([this.props.href]);
       this.props.onToggleSideNav();
-      // if (this.props.react) {
-      //   location.reload(true);
-      // }
+      navigate([this.props.href]);
     }
     if (this.props.containsSubItems) {
       this.setState((previousState) => ({subItemsOpen: !previousState.subItemsOpen}));
