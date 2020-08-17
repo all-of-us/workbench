@@ -6,7 +6,6 @@ import {navigate, navigateSignOut, signInStore} from 'app/utils/navigation';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {Authority, Profile} from 'generated/fetch';
 import * as React from 'react';
-import {Navigate} from "./app-router";
 
 const styles = reactStyles({
   flex: {
@@ -90,7 +89,6 @@ interface SideNavItemProps {
 
 interface SideNavItemState {
   hovering: boolean;
-  redirect: boolean;
   subItemsOpen: boolean;
 }
 
@@ -99,7 +97,6 @@ export class SideNavItem extends React.Component<SideNavItemProps, SideNavItemSt
     super(props);
     this.state = {
       hovering: false,
-      redirect: false,
       subItemsOpen: false,
     };
   }
@@ -107,19 +104,15 @@ export class SideNavItem extends React.Component<SideNavItemProps, SideNavItemSt
   iconSize = 21;
 
   onClick() {
+    if (this.props.href && !this.props.disabled) {
+      navigate([this.props.href]);
+      this.props.onToggleSideNav();
+      // if (this.props.react) {
+      //   location.reload(true);
+      // }
+    }
     if (this.props.containsSubItems) {
       this.setState((previousState) => ({subItemsOpen: !previousState.subItemsOpen}));
-    }
-    if (this.props.href && !this.props.disabled) {
-      if (this.props.react) {
-        this.setState({redirect: true});
-        // this.props.onToggleSideNav();
-        return;
-      }
-      else {
-        navigate([this.props.href]);
-        this.props.onToggleSideNav();
-      }
     }
   }
 
@@ -143,7 +136,6 @@ export class SideNavItem extends React.Component<SideNavItemProps, SideNavItemSt
 
   render() {
     return <React.Fragment>
-      {this.state.redirect && <Navigate to={this.props.href}/>}
       <Clickable
         // data-test-id is the text within the SideNavItem, with whitespace removed
         // and appended with '-menu-item'

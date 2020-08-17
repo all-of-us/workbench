@@ -56,7 +56,6 @@ export const ProtectedRoutes = (
 };
 
 export const Navigate = ({to}): React.ReactElement => {
-  debugger;
   const location = useLocation();
   return <Redirect to={{pathname: to, state: {from: location}}}/>;
 };
