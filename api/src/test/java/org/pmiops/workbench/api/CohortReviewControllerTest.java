@@ -35,6 +35,9 @@ import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
+import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
+import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortAnnotationMapperImpl;
+import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortStatusMapperImpl;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -78,6 +81,7 @@ import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SortOrder;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -188,7 +192,11 @@ public class CohortReviewControllerTest {
     CohortReviewController.class,
     CohortReviewServiceImpl.class,
     CohortQueryBuilder.class,
-    ReviewQueryBuilder.class
+    ReviewQueryBuilder.class,
+    ParticipantCohortStatusMapperImpl.class,
+    CohortReviewMapperImpl.class,
+    ParticipantCohortAnnotationMapperImpl.class,
+    CommonMappers.class
   })
   @MockBean({
     BigQueryService.class,
@@ -335,7 +343,7 @@ public class CohortReviewControllerTest {
     participantCohortStatus1 =
         participantCohortStatusDao.save(
             new DbParticipantCohortStatus()
-                .statusEnum(CohortStatus.NOT_REVIEWED)
+                .status(DbStorageEnums.cohortStatusToStorage(CohortStatus.NOT_REVIEWED))
                 .participantKey(key1)
                 .genderConceptId(TestConcepts.MALE.getConceptId())
                 .raceConceptId(TestConcepts.ASIAN.getConceptId())
@@ -347,7 +355,7 @@ public class CohortReviewControllerTest {
     participantCohortStatus2 =
         participantCohortStatusDao.save(
             new DbParticipantCohortStatus()
-                .statusEnum(CohortStatus.NOT_REVIEWED)
+                .status(DbStorageEnums.cohortStatusToStorage(CohortStatus.NOT_REVIEWED))
                 .participantKey(key2)
                 .genderConceptId(TestConcepts.FEMALE.getConceptId())
                 .raceConceptId(TestConcepts.WHITE.getConceptId())
@@ -1058,6 +1066,7 @@ public class CohortReviewControllerTest {
 
     return new CohortReview()
         .cohortReviewId(actualReview.getCohortReviewId())
+        .etag(Etags.fromVersion(actualReview.getVersion()))
         .cohortId(actualReview.getCohortId())
         .cdrVersionId(actualReview.getCdrVersionId())
         .creationTime(actualReview.getCreationTime().toString())
@@ -1086,7 +1095,7 @@ public class CohortReviewControllerTest {
         .race(demographicsMap.get(dbStatus.getRaceConceptId()))
         .sexAtBirthConceptId(dbStatus.getSexAtBirthConceptId())
         .sexAtBirth(demographicsMap.get(dbStatus.getSexAtBirthConceptId()))
-        .status(dbStatus.getStatusEnum())
+        .status(DbStorageEnums.cohortStatusFromStorage(dbStatus.getStatus()))
         .deceased(dbStatus.getDeceased());
   }
 }

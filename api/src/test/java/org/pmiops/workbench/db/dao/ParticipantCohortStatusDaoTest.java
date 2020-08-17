@@ -17,6 +17,7 @@ import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
 import org.pmiops.workbench.db.model.DbParticipantCohortStatusKey;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.Filter;
@@ -35,10 +36,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 @Import({TestJpaConfig.class})
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ParticipantCohortStatusDaoTest {
-  private static Long COHORT_REVIEW_ID = 1L;
-  private static Date birthDate = new Date(System.currentTimeMillis());
-  private static int PAGE = 0;
-  private static int PAGE_SIZE = 25;
+  private static final Long COHORT_REVIEW_ID = 1L;
+  private static final Date birthDate = new Date(System.currentTimeMillis());
+  private static final int PAGE = 0;
+  private static final int PAGE_SIZE = 25;
 
   @Autowired private ParticipantCohortStatusDao participantCohortStatusDao;
   @Autowired private ConceptDao conceptDao;
@@ -52,7 +53,7 @@ public class ParticipantCohortStatusDaoTest {
 
     DbParticipantCohortStatus status1 =
         new DbParticipantCohortStatus()
-            .statusEnum(CohortStatus.INCLUDED)
+            .status(DbStorageEnums.cohortStatusToStorage(CohortStatus.INCLUDED))
             .participantKey(
                 new DbParticipantCohortStatusKey()
                     .cohortReviewId(COHORT_REVIEW_ID)
@@ -67,7 +68,7 @@ public class ParticipantCohortStatusDaoTest {
 
     DbParticipantCohortStatus status2 =
         new DbParticipantCohortStatus()
-            .statusEnum(CohortStatus.EXCLUDED)
+            .status(DbStorageEnums.cohortStatusToStorage(CohortStatus.EXCLUDED))
             .participantKey(
                 new DbParticipantCohortStatusKey()
                     .cohortReviewId(COHORT_REVIEW_ID)
@@ -143,7 +144,7 @@ public class ParticipantCohortStatusDaoTest {
     DbParticipantCohortStatus pcs1 =
         new DbParticipantCohortStatus()
             .participantKey(key1)
-            .statusEnum(CohortStatus.INCLUDED)
+            .status(DbStorageEnums.cohortStatusToStorage(CohortStatus.INCLUDED))
             .birthDate(new Date(System.currentTimeMillis()))
             .ethnicityConceptId(1L)
             .genderConceptId(1L)
@@ -152,7 +153,7 @@ public class ParticipantCohortStatusDaoTest {
     DbParticipantCohortStatus pcs2 =
         new DbParticipantCohortStatus()
             .participantKey(key2)
-            .statusEnum(CohortStatus.EXCLUDED)
+            .status(DbStorageEnums.cohortStatusToStorage(CohortStatus.EXCLUDED))
             .birthDate(new Date(System.currentTimeMillis()))
             .ethnicityConceptId(1L)
             .genderConceptId(1L)
@@ -596,7 +597,7 @@ public class ParticipantCohortStatusDaoTest {
       DbParticipantCohortStatusKey key, CohortStatus status) {
     return new DbParticipantCohortStatus()
         .participantKey(key)
-        .statusEnum(status)
+        .status(DbStorageEnums.cohortStatusToStorage(status))
         .ethnicityConceptId(38003564L)
         .genderConceptId(8507L)
         .raceConceptId(8515L)

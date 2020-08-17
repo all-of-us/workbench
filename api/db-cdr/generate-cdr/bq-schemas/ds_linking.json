@@ -1,0 +1,27 @@
+[
+  {
+    "mode": "REQUIRED",
+    "name": "ID",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "DENORMALIZED_NAME",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "OMOP_SQL",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "JOIN_VALUE",
+    "type": "STRING"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "DOMAIN",
+    "type": "STRING"
+  }
+]

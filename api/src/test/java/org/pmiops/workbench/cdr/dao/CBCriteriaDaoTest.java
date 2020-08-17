@@ -188,12 +188,14 @@ public class CBCriteriaDaoTest {
   public void findCriteriaByDomainAndTypeAndCode() {
     PageRequest page = new PageRequest(0, 10);
     List<DbCriteria> criteriaList =
-        cbCriteriaDao.findCriteriaByDomainAndTypeAndCode(
-            DomainType.CONDITION.toString(),
-            CriteriaType.ICD9CM.toString(),
-            Boolean.FALSE,
-            "00",
-            page);
+        cbCriteriaDao
+            .findCriteriaByDomainAndTypeAndCode(
+                DomainType.CONDITION.toString(),
+                CriteriaType.ICD9CM.toString(),
+                Boolean.FALSE,
+                "00",
+                page)
+            .getContent();
     assertThat(criteriaList).containsExactly(icd9Criteria);
   }
 
@@ -201,8 +203,10 @@ public class CBCriteriaDaoTest {
   public void findCriteriaByDomainAndCode() {
     PageRequest page = new PageRequest(0, 10);
     List<DbCriteria> criteriaList =
-        cbCriteriaDao.findCriteriaByDomainAndCode(
-            DomainType.CONDITION.toString(), Boolean.FALSE, "001", page);
+        cbCriteriaDao
+            .findCriteriaByDomainAndCode(
+                DomainType.CONDITION.toString(), Boolean.FALSE, "001", page)
+            .getContent();
     assertThat(criteriaList).containsExactly(icd9Criteria);
   }
 
@@ -210,8 +214,10 @@ public class CBCriteriaDaoTest {
   public void findCriteriaByDomainAndSynonyms() {
     PageRequest page = new PageRequest(0, 10);
     List<DbCriteria> measurements =
-        cbCriteriaDao.findCriteriaByDomainAndSynonyms(
-            DomainType.MEASUREMENT.toString(), Boolean.TRUE, "001", page);
+        cbCriteriaDao
+            .findCriteriaByDomainAndSynonyms(
+                DomainType.MEASUREMENT.toString(), Boolean.TRUE, "001", page)
+            .getContent();
     assertThat(measurements).containsExactly(measurementCriteria);
   }
 

@@ -35,6 +35,7 @@ import org.pmiops.workbench.model.AgeTypeCount;
 import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
+import org.pmiops.workbench.model.CriteriaListWithCountResponse;
 import org.pmiops.workbench.model.CriteriaMenuOption;
 import org.pmiops.workbench.model.CriteriaMenuSubOption;
 import org.pmiops.workbench.model.DataFilter;
@@ -45,6 +46,7 @@ import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.StandardFlag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -142,40 +144,51 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public List<Criteria> findCriteriaByDomainAndSearchTerm(
+  public CriteriaListWithCountResponse findCriteriaByDomainAndSearchTerm(
       String domain, String term, Integer limit) {
-    List<DbCriteria> criteriaList;
+    Page<DbCriteria> dbCriteriaPage;
     PageRequest pageRequest =
         new PageRequest(0, Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT));
     List<DbCriteria> exactMatchByCode = cbCriteriaDao.findExactMatchByCode(domain, term);
     boolean isStandard = exactMatchByCode.isEmpty() || exactMatchByCode.get(0).getStandard();
 
     if (!isStandard) {
+      // source search
+      dbCriteriaPage =
+          cbCriteriaDao.findCriteriaByDomainAndTypeAndCode(
+              domain, exactMatchByCode.get(0).getType(), isStandard, term, pageRequest);
       Map<Boolean, List<DbCriteria>> groups =
-          cbCriteriaDao
-              .findCriteriaByDomainAndTypeAndCode(
-                  domain, exactMatchByCode.get(0).getType(), isStandard, term, pageRequest)
-              .stream()
+          dbCriteriaPage.getContent().stream()
               .collect(Collectors.partitioningBy(c -> c.getCode().equals(term)));
-      criteriaList = groups.get(true);
-      criteriaList.addAll(groups.get(false));
-    } else {
-      criteriaList =
-          cbCriteriaDao.findCriteriaByDomainAndCode(domain, isStandard, term, pageRequest);
-      if (criteriaList.isEmpty() && !term.contains(".")) {
-        criteriaList =
-            cbCriteriaDao.findCriteriaByDomainAndSynonyms(
-                domain, isStandard, modifyTermMatch(term), pageRequest);
-      }
-      if (criteriaList.isEmpty() && !term.contains(".")) {
-        criteriaList =
-            cbCriteriaDao.findCriteriaByDomainAndSynonyms(
-                domain, !isStandard, modifyTermMatch(term), pageRequest);
-      }
+      List<DbCriteria> dbCriteriaList = groups.get(true);
+      dbCriteriaList.addAll(groups.get(false));
+      return new CriteriaListWithCountResponse()
+          .items(
+              dbCriteriaList.stream()
+                  .map(cohortBuilderMapper::dbModelToClient)
+                  .collect(Collectors.toList()))
+          .totalCount(dbCriteriaPage.getTotalElements());
     }
-    return criteriaList.stream()
-        .map(cohortBuilderMapper::dbModelToClient)
-        .collect(Collectors.toList());
+
+    // standard search
+    dbCriteriaPage =
+        cbCriteriaDao.findCriteriaByDomainAndCode(domain, isStandard, term, pageRequest);
+    if (dbCriteriaPage.getContent().isEmpty() && !term.contains(".")) {
+      dbCriteriaPage =
+          cbCriteriaDao.findCriteriaByDomainAndSynonyms(
+              domain, isStandard, modifyTermMatch(term), pageRequest);
+    }
+    if (dbCriteriaPage.getContent().isEmpty() && !term.contains(".")) {
+      dbCriteriaPage =
+          cbCriteriaDao.findCriteriaByDomainAndSynonyms(
+              domain, !isStandard, modifyTermMatch(term), pageRequest);
+    }
+    return new CriteriaListWithCountResponse()
+        .items(
+            dbCriteriaPage.getContent().stream()
+                .map(cohortBuilderMapper::dbModelToClient)
+                .collect(Collectors.toList()))
+        .totalCount(dbCriteriaPage.getTotalElements());
   }
 
   @Override
