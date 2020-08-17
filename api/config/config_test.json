@@ -99,7 +99,6 @@
     "enableBillingUpgrade": true,
     "useKeylessDelegatedCredentials": true,
     "enableMoodleV2Api": true,
-    "enableCBAgeTypeOptions": true,
     "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,
     "useNewShibbolethService": true,
