@@ -19,7 +19,7 @@
         <constraints nullable="true"/>
       </column>
       <column name="domain" type="VARCHAR(80)">
-        <constraints nullable="true"/>
+        <constraints nullable="false"/>
       </column>
     </createTable>
 
