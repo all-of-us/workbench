@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 import {navigate, queryParamsStore, serverConfigStore} from 'app/utils/navigation';
 
 import {
@@ -19,7 +18,7 @@ import {RecentWorkspaces} from 'app/pages/homepage/recent-workspaces';
 import {getRegistrationTasksMap, RegistrationDashboard} from 'app/pages/homepage/registration-dashboard';
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity} from 'app/styles/colors';
-import {hasRegisteredAccessFetch, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {hasRegisteredAccessFetch, reactStyles, withUserProfile} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
 import {supportUrls} from 'app/utils/zendesk';

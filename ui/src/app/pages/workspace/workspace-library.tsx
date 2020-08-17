@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 import * as React from 'react';
 
 import {AlertDanger} from 'app/components/alert';
@@ -10,7 +9,7 @@ import {AoU} from 'app/components/text-wrappers';
 import {WorkspaceCard} from 'app/pages/workspace/workspace-card';
 import {featuredWorkspacesConfigApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {reactStyles, withUserProfile} from 'app/utils';
 import {convertAPIError} from 'app/utils/errors';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import {environment} from 'environments/environment';

@@ -6,9 +6,9 @@ import 'rxjs/Rx';
 import {Injectable} from '@angular/core';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
 
+import {profileStore} from 'app/utils/stores';
 import {Profile} from 'generated';
 import {ProfileService} from 'generated';
-import {profileStore} from "../utils/stores";
 
 
 @Injectable()

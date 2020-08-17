@@ -1,6 +1,6 @@
+import {Profile} from 'generated';
 import {useEffect, useState} from 'react';
 import {atom, Atom} from './subscribable';
-import {Profile} from 'generated';
 
 interface RouteDataStore {
   title?: string;

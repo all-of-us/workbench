@@ -13,10 +13,10 @@ import {authStore, profileStore, useStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Redirect} from 'react-router';
+import {Homepage} from './pages/homepage/homepage';
 import {SignIn} from './pages/login/sign-in';
+import {WorkspaceLibrary} from './pages/workspace/workspace-library';
 import {AnalyticsTracker} from './utils/analytics';
-import {WorkspaceLibrary} from "./pages/workspace/workspace-library";
-import {Homepage} from "./pages/homepage/homepage";
 
 
 const signInGuard: Guard = {
