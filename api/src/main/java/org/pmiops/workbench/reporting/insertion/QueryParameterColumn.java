@@ -1,6 +1,8 @@
 package org.pmiops.workbench.reporting.insertion;
 
 import com.google.cloud.bigquery.QueryParameterValue;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.function.Function;
 
 public interface QueryParameterColumn<T> {
@@ -33,7 +35,10 @@ public interface QueryParameterColumn<T> {
     INT64(obj -> QueryParameterValue.int64((Long) obj)),
     STRING(obj -> QueryParameterValue.string((String) obj)),
     BOOLEAN(obj -> QueryParameterValue.bool((Boolean) obj)),
-    TIMESTAMP_MICROS(w -> QueryParameterValue.timestamp((Long) w));
+    TIMESTAMP_MICROS(
+        w ->
+            QueryParameterValue.timestamp(
+                Constants.TIMESTAMP_FORMATTER.format(Instant.ofEpochMilli((Long) w))));
 
     private final Function<Object, QueryParameterValue> fromObjectFunction;
 
@@ -44,6 +49,14 @@ public interface QueryParameterColumn<T> {
     @Override
     public QueryParameterValue apply(Object o) {
       return fromObjectFunction.apply(o);
+    }
+
+    private static class Constants {
+
+      private static final String BIG_QUERY_TIMESTAMP_STRING_INPUT_FORMAT =
+          "yyyy-MM-dd HH:mm:ss.SSSSSSZZ";
+      private static final DateTimeFormatter TIMESTAMP_FORMATTER =
+          DateTimeFormatter.ofPattern(BIG_QUERY_TIMESTAMP_STRING_INPUT_FORMAT);
     }
   }
 }
