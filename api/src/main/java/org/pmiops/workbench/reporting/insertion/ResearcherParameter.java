@@ -2,13 +2,14 @@ package org.pmiops.workbench.reporting.insertion;
 
 import com.google.cloud.bigquery.QueryParameterValue;
 import java.util.function.Function;
+import org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.DowncastObject;
 import org.pmiops.workbench.model.ReportingResearcher;
 
 public enum ResearcherParameter implements QueryParameterColumn<ReportingResearcher> {
-  RESEARCHER_ID("researcher_id", ReportingResearcher::getResearcherId, QPVFn.INT64),
-  USERNAME("username", ReportingResearcher::getUsername, QPVFn.STRING),
-  FIRST_NAME("first_name", ReportingResearcher::getFirstName, QPVFn.STRING),
-  IS_DISABLED("is_disabled", ReportingResearcher::getIsDisabled, QPVFn.BOOLEAN);
+  RESEARCHER_ID("researcher_id", ReportingResearcher::getResearcherId, DowncastObject.INT64),
+  USERNAME("username", ReportingResearcher::getUsername, DowncastObject.STRING),
+  FIRST_NAME("first_name", ReportingResearcher::getFirstName, DowncastObject.STRING),
+  IS_DISABLED("is_disabled", ReportingResearcher::getIsDisabled, DowncastObject.BOOLEAN);
 
   private final String parameterName;
   private final Function<ReportingResearcher, Object> objectValueFunction;
