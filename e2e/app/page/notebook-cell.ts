@@ -38,17 +38,16 @@ export default class NotebookCell {
   }
 
   /**
-   * Set focus in notebook cell input.
+   * Set focus to (select) a notebook cell input.
    * @returns ElementHandle to code input if exists.
    */
   async focus(): Promise<ElementHandle> {
-    if (this.getCellIndex() === undefined) {
-      throw new Error('cellIndex is required.');
-    }
     const frame = await this.getIFrame();
-    const selector = `${this.cellSelector(this.getCellIndex())} .CodeMirror-code`;
-    const cell = await frame.waitForSelector(selector, {visible: true});
+    const selector = this.cellSelector(this.getCellIndex());
+    const cell = await frame.waitForSelector(`${selector} .CodeMirror-code`, {visible: true});
     await cell.click({delay: 10}); // focus
+    // Focused element className should contains 'selected' text.
+    await this.waitForPropertyContains(selector, 'className', 'selected');
     return cell;
   }
 
@@ -164,6 +163,15 @@ export default class NotebookCell {
       return substr;
     }
     return `${substr}:nth-child(${indx})`;
+  }
+
+  async waitForPropertyContains(cssSelector: string, propertyName: string, propertyValue: string): Promise<boolean> {
+    const iframe = await this.getIFrame();
+    const jsHandle = await iframe.waitForFunction((css, prop, value) => {
+      const element = document.querySelector(css);
+      return element && element[prop].includes(value);
+    }, {}, cssSelector, propertyName, propertyValue);
+    return (await jsHandle.jsonValue()) as boolean;
   }
 
 }
