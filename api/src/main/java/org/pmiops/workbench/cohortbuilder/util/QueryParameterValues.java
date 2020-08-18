@@ -20,8 +20,7 @@ public final class QueryParameterValues {
   private static final int MICROSECONDS_IN_MILLISECOND = 1000;
 
   public static final DateTimeFormatter TIMESTAMP_FORMATTER =
-      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSSZZ")
-      .withZone(ZoneOffset.UTC);
+      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSSZZ").withZone(ZoneOffset.UTC);
 
   /** Generate a unique parameter name and add it to the parameter map provided. */
   public static String buildParameter(
@@ -42,8 +41,7 @@ public final class QueryParameterValues {
       return Optional.empty();
     }
     final ZonedDateTime zonedDateTime =
-        ZonedDateTime.parse(
-            timestamp.getValue(), TIMESTAMP_FORMATTER);
+        ZonedDateTime.parse(timestamp.getValue(), TIMESTAMP_FORMATTER);
     return Optional.of(zonedDateTime.toInstant());
   }
 
@@ -94,15 +92,15 @@ public final class QueryParameterValues {
   // getObjectValue().
   // The object is needed for streaming inserts (InsertAllRequest maps), and the QPV for the DAL
   // insert statements.
-  public enum DowncastObject implements
-      Function<Object, QueryParameterValue> {
+  public enum DowncastObject implements Function<Object, QueryParameterValue> {
     INT64(obj -> QueryParameterValue.int64((Long) obj)),
     STRING(obj -> QueryParameterValue.string((String) obj)),
     BOOLEAN(obj -> QueryParameterValue.bool((Boolean) obj)),
     TIMESTAMP_MICROS(
         w ->
             QueryParameterValue.timestamp(
-                TIMESTAMP_FORMATTER.format(Instant.ofEpochMilli(((Long) w) / MICROSECONDS_IN_MILLISECOND))));
+                TIMESTAMP_FORMATTER.format(
+                    Instant.ofEpochMilli(((Long) w) / MICROSECONDS_IN_MILLISECOND))));
 
     private final Function<Object, QueryParameterValue> fromObjectFunction;
 

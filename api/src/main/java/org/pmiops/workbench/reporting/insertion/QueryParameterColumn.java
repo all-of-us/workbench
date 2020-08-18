@@ -1,9 +1,7 @@
 package org.pmiops.workbench.reporting.insertion;
 
 import com.google.cloud.bigquery.QueryParameterValue;
-import java.time.Instant;
 import java.util.function.Function;
-import org.pmiops.workbench.cohortbuilder.util.QueryParameterValues;
 
 public interface QueryParameterColumn<T> {
 
@@ -24,5 +22,4 @@ public interface QueryParameterColumn<T> {
   default QueryParameterValue toParameterValue(T model) {
     return getQueryParameterValueFunction().apply(getObjectValue(model));
   }
-
 }

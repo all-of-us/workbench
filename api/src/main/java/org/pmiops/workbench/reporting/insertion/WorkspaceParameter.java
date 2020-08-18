@@ -10,7 +10,10 @@ public enum WorkspaceParameter implements QueryParameterColumn<ReportingWorkspac
   CREATOR_ID("creator_id", ReportingWorkspace::getCreatorId, DowncastObject.INT64),
   NAME("name", ReportingWorkspace::getName, DowncastObject.STRING),
   FAKE_SIZE("fake_size", ReportingWorkspace::getFakeSize, DowncastObject.INT64),
-  CREATION_TIME("creation_time", w -> MICROSECODNS_IN_MILLISECOND * w.getCreationTime(), DowncastObject.TIMESTAMP_MICROS);
+  CREATION_TIME(
+      "creation_time",
+      w -> MICROSECODNS_IN_MILLISECOND * w.getCreationTime(),
+      DowncastObject.TIMESTAMP_MICROS);
 
   private final String parameterName;
   private final Function<ReportingWorkspace, Object> objectValueFunction;
