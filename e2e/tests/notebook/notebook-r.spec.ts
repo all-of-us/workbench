@@ -24,9 +24,7 @@ describe('Jupyter notebook tests', () => {
 
       const kernelName = await notebook.getKernelName();
       expect(kernelName).toBe('R');
-
-      await notebook.waitForKernelIdle();
-
+      
       // Run few basic R calls in empty code cell [1]
       const code1 =
            'name <- c("Jon", "Bill", "Maria")\n' +
