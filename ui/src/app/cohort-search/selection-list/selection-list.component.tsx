@@ -156,7 +156,7 @@ function mapCriteria(crit: Selection) {
 }
 
 export interface Selection extends Criteria {
-  attributes: Array<Attribute>;
+  attributes?: Array<Attribute>;
   parameterId: string;
 }
 
