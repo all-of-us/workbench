@@ -102,12 +102,14 @@ export class SignInService {
 
   public get currentAccessToken() {
     if (window.clientSuppliedToken) {
+      console.log('[TEST-INJECTED] currentAccessToken = ' + window.clientSuppliedToken);
       return window.clientSuppliedToken;
     } else if (!gapi.auth2) {
       return null;
     } else {
       const authResponse = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse(true);
       if (authResponse !== null) {
+        console.log('[REAL AUTH FLOW] currentAccessToken = ' + authResponse.access_token);
         return authResponse.access_token;
       } else {
         return null;
