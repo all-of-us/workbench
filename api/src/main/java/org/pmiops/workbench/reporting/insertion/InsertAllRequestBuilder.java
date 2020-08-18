@@ -35,7 +35,7 @@ public interface InsertAllRequestBuilder<T> extends ColumnDrivenBuilder<T> {
         Arrays.stream(getQueryParameterColumns())
             .collect(
                 ImmutableMap.toImmutableMap(
-                    QueryParameterColumn::getParameterName, c -> c.getObjectValue(model))));
+                    QueryParameterColumn::getParameterName, c -> c.getRowToInsertValue(model))));
     return RowToInsert.of(generateInsertId(), builder.build());
   }
 

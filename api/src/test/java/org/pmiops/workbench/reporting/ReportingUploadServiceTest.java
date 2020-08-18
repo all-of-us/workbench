@@ -8,6 +8,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.timestampQpvToInstant;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.timestampStringToInstant;
 
 import com.google.cloud.bigquery.EmptyTableResult;
@@ -160,8 +161,14 @@ public class ReportingUploadServiceTest {
 
     final String expandedQuery =
         QueryParameterValues.formatQuery(QueryParameterValues.replaceNamedParameters(job0));
-
     assertThat(expandedQuery).containsMatch("INSERT\\s+INTO");
+
+    assertThat(
+            (double)
+                timestampQpvToInstant(jobs.get(1).getNamedParameters().get("creation_time__0"))
+                    .toEpochMilli())
+        .isWithin(500.0)
+        .of(THEN.toEpochMilli());
   }
 
   @Test
@@ -204,9 +211,7 @@ public class ReportingUploadServiceTest {
     final QueryParameterValue creationTime =
         jobs.get(5).getNamedParameters().get("creation_time__0");
     assertThat(creationTime).isNotNull();
-    final Instant instant =
-        QueryParameterValues.timestampToInstant(creationTime)
-            .orElseThrow(() -> new IllegalStateException("Failed to convert to instant."));
+    final Instant instant = QueryParameterValues.timestampQpvToInstant(creationTime);
     assertThat((double) instant.toEpochMilli()).isWithin(500.0).of(THEN.toEpochMilli());
   }
 

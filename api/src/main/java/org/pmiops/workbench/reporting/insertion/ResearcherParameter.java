@@ -2,23 +2,34 @@ package org.pmiops.workbench.reporting.insertion;
 
 import com.google.cloud.bigquery.QueryParameterValue;
 import java.util.function.Function;
-import org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.DowncastObject;
 import org.pmiops.workbench.model.ReportingResearcher;
 
 public enum ResearcherParameter implements QueryParameterColumn<ReportingResearcher> {
-  RESEARCHER_ID("researcher_id", ReportingResearcher::getResearcherId, DowncastObject.INT64),
-  USERNAME("username", ReportingResearcher::getUsername, DowncastObject.STRING),
-  FIRST_NAME("first_name", ReportingResearcher::getFirstName, DowncastObject.STRING),
-  IS_DISABLED("is_disabled", ReportingResearcher::getIsDisabled, DowncastObject.BOOLEAN);
+  RESEARCHER_ID(
+      "researcher_id",
+      ReportingResearcher::getResearcherId,
+      r -> QueryParameterValue.int64(r.getResearcherId())),
+  USERNAME(
+      "username",
+      ReportingResearcher::getUsername,
+      r -> QueryParameterValue.string(r.getUsername())),
+  FIRST_NAME(
+      "first_name",
+      ReportingResearcher::getFirstName,
+      r -> QueryParameterValue.string(r.getFirstName())),
+  IS_DISABLED(
+      "is_disabled",
+      ReportingResearcher::getIsDisabled,
+      r -> QueryParameterValue.bool(r.getIsDisabled()));
 
   private final String parameterName;
   private final Function<ReportingResearcher, Object> objectValueFunction;
-  private final Function<Object, QueryParameterValue> parameterValueFunction;
+  private final Function<ReportingResearcher, QueryParameterValue> parameterValueFunction;
 
   ResearcherParameter(
       String parameterName,
       Function<ReportingResearcher, Object> objectValueFunction,
-      Function<Object, QueryParameterValue> parameterValueFunction) {
+      Function<ReportingResearcher, QueryParameterValue> parameterValueFunction) {
     this.parameterName = parameterName;
     this.objectValueFunction = objectValueFunction;
     this.parameterValueFunction = parameterValueFunction;
@@ -30,12 +41,12 @@ public enum ResearcherParameter implements QueryParameterColumn<ReportingResearc
   }
 
   @Override
-  public Function<ReportingResearcher, Object> getObjectValueFunction() {
+  public Function<ReportingResearcher, Object> getRowToInsertValueFunction() {
     return objectValueFunction;
   }
 
   @Override
-  public Function<Object, QueryParameterValue> getQueryParameterValueFunction() {
+  public Function<ReportingResearcher, QueryParameterValue> getQueryParameterValueFunction() {
     return parameterValueFunction;
   }
 }
