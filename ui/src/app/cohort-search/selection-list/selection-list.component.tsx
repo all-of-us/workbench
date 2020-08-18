@@ -375,6 +375,11 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
       return index > 0 && selection.domainId !== DomainType.PERSON.toString();
     }
 
+    get criteriaUnchanged() {
+      const {cohortContext, criteria} = this.props;
+      return !!cohortContext && JSON.stringify(cohortContext.item.searchParameters) === JSON.stringify(criteria);
+    }
+
     renderCriteria() {
       const {criteria} = this.props;
       const g = fp.groupBy('isStandard', criteria);
@@ -460,6 +465,7 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
             <FlexRowWrap style={{flexDirection: 'row-reverse', marginTop: '2rem'}}>
               <Button type='primary'
                       style={styles.saveButton}
+                      disabled={this.criteriaUnchanged}
                       onClick={() => saveCriteria()}>Save Criteria</Button>
               <Button type='link'
                       style={{color: colors.primary, marginRight: '0.5rem'}}
