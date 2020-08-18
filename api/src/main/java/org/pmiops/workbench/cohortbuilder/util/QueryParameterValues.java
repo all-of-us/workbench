@@ -40,9 +40,11 @@ public final class QueryParameterValues {
         || Strings.isNullOrEmpty(timestamp.getValue())) {
       return Optional.empty();
     }
-    final ZonedDateTime zonedDateTime =
-        ZonedDateTime.parse(timestamp.getValue(), TIMESTAMP_FORMATTER);
-    return Optional.of(zonedDateTime.toInstant());
+    return Optional.of(timestampStringToInstant(timestamp.getValue()));
+  }
+
+  public static Instant timestampStringToInstant(String timestamp) {
+    return ZonedDateTime.parse(timestamp, TIMESTAMP_FORMATTER).toInstant();
   }
 
   // Since BigQuery doesn't expose the literal query string built from a QueryJobConfiguration,
@@ -96,11 +98,7 @@ public final class QueryParameterValues {
     INT64(obj -> QueryParameterValue.int64((Long) obj)),
     STRING(obj -> QueryParameterValue.string((String) obj)),
     BOOLEAN(obj -> QueryParameterValue.bool((Boolean) obj)),
-    TIMESTAMP_MICROS(
-        w ->
-            QueryParameterValue.timestamp(
-                TIMESTAMP_FORMATTER.format(
-                    Instant.ofEpochMilli(((Long) w) / MICROSECONDS_IN_MILLISECOND))));
+    TIMESTAMP_STRING(obj -> QueryParameterValue.timestamp((String) obj));
 
     private final Function<Object, QueryParameterValue> fromObjectFunction;
 

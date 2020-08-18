@@ -8,6 +8,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.timestampStringToInstant;
 
 import com.google.cloud.bigquery.EmptyTableResult;
 import com.google.cloud.bigquery.InsertAllRequest;
@@ -233,11 +234,11 @@ public class ReportingUploadServiceTest {
     final Map<String, Object> workspaceColumnValues = workspace1Rows.get(0).getContent();
     assertThat(workspaceColumnValues.get(WorkspaceParameter.WORKSPACE_ID.getParameterName()))
         .isEqualTo(201L);
-    assertThat(
-            ((Long) workspaceColumnValues.get(WorkspaceParameter.CREATION_TIME.getParameterName()))
-                .doubleValue())
-        .isWithin(500.0)
-        .of(THEN.toEpochMilli() * 1000);
+    final Instant creationInstant =
+        timestampStringToInstant(
+            (String)
+                workspaceColumnValues.get(WorkspaceParameter.CREATION_TIME.getParameterName()));
+    assertThat((double) creationInstant.toEpochMilli()).isWithin(500.0).of(THEN.toEpochMilli());
     assertThat(workspaceColumnValues.get(WorkspaceParameter.CREATOR_ID.getParameterName()))
         .isEqualTo(101L);
   }
