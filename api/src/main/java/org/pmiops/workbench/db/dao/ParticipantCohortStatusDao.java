@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface ParticipantCohortStatusDao
     extends CrudRepository<DbParticipantCohortStatus, Long>, ParticipantCohortStatusDaoCustom {
@@ -32,6 +33,17 @@ public interface ParticipantCohortStatusDao
       nativeQuery = true)
   void bulkCopyByCohortReview(
       @Param("fromCrId") long fromCohortReviewId, @Param("toCrId") long toCohortReviewId);
+
+  @Modifying
+  @Query(
+      value =
+          "UPDATE participant_cohort_status"
+              + " SET sex_at_birth_concept_id = :conceptId"
+              + " WHERE participant_id in (:personIds)",
+      nativeQuery = true)
+  @Transactional
+  void bulkUpdateSexAtBirthByParticipantId(
+      @Param("conceptId") long conceptId, @Param("personIds") List<Long> personIds);
 
   DbParticipantCohortStatus findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId(
       @Param("cohortReviewId") long cohortReviewId, @Param("participantId") long participantId);

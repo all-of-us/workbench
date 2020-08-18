@@ -2021,6 +2021,32 @@ Common.register_command({
   :fn => ->(*args) { update_cdr_versions_local("update-cdr-versions-local", *args)}
 })
 
+def update_review_demographics_for_project(versions_file, dry_run)
+  common = Common.new
+  common.run_inline %W{
+    gradle updateReviewDemographics
+   -PappArgs=['#{versions_file}',#{dry_run}]}
+end
+
+def update_review_demographics(cmd_name, *args)
+  ensure_docker cmd_name, args
+  op = update_cdr_version_options(cmd_name, args)
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+
+  common = Common.new
+  common.run_inline %W{
+    gradle updateReviewDemographics
+    -PappArgs=[#{op.opts.dry_run}]}
+end
+
+Common.register_command({
+  :invocation => "update-review-demographics",
+  :description => "Update demographics concept ids",
+  :fn => ->(*args) { update_review_demographics("update-review-demographics", *args)}
+})
+
 def get_test_service_account()
   ServiceAccountContext.new(TEST_PROJECT).run do
     print "Service account key is now in sa-key.json"
