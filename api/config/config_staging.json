@@ -123,6 +123,7 @@
   },
   "reporting": {
     "dataset": "reporting_staging",
-    "maxRowsPerInsert": 200
+    "maxRowsPerInsert": 200,
+    "uploadMethod": "STREAMING"
   }
 }
