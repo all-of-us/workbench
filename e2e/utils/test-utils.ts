@@ -52,6 +52,9 @@ export async function experimentalTestSignIn(page: Page): Promise<void> {
   const homePage = new HomePage(page);
   await homePage.gotoUrl(PageUrl.Home.toString());
 
+  let printToken = await page.evaluate('window.clientSuppliedToken');
+  console.log('window.clientSuppliedToken pre function call = ' + printToken);
+
   // generate this token manually via:
   // gcloud auth application-default login --no-launch-browser
   // gcloud auth application-default print-access-token
@@ -60,7 +63,11 @@ export async function experimentalTestSignIn(page: Page): Promise<void> {
 
   const actualToken = '[redacted]';
   const cmd = 'window.useToken(\'' + actualToken + '\')';
+  console.log('window.useToken function call = ' + cmd);
   await page.evaluate(cmd);
+
+  printToken = await page.evaluate('window.clientSuppliedToken');
+  console.log('window.clientSuppliedToken post function call = ' + printToken);
 
   await homePage.gotoUrl(PageUrl.Home.toString());
   await homePage.waitForLoad();
