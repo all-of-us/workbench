@@ -46,6 +46,7 @@ export default class WorkspaceAnalysisPage extends AuthenticatedPage {
     await waitWhileLoading(this.page);
 
     console.log(`Deleted Notebook "${notebookName}"`);
+    await this.waitForLoad();
     return modalContentText;
   }
 

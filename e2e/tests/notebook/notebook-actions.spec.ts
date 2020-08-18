@@ -17,8 +17,6 @@ describe('Jupyter notebook tests', () => {
   describe('Workspace owner notebook actions', () => {
 
     test('Notebook name must be unique in same workspace', async () => {
-      expect.assertions(5);
-
       const notebookName = makeRandomName('test-notebook');
       const workspacesPage = new WorkspacesPage(page);
       const workspaceAnalysisPage = await workspacesPage.createNotebook(notebookName);
@@ -53,8 +51,6 @@ describe('Jupyter notebook tests', () => {
     })
 
     test('Notebook can be renamed by workspace owner', async () => {
-      expect.assertions(4);
-
       const notebookName = makeRandomName('test-notebook');
       const workspacesPage = new WorkspacesPage(page);
       const workspaceAnalysisPage = await workspacesPage.createNotebook(notebookName);
@@ -75,8 +71,6 @@ describe('Jupyter notebook tests', () => {
     })
 
     test('Notebook can be duplicated by workspace owner', async () => {
-      expect.assertions(1);
-
       const notebookName = makeRandomName('test-notebook');
       const workspacesPage = new WorkspacesPage(page);
 
@@ -85,14 +79,11 @@ describe('Jupyter notebook tests', () => {
 
       await workspaceAnalysisPage.duplicateNotebook(notebookName);
 
-      // Verify duplicate notebook exists
+      // Delete notebooks
       const duplNotebookName = `Duplicate of ${notebookName}`;
-      const resourceCard = new DataResourceCard(page);
-      const duplNotebookExists = await resourceCard.cardExists(duplNotebookName, CardType.Notebook);
-      expect(duplNotebookExists).toBe(true);
+      await workspaceAnalysisPage.deleteNotebook(duplNotebookName);
 
       await workspaceAnalysisPage.deleteNotebook(notebookName);
-      await workspaceAnalysisPage.deleteNotebook(duplNotebookName);
     })
 
   })

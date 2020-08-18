@@ -270,6 +270,7 @@ export default class DataPage extends AuthenticatedPage {
 
     const notebook = new NotebookPage(this.page, notebookName);
     await notebook.waitForLoad();
+    await notebook.waitForKernelIdle();
     return notebook;
   }
 

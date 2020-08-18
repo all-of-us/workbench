@@ -92,6 +92,7 @@ export default class DatasetBuildPage extends AuthenticatedPage {
     const saveButton = await Button.findByName(this.page, {name: 'Save and Analyze'});
     await saveButton.waitUntilEnabled();
     await saveButton.click();
+    await waitWhileLoading(this.page);
   }
 
   async clickAnalyzeButton(): Promise<void> {

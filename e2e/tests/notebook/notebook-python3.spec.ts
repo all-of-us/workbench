@@ -7,7 +7,6 @@ import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn} from 'utils/test-utils';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 
-
 // Notebook server start may take a long time. Set maximum test running time to 20 minutes.
 jest.setTimeout(20 * 60 * 1000);
 
@@ -17,9 +16,9 @@ describe('Jupyter notebook tests', () => {
     await signIn(page);
   });
 
-  describe('Create new notebooks', () => {
+  describe('Notebooks in Python', () => {
 
-    test('Python 3 notebook', async () => {
+    test('Save and open Python notebook', async () => {
 
       const workspaceCard = await findWorkspace(page);
       await workspaceCard.clickWorkspaceName();
@@ -27,7 +26,7 @@ describe('Jupyter notebook tests', () => {
       const dataPage = new DataPage(page);
       await dataPage.openTab(TabLabelAlias.Analysis);
 
-      const notebookName = makeRandomName('test-notebook');
+      const notebookName = makeRandomName('py-notebook');
       const analysisPage = new WorkspaceAnalysisPage(page);
       await analysisPage.createNotebook(notebookName, Language.Python);
 
@@ -37,28 +36,26 @@ describe('Jupyter notebook tests', () => {
       const kernelName = await notebook.getKernelName();
       expect(kernelName).toBe('Python 3');
 
-      // Always one empty code cell in an empty notebook
-      let kernelState = await notebook.waitForKernelIdle();
-      expect(kernelState).toBe(true);
+      await notebook.waitForKernelIdle();
 
       // Run few basic Python calls
-      const code1 =
+      const codeSnippet1 =
            'import sys\n' +
            'print(sys.version)';
-      const code1Output = await notebook.runCodeCell(1, {code: code1});
+      const codeOutput1 = await notebook.runCodeCell(1, {code: codeSnippet1});
       // Python version is 3.7.6 at time of this writing. It can change.
-      expect(code1Output).toEqual(expect.stringContaining('3.7.6'));
+      expect(codeOutput1).toEqual(expect.stringContaining('3.7.6'));
 
-      const code2 = '!jupyter kernelspec list';
-      const code2Output = await notebook.runCodeCell(2, {code: code2});
-      expect(code2Output).toEqual(expect.stringContaining('/usr/local/share/jupyter/kernels/python3'));
+      const codeSnippet2 = '!jupyter kernelspec list';
+      const codeOutput2 = await notebook.runCodeCell(2, {code: codeSnippet2});
+      expect(codeOutput2).toEqual(expect.stringContaining('/usr/local/share/jupyter/kernels/python3'));
 
-      await notebook.saveNotebook();
+      await notebook.save();
 
       // Exit notebook but come back again from Analysis page.
-      await notebook.goBackAnalysisPage();
+      await notebook.goAnalysisPage();
 
-      // Open same notebook and verify notebook were saved successfully.
+      // Open saved notebook and verify notebook contents matches.
       const resourceCard = new DataResourceCard(page);
       const notebookCard = await resourceCard.findCard(notebookName, CardType.Notebook);
       await notebookCard.clickResourceName();
@@ -66,29 +63,25 @@ describe('Jupyter notebook tests', () => {
       const notebookPreviewPage = new NotebookPreviewPage(page);
       await notebookPreviewPage.waitForLoad();
       await notebookPreviewPage.openEditMode(notebookName);
+      await notebook.waitForKernelIdle();
 
-      kernelState = await notebook.waitForKernelIdle();
-      expect(kernelState).toBe(true);
+      // Get Code cell [1] input and output.
+      const [newCode1, newOutput1] = await notebook.getCellInputOutput(1);
 
-      // Verify Code cell [1] input and output.
-      const actualCode1 = await notebook.findCodeCellInput(1);
-      expect(actualCode1).toEqual(code1);
-
-      const actualOutput1 = await notebook.findCodeCellOutput(1);
-      expect(actualOutput1).toEqual(code1Output);
-
-      // Verify Code cell [2] input and output.
-      const actualCode2 = await notebook.findCodeCellInput(2);
-      expect(actualCode2).toEqual(code2);
-
-      const actualOutput2 = await notebook.findCodeCellOutput(2);
-      expect(actualOutput2).toEqual(code2Output);
+      // Get Code cell [2] input and output.
+      const [newCode2, newOutput2] = await notebook.getCellInputOutput(2);
 
       // Delete Python notebook from Workspace Analysis page.
-      await notebook.goBackAnalysisPage();
-      await analysisPage.deleteNotebook(notebookName);
-    })
+      await notebook.deleteNotebook(notebookName);
 
+      // Verify Code cell [1] input and output.
+      expect(newCode1).toEqual(codeSnippet1);
+      expect(newOutput1).toEqual(codeOutput1);
+
+      // Verify Code cell [2] input and output.
+      expect(newCode2).toEqual(codeSnippet2);
+      expect(newOutput2).toEqual(codeOutput2);
+    })
 
   })
 
