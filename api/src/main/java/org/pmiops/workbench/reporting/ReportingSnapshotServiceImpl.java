@@ -23,7 +23,6 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
   private final Clock clock;
   private final ReportingMapper reportingMapper;
   private final Random random;
-  private final PlatformTransactionManager platformTransactionManager;
   private final Provider<Stopwatch> stopwatchProvider;
   private final UserService userService;
   private final WorkspaceService workspaceService;
@@ -52,14 +51,12 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
       Clock clock,
       ReportingMapper reportingMapper,
       Random random,
-      @Qualifier("transactionManager") PlatformTransactionManager platformTransactionManager,
       Provider<Stopwatch> stopwatchProvider,
       UserService userService,
       WorkspaceService workspaceService) {
     this.clock = clock;
     this.reportingMapper = reportingMapper;
     this.random = random;
-    this.platformTransactionManager = platformTransactionManager;
     this.stopwatchProvider = stopwatchProvider;
     this.userService = userService;
     this.workspaceService = workspaceService;
