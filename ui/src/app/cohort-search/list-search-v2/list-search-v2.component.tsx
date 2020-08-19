@@ -3,7 +3,7 @@ import * as React from 'react';
 import {Key} from 'ts-key-enum';
 
 import {domainToTitle} from 'app/cohort-search/utils';
-import {Button, Clickable} from 'app/components/buttons';
+import {Button, Clickable, StyledAnchorTag} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
@@ -136,6 +136,7 @@ const styles = reactStyles({
     borderRadius: '5px',
   },
   helpText: {
+    color: colors.primary,
     display: 'table-cell',
     height: '100%',
     lineHeight: '0.75rem',
@@ -381,14 +382,22 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
           </div>
           <div style={{...styles.helpText, textAlign: 'right'}}>
             {domain === DomainType.DRUG && <div>
-              <a href='https://mor.nlm.nih.gov/RxNav/' target='_blank' rel='noopener noreferrer'>
+              <StyledAnchorTag
+                 href='https://mor.nlm.nih.gov/RxNav/'
+                 target='_blank'
+                 rel='noopener noreferrer'>
                 Explore
-              </a>
+              </StyledAnchorTag>
               &nbsp;drugs by brand names outside of <AoU/>.
             </div>}
             {this.showDataBrowserLink && <div>
               Explore Source information on the&nbsp;
-              <a href={environment.publicUiUrl} target='_blank' rel='noopener noreferrer'>Data Browser.</a>
+              <StyledAnchorTag
+                 href={environment.publicUiUrl}
+                 target='_blank'
+                 rel='noopener noreferrer'>
+                Data Browser.
+              </StyledAnchorTag>
             </div>}
           </div>
         </div>
