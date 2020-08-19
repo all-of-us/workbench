@@ -122,7 +122,8 @@ public class UpdateReviewDemographics {
                             dbCohortReview.getCohortReviewId());
                 logger.info(
                     String.format(
-                        "%d participant(s) %s with sex at birth concept id %d - review id %d - CDR v: %d name: %s project: %s dataset: %s r#: %d",
+                        "%d participant(s) %s with sex at birth concept id %d - review id %d - "
+                            + "CDR v: %d name: %s project: %s dataset: %s r#: %d",
                         personCount,
                         dryRun ? "pending update" : "updated",
                         sexAtBirthConceptId,
