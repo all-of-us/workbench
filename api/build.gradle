@@ -645,6 +645,8 @@ tasks.withType(Test) {
       html.enabled = true
     }
   }
+  // The default max heap size was reduced in Gradle 5; override.
+  maxHeapSize = "1g"
 }
 
 appengine {  // App Engine tasks configuration
