@@ -45,9 +45,7 @@ export default class NewNotebookModal extends Modal {
     } else {
       await this.RRadiobutton().then( (radio) => radio.select());
     }
-    const btn = await this.createNotebookButton();
-    await btn.waitUntilEnabled();
-    await btn.clickAndWait();
+    return this.clickButton(LinkText.CreateNotebook, {waitForClose: true, waitForNav: true});
   }
 
   async name(): Promise<Textbox> {

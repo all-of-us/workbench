@@ -264,13 +264,8 @@ export default class DataPage extends AuthenticatedPage {
    */
   async createNotebook(notebookName: string, lang: Language = Language.Python): Promise<NotebookPage> {
     await this.openTab(TabLabelAlias.Analysis);
-
     const analysisPage = new WorkspaceAnalysisPage(this.page);
-    await analysisPage.createNotebook(notebookName, lang);
-
-    const notebook = new NotebookPage(this.page, notebookName);
-    await notebook.waitForLoad();
-    return notebook;
+    return analysisPage.createNotebook(notebookName, lang);
   }
 
 }
