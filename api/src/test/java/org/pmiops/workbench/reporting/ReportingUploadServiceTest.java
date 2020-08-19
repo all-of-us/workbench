@@ -12,6 +12,7 @@ import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.times
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.timestampStringToInstant;
 
 import com.google.cloud.bigquery.InsertAllRequest;
+import com.google.cloud.bigquery.InsertAllRequest;
 import com.google.cloud.bigquery.InsertAllRequest.RowToInsert;
 import com.google.cloud.bigquery.InsertAllResponse;
 import com.google.cloud.bigquery.QueryJobConfiguration;
