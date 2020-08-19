@@ -47,11 +47,11 @@ tools/*.jar
 tools/cloud_sql_proxy
 .DS_Store
 client/py/.pydevproject
-common-api/out/*
 **/.idea
 **/*.iml
 **/*.ipr
 **/*.iws
 **/build
+**/gradlew.bat
 **/.gradle
 **/*.orig
