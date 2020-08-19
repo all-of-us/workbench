@@ -20,6 +20,7 @@ import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.reporting.insertion.InsertAllRequestBuilder;
 import org.pmiops.workbench.reporting.insertion.ResearcherParameter;
 import org.pmiops.workbench.reporting.insertion.WorkspaceParameter;
+import org.pmiops.workbench.utils.LogFormatters;
 import org.springframework.stereotype.Service;
 
 @Service("REPORTING_UPLOAD_SERVICE_STREAMING_IMPL")
@@ -54,10 +55,12 @@ public class ReportingUploadServiceStreamingImpl implements ReportingUploadServi
       final InsertAllResponse currentResponse = bigQueryService.insertAll(request);
       responseMapBuilder.put(request.getTable(), currentResponse);
       stopwatch.stop();
-      logDuration(
-          stopwatch.elapsed(),
-          String.format(
-              "Stream %d rows into %s", request.getRows().size(), request.getTable().getTable()));
+      log.info(
+          LogFormatters.rate(
+              String.format("Streaming upload into %s table", request.getTable().getTable()),
+              stopwatch.elapsed(),
+              request.getRows().size(),
+              "rows"));
       stopwatch.reset();
     }
     return computeOverallResult(responseMapBuilder.build());
@@ -84,7 +87,7 @@ public class ReportingUploadServiceStreamingImpl implements ReportingUploadServi
                 reportingSnapshot.getWorkspaces(),
                 fixedValues))
         .stream()
-        .filter(r -> 0 < r.getRows().size())
+        .filter(r -> r.getRows().size() > 0)
         .collect(ImmutableList.toImmutableList());
   }
 

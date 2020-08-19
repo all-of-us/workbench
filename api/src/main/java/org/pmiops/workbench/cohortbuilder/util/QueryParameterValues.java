@@ -22,9 +22,6 @@ public final class QueryParameterValues {
   // "1989-02-17 00:00:00.000000" is too short".
   public static final DateTimeFormatter QPV_TIMESTAMP_FORMATTER =
       DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSSZZ").withZone(ZoneOffset.UTC);
-  // For parsing the string value of a timestamp QPV, use this formatter (with colon).
-  public static final DateTimeFormatter QPV_TIMESTAMP_TO_STRING_FORMATTER =
-      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSSxxx").withZone(ZoneOffset.UTC);
   // For inserting a Timestamp in a RowToInsert map for an InsertAllRequest, use this format
   public static final DateTimeFormatter ROW_TO_INSERT_TIMESTAMP_FORMATTER =
       DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS").withZone(ZoneOffset.UTC);

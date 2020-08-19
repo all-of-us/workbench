@@ -9,7 +9,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class ReportingServiceImpl implements ReportingService {
 
-  private static enum UploadMethod {
+  // Describe whether to upload via Data Manipulation Language (DML, i.e. Insert
+  // QueryJobConfiguration)
+  // or Streaming upload via InsertAllRequest.
+  private enum UploadMethod {
     DML,
     STREAMING;
   }

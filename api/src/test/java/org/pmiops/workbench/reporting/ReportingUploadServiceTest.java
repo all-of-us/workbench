@@ -11,12 +11,12 @@ import static org.mockito.Mockito.verify;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.timestampQpvToInstant;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.timestampStringToInstant;
 
-import com.google.cloud.bigquery.EmptyTableResult;
 import com.google.cloud.bigquery.InsertAllRequest;
 import com.google.cloud.bigquery.InsertAllRequest.RowToInsert;
 import com.google.cloud.bigquery.InsertAllResponse;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
+import com.google.cloud.bigquery.TableResult;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import java.time.Clock;
@@ -140,7 +140,11 @@ public class ReportingUploadServiceTest {
                         .creationTime(THEN.toEpochMilli())
                         .fakeSize(4444L)
                         .creatorId(202L)));
-    doReturn(new EmptyTableResult())
+
+    final TableResult mockTableResult = mock(TableResult.class);
+    doReturn(99L).when(mockTableResult).getTotalRows();
+
+    doReturn(mockTableResult)
         .when(mockBigQueryService)
         .executeQuery(any(QueryJobConfiguration.class), anyLong());
     doReturn(Duration.ofMillis(250L)).when(mockStopwatch).elapsed();
@@ -192,6 +196,7 @@ public class ReportingUploadServiceTest {
     largeSnapshot.setWorkspaces(
         ImmutableList.of(
             new ReportingWorkspace()
+                .workspaceId(303L)
                 .name("Circle K")
                 .creationTime(THEN.toEpochMilli())
                 .fakeSize(4444L)
@@ -235,8 +240,10 @@ public class ReportingUploadServiceTest {
     assertThat(researcherRows.get(0).getId()).hasLength(16);
     assertThat(researcherRows.get(0).getContent()).hasSize(RESEARCHER_COLUMN_COUNT + 1);
 
-    final List<RowToInsert> workspace1Rows = requests.get(1).getRows();
-    final Map<String, Object> workspaceColumnValues = workspace1Rows.get(0).getContent();
+    final List<RowToInsert> workspaceRows = requests.get(1).getRows();
+    assertThat(workspaceRows).hasSize(3);
+
+    final Map<String, Object> workspaceColumnValues = workspaceRows.get(0).getContent();
     assertThat(workspaceColumnValues.get(WorkspaceParameter.WORKSPACE_ID.getParameterName()))
         .isEqualTo(201L);
     final Instant creationInstant =
