@@ -1,7 +1,7 @@
 ## Creating a randomized microarray dataset and uploading to BigQuery in test environment
 The following commands are not meant to be run as is. Treat it more as documentation of what I ran to get the data uploaded.
 
-### Generate Randomized VCF samples (Takes several hours and consumes 600-700 GB)
+### Generate Randomized VCF samples
 - Run from workbench/api  
 `./project.rb randomize-vcf --vcf ~/broad/variantstore/NA12878_204126160130_R01C01.vcf --number-of-copies 1000 --output-path /mnt/genomics/randomized1000.vcf`
 
@@ -69,5 +69,5 @@ The following commands are not meant to be run as is. Treat it more as documenta
 
 ### Move into VPC-SC (Fairly quick, < 1h)
 - FIRST - Modify api/db-cdr/generate-cdr/libproject/devstart.rb so that the config all-of-us-workbench-test.source_cdr_project = all-of-us-workbench-test
-- `./project.rb publish-cdr --bq-dataset microarray_data --project all-of-us-workbench-test~
+- `./project.rb publish-cdr --bq-dataset microarray_data --project all-of-us-workbench-test`
 - Notebooks should now be able to query the dataset at `fc-aou-cdr-synth-test.microarray_data`
