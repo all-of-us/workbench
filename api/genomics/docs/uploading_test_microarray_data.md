@@ -1,6 +1,6 @@
 ## Creating a randomized microarray dataset and uploading to BigQuery in test environment
-The following commands are not meant to be run as is. Treat it more as documentation of what I ran to get the data uploaded.
-
+- The following commands are not meant to be run as is. Treat it more as documentation of what I ran to get the data uploaded.
+- All profiling was done on a laptop with an Intel Core i7-9850H CPU @ 2.60GHz, 32GB RAM, and an SSD
 ### Generate Randomized VCF samples
 - Run from workbench/api  
 `./project.rb randomize-vcf --vcf ~/broad/variantstore/NA12878_204126160130_R01C01.vcf --number-of-copies 1000 --output-path /mnt/genomics/randomized1000.vcf`
