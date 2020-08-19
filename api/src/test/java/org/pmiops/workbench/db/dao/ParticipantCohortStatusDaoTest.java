@@ -184,6 +184,14 @@ public class ParticipantCohortStatusDaoTest {
   }
 
   @Test
+  public void findByParticipantKeyCohortReviewId() {
+    List<DbParticipantCohortStatus> results =
+        participantCohortStatusDao.findByParticipantKey_CohortReviewId(COHORT_REVIEW_ID);
+
+    assertEquals(2, results.size());
+  }
+
+  @Test
   public void findAllNoSearchCriteria() {
     PageRequest pageRequest =
         new PageRequest()

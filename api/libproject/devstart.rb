@@ -2021,13 +2021,6 @@ Common.register_command({
   :fn => ->(*args) { update_cdr_versions_local("update-cdr-versions-local", *args)}
 })
 
-def update_review_demographics_for_project(versions_file, dry_run)
-  common = Common.new
-  common.run_inline %W{
-    gradle updateReviewDemographics
-   -PappArgs=['#{versions_file}',#{dry_run}]}
-end
-
 def update_review_demographics(cmd_name, *args)
   ensure_docker cmd_name, args
   op = update_cdr_version_options(cmd_name, args)
@@ -2035,10 +2028,12 @@ def update_review_demographics(cmd_name, *args)
   op.parse.validate
   gcc.validate
 
-  common = Common.new
-  common.run_inline %W{
-    gradle updateReviewDemographics
-    -PappArgs=[#{op.opts.dry_run}]}
+  with_cloud_proxy_and_db(gcc) do
+      common = Common.new
+      common.run_inline %W{
+        gradle updateReviewDemographics
+        -PappArgs=[#{op.opts.dry_run}]}
+  end
 end
 
 Common.register_command({

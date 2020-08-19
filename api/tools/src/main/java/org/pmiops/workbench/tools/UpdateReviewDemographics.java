@@ -10,84 +10,163 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.db.model.DbCohortReview;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/** Backfill script to adjust cohort reviews that don't include sex at birth. */
+/**
+ * Backfill script to update cohort reviews with the correct sex at birth concept ids. This tool
+ * aligns sex at birth data from cdr versions with the proper reviews cdr version.
+ */
 @Configuration
 public class UpdateReviewDemographics {
 
   private static final Logger logger = Logger.getLogger(UpdateReviewDemographics.class.getName());
 
-  private BigQuery bigQueryService;
-  private String projectId;
-  private String datasetId;
-  private static final String PARAM_NAME = "p0";
+  private static final String SEX_AT_BIRTH_CONCEPT_ID_PARAM = "sexAtBirthConceptId";
+  private static final String PERSON_ID_PARAM = "personId";
+  private static final String SEX_AT_BIRTH_CONCEPT_ID = "sex_at_birth_concept_id";
   private static final String SELECT_DISTINCT_SEX_AT_BIRTH =
-      "SELECT DISTINCT sex_at_birth_concept_id\n FROM `${projectId}.${datasetId}.person`";
+      "SELECT DISTINCT "
+          + SEX_AT_BIRTH_CONCEPT_ID
+          + "\n "
+          + "FROM `${projectId}.${datasetId}.person`\n"
+          + "WHERE "
+          + SEX_AT_BIRTH_CONCEPT_ID
+          + " != 0";
   private static final String SELECT_PERSON_IDS =
       "SELECT person_id\n"
           + "FROM `${projectId}.${datasetId}.person`\n"
-          + "WHERE sex_at_birth_concept_id = @"
-          + PARAM_NAME;
+          + "WHERE "
+          + SEX_AT_BIRTH_CONCEPT_ID
+          + " = @"
+          + SEX_AT_BIRTH_CONCEPT_ID_PARAM
+          + "\nAND person_id in unnest(@"
+          + PERSON_ID_PARAM
+          + ")";
 
   @Bean
   public CommandLineRunner run(
-      CdrVersionDao cdrVersionDao, ParticipantCohortStatusDao participantCohortStatusDao) {
+      CdrVersionDao cdrVersionDao,
+      ParticipantCohortStatusDao participantCohortStatusDao,
+      CohortReviewDao cohortReviewDao) {
     return (args) -> {
       if (args.length != 1) {
         throw new IllegalArgumentException("Expected 1 args (dry_run). Got " + Arrays.asList(args));
       }
       boolean dryRun = Boolean.parseBoolean(args[0]);
 
-      for (DbCdrVersion cdrVersion : cdrVersionDao.findAll()) {
-        if (cdrVersion.getIsDefault()) {
-          projectId = cdrVersion.getBigqueryProject();
-          datasetId = cdrVersion.getBigqueryDataset();
+      for (DbCdrVersion dbCdrVersion : cdrVersionDao.findAll()) {
+        String projectId = dbCdrVersion.getBigqueryProject();
+        String datasetId = dbCdrVersion.getBigqueryDataset();
+
+        if (StringUtils.isNotEmpty(projectId) && StringUtils.isNotEmpty(datasetId)) {
+          BigQuery bigQueryService = initBigQueryService(dbCdrVersion.getBigqueryProject());
+
+          // Get all the sex at birth concept ids per cdr version
+          List<Long> sexAtBirthConceptIds =
+              StreamSupport.stream(
+                      executeQuery(
+                              bigQueryService, dbCdrVersion, SELECT_DISTINCT_SEX_AT_BIRTH, null)
+                          .getValues()
+                          .spliterator(),
+                      false)
+                  .map(fieldValues -> fieldValues.get(SEX_AT_BIRTH_CONCEPT_ID).getLongValue())
+                  .collect(Collectors.toList());
+
+          // Iterate each review per cdr version
+          for (DbCohortReview dbCohortReview :
+              cohortReviewDao.findAllByCdrVersionId(dbCdrVersion.getCdrVersionId())) {
+
+            // Get all the person ids from review that need updating
+            List<Long> personIds =
+                participantCohortStatusDao
+                    .findByParticipantKey_CohortReviewId(dbCohortReview.getCohortReviewId())
+                    .stream()
+                    .map(p -> p.getParticipantKey().getParticipantId())
+                    .collect(Collectors.toList());
+
+            for (Long sexAtBirthConceptId : sexAtBirthConceptIds) {
+              // All person ids to update from BQ per sex at birth concept id
+              final List<Long> personIdsToUpdate =
+                  StreamSupport.stream(
+                          executeQuery(
+                                  bigQueryService,
+                                  dbCdrVersion,
+                                  SELECT_PERSON_IDS,
+                                  createParameterMap(personIds, sexAtBirthConceptId))
+                              .getValues()
+                              .spliterator(),
+                          false)
+                      .map(fieldValues -> fieldValues.get("person_id").getLongValue())
+                      .collect(Collectors.toList());
+
+              if (!personIdsToUpdate.isEmpty()) {
+                // Bulk update the participants sex at birth per person_id and review_id
+                int personCount =
+                    dryRun
+                        ? personIdsToUpdate.size()
+                        : participantCohortStatusDao.bulkUpdateSexAtBirthByParticipantId(
+                            sexAtBirthConceptId,
+                            personIdsToUpdate,
+                            dbCohortReview.getCohortReviewId());
+                logger.info(
+                    String.format(
+                        "%d participant(s) %s with sex at birth concept id %d - review id %d - CDR v: %d name: %s project: %s dataset: %s r#: %d",
+                        personCount,
+                        dryRun ? "pending update" : "updated",
+                        sexAtBirthConceptId,
+                        dbCohortReview.getCohortReviewId(),
+                        dbCdrVersion.getCdrVersionId(),
+                        dbCdrVersion.getName(),
+                        dbCdrVersion.getBigqueryProject(),
+                        dbCdrVersion.getBigqueryDataset(),
+                        dbCdrVersion.getReleaseNumber()));
+              }
+            }
+          }
         }
-      }
-      Optional.ofNullable(projectId)
-          .orElseThrow(() -> new IllegalArgumentException("No Default CDR version exists."));
-      bigQueryService = BigQueryOptions.newBuilder().setProjectId(projectId).build().getService();
-
-      final List<Long> sexAtBirthConceptIds =
-          StreamSupport.stream(
-                  executeQuery(SELECT_DISTINCT_SEX_AT_BIRTH, null).getValues().spliterator(), false)
-              .map(fieldValues -> fieldValues.get("sex_at_birth_concept_id").getLongValue())
-              .collect(Collectors.toList());
-
-      for (Long sexAtBirthConceptId : sexAtBirthConceptIds) {
-        Map<String, QueryParameterValue> params = new HashMap<>();
-        params.put(PARAM_NAME, QueryParameterValue.int64(sexAtBirthConceptId));
-
-        final List<Long> personIds =
-            StreamSupport.stream(
-                    executeQuery(SELECT_PERSON_IDS, params).getValues().spliterator(), false)
-                .map(fieldValues -> fieldValues.get("person_id").getLongValue())
-                .collect(Collectors.toList());
-
-        logger.info(String.format("Processing sex at birth concept id: %d", sexAtBirthConceptId));
-        participantCohortStatusDao.bulkUpdateSexAtBirthByParticipantId(
-            sexAtBirthConceptId, personIds);
       }
     };
   }
 
-  private TableResult executeQuery(String query, Map<String, QueryParameterValue> params)
+  @NotNull
+  private Map<String, QueryParameterValue> createParameterMap(
+      List<Long> personIds, Long sexAtBirthConceptId) {
+    Map<String, QueryParameterValue> params = new HashMap<>();
+    params.put(SEX_AT_BIRTH_CONCEPT_ID_PARAM, QueryParameterValue.int64(sexAtBirthConceptId));
+    params.put(
+        PERSON_ID_PARAM, QueryParameterValue.array(personIds.toArray(new Long[0]), Long.class));
+    return params;
+  }
+
+  private BigQuery initBigQueryService(String projectId) {
+    return BigQueryOptions.newBuilder().setProjectId(projectId).build().getService();
+  }
+
+  private TableResult executeQuery(
+      BigQuery bigQueryService,
+      DbCdrVersion cdrVersion,
+      String query,
+      Map<String, QueryParameterValue> params)
       throws InterruptedException {
     return bigQueryService
         .create(
             JobInfo.of(
                 QueryJobConfiguration.newBuilder(
-                        query.replace("${projectId}", projectId).replace("${datasetId}", datasetId))
+                        query
+                            .replace("${projectId}", cdrVersion.getBigqueryProject())
+                            .replace("${datasetId}", cdrVersion.getBigqueryDataset()))
                     .setUseLegacySql(false)
                     .setNamedParameters(params)
                     .build()))

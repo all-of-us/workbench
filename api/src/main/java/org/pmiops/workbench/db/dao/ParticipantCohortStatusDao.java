@@ -39,15 +39,20 @@ public interface ParticipantCohortStatusDao
       value =
           "UPDATE participant_cohort_status"
               + " SET sex_at_birth_concept_id = :conceptId"
-              + " WHERE participant_id in (:personIds)",
+              + " WHERE participant_id in (:personIds)"
+              + " AND cohort_review_id = :cohortReviewId",
       nativeQuery = true)
   @Transactional
-  void bulkUpdateSexAtBirthByParticipantId(
-      @Param("conceptId") long conceptId, @Param("personIds") List<Long> personIds);
+  int bulkUpdateSexAtBirthByParticipantId(
+      @Param("conceptId") long conceptId,
+      @Param("personIds") List<Long> personIds,
+      @Param("cohortReviewId") Long cohortReviewId);
 
   DbParticipantCohortStatus findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId(
       @Param("cohortReviewId") long cohortReviewId, @Param("participantId") long participantId);
 
   List<DbParticipantIdAndCohortStatus> findByParticipantKey_CohortReviewIdAndStatusIn(
       Long cohortReviewId, List<Short> cohortStatuses);
+
+  List<DbParticipantCohortStatus> findByParticipantKey_CohortReviewId(Long cohortReviewId);
 }
