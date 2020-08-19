@@ -63,7 +63,7 @@ public class ReportingSnapshotServiceTest {
     CommonMappers.class,
     ReportingMapperImpl.class,
     ReportingSnapshotServiceImpl.class,
-    ReportingUploadServiceImpl.class
+    ReportingUploadServiceDmlImpl.class
   })
   @MockBean({BigQueryService.class})
   public static class config {

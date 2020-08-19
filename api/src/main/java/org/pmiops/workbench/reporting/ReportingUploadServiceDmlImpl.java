@@ -18,27 +18,27 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.ReportingResearcher;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingWorkspace;
-import org.pmiops.workbench.reporting.insertion.ReportingInsertionJobBuilder;
+import org.pmiops.workbench.reporting.insertion.DmlInsertJobBuilder;
 import org.pmiops.workbench.reporting.insertion.ResearcherParameter;
 import org.pmiops.workbench.reporting.insertion.WorkspaceParameter;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
-@Service
+@Service("REPORTING_UPLOAD_SERVICE_DML_IMPL")
 @Primary
-public class ReportingUploadServiceImpl implements ReportingUploadService {
+public class ReportingUploadServiceDmlImpl implements ReportingUploadService {
   private static final Logger logger = Logger.getLogger("ReportingUploadServiceInsertQueryImpl");
   private static final long MAX_WAIT_TIME = Duration.ofSeconds(60).toMillis();
 
   private final BigQueryService bigQueryService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
-  private static final ReportingInsertionJobBuilder<ReportingResearcher> researcherJobBuilder =
+  private static final DmlInsertJobBuilder<ReportingResearcher> researcherJobBuilder =
       ResearcherParameter::values;
-  private static final ReportingInsertionJobBuilder<ReportingWorkspace> workspaceJobBuilder =
+  private static final DmlInsertJobBuilder<ReportingWorkspace> workspaceJobBuilder =
       WorkspaceParameter::values;
 
-  public ReportingUploadServiceImpl(
+  public ReportingUploadServiceDmlImpl(
       BigQueryService bigQueryService, Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.bigQueryService = bigQueryService;
     this.workbenchConfigProvider = workbenchConfigProvider;
@@ -73,6 +73,7 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
                 researcherJobBuilder.build(
                     qualifyTableName("researcher"), batch, snapshotTimestamp))
         .forEach(resultBuilder::add);
+
     Lists.partition(reportingSnapshot.getWorkspaces(), partitionSize).stream()
         .map(
             batch ->
