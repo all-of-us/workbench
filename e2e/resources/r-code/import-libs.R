@@ -30,3 +30,5 @@ library(reticulate)
 library(scales)
 
 pd <- reticulate::import("pandas")
+
+print('success',quote=FALSE)

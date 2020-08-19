@@ -9,6 +9,7 @@ import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
 import {getPropValue} from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
+import NotebookPage from './notebook-page';
 
 const PageTitle = 'View Notebooks';
 
@@ -58,7 +59,7 @@ export default class WorkspaceAnalysisPage extends AuthenticatedPage {
    * @param {string} notebookName New notebook name.
    * @param {Language} language Notebook language.
    */
-  async createNotebook(notebookName: string, language: Language): Promise<void> {
+  async createNotebook(notebookName: string, language: Language): Promise<NotebookPage> {
     const link = await this.createNewNotebookLink();
     await link.click();
     const modal = new NewNotebookModal(this.page);
@@ -95,6 +96,11 @@ export default class WorkspaceAnalysisPage extends AuthenticatedPage {
 
     // Waiting up to 15 minutes
     await waitWhileLoading(this.page, 60 * 15 * 1000);
+
+    const notebook = new NotebookPage(this.page, notebookName);
+    await notebook.waitForLoad();
+    await notebook.waitForKernelIdle();
+    return notebook;
   }
 
   async createNewNotebookLink(): Promise<Link> {
@@ -119,12 +125,13 @@ export default class WorkspaceAnalysisPage extends AuthenticatedPage {
    * Duplicate notebook using Ellipsis menu in Workspace Analysis page.
    * @param {string} notebookName The notebook name to clone from.
    */
-  async duplicateNotebook(notebookName: string): Promise<void> {
+  async duplicateNotebook(notebookName: string): Promise<string> {
     const resourceCard = new DataResourceCard(this.page);
     const notebookCard = await resourceCard.findCard(notebookName, CardType.Notebook);
     const menu = notebookCard.getEllipsis();
     await menu.clickAction(EllipsisMenuAction.Duplicate, {waitForNav: false});
     await waitWhileLoading(this.page);
+    return `Duplicate of ${notebookName}`; // name of clone notebook
   }
 
 }

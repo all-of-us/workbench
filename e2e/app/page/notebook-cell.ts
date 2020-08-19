@@ -13,21 +13,17 @@ export enum CellType {
  */
 export default class NotebookCell {
 
-  private readonly page: Page;
   private iframe: Frame; // Jupyter notebook iframe
-  private cellIndex: number; // 1-based cell index because notebook cell prompt index starts from 1.
-  private readonly cellType: CellType; // Markdown or Code cell.
 
   /**
    *
    * @param {Page} page Puppeteer Page.
-   * @param {CellType} cellType Cell type: Code or Markdown cell. Default value is Code cell.
-   * @param {number} cellIndex 1-based cell index. Default value is 1.
+   * @param {CellType} cellType: Code or Markdown cell. Default value is Code cell.
+   * @param {number} cellIndex Cell index. (first index is 1)
    */
-  constructor(page: Page, cellType: CellType = CellType.Code, cellIndex: number = 1) {
-    this.page = page;
-    this.cellType = cellType;
-    this.cellIndex = cellIndex;
+  constructor(private readonly page: Page,
+              private readonly cellType: CellType = CellType.Code,
+              private cellIndex: number = 1) {
   }
 
   async getLastCell(): Promise<NotebookCell | null> {
@@ -149,20 +145,7 @@ export default class NotebookCell {
     if (index === undefined) {
       return substr;
     }
-    return `${substr}:nth-child(${index})`;
-  }
-
-  /**
-   * Returns css selector for an unused (empty) cell.
-   * @param {number} indx Cell index.
-   */
-  // @ts-ignore
-  private emptyCellSelector(indx?: number): string {
-    const substr = `.cell.unrendered${this.cellType}`;
-    if (indx === undefined) {
-      return substr;
-    }
-    return `${substr}:nth-child(${indx})`;
+    return `${substr}:nth-child(${index})`; // the index of the first child is 1 in :nth-child() selector
   }
 
   async waitForPropertyContains(cssSelector: string, propertyName: string, propertyValue: string): Promise<boolean> {

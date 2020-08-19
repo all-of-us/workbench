@@ -119,11 +119,20 @@ export default class NotebookPage extends AuthenticatedPage {
     return value.trim();
   }
 
+  /**
+   *
+   * @param {number} cellIndex Code Cell index. (first index is 1)
+   * @param {CellType} cellType: Code or Markdown cell. Default value is Code cell.
+   */
   async findCell(cellIndex: number, cellType: CellType = CellType.Code): Promise<NotebookCell> {
     const cell = new NotebookCell(this.page, cellType, cellIndex);
     return cell;
   }
 
+  /**
+   * Find the last cell.
+   * @param {CellType} cellType: Code or Markdown cell. Default value is Code cell.
+   */
   async findLastCell(cellType: CellType = CellType.Code): Promise<NotebookCell | null> {
     const cell = new NotebookCell(this.page, cellType);
     await cell.getLastCell();
@@ -133,7 +142,7 @@ export default class NotebookPage extends AuthenticatedPage {
   /**
    * Click Run button in toolbar. Run focused code cell and insert a new code cell below.
    *
-   * @param {number} cellIndex Code Cell index. (1-based index)
+   * @param {number} cellIndex Code Cell index. (first index is 1)
    * @param {string} code The code to run.
    * @param {string} codeFile The full path to file that contains code to run.
    * @param {number} timeOut The timeout time in milliseconds.
@@ -159,12 +168,11 @@ export default class NotebookPage extends AuthenticatedPage {
   }
 
   /**
-   * Get cell input and output texts in array.
-   * @param {number} cellIndex 1-based Cell index.
-   * @param {CellType} cellType Cell type: Markdown or Code.
+   * Returnss cell input and output texts in an array. Not waiting for output rendered.
+   * @param {number} cellIndex Code Cell index. (first index is 1)
+   * @param {CellType} cellType: Markdown or Code. Default value is Code cell.
    */
   async getCellInputOutput(cellIndex: number, cellType: CellType = CellType.Code): Promise<[string, string]> {
-    // Get Code cell [1] input and output.
     const cell = await this.findCell(cellIndex, cellType);
     const code = await cell.getInputText();
     const output = await cell.waitForOutput(1000);
