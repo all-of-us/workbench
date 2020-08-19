@@ -1,3 +1,4 @@
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Key} from 'ts-key-enum';
 
@@ -10,12 +11,12 @@ import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {AoU} from 'app/components/text-wrappers';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, withCdrVersions, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {attributesSelectionStore, setSidebarActiveIconStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {environment} from 'environments/environment';
-import {CriteriaType, DomainType} from 'generated/fetch';
+import {CdrVersion, CdrVersionListResponse, CriteriaType, DomainType} from 'generated/fetch';
 
 const borderStyle = `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`;
 const styles = reactStyles({
@@ -144,6 +145,7 @@ const styles = reactStyles({
 });
 
 interface Props {
+  cdrVersionListResponse: CdrVersionListResponse;
   hierarchy: Function;
   searchContext: any;
   select: Function;
@@ -153,30 +155,39 @@ interface Props {
 }
 
 interface State {
+  cdrVersion: CdrVersion;
   data: any;
-  standardData: any;
   error: boolean;
+  hoverId: string;
+  ingredients: any;
   loading: boolean;
   standardOnly: boolean;
   sourceMatch: any;
-  ingredients: any;
-  hoverId: string;
+  standardData: any;
+  totalCount: number;
 }
 
-export const ListSearchV2 = withCurrentWorkspace()(
+export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
   class extends React.Component<Props, State> {
     constructor(props: any) {
       super(props);
       this.state = {
+        cdrVersion: undefined,
         data: null,
-        standardData: null,
         error: false,
+        ingredients: {},
+        hoverId: undefined,
         loading: false,
         standardOnly: false,
         sourceMatch: undefined,
-        ingredients: {},
-        hoverId: undefined
+        standardData: null,
+        totalCount: null
       };
+    }
+    componentDidMount(): void {
+      const {cdrVersionListResponse, workspace: {cdrVersionId}} = this.props;
+      const cdrVersions = cdrVersionListResponse.items;
+      this.setState({cdrVersion: cdrVersions.find(cdr => cdr.cdrVersionId === cdrVersionId)});
     }
 
     handleInput = (event: any) => {
@@ -202,7 +213,7 @@ export const ListSearchV2 = withCurrentWorkspace()(
             this.setState({standardData: stdResp.items});
           }
         }
-        this.setState({data});
+        this.setState({data, totalCount: resp.totalCount});
       } catch (err) {
         this.setState({error: true});
       } finally {
@@ -328,7 +339,7 @@ export const ListSearchV2 = withCurrentWorkspace()(
 
     render() {
       const {searchContext: {domain}, selectedIds} = this.props;
-      const {data, error, ingredients, loading, standardOnly, sourceMatch, standardData} = this.state;
+      const {cdrVersion, data, error, ingredients, loading, standardOnly, sourceMatch, standardData, totalCount} = this.state;
       const showStandardOption = !standardOnly && !!standardData && standardData.length > 0;
       const displayData = standardOnly ? standardData : data;
       return <div style={{overflow: 'auto'}}>
@@ -342,19 +353,22 @@ export const ListSearchV2 = withCurrentWorkspace()(
         </div>
         <div style={{display: 'table', height: '100%', width: '100%'}}>
           <div style={styles.helpText}>
+            {!!totalCount && <div>
+              There are {totalCount.toLocaleString()} results{!!cdrVersion && <span> in {cdrVersion.name}</span>}.
+            </div>}
             {sourceMatch && !standardOnly && <div>
               There are {sourceMatch.count.toLocaleString()} participants with source code {sourceMatch.code}.
               {showStandardOption && <span> For more results, browse
                 &nbsp;<Clickable style={styles.vocabLink} onClick={() => this.showStandardResults()}>Standard Vocabulary</Clickable>.
-            </span>}
+              </span>}
             </div>}
             {standardOnly && <div>
               {!!displayData.length && <span>
-              There are {displayData[0].count.toLocaleString()} participants for the standard version of the code you searched.
-            </span>}
+                There are {displayData[0].count.toLocaleString()} participants for the standard version of the code you searched.
+              </span>}
               {!displayData.length && <span>
-              There are no standard matches for source code {sourceMatch.code}.
-            </span>}
+                There are no standard matches for source code {sourceMatch.code}.
+              </span>}
               &nbsp;<Clickable style={styles.vocabLink}
                                onMouseDown={() => this.trackEvent('Source Vocab Hyperlink')}
                                onClick={() => this.setState({standardOnly: false})}>
