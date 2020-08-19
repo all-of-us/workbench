@@ -25,6 +25,21 @@ export async function getPropValue<T> (element: ElementHandle, property: string)
  * @param {Page} page Instance of Puppeteer page object.
  * @param {ElementHandle} element Element.
  */
-export async function waitUntilChanged (page: Page, element: ElementHandle): Promise<JSHandle> {
+export async function waitUntilChanged(page: Page, element: ElementHandle): Promise<JSHandle> {
   return page.waitForFunction(elemt => !elemt.ownerDocument.contains(elemt), {polling: 'raf'}, element);
+}
+
+export async function matchText(page: Page, cssSelector, subString): Promise<boolean> {
+  const texts = await page.$$eval(
+     cssSelector,
+     (elements) => elements.map((el) => el.textContent),
+  );
+  let found = false;
+  for (const txt of texts) {
+    if (txt.includes(subString)) {
+      found = true;
+      break;
+    }
+  }
+  return found;
 }

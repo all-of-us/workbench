@@ -103,6 +103,19 @@ export async function waitForPropertyNotExists(page: Page,
   }
 }
 
+export async function waitForPropertyExists(page: Page, xpathSelector: string, propertyName: string): Promise<boolean> {
+  try {
+    await page.waitForFunction((xpath, prop) => {
+      const element = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+      return element[prop] !== null;
+    }, {}, xpathSelector, propertyName);
+    return true;
+  } catch (err) {
+    console.error(`Failed waiting element (XPath="${xpathSelector}") property: ${propertyName} exists. ${err}`);
+    throw new Error(err);
+  }
+}
+
 // ************************************************************************
 /**
  * Helper functions when directly dealing with CSS selectors.
