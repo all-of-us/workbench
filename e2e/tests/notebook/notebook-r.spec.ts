@@ -25,7 +25,7 @@ describe('Jupyter notebook tests in R language', () => {
 
     // Run math function in code cell [1]
     const code1Output = await notebook.runCodeCell(1, {codeFile: 'resources/r-code/calculate-max.R'});
-    expect(code1Output).toEqual(20);
+    expect(code1Output).toEqual('[1] 20');
 
     // Print sys environment details in code cell [2]
     const code2Output = await notebook.runCodeCell(2, {codeFile: 'resources/r-code/sys-print.R'});
