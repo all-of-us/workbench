@@ -110,7 +110,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
       const details = await institutionApi().getPublicInstitutionDetails();
       this.setState({
         loadingInstitutions: false,
-        institutions: fp.sortBy( institution => institution.displayName, details.institutions)
+        institutions: fp.sortBy( institution => institution.displayName.trim(), details.institutions)
       });
       // Check email and populate appropriate icon In case page is loaded :
       // after clicking PREVIOUS BUTTON from step 3 or

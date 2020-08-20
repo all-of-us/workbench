@@ -330,6 +330,7 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
                 inputStyle={{width: '16rem', marginTop: '0.3rem'}}
                 labelText='Institution Name'
                 onChange={v => this.setState(fp.set(['institution', 'displayName'], v))}
+                onBlur={v => this.setState(fp.set(['institution', 'displayName'], v.trim()))}
             />
             <div style={{color: colors.danger}} data-test-id='displayNameError'>
               {!this.isAddInstitutionMode && errors && errors.displayName}
@@ -341,10 +342,11 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
                       value={institution.organizationTypeEnum}
                       onChange={v => this.updateInstitutionRole(v.value)}/>
             <div style={{color: colors.danger}}>{!this.isAddInstitutionMode && errors && errors.organizationTypeEnum}</div>
-
-            {showOtherInstitutionTextBox && <TextInputWithLabel value={institution.organizationTypeOtherText}
-               onChange={v => this.setState(fp.set(['institution', 'organizationTypeOtherText'], v))}
-               inputStyle={{width: '16rem', marginTop: '0.8rem'}}/>}
+            {showOtherInstitutionTextBox && <TextInputWithLabel
+              value={institution.organizationTypeOtherText}
+              onChange={v => this.setState(fp.set(['institution', 'organizationTypeOtherText'], v))}
+              onBlur={v => this.setState(fp.set(['institution', 'organizationTypeOtherText'], v.trim()))}
+              inputStyle={{width: '16rem', marginTop: '0.8rem'}}/>}
             <label style={styles.label}>Agreement Type</label>
             <Dropdown style={{width: '16rem'}} data-test-id='agreement-dropdown'
                       placeholder='Your Agreement'
