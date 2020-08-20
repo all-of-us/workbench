@@ -29,14 +29,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class ConceptSetMapperTest {
 
   @Autowired private ConceptSetMapper conceptSetMapper;
-  @Autowired private ConceptService conceptService;
   @Autowired private ConceptBigQueryService conceptBigQueryService;
 
   private DbConceptSet dbConceptSet;
 
   @TestConfiguration
   @Import({ConceptSetMapperImpl.class, CommonMappers.class})
-  @MockBean({ConceptService.class, ConceptBigQueryService.class, Clock.class})
+  @MockBean({ConceptBigQueryService.class, Clock.class})
   static class Configuration {}
 
   @Before
@@ -85,7 +84,7 @@ public class ConceptSetMapperTest {
     conceptSetRequest.setConceptSet(clientConceptSet);
     conceptSetRequest.setAddedIds(Arrays.asList(1l, 2l, 3l));
     conceptSetMapper.clientToDbModel(
-        conceptSetRequest, 1l, dbConceptSet.getCreator(), conceptService, conceptBigQueryService);
+        conceptSetRequest, 1l, dbConceptSet.getCreator(), conceptBigQueryService);
     assertThat(clientConceptSet.getId()).isEqualTo(dbConceptSet.getConceptSetId());
     assertThat(Etags.toVersion(clientConceptSet.getEtag())).isEqualTo(dbConceptSet.getVersion());
     assertThat(clientConceptSet.getDomain()).isEqualTo(dbConceptSet.getDomainEnum());
