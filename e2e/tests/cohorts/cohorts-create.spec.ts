@@ -4,7 +4,7 @@ import Link from 'app/element/link';
 import {EllipsisMenuAction, LinkText} from 'app/text-labels';
 import CohortBuildPage, {FieldSelector} from 'app/page/cohort-build-page';
 import DataPage, {TabLabelAlias} from 'app/page/data-page';
-import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
+import {pickWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
 import DataResourceCard from 'app/component/data-resource-card';
 import Button from 'app/element/button';
@@ -26,8 +26,7 @@ describe('User can create new Cohorts', () => {
    */
   test('Add Cohort of Physical Measurements BMI', async () => {
 
-    const workspaceCard = await findWorkspace(page);
-    await workspaceCard.clickWorkspaceName();
+    await pickWorkspace(page).then(card => card.clickWorkspaceName());
 
     // Wait for the Data page.
     const dataPage = new DataPage(page);
@@ -114,8 +113,7 @@ describe('User can create new Cohorts', () => {
    */
   test('Add Cohort of EKG condition with modifiers', async () => {
 
-    const workspaceCard = await findWorkspace(page);
-    await workspaceCard.clickWorkspaceName();
+    await pickWorkspace(page).then(card => card.clickWorkspaceName());
 
     // Wait for the Data page.
     const dataPage = new DataPage(page);

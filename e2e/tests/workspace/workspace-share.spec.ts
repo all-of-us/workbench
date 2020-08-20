@@ -7,7 +7,7 @@ import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspacesPage from 'app/page/workspaces-page';
 import {EllipsisMenuAction, LinkText, WorkspaceAccessLevel} from 'app/text-labels';
 import {config} from 'resources/workbench-config';
-import {findWorkspace, signIn, signInAs, waitWhileLoading} from 'utils/test-utils';
+import {pickWorkspace, signIn, signInAs, waitWhileLoading} from 'utils/test-utils';
 import DataPage, {TabLabelAlias} from 'app/page/data-page';
 
 describe('Share workspace', () => {
@@ -22,8 +22,7 @@ describe('Share workspace', () => {
       // Using the share modal requires a viewport be set, due to react-select weirdness.
       await page.setViewport({height: 1280, width: 1280});
 
-      const workspaceCard = await findWorkspace(page);
-      await workspaceCard.clickWorkspaceName();
+      await pickWorkspace(page).then(card => card.clickWorkspaceName());
 
       const notebooksLink = await Link.findByName(page, {name: 'About'});
       await notebooksLink.clickAndWait();
@@ -66,7 +65,7 @@ describe('Share workspace', () => {
      */
     test('Workspace READER cannot share edit or delete workspace', async () => {
 
-      const workspaceCard = await findWorkspace(page, true);
+      const workspaceCard = await pickWorkspace(page, {create: true});
       const workspaceName = await workspaceCard.getWorkspaceName();
 
       // Open the Share modal
@@ -79,6 +78,11 @@ describe('Share workspace', () => {
       await shareModal.shareWithUser(config.collaboratorUsername, WorkspaceAccessLevel.Reader);
       await waitWhileLoading(page);
       await Navigation.navMenu(page, NavLink.SIGN_OUT);
+
+      // browser and page reset.
+      await page.deleteCookie(...await page.cookies());
+      await jestPuppeteer.resetPage();
+      await jestPuppeteer.resetBrowser();
 
       // To verify READER role assigned correctly, user with READER role will sign in in new Incognito page.
       const newPage = await signInAs(config.collaboratorUsername, config.userPassword);

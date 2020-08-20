@@ -1,5 +1,5 @@
 import WorkspacesPage from 'app/page/workspaces-page';
-import {findWorkspace, signIn} from 'utils/test-utils';
+import {pickWorkspace, signIn} from 'utils/test-utils';
 import {EllipsisMenuAction} from 'app/text-labels';
 import DataPage from 'app/page/data-page';
 
@@ -18,7 +18,7 @@ describe('Clone workspace', () => {
   describe('From "Your Workspaces" page using Workspace card ellipsis menu', () => {
 
     test('As OWNER, user can clone workspace', async () => {
-      const workspaceCard = await findWorkspace(page);
+      const workspaceCard = await pickWorkspace(page);
       await workspaceCard.asElementHandle().hover();
       // click on Ellipsis "Duplicate"
       await (workspaceCard.getEllipsis()).clickAction(EllipsisMenuAction.Duplicate);
@@ -52,8 +52,8 @@ describe('Clone workspace', () => {
   describe('From "Data" page using side ellipsis menu', () => {
 
     test('As OWNER, user can clone workspace', async () => {
-      const workspaceCard = await findWorkspace(page);
-      await workspaceCard.clickWorkspaceName();
+
+      await pickWorkspace(page).then(card => card.clickWorkspaceName());
 
       const dataPage = new DataPage(page);
       await dataPage.selectWorkspaceAction(EllipsisMenuAction.Duplicate);

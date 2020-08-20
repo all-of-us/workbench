@@ -5,7 +5,7 @@ import DataPage, {TabLabelAlias} from 'app/page/data-page';
 import DatasetSaveModal from 'app/page/dataset-save-modal';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import {makeRandomName} from 'utils/str-utils';
-import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
+import {pickWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
 import CohortActionsPage from 'app/page/cohort-actions-page';
 import {Ethnicity} from 'app/page/cohort-criteria-modal';
@@ -22,8 +22,8 @@ describe('Create Dataset', () => {
     * Finally delete Dataset.
     */
   test('Export dataset to notebook in Python programming language', async () => {
-    const workspaceCard = await findWorkspace(page);
-    await workspaceCard.clickWorkspaceName();
+
+    await pickWorkspace(page).then(card => card.clickWorkspaceName());
 
     // Click Add Datasets button.
     const dataPage = new DataPage(page);
@@ -91,8 +91,8 @@ describe('Create Dataset', () => {
    * Delete Cohort, Dataset, and Notebook.
    */
   test('Export dataset to notebook in R programming language', async () => {
-    const workspaceCard = await findWorkspace(page);
-    const workspaceName = await workspaceCard.clickWorkspaceName();
+
+    const workspaceName = await pickWorkspace(page).then(card => card.clickWorkspaceName());
 
     // Click Add Datasets button
     const dataPage = new DataPage(page);

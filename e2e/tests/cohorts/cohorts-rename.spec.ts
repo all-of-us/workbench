@@ -1,8 +1,8 @@
 import Link from 'app/element/link';
 import CohortBuildPage, {FieldSelector} from 'app/page/cohort-build-page';
 import DataPage, {TabLabelAlias} from 'app/page/data-page';
-import {findWorkspace, signIn} from 'utils/test-utils';
-import {waitForText} from 'utils/waits-utils';
+import {pickWorkspace, signIn} from 'utils/test-utils';
+import {waitForNumericalString, waitForText} from 'utils/waits-utils';
 import DataResourceCard from 'app/component/data-resource-card';
 import {makeRandomName} from 'utils/str-utils';
 import CohortActionsPage from 'app/page/cohort-actions-page';
@@ -28,8 +28,7 @@ describe('User can create, modify, rename and delete Cohort', () => {
    */
   test('Add cohort including Demographics Age', async () => {
 
-    const workspaceCard = await findWorkspace(page);
-    await workspaceCard.clickWorkspaceName();
+    await pickWorkspace(page).then(card => card.clickWorkspaceName());
 
     const dataPage = new DataPage(page);
     // Click Add Cohorts button in Data page.
@@ -43,13 +42,16 @@ describe('User can create, modify, rename and delete Cohort', () => {
     const minAge = 21;
     const maxAge = 95;
     const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
-    const group1Count = await group1.includeAge(minAge, maxAge);
+    await group1.includeAge(minAge, maxAge);
 
     // Checking Group 1 count is numerical and greater than 1.
-    await waitForText(page, group1Count, {xpath: group1.getGroupCountXpath()});
+    const group1Count = await waitForNumericalString(page, group1.getGroupCountXpath());
     const group1CountInt = Number(group1Count.replace(/,/g, ''));
     expect(group1CountInt).toBeGreaterThan(1);
-    console.log('Include in Group 1 Demographics Age: Count = ' + group1CountInt);
+    console.log('Include Participants Group 1 Demographics Age Count = ' + group1CountInt);
+
+    let totalCount = await cohortBuildPage.getTotalCount();
+    expect(totalCount).toEqual(group1Count);
 
     // Exclude Group 3: Demographics Deceased
     const group3 = cohortBuildPage.findExcludeParticipantsGroup('Group 3');
@@ -57,10 +59,10 @@ describe('User can create, modify, rename and delete Cohort', () => {
 
     const group3CountInt = Number(group3Count.replace(/,/g, ''));
     expect(group3CountInt).toBeGreaterThan(1);
-    console.log('Exclude in Group 3 Demographics Deceased: Count = ' + group3CountInt);
+    console.log('Exclude Participants Group 3 Demographics Deceased Count = ' + group3CountInt);
 
     // Log Total Count.
-    const totalCount = await cohortBuildPage.getTotalCount();
+    totalCount = await cohortBuildPage.getTotalCount();
     const totalCountInt = Number(totalCount.replace(/,/g, ''));
     expect(totalCountInt).toBeGreaterThan(1);
     console.log('Total Count: ' + totalCountInt);

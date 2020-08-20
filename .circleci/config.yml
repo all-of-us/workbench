@@ -205,12 +205,25 @@ commands:
 
   run_e2e_test:
     description: "Run puppeteer e2e integration tests"
+    parameters:
+      env_name:
+        description: The target environment for run Puppeteer tests. Must be one of "dev", "staging".
+        default: "dev"
+        type: enum
+        enum: ["dev", "staging"]
     steps:
       - install_e2e_dependencies
       - run:
-          name: Update Puppeteer test environment variables
+          name: Update test user email env variable
           command: |
-            echo 'export USER_NAME=$PUPPETEER_TEST_USER' >> $BASH_ENV
+            case << parameters.env_name >> in
+              staging) echo 'export USER_NAME=$PUPPETEER_TEST_USER_STAGING' >> $BASH_ENV ;;
+              dev) echo 'export USER_NAME=$PUPPETEER_TEST_USER' >> $BASH_ENV ;;
+            esac
+            source $BASH_ENV
+      - run:
+          name: Update rest of test environment variables
+          command: |
             echo 'export PASSWORD=$PUPPETEER_TEST_USER_PASSWORD' >> $BASH_ENV
             echo 'export INVITATION_KEY=$PUPPETEER_TEST_REGISTRATION_KEY' >> $BASH_ENV
             source $BASH_ENV
@@ -220,13 +233,14 @@ commands:
           # parallelism used to run e2e tests
           command: |
             circleci tests glob "tests/**/*.spec.ts" | circleci tests split --split-by=timings > /tmp/tests-to-run
-            yarn test:ci $(cat /tmp/tests-to-run)
+            yarn test:ci:<< parameters.env_name >> $(cat /tmp/tests-to-run)
           no_output_timeout: 15m
       - store_artifacts:
           path: e2e/logs
           destination: logs
       - store_test_results:
           path: ~/workbench/e2e/logs
+
 
   start_local_api:
     description: "Start local API server"
@@ -579,6 +593,21 @@ jobs:
           firefox-version: "78.0" # https://github.com/CircleCI-Public/browser-tools-orb/issues/14
       - run_e2e_test
 
+  # Run Puppeteer e2e UI tests on deployed "staging" environment.
+  puppeteer-e2e-test-staging:
+    <<: *defaults
+    environment:
+      <<: *e2e_env
+      WORKBENCH_ENV: staging
+    working_directory: ~/workbench
+    parallelism: 3
+    steps:
+      - checkout_init_git
+      - browser-tools/install-browser-tools:
+          firefox-version: "78.0" # https://github.com/CircleCI-Public/browser-tools-orb/issues/14
+      - run_e2e_test:
+          env_name: "staging"
+
   # Deploy UI local server then run Puppeteer e2e tests on deployed "local" environment.
   puppeteer-e2e-local-ui:
     <<: *defaults
@@ -625,6 +654,9 @@ workflows:
           requires:
             - api-deploy-to-test
             - ui-deploy-to-test
+      - puppeteer-e2e-test-staging
+
+
 
   deploy-staging:
     jobs:
@@ -659,6 +691,11 @@ workflows:
             - api-deps-check
             - api-integration-test
             - ui-unit-test
+      # Not ready
+      # - puppeteer-e2e-test-staging:
+          # filters: *filter_only_release_tags
+          # requires:
+            # - deploy-staging
 
   nightly-tests:
     triggers:

@@ -1,7 +1,6 @@
 import { ElementHandle, Page } from 'puppeteer';
 import {config} from 'resources/workbench-config';
 import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
-import {waitForDocumentTitle} from 'utils/waits-utils';
 import BaseElement from 'app/element/base-element';
 import Button from 'app/element/button';
 
@@ -132,17 +131,17 @@ export default class GoogleLoginPage {
     // Sometimes, user is prompted with "Enter Recovery Email" page. Handle the page if found.
     const recoverEmailXpath = '//input[@type="email" and @aria-label="Enter recovery email address"]';
     await Promise.race([
-      waitForDocumentTitle(this.page, 'Homepage'),
+      this.page.waitForSelector('app-signed-in'),
       this.page.waitForXPath(recoverEmailXpath, {visible: true})
     ]);
     const elementHandles = await this.page.$x(recoverEmailXpath);
     if (elementHandles.length > 0) {
-      await elementHandles[0].type(config.broadInstitutionContactEmail);
+      await elementHandles[0].type(config.institutionContactEmail);
       await Promise.all([
         this.page.waitForNavigation(),
         this.page.keyboard.press(String.fromCharCode(13)), // press Enter key
       ]);
-      await waitForDocumentTitle(this.page, 'Homepage');
+      await this.page.waitForSelector('app-signed-in');
     }
 
   }

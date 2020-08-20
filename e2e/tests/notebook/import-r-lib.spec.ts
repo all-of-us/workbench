@@ -2,7 +2,7 @@ import DataPage from 'app/page/data-page';
 import {Language} from 'app/text-labels';
 import * as fs from 'fs';
 import {makeRandomName} from 'utils/str-utils';
-import {findWorkspace, signIn} from 'utils/test-utils';
+import {pickWorkspace, signIn} from 'utils/test-utils';
 import {CellType} from 'app/page/notebook-cell';
 
 // Notebook server start may take a long time. Set maximum test running time to 20 minutes.
@@ -15,10 +15,10 @@ describe('Jupyter notebook tests in R', () => {
   });
 
   test('Import libraries', async () => {
+
     const rCodeSnippet = fs.readFileSync('resources/r-code/import-libs.R', 'utf8');
 
-    const workspaceCard = await findWorkspace(page);
-    await workspaceCard.clickWorkspaceName();
+    await pickWorkspace(page).then(card => card.clickWorkspaceName());
 
     const dataPage = new DataPage(page);
     const notebookName = makeRandomName('import-r-lib');

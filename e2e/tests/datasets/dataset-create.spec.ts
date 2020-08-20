@@ -5,7 +5,7 @@ import DataPage, {TabLabelAlias} from 'app/page/data-page';
 import DatasetSaveModal from 'app/page/dataset-save-modal';
 import {EllipsisMenuAction, LinkText} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
-import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
+import {pickWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
 
 describe('Create Dataset', () => {
@@ -22,8 +22,8 @@ describe('Create Dataset', () => {
    * - Delete Dataset.
    */
   test('Can create Dataset with defaults selections', async () => {
-    const workspaceCard = await findWorkspace(page);
-    await workspaceCard.clickWorkspaceName();
+
+    await pickWorkspace(page).then(card => card.clickWorkspaceName());
 
     // Click Add Datasets button
     const dataPage = new DataPage(page);
@@ -69,8 +69,8 @@ describe('Create Dataset', () => {
    * - Delete Dataset.
    */
   test('Can create Dataset with user-defined cohort', async () => {
-    const workspaceCard = await findWorkspace(page);
-    await workspaceCard.clickWorkspaceName();
+
+    await pickWorkspace(page).then(card => card.clickWorkspaceName());
 
     // Click Add Cohorts button
     const dataPage = new DataPage(page);

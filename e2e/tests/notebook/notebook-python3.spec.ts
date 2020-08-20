@@ -1,6 +1,6 @@
 import DataPage from 'app/page/data-page';
 import {makeRandomName} from 'utils/str-utils';
-import {findWorkspace, signIn} from 'utils/test-utils';
+import {pickWorkspace, signIn} from 'utils/test-utils';
 
 // Notebook server start may take a long time. Set maximum test running time to 20 minutes.
 jest.setTimeout(20 * 60 * 1000);
@@ -12,8 +12,8 @@ describe('Jupyter notebook tests in Python language', () => {
   });
 
   test('Run code from file', async () => {
-    const workspaceCard = await findWorkspace(page);
-    await workspaceCard.clickWorkspaceName();
+
+    await pickWorkspace(page).then(card => card.clickWorkspaceName());
 
     const dataPage = new DataPage(page);
     const notebookName = makeRandomName('py');

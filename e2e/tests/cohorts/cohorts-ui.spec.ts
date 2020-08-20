@@ -1,7 +1,7 @@
 import {PhysicalMeasurementsCriteria} from 'app/page/cohort-criteria-modal';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import DataPage, {TabLabelAlias} from 'app/page/data-page';
-import {findWorkspace, signIn} from 'utils/test-utils';
+import {pickWorkspace, signIn} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 
@@ -18,8 +18,8 @@ describe('Cohorts UI tests', () => {
    * Confirm Discard Changes.
    */
   test('Discard Changes', async () => {
-    const workspaceCard = await findWorkspace(page);
-    await workspaceCard.clickWorkspaceName();
+
+    await pickWorkspace(page).then(card => card.clickWorkspaceName());
 
     // Wait for the Data page.
     const dataPage = new DataPage(page);

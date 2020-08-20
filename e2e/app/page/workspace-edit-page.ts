@@ -234,7 +234,7 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
       await Promise.all([
         waitForDocumentTitle(this.page, PageTitle),
         this.getWorkspaceNameTextbox(),
-        select.getSelectedOption(),
+        select.asElementHandle(),
         this.getCreateWorkspaceButton(),
         waitWhileLoading(this.page),
       ]);
@@ -243,6 +243,13 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
       console.log(`WorkspaceEditPage isLoaded() encountered ${err}`);
       return false;
     }
+  }
+
+  /**
+   * Find the Synthetic Dataset Select element.
+   */
+  async getDatasetSelect(): Promise<Select> {
+    return Select.findByName(this.page, FIELD.dataSetSelect.textOption);
   }
 
   async getCreateWorkspaceButton(): Promise<Button> {
@@ -311,11 +318,11 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
 
   /**
    * Select Synthetic Dataset.
-   * @param {string} optionValue: 1 for "Synthetic Dataset 1". 2 for "Synthetic Dataset 2", so on.
+   * @param {string} value Option texts: "Synthetic Dataset 1", "Synthetic Dataset 2" and "Synthetic Dataset v3".
    */
-  async selectDataset(optionValue: string = '3') {
-    const dataSetSelect = await Select.findByName(this.page, FIELD.dataSetSelect.textOption);
-    await dataSetSelect.selectOption(optionValue);
+  async selectDataset(value: string = 'Synthetic Dataset v3'): Promise<string> {
+    const dataSetSelect = await this.getDatasetSelect();
+    return dataSetSelect.selectOption(value);
   }
 
   /**
