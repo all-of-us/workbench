@@ -4,15 +4,20 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import java.util.function.Function;
 
 public interface QueryParameterColumn<T> {
-
-  int MICROSECODNS_IN_MILLISECOND = 1000;
-
   // parameter name (without any @ sign). Also matches column name
   String getParameterName();
 
+  Function<T, Object> getRowToInsertValueFunction();
+
   Function<T, QueryParameterValue> getQueryParameterValueFunction();
 
-  default QueryParameterValue toParameterValue(T target) {
-    return getQueryParameterValueFunction().apply(target);
+  // Expected number and String formats for InsertAllRequest.RowToInsert don't
+  // always match those for QueryParameterValue
+  default Object getRowToInsertValue(T model) {
+    return getRowToInsertValueFunction().apply(model);
+  };
+
+  default QueryParameterValue toParameterValue(T model) {
+    return getQueryParameterValueFunction().apply(model);
   }
 }

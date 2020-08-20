@@ -24,12 +24,10 @@ import {CohortActionsComponent} from './pages/data/cohort/cohort-actions';
 import {ConceptHomepageComponent} from './pages/data/concept/concept-homepage';
 import {ConceptSetActionsComponent} from './pages/data/concept/concept-set-actions';
 import {ConceptSetDetailsComponent} from './pages/data/concept/concept-set-details';
-import {HomepageComponent} from './pages/homepage/homepage';
 import {ProfilePageComponent} from './pages/profile/profile-page';
 import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './pages/workspace/workspace-edit';
-import {WorkspaceLibraryComponent} from './pages/workspace/workspace-library';
 import {WorkspaceListComponent} from './pages/workspace/workspace-list';
 import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/component';
 
@@ -46,10 +44,10 @@ import {BreadcrumbType, NavStore} from './utils/navigation';
 declare let gtag: Function;
 
 const routes: Routes = [
-  // For now, all publicly accessible React routes must kept in sync between here
-  // and AppRouting, as we cannot use an Angular ** route to send to AppRouting
-  // under both the sign in guard and the signed out context. All signed out paths
-  // should be hardcoded here until the full React router migration is complete.
+  // NOTE: Instead of using Angular wildcard routes, which short-circuit further route
+  // discovery and behave strangely with the Angular router anyways, we're going to explicitly
+  // list each React route here with component: AppRouting and just delete the entire file
+  // when we migrate away from Angular.
   {
     path: 'cookie-policy',
     component: AppRouting
@@ -77,21 +75,35 @@ const routes: Routes = [
     canActivateChild: [SignInGuard, DisabledGuard],
     runGuardsAndResolvers: 'always',
     children: [
+      // legacy / duplicated routes go HERE
       {
         path: '',
-        component: HomepageComponent,
-        data: {title: 'Homepage'}
+        component: AppRouting,
+        data: {}
       },
+      {
+        path: 'data-code-of-conduct',
+        component: AppRouting
+      },
+      {
+        path: 'nih-callback',
+        component: AppRouting,
+        data: {}
+      },
+      // non-migrated routes go HERE
       {
         path: '',
         canActivateChild: [RegistrationGuard],
         runGuardsAndResolvers: 'always',
         children: [
+          // legacy / duplicated routes go HERE
           {
             path: 'library',
-            component: WorkspaceLibraryComponent,
-            data: {title: 'Workspace Library'}
-          }, {
+            component: AppRouting,
+            data: {}
+          },
+          // non-migrated routes go HERE
+          {
             path: 'workspaces',
             canActivateChild: [WorkspaceGuard],
             children: [
@@ -104,9 +116,9 @@ const routes: Routes = [
                 }
               },
               {
-            /* TODO The children under ./views need refactoring to use the data
-             * provided by the route rather than double-requesting it.
-             */
+                /* TODO The children under ./views need refactoring to use the data
+                 * provided by the route rather than double-requesting it.
+                 */
                 path: ':ns/:wsid',
                 component: WorkspaceWrapperComponent,
                 runGuardsAndResolvers: 'always',
@@ -306,15 +318,33 @@ const routes: Routes = [
             component: WorkspaceEditComponent,
             data: {title: 'Create Workspace', mode: WorkspaceEditMode.Create}
           }
-        ]},
-      {
-        path: 'nih-callback',
-        component: HomepageComponent,
-        data: {title: 'Homepage'},
+        ]
       },
       {
         path: 'admin',
         children: [
+          // legacy / duplicated routes go HERE
+          {
+            path: 'user-audit',
+            component: AppRouting,
+            data: {}
+          },
+          {
+            path: 'user-audit/:username',
+            component: AppRouting,
+            data: {}
+          },
+          {
+            path: 'workspaceAudit',
+            component: AppRouting,
+            data: {}
+          },
+          {
+            path: 'workspaceAudit/:workspaceNamespace',
+            component: AppRouting,
+            data: {}
+          },
+          // non-migrated routes go HERE
           {
             path: 'review-workspace',
             component: AdminReviewWorkspaceComponent,
@@ -361,13 +391,9 @@ const routes: Routes = [
             path: 'institution/edit/:institutionId',
             component: AdminInstitutionEditComponent,
             data: { title: 'Institution Admin'},
-          }]
+          }
+        ]
       },
-      {
-        path: '**',
-        component: AppRouting,
-        data: {}
-      }
     ]
   }
 ];

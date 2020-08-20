@@ -2,8 +2,9 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {currentWorkspaceStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
 import {CohortBuilderApi} from 'generated/fetch';
+import defaultServerConfig from 'testing/default-server-config';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 import {NodeProp, TreeNode} from './tree-node.component';
@@ -30,6 +31,10 @@ describe('TreeNode', () => {
     currentWorkspaceStore.next({
       ...workspaceDataStub,
       cdrVersionId: '1',
+    });
+    serverConfigStore.next({
+      ...defaultServerConfig,
+      enableCohortBuilderV2: false
     });
   });
   it('should create', () => {

@@ -5,6 +5,7 @@ import java.util.Set;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaLookup;
 import org.pmiops.workbench.cdr.model.DbMenuOption;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
@@ -160,7 +161,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
   @Query(
       value =
           "select c from DbCriteria c where domainId=:domain and type=:type and standard=:standard and code like upper(concat(:term,'%')) and match(synonyms, concat('+[', :domain, '_rank1]')) > 0 order by c.count desc")
-  List<DbCriteria> findCriteriaByDomainAndTypeAndCode(
+  Page<DbCriteria> findCriteriaByDomainAndTypeAndCode(
       @Param("domain") String domain,
       @Param("type") String type,
       @Param("standard") Boolean isStandard,
@@ -170,7 +171,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
   @Query(
       value =
           "select c from DbCriteria c where domainId=:domain and standard=:standard and code like upper(concat(:term,'%')) and match(synonyms, concat('+[', :domain, '_rank1]')) > 0 order by c.count desc")
-  List<DbCriteria> findCriteriaByDomainAndCode(
+  Page<DbCriteria> findCriteriaByDomainAndCode(
       @Param("domain") String domain,
       @Param("standard") Boolean isStandard,
       @Param("term") String term,
@@ -179,7 +180,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
   @Query(
       value =
           "select c from DbCriteria c where domainId=:domain and standard=:standard and match(synonyms, concat(:term, '+[', :domain, '_rank1]')) > 0 order by c.count desc, c.name asc")
-  List<DbCriteria> findCriteriaByDomainAndSynonyms(
+  Page<DbCriteria> findCriteriaByDomainAndSynonyms(
       @Param("domain") String domain,
       @Param("standard") Boolean isStandard,
       @Param("term") String term,

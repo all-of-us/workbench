@@ -8,7 +8,6 @@ import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.pmiops.workbench.model.CohortStatus;
 
@@ -58,17 +57,8 @@ public class DbParticipantCohortStatus {
     return this;
   }
 
-  @Transient
-  public CohortStatus getStatusEnum() {
-    return DbStorageEnums.cohortStatusFromStorage(getStatus());
-  }
-
   public void setStatusEnum(CohortStatus status) {
     setStatus(DbStorageEnums.cohortStatusToStorage(status));
-  }
-
-  public DbParticipantCohortStatus statusEnum(CohortStatus status) {
-    return this.status(DbStorageEnums.cohortStatusToStorage(status));
   }
 
   @Column(name = "gender_concept_id")

@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -82,6 +81,7 @@ import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.DistributionMetric;
 import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
 import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.utils.RandomUtils;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -156,15 +156,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return registeredDomainGroup.getGroupEmail();
   }
 
-  private static String generateRandomChars(String candidateChars, int length) {
-    StringBuilder sb = new StringBuilder();
-    Random random = new Random();
-    for (int i = 0; i < length; i++) {
-      sb.append(candidateChars.charAt(random.nextInt(candidateChars.length())));
-    }
-    return sb.toString();
-  }
-
   private DbCdrVersion setLiveCdrVersionId(DbWorkspace dbWorkspace, String cdrVersionId) {
     if (Strings.isNullOrEmpty(cdrVersionId)) {
       throw new BadRequestException("missing cdrVersionId");
@@ -193,7 +184,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     String strippedName = name.toLowerCase().replaceAll("[^0-9a-z]", "");
     // If the stripped name has no chars, generate a random name.
     if (strippedName.isEmpty()) {
-      strippedName = generateRandomChars(RANDOM_CHARS, NUM_RANDOM_CHARS);
+      strippedName = RandomUtils.generateRandomChars(RANDOM_CHARS, NUM_RANDOM_CHARS);
     }
     return new FirecloudWorkspaceId(namespace, strippedName);
   }

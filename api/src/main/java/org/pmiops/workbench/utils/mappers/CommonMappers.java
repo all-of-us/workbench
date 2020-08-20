@@ -1,5 +1,6 @@
 package org.pmiops.workbench.utils.mappers;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Optional;
@@ -55,6 +56,18 @@ public class CommonMappers {
       return new Timestamp(timestamp);
     }
 
+    return null;
+  }
+
+  @Named("dateToString")
+  public String dateToString(Date date) {
+    // We are using this method because mapstruct defaults to gregorian conversion. The difference
+    // is:
+    // Gregorian: "2020-03-30T18:31:50.000Z"
+    // toString: "2020-03-30"
+    if (date != null) {
+      return date.toString();
+    }
     return null;
   }
 

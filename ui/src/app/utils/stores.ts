@@ -1,3 +1,4 @@
+import {Profile} from 'generated';
 import {useEffect, useState} from 'react';
 import {atom, Atom} from './subscribable';
 
@@ -14,6 +15,12 @@ interface AuthStore {
 }
 
 export const authStore = atom<AuthStore>({authLoaded: false, isSignedIn: false});
+
+interface ProfileStore {
+  profile?: Profile;
+}
+
+export const profileStore = atom<ProfileStore>({});
 
 /**
  * @name useStore

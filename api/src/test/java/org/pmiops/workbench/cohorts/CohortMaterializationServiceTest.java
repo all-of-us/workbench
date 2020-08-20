@@ -35,6 +35,7 @@ import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
 import org.pmiops.workbench.db.model.DbParticipantCohortStatusKey;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.AnnotationQuery;
 import org.pmiops.workbench.model.CdrQuery;
@@ -320,7 +321,9 @@ public class CohortMaterializationServiceTest {
             .cohortReviewId(cohortReviewId)
             .participantId(participantId);
     DbParticipantCohortStatus result =
-        new DbParticipantCohortStatus().statusEnum(status).participantKey(key);
+        new DbParticipantCohortStatus()
+            .status(DbStorageEnums.cohortStatusToStorage(status))
+            .participantKey(key);
     return result;
   }
 

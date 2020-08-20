@@ -28,9 +28,6 @@ public class CohortReviewMapperTest {
   @MockBean({Clock.class})
   static class Configuration {}
 
-  @Before
-  public void setUp() throws Exception {}
-
   @Test
   public void dbModelToClient() {
     Timestamp timestamp = new Timestamp(System.currentTimeMillis());

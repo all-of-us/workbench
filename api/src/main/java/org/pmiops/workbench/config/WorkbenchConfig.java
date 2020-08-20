@@ -247,8 +247,6 @@ public class WorkbenchConfig {
     // Flag to indicate whether to use the new Moodle badges API
     // https://precisionmedicineinitiative.atlassian.net/browse/RW-2957
     public boolean enableMoodleV2Api;
-    // Flag to indicate whether to use the new age type options in cohort builder age wizard
-    public boolean enableCBAgeTypeOptions;
     // Flag to indicate whether to use the V2 Data User Code of Conduct
     public boolean enableV3DataUserCodeOfConduct;
     // Flag to indicate whether to show the Event Date modifier in cohort builder
@@ -301,5 +299,6 @@ public class WorkbenchConfig {
   public static class ReportingConfig {
     public String dataset;
     public Integer maxRowsPerInsert;
+    public String uploadMethod;
   }
 }

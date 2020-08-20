@@ -149,7 +149,7 @@ export default class WorkspacesPage extends WorkspaceEditPage {
     const notebookPage = await dataPage.createNotebook(notebookName, lang); // Python 3 is the default
 
     // Do not run any code. Simply returns to the Workspace Analysis tab.
-    return notebookPage.goBackAnalysisPage();
+    return notebookPage.goAnalysisPage();
   }
 
 }

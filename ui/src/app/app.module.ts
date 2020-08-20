@@ -40,13 +40,11 @@ import {CohortActionsComponent} from './pages/data/cohort/cohort-actions';
 import {ConceptHomepageComponent} from './pages/data/concept/concept-homepage';
 import {ConceptSetActionsComponent} from './pages/data/concept/concept-set-actions';
 import {ConceptSetDetailsComponent} from './pages/data/concept/concept-set-details';
-import {HomepageComponent} from './pages/homepage/homepage';
 import {InitialErrorComponent} from './pages/initial-error/component';
 import {ProfilePageComponent} from './pages/profile/profile-page';
 import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
 import {WorkspaceEditComponent} from './pages/workspace/workspace-edit';
-import {WorkspaceLibraryComponent} from './pages/workspace/workspace-library';
 import {WorkspaceListComponent} from './pages/workspace/workspace-list';
 import {WorkspaceNavBarComponent} from './pages/workspace/workspace-nav-bar';
 import {WorkspaceShareComponent} from './pages/workspace/workspace-share';
@@ -163,12 +161,10 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     TextModalComponent,
     WorkspaceAboutComponent,
     WorkspaceEditComponent,
-    WorkspaceLibraryComponent,
     WorkspaceListComponent,
     WorkspaceNavBarComponent,
     WorkspaceShareComponent,
     WorkspaceWrapperComponent,
-    HomepageComponent
   ],
   providers: [
     {

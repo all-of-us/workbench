@@ -37,6 +37,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
+import org.pmiops.workbench.cdr.dao.DSLinkingDao;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.dataset.DataSetServiceImpl;
@@ -89,6 +90,7 @@ public class DataSetServiceTest {
   @Autowired private CohortQueryBuilder cohortQueryBuilder;
   @Autowired private DataDictionaryEntryDao dataDictionaryEntryDao;
   @Autowired private DataSetDao dataSetDao;
+  @Autowired private DSLinkingDao dsLinkingDao;
   @Autowired private DataSetMapper dataSetMapper;
 
   @MockBean private BigQueryService mockBigQueryService;
@@ -124,6 +126,7 @@ public class DataSetServiceTest {
             cohortQueryBuilder,
             dataDictionaryEntryDao,
             dataSetDao,
+            dsLinkingDao,
             dataSetMapper,
             CLOCK);
 

@@ -28,6 +28,8 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
+import org.pmiops.workbench.cdr.dao.DSLinkingDao;
+import org.pmiops.workbench.cdr.model.DbDSLinking;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortService;
@@ -92,6 +94,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private CdrVersionService cdrVersionService;
   @Autowired private CohortDao cohortDao;
   @Autowired private ConceptSetDao conceptSetDao;
+  @Autowired private DSLinkingDao dsLinkingDao;
   @Autowired private DataSetService dataSetService;
   @Autowired private FireCloudService fireCloudService;
   @Autowired private NotebooksService notebooksService;
@@ -111,6 +114,14 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   private DbConceptSet dbConditionConceptSet;
   private DbConceptSet dbProcedureConceptSet;
   private DbWorkspace dbWorkspace;
+  private DbDSLinking conditionLinking1;
+  private DbDSLinking conditionLinking2;
+  private DbDSLinking personLinking1;
+  private DbDSLinking personLinking2;
+  private DbDSLinking surveyLinking1;
+  private DbDSLinking surveyLinking2;
+  private DbDSLinking procedureLinking1;
+  private DbDSLinking procedureLinking2;
 
   @TestConfiguration
   @Import({
@@ -218,6 +229,74 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     dbCohort2 = cohortDao.save(dbCohort2);
 
     when(controller.generateRandomEightCharacterQualifier()).thenReturn("00000000");
+
+    conditionLinking1 =
+        DbDSLinking.builder()
+            .addDenormalizedName("CORE_TABLE_FOR_DOMAIN")
+            .addOmopSql("CORE_TABLE_FOR_DOMAIN")
+            .addJoinValue("from `${projectId}.${dataSetId}.condition_occurrence` c_occurrence")
+            .addDomain("Condition")
+            .build();
+    dsLinkingDao.save(conditionLinking1);
+    conditionLinking2 =
+        DbDSLinking.builder()
+            .addDenormalizedName("PERSON_ID")
+            .addOmopSql("c_occurrence.PERSON_ID")
+            .addJoinValue("from `${projectId}.${dataSetId}.condition_occurrence` c_occurrence")
+            .addDomain("Condition")
+            .build();
+    dsLinkingDao.save(conditionLinking2);
+
+    personLinking1 =
+        DbDSLinking.builder()
+            .addDenormalizedName("CORE_TABLE_FOR_DOMAIN")
+            .addOmopSql("CORE_TABLE_FOR_DOMAIN")
+            .addJoinValue("FROM `${projectId}.${dataSetId}.person` person")
+            .addDomain("Person")
+            .build();
+    dsLinkingDao.save(personLinking1);
+    personLinking2 =
+        DbDSLinking.builder()
+            .addDenormalizedName("PERSON_ID")
+            .addOmopSql("person.PERSON_ID")
+            .addJoinValue("FROM `${projectId}.${dataSetId}.person` person")
+            .addDomain("Person")
+            .build();
+    dsLinkingDao.save(personLinking2);
+
+    surveyLinking1 =
+        DbDSLinking.builder()
+            .addDenormalizedName("CORE_TABLE_FOR_DOMAIN")
+            .addOmopSql("CORE_TABLE_FOR_DOMAIN")
+            .addJoinValue("FROM `${projectId}.${dataSetId}.ds_survey` answer")
+            .addDomain("Survey")
+            .build();
+    dsLinkingDao.save(surveyLinking1);
+    surveyLinking2 =
+        DbDSLinking.builder()
+            .addDenormalizedName("PERSON_ID")
+            .addOmopSql("answer.PERSON_ID")
+            .addJoinValue("")
+            .addDomain("Survey")
+            .build();
+    dsLinkingDao.save(surveyLinking2);
+
+    procedureLinking1 =
+        DbDSLinking.builder()
+            .addDenormalizedName("CORE_TABLE_FOR_DOMAIN")
+            .addOmopSql("CORE_TABLE_FOR_DOMAIN")
+            .addJoinValue("from `${projectId}.${dataSetId}.procedure_occurrence` procedure")
+            .addDomain("Procedure")
+            .build();
+    dsLinkingDao.save(procedureLinking1);
+    procedureLinking2 =
+        DbDSLinking.builder()
+            .addDenormalizedName("PERSON_ID")
+            .addOmopSql("procedure.PERSON_ID")
+            .addJoinValue("from `${projectId}.${dataSetId}.procedure_occurrence` procedure")
+            .addDomain("Procedure")
+            .build();
+    dsLinkingDao.save(procedureLinking2);
   }
 
   private DbConceptSet createConceptSet(Domain domain, long workspaceId) {
@@ -236,6 +315,14 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     conceptSetDao.delete(dbProcedureConceptSet.getConceptSetId());
     workspaceDao.delete(dbWorkspace.getWorkspaceId());
     cdrVersionDao.delete(dbCdrVersion.getCdrVersionId());
+    dsLinkingDao.delete(conditionLinking1);
+    dsLinkingDao.delete(conditionLinking2);
+    dsLinkingDao.delete(personLinking1);
+    dsLinkingDao.delete(personLinking2);
+    dsLinkingDao.delete(surveyLinking1);
+    dsLinkingDao.delete(surveyLinking2);
+    dsLinkingDao.delete(procedureLinking1);
+    dsLinkingDao.delete(procedureLinking2);
   }
 
   @Test

@@ -4,8 +4,10 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Random;
@@ -52,6 +54,7 @@ public class ReportingSnapshotServiceTest {
 
   @MockBean private Random mockRandom;
   @MockBean private UserService mockUserService;
+  @MockBean private Stopwatch mockStopwatch;
   @MockBean private WorkspaceService mockWorkspaceService;
 
   @Autowired private ReportingSnapshotService reportingSnapshotService;
@@ -63,7 +66,7 @@ public class ReportingSnapshotServiceTest {
     CommonMappers.class,
     ReportingMapperImpl.class,
     ReportingSnapshotServiceImpl.class,
-    ReportingUploadServiceImpl.class
+    ReportingUploadServiceDmlImpl.class
   })
   @MockBean({BigQueryService.class})
   public static class config {
@@ -86,6 +89,7 @@ public class ReportingSnapshotServiceTest {
             })
         .when(mockRandom)
         .nextLong();
+    TestMockFactory.stubStopwatch(mockStopwatch, Duration.ofMillis(100));
   }
 
   public void mockWorkspaces() {

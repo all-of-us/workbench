@@ -36,7 +36,6 @@ public class ConfigController implements ConfigApiDelegate {
             .requireInvitationKey(config.access.requireInvitationKey)
             .enableBillingLockout(config.featureFlags.enableBillingLockout)
             .enableBillingUpgrade(config.featureFlags.enableBillingUpgrade)
-            .enableCBAgeTypeOptions(config.featureFlags.enableCBAgeTypeOptions)
             .enableV3DataUserCodeOfConduct(config.featureFlags.enableV3DataUserCodeOfConduct)
             .enableEventDateModifier(config.featureFlags.enableEventDateModifier)
             .useNewShibbolethService(config.featureFlags.useNewShibbolethService)

@@ -1,7 +1,6 @@
 import {Component} from '@angular/core';
-import * as React from 'react';
-
 import * as fp from 'lodash/fp';
+import * as React from 'react';
 
 import {CohortSearch} from 'app/cohort-search/cohort-search/cohort-search.component';
 import {CBModal} from 'app/cohort-search/modal/modal.component';
@@ -23,8 +22,6 @@ import {
   withCurrentWorkspace
 } from 'app/utils';
 import {
-  attributesSelectionStore,
-  currentCohortCriteriaStore,
   currentCohortSearchContextStore,
   currentCohortStore,
   queryParamsStore,
@@ -55,11 +52,11 @@ function colStyle(percentage: string) {
 }
 
 interface Props {
+  cohortContext: any;
   setCohortChanged: (cohortChanged: boolean) => void;
   setUpdatingCohort: (updatingCohort: boolean) => void;
   setShowWarningModal: (showWarningModal: () => Promise<boolean>) => void;
   workspace: WorkspaceData;
-  searchContext: any;
 }
 
 interface State {
@@ -173,6 +170,7 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
     }
 
     render() {
+      const {cohortContext} = this.props;
       const {cohort, cohortChanged, cohortError, criteria, loading, modalOpen, overview, searchContext, updateCount, updateGroupListsCount}
         = this.state;
       return <React.Fragment>
@@ -185,7 +183,7 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
             : serverConfigStore.getValue().enableCohortBuilderV2
               /* Cohort Builder V2 UI - behind enableCohortBuilderV2 feature flag */
               ? <React.Fragment>
-                <FlexRowWrap style={{margin: '0 -0.5rem', ...(!!searchContext ? {display: 'none'} : {})}}>
+                <FlexRowWrap style={{margin: '0 -0.5rem', ...(!!cohortContext ? {display: 'none'} : {})}}>
                   <div style={colStyle('66.66667')}>
                     <FlexRowWrap style={{margin: '0 -0.5rem'}}>
                       <div style={{height: '1.5rem', padding: '0 0.5rem', width: '100%'}}>
@@ -217,14 +215,7 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
                   </div>
                   {loading && <SpinnerOverlay/>}
                 </FlexRowWrap>
-                {searchContext && <CohortSearch
-                    closeSearch={() => {
-                      this.setState({searchContext: undefined});
-                      currentCohortCriteriaStore.next(undefined);
-                      // Delay hiding attributes page until sidebar is closed
-                      setTimeout(() => attributesSelectionStore.next(undefined), 500);
-                    }}
-                    searchContext={searchContext}/>}
+                {!!cohortContext && <CohortSearch/>}
               </React.Fragment>
               /* Current Cohort Builder UI - not behind enableCohortBuilderV2 feature flag */
               : <FlexRowWrap style={{margin: '0 -0.5rem'}}>
