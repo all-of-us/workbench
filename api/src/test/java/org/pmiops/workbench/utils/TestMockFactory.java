@@ -20,7 +20,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import org.mockito.Mock;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -214,15 +213,11 @@ public class TestMockFactory {
   // next best thing is this helper method for setting all the method stubs in
   // a test's @Before method.
   public static void stubStopwatch(Stopwatch mockStopwatch, Duration elapsed) {
-    doReturn(elapsed)
-        .when(mockStopwatch)
-        .elapsed();
+    doReturn(elapsed).when(mockStopwatch).elapsed();
 
     // Just use millis unconditionally. This method is not recommended and not used currently,
     // so I'm not investing in making this correct yet.
-    doReturn(elapsed.toMillis())
-        .when(mockStopwatch)
-        .elapsed(any(TimeUnit.class));
+    doReturn(elapsed.toMillis()).when(mockStopwatch).elapsed(any(TimeUnit.class));
 
     doReturn(mockStopwatch).when(mockStopwatch).start();
     doReturn(mockStopwatch).when(mockStopwatch).stop();
