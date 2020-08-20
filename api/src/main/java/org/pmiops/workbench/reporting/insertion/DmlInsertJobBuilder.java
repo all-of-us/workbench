@@ -10,11 +10,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public interface ReportingInsertionJobBuilder<T> {
-
-  // Extending classes need only provide an  array of QueryParameterColumns, such
-  // as an enum class's values() array.
-  QueryParameterColumn<T>[] getQueryParameterColumns();
+public interface DmlInsertJobBuilder<T> extends ColumnDrivenBuilder<T> {
 
   default String getColumnNameList() {
     return Arrays.stream(getQueryParameterColumns())

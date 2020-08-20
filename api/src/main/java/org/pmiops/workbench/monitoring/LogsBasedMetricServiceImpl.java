@@ -27,9 +27,9 @@ public class LogsBasedMetricServiceImpl implements LogsBasedMetricService {
   private static final Logger log = Logger.getLogger(LogsBasedMetricServiceImpl.class.getName());
 
   private static final String METRICS_LOG_NAME = "debug-logs-based-metrics";
-  private Logging cloudLogging;
-  private StackdriverStatsExporterService stackdriverStatsExporterService;
-  private Provider<Stopwatch> stopwatchProvider;
+  private final Logging cloudLogging;
+  private final StackdriverStatsExporterService stackdriverStatsExporterService;
+  private final Provider<Stopwatch> stopwatchProvider;
 
   /**
    * TODO(jaycarlton) The dependency on the OpenCensus-specific StackdriverStatsExporterService is
