@@ -54,8 +54,9 @@
   ~/broad/gatk/gatk CreateArrayIngestFiles --sample-id 908 -V 1000_sample.vcf --probe-info-file probe_info.csv --ref-version 37
   gsutil cp *.tsv gs://all-of-us-workbench-test-genomics/eric/import/3/ready/
 ```
+- [This](https://github.com/broadinstitute/variantstore/blob/master/quickstart_example.sh#L13) will create the probe_info.csv file. 
 - Every import/# folder can only contain up to 4k samples
-- CreateArrayIngestFiles takes ~1m 20s and operates 1 sample at a time
+- [CreateArrayIngestFiles](https://github.com/broadinstitute/gatk/blob/ah_var_store/src/main/java/org/broadinstitute/hellbender/tools/variantdb/arrays/CreateArrayIngestFiles.java) takes ~1m 20s and operates 1 sample at a time
 - gsutil cp depends on upload speed
 
 
@@ -65,6 +66,7 @@
   cd ingest
   ./bq_ingest_arrays.sh all-of-us-workbench-test microarray_data gs://all-of-us-workbench-test-genomics/eric/import 3
 ```
+- https://github.com/broadinstitute/variantstore/blob/master/ingest/bq_ingest_arrays.sh
 - This will have to be changed for >4k samples since a BigQuery table can only have 4k partitions
 
 ### Move into VPC-SC (Fairly quick, < 1h)
