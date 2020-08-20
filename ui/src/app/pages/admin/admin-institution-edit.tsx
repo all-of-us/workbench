@@ -345,7 +345,7 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
             {showOtherInstitutionTextBox && <TextInputWithLabel
               value={institution.organizationTypeOtherText}
               onChange={v => this.setState(fp.set(['institution', 'organizationTypeOtherText'], v))}
-              onBlur={v => this.setState(fp.set(['institution', 'displayName'], v.trim()))}
+              onBlur={v => this.setState(fp.set(['institution', 'organizationTypeOtherText'], v.trim()))}
               inputStyle={{width: '16rem', marginTop: '0.8rem'}}/>}
             <label style={styles.label}>Agreement Type</label>
             <Dropdown style={{width: '16rem'}} data-test-id='agreement-dropdown'
