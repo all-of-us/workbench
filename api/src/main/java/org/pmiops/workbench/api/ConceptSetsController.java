@@ -380,43 +380,21 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     }
     validateConceptSet(
         dbConceptSet,
-        dbConceptSet.getConceptIds().stream().map(concept -> concept).collect(Collectors.toList()));
+        dbConceptSet.getConceptIds().stream().collect(Collectors.toList()));
   }
 
-  private void validateConceptSet(DbConceptSet dbConceptSet, List<Long> addedIds) {
+  private void validateConceptSet(DbConceptSet dbConceptSet, List<Long> conceptIds) {
     Domain domainEnum = dbConceptSet.getDomainEnum();
     if (domainEnum == null) {
       throw new BadRequestException("Domain is not allowed for concept sets");
     }
-    if (addedIds == null || addedIds.size() == 0) {
+    if (conceptIds == null || conceptIds.size() == 0) {
       throw new BadRequestException("Cannot create a concept set with no concepts");
     }
 
-    Iterable<DbConcept> concepts = conceptService.findAll(addedIds);
     if (dbConceptSet.getConceptIds().size() > MAX_CONCEPTS_PER_SET) {
       throw new BadRequestException("Exceeded " + MAX_CONCEPTS_PER_SET + " in concept set");
     }
-    List<DbConcept> mismatchedConcepts =
-        ImmutableList.copyOf(concepts).stream()
-            .filter(concept -> !concept.getConceptClassId().equals("Question"))
-            .filter(
-                concept -> {
-                  Domain domain =
-                      Domain.PHYSICALMEASUREMENT.equals(domainEnum)
-                          ? Domain.PHYSICALMEASUREMENT
-                          : DbStorageEnums.domainIdToDomain(concept.getDomainId());
-                  return !domainEnum.equals(domain);
-                })
-            .collect(Collectors.toList());
-    if (!mismatchedConcepts.isEmpty()) {
-      String mismatchedConceptIds =
-          Joiner.on(", ")
-              .join(
-                  mismatchedConcepts.stream()
-                      .map(DbConcept::getConceptId)
-                      .collect(Collectors.toList()));
-      throw new BadRequestException(
-          String.format("Concepts [%s] are not in domain %s", mismatchedConceptIds, domainEnum));
-    }
+
   }
 }
