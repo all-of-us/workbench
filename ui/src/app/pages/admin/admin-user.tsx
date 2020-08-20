@@ -318,6 +318,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
   validateCheckEmailResponse() {
     const {validateEmailResponse, validateEmailError} = this.state;
 
+    // if we have never called validateEmail()
     if (!validateEmailResponse && !validateEmailError) {
       return true;
     }
