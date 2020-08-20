@@ -98,7 +98,6 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
             request,
             workspace.getWorkspaceId(),
             userProvider.get(),
-            conceptService,
             conceptBigQueryService);
 
     try {

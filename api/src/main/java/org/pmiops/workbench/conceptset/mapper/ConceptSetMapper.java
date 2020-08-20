@@ -51,7 +51,6 @@ public interface ConceptSetMapper {
       CreateConceptSetRequest source,
       @Context Long workspaceId,
       @Context DbUser creator,
-      @Context ConceptService conceptService,
       @Context ConceptBigQueryService conceptBigQueryService);
 
   @AfterMapping
@@ -60,7 +59,6 @@ public interface ConceptSetMapper {
       @Context Long workspaceId,
       @Context DbUser creator,
       @MappingTarget DbConceptSet dbConceptSet,
-      @Context ConceptService conceptService,
       @Context ConceptBigQueryService conceptBigQueryService) {
     dbConceptSet.setWorkspaceId(workspaceId);
     dbConceptSet.setCreator(creator);
