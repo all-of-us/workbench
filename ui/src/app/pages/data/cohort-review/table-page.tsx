@@ -203,14 +203,14 @@ const defaultDemoFilters: any = {
   ]
 };
 const reverseColumnEnum = {
-  participantId: Columns.PARTICIPANTID,
-  sexAtBirth: Columns.SEXATBIRTH,
-  gender: Columns.GENDER,
-  race: Columns.RACE,
-  ethnicity: Columns.ETHNICITY,
-  birthDate: Columns.BIRTHDATE,
-  deceased: Columns.DECEASED,
-  status: Columns.STATUS
+  participantId: 'PARTICIPANTID',
+  sexAtBirth: 'SEXATBIRTH',
+  gender: 'GENDER',
+  race: 'RACE',
+  ethnicity: 'ETHNICITY',
+  birthDate: 'BIRTHDATE',
+  deceased: 'DECEASED',
+  status: 'STATUS'
 };
 const EVENT_CATEGORY = 'Review Participant List';
 
@@ -289,10 +289,10 @@ export const ParticipantsTable = withCurrentWorkspace()(
           ]) as string[];
           demoFilters = {
             ...demoFilters,
-            RACE: extract(data.raceList, Columns.RACE),
-            GENDER: extract(data.genderList, Columns.GENDER),
-            ETHNICITY: extract(data.ethnicityList, Columns.ETHNICITY),
-            SEX_AT_BIRTH: extract(data.sexAtBirthList, Columns.SEXATBIRTH)
+            RACE: extract(data.raceList, 'RACE'),
+            GENDER: extract(data.genderList, 'GENDER'),
+            ETHNICITY: extract(data.ethnicityList, 'ETHNICITY'),
+            SEXATBIRTH: extract(data.sexAtBirthList, 'SEXATBIRTH')
           };
           this.setState({demoFilters, filters});
         }, error => {
@@ -301,7 +301,8 @@ export const ParticipantsTable = withCurrentWorkspace()(
             ...demoFilters,
             RACE: [{name: 'Select All', value: 'Select All'}],
             GENDER: [{name: 'Select All', value: 'Select All'}],
-            ETHNICITY: [{name: 'Select All', value: 'Select All'}]
+            ETHNICITY: [{name: 'Select All', value: 'Select All'}],
+            SEXATBIRTH: [{name: 'Select All', value: 'Select All'}]
           };
           this.setState({demoFilters});
         })
