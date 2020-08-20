@@ -79,7 +79,7 @@ public class ConceptSetMapperTest {
   }
 
   @Test
-  public void clientToDb() {
+  public void clientToDbModel() {
     ConceptSet clientConceptSet = conceptSetMapper.dbModelToClient(dbConceptSet);
     CreateConceptSetRequest conceptSetRequest = new CreateConceptSetRequest();
     conceptSetRequest.setConceptSet(clientConceptSet);

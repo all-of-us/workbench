@@ -93,19 +93,16 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     DbWorkspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    if (request.getAddedIds() == null || request.getAddedIds().size() == 0) {
-      throw new BadRequestException("Cannot create a concept set with no concepts");
-    }
     DbConceptSet dbConceptSet =
-        validateConceptSize(
-            conceptSetMapper.clientToDbModel(
-                request,
-                workspace.getWorkspaceId(),
-                userProvider.get(),
-                conceptService,
-                conceptBigQueryService));
+        conceptSetMapper.clientToDbModel(
+            request,
+            workspace.getWorkspaceId(),
+            userProvider.get(),
+            conceptService,
+            conceptBigQueryService);
 
     try {
+      validateConceptSet(dbConceptSet, request.getAddedIds());
       dbConceptSet = conceptSetService.save(dbConceptSet);
       userRecentResourceService.updateConceptSetEntry(
           workspace.getWorkspaceId(),
@@ -180,22 +177,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       String workspaceNamespace, String workspaceId, Long conceptSetId, ConceptSet conceptSet) {
     DbConceptSet dbConceptSet =
         getDbConceptSet(workspaceNamespace, workspaceId, conceptSetId, WorkspaceAccessLevel.WRITER);
-    if (Strings.isNullOrEmpty(conceptSet.getEtag())) {
-      throw new BadRequestException("missing required update field 'etag'");
-    }
-    int version = Etags.toVersion(conceptSet.getEtag());
-    if (dbConceptSet.getVersion() != version) {
-      throw new ConflictException("Attempted to modify outdated concept set version");
-    }
-    if (conceptSet.getName() != null) {
-      dbConceptSet.setName(conceptSet.getName());
-    }
-    if (conceptSet.getDescription() != null) {
-      dbConceptSet.setDescription(conceptSet.getDescription());
-    }
-    if (conceptSet.getDomain() != null && conceptSet.getDomain() != dbConceptSet.getDomainEnum()) {
-      throw new BadRequestException("Cannot modify the domain of an existing concept set");
-    }
+    validateUpdateConceptSet(dbConceptSet, conceptSet);
     final Timestamp now = Timestamp.from(clock.instant());
     dbConceptSet.setLastModifiedTime(now);
     try {
@@ -244,43 +226,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       UpdateConceptSetRequest request) {
     DbConceptSet dbConceptSet =
         getDbConceptSet(workspaceNamespace, workspaceId, conceptSetId, WorkspaceAccessLevel.WRITER);
-
-    Set<Long> allConceptSetIds = dbConceptSet.getConceptIds();
-    if (request.getAddedIds() != null) {
-      allConceptSetIds.addAll(request.getAddedIds());
-    }
-    int sizeOfAllConceptSetIds = allConceptSetIds.stream().collect(Collectors.toSet()).size();
-    if (request.getRemovedIds() != null
-        && request.getRemovedIds().size() == sizeOfAllConceptSetIds) {
-      throw new BadRequestException("Concept Set must have at least one concept");
-    }
-
-    if (Strings.isNullOrEmpty(request.getEtag())) {
-      throw new BadRequestException("missing required update field 'etag'");
-    }
-    int version = Etags.toVersion(request.getEtag());
-    if (dbConceptSet.getVersion() != version) {
-      throw new ConflictException("Attempted to modify outdated concept set version");
-    }
-
-    if (request.getAddedIds() != null) {
-      addConceptsToSet(dbConceptSet, request.getAddedIds());
-    }
-    if (request.getRemovedIds() != null) {
-      dbConceptSet.getConceptIds().removeAll(request.getRemovedIds());
-    }
-    if (dbConceptSet.getConceptIds().size() > maxConceptsPerSet) {
-      throw new BadRequestException("Exceeded " + maxConceptsPerSet + " in concept set");
-    }
-    if (dbConceptSet.getConceptIds().isEmpty()) {
-      dbConceptSet.setParticipantCount(0);
-    } else {
-      String omopTable = BigQueryTableInfo.getTableName(dbConceptSet.getDomainEnum());
-      dbConceptSet.setParticipantCount(
-          conceptBigQueryService.getParticipantCountForConcepts(
-              dbConceptSet.getDomainEnum(), omopTable, dbConceptSet.getConceptIds()));
-    }
-
+    validateUpdateConceptSetConcepts(dbConceptSet, request);
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     dbConceptSet.setLastModifiedTime(now);
     try {
@@ -375,11 +321,103 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
         conceptService.findAll(dbConceptSet.getConceptIds(), CONCEPT_NAME_ORDERING));
   }
 
-  private DbConceptSet validateConceptSize(DbConceptSet requestDbConceptSet) {
-    requestDbConceptSet.setVersion(INITIAL_VERSION);
-    if (requestDbConceptSet.getConceptIds().size() > maxConceptsPerSet) {
-      throw new BadRequestException("Exceeded " + maxConceptsPerSet + " in concept set");
+  private void validateUpdateConceptSet(DbConceptSet dbConceptSet, ConceptSet conceptSet) {
+    if (Strings.isNullOrEmpty(conceptSet.getEtag())) {
+      throw new BadRequestException("missing required update field 'etag'");
     }
-    return requestDbConceptSet;
+    int version = Etags.toVersion(conceptSet.getEtag());
+    if (dbConceptSet.getVersion() != version) {
+      throw new ConflictException("Attempted to modify outdated concept set version");
+    }
+    if (conceptSet.getName() != null) {
+      dbConceptSet.setName(conceptSet.getName());
+    }
+    if (conceptSet.getDescription() != null) {
+      dbConceptSet.setDescription(conceptSet.getDescription());
+    }
+    if (conceptSet.getDomain() != null && conceptSet.getDomain() != dbConceptSet.getDomainEnum()) {
+      throw new BadRequestException("Cannot modify the domain of an existing concept set");
+    }
+    validateConceptSet(
+        dbConceptSet,
+        conceptSet.getConcepts().stream()
+            .map(concept -> concept.getConceptId())
+            .collect(Collectors.toList()));
+  }
+
+  private void validateUpdateConceptSetConcepts(
+      DbConceptSet dbConceptSet, UpdateConceptSetRequest request) {
+    Set<Long> allConceptSetIds = dbConceptSet.getConceptIds();
+    if (request.getAddedIds() != null) {
+      allConceptSetIds.addAll(request.getAddedIds());
+    }
+    int sizeOfAllConceptSetIds = allConceptSetIds.stream().collect(Collectors.toSet()).size();
+    if (request.getRemovedIds() != null
+        && request.getRemovedIds().size() == sizeOfAllConceptSetIds) {
+      throw new BadRequestException("Concept Set must have at least one concept");
+    }
+
+    if (Strings.isNullOrEmpty(request.getEtag())) {
+      throw new BadRequestException("missing required update field 'etag'");
+    }
+    int version = Etags.toVersion(request.getEtag());
+    if (dbConceptSet.getVersion() != version) {
+      throw new ConflictException("Attempted to modify outdated concept set version");
+    }
+
+    if (request.getAddedIds() != null) {
+      addConceptsToSet(dbConceptSet, request.getAddedIds());
+    }
+    if (request.getRemovedIds() != null) {
+      dbConceptSet.getConceptIds().removeAll(request.getRemovedIds());
+    }
+    if (dbConceptSet.getConceptIds().isEmpty()) {
+      dbConceptSet.setParticipantCount(0);
+    } else {
+      String omopTable = BigQueryTableInfo.getTableName(dbConceptSet.getDomainEnum());
+      dbConceptSet.setParticipantCount(
+          conceptBigQueryService.getParticipantCountForConcepts(
+              dbConceptSet.getDomainEnum(), omopTable, dbConceptSet.getConceptIds()));
+    }
+    validateConceptSet(
+        dbConceptSet,
+        dbConceptSet.getConceptIds().stream().map(concept -> concept).collect(Collectors.toList()));
+  }
+
+  private void validateConceptSet(DbConceptSet dbConceptSet, List<Long> addedIds) {
+    Domain domainEnum = dbConceptSet.getDomainEnum();
+    if (domainEnum == null) {
+      throw new BadRequestException("Domain is not allowed for concept sets");
+    }
+    if (addedIds == null || addedIds.size() == 0) {
+      throw new BadRequestException("Cannot create a concept set with no concepts");
+    }
+
+    Iterable<DbConcept> concepts = conceptService.findAll(addedIds);
+    if (dbConceptSet.getConceptIds().size() > MAX_CONCEPTS_PER_SET) {
+      throw new BadRequestException("Exceeded " + MAX_CONCEPTS_PER_SET + " in concept set");
+    }
+    List<DbConcept> mismatchedConcepts =
+        ImmutableList.copyOf(concepts).stream()
+            .filter(concept -> !concept.getConceptClassId().equals("Question"))
+            .filter(
+                concept -> {
+                  Domain domain =
+                      Domain.PHYSICALMEASUREMENT.equals(domainEnum)
+                          ? Domain.PHYSICALMEASUREMENT
+                          : DbStorageEnums.domainIdToDomain(concept.getDomainId());
+                  return !domainEnum.equals(domain);
+                })
+            .collect(Collectors.toList());
+    if (!mismatchedConcepts.isEmpty()) {
+      String mismatchedConceptIds =
+          Joiner.on(", ")
+              .join(
+                  mismatchedConcepts.stream()
+                      .map(DbConcept::getConceptId)
+                      .collect(Collectors.toList()));
+      throw new BadRequestException(
+          String.format("Concepts [%s] are not in domain %s", mismatchedConceptIds, domainEnum));
+    }
   }
 }

@@ -1,25 +1,17 @@
 package org.pmiops.workbench.conceptset.mapper;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableList;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
-import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.db.model.DbConceptSet;
-import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
-import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
@@ -63,7 +55,7 @@ public interface ConceptSetMapper {
       @Context ConceptBigQueryService conceptBigQueryService);
 
   @AfterMapping
-  default void addConceptIdsToSet(
+  default void updateConceptSetFields(
       CreateConceptSetRequest source,
       @Context Long workspaceId,
       @Context DbUser creator,
@@ -72,37 +64,6 @@ public interface ConceptSetMapper {
       @Context ConceptBigQueryService conceptBigQueryService) {
     dbConceptSet.setWorkspaceId(workspaceId);
     dbConceptSet.setCreator(creator);
-    Domain domainEnum = dbConceptSet.getDomainEnum();
-    if (domainEnum == null) {
-      throw new BadRequestException(
-          "Domain " + source.getConceptSet().getDomain() + " is not allowed for concept sets");
-    }
-    Iterable<DbConcept> concepts = conceptService.findAll(source.getAddedIds());
-    if (dbConceptSet.getConceptIds().size() > 1000) {
-      throw new BadRequestException("Exceeded 1000 in concept set");
-    }
-    List<DbConcept> mismatchedConcepts =
-        ImmutableList.copyOf(concepts).stream()
-            .filter(concept -> !concept.getConceptClassId().equals("Question"))
-            .filter(
-                concept -> {
-                  Domain domain =
-                      Domain.PHYSICALMEASUREMENT.equals(domainEnum)
-                          ? Domain.PHYSICALMEASUREMENT
-                          : DbStorageEnums.domainIdToDomain(concept.getDomainId());
-                  return !domainEnum.equals(domain);
-                })
-            .collect(Collectors.toList());
-    if (!mismatchedConcepts.isEmpty()) {
-      String mismatchedConceptIds =
-          Joiner.on(", ")
-              .join(
-                  mismatchedConcepts.stream()
-                      .map(DbConcept::getConceptId)
-                      .collect(Collectors.toList()));
-      throw new BadRequestException(
-          String.format("Concepts [%s] are not in domain %s", mismatchedConceptIds, domainEnum));
-    }
     dbConceptSet.getConceptIds().addAll(source.getAddedIds());
     String omopTable = BigQueryTableInfo.getTableName(source.getConceptSet().getDomain());
     dbConceptSet.setParticipantCount(
