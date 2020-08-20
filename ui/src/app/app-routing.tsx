@@ -17,6 +17,7 @@ import {Homepage} from './pages/homepage/homepage';
 import {SignIn} from './pages/login/sign-in';
 import {WorkspaceLibrary} from './pages/workspace/workspace-library';
 import {AnalyticsTracker} from './utils/analytics';
+import {NotebookList} from "./pages/analysis/notebook-list";
 
 
 const signInGuard: Guard = {
@@ -32,6 +33,7 @@ const registrationGuard: Guard = {
 const CookiePolicyPage = withRouteData(CookiePolicy);
 const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight)(DataUserCodeOfConduct);
 const HomepagePage = withRouteData(Homepage); // this name is bad i am sorry
+const NotebookListPage = withRouteData(NotebookList);
 const SessionExpiredPage = withRouteData(SessionExpired);
 const SignInAgainPage = withRouteData(SignInAgain);
 const SignInPage = withRouteData(SignIn);
@@ -72,7 +74,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
     <ProtectedRoutes guards={[signInGuard]}>
       <AppRoute
         path='/'
-          component={() => <HomepagePage routeData={{title: 'Homepage'}}/>}
+        component={() => <HomepagePage routeData={{title: 'Homepage'}}/>}
       />
       <AppRoute
           path='/admin/user-audit'
@@ -103,7 +105,11 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
     <ProtectedRoutes guards={[signInGuard, registrationGuard]}>
       <AppRoute
           path='/library'
-          component={() => <WorkspaceLibraryPage routeData={{title: 'Workspace Library', minimizeChrome: false}}/>}
+          component={() => <WorkspaceLibraryPage routeData={{title: 'Workspace Library'}}/>}
+      />
+      <AppRoute
+          path='/workspaces/:ns/:wsid/notebooks'
+          component={() => <NotebookListPage routeData={{title: 'View Notebooks'}}/>}
       />
     </ProtectedRoutes>
   </AppRouter>;

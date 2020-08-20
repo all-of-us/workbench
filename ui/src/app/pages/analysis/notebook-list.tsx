@@ -20,6 +20,7 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {BillingStatus, FileDetail, ResourceType, WorkspaceAccessLevel} from 'generated/fetch';
+import {useParams} from "react-router";
 
 const styles = {
   heading: {
@@ -28,8 +29,16 @@ const styles = {
   }
 };
 
-export const NotebookList = withCurrentWorkspace()(class extends React.Component<{
-  workspace: WorkspaceData
+export const NotebookList = withCurrentWorkspace()(({workspace: WorkspaceData}) => {
+  debugger;
+  const {ns = '', wsid = ''} = useParams();
+  return <NotebookListImpl
+      workspace={this.props.workspace}
+  />;
+});
+
+class NotebookListImpl extends React.Component<{
+  workspace: WorkspaceData;
 }, {
   notebookList: FileDetail[],
   notebookNameList: string[],
@@ -131,7 +140,7 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
       />}
     </FadeBox>;
   }
-});
+}
 
 @Component({
   template: '<div #root></div>'

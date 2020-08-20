@@ -131,7 +131,8 @@ const routes: Routes = [
                       breadcrumb: BreadcrumbType.Workspace,
                       helpContentKey: 'about'
                     }
-                  }, {
+                  },
+                  {
                     path: 'edit',
                     component: WorkspaceEditComponent,
                     data: {
@@ -140,7 +141,8 @@ const routes: Routes = [
                       breadcrumb: BreadcrumbType.WorkspaceEdit,
                       helpContentKey: 'edit'
                     }
-                  }, {
+                  },
+                  {
                     path: 'duplicate',
                     component: WorkspaceEditComponent,
                     data: {
@@ -155,28 +157,33 @@ const routes: Routes = [
                     children: [
                       {
                         path: '',
-                        component: NotebookListComponent,
+                        component: AppRouting,
                         data: {
-                          title: 'View Notebooks',
                           breadcrumb: BreadcrumbType.Workspace,
-                          helpContentKey: 'notebooks'
                         }
-                      }, {
+                        // data: {
+                        //   title: 'View Notebooks',
+                        //   breadcrumb: BreadcrumbType.Workspace,
+                        //   helpContentKey: 'notebooks'
+                        // }
+                      },
+                      {
                         path: ':nbName',
                         component: NotebookRedirectComponent,
                         data: {
-                      // use the (urldecoded) captured value nbName
+                          // use the (urldecoded) captured value nbName
                           pathElementForTitle: 'nbName',
                           breadcrumb: BreadcrumbType.Notebook,
-                      // The iframe we use to display the Jupyter notebook does something strange
-                      // to the height calculation of the container, which is normally set to auto.
-                      // Setting this flag sets the container to 100% so that no content is clipped.
+                          // The iframe we use to display the Jupyter notebook does something strange
+                          // to the height calculation of the container, which is normally set to auto.
+                          // Setting this flag sets the container to 100% so that no content is clipped.
                           contentFullHeightOverride: true,
                           helpContentKey: NOTEBOOK_HELP_CONTENT,
                           notebookHelpSidebarStyles: true,
                           minimizeChrome: true
                         }
-                      }, {
+                      },
+                      {
                         path: 'preview/:nbName',
                         component: InteractiveNotebookComponent,
                         data: {
