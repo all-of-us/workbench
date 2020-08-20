@@ -3,7 +3,7 @@ import DataResourceCard, {CardType} from 'app/component/data-resource-card';
 import ConceptsetActionsPage from 'app/page/conceptset-actions-page';
 import DataPage, {TabLabelAlias} from 'app/page/data-page';
 import DatasetSaveModal from 'app/page/dataset-save-modal';
-import {pickWorkspace, signIn} from 'utils/test-utils';
+import {findWorkspace, signIn} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
 
 describe('Create Concept Sets from Domains', () => {
@@ -18,7 +18,8 @@ describe('Create Concept Sets from Domains', () => {
    * - Delete Concept Set.
    */
   test('Create Concept Set from Conditions domain', async () => {
-    await pickWorkspace(page).then(card => card.clickWorkspaceName());
+    const workspaceCard = await findWorkspace(page);
+    await workspaceCard.clickWorkspaceName();
 
     // Click Add Datasets button.
     const dataPage = new DataPage(page);
@@ -81,7 +82,8 @@ describe('Create Concept Sets from Domains', () => {
    * - Delete Dataset, Concept Set.
    */
   test('Create Concept Sets from Drug Exposures and Measurements domains', async () => {
-    await pickWorkspace(page).then(card => card.clickWorkspaceName());
+    const workspaceCard = await findWorkspace(page);
+    await workspaceCard.clickWorkspaceName();
 
     // Click Add Datasets button.
     const dataPage = new DataPage(page);

@@ -4,7 +4,7 @@ import {Language, LinkText, PageUrl} from 'app/text-labels';
 import WorkspaceEditPage, {FIELD as EDIT_FIELD} from 'app/page/workspace-edit-page';
 import {makeWorkspaceName} from 'utils/str-utils';
 import RadioButton from 'app/element/radiobutton';
-import {pickWorkspace, waitWhileLoading} from 'utils/test-utils';
+import {findWorkspace, waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle, waitForText} from 'utils/waits-utils';
 import DataPage from './data-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
@@ -143,7 +143,8 @@ export default class WorkspacesPage extends WorkspaceEditPage {
    * @param lang
    */
   async createNotebook(notebookName: string, lang?: Language): Promise<WorkspaceAnalysisPage> {
-    await pickWorkspace(this.page).then(card => card.clickWorkspaceName());
+    const workspaceCard = await findWorkspace(page);
+    await workspaceCard.clickWorkspaceName();
 
     const dataPage = new DataPage(this.page);
     const notebookPage = await dataPage.createNotebook(notebookName, lang); // Python 3 is the default

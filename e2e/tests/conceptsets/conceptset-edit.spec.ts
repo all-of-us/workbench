@@ -7,7 +7,7 @@ import {SaveOption} from 'app/page/conceptset-save-modal';
 import DataPage, {TabLabelAlias} from 'app/page/data-page';
 import {LinkText} from 'app/text-labels';
 import {makeRandomName, makeString} from 'utils/str-utils';
-import {pickWorkspace, signIn} from 'utils/test-utils';
+import {findWorkspace, signIn} from 'utils/test-utils';
 import Link from 'app/element/link';
 
 
@@ -23,9 +23,9 @@ describe('Editing and Copying Concept Sets', () => {
    * - Create first new Concept Set in Procedure domain.
    * - Create second new Concept Set in Procedure domain. Add to first Concept Set.
    */
-  test.skip('Add to existing Concept Set in same workspace', async () => {
+  test('Add to existing Concept Set in same workspace', async () => {
     // Create a workspace
-    const workspaceName = await pickWorkspace(page, {create: true}).then(card => card.clickWorkspaceName());
+    const workspaceName = await findWorkspace(page, true).then(card => card.clickWorkspaceName());
 
     const dataPage = new DataPage(page);
     let conceptSearchPage = await dataPage.openConceptSearch(Domain.Procedures);
@@ -99,10 +99,10 @@ describe('Editing and Copying Concept Sets', () => {
   test('Copy Concept Set to another workspace', async () => {
 
     // Need two workspaces. workspace1 is the Copy to workspace. workspace2 is the Copy from workspace.
-    const workspace1: WorkspaceCard = await pickWorkspace(page, {create: true});
+    const workspace1: WorkspaceCard = await findWorkspace(page, true);
     const copyToWorkspace = await workspace1.getWorkspaceName();
 
-    const workspace2: WorkspaceCard = await pickWorkspace(page, {create: true});
+    const workspace2: WorkspaceCard = await findWorkspace(page, true);
     const copyFromWorkspace = await workspace2.getWorkspaceName();
 
     // Open workspace2 Data Page.

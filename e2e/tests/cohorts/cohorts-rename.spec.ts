@@ -1,7 +1,7 @@
 import Link from 'app/element/link';
 import CohortBuildPage, {FieldSelector} from 'app/page/cohort-build-page';
 import DataPage, {TabLabelAlias} from 'app/page/data-page';
-import {pickWorkspace, signIn} from 'utils/test-utils';
+import {findWorkspace, signIn} from 'utils/test-utils';
 import {waitForNumericalString, waitForText} from 'utils/waits-utils';
 import DataResourceCard from 'app/component/data-resource-card';
 import {makeRandomName} from 'utils/str-utils';
@@ -28,7 +28,8 @@ describe('User can create, modify, rename and delete Cohort', () => {
    */
   test('Add cohort including Demographics Age', async () => {
 
-    await pickWorkspace(page).then(card => card.clickWorkspaceName());
+    const workspaceCard = await findWorkspace(page);
+    await workspaceCard.clickWorkspaceName();
 
     const dataPage = new DataPage(page);
     // Click Add Cohorts button in Data page.

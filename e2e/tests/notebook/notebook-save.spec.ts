@@ -3,7 +3,7 @@ import DataPage, {TabLabelAlias} from 'app/page/data-page';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import {Language} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
-import {pickWorkspace, signIn} from 'utils/test-utils';
+import {findWorkspace, signIn} from 'utils/test-utils';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 
 // Notebook server start may take a long time. Set maximum test running time to 20 minutes.
@@ -17,7 +17,8 @@ describe('Jupyter Notebook tests in Python language', () => {
 
   test('Save and open notebook', async () => {
 
-    await pickWorkspace(page).then(card => card.clickWorkspaceName());
+    const workspaceCard = await findWorkspace(page);
+    await workspaceCard.clickWorkspaceName();
 
     const dataPage = new DataPage(page);
     await dataPage.openTab(TabLabelAlias.Analysis);
