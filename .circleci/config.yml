@@ -207,25 +207,24 @@ commands:
     description: "Run puppeteer e2e integration tests"
     parameters:
       env_name:
-        description: The target environment for run Puppeteer tests. Must be one of "dev", "staging".
-        default: "dev"
+        description: The target environment for run Puppeteer tests. Must be one of "test", "staging".
+        default: "test"
         type: enum
-        enum: ["dev", "staging"]
+        enum: ["test", "staging"]
     steps:
       - install_e2e_dependencies
       - run:
           name: Update test user email env variable
           command: |
             case << parameters.env_name >> in
-              staging) echo 'export USER_NAME=$PUPPETEER_TEST_USER_STAGING' >> $BASH_ENV ;;
-              dev) echo 'export USER_NAME=$PUPPETEER_TEST_USER' >> $BASH_ENV ;;
+              staging) echo 'export USER_NAME=$PUPPETEER_USER_STAGING' >> $BASH_ENV ;;
+              test) echo 'export USER_NAME=$PUPPETEER_USER_TEST' >> $BASH_ENV ;;
             esac
             source $BASH_ENV
       - run:
           name: Update rest of test environment variables
           command: |
-            echo 'export PASSWORD=$PUPPETEER_TEST_USER_PASSWORD' >> $BASH_ENV
-            echo 'export INVITATION_KEY=$PUPPETEER_TEST_REGISTRATION_KEY' >> $BASH_ENV
+            echo 'export PASSWORD=$PUPPETEER_USER_PASSWORD' >> $BASH_ENV
             source $BASH_ENV
       - run:
           name: Run puppeteer e2e tests
@@ -583,10 +582,10 @@ jobs:
   puppeteer-e2e-test:
     parameters:
       env_name:
-        description: The target environment for run Puppeteer tests. Must be one of "dev", "staging".
-        default: "dev"
+        description: The target environment for run Puppeteer tests. Must be one of "test", "staging".
+        default: "test"
         type: enum
-        enum: ["dev", "staging"]
+        enum: ["test", "staging"]
     <<: *defaults
     environment:
       <<: *e2e_env
@@ -681,7 +680,7 @@ workflows:
             - api-deps-check
             - api-integration-test
             - ui-unit-test
-      # Not ready until workspace delete script is working
+      # Not ready until delete workspace script is working
       # - puppeteer-e2e-test:
           # env_name: "staging"
           # filters: *filter_only_release_tags
