@@ -12,7 +12,6 @@ import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.times
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.timestampStringToInstant;
 
 import com.google.cloud.bigquery.InsertAllRequest;
-import com.google.cloud.bigquery.InsertAllRequest;
 import com.google.cloud.bigquery.InsertAllRequest.RowToInsert;
 import com.google.cloud.bigquery.InsertAllResponse;
 import com.google.cloud.bigquery.QueryJobConfiguration;
@@ -40,6 +39,7 @@ import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.reporting.insertion.WorkspaceParameter;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -148,7 +148,8 @@ public class ReportingUploadServiceTest {
     doReturn(mockTableResult)
         .when(mockBigQueryService)
         .executeQuery(any(QueryJobConfiguration.class), anyLong());
-    doReturn(Duration.ofMillis(250L)).when(mockStopwatch).elapsed();
+
+    TestMockFactory.stubStopwatch(mockStopwatch, Duration.ofMillis(250));
   }
 
   @Test

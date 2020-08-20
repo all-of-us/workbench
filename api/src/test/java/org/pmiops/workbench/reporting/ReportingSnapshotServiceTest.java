@@ -1,14 +1,19 @@
 package org.pmiops.workbench.reporting;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,6 +57,7 @@ public class ReportingSnapshotServiceTest {
 
   @MockBean private Random mockRandom;
   @MockBean private UserService mockUserService;
+  @MockBean private Stopwatch mockStopwatch;
   @MockBean private WorkspaceService mockWorkspaceService;
 
   @Autowired private ReportingSnapshotService reportingSnapshotService;
@@ -86,6 +92,7 @@ public class ReportingSnapshotServiceTest {
             })
         .when(mockRandom)
         .nextLong();
+    TestMockFactory.stubStopwatch(mockStopwatch, Duration.ofMillis(100));
   }
 
   public void mockWorkspaces() {
