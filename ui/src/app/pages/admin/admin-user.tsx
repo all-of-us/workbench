@@ -164,6 +164,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
       }
     } = this.state;
 
+    await this.setState({loading: true});
     // Cancel any outstanding API calls.
     if (this.aborter) {
       this.aborter.abort();
@@ -188,6 +189,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
         validateEmailResponse: null,
       });
     }
+    await this.setState({loading: false});
   }
 
   async getUser() {
@@ -251,7 +253,6 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
 
   async setVerifiedInstitutionOnProfile(institutionShortName: string) {
     const {verifiedInstitutionOptions} = this.state;
-    await this.setState({loading: true});
     await this.setState(fp.flow(
       fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionShortName'], institutionShortName),
       fp.set(
@@ -265,11 +266,11 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
       fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], undefined)
       ));
     await this.validateEmail();
-    await this.setState({loading: false});
   }
 
   async setContactEmail(contactEmail: string) {
     await this.setState(fp.set(['updatedProfile', 'contactEmail'], contactEmail));
+    await this.validateEmail();
   }
 
   setInstitutionalRoleOnProfile(institutionalRoleEnum: InstitutionalRole) {
@@ -504,7 +505,6 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
                 inputStyle={{...styles.textInput, ...styles.backgroundColorDark}}
                 containerStyle={styles.textInputContainer}
                 onChange={email => this.setContactEmail(email)}
-                onBlur={() => this.validateEmail()}
             />
             <TextInputWithLabel
                 labelText={'Free credits used'}
