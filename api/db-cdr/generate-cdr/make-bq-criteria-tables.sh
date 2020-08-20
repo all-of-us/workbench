@@ -821,6 +821,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
         , concept_id
         , name
         , value
+        , rollup_count
         , item_count
         , est_count
         , is_group
@@ -838,6 +839,7 @@ SELECT
     , concept_id
     , name
     , value
+    , CASE WHEN is_selectable = 1 THEN 0 ELSE null END as rollup_count
     , CASE WHEN is_selectable = 1 THEN 0 ELSE null END as item_count
     , CASE WHEN is_selectable = 1 THEN 0 ELSE null END as est_count
     , is_group
@@ -1080,6 +1082,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
         , concept_id
         , name
         , value
+        , rollup_count
         , is_group
         , is_selectable
         , has_attribute
@@ -1097,6 +1100,7 @@ SELECT
     , e.concept_id
     , d.answer as name
     , CAST(d.value_source_concept_id as STRING)
+    , 0
     , 0
     , 1
     , 0
@@ -1273,6 +1277,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
         , is_standard
         , type
         , name
+        , rollup_count
         , item_count
         , est_count
         , is_group
@@ -1287,6 +1292,7 @@ SELECT
     , 1
     , 'DECEASED'
     , 'Deceased'
+    , 0
     , COUNT(DISTINCT person_id)
     , COUNT(DISTINCT person_id)
     , 0
@@ -1306,6 +1312,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
         , type
         , concept_id
         , name
+        , rollup_count
         , item_count
         , est_count
         , is_group
@@ -1321,6 +1328,7 @@ SELECT
     , 'GENDER'
     , concept_id
     , CASE WHEN b.concept_id = 0 THEN 'Unknown' ELSE b.concept_name END as name
+    , 0
     , a.cnt
     , a.cnt
     , 0
@@ -1346,6 +1354,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
         , type
         , concept_id
         , name
+        , rollup_count
         , item_count
         , est_count
         , is_group
@@ -1361,6 +1370,7 @@ SELECT
     , 'SEX'
     , concept_id
     , CASE WHEN b.concept_id = 0 THEN 'Unknown' ELSE b.concept_name END as name
+    , 0
     , a.cnt
     , a.cnt
     , 0
@@ -1386,6 +1396,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
         , type
         , concept_id
         , name
+        , rollup_count
         , item_count
         , est_count
         , is_group
@@ -1404,6 +1415,7 @@ SELECT
         WHEN a.race_concept_id = 0 THEN 'Unknown'
         ELSE regexp_replace(b.concept_name, r'^.+:\s', '')
       END as name
+    , 0
     , a.cnt
     , a.cnt
     , 0
@@ -1430,6 +1442,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
         , type
         , concept_id
         , name
+        , rollup_count
         , item_count
         , est_count
         , is_group
@@ -1445,6 +1458,7 @@ SELECT
     , 'ETHNICITY'
     , concept_id
     , regexp_replace(b.concept_name, r'^.+:\s', '')
+    , 0
     , a.cnt
     , a.cnt
     , 0
@@ -1475,6 +1489,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
         , type
         , concept_id
         , name
+        , rollup_count
         , item_count
         , est_count
         , is_group
@@ -1490,6 +1505,7 @@ SELECT
     , 'VISIT'
     , concept_id
     , concept_name
+    , 0
     , a.cnt
     , a.cnt
     , 0
@@ -4958,4 +4974,367 @@ WHERE x.concept_id = y.concept_id
     and x.type = 'SNOMED'
     and x.is_standard = 1
     and x.is_group = 1"
+
+################################################
+# CB_CRITERIA_ANCESTOR
+################################################
+echo "CB_CRITERIA_ANCESTOR - Drugs - add ingredients to drugs mapping"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_ancestor\`
+    (
+          ancestor_id
+        , descendant_id
+    )
+SELECT
+      ancestor_concept_id
+    , descendant_concept_id
+FROM \`$BQ_PROJECT.$BQ_DATASET.concept_ancestor\`
+WHERE ancestor_concept_id in
+    (
+        SELECT DISTINCT concept_id
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+        WHERE domain_id = 'DRUG'
+            and type = 'RXNORM'
+            and is_group = 0
+            and is_selectable = 1
+    )
+and descendant_concept_id in
+    (
+        SELECT DISTINCT drug_concept_id
+        FROM \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\`
+    )"
+
+###############################################
+# ADD IN OTHER CODES NOT ALREADY CAPTURED
+################################################
+echo "CONDITION_OCCURRENCE - add other source concepts"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (id,parent_id,domain_id,is_standard,type,concept_id,code,name,rollup_count,item_count,est_count,is_group,is_selectable,has_attribute,has_hierarchy,path)
+SELECT ROW_NUMBER() OVER (order by vocabulary_id,concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as id,
+    -1, 'CONDITION', 0, vocabulary_id,concept_id,concept_code,concept_name,0,cnt,cnt,0,1,0,0,
+    CAST(ROW_NUMBER() OVER(order by vocabulary_id,concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING) as path
+FROM
+    (
+        SELECT b.concept_name, b.vocabulary_id, b.concept_id, b.concept_code, count(DISTINCT a.person_id) cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\` a
+        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.condition_source_concept_id = b.concept_id
+        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on a.condition_concept_id = c.concept_id
+        WHERE a.condition_source_concept_id NOT IN
+            (
+                SELECT concept_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                WHERE is_standard = 0
+                    and concept_id is not null
+            )
+            and a.condition_source_concept_id != 0
+            and a.condition_source_concept_id is not null
+            and b.concept_id is not null
+            and b.vocabulary_id != 'PPI'
+            and (b.domain_id LIKE 'Condition%' OR c.domain_id = 'Condition')
+        GROUP BY 1,2,3,4
+    ) x"
+
+echo "CONDITION_OCCURRENCE - add other standard concepts"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (id,parent_id,domain_id,is_standard,type,concept_id,code,name,rollup_count,item_count,est_count,is_group,is_selectable,has_attribute,has_hierarchy,path)
+SELECT ROW_NUMBER() OVER(order by vocabulary_id,concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as ID,
+    -1, 'CONDITION',1, vocabulary_id,concept_id,concept_code,concept_name,0,cnt,cnt,0,1,0,0,
+    CAST(ROW_NUMBER() OVER(order by vocabulary_id,concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING) as path
+FROM
+    (
+        SELECT concept_name, vocabulary_id, concept_id, concept_code, count(DISTINCT person_id) cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\` a
+        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.condition_concept_id = b.concept_id
+        WHERE standard_concept = 'S'
+            and domain_id = 'Condition'
+            and condition_concept_id NOT IN
+                (
+                    SELECT concept_id
+                    FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                    WHERE domain_id = 'CONDITION'
+                        and is_standard = 1
+                        and concept_id is not null
+                )
+        GROUP BY 1,2,3,4
+    ) x"
+
+echo "PROCEDURE_OCCURRENCE - add other source concepts"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (id,parent_id,domain_id,is_standard,type,concept_id,code,name,rollup_count,item_count,est_count,is_group,is_selectable,has_attribute,has_hierarchy,path)
+SELECT ROW_NUMBER() OVER (order by vocabulary_id,concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as id,
+    -1, 'PROCEDURE', 0, vocabulary_id,concept_id,concept_code,concept_name,0,cnt,cnt,0,1,0,0,
+    CAST(ROW_NUMBER() OVER(order by vocabulary_id,concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING) as path
+FROM
+    (
+        SELECT b.concept_name, b.vocabulary_id, b.concept_id, b.concept_code, count(DISTINCT a.person_id) cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` a
+        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.procedure_source_concept_id = b.concept_id
+        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on a.procedure_concept_id = c.concept_id
+        WHERE a.procedure_source_concept_id NOT IN
+            (
+                SELECT concept_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                WHERE is_standard = 0
+                    and concept_id is not null
+            )
+            and a.procedure_source_concept_id != 0
+            and a.procedure_source_concept_id is not null
+            and b.concept_id is not null
+            and b.vocabulary_id != 'PPI'
+            and (b.domain_id = 'Procedure' OR c.domain_id = 'Procedure')
+        GROUP BY 1,2,3,4
+    ) x"
+
+echo "PROCEDURE_OCCURRENCE - add other standard concepts"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (id,parent_id,domain_id,is_standard,type,concept_id,code,name,rollup_count,item_count,est_count,is_group,is_selectable,has_attribute,has_hierarchy,path)
+SELECT ROW_NUMBER() OVER(order by vocabulary_id,concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as ID,
+    -1, 'PROCEDURE',1, vocabulary_id,concept_id,concept_code,concept_name,0,cnt,cnt,0,1,0,0,
+    CAST(ROW_NUMBER() OVER(order by vocabulary_id,concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING) as path
+FROM
+    (
+        SELECT concept_name, vocabulary_id, concept_id, concept_code, count(DISTINCT person_id) cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` a
+        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.procedure_concept_id = b.concept_id
+        WHERE standard_concept = 'S'
+            and domain_id = 'Procedure'
+            and procedure_concept_id NOT IN
+                (
+                    SELECT concept_id
+                    FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                    WHERE domain_id = 'PROCEDURE'
+                        and is_standard = 1
+                        and concept_id is not null
+                )
+        GROUP BY 1,2,3,4
+    ) x"
+
+echo "MEASUREMENT - add other standard concepts"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (id,parent_id,domain_id,is_standard,type,concept_id,code,name,rollup_count,item_count,est_count,is_group,is_selectable,has_attribute,has_hierarchy,path)
+SELECT ROW_NUMBER() OVER(order by vocabulary_id,concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as ID,
+    -1, 'MEASUREMENT',1, vocabulary_id,concept_id,concept_code,concept_name,0,cnt,cnt,0,1,0,0,
+    CAST(ROW_NUMBER() OVER(order by vocabulary_id,concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING) as path
+FROM
+    (
+        SELECT concept_name, vocabulary_id, concept_id, concept_code, count(DISTINCT person_id) cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\` a
+        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.measurement_concept_id = b.concept_id
+        WHERE standard_concept = 'S'
+            and domain_id = 'Measurement'
+            and vocabulary_id not in ('PPI')
+            and measurement_concept_id NOT IN
+                (
+                    SELECT concept_id
+                    FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                    WHERE domain_id = 'MEASUREMENT'
+                        and is_standard = 1
+                        and concept_id is not null
+                )
+        GROUP BY 1,2,3,4
+    ) x"
+
+echo "DRUG_EXPOSURE - add other standard concepts"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (id,parent_id,domain_id,is_standard,type,concept_id,code,name,rollup_count,item_count,est_count,is_group,is_selectable,has_attribute,has_hierarchy,path)
+SELECT ROW_NUMBER() OVER(order by vocabulary_id,concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as ID,
+    -1, 'DRUG',1, vocabulary_id,concept_id,concept_code,concept_name,0,cnt,cnt,0,1,0,0,
+    CAST(ROW_NUMBER() OVER(order by vocabulary_id,concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING) as path
+FROM
+    (
+        SELECT concept_name, vocabulary_id, concept_id, concept_code, count(DISTINCT person_id) cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\` a
+        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.drug_concept_id = b.concept_id
+        WHERE standard_concept = 'S'
+            and domain_id = 'Drug'
+            and drug_concept_id NOT IN
+                (
+                    SELECT descendant_id
+                    FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_ancestor\`
+                    WHERE ancestor_id in
+                        (
+                            SELECT concept_id
+                            FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                            WHERE domain_id = 'DRUG'
+                                and is_standard = 1
+                        )
+                )
+        GROUP BY 1,2,3,4
+    ) x"
+
+################################################
+# CB_CRITERIA_ATTRIBUTE
+################################################
+echo "CB_CRITERIA_ATTRIBUTE - PPI SURVEY - add values for certain questions"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`
+    (id, concept_id, value_as_concept_id, concept_name, type, est_count)
+VALUES
+    (1, 1585889, 0, 'MIN', 'NUM', '0'),
+    (2, 1585889, 0, 'MAX', 'NUM', '20'),
+    (3, 1585890, 0, 'MIN', 'NUM', '0'),
+    (4, 1585890, 0, 'MAX', 'NUM', '20'),
+    (5, 1585864, 0, 'MIN', 'NUM', '0'),
+    (6, 1585864, 0, 'MAX', 'NUM', '99'),
+    (7, 1585870, 0, 'MIN', 'NUM', '0'),
+    (8, 1585870, 0, 'MAX', 'NUM', '99'),
+    (9, 1585873, 0, 'MIN', 'NUM', '0'),
+    (10, 1585873, 0, 'MAX', 'NUM', '99'),
+    (11, 1586159, 0, 'MIN', 'NUM', '0'),
+    (12, 1586159, 0, 'MAX', 'NUM', '99'),
+    (13, 1586162, 0, 'MIN', 'NUM', '0'),
+    (14, 1586162, 0, 'MAX', 'NUM', '99'),
+    (15, 1585795, 0, 'MIN', 'NUM', '0'),
+    (16, 1585795, 0, 'MAX', 'NUM', '99'),
+    (17, 1585802, 0, 'MIN', 'NUM', '0'),
+    (18, 1585802, 0, 'MAX', 'NUM', '99'),
+    (19, 1585820, 0, 'MIN', 'NUM', '0'),
+    (20, 1585820, 0, 'MAX', 'NUM', '255')
+"
+
+# this code filters out any labs WHERE all results = 0
+echo "CB_CRITERIA_ATTRIBUTE - Measurements - add numeric results"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`
+    (id, concept_id, value_as_concept_id, concept_name, type, est_count)
+SELECT ROW_NUMBER() OVER (order by measurement_concept_id) + (SELECT MAX(ID) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`) as id, *
+FROM
+    (
+        SELECT measurement_concept_id, 0, 'MIN', 'NUM', CAST(min(value_as_number) as STRING)
+        FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\`
+        WHERE measurement_concept_id in
+            (
+                SELECT concept_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                WHERE domain_id = 'MEASUREMENT'
+            )
+            and value_as_number is not null
+        GROUP BY 1
+        HAVING NOT (min(value_as_number) = 0 and max(value_as_number) = 0)
+
+        UNION ALL
+
+        SELECT measurement_concept_id, 0, 'MAX', 'NUM', CAST(max(value_as_number) as STRING)
+        FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\`
+        WHERE measurement_concept_id in
+            (
+                SELECT concept_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                WHERE domain_id = 'MEASUREMENT'
+            )
+            and value_as_number is not null
+        GROUP BY 1
+        HAVING NOT (min(value_as_number) = 0 and max(value_as_number) = 0)
+    ) a"
+
+echo "CB_CRITERIA_ATTRIBUTE - Measurements - add categorical results"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`
+    (id, concept_id, value_as_concept_Id, concept_name, type, est_count)
+SELECT ROW_NUMBER() OVER (order by measurement_concept_id) + (SELECT MAX(ID) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`) as id, *
+FROM
+    (
+        SELECT measurement_concept_id, value_as_concept_id, b.concept_name, 'CAT' as type, CAST(count(DISTINCT person_id) as STRING)
+        FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\` a
+        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.value_as_concept_Id = b.concept_id
+        WHERE measurement_concept_id in
+            (
+                SELECT concept_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                WHERE domain_id = 'MEASUREMENT'
+            )
+            and value_as_concept_id != 0
+            and value_as_concept_id is not null
+        GROUP BY 1,2,3
+    ) a"
+
+
+# set has_attributes=1 for any criteria that has data in cb_criteria_attribute
+echo "CB_CRITERIA_ATTRIBUTE - update has_attributes column for measurement criteria"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+SET has_attribute = 1
+WHERE concept_id in
+    (
+        SELECT DISTINCT concept_id
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`
+    )
+    and domain_id = 'MEASUREMENT'
+    and is_selectable = 1"
+
+################################################
+# CB_CRITERIA_RELATIONSHIP
+################################################
+echo "CB_CRITERIA_RELATIONSHIP - Drugs - add drug/ingredient relationships"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_relationship\`
+    (concept_id_1, concept_id_2)
+SELECT a.concept_id_1, a.concept_id_2
+FROM \`$BQ_PROJECT.$BQ_DATASET.concept_relationship\` a
+join \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.concept_id_2 = b.concept_id
+WHERE b.concept_class_id = 'Ingredient'
+    and a.concept_id_1 in
+        (
+            SELECT concept_id
+            FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+            WHERE domain_id = 'DRUG'
+                and type = 'BRAND'
+        )"
+
+echo "CB_CRITERIA_RELATIONSHIP - Source Concept -> Standard Concept Mapping"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_relationship\`
+    (concept_id_1, concept_id_2)
+SELECT a.concept_id_1 as source_concept_id, a.concept_id_2 as standard_concept_id
+FROM \`$BQ_PROJECT.$BQ_DATASET.concept_relationship\` a
+JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.concept_id_2 = b.concept_id
+WHERE b.standard_concept = 'S'
+    AND a.relationship_id = 'Maps to'
+    AND a.concept_id_1 in
+        (
+            SELECT DISTINCT concept_id
+            FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+            WHERE concept_id is not null
+                and is_standard = 0
+                and domain_id in ('CONDITION', 'PROCEDURE')
+        )"
+
+################################################
+# DATA CLEAN UP
+################################################
+echo "CLEAN UP - set rollup_count = -1 WHERE the count is NULL"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+SET rollup_count = -1
+WHERE rollup_count is null"
+
+echo "CLEAN UP - set item_count = -1 WHERE the count is NULL"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+SET item_count = -1
+WHERE item_count is null"
+
+echo "CLEAN UP - set est_count = -1 WHERE the count is NULL"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+SET est_count = -1
+WHERE est_count is null"
+
+echo "CLEAN UP - set has_ancestor_data = 0 for all items WHERE it is currently NULL"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+SET has_ancestor_data = 0
+WHERE has_ancestor_data is null"
+
+echo "CLEAN UP - remove all double quotes FROM criteria names"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+SET name = REGEXP_REPLACE(name, r'[\"]', '')
+WHERE REGEXP_CONTAINS(name, r'[\"]')"
 
