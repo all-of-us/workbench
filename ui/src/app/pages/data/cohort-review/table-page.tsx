@@ -31,6 +31,7 @@ const fields = [
   {field: 'participantId', name: 'Participant ID'},
   {field: 'birthDate', name: 'Date of Birth'},
   {field: 'deceased', name: 'Deceased'},
+  {field: 'sexAtBirth', name: 'Sex at Birth'},
   {field: 'gender', name: 'Gender'},
   {field: 'race', name: 'Race'},
   {field: 'ethnicity', name: 'Ethnicity'},
@@ -203,6 +204,7 @@ const defaultDemoFilters: any = {
 };
 const reverseColumnEnum = {
   participantId: Columns.PARTICIPANTID,
+  sexAtBirth: Columns.SEXATBIRTH,
   gender: Columns.GENDER,
   race: Columns.RACE,
   ethnicity: Columns.ETHNICITY,
@@ -289,7 +291,8 @@ export const ParticipantsTable = withCurrentWorkspace()(
             ...demoFilters,
             RACE: extract(data.raceList, Columns.RACE),
             GENDER: extract(data.genderList, Columns.GENDER),
-            ETHNICITY: extract(data.ethnicityList, Columns.ETHNICITY)
+            ETHNICITY: extract(data.ethnicityList, Columns.ETHNICITY),
+            SEX_AT_BIRTH: extract(data.sexAtBirthList, Columns.SEXATBIRTH)
           };
           this.setState({demoFilters, filters});
         }, error => {
@@ -372,10 +375,11 @@ export const ParticipantsTable = withCurrentWorkspace()(
     }
 
     mapData = (participant: ParticipantCohortStatus) => {
-      const {participantId, status, gender, race, ethnicity, birthDate, deceased} = participant;
+      const {participantId, status, sexAtBirth, gender, race, ethnicity, birthDate, deceased} = participant;
       return {
         participantId,
         status: this.formatStatusForText(status),
+        sexAtBirth,
         gender: !!gender ? gender.charAt(0).toUpperCase() + gender.slice(1).toLowerCase() : gender,
         race,
         ethnicity,

@@ -13,6 +13,7 @@ export const initialFilterState = {
   },
   participants: {
     PARTICIPANTID: '',
+    SEX_AT_BIRTH: ['Select All'],
     GENDER: ['Select All'],
     RACE: ['Select All'],
     ETHNICITY: ['Select All'],
