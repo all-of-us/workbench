@@ -280,15 +280,6 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     ));
   }
 
-  updateVerifiedInstitutionalAffiliation() {
-    const {updatedProfile} = this.state;
-    const {userId, verifiedInstitutionalAffiliation} = updatedProfile;
-    this.setState({loading: true});
-    profileApi().updateVerifiedInstitutionalAffiliation(userId, verifiedInstitutionalAffiliation).then(() => {
-      this.setState({oldProfile: updatedProfile, loading: false});
-    });
-  }
-
   // returns the updated profile value only if it has changed
   updatedProfileValue(attribute: string) {
     const oldValue = fp.get(['oldProfile' , attribute], this.state);

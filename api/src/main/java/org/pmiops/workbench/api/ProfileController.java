@@ -511,6 +511,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   @AuthorityRequired(Authority.ACCESS_CONTROL_ADMIN)
   @Override
+  @Deprecated // use updateAccountProperties()
   public ResponseEntity<EmptyResponse> updateVerifiedInstitutionalAffiliation(
       Long userId, VerifiedInstitutionalAffiliation verifiedAffiliation) {
     DbUser dbUser = userDao.findUserByUserId(userId);
