@@ -601,7 +601,7 @@ jobs:
           env_name: << parameters.env_name >>
 
 
-  # Deploy UI local server then run Puppeteer e2e tests on deployed "local" environment.
+  # Deploy UI local server then run Puppeteer tests against "local ui" + "test api" environment.
   puppeteer-e2e-local-ui:
     <<: *defaults
     environment:
@@ -647,9 +647,6 @@ workflows:
           requires:
             - api-deploy-to-test
             - ui-deploy-to-test
-      # (TO REMOVE) config change test: Run tests against staging
-      - puppeteer-e2e-test:
-          env_name: "staging"
 
   deploy-staging:
     jobs:
@@ -684,8 +681,9 @@ workflows:
             - api-deps-check
             - api-integration-test
             - ui-unit-test
-      # Not ready
-      # - puppeteer-e2e-test-staging:
+      # Not ready until workspace delete script is working
+      # - puppeteer-e2e-test:
+          # env_name: "staging"
           # filters: *filter_only_release_tags
           # requires:
             # - deploy-staging
