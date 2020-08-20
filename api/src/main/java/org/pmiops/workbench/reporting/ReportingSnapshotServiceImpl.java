@@ -62,6 +62,9 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
     this.workspaceService = workspaceService;
   }
 
+  // Retrieve all the data we need from the MySQL database in a single transaction for
+  // consistency.
+  @Transactional(readOnly = true)
   @Override
   public ReportingSnapshot takeSnapshot() {
     final EntityBundle entityBundle = getApplicationDbData();
@@ -84,10 +87,7 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
     return result;
   }
 
-  // Retrieve all the data we need from the MySQL database in a single transaction for
-  // consistency.
-  @Transactional(readOnly = true)
-  protected EntityBundle getApplicationDbData() {
+  private EntityBundle getApplicationDbData() {
     final Stopwatch stopwatch = stopwatchProvider.get().start();
     final List<DbUser> users = userService.getAllUsers();
     final List<DbWorkspace> workspaces = workspaceService.getAllActiveWorkspaces();
