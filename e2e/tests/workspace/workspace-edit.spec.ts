@@ -20,7 +20,6 @@ describe('Editing workspace thru workspace card ellipsis menu', () => {
    * - Verify Workspace Information in ABOUT tab.
    */
   test('User as OWNER can edit workspace', async () => {
-
     const workspaceCard = await findWorkspace(page, true);
     await (workspaceCard.getEllipsis()).clickAction(EllipsisMenuAction.Edit);
 

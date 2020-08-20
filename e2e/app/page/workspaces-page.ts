@@ -143,7 +143,7 @@ export default class WorkspacesPage extends WorkspaceEditPage {
    * @param lang
    */
   async createNotebook(notebookName: string, lang?: Language): Promise<WorkspaceAnalysisPage> {
-    const workspaceCard = await findWorkspace(page);
+    const workspaceCard = await findWorkspace(this.page);
     await workspaceCard.clickWorkspaceName();
 
     const dataPage = new DataPage(this.page);

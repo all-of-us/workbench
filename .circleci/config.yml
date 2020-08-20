@@ -579,26 +579,18 @@ jobs:
       - manage_api_cache:
           save: true
 
-  # Run Puppeteer e2e UI tests on deployed "test" environment.
+  # Run Puppeteer e2e UI tests on deployed "test" or "staging" environment.
   puppeteer-e2e-test:
+    parameters:
+      env_name:
+        description: The target environment for run Puppeteer tests. Must be one of "dev", "staging".
+        default: "dev"
+        type: enum
+        enum: ["dev", "staging"]
     <<: *defaults
     environment:
       <<: *e2e_env
-      WORKBENCH_ENV: dev
-    working_directory: ~/workbench
-    parallelism: 3
-    steps:
-      - checkout_init_git
-      - browser-tools/install-browser-tools:
-          firefox-version: "78.0" # https://github.com/CircleCI-Public/browser-tools-orb/issues/14
-      - run_e2e_test
-
-  # Run Puppeteer e2e UI tests on deployed "staging" environment.
-  puppeteer-e2e-test-staging:
-    <<: *defaults
-    environment:
-      <<: *e2e_env
-      WORKBENCH_ENV: staging
+      WORKBENCH_ENV: << parameters.env_name >>
     working_directory: ~/workbench
     parallelism: 3
     steps:
@@ -606,7 +598,8 @@ jobs:
       - browser-tools/install-browser-tools:
           firefox-version: "78.0" # https://github.com/CircleCI-Public/browser-tools-orb/issues/14
       - run_e2e_test:
-          env_name: "staging"
+          env_name: << parameters.env_name >>
+
 
   # Deploy UI local server then run Puppeteer e2e tests on deployed "local" environment.
   puppeteer-e2e-local-ui:
@@ -654,9 +647,9 @@ workflows:
           requires:
             - api-deploy-to-test
             - ui-deploy-to-test
-      - puppeteer-e2e-test-staging
-
-
+      # (TO REMOVE) config change test: Run tests against staging
+      - puppeteer-e2e-test:
+          env_name: "staging"
 
   deploy-staging:
     jobs:

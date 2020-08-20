@@ -18,7 +18,6 @@ describe('Clone workspace', () => {
   describe('From "Your Workspaces" page using Workspace card ellipsis menu', () => {
 
     test('As OWNER, user can clone workspace', async () => {
-
       const workspaceCard = await findWorkspace(page);
       await workspaceCard.asElementHandle().hover();
       // click on Ellipsis "Duplicate"
@@ -53,7 +52,6 @@ describe('Clone workspace', () => {
   describe('From "Data" page using side ellipsis menu', () => {
 
     test('As OWNER, user can clone workspace', async () => {
-
       const workspaceCard = await findWorkspace(page);
       await workspaceCard.clickWorkspaceName();
 
