@@ -448,7 +448,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
             <Button
                 type='primary'
                 disabled={this.isSaveDisabled(errors)}
-                onClick={() => this.updateAccountProperties()}
+                onClick={this.updateAccountProperties}
             >
               Save
             </Button>
@@ -498,7 +498,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
                 inputId={'contactEmail'}
                 inputStyle={{...styles.textInput, ...styles.backgroundColorDark}}
                 containerStyle={styles.textInputContainer}
-                onChange={email => this.setContactEmail(email)}
+                onChange={this.setContactEmail}
             />
             <TextInputWithLabel
                 labelText={'Free credits used'}
