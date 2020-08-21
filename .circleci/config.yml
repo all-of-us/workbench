@@ -214,16 +214,12 @@ commands:
     steps:
       - install_e2e_dependencies
       - run:
-          name: Update test user email env variable
+          name: Update test user environment variables
           command: |
             case << parameters.env_name >> in
               staging) echo 'export USER_NAME=$PUPPETEER_USER_STAGING' >> $BASH_ENV ;;
               test) echo 'export USER_NAME=$PUPPETEER_USER_TEST' >> $BASH_ENV ;;
             esac
-            source $BASH_ENV
-      - run:
-          name: Update rest of test environment variables
-          command: |
             echo 'export PASSWORD=$PUPPETEER_USER_PASSWORD' >> $BASH_ENV
             source $BASH_ENV
       - run:
@@ -640,7 +636,7 @@ workflows:
           filters: *filter_only_master_branch
           requires:
             - ui-unit-test
-      # On master merges, run Puppeteer e2e tests after ui and api deployed to "test" env successfully.
+      # On master branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully.
       - puppeteer-e2e-test:
           filters: *filter_only_master_branch
           requires:
