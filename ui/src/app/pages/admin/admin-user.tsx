@@ -109,8 +109,8 @@ interface Props {
 }
 
 interface State {
-  validateEmailError: string;
-  validateEmailResponse: CheckEmailResponse;
+  emailValidationError: string;
+  emailValidationResponse: CheckEmailResponse;
   institutionsLoadingError: string;
   loading: boolean;
   oldProfile: Profile;
@@ -128,8 +128,8 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      validateEmailError: '',
-      validateEmailResponse: null,
+      emailValidationError: '',
+      emailValidationResponse: null,
       institutionsLoadingError: '',
       loading: true,
       oldProfile: null,
@@ -170,7 +170,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
       this.aborter.abort();
     }
     this.aborter = new AbortController();
-    this.setState({validateEmailResponse: null});
+    this.setState({emailValidationResponse: null});
 
     // Early-exit with no result if either input is blank.
     if (!institutionShortName || isBlank(contactEmail)) {
@@ -180,13 +180,13 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     try {
       const result = await validateEmail(contactEmail, institutionShortName, this.aborter);
       this.setState({
-        validateEmailError: '',
-        validateEmailResponse: result
+        emailValidationError: '',
+        emailValidationResponse: result
       });
     } catch (e) {
       this.setState({
-        validateEmailError: 'Error validating user email against institution - please refresh page and try again',
-        validateEmailResponse: null,
+        emailValidationError: 'Error validating user email against institution - please refresh page and try again',
+        emailValidationResponse: null,
       });
     }
     await this.setState({loading: false});
@@ -229,9 +229,9 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
   }
 
   renderValidateEmailResponse() {
-    const {validateEmailResponse, updatedProfile, verifiedInstitutionOptions} = this.state;
+    const {emailValidationResponse, updatedProfile, verifiedInstitutionOptions} = this.state;
     if (updatedProfile && updatedProfile.verifiedInstitutionalAffiliation) {
-      if (validateEmailResponse.isValidMember) {
+      if (emailValidationResponse.isValidMember) {
         return null;
       } else {
         const {verifiedInstitutionalAffiliation} = updatedProfile;
@@ -307,15 +307,15 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
   }
 
   validateCheckEmailResponse() {
-    const {validateEmailResponse, validateEmailError} = this.state;
+    const {emailValidationResponse, emailValidationError} = this.state;
 
     // if we have never called validateEmail()
-    if (!validateEmailResponse && !validateEmailError) {
+    if (!emailValidationResponse && !emailValidationError) {
       return true;
     }
 
-    if (validateEmailResponse) {
-      return validateEmailResponse.isValidMember;
+    if (emailValidationResponse) {
+      return emailValidationResponse.isValidMember;
     }
     return false;
   }
@@ -355,8 +355,8 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
 
   render() {
     const {
-      validateEmailError,
-      validateEmailResponse,
+      emailValidationError,
+      emailValidationResponse,
       institutionsLoadingError,
       profileLoadingError,
       updatedProfile,
@@ -384,7 +384,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
           color: colors.primary
         }}
     >
-      {validateEmailError && <div>{validateEmailError}</div>}
+      {emailValidationError && <div>{emailValidationError}</div>}
       {institutionsLoadingError && <div>{institutionsLoadingError}</div>}
       {profileLoadingError && <div>{profileLoadingError}</div>}
       {updatedProfile && <FlexColumn>
@@ -528,7 +528,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
                 }
                 dataTestId={'verifiedInstitution'}
             />}
-            {validateEmailResponse && !validateEmailResponse.isValidMember && this.renderValidateEmailResponse()}
+            {emailValidationResponse && !emailValidationResponse.isValidMember && this.renderValidateEmailResponse()}
             {verifiedInstitutionOptions
               && updatedProfile.verifiedInstitutionalAffiliation
               && <DropdownWithLabel
