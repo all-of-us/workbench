@@ -286,6 +286,8 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     const updatedValue = fp.get(['updatedProfile' , attribute], this.state);
     if (!fp.isEqual(oldValue, updatedValue)) {
       return updatedValue;
+    } else {
+      return null;
     }
   }
 
@@ -294,7 +296,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     const {username} = updatedProfile;
     const request: AccountPropertyUpdate = {
       username,
-      freeCreditsLimit: undefined, // coming soon: RW-4956
+      freeCreditsLimit: null, // coming soon: RW-4956
       contactEmail: this.updatedProfileValue('contactEmail'),
       affiliation: this.updatedProfileValue('verifiedInstitutionalAffiliation'),
       accessBypassRequests: [],  // coming soon: RW-4958
