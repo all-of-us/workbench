@@ -388,8 +388,8 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       throw new BadRequestException("Cannot create a concept set with no concepts");
     }
 
-    if (dbConceptSet.getConceptIds().size() > MAX_CONCEPTS_PER_SET) {
-      throw new BadRequestException("Exceeded " + MAX_CONCEPTS_PER_SET + " in concept set");
+    if (dbConceptSet.getConceptIds().size() > maxConceptsPerSet) {
+      throw new BadRequestException("Exceeded " + maxConceptsPerSet + " in concept set");
     }
   }
 }
