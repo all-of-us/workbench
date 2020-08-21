@@ -95,10 +95,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
     DbConceptSet dbConceptSet =
         conceptSetMapper.clientToDbModel(
-            request,
-            workspace.getWorkspaceId(),
-            userProvider.get(),
-            conceptBigQueryService);
+            request, workspace.getWorkspaceId(), userProvider.get(), conceptBigQueryService);
 
     try {
       validateConceptSet(dbConceptSet, request.getAddedIds());
@@ -176,7 +173,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       String workspaceNamespace, String workspaceId, Long conceptSetId, ConceptSet conceptSet) {
     DbConceptSet dbConceptSet =
         getDbConceptSet(workspaceNamespace, workspaceId, conceptSetId, WorkspaceAccessLevel.WRITER);
-    validateUpdateConceptSet(dbConceptSet, conceptSet);
+    validateAndUpdateDbConceptSet(dbConceptSet, conceptSet);
     final Timestamp now = Timestamp.from(clock.instant());
     dbConceptSet.setLastModifiedTime(now);
     try {
@@ -225,7 +222,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       UpdateConceptSetRequest request) {
     DbConceptSet dbConceptSet =
         getDbConceptSet(workspaceNamespace, workspaceId, conceptSetId, WorkspaceAccessLevel.WRITER);
-    validateUpdateConceptSetConcepts(dbConceptSet, request);
+    validateAndUpdateDbConceptSetConcept(dbConceptSet, request);
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     dbConceptSet.setLastModifiedTime(now);
     try {
@@ -320,7 +317,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
         conceptService.findAll(dbConceptSet.getConceptIds(), CONCEPT_NAME_ORDERING));
   }
 
-  private void validateUpdateConceptSet(DbConceptSet dbConceptSet, ConceptSet conceptSet) {
+  private void validateAndUpdateDbConceptSet(DbConceptSet dbConceptSet, ConceptSet conceptSet) {
     if (Strings.isNullOrEmpty(conceptSet.getEtag())) {
       throw new BadRequestException("missing required update field 'etag'");
     }
@@ -344,7 +341,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
             .collect(Collectors.toList()));
   }
 
-  private void validateUpdateConceptSetConcepts(
+  private void validateAndUpdateDbConceptSetConcept(
       DbConceptSet dbConceptSet, UpdateConceptSetRequest request) {
     Set<Long> allConceptSetIds = dbConceptSet.getConceptIds();
     if (request.getAddedIds() != null) {
@@ -379,8 +376,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
               dbConceptSet.getDomainEnum(), omopTable, dbConceptSet.getConceptIds()));
     }
     validateConceptSet(
-        dbConceptSet,
-        dbConceptSet.getConceptIds().stream().collect(Collectors.toList()));
+        dbConceptSet, dbConceptSet.getConceptIds().stream().collect(Collectors.toList()));
   }
 
   private void validateConceptSet(DbConceptSet dbConceptSet, List<Long> conceptIds) {
@@ -395,6 +391,5 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     if (dbConceptSet.getConceptIds().size() > MAX_CONCEPTS_PER_SET) {
       throw new BadRequestException("Exceeded " + MAX_CONCEPTS_PER_SET + " in concept set");
     }
-
   }
 }

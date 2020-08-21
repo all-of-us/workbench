@@ -4,7 +4,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import java.sql.Timestamp;
 import java.time.Clock;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.Etags;

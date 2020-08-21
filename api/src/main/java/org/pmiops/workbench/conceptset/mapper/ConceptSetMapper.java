@@ -6,7 +6,6 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
-import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbUser;
