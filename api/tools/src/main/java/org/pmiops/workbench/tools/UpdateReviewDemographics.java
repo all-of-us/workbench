@@ -116,10 +116,11 @@ public class UpdateReviewDemographics {
                 int personCount =
                     dryRun
                         ? personIdsToUpdate.size()
-                        : participantCohortStatusDao.bulkUpdateSexAtBirthByParticipantId(
-                            sexAtBirthConceptId,
-                            personIdsToUpdate,
-                            dbCohortReview.getCohortReviewId());
+                        : participantCohortStatusDao
+                            .bulkUpdateSexAtBirthByParticipantAndCohortReviewId(
+                                sexAtBirthConceptId,
+                                personIdsToUpdate,
+                                dbCohortReview.getCohortReviewId());
                 logger.info(
                     String.format(
                         "%d participant(s) %s with sex at birth concept id %d - review id %d - "

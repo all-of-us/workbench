@@ -43,7 +43,7 @@ public interface ParticipantCohortStatusDao
               + " AND cohort_review_id = :cohortReviewId",
       nativeQuery = true)
   @Transactional
-  int bulkUpdateSexAtBirthByParticipantId(
+  int bulkUpdateSexAtBirthByParticipantAndCohortReviewId(
       @Param("conceptId") long conceptId,
       @Param("personIds") List<Long> personIds,
       @Param("cohortReviewId") Long cohortReviewId);
