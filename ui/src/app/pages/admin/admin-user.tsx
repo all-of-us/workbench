@@ -101,6 +101,29 @@ const ToggleWithLabelAndToggledText = ({label, initialValue, disabled, onToggle,
   </FlexColumn>;
 };
 
+
+const EmailValidationErrorMessage = ({emailValidationResponse, updatedProfile, verifiedInstitutionOptions}) => {
+  if (updatedProfile && updatedProfile.verifiedInstitutionalAffiliation) {
+    if (emailValidationResponse.isValidMember) {
+      return null;
+    } else {
+      const {verifiedInstitutionalAffiliation} = updatedProfile;
+      const selectedInstitution = fp.find(
+        institution => institution.shortName === verifiedInstitutionalAffiliation.institutionShortName,
+        verifiedInstitutionOptions
+      );
+      if (selectedInstitution.duaTypeEnum === DuaType.RESTRICTED) {
+        // Institution has signed Restricted agreement and the email is not in allowed emails list
+        return <RestrictedDuaEmailMismatchErrorMessage/>;
+      } else {
+        // Institution has MASTER or NULL agreement and the domain is not in the allowed list
+        return <MasterDuaEmailMismatchErrorMessage/>;
+      }
+    }
+  }
+  return null;
+};
+
 interface Props {
   // From withUrlParams
   urlParams: {
@@ -226,29 +249,6 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
   isSaveDisabled(errors) {
     const {oldProfile, updatedProfile} = this.state;
     return fp.isEqual(oldProfile, updatedProfile) || errors;
-  }
-
-  renderValidateEmailResponse() {
-    const {emailValidationResponse, updatedProfile, verifiedInstitutionOptions} = this.state;
-    if (updatedProfile && updatedProfile.verifiedInstitutionalAffiliation) {
-      if (emailValidationResponse.isValidMember) {
-        return null;
-      } else {
-        const {verifiedInstitutionalAffiliation} = updatedProfile;
-        const selectedInstitution = fp.find(
-          institution => institution.shortName === verifiedInstitutionalAffiliation.institutionShortName,
-          verifiedInstitutionOptions
-        );
-        if (selectedInstitution.duaTypeEnum === DuaType.RESTRICTED) {
-          // Institution has signed Restricted agreement and the email is not in allowed emails list
-          return <RestrictedDuaEmailMismatchErrorMessage/>;
-        } else {
-          // Institution has MASTER or NULL agreement and the domain is not in the allowed list
-          return <MasterDuaEmailMismatchErrorMessage/>;
-        }
-      }
-    }
-    return null;
   }
 
   async setVerifiedInstitutionOnProfile(institutionShortName: string) {
@@ -530,7 +530,11 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
                 }
                 dataTestId={'verifiedInstitution'}
             />}
-            {emailValidationResponse && !emailValidationResponse.isValidMember && this.renderValidateEmailResponse()}
+            {emailValidationResponse && !emailValidationResponse.isValidMember && <EmailValidationErrorMessage
+              emailValidationResponse={emailValidationResponse}
+              updatedProfile={updatedProfile}
+              verifiedInstitutionOptions={verifiedInstitutionOptions}
+            />}
             {verifiedInstitutionOptions
               && updatedProfile.verifiedInstitutionalAffiliation
               && <DropdownWithLabel
