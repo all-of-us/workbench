@@ -29,6 +29,9 @@ module.exports = {
   rules: {
     // 'prettier/prettier': 'warn',
 
+    /* Best Practices */
+    'no-multi-spaces': 'warn',
+
     /* Typescript specific */
     '@typescript-eslint/explicit-member-accessibility': 'off',
     // '@typescript-eslint/member-ordering': ['warn', { 'classExpressions': ['method', 'field'] }],
@@ -58,7 +61,6 @@ module.exports = {
     'curly': 'warn',
     'guard-for-in': 'warn',
     'no-restricted-imports': ['error', {paths: ['rxjs'] }],
-    'no-unused-labels': 'warn',
     'no-caller': 'warn',
     'no-bitwise': 'warn',
     'no-console': 'warn',
@@ -71,22 +73,20 @@ module.exports = {
     '@typescript-eslint/no-misused-new': 'warn',
     'no-shadow': 'warn',
     'dot-notation': 'warn',
-    'no-throw-literal': 'warn',
-    'no-fallthrough': 'warn',
-    'no-unused-expressions': 'warn',
-    'no-use-before-define': 'off',
+    'no-throw-literal': 'warn', 
+    'no-fallthrough': 'warn', // For switch statements
+    'no-use-before-define': 'off', // Needed for TS
     '@typescript-eslint/no-use-before-define': 'warn',
-    'no-unused-vars': 'off',
+    'no-unused-vars': 'off', // Needed for react
     '@typescript-eslint/no-unused-vars': 'warn', 
     'react/jsx-uses-vars': 'warn', 
     'no-var': 'warn',
-    'radix': 'warn',
+    'radix': 'warn', // Add radix on parseInt
     'eqeqeq': ['warn', 'always', {'null': 'ignore'}],
     
     /* Maintainability */
     'eol-last': 'warn',
     'max-len': ['warn', {code: 140, ignorePattern: '^import |^export\\{(.*?)\\}'}], 
-    'sort-keys-fix/sort-keys-fix': 'warn',
-    'prefer-const': ['warn', {'destructuring': 'all'}],
+    'prefer-const': ['warn', {'destructuring': 'all'}], 
   }
 };
