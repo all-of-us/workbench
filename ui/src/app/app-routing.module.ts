@@ -159,12 +159,8 @@ const routes: Routes = [
                         component: AppRouting,
                         data: {
                           breadcrumb: BreadcrumbType.Workspace,
+                          helpContentKey: 'notebooks'
                         }
-                        // data: {
-                        //   title: 'View Notebooks',
-                        //   breadcrumb: BreadcrumbType.Workspace,
-                        //   helpContentKey: 'notebooks'
-                        // }
                       },
                       {
                         path: ':nbName',

@@ -51,14 +51,6 @@ export const AppRoute = ({path, data = {}, guards = [], exact=false, component: 
   </Route>;
 };
 
-// export const ProtectedRoutes = (
-//   {guards, children}: {guards: Guard[], children: any }): React.ReactElement => {
-//   const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
-//
-//   return redirectPath ? <NavRedirect path={redirectPath}/>
-//   : <Fragment>{children}</Fragment>;
-// };
-
 export const Navigate = ({to}): React.ReactElement => {
   const location = useLocation();
   return <Redirect to={{pathname: to, state: {from: location}}}/>;
