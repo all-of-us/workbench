@@ -106,7 +106,6 @@ export default class GoogleLoginPage {
   async login(email?: string, paswd?: string) {
     const user = email || config.userEmail;
     const pwd = paswd || config.userPassword;
-    console.log(`env = ${process.env.WORKBENCH_ENV}`);
 
     try {
       await this.load(); // load the Google Sign In page
