@@ -445,10 +445,9 @@ public class ConceptSetsControllerTest {
   }
 
   @Test(expected = NotFoundException.class)
-  public void testGetSurveyConceptSetWrongWorkspace() {
+  public void testGetSurveyConceptSetWrongConceptId() {
     ConceptSet conceptSet = makeSurveyConceptSet1();
-    conceptSetsController.getConceptSet(
-        workspace2.getNamespace(), WORKSPACE_NAME_2, conceptSet.getId());
+    conceptSetsController.getConceptSet(workspace2.getNamespace(), WORKSPACE_NAME_2, 99L);
   }
 
   @Test
@@ -476,10 +475,9 @@ public class ConceptSetsControllerTest {
   }
 
   @Test(expected = NotFoundException.class)
-  public void testGetConceptSetWrongWorkspace() {
+  public void testGetConceptSetWrongConceptSetId() {
     ConceptSet conceptSet = makeConceptSet1();
-    conceptSetsController.getConceptSet(
-        workspace2.getNamespace(), WORKSPACE_NAME_2, conceptSet.getId());
+    conceptSetsController.getConceptSet(workspace2.getNamespace(), WORKSPACE_NAME_2, 99L);
   }
 
   @Test
@@ -589,6 +587,7 @@ public class ConceptSetsControllerTest {
   @Test
   public void testUpdateConceptSetConceptsAddMany() {
     saveConcepts();
+    conceptSetService.MAX_CONCEPTS_PER_SET = 1000;
     when(conceptBigQueryService.getParticipantCountForConcepts(
             Domain.CONDITION,
             "condition_occurrence",
@@ -658,11 +657,11 @@ public class ConceptSetsControllerTest {
     assertThat(conceptSet.getParticipantCount()).isEqualTo(456);
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test(expected = ConflictException.class)
   public void testUpdateConceptSetConceptsAddTooMany() {
     saveConcepts();
     ConceptSet conceptSet = makeConceptSet1();
-    conceptSetsController.maxConceptsPerSet = 2;
+    conceptSetService.MAX_CONCEPTS_PER_SET = 2;
     conceptSetsController
         .updateConceptSetConcepts(
             workspace.getNamespace(),
@@ -687,23 +686,10 @@ public class ConceptSetsControllerTest {
         addConceptsRequest(Etags.fromVersion(2), CLIENT_CONCEPT_1.getConceptId()));
   }
 
-  @Test(expected = BadRequestException.class)
-  public void testUpdateConceptSetConceptsAddWrongDomain() {
-    saveConcepts();
-    ConceptSet conceptSet = makeConceptSet1();
-    conceptSetsController.updateConceptSetConcepts(
-        workspace.getNamespace(),
-        WORKSPACE_NAME,
-        conceptSet.getId(),
-        addConceptsRequest(
-            conceptSet.getEtag(),
-            CLIENT_CONCEPT_1.getConceptId(),
-            CLIENT_CONCEPT_2.getConceptId()));
-  }
-
   @Test
   public void testDeleteConceptSet() {
     saveConcepts();
+    conceptSetService.MAX_CONCEPTS_PER_SET = 1000;
     ConceptSet conceptSet1 = makeConceptSet1();
     ConceptSet conceptSet2 = makeConceptSet2();
     ConceptSet updatedConceptSet =
@@ -744,11 +730,6 @@ public class ConceptSetsControllerTest {
             .getConceptSet(workspace.getNamespace(), WORKSPACE_NAME, conceptSet2.getId())
             .getBody();
     assertThat(conceptSet2.getConcepts()).containsExactly(CLIENT_CONCEPT_2);
-  }
-
-  @Test(expected = NotFoundException.class)
-  public void testDeleteConceptSetNotFound() {
-    conceptSetsController.deleteConceptSet(workspace.getNamespace(), WORKSPACE_NAME, 1L);
   }
 
   private UpdateConceptSetRequest addConceptsRequest(String etag, Long... conceptIds) {

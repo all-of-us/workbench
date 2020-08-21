@@ -4,21 +4,20 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Ordering;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import javax.persistence.OptimisticLockException;
+import org.apache.commons.collections4.CollectionUtils;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
-import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper;
 import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.DbConceptSet;
@@ -28,7 +27,6 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.ConceptSetListResponse;
 import org.pmiops.workbench.model.CopyRequest;
@@ -40,7 +38,6 @@ import org.pmiops.workbench.model.UpdateConceptSetRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RestController;
@@ -58,14 +55,10 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   private final UserRecentResourceService userRecentResourceService;
   private final ConceptBigQueryService conceptBigQueryService;
   private final Clock clock;
-  private final ConceptSetMapper conceptSetMapper;
 
-  private Provider<DbUser> userProvider;
+  private final Provider<DbUser> userProvider;
 
   @VisibleForTesting int maxConceptsPerSet;
-
-  public static final Ordering<Concept> CONCEPT_NAME_ORDERING =
-      Ordering.from(String.CASE_INSENSITIVE_ORDER).onResultOf(Concept::getConceptName);
 
   @Autowired
   ConceptSetsController(
@@ -75,8 +68,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       ConceptBigQueryService conceptBigQueryService,
       UserRecentResourceService userRecentResourceService,
       Provider<DbUser> userProvider,
-      Clock clock,
-      ConceptSetMapper conceptSetMapper) {
+      Clock clock) {
     this.workspaceService = workspaceService;
     this.conceptSetService = conceptSetService;
     this.conceptService = conceptService;
@@ -84,51 +76,44 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     this.userRecentResourceService = userRecentResourceService;
     this.userProvider = userProvider;
     this.clock = clock;
-    this.conceptSetMapper = conceptSetMapper;
     this.maxConceptsPerSet = MAX_CONCEPTS_PER_SET;
   }
 
   @Override
   public ResponseEntity<ConceptSet> createConceptSet(
       String workspaceNamespace, String workspaceId, CreateConceptSetRequest request) {
+    // Fail fast if no concept ids are in request
+    if (CollectionUtils.isEmpty(request.getAddedIds())) {
+      throw new BadRequestException("Cannot create a concept set with no concepts");
+    }
     DbWorkspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    DbConceptSet dbConceptSet =
-        conceptSetMapper.clientToDbModel(
-            request, workspace.getWorkspaceId(), userProvider.get(), conceptBigQueryService);
 
-    try {
-      validateConceptSet(dbConceptSet, request.getAddedIds());
-      dbConceptSet = conceptSetService.save(dbConceptSet);
-      userRecentResourceService.updateConceptSetEntry(
-          workspace.getWorkspaceId(),
-          userProvider.get().getUserId(),
-          dbConceptSet.getConceptSetId());
-    } catch (DataIntegrityViolationException e) {
-      throw new BadRequestException(
-          String.format(
-              "Concept set \"/%s/%s/%s\" already exists.",
-              workspaceNamespace, workspaceId, dbConceptSet.getName()));
-    }
-    return ResponseEntity.ok(toHydratedConceptSet(dbConceptSet));
+    DbConceptSet dbConceptSet = fromClientConceptSet(request, workspace.getWorkspaceId());
+
+    validateConceptSet(dbConceptSet, request.getAddedIds());
+    ConceptSet conceptSet = conceptSetService.save(dbConceptSet);
+    userRecentResourceService.updateConceptSetEntry(
+        workspace.getWorkspaceId(), userProvider.get().getUserId(), conceptSet.getId());
+    return ResponseEntity.ok(conceptSetService.toHydratedConcepts(conceptSet));
   }
 
   @Override
   public ResponseEntity<EmptyResponse> deleteConceptSet(
       String workspaceNamespace, String workspaceId, Long conceptSetId) {
-    DbConceptSet conceptSet =
-        getDbConceptSet(workspaceNamespace, workspaceId, conceptSetId, WorkspaceAccessLevel.WRITER);
-    conceptSetService.delete(conceptSet.getConceptSetId());
+    conceptSetService.delete(conceptSetId);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
   public ResponseEntity<ConceptSet> getConceptSet(
       String workspaceNamespace, String workspaceId, Long conceptSetId) {
-    DbConceptSet conceptSet =
-        getDbConceptSet(workspaceNamespace, workspaceId, conceptSetId, WorkspaceAccessLevel.READER);
-    return ResponseEntity.ok(toHydratedConceptSet(conceptSet));
+    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+
+    return ResponseEntity.ok(
+        conceptSetService.toHydratedConcepts(conceptSetService.findOne(conceptSetId)));
   }
 
   @Override
@@ -138,15 +123,13 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    List<DbConceptSet> conceptSets =
-        conceptSetService.findByWorkspaceId(workspace.getWorkspaceId());
+    List<ConceptSet> conceptSets = conceptSetService.findByWorkspaceId(workspace.getWorkspaceId());
     ConceptSetListResponse response = new ConceptSetListResponse();
     // Concept sets in the list response will *not* have concepts under them, as this could be
     // a lot of data... you need to open up a concept set to see what concepts are within it.
     response.setItems(
         conceptSets.stream()
-            .map(conceptSetMapper::dbModelToClient)
-            .sorted(Comparator.comparing(c -> c.getName()))
+            .sorted(Comparator.comparing(ConceptSet::getName))
             .collect(Collectors.toList()));
     return ResponseEntity.ok(response);
   }
@@ -158,32 +141,97 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     short surveyId = DbStorageEnums.surveysToStorage(Surveys.fromValue(surveyName.toUpperCase()));
-    List<DbConceptSet> conceptSets =
+    List<ConceptSet> conceptSets =
         conceptSetService.findByWorkspaceIdAndSurvey(workspace.getWorkspaceId(), surveyId);
-    ConceptSetListResponse response = new ConceptSetListResponse();
-    response.setItems(
-        conceptSets.stream()
-            .map(conceptSetMapper::dbModelToClient)
-            .sorted(Comparator.comparing(c -> c.getName()))
-            .collect(Collectors.toList()));
+    ConceptSetListResponse response =
+        new ConceptSetListResponse()
+            .items(
+                conceptSets.stream()
+                    .sorted(Comparator.comparing(ConceptSet::getName))
+                    .collect(Collectors.toList()));
     return ResponseEntity.ok(response);
   }
 
   @Override
   public ResponseEntity<ConceptSet> updateConceptSet(
       String workspaceNamespace, String workspaceId, Long conceptSetId, ConceptSet conceptSet) {
-    DbConceptSet dbConceptSet =
-        getDbConceptSet(workspaceNamespace, workspaceId, conceptSetId, WorkspaceAccessLevel.WRITER);
-    validateAndUpdateDbConceptSet(dbConceptSet, conceptSet);
-    final Timestamp now = Timestamp.from(clock.instant());
-    dbConceptSet.setLastModifiedTime(now);
-    try {
-      dbConceptSet = conceptSetService.save(dbConceptSet);
-      // TODO: add recent resource entry for concept sets [RW-1129]
-    } catch (OptimisticLockException e) {
-      throw new ConflictException("Failed due to concurrent concept set modification");
+    // Fail fast if etag isn't provided
+    if (Strings.isNullOrEmpty(conceptSet.getEtag())) {
+      throw new BadRequestException("missing required update field 'etag'");
     }
-    return ResponseEntity.ok(toHydratedConceptSet(dbConceptSet));
+    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+
+    validateAndUpdateDbConceptSet(dbConceptSet, conceptSet);
+    return ResponseEntity.ok(
+        conceptSetService.toHydratedConcepts(
+            conceptSetService.updateConceptSet(conceptSetId, conceptSet)));
+  }
+
+  @Override
+  public ResponseEntity<ConceptSet> updateConceptSetConcepts(
+      String workspaceNamespace,
+      String workspaceId,
+      Long conceptSetId,
+      UpdateConceptSetRequest request) {
+    // Fail fast if etag isn't provided
+    if (Strings.isNullOrEmpty(request.getEtag())) {
+      throw new BadRequestException("missing required update field 'etag'");
+    }
+
+    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+
+    validateAndUpdateDbConceptSetConcept(dbConceptSet, request);
+    return ResponseEntity.ok(
+        conceptSetService.toHydratedConcepts(
+            conceptSetService.updateConceptSetConcepts(conceptSetId, request)));
+  }
+
+  @Override
+  // TODO: Refactor this -> https://precisionmedicineinitiative.atlassian.net/browse/RW-5428
+  public ResponseEntity<ConceptSet> copyConceptSet(
+      String fromWorkspaceNamespace,
+      String fromWorkspaceId,
+      String fromConceptSetId,
+      CopyRequest copyRequest) {
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+        fromWorkspaceNamespace, fromWorkspaceId, WorkspaceAccessLevel.READER);
+    DbWorkspace toWorkspace =
+        workspaceService.get(
+            copyRequest.getToWorkspaceNamespace(), copyRequest.getToWorkspaceName());
+    DbWorkspace fromWorkspace = workspaceService.get(fromWorkspaceNamespace, fromWorkspaceId);
+    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+        toWorkspace.getWorkspaceNamespace(),
+        toWorkspace.getFirecloudName(),
+        WorkspaceAccessLevel.WRITER);
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(toWorkspace.getCdrVersion());
+    if (toWorkspace.getCdrVersion().getCdrVersionId()
+        != fromWorkspace.getCdrVersion().getCdrVersionId()) {
+      throw new BadRequestException(
+          "Target workspace does not have the same CDR version as current workspace");
+    }
+    final DbConceptSet existingConceptSet =
+        conceptSetService
+            .findDbConceptSet(Long.valueOf(fromConceptSetId))
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("Concept set %s does not exist", fromConceptSetId)));
+    DbConceptSet newConceptSet = new DbConceptSet(existingConceptSet);
+
+    newConceptSet.setName(copyRequest.getNewName());
+    newConceptSet.setCreator(userProvider.get());
+    newConceptSet.setWorkspaceId(toWorkspace.getWorkspaceId());
+    newConceptSet.setCreationTime(now);
+    newConceptSet.setLastModifiedTime(now);
+    newConceptSet.setVersion(INITIAL_VERSION);
+
+    ConceptSet conceptSet = conceptSetService.save(newConceptSet);
+    userRecentResourceService.updateConceptSetEntry(
+        toWorkspace.getWorkspaceId(), userProvider.get().getUserId(), conceptSet.getId());
+    return ResponseEntity.ok(conceptSetService.toHydratedConcepts(conceptSet));
   }
 
   private void addConceptsToSet(DbConceptSet dbConceptSet, List<Long> addedIds) {
@@ -215,107 +263,36 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     dbConceptSet.getConceptIds().addAll(addedIds);
   }
 
-  @Override
-  public ResponseEntity<ConceptSet> updateConceptSetConcepts(
-      String workspaceNamespace,
-      String workspaceId,
-      Long conceptSetId,
-      UpdateConceptSetRequest request) {
-    DbConceptSet dbConceptSet =
-        getDbConceptSet(workspaceNamespace, workspaceId, conceptSetId, WorkspaceAccessLevel.WRITER);
-    validateAndUpdateDbConceptSetConcept(dbConceptSet, request);
+  private DbConceptSet fromClientConceptSet(CreateConceptSetRequest request, long workspaceId) {
+    ConceptSet conceptSet = request.getConceptSet();
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    dbConceptSet.setLastModifiedTime(now);
-    try {
-      dbConceptSet = conceptSetService.save(dbConceptSet);
-      return ResponseEntity.ok(toHydratedConceptSet(dbConceptSet));
-      // TODO: add recent resource entry for concept sets [RW-1129]
-    } catch (OptimisticLockException e) {
-      throw new ConflictException("Failed due to concurrent concept set modification");
+    DbConceptSet dbConceptSet = new DbConceptSet();
+    dbConceptSet.setDomainEnum(conceptSet.getDomain());
+    if (conceptSet.getSurvey() != null) {
+      dbConceptSet.setSurveysEnum(conceptSet.getSurvey());
     }
-  }
-
-  @Override
-  public ResponseEntity<ConceptSet> copyConceptSet(
-      String fromWorkspaceNamespace,
-      String fromWorkspaceId,
-      String fromConceptSetId,
-      CopyRequest copyRequest) {
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
-        fromWorkspaceNamespace, fromWorkspaceId, WorkspaceAccessLevel.READER);
-    DbWorkspace toWorkspace =
-        workspaceService.get(
-            copyRequest.getToWorkspaceNamespace(), copyRequest.getToWorkspaceName());
-    DbWorkspace fromWorkspace = workspaceService.get(fromWorkspaceNamespace, fromWorkspaceId);
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
-        toWorkspace.getWorkspaceNamespace(),
-        toWorkspace.getFirecloudName(),
-        WorkspaceAccessLevel.WRITER);
-    CdrVersionContext.setCdrVersionNoCheckAuthDomain(toWorkspace.getCdrVersion());
-    if (toWorkspace.getCdrVersion().getCdrVersionId()
-        != fromWorkspace.getCdrVersion().getCdrVersionId()) {
+    if (dbConceptSet.getDomainEnum() == null) {
       throw new BadRequestException(
-          "Target workspace does not have the same CDR version as current workspace");
+          "Domain " + conceptSet.getDomain() + " is not allowed for concept sets");
     }
-    final DbConceptSet existingConceptSet =
-        conceptSetService
-            .findOne(Long.valueOf(fromConceptSetId))
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format(
-                            "Concept set %s does not exist",
-                            createResourcePath(
-                                fromWorkspaceNamespace, fromWorkspaceId, fromConceptSetId))));
-    DbConceptSet newConceptSet = new DbConceptSet(existingConceptSet);
-
-    newConceptSet.setName(copyRequest.getNewName());
-    newConceptSet.setCreator(userProvider.get());
-    newConceptSet.setWorkspaceId(toWorkspace.getWorkspaceId());
-    newConceptSet.setCreationTime(now);
-    newConceptSet.setLastModifiedTime(now);
-    newConceptSet.setVersion(INITIAL_VERSION);
-
-    try {
-      newConceptSet = conceptSetService.save(newConceptSet);
-    } catch (DataIntegrityViolationException e) {
-      throw new ConflictException(
-          String.format(
-              "Concept set %s already exists.",
-              createResourcePath(
-                  toWorkspace.getWorkspaceNamespace(),
-                  toWorkspace.getFirecloudName(),
-                  newConceptSet.getName())));
+    Optional.ofNullable(conceptSet.getEtag())
+        .ifPresent(etag -> dbConceptSet.setVersion(Etags.toVersion(etag)));
+    dbConceptSet.setDescription(conceptSet.getDescription());
+    dbConceptSet.setName(conceptSet.getName());
+    dbConceptSet.setCreator(userProvider.get());
+    dbConceptSet.setWorkspaceId(workspaceId);
+    dbConceptSet.setCreationTime(now);
+    dbConceptSet.setLastModifiedTime(now);
+    dbConceptSet.setVersion(INITIAL_VERSION);
+    addConceptsToSet(dbConceptSet, request.getAddedIds());
+    if (dbConceptSet.getConceptIds().size() > maxConceptsPerSet) {
+      throw new BadRequestException("Exceeded " + maxConceptsPerSet + " in concept set");
     }
-    userRecentResourceService.updateConceptSetEntry(
-        toWorkspace.getWorkspaceId(),
-        userProvider.get().getUserId(),
-        newConceptSet.getConceptSetId());
-    return ResponseEntity.ok(toHydratedConceptSet(newConceptSet));
-  }
-
-  private String createResourcePath(
-      String workspaceNamespace, String workspaceFirecloudName, String identifier) {
-    return String.format("\"/%s/%s/%s\"", workspaceNamespace, workspaceFirecloudName, identifier);
-  }
-
-  private DbConceptSet getDbConceptSet(
-      String workspaceNamespace,
-      String workspaceId,
-      Long conceptSetId,
-      WorkspaceAccessLevel workspaceAccessLevel) {
-    DbWorkspace workspace =
-        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, workspaceId, workspaceAccessLevel);
-
-    return conceptSetService.findOne(conceptSetId, workspace);
-  }
-
-  public ConceptSet toHydratedConceptSet(DbConceptSet dbConceptSet) {
-    ConceptSet conceptSet = conceptSetMapper.dbModelToClient(dbConceptSet);
-    return conceptSet.concepts(
-        conceptService.findAll(dbConceptSet.getConceptIds(), CONCEPT_NAME_ORDERING));
+    String omopTable = BigQueryTableInfo.getTableName(request.getConceptSet().getDomain());
+    dbConceptSet.setParticipantCount(
+        conceptBigQueryService.getParticipantCountForConcepts(
+            dbConceptSet.getDomainEnum(), omopTable, dbConceptSet.getConceptIds()));
+    return dbConceptSet;
   }
 
   private void validateAndUpdateDbConceptSet(DbConceptSet dbConceptSet, ConceptSet conceptSet) {
@@ -336,7 +313,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       throw new BadRequestException("Cannot modify the domain of an existing concept set");
     }
     // In case of rename ConceptDet does not have concepts
-    if (!CollectionUtils.isEmpty(conceptSet.getConcepts())) {
+    if (!org.springframework.util.CollectionUtils.isEmpty(conceptSet.getConcepts())) {
       validateConceptSet(
           dbConceptSet,
           conceptSet.getConcepts().stream()
