@@ -7,7 +7,8 @@ module.exports = {
     'prefer-arrow',
     '@typescript-eslint',
     'simple-import-sort',
-    'prettier'
+    'prettier',
+    'jest'
   ],
   extends: [],
   parserOptions: {
@@ -26,6 +27,8 @@ module.exports = {
   // These rules were ported over from our common-ui/tslint.json file
   // The rules found here were ported and categorized using the tslint migration roadmap:
   // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/ROADMAP.md
+
+  // The eslint rules can be found here: https://eslint.org/docs/rules/
   rules: {
     // 'prettier/prettier': 'warn', // Possibly use prettier to handle some formatting
 
@@ -49,7 +52,7 @@ module.exports = {
     '@typescript-eslint/consistent-type-definitions': ['warn', 'interface'],
     'no-trailing-spaces': 'warn',
     'no-undef-init': 'warn',
-    // 'brace-style': ['warn', '1tbs', { 'allowSingleLine': true }],
+    // 'brace-style': ['warn', '1tbs'],
     // 'simple-import-sort/sort': 'warn',
     // 'quotes': ['warn', 'single'], 
     // '@typescript-eslint/semi': 'warn',
@@ -86,7 +89,7 @@ module.exports = {
     
     /* Maintainability */
     // 'eol-last': 'warn',
-    // 'max-len': ['warn', {code: 140, ignorePattern: '^import |^export\\{(.*?)\\}'}], 
+    // 'max-len': ['warn', {code: 140, ignorePattern: '^import |^export\\{(.*?)\\}', ignoreComments: true}], 
     // 'prefer-const': ['warn', {'destructuring': 'all'}], 
   }
 };
