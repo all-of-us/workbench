@@ -27,10 +27,10 @@ module.exports = {
   // The rules found here were ported and categorized using the tslint migration roadmap:
   // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/ROADMAP.md
   rules: {
-    // 'prettier/prettier': 'warn',
+    // 'prettier/prettier': 'warn', // Possibly use prettier to handle some formatting
 
     /* Best Practices */
-    'no-multi-spaces': 'warn',
+    // 'no-multi-spaces': 'warn',
 
     /* Typescript specific */
     '@typescript-eslint/explicit-member-accessibility': 'off',
@@ -43,19 +43,19 @@ module.exports = {
     '@typescript-eslint/unified-signatures': 'warn',
 
     /* Style */
-    'arrow-body-style': 'warn',
     '@typescript-eslint/prefer-function-type': 'warn',
     '@typescript-eslint/class-name-casing': 'warn',
-    'spaced-comment': 'warn',
+    // 'spaced-comment': 'warn',
     '@typescript-eslint/consistent-type-definitions': ['warn', 'interface'],
     'no-trailing-spaces': 'warn',
     'no-undef-init': 'warn',
-    'brace-style': ['warn', '1tbs', { 'allowSingleLine': true }],
-    'simple-import-sort/sort': 'warn',
-    'quotes': ['warn', 'single'],
-    '@typescript-eslint/semi': 'warn',
+    // 'brace-style': ['warn', '1tbs', { 'allowSingleLine': true }],
+    // 'simple-import-sort/sort': 'warn',
+    // 'quotes': ['warn', 'single'], 
+    // '@typescript-eslint/semi': 'warn',
     '@typescript-eslint/naming-convention': 'warn',
-    'space-before-function-paren': ['warn', 'never'],
+    // 'space-before-function-paren': ['warn', { 'anonymous': 'never', 'named': 'never', 'asyncArrow': 'always' }],
+
 
     /* Functionality */
     'curly': 'warn',
@@ -63,7 +63,7 @@ module.exports = {
     'no-restricted-imports': ['error', {paths: ['rxjs'] }],
     'no-caller': 'warn',
     'no-bitwise': 'warn',
-    'no-console': 'warn',
+    // 'no-console': 'warn', 
     'no-new-wrappers': 'warn',
     'no-debugger': 'warn',
     'constructor-super': 'warn',
@@ -71,22 +71,22 @@ module.exports = {
     'no-eval': 'warn',
     'no-irregular-whitespace': 'warn',
     '@typescript-eslint/no-misused-new': 'warn',
-    'no-shadow': 'warn',
-    'dot-notation': 'warn',
+    // 'no-shadow': 'warn',
+    // 'dot-notation': 'warn', 
     'no-throw-literal': 'warn', 
     'no-fallthrough': 'warn', // For switch statements
     'no-use-before-define': 'off', // Needed for TS
-    '@typescript-eslint/no-use-before-define': 'warn',
-    'no-unused-vars': 'off', // Needed for react
-    '@typescript-eslint/no-unused-vars': 'warn', 
+    // '@typescript-eslint/no-use-before-define': 'warn',
+    // 'no-unused-vars': 'off', // Needed for TS 
+    // '@typescript-eslint/no-unused-vars': 'warn', 
     'react/jsx-uses-vars': 'warn', 
-    'no-var': 'warn',
+    // 'no-var': 'warn',
     'radix': 'warn', // Add radix on parseInt
     'eqeqeq': ['warn', 'always', {'null': 'ignore'}],
     
     /* Maintainability */
-    'eol-last': 'warn',
-    'max-len': ['warn', {code: 140, ignorePattern: '^import |^export\\{(.*?)\\}'}], 
-    'prefer-const': ['warn', {'destructuring': 'all'}], 
+    // 'eol-last': 'warn',
+    // 'max-len': ['warn', {code: 140, ignorePattern: '^import |^export\\{(.*?)\\}'}], 
+    // 'prefer-const': ['warn', {'destructuring': 'all'}], 
   }
 };
