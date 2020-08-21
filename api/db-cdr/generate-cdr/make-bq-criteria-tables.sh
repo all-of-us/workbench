@@ -65,7 +65,8 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
     has_hierarchy       INT64,
     has_ancestor_data   INT64,
     path                STRING,
-    synonyms            STRING
+    synonyms            STRING,
+    full_text           STRING
 )"
 
 # table that holds the ingredient --> coded drugs mapping
@@ -5242,7 +5243,7 @@ FROM
     (
         SELECT measurement_concept_id, value_as_concept_id, b.concept_name, 'CAT' as type, CAST(count(DISTINCT person_id) as STRING)
         FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\` a
-        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.value_as_concept_Id = b.concept_id
+        JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.value_as_concept_id = b.concept_id
         WHERE measurement_concept_id in
             (
                 SELECT concept_id
@@ -5338,3 +5339,44 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 SET name = REGEXP_REPLACE(name, r'[\"]', '')
 WHERE REGEXP_CONTAINS(name, r'[\"]')"
 
+
+###############################################
+ FULL_TEXT and SYNONYMS
+###############################################
+echo "FULL_TEXT and SYNONYMS - adding data"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
+SET   x.full_text = y.full_text
+    , x.synonyms = y.synonyms
+FROM
+    (
+        SELECT
+              a.id
+            , CASE
+                WHEN STRING_AGG(REPLACE(b.concept_synonym_name,'|','||'),'|') is null
+                    OR a.concept_id = 0
+                    OR a.domain_id = 'SURVEY'
+                THEN a.name
+                ELSE CONCAT(a.name,'|',STRING_AGG(REPLACE(b.concept_synonym_name,'|','||'),'|'))
+              END as full_text
+            , STRING_AGG(b.concept_synonym_name,'; ') as synonyms
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` a
+        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` b on a.concept_id = b.concept_id
+        GROUP BY a.id, a.name, a.code, a.concept_id, a.domain_id
+    ) y
+WHERE x.id = y.id"
+
+# add [rank1] for all items. this is to deal with the poly-hierarchical issue in many trees
+echo "FULL_TEXT - add [rank1]"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
+SET x.full_text = CONCAT(x.full_text, '|', y.rnk)
+FROM
+    (
+        SELECT MIN(id) as id, CONCAT('[', LOWER(domain_id), '_rank1]') as rnk
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+        WHERE full_text is not null
+            and (item_count != -1 OR (item_count = -1 AND type = 'BRAND'))
+        group by domain_id, is_standard, type, subtype, concept_id, name
+    ) y
+WHERE x.id = y.id"
