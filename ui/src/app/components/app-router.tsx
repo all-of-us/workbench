@@ -38,18 +38,19 @@ const NavRedirect = ({path}) => {
   return null;
 };
 
-export const AppRoute = ({path, data = {}, guards = [], exact=false, component: Component}): React.ReactElement => {
-  const routeParams = useParams();
-  const routeHistory = useHistory();
-
+// A Switch (which, ultimately, is the innermost element in an AppRouter) expects its
+// immediate children to be Routes. If they're not, the code will _probably_ still work, but
+// may behave unexpectedly if the child component doesn't have all the props that a Route should.
+// Duck typing is bad, so we use a function to build the Routes in-place.
+export function generateRoute({path, data={}, guards=[], component: Component}): React.ReactElement {
   const {redirectPath = null} = fp.find(({allowed}) => !allowed(), guards) || {};
 
   return redirectPath
       ? <NavRedirect path={redirectPath}/>
-      : <Route exact={exact} path={path} >
-    <Component urlParams={routeParams} routeHistory={routeHistory} routeConfig={data}/>
+      : <Route exact={true} path={path} >
+    <Component urlParams={() => useParams()} routeHistory={() => useHistory()} routeConfig={data}/>
   </Route>;
-};
+}
 
 export const Navigate = ({to}): React.ReactElement => {
   const location = useLocation();
