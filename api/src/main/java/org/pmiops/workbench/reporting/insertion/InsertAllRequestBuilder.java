@@ -4,8 +4,7 @@ import com.google.cloud.bigquery.InsertAllRequest;
 import com.google.cloud.bigquery.InsertAllRequest.RowToInsert;
 import com.google.cloud.bigquery.TableId;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import java.util.Arrays;
+import com.google.common.collect.Maps;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -28,15 +27,16 @@ public interface InsertAllRequestBuilder<T> extends ColumnDrivenBuilder<T> {
   }
 
   default RowToInsert modelToRow(T model, Map<String, Object> fixedValues) {
-    final ImmutableMap.Builder<String, Object> builder = new ImmutableMap.Builder<>();
     // First N columns are same for all rows (e.g. a partition key column)
-    builder.putAll(fixedValues);
-    builder.putAll(
-        Arrays.stream(getQueryParameterColumns())
-            .collect(
-                ImmutableMap.toImmutableMap(
-                    QueryParameterColumn::getParameterName, c -> c.getRowToInsertValue(model))));
-    return RowToInsert.of(generateInsertId(), builder.build());
+    final Map<String, Object> map = Maps.newHashMap(fixedValues);
+
+    // can't stream/collect here because that uses HashMap.merge() which surprisingly does not
+    // allow null values although they are valid for HashMap.  We do use null values.
+    for (QueryParameterColumn<T> qpc : getQueryParameterColumns()) {
+      map.put(qpc.getParameterName(), qpc.getRowToInsertValue(model));
+    }
+
+    return RowToInsert.of(generateInsertId(), map);
   }
 
   default String generateInsertId() {

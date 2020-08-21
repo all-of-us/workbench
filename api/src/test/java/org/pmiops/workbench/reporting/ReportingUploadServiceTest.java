@@ -63,6 +63,7 @@ public class ReportingUploadServiceTest {
   private static final Instant THEN = Instant.parse("1989-02-17T00:00:00.00Z");
 
   private ReportingSnapshot reportingSnapshot;
+  private ReportingSnapshot snapshotWithNulls;
 
   @MockBean private BigQueryService mockBigQueryService;
   @MockBean private Stopwatch mockStopwatch;
@@ -142,6 +143,47 @@ public class ReportingUploadServiceTest {
                         .fakeSize(4444L)
                         .creatorId(202L)));
 
+    snapshotWithNulls =
+        new ReportingSnapshot()
+            .captureTimestamp(NOW.toEpochMilli())
+            .researchers(
+                ImmutableList.of(
+                    new ReportingResearcher()
+                        .username(null)
+                        .firstName("Nullson")
+                        .isDisabled(false)
+                        .researcherId(111L),
+                    new ReportingResearcher()
+                        .username("america@usa.gov")
+                        .firstName(null)
+                        .isDisabled(false)
+                        .researcherId(212L),
+                    new ReportingResearcher()
+                        .username(null)
+                        .firstName(null)
+                        .isDisabled(true)
+                        .researcherId(313L)))
+            .workspaces(
+                ImmutableList.of(
+                    new ReportingWorkspace()
+                        .workspaceId(211L)
+                        .name(null)
+                        .creationTime(THEN.toEpochMilli())
+                        .fakeSize(4444L)
+                        .creatorId(111L),
+                    new ReportingWorkspace()
+                        .workspaceId(212L)
+                        .name("Work Work Work")
+                        .creationTime(THEN.toEpochMilli())
+                        .fakeSize(4444L)
+                        .creatorId(111L),
+                    new ReportingWorkspace()
+                        .workspaceId(213L)
+                        .name(null)
+                        .creationTime(THEN.toEpochMilli())
+                        .fakeSize(4444L)
+                        .creatorId(212L)));
+
     final TableResult mockTableResult = mock(TableResult.class);
     doReturn(99L).when(mockTableResult).getTotalRows();
 
@@ -154,7 +196,16 @@ public class ReportingUploadServiceTest {
 
   @Test
   public void testUploadSnapshot_dml() {
-    reportingUploadServiceDmlImpl.uploadSnapshot(reportingSnapshot);
+    testUploadSnapshot_dml(reportingSnapshot);
+  }
+
+  @Test
+  public void testUploadSnapshot_dml_with_nulls() {
+    testUploadSnapshot_dml(snapshotWithNulls);
+  }
+
+  private void testUploadSnapshot_dml(ReportingSnapshot snapshot) {
+    reportingUploadServiceDmlImpl.uploadSnapshot(snapshot);
     verify(mockBigQueryService, times(2))
         .executeQuery(queryJobConfigurationCaptor.capture(), anyLong());
 
@@ -224,14 +275,22 @@ public class ReportingUploadServiceTest {
 
   @Test
   public void testUploadSnapshot_streaming() {
+    testUploadSnapshot_streaming(reportingSnapshot);
+  }
+
+  @Test
+  public void testUploadSnapshot_streaming_with_nulls() {
+    testUploadSnapshot_streaming(snapshotWithNulls);
+  }
+
+  private void testUploadSnapshot_streaming(ReportingSnapshot snapshot) {
     final InsertAllResponse mockInsertAllResponse = mock(InsertAllResponse.class);
     doReturn(Collections.emptyMap()).when(mockInsertAllResponse).getInsertErrors();
 
     doReturn(mockInsertAllResponse)
         .when(mockBigQueryService)
         .insertAll(any(InsertAllRequest.class));
-    final ReportingJobResult result =
-        reportingUploadServiceStreamingImpl.uploadSnapshot(reportingSnapshot);
+    final ReportingJobResult result = reportingUploadServiceStreamingImpl.uploadSnapshot(snapshot);
     verify(mockBigQueryService, times(2)).insertAll(insertAllRequestCaptor.capture());
     final List<InsertAllRequest> requests = insertAllRequestCaptor.getAllValues();
 
