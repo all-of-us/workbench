@@ -115,8 +115,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
           FilterColumns.SEX_AT_BIRTH.name(),
           FilterColumns.ETHNICITY.name(),
           FilterColumns.GENDER.name(),
-          FilterColumns.RACE.name()
-      );
+          FilterColumns.RACE.name());
 
   private CBCriteriaDao cbCriteriaDao;
   private CohortReviewService cohortReviewService;
@@ -756,12 +755,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
             : new Sort(Direction.DESC, "name");
     if (SEX_GENDER_RACE_ETHNICITY_TYPES.contains(sortColumn)) {
       String criteriaSortColumn =
-          sortColumn.equals(FilterColumns.SEX_AT_BIRTH.toString()) ? CriteriaType.SEX.toString()
+          sortColumn.equals(FilterColumns.SEX_AT_BIRTH.toString())
+              ? CriteriaType.SEX.toString()
               : sortColumn;
       List<DbCriteria> criteriaList =
           cbCriteriaDao.findByDomainIdAndTypeAndParentIdNotIn(
-              DomainType.PERSON.toString(),
-              criteriaSortColumn, 0L, sort);
+              DomainType.PERSON.toString(), criteriaSortColumn, 0L, sort);
       Map<String, Map<Long, String>> concepts = new HashMap<>();
       List<String> demoList =
           criteriaList.stream()
