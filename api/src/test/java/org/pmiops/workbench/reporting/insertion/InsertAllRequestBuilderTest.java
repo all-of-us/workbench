@@ -23,8 +23,9 @@ public class InsertAllRequestBuilderTest {
   final InsertAllRequestBuilder<ReportingResearcher> researcherRequestBuilder =
       ResearcherParameter::values;
 
+  final Instant princePartyTime = Instant.parse("1999-12-31T23:59:59.99Z");
   final Map<String, Object> fixedValues =
-      ImmutableMap.of("snapshot_timestamp", Instant.now().toEpochMilli());
+      ImmutableMap.of("snapshot_timestamp", princePartyTime.toEpochMilli());
 
   final List<ReportingResearcher> researchers =
       ImmutableList.of(

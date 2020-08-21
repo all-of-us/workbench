@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.timestampQpvToInstant;
@@ -64,6 +65,7 @@ public class ReportingUploadServiceTest {
 
   private ReportingSnapshot reportingSnapshot;
   private ReportingSnapshot snapshotWithNulls;
+  private ReportingSnapshot emptySnapshot;
 
   @MockBean private BigQueryService mockBigQueryService;
   @MockBean private Stopwatch mockStopwatch;
@@ -184,6 +186,12 @@ public class ReportingUploadServiceTest {
                         .fakeSize(4444L)
                         .creatorId(202L)));
 
+    emptySnapshot =
+        new ReportingSnapshot()
+            .captureTimestamp(NOW.toEpochMilli())
+            .researchers(Collections.emptyList())
+            .workspaces(Collections.emptyList());
+
     final TableResult mockTableResult = mock(TableResult.class);
     doReturn(99L).when(mockTableResult).getTotalRows();
 
@@ -202,6 +210,12 @@ public class ReportingUploadServiceTest {
   @Test
   public void testUploadSnapshot_dml_with_nulls() {
     testUploadSnapshot_dml(snapshotWithNulls);
+  }
+
+  @Test
+  public void testUploadSnapshot_dml_empty() {
+    reportingUploadServiceDmlImpl.uploadSnapshot(emptySnapshot);
+    verify(mockBigQueryService, never()).executeQuery(any(), anyLong());
   }
 
   private void testUploadSnapshot_dml(ReportingSnapshot snapshot) {
@@ -281,6 +295,12 @@ public class ReportingUploadServiceTest {
   @Test
   public void testUploadSnapshot_streaming_with_nulls() {
     testUploadSnapshot_streaming(snapshotWithNulls);
+  }
+
+  @Test
+  public void testUploadSnapshot_streaming_empty() {
+    reportingUploadServiceStreamingImpl.uploadSnapshot(emptySnapshot);
+    verify(mockBigQueryService, never()).insertAll(any());
   }
 
   private void testUploadSnapshot_streaming(ReportingSnapshot snapshot) {
