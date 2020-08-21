@@ -49,6 +49,7 @@ public class InsertAllRequestBuilderTest {
               .isDisabled(true)
               .researcherId(313L));
 
+  // regression test for RW-5437
   @Test
   public void build_tolerates_nulls() {
     InsertAllRequest request =
