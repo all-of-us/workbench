@@ -152,37 +152,37 @@ public class ReportingUploadServiceTest {
                         .username(null)
                         .firstName("Nullson")
                         .isDisabled(false)
-                        .researcherId(111L),
+                        .researcherId(101L),
                     new ReportingResearcher()
                         .username("america@usa.gov")
                         .firstName(null)
                         .isDisabled(false)
-                        .researcherId(212L),
+                        .researcherId(202L),
                     new ReportingResearcher()
                         .username(null)
                         .firstName(null)
                         .isDisabled(true)
-                        .researcherId(313L)))
+                        .researcherId(303L)))
             .workspaces(
                 ImmutableList.of(
                     new ReportingWorkspace()
-                        .workspaceId(211L)
+                        .workspaceId(201L)
                         .name(null)
                         .creationTime(THEN.toEpochMilli())
                         .fakeSize(4444L)
-                        .creatorId(111L),
+                        .creatorId(101L),
                     new ReportingWorkspace()
-                        .workspaceId(212L)
+                        .workspaceId(202L)
                         .name("Work Work Work")
                         .creationTime(THEN.toEpochMilli())
                         .fakeSize(4444L)
-                        .creatorId(111L),
+                        .creatorId(101L),
                     new ReportingWorkspace()
-                        .workspaceId(213L)
+                        .workspaceId(203L)
                         .name(null)
                         .creationTime(THEN.toEpochMilli())
                         .fakeSize(4444L)
-                        .creatorId(212L)));
+                        .creatorId(202L)));
 
     final TableResult mockTableResult = mock(TableResult.class);
     doReturn(99L).when(mockTableResult).getTotalRows();

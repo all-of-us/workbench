@@ -28,15 +28,15 @@ public interface InsertAllRequestBuilder<T> extends ColumnDrivenBuilder<T> {
 
   default RowToInsert modelToRow(T model, Map<String, Object> fixedValues) {
     // First N columns are same for all rows (e.g. a partition key column)
-    final Map<String, Object> map = Maps.newHashMap(fixedValues);
+    final Map<String, Object> rowMap = Maps.newHashMap(fixedValues);
 
     // can't stream/collect here because that uses HashMap.merge() which surprisingly does not
     // allow null values although they are valid for HashMap.  We do use null values.
     for (QueryParameterColumn<T> qpc : getQueryParameterColumns()) {
-      map.put(qpc.getParameterName(), qpc.getRowToInsertValue(model));
+      rowMap.put(qpc.getParameterName(), qpc.getRowToInsertValue(model));
     }
 
-    return RowToInsert.of(generateInsertId(), map);
+    return RowToInsert.of(generateInsertId(), rowMap);
   }
 
   default String generateInsertId() {

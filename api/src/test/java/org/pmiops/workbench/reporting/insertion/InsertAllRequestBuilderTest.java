@@ -12,7 +12,6 @@ import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.model.ReportingResearcher;
-import org.pmiops.workbench.model.ReportingWorkspace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -23,8 +22,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class InsertAllRequestBuilderTest {
   final InsertAllRequestBuilder<ReportingResearcher> researcherRequestBuilder =
       ResearcherParameter::values;
-  final InsertAllRequestBuilder<ReportingWorkspace> workspaceRequestBuilder =
-      WorkspaceParameter::values;
 
   final Map<String, Object> fixedValues =
       ImmutableMap.of("snapshot_timestamp", Instant.now().toEpochMilli());
