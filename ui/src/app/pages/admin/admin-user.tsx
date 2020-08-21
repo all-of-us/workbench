@@ -23,17 +23,19 @@ import {
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
 import {
-  getRoleOptions, MasterDuaEmailMismatchErrorMessage,
+  getRoleOptions,
+  MasterDuaEmailMismatchErrorMessage,
   RestrictedDuaEmailMismatchErrorMessage,
   validateEmail
 } from 'app/utils/institutions';
 import {navigate, serverConfigStore} from 'app/utils/navigation';
 import {
+  AccountPropertyUpdate,
   CheckEmailResponse,
   DuaType,
   InstitutionalRole,
   Profile,
-  PublicInstitutionDetails
+  PublicInstitutionDetails,
 } from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
 import * as validate from 'validate.js';
@@ -99,6 +101,29 @@ const ToggleWithLabelAndToggledText = ({label, initialValue, disabled, onToggle,
   </FlexColumn>;
 };
 
+
+const EmailValidationErrorMessage = ({emailValidationResponse, updatedProfile, verifiedInstitutionOptions}) => {
+  if (updatedProfile && updatedProfile.verifiedInstitutionalAffiliation) {
+    if (emailValidationResponse.isValidMember) {
+      return null;
+    } else {
+      const {verifiedInstitutionalAffiliation} = updatedProfile;
+      const selectedInstitution = fp.find(
+        institution => institution.shortName === verifiedInstitutionalAffiliation.institutionShortName,
+        verifiedInstitutionOptions
+      );
+      if (selectedInstitution.duaTypeEnum === DuaType.RESTRICTED) {
+        // Institution has signed Restricted agreement and the email is not in allowed emails list
+        return <RestrictedDuaEmailMismatchErrorMessage/>;
+      } else {
+        // Institution has MASTER or NULL agreement and the domain is not in the allowed list
+        return <MasterDuaEmailMismatchErrorMessage/>;
+      }
+    }
+  }
+  return null;
+};
+
 interface Props {
   // From withUrlParams
   urlParams: {
@@ -107,8 +132,8 @@ interface Props {
 }
 
 interface State {
-  checkEmailError: string;
-  checkEmailResponse: CheckEmailResponse;
+  emailValidationError: string;
+  emailValidationResponse: CheckEmailResponse;
   institutionsLoadingError: string;
   loading: boolean;
   oldProfile: Profile;
@@ -126,8 +151,8 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      checkEmailError: '',
-      checkEmailResponse: null,
+      emailValidationError: '',
+      emailValidationResponse: null,
       institutionsLoadingError: '',
       loading: true,
       oldProfile: null,
@@ -154,7 +179,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     }
   }
 
-  async checkEmail() {
+  async validateEmail() {
     const {
       updatedProfile: {
         contactEmail,
@@ -162,12 +187,13 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
       }
     } = this.state;
 
+    await this.setState({loading: true});
     // Cancel any outstanding API calls.
     if (this.aborter) {
       this.aborter.abort();
     }
     this.aborter = new AbortController();
-    this.setState({checkEmailResponse: null});
+    this.setState({emailValidationResponse: null});
 
     // Early-exit with no result if either input is blank.
     if (!institutionShortName || isBlank(contactEmail)) {
@@ -177,15 +203,16 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     try {
       const result = await validateEmail(contactEmail, institutionShortName, this.aborter);
       this.setState({
-        checkEmailError: '',
-        checkEmailResponse: result
+        emailValidationError: '',
+        emailValidationResponse: result
       });
     } catch (e) {
       this.setState({
-        checkEmailError: 'Error validating user email against institution - please refresh page and try again',
-        checkEmailResponse: null,
+        emailValidationError: 'Error validating user email against institution - please refresh page and try again',
+        emailValidationResponse: null,
       });
     }
+    await this.setState({loading: false});
   }
 
   async getUser() {
@@ -224,32 +251,8 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     return fp.isEqual(oldProfile, updatedProfile) || errors;
   }
 
-  renderCheckEmailResponse() {
-    const {checkEmailResponse, updatedProfile, verifiedInstitutionOptions} = this.state;
-    if (updatedProfile && updatedProfile.verifiedInstitutionalAffiliation) {
-      if (checkEmailResponse.isValidMember) {
-        return null;
-      } else {
-        const {verifiedInstitutionalAffiliation} = updatedProfile;
-        const selectedInstitution = fp.find(
-          institution => institution.shortName === verifiedInstitutionalAffiliation.institutionShortName,
-          verifiedInstitutionOptions
-        );
-        if (selectedInstitution.duaTypeEnum === DuaType.RESTRICTED) {
-          // Institution has signed Restricted agreement and the email is not in allowed emails list
-          return <RestrictedDuaEmailMismatchErrorMessage/>;
-        } else {
-          // Institution has MASTER or NULL agreement and the domain is not in the allowed list
-          return <MasterDuaEmailMismatchErrorMessage/>;
-        }
-      }
-    }
-    return null;
-  }
-
   async setVerifiedInstitutionOnProfile(institutionShortName: string) {
     const {verifiedInstitutionOptions} = this.state;
-    await this.setState({loading: true});
     await this.setState(fp.flow(
       fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionShortName'], institutionShortName),
       fp.set(
@@ -262,8 +265,12 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
       fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionRoleEnum'], undefined),
       fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], undefined)
       ));
-    await this.checkEmail();
-    await this.setState({loading: false});
+    await this.validateEmail();
+  }
+
+  async setContactEmail(contactEmail: string) {
+    await this.setState(fp.set(['updatedProfile', 'contactEmail'], contactEmail));
+    await this.validateEmail();
   }
 
   setInstitutionalRoleOnProfile(institutionalRoleEnum: InstitutionalRole) {
@@ -273,20 +280,46 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     ));
   }
 
-  updateVerifiedInstitutionalAffiliation() {
+  // returns the updated profile value only if it has changed
+  updatedProfileValue(attribute: string) {
+    const oldValue = fp.get(['oldProfile' , attribute], this.state);
+    const updatedValue = fp.get(['updatedProfile' , attribute], this.state);
+    if (!fp.isEqual(oldValue, updatedValue)) {
+      return updatedValue;
+    } else {
+      return null;
+    }
+  }
+
+  updateAccountProperties() {
     const {updatedProfile} = this.state;
-    const {userId, verifiedInstitutionalAffiliation} = updatedProfile;
+    const {username} = updatedProfile;
+    const request: AccountPropertyUpdate = {
+      username,
+      freeCreditsLimit: null, // coming soon: RW-4956
+      contactEmail: this.updatedProfileValue('contactEmail'),
+      affiliation: this.updatedProfileValue('verifiedInstitutionalAffiliation'),
+      accessBypassRequests: [],  // coming soon: RW-4958
+    };
+
     this.setState({loading: true});
-    profileApi().updateVerifiedInstitutionalAffiliation(userId, verifiedInstitutionalAffiliation).then(() => {
-      this.setState({oldProfile: updatedProfile, loading: false});
+    profileApi().updateAccountProperties(request).then((response) => {
+      this.setState({oldProfile: response, updatedProfile: response, loading: false});
     });
   }
 
   validateCheckEmailResponse() {
-    const {checkEmailResponse} = this.state;
-    if (checkEmailResponse) {
-      return checkEmailResponse.isValidMember;
+    const {emailValidationResponse, emailValidationError} = this.state;
+
+    // if we have never called validateEmail()
+    if (!emailValidationResponse && !emailValidationError) {
+      return true;
     }
+
+    if (emailValidationResponse) {
+      return emailValidationResponse.isValidMember;
+    }
+    return false;
   }
 
   validateVerifiedInstitutionalAffiliation() {
@@ -324,8 +357,8 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
 
   render() {
     const {
-      checkEmailError,
-      checkEmailResponse,
+      emailValidationError,
+      emailValidationResponse,
       institutionsLoadingError,
       profileLoadingError,
       updatedProfile,
@@ -353,7 +386,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
           color: colors.primary
         }}
     >
-      {checkEmailError && <div>{checkEmailError}</div>}
+      {emailValidationError && <div>{emailValidationError}</div>}
       {institutionsLoadingError && <div>{institutionsLoadingError}</div>}
       {profileLoadingError && <div>{profileLoadingError}</div>}
       {updatedProfile && <FlexColumn>
@@ -415,7 +448,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
             <Button
                 type='primary'
                 disabled={this.isSaveDisabled(errors)}
-                onClick={() => this.updateVerifiedInstitutionalAffiliation()}
+                onClick={() => this.updateAccountProperties()}
             >
               Save
             </Button>
@@ -461,11 +494,11 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
             />
             <TextInputWithLabel
                 labelText={'Contact email'}
-                placeholder={updatedProfile.contactEmail}
+                value={updatedProfile.contactEmail}
                 inputId={'contactEmail'}
-                disabled={true}
                 inputStyle={{...styles.textInput, ...styles.backgroundColorDark}}
                 containerStyle={styles.textInputContainer}
+                onChange={email => this.setContactEmail(email)}
             />
             <TextInputWithLabel
                 labelText={'Free credits used'}
@@ -497,10 +530,12 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
                 }
                 dataTestId={'verifiedInstitution'}
             />}
-            {checkEmailResponse && !checkEmailResponse.isValidMember && this.renderCheckEmailResponse()}
+            {emailValidationResponse && !emailValidationResponse.isValidMember && <EmailValidationErrorMessage
+              emailValidationResponse={emailValidationResponse}
+              updatedProfile={updatedProfile}
+              verifiedInstitutionOptions={verifiedInstitutionOptions}
+            />}
             {verifiedInstitutionOptions
-              && checkEmailResponse
-              && checkEmailResponse.isValidMember
               && updatedProfile.verifiedInstitutionalAffiliation
               && <DropdownWithLabel
                 label={'Institutional role'}
@@ -518,8 +553,6 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
               verifiedInstitutionOptions
               && updatedProfile.verifiedInstitutionalAffiliation
               && updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum === InstitutionalRole.OTHER
-              && checkEmailResponse
-              && checkEmailResponse.isValidMember
               && <TextInputWithLabel
                 labelText={'Institutional role description'}
                 placeholder={updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleOtherText}

@@ -1211,6 +1211,41 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test(expected = BadRequestException.class)
+  public void test_updateAccountProperties_contactEmail_user() {
+    // ProfileController.updateAccountProperties() is gated on ACCESS_CONTROL_ADMIN Authority
+    // which is also checked in ProfileService.validateProfile()
+    boolean grantAdminAuthority = false;
+
+    // pre-affiliate with an Institution which will validate the user's existing
+    // CONTACT_EMAIL and also a new one
+    final String newContactEmail = "eric.lander@broadinstitute.org";
+
+    final Institution broadPlus =
+        new Institution()
+            .shortName("Broad")
+            .displayName("The Broad Institute")
+            .emailAddresses(ImmutableList.of(CONTACT_EMAIL, newContactEmail))
+            .duaTypeEnum(DuaType.RESTRICTED)
+            .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
+    institutionService.createInstitution(broadPlus);
+
+    final VerifiedInstitutionalAffiliation affiliation =
+        new VerifiedInstitutionalAffiliation()
+            .institutionShortName(broadPlus.getShortName())
+            .institutionDisplayName(broadPlus.getDisplayName())
+            .institutionalRoleEnum(InstitutionalRole.PROJECT_PERSONNEL);
+
+    final Profile original =
+        createAccountAndDbUserWithAffiliation(affiliation, grantAdminAuthority);
+    assertThat(original.getContactEmail()).isEqualTo(CONTACT_EMAIL);
+
+    final AccountPropertyUpdate request =
+        new AccountPropertyUpdate().username(PRIMARY_EMAIL).contactEmail(newContactEmail);
+
+    profileService.updateAccountProperties(request);
+  }
+
+  @Test(expected = BadRequestException.class)
   public void test_updateAccountProperties_contactEmail_no_match() {
     // ProfileController.updateAccountProperties() is gated on ACCESS_CONTROL_ADMIN Authority
     // which is also checked in ProfileService.validateProfile()
