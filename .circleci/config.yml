@@ -207,18 +207,18 @@ commands:
     description: "Run puppeteer e2e integration tests"
     parameters:
       env_name:
-        description: The target environment for run Puppeteer tests. Must be one of "test", "staging".
+        description: The target environment for run Puppeteer tests. Must be one of "local", "test", "staging".
         default: "test"
         type: enum
-        enum: ["test", "staging"]
+        enum: ["local", "test", "staging"]
     steps:
       - install_e2e_dependencies
       - run:
           name: Update test user environment variables
           command: |
             case << parameters.env_name >> in
-              staging) echo 'export USER_NAME=$PUPPETEER_USER_STAGING' >> $BASH_ENV ;;
-              test) echo 'export USER_NAME=$PUPPETEER_USER_TEST' >> $BASH_ENV ;;
+              "staging") echo 'export USER_NAME=$PUPPETEER_USER_STAGING' >> $BASH_ENV ;;
+              "local" | "test") echo 'export USER_NAME=$PUPPETEER_USER_TEST' >> $BASH_ENV ;;
             esac
             echo 'export PASSWORD=$PUPPETEER_USER_PASSWORD' >> $BASH_ENV
             source $BASH_ENV
@@ -614,7 +614,8 @@ jobs:
       - browser-tools/install-browser-tools:
           firefox-version: "78.0" # https://github.com/CircleCI-Public/browser-tools-orb/issues/14
       - start_local_ui
-      - run_e2e_test
+      - run_e2e_test:
+          env_name: local
 
 workflows:
   build-test-deploy:
