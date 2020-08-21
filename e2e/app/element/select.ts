@@ -23,18 +23,26 @@ export default class Select extends BaseElement {
     super(page, xpath);
   }
 
-  async selectOption(optionValue: string): Promise<string> {
+  async selectOption(value: string): Promise<string> {
+    const disabled = await this.isDisabled();
+    if (disabled) {
+      console.warn(`Select is disabled. Cannot select option value: "${value}".`);
+    }
+    const selector = `${this.xpath}/option[text()="${value}"]`;
+    const option = (await page.$x(selector))[0];
+    const optionValue = await getPropValue<string>(option, 'value');
     [this.selectedOption] = await (await this.asElementHandle()).select(optionValue);
     return this.selectedOption;
   }
 
   /**
-   * Returns selected value in Select.
+   * Returns value that matches the Select option.
    */
-  async getSelectedOption(): Promise<string> {
-    const selector = this.xpath + '/parent::*/following-sibling::label';
-    const displayedValue = await this.page.waitForXPath(selector, { visible: true });
-    return this.selectedOption = await getPropValue<string>(displayedValue, 'innerText');
+  async getOptionValue(option: string): Promise<string> {
+    // Returns option texts. No matter if option was selected or not.
+    const selector = `${this.xpath}/option[@value="${option}"]`;
+    const displayedValue = await this.page.waitForXPath(selector);
+    return getPropValue<string>(displayedValue, 'innerText');
   }
 
 }

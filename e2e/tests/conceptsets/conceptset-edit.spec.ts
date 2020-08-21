@@ -5,11 +5,10 @@ import ConceptsetActionsPage from 'app/page/conceptset-actions-page';
 import ConceptsetPage from 'app/page/conceptset-page';
 import {SaveOption} from 'app/page/conceptset-save-modal';
 import DataPage, {TabLabelAlias} from 'app/page/data-page';
-import {LinkText, WorkspaceAccessLevel} from 'app/text-labels';
+import {LinkText} from 'app/text-labels';
 import {makeRandomName, makeString} from 'utils/str-utils';
 import {findWorkspace, signIn} from 'utils/test-utils';
 import Link from 'app/element/link';
-import {getPropValue} from 'utils/element-utils';
 
 
 describe('Editing and Copying Concept Sets', () => {
@@ -26,9 +25,7 @@ describe('Editing and Copying Concept Sets', () => {
    */
   test('Add to existing Concept Set in same workspace', async () => {
     // Create a workspace
-    const workspaceCard = await findWorkspace(page, true);
-    const workspaceName = await workspaceCard.getWorkspaceName();
-    await workspaceCard.clickWorkspaceName();
+    const workspaceName = await findWorkspace(page, true).then(card => card.clickWorkspaceName());
 
     const dataPage = new DataPage(page);
     let conceptSearchPage = await dataPage.openConceptSearch(Domain.Procedures);
@@ -98,28 +95,14 @@ describe('Editing and Copying Concept Sets', () => {
   /**
    * Test:
    * - Copy Concept Set from one workspace to another workspace.
-   * Note: Use existing workspaces and Concept Set when possible. Otherwise create new workspaces and Concept Sets.
    */
   test('Copy Concept Set to another workspace', async () => {
-    // Find all workspaces.
-    const workspaceCard = new WorkspaceCard(page);
-    const allWorkspaces = await workspaceCard.getWorkspaceMatchAccessLevel(WorkspaceAccessLevel.Owner);
 
-    // Need two workspaces.
-    let workspace1: WorkspaceCard;
-    let workspace2: WorkspaceCard;
-
-    if (allWorkspaces.length > 1) {
-      workspace1 = allWorkspaces[0];
-      workspace2 = allWorkspaces[1];
-    } else {
-      // Don't have two. Create two new workspaces.
-      workspace1 = await findWorkspace(page, true);
-      workspace2 = await findWorkspace(page, true);
-    }
-
-    // Note: workspace1 is the Copy to workspace. workspace2 is the Copy from workspace.
+    // Need two workspaces. workspace1 is the Copy to workspace. workspace2 is the Copy from workspace.
+    const workspace1: WorkspaceCard = await findWorkspace(page, true);
     const copyToWorkspace = await workspace1.getWorkspaceName();
+
+    const workspace2: WorkspaceCard = await findWorkspace(page, true);
     const copyFromWorkspace = await workspace2.getWorkspaceName();
 
     // Open workspace2 Data Page.
@@ -129,32 +112,17 @@ describe('Editing and Copying Concept Sets', () => {
     const dataPage = new DataPage(page);
     await dataPage.openTab(TabLabelAlias.ConceptSets, {waitPageChange: false});
 
-    const dataCards = new DataResourceCard(page);
-    const conceptCards = await dataCards.getResourceCard(CardType.ConceptSet);
-
-    let conceptName;
-    if (conceptCards.length === 0) {
-      // Create new Concept Set
-      const conceptSearchPage = await dataPage.openConceptSearch(Domain.Procedures);
-      // Select all rows.
-      await conceptSearchPage.dataTableSelectAllRows();
-      const addButtonLabel = await conceptSearchPage.clickAddToSetButton();
-      // Table pagination displays 20 rows. If this changes, then update the check below.
-      expect(addButtonLabel).toBe('Add (20) to set');
-      conceptName = await conceptSearchPage.saveConcept(SaveOption.CreateNewSet);
-      console.log(`Created Concept Set: "${conceptName}"`);
-      // Click on link to open Concept Set page.
-      const conceptsetActionPage = new ConceptsetActionsPage(page);
-      await conceptsetActionPage.openConceptSet(conceptName);
-    } else {
-      // Find existing Concept Set, click it to open Concept Set.
-      const conceptCard = await conceptCards[0];
-      conceptName = await conceptCard.getResourceName();
-      const nameLink = await conceptCard.getLink();
-      const value = await getPropValue<string>(nameLink, 'textContent');
-      expect(conceptName).toEqual(value);
-      await nameLink.click();
-    }
+    // Create new Concept Set
+    const conceptSearchPage = await dataPage.openConceptSearch(Domain.Procedures);
+    await conceptSearchPage.dataTableSelectAllRows();
+    const addButtonLabel = await conceptSearchPage.clickAddToSetButton();
+    // Table pagination displays 20 rows. If this changes, then update the check below.
+    expect(addButtonLabel).toBe('Add (20) to set');
+    const conceptName = await conceptSearchPage.saveConcept(SaveOption.CreateNewSet);
+    console.log(`Created Concept Set: "${conceptName}"`);
+    // Click on link to open Concept Set page.
+    const conceptsetActionPage = new ConceptsetActionsPage(page);
+    await conceptsetActionPage.openConceptSet(conceptName);
 
     // Concept Set page is open.
     const conceptsetPage = new ConceptsetPage(page);

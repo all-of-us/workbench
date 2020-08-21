@@ -196,7 +196,6 @@ export default class CohortCriteriaModal extends Modal {
 
     // Get count from slider badge
     const count = await waitForNumericalString(this.page, `${this.xpath}//*[@id="age-count"]`);
-    console.log(`Age min: ${minAge}, max: ${maxAge} ==> number of participants: ${count}`);
 
     // Click FINISH button. Dialog should close.
     await this.clickFinishButton();

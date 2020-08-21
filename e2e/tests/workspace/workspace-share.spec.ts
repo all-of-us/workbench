@@ -80,6 +80,11 @@ describe('Share workspace', () => {
       await waitWhileLoading(page);
       await Navigation.navMenu(page, NavLink.SIGN_OUT);
 
+      // browser and page reset.
+      await page.deleteCookie(...await page.cookies());
+      await jestPuppeteer.resetPage();
+      await jestPuppeteer.resetBrowser();
+
       // To verify READER role assigned correctly, user with READER role will sign in in new Incognito page.
       const newPage = await signInAs(config.collaboratorUsername, config.userPassword);
 

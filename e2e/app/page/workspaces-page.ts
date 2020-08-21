@@ -47,6 +47,7 @@ export default class WorkspacesPage extends WorkspaceEditPage {
    */
   async load(): Promise<this> {
     await this.loadPageUrl(PageUrl.Workspaces);
+    await waitWhileLoading(this.page);
     return this;
   }
 

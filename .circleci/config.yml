@@ -205,14 +205,22 @@ commands:
 
   run_e2e_test:
     description: "Run puppeteer e2e integration tests"
+    parameters:
+      env_name:
+        description: The target environment for run Puppeteer tests. Must be one of "local", "test", "staging".
+        default: "test"
+        type: enum
+        enum: ["local", "test", "staging"]
     steps:
       - install_e2e_dependencies
       - run:
-          name: Update Puppeteer test environment variables
+          name: Update test user environment variables
           command: |
-            echo 'export USER_NAME=$PUPPETEER_TEST_USER' >> $BASH_ENV
-            echo 'export PASSWORD=$PUPPETEER_TEST_USER_PASSWORD' >> $BASH_ENV
-            echo 'export INVITATION_KEY=$PUPPETEER_TEST_REGISTRATION_KEY' >> $BASH_ENV
+            case << parameters.env_name >> in
+              "staging") echo 'export USER_NAME=$PUPPETEER_USER_STAGING' >> $BASH_ENV ;;
+              "local" | "test") echo 'export USER_NAME=$PUPPETEER_USER_TEST' >> $BASH_ENV ;;
+            esac
+            echo 'export PASSWORD=$PUPPETEER_USER_PASSWORD' >> $BASH_ENV
             source $BASH_ENV
       - run:
           name: Run puppeteer e2e tests
@@ -565,21 +573,28 @@ jobs:
       - manage_api_cache:
           save: true
 
-  # Run Puppeteer e2e UI tests on deployed "test" environment.
+  # Run Puppeteer e2e UI tests on deployed "test" or "staging" environment.
   puppeteer-e2e-test:
+    parameters:
+      env_name:
+        description: The target environment for run Puppeteer tests. Must be one of "test", "staging".
+        default: "test"
+        type: enum
+        enum: ["test", "staging"]
     <<: *defaults
     environment:
       <<: *e2e_env
-      WORKBENCH_ENV: dev
+      WORKBENCH_ENV: << parameters.env_name >>
     working_directory: ~/workbench
     parallelism: 3
     steps:
       - checkout_init_git
       - browser-tools/install-browser-tools:
           firefox-version: "78.0" # https://github.com/CircleCI-Public/browser-tools-orb/issues/14
-      - run_e2e_test
+      - run_e2e_test:
+          env_name: << parameters.env_name >>
 
-  # Deploy UI local server then run Puppeteer e2e tests on deployed "local" environment.
+  # Deploy UI local server then run Puppeteer tests against "local ui" + "test api" environment.
   puppeteer-e2e-local-ui:
     <<: *defaults
     environment:
@@ -597,7 +612,8 @@ jobs:
       - browser-tools/install-browser-tools:
           firefox-version: "78.0" # https://github.com/CircleCI-Public/browser-tools-orb/issues/14
       - start_local_ui
-      - run_e2e_test
+      - run_e2e_test:
+          env_name: local
 
 workflows:
   build-test-deploy:
@@ -619,7 +635,7 @@ workflows:
           filters: *filter_only_master_branch
           requires:
             - ui-unit-test
-      # On master merges, run Puppeteer e2e tests after ui and api deployed to "test" env successfully.
+      # On master branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully.
       - puppeteer-e2e-test:
           filters: *filter_only_master_branch
           requires:
@@ -659,6 +675,12 @@ workflows:
             - api-deps-check
             - api-integration-test
             - ui-unit-test
+      # Not ready until delete workspace script is working
+      # - puppeteer-e2e-test:
+          # env_name: "staging"
+          # filters: *filter_only_release_tags
+          # requires:
+            # - deploy-staging
 
   nightly-tests:
     triggers:
