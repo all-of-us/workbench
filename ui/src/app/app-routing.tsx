@@ -1,5 +1,5 @@
 import {Component as AComponent} from '@angular/core';
-import {AppRoute, AppRouter, Guard, ProtectedRoutes, withFullHeight, withRouteData} from 'app/components/app-router';
+import {AppRoute, AppRouter, Guard, withFullHeight, withRouteData} from 'app/components/app-router';
 import {WorkspaceAudit} from 'app/pages/admin/admin-workspace-audit';
 import {UserAudit} from 'app/pages/admin/user-audit';
 import {CookiePolicy} from 'app/pages/cookie-policy';
@@ -71,47 +71,60 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
         component={() => <UserDisabledPage routeData={{title: 'Disabled'}}/>}
     />
 
-    <ProtectedRoutes guards={[signInGuard]}>
+    {/*<ProtectedRoutes guards={[signInGuard]}>*/}
       <AppRoute
+        exact
         path='/'
+        guards={[signInGuard]}
         component={() => <HomepagePage routeData={{title: 'Homepage'}}/>}
       />
       <AppRoute
           path='/admin/user-audit'
+          guards={[signInGuard]}
           component={() => <UserAuditPage routeData={{title: 'User Audit'}}/>}
       />
       <AppRoute
           path='/admin/user-audit/:username'
+          guards={[signInGuard]}
           component={() => <UserAuditPage routeData={{title: 'User Audit'}}/>}
       />
       <AppRoute
           path='/admin/workspace-audit'
+          guards={[signInGuard]}
           component={() => <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>}
       />
       <AppRoute
           path='/admin/workspace-audit/:workspaceNamespace'
+          guards={[signInGuard]}
           component={() => <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>}
       />
       <AppRoute
           path='/data-code-of-conduct'
+          guards={[signInGuard]}
           component={ () => <DataUserCodeOfConductPage routeData={{
             title: 'Data User Code of Conduct',
             minimizeChrome: true
           }} />}
       />
-      <AppRoute path='/nih-callback' component={() => <HomepagePage routeData={{title: 'Homepage'}}/>} />
-    </ProtectedRoutes>
+      <AppRoute
+          path='/nih-callback'
+          guards={[signInGuard]}
+          component={() => <HomepagePage routeData={{title: 'Homepage'}}/>}
+      />
+    {/*</ProtectedRoutes>*/}
 
-    <ProtectedRoutes guards={[signInGuard, registrationGuard]}>
+    {/*<ProtectedRoutes guards={[signInGuard, registrationGuard]}>*/}
       <AppRoute
           path='/library'
+          guards={[signInGuard, registrationGuard]}
           component={() => <WorkspaceLibraryPage routeData={{title: 'Workspace Library'}}/>}
       />
       <AppRoute
           path='/workspaces/:ns/:wsid/notebooks'
+          guards={[signInGuard, registrationGuard]}
           component={() => <NotebookListPage routeData={{title: 'View Notebooks'}}/>}
       />
-    </ProtectedRoutes>
+    {/*</ProtectedRoutes>*/}
   </AppRouter>;
 };
 

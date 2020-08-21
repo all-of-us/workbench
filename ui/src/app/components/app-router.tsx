@@ -38,22 +38,26 @@ const NavRedirect = ({path}) => {
   return null;
 };
 
-export const AppRoute = ({path, data = {}, component: Component}): React.ReactElement => {
+export const AppRoute = ({path, data = {}, guards = [], exact=false, component: Component}): React.ReactElement => {
   const routeParams = useParams();
   const routeHistory = useHistory();
 
-  return <Route exact={true} path={path} >
+  const {redirectPath = null} = fp.find(({allowed}) => !allowed(), guards) || {};
+
+  return redirectPath
+      ? <NavRedirect path={redirectPath}/>
+      : <Route exact={exact} path={path} >
     <Component urlParams={routeParams} routeHistory={routeHistory} routeConfig={data}/>
   </Route>;
 };
 
-export const ProtectedRoutes = (
-  {guards, children}: {guards: Guard[], children: any }): React.ReactElement => {
-  const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
-
-  return redirectPath ? <NavRedirect path={redirectPath}/>
-  : <Fragment>{children}</Fragment>;
-};
+// export const ProtectedRoutes = (
+//   {guards, children}: {guards: Guard[], children: any }): React.ReactElement => {
+//   const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
+//
+//   return redirectPath ? <NavRedirect path={redirectPath}/>
+//   : <Fragment>{children}</Fragment>;
+// };
 
 export const Navigate = ({to}): React.ReactElement => {
   const location = useLocation();

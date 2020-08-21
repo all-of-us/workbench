@@ -14,7 +14,6 @@ import {AdminUserComponent} from './pages/admin/admin-user';
 import {AdminUsersComponent} from './pages/admin/admin-users';
 import {AdminWorkspaceComponent} from './pages/admin/admin-workspace';
 import {AdminWorkspaceSearchComponent} from './pages/admin/admin-workspace-search';
-import {NotebookListComponent} from './pages/analysis/notebook-list';
 import {NotebookRedirectComponent} from './pages/analysis/notebook-redirect';
 import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
 import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
@@ -342,12 +341,12 @@ const routes: Routes = [
             data: {}
           },
           {
-            path: 'workspaceAudit',
+            path: 'workspace-audit',
             component: AppRouting,
             data: {}
           },
           {
-            path: 'workspaceAudit/:workspaceNamespace',
+            path: 'workspace-audit/:workspaceNamespace',
             component: AppRouting,
             data: {}
           },
