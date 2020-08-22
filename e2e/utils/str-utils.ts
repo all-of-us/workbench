@@ -39,3 +39,12 @@ export const extractPageName = async (page: Page): Promise<string> => {
   const splitValue = fp.zipObject(['name', 'domain'], title.split(' | '));
   return splitValue.name.replace(/\s/g, '');
 }
+
+/**
+ * Get the Workspace namespace from page URL.
+ * @param url
+ */
+export function extractNamespace(url: URL): string {
+  const urlPath = url.pathname;
+  return urlPath.split('/')[2];
+}

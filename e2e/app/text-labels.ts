@@ -49,6 +49,7 @@ export enum LinkText {
    DuplicateWorkspace = 'Duplicate Workspace',
    Finish = 'Finish',
    GoToCopiedConceptSet = 'Go to Copied Concept Set',
+   GoToCopiedNotebook = 'Go to Copied Notebook',
    KeepEditing = 'Keep Editing',
    Next = 'Next',
    Rename = 'Rename',

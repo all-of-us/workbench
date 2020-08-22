@@ -9,6 +9,7 @@ import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
 import {getPropValue} from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
+import CopyModal from 'app/component/copy-modal';
 import NotebookPage from './notebook-page';
 
 const PageTitle = 'View Notebooks';
@@ -132,6 +133,23 @@ export default class WorkspaceAnalysisPage extends AuthenticatedPage {
     await menu.clickAction(EllipsisMenuAction.Duplicate, {waitForNav: false});
     await waitWhileLoading(this.page);
     return `Duplicate of ${notebookName}`; // name of clone notebook
+  }
+
+  /**
+   * Copy notebook to another Workspace using Ellipsis menu in Workspace Analysis page.
+   * @param {string} notebookName The notebook name to clone from.
+   * @param {string} destinationWorkspace Copy To Workspace.
+   * @param {string} destinationNotebookName New notebook book.
+   */
+  async copyNotebookToWorkspace(notebookName: string, destinationWorkspace: string, destinationNotebookName?: string): Promise<void> {
+    // Open Copy modal.s
+    const resourceCard = new DataResourceCard(this.page);
+    const notebookCard = await resourceCard.findCard(notebookName, CardType.Notebook);
+    const ellipsisMenu = notebookCard.getEllipsis();
+    await ellipsisMenu.clickAction(EllipsisMenuAction.CopyToAnotherWorkspace, {waitForNav: false});
+    // Fill out modal fields.
+    const copyModal = await new CopyModal(this.page);
+    await copyModal.copyToAnotherWorkspace(destinationWorkspace, destinationNotebookName);
   }
 
 }

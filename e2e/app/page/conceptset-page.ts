@@ -9,7 +9,7 @@ import Button from 'app/element/button';
 import Textbox from 'app/element/textbox';
 import {getPropValue} from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
-import ConceptsetCopyModal from './conceptset-copy-modal';
+import CopyModal from 'app/component/copy-modal';
 
 
 const PageTitle = 'Concept Set';
@@ -33,10 +33,10 @@ export default class ConceptsetPage extends AuthenticatedPage {
     }
   }
 
-  async openCopyToWorkspaceModal(conceptName: string): Promise<ConceptsetCopyModal> {
+  async openCopyToWorkspaceModal(conceptName: string): Promise<CopyModal> {
     const ellipsis = this.getEllipsisMenu(conceptName);
     await ellipsis.clickAction(EllipsisMenuAction.CopyToAnotherWorkspace, {waitForNav: false});
-    return new ConceptsetCopyModal(this.page);
+    return new CopyModal(this.page);
   }
 
   // Get Concept Ellipsis dropdown menu

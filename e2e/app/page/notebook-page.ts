@@ -142,14 +142,19 @@ export default class NotebookPage extends AuthenticatedPage {
   /**
    * Click Run button in toolbar. Run focused code cell and insert a new code cell below.
    *
-   * @param {number} cellIndex Code Cell index. (first index is 1)
+   * @param {number} cellIndex Code Cell index. (first index is 1). Use -1 to find last cell.
    * @param {string} code The code to run.
    * @param {string} codeFile The full path to file that contains code to run.
    * @param {number} timeOut The timeout time in milliseconds.
    * @returns {string} Run output.
    */
   async runCodeCell(cellIndex: number, opts: { code?: string, codeFile?: string, timeOut?: number } = {}): Promise<string> {
-    const cell = await this.findCell(cellIndex)
+    let cell;
+    if (cellIndex === -1) {
+      cell = await this.findLastCell();
+    } else {
+      cell = await this.findCell(cellIndex);
+    }
     const cellInput = await cell.focus();
     if (opts.code !== undefined) {
       await cellInput.type(opts.code);
