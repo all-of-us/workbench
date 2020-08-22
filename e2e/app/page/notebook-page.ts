@@ -86,11 +86,13 @@ export default class NotebookPage extends AuthenticatedPage {
   async waitForKernelIdle(timeOut?: number): Promise<void> {
     const idleIconSelector = `${CssSelector.kernelIcon}.kernel_idle_icon`;
     const notifSelector = '#notification_kernel';
+    const mathJaxMessage = '#MathJax_Message'; // py library loading in background
     const frame = await this.getIFrame();
     try {
       await Promise.all([
         frame.waitForSelector(idleIconSelector, {visible: true, timeout: timeOut}),
         frame.waitForSelector(notifSelector, {hidden: true, timeout: timeOut}),
+        frame.waitForSelector(mathJaxMessage, {hidden: true, timeout: timeOut}),
       ]);
     } catch (e) {
       console.error(`Notebook kernel is: ${await this.kernelStatus()}`);

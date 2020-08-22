@@ -75,7 +75,7 @@ export default class WorkspacesPage extends WorkspaceEditPage {
   async createWorkspace(
      workspaceName: string,
      billingAccount: string = 'Use All of Us free credits',
-     reviewRequest: boolean = false): Promise<string> {
+     reviewRequest: boolean = false): Promise<string[]> {
 
     const editPage = await this.clickCreateNewWorkspace();
     // wait for Billing Account default selected value

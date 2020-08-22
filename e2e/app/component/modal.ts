@@ -32,13 +32,17 @@ export default class Modal extends Container {
     return this;
   }
 
-  async getContent(): Promise<string> {
+  async getTextContent(): Promise<string[]> {
     // xpath that excludes button labels and spans
-    // '//*[@role="dialog"]//div[normalize-space(text()) and not(@role="button")]'
-    const modal = await this.waitUntilVisible();
-    const modalText = await getPropValue<string>(modal, 'innerText');
-    console.debug('Modal: \n' + modalText);
-    return modalText.toString();
+    const selector = '//*[@role="dialog"]//div[normalize-space(text()) and not(@role="button")]';
+    await this.waitUntilVisible();
+    await this.page.waitForXPath(selector, {visible: true});
+    const elements = await this.page.$x(selector);
+    const textContents = [];
+    for (const elem of elements) {
+      textContents.push((await getPropValue<string>(elem, 'textContent')).trim());
+    }
+    return textContents;
   }
 
   /**

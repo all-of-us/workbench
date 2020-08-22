@@ -1,17 +1,15 @@
-import {findWorkspace, signIn} from 'utils/test-utils';
-import DataPage from 'app/page/data-page';
-import {extractNamespace, makeRandomName} from 'utils/str-utils';
 import DataResourceCard, {CardType} from 'app/component/data-resource-card';
 import Modal from 'app/component/modal';
-import Link from 'app/element/link';
+import DataPage, {TabLabelAlias} from 'app/page/data-page';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
-import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import {LinkText} from 'app/text-labels';
+import {extractNamespace, makeRandomName} from 'utils/str-utils';
+import {findWorkspace, signIn} from 'utils/test-utils';
 
 // Notebook server start may take a long time. Set maximum test running time to 20 minutes.
 jest.setTimeout(20 * 60 * 1000);
 
-describe('Jupyter notebook action tests', () => {
+describe('Workspace owner Jupyter notebook action tests', () => {
 
   beforeEach(async () => {
     await signIn(page);
@@ -19,23 +17,23 @@ describe('Jupyter notebook action tests', () => {
 
   /**
    * Test:
-   * - Create new Workspace as the copy to destination Workspace.
-   * - Create new Workspace as copy from Workspace and create new notebook in this Workspace.
-   * - Run code to print WORKSPACE_NAMESPACE. It should match Workspace namespace in Workspace URL.
+   * - Create new Workspace as the copy-to destination Workspace.
+   * - Create new Workspace as copy-from Workspace and create new notebook in this Workspace.
+   * - Run code to print WORKSPACE_NAMESPACE. It should match Workspace namespace from Workspace URL.
    * - Copy notebook to destination Workspace and give copied notebook a new name.
    * - Verify copied notebook is in destination Workspace.
    * - Open copied notebook and run code to print WORKSPACE_NAMESPACE. It should match destination Workspace namespace.
-   * - Delete notebook.
+   * - Delete notebooks.
    */
   test('Copy notebook to another Workspace', async () => {
     // Create destination workspace
-    const toWorkspace = await findWorkspace(page, true).then(card => card.getWorkspaceName());
+    const toWorkspace = await findWorkspace(page, {create: true}).then(card => card.getWorkspaceName());
 
     // Create copy-from workspace
-    await findWorkspace(page, true).then(card => card.clickWorkspaceName());
+    await findWorkspace(page, {create: true}).then(card => card.clickWorkspaceName());
 
     // Create notebook in copy-from workspace.
-    const copyFromNotebookName = makeRandomName('copy-from');
+    const copyFromNotebookName = makeRandomName('pytest');
     const dataPage = new DataPage(page);
 
     // Get the billing project name from page url.
@@ -43,7 +41,7 @@ describe('Jupyter notebook action tests', () => {
 
     let notebookPage = await dataPage.createNotebook(copyFromNotebookName);
 
-    // Run code to print out Workspace billing project name
+    // Run code to print out Workspace namespace.
     const code =
        'import os\n' +
        'print(os.getenv(\'WORKSPACE_NAMESPACE\'))';
@@ -52,32 +50,32 @@ describe('Jupyter notebook action tests', () => {
     expect(codeOutput).toEqual(namespace);
 
     // Exit notebook and returns to the Workspace Analysis tab.
-    let analysisPage = await notebookPage.goAnalysisPage();
+    const analysisPage = await notebookPage.goAnalysisPage();
 
     // Copy to destination Workspace and give notebook a new name.
-    const copiedNotebookName = makeRandomName('copy-to');
+    const copiedNotebookName = makeRandomName('copy-of');
     await analysisPage.copyNotebookToWorkspace(copyFromNotebookName, toWorkspace, copiedNotebookName);
 
     // Verify Copy Success modal.
     const modal = new Modal(page);
     await modal.waitForButton(LinkText.GoToCopiedNotebook);
-    const textContent = await modal.getContent();
+    const textContent = await modal.getTextContent();
     expect(textContent).toContain(`Successfully copied ${copyFromNotebookName} to ${toWorkspace}`);
     // Dismiss modal.
-    await modal.clickButton(LinkText.GoToCopiedNotebook, {waitForClose: true, waitForNav: true});
+    await modal.clickButton(LinkText.StayHere, {waitForClose: true});
 
-    // Verify current workspace is the destination Workspace
-    analysisPage = new WorkspaceAnalysisPage(page);
-    await analysisPage.waitForLoad();
+    // Delete notebook
+    let modalTextContent = await analysisPage.deleteNotebook(copyFromNotebookName);
+    expect(modalTextContent).toContain(`Are you sure you want to delete Notebook: ${copyFromNotebookName}?`);
 
-    const workspaceLink = await Link.findByName(page, {name: toWorkspace});
-    const linkDisplayed = await workspaceLink.isDisplayed();
-    expect(linkDisplayed).toBe(true);
-
-    // Get the destination Workspace billing project name.
+    // Perform actions in copied notebook.
+    // Open destination Workspace
+    await findWorkspace(page, {workspaceName: toWorkspace}).then(card => card.clickWorkspaceName());
+    // Get the destination Workspace namespace.
     namespace = extractNamespace(new URL(page.url()));
 
     // Verify copy-to notebook exists in destination Workspace
+    await dataPage.openTab(TabLabelAlias.Analysis);
     const dataResourceCard = new DataResourceCard(page);
     const notebookCard = await dataResourceCard.findCard(copiedNotebookName, CardType.Notebook);
     expect(notebookCard).toBeTruthy();
@@ -88,15 +86,15 @@ describe('Jupyter notebook action tests', () => {
     await notebookPreviewPage.waitForLoad();
     notebookPage = await notebookPreviewPage.openEditMode(copiedNotebookName);
 
-    // Run same code and compare billing project name
+    // Run same code and compare namespace.
     codeOutput = await notebookPage.runCodeCell(-1, {code});
     expect(codeOutput).toEqual(namespace);
 
     // Exit notebook. Returns to the Workspace Analysis tab.
     await notebookPage.goAnalysisPage();
     // Delete notebook
-    await analysisPage.deleteNotebook(copiedNotebookName);
-
+    modalTextContent = await analysisPage.deleteNotebook(copiedNotebookName);
+    expect(modalTextContent).toContain('This will permanently delete the Notebook.');
   })
 
 });

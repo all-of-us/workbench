@@ -21,9 +21,8 @@ describe('Creating new workspaces', () => {
     const modalTextContent = await workspacesPage.createWorkspace(newWorkspaceName);
 
     // Pick out few sentenses to verify
-    expect(modalTextContent).toContain('Primary purpose of your project (Question 1)');
-    expect(modalTextContent).toContain('Summary of research purpose (Question 2)');
-    expect(modalTextContent).toContain('Will be displayed publicly to inform All of Us research participants.');
+    expect(modalTextContent).toContain('Create Workspace');
+    expect(modalTextContent).toContain('Primary purpose of your project (Question 1)Summary of research purpose (Question 2)Population of interest (Question 5)');
     expect(modalTextContent).toContain('You can also make changes to your answers after you create your workspace.');
 
     await verifyWorkspaceLinkOnDataPage(newWorkspaceName);

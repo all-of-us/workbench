@@ -37,13 +37,13 @@ export default class WorkspaceAnalysisPage extends AuthenticatedPage {
     * Delete notebook thru Ellipsis menu located inside the Notebook resource card.
     * @param {string} notebookName
     */
-  async deleteNotebook(notebookName: string): Promise<string> {
+  async deleteNotebook(notebookName: string): Promise<string[]> {
     const resourceCard = await DataResourceCard.findCard(this.page, notebookName);
     const menu = resourceCard.getEllipsis();
     await menu.clickAction(EllipsisMenuAction.Delete, {waitForNav: false});
 
     const modal = new Modal(this.page);
-    const modalContentText = await modal.getContent();
+    const modalContentText = await modal.getTextContent();
     await modal.clickButton(LinkText.DeleteNotebook, {waitForClose: true});
     await waitWhileLoading(this.page);
 
@@ -108,12 +108,12 @@ export default class WorkspaceAnalysisPage extends AuthenticatedPage {
     return Link.findByName(this.page, {normalizeSpace: LinkText.CreateNewNotebook});
   }
 
-  async renameNotebook(notebookName: string, newNotebookName: string): Promise<string> {
+  async renameNotebook(notebookName: string, newNotebookName: string): Promise<string[]> {
     const notebookCard = await DataResourceCard.findCard(this.page, notebookName);
     const menu = notebookCard.getEllipsis();
     await menu.clickAction(EllipsisMenuAction.Rename, {waitForNav: false});
     const modal = new Modal(this.page);
-    const modalTextContents = await modal.getContent();
+    const modalTextContents = await modal.getTextContent();
     const newNameInput = new Textbox(this.page, `${modal.getXpath()}//*[@id="new-name"]`);
     await newNameInput.type(newNotebookName);
     await modal.clickButton(LinkText.RenameNotebook, {waitForClose: true});

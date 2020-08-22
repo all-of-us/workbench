@@ -25,7 +25,7 @@ describe('Editing and Copying Concept Sets', () => {
    */
   test('Add to existing Concept Set in same workspace', async () => {
     // Create a workspace
-    const workspaceName = await findWorkspace(page, true).then(card => card.clickWorkspaceName());
+    const workspaceName = await findWorkspace(page, {create: true}).then(card => card.clickWorkspaceName());
 
     const dataPage = new DataPage(page);
     let conceptSearchPage = await dataPage.openConceptSearch(Domain.Procedures);
@@ -99,10 +99,10 @@ describe('Editing and Copying Concept Sets', () => {
   test('Copy Concept Set to another workspace', async () => {
 
     // Need two workspaces. workspace1 is the Copy to workspace. workspace2 is the Copy from workspace.
-    const workspace1: WorkspaceCard = await findWorkspace(page, true);
+    const workspace1: WorkspaceCard = await findWorkspace(page, {create: true});
     const copyToWorkspace = await workspace1.getWorkspaceName();
 
-    const workspace2: WorkspaceCard = await findWorkspace(page, true);
+    const workspace2: WorkspaceCard = await findWorkspace(page, {create: true});
     const copyFromWorkspace = await workspace2.getWorkspaceName();
 
     // Open workspace2 Data Page.

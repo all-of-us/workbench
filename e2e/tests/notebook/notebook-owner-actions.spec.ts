@@ -56,8 +56,7 @@ describe('Workspace owner Jupyter notebook action tests', () => {
 
     const newNotebookName = makeRandomName('test-notebook');
     const modalTextContents = await workspaceAnalysisPage.renameNotebook(notebookName, newNotebookName);
-    expect(modalTextContents).toEqual(expect.stringContaining('Enter new name for'));
-    expect(modalTextContents).toEqual(expect.stringContaining(`${notebookName}.ipynb`));
+    expect(modalTextContents).toContain(`Enter new name for ${notebookName}.ipynb`);
 
     const newNotebookCard = new DataResourceCard(page);
     let cardExists = await newNotebookCard.cardExists(newNotebookName, CardType.Notebook);

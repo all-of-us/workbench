@@ -66,7 +66,7 @@ describe('Share workspace', () => {
      */
     test('Workspace READER cannot share edit or delete workspace', async () => {
 
-      const workspaceCard = await findWorkspace(page, true);
+      const workspaceCard = await findWorkspace(page, {create: true});
       const workspaceName = await workspaceCard.getWorkspaceName();
 
       // Open the Share modal
