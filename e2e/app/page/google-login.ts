@@ -118,6 +118,7 @@ export default class GoogleLoginPage {
       if (!user || user.trim().length === 0) {
         console.warn('Login user email: value is empty!!!')
       }
+      console.log(`Sign in as ${user}`);
       await this.enterEmail(user);
       await this.page.waitFor(1000); // to reduce probablity of getting Google login recaptcha
       await this.enterPassword(pwd);

@@ -36,7 +36,6 @@ export default class NotebookPreviewPage extends AuthenticatedPage {
   async openEditMode(notebookName: string): Promise<NotebookPage> {
     const link = new Link(this.page, Selector.editButton);
     await link.click();
-
     // Restarting notebook server may take a while.
     await waitWhileLoading(this.page, 60 * 15 * 1000);
 

@@ -2,7 +2,7 @@ import DataResourceCard, {CardType} from 'app/component/data-resource-card';
 import NewNotebookModal from 'app/component/new-notebook-modal';
 import WorkspacesPage from 'app/page/workspaces-page';
 import {LinkText} from 'app/text-labels';
-import {makeRandomName} from 'utils/str-utils';
+import {makeRandomName, makeWorkspaceName} from 'utils/str-utils';
 import {signIn} from 'utils/test-utils';
 
 // Notebook server start may take a long time. Set maximum test running time to 20 minutes.
@@ -10,15 +10,22 @@ jest.setTimeout(20 * 60 * 1000);
 
 describe('Workspace owner Jupyter notebook action tests', () => {
 
+  // In order to reduce test playback time, reuse same Workspace for all tests in this file.
+  // Workspace to be created in first test. If first test fails, next test will create it.
+  let workspaceName: string;
+
   beforeEach(async () => {
     await signIn(page);
   });
 
 
   test('Notebook name must be unique in same workspace', async () => {
-    const notebookName = makeRandomName('test-notebook');
     const workspacesPage = new WorkspacesPage(page);
-    const workspaceAnalysisPage = await workspacesPage.createNotebook(notebookName);
+
+    const notebookName = makeRandomName('pyNotebook1');
+    workspaceName = makeWorkspaceName();
+
+    const workspaceAnalysisPage = await workspacesPage.createNotebook({workspaceName, notebookName});
 
     const notebookCard = await DataResourceCard.findCard(page, notebookName);
     expect(notebookCard).toBeTruthy();
@@ -49,37 +56,33 @@ describe('Workspace owner Jupyter notebook action tests', () => {
     await workspaceAnalysisPage.deleteNotebook(notebookName);
   })
 
-  test('Notebook can be renamed by workspace owner', async () => {
-    const notebookName = makeRandomName('test-notebook');
+  test('Notebook can be duplicated by workspace owner', async () => {
     const workspacesPage = new WorkspacesPage(page);
-    const workspaceAnalysisPage = await workspacesPage.createNotebook(notebookName);
+    const notebookName = makeRandomName('pyNotebook2');
+    const workspaceAnalysisPage = await workspacesPage.createNotebook({workspaceName, notebookName});
+    const duplNotebookName = await workspaceAnalysisPage.duplicateNotebook(notebookName);
+    // Delete clone notebook.
+    await workspaceAnalysisPage.deleteNotebook(duplNotebookName);
+    await workspaceAnalysisPage.deleteNotebook(notebookName);
+  })
 
-    const newNotebookName = makeRandomName('test-notebook');
-    const modalTextContents = await workspaceAnalysisPage.renameNotebook(notebookName, newNotebookName);
+  test('Notebook can be renamed by workspace owner', async () => {
+    const workspacesPage = new WorkspacesPage(page);
+    const notebookName = makeRandomName('pyNotebook3');
+    const workspaceAnalysisPage = await workspacesPage.createNotebook({workspaceName, notebookName});
+
+    const newName = makeRandomName('test-notebook');
+    const modalTextContents = await workspaceAnalysisPage.renameNotebook(notebookName, newName);
     expect(modalTextContents).toContain(`Enter new name for ${notebookName}.ipynb`);
 
     const newNotebookCard = new DataResourceCard(page);
-    let cardExists = await newNotebookCard.cardExists(newNotebookName, CardType.Notebook);
+    let cardExists = await newNotebookCard.cardExists(newName, CardType.Notebook);
     expect(cardExists).toBe(true);
 
     cardExists = await newNotebookCard.cardExists(notebookName, CardType.Notebook);
     expect(cardExists).toBe(false);
 
-    await workspaceAnalysisPage.deleteNotebook(newNotebookName);
-  })
-
-  test('Notebook can be duplicated by workspace owner', async () => {
-    const notebookName = makeRandomName('test-notebook');
-    const workspacesPage = new WorkspacesPage(page);
-
-    // Create a new notebook for duplicate from.
-    const workspaceAnalysisPage = await workspacesPage.createNotebook(notebookName);
-
-    const duplNotebookName = await workspaceAnalysisPage.duplicateNotebook(notebookName);
-
-    // Delete notebooks
-    await workspaceAnalysisPage.deleteNotebook(duplNotebookName);
-    await workspaceAnalysisPage.deleteNotebook(notebookName);
+    await workspaceAnalysisPage.deleteNotebook(newName);
   })
 
 

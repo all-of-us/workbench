@@ -67,16 +67,19 @@ export default class WorkspaceAnalysisPage extends AuthenticatedPage {
     await modal.waitForLoad();
     await modal.fillInModal(notebookName, language);
 
-    // Log page heading.
-    const pageHeadingXpath = '//*[@data-test-id="notebook-redirect"]/h2';
-    const pageHeading = await this.page.waitForXPath(pageHeadingXpath, {visible: true});
+    // Log notebook page heading.
+    const pageHeadingCss = '[data-test-id="notebook-redirect"] > h2';
+    const pageHeading = await this.page.waitForSelector(pageHeadingCss, {visible: true});
     console.log(await getPropValue<string>(pageHeading, 'textContent'));
+
+    // Log notebook progress text message
+    const progressCss = '[data-test-id="current-progress-card"]';
+    const progressText = await this.page.waitForSelector(progressCss, {visible: true});
+    console.log(await getPropValue<string>(progressText, 'textContent'));
 
     // Wait for existances of important messages.
     const warningTexts = 'You are prohibited from taking screenshots or attempting in any way to remove participant-level data from the workbench.';
     const warningTextsXpath = `//*[contains(normalize-space(text()), "${warningTexts}")]`
-
-    const progressXpath = '//*[@data-test-id="current-progress-card"]';
 
     const authenticateTexts = 'Authenticating with the notebook server';
     const authenticateTextsXpath = `//*[@data-test-id and contains(normalize-space(), "${authenticateTexts}")]`;
@@ -89,7 +92,6 @@ export default class WorkspaceAnalysisPage extends AuthenticatedPage {
 
     await Promise.all([
       this.page.waitForXPath(warningTextsXpath, {visible: true}),
-      this.page.waitForXPath(progressXpath, {visible: true}),
       this.page.waitForXPath(authenticateTextsXpath, {visible: true}),
       this.page.waitForXPath(creatingTextsXpath, {visible: true}),
       this.page.waitForXPath(redirectingTextsXpath, {visible: true}),

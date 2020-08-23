@@ -138,12 +138,14 @@ export default class WorkspacesPage extends WorkspaceEditPage {
   }
 
   /**
-   * Create a new notebook in a randomly selected workspace.
-   * @param notebookName
-   * @param lang
+   * Create a new notebook in a selected Workspace.
+   * @param {string} workspaceName Workspace name.
+   * @param {string} notebookName Notebook name
+   * @param {Language} lang Notebook language.
    */
-  async createNotebook(notebookName: string, lang?: Language): Promise<WorkspaceAnalysisPage> {
-    const workspaceCard = await findWorkspace(this.page);
+  async createNotebook(opts: {workspaceName: string, notebookName: string, lang?: Language}): Promise<WorkspaceAnalysisPage> {
+    const {workspaceName, notebookName, lang} = opts;
+    const workspaceCard = await findWorkspace(this.page, {workspaceName, create: true});
     await workspaceCard.clickWorkspaceName();
 
     const dataPage = new DataPage(this.page);
