@@ -394,33 +394,20 @@ sourceSets {
 // https://docs.gradle.org/current/userguide/java_plugin.html
 classes.dependsOn 'generatedClasses'
 
-def swaggerCodegenTasks = [
-  swaggerSources.workbench.code,
-  swaggerSources.captcha.code,
-  swaggerSources.firecloud.code,
-  swaggerSources.jira.code,
-  swaggerSources.mandrill.code,
-  swaggerSources.moodle.code,
-  swaggerSources.notebooks.code,
-  swaggerSources.rdr.code,
-  swaggerSources.shibboleth.code
-]
-
 // https://docs.gradle.org/current/userguide/idea_plugin.html
-project.tasks.ideaModule.dependsOn(swaggerCodegenTasks)
-//project.tasks.ideaModule.dependsOn(generateSwaggerCode)
+project.tasks.ideaModule.dependsOn(generateSwaggerCode)
 
 // Java plugin's Generated Source Set gives us the compileGeneratedJava task.
-// We need to provide it with the swagger-codegen tasks that excrete Java.
-project.tasks.compileGeneratedJava.dependsOn(swaggerCodegenTasks)
-//project.tasks.compileGeneratedJava.dependsOn(generateSwaggerCode)
+// We need to provide it with the swagger-codegen tasks that output Java.
+project.tasks.compileGeneratedJava.dependsOn(generateSwaggerCode)
 
 project.tasks.war.dependsOn(['compileGeneratedJava', 'generate_appengine_web_xml',
         'generate_appengine_cron_yaml'])
 
 // Clear out generated Java sorces before cleaning the project.
 clean.doFirst {
-  delete("${projectDir}/src/generated/java")
+  delete("${buildDir}/swagger2")
+  delete("${buildDir}/swagger3")
 }
 
 repositories {
