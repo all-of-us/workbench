@@ -4,7 +4,7 @@ import org.pmiops.workbench.tooling.IncrementalHotSwapTask
 // Runs before all tasks. Sets up properties and dependencies for the build
 // process itself.
 buildscript {
-  // External propertiges on the default project. Values declared in ext blocks
+  // External properties on the default project. Values declared in ext blocks
   // outside of the buildscsript block aren't usable here.
   ext {
     ELASTICSEARCH_VERSION = '6.8.3'
@@ -22,7 +22,6 @@ buildscript {
     SPRING_BOOT_VERSION = '1.5.22.RELEASE'
 
     SWAGGER_2_CODEGEN_VERSION = '2.2.3'
-    SWAGGER_3_CODEGEN_VERSION = '3.0.5'
   }
 
   project.ext['hibernate.version'] = '5.2.10.Final'
@@ -82,25 +81,36 @@ configurations {
   __tools__RuntimeOnly.extendsFrom runtimeOnly
 
   swaggerCodegenV2
-  swaggerCodegenV3
 
   generatedCompile {
     exclude group: 'com.google.guava', module:'guava-jdk5'
   }
 }
 
-// XXX
-def swaggerTargetFolder = 'src/generated/java'
+def swagger2CodeGenDir = "$buildDir/swagger2"
 
 // Configuration for the Swagger Gradle plugin:
 // https://github.com/int128/gradle-swagger-generator-plugin
+//
+// Note: The tasks below share an output directory, but we rely on the swagger
+// ignore file to ensure they don't step on eachother's outputs. If this were to
+// happen in the future due to a regression or a codegen upgrade, the issue
+// would likely manifest as an infinite build loop on our continuous incremental
+// build (e.g. dev-up). Run ./gradlew copmileGeneratedJava --info to see which
+// overlapping files/diretories may be getting written by different Swagger
+// codegen tasks.
 swaggerSources {
   // This path is the Java sources root for finding any overridden Swagger-codegen
   // templates we may be using.
   def swaggerTemplateDir = 'src/main/resources/swaggercodegen'
   def swaggerCodegenPackage = 'org.pmiops.workbench'
+  // Raw options passed to the Swagger codegen CLI.
+  def rawOptsSwagger2 = [
+    // By default, the ignore file within the output directory is used. Override
+    // as we don't track the output directory in source.
+    '--ignore-file-override', "$projectDir/.swagger2-codegen-ignore"
+  ]
   def baseJavaProps = [
-    'sourceFolder'     : 'java',
     'library'          : 'okhttp-gson',
     'serializableModel': 'true',
     'dateLibrary'      : 'java8'
@@ -110,16 +120,15 @@ swaggerSources {
     code {
       configuration = configurations.swaggerCodegenV2
       language = 'spring'
-      outputDir = file("$projectDir/src/generated")
+      outputDir = file(swagger2CodeGenDir)
       templateDir = file("$projectDir/$swaggerTemplateDir")
+      // Since the output directory is shared among these swagger tasks, wiping
+      // the directory would result in task invalidation / churn.
       wipeOutputDir = false
-      rawOptions = [
-        '--ignore-file-override', "$projectDir/.swagger-codegen-ignore"
-      ]
+      rawOptions = rawOptsSwagger2
       additionalProperties = [
         'modelPackage'     : "${swaggerCodegenPackage}.model",
         'apiPackage'       : "${swaggerCodegenPackage}.api",
-        'sourceFolder'     : 'java',
         'useTags'        : 'true',
         // Generates delegate interfaces; used to make method annotations work without
         // having to copy them to our implementations.
@@ -132,11 +141,10 @@ swaggerSources {
     code {
       configuration = configurations.swaggerCodegenV2
       language = 'java'
-      outputDir = file("$projectDir/src/generated")
+      outputDir = file(swagger2CodeGenDir)
       templateDir = file("$projectDir/$swaggerTemplateDir")
       wipeOutputDir = false
-      rawOptions = [
-        '--ignore-file-override', "$projectDir/.swagger-codegen-ignore",
+      rawOptions = rawOptsSwagger2 + [
         '--model-name-prefix', 'Firecloud'
       ]
       additionalProperties = baseJavaProps + [
@@ -151,12 +159,10 @@ swaggerSources {
     code {
       configuration = configurations.swaggerCodegenV2
       language = 'java'
-      outputDir = file("$projectDir/src/generated")
+      outputDir = file(swagger2CodeGenDir)
       templateDir = file("$projectDir/$swaggerTemplateDir")
       wipeOutputDir = false
-      rawOptions = [
-        '--ignore-file-override', "$projectDir/.swagger-codegen-ignore"
-      ]
+      rawOptions = rawOptsSwagger2
       additionalProperties = baseJavaProps + [
         'invokerPackage'   : "${swaggerCodegenPackage}.notebooks",
         'modelPackage'     : "${swaggerCodegenPackage}.notebooks.model",
@@ -169,12 +175,10 @@ swaggerSources {
     code {
       configuration = configurations.swaggerCodegenV2
       language = 'java'
-      outputDir = file("$projectDir/src/generated")
+      outputDir = file(swagger2CodeGenDir)
       templateDir = file("$projectDir/$swaggerTemplateDir")
       wipeOutputDir = false
-      rawOptions = [
-        '--ignore-file-override', "$projectDir/.swagger-codegen-ignore"
-      ]
+      rawOptions = rawOptsSwagger2
       additionalProperties = baseJavaProps + [
         'invokerPackage'   : "${swaggerCodegenPackage}.jira",
         'modelPackage'     : "${swaggerCodegenPackage}.jira.model",
@@ -187,12 +191,10 @@ swaggerSources {
     code {
       configuration = configurations.swaggerCodegenV2
       language = 'java'
-      outputDir = file("$projectDir/src/generated")
+      outputDir = file(swagger2CodeGenDir)
       templateDir = file("$projectDir/$swaggerTemplateDir")
       wipeOutputDir = false
-      rawOptions = [
-        '--ignore-file-override', "$projectDir/.swagger-codegen-ignore"
-      ]
+      rawOptions = rawOptsSwagger2
       additionalProperties = baseJavaProps + [
         'invokerPackage'   : "${swaggerCodegenPackage}.mandrill",
         'modelPackage'     : "${swaggerCodegenPackage}.mandrill.model",
@@ -205,12 +207,10 @@ swaggerSources {
     code {
       configuration = configurations.swaggerCodegenV2
       language = 'java'
-      outputDir = file("$projectDir/src/generated")
+      outputDir = file(swagger2CodeGenDir)
       templateDir = file("$projectDir/$swaggerTemplateDir")
       wipeOutputDir = false
-      rawOptions = [
-        '--ignore-file-override', "$projectDir/.swagger-codegen-ignore"
-      ]
+      rawOptions = rawOptsSwagger2
       additionalProperties = baseJavaProps + [
         'invokerPackage'   : "${swaggerCodegenPackage}.moodle",
         'modelPackage'     : "${swaggerCodegenPackage}.moodle.model",
@@ -223,12 +223,10 @@ swaggerSources {
     code {
       configuration = configurations.swaggerCodegenV2
       language = 'java'
-      outputDir = file("$projectDir/src/generated")
+      outputDir = file(swagger2CodeGenDir)
       templateDir = file("$projectDir/$swaggerTemplateDir")
       wipeOutputDir = false
-      rawOptions = [
-        '--ignore-file-override', "$projectDir/.swagger-codegen-ignore"
-      ]
+      rawOptions = rawOptsSwagger2
       additionalProperties = baseJavaProps + [
         'invokerPackage'   : "${swaggerCodegenPackage}.rdr",
         'modelPackage'     : "${swaggerCodegenPackage}.rdr.model",
@@ -241,12 +239,10 @@ swaggerSources {
     code {
       configuration = configurations.swaggerCodegenV2
       language = 'java'
-      outputDir = file("$projectDir/src/generated")
+      outputDir = file(swagger2CodeGenDir)
       templateDir = file("$projectDir/$swaggerTemplateDir")
       wipeOutputDir = false
-      rawOptions = [
-        '--ignore-file-override', "$projectDir/.swagger-codegen-ignore"
-      ]
+      rawOptions = rawOptsSwagger2
       additionalProperties = baseJavaProps + [
         'invokerPackage'   : "${swaggerCodegenPackage}.captcha",
         'modelPackage'     : "${swaggerCodegenPackage}.captcha.model",
@@ -259,12 +255,10 @@ swaggerSources {
     code {
       configuration = configurations.swaggerCodegenV2
       language = 'java'
-      outputDir = file("$projectDir/src/generated")
+      outputDir = file(swagger2CodeGenDir)
       templateDir = file("$projectDir/$swaggerTemplateDir")
       wipeOutputDir = false
-      rawOptions = [
-        '--ignore-file-override', "$projectDir/.swagger-codegen-ignore"
-      ]
+      rawOptions = rawOptsSwagger2
       additionalProperties = baseJavaProps + [
         'invokerPackage'   : "${swaggerCodegenPackage}.shibboleth",
         'modelPackage'     : "${swaggerCodegenPackage}.shibboleth.model",
@@ -310,8 +304,7 @@ spotless {
   }
 }
 
-// Required for the swagger plugin's `validateSwagger` task
-// See https://github.com/int128/gradle-swagger-generator-plugin
+
 // The plugin generates configuration names by concatenating SourceSet names
 // with builtin identifiers according to the rules at
 // https://docs.gradle.org/current/userguide/java_plugin.html#java_source_set_tasks
@@ -321,6 +314,9 @@ sourceSets {
   //
   generated {
     compileClasspath = configurations.generatedCompile
+    java {
+      srcDir swagger2CodeGenDir
+    }
   }
   main {
     compileClasspath += generated.output
@@ -407,7 +403,6 @@ project.tasks.war.dependsOn(['compileGeneratedJava', 'generate_appengine_web_xml
 // Clear out generated Java sorces before cleaning the project.
 clean.doFirst {
   delete("${buildDir}/swagger2")
-  delete("${buildDir}/swagger3")
 }
 
 repositories {
@@ -419,7 +414,6 @@ dependencies {
   annotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
 
   swaggerCodegenV2 "io.swagger:swagger-codegen-cli:$project.ext.SWAGGER_2_CODEGEN_VERSION"
-  swaggerCodegenV3 'io.swagger.codegen.v3:swagger-codegen-cli:$project.ext.SWAGGER_3_CODEGEN_VERSION'
 
   compile "ch.qos.logback:logback-classic:1.2.3"
   compile "com.fasterxml.jackson.core:jackson-annotations:$project.ext.JACKSON_VERSION"
