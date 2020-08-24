@@ -45,7 +45,7 @@ export enum LinkText {
    DeleteConceptSet = 'Delete Concept Set',
    DeleteDataset = 'Delete Dataset',
    DeleteNotebook = 'Delete Notebook',
-   Deleteworkspace = 'Delete Workspace',
+   DeleteWorkspace = 'Delete Workspace',
    DiscardChanges = 'Discard Changes',
    DuplicateWorkspace = 'Duplicate Workspace',
    Finish = 'Finish',
