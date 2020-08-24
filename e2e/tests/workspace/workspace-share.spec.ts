@@ -122,6 +122,16 @@ describe('Share workspace', () => {
       await Navigation.navMenu(newPage, NavLink.SIGN_OUT);
       await newPage.close();
     });
+
+    /**
+     * Test:
+     * - Find an existing workspace
+     * - if any collaborator already sharing the workspace, remove before continuing
+     * - Share with another user - writer level access.
+     * - verify  if a collaborator has been added with e writer level acess
+     * - remove the collaborator (writer)
+     */
+
     test('As OWNER, user can share (writer level access) a workspace', async () => {
       // Using the share modal requires a viewport be set, due to react-select weirdness.
       await page.setViewport({height: 1280, width: 1280});
@@ -152,12 +162,12 @@ describe('Share workspace', () => {
       accessLevel = await aboutPage.findUserInCollaboratorList(config.collaboratorUsername);
       expect(accessLevel).toBe(WorkspaceAccessLevel.Writer);
     
-          shareModal = await aboutPage.openShareModal();
-          await shareModal.removeUser(config.collaboratorUsername);
-          await waitWhileLoading(page);
+      shareModal = await aboutPage.openShareModal();
+      await shareModal.removeUser(config.collaboratorUsername);
+      await waitWhileLoading(page);
     
-          accessLevel = await aboutPage.findUserInCollaboratorList(config.collaboratorUsername);
-          expect(accessLevel).toBeNull();
+      accessLevel = await aboutPage.findUserInCollaboratorList(config.collaboratorUsername);
+      expect(accessLevel).toBeNull();
     
     });
   });
