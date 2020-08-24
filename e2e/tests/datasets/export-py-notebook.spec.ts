@@ -1,8 +1,10 @@
 import DataResourceCard, {CardType} from 'app/component/data-resource-card';
+import ExportToNotebookModal from 'app/component/export-to-notebook-modal';
 import Link from 'app/element/link';
-import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import DataPage, {TabLabelAlias} from 'app/page/data-page';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
+import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
+import {EllipsisMenuAction} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
@@ -84,8 +86,38 @@ describe('Create Dataset', () => {
    * - Create dataset.
    * - Export dataset to notebook thru the ellipsis menu.
    */
-  test('Export dataset to notebook thru ellipsis menu', async () => {
+  // TODO Eanble test after ticket fix. See https://precisionmedicineinitiative.atlassian.net/browse/RW-5388
+  test.skip('Export dataset to notebook thru ellipsis menu', async () => {
+    await findWorkspace(page).then(card => card.clickWorkspaceName());
 
+    // Click Add Datasets button.
+    const dataPage = new DataPage(page);
+    const datasetBuildPage = await dataPage.clickAddDatasetButton();
+
+    await datasetBuildPage.selectCohorts(['All Participants']);
+    await datasetBuildPage.selectConceptSets(['Demographics']);
+    const saveModal = await datasetBuildPage.clickSaveAndAnalyzeButton();
+    const datasetName = await saveModal.saveDataset({exportToNotebook: false});
+    await waitWhileLoading(page);
+
+    const resourceCard = new DataResourceCard(page);
+    const datasetCard = await resourceCard.findCard(datasetName, CardType.Dataset);
+    await (datasetCard.getEllipsis().clickAction(EllipsisMenuAction.exportToNotebook, {waitForNav: false}));
+
+    const exportModal = new ExportToNotebookModal(page);
+    await exportModal.waitForLoad();
+
+    const notebookName = makeRandomName('test-notebook');
+    await exportModal.fillInModal(notebookName);
+
+    // Verify notebook created successfully.
+    await dataPage.openTab(TabLabelAlias.Analysis);
+    const cardExists = await resourceCard.cardExists(notebookName, CardType.Notebook);
+    expect(cardExists).toBe(true);
+
+    // Delete notebook.
+    const analysisPage = new WorkspaceAnalysisPage(page);
+    await analysisPage.deleteNotebook(notebookName);
   });
 
 });
