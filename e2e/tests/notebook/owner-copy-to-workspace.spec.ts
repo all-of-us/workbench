@@ -60,7 +60,8 @@ describe('Workspace owner Jupyter notebook action tests', () => {
     const modal = new Modal(page);
     await modal.waitForButton(LinkText.GoToCopiedNotebook);
     const textContent = await modal.getTextContent();
-    expect(textContent).toContain(`Successfully copied ${copyFromNotebookName} to ${toWorkspace}`);
+    const successMsg = `Successfully copied ${copyFromNotebookName}  to ${toWorkspace} . Do you want to view the copied Notebook?`;
+    expect(textContent).toContain(successMsg);
     // Dismiss modal.
     await modal.clickButton(LinkText.StayHere, {waitForClose: true});
 
