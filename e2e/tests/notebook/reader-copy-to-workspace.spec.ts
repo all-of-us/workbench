@@ -32,7 +32,7 @@ describe('Workspace reader Jupyter notebook action tests', () => {
    * - Verify original notebook contents are unchaged in clone notebook.
    * - Delete clone notebook.
    */
-  test('Workspace reader becomes owner of cloned notebook', async () => {
+  test('Workspace reader copy notebook to another workspace', async () => {
     const workspaceName = await findWorkspace(page, {create: true}).then(card => card.clickWorkspaceName());
 
     let dataPage = new DataPage(page);
