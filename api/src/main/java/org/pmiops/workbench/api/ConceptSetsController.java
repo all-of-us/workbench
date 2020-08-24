@@ -42,6 +42,7 @@ import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -335,7 +336,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       throw new BadRequestException("Cannot modify the domain of an existing concept set");
     }
     // In case of rename ConceptDet does not have concepts
-    if (conceptSet.getConcepts() != null) {
+    if (!CollectionUtils.isEmpty(conceptSet.getConcepts())) {
       validateConceptSet(
           dbConceptSet,
           conceptSet.getConcepts().stream()
