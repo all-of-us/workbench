@@ -86,7 +86,45 @@ configurations {
   }
 }
 
-def swagger2CodegenDir = "$buildDir/swagger2"
+// Shared variables for Swagger codegen. Use "ext" rather than "def" to allow
+// access globally, including from within helper functions.
+ext.swaggerCodegenBasePkg = 'org.pmiops.workbench'
+ext.swagger2CodegenDir = "$buildDir/swagger2"
+// This path is the Java sources root for finding any overridden Swagger-codegen
+// templates we may be using.
+ext.swaggerTemplateDir = "$projectDir/src/main/resources/swaggercodegen"
+// Raw options passed to the Swagger codegen CLI.
+ext.swagger2RawOpts = [
+  // By default, the ignore file within the output directory is used. Override
+  // as we don't track the output directory in source.
+  '--ignore-file-override', "$projectDir/.swagger2-codegen-ignore"
+]
+
+// Helper function to define a Java client Swagger codegen target for the Gradle
+// Swagger Generator Plugin: https://github.com/int128/gradle-swagger-generator-plugin#code-generation
+def swagger2JavaClient(yaml, pkg, rawOptExtras = []) {
+  return {
+    inputFile = file("src/main/resources/${yaml}")
+    code {
+      configuration = configurations.__swaggerCodegenV2__
+      language = 'java'
+      outputDir = file(swagger2CodegenDir)
+      templateDir = file(swaggerTemplateDir)
+      // Since the output directory is shared among these swagger tasks, wiping
+      // the directory would result in task invalidation / churn.
+      wipeOutputDir = false
+      rawOptions = swagger2RawOpts + rawOptExtras
+      additionalProperties = [
+        'library'          : 'okhttp-gson',
+        'serializableModel': 'true',
+        'dateLibrary'      : 'java8',
+        'invokerPackage'   : "${swaggerCodegenBasePkg}.${pkg}",
+        'modelPackage'     : "${swaggerCodegenBasePkg}.${pkg}.model",
+        'apiPackage'       : "${swaggerCodegenBasePkg}.${pkg}.api",
+      ]
+    }
+  }
+}
 
 // Configuration for the Swagger Gradle plugin:
 // https://github.com/int128/gradle-swagger-generator-plugin
@@ -99,21 +137,19 @@ def swagger2CodegenDir = "$buildDir/swagger2"
 // overlapping files/diretories may be getting written by different Swagger
 // codegen tasks.
 swaggerSources {
-  // This path is the Java sources root for finding any overridden Swagger-codegen
-  // templates we may be using.
-  def swaggerTemplateDir = "$projectDir/src/main/resources/swaggercodegen"
-  def swaggerCodegenPackage = 'org.pmiops.workbench'
-  // Raw options passed to the Swagger codegen CLI.
-  def rawOptsSwagger2 = [
-    // By default, the ignore file within the output directory is used. Override
-    // as we don't track the output directory in source.
-    '--ignore-file-override', "$projectDir/.swagger2-codegen-ignore"
-  ]
-  def baseJavaProps = [
-    'library'          : 'okhttp-gson',
-    'serializableModel': 'true',
-    'dateLibrary'      : 'java8'
-  ]
+  firecloud swagger2JavaClient("firecloud.yaml", "firecloud", [
+    '--model-name-prefix', 'Firecloud'
+  ])
+  notebooks swagger2JavaClient("notebooks.yaml", "notebooks")
+  jira swagger2JavaClient("jira.yaml", "jira")
+  mandrill swagger2JavaClient("mandrill.yaml", "mandrill")
+  moodle swagger2JavaClient("moodle.yaml", "moodle")
+  rdr swagger2JavaClient("rdr.yaml", "rdr")
+  captcha swagger2JavaClient("captcha.yaml", "captcha")
+  shibboleth swagger2JavaClient("shibboleth.yaml", "shibboleth")
+
+  // Workbench needs a special configuration style, as we generate Spring server
+  // bindings in this case.
   workbench {
     inputFile = file('src/main/resources/workbench-api.yaml')
     code {
@@ -121,147 +157,15 @@ swaggerSources {
       language = 'spring'
       outputDir = file(swagger2CodegenDir)
       templateDir = file(swaggerTemplateDir)
-      // Since the output directory is shared among these swagger tasks, wiping
-      // the directory would result in task invalidation / churn.
       wipeOutputDir = false
-      rawOptions = rawOptsSwagger2
+      rawOptions = swagger2RawOpts
       additionalProperties = [
-        'modelPackage'     : "${swaggerCodegenPackage}.model",
-        'apiPackage'       : "${swaggerCodegenPackage}.api",
+        'modelPackage'     : "${swaggerCodegenBasePkg}.model",
+        'apiPackage'       : "${swaggerCodegenBasePkg}.api",
         'useTags'        : 'true',
         // Generates delegate interfaces; used to make method annotations work without
         // having to copy them to our implementations.
         'delegatePattern': 'true'
-      ]
-    }
-  }
-  firecloud {
-    inputFile = file('src/main/resources/firecloud.yaml')
-    code {
-      configuration = configurations.__swaggerCodegenV2__
-      language = 'java'
-      outputDir = file(swagger2CodegenDir)
-      templateDir = file(swaggerTemplateDir)
-      wipeOutputDir = false
-      rawOptions = rawOptsSwagger2 + [
-        '--model-name-prefix', 'Firecloud'
-      ]
-      additionalProperties = baseJavaProps + [
-        'invokerPackage'   : "${swaggerCodegenPackage}.firecloud",
-        'modelPackage'     : "${swaggerCodegenPackage}.firecloud.model",
-        'apiPackage'       : "${swaggerCodegenPackage}.firecloud.api",
-      ]
-    }
-  }
-  notebooks {
-    inputFile = file('src/main/resources/notebooks.yaml')
-    code {
-      configuration = configurations.__swaggerCodegenV2__
-      language = 'java'
-      outputDir = file(swagger2CodegenDir)
-      templateDir = file(swaggerTemplateDir)
-      wipeOutputDir = false
-      rawOptions = rawOptsSwagger2
-      additionalProperties = baseJavaProps + [
-        'invokerPackage'   : "${swaggerCodegenPackage}.notebooks",
-        'modelPackage'     : "${swaggerCodegenPackage}.notebooks.model",
-        'apiPackage'       : "${swaggerCodegenPackage}.notebooks.api",
-      ]
-    }
-  }
-  jira {
-    inputFile = file('src/main/resources/jira.yaml')
-    code {
-      configuration = configurations.__swaggerCodegenV2__
-      language = 'java'
-      outputDir = file(swagger2CodegenDir)
-      templateDir = file(swaggerTemplateDir)
-      wipeOutputDir = false
-      rawOptions = rawOptsSwagger2
-      additionalProperties = baseJavaProps + [
-        'invokerPackage'   : "${swaggerCodegenPackage}.jira",
-        'modelPackage'     : "${swaggerCodegenPackage}.jira.model",
-        'apiPackage'       : "${swaggerCodegenPackage}.jira.api",
-      ]
-    }
-  }
-  mandrill {
-    inputFile = file('src/main/resources/mandrill.yaml')
-    code {
-      configuration = configurations.__swaggerCodegenV2__
-      language = 'java'
-      outputDir = file(swagger2CodegenDir)
-      templateDir = file(swaggerTemplateDir)
-      wipeOutputDir = false
-      rawOptions = rawOptsSwagger2
-      additionalProperties = baseJavaProps + [
-        'invokerPackage'   : "${swaggerCodegenPackage}.mandrill",
-        'modelPackage'     : "${swaggerCodegenPackage}.mandrill.model",
-        'apiPackage'       : "${swaggerCodegenPackage}.mandrill.api",
-      ]
-    }
-  }
-  moodle {
-    inputFile = file('src/main/resources/moodle.yaml')
-    code {
-      configuration = configurations.__swaggerCodegenV2__
-      language = 'java'
-      outputDir = file(swagger2CodegenDir)
-      templateDir = file(swaggerTemplateDir)
-      wipeOutputDir = false
-      rawOptions = rawOptsSwagger2
-      additionalProperties = baseJavaProps + [
-        'invokerPackage'   : "${swaggerCodegenPackage}.moodle",
-        'modelPackage'     : "${swaggerCodegenPackage}.moodle.model",
-        'apiPackage'       : "${swaggerCodegenPackage}.moodle.api",
-      ]
-    }
-  }
-  rdr {
-    inputFile = file('src/main/resources/rdr.yaml')
-    code {
-      configuration = configurations.__swaggerCodegenV2__
-      language = 'java'
-      outputDir = file(swagger2CodegenDir)
-      templateDir = file(swaggerTemplateDir)
-      wipeOutputDir = false
-      rawOptions = rawOptsSwagger2
-      additionalProperties = baseJavaProps + [
-        'invokerPackage'   : "${swaggerCodegenPackage}.rdr",
-        'modelPackage'     : "${swaggerCodegenPackage}.rdr.model",
-        'apiPackage'       : "${swaggerCodegenPackage}.rdr.api",
-      ]
-    }
-  }
-  captcha {
-    inputFile = file('src/main/resources/captcha.yaml')
-    code {
-      configuration = configurations.__swaggerCodegenV2__
-      language = 'java'
-      outputDir = file(swagger2CodegenDir)
-      templateDir = file(swaggerTemplateDir)
-      wipeOutputDir = false
-      rawOptions = rawOptsSwagger2
-      additionalProperties = baseJavaProps + [
-        'invokerPackage'   : "${swaggerCodegenPackage}.captcha",
-        'modelPackage'     : "${swaggerCodegenPackage}.captcha.model",
-        'apiPackage'       : "${swaggerCodegenPackage}.captcha.api",
-      ]
-    }
-  }
-  shibboleth {
-    inputFile = file('src/main/resources/shibboleth.yaml')
-    code {
-      configuration = configurations.__swaggerCodegenV2__
-      language = 'java'
-      outputDir = file(swagger2CodegenDir)
-      templateDir = file(swaggerTemplateDir)
-      wipeOutputDir = false
-      rawOptions = rawOptsSwagger2
-      additionalProperties = baseJavaProps + [
-        'invokerPackage'   : "${swaggerCodegenPackage}.shibboleth",
-        'modelPackage'     : "${swaggerCodegenPackage}.shibboleth.model",
-        'apiPackage'       : "${swaggerCodegenPackage}.shibboleth.api",
       ]
     }
   }
