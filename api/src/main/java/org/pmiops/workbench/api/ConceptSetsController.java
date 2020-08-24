@@ -334,11 +334,14 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     if (conceptSet.getDomain() != null && conceptSet.getDomain() != dbConceptSet.getDomainEnum()) {
       throw new BadRequestException("Cannot modify the domain of an existing concept set");
     }
-    validateConceptSet(
-        dbConceptSet,
-        conceptSet.getConcepts().stream()
-            .map(concept -> concept.getConceptId())
-            .collect(Collectors.toList()));
+    // In case of rename ConceptDet does not have concepts
+    if (conceptSet.getConcepts() != null) {
+      validateConceptSet(
+          dbConceptSet,
+          conceptSet.getConcepts().stream()
+              .map(concept -> concept.getConceptId())
+              .collect(Collectors.toList()));
+    }
   }
 
   private void validateAndUpdateDbConceptSetConcept(
