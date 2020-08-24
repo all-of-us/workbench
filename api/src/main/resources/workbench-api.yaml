@@ -5055,10 +5055,9 @@ definitions:
         type: string
       contactEmailFailure:
         description: >
-          Whether or not contact email could be added to verification list. No longer in use.
+          DEPRECATED. Whether or not contact email could be added to verification list. No longer in use.
         type: boolean
         default: false
-        deprecated: true
       firstSignInTime:
         type: integer
         format: int64
@@ -5115,7 +5114,6 @@ definitions:
         description: >
           A list of institutions the user is affiliated with. DEPRECATED
           in favor of the newer verifiedInstitutionalAffiliation.
-        deprecated: true
         type: array
         items:
           "$ref": "#/definitions/InstitutionalAffiliation"
