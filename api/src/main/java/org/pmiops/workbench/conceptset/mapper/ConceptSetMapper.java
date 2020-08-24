@@ -66,6 +66,5 @@ public interface ConceptSetMapper {
     dbConceptSet.setParticipantCount(
         conceptBigQueryService.getParticipantCountForConcepts(
             dbConceptSet.getDomainEnum(), omopTable, dbConceptSet.getConceptIds()));
-    dbConceptSet.getConceptIds().addAll(source.getAddedIds());
   }
 }
