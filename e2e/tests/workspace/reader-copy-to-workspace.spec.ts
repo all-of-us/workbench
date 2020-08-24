@@ -14,7 +14,7 @@ import NotebookPreviewPage from 'app/page/notebook-preview-page';
 
 jest.setTimeout(20 * 60 * 1000);
 
-describe('Workspace owner Jupyter notebook action tests', () => {
+describe('Workspace reader Jupyter notebook action tests', () => {
 
   beforeEach(async () => {
     await signIn(page);
