@@ -22,18 +22,22 @@
 # Then explicitly reverse the ignore rule for a single file:
 #!docs/README.md
 
-src/generated/README.md
-src/generated/pom.xml
-src/generated/.gitignore
-src/generated/.travis.yml
-src/generated/build.sbt
-src/generated/docs/*.md
-src/generated/settings.gradle
-src/generated/git_push.sh
-src/generated/gradle.properties
-src/generated/src/main/AndroidManifest.xml
-src/generated/src/main/resources/application.properties
-src/generated/src/test/**
-src/generated/gradlew
-src/generated/gradlew.bat
-src/generated/gradle/**
+build/swagger2/README.md
+build/swagger2/pom.xml
+build/swagger2/.gitignore
+build/swagger2/.travis.yml
+build/swagger2/.swagger-codegen/**
+build/swagger2/.swagger-codegen-ignore
+build/swagger2/build.gradle
+build/swagger2/build.sbt
+build/swagger2/docs/*.md
+build/swagger2/settings.gradle
+build/swagger2/git_push.sh
+build/swagger2/gradle.properties
+build/swagger2/src/main/AndroidManifest.xml
+build/swagger2/src/main/resources/application.properties
+build/swagger2/src/test/**
+build/swagger2/gradlew
+build/swagger2/gradlew.bat
+build/swagger2/src/main/resources
+build/swagger2/gradle/**
