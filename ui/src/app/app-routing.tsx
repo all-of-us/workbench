@@ -102,7 +102,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
       {/* Protected routes must be nested in order to work. This is a result of the way react-router handles paths
           react-router expects all children under one of its top level components (the Switch component) to have a 'path' prop
           The 'ProtectedRoutes' component does not currently support a path prop - though this may change.
-          The resultant behavior is that any routes outside of the ProtectedRoutes will not be seen.
+          The resultant behavior is that any routes that are "next siblings" of the top level ProtectedRoutes will not be seen.
       */}
       <ProtectedRoutes guards={[registrationGuard]}>
         <AppRoute
