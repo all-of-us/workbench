@@ -52,7 +52,7 @@ public class ConceptSetService {
     this.clock = clock;
   }
 
-  public ConceptSet save(DbConceptSet dbConceptSet) {
+  public ConceptSet save(DbConceptSet dbConceptSet, Long WorkspaceId) {
     try {
       return conceptSetMapper.dbModelToClient(conceptSetDao.save(dbConceptSet));
     } catch (DataIntegrityViolationException e) {

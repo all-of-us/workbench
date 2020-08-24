@@ -6,6 +6,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +28,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.ConceptSetListResponse;
 import org.pmiops.workbench.model.CopyRequest;
@@ -39,7 +41,6 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -82,18 +83,15 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   @Override
   public ResponseEntity<ConceptSet> createConceptSet(
       String workspaceNamespace, String workspaceId, CreateConceptSetRequest request) {
-    // Fail fast if no concept ids are in request
-    if (CollectionUtils.isEmpty(request.getAddedIds())) {
-      throw new BadRequestException("Cannot create a concept set with no concepts");
-    }
+    // Fail fast if request is not valid
+    validateCreateConceptSetRequest(request);
     DbWorkspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     DbConceptSet dbConceptSet = fromClientConceptSet(request, workspace.getWorkspaceId());
 
-    validateConceptSet(dbConceptSet, request.getAddedIds());
-    ConceptSet conceptSet = conceptSetService.save(dbConceptSet);
+    ConceptSet conceptSet = conceptSetService.save(dbConceptSet, );
     userRecentResourceService.updateConceptSetEntry(
         workspace.getWorkspaceId(), userProvider.get().getUserId(), conceptSet.getId());
     return ResponseEntity.ok(conceptSetService.toHydratedConcepts(conceptSet));
@@ -228,7 +226,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     newConceptSet.setLastModifiedTime(now);
     newConceptSet.setVersion(INITIAL_VERSION);
 
-    ConceptSet conceptSet = conceptSetService.save(newConceptSet);
+    ConceptSet conceptSet = conceptSetService.save(newConceptSet, );
     userRecentResourceService.updateConceptSetEntry(
         toWorkspace.getWorkspaceId(), userProvider.get().getUserId(), conceptSet.getId());
     return ResponseEntity.ok(conceptSetService.toHydratedConcepts(conceptSet));
@@ -313,11 +311,11 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       throw new BadRequestException("Cannot modify the domain of an existing concept set");
     }
     // In case of rename ConceptDet does not have concepts
-    if (!org.springframework.util.CollectionUtils.isEmpty(conceptSet.getConcepts())) {
-      validateConceptSet(
+    if (!CollectionUtils.isEmpty(conceptSet.getConcepts())) {
+      validateCreateConceptSetRequest(
           dbConceptSet,
           conceptSet.getConcepts().stream()
-              .map(concept -> concept.getConceptId())
+              .map(Concept::getConceptId)
               .collect(Collectors.toList()));
     }
   }
@@ -328,7 +326,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     if (request.getAddedIds() != null) {
       allConceptSetIds.addAll(request.getAddedIds());
     }
-    int sizeOfAllConceptSetIds = allConceptSetIds.stream().collect(Collectors.toSet()).size();
+    int sizeOfAllConceptSetIds = allConceptSetIds.size();
     if (request.getRemovedIds() != null
         && request.getRemovedIds().size() == sizeOfAllConceptSetIds) {
       throw new BadRequestException("Concept Set must have at least one concept");
@@ -356,21 +354,14 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
           conceptBigQueryService.getParticipantCountForConcepts(
               dbConceptSet.getDomainEnum(), omopTable, dbConceptSet.getConceptIds()));
     }
-    validateConceptSet(
-        dbConceptSet, dbConceptSet.getConceptIds().stream().collect(Collectors.toList()));
+    validateCreateConceptSetRequest(dbConceptSet, new ArrayList<>(dbConceptSet.getConceptIds()));
   }
 
-  private void validateConceptSet(DbConceptSet dbConceptSet, List<Long> conceptIds) {
-    Domain domainEnum = dbConceptSet.getDomainEnum();
-    if (domainEnum == null) {
-      throw new BadRequestException("Domain is not allowed for concept sets");
-    }
-    if (conceptIds == null || conceptIds.size() == 0) {
+  private void validateCreateConceptSetRequest(CreateConceptSetRequest request) {
+    Optional.ofNullable(request.getConceptSet().getDomain())
+        .orElseThrow(() -> new BadRequestException("Domain cannot be null"));
+    if (CollectionUtils.isEmpty(request.getAddedIds())) {
       throw new BadRequestException("Cannot create a concept set with no concepts");
-    }
-
-    if (dbConceptSet.getConceptIds().size() > maxConceptsPerSet) {
-      throw new BadRequestException("Exceeded " + maxConceptsPerSet + " in concept set");
     }
   }
 }
