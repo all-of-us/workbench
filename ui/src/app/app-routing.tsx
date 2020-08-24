@@ -99,7 +99,11 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
       />
       <AppRoute path='/nih-callback' component={() => <HomepagePage routeData={{title: 'Homepage'}}/>} />
 
-      <ProtectedRoutes guards={[signInGuard, registrationGuard]}>
+      {/* Protected routes must be nested in order to work. This is a result of the way react-router handles paths
+          react-router expects all children under one of its top level components (the Switch component) to have a 'path' prop
+          The 'ProtectedRoutes' component does not currently support a path prop - though this may change.
+      */}
+      <ProtectedRoutes guards={[registrationGuard]}>
         <AppRoute
           path='/library'
           component={() => <WorkspaceLibraryPage routeData={{title: 'Workspace Library', minimizeChrome: false}}/>}
