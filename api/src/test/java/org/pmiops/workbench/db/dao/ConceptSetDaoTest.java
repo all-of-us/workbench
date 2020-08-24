@@ -41,18 +41,17 @@ public class ConceptSetDaoTest {
     Timestamp now = new Timestamp(System.currentTimeMillis());
     dbConceptSet =
         conceptSetDao.save(
-            DbConceptSet.builder()
-                .addCreationTime(now)
-                .addCreator(creator)
-                .addDescription("descr")
-                .addDomain(DbStorageEnums.domainToStorage(Domain.CONDITION))
-                .addLastModifiedTime(now)
-                .addName("conceptSet")
-                .addParticipantCount(200)
-                .addSurvey(DbStorageEnums.surveysToStorage(Surveys.THE_BASICS))
-                .addVersion(1)
-                .addWorkspaceId(ws.getWorkspaceId())
-                .build());
+            new DbConceptSet(
+                "conceptSet",
+                1,
+                DbStorageEnums.domainToStorage(Domain.CONDITION),
+                DbStorageEnums.surveysToStorage(Surveys.THE_BASICS),
+                "descr",
+                ws.getWorkspaceId(),
+                creator,
+                now,
+                now,
+                200));
   }
 
   @Test

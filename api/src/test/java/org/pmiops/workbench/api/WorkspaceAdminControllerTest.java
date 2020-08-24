@@ -5,6 +5,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
+import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
 import org.joda.time.DateTime;
@@ -110,7 +111,8 @@ public class WorkspaceAdminControllerTest {
     CloudStorageService.class,
     NotebooksService.class,
     ConceptSetService.class,
-    CohortService.class
+    CohortService.class,
+    Clock.class
   })
   static class Configuration {
     @Bean

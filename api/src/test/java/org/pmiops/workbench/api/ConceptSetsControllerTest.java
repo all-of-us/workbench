@@ -484,6 +484,7 @@ public class ConceptSetsControllerTest {
 
   @Test
   public void testUpdateConceptSet() {
+    conceptDao.save(CONCEPT_1);
     ConceptSet conceptSet = makeConceptSet1();
     conceptSet.setDescription("new description");
     conceptSet.setName("new name");

@@ -213,21 +213,10 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     dbWorkspace.setFirecloudName(WORKSPACE_NAME);
     dbWorkspace.setCdrVersion(dbCdrVersion);
     dbWorkspace = workspaceDao.save(dbWorkspace);
-
     dbConditionConceptSet =
-        conceptSetDao.save(
-            DbConceptSet.builder()
-                .addDomain(DbStorageEnums.domainToStorage(Domain.CONDITION))
-                .addConceptIds(new HashSet<>(Collections.singletonList(1L)))
-                .addWorkspaceId(dbWorkspace.getWorkspaceId())
-                .build());
+        conceptSetDao.save(createConceptSet(Domain.CONDITION, dbWorkspace.getWorkspaceId()));
     dbProcedureConceptSet =
-        conceptSetDao.save(
-            DbConceptSet.builder()
-                .addDomain(DbStorageEnums.domainToStorage(Domain.PROCEDURE))
-                .addConceptIds(new HashSet<>(Collections.singletonList(1L)))
-                .addWorkspaceId(dbWorkspace.getWorkspaceId())
-                .build());
+        conceptSetDao.save(createConceptSet(Domain.PROCEDURE, dbWorkspace.getWorkspaceId()));
 
     dbCohort1 = new DbCohort();
     dbCohort1.setWorkspaceId(dbWorkspace.getWorkspaceId());
@@ -308,6 +297,14 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
             .addDomain("Procedure")
             .build();
     dsLinkingDao.save(procedureLinking2);
+  }
+
+  private DbConceptSet createConceptSet(Domain domain, long workspaceId) {
+    DbConceptSet dbConceptSet = new DbConceptSet();
+    dbConceptSet.setDomain(DbStorageEnums.domainToStorage(domain));
+    dbConceptSet.setConceptIds(new HashSet<>(Collections.singletonList(1L)));
+    dbConceptSet.setWorkspaceId(workspaceId);
+    return dbConceptSet;
   }
 
   @After
