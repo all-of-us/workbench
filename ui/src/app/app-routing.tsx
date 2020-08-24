@@ -98,14 +98,15 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           }} />}
       />
       <AppRoute path='/nih-callback' component={() => <HomepagePage routeData={{title: 'Homepage'}}/>} />
-    </ProtectedRoutes>
 
-    <ProtectedRoutes guards={[signInGuard, registrationGuard]}>
-      <AppRoute
+      <ProtectedRoutes guards={[signInGuard, registrationGuard]}>
+        <AppRoute
           path='/library'
           component={() => <WorkspaceLibraryPage routeData={{title: 'Workspace Library', minimizeChrome: false}}/>}
-      />
+        />
+      </ProtectedRoutes>
     </ProtectedRoutes>
+
   </AppRouter>;
 };
 
