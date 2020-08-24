@@ -534,9 +534,9 @@ export function highlightSearchTerm(searchTerm: string, stringToHighlight: strin
 export function renderUSD(value: number) {
   value = value || 0.0;
   if (value < 0.0) {
-    return <div style={{fontWeight: 600}}>$0</div>;
+    return '$0';
   } else {
-    return <div style={{fontWeight: 600}}>${(value).toFixed(2)}</div>;
+    return '$' + value.toFixed(2).toString();
   }
 }
 

@@ -577,8 +577,8 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
                     <div>Remaining <i>All of Us</i> free credits:</div>
                 </FlexColumn>
                 <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
-                    <div style={{marginTop: '0.4rem'}}>{renderUSD(profile.freeTierUsage)}</div>
-                  {renderUSD(profile.freeTierDollarQuota - profile.freeTierUsage)}
+                  <div style={{marginTop: '0.4rem', fontWeight: 600}}>{renderUSD(profile.freeTierUsage)}</div>
+                  <div style={{fontWeight: 600}}>{renderUSD(profile.freeTierDollarQuota - profile.freeTierUsage)}</div>
                 </FlexColumn>
             </FlexRow>}
             <div style={styles.title}>

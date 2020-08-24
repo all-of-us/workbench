@@ -17,6 +17,7 @@ import {
   isBlank,
   reactStyles,
   ReactWrapperBase,
+  renderUSD,
   withUrlParams
 } from 'app/utils';
 
@@ -56,19 +57,7 @@ const styles = reactStyles({
   }
 });
 
-const freeCreditLimitOptions = [
-  {label: '$300', value: 300},
-  {label: '$350', value: 350},
-  {label: '$400', value: 400},
-  {label: '$450', value: 450},
-  {label: '$500', value: 500},
-  {label: '$550', value: 550},
-  {label: '$600', value: 600},
-  {label: '$650', value: 650},
-  {label: '$700', value: 700},
-  {label: '$750', value: 750},
-  {label: '$800', value: 800}
-];
+const freeCreditLimitDefaultOptions = new Set([300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800]);
 
 const DropdownWithLabel = ({label, options, initialValue, onChange, disabled= false, dataTestId, dropdownStyle = {}}) => {
   return <FlexColumn data-test-id={dataTestId} style={{marginTop: '1rem'}}>
@@ -225,6 +214,12 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     }
   }
 
+  getFreeCreditLimitOptions() {
+    const {oldProfile: {freeTierDollarQuota}} = this.state;
+    const defaultsPlusMaybeOverride = Array.from(freeCreditLimitDefaultOptions.add(freeTierDollarQuota));
+    return fp.map((limit) => ({label: renderUSD(limit), value: limit}), defaultsPlusMaybeOverride.sort());
+  }
+
   async getInstitutions() {
     try {
       const institutionsResponse = await institutionApi().getPublicInstitutionDetails();
@@ -273,6 +268,10 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     await this.validateEmail();
   }
 
+  setFreeTierCreditDollarLimit(newLimit: number) {
+    this.setState(fp.set(['updatedProfile', 'freeTierDollarQuota'], newLimit));
+  }
+
   setInstitutionalRoleOnProfile(institutionalRoleEnum: InstitutionalRole) {
     this.setState(fp.flow(
       fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleEnum'], institutionalRoleEnum),
@@ -296,7 +295,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     const {username} = updatedProfile;
     const request: AccountPropertyUpdate = {
       username,
-      freeCreditsLimit: null, // coming soon: RW-4956
+      freeCreditsLimit: this.updatedProfileValue('freeTierDollarQuota'),
       contactEmail: this.updatedProfileValue('contactEmail'),
       affiliation: this.updatedProfileValue('verifiedInstitutionalAffiliation'),
       accessBypassRequests: [],  // coming soon: RW-4958
@@ -512,11 +511,10 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
           <FlexColumn style={{width: '33%'}}>
             <DropdownWithLabel
                 label={'Free credit limit'}
-                options={freeCreditLimitOptions}
-                onChange={() => {}}
+                options={this.getFreeCreditLimitOptions()}
                 initialValue={updatedProfile.freeTierDollarQuota}
-                dropdownStyle={{width: '3rem'}}
-                disabled={true}
+                onChange={async(event) => this.setFreeTierCreditDollarLimit(event.value)}
+                dropdownStyle={{width: '4.5rem'}}
                 dataTestId={'freeTierDollarQuota'}
             />
             {verifiedInstitutionOptions && <DropdownWithLabel
