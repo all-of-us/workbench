@@ -20,7 +20,6 @@ buildscript {
     OPENCENSUS_VERSION = '0.23.0'
     SPRINGFOX_VERSION = '2.6.1'
     SPRING_BOOT_VERSION = '1.5.22.RELEASE'
-
     SWAGGER_2_CODEGEN_VERSION = '2.2.3'
   }
 
@@ -80,14 +79,14 @@ configurations {
   __tools__Implementation.extendsFrom implementation
   __tools__RuntimeOnly.extendsFrom runtimeOnly
 
-  swaggerCodegenV2
+  __swaggerCodegenV2__
 
   generatedCompile {
     exclude group: 'com.google.guava', module:'guava-jdk5'
   }
 }
 
-def swagger2CodeGenDir = "$buildDir/swagger2"
+def swagger2CodegenDir = "$buildDir/swagger2"
 
 // Configuration for the Swagger Gradle plugin:
 // https://github.com/int128/gradle-swagger-generator-plugin
@@ -102,7 +101,7 @@ def swagger2CodeGenDir = "$buildDir/swagger2"
 swaggerSources {
   // This path is the Java sources root for finding any overridden Swagger-codegen
   // templates we may be using.
-  def swaggerTemplateDir = 'src/main/resources/swaggercodegen'
+  def swaggerTemplateDir = "$projectDir/src/main/resources/swaggercodegen"
   def swaggerCodegenPackage = 'org.pmiops.workbench'
   // Raw options passed to the Swagger codegen CLI.
   def rawOptsSwagger2 = [
@@ -118,10 +117,10 @@ swaggerSources {
   workbench {
     inputFile = file('src/main/resources/workbench-api.yaml')
     code {
-      configuration = configurations.swaggerCodegenV2
+      configuration = configurations.__swaggerCodegenV2__
       language = 'spring'
-      outputDir = file(swagger2CodeGenDir)
-      templateDir = file("$projectDir/$swaggerTemplateDir")
+      outputDir = file(swagger2CodegenDir)
+      templateDir = file(swaggerTemplateDir)
       // Since the output directory is shared among these swagger tasks, wiping
       // the directory would result in task invalidation / churn.
       wipeOutputDir = false
@@ -139,10 +138,10 @@ swaggerSources {
   firecloud {
     inputFile = file('src/main/resources/firecloud.yaml')
     code {
-      configuration = configurations.swaggerCodegenV2
+      configuration = configurations.__swaggerCodegenV2__
       language = 'java'
-      outputDir = file(swagger2CodeGenDir)
-      templateDir = file("$projectDir/$swaggerTemplateDir")
+      outputDir = file(swagger2CodegenDir)
+      templateDir = file(swaggerTemplateDir)
       wipeOutputDir = false
       rawOptions = rawOptsSwagger2 + [
         '--model-name-prefix', 'Firecloud'
@@ -157,10 +156,10 @@ swaggerSources {
   notebooks {
     inputFile = file('src/main/resources/notebooks.yaml')
     code {
-      configuration = configurations.swaggerCodegenV2
+      configuration = configurations.__swaggerCodegenV2__
       language = 'java'
-      outputDir = file(swagger2CodeGenDir)
-      templateDir = file("$projectDir/$swaggerTemplateDir")
+      outputDir = file(swagger2CodegenDir)
+      templateDir = file(swaggerTemplateDir)
       wipeOutputDir = false
       rawOptions = rawOptsSwagger2
       additionalProperties = baseJavaProps + [
@@ -173,10 +172,10 @@ swaggerSources {
   jira {
     inputFile = file('src/main/resources/jira.yaml')
     code {
-      configuration = configurations.swaggerCodegenV2
+      configuration = configurations.__swaggerCodegenV2__
       language = 'java'
-      outputDir = file(swagger2CodeGenDir)
-      templateDir = file("$projectDir/$swaggerTemplateDir")
+      outputDir = file(swagger2CodegenDir)
+      templateDir = file(swaggerTemplateDir)
       wipeOutputDir = false
       rawOptions = rawOptsSwagger2
       additionalProperties = baseJavaProps + [
@@ -189,10 +188,10 @@ swaggerSources {
   mandrill {
     inputFile = file('src/main/resources/mandrill.yaml')
     code {
-      configuration = configurations.swaggerCodegenV2
+      configuration = configurations.__swaggerCodegenV2__
       language = 'java'
-      outputDir = file(swagger2CodeGenDir)
-      templateDir = file("$projectDir/$swaggerTemplateDir")
+      outputDir = file(swagger2CodegenDir)
+      templateDir = file(swaggerTemplateDir)
       wipeOutputDir = false
       rawOptions = rawOptsSwagger2
       additionalProperties = baseJavaProps + [
@@ -205,10 +204,10 @@ swaggerSources {
   moodle {
     inputFile = file('src/main/resources/moodle.yaml')
     code {
-      configuration = configurations.swaggerCodegenV2
+      configuration = configurations.__swaggerCodegenV2__
       language = 'java'
-      outputDir = file(swagger2CodeGenDir)
-      templateDir = file("$projectDir/$swaggerTemplateDir")
+      outputDir = file(swagger2CodegenDir)
+      templateDir = file(swaggerTemplateDir)
       wipeOutputDir = false
       rawOptions = rawOptsSwagger2
       additionalProperties = baseJavaProps + [
@@ -221,10 +220,10 @@ swaggerSources {
   rdr {
     inputFile = file('src/main/resources/rdr.yaml')
     code {
-      configuration = configurations.swaggerCodegenV2
+      configuration = configurations.__swaggerCodegenV2__
       language = 'java'
-      outputDir = file(swagger2CodeGenDir)
-      templateDir = file("$projectDir/$swaggerTemplateDir")
+      outputDir = file(swagger2CodegenDir)
+      templateDir = file(swaggerTemplateDir)
       wipeOutputDir = false
       rawOptions = rawOptsSwagger2
       additionalProperties = baseJavaProps + [
@@ -237,10 +236,10 @@ swaggerSources {
   captcha {
     inputFile = file('src/main/resources/captcha.yaml')
     code {
-      configuration = configurations.swaggerCodegenV2
+      configuration = configurations.__swaggerCodegenV2__
       language = 'java'
-      outputDir = file(swagger2CodeGenDir)
-      templateDir = file("$projectDir/$swaggerTemplateDir")
+      outputDir = file(swagger2CodegenDir)
+      templateDir = file(swaggerTemplateDir)
       wipeOutputDir = false
       rawOptions = rawOptsSwagger2
       additionalProperties = baseJavaProps + [
@@ -253,10 +252,10 @@ swaggerSources {
   shibboleth {
     inputFile = file('src/main/resources/shibboleth.yaml')
     code {
-      configuration = configurations.swaggerCodegenV2
+      configuration = configurations.__swaggerCodegenV2__
       language = 'java'
-      outputDir = file(swagger2CodeGenDir)
-      templateDir = file("$projectDir/$swaggerTemplateDir")
+      outputDir = file(swagger2CodegenDir)
+      templateDir = file(swaggerTemplateDir)
       wipeOutputDir = false
       rawOptions = rawOptsSwagger2
       additionalProperties = baseJavaProps + [
@@ -315,7 +314,7 @@ sourceSets {
   generated {
     compileClasspath = configurations.generatedCompile
     java {
-      srcDir swagger2CodeGenDir
+      srcDir swagger2CodegenDir
     }
   }
   main {
@@ -413,7 +412,7 @@ repositories {
 dependencies {
   annotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
 
-  swaggerCodegenV2 "io.swagger:swagger-codegen-cli:$project.ext.SWAGGER_2_CODEGEN_VERSION"
+  __swaggerCodegenV2__ "io.swagger:swagger-codegen-cli:$project.ext.SWAGGER_2_CODEGEN_VERSION"
 
   compile "ch.qos.logback:logback-classic:1.2.3"
   compile "com.fasterxml.jackson.core:jackson-annotations:$project.ext.JACKSON_VERSION"
@@ -623,6 +622,8 @@ task startCronEmulator(dependsOn: [':appengine-cron-emulator:jar', 'generate_app
 project.tasks.appengineRun.dependsOn project.tasks.startCronEmulator
 project.tasks.appengineStart.dependsOn project.tasks.startCronEmulator
 appengineStart {
+  // This task has the side-effect of running a local server, and therefore
+  // should not be cacheable.
   outputs.upToDateWhen { false }
 }
 
