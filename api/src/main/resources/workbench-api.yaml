@@ -4199,7 +4199,6 @@ definitions:
         type: string
       approved:
         type: boolean
-        default:
       ancestry:
         type: boolean
         default: false
@@ -6147,7 +6146,6 @@ definitions:
       valueNull:
         description: 'Set to true if the column value should be compared to null.'
         type: boolean
-        default:
   CohortStatus:
     type: string
     description: possible values indicating whether participants are in or out of
@@ -6642,7 +6640,6 @@ definitions:
         description: The Value of the annotation if the AnnotationType is DATE
       annotationValueBoolean:
         type: boolean
-        default:
         description: The Value of the annotation if the AnnotationType is BOOLEAN
       annotationValueInteger:
         type: integer
@@ -6689,7 +6686,6 @@ definitions:
         description: The Value of the annotation if the AnnotationType is DATE
       annotationValueBoolean:
         type: boolean
-        default:
         description: The Value of the annotation if the AnnotationType is BOOLEAN
       annotationValueInteger:
         type: integer
