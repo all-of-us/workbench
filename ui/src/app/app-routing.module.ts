@@ -29,6 +29,7 @@ import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './pages/workspace/workspace-edit';
 import {WorkspaceListComponent} from './pages/workspace/workspace-list';
+import {WorkspaceLibraryComponent} from './pages/workspace/workspace-library';
 import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/component';
 
 import {environment} from 'environments/environment';
@@ -83,7 +84,8 @@ const routes: Routes = [
       },
       {
         path: 'data-code-of-conduct',
-        component: AppRouting
+        component: AppRouting,
+        data: {}
       },
       {
         path: 'nih-callback',
@@ -96,13 +98,13 @@ const routes: Routes = [
         canActivateChild: [RegistrationGuard],
         runGuardsAndResolvers: 'always',
         children: [
-          // legacy / duplicated routes go HERE
+          // legacy / duplicated routes will go HERE
+          // non-migrated routes go HERE
           {
             path: 'library',
-            component: AppRouting,
-            data: {}
+            component: WorkspaceLibraryComponent,
+            data: {title: 'Workspace Library'}
           },
-          // non-migrated routes go HERE
           {
             path: 'workspaces',
             canActivateChild: [WorkspaceGuard],
