@@ -16,17 +16,19 @@ import org.pmiops.workbench.db.model.DbUser.ClusterConfig;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
-import org.pmiops.workbench.notebooks.api.ClusterApi;
+import org.pmiops.workbench.leonardo.ApiException;
+import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
+import org.pmiops.workbench.leonardo.api.ClusterApi;
+import org.pmiops.workbench.leonardo.api.ServiceInfoApi;
+import org.pmiops.workbench.leonardo.model.Cluster;
+import org.pmiops.workbench.leonardo.model.ClusterRequest;
+import org.pmiops.workbench.leonardo.model.ListClusterResponse;
+import org.pmiops.workbench.leonardo.model.MachineConfig;
+import org.pmiops.workbench.leonardo.model.UserJupyterExtensionConfig;
 import org.pmiops.workbench.notebooks.api.NotebooksApi;
-import org.pmiops.workbench.notebooks.api.StatusApi;
-import org.pmiops.workbench.notebooks.model.Cluster;
-import org.pmiops.workbench.notebooks.model.ClusterRequest;
-import org.pmiops.workbench.notebooks.model.ListClusterResponse;
 import org.pmiops.workbench.notebooks.model.LocalizationEntry;
 import org.pmiops.workbench.notebooks.model.Localize;
-import org.pmiops.workbench.notebooks.model.MachineConfig;
 import org.pmiops.workbench.notebooks.model.StorageLink;
-import org.pmiops.workbench.notebooks.model.UserJupyterExtensionConfig;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -46,7 +48,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   private final Provider<NotebooksApi> notebooksApiProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Provider<DbUser> userProvider;
-  private final NotebooksRetryHandler retryHandler;
+  private final NotebooksRetryHandler notebooksRetryHandler;
+  private final LeonardoRetryHandler leonardoRetryHandler;
   private final WorkspaceService workspaceService;
 
   @Autowired
@@ -57,14 +60,16 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
       Provider<NotebooksApi> notebooksApiProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<DbUser> userProvider,
-      NotebooksRetryHandler retryHandler,
+      NotebooksRetryHandler notebooksRetryHandler,
+      LeonardoRetryHandler leonardoRetryHandler,
       WorkspaceService workspaceService) {
     this.clusterApiProvider = clusterApiProvider;
     this.serviceClusterApiProvider = serviceClusterApiProvider;
     this.notebooksApiProvider = notebooksApiProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userProvider = userProvider;
-    this.retryHandler = retryHandler;
+    this.notebooksRetryHandler = notebooksRetryHandler;
+    this.leonardoRetryHandler = leonardoRetryHandler;
     this.workspaceService = workspaceService;
   }
 
@@ -134,35 +139,35 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
               + workspace.getCdrVersion().getBigqueryDataset());
     }
 
-    return retryHandler.run(
+    return leonardoRetryHandler.run(
         (context) ->
             clusterApi.createClusterV2(
-                googleProject,
-                clusterName,
                 createFirecloudClusterRequest(
                     user.getUsername(),
                     user.getClusterConfigDefault(),
-                    customClusterEnvironmentVariables)));
+                    customClusterEnvironmentVariables),
+                googleProject,
+                clusterName));
   }
 
   @Override
   public List<ListClusterResponse> listClustersByProject(String googleProject) {
     ClusterApi clusterApi = clusterApiProvider.get();
-    return retryHandler.run(
+    return leonardoRetryHandler.run(
         (context) -> clusterApi.listClustersByProject(googleProject, null, false));
   }
 
   @Override
   public List<ListClusterResponse> listClustersByProjectAsService(String googleProject) {
     ClusterApi clusterApi = serviceClusterApiProvider.get();
-    return retryHandler.run(
+    return leonardoRetryHandler.run(
         (context) -> clusterApi.listClustersByProject(googleProject, null, false));
   }
 
   @Override
   public void deleteCluster(String googleProject, String clusterName) {
     ClusterApi clusterApi = clusterApiProvider.get();
-    retryHandler.run(
+    leonardoRetryHandler.run(
         (context) -> {
           clusterApi.deleteCluster(googleProject, clusterName);
           return null;
@@ -173,17 +178,17 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   public Cluster getCluster(String googleProject, String clusterName) {
     ClusterApi clusterApi = clusterApiProvider.get();
     try {
-      return retryHandler.runAndThrowChecked(
+      return leonardoRetryHandler.runAndThrowChecked(
           (context) -> clusterApi.getCluster(googleProject, clusterName));
     } catch (ApiException e) {
-      throw ExceptionUtils.convertNotebookException(e);
+      throw ExceptionUtils.convertLeonardoException(e);
     }
   }
 
   @Override
   public void deleteClusterAsService(String googleProject, String clusterName) {
     ClusterApi clusterApi = serviceClusterApiProvider.get();
-    retryHandler.run(
+    leonardoRetryHandler.run(
         (context) -> {
           clusterApi.deleteCluster(googleProject, clusterName);
           return null;
@@ -203,7 +208,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
                                 .localDestinationPath(e.getKey()))
                     .collect(Collectors.toList()));
     NotebooksApi notebooksApi = notebooksApiProvider.get();
-    retryHandler.run(
+    notebooksRetryHandler.run(
         (context) -> {
           notebooksApi.welderLocalize(googleProject, clusterName, welderReq);
           return null;
@@ -214,15 +219,15 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   public StorageLink createStorageLink(
       String googleProject, String clusterName, StorageLink storageLink) {
     NotebooksApi notebooksApi = notebooksApiProvider.get();
-    return retryHandler.run(
+    return notebooksRetryHandler.run(
         (context) -> notebooksApi.welderCreateStorageLink(googleProject, clusterName, storageLink));
   }
 
   @Override
   public boolean getNotebooksStatus() {
     try {
-      new StatusApi().getSystemStatus();
-    } catch (ApiException e) {
+      new ServiceInfoApi().getSystemStatus();
+    } catch (org.pmiops.workbench.leonardo.ApiException e) {
       // If any of the systems for notebooks are down, it won't work for us.
       log.log(Level.WARNING, "notebooks status check request failed", e);
       return false;

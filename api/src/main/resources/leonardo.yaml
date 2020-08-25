@@ -1,3 +1,14 @@
+# Copied from https://github.com/DataBiosphere/leonardo/blob/develop/http/src/main/resources/swagger/api-docs.yaml
+#
+# This file has been modified to workaround issues described here:
+# https://docs.google.com/document/d/1LritSTszh1IICKSaSNFe1o_ElXtjdnNbXvzWyauhhT0/edit#
+#   - unroll allOf usages into their child models
+#   - GetRuntimeResponse fixed to reference RuntimeConfig
+#   - ListRuntimeResponse fixed to reference RuntimeConfig
+#
+# TODO(calbach): Temporary hacks to remove:
+#   - added stagingBucket back to the Cluster schema
+
 openapi: 3.0.0
 info:
   title: Leonardo
@@ -2110,6 +2121,8 @@ components:
         googleServiceAccount:
           type: string
           description: The Google Service Account used to create the cluster
+        stagingBucket:
+          type: string
         machineConfig:
           $ref: "#/components/schemas/MachineConfig"
         operationName:
@@ -2194,7 +2207,7 @@ components:
         auditInfo:
           $ref: "#/components/schemas/AuditInfo"
         runtimeConfig:
-          $ref: "#/components/schemas/MachineConfig"
+          $ref: "#/components/schemas/RuntimeConfig"
         proxyUrl:
           type: string
           description: The URL to access a tool on the runtime
@@ -2354,7 +2367,7 @@ components:
           type: string
           description: The Google Project used to create the runtime
         runtimeConfig:
-          $ref: "#/components/schemas/MachineConfig"
+          $ref: "#/components/schemas/RuntimeConfig"
         proxyUrl:
           type: string
           description: The URL to access a tool on the runtime
@@ -2699,44 +2712,49 @@ components:
 
     UpdateGceConfig:
       description: Configuration for Google Compute Engine instances.
-      allOf:
-        - $ref: '#/components/schemas/UpdateRuntimeConfig'
-        - type: object
-          properties:
-            machineType:
-              type: string
-              description: >
-                Optional, the machine type determines the number of CPUs and memory
-                for the instance. For example "n1-standard-16" or "n1-highmem-64".
-                To decide which is right for you, see https://cloud.google.com/compute/docs/machine-types
-            diskSize:
-              type: integer
-              description: >
-                Optional, disk size in gigabytes
+      type: object
+      required:
+        - cloudService
+      properties:
+        cloudService:
+          type: string
+          enum: [gce, dataproc]
+        machineType:
+          type: string
+          description: >
+            Optional, the machine type determines the number of CPUs and memory
+            for the instance. For example "n1-standard-16" or "n1-highmem-64".
+            To decide which is right for you, see https://cloud.google.com/compute/docs/machine-types
+        diskSize:
+          type: integer
+          description: >
+            Optional, disk size in gigabytes
     UpdateDataprocConfig:
       description: Configuration for Google Dataproc clusters.
-      allOf:
-        - $ref: '#/components/schemas/UpdateRuntimeConfig'
-        - type: object
-          properties:
-            masterMachineType:
-              type: string
-              description: >
-                Optional, the machine type determines the number of CPUs and memory
-                for the cluster master node. For example "n1-standard-16" or "n1-highmem-64".
-                To decide which is right for you, see https://cloud.google.com/compute/docs/machine-types
-            masterDiskSize:
-              type: integer
-              description: >
-                Optional, disk size of the master node in gigabytes
-            numberOfWorkers:
-              type: integer
-              description: >
-                Optional, number of workers in the cluster
-            numberOfPreemptibleWorkers:
-              type: integer
-              description: >
-                Optional, number of preemptible workers in the cluster
+      required:
+        - cloudService
+      properties:
+        cloudService:
+          type: string
+          enum: [gce, dataproc]
+        masterMachineType:
+          type: string
+          description: >
+            Optional, the machine type determines the number of CPUs and memory
+            for the cluster master node. For example "n1-standard-16" or "n1-highmem-64".
+            To decide which is right for you, see https://cloud.google.com/compute/docs/machine-types
+        masterDiskSize:
+          type: integer
+          description: >
+            Optional, disk size of the master node in gigabytes
+        numberOfWorkers:
+          type: integer
+          description: >
+            Optional, number of workers in the cluster
+        numberOfPreemptibleWorkers:
+          type: integer
+          description: >
+            Optional, number of preemptible workers in the cluster
     UpdateRuntimeConfig:
       description: Updates a runtime configuration
       type: object
@@ -2881,110 +2899,116 @@ components:
           description: timestamp for image addition to the runtime in ISO 8601 format
     GceConfig:
       description: Configuration for Google Compute Engine instances.
-      allOf:
-        - $ref: '#/components/schemas/RuntimeConfig'
-        - type: object
-          properties:
-            diskSize:
-              type: integer
-              description: >
-                Optional, the size in gigabytes of the disk on the GCE VM.
-                Minimum size is 50GB. If unspecified, default size is 100GB.
-            bootDiskSize:
-              type: integer
-              description: size for boot disk. For old runtimes (prior 6/22/2020, gce runtimes don't have a separate boot disk)
-            machineType:
-              type: string
-              description: >
-                Optional, the machine type determines the number of CPUs and memory
-                for the master node. For example "n1-standard-16"
+      required:
+        - cloudService
+      properties:
+        cloudService:
+          type: string
+          enum: [gce, dataproc]
+        diskSize:
+          type: integer
+          description: >
+            Optional, the size in gigabytes of the disk on the GCE VM.
+            Minimum size is 50GB. If unspecified, default size is 100GB.
+        bootDiskSize:
+          type: integer
+          description: size for boot disk. For old runtimes (prior 6/22/2020, gce runtimes don't have a separate boot disk)
+        machineType:
+          type: string
+          description: >
+            Optional, the machine type determines the number of CPUs and memory
+            for the master node. For example "n1-standard-16"
 
-                or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
+            or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
 
-                see https://cloud.google.com/compute/docs/machine-types
+            see https://cloud.google.com/compute/docs/machine-types
     GceWithPdConfig:
       description: Configuration for Google Compute Engine instances.
-      allOf:
-        - $ref: '#/components/schemas/RuntimeConfig'
-        - type: object
-          properties:
-            persistentDisk:
-              $ref: "#/components/schemas/PersistentDiskRequest"
-            bootDiskSize:
-              type: integer
-              description: size for boot disk
-            machineType:
-              type: string
-              description: >
-                Optional, the machine type determines the number of CPUs and memory
-                for the master node. For example "n1-standard-16"
+      required:
+        - cloudService
+      properties:
+        cloudService:
+          type: string
+          enum: [gce, dataproc]
+        persistentDisk:
+          $ref: "#/components/schemas/PersistentDiskRequest"
+        bootDiskSize:
+          type: integer
+          description: size for boot disk
+        machineType:
+          type: string
+          description: >
+            Optional, the machine type determines the number of CPUs and memory
+            for the master node. For example "n1-standard-16"
 
-                or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
+            or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
 
-                see https://cloud.google.com/compute/docs/machine-types
+            see https://cloud.google.com/compute/docs/machine-types
     MachineConfig:
       description: Configuration for a single Dataproc cluster.
-      allOf:
-        - $ref: '#/components/schemas/RuntimeConfig'
-        - type: object
-          properties:
-            numberOfWorkers:
-              type: integer
-              description: >
-                Optional, number of workers in the cluster. Can be 0 (default), 2 or
-                more. Google Dataproc does not allow 1 worker.
-            masterMachineType:
-              type: string
-              description: >
-                Optional, the machine type determines the number of CPUs and memory
-                for the master node. For example "n1-standard-16"
+      required:
+        - cloudService
+      properties:
+        cloudService:
+          type: string
+          enum: [gce, dataproc]
+        numberOfWorkers:
+          type: integer
+          description: >
+            Optional, number of workers in the cluster. Can be 0 (default), 2 or
+            more. Google Dataproc does not allow 1 worker.
+        masterMachineType:
+          type: string
+          description: >
+            Optional, the machine type determines the number of CPUs and memory
+            for the master node. For example "n1-standard-16"
 
-                or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
+            or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
 
-                see https://cloud.google.com/compute/docs/machine-types
-            masterDiskSize:
-              type: integer
-              description: >
-                Optional, the size in gigabytes of the disk on the master node.
-                Minimum size is 50GB. If unspecified, default size is 100GB.
-            workerMachineType:
-              type: string
-              description: >
-                Optional, the machine type determines the number of CPUs and memory
-                for the worker nodes. For example "n1-standard-16"
+            see https://cloud.google.com/compute/docs/machine-types
+        masterDiskSize:
+          type: integer
+          description: >
+            Optional, the size in gigabytes of the disk on the master node.
+            Minimum size is 50GB. If unspecified, default size is 100GB.
+        workerMachineType:
+          type: string
+          description: >
+            Optional, the machine type determines the number of CPUs and memory
+            for the worker nodes. For example "n1-standard-16"
 
-                or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
+            or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
 
-                see https://cloud.google.com/compute/docs/machine-types. Ignored if numberOfWorkers is 0.
-            workerDiskSize:
-              type: integer
-              description: >
-                Optional, the size in gigabytes of the disk on the master node.
-                Minimum size is 10GB. If unspecified, default size is 100GB.
+            see https://cloud.google.com/compute/docs/machine-types. Ignored if numberOfWorkers is 0.
+        workerDiskSize:
+          type: integer
+          description: >
+            Optional, the size in gigabytes of the disk on the master node.
+            Minimum size is 10GB. If unspecified, default size is 100GB.
 
-                Ignored if numberOfWorkers is 0.
-            numberOfWorkerLocalSSDs:
-              type: integer
-              description: >
-                Optional, the number of local solid state disks for workers. If
-                unspecified, the default number is 0.
+            Ignored if numberOfWorkers is 0.
+        numberOfWorkerLocalSSDs:
+          type: integer
+          description: >
+            Optional, the number of local solid state disks for workers. If
+            unspecified, the default number is 0.
 
-                Ignored if numberOfWorkers is 0.
-            numberOfPreemptibleWorkers:
-              type: integer
-              description: >
-                Optional, the number of preemptible workers. If unspecified, the
-                default number is 0. Ignored if numberOfWorkers is 0.
+            Ignored if numberOfWorkers is 0.
+        numberOfPreemptibleWorkers:
+          type: integer
+          description: >
+            Optional, the number of preemptible workers. If unspecified, the
+            default number is 0. Ignored if numberOfWorkers is 0.
 
-                For more information, see https://cloud.google.com/compute/docs/instances/preemptible
-            properties:
-              description: >
-                Example {"spark:spark.executor.memory": "10g"}. See
-                https://cloud.google.com/dataproc/docs/concepts/configuring-clusters/cluster-properties
-                for allowed property settings
-              type: object
-              additionalProperties:
-                type: string
+            For more information, see https://cloud.google.com/compute/docs/instances/preemptible
+        properties:
+          description: >
+            Example {"spark:spark.executor.memory": "10g"}. See
+            https://cloud.google.com/dataproc/docs/concepts/configuring-clusters/cluster-properties
+            for allowed property settings
+          type: object
+          additionalProperties:
+            type: string
     UserJupyterExtensionConfig:
       description: Specification of Jupyter Extensions to be installed on the cluster
       properties:
