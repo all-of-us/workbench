@@ -402,7 +402,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
           </div>
         </div>
         {!loading && !!displayData && <div style={styles.listContainer}>
-          {!!displayData.length && <table className='p-datatable' style={styles.table}>
+          {!!displayData.length && <React.Fragment><table className='p-datatable' style={styles.table}>
             <thead className='p-datatable-thead'>
               <tr style={{height: '2rem'}}>
                 <th style={{...styles.columnHeader, borderLeft: 0}}>Name</th>
@@ -412,7 +412,10 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
                 <th style={{...styles.columnHeader, textAlign: 'center', width: '12%'}}>View Hierarchy</th>
               </tr>
             </thead>
-            <tbody className='p-datatable-tbody'>
+          </table>
+          <div style={{height: '15rem', overflowY: 'auto'}}>
+            <table className='p-datatable' style={{...styles.table, tableLayout: 'auto'}}>
+              <tbody className='p-datatable-tbody'>
               {displayData.map((row, r) => {
                 const open = ingredients[row.id] && ingredients[row.id].open;
                 const err = ingredients[row.id] && ingredients[row.id].error;
@@ -432,7 +435,9 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
                 </React.Fragment>;
               })}
             </tbody>
-          </table>}
+            </table>
+          </div>
+        </React.Fragment>}
           {!standardOnly && !displayData.length && <div>No results found</div>}
           <Button type='primary'
                   style={{borderRadius: '5px', float: 'right', marginTop: '1rem'}}

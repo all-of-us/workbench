@@ -365,7 +365,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
         <div style={
           (cohortContext.domain === DomainType.PERSON && cohortContext.type !== CriteriaType.AGE)
             ? {marginBottom: '3.5rem'}
-            : {height: 'calc(100% - 3.5rem)'}
+            : (serverConfigStore.getValue().enableCohortBuilderV2) ? {height: 'calc(100% - 3.5rem)'} : {}
         }>
           {cohortContext.domain === DomainType.PERSON ? <div style={{flex: 1, overflow: 'auto'}}>
               <Demographics
