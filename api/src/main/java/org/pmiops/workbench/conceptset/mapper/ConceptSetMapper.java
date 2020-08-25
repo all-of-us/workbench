@@ -1,5 +1,6 @@
 package org.pmiops.workbench.conceptset.mapper;
 
+import java.sql.Timestamp;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
@@ -25,6 +26,26 @@ public interface ConceptSetMapper {
   @Mapping(target = "etag", source = "version", qualifiedByName = "cdrVersionToEtag")
   @Mapping(target = "concepts", ignore = true)
   ConceptSet dbModelToClient(DbConceptSet source);
+
+  @Mapping(target = "conceptSetId", ignore = true)
+  @Mapping(target = "name", ignore = true)
+  @Mapping(target = "creator", ignore = true)
+  @Mapping(target = "workspaceId", ignore = true)
+  @Mapping(target = "creationTime", ignore = true)
+  @Mapping(target = "lastModifiedTime", ignore = true)
+  @Mapping(target = "version", ignore = true)
+  DbConceptSet dbModelToDbModel(DbConceptSet dbConceptSet, @Context MapperContext mapperContext);
+
+  @AfterMapping
+  default void afterMappingDbModelToDbModel(
+      @MappingTarget DbConceptSet dbConceptSet, @Context MapperContext mapperContext) {
+    dbConceptSet.setName(mapperContext.getName());
+    dbConceptSet.setCreator(mapperContext.getCreator());
+    dbConceptSet.setWorkspaceId(mapperContext.getWorkspaceId());
+    dbConceptSet.setCreationTime(mapperContext.getCreationTime());
+    dbConceptSet.setLastModifiedTime(mapperContext.getLastModifiedTime());
+    dbConceptSet.setVersion(mapperContext.getVersion());
+  }
 
   @Mapping(target = "conceptSetId", source = "conceptSet.id")
   @Mapping(target = "domainEnum", source = "conceptSet.domain")
@@ -53,7 +74,7 @@ public interface ConceptSetMapper {
       @Context ConceptBigQueryService conceptBigQueryService);
 
   @AfterMapping
-  default void updateConceptSetFields(
+  default void afterMappingClientToDbModel(
       CreateConceptSetRequest source,
       @Context Long workspaceId,
       @Context DbUser creator,
@@ -66,5 +87,96 @@ public interface ConceptSetMapper {
     dbConceptSet.setParticipantCount(
         conceptBigQueryService.getParticipantCountForConcepts(
             dbConceptSet.getDomainEnum(), omopTable, dbConceptSet.getConceptIds()));
+  }
+
+  /**
+   * Mapstruct throws an error(The types of @Context parameters must be unique) when you have 2 or
+   * more of the same types using the @Context annotation. The 2 Timestamp objects for creationTime
+   * and lastModifiedTime are the offending properties. This is an attempt to work around this
+   * issue.
+   */
+  class MapperContext {
+    private String name;
+    private DbUser creator;
+    private Long workspaceId;
+    private Timestamp creationTime;
+    private Timestamp lastModifiedTime;
+    private int version;
+
+    public MapperContext(Builder builder) {
+      this.name = builder.name;
+      this.creator = builder.creator;
+      this.workspaceId = builder.workspaceId;
+      this.creationTime = builder.creationTime;
+      this.lastModifiedTime = builder.lastModifiedTime;
+      this.version = builder.version;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public DbUser getCreator() {
+      return creator;
+    }
+
+    public Long getWorkspaceId() {
+      return workspaceId;
+    }
+
+    public Timestamp getCreationTime() {
+      return creationTime;
+    }
+
+    public Timestamp getLastModifiedTime() {
+      return lastModifiedTime;
+    }
+
+    public int getVersion() {
+      return version;
+    }
+
+    public static class Builder {
+      private String name;
+      private DbUser creator;
+      private Long workspaceId;
+      private Timestamp creationTime;
+      private Timestamp lastModifiedTime;
+      private int version;
+
+      public Builder name(String name) {
+        this.name = name;
+        return this;
+      }
+
+      public Builder creator(DbUser creator) {
+        this.creator = creator;
+        return this;
+      }
+
+      public Builder workspaceId(Long workspaceId) {
+        this.workspaceId = workspaceId;
+        return this;
+      }
+
+      public Builder creationTime(Timestamp creationTime) {
+        this.creationTime = creationTime;
+        return this;
+      }
+
+      public Builder lastModifiedTime(Timestamp lastModifiedTime) {
+        this.lastModifiedTime = lastModifiedTime;
+        return this;
+      }
+
+      public Builder version(int version) {
+        this.version = version;
+        return this;
+      }
+
+      public MapperContext build() {
+        return new MapperContext(this);
+      }
+    }
   }
 }

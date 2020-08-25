@@ -12,15 +12,17 @@ import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper;
+import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper.MapperContext;
 import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.model.DbConceptSet;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
+import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.UpdateConceptSetRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -52,7 +54,38 @@ public class ConceptSetService {
     this.clock = clock;
   }
 
-  public ConceptSet save(DbConceptSet dbConceptSet, Long WorkspaceId) {
+  public ConceptSet copyAndSave(
+      Long fromConceptSetId, String newConceptSetName, DbUser creator, Long toWorkspaceId) {
+    final DbConceptSet existingConceptSet =
+        findDbConceptSet(fromConceptSetId)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("Concept set %s does not exist", fromConceptSetId)));
+    final Timestamp now = Timestamp.from(clock.instant());
+    MapperContext mapperContext =
+        new MapperContext.Builder()
+            .name(newConceptSetName)
+            .creator(creator)
+            .workspaceId(toWorkspaceId)
+            .creationTime(now)
+            .lastModifiedTime(now)
+            .version(CONCEPT_SET_VERSION)
+            .build();
+    DbConceptSet dbConceptSetCopy =
+        conceptSetMapper.dbModelToDbModel(existingConceptSet, mapperContext);
+
+    try {
+      return conceptSetMapper.dbModelToClient(conceptSetDao.save(dbConceptSetCopy));
+    } catch (DataIntegrityViolationException e) {
+      throw new ConflictException(
+          String.format("Concept set %s already exists.", dbConceptSetCopy.getName()));
+    }
+  }
+
+  public ConceptSet save(CreateConceptSetRequest request, DbUser creator, Long workspaceId) {
+    DbConceptSet dbConceptSet =
+        conceptSetMapper.clientToDbModel(request, workspaceId, creator, conceptBigQueryService);
     try {
       return conceptSetMapper.dbModelToClient(conceptSetDao.save(dbConceptSet));
     } catch (DataIntegrityViolationException e) {
@@ -66,9 +99,9 @@ public class ConceptSetService {
         Optional.ofNullable(conceptSetDao.findOne(conceptSetId))
             .orElseThrow(
                 () ->
-                    new NotFoundException("ConceptSet not found for concept id: " + conceptSetId));
-    int version = Etags.toVersion(conceptSet.getEtag());
-    if (dbConceptSet.getVersion() != version) {
+                    new NotFoundException(
+                        String.format("ConceptSet not found for conceptSetId: %d", conceptSetId)));
+    if (dbConceptSet.getVersion() != Etags.toVersion(conceptSet.getEtag())) {
       throw new ConflictException("Attempted to modify outdated concept set version");
     }
     if (conceptSet.getName() != null) {
@@ -77,13 +110,13 @@ public class ConceptSetService {
     if (conceptSet.getDescription() != null) {
       dbConceptSet.setDescription(conceptSet.getDescription());
     }
-    if (conceptSet.getDomain() != null && conceptSet.getDomain() != dbConceptSet.getDomainEnum()) {
-      throw new BadRequestException("Cannot modify the domain of an existing concept set");
+    if (!conceptSet.getDomain().equals(dbConceptSet.getDomainEnum())) {
+      throw new ConflictException(
+          String.format(
+              "Concept Set is not the same domain as: %s", conceptSet.getDomain().toString()));
     }
-    final Timestamp now = Timestamp.from(clock.instant());
-    dbConceptSet.setLastModifiedTime(now);
+    dbConceptSet.setLastModifiedTime(Timestamp.from(clock.instant()));
     try {
-      // TODO: add recent resource entry for concept sets [RW-1129]
       return conceptSetMapper.dbModelToClient(conceptSetDao.save(dbConceptSet));
     } catch (OptimisticLockException e) {
       throw new ConflictException("Failed due to concurrent concept set modification");
@@ -95,7 +128,8 @@ public class ConceptSetService {
         Optional.ofNullable(conceptSetDao.findOne(conceptSetId))
             .orElseThrow(
                 () ->
-                    new NotFoundException("ConceptSet not found for concept id: " + conceptSetId));
+                    new NotFoundException(
+                        String.format("ConceptSet not found for concept id: %d", conceptSetId)));
 
     int version = Etags.toVersion(request.getEtag());
     if (dbConceptSet.getVersion() != version) {
@@ -109,7 +143,8 @@ public class ConceptSetService {
       dbConceptSet.getConceptIds().removeAll(request.getRemovedIds());
     }
     if (dbConceptSet.getConceptIds().size() > MAX_CONCEPTS_PER_SET) {
-      throw new ConflictException("Exceeded " + MAX_CONCEPTS_PER_SET + " in concept set");
+      throw new ConflictException(
+          String.format("Exceeded %d concept set limit", MAX_CONCEPTS_PER_SET));
     }
     if (dbConceptSet.getConceptIds().isEmpty()) {
       dbConceptSet.setParticipantCount(0);
@@ -124,7 +159,6 @@ public class ConceptSetService {
     dbConceptSet.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
     try {
       return conceptSetMapper.dbModelToClient(conceptSetDao.save(dbConceptSet));
-      // TODO: add recent resource entry for concept sets [RW-1129]
     } catch (OptimisticLockException e) {
       throw new ConflictException("Failed due to concurrent concept set modification");
     }
@@ -139,7 +173,8 @@ public class ConceptSetService {
         Optional.ofNullable(conceptSetDao.findOne(conceptSetId))
             .orElseThrow(
                 () ->
-                    new NotFoundException("ConceptSet not found for concept id: " + conceptSetId));
+                    new NotFoundException(
+                        String.format("ConceptSet not found for concept id: %d", conceptSetId)));
     return conceptSetMapper.dbModelToClient(dbConceptSet);
   }
 
@@ -173,20 +208,25 @@ public class ConceptSetService {
 
   @Transactional
   public DbConceptSet cloneConceptSetAndConceptIds(
-      DbConceptSet conceptSet, DbWorkspace targetWorkspace, boolean cdrVersionChanged) {
-    DbConceptSet dbConceptSet = new DbConceptSet(conceptSet);
+      DbConceptSet dbConceptSet, DbWorkspace targetWorkspace, boolean cdrVersionChanged) {
+    MapperContext mapperContext =
+        new MapperContext.Builder()
+            .name(dbConceptSet.getName())
+            .creator(targetWorkspace.getCreator())
+            .workspaceId(targetWorkspace.getWorkspaceId())
+            .creationTime(targetWorkspace.getCreationTime())
+            .lastModifiedTime(targetWorkspace.getLastModifiedTime())
+            .version(CONCEPT_SET_VERSION)
+            .build();
+
+    DbConceptSet dbConceptSetClone = conceptSetMapper.dbModelToDbModel(dbConceptSet, mapperContext);
     if (cdrVersionChanged) {
-      String omopTable = BigQueryTableInfo.getTableName(conceptSet.getDomainEnum());
-      dbConceptSet.setParticipantCount(
+      String omopTable = BigQueryTableInfo.getTableName(dbConceptSet.getDomainEnum());
+      dbConceptSetClone.setParticipantCount(
           conceptBigQueryService.getParticipantCountForConcepts(
-              conceptSet.getDomainEnum(), omopTable, conceptSet.getConceptIds()));
+              dbConceptSet.getDomainEnum(), omopTable, dbConceptSet.getConceptIds()));
     }
-    dbConceptSet.setWorkspaceId(targetWorkspace.getWorkspaceId());
-    dbConceptSet.setCreator(targetWorkspace.getCreator());
-    dbConceptSet.setLastModifiedTime(targetWorkspace.getLastModifiedTime());
-    dbConceptSet.setCreationTime(targetWorkspace.getCreationTime());
-    dbConceptSet.setVersion(CONCEPT_SET_VERSION);
-    return conceptSetDao.save(dbConceptSet);
+    return conceptSetDao.save(dbConceptSetClone);
   }
 
   public List<DbConceptSet> getConceptSets(DbWorkspace workspace) {
