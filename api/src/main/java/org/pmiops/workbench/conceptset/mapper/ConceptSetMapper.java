@@ -34,17 +34,18 @@ public interface ConceptSetMapper {
   @Mapping(target = "creationTime", ignore = true)
   @Mapping(target = "lastModifiedTime", ignore = true)
   @Mapping(target = "version", ignore = true)
-  DbConceptSet dbModelToDbModel(DbConceptSet dbConceptSet, @Context MapperContext mapperContext);
+  DbConceptSet dbModelToDbModel(
+      DbConceptSet dbConceptSet, @Context ConceptSetContext conceptSetContext);
 
   @AfterMapping
   default void afterMappingDbModelToDbModel(
-      @MappingTarget DbConceptSet dbConceptSet, @Context MapperContext mapperContext) {
-    dbConceptSet.setName(mapperContext.getName());
-    dbConceptSet.setCreator(mapperContext.getCreator());
-    dbConceptSet.setWorkspaceId(mapperContext.getWorkspaceId());
-    dbConceptSet.setCreationTime(mapperContext.getCreationTime());
-    dbConceptSet.setLastModifiedTime(mapperContext.getLastModifiedTime());
-    dbConceptSet.setVersion(mapperContext.getVersion());
+      @MappingTarget DbConceptSet dbConceptSet, @Context ConceptSetContext conceptSetContext) {
+    dbConceptSet.setName(conceptSetContext.getName());
+    dbConceptSet.setCreator(conceptSetContext.getCreator());
+    dbConceptSet.setWorkspaceId(conceptSetContext.getWorkspaceId());
+    dbConceptSet.setCreationTime(conceptSetContext.getCreationTime());
+    dbConceptSet.setLastModifiedTime(conceptSetContext.getLastModifiedTime());
+    dbConceptSet.setVersion(conceptSetContext.getVersion());
   }
 
   @Mapping(target = "conceptSetId", source = "conceptSet.id")
@@ -95,7 +96,7 @@ public interface ConceptSetMapper {
    * and lastModifiedTime are the offending properties. This is an attempt to work around this
    * issue.
    */
-  class MapperContext {
+  class ConceptSetContext {
     private String name;
     private DbUser creator;
     private Long workspaceId;
@@ -103,7 +104,7 @@ public interface ConceptSetMapper {
     private Timestamp lastModifiedTime;
     private int version;
 
-    public MapperContext(Builder builder) {
+    public ConceptSetContext(Builder builder) {
       this.name = builder.name;
       this.creator = builder.creator;
       this.workspaceId = builder.workspaceId;
@@ -174,8 +175,8 @@ public interface ConceptSetMapper {
         return this;
       }
 
-      public MapperContext build() {
-        return new MapperContext(this);
+      public ConceptSetContext build() {
+        return new ConceptSetContext(this);
       }
     }
   }

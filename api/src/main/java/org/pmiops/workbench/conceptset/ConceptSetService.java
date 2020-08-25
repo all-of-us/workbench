@@ -12,7 +12,7 @@ import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper;
-import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper.MapperContext;
+import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper.ConceptSetContext;
 import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.model.DbConceptSet;
@@ -63,8 +63,8 @@ public class ConceptSetService {
                     new NotFoundException(
                         String.format("Concept set %s does not exist", fromConceptSetId)));
     final Timestamp now = Timestamp.from(clock.instant());
-    MapperContext mapperContext =
-        new MapperContext.Builder()
+    ConceptSetContext conceptSetContext =
+        new ConceptSetContext.Builder()
             .name(newConceptSetName)
             .creator(creator)
             .workspaceId(toWorkspaceId)
@@ -73,7 +73,7 @@ public class ConceptSetService {
             .version(CONCEPT_SET_VERSION)
             .build();
     DbConceptSet dbConceptSetCopy =
-        conceptSetMapper.dbModelToDbModel(existingConceptSet, mapperContext);
+        conceptSetMapper.dbModelToDbModel(existingConceptSet, conceptSetContext);
 
     try {
       return conceptSetMapper.dbModelToClient(conceptSetDao.save(dbConceptSetCopy));
@@ -209,8 +209,8 @@ public class ConceptSetService {
   @Transactional
   public DbConceptSet cloneConceptSetAndConceptIds(
       DbConceptSet dbConceptSet, DbWorkspace targetWorkspace, boolean cdrVersionChanged) {
-    MapperContext mapperContext =
-        new MapperContext.Builder()
+    ConceptSetContext conceptSetContext =
+        new ConceptSetContext.Builder()
             .name(dbConceptSet.getName())
             .creator(targetWorkspace.getCreator())
             .workspaceId(targetWorkspace.getWorkspaceId())
@@ -219,7 +219,8 @@ public class ConceptSetService {
             .version(CONCEPT_SET_VERSION)
             .build();
 
-    DbConceptSet dbConceptSetClone = conceptSetMapper.dbModelToDbModel(dbConceptSet, mapperContext);
+    DbConceptSet dbConceptSetClone =
+        conceptSetMapper.dbModelToDbModel(dbConceptSet, conceptSetContext);
     if (cdrVersionChanged) {
       String omopTable = BigQueryTableInfo.getTableName(dbConceptSet.getDomainEnum());
       dbConceptSetClone.setParticipantCount(
