@@ -1,3 +1,6 @@
+const { defaults } = require('jest-config');
+const { TEST_MODE } = process.env;
+
 module.exports = {
   "verbose": true,
   "bail": 3,  // Stop running tests after `n` failures
@@ -17,7 +20,7 @@ module.exports = {
     "jest-junit"
   ],
   "transform": {
-    "\\.(ts|tsx)$": "ts-jest"
+    "^.+\\.(ts|tsx)$": "ts-jest"
   },
   "globals": {
     "ts-jest": {
@@ -28,21 +31,11 @@ module.exports = {
     "/node_modules/",
     "/tsc-out/"
   ],
-  "testMatch": [
-    "<rootDir>/tests/**/*.spec.ts"
-  ],
+  testMatch: TEST_MODE === "nightly-integration" ? [ "<rootDir>/tests/nightly/**/*.spec.ts", ] : [ "<rootDir>/tests(?!\/nightly)/**/*.spec.ts", ],
   "transformIgnorePatterns": [
     "<rootDir>/node_modules/(?!tests)"
   ],
-  "moduleFileExtensions": [
-    "ts",
-    "spec.ts",
-    "tsx",
-    "js",
-    "jsx",
-    "json",
-    "node"
-  ],
+  "moduleFileExtensions": [ ...defaults.moduleFileExtensions, 'ts', 'tsx', 'spec.ts' ],
   "modulePaths": [
     "<rootDir>"
   ]

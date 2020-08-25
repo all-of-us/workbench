@@ -581,10 +581,18 @@ jobs:
         default: "test"
         type: enum
         enum: ["test", "staging"]
+      test_mode:
+        description: Switching between "nightly-integration" and normal "integration" test mode.
+        defaults: "integration"
+        type: enum
+        enum: ["integration", "nightly-integration"]
     <<: *defaults
     environment:
       <<: *e2e_env
       WORKBENCH_ENV: << parameters.env_name >>
+      TEST_MODE: << parameters.test_mode >>
+      CI: true
+      NODE_ENV: development
     working_directory: ~/workbench
     parallelism: 3
     steps:
@@ -600,6 +608,8 @@ jobs:
     environment:
       <<: *e2e_env
       WORKBENCH_ENV: local
+      CI: true
+      NODE_ENV: development
     resource_class: medium+
     working_directory: ~/workbench
     parallelism: 1
@@ -693,6 +703,9 @@ workflows:
                 - master
     jobs:
       - api-bigquery-test
+      - puppeteer-e2e-test:
+          test_mode: "nightly-integration"
+          env_name: "test"
 
 experimental:
   notify:

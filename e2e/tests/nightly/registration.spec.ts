@@ -1,10 +1,11 @@
 import CreateAccountPage from 'app/page/create-account-page';
 import GoogleLoginPage from 'app/page/google-login';
+import {getPropValue} from 'utils/element-utils';
 
 
 describe('User registration tests:', () => {
 
-  test('Can register new user', async () => {
+  test.skip('Can register new user', async () => {
     // Load the landing page for login.
     const loginPage = new GoogleLoginPage(page);
     await loginPage.load();
@@ -28,7 +29,7 @@ describe('User registration tests:', () => {
     await nextButton.clickWithEval();
 
     // Step 3: Enter user information
-    await createAccountPage.fillOutUserInformation();
+    const userId = await createAccountPage.fillOutUserInformation();
     nextButton = await createAccountPage.getNextButton();
     await nextButton.waitUntilEnabled();
     await nextButton.click();
@@ -36,16 +37,31 @@ describe('User registration tests:', () => {
     // Step 4: Enter demographic survey (All Survey Fields are optional)
     await createAccountPage.fillOutDemographicSurvey();
 
-    // TODO uncomment after disable recaptcha
-    // const submitButton = await createAccountPage.getSubmitButton();
-    // await submitButton.click();
+    const submitButton = await createAccountPage.getSubmitButton();
+    await submitButton.click();
 
-    // Step 5: New account created successfully page.
-    // await createAccountPage.waitForTextExists('Congratulations!');
-    // await createAccountPage.waitForTextExists('Your new research workbench account');
+    // Verify New account created successfully.
 
-    // const resendButton = await findClickable(page, 'Resend Instructions');
-    // expect(resendButton).toBeTruthy();
+    // "Resend Instructions" link exists
+    const linkSelector = '//a[text()="Resend Instructions"]';
+    const resendInstrButton = await page.waitForXPath(linkSelector, {visible: true});
+    expect(resendInstrButton).toBeTruthy();
+
+    // Displayed texts checks
+    const textSelector = '//*[normalize-space(text())]';
+    const textElements = await page.$x(textSelector);
+
+    const textsArray = [];
+    for (const elemt of textElements) {
+      textsArray.push(await getPropValue<string>(elemt, 'textContent'));
+    }
+    expect(textsArray).toContain('Congratulations!');
+    expect(textsArray).toContain('Your All of Us research account has been created!');
+    expect(textsArray).toContain(`${userId}@fake-research-aou.org`);
+
+    const note = 'Please note: For full access to the Research Workbench data and tools, you\'ll be required to complete the necessary registration steps.';
+    expect(textsArray).toContain(note);
   });
+
 
 });
