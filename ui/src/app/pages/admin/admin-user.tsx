@@ -217,7 +217,9 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
   getFreeCreditLimitOptions() {
     const {oldProfile: {freeTierDollarQuota}} = this.state;
     const defaultsPlusMaybeOverride = Array.from(freeCreditLimitDefaultOptions.add(freeTierDollarQuota));
-    return fp.map((limit) => ({label: renderUSD(limit), value: limit}), defaultsPlusMaybeOverride.sort());
+    // gotcha: JS sorts numbers lexicographically by default
+    const numericallySorted = defaultsPlusMaybeOverride.sort((a, b) => a - b);
+    return fp.map((limit) => ({label: renderUSD(limit), value: limit}), numericallySorted);
   }
 
   async getInstitutions() {
