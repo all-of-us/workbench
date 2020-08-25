@@ -38,21 +38,31 @@ const NavRedirect = ({path}) => {
   return null;
 };
 
-export const AppRoute = ({path, data = {}, component: Component}): React.ReactElement => {
+export const AppRoute = ({path, data = {}, guards = [], component: Component}): React.ReactElement => {
   const routeParams = useParams();
   const routeHistory = useHistory();
+  const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
 
-  return <Route exact={true} path={path} >
-    <Component urlParams={routeParams} routeHistory={routeHistory} routeConfig={data}/>
+  return <Route exact={true} path={path} render={
+    () => {
+      return redirectPath
+        ? <NavRedirect path={redirectPath}/>
+        : <Component urlParams={routeParams} routeHistory={routeHistory} routeConfig={data}/>
+    }}>
   </Route>;
 };
 
 export const ProtectedRoutes = (
   {guards, children}: {guards: Guard[], children: any }): React.ReactElement => {
-  const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
+  // const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
 
-  return redirectPath ? <NavRedirect path={redirectPath}/>
-  : <Fragment>{children}</Fragment>;
+  // If the guard fails AND we have a route match redirect
+  const guardedChildren = fp.flow(
+    fp.flatten,
+    fp.toPairs,
+    fp.map(([key, element]: [string, React.ReactElement]) => React.cloneElement(element, {key, guards}))
+  )([children]);
+  return <Fragment>{guardedChildren}</Fragment>;
 };
 
 export const Navigate = ({to}): React.ReactElement => {

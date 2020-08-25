@@ -106,12 +106,11 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
       */}
       <ProtectedRoutes guards={[registrationGuard]}>
         <AppRoute
-          path='/library'
+        path='/library'
           component={() => <WorkspaceLibraryPage routeData={{title: 'Workspace Library', minimizeChrome: false}}/>}
         />
       </ProtectedRoutes>
     </ProtectedRoutes>
-
   </AppRouter>;
 };
 

@@ -83,7 +83,8 @@ const routes: Routes = [
       },
       {
         path: 'data-code-of-conduct',
-        component: AppRouting
+        component: AppRouting,
+        data: {}
       },
       {
         path: 'nih-callback',
