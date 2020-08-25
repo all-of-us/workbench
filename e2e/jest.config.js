@@ -35,7 +35,7 @@ module.exports = {
   "transformIgnorePatterns": [
     "<rootDir>/node_modules/(?!tests)"
   ],
-  "moduleFileExtensions": [ ...defaults.moduleFileExtensions, 'ts', 'tsx', 'spec.ts' ],
+  "moduleFileExtensions": [ ...defaults.moduleFileExtensions ],
   "modulePaths": [
     "<rootDir>"
   ]
