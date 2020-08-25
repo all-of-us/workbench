@@ -121,8 +121,8 @@ const FreeCreditsUsage = ({aboveLimit, usage}) => {
   } :
   {...styles.textInput,
     ...styles.backgroundColorDark,
-    borderColor: colors.disabled,
-    color: colors.disabled};
+    color: colors.disabled,
+  };
 
   return <React.Fragment>
     <TextInputWithLabel
