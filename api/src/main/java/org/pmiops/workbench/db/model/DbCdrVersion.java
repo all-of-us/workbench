@@ -29,6 +29,7 @@ public class DbCdrVersion {
   private int numParticipants;
   private String cdrDbName;
   private String elasticIndexBaseName;
+  private String genomicsMicroarrayBigQueryDataset;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -156,6 +157,15 @@ public class DbCdrVersion {
 
   public void setElasticIndexBaseName(String elasticIndexBaseName) {
     this.elasticIndexBaseName = elasticIndexBaseName;
+  }
+
+  @Column(name = "genomics_microarray_bigquery_dataset")
+  public String getGenomicsMicroarrayBigQueryDataset() {
+    return genomicsMicroarrayBigQueryDataset;
+  }
+
+  public void setGenomicsMicroarrayBigQueryDataset(String genomicsMicroarrayBigQueryDataset) {
+    this.genomicsMicroarrayBigQueryDataset = genomicsMicroarrayBigQueryDataset;
   }
 
   @Override

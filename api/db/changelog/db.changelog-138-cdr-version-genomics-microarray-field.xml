@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="ericsong" id="changelog-138-cdr-version-genomics-microarray-field">
+    <addColumn tableName="cdr_version">
+      <column name="genomics_microarray_bigquery_dataset" type="varchar(100)">
+      </column>
+    </addColumn>
+  </changeSet>
+</databaseChangeLog>

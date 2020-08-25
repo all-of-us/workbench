@@ -146,6 +146,7 @@
   <include file="changelog/db.changelog-135-institution-unique-display-name.xml"/>
   <include file="changelog/db.changelog-136-workspace-need-researchpurpose-review.xml"/>
   <include file="changelog/db.changelog-137-sex-at-birth.xml"/>
+  <include file="changelog/db.changelog-138-cdr-version-genomics-microarray-field.xml"/>
 
   <!--
    Note: to update the DB locally, do the following:
