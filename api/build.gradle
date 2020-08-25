@@ -21,6 +21,7 @@ buildscript {
     SPRINGFOX_VERSION = '2.6.1'
     SPRING_BOOT_VERSION = '1.5.22.RELEASE'
     SWAGGER_2_CODEGEN_VERSION = '2.2.3'
+    SWAGGER_3_CODEGEN_VERSION = '3.0.21'
   }
 
   project.ext['hibernate.version'] = '5.2.10.Final'
@@ -80,6 +81,7 @@ configurations {
   __tools__RuntimeOnly.extendsFrom runtimeOnly
 
   __swaggerCodegenV2__
+  __swaggerCodegenV3__
 
   generatedCompile {
     exclude group: 'com.google.guava', module:'guava-jdk5'
@@ -90,9 +92,11 @@ configurations {
 // access globally, including from within helper functions.
 ext.SWAGGER_CODEGEN_BASE_PKG = 'org.pmiops.workbench'
 ext.SWAGGER_2_CODEGEN_DIR = "$buildDir/swagger2"
+ext.SWAGGER_3_CODEGEN_DIR = "$buildDir/swagger3"
+
 // This path is the Java sources root for finding any overridden Swagger-codegen
 // templates we may be using.
-ext.SWAGGER_TEMPLATE_DIR = "$projectDir/src/main/resources/swaggercodegen"
+ext.SWAGGER_2_TEMPLATE_DIR = "$projectDir/src/main/resources/swagger2codegen"
 // Raw options passed to the Swagger codegen CLI.
 ext.SWAGGER_2_RAW_OPTS = [
   // By default, the ignore file within the output directory is used. Override
@@ -100,7 +104,7 @@ ext.SWAGGER_2_RAW_OPTS = [
   '--ignore-file-override', "$projectDir/.swagger2-codegen-ignore"
 ]
 
-// Helper function to define a Java client Swagger codegen target for the Gradle
+// Helper function to define a Java client Swagger codegen targets for the Gradle
 // Swagger Generator Plugin: https://github.com/int128/gradle-swagger-generator-plugin#code-generation
 def swagger2JavaClient(yaml, pkg, rawOptExtras = []) {
   return {
@@ -109,11 +113,40 @@ def swagger2JavaClient(yaml, pkg, rawOptExtras = []) {
       configuration = configurations.__swaggerCodegenV2__
       language = 'java'
       outputDir = file(SWAGGER_2_CODEGEN_DIR)
-      templateDir = file(SWAGGER_TEMPLATE_DIR)
+      templateDir = file(SWAGGER_2_TEMPLATE_DIR)
       // Since the output directory is shared among these swagger tasks, wiping
       // the directory would result in task invalidation / churn.
       wipeOutputDir = false
       rawOptions = SWAGGER_2_RAW_OPTS + rawOptExtras
+      additionalProperties = [
+        'sourceFolder'     : '',
+        'library'          : 'okhttp-gson',
+        'serializableModel': 'true',
+        'dateLibrary'      : 'java8',
+        'invokerPackage'   : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}",
+        'modelPackage'     : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.model",
+        'apiPackage'       : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.api",
+      ]
+    }
+  }
+}
+
+def swagger3JavaClient(yaml, pkg, rawOptExtras = []) {
+  return {
+    inputFile = file("src/main/resources/${yaml}")
+    code {
+      configuration = configurations.__swaggerCodegenV3__
+      language = 'java'
+      outputDir = file(SWAGGER_3_CODEGEN_DIR)
+      templateDir = file("$projectDir/src/main/resources/swagger3codegen")
+      // Since the output directory is shared among these swagger tasks, wiping
+      // the directory would result in task invalidation / churn.
+      wipeOutputDir = false
+      rawOptions = [
+        // By default, the ignore file within the output directory is used. Override
+        // as we don't track the output directory in source.
+        '--ignore-file-override', "$projectDir/.swagger3-codegen-ignore"
+      ] + rawOptExtras
       additionalProperties = [
         'sourceFolder'     : '',
         'library'          : 'okhttp-gson',
@@ -149,6 +182,8 @@ swaggerSources {
   captcha swagger2JavaClient("captcha.yaml", "captcha")
   shibboleth swagger2JavaClient("shibboleth.yaml", "shibboleth")
 
+  leonardo swagger3JavaClient("leonardo.yaml", "leonardo")
+
   // Workbench needs a special configuration style, as we generate Spring server
   // bindings in this case.
   workbench {
@@ -157,7 +192,7 @@ swaggerSources {
       configuration = configurations.__swaggerCodegenV2__
       language = 'spring'
       outputDir = file(SWAGGER_2_CODEGEN_DIR)
-      templateDir = file(SWAGGER_TEMPLATE_DIR)
+      templateDir = file(SWAGGER_2_TEMPLATE_DIR)
       wipeOutputDir = false
       rawOptions = SWAGGER_2_RAW_OPTS
       additionalProperties = [
@@ -221,6 +256,7 @@ sourceSets {
     compileClasspath = configurations.generatedCompile
     java {
       srcDir SWAGGER_2_CODEGEN_DIR
+      srcDir SWAGGER_3_CODEGEN_DIR
     }
   }
   main {
@@ -307,7 +343,8 @@ project.tasks.war.dependsOn(['compileGeneratedJava', 'generate_appengine_web_xml
 
 // Clear out generated Java sorces before cleaning the project.
 clean.doFirst {
-  delete("${buildDir}/swagger2")
+  delete(SWAGGER_2_CODEGEN_DIR)
+  delete(SWAGGER_3_CODEGEN_DIR)
 }
 
 repositories {
@@ -319,6 +356,7 @@ dependencies {
   annotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
 
   __swaggerCodegenV2__ "io.swagger:swagger-codegen-cli:$project.ext.SWAGGER_2_CODEGEN_VERSION"
+  __swaggerCodegenV3__ "io.swagger.codegen.v3:swagger-codegen-cli:$project.ext.SWAGGER_3_CODEGEN_VERSION"
 
   compile "ch.qos.logback:logback-classic:1.2.3"
   compile "com.fasterxml.jackson.core:jackson-annotations:$project.ext.JACKSON_VERSION"
@@ -400,7 +438,7 @@ dependencies {
 
   // Dependencies for Swagger codegen-generated sources. This should include all dependencies required by Swagger's
   // default okhttp API codegen templates (see https://github.com/swagger-api/swagger-codegen/blob/v2.2.3/samples/client/petstore/spring-stubs/pom.xml)
-  // plus any custom templates included in our repo under the SWAGGER_TEMPLATE_DIR.
+  // plus any custom templates included in our repo under the SWAGGER_2_TEMPLATE_DIR.
   generatedCompile "org.springframework.boot:spring-boot-starter-data-rest:$project.ext.SPRING_BOOT_VERSION"
   generatedCompile "io.springfox:springfox-swagger2:$project.ext.SPRINGFOX_VERSION"
   generatedCompile "io.springfox:springfox-swagger-ui:$project.ext.SPRINGFOX_VERSION"
@@ -414,6 +452,14 @@ dependencies {
   generatedCompile "io.opencensus:opencensus-api:$project.ext.OPENCENSUS_VERSION"
   generatedCompile "io.opencensus:opencensus-exporter-trace-stackdriver:$project.ext.OPENCENSUS_VERSION"
   generatedCompile "io.opencensus:opencensus-impl:$project.ext.OPENCENSUS_VERSION"
+
+  // Swagger3 codegen deps
+  compile 'io.swagger.core.v3:swagger-annotations:2.0.0'
+  compile 'io.gsonfire:gson-fire:1.8.3'
+  compile 'org.threeten:threetenbp:1.3.5'
+  generatedCompile 'io.swagger.core.v3:swagger-annotations:2.0.0'
+  generatedCompile 'io.gsonfire:gson-fire:1.8.3'
+  generatedCompile 'org.threeten:threetenbp:1.3.5'
 
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$project.ext.KOTLIN_VERSION"
 

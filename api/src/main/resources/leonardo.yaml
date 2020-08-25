@@ -1,0 +1,3184 @@
+openapi: 3.0.0
+info:
+  title: Leonardo
+  description: |
+    Workbench notebooks service.
+  # Follow semantic versioning https://semver.org/
+  version: "0.1.0"
+  license:
+    name: BSD
+    url: http://opensource.org/licenses/BSD-3-Clause
+  termsOfService: https://github.com/broadinstitute/leonardo
+tags:
+  - name: runtimes
+    description: Runtimes API. Support both Google Dataproc and Google Compute Engine.
+  - name: disks
+    description: Persistent Disks API.
+  - name: apps
+    description: Experimental App API
+  - name: cluster
+    description: Legacy Clusters API. Supports Google Dataproc only.
+  - name: proxy
+    description: Proxy API
+  - name: notebooks
+    description: Notebooks API. Deprecated in favor of Proxy API.
+  - name: service_info
+    description: Service Info API
+security:
+  - googleoauth:
+      - openid
+      - email
+      - profile
+
+##########################################################################################
+## PATHS
+##########################################################################################
+paths:
+  /status:
+    get:
+      summary: Gets system status
+      responses:
+        "200":
+          description: System ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemStatus"
+        "500":
+          description: One or more subsystems down
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemStatus"
+      operationId: getSystemStatus
+      tags:
+        - service_info
+      security: []
+  /version:
+    get:
+      tags:
+        - service_info
+      operationId: leonardoVersion
+      summary: Returns the currently deployed version of this service.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeonardoVersion"
+      security: []
+
+  ## Runtime paths ##
+
+  /api/google/v1/runtimes:
+    get:
+      summary: List all runtimes that the caller has access to
+      description: List all runtimes, optionally filtering on a set of labels
+      operationId: listRuntimes
+      tags:
+        - runtimes
+      parameters:
+        - in: query
+          name: _labels
+          description: >
+            Optional label key-value pairs to filter results by. Example:
+            Querying by key1=val1,key2=val2
+            returns all runtimes that contain the key1/val1 and key2/val2 labels (possibly among other labels).
+            Note: this string format is a workaround because Swagger doesn't support free-form
+            query string parameters. The recommended way to use this endpoint is to specify the
+            labels as top-level query string parameters. For instance: GET /api/google/v1/runtimes?key1=val1&key2=val2.
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: includeDeleted
+          description: Optional filter that includes any runtimes with a Deleted status.
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: List of runtimes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ListClusterResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+  /api/google/v1/runtimes/{googleProject}:
+    get:
+      summary: List all runtimes within the given Google project that the caller has access to
+      description: List all runtimes within the given Google project, optionally
+        filtering on a set of labels
+      operationId: listRuntimesByProject
+      tags:
+        - runtimes
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: _labels
+          description: >
+            Optional label key-value pairs to filter results by. Example:
+            Querying by key1=val1,key2=val2
+            returns all runtimes that contain the key1/val1 and key2/val2 labels (possibly among other labels).
+            Note: this string format is a workaround because Swagger doesn't support free-form
+            query string parameters. The recommended way to use this endpoint is to specify the
+            labels as top-level query string parameters. For instance: GET /api/google/v1/runtimes?key1=val1&key2=val2.
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: includeDeleted
+          description: Optional filter that includes any runtimes with a Deleted status.
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: List of runtimes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ListRuntimeResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+  /api/google/v1/runtimes/{googleProject}/{name}:
+    get:
+      summary: Get details of a runtime
+      description: >
+        Returns information about an existing runtime managed by Leo.
+        Poll this to find out when your runtime has finished starting up.
+      operationId: getRuntime
+      tags:
+        - runtimes
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: name
+          description: runtimeName
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Runtime found, here are the details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetRuntimeResponse"
+        "403":
+          description: User does not have permission to perform action on runtime
+        "404":
+          description: Runtime not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+    post:
+      summary: Creates a new Dataproc cluster or Google Compute Engine instance in the given project with the given name.
+      description: >
+        The request is completed without waiting for the runtime to be created in Google. The runtime status can be polled using the
+        getRuntime API. Default labels runtimeName, googleProject, serviceAccount, and notebookExtension cannot be overridden.
+      operationId: createRuntime
+      tags:
+        - runtimes
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: name
+          description: runtimeName. only lowercase alphanumeric characters, numbers and dashes are allowed
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/CreateRuntimeRequest"
+      responses:
+        "202":
+          description: Runtime creation request accepted
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+    delete:
+      summary: Deletes an existing Dataproc cluster or Google Compute Engine instance in the given project
+      description: deletes a runtime
+      operationId: deleteRuntime
+      tags:
+        - runtimes
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: name
+          description: runtimeName
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: deleteDisk
+          description: Whether or not disk should be deleted if the runtime is using persistent disk. Default to false if not specified
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "202":
+          description: Runtime deletion request accepted
+        "403":
+          description: User does not have permission to perform action on cluster
+        "404":
+          description: Runtime not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+    patch:
+      summary: Updates the configuration of a runtime
+      description: In order to update the configuration of a runtime, it must first be running or paused
+      operationId: updateRuntime
+      tags:
+        - runtimes
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: name
+          description: runtimeName
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/UpdateRuntimeRequest"
+      responses:
+        "202":
+          description: Runtime update request accepted
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+  /api/google/v1/runtimes/{googleProject}/{name}/stop:
+    post:
+      summary: Stops a Dataproc cluster or Google Compute Engine instance
+      description: >
+        Stops the running compute, but retains any data persisted on disk. The runtime may be restarted with the /start endpoint.
+      operationId: stopRuntime
+      tags:
+        - runtimes
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: name
+          description: runtime name
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Runtime stop request accepted
+        "403":
+          description: User does not have permission to perform action on runtime
+        "404":
+          description: Runtime not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "409":
+          description: Runtime cannot be stopped
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+  /api/google/v1/runtimes/{googleProject}/{name}/start:
+    post:
+      summary: Starts a Dataproc cluster or Google Compute Engine instance
+      description: Starts the a stopped runtime
+      operationId: startRuntime
+      tags:
+        - runtimes
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: name
+          description: runtimeName
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Runtime start request accepted
+        "403":
+          description: User does not have permission to perform action on runtime
+        "404":
+          description: Runtime not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "409":
+          description: Runtime cannot be started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+
+  ## Persistent Disk paths ##
+
+  /api/google/v1/disks:
+    get:
+      summary: List all persistent disks that the caller has access to
+      description: List all persistent disks, optionally filtering on a set of labels
+      operationId: listDisks
+      tags:
+        - disks
+      parameters:
+        - in: query
+          name: _labels
+          description: >
+            Optional label key-value pairs to filter results by. Example:
+            Querying by key1=val1,key2=val2
+            returns all persistent disks that contain the key1/val1 and key2/val2 labels (possibly among other labels).
+            Note: this string format is a workaround because Swagger doesn't support free-form
+            query string parameters. The recommended way to use this endpoint is to specify the
+            labels as top-level query string parameters. For instance: GET /api/google/v1/disks?key1=val1&key2=val2.
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: includeDeleted
+          description: Optional filter that includes any persistent disks with a Deleted status.
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: List of persistent disks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ListPersistentDiskResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+  /api/google/v1/disks/{googleProject}:
+    get:
+      summary: List all persistent disks within the given Google project that the caller has access to
+      description: List all persistent disks within the given Google project, optionally
+        filtering on a set of labels
+      operationId: listDisksByProject
+      tags:
+        - disks
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: _labels
+          description: >
+            Optional label key-value pairs to filter results by. Example:
+            Querying by key1=val1,key2=val2
+            returns all persistent disks that contain the key1/val1 and key2/val2 labels (possibly among other labels).
+            Note: this string format is a workaround because Swagger doesn't support free-form
+            query string parameters. The recommended way to use this endpoint is to specify the
+            labels as top-level query string parameters. For instance: GET /api/google/v1/disks?key1=val1&key2=val2.
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: includeDeleted
+          description: Optional filter that includes any persistent disks with a Deleted status.
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: List of persistent disks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ListPersistentDiskResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+  /api/google/v1/disks/{googleProject}/{name}:
+    get:
+      summary: Get details of a persistent disk
+      description: >
+        Returns information about an existing persistent disk managed by Leo.
+        Poll this to find out when your disk has finished starting up.
+      operationId: getDisk
+      tags:
+        - disks
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: name
+          description: diskName
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Persistent disk found, here are the details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetPersistentDiskResponse"
+        "403":
+          description: User does not have permission to perform action on persistent disk
+        "404":
+          description: Persistent disk not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+    post:
+      summary: Creates a new persistent disk in the given project with the given name.
+      description: >
+        The request is completed without waiting for the persistent disk to be created in Google.
+        The disk status can be polled using the getDisk API.
+        Default labels diskName, googleProject, and creator cannot be overridden.
+      operationId: createDisk
+      tags:
+        - disks
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: name
+          description: diskName. only lowercase alphanumeric characters, numbers and dashes are allowed
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/CreateDiskRequest"
+      responses:
+        "202":
+          description: Persistent disk creation request accepted
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+    delete:
+      summary: Deletes an existing persistent disk in the given project
+      description: Deletes a persistent disk
+      operationId: deleteDisk
+      tags:
+        - disks
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: name
+          description: diskName
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Persistent disk deletion request accepted
+        "403":
+          description: User does not have permission to perform action on persistent disk
+        "404":
+          description: Persistent disk not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+    patch:
+      summary: Updates the configuration of a persistent disk
+      description: In order to update the configuration of a persistent disk, it must first be ready
+      operationId: updateDisk
+      tags:
+        - disks
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: name
+          description: diskName
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/UpdateDiskRequest"
+      responses:
+        "202":
+          description: Persistent disk update request accepted
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+
+  ## Legacy Cluster API ##
+
+  /api/clusters:
+    get:
+      deprecated: true
+      summary: List all active clusters
+      description: List all active clusters, optionally filtering on a set of labels
+      operationId: listClusters
+      tags:
+        - cluster
+      parameters:
+        - in: query
+          name: _labels
+          description: >
+            Optional label key-value pairs to filter results by. Example:
+            Querying by key1=val1,key2=val2
+
+            returns all clusters that contain the key1/val1 and key2/val2 labels (possibly among other labels).
+
+            Note: this string format is a workaround because Swagger doesn't support free-form
+
+            query string parameters. The recommended way to use this endpoint is to specify the
+
+            labels as top-level query string parameters. For instance: GET /api/clusters?key1=val1&key2=val2.
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: includeDeleted
+          description: Optional filter that includes any clusters with a Deleted status.
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: List of clusters
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ListClusterResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+      security:
+        - googleoauth:
+            - openid
+            - email
+            - profile
+  "/api/clusters/{googleProject}":
+    get:
+      deprecated: true
+      summary: List all active clusters within the given Google project
+      description: List all active clusters within the given Google project, optionally
+        filtering on a set of labels
+      operationId: listClustersByProject
+      tags:
+        - cluster
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: _labels
+          description: >
+            Optional label key-value pairs to filter results by. Example:
+            Querying by key1=val1,key2=val2
+
+            returns all clusters that contain the key1/val1 and key2/val2 labels (possibly among other labels).
+
+            Note: this string format is a workaround because Swagger doesn't support free-form
+
+            query string parameters. The recommended way to use this endpoint is to specify the
+
+            labels as top-level query string parameters. For instance: GET /api/clusters?key1=val1&key2=val2.
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: includeDeleted
+          description: Optional filter that includes any clusters with a Deleted status.
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: List of clusters
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ListClusterResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+      security:
+        - googleoauth:
+            - openid
+            - email
+            - profile
+
+  "/api/cluster/v2/{googleProject}/{clusterName}":
+    put:
+      deprecated: true
+      summary: Creates a new Dataproc cluster in the given project with the given name.
+      description: >
+        * The request is completed without waiting for the initiation of the
+        cluster's creation on the Google side.
+          This reduces the response time compared with the other version.
+        * Default labels clusterName, googleProject, serviceAccount, and notebookExtension cannot be overridden.
+      operationId: createClusterV2
+      tags:
+        - cluster
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: clusterName
+          description: clusterName. only lowercase alphanumeric characters, numbers and
+            dashes are allowed in cluster name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/ClusterRequest"
+      responses:
+        "202":
+          description: Cluster creation request accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cluster"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+      security:
+        - googleoauth:
+            - openid
+            - email
+            - profile
+  "/api/cluster/{googleProject}/{clusterName}":
+    put:
+      deprecated: true
+      summary: Creates a new Dataproc cluster in the given project with the given name
+      description: Default labels clusterName, googleProject, serviceAccount, and
+        notebookExtension cannot be overridden.
+      operationId: createCluster
+      tags:
+        - cluster
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: clusterName
+          description: clusterName
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/ClusterRequest"
+      responses:
+        "200":
+          description: Cluster creation successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cluster"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "403":
+          description: User does not have permission to perform action on cluster
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+      security:
+        - googleoauth:
+            - openid
+            - email
+            - profile
+    get:
+      deprecated: true
+      summary: Get details of a Dataproc cluster
+      description: Returns information about an existing Dataproc cluster managed by Leo.
+        Poll this to find out when your cluster has finished starting up.
+      operationId: getCluster
+      tags:
+        - cluster
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: clusterName
+          description: clusterName
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Cluster found, here are the details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cluster"
+        "403":
+          description: User does not have permission to perform action on cluster
+        "404":
+          description: Cluster not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+      security:
+        - googleoauth:
+            - openid
+            - email
+            - profile
+    delete:
+      deprecated: true
+      summary: Deletes an existing Dataproc cluster in the given project
+      description: deletes a Dataproc cluster
+      operationId: deleteCluster
+      tags:
+        - cluster
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: clusterName
+          description: clusterName
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Cluster deletion request accepted
+        "403":
+          description: User does not have permission to perform action on cluster
+        "404":
+          description: Cluster not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+  "/api/cluster/{googleProject}/{clusterName}/stop":
+    post:
+      deprecated: true
+      summary: Stops a Dataproc cluster
+      description: >
+        Stops the instances of a Dataproc cluster, but retains any data
+        persisted on disk. The
+
+        cluster may be restarted with the /start endpoint.
+      operationId: stopCluster
+      tags:
+        - cluster
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: clusterName
+          description: clusterName
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Cluster stop request accepted
+        "403":
+          description: User does not have permission to perform action on cluster
+        "404":
+          description: Cluster not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "409":
+          description: Cluster cannot be stopped
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+  "/api/cluster/{googleProject}/{clusterName}/start":
+    post:
+      deprecated: true
+      summary: Starts a Dataproc cluster
+      description: |
+        Starts the instances of a stopped Dataproc cluster.
+      operationId: startCluster
+      tags:
+        - cluster
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: clusterName
+          description: clusterName
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Cluster start request accepted
+        "403":
+          description: User does not have permission to perform action on cluster
+        "404":
+          description: Cluster not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "409":
+          description: Cluster cannot be started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+
+  ## Kubernetes App API ##
+  "/api/google/v1/apps":
+    get:
+      tags:
+        - apps
+      summary: List apps
+      description: List kubernetes apps the caller has access to, without specifying a project
+      operationId: listApp
+      parameters:
+        - in: query
+          name: _labels
+          description: >
+            Optional label key-value pairs to filter results by. Example:
+            Querying by key1=val1,key2=val2
+            returns all apps that contain the key1/val1 and key2/val2 labels (possibly among other labels).
+            Note: this string format is a workaround because Swagger doesn't support free-form
+            query string parameters. The recommended way to use this endpoint is to specify the
+            labels as top-level query string parameters. For instance: GET /api/google/v1/app?key1=val1&key2=val2.
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: includeDeleted
+          description: Optional filter that includes any apps with a Deleted status.
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: List of apps
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ListAppResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+      security:
+        - googleoauth:
+            - openid
+            - email
+            - profile
+  "/api/google/v1/apps/{googleProject}":
+    get:
+      summary: List apps within a project
+      description: List kubernetes apps the caller has access to with a project filter
+      operationId: listAppByProject
+      tags:
+        - apps
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: _labels
+          description: >
+            Optional label key-value pairs to filter results by. Example:
+            Querying by key1=val1,key2=val2
+            returns all apps that contain the key1/val1 and key2/val2 labels (possibly among other labels).
+            Note: this string format is a workaround because Swagger doesn't support free-form
+            query string parameters. The recommended way to use this endpoint is to specify the
+            labels as top-level query string parameters. For instance: GET /api/google/v1/app?key1=val1&key2=val2.
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: includeDeleted
+          description: Optional filter that includes any apps with a Deleted status.
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: List of apps
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ListAppResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+      security:
+        - googleoauth:
+            - openid
+            - email
+            - profile
+  "/api/google/v1/apps/{googleProject}/{appName}":
+    post:
+      summary: Creates a new app in the given project with the given name
+      description: Default labels appName, googleProject, serviceAccount, and creator cannot be overridden.
+      operationId: createApp
+      tags:
+        - apps
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: appName
+          description: appName
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/CreateAppRequest"
+      responses:
+        "202":
+          description: App creation successful
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "403":
+          description: User does not have permission to perform action on App
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+      security:
+        - googleoauth:
+            - openid
+            - email
+            - profile
+    get:
+      summary: Get details of an app
+      description: >
+        Returns information about an existing App managed by Leo.
+        Poll this to find out when your app has finished starting up.
+      operationId: getApp
+      tags:
+        - apps
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: appName
+          description: appName
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: App found, here are the details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetAppResponse"
+        "403":
+          description: User does not have permission to perform action on App
+        "404":
+          description: App not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+      security:
+        - googleoauth:
+            - openid
+            - email
+            - profile
+    delete:
+      summary: Deletes an existing app in the given project
+      description: deletes an App
+      operationId: deleteApp
+      tags:
+        - apps
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: appName
+          description: appName
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: App deletion request accepted
+        "403":
+          description: User does not have permission to perform action on App
+        "404":
+          description: App not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+
+  ## Deprecated Notebook API ##
+
+  "/notebooks/{googleProject}/{clusterName}":
+    get:
+      deprecated: true
+      summary: (Deprecated) Access Jupyter notebooks on a Dataproc cluster
+      description: >
+        This URI supports all HTTP methods, not just GET as implied by this
+        Swagger.
+
+        Proxies all requests through to the Jupyter notebook server running on the given cluster.
+      operationId: proxyCluster
+      tags:
+        - notebooks
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: clusterName
+          description: clusterName
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Proxy connection successful
+        "403":
+          description: Proxy connection unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "404":
+          description: Cluster not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "422":
+          description: Cluster is stopped
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "423":
+          description: Cluster not ready for requests. It could be starting.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+  "/notebooks/{googleProject}/{clusterName}/api/localize":
+    post:
+      deprecated: true
+      summary: Localize files to/from a Jupyter notebook server
+      description: >
+        Sends a command to a Jupyter notebook server to localize files to/from
+        the server. Supports GCS paths and [Data
+        URIs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs).
+
+        Output, including any errors, will appear in `localization.log` in the working directory of the Jupyter notebook server.
+
+        By default this operation will happen synchronously and the response status will reflect any errors encountered in the copy.
+
+        However, if the `async` parameter is specfied then the localization will happen asynchronously to the request, and the API will always return 200.
+      operationId: proxyLocalize
+      tags:
+        - notebooks
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: clusterName
+          description: clusterName
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: async
+          description: >
+            If true, the copy will happen asynchronously to the request and the
+            API will always return 200.
+
+            If false (the default), the copy will happen synchronously and the response will reflect any errors encountered during the copy.
+          required: false
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: ""
+              example:
+                ~/file.txt: gs://somebucket/file.txt
+                ~/directory: gs://somebucket/*
+                gs://upload/to/this/bucketdir: ~/file.txt
+                ~/data.txt: data:text/plain;base64,SGVsbG8sIFdvcmxkIQ%3D%3D
+        description: >
+          JSON object. Keys represent destinations, values represent sources.
+          The following rules apply:
+
+          * If either the source or destination is a GCS path, it will be sent to [gsutil cp](https://cloud.google.com/storage/docs/gsutil/commands/cp). Therefore
+            this can be used to localize a file _from_ a bucket _to_ the notebook server; or delocalize a file _from_ the notebook server _to_ a bucket.
+          * If the source is a Data URI, then the destination file will be created with the decoded data URI contents. This mode can only be used to localize
+            files to the notebook server.
+          In both cases all paths will be quoted & sanitized, and intermediate local directories will be made.
+
+          Note that duplicate keys will lead to unexpected behaviour, so specify the destination filename explicitly if you want to localize multiple files to the same directory.
+        required: true
+      responses:
+        "200":
+          description: Proxy connection successful
+        "400":
+          description: "Bad request. Your POST body is probably malformed: it should be a
+            string/string JSON object."
+        "403":
+          description: Proxy connection unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "404":
+          description: Cluster not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "420":
+          description: Cluster not ready
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "422":
+          description: Cluster is stopped
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+  "/notebooks/{googleProject}/{clusterName}/setCookie":
+    get:
+      deprecated: true
+      summary: (Deprecated) Sets a browser cookie needed to authorize connections to a
+        Jupyter notebook
+      description: >
+        If using Google token-based authorization to a Jupyter notebook, the Leo
+        proxy accepts a
+
+        Google token passed as a cookie value. This endpoint facilitates setting that cookie.
+
+        It accepts a bearer token in an Authorization header and responds with a Set-Cookie header.
+      operationId: setCookieApi
+      tags:
+        - notebooks
+      parameters:
+        - in: path
+          name: googleProject
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: clusterName
+          description: clusterName
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Successfully set a cookie
+        "401":
+          description: Proxy connection unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "404":
+          description: Cluster not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+  /notebooks/invalidateToken:
+    get:
+      deprecated: true
+      summary: (Deprecated) Invalidates a token
+      description: >
+        If using Google token-based auth, call this endpoint when a user's
+        Google token is invalidated
+
+        (e.g. when logging out of the application). This ensures that the token is also invalidated in Leo
+
+        and that the user's proxied notebook connections stop working.
+      operationId: invalidateTokenApi
+      tags:
+        - notebooks
+      responses:
+        "200":
+          description: Successfully invalidated a token
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+
+  ## Proxy API ##
+
+  "/proxy/{googleProject}/{clusterName}/jupyter":
+    get:
+      summary: Access Jupyter (if installed) on a Dataproc cluster
+      description: >
+        This URI supports all HTTP methods, not just GET as implied by this
+        Swagger.
+
+        Proxies all requests through to the tool server running on the given cluster.
+      operationId: proxyClusterJupyter
+      tags:
+        - proxy
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: clusterName
+          description: clusterName
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Proxy connection successful
+        "403":
+          description: Proxy connection unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "404":
+          description: Cluster not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "420":
+          description: Cluster not ready
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "422":
+          description: Cluster is stopped
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+  "/proxy/{googleProject}/{clusterName}/jupyter/lab":
+    get:
+      summary: Access Jupyter Lab (if installed) on a Dataproc cluster
+      description: >
+        This URI supports all HTTP methods, not just GET as implied by this
+        Swagger.
+
+        Proxies all requests through to the tool server running on the given cluster.
+      operationId: proxyClusterJupyterLab
+      tags:
+        - proxy
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: clusterName
+          description: clusterName
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Proxy connection successful
+        "403":
+          description: Proxy connection unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "404":
+          description: Cluster not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "420":
+          description: Cluster not ready
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "422":
+          description: Cluster is stopped
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+  "/proxy/{googleProject}/{clusterName}/rstudio":
+    get:
+      summary: Access RStudio (if installed) on a Dataproc cluster
+      description: >
+        This URI supports all HTTP methods, not just GET as implied by this
+        Swagger.
+
+        Proxies all requests through to the tool server running on the given cluster.
+      operationId: proxyClusterRStudio
+      tags:
+        - proxy
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: clusterName
+          description: clusterName
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Proxy connection successful
+        "403":
+          description: Proxy connection unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "404":
+          description: Cluster not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "420":
+          description: Cluster not ready
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "422":
+          description: Cluster is stopped
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+  "/proxy/{googleProject}/{clusterName}/setCookie":
+    get:
+      summary: Sets a browser cookie needed to authorize connections to a Dataproc
+        cluster
+      description: >
+        If using Google token-based authorization to a cluster, the Leo proxy
+        accepts a
+
+        Google token passed as a cookie value. This endpoint facilitates setting that cookie.
+
+        It accepts a bearer token in an Authorization header and responds with a Set-Cookie header.
+      operationId: setCookie
+      tags:
+        - proxy
+      parameters:
+        - in: path
+          name: googleProject
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: clusterName
+          description: clusterName
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Successfully set a cookie
+        "401":
+          description: Proxy connection unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "404":
+          description: Cluster not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+  /proxy/google/v1/apps/{googleProject}/{appName}/{serviceName}:
+    get:
+      summary: Access an app if the app and service name exists
+      description: >
+        This URI supports all HTTP methods, not just GET as implied by this
+        Swagger.
+
+        Proxies all requests through to the app via an ingress controller
+      operationId: proxyApp
+      tags:
+        - proxy
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: appName
+          description: appName
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: serviceName
+          description: serviceName
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Proxy connection successful
+        "403":
+          description: Proxy connection unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "404":
+          description: App or service not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "420":
+          description: App not ready
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "422":
+          description: App is stopped
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+  /proxy/invalidateToken:
+    get:
+      summary: Invalidates a token
+      description: >
+        If using Google token-based auth, call this endpoint when a user's
+        Google token is invalidated
+
+        (e.g. when logging out of the application). This ensures that the token is also invalidated in Leo
+
+        and that the user's proxied connections stop working.
+      operationId: invalidateToken
+      tags:
+        - proxy
+      responses:
+        "200":
+          description: Successfully invalidated a token
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+
+##########################################################################################
+## COMPONENTS
+##########################################################################################
+
+components:
+  requestBodies:
+    CreateRuntimeRequest:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CreateRuntimeRequest"
+          example:
+            runtimeConfig:
+              cloudService: gce
+              machineType: n1-standard-4
+              diskSize: 100
+    UpdateRuntimeRequest:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UpdateRuntimeRequest"
+          example:
+            allowStop: true
+            runtimeConfig:
+              cloudService: gce
+              machineType: n1-highmem-16
+              diskSize: 500
+    CreateDiskRequest:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CreateDiskRequest"
+          example:
+            size: 500
+            diskType: "pd-standard"
+            blockSize: 4096
+    UpdateDiskRequest:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UpdateDiskRequest"
+          example:
+            size: 600
+    CreateAppRequest:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CreateAppRequest"
+          example:
+            diskConfig:
+              name: "disk1"
+    # legacy
+    ClusterRequest:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ClusterRequest"
+      description: Request for new cluster
+      required: true
+  securitySchemes:
+    googleoauth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://accounts.google.com/o/oauth2/auth
+          scopes:
+            openid: open id authorization
+            email: email authorization
+            profile: profile authorization
+  schemas:
+    AppStatus:
+      type: string
+      enum:
+        - STATUS_UNSPECIFIED
+        - RUNNING
+        - ERROR
+        - DELETING
+        - DELETED
+        - PROVISIONING
+    DiskType:
+      type: string
+      enum:
+        - pd-standard
+        - pd-ssd
+    ClusterStatus:
+      type: string
+      enum:
+        - Creating
+        - Running
+        - Updating
+        - Error
+        - Stopping
+        - Stopped
+        - Starting
+        - Deleting
+        - Deleted
+        - Unknown
+    InstanceStatus:
+      type: string
+      enum:
+        - Provisioning
+        - Staging
+        - Running
+        - Stopping
+        - Stopped
+        - Suspending
+        - Suspended
+        - Terminated
+    DiskStatus:
+      type: string
+      enum:
+        - Creating
+        - Restoring
+        - Failed
+        - Ready
+        - Deleting
+        - Deleted
+    ErrorReport:
+      description: ""
+      required:
+        - source
+        - message
+        - causes
+        - stackTrace
+      properties:
+        source:
+          type: string
+          description: service causing error
+        message:
+          type: string
+          description: what went wrong
+        exceptionClass:
+          type: string
+          description: class of exception thrown
+        statusCode:
+          type: integer
+          description: HTTP status code
+        causes:
+          type: array
+          description: errors triggering this one
+          items:
+            $ref: "#/components/schemas/ErrorReport"
+        stackTrace:
+          type: array
+          description: stack trace
+          items:
+            $ref: "#/components/schemas/StackTraceElement"
+    StackTraceElement:
+      description: ""
+      required:
+        - className
+        - methodName
+        - fileName
+        - lineNumber
+      properties:
+        className:
+          type: string
+          description: class name
+        methodName:
+          type: string
+          description: method name
+        fileName:
+          type: string
+          description: source file name
+        lineNumber:
+          type: integer
+          description: line number
+    Cluster:
+      description: ""
+      required:
+        - id
+        - clusterName
+        - googleProject
+        - googleServiceAccount
+        - machineConfig
+        - status
+        - createdDate
+        - labels
+        - dateAccessed
+        - autopauseThreshold
+        - defaultClientId
+        - scopes
+      properties:
+        id:
+          type: string
+          description: The internally-referenced ID of the cluster
+        internalId:
+          type: string
+          description: Internal resource ID of the cluster
+        clusterName:
+          type: string
+          description: The user-supplied name for the cluster
+        googleId:
+          type: string
+          description: Google's UUID for the cluster
+        googleProject:
+          type: string
+          description: The Google Project used to create the cluster
+        googleServiceAccount:
+          type: string
+          description: The Google Service Account used to create the cluster
+        machineConfig:
+          $ref: "#/components/schemas/MachineConfig"
+        operationName:
+          type: string
+          description: Google's operation ID for the cluster
+        status:
+          $ref: "#/components/schemas/ClusterStatus"
+        hostIp:
+          type: string
+          description: The IP address of the cluster master node
+        createdDate:
+          type: string
+          description: The date and time the cluster was created, in ISO-8601 format
+        destroyedDate:
+          type: string
+          description: The date and time the cluster was destroyed, in ISO-8601 format
+        labels:
+          type: object
+          description: The labels to be placed on the cluster. Of type Map[String,String]
+        errors:
+          type: array
+          description: The list of errors that were encountered on cluster create. Each
+            error consists of the error message, code and timestamp
+          items:
+            $ref: "#/components/schemas/ClusterError"
+        instances:
+          description: Array of instances belonging to this cluster
+          type: array
+          items:
+            $ref: "#/components/schemas/Instance"
+        dateAccessed:
+          type: string
+          description: >
+            The date and time the cluster was last accessed, in ISO-8601 format.
+
+            Date accessed is defined as the last time the cluster was created, modified, or accessed via the proxy.
+        autopauseThreshold:
+          type: integer
+          description: The number of minutes of idle time to elapse before the cluster is
+            autopaused. A value of 0 is equivalent to autopause being turned
+            off.
+        defaultClientId:
+          type: string
+          description: The default Google Client ID.
+        scopes:
+          type: array
+          items:
+            type: string
+          description: The scopes for the cluster.
+        customClusterEnvironmentVariables:
+          type: object
+          description: Optional environment variables to be set on the cluster.
+    GetRuntimeResponse:
+      description: ""
+      required:
+        - id
+        - runtimeName
+        - googleProject
+        - serviceAccount
+        - auditInfo
+        - runtimeConfig
+        - status
+        - labels
+        - autopauseThreshold
+        - defaultClientId
+        - scopes
+      properties:
+        id:
+          type: integer
+          description: The leonardo ID of the runtime
+        runtimeName:
+          type: string
+          description: The user-supplied name for the runtime
+        googleProject:
+          type: string
+          description: The Google Project used to create the runtime
+        serviceAccount:
+          type: string
+          description: The Google Service Account used to create the runtime
+        asyncRuntimeFields:
+          $ref: "#/components/schemas/AsyncRuntimeFields"
+        auditInfo:
+          $ref: "#/components/schemas/AuditInfo"
+        runtimeConfig:
+          $ref: "#/components/schemas/MachineConfig"
+        proxyUrl:
+          type: string
+          description: The URL to access a tool on the runtime
+        status:
+          $ref: "#/components/schemas/ClusterStatus"
+        labels:
+          type: object
+          description: The labels to be placed on the runtime. Of type Map[String,String]
+        jupyterUserScriptUri:
+          type: string
+          description: >
+            Optional GCS object URI to a bash script the user wishes to run
+            inside their jupyter
+
+            docker. This script runs exactly once when the cluster is first initialized. Logs from
+
+            this script can be found in the Leo staging bucket for the cluster. Script is run as root
+
+            and docker --privileged.
+        jupyterStartUserScriptUri:
+          type: string
+          description: >
+            Optional GCS object URI to a bash script the user wishes to run on
+            cluster start inside
+
+            the jupyter docker. In contrast to jupyterUserScriptUri, this always runs before starting
+
+            Jupyter, both on initial cluster creation and on cluster resume (jupyterUserScriptUri runs
+
+            once on cluster creation). This script may be used to launch background processes which
+
+            would not otherwise survive a cluster stop/start.
+
+            The script is pulled once at cluster creation time; subsequent client changes to the user
+
+            script at this URI do not affect the cluster. Timestamped logs for this script can be
+
+            found in the Leo staging bucket for the cluster. Script is run as root and docker --privileged.
+        errors:
+          type: array
+          description: The list of errors that were encountered on runtime create. Each
+            error consists of the error message, code and timestamp
+          items:
+            $ref: "#/components/schemas/ClusterError"
+        userJupyterExtensionConfig:
+          $ref: "#/components/schemas/UserJupyterExtensionConfig"
+        autopauseThreshold:
+          type: integer
+          description: The number of minutes of idle time to elapse before the runtime is
+            autopaused. A value of 0 is equivalent to autopause being turned
+            off.
+        defaultClientId:
+          type: string
+          description: The default Google Client ID.
+        runtimeImages:
+          type: array
+          description: The docker images on the runtime
+          items:
+            $ref: '#/components/schemas/RuntimeImage'
+        scopes:
+          type: array
+          items:
+            type: string
+          description: The scopes for the runtime.
+        customEnvironmentVariables:
+          type: object
+          description: Optional environment variables to be set on the runtime.
+        diskConfig:
+          $ref: "#/components/schemas/DiskConfig"
+    ListClusterResponse:
+      description: ""
+      required:
+        - clusterName
+        - googleProject
+        - googleServiceAccount
+        - machineConfig
+        - status
+        - createdDate
+        - labels
+        - dateAccessed
+        - autopauseThreshold
+        - defaultClientId
+      properties:
+        internalId:
+          type: string
+          description: Internal resource ID of the cluster
+        clusterName:
+          type: string
+          description: The user-supplied name for the cluster
+        googleId:
+          type: string
+          description: Google's UUID for the cluster
+        googleProject:
+          type: string
+          description: The Google Project used to create the cluster
+        googleServiceAccount:
+          type: string
+          description: The Google Service Account used to create the cluster
+        machineConfig:
+          $ref: "#/components/schemas/MachineConfig"
+        operationName:
+          type: string
+          description: Google's operation ID for the cluster
+        status:
+          $ref: "#/components/schemas/ClusterStatus"
+        hostIp:
+          type: string
+          description: The IP address of the cluster master node
+        createdDate:
+          type: string
+          description: The date and time the cluster was created, in ISO-8601 format
+        destroyedDate:
+          type: string
+          description: The date and time the cluster was destroyed, in ISO-8601 format
+        labels:
+          type: object
+          description: The labels to be placed on the cluster. Of type Map[String,String]
+        instances:
+          description: Array of instances belonging to this cluster
+          type: array
+          items:
+            $ref: "#/components/schemas/Instance"
+        dateAccessed:
+          type: string
+          description: >
+            The date and time the cluster was last accessed, in ISO-8601 format.
+
+            Date accessed is defined as the last time the cluster was created, modified, or accessed via the proxy.
+        autopauseThreshold:
+          type: integer
+          description: The number of minutes of idle time to elapse before the cluster is
+            autopaused. A value of 0 is equivalent to autopause being turned
+            off.
+        jupyterUserScriptUri:
+          type: string
+        defaultClientId:
+          type: string
+          description: The default Google Client ID.
+    ListRuntimeResponse:
+      description: ""
+      required:
+        - id
+        - runtimeName
+        - googleProject
+        - serviceAccount
+        - runtimeConfig
+        - status
+        - labels
+      properties:
+        id:
+          type: integer
+          description: Internal Leonardo ID of the runtime
+        runtimeName:
+          type: string
+          description: The user-supplied name for the runtime
+        googleProject:
+          type: string
+          description: The Google Project used to create the runtime
+        runtimeConfig:
+          $ref: "#/components/schemas/MachineConfig"
+        proxyUrl:
+          type: string
+          description: The URL to access a tool on the runtime
+        status:
+          $ref: "#/components/schemas/ClusterStatus"
+        labels:
+          type: object
+          description: The labels to be placed on the runtime. Of type Map[String,String]
+        patchInProgress:
+          type: boolean
+          description: Whether there is a patch in progress on the runtime. Is used to indicate updates that require status transitions.
+        diskConfig:
+          $ref: "#/components/schemas/DiskConfig"
+    ListPersistentDiskResponse:
+      description: ""
+      required:
+        - id
+        - googleProject
+        - zone
+        - name
+        - status
+        - auditInfo
+        - size
+        - diskType
+        - blockSize
+      properties:
+        id:
+          type: integer
+          description: Internal Leonardo ID of the persistent disk
+        googleProject:
+          type: string
+          description: The google project used to create the persistent disk
+        zone:
+          type: string
+          description: The google zone in which the persistent disk was created
+        name:
+          type: string
+          description: The user-supplied name of the persistent disk
+        status:
+          $ref: "#/components/schemas/DiskStatus"
+        auditInfo:
+          $ref: "#/components/schemas/AuditInfo"
+        size:
+          type: integer
+          description: Size of persistent disk in GB
+        diskType:
+          $ref: "#/components/schemas/DiskType"
+        blockSize:
+          type: integer
+          description: Block size of persistent disk in bytes
+
+    GetPersistentDiskResponse:
+      description: ""
+      required:
+        - id
+        - googleProject
+        - zone
+        - name
+        - googleId
+        - samResourceId
+        - status
+        - auditInfo
+        - size
+        - diskType
+        - blockSize
+        - labels
+      properties:
+        id:
+          type: integer
+          description: Internal Leonardo ID of the persistent disk
+        googleProject:
+          type: string
+          description: The google project used to create the persistent disk
+        zone:
+          type: string
+          description: The google zone in which the persistent disk was created
+        name:
+          type: string
+          description: The user-supplied name of the persistent disk
+        googleId:
+          type: string
+          description: Google's UUID for the persistent disk
+        samResourceId:
+          type: string
+          description: Internal resource ID of the persistent disk
+        status:
+          $ref: "#/components/schemas/DiskStatus"
+        auditInfo:
+          $ref: "#/components/schemas/AuditInfo"
+        size:
+          type: integer
+          description: Size of persistent disk in GB
+        diskType:
+          $ref: "#/components/schemas/DiskType"
+        blockSize:
+          type: integer
+          description: Block size of persistent disk in bytes
+        labels:
+          type: object
+          description: The labels to be placed on the persistent disk. Of type Map[String,String]
+
+    InstanceKey:
+      description: ""
+      required:
+        - project
+        - zone
+        - name
+      properties:
+        project:
+          type: string
+          description: The Google Project the instance belongs to
+        zone:
+          type: string
+          description: The Google zone the instance belongs to
+        name:
+          type: string
+          description: The name of the instance
+    Instance:
+      description: ""
+      required:
+        - key
+        - googleId
+        - status
+      properties:
+        key:
+          $ref: "#/components/schemas/InstanceKey"
+        googleId:
+          type: string
+          description: Google's unique id for this instance
+        status:
+          $ref: "#/components/schemas/InstanceStatus"
+        ip:
+          type: string
+          description: The public IP address of the instance, if any
+        dataprocRole:
+          type: string
+          description: The dataproc role (master, worker, preemptible worker) of this
+            instance, if any
+        createdDate:
+          type: string
+          description: The date and time the instance was created, in ISO-8601 format
+    ClusterRequest:
+      description: ""
+      properties:
+        labels:
+          type: object
+          description: The labels to be placed on the cluster. Of type Map[String,String]
+        userJupyterExtensionConfig:
+          $ref: "#/components/schemas/UserJupyterExtensionConfig"
+        jupyterExtensionUri:
+          type: string
+          description: Deprecated. Please use userJupyterExtensionConfig.
+        jupyterUserScriptUri:
+          type: string
+          description: >
+            Optional GCS object URI to a bash script the user wishes to run
+            inside their jupyter
+
+            docker. This script runs exactly once when the cluster is first initialized. Logs from
+
+            this script can be found in the Leo staging bucket for the cluster. Script is run as root
+
+            and docker --privileged.
+        jupyterStartUserScriptUri:
+          type: string
+          description: >
+            Optional GCS object URI to a bash script the user wishes to run on
+            cluster start inside
+
+            the jupyter docker. In contrast to jupyterUserScriptUri, this always runs before starting
+
+            Jupyter, both on initial cluster creation and on cluster resume (jupyterUserScriptUri runs
+
+            once on cluster creation). This script may be used to launch background processes which
+
+            would not otherwise survive a cluster stop/start.
+
+            The script is pulled once at cluster creation time; subsequent client changes to the user
+
+            script at this URI do not affect the cluster. Timestamped logs for this script can be
+
+            found in the Leo staging bucket for the cluster. Script is run as root and docker --privileged.
+        machineConfig:
+          $ref: "#/components/schemas/MachineConfig"
+        stopAfterCreation:
+          description: >
+            If true, Leo will immediately stop the cluster once it's created,
+            with the end result being a
+
+            a cluster in Stopped state. Otherwise, the end result will be a cluster in Running state.
+
+            Defaults to false.
+          type: boolean
+          default: false
+        allowStop:
+          type: boolean
+          description: If true, leo will allow updates that require a stop for this
+            cluster. This flag should not be used at the time of cluster
+            creation, but should be specified in the payload for the patch
+            endpoint.
+          default: false
+        autopause:
+          type: boolean
+          description: Whether autopause feature is enabled for this specific cluster. If
+            unset, autopause will be enabled and a system default threshold will
+            be used.
+        autopauseThreshold:
+          type: integer
+          description: The number of minutes of idle time to elapse before the cluster is
+            autopaused. If autopause is set to false, this value is disregarded.
+            A value of 0 is equivalent to autopause being turned off. If
+            autopause is enabled and this is unset, a system default threshold
+            will be used.
+        defaultClientId:
+          type: string
+          description: The default Google Client ID.
+        jupyterDockerImage:
+          type: string
+          description: Deprecated. Please use toolDockerImage.
+        toolDockerImage:
+          type: string
+          description: The tool docker image to install. May be Dockerhub or GCR. If not
+            set, a default Jupyter image will be installed.
+        welderRegistry:
+          type: string
+          enum: [GCR, DockerHub]
+          description: The container registry from which to pull the latest version of welder.
+        welderDockerImage:
+          type: string
+          description: >
+            The Welder docker image to install. Only takes effect if the tool
+            being installed supports welder.
+
+            May be Dockerhub or GCR. If not set, then a default Welder image will be installed.
+        scopes:
+          type: array
+          items:
+            type: string
+          description: >
+            The scopes for the cluster. Defaults (userinfo.email,
+            userinfo.profile, bigquery, source.read_only) will be used if left
+            blank. Important: If you choose to specify custom scopes, the
+            defaults will be overwritten. Thus, if you need the defaults, you
+            will need to include the default scopes in your custom list of
+            scopes.
+          default:
+            - https://www.googleapis.com/auth/userinfo.email
+            - https://www.googleapis.com/auth/userinfo.profile
+            - https://www.googleapis.com/auth/bigquery
+            - https://www.googleapis.com/auth/source.read_only
+        enableWelder:
+          type: boolean
+          description: If set to true, sets up welder on the cluster. If unset, welder will
+            not be put on the cluster.
+          default: true
+        customClusterEnvironmentVariables:
+          type: object
+          description: Optional environment variables to be set on the cluster.
+    CreateRuntimeRequest:
+      description: "Creates a new runtime"
+      type: object
+      properties:
+        labels:
+          type: object
+          description: The labels to be placed on the runtime. Of type Map[String,String]
+        userJupyterExtensionConfig:
+          $ref: "#/components/schemas/UserJupyterExtensionConfig"
+        jupyterUserScriptUri:
+          type: string
+          description: >
+            Optional GCS object URI to a bash script the user wishes to run
+            inside their jupyter docker. This script runs exactly once when the cluster is first initialized. Logs from
+            this script can be found in the Leo staging bucket for the cluster. Script is run as root
+            and docker --privileged.
+        jupyterStartUserScriptUri:
+          type: string
+          description: >
+            Optional GCS object URI to a bash script the user wishes to run on
+            cluster start inside the jupyter docker. In contrast to jupyterUserScriptUri, this always runs before starting
+            Jupyter, both on initial cluster creation and on cluster resume (jupyterUserScriptUri runs
+            once on cluster creation). This script may be used to launch background processes which
+            would not otherwise survive a cluster stop/start.
+            The script is pulled once at cluster creation time; subsequent client changes to the user
+            script at this URI do not affect the cluster. Timestamped logs for this script can be
+            found in the Leo staging bucket for the cluster. Script is run as root and docker --privileged.
+        runtimeConfig:
+          oneOf:
+            - $ref: "#/components/schemas/GceConfig"
+            - $ref: "#/components/schemas/GceWithPdConfig"
+            - $ref: "#/components/schemas/MachineConfig"
+          discriminator:
+            propertyName: cloudService
+        autopause:
+          type: boolean
+          description: Whether autopause feature is enabled for this specific cluster. If
+            unset, autopause will be enabled and a system default threshold will
+            be used.
+        autopauseThreshold:
+          type: integer
+          description: The number of minutes of idle time to elapse before the cluster is
+            autopaused. If autopause is set to false, this value is disregarded.
+            A value of 0 is equivalent to autopause being turned off. If
+            autopause is enabled and this is unset, a system default threshold
+            will be used.
+        defaultClientId:
+          type: string
+          description: The default Google Client ID.
+        toolDockerImage:
+          type: string
+          description: The tool docker image to install. May be Dockerhub or GCR. If not
+            set, a default Jupyter image will be installed.
+        welderRegistry:
+          type: string
+          enum: [GCR, DockerHub]
+          description: The container registry from which to pull the latest version of welder.
+        welderDockerImage:
+          type: string
+          description: >
+            The Welder docker image to install. Only takes effect if the tool
+            being installed supports welder.
+
+            May be Dockerhub or GCR. If not set, then a default Welder image will be installed.
+        scopes:
+          type: array
+          items:
+            type: string
+          description: >
+            The scopes for the cluster. Defaults (userinfo.email,
+            userinfo.profile, bigquery, source.read_only) will be used if left
+            blank. Important: If you choose to specify custom scopes, the
+            defaults will be overwritten. Thus, if you need the defaults, you
+            will need to include the default scopes in your custom list of
+            scopes.
+          default:
+            - https://www.googleapis.com/auth/userinfo.email
+            - https://www.googleapis.com/auth/userinfo.profile
+            - https://www.googleapis.com/auth/bigquery
+            - https://www.googleapis.com/auth/source.read_only
+        customEnvironmentVariables:
+          type: object
+          description: Optional environment variables to be set on the cluster.
+
+    UpdateGceConfig:
+      description: Configuration for Google Compute Engine instances.
+      allOf:
+        - $ref: '#/components/schemas/UpdateRuntimeConfig'
+        - type: object
+          properties:
+            machineType:
+              type: string
+              description: >
+                Optional, the machine type determines the number of CPUs and memory
+                for the instance. For example "n1-standard-16" or "n1-highmem-64".
+                To decide which is right for you, see https://cloud.google.com/compute/docs/machine-types
+            diskSize:
+              type: integer
+              description: >
+                Optional, disk size in gigabytes
+    UpdateDataprocConfig:
+      description: Configuration for Google Dataproc clusters.
+      allOf:
+        - $ref: '#/components/schemas/UpdateRuntimeConfig'
+        - type: object
+          properties:
+            masterMachineType:
+              type: string
+              description: >
+                Optional, the machine type determines the number of CPUs and memory
+                for the cluster master node. For example "n1-standard-16" or "n1-highmem-64".
+                To decide which is right for you, see https://cloud.google.com/compute/docs/machine-types
+            masterDiskSize:
+              type: integer
+              description: >
+                Optional, disk size of the master node in gigabytes
+            numberOfWorkers:
+              type: integer
+              description: >
+                Optional, number of workers in the cluster
+            numberOfPreemptibleWorkers:
+              type: integer
+              description: >
+                Optional, number of preemptible workers in the cluster
+    UpdateRuntimeConfig:
+      description: Updates a runtime configuration
+      type: object
+      required:
+        - cloudService
+      properties:
+        cloudService:
+          type: string
+          enum: [gce, dataproc]
+    UpdateRuntimeRequest:
+      description: Updates a runtime
+      type: object
+      properties:
+        runtimeConfig:
+          oneOf:
+            - $ref: "#/components/schemas/UpdateGceConfig"
+            - $ref: "#/components/schemas/UpdateDataprocConfig"
+          discriminator:
+            propertyName: cloudService
+        allowStop:
+          type: boolean
+          description: Whether leo should stop the runtime if it is necessary for the
+            update. If false, an exception will be thrown in cases where a stop
+            was required. Defaults to false.
+        autopause:
+          type: boolean
+          description: Whether autopause feature is enabled for this specific cluster.
+        autopauseThreshold:
+          type: integer
+          description: The number of minutes of idle time to elapse before the cluster is
+            autopaused. If autopause is set to false, this value is disregarded.
+            A value of 0 is equivalent to autopause being turned off.
+    CreateDiskRequest:
+      description: "Creates a new persistent disk"
+      type: object
+      properties:
+        labels:
+          type: object
+          description: The labels to be placed on the persistent disk. Of type Map[String,String]
+        size:
+          type: integer
+          description: The size of the persistent disk to be created in GB.
+        diskType:
+          $ref: "#/components/schemas/DiskType"
+        blockSize:
+          type: integer
+          description: The block size of the persistent disk to be created in bytes.
+    UpdateDiskRequest:
+      description: "Updates an existing persistent disk"
+      type: object
+      properties:
+        labels:
+          type: object
+          description: The labels to be added or updated on the persistent disk. Of type Map[String,String]
+        size:
+          type: integer
+          description: The size in GB that the persistent disk is to be updated to.
+        diskType:
+          $ref: "#/components/schemas/DiskType"
+        blockSize:
+          type: integer
+          description: The block size in bytes that the persistent disk is to be updated to.
+    ClusterError:
+      description: Errors encountered on cluster create
+      properties:
+        errorMessage:
+          type: string
+          description: Error message
+        errorCode:
+          type: integer
+          description: Error code
+        timestamp:
+          type: string
+          description: timestamp for error in ISO 8601 format
+    AsyncRuntimeFields:
+      description: Fields populated asynchronously to the runtime's creation
+      type: object
+      required:
+        - googleId
+        - operationName
+        - stagingBucket
+      properties:
+        googleId:
+          type: string
+          description: Google's UUID for the runtime
+        operationName:
+          type: string
+          description: The google operation name for creating this runtime. This is globally unique among operation names in google.
+        stagingBucket:
+          type: string
+          description: The staging bucket associated with this user's runtime. Used for various logs associated with runtime creation. Useful if creation fails.
+        hostIp:
+          type: string
+          description: optional. The hostIP associated with this runtime.
+    AuditInfo:
+      description: Fields associated with the audit trail for this runtime
+      type: object
+      required:
+        - creator
+        - createdDate
+        - dateAccessed
+      properties:
+        creator:
+          type: string
+          description: The email for the user that created this runtime
+        createdDate:
+          type: string
+          description: timestamp for the date this runtime was created in ISO 8601 format
+        destroyedDate:
+          type: string
+          description: timestamp for the date this runtime was deleted in ISO 8601 format. This is null if it has not been deleted yet.
+        dateAccessed:
+          type: string
+          description: timestamp for the date this runtime was last accessed in ISO 8601 format. This is null if it has not been deleted yet.
+        kernelFoundBusyDate:
+          type: string
+          description: timestamp for the date the kernel for the tool (i.e. Jupyter) in this runtime was last found busy, aka in use, in ISO 8601 format.
+    LeonardoVersion:
+      type: object
+      properties:
+        version:
+          type: string
+    RuntimeConfig:
+      type: object
+      required:
+        - cloudService
+      properties:
+        cloudService:
+          type: string
+          enum: [gce, dataproc]
+    RuntimeImage:
+      type: object
+      properties:
+        imageType:
+          description: "The container this image supports. Ex Jupyter, Proxy, VM"
+          type: string
+        imageUrl:
+          description: "The place this image can be pulled from"
+          type: string
+        timestamp:
+          type: string
+          description: timestamp for image addition to the runtime in ISO 8601 format
+    GceConfig:
+      description: Configuration for Google Compute Engine instances.
+      allOf:
+        - $ref: '#/components/schemas/RuntimeConfig'
+        - type: object
+          properties:
+            diskSize:
+              type: integer
+              description: >
+                Optional, the size in gigabytes of the disk on the GCE VM.
+                Minimum size is 50GB. If unspecified, default size is 100GB.
+            bootDiskSize:
+              type: integer
+              description: size for boot disk. For old runtimes (prior 6/22/2020, gce runtimes don't have a separate boot disk)
+            machineType:
+              type: string
+              description: >
+                Optional, the machine type determines the number of CPUs and memory
+                for the master node. For example "n1-standard-16"
+
+                or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
+
+                see https://cloud.google.com/compute/docs/machine-types
+    GceWithPdConfig:
+      description: Configuration for Google Compute Engine instances.
+      allOf:
+        - $ref: '#/components/schemas/RuntimeConfig'
+        - type: object
+          properties:
+            persistentDisk:
+              $ref: "#/components/schemas/PersistentDiskRequest"
+            bootDiskSize:
+              type: integer
+              description: size for boot disk
+            machineType:
+              type: string
+              description: >
+                Optional, the machine type determines the number of CPUs and memory
+                for the master node. For example "n1-standard-16"
+
+                or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
+
+                see https://cloud.google.com/compute/docs/machine-types
+    MachineConfig:
+      description: Configuration for a single Dataproc cluster.
+      allOf:
+        - $ref: '#/components/schemas/RuntimeConfig'
+        - type: object
+          properties:
+            numberOfWorkers:
+              type: integer
+              description: >
+                Optional, number of workers in the cluster. Can be 0 (default), 2 or
+                more. Google Dataproc does not allow 1 worker.
+            masterMachineType:
+              type: string
+              description: >
+                Optional, the machine type determines the number of CPUs and memory
+                for the master node. For example "n1-standard-16"
+
+                or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
+
+                see https://cloud.google.com/compute/docs/machine-types
+            masterDiskSize:
+              type: integer
+              description: >
+                Optional, the size in gigabytes of the disk on the master node.
+                Minimum size is 50GB. If unspecified, default size is 100GB.
+            workerMachineType:
+              type: string
+              description: >
+                Optional, the machine type determines the number of CPUs and memory
+                for the worker nodes. For example "n1-standard-16"
+
+                or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
+
+                see https://cloud.google.com/compute/docs/machine-types. Ignored if numberOfWorkers is 0.
+            workerDiskSize:
+              type: integer
+              description: >
+                Optional, the size in gigabytes of the disk on the master node.
+                Minimum size is 10GB. If unspecified, default size is 100GB.
+
+                Ignored if numberOfWorkers is 0.
+            numberOfWorkerLocalSSDs:
+              type: integer
+              description: >
+                Optional, the number of local solid state disks for workers. If
+                unspecified, the default number is 0.
+
+                Ignored if numberOfWorkers is 0.
+            numberOfPreemptibleWorkers:
+              type: integer
+              description: >
+                Optional, the number of preemptible workers. If unspecified, the
+                default number is 0. Ignored if numberOfWorkers is 0.
+
+                For more information, see https://cloud.google.com/compute/docs/instances/preemptible
+            properties:
+              description: >
+                Example {"spark:spark.executor.memory": "10g"}. See
+                https://cloud.google.com/dataproc/docs/concepts/configuring-clusters/cluster-properties
+                for allowed property settings
+              type: object
+              additionalProperties:
+                type: string
+    UserJupyterExtensionConfig:
+      description: Specification of Jupyter Extensions to be installed on the cluster
+      properties:
+        nbExtensions:
+          type: object
+          description: >
+            Optional, map of extension name and nbExtension. The nbExtension can
+            either be a tar.gz or .js file, either on google storage or at a
+            URL, or a python package.
+
+            An archive must not include a parent directory, and must have an entry point named 'main'.
+
+            For more information on notebook extensions, see http://jupyter-notebook.readthedocs.io/en/latest/extending/frontend_extensions.html.
+
+            Example, {"ext1":"gs://bucket/extension.tar.gz", "ext2":"python-package",  "ext3":"http://foo.com/extension.js"}
+        serverExtensions:
+          type: object
+          description: >
+            Optional, map of extension name and server extension. The
+            serverExtensions can either be a tar.gz file on google storage or a
+            python package.
+
+            Example, {"ext1":"gs://bucket/extension.tar.gz", "ext2":"python-package"}
+        combinedExtensions:
+          type: object
+          description: >
+            Optional, map of extension name and notebook plus server extension.
+            The extension can either be a tar.gz file on google storage or a
+            python package.
+
+            Example, {"ext1":"gs://bucket/extension.tar.gz", "ext2":"python-package"}
+        labExtensions:
+          type: object
+          description: >
+            Optional, map of extension name and lab extension. The extension
+            should be a verified jupyterlab extension that is uploaded to npm
+            (list of public extensions here:
+            https://github.com/search?utf8=%E2%9C%93&q=topic%3Ajupyterlab-extension&type=Repositories),
+            a gzipped tarball made using 'npm pack', a folder structured by
+            'jlpm build', a JS file to be inserted into an JL extension template
+            (see https://github.com/jupyterlab/extension-cookiecutter-js), or a
+            URL to one of the last three options.
+    SystemStatus:
+      description: status of each subsystem Leonardo depends on
+      type: object
+      required:
+        - ok
+        - systems
+      properties:
+        ok:
+          type: boolean
+          description: true if everything is ok, false if anything is amiss
+        systems:
+          type: object
+          description: Map[String, SubsystemStatus]
+
+    DiskConfig:
+      description: The configuration of a persistent disk, returned in runtime responses
+      type: object
+      required:
+        - name
+        - size
+        - diskType
+        - blockSize
+      properties:
+        name:
+          type: string
+          description: Name of the persistent disk
+        size:
+          type: integer
+          description: Size of persistent disk in GB
+        diskType:
+          $ref: "#/components/schemas/DiskType"
+        blockSize:
+          type: integer
+          description: Block size of persistent disk in bytes
+
+    CreateAppRequest:
+      description: the configuration of an app, used to create an app
+      type: object
+      properties:
+        diskConfig:
+          $ref: '#/components/schemas/PersistentDiskRequest'
+        appType:
+          type: string
+          description: currently only "GALAXY" is supported
+        kubernetesRuntimeConfig:
+          $ref: '#/components/schemas/KubernetesRuntimeConfig'
+        labels:
+          type: object
+          description: The labels to be placed on the cluster. Of type Map[String,String]
+
+    GetAppResponse:
+      description: the configuration of an app
+      type: object
+      properties:
+        kubernetesRuntimeConfig:
+          $ref: '#/components/schemas/KubernetesRuntimeConfig'
+        errors:
+          type: array
+          description: The list of errors that the app has encountered.
+          items:
+            $ref: "#/components/schemas/KubernetesError"
+        status:
+          $ref: "#/components/schemas/AppStatus"
+        proxyUrls:
+          type: object
+          description: map of service name to proxyUrl
+        diskName:
+          type: string
+          description: the name of the disk associated with this app
+
+    ListAppResponse:
+      description: the configuration of an app
+      type: object
+      properties:
+        googleProject:
+          type: string
+          description: the project this app is associated with
+        kubernetesRuntimeConfig:
+          $ref: '#/components/schemas/KubernetesRuntimeConfig'
+        errors:
+          type: array
+          description: The list of errors that the app has encountered.
+          items:
+            $ref: "#/components/schemas/KubernetesError"
+        status:
+          $ref: "#/components/schemas/AppStatus"
+        proxyUrls:
+          type: object
+          description: map of service name to proxyUrl
+        diskName:
+          type: string
+          description: the name of the disk associated with this app
+        appName:
+          type: string
+          description: the name of the app
+
+    KubernetesRuntimeConfig:
+      description: configuration for a kubernetes app runtime
+      type: object
+      required:
+        - numNodes
+        - machineType
+        - autoscalingEnabled
+      properties:
+        numNodes:
+          type: integer
+          description: number of nodes for the kubernetes app
+        machineType:
+          type: string
+          description: the machine type for the nodes the kubernetes app will run on
+          example: n1-standard-1
+        autoscalingEnabled:
+          type: boolean
+          description: whether or not the nodes autoscale up and down for this app
+
+    PersistentDiskRequest:
+      description: configuration to create a disk
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: The name of the disk. This can reference an existing disk.
+        size:
+          type: integer
+          description: the size of the disk, if this is a creation request. Has an intelligent default otherwise
+        diskType:
+          $ref: "#/components/schemas/DiskType"
+        labels:
+          type: object
+          description: The labels to be placed on the cluster. Of type Map[String,String]
+
+    KubernetesError:
+      description: a kubernetes app error
+      type: object
+      properties:
+        errorMessage:
+          type: string
+          description: a helpful error message
+        timestamp:
+          type: string
+          description: timestamp for error in ISO 8601 format
+        action:
+          type: string
+          description: the api-level action associated with the error, e.g. createApp
+        source:
+          type: string
+          description: the internal source associated with the error
+        googleErrorCode:
+          type: integer
+          description: if the error is associated with an external API call, the error code will be propagated here
+
+
+
