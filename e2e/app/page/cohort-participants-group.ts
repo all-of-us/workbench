@@ -3,7 +3,7 @@ import {FieldSelector} from 'app/page/cohort-build-page';
 import Modal from 'app/component/modal';
 import EllipsisMenu from 'app/component/ellipsis-menu';
 import {waitForNumericalString, waitForText} from 'utils/waits-utils';
-import CohortCriteriaModal, {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/cohort-criteria-modal';
+import CohortSearchPage, {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/cohort-search-page';
 import TieredMenu from 'app/component/tiered-menu';
 import {waitWhileLoading} from 'utils/test-utils';
 import {LinkText} from 'app/text-labels';
@@ -71,9 +71,9 @@ export default class CohortParticipantsGroup {
 
   async includePhysicalMeasurement(criteriaName: PhysicalMeasurementsCriteria, value: number): Promise<string> {
     await this.clickCriteriaMenuItems(['Physical Measurements']);
-    const modal = new CohortCriteriaModal(this.page);
-    await modal.waitUntilVisible();
-    return modal.filterPhysicalMeasurementValue(criteriaName, FilterSign.GreaterThanOrEqualTo, value);
+    const searchPage = new CohortSearchPage(this.page);
+    await searchPage.waitUntilVisible();
+    return searchPage.filterPhysicalMeasurementValue(criteriaName, FilterSign.GreaterThanOrEqualTo, value);
   }
 
   async includeDemographicsDeceased(): Promise<string> {
@@ -81,25 +81,25 @@ export default class CohortParticipantsGroup {
     return this.getGroupCount();
   }
 
-  async includeConditions(): Promise<CohortCriteriaModal> {
+  async includeConditions(): Promise<CohortSearchPage> {
     await this.clickCriteriaMenuItems(['Conditions']);
-    const modal = new CohortCriteriaModal(this.page);
-    await modal.waitUntilVisible();
-    return modal;
+    const searchPage = new CohortSearchPage(this.page);
+    await searchPage.waitUntilVisible();
+    return searchPage;
   }
 
-  async includeDrugs(): Promise<CohortCriteriaModal> {
+  async includeDrugs(): Promise<CohortSearchPage> {
     await this.clickCriteriaMenuItems(['Drugs']);
-    const modal = new CohortCriteriaModal(this.page);
-    await modal.waitUntilVisible();
-    return modal;
+    const searchPage = new CohortSearchPage(this.page);
+    await searchPage.waitUntilVisible();
+    return searchPage;
   }
 
-  async includeEthnicity(): Promise<CohortCriteriaModal> {
+  async includeEthnicity(): Promise<CohortSearchPage> {
     await this.clickCriteriaMenuItems(['Demographics', 'Ethnicity']);
-    const modal = new CohortCriteriaModal(this.page, '//*[@class="modal-container demographics"]');
-    await modal.waitUntilVisible();
-    return modal;
+    const searchPage = new CohortSearchPage(this.page);
+    await searchPage.waitUntilVisible();
+    return searchPage;
   }
 
   async getGroupCount(): Promise<string> {
@@ -108,18 +108,18 @@ export default class CohortParticipantsGroup {
 
   async includeAge(minAge: number, maxAge: number): Promise<string> {
     await this.clickCriteriaMenuItems(['Demographics', 'Age']);
-    const modal = new CohortCriteriaModal(this.page, '//*[@class="modal-container demographics age"]');
-    await modal.waitUntilVisible();
-    const results = await modal.addAge(minAge, maxAge);
+    const searchPage = new CohortSearchPage(this.page);
+    await searchPage.waitUntilVisible();
+    const results = await searchPage.addAge(minAge, maxAge);
     await waitWhileLoading(this.page);
     return results;
   }
 
-  async includeVisits(): Promise<CohortCriteriaModal> {
+  async includeVisits(): Promise<CohortSearchPage> {
     await this.clickCriteriaMenuItems(['Visits']);
-    const modal = new CohortCriteriaModal(this.page);
-    await modal.waitUntilVisible();
-    return modal;
+    const searchPage = new CohortSearchPage(this.page);
+    await searchPage.waitUntilVisible();
+    return searchPage;
   }
 
   private async clickCriteriaMenuItems(menuItemLinks: string[]): Promise<void> {

@@ -6,7 +6,7 @@ import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
 import CohortActionsPage from 'app/page/cohort-actions-page';
-import {Ethnicity} from 'app/page/cohort-criteria-modal';
+import {Ethnicity} from 'app/page/cohort-search-page';
 import {Language} from 'app/text-labels';
 
 describe('Create Dataset', () => {

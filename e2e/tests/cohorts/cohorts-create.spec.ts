@@ -1,4 +1,4 @@
-import {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/cohort-criteria-modal';
+import {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/cohort-search-page';
 import ClrIconLink from 'app/element/clr-icon-link';
 import Link from 'app/element/link';
 import {EllipsisMenuAction, LinkText} from 'app/text-labels';

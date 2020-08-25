@@ -12,7 +12,7 @@ import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
 import CohortActionsPage from './cohort-actions-page';
 import CohortBuildPage from './cohort-build-page';
-import {Visits} from './cohort-criteria-modal';
+import {Visits} from './cohort-search-page';
 import ConceptsetSearchPage from './conceptset-search-page';
 import DatasetBuildPage from './dataset-build-page';
 import NotebookPage from './notebook-page';

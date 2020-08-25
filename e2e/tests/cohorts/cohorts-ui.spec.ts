@@ -1,3 +1,4 @@
+import {PhysicalMeasurementsCriteria} from 'app/page/cohort-search-page';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import {PhysicalMeasurementsCriteria} from 'app/page/cohort-criteria-modal';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';

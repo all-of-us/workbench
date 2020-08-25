@@ -11,7 +11,7 @@ import {waitForNumericalString} from 'utils/waits-utils';
 import {LinkText} from 'app/text-labels';
 import {waitUntilChanged} from 'utils/element-utils';
 
-const defaultXpath = '//*[@class="modal-container"]';
+const defaultXpath = '//*[@id="cohort-search-container"]';
 
 export enum PhysicalMeasurementsCriteria {
   BloodPressure = 'Blood Pressure',
@@ -63,7 +63,7 @@ export enum FilterSign {
   Between = 'Between',
 }
 
-export default class CohortCriteriaModal extends Modal {
+export default class CohortSearchPage extends Modal {
 
   constructor(page: Page, xpath: string = defaultXpath) {
     super(page, xpath);
