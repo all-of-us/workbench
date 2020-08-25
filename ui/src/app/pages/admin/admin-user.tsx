@@ -90,7 +90,6 @@ const ToggleWithLabelAndToggledText = ({label, initialValue, disabled, onToggle,
   </FlexColumn>;
 };
 
-
 const EmailValidationErrorMessage = ({emailValidationResponse, updatedProfile, verifiedInstitutionOptions}) => {
   if (updatedProfile && updatedProfile.verifiedInstitutionalAffiliation) {
     if (emailValidationResponse.isValidMember) {
@@ -111,6 +110,31 @@ const EmailValidationErrorMessage = ({emailValidationResponse, updatedProfile, v
     }
   }
   return null;
+};
+
+const FreeCreditsUsage = ({aboveLimit, usage}) => {
+  const inputStyle = aboveLimit ?
+  {...styles.textInput,
+    backgroundColor: colorWithWhiteness(colors.danger, .95),
+    borderColor: colors.danger,
+    color: colors.danger,
+  } :
+  {...styles.textInput,
+    ...styles.backgroundColorDark,
+    borderColor: colors.disabled,
+    color: colors.disabled};
+
+  return <React.Fragment>
+    <TextInputWithLabel
+      labelText={'Free credits used'}
+      value={usage}
+      inputId={'freeTierUsage'}
+      disabled={true}
+      inputStyle={inputStyle}
+      containerStyle={styles.textInputContainer}
+    />
+    {aboveLimit && <div style={{color: colors.danger}}>Update free credit limit</div>}
+  </React.Fragment>;
 };
 
 interface Props {
@@ -220,6 +244,16 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     // gotcha: JS sorts numbers lexicographically by default
     const numericallySorted = defaultsPlusMaybeOverride.sort((a, b) => a - b);
     return fp.map((limit) => ({label: renderUSD(limit), value: limit}), numericallySorted);
+  }
+
+  getFreeCreditUsage(): string {
+    const {updatedProfile: {freeTierDollarQuota, freeTierUsage}} = this.state;
+    return `${renderUSD(freeTierUsage)} used of ${renderUSD(freeTierDollarQuota)} limit`;
+  }
+
+  usageIsAboveLimit(): boolean {
+    const {updatedProfile: {freeTierDollarQuota, freeTierUsage}} = this.state;
+    return freeTierDollarQuota < freeTierUsage;
   }
 
   async getInstitutions() {
@@ -501,13 +535,9 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
                 containerStyle={styles.textInputContainer}
                 onChange={email => this.setContactEmail(email)}
             />
-            <TextInputWithLabel
-                labelText={'Free credits used'}
-                placeholder={renderUSD(updatedProfile.freeTierUsage)}
-                inputId={'freeTierUsage'}
-                disabled={true}
-                inputStyle={{width: '6.5rem', ...styles.backgroundColorDark}}
-                containerStyle={styles.textInputContainer}
+            <FreeCreditsUsage
+              aboveLimit={this.usageIsAboveLimit()}
+              usage={this.getFreeCreditUsage()}
             />
           </FlexColumn>
           <FlexColumn style={{width: '33%'}}>
