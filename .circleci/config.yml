@@ -583,7 +583,7 @@ jobs:
         enum: ["test", "staging"]
       test_mode:
         description: Switching between "nightly-integration" and normal "integration" test mode.
-        defaults: "integration"
+        default: "integration"
         type: enum
         enum: ["integration", "nightly-integration"]
     <<: *defaults
