@@ -57,7 +57,7 @@ public class ConceptSetService {
   public ConceptSet copyAndSave(
       Long fromConceptSetId, String newConceptSetName, DbUser creator, Long toWorkspaceId) {
     final DbConceptSet existingConceptSet =
-        findDbConceptSet(fromConceptSetId)
+        Optional.ofNullable(conceptSetDao.findOne(fromConceptSetId))
             .orElseThrow(
                 () ->
                     new NotFoundException(
@@ -181,10 +181,6 @@ public class ConceptSetService {
   public List<ConceptSet> findAll(List<Long> conceptSetIds) {
     return ((List<DbConceptSet>) conceptSetDao.findAll(conceptSetIds))
         .stream().map(conceptSetMapper::dbModelToClient).collect(Collectors.toList());
-  }
-
-  public Optional<DbConceptSet> findDbConceptSet(Long conceptSetId) {
-    return Optional.of(conceptSetDao.findOne(conceptSetId));
   }
 
   public List<ConceptSet> findByWorkspaceId(long workspaceId) {
