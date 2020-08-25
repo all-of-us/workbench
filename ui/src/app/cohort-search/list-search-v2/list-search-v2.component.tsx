@@ -95,6 +95,11 @@ const styles = reactStyles({
     borderBottom: 0,
     tableLayout: 'fixed'
   },
+  tableBody: {
+    tableLayout: 'auto',
+    borderRadius: '0 3px 3px 0',
+    borderTop: 0
+  },
   columnHeader: {
     padding: '0 0 0 0.25rem',
     background: colorWithWhiteness(colors.dark, 0.93),
@@ -415,7 +420,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
             </thead>
           </table>
           <div style={{height: '15rem', overflowY: 'auto'}}>
-            <table className='p-datatable' style={{...styles.table, tableLayout: 'auto'}}>
+            <table className='p-datatable' style={{...styles.table, ...styles.tableBody}}>
               <tbody className='p-datatable-tbody'>
               {displayData.map((row, r) => {
                 const open = ingredients[row.id] && ingredients[row.id].open;
