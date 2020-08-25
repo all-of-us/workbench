@@ -26,7 +26,7 @@ export const withFullHeight = WrappedComponent => ({...props}) => {
 };
 
 export const SubRoute = ({children}): React.ReactElement => <Switch>{children}</Switch>;
-export const AppRouter = ({children}): React.ReactElement => <BrowserRouter><SubRoute>{children}</SubRoute></BrowserRouter>;
+export const AppRouter = ({children}): React.ReactElement => <BrowserRouter>{children}</BrowserRouter>;
 
 export const RouteLink = ({path, style = {}, children}): React.ReactElement => <Link style={{...style}} to={path}>{children}</Link>;
 
@@ -41,27 +41,32 @@ const NavRedirect = ({path}) => {
 export const AppRoute = ({path, data = {}, guards = [], component: Component}): React.ReactElement => {
   const routeParams = useParams();
   const routeHistory = useHistory();
-  const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
 
   return <Route exact={true} path={path} render={
     () => {
+      const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
       return redirectPath
         ? <NavRedirect path={redirectPath}/>
-        : <Component urlParams={routeParams} routeHistory={routeHistory} routeConfig={data}/>
+        : <Component urlParams={routeParams} routeHistory={routeHistory} routeConfig={data}/>;
     }}>
   </Route>;
 };
 
 export const ProtectedRoutes = (
   {guards, children}: {guards: Guard[], children: any }): React.ReactElement => {
-  // const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
 
-  // If the guard fails AND we have a route match redirect
+  // Pass the guards to the individual routes. Be sure not to overwrite any existing guards
   const guardedChildren = fp.flow(
     fp.flatten,
     fp.toPairs,
-    fp.map(([key, element]: [string, React.ReactElement]) => React.cloneElement(element, {key, guards}))
+    fp.map(
+      ([key, element]: [string, React.ReactElement]) => {
+        const {guards: elementGuards = []} = element.props;
+        return React.cloneElement(element, {key, guards: [...elementGuards, ...guards]});
+      }
+    )
   )([children]);
+
   return <Fragment>{guardedChildren}</Fragment>;
 };
 
