@@ -501,7 +501,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
             />
             <TextInputWithLabel
                 labelText={'Free credits used'}
-                placeholder={updatedProfile.freeTierUsage}
+                placeholder={renderUSD(updatedProfile.freeTierUsage)}
                 inputId={'freeTierUsage'}
                 disabled={true}
                 inputStyle={{width: '6.5rem', ...styles.backgroundColorDark}}
