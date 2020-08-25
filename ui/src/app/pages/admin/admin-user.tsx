@@ -512,8 +512,8 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
             <DropdownWithLabel
                 label={'Free credit limit'}
                 options={this.getFreeCreditLimitOptions()}
-                initialValue={updatedProfile.freeTierDollarQuota}
                 onChange={async(event) => this.setFreeTierCreditDollarLimit(event.value)}
+                initialValue={updatedProfile.freeTierDollarQuota}
                 dropdownStyle={{width: '4.5rem'}}
                 dataTestId={'freeTierDollarQuota'}
             />
