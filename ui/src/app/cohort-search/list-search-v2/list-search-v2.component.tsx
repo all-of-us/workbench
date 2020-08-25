@@ -91,8 +91,9 @@ const styles = reactStyles({
   table: {
     width: '100%',
     border: borderStyle,
-    borderRadius: '3px',
-    tableLayout: 'fixed',
+    borderRadius: '3px 3px 0 0',
+    borderBottom: 0,
+    tableLayout: 'fixed'
   },
   columnHeader: {
     padding: '0 0 0 0.25rem',
@@ -329,10 +330,10 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
             </div>
           </TooltipTrigger>
         </td>
-        <td style={styles.columnBody}>{row.code}</td>
-        <td style={styles.columnBody}>{!brand && row.type}</td>
-        <td style={styles.columnBody}>{row.count > -1 && row.count.toLocaleString()}</td>
-        <td style={{...styles.columnBody}}>
+        <td style={{...styles.columnBody, width: '20%'}}>{row.code}</td>
+        <td style={{...styles.columnBody, width: '10%'}}>{!brand && row.type}</td>
+        <td style={{...styles.columnBody, width: '8%'}}>{row.count > -1 && row.count.toLocaleString()}</td>
+        <td style={{...styles.columnBody, textAlign: 'center', width: '12%'}}>
           {row.hasHierarchy && <i className='pi pi-sitemap' style={styles.treeIcon} onClick={() => this.showHierarchy(row)}/>}
         </td>
       </tr>;
