@@ -96,7 +96,6 @@ const styles = reactStyles({
     tableLayout: 'fixed'
   },
   tableBody: {
-    tableLayout: 'auto',
     borderRadius: '0 3px 3px 0',
     borderTop: 0
   },
@@ -337,7 +336,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
         </td>
         <td style={{...styles.columnBody, width: '20%'}}>{row.code}</td>
         <td style={{...styles.columnBody, width: '10%'}}>{!brand && row.type}</td>
-        <td style={{...styles.columnBody, width: '8%'}}>{row.count > -1 && row.count.toLocaleString()}</td>
+        <td style={{...styles.columnBody, width: '8%', paddingLeft: '0.2rem'}}>{row.count > -1 && row.count.toLocaleString()}</td>
         <td style={{...styles.columnBody, textAlign: 'center', width: '12%'}}>
           {row.hasHierarchy && <i className='pi pi-sitemap' style={styles.treeIcon} onClick={() => this.showHierarchy(row)}/>}
         </td>
