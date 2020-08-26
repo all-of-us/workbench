@@ -62,10 +62,10 @@ export const ProtectedRoutes = (
     fp.map(
       ([key, element]: [string, React.ReactElement]) => {
         const {guards: elementGuards = []} = element.props;
-        return React.cloneElement(element, {key, guards: [...elementGuards, ...guards]});
+        return React.cloneElement(element, {key, guards: [...guards, ...elementGuards ]});
       }
     )
-  )([children]);
+  )([children]); // Make sure children is an array - a single child will not be in an array
 
   return <Fragment>{guardedChildren}</Fragment>;
 };
