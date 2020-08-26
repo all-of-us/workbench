@@ -8,13 +8,14 @@ import {SessionExpired} from 'app/pages/session-expired';
 import {SignInAgain} from 'app/pages/sign-in-again';
 import {UserDisabled} from 'app/pages/user-disabled';
 import {SignInService} from 'app/services/sign-in.service';
-import {ReactWrapperBase} from 'app/utils';
-import {authStore, useStore} from 'app/utils/stores';
+import {hasRegisteredAccess, ReactWrapperBase} from 'app/utils';
+import {authStore, profileStore, useStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Redirect} from 'react-router';
 import {Homepage} from './pages/homepage/homepage';
 import {SignIn} from './pages/login/sign-in';
+import {WorkspaceLibrary} from './pages/workspace/workspace-library';
 import {AnalyticsTracker} from './utils/analytics';
 
 
@@ -23,11 +24,10 @@ const signInGuard: Guard = {
   redirectPath: '/login'
 };
 
-// This will be added back in after the protectedRoutes fix
-// const registrationGuard: Guard = {
-//   allowed: (): boolean => hasRegisteredAccess(profileStore.get().profile.dataAccessLevel),
-//   redirectPath: '/'
-// };
+const registrationGuard: Guard = {
+  allowed: (): boolean => hasRegisteredAccess(profileStore.get().profile.dataAccessLevel),
+  redirectPath: '/'
+};
 
 const CookiePolicyPage = withRouteData(CookiePolicy);
 const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight)(DataUserCodeOfConduct);
@@ -38,6 +38,7 @@ const SignInPage = withRouteData(SignIn);
 const UserAuditPage = withRouteData(UserAudit);
 const UserDisabledPage = withRouteData(UserDisabled);
 const WorkspaceAuditPage = withRouteData(WorkspaceAudit);
+const WorkspaceLibraryPage = withRouteData(WorkspaceLibrary);
 
 interface RoutingProps {
   onSignIn: () => void;
@@ -97,8 +98,14 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           }} />}
       />
       <AppRoute path='/nih-callback' component={() => <HomepagePage routeData={{title: 'Homepage'}}/>} />
-    </ProtectedRoutes>
 
+      <ProtectedRoutes guards={[registrationGuard]}>
+        <AppRoute
+          path='/library'
+          component={() => <WorkspaceLibraryPage routeData={{title: 'Workspace Library', minimizeChrome: false}}/>}
+        />
+      </ProtectedRoutes>
+    </ProtectedRoutes>
   </AppRouter>;
 };
 
