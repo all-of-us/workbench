@@ -659,31 +659,31 @@ jobs:
           command: echo "./project.rb generate-private-cdr-counts --bq-project all-of-us-ehr-dev --bq-dataset SR2019q4r4 --workbench-project all-of-us-workbench-test --cdr-version sr_2019q4_1 --bucket all-of-us-workbench-private-cloudsql"
 
 workflows:
-  build-test-deploy:
-    jobs:
-      # Always run basic test/lint/compilation (open PRs, master merge).
-      # Note: by default tags are not picked up.
-      - api-local-test
-      - api-unit-test
-      - ui-unit-test
-      - api-bigquery-test
-      - api-integration-test
-      - puppeteer-e2e-local-ui
-      # Run deployment to "test" on master merges.
-      - api-deploy-to-test:
-          filters: *filter_only_master_branch
-          requires:
-            - api-unit-test
-      - ui-deploy-to-test:
-          filters: *filter_only_master_branch
-          requires:
-            - ui-unit-test
-      # On master branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully.
-      - puppeteer-e2e-test:
-          filters: *filter_only_master_branch
-          requires:
-            - api-deploy-to-test
-            - ui-deploy-to-test
+  # build-test-deploy:
+  #   jobs:
+  #     # Always run basic test/lint/compilation (open PRs, master merge).
+  #     # Note: by default tags are not picked up.
+  #     - api-local-test
+  #     - api-unit-test
+  #     - ui-unit-test
+  #     - api-bigquery-test
+  #     - api-integration-test
+  #     - puppeteer-e2e-local-ui
+  #     # Run deployment to "test" on master merges.
+  #     - api-deploy-to-test:
+  #         filters: *filter_only_master_branch
+  #         requires:
+  #           - api-unit-test
+  #     - ui-deploy-to-test:
+  #         filters: *filter_only_master_branch
+  #         requires:
+  #           - ui-unit-test
+  #     # On master branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully.
+  #     - puppeteer-e2e-test:
+  #         filters: *filter_only_master_branch
+  #         requires:
+  #           - api-deploy-to-test
+  #           - ui-deploy-to-test
 
   deploy-staging:
     jobs:
@@ -730,7 +730,7 @@ workflows:
     jobs:
       - cdr-make-bq-denormalized-tables
       - cdr-make-bq-denormalized-tables-for-data-browser
-      - cdr-generate-private-counts
+      - cdr-generate-private-counts:
         requires:
           - cdr-make-bq-denormalized-tables
 
