@@ -16,9 +16,9 @@ public class LeonardoRetryHandler extends RetryHandler<ApiException> {
 
   private static final Logger logger = Logger.getLogger(LeonardoRetryHandler.class.getName());
 
-  private static class NotebookRetryPolicy extends ResponseCodeRetryPolicy {
+  private static class LeonardoRetryPolicy extends ResponseCodeRetryPolicy {
 
-    public NotebookRetryPolicy() {
+    public LeonardoRetryPolicy() {
       super("Leonardo API");
     }
 
@@ -50,7 +50,7 @@ public class LeonardoRetryHandler extends RetryHandler<ApiException> {
 
   @Autowired
   public LeonardoRetryHandler(BackOffPolicy backoffPolicy) {
-    super(backoffPolicy, new NotebookRetryPolicy());
+    super(backoffPolicy, new LeonardoRetryPolicy());
   }
 
   @Override
