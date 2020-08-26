@@ -9,7 +9,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {NewNotebookModal} from 'app/pages/analysis/new-notebook-modal';
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {withCurrentWorkspace} from 'app/utils';
 import {convertToResource} from 'app/utils/resourceActions';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
