@@ -57,7 +57,9 @@ const styles = reactStyles({
   }
 });
 
-const freeCreditLimitDefaultOptions = new Set([300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800]);
+const CREDIT_LIMIT_DEFAULT_MIN = 300;
+const CREDIT_LIMIT_DEFAULT_MAX = 800;
+const CREDIT_LIMIT_DEFAULT_STEP = 50;
 
 const DropdownWithLabel = ({label, options, initialValue, onChange, disabled= false, dataTestId, dropdownStyle = {}}) => {
   return <FlexColumn data-test-id={dataTestId} style={{marginTop: '1rem'}}>
@@ -245,9 +247,16 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
 
   getFreeCreditLimitOptions() {
     const {oldProfile: {freeTierDollarQuota}} = this.state;
-    const defaultsPlusMaybeOverride = Array.from(freeCreditLimitDefaultOptions.add(freeTierDollarQuota));
+
+    const defaultsPlusMaybeOverride = new Set(
+      // gotcha: argument order for rangeStep is (step, start, end)
+      // IntelliJ incorrectly believes takes the order is (start, end, step)
+      fp.rangeStep(CREDIT_LIMIT_DEFAULT_STEP, CREDIT_LIMIT_DEFAULT_MIN, CREDIT_LIMIT_DEFAULT_MAX))
+      .add(freeTierDollarQuota);
+
     // gotcha: JS sorts numbers lexicographically by default
-    const numericallySorted = defaultsPlusMaybeOverride.sort((a, b) => a - b);
+    const numericallySorted = Array.from(defaultsPlusMaybeOverride).sort((a, b) => a - b);
+
     return fp.map((limit) => ({label: formatFreeCreditsUSD(limit), value: limit}), numericallySorted);
   }
 
