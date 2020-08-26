@@ -17,6 +17,22 @@ parameters:
   mysql_image:
     type: string
     default: "circleci/mysql:5.7"
+  # CDR index generation parameters
+  build_cdr_indices:
+    type: boolean
+    default: false
+  cdr_source_project:
+    type: string
+  cdr_source_dataset:
+    type: string
+  cdr_sql_bucket:
+    type: string
+  cdr_dest_project:
+    type: string
+  cdr_version_db_name:
+    type: string
+  cdr_date:
+    type: string
 
 # -------------------------
 #   ANCHORS
@@ -726,7 +742,8 @@ workflows:
             # - deploy-staging
 
   build-cdr-indices:
-    # We'll want to filter this so it can only be launched manually.
+    # This only runs when launched manually via the Pipelines API.
+    when: << pipeline.parameters.build_cdr_indices >>
     jobs:
       - cdr-make-bq-denormalized-tables
       - cdr-make-bq-denormalized-tables-for-data-browser
