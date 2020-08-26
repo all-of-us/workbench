@@ -7,6 +7,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,6 +20,7 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.model.CdrVersion;
 import org.pmiops.workbench.model.CdrVersionListResponse;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.test.FakeClock;
@@ -91,7 +93,7 @@ public class CdrVersionsControllerTest {
             "Test Registered CDR",
             123L,
             DataAccessLevel.REGISTERED,
-            "microarray");
+            null);
     protectedCdrVersion =
         makeCdrVersion(
             2L, /* isDefault */
@@ -109,14 +111,27 @@ public class CdrVersionsControllerTest {
 
   @Test
   public void testGetCdrVersions_microarray() {
+    user.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
+    List<CdrVersion> cdrVersions = cdrVersionsController
+        .getCdrVersions()
+        .getBody()
+        .getItems();
+
     assertThat(
-            cdrVersionsController
-                .getCdrVersions()
-                .getBody()
-                .getItems()
-                .get(0)
-                .getMicroarrayBigqueryDataset())
-        .isEqualTo("microarray");
+        cdrVersions.stream()
+            .filter(v -> v.getName().equals("Test Registered CDR"))
+            .findFirst()
+            .get()
+            .getHasMicroarrayData())
+        .isFalse();
+
+    assertThat(
+        cdrVersions.stream()
+            .filter(v -> v.getName().equals("Test Protected CDR"))
+            .findFirst()
+            .get()
+            .getHasMicroarrayData())
+        .isTrue();
   }
 
   @Test

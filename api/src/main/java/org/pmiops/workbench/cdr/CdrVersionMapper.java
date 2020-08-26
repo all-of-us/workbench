@@ -12,7 +12,12 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
     uses = {CommonMappers.class})
 public interface CdrVersionMapper {
 
+  @Mapping(source = "microarrayBigqueryDataset", target = "hasMicroarrayData")
   @Mapping(source = "dataAccessLevelEnum", target = "dataAccessLevel")
   @Mapping(source = "archivalStatusEnum", target = "archivalStatus")
   CdrVersion dbModelToClient(DbCdrVersion db);
+
+  default boolean isNonNull(String s) {
+    return s != null;
+  }
 }
