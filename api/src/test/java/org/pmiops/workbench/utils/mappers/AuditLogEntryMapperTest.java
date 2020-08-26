@@ -2,11 +2,13 @@ package org.pmiops.workbench.utils.mappers;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static org.pmiops.workbench.utils.TemporalAssertions.assertTimeWithinTolerance;
 
 import com.google.common.collect.ImmutableList;
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
-import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -24,8 +26,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 public class AuditLogEntryMapperTest {
 
-  private static final DateTime EVENT_TIME_1 = DateTime.parse("2010-06-30T01:20+02:00");
-  private static final DateTime EVENT_TIME_2 = DateTime.parse("2015-06-30T01:20+02:00");
+  private static final OffsetDateTime EVENT_TIME_1 = OffsetDateTime.parse("2010-06-30T01:20+02:00");
+  private static final OffsetDateTime EVENT_TIME_2 = OffsetDateTime.parse("2015-06-30T01:20+02:00");
   private static final int TIME_TOLERANCE_MILLIS = 100;
   private static final long AGENT_ID = 101L;
   private static final long TARGET_ID = 202L;
@@ -263,9 +265,7 @@ public class AuditLogEntryMapperTest {
             .filter(a -> a.getActionId().equals(ACTION_ID_1))
             .findFirst()
             .orElseThrow(() -> new NotFoundException("Action not found"));
-    assertThat((double) action1.getActionTime().getMillis())
-        .isWithin(TIME_TOLERANCE_MILLIS)
-        .of(EVENT_TIME_1.getMillis());
+    assertTimeWithinTolerance(action1.getActionTime().toInstant(), EVENT_TIME_1.toInstant());
     assertThat(action1.getEventBundles()).hasSize(1);
     assertThat(action1.getActionTime()).isEqualTo(EVENT_TIME_1);
     assertThat(action1.getEventBundles()).hasSize(1);
@@ -287,9 +287,7 @@ public class AuditLogEntryMapperTest {
             .filter(a -> a.getActionId().equals(ACTION_ID_2))
             .findFirst()
             .orElseThrow(() -> new NotFoundException("Action not found"));
-    assertThat((double) action2.getActionTime().getMillis())
-        .isWithin(TIME_TOLERANCE_MILLIS)
-        .of(EVENT_TIME_2.getMillis());
+    assertTimeWithinTolerance(action2.getActionTime(), EVENT_TIME_2);
     final AuditEventBundle bundle2 = action2.getEventBundles().get(0);
     assertThat(bundle2.getHeader().getActionType()).isEqualTo(ACTION_TYPE_DELETE);
 
@@ -303,5 +301,11 @@ public class AuditLogEntryMapperTest {
 
     assertThat(header2.getActionType()).isEqualTo(ACTION_TYPE_DELETE);
     assertThat(eventBundle2.getPropertyChanges()).hasSize(1);
+  }
+
+  public void assertRelativeInstant(Instant actual, Instant expected) {
+    assertThat((double) actual.toEpochMilli())
+        .isWithin(TIME_TOLERANCE_MILLIS)
+        .of(expected.toEpochMilli());
   }
 }

@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
 import java.time.Clock;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.joda.time.DateTime;
@@ -72,7 +73,7 @@ public class WorkspaceAdminControllerTest {
                       .agentId(1111L)
                       .agentType("ADMINISTRATOR")
                       .agentUsername(FIRECLOUD_WORKSPACE_CREATOR_USERNAME)
-                      .eventTime(DateTime.parse("2020-02-10T01:20+02:00"))
+                      .eventTime(OffsetDateTime.parse("2020-02-10T01:20+02:00"))
                       .newValue("true")
                       .previousValue(null)
                       .targetId(DB_WORKSPACE_ID)

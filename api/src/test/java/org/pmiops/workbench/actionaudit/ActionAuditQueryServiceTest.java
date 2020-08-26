@@ -149,7 +149,7 @@ public class ActionAuditQueryServiceTest {
     assertThat(row1.getTargetType()).isEqualTo("WORKSPACE");
     assertThat(row1.getPreviousValue()).isNull();
     assertThat(row1.getAgentId()).isEqualTo(AGENT_ID);
-    assertThat((double) row1.getEventTime().getMillis())
+    assertThat((double) row1.getEventTime().toEpochSecond() * 1000)
         .isWithin(TIME_TOLERANCE_MILLIS)
         .of(EVENT_INSTANT.toEpochMilli());
 

@@ -15,6 +15,7 @@ import com.ifountain.opsgenie.client.swagger.model.SuccessResponse;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import org.joda.time.DateTime;
@@ -85,7 +86,7 @@ public class EgressEventServiceTest {
           .role(WorkspaceAccessLevel.OWNER)
           .userDatabaseId(111L)
           .userModel(USER_1)
-          .userAccountCreatedTime(DateTime.parse("2018-08-30T01:20+02:00"));
+          .userAccountCreatedTime(OffsetDateTime.parse("2018-08-30T01:20+02:00"));
 
   private static final String INSTITUTION_1_NAME = "Verily Life Sciences";
   private static final DbUser DB_USER_1 = workspaceAdminUserViewToUser(ADMIN_VIEW_1);
@@ -101,7 +102,7 @@ public class EgressEventServiceTest {
           .role(WorkspaceAccessLevel.READER)
           .userDatabaseId(222L)
           .userModel(USER_2)
-          .userAccountCreatedTime(DateTime.parse("2019-03-25T10:30+02:00"));
+          .userAccountCreatedTime(OffsetDateTime.parse("2019-03-25T10:30+02:00"));
   private static final DbUser DB_USER_2 = workspaceAdminUserViewToUser(ADMIN_VIEW_2);
 
   @TestConfiguration
@@ -198,7 +199,7 @@ public class EgressEventServiceTest {
     result.setFamilyName(userModel.getFamilyName());
     result.setUsername(userModel.getUserName());
     result.setContactEmail(userModel.getEmail());
-    result.setCreationTime(new Timestamp(adminView.getUserAccountCreatedTime().getMillis()));
+    result.setCreationTime(Timestamp.from(adminView.getUserAccountCreatedTime().toInstant()));
     return result;
   }
 }
