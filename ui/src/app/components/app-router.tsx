@@ -53,7 +53,7 @@ export const AppRoute = ({path, data = {}, guards = [], component: Component}): 
 };
 
 export const ProtectedRoutes = (
-  {guards, children}: {guards: Guard[], children: any }): React.ReactElement => {
+  {guards, children}: {guards: Guard[], children: React.ReactElement | React.ReactElement[] }): React.ReactElement => {
 
   // Pass the guards to the individual routes. Be sure not to overwrite any existing guards
   const guardedChildren = fp.flow(
