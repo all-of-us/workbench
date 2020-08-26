@@ -3,6 +3,7 @@ package org.pmiops.workbench.actionaudit;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
+import static org.pmiops.workbench.utils.TemporalAssertions.assertTimeWithinTolerance;
 
 import com.google.api.gax.paging.Page;
 import com.google.cloud.bigquery.EmptyTableResult;
@@ -102,7 +103,6 @@ public class ActionAuditQueryServiceTest {
   private static final long DEFAULT_LIMIT = 100L;
   private static final Instant DEFAULT_AFTER = Instant.parse("2005-02-14T01:20:00.02Z");
   private static final Instant DEFAULT_BEFORE = Instant.parse("2020-08-30T01:20:00.02Z");
-  private static final long TIME_TOLERANCE_MILLIS = 500;
   private static final long USER_DB_ID = 11223344L;
   @MockBean private BigQueryService mockBigQueryService;
   @Autowired private ActionAuditQueryService actionAuditQueryService;
@@ -149,9 +149,7 @@ public class ActionAuditQueryServiceTest {
     assertThat(row1.getTargetType()).isEqualTo("WORKSPACE");
     assertThat(row1.getPreviousValue()).isNull();
     assertThat(row1.getAgentId()).isEqualTo(AGENT_ID);
-    assertThat((double) row1.getEventTime().toEpochSecond() * 1000)
-        .isWithin(TIME_TOLERANCE_MILLIS)
-        .of(EVENT_INSTANT.toEpochMilli());
+    assertTimeWithinTolerance(row1.getEventTime().toInstant(), EVENT_INSTANT);
 
     final AuditLogEntry row2 = response.getLogEntries().get(1);
     assertThat(row2.getActionId()).isEqualTo(ACTION_ID_1);

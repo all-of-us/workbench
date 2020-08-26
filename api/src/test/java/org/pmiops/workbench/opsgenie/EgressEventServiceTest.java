@@ -18,7 +18,6 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.regex.Pattern;
-import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,8 +50,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 public class EgressEventServiceTest {
 
-  private static final Instant NOW =
-      Instant.ofEpochMilli(DateTime.parse("2020-06-11T01:30+02:00").getMillis());
+  private static final Instant NOW = Instant.parse("2020-06-11T01:30+02:00");
   private static final String INSTITUTION_2_NAME = "Auburn University";
   private static WorkbenchConfig workbenchConfig;
   private static final EgressEvent EGRESS_EVENT_1 =

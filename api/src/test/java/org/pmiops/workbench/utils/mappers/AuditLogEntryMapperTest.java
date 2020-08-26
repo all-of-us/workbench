@@ -5,7 +5,6 @@ import static com.google.common.truth.Truth8.assertThat;
 import static org.pmiops.workbench.utils.TemporalAssertions.assertTimeWithinTolerance;
 
 import com.google.common.collect.ImmutableList;
-import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -28,7 +27,6 @@ public class AuditLogEntryMapperTest {
 
   private static final OffsetDateTime EVENT_TIME_1 = OffsetDateTime.parse("2010-06-30T01:20+02:00");
   private static final OffsetDateTime EVENT_TIME_2 = OffsetDateTime.parse("2015-06-30T01:20+02:00");
-  private static final int TIME_TOLERANCE_MILLIS = 100;
   private static final long AGENT_ID = 101L;
   private static final long TARGET_ID = 202L;
   private static final String ACTION_ID_1 = "11111111-1111-1111-1111-111111111111";
@@ -301,11 +299,5 @@ public class AuditLogEntryMapperTest {
 
     assertThat(header2.getActionType()).isEqualTo(ACTION_TYPE_DELETE);
     assertThat(eventBundle2.getPropertyChanges()).hasSize(1);
-  }
-
-  public void assertRelativeInstant(Instant actual, Instant expected) {
-    assertThat((double) actual.toEpochMilli())
-        .isWithin(TIME_TOLERANCE_MILLIS)
-        .of(expected.toEpochMilli());
   }
 }
