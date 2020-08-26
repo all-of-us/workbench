@@ -112,25 +112,22 @@ public class CdrVersionsControllerTest {
   @Test
   public void testGetCdrVersions_microarray() {
     user.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
-    List<CdrVersion> cdrVersions = cdrVersionsController
-        .getCdrVersions()
-        .getBody()
-        .getItems();
+    List<CdrVersion> cdrVersions = cdrVersionsController.getCdrVersions().getBody().getItems();
 
     assertThat(
-        cdrVersions.stream()
-            .filter(v -> v.getName().equals("Test Registered CDR"))
-            .findFirst()
-            .get()
-            .getHasMicroarrayData())
+            cdrVersions.stream()
+                .filter(v -> v.getName().equals("Test Registered CDR"))
+                .findFirst()
+                .get()
+                .getHasMicroarrayData())
         .isFalse();
 
     assertThat(
-        cdrVersions.stream()
-            .filter(v -> v.getName().equals("Test Protected CDR"))
-            .findFirst()
-            .get()
-            .getHasMicroarrayData())
+            cdrVersions.stream()
+                .filter(v -> v.getName().equals("Test Protected CDR"))
+                .findFirst()
+                .get()
+                .getHasMicroarrayData())
         .isTrue();
   }
 
