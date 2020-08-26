@@ -10,7 +10,7 @@ import org.pmiops.workbench.model.WorkspaceUserAdminView;
 
 @Mapper(
     config = MapStructConfig.class,
-    uses = {CommonMappers.class, FirecloudMapper.class})
+    uses = {FirecloudMapper.class})
 public interface UserMapper {
   @Mapping(source = "acl", target = "role")
   @Mapping(source = "user.username", target = "email")
