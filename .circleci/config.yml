@@ -731,8 +731,8 @@ workflows:
       - cdr-make-bq-denormalized-tables
       - cdr-make-bq-denormalized-tables-for-data-browser
       - cdr-generate-private-counts:
-        requires:
-          - cdr-make-bq-denormalized-tables
+          requires:
+            - cdr-make-bq-denormalized-tables
 
   nightly-tests:
     triggers:
