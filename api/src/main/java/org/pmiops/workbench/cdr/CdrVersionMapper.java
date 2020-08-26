@@ -17,7 +17,7 @@ public interface CdrVersionMapper {
   @Mapping(source = "archivalStatusEnum", target = "archivalStatus")
   CdrVersion dbModelToClient(DbCdrVersion db);
 
-  default boolean isNonNull(String s) {
-    return s != null;
+  default boolean isNonEmpty(String s) {
+    return s != null && !s.isEmpty();
   }
 }
