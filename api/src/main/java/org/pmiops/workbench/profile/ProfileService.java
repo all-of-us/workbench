@@ -223,8 +223,6 @@ public class ProfileService {
 
     user.setLastModifiedTime(now);
 
-    updateInstitutionalAffiliations(updatedProfile, user);
-
     userService.updateUserWithConflictHandling(user);
 
     // FIXME: why not do a getOrCreateAffiliation() here and then update that object & save?
