@@ -290,6 +290,17 @@ commands:
           name: Wait for local UI server to start
           command: dockerize -wait tcp://localhost:4200 -timeout 4m
 
+  make_bq_denormalized_tables:
+    parameters:
+      data_browser:
+        type: boolean
+        default: false
+    steps:
+      - run:
+          name: Make BQ denormalized tables
+          working_directory: ~/workbench/api
+          command: echo "./project.rb make-bq-denormalized-tables --bq-project all-of-us-ehr-dev  " \
+            "--bq-dataset SR2019q4r4 --cdr-date 2020-08-25 --data-browser << parameters.data_browser >>"
 
 # -------------------------
 #        JOBS
@@ -615,6 +626,63 @@ jobs:
       - run_e2e_test:
           env_name: local
 
+  api-local-test:
+    # The local API server starts two Java processes (the API server and the cron emulator).
+    # So we want the Java memory limit to be below half of that: other things on the
+    # machine need memory as well. The medium+ machine has 6GB.
+    # Refers to https://circleci.com/docs/2.0/configuration-reference/#resource_class
+    resource_class: medium+
+    docker:
+      - image: << pipeline.parameters.workbench_image >>
+      - image: << pipeline.parameters.mysql_image >>
+        environment:
+          <<: *mysql_env
+    working_directory: ~/workbench
+    environment:
+      <<: *java_env
+    steps:
+      - checkout_init_git
+      - activate_service_account_credential
+      - start_local_api
+      - run:
+          name: Local API tests on running server
+          working_directory: ~/workbench/api
+          command: ./project.rb run-local-api-tests && ./project.rb stop-local-api
+      - manage_api_cache:
+          save: true
+
+  cdr-make-bq-denormalized-tables:
+    <<: *java_defaults
+    steps:
+      - checkout_init_git
+      - manage_api_cache:
+          restore: true
+      - activate_service_account_credential
+      - make_bq_denormalized_tables:
+          data_browser: false
+
+  cdr-make-bq-denormalized-tables-for-data-browser:
+    <<: *java_defaults
+    steps:
+      - checkout_init_git
+      - manage_api_cache:
+          restore: true
+      - activate_service_account_credential
+      - make_bq_denormalized_tables:
+          data_browser: true
+
+  cdr-generate-private-counts:
+    <<: *java_defaults
+    steps:
+      - checkout_init_git
+      - manage_api_cache:
+          restore: true
+      - activate_service_account_credential
+      - run:
+          name: Make BQ denormalized tables
+          working_directory: ~/workbench/api
+          command: echo "./project.rb generate-private-cdr-counts --bq-project all-of-us-ehr-dev --bq-dataset SR2019q4r4 --workbench-project all-of-us-workbench-test --cdr-version sr_2019q4_1 --bucket all-of-us-workbench-private-cloudsql"
+
 workflows:
   build-test-deploy:
     jobs:
@@ -681,6 +749,15 @@ workflows:
           # filters: *filter_only_release_tags
           # requires:
             # - deploy-staging
+
+  build-cdr-indices:
+    # We'll want to filter this so it can only be launched manually.
+    jobs:
+      - cdr-make-bq-denormalized-tables
+      - cdr-make-bq-denormalized-tables-for-data-browser
+      - cdr-generate-private-counts
+        requires:
+          - cdr-make-bq-denormalized-tables
 
   nightly-tests:
     triggers:
