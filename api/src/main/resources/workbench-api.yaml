@@ -3517,58 +3517,6 @@ definitions:
     enum:
     - true
     - false
-  NonAcademicAffiliation:
-    type: string
-    enum:
-    - INDUSTRY
-    - EDUCATIONAL_INSTITUTION
-    - COMMUNITY_SCIENTIST
-    - FREE_TEXT
-    description: 'This enum is used by the older Institutional Affiliation flow associated
-      with the Demographic Survey. The corresponding Verified Institutional Affiliation
-      (newer flow) enum is OrganizationType. The two have slightly different values
-      and are therefore NOT COMPATIBLE. This enum may be deleted in the future.'
-  IndustryRole:
-    type: string
-    enum:
-    - PRE_DOCTORAL
-    - POST_DOCTORAL
-    - EARLY
-    - PI
-    - FREE_TEXT
-    description: 'This enum is used by the older Institutional Affiliation flow associated
-      with the Demographic Survey. The corresponding Verified Institutional Affiliation
-      (newer flow) enum is the UI-only InstitutionalRole_IND_HCNP. The two have slightly
-      different values and are therefore NOT COMPATIBLE. This enum may be deleted
-      in the future.'
-  EducationalRole:
-    type: string
-    enum:
-    - TEACHER
-    - STUDENT
-    - ADMIN
-    - FREE_TEXT
-    description: 'This enum is used by the older Institutional Affiliation flow associated
-      with the Demographic Survey. The corresponding Verified Institutional Affiliation
-      (newer flow) enum is the UI-only InstitutionalRole_EDU. The two have slightly
-      different values and are therefore NOT COMPATIBLE. This enum may be deleted
-      in the future.'
-  AcademicRole:
-    type: string
-    enum:
-    - UNDERGRADUATE
-    - TRAINEE
-    - FELLOW
-    - EARLY_CAREER
-    - NON_TENURE
-    - MID_CAREER
-    - LATE_CAREER
-    - PROJECT_PERSONNEL
-    description: 'This enum is used by the older Institutional Affiliation flow associated
-      with the Demographic Survey. The corresponding Verified Institutional Affiliation
-      (newer flow) enum is the UI-only InstitutionalRole_ARI. The two have slightly
-      different values and are therefore NOT COMPATIBLE. This enum may be deleted
-      in the future.'
   FeaturedWorkspaceCategory:
     type: string
     enum:
@@ -5109,13 +5057,6 @@ definitions:
         type: string
       areaOfResearch:
         type: string
-      institutionalAffiliations:
-        description: >
-          A list of institutions the user is affiliated with. DEPRECATED
-          in favor of the newer verifiedInstitutionalAffiliation.
-        type: array
-        items:
-          "$ref": "#/definitions/InstitutionalAffiliation"
       verifiedInstitutionalAffiliation:
         description: 'The institution the user is verified to be affiliated with,
           based on their email. Will be required for new users when this feature is
@@ -5219,18 +5160,6 @@ definitions:
         format: int64
         description: 'Timestamp when the user first changed from Unregistered to Registered
           data access level. May be null if the user has never done so.'
-  InstitutionalAffiliation:
-    type: object
-    properties:
-      institution:
-        type: string
-      role:
-        type: string
-      nonAcademicAffiliation:
-        "$ref": "#/definitions/NonAcademicAffiliation"
-        type: string
-      other:
-        type: string
   DemographicSurvey:
     type: object
     properties:
