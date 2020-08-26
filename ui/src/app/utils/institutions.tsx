@@ -44,6 +44,10 @@ export const getRoleOptions = (institutions: Array<PublicInstitutionDetails>, in
     const {shortName} = institution;
     return shortName === institutionShortName;
   }, institutions);
+  if (matchedInstitution === undefined) {
+    return [];
+  }
+
   const {organizationTypeEnum} = matchedInstitution;
   const availableRoles: Array<InstitutionalRole> =
       AccountCreationOptions.institutionalRolesByOrganizationType
