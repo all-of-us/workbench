@@ -159,9 +159,9 @@ public class WorkspaceAdminControllerTest {
             WORKSPACE_NAMESPACE, dbWorkspace.getFirecloudName()))
         .thenReturn(cloudStorageCounts);
 
-    org.pmiops.workbench.notebooks.model.ListClusterResponse firecloudListClusterResponse =
+    org.pmiops.workbench.leonardo.model.ListClusterResponse firecloudListClusterResponse =
         testMockFactory.createFirecloudListClusterResponse();
-    List<org.pmiops.workbench.notebooks.model.ListClusterResponse> clusters =
+    List<org.pmiops.workbench.leonardo.model.ListClusterResponse> clusters =
         ImmutableList.of(firecloudListClusterResponse);
     when(mockLeonardoNotebooksClient.listClustersByProjectAsService(WORKSPACE_NAMESPACE))
         .thenReturn(clusters);
