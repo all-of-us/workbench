@@ -3604,6 +3604,8 @@ definitions:
         "$ref": "#/definitions/DataAccessLevel"
       archivalStatus:
         "$ref": "#/definitions/ArchivalStatus"
+      microarrayBigqueryDataset:
+        type: string
       creationTime:
         type: integer
         format: int64
