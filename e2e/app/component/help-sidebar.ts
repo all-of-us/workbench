@@ -47,8 +47,37 @@ export default class HelpSidebar extends Container {
     await this.page.waitForXPath(removeSelectedCriteriaIconSelector,{visible: true});
 
     // dialog close after click FINISH button.
-    await this.clickFinishButton();
+    await this.clickSaveCriteriaButton();
 
+    return participantResult;
+  }
+
+  async addAgeModifier(filterSign: FilterSign, filterValue: number): Promise<string> {
+    await this.clickSidebarButton(LinkText.ApplyModifiers);
+    await this.waitUntilSectionVisible(SectionSelectors.ModifiersForm);
+
+    const selectMenu = await SelectMenu.findByName(this.page, {name: 'Age At Event', ancestorLevel: 2}, this);
+    await selectMenu.clickMenuItem(filterSign);
+    const numberField = await this.page.waitForXPath(`${this.xpath}//input[@type="number"]`, {visible: true});
+    // Issue with Puppeteer type() function: typing value in this textbox doesn't always trigger change event. workaround is needed.
+    // Error: "Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation."
+    await numberField.focus();
+    await numberField.click();
+    await this.page.keyboard.type(String(filterValue));
+    await numberField.press('Tab', { delay: 200 });
+
+    let participantResult;
+    await this.clickSidebarButton(LinkText.Calculate);
+    try {
+      participantResult = await this.waitForParticipantResult();
+    } catch (e) {
+      // Retry one more time.
+      await this.clickSidebarButton(LinkText.Calculate);
+      participantResult = await this.waitForParticipantResult();
+    }
+    await this.clickSidebarButton(LinkText.ApplyModifiers);
+    await this.waitUntilSectionVisible(SectionSelectors.SelectionList);
+    console.debug(`Age Modifier: ${filterSign} ${filterValue}  => number of participants: ${participantResult}`);
     return participantResult;
   }
 
@@ -58,13 +87,13 @@ export default class HelpSidebar extends Container {
     await waitWhileLoading(this.page);
   }
 
-  async clickFinishButton(): Promise<void> {
-    await this.clickSidebarButton(LinkText.Finish);
+  async clickSaveCriteriaButton(): Promise<void> {
+    await this.clickSidebarButton(LinkText.SaveCriteria);
     await this.waitUntilSectionHidden(SectionSelectors.SelectionList);
   }
 
   async waitForParticipantResult(): Promise<string> {
-    const selector = `${this.xpath}//*[./*[contains(text(), "Results")]]/div[contains(text(), "Number")]`;
+    const selector = `${this.xpath}//*[./*[contains(text(), "Number of Participants")]]`;
     return waitForNumericalString(this.page, selector);
   }
 

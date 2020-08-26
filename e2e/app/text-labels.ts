@@ -26,6 +26,7 @@ export enum EllipsisMenuAction {
 
 export enum LinkText {
    AddThis = 'ADD THIS',
+   ApplyModifiers = 'APPLY MODIFIERS',
    BackToCohort = 'Back to cohort',
    BackToReviewSet = 'Back to review set',
    Calculate = 'Calculate',
@@ -51,6 +52,7 @@ export enum LinkText {
    DuplicateWorkspace = 'Duplicate Workspace',
    ExportAndOpen = 'Export and Open',
    Finish = 'Finish',
+   FinishAndReview = 'Finish & Review',
    GoToCopiedConceptSet = 'Go to Copied Concept Set',
    GoToCopiedNotebook = 'Go to Copied Notebook',
    KeepEditing = 'Keep Editing',
@@ -60,6 +62,7 @@ export enum LinkText {
    RenameNotebook = 'Rename Notebook',
    Save = 'Save',
    SaveCohort = 'Save Cohort',
+   SaveCriteria = 'Save Criteria',
    SeeCodePreview = 'See Code Preview',
    StayHere = 'Stay Here',
    Submit = 'Submit',
