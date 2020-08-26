@@ -10,11 +10,11 @@ import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
-import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceResource;
@@ -81,14 +81,14 @@ public class WorkspaceResourcesServiceImpl implements WorkspaceResourcesService 
               .collect(Collectors.toList()));
     }
     if (resourceTypes.contains(ResourceType.CONCEPT_SET)) {
-      List<DbConceptSet> conceptSets =
+      List<ConceptSet> conceptSets =
           conceptSetService.findByWorkspaceId(dbWorkspace.getWorkspaceId());
       workspaceResources.addAll(
           conceptSets.stream()
               .map(
-                  dbConceptSet ->
-                      workspaceMapper.dbWorkspaceAndDbConceptSetToWorkspaceResource(
-                          dbWorkspace, workspaceAccessLevel, dbConceptSet))
+                  conceptSet ->
+                      workspaceMapper.dbWorkspaceSetToWorkspaceResource(
+                          dbWorkspace, workspaceAccessLevel, conceptSet))
               .collect(Collectors.toList()));
     }
     if (resourceTypes.contains(ResourceType.DATASET)) {
