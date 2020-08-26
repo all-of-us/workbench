@@ -33,9 +33,9 @@ import {WorkspaceResearchSummary} from 'app/pages/workspace/workspace-research-s
 import {userApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
+  formatFreeCreditsUSD,
   reactStyles,
   ReactWrapperBase,
-  renderUSD,
   sliceByHalfLength,
   withCdrVersions,
   withCurrentWorkspace,
@@ -1014,7 +1014,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             </div>
             <OverlayPanel ref={(me) => freeTierBalancePanel = me} dismissable={true} appendTo={document.body}>
               <div style={styles.freeCreditsBalanceOverlay}>
-                FREE CREDIT BALANCE {renderUSD(freeTierCreditsBalance)}
+                FREE CREDIT BALANCE {formatFreeCreditsUSD(freeTierCreditsBalance)}
               </div>
             </OverlayPanel>
             <FlexRow>

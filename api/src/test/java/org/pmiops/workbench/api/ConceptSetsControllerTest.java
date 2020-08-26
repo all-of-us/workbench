@@ -15,7 +15,6 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Random;
-import javax.inject.Provider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,14 +41,10 @@ import org.pmiops.workbench.config.WorkbenchConfig.BillingConfig;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
-import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -80,7 +75,6 @@ import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
-import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -180,62 +174,30 @@ public class ConceptSetsControllerTest {
   private static DbUser currentUser;
   private Workspace workspace;
   private Workspace workspace2;
-  private TestMockFactory testMockFactory;
 
   @Autowired BillingProjectBufferService billingProjectBufferService;
-
-  @Autowired WorkspaceService workspaceService;
-
-  @Autowired ConceptSetDao conceptSetDao;
 
   @Autowired CdrVersionDao cdrVersionDao;
 
   @Autowired ConceptDao conceptDao;
 
-  @Autowired ConceptSetService conceptSetService;
-
-  @Autowired ConceptService conceptService;
-
-  @Autowired DataSetService dataSetService;
-
-  @Autowired WorkspaceDao workspaceDao;
-
   @Autowired UserDao userDao;
-
-  @Autowired CloudStorageService cloudStorageService;
-
-  @Autowired NotebooksService notebooksService;
-
-  @Autowired UserService userService;
 
   @Autowired FireCloudService fireCloudService;
 
   @Autowired ConceptSetsController conceptSetsController;
 
-  @Autowired UserRecentResourceService userRecentResourceService;
-
   @Autowired ConceptBigQueryService conceptBigQueryService;
-
-  @Autowired Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired WorkspacesController workspacesController;
 
-  @Autowired WorkspaceAuditor workspaceAuditor;
-
   @TestConfiguration
   @Import({
-    CohortCloningService.class,
-    CohortFactoryImpl.class,
-    CohortMapperImpl.class,
-    CohortReviewMapperImpl.class,
-    CohortReviewServiceImpl.class,
     CommonMappers.class,
     ConceptService.class,
     ConceptSetMapperImpl.class,
     ConceptSetsController.class,
     ConceptSetService.class,
-    DataSetMapperImpl.class,
-    FirecloudMapperImpl.class,
     LogsBasedMetricServiceFakeImpl.class,
     UserMapperImpl.class,
     UserServiceTestConfiguration.class,
@@ -246,10 +208,17 @@ public class ConceptSetsControllerTest {
   })
   @MockBean({
     BillingProjectBufferService.class,
+    CohortCloningService.class,
+    CohortFactoryImpl.class,
+    CohortMapperImpl.class,
+    CohortReviewMapperImpl.class,
+    CohortReviewServiceImpl.class,
     CloudStorageService.class,
     ComplianceService.class,
     ConceptBigQueryService.class,
     CohortService.class,
+    DataSetMapperImpl.class,
+    FirecloudMapperImpl.class,
     DataSetService.class,
     DirectoryService.class,
     FireCloudService.class,
@@ -293,11 +262,11 @@ public class ConceptSetsControllerTest {
   }
 
   @Before
-  public void setUp() throws Exception {
-    testMockFactory = new TestMockFactory();
+  public void setUp() {
+    TestMockFactory testMockFactory = new TestMockFactory();
 
     testMockFactory.stubBufferBillingProject(billingProjectBufferService);
-    testMockFactory.stubCreateFcWorkspace(fireCloudService);
+    TestMockFactory.stubCreateFcWorkspace(fireCloudService);
 
     DbUser user = new DbUser();
     user.setUsername(USER_EMAIL);
@@ -332,14 +301,10 @@ public class ConceptSetsControllerTest {
 
     workspace = workspacesController.createWorkspace(workspace).getBody();
     workspace2 = workspacesController.createWorkspace(workspace2).getBody();
-    stubGetWorkspace(
-        workspace.getNamespace(), WORKSPACE_NAME, USER_EMAIL, WorkspaceAccessLevel.OWNER);
-    stubGetWorkspaceAcl(
-        workspace.getNamespace(), WORKSPACE_NAME, USER_EMAIL, WorkspaceAccessLevel.OWNER);
-    stubGetWorkspace(
-        workspace2.getNamespace(), WORKSPACE_NAME_2, USER_EMAIL, WorkspaceAccessLevel.OWNER);
-    stubGetWorkspaceAcl(
-        workspace2.getNamespace(), WORKSPACE_NAME_2, USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    stubGetWorkspace(workspace.getNamespace(), WORKSPACE_NAME);
+    stubGetWorkspaceAcl(workspace.getNamespace(), WORKSPACE_NAME);
+    stubGetWorkspace(workspace2.getNamespace(), WORKSPACE_NAME_2);
+    stubGetWorkspaceAcl(workspace2.getNamespace(), WORKSPACE_NAME_2);
 
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.name());
@@ -445,10 +410,9 @@ public class ConceptSetsControllerTest {
   }
 
   @Test(expected = NotFoundException.class)
-  public void testGetSurveyConceptSetWrongWorkspace() {
-    ConceptSet conceptSet = makeSurveyConceptSet1();
-    conceptSetsController.getConceptSet(
-        workspace2.getNamespace(), WORKSPACE_NAME_2, conceptSet.getId());
+  public void testGetSurveyConceptSetWrongConceptId() {
+    makeSurveyConceptSet1();
+    conceptSetsController.getConceptSet(workspace2.getNamespace(), WORKSPACE_NAME_2, 99L);
   }
 
   @Test
@@ -476,10 +440,9 @@ public class ConceptSetsControllerTest {
   }
 
   @Test(expected = NotFoundException.class)
-  public void testGetConceptSetWrongWorkspace() {
-    ConceptSet conceptSet = makeConceptSet1();
-    conceptSetsController.getConceptSet(
-        workspace2.getNamespace(), WORKSPACE_NAME_2, conceptSet.getId());
+  public void testGetConceptSetWrongConceptSetId() {
+    makeConceptSet1();
+    conceptSetsController.getConceptSet(workspace2.getNamespace(), WORKSPACE_NAME_2, 99L);
   }
 
   @Test
@@ -526,7 +489,7 @@ public class ConceptSetsControllerTest {
         .isEmpty();
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test(expected = ConflictException.class)
   public void testUpdateConceptSetDomainChange() {
     ConceptSet conceptSet = makeConceptSet1();
     conceptSet.setDescription("new description");
@@ -589,6 +552,7 @@ public class ConceptSetsControllerTest {
   @Test
   public void testUpdateConceptSetConceptsAddMany() {
     saveConcepts();
+    ConceptSetService.MAX_CONCEPTS_PER_SET = 1000;
     when(conceptBigQueryService.getParticipantCountForConcepts(
             Domain.CONDITION,
             "condition_occurrence",
@@ -658,11 +622,11 @@ public class ConceptSetsControllerTest {
     assertThat(conceptSet.getParticipantCount()).isEqualTo(456);
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test(expected = ConflictException.class)
   public void testUpdateConceptSetConceptsAddTooMany() {
     saveConcepts();
     ConceptSet conceptSet = makeConceptSet1();
-    conceptSetsController.maxConceptsPerSet = 2;
+    ConceptSetService.MAX_CONCEPTS_PER_SET = 2;
     conceptSetsController
         .updateConceptSetConcepts(
             workspace.getNamespace(),
@@ -687,23 +651,10 @@ public class ConceptSetsControllerTest {
         addConceptsRequest(Etags.fromVersion(2), CLIENT_CONCEPT_1.getConceptId()));
   }
 
-  @Test(expected = BadRequestException.class)
-  public void testUpdateConceptSetConceptsAddWrongDomain() {
-    saveConcepts();
-    ConceptSet conceptSet = makeConceptSet1();
-    conceptSetsController.updateConceptSetConcepts(
-        workspace.getNamespace(),
-        WORKSPACE_NAME,
-        conceptSet.getId(),
-        addConceptsRequest(
-            conceptSet.getEtag(),
-            CLIENT_CONCEPT_1.getConceptId(),
-            CLIENT_CONCEPT_2.getConceptId()));
-  }
-
   @Test
   public void testDeleteConceptSet() {
     saveConcepts();
+    ConceptSetService.MAX_CONCEPTS_PER_SET = 1000;
     ConceptSet conceptSet1 = makeConceptSet1();
     ConceptSet conceptSet2 = makeConceptSet2();
     ConceptSet updatedConceptSet =
@@ -744,11 +695,6 @@ public class ConceptSetsControllerTest {
             .getConceptSet(workspace.getNamespace(), WORKSPACE_NAME, conceptSet2.getId())
             .getBody();
     assertThat(conceptSet2.getConcepts()).containsExactly(CLIENT_CONCEPT_2);
-  }
-
-  @Test(expected = NotFoundException.class)
-  public void testDeleteConceptSetNotFound() {
-    conceptSetsController.deleteConceptSet(workspace.getNamespace(), WORKSPACE_NAME, 1L);
   }
 
   private UpdateConceptSetRequest addConceptsRequest(String etag, Long... conceptIds) {
@@ -815,25 +761,23 @@ public class ConceptSetsControllerTest {
         .getBody();
   }
 
-  private void stubGetWorkspace(String ns, String name, String creator, WorkspaceAccessLevel access)
-      throws Exception {
+  private void stubGetWorkspace(String ns, String name) {
     FirecloudWorkspace fcWorkspace = new FirecloudWorkspace();
     fcWorkspace.setNamespace(ns);
     fcWorkspace.setName(name);
-    fcWorkspace.setCreatedBy(creator);
+    fcWorkspace.setCreatedBy(USER_EMAIL);
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
-    fcResponse.setAccessLevel(access.toString());
+    fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
     when(fireCloudService.getWorkspace(ns, name)).thenReturn(fcResponse);
   }
 
-  private void stubGetWorkspaceAcl(
-      String ns, String name, String creator, WorkspaceAccessLevel access) {
+  private void stubGetWorkspaceAcl(String ns, String name) {
     FirecloudWorkspaceACL workspaceAccessLevelResponse = new FirecloudWorkspaceACL();
     FirecloudWorkspaceAccessEntry accessLevelEntry =
-        new FirecloudWorkspaceAccessEntry().accessLevel(access.toString());
+        new FirecloudWorkspaceAccessEntry().accessLevel(WorkspaceAccessLevel.OWNER.toString());
     Map<String, FirecloudWorkspaceAccessEntry> userEmailToAccessEntry =
-        ImmutableMap.of(creator, accessLevelEntry);
+        ImmutableMap.of(USER_EMAIL, accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
     when(fireCloudService.getWorkspaceAclAsService(ns, name))
         .thenReturn(workspaceAccessLevelResponse);

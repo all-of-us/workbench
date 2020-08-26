@@ -1,12 +1,12 @@
 import {NgModule} from '@angular/core';
 import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 
+import {AppRouting} from './app-routing';
 import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 
 import {DataPageComponent} from 'app/pages/data/data-page';
 import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
-import {AppRouting} from './app-routing';
 import {AdminBannerComponent} from './pages/admin/admin-banner';
 import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
 import {AdminUserComponent} from './pages/admin/admin-user';
@@ -26,7 +26,6 @@ import {ProfilePageComponent} from './pages/profile/profile-page';
 import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './pages/workspace/workspace-edit';
-import {WorkspaceLibraryComponent} from './pages/workspace/workspace-library';
 import {WorkspaceListComponent} from './pages/workspace/workspace-list';
 import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/component';
 
@@ -96,13 +95,13 @@ const routes: Routes = [
         canActivateChild: [RegistrationGuard],
         runGuardsAndResolvers: 'always',
         children: [
-          // legacy / duplicated routes will go HERE
-          // non-migrated routes go HERE
+          // legacy / duplicated routes go HERE
           {
             path: 'library',
-            component: WorkspaceLibraryComponent,
-            data: {title: 'Workspace Library'}
+            component: AppRouting,
+            data: {}
           },
+          // non-migrated routes go HERE
           {
             path: 'workspaces',
             canActivateChild: [WorkspaceGuard],
