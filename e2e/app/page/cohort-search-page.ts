@@ -1,11 +1,10 @@
 import {Page} from 'puppeteer';
+import HelpSidebar from 'app/component/help-sidebar';
 import Modal from 'app/component/modal';
 import SelectMenu from 'app/component/select-menu';
 import Table from 'app/component/table';
 import ClrIconLink from 'app/element/clr-icon-link';
 import Textbox from 'app/element/textbox';
-import {buildXPath} from 'app/xpath-builders';
-import {ElementType} from 'app/xpath-options';
 import {centerPoint, dragDrop, waitWhileLoading} from 'utils/test-utils';
 import {waitForNumericalString} from 'utils/waits-utils';
 import {LinkText} from 'app/text-labels';
@@ -94,27 +93,9 @@ export default class CohortSearchPage extends Modal {
     const link = await this.waitForPhysicalMeasurementCriteriaLink(criteriaName);
     await link.click();
 
-    const selectMenu = await SelectMenu.findByName(this.page, {ancestorLevel: 2}, this);
-    await selectMenu.clickMenuItem(filterSign);
-
-    const numberField = await this.page.waitForXPath(`${this.xpath}//input[@type="number"]`, {visible: true});
-    await numberField.type(String(filterValue));
-
-    await this.clickButton(LinkText.Calculate);
-    const participantResult = await this.waitForParticipantResult();
+    const helpSidebar = new HelpSidebar(this.page);
+    const participantResult = helpSidebar.getPhysicalMeasurementParticipantResult(filterSign, filterValue);
     console.debug(`Physical Measurements ${criteriaName}: ${filterSign} ${filterValue}  => number of participants: ${participantResult}`);
-
-    // Find criteria in Selected Criteria Content Box.
-    const removeSelectedCriteriaIconSelector = buildXPath({type: ElementType.Icon, iconShape: 'times-circle'}, this);
-    // Before add criteria, first check for nothing in Selected Criteria Content Box.
-    await this.page.waitForXPath(removeSelectedCriteriaIconSelector,{hidden: true});
-
-    await this.clickButton(LinkText.AddThis);
-    // After add criteria, look for X (remove) icon for indication that add succeeded.
-    await this.page.waitForXPath(removeSelectedCriteriaIconSelector,{visible: true});
-
-    // dialog close after click FINISH button.
-    await this.clickFinishButton();
 
     // return participants count for comparing
     return participantResult;
