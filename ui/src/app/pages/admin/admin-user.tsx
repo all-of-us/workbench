@@ -112,8 +112,13 @@ const EmailValidationErrorMessage = ({emailValidationResponse, updatedProfile, v
   return null;
 };
 
-const FreeCreditsUsage = ({aboveLimit, usage}) => {
-  const inputStyle = aboveLimit ?
+interface FreeCreditsProps {
+  isAboveLimit: boolean;
+  usage: string;
+}
+
+const FreeCreditsUsage = ({isAboveLimit, usage}: FreeCreditsProps) => {
+  const inputStyle = isAboveLimit ?
   {...styles.textInput,
     backgroundColor: colorWithWhiteness(colors.danger, .95),
     borderColor: colors.danger,
@@ -133,7 +138,7 @@ const FreeCreditsUsage = ({aboveLimit, usage}) => {
       inputStyle={inputStyle}
       containerStyle={styles.textInputContainer}
     />
-    {aboveLimit && <div style={{color: colors.danger}}>Update free credit limit</div>}
+    {isAboveLimit && <div style={{color: colors.danger}}>Update free credit limit</div>}
   </React.Fragment>;
 };
 
@@ -536,7 +541,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
                 onChange={email => this.setContactEmail(email)}
             />
             <FreeCreditsUsage
-              aboveLimit={this.usageIsAboveLimit()}
+              isAboveLimit={this.usageIsAboveLimit()}
               usage={this.getFreeCreditUsage()}
             />
           </FlexColumn>
