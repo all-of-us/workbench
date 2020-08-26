@@ -32,7 +32,10 @@ import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
+import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
@@ -122,6 +125,8 @@ public class CohortReviewControllerTest {
   private DbCohortAnnotationDefinition integerAnnotationDefinition;
   private DbParticipantCohortAnnotation participantAnnotation;
 
+  @Autowired private CohortBuilderService cohortBuilderService;
+
   @Autowired private CdrVersionDao cdrVersionDao;
 
   @Autowired private CBCriteriaDao cbCriteriaDao;
@@ -189,6 +194,7 @@ public class CohortReviewControllerTest {
   @TestConfiguration
   @Import({
     CdrVersionService.class,
+    CohortBuilderServiceImpl.class,
     CohortReviewController.class,
     CohortReviewServiceImpl.class,
     CohortQueryBuilder.class,
@@ -200,6 +206,7 @@ public class CohortReviewControllerTest {
   })
   @MockBean({
     BigQueryService.class,
+    CohortBuilderMapper.class,
     FireCloudService.class,
     UserRecentResourceService.class,
     WorkspaceService.class
