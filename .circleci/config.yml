@@ -23,16 +23,22 @@ parameters:
     default: false
   cdr_source_project:
     type: string
+    default: ''
   cdr_source_dataset:
     type: string
+    default: ''
   cdr_sql_bucket:
     type: string
+    default: ''
   cdr_dest_project:
     type: string
+    default: ''
   cdr_version_db_name:
     type: string
+    default: ''
   cdr_date:
     type: string
+    default: ''
 
 # -------------------------
 #   ANCHORS
