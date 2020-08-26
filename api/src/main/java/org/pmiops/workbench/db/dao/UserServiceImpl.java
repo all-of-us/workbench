@@ -31,7 +31,6 @@ import org.pmiops.workbench.db.dao.UserDao.UserCountGaugeLabelsAndValue;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbAdminActionHistory;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
-import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
@@ -332,7 +331,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         null,
         null,
         null,
-        null,
         dbVerifiedAffiliation);
   }
 
@@ -350,7 +348,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       List<Degree> degrees,
       DbAddress dbAddress,
       DbDemographicSurvey dbDemographicSurvey,
-      List<DbInstitutionalAffiliation> dbAffiliations,
       DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation) {
     DbUser dbUser = new DbUser();
     dbUser.setCreationNonce(Math.abs(random.nextLong()));
@@ -381,17 +378,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     }
     if (dbDemographicSurvey != null) {
       dbDemographicSurvey.setUser(dbUser);
-    }
-    // set via the older Institutional Affiliation flow, from the Demographic Survey
-    if (dbAffiliations != null) {
-      // We need an "effectively final" variable to be captured in the lambda
-      // to pass to forEach.
-      final DbUser finalDbUserReference = dbUser;
-      dbAffiliations.forEach(
-          affiliation -> {
-            affiliation.setUser(finalDbUserReference);
-            finalDbUserReference.addInstitutionalAffiliation(affiliation);
-          });
     }
 
     try {

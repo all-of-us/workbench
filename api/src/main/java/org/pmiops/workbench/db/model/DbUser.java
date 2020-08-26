@@ -4,7 +4,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.Gson;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -23,7 +22,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
@@ -82,7 +80,6 @@ public class DbUser {
   private Set<DbPageVisit> pageVisits = new HashSet<>();
   private String clusterConfigDefault;
 
-  private List<DbInstitutionalAffiliation> institutionalAffiliations = new ArrayList<>();
   private String aboutYou;
   private String areaOfResearch;
   private Integer clusterCreateRetries;
@@ -434,29 +431,6 @@ public class DbUser {
   public void setEmailVerificationStatusEnum(EmailVerificationStatus emailVerificationStatus) {
     setEmailVerificationStatus(
         DbStorageEnums.emailVerificationStatusToStorage(emailVerificationStatus));
-  }
-
-  @OneToMany(
-      fetch = FetchType.EAGER,
-      orphanRemoval = true,
-      mappedBy = "user",
-      cascade = CascadeType.ALL)
-  @OrderColumn(name = "order_index")
-  public List<DbInstitutionalAffiliation> getInstitutionalAffiliations() {
-    return institutionalAffiliations;
-  }
-
-  public void setInstitutionalAffiliations(
-      List<DbInstitutionalAffiliation> newInstitutionalAffiliations) {
-    this.institutionalAffiliations = newInstitutionalAffiliations;
-  }
-
-  public void clearInstitutionalAffiliations() {
-    this.institutionalAffiliations.clear();
-  }
-
-  public void addInstitutionalAffiliation(DbInstitutionalAffiliation newInstitutionalAffiliation) {
-    this.institutionalAffiliations.add(newInstitutionalAffiliation);
   }
 
   @Column(name = "about_you")
