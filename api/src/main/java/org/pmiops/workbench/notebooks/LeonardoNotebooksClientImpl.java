@@ -46,6 +46,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   private final Provider<ClusterApi> clusterApiProvider;
   private final Provider<ClusterApi> serviceClusterApiProvider;
   private final Provider<NotebooksApi> notebooksApiProvider;
+  private final Provider<ServiceInfoApi> serviceInfoApiProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Provider<DbUser> userProvider;
   private final NotebooksRetryHandler notebooksRetryHandler;
@@ -58,6 +59,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
       @Qualifier(NotebooksConfig.SERVICE_CLUSTER_API)
           Provider<ClusterApi> serviceClusterApiProvider,
       Provider<NotebooksApi> notebooksApiProvider,
+      Provider<ServiceInfoApi> serviceInfoApiProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<DbUser> userProvider,
       NotebooksRetryHandler notebooksRetryHandler,
@@ -66,6 +68,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     this.clusterApiProvider = clusterApiProvider;
     this.serviceClusterApiProvider = serviceClusterApiProvider;
     this.notebooksApiProvider = notebooksApiProvider;
+    this.serviceInfoApiProvider = serviceInfoApiProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userProvider = userProvider;
     this.notebooksRetryHandler = notebooksRetryHandler;
@@ -226,7 +229,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   @Override
   public boolean getNotebooksStatus() {
     try {
-      new ServiceInfoApi().getSystemStatus();
+      serviceInfoApiProvider.get().getSystemStatus();
     } catch (org.pmiops.workbench.leonardo.ApiException e) {
       // If any of the systems for notebooks are down, it won't work for us.
       log.log(Level.WARNING, "notebooks status check request failed", e);

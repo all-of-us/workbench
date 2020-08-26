@@ -9,6 +9,7 @@ import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.leonardo.api.ClusterApi;
+import org.pmiops.workbench.leonardo.api.ServiceInfoApi;
 import org.pmiops.workbench.notebooks.api.JupyterApi;
 import org.pmiops.workbench.notebooks.api.NotebooksApi;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -21,7 +22,7 @@ public class NotebooksConfig {
   public static final String USER_CLUSTER_API = "userClusterApi";
   public static final String SERVICE_CLUSTER_API = "svcClusterApi";
 
-  // Identifiers for the older Swagger2 APIs for Jupyter and Welder.
+  // Identifiers for the Swagger2 APIs for Jupyter and Welder, used for creating/localizing files.
   private static final String USER_NOTEBOOKS_CLIENT = "notebooksApiClient";
   private static final String SERVICE_NOTEBOOKS_CLIENT = "notebooksSvcApiClient";
   // Identifiers for the new OAS3 APIs from Leonardo. These should be used for cluster access.
@@ -106,6 +107,15 @@ public class NotebooksConfig {
   public ClusterApi serviceClusterApi(
       @Qualifier(SERVICE_LEONARDO_CLIENT) org.pmiops.workbench.leonardo.ApiClient apiClient) {
     ClusterApi api = new ClusterApi();
+    api.setApiClient(apiClient);
+    return api;
+  }
+
+  @Bean
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public ServiceInfoApi serviceInfoApi(
+      @Qualifier(SERVICE_LEONARDO_CLIENT) org.pmiops.workbench.leonardo.ApiClient apiClient) {
+    ServiceInfoApi api = new ServiceInfoApi();
     api.setApiClient(apiClient);
     return api;
   }

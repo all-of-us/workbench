@@ -339,7 +339,9 @@ classes.dependsOn 'generatedClasses'
 project.tasks.ideaModule.dependsOn(generateSwaggerCode)
 
 // Java plugin's Generated Source Set gives us the compileGeneratedJava task.
-// We need to provide it with the swagger-codegen tasks that output Java.
+// We need to provide it with the swagger-codegen tasks that output Java; this
+// task is defined by the Swagger gradle plugin, and includes all registered
+// Swagger sources, per the swaggerSources tuple above.
 project.tasks.compileGeneratedJava.dependsOn(generateSwaggerCode)
 
 project.tasks.war.dependsOn(['compileGeneratedJava', 'generate_appengine_web_xml',
