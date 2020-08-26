@@ -533,7 +533,7 @@ export function highlightSearchTerm(searchTerm: string, stringToHighlight: strin
 // negative values are rendered as $0
 export function formatFreeCreditsUSD(value: number): string {
   value = value || 0.0;
-  if (value < 0.0) {
+  if (value <= 0.0) {
     return '$0';
   } else {
     return '$' + value.toFixed(2).toString();

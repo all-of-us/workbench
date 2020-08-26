@@ -44,7 +44,7 @@ export const getRoleOptions = (institutions: Array<PublicInstitutionDetails>, in
     const {shortName} = institution;
     return shortName === institutionShortName;
   }, institutions);
-  if (matchedInstitution === null || matchedInstitution === undefined) {
+  if (matchedInstitution === undefined) {
     return [];
   }
 
