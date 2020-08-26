@@ -29,7 +29,6 @@ import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspac
 import {AdminUserComponent} from './pages/admin/admin-user';
 import {AdminUsersComponent} from './pages/admin/admin-users';
 import {AdminWorkspaceComponent} from './pages/admin/admin-workspace';
-import {NotebookListComponent} from './pages/analysis/notebook-list';
 import {NotebookRedirectComponent} from './pages/analysis/notebook-redirect';
 import {AppComponent, overriddenUrlKey} from './pages/app/component';
 import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
@@ -150,7 +149,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     HelpSidebarComponent,
     InitialErrorComponent,
     InteractiveNotebookComponent,
-    NotebookListComponent,
     NotebookRedirectComponent,
     ProfilePageComponent,
     QueryReportComponent,

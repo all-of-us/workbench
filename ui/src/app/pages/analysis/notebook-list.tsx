@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 import * as React from 'react';
 
 import {CardButton} from 'app/components/buttons';
@@ -132,12 +131,3 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
     </FadeBox>;
   }
 });
-
-@Component({
-  template: '<div #root></div>'
-})
-export class NotebookListComponent extends ReactWrapperBase {
-  constructor() {
-    super(NotebookList, []);
-  }
-}
