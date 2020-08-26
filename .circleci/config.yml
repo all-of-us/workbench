@@ -321,8 +321,12 @@ commands:
       - run:
           name: Make BQ denormalized tables
           working_directory: ~/workbench/api
-          command: echo "./project.rb make-bq-denormalized-tables --bq-project all-of-us-ehr-dev  " \
-            "--bq-dataset SR2019q4r4 --cdr-date 2020-08-25 --data-browser << parameters.data_browser >>"
+          # TODO: un-echo. Will need to discriminate which SA to use.
+          command: echo "./project.rb make-bq-denormalized-tables " \
+            "--bq-project << pipeline.parameters.cdr_source_project >> " \
+            "--bq-dataset << pipeline.parameters.cdr_source_dataset >> " \
+            "--cdr-date   << pipeline.parameters.cdr_date >> " \
+            "--data-browser << parameters.data_browser >>"
 
 # -------------------------
 #        JOBS
@@ -678,7 +682,13 @@ jobs:
       - run:
           name: Make BQ denormalized tables
           working_directory: ~/workbench/api
-          command: echo "./project.rb generate-private-cdr-counts --bq-project all-of-us-ehr-dev --bq-dataset SR2019q4r4 --workbench-project all-of-us-workbench-test --cdr-version sr_2019q4_1 --bucket all-of-us-workbench-private-cloudsql"
+          # TODO: un-echo. Will need to discriminate which SA to use.
+          command: echo "./project.rb generate-private-cdr-counts " \
+            "--bq-project        << pipeline.parameters.cdr_source_project >> " \
+            "--bq-dataset        << pipeline.parameters.cdr_source_dataset >> " \
+            "--workbench-project << pipeline.parameters.cdr_dest_project >> " \
+            "--cdr-version       << pipeline.parameters.cdr_version_db_name >> " \
+            "--bucket            << pipeline.parameters.cdr_sql_bucket >> "
 
 workflows:
   # build-test-deploy:
