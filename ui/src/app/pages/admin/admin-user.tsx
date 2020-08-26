@@ -14,10 +14,10 @@ import {institutionApi, profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   displayDateWithoutHours,
+  formatFreeCreditsUSD,
   isBlank,
   reactStyles,
   ReactWrapperBase,
-  renderUSD,
   withUrlParams
 } from 'app/utils';
 
@@ -248,12 +248,12 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     const defaultsPlusMaybeOverride = Array.from(freeCreditLimitDefaultOptions.add(freeTierDollarQuota));
     // gotcha: JS sorts numbers lexicographically by default
     const numericallySorted = defaultsPlusMaybeOverride.sort((a, b) => a - b);
-    return fp.map((limit) => ({label: renderUSD(limit), value: limit}), numericallySorted);
+    return fp.map((limit) => ({label: formatFreeCreditsUSD(limit), value: limit}), numericallySorted);
   }
 
   getFreeCreditUsage(): string {
     const {updatedProfile: {freeTierDollarQuota, freeTierUsage}} = this.state;
-    return `${renderUSD(freeTierUsage)} used of ${renderUSD(freeTierDollarQuota)} limit`;
+    return `${formatFreeCreditsUSD(freeTierUsage)} used of ${formatFreeCreditsUSD(freeTierDollarQuota)} limit`;
   }
 
   usageIsAboveLimit(): boolean {

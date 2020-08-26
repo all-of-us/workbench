@@ -21,9 +21,9 @@ import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   displayDateWithoutHours,
+  formatFreeCreditsUSD,
   reactStyles,
   ReactWrapperBase,
-  renderUSD,
   withUserProfile
 } from 'app/utils';
 import {convertAPIError, reportError} from 'app/utils/errors';
@@ -577,8 +577,8 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
                     <div>Remaining <i>All of Us</i> free credits:</div>
                 </FlexColumn>
                 <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
-                  <div style={{marginTop: '0.4rem', fontWeight: 600}}>{renderUSD(profile.freeTierUsage)}</div>
-                  <div style={{fontWeight: 600}}>{renderUSD(profile.freeTierDollarQuota - profile.freeTierUsage)}</div>
+                  <div style={{marginTop: '0.4rem', fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierUsage)}</div>
+                  <div style={{fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierDollarQuota - profile.freeTierUsage)}</div>
                 </FlexColumn>
             </FlexRow>}
             <div style={styles.title}>
