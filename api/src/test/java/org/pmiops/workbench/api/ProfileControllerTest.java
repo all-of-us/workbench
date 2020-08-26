@@ -62,7 +62,6 @@ import org.pmiops.workbench.institution.InstitutionMapperImpl;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.InstitutionServiceImpl;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperImpl;
-import org.pmiops.workbench.institution.deprecated.InstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.AccessModule;
@@ -79,7 +78,6 @@ import org.pmiops.workbench.model.Ethnicity;
 import org.pmiops.workbench.model.GenderIdentity;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
-import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.NihToken;
@@ -179,7 +177,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     FreeTierBillingService.class,
     InstitutionMapperImpl.class,
     InstitutionServiceImpl.class,
-    InstitutionalAffiliationMapperImpl.class,
     PageVisitMapperImpl.class,
     ProfileController.class,
     ProfileMapperImpl.class,
@@ -580,104 +577,6 @@ public class ProfileControllerTest extends BaseControllerTest {
         DataAccessLevel.UNREGISTERED,
         TIMESTAMP,
         false);
-  }
-
-  @Deprecated // to be removed in RW-4362
-  @Test
-  public void testMe_institutionalAffiliationsAlphabetical() {
-    createAccountAndDbUserWithAffiliation();
-
-    Profile profile = profileController.getMe().getBody();
-    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<>();
-    InstitutionalAffiliation first = new InstitutionalAffiliation();
-    first.setRole("test");
-    first.setInstitution("Institution");
-    InstitutionalAffiliation second = new InstitutionalAffiliation();
-    second.setRole("zeta");
-    second.setInstitution("Zeta");
-    affiliations.add(first);
-    affiliations.add(second);
-    profile.setInstitutionalAffiliations(affiliations);
-    profileController.updateProfile(profile);
-
-    Profile result = profileController.getMe().getBody();
-    assertThat(result.getInstitutionalAffiliations().size()).isEqualTo(2);
-    assertThat(result.getInstitutionalAffiliations().get(0)).isEqualTo(first);
-    assertThat(result.getInstitutionalAffiliations().get(1)).isEqualTo(second);
-  }
-
-  @Deprecated // to be removed in RW-4362
-  @Test
-  public void testMe_institutionalAffiliationsNotAlphabetical() {
-    createAccountAndDbUserWithAffiliation();
-
-    Profile profile = profileController.getMe().getBody();
-    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<>();
-    InstitutionalAffiliation first = new InstitutionalAffiliation();
-    first.setRole("zeta");
-    first.setInstitution("Zeta");
-    InstitutionalAffiliation second = new InstitutionalAffiliation();
-    second.setRole("test");
-    second.setInstitution("Institution");
-    affiliations.add(first);
-    affiliations.add(second);
-    profile.setInstitutionalAffiliations(affiliations);
-    profileController.updateProfile(profile);
-
-    Profile result = profileController.getMe().getBody();
-    assertThat(result.getInstitutionalAffiliations().size()).isEqualTo(2);
-    assertThat(result.getInstitutionalAffiliations().get(0)).isEqualTo(first);
-    assertThat(result.getInstitutionalAffiliations().get(1)).isEqualTo(second);
-  }
-
-  @Deprecated // to be removed in RW-4362
-  @Test
-  public void testMe_removeSingleInstitutionalAffiliation() {
-    createAccountAndDbUserWithAffiliation();
-
-    Profile profile = profileController.getMe().getBody();
-    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<>();
-    InstitutionalAffiliation first = new InstitutionalAffiliation();
-    first.setRole("test");
-    first.setInstitution("Institution");
-    InstitutionalAffiliation second = new InstitutionalAffiliation();
-    second.setRole("zeta");
-    second.setInstitution("Zeta");
-    affiliations.add(first);
-    affiliations.add(second);
-    profile.setInstitutionalAffiliations(affiliations);
-    profileController.updateProfile(profile);
-    affiliations = new ArrayList<>();
-    affiliations.add(first);
-    profile.setInstitutionalAffiliations(affiliations);
-    profileController.updateProfile(profile);
-    Profile result = profileController.getMe().getBody();
-    assertThat(result.getInstitutionalAffiliations().size()).isEqualTo(1);
-    assertThat(result.getInstitutionalAffiliations().get(0)).isEqualTo(first);
-  }
-
-  @Deprecated // to be removed in RW-4362
-  @Test
-  public void testMe_removeAllInstitutionalAffiliations() {
-    createAccountAndDbUserWithAffiliation();
-
-    Profile profile = profileController.getMe().getBody();
-    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<>();
-    InstitutionalAffiliation first = new InstitutionalAffiliation();
-    first.setRole("test");
-    first.setInstitution("Institution");
-    InstitutionalAffiliation second = new InstitutionalAffiliation();
-    second.setRole("zeta");
-    second.setInstitution("Zeta");
-    affiliations.add(first);
-    affiliations.add(second);
-    profile.setInstitutionalAffiliations(affiliations);
-    profileController.updateProfile(profile);
-    affiliations.clear();
-    profile.setInstitutionalAffiliations(affiliations);
-    profileController.updateProfile(profile);
-    Profile result = profileController.getMe().getBody();
-    assertThat(result.getInstitutionalAffiliations().size()).isEqualTo(0);
   }
 
   @Test(expected = BadRequestException.class)
