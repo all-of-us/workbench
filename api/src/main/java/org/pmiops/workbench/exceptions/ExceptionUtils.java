@@ -55,6 +55,14 @@ public class ExceptionUtils {
     throw codeToException(e.getCode());
   }
 
+  public static WorkbenchException convertLeonardoException(
+      org.pmiops.workbench.leonardo.ApiException e) {
+    if (isSocketTimeoutException(e.getCause())) {
+      throw new GatewayTimeoutException();
+    }
+    throw codeToException(e.getCode());
+  }
+
   public static WorkbenchException convertShibbolethException(
       org.pmiops.workbench.shibboleth.ApiException e) {
     if (isSocketTimeoutException(e.getCause())) {
