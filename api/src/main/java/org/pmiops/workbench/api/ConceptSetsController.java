@@ -56,10 +56,10 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     ConceptSet conceptSet =
-        conceptSetService.save(request, userProvider.get(), workspace.getWorkspaceId());
+        conceptSetService.createConceptSet(request, userProvider.get(), workspace.getWorkspaceId());
     userRecentResourceService.updateConceptSetEntry(
         workspace.getWorkspaceId(), userProvider.get().getUserId(), conceptSet.getId());
-    return ResponseEntity.ok(conceptSetService.toHydratedConcepts(conceptSet));
+    return ResponseEntity.ok(conceptSet);
   }
 
   @Override
@@ -75,8 +75,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    return ResponseEntity.ok(
-        conceptSetService.toHydratedConcepts(conceptSetService.findOne(conceptSetId)));
+    return ResponseEntity.ok(conceptSetService.getConceptSet(conceptSetId));
   }
 
   @Override
@@ -115,9 +114,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
-    return ResponseEntity.ok(
-        conceptSetService.toHydratedConcepts(
-            conceptSetService.updateConceptSet(conceptSetId, conceptSet)));
+    return ResponseEntity.ok(conceptSetService.updateConceptSet(conceptSetId, conceptSet));
   }
 
   @Override
@@ -132,9 +129,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
-    return ResponseEntity.ok(
-        conceptSetService.toHydratedConcepts(
-            conceptSetService.updateConceptSetConcepts(conceptSetId, request)));
+    return ResponseEntity.ok(conceptSetService.updateConceptSetConcepts(conceptSetId, request));
   }
 
   @Override
@@ -165,7 +160,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
             toWorkspace.getWorkspaceId());
     userRecentResourceService.updateConceptSetEntry(
         toWorkspace.getWorkspaceId(), userProvider.get().getUserId(), conceptSet.getId());
-    return ResponseEntity.ok(conceptSetService.toHydratedConcepts(conceptSet));
+    return ResponseEntity.ok(conceptSet);
   }
 
   private void validateCreateConceptSetRequest(CreateConceptSetRequest request) {

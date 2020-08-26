@@ -76,18 +76,20 @@ public class ConceptSetService {
         conceptSetMapper.dbModelToDbModel(existingConceptSet, conceptSetContext);
 
     try {
-      return conceptSetMapper.dbModelToClient(conceptSetDao.save(dbConceptSetCopy));
+      return toHydratedConcepts(
+          conceptSetMapper.dbModelToClient(conceptSetDao.save(dbConceptSetCopy)));
     } catch (DataIntegrityViolationException e) {
       throw new ConflictException(
           String.format("Concept set %s already exists.", dbConceptSetCopy.getName()));
     }
   }
 
-  public ConceptSet save(CreateConceptSetRequest request, DbUser creator, Long workspaceId) {
+  public ConceptSet createConceptSet(
+      CreateConceptSetRequest request, DbUser creator, Long workspaceId) {
     DbConceptSet dbConceptSet =
         conceptSetMapper.clientToDbModel(request, workspaceId, creator, conceptBigQueryService);
     try {
-      return conceptSetMapper.dbModelToClient(conceptSetDao.save(dbConceptSet));
+      return toHydratedConcepts(conceptSetMapper.dbModelToClient(conceptSetDao.save(dbConceptSet)));
     } catch (DataIntegrityViolationException e) {
       throw new ConflictException(
           String.format("Concept set %s already exists.", dbConceptSet.getName()));
@@ -117,7 +119,7 @@ public class ConceptSetService {
     }
     dbConceptSet.setLastModifiedTime(Timestamp.from(clock.instant()));
     try {
-      return conceptSetMapper.dbModelToClient(conceptSetDao.save(dbConceptSet));
+      return toHydratedConcepts(conceptSetMapper.dbModelToClient(conceptSetDao.save(dbConceptSet)));
     } catch (OptimisticLockException e) {
       throw new ConflictException("Failed due to concurrent concept set modification");
     }
@@ -158,7 +160,7 @@ public class ConceptSetService {
 
     dbConceptSet.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
     try {
-      return conceptSetMapper.dbModelToClient(conceptSetDao.save(dbConceptSet));
+      return toHydratedConcepts(conceptSetMapper.dbModelToClient(conceptSetDao.save(dbConceptSet)));
     } catch (OptimisticLockException e) {
       throw new ConflictException("Failed due to concurrent concept set modification");
     }
@@ -168,14 +170,14 @@ public class ConceptSetService {
     conceptSetDao.delete(conceptSetId);
   }
 
-  public ConceptSet findOne(Long conceptSetId) {
+  public ConceptSet getConceptSet(Long conceptSetId) {
     DbConceptSet dbConceptSet =
         Optional.ofNullable(conceptSetDao.findOne(conceptSetId))
             .orElseThrow(
                 () ->
                     new NotFoundException(
                         String.format("ConceptSet not found for concept id: %d", conceptSetId)));
-    return conceptSetMapper.dbModelToClient(dbConceptSet);
+    return toHydratedConcepts(conceptSetMapper.dbModelToClient(dbConceptSet));
   }
 
   public List<ConceptSet> findAll(List<Long> conceptSetIds) {
@@ -193,13 +195,6 @@ public class ConceptSetService {
     return conceptSetDao.findByWorkspaceIdAndSurvey(workspaceId, surveyId).stream()
         .map(conceptSetMapper::dbModelToClient)
         .collect(Collectors.toList());
-  }
-
-  public ConceptSet toHydratedConcepts(ConceptSet conceptSet) {
-    return conceptSet.concepts(
-        conceptService.findAll(
-            conceptSetDao.findOne(conceptSet.getId()).getConceptIds(),
-            Ordering.from(String.CASE_INSENSITIVE_ORDER).onResultOf(Concept::getConceptName)));
   }
 
   @Transactional
@@ -230,5 +225,12 @@ public class ConceptSetService {
     // Allows for fetching concept sets for a workspace once its collection is no longer
     // bound to a session.
     return conceptSetDao.findByWorkspaceId(workspace.getWorkspaceId());
+  }
+
+  private ConceptSet toHydratedConcepts(ConceptSet conceptSet) {
+    return conceptSet.concepts(
+        conceptService.findAll(
+            conceptSetDao.findOne(conceptSet.getId()).getConceptIds(),
+            Ordering.from(String.CASE_INSENSITIVE_ORDER).onResultOf(Concept::getConceptName)));
   }
 }
