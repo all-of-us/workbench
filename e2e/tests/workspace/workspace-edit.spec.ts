@@ -20,10 +20,17 @@ describe('Editing workspace thru workspace card ellipsis menu', () => {
    * - Verify Workspace Information in ABOUT tab.
    */
   test('User as OWNER can edit workspace', async () => {
-    const workspaceCard = await findWorkspace(page);
+    const workspaceCard = await findWorkspace(page, true);
     await (workspaceCard.getEllipsis()).clickAction(EllipsisMenuAction.Edit);
 
     const workspacesPage = new WorkspacesPage(page);
+
+    // Synthetic Dataset Select is readonly. Get selected value.
+    const selectedOption = await workspacesPage.selectDataset();
+    const datasetSelect = await workspacesPage.getDatasetSelect();
+    const selectedValue = await datasetSelect.getOptionValue(selectedOption);
+    console.log(selectedValue);
+
     // Change question #2 answer
     await performActions(page, testData.defaultAnswersResearchPurposeSummary);
 
@@ -40,7 +47,7 @@ describe('Editing workspace thru workspace card ellipsis menu', () => {
     await dataPage.openTab(TabLabelAlias.About);
     const aboutPage = new WorkspaceAboutPage(page);
     const cdrValue = await aboutPage.getCdrVersion();
-    await expect(cdrValue).toMatch('Synthetic Dataset v3');
+    expect(cdrValue).toEqual(expect.stringContaining(selectedValue));
 
     // Check CreationDate string is a valid date and compare year string.
     const creationDate = await aboutPage.getCreationDate();

@@ -29,7 +29,6 @@ export async function signIn(page: Page, userId?: string, passwd?: string): Prom
  * @param {string} passwd
  */
 export async function signInAs(userId: string, passwd: string): Promise<Page> {
-  await jestPuppeteer.resetBrowser();
   const incognitoBrowser = await browser.createIncognitoBrowserContext();
   const newPage = await incognitoBrowser.newPage();
   const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36';

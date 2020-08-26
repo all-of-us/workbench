@@ -26,7 +26,7 @@ export const withFullHeight = WrappedComponent => ({...props}) => {
 };
 
 export const SubRoute = ({children}): React.ReactElement => <Switch>{children}</Switch>;
-export const AppRouter = ({children}): React.ReactElement => <BrowserRouter><SubRoute>{children}</SubRoute></BrowserRouter>;
+export const AppRouter = ({children}): React.ReactElement => <BrowserRouter>{children}</BrowserRouter>;
 
 export const RouteLink = ({path, style = {}, children}): React.ReactElement => <Link style={{...style}} to={path}>{children}</Link>;
 
@@ -38,22 +38,39 @@ const NavRedirect = ({path}) => {
   return null;
 };
 
-// A Switch (which, ultimately, is the innermost element in an AppRouter) expects its
-// immediate children to be Routes. If they're not, the code will _probably_ still work, but
-// may behave unexpectedly if the child component doesn't have all the props that a Route should.
-// Duck typing is bad, so we use a function to build the Routes in-place.
-export function generateRoute({path, data={}, guards=[], component: Component}): React.ReactElement {
-  const {redirectPath = null} = fp.find(({allowed}) => !allowed(), guards) || {};
+export const AppRoute = ({path, data = {}, guards = [], component: Component}): React.ReactElement => {
+  const routeParams = useParams();
+  const routeHistory = useHistory();
 
-  return redirectPath
-      ? <NavRedirect path={redirectPath}/>
-      : <Route exact={true} path={path} >
-    <Component urlParams={() => useParams()} routeHistory={() => useHistory()} routeConfig={data}/>
+  return <Route exact={true} path={path} render={
+    () => {
+      const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
+      return redirectPath
+        ? <NavRedirect path={redirectPath}/>
+        : <Component urlParams={routeParams} routeHistory={routeHistory} routeConfig={data}/>;
+    }}>
   </Route>;
-}
+};
+
+export const ProtectedRoutes = (
+  {guards, children}: {guards: Guard[], children: React.ReactElement | React.ReactElement[] }): React.ReactElement => {
+
+  // Pass the guards to the individual routes. Be sure not to overwrite any existing guards
+  const guardedChildren = fp.flow(
+    fp.flatten,
+    fp.toPairs,
+    fp.map(
+      ([key, element]: [string, React.ReactElement]) => {
+        const {guards: elementGuards = []} = element.props;
+        return React.cloneElement(element, {key, guards: [...guards, ...elementGuards ]});
+      }
+    )
+  )([children]); // Make sure children is an array - a single child will not be in an array
+
+  return <Fragment>{guardedChildren}</Fragment>;
+};
 
 export const Navigate = ({to}): React.ReactElement => {
   const location = useLocation();
   return <Redirect to={{pathname: to, state: {from: location}}}/>;
 };
-

@@ -1,6 +1,6 @@
 import * as fp from 'lodash/fp';
 
-const env = process.env.WORKBENCH_ENV || 'dev';
+const env = process.env.WORKBENCH_ENV || 'test';
 
 const userCredential = {
   userEmail: process.env.USER_NAME,
@@ -25,7 +25,7 @@ const local = {
 };
 
 // workbench test environment
-const dev = {
+const test = {
   uiBaseUrl: process.env.TEST_LOGIN_URL || 'https://all-of-us-workbench-test.appspot.com',
   apiBaseUrl: process.env.TEST_API_URL || 'https://api-dot-all-of-us-workbench-test.appspot.com/v1',
   userEmailDomain: '@fake-research-aou.org',
@@ -37,6 +37,7 @@ const staging = {
   uiBaseUrl: process.env.STAGING_LOGIN_URL || 'https://all-of-us-rw-staging.appspot.com',
   apiBaseUrl: process.env.STAGING_API_URL || 'https://api-dot-all-of-us-rw-staging.appspot.com/v1',
   userEmailDomain: '@staging.fake-research-aou.org',
+  collaboratorUsername: 'puppetcitester4@staging.fake-research-aou.org'
 };
 
 // workbench stable environment
@@ -49,7 +50,7 @@ const stable = {
 
 const environment = {
   local,
-  dev,
+  test,
   staging,
   stable,
 };

@@ -1,5 +1,5 @@
 import {Component as AComponent} from '@angular/core';
-import {AppRouter, generateRoute, Guard, withFullHeight, withRouteData} from 'app/components/app-router';
+import {AppRoute, AppRouter, Guard, ProtectedRoutes, withFullHeight, withRouteData} from 'app/components/app-router';
 import {WorkspaceAudit} from 'app/pages/admin/admin-workspace-audit';
 import {UserAudit} from 'app/pages/admin/user-audit';
 import {CookiePolicy} from 'app/pages/cookie-policy';
@@ -50,79 +50,68 @@ interface RoutingProps {
 export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSignIn, signIn}) => {
   const {authLoaded = false} = useStore(authStore);
   return authLoaded && <AppRouter>
-    {/* unguarded routes */}
-    {generateRoute({
-      path: '/cookie-policy',
-      component: () => <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>
-    })}
-    {generateRoute({
-        path: '/login',
-        component: () => <SignInPage routeData={{title: 'Sign In'}} onSignIn={onSignIn} signIn={signIn}/>
-    })}
-    {generateRoute({
-      path: '/session-expired',
-      component: () => <SessionExpiredPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>
-    })}
-    {generateRoute({
-      path: '/sign-in-again',
-      component: () => <SignInAgainPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>
-    })}
-    {generateRoute({
-      path: '/user-disabled',
-      component: () => <UserDisabledPage routeData={{title: 'Disabled'}}/>
-    })}
+    <AppRoute
+        path='/cookie-policy'
+        component={() => <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>}
+    />
+    <AppRoute
+        path='/login'
+        component={() => <SignInPage routeData={{title: 'Sign In'}} onSignIn={onSignIn} signIn={signIn}/>}
+    />
+    <AppRoute
+        path='/session-expired'
+        component={() => <SessionExpiredPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>}
+    />
+    <AppRoute
+        path='/sign-in-again'
+        component={() => <SignInAgainPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>}
+    />
+    <AppRoute
+        path='/user-disabled'
+        component={() => <UserDisabledPage routeData={{title: 'Disabled'}}/>}
+    />
 
-    {/* signed-in routes */}
-    {generateRoute({
-      path: '/',
-      guards: [signInGuard],
-      component: () => <HomepagePage routeData={{title: 'Homepage'}}/>
-    })}
-    {generateRoute({
-      path: '/admin/user-audit',
-      guards: [signInGuard],
-      component: () => <UserAuditPage routeData={{title: 'User Audit'}}/>
-    })}
-    {generateRoute({
-      path: '/admin/user-audit/:username',
-      guards: [signInGuard],
-      component: () => <UserAuditPage routeData={{title: 'User Audit'}}/>
-    })}
-    {generateRoute({
-      path: '/admin/workspace-audit',
-      guards: [signInGuard],
-      component: () => <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>
-    })}
-    {generateRoute({
-        path: '/admin/workspace-audit/:workspaceNamespace',
-        guards: [signInGuard],
-        component: () => <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>
-    })}
-    {generateRoute({
-        path: '/data-code-of-conduct',
-        guards: [signInGuard],
-        component:  () => <DataUserCodeOfConductPage routeData={{
-          title: 'Data User Code of Conduct',
-          minimizeChrome: true
-        }} />
-    })}
-    {generateRoute({
-      path: '/nih-callback',
-      guards: [signInGuard],
-      component: () => <HomepagePage routeData={{title: 'Homepage'}}/>
-    })}
+    <ProtectedRoutes guards={[signInGuard]}>
+      <AppRoute
+        path='/'
+          component={() => <HomepagePage routeData={{title: 'Homepage'}}/>}
+      />
+      <AppRoute
+          path='/admin/user-audit'
+          component={() => <UserAuditPage routeData={{title: 'User Audit'}}/>}
+      />
+      <AppRoute
+          path='/admin/user-audit/:username'
+          component={() => <UserAuditPage routeData={{title: 'User Audit'}}/>}
+      />
+      <AppRoute
+          path='/admin/workspace-audit'
+          component={() => <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>}
+      />
+      <AppRoute
+          path='/admin/workspace-audit/:workspaceNamespace'
+          component={() => <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>}
+      />
+      <AppRoute
+          path='/data-code-of-conduct'
+          component={ () => <DataUserCodeOfConductPage routeData={{
+            title: 'Data User Code of Conduct',
+            minimizeChrome: true
+          }} />}
+      />
+      <AppRoute path='/nih-callback' component={() => <HomepagePage routeData={{title: 'Homepage'}}/>} />
 
-    {/* registered routes */}
-    {generateRoute({
-      path: '/library',
-      guards: [signInGuard, registrationGuard],
-      component: () => <WorkspaceLibraryPage routeData={{title: 'Workspace Library'}}/>
-    })}
-    {generateRoute({
-      path: '/workspaces/:ns/:wsid/notebooks',
-      guards: [signInGuard, registrationGuard],
-      component: () => <NotebookListPage routeData={{title: 'View Notebooks'}}/>
-    })}
+      <ProtectedRoutes guards={[registrationGuard]}>
+        <AppRoute
+          path='/library'
+          component={() => <WorkspaceLibraryPage routeData={{title: 'Workspace Library', minimizeChrome: false}}/>}
+        />
+        <AppRoute
+          path='/workspaces/:ns/:wsid/notebooks'
+          component={() => <NotebookListPage routeData={{title: 'View Notebooks'}}/>}
+        />
+      </ProtectedRoutes>
+    </ProtectedRoutes>
   </AppRouter>;
 };
 

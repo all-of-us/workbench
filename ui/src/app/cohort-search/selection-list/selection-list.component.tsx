@@ -17,7 +17,7 @@ import {
   serverConfigStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
-import {Criteria, DomainType} from 'generated/fetch';
+import {Attribute, Criteria, DomainType} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 
 const proIcons = {
@@ -141,7 +141,22 @@ const styles = reactStyles({
   },
 });
 
+function mapCriteria(crit: Selection) {
+  return {
+    attributes: crit.attributes,
+    code: crit.code,
+    domainId: crit.domainId,
+    group: crit.group,
+    hasAncestorData: crit.hasAncestorData,
+    isStandard: crit.isStandard,
+    name: crit.name,
+    parameterId: crit.parameterId,
+    type: crit.type
+  };
+}
+
 export interface Selection extends Criteria {
+  attributes?: Array<Attribute>;
   parameterId: string;
 }
 
@@ -269,6 +284,7 @@ interface Props {
 
 interface State {
   attributesSelection: Criteria;
+  disableSave: boolean;
   modifierButtonText: string;
   showModifiersSlide: boolean;
 }
@@ -336,12 +352,17 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
       super(props);
       this.state = {
         attributesSelection: undefined,
+        disableSave: false,
         modifierButtonText: 'APPLY MODIFIERS',
         showModifiersSlide: false
       };
     }
 
     componentDidMount(): void {
+      if (!!this.props.cohortContext) {
+        // Check for disabling the Save Criteria button
+        this.checkCriteriaChanges();
+      }
       this.subscription = attributesSelectionStore.subscribe(attributesSelection => {
         this.setState({attributesSelection});
         if (!!attributesSelection) {
@@ -351,11 +372,16 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
-      if (!this.props.criteria && !!prevProps.criteria) {
+      const {cohortContext, criteria} = this.props;
+      if (!criteria && !!prevProps.criteria) {
         this.setState({
           modifierButtonText: 'APPLY MODIFIERS',
           showModifiersSlide: false
         });
+      }
+      if (!!cohortContext && !!criteria && criteria !== prevProps.criteria) {
+        // Each time the criteria changes, we check for disabling the Save Criteria button again
+        this.checkCriteriaChanges();
       }
     }
 
@@ -373,6 +399,17 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
 
     showOr(index, selection) {
       return index > 0 && selection.domainId !== DomainType.PERSON.toString();
+    }
+
+    checkCriteriaChanges() {
+      const {cohortContext, criteria} = this.props;
+      if (criteria.length === 0) {
+        this.setState({disableSave: true});
+      } else {
+        const mappedCriteriaString = JSON.stringify(criteria.map(mapCriteria));
+        const mappedParametersString = JSON.stringify(cohortContext.item.searchParameters.map(mapCriteria));
+        this.setState({disableSave: mappedCriteriaString === mappedParametersString});
+      }
     }
 
     renderCriteria() {
@@ -426,7 +463,7 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
 
     render() {
       const {back, criteria} = this.props;
-      const {attributesSelection, modifierButtonText, showModifiersSlide} = this.state;
+      const {attributesSelection, disableSave, modifierButtonText, showModifiersSlide} = this.state;
       return <div>
         <FlexRow style={styles.navIcons}>
           {this.showAttributesOrModifiers &&
@@ -460,6 +497,7 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
             <FlexRowWrap style={{flexDirection: 'row-reverse', marginTop: '2rem'}}>
               <Button type='primary'
                       style={styles.saveButton}
+                      disabled={disableSave}
                       onClick={() => saveCriteria()}>Save Criteria</Button>
               <Button type='link'
                       style={{color: colors.primary, marginRight: '0.5rem'}}

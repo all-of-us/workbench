@@ -6,6 +6,13 @@ import RadioButton from 'app/element/radiobutton';
 import Textbox from 'app/element/textbox';
 import {Language, LinkText} from 'app/text-labels';
 import Button from 'app/element/button';
+import {waitUntilChanged} from 'utils/element-utils';
+import {waitForPropertyExists} from 'utils/waits-utils';
+import Textarea from 'app/element/textarea';
+
+export const labelAlias = {
+  SeeCodePreview: 'See Code Preview'
+}
 
 export default class DatasetSaveModal extends Modal {
 
@@ -69,6 +76,23 @@ export default class DatasetSaveModal extends Modal {
       console.log(`Created Notebook "${notebookName}"`);
     }
     return newDatasetName;
+  }
+
+  /**
+   * Click 'See Code Preview' button. Returns code contents.
+   */
+  async previewCode(): Promise<string> {
+    // Click 'See Code Preview' button.
+    const previewButton = await Button.findByName(this.page, {name: 'See Code Preview'}, this);
+    await previewButton.click();
+    await waitUntilChanged(this.page, await previewButton.asElementHandle());
+
+    // Find Preview Code
+    const selector = `${this.getXpath()}//textarea[@data-test-id="code-text-box"]`;
+    const previewTextArea = new Textarea(this.page, selector);
+    // Has 'disabled' property
+    await waitForPropertyExists(this.page, selector, 'disabled');
+    return previewTextArea.getTextContent();
   }
 
 }

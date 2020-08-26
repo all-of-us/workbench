@@ -4,10 +4,9 @@ import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 
-import {AppRouting} from './app-routing';
-
 import {DataPageComponent} from 'app/pages/data/data-page';
 import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
+import {AppRouting} from './app-routing';
 import {AdminBannerComponent} from './pages/admin/admin-banner';
 import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
 import {AdminUserComponent} from './pages/admin/admin-user';
@@ -27,6 +26,7 @@ import {ProfilePageComponent} from './pages/profile/profile-page';
 import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './pages/workspace/workspace-edit';
+import {WorkspaceLibraryComponent} from './pages/workspace/workspace-library';
 import {WorkspaceListComponent} from './pages/workspace/workspace-list';
 import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/component';
 
@@ -82,7 +82,8 @@ const routes: Routes = [
       },
       {
         path: 'data-code-of-conduct',
-        component: AppRouting
+        component: AppRouting,
+        data: {}
       },
       {
         path: 'nih-callback',
@@ -95,13 +96,13 @@ const routes: Routes = [
         canActivateChild: [RegistrationGuard],
         runGuardsAndResolvers: 'always',
         children: [
-          // legacy / duplicated routes go HERE
+          // legacy / duplicated routes will go HERE
+          // non-migrated routes go HERE
           {
             path: 'library',
-            component: AppRouting,
-            data: {}
+            component: WorkspaceLibraryComponent,
+            data: {title: 'Workspace Library'}
           },
-          // non-migrated routes go HERE
           {
             path: 'workspaces',
             canActivateChild: [WorkspaceGuard],

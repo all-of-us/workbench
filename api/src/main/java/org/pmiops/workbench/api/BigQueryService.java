@@ -6,6 +6,8 @@ import com.google.cloud.bigquery.BigQueryOptions;
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldList;
 import com.google.cloud.bigquery.FieldValue;
+import com.google.cloud.bigquery.InsertAllRequest;
+import com.google.cloud.bigquery.InsertAllResponse;
 import com.google.cloud.bigquery.JobInfo;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableId;
@@ -156,5 +158,9 @@ public class BigQueryService {
             BigQueryDataSetTableInfo.getTableName(domain));
 
     return getBigQueryService().getTable(tableId).getDefinition().getSchema().getFields();
+  }
+
+  public InsertAllResponse insertAll(InsertAllRequest insertAllRequest) {
+    return defaultBigQuery.insertAll(insertAllRequest);
   }
 }

@@ -47,6 +47,7 @@ export default class WorkspacesPage extends WorkspaceEditPage {
    */
   async load(): Promise<this> {
     await this.loadPageUrl(PageUrl.Workspaces);
+    await waitWhileLoading(this.page);
     return this;
   }
 
@@ -149,7 +150,7 @@ export default class WorkspacesPage extends WorkspaceEditPage {
     const notebookPage = await dataPage.createNotebook(notebookName, lang); // Python 3 is the default
 
     // Do not run any code. Simply returns to the Workspace Analysis tab.
-    return notebookPage.goBackAnalysisPage();
+    return notebookPage.goAnalysisPage();
   }
 
 }

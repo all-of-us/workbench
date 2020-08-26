@@ -66,7 +66,7 @@ public class EgressEventServiceImpl implements EgressEventService {
   public void handleEvent(EgressEvent event) {
     logger.warning(
         String.format(
-            "Received an egress event from project %s (%.2fMib, VM %s)",
+            "Received an egress event from project %s (%.2fMiB, VM %s)",
             event.getProjectName(), event.getEgressMib(), event.getVmName()));
     this.egressEventAuditor.fireEgressEvent(event);
     this.createEgressEventAlert(event);
@@ -105,7 +105,7 @@ public class EgressEventServiceImpl implements EgressEventService {
     // an incident.
     request.setNote(
         String.format(
-            "Time window: %d secs, threshold: %.2f Mib, observed: %.2f Mib",
+            "Time window: %d secs, threshold: %.2f MiB, observed: %.2f MiB",
             egressEvent.getTimeWindowDuration(),
             egressEvent.getEgressMibThreshold(),
             egressEvent.getEgressMib()));
@@ -148,7 +148,7 @@ public class EgressEventServiceImpl implements EgressEventService {
         + String.format("Notebook Jupyter VM name: %s\n", egressEvent.getVmName())
         + String.format("MySQL workspace_id: %d\n", adminWorkspace.getWorkspaceDatabaseId())
         + String.format(
-            "Egress detected: %.2f Mib in %d secs\n\n",
+            "Egress detected: %.2f MiB in %d secs\n\n",
             egressEvent.getEgressMib(), egressEvent.getTimeWindowDuration())
         + String.format(
             "Cluster Name: %s\n", executor.map(DbUser::getClusterName).orElse("unknown"))

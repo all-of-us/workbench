@@ -122,6 +122,7 @@
   },
   "reporting": {
     "dataset": "reporting_local",
-    "maxRowsPerInsert": 200
+    "maxRowsPerInsert": 200,
+    "uploadMethod": "STREAMING"
   }
 }
