@@ -134,8 +134,7 @@ public class CdrVersionsControllerTest {
 
   private void assertResponse(CdrVersionListResponse response, DbCdrVersion... versions) {
     assertThat(response.getItems())
-        .containsExactly(
-            Arrays.stream(versions).map(cdrVersionMapper::dbModelToClient).toArray())
+        .containsExactly(Arrays.stream(versions).map(cdrVersionMapper::dbModelToClient).toArray())
         .inOrder();
     assertThat(response.getDefaultCdrVersionId())
         .isEqualTo(String.valueOf(defaultCdrVersion.getCdrVersionId()));
