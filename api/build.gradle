@@ -157,6 +157,10 @@ def swagger3JavaClient(yaml, pkg, rawOptExtras = []) {
         'apiPackage'       : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.api",
       ]
     }
+    // Validation only works for Swagger 2 - skip.
+    validation {
+      inputFile = null
+    }
   }
 }
 
