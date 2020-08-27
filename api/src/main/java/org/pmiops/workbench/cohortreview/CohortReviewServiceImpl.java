@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
+import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortAnnotationMapper;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -21,17 +22,16 @@ import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbParticipantCohortAnnotation;
 import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
 import org.pmiops.workbench.db.model.DbStorageEnums;
-import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
-import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,7 +44,7 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   private ParticipantCohortStatusDao participantCohortStatusDao;
   private ParticipantCohortAnnotationDao participantCohortAnnotationDao;
   private CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
-  private WorkspaceService workspaceService;
+  private ParticipantCohortAnnotationMapper participantCohortAnnotationMapper;
 
   @Autowired
   public CohortReviewServiceImpl(
@@ -53,13 +53,13 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
       ParticipantCohortStatusDao participantCohortStatusDao,
       ParticipantCohortAnnotationDao participantCohortAnnotationDao,
       CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao,
-      WorkspaceService workspaceService) {
+      ParticipantCohortAnnotationMapper participantCohortAnnotationMapper) {
     this.cohortReviewDao = cohortReviewDao;
     this.cohortDao = cohortDao;
     this.participantCohortStatusDao = participantCohortStatusDao;
     this.participantCohortAnnotationDao = participantCohortAnnotationDao;
     this.cohortAnnotationDefinitionDao = cohortAnnotationDefinitionDao;
-    this.workspaceService = workspaceService;
+    this.participantCohortAnnotationMapper = participantCohortAnnotationMapper;
   }
 
   public CohortReviewServiceImpl() {}
@@ -72,31 +72,6 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
           String.format("Not Found: No Cohort exists for cohortId: %s", cohortId));
     }
     return cohort;
-  }
-
-  @Override
-  public DbWorkspace validateMatchingWorkspaceAndSetCdrVersion(
-      String workspaceNamespace,
-      String workspaceName,
-      long workspaceId,
-      WorkspaceAccessLevel accessRequired) {
-    DbWorkspace workspace =
-        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, workspaceName, accessRequired);
-    if (workspace == null || workspace.getWorkspaceId() != workspaceId) {
-      throw new NotFoundException(
-          String.format(
-              "Not Found: No workspace matching workspaceNamespace: %s, workspaceId: %s",
-              workspaceNamespace, workspaceName));
-    }
-    return workspace;
-  }
-
-  @Override
-  public WorkspaceAccessLevel enforceWorkspaceAccessLevel(
-      String workspaceNamespace, String workspaceId, WorkspaceAccessLevel requiredAccess) {
-    return workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
-        workspaceNamespace, workspaceId, requiredAccess);
   }
 
   @Override
@@ -198,29 +173,29 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   }
 
   @Override
-  public DbParticipantCohortAnnotation saveParticipantCohortAnnotation(
-      Long cohortReviewId, DbParticipantCohortAnnotation participantCohortAnnotation) {
-    DbCohortAnnotationDefinition cohortAnnotationDefinition =
+  public ParticipantCohortAnnotation saveParticipantCohortAnnotation(
+      Long cohortReviewId, ParticipantCohortAnnotation participantCohortAnnotation) {
+    DbParticipantCohortAnnotation dbParticipantCohortAnnotation =
+        participantCohortAnnotationMapper.clientToDbModel(participantCohortAnnotation);
+
+    DbCohortAnnotationDefinition dbCohortAnnotationDefinition =
         findCohortAnnotationDefinition(
-            participantCohortAnnotation.getCohortAnnotationDefinitionId());
+            dbParticipantCohortAnnotation.getCohortAnnotationDefinitionId());
 
-    validateParticipantCohortAnnotation(participantCohortAnnotation, cohortAnnotationDefinition);
+    validateParticipantCohortAnnotationAndMutateForSave(
+        dbParticipantCohortAnnotation, dbCohortAnnotationDefinition);
 
-    if (findParticipantCohortAnnotation(
-            cohortReviewId,
-            participantCohortAnnotation.getCohortAnnotationDefinitionId(),
-            participantCohortAnnotation.getParticipantId())
-        != null) {
-      throw new BadRequestException(
-          String.format(
-              "Bad Request: Cohort annotation definition exists for id: %s",
-              participantCohortAnnotation.getCohortAnnotationDefinitionId()));
-    }
-    return participantCohortAnnotationDao.save(participantCohortAnnotation);
+    validateParticipantCohortAnnotationNotExists(
+        cohortReviewId,
+        dbParticipantCohortAnnotation.getCohortAnnotationDefinitionId(),
+        dbParticipantCohortAnnotation.getParticipantId());
+
+    return participantCohortAnnotationMapper.dbModelToClient(
+        participantCohortAnnotationDao.save(dbParticipantCohortAnnotation));
   }
 
   @Override
-  public DbParticipantCohortAnnotation updateParticipantCohortAnnotation(
+  public ParticipantCohortAnnotation updateParticipantCohortAnnotation(
       Long annotationId,
       Long cohortReviewId,
       Long participantId,
@@ -244,9 +219,11 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
         findCohortAnnotationDefinition(
             participantCohortAnnotation.getCohortAnnotationDefinitionId());
 
-    validateParticipantCohortAnnotation(participantCohortAnnotation, cohortAnnotationDefinition);
+    validateParticipantCohortAnnotationAndMutateForSave(
+        participantCohortAnnotation, cohortAnnotationDefinition);
 
-    return participantCohortAnnotationDao.save(participantCohortAnnotation);
+    return participantCohortAnnotationMapper.dbModelToClient(
+        participantCohortAnnotationDao.save(participantCohortAnnotation));
   }
 
   @Override
@@ -281,44 +258,47 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   }
 
   @Override
-  public DbParticipantCohortAnnotation findParticipantCohortAnnotation(
-      Long cohortReviewId, Long cohortAnnotationDefinitionId, Long participantId) {
-    return participantCohortAnnotationDao
-        .findByCohortReviewIdAndCohortAnnotationDefinitionIdAndParticipantId(
-            cohortReviewId, cohortAnnotationDefinitionId, participantId);
-  }
-
-  @Override
-  public List<DbParticipantCohortAnnotation> findParticipantCohortAnnotations(
+  public List<ParticipantCohortAnnotation> findParticipantCohortAnnotations(
       Long cohortReviewId, Long participantId) {
-    return participantCohortAnnotationDao.findByCohortReviewIdAndParticipantId(
-        cohortReviewId, participantId);
+    return participantCohortAnnotationDao
+        .findByCohortReviewIdAndParticipantId(cohortReviewId, participantId)
+        .stream()
+        .map(participantCohortAnnotationMapper::dbModelToClient)
+        .collect(Collectors.toList());
   }
 
-  /**
-   * Helper method to validate that requested annotations are proper.
-   *
-   * @param participantCohortAnnotation
-   */
-  private void validateParticipantCohortAnnotation(
+  private void validateParticipantCohortAnnotationNotExists(
+      Long cohortReviewId, Long cohortAnnotationDefinitionId, Long participantId) {
+    if (participantCohortAnnotationDao
+            .findByCohortReviewIdAndCohortAnnotationDefinitionIdAndParticipantId(
+                cohortReviewId, cohortAnnotationDefinitionId, participantId)
+        != null) {
+      throw new ConflictException(
+          String.format(
+              "Cohort annotation definition exists for id: %s", cohortAnnotationDefinitionId));
+    }
+  }
+
+  /** Helper method to validate that requested annotations are proper. */
+  private void validateParticipantCohortAnnotationAndMutateForSave(
       DbParticipantCohortAnnotation participantCohortAnnotation,
       DbCohortAnnotationDefinition cohortAnnotationDefinition) {
 
     if (cohortAnnotationDefinition.getAnnotationTypeEnum().equals(AnnotationType.BOOLEAN)) {
       if (participantCohortAnnotation.getAnnotationValueBoolean() == null) {
-        throw createBadRequestException(
+        throw createConflictException(
             AnnotationType.BOOLEAN.name(),
             participantCohortAnnotation.getCohortAnnotationDefinitionId());
       }
     } else if (cohortAnnotationDefinition.getAnnotationTypeEnum().equals(AnnotationType.STRING)) {
       if (StringUtils.isBlank(participantCohortAnnotation.getAnnotationValueString())) {
-        throw createBadRequestException(
+        throw createConflictException(
             AnnotationType.STRING.name(),
             participantCohortAnnotation.getCohortAnnotationDefinitionId());
       }
     } else if (cohortAnnotationDefinition.getAnnotationTypeEnum().equals(AnnotationType.DATE)) {
       if (StringUtils.isBlank(participantCohortAnnotation.getAnnotationValueDateString())) {
-        throw createBadRequestException(
+        throw createConflictException(
             AnnotationType.DATE.name(),
             participantCohortAnnotation.getCohortAnnotationDefinitionId());
       }
@@ -338,13 +318,13 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
       }
     } else if (cohortAnnotationDefinition.getAnnotationTypeEnum().equals(AnnotationType.INTEGER)) {
       if (participantCohortAnnotation.getAnnotationValueInteger() == null) {
-        throw createBadRequestException(
+        throw createConflictException(
             AnnotationType.INTEGER.name(),
             participantCohortAnnotation.getCohortAnnotationDefinitionId());
       }
     } else if (cohortAnnotationDefinition.getAnnotationTypeEnum().equals(AnnotationType.ENUM)) {
       if (StringUtils.isBlank(participantCohortAnnotation.getAnnotationValueEnum())) {
-        throw createBadRequestException(
+        throw createConflictException(
             AnnotationType.ENUM.name(),
             participantCohortAnnotation.getCohortAnnotationDefinitionId());
       }
@@ -357,7 +337,7 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
                           .equals(enumValue.getName()))
               .collect(Collectors.toList());
       if (enumValues.isEmpty()) {
-        throw createBadRequestException(
+        throw createConflictException(
             AnnotationType.ENUM.name(),
             participantCohortAnnotation.getCohortAnnotationDefinitionId());
       }
@@ -365,18 +345,12 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
     }
   }
 
-  /**
-   * Helper method that creates a {@link BadRequestException} from the specified parameters.
-   *
-   * @param annotationType
-   * @param cohortAnnotationDefinitionId
-   * @return
-   */
-  private BadRequestException createBadRequestException(
+  /** Helper method that creates a {@link ConflictException} from the specified parameters. */
+  private ConflictException createConflictException(
       String annotationType, Long cohortAnnotationDefinitionId) {
-    return new BadRequestException(
+    return new ConflictException(
         String.format(
-            "Bad Request: Please provide a valid %s value for annotation defintion id: %s",
+            "Conflict Exception: Please provide a valid %s value for annotation defintion id: %s",
             annotationType, cohortAnnotationDefinitionId));
   }
 
