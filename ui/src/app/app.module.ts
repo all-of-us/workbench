@@ -66,7 +66,6 @@ import {
 
 import {TextModalComponent} from 'app/components/text-modal';
 import {AdminWorkspaceSearchComponent} from 'app/pages/admin/admin-workspace-search';
-import {InteractiveNotebookComponent} from 'app/pages/analysis/interactive-notebook';
 import {DataPageComponent} from 'app/pages/data/data-page';
 import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
 import {NavBarComponent} from 'app/pages/signed-in/nav-bar';
@@ -148,7 +147,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     FooterComponent,
     HelpSidebarComponent,
     InitialErrorComponent,
-    InteractiveNotebookComponent,
     NotebookRedirectComponent,
     ProfilePageComponent,
     QueryReportComponent,

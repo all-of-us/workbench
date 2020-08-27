@@ -96,7 +96,7 @@ export class AppComponent implements OnInit {
       }
     });
 
-    routeDataStore.subscribe(({title}) => this.setTitleFromReactRoute(title));
+    routeDataStore.subscribe(({title, pathElementForTitle}) => this.setTitleFromReactRoute({title, pathElementForTitle}));
     initializeAnalytics();
   }
 
@@ -121,12 +121,12 @@ export class AppComponent implements OnInit {
     }
   }
 
-  private setTitleFromReactRoute(title: string): void {
+  private setTitleFromReactRoute({title = '', pathElementForTitle}: {title: string, pathElementForTitle?: string}): void {
     const currentRoute = this.getLeafRoute();
     if (currentRoute.outlet === 'primary') {
-      currentRoute.data.subscribe(value => {
+      currentRoute.data.subscribe(() => {
         const routeTitle = title ||
-          decodeURIComponent(currentRoute.params.getValue()[value.pathElementForTitle]);
+          decodeURIComponent(currentRoute.params.getValue()[pathElementForTitle]);
         this.titleService.setTitle(`${routeTitle} | ${this.baseTitle}`);
       });
     }

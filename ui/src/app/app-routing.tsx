@@ -13,6 +13,8 @@ import {authStore, profileStore, useStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Redirect} from 'react-router';
+import {NOTEBOOK_HELP_CONTENT} from './components/help-sidebar';
+import {InteractiveNotebook} from './pages/analysis/interactive-notebook';
 import {NotebookList} from './pages/analysis/notebook-list';
 import {Homepage} from './pages/homepage/homepage';
 import {SignIn} from './pages/login/sign-in';
@@ -42,6 +44,7 @@ const UserAuditPage = withRouteData(UserAudit);
 const UserDisabledPage = withRouteData(UserDisabled);
 const WorkspaceAuditPage = withRouteData(WorkspaceAudit);
 const WorkspaceLibraryPage = withRouteData(WorkspaceLibrary);
+const InteractiveNotebookPage = withRouteData(InteractiveNotebook);
 
 interface RoutingProps {
   onSignIn: () => void;
@@ -113,6 +116,16 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
             title: 'View Notebooks',
             helpContentKey: 'notebooks',
             breadcrumb: BreadcrumbType.Workspace
+          }}/>}
+        />
+        <AppRoute
+          path='/workspaces/:ns/:wsid/notebooks/preview/:nbName'
+          component={() => <InteractiveNotebookPage routeData={{
+            pathElementForTitle: 'nbName',
+            breadcrumb: BreadcrumbType.Notebook,
+            helpContentKey: NOTEBOOK_HELP_CONTENT,
+            notebookHelpSidebarStyles: true,
+            minimizeChrome: true
           }}/>}
         />
       </ProtectedRoutes>

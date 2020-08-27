@@ -1,5 +1,6 @@
 import {NgModule} from '@angular/core';
 import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
+import { AppRouter } from 'app/components/app-router';
 
 import {AppRouting} from './app-routing';
 import {RegistrationGuard} from './guards/registration-guard.service';
@@ -177,14 +178,8 @@ const routes: Routes = [
                       },
                       {
                         path: 'preview/:nbName',
-                        component: InteractiveNotebookComponent,
-                        data: {
-                          pathElementForTitle: 'nbName',
-                          breadcrumb: BreadcrumbType.Notebook,
-                          helpContentKey: NOTEBOOK_HELP_CONTENT,
-                          notebookHelpSidebarStyles: true,
-                          minimizeChrome: true
-                        }
+                        component: AppRouting,
+                        data: {}
                       }
                     ]
                   },
