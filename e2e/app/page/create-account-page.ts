@@ -154,24 +154,24 @@ export default class CreateAccountPage extends BasePage {
   }
 
   // select Institution Affiliation from a dropdown
-  async selectInstitution(selectTextValue: string) {
+  async selectInstitution(selectTextValue: string): Promise<void> {
     const dropdown = await SelectMenu.findByName(this.page, FieldSelector.InstitutionSelect.textOption);
     await dropdown.clickMenuItem(selectTextValue);
   }
 
-  async getInstitutionValue() {
+  async getInstitutionValue(): Promise<string> {
     const dropdown = await SelectMenu.findByName(this.page, FieldSelector.InstitutionSelect.textOption);
     return await dropdown.getSelectedValue();
   }
 
   // select Education Level from a dropdown
-  async selectEducationLevel(selectTextValue: string) {
+  async selectEducationLevel(selectTextValue: string): Promise<void> {
     const dropdown = await SelectMenu.findByName(this.page, FieldSelector.EducationLevelSelect.textOption);
     await dropdown.clickMenuItem(selectTextValue);
   }
 
   // select Year of Birth from a dropdown
-  async selectYearOfBirth(year: string) {
+  async selectYearOfBirth(year: string): Promise<void> {
     const dropdown = await SelectMenu.findByName(this.page, FieldSelector.BirthYearSelect.textOption);
     await dropdown.clickMenuItem(year);
   }
@@ -179,7 +179,7 @@ export default class CreateAccountPage extends BasePage {
   // Combined steps to make test code cleaner and shorter
 
   // Step 1: Fill out institution affiliation details
-  async fillOutInstitution() {
+  async fillOutInstitution(): Promise<void> {
     await Promise.all([
       waitForText(this.page, 'complete Step 1 of 3', {css: 'body'}),
       waitWhileLoading(this.page),
@@ -197,7 +197,7 @@ export default class CreateAccountPage extends BasePage {
   }
 
   // Step 3: Accepting Terms of Use and Privacy statement.
-  async acceptTermsOfUseAgreement() {
+  async acceptTermsOfUseAgreement(): Promise<void> {
     const privacyStatementCheckbox = this.getPrivacyStatementCheckbox();
     const termsOfUseCheckbox = this.getTermsOfUseCheckbox();
 
@@ -209,14 +209,14 @@ export default class CreateAccountPage extends BasePage {
   }
 
   // Step 3: Fill out user information with default values
-  async fillOutUserInformation() {
+  async fillOutUserInformation(): Promise<string> {
     const newUserName = await this.fillInFormFields(defaultFieldValues);
     await (await this.getResearchBackgroundTextarea()).type(faker.lorem.word());
     return newUserName;
   }
 
   // Step 4: Fill out demographic survey information with default values
-  async fillOutDemographicSurvey() {
+  async fillOutDemographicSurvey(): Promise<void> {
     await waitForText(this.page, 'Optional Demographics Survey');
     // Find and check on all checkboxes with same label: Prefer not to answer
     const targetXpath = '//*[normalize-space(text())="Prefer not to answer"]/ancestor::node()[1]/input[@type="checkbox"]';

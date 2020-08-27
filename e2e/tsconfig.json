@@ -4,7 +4,7 @@
     "allowUnreachableCode": false,
     "suppressExcessPropertyErrors": false,
     "moduleResolution": "node",
-    "module": "commonjs",
+    "module": "ES2015",
     "importHelpers": true,
     "sourceMap": true,
     "declaration": false,
@@ -27,7 +27,8 @@
     "lib": [
       "ES2017",
       "dom"
-    ]
+    ],
+    "esModuleInterop": true
   },
   "inclue": ["/*"],
   "exclude": [ "tsc-out", "node_modules" ]

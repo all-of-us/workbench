@@ -70,6 +70,7 @@ import org.pmiops.workbench.model.CohortChartDataListResponse;
 import org.pmiops.workbench.model.CohortReviewListResponse;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CreateReviewRequest;
+import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FilterColumns;
@@ -103,9 +104,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   public static final Integer MIN_LIMIT = 1;
   public static final Integer MAX_LIMIT = 20;
   public static final Integer DEFAULT_LIMIT = 5;
-  public static final List<String> GENDER_RACE_ETHNICITY_TYPES =
+  public static final List<String> SEX_GENDER_RACE_ETHNICITY_TYPES =
       ImmutableList.of(
-          FilterColumns.ETHNICITY.name(), FilterColumns.GENDER.name(), FilterColumns.RACE.name());
+          FilterColumns.SEX_AT_BIRTH.name(),
+          FilterColumns.ETHNICITY.name(),
+          FilterColumns.GENDER.name(),
+          FilterColumns.RACE.name());
 
   private CohortBuilderService cohortBuilderService;
   private CohortReviewService cohortReviewService;
@@ -732,10 +736,14 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   private void convertGenderRaceEthnicitySortOrder(PageRequest pageRequest) {
     String sortColumn = pageRequest.getSortColumn();
     String sortName = pageRequest.getSortOrder().name();
-    if (GENDER_RACE_ETHNICITY_TYPES.contains(sortColumn)) {
+    if (SEX_GENDER_RACE_ETHNICITY_TYPES.contains(sortColumn)) {
+      String criteriaSortColumn =
+          sortColumn.equals(FilterColumns.SEX_AT_BIRTH.toString())
+              ? CriteriaType.SEX.toString()
+              : sortColumn;
       List<String> demoList =
           cohortBuilderService.findSortedConceptIdsByDomainIdAndTypeAndParentIdNotIn(
-              DomainType.PERSON.toString(), 0L, sortColumn, sortName);
+              DomainType.PERSON.toString(), 0L, criteriaSortColumn, sortName);
       if (!demoList.isEmpty()) {
         pageRequest.setSortColumn(
             "FIELD("

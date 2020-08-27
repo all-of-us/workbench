@@ -22,7 +22,7 @@ import org.pmiops.workbench.model.Surveys;
 @Entity
 @Table(name = "concept_set")
 public class DbConceptSet {
-  private static final int INITIAL_VERSION = 1;
+  public static final int INITIAL_VERSION = 1;
 
   private long conceptSetId;
   private int version;

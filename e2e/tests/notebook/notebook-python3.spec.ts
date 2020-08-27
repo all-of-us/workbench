@@ -25,12 +25,12 @@ describe('Jupyter notebook tests in Python language', () => {
     const cell2OutputText = await notebook.runCodeCell(2, {codeFile: 'resources/python-code/import-libs.py'});
     expect(cell2OutputText).toContain('success');
 
-    const cell3OutputText =  await notebook.runCodeCell(3, {codeFile: 'resources/python-code/simple-pyplot.py'});
+    await notebook.runCodeCell(3, {codeFile: 'resources/python-code/simple-pyplot.py'});
+
     // Verify plot is the output.
     const cell = await notebook.findCell(3);
     const cellOutputElement = await cell.findOutputElementHandle();
     const [imgElement] = await cellOutputElement.$x('./img[@src]');
-    expect(cell3OutputText).toEqual(''); // generated pyplot is a image, no texts.
     expect(imgElement).toBeTruthy(); // plot format is a img.
 
     const codeSnippet = '!jupyter kernelspec list';

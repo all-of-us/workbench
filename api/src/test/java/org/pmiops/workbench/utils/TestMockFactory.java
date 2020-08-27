@@ -26,6 +26,8 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.leonardo.model.ClusterStatus;
+import org.pmiops.workbench.leonardo.model.ListClusterResponse;
 import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
@@ -33,8 +35,6 @@ import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.notebooks.model.ClusterStatus;
-import org.pmiops.workbench.notebooks.model.ListClusterResponse;
 
 public class TestMockFactory {
   public static final String WORKSPACE_BUCKET_NAME = "fc-secure-111111-2222-AAAA-BBBB-000000000000";

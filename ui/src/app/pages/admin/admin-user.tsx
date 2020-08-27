@@ -14,6 +14,7 @@ import {institutionApi, profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   displayDateWithoutHours,
+  formatFreeCreditsUSD,
   isBlank,
   reactStyles,
   ReactWrapperBase,
@@ -56,19 +57,9 @@ const styles = reactStyles({
   }
 });
 
-const freeCreditLimitOptions = [
-  {label: '$300', value: 300},
-  {label: '$350', value: 350},
-  {label: '$400', value: 400},
-  {label: '$450', value: 450},
-  {label: '$500', value: 500},
-  {label: '$550', value: 550},
-  {label: '$600', value: 600},
-  {label: '$650', value: 650},
-  {label: '$700', value: 700},
-  {label: '$750', value: 750},
-  {label: '$800', value: 800}
-];
+const CREDIT_LIMIT_DEFAULT_MIN = 300;
+const CREDIT_LIMIT_DEFAULT_MAX = 800;
+const CREDIT_LIMIT_DEFAULT_STEP = 50;
 
 const DropdownWithLabel = ({label, options, initialValue, onChange, disabled= false, dataTestId, dropdownStyle = {}}) => {
   return <FlexColumn data-test-id={dataTestId} style={{marginTop: '1rem'}}>
@@ -101,7 +92,6 @@ const ToggleWithLabelAndToggledText = ({label, initialValue, disabled, onToggle,
   </FlexColumn>;
 };
 
-
 const EmailValidationErrorMessage = ({emailValidationResponse, updatedProfile, verifiedInstitutionOptions}) => {
   if (updatedProfile && updatedProfile.verifiedInstitutionalAffiliation) {
     if (emailValidationResponse.isValidMember) {
@@ -122,6 +112,36 @@ const EmailValidationErrorMessage = ({emailValidationResponse, updatedProfile, v
     }
   }
   return null;
+};
+
+interface FreeCreditsProps {
+  isAboveLimit: boolean;
+  usage: string;
+}
+
+const FreeCreditsUsage = ({isAboveLimit, usage}: FreeCreditsProps) => {
+  const inputStyle = isAboveLimit ?
+  {...styles.textInput,
+    backgroundColor: colorWithWhiteness(colors.danger, .95),
+    borderColor: colors.danger,
+    color: colors.danger,
+  } :
+  {...styles.textInput,
+    ...styles.backgroundColorDark,
+    color: colors.disabled,
+  };
+
+  return <React.Fragment>
+    <TextInputWithLabel
+      labelText='Free credits used'
+      value={usage}
+      inputId='freeTierUsage'
+      disabled={true}
+      inputStyle={inputStyle}
+      containerStyle={styles.textInputContainer}
+    />
+    {isAboveLimit && <div style={{color: colors.danger}}>Update free credit limit</div>}
+  </React.Fragment>;
 };
 
 interface Props {
@@ -225,6 +245,31 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     }
   }
 
+  getFreeCreditLimitOptions() {
+    const {oldProfile: {freeTierDollarQuota}} = this.state;
+
+    const defaultsPlusMaybeOverride = new Set(
+      // gotcha: argument order for rangeStep is (step, start, end)
+      // IntelliJ incorrectly believes takes the order is (start, end, step)
+      fp.rangeStep(CREDIT_LIMIT_DEFAULT_STEP, CREDIT_LIMIT_DEFAULT_MIN, CREDIT_LIMIT_DEFAULT_MAX))
+      .add(freeTierDollarQuota);
+
+    // gotcha: JS sorts numbers lexicographically by default
+    const numericallySorted = Array.from(defaultsPlusMaybeOverride).sort((a, b) => a - b);
+
+    return fp.map((limit) => ({label: formatFreeCreditsUSD(limit), value: limit}), numericallySorted);
+  }
+
+  getFreeCreditUsage(): string {
+    const {updatedProfile: {freeTierDollarQuota, freeTierUsage}} = this.state;
+    return `${formatFreeCreditsUSD(freeTierUsage)} used of ${formatFreeCreditsUSD(freeTierDollarQuota)} limit`;
+  }
+
+  usageIsAboveLimit(): boolean {
+    const {updatedProfile: {freeTierDollarQuota, freeTierUsage}} = this.state;
+    return freeTierDollarQuota < freeTierUsage;
+  }
+
   async getInstitutions() {
     try {
       const institutionsResponse = await institutionApi().getPublicInstitutionDetails();
@@ -273,6 +318,10 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     await this.validateEmail();
   }
 
+  setFreeTierCreditDollarLimit(newLimit: number) {
+    this.setState(fp.set(['updatedProfile', 'freeTierDollarQuota'], newLimit));
+  }
+
   setInstitutionalRoleOnProfile(institutionalRoleEnum: InstitutionalRole) {
     this.setState(fp.flow(
       fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleEnum'], institutionalRoleEnum),
@@ -296,7 +345,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     const {username} = updatedProfile;
     const request: AccountPropertyUpdate = {
       username,
-      freeCreditsLimit: null, // coming soon: RW-4956
+      freeCreditsLimit: this.updatedProfileValue('freeTierDollarQuota'),
       contactEmail: this.updatedProfileValue('contactEmail'),
       affiliation: this.updatedProfileValue('verifiedInstitutionalAffiliation'),
       accessBypassRequests: [],  // coming soon: RW-4958
@@ -500,23 +549,18 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
                 containerStyle={styles.textInputContainer}
                 onChange={email => this.setContactEmail(email)}
             />
-            <TextInputWithLabel
-                labelText={'Free credits used'}
-                placeholder={updatedProfile.freeTierUsage}
-                inputId={'freeTierUsage'}
-                disabled={true}
-                inputStyle={{width: '6.5rem', ...styles.backgroundColorDark}}
-                containerStyle={styles.textInputContainer}
+            <FreeCreditsUsage
+              isAboveLimit={this.usageIsAboveLimit()}
+              usage={this.getFreeCreditUsage()}
             />
           </FlexColumn>
           <FlexColumn style={{width: '33%'}}>
             <DropdownWithLabel
                 label={'Free credit limit'}
-                options={freeCreditLimitOptions}
-                onChange={() => {}}
+                options={this.getFreeCreditLimitOptions()}
+                onChange={async(event) => this.setFreeTierCreditDollarLimit(event.value)}
                 initialValue={updatedProfile.freeTierDollarQuota}
-                dropdownStyle={{width: '3rem'}}
-                disabled={true}
+                dropdownStyle={{width: '4.5rem'}}
                 dataTestId={'freeTierDollarQuota'}
             />
             {verifiedInstitutionOptions && <DropdownWithLabel
