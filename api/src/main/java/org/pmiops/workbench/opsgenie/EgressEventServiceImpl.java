@@ -5,7 +5,6 @@ import com.ifountain.opsgenie.client.swagger.ApiException;
 import com.ifountain.opsgenie.client.swagger.api.AlertApi;
 import com.ifountain.opsgenie.client.swagger.model.CreateAlertRequest;
 import com.ifountain.opsgenie.client.swagger.model.SuccessResponse;
-import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -141,8 +140,7 @@ public class EgressEventServiceImpl implements EgressEventService {
 
     return String.format(
             "Workspace \"%s\", Age = %d Days\n",
-            workspace.getName(),
-            getAgeInDays(Timestamp.from(Instant.ofEpochMilli(workspace.getCreationTime()))))
+            workspace.getName(), getAgeInDays(Instant.ofEpochMilli(workspace.getCreationTime())))
         + String.format(
             "GCP Billing Project/Firecloud Namespace: %s\n", egressEvent.getProjectName())
         + String.format("Notebook Jupyter VM name: %s\n", egressEvent.getVmName())
@@ -187,11 +185,11 @@ public class EgressEventServiceImpl implements EgressEventService {
         dbUser.getUsername(),
         dbUser.getUserId(),
         institution,
-        getAgeInDays(dbUser.getCreationTime()));
+        getAgeInDays(dbUser.getCreationTime().toInstant()));
   }
 
-  private long getAgeInDays(Timestamp creationTime) {
-    return Duration.between(creationTime.toInstant(), clock.instant()).toDays();
+  private long getAgeInDays(Instant creationTime) {
+    return Duration.between(creationTime, clock.instant()).toDays();
   }
 
   private Optional<Long> vmNameToUserDatabaseId(String vmName) {

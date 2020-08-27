@@ -263,7 +263,7 @@ public class AuditLogEntryMapperTest {
             .filter(a -> a.getActionId().equals(ACTION_ID_1))
             .findFirst()
             .orElseThrow(() -> new NotFoundException("Action not found"));
-    assertTimeWithinTolerance(action1.getActionTime().toInstant(), EVENT_TIME_1.toInstant());
+    assertTimeWithinTolerance(action1.getActionTime(), EVENT_TIME_1);
     assertThat(action1.getEventBundles()).hasSize(1);
     assertThat(action1.getActionTime()).isEqualTo(EVENT_TIME_1);
     assertThat(action1.getEventBundles()).hasSize(1);
