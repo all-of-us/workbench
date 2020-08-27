@@ -10,12 +10,12 @@ import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.notebooks.ApiException;
+import org.pmiops.workbench.leonardo.ApiException;
+import org.pmiops.workbench.leonardo.api.ClusterApi;
+import org.pmiops.workbench.leonardo.model.Cluster;
+import org.pmiops.workbench.leonardo.model.ClusterStatus;
+import org.pmiops.workbench.leonardo.model.ListClusterResponse;
 import org.pmiops.workbench.notebooks.NotebooksConfig;
-import org.pmiops.workbench.notebooks.api.ClusterApi;
-import org.pmiops.workbench.notebooks.model.Cluster;
-import org.pmiops.workbench.notebooks.model.ClusterStatus;
-import org.pmiops.workbench.notebooks.model.ListClusterResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -75,7 +75,7 @@ public class OfflineClusterController implements OfflineClusterApiDelegate {
     try {
       listClusterResponses = clusterApi.listClusters(null, false);
     } catch (ApiException e) {
-      throw ExceptionUtils.convertNotebookException(e);
+      throw ExceptionUtils.convertLeonardoException(e);
     }
 
     int errors = 0;

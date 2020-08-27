@@ -3,10 +3,16 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 
 import java.sql.Timestamp;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.cdr.CdrVersionMapper;
+import org.pmiops.workbench.cdr.CdrVersionMapperImpl;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -14,8 +20,11 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.model.CdrVersion;
 import org.pmiops.workbench.model.CdrVersionListResponse;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -37,20 +46,33 @@ public class CdrVersionsControllerTest {
 
   @Autowired private CdrVersionDao cdrVersionDao;
 
+  @Autowired private CdrVersionMapper cdrVersionMapper;
+
   @Autowired private CdrVersionsController cdrVersionsController;
 
+  private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
   private DbCdrVersion defaultCdrVersion;
   private DbCdrVersion protectedCdrVersion;
   private static DbUser user;
 
   @TestConfiguration
-  @Import({CdrVersionService.class, CdrVersionsController.class})
+  @Import({
+    CommonMappers.class,
+    CdrVersionService.class,
+    CdrVersionMapperImpl.class,
+    CdrVersionsController.class
+  })
   @MockBean({FireCloudService.class})
   static class Configuration {
     @Bean
     @Scope("prototype")
     public DbUser user() {
       return user;
+    }
+
+    @Bean
+    Clock clock() {
+      return CLOCK;
     }
 
     @Bean
@@ -66,15 +88,47 @@ public class CdrVersionsControllerTest {
 
     defaultCdrVersion =
         makeCdrVersion(
-            1L, /* isDefault */ true, "Test Registered CDR", 123L, DataAccessLevel.REGISTERED);
+            1L, /* isDefault */
+            true,
+            "Test Registered CDR",
+            123L,
+            DataAccessLevel.REGISTERED,
+            null);
     protectedCdrVersion =
         makeCdrVersion(
-            2L, /* isDefault */ false, "Test Protected CDR", 456L, DataAccessLevel.PROTECTED);
+            2L, /* isDefault */
+            false,
+            "Test Protected CDR",
+            456L,
+            DataAccessLevel.PROTECTED,
+            "microarray");
   }
 
   @Test
   public void testGetCdrVersionsRegistered() {
     assertResponse(cdrVersionsController.getCdrVersions().getBody(), defaultCdrVersion);
+  }
+
+  @Test
+  public void testGetCdrVersions_microarray() {
+    user.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
+    List<CdrVersion> cdrVersions = cdrVersionsController.getCdrVersions().getBody().getItems();
+
+    assertThat(
+            cdrVersions.stream()
+                .filter(v -> v.getName().equals("Test Registered CDR"))
+                .findFirst()
+                .get()
+                .getHasMicroarrayData())
+        .isFalse();
+
+    assertThat(
+            cdrVersions.stream()
+                .filter(v -> v.getName().equals("Test Protected CDR"))
+                .findFirst()
+                .get()
+                .getHasMicroarrayData())
+        .isTrue();
   }
 
   @Test
@@ -92,8 +146,7 @@ public class CdrVersionsControllerTest {
 
   private void assertResponse(CdrVersionListResponse response, DbCdrVersion... versions) {
     assertThat(response.getItems())
-        .containsExactly(
-            Arrays.stream(versions).map(CdrVersionsController.TO_CLIENT_CDR_VERSION).toArray())
+        .containsExactly(Arrays.stream(versions).map(cdrVersionMapper::dbModelToClient).toArray())
         .inOrder();
     assertThat(response.getDefaultCdrVersionId())
         .isEqualTo(String.valueOf(defaultCdrVersion.getCdrVersionId()));
@@ -104,7 +157,8 @@ public class CdrVersionsControllerTest {
       boolean isDefault,
       String name,
       long creationTime,
-      DataAccessLevel dataAccessLevel) {
+      DataAccessLevel dataAccessLevel,
+      String microarrayDataset) {
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setIsDefault(isDefault);
     cdrVersion.setBigqueryDataset("a");
@@ -116,6 +170,7 @@ public class CdrVersionsControllerTest {
     cdrVersion.setName(name);
     cdrVersion.setNumParticipants(123);
     cdrVersion.setReleaseNumber((short) 1);
+    cdrVersion.setMicroarrayBigqueryDataset(microarrayDataset);
     cdrVersionDao.save(cdrVersion);
     return cdrVersion;
   }

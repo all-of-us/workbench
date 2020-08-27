@@ -5,9 +5,9 @@ import {config} from 'resources/workbench-config';
 import {waitForText} from 'utils/waits-utils';
 
 
-describe('User registration tests:', () => {
+describe('User registration UI tests:', () => {
 
-  test('Loading Terms of Use and Privacy statement page', async () => {
+  test('Loading registration workflow', async () => {
     const loginPage = new GoogleLoginPage(page);
     await loginPage.load();
 
@@ -29,7 +29,7 @@ describe('User registration tests:', () => {
     expect(await termsOfUseCheckbox.isDisabled()).toBe(true);
     expect(await termsOfUseCheckbox.isChecked()).toBe(false);
 
-    const nextButton = await createAccountPage.getNextButton();
+    let nextButton = await createAccountPage.getNextButton();
     expect(await nextButton.isCursorNotAllowed()).toEqual(true);
 
     // scroll to last pdf file will enables checkboxes
@@ -50,19 +50,6 @@ describe('User registration tests:', () => {
     // uncheck a checkbox then check NEXT button is again disabled
     await (await createAccountPage.getTermsOfUseCheckbox()).unCheck();
     expect(await nextButton.isCursorNotAllowed()).toEqual(true);
-  });
-
-
-  test('Loading User information page', async () => {
-    const loginPage = new GoogleLoginPage(page);
-    await loginPage.load();
-
-    // Click the create account button to start new-user-registration flow.
-    await loginPage.clickCreateAccountButton();
-
-    const createAccountPage = new CreateAccountPage(page);
-    // Step 1 of 3: Accepting Terms of Service.
-    await createAccountPage.readAgreement();
 
     // check checkboxes
     await (await createAccountPage.getPrivacyStatementCheckbox()).check();
@@ -71,7 +58,7 @@ describe('User registration tests:', () => {
     await agreementPageButton.clickWithEval();
 
     // Step 2 of 3: Enter Institution information
-    const nextButton = await createAccountPage.getNextButton();
+    nextButton = await createAccountPage.getNextButton();
     expect(await nextButton.isCursorNotAllowed()).toEqual(true);
 
     await createAccountPage.fillOutInstitution();

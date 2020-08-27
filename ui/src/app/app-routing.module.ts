@@ -1,10 +1,9 @@
 import {NgModule} from '@angular/core';
 import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 
+import {AppRouting} from './app-routing';
 import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
-
-import {AppRouting} from './app-routing';
 
 import {DataPageComponent} from 'app/pages/data/data-page';
 import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
@@ -83,7 +82,8 @@ const routes: Routes = [
       },
       {
         path: 'data-code-of-conduct',
-        component: AppRouting
+        component: AppRouting,
+        data: {}
       },
       {
         path: 'nih-callback',
@@ -335,12 +335,12 @@ const routes: Routes = [
             data: {}
           },
           {
-            path: 'workspaceAudit',
+            path: 'workspace-audit',
             component: AppRouting,
             data: {}
           },
           {
-            path: 'workspaceAudit/:workspaceNamespace',
+            path: 'workspace-audit/:workspaceNamespace',
             component: AppRouting,
             data: {}
           },

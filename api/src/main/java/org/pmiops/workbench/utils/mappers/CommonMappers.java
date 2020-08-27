@@ -2,6 +2,7 @@ package org.pmiops.workbench.utils.mappers;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.time.Clock;
 import java.util.Optional;
 import javax.inject.Provider;
 import joptsimple.internal.Strings;
@@ -17,9 +18,11 @@ import org.springframework.stereotype.Service;
 public class CommonMappers {
 
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final Clock clock;
 
-  public CommonMappers(Provider<WorkbenchConfig> workbenchConfigProvider) {
+  public CommonMappers(Provider<WorkbenchConfig> workbenchConfigProvider, Clock clock) {
     this.workbenchConfigProvider = workbenchConfigProvider;
+    this.clock = clock;
   }
 
   public Long timestamp(Timestamp timestamp) {
@@ -27,6 +30,14 @@ public class CommonMappers {
       return timestamp.getTime();
     }
     return null;
+  }
+
+  @Named("toTimestampCurrentIfNull")
+  public Timestamp timestampCurrentIfNull(Long timestamp) {
+    if (timestamp != null) {
+      return new Timestamp(timestamp);
+    }
+    return Timestamp.from(clock.instant());
   }
 
   public String timestampToString(Timestamp timestamp) {

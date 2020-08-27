@@ -91,8 +91,13 @@ const styles = reactStyles({
   table: {
     width: '100%',
     border: borderStyle,
-    borderRadius: '3px',
-    tableLayout: 'fixed',
+    borderRadius: '3px 3px 0 0',
+    borderBottom: 0,
+    tableLayout: 'fixed'
+  },
+  tableBody: {
+    borderRadius: '0 3px 3px 0',
+    borderTop: 0
   },
   columnHeader: {
     padding: '0 0 0 0.25rem',
@@ -329,10 +334,10 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
             </div>
           </TooltipTrigger>
         </td>
-        <td style={styles.columnBody}>{row.code}</td>
-        <td style={styles.columnBody}>{!brand && row.type}</td>
-        <td style={styles.columnBody}>{row.count > -1 && row.count.toLocaleString()}</td>
-        <td style={{...styles.columnBody}}>
+        <td style={{...styles.columnBody, width: '20%'}}>{row.code}</td>
+        <td style={{...styles.columnBody, width: '10%'}}>{!brand && row.type}</td>
+        <td style={{...styles.columnBody, width: '8%', paddingLeft: '0.2rem'}}>{row.count > -1 && row.count.toLocaleString()}</td>
+        <td style={{...styles.columnBody, textAlign: 'center', width: '12%'}}>
           {row.hasHierarchy && <i className='pi pi-sitemap' style={styles.treeIcon} onClick={() => this.showHierarchy(row)}/>}
         </td>
       </tr>;
@@ -402,7 +407,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
           </div>
         </div>
         {!loading && !!displayData && <div style={styles.listContainer}>
-          {!!displayData.length && <table className='p-datatable' style={styles.table}>
+          {!!displayData.length && <React.Fragment><table className='p-datatable' style={styles.table}>
             <thead className='p-datatable-thead'>
               <tr style={{height: '2rem'}}>
                 <th style={{...styles.columnHeader, borderLeft: 0}}>Name</th>
@@ -412,7 +417,10 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
                 <th style={{...styles.columnHeader, textAlign: 'center', width: '12%'}}>View Hierarchy</th>
               </tr>
             </thead>
-            <tbody className='p-datatable-tbody'>
+          </table>
+          <div style={{height: '15rem', overflowY: 'auto'}}>
+            <table className='p-datatable' style={{...styles.table, ...styles.tableBody}}>
+              <tbody className='p-datatable-tbody'>
               {displayData.map((row, r) => {
                 const open = ingredients[row.id] && ingredients[row.id].open;
                 const err = ingredients[row.id] && ingredients[row.id].error;
@@ -432,7 +440,9 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
                 </React.Fragment>;
               })}
             </tbody>
-          </table>}
+            </table>
+          </div>
+        </React.Fragment>}
           {!standardOnly && !displayData.length && <div>No results found</div>}
           <Button type='primary'
                   style={{borderRadius: '5px', float: 'right', marginTop: '1rem'}}

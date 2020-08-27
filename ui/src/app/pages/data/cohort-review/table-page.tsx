@@ -31,6 +31,7 @@ const fields = [
   {field: 'participantId', name: 'Participant ID'},
   {field: 'birthDate', name: 'Date of Birth'},
   {field: 'deceased', name: 'Deceased'},
+  {field: 'sexAtBirth', name: 'Sex at Birth'},
   {field: 'gender', name: 'Gender'},
   {field: 'race', name: 'Race'},
   {field: 'ethnicity', name: 'Ethnicity'},
@@ -202,13 +203,14 @@ const defaultDemoFilters: any = {
   ]
 };
 const reverseColumnEnum = {
-  participantId: Columns.PARTICIPANTID,
-  gender: Columns.GENDER,
-  race: Columns.RACE,
-  ethnicity: Columns.ETHNICITY,
-  birthDate: Columns.BIRTHDATE,
-  deceased: Columns.DECEASED,
-  status: Columns.STATUS
+  participantId: 'PARTICIPANTID',
+  sexAtBirth: 'SEXATBIRTH',
+  gender: 'GENDER',
+  race: 'RACE',
+  ethnicity: 'ETHNICITY',
+  birthDate: 'BIRTHDATE',
+  deceased: 'DECEASED',
+  status: 'STATUS'
 };
 const EVENT_CATEGORY = 'Review Participant List';
 
@@ -287,9 +289,10 @@ export const ParticipantsTable = withCurrentWorkspace()(
           ]) as string[];
           demoFilters = {
             ...demoFilters,
-            RACE: extract(data.raceList, Columns.RACE),
-            GENDER: extract(data.genderList, Columns.GENDER),
-            ETHNICITY: extract(data.ethnicityList, Columns.ETHNICITY)
+            RACE: extract(data.raceList, 'RACE'),
+            GENDER: extract(data.genderList, 'GENDER'),
+            ETHNICITY: extract(data.ethnicityList, 'ETHNICITY'),
+            SEXATBIRTH: extract(data.sexAtBirthList, 'SEXATBIRTH')
           };
           this.setState({demoFilters, filters});
         }, error => {
@@ -298,7 +301,8 @@ export const ParticipantsTable = withCurrentWorkspace()(
             ...demoFilters,
             RACE: [{name: 'Select All', value: 'Select All'}],
             GENDER: [{name: 'Select All', value: 'Select All'}],
-            ETHNICITY: [{name: 'Select All', value: 'Select All'}]
+            ETHNICITY: [{name: 'Select All', value: 'Select All'}],
+            SEXATBIRTH: [{name: 'Select All', value: 'Select All'}]
           };
           this.setState({demoFilters});
         })
@@ -372,10 +376,11 @@ export const ParticipantsTable = withCurrentWorkspace()(
     }
 
     mapData = (participant: ParticipantCohortStatus) => {
-      const {participantId, status, gender, race, ethnicity, birthDate, deceased} = participant;
+      const {participantId, status, sexAtBirth, gender, race, ethnicity, birthDate, deceased} = participant;
       return {
         participantId,
         status: this.formatStatusForText(status),
+        sexAtBirth,
         gender: !!gender ? gender.charAt(0).toUpperCase() + gender.slice(1).toLowerCase() : gender,
         race,
         ethnicity,

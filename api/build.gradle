@@ -1,12 +1,10 @@
-import io.swagger.codegen.DefaultGenerator
-import io.swagger.codegen.config.CodegenConfigurator
 import org.pmiops.workbench.tooling.GenerateAPIListingTask
 import org.pmiops.workbench.tooling.IncrementalHotSwapTask
 
 // Runs before all tasks. Sets up properties and dependencies for the build
 // process itself.
 buildscript {
-  // External propertiges on the default project. Values declared in ext blocks
+  // External properties on the default project. Values declared in ext blocks
   // outside of the buildscsript block aren't usable here.
   ext {
     ELASTICSEARCH_VERSION = '6.8.3'
@@ -22,7 +20,8 @@ buildscript {
     OPENCENSUS_VERSION = '0.23.0'
     SPRINGFOX_VERSION = '2.6.1'
     SPRING_BOOT_VERSION = '1.5.22.RELEASE'
-    SWAGGER_CODEGEN_VERSION = '2.2.3'
+    SWAGGER_2_CODEGEN_VERSION = '2.2.3'
+    SWAGGER_3_CODEGEN_VERSION = '3.0.21'
   }
 
   project.ext['hibernate.version'] = '5.2.10.Final'
@@ -41,13 +40,12 @@ buildscript {
   dependencies {
     classpath 'com.diffplug.spotless:spotless-plugin-gradle:3.23.0'
     classpath 'com.google.cloud.tools:appengine-gradle-plugin:1.3.5'
-    classpath 'gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.12.0'
+    classpath 'gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.18.2'
     // Note: if you plan to upgrade the version of swagger-codegen beyond 2.2.3, be aware of two
     // implicit dependencies: (1) the set of "generatedCompile" Gradle dependencies need to be updated
     // to match the modules imported by the Swagger codegen templates, and (2) some template files
     // are overridden with forked templates within this repo; they will likely need to be re-copied from
     // the newer release version and have AoU-specific modifications re-applied.
-    classpath "io.swagger:swagger-codegen:$project.ext.SWAGGER_CODEGEN_VERSION"
     classpath 'net.ltgt.gradle:gradle-apt-plugin:0.21'
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$project.ext.KOTLIN_VERSION"
     classpath "org.jetbrains.kotlin:kotlin-noarg:$project.ext.KOTLIN_VERSION"
@@ -69,251 +67,152 @@ apply plugin: 'org.owasp.dependencycheck'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'war'
 
-def swaggerTargetFolder = 'src/generated/java'
+// Artifact configurations derived from base configs. Configuration names
+// are concatenated by the Java plugin.
+// https://docs.gradle.org/current/userguide/java_plugin.html#java_source_set_configurations
+configurations {
+  __bigQueryTest__Compile.extendsFrom testCompile
+  __bigQueryTest__Runtime.extendsFrom testRuntime
+
+  __integration__Compile.extendsFrom testCompile
+  __integration__Runtime.extendsFrom testRuntime
+
+  __tools__Implementation.extendsFrom implementation
+  __tools__RuntimeOnly.extendsFrom runtimeOnly
+
+  __swaggerCodegenV2__
+  __swaggerCodegenV3__
+
+  generatedCompile {
+    exclude group: 'com.google.guava', module:'guava-jdk5'
+  }
+}
+
+// Shared variables for Swagger codegen. Use "ext" rather than "def" to allow
+// access globally, including from within helper functions.
+ext.SWAGGER_CODEGEN_BASE_PKG = 'org.pmiops.workbench'
+ext.SWAGGER_2_CODEGEN_DIR = "$buildDir/swagger2"
+ext.SWAGGER_3_CODEGEN_DIR = "$buildDir/swagger3"
+
 // This path is the Java sources root for finding any overridden Swagger-codegen
 // templates we may be using.
-def swaggerTemplateDir = 'src/main/resources/swaggercodegen'
-def workbenchApiSourceFile = 'src/main/resources/workbench-api.yaml'
+ext.SWAGGER_2_TEMPLATE_DIR = "$projectDir/src/main/resources/swagger2codegen"
+// Raw options passed to the Swagger codegen CLI.
+ext.SWAGGER_2_RAW_OPTS = [
+  // By default, the ignore file within the output directory is used. Override
+  // as we don't track the output directory in source.
+  '--ignore-file-override', "$projectDir/.swagger2-codegen-ignore"
+]
 
-task generateWorkbenchApi {
-  group 'swagger-codegen'
-  description 'Generates the Spring controllers and API model classes in Java.'
-  dependsOn tasks.validateSwagger
-  inputs.file("$projectDir/$workbenchApiSourceFile")
-  outputs.dir("$projectDir/$swaggerTargetFolder")
-  doLast {
-    def config = new CodegenConfigurator()
-    config.setInputSpec("$projectDir/$workbenchApiSourceFile")
-    config.setOutputDir("$projectDir")
-    config.setTemplateDir("$projectDir/$swaggerTemplateDir")
-    config.setLang('spring')
-    config.setAdditionalProperties([
-            'apiPackage'     : 'org.pmiops.workbench.api',
-            'modelPackage'   : 'org.pmiops.workbench.model',
-            'sourceFolder'   : swaggerTargetFolder,
-            'useTags'        : 'true',
-            // Generates delegate interfaces; used to make method annotations work without
-            // having to copy them to our implementations.
-            'delegatePattern': 'true'
-    ])
-    new DefaultGenerator().opts(config.toClientOptInput()).generate()
+// Helper function to define a Java client Swagger codegen targets for the Gradle
+// Swagger Generator Plugin: https://github.com/int128/gradle-swagger-generator-plugin#code-generation
+def swagger2JavaClient(yaml, pkg, rawOptExtras = []) {
+  return {
+    inputFile = file("src/main/resources/${yaml}")
+    code {
+      configuration = configurations.__swaggerCodegenV2__
+      language = 'java'
+      outputDir = file(SWAGGER_2_CODEGEN_DIR)
+      templateDir = file(SWAGGER_2_TEMPLATE_DIR)
+      // Since the output directory is shared among these swagger tasks, wiping
+      // the directory would result in task invalidation / churn.
+      wipeOutputDir = false
+      rawOptions = SWAGGER_2_RAW_OPTS + rawOptExtras
+      additionalProperties = [
+        'sourceFolder'     : '',
+        'library'          : 'okhttp-gson',
+        'serializableModel': 'true',
+        'dateLibrary'      : 'java8',
+        'invokerPackage'   : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}",
+        'modelPackage'     : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.model",
+        'apiPackage'       : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.api",
+      ]
+    }
   }
 }
 
-def fireCloudApiFile = 'src/main/resources/fireCloud.yaml'
-
-task generateFireCloudClient {
-  group 'swagger-codegen'
-  description 'Generates the FireCloud service client and model class definitions from Swagger file.'
-  inputs.file("$projectDir/$fireCloudApiFile")
-  outputs.dir("$projectDir/$swaggerTargetFolder")
-  doLast {
-    def config = new CodegenConfigurator()
-    config.setInputSpec("$projectDir/$fireCloudApiFile")
-    config.setOutputDir("$projectDir")
-    config.setTemplateDir("$projectDir/$swaggerTemplateDir")
-    config.setLang('java')
-    config.setModelNamePrefix("Firecloud")
-    config.setAdditionalProperties([
-            'invokerPackage'   : 'org.pmiops.workbench.firecloud',
-            'modelPackage'     : 'org.pmiops.workbench.firecloud.model',
-            'apiPackage'       : 'org.pmiops.workbench.firecloud.api',
-            'sourceFolder'     : swaggerTargetFolder,
-            'library'          : 'okhttp-gson',
-            'serializableModel': 'true',
-            'dateLibrary'      : 'java8'
-    ])
-    new DefaultGenerator().opts(config.toClientOptInput()).generate()
+def swagger3JavaClient(yaml, pkg, rawOptExtras = []) {
+  return {
+    inputFile = file("src/main/resources/${yaml}")
+    code {
+      configuration = configurations.__swaggerCodegenV3__
+      language = 'java'
+      outputDir = file(SWAGGER_3_CODEGEN_DIR)
+      templateDir = file("$projectDir/src/main/resources/swagger3codegen")
+      // Since the output directory is shared among these swagger tasks, wiping
+      // the directory would result in task invalidation / churn.
+      wipeOutputDir = false
+      rawOptions = [
+        // By default, the ignore file within the output directory is used. Override
+        // as we don't track the output directory in source.
+        '--ignore-file-override', "$projectDir/.swagger3-codegen-ignore"
+      ] + rawOptExtras
+      additionalProperties = [
+        'sourceFolder'     : '',
+        'library'          : 'okhttp-gson',
+        'serializableModel': 'true',
+        'dateLibrary'      : 'java8',
+        'invokerPackage'   : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}",
+        'modelPackage'     : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.model",
+        'apiPackage'       : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.api",
+      ]
+    }
+    // Validation only works for Swagger 2 - skip.
+    validation {
+      inputFile = null
+    }
   }
 }
 
-def notebooksApiFile = 'src/main/resources/notebooks.yaml'
+// Configuration for the Swagger Gradle plugin:
+// https://github.com/int128/gradle-swagger-generator-plugin
+//
+// Note: The tasks below share an output directory, but we rely on the swagger
+// ignore file to ensure they don't step on eachother's outputs. If this were to
+// happen in the future due to a regression or a codegen upgrade, the issue
+// would likely manifest as an infinite build loop on our continuous incremental
+// build (e.g. dev-up). Run ./gradlew copmileGeneratedJava --info to see which
+// overlapping files/diretories may be getting written by different Swagger
+// codegen tasks.
+swaggerSources {
+  firecloud swagger2JavaClient("firecloud.yaml", "firecloud", [
+    '--model-name-prefix', 'Firecloud'
+  ])
+  notebooks swagger2JavaClient("notebooks.yaml", "notebooks")
+  jira swagger2JavaClient("jira.yaml", "jira")
+  mandrill swagger2JavaClient("mandrill.yaml", "mandrill")
+  moodle swagger2JavaClient("moodle.yaml", "moodle")
+  rdr swagger2JavaClient("rdr.yaml", "rdr")
+  captcha swagger2JavaClient("captcha.yaml", "captcha")
+  shibboleth swagger2JavaClient("shibboleth.yaml", "shibboleth")
 
-task generateNotebooksClient {
-  group 'swagger-codegen'
-  description 'Generates the Leonardo Notebooks client Java code.'
-  inputs.file("$projectDir/$notebooksApiFile")
-  outputs.dir("$projectDir/$swaggerTargetFolder")
-  doLast {
-    def config = new CodegenConfigurator()
-    config.setInputSpec("file:///$projectDir/$notebooksApiFile")
-    config.setOutputDir("$projectDir")
-    config.setTemplateDir("$projectDir/$swaggerTemplateDir")
-    config.setLang('java')
-    config.setAdditionalProperties([
-            'invokerPackage'   : 'org.pmiops.workbench.notebooks',
-            'modelPackage'     : 'org.pmiops.workbench.notebooks.model',
-            'apiPackage'       : 'org.pmiops.workbench.notebooks.api',
-            'sourceFolder'     : swaggerTargetFolder,
-            'library'          : 'okhttp-gson',
-            'serializableModel': 'true',
-            'dateLibrary'      : 'java8'
-    ])
-    new DefaultGenerator().opts(config.toClientOptInput()).generate()
+  leonardo swagger3JavaClient("leonardo.yaml", "leonardo")
+
+  // Workbench needs a special configuration style, as we generate Spring server
+  // bindings in this case.
+  workbench {
+    inputFile = file('src/main/resources/workbench-api.yaml')
+    code {
+      configuration = configurations.__swaggerCodegenV2__
+      language = 'spring'
+      outputDir = file(SWAGGER_2_CODEGEN_DIR)
+      templateDir = file(SWAGGER_2_TEMPLATE_DIR)
+      wipeOutputDir = false
+      rawOptions = SWAGGER_2_RAW_OPTS
+      additionalProperties = [
+        'sourceFolder'     : '',
+        'modelPackage'     : "${SWAGGER_CODEGEN_BASE_PKG}.model",
+        'apiPackage'       : "${SWAGGER_CODEGEN_BASE_PKG}.api",
+        'useTags'        : 'true',
+        // Generates delegate interfaces; used to make method annotations work without
+        // having to copy them to our implementations.
+        'delegatePattern': 'true'
+      ]
+    }
   }
 }
 
-def jiraApiFile = 'src/main/resources/jira.yaml'
 
-task generateJiraClient {
-  group 'swagger-codegen'
-  description 'Generates the Jira client Java code.'
-  inputs.file("$projectDir/$jiraApiFile")
-  outputs.dir("$projectDir/$swaggerTargetFolder")
-  doLast {
-    def config = new CodegenConfigurator()
-    config.setInputSpec("$projectDir/$jiraApiFile")
-    config.setOutputDir("$projectDir")
-    config.setTemplateDir("$projectDir/$swaggerTemplateDir")
-    config.setLang('java')
-    config.setAdditionalProperties([
-            'invokerPackage'   : 'org.pmiops.workbench.jira',
-            'modelPackage'     : 'org.pmiops.workbench.jira.model',
-            'apiPackage'       : 'org.pmiops.workbench.jira.api',
-            'sourceFolder'     : swaggerTargetFolder,
-            'library'          : 'okhttp-gson',
-            'serializableModel': 'true',
-            'dateLibrary'      : 'java8'
-    ])
-    new DefaultGenerator().opts(config.toClientOptInput()).generate()
-  }
-}
-
-def mandrillApiFile = 'src/main/resources/mandrill_api.yaml'
-
-task generateMandrillClient {
-  group 'swagger-codegen'
-  description 'Generates the Mandrill client Java code.'
-
-  inputs.file("$projectDir/$mandrillApiFile")
-  outputs.dir("$projectDir/$swaggerTargetFolder")
-  doLast {
-    def config = new CodegenConfigurator()
-    config.setInputSpec("file:///$projectDir/$mandrillApiFile")
-    config.setOutputDir("$projectDir")
-    config.setTemplateDir("$projectDir/$swaggerTemplateDir")
-    config.setLang('java')
-    config.setAdditionalProperties([
-            'invokerPackage'   : 'org.pmiops.workbench.mandrill',
-            'modelPackage'     : 'org.pmiops.workbench.mandrill.model',
-            'apiPackage'       : 'org.pmiops.workbench.mandrill.api',
-            'sourceFolder'     : swaggerTargetFolder,
-            'library'          : 'okhttp-gson',
-            'serializableModel': 'true',
-            'dateLibrary'      : 'java8'
-    ])
-    new DefaultGenerator().opts(config.toClientOptInput()).generate()
-  }
-}
-
-def moodleApiFile = 'src/main/resources/moodle.yaml'
-
-task generateMoodleClient {
-  group 'swagger-codegen'
-  description 'Generates the Moodle client Java code.'
-
-  inputs.file("$projectDir/$moodleApiFile")
-  outputs.dir("$projectDir/$swaggerTargetFolder")
-  doLast {
-    def config = new CodegenConfigurator()
-    config.setInputSpec("file:///$projectDir/$moodleApiFile")
-    config.setOutputDir("$projectDir")
-    config.setTemplateDir("$projectDir/$swaggerTemplateDir")
-    config.setLang('java')
-    config.setAdditionalProperties([
-            'invokerPackage'   : 'org.pmiops.workbench.moodle',
-            'modelPackage'     : 'org.pmiops.workbench.moodle.model',
-            'apiPackage'       : 'org.pmiops.workbench.moodle.api',
-            'sourceFolder'     : swaggerTargetFolder,
-            'library'          : 'okhttp-gson',
-            'serializableModel': 'true',
-            'dateLibrary'      : 'java8'
-    ])
-    new DefaultGenerator().opts(config.toClientOptInput()).generate()
-  }
-}
-
-def rdrApiFile = 'src/main/resources/rdr.yaml'
-
-task generateRdrClient {
-  group 'swagger-codegen'
-  description 'Generates the AoU Raw Data Repository API client Java code.'
-
-  inputs.file("$projectDir/$rdrApiFile")
-  outputs.dir("$projectDir/$swaggerTargetFolder")
-  doLast {
-    def config = new CodegenConfigurator()
-    config.setInputSpec("file:///$projectDir/$rdrApiFile")
-    config.setOutputDir("$projectDir")
-    config.setTemplateDir("$projectDir/$swaggerTemplateDir")
-    config.setLang('java')
-    config.setAdditionalProperties([
-            'invokerPackage'   : 'org.pmiops.workbench.rdr',
-            'modelPackage'     : 'org.pmiops.workbench.rdr.model',
-            'apiPackage'       : 'org.pmiops.workbench.rdr.api',
-            'sourceFolder'     : swaggerTargetFolder,
-            'library'          : 'okhttp-gson',
-            'serializableModel': 'true',
-            'dateLibrary'      : 'java8'
-    ])
-    new DefaultGenerator().opts(config.toClientOptInput()).generate()
-  }
-}
-
-def captchaApiFile = 'src/main/resources/captcha.yaml'
-
-task generateCaptchaClient {
-  group 'swagger-codegen'
-  description 'Generates the ReCAPTCHA API Java code.'
-
-  inputs.file("$projectDir/$captchaApiFile")
-  outputs.dir("$projectDir/$swaggerTargetFolder")
-  doLast {
-    def config = new CodegenConfigurator()
-    config.setInputSpec("file:///$projectDir/$captchaApiFile")
-    config.setOutputDir("$projectDir")
-    config.setTemplateDir("$projectDir/$swaggerTemplateDir")
-    config.setLang('java')
-    config.setAdditionalProperties([
-            'invokerPackage'   : 'org.pmiops.workbench.captcha',
-            'modelPackage'     : 'org.pmiops.workbench.captcha.model',
-            'apiPackage'       : 'org.pmiops.workbench.captcha.api',
-            'sourceFolder'     : swaggerTargetFolder,
-            'library'          : 'okhttp-gson',
-            'serializableModel': 'true',
-            'dateLibrary'      : 'java8'
-    ])
-    new DefaultGenerator().opts(config.toClientOptInput()).generate()
-  }
-}
-
-def shibbolethApiFile = 'src/main/resources/shibboleth.yaml'
-
-task generateShibbolethClient {
-  group 'swagger-codegen'
-  description 'Generates the Shibboleth API Java code.'
-
-  inputs.file("$projectDir/$shibbolethApiFile")
-  outputs.dir("$projectDir/$swaggerTargetFolder")
-  doLast {
-    def config = new CodegenConfigurator()
-    config.setInputSpec("file:///$projectDir/$shibbolethApiFile")
-    config.setOutputDir("$projectDir")
-    config.setTemplateDir("$projectDir/$swaggerTemplateDir")
-    config.setLang('java')
-    config.setModelNamePrefix("Shibboleth")
-    config.setAdditionalProperties([
-            'invokerPackage'   : 'org.pmiops.workbench.shibboleth',
-            'modelPackage'     : 'org.pmiops.workbench.shibboleth.model',
-            'apiPackage'       : 'org.pmiops.workbench.shibboleth.api',
-            'sourceFolder'     : swaggerTargetFolder,
-            'library'          : 'okhttp-gson',
-            'serializableModel': 'true',
-            'dateLibrary'      : 'java8'
-    ])
-    new DefaultGenerator().opts(config.toClientOptInput()).generate()
-  }
-}
 //
 // AppEngine
 //
@@ -349,8 +248,7 @@ spotless {
   }
 }
 
-// Required for the swagger plugin's `validateSwagger` task
-// See https://github.com/int128/gradle-swagger-generator-plugin
+
 // The plugin generates configuration names by concatenating SourceSet names
 // with builtin identifiers according to the rules at
 // https://docs.gradle.org/current/userguide/java_plugin.html#java_source_set_tasks
@@ -360,6 +258,10 @@ sourceSets {
   //
   generated {
     compileClasspath = configurations.generatedCompile
+    java {
+      srcDir SWAGGER_2_CODEGEN_DIR
+      srcDir SWAGGER_3_CODEGEN_DIR
+    }
   }
   main {
     compileClasspath += generated.output
@@ -427,48 +329,28 @@ sourceSets {
   }
 }
 
-// Artifact configurations derived from base configs. Configuration names
-// are concatenated by the Java plugin.
-// https://docs.gradle.org/current/userguide/java_plugin.html#java_source_set_configurations
-configurations {
-  __bigQueryTest__Compile.extendsFrom testCompile
-  __bigQueryTest__Runtime.extendsFrom testRuntime
-
-  __integration__Compile.extendsFrom testCompile
-  __integration__Runtime.extendsFrom testRuntime
-
-  __tools__Implementation.extendsFrom implementation
-  __tools__RuntimeOnly.extendsFrom runtimeOnly
-
-  generatedCompile {
-    exclude group: 'com.google.guava', module:'guava-jdk5'
-  }
-}
-
 // Add dependencies to the classes builtin task from the  Java plugin.
 // "This is an aggregate task that just depends on other tasks.
 // Other plugins may attach additional compilation tasks to it."
 // https://docs.gradle.org/current/userguide/java_plugin.html
 classes.dependsOn 'generatedClasses'
 
-def swaggerCodegenTasks = ['generateWorkbenchApi', 'generateFireCloudClient', 'generateNotebooksClient',
-                           'generateJiraClient', 'generateMandrillClient', 'generateMoodleClient',
-                           'generateRdrClient', 'generateCaptchaClient', 'generateShibbolethClient']
-
-// The IDEA plugin generates files that assist the IntelliJ IDE in opening Gradle-defined projects.
 // https://docs.gradle.org/current/userguide/idea_plugin.html
-project.tasks.ideaModule.dependsOn(swaggerCodegenTasks)
+project.tasks.ideaModule.dependsOn(generateSwaggerCode)
 
 // Java plugin's Generated Source Set gives us the compileGeneratedJava task.
-// We need to provide it with the swagger-codegen tasks that excrete Java.
-project.tasks.compileGeneratedJava.dependsOn(swaggerCodegenTasks)
+// We need to provide it with the swagger-codegen tasks that output Java; this
+// task is defined by the Swagger gradle plugin, and includes all registered
+// Swagger sources, per the swaggerSources tuple above.
+project.tasks.compileGeneratedJava.dependsOn(generateSwaggerCode)
 
 project.tasks.war.dependsOn(['compileGeneratedJava', 'generate_appengine_web_xml',
         'generate_appengine_cron_yaml'])
 
 // Clear out generated Java sorces before cleaning the project.
 clean.doFirst {
-  delete("${projectDir}/$swaggerTargetFolder")
+  delete(SWAGGER_2_CODEGEN_DIR)
+  delete(SWAGGER_3_CODEGEN_DIR)
 }
 
 repositories {
@@ -478,6 +360,9 @@ repositories {
 // To show the dependency tree, try: ./project.rb gradle dependencies --configuration compile
 dependencies {
   annotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
+
+  __swaggerCodegenV2__ "io.swagger:swagger-codegen-cli:$project.ext.SWAGGER_2_CODEGEN_VERSION"
+  __swaggerCodegenV3__ "io.swagger.codegen.v3:swagger-codegen-cli:$project.ext.SWAGGER_3_CODEGEN_VERSION"
 
   compile "ch.qos.logback:logback-classic:1.2.3"
   compile "com.fasterxml.jackson.core:jackson-annotations:$project.ext.JACKSON_VERSION"
@@ -559,7 +444,7 @@ dependencies {
 
   // Dependencies for Swagger codegen-generated sources. This should include all dependencies required by Swagger's
   // default okhttp API codegen templates (see https://github.com/swagger-api/swagger-codegen/blob/v2.2.3/samples/client/petstore/spring-stubs/pom.xml)
-  // plus any custom templates included in our repo under the swaggerTemplateDir.
+  // plus any custom templates included in our repo under the SWAGGER_2_TEMPLATE_DIR.
   generatedCompile "org.springframework.boot:spring-boot-starter-data-rest:$project.ext.SPRING_BOOT_VERSION"
   generatedCompile "io.springfox:springfox-swagger2:$project.ext.SPRINGFOX_VERSION"
   generatedCompile "io.springfox:springfox-swagger-ui:$project.ext.SPRINGFOX_VERSION"
@@ -573,6 +458,16 @@ dependencies {
   generatedCompile "io.opencensus:opencensus-api:$project.ext.OPENCENSUS_VERSION"
   generatedCompile "io.opencensus:opencensus-exporter-trace-stackdriver:$project.ext.OPENCENSUS_VERSION"
   generatedCompile "io.opencensus:opencensus-impl:$project.ext.OPENCENSUS_VERSION"
+
+  // Swagger3 codegen deps
+  // TODO(calbach): The duplicated deps here are highly suspect. Investigate
+  // removing the generated sourceSet, or else fixing the runtime deps.
+  compile 'io.swagger.core.v3:swagger-annotations:2.0.0'
+  compile 'io.gsonfire:gson-fire:1.8.3'
+  compile 'org.threeten:threetenbp:1.3.5'
+  generatedCompile 'io.swagger.core.v3:swagger-annotations:2.0.0'
+  generatedCompile 'io.gsonfire:gson-fire:1.8.3'
+  generatedCompile 'org.threeten:threetenbp:1.3.5'
 
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$project.ext.KOTLIN_VERSION"
 
@@ -686,6 +581,11 @@ task startCronEmulator(dependsOn: [':appengine-cron-emulator:jar', 'generate_app
 // AppEngine plugin tasks
 project.tasks.appengineRun.dependsOn project.tasks.startCronEmulator
 project.tasks.appengineStart.dependsOn project.tasks.startCronEmulator
+appengineStart {
+  // This task has the side-effect of running a local server, and therefore
+  // should not be cacheable.
+  outputs.upToDateWhen { false }
+}
 
 group = 'org.pmiops.allofus.workbench'
 version = '0.1.0'          // Version in generated output
@@ -826,6 +726,16 @@ task updateCdrVersions(type: JavaExec) {
   if (project.hasProperty("appArgs")) {
     args Eval.me(appArgs)
   }
+}
+
+// This should be run directly
+task updateReviewDemographics(type: JavaExec) {
+    classpath sourceSets.__tools__.runtimeClasspath
+    main = "org.pmiops.workbench.tools.UpdateReviewDemographics"
+    systemProperties = commandLineSpringProperties
+    if (project.hasProperty("appArgs")) {
+        args Eval.me(appArgs)
+    }
 }
 
 // This can be run directly or via the deploy command.

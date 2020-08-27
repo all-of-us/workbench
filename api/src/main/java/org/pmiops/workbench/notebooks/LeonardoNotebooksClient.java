@@ -3,8 +3,8 @@ package org.pmiops.workbench.notebooks;
 import java.util.List;
 import java.util.Map;
 import org.pmiops.workbench.exceptions.WorkbenchException;
-import org.pmiops.workbench.notebooks.model.Cluster;
-import org.pmiops.workbench.notebooks.model.ListClusterResponse;
+import org.pmiops.workbench.leonardo.model.Cluster;
+import org.pmiops.workbench.leonardo.model.ListClusterResponse;
 import org.pmiops.workbench.notebooks.model.StorageLink;
 
 /**

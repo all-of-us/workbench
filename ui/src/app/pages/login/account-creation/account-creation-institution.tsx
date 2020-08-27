@@ -21,7 +21,8 @@ import {isBlank, reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {reportError} from 'app/utils/errors';
 import {
-  getRoleOptions, MasterDuaEmailMismatchErrorMessage,
+  getRoleOptions,
+  MasterDuaEmailMismatchErrorMessage,
   RestrictedDuaEmailMismatchErrorMessage,
   validateEmail
 } from 'app/utils/institutions';

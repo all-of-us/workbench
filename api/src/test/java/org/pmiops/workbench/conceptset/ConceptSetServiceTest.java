@@ -3,6 +3,7 @@ package org.pmiops.workbench.conceptset;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.time.Clock;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -37,13 +38,8 @@ public class ConceptSetServiceTest {
   @Autowired ConceptSetMapper conceptSetMapper;
 
   @TestConfiguration
-  @Import({
-    ConceptSetService.class,
-    ConceptService.class,
-    CommonMappers.class,
-    ConceptSetMapperImpl.class
-  })
-  @MockBean({ConceptBigQueryService.class})
+  @Import({ConceptSetService.class, ConceptService.class, ConceptSetMapperImpl.class})
+  @MockBean({CommonMappers.class, ConceptBigQueryService.class, Clock.class})
   static class Configuration {}
 
   @Test

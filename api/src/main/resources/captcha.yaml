@@ -3,10 +3,10 @@ info:
   title: Captcha
   version: '0.1'
 
-host: 'google.com/recaptcha/api'
+host: 'google.com'
 schemes:
   - 'https'
-basePath: /
+basePath: /recaptcha/api
 
 produces:
   - application/json

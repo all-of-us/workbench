@@ -67,7 +67,7 @@ public class ClusterController implements ClusterApiDelegate {
 
   private static final Logger log = Logger.getLogger(ClusterController.class.getName());
 
-  private static final Function<org.pmiops.workbench.notebooks.model.Cluster, Cluster>
+  private static final Function<org.pmiops.workbench.leonardo.model.Cluster, Cluster>
       TO_ALL_OF_US_CLUSTER =
           (firecloudCluster) -> {
             Cluster allOfUsCluster = new Cluster();
@@ -123,8 +123,8 @@ public class ClusterController implements ClusterApiDelegate {
     this.clock = clock;
   }
 
-  private Stream<org.pmiops.workbench.notebooks.model.ListClusterResponse> filterByClustersInList(
-      Stream<org.pmiops.workbench.notebooks.model.ListClusterResponse> clustersToFilter,
+  private Stream<org.pmiops.workbench.leonardo.model.ListClusterResponse> filterByClustersInList(
+      Stream<org.pmiops.workbench.leonardo.model.ListClusterResponse> clustersToFilter,
       List<String> clusterNames) {
     // Null means keep all clusters.
     return clustersToFilter.filter(
@@ -138,7 +138,7 @@ public class ClusterController implements ClusterApiDelegate {
     if (billingProjectId == null) {
       throw new BadRequestException("Must specify billing project");
     }
-    List<org.pmiops.workbench.notebooks.model.ListClusterResponse> clustersToDelete =
+    List<org.pmiops.workbench.leonardo.model.ListClusterResponse> clustersToDelete =
         filterByClustersInList(
                 leonardoNotebooksClient.listClustersByProjectAsService(billingProjectId).stream(),
                 clusterNamesToDelete.getClustersToDelete())
@@ -179,7 +179,7 @@ public class ClusterController implements ClusterApiDelegate {
     clusterAuditor.fireDeleteClustersInProject(
         billingProjectId,
         clustersToDelete.stream()
-            .map(org.pmiops.workbench.notebooks.model.ListClusterResponse::getClusterName)
+            .map(org.pmiops.workbench.leonardo.model.ListClusterResponse::getClusterName)
             .collect(Collectors.toList()));
     return ResponseEntity.ok(clustersInProjectAffected);
   }
@@ -197,10 +197,10 @@ public class ClusterController implements ClusterApiDelegate {
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
     workspaceService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
 
-    org.pmiops.workbench.notebooks.model.Cluster firecloudCluster =
+    org.pmiops.workbench.leonardo.model.Cluster leoCluster =
         leonardoNotebooksClient.getCluster(workspaceNamespace, userProvider.get().getClusterName());
 
-    return ResponseEntity.ok(TO_ALL_OF_US_CLUSTER.apply(firecloudCluster));
+    return ResponseEntity.ok(TO_ALL_OF_US_CLUSTER.apply(leoCluster));
   }
 
   @Override
@@ -210,11 +210,11 @@ public class ClusterController implements ClusterApiDelegate {
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
     workspaceService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
 
-    org.pmiops.workbench.notebooks.model.Cluster firecloudCluster =
+    org.pmiops.workbench.leonardo.model.Cluster leoCluster =
         leonardoNotebooksClient.createCluster(
             workspaceNamespace, userProvider.get().getClusterName(), firecloudWorkspaceName);
 
-    return ResponseEntity.ok(TO_ALL_OF_US_CLUSTER.apply(firecloudCluster));
+    return ResponseEntity.ok(TO_ALL_OF_US_CLUSTER.apply(leoCluster));
   }
 
   @Override

@@ -5,6 +5,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
+import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
 import org.joda.time.DateTime;
@@ -110,7 +111,8 @@ public class WorkspaceAdminControllerTest {
     CloudStorageService.class,
     NotebooksService.class,
     ConceptSetService.class,
-    CohortService.class
+    CohortService.class,
+    Clock.class
   })
   static class Configuration {
     @Bean
@@ -157,9 +159,9 @@ public class WorkspaceAdminControllerTest {
             WORKSPACE_NAMESPACE, dbWorkspace.getFirecloudName()))
         .thenReturn(cloudStorageCounts);
 
-    org.pmiops.workbench.notebooks.model.ListClusterResponse firecloudListClusterResponse =
+    org.pmiops.workbench.leonardo.model.ListClusterResponse firecloudListClusterResponse =
         testMockFactory.createFirecloudListClusterResponse();
-    List<org.pmiops.workbench.notebooks.model.ListClusterResponse> clusters =
+    List<org.pmiops.workbench.leonardo.model.ListClusterResponse> clusters =
         ImmutableList.of(firecloudListClusterResponse);
     when(mockLeonardoNotebooksClient.listClustersByProjectAsService(WORKSPACE_NAMESPACE))
         .thenReturn(clusters);

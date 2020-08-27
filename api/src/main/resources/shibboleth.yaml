@@ -8,7 +8,9 @@ info:
   title: Shibboleth
   description: Workbench Shibboleth service
   version: '1.0'
-host: "https://profile-dot-broad-shibboleth-prod.appspot.com/"
+host: profile-dot-broad-shibboleth-prod.appspot.com
+schemes:
+  - 'https'
 basePath: /
 
 produces:
@@ -52,12 +54,12 @@ paths:
           required: true
           schema:
             type: string
-    responses:
-      200:
-        description: OK
-      400:
-        description: Invalid or malformed JWT
-      401:
-        description: Unauthorized
-      500:
-        description: Internal Server Error
+      responses:
+        200:
+          description: OK
+        400:
+          description: Invalid or malformed JWT
+        401:
+          description: Unauthorized
+        500:
+          description: Internal Server Error
