@@ -2,20 +2,20 @@
   "name": "All of Us R and Cloud Storage snippets",
   "sub-menu": [
     {
-      "name": "Documentation",
-      "external-link": "https://aousupporthelp.zendesk.com/hc/en-us/articles/360039856791-How-to-use-code-snippets-in-Jupyter-Notebooks"
+      "external-link": "https://aousupporthelp.zendesk.com/hc/en-us/articles/360039856791-How-to-use-code-snippets-in-Jupyter-Notebooks",
+      "name": "Documentation"
     },
     "---",
     {
-      "snippet": "library(tidyverse)  # Data wrangling packages.\n\n",
-      "name": "(1) Setup"
+      "name": "(1) Setup",
+      "snippet": "library(tidyverse)  # Data wrangling packages.\n\n"
     },
     {
       "name": "(2) List objects in Workspace Bucket",
       "sub-menu": [
         {
-          "snippet": "# This snippet assumes that you run setup first\n\n# This code lists objects in your Google Bucket\n\n# Get the bucket name\nmy_bucket <- Sys.getenv('WORKSPACE_BUCKET')\n\n# List objects in the bucket\nsystem(paste0(\"gsutil ls -r \", my_bucket), intern=T)\n\n\n",
-          "name": "list_objects_in_bucket.R"
+          "name": "list_objects_in_bucket.R",
+          "snippet": "# This snippet assumes that you run setup first\n\n# This code lists objects in your Google Bucket\n\n# Get the bucket name\nmy_bucket <- Sys.getenv('WORKSPACE_BUCKET')\n\n# List objects in the bucket\nsystem(paste0(\"gsutil ls -r \", my_bucket), intern=T)\n\n\n"
         }
       ]
     },
@@ -23,12 +23,12 @@
       "name": "(3) Copy file to or from Workspace Bucket",
       "sub-menu": [
         {
-          "snippet": "# This snippet assumes that you run setup first\n\n# This code saves your dataframe into a csv file in a \"data\" folder in Google Bucket\n\n# Replace df with THE NAME OF YOUR DATAFRAME\nmy_dataframe <- df\n\n# Replace 'test.csv' with THE NAME of the file you're going to store in the bucket (don't delete the quotation marks)\ndestination_filename <- 'test.csv'\n\n########################################################################\n##\n################# DON'T CHANGE FROM HERE ###############################\n##\n########################################################################\n\n# store the dataframe in current workspace\nwrite_excel_csv(my_dataframe, destination_filename)\n\n# Get the bucket name\nmy_bucket <- Sys.getenv('WORKSPACE_BUCKET')\n\n# Copy the file from current workspace to the bucket\nsystem(paste0(\"gsutil cp ./\", destination_filename, \" \", my_bucket, \"/data/\"), intern=T)\n\n# Check if file is in the bucket\nsystem(paste0(\"gsutil ls \", my_bucket, \"/data/*.csv\"), intern=T)\n",
-          "name": "copy_data_to_workspace_bucket.R"
+          "name": "copy_data_to_workspace_bucket.R",
+          "snippet": "# This snippet assumes that you run setup first\n\n# This code saves your dataframe into a csv file in a \"data\" folder in Google Bucket\n\n# Replace df with THE NAME OF YOUR DATAFRAME\nmy_dataframe <- df\n\n# Replace 'test.csv' with THE NAME of the file you're going to store in the bucket (don't delete the quotation marks)\ndestination_filename <- 'test.csv'\n\n########################################################################\n##\n################# DON'T CHANGE FROM HERE ###############################\n##\n########################################################################\n\n# store the dataframe in current workspace\nwrite_excel_csv(my_dataframe, destination_filename)\n\n# Get the bucket name\nmy_bucket <- Sys.getenv('WORKSPACE_BUCKET')\n\n# Copy the file from current workspace to the bucket\nsystem(paste0(\"gsutil cp ./\", destination_filename, \" \", my_bucket, \"/data/\"), intern=T)\n\n# Check if file is in the bucket\nsystem(paste0(\"gsutil ls \", my_bucket, \"/data/*.csv\"), intern=T)\n"
         },
         {
-          "snippet": "# This snippet assumes that you run setup first\n\n# This code copies a file from your Google Bucket into a dataframe\n\n# replace 'test.csv' with the name of the file in your google bucket (don't delete the quotation marks)\nname_of_file_in_bucket <- 'test.csv'\n\n########################################################################\n##\n################# DON'T CHANGE FROM HERE ###############################\n##\n########################################################################\n\n# Get the bucket name\nmy_bucket <- Sys.getenv('WORKSPACE_BUCKET')\n\n# Copy the file from current workspace to the bucket\nsystem(paste0(\"gsutil cp \", my_bucket, \"/data/\", name_of_file_in_bucket, \" .\"), intern=T)\n\n# Load the file into a dataframe\nmy_dataframe  <- read_csv(name_of_file_in_bucket)\nhead(my_dataframe)\n",
-          "name": "copy_file_from_workspace_bucket.R"
+          "name": "copy_file_from_workspace_bucket.R",
+          "snippet": "# This snippet assumes that you run setup first\n\n# This code copies a file from your Google Bucket into a dataframe\n\n# replace 'test.csv' with the name of the file in your google bucket (don't delete the quotation marks)\nname_of_file_in_bucket <- 'test.csv'\n\n########################################################################\n##\n################# DON'T CHANGE FROM HERE ###############################\n##\n########################################################################\n\n# Get the bucket name\nmy_bucket <- Sys.getenv('WORKSPACE_BUCKET')\n\n# Copy the file from current workspace to the bucket\nsystem(paste0(\"gsutil cp \", my_bucket, \"/data/\", name_of_file_in_bucket, \" .\"), intern=T)\n\n# Load the file into a dataframe\nmy_dataframe  <- read_csv(name_of_file_in_bucket)\nhead(my_dataframe)\n"
         }
       ]
     }
