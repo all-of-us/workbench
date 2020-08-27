@@ -117,7 +117,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/ListClusterResponse"
+                  $ref: "#/components/schemas/ListRuntimeResponse"
         "400":
           description: Bad Request
           content:
@@ -2004,7 +2004,7 @@ components:
       enum:
         - pd-standard
         - pd-ssd
-    ClusterStatus:
+    RuntimeStatus:
       type: string
       enum:
         - Creating
@@ -2129,7 +2129,7 @@ components:
           type: string
           description: Google's operation ID for the cluster
         status:
-          $ref: "#/components/schemas/ClusterStatus"
+          $ref: "#/components/schemas/RuntimeStatus"
         hostIp:
           type: string
           description: The IP address of the cluster master node
@@ -2212,7 +2212,7 @@ components:
           type: string
           description: The URL to access a tool on the runtime
         status:
-          $ref: "#/components/schemas/ClusterStatus"
+          $ref: "#/components/schemas/RuntimeStatus"
         labels:
           type: object
           description: The labels to be placed on the runtime. Of type Map[String,String]
@@ -2312,7 +2312,7 @@ components:
           type: string
           description: Google's operation ID for the cluster
         status:
-          $ref: "#/components/schemas/ClusterStatus"
+          $ref: "#/components/schemas/RuntimeStatus"
         hostIp:
           type: string
           description: The IP address of the cluster master node
@@ -2372,7 +2372,7 @@ components:
           type: string
           description: The URL to access a tool on the runtime
         status:
-          $ref: "#/components/schemas/ClusterStatus"
+          $ref: "#/components/schemas/RuntimeStatus"
         labels:
           type: object
           description: The labels to be placed on the runtime. Of type Map[String,String]

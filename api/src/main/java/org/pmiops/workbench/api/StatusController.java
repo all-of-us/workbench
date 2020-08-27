@@ -24,7 +24,7 @@ public class StatusController implements StatusApiDelegate {
   public ResponseEntity<StatusResponse> getStatus() {
     StatusResponse statusResponse = new StatusResponse();
     statusResponse.setFirecloudStatus(fireCloudService.getFirecloudStatus());
-    statusResponse.setNotebooksStatus(leonardoNotebooksClient.getNotebooksStatus());
+    statusResponse.setNotebooksStatus(leonardoNotebooksClient.getLeonardoStatus());
     return ResponseEntity.ok(statusResponse);
   }
 }

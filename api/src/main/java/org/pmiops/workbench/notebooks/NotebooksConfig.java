@@ -8,7 +8,7 @@ import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.leonardo.api.ClusterApi;
+import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.api.ServiceInfoApi;
 import org.pmiops.workbench.notebooks.api.JupyterApi;
 import org.pmiops.workbench.notebooks.api.NotebooksApi;
@@ -19,13 +19,13 @@ import org.springframework.web.context.annotation.RequestScope;
 
 @org.springframework.context.annotation.Configuration
 public class NotebooksConfig {
-  public static final String USER_CLUSTER_API = "userClusterApi";
-  public static final String SERVICE_CLUSTER_API = "svcClusterApi";
+  public static final String USER_RUNTIMES_API = "userRuntimesApi";
+  public static final String SERVICE_RUNTIMES_API = "svcRuntimesApi";
 
   // Identifiers for the Swagger2 APIs for Jupyter and Welder, used for creating/localizing files.
   private static final String USER_NOTEBOOKS_CLIENT = "notebooksApiClient";
   private static final String SERVICE_NOTEBOOKS_CLIENT = "notebooksSvcApiClient";
-  // Identifiers for the new OAS3 APIs from Leonardo. These should be used for cluster access.
+  // Identifiers for the new OAS3 APIs from Leonardo. These should be used for runtimes access.
   private static final String USER_LEONARDO_CLIENT = "leonardoApiClient";
   private static final String SERVICE_LEONARDO_CLIENT = "leonardoServiceAPiClient";
 
@@ -77,11 +77,11 @@ public class NotebooksConfig {
     return apiClient;
   }
 
-  @Bean(name = USER_CLUSTER_API)
+  @Bean(name = USER_RUNTIMES_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ClusterApi clusterApi(
+  public RuntimesApi runtimesApi(
       @Qualifier(USER_LEONARDO_CLIENT) org.pmiops.workbench.leonardo.ApiClient apiClient) {
-    ClusterApi api = new ClusterApi();
+    RuntimesApi api = new RuntimesApi();
     api.setApiClient(apiClient);
     return api;
   }
@@ -102,11 +102,11 @@ public class NotebooksConfig {
     return api;
   }
 
-  @Bean(name = SERVICE_CLUSTER_API)
+  @Bean(name = SERVICE_RUNTIMES_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ClusterApi serviceClusterApi(
+  public RuntimesApi serviceRuntimesApi(
       @Qualifier(SERVICE_LEONARDO_CLIENT) org.pmiops.workbench.leonardo.ApiClient apiClient) {
-    ClusterApi api = new ClusterApi();
+    RuntimesApi api = new RuntimesApi();
     api.setApiClient(apiClient);
     return api;
   }

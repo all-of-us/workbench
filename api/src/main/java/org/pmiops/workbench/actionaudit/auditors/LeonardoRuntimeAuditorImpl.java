@@ -15,14 +15,14 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ClusterAuditorImpl implements ClusterAuditor {
+public class LeonardoRuntimeAuditorImpl implements LeonardoRuntimeAuditor {
   private Provider<String> actionIdProvider;
   private ActionAuditService actionAuditService;
   private Clock clock;
   private Provider<DbUser> userProvider;
 
   @Autowired
-  public ClusterAuditorImpl(
+  public LeonardoRuntimeAuditorImpl(
       @Qualifier("ACTION_ID") Provider<String> actionIdProvider,
       ActionAuditService actionAuditService,
       Clock clock,
@@ -34,12 +34,12 @@ public class ClusterAuditorImpl implements ClusterAuditor {
   }
 
   @Override
-  public void fireDeleteClustersInProject(String projectId, List<String> clusterNames) {
+  public void fireDeleteRuntimesInProject(String projectId, List<String> runtimeNames) {
     String actionId = actionIdProvider.get();
     actionAuditService.send(
-        clusterNames.stream()
+        runtimeNames.stream()
             .map(
-                clusterName ->
+                runtimeName ->
                     ActionAuditEvent.builder()
                         .timestamp(clock.millis())
                         .actionId(actionId)
@@ -47,7 +47,7 @@ public class ClusterAuditorImpl implements ClusterAuditor {
                         .agentIdMaybe(userProvider.get().getUserId())
                         .agentEmailMaybe(userProvider.get().getUsername())
                         .actionType(ActionType.DELETE)
-                        .newValueMaybe(clusterName)
+                        .newValueMaybe(runtimeName)
                         .targetType(TargetType.NOTEBOOK_SERVER)
                         .targetPropertyMaybe(projectId)
                         .build())
