@@ -18,6 +18,7 @@ import {Homepage} from './pages/homepage/homepage';
 import {SignIn} from './pages/login/sign-in';
 import {WorkspaceLibrary} from './pages/workspace/workspace-library';
 import {AnalyticsTracker} from './utils/analytics';
+import {BreadcrumbType} from './utils/navigation';
 
 
 const signInGuard: Guard = {
@@ -108,7 +109,12 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
         />
         <AppRoute
           path='/workspaces/:ns/:wsid/notebooks'
-          component={() => <NotebookListPage routeData={{title: 'View Notebooks'}}/>}
+          component={() => <React.Fragment><NotebookListPage routeData={{
+            title: 'View Notebooks',
+            helpContentKey: 'notebooks',
+            breadcrumb: BreadcrumbType.Workspace
+          }}/>
+          </React.Fragment>}
         />
       </ProtectedRoutes>
     </ProtectedRoutes>
