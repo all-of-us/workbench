@@ -8,6 +8,7 @@ import org.mapstruct.MappingTarget;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbStorageEnums;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
@@ -48,5 +49,21 @@ public interface CohortReviewMapper {
         .pageSize(pageRequest.getPageSize())
         .sortOrder(pageRequest.getSortOrder().toString())
         .sortColumn(pageRequest.getSortColumn());
+  }
+
+  @Mapping(target = "version", source = "cohortReview.etag", qualifiedByName = "etagToCdrVersion")
+  @Mapping(target = "creator", ignore = true)
+  @Mapping(target = "reviewStatusEnum", ignore = true)
+  DbCohortReview clientToDbModel(CohortReview cohortReview);
+
+  @Mapping(target = "version", source = "cohortReview.etag", qualifiedByName = "etagToCdrVersion")
+  @Mapping(target = "creator", ignore = true)
+  @Mapping(target = "reviewStatusEnum", ignore = true)
+  DbCohortReview clientToDbModel(CohortReview cohortReview, @Context DbUser creator);
+
+  @AfterMapping
+  default void populateAfterMapping(
+      @MappingTarget DbCohortReview dbCohortReview, @Context DbUser creator) {
+    dbCohortReview.creator(creator);
   }
 }

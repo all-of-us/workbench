@@ -9,11 +9,11 @@ import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -69,7 +69,7 @@ public class WorkspaceResourcesServiceImpl implements WorkspaceResourcesService 
               .collect(Collectors.toList()));
     }
     if (resourceTypes.contains(ResourceType.COHORT_REVIEW)) {
-      List<DbCohortReview> reviews =
+      List<CohortReview> reviews =
           cohortReviewService.getRequiredWithCohortReviews(
               dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
       workspaceResources.addAll(

@@ -1,14 +1,21 @@
 package org.pmiops.workbench.cohortreview;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.persistence.OptimisticLockException;
 import org.apache.commons.lang3.StringUtils;
+import org.pmiops.workbench.api.Etags;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
+import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapper;
 import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortAnnotationMapper;
+import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortStatusMapper;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -22,12 +29,16 @@ import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbParticipantCohortAnnotation;
 import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
 import org.pmiops.workbench.db.model.DbStorageEnums;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AnnotationType;
+import org.pmiops.workbench.model.CohortReview;
+import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
 import org.pmiops.workbench.model.ParticipantCohortAnnotation;
+import org.pmiops.workbench.model.ParticipantCohortStatus;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
@@ -39,27 +50,36 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCollector {
 
+  private CohortBuilderService cohortBuilderService;
   private CohortReviewDao cohortReviewDao;
   private CohortDao cohortDao;
   private ParticipantCohortStatusDao participantCohortStatusDao;
   private ParticipantCohortAnnotationDao participantCohortAnnotationDao;
   private CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
   private ParticipantCohortAnnotationMapper participantCohortAnnotationMapper;
+  private ParticipantCohortStatusMapper participantCohortStatusMapper;
+  private CohortReviewMapper cohortReviewMapper;
 
   @Autowired
   public CohortReviewServiceImpl(
+      CohortBuilderService cohortBuilderService,
       CohortReviewDao cohortReviewDao,
       CohortDao cohortDao,
       ParticipantCohortStatusDao participantCohortStatusDao,
       ParticipantCohortAnnotationDao participantCohortAnnotationDao,
       CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao,
-      ParticipantCohortAnnotationMapper participantCohortAnnotationMapper) {
+      ParticipantCohortAnnotationMapper participantCohortAnnotationMapper,
+      ParticipantCohortStatusMapper participantCohortStatusMapper,
+      CohortReviewMapper cohortReviewMapper) {
+    this.cohortBuilderService = cohortBuilderService;
     this.cohortReviewDao = cohortReviewDao;
     this.cohortDao = cohortDao;
     this.participantCohortStatusDao = participantCohortStatusDao;
     this.participantCohortAnnotationDao = participantCohortAnnotationDao;
     this.cohortAnnotationDefinitionDao = cohortAnnotationDefinitionDao;
     this.participantCohortAnnotationMapper = participantCohortAnnotationMapper;
+    this.participantCohortStatusMapper = participantCohortStatusMapper;
+    this.cohortReviewMapper = cohortReviewMapper;
   }
 
   public CohortReviewServiceImpl() {}
@@ -75,7 +95,7 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   }
 
   @Override
-  public DbCohortReview findCohortReview(Long cohortId, Long cdrVersionId) {
+  public CohortReview findCohortReview(Long cohortId, Long cdrVersionId) {
     DbCohortReview cohortReview =
         cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
 
@@ -85,7 +105,7 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
               "Not Found: Cohort Review does not exist for cohortId: %s, cdrVersionId: %s",
               cohortId, cdrVersionId));
     }
-    return cohortReview;
+    return cohortReviewMapper.dbModelToClient(cohortReview);
   }
 
   @Override
@@ -121,11 +141,15 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   }
 
   @Override
-  public List<DbCohortReview> getRequiredWithCohortReviews(String ns, String firecloudName) {
-    return cohortReviewDao.findByFirecloudNameAndActiveStatus(
-        ns,
-        firecloudName,
-        DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+  public List<CohortReview> getRequiredWithCohortReviews(String ns, String firecloudName) {
+    return cohortReviewDao
+        .findByFirecloudNameAndActiveStatus(
+            ns,
+            firecloudName,
+            DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE))
+        .stream()
+        .map(cohortReviewMapper::dbModelToClient)
+        .collect(Collectors.toList());
   }
 
   @Override
@@ -134,37 +158,91 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   }
 
   @Override
+  public CohortReview saveCohortReview(CohortReview cohortReview, DbUser creator) {
+    return cohortReviewMapper.dbModelToClient(
+        cohortReviewDao.save(cohortReviewMapper.clientToDbModel(cohortReview, creator)));
+  }
+
+  @Override
   @Transactional
   public void saveFullCohortReview(
-      DbCohortReview cohortReview, List<DbParticipantCohortStatus> participantCohortStatuses) {
-    saveCohortReview(cohortReview);
+      CohortReview cohortReview, List<DbParticipantCohortStatus> participantCohortStatuses) {
+    saveCohortReview(cohortReviewMapper.clientToDbModel(cohortReview));
     participantCohortStatusDao.saveParticipantCohortStatusesCustom(participantCohortStatuses);
   }
 
-  @Override
-  public DbParticipantCohortStatus saveParticipantCohortStatus(
-      DbParticipantCohortStatus participantCohortStatus) {
-    return participantCohortStatusDao.save(participantCohortStatus);
+  public CohortReview updateCohortReview(
+      CohortReview cohortReview, Long cohortReviewId, Timestamp lastModified) {
+    DbCohortReview dbCohortReview = findCohortReview(cohortReviewId);
+    if (Strings.isNullOrEmpty(cohortReview.getEtag())) {
+      throw new ConflictException("missing required update field 'etag'");
+    }
+    int version = Etags.toVersion(cohortReview.getEtag());
+    if (dbCohortReview.getVersion() != version) {
+      throw new ConflictException("Attempted to modify outdated cohort review version");
+    }
+    if (cohortReview.getCohortName() != null) {
+      dbCohortReview.setCohortName(cohortReview.getCohortName());
+    }
+    if (cohortReview.getDescription() != null) {
+      dbCohortReview.setDescription(cohortReview.getDescription());
+    }
+    dbCohortReview.setLastModifiedTime(lastModified);
+    try {
+      return cohortReviewMapper.dbModelToClient(cohortReviewDao.save(dbCohortReview));
+    } catch (OptimisticLockException e) {
+      throw new ConflictException("Failed due to concurrent cohort review modification");
+    }
   }
 
   @Override
-  public DbParticipantCohortStatus findParticipantCohortStatus(
-      Long cohortReviewId, Long participantId) {
-    DbParticipantCohortStatus participantCohortStatus =
+  public ParticipantCohortStatus updateParticipantCohortStatus(
+      Long cohortReviewId, Long participantId, CohortStatus status, Timestamp lastModified) {
+    DbCohortReview cohortReview = findCohortReview(cohortReviewId);
+    cohortReview.lastModifiedTime(lastModified);
+    cohortReview.incrementReviewedCount();
+    saveCohortReview(cohortReview);
+
+    DbParticipantCohortStatus dbParticipantCohortStatus =
         participantCohortStatusDao
             .findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId(
                 cohortReviewId, participantId);
-    if (participantCohortStatus == null) {
+    if (dbParticipantCohortStatus == null) {
       throw new NotFoundException(
           String.format(
               "Not Found: Participant Cohort Status does not exist for cohortReviewId: %s, participantId: %s",
               cohortReviewId, participantId));
     }
-    return participantCohortStatus;
+    dbParticipantCohortStatus.setStatusEnum(status);
+    return participantCohortStatusMapper.dbModelToClient(
+        participantCohortStatusDao.save(dbParticipantCohortStatus),
+        cohortBuilderService.findAllDemographicsMap());
   }
 
-  public List<DbParticipantCohortStatus> findAll(Long cohortReviewId, PageRequest pageRequest) {
-    return participantCohortStatusDao.findAll(cohortReviewId, pageRequest);
+  @Override
+  public ParticipantCohortStatus findParticipantCohortStatus(
+      Long cohortReviewId, Long participantId) {
+    DbParticipantCohortStatus dbParticipantCohortStatus =
+        participantCohortStatusDao
+            .findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId(
+                cohortReviewId, participantId);
+    if (dbParticipantCohortStatus == null) {
+      throw new NotFoundException(
+          String.format(
+              "Not Found: Participant Cohort Status does not exist for cohortReviewId: %s, participantId: %s",
+              cohortReviewId, participantId));
+    }
+    return participantCohortStatusMapper.dbModelToClient(
+        dbParticipantCohortStatus, cohortBuilderService.findAllDemographicsMap());
+  }
+
+  public List<ParticipantCohortStatus> findAll(Long cohortReviewId, PageRequest pageRequest) {
+    return participantCohortStatusDao.findAll(cohortReviewId, pageRequest).stream()
+        .map(
+            pcs ->
+                participantCohortStatusMapper.dbModelToClient(
+                    pcs, cohortBuilderService.findAllDemographicsMap()))
+        .collect(Collectors.toList());
   }
 
   @Override
