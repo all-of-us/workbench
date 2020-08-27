@@ -17,6 +17,8 @@ constructor(override val propertyName: String, override val extractor: (Profile)
     DISABLED("disabled", { it.disabled?.toString() }),
     ABOUT_YOU("about_you", Profile::getAboutYou),
     AREA_OF_RESEARCH("area_of_research", Profile::getAreaOfResearch),
+    // deprecated - previously referred to old-style (unverified) affiliations
+    INSTITUTIONAL_AFFILIATIONS("institutional_affiliations", { null }),
     AFFILIATION("affiliation", { it.verifiedInstitutionalAffiliation?.toString() }),
     DEMOGRAPHIC_SURVEY("demographic_survey", { it.demographicSurvey?.toString() }),
     ADDRESS("address", { it.address?.toString() }),
