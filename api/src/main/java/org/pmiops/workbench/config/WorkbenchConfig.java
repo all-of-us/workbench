@@ -100,10 +100,15 @@ public class WorkbenchConfig {
   public static class FireCloudConfig {
     public boolean debugEndpoints;
     public String baseUrl;
-    public Integer clusterMaxAgeDays;
-    public Integer clusterIdleMaxAgeDays;
-    public String clusterDefaultMachineType;
-    public Integer clusterDefaultDiskSizeGb;
+    // Remove after next release.
+    @Deprecated public Integer clusterMaxAgeDays;
+    @Deprecated public Integer clusterIdleMaxAgeDays;
+    @Deprecated public String clusterDefaultMachineType;
+    @Deprecated public Integer clusterDefaultDiskSizeGb;
+    public Integer leoRuntimeMaxAgeDays;
+    public Integer leoRuntimeIdleMaxAgeDays;
+    public String leoRuntimeDefaultMachineType;
+    public Integer leonRuntimeDefaultDiskSizeGb;
     public String registeredDomainName;
     public String registeredDomainGroup;
     public String leoBaseUrl;
