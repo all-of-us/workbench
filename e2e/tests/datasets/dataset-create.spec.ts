@@ -6,6 +6,8 @@ import {EllipsisMenuAction, LinkText} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
+import Button from '../../app/element/button';
+import HelpSidebar from '../../app/component/help-sidebar';
 
 describe('Create Dataset', () => {
 
@@ -78,17 +80,23 @@ describe('Create Dataset', () => {
     const cohortBuildPage = new CohortBuildPage(page);
     // Include Participants Group 1: Add a Condition
     const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
-    const modal = await group1.includeDrugs();
+    const searchPage = await group1.includeDrugs();
 
     // Search for drug hydroxychloroquine
-    const searchResultsTable = await modal.searchCondition('hydroxychloroquine');
+    const searchResultsTable = await searchPage.searchCondition('hydroxychloroquine');
     // Add drug in first row result
     const nameValue = await searchResultsTable.getCellValue(1, 1);
-    const addIcon = await ClrIconLink.findByName(page, {containsText: nameValue, iconShape: 'plus-circle'}, modal);
+    const addIcon = await ClrIconLink.findByName(page, {containsText: nameValue, iconShape: 'plus-circle'}, searchPage);
     await addIcon.click();
 
-    // Click FINISH button. Criteria dialog closes.
-    await modal.clickButton(LinkText.Finish);
+    // Click Finish & Review button to open selection list
+    const finishAndReviewButton = await Button.findByName(page, {name: LinkText.FinishAndReview}, searchPage);
+    await finishAndReviewButton.waitUntilEnabled();
+    await finishAndReviewButton.click();
+
+    // Click Save Criteria button in sidebar
+    const helpSidebar = new HelpSidebar(page);
+    await helpSidebar.clickSaveCriteriaButton();
     await cohortBuildPage.getTotalCount();
 
     // Save new cohort.
