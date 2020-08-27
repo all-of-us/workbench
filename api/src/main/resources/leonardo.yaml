@@ -2368,6 +2368,8 @@ components:
           description: The Google Project used to create the runtime
         runtimeConfig:
           $ref: "#/components/schemas/RuntimeConfig"
+        auditInfo:
+          $ref: "#/components/schemas/AuditInfo"
         proxyUrl:
           type: string
           description: The URL to access a tool on the runtime

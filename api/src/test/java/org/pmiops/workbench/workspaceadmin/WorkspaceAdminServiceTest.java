@@ -53,6 +53,7 @@ import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
+import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -78,7 +79,12 @@ public class WorkspaceAdminServiceTest {
   @Autowired private WorkspaceAdminService workspaceAdminService;
 
   @TestConfiguration
-  @Import({CohortMapperImpl.class, WorkspaceAdminServiceImpl.class, WorkspaceMapperImpl.class})
+  @Import({
+    CohortMapperImpl.class,
+    WorkspaceAdminServiceImpl.class,
+    WorkspaceMapperImpl.class,
+    LeonardoMapperImpl.class
+  })
   @MockBean({
     ActionAuditQueryService.class,
     CloudStorageService.class,

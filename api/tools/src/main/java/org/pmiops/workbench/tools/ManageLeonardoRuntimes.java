@@ -23,31 +23,31 @@ import javax.annotation.Nullable;
 import org.pmiops.workbench.leonardo.ApiClient;
 import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.ApiResponse;
-import org.pmiops.workbench.leonardo.api.ClusterApi;
-import org.pmiops.workbench.leonardo.model.Cluster;
-import org.pmiops.workbench.leonardo.model.ClusterStatus;
-import org.pmiops.workbench.leonardo.model.ListClusterResponse;
+import org.pmiops.workbench.leonardo.api.RuntimesApi;
+import org.pmiops.workbench.leonardo.model.GetRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.ListRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.RuntimeStatus;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * ManageClusters is an operational utility for interacting with the Leonardo Notebook clusters
- * available to the application default user. This should generally be used while authorized as the
- * App Engine default service account for a given environment.
+ * ManageLeonardoRuntimes is an operational utility for interacting with the Leonardo Notebook
+ * runtimes available to the application default user. This should generally be used while
+ * authorized as the App Engine default service account for a given environment.
  */
 @Configuration
-public class ManageClusters {
+public class ManageLeonardoRuntimes {
 
-  private static final Logger log = Logger.getLogger(ManageClusters.class.getName());
+  private static final Logger log = Logger.getLogger(ManageLeonardoRuntimes.class.getName());
   private static final String[] BILLING_SCOPES =
       new String[] {
         "https://www.googleapis.com/auth/userinfo.profile",
         "https://www.googleapis.com/auth/userinfo.email"
       };
   private static final List<String> DESCRIBE_ARG_NAMES =
-      ImmutableList.of("api_url", "project", "service_account", "cluster_id");
+      ImmutableList.of("api_url", "project", "service_account", "runtime_id");
   private static final List<String> DELETE_ARG_NAMES =
       ImmutableList.of("api_url", "min_age", "ids", "dry_run");
   private static final Gson PRETTY_GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -58,128 +58,133 @@ public class ManageClusters {
         .collect(Collectors.toSet());
   }
 
-  private static ClusterApi newApiClient(String apiUrl) throws IOException {
+  private static RuntimesApi newApiClient(String apiUrl) throws IOException {
     ApiClient apiClient = new ApiClient();
     apiClient.setBasePath(apiUrl);
     GoogleCredential credential =
         GoogleCredential.getApplicationDefault().createScoped(Arrays.asList(BILLING_SCOPES));
     credential.refreshToken();
     apiClient.setAccessToken(credential.getAccessToken());
-    ClusterApi api = new ClusterApi();
+    apiClient.setDebugging(true);
+    RuntimesApi api = new RuntimesApi();
     api.setApiClient(apiClient);
     return api;
   }
 
-  private static String clusterId(ListClusterResponse c) {
-    return c.getGoogleProject() + "/" + c.getClusterName();
+  private static String runtimeId(ListRuntimeResponse r) {
+    return r.getGoogleProject() + "/" + r.getRuntimeName();
   }
 
-  private static String formatTabular(ListClusterResponse c) {
+  private static String formatTabular(ListRuntimeResponse r) {
     Gson gson = new Gson();
-    JsonObject labels = gson.toJsonTree(c.getLabels()).getAsJsonObject();
+    JsonObject labels = gson.toJsonTree(r.getLabels()).getAsJsonObject();
     String creator = "unknown";
     if (labels.has("created-by")) {
       creator = labels.get("created-by").getAsString();
     }
-    ClusterStatus status = ClusterStatus.UNKNOWN;
-    if (c.getStatus() != null) {
-      status = c.getStatus();
+    RuntimeStatus status = RuntimeStatus.UNKNOWN;
+    if (r.getStatus() != null) {
+      status = r.getStatus();
     }
     return String.format(
-        "%-40.40s %-50.50s %-10s %-15s", clusterId(c), creator, status, c.getCreatedDate());
+        "%-40.40s %-50.50s %-10s %-15s",
+        runtimeId(r), creator, status, r.getAuditInfo().getCreatedDate());
   }
 
-  private static void listClusters(String apiUrl) throws IOException, ApiException {
+  private static void listRuntimes(String apiUrl) throws IOException, ApiException {
     AtomicInteger count = new AtomicInteger();
-    newApiClient(apiUrl).listClusters(null, false).stream()
-        .sorted(Comparator.comparing(c -> Instant.parse(c.getCreatedDate())))
+    newApiClient(apiUrl).listRuntimes(null, false).stream()
+        .sorted(Comparator.comparing(r -> r.getGoogleProject()))
         .forEachOrdered(
             (c) -> {
               System.out.println(formatTabular(c));
               count.getAndIncrement();
             });
-    System.out.println(String.format("listed %d clusters", count.get()));
+    System.out.println(String.format("listed %d runtimes", count.get()));
   }
 
-  private static void describeCluster(
-      String apiUrl, String workbenchProjectId, String workbenchServiceAccount, String clusterId)
+  private static void describeRuntime(
+      String apiUrl, String workbenchProjectId, String workbenchServiceAccount, String runtimeId)
       throws IOException, ApiException {
-    String[] parts = clusterId.split("/");
+    String[] parts = runtimeId.split("/");
     if (parts.length != 2) {
       System.err.println(
           String.format(
-              "given cluster ID '%s' is invalid, wanted format 'project/clusterName'", clusterId));
+              "given runtime ID '%s' is invalid, wanted format 'project/runtimeName'", runtimeId));
       return;
     }
-    String clusterProject = parts[0];
-    String clusterName = parts[1];
+    String runtimeProject = parts[0];
+    String runtimeName = parts[1];
 
-    // Leo's getCluster API swagger tends to be outdated; issue a raw getCluster request to ensure
+    // Leo's getRuntime API swagger tends to be outdated; issue a raw getRuntime request to ensure
     // we get all available information for debugging.
-    ClusterApi client = newApiClient(apiUrl);
+    RuntimesApi client = newApiClient(apiUrl);
     com.squareup.okhttp.Call call =
-        client.getClusterCall(
-            clusterProject,
-            clusterName,
+        client.getRuntimeCall(
+            runtimeProject,
+            runtimeName,
             /* progressListener */ null,
             /* progressRequestListener */ null);
     ApiResponse<Object> resp = client.getApiClient().execute(call, Object.class);
 
     // Parse the response as well so we can log specific structured fields.
-    Cluster cluster = PRETTY_GSON.fromJson(PRETTY_GSON.toJson(resp.getData()), Cluster.class);
+    GetRuntimeResponse runtime =
+        PRETTY_GSON.fromJson(PRETTY_GSON.toJson(resp.getData()), GetRuntimeResponse.class);
 
     System.out.println(PRETTY_GSON.toJson(resp.getData()));
     System.out.printf("\n\nTo inspect logs in cloud storage, run the following:\n\n");
 
     System.out.printf(
-        "    gsutil -i %s ls gs://%s/**\n", workbenchServiceAccount, cluster.getStagingBucket());
+        "    gsutil -i %s ls gs://%s/**\n",
+        workbenchServiceAccount, runtime.getAsyncRuntimeFields().getStagingBucket());
     System.out.printf(
         "    gsutil -i %s cat ... # inspect or copy logs\n\n", workbenchServiceAccount);
   }
 
-  private static void deleteClusters(
+  private static void deleteRuntimes(
       String apiUrl, @Nullable Instant oldest, Set<String> ids, boolean dryRun)
       throws IOException, ApiException {
     Set<String> remaining = new HashSet<>(ids);
     String dryMsg = dryRun ? "[DRY RUN]: would have... " : "";
 
     AtomicInteger deleted = new AtomicInteger();
-    ClusterApi api = newApiClient(apiUrl);
-    api.listClusters(null, false).stream()
-        .sorted(Comparator.comparing(c -> Instant.parse(c.getCreatedDate())))
+    RuntimesApi api = newApiClient(apiUrl);
+    api.listRuntimes(null, false).stream()
+        .sorted(Comparator.comparing(r -> r.getRuntimeName()))
         .filter(
-            (c) -> {
-              Instant createdDate = Instant.parse(c.getCreatedDate());
+            (r) -> {
+              Instant createdDate = Instant.parse(r.getAuditInfo().getCreatedDate());
               if (oldest != null && createdDate.isAfter(oldest)) {
                 return false;
               }
-              if (!ids.isEmpty() && !ids.contains(clusterId(c))) {
+              if (!ids.isEmpty() && !ids.contains(runtimeId(r))) {
                 return false;
               }
               return true;
             })
         .forEachOrdered(
-            (c) -> {
-              String cid = clusterId(c);
+            (r) -> {
+              String cid = runtimeId(r);
               if (!dryRun) {
                 try {
-                  api.deleteCluster(c.getGoogleProject(), c.getClusterName());
+                  api.deleteRuntime(
+                      r.getGoogleProject(), r.getRuntimeName(), /* deleteDisk */ false);
                 } catch (ApiException e) {
-                  log.log(Level.SEVERE, "failed to deleted cluster " + cid, e);
+                  log.log(Level.SEVERE, "failed to deleted runtime " + cid, e);
                   return;
                 }
               }
               remaining.remove(cid);
               deleted.getAndIncrement();
-              System.out.println(dryMsg + "deleted cluster: " + formatTabular(c));
+              System.out.println(dryMsg + "deleted runtime: " + formatTabular(r));
             });
     if (!remaining.isEmpty()) {
       log.log(
           Level.SEVERE,
-          "failed to find/delete clusters: {1}",
+          "failed to find/delete runtimes: {1}",
           new Object[] {Joiner.on(", ").join(remaining)});
     }
-    System.out.println(String.format("%sdeleted %d clusters", dryMsg, deleted.get()));
+    System.out.println(String.format("%sdeleted %d runtimes", dryMsg, deleted.get()));
   }
 
   @Bean
@@ -198,14 +203,14 @@ public class ManageClusters {
                     "Expected %d args %s. Got: %s",
                     DESCRIBE_ARG_NAMES.size(), DESCRIBE_ARG_NAMES, Arrays.asList(args)));
           }
-          describeCluster(args[0], args[1], args[2], args[3]);
+          describeRuntime(args[0], args[1], args[2], args[3]);
           return;
 
         case "list":
           if (args.length != 1) {
             throw new IllegalArgumentException("Expected 1 arg. Got " + Arrays.asList(args));
           }
-          listClusters(args[0]);
+          listRuntimes(args[0]);
           return;
 
         case "delete":
@@ -222,7 +227,7 @@ public class ManageClusters {
           if (!args[1].isEmpty()) {
             Duration age = Duration.ofDays(Long.parseLong(args[1]));
             oldest = Clock.systemUTC().instant().minus(age);
-            log.info("only clusters created before " + oldest + " will be considered");
+            log.info("only runtimes created before " + oldest + " will be considered");
           }
 
           // Note: IDs are optional, this set may be empty.
@@ -231,9 +236,9 @@ public class ManageClusters {
 
           if (oldest == null && ids.isEmpty()) {
             throw new IllegalArgumentException(
-                "must provide either a maximum age, or a list of ids for filtering of clusters");
+                "must provide either a maximum age, or a list of ids for filtering of runtimes");
           }
-          deleteClusters(apiUrl, oldest, ids, dryRun);
+          deleteRuntimes(apiUrl, oldest, ids, dryRun);
           return;
 
         default:
@@ -247,6 +252,6 @@ public class ManageClusters {
     // This tool doesn't currently need database access, so it doesn't extend the
     // CommandLineToolConfig. To add database access, extend from that config and update project.rb
     // to ensure a Cloud SQL proxy is available when this command is run.
-    new SpringApplicationBuilder(ManageClusters.class).web(false).run(args);
+    new SpringApplicationBuilder(ManageLeonardoRuntimes.class).web(false).run(args);
   }
 }

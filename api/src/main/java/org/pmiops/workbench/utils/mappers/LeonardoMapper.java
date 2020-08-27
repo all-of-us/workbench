@@ -26,11 +26,13 @@ public interface LeonardoMapper {
       GetRuntimeResponse runtime);
 
   @Mapping(target = "clusterName", source = "runtimeName")
-  @Mapping(target = "createdDate", ignore = true)
-  @Mapping(target = "dateAccessed", ignore = true)
+  @Mapping(target = "createdDate", source = "auditInfo.createdDate")
+  @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
   ListClusterResponse toApiListClusterResponse(
       org.pmiops.workbench.leonardo.model.ListRuntimeResponse leonardoListRuntimeResponse);
 
+  @Mapping(target = "createdDate", source = "auditInfo.createdDate")
+  @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
   ListRuntimeResponse toApiListRuntimeResponse(
       org.pmiops.workbench.leonardo.model.ListRuntimeResponse leonardoListRuntimeResponse);
 
