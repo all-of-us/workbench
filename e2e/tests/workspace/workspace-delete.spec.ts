@@ -1,8 +1,7 @@
 import WorkspacesPage from 'app/page/workspaces-page';
 import {findWorkspace, signIn} from 'utils/test-utils';
 import WorkspaceCard from 'app/component/workspace-card';
-import {EllipsisMenuAction, WorkspaceAccessLevel, LinkText} from 'app/text-labels';
-import Modal from 'app/component/modal';
+import {EllipsisMenuAction, WorkspaceAccessLevel} from 'app/text-labels';
 
 
 describe('Delete workspace', () => {
@@ -12,11 +11,12 @@ describe('Delete workspace', () => {
   });
 
   /**
-   * Test:
+   * Test
+   * - Navigate to "Your Workspaces" page   
    * - Find an existing workspace. Create a new workspace if none exists.
    * - Select "Delete" thru the Ellipsis menu located on the Workspace card.
    * - Get the content on the modal
-   * - Click the delete workspace button on the modal
+   * - Click the delete workspace button on the confirmation dialog
    * - Navigate to the "View Workspaces" page
    * - Verify that the workspace has been delete
    */
@@ -34,14 +34,14 @@ describe('Delete workspace', () => {
       expect(accessLevel).toBe(WorkspaceAccessLevel.Owner);
       
       await workspaceCard.asElementHandle().hover();
+
       // click on Ellipsis "Delete"
       await (workspaceCard.getEllipsis()).clickAction(EllipsisMenuAction.Delete, { waitForNav: false });
 
-      const modal = new Modal(page);
-      // get the modal content
-      await modal.getContent();
-      // click on the Delete workspace button
-      await modal.clickButton(LinkText.DeleteWorkspace);
+      // click the delete workspace button on the confirmation dialog
+      await workspacesPage.deleteWorkspaceModal();
+
+      // navigate to "Your Workspaces" page
       await workspacesPage.isLoaded(); 
 
       // Verify if the delete workspace action was successful.
