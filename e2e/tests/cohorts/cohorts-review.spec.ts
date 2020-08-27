@@ -52,7 +52,7 @@ describe('Cohort review tests', () => {
     expect(Number(records[2])).toEqual(reviewSetNumberOfParticipants);
 
     // Verify table column names match.
-    const columns = ['Participant ID', 'Date of Birth', 'Deceased', 'Gender', 'Race', 'Ethnicity', 'Status'];
+    const columns = ['Participant ID', 'Date of Birth', 'Deceased', 'Sex at Birth', 'Gender', 'Race', 'Ethnicity', 'Status'];
     const columnNames = await participantsTable.getColumnNames();
     expect(columnNames).toHaveLength(columns.length);
     expect(columnNames.sort()).toEqual(columns.sort());
