@@ -109,12 +109,11 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
         />
         <AppRoute
           path='/workspaces/:ns/:wsid/notebooks'
-          component={() => <React.Fragment><NotebookListPage routeData={{
+          component={() => <NotebookListPage routeData={{
             title: 'View Notebooks',
             helpContentKey: 'notebooks',
             breadcrumb: BreadcrumbType.Workspace
-          }}/>
-          </React.Fragment>}
+          }}/>}
         />
       </ProtectedRoutes>
     </ProtectedRoutes>
