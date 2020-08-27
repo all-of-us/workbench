@@ -169,11 +169,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
               "Bad Request: Cohort Review size must be between %s and %s", 0, MAX_REVIEW_SIZE));
     }
 
-    DbCohort cohort = cohortReviewService.findCohort(cohortId);
     // this validates that the user is in the proper workspace
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+
     DbCohortReview cohortReview;
+    DbCohort cohort = cohortReviewService.findCohort(cohortId);
     try {
       cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
     } catch (NotFoundException nfe) {
