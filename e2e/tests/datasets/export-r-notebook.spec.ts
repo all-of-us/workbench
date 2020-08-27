@@ -1,6 +1,4 @@
 import DataResourceCard, {CardType} from 'app/component/data-resource-card';
-import HelpSidebar from 'app/component/help-sidebar';
-import Button from 'app/element/button';
 import Link from 'app/element/link';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
@@ -10,7 +8,7 @@ import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
 import CohortActionsPage from 'app/page/cohort-actions-page';
 import {Ethnicity} from 'app/page/cohort-search-page';
-import {Language, LinkText} from 'app/text-labels';
+import {Language} from 'app/text-labels';
 
 describe('Create Dataset', () => {
 
@@ -37,14 +35,8 @@ describe('Create Dataset', () => {
     const searchPage = await group1.includeEthnicity();
     await searchPage.addEthnicity([Ethnicity.HispanicOrLatino, Ethnicity.NotHispanicOrLatino]);
 
-    // Click Finish & Review button to open selection list
-    const finishAndReviewButton = await Button.findByName(page, {name: LinkText.FinishAndReview}, searchPage);
-    await finishAndReviewButton.waitUntilEnabled();
-    await finishAndReviewButton.click();
-
-    // Click Save Criteria button in sidebar
-    const helpSidebar = new HelpSidebar(page);
-    await helpSidebar.clickSaveCriteriaButton();
+    // Open selection list and click Save Criteria button
+    await searchPage.viewAndSaveCriteria();
 
     // Check Group 1 Count.
     const group1Count = await group1.getGroupCount();

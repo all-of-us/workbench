@@ -3,6 +3,7 @@ import HelpSidebar from 'app/component/help-sidebar';
 import Modal from 'app/component/modal';
 import SelectMenu from 'app/component/select-menu';
 import Table from 'app/component/table';
+import Button from 'app/element/button';
 import ClrIconLink from 'app/element/clr-icon-link';
 import Textbox from 'app/element/textbox';
 import {centerPoint, dragDrop, waitWhileLoading} from 'utils/test-utils';
@@ -106,6 +107,16 @@ export default class CohortSearchPage extends Modal {
    */
   async clickFinishButton(): Promise<void> {
     return this.clickButton(LinkText.Finish, {waitForClose: true});
+  }
+
+  async viewAndSaveCriteria(): Promise<void> {
+    const finishAndReviewButton = await Button.findByName(this.page, {name: LinkText.FinishAndReview});
+    await finishAndReviewButton.waitUntilEnabled();
+    await finishAndReviewButton.click();
+
+    // Click Save Criteria button in sidebar
+    const helpSidebar = new HelpSidebar(page);
+    await helpSidebar.clickSaveCriteriaButton();
   }
 
   async waitForParticipantResult(): Promise<string> {

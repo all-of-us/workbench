@@ -1,13 +1,13 @@
 import DataResourceCard, {CardType} from 'app/component/data-resource-card';
 import ClrIconLink from 'app/element/clr-icon-link';
 import CohortBuildPage from 'app/page/cohort-build-page';
+import DataPage, {TabLabelAlias} from 'app/page/data-page';
+import DatasetSaveModal from 'app/page/dataset-save-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {EllipsisMenuAction, LinkText} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
-import Button from '../../app/element/button';
-import HelpSidebar from '../../app/component/help-sidebar';
 
 describe('Create Dataset', () => {
 
@@ -89,14 +89,8 @@ describe('Create Dataset', () => {
     const addIcon = await ClrIconLink.findByName(page, {containsText: nameValue, iconShape: 'plus-circle'}, searchPage);
     await addIcon.click();
 
-    // Click Finish & Review button to open selection list
-    const finishAndReviewButton = await Button.findByName(page, {name: LinkText.FinishAndReview}, searchPage);
-    await finishAndReviewButton.waitUntilEnabled();
-    await finishAndReviewButton.click();
-
-    // Click Save Criteria button in sidebar
-    const helpSidebar = new HelpSidebar(page);
-    await helpSidebar.clickSaveCriteriaButton();
+    // Open selection list and click Save Criteria button
+    await searchPage.viewAndSaveCriteria();
     await cohortBuildPage.getTotalCount();
 
     // Save new cohort.
