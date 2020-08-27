@@ -22,6 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
@@ -119,6 +120,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   })
   @MockBean({
     CohortFactory.class,
+    CohortBuilderService.class,
     CohortService.class,
     ConceptSetService.class,
     DataSetService.class,

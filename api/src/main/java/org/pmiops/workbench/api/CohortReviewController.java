@@ -36,8 +36,6 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -46,8 +44,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
-import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
-import org.pmiops.workbench.cdr.model.DbCriteria;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
@@ -72,7 +69,6 @@ import org.pmiops.workbench.model.CohortChartData;
 import org.pmiops.workbench.model.CohortChartDataListResponse;
 import org.pmiops.workbench.model.CohortReviewListResponse;
 import org.pmiops.workbench.model.CohortStatus;
-import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DomainType;
@@ -95,8 +91,6 @@ import org.pmiops.workbench.model.Vocabulary;
 import org.pmiops.workbench.model.VocabularyListResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -117,7 +111,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
           FilterColumns.GENDER.name(),
           FilterColumns.RACE.name());
 
-  private CBCriteriaDao cbCriteriaDao;
+  private CohortBuilderService cohortBuilderService;
   private CohortReviewService cohortReviewService;
   private BigQueryService bigQueryService;
   private CohortQueryBuilder cohortQueryBuilder;
@@ -132,10 +126,10 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
   @Autowired
   CohortReviewController(
-      CBCriteriaDao cbCriteriaDao,
-      CohortReviewService cohortReviewService,
       BigQueryService bigQueryService,
+      CohortBuilderService cohortBuilderService,
       CohortQueryBuilder cohortQueryBuilder,
+      CohortReviewService cohortReviewService,
       ReviewQueryBuilder reviewQueryBuilder,
       UserRecentResourceService userRecentResourceService,
       Provider<DbUser> userProvider,
@@ -143,10 +137,10 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       CohortReviewMapper cohortReviewMapper,
       ParticipantCohortAnnotationMapper participantCohortAnnotationMapper,
       Clock clock) {
-    this.cbCriteriaDao = cbCriteriaDao;
-    this.cohortReviewService = cohortReviewService;
     this.bigQueryService = bigQueryService;
+    this.cohortBuilderService = cohortBuilderService;
     this.cohortQueryBuilder = cohortQueryBuilder;
+    this.cohortReviewService = cohortReviewService;
     this.reviewQueryBuilder = reviewQueryBuilder;
     this.userRecentResourceService = userRecentResourceService;
     this.userProvider = userProvider;
@@ -232,7 +226,10 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         cohortReviewMapper.dbModelToClient(cohortReview, pageRequest);
     responseReview.setParticipantCohortStatuses(
         paginatedPCS.stream()
-            .map(pcs -> participantCohortStatusMapper.dbModelToClient(pcs, getAllDemographicsMap()))
+            .map(
+                pcs ->
+                    participantCohortStatusMapper.dbModelToClient(
+                        pcs, cohortBuilderService.findAllDemographicsMap()))
             .collect(Collectors.toList()));
     return ResponseEntity.ok(responseReview);
   }
@@ -419,7 +416,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         cohortReviewService.findParticipantCohortStatus(review.getCohortReviewId(), participantId);
     return ResponseEntity.ok(
         participantCohortStatusMapper.dbModelToClient(
-            dbParticipantCohortStatus, getAllDemographicsMap()));
+            dbParticipantCohortStatus, cohortBuilderService.findAllDemographicsMap()));
   }
 
   /**
@@ -459,7 +456,10 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         cohortReviewMapper.dbModelToClient(cohortReview, pageRequest);
     responseReview.setParticipantCohortStatuses(
         participantCohortStatuses.stream()
-            .map(pcs -> participantCohortStatusMapper.dbModelToClient(pcs, getAllDemographicsMap()))
+            .map(
+                pcs ->
+                    participantCohortStatusMapper.dbModelToClient(
+                        pcs, cohortBuilderService.findAllDemographicsMap()))
             .collect(Collectors.toList()));
     responseReview.setQueryResultSize(queryResultSize);
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
@@ -625,7 +625,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     return ResponseEntity.ok(
         participantCohortStatusMapper.dbModelToClient(
-            dbParticipantCohortStatus, getAllDemographicsMap()));
+            dbParticipantCohortStatus, cohortBuilderService.findAllDemographicsMap()));
   }
 
   /**
@@ -729,19 +729,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   }
 
   /**
-   * Build a map that contains all gender/race/ethnicity/sex_at_birth names with the concept id as
-   * the key.
-   */
-  private Map<Long, String> getAllDemographicsMap() {
-    return cbCriteriaDao.findAllDemographics().stream()
-        .collect(
-            Collectors.toMap(
-                DbCriteria::getLongConceptId,
-                DbCriteria::getName,
-                (oldValue, newValue) -> oldValue));
-  }
-
-  /**
    * Helper method that converts sortOrder if gender, race or ethnicity.
    *
    * @param pageRequest
@@ -749,29 +736,14 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   private void convertGenderRaceEthnicitySortOrder(PageRequest pageRequest) {
     String sortColumn = pageRequest.getSortColumn();
     String sortName = pageRequest.getSortOrder().name();
-    Sort sort =
-        sortName.equalsIgnoreCase(Direction.ASC.toString())
-            ? new Sort(Direction.ASC, "name")
-            : new Sort(Direction.DESC, "name");
     if (SEX_GENDER_RACE_ETHNICITY_TYPES.contains(sortColumn)) {
       String criteriaSortColumn =
           sortColumn.equals(FilterColumns.SEX_AT_BIRTH.toString())
               ? CriteriaType.SEX.toString()
               : sortColumn;
-      List<DbCriteria> criteriaList =
-          cbCriteriaDao.findByDomainIdAndTypeAndParentIdNotIn(
-              DomainType.PERSON.toString(), criteriaSortColumn, 0L, sort);
-      Map<String, Map<Long, String>> concepts = new HashMap<>();
       List<String> demoList =
-          criteriaList.stream()
-              .map(
-                  c ->
-                      new ConceptIdName()
-                          .conceptId(new Long(c.getConceptId()))
-                          .conceptName(c.getName()))
-              .sorted(Comparator.comparing(ConceptIdName::getConceptName))
-              .map(c -> c.getConceptId().toString())
-              .collect(Collectors.toList());
+          cohortBuilderService.findSortedConceptIdsByDomainIdAndTypeAndParentIdNotIn(
+              DomainType.PERSON.toString(), 0L, criteriaSortColumn, sortName);
       if (!demoList.isEmpty()) {
         pageRequest.setSortColumn(
             "FIELD("
