@@ -29,7 +29,7 @@ const styles = {
   }
 };
 
-export class BreadcrumbData {
+class BreadcrumbData {
   label: string;
   url: string;
 
