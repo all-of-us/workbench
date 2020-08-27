@@ -3604,6 +3604,8 @@ definitions:
         "$ref": "#/definitions/DataAccessLevel"
       archivalStatus:
         "$ref": "#/definitions/ArchivalStatus"
+      hasMicroarrayData:
+        type: boolean
       creationTime:
         type: integer
         format: int64
@@ -3830,6 +3832,10 @@ definitions:
         type: boolean
         default: false
         description: Whether to use the Cohort Builder UI.
+      enableConceptSetSearchV2:
+        type: boolean
+        default: false
+        description: Whether to use new Concept Search.
       enableResearchReviewPrompt:
         type: boolean
         default: false

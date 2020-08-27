@@ -24,5 +24,19 @@
     "numParticipants": 946237,
     "cdrDbName": "cdr",
     "elasticIndexBaseName": "cdr"
+  },
+  {
+    "cdrVersionId": 3,
+    "isDefault": false,
+    "name": "Synthetic Dataset v1 with Microarray",
+    "dataAccessLevel": 1,
+    "bigqueryProject": "fc-aou-cdr-synth-test",
+    "bigqueryDataset": "SR2019q4r3",
+    "microarrayBigqueryDataset": "microarray_data",
+    "creationTime": "2020-08-26 00:09:51Z",
+    "releaseNumber": 1,
+    "numParticipants": 946237,
+    "cdrDbName": "cdr",
+    "elasticIndexBaseName": "cdr"
   }
 ]

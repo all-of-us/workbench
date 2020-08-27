@@ -11,10 +11,10 @@ import org.pmiops.workbench.workspaces.WorkspaceService;
 public interface FirecloudMapper {
 
   ListClusterResponse toApiListClusterResponse(
-      org.pmiops.workbench.notebooks.model.ListClusterResponse leonardoListClusterResponse);
+      org.pmiops.workbench.leonardo.model.ListClusterResponse leonardoListClusterResponse);
 
   default ClusterStatus toApiClusterStatus(
-      org.pmiops.workbench.notebooks.model.ClusterStatus leonardoClusterStatus) {
+      org.pmiops.workbench.leonardo.model.ClusterStatus leonardoClusterStatus) {
     return ClusterStatus.fromValue(leonardoClusterStatus.toString());
   }
 

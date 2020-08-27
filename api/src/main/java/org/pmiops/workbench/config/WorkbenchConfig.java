@@ -259,6 +259,8 @@ public class WorkbenchConfig {
     public boolean enableResearchPurposePrompt;
     // Flag to indicate whether to use the new UI for cohort builder
     public boolean enableCohortBuilderV2;
+    // Flag to indicate whether to use new Concept Set Search
+    public boolean enableConceptSetSearchV2;
     // If true, reporting cron job will write data to configured BigQuery reporting dataset.
     public boolean enableReportingUploadCron;
   }

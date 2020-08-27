@@ -52,6 +52,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
+import org.pmiops.workbench.leonardo.model.ListClusterResponse;
 import org.pmiops.workbench.model.Cluster;
 import org.pmiops.workbench.model.ClusterConfig;
 import org.pmiops.workbench.model.ClusterLocalizeRequest;
@@ -62,7 +63,6 @@ import org.pmiops.workbench.model.ListClusterDeleteRequest;
 import org.pmiops.workbench.model.UpdateClusterConfigRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
-import org.pmiops.workbench.notebooks.model.ListClusterResponse;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
@@ -172,12 +172,12 @@ public class ClusterControllerTest {
   @Autowired ClusterController clusterController;
 
   private DbCdrVersion cdrVersion;
-  private org.pmiops.workbench.notebooks.model.Cluster testFcCluster;
-  private org.pmiops.workbench.notebooks.model.Cluster testFcCluster2;
-  private org.pmiops.workbench.notebooks.model.Cluster testFcClusterDifferentProject;
-  private org.pmiops.workbench.notebooks.model.ListClusterResponse testFcClusterListResponse;
-  private org.pmiops.workbench.notebooks.model.ListClusterResponse testFcClusterListResponse2;
-  private org.pmiops.workbench.notebooks.model.ListClusterResponse
+  private org.pmiops.workbench.leonardo.model.Cluster testFcCluster;
+  private org.pmiops.workbench.leonardo.model.Cluster testFcCluster2;
+  private org.pmiops.workbench.leonardo.model.Cluster testFcClusterDifferentProject;
+  private org.pmiops.workbench.leonardo.model.ListClusterResponse testFcClusterListResponse;
+  private org.pmiops.workbench.leonardo.model.ListClusterResponse testFcClusterListResponse2;
+  private org.pmiops.workbench.leonardo.model.ListClusterResponse
       testFcClusterListResponseDifferentProject;
 
   private Cluster testCluster;
@@ -208,16 +208,16 @@ public class ClusterControllerTest {
     String createdDate = Date.fromYearMonthDay(1988, 12, 26).toString();
 
     testFcCluster =
-        new org.pmiops.workbench.notebooks.model.Cluster()
+        new org.pmiops.workbench.leonardo.model.Cluster()
             .clusterName(getClusterName())
             .googleProject(BILLING_PROJECT_ID)
-            .status(org.pmiops.workbench.notebooks.model.ClusterStatus.DELETING)
+            .status(org.pmiops.workbench.leonardo.model.ClusterStatus.DELETING)
             .createdDate(createdDate);
     testFcClusterListResponse =
-        new org.pmiops.workbench.notebooks.model.ListClusterResponse()
+        new org.pmiops.workbench.leonardo.model.ListClusterResponse()
             .clusterName(getClusterName())
             .googleProject(BILLING_PROJECT_ID)
-            .status(org.pmiops.workbench.notebooks.model.ClusterStatus.RUNNING)
+            .status(org.pmiops.workbench.leonardo.model.ClusterStatus.RUNNING)
             .createdDate(createdDate);
     testCluster =
         new Cluster()
@@ -227,31 +227,31 @@ public class ClusterControllerTest {
             .createdDate(createdDate);
 
     testFcCluster2 =
-        new org.pmiops.workbench.notebooks.model.Cluster()
+        new org.pmiops.workbench.leonardo.model.Cluster()
             .clusterName(EXTRA_CLUSTER_NAME)
             .googleProject(BILLING_PROJECT_ID)
-            .status(org.pmiops.workbench.notebooks.model.ClusterStatus.RUNNING)
+            .status(org.pmiops.workbench.leonardo.model.ClusterStatus.RUNNING)
             .createdDate(createdDate);
 
     testFcClusterListResponse2 =
-        new org.pmiops.workbench.notebooks.model.ListClusterResponse()
+        new org.pmiops.workbench.leonardo.model.ListClusterResponse()
             .clusterName(EXTRA_CLUSTER_NAME)
             .googleProject(BILLING_PROJECT_ID)
-            .status(org.pmiops.workbench.notebooks.model.ClusterStatus.RUNNING)
+            .status(org.pmiops.workbench.leonardo.model.ClusterStatus.RUNNING)
             .createdDate(createdDate);
 
     testFcClusterDifferentProject =
-        new org.pmiops.workbench.notebooks.model.Cluster()
+        new org.pmiops.workbench.leonardo.model.Cluster()
             .clusterName(EXTRA_CLUSTER_NAME_DIFFERENT_PROJECT)
             .googleProject(BILLING_PROJECT_ID_2)
-            .status(org.pmiops.workbench.notebooks.model.ClusterStatus.RUNNING)
+            .status(org.pmiops.workbench.leonardo.model.ClusterStatus.RUNNING)
             .createdDate(createdDate);
 
     testFcClusterListResponseDifferentProject =
-        new org.pmiops.workbench.notebooks.model.ListClusterResponse()
+        new org.pmiops.workbench.leonardo.model.ListClusterResponse()
             .clusterName(EXTRA_CLUSTER_NAME_DIFFERENT_PROJECT)
             .googleProject(BILLING_PROJECT_ID_2)
-            .status(org.pmiops.workbench.notebooks.model.ClusterStatus.RUNNING)
+            .status(org.pmiops.workbench.leonardo.model.ClusterStatus.RUNNING)
             .createdDate(createdDate);
 
     testWorkspace = new DbWorkspace();
