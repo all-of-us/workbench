@@ -335,12 +335,12 @@ const routes: Routes = [
             data: {}
           },
           {
-            path: 'workspaceAudit',
+            path: 'workspace-audit',
             component: AppRouting,
             data: {}
           },
           {
-            path: 'workspaceAudit/:workspaceNamespace',
+            path: 'workspace-audit/:workspaceNamespace',
             component: AppRouting,
             data: {}
           },
