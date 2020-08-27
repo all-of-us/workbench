@@ -577,7 +577,7 @@ paths:
         billing project.'
       operationId: deleteClustersInProject
       tags:
-      - cluster
+      - runtime
       parameters:
       - in: path
         name: billingProjectId
@@ -611,7 +611,7 @@ paths:
         for the given workspace.'
       operationId: getCluster
       tags:
-      - cluster
+      - runtime
       parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       responses:
@@ -630,7 +630,7 @@ paths:
         TODO(RW-3697): Custom cluster creation params should be added as a body param here.
       operationId: createCluster
       tags:
-      - cluster
+      - runtime
       parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       responses:
@@ -648,7 +648,7 @@ paths:
         here.'
       operationId: deleteCluster
       tags:
-      - cluster
+      - runtime
       parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       responses:
@@ -666,9 +666,9 @@ paths:
       description: 'Localizes files to the cluster for the current user and given
         workspace. As a side-effect, JSON workspace environment files will also be
         localized to the cluster.'
-      operationId: localize
+      operationId: deprecatedLocalize
       tags:
-      - cluster
+      - runtime
       consumes:
       - application/json
       parameters:
@@ -1421,7 +1421,7 @@ paths:
         cluster expiration (~2w) or via manual reset. Requires DEVELOPER authority.'
       operationId: updateClusterConfig
       tags:
-      - cluster
+      - runtime
       parameters:
       - in: body
         name: body
@@ -5437,13 +5437,6 @@ definitions:
         description: The cluster associated with a given user and workspace. May be
           empty.
         "$ref": "#/definitions/Cluster"
-  GetRuntimeResponse:
-    type: object
-    properties:
-      runtime:
-        description: The runtime associated with a given user and workspace. May be
-          empty.
-        "$ref": "#/definitions/Runtime"
   CreateClusterResponse:
     type: object
     required:

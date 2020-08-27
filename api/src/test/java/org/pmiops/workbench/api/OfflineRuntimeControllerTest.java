@@ -20,14 +20,13 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.FireCloudConfig;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.AuditInfo;
-import org.pmiops.workbench.leonardo.model.ClusterStatus;
 import org.pmiops.workbench.leonardo.model.GetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.ListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.RuntimeStatus;
 import org.pmiops.workbench.notebooks.NotebooksConfig;
 import org.pmiops.workbench.test.FakeClock;
-import org.pmiops.workbench.utils.ClusterMapperImpl;
-import org.pmiops.workbench.utils.LeonardoMapper;
+import org.pmiops.workbench.utils.mappers.LeonardoMapper;
+import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -45,7 +44,7 @@ public class OfflineRuntimeControllerTest {
   private static final Duration IDLE_MAX_AGE = Duration.ofDays(7);
 
   @TestConfiguration
-  @Import({OfflineRuntimeController.class, ClusterMapperImpl.class})
+  @Import({OfflineRuntimeController.class, LeonardoMapperImpl.class})
   static class Configuration {
 
     @Bean
@@ -132,7 +131,7 @@ public class OfflineRuntimeControllerTest {
     stubRuntimes(ImmutableList.of(runtimeWithAge(MAX_AGE.plusMinutes(5))));
     assertThat(controller.checkRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verify(mockRuntimesApi, never()).deleteRuntime(any(), any(), any());
+    verify(mockRuntimesApi).deleteRuntime(any(), any(), any());
   }
 
   @Test
