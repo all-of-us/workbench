@@ -40,7 +40,6 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperImpl;
-import org.pmiops.workbench.institution.deprecated.InstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.DuaType;
@@ -116,7 +115,6 @@ public class ProfileServiceTest {
     CommonConfig.class,
     CommonMappers.class,
     DemographicSurveyMapperImpl.class,
-    InstitutionalAffiliationMapperImpl.class,
     PageVisitMapperImpl.class,
     ProfileMapperImpl.class,
     ProfileService.class,

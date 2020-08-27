@@ -7,15 +7,12 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -35,7 +32,6 @@ import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbInstitution;
-import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
@@ -227,8 +223,6 @@ public class ProfileService {
 
     user.setLastModifiedTime(now);
 
-    updateInstitutionalAffiliations(updatedProfile, user);
-
     userService.updateUserWithConflictHandling(user);
 
     // FIXME: why not do a getOrCreateAffiliation() here and then update that object & save?
@@ -259,51 +253,9 @@ public class ProfileService {
     // Cleaning steps, which provide non-null fields or apply some cleanup / transformation.
     profile.setDemographicSurvey(
         Optional.ofNullable(profile.getDemographicSurvey()).orElse(new DemographicSurvey()));
-    profile.setInstitutionalAffiliations(
-        Optional.ofNullable(profile.getInstitutionalAffiliations()).orElse(new ArrayList<>()));
     if (profile.getUsername() != null) {
       // We always store the username as all lowercase.
       profile.setUsername(profile.getUsername().toLowerCase());
-    }
-  }
-
-  // Deprecated because it refers to old-style Institutional Affiliations, to be deleted in RW-4362
-  // The new-style equivalent is VerifiedInstitutionalAffiliationMapper.modelToDbWithoutUser()
-  @Deprecated
-  private void updateInstitutionalAffiliations(Profile updatedProfile, DbUser user) {
-    List<DbInstitutionalAffiliation> newAffiliations =
-        updatedProfile.getInstitutionalAffiliations().stream()
-            .map(institutionService::legacyInstitutionToDbInstitution)
-            .collect(Collectors.toList());
-    int i = 0;
-    ListIterator<DbInstitutionalAffiliation> oldAffilations =
-        user.getInstitutionalAffiliations().listIterator();
-    boolean shouldAdd = false;
-    if (newAffiliations.size() == 0) {
-      shouldAdd = true;
-    }
-    for (DbInstitutionalAffiliation affiliation : newAffiliations) {
-      affiliation.setOrderIndex(i);
-      affiliation.setUser(user);
-      if (oldAffilations.hasNext()) {
-        DbInstitutionalAffiliation oldAffilation = oldAffilations.next();
-        if (!oldAffilation.getRole().equals(affiliation.getRole())
-            || !oldAffilation.getInstitution().equals(affiliation.getInstitution())) {
-          shouldAdd = true;
-        }
-      } else {
-        shouldAdd = true;
-      }
-      i++;
-    }
-    if (oldAffilations.hasNext()) {
-      shouldAdd = true;
-    }
-    if (shouldAdd) {
-      user.clearInstitutionalAffiliations();
-      for (DbInstitutionalAffiliation affiliation : newAffiliations) {
-        user.addInstitutionalAffiliation(affiliation);
-      }
     }
   }
 
