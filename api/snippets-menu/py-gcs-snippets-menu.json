@@ -3,19 +3,19 @@
   "sub-menu": [
     {
       "name": "Documentation",
-      "external-link": "https://github.com/all-of-us/workbench-snippets"
+      "external-link": "https://aousupporthelp.zendesk.com/hc/en-us/articles/360039856791-How-to-use-code-snippets-in-Jupyter-Notebooks"
     },
     "---",
     {
-      "name": "(1) Setup",
-      "snippet": "import os\nimport subprocess\nimport numpy as np\nimport pandas as pd\n\n\n"
+      "snippet": "import os\nimport subprocess\nimport numpy as np\nimport pandas as pd\n\n\n",
+      "name": "(1) Setup"
     },
     {
       "name": "(2) List objects in Workspace Bucket",
       "sub-menu": [
         {
-          "name": "list_objects_in_bucket.py",
-          "snippet": "# This snippet assumes that you run setup first\n\n# This code lists objects in your Google Bucket\n\n# Get the bucket name\nmy_bucket = os.getenv('WORKSPACE_BUCKET')\n\n# List objects in the bucket\nprint(subprocess.check_output(f\"gsutil ls {my_bucket}\", shell=True).decode('utf-8'))\n\n\n"
+          "snippet": "# This snippet assumes that you run setup first\n\n# This code lists objects in your Google Bucket\n\n# Get the bucket name\nmy_bucket = os.getenv('WORKSPACE_BUCKET')\n\n# List objects in the bucket\nprint(subprocess.check_output(f\"gsutil ls -r {my_bucket}\", shell=True).decode('utf-8'))\n\n\n",
+          "name": "list_objects_in_bucket.py"
         }
       ]
     },
@@ -23,12 +23,21 @@
       "name": "(3) Copy file to or from Workspace Bucket",
       "sub-menu": [
         {
-          "name": "copy_data_to_workspace_bucket.py",
-          "snippet": "# This snippet assumes you run setup first\n\n# This code saves your dataframe into a csv file in a \"data\" folder in Google Bucket\n\n# Replace df with THE NAME OF YOUR DATAFRAME\nmy_dataframe = df   \n\n# Replace 'test.csv' with THE NAME of the file you're going to store in the bucket (don't delete the quotation marks)\ndestination_filename = 'test.csv'\n\n########################################################################\n##\n################# DON'T CHANGE FROM HERE ###############################\n##\n########################################################################\n\n# save dataframe in a csv file in the same workspace as the notebook\nmy_dataframe.to_csv(destination_filename, index=False)\n\n# get the bucket name\nmy_bucket = os.getenv('WORKSPACE_BUCKET')\n\n# copy csv file to the bucket\nos.system(f\"gsutil cp './{destination_filename}' '{my_bucket}/data/'\")\nprint(f'[INFO] {destination_filename} is successfully uploaded in your bucket.')\n"
+          "snippet": "# This snippet assumes you run setup first\n\n# This code saves your dataframe into a csv file in a \"data\" folder in Google Bucket\n\n# Replace df with THE NAME OF YOUR DATAFRAME\nmy_dataframe = df   \n\n# Replace 'test.csv' with THE NAME of the file you're going to store in the bucket (don't delete the quotation marks)\ndestination_filename = 'test.csv'\n\n########################################################################\n##\n################# DON'T CHANGE FROM HERE ###############################\n##\n########################################################################\n\n# save dataframe in a csv file in the same workspace as the notebook\nmy_dataframe.to_csv(destination_filename, index=False)\n\n# get the bucket name\nmy_bucket = os.getenv('WORKSPACE_BUCKET')\n\n# copy csv file to the bucket\nos.system(f\"gsutil cp './{destination_filename}' '{my_bucket}/data/'\")\nprint(f'[INFO] {destination_filename} is successfully uploaded in your bucket.')\n",
+          "name": "copy_data_to_workspace_bucket.py"
         },
         {
-          "name": "copy_file_from_workspace_bucket.py",
-          "snippet": "# This snippet assumes you run setup first\n\n# This code copies file in your Google Bucket and loads it into a dataframe\n\n# Replace 'test.csv' with THE NAME of the file you're going to download from the bucket (don't delete the quotation marks)\nname_of_file_in_bucket = 'test.csv'\n\n########################################################################\n##\n################# DON'T CHANGE FROM HERE ###############################\n##\n########################################################################\n\n# get the bucket name\nmy_bucket = os.getenv('WORKSPACE_BUCKET')\n\n# copy csv file from the bucket to the current working space\nos.system(f\"gsutil cp '{my_bucket}/data/{name_of_file_in_bucket}' .\")\n\nprint(f'[INFO] {name_of_file_in_bucket} is successfully downloaded into your working space')\n# save dataframe in a csv file in the same workspace as the notebook\nmy_dataframe = pd.read_csv(name_of_file_in_bucket)\nmy_dataframe.head()\n"
+          "snippet": "# This snippet assumes you run setup first\n\n# This code copies file in your Google Bucket and loads it into a dataframe\n\n# Replace 'test.csv' with THE NAME of the file you're going to download from the bucket (don't delete the quotation marks)\nname_of_file_in_bucket = 'test.csv'\n\n########################################################################\n##\n################# DON'T CHANGE FROM HERE ###############################\n##\n########################################################################\n\n# get the bucket name\nmy_bucket = os.getenv('WORKSPACE_BUCKET')\n\n# copy csv file from the bucket to the current working space\nos.system(f\"gsutil cp '{my_bucket}/data/{name_of_file_in_bucket}' .\")\n\nprint(f'[INFO] {name_of_file_in_bucket} is successfully downloaded into your working space')\n# save dataframe in a csv file in the same workspace as the notebook\nmy_dataframe = pd.read_csv(name_of_file_in_bucket)\nmy_dataframe.head()\n",
+          "name": "copy_file_from_workspace_bucket.py"
+        }
+      ]
+    },
+    {
+      "name": "(4) Interact with HTML snapshots in the Workspace Bucket",
+      "sub-menu": [
+        {
+          "snippet": "from terra_widgets.html_snapshots import display_html_snapshots_widget\n# You may see some 'FutureWarning' messages emitted by Tensorflow and numpy. These are\n# safe to ignore and will go away the next time the base image updates its package versions.\n\n# This will display a user interface to interact with HTML snapshots stored in the workspace bucket.\ndisplay_html_snapshots_widget()\n",
+          "name": "interact_with_html_snapshots.py"
         }
       ]
     }
