@@ -107,6 +107,7 @@
     "useNewShibbolethService": true,
     "enableResearchPurposePrompt": false,
     "enableCohortBuilderV2": false,
+    "enableConceptSetSearchV2": false,
     "enableReportingUploadCron": false
   },
   "actionAudit": {
