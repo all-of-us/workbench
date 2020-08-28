@@ -1,6 +1,5 @@
 import {NgModule} from '@angular/core';
 import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
-import { AppRouter } from 'app/components/app-router';
 
 import {AppRouting} from './app-routing';
 import {RegistrationGuard} from './guards/registration-guard.service';
@@ -36,7 +35,6 @@ import {DisabledGuard} from './guards/disabled-guard.service';
 import {WorkspaceGuard} from './guards/workspace-guard.service';
 import {AdminInstitutionComponent} from './pages/admin/admin-institution';
 import {AdminInstitutionEditComponent} from './pages/admin/admin-institution-edit';
-import {InteractiveNotebookComponent} from './pages/analysis/interactive-notebook';
 import {BreadcrumbType, NavStore} from './utils/navigation';
 
 
