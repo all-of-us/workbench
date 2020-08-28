@@ -5,10 +5,10 @@ import {registerApiClient as registerApiClientNotebooks} from 'app/services/note
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, queryParamsStore, serverConfigStore, urlParamsStore, userProfileStore} from 'app/utils/navigation';
 import {Kernels} from 'app/utils/notebook-kernels';
-import {RuntimeApi, ClusterStatus, WorkspaceAccessLevel} from 'generated/fetch';
+import {RuntimeApi, RuntimeStatus, WorkspaceAccessLevel} from 'generated/fetch';
 import {ClusterApi as NotebooksClusterApi, JupyterApi, NotebooksApi} from 'notebooks-generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {ClusterApiStub} from 'testing/stubs/cluster-api-stub';
+import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {JupyterApiStub} from 'testing/stubs/jupyter-api-stub';
 import {NotebooksApiStub} from 'testing/stubs/notebooks-api-stub';
 import {NotebooksClusterApiStub} from 'testing/stubs/notebooks-cluster-api-stub';
@@ -26,7 +26,7 @@ describe('NotebookRedirect', () => {
   const reload = jest.fn();
   const updateCache = jest.fn();
 
-  let clusterStub: ClusterApiStub;
+  let runtimeStub: RuntimeApiStub;
 
   const mountedComponent = () => {
     return mount(<NotebookRedirect/>);
@@ -46,10 +46,10 @@ describe('NotebookRedirect', () => {
   }
 
   beforeEach(() => {
-    clusterStub = new ClusterApiStub();
-    clusterStub.cluster.status = ClusterStatus.Creating;
+    runtimeStub = new RuntimeApiStub();
+    runtimeStub.runtime.status = RuntimeStatus.Creating;
 
-    registerApiClient(RuntimeApi, clusterStub);
+    registerApiClient(RuntimeApi, runtimeStub);
     registerApiClientNotebooks(JupyterApi, new JupyterApiStub());
     registerApiClientNotebooks(NotebooksApi, new NotebooksApiStub());
     registerApiClientNotebooks(NotebooksClusterApi, new NotebooksClusterApiStub());
@@ -86,11 +86,11 @@ describe('NotebookRedirect', () => {
     expect(wrapper.exists('[data-test-id="notebook-redirect"]')).toBeTruthy();
   });
 
-  it('should be "Initializing" until a Creating cluster for an existing notebook is running', async() => {
+  it('should be "Initializing" until a Creating runtime for an existing notebook is running', async() => {
     const wrapper = mountedComponent();
 
     wrapper.setState({creatingNewNotebook: false});
-    clusterStub.cluster.status = ClusterStatus.Creating;
+    runtimeStub.runtime.status = RuntimeStatus.Creating;
     await awaitTickAndTimers(wrapper);
 
     expect(wrapper
@@ -99,7 +99,7 @@ describe('NotebookRedirect', () => {
     expect(currentCardText(wrapper))
       .toContain(progressStrings.get(Progress.Initializing));
 
-    clusterStub.cluster.status = ClusterStatus.Running;
+    runtimeStub.runtime.status = RuntimeStatus.Running;
     await awaitTickAndTimers(wrapper);
 
     expect(wrapper
@@ -109,11 +109,11 @@ describe('NotebookRedirect', () => {
       .toContain(progressStrings.get(Progress.Redirecting));
   });
 
-  it('should be "Initializing" until a Creating cluster for a new notebook is running', async() => {
+  it('should be "Initializing" until a Creating runtime for a new notebook is running', async() => {
     const wrapper = mountedComponent();
 
     wrapper.setState({creatingNewNotebook: true});
-    clusterStub.cluster.status = ClusterStatus.Creating;
+    runtimeStub.runtime.status = RuntimeStatus.Creating;
     await awaitTickAndTimers(wrapper);
 
     expect(wrapper
@@ -122,7 +122,7 @@ describe('NotebookRedirect', () => {
     expect(currentCardText(wrapper))
       .toContain(progressStrings.get(Progress.Initializing));
 
-    clusterStub.cluster.status = ClusterStatus.Running;
+    runtimeStub.runtime.status = RuntimeStatus.Running;
     await awaitTickAndTimers(wrapper);
 
     expect(wrapper
@@ -132,11 +132,11 @@ describe('NotebookRedirect', () => {
       .toContain(progressStrings.get(Progress.Redirecting));
   });
 
-  it('should be "Resuming" until a Stopped cluster for an existing notebook is running', async() => {
+  it('should be "Resuming" until a Stopped runtime for an existing notebook is running', async() => {
     const wrapper = mountedComponent();
 
     wrapper.setState({creatingNewNotebook: false});
-    clusterStub.cluster.status = ClusterStatus.Stopped;
+    runtimeStub.runtime.status = RuntimeStatus.Stopped;
     await awaitTickAndTimers(wrapper);
 
     expect(wrapper
@@ -145,7 +145,7 @@ describe('NotebookRedirect', () => {
     expect(currentCardText(wrapper))
       .toContain(progressStrings.get(Progress.Resuming));
 
-    clusterStub.cluster.status = ClusterStatus.Running;
+    runtimeStub.runtime.status = RuntimeStatus.Running;
     await awaitTickAndTimers(wrapper);
 
     expect(wrapper
@@ -155,11 +155,11 @@ describe('NotebookRedirect', () => {
       .toContain(progressStrings.get(Progress.Redirecting));
   });
 
-  it('should be "Resuming" until a Stopped cluster for a new notebook is running', async() => {
+  it('should be "Resuming" until a Stopped runtime for a new notebook is running', async() => {
     const wrapper = mountedComponent();
 
     wrapper.setState({creatingNewNotebook: true});
-    clusterStub.cluster.status = ClusterStatus.Stopped;
+    runtimeStub.runtime.status = RuntimeStatus.Stopped;
     await awaitTickAndTimers(wrapper);
 
     expect(wrapper
@@ -168,7 +168,7 @@ describe('NotebookRedirect', () => {
     expect(currentCardText(wrapper))
       .toContain(progressStrings.get(Progress.Resuming));
 
-    clusterStub.cluster.status = ClusterStatus.Running;
+    runtimeStub.runtime.status = RuntimeStatus.Running;
     await awaitTickAndTimers(wrapper);
 
     expect(wrapper
@@ -178,11 +178,11 @@ describe('NotebookRedirect', () => {
       .toContain(progressStrings.get(Progress.Redirecting));
   });
 
-  it('should be "Redirecting" when the cluster is initially Running for an existing notebook', async() => {
+  it('should be "Redirecting" when the runtime is initially Running for an existing notebook', async() => {
     const wrapper = mountedComponent();
 
     wrapper.setState({creatingNewNotebook: false});
-    clusterStub.cluster.status = ClusterStatus.Running;
+    runtimeStub.runtime.status = RuntimeStatus.Running;
     await awaitTickAndTimers(wrapper);
 
     expect(wrapper
@@ -193,11 +193,11 @@ describe('NotebookRedirect', () => {
   });
 
 
-  it('should be "Redirecting" when the cluster is initially Running for a new notebook', async() => {
+  it('should be "Redirecting" when the runtime is initially Running for a new notebook', async() => {
     const wrapper = mountedComponent();
 
     wrapper.setState({creatingNewNotebook: true});
-    clusterStub.cluster.status = ClusterStatus.Running;
+    runtimeStub.runtime.status = RuntimeStatus.Running;
     await awaitTickAndTimers(wrapper);
 
     expect(wrapper

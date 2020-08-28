@@ -9,7 +9,7 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Error as ErrorDiv} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {clusterApi, workspaceAdminApi} from 'app/services/swagger-fetch-clients';
+import {runtimeApi, workspaceAdminApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, UrlParamsProps, withUrlParams} from 'app/utils';
 import {
@@ -18,7 +18,7 @@ import {
 } from 'app/utils/research-purpose';
 import {
   CloudStorageTraffic,
-  ListClusterResponse, WorkspaceAdminView,
+  ListRuntimeResponse, WorkspaceAdminView,
 } from 'generated/fetch';
 import {ReactFragment} from 'react';
 
@@ -43,8 +43,8 @@ interface State {
   workspaceDetails?: WorkspaceAdminView;
   cloudStorageTraffic?: CloudStorageTraffic;
   loadingData?: boolean;
-  clusterToDelete?: ListClusterResponse;
-  confirmDeleteCluster?: boolean;
+  runtimeToDelete?: ListRuntimeResponse;
+  confirmDeleteRuntime?: boolean;
   dataLoadError?: Response;
 }
 
@@ -171,26 +171,26 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
     </div>;
   }
 
-  private async deleteCluster() {
-    await clusterApi().deleteClustersInProject(
+  private async deleteRuntime() {
+    await runtimeApi().deleteRuntimesInProject(
       this.props.urlParams.workspaceNamespace,
-      {clustersToDelete: [this.state.clusterToDelete.clusterName]});
-    this.setState({clusterToDelete: null});
+      {runtimesToDelete: [this.state.runtimeToDelete.runtimeName]});
+    this.setState({runtimeToDelete: null});
     await this.getFederatedWorkspaceInformation();
   }
 
-  private cancelDeleteCluster() {
+  private cancelDeleteRuntime() {
     this.setState({
-      confirmDeleteCluster: false,
-      clusterToDelete: null
+      confirmDeleteRuntime: false,
+      runtimeToDelete: null
     });
   }
 
   render() {
     const {
       cloudStorageTraffic,
-      clusterToDelete,
-      confirmDeleteCluster,
+      runtimeToDelete,
+      confirmDeleteRuntime,
       loadingData,
       dataLoadError,
       workspaceDetails: {collaborators, resources, workspace},
@@ -327,31 +327,31 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
         </div>
       }
 
-      {resources && resources.clusters.length === 0 && <div>
-        <h2>Clusters</h2>
-        <p>No active clusters exist for this workspace.</p>
+      {resources && resources.runtimes.length === 0 && <div>
+        <h2>Runtimes</h2>
+        <p>No active runtimes exist for this workspace.</p>
       </div>
       }
-      {resources && resources.clusters.length > 0 && <div>
-        <h2>Clusters</h2>
+      {resources && resources.runtimes.length > 0 && <div>
+        <h2>Runtimes</h2>
         <FlexColumn>
           <FlexRow>
-            <PurpleLabel style={styles.narrowWithMargin}>Cluster Name</PurpleLabel>
+            <PurpleLabel style={styles.narrowWithMargin}>Runtime Name</PurpleLabel>
             <PurpleLabel style={styles.narrowWithMargin}>Google Project</PurpleLabel>
             <PurpleLabel style={styles.narrowWithMargin}>Created Time</PurpleLabel>
             <PurpleLabel style={styles.narrowWithMargin}>Last Accessed Time</PurpleLabel>
             <PurpleLabel style={styles.narrowWithMargin}>Status</PurpleLabel>
           </FlexRow>
-          {resources.clusters.map((cluster, i) =>
+          {resources.runtimes.map((runtime, i) =>
               <FlexRow key={i}>
-                <div style={styles.narrowWithMargin}>{cluster.clusterName}</div>
-                <div style={styles.narrowWithMargin}>{cluster.googleProject}</div>
-                <div style={styles.narrowWithMargin}>{new Date(cluster.createdDate).toDateString()}</div>
-                <div style={styles.narrowWithMargin}>{new Date(cluster.dateAccessed).toDateString()}</div>
-                <div style={styles.narrowWithMargin}>{cluster.status}</div>
+                <div style={styles.narrowWithMargin}>{runtime.runtimeName}</div>
+                <div style={styles.narrowWithMargin}>{runtime.googleProject}</div>
+                <div style={styles.narrowWithMargin}>{new Date(runtime.createdDate).toDateString()}</div>
+                <div style={styles.narrowWithMargin}>{new Date(runtime.dateAccessed).toDateString()}</div>
+                <div style={styles.narrowWithMargin}>{runtime.status}</div>
                 <Button onClick={() =>
-                  this.setState({clusterToDelete: cluster, confirmDeleteCluster: true})}
-                  disabled={clusterToDelete && clusterToDelete.clusterName === cluster.clusterName}>
+                  this.setState({runtimeToDelete: runtime, confirmDeleteRuntime: true})}
+                  disabled={runtimeToDelete && runtimeToDelete.runtimeName === runtime.runtimeName}>
                   Delete
                 </Button>
               </FlexRow>
@@ -359,20 +359,20 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
         </FlexColumn>
       </div>
       }
-      {confirmDeleteCluster &&
-        <Modal onRequestClose={() => this.cancelDeleteCluster()}>
-          <ModalTitle>Delete Cluster</ModalTitle>
+      {confirmDeleteRuntime &&
+        <Modal onRequestClose={() => this.cancelDeleteRuntime()}>
+          <ModalTitle>Delete Runtime</ModalTitle>
           <ModalBody>
-            This will immediately delete the given cluster. This will disrupt the user's work
+            This will immediately delete the given runtime. This will disrupt the user's work
             and may cause data loss.<br/><br/><b>Are you sure?</b>
           </ModalBody>
           <ModalFooter>
             <Button type='secondary'
-                    onClick={() => this.cancelDeleteCluster()}>Cancel</Button>
+                    onClick={() => this.cancelDeleteRuntime()}>Cancel</Button>
             <Button style={{marginLeft: '0.5rem'}}
                     onClick={() => {
-                      this.setState({confirmDeleteCluster: false});
-                      this.deleteCluster();
+                      this.setState({confirmDeleteRuntime: false});
+                      this.deleteRuntime();
                     }}
             >Delete</Button>
           </ModalFooter>
