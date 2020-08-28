@@ -3,8 +3,7 @@
 # This file has been modified to workaround issues described here:
 # https://docs.google.com/document/d/1LritSTszh1IICKSaSNFe1o_ElXtjdnNbXvzWyauhhT0/edit#
 #   - unroll allOf usages into their child models
-#   - GetRuntimeResponse fixed to reference RuntimeConfig
-#   - ListRuntimeResponse fixed to reference RuntimeConfig
+#   - oneOf runtimeConfig properties replaced with opaque object types
 #
 # TODO(calbach): Temporary hacks to remove:
 #   - added stagingBucket back to the Cluster schema
@@ -2207,7 +2206,8 @@ components:
         auditInfo:
           $ref: "#/components/schemas/AuditInfo"
         runtimeConfig:
-          $ref: "#/components/schemas/RuntimeConfig"
+          type: object
+          description: oneOf GceConfig, GceWithPdConfig, MachineConfig
         proxyUrl:
           type: string
           description: The URL to access a tool on the runtime
@@ -2367,7 +2367,8 @@ components:
           type: string
           description: The Google Project used to create the runtime
         runtimeConfig:
-          $ref: "#/components/schemas/RuntimeConfig"
+          type: object
+          description: oneOf GceConfig, GceWithPdConfig, MachineConfig
         auditInfo:
           $ref: "#/components/schemas/AuditInfo"
         proxyUrl:
@@ -2656,12 +2657,8 @@ components:
             script at this URI do not affect the cluster. Timestamped logs for this script can be
             found in the Leo staging bucket for the cluster. Script is run as root and docker --privileged.
         runtimeConfig:
-          oneOf:
-            - $ref: "#/components/schemas/GceConfig"
-            - $ref: "#/components/schemas/GceWithPdConfig"
-            - $ref: "#/components/schemas/MachineConfig"
-          discriminator:
-            propertyName: cloudService
+          type: object
+          description: oneOf GceConfig, GceWithPdConfig, MachineConfig
         autopause:
           type: boolean
           description: Whether autopause feature is enabled for this specific cluster. If
@@ -2771,11 +2768,8 @@ components:
       type: object
       properties:
         runtimeConfig:
-          oneOf:
-            - $ref: "#/components/schemas/UpdateGceConfig"
-            - $ref: "#/components/schemas/UpdateDataprocConfig"
-          discriminator:
-            propertyName: cloudService
+          type: object
+          description: oneOf GceConfig, GceWithPdConfig, MachineConfig
         allowStop:
           type: boolean
           description: Whether leo should stop the runtime if it is necessary for the

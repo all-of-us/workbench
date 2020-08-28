@@ -2,7 +2,11 @@ package org.pmiops.workbench.utils.mappers;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.pmiops.workbench.leonardo.model.GetRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoCluster;
+import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoListClusterResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.Cluster;
 import org.pmiops.workbench.model.ClusterLocalizeRequest;
 import org.pmiops.workbench.model.ClusterLocalizeResponse;
@@ -18,47 +22,43 @@ import org.pmiops.workbench.model.RuntimeStatus;
 public interface LeonardoMapper {
   @Mapping(target = "internalId", source = "id")
   @Mapping(target = "jupyterUserScriptUri", ignore = true)
-  org.pmiops.workbench.leonardo.model.ListClusterResponse toListClusterResponse(
-      org.pmiops.workbench.leonardo.model.Cluster cluster);
+  LeonardoListClusterResponse toListClusterResponse(LeonardoCluster cluster);
 
   @Mapping(target = "patchInProgress", ignore = true)
-  org.pmiops.workbench.leonardo.model.ListRuntimeResponse toListRuntimeResponse(
-      GetRuntimeResponse runtime);
+  LeonardoListRuntimeResponse toListRuntimeResponse(LeonardoGetRuntimeResponse runtime);
 
   @Mapping(target = "clusterName", source = "runtimeName")
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
   ListClusterResponse toApiListClusterResponse(
-      org.pmiops.workbench.leonardo.model.ListRuntimeResponse leonardoListRuntimeResponse);
+      LeonardoListRuntimeResponse leonardoListRuntimeResponse);
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
   ListRuntimeResponse toApiListRuntimeResponse(
-      org.pmiops.workbench.leonardo.model.ListRuntimeResponse leonardoListRuntimeResponse);
+      LeonardoListRuntimeResponse leonardoListRuntimeResponse);
 
   @Mapping(target = "clusterName", source = "runtimeName")
   @Mapping(target = "clusterNamespace", source = "googleProject")
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
-  Cluster toApiCluster(GetRuntimeResponse runtime);
+  Cluster toApiCluster(LeonardoGetRuntimeResponse runtime);
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
-  Runtime toApiRuntime(GetRuntimeResponse runtime);
+  Runtime toApiRuntime(LeonardoGetRuntimeResponse runtime);
 
   RuntimeLocalizeRequest clusterToRuntimeLocalizeRequest(ClusterLocalizeRequest req);
 
   @Mapping(target = "clusterLocalDirectory", source = "runtimeLocalDirectory")
   ClusterLocalizeResponse runtimeToClusterLocalizeResponse(RuntimeLocalizeResponse resp);
 
-  default ClusterStatus toApiClusterStatus(
-      org.pmiops.workbench.leonardo.model.RuntimeStatus leonardoRuntimeStatus) {
+  default ClusterStatus toApiClusterStatus(LeonardoRuntimeStatus leonardoRuntimeStatus) {
     if (leonardoRuntimeStatus == null) {
       return ClusterStatus.UNKNOWN;
     }
     return ClusterStatus.fromValue(leonardoRuntimeStatus.toString());
   }
 
-  default RuntimeStatus toApiRuntimeStatus(
-      org.pmiops.workbench.leonardo.model.RuntimeStatus leonardoRuntimeStatus) {
+  default RuntimeStatus toApiRuntimeStatus(LeonardoRuntimeStatus leonardoRuntimeStatus) {
     if (leonardoRuntimeStatus == null) {
       return RuntimeStatus.UNKNOWN;
     }

@@ -12,9 +12,9 @@ import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
-import org.pmiops.workbench.leonardo.model.GetRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.ListRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.RuntimeStatus;
+import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.notebooks.NotebooksConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -73,7 +73,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     final Duration idleMaxAge = Duration.ofDays(config.firecloud.clusterIdleMaxAgeDays);
 
     final RuntimesApi runtimesApi = runtimesApiProvider.get();
-    final List<ListRuntimeResponse> listRuntimeResponses;
+    final List<LeonardoListRuntimeResponse> listRuntimeResponses;
     try {
       listRuntimeResponses = runtimesApi.listRuntimes(null, false);
     } catch (ApiException e) {
@@ -84,10 +84,10 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     int idles = 0;
     int activeDeletes = 0;
     int unusedDeletes = 0;
-    for (ListRuntimeResponse listRuntimeResponse : listRuntimeResponses) {
+    for (LeonardoListRuntimeResponse listRuntimeResponse : listRuntimeResponses) {
       final String runtimeId =
           listRuntimeResponse.getGoogleProject() + "/" + listRuntimeResponse.getRuntimeName();
-      final GetRuntimeResponse runtime;
+      final LeonardoGetRuntimeResponse runtime;
       try {
         // Refetch the cluster to ensure freshness as this iteration may take
         // some time.
@@ -99,12 +99,13 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
         errors++;
         continue;
       }
-      if (RuntimeStatus.UNKNOWN.equals(runtime.getStatus()) || runtime.getStatus() == null) {
+      if (LeonardoRuntimeStatus.UNKNOWN.equals(runtime.getStatus())
+          || runtime.getStatus() == null) {
         log.warning(String.format("unknown runtime status for runtime '%s'", runtimeId));
         continue;
       }
-      if (!RuntimeStatus.RUNNING.equals(runtime.getStatus())
-          && !RuntimeStatus.STOPPED.equals(runtime.getStatus())) {
+      if (!LeonardoRuntimeStatus.RUNNING.equals(runtime.getStatus())
+          && !LeonardoRuntimeStatus.STOPPED.equals(runtime.getStatus())) {
         // For now, we only handle running or stopped (suspended) clusters.
         continue;
       }
@@ -120,7 +121,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
       if (age.toMillis() > maxAge.toMillis()) {
         log.info(
             String.format(
-                "deleting cluster '%s', exceeded max lifetime @ %s (>%s)",
+                "deleting runtime '%s', exceeded max lifetime @ %s (>%s)",
                 runtimeId, formatDuration(age), formatDuration(maxAge)));
         activeDeletes++;
       } else if (isIdle && age.toMillis() > idleMaxAge.toMillis()) {

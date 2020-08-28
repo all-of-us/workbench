@@ -1868,7 +1868,7 @@ end
 
 Common.register_command({
   :invocation => "describe-runtime",
-  :description => "Describe all runtime in this environment",
+  :description => "Describe a given leonardo runtime",
   :fn => ->(*args) { describe_runtime("describe-runtime", *args) }
 })
 

@@ -3,8 +3,8 @@ package org.pmiops.workbench.notebooks;
 import java.util.List;
 import java.util.Map;
 import org.pmiops.workbench.exceptions.WorkbenchException;
-import org.pmiops.workbench.leonardo.model.GetRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.ListRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.notebooks.model.StorageLink;
 
 /**
@@ -13,7 +13,7 @@ import org.pmiops.workbench.notebooks.model.StorageLink;
  */
 public interface LeonardoNotebooksClient {
   /** lists all notebook clusters as the appengine SA, to be used only for admin operations */
-  List<ListRuntimeResponse> listRuntimesByProjectAsService(String googleProject);
+  List<LeonardoListRuntimeResponse> listRuntimesByProjectAsService(String googleProject);
 
   /**
    * Creates a notebooks cluster owned by the current authenticated user.
@@ -33,7 +33,8 @@ public interface LeonardoNotebooksClient {
   void deleteRuntimeAsService(String googleProject, String runtimeName) throws WorkbenchException;
 
   /** Gets information about a notebook runtime */
-  GetRuntimeResponse getRuntime(String googleProject, String runtimeName) throws WorkbenchException;
+  LeonardoGetRuntimeResponse getRuntime(String googleProject, String runtimeName)
+      throws WorkbenchException;
 
   /** Send files over to notebook runtime */
   void localize(String googleProject, String runtimeName, Map<String, String> fileList)

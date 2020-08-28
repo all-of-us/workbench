@@ -186,7 +186,9 @@ swaggerSources {
   captcha swagger2JavaClient("captcha.yaml", "captcha")
   shibboleth swagger2JavaClient("shibboleth.yaml", "shibboleth")
 
-  leonardo swagger3JavaClient("leonardo.yaml", "leonardo")
+  leonardo swagger3JavaClient("leonardo.yaml", "leonardo", [
+    '--model-name-prefix', 'Leonardo'
+  ])
 
   // Workbench needs a special configuration style, as we generate Spring server
   // bindings in this case.

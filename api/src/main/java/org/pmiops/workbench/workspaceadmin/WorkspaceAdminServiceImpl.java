@@ -26,6 +26,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.AdminWorkspaceResources;
@@ -177,7 +178,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         getAdminWorkspaceCloudStorageCounts(
             dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
 
-    final List<org.pmiops.workbench.leonardo.model.ListRuntimeResponse> leoRuntimeResponses =
+    final List<LeonardoListRuntimeResponse> leoRuntimeResponses =
         leonardoNotebooksClient.listRuntimesByProjectAsService(workspaceNamespace);
     final List<ListClusterResponse> workbenchListClusterResponses =
         leoRuntimeResponses.stream()

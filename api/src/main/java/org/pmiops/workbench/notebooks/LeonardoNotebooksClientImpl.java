@@ -20,14 +20,14 @@ import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.api.ServiceInfoApi;
-import org.pmiops.workbench.leonardo.model.CreateRuntimeRequest;
-import org.pmiops.workbench.leonardo.model.GetRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.ListRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.MachineConfig;
-import org.pmiops.workbench.leonardo.model.UserJupyterExtensionConfig;
+import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
+import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
 import org.pmiops.workbench.notebooks.api.NotebooksApi;
 import org.pmiops.workbench.notebooks.model.LocalizationEntry;
 import org.pmiops.workbench.notebooks.model.Localize;
+import org.pmiops.workbench.notebooks.model.MachineConfig;
 import org.pmiops.workbench.notebooks.model.StorageLink;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,7 +76,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     this.workspaceService = workspaceService;
   }
 
-  private CreateRuntimeRequest buildCreateRuntimeRequest(
+  private LeonardoCreateRuntimeRequest buildCreateRuntimeRequest(
       String userEmail,
       @Nullable ClusterConfig clusterOverride,
       Map<String, String> customEnvironmentVariables) {
@@ -96,13 +96,14 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     nbExtensions.put(
         "aou-upload-policy-extension", assetsBaseUrl + "/aou-upload-policy-extension.js");
 
-    return new CreateRuntimeRequest()
+    return new LeonardoCreateRuntimeRequest()
         .labels(ImmutableMap.of(RUNTIME_LABEL_AOU, "true", RUNTIME_LABEL_CREATED_BY, userEmail))
         .defaultClientId(config.server.oauthClientId)
         // Note: Filenames must be kept in sync with files in api/src/main/webapp/static.
         .jupyterUserScriptUri(assetsBaseUrl + "/initialize_notebook_cluster.sh")
         .jupyterStartUserScriptUri(assetsBaseUrl + "/start_notebook_cluster.sh")
-        .userJupyterExtensionConfig(new UserJupyterExtensionConfig().nbExtensions(nbExtensions))
+        .userJupyterExtensionConfig(
+            new LeonardoUserJupyterExtensionConfig().nbExtensions(nbExtensions))
         // Matches Terra UI's scopes, see RW-3531 for rationale.
         .addScopesItem("https://www.googleapis.com/auth/cloud-platform")
         .addScopesItem("https://www.googleapis.com/auth/userinfo.email")
@@ -149,7 +150,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   }
 
   @Override
-  public List<ListRuntimeResponse> listRuntimesByProjectAsService(String googleProject) {
+  public List<LeonardoListRuntimeResponse> listRuntimesByProjectAsService(String googleProject) {
     RuntimesApi runtimesApi = serviceRuntimesApiProvider.get();
     return leonardoRetryHandler.run(
         (context) -> runtimesApi.listRuntimesByProject(googleProject, null, false));
@@ -166,7 +167,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   }
 
   @Override
-  public GetRuntimeResponse getRuntime(String googleProject, String runtimeName) {
+  public LeonardoGetRuntimeResponse getRuntime(String googleProject, String runtimeName) {
     RuntimesApi runtimesApi = runtimesApiProvider.get();
     try {
       return leonardoRetryHandler.runAndThrowChecked(
