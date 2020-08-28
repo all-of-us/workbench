@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 import * as Cookies from 'js-cookie';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -367,11 +366,3 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
     }
   });
 
-@Component({
-  template: '<div #root></div>'
-})
-export class InteractiveNotebookComponent extends ReactWrapperBase {
-  constructor() {
-    super(InteractiveNotebook, []);
-  }
-}
