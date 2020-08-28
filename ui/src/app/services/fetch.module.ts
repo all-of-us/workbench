@@ -10,7 +10,7 @@ import {
 
 import {
   Configuration as LeoConfiguration
-} from 'notebooks-generated';
+} from 'notebooks-generated/fetch';
 
 
 const FETCH_API_REF = 'fetchApi';
