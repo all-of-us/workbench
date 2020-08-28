@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import Iframe from 'react-iframe';
@@ -439,13 +438,4 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       </React.Fragment>;
     }
   });
-
-@Component({
-  template: '<div #root style="height: 100%"></div>'
-})
-export class NotebookRedirectComponent extends ReactWrapperBase {
-  constructor() {
-    super(NotebookRedirect, []);
-  }
-}
 
