@@ -38,7 +38,7 @@ public class CohortReviewMapperTest {
             .cohortId(1L)
             .cohortName("name")
             .cohortReviewId(1L)
-            .creationTime(timestamp.toString())
+            .creationTime(timestamp.getTime())
             .description("descr")
             .etag(Etags.fromVersion(1))
             .lastModifiedTime(timestamp.getTime())
