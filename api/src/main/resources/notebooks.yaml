@@ -23,10 +23,10 @@ produces:
 tags:
   - name: test
     description: Test API
-  - name: cluster
-    description: Clusters API
-  - name: notebooks
-    description: Notebooks API
+  - name: runtime
+    description: Runtimes API
+  - name: proxy
+    description: Notebook proxy API
   - name: jupyter
     description: Jupyter API
 
@@ -47,22 +47,21 @@ securityDefinitions:
       profile: profile authorization
 
 ##########################################################################################
-## PATHS
+## Subset of Leo APIs needed by the frontend. Just leave them here for ease of
+## access. If we want to consolidate these APIs, we can later decide to migrate
+## the Welder and Jupyter spec to OAS3 as well, and move typescript codegen.
 ##########################################################################################
 
-# TODO(calbach): migrate start/stop into new swagger3 spec; currently these are
-# needed by typescript.
-
 paths:
-  '/api/cluster/{googleProject}/{clusterName}/stop':
+
+  /api/google/v1/runtimes/{googleProject}/{name}/stop:
     post:
-      summary: Stops a Dataproc cluster
-      description: |
-        Stops the instances of a Dataproc cluster, but retains any data persisted on disk. The
-        cluster may be restarted with the /start endpoint.
-      operationId: stopCluster
+      summary: Stops a Dataproc cluster or Google Compute Engine instance
+      description: >
+        Stops the running compute, but retains any data persisted on disk. The runtime may be restarted with the /start endpoint.
+      operationId: stopRuntime
       tags:
-        - cluster
+        - runtimes
       parameters:
         - in: path
           name: googleProject
@@ -70,36 +69,40 @@ paths:
           required: true
           type: string
         - in: path
-          name: clusterName
-          description: clusterName
+          name: name
+          description: runtime name
           required: true
           type: string
       responses:
-        '202':
-          description: Cluster stop request accepted
-        '403':
-          description: User does not have permission to perform action on cluster
-        '404':
-          description: Cluster not found
-          schema:
-            $ref: '#/definitions/ErrorReport'
-        '409':
-          description: Cluster cannot be stopped
-          schema:
-            $ref: '#/definitions/ErrorReport'
-        '500':
+        "202":
+          description: Runtime stop request accepted
+        "403":
+          description: User does not have permission to perform action on runtime
+        "404":
+          description: Runtime not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorReport"
+        "409":
+          description: Runtime cannot be stopped
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorReport"
+        "500":
           description: Internal Error
-          schema:
-            $ref: '#/definitions/ErrorReport'
-
-  '/api/cluster/{googleProject}/{clusterName}/start':
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorReport"
+  /api/google/v1/runtimes/{googleProject}/{name}/start:
     post:
-      summary: Starts a Dataproc cluster
-      description: |
-        Starts the instances of a stopped Dataproc cluster.
-      operationId: startCluster
+      summary: Starts a Dataproc cluster or Google Compute Engine instance
+      description: Starts the a stopped runtime
+      operationId: startRuntime
       tags:
-        - cluster
+        - runtimes
       parameters:
         - in: path
           name: googleProject
@@ -107,38 +110,48 @@ paths:
           required: true
           type: string
         - in: path
-          name: clusterName
-          description: clusterName
+          name: name
+          description: runtimeName
           required: true
           type: string
       responses:
-        '202':
-          description: Cluster start request accepted
-        '403':
-          description: User does not have permission to perform action on cluster
-        '404':
-          description: Cluster not found
-          schema:
-            $ref: '#/definitions/ErrorReport'
-        '409':
-          description: Cluster cannot be started
-          schema:
-            $ref: '#/definitions/ErrorReport'
-        '500':
+        "202":
+          description: Runtime start request accepted
+        "403":
+          description: User does not have permission to perform action on runtime
+        "404":
+          description: Runtime not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorReport"
+        "409":
+          description: Runtime cannot be started
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorReport"
+        "500":
           description: Internal Error
-          schema:
-            $ref: '#/definitions/ErrorReport'
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorReport"
 
-  '/notebooks/{googleProject}/{clusterName}/setCookie':
+  "/proxy/{googleProject}/{clusterName}/setCookie":
     get:
-      summary: (Deprecated) Sets a browser cookie needed to authorize connections to a Jupyter notebook
-      description: |
-        If using Google token-based authorization to a Jupyter notebook, the Leo proxy accepts a
+      summary: Sets a browser cookie needed to authorize connections to a Dataproc
+        cluster
+      description: >
+        If using Google token-based authorization to a cluster, the Leo proxy
+        accepts a
+
         Google token passed as a cookie value. This endpoint facilitates setting that cookie.
+
         It accepts a bearer token in an Authorization header and responds with a Set-Cookie header.
       operationId: setCookie
       tags:
-        - notebooks
+        - proxy
       parameters:
         - in: path
           name: googleProject
@@ -150,38 +163,49 @@ paths:
           required: true
           type: string
       responses:
-        '204':
+        "204":
           description: Successfully set a cookie
-        '401':
+        "401":
           description: Proxy connection unauthorized
-          schema:
-            $ref: '#/definitions/ErrorReport'
-        '404':
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorReport"
+        "404":
           description: Cluster not found
-          schema:
-            $ref: '#/definitions/ErrorReport'
-        '500':
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorReport"
+        "500":
           description: Internal Error
-          schema:
-            $ref: '#/definitions/ErrorReport'
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorReport"
 
-  '/notebooks/invalidateToken':
+  /proxy/invalidateToken:
     get:
-      summary: (Deprecated) Invalidates a token
-      description: |
-        If using Google token-based auth, call this endpoint when a user's Google token is invalidated
+      summary: Invalidates a token
+      description: >
+        If using Google token-based auth, call this endpoint when a user's
+        Google token is invalidated
+
         (e.g. when logging out of the application). This ensures that the token is also invalidated in Leo
-        and that the user's proxied notebook connections stop working.
+
+        and that the user's proxied connections stop working.
       operationId: invalidateToken
       tags:
-        - notebooks
+        - proxy
       responses:
-        '200':
+        "200":
           description: Successfully invalidated a token
-        '500':
+        "500":
           description: Internal Error
-          schema:
-            $ref: '#/definitions/ErrorReport'
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorReport"
 
 ##########################################################################################
 ## Subset of the Welder API

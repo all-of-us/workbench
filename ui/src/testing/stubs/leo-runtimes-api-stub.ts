@@ -1,7 +1,7 @@
-import {ClusterApi} from 'notebooks-generated/fetch';
+import {RuntimesApi} from 'notebooks-generated/fetch';
 
 
-export class NotebooksClusterApiStub extends ClusterApi {
+export class LeoRuntimesApiStub extends RuntimesApi {
 
   constructor() {
     super(undefined, undefined, (..._: any[]) => {
@@ -9,7 +9,7 @@ export class NotebooksClusterApiStub extends ClusterApi {
     });
   }
 
-  public startCluster(googleProject: string, clusterName: string,
+  public startRuntime(googleProject: string, runtimeName: string,
     extraHttpRequestParams?: any): Promise<Response> {
     return new Promise<Response>(resolve => {
       resolve(new Response());

@@ -12,7 +12,7 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {Spinner} from 'app/components/spinners';
 import {NotebookIcon} from 'app/icons/notebook-icon';
 import {ReminderIcon} from 'app/icons/reminder';
-import {jupyterApi, notebooksApi} from 'app/services/notebooks-swagger-fetch-clients';
+import {jupyterApi, proxyApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
@@ -275,7 +275,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
     }
 
     private async initializeNotebookCookies(c: Runtime) {
-      return await this.runtimeRetry(() => notebooksApi().setCookie(c.googleProject, c.runtimeName, {
+      return await this.runtimeRetry(() => proxyApi().setCookie(c.googleProject, c.runtimeName, {
         withCredentials: true,
         crossDomain: true,
         credentials: 'include',

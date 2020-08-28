@@ -1,4 +1,4 @@
-import {notebooksClusterApi} from 'app/services/notebooks-swagger-fetch-clients';
+import {leoRuntimesApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import {isAbortError, reportError} from 'app/utils/errors';
 import {Runtime, RuntimeStatus} from 'generated/fetch';
@@ -183,8 +183,7 @@ export class LeoRuntimeInitializer {
       throw new ExceededActionCountError(
         `Reached max runtime resume count (${this.maxResumeCount})`, this.currentRuntime);
     }
-    // TODO(calbach): Convert this usage to the new OAS3 Leo API.
-    await notebooksClusterApi().startCluster(
+    await leoRuntimesApi().startRuntime(
       this.currentRuntime.googleProject, this.currentRuntime.runtimeName, {signal: this.abortSignal});
     this.resumeCount++;
   }
