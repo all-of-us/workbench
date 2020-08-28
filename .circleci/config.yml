@@ -586,6 +586,9 @@ jobs:
         default: "integration"
         type: enum
         enum: ["integration", "nightly-integration"]
+      parallel_num:
+        type: integer
+        default: 1
     <<: *defaults
     environment:
       <<: *e2e_env
@@ -594,7 +597,7 @@ jobs:
       CI: true
       NODE_ENV: development
     working_directory: ~/workbench
-    parallelism: 3
+    parallelism: << parameters.parallel_num >>
     steps:
       - checkout_init_git
       - browser-tools/install-browser-tools:
@@ -647,6 +650,7 @@ workflows:
             - ui-unit-test
       # On master branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully.
       - puppeteer-e2e-test:
+          parallel_num: 4
           filters: *filter_only_master_branch
           requires:
             - api-deploy-to-test
@@ -687,6 +691,7 @@ workflows:
             - ui-unit-test
       # Not ready until delete workspace script is working
       # - puppeteer-e2e-test:
+          # parallel_num: 4
           # env_name: "staging"
           # filters: *filter_only_release_tags
           # requires:
@@ -704,6 +709,7 @@ workflows:
     jobs:
       - api-bigquery-test
       - puppeteer-e2e-test:
+          parallel_num: 1
           test_mode: "nightly-integration"
           env_name: "test"
 
