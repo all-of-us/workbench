@@ -1,8 +1,9 @@
 import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
-import DataResourceCard from 'app/component/data-resource-card';
+import DataResourceCard, {CardType} from 'app/component/data-resource-card';
 import EllipsisMenu from 'app/component/ellipsis-menu';
 import Modal from 'app/component/modal';
 import ClrIconLink from 'app/element/clr-icon-link';
+import Link from 'app/element/link';
 import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
 import AuthenticatedPage from 'app/page/authenticated-page';
@@ -13,7 +14,6 @@ import {ElementHandle, Page} from 'puppeteer';
 import {makeRandomName} from 'utils/str-utils';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
-import Link from 'app/element/link';
 import CohortActionsPage from './cohort-actions-page';
 import CohortBuildPage from './cohort-build-page';
 import {Visits} from './cohort-criteria-modal';
@@ -106,6 +106,20 @@ export default class DataPage extends AuthenticatedPage {
   }
 
   /**
+   * Export Dataset to notebook thru the Ellipsis menu located inside the Dataset Resource card.
+   * @param {string} datasetName Dataset name.
+   * @param {string} notebookName Notebook name.
+   */
+  async exportToNotebook(datasetName: string, notebookName: string): Promise<void> {
+    const resourceCard = new DataResourceCard(this.page);
+    const datasetCard = await resourceCard.findCard(datasetName, CardType.Dataset);
+    await datasetCard.getEllipsis().clickAction(EllipsisMenuAction.exportToNotebook, {waitForNav: false});
+
+
+    console.log(`Exported Dataset "${datasetName}" to notebook "${notebookName}"`);
+  }
+
+  /**
    * Delete cohort by look up its name using Ellipsis menu.
    * @param {string} cohortName
    */
@@ -139,6 +153,7 @@ export default class DataPage extends AuthenticatedPage {
     await waitWhileLoading(this.page);
 
     console.log(`Deleted Dataset "${datasetName}"`);
+    await this.waitForLoad();
     return modalContentText;
   }
 

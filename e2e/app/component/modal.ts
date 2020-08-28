@@ -7,7 +7,6 @@ import Checkbox from 'app/element/checkbox';
 import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
 import {LinkText} from 'app/text-labels';
 import {getPropValue} from 'utils/element-utils';
-
 import * as fp from 'lodash/fp';
 
 const Selector = {

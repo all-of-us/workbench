@@ -10,10 +10,6 @@ import {waitUntilChanged} from 'utils/element-utils';
 import {waitForPropertyExists} from 'utils/waits-utils';
 import Textarea from 'app/element/textarea';
 
-export const labelAlias = {
-  SeeCodePreview: 'See Code Preview'
-}
-
 export default class DatasetSaveModal extends Modal {
 
   constructor(page: Page) {
@@ -57,14 +53,11 @@ export default class DatasetSaveModal extends Modal {
     }
     await waitWhileLoading(this.page);
 
-    let finishButton: Button;
     if (isUpdate) {
-      finishButton = await this.waitForButton(LinkText.Update);
+      await this.clickButton(LinkText.Update, {waitForClose: true, waitForNav: true});
     } else {
-      finishButton = await this.waitForButton(LinkText.Save);
+      await this.clickButton(LinkText.Save, {waitForClose: true, waitForNav: true});
     }
-    await finishButton.waitUntilEnabled();
-    await finishButton.clickAndWait();
     await waitWhileLoading(this.page);
 
     if (isUpdate) {
@@ -83,7 +76,7 @@ export default class DatasetSaveModal extends Modal {
    */
   async previewCode(): Promise<string> {
     // Click 'See Code Preview' button.
-    const previewButton = await Button.findByName(this.page, {name: 'See Code Preview'}, this);
+    const previewButton = await Button.findByName(this.page, {name: LinkText.SeeCodePreview}, this);
     await previewButton.click();
     await waitUntilChanged(this.page, await previewButton.asElementHandle());
 

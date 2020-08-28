@@ -21,6 +21,7 @@ export enum EllipsisMenuAction {
    RenameDataset = 'Rename Dataset',
    Review = 'Review',
    Share = 'Share',
+   exportToNotebook = 'Export to Notebook',
 }
 
 export enum LinkText {
@@ -47,6 +48,7 @@ export enum LinkText {
    DeleteNotebook = 'Delete Notebook',
    DiscardChanges = 'Discard Changes',
    DuplicateWorkspace = 'Duplicate Workspace',
+   ExportAndOpen = 'Export and Open',
    Finish = 'Finish',
    GoToCopiedConceptSet = 'Go to Copied Concept Set',
    GoToCopiedNotebook = 'Go to Copied Notebook',
@@ -57,6 +59,7 @@ export enum LinkText {
    RenameNotebook = 'Rename Notebook',
    Save = 'Save',
    SaveCohort = 'Save Cohort',
+   SeeCodePreview = 'See Code Preview',
    StayHere = 'Stay Here',
    Submit = 'Submit',
    Update = 'Update',
