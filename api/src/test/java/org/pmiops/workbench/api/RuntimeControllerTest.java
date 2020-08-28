@@ -199,7 +199,7 @@ public class RuntimeControllerTest {
     config.server.apiBaseUrl = API_BASE_URL;
     config.firecloud.registeredDomainName = "";
     config.firecloud.leoRuntimeDefaultMachineType = "n1-standard-4";
-    config.firecloud.leonRuntimeDefaultDiskSizeGb = 50;
+    config.firecloud.leoRuntimeDefaultDiskSizeGb = 50;
     config.access.enableComplianceTraining = true;
 
     user = new DbUser();

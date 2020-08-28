@@ -117,7 +117,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
             new LeonardoMachineConfig()
                 .masterDiskSize(
                     Optional.ofNullable(clusterOverride.masterDiskSize)
-                        .orElse(config.firecloud.leonRuntimeDefaultDiskSizeGb))
+                        .orElse(config.firecloud.leoRuntimeDefaultDiskSizeGb))
                 .masterMachineType(
                     Optional.ofNullable(clusterOverride.machineType)
                         .orElse(config.firecloud.leoRuntimeDefaultMachineType)))

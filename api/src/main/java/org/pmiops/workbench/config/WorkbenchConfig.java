@@ -108,7 +108,7 @@ public class WorkbenchConfig {
     public Integer leoRuntimeMaxAgeDays;
     public Integer leoRuntimeIdleMaxAgeDays;
     public String leoRuntimeDefaultMachineType;
-    public Integer leonRuntimeDefaultDiskSizeGb;
+    public Integer leoRuntimeDefaultDiskSizeGb;
     public String registeredDomainName;
     public String registeredDomainGroup;
     public String leoBaseUrl;
