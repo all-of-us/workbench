@@ -4,7 +4,6 @@ import java.sql.Timestamp;
 import java.util.List;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbParticipantCohortAnnotation;
 import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
@@ -24,19 +23,13 @@ public interface CohortReviewService {
   CohortReview findCohortReview(Long cohortId, Long cdrVersionId);
 
   /** Find the {@link DbCohortReview} for the specified cohortReviewId. */
-  DbCohortReview findCohortReview(Long cohortReviewId);
-
-  /** Find the {@link DbCohortReview} for the specified ns, firecloudName and cohortReviewId */
-  DbCohortReview findCohortReview(String ns, String firecloudName, Long cohortReviewId);
+  CohortReview findCohortReview(Long cohortReviewId);
 
   /** Delete the specified cohort review. */
-  void deleteCohortReview(DbCohortReview cohortReview);
+  void deleteCohortReview(Long cohortReviewId);
 
   /** Find the {@link DbCohortReview} for the specified ns and firecloudName. */
   List<CohortReview> getRequiredWithCohortReviews(String ns, String firecloudName);
-
-  /** Save the specified {@link DbCohortReview}. */
-  DbCohortReview saveCohortReview(DbCohortReview cohortReview);
 
   /** Save the specified {@link CohortReview}. */
   CohortReview saveCohortReview(CohortReview cohortReview, DbUser creator);
@@ -81,11 +74,6 @@ public interface CohortReviewService {
       Long cohortReviewId,
       Long participantId,
       ModifyParticipantCohortAnnotationRequest modifyParticipantCohortAnnotationRequest);
-
-  /**
-   * Find the {@link DbCohortAnnotationDefinition} for the specified cohortAnnotationDefinitionId.
-   */
-  DbCohortAnnotationDefinition findCohortAnnotationDefinition(Long cohortAnnotationDefinitionId);
 
   /**
    * Delete the {@link DbParticipantCohortAnnotation} for the specified annotationId, cohortReviewId

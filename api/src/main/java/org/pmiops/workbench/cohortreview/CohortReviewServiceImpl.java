@@ -109,35 +109,14 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   }
 
   @Override
-  public DbCohortReview findCohortReview(Long cohortReviewId) {
-    DbCohortReview cohortReview = cohortReviewDao.findCohortReviewByCohortReviewId(cohortReviewId);
-
-    if (cohortReview == null) {
-      throw new NotFoundException(
-          String.format(
-              "Not Found: Cohort Review does not exist for cohortReviewId: %s", cohortReviewId));
-    }
-    return cohortReview;
+  public CohortReview findCohortReview(Long cohortReviewId) {
+    DbCohortReview cohortReview = findDbCohortReview(cohortReviewId);
+    return cohortReviewMapper.dbModelToClient(cohortReview);
   }
 
   @Override
-  public DbCohortReview findCohortReview(String ns, String firecloudName, Long cohortReviewId) {
-    DbCohortReview cohortReview =
-        cohortReviewDao.findByNamespaceAndFirecloudNameAndCohortReviewId(
-            ns, firecloudName, cohortReviewId);
-
-    if (cohortReview == null) {
-      throw new NotFoundException(
-          String.format(
-              "Not Found: Cohort Review does not exist for namespace: %s, firecloudName: %s and cohortReviewId: %d",
-              ns, firecloudName, cohortReviewId));
-    }
-    return cohortReview;
-  }
-
-  @Override
-  public void deleteCohortReview(DbCohortReview cohortReview) {
-    cohortReviewDao.delete(cohortReview);
+  public void deleteCohortReview(Long cohortReviewId) {
+    cohortReviewDao.delete(findDbCohortReview(cohortReviewId));
   }
 
   @Override
@@ -153,11 +132,6 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   }
 
   @Override
-  public DbCohortReview saveCohortReview(DbCohortReview cohortReview) {
-    return cohortReviewDao.save(cohortReview);
-  }
-
-  @Override
   public CohortReview saveCohortReview(CohortReview cohortReview, DbUser creator) {
     return cohortReviewMapper.dbModelToClient(
         cohortReviewDao.save(cohortReviewMapper.clientToDbModel(cohortReview, creator)));
@@ -167,13 +141,13 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   @Transactional
   public void saveFullCohortReview(
       CohortReview cohortReview, List<DbParticipantCohortStatus> participantCohortStatuses) {
-    saveCohortReview(cohortReviewMapper.clientToDbModel(cohortReview));
+    cohortReviewDao.save(cohortReviewMapper.clientToDbModel(cohortReview));
     participantCohortStatusDao.saveParticipantCohortStatusesCustom(participantCohortStatuses);
   }
 
   public CohortReview updateCohortReview(
       CohortReview cohortReview, Long cohortReviewId, Timestamp lastModified) {
-    DbCohortReview dbCohortReview = findCohortReview(cohortReviewId);
+    DbCohortReview dbCohortReview = findDbCohortReview(cohortReviewId);
     if (Strings.isNullOrEmpty(cohortReview.getEtag())) {
       throw new ConflictException("missing required update field 'etag'");
     }
@@ -198,10 +172,10 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   @Override
   public ParticipantCohortStatus updateParticipantCohortStatus(
       Long cohortReviewId, Long participantId, CohortStatus status, Timestamp lastModified) {
-    DbCohortReview cohortReview = findCohortReview(cohortReviewId);
-    cohortReview.lastModifiedTime(lastModified);
-    cohortReview.incrementReviewedCount();
-    saveCohortReview(cohortReview);
+    DbCohortReview dbCohortReview = findDbCohortReview(cohortReviewId);
+    dbCohortReview.lastModifiedTime(lastModified);
+    dbCohortReview.incrementReviewedCount();
+    cohortReviewDao.save(dbCohortReview);
 
     DbParticipantCohortStatus dbParticipantCohortStatus =
         participantCohortStatusDao
@@ -257,7 +231,7 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
         participantCohortAnnotationMapper.clientToDbModel(participantCohortAnnotation);
 
     DbCohortAnnotationDefinition dbCohortAnnotationDefinition =
-        findCohortAnnotationDefinition(
+        findDbCohortAnnotationDefinition(
             dbParticipantCohortAnnotation.getCohortAnnotationDefinitionId());
 
     validateParticipantCohortAnnotationAndMutateForSave(
@@ -294,7 +268,7 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
         .annotationValueBoolean(modifyRequest.getAnnotationValueBoolean())
         .annotationValueInteger(modifyRequest.getAnnotationValueInteger());
     DbCohortAnnotationDefinition cohortAnnotationDefinition =
-        findCohortAnnotationDefinition(
+        findDbCohortAnnotationDefinition(
             participantCohortAnnotation.getCohortAnnotationDefinitionId());
 
     validateParticipantCohortAnnotationAndMutateForSave(
@@ -302,21 +276,6 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
 
     return participantCohortAnnotationMapper.dbModelToClient(
         participantCohortAnnotationDao.save(participantCohortAnnotation));
-  }
-
-  @Override
-  public DbCohortAnnotationDefinition findCohortAnnotationDefinition(
-      Long cohortAnnotationDefinitionId) {
-    DbCohortAnnotationDefinition cohortAnnotationDefinition =
-        cohortAnnotationDefinitionDao.findOne(cohortAnnotationDefinitionId);
-
-    if (cohortAnnotationDefinition == null) {
-      throw new NotFoundException(
-          String.format(
-              "Not Found: No cohort annotation definition found for id: %s",
-              cohortAnnotationDefinitionId));
-    }
-    return cohortAnnotationDefinition;
   }
 
   @Override
@@ -343,6 +302,31 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
         .stream()
         .map(participantCohortAnnotationMapper::dbModelToClient)
         .collect(Collectors.toList());
+  }
+
+  private DbCohortAnnotationDefinition findDbCohortAnnotationDefinition(
+      Long cohortAnnotationDefinitionId) {
+    DbCohortAnnotationDefinition cohortAnnotationDefinition =
+        cohortAnnotationDefinitionDao.findOne(cohortAnnotationDefinitionId);
+
+    if (cohortAnnotationDefinition == null) {
+      throw new NotFoundException(
+          String.format(
+              "Not Found: No cohort annotation definition found for id: %s",
+              cohortAnnotationDefinitionId));
+    }
+    return cohortAnnotationDefinition;
+  }
+
+  private DbCohortReview findDbCohortReview(Long cohortReviewId) {
+    DbCohortReview cohortReview = cohortReviewDao.findCohortReviewByCohortReviewId(cohortReviewId);
+
+    if (cohortReview == null) {
+      throw new NotFoundException(
+          String.format(
+              "Not Found: Cohort Review does not exist for cohortReviewId: %s", cohortReviewId));
+    }
+    return cohortReview;
   }
 
   private void validateParticipantCohortAnnotationNotExists(

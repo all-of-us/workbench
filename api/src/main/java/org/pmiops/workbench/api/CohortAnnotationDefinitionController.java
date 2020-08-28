@@ -8,10 +8,8 @@ import javax.persistence.OptimisticLockException;
 import org.pmiops.workbench.cohortreview.AnnotationQueryBuilder;
 import org.pmiops.workbench.cohortreview.CohortAnnotationDefinitionService;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
-import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.model.CohortAnnotationDefinitionListResponse;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -134,11 +132,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
   }
 
   private void validateCohortExist(long cohortId) {
-    DbCohort cohort = cohortReviewService.findCohort(cohortId);
-    if (cohort == null) {
-      throw new NotFoundException(
-          String.format("Not Found: No Cohort exists for cohortId: %s", cohortId));
-    }
+    cohortReviewService.findCohort(cohortId);
   }
 
   private CohortAnnotationDefinition save(CohortAnnotationDefinition cohortAnnotationDefinition) {

@@ -3,7 +3,7 @@ package org.pmiops.workbench.cohortbuilder;
 import static org.pmiops.workbench.model.FilterColumns.ETHNICITY;
 import static org.pmiops.workbench.model.FilterColumns.GENDER;
 import static org.pmiops.workbench.model.FilterColumns.RACE;
-import static org.pmiops.workbench.model.FilterColumns.SEX_AT_BIRTH;
+import static org.pmiops.workbench.model.FilterColumns.SEXATBIRTH;
 
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
@@ -281,7 +281,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         .genderList(buildConceptIdNameList(criteriaList, GENDER))
         .raceList(buildConceptIdNameList(criteriaList, RACE))
         .ethnicityList(buildConceptIdNameList(criteriaList, ETHNICITY))
-        .sexAtBirthList(buildConceptIdNameList(criteriaList, SEX_AT_BIRTH));
+        .sexAtBirthList(buildConceptIdNameList(criteriaList, SEXATBIRTH));
   }
 
   @Override

@@ -6609,7 +6609,7 @@ definitions:
     - BIRTHDATE
     - RACE
     - ETHNICITY
-    - SEX_AT_BIRTH
+    - SEXATBIRTH
     - DECEASED
     - START_DATETIME
     - STANDARD_CODE

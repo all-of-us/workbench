@@ -49,7 +49,6 @@ import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.cohortreview.util.ParticipantCohortStatusDbInfo;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
 import org.pmiops.workbench.db.model.DbParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.DbStorageEnums;
@@ -99,7 +98,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   public static final Integer DEFAULT_LIMIT = 5;
   public static final List<String> SEX_GENDER_RACE_ETHNICITY_TYPES =
       ImmutableList.of(
-          FilterColumns.SEX_AT_BIRTH.name(),
+          FilterColumns.SEXATBIRTH.name(),
           FilterColumns.ETHNICITY.name(),
           FilterColumns.GENDER.name(),
           FilterColumns.RACE.name());
@@ -238,9 +237,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
-    DbCohortReview dbCohortReview =
-        cohortReviewService.findCohortReview(workspaceNamespace, workspaceId, cohortReviewId);
-    cohortReviewService.deleteCohortReview(dbCohortReview);
+    cohortReviewService.deleteCohortReview(cohortReviewId);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -277,7 +274,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
               MIN_LIMIT, MAX_LIMIT));
     }
 
-    DbCohortReview cohortReview = cohortReviewService.findCohortReview(cohortReviewId);
+    CohortReview cohortReview = cohortReviewService.findCohortReview(cohortReviewId);
     DbCohort cohort = cohortReviewService.findCohort(cohortReview.getCohortId());
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
@@ -622,7 +619,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     String sortName = pageRequest.getSortOrder().name();
     if (SEX_GENDER_RACE_ETHNICITY_TYPES.contains(sortColumn)) {
       String criteriaSortColumn =
-          sortColumn.equals(FilterColumns.SEX_AT_BIRTH.toString())
+          sortColumn.equals(FilterColumns.SEXATBIRTH.name())
               ? CriteriaType.SEX.toString()
               : sortColumn;
       List<String> demoList =
