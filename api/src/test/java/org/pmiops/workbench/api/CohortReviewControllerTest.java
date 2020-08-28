@@ -534,35 +534,6 @@ public class CohortReviewControllerTest {
   }
 
   @Test
-  public void createCohortReviewNoMatchingWorkspaceException() {
-    String badWorkspaceName = WORKSPACE_NAME + "bad";
-    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
-        .thenReturn(workspace);
-
-    stubBigQueryCohortCalls();
-
-    try {
-      cohortReviewController
-          .createCohortReview(
-              WORKSPACE_NAMESPACE,
-              badWorkspaceName,
-              cohortWithoutReview.getCohortId(),
-              cdrVersion.getCdrVersionId(),
-              new CreateReviewRequest().size(1))
-          .getBody();
-      fail("Should have thrown NotFoundException!");
-    } catch (NotFoundException nfe) {
-      assertEquals(
-          "Not Found: No workspace matching workspaceNamespace: "
-              + WORKSPACE_NAMESPACE
-              + ", workspaceId: "
-              + badWorkspaceName,
-          nfe.getMessage());
-    }
-  }
-
-  @Test
   public void updateCohortReview() {
     when(workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
