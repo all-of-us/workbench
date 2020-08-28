@@ -12,15 +12,15 @@ import org.pmiops.workbench.notebooks.model.StorageLink;
  * for internal use.
  */
 public interface LeonardoNotebooksClient {
-  /** lists all notebook clusters as the appengine SA, to be used only for admin operations */
+  /** lists all notebook runtimes as the appengine SA, to be used only for admin operations */
   List<LeonardoListRuntimeResponse> listRuntimesByProjectAsService(String googleProject);
 
   /**
-   * Creates a notebooks cluster owned by the current authenticated user.
+   * Creates a notebooks runtime owned by the current authenticated user.
    *
    * @param googleProject the google project that will be used for this notebooks runtime
    * @param runtimeName the user assigned/auto-generated name for this notebooks runtime
-   * @param workspaceFirecloudName the firecloudName of the workspace this cluster is associated
+   * @param workspaceFirecloudName the firecloudName of the workspace this runtime is associated
    *     with
    */
   void createRuntime(String googleProject, String runtimeName, String workspaceFirecloudName)
