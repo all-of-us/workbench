@@ -86,11 +86,13 @@ export default class NotebookPage extends AuthenticatedPage {
   async waitForKernelIdle(timeOut?: number): Promise<void> {
     const idleIconSelector = `${CssSelector.kernelIcon}.kernel_idle_icon`;
     const notifSelector = '#notification_kernel';
+    const mathJaxMessage = '#MathJax_Message'; // py library loading in background
     const frame = await this.getIFrame();
     try {
       await Promise.all([
         frame.waitForSelector(idleIconSelector, {visible: true, timeout: timeOut}),
         frame.waitForSelector(notifSelector, {hidden: true, timeout: timeOut}),
+        frame.waitForSelector(mathJaxMessage, {hidden: true, timeout: timeOut}),
       ]);
     } catch (e) {
       console.error(`Notebook kernel is: ${await this.kernelStatus()}`);
@@ -142,14 +144,14 @@ export default class NotebookPage extends AuthenticatedPage {
   /**
    * Click Run button in toolbar. Run focused code cell and insert a new code cell below.
    *
-   * @param {number} cellIndex Code Cell index. (first index is 1)
+   * @param {number} cellIndex Code Cell index. (first index is 1). Use -1 to find last cell.
    * @param {string} code The code to run.
    * @param {string} codeFile The full path to file that contains code to run.
    * @param {number} timeOut The timeout time in milliseconds.
    * @returns {string} Run output.
    */
   async runCodeCell(cellIndex: number, opts: { code?: string, codeFile?: string, timeOut?: number } = {}): Promise<string> {
-    const cell = await this.findCell(cellIndex)
+    const cell = cellIndex === -1 ? await this.findLastCell() : await this.findCell(cellIndex);
     const cellInput = await cell.focus();
     if (opts.code !== undefined) {
       await cellInput.type(opts.code);

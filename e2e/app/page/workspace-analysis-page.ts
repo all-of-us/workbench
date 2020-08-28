@@ -9,6 +9,7 @@ import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
 import {getPropValue} from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
+import CopyModal from 'app/component/copy-modal';
 import NotebookPage from './notebook-page';
 
 const PageTitle = 'View Notebooks';
@@ -36,13 +37,13 @@ export default class WorkspaceAnalysisPage extends AuthenticatedPage {
     * Delete notebook thru Ellipsis menu located inside the Notebook resource card.
     * @param {string} notebookName
     */
-  async deleteNotebook(notebookName: string): Promise<string> {
+  async deleteNotebook(notebookName: string): Promise<string[]> {
     const resourceCard = await DataResourceCard.findCard(this.page, notebookName);
     const menu = resourceCard.getEllipsis();
     await menu.clickAction(EllipsisMenuAction.Delete, {waitForNav: false});
 
     const modal = new Modal(this.page);
-    const modalContentText = await modal.getContent();
+    const modalContentText = await modal.getTextContent();
     await modal.clickButton(LinkText.DeleteNotebook, {waitForClose: true});
     await waitWhileLoading(this.page);
 
@@ -66,16 +67,19 @@ export default class WorkspaceAnalysisPage extends AuthenticatedPage {
     await modal.waitForLoad();
     await modal.fillInModal(notebookName, language);
 
-    // Log page heading.
-    const pageHeadingXpath = '//*[@data-test-id="notebook-redirect"]/h2';
-    const pageHeading = await this.page.waitForXPath(pageHeadingXpath, {visible: true});
+    // Log notebook page heading.
+    const pageHeadingCss = '[data-test-id="notebook-redirect"] > h2';
+    const pageHeading = await this.page.waitForSelector(pageHeadingCss, {visible: true});
     console.log(await getPropValue<string>(pageHeading, 'textContent'));
+
+    // Log notebook progress text message
+    const progressCss = '[data-test-id="current-progress-card"]';
+    const progressText = await this.page.waitForSelector(progressCss, {visible: true});
+    console.log(await getPropValue<string>(progressText, 'textContent'));
 
     // Wait for existances of important messages.
     const warningTexts = 'You are prohibited from taking screenshots or attempting in any way to remove participant-level data from the workbench.';
     const warningTextsXpath = `//*[contains(normalize-space(text()), "${warningTexts}")]`
-
-    const progressXpath = '//*[@data-test-id="current-progress-card"]';
 
     const authenticateTexts = 'Authenticating with the notebook server';
     const authenticateTextsXpath = `//*[@data-test-id and contains(normalize-space(), "${authenticateTexts}")]`;
@@ -88,7 +92,6 @@ export default class WorkspaceAnalysisPage extends AuthenticatedPage {
 
     await Promise.all([
       this.page.waitForXPath(warningTextsXpath, {visible: true}),
-      this.page.waitForXPath(progressXpath, {visible: true}),
       this.page.waitForXPath(authenticateTextsXpath, {visible: true}),
       this.page.waitForXPath(creatingTextsXpath, {visible: true}),
       this.page.waitForXPath(redirectingTextsXpath, {visible: true}),
@@ -107,12 +110,12 @@ export default class WorkspaceAnalysisPage extends AuthenticatedPage {
     return Link.findByName(this.page, {normalizeSpace: LinkText.CreateNewNotebook});
   }
 
-  async renameNotebook(notebookName: string, newNotebookName: string): Promise<string> {
+  async renameNotebook(notebookName: string, newNotebookName: string): Promise<string[]> {
     const notebookCard = await DataResourceCard.findCard(this.page, notebookName);
     const menu = notebookCard.getEllipsis();
     await menu.clickAction(EllipsisMenuAction.Rename, {waitForNav: false});
     const modal = new Modal(this.page);
-    const modalTextContents = await modal.getContent();
+    const modalTextContents = await modal.getTextContent();
     const newNameInput = new Textbox(this.page, `${modal.getXpath()}//*[@id="new-name"]`);
     await newNameInput.type(newNotebookName);
     await modal.clickButton(LinkText.RenameNotebook, {waitForClose: true});
@@ -132,6 +135,23 @@ export default class WorkspaceAnalysisPage extends AuthenticatedPage {
     await menu.clickAction(EllipsisMenuAction.Duplicate, {waitForNav: false});
     await waitWhileLoading(this.page);
     return `Duplicate of ${notebookName}`; // name of clone notebook
+  }
+
+  /**
+   * Copy notebook to another Workspace using Ellipsis menu in Workspace Analysis page.
+   * @param {string} notebookName The notebook name to clone from.
+   * @param {string} destinationWorkspace Copy To Workspace.
+   * @param {string} destinationNotebookName New notebook book.
+   */
+  async copyNotebookToWorkspace(notebookName: string, destinationWorkspace: string, destinationNotebookName?: string): Promise<void> {
+    // Open Copy modal.s
+    const resourceCard = new DataResourceCard(this.page);
+    const notebookCard = await resourceCard.findCard(notebookName, CardType.Notebook);
+    const ellipsisMenu = notebookCard.getEllipsis();
+    await ellipsisMenu.clickAction(EllipsisMenuAction.CopyToAnotherWorkspace, {waitForNav: false});
+    // Fill out modal fields.
+    const copyModal = await new CopyModal(this.page);
+    await copyModal.copyToAnotherWorkspace(destinationWorkspace, destinationNotebookName);
   }
 
 }

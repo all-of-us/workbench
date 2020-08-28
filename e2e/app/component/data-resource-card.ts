@@ -36,6 +36,7 @@ export default class DataResourceCard {
    * @throws TimeoutError if fails to find Card.
    */
   static async findAllCards(page: Page, timeOut: number = 2000): Promise<DataResourceCard[]> {
+    await waitWhileLoading(page);
     try {
       await page.waitForXPath(DataResourceCardSelector.cardRootXpath, {visible: true, timeout: timeOut});
     } catch (e) {

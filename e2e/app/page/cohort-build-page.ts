@@ -77,7 +77,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
     return cohortName;
   }
 
-  async deleteCohort(): Promise<string> {
+  async deleteCohort(): Promise<string[]> {
     const saveButton = this.getSaveCohortButton();
     await saveButton.waitUntilEnabled();
     await this.getDeleteButton().then(b => b.click());
@@ -88,9 +88,9 @@ export default class CohortBuildPage extends AuthenticatedPage {
    * Click DELETE COHORT button in Cohort Delete Confirmation dialog.
    * @return {string} Dialog textContent.
    */
-  async deleteConfirmationDialog(): Promise<string> {
+  async deleteConfirmationDialog(): Promise<string[]> {
     const modal = new Modal(this.page);
-    const contentText = await modal.getContent();
+    const contentText = await modal.getTextContent();
     await modal.clickButton(LinkText.DeleteCohort, {waitForClose: true});
     await waitWhileLoading(this.page);
     return contentText;
@@ -100,9 +100,9 @@ export default class CohortBuildPage extends AuthenticatedPage {
    * Click DISCARD CHANGES button in Confirmation dialog.
    * @return {string} Dialog textContent.
    */
-  async discardChangesConfirmationDialog(): Promise<string> {
+  async discardChangesConfirmationDialog(): Promise<string[]> {
     const modal = new Modal(this.page);
-    const contentText = await modal.getContent();
+    const contentText = await modal.getTextContent();
     await modal.clickButton(LinkText.DiscardChanges, {waitForNav: true, waitForClose: true});
     await waitWhileLoading(this.page);
     return contentText;

@@ -20,7 +20,7 @@ describe('Editing workspace thru workspace card ellipsis menu', () => {
    * - Verify Workspace Information in ABOUT tab.
    */
   test('User as OWNER can edit workspace', async () => {
-    const workspaceCard = await findWorkspace(page, true);
+    const workspaceCard = await findWorkspace(page, {create: true});
     await (workspaceCard.getEllipsis()).clickAction(EllipsisMenuAction.Edit);
 
     const workspacesPage = new WorkspacesPage(page);
@@ -29,7 +29,6 @@ describe('Editing workspace thru workspace card ellipsis menu', () => {
     const selectedOption = await workspacesPage.selectDataset();
     const datasetSelect = await workspacesPage.getDatasetSelect();
     const selectedValue = await datasetSelect.getOptionValue(selectedOption);
-    console.log(selectedValue);
 
     // Change question #2 answer
     await performActions(page, testData.defaultAnswersResearchPurposeSummary);

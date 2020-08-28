@@ -109,7 +109,7 @@ export default class DataPage extends AuthenticatedPage {
    * Delete cohort by look up its name using Ellipsis menu.
    * @param {string} cohortName
    */
-  async deleteCohort(cohortName: string): Promise<string> {
+  async deleteCohort(cohortName: string): Promise<string[]> {
     const cohortCard = await DataResourceCard.findCard(this.page, cohortName);
     if (cohortCard == null) {
       throw new Error(`Failed to find Cohort: "${cohortName}".`);
@@ -125,7 +125,7 @@ export default class DataPage extends AuthenticatedPage {
    * Delete Dataset thru Ellipsis menu located inside the Dataset Resource card.
    * @param {string} datasetName
    */
-  async deleteDataset(datasetName: string): Promise<string> {
+  async deleteDataset(datasetName: string): Promise<string[]> {
     const datasetCard = await DataResourceCard.findCard(this.page, datasetName);
     if (datasetCard == null) {
       throw new Error(`Failed to find Dataset: "${datasetName}".`);
@@ -134,7 +134,7 @@ export default class DataPage extends AuthenticatedPage {
     await menu.clickAction(EllipsisMenuAction.Delete, {waitForNav: false});
 
     const modal = new Modal(this.page);
-    const modalContentText = await modal.getContent();
+    const modalContentText = await modal.getTextContent();
     await modal.clickButton(LinkText.DeleteDataset, {waitForClose: true});
     await waitWhileLoading(this.page);
 
@@ -169,7 +169,7 @@ export default class DataPage extends AuthenticatedPage {
    * Delete ConceptSet thru Ellipsis menu located inside the Concept Set resource card.
    * @param {string} conceptsetName
    */
-  async deleteConceptSet(conceptsetName: string): Promise<string> {
+  async deleteConceptSet(conceptsetName: string): Promise<string[]> {
     const conceptSetCard = await DataResourceCard.findCard(this.page, conceptsetName);
     if (conceptSetCard == null) {
       throw new Error(`Failed to find Concept Set: "${conceptsetName}".`);
@@ -178,7 +178,7 @@ export default class DataPage extends AuthenticatedPage {
     await menu.clickAction(EllipsisMenuAction.Delete, {waitForNav: false});
 
     const modal = new Modal(this.page);
-    const modalTextContent = await modal.getContent();
+    const modalTextContent = await modal.getTextContent();
     await modal.clickButton(LinkText.DeleteConceptSet, {waitForClose: true});
     await waitWhileLoading(this.page);
 
@@ -191,7 +191,7 @@ export default class DataPage extends AuthenticatedPage {
     const menu = cohortCard.getEllipsis();
     await menu.clickAction(EllipsisMenuAction.Rename, {waitForNav: false});
     const modal = new Modal(this.page);
-    await modal.getContent();
+    await modal.getTextContent();
     const newNameInput = new Textbox(this.page, `${modal.getXpath()}//*[@id="new-name"]`);
     await newNameInput.type(newCohortName);
     const descriptionTextarea = await Textarea.findByName(this.page, {containsText: 'Description:'}, modal);
