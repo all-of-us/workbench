@@ -19,10 +19,10 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.FireCloudConfig;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
-import org.pmiops.workbench.leonardo.model.AuditInfo;
-import org.pmiops.workbench.leonardo.model.GetRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.ListRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.RuntimeStatus;
+import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
+import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.notebooks.NotebooksConfig;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
@@ -77,41 +77,42 @@ public class OfflineRuntimeControllerTest {
     projectIdIndex = 0;
   }
 
-  private GetRuntimeResponse runtimeWithAge(Duration age) {
+  private LeonardoGetRuntimeResponse runtimeWithAge(Duration age) {
     return runtimeWithAgeAndIdle(age, Duration.ZERO);
   }
 
-  private GetRuntimeResponse runtimeWithAgeAndIdle(Duration age, Duration idleTime) {
+  private LeonardoGetRuntimeResponse runtimeWithAgeAndIdle(Duration age, Duration idleTime) {
     // There should only be one cluster per project, so increment an index for
     // each cluster created per test.
-    return new GetRuntimeResponse()
+    return new LeonardoGetRuntimeResponse()
         .runtimeName("all-of-us")
         .googleProject(String.format("proj-%d", projectIdIndex++))
-        .status(RuntimeStatus.RUNNING)
+        .status(LeonardoRuntimeStatus.RUNNING)
         .auditInfo(
-            new AuditInfo()
+            new LeonardoAuditInfo()
                 .createdDate(NOW.minus(age).toString())
                 .dateAccessed(NOW.minus(idleTime).toString()));
   }
 
-  private List<ListRuntimeResponse> toListRuntimeResponseList(List<GetRuntimeResponse> runtimes) {
+  private List<LeonardoListRuntimeResponse> toListRuntimeResponseList(
+      List<LeonardoGetRuntimeResponse> runtimes) {
     return runtimes.stream()
         .map(leonardoMapper::toListRuntimeResponse)
         .collect(Collectors.toList());
   }
 
-  private void stubRuntimes(List<GetRuntimeResponse> runtimes) throws Exception {
+  private void stubRuntimes(List<LeonardoGetRuntimeResponse> runtimes) throws Exception {
     when(mockRuntimesApi.listRuntimes(any(), any()))
         .thenReturn(toListRuntimeResponseList(runtimes));
 
-    for (GetRuntimeResponse runtime : runtimes) {
+    for (LeonardoGetRuntimeResponse runtime : runtimes) {
       when(mockRuntimesApi.getRuntime(runtime.getGoogleProject(), runtime.getRuntimeName()))
           .thenReturn(runtime);
     }
   }
 
   @Test
-  public void testCheckClustersNoResults() throws Exception {
+  public void testCheckRuntimesNoResults() throws Exception {
     stubRuntimes(ImmutableList.of());
     assertThat(controller.checkRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
@@ -119,7 +120,7 @@ public class OfflineRuntimeControllerTest {
   }
 
   @Test
-  public void testCheckClustersActiveCluster() throws Exception {
+  public void testCheckRuntimesActiveRuntime() throws Exception {
     stubRuntimes(ImmutableList.of(runtimeWithAge(Duration.ofHours(10))));
     assertThat(controller.checkRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
@@ -127,7 +128,7 @@ public class OfflineRuntimeControllerTest {
   }
 
   @Test
-  public void testCheckClustersActiveTooOld() throws Exception {
+  public void testCheckRuntimesActiveTooOld() throws Exception {
     stubRuntimes(ImmutableList.of(runtimeWithAge(MAX_AGE.plusMinutes(5))));
     assertThat(controller.checkRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
@@ -135,7 +136,7 @@ public class OfflineRuntimeControllerTest {
   }
 
   @Test
-  public void testCheckClustersIdleYoung() throws Exception {
+  public void testCheckRuntimesIdleYoung() throws Exception {
     // Running for under the IDLE_MAX_AGE, idle for 10 hours
     stubRuntimes(
         ImmutableList.of(
@@ -146,7 +147,7 @@ public class OfflineRuntimeControllerTest {
   }
 
   @Test
-  public void testCheckClustersIdleOld() throws Exception {
+  public void testCheckRuntimesIdleOld() throws Exception {
     // Running for >IDLE_MAX_AGE, idle for 10 hours
     stubRuntimes(
         ImmutableList.of(
@@ -157,7 +158,7 @@ public class OfflineRuntimeControllerTest {
   }
 
   @Test
-  public void testCheckClustersBrieflyIdleOld() throws Exception {
+  public void testCheckRuntimesBrieflyIdleOld() throws Exception {
     // Running for >IDLE_MAX_AGE, idle for only 15 minutes
     stubRuntimes(
         ImmutableList.of(
@@ -168,9 +169,10 @@ public class OfflineRuntimeControllerTest {
   }
 
   @Test
-  public void testCheckClustersOtherStatusFiltered() throws Exception {
+  public void testCheckRuntimesOtherStatusFiltered() throws Exception {
     stubRuntimes(
-        ImmutableList.of(runtimeWithAge(MAX_AGE.plusDays(10)).status(RuntimeStatus.DELETING)));
+        ImmutableList.of(
+            runtimeWithAge(MAX_AGE.plusDays(10)).status(LeonardoRuntimeStatus.DELETING)));
     assertThat(controller.checkRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
     verify(mockRuntimesApi, never()).deleteRuntime(any(), any(), any());

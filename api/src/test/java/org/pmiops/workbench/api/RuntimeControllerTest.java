@@ -52,9 +52,10 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
-import org.pmiops.workbench.leonardo.model.AuditInfo;
-import org.pmiops.workbench.leonardo.model.GetRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.ListRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
+import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.Cluster;
 import org.pmiops.workbench.model.ClusterConfig;
 import org.pmiops.workbench.model.ClusterLocalizeRequest;
@@ -181,13 +182,12 @@ public class RuntimeControllerTest {
   @Autowired RuntimeController runtimeController;
 
   private DbCdrVersion cdrVersion;
-  private GetRuntimeResponse testLeoRuntime;
-  private GetRuntimeResponse testLeoRuntime2;
-  private GetRuntimeResponse testLeoRuntimeDifferentProject;
-  private org.pmiops.workbench.leonardo.model.ListRuntimeResponse testLeoListRuntimeResponse;
-  private org.pmiops.workbench.leonardo.model.ListRuntimeResponse testLeoListRuntimeResponse2;
-  private org.pmiops.workbench.leonardo.model.ListRuntimeResponse
-      testLeoListRuntimeResponseDifferentProject;
+  private LeonardoGetRuntimeResponse testLeoRuntime;
+  private LeonardoGetRuntimeResponse testLeoRuntime2;
+  private LeonardoGetRuntimeResponse testLeoRuntimeDifferentProject;
+  private LeonardoListRuntimeResponse testLeoListRuntimeResponse;
+  private LeonardoListRuntimeResponse testLeoListRuntimeResponse2;
+  private LeonardoListRuntimeResponse testLeoListRuntimeResponseDifferentProject;
 
   private Cluster testCluster;
   private Runtime testRuntime;
@@ -218,16 +218,16 @@ public class RuntimeControllerTest {
     String createdDate = Date.fromYearMonthDay(1988, 12, 26).toString();
 
     testLeoRuntime =
-        new GetRuntimeResponse()
+        new LeonardoGetRuntimeResponse()
             .runtimeName(getRuntimeName())
             .googleProject(BILLING_PROJECT_ID)
-            .status(org.pmiops.workbench.leonardo.model.RuntimeStatus.DELETING)
-            .auditInfo(new AuditInfo().createdDate(createdDate));
+            .status(LeonardoRuntimeStatus.DELETING)
+            .auditInfo(new LeonardoAuditInfo().createdDate(createdDate));
     testLeoListRuntimeResponse =
-        new org.pmiops.workbench.leonardo.model.ListRuntimeResponse()
+        new LeonardoListRuntimeResponse()
             .runtimeName(getRuntimeName())
             .googleProject(BILLING_PROJECT_ID)
-            .status(org.pmiops.workbench.leonardo.model.RuntimeStatus.RUNNING);
+            .status(LeonardoRuntimeStatus.RUNNING);
     testCluster =
         new Cluster()
             .clusterName(getRuntimeName())
@@ -242,30 +242,30 @@ public class RuntimeControllerTest {
             .createdDate(createdDate);
 
     testLeoRuntime2 =
-        new GetRuntimeResponse()
+        new LeonardoGetRuntimeResponse()
             .runtimeName(EXTRA_RUNTIME_NAME)
             .googleProject(BILLING_PROJECT_ID)
-            .status(org.pmiops.workbench.leonardo.model.RuntimeStatus.RUNNING)
-            .auditInfo(new AuditInfo().createdDate(createdDate));
+            .status(LeonardoRuntimeStatus.RUNNING)
+            .auditInfo(new LeonardoAuditInfo().createdDate(createdDate));
 
     testLeoListRuntimeResponse2 =
-        new org.pmiops.workbench.leonardo.model.ListRuntimeResponse()
+        new LeonardoListRuntimeResponse()
             .runtimeName(EXTRA_RUNTIME_NAME)
             .googleProject(BILLING_PROJECT_ID)
-            .status(org.pmiops.workbench.leonardo.model.RuntimeStatus.RUNNING);
+            .status(LeonardoRuntimeStatus.RUNNING);
 
     testLeoRuntimeDifferentProject =
-        new GetRuntimeResponse()
+        new LeonardoGetRuntimeResponse()
             .runtimeName(EXTRA_CLUSTER_NAME_DIFFERENT_PROJECT)
             .googleProject(BILLING_PROJECT_ID_2)
-            .status(org.pmiops.workbench.leonardo.model.RuntimeStatus.RUNNING)
-            .auditInfo(new AuditInfo().createdDate(createdDate));
+            .status(LeonardoRuntimeStatus.RUNNING)
+            .auditInfo(new LeonardoAuditInfo().createdDate(createdDate));
 
     testLeoListRuntimeResponseDifferentProject =
-        new org.pmiops.workbench.leonardo.model.ListRuntimeResponse()
+        new LeonardoListRuntimeResponse()
             .runtimeName(EXTRA_CLUSTER_NAME_DIFFERENT_PROJECT)
             .googleProject(BILLING_PROJECT_ID_2)
-            .status(org.pmiops.workbench.leonardo.model.RuntimeStatus.RUNNING);
+            .status(LeonardoRuntimeStatus.RUNNING);
 
     testWorkspace = new DbWorkspace();
     testWorkspace.setWorkspaceNamespace(WORKSPACE_NS);
@@ -336,7 +336,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testDeleteRuntimesInProject() {
-    List<ListRuntimeResponse> listRuntimeResponseList =
+    List<LeonardoListRuntimeResponse> listRuntimeResponseList =
         ImmutableList.of(testLeoListRuntimeResponse);
     when(mockLeoNotebooksClient.listRuntimesByProjectAsService(BILLING_PROJECT_ID))
         .thenReturn(listRuntimeResponseList);
@@ -351,13 +351,13 @@ public class RuntimeControllerTest {
         .fireDeleteRuntimesInProject(
             BILLING_PROJECT_ID,
             listRuntimeResponseList.stream()
-                .map(ListRuntimeResponse::getRuntimeName)
+                .map(LeonardoListRuntimeResponse::getRuntimeName)
                 .collect(Collectors.toList()));
   }
 
   @Test
   public void testDeleteRuntimesInProject_DeleteSome() {
-    List<ListRuntimeResponse> listRuntimeResponseList =
+    List<LeonardoListRuntimeResponse> listRuntimeResponseList =
         ImmutableList.of(testLeoListRuntimeResponse, testLeoListRuntimeResponse2);
     List<String> runtimesToDelete = ImmutableList.of(testLeoRuntime.getRuntimeName());
     when(mockLeoNotebooksClient.listRuntimesByProjectAsService(BILLING_PROJECT_ID))
@@ -373,7 +373,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testDeleteRuntimesInProject_DeleteDoesNotAffectOtherProjects() {
-    List<ListRuntimeResponse> listRuntimeResponseList =
+    List<LeonardoListRuntimeResponse> listRuntimeResponseList =
         ImmutableList.of(testLeoListRuntimeResponse, testLeoListRuntimeResponse2);
     List<String> runtimesToDelete =
         ImmutableList.of(testLeoRuntimeDifferentProject.getRuntimeName());
@@ -390,7 +390,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testDeleteRuntimesInProject_NoRuntimes() {
-    List<ListRuntimeResponse> listRuntimeResponseList =
+    List<LeonardoListRuntimeResponse> listRuntimeResponseList =
         ImmutableList.of(testLeoListRuntimeResponse);
     when(mockLeoNotebooksClient.listRuntimesByProjectAsService(BILLING_PROJECT_ID))
         .thenReturn(listRuntimeResponseList);
@@ -403,13 +403,13 @@ public class RuntimeControllerTest {
         .fireDeleteRuntimesInProject(
             BILLING_PROJECT_ID,
             listRuntimeResponseList.stream()
-                .map(ListRuntimeResponse::getRuntimeName)
+                .map(LeonardoListRuntimeResponse::getRuntimeName)
                 .collect(Collectors.toList()));
   }
 
   @Test
   public void testDeleteRuntimesInProject_NullRuntimesList() {
-    List<ListRuntimeResponse> listRuntimeResponseList =
+    List<LeonardoListRuntimeResponse> listRuntimeResponseList =
         ImmutableList.of(testLeoListRuntimeResponse);
     when(mockLeoNotebooksClient.listRuntimesByProjectAsService(BILLING_PROJECT_ID))
         .thenReturn(listRuntimeResponseList);
@@ -422,7 +422,7 @@ public class RuntimeControllerTest {
         .fireDeleteRuntimesInProject(
             BILLING_PROJECT_ID,
             listRuntimeResponseList.stream()
-                .map(ListRuntimeResponse::getRuntimeName)
+                .map(LeonardoListRuntimeResponse::getRuntimeName)
                 .collect(Collectors.toList()));
   }
 
@@ -610,7 +610,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testDeleteClustersInProject() {
-    List<ListRuntimeResponse> listRuntimeResponseList =
+    List<LeonardoListRuntimeResponse> listRuntimeResponseList =
         ImmutableList.of(testLeoListRuntimeResponse);
     when(mockLeoNotebooksClient.listRuntimesByProjectAsService(BILLING_PROJECT_ID))
         .thenReturn(listRuntimeResponseList);
@@ -625,13 +625,13 @@ public class RuntimeControllerTest {
         .fireDeleteRuntimesInProject(
             BILLING_PROJECT_ID,
             listRuntimeResponseList.stream()
-                .map(ListRuntimeResponse::getRuntimeName)
+                .map(LeonardoListRuntimeResponse::getRuntimeName)
                 .collect(Collectors.toList()));
   }
 
   @Test
   public void testDeleteClustersInProject_DeleteSome() {
-    List<ListRuntimeResponse> listRuntimeResponseList =
+    List<LeonardoListRuntimeResponse> listRuntimeResponseList =
         ImmutableList.of(testLeoListRuntimeResponse, testLeoListRuntimeResponse2);
     List<String> clustersToDelete = ImmutableList.of(testLeoRuntime.getRuntimeName());
     when(mockLeoNotebooksClient.listRuntimesByProjectAsService(BILLING_PROJECT_ID))
@@ -647,7 +647,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testDeleteClustersInProject_DeleteDoesNotAffectOtherProjects() {
-    List<ListRuntimeResponse> listRuntimeResponseList =
+    List<LeonardoListRuntimeResponse> listRuntimeResponseList =
         ImmutableList.of(testLeoListRuntimeResponse, testLeoListRuntimeResponse2);
     List<String> clustersToDelete =
         ImmutableList.of(testLeoRuntimeDifferentProject.getRuntimeName());
@@ -664,7 +664,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testDeleteClustersInProject_NoClusters() {
-    List<ListRuntimeResponse> listRuntimeResponseList =
+    List<LeonardoListRuntimeResponse> listRuntimeResponseList =
         ImmutableList.of(testLeoListRuntimeResponse);
     when(mockLeoNotebooksClient.listRuntimesByProjectAsService(BILLING_PROJECT_ID))
         .thenReturn(listRuntimeResponseList);
@@ -677,13 +677,13 @@ public class RuntimeControllerTest {
         .fireDeleteRuntimesInProject(
             BILLING_PROJECT_ID,
             listRuntimeResponseList.stream()
-                .map(ListRuntimeResponse::getRuntimeName)
+                .map(LeonardoListRuntimeResponse::getRuntimeName)
                 .collect(Collectors.toList()));
   }
 
   @Test
   public void testDeleteClustersInProject_NullClustersList() {
-    List<ListRuntimeResponse> listRuntimeResponseList =
+    List<LeonardoListRuntimeResponse> listRuntimeResponseList =
         ImmutableList.of(testLeoListRuntimeResponse);
     when(mockLeoNotebooksClient.listRuntimesByProjectAsService(BILLING_PROJECT_ID))
         .thenReturn(listRuntimeResponseList);
@@ -696,7 +696,7 @@ public class RuntimeControllerTest {
         .fireDeleteRuntimesInProject(
             BILLING_PROJECT_ID,
             listRuntimeResponseList.stream()
-                .map(ListRuntimeResponse::getRuntimeName)
+                .map(LeonardoListRuntimeResponse::getRuntimeName)
                 .collect(Collectors.toList()));
   }
 
@@ -861,7 +861,7 @@ public class RuntimeControllerTest {
   }
 
   @Test
-  public void GetCluster_validateActiveBilling() {
+  public void getCluster_validateActiveBilling() {
     doThrow(ForbiddenException.class)
         .when(mockWorkspaceService)
         .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
