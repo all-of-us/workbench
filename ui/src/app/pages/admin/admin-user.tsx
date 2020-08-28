@@ -251,7 +251,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     const defaultsPlusMaybeOverride = new Set(
       // gotcha: argument order for rangeStep is (step, start, end)
       // IntelliJ incorrectly believes takes the order is (start, end, step)
-      fp.rangeStep(CREDIT_LIMIT_DEFAULT_STEP, CREDIT_LIMIT_DEFAULT_MIN, CREDIT_LIMIT_DEFAULT_MAX))
+      fp.rangeStep(CREDIT_LIMIT_DEFAULT_STEP, CREDIT_LIMIT_DEFAULT_MIN, CREDIT_LIMIT_DEFAULT_MAX + 1))
       .add(freeTierDollarQuota);
 
     // gotcha: JS sorts numbers lexicographically by default
