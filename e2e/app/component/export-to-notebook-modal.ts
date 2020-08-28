@@ -29,12 +29,12 @@ export default class ExportToNotebookModal extends Modal {
     return new Textbox(this.page, selector);
   }
 
-  getPythonRadiobutton(): RadioButton {
+  getPythonRadioButton(): RadioButton {
     const selector = `${this.getXpath()}//label[contains(normalize-space(),"Python")]//input[@type="radio"]`;
     return new RadioButton(this.page, selector);
   }
 
-  getRRadiobutton(): RadioButton {
+  getRRadioButton(): RadioButton {
     const selector = `${this.getXpath()}//label[contains(normalize-space(),"R")]//input[@type="radio"]`;
     return new RadioButton(this.page, selector);
   }
@@ -50,13 +50,8 @@ export default class ExportToNotebookModal extends Modal {
   async fillInModal(notebookName: string, language: Language = Language.Python): Promise<void> {
     const notebookNameInput = this.getNotebookNameInput();
     await notebookNameInput.type(notebookName);
-    if (language === Language.Python) {
-      const radio = this.getPythonRadiobutton();
-      await radio.select();
-    } else {
-      const radio = this.getRRadiobutton();
-      await radio.select();
-    }
+    const radio = language === Language.Python ? this.getPythonRadioButton() : this.getRRadioButton();
+    await radio.select();
     return this.clickButton(LinkText.ExportAndOpen, {waitForClose: true});
   }
 

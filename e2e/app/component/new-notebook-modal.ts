@@ -40,13 +40,8 @@ export default class NewNotebookModal extends Modal {
    */
   async fillInModal(notebookName: string, language: Language): Promise<void> {
     await this.name().then( (textbox) => textbox.type(notebookName));
-    if (language === Language.Python) {
-      const radio = this.python3Radiobutton();
-      await radio.select();
-    } else {
-      const radio = this.RRadiobutton();
-      await radio.select();
-    }
+    const radio = language === Language.Python ? this.getPythonRadioButton() : this.getRRadioButton();
+    await radio.select();
     return this.clickButton(LinkText.CreateNotebook, {waitForClose: true, waitForNav: true});
   }
 
@@ -54,12 +49,12 @@ export default class NewNotebookModal extends Modal {
     return Textbox.findByName(this.page, {name: 'Name:'});
   }
 
-  python3Radiobutton(): RadioButton {
+  getPythonRadioButton(): RadioButton {
     const selector = '//*[@role="dialog"]//label[contains(normalize-space(),"Python 3")]//input[@type="radio"]';
     return new RadioButton(this.page, selector);
   }
 
-  RRadiobutton(): RadioButton {
+  getRRadioButton(): RadioButton {
     const selector = '//*[@role="dialog"]//label[contains(normalize-space(),"R")]//input[@type="radio"]';
     return new RadioButton(this.page, selector);
   }
