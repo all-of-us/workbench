@@ -37,20 +37,20 @@ describe('Workspace owner Jupyter notebook action tests', () => {
     const dataPage = new DataPage(page);
 
     // Get the billing project name from page url.
-    let namespace = extractNamespace(new URL(page.url()));
+    const fromWorkspaceNamespace = extractNamespace(new URL(page.url()));
 
-    let notebookPage = await dataPage.createNotebook(copyFromNotebookName);
+    const copyFromNotebookPage = await dataPage.createNotebook(copyFromNotebookName);
 
     // Run code to print out Workspace namespace.
     const code =
        'import os\n' +
        'print(os.getenv(\'WORKSPACE_NAMESPACE\'))';
 
-    let codeOutput = await notebookPage.runCodeCell(1, {code});
-    expect(codeOutput).toEqual(namespace);
+    const codeOutput1 = await copyFromNotebookPage.runCodeCell(1, {code});
+    expect(codeOutput1).toEqual(fromWorkspaceNamespace);
 
     // Exit notebook and returns to the Workspace Analysis tab.
-    const analysisPage = await notebookPage.goAnalysisPage();
+    const analysisPage = await copyFromNotebookPage.goAnalysisPage();
 
     // Copy to destination Workspace and give notebook a new name.
     const copiedNotebookName = makeRandomName('copy-of');
@@ -66,14 +66,14 @@ describe('Workspace owner Jupyter notebook action tests', () => {
     await modal.clickButton(LinkText.StayHere, {waitForClose: true});
 
     // Delete notebook
-    let modalTextContent = await analysisPage.deleteNotebook(copyFromNotebookName);
-    expect(modalTextContent).toContain(`Are you sure you want to delete Notebook: ${copyFromNotebookName}?`);
+    const deleteModalTextContent = await analysisPage.deleteNotebook(copyFromNotebookName);
+    expect(deleteModalTextContent).toContain(`Are you sure you want to delete Notebook: ${copyFromNotebookName}?`);
 
     // Perform actions in copied notebook.
     // Open destination Workspace
     await findWorkspace(page, {workspaceName: toWorkspace}).then(card => card.clickWorkspaceName());
     // Get the destination Workspace namespace.
-    namespace = extractNamespace(new URL(page.url()));
+    const toWorkspaceNamespace = extractNamespace(new URL(page.url()));
 
     // Verify copy-to notebook exists in destination Workspace
     await dataPage.openTab(TabLabelAlias.Analysis);
@@ -85,16 +85,16 @@ describe('Workspace owner Jupyter notebook action tests', () => {
     await notebookCard.clickResourceName();
     const notebookPreviewPage = new NotebookPreviewPage(page);
     await notebookPreviewPage.waitForLoad();
-    notebookPage = await notebookPreviewPage.openEditMode(copiedNotebookName);
+    const copyNotebookPage = await notebookPreviewPage.openEditMode(copiedNotebookName);
 
     // Run same code and compare namespace.
-    codeOutput = await notebookPage.runCodeCell(-1, {code});
-    expect(codeOutput).toEqual(namespace);
+    const codeOutput2 = await copyNotebookPage.runCodeCell(-1, {code});
+    expect(codeOutput2).toEqual(toWorkspaceNamespace);
 
     // Exit notebook. Returns to the Workspace Analysis tab.
-    await notebookPage.goAnalysisPage();
+    await copyNotebookPage.goAnalysisPage();
     // Delete notebook
-    modalTextContent = await analysisPage.deleteNotebook(copiedNotebookName);
+    const modalTextContent = await analysisPage.deleteNotebook(copiedNotebookName);
     expect(modalTextContent).toContain('This will permanently delete the Notebook.');
   })
 

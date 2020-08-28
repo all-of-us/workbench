@@ -1,16 +1,16 @@
+import DataResourceCard, {CardType} from 'app/component/data-resource-card';
+import Modal from 'app/component/modal';
 import Navigation, {NavLink} from 'app/component/navigation';
+import WorkspaceCard from 'app/component/workspace-card';
 import Link from 'app/element/link';
 import DataPage, {TabLabelAlias} from 'app/page/data-page';
+import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import {EllipsisMenuAction, Language, LinkText, WorkspaceAccessLevel} from 'app/text-labels';
 import {config} from 'resources/workbench-config';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn, signInAs, waitWhileLoading} from 'utils/test-utils';
-import WorkspaceCard from 'app/component/workspace-card';
-import DataResourceCard, {CardType} from 'app/component/data-resource-card';
-import Modal from 'app/component/modal';
-import NotebookPreviewPage from 'app/page/notebook-preview-page';
 
 jest.setTimeout(20 * 60 * 1000);
 
@@ -35,7 +35,7 @@ describe('Workspace reader Jupyter notebook action tests', () => {
   test('Workspace reader copy notebook to another workspace', async () => {
     const workspaceName = await findWorkspace(page, {create: true}).then(card => card.clickWorkspaceName());
 
-    let dataPage = new DataPage(page);
+    const dataPage = new DataPage(page);
     const notebookName = makeRandomName('pyAdd');
     let notebook = await dataPage.createNotebook(notebookName, Language.Python);
 
@@ -74,13 +74,11 @@ describe('Workspace reader Jupyter notebook action tests', () => {
 
     // Verify notebook actions list.
     await workspaceCard.clickWorkspaceName();
-    dataPage = new DataPage(newPage);
-    await dataPage.openTab(TabLabelAlias.Analysis);
+    await new DataPage(newPage).openTab(TabLabelAlias.Analysis);
 
     // Notebook actions Rename, Duplicate and Delete actions are disabled.
     const dataResourceCard = new DataResourceCard(newPage);
-    let notebookCard = await dataResourceCard.findCard(notebookName, CardType.Notebook);
-    let menu = notebookCard.getEllipsis();
+    const menu = await dataResourceCard.findCard(notebookName, CardType.Notebook).then(card => card.getEllipsis());
     await menu.clickEllipsis(); // open ellipsis menu.
     expect(await menu.isDisabled(EllipsisMenuAction.Rename)).toBe(true);
     expect(await menu.isDisabled(EllipsisMenuAction.Duplicate)).toBe(true);
@@ -112,17 +110,17 @@ describe('Workspace reader Jupyter notebook action tests', () => {
     expect(linkDisplayed).toBe(true);
 
     // Verify copied notebook exists in collaborator Workspace.
-    notebookCard = await dataResourceCard.findCard(copiedNotebookName, CardType.Notebook);
+    const notebookCard = await dataResourceCard.findCard(copiedNotebookName, CardType.Notebook);
     expect(notebookCard).toBeTruthy();
 
     // Notebook actions Rename, Duplicate, Delete and Copy to another Workspace actions are avaliable to click.
-    menu = notebookCard.getEllipsis();
-    await menu.clickEllipsis();
-    expect(await menu.isDisabled(EllipsisMenuAction.Rename)).toBe(false);
-    expect(await menu.isDisabled(EllipsisMenuAction.Duplicate)).toBe(false);
-    expect(await menu.isDisabled(EllipsisMenuAction.Delete)).toBe(false);
-    expect(await menu.isDisabled(EllipsisMenuAction.CopyToAnotherWorkspace)).toBe(false);
-    await menu.clickEllipsis();
+    const copyNotebookCardMenu = notebookCard.getEllipsis();
+    await copyNotebookCardMenu.clickEllipsis();
+    expect(await copyNotebookCardMenu.isDisabled(EllipsisMenuAction.Rename)).toBe(false);
+    expect(await copyNotebookCardMenu.isDisabled(EllipsisMenuAction.Duplicate)).toBe(false);
+    expect(await copyNotebookCardMenu.isDisabled(EllipsisMenuAction.Delete)).toBe(false);
+    expect(await copyNotebookCardMenu.isDisabled(EllipsisMenuAction.CopyToAnotherWorkspace)).toBe(false);
+    await copyNotebookCardMenu.clickEllipsis(); // close menu
 
     // Open copied notebook, verify original notebook contents unchanged.
     await notebookCard.clickResourceName();

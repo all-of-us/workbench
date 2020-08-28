@@ -37,12 +37,11 @@ export default class Modal extends Container {
     const selector = '//*[@role="dialog"]//div[normalize-space(text()) and not(@role="button")]';
     await this.waitUntilVisible();
     await this.page.waitForXPath(selector, {visible: true});
-    const elements = await this.page.$x(selector);
-    const textContents = [];
-    for (const elem of elements) {
-      textContents.push((await getPropValue<string>(elem, 'textContent')).trim());
-    }
-    return textContents;
+    const elements: ElementHandle[] = await this.page.$x(selector);
+    return fp.flow(
+       fp.map( async (elem: ElementHandle) => (await getPropValue<string>(elem, 'textContent')).trim()),
+       contents => Promise.all(contents)
+    )(elements);
   }
 
   /**

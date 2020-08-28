@@ -151,12 +151,7 @@ export default class NotebookPage extends AuthenticatedPage {
    * @returns {string} Run output.
    */
   async runCodeCell(cellIndex: number, opts: { code?: string, codeFile?: string, timeOut?: number } = {}): Promise<string> {
-    let cell;
-    if (cellIndex === -1) {
-      cell = await this.findLastCell();
-    } else {
-      cell = await this.findCell(cellIndex);
-    }
+    const cell = cellIndex === -1 ? await this.findLastCell() : await this.findCell(cellIndex);
     const cellInput = await cell.focus();
     if (opts.code !== undefined) {
       await cellInput.type(opts.code);
