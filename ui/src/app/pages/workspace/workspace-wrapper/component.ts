@@ -67,7 +67,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // This is allows the react-router conversion to utilize the helpContentKey
+    // This is allows the react-router conversion to utilize various route config properties
     // Once we are fully converted the help sidebar and modals will need to be reworked a bit to eliminate
     // This Angular code
     this.subscriptions.push(routeDataStore.subscribe(({helpContentKey, notebookHelpSidebarStyles}) => {
