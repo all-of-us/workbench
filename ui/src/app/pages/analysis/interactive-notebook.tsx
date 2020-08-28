@@ -11,7 +11,7 @@ import {ConfirmPlaygroundModeModal} from 'app/pages/analysis/confirm-playground-
 import {NotebookInUseModal} from 'app/pages/analysis/notebook-in-use-modal';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withUrlParams} from 'app/utils';
+import {reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {ClusterInitializer} from 'app/utils/cluster-initializer';
 import {navigate, userProfileStore} from 'app/utils/navigation';
