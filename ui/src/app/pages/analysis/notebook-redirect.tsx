@@ -17,7 +17,6 @@ import {clusterApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   reactStyles,
-  ReactWrapperBase,
   withCurrentWorkspace,
   withQueryParams,
   withUserProfile
