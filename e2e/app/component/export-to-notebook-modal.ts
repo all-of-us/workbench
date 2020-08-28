@@ -6,7 +6,6 @@ import {Language, LinkText} from 'app/text-labels';
 import Modal from './modal';
 
 export default class ExportToNotebookModal extends Modal {
-   // data-test-id="notebook-name-input"
 
   constructor(page: Page, xpath?: string) {
     super(page, xpath);
