@@ -32,8 +32,7 @@ describe('Cohort review tests', () => {
     const cohortName = await cohortCard.getResourceName();
     console.log(`Created Cohort: "${cohortName}"`);
 
-    const menu = cohortCard.getEllipsis();
-    await menu.clickAction(EllipsisMenuAction.Review);
+    await cohortCard.clickEllipsisAction(EllipsisMenuAction.Review);
     const modal = new CohortReviewModal(page);
     await modal.fillInNumberOfPartcipants(reviewSetNumberOfParticipants);
     await modal.clickButton(LinkText.CreateSet);

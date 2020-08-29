@@ -21,7 +21,7 @@ describe('Editing workspace thru workspace card ellipsis menu', () => {
    */
   test('User as OWNER can edit workspace', async () => {
     const workspaceCard = await findWorkspace(page, {create: true});
-    await (workspaceCard.getEllipsis()).clickAction(EllipsisMenuAction.Edit);
+    await workspaceCard.clickEllipsisAction(EllipsisMenuAction.Edit);
 
     const workspacesPage = new WorkspacesPage(page);
 

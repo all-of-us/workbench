@@ -34,8 +34,7 @@ export default class ConceptsetPage extends AuthenticatedPage {
   }
 
   async openCopyToWorkspaceModal(conceptName: string): Promise<CopyModal> {
-    const ellipsis = this.getEllipsisMenu(conceptName);
-    await ellipsis.clickAction(EllipsisMenuAction.CopyToAnotherWorkspace, {waitForNav: false});
+    await this.getEllipsisMenu(conceptName).clickAction(EllipsisMenuAction.CopyToAnotherWorkspace, {waitForNav: false});
     return new CopyModal(this.page);
   }
 

@@ -113,9 +113,7 @@ export default class DataPage extends AuthenticatedPage {
   async exportToNotebook(datasetName: string, notebookName: string): Promise<void> {
     const resourceCard = new DataResourceCard(this.page);
     const datasetCard = await resourceCard.findCard(datasetName, CardType.Dataset);
-    await datasetCard.getEllipsis().clickAction(EllipsisMenuAction.exportToNotebook, {waitForNav: false});
-
-
+    await datasetCard.clickEllipsisAction(EllipsisMenuAction.exportToNotebook, {waitForNav: false});
     console.log(`Exported Dataset "${datasetName}" to notebook "${notebookName}"`);
   }
 
@@ -128,8 +126,7 @@ export default class DataPage extends AuthenticatedPage {
     if (cohortCard == null) {
       throw new Error(`Failed to find Cohort: "${cohortName}".`);
     }
-    const menu = cohortCard.getEllipsis();
-    await menu.clickAction(EllipsisMenuAction.Delete, {waitForNav: false});
+    await cohortCard.clickEllipsisAction(EllipsisMenuAction.Delete, {waitForNav: false});
     const modalContent = await (new CohortBuildPage(this.page)).deleteConfirmationDialog();
     console.log(`Deleted Cohort "${cohortName}"`);
     return modalContent;
@@ -144,8 +141,7 @@ export default class DataPage extends AuthenticatedPage {
     if (datasetCard == null) {
       throw new Error(`Failed to find Dataset: "${datasetName}".`);
     }
-    const menu = datasetCard.getEllipsis();
-    await menu.clickAction(EllipsisMenuAction.Delete, {waitForNav: false});
+    await datasetCard.clickEllipsisAction(EllipsisMenuAction.Delete, {waitForNav: false});
 
     const modal = new Modal(this.page);
     const modalContentText = await modal.getTextContent();
@@ -164,7 +160,7 @@ export default class DataPage extends AuthenticatedPage {
    */
   async renameDataset(datasetName: string, newDatasetName: string): Promise<void> {
     const datasetCard = await DataResourceCard.findCard(this.page, datasetName);
-    await datasetCard.getEllipsis().clickAction(EllipsisMenuAction.RenameDataset, {waitForNav: false});
+    await datasetCard.clickEllipsisAction(EllipsisMenuAction.RenameDataset, {waitForNav: false});
 
     const modal = new Modal(this.page);
 
@@ -189,8 +185,7 @@ export default class DataPage extends AuthenticatedPage {
     if (conceptSetCard == null) {
       throw new Error(`Failed to find Concept Set: "${conceptsetName}".`);
     }
-    const menu = conceptSetCard.getEllipsis();
-    await menu.clickAction(EllipsisMenuAction.Delete, {waitForNav: false});
+    await conceptSetCard.clickEllipsisAction(EllipsisMenuAction.Delete, {waitForNav: false});
 
     const modal = new Modal(this.page);
     const modalTextContent = await modal.getTextContent();
@@ -203,8 +198,7 @@ export default class DataPage extends AuthenticatedPage {
 
   async renameCohort(cohortName: string, newCohortName: string): Promise<void> {
     const cohortCard = await DataResourceCard.findCard(this.page, cohortName);
-    const menu = cohortCard.getEllipsis();
-    await menu.clickAction(EllipsisMenuAction.Rename, {waitForNav: false});
+    await cohortCard.clickEllipsisAction(EllipsisMenuAction.Rename, {waitForNav: false});
     const modal = new Modal(this.page);
     await modal.getTextContent();
     const newNameInput = new Textbox(this.page, `${modal.getXpath()}//*[@id="new-name"]`);
