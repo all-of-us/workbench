@@ -117,10 +117,10 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
             new LeonardoMachineConfig()
                 .masterDiskSize(
                     Optional.ofNullable(clusterOverride.masterDiskSize)
-                        .orElse(config.firecloud.leoRuntimeDefaultDiskSizeGb))
+                        .orElse(config.firecloud.notebookRuntimeDefaultDiskSizeGb))
                 .masterMachineType(
                     Optional.ofNullable(clusterOverride.machineType)
-                        .orElse(config.firecloud.leoRuntimeDefaultMachineType)))
+                        .orElse(config.firecloud.notebookRuntimeDefaultMachineType)))
         .toolDockerImage(workbenchConfigProvider.get().firecloud.jupyterDockerImage)
         .welderDockerImage(workbenchConfigProvider.get().firecloud.welderDockerImage)
         .customClusterEnvironmentVariables(customClusterEnvironmentVariables);

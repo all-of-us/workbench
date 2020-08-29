@@ -105,10 +105,10 @@ public class WorkbenchConfig {
     @Deprecated public Integer clusterIdleMaxAgeDays;
     @Deprecated public String clusterDefaultMachineType;
     @Deprecated public Integer clusterDefaultDiskSizeGb;
-    public Integer leoRuntimeMaxAgeDays;
-    public Integer leoRuntimeIdleMaxAgeDays;
-    public String leoRuntimeDefaultMachineType;
-    public Integer leoRuntimeDefaultDiskSizeGb;
+    public Integer notebookRuntimeMaxAgeDays;
+    public Integer notebookRuntimeIdleMaxAgeDays;
+    public String notebookRuntimeDefaultMachineType;
+    public Integer notebookRuntimeDefaultDiskSizeGb;
     public String registeredDomainName;
     public String registeredDomainGroup;
     public String leoBaseUrl;

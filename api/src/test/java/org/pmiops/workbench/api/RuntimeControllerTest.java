@@ -198,8 +198,8 @@ public class RuntimeControllerTest {
     config = WorkbenchConfig.createEmptyConfig();
     config.server.apiBaseUrl = API_BASE_URL;
     config.firecloud.registeredDomainName = "";
-    config.firecloud.leoRuntimeDefaultMachineType = "n1-standard-4";
-    config.firecloud.leoRuntimeDefaultDiskSizeGb = 50;
+    config.firecloud.notebookRuntimeDefaultMachineType = "n1-standard-4";
+    config.firecloud.notebookRuntimeDefaultDiskSizeGb = 50;
     config.access.enableComplianceTraining = true;
 
     user = new DbUser();
