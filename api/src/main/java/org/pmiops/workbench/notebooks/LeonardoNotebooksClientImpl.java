@@ -23,11 +23,12 @@ import org.pmiops.workbench.leonardo.api.ServiceInfoApi;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
+import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig.CloudServiceEnum;
 import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
 import org.pmiops.workbench.notebooks.api.NotebooksApi;
 import org.pmiops.workbench.notebooks.model.LocalizationEntry;
 import org.pmiops.workbench.notebooks.model.Localize;
-import org.pmiops.workbench.notebooks.model.MachineConfig;
 import org.pmiops.workbench.notebooks.model.StorageLink;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,7 +110,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
         .addScopesItem("https://www.googleapis.com/auth/userinfo.email")
         .addScopesItem("https://www.googleapis.com/auth/userinfo.profile")
         .runtimeConfig(
-            new MachineConfig()
+            new LeonardoMachineConfig()
+                .cloudService(CloudServiceEnum.DATAPROC)
                 .masterDiskSize(
                     Optional.ofNullable(clusterOverride.masterDiskSize)
                         .orElse(config.firecloud.clusterDefaultDiskSizeGb))

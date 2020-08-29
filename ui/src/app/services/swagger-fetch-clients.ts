@@ -24,7 +24,7 @@ import {
   AuthDomainApi,
   BaseAPI,  // internal
   CdrVersionsApi,
-  ClusterApi,
+  RuntimeApi,
   CohortAnnotationDefinitionApi,
   CohortBuilderApi,
   CohortReviewApi,
@@ -83,7 +83,7 @@ function bindCtor<T extends BaseAPI>(ctor: new() => T): () => T {
 // getters for the API clients, e.g.: clusterApi().listClusters();
 export const authDomainApi = bindCtor(AuthDomainApi);
 export const cdrVersionsApi = bindCtor(CdrVersionsApi);
-export const clusterApi = bindCtor(ClusterApi);
+export const clusterApi = bindCtor(RuntimeApi); // TODO(calbach): Refactor name and code.
 export const cohortAnnotationDefinitionApi = bindCtor(CohortAnnotationDefinitionApi);
 export const cohortBuilderApi = bindCtor(CohortBuilderApi);
 export const cohortReviewApi = bindCtor(CohortReviewApi);

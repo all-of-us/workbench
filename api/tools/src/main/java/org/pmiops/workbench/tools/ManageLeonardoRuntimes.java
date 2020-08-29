@@ -24,9 +24,9 @@ import org.pmiops.workbench.leonardo.ApiClient;
 import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.ApiResponse;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
-import org.pmiops.workbench.leonardo.model.GetRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.ListRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.RuntimeStatus;
+import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
@@ -71,18 +71,18 @@ public class ManageLeonardoRuntimes {
     return api;
   }
 
-  private static String runtimeId(ListRuntimeResponse r) {
+  private static String runtimeId(LeonardoListRuntimeResponse r) {
     return r.getGoogleProject() + "/" + r.getRuntimeName();
   }
 
-  private static String formatTabular(ListRuntimeResponse r) {
+  private static String formatTabular(LeonardoListRuntimeResponse r) {
     Gson gson = new Gson();
     JsonObject labels = gson.toJsonTree(r.getLabels()).getAsJsonObject();
     String creator = "unknown";
     if (labels.has("created-by")) {
       creator = labels.get("created-by").getAsString();
     }
-    RuntimeStatus status = RuntimeStatus.UNKNOWN;
+    LeonardoRuntimeStatus status = LeonardoRuntimeStatus.UNKNOWN;
     if (r.getStatus() != null) {
       status = r.getStatus();
     }
@@ -128,8 +128,8 @@ public class ManageLeonardoRuntimes {
     ApiResponse<Object> resp = client.getApiClient().execute(call, Object.class);
 
     // Parse the response as well so we can log specific structured fields.
-    GetRuntimeResponse runtime =
-        PRETTY_GSON.fromJson(PRETTY_GSON.toJson(resp.getData()), GetRuntimeResponse.class);
+    LeonardoGetRuntimeResponse runtime =
+        PRETTY_GSON.fromJson(PRETTY_GSON.toJson(resp.getData()), LeonardoGetRuntimeResponse.class);
 
     System.out.println(PRETTY_GSON.toJson(resp.getData()));
     System.out.printf("\n\nTo inspect logs in cloud storage, run the following:\n\n");

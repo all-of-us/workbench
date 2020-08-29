@@ -378,7 +378,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
 
     private async localizeNotebooks(cluster: Cluster, notebookNames: Array<string>) {
       const {workspace} = this.props;
-      const resp = await this.clusterRetry(() => clusterApi().localize(
+      const resp = await this.clusterRetry(() => clusterApi().deprecatedLocalize(
         workspace.namespace, {
           notebookNames, playgroundMode: this.isPlaygroundMode()
         },

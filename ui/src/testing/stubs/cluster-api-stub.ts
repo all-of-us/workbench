@@ -1,12 +1,12 @@
 import {
   Cluster,
-  ClusterApi,
+  RuntimeApi,
   ClusterLocalizeRequest,
   ClusterLocalizeResponse,
   ClusterStatus
 } from 'generated/fetch';
 
-export class ClusterApiStub extends ClusterApi {
+export class ClusterApiStub extends RuntimeApi {
   public cluster: Cluster;
 
   constructor() {
