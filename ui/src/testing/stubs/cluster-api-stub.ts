@@ -38,7 +38,7 @@ export class ClusterApiStub extends RuntimeApi {
     });
   }
 
-  localize(projectName: string, req: ClusterLocalizeRequest,
+  deprecatedLocalize(projectName: string, req: ClusterLocalizeRequest,
     extraHttpRequestParams?: any): Promise<ClusterLocalizeResponse> {
     return new Promise<ClusterLocalizeResponse>(resolve => {
       resolve({clusterLocalDirectory: 'workspaces/${req.workspaceId}'});
