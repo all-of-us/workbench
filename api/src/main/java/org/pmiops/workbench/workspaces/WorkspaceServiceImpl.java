@@ -808,8 +808,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
         DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
   }
 
-  @Override
-  public List<ReportingWorkspace> getAllReportingWorkspaces() {
-    return workspaceDao.getReportingWorkspaces();
-  }
+//  @Override
+//  public List<ReportingWorkspace> getAllReportingWorkspaces() {
+//    return workspaceDao.getReportingWorkspaces();
+//  }
 }

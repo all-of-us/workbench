@@ -110,5 +110,5 @@ public interface WorkspaceService {
 
   List<DbWorkspace> getAllActiveWorkspaces();
 
-  List<ReportingWorkspace> getAllReportingWorkspaces();
+//  List<ReportingWorkspace> getAllReportingWorkspaces();
 }

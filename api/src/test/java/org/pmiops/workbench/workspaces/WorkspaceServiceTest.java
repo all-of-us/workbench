@@ -69,7 +69,6 @@ public class WorkspaceServiceTest {
     ConceptSetMapperImpl.class,
     CommonMappers.class,
     DataSetMapperImpl.class,
-    TestJpaConfig.class,
     WorkspaceMapperImpl.class,
     WorkspaceServiceImpl.class
   })

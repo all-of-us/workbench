@@ -182,8 +182,8 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
     return null;
   }
 
-  @Override
-  public List<ReportingWorkspace> getAllReportingWorkspaces() {
-    return null;
-  }
+//  @Override
+//  public List<ReportingWorkspace> getAllReportingWorkspaces() {
+//    return null;
+//  }
 }
