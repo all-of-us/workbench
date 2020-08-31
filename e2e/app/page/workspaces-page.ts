@@ -1,6 +1,7 @@
 import {Page} from 'puppeteer';
 import Button from 'app/element/button';
 import {Language, LinkText, PageUrl} from 'app/text-labels';
+import Modal from 'app/component/modal';
 import WorkspaceEditPage, {FIELD as EDIT_FIELD} from 'app/page/workspace-edit-page';
 import {makeWorkspaceName} from 'utils/str-utils';
 import RadioButton from 'app/element/radiobutton';
@@ -155,4 +156,15 @@ export default class WorkspacesPage extends WorkspaceEditPage {
     return notebookPage.goAnalysisPage();
   }
 
+  /**
+   * Click DELETE WORKSPACE button in delete workspace Confirmation dialog.
+   * @return {string} Dialog textContent.
+   */
+  async deleteWorkspaceModal(): Promise<string> {
+    const modal = new Modal(this.page);
+    const contentText = await modal.getContent();
+    await modal.clickButton(LinkText.DeleteWorkspace, {waitForClose: true});
+    await waitWhileLoading(this.page);
+    return contentText;
+  }
 }
