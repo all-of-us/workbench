@@ -9,15 +9,14 @@ import Textarea from '../element/textarea';
 export const PageTitle = 'Profile';
 
 export const LabelAlias = {
-  FirstName: 'First Name',
-  LastName: 'Last Name',
+  ResearchBackground: 'Your research background, experience and research interests',
   SaveProfile: 'Save Profile',
 };
 
 
 export const DataTestIdAlias = {
-  FirstName: 'First Name',
-  LastName: 'Last Name',
+  FirstName: 'givenName',
+  LastName: 'familyName',
   ProfessionalUrl: 'professionalUrl',
   Address1: 'streetAddress1',
   Address2: 'streetAddress2',
@@ -48,11 +47,11 @@ export default class ProfilePage extends AuthenticatedPage {
   }
 
   async getFirstNameInput(): Promise<Textbox> {
-    return Textbox.findByName(this.page, {name: LabelAlias.FirstName});
+    return Textbox.findByName(this.page, {dataTestId: DataTestIdAlias.FirstName});
   }
 
   async getLastNameInput(): Promise<Textbox> {
-    return Textbox.findByName(this.page, {name: LabelAlias.LastName});
+    return Textbox.findByName(this.page, {dataTestId: DataTestIdAlias.LastName});
   }
 
   async getProfessionalUrlInput(): Promise<Textbox> {
@@ -60,7 +59,7 @@ export default class ProfilePage extends AuthenticatedPage {
   }
 
   async getResearchBackgroundTextarea(): Promise<Textarea> {
-    return Textarea.findByName(this.page, {normalizeSpace: 'Your research background, experience and research interests'});
+    return Textarea.findByName(this.page, {normalizeSpace: LabelAlias.ResearchBackground});
   }
 
   async getAddress1Input(): Promise<Textbox> {
