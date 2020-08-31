@@ -4,7 +4,7 @@ import Link from 'app/element/link';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {EllipsisMenuAction, TabLabelAlias} from 'app/text-labels';
+import {EllipsisMenuAction, TabLabel} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
@@ -75,8 +75,8 @@ describe('Create Dataset', () => {
     expect(newCardsCount).toBe(origCardsCount - 1);
 
     // Delete Dataset.
-    await dataPage.openTab(TabLabelAlias.Data);
-    await dataPage.openTab(TabLabelAlias.Datasets, {waitPageChange: false});
+    await dataPage.openTab(TabLabel.Data);
+    await dataPage.openTab(TabLabel.Datasets, {waitPageChange: false});
 
     await dataPage.deleteResource(newDatasetName, CardType.Dataset);
   });
@@ -111,7 +111,7 @@ describe('Create Dataset', () => {
     await exportModal.fillInModal(notebookName);
 
     // Verify notebook created successfully.
-    await dataPage.openTab(TabLabelAlias.Analysis);
+    await dataPage.openTab(TabLabel.Analysis);
     const cardExists = await resourceCard.cardExists(notebookName, CardType.Notebook);
     expect(cardExists).toBe(true);
 

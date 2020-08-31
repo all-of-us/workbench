@@ -4,7 +4,7 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {findWorkspace, signIn} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
-import {TabLabelAlias} from '../../app/text-labels';
+import {TabLabel} from '../../app/text-labels';
 
 describe('Cohorts UI tests', () => {
 
@@ -54,7 +54,7 @@ describe('Cohorts UI tests', () => {
     const exportButton = await cohortPage.getExportButton();
     expect(await exportButton.isDisabled()).toBe(true);
 
-    await dataPage.openTab(TabLabelAlias.About, {waitPageChange: false});
+    await dataPage.openTab(TabLabel.About, {waitPageChange: false});
 
     // Don't save. Confirm Discard Changes
     const modalTextContent = await cohortPage.discardChangesConfirmationDialog();

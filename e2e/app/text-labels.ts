@@ -71,7 +71,7 @@ export enum Language {
    R = 'R',
 }
 
-export enum TabLabelAlias {
+export enum TabLabel {
    Data = 'Data',
    Analysis = 'Analysis',
    About = 'About',

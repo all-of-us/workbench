@@ -1,6 +1,6 @@
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import WorkspacesPage from 'app/page/workspaces-page';
-import {EllipsisMenuAction, TabLabelAlias} from 'app/text-labels';
+import {EllipsisMenuAction, TabLabel} from 'app/text-labels';
 import * as testData from 'resources/data/workspace-data';
 import {findWorkspace, performActions, signIn} from 'utils/test-utils';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
@@ -43,7 +43,7 @@ describe('Editing workspace thru workspace card ellipsis menu', () => {
     // Check Workspace Information
 
     // Check CDR version
-    await dataPage.openTab(TabLabelAlias.About);
+    await dataPage.openTab(TabLabel.About);
     const aboutPage = new WorkspaceAboutPage(page);
     const cdrValue = await aboutPage.getCdrVersion();
     expect(cdrValue).toEqual(expect.stringContaining(selectedValue));

@@ -5,7 +5,7 @@ import {Ethnicity} from 'app/page/cohort-criteria-modal';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {Language, TabLabelAlias} from 'app/text-labels';
+import {Language, TabLabel} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
@@ -77,21 +77,21 @@ describe('Create Dataset', () => {
 
     // Delete test data sequence is: Delete Notebook, then Dataset, finally Cohort.
     // Delete Notebook
-    await dataPage.openTab(TabLabelAlias.Analysis);
+    await dataPage.openTab(TabLabel.Analysis);
 
     const analysisPage = new WorkspaceAnalysisPage(page);
     await analysisPage.waitForLoad();
     await analysisPage.deleteResource(newNotebookName, CardType.Notebook);
 
     // Delete Dataset
-    await dataPage.openTab(TabLabelAlias.Data);
-    await dataPage.openTab(TabLabelAlias.Datasets, {waitPageChange: false});
+    await dataPage.openTab(TabLabel.Data);
+    await dataPage.openTab(TabLabel.Datasets, {waitPageChange: false});
 
     const datasetDeleteDialogText = await dataPage.deleteResource(newDatasetName, CardType.Dataset);
     expect(datasetDeleteDialogText).toContain(`Are you sure you want to delete Dataset: ${newDatasetName}?`);
 
     // Delete Cohort
-    await dataPage.openTab(TabLabelAlias.Cohorts, {waitPageChange: false});
+    await dataPage.openTab(TabLabel.Cohorts, {waitPageChange: false});
 
     const cohortDeleteDialogText = await dataPage.deleteResource(newCohortName, CardType.Cohort);
     expect(cohortDeleteDialogText).toContain(`Are you sure you want to delete Cohort: ${newCohortName}?`);

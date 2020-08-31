@@ -2,7 +2,7 @@ import DataResourceCard, {CardType} from 'app/component/data-resource-card';
 import Modal from 'app/component/modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
-import {LinkText, TabLabelAlias} from 'app/text-labels';
+import {LinkText, TabLabel} from 'app/text-labels';
 import {extractNamespace, makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn} from 'utils/test-utils';
 
@@ -76,7 +76,7 @@ describe('Workspace owner Jupyter notebook action tests', () => {
     const toWorkspaceNamespace = extractNamespace(new URL(page.url()));
 
     // Verify copy-to notebook exists in destination Workspace
-    await dataPage.openTab(TabLabelAlias.Analysis);
+    await dataPage.openTab(TabLabel.Analysis);
     const dataResourceCard = new DataResourceCard(page);
     const notebookCard = await dataResourceCard.findCard(copiedNotebookName, CardType.Notebook);
     expect(notebookCard).toBeTruthy();

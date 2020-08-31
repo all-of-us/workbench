@@ -5,7 +5,7 @@ import Modal from 'app/component/modal';
 import ClrIconLink from 'app/element/clr-icon-link';
 import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
-import {EllipsisMenuAction, Language, LinkText, TabLabelAlias} from 'app/text-labels';
+import {EllipsisMenuAction, Language, LinkText, TabLabel} from 'app/text-labels';
 import {ElementHandle, Page} from 'puppeteer';
 import {makeRandomName} from 'utils/str-utils';
 import {waitWhileLoading} from 'utils/test-utils';
@@ -54,11 +54,11 @@ export default class WorkspaceDataPage extends WorkspaceBase {
   }
 
   async getAddDatasetButton(): Promise<ClrIconLink> {
-    return ClrIconLink.findByName(this.page, {name: TabLabelAlias.Datasets, iconShape: 'plus-circle'});
+    return ClrIconLink.findByName(this.page, {name: TabLabel.Datasets, iconShape: 'plus-circle'});
   }
 
   async getAddCohortsButton(): Promise<ClrIconLink> {
-    return ClrIconLink.findByName(this.page, {name: TabLabelAlias.Cohorts, iconShape: 'plus-circle'});
+    return ClrIconLink.findByName(this.page, {name: TabLabel.Cohorts, iconShape: 'plus-circle'});
   }
 
   // Click Add Datasets button.
@@ -123,8 +123,8 @@ export default class WorkspaceDataPage extends WorkspaceBase {
   }
 
   async findCohortCard(cohortName?: string): Promise<DataResourceCard> {
-    await this.openTab(TabLabelAlias.Data);
-    await this.openTab(TabLabelAlias.Cohorts, {waitPageChange: false});
+    await this.openTab(TabLabel.Data);
+    await this.openTab(TabLabel.Cohorts, {waitPageChange: false});
     if (cohortName === undefined) {
       // if cohort name isn't specified, find any existing cohort.
       return DataResourceCard.findAnyCard(this.page);
@@ -184,7 +184,7 @@ export default class WorkspaceDataPage extends WorkspaceBase {
    * @param {Language} lang The notebook language.
    */
   async createNotebook(notebookName: string, lang: Language = Language.Python): Promise<NotebookPage> {
-    await this.openTab(TabLabelAlias.Analysis);
+    await this.openTab(TabLabel.Analysis);
     const analysisPage = new WorkspaceAnalysisPage(this.page);
     return analysisPage.createNotebook(notebookName, lang);
   }

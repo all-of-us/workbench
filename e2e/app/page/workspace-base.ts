@@ -5,7 +5,7 @@ import Modal from 'app/component/modal';
 import Link from 'app/element/link';
 import {buildXPath} from 'app/xpath-builders';
 import {ElementType} from 'app/xpath-options';
-import {EllipsisMenuAction, LinkText, TabLabelAlias} from 'app/text-labels';
+import {EllipsisMenuAction, LinkText, TabLabel} from 'app/text-labels';
 import AuthenticatedPage from './authenticated-page';
 
 
@@ -17,10 +17,10 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
 
   /**
    * Select DATA, ANALYSIS or ABOUT page tab.
-   * @param {TabLabelAlias} tabName
+   * @param {TabLabel} tabName
    * @param opts
    */
-  async openTab(tabName: TabLabelAlias, opts: {waitPageChange?: boolean} = {}): Promise<void> {
+  async openTab(tabName: TabLabel, opts: {waitPageChange?: boolean} = {}): Promise<void> {
     const { waitPageChange = true } = opts;
     const selector = buildXPath({name: tabName, type: ElementType.Tab});
     const tab = new Link(this.page, selector);

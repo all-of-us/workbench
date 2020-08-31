@@ -5,7 +5,7 @@ import ConceptsetActionsPage from 'app/page/conceptset-actions-page';
 import ConceptsetPage from 'app/page/conceptset-page';
 import {SaveOption} from 'app/page/conceptset-save-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {LinkText, TabLabelAlias} from 'app/text-labels';
+import {LinkText, TabLabel} from 'app/text-labels';
 import {makeRandomName, makeString} from 'utils/str-utils';
 import {findWorkspace, signIn} from 'utils/test-utils';
 import Link from 'app/element/link';
@@ -88,7 +88,7 @@ describe('Editing and Copying Concept Sets', () => {
     // Navigate to workspace Data page, then delete Concept Set
     await (new Link(page, `//a[text()="${workspaceName}"]`)).click();
     await dataPage.waitForLoad();
-    await dataPage.openTab(TabLabelAlias.ConceptSets, {waitPageChange: false});
+    await dataPage.openTab(TabLabel.ConceptSets, {waitPageChange: false});
     await dataPage.deleteResource(newName, CardType.ConceptSet);
   });
 
@@ -110,7 +110,7 @@ describe('Editing and Copying Concept Sets', () => {
 
     // Look for one existing Concept Set in workspace2. If none exists, create a new Concept Set.
     const dataPage = new WorkspaceDataPage(page);
-    await dataPage.openTab(TabLabelAlias.ConceptSets, {waitPageChange: false});
+    await dataPage.openTab(TabLabel.ConceptSets, {waitPageChange: false});
 
     // Create new Concept Set
     const conceptSearchPage = await dataPage.openConceptSearch(Domain.Procedures);

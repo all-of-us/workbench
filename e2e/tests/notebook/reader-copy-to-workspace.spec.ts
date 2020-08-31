@@ -7,7 +7,7 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
-import {EllipsisMenuAction, Language, LinkText, WorkspaceAccessLevel, TabLabelAlias} from 'app/text-labels';
+import {EllipsisMenuAction, Language, LinkText, WorkspaceAccessLevel, TabLabel} from 'app/text-labels';
 import {config} from 'resources/workbench-config';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn, signInAs, waitWhileLoading} from 'utils/test-utils';
@@ -74,7 +74,7 @@ describe('Workspace reader Jupyter notebook action tests', () => {
 
     // Verify notebook actions list.
     await workspaceCard.clickWorkspaceName();
-    await new WorkspaceDataPage(newPage).openTab(TabLabelAlias.Analysis);
+    await new WorkspaceDataPage(newPage).openTab(TabLabel.Analysis);
 
     // Notebook actions Rename, Duplicate and Delete actions are disabled.
     const dataResourceCard = new DataResourceCard(newPage);

@@ -5,7 +5,7 @@ import Link from 'app/element/link';
 import CohortBuildPage, {FieldSelector} from 'app/page/cohort-build-page';
 import {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/cohort-criteria-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {EllipsisMenuAction, LinkText, TabLabelAlias} from 'app/text-labels';
+import {EllipsisMenuAction, LinkText, TabLabel} from 'app/text-labels';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
 
@@ -189,7 +189,7 @@ describe('User can create new Cohorts', () => {
     await cohortBuildPage.waitForLoad();
     await waitWhileLoading(page);
 
-    await dataPage.openTab(TabLabelAlias.Data);
+    await dataPage.openTab(TabLabel.Data);
 
     // Duplicate cohort using Ellipsis menu.
     const origCardsCount = (await DataResourceCard.findAllCards(page)).length;
