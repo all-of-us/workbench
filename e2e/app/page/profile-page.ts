@@ -3,21 +3,28 @@ import Textbox from 'app/element/textbox';
 import AuthenticatedPage from 'app/page/authenticated-page';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle, waitForUrl} from 'utils/waits-utils';
+import Button from '../element/button';
+import Textarea from '../element/textarea';
 
 export const PageTitle = 'Profile';
 
 export const LabelAlias = {
   FirstName: 'First Name',
   LastName: 'Last Name',
-  ContactEmail: 'Contact Email',
-  CurrentPosition: 'Your Current Position',
-  Organization: 'Your Organization',
-  CurrentResearchWork: 'Current Research Work',
-  AboutYou: 'About You',
-  Institution: 'Institution',
-  Role: 'Role',
-  DiscardChanges: 'Discard Changes',
   SaveProfile: 'Save Profile',
+};
+
+
+export const DataTestIdAlias = {
+  FirstName: 'First Name',
+  LastName: 'Last Name',
+  ProfessionalUrl: 'professionalUrl',
+  Address1: 'streetAddress1',
+  Address2: 'streetAddress2',
+  City: 'city',
+  State: 'state',
+  Zip: 'zipCode',
+  Country: 'country',
 };
 
 export default class ProfilePage extends AuthenticatedPage {
@@ -40,12 +47,47 @@ export default class ProfilePage extends AuthenticatedPage {
     }
   }
 
-  async getFirstName(): Promise<Textbox> {
-    return await Textbox.findByName(this.page, {name: LabelAlias.FirstName});
+  async getFirstNameInput(): Promise<Textbox> {
+    return Textbox.findByName(this.page, {name: LabelAlias.FirstName});
   }
 
-  async getLastName(): Promise<Textbox> {
-    return await Textbox.findByName(this.page, {name: LabelAlias.LastName});
+  async getLastNameInput(): Promise<Textbox> {
+    return Textbox.findByName(this.page, {name: LabelAlias.LastName});
   }
 
+  async getProfessionalUrlInput(): Promise<Textbox> {
+    return Textbox.findByName(this.page, {dataTestId: DataTestIdAlias.ProfessionalUrl});
+  }
+
+  async getResearchBackgroundTextarea(): Promise<Textarea> {
+    return Textarea.findByName(this.page, {normalizeSpace: 'Your research background, experience and research interests'});
+  }
+
+  async getAddress1Input(): Promise<Textbox> {
+    return Textbox.findByName(this.page, {dataTestId: DataTestIdAlias.Address1});
+  }
+
+  async getAddress2Input(): Promise<Textbox> {
+    return Textbox.findByName(this.page, {dataTestId: DataTestIdAlias.Address2});
+  }
+
+  async getCityInput(): Promise<Textbox> {
+    return Textbox.findByName(this.page, {dataTestId: DataTestIdAlias.City});
+  }
+
+  async getStateInput(): Promise<Textbox> {
+    return Textbox.findByName(this.page, {dataTestId: DataTestIdAlias.State});
+  }
+
+  async getZipCodeInput(): Promise<Textbox> {
+    return Textbox.findByName(this.page, {dataTestId: DataTestIdAlias.Zip});
+  }
+
+  async getCountryInput(): Promise<Textbox> {
+    return Textbox.findByName(this.page, {dataTestId: DataTestIdAlias.Country});
+  }
+
+  async getSaveProfileButton(): Promise<Button> {
+    return Button.findByName(this.page, {name: LabelAlias.SaveProfile});
+  }
 }

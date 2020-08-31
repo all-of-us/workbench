@@ -20,8 +20,8 @@ describe('Sidebar Navigation', () => {
     expect(await profilePage.isLoaded()).toBe(true);
 
     // check user name in dropdown matches names on Profile page
-    const fname = await (await profilePage.getFirstName()).getValue();
-    const lname = await (await profilePage.getLastName()).getValue();
+    const fname = await (await profilePage.getFirstNameInput()).getValue();
+    const lname = await (await profilePage.getLastNameInput()).getValue();
     await Navigation.openNavMenu(page);
     const displayedUsername = await homePage.getUsername();
     expect(displayedUsername).toBe(`${fname} ${lname}`);
