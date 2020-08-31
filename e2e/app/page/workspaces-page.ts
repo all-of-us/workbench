@@ -160,9 +160,9 @@ export default class WorkspacesPage extends WorkspaceEditPage {
    * Click DELETE WORKSPACE button in delete workspace Confirmation dialog.
    * @return {string} Dialog textContent.
    */
-  async deleteWorkspaceModal(): Promise<string> {
+  async deleteWorkspaceModal(): Promise<string[]> {
     const modal = new Modal(this.page);
-    const contentText = await modal.getContent();
+    const contentText = await modal.getTextContent();
     await modal.clickButton(LinkText.DeleteWorkspace, {waitForClose: true});
     await waitWhileLoading(this.page);
     return contentText;
