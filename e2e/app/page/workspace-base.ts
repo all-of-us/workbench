@@ -1,8 +1,8 @@
 import {Page} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
-import DataResourceCard, {CardType} from '../component/data-resource-card';
-import Modal from '../component/modal';
-import Link from '../element/link';
+import DataResourceCard, {CardType} from 'app/component/data-resource-card';
+import Modal from 'app/component/modal';
+import Link from 'app/element/link';
 import {buildXPath} from 'app/xpath-builders';
 import {ElementType} from 'app/xpath-options';
 import {EllipsisMenuAction, LinkText, TabLabelAlias} from 'app/text-labels';
@@ -40,15 +40,35 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
       throw new Error(`Failed to find ${resourceType} card "${resourceName}"`);
     }
 
-    const menu = card.getEllipsis();
-    await menu.clickAction(EllipsisMenuAction.Delete, {waitForNav: false});
+    await card.clickEllipsisAction(EllipsisMenuAction.Delete, {waitForNav: false});
 
     const modal = new Modal(this.page);
+    await modal.waitForLoad();
     const modalTextContent = await modal.getTextContent();
-    await modal.clickButton(LinkText.DeleteConceptSet, {waitForClose: true});
+
+    let link;
+    switch (resourceType) {
+    case CardType.Cohort:
+      link = LinkText.DeleteCohort;
+      break;
+    case CardType.ConceptSet:
+      link = LinkText.DeleteConceptSet;
+      break;
+    case CardType.Dataset:
+      link = LinkText.DeleteDataset;
+      break;
+    case CardType.Notebook:
+      link = LinkText.DeleteNotebook;
+      break;
+    default:
+      throw new Error(`Case ${resourceType} handling is not defined.`);
+    }
+
+    await modal.clickButton(link, {waitForClose: true});
     await waitWhileLoading(this.page);
 
-    console.log(`Deleted Concept Set "${resourceName}"`);
+    console.log(`Deleted ${resourceType} card "${resourceName}"`);
+    await this.waitForLoad();
     return modalTextContent;
   }
 

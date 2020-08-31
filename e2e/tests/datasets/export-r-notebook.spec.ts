@@ -1,13 +1,14 @@
+import {CardType} from 'app/component/data-resource-card';
 import Link from 'app/element/link';
+import CohortActionsPage from 'app/page/cohort-actions-page';
+import {Ethnicity} from 'app/page/cohort-criteria-modal';
+import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import NotebookPreviewPage from 'app/page/notebook-preview-page';
+import {Language, TabLabelAlias} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
-import CohortActionsPage from 'app/page/cohort-actions-page';
-import {Ethnicity} from 'app/page/cohort-criteria-modal';
-import {Language, TabLabelAlias} from 'app/text-labels';
 
 describe('Create Dataset', () => {
 
@@ -80,19 +81,19 @@ describe('Create Dataset', () => {
 
     const analysisPage = new WorkspaceAnalysisPage(page);
     await analysisPage.waitForLoad();
-    await analysisPage.deleteNotebook(newNotebookName);
+    await analysisPage.deleteResource(newNotebookName, CardType.Notebook);
 
     // Delete Dataset
     await dataPage.openTab(TabLabelAlias.Data);
     await dataPage.openTab(TabLabelAlias.Datasets, {waitPageChange: false});
 
-    const datasetDeleteDialogText = await dataPage.deleteDataset(newDatasetName);
+    const datasetDeleteDialogText = await dataPage.deleteResource(newDatasetName, CardType.Dataset);
     expect(datasetDeleteDialogText).toContain(`Are you sure you want to delete Dataset: ${newDatasetName}?`);
 
     // Delete Cohort
     await dataPage.openTab(TabLabelAlias.Cohorts, {waitPageChange: false});
 
-    const cohortDeleteDialogText = await dataPage.deleteCohort(newCohortName);
+    const cohortDeleteDialogText = await dataPage.deleteResource(newCohortName, CardType.Cohort);
     expect(cohortDeleteDialogText).toContain(`Are you sure you want to delete Cohort: ${newCohortName}?`);
 
   });

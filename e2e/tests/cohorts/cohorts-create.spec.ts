@@ -1,13 +1,13 @@
-import {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/cohort-criteria-modal';
+import DataResourceCard, {CardType} from 'app/component/data-resource-card';
+import Button from 'app/element/button';
 import ClrIconLink from 'app/element/clr-icon-link';
 import Link from 'app/element/link';
-import {EllipsisMenuAction, LinkText, TabLabelAlias} from 'app/text-labels';
 import CohortBuildPage, {FieldSelector} from 'app/page/cohort-build-page';
+import {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/cohort-criteria-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
+import {EllipsisMenuAction, LinkText, TabLabelAlias} from 'app/text-labels';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
-import DataResourceCard from 'app/component/data-resource-card';
-import Button from 'app/element/button';
 
 
 describe('User can create new Cohorts', () => {
@@ -201,14 +201,14 @@ describe('User can create new Cohorts', () => {
     expect(newCardsCount).toBe(origCardsCount + 1);
 
     // Delete duplicated cohort.
-    let modalTextContent = await dataPage.deleteCohort(`Duplicate of ${cohortName}`);
+    let modalTextContent = await dataPage.deleteResource(`Duplicate of ${cohortName}`, CardType.Cohort);
     expect(modalTextContent).toContain(`Are you sure you want to delete Cohort: Duplicate of ${cohortName}?`);
 
     // Delete new cohort.
-    modalTextContent = await dataPage.deleteCohort(cohortName);
+    modalTextContent = await dataPage.deleteResource(cohortName, CardType.Cohort);
     expect(modalTextContent).toContain(`Are you sure you want to delete Cohort: ${cohortName}?`);
 
   });
 
 
-});
+})

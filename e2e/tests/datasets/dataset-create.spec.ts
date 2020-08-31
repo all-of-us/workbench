@@ -52,7 +52,7 @@ describe('Create Dataset', () => {
     expect(oldDatasetExists).toBe(false);
 
     // Delete Dataset
-    const textContent = await dataPage.deleteDataset(newDatasetName);
+    const textContent = await dataPage.deleteResource(newDatasetName, CardType.Dataset);
     expect(textContent).toContain(`Are you sure you want to delete Dataset: ${newDatasetName}?`);
 
   });
@@ -126,7 +126,7 @@ describe('Create Dataset', () => {
     await dataPage.waitForLoad();
 
     await dataPage.openTab(TabLabelAlias.Datasets, {waitPageChange: false});
-    await dataPage.deleteDataset(datasetName);
+    await dataPage.deleteResource(datasetName, CardType.Dataset);
   });
 
 });

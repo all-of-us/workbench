@@ -86,42 +86,6 @@ export default class WorkspaceDataPage extends WorkspaceBase {
   }
 
   /**
-   * Delete cohort by look up its name using Ellipsis menu.
-   * @param {string} cohortName
-   */
-  async deleteCohort(cohortName: string): Promise<string[]> {
-    const cohortCard = await DataResourceCard.findCard(this.page, cohortName);
-    if (cohortCard == null) {
-      throw new Error(`Failed to find Cohort: "${cohortName}".`);
-    }
-    await cohortCard.clickEllipsisAction(EllipsisMenuAction.Delete, {waitForNav: false});
-    const modalContent = await (new CohortBuildPage(this.page)).deleteConfirmationDialog();
-    console.log(`Deleted Cohort "${cohortName}"`);
-    return modalContent;
-  }
-
-  /**
-   * Delete Dataset thru Ellipsis menu located inside the Dataset Resource card.
-   * @param {string} datasetName
-   */
-  async deleteDataset(datasetName: string): Promise<string[]> {
-    const datasetCard = await DataResourceCard.findCard(this.page, datasetName);
-    if (datasetCard == null) {
-      throw new Error(`Failed to find Dataset: "${datasetName}".`);
-    }
-    await datasetCard.clickEllipsisAction(EllipsisMenuAction.Delete, {waitForNav: false});
-
-    const modal = new Modal(this.page);
-    const modalContentText = await modal.getTextContent();
-    await modal.clickButton(LinkText.DeleteDataset, {waitForClose: true});
-    await waitWhileLoading(this.page);
-
-    console.log(`Deleted Dataset "${datasetName}"`);
-    await this.waitForLoad();
-    return modalContentText;
-  }
-
-  /**
    * Rename Dataset thru the Ellipsis menu located inside the Dataset Resource card.
    * @param {string} datasetName
    * @param {string} newDatasetName
@@ -142,26 +106,6 @@ export default class WorkspaceDataPage extends WorkspaceBase {
     await waitWhileLoading(this.page);
 
     console.log(`Renamed Dataset "${datasetName}" to "${newDatasetName}"`);
-  }
-
-  /**
-   * Delete ConceptSet thru Ellipsis menu located inside the Concept Set resource card.
-   * @param {string} conceptsetName
-   */
-  async deleteConceptSet(conceptsetName: string): Promise<string[]> {
-    const conceptSetCard = await DataResourceCard.findCard(this.page, conceptsetName);
-    if (conceptSetCard == null) {
-      throw new Error(`Failed to find Concept Set: "${conceptsetName}".`);
-    }
-    await conceptSetCard.clickEllipsisAction(EllipsisMenuAction.Delete, {waitForNav: false});
-
-    const modal = new Modal(this.page);
-    const modalTextContent = await modal.getTextContent();
-    await modal.clickButton(LinkText.DeleteConceptSet, {waitForClose: true});
-    await waitWhileLoading(this.page);
-
-    console.log(`Deleted Concept Set "${conceptsetName}"`);
-    return modalTextContent;
   }
 
   async renameCohort(cohortName: string, newCohortName: string): Promise<void> {

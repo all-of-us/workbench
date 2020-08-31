@@ -2,9 +2,9 @@ import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
 import DataResourceCard, {CardType} from 'app/component/data-resource-card';
 import ConceptsetActionsPage from 'app/page/conceptset-actions-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
+import {TabLabelAlias} from 'app/text-labels';
 import {findWorkspace, signIn} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
-import {TabLabelAlias} from 'app/text-labels';
 
 describe('Create Concept Sets from Domains', () => {
 
@@ -70,7 +70,7 @@ describe('Create Concept Sets from Domains', () => {
     await dataPage.openTab(TabLabelAlias.Data);
     await dataPage.openTab(TabLabelAlias.ConceptSets, {waitPageChange: false});
 
-    const modalTextContent = await dataPage.deleteConceptSet(conceptName);
+    const modalTextContent = await dataPage.deleteResource(conceptName, CardType.ConceptSet);
     expect(modalTextContent).toContain(`Are you sure you want to delete Concept Set: ${conceptName}?`);
   });
 
@@ -157,14 +157,14 @@ describe('Create Concept Sets from Domains', () => {
     expect(dataSetExists).toBe(true);
 
     // Delete Dataset.
-    const textContent = await dataPage.deleteDataset(datasetName);
+    const textContent = await dataPage.deleteResource(datasetName, CardType.Dataset);
     expect(textContent).toContain(`Are you sure you want to delete Dataset: ${datasetName}?`);
 
     // Delete Concept Set.
     await dataPage.openTab(TabLabelAlias.ConceptSets, {waitPageChange: false});
 
-    await dataPage.deleteConceptSet(conceptName1);
-    await dataPage.deleteConceptSet(conceptName2);
+    await dataPage.deleteResource(conceptName1, CardType.ConceptSet);
+    await dataPage.deleteResource(conceptName2, CardType.ConceptSet);
   });
 
 });

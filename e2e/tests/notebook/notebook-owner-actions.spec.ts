@@ -53,7 +53,7 @@ describe('Workspace owner Jupyter notebook action tests', () => {
     // Page remain unchanged, still should be the Analysis page.
     expect(await workspaceAnalysisPage.isLoaded()).toBe(true);
 
-    await workspaceAnalysisPage.deleteNotebook(notebookName);
+    await workspaceAnalysisPage.deleteResource(notebookName, CardType.Notebook);
   })
 
   test('Notebook can be duplicated by workspace owner', async () => {
@@ -62,8 +62,8 @@ describe('Workspace owner Jupyter notebook action tests', () => {
     const workspaceAnalysisPage = await workspacesPage.createNotebook({workspaceName, notebookName});
     const duplNotebookName = await workspaceAnalysisPage.duplicateNotebook(notebookName);
     // Delete clone notebook.
-    await workspaceAnalysisPage.deleteNotebook(duplNotebookName);
-    await workspaceAnalysisPage.deleteNotebook(notebookName);
+    await workspaceAnalysisPage.deleteResource(duplNotebookName, CardType.Notebook);
+    await workspaceAnalysisPage.deleteResource(notebookName, CardType.Notebook);
   })
 
   test('Notebook can be renamed by workspace owner', async () => {
@@ -82,7 +82,7 @@ describe('Workspace owner Jupyter notebook action tests', () => {
     cardExists = await newNotebookCard.cardExists(notebookName, CardType.Notebook);
     expect(cardExists).toBe(false);
 
-    await workspaceAnalysisPage.deleteNotebook(newName);
+    await workspaceAnalysisPage.deleteResource(newName, CardType.Notebook);
   })
 
 

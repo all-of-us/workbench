@@ -89,7 +89,7 @@ describe('Editing and Copying Concept Sets', () => {
     await (new Link(page, `//a[text()="${workspaceName}"]`)).click();
     await dataPage.waitForLoad();
     await dataPage.openTab(TabLabelAlias.ConceptSets, {waitPageChange: false});
-    await dataPage.deleteConceptSet(newName);
+    await dataPage.deleteResource(newName, CardType.ConceptSet);
   });
 
   /**
@@ -149,7 +149,7 @@ describe('Editing and Copying Concept Sets', () => {
     console.log(`Copied Concept Set: "${conceptName} from workspace: "${copyFromWorkspace}" to Concept Set: "${conceptSetCopyName}" in another workspace: "${copyToWorkspace}"`)
 
     // Delete Concept Sets
-    await dataPage.deleteConceptSet(conceptSetCopyName);
+    await dataPage.deleteResource(conceptSetCopyName, CardType.ConceptSet);
   });
 
 

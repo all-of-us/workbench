@@ -66,7 +66,7 @@ describe('Workspace owner Jupyter notebook action tests', () => {
     await modal.clickButton(LinkText.StayHere, {waitForClose: true});
 
     // Delete notebook
-    const deleteModalTextContent = await analysisPage.deleteNotebook(copyFromNotebookName);
+    const deleteModalTextContent = await analysisPage.deleteResource(copyFromNotebookName, CardType.Notebook);
     expect(deleteModalTextContent).toContain(`Are you sure you want to delete Notebook: ${copyFromNotebookName}?`);
 
     // Perform actions in copied notebook.
@@ -94,7 +94,7 @@ describe('Workspace owner Jupyter notebook action tests', () => {
     // Exit notebook. Returns to the Workspace Analysis tab.
     await copyNotebookPage.goAnalysisPage();
     // Delete notebook
-    const modalTextContent = await analysisPage.deleteNotebook(copiedNotebookName);
+    const modalTextContent = await analysisPage.deleteResource(copiedNotebookName, CardType.Notebook);
     expect(modalTextContent).toContain('This will permanently delete the Notebook.');
   })
 

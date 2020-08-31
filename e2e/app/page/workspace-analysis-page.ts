@@ -33,24 +33,6 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
     }
   }
 
-   /**
-    * Delete notebook thru Ellipsis menu located inside the Notebook resource card.
-    * @param {string} notebookName
-    */
-  async deleteNotebook(notebookName: string): Promise<string[]> {
-    const resourceCard = await DataResourceCard.findCard(this.page, notebookName);
-    await resourceCard.clickEllipsisAction(EllipsisMenuAction.Delete, {waitForNav: false});
-
-    const modal = new Modal(this.page);
-    const modalContentText = await modal.getTextContent();
-    await modal.clickButton(LinkText.DeleteNotebook, {waitForClose: true});
-    await waitWhileLoading(this.page);
-
-    console.log(`Deleted Notebook "${notebookName}"`);
-    await this.waitForLoad();
-    return modalContentText;
-  }
-
   /**
    * Create a new notebook.
    * - Click "Create a New Notebook" link in Analysis page.

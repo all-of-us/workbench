@@ -1,9 +1,9 @@
 import DataResourceCard, {CardType} from 'app/component/data-resource-card';
 import ExportToNotebookModal from 'app/component/export-to-notebook-modal';
 import Link from 'app/element/link';
-import WorkspaceDataPage from 'app/page/workspace-data-page';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {EllipsisMenuAction, TabLabelAlias} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
@@ -68,7 +68,7 @@ describe('Create Dataset', () => {
     const origCardsCount = (await DataResourceCard.findAllCards(page)).length;
 
     // Delete notebook
-    await analysiPage.deleteNotebook(newNotebookName);
+    await analysiPage.deleteResource(newNotebookName, CardType.Notebook);
 
     // Resource cards count decrease by 1.
     const newCardsCount = (await DataResourceCard.findAllCards(page)).length;
@@ -78,7 +78,7 @@ describe('Create Dataset', () => {
     await dataPage.openTab(TabLabelAlias.Data);
     await dataPage.openTab(TabLabelAlias.Datasets, {waitPageChange: false});
 
-    await dataPage.deleteDataset(newDatasetName);
+    await dataPage.deleteResource(newDatasetName, CardType.Dataset);
   });
 
   /**
@@ -117,7 +117,7 @@ describe('Create Dataset', () => {
 
     // Delete notebook.
     const analysisPage = new WorkspaceAnalysisPage(page);
-    await analysisPage.deleteNotebook(notebookName);
+    await analysisPage.deleteResource(notebookName, CardType.Notebook);
   });
 
 });
