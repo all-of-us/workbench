@@ -1,7 +1,7 @@
 import WorkspacesPage from 'app/page/workspaces-page';
 import {findWorkspace, signIn} from 'utils/test-utils';
 import {EllipsisMenuAction} from 'app/text-labels';
-import DataPage from 'app/page/data-page';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
 
 describe('Clone workspace', () => {
 
@@ -33,7 +33,7 @@ describe('Clone workspace', () => {
       await workspacesPage.clickCreateFinishButton(finishButton);
 
       // wait for Data page
-      const dataPage = new DataPage(page);
+      const dataPage = new WorkspaceDataPage(page);
       await dataPage.waitForLoad();
       // save Data page URL for comparison
       const workspaceDataUrl1 = page.url();
@@ -55,7 +55,7 @@ describe('Clone workspace', () => {
       const workspaceCard = await findWorkspace(page);
       await workspaceCard.clickWorkspaceName();
 
-      const dataPage = new DataPage(page);
+      const dataPage = new WorkspaceDataPage(page);
       await dataPage.selectWorkspaceAction(EllipsisMenuAction.Duplicate);
 
       const workspacesPage = new WorkspacesPage(page);

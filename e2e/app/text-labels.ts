@@ -70,3 +70,14 @@ export enum Language {
    Python = 'Python',
    R = 'R',
 }
+
+export enum TabLabelAlias {
+   Data = 'Data',
+   Analysis = 'Analysis',
+   About = 'About',
+   Cohorts = 'Cohorts',
+   Datasets = 'Datasets',
+   CohortReviews = 'Cohort Reviews',
+   ConceptSets = 'Concept Sets',
+   ShowAll = 'Show All',
+}

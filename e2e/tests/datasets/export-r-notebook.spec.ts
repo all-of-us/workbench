@@ -1,13 +1,13 @@
 import Link from 'app/element/link';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
-import DataPage, {TabLabelAlias} from 'app/page/data-page';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
 import CohortActionsPage from 'app/page/cohort-actions-page';
 import {Ethnicity} from 'app/page/cohort-criteria-modal';
-import {Language} from 'app/text-labels';
+import {Language, TabLabelAlias} from 'app/text-labels';
 
 describe('Create Dataset', () => {
 
@@ -25,7 +25,7 @@ describe('Create Dataset', () => {
     const workspaceName = await workspaceCard.clickWorkspaceName();
 
     // Click Add Datasets button
-    const dataPage = new DataPage(page);
+    const dataPage = new WorkspaceDataPage(page);
     const datasetBuildPage = await dataPage.clickAddDatasetButton();
     const cohortBuildPage = await datasetBuildPage.clickAddCohortsButton();
 

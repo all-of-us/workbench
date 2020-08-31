@@ -4,8 +4,8 @@ import WorkspaceCard from 'app/component/workspace-card';
 import ConceptsetActionsPage from 'app/page/conceptset-actions-page';
 import ConceptsetPage from 'app/page/conceptset-page';
 import {SaveOption} from 'app/page/conceptset-save-modal';
-import DataPage, {TabLabelAlias} from 'app/page/data-page';
-import {LinkText} from 'app/text-labels';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
+import {LinkText, TabLabelAlias} from 'app/text-labels';
 import {makeRandomName, makeString} from 'utils/str-utils';
 import {findWorkspace, signIn} from 'utils/test-utils';
 import Link from 'app/element/link';
@@ -27,7 +27,7 @@ describe('Editing and Copying Concept Sets', () => {
     // Create a workspace
     const workspaceName = await findWorkspace(page, {create: true}).then(card => card.clickWorkspaceName());
 
-    const dataPage = new DataPage(page);
+    const dataPage = new WorkspaceDataPage(page);
     let conceptSearchPage = await dataPage.openConceptSearch(Domain.Procedures);
 
     // Select first two rows.
@@ -109,7 +109,7 @@ describe('Editing and Copying Concept Sets', () => {
     await workspace2.clickWorkspaceName();
 
     // Look for one existing Concept Set in workspace2. If none exists, create a new Concept Set.
-    const dataPage = new DataPage(page);
+    const dataPage = new WorkspaceDataPage(page);
     await dataPage.openTab(TabLabelAlias.ConceptSets, {waitPageChange: false});
 
     // Create new Concept Set

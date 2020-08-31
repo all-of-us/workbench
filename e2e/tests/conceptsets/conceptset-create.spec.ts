@@ -1,9 +1,10 @@
 import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
 import DataResourceCard, {CardType} from 'app/component/data-resource-card';
 import ConceptsetActionsPage from 'app/page/conceptset-actions-page';
-import DataPage, {TabLabelAlias} from 'app/page/data-page';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {findWorkspace, signIn} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
+import {TabLabelAlias} from 'app/text-labels';
 
 describe('Create Concept Sets from Domains', () => {
 
@@ -21,7 +22,7 @@ describe('Create Concept Sets from Domains', () => {
     await workspaceCard.clickWorkspaceName();
 
     // Click Add Datasets button.
-    const dataPage = new DataPage(page);
+    const dataPage = new WorkspaceDataPage(page);
     const datasetBuildPage = await dataPage.clickAddDatasetButton();
 
     // Click Add Concept Sets button.
@@ -85,7 +86,7 @@ describe('Create Concept Sets from Domains', () => {
     await workspaceCard.clickWorkspaceName();
 
     // Click Add Datasets button.
-    const dataPage = new DataPage(page);
+    const dataPage = new WorkspaceDataPage(page);
     const datasetBuildPage = await dataPage.clickAddDatasetButton();
 
     // Start: Create new Concept Set 1

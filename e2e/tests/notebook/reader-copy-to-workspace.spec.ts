@@ -3,11 +3,11 @@ import Modal from 'app/component/modal';
 import Navigation, {NavLink} from 'app/component/navigation';
 import WorkspaceCard from 'app/component/workspace-card';
 import Link from 'app/element/link';
-import DataPage, {TabLabelAlias} from 'app/page/data-page';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
-import {EllipsisMenuAction, Language, LinkText, WorkspaceAccessLevel} from 'app/text-labels';
+import {EllipsisMenuAction, Language, LinkText, WorkspaceAccessLevel, TabLabelAlias} from 'app/text-labels';
 import {config} from 'resources/workbench-config';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn, signInAs, waitWhileLoading} from 'utils/test-utils';
@@ -35,7 +35,7 @@ describe('Workspace reader Jupyter notebook action tests', () => {
   test('Workspace reader copy notebook to another workspace', async () => {
     const workspaceName = await findWorkspace(page, {create: true}).then(card => card.clickWorkspaceName());
 
-    const dataPage = new DataPage(page);
+    const dataPage = new WorkspaceDataPage(page);
     const notebookName = makeRandomName('pyAdd');
     let notebook = await dataPage.createNotebook(notebookName, Language.Python);
 
@@ -74,7 +74,7 @@ describe('Workspace reader Jupyter notebook action tests', () => {
 
     // Verify notebook actions list.
     await workspaceCard.clickWorkspaceName();
-    await new DataPage(newPage).openTab(TabLabelAlias.Analysis);
+    await new WorkspaceDataPage(newPage).openTab(TabLabelAlias.Analysis);
 
     // Notebook actions Rename, Duplicate and Delete actions are disabled.
     const dataResourceCard = new DataResourceCard(newPage);

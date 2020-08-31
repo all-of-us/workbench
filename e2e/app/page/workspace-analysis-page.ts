@@ -8,13 +8,13 @@ import {Page} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
 import {getPropValue} from 'utils/element-utils';
-import AuthenticatedPage from './authenticated-page';
 import CopyModal from 'app/component/copy-modal';
 import NotebookPage from './notebook-page';
+import WorkspaceBase from './workspace-base';
 
 const PageTitle = 'View Notebooks';
 
-export default class WorkspaceAnalysisPage extends AuthenticatedPage {
+export default class WorkspaceAnalysisPage extends WorkspaceBase {
 
   constructor(page: Page) {
     super(page);

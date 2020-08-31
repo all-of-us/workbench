@@ -1,8 +1,8 @@
 import DataResourceCard, {CardType} from 'app/component/data-resource-card';
 import Modal from 'app/component/modal';
-import DataPage, {TabLabelAlias} from 'app/page/data-page';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
-import {LinkText} from 'app/text-labels';
+import {LinkText, TabLabelAlias} from 'app/text-labels';
 import {extractNamespace, makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn} from 'utils/test-utils';
 
@@ -34,7 +34,7 @@ describe('Workspace owner Jupyter notebook action tests', () => {
 
     // Create notebook in copy-from workspace.
     const copyFromNotebookName = makeRandomName('pytest');
-    const dataPage = new DataPage(page);
+    const dataPage = new WorkspaceDataPage(page);
 
     // Get the billing project name from page url.
     const fromWorkspaceNamespace = extractNamespace(new URL(page.url()));

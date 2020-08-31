@@ -2,17 +2,16 @@ import {Page} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForAttributeEquality, waitForDocumentTitle} from 'utils/waits-utils';
 import {buildXPath} from 'app/xpath-builders';
-import {WorkspaceAccessLevel} from 'app/text-labels';
+import {TabLabelAlias, WorkspaceAccessLevel} from 'app/text-labels';
 import {ElementType} from 'app/xpath-options';
 import {getPropValue} from 'utils/element-utils';
-import AuthenticatedPage from './authenticated-page';
-import {TabLabelAlias} from './data-page';
 import Button from 'app/element/button';
 import ShareModal from 'app/component/share-modal';
+import WorkspaceBase from './workspace-base';
 
 export const PageTitle = 'View Workspace Details';
 
-export default class WorkspaceAboutPage extends AuthenticatedPage{
+export default class WorkspaceAboutPage extends WorkspaceBase {
 
   constructor(page: Page) {
     super(page);

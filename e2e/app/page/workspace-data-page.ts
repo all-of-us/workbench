@@ -3,13 +3,9 @@ import DataResourceCard, {CardType} from 'app/component/data-resource-card';
 import EllipsisMenu from 'app/component/ellipsis-menu';
 import Modal from 'app/component/modal';
 import ClrIconLink from 'app/element/clr-icon-link';
-import Link from 'app/element/link';
 import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
-import AuthenticatedPage from 'app/page/authenticated-page';
-import {EllipsisMenuAction, Language, LinkText} from 'app/text-labels';
-import {buildXPath} from 'app/xpath-builders';
-import {ElementType} from 'app/xpath-options';
+import {EllipsisMenuAction, Language, LinkText, TabLabelAlias} from 'app/text-labels';
 import {ElementHandle, Page} from 'puppeteer';
 import {makeRandomName} from 'utils/str-utils';
 import {waitWhileLoading} from 'utils/test-utils';
@@ -21,21 +17,11 @@ import ConceptsetSearchPage from './conceptset-search-page';
 import DatasetBuildPage from './dataset-build-page';
 import NotebookPage from './notebook-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
-
-export enum TabLabelAlias {
-  Data = 'Data',
-  Analysis = 'Analysis',
-  About = 'About',
-  Cohorts = 'Cohorts',
-  Datasets = 'Datasets',
-  CohortReviews = 'Cohort Reviews',
-  ConceptSets = 'Concept Sets',
-  ShowAll = 'Show All',
-}
+import WorkspaceBase from './workspace-base';
 
 const PageTitle = 'Data Page';
 
-export default class DataPage extends AuthenticatedPage {
+export default class WorkspaceDataPage extends WorkspaceBase {
 
   constructor(page: Page) {
     super(page);
@@ -65,24 +51,6 @@ export default class DataPage extends AuthenticatedPage {
   async selectWorkspaceAction(action: EllipsisMenuAction): Promise<void> {
     const ellipsisMenu = new EllipsisMenu(this.page, './/*[@data-test-id="workspace-menu-button"]');
     return ellipsisMenu.clickAction(action);
-  }
-
-  /**
-   * Select DATA, ANALYSIS or ABOUT page tab.
-   * @param {TabLabelAlias} tabName
-   * @param opts
-   */
-  async openTab(tabName: TabLabelAlias, opts: {waitPageChange?: boolean} = {}): Promise<void> {
-    const {waitPageChange = true} = opts;
-    const selector = buildXPath({name: tabName, type: ElementType.Tab});
-    const tab = new Link(this.page, selector);
-    if (waitPageChange) {
-      await tab.clickAndWait();
-    } else {
-      await tab.click();
-    }
-    await tab.dispose();
-    return waitWhileLoading(this.page);
   }
 
   async getAddDatasetButton(): Promise<ClrIconLink> {

@@ -1,8 +1,8 @@
 import DataResourceCard, {CardType} from 'app/component/data-resource-card';
 import ClrIconLink from 'app/element/clr-icon-link';
 import CohortBuildPage from 'app/page/cohort-build-page';
-import DataPage, {TabLabelAlias} from 'app/page/data-page';
-import {EllipsisMenuAction, LinkText} from 'app/text-labels';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
+import {EllipsisMenuAction, LinkText, TabLabelAlias} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
@@ -25,7 +25,7 @@ describe('Create Dataset', () => {
     await workspaceCard.clickWorkspaceName();
 
     // Click Add Datasets button
-    const dataPage = new DataPage(page);
+    const dataPage = new WorkspaceDataPage(page);
     const datasetPage = await dataPage.clickAddDatasetButton();
 
     await datasetPage.selectCohorts(['All Participants']);
@@ -70,7 +70,7 @@ describe('Create Dataset', () => {
     await workspaceCard.clickWorkspaceName();
 
     // Click Add Cohorts button
-    const dataPage = new DataPage(page);
+    const dataPage = new WorkspaceDataPage(page);
     const addCohortsButton = await dataPage.getAddCohortsButton();
     await addCohortsButton.clickAndWait();
 

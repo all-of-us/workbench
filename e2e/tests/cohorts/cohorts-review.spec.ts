@@ -4,7 +4,7 @@ import CohortBuildPage from 'app/page/cohort-build-page';
 import CohortParticipantDetailPage from 'app/page/cohort-participant-detail-page';
 import CohortReviewModal from 'app/page/cohort-review-modal';
 import CohortReviewPage from 'app/page/cohort-review-page';
-import DataPage from 'app/page/data-page';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {waitForText} from 'utils/waits-utils';
 import {getPropValue} from 'utils/element-utils';
 
@@ -27,7 +27,7 @@ describe('Cohort review tests', () => {
 
     await findWorkspace(page).then(card => card.clickWorkspaceName());
 
-    const dataPage = new DataPage(page);
+    const dataPage = new WorkspaceDataPage(page);
     const cohortCard = await dataPage.createCohort();
     const cohortName = await cohortCard.getResourceName();
     console.log(`Created Cohort: "${cohortName}"`);

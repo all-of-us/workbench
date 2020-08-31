@@ -1,10 +1,10 @@
 import DataResourceCard, {CardType} from 'app/component/data-resource-card';
 import ExportToNotebookModal from 'app/component/export-to-notebook-modal';
 import Link from 'app/element/link';
-import DataPage, {TabLabelAlias} from 'app/page/data-page';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
-import {EllipsisMenuAction} from 'app/text-labels';
+import {EllipsisMenuAction, TabLabelAlias} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
@@ -24,7 +24,7 @@ describe('Create Dataset', () => {
     await workspaceCard.clickWorkspaceName();
 
     // Click Add Datasets button.
-    const dataPage = new DataPage(page);
+    const dataPage = new WorkspaceDataPage(page);
     const datasetBuildPage = await dataPage.clickAddDatasetButton();
 
     await datasetBuildPage.selectCohorts(['All Participants']);
@@ -91,7 +91,7 @@ describe('Create Dataset', () => {
     await findWorkspace(page).then(card => card.clickWorkspaceName());
 
     // Click Add Datasets button.
-    const dataPage = new DataPage(page);
+    const dataPage = new WorkspaceDataPage(page);
     const datasetBuildPage = await dataPage.clickAddDatasetButton();
 
     await datasetBuildPage.selectCohorts(['All Participants']);

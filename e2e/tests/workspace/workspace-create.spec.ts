@@ -1,5 +1,5 @@
 import Link from 'app/element/link';
-import DataPage from 'app/page/data-page';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
 import WorkspacesPage, {FieldSelector} from 'app/page/workspaces-page';
 import {signIn, performActions} from 'utils/test-utils';
 import Button from 'app/element/button';
@@ -73,7 +73,7 @@ describe('Creating new workspaces', () => {
 
   // helper function to check visible workspace link on Data page
   async function verifyWorkspaceLinkOnDataPage(workspaceName: string) {
-    const dataPage = new DataPage(page);
+    const dataPage = new WorkspaceDataPage(page);
     await dataPage.waitForLoad();
 
     const workspaceLink = new Link(page, `//a[text()='${workspaceName}']`);
