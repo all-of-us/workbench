@@ -20,7 +20,6 @@ import org.pmiops.workbench.mandrill.api.MandrillApi;
 import org.pmiops.workbench.mandrill.model.MandrillApiKeyAndMessage;
 import org.pmiops.workbench.mandrill.model.MandrillMessageStatus;
 import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
-import org.pmiops.workbench.test.Providers;
 
 public class MailServiceImplTest {
 
@@ -47,9 +46,9 @@ public class MailServiceImplTest {
 
     service =
         new MailServiceImpl(
-            Providers.of(mandrillApi),
-            Providers.of(cloudStorageService),
-            Providers.of(createWorkbenchConfig()));
+            () -> mandrillApi,
+            () -> (org.pmiops.workbench.google.CloudStorageService) cloudStorageService,
+            () -> createWorkbenchConfig());
   }
 
   @Test(expected = MessagingException.class)

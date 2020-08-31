@@ -4,7 +4,6 @@ import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.QPV_T
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.ROW_TO_INSERT_TIMESTAMP_FORMATTER;
 
 import com.google.cloud.bigquery.QueryParameterValue;
-import java.time.Instant;
 import java.util.function.Function;
 import org.pmiops.workbench.model.ReportingWorkspace;
 
@@ -24,10 +23,10 @@ public enum WorkspaceParameter implements QueryParameterColumn<ReportingWorkspac
       w -> QueryParameterValue.int64(w.getFakeSize())),
   CREATION_TIME(
       "creation_time",
-      w -> ROW_TO_INSERT_TIMESTAMP_FORMATTER.format(Instant.ofEpochMilli(w.getCreationTime())),
+      w -> ROW_TO_INSERT_TIMESTAMP_FORMATTER.format(w.getCreationTime().toInstant()),
       w ->
           QueryParameterValue.timestamp(
-              QPV_TIMESTAMP_FORMATTER.format(Instant.ofEpochMilli(w.getCreationTime()))));
+              QPV_TIMESTAMP_FORMATTER.format(w.getCreationTime().toInstant())));
 
   private final String parameterName;
   private final Function<ReportingWorkspace, Object> rowToInsertValueFunction;

@@ -7,8 +7,8 @@ import java.util.Random;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.model.ReportingResearcher;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.utils.LogFormatters;
@@ -30,16 +30,16 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
   // Define immutable value class to hold results of queries within a transaction. Mapping to
   // Reporting DTO classes will happen outside the transaction.
   private static class EntityBundle {
-    private final List<DbUser> users;
+    private final List<ReportingResearcher> researchers;
     private final List<DbWorkspace> workspaces;
 
-    public EntityBundle(List<DbUser> users, List<DbWorkspace> workspaces) {
-      this.users = users;
+    public EntityBundle(List<ReportingResearcher> researchers, List<DbWorkspace> workspaces) {
+      this.researchers = researchers;
       this.workspaces = workspaces;
     }
 
-    public List<DbUser> getUsers() {
-      return users;
+    public List<ReportingResearcher> getResearchers() {
+      return researchers;
     }
 
     public List<DbWorkspace> getWorkspaces() {
@@ -80,7 +80,7 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
     final ReportingSnapshot result =
         new ReportingSnapshot()
             .captureTimestamp(clock.millis())
-            .researchers(reportingMapper.toReportingResearcherList(entityBundle.getUsers()))
+            .researchers(entityBundle.getResearchers())
             .workspaces(workspaces);
     stopwatch.stop();
     log.info(LogFormatters.duration("Conversion to ReportingSnapshot", stopwatch.elapsed()));
@@ -89,7 +89,7 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
 
   private EntityBundle getApplicationDbData() {
     final Stopwatch stopwatch = stopwatchProvider.get().start();
-    final List<DbUser> users = userService.getAllUsers();
+    final List<ReportingResearcher> users = userService.getAllResearchers();
     final List<DbWorkspace> workspaces = workspaceService.getAllActiveWorkspaces();
     final EntityBundle result = new EntityBundle(users, workspaces);
     stopwatch.stop();

@@ -11,6 +11,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.timestampQpvToInstant;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.timestampStringToInstant;
+import static org.pmiops.workbench.utils.TemporalAssertions.assertTimeWithinTolerance;
 
 import com.google.cloud.bigquery.InsertAllRequest;
 import com.google.cloud.bigquery.InsertAllRequest.RowToInsert;
@@ -18,11 +19,10 @@ import com.google.cloud.bigquery.InsertAllResponse;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.TableResult;
-import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import java.time.Clock;
-import java.time.Duration;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +40,7 @@ import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.reporting.insertion.WorkspaceParameter;
 import org.pmiops.workbench.test.FakeClock;
-import org.pmiops.workbench.utils.TestMockFactory;
+import org.pmiops.workbench.testconfig.StopwatchTestConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -61,14 +61,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ReportingUploadServiceTest {
   private static final Instant NOW = Instant.parse("2000-01-01T00:00:00.00Z");
-  private static final Instant THEN = Instant.parse("1989-02-17T00:00:00.00Z");
+  private static final OffsetDateTime THEN = OffsetDateTime.parse("1989-02-17T00:00:00.00Z");
 
   private ReportingSnapshot reportingSnapshot;
   private ReportingSnapshot snapshotWithNulls;
   private ReportingSnapshot emptySnapshot;
 
   @MockBean private BigQueryService mockBigQueryService;
-  @MockBean private Stopwatch mockStopwatch;
 
   @Autowired
   @Qualifier("REPORTING_UPLOAD_SERVICE_DML_IMPL")
@@ -84,8 +83,11 @@ public class ReportingUploadServiceTest {
   private static final int WORKSPACE_COLUMN_COUNT = 5;
 
   @TestConfiguration
-  @Import({ReportingUploadServiceDmlImpl.class, ReportingUploadServiceStreamingImpl.class})
-  @MockBean(Stopwatch.class)
+  @Import({
+    ReportingUploadServiceDmlImpl.class,
+    ReportingUploadServiceStreamingImpl.class,
+    StopwatchTestConfiguration.class
+  })
   public static class config {
     @Bean
     public Clock getClock() {
@@ -129,19 +131,19 @@ public class ReportingUploadServiceTest {
                     new ReportingWorkspace()
                         .workspaceId(201L)
                         .name("Circle K")
-                        .creationTime(THEN.toEpochMilli())
+                        .creationTime(THEN)
                         .fakeSize(4444L)
                         .creatorId(101L),
                     new ReportingWorkspace()
                         .workspaceId(202L)
                         .name("Wyld Stallyns")
-                        .creationTime(THEN.toEpochMilli())
+                        .creationTime(THEN)
                         .fakeSize(4444L)
                         .creatorId(101L),
                     new ReportingWorkspace()
                         .workspaceId(203L)
                         .name("You-us said what we-us are saying right now.")
-                        .creationTime(THEN.toEpochMilli())
+                        .creationTime(THEN)
                         .fakeSize(4444L)
                         .creatorId(202L)));
 
@@ -170,19 +172,19 @@ public class ReportingUploadServiceTest {
                     new ReportingWorkspace()
                         .workspaceId(201L)
                         .name(null)
-                        .creationTime(THEN.toEpochMilli())
+                        .creationTime(THEN)
                         .fakeSize(4444L)
                         .creatorId(101L),
                     new ReportingWorkspace()
                         .workspaceId(202L)
                         .name("Work Work Work")
-                        .creationTime(THEN.toEpochMilli())
+                        .creationTime(THEN)
                         .fakeSize(4444L)
                         .creatorId(101L),
                     new ReportingWorkspace()
                         .workspaceId(203L)
                         .name(null)
-                        .creationTime(THEN.toEpochMilli())
+                        .creationTime(THEN)
                         .fakeSize(4444L)
                         .creatorId(202L)));
 
@@ -198,8 +200,6 @@ public class ReportingUploadServiceTest {
     doReturn(mockTableResult)
         .when(mockBigQueryService)
         .executeQuery(any(QueryJobConfiguration.class), anyLong());
-
-    TestMockFactory.stubStopwatch(mockStopwatch, Duration.ofMillis(250));
   }
 
   @Test
@@ -234,12 +234,9 @@ public class ReportingUploadServiceTest {
         QueryParameterValues.formatQuery(QueryParameterValues.replaceNamedParameters(job0));
     assertThat(expandedQuery).containsMatch("INSERT\\s+INTO");
 
-    assertThat(
-            (double)
-                timestampQpvToInstant(jobs.get(1).getNamedParameters().get("creation_time__0"))
-                    .toEpochMilli())
-        .isWithin(500.0)
-        .of(THEN.toEpochMilli());
+    assertTimeWithinTolerance(
+        timestampQpvToInstant(jobs.get(1).getNamedParameters().get("creation_time__0")),
+        THEN.toInstant());
   }
 
   @Test
@@ -265,7 +262,7 @@ public class ReportingUploadServiceTest {
             new ReportingWorkspace()
                 .workspaceId(303L)
                 .name("Circle K")
-                .creationTime(THEN.toEpochMilli())
+                .creationTime(THEN)
                 .fakeSize(4444L)
                 .creatorId(101L)));
 
@@ -284,7 +281,7 @@ public class ReportingUploadServiceTest {
         jobs.get(5).getNamedParameters().get("creation_time__0");
     assertThat(creationTime).isNotNull();
     final Instant instant = QueryParameterValues.timestampQpvToInstant(creationTime);
-    assertThat((double) instant.toEpochMilli()).isWithin(500.0).of(THEN.toEpochMilli());
+    assertTimeWithinTolerance(instant, THEN.toInstant());
   }
 
   @Test
@@ -310,7 +307,7 @@ public class ReportingUploadServiceTest {
     doReturn(mockInsertAllResponse)
         .when(mockBigQueryService)
         .insertAll(any(InsertAllRequest.class));
-    final ReportingJobResult result = reportingUploadServiceStreamingImpl.uploadSnapshot(snapshot);
+    reportingUploadServiceStreamingImpl.uploadSnapshot(snapshot);
     verify(mockBigQueryService, times(2)).insertAll(insertAllRequestCaptor.capture());
     final List<InsertAllRequest> requests = insertAllRequestCaptor.getAllValues();
 
@@ -331,7 +328,7 @@ public class ReportingUploadServiceTest {
         timestampStringToInstant(
             (String)
                 workspaceColumnValues.get(WorkspaceParameter.CREATION_TIME.getParameterName()));
-    assertThat((double) creationInstant.toEpochMilli()).isWithin(500.0).of(THEN.toEpochMilli());
+    assertTimeWithinTolerance(creationInstant, THEN.toInstant());
     assertThat(workspaceColumnValues.get(WorkspaceParameter.CREATOR_ID.getParameterName()))
         .isEqualTo(101L);
   }

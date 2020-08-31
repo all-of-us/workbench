@@ -3,6 +3,7 @@ package org.pmiops.workbench.db.dao;
 import java.util.List;
 import java.util.Set;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.model.ReportingResearcher;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -71,4 +72,8 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
 
     Long getUserCount();
   }
+
+  @Query(
+      "SELECT u.userId AS researcherId, u.username" + " FROM DbUser AS u" + " ORDER BY u.username")
+  List<ReportingResearcher> getAllResearchers();
 }

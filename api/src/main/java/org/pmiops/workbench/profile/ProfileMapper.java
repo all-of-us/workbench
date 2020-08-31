@@ -7,18 +7,18 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
-import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
+import org.pmiops.workbench.utils.mappers.TimeMappers;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 
 @Mapper(
     config = MapStructConfig.class,
     uses = {
       AddressMapper.class,
-      CommonMappers.class,
       DbStorageEnums.class,
       DemographicSurveyMapper.class,
       PageVisitMapper.class,
+      TimeMappers.class,
       UserMapper.class
     })
 public interface ProfileMapper {

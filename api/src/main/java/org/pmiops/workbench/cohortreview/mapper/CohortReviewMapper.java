@@ -11,10 +11,11 @@ import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
+import org.pmiops.workbench.utils.mappers.TimeMappers;
 
 @Mapper(
     config = MapStructConfig.class,
-    uses = {CommonMappers.class, DbStorageEnums.class})
+    uses = {CommonMappers.class, DbStorageEnums.class, TimeMappers.class})
 public interface CohortReviewMapper {
   @Mapping(target = "etag", source = "version", qualifiedByName = "cdrVersionToEtag")
   // used for pagination. Effectively deprecated, to remove with RW-4706

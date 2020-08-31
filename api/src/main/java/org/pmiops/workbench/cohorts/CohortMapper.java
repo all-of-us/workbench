@@ -7,10 +7,11 @@ import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
+import org.pmiops.workbench.utils.mappers.TimeMappers;
 
 @Mapper(
     config = MapStructConfig.class,
-    uses = {CommonMappers.class, UserDao.class})
+    uses = {CommonMappers.class, TimeMappers.class, UserDao.class})
 public interface CohortMapper {
 
   @Mapping(target = "cohortReviews", ignore = true)

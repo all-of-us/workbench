@@ -49,6 +49,7 @@ import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.ReportingResearcher;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
@@ -1028,5 +1029,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   @Override
   public Set<DbUser> findAllUsersWithAuthoritiesAndPageVisits() {
     return userDao.findAllUsersWithAuthoritiesAndPageVisits();
+  }
+
+  @Override
+  public List<ReportingResearcher> getAllResearchers() {
+    return userDao.getAllResearchers();
   }
 }

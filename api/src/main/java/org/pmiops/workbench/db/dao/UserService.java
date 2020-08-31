@@ -16,6 +16,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
+import org.pmiops.workbench.model.ReportingResearcher;
 import org.springframework.data.domain.Sort;
 
 public interface UserService {
@@ -119,4 +120,6 @@ public interface UserService {
   Set<DbUser> findAllUsersWithAuthoritiesAndPageVisits();
 
   Optional<DbUser> findUserWithAuthoritiesAndPageVisits(long userId);
+
+  List<ReportingResearcher> getAllResearchers();
 }

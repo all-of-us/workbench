@@ -7711,24 +7711,229 @@ definitions:
         type: string
         format: date-time
   ReportingResearcher:
-    description: >
-      Payload for the researcher table in the BigQuery reporting dataset.
-      Internal use only (not part of the API).
     type: object
     properties:
       username:
-        description: full Username (GSuite)
+        description: Researcher username (Gsuite username without  @domain.com).
         type: string
       firstName:
-        description: First name for the researcher
+        description: First (given) name for this researcher.
         type: string
       researcherId:
-        description: ID (PK) for this researcher.
+        description: Primary key for the researcher table.
         type: integer
         format: int64
       isDisabled:
-        description: true if this researcher has a disabled account
+        description: If true, this user's account is currently disabled.
         type: boolean
+        default: false
+      dataAccessLevel:
+        description: ''
+        type: integer
+        format: int64
+      contactEmail:
+        description: ''
+        type: string
+      lastName:
+        description: ''
+        type: string
+      phoneNumber:
+        description: ''
+        type: string
+      firstSignInTime:
+        description: ''
+        type: integer
+        format: int64
+      version:
+        description: ''
+        type: integer
+        format: int64
+      demographicSurveyCompletionTime:
+        description: ''
+        type: integer
+        format: int64
+      disabled:
+        description: ''
+        type: boolean
+        default: false
+      emailVerificationStatus:
+        description: ''
+        type: integer
+        format: int64
+      areaOfResearch:
+        description: ''
+        type: string
+      aboutYou:
+        description: ''
+        type: string
+      clusterCreateRetries:
+        description: ''
+        type: integer
+        format: int64
+      billingProjectRetries:
+        description: ''
+        type: integer
+        format: int64
+      betaAccessRequestTime:
+        description: ''
+        type: integer
+        format: int64
+      currentPosition:
+        description: ''
+        type: string
+      organization:
+        description: ''
+        type: string
+      creationNonce:
+        description: ''
+        type: integer
+        format: int64
+      moodleId:
+        description: ''
+        type: integer
+        format: int64
+      eraCommonsLinkedNihUsername:
+        description: ''
+        type: string
+      eraCommonsLinkExpireTime:
+        description: ''
+        type: string
+        format: date-time
+      eraCommonsCompletionTime:
+        description: ''
+        type: integer
+        format: int64
+      dataUseAgreementCompletionTime:
+        description: ''
+        type: integer
+        format: int64
+      dataUseAgreementBypassTime:
+        description: ''
+        type: integer
+        format: int64
+      complianceTrainingCompletionTime:
+        description: ''
+        type: integer
+        format: int64
+      complianceTrainingBypassTime:
+        description: ''
+        type: integer
+        format: int64
+      betaAccessBypassTime:
+        description: ''
+        type: integer
+        format: int64
+      emailVerificationCompletionTime:
+        description: ''
+        type: integer
+        format: int64
+      emailVerificationBypassTime:
+        description: ''
+        type: integer
+        format: int64
+      eraCommonsBypassTime:
+        description: ''
+        type: integer
+        format: int64
+      idVerificationCompletionTime:
+        description: ''
+        type: integer
+        format: int64
+      idVerificationBypassTime:
+        description: ''
+        type: integer
+        format: int64
+      twoFactorAuthCompletionTime:
+        description: ''
+        type: integer
+        format: int64
+      twoFactorAuthBypassTime:
+        description: ''
+        type: integer
+        format: int64
+      complianceTrainingExpirationTime:
+        description: ''
+        type: integer
+        format: int64
+      dataUseAgreementSignedVersion:
+        description: ''
+        type: integer
+        format: int64
+      freeTierCreditsLimitDollarsOverride:
+        description: ''
+        type: number
+        format: double
+      freeTierCreditsLimitDaysOverride:
+        description: ''
+        type: integer
+        format: int64
+      lastFreeTierCreditsTimeCheck:
+        description: ''
+        type: integer
+        format: int64
+      firstRegistrationCompletionTime:
+        description: ''
+        type: integer
+        format: int64
+      creationTime:
+        description: ''
+        type: integer
+        format: int64
+      lastModifiedTime:
+        description: ''
+        type: integer
+        format: int64
+      professionalUrl:
+        description: ''
+        type: string
+      streetAddress1:
+        description: ''
+        type: string
+      streetAddress2:
+        description: ''
+        type: string
+      zipCode:
+        description: ''
+        type: string
+      city:
+        description: ''
+        type: string
+      state:
+        description: ''
+        type: string
+      country:
+        description: ''
+        type: string
+      ethnicity:
+        description: ''
+        type: string
+      yearOfBirth:
+        description: ''
+        type: integer
+        format: int64
+      education:
+        description: ''
+        type: string
+      disability:
+        description: ''
+        type: string
+      identifiesAsLgbtq:
+        description: ''
+        type: boolean
+        default: false
+      lgbtqIdentity:
+        description: ''
+        type: string
+      institutionId:
+        description: ''
+        type: integer
+        format: int64
+      institutionalRole:
+        description: ''
+        type: string
+      institutionalRoleOtherText:
+        description: ''
+        type: string
   ReportingSnapshot:
     description: >
       Payload for upload to BigQuery reporting dataset. Internal use only (not part of the API).
@@ -7769,8 +7974,8 @@ definitions:
       creationTime:
         description: >
           timestamp (epoch millis) at workspace creation
-        type: integer
-        format: int64
+        type: string
+        format: date-time
   AccountPropertyUpdate:
     description: >
       A group of changes an admin can make to a user in the Edit Information card of the individual-user admin page.

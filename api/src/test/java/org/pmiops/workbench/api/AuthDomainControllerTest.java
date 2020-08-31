@@ -30,7 +30,6 @@ import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.UpdateUserDisabledRequest;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
-import org.pmiops.workbench.test.Providers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
@@ -79,7 +78,7 @@ public class AuthDomainControllerTest {
     FakeClock clock = new FakeClock(Instant.now());
     UserService userService =
         new UserServiceImpl(
-            Providers.of(config),
+            () -> config,
             userProvider,
             clock,
             new FakeLongRandom(12345),

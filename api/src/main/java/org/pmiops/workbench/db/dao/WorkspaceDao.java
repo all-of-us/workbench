@@ -4,11 +4,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.pmiops.workbench.db.ReportingProjections;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.model.BillingStatus;
+import org.pmiops.workbench.model.ReportingWorkspace;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -85,4 +87,22 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
 
     Long getWorkspaceCount();
   }
+
+  @Query(
+      value =
+          "SELECT w.workspace_id as workspaceId, w.creator_id AS creatorId, w.name,"
+              + " NULL AS fake_size, w.creation_Time AS creationTime"
+              + " FROM workspace w"
+              + " ORDER BY w.workspace_id",
+      nativeQuery = true)
+  List<ReportingWorkspace> getReportingWorkspaces();
+
+  @Query(
+      value =
+          "SELECT w.workspace_id as workspaceId, w.name,"
+              + " w.creation_Time AS creationTime"
+              + " FROM workspace w"
+              + " ORDER BY w.workspace_id",
+      nativeQuery = true)
+  List<ReportingProjections.Workspace> getReportingWorkspaceProjections();
 }

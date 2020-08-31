@@ -3,6 +3,7 @@ package org.pmiops.workbench.workspaces;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.pmiops.workbench.utils.TemporalAssertions.assertTimeWithinTolerance;
 
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -26,6 +27,7 @@ import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
+import org.pmiops.workbench.db.ReportingProjections;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -36,9 +38,11 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.profile.ProfileMapper;
+import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
@@ -65,6 +69,7 @@ public class WorkspaceServiceTest {
     ConceptSetMapperImpl.class,
     CommonMappers.class,
     DataSetMapperImpl.class,
+    TestJpaConfig.class,
     WorkspaceMapperImpl.class,
     WorkspaceServiceImpl.class
   })
@@ -388,5 +393,20 @@ public class WorkspaceServiceTest {
     List<DbUserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces();
     assertThat(recentWorkspaces.size()).isEqualTo(1);
     assertThat(recentWorkspaces.get(0).getWorkspaceId()).isEqualTo(ownedId);
+  }
+
+  @Test
+  public void testGetReportingWorkspaces() {
+    final List<ReportingWorkspace> workspaces = workspaceService.getAllReportingWorkspaces();
+    assertThat(workspaces).isNotEmpty();
+  }
+
+  @Test
+  public void testGetWorkspaceView1s() {
+    final List<ReportingProjections.Workspace> views =
+        workspaceDao.getReportingWorkspaceProjections();
+    assertThat(views).hasSize(5);
+
+    assertTimeWithinTolerance(views.get(0).getCreationTime().toInstant(), NOW);
   }
 }

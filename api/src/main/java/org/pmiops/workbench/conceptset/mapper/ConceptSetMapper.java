@@ -14,10 +14,11 @@ import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
+import org.pmiops.workbench.utils.mappers.TimeMappers;
 
 @Mapper(
     config = MapStructConfig.class,
-    uses = {CommonMappers.class})
+    uses = {CommonMappers.class, TimeMappers.class})
 public interface ConceptSetMapper {
 
   @Mapping(target = "id", source = "conceptSetId")

@@ -85,9 +85,7 @@ public class EgressEventServiceTest {
           .role(WorkspaceAccessLevel.OWNER)
           .userDatabaseId(111L)
           .userModel(USER_1)
-          .userAccountCreatedTime(
-              OffsetDateTime.parse(
-                  "2018-08-30T01:20+02:00", DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+          .userAccountCreatedTime(OffsetDateTime.parse("2018-08-30T01:20+02:00"));
 
   private static final String INSTITUTION_1_NAME = "Verily Life Sciences";
   private static final DbUser DB_USER_1 = workspaceAdminUserViewToUser(ADMIN_VIEW_1);

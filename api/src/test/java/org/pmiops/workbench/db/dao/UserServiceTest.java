@@ -13,6 +13,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
@@ -31,6 +32,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.model.ReportingResearcher;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV1;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
@@ -487,5 +489,17 @@ public class UserServiceTest {
     for (Authority auth : Authority.values()) {
       assertThat(userService.hasAuthority(user.getUserId(), auth)).isTrue();
     }
+  }
+
+  @Test
+  public void testGetAllResearchers() {
+    DbUser user2 = new DbUser();
+    user2.setUsername("pinky@allofus.info");
+    user2.setFamilyName("Pinky");
+    user2.setAreaOfResearch("What are we going to do tonight, Brain?");
+    userDao.save(user2);
+
+    final List<ReportingResearcher> researchers = userService.getAllResearchers();
+    assertThat(researchers).hasSize(2);
   }
 }

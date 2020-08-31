@@ -4,10 +4,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 
-import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import java.time.Clock;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Random;
@@ -18,13 +16,13 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.ReportingResearcher;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.testconfig.StopwatchTestConfiguration;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -43,7 +41,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class ReportingSnapshotServiceTest {
   private static final String FAMILY_NAME = "Bobberson";
   private static final String CONTACT_EMAIL = "bob@example.com";
-  private static final String PRIMARY_EMAIL = "bob@researchallofus.org";
+  private static final String PRIMARY_USERNAME = "bob@researchallofus.org";
   private static final String ORGANIZATION = "Test";
   private static final String CURRENT_POSITION = "Tester";
   private static final String RESEARCH_PURPOSE = "To test things";
@@ -54,7 +52,6 @@ public class ReportingSnapshotServiceTest {
 
   @MockBean private Random mockRandom;
   @MockBean private UserService mockUserService;
-  @MockBean private Stopwatch mockStopwatch;
   @MockBean private WorkspaceService mockWorkspaceService;
 
   @Autowired private ReportingSnapshotService reportingSnapshotService;
@@ -66,7 +63,8 @@ public class ReportingSnapshotServiceTest {
     CommonMappers.class,
     ReportingMapperImpl.class,
     ReportingSnapshotServiceImpl.class,
-    ReportingUploadServiceDmlImpl.class
+    ReportingUploadServiceDmlImpl.class,
+    StopwatchTestConfiguration.class
   })
   @MockBean({BigQueryService.class})
   public static class config {
@@ -89,7 +87,6 @@ public class ReportingSnapshotServiceTest {
             })
         .when(mockRandom)
         .nextLong();
-    TestMockFactory.stubStopwatch(mockStopwatch, Duration.ofMillis(100));
   }
 
   public void mockWorkspaces() {
@@ -121,7 +118,7 @@ public class ReportingSnapshotServiceTest {
     assertThat(researcher1.getResearcherId()).isEqualTo(USER_ID_1);
     assertThat(researcher1.getIsDisabled()).isEqualTo(USER_DISABLED_1);
     assertThat(researcher1.getFirstName()).isEqualTo(USER_GIVEN_NAME_1);
-    assertThat(researcher1.getUsername()).isEqualTo(PRIMARY_EMAIL);
+    assertThat(researcher1.getUsername()).isEqualTo(PRIMARY_USERNAME);
 
     assertThat(snapshot.getWorkspaces()).hasSize(2);
     final ReportingWorkspace workspace1 = snapshot.getWorkspaces().get(0);
@@ -132,25 +129,28 @@ public class ReportingSnapshotServiceTest {
   }
 
   private void mockUsers() {
-    final List<DbUser> users =
+    final List<ReportingResearcher> users =
         ImmutableList.of(
-            createFakeUser(USER_GIVEN_NAME_1, USER_DISABLED_1, USER_ID_1),
-            createFakeUser("Homer", false, 102L));
-    doReturn(users).when(mockUserService).getAllUsers();
+            createResearcher(USER_GIVEN_NAME_1, USER_DISABLED_1, USER_ID_1),
+            createResearcher("Homer", false, 102L));
+    doReturn(users).when(mockUserService).getAllResearchers();
   }
 
-  private DbUser createFakeUser(String givenName, boolean disabled, long userId) {
-    DbUser user = new DbUser();
-    user.setUserId(userId);
-    user.setGivenName(givenName);
-    user.setFamilyName(FAMILY_NAME);
-    user.setUsername(PRIMARY_EMAIL);
-    user.setContactEmail(CONTACT_EMAIL);
-    user.setOrganization(ORGANIZATION);
-    user.setCurrentPosition(CURRENT_POSITION);
-    user.setAreaOfResearch(RESEARCH_PURPOSE);
-    user.setDisabled(disabled);
-    return user;
+  private ReportingResearcher createResearcher(String givenName, boolean disabled, long userId) {
+    return new ReportingResearcher()
+        .researcherId(userId)
+        .firstName(givenName)
+        .lastName(FAMILY_NAME)
+        .username(PRIMARY_USERNAME)
+        .contactEmail(CONTACT_EMAIL)
+        .organization(ORGANIZATION)
+        .currentPosition(CURRENT_POSITION)
+        .areaOfResearch(RESEARCH_PURPOSE)
+        .disabled(disabled)
+        .streetAddress1("101 Alamo Way")
+        .city("San Antonio")
+        .state("Texas")
+        .country("Texas");
   }
 
   private DbWorkspace stubDbWorkspace(

@@ -36,7 +36,8 @@ import org.pmiops.workbench.model.WorkspaceResponse;
       ConceptSetMapper.class,
       DataSetMapper.class,
       DbStorageEnums.class,
-      FirecloudMapper.class
+      FirecloudMapper.class,
+      TimeMappers.class
     })
 public interface WorkspaceMapper {
 

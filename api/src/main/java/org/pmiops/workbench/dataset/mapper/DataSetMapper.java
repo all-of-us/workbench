@@ -25,12 +25,12 @@ import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
-import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
+import org.pmiops.workbench.utils.mappers.TimeMappers;
 
 @Mapper(
     config = MapStructConfig.class,
-    uses = {CommonMappers.class, ConceptSetService.class, CohortService.class})
+    uses = {ConceptSetService.class, CohortService.class, TimeMappers.class})
 public interface DataSetMapper {
 
   // This is a lightweight version of a client mapper that doesn't make any extra db calls for extra
