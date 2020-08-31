@@ -70,8 +70,7 @@ describe('Share workspace', () => {
       const workspaceName = await workspaceCard.getWorkspaceName();
 
       // Open the Share modal
-      const menu = workspaceCard.getEllipsis();
-      await menu.clickAction(EllipsisMenuAction.Share, {waitForNav: false});
+      await workspaceCard.clickEllipsisAction(EllipsisMenuAction.Share, {waitForNav: false});
 
       const shareModal = new ShareModal(page);
       await shareModal.waitUntilVisible();

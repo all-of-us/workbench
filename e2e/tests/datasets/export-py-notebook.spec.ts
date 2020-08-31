@@ -102,7 +102,7 @@ describe('Create Dataset', () => {
 
     const resourceCard = new DataResourceCard(page);
     const datasetCard = await resourceCard.findCard(datasetName, CardType.Dataset);
-    await (datasetCard.getEllipsis().clickAction(EllipsisMenuAction.exportToNotebook, {waitForNav: false}));
+    await datasetCard.clickEllipsisAction(EllipsisMenuAction.exportToNotebook, {waitForNav: false});
 
     const exportModal = new ExportToNotebookModal(page);
     await exportModal.waitForLoad();

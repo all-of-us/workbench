@@ -115,8 +115,7 @@ describe('Create Dataset', () => {
 
     // Edit the dataset to include "All Participants".
     const datasetCard = await resourceCard.findCard(datasetName)
-    const menu = datasetCard.getEllipsis();
-    await menu.clickAction(EllipsisMenuAction.Edit);
+    await datasetCard.clickEllipsisAction(EllipsisMenuAction.Edit);
     await waitWhileLoading(page);
 
     await datasetPage.selectCohorts(['All Participants']);

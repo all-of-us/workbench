@@ -1,14 +1,13 @@
 import {ElementHandle, Page} from 'puppeteer';
 import {WorkspaceAccessLevel} from 'app/text-labels';
-import EllipsisMenu from 'app/component/ellipsis-menu';
 import * as fp from 'lodash/fp';
 import DataPage from 'app/page/data-page';
 import {getPropValue} from 'utils/element-utils';
+import CardBase from './card-base';
 
 const WorkspaceCardSelector = {
   cardRootXpath: '//*[child::*[@data-test-id="workspace-card"]]', // finds 'workspace-card' parent container node
   cardNameXpath: '@data-test-id="workspace-card-name"',
-  ellipsisXpath: './/clr-icon[@shape="ellipsis-vertical"]',
   accessLevelXpath: './/*[@data-test-id="workspace-access-level"]',
 }
 
@@ -17,9 +16,7 @@ const WorkspaceCardSelector = {
  * WorkspaceCard represents workspace card user found on Home and All Workspaces pages.
  * A Workspace Card is element that contains a child element with attribute: @data-test-id='workspace-card'
  */
-export default class WorkspaceCard {
-
-  private cardElement: ElementHandle;
+export default class WorkspaceCard extends CardBase {
 
   // **********************
   // static functions
@@ -66,8 +63,8 @@ export default class WorkspaceCard {
   }
 
 
-  constructor(private readonly page: Page) {
-
+  constructor(page: Page) {
+    super(page);
   }
 
   async findCard(workspaceName: string): Promise<WorkspaceCard | null> {
@@ -85,14 +82,6 @@ export default class WorkspaceCard {
   async getWorkspaceName(): Promise<string> {
     const workspaceNameElemt = await this.cardElement.$x(`.//*[${WorkspaceCardSelector.cardNameXpath}]`);
     return getPropValue<string>(workspaceNameElemt[0], 'innerText');
-  }
-
-  asElementHandle(): ElementHandle {
-    return this.cardElement.asElement();
-  }
-
-  getEllipsis(): EllipsisMenu {
-    return new EllipsisMenu(this.page, WorkspaceCardSelector.ellipsisXpath, this.asElementHandle());
   }
 
   /**

@@ -39,8 +39,7 @@ export default class WorkspaceAnalysisPage extends AuthenticatedPage {
     */
   async deleteNotebook(notebookName: string): Promise<string[]> {
     const resourceCard = await DataResourceCard.findCard(this.page, notebookName);
-    const menu = resourceCard.getEllipsis();
-    await menu.clickAction(EllipsisMenuAction.Delete, {waitForNav: false});
+    await resourceCard.clickEllipsisAction(EllipsisMenuAction.Delete, {waitForNav: false});
 
     const modal = new Modal(this.page);
     const modalContentText = await modal.getTextContent();
@@ -112,8 +111,7 @@ export default class WorkspaceAnalysisPage extends AuthenticatedPage {
 
   async renameNotebook(notebookName: string, newNotebookName: string): Promise<string[]> {
     const notebookCard = await DataResourceCard.findCard(this.page, notebookName);
-    const menu = notebookCard.getEllipsis();
-    await menu.clickAction(EllipsisMenuAction.Rename, {waitForNav: false});
+    await notebookCard.clickEllipsisAction(EllipsisMenuAction.Rename, {waitForNav: false});
     const modal = new Modal(this.page);
     const modalTextContents = await modal.getTextContent();
     const newNameInput = new Textbox(this.page, `${modal.getXpath()}//*[@id="new-name"]`);
@@ -131,8 +129,7 @@ export default class WorkspaceAnalysisPage extends AuthenticatedPage {
   async duplicateNotebook(notebookName: string): Promise<string> {
     const resourceCard = new DataResourceCard(this.page);
     const notebookCard = await resourceCard.findCard(notebookName, CardType.Notebook);
-    const menu = notebookCard.getEllipsis();
-    await menu.clickAction(EllipsisMenuAction.Duplicate, {waitForNav: false});
+    await notebookCard.clickEllipsisAction(EllipsisMenuAction.Duplicate, {waitForNav: false});
     await waitWhileLoading(this.page);
     return `Duplicate of ${notebookName}`; // name of clone notebook
   }
@@ -147,8 +144,7 @@ export default class WorkspaceAnalysisPage extends AuthenticatedPage {
     // Open Copy modal.s
     const resourceCard = new DataResourceCard(this.page);
     const notebookCard = await resourceCard.findCard(notebookName, CardType.Notebook);
-    const ellipsisMenu = notebookCard.getEllipsis();
-    await ellipsisMenu.clickAction(EllipsisMenuAction.CopyToAnotherWorkspace, {waitForNav: false});
+    await notebookCard.clickEllipsisAction(EllipsisMenuAction.CopyToAnotherWorkspace, {waitForNav: false});
     // Fill out modal fields.
     const copyModal = await new CopyModal(this.page);
     await copyModal.copyToAnotherWorkspace(destinationWorkspace, destinationNotebookName);
