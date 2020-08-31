@@ -6,6 +6,7 @@ export interface XPathOptions {
   ancestorLevel?: number;
   iconShape?: string;
   startsWith?: string;
+  dataTestId? : string;
 }
 
 export enum ElementType {
