@@ -32,7 +32,6 @@ import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
-import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
@@ -125,9 +124,6 @@ public class CohortReviewControllerTest {
   private DbCohortAnnotationDefinition booleanAnnotationDefinition;
   private DbCohortAnnotationDefinition integerAnnotationDefinition;
   private DbParticipantCohortAnnotation participantAnnotation;
-
-  @Autowired private CohortBuilderService cohortBuilderService;
-
   @Autowired private CdrVersionDao cdrVersionDao;
 
   @Autowired private CBCriteriaDao cbCriteriaDao;
