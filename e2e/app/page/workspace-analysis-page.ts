@@ -1,9 +1,9 @@
-import DataResourceCard, {CardType} from 'app/component/data-resource-card';
+import DataResourceCard from 'app/component/data-resource-card';
 import Modal from 'app/component/modal';
 import NewNotebookModal from 'app/component/new-notebook-modal';
 import Link from 'app/element/link';
 import Textbox from 'app/element/textbox';
-import {EllipsisMenuAction, Language, LinkText} from 'app/text-labels';
+import {EllipsisMenuAction, Language, LinkText, ResourceCard} from 'app/text-labels';
 import {Page} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
@@ -110,7 +110,7 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
    */
   async duplicateNotebook(notebookName: string): Promise<string> {
     const resourceCard = new DataResourceCard(this.page);
-    const notebookCard = await resourceCard.findCard(notebookName, CardType.Notebook);
+    const notebookCard = await resourceCard.findCard(notebookName, ResourceCard.Notebook);
     await notebookCard.clickEllipsisAction(EllipsisMenuAction.Duplicate, {waitForNav: false});
     await waitWhileLoading(this.page);
     return `Duplicate of ${notebookName}`; // name of clone notebook
@@ -125,7 +125,7 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
   async copyNotebookToWorkspace(notebookName: string, destinationWorkspace: string, destinationNotebookName?: string): Promise<void> {
     // Open Copy modal.s
     const resourceCard = new DataResourceCard(this.page);
-    const notebookCard = await resourceCard.findCard(notebookName, CardType.Notebook);
+    const notebookCard = await resourceCard.findCard(notebookName, ResourceCard.Notebook);
     await notebookCard.clickEllipsisAction(EllipsisMenuAction.CopyToAnotherWorkspace, {waitForNav: false});
     // Fill out modal fields.
     const copyModal = await new CopyModal(this.page);

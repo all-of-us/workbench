@@ -1,4 +1,4 @@
-import DataResourceCard, {CardType} from 'app/component/data-resource-card';
+import DataResourceCard from 'app/component/data-resource-card';
 import Modal from 'app/component/modal';
 import Navigation, {NavLink} from 'app/component/navigation';
 import WorkspaceCard from 'app/component/workspace-card';
@@ -7,7 +7,7 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
-import {EllipsisMenuAction, Language, LinkText, WorkspaceAccessLevel, TabLabel} from 'app/text-labels';
+import {EllipsisMenuAction, Language, LinkText, WorkspaceAccessLevel, TabLabel, ResourceCard} from 'app/text-labels';
 import {config} from 'resources/workbench-config';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn, signInAs, waitWhileLoading} from 'utils/test-utils';
@@ -78,7 +78,7 @@ describe('Workspace reader Jupyter notebook action tests', () => {
 
     // Notebook actions Rename, Duplicate and Delete actions are disabled.
     const dataResourceCard = new DataResourceCard(newPage);
-    const menu = await dataResourceCard.findCard(notebookName, CardType.Notebook).then(card => card.getEllipsis());
+    const menu = await dataResourceCard.findCard(notebookName, ResourceCard.Notebook).then(card => card.getEllipsis());
     await menu.clickEllipsis(); // open ellipsis menu.
     expect(await menu.isDisabled(EllipsisMenuAction.Rename)).toBe(true);
     expect(await menu.isDisabled(EllipsisMenuAction.Duplicate)).toBe(true);
@@ -110,7 +110,7 @@ describe('Workspace reader Jupyter notebook action tests', () => {
     expect(linkDisplayed).toBe(true);
 
     // Verify copied notebook exists in collaborator Workspace.
-    const notebookCard = await dataResourceCard.findCard(copiedNotebookName, CardType.Notebook);
+    const notebookCard = await dataResourceCard.findCard(copiedNotebookName, ResourceCard.Notebook);
     expect(notebookCard).toBeTruthy();
 
     // Notebook actions Rename, Duplicate, Delete and Copy to another Workspace actions are avaliable to click.

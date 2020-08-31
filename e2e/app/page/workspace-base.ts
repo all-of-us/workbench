@@ -1,11 +1,11 @@
 import {Page} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
-import DataResourceCard, {CardType} from 'app/component/data-resource-card';
+import DataResourceCard from 'app/component/data-resource-card';
 import Modal from 'app/component/modal';
 import Link from 'app/element/link';
 import {buildXPath} from 'app/xpath-builders';
 import {ElementType} from 'app/xpath-options';
-import {EllipsisMenuAction, LinkText, TabLabel} from 'app/text-labels';
+import {EllipsisMenuAction, LinkText, ResourceCard, TabLabel} from 'app/text-labels';
 import AuthenticatedPage from './authenticated-page';
 
 
@@ -33,7 +33,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * Delete ConceptSet, Dataset or Cohort thru Ellipsis menu located inside the resource card.
    * @param {string} resourceName
    */
-  async deleteResource(resourceName: string, resourceType: CardType): Promise<string[]> {
+  async deleteResource(resourceName: string, resourceType: ResourceCard): Promise<string[]> {
     const resourceCard = new DataResourceCard(this.page);
     const card = await resourceCard.findCard(resourceName, resourceType);
     if (!card) {
@@ -48,16 +48,16 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
 
     let link;
     switch (resourceType) {
-    case CardType.Cohort:
+    case ResourceCard.Cohort:
       link = LinkText.DeleteCohort;
       break;
-    case CardType.ConceptSet:
+    case ResourceCard.ConceptSet:
       link = LinkText.DeleteConceptSet;
       break;
-    case CardType.Dataset:
+    case ResourceCard.Dataset:
       link = LinkText.DeleteDataset;
       break;
-    case CardType.Notebook:
+    case ResourceCard.Notebook:
       link = LinkText.DeleteNotebook;
       break;
     default:

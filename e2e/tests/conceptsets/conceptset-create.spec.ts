@@ -1,8 +1,8 @@
 import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
-import DataResourceCard, {CardType} from 'app/component/data-resource-card';
+import DataResourceCard from 'app/component/data-resource-card';
 import ConceptsetActionsPage from 'app/page/conceptset-actions-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {TabLabel} from 'app/text-labels';
+import {ResourceCard, TabLabel} from 'app/text-labels';
 import {findWorkspace, signIn} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
 
@@ -70,7 +70,7 @@ describe('Create Concept Sets from Domains', () => {
     await dataPage.openTab(TabLabel.Data);
     await dataPage.openTab(TabLabel.ConceptSets, {waitPageChange: false});
 
-    const modalTextContent = await dataPage.deleteResource(conceptName, CardType.ConceptSet);
+    const modalTextContent = await dataPage.deleteResource(conceptName, ResourceCard.ConceptSet);
     expect(modalTextContent).toContain(`Are you sure you want to delete Concept Set: ${conceptName}?`);
   });
 
@@ -153,18 +153,18 @@ describe('Create Concept Sets from Domains', () => {
     await dataPage.openTab(TabLabel.Datasets, {waitPageChange: false});
 
     const resourceCard = new DataResourceCard(page);
-    const dataSetExists = await resourceCard.cardExists(datasetName, CardType.Dataset);
+    const dataSetExists = await resourceCard.cardExists(datasetName, ResourceCard.Dataset);
     expect(dataSetExists).toBe(true);
 
     // Delete Dataset.
-    const textContent = await dataPage.deleteResource(datasetName, CardType.Dataset);
+    const textContent = await dataPage.deleteResource(datasetName, ResourceCard.Dataset);
     expect(textContent).toContain(`Are you sure you want to delete Dataset: ${datasetName}?`);
 
     // Delete Concept Set.
     await dataPage.openTab(TabLabel.ConceptSets, {waitPageChange: false});
 
-    await dataPage.deleteResource(conceptName1, CardType.ConceptSet);
-    await dataPage.deleteResource(conceptName2, CardType.ConceptSet);
+    await dataPage.deleteResource(conceptName1, ResourceCard.ConceptSet);
+    await dataPage.deleteResource(conceptName2, ResourceCard.ConceptSet);
   });
 
 });

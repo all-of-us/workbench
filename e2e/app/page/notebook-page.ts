@@ -2,7 +2,7 @@ import {Frame, Page} from 'puppeteer';
 import {getPropValue} from 'utils/element-utils';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
-import {CardType} from 'app/component/data-resource-card';
+import {ResourceCard} from 'app/text-labels';
 import AuthenticatedPage from './authenticated-page';
 import NotebookCell, {CellType} from './notebook-cell';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
@@ -187,7 +187,7 @@ export default class NotebookPage extends AuthenticatedPage {
    */
   async deleteNotebook(notebookName: string): Promise<void> {
     const analysisPage = await this.goAnalysisPage();
-    await analysisPage.deleteResource(notebookName, CardType.Notebook);
+    await analysisPage.deleteResource(notebookName, ResourceCard.Notebook);
   }
 
   private async getIFrame(): Promise<Frame> {

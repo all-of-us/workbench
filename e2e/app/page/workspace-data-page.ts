@@ -1,11 +1,11 @@
 import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
-import DataResourceCard, {CardType} from 'app/component/data-resource-card';
+import DataResourceCard from 'app/component/data-resource-card';
 import EllipsisMenu from 'app/component/ellipsis-menu';
 import Modal from 'app/component/modal';
 import ClrIconLink from 'app/element/clr-icon-link';
 import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
-import {EllipsisMenuAction, Language, LinkText, TabLabel} from 'app/text-labels';
+import {EllipsisMenuAction, Language, LinkText, ResourceCard, TabLabel} from 'app/text-labels';
 import {ElementHandle, Page} from 'puppeteer';
 import {makeRandomName} from 'utils/str-utils';
 import {waitWhileLoading} from 'utils/test-utils';
@@ -80,7 +80,7 @@ export default class WorkspaceDataPage extends WorkspaceBase {
    */
   async exportToNotebook(datasetName: string, notebookName: string): Promise<void> {
     const resourceCard = new DataResourceCard(this.page);
-    const datasetCard = await resourceCard.findCard(datasetName, CardType.Dataset);
+    const datasetCard = await resourceCard.findCard(datasetName, ResourceCard.Dataset);
     await datasetCard.clickEllipsisAction(EllipsisMenuAction.exportToNotebook, {waitForNav: false});
     console.log(`Exported Dataset "${datasetName}" to notebook "${notebookName}"`);
   }

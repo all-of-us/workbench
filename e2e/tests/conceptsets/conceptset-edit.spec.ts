@@ -1,11 +1,11 @@
 import {Domain} from 'app/component/concept-domain-card';
-import DataResourceCard, {CardType} from 'app/component/data-resource-card';
+import DataResourceCard from 'app/component/data-resource-card';
 import WorkspaceCard from 'app/component/workspace-card';
 import ConceptsetActionsPage from 'app/page/conceptset-actions-page';
 import ConceptsetPage from 'app/page/conceptset-page';
 import {SaveOption} from 'app/page/conceptset-save-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {LinkText, TabLabel} from 'app/text-labels';
+import {LinkText, ResourceCard, TabLabel} from 'app/text-labels';
 import {makeRandomName, makeString} from 'utils/str-utils';
 import {findWorkspace, signIn} from 'utils/test-utils';
 import Link from 'app/element/link';
@@ -89,7 +89,7 @@ describe('Editing and Copying Concept Sets', () => {
     await (new Link(page, `//a[text()="${workspaceName}"]`)).click();
     await dataPage.waitForLoad();
     await dataPage.openTab(TabLabel.ConceptSets, {waitPageChange: false});
-    await dataPage.deleteResource(newName, CardType.ConceptSet);
+    await dataPage.deleteResource(newName, ResourceCard.ConceptSet);
   });
 
   /**
@@ -143,13 +143,13 @@ describe('Editing and Copying Concept Sets', () => {
     expect(url).toContain(copyToWorkspace.replace(/-/g, ''));
 
     const resourceCard = new DataResourceCard(page);
-    const exists = await resourceCard.cardExists(conceptSetCopyName, CardType.ConceptSet);
+    const exists = await resourceCard.cardExists(conceptSetCopyName, ResourceCard.ConceptSet);
     expect(exists).toBe(true);
 
     console.log(`Copied Concept Set: "${conceptName} from workspace: "${copyFromWorkspace}" to Concept Set: "${conceptSetCopyName}" in another workspace: "${copyToWorkspace}"`)
 
     // Delete Concept Sets
-    await dataPage.deleteResource(conceptSetCopyName, CardType.ConceptSet);
+    await dataPage.deleteResource(conceptSetCopyName, ResourceCard.ConceptSet);
   });
 
 

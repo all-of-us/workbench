@@ -1,10 +1,10 @@
-import DataResourceCard, {CardType} from 'app/component/data-resource-card';
+import DataResourceCard from 'app/component/data-resource-card';
 import ExportToNotebookModal from 'app/component/export-to-notebook-modal';
 import Link from 'app/element/link';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {EllipsisMenuAction, TabLabel} from 'app/text-labels';
+import {EllipsisMenuAction, ResourceCard, TabLabel} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
@@ -62,13 +62,13 @@ describe('Create Dataset', () => {
 
     // Verify new notebook exists.
     const resourceCard = new DataResourceCard(page);
-    const notebookExists = await resourceCard.cardExists(newNotebookName, CardType.Notebook);
+    const notebookExists = await resourceCard.cardExists(newNotebookName, ResourceCard.Notebook);
     expect(notebookExists).toBe(true);
 
     const origCardsCount = (await DataResourceCard.findAllCards(page)).length;
 
     // Delete notebook
-    await analysiPage.deleteResource(newNotebookName, CardType.Notebook);
+    await analysiPage.deleteResource(newNotebookName, ResourceCard.Notebook);
 
     // Resource cards count decrease by 1.
     const newCardsCount = (await DataResourceCard.findAllCards(page)).length;
@@ -78,7 +78,7 @@ describe('Create Dataset', () => {
     await dataPage.openTab(TabLabel.Data);
     await dataPage.openTab(TabLabel.Datasets, {waitPageChange: false});
 
-    await dataPage.deleteResource(newDatasetName, CardType.Dataset);
+    await dataPage.deleteResource(newDatasetName, ResourceCard.Dataset);
   });
 
   /**
@@ -101,7 +101,7 @@ describe('Create Dataset', () => {
     await waitWhileLoading(page);
 
     const resourceCard = new DataResourceCard(page);
-    const datasetCard = await resourceCard.findCard(datasetName, CardType.Dataset);
+    const datasetCard = await resourceCard.findCard(datasetName, ResourceCard.Dataset);
     await datasetCard.clickEllipsisAction(EllipsisMenuAction.exportToNotebook, {waitForNav: false});
 
     const exportModal = new ExportToNotebookModal(page);
@@ -112,12 +112,12 @@ describe('Create Dataset', () => {
 
     // Verify notebook created successfully.
     await dataPage.openTab(TabLabel.Analysis);
-    const cardExists = await resourceCard.cardExists(notebookName, CardType.Notebook);
+    const cardExists = await resourceCard.cardExists(notebookName, ResourceCard.Notebook);
     expect(cardExists).toBe(true);
 
     // Delete notebook.
     const analysisPage = new WorkspaceAnalysisPage(page);
-    await analysisPage.deleteResource(notebookName, CardType.Notebook);
+    await analysisPage.deleteResource(notebookName, ResourceCard.Notebook);
   });
 
 });

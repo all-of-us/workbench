@@ -81,3 +81,11 @@ export enum TabLabel {
    ConceptSets = 'Concept Sets',
    ShowAll = 'Show All',
 }
+
+export enum ResourceCard {
+   Cohort = 'Cohort',
+   ConceptSet = 'Concept Set',
+   Notebook = 'Notebook',
+   Dataset = 'Dataset',
+   CohortReview = 'Cohort Review',
+}

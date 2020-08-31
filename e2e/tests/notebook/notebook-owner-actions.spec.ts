@@ -1,7 +1,7 @@
-import DataResourceCard, {CardType} from 'app/component/data-resource-card';
+import DataResourceCard from 'app/component/data-resource-card';
 import NewNotebookModal from 'app/component/new-notebook-modal';
 import WorkspacesPage from 'app/page/workspaces-page';
-import {LinkText} from 'app/text-labels';
+import {LinkText, ResourceCard} from 'app/text-labels';
 import {makeRandomName, makeWorkspaceName} from 'utils/str-utils';
 import {signIn} from 'utils/test-utils';
 
@@ -53,7 +53,7 @@ describe('Workspace owner Jupyter notebook action tests', () => {
     // Page remain unchanged, still should be the Analysis page.
     expect(await workspaceAnalysisPage.isLoaded()).toBe(true);
 
-    await workspaceAnalysisPage.deleteResource(notebookName, CardType.Notebook);
+    await workspaceAnalysisPage.deleteResource(notebookName, ResourceCard.Notebook);
   })
 
   test('Notebook can be duplicated by workspace owner', async () => {
@@ -62,8 +62,8 @@ describe('Workspace owner Jupyter notebook action tests', () => {
     const workspaceAnalysisPage = await workspacesPage.createNotebook({workspaceName, notebookName});
     const duplNotebookName = await workspaceAnalysisPage.duplicateNotebook(notebookName);
     // Delete clone notebook.
-    await workspaceAnalysisPage.deleteResource(duplNotebookName, CardType.Notebook);
-    await workspaceAnalysisPage.deleteResource(notebookName, CardType.Notebook);
+    await workspaceAnalysisPage.deleteResource(duplNotebookName, ResourceCard.Notebook);
+    await workspaceAnalysisPage.deleteResource(notebookName, ResourceCard.Notebook);
   })
 
   test('Notebook can be renamed by workspace owner', async () => {
@@ -76,13 +76,13 @@ describe('Workspace owner Jupyter notebook action tests', () => {
     expect(modalTextContents).toContain(`Enter new name for ${notebookName}.ipynb`);
 
     const newNotebookCard = new DataResourceCard(page);
-    let cardExists = await newNotebookCard.cardExists(newName, CardType.Notebook);
+    let cardExists = await newNotebookCard.cardExists(newName, ResourceCard.Notebook);
     expect(cardExists).toBe(true);
 
-    cardExists = await newNotebookCard.cardExists(notebookName, CardType.Notebook);
+    cardExists = await newNotebookCard.cardExists(notebookName, ResourceCard.Notebook);
     expect(cardExists).toBe(false);
 
-    await workspaceAnalysisPage.deleteResource(newName, CardType.Notebook);
+    await workspaceAnalysisPage.deleteResource(newName, ResourceCard.Notebook);
   })
 
 
