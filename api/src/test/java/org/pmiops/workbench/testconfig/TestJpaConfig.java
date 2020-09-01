@@ -3,6 +3,7 @@ package org.pmiops.workbench.testconfig;
 import java.util.Properties;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
+import org.springframework.boot.test.autoconfigure.jdbc.TestDatabaseAutoConfiguration;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -45,7 +46,7 @@ public class TestJpaConfig {
   public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
     final LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
     em.setDataSource(dataSource());
-    em.setPackagesToScan(new String[] {"org.pmiops.workbench.cdr", "org.pmiops.workbench.db"});
+    em.setPackagesToScan("org.pmiops.workbench.cdr", "org.pmiops.workbench.db");
     em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
     em.setJpaProperties(additionalProperties());
     return em;
@@ -58,6 +59,8 @@ public class TestJpaConfig {
     return transactionManager;
   }
 
+//  @Bean
+//  public TestDatabaseAutoConfiguration.EmbeddedDataSourceFactoryBean
   public final Properties additionalProperties() {
     final Properties hibernateProperties = new Properties();
 

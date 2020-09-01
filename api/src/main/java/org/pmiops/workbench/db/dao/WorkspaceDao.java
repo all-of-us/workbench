@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -90,17 +91,17 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
 
   @Query(
       value =
-          "SELECT w.workspace_id, w.name,"
-              + " w.creation_Time"
-              + " FROM workspace w"
-              + " ORDER BY w.workspace_id",
-      nativeQuery = true)
-//@Query(
-//    value =
-//        "SELECT workrspaceId, name,"
-//            + " w.creation_time"
-//            + " FROM workspace w"
-//            + " ORDER BY w.workspace_id")
-
+          "SELECT w.workspaceId, w.name,"
+              + " w.creationTime"
+              + " FROM DbWorkspace w"
+              + " ORDER BY w.workrspaceId")
   List<ReportingProjections.Workspace> getReportingWorkspaceProjections();
+
+  interface Stuff {
+    int getNum();
+    String getWord();
+  }
+
+  @Query("SELECT 99 AS num, 'Foo' AS word;")
+  Stuff getStuff();
 }

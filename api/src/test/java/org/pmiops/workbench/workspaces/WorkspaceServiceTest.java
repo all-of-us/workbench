@@ -31,6 +31,7 @@ import org.pmiops.workbench.db.ReportingProjections;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.WorkspaceDao.Stuff;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -59,6 +60,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@Import(TestJpaConfig.class)
 public class WorkspaceServiceTest {
 
   @TestConfiguration
@@ -68,7 +70,6 @@ public class WorkspaceServiceTest {
     ConceptSetMapperImpl.class,
     CommonMappers.class,
     DataSetMapperImpl.class,
-    TestJpaConfig.class,
     WorkspaceMapperImpl.class,
     WorkspaceServiceImpl.class
   })
@@ -393,12 +394,6 @@ public class WorkspaceServiceTest {
     assertThat(recentWorkspaces.size()).isEqualTo(1);
     assertThat(recentWorkspaces.get(0).getWorkspaceId()).isEqualTo(ownedId);
   }
-//
-//  @Test
-//  public void testGetReportingWorkspaces() {
-//    final List<ReportingWorkspace> workspaces = workspaceService.getAllReportingWorkspaces();
-//    assertThat(workspaces).isNotEmpty();
-//  }
 
   @Test
   public void testGetRepotingWorkspacePorjections() {
@@ -407,5 +402,12 @@ public class WorkspaceServiceTest {
     assertThat(views).hasSize(5);
 
     assertTimeWithinTolerance(views.get(0).getCreationTime().toInstant(), NOW);
+  }
+
+  @Test
+  public void testGetStuff() {
+    final Stuff stuff = workspaceDao.getStuff();
+    assertThat(stuff.getNum()).isEqualTo(99);
+    assertThat(stuff.getWord()).isEqualTo("Foo");
   }
 }
