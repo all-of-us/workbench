@@ -91,7 +91,7 @@ export default class ProfilePage extends AuthenticatedPage {
     return Button.findByName(this.page, {name: LabelAlias.SaveProfile});
   }
 
-  // TODO generalize - promote to a Div component?
+  // TODO generalize - promote to a Div Element?
   async getDivWithText(text: string, options?: WaitForSelectorOptions): Promise<BaseElement> {
     const selector = `//div[normalize-space(text())="${text}"]`;
     const handle = await this.page.waitForXPath(selector, options);
