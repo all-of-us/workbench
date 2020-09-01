@@ -65,16 +65,16 @@ describe('Profile', () => {
     const testTextZip = makeString(10);
     const testTextCountry = makeString(10);
 
-    let firstName = await profilePage.getFirstNameInput();
-    let lastName = await profilePage.getLastNameInput();
-    let url = await profilePage.getProfessionalUrlInput();
-    let researchBackground = await profilePage.getResearchBackgroundTextarea();
-    let address1 = await profilePage.getAddress1Input();
-    let address2 = await profilePage.getAddress2Input();
-    let city = await profilePage.getCityInput();
-    let state = await profilePage.getStateInput();
-    let zip = await profilePage.getZipCodeInput();
-    let country = await profilePage.getCountryInput();
+    const firstName = await profilePage.getFirstNameInput();
+    const lastName = await profilePage.getLastNameInput();
+    const url = await profilePage.getProfessionalUrlInput();
+    const researchBackground = await profilePage.getResearchBackgroundTextarea();
+    const address1 = await profilePage.getAddress1Input();
+    const address2 = await profilePage.getAddress2Input();
+    const city = await profilePage.getCityInput();
+    const state = await profilePage.getStateInput();
+    const zip = await profilePage.getZipCodeInput();
+    const country = await profilePage.getCountryInput();
 
     await firstName.type(testTextFirstName);
     await lastName.type(testTextLastName);
@@ -91,17 +91,6 @@ describe('Profile', () => {
     const saveButton = await waitForSaveButton(true);
     await saveButton.click();
     await profilePage.waitForLoad();
-
-    firstName = await profilePage.getFirstNameInput();
-    lastName = await profilePage.getLastNameInput();
-    url = await profilePage.getProfessionalUrlInput();
-    researchBackground = await profilePage.getResearchBackgroundTextarea();
-    address1 = await profilePage.getAddress1Input();
-    address2 = await profilePage.getAddress2Input();
-    city = await profilePage.getCityInput();
-    state = await profilePage.getStateInput();
-    zip = await profilePage.getZipCodeInput();
-    country = await profilePage.getCountryInput();
 
     expect(await firstName.getValue()).toBe(testTextFirstName);
     expect(await lastName.getValue()).toBe(testTextLastName);
