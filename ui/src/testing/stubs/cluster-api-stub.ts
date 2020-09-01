@@ -1,9 +1,9 @@
 import {
   Cluster,
-  RuntimeApi,
   ClusterLocalizeRequest,
   ClusterLocalizeResponse,
-  ClusterStatus
+  ClusterStatus,
+  RuntimeApi
 } from 'generated/fetch';
 
 export class ClusterApiStub extends RuntimeApi {

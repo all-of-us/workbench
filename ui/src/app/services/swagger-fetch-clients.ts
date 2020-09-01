@@ -24,7 +24,6 @@ import {
   AuthDomainApi,
   BaseAPI,  // internal
   CdrVersionsApi,
-  RuntimeApi,
   CohortAnnotationDefinitionApi,
   CohortBuilderApi,
   CohortReviewApi,
@@ -34,9 +33,10 @@ import {
   Configuration as FetchConfiguration,
   DataSetApi,
   FeaturedWorkspacesConfigApi,
-  FetchAPI, // internal
-  InstitutionApi,
+  FetchAPI,
+  InstitutionApi, // internal
   ProfileApi,
+  RuntimeApi,
   StatusAlertApi,
   StatusApi,
   UserApi,
