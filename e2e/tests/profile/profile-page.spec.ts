@@ -120,4 +120,51 @@ describe('Profile', () => {
     await waitForSaveButton(false);
     expect(await isMissingErrorPresent(MissingErrorAlias.ResearchBackground)).toBeTruthy();
   });
+
+  test('Each missing required field individually disables the save button', async () => {
+    const firstName = await profilePage.getFirstNameInput();
+    const lastName = await profilePage.getLastNameInput();
+    const researchBackground = await profilePage.getResearchBackgroundTextarea();
+    const address1 = await profilePage.getAddress1Input();
+    const city = await profilePage.getCityInput();
+    const state = await profilePage.getStateInput();
+    const zip = await profilePage.getZipCodeInput();
+    const country = await profilePage.getCountryInput();
+
+    // note: Professional URL and Address2 are optional fields
+
+    const testText = makeString(10);
+
+    for (const {element, missingError} of [
+      {element: firstName, missingError: MissingErrorAlias.FirstName},
+      {element: lastName, missingError: MissingErrorAlias.LastName},
+      {element: researchBackground, missingError: MissingErrorAlias.ResearchBackground},
+      {element: address1, missingError: MissingErrorAlias.Address1},
+      {element: city, missingError: MissingErrorAlias.City},
+      {element: state, missingError: MissingErrorAlias.State},
+      {element: zip, missingError: MissingErrorAlias.Zip},
+      {element: country, missingError: MissingErrorAlias.Country},
+    ]) {
+      const originalValue = await element.getValue();
+
+      // make a change, causing the Save button to activate
+      await element.type(testText);
+
+      // save button is enabled and no error message is displayed
+      await waitForSaveButton(true);
+      expect(await isMissingErrorPresent(missingError)).toBeFalsy();
+
+      // remove text from First Name
+      await element.clear();
+
+      // save button is disabled and error message is displayed
+      await waitForSaveButton(false);
+      expect(await isMissingErrorPresent(missingError)).toBeTruthy();
+
+      // restore state for next loop
+      await element.type(originalValue);
+    }
+  });
+
+
 });
