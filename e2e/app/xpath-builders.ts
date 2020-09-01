@@ -12,7 +12,7 @@ export function iframeXpath(label: string) {
  */
 export function buildXPath(xOpts: XPathOptions, container?: Container): string {
 
-  const  { type, name, containsText, normalizeSpace, ancestorLevel = 1, iconShape, startsWith } = xOpts;
+  const  { type, name, containsText, normalizeSpace, ancestorLevel = 1, iconShape, startsWith, dataTestId } = xOpts;
 
   // optional function parameters check
   if (type === 'icon') {
@@ -22,7 +22,9 @@ export function buildXPath(xOpts: XPathOptions, container?: Container): string {
   }
 
   let str = '';
-  if (name !== undefined) {
+  if (dataTestId !== undefined) {
+    str = `[@data-test-id="${dataTestId}"]`;
+  } else if (name !== undefined) {
     str = `[text()="${name}" or @aria-label="${name}" or @placeholder="${name}" or @value="${name}"]`;
   } else if (containsText !== undefined) {
     str = `[contains(text(), "${containsText}") or contains(@aria-label, "${containsText}") or contains(@placeholder, "${containsText}")]`;

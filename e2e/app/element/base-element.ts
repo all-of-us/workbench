@@ -149,12 +149,12 @@ export default class BaseElement extends Container {
 
   /**
    * Clear existing value in textbox then type new text value.
-   * @param {string} The texts string.
+   * @param textValue The text string.
    * @param options The typing options.
    */
   async type(textValue: string, options?: { delay: number }): Promise<this> {
 
-    const clearAndType =  async (txt: string, opts?: { delay: number }): Promise<string> => {
+    const clearAndType = async (txt: string, opts?: { delay: number }): Promise<string> => {
       await this.clear();
       await this.asElementHandle().then((handle: ElementHandle) => handle.type(txt, opts));
       return this.getProperty<string>('value');
@@ -162,12 +162,12 @@ export default class BaseElement extends Container {
 
     let maxRetries = 1;
     const typeAndCheck = async () => {
-      const actualValue = (await clearAndType(textValue, options)).trim();
+      const actualValue = (await clearAndType(textValue, options));
       if (actualValue === textValue) {
         return; // success
       }
       if (maxRetries <= 0) {
-        throw new Error(`Type "${textValue}" failed. Actual text: ${actualValue}`);
+        throw new Error(`BaseElement.type("${textValue}") failed. Actual text: "${actualValue}"`);
       }
       maxRetries--;
       return await this.page.waitFor(1000).then(typeAndCheck); // one second pause and retry type
