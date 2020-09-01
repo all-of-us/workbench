@@ -120,25 +120,4 @@ describe('Profile', () => {
     await waitForSaveButton(false);
     expect(await isMissingErrorPresent(MissingErrorAlias.ResearchBackground)).toBeTruthy();
   });
-
-  // TODO
-  test('Each missing required field individually disables the save button', async () => {
-    const firstName = await profilePage.getFirstNameInput();
-
-    // make a change, causing the Save button to activate
-    await firstName.type(makeString(10));
-
-    // save button is enabled and no error message is displayed
-    await waitForSaveButton(true);
-    expect(await isMissingErrorPresent(MissingErrorAlias.FirstName)).toBeFalsy();
-
-    // remove text from First Name
-    await firstName.clear();
-
-    // save button is disabled and error message is displayed
-    await waitForSaveButton(false);
-    expect(await isMissingErrorPresent(MissingErrorAlias.FirstName)).toBeTruthy();
-  });
-
-
 });
