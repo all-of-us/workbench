@@ -1,10 +1,11 @@
-import {Page} from 'puppeteer';
+import {Page, WaitForSelectorOptions} from 'puppeteer';
 import Textbox from 'app/element/textbox';
 import AuthenticatedPage from 'app/page/authenticated-page';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle, waitForUrl} from 'utils/waits-utils';
 import Button from '../element/button';
 import Textarea from '../element/textarea';
+import BaseElement from '../element/base-element';
 
 export const PageTitle = 'Profile';
 
@@ -88,5 +89,22 @@ export default class ProfilePage extends AuthenticatedPage {
 
   async getSaveProfileButton(): Promise<Button> {
     return Button.findByName(this.page, {name: LabelAlias.SaveProfile});
+  }
+
+  // TODO generalize - promote to a Div component?
+  async getDivWithText(text: string, options?: WaitForSelectorOptions): Promise<BaseElement> {
+    const selector = `//div[normalize-space(text())="${text}"]`;
+    const handle = await this.page.waitForXPath(selector, options);
+    return BaseElement.asBaseElement(this.page, handle);
+  }
+
+  async expectResearchPurposeErrorMissing(): Promise<void> {
+    const text = 'Current Research can\'t be blank';
+    await this.getDivWithText(text, {hidden: true});
+  }
+
+  async expectResearchPurposeErrorPresent(): Promise<void> {
+    const text = 'Current Research can\'t be blank';
+    await this.getDivWithText(text, {visible: true});
   }
 }

@@ -5,7 +5,7 @@ import {makeString, makeUrl} from 'utils/str-utils';
 import Button from '../../app/element/button';
 
 describe('Profile', () => {
-
+  // initialized in beforeEach()
   let profilePage: ProfilePage;
 
   async function waitForSaveButton(isActive: boolean): Promise<Button> {
@@ -102,5 +102,22 @@ describe('Profile', () => {
     expect(await zip.getValue()).toBe(testTextZip);
     expect(await country.getValue()).toBe(testTextCountry);
   });
+
+  test('A missing required field disables the save button', async () => {
+    const researchBackground = await profilePage.getResearchBackgroundTextarea();
+    await researchBackground.type(makeString(10));
+
+    // save button is enabled and no error message is displayed
+    await waitForSaveButton(true);
+    await profilePage.expectResearchPurposeErrorMissing();
+
+    // remove text from Research Background textarea
+    await researchBackground.clear();
+
+    // save button is disabled and error message is displayed
+    await waitForSaveButton(false);
+    await profilePage.expectResearchPurposeErrorPresent();
+  });
+
 
 });
