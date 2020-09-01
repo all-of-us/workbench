@@ -158,7 +158,7 @@ export class ResetRuntimeButton extends React.Component<Props, State> {
         <ModalBody>
             <div>
               <strong>Warning:</strong> Any unsaved changes to your notebooks may be lost
-              and your runtime will be offline for 5-10 minutes.
+              and your server will be offline for 5-10 minutes.
               <br/><br/>
               Resetting should not be necessary under normal conditions. Please help us to
               improve this experience by using "Contact Support" from the left side's hamburger
