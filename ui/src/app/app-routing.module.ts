@@ -35,7 +35,6 @@ import {DisabledGuard} from './guards/disabled-guard.service';
 import {WorkspaceGuard} from './guards/workspace-guard.service';
 import {AdminInstitutionComponent} from './pages/admin/admin-institution';
 import {AdminInstitutionEditComponent} from './pages/admin/admin-institution-edit';
-import {InteractiveNotebookComponent} from './pages/analysis/interactive-notebook';
 import {BreadcrumbType, NavStore} from './utils/navigation';
 
 
@@ -177,14 +176,8 @@ const routes: Routes = [
                       },
                       {
                         path: 'preview/:nbName',
-                        component: InteractiveNotebookComponent,
-                        data: {
-                          pathElementForTitle: 'nbName',
-                          breadcrumb: BreadcrumbType.Notebook,
-                          helpContentKey: NOTEBOOK_HELP_CONTENT,
-                          notebookHelpSidebarStyles: true,
-                          minimizeChrome: true
-                        }
+                        component: AppRouting,
+                        data: {}
                       }
                     ]
                   },

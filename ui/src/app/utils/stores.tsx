@@ -10,6 +10,8 @@ export interface RouteDataStore {
   minimizeChrome?: boolean;
   helpContentKey?: string;
   breadcrumb?: BreadcrumbType;
+  pathElementForTitle?: string;
+  notebookHelpSidebarStyles?: boolean;
 }
 
 export const routeDataStore = atom<RouteDataStore>({});
