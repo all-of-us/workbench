@@ -2,10 +2,10 @@ package org.pmiops.workbench.utils;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.pmiops.workbench.utils.TemporalAssertions.DEFAULT_TOLERANCE;
-import static org.pmiops.workbench.utils.TemporalAssertions.MAX_SUPPORTED_INSTANT;
-import static org.pmiops.workbench.utils.TemporalAssertions.MIN_SUPPORTED_INSTANT;
-import static org.pmiops.workbench.utils.TemporalAssertions.assertTimeWithinTolerance;
+import static org.pmiops.workbench.utils.TimeAssertions.DEFAULT_TOLERANCE;
+import static org.pmiops.workbench.utils.TimeAssertions.MAX_SUPPORTED_INSTANT;
+import static org.pmiops.workbench.utils.TimeAssertions.MIN_SUPPORTED_INSTANT;
+import static org.pmiops.workbench.utils.TimeAssertions.assertTimeWithinTolerance;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -13,7 +13,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import org.junit.Test;
 
-public class TemporalAssertionsTest {
+public class TimeAssertionsTest {
 
   private static final Instant EXPECTED_TIME = Instant.parse("2010-06-30T01:20:00.00Z");
   private static final Duration DELTA_WITHIN_TOLERANCE = DEFAULT_TOLERANCE.dividedBy(2);
@@ -74,7 +74,7 @@ public class TemporalAssertionsTest {
         AssertionError.class,
         () ->
             assertTimeWithinTolerance(
-                MAX_SUPPORTED_INSTANT.plus(DELTA_OUTSIDE_TOLERANCE), MAX_SUPPORTED_INSTANT));
+                MAX_SUPPORTED_INSTANT.minus(DELTA_OUTSIDE_TOLERANCE), MAX_SUPPORTED_INSTANT));
   }
 
   @Test

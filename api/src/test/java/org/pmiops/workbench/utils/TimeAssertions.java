@@ -6,7 +6,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 
-public class TemporalAssertions {
+public class TimeAssertions {
 
   // We can't convert the whole range for OffsetDateTime to  Instant b/c of long overflow.
   public static final Instant MIN_SUPPORTED_INSTANT = Instant.parse("1000-01-30T01:20:00.00Z");
