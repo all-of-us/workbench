@@ -41,7 +41,7 @@ describe('Profile', () => {
     const testText = makeString(50);
 
     // Type in Research Background textarea
-    let researchBackground = await profilePage.getResearchBackgroundTextarea();
+    const researchBackground = await profilePage.getResearchBackgroundTextarea();
     await researchBackground.paste(testText);
 
     // profile update should enable Save button
@@ -49,7 +49,6 @@ describe('Profile', () => {
     await saveButton.click();
     await profilePage.waitForLoad();
 
-    researchBackground = await profilePage.getResearchBackgroundTextarea();
     expect(await researchBackground.getValue()).toBe(testText);
   });
 
