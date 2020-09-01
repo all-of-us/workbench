@@ -8,12 +8,12 @@ import Textarea from 'app/element/textarea';
 
 export const PageTitle = 'Profile';
 
-export const LabelAlias = {
+const LabelAlias = {
   ResearchBackground: 'Your research background, experience and research interests',
   SaveProfile: 'Save Profile',
 };
 
-export const DataTestIdAlias = {
+const DataTestIdAlias = {
   FirstName: 'givenName',
   LastName: 'familyName',
   ProfessionalUrl: 'professionalUrl',
