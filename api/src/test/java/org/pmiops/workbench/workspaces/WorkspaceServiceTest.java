@@ -38,7 +38,6 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.EmailVerificationStatus;
-import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.profile.ProfileMapper;
@@ -69,6 +68,7 @@ public class WorkspaceServiceTest {
     ConceptSetMapperImpl.class,
     CommonMappers.class,
     DataSetMapperImpl.class,
+    TestJpaConfig.class,
     WorkspaceMapperImpl.class,
     WorkspaceServiceImpl.class
   })
@@ -393,15 +393,15 @@ public class WorkspaceServiceTest {
     assertThat(recentWorkspaces.size()).isEqualTo(1);
     assertThat(recentWorkspaces.get(0).getWorkspaceId()).isEqualTo(ownedId);
   }
+//
+//  @Test
+//  public void testGetReportingWorkspaces() {
+//    final List<ReportingWorkspace> workspaces = workspaceService.getAllReportingWorkspaces();
+//    assertThat(workspaces).isNotEmpty();
+//  }
 
   @Test
-  public void testGetReportingWorkspaces() {
-    final List<ReportingWorkspace> workspaces = workspaceService.getAllReportingWorkspaces();
-    assertThat(workspaces).isNotEmpty();
-  }
-
-  @Test
-  public void testGetWorkspaceView1s() {
+  public void testGetRepotingWorkspacePorjections() {
     final List<ReportingProjections.Workspace> views =
         workspaceDao.getReportingWorkspaceProjections();
     assertThat(views).hasSize(5);

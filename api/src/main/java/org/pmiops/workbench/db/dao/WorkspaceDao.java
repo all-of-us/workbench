@@ -90,10 +90,17 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
 
   @Query(
       value =
-          "SELECT w.workspace_id as workspaceId, w.name,"
-              + " w.creation_Time AS creationTime"
+          "SELECT w.workspace_id, w.name,"
+              + " w.creation_Time"
               + " FROM workspace w"
               + " ORDER BY w.workspace_id",
       nativeQuery = true)
+//@Query(
+//    value =
+//        "SELECT workrspaceId, name,"
+//            + " w.creation_time"
+//            + " FROM workspace w"
+//            + " ORDER BY w.workspace_id")
+
   List<ReportingProjections.Workspace> getReportingWorkspaceProjections();
 }
