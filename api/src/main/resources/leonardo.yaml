@@ -853,7 +853,8 @@ paths:
         * Default labels clusterName, googleProject, serviceAccount, and notebookExtension cannot be overridden.
       operationId: createClusterV2
       tags:
-        - cluster
+        # TODO(RW-4847): Revert this to the cluster tag, or just remove cluster tagged endpoints.
+        - runtimes
       parameters:
         - in: path
           name: googleProject

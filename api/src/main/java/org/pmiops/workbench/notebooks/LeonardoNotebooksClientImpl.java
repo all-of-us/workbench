@@ -20,11 +20,10 @@ import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.api.ServiceInfoApi;
-import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
+import org.pmiops.workbench.leonardo.model.LeonardoClusterRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig.CloudServiceEnum;
 import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
 import org.pmiops.workbench.notebooks.api.NotebooksApi;
 import org.pmiops.workbench.notebooks.model.LocalizationEntry;
@@ -77,10 +76,10 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     this.workspaceService = workspaceService;
   }
 
-  private LeonardoCreateRuntimeRequest buildCreateRuntimeRequest(
+  private LeonardoClusterRequest buildCreateClusterRequest(
       String userEmail,
       @Nullable ClusterConfig clusterOverride,
-      Map<String, String> customEnvironmentVariables) {
+      Map<String, String> customClusterEnvironmentVariables) {
     // TODO(RW-5406): Remove cluster override.
     if (clusterOverride == null) {
       clusterOverride = new ClusterConfig();
@@ -97,21 +96,25 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     nbExtensions.put(
         "aou-upload-policy-extension", assetsBaseUrl + "/aou-upload-policy-extension.js");
 
-    return new LeonardoCreateRuntimeRequest()
+    return new LeonardoClusterRequest()
         .labels(ImmutableMap.of(RUNTIME_LABEL_AOU, "true", RUNTIME_LABEL_CREATED_BY, userEmail))
         .defaultClientId(config.server.oauthClientId)
         // Note: Filenames must be kept in sync with files in api/src/main/webapp/static.
         .jupyterUserScriptUri(assetsBaseUrl + "/initialize_notebook_cluster.sh")
         .jupyterStartUserScriptUri(assetsBaseUrl + "/start_notebook_cluster.sh")
         .userJupyterExtensionConfig(
-            new LeonardoUserJupyterExtensionConfig().nbExtensions(nbExtensions))
+            new LeonardoUserJupyterExtensionConfig()
+                .nbExtensions(nbExtensions)
+                .serverExtensions(ImmutableMap.of("jupyterlab", "jupyterlab"))
+                .combinedExtensions(ImmutableMap.<String, String>of())
+                .labExtensions(ImmutableMap.<String, String>of()))
         // Matches Terra UI's scopes, see RW-3531 for rationale.
         .addScopesItem("https://www.googleapis.com/auth/cloud-platform")
         .addScopesItem("https://www.googleapis.com/auth/userinfo.email")
         .addScopesItem("https://www.googleapis.com/auth/userinfo.profile")
-        .runtimeConfig(
+        .enableWelder(true)
+        .machineConfig(
             new LeonardoMachineConfig()
-                .cloudService(CloudServiceEnum.DATAPROC)
                 .masterDiskSize(
                     Optional.ofNullable(clusterOverride.masterDiskSize)
                         .orElse(config.firecloud.clusterDefaultDiskSizeGb))
@@ -120,7 +123,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
                         .orElse(config.firecloud.clusterDefaultMachineType)))
         .toolDockerImage(workbenchConfigProvider.get().firecloud.jupyterDockerImage)
         .welderDockerImage(workbenchConfigProvider.get().firecloud.welderDockerImage)
-        .customEnvironmentVariables(customEnvironmentVariables);
+        .customClusterEnvironmentVariables(customClusterEnvironmentVariables);
   }
 
   @Override
@@ -142,11 +145,12 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
     leonardoRetryHandler.run(
         (context) -> {
-          runtimesApi.createRuntime(
+          // TODO(RW-4847): Switch to createRuntime once IA-2167 is fixed/deployed.
+          runtimesApi.createClusterV2(
+              buildCreateClusterRequest(
+                  user.getUsername(), user.getClusterConfigDefault(), customEnvironmentVariables),
               googleProject,
-              runtimeName,
-              buildCreateRuntimeRequest(
-                  user.getUsername(), user.getClusterConfigDefault(), customEnvironmentVariables));
+              runtimeName);
           return null;
         });
   }
