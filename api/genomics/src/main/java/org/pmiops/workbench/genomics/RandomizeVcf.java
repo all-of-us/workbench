@@ -10,11 +10,12 @@ import htsjdk.variant.variantcontext.VariantContextBuilder;
 import htsjdk.variant.variantcontext.writer.VariantContextWriter;
 import htsjdk.variant.vcf.VCFHeader;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import org.broadinstitute.barclay.argparser.Argument;
 import org.broadinstitute.barclay.argparser.CommandLineProgramProperties;
 import org.broadinstitute.hellbender.cmdline.StandardArgumentDefinitions;
@@ -35,8 +36,13 @@ public class RandomizeVcf extends VariantWalker {
       shortName = StandardArgumentDefinitions.OUTPUT_SHORT_NAME)
   protected File outputVcf;
 
-  @Argument(doc = "Number of samples to generate.", fullName = "NUM_SAMPLES", shortName = "N")
-  protected int samples;
+  @Argument(
+      doc = "Newline separated file of sample names",
+      fullName = "sample-names",
+      shortName = "SN")
+  protected File sampleNamesFile;
+
+  private List<String> sampleNames;
 
   private Random random = new Random();
 
@@ -51,9 +57,9 @@ public class RandomizeVcf extends VariantWalker {
   }
 
   @VisibleForTesting
-  protected RandomizeVcf(int samples, Random random) {
+  protected RandomizeVcf(List<String> sampleNames, Random random) {
     super();
-    this.samples = samples;
+    this.sampleNames = sampleNames;
     this.random = random;
   }
 
@@ -69,10 +75,13 @@ public class RandomizeVcf extends VariantWalker {
   @Override
   public void onTraversalStart() {
     final VCFHeader inputHeader = getHeaderForVariants();
-    final List<String> newSampleNames =
-        this.generateNSampleNames(inputHeader.getSampleNamesInOrder().get(0));
+    try {
+      this.sampleNames = Files.lines(sampleNamesFile.toPath()).collect(Collectors.toList());
+    } catch (IOException e) {
+      throw new RuntimeException("Could not open sample names file", e);
+    }
     final VCFHeader outputHeader =
-        new VCFHeader(inputHeader.getMetaDataInInputOrder(), newSampleNames);
+        new VCFHeader(inputHeader.getMetaDataInInputOrder(), this.sampleNames);
     vcfWriter = this.createVCFWriter(outputVcf);
     vcfWriter.writeHeader(outputHeader);
   }
@@ -92,9 +101,10 @@ public class RandomizeVcf extends VariantWalker {
     variantContextBuilder.alleles(variant.getAlleles());
 
     List<Genotype> randomizedGenotypes =
-        IntStream.rangeClosed(1, this.samples)
-            .mapToObj(i -> randomizeGenotype(variant, variant.getGenotype(0), i))
+        this.sampleNames.stream()
+            .map(name -> randomizeGenotype(variant, variant.getGenotype(0), name))
             .collect(Collectors.toList());
+
     GenotypesContext randomizedGenotypesContext =
         GenotypesContext.create(new ArrayList<>(randomizedGenotypes));
 
@@ -105,11 +115,11 @@ public class RandomizeVcf extends VariantWalker {
 
   @VisibleForTesting
   protected Genotype randomizeGenotype(
-      VariantContext variantContext, Genotype genotype, int sample) {
+      VariantContext variantContext, Genotype genotype, String sampleName) {
     GenotypeBuilder genotypeBuilder =
         new GenotypeBuilder()
             .copy(genotype)
-            .name(appendSuffixToSampleName(genotype.getSampleName(), sample))
+            .name(sampleName)
             .alleles(randomizeAlleles(variantContext));
     return genotypeBuilder.make();
   }
@@ -184,16 +194,5 @@ public class RandomizeVcf extends VariantWalker {
       }
     }
     return alleles;
-  }
-
-  private List<String> generateNSampleNames(String sampleName) {
-    List<String> sampleNames = new ArrayList<>();
-    IntStream.rangeClosed(1, this.samples)
-        .forEach(i -> sampleNames.add(appendSuffixToSampleName(sampleName, i)));
-    return sampleNames;
-  }
-
-  private String appendSuffixToSampleName(String sampleName, int sampleIndex) {
-    return sampleName + "." + sampleIndex;
   }
 }
