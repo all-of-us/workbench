@@ -46,7 +46,7 @@ describe('Workspace ui tests', () => {
 
     // check workspace name string is made of english characters
     const workspaceName = await card.getWorkspaceName();
-    expect(workspaceName).toMatch(new RegExp(/^[a-zA-Z]+/));
+    await expect(workspaceName).toMatch(new RegExp(/^[a-zA-Z]+/));
 
     const levels = ['WRITER', 'READER', 'OWNER'];
     const accessLevel = await card.getWorkspaceAccessLevel();

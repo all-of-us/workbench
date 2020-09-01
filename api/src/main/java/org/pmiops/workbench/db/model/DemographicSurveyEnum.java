@@ -2,13 +2,10 @@ package org.pmiops.workbench.db.model;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
-import org.pmiops.workbench.model.AcademicRole;
 import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.Education;
-import org.pmiops.workbench.model.EducationalRole;
 import org.pmiops.workbench.model.Ethnicity;
 import org.pmiops.workbench.model.GenderIdentity;
-import org.pmiops.workbench.model.IndustryRole;
 import org.pmiops.workbench.model.Race;
 import org.pmiops.workbench.model.SexAtBirth;
 import org.pmiops.workbench.model.SexualOrientation;
@@ -75,35 +72,6 @@ public class DemographicSurveyEnum {
       ImmutableBiMap.<Disability, Short>builder()
           .put(Disability.TRUE, (short) 1)
           .put(Disability.FALSE, (short) 2)
-          .build();
-
-  private static final BiMap<IndustryRole, Short> CLIENT_TO_STORAGE_INDUSTRY_ROLE =
-      ImmutableBiMap.<IndustryRole, Short>builder()
-          .put(IndustryRole.EARLY, (short) 1)
-          .put(IndustryRole.FREE_TEXT, (short) 2)
-          .put(IndustryRole.PI, (short) 3)
-          .put(IndustryRole.POST_DOCTORAL, (short) 4)
-          .put(IndustryRole.PRE_DOCTORAL, (short) 5)
-          .build();
-
-  private static final BiMap<EducationalRole, Short> CLIENT_TO_STORAGE_EDUCATIONAL_ROLE =
-      ImmutableBiMap.<EducationalRole, Short>builder()
-          .put(EducationalRole.TEACHER, (short) 1)
-          .put(EducationalRole.STUDENT, (short) 2)
-          .put(EducationalRole.ADMIN, (short) 3)
-          .put(EducationalRole.FREE_TEXT, (short) 4)
-          .build();
-
-  private static final BiMap<AcademicRole, Short> CLIENT_TO_STORAGE_ROLE =
-      ImmutableBiMap.<AcademicRole, Short>builder()
-          .put(AcademicRole.UNDERGRADUATE, (short) 1)
-          .put(AcademicRole.TRAINEE, (short) 2)
-          .put(AcademicRole.FELLOW, (short) 3)
-          .put(AcademicRole.EARLY_CAREER, (short) 4)
-          .put(AcademicRole.NON_TENURE, (short) 5)
-          .put(AcademicRole.MID_CAREER, (short) 6)
-          .put(AcademicRole.LATE_CAREER, (short) 7)
-          .put(AcademicRole.PROJECT_PERSONNEL, (short) 8)
           .build();
 
   public static Race raceFromStorage(Short race) {
@@ -178,29 +146,5 @@ public class DemographicSurveyEnum {
     } else {
       return null;
     }
-  }
-
-  public static Short roleToStorage(AcademicRole role) {
-    return CLIENT_TO_STORAGE_ROLE.get(role);
-  }
-
-  public static AcademicRole roleFromStorage(Short role) {
-    return CLIENT_TO_STORAGE_ROLE.inverse().get(role);
-  }
-
-  public static Short industryRoleToStorage(IndustryRole role) {
-    return CLIENT_TO_STORAGE_INDUSTRY_ROLE.get(role);
-  }
-
-  public static IndustryRole industryRoleFromStorage(Short role) {
-    return CLIENT_TO_STORAGE_INDUSTRY_ROLE.inverse().get(role);
-  }
-
-  public static Short educationRoleToStorage(EducationalRole role) {
-    return CLIENT_TO_STORAGE_EDUCATIONAL_ROLE.get(role);
-  }
-
-  public static EducationalRole educationRoleFromStorage(Short role) {
-    return CLIENT_TO_STORAGE_EDUCATIONAL_ROLE.inverse().get(role);
   }
 }

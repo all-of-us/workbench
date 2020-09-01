@@ -40,6 +40,7 @@ import org.pmiops.workbench.model.CriteriaMenuOption;
 import org.pmiops.workbench.model.CriteriaMenuSubOption;
 import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DemoChartInfo;
+import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
@@ -48,6 +49,7 @@ import org.pmiops.workbench.model.StandardFlag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -300,6 +302,39 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     return criteriaList.stream()
         .map(cohortBuilderMapper::dbModelToClient)
         .collect(Collectors.toList());
+  }
+
+  @Override
+  public Map<Long, String> findAllDemographicsMap() {
+    return cbCriteriaDao.findAllDemographics().stream()
+        .collect(
+            Collectors.toMap(
+                DbCriteria::getLongConceptId,
+                DbCriteria::getName,
+                (oldValue, newValue) -> oldValue));
+  }
+
+  @Override
+  public List<String> findSortedConceptIdsByDomainIdAndTypeAndParentIdNotIn(
+      String domainId, Long parentId, String sortColumn, String sortName) {
+    Sort sort =
+        sortName.equalsIgnoreCase(Sort.Direction.ASC.toString())
+            ? new Sort(Sort.Direction.ASC, "name")
+            : new Sort(Sort.Direction.DESC, "name");
+    List<DbCriteria> criteriaList =
+        cbCriteriaDao.findByDomainIdAndTypeAndParentIdNotIn(
+            DomainType.PERSON.toString(), sortColumn, 0L, sort);
+    List<String> demoList =
+        criteriaList.stream()
+            .map(
+                c ->
+                    new ConceptIdName()
+                        .conceptId(new Long(c.getConceptId()))
+                        .conceptName(c.getName()))
+            .sorted(Comparator.comparing(ConceptIdName::getConceptName))
+            .map(c -> c.getConceptId().toString())
+            .collect(Collectors.toList());
+    return demoList;
   }
 
   private String modifyTermMatch(String term) {

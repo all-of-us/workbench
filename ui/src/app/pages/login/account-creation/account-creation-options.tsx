@@ -1,13 +1,9 @@
 import {
-  AcademicRole,
   Degree,
   Education,
-  EducationalRole,
   Ethnicity,
   GenderIdentity,
-  IndustryRole,
   InstitutionalRole,
-  NonAcademicAffiliation,
   OrganizationType,
   Race,
   SexAtBirth
@@ -28,43 +24,6 @@ export const AccountCreationOptions = {
     {label: 'B.S.', value: Degree.BS},
     {label: 'B.S.N.', value: Degree.BSN},
   ],
-  // BEGIN roles and affiliations for old (pre-verification) institutional affiliation
-  // TODO(RW-4361) remove when the verification feature flag is fully enabled
-  roles: [
-    {label: `Undergraduate (Bachelor level) student`, value: AcademicRole.UNDERGRADUATE},
-    {label: `Graduate trainee (Current student in a Masters, PhD, or Medical school training
-        program)`, value: AcademicRole.TRAINEE},
-    {label: `Research fellow (a post-doctoral fellow or medical resident in training)`,
-      value: AcademicRole.FELLOW},
-    {label: `Early career tenure-track researcher`, value: AcademicRole.EARLYCAREER},
-    {label: `Non tenure-track researcher`, value: AcademicRole.NONTENURE},
-    {label: `Mid-career tenured researcher`, value: AcademicRole.MIDCAREER},
-    {label: `Late career tenured researcher`, value: AcademicRole.LATECAREER},
-    {label: `Project Personnel (eg: Research Assistant, Data Analyst, Project Manager, Research
-        Coordinator or other roles)`, value: AcademicRole.PROJECTPERSONNEL}
-  ],
-  nonAcademicAffiliations: [
-    {label: 'Industry', value: NonAcademicAffiliation.INDUSTRY },
-    {label: `Educational institution (High school, Community college, 4-year college, trade
-        school)`, value: NonAcademicAffiliation.EDUCATIONALINSTITUTION},
-    {label: `Community Scientist (i.e. I am accessing All of Us for independent research, unrelated to my
-        professional affiliation)`, value: NonAcademicAffiliation.COMMUNITYSCIENTIST},
-    {label: `Other (free text)`, value: NonAcademicAffiliation.FREETEXT}
-  ],
-  industryRole: [
-    {label: 'Research Assistant (pre-doctoral)', value: IndustryRole.PREDOCTORAL},
-    {label: 'Research associate (post-doctoral; early/mid career)', value: IndustryRole.EARLY},
-    {label: 'Senior Researcher (PI/Team Lead)', value: IndustryRole.PI},
-    {label: 'Other (free text)', value: IndustryRole.FREETEXT}
-  ],
-  educationRole: [
-    {label: 'Teacher/Professor', value: EducationalRole.TEACHER},
-    {label: 'Student', value: EducationalRole.STUDENT},
-    {label: 'Administrator', value: EducationalRole.ADMIN},
-    {label: 'Other (free text)', value: EducationalRole.FREETEXT}
-  ],
-  // END roles and affiliations for old (pre-verification) institutional affiliation
-  // BEGIN roles for verified institutional affiliation
   institutionalRoleOptions: [
     {label: `Undergraduate (Bachelor level) student`,
       value: InstitutionalRole.UNDERGRADUATE},

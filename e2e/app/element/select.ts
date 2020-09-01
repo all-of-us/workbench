@@ -29,7 +29,8 @@ export default class Select extends BaseElement {
       console.warn(`Select is disabled. Cannot select option value: "${value}".`);
     }
     const selector = `${this.xpath}/option[text()="${value}"]`;
-    const option = (await page.$x(selector))[0];
+    await this.page.waitForXPath(selector);
+    const option = (await this.page.$x(selector))[0];
     const optionValue = await getPropValue<string>(option, 'value');
     [this.selectedOption] = await (await this.asElementHandle()).select(optionValue);
     return this.selectedOption;

@@ -71,6 +71,7 @@ import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cdrselector.WorkspaceResourcesServiceImpl;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortreview.CohortAnnotationDefinitionServiceImpl;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
@@ -312,6 +313,7 @@ public class WorkspacesControllerTest {
     BillingProjectBufferService.class,
     CdrBigQuerySchemaConfigService.class,
     CloudStorageService.class,
+    CohortBuilderService.class,
     CohortMaterializationService.class,
     CohortQueryBuilder.class,
     ConceptBigQueryService.class,

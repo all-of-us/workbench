@@ -2,8 +2,8 @@
   "name": "All of Us R and SQL snippets",
   "sub-menu": [
     {
-      "name": "Documentation",
-      "external-link": "https://github.com/all-of-us/workbench-snippets"
+      "external-link": "https://aousupporthelp.zendesk.com/hc/en-us/articles/360039856791-How-to-use-code-snippets-in-Jupyter-Notebooks",
+      "name": "Documentation"
     },
     "---",
     {

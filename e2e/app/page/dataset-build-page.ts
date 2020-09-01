@@ -9,6 +9,7 @@ import {ElementType} from 'app/xpath-options';
 import AuthenticatedPage from './authenticated-page';
 import CohortBuildPage from './cohort-build-page';
 import ConceptsetSearchPage from './conceptset-search-page';
+import DatasetSaveModal from './dataset-save-modal';
 
 const PageTitle = 'Dataset Page';
 
@@ -88,11 +89,18 @@ export default class DatasetBuildPage extends AuthenticatedPage {
     }
   }
 
-  async clickSaveAndAnalyzeButton(): Promise<void> {
+  /**
+   * Click "Save and Analyze" button.
+   * @returns Instance of DatasetSaveModal.
+   */
+  async clickSaveAndAnalyzeButton(): Promise<DatasetSaveModal> {
     const saveButton = await Button.findByName(this.page, {name: 'Save and Analyze'});
     await saveButton.waitUntilEnabled();
     await saveButton.click();
     await waitWhileLoading(this.page);
+    const saveModal = new DatasetSaveModal(this.page);
+    await saveModal.waitForLoad();
+    return saveModal;
   }
 
   async clickAnalyzeButton(): Promise<void> {

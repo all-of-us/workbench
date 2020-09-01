@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
@@ -279,9 +278,6 @@ public class ProfileController implements ProfileApiDelegate {
             FROM_CLIENT_ADDRESS.apply(profile.getAddress()),
             demographicSurveyMapper.demographicSurveyToDbDemographicSurvey(
                 profile.getDemographicSurvey()),
-            profile.getInstitutionalAffiliations().stream()
-                .map(institutionService::legacyInstitutionToDbInstitution)
-                .collect(Collectors.toList()),
             verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
                 profile.getVerifiedInstitutionalAffiliation(), institutionService));
 

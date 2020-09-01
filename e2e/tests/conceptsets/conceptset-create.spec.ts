@@ -2,7 +2,6 @@ import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
 import DataResourceCard, {CardType} from 'app/component/data-resource-card';
 import ConceptsetActionsPage from 'app/page/conceptset-actions-page';
 import DataPage, {TabLabelAlias} from 'app/page/data-page';
-import DatasetSaveModal from 'app/page/dataset-save-modal';
 import {findWorkspace, signIn} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
 
@@ -71,7 +70,7 @@ describe('Create Concept Sets from Domains', () => {
     await dataPage.openTab(TabLabelAlias.ConceptSets, {waitPageChange: false});
 
     const modalTextContent = await dataPage.deleteConceptSet(conceptName);
-    expect(modalTextContent).toContain(`Are you sure you want to delete Concept Set: ${conceptName}`);
+    expect(modalTextContent).toContain(`Are you sure you want to delete Concept Set: ${conceptName}?`);
   });
 
   /**
@@ -145,9 +144,7 @@ describe('Create Concept Sets from Domains', () => {
     await conceptActionPage.clickCreateDatasetButton();
     await datasetBuildPage.selectCohorts(['All Participants']);
     await datasetBuildPage.selectConceptSets([conceptName1, conceptName2]);
-    await datasetBuildPage.clickSaveAndAnalyzeButton();
-
-    const saveModal = new DatasetSaveModal(page);
+    const saveModal = await datasetBuildPage.clickSaveAndAnalyzeButton();
     const datasetName = await saveModal.saveDataset();
 
     // Verify Dataset created successful.

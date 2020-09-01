@@ -1,6 +1,7 @@
 import {Page} from 'puppeteer';
 import Button from 'app/element/button';
 import {Language, LinkText, PageUrl} from 'app/text-labels';
+import Modal from 'app/component/modal';
 import WorkspaceEditPage, {FIELD as EDIT_FIELD} from 'app/page/workspace-edit-page';
 import {makeWorkspaceName} from 'utils/str-utils';
 import RadioButton from 'app/element/radiobutton';
@@ -75,7 +76,7 @@ export default class WorkspacesPage extends WorkspaceEditPage {
   async createWorkspace(
      workspaceName: string,
      billingAccount: string = 'Use All of Us free credits',
-     reviewRequest: boolean = false): Promise<string> {
+     reviewRequest: boolean = false): Promise<string[]> {
 
     const editPage = await this.clickCreateNewWorkspace();
     // wait for Billing Account default selected value
@@ -138,12 +139,14 @@ export default class WorkspacesPage extends WorkspaceEditPage {
   }
 
   /**
-   * Create a new notebook in a randomly selected workspace.
-   * @param notebookName
-   * @param lang
+   * Create a new notebook in a selected Workspace.
+   * @param {string} workspaceName Workspace name.
+   * @param {string} notebookName Notebook name
+   * @param {Language} lang Notebook language.
    */
-  async createNotebook(notebookName: string, lang?: Language): Promise<WorkspaceAnalysisPage> {
-    const workspaceCard = await findWorkspace(this.page);
+  async createNotebook(opts: {workspaceName: string, notebookName: string, lang?: Language}): Promise<WorkspaceAnalysisPage> {
+    const {workspaceName, notebookName, lang} = opts;
+    const workspaceCard = await findWorkspace(this.page, {workspaceName, create: true});
     await workspaceCard.clickWorkspaceName();
 
     const dataPage = new DataPage(this.page);
@@ -153,4 +156,15 @@ export default class WorkspacesPage extends WorkspaceEditPage {
     return notebookPage.goAnalysisPage();
   }
 
+  /**
+   * Click DELETE WORKSPACE button in delete workspace Confirmation dialog.
+   * @return {string} Dialog textContent.
+   */
+  async deleteWorkspaceModal(): Promise<string[]> {
+    const modal = new Modal(this.page);
+    const contentText = await modal.getTextContent();
+    await modal.clickButton(LinkText.DeleteWorkspace, {waitForClose: true});
+    await waitWhileLoading(this.page);
+    return contentText;
+  }
 }

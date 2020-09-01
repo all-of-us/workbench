@@ -391,13 +391,13 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
   /**
    * Find and click the CREATE WORKSPACE (FINISH) button
    */
-  async clickCreateFinishButton(button: ElementHandle | Button): Promise<string> {
+  async clickCreateFinishButton(button: ElementHandle | Button): Promise<string[]> {
     await button.focus(); // bring into viewport
     await button.click();
 
     // confirm create in pop-up modal
     const modal = new Modal(this.page);
-    const modalTextContent = await modal.getContent();
+    const modalTextContent = await modal.getTextContent();
     await modal.clickButton(LinkText.Confirm, {waitForClose: true, waitForNav: true});
     await waitWhileLoading(this.page);
     return modalTextContent;

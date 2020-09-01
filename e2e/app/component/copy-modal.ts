@@ -2,9 +2,10 @@ import Modal from 'app/component/modal';
 import Textbox from 'app/element/textbox';
 import {LinkText} from 'app/text-labels';
 import {ElementHandle, Page} from 'puppeteer';
+import {waitWhileLoading} from 'utils/test-utils';
 
 
-export default class ConceptsetCopyModal extends Modal {
+export default class CopyModal extends Modal {
 
   constructor(page: Page, xpath?: string) {
     super(page, xpath);
@@ -20,22 +21,26 @@ export default class ConceptsetCopyModal extends Modal {
 
  /**
   *
-  * @param {string} workspaceName Workspace name.
-  * @param {string} name Give a new name for the copy of Concept Set in new workspace.
+  * @param {string} workspaceName Destination Workspace name.
+  * @param {string} newName New name.
   */
-  async copyToAnotherWorkspace(workspaceName: string, name?: string): Promise<void> {
-    // Click inside textbox to open dropdown.
+  async copyToAnotherWorkspace(workspaceName: string, newName?: string): Promise<void> {
+    // Click dropdown trigger.
     const destinationInput = await this.getDestinationTextbox();
     await destinationInput.click();
-    // Select dropdown option
+
+    // Select Workspace in dropdown
     const selectOption = await this.waitForSelectOption(workspaceName);
     await selectOption.click();
-    // Type new Concept Set if parameter is not undefined.
-    if (name !== undefined) {
+
+    // Type new name.
+    if (newName !== undefined) {
       const nameInput = await this.getNameTextbox();
-      await nameInput.type(name);
+      await nameInput.type(newName);
     }
+
     await this.clickButton(LinkText.Copy);
+    await waitWhileLoading(this.page);
   }
 
   async waitForSelectOption(workspaceName?: string): Promise<ElementHandle> {

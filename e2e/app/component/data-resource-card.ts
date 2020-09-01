@@ -1,13 +1,12 @@
 import {ElementHandle, Page} from 'puppeteer';
-import EllipsisMenu from 'app/component/ellipsis-menu';
 import * as fp from 'lodash/fp';
 import {waitWhileLoading} from 'utils/test-utils';
 import {getPropValue} from 'utils/element-utils';
+import CardBase from './card-base';
 
 const DataResourceCardSelector = {
   cardRootXpath: '//*[@data-test-id="card"]',
   cardNameXpath: '@data-test-id="card-name"',
-  ellipsisXpath: './/clr-icon[@shape="ellipsis-vertical"]',
   cardTypeXpath: './/*[@data-test-id="card-type"]',
 }
 
@@ -22,9 +21,7 @@ export enum CardType {
 /**
  * DataResourceCard represents resource card found on Workspace's data page.
  */
-export default class DataResourceCard {
-
-  private cardElement: ElementHandle;
+export default class DataResourceCard extends CardBase {
 
   // **********************
   // static functions
@@ -36,6 +33,7 @@ export default class DataResourceCard {
    * @throws TimeoutError if fails to find Card.
    */
   static async findAllCards(page: Page, timeOut: number = 2000): Promise<DataResourceCard[]> {
+    await waitWhileLoading(page);
     try {
       await page.waitForXPath(DataResourceCardSelector.cardRootXpath, {visible: true, timeout: timeOut});
     } catch (e) {
@@ -75,8 +73,8 @@ export default class DataResourceCard {
   }
 
 
-  constructor(private readonly page: Page) {
-
+  constructor(page: Page) {
+    super(page);
   }
 
   async findCard(resourceName: string, cardType?: CardType): Promise<DataResourceCard | null> {
@@ -98,14 +96,6 @@ export default class DataResourceCard {
   async getResourceName(): Promise<string> {
     const elemt = await this.cardElement.$x(`.//*[${DataResourceCardSelector.cardNameXpath}]`);
     return getPropValue<string>(elemt[0], 'innerText');
-  }
-
-  asElementHandle(): ElementHandle {
-    return this.cardElement.asElement();
-  }
-
-  getEllipsis(): EllipsisMenu {
-    return new EllipsisMenu(this.page, DataResourceCardSelector.ellipsisXpath, this.asElementHandle());
   }
 
   /**

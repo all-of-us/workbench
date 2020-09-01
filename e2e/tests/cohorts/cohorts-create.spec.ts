@@ -194,8 +194,7 @@ describe('User can create new Cohorts', () => {
     // Duplicate cohort using Ellipsis menu.
     const origCardsCount = (await DataResourceCard.findAllCards(page)).length;
     cohortCard = await DataResourceCard.findCard(page, cohortName);
-    const menu = cohortCard.getEllipsis();
-    await menu.clickAction(EllipsisMenuAction.Duplicate, {waitForNav: false});
+    await cohortCard.clickEllipsisAction(EllipsisMenuAction.Duplicate, {waitForNav: false});
     await waitWhileLoading(page);
     const newCardsCount = (await DataResourceCard.findAllCards(page)).length;
     // cards count increase by 1.

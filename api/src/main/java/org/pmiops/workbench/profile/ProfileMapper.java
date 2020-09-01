@@ -5,7 +5,6 @@ import org.mapstruct.Mapping;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
-import org.pmiops.workbench.institution.deprecated.InstitutionalAffiliationMapper;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -19,7 +18,6 @@ import org.pmiops.workbench.utils.mappers.UserMapper;
       CommonMappers.class,
       DbStorageEnums.class,
       DemographicSurveyMapper.class,
-      InstitutionalAffiliationMapper.class,
       PageVisitMapper.class,
       UserMapper.class
     })

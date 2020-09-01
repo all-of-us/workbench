@@ -2,8 +2,8 @@
   "name": "All of Us R and Cloud Storage snippets",
   "sub-menu": [
     {
-      "name": "Documentation",
-      "external-link": "https://github.com/all-of-us/workbench-snippets"
+      "external-link": "https://aousupporthelp.zendesk.com/hc/en-us/articles/360039856791-How-to-use-code-snippets-in-Jupyter-Notebooks",
+      "name": "Documentation"
     },
     "---",
     {
@@ -15,7 +15,7 @@
       "sub-menu": [
         {
           "name": "list_objects_in_bucket.R",
-          "snippet": "# This snippet assumes that you run setup first\n\n# This code lists objects in your Google Bucket\n\n# Get the bucket name\nmy_bucket <- Sys.getenv('WORKSPACE_BUCKET')\n\n# List objects in the bucket\nsystem(paste0(\"gsutil ls \", my_bucket), intern=T)\n\n\n"
+          "snippet": "# This snippet assumes that you run setup first\n\n# This code lists objects in your Google Bucket\n\n# Get the bucket name\nmy_bucket <- Sys.getenv('WORKSPACE_BUCKET')\n\n# List objects in the bucket\nsystem(paste0(\"gsutil ls -r \", my_bucket), intern=T)\n\n\n"
         }
       ]
     },
