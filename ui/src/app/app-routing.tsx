@@ -16,6 +16,7 @@ import {Redirect} from 'react-router';
 import {NOTEBOOK_HELP_CONTENT} from './components/help-sidebar';
 import {InteractiveNotebook} from './pages/analysis/interactive-notebook';
 import {NotebookList} from './pages/analysis/notebook-list';
+import {NotebookRedirect} from './pages/analysis/notebook-redirect';
 import {Homepage} from './pages/homepage/homepage';
 import {SignIn} from './pages/login/sign-in';
 import {WorkspaceLibrary} from './pages/workspace/workspace-library';
@@ -45,6 +46,7 @@ const UserDisabledPage = withRouteData(UserDisabled);
 const WorkspaceAuditPage = withRouteData(WorkspaceAudit);
 const WorkspaceLibraryPage = withRouteData(WorkspaceLibrary);
 const InteractiveNotebookPage = withRouteData(InteractiveNotebook);
+const NotebookRedirectPage = withRouteData(NotebookRedirect);
 
 interface RoutingProps {
   onSignIn: () => void;
@@ -123,6 +125,21 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           component={() => <InteractiveNotebookPage routeData={{
             pathElementForTitle: 'nbName',
             breadcrumb: BreadcrumbType.Notebook,
+            helpContentKey: NOTEBOOK_HELP_CONTENT,
+            notebookHelpSidebarStyles: true,
+            minimizeChrome: true
+          }}/>}
+        />
+        <AppRoute
+          path='/workspaces/:ns/:wsid/notebooks/:nbName'
+          component={() => <NotebookRedirectPage routeData={{
+              // use the (urldecoded) captured value nbName
+            pathElementForTitle: 'nbName',
+            breadcrumb: BreadcrumbType.Notebook,
+              // The iframe we use to display the Jupyter notebook does something strange
+              // to the height calculation of the container, which is normally set to auto.
+              // Setting this flag sets the container to 100% so that no content is clipped.
+            contentFullHeightOverride: true,
             helpContentKey: NOTEBOOK_HELP_CONTENT,
             notebookHelpSidebarStyles: true,
             minimizeChrome: true

@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import Iframe from 'react-iframe';
@@ -18,7 +17,6 @@ import {clusterApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   reactStyles,
-  ReactWrapperBase,
   withCurrentWorkspace,
   withQueryParams,
   withUserProfile
@@ -439,13 +437,4 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       </React.Fragment>;
     }
   });
-
-@Component({
-  template: '<div #root style="height: 100%"></div>'
-})
-export class NotebookRedirectComponent extends ReactWrapperBase {
-  constructor() {
-    super(NotebookRedirect, []);
-  }
-}
 

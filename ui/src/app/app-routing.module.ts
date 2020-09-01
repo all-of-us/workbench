@@ -13,7 +13,6 @@ import {AdminUserComponent} from './pages/admin/admin-user';
 import {AdminUsersComponent} from './pages/admin/admin-users';
 import {AdminWorkspaceComponent} from './pages/admin/admin-workspace';
 import {AdminWorkspaceSearchComponent} from './pages/admin/admin-workspace-search';
-import {NotebookRedirectComponent} from './pages/analysis/notebook-redirect';
 import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
 import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
 import {QueryReportComponent} from './pages/data/cohort-review/query-report.component';
@@ -30,7 +29,6 @@ import {WorkspaceListComponent} from './pages/workspace/workspace-list';
 import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/component';
 
 import {environment} from 'environments/environment';
-import {NOTEBOOK_HELP_CONTENT} from './components/help-sidebar';
 import {DisabledGuard} from './guards/disabled-guard.service';
 import {WorkspaceGuard} from './guards/workspace-guard.service';
 import {AdminInstitutionComponent} from './pages/admin/admin-institution';
@@ -160,19 +158,8 @@ const routes: Routes = [
                       },
                       {
                         path: ':nbName',
-                        component: NotebookRedirectComponent,
-                        data: {
-                          // use the (urldecoded) captured value nbName
-                          pathElementForTitle: 'nbName',
-                          breadcrumb: BreadcrumbType.Notebook,
-                          // The iframe we use to display the Jupyter notebook does something strange
-                          // to the height calculation of the container, which is normally set to auto.
-                          // Setting this flag sets the container to 100% so that no content is clipped.
-                          contentFullHeightOverride: true,
-                          helpContentKey: NOTEBOOK_HELP_CONTENT,
-                          notebookHelpSidebarStyles: true,
-                          minimizeChrome: true
-                        }
+                        component: AppRouting,
+                        data: {}
                       },
                       {
                         path: 'preview/:nbName',
