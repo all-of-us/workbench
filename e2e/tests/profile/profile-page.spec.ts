@@ -1,4 +1,4 @@
-import ProfilePage from 'app/page/profile-page';
+import ProfilePage, {MissingErrorAlias} from 'app/page/profile-page';
 import {signIn} from 'utils/test-utils';
 import navigation, {NavLink} from 'app/component/navigation';
 import {makeString, makeUrl} from 'utils/str-utils';
@@ -14,6 +14,18 @@ describe('Profile', () => {
     expect(isCursorEnabled).toBe(isActive);
     return button;
   }
+
+  // TODO generalize - promote to a Div Element?
+  async function isDivWithTextPresent(text: string): Promise<boolean> {
+    const selector = `//div[normalize-space(text())="${text}"]`;
+    const elements = await page.$x(selector);
+    return elements.length > 0;
+  }
+
+  async function isMissingErrorPresent(fieldText: string): Promise<boolean> {
+    return isDivWithTextPresent(`${fieldText} can't be blank`);
+  }
+
 
   beforeEach(async () => {
     await signIn(page);
@@ -105,18 +117,39 @@ describe('Profile', () => {
 
   test('A missing required field disables the save button', async () => {
     const researchBackground = await profilePage.getResearchBackgroundTextarea();
-    await researchBackground.type(makeString(10));
+
+    // make a change, causing the Save button to activate
+    await researchBackground.paste(makeString(10));
 
     // save button is enabled and no error message is displayed
     await waitForSaveButton(true);
-    await profilePage.expectResearchPurposeErrorMissing();
+    expect(await isMissingErrorPresent(MissingErrorAlias.ResearchBackground)).toBeFalsy();
 
     // remove text from Research Background textarea
     await researchBackground.clear();
 
     // save button is disabled and error message is displayed
     await waitForSaveButton(false);
-    await profilePage.expectResearchPurposeErrorPresent();
+    expect(await isMissingErrorPresent(MissingErrorAlias.ResearchBackground)).toBeTruthy();
+  });
+
+  // TODO
+  test('Each missing required field individually disables the save button', async () => {
+    const firstName = await profilePage.getFirstNameInput();
+
+    // make a change, causing the Save button to activate
+    await firstName.paste(makeString(10));
+
+    // save button is enabled and no error message is displayed
+    await waitForSaveButton(true);
+    expect(await isMissingErrorPresent(MissingErrorAlias.ResearchBackground)).toBeFalsy();
+
+    // remove text from First Name
+    await firstName.clear();
+
+    // save button is disabled and error message is displayed
+    await waitForSaveButton(false);
+    expect(await isMissingErrorPresent(MissingErrorAlias.ResearchBackground)).toBeTruthy();
   });
 
 

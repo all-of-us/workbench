@@ -1,11 +1,10 @@
-import {Page, WaitForSelectorOptions} from 'puppeteer';
+import {Page} from 'puppeteer';
 import Textbox from 'app/element/textbox';
 import AuthenticatedPage from 'app/page/authenticated-page';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle, waitForUrl} from 'utils/waits-utils';
 import Button from '../element/button';
 import Textarea from '../element/textarea';
-import BaseElement from '../element/base-element';
 
 export const PageTitle = 'Profile';
 
@@ -13,7 +12,6 @@ export const LabelAlias = {
   ResearchBackground: 'Your research background, experience and research interests',
   SaveProfile: 'Save Profile',
 };
-
 
 export const DataTestIdAlias = {
   FirstName: 'givenName',
@@ -25,6 +23,17 @@ export const DataTestIdAlias = {
   State: 'state',
   Zip: 'zipCode',
   Country: 'country',
+};
+
+export const MissingErrorAlias = {
+  FirstName: 'First Name',
+  LastName: 'Last Name',
+  ResearchBackground: 'Current Research',
+  Address1: 'Street address1',
+  City: 'City',
+  State: 'State',
+  Zip: 'Zip code',
+  Country: 'Country',
 };
 
 export default class ProfilePage extends AuthenticatedPage {
@@ -89,22 +98,5 @@ export default class ProfilePage extends AuthenticatedPage {
 
   async getSaveProfileButton(): Promise<Button> {
     return Button.findByName(this.page, {name: LabelAlias.SaveProfile});
-  }
-
-  // TODO generalize - promote to a Div Element?
-  async getDivWithText(text: string, options?: WaitForSelectorOptions): Promise<BaseElement> {
-    const selector = `//div[normalize-space(text())="${text}"]`;
-    const handle = await this.page.waitForXPath(selector, options);
-    return BaseElement.asBaseElement(this.page, handle);
-  }
-
-  async expectResearchPurposeErrorMissing(): Promise<void> {
-    const text = 'Current Research can\'t be blank';
-    await this.getDivWithText(text, {hidden: true});
-  }
-
-  async expectResearchPurposeErrorPresent(): Promise<void> {
-    const text = 'Current Research can\'t be blank';
-    await this.getDivWithText(text, {visible: true});
   }
 }
