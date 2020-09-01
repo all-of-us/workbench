@@ -133,12 +133,11 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
         <AppRoute
           path='/workspaces/:ns/:wsid/notebooks/:nbName'
           component={() => <NotebookRedirectPage routeData={{
-              // use the (urldecoded) captured value nbName
-            pathElementForTitle: 'nbName',
+            pathElementForTitle: 'nbName', // use the (urldecoded) captured value nbName
             breadcrumb: BreadcrumbType.Notebook,
-              // The iframe we use to display the Jupyter notebook does something strange
-              // to the height calculation of the container, which is normally set to auto.
-              // Setting this flag sets the container to 100% so that no content is clipped.
+            // The iframe we use to display the Jupyter notebook does something strange
+            // to the height calculation of the container, which is normally set to auto.
+            // Setting this flag sets the container to 100% so that no content is clipped.
             contentFullHeightOverride: true,
             helpContentKey: NOTEBOOK_HELP_CONTENT,
             notebookHelpSidebarStyles: true,
