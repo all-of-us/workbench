@@ -13,6 +13,8 @@ import {
   userProfileStore
 } from 'app/utils/navigation';
 
+import { routeDataStore } from 'app/utils/stores';
+
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {ResourceType, UserRole, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
 
@@ -65,6 +67,14 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // This is allows the react-router conversion to utilize various route config properties
+    // Once we are fully converted the help sidebar and modals will need to be reworked a bit to eliminate this Angular code
+    this.subscriptions.push(routeDataStore.subscribe(({helpContentKey, notebookHelpSidebarStyles, contentFullHeightOverride}) => {
+      this.helpContentKey = helpContentKey;
+      this.notebookStyles = notebookHelpSidebarStyles;
+      this.contentFullHeightOverride = contentFullHeightOverride;
+    }));
+
     const sidebarState = localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE);
     if (!!sidebarState) {
       this.sidebarOpen = sidebarState === 'open';

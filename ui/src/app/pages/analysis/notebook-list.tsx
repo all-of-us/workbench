@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 import * as React from 'react';
 
 import {CardButton} from 'app/components/buttons';
@@ -10,7 +9,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {NewNotebookModal} from 'app/pages/analysis/new-notebook-modal';
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {withCurrentWorkspace} from 'app/utils';
 import {convertToResource} from 'app/utils/resourceActions';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
@@ -132,12 +131,3 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
     </FadeBox>;
   }
 });
-
-@Component({
-  template: '<div #root></div>'
-})
-export class NotebookListComponent extends ReactWrapperBase {
-  constructor() {
-    super(NotebookList, []);
-  }
-}

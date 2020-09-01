@@ -12,6 +12,7 @@ import {
   withUrlParams
 } from 'app/utils';
 import {BreadcrumbType, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
+import {routeDataStore, RouteDataStore, withStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {BillingStatus, Cohort, ConceptSet} from 'generated/fetch';
 
@@ -142,6 +143,7 @@ interface Props {
   conceptSet: ConceptSet;
   urlParams: any;
   routeConfigData: any;
+  reactRouteData: RouteDataStore;
 }
 
 interface State {
@@ -153,7 +155,8 @@ export const Breadcrumb = fp.flow(
   withCurrentCohort(),
   withCurrentConceptSet(),
   withUrlParams(),
-  withRouteConfigData()
+  withRouteConfigData(),
+  withStore(routeDataStore, 'reactRouteData'),
 )(
   class extends React.Component<Props, State> {
     constructor(props) {
@@ -179,7 +182,7 @@ export const Breadcrumb = fp.flow(
 
     trail(): Array<BreadcrumbData> {
       return getTrail(
-        this.props.routeConfigData.breadcrumb,
+        this.props.routeConfigData.breadcrumb || this.props.reactRouteData.breadcrumb,
         this.props.workspace,
         this.props.cohort,
         this.props.conceptSet,

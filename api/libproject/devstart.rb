@@ -2629,9 +2629,9 @@ def randomize_vcf(cmd_name, *args)
           "by running tabix -p vcf [vcf path]"
   )
   op.add_option(
-      "--number-of-copies [n]",
-      -> (opts, n) {opts.n = n},
-      "How many random vcfs to generate."
+      "--sample-names-file [sn]",
+      -> (opts, sn) {opts.sn = sn},
+      "File containing newline separated sample names"
   )
   op.add_option(
       "--output-path [out]",
@@ -2641,7 +2641,7 @@ def randomize_vcf(cmd_name, *args)
   op.parse.validate
 
   basename = File.basename(op.opts.vcf, ".vcf.gz")
-  app_args = "-PappArgs=['-V#{op.opts.vcf}','-O#{op.opts.out}','-N#{op.opts.n}']"
+  app_args = "-PappArgs=['-V#{op.opts.vcf}','-O#{op.opts.out}','--sample-names', '#{op.opts.sn}']"
   Common.new.run_inline %W{./gradlew -p genomics randomizeVcf} + [app_args]
 end
 

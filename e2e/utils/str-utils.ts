@@ -14,6 +14,11 @@ export function makeString(charLimit?: number) {
   return loremStr;
 }
 
+export function makeUrl(charLimit?: number) {
+  const randomPage = makeString(charLimit).replace(/\s/g, '');
+  return `http://example.com/${randomPage}.html`;
+}
+
 /**
  * Generate a random filename.
  * @param namePrefix

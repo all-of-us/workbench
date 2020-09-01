@@ -1,10 +1,18 @@
 import {Profile} from 'generated';
-import {useEffect, useState} from 'react';
+import * as React from 'react';
+import { BreadcrumbType } from './navigation';
 import {atom, Atom} from './subscribable';
 
-interface RouteDataStore {
+const {useEffect, useState} = React;
+
+export interface RouteDataStore {
   title?: string;
   minimizeChrome?: boolean;
+  helpContentKey?: string;
+  breadcrumb?: BreadcrumbType;
+  pathElementForTitle?: string;
+  notebookHelpSidebarStyles?: boolean;
+  contentFullHeightOverride?: boolean;
 }
 
 export const routeDataStore = atom<RouteDataStore>({});
@@ -35,3 +43,15 @@ export function useStore<T>(theStore: Atom<T>) {
   }, [theStore]);
   return value;
 }
+
+/**
+ * HOC that injects the value of the given store as a prop. When the store changes, the wrapped
+ * component will re-render
+ */
+export const withStore = (theStore, name) => WrappedComponent => {
+  return (props) => {
+    const value = useStore(theStore);
+    const storeProp = {[name]: value};
+    return <WrappedComponent {...props} {...storeProp}/> ;
+  };
+};

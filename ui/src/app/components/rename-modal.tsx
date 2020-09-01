@@ -116,7 +116,7 @@ export class RenameModal extends React.Component<Props, States> {
         </ValidationError>
         {!hideDescription && <div style={{marginTop: '1rem'}}>
           <label data-test-id='descriptionLabel' style={styles.fieldHeader}>Description: </label>
-          <textarea value={resourceDescription || ' '}
+          <textarea value={resourceDescription || ''}
                     onChange={(e) => this.setState({resourceDescription: e.target.value})}/>
         </div> }
       </ModalBody>
