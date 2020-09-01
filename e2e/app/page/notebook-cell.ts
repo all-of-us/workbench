@@ -34,17 +34,34 @@ export default class NotebookCell {
   }
 
   /**
-   * Set focus to (select) a notebook cell input.
+   * Set focus to (select) a notebook cell input. Retry up to 3 times if focus fails.
    * @returns ElementHandle to code input if exists.
    */
-  async focus(): Promise<ElementHandle> {
+  async focus(maxAttempts: number = 3): Promise<ElementHandle> {
+    const clickInCell = async (iframe: Frame): Promise<ElementHandle> => {
+      const selector = this.cellSelector(this.getCellIndex());
+      const cell = await iframe.waitForSelector(`${selector} .CodeMirror-code`, {visible: true});
+      await cell.click({delay: 10}); // focus
+      return cell;
+    };
+
+    const clickAndCheck = async (iframe: Frame): Promise<ElementHandle> => {
+      maxAttempts--;
+      const cell = await clickInCell(iframe);
+      const [element] = await iframe.$$('body.notebook_app.edit_mode');
+      if (element) {
+        return cell;
+      }
+      if (maxAttempts <= 0) {
+        console.warn('Notebook body is not in edit_mode.');
+        return cell;
+      }
+      await this.page.waitFor(3000); // Pause 3 seconds then retry
+      return clickAndCheck(iframe);
+    };
+
     const frame = await this.getIFrame();
-    const selector = this.cellSelector(this.getCellIndex());
-    const cell = await frame.waitForSelector(`${selector} .CodeMirror-code`, {visible: true});
-    await cell.click({delay: 10}); // focus
-    // Focused element className should contains 'selected' text.
-    await this.waitForPropertyContains(selector, 'className', 'selected');
-    return cell;
+    return clickAndCheck(frame);
   }
 
   /**

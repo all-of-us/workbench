@@ -20,7 +20,6 @@ import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.Ethnicity;
 import org.pmiops.workbench.model.GenderIdentity;
 import org.pmiops.workbench.model.InstitutionalRole;
-import org.pmiops.workbench.model.NonAcademicAffiliation;
 import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.Race;
@@ -402,26 +401,6 @@ public final class DbStorageEnums {
 
   public static Short institutionalRoleToStorage(InstitutionalRole institutionalRole) {
     return CLIENT_TO_STORAGE_INSTITUTIONAL_ROLE.get(institutionalRole);
-  }
-
-  // NonAcademicAffiliation
-  private static final BiMap<NonAcademicAffiliation, Short>
-      CLIENT_TO_STORAGE_NON_ACADEMIC_AFFILIATION =
-          ImmutableBiMap.<NonAcademicAffiliation, Short>builder()
-              .put(NonAcademicAffiliation.INDUSTRY, (short) 0)
-              .put(NonAcademicAffiliation.EDUCATIONAL_INSTITUTION, (short) 1)
-              .put(NonAcademicAffiliation.COMMUNITY_SCIENTIST, (short) 2)
-              .put(NonAcademicAffiliation.FREE_TEXT, (short) 3)
-              .build();
-
-  public static NonAcademicAffiliation nonAcademicAffiliationFromStorage(
-      Short nonAcademicAffiliation) {
-    return CLIENT_TO_STORAGE_NON_ACADEMIC_AFFILIATION.inverse().get(nonAcademicAffiliation);
-  }
-
-  public static Short nonAcademicAffiliationToStorage(
-      NonAcademicAffiliation nonAcademicAffiliation) {
-    return CLIENT_TO_STORAGE_NON_ACADEMIC_AFFILIATION.get(nonAcademicAffiliation);
   }
 
   // OrganizationType

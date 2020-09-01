@@ -10,7 +10,6 @@ import java.util.function.Function;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
-import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -42,7 +41,6 @@ public interface UserService {
       List<Degree> degrees,
       DbAddress dbAddress,
       DbDemographicSurvey dbDemographicSurvey,
-      List<DbInstitutionalAffiliation> dbAffiliations,
       DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation);
 
   DbUser updateUserWithConflictHandling(DbUser user);

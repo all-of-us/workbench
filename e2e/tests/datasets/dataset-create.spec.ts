@@ -2,7 +2,6 @@ import DataResourceCard, {CardType} from 'app/component/data-resource-card';
 import ClrIconLink from 'app/element/clr-icon-link';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import DataPage, {TabLabelAlias} from 'app/page/data-page';
-import DatasetSaveModal from 'app/page/dataset-save-modal';
 import {EllipsisMenuAction, LinkText} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
@@ -31,9 +30,7 @@ describe('Create Dataset', () => {
 
     await datasetPage.selectCohorts(['All Participants']);
     await datasetPage.selectConceptSets(['Demographics', 'All Surveys']);
-    await datasetPage.clickSaveAndAnalyzeButton();
-
-    const saveModal = new DatasetSaveModal(page);
+    const saveModal = await datasetPage.clickSaveAndAnalyzeButton();
     const datasetName = await saveModal.saveDataset();
 
     // Verify create successful
@@ -106,9 +103,7 @@ describe('Create Dataset', () => {
 
     await datasetPage.selectCohorts([cohortName]);
     await datasetPage.selectConceptSets(['Demographics']);
-    await datasetPage.clickSaveAndAnalyzeButton();
-
-    const saveModal = new DatasetSaveModal(page);
+    const saveModal = await datasetPage.clickSaveAndAnalyzeButton();
     let datasetName = await saveModal.saveDataset({exportToNotebook: false});
 
     // Verify create successful.
@@ -120,8 +115,7 @@ describe('Create Dataset', () => {
 
     // Edit the dataset to include "All Participants".
     const datasetCard = await resourceCard.findCard(datasetName)
-    const menu = datasetCard.getEllipsis();
-    await menu.clickAction(EllipsisMenuAction.Edit);
+    await datasetCard.clickEllipsisAction(EllipsisMenuAction.Edit);
     await waitWhileLoading(page);
 
     await datasetPage.selectCohorts(['All Participants']);

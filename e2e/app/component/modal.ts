@@ -7,7 +7,6 @@ import Checkbox from 'app/element/checkbox';
 import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
 import {LinkText} from 'app/text-labels';
 import {getPropValue} from 'utils/element-utils';
-
 import * as fp from 'lodash/fp';
 
 const Selector = {
@@ -32,13 +31,16 @@ export default class Modal extends Container {
     return this;
   }
 
-  async getContent(): Promise<string> {
+  async getTextContent(): Promise<string[]> {
     // xpath that excludes button labels and spans
-    // '//*[@role="dialog"]//div[normalize-space(text()) and not(@role="button")]'
-    const modal = await this.waitUntilVisible();
-    const modalText = await getPropValue<string>(modal, 'innerText');
-    console.debug('Modal: \n' + modalText);
-    return modalText.toString();
+    const selector = '//*[@role="dialog"]//div[normalize-space(text()) and not(@role="button")]';
+    await this.waitUntilVisible();
+    await this.page.waitForXPath(selector, {visible: true});
+    const elements: ElementHandle[] = await this.page.$x(selector);
+    return fp.flow(
+       fp.map( async (elem: ElementHandle) => (await getPropValue<string>(elem, 'textContent')).trim()),
+       contents => Promise.all(contents)
+    )(elements);
   }
 
   /**

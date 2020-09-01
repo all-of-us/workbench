@@ -1,6 +1,7 @@
 package org.pmiops.workbench.cohortbuilder;
 
 import java.util.List;
+import java.util.Map;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AgeTypeCount;
 import org.pmiops.workbench.model.Criteria;
@@ -43,4 +44,13 @@ public interface CohortBuilderService {
   ParticipantDemographics findParticipantDemographics();
 
   List<Criteria> findStandardCriteriaByDomainAndConceptId(String domain, Long conceptId);
+
+  /**
+   * Build a map that contains all gender/race/ethnicity/sex_at_birth names with the concept id as
+   * the key.
+   */
+  Map<Long, String> findAllDemographicsMap();
+
+  List<String> findSortedConceptIdsByDomainIdAndTypeAndParentIdNotIn(
+      String domainId, Long parentId, String sortColumn, String sortName);
 }

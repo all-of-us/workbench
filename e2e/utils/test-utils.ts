@@ -187,28 +187,39 @@ export async function performAction(
 
 /**
  * Find an exsting workspace. Create a new workspace if none exists.
- * @param {boolean} createNew Create a new workspace, without regard to any existing workspaces or not.
+ * @param {boolean} create Create a new workspace, regardless any workspace exists or not.
+ * @param {string} workspaceName The name of a Workspace to find. If not found and create parameter is true, create new and returns it.
  */
-export async function findWorkspace(page: Page, createNew: boolean = false): Promise<WorkspaceCard> {
+export async function findWorkspace(page: Page, opts: {create?: boolean, workspaceName?: string} = {}): Promise<WorkspaceCard> {
+  const {create = false, workspaceName} = opts;
+
   const workspacesPage = new WorkspacesPage(page);
   await workspacesPage.load();
 
   const workspaceCard = new WorkspaceCard(page);
-  const existingWorkspaces = await workspaceCard.getWorkspaceMatchAccessLevel(WorkspaceAccessLevel.Owner);
-
-  if (createNew || existingWorkspaces.length === 0) {
-    // Create new workspace
-    const workspaceName = makeWorkspaceName();
-    await workspacesPage.createWorkspace(workspaceName);
-    console.log(`Created workspace: "${workspaceName}"`);
-    await workspacesPage.load();
-    await waitWhileLoading(page);
-    return workspaceCard.findCard(workspaceName);
+  // Returns specified workspaceName Workspace card if exists.
+  if (workspaceName !== undefined) {
+    const cardFound = await workspaceCard.findCard(workspaceName);
+    if (cardFound != null) {
+      // Workspace card found
+      return cardFound;
+    }
   }
 
+  const existingWorkspaces = await workspaceCard.getWorkspaceMatchAccessLevel(WorkspaceAccessLevel.Owner);
+  if (create || existingWorkspaces.length === 0) {
+    // Create new workspace
+    const name = workspaceName || makeWorkspaceName();
+    await workspacesPage.createWorkspace(name);
+    console.log(`Created workspace "${name}"`);
+    await workspacesPage.load();
+    return workspaceCard.findCard(name);
+  }
+
+  // Returns one random selected Workspace card.
   const oneWorkspaceCard = fp.shuffle(existingWorkspaces)[0];
   const workspaceCardName = await oneWorkspaceCard.getWorkspaceName();
-  console.log(`Found existing workspace: "${workspaceCardName}"`);
+  console.log(`Found workspace "${workspaceCardName}"`);
   return oneWorkspaceCard;
 }
 

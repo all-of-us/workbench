@@ -18,10 +18,10 @@ import org.pmiops.workbench.model.DataAccessLevel
 import org.pmiops.workbench.model.DemographicSurvey
 import org.pmiops.workbench.model.Education
 import org.pmiops.workbench.model.Ethnicity
-import org.pmiops.workbench.model.InstitutionalAffiliation
-import org.pmiops.workbench.model.NonAcademicAffiliation
+import org.pmiops.workbench.model.InstitutionalRole
 import org.pmiops.workbench.model.Profile
 import org.pmiops.workbench.model.Race
+import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation
 import org.springframework.test.context.junit4.SpringRunner
 import java.math.BigDecimal
 import java.time.Clock
@@ -69,16 +69,10 @@ class ProfileAuditorTest {
     }
 
     private fun buildProfile(): Profile {
-        val caltechAffiliation = InstitutionalAffiliation()
-                .apply { institution = "Caltech" }
-                .apply { role = "T.A." }
-                .apply { nonAcademicAffiliation = NonAcademicAffiliation.COMMUNITY_SCIENTIST }
-                .apply { other = "They are all fine houses." }
-
-        val mitAffiliation = InstitutionalAffiliation()
-                .apply { institution = "MIT" }
-                .apply { role = "Professor" }
-                .apply { nonAcademicAffiliation = NonAcademicAffiliation.EDUCATIONAL_INSTITUTION }
+        val caltechAffiliation = VerifiedInstitutionalAffiliation()
+                .apply { institutionShortName = "Caltech" }
+                .apply { institutionDisplayName = "California Institute of Technology" }
+                .apply { institutionalRoleEnum = InstitutionalRole.ADMIN }
 
         val demographicSurvey1 = DemographicSurvey()
                 .apply { disability = false }
@@ -103,7 +97,7 @@ class ProfileAuditorTest {
                 .apply { aboutYou = "Nobody in particular" }
                 .apply { areaOfResearch = "Aliens" }
                 .apply { professionalUrl = "linkedin.com" }
-                .apply { institutionalAffiliations = listOf(caltechAffiliation, mitAffiliation) }
+                .apply { verifiedInstitutionalAffiliation = caltechAffiliation }
                 .apply { demographicSurvey = demographicSurvey1 }
     }
 

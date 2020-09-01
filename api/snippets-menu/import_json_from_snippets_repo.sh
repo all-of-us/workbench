@@ -14,6 +14,6 @@ snippet_filename_prefixes=("py_gcs" "py_sql" "py_dataset" "r_gcs" "r_sql" "r_dat
 for prefix in "${snippet_filename_prefixes[@]}"; do
   source="${SNIPPETS_REPO_DIR}/build/${prefix}_snippets_menu_config.json"
   dest="$(git rev-parse --show-toplevel)/api/snippets-menu/$(echo ${prefix} | tr '_' '-')-snippets-menu.json"
-  jq '.' $source > $dest
+  jq -S '.' $source > $dest
   echo "Copied pretty printed $source into $dest"
 done
