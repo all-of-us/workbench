@@ -138,18 +138,18 @@ describe('Profile', () => {
     const firstName = await profilePage.getFirstNameInput();
 
     // make a change, causing the Save button to activate
-    await firstName.paste(makeString(10));
+    await firstName.type(makeString(10));
 
     // save button is enabled and no error message is displayed
     await waitForSaveButton(true);
-    expect(await isMissingErrorPresent(MissingErrorAlias.ResearchBackground)).toBeFalsy();
+    expect(await isMissingErrorPresent(MissingErrorAlias.FirstName)).toBeFalsy();
 
     // remove text from First Name
     await firstName.clear();
 
     // save button is disabled and error message is displayed
     await waitForSaveButton(false);
-    expect(await isMissingErrorPresent(MissingErrorAlias.ResearchBackground)).toBeTruthy();
+    expect(await isMissingErrorPresent(MissingErrorAlias.FirstName)).toBeTruthy();
   });
 
 
