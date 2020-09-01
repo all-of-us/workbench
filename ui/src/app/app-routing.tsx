@@ -13,10 +13,12 @@ import {authStore, profileStore, useStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Redirect} from 'react-router';
+import {NotebookList} from './pages/analysis/notebook-list';
 import {Homepage} from './pages/homepage/homepage';
 import {SignIn} from './pages/login/sign-in';
 import {WorkspaceLibrary} from './pages/workspace/workspace-library';
 import {AnalyticsTracker} from './utils/analytics';
+import {BreadcrumbType} from './utils/navigation';
 
 
 const signInGuard: Guard = {
@@ -32,6 +34,7 @@ const registrationGuard: Guard = {
 const CookiePolicyPage = withRouteData(CookiePolicy);
 const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight)(DataUserCodeOfConduct);
 const HomepagePage = withRouteData(Homepage); // this name is bad i am sorry
+const NotebookListPage = withRouteData(NotebookList);
 const SessionExpiredPage = withRouteData(SessionExpired);
 const SignInAgainPage = withRouteData(SignInAgain);
 const SignInPage = withRouteData(SignIn);
@@ -103,6 +106,14 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
         <AppRoute
           path='/library'
           component={() => <WorkspaceLibraryPage routeData={{title: 'Workspace Library', minimizeChrome: false}}/>}
+        />
+        <AppRoute
+          path='/workspaces/:ns/:wsid/notebooks'
+          component={() => <NotebookListPage routeData={{
+            title: 'View Notebooks',
+            helpContentKey: 'notebooks',
+            breadcrumb: BreadcrumbType.Workspace
+          }}/>}
         />
       </ProtectedRoutes>
     </ProtectedRoutes>
