@@ -12,6 +12,7 @@ import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSet;
+import org.pmiops.workbench.model.DataSetGenerateCodeRequest;
 import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.KernelTypeEnum;
@@ -27,7 +28,7 @@ public interface DataSetService {
 
   QueryJobConfiguration previewBigQueryJobConfig(DataSetPreviewRequest dataSetPreviewRequest);
 
-  Map<String, QueryJobConfiguration> domainToBigQueryConfig(DataSetRequest dataSet);
+  Map<String, QueryJobConfiguration> domainToBigQueryConfig(DataSetGenerateCodeRequest dataSet, long workspaceId);
 
   List<String> generateCodeCells(
       KernelTypeEnum kernelTypeEnum,

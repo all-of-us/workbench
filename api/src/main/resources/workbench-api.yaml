@@ -2191,7 +2191,7 @@ paths:
         name: dataSet
         required: true
         schema:
-          "$ref": "#/definitions/DataSetRequest"
+          "$ref": "#/definitions/DataSetGenerateCodeRequest"
       responses:
         200:
           description: 'A SQL query for each domain in the Data Set'
@@ -4610,6 +4610,16 @@ definitions:
         description: 'All the selected domain/value pairs in the data set'
         items:
           "$ref": "#/definitions/DomainValuePair"
+  DataSetGenerateCodeRequest:
+      type: object
+      description: Data Set Object with just DataSet Name and description
+      required:
+      - name
+      properties:
+        name:
+          type: string
+        description:
+          type: string
   PrePackagedConceptSetEnum:
     type: string
     enum:
@@ -4625,7 +4635,7 @@ definitions:
     - newNotebook
     properties:
       dataSetRequest:
-        "$ref": "#/definitions/DataSetRequest"
+        "$ref": "#/definitions/DataSetGenerateCodeRequest"
       notebookName:
         type: string
       newNotebook:

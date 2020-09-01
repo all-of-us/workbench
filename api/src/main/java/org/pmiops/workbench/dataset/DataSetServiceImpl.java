@@ -55,6 +55,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSet;
+import org.pmiops.workbench.model.DataSetGenerateCodeRequest;
 import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
@@ -332,18 +333,25 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   @Override
-  public Map<String, QueryJobConfiguration> domainToBigQueryConfig(DataSetRequest dataSetRequest) {
+  public Map<String, QueryJobConfiguration> domainToBigQueryConfig(
+      DataSetGenerateCodeRequest dataSetRequest, long workspaceId) {
+    DbDataset dbDataset =
+        dataSetDao.findByNameAndWorkspaceId(
+            dataSetRequest.getName(), workspaceId);
     final boolean includesAllParticipants =
-        getBuiltinBooleanFromNullable(dataSetRequest.getIncludesAllParticipants());
+        getBuiltinBooleanFromNullable(dbDataset.getIncludesAllParticipants());
     final ImmutableList<DbCohort> cohortsSelected =
-        ImmutableList.copyOf(this.cohortDao.findAllByCohortIdIn(dataSetRequest.getCohortIds()));
+        ImmutableList.copyOf(this.cohortDao.findAllByCohortIdIn(dbDataset.getCohortIds()));
     final ImmutableList<DomainValuePair> domainValuePairs =
-        ImmutableList.copyOf(dataSetRequest.getDomainValuePairs());
+        ImmutableList.copyOf(
+            dbDataset.getValues().stream()
+                .map(value -> dataSetMapper.createDomainValuePair(value))
+                .collect(Collectors.toList()));
 
     final ImmutableList<DbConceptSet> expandedSelectedConceptSets =
         getExpandedConceptSetSelections(
-            dataSetRequest.getPrePackagedConceptSet(),
-            dataSetRequest.getConceptSetIds(),
+            dataSetMapper.prePackagedConceptSetFromStorage(dbDataset.getPrePackagedConceptSet()),
+            dbDataset.getConceptSetIds(),
             cohortsSelected,
             includesAllParticipants,
             domainValuePairs);

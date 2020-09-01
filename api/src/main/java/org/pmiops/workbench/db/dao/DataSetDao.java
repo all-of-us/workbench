@@ -14,6 +14,8 @@ public interface DataSetDao extends CrudRepository<DbDataset, Long> {
 
   List<DbDataset> findDataSetsByConceptSetIds(long conceptId);
 
+  DbDataset findByNameAndWorkspaceId(String name, long workspaceId);
+
   List<DbDataset> findByWorkspaceId(long workspaceId);
 
   default Map<Boolean, Long> getInvalidToCountMap() {

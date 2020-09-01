@@ -14,7 +14,7 @@ import {encodeURIComponentStrict, navigateByUrl} from 'app/utils/navigation';
 
 import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {DataSet, DataSetRequest, FileDetail, KernelTypeEnum} from 'generated/fetch';
+import {DataSet, DataSetGenerateCodeRequest, FileDetail, KernelTypeEnum} from 'generated/fetch';
 
 interface Props {
   closeFunction: Function;
@@ -87,13 +87,8 @@ class ExportDataSetModal extends React.Component<
     const {dataSet} = this.props;
     return {
       name: dataSet.name,
-      includesAllParticipants: dataSet.includesAllParticipants,
       description: dataSet.description,
-      conceptSetIds: dataSet.conceptSets.map(cs => cs.id),
-      cohortIds: dataSet.cohorts.map(c => c.id),
-      domainValuePairs: dataSet.domainValuePairs,
-      prePackagedConceptSet: dataSet.prePackagedConceptSet
-    } as DataSetRequest;
+    } as DataSetGenerateCodeRequest;
   }
 
   async generateQuery() {
