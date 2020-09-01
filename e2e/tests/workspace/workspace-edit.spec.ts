@@ -1,4 +1,4 @@
-import DataPage, {TabLabelAlias} from 'app/page/data-page';
+import WorkspaceDataPage, {TabLabelAlias} from 'app/page/workspace-data-page';
 import WorkspacesPage from 'app/page/workspaces-page';
 import {EllipsisMenuAction} from 'app/text-labels';
 import * as testData from 'resources/data/workspace-data';
@@ -37,7 +37,7 @@ describe('Editing workspace thru workspace card ellipsis menu', () => {
     await updateButton.waitUntilEnabled();
     await workspacesPage.clickCreateFinishButton(updateButton);
 
-    const dataPage = new DataPage(page);
+    const dataPage = new WorkspaceDataPage(page);
     await dataPage.waitForLoad();
 
     // Check Workspace Information

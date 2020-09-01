@@ -1,4 +1,4 @@
-import DataPage from 'app/page/data-page';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {Language} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn} from 'utils/test-utils';
@@ -17,7 +17,7 @@ describe('Jupyter notebook tests in R language', () => {
     await workspaceCard.clickWorkspaceName();
 
     const notebookName = makeRandomName('r-notebook');
-    const dataPage = new DataPage(page);
+    const dataPage = new WorkspaceDataPage(page);
     const notebook = await dataPage.createNotebook(notebookName, Language.R);
 
     const kernelName = await notebook.getKernelName();

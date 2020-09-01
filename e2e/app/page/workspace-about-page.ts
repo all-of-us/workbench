@@ -1,18 +1,18 @@
 import {Page} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
-import {waitForAttributeEquality, waitForDocumentTitle} from 'utils/waits-utils';
+import {waitForDocumentTitle} from 'utils/waits-utils';
 import {buildXPath} from 'app/xpath-builders';
 import {WorkspaceAccessLevel} from 'app/text-labels';
 import {ElementType} from 'app/xpath-options';
 import {getPropValue} from 'utils/element-utils';
-import AuthenticatedPage from './authenticated-page';
-import {TabLabelAlias} from './data-page';
+import WorkspaceBase from './workspace-base';
+import {TabLabelAlias} from './workspace-data-page';
 import Button from 'app/element/button';
 import ShareModal from 'app/component/share-modal';
 
 export const PageTitle = 'View Workspace Details';
 
-export default class WorkspaceAboutPage extends AuthenticatedPage{
+export default class WorkspaceAboutPage extends WorkspaceBase {
 
   constructor(page: Page) {
     super(page);
@@ -30,11 +30,6 @@ export default class WorkspaceAboutPage extends AuthenticatedPage{
       console.log(`WorkspaceAboutPage isLoaded() encountered ${err}`);
       return false;
     }
-  }
-
-  async isOpen(): Promise<boolean> {
-    const selector = buildXPath({name: TabLabelAlias.About, type: ElementType.Tab});
-    return waitForAttributeEquality(this.page, {xpath: selector}, 'aria-selected', 'true');
   }
 
   async findUserInCollaboratorList(username: string): Promise<WorkspaceAccessLevel> {

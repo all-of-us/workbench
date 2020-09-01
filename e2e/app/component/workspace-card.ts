@@ -1,7 +1,7 @@
 import {ElementHandle, Page} from 'puppeteer';
 import {WorkspaceAccessLevel} from 'app/text-labels';
 import * as fp from 'lodash/fp';
-import DataPage from 'app/page/data-page';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {getPropValue} from 'utils/element-utils';
 import CardBase from './card-base';
 
@@ -125,7 +125,7 @@ export default class WorkspaceCard extends CardBase {
       elemt.click(),
     ]);
     if (waitForDataPage) {
-      const dataPage = new DataPage(this.page);
+      const dataPage = new WorkspaceDataPage(this.page);
       await dataPage.waitForLoad();
     }
     return name;

@@ -3,7 +3,7 @@ import ClrIconLink from 'app/element/clr-icon-link';
 import Link from 'app/element/link';
 import {EllipsisMenuAction, LinkText} from 'app/text-labels';
 import CohortBuildPage, {FieldSelector} from 'app/page/cohort-build-page';
-import DataPage, {TabLabelAlias} from 'app/page/data-page';
+import WorkspaceDataPage, {TabLabelAlias} from 'app/page/workspace-data-page';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
 import DataResourceCard from 'app/component/data-resource-card';
@@ -30,7 +30,7 @@ describe('User can create new Cohorts', () => {
     await workspaceCard.clickWorkspaceName();
 
     // Wait for the Data page.
-    const dataPage = new DataPage(page);
+    const dataPage = new WorkspaceDataPage(page);
 
     // Click Add Cohorts button
     const addCohortsButton = await dataPage.getAddCohortsButton();
@@ -118,7 +118,7 @@ describe('User can create new Cohorts', () => {
     await workspaceCard.clickWorkspaceName();
 
     // Wait for the Data page.
-    const dataPage = new DataPage(page);
+    const dataPage = new WorkspaceDataPage(page);
 
     // Save url
     const workspaceDataUrl = page.url();
