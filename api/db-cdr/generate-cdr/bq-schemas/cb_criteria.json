@@ -51,16 +51,6 @@
   },
   {
     "mode": "NULLABLE",
-    "name": "rollup_count",
-    "type": "INTEGER"
-  },
-  {
-    "mode": "NULLABLE",
-    "name": "item_count",
-    "type": "INTEGER"
-  },
-  {
-    "mode": "NULLABLE",
     "name": "est_count",
     "type": "INTEGER"
   },
@@ -98,6 +88,16 @@
     "mode": "NULLABLE",
     "name": "synonyms",
     "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "rollup_count",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "item_count",
+    "type": "INTEGER"
   },
   {
     "mode": "NULLABLE",
