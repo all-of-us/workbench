@@ -1,0 +1,22 @@
+[
+  {
+    "mode": "REQUIRED",
+    "name": "survey_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "concept_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "version",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "display_order",
+    "type": "INTEGER"
+  }
+]

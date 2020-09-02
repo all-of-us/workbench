@@ -68,5 +68,10 @@
     "mode": "NULLABLE",
     "name": "diastolic",
     "type": "float"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "survey_id",
+    "type": "integer"
   }
 ]
