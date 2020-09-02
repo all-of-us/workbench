@@ -1,7 +1,7 @@
-import DataResourceCard, {CardType} from 'app/component/data-resource-card';
+import DataResourceCard from 'app/component/data-resource-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
-import {Language} from 'app/text-labels';
+import {Language, ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn} from 'utils/test-utils';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
@@ -39,7 +39,7 @@ describe('Jupyter Notebook tests in Python language', () => {
 
     // Find and open saved notebook and verify notebook contents match.
     const resourceCard = new DataResourceCard(page);
-    const notebookCard = await resourceCard.findCard(notebookName, CardType.Notebook);
+    const notebookCard = await resourceCard.findCard(notebookName, ResourceCard.Notebook);
     await notebookCard.clickResourceName();
 
     const notebookPreviewPage = new NotebookPreviewPage(page);

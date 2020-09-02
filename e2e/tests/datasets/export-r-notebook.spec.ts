@@ -7,7 +7,7 @@ import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
 import CohortActionsPage from 'app/page/cohort-actions-page';
 import {Ethnicity} from 'app/page/cohort-search-page';
-import {Language} from 'app/text-labels';
+import {Language, ResourceCard} from 'app/text-labels';
 
 describe('Create Dataset', () => {
 
@@ -82,19 +82,19 @@ describe('Create Dataset', () => {
 
     const analysisPage = new WorkspaceAnalysisPage(page);
     await analysisPage.waitForLoad();
-    await analysisPage.deleteNotebook(newNotebookName);
+    await analysisPage.deleteResource(newNotebookName, ResourceCard.Notebook);
 
     // Delete Dataset
     await dataPage.openDataPage();
     await dataPage.openDatasetsSubtab({waitPageChange: false});
 
-    const datasetDeleteDialogText = await dataPage.deleteDataset(newDatasetName);
+    const datasetDeleteDialogText = await dataPage.deleteResource(newDatasetName, ResourceCard.Dataset);
     expect(datasetDeleteDialogText).toContain(`Are you sure you want to delete Dataset: ${newDatasetName}?`);
 
     // Delete Cohort
     await dataPage.openCohortsSubtab({waitPageChange: false});
 
-    const cohortDeleteDialogText = await dataPage.deleteCohort(newCohortName);
+    const cohortDeleteDialogText = await dataPage.deleteResource(newCohortName, ResourceCard.Cohort);
     expect(cohortDeleteDialogText).toContain(`Are you sure you want to delete Cohort: ${newCohortName}?`);
 
   });
