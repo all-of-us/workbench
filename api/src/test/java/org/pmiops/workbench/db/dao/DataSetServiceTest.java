@@ -29,6 +29,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -39,6 +40,8 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.DSLinkingDao;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
+import org.pmiops.workbench.cohorts.CohortService;
+import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.dataset.DataSetServiceImpl;
 import org.pmiops.workbench.dataset.DataSetServiceImpl.QueryAndParameters;
@@ -46,19 +49,23 @@ import org.pmiops.workbench.dataset.mapper.DataSetMapper;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
+import org.pmiops.workbench.db.model.DbDataset;
+import org.pmiops.workbench.db.model.DbDatasetValue;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.model.DataSetGenerateCodeRequest;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -99,11 +106,14 @@ public class DataSetServiceTest {
   private DataSetServiceImpl dataSetServiceImpl;
 
   @TestConfiguration
+  @Import({DataSetMapperImpl.class})
   @MockBean({
     CdrBigQuerySchemaConfigService.class,
+    CommonMappers.class,
     ConceptBigQueryService.class,
     ConceptSetDao.class,
-    DataSetMapperImpl.class,
+    CohortService.class,
+    ConceptSetService.class,
     CohortQueryBuilder.class,
     DataSetDao.class
   })
@@ -133,6 +143,34 @@ public class DataSetServiceTest {
     final DbCohort cohort = buildSimpleCohort();
     when(cohortDao.findCohortByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(cohort);
     when(cohortQueryBuilder.buildParticipantIdQuery(any())).thenReturn(QUERY_JOB_CONFIGURATION_1);
+    DbDataset dbDatasetWithNoCohortConceptset =
+        buildDbDataSet(
+            "Blah", Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
+    when(dataSetDao.findByNameAndWorkspaceId("blah", 1l))
+        .thenReturn(dbDatasetWithNoCohortConceptset);
+
+    DbDatasetValue domainValuePair = new DbDatasetValue();
+    domainValuePair.setDomainId("9");
+    domainValuePair.setValue("PERSON_ID");
+    DbDataset dbDatasetWithCohort =
+        buildDbDataSet(
+            "withData", COHORT_IDS, ImmutableList.of(1l, 2l), ImmutableList.of(domainValuePair));
+    when(dataSetDao.findByNameAndWorkspaceId("withData", 1l)).thenReturn(dbDatasetWithCohort);
+  }
+
+  private DbDataset buildDbDataSet(
+      String name,
+      List<Long> cohortId,
+      List<Long> conceptSetId,
+      List<DbDatasetValue> domainValuePair) {
+    DbDataset dbDataset = new DbDataset(1l, 1l, name, "", 1l, null, false);
+    dbDataset.setIncludesAllParticipants(false);
+    dbDataset.setValues(domainValuePair);
+    dbDataset.setCohortIds(cohortId);
+    dbDataset.setConceptSetIds(conceptSetId);
+    dbDataset.setPrePackagedConceptSetEnum(PrePackagedConceptSetEnum.NONE);
+    dbDataset.setPrePackagedConceptSet((short) 0);
+    return dbDataset;
   }
 
   private DbCohort buildSimpleCohort() {
@@ -163,8 +201,8 @@ public class DataSetServiceTest {
 
   @Test(expected = BadRequestException.class)
   public void testThrowsForNoCohortOrConcept() {
-    final DataSetRequest invalidRequest = buildEmptyRequest();
-    dataSetServiceImpl.domainToBigQueryConfig(invalidRequest);
+    final DataSetGenerateCodeRequest invalidRequest = new DataSetGenerateCodeRequest().name("blah");
+    dataSetServiceImpl.domainToBigQueryConfig(invalidRequest, 1l);
   }
 
   @Test
@@ -315,16 +353,8 @@ public class DataSetServiceTest {
   @Test
   public void testDomainToBigQueryConfig() {
     mockLinkingTableQuery(ImmutableList.of("FROM `" + TEST_CDR_TABLE + ".person` person"));
-    final DataSetRequest dataSetRequest =
-        new DataSetRequest()
-            .conceptSetIds(Collections.emptyList())
-            .cohortIds(Collections.emptyList())
-            .domainValuePairs(Collections.emptyList())
-            .name("blah")
-            .prePackagedConceptSet(PrePackagedConceptSetEnum.NONE)
-            .cohortIds(COHORT_IDS)
-            .domainValuePairs(
-                ImmutableList.of(new DomainValuePair().domain(Domain.PERSON).value("PERSON_ID")));
+    final DataSetGenerateCodeRequest dataSetRequest =
+        new DataSetGenerateCodeRequest().name("withData");
     final Gson gson = new Gson();
     final String cohortCriteriaJson =
         gson.toJson(
@@ -341,7 +371,7 @@ public class DataSetServiceTest {
     doReturn(ImmutableList.of(dbCohort)).when(mockCohortDao).findAllByCohortIdIn(anyList());
 
     final Map<String, QueryJobConfiguration> result =
-        dataSetServiceImpl.domainToBigQueryConfig(dataSetRequest);
+        dataSetServiceImpl.domainToBigQueryConfig(dataSetRequest, 1l);
     assertThat(result).hasSize(1);
     assertThat(result.get("PERSON").getNamedParameters()).hasSize(1);
     assertThat(result.get("PERSON").getNamedParameters().get("foo_101").getValue())

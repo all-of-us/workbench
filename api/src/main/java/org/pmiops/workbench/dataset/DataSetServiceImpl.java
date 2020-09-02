@@ -336,8 +336,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   public Map<String, QueryJobConfiguration> domainToBigQueryConfig(
       DataSetGenerateCodeRequest dataSetRequest, long workspaceId) {
     DbDataset dbDataset =
-        dataSetDao.findByNameAndWorkspaceId(
-            dataSetRequest.getName(), workspaceId);
+        dataSetDao.findByNameAndWorkspaceId(dataSetRequest.getName(), workspaceId);
     final boolean includesAllParticipants =
         getBuiltinBooleanFromNullable(dbDataset.getIncludesAllParticipants());
     final ImmutableList<DbCohort> cohortsSelected =

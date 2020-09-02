@@ -44,10 +44,13 @@ import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
+import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
+import org.pmiops.workbench.db.model.DbDataset;
+import org.pmiops.workbench.db.model.DbDatasetValue;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -56,9 +59,8 @@ import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
-import org.pmiops.workbench.model.DataSetRequest;
+import org.pmiops.workbench.model.DataSetGenerateCodeRequest;
 import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -69,6 +71,7 @@ import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -100,6 +103,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private NotebooksService notebooksService;
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
   @Autowired private Provider<DbUser> userProvider;
+  @Autowired private DataSetDao dataSetDao;
 
   @Autowired
   @Qualifier(DatasetConfig.DATASET_PREFIX_CODE)
@@ -131,6 +135,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     CohortQueryBuilder.class,
     ConceptBigQueryService.class,
     DataSetServiceImpl.class,
+    DataSetMapperImpl.class,
     TestBigQueryCdrSchemaConfig.class,
     WorkspaceServiceImpl.class
   })
@@ -139,8 +144,9 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     CohortService.class,
     ConceptService.class,
     ConceptSetMapperImpl.class,
+    CommonMappers.class,
     ConceptSetService.class,
-    DataSetMapperImpl.class,
+    DataSetDao.class,
     FireCloudServiceImpl.class,
     FreeTierBillingService.class,
     NotebooksServiceImpl.class,
@@ -327,18 +333,20 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void testGenerateCodePython() {
+    mockDbDataSet(
+        ImmutableList.of(dbCohort1.getCohortId()),
+        ImmutableList.of(dbConditionConceptSet.getConceptSetId()),
+        ImmutableList.of(Domain.CONDITION),
+        false,
+        PrePackagedConceptSetEnum.NONE);
+
     String code =
         controller
             .generateCode(
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_NAME,
                 KernelTypeEnum.PYTHON.toString(),
-                createDataSetRequest(
-                    ImmutableList.of(dbConditionConceptSet),
-                    ImmutableList.of(dbCohort1),
-                    ImmutableList.of(Domain.CONDITION),
-                    false,
-                    PrePackagedConceptSetEnum.NONE))
+                new DataSetGenerateCodeRequest())
             .getBody()
             .getCode();
     assertAndExecutePythonQuery(code, 1, Domain.CONDITION);
@@ -346,18 +354,19 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void testGenerateCodeR() {
+    mockDbDataSet(
+        ImmutableList.of(dbCohort1.getCohortId()),
+        ImmutableList.of(dbConditionConceptSet.getConceptSetId()),
+        ImmutableList.of(Domain.CONDITION),
+        false,
+        PrePackagedConceptSetEnum.NONE);
     String code =
         controller
             .generateCode(
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_NAME,
                 KernelTypeEnum.R.toString(),
-                createDataSetRequest(
-                    ImmutableList.of(dbConditionConceptSet),
-                    ImmutableList.of(dbCohort1),
-                    ImmutableList.of(Domain.CONDITION),
-                    false,
-                    PrePackagedConceptSetEnum.NONE))
+                new DataSetGenerateCodeRequest())
             .getBody()
             .getCode();
 
@@ -386,18 +395,21 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void testGenerateCodeTwoConceptSets() {
+    mockDbDataSet(
+        ImmutableList.of(dbCohort1.getCohortId()),
+        ImmutableList.of(
+            dbConditionConceptSet.getConceptSetId(), dbProcedureConceptSet.getConceptSetId()),
+        ImmutableList.of(Domain.CONDITION, Domain.PERSON),
+        false,
+        PrePackagedConceptSetEnum.NONE);
+
     String code =
         controller
             .generateCode(
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_NAME,
                 KernelTypeEnum.PYTHON.toString(),
-                createDataSetRequest(
-                    ImmutableList.of(dbConditionConceptSet, dbProcedureConceptSet),
-                    ImmutableList.of(dbCohort1),
-                    ImmutableList.of(Domain.CONDITION, Domain.PROCEDURE),
-                    false,
-                    PrePackagedConceptSetEnum.NONE))
+                new DataSetGenerateCodeRequest())
             .getBody()
             .getCode();
 
@@ -406,18 +418,19 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void testGenerateCodeTwoCohorts() {
+    mockDbDataSet(
+        ImmutableList.of(dbCohort1.getCohortId(), dbCohort2.getCohortId()),
+        ImmutableList.of(dbConditionConceptSet.getConceptSetId()),
+        ImmutableList.of(Domain.CONDITION),
+        false,
+        PrePackagedConceptSetEnum.NONE);
     String code =
         controller
             .generateCode(
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_NAME,
                 KernelTypeEnum.PYTHON.toString(),
-                createDataSetRequest(
-                    ImmutableList.of(dbConditionConceptSet),
-                    ImmutableList.of(dbCohort1, dbCohort2),
-                    ImmutableList.of(Domain.CONDITION),
-                    false,
-                    PrePackagedConceptSetEnum.NONE))
+                new DataSetGenerateCodeRequest())
             .getBody()
             .getCode();
 
@@ -426,18 +439,19 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void testGenerateCodeAllParticipants() {
+    mockDbDataSet(
+        ImmutableList.of(),
+        ImmutableList.of(dbConditionConceptSet.getConceptSetId()),
+        ImmutableList.of(Domain.CONDITION),
+        true,
+        PrePackagedConceptSetEnum.NONE);
     String code =
         controller
             .generateCode(
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_NAME,
                 KernelTypeEnum.PYTHON.toString(),
-                createDataSetRequest(
-                    ImmutableList.of(dbConditionConceptSet),
-                    ImmutableList.of(),
-                    ImmutableList.of(Domain.CONDITION),
-                    true,
-                    PrePackagedConceptSetEnum.NONE))
+                new DataSetGenerateCodeRequest())
             .getBody()
             .getCode();
 
@@ -446,18 +460,19 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void testGenerateCodePrepackagedCohortDemographics() {
+    mockDbDataSet(
+        ImmutableList.of(dbCohort1.getCohortId()),
+        ImmutableList.of(),
+        ImmutableList.of(Domain.PERSON),
+        false,
+        PrePackagedConceptSetEnum.PERSON);
     String code =
         controller
             .generateCode(
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_NAME,
                 KernelTypeEnum.PYTHON.toString(),
-                createDataSetRequest(
-                    ImmutableList.of(),
-                    ImmutableList.of(dbCohort1),
-                    ImmutableList.of(Domain.PERSON),
-                    false,
-                    PrePackagedConceptSetEnum.PERSON))
+                new DataSetGenerateCodeRequest())
             .getBody()
             .getCode();
 
@@ -466,22 +481,50 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void testGenerateCodePrepackagedCohortSurveys() {
+    mockDbDataSet(
+        ImmutableList.of(dbCohort1.getCohortId()),
+        ImmutableList.of(),
+        ImmutableList.of(Domain.SURVEY),
+        false,
+        PrePackagedConceptSetEnum.SURVEY);
     String code =
         controller
             .generateCode(
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_NAME,
                 KernelTypeEnum.PYTHON.toString(),
-                createDataSetRequest(
-                    ImmutableList.of(),
-                    ImmutableList.of(dbCohort1),
-                    ImmutableList.of(Domain.SURVEY),
-                    false,
-                    PrePackagedConceptSetEnum.SURVEY))
+                new DataSetGenerateCodeRequest())
             .getBody()
             .getCode();
 
     assertAndExecutePythonQuery(code, 1, Domain.SURVEY);
+  }
+
+  private void mockDbDataSet(
+      List<Long> cohortIdList,
+      List<Long> conceptIdList,
+      List<Domain> domains,
+      boolean includesAllParticipants,
+      PrePackagedConceptSetEnum prePackagedConceptSetEnum) {
+    DbDataset dbDataset = new DbDataset(1l, 1l, null, "", 1l, null, false);
+    dbDataset.setIncludesAllParticipants(includesAllParticipants);
+    dbDataset.setValues(
+        domains.stream()
+            .map(
+                d -> {
+                  DbDatasetValue s = new DbDatasetValue();
+                  s.setValue("person_id");
+                  s.setDomainId(DbStorageEnums.domainToStorage(d).toString());
+                  return s;
+                })
+            .collect(Collectors.toList()));
+    dbDataset.setCohortIds(cohortIdList);
+    dbDataset.setConceptSetIds(conceptIdList);
+    dbDataset.setPrePackagedConceptSetEnum(prePackagedConceptSetEnum);
+    dbDataset.setPrePackagedConceptSet(
+        DbStorageEnums.prePackagedConceptSetsToStorage(prePackagedConceptSetEnum));
+    when(dataSetDao.findByNameAndWorkspaceId(null, dbWorkspace.getWorkspaceId()))
+        .thenReturn(dbDataset);
   }
 
   private void assertAndExecutePythonQuery(String code, int index, Domain domain) {
@@ -507,24 +550,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     } catch (Exception e) {
       fail("Problem generating BigQuery query for notebooks: " + e.getCause().getMessage());
     }
-  }
-
-  private DataSetRequest createDataSetRequest(
-      List<DbConceptSet> dbConceptSets,
-      List<DbCohort> dbCohorts,
-      List<Domain> domains,
-      boolean allParticipants,
-      PrePackagedConceptSetEnum prePackagedConceptSetEnum) {
-    return new DataSetRequest()
-        .conceptSetIds(
-            dbConceptSets.stream().map(DbConceptSet::getConceptSetId).collect(Collectors.toList()))
-        .cohortIds(dbCohorts.stream().map(DbCohort::getCohortId).collect(Collectors.toList()))
-        .includesAllParticipants(allParticipants)
-        .prePackagedConceptSet(prePackagedConceptSetEnum)
-        .domainValuePairs(
-            domains.stream()
-                .map(d -> new DomainValuePair().domain(d).value("person_id"))
-                .collect(Collectors.toList()));
   }
 
   @NotNull

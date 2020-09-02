@@ -28,7 +28,8 @@ public interface DataSetService {
 
   QueryJobConfiguration previewBigQueryJobConfig(DataSetPreviewRequest dataSetPreviewRequest);
 
-  Map<String, QueryJobConfiguration> domainToBigQueryConfig(DataSetGenerateCodeRequest dataSet, long workspaceId);
+  Map<String, QueryJobConfiguration> domainToBigQueryConfig(
+      DataSetGenerateCodeRequest dataSet, long workspaceId);
 
   List<String> generateCodeCells(
       KernelTypeEnum kernelTypeEnum,

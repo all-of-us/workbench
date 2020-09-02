@@ -73,11 +73,13 @@ import org.pmiops.workbench.dataset.DataSetServiceImpl;
 import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.dataset.mapper.DataSetMapper;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -98,6 +100,7 @@ import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DataSetCodeResponse;
 import org.pmiops.workbench.model.DataSetExportRequest;
+import org.pmiops.workbench.model.DataSetGenerateCodeRequest;
 import org.pmiops.workbench.model.DataSetPreviewValueList;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
@@ -184,8 +187,10 @@ public class DataSetControllerTest {
   @Autowired private ConceptSetsController conceptSetsController;
   @Autowired private DataSetController dataSetController;
   @Autowired private UserDao userDao;
+  @Autowired private DataSetDao dataSetDao;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private WorkspacesController workspacesController;
+  @Autowired private DataSetMapper dataSetMapper;
 
   @MockBean private CdrBigQuerySchemaConfigService mockCdrBigQuerySchemaConfigService;
   @MockBean private BillingProjectBufferService mockBillingProjectBufferService;
@@ -228,6 +233,7 @@ public class DataSetControllerTest {
     ComplianceService.class,
     ConceptBigQueryService.class,
     DataSetMapper.class,
+    DataSetDao.class,
     DirectoryService.class,
     FreeTierBillingService.class,
     UserRecentResourceService.class,
@@ -446,6 +452,9 @@ public class DataSetControllerTest {
               returnSql = returnSql.replace("${dataSetId}", TEST_CDR_DATA_SET_ID);
               return queryJobConfiguration.toBuilder().setQuery(returnSql).build();
             });
+
+    when(dataSetMapper.prePackagedConceptSetFromStorage((short) 0))
+        .thenReturn(PrePackagedConceptSetEnum.NONE);
   }
 
   private DataSetRequest buildEmptyDataSetRequest() {
@@ -455,6 +464,10 @@ public class DataSetControllerTest {
         .domainValuePairs(new ArrayList<>())
         .name("blah")
         .prePackagedConceptSet(PrePackagedConceptSetEnum.NONE);
+  }
+
+  private DataSetGenerateCodeRequest buildEmptyDataSetGeneratecodeRequest() {
+    return new DataSetGenerateCodeRequest().name("blah");
   }
 
   private void stubGetWorkspace(String ns, String name) {
@@ -540,29 +553,30 @@ public class DataSetControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void testGetQueryFailsWithNoCohort() {
-    DataSetRequest dataSet = buildEmptyDataSetRequest();
-    dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
-
+    DataSetGenerateCodeRequest dataSet = buildEmptyDataSetGeneratecodeRequest();
+    mockDbDataSet(
+        Collections.emptyList(), ImmutableList.of(CONCEPT_SET_ONE_ID), Collections.emptyList());
     dataSetController.generateCode(
         workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet);
   }
 
   @Test(expected = BadRequestException.class)
   public void testGetQueryFailsWithNoConceptSet() {
-    DataSetRequest dataSet = buildEmptyDataSetRequest();
-    dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
-
+    DataSetGenerateCodeRequest dataSet = buildEmptyDataSetGeneratecodeRequest();
+    mockDbDataSet(
+        ImmutableList.of(COHORT_ONE_ID), Collections.emptyList(), Collections.emptyList());
     dataSetController.generateCode(
         workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet);
   }
 
   @Test
   public void testGetQueryDropsQueriesWithNoValue() {
-    final DataSetRequest dataSet =
-        buildEmptyDataSetRequest()
-            .addCohortIdsItem(COHORT_ONE_ID)
-            .addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
+    final DataSetGenerateCodeRequest dataSet = buildEmptyDataSetGeneratecodeRequest();
 
+    mockDbDataSet(
+        ImmutableList.of(COHORT_ONE_ID),
+        ImmutableList.of(CONCEPT_SET_ONE_ID),
+        Collections.emptyList());
     DataSetCodeResponse response =
         dataSetController
             .generateCode(
@@ -626,11 +640,7 @@ public class DataSetControllerTest {
 
   @Test
   public void exportToNewNotebook() {
-    DataSetRequest dataSet = buildEmptyDataSetRequest().name("blah");
-    dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
-    dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
-    List<DomainValuePair> domainValuePairs = mockDomainValuePair();
-    dataSet.setDomainValuePairs(domainValuePairs);
+    DataSetGenerateCodeRequest dataSet = buildEmptyDataSetGeneratecodeRequest().name("blah");
 
     ArrayList<String> tables = new ArrayList<>();
     tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");
@@ -645,6 +655,10 @@ public class DataSetControllerTest {
             .notebookName(notebookName)
             .kernelType(KernelTypeEnum.PYTHON);
 
+    mockDbDataSet(
+        ImmutableList.of(COHORT_ONE_ID),
+        ImmutableList.of(CONCEPT_SET_ONE_ID),
+        mockDomainValuePair());
     dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request).getBody();
     verify(mockNotebooksService, never()).getNotebookContents(any(), any());
     // I tried to have this verify against the actual expected contents of the json object, but
@@ -669,11 +683,7 @@ public class DataSetControllerTest {
 
   @Test
   public void exportToExistingNotebook() {
-    DataSetRequest dataSet = buildEmptyDataSetRequest();
-    dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
-    dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
-    List<DomainValuePair> domainValuePairs = mockDomainValuePair();
-    dataSet.setDomainValuePairs(domainValuePairs);
+    DataSetGenerateCodeRequest dataSet = buildEmptyDataSetGeneratecodeRequest();
 
     ArrayList<String> tables = new ArrayList<>();
     tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");
@@ -696,6 +706,10 @@ public class DataSetControllerTest {
             .newNotebook(false)
             .notebookName(notebookName);
 
+    mockDbDataSet(
+        ImmutableList.of(COHORT_ONE_ID),
+        ImmutableList.of(CONCEPT_SET_ONE_ID),
+        mockDomainValuePair());
     dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request).getBody();
     verify(mockNotebooksService, times(1)).getNotebookContents(WORKSPACE_BUCKET_NAME, notebookName);
     // I tried to have this verify against the actual expected contents of the json object, but
@@ -722,5 +736,17 @@ public class DataSetControllerTest {
     assertThat(domainValues)
         .containsExactly(
             new DomainValue().value("field_one"), new DomainValue().value("field_two"));
+  }
+
+  private void mockDbDataSet(
+      List<Long> cohortIdList, List<Long> conceptIdList, List<DomainValuePair> domainValuePair) {
+    DbDataset dbDataset = new DbDataset(1l, 1l, "Blah", "", 1l, null, false);
+    dbDataset.setIncludesAllParticipants(false);
+    dbDataset.setValues(dataSetMapper.toDbDomainValuePairs(domainValuePair));
+    dbDataset.setCohortIds(cohortIdList);
+    dbDataset.setConceptSetIds(conceptIdList);
+    dbDataset.setPrePackagedConceptSetEnum(PrePackagedConceptSetEnum.NONE);
+    dbDataset.setPrePackagedConceptSet((short) 0);
+    when(dataSetDao.findByNameAndWorkspaceId("blah", 1l)).thenReturn(dbDataset);
   }
 }
