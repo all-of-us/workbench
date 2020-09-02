@@ -218,7 +218,8 @@ commands:
           command: |
             case << parameters.env_name >> in
               "staging") echo 'export USER_NAME=$PUPPETEER_USER_STAGING' >> $BASH_ENV ;;
-              "local" | "test") echo 'export USER_NAME=$PUPPETEER_USER_TEST' >> $BASH_ENV ;;
+              "test") echo 'export USER_NAME=$PUPPETEER_USER_TEST' >> $BASH_ENV ;;
+              "local") echo 'export USER_NAME=$PUPPETEER_USER_LOCAL' >> $BASH_ENV ;;
             esac
             echo 'export PASSWORD=$PUPPETEER_USER_PASSWORD' >> $BASH_ENV
             source $BASH_ENV
