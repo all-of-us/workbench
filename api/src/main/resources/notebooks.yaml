@@ -1,6 +1,6 @@
 # This file is a hand-crafted combination of Leo and its proxy APIs.
-#  - A subset of Welder (modified for cluster/path prefix): https://github.com/DataBiosphere/welder/blob/master/server/src/main/resources/api-docs.yaml
-#  - A subset of Jupyter (modified for cluster/path prefix): https://github.com/jupyter/notebook/blob/master/notebook/services/api/api.yaml
+#  - A subset of Welder (modified for runtime/path prefix): https://github.com/DataBiosphere/welder/blob/master/server/src/main/resources/api-docs.yaml
+#  - A subset of Jupyter (modified for runtime/path prefix): https://github.com/jupyter/notebook/blob/master/notebook/services/api/api.yaml
 #  - Subset of Leo API used client-side (downgraded to Swagger2): https://github.com/broadinstitute/leonardo/blob/develop/src/main/resources/swagger/api-docs.yaml
 
 swagger: '2.0'
@@ -18,9 +18,9 @@ basePath: /
 produces:
   - application/json
 tags:
-  - name: test
-    description: Test API
-  - name: runtime
+  - name: notebooks
+    description: Notebooks Welder API
+  - name: runtimes
     description: Runtimes API
   - name: proxy
     description: Notebook proxy API
@@ -135,12 +135,12 @@ paths:
               schema:
                 $ref: "#/definitions/ErrorReport"
 
-  "/proxy/{googleProject}/{clusterName}/setCookie":
+  "/proxy/{googleProject}/{runtimeName}/setCookie":
     get:
       summary: Sets a browser cookie needed to authorize connections to a Dataproc
-        cluster
+        runtime
       description: >
-        If using Google token-based authorization to a cluster, the Leo proxy
+        If using Google token-based authorization to a runtime, the Leo proxy
         accepts a
 
         Google token passed as a cookie value. This endpoint facilitates setting that cookie.
@@ -155,8 +155,8 @@ paths:
           required: true
           type: string
         - in: path
-          name: clusterName
-          description: clusterName
+          name: runtimeName
+          description: runtimeName
           required: true
           type: string
       responses:
@@ -169,7 +169,7 @@ paths:
               schema:
                 $ref: "#/definitions/ErrorReport"
         "404":
-          description: Cluster not found
+          description: Runtime not found
           content:
             application/json:
               schema:
@@ -209,7 +209,7 @@ paths:
 ## https://github.com/DataBiosphere/welder/blob/master/server/src/main/resources/api-docs.yaml
 ##########################################################################################
 
-  '/proxy/{googleProject}/{clusterName}/welder/objects':
+  '/proxy/{googleProject}/{runtimeName}/welder/objects':
     parameters:
       - in: path
         name: googleProject
@@ -217,8 +217,8 @@ paths:
         required: true
         type: string
       - in: path
-        name: clusterName
-        description: clusterName
+        name: runtimeName
+        description: runtimeName
         required: true
         type: string
     post:
@@ -240,7 +240,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/WelderErrorReport'
-  '/proxy/{googleProject}/{clusterName}/welder/storageLinks':
+  '/proxy/{googleProject}/{runtimeName}/welder/storageLinks':
     parameters:
       - in: path
         name: googleProject
@@ -248,12 +248,12 @@ paths:
         required: true
         type: string
       - in: path
-        name: clusterName
-        description: clusterName
+        name: runtimeName
+        description: runtimeName
         required: true
         type: string
     post:
-      summary: 'creates the specified storage link configuration for the cluster'
+      summary: 'creates the specified storage link configuration for the runtime'
       operationId: welderCreateStorageLink
       tags:
         - notebooks
@@ -280,7 +280,7 @@ paths:
   # "workspaces/..." fragment into a single "path" var, as is used in Jupyter's
   # own Swagger definition. Note: this does not initialize any parent
   # directories. The Leo proxy localize API can be used for this purpose.
-  /notebooks/{googleProject}/{clusterName}/api/contents/{fileName}:
+  /notebooks/{googleProject}/{runtimeName}/api/contents/{fileName}:
     parameters:
       - in: path
         name: googleProject
@@ -288,8 +288,8 @@ paths:
         required: true
         type: string
       - in: path
-        name: clusterName
-        description: clusterName
+        name: runtimeName
+        description: runtimeName
         required: true
         type: string
       - in: path
@@ -347,7 +347,7 @@ paths:
             $ref: '#/definitions/JupyterContents'
         500:
           description: Model key error
-  /notebooks/{googleProject}/{clusterName}/api/contents/workspaces/{workspaceDir}:
+  /notebooks/{googleProject}/{runtimeName}/api/contents/workspaces/{workspaceDir}:
     parameters:
       - in: path
         name: googleProject
@@ -355,8 +355,8 @@ paths:
         required: true
         type: string
       - in: path
-        name: clusterName
-        description: clusterName
+        name: runtimeName
+        description: runtimeName
         required: true
         type: string
       - in: path
@@ -406,7 +406,7 @@ paths:
               reason:
                 type: string
                 description: Explanation of error reason
-  /notebooks/{googleProject}/{clusterName}/api/contents/workspaces/{workspaceDir}/{fileName}:
+  /notebooks/{googleProject}/{runtimeName}/api/contents/workspaces/{workspaceDir}/{fileName}:
     parameters:
       - in: path
         name: googleProject
@@ -414,8 +414,8 @@ paths:
         required: true
         type: string
       - in: path
-        name: clusterName
-        description: clusterName
+        name: runtimeName
+        description: runtimeName
         required: true
         type: string
       - in: path
@@ -477,32 +477,6 @@ paths:
 ## DEFINITIONS
 ##########################################################################################
 definitions:
-  ClusterStatus:
-    type: string
-    enum: &CLUSTERSTATUS
-      - Creating
-      - Running
-      - Updating
-      - Error
-      - Stopping
-      - Stopped
-      - Starting
-      - Deleting
-      - Deleted
-      - Unknown
-
-  InstanceStatus:
-    type: string
-    enum: &INSTANCESTATUS
-      - Provisioning
-      - Staging
-      - Running
-      - Stopping
-      - Stopped
-      - Suspending
-      - Suspended
-      - Terminated
-
   ErrorReport:
     description: ''
     required:
@@ -555,419 +529,6 @@ definitions:
         type: integer
         description: line number
 
-  Cluster:
-    description: ''
-    required:
-      - id
-      - clusterName
-      - googleProject
-      - googleServiceAccount
-      - machineConfig
-      - status
-      - createdDate
-      - labels
-      - dateAccessed
-      - autopauseThreshold
-      - defaultClientId
-      - scopes
-    properties:
-      id:
-        type: string
-        description: The internally-referenced ID of the cluster
-      clusterName:
-        type: string
-        description: The user-supplied name for the cluster
-      googleId:
-        type: string
-        description: Google's UUID for the cluster
-      googleProject:
-        type: string
-        description: The Google Project used to create the cluster
-      googleServiceAccount:
-        type: string
-        description: The Google Service Account used to create the cluster
-      machineConfig:
-        description: The machine configurations for the master and worker nodes
-        $ref: '#/definitions/MachineConfig'
-      operationName:
-        type: string
-        description: Google's operation ID for the cluster
-      status:
-        $ref: "#/definitions/ClusterStatus"
-      hostIp:
-        type: string
-        description: The IP address of the cluster master node
-      createdDate:
-        type: string
-        description: The date and time the cluster was created, in ISO-8601 format
-      destroyedDate:
-        type: string
-        description: The date and time the cluster was destroyed, in ISO-8601 format
-      labels:
-        type: object
-        description: The labels to be placed on the cluster. Of type Map[String,String]
-      errors:
-        type: array
-        description: The list of errors that were encountered on cluster create. Each error consists of the error message, code and timestamp
-        items:
-          $ref: "#/definitions/ClusterError"
-      instances:
-        description: Array of instances belonging to this cluster
-        type: array
-        items:
-          $ref: '#/definitions/Instance'
-      dateAccessed:
-        type: string
-        description: |
-          The date and time the cluster was last accessed, in ISO-8601 format.
-          Date accessed is defined as the last time the cluster was created, modified, or accessed via the proxy.
-      autopauseThreshold:
-        type: integer
-        description: The number of minutes of idle time to elapse before the cluster is autopaused. A value of 0 is equivalent to autopause being turned off.
-      defaultClientId:
-        type: string
-        description: The default Google Client ID.
-      scopes:
-        type: array
-        items:
-          type: string
-        description: The scopes for the cluster.
-      stagingBucket:
-        type: string
-        description: Bucket name containing logs and staging resources for the cluster.
-
-
-  ListClusterResponse:
-    description: ''
-    required:
-      - clusterName
-      - googleProject
-      - googleServiceAccount
-      - machineConfig
-      - status
-      - createdDate
-      - labels
-      - dateAccessed
-      - autopauseThreshold
-      - defaultClientId
-    properties:
-      internalId:
-        type: string
-        description: Internal resource ID of the cluster
-      clusterName:
-        type: string
-        description: The user-supplied name for the cluster
-      googleId:
-        type: string
-        description: Google's UUID for the cluster
-      googleProject:
-        type: string
-        description: The Google Project used to create the cluster
-      googleServiceAccount:
-        type: string
-        description: The Google Service Account used to create the cluster
-      machineConfig:
-        description: The machine configurations for the master and worker nodes
-        $ref: '#/definitions/MachineConfig'
-      operationName:
-        type: string
-        description: Google's operation ID for the cluster
-      status:
-        $ref: "#/definitions/ClusterStatus"
-      hostIp:
-        type: string
-        description: The IP address of the cluster master node
-      createdDate:
-        type: string
-        description: The date and time the cluster was created, in ISO-8601 format
-      destroyedDate:
-        type: string
-        description: The date and time the cluster was destroyed, in ISO-8601 format
-      labels:
-        type: object
-        description: The labels to be placed on the cluster. Of type Map[String,String]
-      instances:
-        description: Array of instances belonging to this cluster
-        type: array
-        items:
-          $ref: '#/definitions/Instance'
-      dateAccessed:
-        type: string
-        description: |
-          The date and time the cluster was last accessed, in ISO-8601 format.
-          Date accessed is defined as the last time the cluster was created, modified, or accessed via the proxy.
-      autopauseThreshold:
-        type: integer
-        description: The number of minutes of idle time to elapse before the cluster is autopaused. A value of 0 is equivalent to autopause being turned off.
-      defaultClientId:
-        type: string
-        description: The default Google Client ID.
-
-  InstanceKey:
-    description: ''
-    required:
-      - project
-      - zone
-      - name
-    properties:
-      project:
-        type: string
-        description: The Google Project the instance belongs to
-      zone:
-        type: string
-        description: The Google zone the instance belongs to
-      name:
-        type: string
-        description: The name of the instance
-
-  Instance:
-    description: ''
-    required:
-      - key
-      - googleId
-      - status
-    properties:
-      key:
-        description: Unique identifier of (project, zone, name) for this instance
-        $ref: '#/definitions/InstanceKey'
-      googleId:
-        type: string
-        description: Google's unique id for this instance
-      status:
-        $ref: "#/definitions/InstanceStatus"
-      ip:
-        type: string
-        description: The public IP address of the instance, if any
-      dataprocRole:
-        type: string
-        description: The dataproc role (master, worker, preemptible worker) of this instance, if any
-      createdDate:
-        type: string
-        description: The date and time the instance was created, in ISO-8601 format
-
-  ClusterRequest:
-    description: ''
-    properties:
-      labels:
-        type: object
-        description: The labels to be placed on the cluster. Of type Map[String,String]
-      userJupyterExtensionConfig:
-        $ref: "#/definitions/UserJupyterExtensionConfig"
-        description: Jupyter extensions to be installed in the notebook
-      jupyterUserScriptUri:
-        type: string
-        description: |
-          Optional GCS object URI to a bash script the user wishes to run inside their jupyter
-          docker. This script runs exactly once when the cluster is first initialized. Logs from
-          this script can be found in the Leo staging bucket for the cluster. Script is run as root
-          and docker --privileged.
-      jupyterStartUserScriptUri:
-        type: string
-        description: |
-          Optional GCS object URI to a bash script the user wishes to run on cluster start inside
-          the jupyter docker. In contrast to jupyterUserScriptUri, this always runs before starting
-          Jupyter, both on initial cluster creation and on cluster resume (jupyterUserScriptUri runs
-          once on cluster creation). This script may be used to launch background processes which
-          would not otherwise survive a cluster stop/start.
-          The script is pulled once at cluster creation time; subsequent client changes to the user
-          script at this URI do not affect the cluster. Timestamped logs for this script can be
-          found in the Leo staging bucket for the cluster. Script is run as root and docker --privileged.
-      machineConfig:
-        description: The machine configurations for the master and worker nodes
-        $ref: '#/definitions/MachineConfig'
-      properties:
-        description: >
-          Example {"spark:spark.executor.memory": "10g"}. See https://cloud.google.com/dataproc/docs/concepts/configuring-clusters/cluster-properties for allowed property settings
-        type: object
-        additionalProperties:
-          type: string
-      stopAfterCreation:
-        description: |
-          If true, Leo will immediately stop the cluster once it's created, with the end result being a
-          a cluster in Stopped state. Otherwise, the end result will be a cluster in Running state.
-          Defaults to false.
-        type: boolean
-        default: false
-      autopause:
-        type: boolean
-        description: Whether autopause feature is enabled for this specific cluster. If unset, autopause will be enabled and a system default threshold will be used.
-      autopauseThreshold:
-        type: integer
-        description: The number of minutes of idle time to elapse before the cluster is autopaused. If autopause is set to false, this value is disregarded. A value of 0 is equivalent to autopause being turned off. If autopause is enabled and this is unset, a system default threshold will be used.
-      defaultClientId:
-        type: string
-        description: The default Google Client ID.
-      toolDockerImage:
-        type: string
-        description: The tool docker image to install. May be Dockerhub or GCR. If not set, a default Jupyter image will be installed.
-      welderDockerImage:
-        type: string
-        description: |
-          The Welder docker image to install. Only takes effect if the tool being installed supports welder.
-          May be Dockerhub or GCR. If not set, then a default Welder image will be installed.
-      scopes:
-        type: array
-        items:
-          type: string
-        description: >
-          The scopes for the cluster. Defaults (userinfo.email, userinfo.profile, bigquery, source.read_only) will be used if left blank. Important: If you choose to specify custom scopes, the defaults will be overwritten. Thus, if you need the defaults, you will need to include the default scopes in your custom list of scopes.
-        default: ["https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/bigquery", "https://www.googleapis.com/auth/source.read_only"]
-      enableWelder:
-        type: boolean
-        description: If set to true, sets up welder on the cluster. If unset, welder will not be put on the cluster.
-        default: false
-      customClusterEnvironmentVariables:
-        type: object
-        description: A collection of key/value pairs of environment variable names and their desired value to be set in the cluster.
-        additionalProperties:
-          type: string
-
-  ClusterError:
-    description: 'Errors encountered on cluster create'
-    properties:
-      errorMessage:
-        type: string
-        description: Error message
-      errorCode:
-        type: integer
-        description: Error code
-      timestamp:
-        type: string
-        description: timestamp for error in ISO 8601 format
-
-  LeonardoVersion:
-    type: object
-    properties:
-      version:
-        type: string
-
-  MachineConfig:
-    description: 'The configuration for a single Dataproc cluster'
-    properties:
-      numberOfWorkers:
-        type: integer
-        description: |
-          Optional, number of workers in the cluster. Can be 0 (default), 2 or more. Google Dataproc does not allow 1 worker.
-      masterMachineType:
-        type: string
-        description: |
-          Optional, the machine type determines the number of CPUs and memory for the master node. For example "n1-standard-16"
-          or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
-          see https://cloud.google.com/compute/docs/machine-types
-      masterDiskSize:
-        type: integer
-        description: |
-          Optional, the size in gigabytes of the disk on the master node. Minimum size is 10GB. If unspecified, default size is 100GB.
-      workerMachineType:
-        type: string
-        description: |
-          Optional, the machine type determines the number of CPUs and memory for the worker nodes. For example "n1-standard-16"
-          or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
-          see https://cloud.google.com/compute/docs/machine-types. Ignored if numberOfWorkers is 0.
-      workerDiskSize:
-        type: integer
-        description: |
-          Optional, the size in gigabytes of the disk on the master node. Minimum size is 10GB. If unspecified, default size is 100GB.
-          Ignored if numberOfWorkers is 0.
-      numberOfWorkerLocalSSDs:
-        type: integer
-        description: |
-          Optional, the number of local solid state disks for workers. If unspecified, the default number is 0.
-          Ignored if numberOfWorkers is 0.
-      numberOfPreemptibleWorkers:
-        type: integer
-        description: |
-          Optional, the number of preemptible workers. If unspecified, the default number is 0. Ignored if numberOfWorkers is 0.
-          For more information, see https://cloud.google.com/compute/docs/instances/preemptible
-
-  UserJupyterExtensionConfig:
-    description: 'Specification of Jupyter Extensions to be installed on the cluster'
-    properties:
-      nbExtensions:
-        type: object
-        description: |
-          Optional, map of extension name and nbExtension. The nbExtension can either be a tar.gz or .js file, either on google storage or at a URL, or a python package.
-          An archive must not include a parent directory, and must have an entry point named 'main'.
-          For more information on notebook extensions, see http://jupyter-notebook.readthedocs.io/en/latest/extending/frontend_extensions.html.
-          Example, {"ext1":"gs://bucket/extension.tar.gz", "ext2":"python-package",  "ext3":"http://foo.com/extension.js"}
-      serverExtensions:
-        type: object
-        description: |
-          Optional, map of extension name and server extension. The serverExtensions can either be a tar.gz file on google storage or a python package.
-          Example, {"ext1":"gs://bucket/extension.tar.gz", "ext2":"python-package"}
-      combinedExtensions:
-        type: object
-        description: |
-          Optional, map of extension name and notebook plus server extension. The extension can either be a tar.gz file on google storage or a python package.
-          Example, {"ext1":"gs://bucket/extension.tar.gz", "ext2":"python-package"}
-      labExtensions:
-        type: object
-        description: |
-          Optional, map of extension name and lab extension. The extension should be a verified jupyterlab extension that is uploaded to npm (list of public extensions here: https://github.com/search?utf8=%E2%9C%93&q=topic%3Ajupyterlab-extension&type=Repositories), a gzipped tarball made using 'npm pack', a folder structured by 'jlpm build', a JS file to be inserted into an JL extension template (see https://github.com/jupyterlab/extension-cookiecutter-js), or a URL to one of the last three options.
-
-  SubsystemStatus:
-    description: status of a subsystem Leonardo depends on
-    type: object
-    required:
-      - ok
-    properties:
-      ok:
-        type: boolean
-        description: whether this system is up or down from Leonardo's point of view
-      messages:
-        type: array
-        items:
-          type: string
-
-  SystemStatus:
-    description: status of each subsystem Leonardo depends on
-    type: object
-    required:
-      - ok
-      - systems
-    properties:
-      ok:
-        type: boolean
-        description: true if everything is ok, false if anything is amiss
-      systems:
-        type: object
-        description: Map[String, SubsystemStatus]
-
-  UpdateClusterRequest:
-    description: ''
-    properties:
-      machineConfig:
-        description: The machine configurations for the master and worker nodes
-        $ref: '#/definitions/UpdateMachineConfig'
-      autopause:
-        type: boolean
-        description: Whether autopause feature is enabled for this specific cluster. If unset, autopause will be enabled and a system default threshold will be used.
-      autopauseThreshold:
-        type: integer
-        description: The number of minutes of idle time to elapse before the cluster is autopaused. If autopause is set to false, this value is disregarded. A value of 0 is equivalent to autopause being turned off. If autopause is enabled and this is unset, a system default threshold will be used.
-
-  UpdateMachineConfig:
-    description: 'The configuration for a single Dataproc cluster'
-    properties:
-      numberOfWorkers:
-        type: integer
-        description: |
-          Optional, number of workers in the cluster. Can be 0 (default), 2 or more. Google Dataproc does not allow 1 worker.
-      numberOfPreemptibleWorkers:
-        type: integer
-        description: |
-          Optional, the number of preemptible workers. If unspecified, the default number is 0. Ignored if numberOfWorkers is 0.
-          For more information, see https://cloud.google.com/compute/docs/instances/preemptible
-      masterMachineType:
-        type: string
-        description: |
-          Optional, the machine type determines the number of CPUs and memory for the master node. For example "n1-standard-16"
-          or "n1-highmem-64". To decide which is right for you, see https://cloud.google.com/compute/docs/machine-types
-      masterDiskSize:
-        type: integer
-        description: |
-          Optional, the size in gigabytes of the disk on the master node. Minimum size is 10GB. Note: disk size cannot be
-          decreased in an update request, only increased.
 
 ##########################################################################################
 ## Subset of Welder API models
