@@ -25,6 +25,11 @@ import {environment} from 'environments/environment';
 import {Criteria, CriteriaType, DomainType, TemporalMention, TemporalTime} from 'generated/fetch';
 
 const styles = reactStyles({
+  arrowIcon: {
+    height: '21px',
+    marginTop: '-0.2rem',
+    width: '18px'
+  },
   backArrow: {
     background: `${addOpacity(colors.accent, 0.15)}`,
     borderRadius: '50%',
@@ -33,6 +38,12 @@ const styles = reactStyles({
     lineHeight: '1.6rem',
     textAlign: 'center',
     width: '1.5rem',
+  },
+  externalLinks: {
+    display: 'table-cell',
+    lineHeight: '0.75rem',
+    textAlign: 'right',
+    verticalAlign: 'middle'
   },
   footer: {
     marginTop: '0.5rem',
@@ -61,10 +72,16 @@ const styles = reactStyles({
     width: '100%',
   },
   titleBar: {
-    margin: '0.75rem 0 0.25rem',
-    padding: '0rem 1rem',
+    color: colors.primary,
+    display: 'table',
+    margin: '1rem 0 0.25rem',
     width: '65%',
     height: '1.5rem',
+  },
+  titleHeader: {
+    display: 'inline-block',
+    lineHeight: '1.5rem',
+    margin: '0 0 0 0.75rem'
   }
 });
 
@@ -276,7 +293,6 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
       overflowX: 'hidden',
       width: '100%',
       height: '100%',
-      padding: '0 0.4rem 0 1rem',
     } as React.CSSProperties;
     if (this.state.mode === mode) {
       style = {...style, display: 'block', animation: 'fadeEffect 1s'};
@@ -349,8 +365,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
     const {autocompleteSelection, count, groupSelections, hierarchyNode, loadingSubtree, selectedIds, selections, title, treeSearchTerms}
       = this.state;
     return !!cohortContext && <FlexRowWrap style={styles.searchContainer}>
-
-      <div style={{height: '100%', width: '100%'}}>
+      <div style={{height: '100%', padding: '0 0.5rem', width: '100%'}}>
         <div style={{position: 'absolute', right: '0', marginTop: '-1rem'}}>
           <style>
             {css}
@@ -359,12 +374,10 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
         </div>
         <div style={styles.titleBar}>
           <Clickable style={styles.backArrow} onClick={() => this.closeSearch()}>
-            <img src={arrowIcon} style={{height: '21px', marginTop: '-0.2rem', width: '18px'}} alt='Go back' />
+            <img src={arrowIcon} style={styles.arrowIcon} alt='Go back' />
           </Clickable>
-          <h2 style={{color: colors.primary, display: 'inline-block', lineHeight: '1.5rem', margin: '0 0 0 0.75rem'}}>
-            {title}
-          </h2>
-          <div style={{display: 'inline-block', float: 'right', lineHeight: '0.75rem'}}>
+          <h2 style={styles.titleHeader}>{title}</h2>
+          <div style={styles.externalLinks}>
             {cohortContext.domain === DomainType.DRUG && <div>
               <StyledAnchorTag
                   href='https://mor.nlm.nih.gov/RxNav/'

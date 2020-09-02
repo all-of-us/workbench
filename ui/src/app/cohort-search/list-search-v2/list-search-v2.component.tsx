@@ -39,10 +39,6 @@ const styles = reactStyles({
     border: 0,
     outline: 'none',
   },
-  drugsText: {
-    marginTop: '0.25rem',
-    lineHeight: '0.75rem'
-  },
   attrIcon: {
     marginRight: '0.5rem',
     color: colors.accent,
@@ -142,7 +138,6 @@ const styles = reactStyles({
     color: colors.primary,
     display: 'table-cell',
     height: '100%',
-    lineHeight: '0.75rem',
     verticalAlign: 'middle',
   }
 });
@@ -351,9 +346,6 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
         </div>
         <div style={{display: 'table', height: '100%', width: '100%'}}>
           <div style={styles.helpText}>
-            {!!totalCount && <div>
-              There are {totalCount.toLocaleString()} results{!!cdrVersion && <span> in {cdrVersion.name}</span>}.
-            </div>}
             {sourceMatch && !standardOnly && <div>
               There are {sourceMatch.count.toLocaleString()} participants with source code {sourceMatch.code}.
               {showStandardOption && <span> For more results, browse
@@ -370,11 +362,14 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
               &nbsp;<Clickable style={styles.vocabLink}
                                onMouseDown={() => this.trackEvent('Source Vocab Hyperlink')}
                                onClick={() => this.setState({standardOnly: false})}>
-              Return to source code
-            </Clickable>.
+                Return to source code
+              </Clickable>.
             </div>}
-            {domain === DomainType.DRUG && <div style={styles.drugsText}>
+            {domain === DomainType.DRUG && <div>
               Your search may bring back brand names, generics and ingredients. Only ingredients may be added to your search criteria.
+            </div>}
+            {!!totalCount && <div>
+              There are {totalCount.toLocaleString()} results{!!cdrVersion && <span> in {cdrVersion.name}</span>}.
             </div>}
           </div>
         </div>
