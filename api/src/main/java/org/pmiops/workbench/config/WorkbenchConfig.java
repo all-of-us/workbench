@@ -21,7 +21,6 @@ public class WorkbenchConfig {
   public MoodleConfig moodle;
   public ZendeskConfig zendesk;
   public AccessConfig access;
-  public CohortBuilderConfig cohortbuilder;
   public FeatureFlagsConfig featureFlags;
   public BillingConfig billing;
   public ActionAuditConfig actionAudit;
@@ -37,7 +36,6 @@ public class WorkbenchConfig {
     config.auth = new AuthConfig();
     config.auth.serviceAccountApiUsers = new ArrayList<>();
     config.cdr = new CdrConfig();
-    config.cohortbuilder = new CohortBuilderConfig();
     config.elasticsearch = new ElasticsearchConfig();
     config.featureFlags = new FeatureFlagsConfig();
     config.firecloud = new FireCloudConfig();
@@ -220,10 +218,6 @@ public class WorkbenchConfig {
     // creation UI will show an invitation key form and the server will validate the key before
     // proceeding.
     public boolean requireInvitationKey;
-  }
-
-  public static class CohortBuilderConfig {
-    public boolean enableListSearch;
   }
 
   public static class FeatureFlagsConfig {
