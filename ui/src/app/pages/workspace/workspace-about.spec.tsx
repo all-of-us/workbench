@@ -11,7 +11,7 @@ import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {cdrVersionStore, currentWorkspaceStore, serverConfigStore, userProfileStore} from 'app/utils/navigation';
 import {userRolesStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {ClusterApiStub} from 'testing/stubs/cluster-api-stub';
+import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {CdrVersionsStubVariables, cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {SpecificPopulationItems} from './workspace-edit-text';
 
@@ -33,7 +33,7 @@ describe('WorkspaceAbout', () => {
   beforeEach(() => {
     registerApiClient(ProfileApi, new ProfileApiStub());
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
-    registerApiClient(RuntimeApi, new ClusterApiStub());
+    registerApiClient(RuntimeApi, new RuntimeApiStub());
 
     // mocking because we don't have access to the angular service
     reload.mockImplementation(async () => {

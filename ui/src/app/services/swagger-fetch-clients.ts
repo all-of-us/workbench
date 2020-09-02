@@ -7,10 +7,10 @@
  *
  * Example usage:
  *
- * import {clusterApi} from 'app/services/swagger-fetch-clients';
+ * import {runtimeApi} from 'app/services/swagger-fetch-clients';
  *
  * ...
- * clusterApi().listClusters();
+ * runtimeApi().listRuntimes();
  *
  * Example test usage:
  *
@@ -80,10 +80,10 @@ function bindCtor<T extends BaseAPI>(ctor: new() => T): () => T {
 }
 
 // To add a new service, add a new entry below. Note that these properties are
-// getters for the API clients, e.g.: clusterApi().listClusters();
+// getters for the API clients, e.g.: runtimeApi().listRuntimes();
 export const authDomainApi = bindCtor(AuthDomainApi);
 export const cdrVersionsApi = bindCtor(CdrVersionsApi);
-export const clusterApi = bindCtor(RuntimeApi); // TODO(calbach): Refactor name and code.
+export const runtimeApi = bindCtor(RuntimeApi);
 export const cohortAnnotationDefinitionApi = bindCtor(CohortAnnotationDefinitionApi);
 export const cohortBuilderApi = bindCtor(CohortBuilderApi);
 export const cohortReviewApi = bindCtor(CohortReviewApi);

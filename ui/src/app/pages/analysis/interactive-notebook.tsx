@@ -13,12 +13,12 @@ import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {ClusterInitializer} from 'app/utils/cluster-initializer';
+import {LeoRuntimeInitializer} from 'app/utils/leo-runtime-initializer';
 import {navigate, userProfileStore} from 'app/utils/navigation';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
-import {BillingStatus, ClusterStatus} from 'generated/fetch';
+import {BillingStatus, RuntimeStatus} from 'generated/fetch';
 
 
 const styles = reactStyles({
@@ -100,7 +100,7 @@ interface Props {
 }
 
 interface State {
-  clusterStatus: ClusterStatus;
+  runtimeStatus: RuntimeStatus;
   html: string;
   lastLockedBy: string;
   lockExpirationTime: number;
@@ -119,13 +119,13 @@ enum PreviewErrorMode {
 
 export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace())(
   class extends React.Component<Props, State> {
-    private runClusterTimer: NodeJS.Timeout;
+    private runRuntimeTimer: NodeJS.Timeout;
     private aborter = new AbortController();
 
     constructor(props) {
       super(props);
       this.state = {
-        clusterStatus: ClusterStatus.Unknown,
+        runtimeStatus: RuntimeStatus.Unknown,
         html: '',
         lastLockedBy: '',
         lockExpirationTime: 0,
@@ -163,24 +163,24 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
     }
 
     componentWillUnmount(): void {
-      clearTimeout(this.runClusterTimer);
+      clearTimeout(this.runRuntimeTimer);
       this.aborter.abort();
     }
 
-    private async runCluster(onClusterReady: Function): Promise<void> {
-      await ClusterInitializer.initialize({
+    private async runRuntime(onRuntimeReady: Function): Promise<void> {
+      await LeoRuntimeInitializer.initialize({
         workspaceNamespace: this.props.urlParams.ns,
-        onStatusUpdate: (status) => this.setState({clusterStatus: status}),
+        onStatusUpdate: (status) => this.setState({runtimeStatus: status}),
         abortSignal: this.aborter.signal
       });
-      onClusterReady();
+      onRuntimeReady();
     }
 
     private startEditMode() {
-      if (this.canStartClusters) {
+      if (this.canStartRuntimes) {
         if (!this.notebookInUse) {
           this.setState({userRequestedExecutableNotebook: true});
-          this.runCluster(() => { this.navigateEditMode(); });
+          this.runRuntime(() => { this.navigateEditMode(); });
         } else {
           this.setState({
             showInUseModal: true
@@ -190,14 +190,14 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
     }
 
     private startPlaygroundMode() {
-      if (this.canStartClusters) {
+      if (this.canStartRuntimes) {
         this.setState({userRequestedExecutableNotebook: true});
-        this.runCluster(() => { this.navigatePlaygroundMode(); });
+        this.runRuntime(() => { this.navigatePlaygroundMode(); });
       }
     }
 
     private onPlaygroundModeClick() {
-      if (!this.canStartClusters) {
+      if (!this.canStartRuntimes) {
         return;
       }
       if (Cookies.get(ConfirmPlaygroundModeModal.DO_NOT_SHOW_AGAIN) === String(true)) {
@@ -232,13 +232,13 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
       return this.props.workspace.billingStatus === BillingStatus.INACTIVE;
     }
 
-    private get canStartClusters() {
+    private get canStartRuntimes() {
       return this.canWrite && !this.billingLocked;
     }
 
     private get buttonStyleObj() {
       return Object.assign({}, styles.navBarItem,
-        this.canStartClusters ? styles.clickable : styles.disabled);
+        this.canStartRuntimes ? styles.clickable : styles.disabled);
     }
 
     private cloneNotebook() {
@@ -255,16 +255,16 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
     }
 
     private renderNotebookText() {
-      switch (this.state.clusterStatus) {
-        case ClusterStatus.Starting:
-        case ClusterStatus.Stopping:
-        case ClusterStatus.Stopped:
+      switch (this.state.runtimeStatus) {
+        case RuntimeStatus.Starting:
+        case RuntimeStatus.Stopping:
+        case RuntimeStatus.Stopped:
           return 'Resuming your Jupyter environment. This may take up to 1 minute.';
-        case ClusterStatus.Deleting:
-        case ClusterStatus.Creating:
-        case ClusterStatus.Deleted:
+        case RuntimeStatus.Deleting:
+        case RuntimeStatus.Creating:
+        case RuntimeStatus.Deleted:
           return 'Preparing your Jupyter environment. This may take up to 10 minutes.';
-        case ClusterStatus.Error:
+        case RuntimeStatus.Error:
           return 'Error creating your jupyter environment. Please try clicking' +
             ' the reset notebook server on Workspace About Page.';
         default:
@@ -318,7 +318,7 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
                              this.startEditMode();
                            }}>
                         <EditComponentReact enableHoverEffect={false}
-                                            disabled={!this.canStartClusters}
+                                            disabled={!this.canStartRuntimes}
                                             style={styles.navBarIcon}/>
                         Edit {this.notebookInUse && '(In Use)'}
                       </div>
@@ -330,7 +330,7 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
                              this.onPlaygroundModeClick();
                            }}>
                         <PlaygroundModeIcon enableHoverEffect={false}
-                                            disabled={!this.canStartClusters}
+                                            disabled={!this.canStartRuntimes}
                                             style={styles.navBarIcon}/>
                         Run (Playground Mode)
                       </div>

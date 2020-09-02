@@ -192,7 +192,7 @@ const iconStyles = {
 
 export const NOTEBOOK_HELP_CONTENT = 'notebookStorage';
 
-// TODO uncomment 'thunderstorm' icon when cluster configuration function is ready
+// TODO uncomment 'thunderstorm' icon when runtime configuration function is ready
 // helpContentKey is the json key for the block of help content that is being displayed on this
 // sidebar. If the block of help content is about notebook storage, we want to display a different
 // icon on the sidebar and different tooltip, etc.
