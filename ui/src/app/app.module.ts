@@ -59,9 +59,8 @@ import {
 } from 'generated';
 import {Configuration as FetchConfiguration} from 'generated/fetch';
 import {
-  ApiModule as LeoApiModule,
   Configuration as LeoConfiguration,
-} from 'notebooks-generated';
+} from 'notebooks-generated/fetch';
 
 import {TextModalComponent} from 'app/components/text-modal';
 import {AdminWorkspaceSearchComponent} from 'app/pages/admin/admin-workspace-search';
@@ -109,7 +108,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
 @NgModule({
   imports: [
     ApiModule,
-    LeoApiModule,
     AppRoutingModule,
 
     BrowserModule,
