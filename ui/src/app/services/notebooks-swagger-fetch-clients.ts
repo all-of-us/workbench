@@ -8,11 +8,11 @@
 
 import {
   BaseAPI,
-  RuntimesApi,
   Configuration as FetchConfiguration,
   FetchAPI,
   JupyterApi,
-  ProxyApi
+  ProxyApi,
+  RuntimesApi
 } from 'notebooks-generated/fetch';
 
 let frozen = false;

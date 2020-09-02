@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import {notebooksClusterApi, registerApiClient as registerApiClientNotebooks} from 'app/services/notebooks-swagger-fetch-clients';
+import {leoRuntimesApi, registerApiClient as registerApiClientNotebooks} from 'app/services/notebooks-swagger-fetch-clients';
 import {runtimeApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {LeoRuntimeInitializer, LeoRuntimeInitializerOptions} from 'app/utils/leo-runtime-initializer';
 import {Runtime} from 'generated/fetch';
@@ -8,14 +8,14 @@ import {RuntimeStatus} from 'generated/fetch';
 import {RuntimeApi} from 'generated/fetch/api';
 import SpyInstance = jest.SpyInstance;
 import expect = jest.Expect;
-import {ClusterApi as NotebooksClusterApi} from 'notebooks-generated/fetch';
+import {RuntimesApi as LeoRuntimesApi} from 'notebooks-generated/fetch';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
-import {NotebooksClusterApiStub} from 'testing/stubs/notebooks-cluster-api-stub';
+import {LeoRuntimesApiStub} from 'testing/stubs/leo-runtimes-api-stub';
 
 let mockGetRuntime: SpyInstance;
 let mockCreateRuntime: SpyInstance;
 let mockDeleteRuntime: SpyInstance;
-let mockStartCluster: SpyInstance;
+let mockStartRuntime: SpyInstance;
 
 const baseRuntime: Runtime = {
   runtimeName: 'aou-rw-3',
@@ -30,12 +30,12 @@ describe('RuntimeInitializer', () => {
     jest.useFakeTimers();
 
     registerApiClient(RuntimeApi, new RuntimeApiStub());
-    registerApiClientNotebooks(NotebooksClusterApi, new NotebooksClusterApiStub());
+    registerApiClientNotebooks(LeoRuntimesApi, new LeoRuntimesApiStub());
 
     mockGetRuntime = jest.spyOn(runtimeApi(), 'getRuntime');
     mockCreateRuntime = jest.spyOn(runtimeApi(), 'createRuntime');
     mockDeleteRuntime = jest.spyOn(runtimeApi(), 'deleteRuntime');
-    mockStartCluster = jest.spyOn(notebooksClusterApi(), 'startCluster');
+    mockStartRuntime = jest.spyOn(leoRuntimesApi(), 'startRuntime');
   });
 
   afterEach(() => {
@@ -111,7 +111,7 @@ describe('RuntimeInitializer', () => {
       {status: RuntimeStatus.Running}
     ]);
     const runtime = await runInitializerAndTimers();
-    expect(mockStartCluster).toHaveBeenCalled();
+    expect(mockStartRuntime).toHaveBeenCalled();
     expect(runtime.status).toEqual(RuntimeStatus.Running);
   });
 
