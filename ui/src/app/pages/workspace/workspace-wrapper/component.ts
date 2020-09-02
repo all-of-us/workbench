@@ -67,13 +67,17 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // This is allows the react-router conversion to utilize various route config properties
+
+    // ROUTER MIGRATION: This is allows the react-router conversion to utilize various route config properties
     // Once we are fully converted the help sidebar and modals will need to be reworked a bit to eliminate this Angular code
-    this.subscriptions.push(routeDataStore.subscribe(({helpContentKey, notebookHelpSidebarStyles, contentFullHeightOverride}) => {
-      this.helpContentKey = helpContentKey;
-      this.notebookStyles = notebookHelpSidebarStyles;
-      this.contentFullHeightOverride = contentFullHeightOverride;
-    }));
+    this.subscriptions.push(routeDataStore.subscribe(
+      ({minimizeChrome, helpContentKey, notebookHelpSidebarStyles, contentFullHeightOverride}) => {
+        this.helpContentKey = helpContentKey;
+        this.notebookStyles = notebookHelpSidebarStyles;
+        this.contentFullHeightOverride = contentFullHeightOverride;
+        this.displayNavBar = !minimizeChrome;
+      }
+    ));
 
     const sidebarState = localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE);
     if (!!sidebarState) {
@@ -94,8 +98,11 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
             this.setSidebarState(false);
           }
         }));
-    this.subscriptions.push(routeConfigDataStore.subscribe(({minimizeChrome}) => {
-      this.displayNavBar = !minimizeChrome;
+    this.subscriptions.push(routeConfigDataStore.subscribe((data) => {
+      // ROUTER MIGRATION: Prevent dueling route configs during react transition - only apply minimizeChrome if there is route data
+      if (!fp.isEqual(data, {})) {
+        this.displayNavBar = !data.minimizeChrome;
+      }
     }));
     this.subscriptions.push(urlParamsStore
       .map(({ns, wsid}) => ({ns, wsid}))
