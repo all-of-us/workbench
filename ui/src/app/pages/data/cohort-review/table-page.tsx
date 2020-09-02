@@ -203,14 +203,14 @@ const defaultDemoFilters: any = {
   ]
 };
 const reverseColumnEnum = {
-  participantId: 'PARTICIPANTID',
-  sexAtBirth: 'SEXATBIRTH',
-  gender: 'GENDER',
-  race: 'RACE',
-  ethnicity: 'ETHNICITY',
-  birthDate: 'BIRTHDATE',
-  deceased: 'DECEASED',
-  status: 'STATUS'
+  participantId: Columns.PARTICIPANTID,
+  sexAtBirth: Columns.SEXATBIRTH,
+  gender: Columns.GENDER,
+  race: Columns.RACE,
+  ethnicity: Columns.ETHNICITY,
+  birthDate: Columns.BIRTHDATE,
+  deceased: Columns.DECEASED,
+  status: Columns.STATUS
 };
 const EVENT_CATEGORY = 'Review Participant List';
 

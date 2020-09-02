@@ -353,7 +353,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
             .cohortDefinition(reviewWithoutEHRData.getCohortDefinition())
             .cohortName(reviewWithoutEHRData.getCohortName())
             .cohortId(reviewWithoutEHRData.getCohortId())
-            .creationTime(reviewWithoutEHRData.getCreationTime().toString())
+            .creationTime(reviewWithoutEHRData.getCreationTime().getTime())
             .lastModifiedTime(reviewWithoutEHRData.getLastModifiedTime().getTime())
             .matchedParticipantCount(reviewWithoutEHRData.getMatchedParticipantCount())
             .reviewedCount(reviewWithoutEHRData.getReviewedCount())

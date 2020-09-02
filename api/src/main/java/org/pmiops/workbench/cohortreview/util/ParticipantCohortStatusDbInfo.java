@@ -20,7 +20,7 @@ public enum ParticipantCohortStatusDbInfo {
   BIRTH_DATE(FilterColumns.BIRTHDATE, "birth_date", ParticipantCohortStatusDbInfo::parseDate),
   RACE(FilterColumns.RACE, "race_concept_id", Long::new),
   ETHNICITY(FilterColumns.ETHNICITY, "ethnicity_concept_id", Long::new),
-  SEX_AT_BIRTH(FilterColumns.SEX_AT_BIRTH, "sex_at_birth_concept_id", Long::new),
+  SEX_AT_BIRTH(FilterColumns.SEXATBIRTH, "sex_at_birth_concept_id", Long::new),
   DECEASED(FilterColumns.DECEASED, "deceased", Long::new);
 
   private final FilterColumns name;

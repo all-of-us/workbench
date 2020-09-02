@@ -54,9 +54,12 @@ import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdrselector.WorkspaceResourcesServiceImpl;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
+import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortAnnotationMapper;
+import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortStatusMapper;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
@@ -223,6 +226,7 @@ public class DataSetControllerTest {
     CdrBigQuerySchemaConfigService.class,
     CdrVersionService.class,
     CloudStorageService.class,
+    CohortBuilderService.class,
     CohortCloningService.class,
     CohortMaterializationService.class,
     ComplianceService.class,
@@ -230,6 +234,8 @@ public class DataSetControllerTest {
     DataSetMapper.class,
     DirectoryService.class,
     FreeTierBillingService.class,
+    ParticipantCohortAnnotationMapper.class,
+    ParticipantCohortStatusMapper.class,
     UserRecentResourceService.class,
     UserServiceAuditor.class,
     WorkspaceAuditor.class,

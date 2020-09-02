@@ -11,13 +11,13 @@ import org.pmiops.workbench.cohorts.CohortMapper;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper;
 import org.pmiops.workbench.dataset.mapper.DataSetMapper;
 import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.CdrVersion;
+import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -155,16 +155,16 @@ public interface WorkspaceMapper {
   @Mapping(target = "workspaceFirecloudName", source = "dbWorkspace.firecloudName")
   @Mapping(target = "workspaceBillingStatus", source = "dbWorkspace.billingStatus")
   @Mapping(target = "permission", source = "accessLevel")
-  @Mapping(target = "cohortReview", source = "dbCohortReview")
+  @Mapping(target = "cohortReview", source = "cohortReview")
   // All workspaceResources have one object and all others are null.
   @Mapping(target = "cohort", ignore = true)
   @Mapping(target = "conceptSet", ignore = true)
   @Mapping(target = "dataSet", ignore = true)
   @Mapping(target = "notebook", ignore = true)
   // This should be set when the resource is set
-  @Mapping(target = "modifiedTime", source = "dbCohortReview.lastModifiedTime")
+  @Mapping(target = "modifiedTime", source = "cohortReview.lastModifiedTime")
   WorkspaceResource dbWorkspaceAndDbCohortReviewToWorkspaceResource(
-      DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, DbCohortReview dbCohortReview);
+      DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, CohortReview cohortReview);
 
   @Mapping(target = "workspaceId", source = "dbWorkspace.workspaceId")
   @Mapping(target = "workspaceFirecloudName", source = "dbWorkspace.firecloudName")

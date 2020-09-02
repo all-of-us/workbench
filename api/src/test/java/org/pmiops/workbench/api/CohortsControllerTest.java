@@ -31,8 +31,11 @@ import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cdrselector.WorkspaceResourcesServiceImpl;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
+import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortAnnotationMapper;
+import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortStatusMapper;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
@@ -216,6 +219,7 @@ public class CohortsControllerTest {
     CloudStorageService.class,
     CohortMaterializationService.class,
     CohortService.class,
+    CohortBuilderService.class,
     ComplianceService.class,
     ConceptBigQueryService.class,
     DataSetService.class,
@@ -226,7 +230,9 @@ public class CohortsControllerTest {
     MonitoringService.class,
     UserRecentResourceService.class,
     UserServiceAuditor.class,
-    WorkspaceAuditor.class
+    WorkspaceAuditor.class,
+    ParticipantCohortAnnotationMapper.class,
+    ParticipantCohortStatusMapper.class
   })
   static class Configuration {
 

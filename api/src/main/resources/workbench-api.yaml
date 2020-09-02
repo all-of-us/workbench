@@ -6539,7 +6539,9 @@ definitions:
           a read-modify-write to ensure that the client has not attempted to modify
           a changed resource.'
       creationTime:
-        type: string
+        type: integer
+        format: int64
+        description: Milliseconds since the UNIX epoch.
       lastModifiedTime:
         type: integer
         format: int64
@@ -6607,7 +6609,7 @@ definitions:
     - BIRTHDATE
     - RACE
     - ETHNICITY
-    - SEX_AT_BIRTH
+    - SEXATBIRTH
     - DECEASED
     - START_DATETIME
     - STANDARD_CODE

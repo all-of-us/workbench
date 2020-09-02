@@ -32,7 +32,6 @@ import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
-import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
@@ -62,6 +61,7 @@ import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.AnnotationType;
@@ -124,9 +124,6 @@ public class CohortReviewControllerTest {
   private DbCohortAnnotationDefinition booleanAnnotationDefinition;
   private DbCohortAnnotationDefinition integerAnnotationDefinition;
   private DbParticipantCohortAnnotation participantAnnotation;
-
-  @Autowired private CohortBuilderService cohortBuilderService;
-
   @Autowired private CdrVersionDao cdrVersionDao;
 
   @Autowired private CBCriteriaDao cbCriteriaDao;
@@ -533,35 +530,6 @@ public class CohortReviewControllerTest {
   }
 
   @Test
-  public void createCohortReviewNoMatchingWorkspaceException() {
-    String badWorkspaceName = WORKSPACE_NAME + "bad";
-    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
-        .thenReturn(workspace);
-
-    stubBigQueryCohortCalls();
-
-    try {
-      cohortReviewController
-          .createCohortReview(
-              WORKSPACE_NAMESPACE,
-              badWorkspaceName,
-              cohortWithoutReview.getCohortId(),
-              cdrVersion.getCdrVersionId(),
-              new CreateReviewRequest().size(1))
-          .getBody();
-      fail("Should have thrown NotFoundException!");
-    } catch (NotFoundException nfe) {
-      assertEquals(
-          "Not Found: No workspace matching workspaceNamespace: "
-              + WORKSPACE_NAMESPACE
-              + ", workspaceId: "
-              + badWorkspaceName,
-          nfe.getMessage());
-    }
-  }
-
-  @Test
   public void updateCohortReview() {
     when(workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
@@ -639,15 +607,15 @@ public class CohortReviewControllerTest {
   @Test
   public void createParticipantCohortAnnotationNoAnnotationValue() {
     Long participantId = participantCohortStatus1.getParticipantKey().getParticipantId();
-    assertBadRequestExceptionForAnnotationType(
+    assertConflictExceptionForAnnotationType(
         participantId, stringAnnotationDefinition.getCohortAnnotationDefinitionId(), "STRING");
-    assertBadRequestExceptionForAnnotationType(
+    assertConflictExceptionForAnnotationType(
         participantId, enumAnnotationDefinition.getCohortAnnotationDefinitionId(), "ENUM");
-    assertBadRequestExceptionForAnnotationType(
+    assertConflictExceptionForAnnotationType(
         participantId, dateAnnotationDefinition.getCohortAnnotationDefinitionId(), "DATE");
-    assertBadRequestExceptionForAnnotationType(
+    assertConflictExceptionForAnnotationType(
         participantId, booleanAnnotationDefinition.getCohortAnnotationDefinitionId(), "BOOLEAN");
-    assertBadRequestExceptionForAnnotationType(
+    assertConflictExceptionForAnnotationType(
         participantId, integerAnnotationDefinition.getCohortAnnotationDefinitionId(), "INTEGER");
   }
 
@@ -966,7 +934,7 @@ public class CohortReviewControllerTest {
    * Helper method to consolidate assertions for {@link BadRequestException}s for all {@link
    * AnnotationType}s.
    */
-  private void assertBadRequestExceptionForAnnotationType(
+  private void assertConflictExceptionForAnnotationType(
       Long participantId, Long cohortAnnotationDefId, String type) {
     when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
@@ -984,12 +952,12 @@ public class CohortReviewControllerTest {
                   .participantId(participantId)
                   .cohortAnnotationDefinitionId(cohortAnnotationDefId))
           .getBody();
-      fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException bre) {
+      fail("Should have thrown a ConflictException!");
+    } catch (ConflictException ce) {
       // Success
-      assertThat(bre.getMessage())
+      assertThat(ce.getMessage())
           .isEqualTo(
-              "Bad Request: Please provide a valid "
+              "Conflict Exception: Please provide a valid "
                   + type
                   + " value for annotation defintion id: "
                   + cohortAnnotationDefId);
@@ -1076,7 +1044,7 @@ public class CohortReviewControllerTest {
         .etag(Etags.fromVersion(actualReview.getVersion()))
         .cohortId(actualReview.getCohortId())
         .cdrVersionId(actualReview.getCdrVersionId())
-        .creationTime(actualReview.getCreationTime().toString())
+        .creationTime(actualReview.getCreationTime().getTime())
         .matchedParticipantCount(actualReview.getMatchedParticipantCount())
         .reviewSize(actualReview.getReviewSize())
         .reviewedCount(actualReview.getReviewedCount())

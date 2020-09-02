@@ -14,12 +14,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortreview.CohortAnnotationDefinitionService;
 import org.pmiops.workbench.cohortreview.CohortAnnotationDefinitionServiceImpl;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.mapper.CohortAnnotationDefinitionMapper;
 import org.pmiops.workbench.cohortreview.mapper.CohortAnnotationDefinitionMapperImpl;
+import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapper;
+import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortAnnotationMapper;
+import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortStatusMapper;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -65,6 +69,10 @@ public class CohortAnnotationDefinitionControllerTest {
   @Mock private ParticipantCohortStatusDao participantCohortStatusDao;
   @Mock private ParticipantCohortAnnotationDao participantCohortAnnotationDao;
   @Mock private WorkspaceService workspaceService;
+  @Mock private CohortBuilderService cohortBuilderService;
+  @Mock private ParticipantCohortAnnotationMapper participantCohortAnnotationMapper;
+  @Mock private ParticipantCohortStatusMapper participantCohortStatusMapper;
+  @Mock private CohortReviewMapper cohortReviewMapper;
   private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
 
   @TestConfiguration
@@ -76,12 +84,15 @@ public class CohortAnnotationDefinitionControllerTest {
   public void setUp() {
     CohortReviewService cohortReviewService =
         new CohortReviewServiceImpl(
+            cohortBuilderService,
             cohortReviewDao,
             cohortDao,
             participantCohortStatusDao,
             participantCohortAnnotationDao,
             cohortAnnotationDefinitionDao,
-            workspaceService);
+            participantCohortAnnotationMapper,
+            participantCohortStatusMapper,
+            cohortReviewMapper);
     CohortAnnotationDefinitionService cohortAnnotationDefinitionService =
         new CohortAnnotationDefinitionServiceImpl(
             cohortAnnotationDefinitionDao, cohortAnnotationDefinitionMapper);
