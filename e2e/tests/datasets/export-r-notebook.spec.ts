@@ -1,6 +1,6 @@
 import Link from 'app/element/link';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
-import DataPage, {TabLabelAlias} from 'app/page/data-page';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
@@ -25,7 +25,7 @@ describe('Create Dataset', () => {
     const workspaceName = await workspaceCard.clickWorkspaceName();
 
     // Click Add Datasets button
-    const dataPage = new DataPage(page);
+    const dataPage = new WorkspaceDataPage(page);
     const datasetBuildPage = await dataPage.clickAddDatasetButton();
     const cohortBuildPage = await datasetBuildPage.clickAddCohortsButton();
 
@@ -76,21 +76,21 @@ describe('Create Dataset', () => {
 
     // Delete test data sequence is: Delete Notebook, then Dataset, finally Cohort.
     // Delete Notebook
-    await dataPage.openTab(TabLabelAlias.Analysis);
+    await dataPage.openAnalysisPage();
 
     const analysisPage = new WorkspaceAnalysisPage(page);
     await analysisPage.waitForLoad();
     await analysisPage.deleteNotebook(newNotebookName);
 
     // Delete Dataset
-    await dataPage.openTab(TabLabelAlias.Data);
-    await dataPage.openTab(TabLabelAlias.Datasets, {waitPageChange: false});
+    await dataPage.openDataPage();
+    await dataPage.openDatasetsSubtab({waitPageChange: false});
 
     const datasetDeleteDialogText = await dataPage.deleteDataset(newDatasetName);
     expect(datasetDeleteDialogText).toContain(`Are you sure you want to delete Dataset: ${newDatasetName}?`);
 
     // Delete Cohort
-    await dataPage.openTab(TabLabelAlias.Cohorts, {waitPageChange: false});
+    await dataPage.openCohortsSubtab({waitPageChange: false});
 
     const cohortDeleteDialogText = await dataPage.deleteCohort(newCohortName);
     expect(cohortDeleteDialogText).toContain(`Are you sure you want to delete Cohort: ${newCohortName}?`);

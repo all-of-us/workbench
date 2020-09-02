@@ -1,5 +1,5 @@
 import DataResourceCard, {CardType} from 'app/component/data-resource-card';
-import DataPage, {TabLabelAlias} from 'app/page/data-page';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import {Language} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
@@ -20,8 +20,8 @@ describe('Jupyter Notebook tests in Python language', () => {
     const workspaceCard = await findWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 
-    const dataPage = new DataPage(page);
-    await dataPage.openTab(TabLabelAlias.Analysis);
+    const dataPage = new WorkspaceDataPage(page);
+    await dataPage.openAnalysisPage();
 
     const notebookName = makeRandomName('py-notebook');
     const analysisPage = new WorkspaceAnalysisPage(page);

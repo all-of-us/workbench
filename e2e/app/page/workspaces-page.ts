@@ -7,7 +7,7 @@ import {makeWorkspaceName} from 'utils/str-utils';
 import RadioButton from 'app/element/radiobutton';
 import {findWorkspace, waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle, waitForText} from 'utils/waits-utils';
-import DataPage from './data-page';
+import WorkspaceDataPage from './workspace-data-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
 
 const faker = require('faker/locale/en_US');
@@ -149,7 +149,7 @@ export default class WorkspacesPage extends WorkspaceEditPage {
     const workspaceCard = await findWorkspace(this.page, {workspaceName, create: true});
     await workspaceCard.clickWorkspaceName();
 
-    const dataPage = new DataPage(this.page);
+    const dataPage = new WorkspaceDataPage(this.page);
     const notebookPage = await dataPage.createNotebook(notebookName, lang); // Python 3 is the default
 
     // Do not run any code. Simply returns to the Workspace Analysis tab.

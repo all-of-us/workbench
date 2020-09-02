@@ -8,7 +8,7 @@ import WorkspacesPage from 'app/page/workspaces-page';
 import {EllipsisMenuAction, LinkText, WorkspaceAccessLevel} from 'app/text-labels';
 import {config} from 'resources/workbench-config';
 import {findWorkspace, signIn, signInAs, waitWhileLoading} from 'utils/test-utils';
-import DataPage, {TabLabelAlias} from 'app/page/data-page';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
 
 describe('Share workspace', () => {
 
@@ -110,7 +110,7 @@ describe('Share workspace', () => {
 
       // Make sure the Search input-field in Share modal is disabled.
       await workspaceCard2.clickWorkspaceName();
-      await (new DataPage(newPage)).openTab(TabLabelAlias.About);
+      await (new WorkspaceDataPage(newPage)).openAboutPage();
       const aboutPage = new WorkspaceAboutPage(newPage);
       await aboutPage.waitForLoad();
       const modal2 = await aboutPage.openShareModal();

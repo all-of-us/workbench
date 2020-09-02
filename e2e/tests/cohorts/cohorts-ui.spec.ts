@@ -1,9 +1,10 @@
-import {PhysicalMeasurementsCriteria} from 'app/page/cohort-criteria-modal';
 import CohortBuildPage from 'app/page/cohort-build-page';
-import DataPage, {TabLabelAlias} from 'app/page/data-page';
+import {PhysicalMeasurementsCriteria} from 'app/page/cohort-criteria-modal';
+import WorkspaceAboutPage from 'app/page/workspace-about-page';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {findWorkspace, signIn} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
-import WorkspaceAboutPage from 'app/page/workspace-about-page';
+import {TabLabels} from 'app/page/workspace-base';
 
 describe('Cohorts UI tests', () => {
 
@@ -22,7 +23,7 @@ describe('Cohorts UI tests', () => {
     await workspaceCard.clickWorkspaceName();
 
     // Wait for the Data page.
-    const dataPage = new DataPage(page);
+    const dataPage = new WorkspaceDataPage(page);
 
     const addCohortsButton = await dataPage.getAddCohortsButton();
     await addCohortsButton.clickAndWait();
@@ -53,7 +54,7 @@ describe('Cohorts UI tests', () => {
     const exportButton = await cohortPage.getExportButton();
     expect(await exportButton.isDisabled()).toBe(true);
 
-    await dataPage.openTab(TabLabelAlias.About, {waitPageChange: false});
+    await dataPage.openAboutPage({waitPageChange: false});
 
     // Don't save. Confirm Discard Changes
     const modalTextContent = await cohortPage.discardChangesConfirmationDialog();
@@ -65,7 +66,7 @@ describe('Cohorts UI tests', () => {
     // Check ABOUT tab is open
     const aboutPage = new WorkspaceAboutPage(page);
     await aboutPage.waitForLoad();
-    const isOpen = await aboutPage.isOpen();
+    const isOpen = await aboutPage.isOpen(TabLabels.About);
     expect(isOpen).toBe(true);
   });
 

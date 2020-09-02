@@ -1,4 +1,4 @@
-import DataPage from 'app/page/data-page';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn} from 'utils/test-utils';
 
@@ -15,7 +15,7 @@ describe('Jupyter notebook tests in Python language', () => {
     const workspaceCard = await findWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 
-    const dataPage = new DataPage(page);
+    const dataPage = new WorkspaceDataPage(page);
     const notebookName = makeRandomName('py');
     const notebook = await dataPage.createNotebook(notebookName);
 

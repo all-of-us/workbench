@@ -1,6 +1,6 @@
 import DataResourceCard, {CardType} from 'app/component/data-resource-card';
 import Modal from 'app/component/modal';
-import DataPage, {TabLabelAlias} from 'app/page/data-page';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import {LinkText} from 'app/text-labels';
 import {extractNamespace, makeRandomName} from 'utils/str-utils';
@@ -34,7 +34,7 @@ describe('Workspace owner Jupyter notebook action tests', () => {
 
     // Create notebook in copy-from workspace.
     const copyFromNotebookName = makeRandomName('pytest');
-    const dataPage = new DataPage(page);
+    const dataPage = new WorkspaceDataPage(page);
 
     // Get the billing project name from page url.
     const fromWorkspaceNamespace = extractNamespace(new URL(page.url()));
@@ -76,7 +76,7 @@ describe('Workspace owner Jupyter notebook action tests', () => {
     const toWorkspaceNamespace = extractNamespace(new URL(page.url()));
 
     // Verify copy-to notebook exists in destination Workspace
-    await dataPage.openTab(TabLabelAlias.Analysis);
+    await dataPage.openAnalysisPage();
     const dataResourceCard = new DataResourceCard(page);
     const notebookCard = await dataResourceCard.findCard(copiedNotebookName, CardType.Notebook);
     expect(notebookCard).toBeTruthy();

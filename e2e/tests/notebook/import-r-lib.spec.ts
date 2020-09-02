@@ -1,4 +1,4 @@
-import DataPage from 'app/page/data-page';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {Language} from 'app/text-labels';
 import * as fs from 'fs';
 import {makeRandomName} from 'utils/str-utils';
@@ -20,7 +20,7 @@ describe('Jupyter notebook tests in R', () => {
     const workspaceCard = await findWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 
-    const dataPage = new DataPage(page);
+    const dataPage = new WorkspaceDataPage(page);
     const notebookName = makeRandomName('import-r-lib');
     const notebook = await dataPage.createNotebook(notebookName, Language.R);
 
