@@ -6,12 +6,12 @@ import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, queryParamsStore, serverConfigStore, urlParamsStore, userProfileStore} from 'app/utils/navigation';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {RuntimeApi, RuntimeStatus, WorkspaceAccessLevel} from 'generated/fetch';
-import {ClusterApi as NotebooksClusterApi, JupyterApi, NotebooksApi} from 'notebooks-generated/fetch';
+import {RuntimesApi as LeoRuntimesApi, JupyterApi, NotebooksApi} from 'notebooks-generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {JupyterApiStub} from 'testing/stubs/jupyter-api-stub';
 import {NotebooksApiStub} from 'testing/stubs/notebooks-api-stub';
-import {NotebooksClusterApiStub} from 'testing/stubs/notebooks-cluster-api-stub';
+import {LeoRuntimesApiStub} from 'testing/stubs/leo-runtimes-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {workspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
 
@@ -52,7 +52,7 @@ describe('NotebookRedirect', () => {
     registerApiClient(RuntimeApi, runtimeStub);
     registerApiClientNotebooks(JupyterApi, new JupyterApiStub());
     registerApiClientNotebooks(NotebooksApi, new NotebooksApiStub());
-    registerApiClientNotebooks(NotebooksClusterApi, new NotebooksClusterApiStub());
+    registerApiClientNotebooks(LeoRuntimesApi, new LeoRuntimesApiStub());
 
     serverConfigStore.next({gsuiteDomain: 'x'});
     urlParamsStore.next({

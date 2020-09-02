@@ -77,22 +77,10 @@ paths:
           description: User does not have permission to perform action on runtime
         "404":
           description: Runtime not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/definitions/ErrorReport"
         "409":
           description: Runtime cannot be stopped
-          content:
-            application/json:
-              schema:
-                $ref: "#/definitions/ErrorReport"
         "500":
           description: Internal Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/definitions/ErrorReport"
   /api/google/v1/runtimes/{googleProject}/{name}/start:
     post:
       summary: Starts a Dataproc cluster or Google Compute Engine instance
@@ -118,22 +106,10 @@ paths:
           description: User does not have permission to perform action on runtime
         "404":
           description: Runtime not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/definitions/ErrorReport"
         "409":
           description: Runtime cannot be started
-          content:
-            application/json:
-              schema:
-                $ref: "#/definitions/ErrorReport"
         "500":
           description: Internal Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/definitions/ErrorReport"
 
   "/proxy/{googleProject}/{runtimeName}/setCookie":
     get:
@@ -164,22 +140,10 @@ paths:
           description: Successfully set a cookie
         "401":
           description: Proxy connection unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/definitions/ErrorReport"
         "404":
           description: Runtime not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/definitions/ErrorReport"
         "500":
           description: Internal Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/definitions/ErrorReport"
 
   /proxy/invalidateToken:
     get:
@@ -199,10 +163,6 @@ paths:
           description: Successfully invalidated a token
         "500":
           description: Internal Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/definitions/ErrorReport"
 
 ##########################################################################################
 ## Subset of the Welder API
