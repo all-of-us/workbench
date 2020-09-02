@@ -3,7 +3,7 @@ import Modal from 'app/component/modal';
 import Navigation, {NavLink} from 'app/component/navigation';
 import WorkspaceCard from 'app/component/workspace-card';
 import Link from 'app/element/link';
-import WorkspaceDataPage, {TabLabelAlias} from 'app/page/workspace-data-page';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
@@ -74,7 +74,7 @@ describe('Workspace reader Jupyter notebook action tests', () => {
 
     // Verify notebook actions list.
     await workspaceCard.clickWorkspaceName();
-    await new WorkspaceDataPage(newPage).openTab(TabLabelAlias.Analysis);
+    await new WorkspaceDataPage(newPage).openAnalysisPage();
 
     // Notebook actions Rename, Duplicate and Delete actions are disabled.
     const dataResourceCard = new DataResourceCard(newPage);

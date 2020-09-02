@@ -19,17 +19,6 @@ import NotebookPage from './notebook-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
 import WorkspaceBase from './workspace-base';
 
-export enum TabLabelAlias {
-  Data = 'Data',
-  Analysis = 'Analysis',
-  About = 'About',
-  Cohorts = 'Cohorts',
-  Datasets = 'Datasets',
-  CohortReviews = 'Cohort Reviews',
-  ConceptSets = 'Concept Sets',
-  ShowAll = 'Show All',
-}
-
 const PageTitle = 'Data Page';
 
 export default class WorkspaceDataPage extends WorkspaceBase {
@@ -65,11 +54,11 @@ export default class WorkspaceDataPage extends WorkspaceBase {
   }
 
   async getAddDatasetButton(): Promise<ClrIconLink> {
-    return ClrIconLink.findByName(this.page, {name: TabLabelAlias.Datasets, iconShape: 'plus-circle'});
+    return ClrIconLink.findByName(this.page, {name: 'Datasets', iconShape: 'plus-circle'});
   }
 
   async getAddCohortsButton(): Promise<ClrIconLink> {
-    return ClrIconLink.findByName(this.page, {name: TabLabelAlias.Cohorts, iconShape: 'plus-circle'});
+    return ClrIconLink.findByName(this.page, {name: 'Cohorts', iconShape: 'plus-circle'});
   }
 
   // Click Add Datasets button.
@@ -190,8 +179,8 @@ export default class WorkspaceDataPage extends WorkspaceBase {
   }
 
   async findCohortCard(cohortName?: string): Promise<DataResourceCard> {
-    await this.openTab(TabLabelAlias.Data);
-    await this.openTab(TabLabelAlias.Cohorts, {waitPageChange: false});
+    await this.openDataPage();
+    await this.openCohortsSubtab({waitPageChange: false});
     if (cohortName === undefined) {
       // if cohort name isn't specified, find any existing cohort.
       return DataResourceCard.findAnyCard(this.page);
@@ -251,7 +240,7 @@ export default class WorkspaceDataPage extends WorkspaceBase {
    * @param {Language} lang The notebook language.
    */
   async createNotebook(notebookName: string, lang: Language = Language.Python): Promise<NotebookPage> {
-    await this.openTab(TabLabelAlias.Analysis);
+    await this.openAnalysisPage();
     const analysisPage = new WorkspaceAnalysisPage(this.page);
     return analysisPage.createNotebook(notebookName, lang);
   }

@@ -1,12 +1,9 @@
 import {Page} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
-import {buildXPath} from 'app/xpath-builders';
 import {WorkspaceAccessLevel} from 'app/text-labels';
-import {ElementType} from 'app/xpath-options';
 import {getPropValue} from 'utils/element-utils';
 import WorkspaceBase from './workspace-base';
-import {TabLabelAlias} from './workspace-data-page';
 import Button from 'app/element/button';
 import ShareModal from 'app/component/share-modal';
 
@@ -23,7 +20,6 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
       await Promise.all([
         waitForDocumentTitle(this.page, PageTitle),
         waitWhileLoading(this.page),
-        this.page.waitForXPath(buildXPath({name: TabLabelAlias.About, type: ElementType.Tab})),
       ]);
       return true;
     } catch (err) {

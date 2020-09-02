@@ -1,7 +1,7 @@
 import DataResourceCard, {CardType} from 'app/component/data-resource-card';
 import ClrIconLink from 'app/element/clr-icon-link';
 import CohortBuildPage from 'app/page/cohort-build-page';
-import WorkspaceDataPage, {TabLabelAlias} from 'app/page/workspace-data-page';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {EllipsisMenuAction, LinkText} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
@@ -42,7 +42,7 @@ describe('Create Dataset', () => {
     const newDatasetName = makeRandomName();
     await dataPage.renameDataset(datasetName, newDatasetName);
 
-    await dataPage.openTab(TabLabelAlias.Datasets, {waitPageChange: false});
+    await dataPage.openDataPage({waitPageChange: false});
 
     // Verify rename successful
     const newDatasetExists = await resourceCard.cardExists(newDatasetName, CardType.Dataset);
@@ -96,7 +96,7 @@ describe('Create Dataset', () => {
     await waitForText(page, 'Cohort Saved Successfully');
     console.log(`Created Cohort "${cohortName}"`);
 
-    await dataPage.openTab(TabLabelAlias.Data);
+    await dataPage.openDataPage();
 
     // Click Add Datasets button.
     const datasetPage = await dataPage.clickAddDatasetButton();
@@ -107,7 +107,7 @@ describe('Create Dataset', () => {
     let datasetName = await saveModal.saveDataset({exportToNotebook: false});
 
     // Verify create successful.
-    await dataPage.openTab(TabLabelAlias.Datasets, {waitPageChange: false});
+    await dataPage.openDatasetsSubtab({waitPageChange: false});
 
     const resourceCard = new DataResourceCard(page);
     const dataSetExists = await resourceCard.cardExists(datasetName, CardType.Dataset);
@@ -125,7 +125,7 @@ describe('Create Dataset', () => {
     datasetName = await saveModal.saveDataset({exportToNotebook: false}, true);
     await dataPage.waitForLoad();
 
-    await dataPage.openTab(TabLabelAlias.Datasets, {waitPageChange: false});
+    await dataPage.openDatasetsSubtab({waitPageChange: false});
     await dataPage.deleteDataset(datasetName);
   });
 

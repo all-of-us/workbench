@@ -3,7 +3,7 @@ import ClrIconLink from 'app/element/clr-icon-link';
 import Link from 'app/element/link';
 import {EllipsisMenuAction, LinkText} from 'app/text-labels';
 import CohortBuildPage, {FieldSelector} from 'app/page/cohort-build-page';
-import WorkspaceDataPage, {TabLabelAlias} from 'app/page/workspace-data-page';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
 import DataResourceCard from 'app/component/data-resource-card';
@@ -189,7 +189,7 @@ describe('User can create new Cohorts', () => {
     await cohortBuildPage.waitForLoad();
     await waitWhileLoading(page);
 
-    await dataPage.openTab(TabLabelAlias.Data);
+    await dataPage.openDataPage();
 
     // Duplicate cohort using Ellipsis menu.
     const origCardsCount = (await DataResourceCard.findAllCards(page)).length;

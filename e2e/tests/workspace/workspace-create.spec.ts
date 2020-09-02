@@ -12,7 +12,7 @@ describe('Creating new workspaces', () => {
     await signIn(page);
   });
 
-  test('Create workspace - NO request for review', async () => {
+  test.skip('Create workspace - NO request for review', async () => {
     const newWorkspaceName = makeWorkspaceName();
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();

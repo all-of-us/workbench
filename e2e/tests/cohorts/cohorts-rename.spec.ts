@@ -1,6 +1,6 @@
 import Link from 'app/element/link';
 import CohortBuildPage, {FieldSelector} from 'app/page/cohort-build-page';
-import WorkspaceDataPage, {TabLabelAlias} from 'app/page/workspace-data-page';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {findWorkspace, signIn} from 'utils/test-utils';
 import {waitForNumericalString, waitForText} from 'utils/waits-utils';
 import DataResourceCard from 'app/component/data-resource-card';
@@ -88,8 +88,8 @@ describe('User can create, modify, rename and delete Cohort', () => {
     const cohortActionsPage = new CohortActionsPage(page);
     await cohortActionsPage.waitForLoad();
 
-    await dataPage.openTab(TabLabelAlias.Data);
-    await dataPage.openTab(TabLabelAlias.Cohorts, {waitPageChange: false});
+    await dataPage.openDataPage();
+    await dataPage.openCohortsSubtab({waitPageChange: false});
 
     // Rename cohort.
     const newCohortName = makeRandomName();
