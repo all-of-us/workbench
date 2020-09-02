@@ -42,7 +42,7 @@ describe('Create Dataset', () => {
     const newDatasetName = makeRandomName();
     await dataPage.renameDataset(datasetName, newDatasetName);
 
-    await dataPage.openDataPage({waitPageChange: false});
+    await dataPage.openDatasetsSubtab({waitPageChange: false});
 
     // Verify rename successful
     const newDatasetExists = await resourceCard.cardExists(newDatasetName, CardType.Dataset);
