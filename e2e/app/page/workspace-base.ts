@@ -4,9 +4,9 @@ import {ElementType} from 'app/xpath-options';
 import {Page} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForAttributeEquality} from 'utils/waits-utils';
-import DataResourceCard from '../component/data-resource-card';
-import Modal from '../component/modal';
-import {EllipsisMenuAction, LinkText, ResourceCard} from '../text-labels';
+import DataResourceCard from 'app/component/data-resource-card';
+import Modal from 'app/component/modal';
+import {EllipsisMenuAction, LinkText, ResourceCard} from 'app/text-labels';
 import AuthenticatedPage from './authenticated-page';
 
 export enum TabLabels {
@@ -98,7 +98,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
   }
 
   /**
-   * Delete ConceptSet, Dataset or Cohort thru Ellipsis menu located inside the resource card.
+   * Delete Notebook, Concept Set, Dataset or Cohort thru Ellipsis menu located inside the data resource card.
    * @param {string} resourceName
    * @param {ResourceCard} resourceType
    */
