@@ -40,6 +40,7 @@ task CountSamples {
     memory: "1 GiB"
     disks: "local-disk 1 HDD"
     docker: "ubuntu:latest"
+    preemptible: 3
   }
 
   output {
@@ -68,6 +69,7 @@ task RandomizeVcf {
     memory: "4GiB"
     disks: "local-disk " + number_of_samples + " HDD"
     docker: "gcr.io/all-of-us-workbench-test/randomizevcf:1.0"
+    preemptible: 3
   }
 
   output {
