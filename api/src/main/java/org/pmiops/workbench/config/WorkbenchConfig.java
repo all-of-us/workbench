@@ -268,6 +268,8 @@ public class WorkbenchConfig {
     public boolean enableConceptSetSearchV2;
     // If true, reporting cron job will write data to configured BigQuery reporting dataset.
     public boolean enableReportingUploadCron;
+    // Flag to indicate whether to show COPE Survey data
+    public boolean enableCOPESurvey;
   }
 
   public static class ActionAuditConfig {

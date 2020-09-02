@@ -41,6 +41,7 @@ public class ConfigController implements ConfigApiDelegate {
             .useNewShibbolethService(config.featureFlags.useNewShibbolethService)
             .enableCohortBuilderV2(config.featureFlags.enableCohortBuilderV2)
             .enableConceptSetSearchV2(config.featureFlags.enableConceptSetSearchV2)
-            .enableResearchReviewPrompt(config.featureFlags.enableResearchPurposePrompt));
+            .enableResearchReviewPrompt(config.featureFlags.enableResearchPurposePrompt)
+            .enableCOPESurvey(config.featureFlags.enableCOPESurvey));
   }
 }

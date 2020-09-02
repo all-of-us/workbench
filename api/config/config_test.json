@@ -109,7 +109,8 @@
     "enableResearchPurposePrompt": true,
     "enableCohortBuilderV2": false,
     "enableConceptSetSearchV2": false,
-    "enableReportingUploadCron": true
+    "enableReportingUploadCron": true,
+    "enableCOPESurvey": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-test",
