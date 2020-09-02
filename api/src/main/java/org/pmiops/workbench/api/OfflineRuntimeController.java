@@ -69,8 +69,8 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   public ResponseEntity<Void> checkRuntimes() {
     final Instant now = clock.instant();
     final WorkbenchConfig config = configProvider.get();
-    final Duration maxAge = Duration.ofDays(config.firecloud.clusterMaxAgeDays);
-    final Duration idleMaxAge = Duration.ofDays(config.firecloud.clusterIdleMaxAgeDays);
+    final Duration maxAge = Duration.ofDays(config.firecloud.notebookRuntimeMaxAgeDays);
+    final Duration idleMaxAge = Duration.ofDays(config.firecloud.notebookRuntimeIdleMaxAgeDays);
 
     final RuntimesApi runtimesApi = runtimesApiProvider.get();
     final List<LeonardoListRuntimeResponse> listRuntimeResponses;

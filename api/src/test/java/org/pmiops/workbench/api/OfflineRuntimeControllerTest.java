@@ -56,8 +56,8 @@ public class OfflineRuntimeControllerTest {
     public WorkbenchConfig workbenchConfig() {
       WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
       config.firecloud = new FireCloudConfig();
-      config.firecloud.clusterMaxAgeDays = (int) MAX_AGE.toDays();
-      config.firecloud.clusterIdleMaxAgeDays = (int) IDLE_MAX_AGE.toDays();
+      config.firecloud.notebookRuntimeMaxAgeDays = (int) MAX_AGE.toDays();
+      config.firecloud.notebookRuntimeIdleMaxAgeDays = (int) IDLE_MAX_AGE.toDays();
       return config;
     }
   }
