@@ -6,7 +6,7 @@ import {waitWhileLoading} from 'utils/test-utils';
 import {waitForAttributeEquality} from 'utils/waits-utils';
 import AuthenticatedPage from './authenticated-page';
 
-export enum TabLabelAlias {
+export enum TabLabels {
   Data = 'Data',
   Analysis = 'Analysis',
   About = 'About',
@@ -28,7 +28,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * @param opts
    */
   async openDataPage(opts: {waitPageChange?: boolean} = {}): Promise<void> {
-    return this.openTab(TabLabelAlias.Data, opts);
+    return this.openTab(TabLabels.Data, opts);
   }
 
   /**
@@ -36,7 +36,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * @param opts
    */
   async openAnalysisPage(opts: {waitPageChange?: boolean} = {}): Promise<void> {
-    return this.openTab(TabLabelAlias.Analysis, opts);
+    return this.openTab(TabLabels.Analysis, opts);
   }
 
   /**
@@ -44,7 +44,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * @param opts
    */
   async openAboutPage(opts: {waitPageChange?: boolean} = {}): Promise<void> {
-    return this.openTab(TabLabelAlias.About, opts);
+    return this.openTab(TabLabels.About, opts);
   }
 
   /**
@@ -52,7 +52,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * @param opts
    */
   async openDatasetsSubtab(opts: {waitPageChange?: boolean} = {}): Promise<void> {
-    return this.openTab(TabLabelAlias.Datasets, opts);
+    return this.openTab(TabLabels.Datasets, opts);
   }
 
   /**
@@ -60,7 +60,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * @param opts
    */
   async openCohortsSubtab(opts: {waitPageChange?: boolean} = {}): Promise<void> {
-    return this.openTab(TabLabelAlias.Cohorts, opts);
+    return this.openTab(TabLabels.Cohorts, opts);
   }
 
   /**
@@ -68,7 +68,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * @param opts
    */
   async openConceptSetsSubtab(opts: {waitPageChange?: boolean} = {}): Promise<void> {
-    return this.openTab(TabLabelAlias.ConceptSets, opts);
+    return this.openTab(TabLabels.ConceptSets, opts);
   }
 
   /**
@@ -76,7 +76,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * @param {string} pageTabName Page tab name
    * @param opts
    */
-  async openTab(pageTabName: TabLabelAlias, opts: {waitPageChange?: boolean} = {}): Promise<void> {
+  async openTab(pageTabName: TabLabels, opts: {waitPageChange?: boolean} = {}): Promise<void> {
     const { waitPageChange = true } = opts;
     const selector = buildXPath({name: pageTabName, type: ElementType.Tab});
     const tab = new Link(this.page, selector);
@@ -87,9 +87,9 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
 
   /**
    * Is tab currently open or selected?
-   * @param {TabLabelAlias} pageTabName Tab name.
+   * @param {TabLabels} pageTabName Tab name.
    */
-  async isOpen(pageTabName: TabLabelAlias): Promise<boolean> {
+  async isOpen(pageTabName: TabLabels): Promise<boolean> {
     const selector = buildXPath({name: pageTabName, type: ElementType.Tab});
     return waitForAttributeEquality(this.page, {xpath: selector}, 'aria-selected', 'true');
   }

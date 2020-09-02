@@ -4,7 +4,7 @@ import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {findWorkspace, signIn} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
-import {TabLabelAlias} from 'app/page/workspace-base';
+import {TabLabels} from 'app/page/workspace-base';
 
 describe('Cohorts UI tests', () => {
 
@@ -66,7 +66,7 @@ describe('Cohorts UI tests', () => {
     // Check ABOUT tab is open
     const aboutPage = new WorkspaceAboutPage(page);
     await aboutPage.waitForLoad();
-    const isOpen = await aboutPage.isOpen(TabLabelAlias.About);
+    const isOpen = await aboutPage.isOpen(TabLabels.About);
     expect(isOpen).toBe(true);
   });
 
