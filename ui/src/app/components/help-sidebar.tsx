@@ -584,7 +584,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
               {participant && <SidebarContent />}
             </div>
             <div style={contentStyle('criteria')}>
-              <div style={{display: 'block', overflow: 'auto', padding: '0.5rem 0.5rem 0rem'}}>
+              <div style={{padding: '0.25rem 0.25rem 0rem'}}>
                 <SelectionList back={() => setSidebarState(false)} selections={[]}/>
               </div>
             </div>

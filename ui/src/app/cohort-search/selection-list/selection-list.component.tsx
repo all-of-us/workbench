@@ -73,10 +73,11 @@ const styles = reactStyles({
     border: `2px solid ${colors.primary}`,
     borderRadius: '5px',
     height: 'calc(100% - 17rem)',
+    lineHeight: '0.75rem',
     minHeight: 'calc(100vh - 15rem)',
+    padding: '0.5rem',
     overflowX: 'hidden',
     overflowY: 'auto',
-    width: '95%',
   },
   selectionItem: {
     display: 'flex',
@@ -122,6 +123,11 @@ const styles = reactStyles({
     fontSize: '14px',
     padding: '0.2rem 0.5rem 0',
     width: '100%',
+  },
+  selectionHeader: {
+    color: colors.primary,
+    fontWeight: 600,
+    marginTop: '0.5rem'
   },
   backButton: {
     border: '0px',
@@ -256,8 +262,8 @@ export class SelectionInfo extends React.Component<SelectionInfoProps, Selection
       <button style={styles.removeSelection} onClick={() => removeSelection()}>
         <ClrIcon shape='times-circle'/>
       </button>
-      <FlexColumn>
-        <div>Group</div>
+      <FlexColumn style={{width: 'calc(100% - 1rem)'}}>
+        {selection.group && <div>Group</div>}
         <TooltipTrigger disabled={!this.state.truncated} content={itemName}>
           <div style={styles.itemName} ref={(e) => this.name = e}>
             {itemName}
@@ -412,32 +418,9 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
       }
     }
 
-    renderCriteria() {
-      const {criteria} = this.props;
-      const g = fp.groupBy('isStandard', criteria);
-      return <div style={{paddingLeft: '0.5rem', paddingBottom: '4rem'}}>
-        {g['true'] && g['true'].length > 0 && this.renderCriteriaGroup(g['true'] , 'Standard Groups')}
-        {g['false'] && g['false'].length > 0 && this.renderCriteriaGroup(g['false'], 'Source code Groups')}
-      </div>;
-    }
-
     removeCriteria(criteriaToDel) {
       const updateList = fp.remove((selection) => selection.parameterId === criteriaToDel.parameterId, this.props.criteria);
       currentCohortCriteriaStore.next(updateList);
-    }
-
-    renderCriteriaGroup(criteriaGroup, header) {
-      return  <React.Fragment>
-        <h3> {header}</h3>
-        <hr style={{marginRight: '0.5rem'}}/>
-        {criteriaGroup && criteriaGroup.map((criteria, index) =>
-          <SelectionInfo key={index}
-                         index={index}
-                         selection={criteria}
-                         removeSelection={() => this.removeCriteria(criteria)}/>
-
-        )}
-      </React.Fragment> ;
     }
 
     applyModifier(modifiers) {
@@ -485,7 +468,11 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
             <h3 style={{...styles.sectionTitle, marginTop: 0}}>Add selected criteria to cohort</h3>
             <div style={{paddingTop: '0.5rem', position: 'relative'}}>
               <div style={styles.selectionContainer}>
-                {this.renderCriteria()}
+                {!!criteria && criteria.map((selection, s) => <SelectionInfo key={s}
+                  index={s}
+                  selection={selection}
+                  removeSelection={() => this.removeCriteria(criteria)}/>
+                )}
                 {this.showModifierButton && <div style={{paddingLeft: '0.6rem'}}>
                   <Button type='secondaryOnDarkBackground' style={styles.modifierButton}
                           onClick={() => this.setState({showModifiersSlide: true})}>
