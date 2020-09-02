@@ -26,8 +26,8 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
-import org.pmiops.workbench.leonardo.model.ClusterStatus;
-import org.pmiops.workbench.leonardo.model.ListClusterResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
@@ -102,11 +102,11 @@ public class TestMockFactory {
         .bucketName(WORKSPACE_BUCKET_NAME);
   }
 
-  public ListClusterResponse createFirecloudListClusterResponse() {
-    return new ListClusterResponse()
-        .clusterName("cluster")
+  public LeonardoListRuntimeResponse createLeonardoListRuntimesResponse() {
+    return new LeonardoListRuntimeResponse()
+        .runtimeName("runtime")
         .googleProject("google-project")
-        .status(ClusterStatus.STOPPED);
+        .status(LeonardoRuntimeStatus.STOPPED);
   }
 
   public static void stubCreateFcWorkspace(FireCloudService fireCloudService) {

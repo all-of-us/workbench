@@ -1766,7 +1766,7 @@ Common.register_command({
   :fn => ->(*args) { set_authority_local("set-authority-local", *args) }
 })
 
-def delete_clusters(cmd_name, *args)
+def delete_runtimes(cmd_name, *args)
   ensure_docker cmd_name, args
 
   common = Common.new
@@ -1775,17 +1775,17 @@ def delete_clusters(cmd_name, *args)
   op.add_option(
       "--min-age-days [DAYS]",
       ->(opts, v) { opts.min_age_days = v},
-      "Minimum age filter in days for clusters to delete, e.g. 21")
+      "Minimum age filter in days for runtimes to delete, e.g. 21")
   op.add_option(
-      "--ids [CLUSTER_ID1,...]",
-      ->(opts, v) { opts.cluster_ids = v},
-      "Cluster IDs to delete, e.g. 'aou-test-f1-1/all-of-us'")
+      "--ids [RUNTIME_ID1,...]",
+      ->(opts, v) { opts.runtime_ids = v},
+      "Runtime IDs to delete, e.g. 'aou-test-f1-1/all-of-us'")
   op.add_option(
       "--nodry-run",
       ->(opts, _) { opts.dry_run = false},
-      "Actually delete clusters, defaults to dry run")
+      "Actually delete runtimes, defaults to dry run")
   op.add_validator ->(opts) {
-    unless (opts.min_age_days or opts.cluster_ids)
+    unless (opts.min_age_days or opts.runtime_ids)
       common.error "--ids or --min-age-days must be provided"
       raise ArgumentError
     end
@@ -1802,53 +1802,53 @@ def delete_clusters(cmd_name, *args)
   api_url = get_leo_api_url(gcc.project)
   ServiceAccountContext.new(gcc.project).run do
     common.run_inline %W{
-       gradle manageClusters
-      -PappArgs=['delete','#{api_url}','#{op.opts.min_age_days}','#{op.opts.cluster_ids}',#{op.opts.dry_run}]}
+       gradle manageLeonardoRuntimes
+      -PappArgs=['delete','#{api_url}','#{op.opts.min_age_days}','#{op.opts.runtime_ids}',#{op.opts.dry_run}]}
   end
 end
 
 Common.register_command({
-  :invocation => "delete-clusters",
-  :description => "Delete clusters matching the provided criteria within an environment",
-  :fn => ->(*args) { delete_clusters("delete-clusters", *args) }
+  :invocation => "delete-runtimes",
+  :description => "Delete runtimes matching the provided criteria within an environment",
+  :fn => ->(*args) { delete_runtimes("delete-runtimes", *args) }
 })
 
-def describe_cluster(cmd_name, *args)
+def describe_runtime(cmd_name, *args)
   ensure_docker cmd_name, args
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
-      "--id [CLUSTER_ID]",
-      ->(opts, v) { opts.cluster_id = v},
-      "Required cluster ID to describe, e.g. 'aou-test-f1-1/all-of-us'")
+      "--id [RUNTIME_ID]",
+      ->(opts, v) { opts.runtime_id = v},
+      "Required runtime ID to describe, e.g. 'aou-test-f1-1/all-of-us'")
   op.add_option(
       "--project [project]",
       ->(opts, v) { opts.project = v},
-      "Optional project ID; by default will infer the project from the cluster ID")
-  op.add_validator ->(opts) { raise ArgumentError unless opts.cluster_id }
+      "Optional project ID; by default will infer the project from the runtime ID")
+  op.add_validator ->(opts) { raise ArgumentError unless opts.runtime_id }
   op.parse.validate
 
-  # Infer the project from the cluster ID project ID. If for some reason, the
-  # target cluster ID does not conform to the current billing prefix (e.g. if we
+  # Infer the project from the runtime ID project ID. If for some reason, the
+  # target runtime ID does not conform to the current billing prefix (e.g. if we
   # changed the prefix), --project can be used to override this.
   common = Common.new
   matching_prefix = ""
-  project_from_cluster = nil
+  project_from_runtime = nil
   ENVIRONMENTS.each_key do |env|
     env_prefix = get_billing_project_prefix(env)
-    if op.opts.cluster_id.start_with?(env_prefix)
+    if op.opts.runtime_id.start_with?(env_prefix)
       # Take the most specific prefix match, since prod is a substring of the others.
       if matching_prefix.length < env_prefix.length
-        project_from_cluster = env
+        project_from_runtime = env
         matching_prefix = env_prefix
       end
     end
   end
-  if project_from_cluster == "local"
-    project_from_cluster = TEST_PROJECT
+  if project_from_runtime == "local"
+    project_from_runtime = TEST_PROJECT
   end
-  common.warning "unable to determine project by cluster ID" unless project_from_cluster
+  common.warning "unable to determine project by runtime ID" unless project_from_runtime
   unless op.opts.project
-    op.opts.project = project_from_cluster
+    op.opts.project = project_from_runtime
   end
 
   # Add the GcloudContext after setting up the project parameter to avoid
@@ -1861,19 +1861,19 @@ def describe_cluster(cmd_name, *args)
   ServiceAccountContext.new(gcc.project).run do |ctx|
     common = Common.new
     common.run_inline %W{
-       gradle manageClusters
-      -PappArgs=['describe','#{api_url}','#{gcc.project}','#{ctx.service_account}','#{op.opts.cluster_id}']}
+       gradle manageLeonardoRuntimes
+      -PappArgs=['describe','#{api_url}','#{gcc.project}','#{ctx.service_account}','#{op.opts.runtime_id}']}
   end
 end
 
 Common.register_command({
-  :invocation => "describe-cluster",
-  :description => "Describe all cluster in this environment",
-  :fn => ->(*args) { describe_cluster("describe-cluster", *args) }
+  :invocation => "describe-runtime",
+  :description => "Describe a given leonardo runtime",
+  :fn => ->(*args) { describe_runtime("describe-runtime", *args) }
 })
 
 
-def list_clusters(cmd_name, *args)
+def list_runtimes(cmd_name, *args)
   ensure_docker cmd_name, args
   op = WbOptionsParser.new(cmd_name, args)
   gcc = GcloudContextV2.new(op)
@@ -1884,15 +1884,15 @@ def list_clusters(cmd_name, *args)
   ServiceAccountContext.new(gcc.project).run do
     common = Common.new
     common.run_inline %W{
-      gradle manageClusters -PappArgs=['list','#{api_url}']
+      gradle manageLeonardoRuntimes -PappArgs=['list','#{api_url}']
     }
   end
 end
 
 Common.register_command({
-  :invocation => "list-clusters",
-  :description => "List all clusters in this environment",
-  :fn => ->(*args) { list_clusters("list-clusters", *args) }
+  :invocation => "list-runtimes",
+  :description => "List all runtimes in this environment",
+  :fn => ->(*args) { list_runtimes("list-runtimes", *args) }
 })
 
 def load_es_index(cmd_name, *args)

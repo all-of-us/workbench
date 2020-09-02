@@ -18,13 +18,13 @@ import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
-import org.pmiops.workbench.leonardo.api.ClusterApi;
+import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.api.ServiceInfoApi;
-import org.pmiops.workbench.leonardo.model.Cluster;
-import org.pmiops.workbench.leonardo.model.ClusterRequest;
-import org.pmiops.workbench.leonardo.model.ListClusterResponse;
-import org.pmiops.workbench.leonardo.model.MachineConfig;
-import org.pmiops.workbench.leonardo.model.UserJupyterExtensionConfig;
+import org.pmiops.workbench.leonardo.model.LeonardoClusterRequest;
+import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
+import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
 import org.pmiops.workbench.notebooks.api.NotebooksApi;
 import org.pmiops.workbench.notebooks.model.LocalizationEntry;
 import org.pmiops.workbench.notebooks.model.Localize;
@@ -37,14 +37,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
-  private static final String CLUSTER_LABEL_AOU = "all-of-us";
-  private static final String CLUSTER_LABEL_CREATED_BY = "created-by";
+  private static final String RUNTIME_LABEL_AOU = "all-of-us";
+  private static final String RUNTIME_LABEL_CREATED_BY = "created-by";
   private static final String WORKSPACE_CDR = "WORKSPACE_CDR";
 
   private static final Logger log = Logger.getLogger(LeonardoNotebooksClientImpl.class.getName());
 
-  private final Provider<ClusterApi> clusterApiProvider;
-  private final Provider<ClusterApi> serviceClusterApiProvider;
+  private final Provider<RuntimesApi> runtimesApiProvider;
+  private final Provider<RuntimesApi> serviceRuntimesApiProvider;
   private final Provider<NotebooksApi> notebooksApiProvider;
   private final Provider<ServiceInfoApi> serviceInfoApiProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
@@ -55,9 +55,9 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
   @Autowired
   public LeonardoNotebooksClientImpl(
-      @Qualifier(NotebooksConfig.USER_CLUSTER_API) Provider<ClusterApi> clusterApiProvider,
-      @Qualifier(NotebooksConfig.SERVICE_CLUSTER_API)
-          Provider<ClusterApi> serviceClusterApiProvider,
+      @Qualifier(NotebooksConfig.USER_RUNTIMES_API) Provider<RuntimesApi> runtimesApiProvider,
+      @Qualifier(NotebooksConfig.SERVICE_RUNTIMES_API)
+          Provider<RuntimesApi> serviceRuntimesApiProvider,
       Provider<NotebooksApi> notebooksApiProvider,
       Provider<ServiceInfoApi> serviceInfoApiProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
@@ -65,8 +65,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
       NotebooksRetryHandler notebooksRetryHandler,
       LeonardoRetryHandler leonardoRetryHandler,
       WorkspaceService workspaceService) {
-    this.clusterApiProvider = clusterApiProvider;
-    this.serviceClusterApiProvider = serviceClusterApiProvider;
+    this.runtimesApiProvider = runtimesApiProvider;
+    this.serviceRuntimesApiProvider = serviceRuntimesApiProvider;
     this.notebooksApiProvider = notebooksApiProvider;
     this.serviceInfoApiProvider = serviceInfoApiProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
@@ -76,10 +76,11 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     this.workspaceService = workspaceService;
   }
 
-  private ClusterRequest createFirecloudClusterRequest(
+  private LeonardoClusterRequest buildCreateClusterRequest(
       String userEmail,
       @Nullable ClusterConfig clusterOverride,
       Map<String, String> customClusterEnvironmentVariables) {
+    // TODO(RW-5406): Remove cluster override.
     if (clusterOverride == null) {
       clusterOverride = new ClusterConfig();
     }
@@ -95,14 +96,14 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     nbExtensions.put(
         "aou-upload-policy-extension", assetsBaseUrl + "/aou-upload-policy-extension.js");
 
-    return new ClusterRequest()
-        .labels(ImmutableMap.of(CLUSTER_LABEL_AOU, "true", CLUSTER_LABEL_CREATED_BY, userEmail))
+    return new LeonardoClusterRequest()
+        .labels(ImmutableMap.of(RUNTIME_LABEL_AOU, "true", RUNTIME_LABEL_CREATED_BY, userEmail))
         .defaultClientId(config.server.oauthClientId)
         // Note: Filenames must be kept in sync with files in api/src/main/webapp/static.
         .jupyterUserScriptUri(assetsBaseUrl + "/initialize_notebook_cluster.sh")
         .jupyterStartUserScriptUri(assetsBaseUrl + "/start_notebook_cluster.sh")
         .userJupyterExtensionConfig(
-            new UserJupyterExtensionConfig()
+            new LeonardoUserJupyterExtensionConfig()
                 .nbExtensions(nbExtensions)
                 .serverExtensions(ImmutableMap.of("jupyterlab", "jupyterlab"))
                 .combinedExtensions(ImmutableMap.<String, String>of())
@@ -113,7 +114,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
         .addScopesItem("https://www.googleapis.com/auth/userinfo.profile")
         .enableWelder(true)
         .machineConfig(
-            new MachineConfig()
+            new LeonardoMachineConfig()
                 .masterDiskSize(
                     Optional.ofNullable(clusterOverride.masterDiskSize)
                         .orElse(config.firecloud.clusterDefaultDiskSizeGb))
@@ -126,80 +127,74 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   }
 
   @Override
-  public Cluster createCluster(
-      String googleProject, String clusterName, String workspaceFirecloudName) {
-    ClusterApi clusterApi = clusterApiProvider.get();
+  public void createRuntime(
+      String googleProject, String runtimeName, String workspaceFirecloudName) {
+    RuntimesApi runtimesApi = runtimesApiProvider.get();
 
     DbUser user = userProvider.get();
     DbWorkspace workspace = workspaceService.getRequired(googleProject, workspaceFirecloudName);
-    Map<String, String> customClusterEnvironmentVariables = new HashMap<>();
+    Map<String, String> customEnvironmentVariables = new HashMap<>();
     // i.e. is NEW or MIGRATED
     if (!workspace.getBillingMigrationStatusEnum().equals(BillingMigrationStatus.OLD)) {
-      customClusterEnvironmentVariables.put(
+      customEnvironmentVariables.put(
           WORKSPACE_CDR,
           workspace.getCdrVersion().getBigqueryProject()
               + "."
               + workspace.getCdrVersion().getBigqueryDataset());
     }
 
-    return leonardoRetryHandler.run(
-        (context) ->
-            clusterApi.createClusterV2(
-                createFirecloudClusterRequest(
-                    user.getUsername(),
-                    user.getClusterConfigDefault(),
-                    customClusterEnvironmentVariables),
-                googleProject,
-                clusterName));
-  }
-
-  @Override
-  public List<ListClusterResponse> listClustersByProject(String googleProject) {
-    ClusterApi clusterApi = clusterApiProvider.get();
-    return leonardoRetryHandler.run(
-        (context) -> clusterApi.listClustersByProject(googleProject, null, false));
-  }
-
-  @Override
-  public List<ListClusterResponse> listClustersByProjectAsService(String googleProject) {
-    ClusterApi clusterApi = serviceClusterApiProvider.get();
-    return leonardoRetryHandler.run(
-        (context) -> clusterApi.listClustersByProject(googleProject, null, false));
-  }
-
-  @Override
-  public void deleteCluster(String googleProject, String clusterName) {
-    ClusterApi clusterApi = clusterApiProvider.get();
     leonardoRetryHandler.run(
         (context) -> {
-          clusterApi.deleteCluster(googleProject, clusterName);
+          // TODO(RW-4847): Switch to createRuntime once IA-2167 is fixed/deployed.
+          runtimesApi.createClusterV2(
+              buildCreateClusterRequest(
+                  user.getUsername(), user.getClusterConfigDefault(), customEnvironmentVariables),
+              googleProject,
+              runtimeName);
           return null;
         });
   }
 
   @Override
-  public Cluster getCluster(String googleProject, String clusterName) {
-    ClusterApi clusterApi = clusterApiProvider.get();
+  public List<LeonardoListRuntimeResponse> listRuntimesByProjectAsService(String googleProject) {
+    RuntimesApi runtimesApi = serviceRuntimesApiProvider.get();
+    return leonardoRetryHandler.run(
+        (context) -> runtimesApi.listRuntimesByProject(googleProject, null, false));
+  }
+
+  @Override
+  public void deleteRuntime(String googleProject, String runtimeName) {
+    RuntimesApi runtimesApi = runtimesApiProvider.get();
+    leonardoRetryHandler.run(
+        (context) -> {
+          runtimesApi.deleteRuntime(googleProject, runtimeName, /* deleteDisk */ false);
+          return null;
+        });
+  }
+
+  @Override
+  public LeonardoGetRuntimeResponse getRuntime(String googleProject, String runtimeName) {
+    RuntimesApi runtimesApi = runtimesApiProvider.get();
     try {
       return leonardoRetryHandler.runAndThrowChecked(
-          (context) -> clusterApi.getCluster(googleProject, clusterName));
+          (context) -> runtimesApi.getRuntime(googleProject, runtimeName));
     } catch (ApiException e) {
       throw ExceptionUtils.convertLeonardoException(e);
     }
   }
 
   @Override
-  public void deleteClusterAsService(String googleProject, String clusterName) {
-    ClusterApi clusterApi = serviceClusterApiProvider.get();
+  public void deleteRuntimeAsService(String googleProject, String runtimeName) {
+    RuntimesApi runtimesApi = serviceRuntimesApiProvider.get();
     leonardoRetryHandler.run(
         (context) -> {
-          clusterApi.deleteCluster(googleProject, clusterName);
+          runtimesApi.deleteRuntime(googleProject, runtimeName, /* deleteDisk */ false);
           return null;
         });
   }
 
   @Override
-  public void localize(String googleProject, String clusterName, Map<String, String> fileList) {
+  public void localize(String googleProject, String runtimeName, Map<String, String> fileList) {
     Localize welderReq =
         new Localize()
             .entries(
@@ -213,21 +208,21 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     NotebooksApi notebooksApi = notebooksApiProvider.get();
     notebooksRetryHandler.run(
         (context) -> {
-          notebooksApi.welderLocalize(googleProject, clusterName, welderReq);
+          notebooksApi.welderLocalize(googleProject, runtimeName, welderReq);
           return null;
         });
   }
 
   @Override
   public StorageLink createStorageLink(
-      String googleProject, String clusterName, StorageLink storageLink) {
+      String googleProject, String runtime, StorageLink storageLink) {
     NotebooksApi notebooksApi = notebooksApiProvider.get();
     return notebooksRetryHandler.run(
-        (context) -> notebooksApi.welderCreateStorageLink(googleProject, clusterName, storageLink));
+        (context) -> notebooksApi.welderCreateStorageLink(googleProject, runtime, storageLink));
   }
 
   @Override
-  public boolean getNotebooksStatus() {
+  public boolean getLeonardoStatus() {
     try {
       serviceInfoApiProvider.get().getSystemStatus();
     } catch (org.pmiops.workbench.leonardo.ApiException e) {

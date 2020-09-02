@@ -1,12 +1,12 @@
 import {
   Cluster,
-  ClusterApi,
   ClusterLocalizeRequest,
   ClusterLocalizeResponse,
-  ClusterStatus
+  ClusterStatus,
+  RuntimeApi
 } from 'generated/fetch';
 
-export class ClusterApiStub extends ClusterApi {
+export class ClusterApiStub extends RuntimeApi {
   public cluster: Cluster;
 
   constructor() {
@@ -38,7 +38,7 @@ export class ClusterApiStub extends ClusterApi {
     });
   }
 
-  localize(projectName: string, req: ClusterLocalizeRequest,
+  deprecatedLocalize(projectName: string, req: ClusterLocalizeRequest,
     extraHttpRequestParams?: any): Promise<ClusterLocalizeResponse> {
     return new Promise<ClusterLocalizeResponse>(resolve => {
       resolve({clusterLocalDirectory: 'workspaces/${req.workspaceId}'});

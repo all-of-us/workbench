@@ -7,7 +7,7 @@ import {clusterApi, registerApiClient} from 'app/services/swagger-fetch-clients'
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ClusterApiStub} from 'testing/stubs/cluster-api-stub';
 
-import {ClusterApi} from 'generated/fetch/api';
+import {RuntimeApi} from 'generated/fetch/api';
 
 
 describe('ResetClusterButton', () => {
@@ -22,7 +22,7 @@ describe('ResetClusterButton', () => {
       workspaceNamespace: 'billing-project-123',
     };
 
-    registerApiClient(ClusterApi, new ClusterApiStub());
+    registerApiClient(RuntimeApi, new ClusterApiStub());
   });
 
   it('should not open the cluster reset modal when no cluster', () => {

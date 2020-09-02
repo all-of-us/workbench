@@ -26,11 +26,13 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.AdminWorkspaceResources;
 import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.ListClusterResponse;
+import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAdminView;
@@ -38,7 +40,7 @@ import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 import org.pmiops.workbench.model.WorkspaceUserAdminView;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.NotebooksService;
-import org.pmiops.workbench.utils.mappers.FirecloudMapper;
+import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -55,7 +57,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private final CloudMonitoringService cloudMonitoringService;
   private final ConceptSetDao conceptSetDao;
   private final DataSetDao dataSetDao;
-  private final FirecloudMapper firecloudMapper;
+  private final LeonardoMapper leonardoMapper;
   private final FireCloudService fireCloudService;
   private final LeonardoNotebooksClient leonardoNotebooksClient;
   private final NotebooksService notebooksService;
@@ -74,7 +76,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       ConceptSetDao conceptSetDao,
       DataSetDao dataSetDao,
       FireCloudService fireCloudService,
-      FirecloudMapper firecloudMapper,
+      LeonardoMapper leonardoMapper,
       LeonardoNotebooksClient leonardoNotebooksClient,
       NotebooksService notebooksService,
       UserMapper userMapper,
@@ -89,7 +91,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     this.conceptSetDao = conceptSetDao;
     this.dataSetDao = dataSetDao;
     this.fireCloudService = fireCloudService;
-    this.firecloudMapper = firecloudMapper;
+    this.leonardoMapper = leonardoMapper;
     this.leonardoNotebooksClient = leonardoNotebooksClient;
     this.notebooksService = notebooksService;
     this.userMapper = userMapper;
@@ -176,16 +178,23 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         getAdminWorkspaceCloudStorageCounts(
             dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
 
+    final List<LeonardoListRuntimeResponse> leoRuntimeResponses =
+        leonardoNotebooksClient.listRuntimesByProjectAsService(workspaceNamespace);
     final List<ListClusterResponse> workbenchListClusterResponses =
-        leonardoNotebooksClient.listClustersByProjectAsService(workspaceNamespace).stream()
-            .map(firecloudMapper::toApiListClusterResponse)
+        leoRuntimeResponses.stream()
+            .map(leonardoMapper::toApiListClusterResponse)
+            .collect(Collectors.toList());
+    final List<ListRuntimeResponse> workbenchListRuntimeResponses =
+        leoRuntimeResponses.stream()
+            .map(leonardoMapper::toApiListRuntimeResponse)
             .collect(Collectors.toList());
 
     final AdminWorkspaceResources adminWorkspaceResources =
         new AdminWorkspaceResources()
             .workspaceObjects(adminWorkspaceObjects)
             .cloudStorage(adminWorkspaceCloudStorageCounts)
-            .clusters(workbenchListClusterResponses);
+            .clusters(workbenchListClusterResponses)
+            .runtimes(workbenchListRuntimeResponses);
 
     final FirecloudWorkspace firecloudWorkspace =
         fireCloudService

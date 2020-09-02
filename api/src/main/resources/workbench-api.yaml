@@ -570,13 +570,14 @@ paths:
           schema:
             "$ref": "#/definitions/WorkbenchListBillingAccountsResponse"
   "/v1/admin/security/clusters/{billingProjectId}/delete-clusters":
+    x-aou-note: DEPRECATED. Use Runtime APIs instead.
     post:
       summary: Delete specified (or all if no specified list) clusters in a project
       description: 'An admin gated endpoint that deletes given clusters in a given
         billing project.'
       operationId: deleteClustersInProject
       tags:
-      - cluster
+      - runtime
       parameters:
       - in: path
         name: billingProjectId
@@ -610,7 +611,7 @@ paths:
         for the given workspace.'
       operationId: getCluster
       tags:
-      - cluster
+      - runtime
       parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       responses:
@@ -629,7 +630,7 @@ paths:
         TODO(RW-3697): Custom cluster creation params should be added as a body param here.
       operationId: createCluster
       tags:
-      - cluster
+      - runtime
       parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       responses:
@@ -647,7 +648,7 @@ paths:
         here.'
       operationId: deleteCluster
       tags:
-      - cluster
+      - runtime
       parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       responses:
@@ -665,9 +666,9 @@ paths:
       description: 'Localizes files to the cluster for the current user and given
         workspace. As a side-effect, JSON workspace environment files will also be
         localized to the cluster.'
-      operationId: localize
+      operationId: deprecatedLocalize
       tags:
-      - cluster
+      - runtime
       consumes:
       - application/json
       parameters:
@@ -684,6 +685,127 @@ paths:
             "$ref": "#/definitions/ClusterLocalizeResponse"
         404:
           description: Cluster or Workspace not found
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+        500:
+          description: Internal Error
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+  "/v1/admin/security/runtimes/{billingProjectId}/delete-runtimes":
+    post:
+      summary: Delete specified (or all if no specified list) runtimes in a project
+      description: 'An admin gated endpoint that deletes given runtimes in a given
+        billing project.'
+      operationId: deleteRuntimesInProject
+      tags:
+      - runtime
+      parameters:
+      - in: path
+        name: billingProjectId
+        description: The unique identifier of the Google Billing Project containing
+          the runtimes
+        required: true
+        type: string
+      - in: body
+        name: runtimesToDelete
+        description: A list of names of runtimes to delete. To delete all runtimes,
+          use an empty object, without providing a list property at all (e.g., {})
+          An empty list will delete no runtimes.
+        required: true
+        schema:
+          "$ref": "#/definitions/ListRuntimeDeleteRequest"
+      responses:
+        200:
+          description: Runtimes deleted
+          schema:
+            type: array
+            items:
+              "$ref": "#/definitions/ListRuntimeResponse"
+        500:
+          description: Internal Error
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+  "/v1/runtimes/{workspaceNamespace}":
+    get:
+      summary: Get the user's workspace runtime.
+      description: "Returns the current user's runtime, if any, which has been created
+        for the given workspace."
+      operationId: getRuntime
+      tags:
+      - runtime
+      parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      responses:
+        200:
+          description: The runtime for this user and workspace.
+          schema:
+            "$ref": "#/definitions/Runtime"
+        404:
+          description: No runtime exists for this user and workspace.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+    post:
+      summary: Create a workspace runtime.
+      description: |
+        Creates a new runtime for the current user in the given billing project. If a runtime already exists for the user in this billing project, a 409 conflict error is returned (even if the runtime is still initializing or is not in a ready state).
+        TODO(RW-3697): Custom runtime creation params should be added as a body param here.
+      operationId: createRuntime
+      tags:
+      - runtime
+      parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      responses:
+        200:
+          description: Returns the runtime that was created for this user and workspace.
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
+        409:
+          description: A runtime for this user and workspace already exists.
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
+    delete:
+      summary: Delete a workspace runtime.
+      description: 'TODO(RW-3695): updateRuntime should be added as a PATCH endpoint
+        here.'
+      operationId: deleteRuntime
+      tags:
+      - runtime
+      parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      responses:
+        200:
+          description: Success
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
+        404:
+          description: No runtime exists for this user and workspace.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+  "/v1/runtimes/{workspaceNamespace}/localize":
+    post:
+      summary: Localize files to the user's runtime.
+      description: 'Localizes files to the runtime for the current user and given
+        workspace. As a side-effect, JSON workspace environment files will also be
+        localized to the runtime.'
+      operationId: localize
+      tags:
+      - runtime
+      consumes:
+      - application/json
+      parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - in: body
+        name: body
+        description: Localization request.
+        schema:
+          "$ref": "#/definitions/RuntimeLocalizeRequest"
+      responses:
+        200:
+          description: Success
+          schema:
+            "$ref": "#/definitions/RuntimeLocalizeResponse"
+        404:
+          description: Runtime or Workspace not found
           schema:
             "$ref": "#/definitions/ErrorResponse"
         500:
@@ -1299,7 +1421,7 @@ paths:
         cluster expiration (~2w) or via manual reset. Requires DEVELOPER authority.'
       operationId: updateClusterConfig
       tags:
-      - cluster
+      - runtime
       parameters:
       - in: body
         name: body
@@ -1354,19 +1476,19 @@ paths:
           description: Audit was successful.
           schema:
             "$ref": "#/definitions/AuditBigQueryResponse"
-  "/v1/cron/checkClusters":
+  "/v1/cron/checkRuntimes":
     get:
       security: []
       tags:
-      - offlineCluster
+      - offlineRuntime
       - cron
-      description: 'Endpoint meant to be called offline to trigger cluster checks
-        and cleanup. Enforces upgrades for older cluster deployments. May be slow
+      description: 'Endpoint meant to be called offline to trigger runtime checks
+        and cleanup. Enforces upgrades for older runtime deployments. May be slow
         to execute. Only executable via App Engine cronjob.'
-      operationId: checkClusters
+      operationId: checkRuntimes
       responses:
         204:
-          description: Clusters were checked and handled successfully.
+          description: Runtimes were checked and handled successfully.
   "/v1/cron/bulkSyncComplianceTrainingStatus":
     get:
       security: []
@@ -3873,13 +3995,13 @@ definitions:
         * REVIEW_RESEARCH_PURPOSE: This authority allows the user to review workspaces where
           the user has requested review to approve or reject.
         * DEVELOPER: Grants access to some internal-only
-          administrative endpoints, including group management and cluster
+          administrative endpoints, including group management and runtime
           management. Intended to be granted for devops needs, e.g. for oncall.
         * ACCESS_CONTROL_ADMIN: This is actually basically a user admin authority, for people
           to perform actions on a user's enabled status and manual verification.
         * FEATURED_WORKSPACE_ADMIN: Allows a user to publish workspaces
         * COMMUNICATIONS_ADMIN: Allows a user to post a Status Alert banner
-        * SECURITY_ADMIN: Allows a user to respond to egress alerts by deleting all clusters in a project
+        * SECURITY_ADMIN: Allows a user to respond to egress alerts by deleting all runtimes in a project
         * INSTITUTION_ADMIN: Allows a user to create, delete, and update Institute entities
         * RESEARCHER_DATA_VIEW: Allows a user to view admin-only data (or aggregations of data)
             for users, workspaces, and similar user-created content.
@@ -5260,6 +5382,37 @@ definitions:
       createdDate:
         type: string
         description: The date and time the cluster was created, in ISO-8601 format
+  RuntimeStatus:
+    type: string
+    enum:
+    - Creating
+    - Running
+    - Updating
+    - Error
+    - Stopping
+    - Stopped
+    - Starting
+    - Deleting
+    - Deleted
+    - Unknown
+  Runtime:
+    required:
+      - googleProject
+      - runtimeName
+      - createdDate
+      - status
+    properties:
+      googleProject:
+        type: string
+        description: The Google Project used to create the runtime
+      runtimeName:
+        type: string
+        description: The user-supplied name for the runtime
+      createdDate:
+        type: string
+        description: The date and time the cluster was created, in ISO-8601 format
+      status:
+        "$ref": "#/definitions/RuntimeStatus"
   FileDetail:
     type: object
     required:
@@ -5322,10 +5475,53 @@ definitions:
         description: |
           The date and time the cluster was last accessed, in ISO-8601 format.
           Date accessed is defined as the last time the cluster was created, modified, or accessed via the proxy.
+  ListRuntimeResponse:
+    description: This is a subset of options in a full runtimes response, copied from leonardo.yaml.
+    required:
+    - id
+    - runtimeName
+    - googleProject
+    - status
+    - createdDate
+    - labels
+    - dateAccessed
+    properties:
+      id:
+        type: integer
+        description: Internal Leonardo ID of the runtime
+      runtimeName:
+        type: string
+        description: The user-supplied name for the runtime
+      googleProject:
+        type: string
+        description: The Google Project used to create the runtime
+      status:
+        "$ref": "#/definitions/RuntimeStatus"
+      createdDate:
+        type: string
+        description: The date and time the runtime was created, in ISO-8601 format
+      labels:
+        type: object
+        description: The labels to be placed on the runtime. Of type Map[String,String]
+      dateAccessed:
+        type: string
+        description: |
+          The date and time the runtime was last accessed, in ISO-8601 format.
+          Date accessed is defined as the last time the runtime was created, modified, or accessed via the proxy.
+      patchInProgress:
+        type: boolean
+        description: Whether there is a patch in progress on the runtime. Is used to indicate updates that require status transitions.
   ListClusterDeleteRequest:
     type: object
     properties:
       clustersToDelete:
+        type: array
+        items:
+          type: string
+  ListRuntimeDeleteRequest:
+    type: object
+    properties:
+      runtimesToDelete:
         type: array
         items:
           type: string
@@ -5354,6 +5550,34 @@ definitions:
       clusterLocalDirectory:
         type: string
         description: 'The directory on the notebook cluster file system where the
+          requested files were localized. This is the "API" directory in Jupyter terms,
+          which means it is a relative path in the Jupyter user-facing file system,
+          e.g. "foo/bar.ipynb".'
+  RuntimeLocalizeRequest:
+    type: object
+    required:
+    - notebookNames
+    - playgroundMode
+    properties:
+      notebookNames:
+        type: array
+        description: 'Names of notebooks to localize. This is just the basename (no
+          gs:// needed). This is interpreted as relative to the /notebooks directory
+          within the provided workspace''s Google Cloud Storage bucket.'
+        items:
+          type: string
+      playgroundMode:
+        type: boolean
+        default: false
+        description: Set to true if playgroundMode needed
+  RuntimeLocalizeResponse:
+    type: object
+    required:
+    - runtimeLocalDirectory
+    properties:
+      runtimeLocalDirectory:
+        type: string
+        description: 'The directory on the notebook runtime file system where the
           requested files were localized. This is the "API" directory in Jupyter terms,
           which means it is a relative path in the Jupyter user-facing file system,
           e.g. "foo/bar.ipynb".'
@@ -5787,7 +6011,7 @@ definitions:
         "$ref": "#/definitions/AdminWorkspaceResources"
   AdminWorkspaceResources:
     description: 'A summary of application-level resources associated with a workspace.
-      Includes data about Cohort Builder objects, analysis clusters, and cloud-storage
+      Includes data about Cohort Builder objects, analysis runtimes, and cloud-storage
       contents.'
     type: object
     properties:
@@ -5799,6 +6023,10 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/ListClusterResponse"
+      runtimes:
+        type: array
+        items:
+          "$ref": "#/definitions/ListRuntimeResponse"
   AdminWorkspaceObjectsCounts:
     type: object
     properties:

@@ -37,6 +37,6 @@ public class NotebooksIntegrationTest extends BaseIntegrationTest {
 
   @Test
   public void testStatus() {
-    assertThat(leonardoNotebooksClient.getNotebooksStatus()).isTrue();
+    assertThat(leonardoNotebooksClient.getLeonardoStatus()).isTrue();
   }
 }

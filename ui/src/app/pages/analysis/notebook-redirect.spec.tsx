@@ -5,7 +5,7 @@ import {registerApiClient as registerApiClientNotebooks} from 'app/services/note
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, queryParamsStore, serverConfigStore, urlParamsStore, userProfileStore} from 'app/utils/navigation';
 import {Kernels} from 'app/utils/notebook-kernels';
-import {ClusterApi, ClusterStatus, WorkspaceAccessLevel} from 'generated/fetch';
+import {RuntimeApi, ClusterStatus, WorkspaceAccessLevel} from 'generated/fetch';
 import {ClusterApi as NotebooksClusterApi, JupyterApi, NotebooksApi} from 'notebooks-generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ClusterApiStub} from 'testing/stubs/cluster-api-stub';
@@ -49,7 +49,7 @@ describe('NotebookRedirect', () => {
     clusterStub = new ClusterApiStub();
     clusterStub.cluster.status = ClusterStatus.Creating;
 
-    registerApiClient(ClusterApi, clusterStub);
+    registerApiClient(RuntimeApi, clusterStub);
     registerApiClientNotebooks(JupyterApi, new JupyterApiStub());
     registerApiClientNotebooks(NotebooksApi, new NotebooksApiStub());
     registerApiClientNotebooks(NotebooksClusterApi, new NotebooksClusterApiStub());

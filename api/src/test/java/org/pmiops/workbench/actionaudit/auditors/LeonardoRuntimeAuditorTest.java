@@ -27,7 +27,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
-public class ClusterAuditorTest {
+public class LeonardoRuntimeAuditorTest {
   private DbUser user1;
   private static final long Y2K_EPOCH_MILLIS =
       Instant.parse("2000-01-01T00:00:00.00Z").toEpochMilli();
@@ -36,7 +36,7 @@ public class ClusterAuditorTest {
   private static final List<String> CLUSTER_NAMES =
       ImmutableList.of("all-of-us-1", "all-of-us-2", "all-of-us-3");
 
-  private ClusterAuditor clusterAuditor;
+  private LeonardoRuntimeAuditor leonardoRuntimeauditor;
 
   @Captor private ArgumentCaptor<Collection<ActionAuditEvent>> eventCollectionCaptor;
 
@@ -57,8 +57,8 @@ public class ClusterAuditorTest {
     user1.setGivenName("Fred");
     user1.setFamilyName("Flintstone");
     doReturn(user1).when(mockUserProvider).get();
-    clusterAuditor =
-        new ClusterAuditorImpl(
+    leonardoRuntimeauditor =
+        new LeonardoRuntimeAuditorImpl(
             mockActionIdProvider, mockActionAuditService, mockClock, mockUserProvider);
 
     doReturn(Y2K_EPOCH_MILLIS).when(mockClock).millis();
@@ -67,7 +67,7 @@ public class ClusterAuditorTest {
 
   @Test
   public void testFireDeleteClustersInProject() {
-    clusterAuditor.fireDeleteClustersInProject(BILLING_PROJECT_ID, CLUSTER_NAMES);
+    leonardoRuntimeauditor.fireDeleteRuntimesInProject(BILLING_PROJECT_ID, CLUSTER_NAMES);
     verify(mockActionAuditService).send(eventCollectionCaptor.capture());
     Collection<ActionAuditEvent> eventsSent = eventCollectionCaptor.getValue();
     assertThat(eventsSent).hasSize(CLUSTER_NAMES.size());

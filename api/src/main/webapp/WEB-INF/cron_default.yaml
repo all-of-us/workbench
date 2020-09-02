@@ -1,6 +1,6 @@
 cron:
-- description: 'Periodic notebook cluster checks'
-  url: /v1/cron/checkClusters
+- description: 'Periodic notebook runtime checks'
+  url: /v1/cron/checkRuntimes
   schedule: every 3 hours
   timezone: UTC
   target: api

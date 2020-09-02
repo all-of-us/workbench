@@ -186,7 +186,9 @@ swaggerSources {
   captcha swagger2JavaClient("captcha.yaml", "captcha")
   shibboleth swagger2JavaClient("shibboleth.yaml", "shibboleth")
 
-  leonardo swagger3JavaClient("leonardo.yaml", "leonardo")
+  leonardo swagger3JavaClient("leonardo.yaml", "leonardo", [
+    '--model-name-prefix', 'Leonardo'
+  ])
 
   // Workbench needs a special configuration style, as we generate Spring server
   // bindings in this case.
@@ -695,10 +697,10 @@ task loadConfig(type: JavaExec) {
 }
 
 // Called by devs from the command-line:
-// - devstart.rb > list_clusters
-task manageClusters(type: JavaExec) {
+// - devstart.rb > list_runtimes
+task manageLeonardoRuntimes(type: JavaExec) {
   classpath sourceSets.__tools__.runtimeClasspath
-  main = "org.pmiops.workbench.tools.ManageClusters"
+  main = "org.pmiops.workbench.tools.ManageLeonardoRuntimes"
   systemProperties = commandLineSpringProperties
   if (project.hasProperty("appArgs")) {
     args Eval.me(appArgs)

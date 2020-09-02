@@ -6,7 +6,7 @@ import {ClusterInitializer} from 'app/utils/cluster-initializer';
 import {ClusterInitializerOptions} from 'app/utils/cluster-initializer';
 import {Cluster} from 'generated/fetch';
 import {ClusterStatus} from 'generated/fetch';
-import {ClusterApi} from 'generated/fetch/api';
+import {RuntimeApi} from 'generated/fetch/api';
 import SpyInstance = jest.SpyInstance;
 import expect = jest.Expect;
 import {ClusterApi as NotebooksClusterApi} from 'notebooks-generated/fetch';
@@ -29,7 +29,7 @@ describe('ClusterInitializer', () => {
   beforeEach(() => {
     jest.useFakeTimers();
 
-    registerApiClient(ClusterApi, new ClusterApiStub());
+    registerApiClient(RuntimeApi, new ClusterApiStub());
     registerApiClientNotebooks(NotebooksClusterApi, new NotebooksClusterApiStub());
 
     mockGetCluster = jest.spyOn(clusterApi(), 'getCluster');
