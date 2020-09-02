@@ -91,6 +91,18 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
     est_count             STRING
 )"
 
+# table that holds which survey versions each question and answer are apart of
+echo "CREATE TABLES - cb_survey_attribute"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.cb_survey_attribute\`
+(
+      id                    INT64
+    , question_concept_id   INT64
+    , answer_concept_id     INT64
+    , survey_id             INT64
+    , item_count            INT64
+)"
+
 # table that holds the drug brands to ingredients relationship mapping
 # also holds source concept --> standard concept mapping information
 echo "CREATE TABLES - cb_criteria_relationship"
@@ -1115,26 +1127,28 @@ FROM
             , a.value_source_concept_id
             , regexp_replace(b.concept_name, r'^.+:\s', '') as answer  --remove 'PMI: ' from concept name (ex: PMI: Skip)
         FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
-        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.value_source_concept_id = b.concept_id
-        LEFT JOIN
+        JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.value_source_concept_id = b.concept_id
+        LEFT JOIN  --filter out items already in the table
             (
                 SELECT *
-                FROM \`$BQ_PROJECT.$BQ_DATASET.prep_criteria\`
+                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
                 WHERE domain_id = 'SURVEY'
             ) c on (a.observation_source_concept_id = c.concept_id and CAST(a.value_source_concept_id as STRING) = c.value)
         WHERE a.value_source_concept_id in (903096, 903079, 903087)
             and a.observation_source_concept_id in
                 (
                     SELECT concept_id
-                    FROM \`$BQ_PROJECT.$BQ_DATASET.prep_criteria\`
+                    FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
                     WHERE domain_id = 'SURVEY'
                         and concept_id is not null
                 )
             and c.id is null
     ) d
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_criteria\` e on
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` e on
     (d.observation_source_concept_id = e.concept_id and e.domain_id = 'SURVEY' and e.is_group = 1)"
 
+# the concept_id of the answer, is the concept_id for the question
+# we do this because there are a few answers that are attached to a topic and we want to get those as well
 echo "PPI SURVEYS - add items to ancestor table"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
@@ -1240,7 +1254,6 @@ echo "PPI SURVEYS - generate survey counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.rollup_count = y.cnt
-    , x.item_count = y.cnt
     , x.est_count = y.cnt
 FROM
     (
@@ -5172,10 +5185,18 @@ FROM
 ################################################
 # CB_CRITERIA_ATTRIBUTE
 ################################################
+# we hard code the min/max for these PPI questions because we can't get the information programmatically
 echo "CB_CRITERIA_ATTRIBUTE - PPI SURVEY - add values for certain questions"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`
-    (id, concept_id, value_as_concept_id, concept_name, type, est_count)
+    (
+          id
+        , concept_id
+        , value_as_concept_id
+        , concept_name
+        , type
+        , est_count
+    )
 VALUES
     (1, 1585889, 0, 'MIN', 'NUM', '0'),
     (2, 1585889, 0, 'MAX', 'NUM', '20'),
@@ -5196,24 +5217,84 @@ VALUES
     (17, 1585802, 0, 'MIN', 'NUM', '0'),
     (18, 1585802, 0, 'MAX', 'NUM', '99'),
     (19, 1585820, 0, 'MIN', 'NUM', '0'),
-    (20, 1585820, 0, 'MAX', 'NUM', '255')
+    (20, 1585820, 0, 'MAX', 'NUM', '255'),
+    (21, 1333015, 0, 'MIN', 'NUM', '0'),
+    (22, 1333015, 0, 'MAX', 'NUM', '20'),
+    (23, 1333023, 0, 'MIN', 'NUM', '1'),
+    (24, 1333023, 0, 'MAX', 'NUM', '20'),
+    (25, 715717, 0, 'MIN', 'NUM', '0'),
+    (26, 715717, 0, 'MAX', 'NUM', '24'),
+    (27, 903642, 0, 'MIN', 'NUM', '0'),
+    (28, 903642, 0, 'MAX', 'NUM', '1440'),
+    (29, 715721, 0, 'MIN', 'NUM', '1'),
+    (30, 715721, 0, 'MAX', 'NUM', '99'),
+    (31, 715720, 0, 'MIN', 'NUM', '1'),
+    (32, 715720, 0, 'MAX', 'NUM', '12'),
+    (33, 715719, 0, 'MIN', 'NUM', '1'),
+    (34, 715719, 0, 'MAX', 'NUM', '52'),
+    (35, 1332870, 0, 'MIN', 'NUM', '1'),
+    (36, 1332870, 0, 'MAX', 'NUM', '7'),
+    (37, 903633, 0, 'MIN', 'NUM', '0'),
+    (38, 903633, 0, 'MAX', 'NUM', '24'),
+    (39, 715712, 0, 'MIN', 'NUM', '0'),
+    (40, 715712, 0, 'MAX', 'NUM', '1440'),
+    (41, 1332871, 0, 'MIN', 'NUM', '1'),
+    (42, 1332871, 0, 'MAX', 'NUM', '7'),
+    (43, 903634, 0, 'MIN', 'NUM', '0'),
+    (44, 903634, 0, 'MAX', 'NUM', '24'),
+    (45, 715715, 0, 'MIN', 'NUM', '0'),
+    (46, 715715, 0, 'MAX', 'NUM', '1440'),
+    (47, 1332872, 0, 'MIN', 'NUM', '1'),
+    (48, 1332872, 0, 'MAX', 'NUM', '7'),
+    (49, 903635, 0, 'MIN', 'NUM', '0'),
+    (50, 903635, 0, 'MAX', 'NUM', '7'),
+    (51, 715716, 0, 'MIN', 'NUM', '0'),
+    (52, 715716, 0, 'MAX', 'NUM', '1440'),
+    (53, 715718, 0, 'MIN', 'NUM', '0'),
+    (54, 715718, 0, 'MAX', 'NUM', '1440'),
+    (55, 715723, 0, 'MIN', 'NUM', '1'),
+    (56, 715723, 0, 'MAX', 'NUM', '99'),
+    (57, 715713, 0, 'MIN', 'NUM', '1'),
+    (58, 715713, 0, 'MAX', 'NUM', '12'),
+    (59, 715722, 0, 'MIN', 'NUM', '1'),
+    (60, 715722, 0, 'MAX', 'NUM', '52')
 "
 
-# this code filters out any labs WHERE all results = 0
+# this will add the min/max values for all numeric measurement concepts
+# this code will filter out any labs WHERE all results = 0
 echo "CB_CRITERIA_ATTRIBUTE - Measurements - add numeric results"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`
-    (id, concept_id, value_as_concept_id, concept_name, type, est_count)
-SELECT ROW_NUMBER() OVER (order by measurement_concept_id) + (SELECT MAX(ID) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`) as id, *
+    (
+          id
+        , concept_id
+        , value_as_concept_id
+        , concept_name
+        , type
+        , est_count
+    )
+SELECT
+      ROW_NUMBER() OVER (ORDER BY concept_id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`) as id
+    , concept_id
+    , value_as_concept_id
+    , concept_name
+    , type
+    , cnt
 FROM
     (
-        SELECT measurement_concept_id, 0, 'MIN', 'NUM', CAST(min(value_as_number) as STRING)
+        SELECT
+              measurement_concept_id as concept_id
+            , 0 as value_as_concept_id
+            , 'MIN' as concept_name
+            , 'NUM' as type
+            , CAST(MIN(value_as_number) as STRING) as cnt
         FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\`
         WHERE measurement_concept_id in
             (
                 SELECT concept_id
                 FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
                 WHERE domain_id = 'MEASUREMENT'
+                    and is_group = 0
             )
             and value_as_number is not null
         GROUP BY 1
@@ -5221,27 +5302,52 @@ FROM
 
         UNION ALL
 
-        SELECT measurement_concept_id, 0, 'MAX', 'NUM', CAST(max(value_as_number) as STRING)
+        SELECT
+              measurement_concept_id as concept_id
+            , 0 as value_as_concept_id
+            , 'MAX' as concept_name
+            , 'NUM' as type
+            , CAST(max(value_as_number) as STRING) as cnt
         FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\`
         WHERE measurement_concept_id in
             (
                 SELECT concept_id
                 FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
                 WHERE domain_id = 'MEASUREMENT'
+                    and is_group = 0
             )
             and value_as_number is not null
         GROUP BY 1
         HAVING NOT (min(value_as_number) = 0 and max(value_as_number) = 0)
     ) a"
 
+# this will add all categorical values for all measurement concepts where value_as_concept_id is valid
 echo "CB_CRITERIA_ATTRIBUTE - Measurements - add categorical results"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`
-    (id, concept_id, value_as_concept_Id, concept_name, type, est_count)
-SELECT ROW_NUMBER() OVER (order by measurement_concept_id) + (SELECT MAX(ID) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`) as id, *
+    (
+          id
+        , concept_id
+        , value_as_concept_id
+        , concept_name
+        , type
+        , est_count
+    )
+SELECT
+      ROW_NUMBER() OVER (ORDER BY concept_id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`) as id
+    , concept_id
+    , value_as_concept_id
+    , concept_name
+    , type
+    , cnt
 FROM
     (
-        SELECT measurement_concept_id, value_as_concept_id, b.concept_name, 'CAT' as type, CAST(count(DISTINCT person_id) as STRING)
+        SELECT
+              measurement_concept_id as concept_id
+            , value_as_concept_id
+            , b.concept_name
+            , 'CAT' as type
+            , CAST(COUNT(DISTINCT person_id) as STRING) as cnt
         FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\` a
         JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.value_as_concept_id = b.concept_id
         WHERE measurement_concept_id in
@@ -5249,6 +5355,7 @@ FROM
                 SELECT concept_id
                 FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
                 WHERE domain_id = 'MEASUREMENT'
+                    and is_group = 0
             )
             and value_as_concept_id != 0
             and value_as_concept_id is not null
@@ -5256,18 +5363,65 @@ FROM
     ) a"
 
 
-# set has_attributes=1 for any criteria that has data in cb_criteria_attribute
-echo "CB_CRITERIA_ATTRIBUTE - update has_attributes column for measurement criteria"
+# set has_attribute=1 for any measurement criteria that has data in cb_criteria_attribute
+echo "CB_CRITERIA_ATTRIBUTE - update has_attribute"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 SET has_attribute = 1
-WHERE concept_id in
+WHERE domain_id = 'MEASUREMENT'
+    and is_selectable = 1
+    and concept_id in
     (
         SELECT DISTINCT concept_id
         FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`
-    )
-    and domain_id = 'MEASUREMENT'
-    and is_selectable = 1"
+    )"
+
+
+################################################
+# CB_SURVEY_ATTRIBUTE
+################################################
+echo "CB_SURVEY_ATTRIBUTE - adding data"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_survey_attribute\`
+SELECT
+        ROW_NUMBER() OVER (ORDER BY question_concept_id, answer_concept_id, survey_id) as id
+      , question_concept_id
+      , answer_concept_id
+      , survey_id
+      , cnt
+FROM
+    (
+        SELECT
+              concept_id as question_concept_id
+            , value_source_concept_id as answer_concept_id
+            , survey_id
+            , count(distinct person_id) cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+        WHERE
+            concept_id in
+                (
+                    SELECT concept_id
+                    FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                    WHERE domain_id = 'SURVEY'
+                )
+            and survey_id is not null
+            and is_standard = 0
+        GROUP BY 1,2,3
+    )"
+
+# set has_attribute=1 for any criteria that has data in cb_survey_attribute
+echo "CB_SURVEY_ATTRIBUTE - update has_attribute"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+SET has_attribute = 1
+WHERE domain_id = 'SURVEY'
+    and is_selectable = 1
+    and concept_id in
+    (
+        SELECT DISTINCT question_concept_id
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_survey_attribute\`
+    )"
+
 
 ################################################
 # CB_CRITERIA_RELATIONSHIP
@@ -5275,10 +5429,15 @@ WHERE concept_id in
 echo "CB_CRITERIA_RELATIONSHIP - Drugs - add drug/ingredient relationships"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_relationship\`
-    (concept_id_1, concept_id_2)
-SELECT a.concept_id_1, a.concept_id_2
+    (
+          concept_id_1
+        , concept_id_2
+    )
+SELECT
+      a.concept_id_1
+    , a.concept_id_2
 FROM \`$BQ_PROJECT.$BQ_DATASET.concept_relationship\` a
-join \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.concept_id_2 = b.concept_id
+JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.concept_id_2 = b.concept_id
 WHERE b.concept_class_id = 'Ingredient'
     and a.concept_id_1 in
         (
@@ -5291,8 +5450,13 @@ WHERE b.concept_class_id = 'Ingredient'
 echo "CB_CRITERIA_RELATIONSHIP - Source Concept -> Standard Concept Mapping"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_relationship\`
-    (concept_id_1, concept_id_2)
-SELECT a.concept_id_1 as source_concept_id, a.concept_id_2 as standard_concept_id
+    (
+          concept_id_1
+        , concept_id_2
+    )
+SELECT
+      a.concept_id_1 as source_concept_id
+    , a.concept_id_2 as standard_concept_id
 FROM \`$BQ_PROJECT.$BQ_DATASET.concept_relationship\` a
 JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.concept_id_2 = b.concept_id
 WHERE b.standard_concept = 'S'
@@ -5341,7 +5505,7 @@ WHERE REGEXP_CONTAINS(name, r'[\"]')"
 
 
 ###############################################
- FULL_TEXT and SYNONYMS
+# FULL_TEXT and SYNONYMS
 ###############################################
 echo "FULL_TEXT and SYNONYMS - adding data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -5377,6 +5541,6 @@ FROM
         FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
         WHERE full_text is not null
             and (item_count != -1 OR (item_count = -1 AND type = 'BRAND'))
-        group by domain_id, is_standard, type, subtype, concept_id, name
+        GROUP BY domain_id, is_standard, type, subtype, concept_id, name
     ) y
 WHERE x.id = y.id"
