@@ -43,7 +43,7 @@ cb_cri_anc_table_check=\\bcb_criteria_ancestor\\b
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
-create_tables=(concept cb_criteria cb_criteria_attribute cb_criteria_relationship cb_criteria_ancestor ds_linking domain_info survey_module domain vocabulary concept_synonym cb_person cb_data_filter)
+create_tables=(cb_survey_attribute cb_survey_version concept cb_criteria cb_criteria_attribute cb_criteria_relationship cb_criteria_ancestor ds_linking domain_info survey_module domain vocabulary concept_synonym cb_person cb_data_filter)
 
 for t in "${create_tables[@]}"
 do

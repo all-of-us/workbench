@@ -5364,7 +5364,7 @@ FROM
 
 
 # set has_attribute=1 for any measurement criteria that has data in cb_criteria_attribute
-echo "CB_CRITERIA_ATTRIBUTE - update has_attribute"
+echo "CB_CRITERIA - update has_attribute"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 SET has_attribute = 1
@@ -5410,7 +5410,7 @@ FROM
     )"
 
 # set has_attribute=1 for any criteria that has data in cb_survey_attribute
-echo "CB_SURVEY_ATTRIBUTE - update has_attribute"
+echo "CB_SURVEY - update has_attribute"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 SET has_attribute = 1
