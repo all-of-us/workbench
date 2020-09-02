@@ -1,3 +1,4 @@
+import {Growl} from 'primereact/growl';
 import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -7,9 +8,10 @@ import {searchRequestStore} from 'app/cohort-search/search-state.service';
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {CriteriaTree} from 'app/cohort-search/tree/tree.component';
 import {domainToTitle, generateId, typeToTitle} from 'app/cohort-search/utils';
-import {Button, Clickable} from 'app/components/buttons';
+import {Button, Clickable, StyledAnchorTag} from 'app/components/buttons';
 import {FlexRowWrap} from 'app/components/flex';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {AoU} from 'app/components/text-wrappers';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentCohortSearchContext} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
@@ -19,15 +21,16 @@ import {
   currentCohortSearchContextStore,
   serverConfigStore,
 } from 'app/utils/navigation';
+import {environment} from 'environments/environment';
 import {Criteria, CriteriaType, DomainType, TemporalMention, TemporalTime} from 'generated/fetch';
-import {Growl} from 'primereact/growl';
 
 const styles = reactStyles({
   backArrow: {
     background: `${addOpacity(colors.accent, 0.15)}`,
     borderRadius: '50%',
+    display: 'inline-block',
     height: '1.5rem',
-    lineHeight: '1.4rem',
+    lineHeight: '1.6rem',
     textAlign: 'center',
     width: '1.5rem',
   },
@@ -58,13 +61,10 @@ const styles = reactStyles({
     width: '100%',
   },
   titleBar: {
-    marginBottom: '0.5rem',
+    margin: '0.75rem 0 0.25rem',
     padding: '0rem 1rem',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    height: '2.5rem',
-    marginTop: '0.5rem',
+    width: '65%',
+    height: '1.5rem',
   }
 });
 
@@ -339,6 +339,11 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
     saveCriteria([param]);
   }
 
+  get showDataBrowserLink() {
+    return [DomainType.CONDITION, DomainType.PROCEDURE, DomainType.MEASUREMENT, DomainType.DRUG]
+    .includes(this.props.cohortContext.domain);
+  }
+
   render() {
     const {cohortContext} = this.props;
     const {autocompleteSelection, count, groupSelections, hierarchyNode, loadingSubtree, selectedIds, selections, title, treeSearchTerms}
@@ -353,13 +358,31 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
           <Growl ref={(el) => this.growl = el}/>
         </div>
         <div style={styles.titleBar}>
-          <div style={{display: 'inline-flex', marginRight: '0.5rem'}}>
-            <Clickable style={styles.backArrow} onClick={() => this.closeSearch()}>
-              <img src={arrowIcon} style={{height: '21px', width: '18px'}} alt='Go back' />
-            </Clickable>
-            <h2 style={{color: colors.primary, lineHeight: '1.5rem', margin: '0 0 0 0.75rem'}}>
-              {title}
-            </h2>
+          <Clickable style={styles.backArrow} onClick={() => this.closeSearch()}>
+            <img src={arrowIcon} style={{height: '21px', marginTop: '-0.2rem', width: '18px'}} alt='Go back' />
+          </Clickable>
+          <h2 style={{color: colors.primary, display: 'inline-block', lineHeight: '1.5rem', margin: '0 0 0 0.75rem'}}>
+            {title}
+          </h2>
+          <div style={{display: 'inline-block', float: 'right', lineHeight: '0.75rem'}}>
+            {cohortContext.domain === DomainType.DRUG && <div>
+              <StyledAnchorTag
+                  href='https://mor.nlm.nih.gov/RxNav/'
+                  target='_blank'
+                  rel='noopener noreferrer'>
+                Explore
+              </StyledAnchorTag>
+              &nbsp;drugs by brand names outside of <AoU/>.
+            </div>}
+            {this.showDataBrowserLink && <div>
+              Explore Source information on the&nbsp;
+              <StyledAnchorTag
+                  href={environment.publicUiUrl}
+                  target='_blank'
+                  rel='noopener noreferrer'>
+                Data Browser.
+              </StyledAnchorTag>
+            </div>}
           </div>
         </div>
         <div style={
