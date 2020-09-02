@@ -616,7 +616,7 @@ jobs:
       NODE_ENV: development
     resource_class: medium+
     working_directory: ~/workbench
-    parallelism: 1
+    parallelism: 2
     steps:
       - checkout_init_git
       - run:
