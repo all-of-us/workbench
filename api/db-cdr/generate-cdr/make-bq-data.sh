@@ -51,6 +51,28 @@ do
     bq --quiet --project=$OUTPUT_PROJECT mk --schema=$schema_path/$t.json $OUTPUT_DATASET.$t
 done
 
+# Populate cb_survey_attribute
+#######################
+# cb_survey_attribute #
+#######################
+echo "Inserting cb_survey_attribute"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_survey_attribute\`
+(id,question_concept_id,answer_concept_id,survey_id,item_count)
+SELECT id,question_concept_id,answer_concept_id,survey_id,item_count
+FROM \`$BQ_PROJECT.$BQ_DATASET.cb_survey_attribute\`"
+
+# Populate cb_survey_version
+#####################
+# cb_survey_version #
+#####################
+echo "Inserting cb_survey_version"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_survey_version\`
+(survey_id,concept_id,version,display_order)
+SELECT survey_id,concept_id,version,display_order
+FROM \`$BQ_PROJECT.$BQ_DATASET.cb_survey_version\`"
+
 # Populate domain_info
 ###############
 # domain_info #
@@ -116,8 +138,8 @@ if [[ $tables =~ $cb_cri_table_check ]]; then
     echo "Inserting cb_criteria"
     bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
     "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\`
-     (id, parent_id, domain_id, type, subtype, is_standard, code, name, value, is_group, is_selectable, est_count, concept_id, has_attribute, has_hierarchy, has_ancestor_data, path, synonyms)
-    SELECT id, parent_id, domain_id, type, subtype, is_standard, code, name, value, is_group, is_selectable, est_count, concept_id, has_attribute, has_hierarchy, has_ancestor_data, path, synonyms
+     (id, parent_id, domain_id, type, subtype, is_standard, code, name, value, is_group, is_selectable, est_count, concept_id, has_attribute, has_hierarchy, has_ancestor_data, path, synonyms, rollup_count, item_count, full_text, display_synonyms)
+    SELECT id, parent_id, domain_id, type, subtype, is_standard, code, name, value, is_group, is_selectable, est_count, concept_id, has_attribute, has_hierarchy, has_ancestor_data, path, synonyms, rollup_count, item_count, full_text, display_synonyms
     FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`"
 fi
 
