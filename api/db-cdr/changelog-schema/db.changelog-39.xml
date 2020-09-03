@@ -16,6 +16,9 @@
       <column name="full_text" type="clob">
         <constraints nullable="true"/>
       </column>
+      <column name="display_synonyms" type="clob">
+        <constraints nullable="true"/>
+      </column>
     </addColumn>
 
     <sql dbms="mysql">

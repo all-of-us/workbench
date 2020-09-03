@@ -66,7 +66,8 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
     has_ancestor_data   INT64,
     path                STRING,
     synonyms            STRING,
-    full_text           STRING
+    full_text           STRING,
+    display_synonyms    STRING
 )"
 
 # table that holds the ingredient --> coded drugs mapping
@@ -5511,7 +5512,8 @@ echo "FULL_TEXT and SYNONYMS - adding data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET   x.full_text = y.full_text
-    , x.synonyms = y.synonyms
+    , x.synonyms = y.full_text
+    , x.display_synonyms = y.display_synonyms
 FROM
     (
         SELECT
@@ -5523,7 +5525,7 @@ FROM
                 THEN a.name
                 ELSE CONCAT(a.name,'|',STRING_AGG(REPLACE(b.concept_synonym_name,'|','||'),'|'))
               END as full_text
-            , STRING_AGG(b.concept_synonym_name,'; ') as synonyms
+            , STRING_AGG(b.concept_synonym_name,'; ') as display_synonyms
         FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` a
         LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` b on a.concept_id = b.concept_id
         GROUP BY a.id, a.name, a.code, a.concept_id, a.domain_id
@@ -5535,6 +5537,7 @@ echo "FULL_TEXT - add [rank1]"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.full_text = CONCAT(x.full_text, '|', y.rnk)
+   ,x.synonyms = CONCAT(x.full_text, '|', y.rnk)
 FROM
     (
         SELECT MIN(id) as id, CONCAT('[', LOWER(domain_id), '_rank1]') as rnk
