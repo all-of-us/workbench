@@ -21,7 +21,6 @@ public class WorkbenchConfig {
   public MoodleConfig moodle;
   public ZendeskConfig zendesk;
   public AccessConfig access;
-  public CohortBuilderConfig cohortbuilder;
   public FeatureFlagsConfig featureFlags;
   public BillingConfig billing;
   public ActionAuditConfig actionAudit;
@@ -37,7 +36,6 @@ public class WorkbenchConfig {
     config.auth = new AuthConfig();
     config.auth.serviceAccountApiUsers = new ArrayList<>();
     config.cdr = new CdrConfig();
-    config.cohortbuilder = new CohortBuilderConfig();
     config.elasticsearch = new ElasticsearchConfig();
     config.featureFlags = new FeatureFlagsConfig();
     config.firecloud = new FireCloudConfig();
@@ -222,10 +220,6 @@ public class WorkbenchConfig {
     public boolean requireInvitationKey;
   }
 
-  public static class CohortBuilderConfig {
-    public boolean enableListSearch;
-  }
-
   public static class FeatureFlagsConfig {
     // Allows a user to delete their own account. This is used for testing purposes so that
     // We can clean up after ourselves. This should never go to prod.
@@ -268,6 +262,8 @@ public class WorkbenchConfig {
     public boolean enableConceptSetSearchV2;
     // If true, reporting cron job will write data to configured BigQuery reporting dataset.
     public boolean enableReportingUploadCron;
+    // Flag to indicate whether to show COPE Survey data
+    public boolean enableCOPESurvey;
   }
 
   public static class ActionAuditConfig {
