@@ -149,7 +149,7 @@ public class EgressEventServiceImpl implements EgressEventService {
             "Egress detected: %.2f MiB in %d secs\n\n",
             egressEvent.getEgressMib(), egressEvent.getTimeWindowDuration())
         + String.format(
-            "Cluster Name: %s\n", executor.map(DbUser::getClusterName).orElse("unknown"))
+            "Runtime Name: %s\n", executor.map(DbUser::getRuntimeName).orElse("unknown"))
         + String.format("User Running Notebook: %s\n\n", executorDetails)
         + String.format("Workspace Creator: %s\n\n", creatorDetails)
         + String.format("Collaborators: \n%s\n", collaboratorDetails)

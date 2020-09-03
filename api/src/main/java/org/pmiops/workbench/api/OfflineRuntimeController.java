@@ -22,16 +22,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Offline cluster API. Handles cronjobs for cleanup and upgrade of older runtimes. Methods here
- * should be access restricted as, unlike RuntimeController, these endpoints run as the Workbench
- * service account.
+ * Offline notebook runtime API. Handles cronjobs for cleanup and upgrade of older runtimes. Methods
+ * here should be access restricted as, unlike RuntimeController, these endpoints run as the
+ * Workbench service account.
  */
 @RestController
 public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   private static final Logger log = Logger.getLogger(OfflineRuntimeController.class.getName());
 
   // This is temporary while we wait for Leonardo autopause to rollout. Once
-  // available, we should instead take a cluster status of STOPPED to trigger
+  // available, we should instead take a runtime status of STOPPED to trigger
   // idle deletion.
   private static final int IDLE_AFTER_HOURS = 3;
 
