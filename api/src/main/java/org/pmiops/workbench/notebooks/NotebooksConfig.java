@@ -11,7 +11,7 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.api.ServiceInfoApi;
 import org.pmiops.workbench.notebooks.api.JupyterApi;
-import org.pmiops.workbench.notebooks.api.NotebooksApi;
+import org.pmiops.workbench.notebooks.api.ProxyApi;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -88,8 +88,8 @@ public class NotebooksConfig {
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public NotebooksApi notebooksApi(@Qualifier(USER_NOTEBOOKS_CLIENT) ApiClient apiClient) {
-    NotebooksApi api = new NotebooksApi();
+  public ProxyApi proxyApi(@Qualifier(USER_NOTEBOOKS_CLIENT) ApiClient apiClient) {
+    ProxyApi api = new ProxyApi();
     api.setApiClient(apiClient);
     return api;
   }

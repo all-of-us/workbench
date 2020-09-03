@@ -1,6 +1,6 @@
-import {NotebooksApi} from 'notebooks-generated/fetch';
+import {ProxyApi} from 'notebooks-generated/fetch';
 
-export class NotebooksApiStub extends NotebooksApi {
+export class ProxyApiStub extends ProxyApi {
 
   constructor() {
     super(undefined, undefined, (..._: any[]) => {
@@ -8,7 +8,7 @@ export class NotebooksApiStub extends NotebooksApi {
     });
   }
 
-  public setCookie(googleProject: string, clusterName: string, options?: any): Promise<Response> {
+  public setCookie(googleProject: string, runtimeName: string, options?: any): Promise<Response> {
     return new Promise<Response>(resolve => {
       resolve(new Response());
     });
