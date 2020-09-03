@@ -89,14 +89,14 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
                   }>
           Duplicate
         </MenuItem>
-        <TooltipTrigger content={<div>Requires Write Permission</div>}
-                        disabled={WorkspacePermissionsUtil.canWrite(accessLevel)}>
+        <TooltipTrigger content={<div>Requires Owner Permission</div>}
+                        disabled={WorkspacePermissionsUtil.isOwner(accessLevel)}>
           <MenuItem icon='pencil'
                     onClick={() => {
                       AnalyticsTracker.Workspaces.OpenEditPage('Card');
                       navigate([wsPathPrefix, 'edit']); }
                     }
-                    disabled={!WorkspacePermissionsUtil.canWrite(accessLevel)}>
+                    disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
             Edit
           </MenuItem>
         </TooltipTrigger>
