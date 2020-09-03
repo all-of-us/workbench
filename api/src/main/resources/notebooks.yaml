@@ -18,8 +18,6 @@ basePath: /
 produces:
   - application/json
 tags:
-  - name: notebooks
-    description: Notebooks Welder API
   - name: runtimes
     description: Runtimes API
   - name: proxy
@@ -185,7 +183,7 @@ paths:
       summary: ''
       operationId: welderLocalize
       tags:
-        - notebooks
+        - proxy
       parameters:
         - in: body
           description: ''
@@ -216,7 +214,7 @@ paths:
       summary: 'creates the specified storage link configuration for the runtime'
       operationId: welderCreateStorageLink
       tags:
-        - notebooks
+        - proxy
       parameters:
         - in: body
           description: ''

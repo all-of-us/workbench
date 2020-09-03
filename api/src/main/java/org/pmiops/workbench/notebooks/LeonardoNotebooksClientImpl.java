@@ -25,7 +25,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
-import org.pmiops.workbench.notebooks.api.NotebooksApi;
+import org.pmiops.workbench.notebooks.api.ProxyApi;
 import org.pmiops.workbench.notebooks.model.LocalizationEntry;
 import org.pmiops.workbench.notebooks.model.Localize;
 import org.pmiops.workbench.notebooks.model.StorageLink;
@@ -45,7 +45,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
   private final Provider<RuntimesApi> runtimesApiProvider;
   private final Provider<RuntimesApi> serviceRuntimesApiProvider;
-  private final Provider<NotebooksApi> notebooksApiProvider;
+  private final Provider<ProxyApi> proxyApiProvider;
   private final Provider<ServiceInfoApi> serviceInfoApiProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Provider<DbUser> userProvider;
@@ -58,7 +58,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
       @Qualifier(NotebooksConfig.USER_RUNTIMES_API) Provider<RuntimesApi> runtimesApiProvider,
       @Qualifier(NotebooksConfig.SERVICE_RUNTIMES_API)
           Provider<RuntimesApi> serviceRuntimesApiProvider,
-      Provider<NotebooksApi> notebooksApiProvider,
+      Provider<ProxyApi> proxyApiProvider,
       Provider<ServiceInfoApi> serviceInfoApiProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<DbUser> userProvider,
@@ -67,7 +67,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
       WorkspaceService workspaceService) {
     this.runtimesApiProvider = runtimesApiProvider;
     this.serviceRuntimesApiProvider = serviceRuntimesApiProvider;
-    this.notebooksApiProvider = notebooksApiProvider;
+    this.proxyApiProvider = proxyApiProvider;
     this.serviceInfoApiProvider = serviceInfoApiProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userProvider = userProvider;
@@ -205,10 +205,10 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
                                 .sourceUri(e.getValue())
                                 .localDestinationPath(e.getKey()))
                     .collect(Collectors.toList()));
-    NotebooksApi notebooksApi = notebooksApiProvider.get();
+    ProxyApi proxyApi = proxyApiProvider.get();
     notebooksRetryHandler.run(
         (context) -> {
-          notebooksApi.welderLocalize(googleProject, runtimeName, welderReq);
+          proxyApi.welderLocalize(googleProject, runtimeName, welderReq);
           return null;
         });
   }
@@ -216,9 +216,9 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   @Override
   public StorageLink createStorageLink(
       String googleProject, String runtime, StorageLink storageLink) {
-    NotebooksApi notebooksApi = notebooksApiProvider.get();
+    ProxyApi proxyApi = proxyApiProvider.get();
     return notebooksRetryHandler.run(
-        (context) -> notebooksApi.welderCreateStorageLink(googleProject, runtime, storageLink));
+        (context) -> proxyApi.welderCreateStorageLink(googleProject, runtime, storageLink));
   }
 
   @Override
