@@ -51,6 +51,28 @@ do
     bq --quiet --project=$OUTPUT_PROJECT mk --schema=$schema_path/$t.json $OUTPUT_DATASET.$t
 done
 
+# Populate cb_survey_attribute
+#######################
+# cb_survey_attribute #
+#######################
+echo "Inserting cb_survey_attribute"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_survey_attribute\`
+(id,question_concept_id,answer_concept_id,survey_id,item_count)
+SELECT id,question_concept_id,answer_concept_id,survey_id,item_count
+FROM \`$BQ_PROJECT.$BQ_DATASET.cb_survey_attribute\`"
+
+# Populate cb_survey_version
+#####################
+# cb_survey_version #
+#####################
+echo "Inserting cb_survey_version"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_survey_version\`
+(survey_id,concept_id,version,display_order)
+SELECT survey_id,concept_id,version,display_order
+FROM \`$BQ_PROJECT.$BQ_DATASET.cb_survey_version\`"
+
 # Populate domain_info
 ###############
 # domain_info #
