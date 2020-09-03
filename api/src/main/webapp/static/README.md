@@ -1,9 +1,9 @@
 # Static Files in AppEngine
-We host a number of public static files in GAE for cluster creation. Generated files will be copied here at build time and gitnored (e.g. snippets menu), if any.
+We host a number of public static files in GAE for runtime creation. Generated files will be copied here at build time and gitnored (e.g. snippets menu), if any.
 
-# initialize_notebook_cluster.sh
+# initialize_notebook_runtime.sh
 
-This is the script run on the Leonardo Jupyter server at cluster initialization
+This is the script run on the Leonardo Jupyter server at runtime initialization
 time, i.e. the [jupyterUserScriptUri](
 https://github.com/DataBiosphere/leonardo/blob/cfdbff2448b9cff73ad658ba028d1feafab01b81/src/main/resources/swagger/api-docs.yaml#L509).
 
@@ -31,17 +31,14 @@ To manually test updates to any notebook server assets (initialization script, U
 
 - Run a **local** API server with this config update and point a local UI to it
 - Open your local Workbench UI, go to the workspace 'About' tab, and click 'Reset notebook server'.
-- Wait for the notebook cluster to be created.
+- Wait for the notebook runtime to be created.
 - Revert changes to `config_local.json` before sending a PR
 
 ## Debugging Script Issues
 
-- Find your existing notebook cluster if any, by authorizing as your
-  fake-research-aou.org user [here](
-  https://leonardo.dsde-dev.broadinstitute.org/#!/cluster/listClusters).
-- Call `listClusters` and take the returned `stagingBucket` value.
-- `gcloud auth login USER@fake-research-aou.org`
-- `gsutil ls gs://STAGING_BUCKET`
+- Run `./project.rb list-runtimes --project all-of-us-workbench-test` to find your runtime name
+- Run `./project.rb describe <runtime-name>` to print debug information about
+  the runtime. This will include command lines for listing out associated log files
 - Dig through the directories until you find the initialization script output
   log, as of 4/3/19 the file was named `dataproc-initialization-script-0_output`
 
@@ -56,9 +53,9 @@ This can be used to quickly test command lines or reproduce bugs.
 # Local Jupyter extension testing
 
 Tweak the above instructions for testing the user script to push a modified
-extension and modify the cluster controller to use it.
+extension and modify the runtime controller to use it.
 
-Alternatively, on a live version of a Leo cluster, use Chrome local overrides to
+Alternatively, on a live version of a Leo runtime, use Chrome local overrides to
 plug in your locally modified Javascript.
 
 - Follow these instructions to setup local overrides: https://developers.google.com/web/updates/2018/01/devtools#overrides
