@@ -31,16 +31,10 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
-import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.Authority;
-import org.pmiops.workbench.model.Cluster;
-import org.pmiops.workbench.model.ClusterLocalizeRequest;
-import org.pmiops.workbench.model.ClusterLocalizeResponse;
 import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.ListClusterDeleteRequest;
-import org.pmiops.workbench.model.ListClusterResponse;
 import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.Runtime;
@@ -121,36 +115,15 @@ public class RuntimeController implements RuntimeApiDelegate {
 
   @Override
   @AuthorityRequired(Authority.SECURITY_ADMIN)
-  public ResponseEntity<List<ListClusterResponse>> deleteClustersInProject(
-      String billingProjectId, ListClusterDeleteRequest clusterNamesToDelete) {
-    return ResponseEntity.ok(
-        deleteLeonardoRuntimesInProject(
-                billingProjectId, clusterNamesToDelete.getClustersToDelete())
-            .stream()
-            .map(leonardoMapper::toApiListClusterResponse)
-            .collect(Collectors.toList()));
-  }
-
-  @Override
-  @AuthorityRequired(Authority.SECURITY_ADMIN)
   public ResponseEntity<List<ListRuntimeResponse>> deleteRuntimesInProject(
-      String billingProjectId, ListRuntimeDeleteRequest runtimesToDelete) {
-    return ResponseEntity.ok(
-        deleteLeonardoRuntimesInProject(billingProjectId, runtimesToDelete.getRuntimesToDelete())
-            .stream()
-            .map(leonardoMapper::toApiListRuntimeResponse)
-            .collect(Collectors.toList()));
-  }
-
-  private List<LeonardoListRuntimeResponse> deleteLeonardoRuntimesInProject(
-      String billingProjectId, List<String> clusterNamesToDelete) {
+      String billingProjectId, ListRuntimeDeleteRequest req) {
     if (billingProjectId == null) {
       throw new BadRequestException("Must specify billing project");
     }
     List<LeonardoListRuntimeResponse> runtimesToDelete =
         filterByRuntimesInList(
                 leonardoNotebooksClient.listRuntimesByProjectAsService(billingProjectId).stream(),
-                clusterNamesToDelete)
+                req.getRuntimesToDelete())
             .collect(Collectors.toList());
 
     runtimesToDelete.forEach(
@@ -160,7 +133,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     List<LeonardoListRuntimeResponse> runtimesInProjectAffected =
         filterByRuntimesInList(
                 leonardoNotebooksClient.listRuntimesByProjectAsService(billingProjectId).stream(),
-                clusterNamesToDelete)
+                req.getRuntimesToDelete())
             .collect(Collectors.toList());
     // DELETED is an acceptable status from an implementation standpoint, but we will never
     // receive runtimes with that status from Leo. We don't want to because we reuse runtime
@@ -181,7 +154,10 @@ public class RuntimeController implements RuntimeApiDelegate {
         runtimesToDelete.stream()
             .map(LeonardoListRuntimeResponse::getRuntimeName)
             .collect(Collectors.toList()));
-    return runtimesInProjectAffected;
+    return ResponseEntity.ok(
+        runtimesInProjectAffected.stream()
+            .map(leonardoMapper::toApiListRuntimeResponse)
+            .collect(Collectors.toList()));
   }
 
   private DbWorkspace lookupWorkspace(String workspaceNamespace) throws NotFoundException {
@@ -191,41 +167,20 @@ public class RuntimeController implements RuntimeApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Cluster> getCluster(String workspaceNamespace) {
-    return ResponseEntity.ok(leonardoMapper.toApiCluster(getLeoRuntime(workspaceNamespace)));
-  }
-
-  @Override
   public ResponseEntity<Runtime> getRuntime(String workspaceNamespace) {
-    return ResponseEntity.ok(leonardoMapper.toApiRuntime(getLeoRuntime(workspaceNamespace)));
-  }
-
-  private LeonardoGetRuntimeResponse getLeoRuntime(String workspaceNamespace) {
     String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
     workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
     workspaceService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
 
-    return leonardoNotebooksClient.getRuntime(
-        workspaceNamespace, userProvider.get().getClusterName());
-  }
-
-  @Override
-  public ResponseEntity<Cluster> createCluster(String workspaceNamespace) {
-    createLeoRuntime(workspaceNamespace);
-
-    LeonardoGetRuntimeResponse leoRuntime =
-        leonardoNotebooksClient.getRuntime(workspaceNamespace, userProvider.get().getClusterName());
-    return ResponseEntity.ok(leonardoMapper.toApiCluster(leoRuntime));
+    return ResponseEntity.ok(
+        leonardoMapper.toApiRuntime(
+            leonardoNotebooksClient.getRuntime(
+                workspaceNamespace, userProvider.get().getClusterName())));
   }
 
   @Override
   public ResponseEntity<EmptyResponse> createRuntime(String workspaceNamespace) {
-    createLeoRuntime(workspaceNamespace);
-    return ResponseEntity.ok(new EmptyResponse());
-  }
-
-  private void createLeoRuntime(String workspaceNamespace) {
     String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
     workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
@@ -233,11 +188,7 @@ public class RuntimeController implements RuntimeApiDelegate {
 
     leonardoNotebooksClient.createRuntime(
         workspaceNamespace, userProvider.get().getClusterName(), firecloudWorkspaceName);
-  }
-
-  @Override
-  public ResponseEntity<EmptyResponse> deleteCluster(String workspaceNamespace) {
-    return deleteRuntime(workspaceNamespace);
+    return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
@@ -248,15 +199,6 @@ public class RuntimeController implements RuntimeApiDelegate {
 
     leonardoNotebooksClient.deleteRuntime(workspaceNamespace, userProvider.get().getClusterName());
     return ResponseEntity.ok(new EmptyResponse());
-  }
-
-  @Override
-  public ResponseEntity<ClusterLocalizeResponse> deprecatedLocalize(
-      String workspaceNamespace, ClusterLocalizeRequest body) {
-    return ResponseEntity.ok(
-        leonardoMapper.runtimeToClusterLocalizeResponse(
-            localize(workspaceNamespace, leonardoMapper.clusterToRuntimeLocalizeRequest(body))
-                .getBody()));
   }
 
   @Override
