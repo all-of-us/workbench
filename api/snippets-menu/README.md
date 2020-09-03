@@ -1,11 +1,11 @@
 # Snippets Menu
 
-AoU Clusters enable the [Snippets Menu extension](https://jupyter-contrib-nbextensions.readthedocs.io/en/latest/nbextensions/snippets_menu/readme.html)
+AoU Runtimes enable the [Snippets Menu extension](https://jupyter-contrib-nbextensions.readthedocs.io/en/latest/nbextensions/snippets_menu/readme.html)
 with custom AoU-specific code snippets. The snippets live in
-https://github.com/all-of-us/workbench-snippets. AoU configures Leo clusters as
+https://github.com/all-of-us/workbench-snippets. AoU configures Leo runtimes as
 follows to enable this:
 
-1. Enable the snippets_menu/main extension in ../src/main/webapp/static/initialize_notebook_cluster.sh
+1. Enable the snippets_menu/main extension in ../src/main/webapp/static/initialize_notebook_runtime.sh
 1. Deploy a Jupyter UI extension to configure the menu with AoU-specific snippets
 
 ## Updating Snippets
@@ -24,7 +24,7 @@ Prerequisite: Must have `jq` installed (for pretty printing).
     ./import_json_from_snippets_repo.sh <path to workbench-snippets repo>
     ```
 1. Commit changes and go through normal pull request process.
-1. Wait for a release; note that changes are only visible for clusters started
+1. Wait for a release; note that changes are only visible for runtimes started
     after the release.
 
 ## Snippets Extension Implementation

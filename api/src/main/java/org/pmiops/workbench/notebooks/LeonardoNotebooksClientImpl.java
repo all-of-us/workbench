@@ -100,8 +100,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
         .labels(ImmutableMap.of(RUNTIME_LABEL_AOU, "true", RUNTIME_LABEL_CREATED_BY, userEmail))
         .defaultClientId(config.server.oauthClientId)
         // Note: Filenames must be kept in sync with files in api/src/main/webapp/static.
-        .jupyterUserScriptUri(assetsBaseUrl + "/initialize_notebook_cluster.sh")
-        .jupyterStartUserScriptUri(assetsBaseUrl + "/start_notebook_cluster.sh")
+        .jupyterUserScriptUri(assetsBaseUrl + "/initialize_notebook_runtime.sh")
+        .jupyterStartUserScriptUri(assetsBaseUrl + "/start_notebook_runtime.sh")
         .userJupyterExtensionConfig(
             new LeonardoUserJupyterExtensionConfig()
                 .nbExtensions(nbExtensions)
