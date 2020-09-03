@@ -7,10 +7,10 @@
   <changeSet author="brianfreeman" id="changelog-39">
 
     <addColumn tableName="cb_criteria">
-      <column name="rollup_count" type="VARCHAR(80)">
+      <column name="rollup_count" type="BIGINT">
         <constraints nullable="true"/>
       </column>
-      <column name="item_count" type="VARCHAR(80)">
+      <column name="item_count" type="BIGINT">
         <constraints nullable="true"/>
       </column>
       <column name="full_text" type="clob">
