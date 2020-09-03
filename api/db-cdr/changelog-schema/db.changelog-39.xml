@@ -27,11 +27,6 @@
       (full_text);
     </sql>
 
-    <sql dbms="mysql">
-      ALTER TABLE cb_criteria
-      DROP INDEX cb_criteria_synonyms;
-    </sql>
-
     <createTable tableName="cb_survey_attribute">
       <column name="id" type="BIGINT">
         <constraints primaryKey="true" nullable="false"/>
