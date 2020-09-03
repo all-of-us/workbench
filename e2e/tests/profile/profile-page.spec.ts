@@ -166,5 +166,31 @@ describe('Profile', () => {
     }
   });
 
+  test('Typing an invalid URL disables the save button', async () => {
+    const url = await profilePage.getProfessionalUrlInput();
+    const validUrl = makeUrl(10);
+    const invalidUrls = [
+      'hello',
+      'hello.com',
+      'http://',
+      'https://broad    institute.org',
+      '*http://google.com/',
+    ]
+
+    await url.type(validUrl);
+
+    // save button is enabled
+    await waitForSaveButton(true);
+
+    for (const invalid of invalidUrls) {
+      await url.type(invalid);
+      // save button is disabled
+      await waitForSaveButton(false);
+
+      // reset
+      await url.type(validUrl);
+    }
+  });
+
 
 });
