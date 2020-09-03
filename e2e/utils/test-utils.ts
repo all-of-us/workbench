@@ -12,15 +12,70 @@ import {waitForText} from 'utils/waits-utils';
 import WorkspaceCard from 'app/component/workspace-card';
 import {WorkspaceAccessLevel} from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
+import {config} from 'resources/workbench-config';
 import {makeWorkspaceName} from './str-utils';
+import {readCookiesFromFile, saveCookiesToFile} from './user-login-cookies';
 
-export async function signIn(page: Page, userId?: string, passwd?: string): Promise<void> {
-  const loginPage = new GoogleLoginPage(page);
-  await loginPage.login(userId, passwd);
-  // this element exists in DOM after user has logged in
-  await page.waitForFunction(() => !!document.querySelector('app-signed-in'));
-  const homePage = new HomePage(page);
-  await homePage.waitForLoad();
+const isSignedIn = async (page: Page, timeOut: number = 15000): Promise<boolean> => {
+  try {
+    await page.waitForSelector('app-signed-in', {timeout: timeOut});
+    return true;
+  } catch(err) {
+    return false;
+  }
+};
+
+const isSignInPage = async (page: Page, timeOut: number = 15000): Promise<boolean> => {
+  try {
+    await page.waitForSelector('[data-test-id="sign-in-container"]', {timeout: timeOut});
+    return true;
+  } catch(err) {
+    return false;
+  }
+};
+
+
+export async function signIn(page: Page, userId?: string, password?: string): Promise<void> {
+  const user = userId || config.userEmail;
+  const pwd = password || config.userPassword;
+
+  const googleLoginPage = new GoogleLoginPage(page);
+
+  const fillInLoginData = async (): Promise<void> => {
+    await googleLoginPage.login(user, pwd);
+    // this element exists in DOM after user has logged in
+    await page.waitForFunction(() => !!document.querySelector('app-signed-in'));
+    await new HomePage(page).waitForLoad();
+  }
+
+  const previousPageCookies = readCookiesFromFile(user);
+  if (previousPageCookies) {
+    console.log('Try login with cookies.');
+    await page.setCookie(...previousPageCookies);
+  }
+
+  // Load the Home page if set cookies was successful.
+  const homeUrl = config.uiBaseUrl;
+  await page.goto(homeUrl, {waitUntil: ['networkidle0', 'domcontentloaded', 'load'], timeout: 60000});
+
+  await Promise.race([
+    isSignedIn(page),
+    isSignInPage(page),
+  ]);
+  const loggedIn = await isSignedIn(page, 1000);
+  if (loggedIn) {
+    console.log('Login with cookies is successful.');
+  } else {
+    // log in with cookies is not working. try the real login now.
+    if (previousPageCookies) {
+      console.error('Login with cookies is unsuccessful.');
+    }
+    await fillInLoginData();
+  }
+
+  // Save new cookies.
+  const cookies = await page.cookies();
+  saveCookiesToFile(cookies, user);
 }
 
 /**

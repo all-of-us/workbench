@@ -34,7 +34,7 @@ describe('Home page ui tests', () => {
 
       // check workspace name has characters
       const cardName = await card.getWorkspaceName();
-      expect(cardName).toMatch(new RegExp(/^[a-zA-Z]+/));
+      await expect(cardName).toMatch(new RegExp(/^[a-zA-Z]+/));
 
       // check Workspace Action menu for listed actions
       const ellipsis = card.getEllipsis();
