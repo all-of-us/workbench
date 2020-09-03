@@ -34,7 +34,7 @@ import org.pmiops.workbench.model.EmailVerificationStatus;
 @Table(name = "user")
 public class DbUser {
 
-  private static final String CLUSTER_NAME_PREFIX = "all-of-us-";
+  private static final String RUNTIME_NAME_PREFIX = "all-of-us-";
 
   /**
    * TODO(RW-5406): Remove cluster config overrides.
@@ -719,6 +719,6 @@ public class DbUser {
   /** Returns a name for the VM / cluster to be created for this user. */
   @Transient
   public String getRuntimeName() {
-    return CLUSTER_NAME_PREFIX + getUserId();
+    return RUNTIME_NAME_PREFIX + getUserId();
   }
 }

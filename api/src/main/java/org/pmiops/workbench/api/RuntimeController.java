@@ -176,7 +176,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     return ResponseEntity.ok(
         leonardoMapper.toApiRuntime(
             leonardoNotebooksClient.getRuntime(
-                workspaceNamespace, userProvider.get().getClusterName())));
+                workspaceNamespace, userProvider.get().getRuntimeName())));
   }
 
   @Override
@@ -187,7 +187,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     workspaceService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
 
     leonardoNotebooksClient.createRuntime(
-        workspaceNamespace, userProvider.get().getClusterName(), firecloudWorkspaceName);
+        workspaceNamespace, userProvider.get().getRuntimeName(), firecloudWorkspaceName);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -197,7 +197,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
 
-    leonardoNotebooksClient.deleteRuntime(workspaceNamespace, userProvider.get().getClusterName());
+    leonardoNotebooksClient.deleteRuntime(workspaceNamespace, userProvider.get().getRuntimeName());
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -248,7 +248,7 @@ public class RuntimeController implements RuntimeApiDelegate {
 
     leonardoNotebooksClient.createStorageLink(
         workspaceNamespace,
-        userProvider.get().getClusterName(),
+        userProvider.get().getRuntimeName(),
         new StorageLink()
             .cloudStorageDirectory(gcsNotebooksDir)
             .localBaseDirectory(editDir)
@@ -274,7 +274,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     }
     log.info(localizeMap.toString());
     leonardoNotebooksClient.localize(
-        workspaceNamespace, userProvider.get().getClusterName(), localizeMap);
+        workspaceNamespace, userProvider.get().getRuntimeName(), localizeMap);
 
     // This is the Jupyer-server-root-relative path, the style used by the Jupyter REST API.
     return ResponseEntity.ok(new RuntimeLocalizeResponse().runtimeLocalDirectory(targetDir));
