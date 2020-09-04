@@ -152,40 +152,41 @@ const css = `
     position: sticky;
   }
   .p-growl.p-growl-topright {
-     height: 1rem;
-     width: 6.4rem;
-     padding-top: 0.4rem;
-     line-height: 0.7rem;
-     margin-right: 3rem;
-   }
-   .p-growl .p-growl-item-container .p-growl-item .p-growl-image {
-     font-size: 1rem !important;
-     margin-top: 0.19rem
-   }
-
+    height: 1rem;
+    width: 6.4rem;
+    padding-top: 0.4rem;
+    line-height: 0.7rem;
+    margin-right: 2.5rem;
+  }
+  .p-growl .p-growl-item-container .p-growl-item .p-growl-image {
+    font-size: 1rem !important;
+    margin-top: 0.19rem
+  }
   .p-growl-item-container:after {
     content:"";
     position: absolute;
-    left: 100%;
-    top:0.15rem;
-    width:0px;
-    height:0px;
-    border-top:0.5rem solid transparent;
-    border-left:0.5rem solid ` + colorWithWhiteness(colors.success, 0.6) + `;
-    border-bottom:0.5rem solid transparent;
+    left: 97.5%;
+    top: 0.1rem;
+    width: 0px;
+    height: 0px;
+    border-top: 0.5rem solid transparent;
+    border-left: 0.5rem solid ` + colorWithWhiteness(colors.success, 0.6) + `;
+    border-bottom: 0.5rem solid transparent;
   }
-   .p-growl-item-container {
-     background-color: ` + colorWithWhiteness(colors.success, 0.6) + `!important;
-   }
-   .p-growl-item {
-     padding: 0rem !important;
-     background-color: ` + colorWithWhiteness(colors.success, 0.6) + `!important;
-     margin-left: 0.3rem;
-   }
-
-   .p-growl-message {
-     margin-left: 0.5em
-   }
+  .p-growl-item-container {
+    background-color: ` + colorWithWhiteness(colors.success, 0.6) + `!important;
+  }
+  .p-growl-item {
+    padding: 0rem !important;
+    background-color: ` + colorWithWhiteness(colors.success, 0.6) + `!important;
+    margin-left: 0.3rem;
+  }
+  .p-growl-message {
+    margin-left: 0.5em
+  }
+  .p-growl-details {
+    margin-top: 0.1rem;
+  }
  `;
 
 export const CohortSearch = withCurrentCohortSearchContext()(class extends React.Component<Props, State> {
@@ -366,7 +367,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
       = this.state;
     return !!cohortContext && <FlexRowWrap style={styles.searchContainer}>
       <div style={{height: '100%', padding: '0 0.5rem', width: '100%'}}>
-        <div style={{position: 'absolute', right: '0', marginTop: '-1rem'}}>
+        <div style={{position: 'absolute', right: '0'}}>
           <style>
             {css}
           </style>
