@@ -4,11 +4,13 @@ import * as testData from 'resources/data/workspace-data';
 import {createWorkspace, findOrCreateWorkspace, performActions, experimentalTestSignIn} from 'utils/test-utils';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
+import {config} from 'resources/workbench-config';
 
 describe('Editing workspace via workspace card snowman menu', () => {
 
   beforeEach(async () => {
-    await experimentalTestSignIn(page);
+    console.log(config.userAccessToken);
+    await experimentalTestSignIn(page, config.userAccessToken);
   });
 
   // Reuse same Workspace for all tests in this file to reduce test playback time.

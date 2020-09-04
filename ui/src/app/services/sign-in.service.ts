@@ -14,10 +14,14 @@ import 'rxjs/Rx';
 
 declare const gapi: any;
 
-// for e2e tests: use the SA's token to sign in here instead of interacting with Google's Capcha
+// for e2e tests: provide your own oauth token to obviate Google's oauth UI
+// flow, thereby avoiding inevitable challenges as Google identifies Puppeteer
+// as non-human.
 declare global {
-  interface Window { clientSuppliedToken: string; useToken: (token: string) => void; }
+  interface Window { setTestAccessTokenOverride: (token: string) => void; }
 }
+
+const LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN = 'test-access-token-override';
 
 @Injectable()
 export class SignInService {
@@ -26,15 +30,31 @@ export class SignInService {
   public isSignedIn$ = this.isSignedIn.asObservable();
   // Expose "current user details" as an Observable
   public clientId = environment.clientId;
+  private testAccessTokenOverride: string;
 
   constructor(private zone: NgZone,
     serverConfigService: ServerConfigService) {
     this.zone = zone;
 
-    window.useToken = (token: string) => {
-      window.clientSuppliedToken = token;
-      this.isSignedIn.next(true);
-    };
+    // XXX: if env flag enabled.
+    if (true === true) {
+      window.setTestAccessTokenOverride = (token: string) => {
+        if (token) {
+          window.localStorage.setItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN, token);
+        } else {
+          window.localStorage.removeItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
+        }
+      };
+      this.testAccessTokenOverride = window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
+      if (this.testAccessTokenOverride) {
+        // The client has already configured an access token override. Skip the normal oauth flow.
+        authStore.set({...authStore.get(), authLoaded: true, isSignedIn: true});
+        this.zone.run(() => {
+          this.isSignedIn.next(true);
+        });
+        return;
+      }
+    }
 
     serverConfigService.getConfig().subscribe((config) => {
       this.makeAuth2(config);
@@ -101,9 +121,8 @@ export class SignInService {
   }
 
   public get currentAccessToken() {
-    if (window.clientSuppliedToken) {
-      console.log('[TEST-INJECTED] currentAccessToken = ' + window.clientSuppliedToken);
-      return window.clientSuppliedToken;
+    if (this.testAccessTokenOverride) {
+      return this.testAccessTokenOverride;
     } else if (!gapi.auth2) {
       return null;
     } else {
