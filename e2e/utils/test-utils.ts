@@ -48,12 +48,9 @@ export async function signOut(page: Page) {
   await page.waitForTimeout(1000);
 }
 
-export async function experimentalTestSignIn(page: Page): Promise<void> {
+export async function experimentalTestSignIn(page: Page, token: string): Promise<void> {
   const homePage = new HomePage(page);
   await homePage.gotoUrl(PageUrl.Home.toString());
-
-  let printToken = await page.evaluate('window.clientSuppliedToken');
-  console.log('window.clientSuppliedToken pre function call = ' + printToken);
 
   // generate this token manually via:
   // gcloud auth application-default login --no-launch-browser
@@ -61,12 +58,10 @@ export async function experimentalTestSignIn(page: Page): Promise<void> {
 
   // gcloud auth login user-email WILL NOT WORK
 
-  const actualToken = '[redacted]';
-  const cmd = 'window.useToken(\'' + actualToken + '\')';
-  console.log('window.useToken function call = ' + cmd);
+  const cmd = 'window.setTestAccessTokenOverride(\'' + token + '\')';
   await page.evaluate(cmd);
 
-  printToken = await page.evaluate('window.clientSuppliedToken');
+  const printToken = await page.evaluate('window.localStorage.getItem("test-access-token-override")');
   console.log('window.clientSuppliedToken post function call = ' + printToken);
 
   await homePage.gotoUrl(PageUrl.Home.toString());
