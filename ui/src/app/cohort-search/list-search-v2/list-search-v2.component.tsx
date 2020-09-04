@@ -73,7 +73,6 @@ const styles = reactStyles({
     fontSize: '1.15rem',
   },
   listContainer: {
-    width: '99%',
     margin: '0.5rem 0 1rem',
     fontSize: '12px',
     color: colors.primary,
@@ -374,49 +373,44 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
           </div>
         </div>
         {!loading && !!displayData && <div style={styles.listContainer}>
-          {!!displayData.length && <React.Fragment><table className='p-datatable' style={styles.table}>
-            <thead className='p-datatable-thead'>
-              <tr style={{height: '2rem'}}>
-                <th style={{...styles.columnHeader, borderLeft: 0}}>Name</th>
-                <th style={{...styles.columnHeader, width: '20%'}}>Code</th>
-                <th style={{...styles.columnHeader, width: '10%'}}>Vocab</th>
-                <th style={{...styles.columnHeader, width: '8%'}}>Count</th>
-                <th style={{...styles.columnHeader, textAlign: 'center', width: '12%'}}>View Hierarchy</th>
-              </tr>
-            </thead>
-          </table>
-          <div style={{height: '15rem', overflowY: 'auto'}}>
-            <table className='p-datatable' style={{...styles.table, ...styles.tableBody}}>
-              <tbody className='p-datatable-tbody'>
-              {displayData.map((row, r) => {
-                const open = ingredients[row.id] && ingredients[row.id].open;
-                const err = ingredients[row.id] && ingredients[row.id].error;
-                return <React.Fragment key={r}>
-                  {this.renderRow(row, false, r)}
-                  {open && !err && ingredients[row.id].items.map((item, i) => {
-                    return <React.Fragment key={i}>{this.renderRow(item, true, `${r}.${i}`)}</React.Fragment>;
-                  })}
-                  {open && err && <tr>
-                    <td colSpan={5}>
-                      <div style={{...styles.error, marginTop: 0}}>
-                        <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid' shape='exclamation-triangle' size='22'/>
-                        Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
-                      </div>
-                    </td>
-                  </tr>}
-                </React.Fragment>;
-              })}
-            </tbody>
+          {!!displayData.length && <React.Fragment>
+            <table className='p-datatable' style={styles.table}>
+              <thead className='p-datatable-thead'>
+                <tr style={{height: '2rem'}}>
+                  <th style={{...styles.columnHeader, borderLeft: 0}}>Name</th>
+                  <th style={{...styles.columnHeader, width: '20%'}}>Code</th>
+                  <th style={{...styles.columnHeader, width: '10%'}}>Vocab</th>
+                  <th style={{...styles.columnHeader, width: '8%'}}>Count</th>
+                  <th style={{...styles.columnHeader, textAlign: 'center', width: '12%'}}>View Hierarchy</th>
+                </tr>
+              </thead>
             </table>
-          </div>
-        </React.Fragment>}
+            <div style={{height: '15rem', overflowY: 'auto'}}>
+              <table className='p-datatable' style={{...styles.table, ...styles.tableBody}}>
+                <tbody className='p-datatable-tbody'>
+                {displayData.map((row, r) => {
+                  const open = ingredients[row.id] && ingredients[row.id].open;
+                  const err = ingredients[row.id] && ingredients[row.id].error;
+                  return <React.Fragment key={r}>
+                    {this.renderRow(row, false, r)}
+                    {open && !err && ingredients[row.id].items.map((item, i) => {
+                      return <React.Fragment key={i}>{this.renderRow(item, true, `${r}.${i}`)}</React.Fragment>;
+                    })}
+                    {open && err && <tr>
+                      <td colSpan={5}>
+                        <div style={{...styles.error, marginTop: 0}}>
+                          <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid' shape='exclamation-triangle' size='22'/>
+                          Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
+                        </div>
+                      </td>
+                    </tr>}
+                  </React.Fragment>;
+                })}
+              </tbody>
+              </table>
+            </div>
+          </React.Fragment>}
           {!standardOnly && !displayData.length && <div>No results found</div>}
-          <Button type='primary'
-                  style={{borderRadius: '5px', float: 'right', marginTop: '1rem'}}
-                  disabled={!!selectedIds && selectedIds.length === 0}
-                  onClick={() => setSidebarActiveIconStore.next('criteria')}>
-            Finish & Review
-          </Button>
         </div>}
         {loading && <SpinnerOverlay/>}
         {error && <div style={{...styles.error, ...(domain === DomainType.DRUG ? {marginTop: '3.75rem'} : {})}}>

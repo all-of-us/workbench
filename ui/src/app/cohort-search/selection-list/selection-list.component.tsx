@@ -454,7 +454,7 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
                   removeSelection={() => this.removeCriteria(selection)}/>
                 )}
                 {this.showModifierButton && <div style={{paddingLeft: '0.6rem'}}>
-                  <Button type='secondaryOnDarkBackground' style={styles.modifierButton}
+                  <Button type='secondaryLight' style={styles.modifierButton}
                           onClick={() => this.setState({showModifiersSlide: true})}>
                     {cohortContext.item.modifiers.length > 0
                       ? '(' + cohortContext.item.modifiers.length + ')  MODIFIERS APPLIED'
@@ -464,7 +464,7 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
                 </div>}
               </div>
             </div>
-            <FlexRowWrap style={{flexDirection: 'row-reverse', marginTop: '2rem'}}>
+            <FlexRowWrap style={{flexDirection: 'row-reverse', marginTop: '1rem'}}>
               <Button type='primary'
                       style={styles.saveButton}
                       disabled={disableSave}

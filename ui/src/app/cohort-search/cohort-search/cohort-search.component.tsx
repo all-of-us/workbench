@@ -20,6 +20,7 @@ import {
   currentCohortCriteriaStore,
   currentCohortSearchContextStore,
   serverConfigStore,
+  setSidebarActiveIconStore,
 } from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import {Criteria, CriteriaType, DomainType, TemporalMention, TemporalTime} from 'generated/fetch';
@@ -44,6 +45,12 @@ const styles = reactStyles({
     lineHeight: '0.75rem',
     textAlign: 'right',
     verticalAlign: 'middle'
+  },
+  finishButton: {
+    borderRadius: '5px',
+    bottom: '1rem',
+    position: 'absolute',
+    right: '3rem',
   },
   footer: {
     marginTop: '0.5rem',
@@ -452,6 +459,12 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
           </div>}
         </div>
       </div>
+      {cohortContext.type !== CriteriaType.AGE && <Button type='primary'
+              style={styles.finishButton}
+              disabled={!!selectedIds && selectedIds.length === 0}
+              onClick={() => setSidebarActiveIconStore.next('criteria')}>
+        Finish & Review
+      </Button>}
     </FlexRowWrap>;
   }
 });

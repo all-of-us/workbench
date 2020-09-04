@@ -198,12 +198,6 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
                                                             select={(s) => select(s)}
                                                             selectedIds={selectedIds}
                                                             setAttributes={setAttributes}/>)}
-        {serverConfigStore.getValue().enableCohortBuilderV2 && <Button type='primary'
-                style={{borderRadius: '5px', float: 'right', marginTop: '1rem'}}
-                disabled={selectedIds.length === 0}
-                onClick={() => setSidebarActiveIconStore.next('criteria')}>
-          Finish & Review
-        </Button>}
       </div>}
       {loading && !this.showHeader && <SpinnerOverlay/>}
     </React.Fragment>;
