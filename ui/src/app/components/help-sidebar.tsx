@@ -19,7 +19,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {withCurrentCohortCriteria} from 'app/utils';
 import {highlightSearchTerm, reactStyles, ReactWrapperBase, withCurrentWorkspace, withUserProfile} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {NavStore, setSidebarActiveIconStore} from 'app/utils/navigation';
+import {currentCohortSearchContextStore, NavStore, setSidebarActiveIconStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {ParticipantCohortStatus, WorkspaceAccessLevel} from 'generated/fetch';
@@ -585,7 +585,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
             </div>
             <div style={contentStyle('criteria')}>
               <div style={{padding: '0.25rem 0.25rem 0rem'}}>
-                <SelectionList back={() => setSidebarState(false)} selections={[]}/>
+                {!!currentCohortSearchContextStore.getValue() && <SelectionList back={() => setSidebarState(false)} selections={[]}/>}
               </div>
             </div>
             {activeIcon !== 'criteria' && <div style={styles.footer}>

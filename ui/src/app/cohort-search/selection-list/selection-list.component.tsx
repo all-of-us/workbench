@@ -17,7 +17,7 @@ import {
   serverConfigStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
-import {Attribute, Criteria, DomainType} from 'generated/fetch';
+import {Attribute, Criteria, DomainType, Modifier} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 
 const proIcons = {
@@ -291,7 +291,7 @@ interface Props {
 interface State {
   attributesSelection: Criteria;
   disableSave: boolean;
-  modifierButtonText: string;
+  modifiers: Array<Modifier>;
   showModifiersSlide: boolean;
 }
 
@@ -359,15 +359,16 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
       this.state = {
         attributesSelection: undefined,
         disableSave: false,
-        modifierButtonText: 'APPLY MODIFIERS',
+        modifiers: [],
         showModifiersSlide: false
       };
     }
 
     componentDidMount(): void {
-      if (!!this.props.cohortContext) {
+      const {cohortContext} = this.props;
+      if (!!cohortContext) {
         // Check for disabling the Save Criteria button
-        this.checkCriteriaChanges();
+        this.setState({modifiers: cohortContext.item.modifiers}, () => this.checkCriteriaChanges());
       }
       this.subscription = attributesSelectionStore.subscribe(attributesSelection => {
         this.setState({attributesSelection});
@@ -380,10 +381,7 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
     componentDidUpdate(prevProps: Readonly<Props>): void {
       const {cohortContext, criteria} = this.props;
       if (!criteria && !!prevProps.criteria) {
-        this.setState({
-          modifierButtonText: 'APPLY MODIFIERS',
-          showModifiersSlide: false
-        });
+        this.setState({showModifiersSlide: false});
       }
       if (!!cohortContext && !!criteria && criteria !== prevProps.criteria) {
         // Each time the criteria changes, we check for disabling the Save Criteria button again
@@ -391,29 +389,20 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
       }
     }
 
-    get showModifiers() {
-      return ![DomainType.PHYSICALMEASUREMENT, DomainType.PERSON, DomainType.SURVEY].includes(this.props.domain);
-    }
-
-    get showNext() {
-      return this.showModifiers && this.props.view !== 'modifiers';
-    }
-
-    get showBack() {
-      return this.showModifiers && this.props.view === 'modifiers';
-    }
-
-    showOr(index, selection) {
-      return index > 0 && selection.domainId !== DomainType.PERSON.toString();
-    }
-
     checkCriteriaChanges() {
       const {cohortContext, criteria} = this.props;
       if (criteria.length === 0) {
         this.setState({disableSave: true});
       } else {
-        const mappedCriteriaString = JSON.stringify(criteria.map(mapCriteria));
-        const mappedParametersString = JSON.stringify(cohortContext.item.searchParameters.map(mapCriteria));
+        // We need to check for changes to criteria selections AND the modifiers array
+        const mappedCriteriaString = JSON.stringify({
+          criteria: criteria.map(mapCriteria),
+          modifiers: this.state.modifiers
+        });
+        const mappedParametersString = JSON.stringify({
+          criteria: cohortContext.item.searchParameters.map(mapCriteria),
+          modifiers: cohortContext.item.modifiers
+        });
         this.setState({disableSave: mappedCriteriaString === mappedParametersString});
       }
     }
@@ -421,15 +410,6 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
     removeCriteria(criteriaToDel) {
       const updateList = fp.remove((selection) => selection.parameterId === criteriaToDel.parameterId, this.props.criteria);
       currentCohortCriteriaStore.next(updateList);
-    }
-
-    applyModifier(modifiers) {
-      if (modifiers) {
-        const modifierButtonText = '(' + modifiers.length + ')  MODIFIERS APPLIED';
-        this.setState({showModifiersSlide: false, modifierButtonText: modifierButtonText});
-      } else {
-        this.setState({showModifiersSlide: false, modifierButtonText: 'APPLY MODIFIERS'});
-      }
     }
 
     get showModifierButton() {
@@ -445,13 +425,13 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
     }
 
     render() {
-      const {back, criteria} = this.props;
-      const {attributesSelection, disableSave, modifierButtonText, showModifiersSlide} = this.state;
+      const {back, cohortContext, criteria} = this.props;
+      const {attributesSelection, disableSave, showModifiersSlide} = this.state;
       return <div>
         <FlexRow style={styles.navIcons}>
           {this.showAttributesOrModifiers &&
             <Clickable style={{marginRight: '1rem'}}
-                       onClick={() => this.setState({attributesSelection: undefined})}>
+                       onClick={() => this.setState({attributesSelection: undefined, showModifiersSlide: false})}>
               <img src={proIcons.arrowLeft}
                    style={{height: '21px', width: '18px'}}
                    alt='Go back'/>
@@ -471,12 +451,15 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
                 {!!criteria && criteria.map((selection, s) => <SelectionInfo key={s}
                   index={s}
                   selection={selection}
-                  removeSelection={() => this.removeCriteria(criteria)}/>
+                  removeSelection={() => this.removeCriteria(selection)}/>
                 )}
                 {this.showModifierButton && <div style={{paddingLeft: '0.6rem'}}>
                   <Button type='secondaryOnDarkBackground' style={styles.modifierButton}
                           onClick={() => this.setState({showModifiersSlide: true})}>
-                    {modifierButtonText}
+                    {cohortContext.item.modifiers.length > 0
+                      ? '(' + cohortContext.item.modifiers.length + ')  MODIFIERS APPLIED'
+                      : 'APPLY MODIFIERS'
+                    }
                   </Button>
                 </div>}
               </div>
@@ -493,8 +476,13 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
               </Button>
             </FlexRowWrap>
           </React.Fragment>}
-          {showModifiersSlide && <ModifierPage selections={criteria} applyModifiers={(modifier) => this.applyModifier(modifier)}/>}
-          {!!attributesSelection && <AttributesPageV2 close={() => attributesSelectionStore.next(undefined)} node={attributesSelection}/>}
+          {showModifiersSlide && <ModifierPage selections={criteria}
+                                               closeModifiers={() => {
+                                                 this.setState({showModifiersSlide: false});
+                                                 this.checkCriteriaChanges();
+                                               }}/>}
+          {!!attributesSelection && <AttributesPageV2 close={() => attributesSelectionStore.next(undefined)}
+                                                      node={attributesSelection}/>}
       </div>;
     }
   }
