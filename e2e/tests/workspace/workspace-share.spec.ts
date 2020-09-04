@@ -122,6 +122,53 @@ describe('Share workspace', () => {
       await newPage.close();
     });
 
+    /**
+     * Test:
+     * - Find an existing workspace
+     * - if any collaborator already sharing the workspace, remove before continuing
+     * - As a owner share workspace with another user - give writer level access to the collaborator.
+     * - On about page, verify  if a collaborator has been added with to the workspace as a writer 
+     * - click the share button, remove the collaborator (writer).
+     */
+
+    test('As OWNER, user can share a workspace (writer level access) ', async () => {
+      // Using the share modal requires a viewport be set, due to react-select weirdness.
+      await page.setViewport({height: 1280, width: 1280});
+
+      const workspaceCard = await findWorkspace(page);
+      await workspaceCard.clickWorkspaceName();
+
+      const notebooksLink = await Link.findByName(page, {name: 'About'});
+      await notebooksLink.clickAndWait();
+
+      const aboutPage = new WorkspaceAboutPage(page);
+      await aboutPage.waitForLoad();
+
+      // This test is not hermetic - if the collaborator is already on this
+      // workspace, just remove them before continuing.
+      let accessLevel = await aboutPage.findUserInCollaboratorList(config.collaboratorUsername);
+      if (accessLevel !== null) {
+        await (await aboutPage.openShareModal()).removeUser(config.collaboratorUsername);
+        await waitWhileLoading(page);
+      }
+
+      let shareModal = await aboutPage.openShareModal();
+      await shareModal.shareWithUser(
+        config.collaboratorUsername, WorkspaceAccessLevel.Writer);
+      // Collab list is refreshed.
+      await waitWhileLoading(page);
+
+      accessLevel = await aboutPage.findUserInCollaboratorList(config.collaboratorUsername);
+      expect(accessLevel).toBe(WorkspaceAccessLevel.Writer);
+
+      shareModal = await aboutPage.openShareModal();
+      await shareModal.removeUser(config.collaboratorUsername);
+      await waitWhileLoading(page);
+
+      accessLevel = await aboutPage.findUserInCollaboratorList(config.collaboratorUsername);
+      expect(accessLevel).toBeNull();
+    });
+
   });
 
 });
