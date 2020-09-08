@@ -33,7 +33,7 @@ task CountSamples {
   command <<<
     set -euo pipefail
 
-    wc -l ${file_of_sample_names}
+    cat ~{file_of_sample_names} | wc -l
   >>>
 
   runtime {
@@ -44,7 +44,7 @@ task CountSamples {
   }
 
   output {
-    Int number_of_samples = stdout()
+    Int number_of_samples = read_int(stdout())
   }
 }
 
@@ -56,18 +56,21 @@ task RandomizeVcf {
     String output_file
   }
 
+  Int disk_size = ceil(number_of_samples * size(base_vcf, "GB"))
+
   command <<<
     set -euo pipefail
 
-    ./project.rb randomizeVcf \
-      --vcf ${base_vcf} \
-      --sample-names-file ${file_of_sample_names} \
-      --output ${output_file}
+    /workbench/api/project.rb randomize-vcf \
+    --vcf ~{base_vcf} \
+    --sample-names-file ~{file_of_sample_names} \
+    --output $(pwd)/~{output_file}
+
   >>>
 
   runtime {
-    memory: "4GiB"
-    disks: "local-disk " + number_of_samples + " HDD"
+    memory: "4 GiB"
+    disks: "local-disk " + disk_size + " HDD"
     docker: "gcr.io/all-of-us-workbench-test/randomizevcf:1.0"
     preemptible: 3
   }
