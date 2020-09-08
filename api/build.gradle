@@ -208,7 +208,8 @@ swaggerSources {
         'useTags'        : 'true',
         // Generates delegate interfaces; used to make method annotations work without
         // having to copy them to our implementations.
-        'delegatePattern': 'true'
+        'delegatePattern': 'true',
+        'dateLibrary': 'java8'
       ]
     }
   }

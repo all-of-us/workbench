@@ -6,6 +6,9 @@ import com.google.cloud.bigquery.FieldValue.Attribute;
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.common.annotations.VisibleForTesting;
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -117,10 +120,11 @@ public final class FieldValues {
         .map(DateTime::new);
   }
 
-  public static Optional<DateTime> getDateTime(FieldValueList row, String fieldName) {
+  public static Optional<OffsetDateTime> getDateTime(FieldValueList row, String fieldName) {
     return getTimestampMicroseconds(row, fieldName)
         .map(FieldValues::microsecondsToMillis)
-        .map(DateTime::new);
+        .map(Instant::ofEpochMilli)
+        .map(i -> OffsetDateTime.ofInstant(i, ZoneOffset.UTC));
   }
 
   @VisibleForTesting

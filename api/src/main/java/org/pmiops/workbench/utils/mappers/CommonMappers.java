@@ -3,6 +3,8 @@ package org.pmiops.workbench.utils.mappers;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Optional;
 import javax.inject.Provider;
 import joptsimple.internal.Strings;
@@ -30,6 +32,20 @@ public class CommonMappers {
       return timestamp.getTime();
     }
     return null;
+  }
+
+  public OffsetDateTime offsetDateTime(Timestamp timestamp) {
+    return Optional.ofNullable(timestamp)
+        .map(Timestamp::toInstant)
+        .map(instant -> OffsetDateTime.ofInstant(instant, ZoneOffset.UTC))
+        .orElse(null);
+  }
+
+  public Timestamp timestamp(OffsetDateTime offsetDateTime) {
+    return Optional.ofNullable(offsetDateTime)
+        .map(OffsetDateTime::toInstant)
+        .map(Timestamp::from)
+        .orElse(null);
   }
 
   @Named("toTimestampCurrentIfNull")
