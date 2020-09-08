@@ -206,7 +206,7 @@ export class Demographics extends React.Component<Props, State> {
     const {cdrVersionId} = currentWorkspaceStore.getValue();
     this.setState({loading: true});
     const response = await cohortBuilderApi().findCriteriaBy(+cdrVersionId, DomainType.PERSON.toString(), criteriaType.toString());
-    const nodes = response.items.filter(item => item.parentId !== 0)
+    const nodes = response.items.filter(item => item.count !== -1)
       .sort(sortByCountThenName)
       .map(node => ({...node, parameterId: `param${node.conceptId || node.code}`}));
     if (selections.length) {
