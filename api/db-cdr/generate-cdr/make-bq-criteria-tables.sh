@@ -1282,6 +1282,33 @@ WHERE x.domain_id = 'SURVEY'
 ################################################
 # DEMOGRAPHICS
 ################################################
+echo "DEMOGRAPHICS - Age"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (
+          id
+        , parent_id
+        , domain_id
+        , is_standard
+        , type
+        , name
+        , is_group
+        , is_selectable
+        , has_attribute
+        , has_hierarchy
+    )
+SELECT
+    (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 AS id
+    , 0
+    , 'PERSON'
+    , 1
+    , 'AGE'
+    , 'Age'
+    , 1
+    , 0
+    , 0
+    , 0"
+
 echo "DEMOGRAPHICS - Deceased"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
