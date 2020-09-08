@@ -20,7 +20,7 @@ export function typeDisplay(parameter): string {
 }
 
 export function nameDisplay(parameter): string {
-  if (parameter.type === CriteriaType.AGE || parameter.type === CriteriaType.DECEASED) {
+  if (parameter.type === CriteriaType.DECEASED) {
     return '';
   } else {
     let name = stripHtml(parameter.name);

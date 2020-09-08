@@ -245,19 +245,14 @@ export class SelectionInfo extends React.Component<SelectionInfoProps, Selection
     ].includes(this.props.selection.domainId);
   }
 
-  get showOr() {
-    const {index, selection} = this.props;
-    return index > 0 && selection.domainId !== DomainType.PERSON.toString();
-  }
-
   render() {
-    const {selection, removeSelection} = this.props;
+    const {index, selection, removeSelection} = this.props;
     const itemName = <React.Fragment>
       {this.showType && <strong>{typeDisplay(selection)}&nbsp;</strong>}
-      {nameDisplay(selection)} {attributeDisplay(selection)}
+      {nameDisplay(selection)}
     </React.Fragment>;
     return <FlexColumn style={styles.selectionItem}>
-      {this.showOr && <div style={{padding: '0.3rem 0rem 0.3rem 1rem'}}>OR&nbsp;</div>}
+      {index > 0 && <div style={{padding: '0.3rem 0rem 0.3rem 1rem'}}>OR&nbsp;</div>}
       <FlexRow style={{alignItems: 'baseline'}}>
       <button style={styles.removeSelection} onClick={() => removeSelection()}>
         <ClrIcon shape='times-circle'/>

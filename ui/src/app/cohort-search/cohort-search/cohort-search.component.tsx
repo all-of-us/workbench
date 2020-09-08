@@ -445,26 +445,14 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
                 </div>
               </div>
             </React.Fragment>}
-          {cohortContext.type === CriteriaType.AGE && <div style={styles.footer}>
-            <Button style={styles.footerButton}
-                    type='link'
-                    onClick={() => this.closeSearch()}>
-              Cancel
-            </Button>
-            <Button style={styles.footerButton}
-                    type='primary'
-                    onClick={() => saveCriteria()}>
-              Finish
-            </Button>
-          </div>}
         </div>
       </div>
-      {cohortContext.type !== CriteriaType.AGE && <Button type='primary'
+      <Button type='primary'
               style={styles.finishButton}
               disabled={!!selectedIds && selectedIds.length === 0}
               onClick={() => setSidebarActiveIconStore.next('criteria')}>
         Finish & Review
-      </Button>}
+      </Button>
     </FlexRowWrap>;
   }
 });
