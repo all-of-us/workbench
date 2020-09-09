@@ -1,12 +1,13 @@
 import {Page} from 'puppeteer';
 import Button from 'app/element/button';
-import {Language, LinkText, PageUrl} from 'app/text-labels';
+import {Language, LinkText, PageUrl, WorkspaceAccessLevel} from 'app/text-labels';
 import Modal from 'app/component/modal';
 import WorkspaceEditPage, {FIELD as EDIT_FIELD} from 'app/page/workspace-edit-page';
 import {makeWorkspaceName} from 'utils/str-utils';
 import RadioButton from 'app/element/radiobutton';
 import {findWorkspace, waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle, waitForText} from 'utils/waits-utils';
+import ReactSelect from 'app/element/react-select';
 import WorkspaceDataPage from './workspace-data-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
 
@@ -167,4 +168,12 @@ export default class WorkspacesPage extends WorkspaceEditPage {
     await waitWhileLoading(this.page);
     return contentText;
   }
+
+  async filterByAccessLevel(level: WorkspaceAccessLevel): Promise<void> {
+    const selectMenu = new ReactSelect(this.page);
+    await selectMenu.waitForInput('Filter by').then(input => input.click({delay: 20}));
+    await selectMenu.selectOption(level);
+    await waitWhileLoading(this.page);
+  }
+
 }
