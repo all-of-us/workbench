@@ -89,8 +89,8 @@ class ExportDataSetModal extends React.Component<
       name: dataSet.name,
       includesAllParticipants: dataSet.includesAllParticipants,
       description: dataSet.description,
-      conceptSetIds: dataSet.conceptSets.map(cs => cs.id),
-      cohortIds: dataSet.cohorts.map(c => c.id),
+      conceptSetIds: [],
+      cohortIds: [],
       domainValuePairs: dataSet.domainValuePairs,
       prePackagedConceptSet: dataSet.prePackagedConceptSet
     } as DataSetRequest;

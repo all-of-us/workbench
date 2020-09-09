@@ -70,6 +70,7 @@ import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
@@ -333,17 +334,36 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   @Override
   public Map<String, QueryJobConfiguration> domainToBigQueryConfig(DataSetRequest dataSetRequest) {
+    DbDataset dbDataset;
+    if (CollectionUtils.isEmpty(dataSetRequest.getDomainValuePairs())) {
+      dbDataset =
+          dataSetDao
+              .findDbDatasetByNameAndWorkspaceId(
+                  dataSetRequest.getName(), dataSetRequest.getWorkspaceId())
+              .orElseThrow(
+                  () ->
+                      new BadRequestException("Data Set Generate code Failed: Data set not found"));
+    } else {
+      dbDataset = dataSetMapper.dataSetRequestToDb(dataSetRequest, null, clock);
+    }
+    return buildQueriesByDomain(dbDataset);
+  }
+
+  private Map<String, QueryJobConfiguration> buildQueriesByDomain(DbDataset dbDataset) {
     final boolean includesAllParticipants =
-        getBuiltinBooleanFromNullable(dataSetRequest.getIncludesAllParticipants());
+        getBuiltinBooleanFromNullable(dbDataset.getIncludesAllParticipants());
     final ImmutableList<DbCohort> cohortsSelected =
-        ImmutableList.copyOf(this.cohortDao.findAllByCohortIdIn(dataSetRequest.getCohortIds()));
+        ImmutableList.copyOf(this.cohortDao.findAllByCohortIdIn(dbDataset.getCohortIds()));
     final ImmutableList<DomainValuePair> domainValuePairs =
-        ImmutableList.copyOf(dataSetRequest.getDomainValuePairs());
+        ImmutableList.copyOf(
+            dbDataset.getValues().stream()
+                .map(value -> dataSetMapper.createDomainValuePair(value))
+                .collect(Collectors.toList()));
 
     final ImmutableList<DbConceptSet> expandedSelectedConceptSets =
         getExpandedConceptSetSelections(
-            dataSetRequest.getPrePackagedConceptSet(),
-            dataSetRequest.getConceptSetIds(),
+            dataSetMapper.prePackagedConceptSetFromStorage(dbDataset.getPrePackagedConceptSet()),
+            dbDataset.getConceptSetIds(),
             cohortsSelected,
             includesAllParticipants,
             domainValuePairs);
