@@ -11,8 +11,6 @@ jest.mock('react-router-dom', () => {
     __esModule: true,
     ...originalModule,
     BrowserRouter: ({ children }) => <div>{children}</div>,
-    // useParams: jest.fn(),
-    // useHistory: jest.fn(),
   }
 });
 
