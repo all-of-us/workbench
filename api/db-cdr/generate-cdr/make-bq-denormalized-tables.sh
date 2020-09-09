@@ -22,7 +22,7 @@ fi
 
 echo ""
 echo "Making criteria tables"
-if ./generate-cdr/generate-cb-criteria-tables.sh $BQ_PROJECT $BQ_DATASET $DATA_BROWSER $DRY_RUN
+if ./generate-cdr/make-bq-criteria-tables.sh $BQ_PROJECT $BQ_DATASET $DATA_BROWSER $DRY_RUN
 then
     echo "Making criteria tables complete"
 else
