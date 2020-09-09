@@ -2,7 +2,7 @@ import {Growl} from 'primereact/growl';
 import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
 
-import {Demographics} from 'app/cohort-search/demographics/demographics.component';
+import {DemographicsV2} from 'app/cohort-search/demographics/demographics-v2.component';
 import {ListSearchV2} from 'app/cohort-search/list-search-v2/list-search-v2.component';
 import {searchRequestStore} from 'app/cohort-search/search-state.service';
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
@@ -412,7 +412,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
             : {height: 'calc(100% - 3.5rem)'}
         }>
           {cohortContext.domain === DomainType.PERSON ? <div style={{flex: 1, overflow: 'auto'}}>
-              <Demographics
+              <DemographicsV2
                 count={count}
                 criteriaType={cohortContext.type}
                 select={this.addSelection}

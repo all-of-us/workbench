@@ -168,7 +168,7 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
       const {cohort, cohortChanged, cohortError, criteria, loading, modalOpen, overview, searchContext, updateCount, updateGroupListsCount}
         = this.state;
       return <React.Fragment>
-        <div style={{minHeight: '28rem', padding: '0 0.5rem'}}>
+        <div style={{minHeight: '28rem', padding: '0.5rem'}}>
           {cohortError
             ? <div style={styles.cohortError}>
               <ClrIcon className='is-solid' shape='exclamation-triangle' size={22} />
