@@ -12,7 +12,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {CriteriaType, DomainType, SearchRequest} from 'generated/fetch';
+import {DomainType, SearchRequest} from 'generated/fetch';
 
 function initItem(id: string, type: string) {
   return {
@@ -175,12 +175,7 @@ export class SearchGroupList extends React.Component<Props, State> {
             order: PROGRAM_TYPES.indexOf(DomainType[domain])
           };
           if (domain === DomainType[DomainType.PERSON]) {
-            option['children'] = types
-            .map(subopt => ({name: typeToTitle(subopt.type), domain, type: subopt.type}));
-            // If an AGE option was not returned, we add one manually
-            if (!option['children'].find(node => node.type === CriteriaType.AGE)) {
-              option['children'].unshift({name: 'Age', domain: DomainType.PERSON, type: CriteriaType.AGE});
-            }
+            option['children'] = types.map(subopt => ({name: typeToTitle(subopt.type), domain, type: subopt.type}));
           }
           acc.programTypes.push(option);
         }
