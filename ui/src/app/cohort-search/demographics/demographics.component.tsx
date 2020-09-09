@@ -4,7 +4,7 @@ import * as React from 'react';
 import {typeToTitle} from 'app/cohort-search/utils';
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
-import {NumberInput} from 'app/components/inputs';
+import {NumberInput, RadioButton} from 'app/components/inputs';
 import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -387,13 +387,15 @@ export class Demographics extends React.Component<Props, State> {
             </div>
           </div>
           <div style={{marginLeft: '1rem'}}>
-            {ageTypes.map((ageTypeRadio, a) => <div key={a} style={{display: 'inline-block', marginRight: '0.5rem'}}>
-              <input type='radio' name='ageType'
-                style={{marginRight: '0.25rem'}}
-                onChange={() => this.onRadioChange(ageTypeRadio.type)}
-                checked={ageTypeRadio.type === ageType}/>
-              <label>{ageTypeRadio.label}</label>
-            </div>)}
+            {ageTypes.map((ageTypeRadio, index) =>
+              <div key={index} style={{display: 'inline-block', marginRight: '0.5rem'}}>
+                <RadioButton name='ageType'
+                  style={{marginRight: '0.25rem'}}
+                  onChange={() => this.onRadioChange(ageTypeRadio.type)}
+                  checked={ageTypeRadio.type === ageType}/>
+                <label>{ageTypeRadio.label}</label>
+              </div>)
+            }
           </div>
           <div>
             <Button style={{float: 'right'}}
