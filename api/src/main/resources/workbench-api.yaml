@@ -7949,7 +7949,7 @@ definitions:
         description: Datetime at creation of this user's accont
         type: string
         format: date-time
-  ReportingUser:
+  BqDtoUser:
     type: object
     properties:
       aboutYou:
@@ -8012,9 +8012,6 @@ definitions:
         description: ''
         type: boolean
         default: false
-      email:
-        description: ''
-        type: string
       emailVerificationBypassTime:
         description: ''
         type: integer
@@ -8094,6 +8091,170 @@ definitions:
         description: ''
         type: integer
         format: int64
+      username:
+        description: ''
+        type: string
+  BqDtoWorkspace:
+    type: object
+    properties:
+      activeStatus:
+        description: ''
+        type: integer
+        format: int64
+      billingAccountName:
+        description: ''
+        type: string
+      billingAccountType:
+        description: ''
+        type: integer
+        format: int64
+      billingMigrationStatus:
+        description: ''
+        type: integer
+        format: int64
+      billingStatus:
+        description: ''
+        type: integer
+        format: int64
+      cdrVersionId:
+        description: ''
+        type: integer
+        format: int64
+      creationTime:
+        description: ''
+        type: integer
+        format: int64
+      creatorId:
+        description: ''
+        type: integer
+        format: int64
+      dataAccessLevel:
+        description: ''
+        type: integer
+        format: int64
+      disseminateResearchOther:
+        description: ''
+        type: string
+      firecloudName:
+        description: ''
+        type: string
+      firecloudUuid:
+        description: ''
+        type: string
+      lastAccessedTime:
+        description: ''
+        type: integer
+        format: int64
+      lastModifiedTime:
+        description: ''
+        type: integer
+        format: int64
+      name:
+        description: ''
+        type: string
+      needsRpReviewPrompt:
+        description: ''
+        type: integer
+        format: int64
+      published:
+        description: ''
+        type: boolean
+        default: false
+      rpAdditionalNotes:
+        description: ''
+        type: string
+      rpAncestry:
+        description: ''
+        type: boolean
+        default: false
+      rpAnticipatedFindings:
+        description: ''
+        type: string
+      rpApproved:
+        description: ''
+        type: boolean
+        default: false
+      rpCommercialPurpose:
+        description: ''
+        type: boolean
+        default: false
+      rpControlSet:
+        description: ''
+        type: boolean
+        default: false
+      rpDiseaseFocusedResearch:
+        description: ''
+        type: boolean
+        default: false
+      rpDiseaseOfFocus:
+        description: ''
+        type: string
+      rpDrugDevelopment:
+        description: ''
+        type: boolean
+        default: false
+      rpEducational:
+        description: ''
+        type: boolean
+        default: false
+      rpEthics:
+        description: ''
+        type: boolean
+        default: false
+      rpIntendedStudy:
+        description: ''
+        type: string
+      rpMethodsDevelopment:
+        description: ''
+        type: boolean
+        default: false
+      rpOtherPopulationDetails:
+        description: ''
+        type: string
+      rpOtherPurpose:
+        description: ''
+        type: boolean
+        default: false
+      rpOtherPurposeDetails:
+        description: ''
+        type: string
+      rpPopulation:
+        description: ''
+        type: boolean
+        default: false
+      rpPopulationHealth:
+        description: ''
+        type: boolean
+        default: false
+      rpReasonForAllOfUs:
+        description: ''
+        type: string
+      rpReviewRequested:
+        description: ''
+        type: boolean
+        default: false
+      rpScientificApproach:
+        description: ''
+        type: string
+      rpSocialBehavioral:
+        description: ''
+        type: boolean
+        default: false
+      rpTimeRequested:
+        description: ''
+        type: integer
+        format: int64
+      version:
+        description: ''
+        type: integer
+        format: int64
+      workspaceId:
+        description: ''
+        type: integer
+        format: int64
+      workspaceNamespace:
+        description: ''
+        type: string
   ReportingSnapshot:
     description: >
       Payload for upload to BigQuery reporting dataset. Internal use only (not part of the API).
@@ -8106,31 +8267,11 @@ definitions:
       researchers:
         type: array
         items:
-          "$ref": "#/definitions/ReportingUser"
+          "$ref": "#/definitions/BqDtoUser"
       workspaces:
         type: array
         items:
-          "$ref": "#/definitions/ReportingWorkspace"
-  ReportingWorkspace:
-    description: >
-    type: object
-    properties:
-      workspaceId:
-        description: PK for workspace table.
-        type: integer
-        format: int64
-      creatorId:
-        description: FK researcher ID for creator of workspace.
-        type: integer
-        format: int64
-      name:
-        description: user-generated name for workspace
-        type: string
-      creationTime:
-        description: >
-          timestamp (epoch millis) at workspace creation
-        type: integer
-        format: int64
+          "$ref": "#/definitions/BqDtoWorkspace"
   AccountPropertyUpdate:
     description: >
       A group of changes an admin can make to a user in the Edit Information card of the individual-user admin page.

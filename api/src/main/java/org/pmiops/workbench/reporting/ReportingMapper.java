@@ -4,10 +4,9 @@ import java.util.Collection;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.pmiops.workbench.db.dao.projection.PrjReportingUser;
-import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.model.ReportingResearcher;
+import org.pmiops.workbench.db.dao.projection.PrjUser;
+import org.pmiops.workbench.db.dao.projection.PrjWorkspace;
+import org.pmiops.workbench.model.BqDtoUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
@@ -16,15 +15,11 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
     config = MapStructConfig.class,
     uses = {CommonMappers.class})
 public interface ReportingMapper {
-  @Mapping(source = "givenName", target = "firstName")
-  @Mapping(source = "userId", target = "researcherId")
-  @Mapping(source = "disabled", target = "isDisabled")
-  ReportingResearcher toDto(PrjReportingUser prjReportingUser);
+  BqDtoUser toDto(PrjUser prjUser);
 
-  List<ReportingResearcher> toReportingResearcherList(Collection<PrjReportingUser> users);
+  List<BqDtoUser> toReportingResearcherList(Collection<PrjUser> users);
 
-  @Mapping(source = "creator.userId", target = "creatorId")
-  ReportingWorkspace toModel(DbWorkspace dbWorkspace);
+  ReportingWorkspace toModel(PrjWorkspace prjWorkspace);
 
-  List<ReportingWorkspace> toReportingWorkspaceList(Collection<DbWorkspace> dbWorkspace);
+  List<ReportingWorkspace> toReportingWorkspaceList(Collection<PrjWorkspace> dbWorkspace);
 }

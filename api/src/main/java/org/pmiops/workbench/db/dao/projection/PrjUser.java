@@ -2,8 +2,10 @@ package org.pmiops.workbench.db.dao.projection;
 
 import java.sql.Timestamp;
 
-/** Order must match SELECT query order exactly for projection to work properly. */
-public interface PrjReportingUser {
+public interface PrjUser {
+  /*
+   * User columns
+   */
   String getAboutYou();
   String getAreaOfResearch();
   Timestamp getBetaAccessBypassTime();
@@ -20,7 +22,6 @@ public interface PrjReportingUser {
   long getDataUseAgreementSignedVersion();
   Timestamp getDemographicSurveyCompletionTime();
   boolean getDisabled();
-  String getEmail();
   Timestamp getEmailVerificationBypassTime();
   Timestamp getEmailVerificationCompletionTime();
   long getEmailVerificationStatus();
@@ -42,10 +43,16 @@ public interface PrjReportingUser {
   Timestamp getTwoFactorAuthBypassTime();
   Timestamp getTwoFactorAuthCompletionTime();
   long getUserId();
+  String getUsername();
+
+  /*
+   * Address columns
+   */
   String getCity();
   String getCountry();
   String getState();
   String getStreetAddress1();
   String getStreetAddress2();
   String getZipCode();
+
 }

@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.pmiops.workbench.db.dao.projection.PrjWorkspace;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -85,4 +86,6 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
 
     Long getWorkspaceCount();
   }
+
+  List<PrjWorkspace> getReportingWorkspaces();
 }

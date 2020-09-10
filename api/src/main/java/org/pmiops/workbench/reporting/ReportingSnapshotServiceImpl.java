@@ -7,10 +7,10 @@ import java.util.Random;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.dao.projection.PrjReportingUser;
+import org.pmiops.workbench.db.dao.projection.PrjUser;
+import org.pmiops.workbench.db.dao.projection.PrjWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.ReportingSnapshot;
-import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.utils.LogFormatters;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.stereotype.Service;
@@ -30,19 +30,19 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
   // Define immutable value class to hold results of queries within a transaction. Mapping to
   // Reporting DTO classes will happen outside the transaction.
   private static class QueryResultBundle {
-    private final List<PrjReportingUser> users;
-    private final List<DbWorkspace> workspaces;
+    private final List<PrjUser> users;
+    private final List<PrjWorkspace> workspaces;
 
-    public QueryResultBundle(List<PrjReportingUser> users, List<DbWorkspace> workspaces) {
+    public QueryResultBundle(List<PrjUser> users, List<PrjWorkspace> workspaces) {
       this.users = users;
       this.workspaces = workspaces;
     }
 
-    public List<PrjReportingUser> getUsers() {
+    public List<PrjUser> getUsers() {
       return users;
     }
 
-    public List<DbWorkspace> getWorkspaces() {
+    public List<PrjWorkspace> getWorkspaces() {
       return workspaces;
     }
   }
@@ -82,7 +82,7 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
 
   private QueryResultBundle getApplicationDbData() {
     final Stopwatch stopwatch = stopwatchProvider.get().start();
-    final List<PrjReportingUser> users = userService.getRepotingUsers();
+    final List<PrjUser> users = userService.getRepotingUsers();
     final List<DbWorkspace> workspaces = workspaceService.getAllActiveWorkspaces();
     final QueryResultBundle result = new QueryResultBundle(users, workspaces);
     stopwatch.stop();

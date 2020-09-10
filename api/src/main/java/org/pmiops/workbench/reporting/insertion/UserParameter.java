@@ -2,9 +2,10 @@ package org.pmiops.workbench.reporting.insertion;
 
 import com.google.cloud.bigquery.QueryParameterValue;
 import java.util.function.Function;
+import org.pmiops.workbench.model.BqDtoUser;
 import org.pmiops.workbench.model.ReportingUser;
 
-public enum UserParameter implements QueryParameterColumn<ReportingUser> {
+public enum UserParameter implements QueryParameterColumn<BqDtoUser> {
   RESEARCHER_ID(
       "researcher_id",
       ReportingUser::getUserId,
