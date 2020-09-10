@@ -1,17 +1,3 @@
-# To build and deploy, from this directory:
-# $ docker build -f Dockerfile.circle_build -t allofustest/workbench:buildimage-X.Y.Z .
-# Test out the new image with:
-# $ docker run -it allofustest/workbench:buildimage-X.Y.Z /bin/bash
-# Update all mentions of allofustest/workbench:buildimage-X.Y.Z in
-# .circleci/circle.yml by incrementing the numbers. Using the new values, run:
-# $ docker login  # interactive prompts
-# $ docker push allofustest/workbench:buildimage-X.Y.Z
-# For permission to push, request to be added to the DockerHub repository.
-# Include your changes to circle.yml in the PR that uses the build image.
-# Note: we depend on dockerize being installed on this image.
-#
-# We use OpenJDK 8, Node, and some common browsers from CircleCI's base image
-# see: https://circleci.com/docs/2.0/circleci-images/#language-image-variants
 FROM openjdk:8-jdk
 ENV CLOUD_SDK_VERSION 260.0.0
 RUN cd && \

@@ -72,7 +72,8 @@ task RandomizeVcf {
   >>>
 
   runtime {
-    memory: "4 GiB"
+    memory: "8 GiB"
+    cpu: "2"
     disks: "local-disk " + disk_size + " HDD"
     docker: "gcr.io/all-of-us-workbench-test/randomizevcf:1.0"
     preemptible: 3

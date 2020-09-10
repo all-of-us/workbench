@@ -10,7 +10,7 @@
 8. Click "Create New Method"  
    - Namespace = namespace from your Terra workspace
    - Name = name of your method, can be w/e
-   - WDL = Your WDL. I'll provide a Hello World wdl that you can run for testing
+   - WDL = Your WDL, e.g. IngestSyntheticVcfWf.wdl
 9. Click "Upload"
 10. Click "Export to Workspace..."
 11. Click "Use Blank Configuration"
@@ -19,7 +19,7 @@
 13. Go back to the "Workflows" tab in your Terra workspace
 14. Click on the Workflow you just created
 15. Select "Run workflow with inputs defined by file paths" radio button
-16. Enter your input attributes, remember to wrap strings and file paths with double quotes
+16. Enter your input attributes, remember to wrap strings and file paths with double quotes.
 17. Click "Save"
 18. Click "Run Analysis" 
 19. Click "Launch"
