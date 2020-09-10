@@ -158,7 +158,11 @@ getters = columns.map { |field|
   to_getter(field)
 }
 
-java = "public interface Prj#{to_camel_case(table_name, true )} {\n"
+def projection_name(table_name)
+  "Prj#{to_camel_case(table_name, true )}"
+end
+
+java = "public interface #{projection_name(table_name)} {\n"
 java << getters.join("\n")
 java << "\n}\n"
 
@@ -174,7 +178,11 @@ def to_query(table_name, schema)
   table_alias = table_name[0].downcase
   "@Query(\"SELECT\n" + schema.map do |field|
     "+ \"  #{table_alias}.#{hibernate_column_name(field)}"
-  end.join(",\"\n") + "\"\n+ \"FROM Db#{to_camel_case(table_name, true)} #{table_alias}\")"
+  end \
+    .join(",\\n\"\n") \
+  + "\\n\"\n" \
+  + "+ \"FROM Db#{to_camel_case(table_name, true)} #{table_alias}\")\n" \
+   + "  List<#{projection_name(table_name)}> getReporting#{to_camel_case(table_name, true)}s();"
 end
 
 sql = to_query(table_name, columns)
