@@ -783,22 +783,10 @@ paths:
           description: Runtime update request accepted
         "400":
           description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorReport"
         "409":
           description: Conflict
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorReport"
         "500":
           description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorReport"
     delete:
       summary: Delete a workspace runtime.
       description: 'Delete a runtime'
