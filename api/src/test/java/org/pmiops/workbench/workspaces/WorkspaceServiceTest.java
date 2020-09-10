@@ -1,8 +1,7 @@
 package org.pmiops.workbench.workspaces;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -12,7 +11,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
-import javax.inject.Provider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,7 +25,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
@@ -101,8 +98,6 @@ public class WorkspaceServiceTest {
   @MockBean private Clock mockClock;
   @MockBean private FireCloudService mockFireCloudService;
 
-  @Autowired private Provider<DbUser> userProvider;
-  @Autowired private UserRecentWorkspaceDao userRecentWorkspaceDao;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private WorkspaceService workspaceService;
 
@@ -388,5 +383,14 @@ public class WorkspaceServiceTest {
     List<DbUserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces();
     assertThat(recentWorkspaces.size()).isEqualTo(1);
     assertThat(recentWorkspaces.get(0).getWorkspaceId()).isEqualTo(ownedId);
+  }
+
+  @Test
+  public void deleteWorkspace() {
+    DbWorkspace ws = dbWorkspaces.get(0); // arbitrary choice of those defined for testing
+    workspaceService.deleteWorkspace(ws);
+    assertThat(ws.getWorkspaceActiveStatusEnum()).isEqualTo(WorkspaceActiveStatus.DELETED);
+    verify(mockFireCloudService).deleteWorkspace(eq(ws.getWorkspaceNamespace()), eq(ws.getName()));
+    verify(mockFireCloudService).deleteBillingProject(eq(ws.getWorkspaceNamespace()));
   }
 }
