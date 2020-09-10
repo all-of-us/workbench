@@ -1,4 +1,5 @@
 #!/usr/bin/ruby
+require 'open3'
 
 # Ugly wrapper script for reporting-codegen.rb. Just use all the files in the csv directory
 input_dir = File.expand_path(ARGV[0])
@@ -10,5 +11,8 @@ def table_name(filename)
 end
 
 Dir.each_child(describe_csv_dir) do |file|
-  `./reporting-codegen.rb #{table_name(file)} #{input_dir} #{output_dir}`
+  full_cmd = "./reporting-codegen.rb #{table_name(file)} #{input_dir} #{output_dir}"
+  _stdout, output, _status = Open3.capture3(full_cmd)
+  puts output if output
+  puts _stdout if _stdout.strip
 end

@@ -65,11 +65,11 @@ end
 excluded_fields = File.exist?(inputs[:exclude_columns]) ? File.readlines(inputs[:exclude_columns]) : []
 
 def is_valid_field?(excluded_fields, field)
-  !excluded_fields.include?(field['name'])
+  !excluded_fields.include?(field)
 end
 
 ## BigQuery schema
-describe_rows = CSV.new(File.read(inputs[:describe_csv]))
+describe_rows = CSV.new(File.read(inputs[:describe_csv])).sort_by { |row| row[0]  }
 
 columns = describe_rows.filter{ |row| is_valid_field?(excluded_fields, row[0])} \
   .map{ |row| {:name => row[0], :mysql_type => row[1], :big_query_type => to_bq_type(row[1])} }
