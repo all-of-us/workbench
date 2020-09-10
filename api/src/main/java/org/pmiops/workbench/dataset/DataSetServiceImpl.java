@@ -70,7 +70,6 @@ import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 @Service
 public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
@@ -335,14 +334,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   @Override
   public Map<String, QueryJobConfiguration> domainToBigQueryConfig(DataSetRequest dataSetRequest) {
     DbDataset dbDataset;
-    if (CollectionUtils.isEmpty(dataSetRequest.getDomainValuePairs())) {
-      dbDataset =
-          dataSetDao
-              .findDbDatasetByNameAndWorkspaceId(
-                  dataSetRequest.getName(), dataSetRequest.getWorkspaceId())
-              .orElseThrow(
-                  () ->
-                      new BadRequestException("Data Set Generate code Failed: Data set not found"));
+    if (dataSetRequest.getDataSetId() != null) {
+      dbDataset = dataSetDao.findOne(dataSetRequest.getDataSetId());
+      // In case wrong dataSetId is passed to Api
+      if (dbDataset == null) {
+        throw new BadRequestException("Data Set Generate code Failed: Data set not found");
+      }
     } else {
       dbDataset = dataSetMapper.dataSetRequestToDb(dataSetRequest, null, clock);
     }

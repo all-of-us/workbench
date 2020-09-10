@@ -574,6 +574,7 @@ public class DataSetControllerTest {
   public void testGetQueryDropsQueriesWithNoValue() {
     final DataSetRequest dataSet =
         buildEmptyDataSetRequest()
+            .dataSetId(1l)
             .addCohortIdsItem(COHORT_ONE_ID)
             .addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
 

@@ -86,6 +86,7 @@ class ExportDataSetModal extends React.Component<
   get datasetRequest() {
     const {dataSet} = this.props;
     return {
+      dataSetId: dataSet.id,
       name: dataSet.name,
       includesAllParticipants: dataSet.includesAllParticipants,
       description: dataSet.description,

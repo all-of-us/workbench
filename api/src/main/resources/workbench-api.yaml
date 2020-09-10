@@ -4702,6 +4702,9 @@ definitions:
     required:
     - name
     properties:
+      dataSetId:
+        type: integer
+        format: int64
       name:
         type: string
       description:
