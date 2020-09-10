@@ -3,6 +3,7 @@ package org.pmiops.workbench.reporting;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
@@ -18,7 +19,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.dao.projection.PrjReportingUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.ReportingResearcher;
 import org.pmiops.workbench.model.ReportingSnapshot;
@@ -127,29 +128,28 @@ public class ReportingSnapshotServiceTest {
     final ReportingWorkspace workspace1 = snapshot.getWorkspaces().get(0);
     assertThat(workspace1.getWorkspaceId()).isEqualTo(101L);
     assertThat(workspace1.getName()).isEqualTo("A Tale of Two Cities");
-    assertThat(workspace1.getFakeSize()).isEqualTo(100L);
     assertThat(workspace1.getCreatorId()).isNull(); // not stubbed
   }
 
   private void mockUsers() {
-    final List<DbUser> users =
+    final List<PrjReportingUser> users =
         ImmutableList.of(
-            createFakeUser(USER_GIVEN_NAME_1, USER_DISABLED_1, USER_ID_1),
-            createFakeUser("Homer", false, 102L));
-    doReturn(users).when(mockUserService).getAllUsers();
+            mockUserProjection(USER_GIVEN_NAME_1, USER_DISABLED_1, USER_ID_1),
+            mockUserProjection("Homer", false, 102L));
+    doReturn(users).when(mockUserService).getRepotingUsers();
   }
 
-  private DbUser createFakeUser(String givenName, boolean disabled, long userId) {
-    DbUser user = new DbUser();
-    user.setUserId(userId);
-    user.setGivenName(givenName);
-    user.setFamilyName(FAMILY_NAME);
-    user.setUsername(PRIMARY_EMAIL);
-    user.setContactEmail(CONTACT_EMAIL);
-    user.setOrganization(ORGANIZATION);
-    user.setCurrentPosition(CURRENT_POSITION);
-    user.setAreaOfResearch(RESEARCH_PURPOSE);
-    user.setDisabled(disabled);
+  private PrjReportingUser mockUserProjection(String givenName, boolean disabled, long userId) {
+    final PrjReportingUser user = mock(PrjReportingUser.class);
+    doReturn(userId).when(user).getUserId();
+    doReturn(givenName).when(user).getGivenName();
+    doReturn(FAMILY_NAME).when(user).getFamilyName();
+    doReturn(PRIMARY_EMAIL).when(user).getUsername();
+    doReturn(CONTACT_EMAIL).when(user).getContactEmail();
+    doReturn(ORGANIZATION).when(user).getOrganization();
+    doReturn(CURRENT_POSITION).when(user).getCurrentPosition();
+    doReturn(RESEARCH_PURPOSE).when(user).getAreaOfResearch();
+    doReturn(disabled).when(user).getDisabled();
     return user;
   }
 

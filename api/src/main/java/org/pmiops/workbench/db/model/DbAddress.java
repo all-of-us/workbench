@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.model;
 
+import java.util.Optional;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -8,6 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Entity
 @Table(name = "address")
@@ -96,5 +98,10 @@ public class DbAddress {
 
   public void setUser(DbUser user) {
     this.user = user;
+  }
+
+  @Transient
+  public Long getUserId() {
+    return Optional.ofNullable(getUser()).map(DbUser::getUserId).orElse(null);
   }
 }

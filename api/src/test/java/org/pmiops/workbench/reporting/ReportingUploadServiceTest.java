@@ -81,7 +81,7 @@ public class ReportingUploadServiceTest {
   @Captor private ArgumentCaptor<QueryJobConfiguration> queryJobConfigurationCaptor;
   @Captor private ArgumentCaptor<InsertAllRequest> insertAllRequestCaptor;
   private static final int RESEARCHER_COLUMN_COUNT = 4;
-  private static final int WORKSPACE_COLUMN_COUNT = 5;
+  private static final int WORKSPACE_COLUMN_COUNT = 4;
 
   @TestConfiguration
   @Import({ReportingUploadServiceDmlImpl.class, ReportingUploadServiceStreamingImpl.class})
@@ -130,19 +130,16 @@ public class ReportingUploadServiceTest {
                         .workspaceId(201L)
                         .name("Circle K")
                         .creationTime(THEN.toEpochMilli())
-                        .fakeSize(4444L)
                         .creatorId(101L),
                     new ReportingWorkspace()
                         .workspaceId(202L)
                         .name("Wyld Stallyns")
                         .creationTime(THEN.toEpochMilli())
-                        .fakeSize(4444L)
                         .creatorId(101L),
                     new ReportingWorkspace()
                         .workspaceId(203L)
                         .name("You-us said what we-us are saying right now.")
                         .creationTime(THEN.toEpochMilli())
-                        .fakeSize(4444L)
                         .creatorId(202L)));
 
     snapshotWithNulls =
@@ -171,19 +168,16 @@ public class ReportingUploadServiceTest {
                         .workspaceId(201L)
                         .name(null)
                         .creationTime(THEN.toEpochMilli())
-                        .fakeSize(4444L)
                         .creatorId(101L),
                     new ReportingWorkspace()
                         .workspaceId(202L)
                         .name("Work Work Work")
                         .creationTime(THEN.toEpochMilli())
-                        .fakeSize(4444L)
                         .creatorId(101L),
                     new ReportingWorkspace()
                         .workspaceId(203L)
                         .name(null)
                         .creationTime(THEN.toEpochMilli())
-                        .fakeSize(4444L)
                         .creatorId(202L)));
 
     emptySnapshot =
@@ -266,7 +260,6 @@ public class ReportingUploadServiceTest {
                 .workspaceId(303L)
                 .name("Circle K")
                 .creationTime(THEN.toEpochMilli())
-                .fakeSize(4444L)
                 .creatorId(101L)));
 
     reportingUploadServiceDmlImpl.uploadSnapshot(largeSnapshot);

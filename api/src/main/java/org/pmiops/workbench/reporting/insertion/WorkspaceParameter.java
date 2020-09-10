@@ -18,10 +18,6 @@ public enum WorkspaceParameter implements QueryParameterColumn<ReportingWorkspac
       ReportingWorkspace::getCreatorId,
       w -> QueryParameterValue.int64(w.getCreatorId())),
   NAME("name", ReportingWorkspace::getName, w -> QueryParameterValue.string(w.getName())),
-  FAKE_SIZE(
-      "fake_size",
-      ReportingWorkspace::getFakeSize,
-      w -> QueryParameterValue.int64(w.getFakeSize())),
   CREATION_TIME(
       "creation_time",
       w -> ROW_TO_INSERT_TIMESTAMP_FORMATTER.format(Instant.ofEpochMilli(w.getCreationTime())),

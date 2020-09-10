@@ -7,7 +7,7 @@ import java.util.Random;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.dao.projection.PrjReportingUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingWorkspace;
@@ -29,16 +29,16 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
 
   // Define immutable value class to hold results of queries within a transaction. Mapping to
   // Reporting DTO classes will happen outside the transaction.
-  private static class EntityBundle {
-    private final List<DbUser> users;
+  private static class QueryResultBundle {
+    private final List<PrjReportingUser> users;
     private final List<DbWorkspace> workspaces;
 
-    public EntityBundle(List<DbUser> users, List<DbWorkspace> workspaces) {
+    public QueryResultBundle(List<PrjReportingUser> users, List<DbWorkspace> workspaces) {
       this.users = users;
       this.workspaces = workspaces;
     }
 
-    public List<DbUser> getUsers() {
+    public List<PrjReportingUser> getUsers() {
       return users;
     }
 
@@ -67,37 +67,26 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
   @Transactional(readOnly = true)
   @Override
   public ReportingSnapshot takeSnapshot() {
-    final EntityBundle entityBundle = getApplicationDbData();
+    final QueryResultBundle queryResultBundle = getApplicationDbData();
     final Stopwatch stopwatch = stopwatchProvider.get().start();
-
-    final List<ReportingWorkspace> workspaces =
-        reportingMapper.toReportingWorkspaceList(entityBundle.getWorkspaces());
-    for (ReportingWorkspace model : workspaces) {
-      model.setFakeSize(
-          getFakeSize()); // TODO(jaycarlton): remove after initial query & view testing
-    }
 
     final ReportingSnapshot result =
         new ReportingSnapshot()
             .captureTimestamp(clock.millis())
-            .researchers(reportingMapper.toReportingResearcherList(entityBundle.getUsers()))
-            .workspaces(workspaces);
+            .researchers(reportingMapper.toReportingResearcherList(queryResultBundle.getUsers()))
+            .workspaces(reportingMapper.toReportingWorkspaceList(queryResultBundle.getWorkspaces()));
     stopwatch.stop();
     log.info(LogFormatters.duration("Conversion to ReportingSnapshot", stopwatch.elapsed()));
     return result;
   }
 
-  private EntityBundle getApplicationDbData() {
+  private QueryResultBundle getApplicationDbData() {
     final Stopwatch stopwatch = stopwatchProvider.get().start();
-    final List<DbUser> users = userService.getAllUsers();
+    final List<PrjReportingUser> users = userService.getRepotingUsers();
     final List<DbWorkspace> workspaces = workspaceService.getAllActiveWorkspaces();
-    final EntityBundle result = new EntityBundle(users, workspaces);
+    final QueryResultBundle result = new QueryResultBundle(users, workspaces);
     stopwatch.stop();
     log.info(LogFormatters.duration("Application DB Queries", stopwatch.elapsed()));
     return result;
-  }
-
-  private long getFakeSize() {
-    return random.nextLong();
   }
 }
