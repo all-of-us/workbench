@@ -5474,7 +5474,7 @@ definitions:
           configuration type, other configuration parameters should still be
           provided during creation. The API will only perform limited validation
           that the configuration type and configuration details are consistent.
-        "$ref": "$/definitions/RuntimeConfigurationType"
+        "$ref": "#/definitions/RuntimeConfigurationType"
       toolDockerImage:
         type: string
         description: The tool docker image to install. May be Dockerhub or GCR. If not
