@@ -13,6 +13,8 @@ import {triggerEvent} from 'app/utils/analytics';
 import {attributesSelectionStore, currentCohortCriteriaStore, currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
 import {AttrName, Criteria, CriteriaSubType, CriteriaType, DomainType, Operator} from 'generated/fetch';
 
+// COPE Survey ID will not change
+const COPE_SURVEY_ID = 328232;
 const styles = reactStyles({
   code: {
     color: colors.dark,
@@ -286,6 +288,11 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     }
   }
 
+  get isCOPESurvey() {
+    const {node: {domainId, hasAttributes, id}} = this.props;
+    return !hasAttributes && id === COPE_SURVEY_ID && domainId === DomainType.SURVEY.toString() ;
+  }
+
   render() {
     const {autocompleteSelection, groupSelections, node,
       node: {code, count, domainId, id, group, hasAttributes, name, parentId, selectable}, scrollToMatch, searchTerms, select, selectedIds,
@@ -331,7 +338,9 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
           {(!!code && code !== name) && <div style={styles.code}>{code}</div>}
           <TooltipTrigger content={<div>{displayName}</div>} disabled={!this.state.truncated}>
             <div style={styles.name} ref={(e) => this.name = e}>
-              <span style={searchMatch ? styles.searchMatch : {}}>{displayName}</span>
+              <span data-test-id='displayName' style={searchMatch ? styles.searchMatch : {}}>{displayName}
+              {this.isCOPESurvey && <span style={{paddingRight: '0.1rem'}}> - <i> Versioned</i> </span>}
+              </span>
             </div>
           </TooltipTrigger>
           {this.showCount && <div style={{whiteSpace: 'nowrap'}}>
