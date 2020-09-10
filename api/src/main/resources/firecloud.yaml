@@ -264,6 +264,39 @@ paths:
           - openid
           - email
           - profile
+  /api/user/billing/{projectName}:
+    delete:
+      tags:
+        - Billing
+      summary: delete billing project
+      description: delete billing project
+      operationId: deleteBillingProject
+      parameters:
+        - in: path
+          description: Name of the billing project
+          name: projectName
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successfully delete billing project
+        400:
+          description: Project cannot be deleted because it contains workspaces.
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        403:
+          description: You must be a project owner to delete billing project
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        500:
+          description: Rawls Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+      security:
+        - authorization:
+            - openid
+            - email
+            - profile
 
   /api/nih/callback:
     post:
