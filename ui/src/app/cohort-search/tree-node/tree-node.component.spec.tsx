@@ -35,11 +35,11 @@ const surveyCOPETreeNodeStub = {
   group: true,
   hasAttributes: false,
   id: 328232,
-  name: 'COVID-19 Related Symptoms',
+  name: 'COVID-19 Participant Experience (COPE) Survey',
   parentId: 0,
   predefinedAttributes: null,
   selectable: true,
-  subtype: 'HEIGHT',
+  subtype: 'SURVEY',
   type: 'PM'
 } as NodeProp;
 describe('TreeNode', () => {
@@ -75,6 +75,6 @@ describe('TreeNode', () => {
                                     selectedIds={[]}
                                     setAttributes={() => {}}/>);
     expect(wrapper).toBeTruthy();
-    expect(wrapper.find('[data-test-id="displayName"]').text()).toContain('COVID-19 Related Symptoms -  Versioned');
+    expect(wrapper.find('[data-test-id="displayName"]').text()).toContain('COVID-19 Participant Experience (COPE) Survey -  Versioned');
   });
 });
