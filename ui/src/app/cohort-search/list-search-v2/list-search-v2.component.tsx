@@ -3,19 +3,17 @@ import * as React from 'react';
 import {Key} from 'ts-key-enum';
 
 import {domainToTitle} from 'app/cohort-search/utils';
-import {Button, Clickable, StyledAnchorTag} from 'app/components/buttons';
+import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
-import {AoU} from 'app/components/text-wrappers';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCdrVersions, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {attributesSelectionStore, setSidebarActiveIconStore} from 'app/utils/navigation';
+import {attributesSelectionStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {environment} from 'environments/environment';
 import {CdrVersion, CdrVersionListResponse, CriteriaType, DomainType} from 'generated/fetch';
 
 const borderStyle = `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`;
@@ -40,10 +38,6 @@ const styles = reactStyles({
     background: 'transparent',
     border: 0,
     outline: 'none',
-  },
-  drugsText: {
-    marginTop: '0.25rem',
-    lineHeight: '0.75rem'
   },
   attrIcon: {
     marginRight: '0.5rem',
@@ -79,7 +73,6 @@ const styles = reactStyles({
     fontSize: '1.15rem',
   },
   listContainer: {
-    width: '99%',
     margin: '0.5rem 0 1rem',
     fontSize: '12px',
     color: colors.primary,
@@ -144,9 +137,7 @@ const styles = reactStyles({
     color: colors.primary,
     display: 'table-cell',
     height: '100%',
-    lineHeight: '0.75rem',
     verticalAlign: 'middle',
-    width: '50%'
   }
 });
 
@@ -230,11 +221,6 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
     showStandardResults() {
       this.trackEvent('Standard Vocab Hyperlink');
       this.setState({standardOnly: true});
-    }
-
-    get showDataBrowserLink() {
-      return [DomainType.CONDITION, DomainType.PROCEDURE, DomainType.MEASUREMENT, DomainType.DRUG]
-        .includes(this.props.searchContext.domain);
     }
 
     get checkSource() {
@@ -344,7 +330,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
     }
 
     render() {
-      const {searchContext: {domain}, selectedIds} = this.props;
+      const {searchContext: {domain}} = this.props;
       const {cdrVersion, data, error, ingredients, loading, standardOnly, sourceMatch, standardData, totalCount} = this.state;
       const showStandardOption = !standardOnly && !!standardData && standardData.length > 0;
       const displayData = standardOnly ? standardData : data;
@@ -359,9 +345,6 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
         </div>
         <div style={{display: 'table', height: '100%', width: '100%'}}>
           <div style={styles.helpText}>
-            {!!totalCount && <div>
-              There are {totalCount.toLocaleString()} results{!!cdrVersion && <span> in {cdrVersion.name}</span>}.
-            </div>}
             {sourceMatch && !standardOnly && <div>
               There are {sourceMatch.count.toLocaleString()} participants with source code {sourceMatch.code}.
               {showStandardOption && <span> For more results, browse
@@ -378,78 +361,56 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
               &nbsp;<Clickable style={styles.vocabLink}
                                onMouseDown={() => this.trackEvent('Source Vocab Hyperlink')}
                                onClick={() => this.setState({standardOnly: false})}>
-              Return to source code
-            </Clickable>.
+                Return to source code
+              </Clickable>.
             </div>}
-            {domain === DomainType.DRUG && <div style={styles.drugsText}>
+            {domain === DomainType.DRUG && <div>
               Your search may bring back brand names, generics and ingredients. Only ingredients may be added to your search criteria.
             </div>}
-          </div>
-          <div style={{...styles.helpText, textAlign: 'right'}}>
-            {domain === DomainType.DRUG && <div>
-              <StyledAnchorTag
-                 href='https://mor.nlm.nih.gov/RxNav/'
-                 target='_blank'
-                 rel='noopener noreferrer'>
-                Explore
-              </StyledAnchorTag>
-              &nbsp;drugs by brand names outside of <AoU/>.
-            </div>}
-            {this.showDataBrowserLink && <div>
-              Explore Source information on the&nbsp;
-              <StyledAnchorTag
-                 href={environment.publicUiUrl}
-                 target='_blank'
-                 rel='noopener noreferrer'>
-                Data Browser.
-              </StyledAnchorTag>
+            {!!totalCount && <div>
+              There are {totalCount.toLocaleString()} results{!!cdrVersion && <span> in {cdrVersion.name}</span>}.
             </div>}
           </div>
         </div>
         {!loading && !!displayData && <div style={styles.listContainer}>
-          {!!displayData.length && <React.Fragment><table className='p-datatable' style={styles.table}>
-            <thead className='p-datatable-thead'>
-              <tr style={{height: '2rem'}}>
-                <th style={{...styles.columnHeader, borderLeft: 0}}>Name</th>
-                <th style={{...styles.columnHeader, width: '20%'}}>Code</th>
-                <th style={{...styles.columnHeader, width: '10%'}}>Vocab</th>
-                <th style={{...styles.columnHeader, width: '8%'}}>Count</th>
-                <th style={{...styles.columnHeader, textAlign: 'center', width: '12%'}}>View Hierarchy</th>
-              </tr>
-            </thead>
-          </table>
-          <div style={{height: '15rem', overflowY: 'auto'}}>
-            <table className='p-datatable' style={{...styles.table, ...styles.tableBody}}>
-              <tbody className='p-datatable-tbody'>
-              {displayData.map((row, r) => {
-                const open = ingredients[row.id] && ingredients[row.id].open;
-                const err = ingredients[row.id] && ingredients[row.id].error;
-                return <React.Fragment key={r}>
-                  {this.renderRow(row, false, r)}
-                  {open && !err && ingredients[row.id].items.map((item, i) => {
-                    return <React.Fragment key={i}>{this.renderRow(item, true, `${r}.${i}`)}</React.Fragment>;
-                  })}
-                  {open && err && <tr>
-                    <td colSpan={5}>
-                      <div style={{...styles.error, marginTop: 0}}>
-                        <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid' shape='exclamation-triangle' size='22'/>
-                        Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
-                      </div>
-                    </td>
-                  </tr>}
-                </React.Fragment>;
-              })}
-            </tbody>
+          {!!displayData.length && <React.Fragment>
+            <table className='p-datatable' style={styles.table}>
+              <thead className='p-datatable-thead'>
+                <tr style={{height: '2rem'}}>
+                  <th style={{...styles.columnHeader, borderLeft: 0}}>Name</th>
+                  <th style={{...styles.columnHeader, width: '20%'}}>Code</th>
+                  <th style={{...styles.columnHeader, width: '10%'}}>Vocab</th>
+                  <th style={{...styles.columnHeader, width: '8%'}}>Count</th>
+                  <th style={{...styles.columnHeader, textAlign: 'center', width: '12%'}}>View Hierarchy</th>
+                </tr>
+              </thead>
             </table>
-          </div>
-        </React.Fragment>}
+            <div style={{height: '15rem', overflowY: 'auto'}}>
+              <table className='p-datatable' style={{...styles.table, ...styles.tableBody}}>
+                <tbody className='p-datatable-tbody'>
+                {displayData.map((row, index) => {
+                  const open = ingredients[row.id] && ingredients[row.id].open;
+                  const err = ingredients[row.id] && ingredients[row.id].error;
+                  return <React.Fragment key={index}>
+                    {this.renderRow(row, false, index)}
+                    {open && !err && ingredients[row.id].items.map((item, i) => {
+                      return <React.Fragment key={i}>{this.renderRow(item, true, `${index}.${i}`)}</React.Fragment>;
+                    })}
+                    {open && err && <tr>
+                      <td colSpan={5}>
+                        <div style={{...styles.error, marginTop: 0}}>
+                          <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid' shape='exclamation-triangle' size='22'/>
+                          Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
+                        </div>
+                      </td>
+                    </tr>}
+                  </React.Fragment>;
+                })}
+              </tbody>
+              </table>
+            </div>
+          </React.Fragment>}
           {!standardOnly && !displayData.length && <div>No results found</div>}
-          <Button type='primary'
-                  style={{borderRadius: '5px', float: 'right', marginTop: '1rem'}}
-                  disabled={!!selectedIds && selectedIds.length === 0}
-                  onClick={() => setSidebarActiveIconStore.next('criteria')}>
-            Finish & Review
-          </Button>
         </div>}
         {loading && <SpinnerOverlay/>}
         {error && <div style={{...styles.error, ...(domain === DomainType.DRUG ? {marginTop: '3.75rem'} : {})}}>

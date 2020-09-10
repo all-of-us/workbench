@@ -17,7 +17,7 @@ import {
   serverConfigStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
-import {Attribute, Criteria, DomainType} from 'generated/fetch';
+import {Attribute, Criteria, DomainType, Modifier} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 
 const proIcons = {
@@ -73,10 +73,11 @@ const styles = reactStyles({
     border: `2px solid ${colors.primary}`,
     borderRadius: '5px',
     height: 'calc(100% - 17rem)',
+    lineHeight: '0.75rem',
     minHeight: 'calc(100vh - 15rem)',
+    padding: '0.5rem',
     overflowX: 'hidden',
     overflowY: 'auto',
-    width: '95%',
   },
   selectionItem: {
     display: 'flex',
@@ -122,6 +123,11 @@ const styles = reactStyles({
     fontSize: '14px',
     padding: '0.2rem 0.5rem 0',
     width: '100%',
+  },
+  selectionHeader: {
+    color: colors.primary,
+    fontWeight: 600,
+    marginTop: '0.5rem'
   },
   backButton: {
     border: '0px',
@@ -239,25 +245,20 @@ export class SelectionInfo extends React.Component<SelectionInfoProps, Selection
     ].includes(this.props.selection.domainId);
   }
 
-  get showOr() {
-    const {index, selection} = this.props;
-    return index > 0 && selection.domainId !== DomainType.PERSON.toString();
-  }
-
   render() {
-    const {selection, removeSelection} = this.props;
+    const {index, selection, removeSelection} = this.props;
     const itemName = <React.Fragment>
       {this.showType && <strong>{typeDisplay(selection)}&nbsp;</strong>}
-      {nameDisplay(selection)} {attributeDisplay(selection)}
+      {nameDisplay(selection)}
     </React.Fragment>;
     return <FlexColumn style={styles.selectionItem}>
-      {this.showOr && <div style={{padding: '0.3rem 0rem 0.3rem 1rem'}}>OR&nbsp;</div>}
+      {index > 0 && <div style={{padding: '0.3rem 0rem 0.3rem 1rem'}}>OR&nbsp;</div>}
       <FlexRow style={{alignItems: 'baseline'}}>
       <button style={styles.removeSelection} onClick={() => removeSelection()}>
         <ClrIcon shape='times-circle'/>
       </button>
-      <FlexColumn>
-        <div>Group</div>
+      <FlexColumn style={{width: 'calc(100% - 1rem)'}}>
+        {selection.group && <div>Group</div>}
         <TooltipTrigger disabled={!this.state.truncated} content={itemName}>
           <div style={styles.itemName} ref={(e) => this.name = e}>
             {itemName}
@@ -285,7 +286,7 @@ interface Props {
 interface State {
   attributesSelection: Criteria;
   disableSave: boolean;
-  modifierButtonText: string;
+  modifiers: Array<Modifier>;
   showModifiersSlide: boolean;
 }
 
@@ -353,15 +354,16 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
       this.state = {
         attributesSelection: undefined,
         disableSave: false,
-        modifierButtonText: 'APPLY MODIFIERS',
+        modifiers: [],
         showModifiersSlide: false
       };
     }
 
     componentDidMount(): void {
-      if (!!this.props.cohortContext) {
+      const {cohortContext} = this.props;
+      if (!!cohortContext) {
         // Check for disabling the Save Criteria button
-        this.checkCriteriaChanges();
+        this.setState({modifiers: cohortContext.item.modifiers}, () => this.checkCriteriaChanges());
       }
       this.subscription = attributesSelectionStore.subscribe(attributesSelection => {
         this.setState({attributesSelection});
@@ -374,10 +376,7 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
     componentDidUpdate(prevProps: Readonly<Props>): void {
       const {cohortContext, criteria} = this.props;
       if (!criteria && !!prevProps.criteria) {
-        this.setState({
-          modifierButtonText: 'APPLY MODIFIERS',
-          showModifiersSlide: false
-        });
+        this.setState({showModifiersSlide: false});
       }
       if (!!cohortContext && !!criteria && criteria !== prevProps.criteria) {
         // Each time the criteria changes, we check for disabling the Save Criteria button again
@@ -385,68 +384,27 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
       }
     }
 
-    get showModifiers() {
-      return ![DomainType.PHYSICALMEASUREMENT, DomainType.PERSON, DomainType.SURVEY].includes(this.props.domain);
-    }
-
-    get showNext() {
-      return this.showModifiers && this.props.view !== 'modifiers';
-    }
-
-    get showBack() {
-      return this.showModifiers && this.props.view === 'modifiers';
-    }
-
-    showOr(index, selection) {
-      return index > 0 && selection.domainId !== DomainType.PERSON.toString();
-    }
-
     checkCriteriaChanges() {
       const {cohortContext, criteria} = this.props;
       if (criteria.length === 0) {
         this.setState({disableSave: true});
       } else {
-        const mappedCriteriaString = JSON.stringify(criteria.map(mapCriteria));
-        const mappedParametersString = JSON.stringify(cohortContext.item.searchParameters.map(mapCriteria));
+        // We need to check for changes to criteria selections AND the modifiers array
+        const mappedCriteriaString = JSON.stringify({
+          criteria: criteria.map(mapCriteria),
+          modifiers: this.state.modifiers
+        });
+        const mappedParametersString = JSON.stringify({
+          criteria: cohortContext.item.searchParameters.map(mapCriteria),
+          modifiers: cohortContext.item.modifiers
+        });
         this.setState({disableSave: mappedCriteriaString === mappedParametersString});
       }
-    }
-
-    renderCriteria() {
-      const {criteria} = this.props;
-      const g = fp.groupBy('isStandard', criteria);
-      return <div style={{paddingLeft: '0.5rem', paddingBottom: '4rem'}}>
-        {g['true'] && g['true'].length > 0 && this.renderCriteriaGroup(g['true'] , 'Standard Groups')}
-        {g['false'] && g['false'].length > 0 && this.renderCriteriaGroup(g['false'], 'Source code Groups')}
-      </div>;
     }
 
     removeCriteria(criteriaToDel) {
       const updateList = fp.remove((selection) => selection.parameterId === criteriaToDel.parameterId, this.props.criteria);
       currentCohortCriteriaStore.next(updateList);
-    }
-
-    renderCriteriaGroup(criteriaGroup, header) {
-      return  <React.Fragment>
-        <h3> {header}</h3>
-        <hr style={{marginRight: '0.5rem'}}/>
-        {criteriaGroup && criteriaGroup.map((criteria, index) =>
-          <SelectionInfo key={index}
-                         index={index}
-                         selection={criteria}
-                         removeSelection={() => this.removeCriteria(criteria)}/>
-
-        )}
-      </React.Fragment> ;
-    }
-
-    applyModifier(modifiers) {
-      if (modifiers) {
-        const modifierButtonText = '(' + modifiers.length + ')  MODIFIERS APPLIED';
-        this.setState({showModifiersSlide: false, modifierButtonText: modifierButtonText});
-      } else {
-        this.setState({showModifiersSlide: false, modifierButtonText: 'APPLY MODIFIERS'});
-      }
     }
 
     get showModifierButton() {
@@ -462,13 +420,13 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
     }
 
     render() {
-      const {back, criteria} = this.props;
-      const {attributesSelection, disableSave, modifierButtonText, showModifiersSlide} = this.state;
+      const {back, cohortContext, criteria} = this.props;
+      const {attributesSelection, disableSave, showModifiersSlide} = this.state;
       return <div>
         <FlexRow style={styles.navIcons}>
           {this.showAttributesOrModifiers &&
             <Clickable style={{marginRight: '1rem'}}
-                       onClick={() => this.setState({attributesSelection: undefined})}>
+                       onClick={() => this.setState({attributesSelection: undefined, showModifiersSlide: false})}>
               <img src={proIcons.arrowLeft}
                    style={{height: '21px', width: '18px'}}
                    alt='Go back'/>
@@ -485,16 +443,23 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
             <h3 style={{...styles.sectionTitle, marginTop: 0}}>Add selected criteria to cohort</h3>
             <div style={{paddingTop: '0.5rem', position: 'relative'}}>
               <div style={styles.selectionContainer}>
-                {this.renderCriteria()}
+                {!!criteria && criteria.map((selection, s) => <SelectionInfo key={s}
+                  index={s}
+                  selection={selection}
+                  removeSelection={() => this.removeCriteria(selection)}/>
+                )}
                 {this.showModifierButton && <div style={{paddingLeft: '0.6rem'}}>
-                  <Button type='secondaryOnDarkBackground' style={styles.modifierButton}
+                  <Button type='secondaryLight' style={styles.modifierButton}
                           onClick={() => this.setState({showModifiersSlide: true})}>
-                    {modifierButtonText}
+                    {cohortContext.item.modifiers.length > 0
+                      ? '(' + cohortContext.item.modifiers.length + ')  MODIFIERS APPLIED'
+                      : 'APPLY MODIFIERS'
+                    }
                   </Button>
                 </div>}
               </div>
             </div>
-            <FlexRowWrap style={{flexDirection: 'row-reverse', marginTop: '2rem'}}>
+            <FlexRowWrap style={{flexDirection: 'row-reverse', marginTop: '1rem'}}>
               <Button type='primary'
                       style={styles.saveButton}
                       disabled={disableSave}
@@ -506,8 +471,13 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
               </Button>
             </FlexRowWrap>
           </React.Fragment>}
-          {showModifiersSlide && <ModifierPage selections={criteria} applyModifiers={(modifier) => this.applyModifier(modifier)}/>}
-          {!!attributesSelection && <AttributesPageV2 close={() => attributesSelectionStore.next(undefined)} node={attributesSelection}/>}
+          {showModifiersSlide && <ModifierPage selections={criteria}
+                                               closeModifiers={() => {
+                                                 this.setState({showModifiersSlide: false});
+                                                 this.checkCriteriaChanges();
+                                               }}/>}
+          {!!attributesSelection && <AttributesPageV2 close={() => attributesSelectionStore.next(undefined)}
+                                                      node={attributesSelection}/>}
       </div>;
     }
   }

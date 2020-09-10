@@ -2,13 +2,12 @@ import * as React from 'react';
 
 import {SearchBar} from 'app/cohort-search/search-bar/search-bar.component';
 import {TreeNode} from 'app/cohort-search/tree-node/tree-node.component';
-import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
-import {currentWorkspaceStore, serverConfigStore, setSidebarActiveIconStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
 import {Criteria, CriteriaSubType, CriteriaType, DomainType} from 'generated/fetch';
 
 const styles = reactStyles({
@@ -198,12 +197,6 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
                                                             select={(s) => select(s)}
                                                             selectedIds={selectedIds}
                                                             setAttributes={setAttributes}/>)}
-        {serverConfigStore.getValue().enableCohortBuilderV2 && <Button type='primary'
-                style={{borderRadius: '5px', float: 'right', marginTop: '1rem'}}
-                disabled={selectedIds.length === 0}
-                onClick={() => setSidebarActiveIconStore.next('criteria')}>
-          Finish & Review
-        </Button>}
       </div>}
       {loading && !this.showHeader && <SpinnerOverlay/>}
     </React.Fragment>;

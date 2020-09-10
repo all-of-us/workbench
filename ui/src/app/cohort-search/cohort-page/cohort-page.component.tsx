@@ -78,7 +78,6 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
   class extends React.Component<Props, State> {
     private subscription;
     resolve: Function;
-    searchWrapper: HTMLDivElement;
 
     constructor(props: any) {
       super(props);
@@ -133,7 +132,6 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
           updateGroupListsCount: this.state.updateGroupListsCount + 1
         });
       }));
-      this.updateWrapperDimensions();
       this.props.setShowWarningModal(this.showWarningModal);
     }
 
@@ -141,6 +139,7 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
       this.subscription.unsubscribe();
       idsInUse.next(new Set());
       currentCohortStore.next(undefined);
+      currentCohortSearchContextStore.next(undefined);
       searchRequestStore.next({includes: [], excludes: [], dataFilters: []} as SearchRequest);
     }
 
@@ -152,11 +151,6 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
     getModalResponse(res: boolean) {
       this.setState({modalOpen: false});
       this.resolve(res);
-    }
-
-    updateWrapperDimensions() {
-      const {top} = this.searchWrapper.getBoundingClientRect();
-      this.searchWrapper.style.minHeight = `${window.innerHeight - top - 24}px`;
     }
 
     updateRequest = () => {
@@ -174,7 +168,7 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
       const {cohort, cohortChanged, cohortError, criteria, loading, modalOpen, overview, searchContext, updateCount, updateGroupListsCount}
         = this.state;
       return <React.Fragment>
-        <div ref={el => this.searchWrapper = el} style={{padding: '1rem 1rem 2rem'}}>
+        <div style={{minHeight: '28rem', padding: '0.5rem'}}>
           {cohortError
             ? <div style={styles.cohortError}>
               <ClrIcon className='is-solid' shape='exclamation-triangle' size={22} />
@@ -183,12 +177,12 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
             : serverConfigStore.getValue().enableCohortBuilderV2
               /* Cohort Builder V2 UI - behind enableCohortBuilderV2 feature flag */
               ? <React.Fragment>
-                <FlexRowWrap style={{margin: '0 -0.5rem', ...(!!cohortContext ? {display: 'none'} : {})}}>
+                <FlexRowWrap style={{margin: '1rem 0 2rem', ...(!!cohortContext ? {display: 'none'} : {})}}>
                   <div style={colStyle('66.66667')}>
                     <FlexRowWrap style={{margin: '0 -0.5rem'}}>
-                      <div style={{height: '1.5rem', padding: '0 0.5rem', width: '100%'}}>
-                        {!!cohort && <h3 style={{marginTop: 0}}>{cohort.name}</h3>}
-                      </div>
+                      {!!cohort && !!cohort.name && <div style={{height: '1.5rem', padding: '0 0.5rem', width: '100%'}}>
+                        <h3 style={{marginTop: 0}}>{cohort.name}</h3>
+                      </div>}
                       <div id='list-include-groups-v2' style={colStyle('50')}>
                         <SearchGroupList groups={criteria.includes}
                                          setSearchContext={(c) => this.setSearchContext(c)}
@@ -221,9 +215,9 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
               : <FlexRowWrap style={{margin: '0 -0.5rem'}}>
                 <div style={colStyle('66.66667')}>
                   <FlexRowWrap style={{margin: '0 -0.5rem'}}>
-                    <div style={{height: '1.5rem', padding: '0 0.5rem', width: '100%'}}>
-                      {!!cohort && <h3 style={{marginTop: 0}}>{cohort.name}</h3>}
-                    </div>
+                    {!!cohort && !!cohort.name && <div style={{height: '1.5rem', padding: '0 0.5rem', width: '100%'}}>
+                      <h3 style={{marginTop: 0}}>{cohort.name}</h3>
+                    </div>}
                     <div id='list-include-groups' style={colStyle('50')}>
                       <SearchGroupList groups={criteria.includes}
                                        setSearchContext={(c) => this.setSearchContext(c)}

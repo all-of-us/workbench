@@ -1,15 +1,17 @@
+import {Growl} from 'primereact/growl';
 import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
 
-import {Demographics} from 'app/cohort-search/demographics/demographics.component';
+import {DemographicsV2} from 'app/cohort-search/demographics/demographics-v2.component';
 import {ListSearchV2} from 'app/cohort-search/list-search-v2/list-search-v2.component';
 import {searchRequestStore} from 'app/cohort-search/search-state.service';
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {CriteriaTree} from 'app/cohort-search/tree/tree.component';
 import {domainToTitle, generateId, typeToTitle} from 'app/cohort-search/utils';
-import {Button, Clickable} from 'app/components/buttons';
+import {Button, Clickable, StyledAnchorTag} from 'app/components/buttons';
 import {FlexRowWrap} from 'app/components/flex';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {AoU} from 'app/components/text-wrappers';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentCohortSearchContext} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
@@ -18,18 +20,37 @@ import {
   currentCohortCriteriaStore,
   currentCohortSearchContextStore,
   serverConfigStore,
+  setSidebarActiveIconStore,
 } from 'app/utils/navigation';
+import {environment} from 'environments/environment';
 import {Criteria, CriteriaType, DomainType, TemporalMention, TemporalTime} from 'generated/fetch';
-import {Growl} from 'primereact/growl';
 
 const styles = reactStyles({
+  arrowIcon: {
+    height: '21px',
+    marginTop: '-0.2rem',
+    width: '18px'
+  },
   backArrow: {
     background: `${addOpacity(colors.accent, 0.15)}`,
     borderRadius: '50%',
+    display: 'inline-block',
     height: '1.5rem',
-    lineHeight: '1.4rem',
+    lineHeight: '1.6rem',
     textAlign: 'center',
     width: '1.5rem',
+  },
+  externalLinks: {
+    display: 'table-cell',
+    lineHeight: '0.75rem',
+    textAlign: 'right',
+    verticalAlign: 'middle'
+  },
+  finishButton: {
+    borderRadius: '5px',
+    bottom: '1rem',
+    position: 'absolute',
+    right: '3rem',
   },
   footer: {
     marginTop: '0.5rem',
@@ -58,13 +79,16 @@ const styles = reactStyles({
     width: '100%',
   },
   titleBar: {
-    marginBottom: '0.5rem',
-    padding: '0rem 1rem',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    height: '2.5rem',
-    marginTop: '0.5rem',
+    color: colors.primary,
+    display: 'table',
+    margin: '1rem 0 0.25rem',
+    width: '65%',
+    height: '1.5rem',
+  },
+  titleHeader: {
+    display: 'inline-block',
+    lineHeight: '1.5rem',
+    margin: '0 0 0 0.75rem'
   }
 });
 
@@ -135,40 +159,41 @@ const css = `
     position: sticky;
   }
   .p-growl.p-growl-topright {
-     height: 1rem;
-     width: 6.4rem;
-     padding-top: 0.4rem;
-     line-height: 0.7rem;
-     margin-right: 3rem;
-   }
-   .p-growl .p-growl-item-container .p-growl-item .p-growl-image {
-     font-size: 1rem !important;
-     margin-top: 0.19rem
-   }
-
+    height: 1rem;
+    width: 6.4rem;
+    padding-top: 0.4rem;
+    line-height: 0.7rem;
+    margin-right: 2.5rem;
+  }
+  .p-growl .p-growl-item-container .p-growl-item .p-growl-image {
+    font-size: 1rem !important;
+    margin-top: 0.19rem
+  }
   .p-growl-item-container:after {
     content:"";
     position: absolute;
-    left: 100%;
-    top:0.15rem;
-    width:0px;
-    height:0px;
-    border-top:0.5rem solid transparent;
-    border-left:0.5rem solid ` + colorWithWhiteness(colors.success, 0.6) + `;
-    border-bottom:0.5rem solid transparent;
+    left: 97.5%;
+    top: 0.1rem;
+    width: 0px;
+    height: 0px;
+    border-top: 0.5rem solid transparent;
+    border-left: 0.5rem solid ` + colorWithWhiteness(colors.success, 0.6) + `;
+    border-bottom: 0.5rem solid transparent;
   }
-   .p-growl-item-container {
-     background-color: ` + colorWithWhiteness(colors.success, 0.6) + `!important;
-   }
-   .p-growl-item {
-     padding: 0rem !important;
-     background-color: ` + colorWithWhiteness(colors.success, 0.6) + `!important;
-     margin-left: 0.3rem;
-   }
-
-   .p-growl-message {
-     margin-left: 0.5em
-   }
+  .p-growl-item-container {
+    background-color: ` + colorWithWhiteness(colors.success, 0.6) + `!important;
+  }
+  .p-growl-item {
+    padding: 0rem !important;
+    background-color: ` + colorWithWhiteness(colors.success, 0.6) + `!important;
+    margin-left: 0.3rem;
+  }
+  .p-growl-message {
+    margin-left: 0.5em
+  }
+  .p-growl-details {
+    margin-top: 0.1rem;
+  }
  `;
 
 export const CohortSearch = withCurrentCohortSearchContext()(class extends React.Component<Props, State> {
@@ -276,7 +301,6 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
       overflowX: 'hidden',
       width: '100%',
       height: '100%',
-      padding: '0 0.4rem 0 1rem',
     } as React.CSSProperties;
     if (this.state.mode === mode) {
       style = {...style, display: 'block', animation: 'fadeEffect 1s'};
@@ -339,27 +363,47 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
     saveCriteria([param]);
   }
 
+  get showDataBrowserLink() {
+    return [DomainType.CONDITION, DomainType.PROCEDURE, DomainType.MEASUREMENT, DomainType.DRUG]
+    .includes(this.props.cohortContext.domain);
+  }
+
   render() {
     const {cohortContext} = this.props;
     const {autocompleteSelection, count, groupSelections, hierarchyNode, loadingSubtree, selectedIds, selections, title, treeSearchTerms}
       = this.state;
     return !!cohortContext && <FlexRowWrap style={styles.searchContainer}>
-
-      <div style={{height: '100%', width: '100%'}}>
-        <div style={{position: 'absolute', right: '0', marginTop: '-1rem'}}>
+      <div style={{height: '100%', padding: '0 0.5rem', width: '100%'}}>
+        <div style={{position: 'absolute', right: '0'}}>
           <style>
             {css}
           </style>
           <Growl ref={(el) => this.growl = el}/>
         </div>
         <div style={styles.titleBar}>
-          <div style={{display: 'inline-flex', marginRight: '0.5rem'}}>
-            <Clickable style={styles.backArrow} onClick={() => this.closeSearch()}>
-              <img src={arrowIcon} style={{height: '21px', width: '18px'}} alt='Go back' />
-            </Clickable>
-            <h2 style={{color: colors.primary, lineHeight: '1.5rem', margin: '0 0 0 0.75rem'}}>
-              {title}
-            </h2>
+          <Clickable style={styles.backArrow} onClick={() => this.closeSearch()}>
+            <img src={arrowIcon} style={styles.arrowIcon} alt='Go back' />
+          </Clickable>
+          <h2 style={styles.titleHeader}>{title}</h2>
+          <div style={styles.externalLinks}>
+            {cohortContext.domain === DomainType.DRUG && <div>
+              <StyledAnchorTag
+                  href='https://mor.nlm.nih.gov/RxNav/'
+                  target='_blank'
+                  rel='noopener noreferrer'>
+                Explore
+              </StyledAnchorTag>
+              &nbsp;drugs by brand names outside of <AoU/>.
+            </div>}
+            {this.showDataBrowserLink && <div>
+              Explore Source information on the&nbsp;
+              <StyledAnchorTag
+                  href={environment.publicUiUrl}
+                  target='_blank'
+                  rel='noopener noreferrer'>
+                Data Browser.
+              </StyledAnchorTag>
+            </div>}
           </div>
         </div>
         <div style={
@@ -368,7 +412,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
             : {height: 'calc(100% - 3.5rem)'}
         }>
           {cohortContext.domain === DomainType.PERSON ? <div style={{flex: 1, overflow: 'auto'}}>
-              <Demographics
+              <DemographicsV2
                 count={count}
                 criteriaType={cohortContext.type}
                 select={this.addSelection}
@@ -401,20 +445,14 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
                 </div>
               </div>
             </React.Fragment>}
-          {cohortContext.type === CriteriaType.AGE && <div style={styles.footer}>
-            <Button style={styles.footerButton}
-                    type='link'
-                    onClick={() => this.closeSearch()}>
-              Cancel
-            </Button>
-            <Button style={styles.footerButton}
-                    type='primary'
-                    onClick={() => saveCriteria()}>
-              Finish
-            </Button>
-          </div>}
         </div>
       </div>
+      <Button type='primary'
+              style={styles.finishButton}
+              disabled={!!selectedIds && selectedIds.length === 0}
+              onClick={() => setSidebarActiveIconStore.next('criteria')}>
+        Finish & Review
+      </Button>
     </FlexRowWrap>;
   }
 });

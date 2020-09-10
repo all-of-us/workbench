@@ -19,7 +19,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {withCurrentCohortCriteria} from 'app/utils';
 import {highlightSearchTerm, reactStyles, ReactWrapperBase, withCurrentWorkspace, withUserProfile} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {NavStore, setSidebarActiveIconStore} from 'app/utils/navigation';
+import {currentCohortSearchContextStore, NavStore, setSidebarActiveIconStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {ParticipantCohortStatus, WorkspaceAccessLevel} from 'generated/fetch';
@@ -39,7 +39,7 @@ const styles = reactStyles({
     top: '60px',
     right: 0,
     height: 'calc(100% - 60px)',
-    width: 'calc(14rem + 55px)',
+    transition: 'width 0.5s ease-out',
     overflow: 'hidden',
     color: colors.primary,
     zIndex: -1,
@@ -56,11 +56,9 @@ const styles = reactStyles({
     top: 0,
     right: '45px',
     height: '100%',
-    width: '14.5rem',
     overflow: 'auto',
-    marginRight: 'calc(-14rem - 40px)',
     background: colorWithWhiteness(colors.primary, .87),
-    transition: 'margin-right 0.5s ease-out',
+    transition: 'margin-right 0.5s ease-out, width 0.5s ease-out',
     boxShadow: `-10px 0px 10px -8px ${colorWithWhiteness(colors.dark, .5)}`,
   },
   sidebarOpen: {
@@ -395,17 +393,21 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
     }
 
     sidebarContainerStyles(activeIcon, notebookStyles) {
+      const sidebarContainerStyle = {
+        ...styles.sidebarContainer,
+        width: `calc(${this.sidebarWidth}rem + 55px)`
+      };
       if (notebookStyles) {
         if (activeIcon) {
-          return {...styles.sidebarContainer, ...styles.notebookOverrides, ...styles.sidebarContainerActive};
+          return {...sidebarContainerStyle, ...styles.notebookOverrides, ...styles.sidebarContainerActive};
         } else {
-          return {...styles.sidebarContainer, ...styles.notebookOverrides};
+          return {...sidebarContainerStyle, ...styles.notebookOverrides};
         }
       } else {
         if (activeIcon) {
-          return {...styles.sidebarContainer, ...styles.sidebarContainerActive};
+          return {...sidebarContainerStyle, ...styles.sidebarContainerActive};
         } else {
-          return {...styles.sidebarContainer};
+          return sidebarContainerStyle;
         }
       }
     }
@@ -486,8 +488,21 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
           </React.Fragment> ;
     }
 
+    get sidebarStyle() {
+      const sidebarStyle = {
+        ...styles.sidebar,
+        marginRight: `calc(-${this.sidebarWidth}rem - 40px)`,
+        width: `${this.sidebarWidth}.5rem`,
+      };
+      return this.props.sidebarOpen ? {...sidebarStyle, ...styles.sidebarOpen} : sidebarStyle;
+    }
+
+    get sidebarWidth() {
+      return this.state.activeIcon === 'criteria' ? '20' : '14';
+    }
+
     render() {
-      const {criteria, helpContentKey, notebookStyles, setSidebarState, sidebarOpen} = this.props;
+      const {criteria, helpContentKey, notebookStyles, setSidebarState} = this.props;
       const {activeIcon, filteredContent, participant, searchTerm, tooltipId} = this.state;
       const displayContent = filteredContent !== undefined ? filteredContent : sidebarContent[helpContentKey];
 
@@ -526,7 +541,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
           }
         </div>
         <div style={this.sidebarContainerStyles(activeIcon, notebookStyles)}>
-          <div style={sidebarOpen ? {...styles.sidebar, ...styles.sidebarOpen} : styles.sidebar} data-test-id='sidebar-content'>
+          <div style={this.sidebarStyle} data-test-id='sidebar-content'>
             {activeIcon !== 'criteria' && <FlexRow style={styles.navIcons}>
               <Clickable style={{marginRight: '1rem'}}
                          onClick={() => setSidebarState(false)}>
@@ -569,8 +584,8 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
               {participant && <SidebarContent />}
             </div>
             <div style={contentStyle('criteria')}>
-              <div style={{display: 'block', overflow: 'auto', padding: '0.5rem 0.5rem 0rem'}}>
-                <SelectionList back={() => setSidebarState(false)} selections={[]}/>
+              <div style={{padding: '0.25rem 0.25rem 0rem'}}>
+                {!!currentCohortSearchContextStore.getValue() && <SelectionList back={() => setSidebarState(false)} selections={[]}/>}
               </div>
             </div>
             {activeIcon !== 'criteria' && <div style={styles.footer}>

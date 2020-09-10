@@ -17,7 +17,7 @@ import {reactStyles, withCurrentCohortSearchContext, withCurrentWorkspace} from 
 import {triggerEvent} from 'app/utils/analytics';
 import {currentCohortSearchContextStore, serverConfigStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {  Criteria, CriteriaType, DomainType, ModifierType, Operator} from 'generated/fetch';
+import {Criteria, CriteriaType, DomainType, ModifierType, Operator} from 'generated/fetch';
 
 
 const styles = reactStyles({
@@ -161,7 +161,7 @@ interface Selection extends Criteria {
 
 interface Props {
   selections: Array<Selection>;
-  applyModifiers: Function;
+  closeModifiers: Function;
   workspace: WorkspaceData;
   cohortContext: any;
 }
@@ -179,7 +179,6 @@ interface State {
 
 export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearchContext())(
   class extends React.Component<Props, State> {
-    updateInput: Function;
     constructor(props: Props) {
       super(props);
       this.state = {
@@ -224,7 +223,6 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
         visitCounts: undefined,
         calculateError: false,
       };
-      this.updateInput = fp.debounce(300, () => this.updateMods());
     }
 
     async componentDidMount() {
@@ -336,16 +334,13 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
         formState[index].values[1] = undefined;
       }
       formState[index].operator = sel;
-      this.setState({count: null, formState});
-      this.updateMods();
-
+      this.setState({count: null, formState}, () => this.validateValues());
     }
 
     inputChange = (index: string, field: string, value: any) => {
       const {formState} = this.state;
       formState[index].values[field] = value;
-      this.setState({count: null, formState});
-      this.updateInput();
+      this.setState({count: null, formState}, () => this.validateValues());
     }
 
     updateMods() {
@@ -369,8 +364,8 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
         }
         return acc;
       }, []);
-      this.validateValues();
       currentCohortSearchContextStore.next(cohortContext);
+      this.props.closeModifiers();
     }
 
     get addEncounters() {
@@ -385,7 +380,6 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
         workspace: {cdrVersionId}
       } = this.props;
       this.trackEvent('Calculate');
-      console.log(modifiers.length);
       try {
         this.setState({loading: true, count: null, calculateError: false});
         const request = {
@@ -528,12 +522,12 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
           <FlexRowWrap style={{flexDirection: 'row-reverse', marginTop: '2rem'}}>
             <Button type='primary'
                     style={styles.addButton}
-                    onClick={() => this.props.applyModifiers(this.props.cohortContext.item.modifiers)}>
+                    onClick={() => this.updateMods()}>
               APPLY MODIFIERS
             </Button>
             <Button type='link'
                     style={{color: colors.primary, marginRight: '0.5rem'}}
-                    onClick={() => this.props.applyModifiers(undefined)}>
+                    onClick={() => this.props.closeModifiers()}>
               BACK
             </Button>
           </FlexRowWrap>
