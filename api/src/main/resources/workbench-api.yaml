@@ -748,25 +748,60 @@ paths:
       summary: Create a workspace runtime.
       description: |
         Creates a new runtime for the current user in the given billing project. If a runtime already exists for the user in this billing project, a 409 conflict error is returned (even if the runtime is still initializing or is not in a ready state).
-        TODO(RW-3697): Custom runtime creation params should be added as a body param here.
       operationId: createRuntime
       tags:
       - runtime
       parameters:
       - "$ref": "#/parameters/workspaceNamespace"
+      parameters:
+      - in: body
+        name: runtime
+        description: notebooks runtime definition
+        schema:
+          "$ref": "#/definitions/Runtime"
       responses:
         200:
-          description: Returns the runtime that was created for this user and workspace.
+          description: Runtime was created successfully.
           schema:
             "$ref": "#/definitions/EmptyResponse"
         409:
           description: A runtime for this user and workspace already exists.
           schema:
             "$ref": "#/definitions/EmptyResponse"
+    patch:
+      summary: Updates the configuration of a runtime
+      description: In order to update the configuration of a runtime, it must first be running or paused
+      operationId: updateRuntime
+      tags:
+      - runtime
+      parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      requestBody:
+        $ref: "#/definitions/UpdateRuntimeRequest"
+      responses:
+        "202":
+          description: Runtime update request accepted
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
     delete:
       summary: Delete a workspace runtime.
-      description: 'TODO(RW-3695): updateRuntime should be added as a PATCH endpoint
-        here.'
+      description: 'Delete a runtime'
       operationId: deleteRuntime
       tags:
       - runtime
@@ -5400,41 +5435,128 @@ definitions:
     - Deleting
     - Deleted
     - Unknown
+  RuntimeConfigurationType:
+    description: >
+      The configuration type for this runtime. Namely, whether there was a user
+      override of a specific cloud service type, or whether one of the preset
+      system defaults was used. This distinction is meaningful for display
+      purposes, and allows the user to pickup natural upgrades to the default
+      configuration.
+    type: string
+    enum:
+    - UserOverride
+    - DefaultGce
+    - DefaultDataproc
   Runtime:
     required:
       - googleProject
       - runtimeName
       - createdDate
       - status
+      - configurationType
+      - toolDockerImage
     properties:
       googleProject:
         type: string
-        description: The Google Project used to create the runtime
+        description: The Google Project used to create the runtime. Output only.
       runtimeName:
         type: string
-        description: The user-supplied name for the runtime
+        description: The user-supplied name for the runtime. Output only.
       createdDate:
         type: string
-        description: The date and time the cluster was created, in ISO-8601 format
+        description: The date and time the cluster was created, in ISO-8601 format. Output only.
       status:
+        description: Runtime status. Output only.
         "$ref": "#/definitions/RuntimeStatus"
-  FileDetail:
-    type: object
-    required:
-    - name
-    - path
-    - lastModifiedTime
+      configurationType:
+        description: >
+          This field is primarily for provenance purposes. Regardless of the
+          configuration type, other configuration parameters should still be
+          provided during creation. The API will only perform limited validation
+          that the configuration type and configuration details are consistent.
+        "$ref": "$/definitions/RuntimeConfigurationType"
+      toolDockerImage:
+        type: string
+        description: The tool docker image to install. May be Dockerhub or GCR. If not
+          set, a default Jupyter image will be installed.
+      gceConfig:
+        description: oneOf gceConfig, dataprocConfig will be returned
+        "$ref": "#/definitions/GceConfig"
+      dataprocConfig:
+        description: oneOf gceConfig, dataprocConfig will be provided
+        "$ref": "#/definitions/DataprocConfig"
+  GceConfig:
+    description: Configuration for Google Compute Engine instances.
     properties:
-      name:
-        type: string
-        description: File Name
-      path:
-        type: string
-        description: The path is in format of gs://bucket-name/name
-      lastModifiedTime:
+      diskSize:
         type: integer
-        format: int64
-        description: Milliseconds since the UNIX epoch.
+        description: >
+          Optional, the size in gigabytes of the disk on the GCE VM.
+          Minimum size is 50GB. If unspecified, default size is 100GB.
+      bootDiskSize:
+        type: integer
+        description: size for boot disk. For old runtimes (prior 6/22/2020, gce runtimes don't have a separate boot disk)
+      machineType:
+        type: string
+        description: >
+          Optional, the machine type determines the number of CPUs and memory
+          for the master node. For example "n1-standard-16"
+
+          or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
+
+          see https://cloud.google.com/compute/docs/machine-types
+  DataprocConfig:
+    description: Configuration for a single Dataproc cluster.
+    properties:
+      numberOfWorkers:
+        type: integer
+        description: >
+          Optional, number of workers in the cluster. Can be 0 (default), 2 or
+          more. Google Dataproc does not allow 1 worker.
+      masterMachineType:
+        type: string
+        description: >
+          Optional, the machine type determines the number of CPUs and memory
+          for the master node. For example "n1-standard-16"
+
+          or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
+
+          see https://cloud.google.com/compute/docs/machine-types
+      masterDiskSize:
+        type: integer
+        description: >
+          Optional, the size in gigabytes of the disk on the master node.
+          Minimum size is 50GB. If unspecified, default size is 100GB.
+      workerMachineType:
+        type: string
+        description: >
+          Optional, the machine type determines the number of CPUs and memory
+          for the worker nodes. For example "n1-standard-16"
+
+          or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
+
+          see https://cloud.google.com/compute/docs/machine-types. Ignored if numberOfWorkers is 0.
+      workerDiskSize:
+        type: integer
+        description: >
+          Optional, the size in gigabytes of the disk on the master node.
+          Minimum size is 10GB. If unspecified, default size is 100GB.
+
+          Ignored if numberOfWorkers is 0.
+      numberOfWorkerLocalSSDs:
+        type: integer
+        description: >
+          Optional, the number of local solid state disks for workers. If
+          unspecified, the default number is 0.
+
+          Ignored if numberOfWorkers is 0.
+      numberOfPreemptibleWorkers:
+        type: integer
+        description: >
+          Optional, the number of preemptible workers. If unspecified, the
+          default number is 0. Ignored if numberOfWorkers is 0.
+
+          For more information, see https://cloud.google.com/compute/docs/instances/preemptible
   GetClusterResponse:
     type: object
     properties:
@@ -5480,6 +5602,13 @@ definitions:
         description: |
           The date and time the cluster was last accessed, in ISO-8601 format.
           Date accessed is defined as the last time the cluster was created, modified, or accessed via the proxy.
+  UpdateRuntimeRequest:
+    type: object
+    required:
+    - runtime
+    properties:
+      runtime:
+        "$ref": "#/definitions/Runtime"
   ListRuntimeResponse:
     description: This is a subset of options in a full runtimes response, copied from leonardo.yaml.
     required:
@@ -5547,6 +5676,23 @@ definitions:
         type: boolean
         default: false
         description: Set to true if playgroundMode needed
+  FileDetail:
+    type: object
+    required:
+    - name
+    - path
+    - lastModifiedTime
+    properties:
+      name:
+        type: string
+        description: File Name
+      path:
+        type: string
+        description: The path is in format of gs://bucket-name/name
+      lastModifiedTime:
+        type: integer
+        format: int64
+        description: Milliseconds since the UNIX epoch.
   ClusterLocalizeResponse:
     type: object
     required:
