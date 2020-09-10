@@ -3,6 +3,7 @@ version 1.0
 workflow IngestSyntheticVcfWf {
   input {
     File base_vcf
+    File base_vcf_index
     File file_of_sample_names
     String output_file
   }
@@ -15,6 +16,7 @@ workflow IngestSyntheticVcfWf {
   call RandomizeVcf {
     input:
       base_vcf = base_vcf,
+      base_vcf_index = base_vcf_index,
       file_of_sample_names = file_of_sample_names,
       number_of_samples = CountSamples.number_of_samples,
       output_file = output_file
@@ -51,12 +53,13 @@ task CountSamples {
 task RandomizeVcf {
   input {
     File base_vcf
+    File base_vcf_index
     File file_of_sample_names
     Int number_of_samples
     String output_file
   }
 
-  Int disk_size = ceil(number_of_samples * size(base_vcf, "GB"))
+  Int disk_size = ceil(2 * number_of_samples * size(base_vcf, "GB"))
 
   command <<<
     set -euo pipefail
