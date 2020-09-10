@@ -9,7 +9,7 @@ import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {currentWorkspaceStore, serverConfigStore, setSidebarActiveIconStore} from 'app/utils/navigation';
-import {Criteria, CriteriaType, DomainType} from 'generated/fetch';
+import {Criteria, CriteriaSubType, CriteriaType, DomainType} from 'generated/fetch';
 
 const styles = reactStyles({
   error: {
@@ -153,6 +153,13 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
       && domainId !== DomainType.VISIT.toString();
   }
 
+  // Hides the tree node for COPE survey if enableCOPESurvey config flag is set to false
+  showNode(node: Criteria) {
+    return node.subtype === CriteriaSubType.SURVEY.toString() && node.name.includes('COPE')
+      ? serverConfigStore.getValue().enableCOPESurvey
+      : true;
+  }
+
   render() {
     const {autocompleteSelection, back, groupSelections, node, scrollToMatch, searchTerms, select, selectedIds, selectOption, setAttributes,
       setSearchTerms} = this.props;
@@ -182,7 +189,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
           <ClrIcon style={{color: colors.white}} className='is-solid' shape='exclamation-triangle' />
           Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
         </div>}
-        {!!children && children.map((child, c) => <TreeNode key={c}
+        {!!children && children.map((child, c) => this.showNode(child) && <TreeNode key={c}
                                                             autocompleteSelection={autocompleteSelection}
                                                             groupSelections={groupSelections}
                                                             node={child}
