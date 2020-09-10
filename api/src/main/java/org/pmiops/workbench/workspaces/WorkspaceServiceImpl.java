@@ -306,6 +306,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
     dbWorkspace = saveWithLastModified(dbWorkspace);
     maybeDeleteRecentWorkspace(dbWorkspace.getWorkspaceId());
+
+    fireCloudService.deleteBillingProject(dbWorkspace.getWorkspaceNamespace());
   }
 
   @Override
