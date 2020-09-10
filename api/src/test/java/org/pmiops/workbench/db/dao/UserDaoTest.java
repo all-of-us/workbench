@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.dao.UserDao.UserCountGaugeLabelsAndValue;
-import org.pmiops.workbench.db.dao.projection.PrjReportingUser;
 import org.pmiops.workbench.db.dao.projection.PrjUser;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbStorageEnums;

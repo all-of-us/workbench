@@ -18,7 +18,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.BqDtoUser;
 import org.pmiops.workbench.model.BqDtoWorkspace;
 import org.pmiops.workbench.model.ReportingSnapshot;
-import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.reporting.insertion.DmlInsertJobBuilder;
 import org.pmiops.workbench.reporting.insertion.UserParameter;
 import org.pmiops.workbench.reporting.insertion.WorkspaceParameter;

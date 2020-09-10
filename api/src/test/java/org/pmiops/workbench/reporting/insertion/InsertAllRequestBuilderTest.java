@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.model.ReportingResearcher;
+import org.pmiops.workbench.model.BqDtoUser;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -20,35 +20,35 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class InsertAllRequestBuilderTest {
-  final InsertAllRequestBuilder<ReportingResearcher> researcherRequestBuilder =
+  final InsertAllRequestBuilder<BqDtoUser> researcherRequestBuilder =
       UserParameter::values;
 
   final Instant princePartyTime = Instant.parse("1999-12-31T23:59:59.99Z");
   final Map<String, Object> fixedValues =
       ImmutableMap.of("snapshot_timestamp", princePartyTime.toEpochMilli());
 
-  final List<ReportingResearcher> researchers =
+  final List<BqDtoUser> researchers =
       ImmutableList.of(
-          new ReportingResearcher()
+          new BqDtoUser()
               .username("user1")
-              .firstName("Onceler")
-              .isDisabled(false)
-              .researcherId(1L),
-          new ReportingResearcher()
+              .givenName("Onceler")
+              .disabled(false)
+              .userId(1L),
+          new BqDtoUser()
               .username(null)
-              .firstName("Nullson")
-              .isDisabled(false)
-              .researcherId(111L),
-          new ReportingResearcher()
+              .givenName("Nullson")
+              .disabled(false)
+              .userId(111L),
+          new BqDtoUser()
               .username("america@usa.gov")
-              .firstName(null)
-              .isDisabled(false)
-              .researcherId(212L),
-          new ReportingResearcher()
+              .givenName(null)
+              .disabled(false)
+              .userId(212L),
+          new BqDtoUser()
               .username(null)
-              .firstName(null)
-              .isDisabled(true)
-              .researcherId(313L));
+              .givenName(null)
+              .disabled(true)
+              .userId(313L));
 
   // regression test for RW-5437
   @Test

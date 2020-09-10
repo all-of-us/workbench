@@ -19,11 +19,11 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.dao.projection.PrjReportingUser;
+import org.pmiops.workbench.db.dao.projection.PrjUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.model.ReportingResearcher;
+import org.pmiops.workbench.model.BqDtoUser;
+import org.pmiops.workbench.model.BqDtoWorkspace;
 import org.pmiops.workbench.model.ReportingSnapshot;
-import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -118,29 +118,29 @@ public class ReportingSnapshotServiceTest {
     final ReportingSnapshot snapshot = reportingSnapshotService.takeSnapshot();
     assertThat((double) snapshot.getCaptureTimestamp()).isWithin(100.0).of(NOW_EPOCH_MILLI);
     assertThat(snapshot.getResearchers()).hasSize(2);
-    final ReportingResearcher researcher1 = snapshot.getResearchers().get(0);
-    assertThat(researcher1.getResearcherId()).isEqualTo(USER_ID_1);
-    assertThat(researcher1.getIsDisabled()).isEqualTo(USER_DISABLED_1);
-    assertThat(researcher1.getFirstName()).isEqualTo(USER_GIVEN_NAME_1);
+    final BqDtoUser researcher1 = snapshot.getResearchers().get(0);
+    assertThat(researcher1.getUserId()).isEqualTo(USER_ID_1);
+    assertThat(researcher1.getDisabled()).isEqualTo(USER_DISABLED_1);
+    assertThat(researcher1.getGivenName()).isEqualTo(USER_GIVEN_NAME_1);
     assertThat(researcher1.getUsername()).isEqualTo(PRIMARY_EMAIL);
 
     assertThat(snapshot.getWorkspaces()).hasSize(2);
-    final ReportingWorkspace workspace1 = snapshot.getWorkspaces().get(0);
+    final BqDtoWorkspace workspace1 = snapshot.getWorkspaces().get(0);
     assertThat(workspace1.getWorkspaceId()).isEqualTo(101L);
     assertThat(workspace1.getName()).isEqualTo("A Tale of Two Cities");
     assertThat(workspace1.getCreatorId()).isNull(); // not stubbed
   }
 
   private void mockUsers() {
-    final List<PrjReportingUser> users =
+    final List<PrjUser> users =
         ImmutableList.of(
             mockUserProjection(USER_GIVEN_NAME_1, USER_DISABLED_1, USER_ID_1),
             mockUserProjection("Homer", false, 102L));
     doReturn(users).when(mockUserService).getRepotingUsers();
   }
 
-  private PrjReportingUser mockUserProjection(String givenName, boolean disabled, long userId) {
-    final PrjReportingUser user = mock(PrjReportingUser.class);
+  private PrjUser mockUserProjection(String givenName, boolean disabled, long userId) {
+    final PrjUser user = mock(PrjUser.class);
     doReturn(userId).when(user).getUserId();
     doReturn(givenName).when(user).getGivenName();
     doReturn(FAMILY_NAME).when(user).getFamilyName();

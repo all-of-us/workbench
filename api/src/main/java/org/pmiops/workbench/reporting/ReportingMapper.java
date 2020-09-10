@@ -3,11 +3,10 @@ package org.pmiops.workbench.reporting;
 import java.util.Collection;
 import java.util.List;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.pmiops.workbench.db.dao.projection.PrjUser;
 import org.pmiops.workbench.db.dao.projection.PrjWorkspace;
 import org.pmiops.workbench.model.BqDtoUser;
-import org.pmiops.workbench.model.ReportingWorkspace;
+import org.pmiops.workbench.model.BqDtoWorkspace;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
@@ -19,7 +18,7 @@ public interface ReportingMapper {
 
   List<BqDtoUser> toReportingResearcherList(Collection<PrjUser> users);
 
-  ReportingWorkspace toModel(PrjWorkspace prjWorkspace);
+  BqDtoWorkspace toModel(PrjWorkspace prjWorkspace);
 
-  List<ReportingWorkspace> toReportingWorkspaceList(Collection<PrjWorkspace> dbWorkspace);
+  List<BqDtoWorkspace> toReportingWorkspaceList(Collection<PrjWorkspace> dbWorkspace);
 }

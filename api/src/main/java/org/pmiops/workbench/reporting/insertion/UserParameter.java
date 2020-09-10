@@ -3,34 +3,34 @@ package org.pmiops.workbench.reporting.insertion;
 import com.google.cloud.bigquery.QueryParameterValue;
 import java.util.function.Function;
 import org.pmiops.workbench.model.BqDtoUser;
-import org.pmiops.workbench.model.ReportingUser;
+import org.pmiops.workbench.model.BqDtoUser;
 
 public enum UserParameter implements QueryParameterColumn<BqDtoUser> {
   RESEARCHER_ID(
       "researcher_id",
-      ReportingUser::getUserId,
+      BqDtoUser::getUserId,
       r -> QueryParameterValue.int64(r.getUserId())),
   USERNAME(
       "username",
-      ReportingUser::getEmail,
-      r -> QueryParameterValue.string(r.getEmail())),
+      BqDtoUser::getUsername,
+      r -> QueryParameterValue.string(r.getUsername())),
   FIRST_NAME(
       "first_name",
-      ReportingUser::getGivenName,
+      BqDtoUser::getGivenName,
       r -> QueryParameterValue.string(r.getGivenName())),
   IS_DISABLED(
       "is_disabled",
-      ReportingUser::getDisabled,
+      BqDtoUser::getDisabled,
       r -> QueryParameterValue.bool(r.getDisabled()));
 
   private final String parameterName;
-  private final Function<ReportingUser, Object> objectValueFunction;
-  private final Function<ReportingUser, QueryParameterValue> parameterValueFunction;
+  private final Function<BqDtoUser, Object> objectValueFunction;
+  private final Function<BqDtoUser, QueryParameterValue> parameterValueFunction;
 
   UserParameter(
       String parameterName,
-      Function<ReportingUser, Object> objectValueFunction,
-      Function<ReportingUser, QueryParameterValue> parameterValueFunction) {
+      Function<BqDtoUser, Object> objectValueFunction,
+      Function<BqDtoUser, QueryParameterValue> parameterValueFunction) {
     this.parameterName = parameterName;
     this.objectValueFunction = objectValueFunction;
     this.parameterValueFunction = parameterValueFunction;
@@ -42,12 +42,12 @@ public enum UserParameter implements QueryParameterColumn<BqDtoUser> {
   }
 
   @Override
-  public Function<ReportingUser, Object> getRowToInsertValueFunction() {
+  public Function<BqDtoUser, Object> getRowToInsertValueFunction() {
     return objectValueFunction;
   }
 
   @Override
-  public Function<ReportingUser, QueryParameterValue> getQueryParameterValueFunction() {
+  public Function<BqDtoUser, QueryParameterValue> getQueryParameterValueFunction() {
     return parameterValueFunction;
   }
 }
