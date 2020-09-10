@@ -110,7 +110,8 @@
     "enableCohortBuilderV2": false,
     "enableConceptSetSearchV2": false,
     "enableReportingUploadCron": false,
-    "enableCOPESurvey": false
+    "enableCOPESurvey": false,
+    "enableCustomRuntimes": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-prod",
