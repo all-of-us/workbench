@@ -13,7 +13,8 @@ import {triggerEvent} from 'app/utils/analytics';
 import {attributesSelectionStore, currentCohortCriteriaStore, currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
 import {AttrName, Criteria, CriteriaSubType, CriteriaType, DomainType, Operator} from 'generated/fetch';
 
-const COPE_SURVEY_ID = 328232;
+const COPE_SURVEY_ID = 1333342;
+const COPE_SURVEY_GROUP_NAME = 'COVID-19 Participant Experience (COPE) Survey';
 const styles = reactStyles({
   code: {
     color: colors.dark,
@@ -288,8 +289,9 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
   }
 
   get isCOPESurvey() {
-    const {node: {domainId, hasAttributes, id}} = this.props;
-    return !hasAttributes && id === COPE_SURVEY_ID && domainId === DomainType.SURVEY.toString() ;
+    const {node: {conceptId, name, subtype}} = this.props;
+    return subtype === CriteriaSubType.SURVEY.toString() && conceptId === COPE_SURVEY_ID &&
+       name === COPE_SURVEY_GROUP_NAME;
   }
 
   render() {

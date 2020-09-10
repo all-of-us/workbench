@@ -29,7 +29,7 @@ const treeNodeStub = {
 const surveyCOPETreeNodeStub = {
   children: [],
   code: '',
-  conceptId: 328232,
+  conceptId: 1333342,
   count: 0,
   domainId: DomainType.SURVEY.toString(),
   group: true,
@@ -65,7 +65,7 @@ describe('TreeNode', () => {
                                       setAttributes={() => {}}/>);
     expect(wrapper).toBeTruthy();
   });
-  it('should display Versiond if SURVEY is COPE', () => {
+  it('should display Versioned if SURVEY is COPE', () => {
     const wrapper = mount(<TreeNode autocompleteSelection={undefined}
                                     groupSelections={[]}
                                     node={surveyCOPETreeNodeStub}
