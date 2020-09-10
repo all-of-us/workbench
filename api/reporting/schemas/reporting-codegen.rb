@@ -62,10 +62,12 @@ def to_bq_type(mysql_type)
   result
 end
 
-excluded_fields = File.exist?(inputs[:exclude_columns]) ? File.readlines(inputs[:exclude_columns]) : []
-
+excluded_fields = File.exist?(inputs[:exclude_columns]) ? File.readlines(inputs[:exclude_columns]).map{ |c| c.strip } : []
+puts excluded_fields.join(', ')
 def is_valid_field?(excluded_fields, field)
-  !excluded_fields.include?(field)
+  result = !excluded_fields.include?(field)
+  puts "is_valid_field? #{field}: #{result}"
+  result
 end
 
 ## BigQuery schema
