@@ -1,0 +1,2 @@
+demographic_survey_id,bigint(20),NO,MUL,,""
+gender_identity,tinyint(4),NO,"",,""
