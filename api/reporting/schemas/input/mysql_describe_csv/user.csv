@@ -1,5 +1,5 @@
 user_id,bigint(20),NO,PRI,,auto_increment
-email,varchar(80),NO,UNI,,""
+username,varchar(80),NO,UNI,,""
 data_access_level,tinyint(4),NO,"",,""
 contact_email,varchar(255),NO,"",,""
 given_name,varchar(80),YES,"",,""

@@ -26,7 +26,7 @@ def to_output_path(dir_name, table_name, suffix)
   File.expand_path(File.join(dir_name, "#{table_name}.#{suffix}"))
 end
 
-dto_class_name = "DtoReporting#{to_camel_case(table_name, true)}"
+dto_class_name = "BqDto#{to_camel_case(table_name, true)}"
 
 inputs = {
     :describe_csv => to_input_path(File.join(input_dir, 'mysql_describe_csv'), table_name,'csv'),
