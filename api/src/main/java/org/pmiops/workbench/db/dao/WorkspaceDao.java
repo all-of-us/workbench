@@ -86,15 +86,5 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
     Long getWorkspaceCount();
   }
 
-  //  @Query(
-  //      "SELECT workspaceId, name, workspaceNamespace, firecloudName, dataAccessLevel,
-  // cdrVersionId, creatorId, creationTime, lastModifiedTime, rpIntendedStudy,
-  // rpDiseaseFocusedResearch, rpDiseaseOfFocus, rpMethodsDevelopment, rpControlSet, rpAncestry,
-  // rpCommercialPurpose, rpPopulation, rpAdditionalNotes, rpReviewRequested, rpApproved,
-  // rpTimeRequested, version, firecloudUuid, lastAccessedTime, activeStatus, rpSocialBehavioral,
-  // rpPopulationHealth, rpEducational, rpOtherPurpose, rpDrugDevelopment, rpOtherPurposeDetails,
-  // rpReasonForAllOfUs, rpAnticipatedFindings, billingMigrationStatus, rpOtherPopulationDetails,
-  // published, billingStatus, billingAccountType, billingAccountName, rpEthics,
-  // disseminateResearchOther, rpScientificApproach, needsRpReviewPrompt FROM DbWorkspace")
   //  List<PrjWorkspace> getProjections();
 }
