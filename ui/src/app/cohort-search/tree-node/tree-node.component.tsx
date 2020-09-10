@@ -13,7 +13,6 @@ import {triggerEvent} from 'app/utils/analytics';
 import {attributesSelectionStore, currentCohortCriteriaStore, currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
 import {AttrName, Criteria, CriteriaSubType, CriteriaType, DomainType, Operator} from 'generated/fetch';
 
-// COPE Survey ID will not change
 const COPE_SURVEY_ID = 328232;
 const styles = reactStyles({
   code: {
