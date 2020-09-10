@@ -26,7 +26,7 @@ def to_output_path(dir_name, table_name, suffix)
   File.expand_path(File.join(dir_name, "#{table_name}.#{suffix}"))
 end
 
-dto_class_name = "Reporting#{to_camel_case(table_name, true)}"
+dto_class_name = "DtoReporting#{to_camel_case(table_name, true)}"
 
 inputs = {
     :describe_csv => to_input_path(File.join(input_dir, 'mysql_describe_csv'), table_name,'csv'),
@@ -62,11 +62,13 @@ def to_bq_type(mysql_type)
   result
 end
 
-excluded_fields = File.exist?(inputs[:exclude_columns]) ? File.readlines(inputs[:exclude_columns]).map{ |c| c.strip } : []
-puts excluded_fields.join(', ')
+excluded_fields = File.exist?(inputs[:exclude_columns]) \
+  ? File.readlines(inputs[:exclude_columns]) \
+      .map{ |c| c.strip } \
+  : []
+
 def is_valid_field?(excluded_fields, field)
   result = !excluded_fields.include?(field)
-  puts "is_valid_field? #{field}: #{result}"
   result
 end
 
@@ -80,7 +82,7 @@ big_query_schema = columns.map{ |col| { :name => col[:name], :type => col[:big_q
 schema_json = JSON.pretty_generate(big_query_schema)
 
 IO.write(outputs[:big_query_json], schema_json)
-puts "#{table_name} Spring BigQuery Schema: #{outputs[:projection_interface]}"
+puts "  Spring BigQuery Schema: #{outputs[:big_query_json]}"
 
 ## Swagger DTO Objects
 BIGQUERY_TYPE_TO_SWAGGER  = {
@@ -106,7 +108,6 @@ BIGQUERY_TYPE_TO_SWAGGER  = {
 }
 
 def to_swagger_name(snake_case, is_class_name)
-  # puts "to_swagger_name(#{snake_case}, #{is_class_name})"
   result =  snake_case.split('_').collect(&:capitalize).join
   unless is_class_name
     result[0] = result[0].downcase
@@ -119,24 +120,25 @@ def to_property_name(column_name)
 end
 
 def to_swagger_property(column)
-  # puts "to_swagger_property(#{column})"
-  attributes = {
-      'description' => column[:description] || ''
-  }
-  attributes.merge(BIGQUERY_TYPE_TO_SWAGGER[column[:big_query_type]])
+  { 'description' => column[:description] || '' } \
+    .merge(BIGQUERY_TYPE_TO_SWAGGER[column[:big_query_type]])
 end
 
 swagger_object =  {  dto_class_name => {
     'type'  =>  'object',
     'properties' => columns.to_h  { |field|
-      # puts "mapping column hash #{field}"
       [to_property_name(field[:name]), to_swagger_property(field)]
     }
   }
 }
 
-IO.write(outputs[:swagger_yaml], swagger_object.to_yaml)
-puts "#{table_name} DTO Swagger Definition to #{outputs[:swagger_yaml]}"
+indented_yaml = swagger_object.to_yaml \
+  .split("\n") \
+  .reject{ |line| '---'.eql?(line)} \
+  .map{ |line| '  ' + line } \
+  .join("\n")
+IO.write(outputs[:swagger_yaml], indented_yaml)
+puts "  DTO Swagger Definition to #{outputs[:swagger_yaml]}"
 
 ### Projection Interface
 
@@ -156,12 +158,12 @@ getters = columns.map { |field|
   to_getter(field)
 }
 
-java = "interface Prj#{to_camel_case(table_name, true )} {\n"
+java = "public interface Prj#{to_camel_case(table_name, true )} {\n"
 java << getters.join("\n")
 java << "\n}\n"
 
 IO.write(outputs[:projection_interface], java)
-puts "#{table_name} Spring Data Projection Interface: #{outputs[:projection_interface]}"
+puts "  Spring Data Projection Interface: #{outputs[:projection_interface]}"
 
 ### Projection query
 def hibernate_column_name(field)
@@ -177,4 +179,4 @@ end
 
 sql = to_query(table_name, columns)
 IO.write(outputs[:projection_query], sql)
-puts "#{table_name} Projection Query: #{outputs[:projection_query]}"
+puts "  Projection Query: #{outputs[:projection_query]}"
