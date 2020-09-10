@@ -4,103 +4,48 @@ import java.sql.Timestamp;
 
 /** Order must match SELECT query order exactly for projection to work properly. */
 public interface PrjReportingUser {
-
-  long getUserId();
-
-  String getUsername();
-
-  long getDataAccessLevel();
-
-  String getContactEmail();
-
-  String getGivenName();
-
-  String getFamilyName();
-
-  String getPhoneNumber();
-
-  Timestamp getFirstSignInTime();
-
-  boolean getIdVerificationIsValid();
-
-  Timestamp getDemographicSurveyCompletionTime();
-
-  boolean getDisabled();
-
-  long getEmailVerificationStatus();
-
-  String getAreaOfResearch();
-
   String getAboutYou();
-
-  long getClusterCreateRetries();
-
-  long getBillingProjectRetries();
-
-  Timestamp getBetaAccessRequestTime();
-
-  String getCurrentPosition();
-
-  String getOrganization();
-
-  String getEraCommonsLinkedNihUsername();
-
-  Timestamp getEraCommonsLinkExpireTime();
-
-  Timestamp getEraCommonsCompletionTime();
-
-  Timestamp getDataUseAgreementCompletionTime();
-
-  Timestamp getDataUseAgreementBypassTime();
-
-  Timestamp getComplianceTrainingCompletionTime();
-
-  Timestamp getComplianceTrainingBypassTime();
-
+  String getAreaOfResearch();
   Timestamp getBetaAccessBypassTime();
-
-  Timestamp getEmailVerificationCompletionTime();
-
-  Timestamp getEmailVerificationBypassTime();
-
-  Timestamp getEraCommonsBypassTime();
-
-  Timestamp getIdVerificationCompletionTime();
-
-  Timestamp getIdVerificationBypassTime();
-
-  Timestamp getTwoFactorAuthCompletionTime();
-
-  Timestamp getTwoFactorAuthBypassTime();
-
+  Timestamp getBetaAccessRequestTime();
+  Timestamp getComplianceTrainingBypassTime();
+  Timestamp getComplianceTrainingCompletionTime();
   Timestamp getComplianceTrainingExpirationTime();
-
-  long getDataUseAgreementSignedVersion();
-
-  double getFreeTierCreditsLimitDollarsOverride();
-
-  long getFreeTierCreditsLimitDaysOverride();
-
-  Timestamp getLastFreeTierCreditsTimeCheck();
-
-  Timestamp getFirstRegistrationCompletionTime();
-
+  String getContactEmail();
   Timestamp getCreationTime();
-
+  String getCurrentPosition();
+  long getDataAccessLevel();
+  Timestamp getDataUseAgreementBypassTime();
+  Timestamp getDataUseAgreementCompletionTime();
+  long getDataUseAgreementSignedVersion();
+  Timestamp getDemographicSurveyCompletionTime();
+  boolean getDisabled();
+  String getEmail();
+  Timestamp getEmailVerificationBypassTime();
+  Timestamp getEmailVerificationCompletionTime();
+  long getEmailVerificationStatus();
+  Timestamp getEraCommonsBypassTime();
+  Timestamp getEraCommonsCompletionTime();
+  Timestamp getEraCommonsLinkExpireTime();
+  String getFamilyName();
+  Timestamp getFirstRegistrationCompletionTime();
+  Timestamp getFirstSignInTime();
+  long getFreeTierCreditsLimitDaysOverride();
+  double getFreeTierCreditsLimitDollarsOverride();
+  String getGivenName();
+  Timestamp getIdVerificationBypassTime();
+  Timestamp getIdVerificationCompletionTime();
   Timestamp getLastModifiedTime();
-
+  String getOrganization();
+  String getPhoneNumber();
   String getProfessionalUrl();
-
-  // fields from DbAddress
-  String getStreetAddress1();
-
-  String getStreetAddress2();
-
-  String getZipCode();
-
+  Timestamp getTwoFactorAuthBypassTime();
+  Timestamp getTwoFactorAuthCompletionTime();
+  long getUserId();
   String getCity();
-
-  String getState();
-
   String getCountry();
+  String getState();
+  String getStreetAddress1();
+  String getStreetAddress2();
+  String getZipCode();
 }

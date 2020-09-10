@@ -19,7 +19,7 @@ import org.pmiops.workbench.model.ReportingResearcher;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.reporting.insertion.DmlInsertJobBuilder;
-import org.pmiops.workbench.reporting.insertion.ResearcherParameter;
+import org.pmiops.workbench.reporting.insertion.UserParameter;
 import org.pmiops.workbench.reporting.insertion.WorkspaceParameter;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -34,7 +34,7 @@ public class ReportingUploadServiceDmlImpl implements ReportingUploadService {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   private static final DmlInsertJobBuilder<ReportingResearcher> researcherJobBuilder =
-      ResearcherParameter::values;
+      UserParameter::values;
   private static final DmlInsertJobBuilder<ReportingWorkspace> workspaceJobBuilder =
       WorkspaceParameter::values;
 

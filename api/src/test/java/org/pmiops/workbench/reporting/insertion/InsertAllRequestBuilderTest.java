@@ -21,7 +21,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class InsertAllRequestBuilderTest {
   final InsertAllRequestBuilder<ReportingResearcher> researcherRequestBuilder =
-      ResearcherParameter::values;
+      UserParameter::values;
 
   final Instant princePartyTime = Instant.parse("1999-12-31T23:59:59.99Z");
   final Map<String, Object> fixedValues =

@@ -18,7 +18,7 @@ import org.pmiops.workbench.model.ReportingResearcher;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.reporting.insertion.InsertAllRequestBuilder;
-import org.pmiops.workbench.reporting.insertion.ResearcherParameter;
+import org.pmiops.workbench.reporting.insertion.UserParameter;
 import org.pmiops.workbench.reporting.insertion.WorkspaceParameter;
 import org.pmiops.workbench.utils.LogFormatters;
 import org.springframework.stereotype.Service;
@@ -28,7 +28,7 @@ public class ReportingUploadServiceStreamingImpl implements ReportingUploadServi
   private static final Logger log =
       Logger.getLogger(ReportingUploadServiceStreamingImpl.class.getName());
   private static final InsertAllRequestBuilder<ReportingResearcher> researcherRequestBuilder =
-      ResearcherParameter::values;
+      UserParameter::values;
   private static final InsertAllRequestBuilder<ReportingWorkspace> workspaceRequestBuilder =
       WorkspaceParameter::values;
 
