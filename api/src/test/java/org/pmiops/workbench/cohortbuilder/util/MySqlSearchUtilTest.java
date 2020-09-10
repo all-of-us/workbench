@@ -20,4 +20,17 @@ public class MySqlSearchUtilTest {
     assertThat(MySqlSearchUtil.modifySearchTerm("at base ball hill"))
         .isEqualTo("+\"base\"+\"ball\"+hill*");
   }
+
+  @Test
+  public void modifyMultipleMatchKeyword() {
+    assertThat(MySqlSearchUtil.modifyMultipleMatchKeyword("brian")).isEqualTo("+brian*");
+    assertThat(MySqlSearchUtil.modifyMultipleMatchKeyword("brian free"))
+        .isEqualTo("+\"brian\"+free*");
+    assertThat(MySqlSearchUtil.modifyMultipleMatchKeyword("001")).isEqualTo("+\"001");
+    assertThat(MySqlSearchUtil.modifyMultipleMatchKeyword("001.1")).isEqualTo("+\"001\"");
+    assertThat(MySqlSearchUtil.modifyMultipleMatchKeyword("001*")).isEqualTo("+\"001");
+    assertThat(MySqlSearchUtil.modifyMultipleMatchKeyword("re -write")).isEqualTo("+write*");
+    assertThat(MySqlSearchUtil.modifyMultipleMatchKeyword("at base ball hill"))
+        .isEqualTo("+\"base\"+\"ball\"+hill*");
+  }
 }
