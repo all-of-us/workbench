@@ -85,6 +85,4 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
 
     Long getWorkspaceCount();
   }
-
-  //  List<PrjWorkspace> getProjections();
 }
