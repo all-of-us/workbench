@@ -5458,15 +5458,15 @@ definitions:
     properties:
       googleProject:
         type: string
-        description: The Google Project used to create the runtime. Output only.
+        description: The Google Project used to create the runtime. Read only.
       runtimeName:
         type: string
-        description: The user-supplied name for the runtime. Output only.
+        description: The user-supplied name for the runtime. Read only.
       createdDate:
         type: string
-        description: The date and time the cluster was created, in ISO-8601 format. Output only.
+        description: The date and time the cluster was created, in ISO-8601 format. Read only.
       status:
-        description: Runtime status. Output only.
+        description: Runtime status. Read only.
         "$ref": "#/definitions/RuntimeStatus"
       configurationType:
         description: >
