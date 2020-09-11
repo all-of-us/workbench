@@ -13,8 +13,7 @@ export default class TieredMenu extends Container {
    * Select menu item(s).
    * @param {string[]} menuItems
    */
-  async clickMenuItem(menuItems: string[], waitOptions: {waitForNav?: boolean} = {}): Promise<void> {
-    const { waitForNav = false } = waitOptions;
+  async clickMenuItem(menuItems: string[]): Promise<void> {
     // menu dropdown must be open and visible
     await this.page.waitForXPath(`${this.xpath}/ul`, {visible: true});
 
@@ -31,14 +30,7 @@ export default class TieredMenu extends Container {
     for (let i=0; i<num; i++) {
       const menuItem = await findLink(menuItems[i]);
       if (i >= (num - 1)) {
-        if (waitForNav) {
-          await Promise.all([
-            this.page.waitForNavigation({waitUntil: ['networkidle0']}),
-            menuItem.click(),
-          ]);
-        } else {
-          await menuItem.click();
-        }
+        await menuItem.click();
       }
       await menuItem.dispose();
     }

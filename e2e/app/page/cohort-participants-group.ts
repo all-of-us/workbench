@@ -124,7 +124,7 @@ export default class CohortParticipantsGroup {
 
   private async clickCriteriaMenuItems(menuItemLinks: string[]): Promise<void> {
     const menu = await this.openTieredMenu();
-    await menu.clickMenuItem(menuItemLinks, {waitForNav: true});
+    await menu.clickMenuItem(menuItemLinks);
   }
 
   private async openTieredMenu(): Promise<TieredMenu> {
