@@ -72,7 +72,7 @@ task AddSampleIds {
     memory: "1 GiB"
     disks: "local-disk 1 HDD"
     docker: "ubuntu:latest"
-    preemptible: 3
+    preemptible: 2
   }
 
   output {
@@ -94,13 +94,14 @@ task ExtractSampleNamesFromMap {
     memory: "1 GiB"
     disks: "local-disk 1 HDD"
     docker: "ubuntu:latest"
-    preemptible: 3
+    preemptible: 2
   }
 
   output {
     File sample_names = "sample_names.txt"
   }
 }
+
 task SplitFileIntoNParts {
   input {
     File file
@@ -125,7 +126,7 @@ task SplitFileIntoNParts {
 
   runtime {
     memory: "1 GiB"
-    disks: "local-disk 10 HDD"
+    disks: "local-disk 1 HDD"
     docker: "ubuntu:latest"
     preemptible: 2
   }
@@ -158,7 +159,7 @@ task SplitFileIntoNSizeParts {
 
   runtime {
     memory: "1 GiB"
-    disks: "local-disk 10 HDD"
+    disks: "local-disk 1 HDD"
     docker: "ubuntu:latest"
     preemptible: 2
   }
@@ -189,8 +190,8 @@ task RandomizeVcf {
   >>>
 
   runtime {
-    memory: "8 GiB"
-    cpu: "2"
+    cpu: 1
+    memory: "4 GiB"
     disks: "local-disk " + disk_size + " HDD"
     docker: "gcr.io/all-of-us-workbench-test/randomizevcf:1.0"
     preemptible: 3
@@ -244,11 +245,11 @@ task CreateImportTsvs {
   >>>
 
   runtime {
+    cpu: 1
+    memory: "4 GiB"
     docker: "gcr.io/all-of-us-workbench-test/gatk-varstore:2"
-    memory: "4 GB"
     disks: "local-disk " + disk_size + " HDD"
     preemptible: 3
-    cpu: 2
   }
 
   output {}
