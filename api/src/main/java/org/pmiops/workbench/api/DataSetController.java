@@ -32,6 +32,7 @@ import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -145,13 +146,17 @@ public class DataSetController implements DataSetApiDelegate {
       String workspaceId,
       String kernelTypeEnumString,
       DataSetRequest dataSetRequest) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    DbWorkspace dbWorkspace =
+        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     final KernelTypeEnum kernelTypeEnum = KernelTypeEnum.fromValue(kernelTypeEnumString);
 
     // Generate query per domain for the selected concept set, cohort and values
     // TODO(jaycarlton): return better error information form this function for common validation
     // scenarios
+    if (dataSetRequest.getWorkspaceId() == null) {
+      dataSetRequest.setWorkspaceId(dbWorkspace.getWorkspaceId());
+    }
     final Map<String, QueryJobConfiguration> bigQueryJobConfigsByDomain =
         dataSetService.domainToBigQueryConfig(dataSetRequest);
 
@@ -261,8 +266,9 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> exportToNotebook(
       String workspaceNamespace, String workspaceId, DataSetExportRequest dataSetExportRequest) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    DbWorkspace dbWorkspace =
+        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
     workspaceService.validateActiveBilling(workspaceNamespace, workspaceId);
     // This suppresses 'may not be initialized errors. We will always init to something else before
     // used.
@@ -315,6 +321,9 @@ public class DataSetController implements DataSetApiDelegate {
       }
     }
 
+    if (dataSetExportRequest.getDataSetRequest().getWorkspaceId() == null) {
+      dataSetExportRequest.getDataSetRequest().setWorkspaceId(dbWorkspace.getWorkspaceId());
+    }
     Map<String, QueryJobConfiguration> queriesByDomain =
         dataSetService.domainToBigQueryConfig(dataSetExportRequest.getDataSetRequest());
 

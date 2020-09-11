@@ -74,7 +74,7 @@ import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetServiceImpl;
 import org.pmiops.workbench.dataset.DatasetConfig;
-import org.pmiops.workbench.dataset.mapper.DataSetMapper;
+import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
@@ -210,6 +210,7 @@ public class DataSetControllerTest {
     ConceptSetMapperImpl.class,
     ConceptSetsController.class,
     ConceptSetService.class,
+    DataSetMapperImpl.class,
     DataSetController.class,
     DataSetServiceImpl.class,
     FirecloudMapperImpl.class,
@@ -231,7 +232,6 @@ public class DataSetControllerTest {
     CohortMaterializationService.class,
     ComplianceService.class,
     ConceptBigQueryService.class,
-    DataSetMapper.class,
     DirectoryService.class,
     FreeTierBillingService.class,
     ParticipantCohortAnnotationMapper.class,
@@ -547,7 +547,10 @@ public class DataSetControllerTest {
   @Test(expected = BadRequestException.class)
   public void testGetQueryFailsWithNoCohort() {
     DataSetRequest dataSet = buildEmptyDataSetRequest();
-    dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
+    dataSet =
+        dataSet
+            .addConceptSetIdsItem(CONCEPT_SET_ONE_ID)
+            .domainValuePairs(ImmutableList.of(new DomainValuePair().domain(Domain.CONDITION)));
 
     dataSetController.generateCode(
         workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet);
@@ -556,28 +559,33 @@ public class DataSetControllerTest {
   @Test(expected = BadRequestException.class)
   public void testGetQueryFailsWithNoConceptSet() {
     DataSetRequest dataSet = buildEmptyDataSetRequest();
-    dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
+    dataSet =
+        dataSet
+            .addCohortIdsItem(COHORT_ONE_ID)
+            .domainValuePairs(ImmutableList.of(new DomainValuePair().domain(Domain.CONDITION)));
 
     dataSetController.generateCode(
         workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet);
   }
 
+  @Rule public ExpectedException expectedException = ExpectedException.none();
+
   @Test
   public void testGetQueryDropsQueriesWithNoValue() {
     final DataSetRequest dataSet =
         buildEmptyDataSetRequest()
+            .dataSetId(1l)
             .addCohortIdsItem(COHORT_ONE_ID)
             .addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
+
+    expectedException.expect(BadRequestException.class);
 
     DataSetCodeResponse response =
         dataSetController
             .generateCode(
                 workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
             .getBody();
-    assertThat(response.getCode()).isEmpty();
   }
-
-  @Rule public ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void createDataSetMissingArguments() {

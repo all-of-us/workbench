@@ -333,17 +333,34 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   @Override
   public Map<String, QueryJobConfiguration> domainToBigQueryConfig(DataSetRequest dataSetRequest) {
+    DbDataset dbDataset;
+    if (dataSetRequest.getDataSetId() != null) {
+      dbDataset = dataSetDao.findOne(dataSetRequest.getDataSetId());
+      // In case wrong dataSetId is passed to Api
+      if (dbDataset == null) {
+        throw new BadRequestException("Data Set Generate code Failed: Data set not found");
+      }
+    } else {
+      dbDataset = dataSetMapper.dataSetRequestToDb(dataSetRequest, null, clock);
+    }
+    return buildQueriesByDomain(dbDataset);
+  }
+
+  private Map<String, QueryJobConfiguration> buildQueriesByDomain(DbDataset dbDataset) {
     final boolean includesAllParticipants =
-        getBuiltinBooleanFromNullable(dataSetRequest.getIncludesAllParticipants());
+        getBuiltinBooleanFromNullable(dbDataset.getIncludesAllParticipants());
     final ImmutableList<DbCohort> cohortsSelected =
-        ImmutableList.copyOf(this.cohortDao.findAllByCohortIdIn(dataSetRequest.getCohortIds()));
+        ImmutableList.copyOf(this.cohortDao.findAllByCohortIdIn(dbDataset.getCohortIds()));
     final ImmutableList<DomainValuePair> domainValuePairs =
-        ImmutableList.copyOf(dataSetRequest.getDomainValuePairs());
+        ImmutableList.copyOf(
+            dbDataset.getValues().stream()
+                .map(value -> dataSetMapper.createDomainValuePair(value))
+                .collect(Collectors.toList()));
 
     final ImmutableList<DbConceptSet> expandedSelectedConceptSets =
         getExpandedConceptSetSelections(
-            dataSetRequest.getPrePackagedConceptSet(),
-            dataSetRequest.getConceptSetIds(),
+            dataSetMapper.prePackagedConceptSetFromStorage(dbDataset.getPrePackagedConceptSet()),
+            dbDataset.getConceptSetIds(),
             cohortsSelected,
             includesAllParticipants,
             domainValuePairs);

@@ -69,6 +69,7 @@ import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -130,6 +131,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     CdrVersionService.class,
     CohortQueryBuilder.class,
     ConceptBigQueryService.class,
+    DataSetMapperImpl.class,
     DataSetServiceImpl.class,
     TestBigQueryCdrSchemaConfig.class,
     WorkspaceServiceImpl.class
@@ -137,10 +139,10 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @MockBean({
     CohortCloningService.class,
     CohortService.class,
+    CommonMappers.class,
     ConceptService.class,
     ConceptSetMapperImpl.class,
     ConceptSetService.class,
-    DataSetMapperImpl.class,
     FireCloudServiceImpl.class,
     FreeTierBillingService.class,
     NotebooksServiceImpl.class,

@@ -107,7 +107,7 @@
     "enableEventDateModifier": false,
     "useNewShibbolethService": true,
     "enableResearchPurposePrompt": true,
-    "enableCohortBuilderV2": false,
+    "enableCohortBuilderV2": true,
     "enableConceptSetSearchV2": false,
     "enableReportingUploadCron": true,
     "enableCOPESurvey": true,
