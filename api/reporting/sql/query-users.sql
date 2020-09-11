@@ -1,5 +1,4 @@
--- Fetch all users from this environment who are not
-
+-- Fetch all users from this environment who are not disabled
 
 CREATE VIEW vw_researcher AS select u.user_id, u.email AS username, u.given_name AS first_name, u.family_name AS last_name,
        u.creation_time, uvia.institution_id, uvia.institutional_role_enum, uvia.institutional_role_other_text

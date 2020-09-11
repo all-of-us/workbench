@@ -522,3 +522,9 @@ oauth2l reset
 We have a Stackdriver- and BigQuery-powered framework for user action auditing that supports
 flexible [queries](api/docs/action-audit-queries.md). Read more about its design, structure, and
 implementation in this [document](api/docs/action-audit.md).
+
+### Reporting System
+To supporrt analytics, we have a reporting pipeline that exports data to a BigQuery dataset.
+The main source of documentation is the [design document (internal)](https://docs.google.com/document/d/1EKGApPC55X-KTHwVsv_saBQty4m-HCP2Kd5o6JHKDnQ/edit?usp=sharing).
+Some [codegen utilities](./api/reporting/schemas/REPORTING-SCHEMA-TOOLS.md) exist to assist
+with keeping types for all phases of the pipeline consistent.

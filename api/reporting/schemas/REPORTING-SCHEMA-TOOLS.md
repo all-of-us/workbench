@@ -28,6 +28,11 @@ For example, the output of the `explain address;` is shown below.
 | country | varchar\(95\) | NO |  | NULL |  |
 | user\_id | bigint\(20\) | NO | MUL | NULL |  |
 
+### Excluded Columns Text File
+Frequently, we want to convert most, but not all, columns in a table into the downstream formats.
+In order to suppress a column, create a `<table_name>.txt` file under `input/excluded_columns` with
+one column name per line. 
+
 ## Mapping to BigQuery Schema JSON Format
 The next task is to translate the MySql table description into the [BigQuery schema format](https://cloud.google.com/bigquery/docs/schemas#specifying_a_json_schema_file). Given this CSV input, we only really care about the field name and types. The
 relational constraints won't be preserved in BigQuery, so they're basically ignored,
