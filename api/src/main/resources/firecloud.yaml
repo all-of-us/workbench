@@ -293,7 +293,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorReport'
       security:
-        - authorization:
+        - googleoauth:
             - openid
             - email
             - profile
