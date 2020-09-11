@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
+import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -20,6 +21,7 @@ import org.mockito.stubbing.Answer;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.projection.PrjUser;
+import org.pmiops.workbench.db.dao.projection.PrjWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.BqDtoUser;
 import org.pmiops.workbench.model.BqDtoWorkspace;
@@ -52,6 +54,88 @@ public class ReportingSnapshotServiceTest {
   private static final String USER_GIVEN_NAME_1 = "Marge";
   private static final boolean USER_DISABLED_1 = false;
   private static final long USER_ID_1 = 101L;
+
+  private static final String USER__ABOUT_YOU = "foo";
+  private static final String USER__AREA_OF_RESEARCH = "foo";
+  private static final Timestamp USER__BETA_ACCESS_BYPASS_TIME = Timestamp.from(Instant.parse("2005-01-01T00:00:00.00Z"));
+  private static final Timestamp USER__BETA_ACCESS_REQUEST_TIME = Timestamp.from(Instant.parse("2005-01-01T00:00:00.00Z"));
+  private static final Timestamp USER__COMPLIANCE_TRAINING_BYPASS_TIME = Timestamp.from(Instant.parse("2005-01-01T00:00:00.00Z"));
+  private static final Timestamp USER__COMPLIANCE_TRAINING_COMPLETION_TIME = Timestamp.from(Instant.parse("2005-01-01T00:00:00.00Z"));
+  private static final Timestamp USER__COMPLIANCE_TRAINING_EXPIRATION_TIME = Timestamp.from(Instant.parse("2005-01-01T00:00:00.00Z"));
+  private static final String USER__CONTACT_EMAIL = "foo";
+  private static final Timestamp USER__CREATION_TIME = Timestamp.from(Instant.parse("2005-01-01T00:00:00.00Z"));
+  private static final String USER__CURRENT_POSITION = "foo";
+  private static final long USER__DATA_ACCESS_LEVEL = 1001;
+  private static final Timestamp USER__DATA_USE_AGREEMENT_BYPASS_TIME = Timestamp.from(Instant.parse("2005-01-01T00:00:00.00Z"));
+  private static final Timestamp USER__DATA_USE_AGREEMENT_COMPLETION_TIME = Timestamp.from(Instant.parse("2005-01-01T00:00:00.00Z"));
+  private static final long USER__DATA_USE_AGREEMENT_SIGNED_VERSION = 1001;
+  private static final Timestamp USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME = Timestamp.from(Instant.parse("2005-01-01T00:00:00.00Z"));
+  private static final boolean USER__DISABLED = false;
+  private static final Timestamp USER__EMAIL_VERIFICATION_BYPASS_TIME = Timestamp.from(Instant.parse("2005-01-01T00:00:00.00Z"));
+  private static final Timestamp USER__EMAIL_VERIFICATION_COMPLETION_TIME = Timestamp.from(Instant.parse("2005-01-01T00:00:00.00Z"));
+  private static final long USER__EMAIL_VERIFICATION_STATUS = 1001;
+  private static final Timestamp USER__ERA_COMMONS_BYPASS_TIME = Timestamp.from(Instant.parse("2005-01-01T00:00:00.00Z"));
+  private static final Timestamp USER__ERA_COMMONS_COMPLETION_TIME = Timestamp.from(Instant.parse("2005-01-01T00:00:00.00Z"));
+  private static final Timestamp USER__ERA_COMMONS_LINK_EXPIRE_TIME = Timestamp.from(Instant.parse("2005-01-01T00:00:00.00Z"));
+  private static final String USER__FAMILY_NAME = "foo";
+  private static final Timestamp USER__FIRST_REGISTRATION_COMPLETION_TIME = Timestamp.from(Instant.parse("2005-01-01T00:00:00.00Z"));
+  private static final Timestamp USER__FIRST_SIGN_IN_TIME = Timestamp.from(Instant.parse("2005-01-01T00:00:00.00Z"));
+  private static final long USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE = 1001;
+  private static final double USER__FREE_TIER_CREDITS_LIMIT_DOLLARS_OVERRIDE = 5.2;
+  private static final String USER__GIVEN_NAME = "foo";
+  private static final Timestamp USER__ID_VERIFICATION_BYPASS_TIME = Timestamp.from(Instant.parse("2005-01-01T00:00:00.00Z"));
+  private static final Timestamp USER__ID_VERIFICATION_COMPLETION_TIME = Timestamp.from(Instant.parse("2005-01-01T00:00:00.00Z"));
+  private static final Timestamp USER__LAST_MODIFIED_TIME = Timestamp.from(Instant.parse("2005-01-01T00:00:00.00Z"));
+  private static final String USER__ORGANIZATION = "foo";
+  private static final String USER__PHONE_NUMBER = "foo";
+  private static final String USER__PROFESSIONAL_URL = "foo";
+  private static final Timestamp USER__TWO_FACTOR_AUTH_BYPASS_TIME = Timestamp.from(Instant.parse("2005-01-01T00:00:00.00Z"));
+  private static final Timestamp USER__TWO_FACTOR_AUTH_COMPLETION_TIME = Timestamp.from(Instant.parse("2005-01-01T00:00:00.00Z"));
+  private static final long USER__USER_ID = 1001;
+  private static final String USER__USERNAME = "foo";
+
+  private static final long WORKSPACE__ACTIVE_STATUS = 1001;
+  private static final String WORKSPACE__BILLING_ACCOUNT_NAME = "foo";
+  private static final long WORKSPACE__BILLING_ACCOUNT_TYPE = 1001;
+  private static final long WORKSPACE__BILLING_MIGRATION_STATUS = 1001;
+  private static final long WORKSPACE__BILLING_STATUS = 1001;
+  private static final long WORKSPACE__CDR_VERSION_ID = 1001;
+  private static final Timestamp WORKSPACE__CREATION_TIME = Timestamp.from(Instant.parse("2005-01-01T00:00:00.00Z"));
+  private static final long WORKSPACE__CREATOR_ID = 1001;
+  private static final long WORKSPACE__DATA_ACCESS_LEVEL = 1001;
+  private static final String WORKSPACE__DISSEMINATE_RESEARCH_OTHER = "foo";
+  private static final String WORKSPACE__FIRECLOUD_NAME = "foo";
+  private static final String WORKSPACE__FIRECLOUD_UUID = "foo";
+  private static final Timestamp WORKSPACE__LAST_ACCESSED_TIME = Timestamp.from(Instant.parse("2005-01-01T00:00:00.00Z"));
+  private static final Timestamp WORKSPACE__LAST_MODIFIED_TIME = Timestamp.from(Instant.parse("2005-01-01T00:00:00.00Z"));
+  private static final String WORKSPACE__NAME = "foo";
+  private static final long WORKSPACE__NEEDS_RP_REVIEW_PROMPT = 1001;
+  private static final boolean WORKSPACE__PUBLISHED = false;
+  private static final String WORKSPACE__RP_ADDITIONAL_NOTES = "foo";
+  private static final boolean WORKSPACE__RP_ANCESTRY = false;
+  private static final String WORKSPACE__RP_ANTICIPATED_FINDINGS = "foo";
+  private static final boolean WORKSPACE__RP_APPROVED = false;
+  private static final boolean WORKSPACE__RP_COMMERCIAL_PURPOSE = false;
+  private static final boolean WORKSPACE__RP_CONTROL_SET = false;
+  private static final boolean WORKSPACE__RP_DISEASE_FOCUSED_RESEARCH = false;
+  private static final String WORKSPACE__RP_DISEASE_OF_FOCUS = "foo";
+  private static final boolean WORKSPACE__RP_DRUG_DEVELOPMENT = false;
+  private static final boolean WORKSPACE__RP_EDUCATIONAL = false;
+  private static final boolean WORKSPACE__RP_ETHICS = false;
+  private static final String WORKSPACE__RP_INTENDED_STUDY = "foo";
+  private static final boolean WORKSPACE__RP_METHODS_DEVELOPMENT = false;
+  private static final String WORKSPACE__RP_OTHER_POPULATION_DETAILS = "foo";
+  private static final boolean WORKSPACE__RP_OTHER_PURPOSE = false;
+  private static final String WORKSPACE__RP_OTHER_PURPOSE_DETAILS = "foo";
+  private static final boolean WORKSPACE__RP_POPULATION_HEALTH = false;
+  private static final String WORKSPACE__RP_REASON_FOR_ALL_OF_US = "foo";
+  private static final boolean WORKSPACE__RP_REVIEW_REQUESTED = false;
+  private static final String WORKSPACE__RP_SCIENTIFIC_APPROACH = "foo";
+  private static final boolean WORKSPACE__RP_SOCIAL_BEHAVIORAL = false;
+  private static final Timestamp WORKSPACE__RP_TIME_REQUESTED = Timestamp.from(Instant.parse("2005-01-01T00:00:00.00Z"));
+  private static final long WORKSPACE__VERSION = 1001;
+  private static final long WORKSPACE__WORKSPACE_ID = 1001;
+  private static final String WORKSPACE__WORKSPACE_NAMESPACE = "foo";
 
   @MockBean private Random mockRandom;
   @MockBean private UserService mockUserService;
@@ -94,12 +178,53 @@ public class ReportingSnapshotServiceTest {
   }
 
   public void mockWorkspaces() {
-    final DbWorkspace dbWorkspace1 = stubDbWorkspace("aou-rw-123456", "A Tale of Two Cities", 101L);
-    final DbWorkspace dbWorkspace2 = stubDbWorkspace("aou-rw-789", "Moby Dick", 202L);
+    final PrjWorkspace mockWorkspace = mock(PrjWorkspace.class);
+    doReturn(WORKSPACE__ACTIVE_STATUS).when(mockWorkspace).getActiveStatus();
+    doReturn(WORKSPACE__BILLING_ACCOUNT_NAME).when(mockWorkspace).getBillingAccountName();
+    doReturn(WORKSPACE__BILLING_ACCOUNT_TYPE).when(mockWorkspace).getBillingAccountType();
+    doReturn(WORKSPACE__BILLING_MIGRATION_STATUS).when(mockWorkspace).getBillingMigrationStatus();
+    doReturn(WORKSPACE__BILLING_STATUS).when(mockWorkspace).getBillingStatus();
+    doReturn(WORKSPACE__CDR_VERSION_ID).when(mockWorkspace).getCdrVersionId();
+    doReturn(WORKSPACE__CREATION_TIME).when(mockWorkspace).getCreationTime();
+    doReturn(WORKSPACE__CREATOR_ID).when(mockWorkspace).getCreatorId();
+    doReturn(WORKSPACE__DATA_ACCESS_LEVEL).when(mockWorkspace).getDataAccessLevel();
+    doReturn(WORKSPACE__DISSEMINATE_RESEARCH_OTHER).when(mockWorkspace).getDisseminateResearchOther();
+    doReturn(WORKSPACE__FIRECLOUD_NAME).when(mockWorkspace).getFirecloudName();
+    doReturn(WORKSPACE__FIRECLOUD_UUID).when(mockWorkspace).getFirecloudUuid();
+    doReturn(WORKSPACE__LAST_ACCESSED_TIME).when(mockWorkspace).getLastAccessedTime();
+    doReturn(WORKSPACE__LAST_MODIFIED_TIME).when(mockWorkspace).getLastModifiedTime();
+    doReturn(WORKSPACE__NAME).when(mockWorkspace).getName();
+    doReturn(WORKSPACE__NEEDS_RP_REVIEW_PROMPT).when(mockWorkspace).getNeedsRpReviewPrompt();
+    doReturn(WORKSPACE__PUBLISHED).when(mockWorkspace).getPublished();
+    doReturn(WORKSPACE__RP_ADDITIONAL_NOTES).when(mockWorkspace).getRpAdditionalNotes();
+    doReturn(WORKSPACE__RP_ANCESTRY).when(mockWorkspace).getRpAncestry();
+    doReturn(WORKSPACE__RP_ANTICIPATED_FINDINGS).when(mockWorkspace).getRpAnticipatedFindings();
+    doReturn(WORKSPACE__RP_APPROVED).when(mockWorkspace).getRpApproved();
+    doReturn(WORKSPACE__RP_COMMERCIAL_PURPOSE).when(mockWorkspace).getRpCommercialPurpose();
+    doReturn(WORKSPACE__RP_CONTROL_SET).when(mockWorkspace).getRpControlSet();
+    doReturn(WORKSPACE__RP_DISEASE_FOCUSED_RESEARCH).when(mockWorkspace).getRpDiseaseFocusedResearch();
+    doReturn(WORKSPACE__RP_DISEASE_OF_FOCUS).when(mockWorkspace).getRpDiseaseOfFocus();
+    doReturn(WORKSPACE__RP_DRUG_DEVELOPMENT).when(mockWorkspace).getRpDrugDevelopment();
+    doReturn(WORKSPACE__RP_EDUCATIONAL).when(mockWorkspace).getRpEducational();
+    doReturn(WORKSPACE__RP_ETHICS).when(mockWorkspace).getRpEthics();
+    doReturn(WORKSPACE__RP_INTENDED_STUDY).when(mockWorkspace).getRpIntendedStudy();
+    doReturn(WORKSPACE__RP_METHODS_DEVELOPMENT).when(mockWorkspace).getRpMethodsDevelopment();
+    doReturn(WORKSPACE__RP_OTHER_POPULATION_DETAILS).when(mockWorkspace).getRpOtherPopulationDetails();
+    doReturn(WORKSPACE__RP_OTHER_PURPOSE).when(mockWorkspace).getRpOtherPurpose();
+    doReturn(WORKSPACE__RP_OTHER_PURPOSE_DETAILS).when(mockWorkspace).getRpOtherPurposeDetails();
+    doReturn(WORKSPACE__RP_POPULATION_HEALTH).when(mockWorkspace).getRpPopulationHealth();
+    doReturn(WORKSPACE__RP_REASON_FOR_ALL_OF_US).when(mockWorkspace).getRpReasonForAllOfUs();
+    doReturn(WORKSPACE__RP_REVIEW_REQUESTED).when(mockWorkspace).getRpReviewRequested();
+    doReturn(WORKSPACE__RP_SCIENTIFIC_APPROACH).when(mockWorkspace).getRpScientificApproach();
+    doReturn(WORKSPACE__RP_SOCIAL_BEHAVIORAL).when(mockWorkspace).getRpSocialBehavioral();
+    doReturn(WORKSPACE__RP_TIME_REQUESTED).when(mockWorkspace).getRpTimeRequested();
+    doReturn(WORKSPACE__VERSION).when(mockWorkspace).getVersion();
+    doReturn(WORKSPACE__WORKSPACE_ID).when(mockWorkspace).getWorkspaceId();
+    doReturn(WORKSPACE__WORKSPACE_NAMESPACE).when(mockWorkspace).getWorkspaceNamespace();
 
-    doReturn(ImmutableList.of(dbWorkspace1, dbWorkspace2))
+    doReturn(ImmutableList.of(mockWorkspace))
         .when(mockWorkspaceService)
-        .getAllActiveWorkspaces();
+        .getReportingWorkspaces();
   }
 
   @Test
@@ -118,11 +243,50 @@ public class ReportingSnapshotServiceTest {
     final ReportingSnapshot snapshot = reportingSnapshotService.takeSnapshot();
     assertThat((double) snapshot.getCaptureTimestamp()).isWithin(100.0).of(NOW_EPOCH_MILLI);
     assertThat(snapshot.getResearchers()).hasSize(2);
-    final BqDtoUser researcher1 = snapshot.getResearchers().get(0);
-    assertThat(researcher1.getUserId()).isEqualTo(USER_ID_1);
-    assertThat(researcher1.getDisabled()).isEqualTo(USER_DISABLED_1);
-    assertThat(researcher1.getGivenName()).isEqualTo(USER_GIVEN_NAME_1);
-    assertThat(researcher1.getUsername()).isEqualTo(PRIMARY_EMAIL);
+    final BqDtoUser user = snapshot.getResearchers().get(0);
+    assertThat(user.getAboutYou()).isEqualTo(USER__ABOUT_YOU);
+    assertThat(user.getAreaOfResearch()).isEqualTo(USER__AREA_OF_RESEARCH);
+    assertThat(user.getBetaAccessBypassTime()).isEqualTo(USER__BETA_ACCESS_BYPASS_TIME);
+    assertThat(user.getBetaAccessRequestTime()).isEqualTo(USER__BETA_ACCESS_REQUEST_TIME);
+    assertThat(user.getComplianceTrainingBypassTime()).isEqualTo(USER__COMPLIANCE_TRAINING_BYPASS_TIME);
+    assertThat(user.getComplianceTrainingCompletionTime()).isEqualTo(USER__COMPLIANCE_TRAINING_COMPLETION_TIME);
+    assertThat(user.getComplianceTrainingExpirationTime()).isEqualTo(USER__COMPLIANCE_TRAINING_EXPIRATION_TIME);
+    assertThat(user.getContactEmail()).isEqualTo(USER__CONTACT_EMAIL);
+    assertThat(user.getCreationTime()).isEqualTo(USER__CREATION_TIME);
+    assertThat(user.getCurrentPosition()).isEqualTo(USER__CURRENT_POSITION);
+    assertThat(user.getDataAccessLevel()).isEqualTo(USER__DATA_ACCESS_LEVEL);
+    assertThat(user.getDataUseAgreementBypassTime()).isEqualTo(USER__DATA_USE_AGREEMENT_BYPASS_TIME);
+    assertThat(user.getDataUseAgreementCompletionTime()).isEqualTo(USER__DATA_USE_AGREEMENT_COMPLETION_TIME);
+    assertThat(user.getDataUseAgreementSignedVersion()).isEqualTo(USER__DATA_USE_AGREEMENT_SIGNED_VERSION);
+    assertThat(user.getDemographicSurveyCompletionTime()).isEqualTo(USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME);
+    assertThat(user.getDisabled()).isEqualTo(USER__DISABLED);
+    assertThat(user.getEmailVerificationBypassTime()).isEqualTo(USER__EMAIL_VERIFICATION_BYPASS_TIME);
+    assertThat(user.getEmailVerificationCompletionTime()).isEqualTo(USER__EMAIL_VERIFICATION_COMPLETION_TIME);
+    assertThat(user.getEmailVerificationStatus()).isEqualTo(USER__EMAIL_VERIFICATION_STATUS);
+    assertThat(user.getEraCommonsBypassTime()).isEqualTo(USER__ERA_COMMONS_BYPASS_TIME);
+    assertThat(user.getEraCommonsCompletionTime()).isEqualTo(USER__ERA_COMMONS_COMPLETION_TIME);
+    assertThat(user.getEraCommonsLinkExpireTime()).isEqualTo(USER__ERA_COMMONS_LINK_EXPIRE_TIME);
+    assertThat(user.getFamilyName()).isEqualTo(USER__FAMILY_NAME);
+    assertThat(user.getFirstRegistrationCompletionTime()).isEqualTo(USER__FIRST_REGISTRATION_COMPLETION_TIME);
+    assertThat(user.getFirstSignInTime()).isEqualTo(USER__FIRST_SIGN_IN_TIME);
+    assertThat(user.getFreeTierCreditsLimitDaysOverride()).isEqualTo(USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE);
+    assertThat(user.getFreeTierCreditsLimitDollarsOverride()).isEqualTo(USER__FREE_TIER_CREDITS_LIMIT_DOLLARS_OVERRIDE);
+    assertThat(user.getGivenName()).isEqualTo(USER__GIVEN_NAME);
+    assertThat(user.getIdVerificationBypassTime()).isEqualTo(USER__ID_VERIFICATION_BYPASS_TIME);
+    assertThat(user.getIdVerificationCompletionTime()).isEqualTo(USER__ID_VERIFICATION_COMPLETION_TIME);
+    assertThat(user.getLastModifiedTime()).isEqualTo(USER__LAST_MODIFIED_TIME);
+    assertThat(user.getOrganization()).isEqualTo(USER__ORGANIZATION);
+    assertThat(user.getPhoneNumber()).isEqualTo(USER__PHONE_NUMBER);
+    assertThat(user.getProfessionalUrl()).isEqualTo(USER__PROFESSIONAL_URL);
+    assertThat(user.getTwoFactorAuthBypassTime()).isEqualTo(USER__TWO_FACTOR_AUTH_BYPASS_TIME);
+    assertThat(user.getTwoFactorAuthCompletionTime()).isEqualTo(USER__TWO_FACTOR_AUTH_COMPLETION_TIME);
+    assertThat(user.getUserId()).isEqualTo(USER__USER_ID);
+    assertThat(user.getUsername()).isEqualTo(USER__USERNAME);
+//    final BqDtoUser researcher1 = snapshot.getResearchers().get(0);
+//    assertThat(researcher1.getUserId()).isEqualTo(USER_ID);
+//    assertThat(researcher1.getDisabled()).isEqualTo(DISABLED);
+//    assertThat(researcher1.getGivenName()).isEqualTo(GIVEN_NAME);
+//    assertThat(researcher1.getUsername()).isEqualTo(USERNAME);
 
     assertThat(snapshot.getWorkspaces()).hasSize(2);
     final BqDtoWorkspace workspace1 = snapshot.getWorkspaces().get(0);
@@ -140,23 +304,45 @@ public class ReportingSnapshotServiceTest {
   }
 
   private PrjUser mockUserProjection(String givenName, boolean disabled, long userId) {
-    final PrjUser user = mock(PrjUser.class);
-    doReturn(userId).when(user).getUserId();
-    doReturn(givenName).when(user).getGivenName();
-    doReturn(FAMILY_NAME).when(user).getFamilyName();
-    doReturn(PRIMARY_EMAIL).when(user).getUsername();
-    doReturn(CONTACT_EMAIL).when(user).getContactEmail();
-    doReturn(ORGANIZATION).when(user).getOrganization();
-    doReturn(CURRENT_POSITION).when(user).getCurrentPosition();
-    doReturn(RESEARCH_PURPOSE).when(user).getAreaOfResearch();
-    doReturn(disabled).when(user).getDisabled();
-    return user;
-  }
-
-  private DbWorkspace stubDbWorkspace(
-      String workspaceNamespace, String workspaceName, long workspaceId) {
-    final Workspace workspace1 =
-        TEST_MOCK_FACTORY.createWorkspace(workspaceNamespace, workspaceName);
-    return TestMockFactory.createDbWorkspaceStub(workspace1, workspaceId);
+    final PrjUser mockUser = mock(PrjUser.class);
+    doReturn(USER__ABOUT_YOU).when(mockUser).getAboutYou();
+    doReturn(USER__AREA_OF_RESEARCH).when(mockUser).getAreaOfResearch();
+    doReturn(USER__BETA_ACCESS_BYPASS_TIME).when(mockUser).getBetaAccessBypassTime();
+    doReturn(USER__BETA_ACCESS_REQUEST_TIME).when(mockUser).getBetaAccessRequestTime();
+    doReturn(USER__COMPLIANCE_TRAINING_BYPASS_TIME).when(mockUser).getComplianceTrainingBypassTime();
+    doReturn(USER__COMPLIANCE_TRAINING_COMPLETION_TIME).when(mockUser).getComplianceTrainingCompletionTime();
+    doReturn(USER__COMPLIANCE_TRAINING_EXPIRATION_TIME).when(mockUser).getComplianceTrainingExpirationTime();
+    doReturn(USER__CONTACT_EMAIL).when(mockUser).getContactEmail();
+    doReturn(USER__CREATION_TIME).when(mockUser).getCreationTime();
+    doReturn(USER__CURRENT_POSITION).when(mockUser).getCurrentPosition();
+    doReturn(USER__DATA_ACCESS_LEVEL).when(mockUser).getDataAccessLevel();
+    doReturn(USER__DATA_USE_AGREEMENT_BYPASS_TIME).when(mockUser).getDataUseAgreementBypassTime();
+    doReturn(USER__DATA_USE_AGREEMENT_COMPLETION_TIME).when(mockUser).getDataUseAgreementCompletionTime();
+    doReturn(USER__DATA_USE_AGREEMENT_SIGNED_VERSION).when(mockUser).getDataUseAgreementSignedVersion();
+    doReturn(USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME).when(mockUser).getDemographicSurveyCompletionTime();
+    doReturn(USER__DISABLED).when(mockUser).getDisabled();
+    doReturn(USER__EMAIL_VERIFICATION_BYPASS_TIME).when(mockUser).getEmailVerificationBypassTime();
+    doReturn(USER__EMAIL_VERIFICATION_COMPLETION_TIME).when(mockUser).getEmailVerificationCompletionTime();
+    doReturn(USER__EMAIL_VERIFICATION_STATUS).when(mockUser).getEmailVerificationStatus();
+    doReturn(USER__ERA_COMMONS_BYPASS_TIME).when(mockUser).getEraCommonsBypassTime();
+    doReturn(USER__ERA_COMMONS_COMPLETION_TIME).when(mockUser).getEraCommonsCompletionTime();
+    doReturn(USER__ERA_COMMONS_LINK_EXPIRE_TIME).when(mockUser).getEraCommonsLinkExpireTime();
+    doReturn(USER__FAMILY_NAME).when(mockUser).getFamilyName();
+    doReturn(USER__FIRST_REGISTRATION_COMPLETION_TIME).when(mockUser).getFirstRegistrationCompletionTime();
+    doReturn(USER__FIRST_SIGN_IN_TIME).when(mockUser).getFirstSignInTime();
+    doReturn(USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE).when(mockUser).getFreeTierCreditsLimitDaysOverride();
+    doReturn(USER__FREE_TIER_CREDITS_LIMIT_DOLLARS_OVERRIDE).when(mockUser).getFreeTierCreditsLimitDollarsOverride();
+    doReturn(USER__GIVEN_NAME).when(mockUser).getGivenName();
+    doReturn(USER__ID_VERIFICATION_BYPASS_TIME).when(mockUser).getIdVerificationBypassTime();
+    doReturn(USER__ID_VERIFICATION_COMPLETION_TIME).when(mockUser).getIdVerificationCompletionTime();
+    doReturn(USER__LAST_MODIFIED_TIME).when(mockUser).getLastModifiedTime();
+    doReturn(USER__ORGANIZATION).when(mockUser).getOrganization();
+    doReturn(USER__PHONE_NUMBER).when(mockUser).getPhoneNumber();
+    doReturn(USER__PROFESSIONAL_URL).when(mockUser).getProfessionalUrl();
+    doReturn(USER__TWO_FACTOR_AUTH_BYPASS_TIME).when(mockUser).getTwoFactorAuthBypassTime();
+    doReturn(USER__TWO_FACTOR_AUTH_COMPLETION_TIME).when(mockUser).getTwoFactorAuthCompletionTime();
+    doReturn(USER__USER_ID).when(mockUser).getUserId();
+    doReturn(USER__USERNAME).when(mockUser).getUsername();
+    return mockUser;
   }
 }

@@ -45,11 +45,17 @@ public class WorkspaceDaoTest {
     }
   }
 
-  public DbWorkspace createWorkspace() {
-    DbWorkspace workspace1 = new DbWorkspace();
-    workspace1.setName(WORKSPACE_1_NAME);
-    workspace1.setWorkspaceNamespace(WORKSPACE_NAMESPACE);
-    workspace1 = workspaceDao.save(workspace1);
-    return workspace1;
+  private DbWorkspace createWorkspace() {
+    DbWorkspace workspace = new DbWorkspace();
+    workspace.setVersion(1);
+    workspace.setName(WORKSPACE_1_NAME);
+    workspace.setWorkspaceNamespace(WORKSPACE_NAMESPACE);
+    workspace = workspaceDao.save(workspace);
+    return workspace;
+  }
+
+  @Test public void testGetReportingWorkspaces() {
+    final DbWorkspace ws1 = createWorkspace();
+
   }
 }

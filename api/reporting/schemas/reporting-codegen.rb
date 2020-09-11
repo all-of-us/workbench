@@ -37,7 +37,10 @@ outputs = {
     :big_query_json => to_output_path(File.join(output_dir, 'big_query_json'), table_name,'json'),
     :swagger_yaml => to_output_path(File.join(output_dir, 'swagger_yaml'), table_name,'yaml'),
     :projection_interface => to_output_path(File.join(output_dir, 'projection_interface'), table_name, 'java'),
-    :projection_query => to_output_path(File.join(output_dir, 'projection_query'), table_name,'java')
+    :projection_query => to_output_path(File.join(output_dir, 'projection_query'), table_name,'java'),
+    :unit_test_constants => to_output_path(File.join(output_dir, 'unit_test_constants'), table_name, 'java'),
+    :unit_test_mocks => to_output_path(File.join(output_dir, 'unit_test_mocks'), table_name, 'java'),
+    :dto_assertions => to_output_path(File.join(output_dir, 'dto_assertions'), table_name, 'java'),
 }
 
 MYSQL_TO_BIGQUERY_TYPE = {
@@ -52,6 +55,15 @@ MYSQL_TO_BIGQUERY_TYPE = {
     'double' => 'FLOAT64',
     'text' => 'STRING',
     'mediumblob' => 'STRING'
+}
+
+
+BIGQUERY_TYPE_TO_JAVA  = {
+    'STRING' => 'String',
+    'INT64' => 'long',
+    'TIMESTAMP' =>  'Timestamp',
+    'BOOLEAN' =>  'boolean',
+    'FLOAT64' => 'double'
 }
 
 def to_bq_type(mysql_type)
@@ -75,13 +87,26 @@ end
 describe_rows = CSV.new(File.read(inputs[:describe_csv])).sort_by { |row| row[0]  }
 
 columns = describe_rows.filter{ |row| include_field?(excluded_fields, row[0])} \
-  .map{ |row| {:name => row[0], :mysql_type => row[1], :big_query_type => to_bq_type(row[1])} }
+  .map{ |row| \
+    col_name = row[0]
+    big_query_type = to_bq_type(row[1])
+    {:name => col_name, \
+    :mysql_type => row[1], \
+    :big_query_type => big_query_type, \
+    :java_type => BIGQUERY_TYPE_TO_JAVA[big_query_type], \
+    :projection_name => "Prj#{to_camel_case(col_name, true)}", \
+    :java_constant_name => "#{table_name.upcase}__#{col_name.upcase}", \
+    :prj_getter => "get#{to_camel_case(col_name, true)}()" }}
 
 big_query_schema = columns.map{ |col| { :name => col[:name], :type => col[:big_query_type]} }
 schema_json = JSON.pretty_generate(big_query_schema)
 
-IO.write(outputs[:big_query_json], schema_json)
-puts "  Spring BigQuery Schema: #{outputs[:big_query_json]}"
+def write_output(path, contents, description)
+  IO.write(path, contents)
+  puts "  #{description}: #{path}"
+end
+
+write_output(outputs[:big_query_json], schema_json, 'Spring BigQuery Schema')
 
 ## Swagger DTO Objects
 BIGQUERY_TYPE_TO_SWAGGER  = {
@@ -136,21 +161,12 @@ indented_yaml = swagger_object.to_yaml \
   .reject{ |line| '---'.eql?(line)} \
   .map{ |line| '  ' + line } \
   .join("\n")
-IO.write(outputs[:swagger_yaml], indented_yaml)
-puts "  DTO Swagger Definition to #{outputs[:swagger_yaml]}"
+
+write_output(outputs[:swagger_yaml], indented_yaml, 'DTO Swagger Definition')
 
 ### Projection Interface
-
-BIGQUERY_TYPE_TO_JAVA  = {
-    'STRING' => 'String',
-    'INT64' => 'long',
-    'TIMESTAMP' =>  'Timestamp',
-    'BOOLEAN' =>  'boolean',
-    'FLOAT64' => 'double'
-}
-
 def to_getter(field)
-  "  #{BIGQUERY_TYPE_TO_JAVA[field[:big_query_type]]} get#{to_camel_case(field[:name], true)}();"
+  "  #{field[:java_type]} get#{to_camel_case(field[:name], true)}();"
 end
 
 getters = columns.map { |field|
@@ -165,8 +181,7 @@ java = "public interface #{projection_name(table_name)} {\n"
 java << getters.join("\n")
 java << "\n}\n"
 
-IO.write(outputs[:projection_interface], java)
-puts "  Spring Data Projection Interface: #{outputs[:projection_interface]}"
+write_output(outputs[:projection_interface], java, 'Spring Data Projection Interface')
 
 ### Projection query
 def hibernate_column_name(field)
@@ -199,5 +214,46 @@ end
 end
 
 sql = to_query(table_name, columns)
-IO.write(outputs[:projection_query], sql)
-puts "  Projection Query: #{outputs[:projection_query]}"
+
+write_output(outputs[:projection_query], sql, 'Projection Query')
+
+# Unit Test Constants
+#
+JAVA_TYPE_TO_DEFAULT = {
+    'String' => '"foo"',
+    'int' => '42',
+    'long' => '1001',
+    'double' => '5.2',
+    'Timestamp' => 'Timestamp.from(Instant.parse("2005-01-01T00:00:00.00Z"))',
+    'boolean' => 'false'
+}
+
+def to_constant_declaration(column)
+  "private static final #{column[:java_type]} #{column[:java_constant_name]} = #{JAVA_TYPE_TO_DEFAULT[column[:java_type]]};"
+end
+
+constants = columns.map { |col| to_constant_declaration(col) }.join("\n")
+write_output(outputs[:unit_test_constants], constants, 'Unit Test Constants')
+
+### Mock Instantiation
+
+mockName = "mock#{to_camel_case(table_name, true)}"
+mocks = columns.map { |col|
+  "doReturn(#{col[:java_constant_name]}).when(#{mockName}).#{col[:prj_getter]};"
+}
+
+lines = []
+lines << "final #{projection_name(table_name)} #{mockName} = mock(#{projection_name(table_name)}.class);"
+lines << mocks
+lines.flatten!
+
+write_output(outputs[:unit_test_mocks], lines.join("\n"), 'Unit Test Mocks')
+
+### Assertions
+#     assertThat(researcher1.getUserId()).isEqualTo(USER_ID);
+#
+dto_assertions = columns.map{ |col|
+  "    assertThat(#{to_camel_case(table_name, false)}.#{col[:prj_getter]}).isEqualTo(#{col[:java_constant_name]});"
+}.join("\n")
+
+write_output(outputs[:dto_assertions], dto_assertions, 'Unit Test DTO Assertions')
