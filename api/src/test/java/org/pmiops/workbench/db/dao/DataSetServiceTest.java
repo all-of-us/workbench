@@ -39,6 +39,8 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.DSLinkingDao;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
+import org.pmiops.workbench.cohorts.CohortService;
+import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.dataset.DataSetServiceImpl;
 import org.pmiops.workbench.dataset.DataSetServiceImpl.QueryAndParameters;
@@ -54,11 +56,13 @@ import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -99,11 +103,14 @@ public class DataSetServiceTest {
   private DataSetServiceImpl dataSetServiceImpl;
 
   @TestConfiguration
+  @Import({DataSetMapperImpl.class})
   @MockBean({
     CdrBigQuerySchemaConfigService.class,
+    CommonMappers.class,
+    CohortService.class,
     ConceptBigQueryService.class,
     ConceptSetDao.class,
-    DataSetMapperImpl.class,
+    ConceptSetService.class,
     CohortQueryBuilder.class,
     DataSetDao.class
   })
@@ -158,12 +165,15 @@ public class DataSetServiceTest {
   private static DataSetRequest buildEmptyRequest() {
     final DataSetRequest invalidRequest = new DataSetRequest();
     invalidRequest.setDomainValuePairs(Collections.emptyList());
+    invalidRequest.setPrePackagedConceptSet(PrePackagedConceptSetEnum.NONE);
     return invalidRequest;
   }
 
   @Test(expected = BadRequestException.class)
   public void testThrowsForNoCohortOrConcept() {
     final DataSetRequest invalidRequest = buildEmptyRequest();
+    invalidRequest.setDomainValuePairs(
+        ImmutableList.of(new DomainValuePair().domain(Domain.CONDITION)));
     dataSetServiceImpl.domainToBigQueryConfig(invalidRequest);
   }
 
@@ -319,7 +329,7 @@ public class DataSetServiceTest {
         new DataSetRequest()
             .conceptSetIds(Collections.emptyList())
             .cohortIds(Collections.emptyList())
-            .domainValuePairs(Collections.emptyList())
+            .domainValuePairs(ImmutableList.of(new DomainValuePair()))
             .name("blah")
             .prePackagedConceptSet(PrePackagedConceptSetEnum.NONE)
             .cohortIds(COHORT_IDS)
