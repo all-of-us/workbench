@@ -5,11 +5,11 @@ workflow IngestSyntheticVcfWf {
     File base_vcf # Sample VCF file that the randomization will be based on
     File base_vcf_index
     File sample_names # Newline separated list of names 
-    Int num_partitions # sample_names will be evenly split across this #
+    Int num_partitions # sample_names will be evenly split across this #. (`wc -l sample_names` / num_partitions) should be <= 4000
     String output_bucket # Bucket that will contain the generated TSV data
     File probe_info_file
 
-    Int batch_size # Should be set to 10 for actual runs
+    Int batch_size # Should be set to 10 for actual runs. Hard limit is the partition size which is (`wc -l sample_names` / num_partitions)
   }
 
   call AddSampleIds {
