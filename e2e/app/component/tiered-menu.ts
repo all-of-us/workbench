@@ -33,7 +33,7 @@ export default class TieredMenu extends Container {
       if (i >= (num - 1)) {
         if (waitForNav) {
           await Promise.all([
-            this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0']}),
+            this.page.waitForNavigation({waitUntil: ['networkidle0']}),
             menuItem.click(),
           ]);
         } else {
