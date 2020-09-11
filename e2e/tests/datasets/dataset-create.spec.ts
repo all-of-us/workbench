@@ -84,7 +84,7 @@ describe('Create Dataset', () => {
     const searchResultsTable = await searchPage.searchCondition('hydroxychloroquine');
     // Add drug in first row result
     const nameValue = await searchResultsTable.getCellValue(1, 1);
-    const addIcon = await ClrIconLink.findByName(page, {containsText: nameValue, iconShape: 'plus-circle'}, searchPage);
+    const addIcon = await ClrIconLink.findByName(page, {containsText: nameValue, iconShape: 'plus-circle'}, searchResultsTable);
     await addIcon.click();
 
     // Open selection list and click Save Criteria button

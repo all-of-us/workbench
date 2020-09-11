@@ -148,7 +148,7 @@ describe('User can create new Cohorts', () => {
 
     // Add the condition in first row. We don't know what the condition name is, so we get the cell value first.
     const nameValue = await search2ResultsTable.getCellValue(1, 1);
-    const addIcon = await ClrIconLink.findByName(page, {containsText: nameValue, iconShape: 'plus-circle'}, searchPage);
+    const addIcon = await ClrIconLink.findByName(page, {containsText: nameValue, iconShape: 'plus-circle'}, search2ResultsTable);
     await addIcon.click();
 
     // Click Finish & Review button to open selection list and add modifier

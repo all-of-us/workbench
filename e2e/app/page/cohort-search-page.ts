@@ -1,17 +1,16 @@
 import {Page} from 'puppeteer';
 import HelpSidebar from 'app/component/help-sidebar';
-import Modal from 'app/component/modal';
 import SelectMenu from 'app/component/select-menu';
 import Table from 'app/component/table';
 import Button from 'app/element/button';
 import ClrIconLink from 'app/element/clr-icon-link';
 import Textbox from 'app/element/textbox';
 import {centerPoint, dragDrop, waitWhileLoading} from 'utils/test-utils';
-import {waitForNumericalString} from 'utils/waits-utils';
+import {waitForDocumentTitle, waitForNumericalString} from 'utils/waits-utils';
 import {LinkText} from 'app/text-labels';
 import {waitUntilChanged} from 'utils/element-utils';
+import AuthenticatedPage from './authenticated-page';
 
-const defaultXpath = '//*[@id="cohort-search-container"]';
 
 export enum PhysicalMeasurementsCriteria {
   BloodPressure = 'Blood Pressure',
@@ -63,22 +62,39 @@ export enum FilterSign {
   Between = 'Between',
 }
 
-export default class CohortSearchPage extends Modal {
+const pageTitle = 'Build Cohort Criteria';
 
-  constructor(page: Page, xpath: string = defaultXpath) {
-    super(page, xpath);
+export default class CohortSearchPage extends AuthenticatedPage {
+  private containerXpath = '//*[@id="cohort-search-container"]';
+
+  constructor(page: Page) {
+    super(page);
   }
 
+  async isLoaded(): Promise<boolean> {
+    try {
+      await Promise.all([
+        waitForDocumentTitle(this.page, pageTitle),
+        waitWhileLoading(this.page),
+      ]);
+      return true;
+    } catch (e) {
+      console.log(`CohortReviewPage isLoaded() encountered ${e}`);
+      return false;
+    }
+  }
+
+
   async waitForPhysicalMeasurementCriteriaLink(criteriaType: PhysicalMeasurementsCriteria): Promise<ClrIconLink> {
-    return ClrIconLink.findByName(this.page, {name: criteriaType, iconShape: 'slider', ancestorLevel: 2}, this);
+    return ClrIconLink.findByName(this.page, {name: criteriaType, iconShape: 'slider', ancestorLevel: 2});
   }
 
   async waitForEthnicityCriteriaLink(criteriaType: Ethnicity): Promise<ClrIconLink> {
-    return ClrIconLink.findByName(this.page, {startsWith: criteriaType, iconShape: 'plus-circle', ancestorLevel: 0}, this);
+    return ClrIconLink.findByName(this.page, {startsWith: criteriaType, iconShape: 'plus-circle', ancestorLevel: 0});
   }
 
   async waitForVisitsCriteriaLink(criteriaType: Visits): Promise<ClrIconLink> {
-    return ClrIconLink.findByName(this.page, {startsWith: criteriaType, iconShape: 'plus-circle', ancestorLevel: 1}, this);
+    return ClrIconLink.findByName(this.page, {startsWith: criteriaType, iconShape: 'plus-circle', ancestorLevel: 1});
   }
 
   /**
@@ -106,7 +122,7 @@ export default class CohortSearchPage extends Modal {
    * Click FINISH button.
    */
   async clickFinishButton(): Promise<void> {
-    return this.clickButton(LinkText.FinishAndReview, {waitForClose: true});
+    return Button.findByName(this.page, {normalizeSpace: LinkText.FinishAndReview}).then(button => button.click());
   }
 
   async viewAndSaveCriteria(): Promise<void> {
@@ -115,23 +131,23 @@ export default class CohortSearchPage extends Modal {
     await finishAndReviewButton.click();
 
     // Click Save Criteria button in sidebar
-    const helpSidebar = new HelpSidebar(page);
+    const helpSidebar = new HelpSidebar(this.page);
     await helpSidebar.clickSaveCriteriaButton();
   }
 
   async waitForParticipantResult(): Promise<string> {
-    const selector = `${this.xpath}//*[./*[contains(text(), "Results")]]/div[contains(text(), "Number")]`;
+    const selector = `${this.containerXpath}//*[./*[contains(text(), "Results")]]/div[contains(text(), "Number")]`;
     return waitForNumericalString(this.page, selector);
   }
 
   getConditionSearchResultsTable(): Table {
-    return new Table(this.page, '//table[@class="p-datatable"]', this);
+    return new Table(this.page, '//table[@class="p-datatable"]');
   }
 
   async searchCondition(searchWord: string): Promise<Table> {
     const resultsTable = this.getConditionSearchResultsTable();
     const exists = await resultsTable.exists();
-    const searchFilterTextbox = await Textbox.findByName(this.page, {containsText: 'by code or description'}, this);
+    const searchFilterTextbox = await Textbox.findByName(this.page, {containsText: 'by code or description'});
     await searchFilterTextbox.type(searchWord);
     await searchFilterTextbox.pressReturn();
     if (exists) {
@@ -143,9 +159,9 @@ export default class CohortSearchPage extends Modal {
   }
 
   async addAgeModifier(filterSign: FilterSign, filterValue: number): Promise<string> {
-    const selectMenu = await SelectMenu.findByName(this.page, {name: 'Age At Event', ancestorLevel: 2}, this);
+    const selectMenu = await SelectMenu.findByName(this.page, {name: 'Age At Event', ancestorLevel: 2});
     await selectMenu.clickMenuItem(filterSign);
-    const numberField = await this.page.waitForXPath(`${this.xpath}//input[@type="number"]`, {visible: true});
+    const numberField = await this.page.waitForXPath(`${this.containerXpath}//input[@type="number"]`, {visible: true});
     // Issue with Puppeteer type() function: typing value in this textbox doesn't always trigger change event. workaround is needed.
     // Error: "Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation."
     await numberField.focus();
@@ -154,12 +170,12 @@ export default class CohortSearchPage extends Modal {
     await numberField.press('Tab', { delay: 200 });
 
     let participantResult;
-    await this.clickButton(LinkText.Calculate);
+    await Button.findByName(this.page, {name: LinkText.Calculate}).then(button => button.click());
     try {
       participantResult = await this.waitForParticipantResult();
     } catch (e) {
       // Retry one more time.
-      await this.clickButton(LinkText.Calculate);
+      await Button.findByName(this.page, {name: LinkText.Calculate}).then(button => button.click());
       participantResult = await this.waitForParticipantResult();
     }
     console.debug(`Age Modifier: ${filterSign} ${filterValue}  => number of participants: ${participantResult}`);
@@ -179,7 +195,7 @@ export default class CohortSearchPage extends Modal {
    * @param {number} maxAge
    */
   async addAge(minAge: number, maxAge: number): Promise<string> {
-    const selector = `${this.getXpath()}//input[@type="number"]`;
+    const selector = `${this.containerXpath}//input[@type="number"]`;
     await this.page.waitForXPath(selector, {visible: true});
 
     const [lowerNumberInput, upperNumberInput] = await this.page.$x(selector);
@@ -187,18 +203,18 @@ export default class CohortSearchPage extends Modal {
     await (Textbox.asBaseElement(this.page, upperNumberInput)).type(maxAge.toString()).then(input => input.pressTab());
 
     // Get count from slider badge
-    const count = await waitForNumericalString(this.page, `${this.xpath}//*[@id="age-count"]`);
+    const count = await waitForNumericalString(this.page, `${this.containerXpath}//*[@id="age-count"]`);
 
     // Click ADD SELECTION to add selected age range
-    await this.clickButton(LinkText.AddSelection);
+    await Button.findByName(this.page, {name: LinkText.AddSelection}).then(button => button.click());
 
     // Click FINISH & REVIEW button. Sidebar should open.
-    const finishAndReviewButton = await Button.findByName(page, {name: LinkText.FinishAndReview});
+    const finishAndReviewButton = await Button.findByName(this.page, {name: LinkText.FinishAndReview});
     await finishAndReviewButton.waitUntilEnabled();
     await finishAndReviewButton.click();
 
     // Click SAVE CRITERIA button. Sidebar closes.
-    const helpSidebar = new HelpSidebar(page);
+    const helpSidebar = new HelpSidebar(this.page);
     await helpSidebar.clickSaveCriteriaButton();
     return count;
   }
@@ -206,7 +222,7 @@ export default class CohortSearchPage extends Modal {
   // Experimental
   async drageAgeSlider(): Promise<void> {
     const getXpath = (classValue: string) => {
-      return `${this.getXpath()}//*[text()="Age Range"]/ancestor::node()[1]//*[contains(@class,"${classValue}") and @role="slider"]`;
+      return `${this.containerXpath}//*[text()="Age Range"]/ancestor::node()[1]//*[contains(@class,"${classValue}") and @role="slider"]`;
     }
 
     const lowerNumberInputHandle = await this.page.waitForXPath(getXpath('noUi-handle-lower'), {visible: true});
