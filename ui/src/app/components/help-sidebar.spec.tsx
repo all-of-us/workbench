@@ -35,7 +35,8 @@ describe('HelpSidebar', () => {
     cohortReviewStore.next(cohortReviewStubs[0]);
     serverConfigStore.next({
       ...defaultServerConfig,
-      enableCohortBuilderV2: false
+      enableCohortBuilderV2: false,
+      enableCustomRuntimes: true
     });
   });
 
@@ -97,9 +98,14 @@ describe('HelpSidebar', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find({'data-test-id': 'criteria-count'}).first().props().children).toBe(2);
   });
-  it('should not display disabled icons', () => {
+  it('should not display cluster control icon for read-only workspaces', () => {
     props = {workspace: {accessLevel: WorkspaceAccessLevel.READER}}
     const wrapper = component();
     expect(wrapper.find({'data-test-id': 'help-sidebar-icon-thunderstorm'}).length).toBe(0);
+  });
+  it('should display cluster control icon for writable workspaces', () => {
+    props = {workspace: {accessLevel: WorkspaceAccessLevel.WRITER}}
+    const wrapper = component();
+    expect(wrapper.find({'data-test-id': 'help-sidebar-icon-thunderstorm'}).length).toBe(1);
   });
 });
