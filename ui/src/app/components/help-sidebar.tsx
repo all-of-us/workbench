@@ -510,7 +510,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
         {(criteria && icon.page === 'criteria') && <span data-test-id='criteria-count'
                                                          style={styles.criteriaCount}>
           {criteria.length}</span>}
-            <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + i} icon={icon.faIcon} style={icon.style} />
+            <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + icon.id} icon={icon.faIcon} style={icon.style} />
           </React.Fragment> ;
     }
 
@@ -554,10 +554,10 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
                        onMouseOut={() => this.setState({tooltipId: undefined})}>
                     {icon.id === 'dataDictionary'
                       ? <a href={supportUrls.dataDictionary} target='_blank'>
-                          <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + i} icon={icon.faIcon} style={icon.style} />
+                          <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + icon.id} icon={icon.faIcon} style={icon.style} />
                         </a>
                       : icon.faIcon === null
-                        ? <img src={proIcons[icon.id]} style={icon.style} />
+                        ? <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={icon.style} />
                         : this.displayIcon(icon, i)
                     }
                   </div>

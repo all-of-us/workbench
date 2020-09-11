@@ -11,6 +11,7 @@ import {CohortAnnotationDefinitionServiceStub} from 'testing/stubs/cohort-annota
 import {CohortReviewServiceStub, cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 import {HelpSidebar} from './help-sidebar';
+import {WorkspaceAccessLevel} from "generated/fetch";
 
 const sidebarContent = require('assets/json/help-sidebar.json');
 
@@ -55,7 +56,7 @@ describe('HelpSidebar', () => {
     props = {helpContentKey: 'notebookStorage', sidebarOpen: true};
     const wrapper = component();
     expect(wrapper.find('[data-test-id="section-title-0"]').text()).toBe(sidebarContent.notebookStorage[0].title);
-    expect(wrapper.find('[data-test-id="help-sidebar-icon-1"]').get(0).props.icon.iconName).toBe('folder-open');
+    expect(wrapper.find('[data-test-id="help-sidebar-icon-help"]').get(0).props.icon.iconName).toBe('folder-open');
   });
 
   it('should update marginRight style when sidebarOpen prop changes', () => {
@@ -95,5 +96,10 @@ describe('HelpSidebar', () => {
     currentCohortCriteriaStore.next([criteria1, criteria2]);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find({'data-test-id': 'criteria-count'}).first().props().children).toBe(2);
+  });
+  it('should not display disabled icons', () => {
+    props = {workspace: {accessLevel: WorkspaceAccessLevel.READER}}
+    const wrapper = component();
+    expect(wrapper.find({'data-test-id': 'help-sidebar-icon-thunderstorm'}).length).toBe(0);
   });
 });
