@@ -1,0 +1,4 @@
+runtime: python38
+default_expiration: "2m"
+service: pheweb
+entrypoint: gunicorn -w4 --chdir generated-by-pheweb wsgi
