@@ -174,10 +174,23 @@ def hibernate_column_name(field)
   to_camel_case(field[:name], false)
 end
 
-def to_query(table_name, schema)
+# Fix up research purpose entity fields, which don't match the column names (i.e. there's no 'rp' prefix)
+def adjust_rp_col(field, table_alias)
+  md = field.match(/^rp_(?<root>\w+$)/)
+  projection_field = to_camel_case(field, false)
+  entity_property = projection_field
+  if md and md['root']
+    entity_property = to_camel_case(md['root'], false)
+    "#{table_alias}.#{entity_property} AS #{projection_field}}"
+  else
+    "#{table_alias}.#{entity_property}}"
+  end
+end
+
+  def to_query(table_name, schema)
   table_alias = table_name[0].downcase
   "@Query(\"SELECT\n" + schema.map do |field|
-    "+ \"  #{table_alias}.#{hibernate_column_name(field)}"
+    "+ \"  #{adjust_rp_col(field[:name], table_alias)}"
   end \
     .join(",\\n\"\n") \
   + "\\n\"\n" \
