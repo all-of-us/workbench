@@ -31,6 +31,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
     try {
       await Promise.all([
         waitForDocumentTitle(this.page, PageTitle),
+        this.page.waitForXPath('//*[@data-test-id="sidebar-content"]'),
         waitWhileLoading(this.page),
       ]);
       return true;

@@ -108,7 +108,7 @@ export default class CohortSearchPage extends AuthenticatedPage {
 
     const link = await this.waitForPhysicalMeasurementCriteriaLink(criteriaName);
     await link.click();
-    console.log(`clicked ${link}`);
+    console.log(`clicked link`, link);
 
     const helpSidebar = new HelpSidebar(this.page);
     const participantResult = await helpSidebar.getPhysicalMeasurementParticipantResult(filterSign, filterValue);
