@@ -20,6 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class WorkspaceDaoTest {
+  private static final String WORKSPACE_1_NAME = "Foo";
+  private static final String WORKSPACE_NAMESPACE = "aou-1";
+
   @Autowired WorkspaceDao workspaceDao;
 
   @Test
@@ -40,5 +43,13 @@ public class WorkspaceDaoTest {
     } catch (ObjectOptimisticLockingFailureException e) {
       // expected
     }
+  }
+
+  public DbWorkspace createWorkspace() {
+    DbWorkspace workspace1 = new DbWorkspace();
+    workspace1.setName(WORKSPACE_1_NAME);
+    workspace1.setWorkspaceNamespace(WORKSPACE_NAMESPACE);
+    workspace1 = workspaceDao.save(workspace1);
+    return workspace1;
   }
 }

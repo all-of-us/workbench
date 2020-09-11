@@ -35,8 +35,6 @@ public interface PrjWorkspace {
 
   boolean getRpCommercialPurpose();
 
-  boolean getRpPopulation();
-
   String getRpAdditionalNotes();
 
   boolean getRpReviewRequested();

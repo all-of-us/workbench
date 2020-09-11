@@ -8218,10 +8218,6 @@ definitions:
       rpOtherPurposeDetails:
         description: ''
         type: string
-      rpPopulation:
-        description: ''
-        type: boolean
-        default: false
       rpPopulationHealth:
         description: ''
         type: boolean
