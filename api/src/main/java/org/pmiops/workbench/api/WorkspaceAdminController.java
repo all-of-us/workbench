@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloudStorageTraffic;
+import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 import org.pmiops.workbench.workspaceadmin.WorkspaceAdminService;
@@ -52,5 +53,15 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
     return ResponseEntity.ok(
         workspaceAdminService.getAuditLogEntries(
             workspaceNamespace, limit, afterMillis, beforeMillisNullable));
+  }
+
+  @Override
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
+  public ResponseEntity<ReadOnlyNotebookResponse> adminReadOnlyNotebook(
+      String workspaceNamespace, String workspaceName, String notebookName, String accessReason) {
+    final String notebookHtml =
+        workspaceAdminService.getReadOnlyNotebook(
+            workspaceNamespace, workspaceName, notebookName, accessReason);
+    return ResponseEntity.ok(new ReadOnlyNotebookResponse().html(notebookHtml));
   }
 }

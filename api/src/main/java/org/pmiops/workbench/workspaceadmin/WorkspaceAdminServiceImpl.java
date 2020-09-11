@@ -220,6 +220,13 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         workspaceDatabaseId, limit, after, before);
   }
 
+  @Override
+  public String getReadOnlyNotebook(
+      String workspaceNamespace, String workspaceName, String notebookName, String accessReason) {
+    // TODO audit log
+    return notebooksService.getReadOnlyHtml(workspaceNamespace, workspaceName, notebookName);
+  }
+
   private int getNonNotebookFileCount(String bucketName) {
     return (int)
         cloudStorageService

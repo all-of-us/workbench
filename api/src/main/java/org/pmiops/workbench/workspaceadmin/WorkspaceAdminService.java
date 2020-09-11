@@ -26,4 +26,7 @@ public interface WorkspaceAdminService {
       Integer limit,
       Long afterMillis,
       @Nullable Long beforeMillisNullable);
+
+  String getReadOnlyNotebook(
+      String workspaceNamespace, String workspaceName, String notebookName, String accessReason);
 }
