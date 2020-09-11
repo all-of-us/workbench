@@ -113,7 +113,7 @@ describe('User can create new Cohorts', () => {
    * Duplicate cohort.
    * Delete cohort.
    */
-  test('Add Cohort of EKG condition with modifiers', async () => {
+  test.skip('Add Cohort of EKG condition with modifiers', async () => {
 
     const workspaceCard = await findWorkspace(page);
     await workspaceCard.clickWorkspaceName();
