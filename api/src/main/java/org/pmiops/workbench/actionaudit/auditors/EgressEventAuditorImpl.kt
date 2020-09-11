@@ -36,8 +36,7 @@ constructor(
      * flow logs. Empirically, an "-m" suffix is added to the VM name, due to Leo team's use
      * of Dataproc (see https://cloud.google.com/dataproc/docs/concepts/configuring-clusters/metadata).
      *
-     * Note: this pattern may change if the Leo team switches to using raw VMs instead of Dataproc
-     * clusters!
+     * TODO(RW-4848): Update this to account for GCE naming conventions.
      */
     private fun dbUserToVmName(dbUser: DbUser): String {
         return dbUser.runtimeName + DATAPROC_MASTER_NODE_SUFFIX
