@@ -1,7 +1,10 @@
 import {Component, Input} from '@angular/core';
 import {faEdit} from '@fortawesome/free-regular-svg-icons';
 import {
-  faBook, faEllipsisV, faFolderOpen, faInbox,
+  faBook,
+  faEllipsisV,
+  faFolderOpen,
+  faInbox,
   faInfoCircle
 } from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
@@ -16,15 +19,28 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SidebarContent} from 'app/pages/data/cohort-review/sidebar-content.component';
 import {participantStore} from 'app/services/review-state.service';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {withCurrentCohortCriteria} from 'app/utils';
-import {highlightSearchTerm, reactStyles, ReactWrapperBase, withCurrentWorkspace, withUserProfile} from 'app/utils';
+import {
+  highlightSearchTerm,
+  reactStyles,
+  ReactWrapperBase,
+  withCurrentCohortCriteria,
+  withCurrentWorkspace,
+  withUserProfile
+} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {currentCohortSearchContextStore, NavStore, setSidebarActiveIconStore} from 'app/utils/navigation';
+import {
+  currentCohortSearchContextStore,
+  NavStore,
+  serverConfigStore,
+  setSidebarActiveIconStore
+} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
+import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {ParticipantCohortStatus, WorkspaceAccessLevel} from 'generated/fetch';
 import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
 import {PopupTrigger} from './popups';
+import canWrite = WorkspacePermissionsUtil.canWrite;
 
 const proIcons = {
   arrowLeft: '/assets/icons/arrow-left-regular.svg',
@@ -194,16 +210,21 @@ export const NOTEBOOK_HELP_CONTENT = 'notebookStorage';
 // helpContentKey is the json key for the block of help content that is being displayed on this
 // sidebar. If the block of help content is about notebook storage, we want to display a different
 // icon on the sidebar and different tooltip, etc.
-const icons = (helpContentKey: string) => {
-  return [{
-    id: 'criteria',
-    disabled: false,
-    faIcon: faInbox,
-    label: 'Selected Criteria',
-    page: 'criteria',
-    style: {fontSize: '21px'},
-    tooltip: 'Selected Criteria'
-  },
+const icons = (
+  helpContentKey: string,
+  enableCustomRuntimes: boolean,
+  workspaceAccessLevel: WorkspaceAccessLevel
+) => {
+  const iconsList = [
+    {
+      id: 'criteria',
+      disabled: false,
+      faIcon: faInbox,
+      label: 'Selected Criteria',
+      page: 'criteria',
+      style: {fontSize: '21px'},
+      tooltip: 'Selected Criteria'
+    },
     {
       id: 'help',
       disabled: false,
@@ -212,14 +233,6 @@ const icons = (helpContentKey: string) => {
       page: null,
       style: {fontSize: '21px'},
       tooltip: helpContentKey === NOTEBOOK_HELP_CONTENT ? 'Workspace Storage' : 'Help Tips',
-// }, {
-//   id: 'thunderstorm',
-//   disabled: true,
-//   faIcon: null,
-//   label: 'Cloud Icon',
-//   page: null,
-//   style: {height: '22px', width: '22px', marginTop: '0.25rem', opacity: 0.5},
-//   tooltip: 'Compute Configuration',
     }, {
       id: 'dataDictionary',
       disabled: false,
@@ -237,6 +250,19 @@ const icons = (helpContentKey: string) => {
       style: {fontSize: '20px', marginLeft: '3px'},
       tooltip: 'Annotations',
     }];
+  if (enableCustomRuntimes && canWrite(workspaceAccessLevel)) {
+    return [...iconsList, {
+      id: 'thunderstorm',
+      disabled: false,
+      faIcon: null,
+      label: 'Cloud Icon',
+      page: null,
+      style: {height: '22px', width: '22px', marginTop: '0.25rem'},
+      tooltip: 'Compute Configuration',
+    }];
+  } else {
+    return iconsList;
+  }
 };
 
 const analyticsLabels = {
@@ -484,7 +510,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
         {(criteria && icon.page === 'criteria') && <span data-test-id='criteria-count'
                                                          style={styles.criteriaCount}>
           {criteria.length}</span>}
-            <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + i} icon={icon.faIcon} style={icon.style} />
+            <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + icon.id} icon={icon.faIcon} style={icon.style} />
           </React.Fragment> ;
     }
 
@@ -502,7 +528,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
     }
 
     render() {
-      const {criteria, helpContentKey, notebookStyles, setSidebarState} = this.props;
+      const {criteria, helpContentKey, notebookStyles, setSidebarState, workspace} = this.props;
       const {activeIcon, filteredContent, participant, searchTerm, tooltipId} = this.state;
       const displayContent = filteredContent !== undefined ? filteredContent : sidebarContent[helpContentKey];
 
@@ -515,12 +541,12 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
       return <React.Fragment>
         <div style={notebookStyles ? {...styles.iconContainer, ...styles.notebookOverrides} : {...styles.iconContainer}}>
           {!criteria && this.renderWorkspaceMenu()}
-          {icons(helpContentKey).map((icon, i) =>
+          {icons(helpContentKey, serverConfigStore.getValue().enableCustomRuntimes, workspace.accessLevel).map((icon, i) =>
           this.showIcon(icon) && <div key={i} style={{display: 'table'}}>
                 <TooltipTrigger content={<div>{tooltipId === i && icon.tooltip}</div>} side='left'>
                   <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
                        onClick={() => {
-                         if (icon.id !== 'dataDictionary') {
+                         if (icon.id !== 'dataDictionary' && !icon.disabled) {
                            this.onIconClick(icon);
                          }
                        }}
@@ -528,10 +554,10 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
                        onMouseOut={() => this.setState({tooltipId: undefined})}>
                     {icon.id === 'dataDictionary'
                       ? <a href={supportUrls.dataDictionary} target='_blank'>
-                          <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + i} icon={icon.faIcon} style={icon.style} />
+                          <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + icon.id} icon={icon.faIcon} style={icon.style} />
                         </a>
                       : icon.faIcon === null
-                        ? <img src={proIcons[icon.id]} style={icon.style} />
+                        ? <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={icon.style} />
                         : this.displayIcon(icon, i)
                     }
                   </div>
