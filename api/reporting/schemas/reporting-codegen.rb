@@ -181,21 +181,22 @@ def adjust_rp_col(field, table_alias)
   entity_property = projection_field
   if md and md['root']
     entity_property = to_camel_case(md['root'], false)
-    "#{table_alias}.#{entity_property} AS #{projection_field}}"
+    "#{table_alias}.#{entity_property} AS #{projection_field}"
   else
-    "#{table_alias}.#{entity_property}}"
+    "#{table_alias}.#{entity_property}"
   end
 end
 
   def to_query(table_name, schema)
   table_alias = table_name[0].downcase
-  "@Query(\"SELECT\n" + schema.map do |field|
-    "+ \"  #{adjust_rp_col(field[:name], table_alias)}"
-  end \
+  "@Query(\"SELECT\\n\"\n" \
+    + schema.map do |field|
+      "+ \"  #{adjust_rp_col(field[:name], table_alias)}"
+    end \
     .join(",\\n\"\n") \
-  + "\\n\"\n" \
-  + "+ \"FROM Db#{to_camel_case(table_name, true)} #{table_alias}\")\n" \
-   + "  List<#{projection_name(table_name)}> getReporting#{to_camel_case(table_name, true)}s();"
+    + "\\n\"\n" \
+    + "+ \"FROM Db#{to_camel_case(table_name, true)} #{table_alias}\")\n" \
+    + "  List<#{projection_name(table_name)}> getReporting#{to_camel_case(table_name, true)}s();"
 end
 
 sql = to_query(table_name, columns)
