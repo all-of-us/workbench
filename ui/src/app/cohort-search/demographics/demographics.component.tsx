@@ -438,7 +438,6 @@ export class Demographics extends React.Component<Props, State> {
   render() {
     const {criteriaType, selectedIds} = this.props;
     const {ageType, calculating, count, loading, maxAge, minAge, nodes} = this.state;
-    const calcDisabled = calculating || count !== null;
     return loading
       ? <div style={{textAlign: 'center'}}><Spinner style={{marginTop: '3rem'}}/></div>
       : <React.Fragment>
