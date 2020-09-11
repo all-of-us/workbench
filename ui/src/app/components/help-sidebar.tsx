@@ -39,6 +39,8 @@ import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {ParticipantCohortStatus, WorkspaceAccessLevel} from 'generated/fetch';
 import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
 import {PopupTrigger} from './popups';
+import {WorkspacePermissionsUtil} from "../utils/workspace-permissions";
+import canWrite = WorkspacePermissionsUtil.canWrite;
 
 const proIcons = {
   arrowLeft: '/assets/icons/arrow-left-regular.svg',
@@ -248,20 +250,14 @@ const icons = (
       style: {fontSize: '20px', marginLeft: '3px'},
       tooltip: 'Annotations',
     }];
-  if (
-    enableCustomRuntimes
-    && (
-      workspaceAccessLevel === WorkspaceAccessLevel.OWNER
-      || workspaceAccessLevel === WorkspaceAccessLevel.WRITER
-    )
-  ) {
+  if (enableCustomRuntimes && canWrite(workspaceAccessLevel)) {
     return [...iconsList, {
       id: 'thunderstorm',
       disabled: true,
       faIcon: null,
       label: 'Cloud Icon',
       page: null,
-      style: {height: '22px', width: '22px', marginTop: '0.25rem', opacity: 0.5},
+      style: {height: '22px', width: '22px', marginTop: '0.25rem'},
       tooltip: 'Compute Configuration',
     }];
   } else {
@@ -550,7 +546,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
                 <TooltipTrigger content={<div>{tooltipId === i && icon.tooltip}</div>} side='left'>
                   <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
                        onClick={() => {
-                         if (icon.id !== 'dataDictionary') {
+                         if (icon.id !== 'dataDictionary' && icon.disabled === false) {
                            this.onIconClick(icon);
                          }
                        }}
