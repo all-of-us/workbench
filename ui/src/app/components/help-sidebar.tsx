@@ -35,11 +35,11 @@ import {
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
+import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {ParticipantCohortStatus, WorkspaceAccessLevel} from 'generated/fetch';
 import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
 import {PopupTrigger} from './popups';
-import {WorkspacePermissionsUtil} from "../utils/workspace-permissions";
 import canWrite = WorkspacePermissionsUtil.canWrite;
 
 const proIcons = {
