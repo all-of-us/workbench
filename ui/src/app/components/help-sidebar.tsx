@@ -253,7 +253,7 @@ const icons = (
   if (enableCustomRuntimes && canWrite(workspaceAccessLevel)) {
     return [...iconsList, {
       id: 'thunderstorm',
-      disabled: true,
+      disabled: false,
       faIcon: null,
       label: 'Cloud Icon',
       page: null,
