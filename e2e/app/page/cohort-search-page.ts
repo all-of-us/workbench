@@ -95,7 +95,7 @@ export default class CohortSearchPage extends Modal {
     await link.click();
 
     const helpSidebar = new HelpSidebar(this.page);
-    const participantResult = helpSidebar.getPhysicalMeasurementParticipantResult(filterSign, filterValue);
+    const participantResult = await helpSidebar.getPhysicalMeasurementParticipantResult(filterSign, filterValue);
     console.debug(`Physical Measurements ${criteriaName}: ${filterSign} ${filterValue}  => number of participants: ${participantResult}`);
 
     // return participants count for comparing
