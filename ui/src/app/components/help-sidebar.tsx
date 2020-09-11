@@ -546,7 +546,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
                 <TooltipTrigger content={<div>{tooltipId === i && icon.tooltip}</div>} side='left'>
                   <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
                        onClick={() => {
-                         if (icon.id !== 'dataDictionary' && icon.disabled === false) {
+                         if (icon.id !== 'dataDictionary' && !icon.disabled) {
                            this.onIconClick(icon);
                          }
                        }}
