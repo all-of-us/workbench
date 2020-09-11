@@ -1,7 +1,10 @@
 import {Component, Input} from '@angular/core';
 import {faEdit} from '@fortawesome/free-regular-svg-icons';
 import {
-  faBook, faEllipsisV, faFolderOpen, faInbox,
+  faBook,
+  faEllipsisV,
+  faFolderOpen,
+  faInbox,
   faInfoCircle
 } from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
@@ -16,8 +19,14 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SidebarContent} from 'app/pages/data/cohort-review/sidebar-content.component';
 import {participantStore} from 'app/services/review-state.service';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {withCurrentCohortCriteria} from 'app/utils';
-import {highlightSearchTerm, reactStyles, ReactWrapperBase, withCurrentWorkspace, withUserProfile} from 'app/utils';
+import {
+  highlightSearchTerm,
+  reactStyles,
+  ReactWrapperBase,
+  withCurrentCohortCriteria,
+  withCurrentWorkspace,
+  withUserProfile
+} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {
   currentCohortSearchContextStore,
@@ -199,7 +208,11 @@ export const NOTEBOOK_HELP_CONTENT = 'notebookStorage';
 // helpContentKey is the json key for the block of help content that is being displayed on this
 // sidebar. If the block of help content is about notebook storage, we want to display a different
 // icon on the sidebar and different tooltip, etc.
-const icons = (helpContentKey: string, enableCustomRuntimes: boolean) => {
+const icons = (
+  helpContentKey: string,
+  enableCustomRuntimes: boolean,
+  workspaceAccessLevel: WorkspaceAccessLevel
+) => {
   const iconsList = [
     {
       id: 'criteria',
@@ -235,7 +248,13 @@ const icons = (helpContentKey: string, enableCustomRuntimes: boolean) => {
       style: {fontSize: '20px', marginLeft: '3px'},
       tooltip: 'Annotations',
     }];
-  if (enableCustomRuntimes) {
+  if (
+    enableCustomRuntimes
+    && (
+      workspaceAccessLevel === WorkspaceAccessLevel.OWNER
+      || workspaceAccessLevel === WorkspaceAccessLevel.WRITER
+    )
+  ) {
     return [...iconsList, {
       id: 'thunderstorm',
       disabled: true,
@@ -513,7 +532,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
     }
 
     render() {
-      const {criteria, helpContentKey, notebookStyles, setSidebarState} = this.props;
+      const {criteria, helpContentKey, notebookStyles, setSidebarState, workspace} = this.props;
       const {activeIcon, filteredContent, participant, searchTerm, tooltipId} = this.state;
       const displayContent = filteredContent !== undefined ? filteredContent : sidebarContent[helpContentKey];
 
@@ -526,7 +545,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
       return <React.Fragment>
         <div style={notebookStyles ? {...styles.iconContainer, ...styles.notebookOverrides} : {...styles.iconContainer}}>
           {!criteria && this.renderWorkspaceMenu()}
-          {icons(helpContentKey, serverConfigStore.getValue().enableCustomRuntimes).map((icon, i) =>
+          {icons(helpContentKey, serverConfigStore.getValue().enableCustomRuntimes, workspace.accessLevel).map((icon, i) =>
           this.showIcon(icon) && <div key={i} style={{display: 'table'}}>
                 <TooltipTrigger content={<div>{tooltipId === i && icon.tooltip}</div>} side='left'>
                   <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
