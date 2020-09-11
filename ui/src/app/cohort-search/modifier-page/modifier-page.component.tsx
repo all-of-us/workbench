@@ -18,6 +18,7 @@ import {triggerEvent} from 'app/utils/analytics';
 import {currentCohortSearchContextStore, serverConfigStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Criteria, CriteriaType, DomainType, ModifierType, Operator} from 'generated/fetch';
+import {Spinner} from '../../components/spinners';
 
 
 const styles = reactStyles({
@@ -168,13 +169,14 @@ interface Props {
 
 interface State {
   calculateError: boolean;
+  calculating: boolean;
   count: number;
   formErrors: Array<string>;
   formState: any;
   formUntouched: boolean;
   initialFormState: boolean;
-  visitCounts: any;
   loading: boolean;
+  visitCounts: any;
 }
 
 export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearchContext())(
@@ -201,7 +203,23 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
             label: 'Between',
             value: Operator.BETWEEN,
           }]
-        }, {
+        }],
+        formErrors: [],
+        formUntouched: false,
+        initialFormState: true,
+        calculating: false,
+        count: null,
+        visitCounts: undefined,
+        calculateError: false,
+        loading: true,
+      };
+    }
+
+    async componentDidMount() {
+      const {cohortContext: {domain}, workspace: {cdrVersionId}} = this.props;
+      const {formState} = this.state;
+      if (domain !== DomainType.SURVEY) {
+        formState.push({
           name: ModifierType.NUMOFOCCURRENCES,
           label: 'Has Occurrences',
           type: 'number',
@@ -214,20 +232,8 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
             label: 'N or More',
             value: Operator.GREATERTHANOREQUALTO,
           }]
-        }],
-        formErrors: [],
-        formUntouched: false,
-        initialFormState: true,
-        loading: false,
-        count: null,
-        visitCounts: undefined,
-        calculateError: false,
-      };
-    }
-
-    async componentDidMount() {
-      const {workspace: {cdrVersionId}} = this.props;
-      const formState = this.formState;
+        });
+      }
       if (serverConfigStore.getValue().enableEventDateModifier) {
         formState.push({
           name: ModifierType.EVENTDATE,
@@ -296,7 +302,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
 
     getExisting() {
       const {cohortContext} = this.props;
-      const formState = this.formState;
+      const {formState} = this.state;
       // This reseeds the form state with existing data if we're editing an existing item
       cohortContext.item.modifiers.forEach(existing => {
         const index = formState.findIndex(mod => existing.name === mod.name);
@@ -319,7 +325,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
           }
         }
       });
-      this.setState({formState});
+      this.setState({formState, loading: false});
     }
 
     selectChange = (sel: any, index: number) => {
@@ -370,7 +376,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
 
     get addEncounters() {
       const {cohortContext: {domain}} = this.props;
-      return ![DomainType.PHYSICALMEASUREMENT, DomainType.VISIT].includes(domain);
+      return ![DomainType.PHYSICALMEASUREMENT, DomainType.SURVEY, DomainType.VISIT].includes(domain);
     }
 
     calculate = async() => {
@@ -381,7 +387,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
       } = this.props;
       this.trackEvent('Calculate');
       try {
-        this.setState({loading: true, count: null, calculateError: false});
+        this.setState({calculating: true, count: null, calculateError: false});
         const request = {
           includes: [],
           excludes: [],
@@ -395,10 +401,10 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
           dataFilters: []
         };
         await cohortBuilderApi().countParticipants(+cdrVersionId, request)
-          .then(response => this.setState({count: response, loading: false}));
+          .then(response => this.setState({count: response, calculating: false}));
       } catch (error) {
         console.error(error);
-        this.setState({loading: false, calculateError: true});
+        this.setState({calculating: false, calculateError: true});
       }
     }
 
@@ -469,7 +475,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
     }
 
     render() {
-      const {count, calculateError, formErrors, formState, formUntouched, initialFormState, loading} = this.state;
+      const {calculateError, calculating, count, formErrors, formState, formUntouched, initialFormState, loading} = this.state;
       const tooltip = `Dates are consistently shifted within a participant’s record
       by a time period of up to 364 days backwards to de-identify patient data.
       The date shift differs across participants.`;
@@ -491,33 +497,38 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
               {err}
             </div>)}
           </div>}
-          {formState.map((mod, i) => {
-            const {label, name, options, operator} = mod;
-            return <div data-test-id={name} key={i} style={{marginTop: '0.75rem'}}>
-              <label style={styles.label}>{label}</label>
-              {name === ModifierType.EVENTDATE &&
-              <TooltipTrigger content={<div>{tooltip}</div>}>
-                <ClrIcon style={styles.info} className='is-solid' shape='info-standard'/>
-              </TooltipTrigger>
-              }
-              <div style={styles.modifier}>
-                <Dropdown value={operator}
-                          style={styles.select}
-                          onChange={(e) => this.selectChange(e.value, i)}
-                          options={options}
-                          optionValue='value'
-                          itemTemplate={(e) => this.optionTemplate(e, name)}/>
-                {operator && name !== ModifierType.ENCOUNTERS && <div style={{paddingTop: '1rem'}}>
-                  {this.renderInput(i, '0', mod.type)}
-                  {operator === Operator.BETWEEN && <React.Fragment>
-                    <span style={{margin: '0 0.25rem'}}>and</span>
-                    {this.renderInput(i, '1', mod.type)}
-                  </React.Fragment>}
-                </div>}
-              </div>
-            </div>;
-          })}
-          <CalculateFooter disabled={disableCalculate} calculating={loading}
+          {loading
+            ? <div style={{margin: '1rem 0 2rem', textAlign: 'center'}}>
+              <Spinner/>
+            </div>
+            : formState.map((mod, i) => {
+              const {label, name, options, operator} = mod;
+              return <div data-test-id={name} key={i} style={{marginTop: '0.75rem'}}>
+                <label style={styles.label}>{label}</label>
+                {name === ModifierType.EVENTDATE &&
+                <TooltipTrigger content={<div>{tooltip}</div>}>
+                  <ClrIcon style={styles.info} className='is-solid' shape='info-standard'/>
+                </TooltipTrigger>
+                }
+                <div style={styles.modifier}>
+                  <Dropdown value={operator}
+                            style={styles.select}
+                            onChange={(e) => this.selectChange(e.value, i)}
+                            options={options}
+                            optionValue='value'
+                            itemTemplate={(e) => this.optionTemplate(e, name)}/>
+                  {operator && name !== ModifierType.ENCOUNTERS && <div style={{paddingTop: '1rem'}}>
+                    {this.renderInput(i, '0', mod.type)}
+                    {operator === Operator.BETWEEN && <React.Fragment>
+                      <span style={{margin: '0 0.25rem'}}>and</span>
+                      {this.renderInput(i, '1', mod.type)}
+                    </React.Fragment>}
+                  </div>}
+                </div>
+              </div>;
+            })
+          }
+          <CalculateFooter disabled={disableCalculate} calculating={calculating}
                            calculate={() => this.calculate()} count={count}/>
           <FlexRowWrap style={{flexDirection: 'row-reverse', marginTop: '2rem'}}>
             <Button type='primary'
