@@ -75,6 +75,7 @@ export default class CohortSearchPage extends AuthenticatedPage {
     try {
       await Promise.all([
         waitForDocumentTitle(this.page, pageTitle),
+        this.page.waitForXPath('//*[@id="cohort-search-container"]', {visible: true}),
         waitWhileLoading(this.page),
       ]);
       return true;

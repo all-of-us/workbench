@@ -1,6 +1,5 @@
 import Container from 'app/container';
 import {ElementHandle, Page} from 'puppeteer';
-import {waitUntilChanged} from '../../utils/element-utils';
 
 const defaultXpath = '//*[contains(concat(" ", normalize-space(@class)), " p-menu-overlay-visible")]';
 
@@ -32,7 +31,6 @@ export default class TieredMenu extends Container {
       const menuItem = await findLink(menuItems[i]);
       if (i >= (num - 1)) {
         await menuItem.click();
-        await waitUntilChanged(this.page, menuItem);
       }
       await menuItem.dispose();
     }
