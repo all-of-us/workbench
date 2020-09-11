@@ -1,7 +1,6 @@
 package org.pmiops.workbench.reporting;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
@@ -35,6 +34,8 @@ import org.mockito.Captor;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cohortbuilder.util.QueryParameterValues;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.model.BqDtoUser;
+import org.pmiops.workbench.model.BqDtoWorkspace;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.reporting.insertion.WorkspaceParameter;
 import org.pmiops.workbench.test.FakeClock;
@@ -107,34 +108,34 @@ public class ReportingUploadServiceTest {
             .captureTimestamp(NOW.toEpochMilli())
             .researchers(
                 ImmutableList.of(
-                    new ReportingResearcher()
+                    new BqDtoUser()
                         .username("bill@aou.biz")
-                        .firstName("Bill")
-                        .isDisabled(false)
-                        .researcherId(101L),
-                    new ReportingResearcher()
+                        .givenName("Bill")
+                        .disabled(false)
+                        .userId(101L),
+                    new BqDtoUser()
                         .username("ted@aou.biz")
-                        .firstName("Ted")
-                        .isDisabled(true)
-                        .researcherId(202L),
-                    new ReportingResearcher()
+                        .givenName("Ted")
+                        .disabled(true)
+                        .userId(202L),
+                    new BqDtoUser()
                         .username("socrates@aou.biz")
-                        .firstName("So-Crates")
-                        .isDisabled(false)
-                        .researcherId(303L)))
+                        .givenName("So-Crates")
+                        .disabled(false)
+                        .userId(303L)))
             .workspaces(
                 ImmutableList.of(
-                    new ReportingWorkspace()
+                    new BqDtoWorkspace()
                         .workspaceId(201L)
                         .name("Circle K")
                         .creationTime(THEN.toEpochMilli())
                         .creatorId(101L),
-                    new ReportingWorkspace()
+                    new BqDtoWorkspace()
                         .workspaceId(202L)
                         .name("Wyld Stallyns")
                         .creationTime(THEN.toEpochMilli())
                         .creatorId(101L),
-                    new ReportingWorkspace()
+                    new BqDtoWorkspace()
                         .workspaceId(203L)
                         .name("You-us said what we-us are saying right now.")
                         .creationTime(THEN.toEpochMilli())
@@ -145,34 +146,34 @@ public class ReportingUploadServiceTest {
             .captureTimestamp(NOW.toEpochMilli())
             .researchers(
                 ImmutableList.of(
-                    new ReportingResearcher()
+                    new BqDtoUser()
                         .username(null)
-                        .firstName("Nullson")
-                        .isDisabled(false)
-                        .researcherId(101L),
-                    new ReportingResearcher()
+                        .givenName("Nullson")
+                        .disabled(false)
+                        .userId(101L),
+                    new BqDtoUser()
                         .username("america@usa.gov")
-                        .firstName(null)
-                        .isDisabled(false)
-                        .researcherId(202L),
-                    new ReportingResearcher()
+                        .givenName(null)
+                        .disabled(false)
+                        .userId(202L),
+                    new BqDtoUser()
                         .username(null)
-                        .firstName(null)
-                        .isDisabled(true)
-                        .researcherId(303L)))
+                        .givenName(null)
+                        .disabled(true)
+                        .userId(303L)))
             .workspaces(
                 ImmutableList.of(
-                    new ReportingWorkspace()
+                    new BqDtoWorkspace()
                         .workspaceId(201L)
                         .name(null)
                         .creationTime(THEN.toEpochMilli())
                         .creatorId(101L),
-                    new ReportingWorkspace()
+                    new BqDtoWorkspace()
                         .workspaceId(202L)
                         .name("Work Work Work")
                         .creationTime(THEN.toEpochMilli())
                         .creatorId(101L),
-                    new ReportingWorkspace()
+                    new BqDtoWorkspace()
                         .workspaceId(203L)
                         .name(null)
                         .creationTime(THEN.toEpochMilli())
@@ -241,20 +242,20 @@ public class ReportingUploadServiceTest {
     // It's certainly possible to make the batch size an environment configuration value and
     // inject it so that we don't need this many rows in the test, but I didn't think that was
     // necessarily a good enoughh reason to add configurable state.
-    final List<ReportingResearcher> researchers =
+    final List<BqDtoUser> users =
         IntStream.range(0, 21)
             .mapToObj(
                 id ->
-                    new ReportingResearcher()
+                    new BqDtoUser()
                         .username("bill@aou.biz")
-                        .firstName("Bill")
-                        .isDisabled(false)
-                        .researcherId((long) id))
+                        .givenName("Bill")
+                        .disabled(false)
+                        .userId((long) id))
             .collect(ImmutableList.toImmutableList());
-    largeSnapshot.setResearchers(researchers);
+    largeSnapshot.setResearchers(users);
     largeSnapshot.setWorkspaces(
         ImmutableList.of(
-            new ReportingWorkspace()
+            new BqDtoWorkspace()
                 .workspaceId(303L)
                 .name("Circle K")
                 .creationTime(THEN.toEpochMilli())

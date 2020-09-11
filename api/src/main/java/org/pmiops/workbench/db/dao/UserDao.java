@@ -112,7 +112,7 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
     + "  u.twoFactorAuthBypassTime,\n"
     + "  u.twoFactorAuthCompletionTime,\n"
     + "  u.userId,\n"
-    + "  u.username"
+    + "  u.username,\n"
     + "  a.city,\n"
     + "  a.country,\n"
     + "  a.state,\n"

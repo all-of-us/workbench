@@ -92,9 +92,9 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
       + "  w.billingAccountType,\n"
       + "  w.billingMigrationStatus,\n"
       + "  w.billingStatus,\n"
-      + "  w.cdrVersionId,\n"
+      + "  w.cdrVersion.cdrVersionId AS cdrVersionId,\n"
       + "  w.creationTime,\n"
-      + "  w.creatorId,\n"
+      + "  w.creator.userId AS creatorId,\n"
       + "  w.dataAccessLevel,\n"
       + "  w.disseminateResearchOther,\n"
       + "  w.firecloudName,\n"
@@ -102,9 +102,9 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
       + "  w.lastAccessedTime,\n"
       + "  w.lastModifiedTime,\n"
       + "  w.name,\n"
-      + "  w.needsRpReviewPrompt,\n"
+      + "  w.needsResearchPurposeReviewPrompt AS needsRpReviewPrompt,\n"
       + "  w.published,\n"
-      + "  w.rpAdditionalNotes,\n"
+      + "  w.additionalNotes AS rpAdditionalNotes,\n"
       + "  w.rpAncestry,\n"
       + "  w.rpAnticipatedFindings,\n"
       + "  w.rpApproved,\n"
@@ -130,7 +130,7 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
       + "  w.version,\n"
       + "  w.workspaceId,\n"
       + "  w.workspaceNamespace\n"
-      + "FROM DbWorkspace w\n")
-//      + "WHERE w.activeStatus = 0")
+      + "FROM DbWorkspace w\n"
+      + "WHERE w.activeStatus = 0")
   List<PrjWorkspace> getReportingWorkspaces();
 }

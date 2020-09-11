@@ -148,7 +148,7 @@ public class UserDaoTest {
   }
 
   @Test
-  public void testGetUserProjections() {
+  public void testGetReportingUsers() {
     insertMultipleUsers();
     final List<PrjUser> projections = userDao.getReportingUsers();
     assertThat(projections).isNotEmpty();
