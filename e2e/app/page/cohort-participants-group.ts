@@ -73,6 +73,7 @@ export default class CohortParticipantsGroup {
     await this.clickCriteriaMenuItems(['Physical Measurements']);
     const searchPage = new CohortSearchPage(this.page);
     await searchPage.waitForLoad();
+    console.log('searchPage.waitForLoad');
     return searchPage.filterPhysicalMeasurementValue(criteriaName, FilterSign.GreaterThanOrEqualTo, value);
   }
 

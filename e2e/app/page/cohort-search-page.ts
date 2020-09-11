@@ -78,9 +78,8 @@ export default class CohortSearchPage extends AuthenticatedPage {
         waitWhileLoading(this.page),
       ]);
       return true;
-    } catch (e) {
-      console.log(`CohortReviewPage isLoaded() encountered ${e}`);
-      return false;
+    } catch (err) {
+      throw new Error(`CohortSearchPage isLoaded() encountered error.\n ${err}`);
     }
   }
 
@@ -109,6 +108,7 @@ export default class CohortSearchPage extends AuthenticatedPage {
 
     const link = await this.waitForPhysicalMeasurementCriteriaLink(criteriaName);
     await link.click();
+    console.log(`clicked ${link}`);
 
     const helpSidebar = new HelpSidebar(this.page);
     const participantResult = await helpSidebar.getPhysicalMeasurementParticipantResult(filterSign, filterValue);
