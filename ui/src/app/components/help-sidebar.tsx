@@ -19,7 +19,12 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {withCurrentCohortCriteria} from 'app/utils';
 import {highlightSearchTerm, reactStyles, ReactWrapperBase, withCurrentWorkspace, withUserProfile} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {currentCohortSearchContextStore, NavStore, setSidebarActiveIconStore} from 'app/utils/navigation';
+import {
+  currentCohortSearchContextStore,
+  NavStore,
+  serverConfigStore,
+  setSidebarActiveIconStore
+} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {ParticipantCohortStatus, WorkspaceAccessLevel} from 'generated/fetch';
@@ -194,16 +199,17 @@ export const NOTEBOOK_HELP_CONTENT = 'notebookStorage';
 // helpContentKey is the json key for the block of help content that is being displayed on this
 // sidebar. If the block of help content is about notebook storage, we want to display a different
 // icon on the sidebar and different tooltip, etc.
-const icons = (helpContentKey: string) => {
-  return [{
-    id: 'criteria',
-    disabled: false,
-    faIcon: faInbox,
-    label: 'Selected Criteria',
-    page: 'criteria',
-    style: {fontSize: '21px'},
-    tooltip: 'Selected Criteria'
-  },
+const icons = (helpContentKey: string, enableCustomRuntimes: boolean) => {
+  const iconsList = [
+    {
+      id: 'criteria',
+      disabled: false,
+      faIcon: faInbox,
+      label: 'Selected Criteria',
+      page: 'criteria',
+      style: {fontSize: '21px'},
+      tooltip: 'Selected Criteria'
+    },
     {
       id: 'help',
       disabled: false,
@@ -212,14 +218,6 @@ const icons = (helpContentKey: string) => {
       page: null,
       style: {fontSize: '21px'},
       tooltip: helpContentKey === NOTEBOOK_HELP_CONTENT ? 'Workspace Storage' : 'Help Tips',
-// }, {
-//   id: 'thunderstorm',
-//   disabled: true,
-//   faIcon: null,
-//   label: 'Cloud Icon',
-//   page: null,
-//   style: {height: '22px', width: '22px', marginTop: '0.25rem', opacity: 0.5},
-//   tooltip: 'Compute Configuration',
     }, {
       id: 'dataDictionary',
       disabled: false,
@@ -237,6 +235,19 @@ const icons = (helpContentKey: string) => {
       style: {fontSize: '20px', marginLeft: '3px'},
       tooltip: 'Annotations',
     }];
+  if (enableCustomRuntimes) {
+    return [...iconsList, {
+      id: 'thunderstorm',
+      disabled: true,
+      faIcon: null,
+      label: 'Cloud Icon',
+      page: null,
+      style: {height: '22px', width: '22px', marginTop: '0.25rem', opacity: 0.5},
+      tooltip: 'Compute Configuration',
+    }];
+  } else {
+    return iconsList;
+  }
 };
 
 const analyticsLabels = {
@@ -515,7 +526,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
       return <React.Fragment>
         <div style={notebookStyles ? {...styles.iconContainer, ...styles.notebookOverrides} : {...styles.iconContainer}}>
           {!criteria && this.renderWorkspaceMenu()}
-          {icons(helpContentKey).map((icon, i) =>
+          {icons(helpContentKey, serverConfigStore.getValue().enableCustomRuntimes).map((icon, i) =>
           this.showIcon(icon) && <div key={i} style={{display: 'table'}}>
                 <TooltipTrigger content={<div>{tooltipId === i && icon.tooltip}</div>} side='left'>
                   <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
