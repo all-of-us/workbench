@@ -9,7 +9,7 @@ workflow IngestSyntheticVcfWf {
     String output_bucket # Bucket that will contain the generated TSV data
     File probe_info_file
 
-    Int chunk_size # Should be set to 10 for actual runs
+    Int batch_size # Should be set to 10 for actual runs
   }
 
   call AddSampleIds {
@@ -27,7 +27,7 @@ workflow IngestSyntheticVcfWf {
     call SplitFileIntoNSizeParts {
       input:
         file = partitioned_sample_map,
-        n = chunk_size
+        n = batch_size
     }
 
     scatter (sample_map in SplitFileIntoNSizeParts.partitions) {
@@ -41,7 +41,7 @@ workflow IngestSyntheticVcfWf {
           base_vcf = base_vcf,
           base_vcf_index = base_vcf_index,
           file_of_sample_names = ExtractSampleNamesFromMap.sample_names,
-          number_of_samples = chunk_size, # Not necessarily correct but its close enough to get a usable disk size
+          number_of_samples = batch_size, # Not necessarily correct but its close enough to get a usable disk size
       }
 
       call CreateImportTsvs {
