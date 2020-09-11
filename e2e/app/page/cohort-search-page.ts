@@ -6,7 +6,7 @@ import Button from 'app/element/button';
 import ClrIconLink from 'app/element/clr-icon-link';
 import Textbox from 'app/element/textbox';
 import {centerPoint, dragDrop, waitWhileLoading} from 'utils/test-utils';
-import {waitForDocumentTitle, waitForNumericalString} from 'utils/waits-utils';
+import {waitForNumericalString} from 'utils/waits-utils';
 import {LinkText} from 'app/text-labels';
 import {waitUntilChanged} from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
@@ -62,7 +62,6 @@ export enum FilterSign {
   Between = 'Between',
 }
 
-const pageTitle = 'Build Cohort Criteria';
 
 export default class CohortSearchPage extends AuthenticatedPage {
   private containerXpath = '//*[@id="cohort-search-container"]';
@@ -74,7 +73,6 @@ export default class CohortSearchPage extends AuthenticatedPage {
   async isLoaded(): Promise<boolean> {
     try {
       await Promise.all([
-        waitForDocumentTitle(this.page, pageTitle),
         this.page.waitForXPath('//*[@id="cohort-search-container"]', {visible: true}),
         waitWhileLoading(this.page),
       ]);
