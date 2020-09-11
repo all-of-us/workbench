@@ -161,9 +161,9 @@ public class WorkspaceAdminControllerTest {
             WORKSPACE_NAMESPACE, dbWorkspace.getFirecloudName()))
         .thenReturn(cloudStorageCounts);
 
-    LeonardoListRuntimeResponse firecloudListClusterResponse =
+    LeonardoListRuntimeResponse leonardoListRuntimeResponse =
         testMockFactory.createLeonardoListRuntimesResponse();
-    List<LeonardoListRuntimeResponse> runtimes = ImmutableList.of(firecloudListClusterResponse);
+    List<LeonardoListRuntimeResponse> runtimes = ImmutableList.of(leonardoListRuntimeResponse);
     when(mockLeonardoNotebooksClient.listRuntimesByProjectAsService(WORKSPACE_NAMESPACE))
         .thenReturn(runtimes);
 

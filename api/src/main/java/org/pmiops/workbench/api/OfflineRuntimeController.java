@@ -22,16 +22,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Offline cluster API. Handles cronjobs for cleanup and upgrade of older runtimes. Methods here
- * should be access restricted as, unlike RuntimeController, these endpoints run as the Workbench
- * service account.
+ * Offline notebook runtime API. Handles cronjobs for cleanup and upgrade of older runtimes. Methods
+ * here should be access restricted as, unlike RuntimeController, these endpoints run as the
+ * Workbench service account.
  */
 @RestController
 public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   private static final Logger log = Logger.getLogger(OfflineRuntimeController.class.getName());
 
   // This is temporary while we wait for Leonardo autopause to rollout. Once
-  // available, we should instead take a cluster status of STOPPED to trigger
+  // available, we should instead take a runtime status of STOPPED to trigger
   // idle deletion.
   private static final int IDLE_AFTER_HOURS = 3;
 
@@ -50,7 +50,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   }
 
   /**
-   * checkClusters deletes older runtimes in order to force an upgrade on the next researcher login.
+   * checkRuntimes deletes older runtimes in order to force an upgrade on the next researcher login.
    * This method is meant to be restricted to invocation by App Engine cron.
    *
    * <p>The runtime deletion policy here aims to strike a balance between enforcing upgrades, cost
@@ -59,8 +59,8 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
    * it. We delete runtimes in the following cases:
    *
    * <ol>
-   *   <li>It exceeds the max cluster age. Per environment, but O(weeks).
-   *   <li>It is idle and exceeds the max idle cluster age. Per environment, smaller than (1).
+   *   <li>It exceeds the max runtime age. Per environment, but O(weeks).
+   *   <li>It is idle and exceeds the max idle runtime age. Per environment, smaller than (1).
    * </ol>
    *
    * <p>As an App Engine cron endpoint, the runtime of this method may not exceed 10 minutes.
@@ -89,7 +89,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
           listRuntimeResponse.getGoogleProject() + "/" + listRuntimeResponse.getRuntimeName();
       final LeonardoGetRuntimeResponse runtime;
       try {
-        // Refetch the cluster to ensure freshness as this iteration may take
+        // Refetch the runtime to ensure freshness as this iteration may take
         // some time.
         runtime =
             runtimesApi.getRuntime(
@@ -106,7 +106,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
       }
       if (!LeonardoRuntimeStatus.RUNNING.equals(runtime.getStatus())
           && !LeonardoRuntimeStatus.STOPPED.equals(runtime.getStatus())) {
-        // For now, we only handle running or stopped (suspended) clusters.
+        // For now, we only handle running or stopped (suspended) runtimes.
         continue;
       }
 

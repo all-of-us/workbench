@@ -34,10 +34,12 @@ import org.pmiops.workbench.model.EmailVerificationStatus;
 @Table(name = "user")
 public class DbUser {
 
-  private static final String CLUSTER_NAME_PREFIX = "all-of-us-";
+  private static final String RUNTIME_NAME_PREFIX = "all-of-us-";
 
   /**
-   * This is a Gson compatible class for encoding a JSON blob which is stored in MySQL. This
+   * TODO(RW-5406): Remove cluster config overrides.
+   *
+   * <p>This is a Gson compatible class for encoding a JSON blob which is stored in MySQL. This
    * represents cluster configuration overrides we support on a per-user basis for their notebook
    * cluster. Corresponds to Leonardo's MachineConfig model. All fields are optional.
    *
@@ -716,7 +718,7 @@ public class DbUser {
 
   /** Returns a name for the VM / cluster to be created for this user. */
   @Transient
-  public String getClusterName() {
-    return CLUSTER_NAME_PREFIX + getUserId();
+  public String getRuntimeName() {
+    return RUNTIME_NAME_PREFIX + getUserId();
   }
 }

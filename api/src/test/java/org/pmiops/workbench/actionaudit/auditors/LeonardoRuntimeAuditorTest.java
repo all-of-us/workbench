@@ -33,7 +33,7 @@ public class LeonardoRuntimeAuditorTest {
       Instant.parse("2000-01-01T00:00:00.00Z").toEpochMilli();
   private static final String ACTION_ID = "58cbae08-447f-499f-95b9-7bdedc955f4d";
   private static final String BILLING_PROJECT_ID = "all-of-us-yjty";
-  private static final List<String> CLUSTER_NAMES =
+  private static final List<String> RUNTIME_NAMES =
       ImmutableList.of("all-of-us-1", "all-of-us-2", "all-of-us-3");
 
   private LeonardoRuntimeAuditor leonardoRuntimeauditor;
@@ -66,11 +66,11 @@ public class LeonardoRuntimeAuditorTest {
   }
 
   @Test
-  public void testFireDeleteClustersInProject() {
-    leonardoRuntimeauditor.fireDeleteRuntimesInProject(BILLING_PROJECT_ID, CLUSTER_NAMES);
+  public void testFireDeleteRuntimesInProject() {
+    leonardoRuntimeauditor.fireDeleteRuntimesInProject(BILLING_PROJECT_ID, RUNTIME_NAMES);
     verify(mockActionAuditService).send(eventCollectionCaptor.capture());
     Collection<ActionAuditEvent> eventsSent = eventCollectionCaptor.getValue();
-    assertThat(eventsSent).hasSize(CLUSTER_NAMES.size());
+    assertThat(eventsSent).hasSize(RUNTIME_NAMES.size());
     Optional<ActionAuditEvent> firstEvent = eventsSent.stream().findFirst();
     assertThat(firstEvent.isPresent()).isTrue();
     assertThat(firstEvent.map(ActionAuditEvent::getActionType).orElse(null))
@@ -78,7 +78,7 @@ public class LeonardoRuntimeAuditorTest {
     assertThat(firstEvent.map(ActionAuditEvent::getTargetPropertyMaybe).orElse(null))
         .isEqualTo(BILLING_PROJECT_ID);
     assertThat(firstEvent.map(ActionAuditEvent::getNewValueMaybe).orElse(null))
-        .isEqualTo(CLUSTER_NAMES.get(0));
+        .isEqualTo(RUNTIME_NAMES.get(0));
     assertThat(
             eventsSent.stream()
                 .map(ActionAuditEvent::getActionType)

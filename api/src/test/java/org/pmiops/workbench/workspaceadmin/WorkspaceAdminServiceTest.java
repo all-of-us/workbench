@@ -44,7 +44,7 @@ import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.AdminWorkspaceResources;
 import org.pmiops.workbench.model.CloudStorageTraffic;
-import org.pmiops.workbench.model.ListClusterResponse;
+import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAdminView;
@@ -196,7 +196,7 @@ public class WorkspaceAdminServiceTest {
     assertThat(cloudStorageCounts.getNonNotebookFileCount()).isEqualTo(0);
     assertThat(cloudStorageCounts.getStorageBytesUsed()).isEqualTo(0L);
 
-    List<ListClusterResponse> clusters = resources.getClusters();
-    assertThat(clusters).isEmpty();
+    List<ListRuntimeResponse> runtimes = resources.getRuntimes();
+    assertThat(runtimes).isEmpty();
   }
 }
