@@ -152,7 +152,7 @@ describe('User can create new Cohorts', () => {
     await addIcon.click();
 
     // Click Finish & Review button to open selection list and add modifier
-    const finishAndReviewButton = await Button.findByName(page, {name: LinkText.FinishAndReview}, searchPage);
+    const finishAndReviewButton = await Button.findByName(page, {name: LinkText.FinishAndReview});
     await finishAndReviewButton.waitUntilEnabled();
     await finishAndReviewButton.click();
 

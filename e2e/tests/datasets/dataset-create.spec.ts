@@ -1,10 +1,8 @@
 import DataResourceCard, {CardType} from 'app/component/data-resource-card';
 import ClrIconLink from 'app/element/clr-icon-link';
 import CohortBuildPage from 'app/page/cohort-build-page';
-import DataPage, {TabLabelAlias} from 'app/page/data-page';
-import DatasetSaveModal from 'app/page/dataset-save-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {EllipsisMenuAction, LinkText} from 'app/text-labels';
+import {EllipsisMenuAction} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';

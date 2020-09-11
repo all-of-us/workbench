@@ -1,4 +1,3 @@
-import DataResourceCard, {CardType} from 'app/component/data-resource-card';
 import Link from 'app/element/link';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';

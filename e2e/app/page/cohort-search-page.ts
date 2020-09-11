@@ -106,7 +106,7 @@ export default class CohortSearchPage extends Modal {
    * Click FINISH button.
    */
   async clickFinishButton(): Promise<void> {
-    return this.clickButton(LinkText.Finish, {waitForClose: true});
+    return this.clickButton(LinkText.FinishAndReview, {waitForClose: true});
   }
 
   async viewAndSaveCriteria(): Promise<void> {
@@ -189,8 +189,17 @@ export default class CohortSearchPage extends Modal {
     // Get count from slider badge
     const count = await waitForNumericalString(this.page, `${this.xpath}//*[@id="age-count"]`);
 
-    // Click FINISH button. Dialog should close.
-    await this.clickFinishButton();
+    // Click ADD SELECTION to add selected age range
+    await this.clickButton(LinkText.AddSelection);
+
+    // Click FINISH & REVIEW button. Sidebar should open.
+    const finishAndReviewButton = await Button.findByName(page, {name: LinkText.FinishAndReview});
+    await finishAndReviewButton.waitUntilEnabled();
+    await finishAndReviewButton.click();
+
+    // Click SAVE CRITERIA button. Sidebar closes.
+    const helpSidebar = new HelpSidebar(page);
+    await helpSidebar.clickSaveCriteriaButton();
     return count;
   }
 

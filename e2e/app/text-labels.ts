@@ -25,6 +25,7 @@ export enum EllipsisMenuAction {
 }
 
 export enum LinkText {
+   AddSelection = 'Add Selection',
    AddThis = 'ADD THIS',
    ApplyModifiers = 'APPLY MODIFIERS',
    BackToCohort = 'Back to cohort',
