@@ -812,5 +812,4 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   public List<PrjWorkspace> getReportingWorkspaces() {
     return workspaceDao.getReportingWorkspaces();
   }
-
 }

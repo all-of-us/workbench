@@ -33,8 +33,7 @@ public class ReportingUploadServiceDmlImpl implements ReportingUploadService {
   private final BigQueryService bigQueryService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
-  private static final DmlInsertJobBuilder<BqDtoUser> researcherJobBuilder =
-      UserParameter::values;
+  private static final DmlInsertJobBuilder<BqDtoUser> researcherJobBuilder = UserParameter::values;
   private static final DmlInsertJobBuilder<BqDtoWorkspace> workspaceJobBuilder =
       WorkspaceParameter::values;
 

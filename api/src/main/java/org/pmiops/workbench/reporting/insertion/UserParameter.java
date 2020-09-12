@@ -3,25 +3,15 @@ package org.pmiops.workbench.reporting.insertion;
 import com.google.cloud.bigquery.QueryParameterValue;
 import java.util.function.Function;
 import org.pmiops.workbench.model.BqDtoUser;
-import org.pmiops.workbench.model.BqDtoUser;
 
 public enum UserParameter implements QueryParameterColumn<BqDtoUser> {
   RESEARCHER_ID(
-      "researcher_id",
-      BqDtoUser::getUserId,
-      r -> QueryParameterValue.int64(r.getUserId())),
-  USERNAME(
-      "username",
-      BqDtoUser::getUsername,
-      r -> QueryParameterValue.string(r.getUsername())),
+      "researcher_id", BqDtoUser::getUserId, r -> QueryParameterValue.int64(r.getUserId())),
+  USERNAME("username", BqDtoUser::getUsername, r -> QueryParameterValue.string(r.getUsername())),
   FIRST_NAME(
-      "first_name",
-      BqDtoUser::getGivenName,
-      r -> QueryParameterValue.string(r.getGivenName())),
+      "first_name", BqDtoUser::getGivenName, r -> QueryParameterValue.string(r.getGivenName())),
   IS_DISABLED(
-      "is_disabled",
-      BqDtoUser::getDisabled,
-      r -> QueryParameterValue.bool(r.getDisabled()));
+      "is_disabled", BqDtoUser::getDisabled, r -> QueryParameterValue.bool(r.getDisabled()));
 
   private final String parameterName;
   private final Function<BqDtoUser, Object> objectValueFunction;

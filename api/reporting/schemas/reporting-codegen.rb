@@ -118,8 +118,8 @@ BIGQUERY_TYPE_TO_SWAGGER  = {
         'format' => 'int64'
     },
     'TIMESTAMP' =>  {
-        'type'  => 'integer',
-        'format' => 'int64'
+        'type' => 'string',
+        'format' => 'date-time'
     },
     'BOOLEAN' =>  {
         'type'  => 'boolean',
@@ -250,10 +250,15 @@ lines.flatten!
 write_output(outputs[:unit_test_mocks], lines.join("\n"), 'Unit Test Mocks')
 
 ### Assertions
-#     assertThat(researcher1.getUserId()).isEqualTo(USER_ID);
-#
 dto_assertions = columns.map{ |col|
-  "    assertThat(#{to_camel_case(table_name, false)}.#{col[:prj_getter]}).isEqualTo(#{col[:java_constant_name]});"
+  getter_call = "#{to_camel_case(table_name, false)}.#{col[:prj_getter]}"
+  expected = col[:java_constant_name]
+  if col[:java_type].eql?('Timestamp')
+    "    assertTimeWithinTolerance(#{getter_call}, #{expected});"
+  else
+    "    assertThat(#{getter_call}).isEqualTo(#{expected});"
+  end
+
 }.join("\n")
 
 write_output(outputs[:dto_assertions], dto_assertions, 'Unit Test DTO Assertions')

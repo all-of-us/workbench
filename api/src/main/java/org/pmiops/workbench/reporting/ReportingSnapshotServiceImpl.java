@@ -9,7 +9,6 @@ import javax.inject.Provider;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.projection.PrjUser;
 import org.pmiops.workbench.db.dao.projection.PrjWorkspace;
-import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.utils.LogFormatters;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -74,7 +73,8 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
         new ReportingSnapshot()
             .captureTimestamp(clock.millis())
             .researchers(reportingMapper.toReportingResearcherList(queryResultBundle.getUsers()))
-            .workspaces(reportingMapper.toReportingWorkspaceList(queryResultBundle.getWorkspaces()));
+            .workspaces(
+                reportingMapper.toReportingWorkspaceList(queryResultBundle.getWorkspaces()));
     stopwatch.stop();
     log.info(LogFormatters.duration("Conversion to ReportingSnapshot", stopwatch.elapsed()));
     return result;

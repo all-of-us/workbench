@@ -7,7 +7,6 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import java.time.Instant;
 import java.util.function.Function;
 import org.pmiops.workbench.model.BqDtoWorkspace;
-import org.pmiops.workbench.model.BqDtoWorkspace;
 
 public enum WorkspaceParameter implements QueryParameterColumn<BqDtoWorkspace> {
   WORKSPACE_ID(
@@ -15,9 +14,7 @@ public enum WorkspaceParameter implements QueryParameterColumn<BqDtoWorkspace> {
       BqDtoWorkspace::getWorkspaceId,
       w -> QueryParameterValue.int64(w.getWorkspaceId())),
   CREATOR_ID(
-      "creator_id",
-      BqDtoWorkspace::getCreatorId,
-      w -> QueryParameterValue.int64(w.getCreatorId())),
+      "creator_id", BqDtoWorkspace::getCreatorId, w -> QueryParameterValue.int64(w.getCreatorId())),
   NAME("name", BqDtoWorkspace::getName, w -> QueryParameterValue.string(w.getName())),
   CREATION_TIME(
       "creation_time",

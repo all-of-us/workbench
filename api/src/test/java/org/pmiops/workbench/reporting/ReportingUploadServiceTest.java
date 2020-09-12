@@ -156,11 +156,7 @@ public class ReportingUploadServiceTest {
                         .givenName(null)
                         .disabled(false)
                         .userId(202L),
-                    new BqDtoUser()
-                        .username(null)
-                        .givenName(null)
-                        .disabled(true)
-                        .userId(303L)))
+                    new BqDtoUser().username(null).givenName(null).disabled(true).userId(303L)))
             .workspaces(
                 ImmutableList.of(
                     new BqDtoWorkspace()

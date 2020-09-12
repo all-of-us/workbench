@@ -7963,31 +7963,31 @@ definitions:
         type: string
       betaAccessBypassTime:
         description: ''
-        type: integer
-        format: int64
+        type: string
+        format: date-time
       betaAccessRequestTime:
         description: ''
-        type: integer
-        format: int64
+        type: string
+        format: date-time
       complianceTrainingBypassTime:
         description: ''
-        type: integer
-        format: int64
+        type: string
+        format: date-time
       complianceTrainingCompletionTime:
         description: ''
-        type: integer
-        format: int64
+        type: string
+        format: date-time
       complianceTrainingExpirationTime:
         description: ''
-        type: integer
-        format: int64
+        type: string
+        format: date-time
       contactEmail:
         description: ''
         type: string
       creationTime:
         description: ''
-        type: integer
-        format: int64
+        type: string
+        format: date-time
       currentPosition:
         description: ''
         type: string
@@ -7997,59 +7997,59 @@ definitions:
         format: int64
       dataUseAgreementBypassTime:
         description: ''
-        type: integer
-        format: int64
+        type: string
+        format: date-time
       dataUseAgreementCompletionTime:
         description: ''
-        type: integer
-        format: int64
+        type: string
+        format: date-time
       dataUseAgreementSignedVersion:
         description: ''
         type: integer
         format: int64
       demographicSurveyCompletionTime:
         description: ''
-        type: integer
-        format: int64
+        type: string
+        format: date-time
       disabled:
         description: ''
         type: boolean
         default: false
       emailVerificationBypassTime:
         description: ''
-        type: integer
-        format: int64
+        type: string
+        format: date-time
       emailVerificationCompletionTime:
         description: ''
-        type: integer
-        format: int64
+        type: string
+        format: date-time
       emailVerificationStatus:
         description: ''
         type: integer
         format: int64
       eraCommonsBypassTime:
         description: ''
-        type: integer
-        format: int64
+        type: string
+        format: date-time
       eraCommonsCompletionTime:
         description: ''
-        type: integer
-        format: int64
+        type: string
+        format: date-time
       eraCommonsLinkExpireTime:
         description: ''
-        type: integer
-        format: int64
+        type: string
+        format: date-time
       familyName:
         description: ''
         type: string
       firstRegistrationCompletionTime:
         description: ''
-        type: integer
-        format: int64
+        type: string
+        format: date-time
       firstSignInTime:
         description: ''
-        type: integer
-        format: int64
+        type: string
+        format: date-time
       freeTierCreditsLimitDaysOverride:
         description: ''
         type: integer
@@ -8063,16 +8063,16 @@ definitions:
         type: string
       idVerificationBypassTime:
         description: ''
-        type: integer
-        format: int64
+        type: string
+        format: date-time
       idVerificationCompletionTime:
         description: ''
-        type: integer
-        format: int64
+        type: string
+        format: date-time
       lastModifiedTime:
         description: ''
-        type: integer
-        format: int64
+        type: string
+        format: date-time
       organization:
         description: ''
         type: string
@@ -8084,12 +8084,12 @@ definitions:
         type: string
       twoFactorAuthBypassTime:
         description: ''
-        type: integer
-        format: int64
+        type: string
+        format: date-time
       twoFactorAuthCompletionTime:
         description: ''
-        type: integer
-        format: int64
+        type: string
+        format: date-time
       userId:
         description: ''
         type: integer

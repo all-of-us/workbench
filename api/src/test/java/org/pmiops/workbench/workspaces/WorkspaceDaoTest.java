@@ -54,8 +54,8 @@ public class WorkspaceDaoTest {
     return workspace;
   }
 
-  @Test public void testGetReportingWorkspaces() {
+  @Test
+  public void testGetReportingWorkspaces() {
     final DbWorkspace ws1 = createWorkspace();
-
   }
 }

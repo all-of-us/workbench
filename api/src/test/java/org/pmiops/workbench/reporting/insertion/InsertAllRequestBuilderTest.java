@@ -20,8 +20,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class InsertAllRequestBuilderTest {
-  final InsertAllRequestBuilder<BqDtoUser> researcherRequestBuilder =
-      UserParameter::values;
+  final InsertAllRequestBuilder<BqDtoUser> researcherRequestBuilder = UserParameter::values;
 
   final Instant princePartyTime = Instant.parse("1999-12-31T23:59:59.99Z");
   final Map<String, Object> fixedValues =
@@ -29,26 +28,10 @@ public class InsertAllRequestBuilderTest {
 
   final List<BqDtoUser> researchers =
       ImmutableList.of(
-          new BqDtoUser()
-              .username("user1")
-              .givenName("Onceler")
-              .disabled(false)
-              .userId(1L),
-          new BqDtoUser()
-              .username(null)
-              .givenName("Nullson")
-              .disabled(false)
-              .userId(111L),
-          new BqDtoUser()
-              .username("america@usa.gov")
-              .givenName(null)
-              .disabled(false)
-              .userId(212L),
-          new BqDtoUser()
-              .username(null)
-              .givenName(null)
-              .disabled(true)
-              .userId(313L));
+          new BqDtoUser().username("user1").givenName("Onceler").disabled(false).userId(1L),
+          new BqDtoUser().username(null).givenName("Nullson").disabled(false).userId(111L),
+          new BqDtoUser().username("america@usa.gov").givenName(null).disabled(false).userId(212L),
+          new BqDtoUser().username(null).givenName(null).disabled(true).userId(313L));
 
   // regression test for RW-5437
   @Test
