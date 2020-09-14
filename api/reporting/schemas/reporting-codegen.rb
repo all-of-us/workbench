@@ -335,7 +335,7 @@ write_output(outputs[:query_parameter_columns], qpc_enum, "QueryParameterValue E
 dto_setters = columns.map do |col|
   value = case col[:java_type]
       when 'Timestamp'
-            "offsetDateTime(#{col[:java_constant_name]})"
+            "offsetDateTimeUtc(#{col[:java_constant_name]})"
           else
             "#{col[:java_constant_name]}"
           end
