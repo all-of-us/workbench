@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
@@ -18,6 +19,7 @@ import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.GoogleCloudLocators;
 import org.pmiops.workbench.model.FileDetail;
@@ -241,9 +243,35 @@ public class NotebooksServiceImpl implements NotebooksService {
   @Override
   public String getReadOnlyHtml(
       String workspaceNamespace, String workspaceName, String notebookName) {
+    FirecloudWorkspace workspace =
+        fireCloudService.getWorkspace(workspaceNamespace, workspaceName).getWorkspace();
+    return getReadOnlyHtml(workspace, notebookName);
+  }
+
+  @Override
+  public String adminGetReadOnlyHtml(
+      String workspaceNamespace, String workspaceName, String notebookName) {
+    FirecloudWorkspace workspace =
+        fireCloudService.getWorkspaceAsService(workspaceNamespace, workspaceName).getWorkspace();
+    return getReadOnlyHtml(workspace, notebookName);
+  }
+
+  @NotNull
+  private String getReadOnlyHtml(FirecloudWorkspace workspace, String notebookName) {
+    Blob blob = getBlobWithSizeConstraint(workspace.getBucketName(), notebookName);
+    // We need to send a byte array so the ApiClient attaches the body as is instead
+    // of serializing it through Gson which it will do for Strings.
+    // The default Gson serializer does not work since it strips out some null fields
+    // which are needed for nbconvert. Skip the JSON conversion here to reduce memory overhead.
+    return PREVIEW_SANITIZER.sanitize(fireCloudService.staticNotebooksConvert(blob.getContent()));
+  }
+
+  @Override
+  public String adminGetReadOnlyHtml(
+      String workspaceNamespace, String workspaceName, String notebookName) {
     String bucketName =
         fireCloudService
-            .getWorkspace(workspaceNamespace, workspaceName)
+            .getWorkspaceAsService(workspaceNamespace, workspaceName)
             .getWorkspace()
             .getBucketName();
 
@@ -252,7 +280,8 @@ public class NotebooksServiceImpl implements NotebooksService {
     // of serializing it through Gson which it will do for Strings.
     // The default Gson serializer does not work since it strips out some null fields
     // which are needed for nbconvert. Skip the JSON conversion here to reduce memory overhead.
-    return PREVIEW_SANITIZER.sanitize(fireCloudService.staticNotebooksConvert(blob.getContent()));
+    return PREVIEW_SANITIZER.sanitize(
+        fireCloudService.staticNotebooksConvertAsService(blob.getContent()));
   }
 
   private GoogleCloudLocators getNotebookLocators(

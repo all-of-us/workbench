@@ -47,4 +47,6 @@ public interface NotebooksService {
   void saveNotebook(String bucketName, String notebookName, JSONObject notebookContents);
 
   String getReadOnlyHtml(String workspaceNamespace, String workspaceName, String notebookName);
+
+  String adminGetReadOnlyHtml(String workspaceNamespace, String workspaceName, String notebookName);
 }

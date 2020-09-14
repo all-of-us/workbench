@@ -1709,8 +1709,9 @@ paths:
       parameters:
         - in: body
           name: accessReason
+          required: true
           schema:
-            type: string
+            "$ref": "#/definitions/AccessReason"
         - in: path
           name: notebookName
           required: true
@@ -7826,3 +7827,9 @@ definitions:
         type: array
         items:
           "$ref": '#/definitions/AccessBypassRequest'
+  AccessReason:
+    type: object
+    properties:
+      reason:
+        type: string
+        description: 'The administrative purpose for accessing this notebook'

@@ -6,6 +6,7 @@ import org.pmiops.workbench.actionaudit.ActionType
 import org.pmiops.workbench.actionaudit.AgentType
 import org.pmiops.workbench.actionaudit.TargetType
 import org.pmiops.workbench.db.model.DbUser
+import org.pmiops.workbench.model.AccessReason
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
@@ -22,7 +23,7 @@ constructor(
     @Qualifier("ACTION_ID") private val actionIdProvider: Provider<String>
 ) : AdminAuditor {
 
-    override fun fireViewNotebookAction(workspaceNamespace: String, workspaceName: String, notebookFilename: String, accessReason: String) {
+    override fun fireViewNotebookAction(workspaceNamespace: String, workspaceName: String, accessReason: AccessReason, notebookFilename: String) {
         val dbUser = userProvider.get()
         val actionId = actionIdProvider.get()
 
@@ -30,7 +31,7 @@ constructor(
             "Workspace Namespace" to workspaceNamespace,
             "Workspace Name" to workspaceName,
             "Notebook Name" to notebookFilename,
-            "Access Reason" to accessReason
+            "Access Reason" to accessReason.reason
         )
 
         val events = props.map {
