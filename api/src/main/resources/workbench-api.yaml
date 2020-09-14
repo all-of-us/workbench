@@ -6904,6 +6904,16 @@ definitions:
           which have a least one event matching this criteria.'
         type: integer
         format: int64
+      parentCount:
+        description: 'Estimated number of Parents participants in a particular CDR version
+          which have a least one event matching this criteria.'
+        type: integer
+        format: int64
+      childCount:
+        description: 'Estimated number of Children participants in a particular CDR version
+          which have a least one event matching this criteria.'
+        type: integer
+        format: int64
       group:
         description: specifies if child or parent
         type: boolean

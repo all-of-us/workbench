@@ -24,6 +24,8 @@ public class DbCriteria {
   private boolean group;
   private boolean selectable;
   private String count;
+  private String parentCount;
+  private String childCount;
   private String conceptId;
   private String domainId;
   private boolean attribute;
@@ -119,7 +121,39 @@ public class DbCriteria {
 
   @Transient
   public Long getLongCount() {
-    return Strings.isNullOrEmpty(this.count) ? null : Long.valueOf(this.count);
+    return getLongValue(this.count);
+  }
+
+  private Long getLongValue(String count) {
+    return Strings.isNullOrEmpty(count) ? null : Long.valueOf(count);
+  }
+
+  @Column(name = "rollup_count")
+  public String getParentCount() {
+    return parentCount;
+  }
+
+  public void setParentCount(String parentCount) {
+    this.parentCount = parentCount;
+  }
+
+  @Transient
+  public Long getLongParentCount() {
+    return getLongValue(this.parentCount);
+  }
+
+  @Column(name = "item_count")
+  public String getChildCount() {
+    return childCount;
+  }
+
+  public void setChildCount(String childCount) {
+    this.childCount = childCount;
+  }
+
+  @Transient
+  public Long getLongChildCount() {
+    return getLongValue(this.childCount);
   }
 
   @Column(name = "concept_id")
@@ -270,6 +304,8 @@ public class DbCriteria {
     private boolean group;
     private boolean selectable;
     private String count;
+    private String parentCount;
+    private String childCount;
     private String conceptId;
     private String domainId;
     private boolean attribute;
@@ -324,6 +360,16 @@ public class DbCriteria {
 
     public Builder addCount(String count) {
       this.count = count;
+      return this;
+    }
+
+    public Builder addParentCount(String parentCount) {
+      this.parentCount = parentCount;
+      return this;
+    }
+
+    public Builder addChildCount(String childCount) {
+      this.childCount = childCount;
       return this;
     }
 
@@ -383,6 +429,8 @@ public class DbCriteria {
       dbCriteria.setGroup(this.group);
       dbCriteria.setSelectable(this.selectable);
       dbCriteria.setCount(this.count);
+      dbCriteria.setParentCount(this.parentCount);
+      dbCriteria.setChildCount(this.childCount);
       dbCriteria.setConceptId(this.conceptId);
       dbCriteria.setDomainId(this.domainId);
       dbCriteria.setAttribute(this.attribute);
