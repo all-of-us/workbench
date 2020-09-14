@@ -18,10 +18,10 @@ public enum WorkspaceParameter implements QueryParameterColumn<BqDtoWorkspace> {
   NAME("name", BqDtoWorkspace::getName, w -> QueryParameterValue.string(w.getName())),
   CREATION_TIME(
       "creation_time",
-      w -> ROW_TO_INSERT_TIMESTAMP_FORMATTER.format(Instant.ofEpochMilli(w.getCreationTime())),
+      w -> ROW_TO_INSERT_TIMESTAMP_FORMATTER.format(w.getCreationTime()),
       w ->
           QueryParameterValue.timestamp(
-              QPV_TIMESTAMP_FORMATTER.format(Instant.ofEpochMilli(w.getCreationTime()))));
+              QPV_TIMESTAMP_FORMATTER.format(w.getCreationTime())));
 
   private final String parameterName;
   private final Function<BqDtoWorkspace, Object> rowToInsertValueFunction;

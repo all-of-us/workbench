@@ -8125,8 +8125,8 @@ definitions:
         format: int64
       creationTime:
         description: ''
-        type: integer
-        format: int64
+        type: string
+        format: date-time
       creatorId:
         description: ''
         type: integer
@@ -8146,12 +8146,12 @@ definitions:
         type: string
       lastAccessedTime:
         description: ''
-        type: integer
-        format: int64
+        type: string
+        format: date-time
       lastModifiedTime:
         description: ''
-        type: integer
-        format: int64
+        type: string
+        format: date-time
       name:
         description: ''
         type: string
@@ -8241,8 +8241,8 @@ definitions:
         default: false
       rpTimeRequested:
         description: ''
-        type: integer
-        format: int64
+        type: string
+        format: date-time
       version:
         description: ''
         type: integer
@@ -8263,7 +8263,7 @@ definitions:
         description: Time at which snapshot is retrieved. Epoch millis.
         type: integer
         format: int64
-      researchers:
+      users:
         type: array
         items:
           "$ref": "#/definitions/BqDtoUser"

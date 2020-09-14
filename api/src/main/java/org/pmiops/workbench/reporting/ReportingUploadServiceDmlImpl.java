@@ -66,7 +66,7 @@ public class ReportingUploadServiceDmlImpl implements ReportingUploadService {
     final ImmutableList.Builder<QueryJobConfiguration> resultBuilder = new Builder<>();
     final int partitionSize = workbenchConfigProvider.get().reporting.maxRowsPerInsert;
 
-    Lists.partition(reportingSnapshot.getResearchers(), partitionSize).stream()
+    Lists.partition(reportingSnapshot.getUsers(), partitionSize).stream()
         .map(
             batch ->
                 researcherJobBuilder.build(

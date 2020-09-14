@@ -8,8 +8,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.timestampQpvToInstant;
+import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.timestampQpvToOffsetDateTime;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.timestampStringToInstant;
+import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 
 import com.google.cloud.bigquery.InsertAllRequest;
 import com.google.cloud.bigquery.InsertAllRequest.RowToInsert;
@@ -22,6 +23,8 @@ import com.google.common.collect.ImmutableList;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -60,7 +63,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ReportingUploadServiceTest {
   private static final Instant NOW = Instant.parse("2000-01-01T00:00:00.00Z");
-  private static final Instant THEN = Instant.parse("1989-02-17T00:00:00.00Z");
+  private static final Instant THEN_INSTANT = Instant.parse("1989-02-17T00:00:00.00Z");
+  private static final OffsetDateTime THEN = OffsetDateTime.ofInstant(THEN_INSTANT, ZoneOffset.UTC);
 
   private ReportingSnapshot reportingSnapshot;
   private ReportingSnapshot snapshotWithNulls;
@@ -106,7 +110,7 @@ public class ReportingUploadServiceTest {
     reportingSnapshot =
         new ReportingSnapshot()
             .captureTimestamp(NOW.toEpochMilli())
-            .researchers(
+            .users(
                 ImmutableList.of(
                     new BqDtoUser()
                         .username("bill@aou.biz")
@@ -128,23 +132,23 @@ public class ReportingUploadServiceTest {
                     new BqDtoWorkspace()
                         .workspaceId(201L)
                         .name("Circle K")
-                        .creationTime(THEN.toEpochMilli())
+                        .creationTime(THEN)
                         .creatorId(101L),
                     new BqDtoWorkspace()
                         .workspaceId(202L)
                         .name("Wyld Stallyns")
-                        .creationTime(THEN.toEpochMilli())
+                        .creationTime(THEN)
                         .creatorId(101L),
                     new BqDtoWorkspace()
                         .workspaceId(203L)
                         .name("You-us said what we-us are saying right now.")
-                        .creationTime(THEN.toEpochMilli())
+                        .creationTime(THEN)
                         .creatorId(202L)));
 
     snapshotWithNulls =
         new ReportingSnapshot()
             .captureTimestamp(NOW.toEpochMilli())
-            .researchers(
+            .users(
                 ImmutableList.of(
                     new BqDtoUser()
                         .username(null)
@@ -162,23 +166,23 @@ public class ReportingUploadServiceTest {
                     new BqDtoWorkspace()
                         .workspaceId(201L)
                         .name(null)
-                        .creationTime(THEN.toEpochMilli())
+                        .creationTime(THEN)
                         .creatorId(101L),
                     new BqDtoWorkspace()
                         .workspaceId(202L)
                         .name("Work Work Work")
-                        .creationTime(THEN.toEpochMilli())
+                        .creationTime(THEN)
                         .creatorId(101L),
                     new BqDtoWorkspace()
                         .workspaceId(203L)
                         .name(null)
-                        .creationTime(THEN.toEpochMilli())
+                        .creationTime(THEN)
                         .creatorId(202L)));
 
     emptySnapshot =
         new ReportingSnapshot()
             .captureTimestamp(NOW.toEpochMilli())
-            .researchers(Collections.emptyList())
+            .users(Collections.emptyList())
             .workspaces(Collections.emptyList());
 
     final TableResult mockTableResult = mock(TableResult.class);
@@ -223,12 +227,7 @@ public class ReportingUploadServiceTest {
         QueryParameterValues.formatQuery(QueryParameterValues.replaceNamedParameters(job0));
     assertThat(expandedQuery).containsMatch("INSERT\\s+INTO");
 
-    assertThat(
-            (double)
-                timestampQpvToInstant(jobs.get(1).getNamedParameters().get("creation_time__0"))
-                    .toEpochMilli())
-        .isWithin(500.0)
-        .of(THEN.toEpochMilli());
+    assertTimeApprox(timestampQpvToOffsetDateTime(jobs.get(1).getNamedParameters().get("creation_time__0")), THEN);
   }
 
   @Test
@@ -248,13 +247,13 @@ public class ReportingUploadServiceTest {
                         .disabled(false)
                         .userId((long) id))
             .collect(ImmutableList.toImmutableList());
-    largeSnapshot.setResearchers(users);
+    largeSnapshot.setUsers(users);
     largeSnapshot.setWorkspaces(
         ImmutableList.of(
             new BqDtoWorkspace()
                 .workspaceId(303L)
                 .name("Circle K")
-                .creationTime(THEN.toEpochMilli())
+                .creationTime(THEN)
                 .creatorId(101L)));
 
     reportingUploadServiceDmlImpl.uploadSnapshot(largeSnapshot);
@@ -271,8 +270,7 @@ public class ReportingUploadServiceTest {
     final QueryParameterValue creationTime =
         jobs.get(5).getNamedParameters().get("creation_time__0");
     assertThat(creationTime).isNotNull();
-    final Instant instant = QueryParameterValues.timestampQpvToInstant(creationTime);
-    assertThat((double) instant.toEpochMilli()).isWithin(500.0).of(THEN.toEpochMilli());
+    assertTimeApprox(QueryParameterValues.timestampQpvToOffsetDateTime(creationTime), THEN);
   }
 
   @Test
@@ -315,11 +313,9 @@ public class ReportingUploadServiceTest {
     final Map<String, Object> workspaceColumnValues = workspaceRows.get(0).getContent();
     assertThat(workspaceColumnValues.get(WorkspaceParameter.WORKSPACE_ID.getParameterName()))
         .isEqualTo(201L);
-    final Instant creationInstant =
-        timestampStringToInstant(
-            (String)
-                workspaceColumnValues.get(WorkspaceParameter.CREATION_TIME.getParameterName()));
-    assertThat((double) creationInstant.toEpochMilli()).isWithin(500.0).of(THEN.toEpochMilli());
+    assertTimeApprox(
+        timestampStringToInstant((String) workspaceColumnValues.get(WorkspaceParameter.CREATION_TIME.getParameterName())),
+        THEN_INSTANT);
     assertThat(workspaceColumnValues.get(WorkspaceParameter.CREATOR_ID.getParameterName()))
         .isEqualTo(101L);
   }

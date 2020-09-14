@@ -72,7 +72,7 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
     final ReportingSnapshot result =
         new ReportingSnapshot()
             .captureTimestamp(clock.millis())
-            .researchers(reportingMapper.toReportingResearcherList(queryResultBundle.getUsers()))
+            .users(reportingMapper.toReportingResearcherList(queryResultBundle.getUsers()))
             .workspaces(
                 reportingMapper.toReportingWorkspaceList(queryResultBundle.getWorkspaces()));
     stopwatch.stop();

@@ -2,6 +2,7 @@
 require 'csv'
 require 'json'
 require 'yaml'
+require 'enumerator'
 
 table_name = ARGV[0]
 input_dir = File.expand_path(ARGV[1])
@@ -227,12 +228,35 @@ JAVA_TYPE_TO_DEFAULT = {
     'Timestamp' => 'Timestamp.from(Instant.parse("2005-01-01T00:00:00.00Z"))',
     'boolean' => 'false'
 }
+BASE_TIMESTAMP = Time.new(2015, 5, 5)
+TIMESTAMP_DELTA_SECONDS = 24 * 60 * 60 # seconds in day
 
-def to_constant_declaration(column)
-  "private static final #{column[:java_type]} #{column[:java_constant_name]} = #{JAVA_TYPE_TO_DEFAULT[column[:java_type]]};"
+def to_constant_declaration(column, index)
+  value = case column[:java_type]
+          when 'String'
+            "\"foo_#{index}\""
+          when 'int'
+            "%d" % [index]
+          when 'long'
+            "%dL" % [index]
+          when 'double'
+            "%f" % [index + 0.5]
+          when 'boolean'
+            index.even? # just flip it every time
+          when 'Timestamp'
+            # add a day times the index to base timestamp
+            timestamp = BASE_TIMESTAMP + TIMESTAMP_DELTA_SECONDS * index
+            "Timestamp.from(Instant.parse(\"#{timestamp.strftime("%Y-%m-%dT00:00:00.00Z")}\"))"
+          else
+            index.to_s
+          end
+  "private static final #{column[:java_type]} #{column[:java_constant_name]} = #{value};"
 end
 
-constants = columns.map { |col| to_constant_declaration(col) }.join("\n")
+constants = columns.enum_for(:each_with_index) \
+  .map { |col, index| to_constant_declaration(col, index) } \
+  .join("\n")
+
 write_output(outputs[:unit_test_constants], constants, 'Unit Test Constants')
 
 ### Mock Instantiation
@@ -254,7 +278,7 @@ dto_assertions = columns.map{ |col|
   getter_call = "#{to_camel_case(table_name, false)}.#{col[:prj_getter]}"
   expected = col[:java_constant_name]
   if col[:java_type].eql?('Timestamp')
-    "    assertTimeWithinTolerance(#{getter_call}, #{expected});"
+    "    assertTimeApprox(#{getter_call}, #{expected});"
   else
     "    assertThat(#{getter_call}).isEqualTo(#{expected});"
   end

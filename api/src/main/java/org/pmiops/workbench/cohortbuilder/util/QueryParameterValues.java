@@ -4,6 +4,7 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.StandardSQLTypeName;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -53,7 +54,11 @@ public final class QueryParameterValues {
     return ZonedDateTime.parse(queryParameterValue.getValue(), QPV_TIMESTAMP_FORMATTER).toInstant();
   }
 
-  // Since BigQuery doesn't expose the literal query string built from a QueryJobConfiguration,
+  public static OffsetDateTime timestampQpvToOffsetDateTime(QueryParameterValue queryParameterValue) {
+    return OffsetDateTime.ofInstant(timestampQpvToInstant(queryParameterValue), ZoneOffset.UTC);
+  }
+
+    // Since BigQuery doesn't expose the literal query string built from a QueryJobConfiguration,
   // this method does the next best thing. Useful for diagnostics, logging, testing, etc.
   public static String replaceNamedParameters(QueryJobConfiguration queryJobConfiguration) {
     String result = queryJobConfiguration.getQuery();

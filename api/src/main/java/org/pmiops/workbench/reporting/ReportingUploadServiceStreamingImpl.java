@@ -80,7 +80,7 @@ public class ReportingUploadServiceStreamingImpl implements ReportingUploadServi
     return ImmutableList.of(
             researcherRequestBuilder.build(
                 TableId.of(projectId, dataset, "researcher"),
-                reportingSnapshot.getResearchers(),
+                reportingSnapshot.getUsers(),
                 fixedValues),
             workspaceRequestBuilder.build(
                 TableId.of(projectId, dataset, "workspace"),
