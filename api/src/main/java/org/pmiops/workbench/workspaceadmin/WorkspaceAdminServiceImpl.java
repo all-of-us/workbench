@@ -14,18 +14,22 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
+import org.pmiops.workbench.actionaudit.auditors.AdminAuditor;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.model.AccessReason;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.AdminWorkspaceResources;
@@ -50,6 +54,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private static final Duration TRAILING_TIME_TO_QUERY = Duration.ofHours(6);
 
   private final ActionAuditQueryService actionAuditQueryService;
+  private final AdminAuditor adminAuditor;
   private final CloudStorageService cloudStorageService;
   private final CohortDao cohortDao;
   private final CloudMonitoringService cloudMonitoringService;
@@ -68,6 +73,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   @Autowired
   public WorkspaceAdminServiceImpl(
       ActionAuditQueryService actionAuditQueryService,
+      AdminAuditor adminAuditor,
       CloudStorageService cloudStorageService,
       CohortDao cohortDao,
       CloudMonitoringService cloudMonitoringService,
@@ -83,6 +89,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       WorkspaceMapper workspaceMapper,
       WorkspaceService workspaceService) {
     this.actionAuditQueryService = actionAuditQueryService;
+    this.adminAuditor = adminAuditor;
     this.cloudStorageService = cloudStorageService;
     this.cohortDao = cohortDao;
     this.cloudMonitoringService = cloudMonitoringService;
@@ -218,6 +225,21 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         Optional.ofNullable(beforeMillisNullable).map(Instant::ofEpochMilli).orElse(Instant.now());
     return actionAuditQueryService.queryEventsForWorkspace(
         workspaceDatabaseId, limit, after, before);
+  }
+
+  @Override
+  public String getReadOnlyNotebook(
+      String workspaceNamespace,
+      String workspaceName,
+      String notebookName,
+      AccessReason accessReason) {
+    if (StringUtils.isBlank(accessReason.getReason())) {
+      throw new BadRequestException("Notebook viewing access reason is required");
+    }
+
+    adminAuditor.fireViewNotebookAction(
+        workspaceNamespace, workspaceName, notebookName, accessReason);
+    return notebooksService.adminGetReadOnlyHtml(workspaceNamespace, workspaceName, notebookName);
   }
 
   private int getNonNotebookFileCount(String bucketName) {

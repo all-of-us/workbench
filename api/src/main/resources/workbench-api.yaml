@@ -1697,6 +1697,30 @@ paths:
           description: HTML Read Only version of the notebook
           schema:
             "$ref": "#/definitions/ReadOnlyNotebookResponse"
+  "/v1/admin/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/readonly":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    post:
+      tags:
+        - workspaceAdmin
+      description: Get the HTML for a read only view of the notebook. RESEARCHER_DATA_VIEW authority required.
+      operationId: adminReadOnlyNotebook
+      parameters:
+      - in: path
+        name: notebookName
+        required: true
+        type: string
+      - in: body
+        name: accessReason
+        required: true
+        schema:
+          "$ref": "#/definitions/AccessReason"
+      responses:
+        200:
+          description: HTML Read Only version of the notebook
+          schema:
+            "$ref": "#/definitions/ReadOnlyNotebookResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/lockingMetadata":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -7803,3 +7827,9 @@ definitions:
         type: array
         items:
           "$ref": '#/definitions/AccessBypassRequest'
+  AccessReason:
+    type: object
+    properties:
+      reason:
+        type: string
+        description: 'The administrative purpose for accessing this notebook'
