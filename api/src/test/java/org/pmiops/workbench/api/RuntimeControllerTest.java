@@ -14,10 +14,12 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.Date;
 import com.google.common.collect.ImmutableList;
+import com.google.gson.internal.LinkedTreeMap;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -55,7 +57,10 @@ import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoRuntimeImage;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
+import org.pmiops.workbench.model.DataprocConfig;
+import org.pmiops.workbench.model.GceConfig;
 import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeLocalizeRequest;
@@ -111,6 +116,11 @@ public class RuntimeControllerTest {
   private static final String BIGQUERY_DATASET = "dataset-name";
   private static final String EXTRA_RUNTIME_NAME = "all-of-us-extra";
   private static final String EXTRA_RUNTIME_NAME_DIFFERENT_PROJECT = "all-of-us-different-project";
+  private static final String TOOL_DOCKER_IMAGE = "docker-image";
+  private static final LeonardoRuntimeImage RUNTIME_IMAGE = new LeonardoRuntimeImage()
+      .imageType("Jupyter")
+      .imageUrl(TOOL_DOCKER_IMAGE);
+  private static final int AUTOPAUSE_THRESHOLD = 10;
 
   private static WorkbenchConfig config = new WorkbenchConfig();
   private static DbUser user = new DbUser();
@@ -205,11 +215,25 @@ public class RuntimeControllerTest {
 
     String createdDate = Date.fromYearMonthDay(1988, 12, 26).toString();
 
+    DataprocConfig dataprocConfig = new DataprocConfig()
+        .numberOfWorkers(0)
+        .masterMachineType("n1-standard-4")
+        .masterDiskSize(50);
+
+    LinkedTreeMap<String, Object> dataProcConfigObj = new LinkedTreeMap<>();
+    dataProcConfigObj.put("cloudService", "DATAPROC");
+    dataProcConfigObj.put("numberOfWorkers", 0);
+    dataProcConfigObj.put("masterMachineType", "n1-standard-4");
+    dataProcConfigObj.put("masterDiskSize", 50.0);
+
     testLeoRuntime =
         new LeonardoGetRuntimeResponse()
             .runtimeName(getRuntimeName())
             .googleProject(BILLING_PROJECT_ID)
             .status(LeonardoRuntimeStatus.DELETING)
+            .runtimeImages(Collections.singletonList(RUNTIME_IMAGE))
+            .autopauseThreshold(AUTOPAUSE_THRESHOLD)
+            .runtimeConfig(dataProcConfigObj)
             .auditInfo(new LeonardoAuditInfo().createdDate(createdDate));
     testLeoListRuntimeResponse =
         new LeonardoListRuntimeResponse()
@@ -221,6 +245,9 @@ public class RuntimeControllerTest {
             .runtimeName(getRuntimeName())
             .googleProject(BILLING_PROJECT_ID)
             .status(RuntimeStatus.DELETING)
+            .toolDockerImage(TOOL_DOCKER_IMAGE)
+            .autopauseThreshold(AUTOPAUSE_THRESHOLD)
+            .dataprocConfig(dataprocConfig)
             .createdDate(createdDate);
 
     testLeoRuntime2 =
@@ -300,6 +327,26 @@ public class RuntimeControllerTest {
         .thenReturn(testLeoRuntime);
 
     assertThat(runtimeController.getRuntime(BILLING_PROJECT_ID).getBody()).isEqualTo(testRuntime);
+  }
+
+  @Test
+  public void testGetRuntime_gceConfig() {
+    GceConfig gceConfig = new GceConfig()
+        .bootDiskSize(10)
+        .diskSize(100)
+        .machineType("n1-standard-2");
+
+    LinkedTreeMap<String, Object> gceConfigObj = new LinkedTreeMap<>();
+    gceConfigObj.put("bootDiskSize", 10.0);
+    gceConfigObj.put("diskSize", 100.0);
+    gceConfigObj.put("machineType", "n1-standard-2");
+    gceConfigObj.put("cloudService", "GCE");
+
+    when(mockLeoNotebooksClient.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenReturn(testLeoRuntime.runtimeConfig(gceConfigObj));
+
+    assertThat(runtimeController.getRuntime(BILLING_PROJECT_ID).getBody()).isEqualTo(
+        testRuntime.dataprocConfig(null).gceConfig(gceConfig));
   }
 
   @Test
