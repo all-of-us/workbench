@@ -52,7 +52,7 @@ describe('Create Dataset', () => {
     expect(code).toContain('import os');
 
     // Navigate to Workpace Notebooks page.
-    const analysiPage = await notebookPreviewPage.goAnalysisPage();
+    const analysisPage = await notebookPreviewPage.goAnalysisPage();
 
     // Verify new notebook exists.
     const resourceCard = new DataResourceCard(page);
@@ -62,7 +62,7 @@ describe('Create Dataset', () => {
     const origCardsCount = (await DataResourceCard.findAllCards(page)).length;
 
     // Delete notebook
-    await analysiPage.deleteResource(newNotebookName, ResourceCard.Notebook);
+    await analysisPage.deleteResource(newNotebookName, ResourceCard.Notebook);
 
     // Resource cards count decrease by 1.
     const newCardsCount = (await DataResourceCard.findAllCards(page)).length;
@@ -110,15 +110,15 @@ describe('Create Dataset', () => {
     expect(currentPageUrl).toContain(`notebooks/preview/${notebookName}.ipynb`);
 
     // Navigate to Workpace Notebooks page.
-    const analysiPage = await notebookPreviewPage.goAnalysisPage();
+    const analysisPage = await notebookPreviewPage.goAnalysisPage();
 
     // Delete notebook
-    await analysiPage.deleteResource(notebookName, ResourceCard.Notebook);
+    await analysisPage.deleteResource(notebookName, ResourceCard.Notebook);
 
     // Delete Dataset
-    await analysiPage.openDataPage();
-    await analysiPage.openDatasetsSubtab({waitPageChange: false});
-    await analysiPage.deleteResource(datasetName, ResourceCard.Dataset);
+    await analysisPage.openDataPage();
+    await analysisPage.openDatasetsSubtab({waitPageChange: false});
+    await analysisPage.deleteResource(datasetName, ResourceCard.Dataset);
   });
 
 });
