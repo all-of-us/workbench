@@ -1,8 +1,6 @@
 import DataResourceCard from 'app/component/data-resource-card';
 import ExportToNotebookModal from 'app/component/export-to-notebook-modal';
-import Link from 'app/element/link';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
-import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {EllipsisMenuAction, ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
@@ -54,11 +52,7 @@ describe('Create Dataset', () => {
     expect(code).toContain('import os');
 
     // Navigate to Workpace Notebooks page.
-    const notebooksLink = await Link.findByName(page, {name: 'Notebooks'});
-    await notebooksLink.clickAndWait();
-
-    const analysiPage = new WorkspaceAnalysisPage(page);
-    await analysiPage.waitForLoad();
+    const analysiPage = await notebookPreviewPage.goAnalysisPage();
 
     // Verify new notebook exists.
     const resourceCard = new DataResourceCard(page);
@@ -109,14 +103,22 @@ describe('Create Dataset', () => {
     const notebookName = makeRandomName('test-notebook');
     await exportModal.fillInModal(notebookName);
 
-    // Verify notebook created successfully.
-    await dataPage.openAnalysisPage();
-    const cardExists = await resourceCard.cardExists(notebookName, ResourceCard.Notebook);
-    expect(cardExists).toBe(true);
+    // Verify notebook created successfully. Not going to start the Jupyter notebook.
+    const notebookPreviewPage = new NotebookPreviewPage(page);
+    await notebookPreviewPage.waitForLoad();
+    const currentPageUrl = page.url();
+    expect(currentPageUrl).toContain(`notebooks/preview/${notebookName}.ipynb`);
 
-    // Delete notebook.
-    const analysisPage = new WorkspaceAnalysisPage(page);
-    await analysisPage.deleteResource(notebookName, ResourceCard.Notebook);
+    // Navigate to Workpace Notebooks page.
+    const analysiPage = await notebookPreviewPage.goAnalysisPage();
+
+    // Delete notebook
+    await analysiPage.deleteResource(notebookName, ResourceCard.Notebook);
+
+    // Delete Dataset
+    await analysiPage.openDataPage();
+    await analysiPage.openDatasetsSubtab({waitPageChange: false});
+    await analysiPage.deleteResource(datasetName, ResourceCard.Dataset);
   });
 
 });

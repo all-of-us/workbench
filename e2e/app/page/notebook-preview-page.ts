@@ -4,6 +4,7 @@ import Link from 'app/element/link';
 import {getPropValue} from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
 import NotebookPage from './notebook-page';
+import WorkspaceAnalysisPage from './workspace-analysis-page';
 
 const Selector = {
   editButton: '//div[normalize-space(text())="Edit"]',
@@ -48,6 +49,20 @@ export default class NotebookPreviewPage extends AuthenticatedPage {
   async getFormattedCode(): Promise<string> {
     const codeContent = await this.waitForCssSelector('#notebook-container pre');
     return getPropValue<string>(codeContent, 'textContent');
+  }
+
+  /**
+   * Click "Notebook" link, goto Workspace Analysis page.
+   * This function does not handle Unsaved Changes confirmation.
+   */
+  async goAnalysisPage(): Promise<WorkspaceAnalysisPage> {
+    const notebooksLink = await Link.findByName(this.page, {name: 'Notebooks'});
+    await notebooksLink.clickAndWait();
+    await waitWhileLoading(this.page);
+
+    const analysisPage = new WorkspaceAnalysisPage(this.page);
+    await analysisPage.waitForLoad();
+    return analysisPage;
   }
 
   private async waitForCssSelector(selector: string, options?: WaitForSelectorOptions): Promise<ElementHandle> {
