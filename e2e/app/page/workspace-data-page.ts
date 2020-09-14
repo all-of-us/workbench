@@ -1,11 +1,11 @@
 import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
-import DataResourceCard, {CardType} from 'app/component/data-resource-card';
+import DataResourceCard from 'app/component/data-resource-card';
 import EllipsisMenu from 'app/component/ellipsis-menu';
 import Modal from 'app/component/modal';
 import ClrIconLink from 'app/element/clr-icon-link';
 import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
-import {EllipsisMenuAction, Language, LinkText} from 'app/text-labels';
+import {EllipsisMenuAction, Language, LinkText, ResourceCard} from 'app/text-labels';
 import {ElementHandle, Page} from 'puppeteer';
 import {makeRandomName} from 'utils/str-utils';
 import {waitWhileLoading} from 'utils/test-utils';
@@ -80,45 +80,9 @@ export default class WorkspaceDataPage extends WorkspaceBase {
    */
   async exportToNotebook(datasetName: string, notebookName: string): Promise<void> {
     const resourceCard = new DataResourceCard(this.page);
-    const datasetCard = await resourceCard.findCard(datasetName, CardType.Dataset);
+    const datasetCard = await resourceCard.findCard(datasetName, ResourceCard.Dataset);
     await datasetCard.clickEllipsisAction(EllipsisMenuAction.exportToNotebook, {waitForNav: false});
     console.log(`Exported Dataset "${datasetName}" to notebook "${notebookName}"`);
-  }
-
-  /**
-   * Delete cohort by look up its name using Ellipsis menu.
-   * @param {string} cohortName
-   */
-  async deleteCohort(cohortName: string): Promise<string[]> {
-    const cohortCard = await DataResourceCard.findCard(this.page, cohortName);
-    if (cohortCard == null) {
-      throw new Error(`Failed to find Cohort: "${cohortName}".`);
-    }
-    await cohortCard.clickEllipsisAction(EllipsisMenuAction.Delete, {waitForNav: false});
-    const modalContent = await (new CohortBuildPage(this.page)).deleteConfirmationDialog();
-    console.log(`Deleted Cohort "${cohortName}"`);
-    return modalContent;
-  }
-
-  /**
-   * Delete Dataset thru Ellipsis menu located inside the Dataset Resource card.
-   * @param {string} datasetName
-   */
-  async deleteDataset(datasetName: string): Promise<string[]> {
-    const datasetCard = await DataResourceCard.findCard(this.page, datasetName);
-    if (datasetCard == null) {
-      throw new Error(`Failed to find Dataset: "${datasetName}".`);
-    }
-    await datasetCard.clickEllipsisAction(EllipsisMenuAction.Delete, {waitForNav: false});
-
-    const modal = new Modal(this.page);
-    const modalContentText = await modal.getTextContent();
-    await modal.clickButton(LinkText.DeleteDataset, {waitForClose: true});
-    await waitWhileLoading(this.page);
-
-    console.log(`Deleted Dataset "${datasetName}"`);
-    await this.waitForLoad();
-    return modalContentText;
   }
 
   /**
@@ -142,26 +106,6 @@ export default class WorkspaceDataPage extends WorkspaceBase {
     await waitWhileLoading(this.page);
 
     console.log(`Renamed Dataset "${datasetName}" to "${newDatasetName}"`);
-  }
-
-  /**
-   * Delete ConceptSet thru Ellipsis menu located inside the Concept Set resource card.
-   * @param {string} conceptsetName
-   */
-  async deleteConceptSet(conceptsetName: string): Promise<string[]> {
-    const conceptSetCard = await DataResourceCard.findCard(this.page, conceptsetName);
-    if (conceptSetCard == null) {
-      throw new Error(`Failed to find Concept Set: "${conceptsetName}".`);
-    }
-    await conceptSetCard.clickEllipsisAction(EllipsisMenuAction.Delete, {waitForNav: false});
-
-    const modal = new Modal(this.page);
-    const modalTextContent = await modal.getTextContent();
-    await modal.clickButton(LinkText.DeleteConceptSet, {waitForClose: true});
-    await waitWhileLoading(this.page);
-
-    console.log(`Deleted Concept Set "${conceptsetName}"`);
-    return modalTextContent;
   }
 
   async renameCohort(cohortName: string, newCohortName: string): Promise<void> {

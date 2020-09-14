@@ -1,8 +1,8 @@
-import DataResourceCard, {CardType} from 'app/component/data-resource-card';
+import DataResourceCard from 'app/component/data-resource-card';
 import ClrIconLink from 'app/element/clr-icon-link';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {EllipsisMenuAction} from 'app/text-labels';
+import {EllipsisMenuAction, ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
@@ -35,7 +35,7 @@ describe('Create Dataset', () => {
 
     // Verify create successful
     const resourceCard = new DataResourceCard(page);
-    const dataSetExists = await resourceCard.cardExists(datasetName, CardType.Dataset);
+    const dataSetExists = await resourceCard.cardExists(datasetName, ResourceCard.Dataset);
     expect(dataSetExists).toBe(true);
 
     // Rename Dataset
@@ -45,14 +45,14 @@ describe('Create Dataset', () => {
     await dataPage.openDatasetsSubtab({waitPageChange: false});
 
     // Verify rename successful
-    const newDatasetExists = await resourceCard.cardExists(newDatasetName, CardType.Dataset);
+    const newDatasetExists = await resourceCard.cardExists(newDatasetName, ResourceCard.Dataset);
     expect(newDatasetExists).toBe(true);
 
-    const oldDatasetExists = await resourceCard.cardExists(datasetName, CardType.Dataset);
+    const oldDatasetExists = await resourceCard.cardExists(datasetName, ResourceCard.Dataset);
     expect(oldDatasetExists).toBe(false);
 
     // Delete Dataset
-    const textContent = await dataPage.deleteDataset(newDatasetName);
+    const textContent = await dataPage.deleteResource(newDatasetName, ResourceCard.Dataset);
     expect(textContent).toContain(`Are you sure you want to delete Dataset: ${newDatasetName}?`);
 
   });
@@ -110,7 +110,7 @@ describe('Create Dataset', () => {
     await dataPage.openDatasetsSubtab({waitPageChange: false});
 
     const resourceCard = new DataResourceCard(page);
-    const dataSetExists = await resourceCard.cardExists(datasetName, CardType.Dataset);
+    const dataSetExists = await resourceCard.cardExists(datasetName, ResourceCard.Dataset);
     expect(dataSetExists).toBe(true);
 
     // Edit the dataset to include "All Participants".
@@ -126,7 +126,7 @@ describe('Create Dataset', () => {
     await dataPage.waitForLoad();
 
     await dataPage.openDatasetsSubtab({waitPageChange: false});
-    await dataPage.deleteDataset(datasetName);
+    await dataPage.deleteResource(datasetName, ResourceCard.Dataset);
   });
 
 });

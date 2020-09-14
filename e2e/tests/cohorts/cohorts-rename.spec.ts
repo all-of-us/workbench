@@ -1,11 +1,12 @@
+import DataResourceCard from 'app/component/data-resource-card';
 import Link from 'app/element/link';
+import CohortActionsPage from 'app/page/cohort-actions-page';
 import CohortBuildPage, {FieldSelector} from 'app/page/cohort-build-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
+import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn} from 'utils/test-utils';
 import {waitForNumericalString, waitForText} from 'utils/waits-utils';
-import DataResourceCard from 'app/component/data-resource-card';
-import {makeRandomName} from 'utils/str-utils';
-import CohortActionsPage from 'app/page/cohort-actions-page';
+import {ResourceCard} from 'app/text-labels';
 
 
 describe('User can create, modify, rename and delete Cohort', () => {
@@ -99,7 +100,7 @@ describe('User can create, modify, rename and delete Cohort', () => {
     expect(await DataResourceCard.findCard(page, newCohortName)).toBeTruthy();
 
     // Delete cohort.
-    const modalTextContent = await dataPage.deleteCohort(newCohortName);
+    const modalTextContent = await dataPage.deleteResource(newCohortName, ResourceCard.Cohort);
 
     // Verify Delete dialog content text
     expect(modalTextContent).toContain(`Are you sure you want to delete Cohort: ${newCohortName}?`);

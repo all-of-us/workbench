@@ -2,20 +2,13 @@ import {ElementHandle, Page} from 'puppeteer';
 import * as fp from 'lodash/fp';
 import {waitWhileLoading} from 'utils/test-utils';
 import {getPropValue} from 'utils/element-utils';
+import {ResourceCard} from 'app/text-labels';
 import CardBase from './card-base';
 
 const DataResourceCardSelector = {
   cardRootXpath: '//*[@data-test-id="card"]',
   cardNameXpath: '@data-test-id="card-name"',
   cardTypeXpath: './/*[@data-test-id="card-type"]',
-}
-
-export enum CardType {
-  Cohort = 'Cohort',
-  ConceptSet = 'Concept Set',
-  Notebook = 'Notebook',
-  Dataset = 'Dataset',
-  CohortReview = 'Cohort Review',
 }
 
 /**
@@ -77,7 +70,7 @@ export default class DataResourceCard extends CardBase {
     super(page);
   }
 
-  async findCard(resourceName: string, cardType?: CardType): Promise<DataResourceCard | null> {
+  async findCard(resourceName: string, cardType?: ResourceCard): Promise<DataResourceCard | null> {
     const selector = `.//*[${DataResourceCardSelector.cardNameXpath} and normalize-space(text())="${resourceName}"]`;
     let elements: DataResourceCard[];
     if (cardType === undefined) {
@@ -114,7 +107,7 @@ export default class DataResourceCard extends CardBase {
     return element;
   }
 
-  async getResourceCard(cardType: CardType = CardType.Cohort): Promise<DataResourceCard[]> {
+  async getResourceCard(cardType: ResourceCard = ResourceCard.Cohort): Promise<DataResourceCard[]> {
     const matchArray: DataResourceCard[] = [];
     const allCards = await DataResourceCard.findAllCards(this.page);
     for (const card of allCards) {
@@ -143,7 +136,7 @@ export default class DataResourceCard extends CardBase {
    * @param {string} cardName
    * @param {CardType} cardType
    */
-  async cardExists(cardName: string, cardType: CardType):  Promise<boolean> {
+  async cardExists(cardName: string, cardType: ResourceCard):  Promise<boolean> {
     const cards = await this.getResourceCard(cardType);
     const names = await Promise.all(cards.map(item => item.getResourceName()));
     const filterdList = names.filter(name => name === cardName);

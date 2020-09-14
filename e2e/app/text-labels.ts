@@ -74,3 +74,11 @@ export enum Language {
    Python = 'Python',
    R = 'R',
 }
+
+export enum ResourceCard {
+   Cohort = 'Cohort',
+   ConceptSet = 'Concept Set',
+   Notebook = 'Notebook',
+   Dataset = 'Dataset',
+   CohortReview = 'Cohort Review',
+}
