@@ -12,5 +12,6 @@ enum class TargetType {
     CONCEPT_SET,
     COHORT,
     CREDIT,
-    WORKSPACE
+    WORKSPACE,
+    BILLING_PROJECT,
 }

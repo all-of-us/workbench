@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortCloningService;
@@ -62,23 +63,24 @@ public class WorkspaceServiceTest {
   @Import({
     CohortMapperImpl.class,
     CohortReviewMapperImpl.class,
-    ConceptSetMapperImpl.class,
     CommonMappers.class,
+    ConceptSetMapperImpl.class,
     DataSetMapperImpl.class,
     WorkspaceMapperImpl.class,
-    WorkspaceServiceImpl.class
+    WorkspaceServiceImpl.class,
   })
   @MockBean({
-    ConceptSetService.class,
-    CohortService.class,
+    BillingProjectAuditor.class,
     CohortCloningService.class,
+    CohortService.class,
+    ConceptSetService.class,
     DataSetService.class,
-    FirecloudMapper.class,
     FireCloudService.class,
+    FirecloudMapper.class,
+    FreeTierBillingService.class,
     ProfileMapper.class,
     UserDao.class,
-    FreeTierBillingService.class,
-    UserMapper.class
+    UserMapper.class,
   })
   static class Configuration {
     @Bean
@@ -98,6 +100,7 @@ public class WorkspaceServiceTest {
     }
   }
 
+  @MockBean private BillingProjectAuditor mockBillingProjectAuditor;
   @MockBean private Clock mockClock;
   @MockBean private FireCloudService mockFireCloudService;
 
@@ -393,7 +396,10 @@ public class WorkspaceServiceTest {
     DbWorkspace ws = dbWorkspaces.get(0); // arbitrary choice of those defined for testing
     workspaceService.deleteWorkspace(ws);
     assertThat(ws.getWorkspaceActiveStatusEnum()).isEqualTo(WorkspaceActiveStatus.DELETED);
-    verify(mockFireCloudService).deleteWorkspace(eq(ws.getWorkspaceNamespace()), eq(ws.getName()));
-    verify(mockFireCloudService).deleteBillingProject(eq(ws.getWorkspaceNamespace()));
+
+    String billingProject = ws.getWorkspaceNamespace();
+    verify(mockFireCloudService).deleteWorkspace(eq(billingProject), eq(ws.getName()));
+    verify(mockFireCloudService).deleteBillingProject(eq(billingProject));
+    verify(mockBillingProjectAuditor).fireDeleteAction(eq(billingProject));
   }
 }
