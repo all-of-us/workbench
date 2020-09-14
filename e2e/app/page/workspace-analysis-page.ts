@@ -1,14 +1,12 @@
+import CopyModal from 'app/component/copy-modal';
 import DataResourceCard from 'app/component/data-resource-card';
-import Modal from 'app/component/modal';
 import NewNotebookModal from 'app/component/new-notebook-modal';
 import Link from 'app/element/link';
-import Textbox from 'app/element/textbox';
 import {EllipsisMenuAction, Language, LinkText, ResourceCard} from 'app/text-labels';
 import {Page} from 'puppeteer';
+import {getPropValue} from 'utils/element-utils';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
-import {getPropValue} from 'utils/element-utils';
-import CopyModal from 'app/component/copy-modal';
 import NotebookPage from './notebook-page';
 import WorkspaceBase from './workspace-base';
 
@@ -92,16 +90,7 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
   }
 
   async renameNotebook(notebookName: string, newNotebookName: string): Promise<string[]> {
-    const notebookCard = await DataResourceCard.findCard(this.page, notebookName);
-    await notebookCard.clickEllipsisAction(EllipsisMenuAction.Rename, {waitForNav: false});
-    const modal = new Modal(this.page);
-    const modalTextContents = await modal.getTextContent();
-    const newNameInput = new Textbox(this.page, `${modal.getXpath()}//*[@id="new-name"]`);
-    await newNameInput.type(newNotebookName);
-    await modal.clickButton(LinkText.RenameNotebook, {waitForClose: true});
-    await waitWhileLoading(this.page);
-    console.log(`Notebook "${notebookName}" renamed to "${newNotebookName}"`);
-    return modalTextContents;
+    return this.renameResource(notebookName, newNotebookName, ResourceCard.Notebook);
   }
 
   /**
