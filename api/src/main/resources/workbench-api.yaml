@@ -5456,9 +5456,6 @@ definitions:
       status:
         description: Runtime status. Read only.
         "$ref": "#/definitions/RuntimeStatus"
-      autopause:
-        type: boolean
-        description: Whether autopause feature is enabled for this specific runtime.
       autopauseThreshold:
         type: integer
         description: The number of minutes of idle time to elapse before the cluster is
