@@ -8,6 +8,7 @@ import org.pmiops.workbench.cdr.model.DbAgeTypeCount;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cdr.model.DbDataFilter;
+import org.pmiops.workbench.cdr.model.DbSurveyVersion;
 import org.pmiops.workbench.model.AgeTypeCount;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
@@ -15,6 +16,7 @@ import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DomainType;
+import org.pmiops.workbench.model.SurveyVersion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
@@ -122,6 +124,16 @@ public class CohortBuilderMapperTest {
         .isEqualTo(expectedAgeTypeCount);
   }
 
+  @Test
+  public void dbModelToClientSurveyVersion() {
+    SurveyVersion expectedSurveyVersion =
+        new SurveyVersion().surveyId(100L).version("May 2020").itemCount(2344L);
+    assertThat(
+            cohortBuilderMapper.dbModelToClient(
+                new CohortBuilderMapperTest.DbSurveyVersionImpl(100L, "May 2020", 2344L)))
+        .isEqualTo(expectedSurveyVersion);
+  }
+
   class DbAgeTypeCountImpl implements DbAgeTypeCount {
     private String ageType;
     private int age;
@@ -146,6 +158,33 @@ public class CohortBuilderMapperTest {
     @Override
     public long getCount() {
       return count;
+    }
+  }
+
+  class DbSurveyVersionImpl implements DbSurveyVersion {
+    private long surveyId;
+    private String version;
+    private long itemCount;
+
+    public DbSurveyVersionImpl(long surveyId, String version, long itemCount) {
+      this.surveyId = surveyId;
+      this.version = version;
+      this.itemCount = itemCount;
+    }
+
+    @Override
+    public long getSurveyId() {
+      return surveyId;
+    }
+
+    @Override
+    public String getVersion() {
+      return version;
+    }
+
+    @Override
+    public long getItemCount() {
+      return itemCount;
     }
   }
 }

@@ -38,6 +38,7 @@ import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.model.SurveyVersionListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -627,6 +628,45 @@ public class CohortBuilderControllerTest {
         demos.getEthnicityList().get(0));
     assertEquals(
         new ConceptIdName().conceptId(4L).conceptName("Male"), demos.getSexAtBirthList().get(0));
+  }
+
+  @Test
+  public void findSurveyVersionByQuestionConceptId() {
+    jdbcTemplate.execute(
+        "create table cb_survey_version(survey_id integer, concept_id integer, version varchar(50), display_order integer)");
+    jdbcTemplate.execute(
+        "create table cb_survey_attribute(id integer, question_concept_id integer, answer_concept_id integer, survey_id integer, item_count integer)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_version(survey_id, concept_id, version, display_order) values (100, 1333342, 'May 2020', 1)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_version(survey_id, concept_id, version, display_order) values (101, 1333342, 'June 2020', 2)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_version(survey_id, concept_id, version, display_order) values (102, 1333342, 'July 2020', 3)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (1, 715713, 0, 100, 291)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (2, 715713, 0, 101, 148)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (3, 715713, 0, 102, 150)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (4, 715713, 903096, 100, 154)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (5, 715713, 903096, 101, 82)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (6, 715713, 903096, 102, 31)");
+    SurveyVersionListResponse response =
+        controller.findSurveyVersionByQuestionConceptId(1L, 1333342L, 715713L).getBody();
+    assertEquals(response.getItems().get(0).getSurveyId(), new Long("100"));
+    assertEquals(response.getItems().get(0).getVersion(), "May 2020");
+    assertEquals(response.getItems().get(0).getItemCount(), new Long("445"));
+    assertEquals(response.getItems().get(1).getSurveyId(), new Long("101"));
+    assertEquals(response.getItems().get(1).getVersion(), "June 2020");
+    assertEquals(response.getItems().get(1).getItemCount(), new Long("230"));
+    assertEquals(response.getItems().get(2).getSurveyId(), new Long("102"));
+    assertEquals(response.getItems().get(2).getVersion(), "July 2020");
+    assertEquals(response.getItems().get(2).getItemCount(), new Long("181"));
+    jdbcTemplate.execute("drop table cb_survey_version");
+    jdbcTemplate.execute("drop table cb_survey_attribute");
   }
 
   @Test

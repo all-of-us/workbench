@@ -13,6 +13,7 @@ import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.model.SurveyVersion;
 
 public interface CohortBuilderService {
 
@@ -53,4 +54,10 @@ public interface CohortBuilderService {
 
   List<String> findSortedConceptIdsByDomainIdAndTypeAndParentIdNotIn(
       String domainId, Long parentId, String sortColumn, String sortName);
+
+  List<SurveyVersion> findSurveyVersionByQuestionConceptId(
+      Long surveyConceptId, Long questionConceptId);
+
+  List<SurveyVersion> findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
+      Long surveyConceptId, Long questionConceptId, Long answerConceptId);
 }
