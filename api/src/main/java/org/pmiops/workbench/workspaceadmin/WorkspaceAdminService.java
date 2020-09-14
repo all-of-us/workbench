@@ -31,6 +31,6 @@ public interface WorkspaceAdminService {
   String getReadOnlyNotebook(
       String workspaceNamespace,
       String workspaceName,
-      AccessReason accessReason,
-      String notebookName);
+      String notebookName,
+      AccessReason accessReason);
 }

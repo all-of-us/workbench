@@ -61,11 +61,11 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
   public ResponseEntity<ReadOnlyNotebookResponse> adminReadOnlyNotebook(
       String workspaceNamespace,
       String workspaceName,
-      AccessReason accessReason,
-      String notebookName) {
+      String notebookName,
+      AccessReason accessReason) {
     final String notebookHtml =
         workspaceAdminService.getReadOnlyNotebook(
-            workspaceNamespace, workspaceName, accessReason, notebookName);
+            workspaceNamespace, workspaceName, notebookName, accessReason);
     return ResponseEntity.ok(new ReadOnlyNotebookResponse().html(notebookHtml));
   }
 }

@@ -23,10 +23,10 @@ constructor(
     @Qualifier("ACTION_ID") private val actionIdProvider: Provider<String>
 ) : AdminAuditor {
 
-    override fun fireViewNotebookAction(workspaceNamespace: String, workspaceName: String, accessReason: AccessReason, notebookFilename: String) {
+    override fun fireViewNotebookAction(workspaceNamespace: String, workspaceName: String, notebookFilename: String, accessReason: AccessReason) {
         val dbUser = userProvider.get()
         val actionId = actionIdProvider.get()
-        val timestamp = clock.millis();
+        val timestamp = clock.millis()
 
         val props = mapOf(
             "workspace_namespace" to workspaceNamespace,

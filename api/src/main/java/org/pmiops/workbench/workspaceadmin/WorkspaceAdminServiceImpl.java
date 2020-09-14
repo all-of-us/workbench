@@ -231,14 +231,14 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   public String getReadOnlyNotebook(
       String workspaceNamespace,
       String workspaceName,
-      AccessReason accessReason,
-      String notebookName) {
+      String notebookName,
+      AccessReason accessReason) {
     if (StringUtils.isBlank(accessReason.getReason())) {
       throw new BadRequestException("Notebook viewing access reason is required");
     }
 
     adminAuditor.fireViewNotebookAction(
-        workspaceNamespace, workspaceName, accessReason, notebookName);
+        workspaceNamespace, workspaceName, notebookName, accessReason);
     return notebooksService.adminGetReadOnlyHtml(workspaceNamespace, workspaceName, notebookName);
   }
 

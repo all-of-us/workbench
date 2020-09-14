@@ -1707,15 +1707,15 @@ paths:
       description: Get the HTML for a read only view of the notebook. RESEARCHER_DATA_VIEW authority required.
       operationId: adminReadOnlyNotebook
       parameters:
-        - in: body
-          name: accessReason
-          required: true
-          schema:
-            "$ref": "#/definitions/AccessReason"
-        - in: path
-          name: notebookName
-          required: true
-          type: string
+      - in: path
+        name: notebookName
+        required: true
+        type: string
+      - in: body
+        name: accessReason
+        required: true
+        schema:
+          "$ref": "#/definitions/AccessReason"
       responses:
         200:
           description: HTML Read Only version of the notebook
