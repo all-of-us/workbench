@@ -3,6 +3,7 @@ import * as React from 'react';
 
 import {ageCountStore} from 'app/cohort-search/search-state.service';
 import {mapParameter, typeToTitle} from 'app/cohort-search/utils';
+import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {NumberInput} from 'app/components/inputs';
 import {Spinner} from 'app/components/spinners';
@@ -10,7 +11,7 @@ import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {currentWorkspaceStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, serverConfigStore, setSidebarActiveIconStore} from 'app/utils/navigation';
 import {AttrName, CriteriaType, DomainType, Operator} from 'generated/fetch';
 
 const styles = reactStyles({
@@ -30,11 +31,6 @@ const styles = reactStyles({
     fontSize: '14px',
     fontWeight: 600,
     color: colors.primary
-  },
-  agePreview: {
-    minWidth: '50%',
-    padding: '0.25rem 1rem',
-    width: 'auto'
   },
   calculateBtn: {
     background: colors.primary,
@@ -96,7 +92,6 @@ const styles = reactStyles({
   },
   selectList: {
     alignItems: 'center',
-    display: 'flex',
     marginRight: '1rem',
     maxHeight: '15rem',
     padding: '0.5rem 0 0 1rem'
@@ -428,7 +423,10 @@ export class Demographics extends React.Component<Props, State> {
 
   get showPreview() {
     const {criteriaType, selections} = this.props;
-    return !this.state.loading && (selections && selections.length > 0) && criteriaType !== CriteriaType.AGE;
+    return !serverConfigStore.getValue().enableCohortBuilderV2 &&
+      !this.state.loading &&
+      (selections && selections.length > 0) &&
+      criteriaType !== CriteriaType.AGE;
   }
 
   // Checks if form is in its initial state and if a count already exists before setting the total age count
@@ -440,12 +438,10 @@ export class Demographics extends React.Component<Props, State> {
   render() {
     const {criteriaType, selectedIds} = this.props;
     const {ageType, calculating, count, loading, maxAge, minAge, nodes} = this.state;
-    const isAge = criteriaType === CriteriaType.AGE;
-    const calcDisabled = calculating || count !== null;
     return loading
       ? <div style={{textAlign: 'center'}}><Spinner style={{marginTop: '3rem'}}/></div>
       : <React.Fragment>
-        {isAge
+        {criteriaType === CriteriaType.AGE
           // Age slider with number inputs
           ? <div style={styles.ageContainer}>
             <div style={styles.ageLabel}>
@@ -509,18 +505,16 @@ export class Demographics extends React.Component<Props, State> {
                 </span>}
               </div>)}
             </div>
+            {serverConfigStore.getValue().enableCohortBuilderV2 && <Button type='primary'
+                    style={{borderRadius: '5px', float: 'right', marginTop: '1rem'}}
+                    disabled={!!selectedIds && selectedIds.length === 0}
+                    onClick={() => setSidebarActiveIconStore.next('criteria')}>
+              Finish & Review
+            </Button>}
           </div>
         }
-        {this.showPreview && <div style={isAge ? {...styles.countPreview, ...styles.agePreview} : styles.countPreview}>
-          {isAge && <div style={{float: 'left', marginRight: '0.25rem'}}>
-            <button style={calcDisabled ? {...styles.calculateBtn, opacity: 0.4} : styles.calculateBtn}
-              disabled={calcDisabled}
-              onClick={() => this.calculateAge()}>
-              {calculating && <Spinner style={{marginRight: '0.25rem'}} size={16}/>}
-              Calculate
-            </button>
-          </div>}
-          {(count !== null || isAge) && <div style={{float: 'left', fontSize: '14px'}}>
+        {this.showPreview && <div style={styles.countPreview}>
+          {count !== null && <div style={{float: 'left', fontSize: '14px'}}>
             <div style={{color: colors.primary, fontWeight: 500}}>
               Results
             </div>

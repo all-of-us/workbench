@@ -6,7 +6,7 @@ import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
 import CohortActionsPage from 'app/page/cohort-actions-page';
-import {Ethnicity} from 'app/page/cohort-criteria-modal';
+import {Ethnicity} from 'app/page/cohort-search-page';
 import {Language} from 'app/text-labels';
 
 describe('Create Dataset', () => {
@@ -31,9 +31,11 @@ describe('Create Dataset', () => {
 
     // Include Participants Group 1: Add Criteria: Ethnicity
     const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
-    const modal = await group1.includeEthnicity();
-    await modal.addEthnicity([Ethnicity.HispanicOrLatino, Ethnicity.NotHispanicOrLatino]);
-    await modal.clickFinishButton();
+    const searchPage = await group1.includeEthnicity();
+    await searchPage.addEthnicity([Ethnicity.HispanicOrLatino, Ethnicity.NotHispanicOrLatino]);
+
+    // Open selection list and click Save Criteria button
+    await searchPage.viewAndSaveCriteria();
 
     // Check Group 1 Count.
     const group1Count = await group1.getGroupCount();

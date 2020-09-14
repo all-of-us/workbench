@@ -129,7 +129,8 @@ const styles = reactStyles({
 export const CalculateFooter = (props) => {
   return <FlexRowWrap style={styles.countPreview}>
      <div style={styles.resultsContainer}>
-     <Button type='secondaryLight'
+     <Button id='attributes-calculate'
+       type='secondaryLight'
     disabled={props.disabled}
     style={{...styles.calculateButton, ...(props.disabled ? {borderColor: colorWithWhiteness(colors.dark, 0.6)} : {})}}
     onClick={() => props.calculate()}>
@@ -529,7 +530,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
       const disableCalculate = disableAdd || form.exists || form.num.every(attr => attr.operator === 'ANY');
       return (loading ?
         <SpinnerOverlay/> :
-        <div style={{marginTop: '0.5rem'}}>
+        <div id='attributes-form' style={{marginTop: '0.5rem'}}>
           <h3 style={{fontWeight: 600, margin: '0 0 0.5rem', textTransform: 'capitalize'}}>
             {this.isPhysicalMeasurement ? name : domainId.toString().toLowerCase()} Detail
           </h3>

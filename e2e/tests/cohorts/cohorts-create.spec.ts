@@ -1,4 +1,5 @@
-import {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/cohort-criteria-modal';
+import HelpSidebar from 'app/component/help-sidebar';
+import {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/cohort-search-page';
 import ClrIconLink from 'app/element/clr-icon-link';
 import Link from 'app/element/link';
 import {EllipsisMenuAction, LinkText} from 'app/text-labels';
@@ -133,33 +134,34 @@ describe('User can create new Cohorts', () => {
 
     // Include Participants Group 1: Add a Condition
     const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
-    const modal = await group1.includeConditions();
+    const searchPage = await group1.includeConditions();
 
     // First, search for non-existent condition, expect returns no results.
-    const search1ResultsTable = await modal.searchCondition('allergist');
+    const search1ResultsTable = await searchPage.searchCondition('allergist');
     expect(await search1ResultsTable.exists()).toBe(false);
 
     // Next, search for condition EKG
-    const search2ResultsTable = await modal.searchCondition('EKG');
+    const search2ResultsTable = await searchPage.searchCondition('EKG');
     // Check cell value in column "Code" (column #2)
     const codeValue = await search2ResultsTable.getCellValue(1, 2);
     expect(Number(codeValue)).not.toBeNaN();
 
     // Add the condition in first row. We don't know what the condition name is, so we get the cell value first.
     const nameValue = await search2ResultsTable.getCellValue(1, 1);
-    const addIcon = await ClrIconLink.findByName(page, {containsText: nameValue, iconShape: 'plus-circle'}, modal);
+    const addIcon = await ClrIconLink.findByName(page, {containsText: nameValue, iconShape: 'plus-circle'}, search2ResultsTable);
     await addIcon.click();
 
-    // Click Next button to add modifier
-    const nextButton = await Button.findByName(page, {name: LinkText.Next}, modal);
-    await nextButton.waitUntilEnabled();
-    await nextButton.click();
+    // Click Finish & Review button to open selection list and add modifier
+    const finishAndReviewButton = await Button.findByName(page, {name: LinkText.FinishAndReview});
+    await finishAndReviewButton.waitUntilEnabled();
+    await finishAndReviewButton.click();
 
     // Add Condition Modifiers: Age At Event >= 50
-    await modal.addAgeModifier(FilterSign.GreaterThanOrEqualTo, 50);
+    const helpSidebar = new HelpSidebar(page);
+    await helpSidebar.addAgeModifier(FilterSign.GreaterThanOrEqualTo, 50);
 
-    // Click FINISH button. Criteria dialog closes.
-    await modal.clickFinishButton();
+    // Click SAVE CRITERIA button. Sidebar closes.
+    await helpSidebar.clickSaveCriteriaButton();
 
     // Check Group 1 Count.
     const group1Count = await group1.getGroupCount();
