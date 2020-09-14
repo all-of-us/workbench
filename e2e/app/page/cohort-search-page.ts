@@ -107,7 +107,8 @@ export default class CohortSearchPage extends AuthenticatedPage {
 
     const link = await this.waitForPhysicalMeasurementCriteriaLink(criteriaName);
     await link.click();
-    console.log(`clicked link`, link);
+
+    // Delay to make sure correct sidebar content is showing
     await this.page.waitFor(1000);
 
     const helpSidebar = new HelpSidebar(this.page);
@@ -131,7 +132,7 @@ export default class CohortSearchPage extends AuthenticatedPage {
     await finishAndReviewButton.click();
 
     // Click Save Criteria button in sidebar
-    const helpSidebar = await new HelpSidebar(this.page);
+    const helpSidebar = new HelpSidebar(this.page);
     await helpSidebar.clickSaveCriteriaButton();
   }
 
