@@ -227,7 +227,9 @@ public class ReportingUploadServiceTest {
         QueryParameterValues.formatQuery(QueryParameterValues.replaceNamedParameters(job0));
     assertThat(expandedQuery).containsMatch("INSERT\\s+INTO");
 
-    assertTimeApprox(timestampQpvToOffsetDateTime(jobs.get(1).getNamedParameters().get("creation_time__0")), THEN);
+    assertTimeApprox(
+        timestampQpvToOffsetDateTime(jobs.get(1).getNamedParameters().get("creation_time__0")),
+        THEN);
   }
 
   @Test
@@ -314,7 +316,9 @@ public class ReportingUploadServiceTest {
     assertThat(workspaceColumnValues.get(WorkspaceParameter.WORKSPACE_ID.getParameterName()))
         .isEqualTo(201L);
     assertTimeApprox(
-        timestampStringToInstant((String) workspaceColumnValues.get(WorkspaceParameter.CREATION_TIME.getParameterName())),
+        timestampStringToInstant(
+            (String)
+                workspaceColumnValues.get(WorkspaceParameter.CREATION_TIME.getParameterName())),
         THEN_INSTANT);
     assertThat(workspaceColumnValues.get(WorkspaceParameter.CREATOR_ID.getParameterName()))
         .isEqualTo(101L);
