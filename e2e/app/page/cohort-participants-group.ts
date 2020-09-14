@@ -72,7 +72,7 @@ export default class CohortParticipantsGroup {
   async includePhysicalMeasurement(criteriaName: PhysicalMeasurementsCriteria, value: number): Promise<string> {
     await this.clickCriteriaMenuItems(['Physical Measurements']);
     const searchPage = new CohortSearchPage(this.page);
-    await searchPage.waitUntilVisible();
+    await searchPage.waitForLoad();
     return searchPage.filterPhysicalMeasurementValue(criteriaName, FilterSign.GreaterThanOrEqualTo, value);
   }
 
@@ -84,21 +84,21 @@ export default class CohortParticipantsGroup {
   async includeConditions(): Promise<CohortSearchPage> {
     await this.clickCriteriaMenuItems(['Conditions']);
     const searchPage = new CohortSearchPage(this.page);
-    await searchPage.waitUntilVisible();
+    await searchPage.waitForLoad();
     return searchPage;
   }
 
   async includeDrugs(): Promise<CohortSearchPage> {
     await this.clickCriteriaMenuItems(['Drugs']);
     const searchPage = new CohortSearchPage(this.page);
-    await searchPage.waitUntilVisible();
+    await searchPage.waitForLoad();
     return searchPage;
   }
 
   async includeEthnicity(): Promise<CohortSearchPage> {
     await this.clickCriteriaMenuItems(['Demographics', 'Ethnicity']);
     const searchPage = new CohortSearchPage(this.page);
-    await searchPage.waitUntilVisible();
+    await searchPage.waitForLoad();
     return searchPage;
   }
 
@@ -109,7 +109,7 @@ export default class CohortParticipantsGroup {
   async includeAge(minAge: number, maxAge: number): Promise<string> {
     await this.clickCriteriaMenuItems(['Demographics', 'Age']);
     const searchPage = new CohortSearchPage(this.page);
-    await searchPage.waitUntilVisible();
+    await searchPage.waitForLoad();
     const results = await searchPage.addAge(minAge, maxAge);
     await waitWhileLoading(this.page);
     return results;
@@ -118,13 +118,13 @@ export default class CohortParticipantsGroup {
   async includeVisits(): Promise<CohortSearchPage> {
     await this.clickCriteriaMenuItems(['Visits']);
     const searchPage = new CohortSearchPage(this.page);
-    await searchPage.waitUntilVisible();
+    await searchPage.waitForLoad();
     return searchPage;
   }
 
   private async clickCriteriaMenuItems(menuItemLinks: string[]): Promise<void> {
     const menu = await this.openTieredMenu();
-    return menu.clickMenuItem(menuItemLinks);
+    await menu.clickMenuItem(menuItemLinks);
   }
 
   private async openTieredMenu(): Promise<TieredMenu> {
