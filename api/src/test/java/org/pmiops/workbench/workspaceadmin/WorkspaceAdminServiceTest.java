@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
+import org.pmiops.workbench.actionaudit.auditors.AdminAuditor;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapper;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper;
@@ -87,6 +88,7 @@ public class WorkspaceAdminServiceTest {
   })
   @MockBean({
     ActionAuditQueryService.class,
+    AdminAuditor.class,
     CloudStorageService.class,
     CohortDao.class,
     CohortReviewMapper.class,
