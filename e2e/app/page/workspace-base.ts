@@ -4,6 +4,9 @@ import {ElementType} from 'app/xpath-options';
 import {Page} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForAttributeEquality} from 'utils/waits-utils';
+import DataResourceCard from 'app/component/data-resource-card';
+import Modal from 'app/component/modal';
+import {EllipsisMenuAction, LinkText, ResourceCard} from 'app/text-labels';
 import AuthenticatedPage from './authenticated-page';
 
 export enum TabLabels {
@@ -94,5 +97,48 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
     return waitForAttributeEquality(this.page, {xpath: selector}, 'aria-selected', 'true');
   }
 
+  /**
+   * Delete Notebook, Concept Set, Dataset or Cohort thru Ellipsis menu located inside the data resource card.
+   * @param {string} resourceName
+   * @param {ResourceCard} resourceType
+   */
+  async deleteResource(resourceName: string, resourceType: ResourceCard): Promise<string[]> {
+    const resourceCard = new DataResourceCard(this.page);
+    const card = await resourceCard.findCard(resourceName, resourceType);
+    if (!card) {
+      throw new Error(`Failed to find ${resourceType} card "${resourceName}"`);
+    }
+
+    await card.clickEllipsisAction(EllipsisMenuAction.Delete, {waitForNav: false});
+
+    const modal = new Modal(this.page);
+    await modal.waitForLoad();
+    const modalTextContent = await modal.getTextContent();
+
+    let link;
+    switch (resourceType) {
+      case ResourceCard.Cohort:
+        link = LinkText.DeleteCohort;
+        break;
+      case ResourceCard.ConceptSet:
+        link = LinkText.DeleteConceptSet;
+        break;
+      case ResourceCard.Dataset:
+        link = LinkText.DeleteDataset;
+        break;
+      case ResourceCard.Notebook:
+        link = LinkText.DeleteNotebook;
+        break;
+      default:
+        throw new Error(`Case ${resourceType} handling is not defined.`);
+    }
+
+    await modal.clickButton(link, {waitForClose: true});
+    await waitWhileLoading(this.page);
+
+    console.log(`Deleted ${resourceType} card "${resourceName}"`);
+    await this.waitForLoad();
+    return modalTextContent;
+  }
 
 }

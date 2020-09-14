@@ -1,8 +1,8 @@
-import DataResourceCard, {CardType} from 'app/component/data-resource-card';
+import DataResourceCard from 'app/component/data-resource-card';
 import Modal from 'app/component/modal';
-import WorkspaceDataPage from 'app/page/workspace-data-page';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
-import {LinkText} from 'app/text-labels';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
+import {LinkText, ResourceCard} from 'app/text-labels';
 import {extractNamespace, makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn} from 'utils/test-utils';
 
@@ -66,7 +66,7 @@ describe('Workspace owner Jupyter notebook action tests', () => {
     await modal.clickButton(LinkText.StayHere, {waitForClose: true});
 
     // Delete notebook
-    const deleteModalTextContent = await analysisPage.deleteNotebook(copyFromNotebookName);
+    const deleteModalTextContent = await analysisPage.deleteResource(copyFromNotebookName, ResourceCard.Notebook);
     expect(deleteModalTextContent).toContain(`Are you sure you want to delete Notebook: ${copyFromNotebookName}?`);
 
     // Perform actions in copied notebook.
@@ -78,7 +78,7 @@ describe('Workspace owner Jupyter notebook action tests', () => {
     // Verify copy-to notebook exists in destination Workspace
     await dataPage.openAnalysisPage();
     const dataResourceCard = new DataResourceCard(page);
-    const notebookCard = await dataResourceCard.findCard(copiedNotebookName, CardType.Notebook);
+    const notebookCard = await dataResourceCard.findCard(copiedNotebookName, ResourceCard.Notebook);
     expect(notebookCard).toBeTruthy();
 
     // Open copied notebook and run code to verify billing project name.
@@ -94,7 +94,7 @@ describe('Workspace owner Jupyter notebook action tests', () => {
     // Exit notebook. Returns to the Workspace Analysis tab.
     await copyNotebookPage.goAnalysisPage();
     // Delete notebook
-    const modalTextContent = await analysisPage.deleteNotebook(copiedNotebookName);
+    const modalTextContent = await analysisPage.deleteResource(copiedNotebookName, ResourceCard.Notebook);
     expect(modalTextContent).toContain('This will permanently delete the Notebook.');
   })
 
