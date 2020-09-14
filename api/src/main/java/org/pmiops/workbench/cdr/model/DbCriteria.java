@@ -24,8 +24,8 @@ public class DbCriteria {
   private boolean group;
   private boolean selectable;
   private String count;
-  private String parentCount;
-  private String childCount;
+  private Long parentCount;
+  private Long childCount;
   private String conceptId;
   private String domainId;
   private boolean attribute;
@@ -129,31 +129,21 @@ public class DbCriteria {
   }
 
   @Column(name = "rollup_count")
-  public String getParentCount() {
-    return parentCount;
+  public Long getParentCount() {
+    return this.parentCount == null ? 0 : this.parentCount;
   }
 
-  public void setParentCount(String parentCount) {
+  public void setParentCount(Long parentCount) {
     this.parentCount = parentCount;
   }
 
-  @Transient
-  public Long getLongParentCount() {
-    return getLongValue(this.parentCount);
-  }
-
   @Column(name = "item_count")
-  public String getChildCount() {
-    return childCount;
+  public Long getChildCount() {
+    return this.childCount == null ? 0 : this.childCount;
   }
 
-  public void setChildCount(String childCount) {
+  public void setChildCount(Long childCount) {
     this.childCount = childCount;
-  }
-
-  @Transient
-  public Long getLongChildCount() {
-    return getLongValue(this.childCount);
   }
 
   @Column(name = "concept_id")
@@ -304,8 +294,8 @@ public class DbCriteria {
     private boolean group;
     private boolean selectable;
     private String count;
-    private String parentCount;
-    private String childCount;
+    private Long parentCount;
+    private Long childCount;
     private String conceptId;
     private String domainId;
     private boolean attribute;
@@ -363,12 +353,12 @@ public class DbCriteria {
       return this;
     }
 
-    public Builder addParentCount(String parentCount) {
+    public Builder addParentCount(Long parentCount) {
       this.parentCount = parentCount;
       return this;
     }
 
-    public Builder addChildCount(String childCount) {
+    public Builder addChildCount(Long childCount) {
       this.childCount = childCount;
       return this;
     }

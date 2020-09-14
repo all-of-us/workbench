@@ -21,8 +21,6 @@ public interface CohortBuilderMapper {
   AgeTypeCount dbModelToClient(DbAgeTypeCount source);
 
   @Mapping(target = "count", source = "longCount")
-  @Mapping(target = "parentCount", source = "longParentCount")
-  @Mapping(target = "childCount", source = "longChildCount")
   @Mapping(target = "conceptId", source = "longConceptId")
   @Mapping(target = "hasAttributes", source = "attribute")
   @Mapping(target = "hasAncestorData", source = "ancestorData")
