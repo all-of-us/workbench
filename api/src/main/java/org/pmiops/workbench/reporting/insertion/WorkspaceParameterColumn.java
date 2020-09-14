@@ -7,7 +7,7 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import java.util.function.Function;
 import org.pmiops.workbench.model.BqDtoWorkspace;
 
-public enum WorkspaceParameter implements QueryParameterColumn<BqDtoWorkspace> {
+public enum WorkspaceParameterColumn implements QueryParameterColumn<BqDtoWorkspace> {
   WORKSPACE_ID(
       "workspace_id",
       BqDtoWorkspace::getWorkspaceId,
@@ -24,7 +24,7 @@ public enum WorkspaceParameter implements QueryParameterColumn<BqDtoWorkspace> {
   private final Function<BqDtoWorkspace, Object> rowToInsertValueFunction;
   private final Function<BqDtoWorkspace, QueryParameterValue> parameterValueFunction;
 
-  WorkspaceParameter(
+  WorkspaceParameterColumn(
       String parameterName,
       Function<BqDtoWorkspace, Object> rowToInsertValueFunction,
       Function<BqDtoWorkspace, QueryParameterValue> parameterValueFunction) {

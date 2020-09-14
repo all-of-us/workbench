@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.pmiops.workbench.utils.Matchers;
 
@@ -83,6 +84,13 @@ public final class QueryParameterValues {
 
   public static String decorateParameterName(String parameterName) {
     return "@" + parameterName;
+  }
+
+  @Nullable
+  public static QueryParameterValue toTimestampQpv(@Nullable OffsetDateTime offsetDateTime) {
+    return Optional.ofNullable(offsetDateTime)
+        .map(t -> QueryParameterValue.timestamp(QPV_TIMESTAMP_FORMATTER.format(t)))
+        .orElse(null);
   }
 
   private static String getReplacementString(QueryParameterValue parameterValue) {

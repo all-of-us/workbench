@@ -4,9 +4,12 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -70,9 +73,11 @@ public interface DmlInsertJobBuilder<T> extends ColumnDrivenBuilder<T> {
 
   default Map<String, QueryParameterValue> toNamedParameterMap(T target, int rowIndex) {
     return Arrays.stream(getQueryParameterColumns())
-        .collect(
-            ImmutableMap.toImmutableMap(
-                e -> parameterName(rowIndex, e.getParameterName()),
-                e -> e.toParameterValue(target)));
+        .map(
+            e ->
+                new SimpleImmutableEntry<>(
+                    parameterName(rowIndex, e.getParameterName()), e.toParameterValue(target)))
+        .filter(e -> Objects.nonNull(e.getValue()))
+        .collect(ImmutableMap.toImmutableMap(Entry::getKey, Entry::getValue));
   }
 }

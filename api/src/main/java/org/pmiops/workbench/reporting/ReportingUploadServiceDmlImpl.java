@@ -19,8 +19,8 @@ import org.pmiops.workbench.model.BqDtoUser;
 import org.pmiops.workbench.model.BqDtoWorkspace;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.reporting.insertion.DmlInsertJobBuilder;
-import org.pmiops.workbench.reporting.insertion.UserParameter;
-import org.pmiops.workbench.reporting.insertion.WorkspaceParameter;
+import org.pmiops.workbench.reporting.insertion.UserParameterColumn;
+import org.pmiops.workbench.reporting.insertion.WorkspaceParameterColumn;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
@@ -33,9 +33,10 @@ public class ReportingUploadServiceDmlImpl implements ReportingUploadService {
   private final BigQueryService bigQueryService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
-  private static final DmlInsertJobBuilder<BqDtoUser> researcherJobBuilder = UserParameter::values;
+  private static final DmlInsertJobBuilder<BqDtoUser> researcherJobBuilder =
+      UserParameterColumn::values;
   private static final DmlInsertJobBuilder<BqDtoWorkspace> workspaceJobBuilder =
-      WorkspaceParameter::values;
+      WorkspaceParameterColumn::values;
 
   public ReportingUploadServiceDmlImpl(
       BigQueryService bigQueryService, Provider<WorkbenchConfig> workbenchConfigProvider) {

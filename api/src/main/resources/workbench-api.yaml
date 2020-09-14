@@ -8097,6 +8097,24 @@ definitions:
       username:
         description: ''
         type: string
+      city:
+        description: ''
+        type: string
+      country:
+        description: ''
+        type: string
+      state:
+        description: ''
+        type: string
+      streetAddress1:
+        description: ''
+        type: string
+      streetAddress2:
+        description: ''
+        type: string
+      zipCode:
+        description: ''
+        type: string
   BqDtoWorkspace:
     type: object
     properties:

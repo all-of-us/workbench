@@ -27,8 +27,6 @@ def to_output_path(dir_name, table_name, suffix)
   File.expand_path(File.join(dir_name, "#{table_name}.#{suffix}"))
 end
 
-dto_class_name = "BqDto#{to_camel_case(table_name, true)}"
-
 inputs = {
     :describe_csv => to_input_path(File.join(input_dir, 'mysql_describe_csv'), table_name,'csv'),
     :exclude_columns => to_input_path(File.join(input_dir, 'excluded_columns'), table_name,'txt')
@@ -42,6 +40,7 @@ outputs = {
     :unit_test_constants => to_output_path(File.join(output_dir, 'unit_test_constants'), table_name, 'java'),
     :unit_test_mocks => to_output_path(File.join(output_dir, 'unit_test_mocks'), table_name, 'java'),
     :dto_assertions => to_output_path(File.join(output_dir, 'dto_assertions'), table_name, 'java'),
+    :query_parameter_columns => to_output_path(File.join(output_dir, 'query_parameter_columns'), table_name, 'java')
 }
 
 MYSQL_TO_BIGQUERY_TYPE = {
@@ -92,12 +91,15 @@ columns = describe_rows.filter{ |row| include_field?(excluded_fields, row[0])} \
     col_name = row[0]
     big_query_type = to_bq_type(row[1])
     {:name => col_name, \
+    :lambda_var => table_name[0].downcase, \
     :mysql_type => row[1], \
     :big_query_type => big_query_type, \
     :java_type => BIGQUERY_TYPE_TO_JAVA[big_query_type], \
     :projection_name => "Prj#{to_camel_case(col_name, true)}", \
     :java_constant_name => "#{table_name.upcase}__#{col_name.upcase}", \
-    :prj_getter => "get#{to_camel_case(col_name, true)}()" }}
+    :prj_getter => "get#{to_camel_case(col_name, true)}", \
+    :dto_class_name => "BqDto#{to_camel_case(table_name, true)}"
+    }}
 
 big_query_schema = columns.map{ |col| { :name => col[:name], :type => col[:big_query_type]} }
 schema_json = JSON.pretty_generate(big_query_schema)
@@ -149,7 +151,8 @@ def to_swagger_property(column)
     .merge(BIGQUERY_TYPE_TO_SWAGGER[column[:big_query_type]])
 end
 
-swagger_object =  {  dto_class_name => {
+swagger_name = columns[0][:dto_class_name]
+swagger_object =  {  swagger_name => {
     'type'  =>  'object',
     'properties' => columns.to_h  { |field|
       [to_property_name(field[:name]), to_swagger_property(field)]
@@ -263,7 +266,7 @@ write_output(outputs[:unit_test_constants], constants, 'Unit Test Constants')
 
 mockName = "mock#{to_camel_case(table_name, true)}"
 mocks = columns.map { |col|
-  "doReturn(#{col[:java_constant_name]}).when(#{mockName}).#{col[:prj_getter]};"
+  "doReturn(#{col[:java_constant_name]}).when(#{mockName}).#{col[:prj_getter]}();"
 }
 
 lines = []
@@ -275,7 +278,7 @@ write_output(outputs[:unit_test_mocks], lines.join("\n"), 'Unit Test Mocks')
 
 ### Assertions
 dto_assertions = columns.map{ |col|
-  getter_call = "#{to_camel_case(table_name, false)}.#{col[:prj_getter]}"
+  getter_call = "#{to_camel_case(table_name, false)}.#{col[:prj_getter]}()"
   expected = col[:java_constant_name]
   if col[:java_type].eql?('Timestamp')
     "    assertTimeApprox(#{getter_call}, #{expected});"
@@ -286,3 +289,41 @@ dto_assertions = columns.map{ |col|
 }.join("\n")
 
 write_output(outputs[:dto_assertions], dto_assertions, 'Unit Test DTO Assertions')
+
+### Parameter Column Enum
+def object_value_function(col)
+  case col[:java_type]
+  when 'Timesttamp'
+    "#{col[:lambda_var]} -> ROW_TO_INSERT_TIMESTAMP_FORMATTER.format(#{col[:lambda_var]}.#{col[:prj_getter]}()"
+  else
+    "#{col[:dto_class_name]}::#{col[:prj_getter]}"
+  end
+end
+
+JAVA_TYPE_TO_QPV_FACTORY = {
+    'int' => 'QueryParameterValue.int64',
+    'long' => 'QueryParameterValue.int64',
+    'String' => 'QueryParameterValue.string',
+    'double' => 'QueryParameterValue.float64',
+    'boolean' => 'QueryParameterValue.bool',
+    'Timestamp' => 'toTimestampQpv'
+}
+
+def qpv_function(col)
+  case col[:java_type]
+  when 'Timestamp'
+    "#{col[:lambda_var]} -> #{JAVA_TYPE_TO_QPV_FACTORY[col[:java_type]]}(#{col[:lambda_var]}.#{col[:prj_getter]}())"
+  else
+    "#{col[:lambda_var]} -> #{JAVA_TYPE_TO_QPV_FACTORY[col[:java_type]]}(#{col[:lambda_var]}.#{col[:prj_getter]}())"
+  end
+end
+
+def query_parameter_column_entry(col)
+  "#{col[:name].upcase}(\"#{col[:name]}\", #{object_value_function(col)}, #{qpv_function(col)})"
+end
+
+qpc_enum = columns.map do |col|
+  query_parameter_column_entry(col)
+end.join(",\n")
+
+write_output(outputs[:query_parameter_columns], qpc_enum, "QueryParameterValue Enum Entries")
