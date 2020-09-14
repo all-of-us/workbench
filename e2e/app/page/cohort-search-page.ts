@@ -108,7 +108,10 @@ export default class CohortSearchPage extends AuthenticatedPage {
     const link = await this.waitForPhysicalMeasurementCriteriaLink(criteriaName);
     await link.click();
 
-    const helpSidebar = await new HelpSidebar(this.page);
+    // Delay to make sure correct sidebar content is showing
+    await this.page.waitFor(1000);
+
+    const helpSidebar = new HelpSidebar(this.page);
     const participantResult = await helpSidebar.getPhysicalMeasurementParticipantResult(filterSign, filterValue);
     console.debug(`Physical Measurements ${criteriaName}: ${filterSign} ${filterValue}  => number of participants: ${participantResult}`);
 
@@ -129,7 +132,7 @@ export default class CohortSearchPage extends AuthenticatedPage {
     await finishAndReviewButton.click();
 
     // Click Save Criteria button in sidebar
-    const helpSidebar = await new HelpSidebar(this.page);
+    const helpSidebar = new HelpSidebar(this.page);
     await helpSidebar.clickSaveCriteriaButton();
   }
 

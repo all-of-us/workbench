@@ -7,8 +7,8 @@ import {FilterSign} from 'app/page/cohort-search-page';
 import {LinkText} from 'app/text-labels';
 import {buildXPath} from 'app/xpath-builders';
 import {ElementType} from 'app/xpath-options';
+import {waitWhileLoading} from 'utils/test-utils';
 import {waitForNumericalString} from 'utils/waits-utils';
-import {waitWhileLoading} from '../../utils/test-utils';
 
 const defaultXpath = '//*[@id="help-sidebar"]';
 enum SectionSelectors {
@@ -46,7 +46,7 @@ export default class HelpSidebar extends Container {
     // Look for X (remove) icon for indication that add succeeded.
     await this.page.waitForXPath(removeSelectedCriteriaIconSelector,{visible: true});
 
-    // dialog close after click FINISH button.
+    // Sidebar close after click Save Criteria button.
     await this.clickSaveCriteriaButton();
 
     return participantResult;
