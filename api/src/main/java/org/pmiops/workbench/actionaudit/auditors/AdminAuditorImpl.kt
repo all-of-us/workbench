@@ -28,10 +28,10 @@ constructor(
         val actionId = actionIdProvider.get()
 
         val props = mapOf(
-            "Workspace Namespace" to workspaceNamespace,
-            "Workspace Name" to workspaceName,
-            "Notebook Name" to notebookFilename,
-            "Access Reason" to accessReason.reason
+            "workspace_namespace" to workspaceNamespace,
+            "workspace_name" to workspaceName,
+            "notebook_name" to notebookFilename,
+            "access_reason" to accessReason.reason
         )
 
         val events = props.map {
