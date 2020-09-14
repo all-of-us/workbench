@@ -34,7 +34,7 @@ public class CommonMappers {
     return null;
   }
 
-  public OffsetDateTime offsetDateTime(Timestamp timestamp) {
+  public static OffsetDateTime offsetDateTime(Timestamp timestamp) {
     return Optional.ofNullable(timestamp)
         .map(Timestamp::toInstant)
         .map(instant -> OffsetDateTime.ofInstant(instant, ZoneOffset.UTC))

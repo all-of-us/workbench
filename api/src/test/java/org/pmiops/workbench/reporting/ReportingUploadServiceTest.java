@@ -10,6 +10,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.timestampQpvToOffsetDateTime;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.timestampStringToInstant;
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDtoUser;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 
 import com.google.cloud.bigquery.InsertAllRequest;
@@ -58,8 +59,6 @@ import org.springframework.test.context.junit4.SpringRunner;
  * code and have separate tests.
  */
 @RunWith(SpringRunner.class)
-// @DataJpaTest
-// @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ReportingUploadServiceTest {
   private static final Instant NOW = Instant.parse("2000-01-01T00:00:00.00Z");
   private static final Instant THEN_INSTANT = Instant.parse("1989-02-17T00:00:00.00Z");
@@ -111,11 +110,7 @@ public class ReportingUploadServiceTest {
             .captureTimestamp(NOW.toEpochMilli())
             .users(
                 ImmutableList.of(
-                    new BqDtoUser()
-                        .username("bill@aou.biz")
-                        .givenName("Bill")
-                        .disabled(false)
-                        .userId(101L),
+                    createDtoUser(),
                     new BqDtoUser()
                         .username("ted@aou.biz")
                         .givenName("Ted")

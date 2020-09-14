@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
+import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTime;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -12,7 +13,7 @@ import org.pmiops.workbench.db.dao.projection.PrjWorkspace;
 import org.pmiops.workbench.model.BqDtoUser;
 import org.pmiops.workbench.model.BqDtoWorkspace;
 
-public class ReportingTestConfig {
+public class ReportingTestUtils {
   public static final String USER__ABOUT_YOU = "foo_0";
   public static final String USER__AREA_OF_RESEARCH = "foo_1";
   public static final Timestamp USER__BETA_ACCESS_BYPASS_TIME =
@@ -174,6 +175,12 @@ public class ReportingTestConfig {
     assertTimeApprox(user.getTwoFactorAuthCompletionTime(), USER__TWO_FACTOR_AUTH_COMPLETION_TIME);
     assertThat(user.getUserId()).isEqualTo(USER__USER_ID);
     assertThat(user.getUsername()).isEqualTo(USER__USERNAME);
+    assertThat(user.getCity()).isEqualTo(USER__CITY);
+    assertThat(user.getCountry()).isEqualTo(USER__COUNTRY);
+    assertThat(user.getState()).isEqualTo(USER__STATE);
+    assertThat(user.getStreetAddress1()).isEqualTo(USER__STREET_ADDRESS_1);
+    assertThat(user.getStreetAddress2()).isEqualTo(USER__STREET_ADDRESS_2);
+    assertThat(user.getZipCode()).isEqualTo(USER__ZIP_CODE);
   }
 
   public static void assertWorkspaceFields(BqDtoWorkspace workspace) {
@@ -348,5 +355,47 @@ public class ReportingTestConfig {
     doReturn(WORKSPACE__WORKSPACE_NAMESPACE).when(mockWorkspace).getWorkspaceNamespace();
 
     return mockWorkspace;
+  }
+
+  public static BqDtoUser createDtoUser() {
+    return new BqDtoUser()
+        .aboutYou(USER__ABOUT_YOU)
+        .areaOfResearch(USER__AREA_OF_RESEARCH)
+        .betaAccessBypassTime(offsetDateTime(USER__BETA_ACCESS_BYPASS_TIME))
+        .betaAccessRequestTime(offsetDateTime(USER__BETA_ACCESS_REQUEST_TIME))
+        .complianceTrainingBypassTime(offsetDateTime(USER__COMPLIANCE_TRAINING_BYPASS_TIME))
+        .complianceTrainingCompletionTime(offsetDateTime(USER__COMPLIANCE_TRAINING_COMPLETION_TIME))
+        .complianceTrainingExpirationTime(offsetDateTime(USER__COMPLIANCE_TRAINING_EXPIRATION_TIME))
+        .contactEmail(USER__CONTACT_EMAIL)
+        .creationTime(offsetDateTime(USER__CREATION_TIME))
+        .currentPosition(USER__CURRENT_POSITION)
+        .dataAccessLevel(USER__DATA_ACCESS_LEVEL)
+        .dataUseAgreementBypassTime(offsetDateTime(USER__DATA_USE_AGREEMENT_BYPASS_TIME))
+        .dataUseAgreementCompletionTime(offsetDateTime(USER__DATA_USE_AGREEMENT_COMPLETION_TIME))
+        .dataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION)
+        .demographicSurveyCompletionTime(offsetDateTime(USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME))
+        .disabled(USER__DISABLED)
+        .emailVerificationBypassTime(offsetDateTime(USER__EMAIL_VERIFICATION_BYPASS_TIME))
+        .emailVerificationCompletionTime(offsetDateTime(USER__EMAIL_VERIFICATION_COMPLETION_TIME))
+        .emailVerificationStatus(USER__EMAIL_VERIFICATION_STATUS)
+        .eraCommonsBypassTime(offsetDateTime(USER__ERA_COMMONS_BYPASS_TIME))
+        .eraCommonsCompletionTime(offsetDateTime(USER__ERA_COMMONS_COMPLETION_TIME))
+        .eraCommonsLinkExpireTime(offsetDateTime(USER__ERA_COMMONS_LINK_EXPIRE_TIME))
+        .familyName(USER__FAMILY_NAME)
+        .firstRegistrationCompletionTime(offsetDateTime(USER__FIRST_REGISTRATION_COMPLETION_TIME))
+        .firstSignInTime(offsetDateTime(USER__FIRST_SIGN_IN_TIME))
+        .freeTierCreditsLimitDaysOverride(USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE)
+        .freeTierCreditsLimitDollarsOverride(USER__FREE_TIER_CREDITS_LIMIT_DOLLARS_OVERRIDE)
+        .givenName(USER__GIVEN_NAME)
+        .idVerificationBypassTime(offsetDateTime(USER__ID_VERIFICATION_BYPASS_TIME))
+        .idVerificationCompletionTime(offsetDateTime(USER__ID_VERIFICATION_COMPLETION_TIME))
+        .lastModifiedTime(offsetDateTime(USER__LAST_MODIFIED_TIME))
+        .organization(USER__ORGANIZATION)
+        .phoneNumber(USER__PHONE_NUMBER)
+        .professionalUrl(USER__PROFESSIONAL_URL)
+        .twoFactorAuthBypassTime(offsetDateTime(USER__TWO_FACTOR_AUTH_BYPASS_TIME))
+        .twoFactorAuthCompletionTime(offsetDateTime(USER__TWO_FACTOR_AUTH_COMPLETION_TIME))
+        .userId(USER__USER_ID)
+        .username(USER__USERNAME);
   }
 }

@@ -3,7 +3,6 @@ package org.pmiops.workbench.reporting;
 import com.google.common.base.Stopwatch;
 import java.time.Clock;
 import java.util.List;
-import java.util.Random;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.db.dao.UserService;
@@ -21,7 +20,6 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
 
   private final Clock clock;
   private final ReportingMapper reportingMapper;
-  private final Random random;
   private final Provider<Stopwatch> stopwatchProvider;
   private final UserService userService;
   private final WorkspaceService workspaceService;
@@ -49,13 +47,11 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
   public ReportingSnapshotServiceImpl(
       Clock clock,
       ReportingMapper reportingMapper,
-      Random random,
       Provider<Stopwatch> stopwatchProvider,
       UserService userService,
       WorkspaceService workspaceService) {
     this.clock = clock;
     this.reportingMapper = reportingMapper;
-    this.random = random;
     this.stopwatchProvider = stopwatchProvider;
     this.userService = userService;
     this.workspaceService = workspaceService;

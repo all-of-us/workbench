@@ -333,7 +333,13 @@ write_output(outputs[:query_parameter_columns], qpc_enum, "QueryParameterValue E
 ### DTO Fluent Setters
 #
 dto_setters = columns.map do |col|
-  "    .#{col[:java_field_name]}(#{col[:java_constant_name]})"
+  value = case col[:java_type]
+      when 'Timestamp'
+            "offsetDateTime(#{col[:java_constant_name]})"
+          else
+            "#{col[:java_constant_name]}"
+          end
+  "    .#{col[:java_field_name]}(#{value})"
 end
 
 dto_decl = ["new #{dto_name}()"]

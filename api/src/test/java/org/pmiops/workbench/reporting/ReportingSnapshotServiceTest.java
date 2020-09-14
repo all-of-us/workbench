@@ -1,9 +1,8 @@
 package org.pmiops.workbench.reporting;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
-import static org.pmiops.workbench.testconfig.ReportingTestConfig.*;
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.*;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 
 import com.google.common.base.Stopwatch;
@@ -12,12 +11,9 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
-import java.util.Random;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.projection.PrjUser;
@@ -25,7 +21,6 @@ import org.pmiops.workbench.model.BqDtoUser;
 import org.pmiops.workbench.model.BqDtoWorkspace;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.test.FakeClock;
-import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -41,19 +36,13 @@ public class ReportingSnapshotServiceTest {
   private static final long NOW_EPOCH_MILLI = 1594404482000L;
   private static final Instant NOW_INSTANT = Instant.ofEpochMilli(NOW_EPOCH_MILLI);
 
-  @MockBean private Random mockRandom;
   @MockBean private UserService mockUserService;
   @MockBean private Stopwatch mockStopwatch;
   @MockBean private WorkspaceService mockWorkspaceService;
   @Autowired private ReportingSnapshotService reportingSnapshotService;
 
   @TestConfiguration
-  @Import({
-    CommonMappers.class,
-    ReportingMapperImpl.class,
-    ReportingSnapshotServiceImpl.class,
-    ReportingTestConfig.class
-  })
+  @Import({CommonMappers.class, ReportingMapperImpl.class, ReportingSnapshotServiceImpl.class})
   @MockBean({BigQueryService.class})
   public static class config {
     @Bean
@@ -64,17 +53,6 @@ public class ReportingSnapshotServiceTest {
 
   @Before
   public void setup() {
-    // Return "random" numbers 100, 101, 102...
-    doAnswer(
-            new Answer<Long>() {
-              private long lastValue = 100;
-
-              public Long answer(InvocationOnMock invocation) {
-                return lastValue++;
-              }
-            })
-        .when(mockRandom)
-        .nextLong();
     TestMockFactory.stubStopwatch(mockStopwatch, Duration.ofMillis(100));
   }
 
