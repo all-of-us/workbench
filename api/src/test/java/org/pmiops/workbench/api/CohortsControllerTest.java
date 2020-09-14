@@ -22,6 +22,7 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
@@ -200,8 +201,8 @@ public class CohortsControllerTest {
     CommonMappers.class,
     ConceptService.class,
     ConceptSetMapperImpl.class,
-    ConceptSetsController.class,
     ConceptSetService.class,
+    ConceptSetsController.class,
     DataSetMapperImpl.class,
     FirecloudMapperImpl.class,
     LogsBasedMetricServiceFakeImpl.class,
@@ -210,16 +211,17 @@ public class CohortsControllerTest {
     UserServiceTestConfiguration.class,
     WorkspaceMapperImpl.class,
     WorkspaceResourcesServiceImpl.class,
-    WorkspacesController.class,
     WorkspaceServiceImpl.class,
+    WorkspacesController.class,
   })
   @MockBean({
+    BillingProjectAuditor.class,
     BillingProjectBufferService.class,
     CdrVersionService.class,
     CloudStorageService.class,
+    CohortBuilderService.class,
     CohortMaterializationService.class,
     CohortService.class,
-    CohortBuilderService.class,
     ComplianceService.class,
     ConceptBigQueryService.class,
     DataSetService.class,
@@ -228,11 +230,11 @@ public class CohortsControllerTest {
     FreeTierBillingService.class,
     LeonardoNotebooksClient.class,
     MonitoringService.class,
+    ParticipantCohortAnnotationMapper.class,
+    ParticipantCohortStatusMapper.class,
     UserRecentResourceService.class,
     UserServiceAuditor.class,
     WorkspaceAuditor.class,
-    ParticipantCohortAnnotationMapper.class,
-    ParticipantCohortStatusMapper.class
   })
   static class Configuration {
 
