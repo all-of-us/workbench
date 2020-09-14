@@ -40,7 +40,8 @@ outputs = {
     :unit_test_constants => to_output_path(File.join(output_dir, 'unit_test_constants'), table_name, 'java'),
     :unit_test_mocks => to_output_path(File.join(output_dir, 'unit_test_mocks'), table_name, 'java'),
     :dto_assertions => to_output_path(File.join(output_dir, 'dto_assertions'), table_name, 'java'),
-    :query_parameter_columns => to_output_path(File.join(output_dir, 'query_parameter_columns'), table_name, 'java')
+    :query_parameter_columns => to_output_path(File.join(output_dir, 'query_parameter_columns'), table_name, 'java'),
+    :dto_decl => to_output_path(File.join(output_dir, 'dto_decl'), table_name, 'java')
 }
 
 MYSQL_TO_BIGQUERY_TYPE = {
@@ -86,19 +87,21 @@ end
 ## BigQuery schema
 describe_rows = CSV.new(File.read(inputs[:describe_csv])).sort_by { |row| row[0]  }
 
+dto_name = "BqDto#{to_camel_case(table_name, true)}"
+
 columns = describe_rows.filter{ |row| include_field?(excluded_fields, row[0])} \
   .map{ |row| \
     col_name = row[0]
     big_query_type = to_bq_type(row[1])
-    {:name => col_name, \
-    :lambda_var => table_name[0].downcase, \
-    :mysql_type => row[1], \
-    :big_query_type => big_query_type, \
-    :java_type => BIGQUERY_TYPE_TO_JAVA[big_query_type], \
-    :projection_name => "Prj#{to_camel_case(col_name, true)}", \
-    :java_constant_name => "#{table_name.upcase}__#{col_name.upcase}", \
-    :prj_getter => "get#{to_camel_case(col_name, true)}", \
-    :dto_class_name => "BqDto#{to_camel_case(table_name, true)}"
+    {
+        :name => col_name, \
+        :lambda_var => table_name[0].downcase, \
+        :mysql_type => row[1], \
+        :big_query_type => big_query_type, \
+        :java_type => BIGQUERY_TYPE_TO_JAVA[big_query_type], \
+        :java_field_name => "#{to_camel_case(col_name, false)}", \
+        :java_constant_name => "#{table_name.upcase}__#{col_name.upcase}", \
+        :getter => "get#{to_camel_case(col_name, true)}"
     }}
 
 big_query_schema = columns.map{ |col| { :name => col[:name], :type => col[:big_query_type]} }
@@ -151,8 +154,7 @@ def to_swagger_property(column)
     .merge(BIGQUERY_TYPE_TO_SWAGGER[column[:big_query_type]])
 end
 
-swagger_name = columns[0][:dto_class_name]
-swagger_object =  {  swagger_name => {
+swagger_object =  {  dto_name => {
     'type'  =>  'object',
     'properties' => columns.to_h  { |field|
       [to_property_name(field[:name]), to_swagger_property(field)]
@@ -263,10 +265,10 @@ constants = columns.enum_for(:each_with_index) \
 write_output(outputs[:unit_test_constants], constants, 'Unit Test Constants')
 
 ### Mock Instantiation
-
+# Mock the projection interface for testing with mock services exposing them
 mockName = "mock#{to_camel_case(table_name, true)}"
 mocks = columns.map { |col|
-  "doReturn(#{col[:java_constant_name]}).when(#{mockName}).#{col[:prj_getter]}();"
+  "doReturn(#{col[:java_constant_name]}).when(#{mockName}).#{col[:getter]}();"
 }
 
 lines = []
@@ -278,7 +280,7 @@ write_output(outputs[:unit_test_mocks], lines.join("\n"), 'Unit Test Mocks')
 
 ### Assertions
 dto_assertions = columns.map{ |col|
-  getter_call = "#{to_camel_case(table_name, false)}.#{col[:prj_getter]}()"
+  getter_call = "#{to_camel_case(table_name, false)}.#{col[:getter]}()"
   expected = col[:java_constant_name]
   if col[:java_type].eql?('Timestamp')
     "    assertTimeApprox(#{getter_call}, #{expected});"
@@ -294,9 +296,9 @@ write_output(outputs[:dto_assertions], dto_assertions, 'Unit Test DTO Assertions
 def object_value_function(col)
   case col[:java_type]
   when 'Timesttamp'
-    "#{col[:lambda_var]} -> ROW_TO_INSERT_TIMESTAMP_FORMATTER.format(#{col[:lambda_var]}.#{col[:prj_getter]}()"
+    "#{col[:lambda_var]} -> ROW_TO_INSERT_TIMESTAMP_FORMATTER.format(#{col[:lambda_var]}.#{col[:getter]}()"
   else
-    "#{col[:dto_class_name]}::#{col[:prj_getter]}"
+    "#{col[:dto_class_name]}::#{col[:getter]}"
   end
 end
 
@@ -312,9 +314,9 @@ JAVA_TYPE_TO_QPV_FACTORY = {
 def qpv_function(col)
   case col[:java_type]
   when 'Timestamp'
-    "#{col[:lambda_var]} -> #{JAVA_TYPE_TO_QPV_FACTORY[col[:java_type]]}(#{col[:lambda_var]}.#{col[:prj_getter]}())"
+    "#{col[:lambda_var]} -> #{JAVA_TYPE_TO_QPV_FACTORY[col[:java_type]]}(#{col[:lambda_var]}.#{col[:getter]}())"
   else
-    "#{col[:lambda_var]} -> #{JAVA_TYPE_TO_QPV_FACTORY[col[:java_type]]}(#{col[:lambda_var]}.#{col[:prj_getter]}())"
+    "#{col[:lambda_var]} -> #{JAVA_TYPE_TO_QPV_FACTORY[col[:java_type]]}(#{col[:lambda_var]}.#{col[:getter]}())"
   end
 end
 
@@ -327,3 +329,15 @@ qpc_enum = columns.map do |col|
 end.join(",\n")
 
 write_output(outputs[:query_parameter_columns], qpc_enum, "QueryParameterValue Enum Entries")
+
+### DTO Fluent Setters
+#
+dto_setters = columns.map do |col|
+  "    .#{col[:java_field_name]}(#{col[:java_constant_name]})"
+end
+
+dto_decl = ["new #{dto_name}()"]
+dto_decl << dto_setters
+
+dto_decl_str = dto_decl.join("\n") + ';'
+write_output(outputs[:dto_decl], dto_decl_str, "DTO Object Construction")
