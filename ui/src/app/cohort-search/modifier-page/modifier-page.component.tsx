@@ -11,6 +11,7 @@ import {FlexRowWrap} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {DatePicker, NumberInput} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
+import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, withCurrentCohortSearchContext, withCurrentWorkspace} from 'app/utils';
@@ -18,7 +19,6 @@ import {triggerEvent} from 'app/utils/analytics';
 import {currentCohortSearchContextStore, serverConfigStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Criteria, CriteriaType, DomainType, ModifierType, Operator} from 'generated/fetch';
-import {Spinner} from '../../components/spinners';
 
 
 const styles = reactStyles({
