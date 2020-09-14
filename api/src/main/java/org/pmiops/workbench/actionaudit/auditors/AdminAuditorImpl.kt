@@ -26,6 +26,7 @@ constructor(
     override fun fireViewNotebookAction(workspaceNamespace: String, workspaceName: String, accessReason: AccessReason, notebookFilename: String) {
         val dbUser = userProvider.get()
         val actionId = actionIdProvider.get()
+        val timestamp = clock.millis();
 
         val props = mapOf(
             "workspace_namespace" to workspaceNamespace,
@@ -44,7 +45,7 @@ constructor(
                     targetType = TargetType.NOTEBOOK,
                     targetPropertyMaybe = it.key,
                     newValueMaybe = it.value,
-                    timestamp = clock.millis()) }
+                    timestamp = timestamp) }
 
         actionAuditService.send(events)
     }
