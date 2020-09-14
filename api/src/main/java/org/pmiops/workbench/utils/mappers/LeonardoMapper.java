@@ -44,6 +44,11 @@ public interface LeonardoMapper {
   @AfterMapping
   default void mapRuntimeConfig(
       @MappingTarget Runtime runtime, LeonardoGetRuntimeResponse leonardoGetRuntimeResponse) {
+    // There's a lot of unchecked casting happening here but I couldn't find a way around it
+    // This is primarily due to the fact that Swagger generates the `runtimeConfig` object as a
+    // generic Java object.
+    // From manual testing, it seems like it is generated as a LinkedTreeMap.
+
     Map<String, Object> runtimeConfig =
         (Map<String, Object>) leonardoGetRuntimeResponse.getRuntimeConfig();
 
