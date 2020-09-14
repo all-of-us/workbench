@@ -86,8 +86,7 @@ describe('Create Dataset', () => {
    * - Create dataset.
    * - Export dataset to notebook thru the ellipsis menu.
    */
-  // TODO Eanble test after ticket fix. See https://precisionmedicineinitiative.atlassian.net/browse/RW-5388
-  test.skip('Export dataset to notebook thru ellipsis menu', async () => {
+  test('Export dataset to notebook thru ellipsis menu', async () => {
     await findWorkspace(page).then(card => card.clickWorkspaceName());
 
     // Click Add Datasets button.
