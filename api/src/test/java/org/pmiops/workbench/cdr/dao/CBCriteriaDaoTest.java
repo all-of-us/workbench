@@ -365,4 +365,20 @@ public class CBCriteriaDaoTest {
     assertThat(option9.getType()).isEqualTo("PPI");
     assertThat(option9.getStandard()).isFalse();
   }
+
+  @Test
+  public void findSurveyVersionByQuestionConceptId() {
+    jdbcTemplate.execute(
+        "create table cb_survey_version(survey_id integer, concept_id integer, version varchar(50), display_order integer)");
+    jdbcTemplate.execute(
+        "create table cb_survey_attribute(id integer, question_concept_id integer, answer_concept_id integer, survey_id integer, item_count integer)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_version(survey_id, concept_id, version, display_order) values (100, 1333342, 'May 2020', 1)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_version(survey_id, concept_id, version, display_order) values (101, 1333342, 'June 2020', 2)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_version(survey_id, concept_id, version, display_order) values (102, 1333342, 'July 2020', 3)");
+    assertThat(cbCriteriaDao.findConceptId2ByConceptId1(12345L)).containsExactly(1);
+    jdbcTemplate.execute("drop table cb_criteria_relationship");
+  }
 }

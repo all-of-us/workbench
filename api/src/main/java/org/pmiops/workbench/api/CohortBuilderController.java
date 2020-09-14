@@ -34,7 +34,9 @@ import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.model.SurveyVersionListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -45,10 +47,10 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   private static final String BAD_REQUEST_MESSAGE =
       "Bad Request: Please provide a valid %s. %s is not valid.";
 
-  private CdrVersionService cdrVersionService;
-  private ElasticSearchService elasticSearchService;
-  private Provider<WorkbenchConfig> configProvider;
-  private CohortBuilderService cohortBuilderService;
+  private final CdrVersionService cdrVersionService;
+  private final ElasticSearchService elasticSearchService;
+  private final Provider<WorkbenchConfig> configProvider;
+  private final CohortBuilderService cohortBuilderService;
 
   @Autowired
   CohortBuilderController(
@@ -209,6 +211,19 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     return ResponseEntity.ok(cohortBuilderService.findParticipantDemographics());
   }
 
+  @Override
+  public ResponseEntity<SurveyVersionListResponse> findSurveyVersionByQuestionConceptId(
+      Long cdrVersionId, Long surveyConceptId, Long questionConceptId) {
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<SurveyVersionListResponse>
+      findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
+          Long cdrVersionId, Long surveyConceptId, Long questionConceptId, Long answerConceptId) {
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
   /**
    * This method helps determine what request can only be approximated by elasticsearch and must
    * fallback to the BQ implementation.
@@ -221,7 +236,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
             .flatMap(sg -> sg.getItems().stream())
             .flatMap(sgi -> sgi.getSearchParameters().stream())
             .collect(Collectors.toList());
-    return allGroups.stream().anyMatch(sg -> sg.getTemporal())
+    return allGroups.stream().anyMatch(SearchGroup::getTemporal)
         || allParams.stream().anyMatch(sp -> CriteriaSubType.BP.toString().equals(sp.getSubtype()));
   }
 
