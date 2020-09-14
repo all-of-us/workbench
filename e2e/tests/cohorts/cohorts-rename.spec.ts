@@ -3,10 +3,10 @@ import Link from 'app/element/link';
 import CohortActionsPage from 'app/page/cohort-actions-page';
 import CohortBuildPage, {FieldSelector} from 'app/page/cohort-build-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
+import {ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn} from 'utils/test-utils';
 import {waitForNumericalString, waitForText} from 'utils/waits-utils';
-import {ResourceCard} from 'app/text-labels';
 
 
 describe('User can create, modify, rename and delete Cohort', () => {
@@ -94,7 +94,7 @@ describe('User can create, modify, rename and delete Cohort', () => {
 
     // Rename cohort.
     const newCohortName = makeRandomName();
-    await dataPage.renameCohort(cohortName, newCohortName);
+    await dataPage.renameResource(cohortName, newCohortName, ResourceCard.Cohort);
 
     // Verify rename successful.
     expect(await DataResourceCard.findCard(page, newCohortName)).toBeTruthy();

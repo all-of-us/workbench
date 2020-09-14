@@ -72,7 +72,7 @@ describe('Workspace owner Jupyter notebook action tests', () => {
     const workspaceAnalysisPage = await workspacesPage.createNotebook({workspaceName, notebookName});
 
     const newName = makeRandomName('test-notebook');
-    const modalTextContents = await workspaceAnalysisPage.renameNotebook(notebookName, newName);
+    const modalTextContents = await workspaceAnalysisPage.renameResource(notebookName, newName, ResourceCard.Notebook);
     expect(modalTextContents).toContain(`Enter new name for ${notebookName}.ipynb`);
 
     const newNotebookCard = new DataResourceCard(page);

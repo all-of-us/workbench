@@ -82,24 +82,6 @@ export default class WorkspaceDataPage extends WorkspaceBase {
     console.log(`Exported Dataset "${datasetName}" to notebook "${notebookName}"`);
   }
 
-  /**
-   * Rename Dataset thru the Ellipsis menu located inside the Dataset Resource card.
-   * @param {string} datasetName
-   * @param {string} newDatasetName
-   */
-  async renameDataset(datasetName: string, newDatasetName: string): Promise<string[]> {
-    return this.renameResource(datasetName, newDatasetName, ResourceCard.Dataset);
-  }
-
-  /**
-   * Rename Cohort thru Ellipsis menu located inside the Cohort Resource card.
-   * @param cohortName
-   * @param newCohortName
-   */
-  async renameCohort(cohortName: string, newCohortName: string): Promise<string[]> {
-    return this.renameResource(cohortName, newCohortName, ResourceCard.Cohort);
-  }
-
   async findCohortCard(cohortName?: string): Promise<DataResourceCard> {
     await this.openDataPage();
     await this.openCohortsSubtab({waitPageChange: false});

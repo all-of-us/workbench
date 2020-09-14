@@ -89,10 +89,6 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
     return Link.findByName(this.page, {normalizeSpace: LinkText.CreateNewNotebook});
   }
 
-  async renameNotebook(notebookName: string, newNotebookName: string): Promise<string[]> {
-    return this.renameResource(notebookName, newNotebookName, ResourceCard.Notebook);
-  }
-
   /**
    * Duplicate notebook using Ellipsis menu in Workspace Analysis page.
    * @param {string} notebookName The notebook name to clone from.
