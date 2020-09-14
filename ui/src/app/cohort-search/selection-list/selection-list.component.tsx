@@ -422,7 +422,7 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
     render() {
       const {back, cohortContext, criteria} = this.props;
       const {attributesSelection, disableSave, showModifiersSlide} = this.state;
-      return <div>
+      return <div id='selection-list'>
         <FlexRow style={styles.navIcons}>
           {this.showAttributesOrModifiers &&
             <Clickable style={{marginRight: '1rem'}}
