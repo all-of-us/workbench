@@ -117,20 +117,20 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
 
     let link;
     switch (resourceType) {
-    case ResourceCard.Cohort:
-      link = LinkText.DeleteCohort;
-      break;
-    case ResourceCard.ConceptSet:
-      link = LinkText.DeleteConceptSet;
-      break;
-    case ResourceCard.Dataset:
-      link = LinkText.DeleteDataset;
-      break;
-    case ResourceCard.Notebook:
-      link = LinkText.DeleteNotebook;
-      break;
-    default:
-      throw new Error(`Case ${resourceType} handling is not defined.`);
+      case ResourceCard.Cohort:
+        link = LinkText.DeleteCohort;
+        break;
+      case ResourceCard.ConceptSet:
+        link = LinkText.DeleteConceptSet;
+        break;
+      case ResourceCard.Dataset:
+        link = LinkText.DeleteDataset;
+        break;
+      case ResourceCard.Notebook:
+        link = LinkText.DeleteNotebook;
+        break;
+      default:
+        throw new Error(`Case ${resourceType} handling is not defined.`);
     }
 
     await modal.clickButton(link, {waitForClose: true});
