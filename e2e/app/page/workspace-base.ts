@@ -1,14 +1,14 @@
+import DataResourceCard from 'app/component/data-resource-card';
+import Modal from 'app/component/modal';
 import Link from 'app/element/link';
+import Textarea from 'app/element/textarea';
+import Textbox from 'app/element/textbox';
+import {EllipsisMenuAction, LinkText, ResourceCard} from 'app/text-labels';
 import {buildXPath} from 'app/xpath-builders';
 import {ElementType} from 'app/xpath-options';
 import {Page} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForAttributeEquality} from 'utils/waits-utils';
-import DataResourceCard from 'app/component/data-resource-card';
-import Modal from 'app/component/modal';
-import {EllipsisMenuAction, LinkText, ResourceCard} from 'app/text-labels';
-import Textarea from 'app/element/textarea';
-import Textbox from 'app/element/textbox';
 import AuthenticatedPage from './authenticated-page';
 
 export enum TabLabels {
@@ -179,9 +179,11 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
     const newNameTextbox = new Textbox(this.page, `${modal.getXpath()}//*[@id="new-name"]`);
     await newNameTextbox.type(newResourceName);
 
-    // Type description.
-    const descriptionTextarea = await Textarea.findByName(this.page, {containsText: 'Description:'}, modal);
-    await descriptionTextarea.type(`Puppeteer automation test. Rename ${resourceName}.`);
+    // Type description. Notebook rename modal does not have Description textarea.
+    if (resourceType !== ResourceCard.Notebook) {
+      const descriptionTextarea = await Textarea.findByName(this.page, {containsText: 'Description:'}, modal);
+      await descriptionTextarea.type(`Puppeteer automation test. Rename ${resourceName}.`);
+    }
 
     let buttonLink;
     switch (resourceType) {
