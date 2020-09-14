@@ -44,26 +44,30 @@ public interface LeonardoMapper {
   @AfterMapping
   default void mapRuntimeConfig(
       @MappingTarget Runtime runtime, LeonardoGetRuntimeResponse leonardoGetRuntimeResponse) {
-    Map<String, Object> runtimeConfig = (Map<String, Object>) leonardoGetRuntimeResponse.getRuntimeConfig();
+    Map<String, Object> runtimeConfig =
+        (Map<String, Object>) leonardoGetRuntimeResponse.getRuntimeConfig();
 
     if (runtimeConfig.get("cloudService").equals("DATAPROC")) {
-      runtime.dataprocConfig(new DataprocConfig()
-          .numberOfWorkers(extractIntField(runtimeConfig, "numberOfWorkers"))
-          .masterMachineType((String) runtimeConfig.get("masterMachineType"))
-          .masterDiskSize(extractIntField(runtimeConfig, "masterDiskSize"))
-          .workerMachineType((String) runtimeConfig.get("workerMachineType"))
-          .workerDiskSize(extractIntField(runtimeConfig, "workerDiskSize"))
-          .numberOfWorkerLocalSSDs(extractIntField(runtimeConfig, "numberOfWorkerLocalSSDs"))
-          .numberOfPreemptibleWorkers(extractIntField(runtimeConfig, "numberOfPreemptibleWorkers"))
-      );
+      runtime.dataprocConfig(
+          new DataprocConfig()
+              .numberOfWorkers(extractIntField(runtimeConfig, "numberOfWorkers"))
+              .masterMachineType((String) runtimeConfig.get("masterMachineType"))
+              .masterDiskSize(extractIntField(runtimeConfig, "masterDiskSize"))
+              .workerMachineType((String) runtimeConfig.get("workerMachineType"))
+              .workerDiskSize(extractIntField(runtimeConfig, "workerDiskSize"))
+              .numberOfWorkerLocalSSDs(extractIntField(runtimeConfig, "numberOfWorkerLocalSSDs"))
+              .numberOfPreemptibleWorkers(
+                  extractIntField(runtimeConfig, "numberOfPreemptibleWorkers")));
     } else if (runtimeConfig.get("cloudService").equals("GCE")) {
-      runtime.gceConfig(new GceConfig()
-          .diskSize(extractIntField(runtimeConfig, "diskSize"))
-          .bootDiskSize(extractIntField(runtimeConfig, "bootDiskSize"))
-          .machineType((String) runtimeConfig.get("machineType"))
-      );
+      runtime.gceConfig(
+          new GceConfig()
+              .diskSize(extractIntField(runtimeConfig, "diskSize"))
+              .bootDiskSize(extractIntField(runtimeConfig, "bootDiskSize"))
+              .machineType((String) runtimeConfig.get("machineType")));
     } else {
-      throw new IllegalArgumentException("Invalid LeonardoGetRuntimeResponse.RuntimeConfig.cloudService : " + runtimeConfig.get("cloudService"));
+      throw new IllegalArgumentException(
+          "Invalid LeonardoGetRuntimeResponse.RuntimeConfig.cloudService : "
+              + runtimeConfig.get("cloudService"));
     }
   }
 
@@ -75,6 +79,10 @@ public interface LeonardoMapper {
   }
 
   default String getJupyterImage(List<LeonardoRuntimeImage> images) {
-    return images.stream().filter(image -> image.getImageType().equals("Jupyter")).findFirst().get().getImageUrl();
+    return images.stream()
+        .filter(image -> image.getImageType().equals("Jupyter"))
+        .findFirst()
+        .get()
+        .getImageUrl();
   }
 }
