@@ -1,11 +1,8 @@
 import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
 import DataResourceCard from 'app/component/data-resource-card';
 import EllipsisMenu from 'app/component/ellipsis-menu';
-import Modal from 'app/component/modal';
 import ClrIconLink from 'app/element/clr-icon-link';
-import Textarea from 'app/element/textarea';
-import Textbox from 'app/element/textbox';
-import {EllipsisMenuAction, Language, LinkText, ResourceCard} from 'app/text-labels';
+import {EllipsisMenuAction, Language, ResourceCard} from 'app/text-labels';
 import {ElementHandle, Page} from 'puppeteer';
 import {makeRandomName} from 'utils/str-utils';
 import {waitWhileLoading} from 'utils/test-utils';
@@ -83,43 +80,6 @@ export default class WorkspaceDataPage extends WorkspaceBase {
     const datasetCard = await resourceCard.findCard(datasetName, ResourceCard.Dataset);
     await datasetCard.clickEllipsisAction(EllipsisMenuAction.exportToNotebook, {waitForNav: false});
     console.log(`Exported Dataset "${datasetName}" to notebook "${notebookName}"`);
-  }
-
-  /**
-   * Rename Dataset thru the Ellipsis menu located inside the Dataset Resource card.
-   * @param {string} datasetName
-   * @param {string} newDatasetName
-   */
-  async renameDataset(datasetName: string, newDatasetName: string): Promise<void> {
-    const datasetCard = await DataResourceCard.findCard(this.page, datasetName);
-    await datasetCard.clickEllipsisAction(EllipsisMenuAction.RenameDataset, {waitForNav: false});
-
-    const modal = new Modal(this.page);
-
-    const newNameTextbox = new Textbox(this.page, `${modal.getXpath()}//*[@id="new-name"]`);
-    await newNameTextbox.type(newDatasetName);
-
-    const descriptionTextarea = await Textarea.findByName(this.page, {containsText: 'Description:'}, modal);
-    await descriptionTextarea.type('Puppeteer automation rename dataset.');
-
-    await modal.clickButton(LinkText.RenameDataset, {waitForClose: true});
-    await waitWhileLoading(this.page);
-
-    console.log(`Renamed Dataset "${datasetName}" to "${newDatasetName}"`);
-  }
-
-  async renameCohort(cohortName: string, newCohortName: string): Promise<void> {
-    const cohortCard = await DataResourceCard.findCard(this.page, cohortName);
-    await cohortCard.clickEllipsisAction(EllipsisMenuAction.Rename, {waitForNav: false});
-    const modal = new Modal(this.page);
-    await modal.getTextContent();
-    const newNameInput = new Textbox(this.page, `${modal.getXpath()}//*[@id="new-name"]`);
-    await newNameInput.type(newCohortName);
-    const descriptionTextarea = await Textarea.findByName(this.page, {containsText: 'Description:'}, modal);
-    await descriptionTextarea.type('Puppeteer automation rename cohort.');
-    await modal.clickButton(LinkText.Rename, {waitForClose: true});
-    await waitWhileLoading(this.page);
-    console.log(`Cohort "${cohortName}" renamed to "${newCohortName}"`);
   }
 
   async findCohortCard(cohortName?: string): Promise<DataResourceCard> {
