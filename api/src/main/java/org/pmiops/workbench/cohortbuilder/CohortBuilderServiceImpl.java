@@ -341,8 +341,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   @Override
   public List<SurveyVersion> findSurveyVersionByQuestionConceptId(
       Long surveyConceptId, Long questionConceptId) {
-    return cbCriteriaDao
-        .findSurveyVersionByQuestionConceptId(surveyConceptId, questionConceptId)
+    return cbCriteriaDao.findSurveyVersionByQuestionConceptId(surveyConceptId, questionConceptId)
         .stream()
         .map(cohortBuilderMapper::dbModelToClient)
         .collect(Collectors.toList());
