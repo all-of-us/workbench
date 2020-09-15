@@ -23,7 +23,7 @@ public class DbCriteria {
   private String name;
   private boolean group;
   private boolean selectable;
-  private String count;
+  private Long count;
   private Long parentCount;
   private Long childCount;
   private String conceptId;
@@ -111,17 +111,12 @@ public class DbCriteria {
   }
 
   @Column(name = "est_count")
-  public String getCount() {
-    return count;
+  public Long getCount() {
+    return this.count == null ? 0 : this.count;
   }
 
-  public void setCount(String count) {
+  public void setCount(Long count) {
     this.count = count;
-  }
-
-  @Transient
-  public Long getLongCount() {
-    return Strings.isNullOrEmpty(this.count) ? null : Long.valueOf(this.count);
   }
 
   @Column(name = "rollup_count")
@@ -289,7 +284,7 @@ public class DbCriteria {
     private String name;
     private boolean group;
     private boolean selectable;
-    private String count;
+    private Long count;
     private Long parentCount;
     private Long childCount;
     private String conceptId;
@@ -344,7 +339,7 @@ public class DbCriteria {
       return this;
     }
 
-    public Builder addCount(String count) {
+    public Builder addCount(Long count) {
       this.count = count;
       return this;
     }

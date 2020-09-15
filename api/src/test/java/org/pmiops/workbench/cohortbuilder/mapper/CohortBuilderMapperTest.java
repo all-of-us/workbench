@@ -64,7 +64,7 @@ public class CohortBuilderMapperTest {
                     .addName("name")
                     .addGroup(true)
                     .addSelectable(true)
-                    .addCount("200")
+                    .addCount(200L)
                     .addParentCount(100L)
                     .addChildCount(null)
                     .addConceptId("12345")
