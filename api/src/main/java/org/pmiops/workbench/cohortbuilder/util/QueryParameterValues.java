@@ -93,6 +93,13 @@ public final class QueryParameterValues {
         .orElse(null);
   }
 
+  @Nullable
+  public static String toInsertRowString(@Nullable OffsetDateTime offsetDateTime) {
+    return Optional.ofNullable(offsetDateTime)
+        .map(ROW_TO_INSERT_TIMESTAMP_FORMATTER::format)
+        .orElse(null);
+  }
+
   private static String getReplacementString(QueryParameterValue parameterValue) {
     final String value =
         Optional.ofNullable(parameterValue).map(QueryParameterValue::getValue).orElse("NULL");

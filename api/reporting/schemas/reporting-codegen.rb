@@ -293,12 +293,12 @@ dto_assertions = columns.map{ |col|
 write_output(outputs[:dto_assertions], dto_assertions, 'Unit Test DTO Assertions')
 
 ### Parameter Column Enum
-def object_value_function(col)
+def object_value_function(col, dto_name)
   case col[:java_type]
   when 'Timesttamp'
     "#{col[:lambda_var]} -> ROW_TO_INSERT_TIMESTAMP_FORMATTER.format(#{col[:lambda_var]}.#{col[:getter]}()"
   else
-    "#{col[:dto_class_name]}::#{col[:getter]}"
+    "#{dto_name}::#{col[:getter]}"
   end
 end
 
@@ -320,12 +320,12 @@ def qpv_function(col)
   end
 end
 
-def query_parameter_column_entry(col)
-  "#{col[:name].upcase}(\"#{col[:name]}\", #{object_value_function(col)}, #{qpv_function(col)})"
+def query_parameter_column_entry(col, dto_name)
+  "#{col[:name].upcase}(\"#{col[:name]}\", #{object_value_function(col, dto_name)}, #{qpv_function(col)})"
 end
 
 qpc_enum = columns.map do |col|
-  query_parameter_column_entry(col)
+  query_parameter_column_entry(col, dto_name)
 end.join(",\n")
 
 write_output(outputs[:query_parameter_columns], qpc_enum, "QueryParameterValue Enum Entries")

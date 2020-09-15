@@ -9,7 +9,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.timestampQpvToOffsetDateTime;
-import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.timestampStringToInstant;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDtoUser;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 
@@ -259,10 +258,9 @@ public class ReportingUploadServiceTest {
     final List<QueryJobConfiguration> jobs = queryJobConfigurationCaptor.getAllValues();
     assertThat(jobs).hasSize(6);
 
-    assertThat(jobs.get(0).getNamedParameters())
-        .isNotEmpty(); // hasSize(USER_COLUMN_COUNT * 21 + 1);
-    assertThat(jobs.get(4).getNamedParameters()).isNotEmpty(); // hasSize(USER_COLUMN_COUNT + 1);
-    assertThat(jobs.get(5).getNamedParameters()).hasSize(WORKSPACE_COLUMN_COUNT + 1);
+    // Since null values are omitted, map sizes will vary
+    assertThat(jobs.get(0).getNamedParameters()).isNotEmpty();
+    assertThat(jobs.get(4).getNamedParameters()).isNotEmpty();
 
     final QueryParameterValue creationTime =
         jobs.get(5).getNamedParameters().get("creation_time__0");
@@ -311,11 +309,9 @@ public class ReportingUploadServiceTest {
     assertThat(workspaceColumnValues.get(WorkspaceParameterColumn.WORKSPACE_ID.getParameterName()))
         .isEqualTo(201L);
     assertTimeApprox(
-        timestampStringToInstant(
-            (String)
-                workspaceColumnValues.get(
-                    WorkspaceParameterColumn.CREATION_TIME.getParameterName())),
-        THEN_INSTANT);
+        (OffsetDateTime)
+            workspaceColumnValues.get(WorkspaceParameterColumn.CREATION_TIME.getParameterName()),
+        THEN);
     assertThat(workspaceColumnValues.get(WorkspaceParameterColumn.CREATOR_ID.getParameterName()))
         .isEqualTo(101L);
   }

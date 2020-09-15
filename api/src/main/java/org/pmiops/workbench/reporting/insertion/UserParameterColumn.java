@@ -1,5 +1,6 @@
 package org.pmiops.workbench.reporting.insertion;
 
+import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.ROW_TO_INSERT_TIMESTAMP_FORMATTER;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.toTimestampQpv;
 
 import com.google.cloud.bigquery.QueryParameterValue;
@@ -52,7 +53,7 @@ public enum UserParameterColumn implements QueryParameterColumn<BqDtoUser> {
       u -> toTimestampQpv(u.getDataUseAgreementBypassTime())),
   DATA_USE_AGREEMENT_COMPLETION_TIME(
       "data_use_agreement_completion_time",
-      BqDtoUser::getDataUseAgreementCompletionTime,
+      u -> ROW_TO_INSERT_TIMESTAMP_FORMATTER.format(u.getDataUseAgreementCompletionTime()),
       u -> toTimestampQpv(u.getDataUseAgreementCompletionTime())),
   DATA_USE_AGREEMENT_SIGNED_VERSION(
       "data_use_agreement_signed_version",
