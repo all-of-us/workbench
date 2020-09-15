@@ -50,13 +50,13 @@ public interface LeonardoMapper {
             gson.toJson(leonardoGetRuntimeResponse.getRuntimeConfig()),
             LeonardoRuntimeConfig.class);
 
-    if (runtimeConfig.getCloudService().equals(CloudServiceEnum.DATAPROC)) {
+    if (CloudServiceEnum.DATAPROC.equals(runtimeConfig.getCloudService())) {
       runtime.dataprocConfig(
           toDataprocConfig(
               gson.fromJson(
                   gson.toJson(leonardoGetRuntimeResponse.getRuntimeConfig()),
                   LeonardoMachineConfig.class)));
-    } else if (runtimeConfig.getCloudService().equals(CloudServiceEnum.GCE)) {
+    } else if (CloudServiceEnum.GCE.equals(runtimeConfig.getCloudService())) {
       runtime.gceConfig(
           toGceConfig(
               gson.fromJson(
