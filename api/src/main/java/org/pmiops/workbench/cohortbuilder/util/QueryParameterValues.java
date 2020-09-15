@@ -4,10 +4,12 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.StandardSQLTypeName;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -15,6 +17,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
+import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.utils.Matchers;
 
 public final class QueryParameterValues {
@@ -101,6 +104,13 @@ public final class QueryParameterValues {
     return Optional.ofNullable(offsetDateTime)
         .map(ROW_TO_INSERT_TIMESTAMP_FORMATTER::format)
         .orElse(null);
+  }
+
+  @NotNull
+  public static OffsetDateTime rowToInsertStringToOffsetTimestamp(String timeString) {
+    final TemporalAccessor temporalAccessor = ROW_TO_INSERT_TIMESTAMP_FORMATTER.parse(timeString);
+    final LocalDateTime localDateTime = LocalDateTime.from(temporalAccessor);
+    return OffsetDateTime.of(localDateTime, ZoneOffset.UTC);
   }
 
   private static String getReplacementString(QueryParameterValue parameterValue) {
