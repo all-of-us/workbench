@@ -26,6 +26,8 @@ import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig.CloudServiceEnum;
 import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
+import org.pmiops.workbench.model.Runtime;
+import org.pmiops.workbench.model.RuntimeConfigurationType;
 import org.pmiops.workbench.notebooks.api.ProxyApi;
 import org.pmiops.workbench.notebooks.model.LocalizationEntry;
 import org.pmiops.workbench.notebooks.model.Localize;
@@ -39,6 +41,7 @@ import org.springframework.stereotype.Service;
 public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
   private static final String RUNTIME_LABEL_AOU = "all-of-us";
+  private static final String RUNTIME_LABEL_AOU_CONFIG = "all-of-us-config";
   private static final String RUNTIME_LABEL_CREATED_BY = "created-by";
   private static final String WORKSPACE_CDR = "WORKSPACE_CDR";
 
@@ -80,6 +83,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   private LeonardoCreateRuntimeRequest buildCreateRuntimeRequest(
       String userEmail,
       @Nullable ClusterConfig clusterOverride,
+      Runtime runtime,
       Map<String, String> customEnvironmentVariables) {
     // TODO(RW-5406): Remove cluster override.
     if (clusterOverride == null) {
@@ -97,39 +101,51 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     nbExtensions.put(
         "aou-upload-policy-extension", assetsBaseUrl + "/aou-upload-policy-extension.js");
 
-    return new LeonardoCreateRuntimeRequest()
-        .labels(ImmutableMap.of(RUNTIME_LABEL_AOU, "true", RUNTIME_LABEL_CREATED_BY, userEmail))
-        .defaultClientId(config.server.oauthClientId)
-        // Note: Filenames must be kept in sync with files in api/src/main/webapp/static.
-        .jupyterUserScriptUri(assetsBaseUrl + "/initialize_notebook_runtime.sh")
-        .jupyterStartUserScriptUri(assetsBaseUrl + "/start_notebook_runtime.sh")
-        .userJupyterExtensionConfig(
-            new LeonardoUserJupyterExtensionConfig().nbExtensions(nbExtensions))
-        // Matches Terra UI's scopes, see RW-3531 for rationale.
-        .addScopesItem("https://www.googleapis.com/auth/cloud-platform")
-        .addScopesItem("https://www.googleapis.com/auth/userinfo.email")
-        .addScopesItem("https://www.googleapis.com/auth/userinfo.profile")
-        .runtimeConfig(
-            new LeonardoMachineConfig()
-                .cloudService(CloudServiceEnum.DATAPROC)
-                .masterDiskSize(
-                    Optional.ofNullable(clusterOverride.masterDiskSize)
-                        .orElse(config.firecloud.notebookRuntimeDefaultDiskSizeGb))
-                .masterMachineType(
-                    Optional.ofNullable(clusterOverride.machineType)
-                        .orElse(config.firecloud.notebookRuntimeDefaultMachineType)))
-        .toolDockerImage(workbenchConfigProvider.get().firecloud.jupyterDockerImage)
-        .welderDockerImage(workbenchConfigProvider.get().firecloud.welderDockerImage)
-        .customEnvironmentVariables(customEnvironmentVariables);
+    LeonardoCreateRuntimeRequest request =
+        new LeonardoCreateRuntimeRequest()
+            .labels(
+                ImmutableMap.of(
+                    RUNTIME_LABEL_AOU,
+                    "true",
+                    RUNTIME_LABEL_CREATED_BY,
+                    userEmail,
+                    RUNTIME_LABEL_AOU_CONFIG,
+                    RuntimeConfigurationType.USEROVERRIDE.equals(runtime.getConfigurationType())
+                        ? "user-override"
+                        : "default"))
+            .defaultClientId(config.server.oauthClientId)
+            // Note: Filenames must be kept in sync with files in api/src/main/webapp/static.
+            .jupyterUserScriptUri(assetsBaseUrl + "/initialize_notebook_runtime.sh")
+            .jupyterStartUserScriptUri(assetsBaseUrl + "/start_notebook_runtime.sh")
+            .userJupyterExtensionConfig(
+                new LeonardoUserJupyterExtensionConfig().nbExtensions(nbExtensions))
+            // Matches Terra UI's scopes, see RW-3531 for rationale.
+            .addScopesItem("https://www.googleapis.com/auth/cloud-platform")
+            .addScopesItem("https://www.googleapis.com/auth/userinfo.email")
+            .addScopesItem("https://www.googleapis.com/auth/userinfo.profile")
+            .runtimeConfig(
+                new LeonardoMachineConfig()
+                    .cloudService(CloudServiceEnum.DATAPROC)
+                    .masterDiskSize(
+                        Optional.ofNullable(clusterOverride.masterDiskSize)
+                            .orElse(config.firecloud.notebookRuntimeDefaultDiskSizeGb))
+                    .masterMachineType(
+                        Optional.ofNullable(clusterOverride.machineType)
+                            .orElse(config.firecloud.notebookRuntimeDefaultMachineType)))
+            .toolDockerImage(workbenchConfigProvider.get().firecloud.jupyterDockerImage)
+            .welderDockerImage(workbenchConfigProvider.get().firecloud.welderDockerImage)
+            .customEnvironmentVariables(customEnvironmentVariables);
+
+    return request;
   }
 
   @Override
-  public void createRuntime(
-      String googleProject, String runtimeName, String workspaceFirecloudName) {
+  public void createRuntime(Runtime runtime, String workspaceFirecloudName) {
     RuntimesApi runtimesApi = runtimesApiProvider.get();
 
     DbUser user = userProvider.get();
-    DbWorkspace workspace = workspaceService.getRequired(googleProject, workspaceFirecloudName);
+    DbWorkspace workspace =
+        workspaceService.getRequired(runtime.getGoogleProject(), workspaceFirecloudName);
     Map<String, String> customEnvironmentVariables = new HashMap<>();
     // i.e. is NEW or MIGRATED
     if (!workspace.getBillingMigrationStatusEnum().equals(BillingMigrationStatus.OLD)) {
@@ -143,10 +159,13 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     leonardoRetryHandler.run(
         (context) -> {
           runtimesApi.createRuntime(
-              googleProject,
-              runtimeName,
+              runtime.getGoogleProject(),
+              runtime.getRuntimeName(),
               buildCreateRuntimeRequest(
-                  user.getUsername(), user.getClusterConfigDefault(), customEnvironmentVariables));
+                  user.getUsername(),
+                  user.getClusterConfigDefault(),
+                  runtime,
+                  customEnvironmentVariables));
           return null;
         });
   }

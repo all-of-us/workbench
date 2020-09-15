@@ -632,9 +632,14 @@ paths:
       - runtime
       parameters:
       - "$ref": "#/parameters/workspaceNamespace"
+      - in: body
+        name: runtime
+        description: notebooks runtime definition
+        schema:
+          "$ref": "#/definitions/Runtime"
       responses:
         200:
-          description: Returns the runtime that was created for this user and workspace.
+          description: Runtime was created successfully
           schema:
             "$ref": "#/definitions/EmptyResponse"
         409:

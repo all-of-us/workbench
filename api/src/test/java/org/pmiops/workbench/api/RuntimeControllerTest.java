@@ -22,6 +22,7 @@ import java.time.ZoneId;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -58,6 +59,7 @@ import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
+import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeImage;
@@ -66,6 +68,7 @@ import org.pmiops.workbench.model.DataprocConfig;
 import org.pmiops.workbench.model.GceConfig;
 import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.Runtime;
+import org.pmiops.workbench.model.RuntimeConfigurationType;
 import org.pmiops.workbench.model.RuntimeLocalizeRequest;
 import org.pmiops.workbench.model.RuntimeLocalizeResponse;
 import org.pmiops.workbench.model.RuntimeStatus;
@@ -178,6 +181,7 @@ public class RuntimeControllerTest {
   }
 
   @Captor private ArgumentCaptor<Localize> welderReqCaptor;
+  @Captor private ArgumentCaptor<LeonardoCreateRuntimeRequest> createRuntimeRequestCaptor;
 
   @MockBean AdminActionHistoryDao mockAdminActionHistoryDao;
   @MockBean LeonardoRuntimeAuditor mockLeonardoRuntimeAuditor;
@@ -196,8 +200,7 @@ public class RuntimeControllerTest {
   @MockBean
   RuntimesApi serviceRuntimesApi;
 
-  @MockBean
-  ProxyApi proxyApi;
+  @MockBean ProxyApi proxyApi;
 
   @Autowired UserDao userDao;
   @Autowired RuntimeController runtimeController;
@@ -482,9 +485,60 @@ public class RuntimeControllerTest {
         .thenThrow(new NotFoundException());
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
 
-    runtimeController.createRuntime(BILLING_PROJECT_ID);
+    runtimeController.createRuntime(BILLING_PROJECT_ID, new Runtime());
+    verify(userRuntimesApi).createRuntime(eq(BILLING_PROJECT_ID), eq(getRuntimeName()), any());
+  }
+
+  @Test
+  public void testCreateRuntime_defaultLabel_dataproc() throws ApiException {
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
+
+    runtimeController.createRuntime(
+        BILLING_PROJECT_ID,
+        new Runtime().configurationType(RuntimeConfigurationType.DEFAULTDATAPROC));
     verify(userRuntimesApi)
-        .createRuntime(eq(BILLING_PROJECT_ID), eq(getRuntimeName()), any());
+        .createRuntime(
+            eq(BILLING_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+
+    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    assertThat(((Map<String, String>) createRuntimeRequest.getLabels()).get("all-of-us-config"))
+        .isEqualTo("default");
+  }
+
+  @Test
+  public void testCreateRuntime_defaultLabel_gce() throws ApiException {
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
+
+    runtimeController.createRuntime(
+        BILLING_PROJECT_ID, new Runtime().configurationType(RuntimeConfigurationType.DEFAULTGCE));
+    verify(userRuntimesApi)
+        .createRuntime(
+            eq(BILLING_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+
+    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    assertThat(((Map<String, String>) createRuntimeRequest.getLabels()).get("all-of-us-config"))
+        .isEqualTo("default");
+  }
+
+  @Test
+  public void testCreateRuntime_overrideLabel() throws ApiException {
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
+
+    runtimeController.createRuntime(
+        BILLING_PROJECT_ID, new Runtime().configurationType(RuntimeConfigurationType.USEROVERRIDE));
+    verify(userRuntimesApi)
+        .createRuntime(
+            eq(BILLING_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+
+    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    assertThat(((Map<String, String>) createRuntimeRequest.getLabels()).get("all-of-us-config"))
+        .isEqualTo("user-override");
   }
 
   @Test
@@ -507,21 +561,35 @@ public class RuntimeControllerTest {
         .welderLocalize(eq(BILLING_PROJECT_ID), eq(getRuntimeName()), welderReqCaptor.capture());
 
     Localize welderReq = welderReqCaptor.getValue();
-    assertThat(welderReq.getEntries().stream().map(e -> e.getLocalDestinationPath()).collect(
-        Collectors.toList()))
+    assertThat(
+            welderReq.getEntries().stream()
+                .map(e -> e.getLocalDestinationPath())
+                .collect(Collectors.toList()))
         .containsExactly(
             "workspaces/myfirstworkspace/foo.ipynb",
             "workspaces_playground/myfirstworkspace/.all_of_us_config.json",
             "workspaces/myfirstworkspace/.all_of_us_config.json");
 
-    assertThat(welderReq.getEntries().stream()
-            .filter(e -> e.getSourceUri().equals("gs://workspace-bucket/notebooks/foo.ipynb") && e.getLocalDestinationPath().equals("workspaces/myfirstworkspace/foo.ipynb")).count())
+    assertThat(
+            welderReq.getEntries().stream()
+                .filter(
+                    e ->
+                        e.getSourceUri().equals("gs://workspace-bucket/notebooks/foo.ipynb")
+                            && e.getLocalDestinationPath()
+                                .equals("workspaces/myfirstworkspace/foo.ipynb"))
+                .count())
         .isAtLeast(1L);
 
-    JSONObject aouJson = dataUriToJson(welderReq.getEntries().stream()
-        .filter(e -> e.getLocalDestinationPath().equals("workspaces/myfirstworkspace/.all_of_us_config.json"))
-        .findFirst().get().getSourceUri());
-
+    JSONObject aouJson =
+        dataUriToJson(
+            welderReq.getEntries().stream()
+                .filter(
+                    e ->
+                        e.getLocalDestinationPath()
+                            .equals("workspaces/myfirstworkspace/.all_of_us_config.json"))
+                .findFirst()
+                .get()
+                .getSourceUri());
 
     assertThat(aouJson.getString("WORKSPACE_ID")).isEqualTo(WORKSPACE_ID);
     assertThat(aouJson.getString("BILLING_CLOUD_PROJECT")).isEqualTo(BILLING_PROJECT_ID);
@@ -545,15 +613,22 @@ public class RuntimeControllerTest {
     Localize welderReq = welderReqCaptor.getValue();
 
     assertThat(
-        welderReq.getEntries().stream().map(e -> e.getLocalDestinationPath()).collect(Collectors.toList()))
+            welderReq.getEntries().stream()
+                .map(e -> e.getLocalDestinationPath())
+                .collect(Collectors.toList()))
         .containsExactly(
             "workspaces_playground/myfirstworkspace/foo.ipynb",
             "workspaces_playground/myfirstworkspace/.all_of_us_config.json",
             "workspaces/myfirstworkspace/.all_of_us_config.json");
 
-    assertThat(welderReq.getEntries().stream().filter(
-        e -> e.getLocalDestinationPath().equals("workspaces_playground/myfirstworkspace/foo.ipynb") &&
-        e.getSourceUri().equals("gs://workspace-bucket/notebooks/foo.ipynb")).count())
+    assertThat(
+            welderReq.getEntries().stream()
+                .filter(
+                    e ->
+                        e.getLocalDestinationPath()
+                                .equals("workspaces_playground/myfirstworkspace/foo.ipynb")
+                            && e.getSourceUri().equals("gs://workspace-bucket/notebooks/foo.ipynb"))
+                .count())
         .isAtLeast(1L);
   }
 
@@ -571,20 +646,35 @@ public class RuntimeControllerTest {
 
     Localize welderReq = welderReqCaptor.getValue();
 
-    assertThat(welderReq.getEntries().stream().map(e -> e.getLocalDestinationPath()).collect(Collectors.toList()))
+    assertThat(
+            welderReq.getEntries().stream()
+                .map(e -> e.getLocalDestinationPath())
+                .collect(Collectors.toList()))
         .containsExactly(
             "workspaces/myotherworkspace/foo.ipynb",
             "workspaces/myotherworkspace/.all_of_us_config.json",
             "workspaces_playground/myotherworkspace/.all_of_us_config.json");
 
-    assertThat(welderReq.getEntries().stream().filter(
-        e -> e.getLocalDestinationPath().equals("workspaces/myotherworkspace/foo.ipynb") &&
-            e.getSourceUri().equals("gs://workspace-bucket/notebooks/foo.ipynb")).count())
+    assertThat(
+            welderReq.getEntries().stream()
+                .filter(
+                    e ->
+                        e.getLocalDestinationPath().equals("workspaces/myotherworkspace/foo.ipynb")
+                            && e.getSourceUri().equals("gs://workspace-bucket/notebooks/foo.ipynb"))
+                .count())
         .isAtLeast(1L);
 
     assertThat(resp.getRuntimeLocalDirectory()).isEqualTo("workspaces/myotherworkspace");
     JSONObject aouJson =
-        dataUriToJson(welderReq.getEntries().stream().filter(e -> e.getLocalDestinationPath().equals("workspaces/myotherworkspace/.all_of_us_config.json")).findFirst().get().getSourceUri());
+        dataUriToJson(
+            welderReq.getEntries().stream()
+                .filter(
+                    e ->
+                        e.getLocalDestinationPath()
+                            .equals("workspaces/myotherworkspace/.all_of_us_config.json"))
+                .findFirst()
+                .get()
+                .getSourceUri());
     assertThat(aouJson.getString("BILLING_CLOUD_PROJECT")).isEqualTo("other-proj");
   }
 
@@ -600,7 +690,10 @@ public class RuntimeControllerTest {
     // Config files only.
     Localize welderReq = welderReqCaptor.getValue();
 
-    assertThat(welderReq.getEntries().stream().map(e -> e.getLocalDestinationPath()).collect(Collectors.toList()))
+    assertThat(
+            welderReq.getEntries().stream()
+                .map(e -> e.getLocalDestinationPath())
+                .collect(Collectors.toList()))
         .containsExactly(
             "workspaces_playground/myfirstworkspace/.all_of_us_config.json",
             "workspaces/myfirstworkspace/.all_of_us_config.json");
