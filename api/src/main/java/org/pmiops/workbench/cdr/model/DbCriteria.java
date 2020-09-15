@@ -235,6 +235,8 @@ public class DbCriteria {
         && Objects.equals(code, criteria.code)
         && Objects.equals(name, criteria.name)
         && Objects.equals(count, criteria.count)
+        && Objects.equals(parentCount, criteria.parentCount)
+        && Objects.equals(childCount, criteria.childCount)
         && Objects.equals(conceptId, criteria.conceptId)
         && Objects.equals(domainId, criteria.domainId)
         && Objects.equals(attribute, criteria.attribute)
@@ -256,6 +258,8 @@ public class DbCriteria {
         group,
         selectable,
         count,
+        parentCount,
+        childCount,
         conceptId,
         domainId,
         attribute,
