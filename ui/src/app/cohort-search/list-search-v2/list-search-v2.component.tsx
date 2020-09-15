@@ -92,7 +92,7 @@ const styles = reactStyles({
     borderRadius: '0 3px 3px 0',
     borderTop: 0
   },
-  columnHeader: {
+  columnNameHeader: {
     padding: '0 0 0 0.25rem',
     background: colorWithWhiteness(colors.dark, 0.93),
     color: colors.primary,
@@ -103,7 +103,7 @@ const styles = reactStyles({
     verticalAlign: 'middle',
     lineHeight: '0.75rem'
   },
-  columnBody: {
+  columnBodyName: {
     background: colors.white,
     verticalAlign: 'middle',
     padding: 0,
@@ -140,6 +140,16 @@ const styles = reactStyles({
     verticalAlign: 'middle',
   }
 });
+
+const columnBodyStyle =  {
+  ...styles.columnBodyName,
+  width: '9%'
+};
+
+const columnHeaderStyle = {
+  ...styles.columnNameHeader,
+  width: '9%'
+}
 
 interface Props {
   cdrVersionListResponse: CdrVersionListResponse;
@@ -296,9 +306,9 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
       const open = ingredients[row.id] && ingredients[row.id].open;
       const loadingIngredients = ingredients[row.id] && ingredients[row.id].loading;
       const columnStyle = child ?
-        {...styles.columnBody, paddingLeft: '1.25rem'} : styles.columnBody;
+        {...styles.columnBodyName, paddingLeft: '1.25rem'} : styles.columnBodyName;
       return <tr style={{height: '1.75rem'}}>
-        <td style={{...columnStyle, textAlign: 'left', borderLeft: 0, padding: '0 0.25rem'}}>
+        <td style={{...columnStyle, width: '31%', textAlign: 'left', borderLeft: 0, padding: '0 0.25rem'}}>
           {row.selectable && <div style={{...styles.selectDiv}}>
             {attributes &&
               <ClrIcon style={styles.attrIcon} shape='slider' dir='right' size='20' onClick={() => attributesSelectionStore.next(row)}/>
@@ -320,10 +330,13 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
             </div>
           </TooltipTrigger>
         </td>
-        <td style={{...styles.columnBody, width: '20%'}}>{row.code}</td>
-        <td style={{...styles.columnBody, width: '10%'}}>{!brand && row.type}</td>
-        <td style={{...styles.columnBody, width: '8%', paddingLeft: '0.2rem'}}>{row.count > -1 && row.count.toLocaleString()}</td>
-        <td style={{...styles.columnBody, textAlign: 'center', width: '12%'}}>
+        <td style={{...columnBodyStyle, paddingLeft: '0.2rem'}}>{row.code}</td>
+        <td style={columnBodyStyle}>{!brand && row.type}</td>
+        <td style={{...columnBodyStyle, paddingLeft: '0.2rem'}}>{row.count > -1 && row.count.toLocaleString()}</td>
+        <td style={{...columnBodyStyle, width: '6%', paddingLeft: '0.2rem', paddingRight: '0.5rem'}}>{row.isStandard ? 'Standard' : 'Source'}</td>
+        <td style={{...columnBodyStyle, paddingLeft: '0.2rem'}}>{row.parentCount > -1 && row.parentCount.toLocaleString()}</td>
+        <td style={{...columnBodyStyle, paddingLeft: '0.2rem'}}>{row.childCount > -1 && row.childCount.toLocaleString()}</td>
+        <td style={{...columnBodyStyle, textAlign: 'center', width: '12%'}}>
           {row.hasHierarchy && <i className='pi pi-sitemap' style={styles.treeIcon} onClick={() => this.showHierarchy(row)}/>}
         </td>
       </tr>;
@@ -377,11 +390,14 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
             <table className='p-datatable' style={styles.table}>
               <thead className='p-datatable-thead'>
                 <tr style={{height: '2rem'}}>
-                  <th style={{...styles.columnHeader, borderLeft: 0}}>Name</th>
-                  <th style={{...styles.columnHeader, width: '20%'}}>Code</th>
-                  <th style={{...styles.columnHeader, width: '10%'}}>Vocab</th>
-                  <th style={{...styles.columnHeader, width: '8%'}}>Count</th>
-                  <th style={{...styles.columnHeader, textAlign: 'center', width: '12%'}}>View Hierarchy</th>
+                  <th style={{...styles.columnNameHeader, width: '31%', borderLeft: 0}}>Name</th>
+                  <th style={columnHeaderStyle}>Code</th>
+                  <th style={columnHeaderStyle}>Vocab</th>
+                  <th style={columnHeaderStyle}>Count</th>
+                  <th style={{...styles.columnNameHeader, width: '6%', paddingRight: '0.5rem'}}>Source/ Standard</th>
+                  <th style={columnHeaderStyle}>Parent Count</th>
+                  <th style={columnHeaderStyle}>Child Count</th>
+                  <th style={{...styles.columnNameHeader, textAlign: 'center', width: '12%'}}>View Hierarchy</th>
                 </tr>
               </thead>
             </table>
