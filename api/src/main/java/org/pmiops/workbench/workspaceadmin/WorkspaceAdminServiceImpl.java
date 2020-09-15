@@ -162,12 +162,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
   @Override
   public WorkspaceAdminView getWorkspaceAdminView(String workspaceNamespace) {
-    final DbWorkspace dbWorkspace =
-        getFirstWorkspaceByNamespace(workspaceNamespace)
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("No workspace found for namespace %s", workspaceNamespace)));
+    final DbWorkspace dbWorkspace = getWorkspaceByNamespaceOrThrow(workspaceNamespace);
 
     final String workspaceFirecloudName = dbWorkspace.getFirecloudName();
 
@@ -206,6 +201,16 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         .resources(adminWorkspaceResources);
   }
 
+  private DbWorkspace getWorkspaceByNamespaceOrThrow(String workspaceNamespace) {
+    final DbWorkspace dbWorkspace =
+        getFirstWorkspaceByNamespace(workspaceNamespace)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("No workspace found for namespace %s", workspaceNamespace)));
+    return dbWorkspace;
+  }
+
   @Override
   public WorkspaceAuditLogQueryResponse getAuditLogEntries(
       String workspaceNamespace,
@@ -213,13 +218,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       Long afterMillis,
       @Nullable Long beforeMillisNullable) {
     final long workspaceDatabaseId =
-        getFirstWorkspaceByNamespace(workspaceNamespace)
-            .map(DbWorkspace::getWorkspaceId)
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format(
-                            "No workspace found with Firecloud namespace %s", workspaceNamespace)));
+        getWorkspaceByNamespaceOrThrow(workspaceNamespace).getWorkspaceId();
     final Instant after = Instant.ofEpochMilli(afterMillis);
     final Instant before =
         Optional.ofNullable(beforeMillisNullable).map(Instant::ofEpochMilli).orElse(Instant.now());
@@ -229,14 +228,13 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
   @Override
   public String getReadOnlyNotebook(
-      String workspaceNamespace,
-      String workspaceName,
-      String notebookName,
-      AccessReason accessReason) {
+      String workspaceNamespace, String notebookName, AccessReason accessReason) {
     if (StringUtils.isBlank(accessReason.getReason())) {
       throw new BadRequestException("Notebook viewing access reason is required");
     }
 
+    final String workspaceName =
+        getWorkspaceByNamespaceOrThrow(workspaceNamespace).getFirecloudName();
     adminAuditor.fireViewNotebookAction(
         workspaceNamespace, workspaceName, notebookName, accessReason);
     return notebooksService.adminGetReadOnlyHtml(workspaceNamespace, workspaceName, notebookName);
