@@ -23,7 +23,9 @@ public class DbCriteria {
   private String name;
   private boolean group;
   private boolean selectable;
-  private String count;
+  private Long count;
+  private Long parentCount;
+  private Long childCount;
   private String conceptId;
   private String domainId;
   private boolean attribute;
@@ -109,17 +111,30 @@ public class DbCriteria {
   }
 
   @Column(name = "est_count")
-  public String getCount() {
-    return count;
+  public Long getCount() {
+    return this.count == null ? 0 : this.count;
   }
 
-  public void setCount(String count) {
+  public void setCount(Long count) {
     this.count = count;
   }
 
-  @Transient
-  public Long getLongCount() {
-    return Strings.isNullOrEmpty(this.count) ? null : Long.valueOf(this.count);
+  @Column(name = "rollup_count")
+  public Long getParentCount() {
+    return this.parentCount == null ? 0 : this.parentCount;
+  }
+
+  public void setParentCount(Long parentCount) {
+    this.parentCount = parentCount;
+  }
+
+  @Column(name = "item_count")
+  public Long getChildCount() {
+    return this.childCount == null ? 0 : this.childCount;
+  }
+
+  public void setChildCount(Long childCount) {
+    this.childCount = childCount;
   }
 
   @Column(name = "concept_id")
@@ -220,6 +235,8 @@ public class DbCriteria {
         && Objects.equals(code, criteria.code)
         && Objects.equals(name, criteria.name)
         && Objects.equals(count, criteria.count)
+        && Objects.equals(parentCount, criteria.parentCount)
+        && Objects.equals(childCount, criteria.childCount)
         && Objects.equals(conceptId, criteria.conceptId)
         && Objects.equals(domainId, criteria.domainId)
         && Objects.equals(attribute, criteria.attribute)
@@ -241,6 +258,8 @@ public class DbCriteria {
         group,
         selectable,
         count,
+        parentCount,
+        childCount,
         conceptId,
         domainId,
         attribute,
@@ -269,7 +288,9 @@ public class DbCriteria {
     private String name;
     private boolean group;
     private boolean selectable;
-    private String count;
+    private Long count;
+    private Long parentCount;
+    private Long childCount;
     private String conceptId;
     private String domainId;
     private boolean attribute;
@@ -322,8 +343,18 @@ public class DbCriteria {
       return this;
     }
 
-    public Builder addCount(String count) {
+    public Builder addCount(Long count) {
       this.count = count;
+      return this;
+    }
+
+    public Builder addParentCount(Long parentCount) {
+      this.parentCount = parentCount;
+      return this;
+    }
+
+    public Builder addChildCount(Long childCount) {
+      this.childCount = childCount;
       return this;
     }
 
@@ -383,6 +414,8 @@ public class DbCriteria {
       dbCriteria.setGroup(this.group);
       dbCriteria.setSelectable(this.selectable);
       dbCriteria.setCount(this.count);
+      dbCriteria.setParentCount(this.parentCount);
+      dbCriteria.setChildCount(this.childCount);
       dbCriteria.setConceptId(this.conceptId);
       dbCriteria.setDomainId(this.domainId);
       dbCriteria.setAttribute(this.attribute);

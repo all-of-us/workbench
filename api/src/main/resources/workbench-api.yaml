@@ -1697,6 +1697,30 @@ paths:
           description: HTML Read Only version of the notebook
           schema:
             "$ref": "#/definitions/ReadOnlyNotebookResponse"
+  "/v1/admin/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/readonly":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    post:
+      tags:
+        - workspaceAdmin
+      description: Get the HTML for a read only view of the notebook. RESEARCHER_DATA_VIEW authority required.
+      operationId: adminReadOnlyNotebook
+      parameters:
+      - in: path
+        name: notebookName
+        required: true
+        type: string
+      - in: body
+        name: accessReason
+        required: true
+        schema:
+          "$ref": "#/definitions/AccessReason"
+      responses:
+        200:
+          description: HTML Read Only version of the notebook
+          schema:
+            "$ref": "#/definitions/ReadOnlyNotebookResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/lockingMetadata":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -3307,6 +3331,64 @@ paths:
           description: A collection of criteria
           schema:
             "$ref": "#/definitions/CriteriaAttributeListResponse"
+  "/v1/cohortbuilder/{cdrVersionId}/criteria/survey/attribute/{surveyConceptId}/{questionConceptId}":
+    parameters:
+    - "$ref": "#/parameters/cdrVersionId"
+    get:
+      tags:
+      - cohortBuilder
+      description: Returns SurveyVersion with counts
+      operationId: findSurveyVersionByQuestionConceptId
+      parameters:
+      - in: path
+        name: surveyConceptId
+        type: integer
+        format: int64
+        required: true
+        description: surveyConceptId of the survey
+      - in: path
+        name: questionConceptId
+        type: integer
+        format: int64
+        required: true
+        description: questionConceptId of the question
+      responses:
+        200:
+          description: A collection of SurveyVersion
+          schema:
+            "$ref": "#/definitions/SurveyVersionListResponse"
+  "/v1/cohortbuilder/{cdrVersionId}/criteria/survey/attribute/{surveyConceptId}/{questionConceptId}/{answerConceptId}":
+    parameters:
+    - "$ref": "#/parameters/cdrVersionId"
+    get:
+      tags:
+      - cohortBuilder
+      description: Returns SurveyVersion with counts
+      operationId: findSurveyVersionByQuestionConceptIdAndAnswerConceptId
+      parameters:
+      - in: path
+        name: surveyConceptId
+        type: integer
+        format: int64
+        required: true
+        description: surveyConceptId of the survey
+      - in: path
+        name: questionConceptId
+        type: integer
+        format: int64
+        required: true
+        description: questionConceptId of the question
+      - in: path
+        name: answerConceptId
+        type: integer
+        format: int64
+        required: true
+        description: answerConceptId of the answer
+      responses:
+        200:
+          description: A collection of SurveyVersion
+          schema:
+            "$ref": "#/definitions/SurveyVersionListResponse"
   "/v1/cohortbuilder/{cdrVersionId}/age/counts":
     parameters:
     - "$ref": "#/parameters/cdrVersionId"
@@ -6984,6 +7066,16 @@ definitions:
           which have a least one event matching this criteria.'
         type: integer
         format: int64
+      parentCount:
+        description: 'Estimated number of Parents participants in a particular CDR version
+          which have a least one event matching this criteria.'
+        type: integer
+        format: int64
+      childCount:
+        description: 'Estimated number of Children participants in a particular CDR version
+          which have a least one event matching this criteria.'
+        type: integer
+        format: int64
       group:
         description: specifies if child or parent
         type: boolean
@@ -7104,6 +7196,33 @@ definitions:
       estCount:
         description: possible count
         type: string
+  SurveyVersionListResponse:
+    type: object
+    required:
+    - items
+    properties:
+      items:
+        type: array
+        items:
+          "$ref": "#/definitions/SurveyVersion"
+  SurveyVersion:
+    type: object
+    required:
+    - surveyId
+    - version
+    - itemCount
+    properties:
+      surveyId:
+        description: id of the cope survey
+        type: integer
+        format: int64
+      version:
+        description: name of the verion
+        type: string
+      itemCount:
+        description: name of concept
+        type: integer
+        format: int64
   SearchRequest:
     description: 'The SearchRequest describes the state of the Cohort Builder at any
       given moment. It contains two keys, `include` and `exclude`, each of which specifies
@@ -7883,3 +8002,9 @@ definitions:
         type: array
         items:
           "$ref": '#/definitions/AccessBypassRequest'
+  AccessReason:
+    type: object
+    properties:
+      reason:
+        type: string
+        description: 'The administrative purpose for accessing this notebook'

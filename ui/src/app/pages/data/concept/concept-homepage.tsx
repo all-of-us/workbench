@@ -15,7 +15,7 @@ import {ConceptSurveyAddModal} from 'app/pages/data/concept/concept-survey-add-m
 import {ConceptTable} from 'app/pages/data/concept/concept-table';
 import {conceptsApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, ReactWrapperBase, validateInputForMySQL, withCurrentWorkspace} from 'app/utils';
 import {NavStore, queryParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
@@ -318,68 +318,17 @@ export const ConceptHomepage = withCurrentWorkspace()(
       }
     }
 
-    validateInputForMySQL() {
-      const {currentInputString} = this.state;
-      const inputErrors = new Set(); // use Set to prevent duplicate messages
-      let openParensCount = 0;
-      let unclosedQuotes = false;
-      for (let i = 0; i < currentInputString.length; i++) {
-        const character = currentInputString[i];
-        if (character === '"') {
-          unclosedQuotes = !unclosedQuotes;
-          continue;
-        }
-        if (unclosedQuotes) {
-          // inside a quote, no need to validate further
-          continue;
-        }
-        // Check for characters that break search
-        if ('~@[]|<>'.indexOf(character) > -1) {
-          inputErrors.add('The following characters are not allowed in the search string: ~ @ [ ] | < >');
-          continue;
-        }
-        // Check for trailing + or -
-        if ('+-'.indexOf(character) > -1 && (currentInputString[i + 1] === ' ' || currentInputString[i + 1] === undefined)) {
-          inputErrors.add(`Trailing ${character} characters are not allowed in the search string`);
-          continue;
-        }
-        const parenPosition = '()'.indexOf(character);
-        if (parenPosition === -1) {
-          // Parens are the last character check, so we can continue if it's something else
-          continue;
-        }
-        if (parenPosition === 0) {
-          openParensCount++; // increment the number of unclosed parens
-        } else {
-          if (openParensCount === 0) {
-            // too many closing parens
-            inputErrors.add('There are too many ) characters in the search string');
-            continue;
-          }
-          openParensCount--; // decrement the number of unclosed parens
-        }
-      }
-      if (openParensCount > 0) {
-        // unclosed paren
-        inputErrors.add('There is an unclosed ( in the search string');
-      }
-      if (unclosedQuotes) {
-        // unclosed quote
-        inputErrors.add('There is an unclosed " in the search string');
-      }
-      this.setState({inputErrors: Array.from(inputErrors)});
-      return inputErrors.size === 0; // return true if no errors
-    }
-
     handleSearchKeyPress(e) {
       const {currentInputString} = this.state;
       // search on enter key if no forbidden characters are present
       if (e.key === Key.Enter) {
         if (currentInputString.trim().length < 3) {
-          this.setState({showSearchError: true});
+          this.setState({inputErrors: [], showSearchError: true});
         } else {
-          if (this.validateInputForMySQL()) {
-            this.setState({currentSearchString: currentInputString, showSearchError: false}, () => this.searchConcepts());
+          const inputErrors = validateInputForMySQL(currentInputString);
+          this.setState({inputErrors, showSearchError: false});
+          if (inputErrors.length === 0) {
+            this.setState({currentSearchString: currentInputString}, () => this.searchConcepts());
           }
         }
       }

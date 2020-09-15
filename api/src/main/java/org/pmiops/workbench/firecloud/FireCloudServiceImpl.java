@@ -64,7 +64,8 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<WorkspacesApi> serviceAccountWorkspaceApiProvider;
 
   private final Provider<StatusApi> statusApiProvider;
-  private final Provider<StaticNotebooksApi> staticNotebooksApiProvider;
+  private final Provider<StaticNotebooksApi> endUserStaticNotebooksApiProvider;
+  private final Provider<StaticNotebooksApi> serviceAccountStaticNotebooksApiProvider;
   private final FirecloudRetryHandler retryHandler;
 
   private final Provider<ServiceAccountCredentials> fcAdminCredsProvider;
@@ -114,7 +115,10 @@ public class FireCloudServiceImpl implements FireCloudService {
       @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_WORKSPACE_API)
           Provider<WorkspacesApi> serviceAccountWorkspaceApiProvider,
       Provider<StatusApi> statusApiProvider,
-      Provider<StaticNotebooksApi> staticNotebooksApiProvider,
+      @Qualifier(FireCloudConfig.END_USER_STATIC_NOTEBOOKS_API)
+          Provider<StaticNotebooksApi> endUserStaticNotebooksApiProvider,
+      @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_STATIC_NOTEBOOKS_API)
+          Provider<StaticNotebooksApi> serviceAccountStaticNotebooksApiProvider,
       FirecloudRetryHandler retryHandler,
       @Qualifier(Constants.FIRECLOUD_ADMIN_CREDS)
           Provider<ServiceAccountCredentials> fcAdminCredsProvider,
@@ -130,7 +134,8 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.statusApiProvider = statusApiProvider;
     this.retryHandler = retryHandler;
     this.fcAdminCredsProvider = fcAdminCredsProvider;
-    this.staticNotebooksApiProvider = staticNotebooksApiProvider;
+    this.endUserStaticNotebooksApiProvider = endUserStaticNotebooksApiProvider;
+    this.serviceAccountStaticNotebooksApiProvider = serviceAccountStaticNotebooksApiProvider;
     this.iamCredentialsClient = iamCredentialsClient;
     this.httpTransport = httpTransport;
   }
@@ -471,7 +476,13 @@ public class FireCloudServiceImpl implements FireCloudService {
   @Override
   public String staticNotebooksConvert(byte[] notebook) {
     return retryHandler.run(
-        (context) -> staticNotebooksApiProvider.get().convertNotebook(notebook));
+        (context) -> endUserStaticNotebooksApiProvider.get().convertNotebook(notebook));
+  }
+
+  @Override
+  public String staticNotebooksConvertAsService(byte[] notebook) {
+    return retryHandler.run(
+        (context) -> serviceAccountStaticNotebooksApiProvider.get().convertNotebook(notebook));
   }
 
   @Override

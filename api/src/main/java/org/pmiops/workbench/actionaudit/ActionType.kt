@@ -12,4 +12,5 @@ enum class ActionType {
     COLLABORATE,
     DELETE,
     DETECT_HIGH_EGRESS_EVENT,
+    VIEW,
 }

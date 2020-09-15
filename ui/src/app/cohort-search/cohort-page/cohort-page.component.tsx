@@ -183,14 +183,14 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
                       {!!cohort && !!cohort.name && <div style={{height: '1.5rem', padding: '0 0.5rem', width: '100%'}}>
                         <h3 style={{marginTop: 0}}>{cohort.name}</h3>
                       </div>}
-                      <div id='list-include-groups-v2' style={colStyle('50')}>
+                      <div id='list-include-groups' style={colStyle('50')}>
                         <SearchGroupList groups={criteria.includes}
                                          setSearchContext={(c) => this.setSearchContext(c)}
                                          role='includes'
                                          updated={updateGroupListsCount}
                                          updateRequest={() => this.updateRequest()}/>
                       </div>
-                      <div id='list-exclude-groups-v2' style={colStyle('50')}>
+                      <div id='list-exclude-groups' style={colStyle('50')}>
                         {overview && <SearchGroupList groups={criteria.excludes}
                                                       setSearchContext={(c) => this.setSearchContext(c)}
                                                       role='excludes'

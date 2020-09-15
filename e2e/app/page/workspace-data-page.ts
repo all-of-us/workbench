@@ -1,18 +1,15 @@
 import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
-import DataResourceCard, {CardType} from 'app/component/data-resource-card';
+import DataResourceCard from 'app/component/data-resource-card';
 import EllipsisMenu from 'app/component/ellipsis-menu';
-import Modal from 'app/component/modal';
 import ClrIconLink from 'app/element/clr-icon-link';
-import Textarea from 'app/element/textarea';
-import Textbox from 'app/element/textbox';
-import {EllipsisMenuAction, Language, LinkText} from 'app/text-labels';
+import {EllipsisMenuAction, Language, ResourceCard} from 'app/text-labels';
 import {ElementHandle, Page} from 'puppeteer';
 import {makeRandomName} from 'utils/str-utils';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
 import CohortActionsPage from './cohort-actions-page';
 import CohortBuildPage from './cohort-build-page';
-import {Visits} from './cohort-criteria-modal';
+import {Visits} from './cohort-search-page';
 import ConceptsetSearchPage from './conceptset-search-page';
 import DatasetBuildPage from './dataset-build-page';
 import NotebookPage from './notebook-page';
@@ -80,102 +77,9 @@ export default class WorkspaceDataPage extends WorkspaceBase {
    */
   async exportToNotebook(datasetName: string, notebookName: string): Promise<void> {
     const resourceCard = new DataResourceCard(this.page);
-    const datasetCard = await resourceCard.findCard(datasetName, CardType.Dataset);
+    const datasetCard = await resourceCard.findCard(datasetName, ResourceCard.Dataset);
     await datasetCard.clickEllipsisAction(EllipsisMenuAction.exportToNotebook, {waitForNav: false});
     console.log(`Exported Dataset "${datasetName}" to notebook "${notebookName}"`);
-  }
-
-  /**
-   * Delete cohort by look up its name using Ellipsis menu.
-   * @param {string} cohortName
-   */
-  async deleteCohort(cohortName: string): Promise<string[]> {
-    const cohortCard = await DataResourceCard.findCard(this.page, cohortName);
-    if (cohortCard == null) {
-      throw new Error(`Failed to find Cohort: "${cohortName}".`);
-    }
-    await cohortCard.clickEllipsisAction(EllipsisMenuAction.Delete, {waitForNav: false});
-    const modalContent = await (new CohortBuildPage(this.page)).deleteConfirmationDialog();
-    console.log(`Deleted Cohort "${cohortName}"`);
-    return modalContent;
-  }
-
-  /**
-   * Delete Dataset thru Ellipsis menu located inside the Dataset Resource card.
-   * @param {string} datasetName
-   */
-  async deleteDataset(datasetName: string): Promise<string[]> {
-    const datasetCard = await DataResourceCard.findCard(this.page, datasetName);
-    if (datasetCard == null) {
-      throw new Error(`Failed to find Dataset: "${datasetName}".`);
-    }
-    await datasetCard.clickEllipsisAction(EllipsisMenuAction.Delete, {waitForNav: false});
-
-    const modal = new Modal(this.page);
-    const modalContentText = await modal.getTextContent();
-    await modal.clickButton(LinkText.DeleteDataset, {waitForClose: true});
-    await waitWhileLoading(this.page);
-
-    console.log(`Deleted Dataset "${datasetName}"`);
-    await this.waitForLoad();
-    return modalContentText;
-  }
-
-  /**
-   * Rename Dataset thru the Ellipsis menu located inside the Dataset Resource card.
-   * @param {string} datasetName
-   * @param {string} newDatasetName
-   */
-  async renameDataset(datasetName: string, newDatasetName: string): Promise<void> {
-    const datasetCard = await DataResourceCard.findCard(this.page, datasetName);
-    await datasetCard.clickEllipsisAction(EllipsisMenuAction.RenameDataset, {waitForNav: false});
-
-    const modal = new Modal(this.page);
-
-    const newNameTextbox = new Textbox(this.page, `${modal.getXpath()}//*[@id="new-name"]`);
-    await newNameTextbox.type(newDatasetName);
-
-    const descriptionTextarea = await Textarea.findByName(this.page, {containsText: 'Description:'}, modal);
-    await descriptionTextarea.type('Puppeteer automation rename dataset.');
-
-    await modal.clickButton(LinkText.RenameDataset, {waitForClose: true});
-    await waitWhileLoading(this.page);
-
-    console.log(`Renamed Dataset "${datasetName}" to "${newDatasetName}"`);
-  }
-
-  /**
-   * Delete ConceptSet thru Ellipsis menu located inside the Concept Set resource card.
-   * @param {string} conceptsetName
-   */
-  async deleteConceptSet(conceptsetName: string): Promise<string[]> {
-    const conceptSetCard = await DataResourceCard.findCard(this.page, conceptsetName);
-    if (conceptSetCard == null) {
-      throw new Error(`Failed to find Concept Set: "${conceptsetName}".`);
-    }
-    await conceptSetCard.clickEllipsisAction(EllipsisMenuAction.Delete, {waitForNav: false});
-
-    const modal = new Modal(this.page);
-    const modalTextContent = await modal.getTextContent();
-    await modal.clickButton(LinkText.DeleteConceptSet, {waitForClose: true});
-    await waitWhileLoading(this.page);
-
-    console.log(`Deleted Concept Set "${conceptsetName}"`);
-    return modalTextContent;
-  }
-
-  async renameCohort(cohortName: string, newCohortName: string): Promise<void> {
-    const cohortCard = await DataResourceCard.findCard(this.page, cohortName);
-    await cohortCard.clickEllipsisAction(EllipsisMenuAction.Rename, {waitForNav: false});
-    const modal = new Modal(this.page);
-    await modal.getTextContent();
-    const newNameInput = new Textbox(this.page, `${modal.getXpath()}//*[@id="new-name"]`);
-    await newNameInput.type(newCohortName);
-    const descriptionTextarea = await Textarea.findByName(this.page, {containsText: 'Description:'}, modal);
-    await descriptionTextarea.type('Puppeteer automation rename cohort.');
-    await modal.clickButton(LinkText.Rename, {waitForClose: true});
-    await waitWhileLoading(this.page);
-    console.log(`Cohort "${cohortName}" renamed to "${newCohortName}"`);
   }
 
   async findCohortCard(cohortName?: string): Promise<DataResourceCard> {
@@ -200,9 +104,10 @@ export default class WorkspaceDataPage extends WorkspaceBase {
     const cohortBuildPage = new CohortBuildPage(this.page);
     await cohortBuildPage.waitForLoad();
     const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
-    const modal = await group1.includeVisits();
-    await modal.addVisits([Visits.OutpatientVisit]);
-    await modal.clickFinishButton();
+    const searchPage = await group1.includeVisits();
+    await searchPage.addVisits([Visits.OutpatientVisit]);
+    // Open selection list and click Save Criteria button
+    await searchPage.viewAndSaveCriteria();
     await waitWhileLoading(this.page);
     await cohortBuildPage.getTotalCount();
     const name = (cohortName === undefined) ? makeRandomName() : cohortName;
