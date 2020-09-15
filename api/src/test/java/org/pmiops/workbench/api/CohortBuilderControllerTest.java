@@ -95,7 +95,7 @@ public class CohortBuilderControllerTest {
         DbCriteria.builder()
             .addDomainId(DomainType.CONDITION.toString())
             .addType(CriteriaType.ICD9CM.toString())
-            .addCount("0")
+            .addCount(0L)
             .addHierarchy(true)
             .addStandard(false)
             .addParentId(0L)
@@ -105,7 +105,7 @@ public class CohortBuilderControllerTest {
         DbCriteria.builder()
             .addDomainId(DomainType.CONDITION.toString())
             .addType(CriteriaType.ICD9CM.toString())
-            .addCount("0")
+            .addCount(0L)
             .addHierarchy(true)
             .addStandard(false)
             .addParentId(icd9CriteriaParent.getId())
@@ -170,7 +170,7 @@ public class CohortBuilderControllerTest {
         DbCriteria.builder()
             .addDomainId(DomainType.PERSON.toString())
             .addType(CriteriaType.AGE.toString())
-            .addCount("0")
+            .addCount(0L)
             .addParentId(0L)
             .build();
     cbCriteriaDao.save(demoCriteria);
@@ -191,7 +191,7 @@ public class CohortBuilderControllerTest {
         DbCriteria.builder()
             .addDomainId(DomainType.MEASUREMENT.toString())
             .addType(CriteriaType.LOINC.toString())
-            .addCount("0")
+            .addCount(0L)
             .addHierarchy(true)
             .addStandard(true)
             .addSynonyms("LP12*[MEASUREMENT_rank1]")
@@ -219,7 +219,7 @@ public class CohortBuilderControllerTest {
         DbCriteria.builder()
             .addDomainId(DomainType.MEASUREMENT.toString())
             .addType(CriteriaType.LOINC.toString())
-            .addCount("0")
+            .addCount(0L)
             .addHierarchy(true)
             .addStandard(true)
             .addCode("LP123")
@@ -248,7 +248,7 @@ public class CohortBuilderControllerTest {
         DbCriteria.builder()
             .addDomainId(DomainType.CONDITION.toString())
             .addType(CriteriaType.SNOMED.toString())
-            .addCount("0")
+            .addCount(0L)
             .addHierarchy(true)
             .addStandard(true)
             .addSynonyms("LP12*[CONDITION_rank1]")
@@ -306,7 +306,7 @@ public class CohortBuilderControllerTest {
     DbCriteria criteria =
         DbCriteria.builder()
             .addCode("001")
-            .addCount("10")
+            .addCount(10L)
             .addConceptId("123")
             .addDomainId(DomainType.CONDITION.toString())
             .addGroup(Boolean.TRUE)
@@ -334,7 +334,7 @@ public class CohortBuilderControllerTest {
     DbCriteria criteria =
         DbCriteria.builder()
             .addCode("00")
-            .addCount("10")
+            .addCount(10L)
             .addConceptId("123")
             .addDomainId(DomainType.CONDITION.toString())
             .addGroup(Boolean.TRUE)
@@ -363,7 +363,7 @@ public class CohortBuilderControllerTest {
     DbCriteria criteria1 =
         DbCriteria.builder()
             .addCode("672535")
-            .addCount("-1")
+            .addCount(-1L)
             .addConceptId("19001487")
             .addDomainId(DomainType.DRUG.toString())
             .addGroup(Boolean.FALSE)
@@ -391,7 +391,7 @@ public class CohortBuilderControllerTest {
     DbCriteria criteria =
         DbCriteria.builder()
             .addCode("LP12")
-            .addCount("10")
+            .addCount(10L)
             .addConceptId("123")
             .addDomainId(DomainType.CONDITION.toString())
             .addGroup(Boolean.TRUE)
@@ -419,7 +419,7 @@ public class CohortBuilderControllerTest {
     DbCriteria criteria =
         DbCriteria.builder()
             .addCode("001")
-            .addCount("10")
+            .addCount(10L)
             .addConceptId("123")
             .addDomainId(DomainType.CONDITION.toString())
             .addGroup(Boolean.TRUE)
@@ -449,7 +449,7 @@ public class CohortBuilderControllerTest {
     DbCriteria criteria =
         DbCriteria.builder()
             .addCode("001")
-            .addCount("10")
+            .addCount(10L)
             .addConceptId("123")
             .addDomainId(DomainType.DRUG.toString())
             .addGroup(Boolean.TRUE)
@@ -484,7 +484,7 @@ public class CohortBuilderControllerTest {
             .addDomainId(DomainType.CONDITION.toString())
             .addType(CriteriaType.ICD10CM.toString())
             .addStandard(true)
-            .addCount("1")
+            .addCount(1L)
             .addConceptId("1")
             .addSynonyms("[CONDITION_rank1]")
             .build();
@@ -511,7 +511,7 @@ public class CohortBuilderControllerTest {
             .addConceptId("12345")
             .addGroup(true)
             .addSelectable(true)
-            .addCount("12")
+            .addCount(12L)
             .build();
     cbCriteriaDao.save(drugATCCriteria);
     DbCriteria drugBrandCriteria =
@@ -524,7 +524,7 @@ public class CohortBuilderControllerTest {
             .addConceptId("1235")
             .addGroup(true)
             .addSelectable(true)
-            .addCount("33")
+            .addCount(33L)
             .build();
     cbCriteriaDao.save(drugBrandCriteria);
 
@@ -720,6 +720,8 @@ public class CohortBuilderControllerTest {
         .code(dbCriteria.getCode())
         .conceptId(dbCriteria.getConceptId() == null ? null : new Long(dbCriteria.getConceptId()))
         .count(new Long(dbCriteria.getCount()))
+        .parentCount(dbCriteria.getParentCount())
+        .childCount(dbCriteria.getChildCount())
         .domainId(dbCriteria.getDomainId())
         .group(dbCriteria.getGroup())
         .hasAttributes(dbCriteria.getAttribute())
