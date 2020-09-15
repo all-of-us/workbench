@@ -13,13 +13,13 @@ const AdminNotebookViewComponent = (props: Props) => {
 
 // attempt 1
 
-// export const AdminNotebookView = () => {
+// const AdminNotebookView = () => {
 //     const {workspaceNamespace, nbName} = useParams();
 //     return <AdminNotebookViewComponent workspaceNamespace={workspaceNamespace} nbName={nbName}/>;
 // };
 
 // attempt 2
-export class AdminNotebookView extends React.Component<Props, {}> {
+class AdminNotebookView extends React.Component<Props, {}> {
   constructor(props: Props) {
     super(props);
   }
@@ -28,4 +28,8 @@ export class AdminNotebookView extends React.Component<Props, {}> {
     const {workspaceNamespace, nbName} = useParams();
     return <AdminNotebookViewComponent workspaceNamespace={workspaceNamespace} nbName={nbName}/>;
   }
+}
+
+export {
+  AdminNotebookView
 }
