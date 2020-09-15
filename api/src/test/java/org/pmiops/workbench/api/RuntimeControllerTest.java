@@ -56,19 +56,11 @@ import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
-import org.pmiops.workbench.model.Cluster;
-import org.pmiops.workbench.model.ClusterConfig;
-import org.pmiops.workbench.model.ClusterLocalizeRequest;
-import org.pmiops.workbench.model.ClusterLocalizeResponse;
-import org.pmiops.workbench.model.ClusterStatus;
-import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.ListClusterDeleteRequest;
 import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeLocalizeRequest;
 import org.pmiops.workbench.model.RuntimeLocalizeResponse;
 import org.pmiops.workbench.model.RuntimeStatus;
-import org.pmiops.workbench.model.UpdateClusterConfigRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.test.FakeClock;
@@ -77,7 +69,6 @@ import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
-import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,7 +78,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -120,7 +110,7 @@ public class RuntimeControllerTest {
   private static final String API_BASE_URL = "https://" + API_HOST;
   private static final String BIGQUERY_DATASET = "dataset-name";
   private static final String EXTRA_RUNTIME_NAME = "all-of-us-extra";
-  private static final String EXTRA_CLUSTER_NAME_DIFFERENT_PROJECT = "all-of-us-different-project";
+  private static final String EXTRA_RUNTIME_NAME_DIFFERENT_PROJECT = "all-of-us-different-project";
 
   private static WorkbenchConfig config = new WorkbenchConfig();
   private static DbUser user = new DbUser();
@@ -178,7 +168,6 @@ public class RuntimeControllerTest {
   @MockBean WorkspaceService mockWorkspaceService;
 
   @Autowired UserDao userDao;
-  @Autowired WorkspaceMapper workspaceMapper;
   @Autowired RuntimeController runtimeController;
 
   private DbCdrVersion cdrVersion;
@@ -189,7 +178,6 @@ public class RuntimeControllerTest {
   private LeonardoListRuntimeResponse testLeoListRuntimeResponse2;
   private LeonardoListRuntimeResponse testLeoListRuntimeResponseDifferentProject;
 
-  private Cluster testCluster;
   private Runtime testRuntime;
   private DbWorkspace testWorkspace;
 
@@ -228,12 +216,6 @@ public class RuntimeControllerTest {
             .runtimeName(getRuntimeName())
             .googleProject(BILLING_PROJECT_ID)
             .status(LeonardoRuntimeStatus.RUNNING);
-    testCluster =
-        new Cluster()
-            .clusterName(getRuntimeName())
-            .clusterNamespace(BILLING_PROJECT_ID)
-            .status(ClusterStatus.DELETING)
-            .createdDate(createdDate);
     testRuntime =
         new Runtime()
             .runtimeName(getRuntimeName())
@@ -256,14 +238,14 @@ public class RuntimeControllerTest {
 
     testLeoRuntimeDifferentProject =
         new LeonardoGetRuntimeResponse()
-            .runtimeName(EXTRA_CLUSTER_NAME_DIFFERENT_PROJECT)
+            .runtimeName(EXTRA_RUNTIME_NAME_DIFFERENT_PROJECT)
             .googleProject(BILLING_PROJECT_ID_2)
             .status(LeonardoRuntimeStatus.RUNNING)
             .auditInfo(new LeonardoAuditInfo().createdDate(createdDate));
 
     testLeoListRuntimeResponseDifferentProject =
         new LeonardoListRuntimeResponse()
-            .runtimeName(EXTRA_CLUSTER_NAME_DIFFERENT_PROJECT)
+            .runtimeName(EXTRA_RUNTIME_NAME_DIFFERENT_PROJECT)
             .googleProject(BILLING_PROJECT_ID_2)
             .status(LeonardoRuntimeStatus.RUNNING);
 
@@ -581,327 +563,6 @@ public class RuntimeControllerTest {
     RuntimeLocalizeRequest req = new RuntimeLocalizeRequest();
 
     assertThrows(ForbiddenException.class, () -> runtimeController.localize(WORKSPACE_NS, req));
-    verify(mockWorkspaceService, never()).validateActiveBilling(anyString(), anyString());
-  }
-
-  // TODO(RW-5405): all below tests are deprecated, and will be removed after the next release.
-
-  @Test
-  public void testGetCluster() {
-    when(mockLeoNotebooksClient.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
-        .thenReturn(testLeoRuntime);
-
-    assertThat(runtimeController.getCluster(BILLING_PROJECT_ID).getBody()).isEqualTo(testCluster);
-  }
-
-  @Test
-  public void testGetCluster_UnknownStatus() {
-    when(mockLeoNotebooksClient.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
-        .thenReturn(testLeoRuntime.status(null));
-
-    assertThat(runtimeController.getCluster(BILLING_PROJECT_ID).getBody().getStatus())
-        .isEqualTo(ClusterStatus.UNKNOWN);
-  }
-
-  @Test(expected = NotFoundException.class)
-  public void testGetCluster_NullBillingProject() {
-    runtimeController.getCluster(null);
-  }
-
-  @Test
-  public void testDeleteClustersInProject() {
-    List<LeonardoListRuntimeResponse> listRuntimeResponseList =
-        ImmutableList.of(testLeoListRuntimeResponse);
-    when(mockLeoNotebooksClient.listRuntimesByProjectAsService(BILLING_PROJECT_ID))
-        .thenReturn(listRuntimeResponseList);
-
-    runtimeController.deleteClustersInProject(
-        BILLING_PROJECT_ID,
-        new ListClusterDeleteRequest()
-            .clustersToDelete(ImmutableList.of(testLeoRuntime.getRuntimeName())));
-    verify(mockLeoNotebooksClient)
-        .deleteRuntimeAsService(BILLING_PROJECT_ID, testLeoRuntime.getRuntimeName());
-    verify(mockLeonardoRuntimeAuditor)
-        .fireDeleteRuntimesInProject(
-            BILLING_PROJECT_ID,
-            listRuntimeResponseList.stream()
-                .map(LeonardoListRuntimeResponse::getRuntimeName)
-                .collect(Collectors.toList()));
-  }
-
-  @Test
-  public void testDeleteClustersInProject_DeleteSome() {
-    List<LeonardoListRuntimeResponse> listRuntimeResponseList =
-        ImmutableList.of(testLeoListRuntimeResponse, testLeoListRuntimeResponse2);
-    List<String> clustersToDelete = ImmutableList.of(testLeoRuntime.getRuntimeName());
-    when(mockLeoNotebooksClient.listRuntimesByProjectAsService(BILLING_PROJECT_ID))
-        .thenReturn(listRuntimeResponseList);
-
-    runtimeController.deleteClustersInProject(
-        BILLING_PROJECT_ID, new ListClusterDeleteRequest().clustersToDelete(clustersToDelete));
-    verify(mockLeoNotebooksClient, times(clustersToDelete.size()))
-        .deleteRuntimeAsService(BILLING_PROJECT_ID, testLeoRuntime.getRuntimeName());
-    verify(mockLeonardoRuntimeAuditor, times(1))
-        .fireDeleteRuntimesInProject(BILLING_PROJECT_ID, clustersToDelete);
-  }
-
-  @Test
-  public void testDeleteClustersInProject_DeleteDoesNotAffectOtherProjects() {
-    List<LeonardoListRuntimeResponse> listRuntimeResponseList =
-        ImmutableList.of(testLeoListRuntimeResponse, testLeoListRuntimeResponse2);
-    List<String> clustersToDelete =
-        ImmutableList.of(testLeoRuntimeDifferentProject.getRuntimeName());
-    when(mockLeoNotebooksClient.listRuntimesByProjectAsService(BILLING_PROJECT_ID))
-        .thenReturn(listRuntimeResponseList);
-
-    runtimeController.deleteClustersInProject(
-        BILLING_PROJECT_ID, new ListClusterDeleteRequest().clustersToDelete(clustersToDelete));
-    verify(mockLeoNotebooksClient, times(0))
-        .deleteRuntimeAsService(BILLING_PROJECT_ID, testLeoRuntime.getRuntimeName());
-    verify(mockLeonardoRuntimeAuditor, times(0))
-        .fireDeleteRuntimesInProject(BILLING_PROJECT_ID, clustersToDelete);
-  }
-
-  @Test
-  public void testDeleteClustersInProject_NoClusters() {
-    List<LeonardoListRuntimeResponse> listRuntimeResponseList =
-        ImmutableList.of(testLeoListRuntimeResponse);
-    when(mockLeoNotebooksClient.listRuntimesByProjectAsService(BILLING_PROJECT_ID))
-        .thenReturn(listRuntimeResponseList);
-
-    runtimeController.deleteClustersInProject(
-        BILLING_PROJECT_ID, new ListClusterDeleteRequest().clustersToDelete(ImmutableList.of()));
-    verify(mockLeoNotebooksClient, never())
-        .deleteRuntimeAsService(BILLING_PROJECT_ID, testLeoRuntime.getRuntimeName());
-    verify(mockLeonardoRuntimeAuditor, never())
-        .fireDeleteRuntimesInProject(
-            BILLING_PROJECT_ID,
-            listRuntimeResponseList.stream()
-                .map(LeonardoListRuntimeResponse::getRuntimeName)
-                .collect(Collectors.toList()));
-  }
-
-  @Test
-  public void testDeleteClustersInProject_NullClustersList() {
-    List<LeonardoListRuntimeResponse> listRuntimeResponseList =
-        ImmutableList.of(testLeoListRuntimeResponse);
-    when(mockLeoNotebooksClient.listRuntimesByProjectAsService(BILLING_PROJECT_ID))
-        .thenReturn(listRuntimeResponseList);
-
-    runtimeController.deleteClustersInProject(
-        BILLING_PROJECT_ID, new ListClusterDeleteRequest().clustersToDelete(null));
-    verify(mockLeoNotebooksClient)
-        .deleteRuntimeAsService(BILLING_PROJECT_ID, testLeoRuntime.getRuntimeName());
-    verify(mockLeonardoRuntimeAuditor)
-        .fireDeleteRuntimesInProject(
-            BILLING_PROJECT_ID,
-            listRuntimeResponseList.stream()
-                .map(LeonardoListRuntimeResponse::getRuntimeName)
-                .collect(Collectors.toList()));
-  }
-
-  @Test
-  public void testCreateCluster() {
-    when(mockLeoNotebooksClient.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
-        .thenReturn(testLeoRuntime);
-    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
-
-    assertThat(runtimeController.createCluster(BILLING_PROJECT_ID).getBody())
-        .isEqualTo(testCluster);
-    verify(mockLeoNotebooksClient)
-        .createRuntime(eq(BILLING_PROJECT_ID), eq(getRuntimeName()), eq(WORKSPACE_ID));
-  }
-
-  @Test
-  public void testDeleteCluster() {
-    runtimeController.deleteCluster(BILLING_PROJECT_ID);
-    verify(mockLeoNotebooksClient).deleteRuntime(BILLING_PROJECT_ID, getRuntimeName());
-  }
-
-  @Test
-  public void testSetClusterConfig() {
-    ResponseEntity<EmptyResponse> response =
-        this.runtimeController.updateClusterConfig(
-            new UpdateClusterConfigRequest()
-                .userEmail(OTHER_USER_EMAIL)
-                .clusterConfig(
-                    new ClusterConfig().machineType("n1-standard-16").masterDiskSize(100)));
-    assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
-
-    DbUser updatedUser = userDao.findUserByUsername(OTHER_USER_EMAIL);
-    assertThat(updatedUser.getClusterConfigDefault().machineType).isEqualTo("n1-standard-16");
-    assertThat(updatedUser.getClusterConfigDefault().masterDiskSize).isEqualTo(100);
-  }
-
-  @Test
-  public void testUpdateClusterConfigClear() {
-    ResponseEntity<EmptyResponse> response =
-        this.runtimeController.updateClusterConfig(
-            new UpdateClusterConfigRequest()
-                .userEmail(OTHER_USER_EMAIL)
-                .clusterConfig(
-                    new ClusterConfig().machineType("n1-standard-16").masterDiskSize(100)));
-    assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
-
-    response =
-        this.runtimeController.updateClusterConfig(
-            new UpdateClusterConfigRequest().userEmail(OTHER_USER_EMAIL).clusterConfig(null));
-    assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
-
-    DbUser updatedUser = userDao.findUserByUsername(OTHER_USER_EMAIL);
-    assertThat(updatedUser.getClusterConfigDefault()).isNull();
-  }
-
-  @Test(expected = NotFoundException.class)
-  public void testUpdateClusterConfigUserNotFound() {
-    this.runtimeController.updateClusterConfig(
-        new UpdateClusterConfigRequest().userEmail("not-found@researchallofus.org"));
-  }
-
-  @Test
-  public void testDeprecatedLocalize() {
-    ClusterLocalizeRequest req =
-        new ClusterLocalizeRequest()
-            .notebookNames(ImmutableList.of("foo.ipynb"))
-            .playgroundMode(false);
-    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
-    ClusterLocalizeResponse resp =
-        runtimeController.deprecatedLocalize(BILLING_PROJECT_ID, req).getBody();
-    assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces/myfirstworkspace");
-
-    verify(mockLeoNotebooksClient)
-        .localize(eq(BILLING_PROJECT_ID), eq(getRuntimeName()), mapCaptor.capture());
-    Map<String, String> localizeMap = mapCaptor.getValue();
-    assertThat(localizeMap.keySet())
-        .containsExactly(
-            "workspaces/myfirstworkspace/foo.ipynb",
-            "workspaces_playground/myfirstworkspace/.all_of_us_config.json",
-            "workspaces/myfirstworkspace/.all_of_us_config.json");
-    assertThat(localizeMap)
-        .containsEntry(
-            "workspaces/myfirstworkspace/foo.ipynb", "gs://workspace-bucket/notebooks/foo.ipynb");
-    JSONObject aouJson =
-        dataUriToJson(localizeMap.get("workspaces/myfirstworkspace/.all_of_us_config.json"));
-    assertThat(aouJson.getString("WORKSPACE_ID")).isEqualTo(WORKSPACE_ID);
-    assertThat(aouJson.getString("BILLING_CLOUD_PROJECT")).isEqualTo(BILLING_PROJECT_ID);
-    assertThat(aouJson.getString("API_HOST")).isEqualTo(API_HOST);
-    verify(mockUserRecentResourceService, times(1))
-        .updateNotebookEntry(anyLong(), anyLong(), anyString());
-  }
-
-  @Test
-  public void testDeprecatedLocalize_playgroundMode() {
-    ClusterLocalizeRequest req =
-        new ClusterLocalizeRequest()
-            .notebookNames(ImmutableList.of("foo.ipynb"))
-            .playgroundMode(true);
-    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
-    ClusterLocalizeResponse resp =
-        runtimeController.deprecatedLocalize(BILLING_PROJECT_ID, req).getBody();
-    assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces_playground/myfirstworkspace");
-    verify(mockLeoNotebooksClient)
-        .localize(eq(BILLING_PROJECT_ID), eq(getRuntimeName()), mapCaptor.capture());
-    Map<String, String> localizeMap = mapCaptor.getValue();
-    assertThat(localizeMap.keySet())
-        .containsExactly(
-            "workspaces_playground/myfirstworkspace/foo.ipynb",
-            "workspaces_playground/myfirstworkspace/.all_of_us_config.json",
-            "workspaces/myfirstworkspace/.all_of_us_config.json");
-    assertThat(localizeMap)
-        .containsEntry(
-            "workspaces_playground/myfirstworkspace/foo.ipynb",
-            "gs://workspace-bucket/notebooks/foo.ipynb");
-  }
-
-  @Test
-  public void testDeprecatedLocalize_differentNamespace() {
-    ClusterLocalizeRequest req =
-        new ClusterLocalizeRequest()
-            .notebookNames(ImmutableList.of("foo.ipynb"))
-            .playgroundMode(false);
-    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
-    stubGetWorkspace("other-proj", "myotherworkspace", LOGGED_IN_USER_EMAIL);
-    ClusterLocalizeResponse resp =
-        runtimeController.deprecatedLocalize("other-proj", req).getBody();
-    verify(mockLeoNotebooksClient)
-        .localize(eq("other-proj"), eq(getRuntimeName()), mapCaptor.capture());
-
-    Map<String, String> localizeMap = mapCaptor.getValue();
-    assertThat(localizeMap.keySet())
-        .containsExactly(
-            "workspaces/myotherworkspace/foo.ipynb",
-            "workspaces/myotherworkspace/.all_of_us_config.json",
-            "workspaces_playground/myotherworkspace/.all_of_us_config.json");
-    assertThat(localizeMap)
-        .containsEntry(
-            "workspaces/myotherworkspace/foo.ipynb", "gs://workspace-bucket/notebooks/foo.ipynb");
-    assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces/myotherworkspace");
-    JSONObject aouJson =
-        dataUriToJson(localizeMap.get("workspaces/myotherworkspace/.all_of_us_config.json"));
-    assertThat(aouJson.getString("BILLING_CLOUD_PROJECT")).isEqualTo("other-proj");
-  }
-
-  @Test
-  public void testDeprecatedLocalize_noNotebooks() {
-    ClusterLocalizeRequest req = new ClusterLocalizeRequest();
-    req.setPlaygroundMode(false);
-    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
-    ClusterLocalizeResponse resp =
-        runtimeController.deprecatedLocalize(BILLING_PROJECT_ID, req).getBody();
-    verify(mockLeoNotebooksClient)
-        .localize(eq(BILLING_PROJECT_ID), eq(getRuntimeName()), mapCaptor.capture());
-
-    // Config files only.
-    Map<String, String> localizeMap = mapCaptor.getValue();
-    assertThat(localizeMap.keySet())
-        .containsExactly(
-            "workspaces_playground/myfirstworkspace/.all_of_us_config.json",
-            "workspaces/myfirstworkspace/.all_of_us_config.json");
-    assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces/myfirstworkspace");
-  }
-
-  @Test
-  public void getCluster_validateActiveBilling() {
-    doThrow(ForbiddenException.class)
-        .when(mockWorkspaceService)
-        .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
-
-    assertThrows(ForbiddenException.class, () -> runtimeController.getCluster(WORKSPACE_NS));
-  }
-
-  @Test
-  public void getCluster_validateActiveBilling_checkAccessFirst() {
-    doThrow(ForbiddenException.class)
-        .when(mockWorkspaceService)
-        .enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
-            WORKSPACE_NS, WORKSPACE_ID, WorkspaceAccessLevel.WRITER);
-
-    assertThrows(ForbiddenException.class, () -> runtimeController.getCluster(WORKSPACE_NS));
-    verify(mockWorkspaceService, never()).validateActiveBilling(anyString(), anyString());
-  }
-
-  @Test
-  public void deprecatedLocalize_validateActiveBilling() {
-    doThrow(ForbiddenException.class)
-        .when(mockWorkspaceService)
-        .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
-
-    ClusterLocalizeRequest req = new ClusterLocalizeRequest();
-    assertThrows(
-        ForbiddenException.class, () -> runtimeController.deprecatedLocalize(WORKSPACE_NS, req));
-  }
-
-  @Test
-  public void deprecatedLocalize_validateActiveBilling_checkAccessFirst() {
-    doThrow(ForbiddenException.class)
-        .when(mockWorkspaceService)
-        .enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
-            WORKSPACE_NS, WORKSPACE_ID, WorkspaceAccessLevel.WRITER);
-
-    ClusterLocalizeRequest req = new ClusterLocalizeRequest();
-
-    assertThrows(
-        ForbiddenException.class, () -> runtimeController.deprecatedLocalize(WORKSPACE_NS, req));
     verify(mockWorkspaceService, never()).validateActiveBilling(anyString(), anyString());
   }
 

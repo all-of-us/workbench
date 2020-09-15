@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
+import org.pmiops.workbench.actionaudit.auditors.AdminAuditor;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapper;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper;
@@ -44,7 +45,7 @@ import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.AdminWorkspaceResources;
 import org.pmiops.workbench.model.CloudStorageTraffic;
-import org.pmiops.workbench.model.ListClusterResponse;
+import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAdminView;
@@ -87,6 +88,7 @@ public class WorkspaceAdminServiceTest {
   })
   @MockBean({
     ActionAuditQueryService.class,
+    AdminAuditor.class,
     CloudStorageService.class,
     CohortDao.class,
     CohortReviewMapper.class,
@@ -196,7 +198,7 @@ public class WorkspaceAdminServiceTest {
     assertThat(cloudStorageCounts.getNonNotebookFileCount()).isEqualTo(0);
     assertThat(cloudStorageCounts.getStorageBytesUsed()).isEqualTo(0L);
 
-    List<ListClusterResponse> clusters = resources.getClusters();
-    assertThat(clusters).isEmpty();
+    List<ListRuntimeResponse> runtimes = resources.getRuntimes();
+    assertThat(runtimes).isEmpty();
   }
 }

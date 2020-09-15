@@ -1,14 +1,12 @@
-import DataResourceCard, {CardType} from 'app/component/data-resource-card';
-import Modal from 'app/component/modal';
+import CopyModal from 'app/component/copy-modal';
+import DataResourceCard from 'app/component/data-resource-card';
 import NewNotebookModal from 'app/component/new-notebook-modal';
 import Link from 'app/element/link';
-import Textbox from 'app/element/textbox';
-import {EllipsisMenuAction, Language, LinkText} from 'app/text-labels';
+import {EllipsisMenuAction, Language, LinkText, ResourceCard} from 'app/text-labels';
 import {Page} from 'puppeteer';
+import {getPropValue} from 'utils/element-utils';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
-import {getPropValue} from 'utils/element-utils';
-import CopyModal from 'app/component/copy-modal';
 import NotebookPage from './notebook-page';
 import WorkspaceBase from './workspace-base';
 
@@ -31,24 +29,6 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
       console.log(`WorkspaceAnalysisPage isLoaded() encountered ${err}`);
       return false;
     }
-  }
-
-   /**
-    * Delete notebook thru Ellipsis menu located inside the Notebook resource card.
-    * @param {string} notebookName
-    */
-  async deleteNotebook(notebookName: string): Promise<string[]> {
-    const resourceCard = await DataResourceCard.findCard(this.page, notebookName);
-    await resourceCard.clickEllipsisAction(EllipsisMenuAction.Delete, {waitForNav: false});
-
-    const modal = new Modal(this.page);
-    const modalContentText = await modal.getTextContent();
-    await modal.clickButton(LinkText.DeleteNotebook, {waitForClose: true});
-    await waitWhileLoading(this.page);
-
-    console.log(`Deleted Notebook "${notebookName}"`);
-    await this.waitForLoad();
-    return modalContentText;
   }
 
   /**
@@ -109,26 +89,13 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
     return Link.findByName(this.page, {normalizeSpace: LinkText.CreateNewNotebook});
   }
 
-  async renameNotebook(notebookName: string, newNotebookName: string): Promise<string[]> {
-    const notebookCard = await DataResourceCard.findCard(this.page, notebookName);
-    await notebookCard.clickEllipsisAction(EllipsisMenuAction.Rename, {waitForNav: false});
-    const modal = new Modal(this.page);
-    const modalTextContents = await modal.getTextContent();
-    const newNameInput = new Textbox(this.page, `${modal.getXpath()}//*[@id="new-name"]`);
-    await newNameInput.type(newNotebookName);
-    await modal.clickButton(LinkText.RenameNotebook, {waitForClose: true});
-    await waitWhileLoading(this.page);
-    console.log(`Notebook "${notebookName}" renamed to "${newNotebookName}"`);
-    return modalTextContents;
-  }
-
   /**
    * Duplicate notebook using Ellipsis menu in Workspace Analysis page.
    * @param {string} notebookName The notebook name to clone from.
    */
   async duplicateNotebook(notebookName: string): Promise<string> {
     const resourceCard = new DataResourceCard(this.page);
-    const notebookCard = await resourceCard.findCard(notebookName, CardType.Notebook);
+    const notebookCard = await resourceCard.findCard(notebookName, ResourceCard.Notebook);
     await notebookCard.clickEllipsisAction(EllipsisMenuAction.Duplicate, {waitForNav: false});
     await waitWhileLoading(this.page);
     return `Duplicate of ${notebookName}`; // name of clone notebook
@@ -143,7 +110,7 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
   async copyNotebookToWorkspace(notebookName: string, destinationWorkspace: string, destinationNotebookName?: string): Promise<void> {
     // Open Copy modal.s
     const resourceCard = new DataResourceCard(this.page);
-    const notebookCard = await resourceCard.findCard(notebookName, CardType.Notebook);
+    const notebookCard = await resourceCard.findCard(notebookName, ResourceCard.Notebook);
     await notebookCard.clickEllipsisAction(EllipsisMenuAction.CopyToAnotherWorkspace, {waitForNav: false});
     // Fill out modal fields.
     const copyModal = await new CopyModal(this.page);

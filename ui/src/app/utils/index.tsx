@@ -560,3 +560,56 @@ export const useToggle = (): [boolean, Function] => {
 
   return [state, setState];
 };
+
+// Takes a search string and validates for the most common MySQL use cases.
+// Checks for unbalanced (), unclosed "", trailing + or -, and breaking special characters.
+export function validateInputForMySQL(searchString: string): Array<string> {
+  const inputErrors = new Set(); // use Set to prevent duplicate messages
+  let openParensCount = 0;
+  let unclosedQuotes = false;
+  for (let i = 0; i < searchString.length; i++) {
+    const character = searchString[i];
+    if (character === '"') {
+      unclosedQuotes = !unclosedQuotes;
+      continue;
+    }
+    if (unclosedQuotes) {
+      // inside a quote, no need to validate further
+      continue;
+    }
+    // Check for characters that break search
+    if ('~@[]|<>'.indexOf(character) > -1) {
+      inputErrors.add('The following characters are not allowed in the search string: ~ @ [ ] | < >');
+      continue;
+    }
+    // Check for trailing + or -
+    if ('+-'.indexOf(character) > -1 && (searchString[i + 1] === ' ' || searchString[i + 1] === undefined)) {
+      inputErrors.add(`Trailing ${character} characters are not allowed in the search string`);
+      continue;
+    }
+    const parenPosition = '()'.indexOf(character);
+    if (parenPosition === -1) {
+      // Parens are the last character check, so we can continue if it's something else
+      continue;
+    }
+    if (parenPosition === 0) {
+      openParensCount++; // increment the number of unclosed parens
+    } else {
+      if (openParensCount === 0) {
+        // too many closing parens
+        inputErrors.add('There are too many ) characters in the search string');
+        continue;
+      }
+      openParensCount--; // decrement the number of unclosed parens
+    }
+  }
+  if (openParensCount > 0) {
+    // unclosed paren
+    inputErrors.add('There is an unclosed ( in the search string');
+  }
+  if (unclosedQuotes) {
+    // unclosed quote
+    inputErrors.add('There is an unclosed " in the search string');
+  }
+  return Array.from(inputErrors);
+}

@@ -82,8 +82,8 @@ public class OfflineRuntimeControllerTest {
   }
 
   private LeonardoGetRuntimeResponse runtimeWithAgeAndIdle(Duration age, Duration idleTime) {
-    // There should only be one cluster per project, so increment an index for
-    // each cluster created per test.
+    // There should only be one runtime per project, so increment an index for
+    // each runtime created per test.
     return new LeonardoGetRuntimeResponse()
         .runtimeName("all-of-us")
         .googleProject(String.format("proj-%d", projectIdIndex++))

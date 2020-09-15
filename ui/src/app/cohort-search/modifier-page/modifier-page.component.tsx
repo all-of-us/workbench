@@ -474,7 +474,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
       by a time period of up to 364 days backwards to de-identify patient data.
       The date shift differs across participants.`;
       const disableCalculate = formErrors.length > 0 || formUntouched || initialFormState;
-      return <div>
+      return <div id='modifiers-form'>
         <h3 style={{...styles.header, marginTop: 0}}>Apply optional Modifiers</h3>
         <div style={{marginTop: '1rem'}}>
           <div>

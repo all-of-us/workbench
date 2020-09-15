@@ -32,15 +32,14 @@ constructor(
 ) : EgressEventAuditor {
 
     /**
-     * Converts the AoU-chosen cluster name into the actual VM name as reported by Google Cloud's
+     * Converts the AoU-chosen runtime name into the actual VM name as reported by Google Cloud's
      * flow logs. Empirically, an "-m" suffix is added to the VM name, due to Leo team's use
      * of Dataproc (see https://cloud.google.com/dataproc/docs/concepts/configuring-clusters/metadata).
      *
-     * Note: this pattern may change if the Leo team switches to using raw VMs instead of Dataproc
-     * clusters!
+     * TODO(RW-4848): Update this to account for GCE naming conventions.
      */
     private fun dbUserToVmName(dbUser: DbUser): String {
-        return dbUser.clusterName + DATAPROC_MASTER_NODE_SUFFIX
+        return dbUser.runtimeName + DATAPROC_MASTER_NODE_SUFFIX
     }
 
     override fun fireEgressEvent(event: EgressEvent) {

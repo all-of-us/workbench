@@ -373,7 +373,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
     const {autocompleteSelection, count, groupSelections, hierarchyNode, loadingSubtree, selectedIds, selections, title, treeSearchTerms}
       = this.state;
     return !!cohortContext && <FlexRowWrap style={styles.searchContainer}>
-      <div style={{height: '100%', padding: '0 0.5rem', width: '100%'}}>
+      <div id='cohort-search-container' style={{height: '100%', padding: '0 0.5rem', width: '100%'}}>
         <div style={{position: 'absolute', right: '0'}}>
           <style>
             {css}

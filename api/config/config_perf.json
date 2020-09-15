@@ -1,10 +1,6 @@
 {
   "firecloud": {
     "baseUrl": "https:\/\/firecloud-orchestration.dsde-perf.broadinstitute.org",
-    "clusterMaxAgeDays": 7,
-    "clusterIdleMaxAgeDays": 3,
-    "clusterDefaultMachineType": "n1-standard-2",
-    "clusterDefaultDiskSizeGb": 50,
     "notebookRuntimeMaxAgeDays": 7,
     "notebookRuntimeIdleMaxAgeDays": 3,
     "notebookRuntimeDefaultMachineType": "n1-standard-2",

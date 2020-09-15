@@ -1,10 +1,6 @@
 {
   "firecloud": {
     "baseUrl": "https:\/\/api.firecloud.org",
-    "clusterMaxAgeDays": 14,
-    "clusterIdleMaxAgeDays": 7,
-    "clusterDefaultMachineType": "n1-highmem-4",
-    "clusterDefaultDiskSizeGb": 50,
     "notebookRuntimeMaxAgeDays": 14,
     "notebookRuntimeIdleMaxAgeDays": 7,
     "notebookRuntimeDefaultMachineType": "n1-highmem-4",

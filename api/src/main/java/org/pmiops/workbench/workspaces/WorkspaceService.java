@@ -64,7 +64,7 @@ public interface WorkspaceService {
    *
    * There is no hard and fast rule on what operations should require active billing but
    * the general idea is that we should prevent operations that can either incur a non trivial
-   * amount of Google Cloud computation costs (starting a notebook cluster) or increase the
+   * amount of Google Cloud computation costs (starting a notebook runtime) or increase the
    * monthly cost of the workspace (ex. creating GCS objects).
    */
   void validateActiveBilling(String workspaceNamespace, String workspaceId)

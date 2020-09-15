@@ -538,7 +538,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
         overflow: 'auto',
         padding: '0.5rem 0.5rem ' + (tab === 'criteria' ? '0' : '5.5rem'),
       });
-      return <React.Fragment>
+      return <div id='help-sidebar'>
         <div style={notebookStyles ? {...styles.iconContainer, ...styles.notebookOverrides} : {...styles.iconContainer}}>
           {!criteria && this.renderWorkspaceMenu()}
           {icons(helpContentKey, serverConfigStore.getValue().enableCustomRuntimes, workspace.accessLevel).map((icon, i) =>
@@ -624,7 +624,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
             </div>}
           </div>
         </div>
-      </React.Fragment>;
+      </div>;
     }
   }
 );

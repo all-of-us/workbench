@@ -569,128 +569,6 @@ paths:
           description: List of billing accounts
           schema:
             "$ref": "#/definitions/WorkbenchListBillingAccountsResponse"
-  "/v1/admin/security/clusters/{billingProjectId}/delete-clusters":
-    x-aou-note: DEPRECATED. Use Runtime APIs instead.
-    post:
-      summary: Delete specified (or all if no specified list) clusters in a project
-      description: 'An admin gated endpoint that deletes given clusters in a given
-        billing project.'
-      operationId: deleteClustersInProject
-      tags:
-      - runtime
-      parameters:
-      - in: path
-        name: billingProjectId
-        description: The unique identifier of the Google Billing Project containing
-          the clusters
-        required: true
-        type: string
-      - in: body
-        name: clustersToDelete
-        description: A list of names of clusters to delete. To delete all clusters,
-          use an empty object, without providing a list property at all (e.g., {})
-          An empty list will delete no clusters.
-        required: true
-        schema:
-          "$ref": "#/definitions/ListClusterDeleteRequest"
-      responses:
-        200:
-          description: Clusters deleted
-          schema:
-            type: array
-            items:
-              "$ref": "#/definitions/ListClusterResponse"
-        500:
-          description: Internal Error
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
-  "/v1/clusters/{workspaceNamespace}":
-    get:
-      summary: Get the user's workspace cluster.
-      description: 'Returns the current user''s cluster, if any, which has been created
-        for the given workspace.'
-      operationId: getCluster
-      tags:
-      - runtime
-      parameters:
-      - "$ref": "#/parameters/workspaceNamespace"
-      responses:
-        200:
-          description: The cluster for this user and workspace.
-          schema:
-            "$ref": "#/definitions/Cluster"
-        404:
-          description: No cluster exists for this user and workspace.
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
-    post:
-      summary: Create a workspace cluster.
-      description: |
-        Creates a new cluster for the current user in the given billing project. If a cluster already exists for the user in this billing project, a 409 conflict error is returned (even if the cluster is still initializing or is not in a ready state).
-        TODO(RW-3697): Custom cluster creation params should be added as a body param here.
-      operationId: createCluster
-      tags:
-      - runtime
-      parameters:
-      - "$ref": "#/parameters/workspaceNamespace"
-      responses:
-        200:
-          description: Returns the cluster that was created for this user and workspace.
-          schema:
-            "$ref": "#/definitions/Cluster"
-        409:
-          description: A cluster for this user and workspace already exists.
-          schema:
-            "$ref": "#/definitions/EmptyResponse"
-    delete:
-      summary: Delete a workspace cluster.
-      description: 'TODO(RW-3695): updateCluster should be added as a PATCH endpoint
-        here.'
-      operationId: deleteCluster
-      tags:
-      - runtime
-      parameters:
-      - "$ref": "#/parameters/workspaceNamespace"
-      responses:
-        200:
-          description: Success
-          schema:
-            "$ref": "#/definitions/EmptyResponse"
-        404:
-          description: No cluster exists for this user and workspace.
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
-  "/v1/clusters/{workspaceNamespace}/localize":
-    post:
-      summary: Localize files to the user's cluster.
-      description: 'Localizes files to the cluster for the current user and given
-        workspace. As a side-effect, JSON workspace environment files will also be
-        localized to the cluster.'
-      operationId: deprecatedLocalize
-      tags:
-      - runtime
-      consumes:
-      - application/json
-      parameters:
-      - "$ref": "#/parameters/workspaceNamespace"
-      - in: body
-        name: body
-        description: Localization request.
-        schema:
-          "$ref": "#/definitions/ClusterLocalizeRequest"
-      responses:
-        200:
-          description: Success
-          schema:
-            "$ref": "#/definitions/ClusterLocalizeResponse"
-        404:
-          description: Cluster or Workspace not found
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
-        500:
-          description: Internal Error
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
   "/v1/admin/security/runtimes/{billingProjectId}/delete-runtimes":
     post:
       summary: Delete specified (or all if no specified list) runtimes in a project
@@ -1814,6 +1692,30 @@ paths:
         name: notebookName
         required: true
         type: string
+      responses:
+        200:
+          description: HTML Read Only version of the notebook
+          schema:
+            "$ref": "#/definitions/ReadOnlyNotebookResponse"
+  "/v1/admin/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/readonly":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    post:
+      tags:
+        - workspaceAdmin
+      description: Get the HTML for a read only view of the notebook. RESEARCHER_DATA_VIEW authority required.
+      operationId: adminReadOnlyNotebook
+      parameters:
+      - in: path
+        name: notebookName
+        required: true
+        type: string
+      - in: body
+        name: accessReason
+        required: true
+        schema:
+          "$ref": "#/definitions/AccessReason"
       responses:
         200:
           description: HTML Read Only version of the notebook
@@ -3429,6 +3331,64 @@ paths:
           description: A collection of criteria
           schema:
             "$ref": "#/definitions/CriteriaAttributeListResponse"
+  "/v1/cohortbuilder/{cdrVersionId}/criteria/survey/attribute/{surveyConceptId}/{questionConceptId}":
+    parameters:
+    - "$ref": "#/parameters/cdrVersionId"
+    get:
+      tags:
+      - cohortBuilder
+      description: Returns SurveyVersion with counts
+      operationId: findSurveyVersionByQuestionConceptId
+      parameters:
+      - in: path
+        name: surveyConceptId
+        type: integer
+        format: int64
+        required: true
+        description: surveyConceptId of the survey
+      - in: path
+        name: questionConceptId
+        type: integer
+        format: int64
+        required: true
+        description: questionConceptId of the question
+      responses:
+        200:
+          description: A collection of SurveyVersion
+          schema:
+            "$ref": "#/definitions/SurveyVersionListResponse"
+  "/v1/cohortbuilder/{cdrVersionId}/criteria/survey/attribute/{surveyConceptId}/{questionConceptId}/{answerConceptId}":
+    parameters:
+    - "$ref": "#/parameters/cdrVersionId"
+    get:
+      tags:
+      - cohortBuilder
+      description: Returns SurveyVersion with counts
+      operationId: findSurveyVersionByQuestionConceptIdAndAnswerConceptId
+      parameters:
+      - in: path
+        name: surveyConceptId
+        type: integer
+        format: int64
+        required: true
+        description: surveyConceptId of the survey
+      - in: path
+        name: questionConceptId
+        type: integer
+        format: int64
+        required: true
+        description: questionConceptId of the question
+      - in: path
+        name: answerConceptId
+        type: integer
+        format: int64
+        required: true
+        description: answerConceptId of the answer
+      responses:
+        200:
+          description: A collection of SurveyVersion
+          schema:
+            "$ref": "#/definitions/SurveyVersionListResponse"
   "/v1/cohortbuilder/{cdrVersionId}/age/counts":
     parameters:
     - "$ref": "#/parameters/cdrVersionId"
@@ -5363,37 +5323,6 @@ definitions:
       lineNumber:
         type: integer
         description: line number
-  ClusterStatus:
-    type: string
-    enum:
-    - Creating
-    - Running
-    - Updating
-    - Error
-    - Stopping
-    - Stopped
-    - Starting
-    - Deleting
-    - Deleted
-    - Unknown
-  Cluster:
-    description: A Firecloud notebook cluster.
-    required:
-    - clusterName
-    - clusterNamespace
-    - status
-    properties:
-      clusterName:
-        type: string
-        description: The user-supplied name for the cluster
-      clusterNamespace:
-        type: string
-        description: The Google Project used to create the cluster
-      status:
-        "$ref": "#/definitions/ClusterStatus"
-      createdDate:
-        type: string
-        description: The date and time the cluster was created, in ISO-8601 format
   RuntimeStatus:
     type: string
     enum:
@@ -5422,7 +5351,7 @@ definitions:
         description: The user-supplied name for the runtime
       createdDate:
         type: string
-        description: The date and time the cluster was created, in ISO-8601 format
+        description: The date and time the runtime was created, in ISO-8601 format
       status:
         "$ref": "#/definitions/RuntimeStatus"
   FileDetail:
@@ -5442,51 +5371,6 @@ definitions:
         type: integer
         format: int64
         description: Milliseconds since the UNIX epoch.
-  GetClusterResponse:
-    type: object
-    properties:
-      cluster:
-        description: The cluster associated with a given user and workspace. May be
-          empty.
-        "$ref": "#/definitions/Cluster"
-  CreateClusterResponse:
-    type: object
-    required:
-    - cluster
-    properties:
-      cluster:
-        description: The cluster that was created.
-        "$ref": "#/definitions/Cluster"
-  ListClusterResponse:
-    description: Limited set of responses for a cluster. This is a subset of options
-      in a full cluster, copied from the Leonardo swagger
-    required:
-    - clusterName
-    - googleProject
-    - status
-    - createdDate
-    - labels
-    - dateAccessed
-    properties:
-      clusterName:
-        type: string
-        description: The user-supplied name for the cluster
-      googleProject:
-        type: string
-        description: The Google Project used to create the cluster
-      status:
-        "$ref": "#/definitions/ClusterStatus"
-      createdDate:
-        type: string
-        description: The date and time the cluster was created, in ISO-8601 format
-      labels:
-        type: object
-        description: The labels to be placed on the cluster. Of type Map[String,String]
-      dateAccessed:
-        type: string
-        description: |
-          The date and time the cluster was last accessed, in ISO-8601 format.
-          Date accessed is defined as the last time the cluster was created, modified, or accessed via the proxy.
   ListRuntimeResponse:
     description: This is a subset of options in a full runtimes response, copied from leonardo.yaml.
     required:
@@ -5523,13 +5407,6 @@ definitions:
       patchInProgress:
         type: boolean
         description: Whether there is a patch in progress on the runtime. Is used to indicate updates that require status transitions.
-  ListClusterDeleteRequest:
-    type: object
-    properties:
-      clustersToDelete:
-        type: array
-        items:
-          type: string
   ListRuntimeDeleteRequest:
     type: object
     properties:
@@ -5537,34 +5414,6 @@ definitions:
         type: array
         items:
           type: string
-  ClusterLocalizeRequest:
-    type: object
-    required:
-    - notebookNames
-    - playgroundMode
-    properties:
-      notebookNames:
-        type: array
-        description: 'Names of notebooks to localize. This is just the basename (no
-          gs:// needed). This is interpreted as relative to the /notebooks directory
-          within the provided workspace''s Google Cloud Storage bucket.'
-        items:
-          type: string
-      playgroundMode:
-        type: boolean
-        default: false
-        description: Set to true if playgroundMode needed
-  ClusterLocalizeResponse:
-    type: object
-    required:
-    - clusterLocalDirectory
-    properties:
-      clusterLocalDirectory:
-        type: string
-        description: 'The directory on the notebook cluster file system where the
-          requested files were localized. This is the "API" directory in Jupyter terms,
-          which means it is a relative path in the Jupyter user-facing file system,
-          e.g. "foo/bar.ipynb".'
   RuntimeLocalizeRequest:
     type: object
     required:
@@ -6031,10 +5880,6 @@ definitions:
         "$ref": "#/definitions/AdminWorkspaceObjectsCounts"
       cloudStorage:
         "$ref": "#/definitions/AdminWorkspaceCloudStorageCounts"
-      clusters:
-        type: array
-        items:
-          "$ref": "#/definitions/ListClusterResponse"
       runtimes:
         type: array
         items:
@@ -7141,6 +6986,16 @@ definitions:
           which have a least one event matching this criteria.'
         type: integer
         format: int64
+      parentCount:
+        description: 'Estimated number of Parents participants in a particular CDR version
+          which have a least one event matching this criteria.'
+        type: integer
+        format: int64
+      childCount:
+        description: 'Estimated number of Children participants in a particular CDR version
+          which have a least one event matching this criteria.'
+        type: integer
+        format: int64
       group:
         description: specifies if child or parent
         type: boolean
@@ -7261,6 +7116,33 @@ definitions:
       estCount:
         description: possible count
         type: string
+  SurveyVersionListResponse:
+    type: object
+    required:
+    - items
+    properties:
+      items:
+        type: array
+        items:
+          "$ref": "#/definitions/SurveyVersion"
+  SurveyVersion:
+    type: object
+    required:
+    - surveyId
+    - version
+    - itemCount
+    properties:
+      surveyId:
+        description: id of the cope survey
+        type: integer
+        format: int64
+      version:
+        description: name of the verion
+        type: string
+      itemCount:
+        description: name of concept
+        type: integer
+        format: int64
   SearchRequest:
     description: 'The SearchRequest describes the state of the Cohort Builder at any
       given moment. It contains two keys, `include` and `exclude`, each of which specifies
@@ -8316,3 +8198,9 @@ definitions:
         type: array
         items:
           "$ref": '#/definitions/AccessBypassRequest'
+  AccessReason:
+    type: object
+    properties:
+      reason:
+        type: string
+        description: 'The administrative purpose for accessing this notebook'

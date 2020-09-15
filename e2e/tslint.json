@@ -35,10 +35,6 @@
       "single",
       "jsx-double"
     ],
-    "ter-indent": [
-      true,
-      2
-    ],
     "max-classes-per-file": true,
     "max-line-length": [
       true,

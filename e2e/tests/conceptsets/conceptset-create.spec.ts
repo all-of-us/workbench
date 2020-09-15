@@ -1,9 +1,10 @@
 import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
-import DataResourceCard, {CardType} from 'app/component/data-resource-card';
+import DataResourceCard from 'app/component/data-resource-card';
 import ConceptsetActionsPage from 'app/page/conceptset-actions-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {findWorkspace, signIn} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
+import {ResourceCard} from 'app/text-labels';
 
 describe('Create Concept Sets from Domains', () => {
 
@@ -69,7 +70,7 @@ describe('Create Concept Sets from Domains', () => {
     await dataPage.openDataPage();
     await dataPage.openConceptSetsSubtab({waitPageChange: false});
 
-    const modalTextContent = await dataPage.deleteConceptSet(conceptName);
+    const modalTextContent = await dataPage.deleteResource(conceptName, ResourceCard.ConceptSet);
     expect(modalTextContent).toContain(`Are you sure you want to delete Concept Set: ${conceptName}?`);
   });
 
@@ -152,18 +153,18 @@ describe('Create Concept Sets from Domains', () => {
     await dataPage.openDatasetsSubtab({waitPageChange: false});
 
     const resourceCard = new DataResourceCard(page);
-    const dataSetExists = await resourceCard.cardExists(datasetName, CardType.Dataset);
+    const dataSetExists = await resourceCard.cardExists(datasetName, ResourceCard.Dataset);
     expect(dataSetExists).toBe(true);
 
     // Delete Dataset.
-    const textContent = await dataPage.deleteDataset(datasetName);
+    const textContent = await dataPage.deleteResource(datasetName, ResourceCard.Dataset);
     expect(textContent).toContain(`Are you sure you want to delete Dataset: ${datasetName}?`);
 
     // Delete Concept Set.
     await dataPage.openConceptSetsSubtab({waitPageChange: false});
 
-    await dataPage.deleteConceptSet(conceptName1);
-    await dataPage.deleteConceptSet(conceptName2);
+    await dataPage.deleteResource(conceptName1, ResourceCard.ConceptSet);
+    await dataPage.deleteResource(conceptName2, ResourceCard.ConceptSet);
   });
 
 });
