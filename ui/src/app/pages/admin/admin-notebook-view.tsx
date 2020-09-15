@@ -1,0 +1,74 @@
+import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
+import {reactStyles} from 'app/utils';
+import {reactRouterUrlSearchParams} from 'app/utils/navigation';
+import * as React from 'react';
+import {useEffect, useState} from 'react';
+import {useParams} from 'react-router';
+
+const styles = reactStyles({
+  notebook: {
+    width: '100%',
+    height: 'calc(100% - 40px)',
+    position: 'absolute',
+    border: 0
+  },
+  error: {
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    marginTop: '56px',
+    background: colors.warning,
+    border: '1px solid #ebafa6',
+    borderRadius: '5px',
+    color: colors.white,
+    display: 'flex',
+    fontSize: '14px',
+    fontWeight: 500,
+    maxWidth: '550px',
+    padding: '8px',
+    textAlign: 'left'
+  },
+});
+
+interface Props {
+  workspaceNamespace: string;
+  nbName: string;
+  accessReason: string;
+}
+
+const AdminNotebookViewComponent = (props: Props) => {
+  const {workspaceNamespace, workspaceName, nbName, accessReason} = props;
+  const [notebookHtml, setHtml] = useState(undefined);
+  const [errorMessage, setErrorMessage] = useState(undefined);
+
+  useEffect(() => {
+    workspaceAdminApi().adminReadOnlyNotebook(workspaceNamespace, workspaceName, nbName, {reason: accessReason})
+      .then(setHtml)
+      .catch((e) => {
+        if (e.status === 412) {
+          setErrorMessage('Notebook is too large to display in preview mode');
+        } else {
+          setErrorMessage('Failed to render notebook preview due to unknown error');
+        }
+      });
+  });
+
+  return <React.Fragment>
+    <div>HELLO WORLD: {workspaceNamespace}/{workspaceName}/{nbName}: {accessReason}</div>
+    {notebookHtml && <iframe id='notebook-frame' style={styles.notebook} srcDoc={notebookHtml}/>}
+    {errorMessage && <div style={styles.error}>{errorMessage}</div>}
+  </React.Fragment>;
+};
+
+const AdminNotebookView = () => {
+  const {workspaceNamespace, nbName} = useParams();
+  const accessReason = reactRouterUrlSearchParams().get('accessReason');
+  return <AdminNotebookViewComponent
+        workspaceNamespace={workspaceNamespace}
+        nbName={nbName}
+        accessReason={accessReason}/>;
+};
+
+export {
+  AdminNotebookView
+};
