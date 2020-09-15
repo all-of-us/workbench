@@ -14,6 +14,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Redirect} from 'react-router';
 import {NOTEBOOK_HELP_CONTENT} from './components/help-sidebar';
+import {AdminNotebookView} from './pages/admin/admin-notebook-view';
 import {InteractiveNotebook} from './pages/analysis/interactive-notebook';
 import {NotebookList} from './pages/analysis/notebook-list';
 import {NotebookRedirect} from './pages/analysis/notebook-redirect';
@@ -47,6 +48,7 @@ const WorkspaceAuditPage = withRouteData(WorkspaceAudit);
 const WorkspaceLibraryPage = withRouteData(WorkspaceLibrary);
 const InteractiveNotebookPage = withRouteData(InteractiveNotebook);
 const NotebookRedirectPage = withRouteData(NotebookRedirect);
+const AdminNotebookViewPage = withRouteData(AdminNotebookView);
 
 interface RoutingProps {
   onSignIn: () => void;
@@ -97,6 +99,14 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
       <AppRoute
           path='/admin/workspace-audit/:workspaceNamespace'
           component={() => <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>}
+      />
+      <AppRoute
+          path='/admin/workspace-audit/:workspaceNamespace/:nbName'
+          component={() => <AdminNotebookViewPage routeData={{
+            pathElementForTitle: 'nbName',
+            notebookHelpSidebarStyles: true,  // TODO: remove?
+            minimizeChrome: true
+          }}/>}
       />
       <AppRoute
           path='/data-code-of-conduct'
