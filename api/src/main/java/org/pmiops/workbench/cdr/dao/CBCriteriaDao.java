@@ -5,6 +5,7 @@ import java.util.Set;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaLookup;
 import org.pmiops.workbench.cdr.model.DbMenuOption;
+import org.pmiops.workbench.cdr.model.DbSurveyVersion;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -249,4 +250,35 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
           "select distinct domain_id as domain, type, is_standard as standard from cb_criteria order by domain, type, is_standard",
       nativeQuery = true)
   List<DbMenuOption> findMenuOptions();
+
+  @Query(
+      value =
+          "select surveyId, version, itemCount from( "
+              + "select csv.survey_id as surveyId, csv.version as version, sum(csa.item_count) as itemCount, csv.display_order "
+              + "from cb_survey_version csv "
+              + "join cb_survey_attribute csa on csv.survey_id = csa.survey_id "
+              + "where csv.concept_id = :surveyConceptId "
+              + "and csa.question_concept_id = :questionConceptId "
+              + "group by csv.survey_id, csv.version, csv.display_order "
+              + "order by csv.display_order) innerSql",
+      nativeQuery = true)
+  List<DbSurveyVersion> findSurveyVersionByQuestionConceptId(
+      @Param("surveyConceptId") Long surveyConceptId,
+      @Param("questionConceptId") Long questionConceptId);
+
+  @Query(
+      value =
+          "select surveyId, version, itemCount from( "
+              + "select distinct csv.survey_id as surveyId, csv.version as version, csa.item_count as itemCount, csv.display_order "
+              + "from cb_survey_version csv "
+              + "join cb_survey_attribute csa on csv.survey_id = csa.survey_id "
+              + "where csv.concept_id = :surveyConceptId "
+              + "and csa.question_concept_id = :questionConceptId "
+              + "and csa.answer_concept_id = :answerConceptId "
+              + "order by csv.display_order) innerSql",
+      nativeQuery = true)
+  List<DbSurveyVersion> findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
+      @Param("surveyConceptId") Long surveyConceptId,
+      @Param("questionConceptId") Long questionConceptId,
+      @Param("answerConceptId") Long answerConceptId);
 }
