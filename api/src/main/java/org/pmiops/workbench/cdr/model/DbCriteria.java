@@ -121,11 +121,7 @@ public class DbCriteria {
 
   @Transient
   public Long getLongCount() {
-    return getLongValue(this.count);
-  }
-
-  private Long getLongValue(String count) {
-    return Strings.isNullOrEmpty(count) ? null : Long.valueOf(count);
+    return Strings.isNullOrEmpty(this.count) ? null : Long.valueOf(this.count);
   }
 
   @Column(name = "rollup_count")
