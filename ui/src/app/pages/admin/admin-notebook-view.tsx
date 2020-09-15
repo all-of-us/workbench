@@ -37,24 +37,26 @@ interface Props {
 }
 
 const AdminNotebookViewComponent = (props: Props) => {
-  const {workspaceNamespace, workspaceName, nbName, accessReason} = props;
+  const {workspaceNamespace, nbName, accessReason} = props;
   const [notebookHtml, setHtml] = useState(undefined);
   const [errorMessage, setErrorMessage] = useState(undefined);
 
   useEffect(() => {
-    workspaceAdminApi().adminReadOnlyNotebook(workspaceNamespace, workspaceName, nbName, {reason: accessReason})
-      .then(setHtml)
+    workspaceAdminApi().adminReadOnlyNotebook(workspaceNamespace, nbName, {reason: accessReason})
+      .then(response => setHtml(response.html))
       .catch((e) => {
-        if (e.status === 412) {
+        if (e.status === 404) {
+          setErrorMessage(`Notebook ${nbName} was not found`);
+        } else if (e.status === 412) {
           setErrorMessage('Notebook is too large to display in preview mode');
         } else {
           setErrorMessage('Failed to render notebook preview due to unknown error');
         }
       });
-  });
+  }, []);
 
   return <React.Fragment>
-    <div>HELLO WORLD: {workspaceNamespace}/{workspaceName}/{nbName}: {accessReason}</div>
+    <div>HELLO WORLD: {workspaceNamespace}/{nbName}: {accessReason}</div>
     {notebookHtml && <iframe id='notebook-frame' style={styles.notebook} srcDoc={notebookHtml}/>}
     {errorMessage && <div style={styles.error}>{errorMessage}</div>}
   </React.Fragment>;
