@@ -4626,6 +4626,11 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/Concept"
+      criteriums:
+        description: Criteriums in the concept set, in conceptName order.
+        type: array
+        items:
+          "$ref": "#/definitions/Criteria"
   CreateConceptSetRequest:
     type: object
     required:

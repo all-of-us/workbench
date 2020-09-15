@@ -1,18 +1,21 @@
 package org.pmiops.workbench.conceptset;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Ordering;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
+import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper.ConceptSetContext;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.model.DbConceptSet;
@@ -20,7 +23,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.UpdateConceptSetRequest;
@@ -37,21 +39,27 @@ public class ConceptSetService {
   private final ConceptSetDao conceptSetDao;
   private final ConceptBigQueryService conceptBigQueryService;
   private final ConceptService conceptService;
+  private final CohortBuilderService cohortBuilderService;
   private final ConceptSetMapper conceptSetMapper;
   private final Clock clock;
+  private final Provider<WorkbenchConfig> configProvider;
 
   @Autowired
   public ConceptSetService(
       ConceptSetDao conceptSetDao,
       ConceptBigQueryService conceptBigQueryService,
       ConceptService conceptService,
+      CohortBuilderService cohortBuilderService,
       ConceptSetMapper conceptSetMapper,
-      Clock clock) {
+      Clock clock,
+      Provider<WorkbenchConfig> configProvider) {
     this.conceptSetDao = conceptSetDao;
     this.conceptBigQueryService = conceptBigQueryService;
     this.conceptService = conceptService;
+    this.cohortBuilderService = cohortBuilderService;
     this.conceptSetMapper = conceptSetMapper;
     this.clock = clock;
+    this.configProvider = configProvider;
   }
 
   public ConceptSet copyAndSave(
@@ -228,9 +236,13 @@ public class ConceptSetService {
   }
 
   private ConceptSet toHydratedConcepts(ConceptSet conceptSet) {
-    return conceptSet.concepts(
-        conceptService.findAll(
-            conceptSetDao.findOne(conceptSet.getId()).getConceptIds(),
-            Ordering.from(String.CASE_INSENSITIVE_ORDER).onResultOf(Concept::getConceptName)));
+    Set<Long> conceptIds = conceptSetDao.findOne(conceptSet.getId()).getConceptIds();
+    if (configProvider.get().featureFlags.enableConceptSetSearchV2) {
+      return conceptSet.criteriums(
+          cohortBuilderService.findCriteriaByDomainIdAndConceptIds(
+              conceptSet.getDomain().toString(),
+              conceptIds.stream().map(String::valueOf).collect(Collectors.toList())));
+    }
+    return conceptSet.concepts(conceptService.findAll(conceptIds));
   }
 }
