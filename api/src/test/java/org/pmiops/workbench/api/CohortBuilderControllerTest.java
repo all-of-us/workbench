@@ -680,6 +680,8 @@ public class CohortBuilderControllerTest {
         .code(dbCriteria.getCode())
         .conceptId(dbCriteria.getConceptId() == null ? null : new Long(dbCriteria.getConceptId()))
         .count(new Long(dbCriteria.getCount()))
+        .parentCount(dbCriteria.getParentCount())
+        .childCount(dbCriteria.getChildCount())
         .domainId(dbCriteria.getDomainId())
         .group(dbCriteria.getGroup())
         .hasAttributes(dbCriteria.getAttribute())
