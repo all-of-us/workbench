@@ -2,11 +2,12 @@ import WorkspacesPage from 'app/page/workspaces-page';
 import {signIn} from 'utils/test-utils';
 import WorkspaceCard from 'app/component/workspace-card';
 import ReactSelect from 'app/element/react-select';
+import {config} from 'resources/workbench-config';
 
 describe('Workspaces Filter Select menu tests', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signIn(page, config.collaboratorUsername, config.userPassword);
   });
 
   /**
@@ -19,7 +20,7 @@ describe('Workspaces Filter Select menu tests', () => {
    */
   test('Display workspaces by access levels', async () => {
 
-    const accessLevels = [
+    const filterMenuOptions = [
       'Owner',
       'Writer',
       'Reader'
@@ -34,14 +35,14 @@ describe('Workspaces Filter Select menu tests', () => {
     expect(defaultSelectedValue).toEqual('All');
 
     // Change Filter by value.
-    for (const accessLevel of accessLevels) {
-      const selectedValue = await workspacesPage.filterByAccessLevel(accessLevel);
-      expect(selectedValue).toEqual(accessLevel);
+    for (const menuOption of filterMenuOptions) {
+      const selectedValue = await workspacesPage.filterByAccessLevel(menuOption);
+      expect(selectedValue).toEqual(menuOption); // Verify selected option
       const cards = await WorkspaceCard.findAllCards(page);
       // If any card exists, get its Access Level and compare with filter level.
       for (const card of cards) {
         const cardLevel = await card.getWorkspaceAccessLevel();
-        expect(cardLevel).toEqual(accessLevel.toUpperCase());
+        expect(cardLevel).toEqual(menuOption.toUpperCase());
       }
     }
 
