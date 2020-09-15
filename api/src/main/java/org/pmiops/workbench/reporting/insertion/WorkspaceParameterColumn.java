@@ -1,5 +1,6 @@
 package org.pmiops.workbench.reporting.insertion;
 
+import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.toInsertRowString;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.toTimestampQpv;
 
 import com.google.cloud.bigquery.QueryParameterValue;
@@ -32,7 +33,9 @@ public enum WorkspaceParameterColumn implements QueryParameterColumn<BqDtoWorksp
       BqDtoWorkspace::getCdrVersionId,
       w -> QueryParameterValue.int64(w.getCdrVersionId())),
   CREATION_TIME(
-      "creation_time", BqDtoWorkspace::getCreationTime, w -> toTimestampQpv(w.getCreationTime())),
+      "creation_time",
+      w -> toInsertRowString(w.getCreationTime()),
+      w -> toTimestampQpv(w.getCreationTime())),
   CREATOR_ID(
       "creator_id", BqDtoWorkspace::getCreatorId, w -> QueryParameterValue.int64(w.getCreatorId())),
   DATA_ACCESS_LEVEL(
@@ -53,11 +56,11 @@ public enum WorkspaceParameterColumn implements QueryParameterColumn<BqDtoWorksp
       w -> QueryParameterValue.string(w.getFirecloudUuid())),
   LAST_ACCESSED_TIME(
       "last_accessed_time",
-      BqDtoWorkspace::getLastAccessedTime,
+      w -> toInsertRowString(w.getLastAccessedTime()),
       w -> toTimestampQpv(w.getLastAccessedTime())),
   LAST_MODIFIED_TIME(
       "last_modified_time",
-      BqDtoWorkspace::getLastModifiedTime,
+      w -> toInsertRowString(w.getLastModifiedTime()),
       w -> toTimestampQpv(w.getLastModifiedTime())),
   NAME("name", BqDtoWorkspace::getName, w -> QueryParameterValue.string(w.getName())),
   NEEDS_RP_REVIEW_PROMPT(
@@ -150,7 +153,7 @@ public enum WorkspaceParameterColumn implements QueryParameterColumn<BqDtoWorksp
       w -> QueryParameterValue.bool(w.getRpSocialBehavioral())),
   RP_TIME_REQUESTED(
       "rp_time_requested",
-      BqDtoWorkspace::getRpTimeRequested,
+      w -> toInsertRowString(w.getRpTimeRequested()),
       w -> toTimestampQpv(w.getRpTimeRequested())),
   VERSION("version", BqDtoWorkspace::getVersion, w -> QueryParameterValue.int64(w.getVersion())),
   WORKSPACE_ID(

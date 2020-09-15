@@ -8,6 +8,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -26,7 +27,9 @@ public final class QueryParameterValues {
       DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSSZZ").withZone(ZoneOffset.UTC);
   // For inserting a Timestamp in a RowToInsert map for an InsertAllRequest, use this format
   public static final DateTimeFormatter ROW_TO_INSERT_TIMESTAMP_FORMATTER =
-      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS").withZone(ZoneOffset.UTC);
+      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")
+          .withZone(ZoneOffset.UTC)
+          .withLocale(Locale.US);
 
   /** Generate a unique parameter name and add it to the parameter map provided. */
   public static String buildParameter(

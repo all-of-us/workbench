@@ -295,8 +295,8 @@ write_output(outputs[:dto_assertions], dto_assertions, 'Unit Test DTO Assertions
 ### Parameter Column Enum
 def object_value_function(col, dto_name)
   case col[:java_type]
-  when 'Timesttamp'
-    "#{col[:lambda_var]} -> ROW_TO_INSERT_TIMESTAMP_FORMATTER.format(#{col[:lambda_var]}.#{col[:getter]}()"
+  when 'Timestamp' # actually OffsetDateTime on the DTO
+    "#{col[:lambda_var]} -> toInsertRowString(#{col[:lambda_var]}.#{col[:getter]}())"
   else
     "#{dto_name}::#{col[:getter]}"
   end

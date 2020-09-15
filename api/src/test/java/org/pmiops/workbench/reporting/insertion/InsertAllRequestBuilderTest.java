@@ -1,13 +1,12 @@
 package org.pmiops.workbench.reporting.insertion;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME;
+import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.ROW_TO_INSERT_TIMESTAMP_FORMATTER;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.USER__DISABLED;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.USER__PROFESSIONAL_URL;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__BILLING_ACCOUNT_NAME;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__CDR_VERSION_ID;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__LAST_ACCESSED_TIME;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__PUBLISHED;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDtoUser;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDtoWorkspace;
@@ -20,13 +19,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.temporal.TemporalAccessor;
 import java.util.List;
 import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.model.BqDtoUser;
 import org.pmiops.workbench.model.BqDtoWorkspace;
-import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -74,9 +73,24 @@ public class InsertAllRequestBuilderTest {
     assertThat(contentMap.get("free_tier_credits_limit_days_override"))
         .isEqualTo(USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE);
     assertThat(contentMap.get("disabled")).isEqualTo(USER__DISABLED);
-    assertTimeApprox(
-        (OffsetDateTime) contentMap.get("demographic_survey_completion_time"),
-        CommonMappers.offsetDateTimeUtc(USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME));
+
+    final String completionTimeBiQqueryString =
+        (String) contentMap.get("demographic_survey_completion_time");
+    assertThat(completionTimeBiQqueryString).isEqualTo("2015-05-19 00:00:00.000000");
+    // FIXME(jaycarlton): the format BigQuery expects here doesn't contain an offset apparently, and
+    // can't
+    //   be parsed back into an OffsetDateTime or Instant
+    //    final OffsetDateTime actualODT = insertRowStringToOffsetDateTime(
+    //        completionTimeBiQqueryString);
+    //    assertTimeApprox(actualODT,
+    //        offsetDateTimeUtc(USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME));
+  }
+
+  public OffsetDateTime insertRowStringToOffsetDateTime(String completionTimeBigqueryString) {
+    final TemporalAccessor temporalAccessor =
+        ROW_TO_INSERT_TIMESTAMP_FORMATTER.parse(completionTimeBigqueryString);
+    final OffsetDateTime actualODT = OffsetDateTime.from(temporalAccessor);
+    return actualODT;
   }
 
   @Test
@@ -94,8 +108,7 @@ public class InsertAllRequestBuilderTest {
     assertThat(contentMap.get("billing_account_name")).isEqualTo(WORKSPACE__BILLING_ACCOUNT_NAME);
     assertThat(contentMap.get("cdr_version_id")).isEqualTo(WORKSPACE__CDR_VERSION_ID);
     assertThat(contentMap.get("published")).isEqualTo(WORKSPACE__PUBLISHED);
-    assertTimeApprox(
-        (OffsetDateTime) contentMap.get("last_accessed_time"),
-        CommonMappers.offsetDateTimeUtc(WORKSPACE__LAST_ACCESSED_TIME));
+    assertThat((String) contentMap.get("last_accessed_time"))
+        .isEqualTo("2015-05-17 00:00:00.000000");
   }
 }
