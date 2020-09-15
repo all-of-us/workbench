@@ -12,11 +12,13 @@ export default class ReactSelect extends BaseElement {
     this.name = opts.name;
   }
 
-  async waitForInput(label: string): Promise<Textbox> {
-    return Textbox.findByName(this.page, {containsText: label, ancestorLevel: 1});
+  async waitForInput(): Promise<Textbox> {
+    const selector = `${this.getRootXpath()}//input`;
+    return new Textbox(this.page, selector);
   }
 
   async selectOption(optionText: string): Promise<void> {
+    await this.waitForInput().then(input => input.click({delay: 20}));
     const option = await this.waitForOption(optionText);
     await option.click({delay: 20});
   }

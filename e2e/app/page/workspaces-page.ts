@@ -171,7 +171,6 @@ export default class WorkspacesPage extends WorkspaceEditPage {
 
   async filterByAccessLevel(level: string): Promise<string> {
     const selectMenu = new ReactSelect(this.page, {name: 'Filter by'});
-    await selectMenu.waitForInput('Filter by').then(input => input.click({delay: 20}));
     await selectMenu.selectOption(level);
     await waitWhileLoading(this.page);
     return selectMenu.getSelectedOption();
