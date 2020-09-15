@@ -2,7 +2,6 @@ package org.pmiops.workbench.utils.mappers;
 
 import com.google.gson.Gson;
 import java.util.List;
-import java.util.Map;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -41,14 +40,6 @@ public interface LeonardoMapper {
   @Mapping(target = "gceConfig", ignore = true)
   @Mapping(target = "dataprocConfig", ignore = true)
   Runtime toApiRuntime(LeonardoGetRuntimeResponse runtime);
-
-  default Integer extractIntField(Map<String, Object> map, String field) {
-    if (map.get(field) == null) {
-      return null;
-    }
-
-    return ((Number) map.get(field)).intValue();
-  }
 
   @AfterMapping
   default void mapRuntimeConfig(
