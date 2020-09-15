@@ -35,10 +35,13 @@ const registrationGuard: Guard = {
   redirectPath: '/'
 };
 
+const AdminNotebookViewPage = withRouteData(AdminNotebookView);
 const CookiePolicyPage = withRouteData(CookiePolicy);
 const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight)(DataUserCodeOfConduct);
 const HomepagePage = withRouteData(Homepage); // this name is bad i am sorry
+const InteractiveNotebookPage = withRouteData(InteractiveNotebook);
 const NotebookListPage = withRouteData(NotebookList);
+const NotebookRedirectPage = withRouteData(NotebookRedirect);
 const SessionExpiredPage = withRouteData(SessionExpired);
 const SignInAgainPage = withRouteData(SignInAgain);
 const SignInPage = withRouteData(SignIn);
@@ -46,9 +49,6 @@ const UserAuditPage = withRouteData(UserAudit);
 const UserDisabledPage = withRouteData(UserDisabled);
 const WorkspaceAuditPage = withRouteData(WorkspaceAudit);
 const WorkspaceLibraryPage = withRouteData(WorkspaceLibrary);
-const InteractiveNotebookPage = withRouteData(InteractiveNotebook);
-const NotebookRedirectPage = withRouteData(NotebookRedirect);
-const AdminNotebookViewPage = withRouteData(AdminNotebookView);
 
 interface RoutingProps {
   onSignIn: () => void;
@@ -101,7 +101,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           component={() => <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>}
       />
       <AppRoute
-          path='/admin/workspace-audit/:workspaceNamespace/:nbName'
+          path='/admin/workspaces/:workspaceNamespace/:nbName'
           component={() => <AdminNotebookViewPage routeData={{
             pathElementForTitle: 'nbName',
             notebookHelpSidebarStyles: true,  // TODO: remove?
