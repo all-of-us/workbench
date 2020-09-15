@@ -1,6 +1,6 @@
 import {Page} from 'puppeteer';
 import Button from 'app/element/button';
-import {Language, LinkText, PageUrl, WorkspaceAccessLevel} from 'app/text-labels';
+import {Language, LinkText, PageUrl} from 'app/text-labels';
 import Modal from 'app/component/modal';
 import WorkspaceEditPage, {FIELD as EDIT_FIELD} from 'app/page/workspace-edit-page';
 import {makeWorkspaceName} from 'utils/str-utils';
@@ -169,11 +169,12 @@ export default class WorkspacesPage extends WorkspaceEditPage {
     return contentText;
   }
 
-  async filterByAccessLevel(level: WorkspaceAccessLevel): Promise<void> {
-    const selectMenu = new ReactSelect(this.page);
+  async filterByAccessLevel(level: string): Promise<string> {
+    const selectMenu = new ReactSelect(this.page, {name: 'Filter by'});
     await selectMenu.waitForInput('Filter by').then(input => input.click({delay: 20}));
     await selectMenu.selectOption(level);
     await waitWhileLoading(this.page);
+    return selectMenu.getSelectedOption();
   }
 
 }

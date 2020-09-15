@@ -1,40 +1,56 @@
 import * as fp from 'lodash/fp';
 import {ElementHandle, Page} from 'puppeteer';
-import {WorkspaceAccessLevel} from 'app/text-labels';
 import {getPropValue} from 'utils/element-utils';
 import BaseElement from './base-element';
 import Textbox from './textbox';
 
 export default class ReactSelect extends BaseElement {
+  private readonly name: string;
 
-  constructor(page: Page, xpath?: string) {
-    super(page, xpath);
+  constructor(page: Page, opts: {xpath?: string, name: string}) {
+    super(page, opts.xpath);
+    this.name = opts.name;
   }
 
   async waitForInput(label: string): Promise<Textbox> {
     return Textbox.findByName(this.page, {containsText: label, ancestorLevel: 1});
   }
 
-  async selectOption(level: WorkspaceAccessLevel): Promise<void> {
-    const option = await this.waitForOption(level);
+  async selectOption(optionText: string): Promise<void> {
+    const option = await this.waitForOption(optionText);
     await option.click({delay: 20});
   }
 
-  async waitForOption(level: WorkspaceAccessLevel): Promise<ElementHandle> {
-     // The label in the select menu uses title case.
-    const levelText =  level[0].toUpperCase() + level.substring(1).toLowerCase();
-    const selector = `//*[starts-with(@id,"react-select") and text()="${levelText}"]`;
+  async waitForOption(optionText: string): Promise<ElementHandle> {
+    const selector = this.getOptionXpath(optionText);
     return this.page.waitForXPath(selector, {visible: true});
   }
 
-  async getAllOptionsText(): Promise<string[]> {
-    const selector = `//*[starts-with(@id,"react-select") and text()]`;
+  async getAllOptionTexts(): Promise<string[]> {
+    const selector = this.getOptionXpath();
     await this.page.waitForXPath(selector, {visible: true});
     const elements = await this.page.$x(selector);
     return fp.flow(
        fp.map( async (elem: ElementHandle) => (await getPropValue<string>(elem, 'textContent')).trim()),
        contents => Promise.all(contents)
     )(elements);
+  }
+
+  async getSelectedOption(): Promise<string> {
+    const selector = `${this.getRootXpath()}//*[contains(@class, "-singleValue")]/text()`;
+    const value = await this.page.waitForXPath(selector, {visible: true});
+    return getPropValue<string>(value, 'textContent');
+  }
+
+  private getOptionXpath(optionText?: string): string {
+    if (optionText) {
+      return `${this.getRootXpath()}//*[starts-with(@id,"react-select") and text()="${optionText}"]`;
+    }
+    return `${this.getRootXpath()}//*[starts-with(@id,"react-select") and text()]`;
+  }
+
+  private getRootXpath(): string {
+    return `//*[contains(text(),"${this.name}")]/following-sibling::*`;
   }
 
 }
