@@ -54,7 +54,7 @@ interface State {
   runtime: Runtime|null;
 }
 
-export const RuntimePanel = withCurrentWorkspace(
+export const RuntimePanel = withCurrentWorkspace()(
   class extends React.Component<Props, State> {
     private aborter = new AbortController();
 
