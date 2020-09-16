@@ -8097,8 +8097,7 @@ definitions:
         format: int64
       billingStatus:
         description: ''
-        type: integer
-        format: int64
+        "$ref": "#/definitions/BillingStatus"
       cdrVersionId:
         description: ''
         type: integer

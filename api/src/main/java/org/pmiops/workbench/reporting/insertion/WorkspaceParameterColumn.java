@@ -27,7 +27,7 @@ public enum WorkspaceParameterColumn implements QueryParameterColumn<BqDtoWorksp
   BILLING_STATUS(
       "billing_status",
       BqDtoWorkspace::getBillingStatus,
-      w -> QueryParameterValue.int64(w.getBillingStatus())),
+      w -> QueryParameterValue.string(w.getBillingStatus().toString())),
   CDR_VERSION_ID(
       "cdr_version_id",
       BqDtoWorkspace::getCdrVersionId,

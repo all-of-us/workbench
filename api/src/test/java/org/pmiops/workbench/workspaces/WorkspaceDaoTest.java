@@ -1,18 +1,22 @@
 package org.pmiops.workbench.workspaces;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.assertWorkspaceFields;
 import static org.springframework.test.util.AssertionErrors.fail;
 
 import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.projection.PrjWorkspace;
+import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.testconfig.ReportingTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -29,6 +33,12 @@ public class WorkspaceDaoTest {
   private static final String WORKSPACE_NAMESPACE = "aou-1";
 
   @Autowired WorkspaceDao workspaceDao;
+  @Autowired CdrVersionDao cdrVersionDao;
+  @Autowired UserDao userDao;
+
+  @TestConfiguration
+  //  @Import(BillingAccountTypeConverter.class)
+  public static class conifg {}
 
   @Test
   public void testWorkspaceVersionLocking() {
@@ -61,10 +71,33 @@ public class WorkspaceDaoTest {
 
   @Test
   public void testGetReportingWorkspaces() {
-    final DbWorkspace dbWorkspace = workspaceDao.save(ReportingTestUtils.createDbWorkspace());
+    final DbCdrVersion cdrVersion = getDbCdrVersion();
+
+    final DbUser user = getDbUser();
+
+    final DbWorkspace dbWorkspace =
+        workspaceDao.save(ReportingTestUtils.createDbWorkspace(user, cdrVersion));
     final List<PrjWorkspace> workspaces = workspaceDao.getReportingWorkspaces();
 
     assertThat(workspaces).hasSize(1);
-    ReportingTestUtils.assertWorkspaceFields(workspaces.get(0));
+    ReportingTestUtils.assertWorkspaceFields(
+        workspaces.get(0),
+        dbWorkspace.getWorkspaceId(),
+        cdrVersion.getCdrVersionId(),
+        user.getUserId());
+  }
+
+  public DbUser getDbUser() {
+    DbUser user = new DbUser();
+    user.setGivenName("Jay");
+    user = userDao.save(user);
+    return user;
+  }
+
+  public DbCdrVersion getDbCdrVersion() {
+    DbCdrVersion cdrVersion = new DbCdrVersion();
+    cdrVersion.setCdrDbName("foo");
+    cdrVersion = cdrVersionDao.save(cdrVersion);
+    return cdrVersion;
   }
 }

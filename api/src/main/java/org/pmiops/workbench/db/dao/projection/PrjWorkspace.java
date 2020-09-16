@@ -1,25 +1,26 @@
 package org.pmiops.workbench.db.dao.projection;
 
 import java.sql.Timestamp;
+import org.pmiops.workbench.model.BillingStatus;
 
 public interface PrjWorkspace {
-  long getActiveStatus();
+  Short getActiveStatus();
 
   String getBillingAccountName();
 
-  long getBillingAccountType();
+  Short getBillingAccountType();
 
-  long getBillingMigrationStatus();
+  Short getBillingMigrationStatus();
 
-  long getBillingStatus();
+  BillingStatus getBillingStatus();
 
-  long getCdrVersionId();
+  Long getCdrVersionId();
 
   Timestamp getCreationTime();
 
-  long getCreatorId();
+  Long getCreatorId();
 
-  long getDataAccessLevel();
+  Short getDataAccessLevel();
 
   String getDisseminateResearchOther();
 
@@ -33,57 +34,57 @@ public interface PrjWorkspace {
 
   String getName();
 
-  long getNeedsRpReviewPrompt();
+  Short getNeedsRpReviewPrompt();
 
-  boolean getPublished();
+  Boolean getPublished();
 
   String getRpAdditionalNotes();
 
-  boolean getRpAncestry();
+  Boolean getRpAncestry();
 
   String getRpAnticipatedFindings();
 
-  boolean getRpApproved();
+  Boolean getRpApproved();
 
-  boolean getRpCommercialPurpose();
+  Boolean getRpCommercialPurpose();
 
-  boolean getRpControlSet();
+  Boolean getRpControlSet();
 
-  boolean getRpDiseaseFocusedResearch();
+  Boolean getRpDiseaseFocusedResearch();
 
   String getRpDiseaseOfFocus();
 
-  boolean getRpDrugDevelopment();
+  Boolean getRpDrugDevelopment();
 
-  boolean getRpEducational();
+  Boolean getRpEducational();
 
-  boolean getRpEthics();
+  Boolean getRpEthics();
 
   String getRpIntendedStudy();
 
-  boolean getRpMethodsDevelopment();
+  Boolean getRpMethodsDevelopment();
 
   String getRpOtherPopulationDetails();
 
-  boolean getRpOtherPurpose();
+  Boolean getRpOtherPurpose();
 
   String getRpOtherPurposeDetails();
 
-  boolean getRpPopulationHealth();
+  Boolean getRpPopulationHealth();
 
   String getRpReasonForAllOfUs();
 
-  boolean getRpReviewRequested();
+  Boolean getRpReviewRequested();
 
   String getRpScientificApproach();
 
-  boolean getRpSocialBehavioral();
+  Boolean getRpSocialBehavioral();
 
   Timestamp getRpTimeRequested();
 
-  long getVersion();
+  Short getVersion();
 
-  long getWorkspaceId();
+  Long getWorkspaceId();
 
   String getWorkspaceNamespace();
 }
