@@ -4,7 +4,7 @@ import * as React from 'react';
 import {Spinner} from 'app/components/spinners';
 import {RuntimePanel, Props} from 'app/pages/analysis/runtime-panel';
 import {workspaceStubs} from 'testing/stubs/workspaces-api-stub';
-import {runtimeApi, registerApiClient} from 'app/services/swagger-fetch-clients';
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {RuntimeApi} from 'generated/fetch/api';
@@ -60,6 +60,6 @@ describe('RuntimePanel', () => {
 
     // See app/utils/machines.ts, these are the valid memory options for an 8
     // CPU machine in GCE.
-    expect(memoryOptions.map(m => m.text())).toEqual(['7.8', '30', '52']);
+    expect(memoryOptions.map(m => m.text())).toEqual(['7.2', '30', '52']);
   });
 });

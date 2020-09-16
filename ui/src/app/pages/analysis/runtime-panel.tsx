@@ -6,7 +6,7 @@ import {Spinner} from 'app/components/spinners';
 import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
-import {machineTypes} from 'app/utils/machines';
+import {allMachineTypes, validLeonardoMachineTypes} from 'app/utils/machines';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Dropdown} from 'primereact/dropdown';
 import {InputNumber} from 'primereact/inputnumber';
@@ -38,7 +38,7 @@ const styles = reactStyles({
   }
 });
 
-const defaultMachineType = machineTypes.find(({name}) => name === 'n1-standard-4');
+const defaultMachineType = allMachineTypes.find(({name}) => name === 'n1-standard-4');
 
 export interface Props {
   workspace: WorkspaceData;
@@ -109,7 +109,7 @@ export const RuntimePanel = withCurrentWorkspace()(
         masterMachineName = runtime.gceConfig.machineType;
         masterDiskSize = runtime.gceConfig.bootDiskSize;
       }
-      const machineType = machineTypes.find(({name}) => name === masterMachineName) || defaultMachineType;
+      const machineType = allMachineTypes.find(({name}) => name === masterMachineName) || defaultMachineType;
 
       return <div data-test-id='runtime-panel'>
         <h3 style={styles.sectionHeader}>Cloud analysis environment</h3>
@@ -120,22 +120,19 @@ export const RuntimePanel = withCurrentWorkspace()(
         {/* TODO(RW-5419): Cost estimates go here. */}
         <div style={styles.controlSection}>
           {/* Recommended runtime: pick from default templates or change the image. */}
-          <FlexRow style={{justifyContent: 'space-between', marginTop: '.5rem', marginBottom: '1rem'}}>
-            <h3 style={{...styles.sectionHeader, margin: '0'}}>Custom cloud environment</h3>
-            <PopupTrigger side='bottom'
-                          closeOnClick
-                          content={
-                            <React.Fragment>
-                              <MenuItem style={styles.presetMenuItem}>General purpose analysis</MenuItem>
-                              <MenuItem style={styles.presetMenuItem}>Genomics analysis</MenuItem>
-                            </React.Fragment>
-                          }>
-              <Clickable data-test-id='runtime-presets-menu'
-                         disabled={true}>
-                Recommended environments <ClrIcon shape='caret down'/>
-              </Clickable>
-            </PopupTrigger>
-          </FlexRow>
+          <PopupTrigger side='bottom'
+                        closeOnClick
+                        content={
+                          <React.Fragment>
+                            <MenuItem style={styles.presetMenuItem}>General purpose analysis</MenuItem>
+                            <MenuItem style={styles.presetMenuItem}>Genomics analysis</MenuItem>
+                          </React.Fragment>
+                        }>
+            <Clickable data-test-id='runtime-presets-menu'
+                       disabled={true}>
+              Recommended environments <ClrIcon shape='caret down'/>
+            </Clickable>
+          </PopupTrigger>
           <h3 style={styles.sectionHeader}>Application configuration</h3>
           {/* TODO(RW-5413): Populate the image list with server driven options. */}
           <Dropdown style={{width: '100%'}}
@@ -152,11 +149,14 @@ export const RuntimePanel = withCurrentWorkspace()(
               <Dropdown id='runtime-cpu'
                         disabled={true}
                         options={fp.flow(
-                          /* Show all CPU options. */
+                          // Show all CPU options.
                           fp.map('cpu'),
+                          // In the event that was remove a machine type from our set of valid
+                          // configs, we want to continue to allow rendering of the value here.
+                          // Union also makes the CPU values unique.
                           fp.union([machineType.cpu]),
                           fp.sortBy(fp.identity)
-                        )(machineTypes)}
+                        )(validLeonardoMachineTypes)}
                         value={machineType.cpu}/>
             </div>
             <div>
@@ -165,12 +165,13 @@ export const RuntimePanel = withCurrentWorkspace()(
               <Dropdown id='runtime-ram'
                         disabled={true}
                         options={fp.flow(
-                          /* Show valid memory options as constrained by the currently selected CPU. */
+                          // Show valid memory options as constrained by the currently selected CPU.
                           fp.filter(({cpu}) => cpu === machineType.cpu),
                           fp.map('memory'),
+                          // See above comment on CPU union.
                           fp.union([machineType.memory]),
                           fp.sortBy(fp.identity)
-                        )(machineTypes)}
+                        )(validLeonardoMachineTypes)}
                         value={machineType.memory}/>
             </div>
             <div>

@@ -266,7 +266,7 @@ const iconConfigs = {
 
 const helpIconName = (helpContentKey: string) => {
   return helpContentKey === NOTEBOOK_HELP_CONTENT ? 'notebooksHelp' : 'help';
-}
+};
 
 const icons = (
   helpContentKey: string,

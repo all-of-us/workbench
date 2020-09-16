@@ -27,11 +27,15 @@ const machineBases = [
   { name: 'n1-highcpu-96', cpu: 96, memory: 86.4, price: 3.402, preemptiblePrice: 0.7200 }
 ];
 
-export const machineTypes = fp.map(({ price, preemptiblePrice, ...details }) => ({
+export const allMachineTypes = fp.map(({ price, preemptiblePrice, ...details }) => ({
   price: price + 0.004,
   preemptiblePrice: preemptiblePrice + 0.002,
   ...details
 }), machineBases); // adding prices for ephemeral IP's, per https://cloud.google.com/compute/network-pricing#ipaddress
+
+// There are issues launching Leo runtimes with <4GB ram.
+// See https://broadworkbench.atlassian.net/browse/SATURN-1337
+export const validLeonardoMachineTypes = allMachineTypes.filter(({memory}) => memory >= 4);
 
 export const diskPrice = 0.04 / 730; // per GB hour, from https://cloud.google.com/compute/pricing
 export const dataprocCpuPrice = 0.01; // dataproc costs $0.01 per cpu per hour
