@@ -52,7 +52,7 @@ const AdminNotebookViewComponent = (props: Props) => {
     const location = workspaceName ? `Workspace ${workspaceNamespace}/${workspaceName}` : workspaceNamespace;
     const link = <a href={`/admin/workspaces/${workspaceNamespace}`}>{location}</a>;
 
-    return <div style={styles.heading}>Viewing {notebookName} in {link} for reason: {accessReason}</div>;
+    return <div style={styles.heading}>Viewing {notebookName} in {link} for reason:<div>{accessReason}</div></div>;
   };
 
   const Main = () => {
