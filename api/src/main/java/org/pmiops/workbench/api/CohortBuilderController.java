@@ -28,6 +28,7 @@ import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DataFiltersResponse;
 import org.pmiops.workbench.model.DemoChartInfoListResponse;
+import org.pmiops.workbench.model.DomainInfoResponse;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
@@ -182,6 +183,13 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     }
     return ResponseEntity.ok(
         response.items(cohortBuilderService.findDemoChartInfo(genderOrSexType, ageType, request)));
+  }
+
+  @Override
+  public ResponseEntity<DomainInfoResponse> findDomainInfos(Long cdrVersionId, String term) {
+    cdrVersionService.setCdrVersion(cdrVersionId);
+    return ResponseEntity.ok(
+        new DomainInfoResponse().items(cohortBuilderService.findDomainInfos(term)));
   }
 
   @Override

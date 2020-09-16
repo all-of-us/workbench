@@ -15,6 +15,7 @@ import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.CBDataFilterDao;
+import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
@@ -61,6 +62,7 @@ public class CohortBuilderControllerTest {
   @Autowired private CBCriteriaDao cbCriteriaDao;
   @Autowired private CBCriteriaAttributeDao cbCriteriaAttributeDao;
   @Autowired private CBDataFilterDao cbDataFilterDao;
+  @Autowired private DomainInfoDao domainInfoDao;
   @Autowired private PersonDao personDao;
   @Autowired private JdbcTemplate jdbcTemplate;
   @Autowired private CohortBuilderMapper cohortBuilderMapper;
@@ -82,6 +84,7 @@ public class CohortBuilderControllerTest {
             cbCriteriaAttributeDao,
             cbCriteriaDao,
             cbDataFilterDao,
+            domainInfoDao,
             personDao,
             cohortBuilderMapper);
     controller =

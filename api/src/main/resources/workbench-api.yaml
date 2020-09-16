@@ -3135,6 +3135,25 @@ paths:
           description: A collection of criteria menu options
           schema:
             "$ref": "#/definitions/CriteriaMenuOptionsListResponse"
+  "/v1/cohortbuilder/{cdrVersionId}/criteria/domaininfo":
+    parameters:
+    - "$ref": "#/parameters/cdrVersionId"
+    get:
+      tags:
+      - cohortBuilder
+      description: 'Returns DomainInfo'
+      operationId: findDomainInfos
+      parameters:
+      - in: query
+        name: term
+        type: string
+        required: true
+        description: the term to search for
+      responses:
+        200:
+          description: A collection of DomainInfo
+          schema:
+            "$ref": "#/definitions/DomainInfoResponse"
   "/v1/cohortbuilder/{cdrVersionId}/criteria/{domain}/search/term":
     parameters:
     - "$ref": "#/parameters/cdrVersionId"

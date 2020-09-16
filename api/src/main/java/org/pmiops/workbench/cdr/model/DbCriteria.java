@@ -31,6 +31,7 @@ public class DbCriteria {
   private boolean attribute;
   private String path;
   private String synonyms;
+  private String fullText;
   private String value;
   private boolean hierarchy;
   private boolean ancestorData;
@@ -187,6 +188,15 @@ public class DbCriteria {
     this.synonyms = synonyms;
   }
 
+  @Column(name = "fullText")
+  public String getFullText() {
+    return fullText;
+  }
+
+  public void setFullText(String fullText) {
+    this.fullText = fullText;
+  }
+
   @Column(name = "value")
   public String getValue() {
     return value;
@@ -296,6 +306,7 @@ public class DbCriteria {
     private boolean attribute;
     private String path;
     private String synonyms;
+    private String fullText;
     private String value;
     private boolean hierarchy;
     private boolean ancestorData;
@@ -383,6 +394,11 @@ public class DbCriteria {
       return this;
     }
 
+    public Builder addFullText(String fullText) {
+      this.fullText = fullText;
+      return this;
+    }
+
     public Builder addValue(String value) {
       this.value = value;
       return this;
@@ -421,6 +437,7 @@ public class DbCriteria {
       dbCriteria.setAttribute(this.attribute);
       dbCriteria.setPath(this.path);
       dbCriteria.setSynonyms(this.synonyms);
+      dbCriteria.setFullText(this.fullText);
       dbCriteria.setValue(this.value);
       dbCriteria.setHierarchy(this.hierarchy);
       dbCriteria.setAncestorData(this.ancestorData);

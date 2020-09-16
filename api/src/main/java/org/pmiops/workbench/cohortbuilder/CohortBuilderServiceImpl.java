@@ -27,6 +27,7 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.CBDataFilterDao;
+import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
@@ -42,6 +43,7 @@ import org.pmiops.workbench.model.CriteriaMenuOption;
 import org.pmiops.workbench.model.CriteriaMenuSubOption;
 import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DemoChartInfo;
+import org.pmiops.workbench.model.DomainInfo;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.GenderOrSexType;
@@ -66,6 +68,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   private CBCriteriaAttributeDao cbCriteriaAttributeDao;
   private CBCriteriaDao cbCriteriaDao;
   private CBDataFilterDao cbDataFilterDao;
+  private DomainInfoDao domainInfoDao;
   private PersonDao personDao;
   private CohortBuilderMapper cohortBuilderMapper;
 
@@ -76,6 +79,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       CBCriteriaAttributeDao cbCriteriaAttributeDao,
       CBCriteriaDao cbCriteriaDao,
       CBDataFilterDao cbDataFilterDao,
+      DomainInfoDao domainInfoDao,
       PersonDao personDao,
       CohortBuilderMapper cohortBuilderMapper) {
     this.bigQueryService = bigQueryService;
@@ -83,6 +87,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     this.cbCriteriaAttributeDao = cbCriteriaAttributeDao;
     this.cbCriteriaDao = cbCriteriaDao;
     this.cbDataFilterDao = cbDataFilterDao;
+    this.domainInfoDao = domainInfoDao;
     this.personDao = personDao;
     this.cohortBuilderMapper = cohortBuilderMapper;
   }
@@ -269,6 +274,19 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
+  public List<DomainInfo> findDomainInfos(String term) {
+    // read domain infos
+    List<DomainInfo> domainInfos =
+        domainInfoDao.findByOrderByDomainId().stream()
+            .map(cohortBuilderMapper::dbModelToClient)
+            .collect(Collectors.toList());
+    // read standard concept count
+
+    // read all concept count
+    return null;
+  }
+
+  @Override
   public List<Criteria> findDrugBrandOrIngredientByValue(String value, Integer limit) {
     List<DbCriteria> criteriaList =
         cbCriteriaDao.findDrugBrandOrIngredientByValue(
@@ -352,7 +370,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   @Override
   public List<SurveyVersion> findSurveyVersionByQuestionConceptId(
       Long surveyConceptId, Long questionConceptId) {
-    return cbCriteriaDao.findSurveyVersionByQuestionConceptId(surveyConceptId, questionConceptId)
+    return cbCriteriaDao
+        .findSurveyVersionByQuestionConceptId(surveyConceptId, questionConceptId)
         .stream()
         .map(cohortBuilderMapper::dbModelToClient)
         .collect(Collectors.toList());

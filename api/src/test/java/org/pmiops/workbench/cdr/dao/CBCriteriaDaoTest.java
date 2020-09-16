@@ -13,6 +13,7 @@ import org.pmiops.workbench.cdr.model.DbMenuOption;
 import org.pmiops.workbench.cdr.model.DbSurveyVersion;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.FilterColumns;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -166,6 +167,12 @@ public class CBCriteriaDaoTest {
                 .addStandard(true)
                 .addParentId(1)
                 .build());
+  }
+
+  @Test
+  public void findCountByDomainAndStandardAndTerm() {
+    cbCriteriaDao.findCountByDomainAndStandardAndTerm(
+        Domain.CONDITION.toString(), ImmutableList.of(false), "term");
   }
 
   @Test

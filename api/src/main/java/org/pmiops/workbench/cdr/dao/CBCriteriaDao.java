@@ -254,6 +254,14 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(
       value =
+          "select count(c) from DbCriteria c where domainId = :domain and standard in (:flags) and match(fullText, concat(:term, '+[', :domain, '_rank1]')) > 0")
+  Long findCountByDomainAndStandardAndTerm(
+      @Param("domain") String domain,
+      @Param("flags") List<Boolean> flags,
+      @Param("term") String term);
+
+  @Query(
+      value =
           "select distinct domain_id as domain, type, is_standard as standard from cb_criteria order by domain, type, is_standard",
       nativeQuery = true)
   List<DbMenuOption> findMenuOptions();
