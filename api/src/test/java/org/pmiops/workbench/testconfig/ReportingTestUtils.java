@@ -3,6 +3,9 @@ package org.pmiops.workbench.testconfig;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.pmiops.workbench.db.model.DbStorageEnums.billingAccountTypeFromStorage;
+import static org.pmiops.workbench.db.model.DbStorageEnums.billingMigrationStatusFromStorage;
+import static org.pmiops.workbench.db.model.DbStorageEnums.billingStatusFromStorage;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
 
@@ -14,6 +17,7 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BqDtoUser;
 import org.pmiops.workbench.model.BqDtoWorkspace;
 
@@ -87,8 +91,8 @@ public class ReportingTestUtils {
   public static final Short WORKSPACE__ACTIVE_STATUS = 0;
   public static final String WORKSPACE__BILLING_ACCOUNT_NAME = "foo_1";
   public static final Short WORKSPACE__BILLING_ACCOUNT_TYPE = 2;
-  public static final Short WORKSPACE__BILLING_MIGRATION_STATUS = 3;
-  public static final Short WORKSPACE__BILLING_STATUS = 4;
+  public static final Short WORKSPACE__BILLING_MIGRATION_STATUS = 1;
+  public static final Short WORKSPACE__BILLING_STATUS = 0; // needs to be in range of enum
   public static final Long WORKSPACE__CDR_VERSION_ID = 5L;
   public static final Timestamp WORKSPACE__CREATION_TIME =
       Timestamp.from(Instant.parse("2015-05-11T00:00:00.00Z"));
@@ -188,6 +192,55 @@ public class ReportingTestUtils {
   }
 
   public static void assertWorkspaceFields(BqDtoWorkspace workspace) {
+    assertThat(workspace.getActiveStatus()).isEqualTo(WORKSPACE__ACTIVE_STATUS);
+    assertThat(workspace.getBillingAccountName()).isEqualTo(WORKSPACE__BILLING_ACCOUNT_NAME);
+    assertThat(workspace.getBillingAccountType()).isEqualTo(WORKSPACE__BILLING_ACCOUNT_TYPE);
+    assertThat(workspace.getBillingMigrationStatus())
+        .isEqualTo(WORKSPACE__BILLING_MIGRATION_STATUS);
+    assertThat(workspace.getBillingStatus()).isEqualTo(WORKSPACE__BILLING_STATUS);
+    assertThat(workspace.getCdrVersionId()).isEqualTo(WORKSPACE__CDR_VERSION_ID);
+    assertTimeApprox(workspace.getCreationTime(), WORKSPACE__CREATION_TIME);
+    assertThat(workspace.getCreatorId()).isEqualTo(WORKSPACE__CREATOR_ID);
+    assertThat(workspace.getDataAccessLevel()).isEqualTo(WORKSPACE__DATA_ACCESS_LEVEL);
+    assertThat(workspace.getDisseminateResearchOther())
+        .isEqualTo(WORKSPACE__DISSEMINATE_RESEARCH_OTHER);
+    assertThat(workspace.getFirecloudName()).isEqualTo(WORKSPACE__FIRECLOUD_NAME);
+    assertThat(workspace.getFirecloudUuid()).isEqualTo(WORKSPACE__FIRECLOUD_UUID);
+    assertTimeApprox(workspace.getLastAccessedTime(), WORKSPACE__LAST_ACCESSED_TIME);
+    assertTimeApprox(workspace.getLastModifiedTime(), WORKSPACE__LAST_MODIFIED_TIME);
+    assertThat(workspace.getName()).isEqualTo(WORKSPACE__NAME);
+    assertThat(workspace.getNeedsRpReviewPrompt()).isEqualTo(WORKSPACE__NEEDS_RP_REVIEW_PROMPT);
+    assertThat(workspace.getPublished()).isEqualTo(WORKSPACE__PUBLISHED);
+    assertThat(workspace.getRpAdditionalNotes()).isEqualTo(WORKSPACE__RP_ADDITIONAL_NOTES);
+    assertThat(workspace.getRpAncestry()).isEqualTo(WORKSPACE__RP_ANCESTRY);
+    assertThat(workspace.getRpAnticipatedFindings()).isEqualTo(WORKSPACE__RP_ANTICIPATED_FINDINGS);
+    assertThat(workspace.getRpApproved()).isEqualTo(WORKSPACE__RP_APPROVED);
+    assertThat(workspace.getRpCommercialPurpose()).isEqualTo(WORKSPACE__RP_COMMERCIAL_PURPOSE);
+    assertThat(workspace.getRpControlSet()).isEqualTo(WORKSPACE__RP_CONTROL_SET);
+    assertThat(workspace.getRpDiseaseFocusedResearch())
+        .isEqualTo(WORKSPACE__RP_DISEASE_FOCUSED_RESEARCH);
+    assertThat(workspace.getRpDiseaseOfFocus()).isEqualTo(WORKSPACE__RP_DISEASE_OF_FOCUS);
+    assertThat(workspace.getRpDrugDevelopment()).isEqualTo(WORKSPACE__RP_DRUG_DEVELOPMENT);
+    assertThat(workspace.getRpEducational()).isEqualTo(WORKSPACE__RP_EDUCATIONAL);
+    assertThat(workspace.getRpEthics()).isEqualTo(WORKSPACE__RP_ETHICS);
+    assertThat(workspace.getRpIntendedStudy()).isEqualTo(WORKSPACE__RP_INTENDED_STUDY);
+    assertThat(workspace.getRpMethodsDevelopment()).isEqualTo(WORKSPACE__RP_METHODS_DEVELOPMENT);
+    assertThat(workspace.getRpOtherPopulationDetails())
+        .isEqualTo(WORKSPACE__RP_OTHER_POPULATION_DETAILS);
+    assertThat(workspace.getRpOtherPurpose()).isEqualTo(WORKSPACE__RP_OTHER_PURPOSE);
+    assertThat(workspace.getRpOtherPurposeDetails()).isEqualTo(WORKSPACE__RP_OTHER_PURPOSE_DETAILS);
+    assertThat(workspace.getRpPopulationHealth()).isEqualTo(WORKSPACE__RP_POPULATION_HEALTH);
+    assertThat(workspace.getRpReasonForAllOfUs()).isEqualTo(WORKSPACE__RP_REASON_FOR_ALL_OF_US);
+    assertThat(workspace.getRpReviewRequested()).isEqualTo(WORKSPACE__RP_REVIEW_REQUESTED);
+    assertThat(workspace.getRpScientificApproach()).isEqualTo(WORKSPACE__RP_SCIENTIFIC_APPROACH);
+    assertThat(workspace.getRpSocialBehavioral()).isEqualTo(WORKSPACE__RP_SOCIAL_BEHAVIORAL);
+    assertTimeApprox(workspace.getRpTimeRequested(), WORKSPACE__RP_TIME_REQUESTED);
+    assertThat(workspace.getVersion()).isEqualTo(WORKSPACE__VERSION);
+    assertThat(workspace.getWorkspaceId()).isEqualTo(WORKSPACE__WORKSPACE_ID);
+    assertThat(workspace.getWorkspaceNamespace()).isEqualTo(WORKSPACE__WORKSPACE_NAMESPACE);
+  }
+
+  public static void assertWorkspaceFields(PrjWorkspace workspace) {
     assertThat(workspace.getActiveStatus()).isEqualTo(WORKSPACE__ACTIVE_STATUS);
     assertThat(workspace.getBillingAccountName()).isEqualTo(WORKSPACE__BILLING_ACCOUNT_NAME);
     assertThat(workspace.getBillingAccountType()).isEqualTo(WORKSPACE__BILLING_ACCOUNT_TYPE);
@@ -375,17 +428,17 @@ public class ReportingTestUtils {
         .contactEmail(USER__CONTACT_EMAIL)
         .creationTime(offsetDateTimeUtc(USER__CREATION_TIME))
         .currentPosition(USER__CURRENT_POSITION)
-        .dataAccessLevel(USER__DATA_ACCESS_LEVEL)
+        .dataAccessLevel(USER__DATA_ACCESS_LEVEL.longValue())
         .dataUseAgreementBypassTime(offsetDateTimeUtc(USER__DATA_USE_AGREEMENT_BYPASS_TIME))
         .dataUseAgreementCompletionTime(offsetDateTimeUtc(USER__DATA_USE_AGREEMENT_COMPLETION_TIME))
-        .dataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION)
+        .dataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION.longValue())
         .demographicSurveyCompletionTime(
             offsetDateTimeUtc(USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME))
         .disabled(USER__DISABLED)
         .emailVerificationBypassTime(offsetDateTimeUtc(USER__EMAIL_VERIFICATION_BYPASS_TIME))
         .emailVerificationCompletionTime(
             offsetDateTimeUtc(USER__EMAIL_VERIFICATION_COMPLETION_TIME))
-        .emailVerificationStatus(USER__EMAIL_VERIFICATION_STATUS)
+        .emailVerificationStatus(USER__EMAIL_VERIFICATION_STATUS.longValue())
         .eraCommonsBypassTime(offsetDateTimeUtc(USER__ERA_COMMONS_BYPASS_TIME))
         .eraCommonsCompletionTime(offsetDateTimeUtc(USER__ERA_COMMONS_COMPLETION_TIME))
         .eraCommonsLinkExpireTime(offsetDateTimeUtc(USER__ERA_COMMONS_LINK_EXPIRE_TIME))
@@ -393,7 +446,7 @@ public class ReportingTestUtils {
         .firstRegistrationCompletionTime(
             offsetDateTimeUtc(USER__FIRST_REGISTRATION_COMPLETION_TIME))
         .firstSignInTime(offsetDateTimeUtc(USER__FIRST_SIGN_IN_TIME))
-        .freeTierCreditsLimitDaysOverride(USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE)
+        .freeTierCreditsLimitDaysOverride(USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE.longValue())
         .freeTierCreditsLimitDollarsOverride(USER__FREE_TIER_CREDITS_LIMIT_DOLLARS_OVERRIDE)
         .givenName(USER__GIVEN_NAME)
         .idVerificationBypassTime(offsetDateTimeUtc(USER__ID_VERIFICATION_BYPASS_TIME))
@@ -410,22 +463,22 @@ public class ReportingTestUtils {
 
   public static BqDtoWorkspace createDtoWorkspace() {
     return new BqDtoWorkspace()
-        .activeStatus(WORKSPACE__ACTIVE_STATUS)
+        .activeStatus(WORKSPACE__ACTIVE_STATUS.longValue())
         .billingAccountName(WORKSPACE__BILLING_ACCOUNT_NAME)
-        .billingAccountType(WORKSPACE__BILLING_ACCOUNT_TYPE)
-        .billingMigrationStatus(WORKSPACE__BILLING_MIGRATION_STATUS)
-        .billingStatus(WORKSPACE__BILLING_STATUS)
+        .billingAccountType(WORKSPACE__BILLING_ACCOUNT_TYPE.longValue())
+        .billingMigrationStatus(WORKSPACE__BILLING_MIGRATION_STATUS.longValue())
+        .billingStatus(WORKSPACE__BILLING_STATUS.longValue())
         .cdrVersionId(WORKSPACE__CDR_VERSION_ID)
         .creationTime(offsetDateTimeUtc(WORKSPACE__CREATION_TIME))
         .creatorId(WORKSPACE__CREATOR_ID)
-        .dataAccessLevel(WORKSPACE__DATA_ACCESS_LEVEL)
+        .dataAccessLevel(WORKSPACE__DATA_ACCESS_LEVEL.longValue())
         .disseminateResearchOther(WORKSPACE__DISSEMINATE_RESEARCH_OTHER)
         .firecloudName(WORKSPACE__FIRECLOUD_NAME)
         .firecloudUuid(WORKSPACE__FIRECLOUD_UUID)
         .lastAccessedTime(offsetDateTimeUtc(WORKSPACE__LAST_ACCESSED_TIME))
         .lastModifiedTime(offsetDateTimeUtc(WORKSPACE__LAST_MODIFIED_TIME))
         .name(WORKSPACE__NAME)
-        .needsRpReviewPrompt(WORKSPACE__NEEDS_RP_REVIEW_PROMPT)
+        .needsRpReviewPrompt(WORKSPACE__NEEDS_RP_REVIEW_PROMPT.longValue())
         .published(WORKSPACE__PUBLISHED)
         .rpAdditionalNotes(WORKSPACE__RP_ADDITIONAL_NOTES)
         .rpAncestry(WORKSPACE__RP_ANCESTRY)
@@ -449,7 +502,7 @@ public class ReportingTestUtils {
         .rpScientificApproach(WORKSPACE__RP_SCIENTIFIC_APPROACH)
         .rpSocialBehavioral(WORKSPACE__RP_SOCIAL_BEHAVIORAL)
         .rpTimeRequested(offsetDateTimeUtc(WORKSPACE__RP_TIME_REQUESTED))
-        .version(WORKSPACE__VERSION)
+        .version(WORKSPACE__VERSION.longValue())
         .workspaceId(WORKSPACE__WORKSPACE_ID)
         .workspaceNamespace(WORKSPACE__WORKSPACE_NAMESPACE);
   }
@@ -462,12 +515,12 @@ public class ReportingTestUtils {
     creator.setUserId(WORKSPACE__CREATOR_ID);
 
     final DbWorkspace workspace = new DbWorkspace();
-    workspace.setActiveStatus(
+    workspace.setWorkspaceActiveStatusEnum(
         DbStorageEnums.workspaceActiveStatusFromStorage(WORKSPACE__ACTIVE_STATUS));
     workspace.setBillingAccountName(WORKSPACE__BILLING_ACCOUNT_NAME);
-    workspace.setBillingAccountType(WORKSPACE__BILLING_ACCOUNT_TYPE);
-    workspace.setBillingMigrationStatus(WORKSPACE__BILLING_MIGRATION_STATUS);
-    workspace.setBillingStatus(WORKSPACE__BILLING_STATUS);
+    workspace.setBillingAccountType(billingAccountTypeFromStorage(WORKSPACE__BILLING_ACCOUNT_TYPE));
+    workspace.setBillingMigrationStatusEnum(billingMigrationStatusFromStorage(WORKSPACE__BILLING_MIGRATION_STATUS));
+    workspace.setBillingStatus(billingStatusFromStorage(WORKSPACE__BILLING_STATUS));
     workspace.setCdrVersion(cdrVersion);
     workspace.setCreationTime(WORKSPACE__CREATION_TIME);
     workspace.setCreator(creator);

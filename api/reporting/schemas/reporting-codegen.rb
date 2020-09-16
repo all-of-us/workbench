@@ -45,6 +45,7 @@ OUTPUTS = {
     :entity_decl => to_output_path(File.join(output_dir, 'entity_decl'), table_name, 'java'),
 }.freeze
 
+# This is the canonical type map, but there are places where we assign a tinyint MySql column a Long Entity field, etc.
 MYSQL_TO_TYPES = {
     'varchar' => {
         :bigquery => 'STRING',
@@ -278,6 +279,8 @@ write_output(OUTPUTS[:projection_query], sql, 'Projection Query')
 BASE_TIMESTAMP = Time.new(2015, 5, 5).freeze
 TIMESTAMP_DELTA_SECONDS = (24 * 60 * 60).freeze # seconds in day
 
+# N.B. some Short fields are only valid up to the number of associated enum values - 1. Fixing these
+# up by hand for now.
 def to_constant_declaration(column, index)
   value = case column[:java_type]
           when 'String'

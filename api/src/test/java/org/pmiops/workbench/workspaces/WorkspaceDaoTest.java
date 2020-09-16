@@ -1,5 +1,7 @@
 package org.pmiops.workbench.workspaces;
 
+import static com.google.common.truth.Truth.assertThat;
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.assertWorkspaceFields;
 import static org.springframework.test.util.AssertionErrors.fail;
 
 import java.util.List;
@@ -8,6 +10,7 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.projection.PrjWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.testconfig.ReportingTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -58,6 +61,10 @@ public class WorkspaceDaoTest {
 
   @Test
   public void testGetReportingWorkspaces() {
+    final DbWorkspace dbWorkspace = workspaceDao.save(ReportingTestUtils.createDbWorkspace());
     final List<PrjWorkspace> workspaces = workspaceDao.getReportingWorkspaces();
+
+    assertThat(workspaces).hasSize(1);
+    ReportingTestUtils.assertWorkspaceFields(workspaces.get(0));
   }
 }
