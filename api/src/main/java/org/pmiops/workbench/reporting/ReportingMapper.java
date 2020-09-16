@@ -16,9 +16,9 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
 public interface ReportingMapper {
   BqDtoUser toDto(PrjUser prjUser);
 
-  List<BqDtoUser> toReportingResearcherList(Collection<PrjUser> users);
+  List<BqDtoUser> toReportingUserList(Collection<PrjUser> users);
 
-  BqDtoWorkspace toModel(PrjWorkspace prjWorkspace);
+  BqDtoWorkspace toDto(PrjWorkspace prjWorkspace);
 
   List<BqDtoWorkspace> toReportingWorkspaceList(Collection<PrjWorkspace> dbWorkspace);
 }

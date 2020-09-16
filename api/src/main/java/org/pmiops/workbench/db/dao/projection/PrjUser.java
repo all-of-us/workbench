@@ -26,13 +26,13 @@ public interface PrjUser {
 
   String getCurrentPosition();
 
-  long getDataAccessLevel();
+  Long getDataAccessLevel();
 
   Timestamp getDataUseAgreementBypassTime();
 
   Timestamp getDataUseAgreementCompletionTime();
 
-  long getDataUseAgreementSignedVersion();
+  Long getDataUseAgreementSignedVersion();
 
   Timestamp getDemographicSurveyCompletionTime();
 
@@ -42,7 +42,7 @@ public interface PrjUser {
 
   Timestamp getEmailVerificationCompletionTime();
 
-  long getEmailVerificationStatus();
+  Long getEmailVerificationStatus();
 
   Timestamp getEraCommonsBypassTime();
 
@@ -56,7 +56,7 @@ public interface PrjUser {
 
   Timestamp getFirstSignInTime();
 
-  long getFreeTierCreditsLimitDaysOverride();
+  Long getFreeTierCreditsLimitDaysOverride();
 
   double getFreeTierCreditsLimitDollarsOverride();
 
@@ -78,7 +78,7 @@ public interface PrjUser {
 
   Timestamp getTwoFactorAuthCompletionTime();
 
-  long getUserId();
+  Long getUserId();
 
   String getUsername();
 

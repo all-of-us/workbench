@@ -2,6 +2,7 @@ package org.pmiops.workbench.reporting;
 
 import com.google.common.base.Stopwatch;
 import java.time.Clock;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 import javax.inject.Provider;
@@ -68,7 +69,7 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
     final ReportingSnapshot result =
         new ReportingSnapshot()
             .captureTimestamp(clock.millis())
-            .users(reportingMapper.toReportingResearcherList(queryResultBundle.getUsers()))
+            .users(reportingMapper.toReportingUserList(queryResultBundle.getUsers()))
             .workspaces(
                 reportingMapper.toReportingWorkspaceList(queryResultBundle.getWorkspaces()));
     stopwatch.stop();
@@ -79,7 +80,8 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
   private QueryResultBundle getApplicationDbData() {
     final Stopwatch stopwatch = stopwatchProvider.get().start();
     final List<PrjUser> users = userService.getRepotingUsers();
-    final List<PrjWorkspace> workspaces = workspaceService.getReportingWorkspaces();
+    final List<PrjWorkspace> workspaces =
+        Collections.emptyList(); // workspaceService.getReportingWorkspaces();
     final QueryResultBundle result = new QueryResultBundle(users, workspaces);
     stopwatch.stop();
     log.info(LogFormatters.duration("Application DB Queries", stopwatch.elapsed()));

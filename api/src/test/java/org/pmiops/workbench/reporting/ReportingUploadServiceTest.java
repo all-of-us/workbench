@@ -8,6 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.rowToInsertStringToOffsetTimestamp;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.timestampQpvToOffsetDateTime;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDtoUser;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
@@ -309,8 +310,10 @@ public class ReportingUploadServiceTest {
     assertThat(workspaceColumnValues.get(WorkspaceParameterColumn.WORKSPACE_ID.getParameterName()))
         .isEqualTo(201L);
     assertTimeApprox(
-        (OffsetDateTime)
-            workspaceColumnValues.get(WorkspaceParameterColumn.CREATION_TIME.getParameterName()),
+        rowToInsertStringToOffsetTimestamp(
+            (String)
+                workspaceColumnValues.get(
+                    WorkspaceParameterColumn.CREATION_TIME.getParameterName())),
         THEN);
     assertThat(workspaceColumnValues.get(WorkspaceParameterColumn.CREATOR_ID.getParameterName()))
         .isEqualTo(101L);

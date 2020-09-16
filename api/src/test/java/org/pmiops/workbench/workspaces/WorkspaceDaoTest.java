@@ -2,9 +2,11 @@ package org.pmiops.workbench.workspaces;
 
 import static org.springframework.test.util.AssertionErrors.fail;
 
+import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.projection.PrjWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -56,6 +58,6 @@ public class WorkspaceDaoTest {
 
   @Test
   public void testGetReportingWorkspaces() {
-    final DbWorkspace ws1 = createWorkspace();
+    final List<PrjWorkspace> workspaces = workspaceDao.getReportingWorkspaces();
   }
 }

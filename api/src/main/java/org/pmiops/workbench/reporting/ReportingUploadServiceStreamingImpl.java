@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 public class ReportingUploadServiceStreamingImpl implements ReportingUploadService {
   private static final Logger log =
       Logger.getLogger(ReportingUploadServiceStreamingImpl.class.getName());
-  private static final InsertAllRequestBuilder<BqDtoUser> researcherRequestBuilder =
+  private static final InsertAllRequestBuilder<BqDtoUser> userRequestBuilder =
       UserParameterColumn::values;
   private static final InsertAllRequestBuilder<BqDtoWorkspace> workspaceRequestBuilder =
       WorkspaceParameterColumn::values;
@@ -78,10 +78,8 @@ public class ReportingUploadServiceStreamingImpl implements ReportingUploadServi
         ImmutableMap.of("snapshot_timestamp", reportingSnapshot.getCaptureTimestamp());
 
     return ImmutableList.of(
-            researcherRequestBuilder.build(
-                TableId.of(projectId, dataset, "researcher"),
-                reportingSnapshot.getUsers(),
-                fixedValues),
+            userRequestBuilder.build(
+                TableId.of(projectId, dataset, "user"), reportingSnapshot.getUsers(), fixedValues),
             workspaceRequestBuilder.build(
                 TableId.of(projectId, dataset, "workspace"),
                 reportingSnapshot.getWorkspaces(),

@@ -27,12 +27,12 @@ def to_output_path(dir_name, table_name, suffix)
   File.expand_path(File.join(dir_name, "#{table_name}.#{suffix}"))
 end
 
-inputs = {
+INPUTS = {
     :describe_csv => to_input_path(File.join(input_dir, 'mysql_describe_csv'), table_name,'csv'),
-    :exclude_columns => to_input_path(File.join(input_dir, 'excluded_columns'), table_name,'txt')
-}
+    :excluded_columns => to_input_path(File.join(input_dir, 'excluded_COLUMNS'), table_name,'txt')
+}.freeze
 
-outputs = {
+OUTPUTS = {
     :big_query_json => to_output_path(File.join(output_dir, 'big_query_json'), table_name,'json'),
     :swagger_yaml => to_output_path(File.join(output_dir, 'swagger_yaml'), table_name,'yaml'),
     :projection_interface => to_output_path(File.join(output_dir, 'projection_interface'), table_name, 'java'),
@@ -40,23 +40,57 @@ outputs = {
     :unit_test_constants => to_output_path(File.join(output_dir, 'unit_test_constants'), table_name, 'java'),
     :unit_test_mocks => to_output_path(File.join(output_dir, 'unit_test_mocks'), table_name, 'java'),
     :dto_assertions => to_output_path(File.join(output_dir, 'dto_assertions'), table_name, 'java'),
-    :query_parameter_columns => to_output_path(File.join(output_dir, 'query_parameter_columns'), table_name, 'java'),
-    :dto_decl => to_output_path(File.join(output_dir, 'dto_decl'), table_name, 'java')
-}
+    :query_parameter_COLUMNS => to_output_path(File.join(output_dir, 'query_parameter_COLUMNS'), table_name, 'java'),
+    :dto_decl => to_output_path(File.join(output_dir, 'dto_decl'), table_name, 'java'),
+    :entity_decl => to_output_path(File.join(output_dir, 'entity_decl'), table_name, 'java'),
+}.freeze
 
-MYSQL_TO_BIGQUERY_TYPE = {
-    'varchar' => 'STRING',
-    'datetime' => 'TIMESTAMP',
-    'bigint' => 'INT64',
-    'smallint' => 'INT64',
-    'longtext' => 'STRING',
-    'int' => 'INT64',
-    'tinyint' => 'INT64',
-    'bit' => 'BOOLEAN',
-    'double' => 'FLOAT64',
-    'text' => 'STRING',
-    'mediumblob' => 'STRING'
-}
+MYSQL_TO_TYPES = {
+    'varchar' => {
+        :bigquery => 'STRING',
+        :java => 'String'
+    },
+    'datetime' => {
+        :bigquery => 'TIMESTAMP',
+        :java => 'Timestamp'
+    },
+    'bigint' => {
+        :bigquery => 'INT64',
+        :java => 'Long'
+    },
+    'smallint' => {
+        :bigquery => 'INT64',
+        :java => 'Short'
+    },
+    'longtext' => {
+        :bigquery => 'STRING',
+        :java => 'String'
+    },
+    'int' => {
+        :bigquery => 'INT64',
+        :java => 'Integer'
+    },
+    'tinyint' => {
+        :bigquery => 'INT64',
+        :java => 'Short'
+    },
+    'bit' => {
+        :bigquery => 'BOOLEAN',
+        :java => 'Boolean'
+    },
+    'double' => {
+        :bigquery =>  'FLOAT64',
+        :java => 'Double'
+    },
+    'text' => {
+        :bigquery => 'STRING',
+        :java => 'String'
+    },
+    'mediumblob' => {
+        :bigquery => 'STRING',
+        :java => 'String'
+    }
+}.freeze
 
 
 BIGQUERY_TYPE_TO_JAVA  = {
@@ -65,18 +99,23 @@ BIGQUERY_TYPE_TO_JAVA  = {
     'TIMESTAMP' =>  'Timestamp',
     'BOOLEAN' =>  'boolean',
     'FLOAT64' => 'double'
-}
+}.freeze
 
-def to_bq_type(mysql_type)
+# strip size/kind
+def simple_mysql_type(mysql_type)
   type_pattern = Regexp.new("(?<type>\\w+)(\\(\\d+\\))?")
   match_data = mysql_type.match(type_pattern)
-  result = MYSQL_TO_BIGQUERY_TYPE[match_data[:type]]
+  result = match_data[:type]
   raise "MySQL type #{mysql_type} not recognized." if result.nil?
   result
 end
 
-excluded_fields = File.exist?(inputs[:exclude_columns]) \
-  ? File.readlines(inputs[:exclude_columns]) \
+def to_bq_type(mysql_type)
+  MYSQL_TO_TYPES[simple_mysql_type(mysql_type)][:bigquery]
+end
+
+excluded_fields = File.exist?(INPUTS[:excluded_columns]) \
+  ? File.readlines(INPUTS[:excluded_columns]) \
       .map{ |c| c.strip } \
   : []
 
@@ -85,26 +124,52 @@ def include_field?(excluded_fields, field)
 end
 
 ## BigQuery schema
-describe_rows = CSV.new(File.read(inputs[:describe_csv])).sort_by { |row| row[0]  }
+describe_rows = CSV.new(File.read(INPUTS[:describe_csv])).sort_by { |row| row[0]  }
 
-dto_name = "BqDto#{to_camel_case(table_name, true)}"
+root_class_name = to_camel_case(table_name, true)
+TABLE_INFO = {
+    :name => table_name,
+    :instance_name => to_camel_case(table_name, false),
+    :dto_class => "BqDto#{root_class_name}",
+    :entity_class => "Db#{root_class_name}",
+    :mock => "mock#{root_class_name}",
+    :projection_interface => "Prj#{root_class_name}",
+    :sql_alias => table_name[0].downcase
+}.freeze
 
-columns = describe_rows.filter{ |row| include_field?(excluded_fields, row[0])} \
+
+def to_swagger_name(snake_case, is_class_name)
+  result =  snake_case.split('_').collect(&:capitalize).join
+  unless is_class_name
+    result[0] = result[0].downcase
+  end
+  result
+end
+
+def to_property_name(column_name)
+  to_swagger_name(column_name, false)
+end
+
+COLUMNS = describe_rows.filter{ |row| include_field?(excluded_fields, row[0]) } \
   .map{ |row| \
     col_name = row[0]
-    big_query_type = to_bq_type(row[1])
+    mysql_type = simple_mysql_type(row[1])
+    type_info = MYSQL_TO_TYPES[mysql_type]
     {
         :name => col_name, \
         :lambda_var => table_name[0].downcase, \
-        :mysql_type => row[1], \
-        :big_query_type => big_query_type, \
-        :java_type => BIGQUERY_TYPE_TO_JAVA[big_query_type], \
+        :mysql_type => mysql_type, \
+        :big_query_type => type_info[:bigquery], \
+        :java_type => type_info[:java], \
         :java_field_name => "#{to_camel_case(col_name, false)}", \
         :java_constant_name => "#{table_name.upcase}__#{col_name.upcase}", \
-        :getter => "get#{to_camel_case(col_name, true)}"
-    }}
+        :getter => "get#{to_camel_case(col_name, true)}",
+        :setter => "set#{to_camel_case(col_name, true)}",
+        :property => to_property_name(col_name)
+    }
+}.freeze
 
-big_query_schema = columns.map{ |col| { :name => col[:name], :type => col[:big_query_type]} }
+big_query_schema = COLUMNS.map{ |col| { :name => col[:name], :type => col[:big_query_type]} }
 schema_json = JSON.pretty_generate(big_query_schema)
 
 def write_output(path, contents, description)
@@ -112,7 +177,7 @@ def write_output(path, contents, description)
   puts "  #{description}: #{path}"
 end
 
-write_output(outputs[:big_query_json], schema_json, 'Spring BigQuery Schema')
+write_output(OUTPUTS[:big_query_json], schema_json, 'BigQuery JSON Schema')
 
 ## Swagger DTO Objects
 BIGQUERY_TYPE_TO_SWAGGER  = {
@@ -135,29 +200,18 @@ BIGQUERY_TYPE_TO_SWAGGER  = {
         'type' =>  'number',
         'format' =>  'double'
     }
-}
+}.freeze
 
-def to_swagger_name(snake_case, is_class_name)
-  result =  snake_case.split('_').collect(&:capitalize).join
-  unless is_class_name
-    result[0] = result[0].downcase
-  end
-  result
-end
-
-def to_property_name(column_name)
-  to_swagger_name(column_name, false)
-end
 
 def to_swagger_property(column)
   { 'description' => column[:description] || '' } \
     .merge(BIGQUERY_TYPE_TO_SWAGGER[column[:big_query_type]])
 end
 
-swagger_object =  {  dto_name => {
+swagger_object =  {  TABLE_INFO[:dto_class] => {
     'type'  =>  'object',
-    'properties' => columns.to_h  { |field|
-      [to_property_name(field[:name]), to_swagger_property(field)]
+    'properties' => COLUMNS.to_h  { |field|
+      [field[:property], to_swagger_property(field)]
     }
   }
 }
@@ -168,26 +222,23 @@ indented_yaml = swagger_object.to_yaml \
   .map{ |line| '  ' + line } \
   .join("\n")
 
-write_output(outputs[:swagger_yaml], indented_yaml, 'DTO Swagger Definition')
+write_output(OUTPUTS[:swagger_yaml], indented_yaml, 'DTO Swagger Definition')
 
 ### Projection Interface
 def to_getter(field)
   "  #{field[:java_type]} get#{to_camel_case(field[:name], true)}();"
 end
 
-getters = columns.map { |field|
+getters = COLUMNS.map { |field|
   to_getter(field)
 }
 
-def projection_name(table_name)
-  "Prj#{to_camel_case(table_name, true )}"
-end
 
-java = "public interface #{projection_name(table_name)} {\n"
+java = "public interface #{TABLE_INFO[:projection_interface]} {\n"
 java << getters.join("\n")
 java << "\n}\n"
 
-write_output(outputs[:projection_interface], java, 'Spring Data Projection Interface')
+write_output(OUTPUTS[:projection_interface], java, 'Spring Data Projection Interface')
 
 ### Projection query
 def hibernate_column_name(field)
@@ -195,58 +246,49 @@ def hibernate_column_name(field)
 end
 
 # Fix up research purpose entity fields, which don't match the column names (i.e. there's no 'rp' prefix)
-def adjust_rp_col(field, table_alias)
+def adjust_rp_col(field)
   md = field.match(/^rp_(?<root>\w+$)/)
   projection_field = to_camel_case(field, false)
   entity_property = projection_field
   if md and md['root']
     entity_property = to_camel_case(md['root'], false)
-    "#{table_alias}.#{entity_property} AS #{projection_field}"
+    "#{TABLE_INFO[:sql_alias]}.#{entity_property} AS #{projection_field}"
   else
-    "#{table_alias}.#{entity_property}"
+    "#{TABLE_INFO[:sql_alias]}.#{entity_property}"
   end
 end
 
-  def to_query(table_name, schema)
-  table_alias = table_name[0].downcase
+def to_query()
   "@Query(\"SELECT\\n\"\n" \
-    + schema.map do |field|
-      "+ \"  #{adjust_rp_col(field[:name], table_alias)}"
+    + COLUMNS.map do |field|
+      "+ \"  #{adjust_rp_col(field[:name])}"
     end \
     .join(",\\n\"\n") \
     + "\\n\"\n" \
-    + "+ \"FROM Db#{to_camel_case(table_name, true)} #{table_alias}\")\n" \
-    + "  List<#{projection_name(table_name)}> getReporting#{to_camel_case(table_name, true)}s();"
+    + "+ \"FROM #{TABLE_INFO[:entity_class]} #{TABLE_INFO[:sql_alias]}\")\n" \
+    + "  List<#{TABLE_INFO[:projection_interface]}> getReporting#{to_camel_case(TABLE_INFO[:name], true)}s();"
 end
 
-sql = to_query(table_name, columns)
+sql = to_query
 
-write_output(outputs[:projection_query], sql, 'Projection Query')
+write_output(OUTPUTS[:projection_query], sql, 'Projection Query')
 
 # Unit Test Constants
 #
-JAVA_TYPE_TO_DEFAULT = {
-    'String' => '"foo"',
-    'int' => '42',
-    'long' => '1001',
-    'double' => '5.2',
-    'Timestamp' => 'Timestamp.from(Instant.parse("2005-01-01T00:00:00.00Z"))',
-    'boolean' => 'false'
-}
-BASE_TIMESTAMP = Time.new(2015, 5, 5)
-TIMESTAMP_DELTA_SECONDS = 24 * 60 * 60 # seconds in day
+BASE_TIMESTAMP = Time.new(2015, 5, 5).freeze
+TIMESTAMP_DELTA_SECONDS = (24 * 60 * 60).freeze # seconds in day
 
 def to_constant_declaration(column, index)
   value = case column[:java_type]
           when 'String'
             "\"foo_#{index}\""
-          when 'int'
+          when 'Integer'
             "%d" % [index]
-          when 'long'
+          when 'Long'
             "%dL" % [index]
-          when 'double'
+          when 'Double'
             "%f" % [index + 0.5]
-          when 'boolean'
+          when 'Boolean'
             index.even? # just flip it every time
           when 'Timestamp'
             # add a day times the index to base timestamp
@@ -255,31 +297,30 @@ def to_constant_declaration(column, index)
           else
             index.to_s
           end
-  "private static final #{column[:java_type]} #{column[:java_constant_name]} = #{value};"
+  "public static final #{column[:java_type]} #{column[:java_constant_name]} = #{value};"
 end
 
-constants = columns.enum_for(:each_with_index) \
+constants = COLUMNS.enum_for(:each_with_index) \
   .map { |col, index| to_constant_declaration(col, index) } \
   .join("\n")
 
-write_output(outputs[:unit_test_constants], constants, 'Unit Test Constants')
+write_output(OUTPUTS[:unit_test_constants], constants, 'Unit Test Constants')
 
 ### Mock Instantiation
 # Mock the projection interface for testing with mock services exposing them
-mockName = "mock#{to_camel_case(table_name, true)}"
-mocks = columns.map { |col|
-  "doReturn(#{col[:java_constant_name]}).when(#{mockName}).#{col[:getter]}();"
+mocks = COLUMNS.map { |col|
+  "doReturn(#{col[:java_constant_name]}).when(#{TABLE_INFO[:mock]}).#{col[:getter]}();"
 }
 
 lines = []
-lines << "final #{projection_name(table_name)} #{mockName} = mock(#{projection_name(table_name)}.class);"
+lines << "final #{TABLE_INFO[:projection_interface]} #{TABLE_INFO[:mock]} = mock(#{TABLE_INFO[:projection_interface]}.class);"
 lines << mocks
 lines.flatten!
 
-write_output(outputs[:unit_test_mocks], lines.join("\n"), 'Unit Test Mocks')
+write_output(OUTPUTS[:unit_test_mocks], lines.join("\n"), 'Unit Test Mocks')
 
 ### Assertions
-dto_assertions = columns.map{ |col|
+dto_assertions = COLUMNS.map{ |col|
   getter_call = "#{to_camel_case(table_name, false)}.#{col[:getter]}()"
   expected = col[:java_constant_name]
   if col[:java_type].eql?('Timestamp')
@@ -290,15 +331,15 @@ dto_assertions = columns.map{ |col|
 
 }.join("\n")
 
-write_output(outputs[:dto_assertions], dto_assertions, 'Unit Test DTO Assertions')
+write_output(OUTPUTS[:dto_assertions], dto_assertions, 'Unit Test DTO Assertions')
 
 ### Parameter Column Enum
-def object_value_function(col, dto_name)
+def object_value_function(col)
   case col[:java_type]
   when 'Timestamp' # actually OffsetDateTime on the DTO
     "#{col[:lambda_var]} -> toInsertRowString(#{col[:lambda_var]}.#{col[:getter]}())"
   else
-    "#{dto_name}::#{col[:getter]}"
+    "#{TABLE_INFO[:dto_class]}::#{col[:getter]}"
   end
 end
 
@@ -312,27 +353,21 @@ JAVA_TYPE_TO_QPV_FACTORY = {
 }
 
 def qpv_function(col)
-  case col[:java_type]
-  when 'Timestamp'
-    "#{col[:lambda_var]} -> #{JAVA_TYPE_TO_QPV_FACTORY[col[:java_type]]}(#{col[:lambda_var]}.#{col[:getter]}())"
-  else
-    "#{col[:lambda_var]} -> #{JAVA_TYPE_TO_QPV_FACTORY[col[:java_type]]}(#{col[:lambda_var]}.#{col[:getter]}())"
-  end
+  "#{col[:lambda_var]} -> #{JAVA_TYPE_TO_QPV_FACTORY[col[:java_type]]}(#{col[:lambda_var]}.#{col[:getter]}())"
 end
 
-def query_parameter_column_entry(col, dto_name)
-  "#{col[:name].upcase}(\"#{col[:name]}\", #{object_value_function(col, dto_name)}, #{qpv_function(col)})"
+def query_parameter_column_entry(col)
+  "#{col[:name].upcase}(\"#{col[:name]}\", #{object_value_function(col)}, #{qpv_function(col)})"
 end
 
-qpc_enum = columns.map do |col|
-  query_parameter_column_entry(col, dto_name)
-end.join(",\n")
+QPC_ENUM = COLUMNS.map do |col|
+  query_parameter_column_entry(col)
+end.join(",\n").freeze
 
-write_output(outputs[:query_parameter_columns], qpc_enum, "QueryParameterValue Enum Entries")
+write_output(OUTPUTS[:query_parameter_COLUMNS], QPC_ENUM, "QueryParameterValue Enum Entries")
 
 ### DTO Fluent Setters
-#
-dto_setters = columns.map do |col|
+DTO_SETTERS = COLUMNS.map do |col|
   value = case col[:java_type]
       when 'Timestamp'
             "offsetDateTimeUtc(#{col[:java_constant_name]})"
@@ -340,10 +375,19 @@ dto_setters = columns.map do |col|
             "#{col[:java_constant_name]}"
           end
   "    .#{col[:java_field_name]}(#{value})"
-end
+end.freeze
 
-dto_decl = ["new #{dto_name}()"]
-dto_decl << dto_setters
+DTO_DECL = ["new #{TABLE_INFO[:dto_class]}()"]
+DTO_DECL << DTO_SETTERS
 
-dto_decl_str = dto_decl.join("\n") + ';'
-write_output(outputs[:dto_decl], dto_decl_str, "DTO Object Construction")
+DTO_DECL_STR = DTO_DECL.join("\n") + ';'
+write_output(OUTPUTS[:dto_decl], DTO_DECL_STR, "DTO Object Construction")
+
+### Entity Field Settings for DAO Test
+ENTITY_DECL = (["final #{TABLE_INFO[:entity_class]} #{TABLE_INFO[:instance_name]} = new #{TABLE_INFO[:entity_class]}();"] \
+  << COLUMNS.map do |col|
+    "#{TABLE_INFO[:instance_name]}.#{col[:setter]}(#{col[:java_constant_name]});"
+  end) \
+.join("\n").freeze
+
+write_output(OUTPUTS[:entity_decl], ENTITY_DECL, "Entity Class Instance Declaration")

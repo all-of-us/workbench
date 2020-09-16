@@ -10,6 +10,10 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import org.pmiops.workbench.db.dao.projection.PrjUser;
 import org.pmiops.workbench.db.dao.projection.PrjWorkspace;
+import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.db.model.DbStorageEnums;
+import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.BqDtoUser;
 import org.pmiops.workbench.model.BqDtoWorkspace;
 
@@ -30,20 +34,20 @@ public class ReportingTestUtils {
   public static final Timestamp USER__CREATION_TIME =
       Timestamp.from(Instant.parse("2015-05-13T00:00:00.00Z"));
   public static final String USER__CURRENT_POSITION = "foo_9";
-  public static final long USER__DATA_ACCESS_LEVEL = 10L;
+  public static final Short USER__DATA_ACCESS_LEVEL = 10;
   public static final Timestamp USER__DATA_USE_AGREEMENT_BYPASS_TIME =
       Timestamp.from(Instant.parse("2015-05-16T00:00:00.00Z"));
   public static final Timestamp USER__DATA_USE_AGREEMENT_COMPLETION_TIME =
       Timestamp.from(Instant.parse("2015-05-17T00:00:00.00Z"));
-  public static final long USER__DATA_USE_AGREEMENT_SIGNED_VERSION = 13L;
+  public static final Integer USER__DATA_USE_AGREEMENT_SIGNED_VERSION = 13;
   public static final Timestamp USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME =
       Timestamp.from(Instant.parse("2015-05-19T00:00:00.00Z"));
-  public static final boolean USER__DISABLED = false;
+  public static final Boolean USER__DISABLED = false;
   public static final Timestamp USER__EMAIL_VERIFICATION_BYPASS_TIME =
       Timestamp.from(Instant.parse("2015-05-21T00:00:00.00Z"));
   public static final Timestamp USER__EMAIL_VERIFICATION_COMPLETION_TIME =
       Timestamp.from(Instant.parse("2015-05-22T00:00:00.00Z"));
-  public static final long USER__EMAIL_VERIFICATION_STATUS = 18L;
+  public static final Short USER__EMAIL_VERIFICATION_STATUS = 18;
   public static final Timestamp USER__ERA_COMMONS_BYPASS_TIME =
       Timestamp.from(Instant.parse("2015-05-24T00:00:00.00Z"));
   public static final Timestamp USER__ERA_COMMONS_COMPLETION_TIME =
@@ -55,8 +59,8 @@ public class ReportingTestUtils {
       Timestamp.from(Instant.parse("2015-05-28T00:00:00.00Z"));
   public static final Timestamp USER__FIRST_SIGN_IN_TIME =
       Timestamp.from(Instant.parse("2015-05-29T00:00:00.00Z"));
-  public static final long USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE = 25L;
-  public static final double USER__FREE_TIER_CREDITS_LIMIT_DOLLARS_OVERRIDE = 26.500000;
+  public static final Short USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE = 25;
+  public static final Double USER__FREE_TIER_CREDITS_LIMIT_DOLLARS_OVERRIDE = 26.500000;
   public static final String USER__GIVEN_NAME = "foo_27";
   public static final Timestamp USER__ID_VERIFICATION_BYPASS_TIME =
       Timestamp.from(Instant.parse("2015-06-02T00:00:00.00Z"));
@@ -71,7 +75,7 @@ public class ReportingTestUtils {
       Timestamp.from(Instant.parse("2015-06-08T00:00:00.00Z"));
   public static final Timestamp USER__TWO_FACTOR_AUTH_COMPLETION_TIME =
       Timestamp.from(Instant.parse("2015-06-09T00:00:00.00Z"));
-  public static final long USER__USER_ID = 36L;
+  public static final Long USER__USER_ID = 36L;
   public static final String USER__USERNAME = "foo_37";
   public static final String USER__CITY = "foo_0";
   public static final String USER__COUNTRY = "foo_1";
@@ -80,16 +84,16 @@ public class ReportingTestUtils {
   public static final String USER__STREET_ADDRESS_2 = "foo_4";
   public static final String USER__ZIP_CODE = "foo_5";
 
-  public static final long WORKSPACE__ACTIVE_STATUS = 0L;
+  public static final Short WORKSPACE__ACTIVE_STATUS = 0;
   public static final String WORKSPACE__BILLING_ACCOUNT_NAME = "foo_1";
-  public static final long WORKSPACE__BILLING_ACCOUNT_TYPE = 2L;
-  public static final long WORKSPACE__BILLING_MIGRATION_STATUS = 3L;
-  public static final long WORKSPACE__BILLING_STATUS = 4L;
-  public static final long WORKSPACE__CDR_VERSION_ID = 5L;
+  public static final Short WORKSPACE__BILLING_ACCOUNT_TYPE = 2;
+  public static final Short WORKSPACE__BILLING_MIGRATION_STATUS = 3;
+  public static final Short WORKSPACE__BILLING_STATUS = 4;
+  public static final Long WORKSPACE__CDR_VERSION_ID = 5L;
   public static final Timestamp WORKSPACE__CREATION_TIME =
       Timestamp.from(Instant.parse("2015-05-11T00:00:00.00Z"));
-  public static final long WORKSPACE__CREATOR_ID = 7L;
-  public static final long WORKSPACE__DATA_ACCESS_LEVEL = 8L;
+  public static final Long WORKSPACE__CREATOR_ID = 7L;
+  public static final Short WORKSPACE__DATA_ACCESS_LEVEL = 8;
   public static final String WORKSPACE__DISSEMINATE_RESEARCH_OTHER = "foo_9";
   public static final String WORKSPACE__FIRECLOUD_NAME = "foo_10";
   public static final String WORKSPACE__FIRECLOUD_UUID = "foo_11";
@@ -98,33 +102,33 @@ public class ReportingTestUtils {
   public static final Timestamp WORKSPACE__LAST_MODIFIED_TIME =
       Timestamp.from(Instant.parse("2015-05-18T00:00:00.00Z"));
   public static final String WORKSPACE__NAME = "foo_14";
-  public static final long WORKSPACE__NEEDS_RP_REVIEW_PROMPT = 15L;
-  public static final boolean WORKSPACE__PUBLISHED = true;
+  public static final Short WORKSPACE__NEEDS_RP_REVIEW_PROMPT = 15;
+  public static final Boolean WORKSPACE__PUBLISHED = true;
   public static final String WORKSPACE__RP_ADDITIONAL_NOTES = "foo_17";
-  public static final boolean WORKSPACE__RP_ANCESTRY = true;
+  public static final Boolean WORKSPACE__RP_ANCESTRY = true;
   public static final String WORKSPACE__RP_ANTICIPATED_FINDINGS = "foo_19";
-  public static final boolean WORKSPACE__RP_APPROVED = true;
-  public static final boolean WORKSPACE__RP_COMMERCIAL_PURPOSE = false;
-  public static final boolean WORKSPACE__RP_CONTROL_SET = true;
-  public static final boolean WORKSPACE__RP_DISEASE_FOCUSED_RESEARCH = false;
+  public static final Boolean WORKSPACE__RP_APPROVED = true;
+  public static final Boolean WORKSPACE__RP_COMMERCIAL_PURPOSE = false;
+  public static final Boolean WORKSPACE__RP_CONTROL_SET = true;
+  public static final Boolean WORKSPACE__RP_DISEASE_FOCUSED_RESEARCH = false;
   public static final String WORKSPACE__RP_DISEASE_OF_FOCUS = "foo_24";
-  public static final boolean WORKSPACE__RP_DRUG_DEVELOPMENT = false;
-  public static final boolean WORKSPACE__RP_EDUCATIONAL = true;
-  public static final boolean WORKSPACE__RP_ETHICS = false;
+  public static final Boolean WORKSPACE__RP_DRUG_DEVELOPMENT = false;
+  public static final Boolean WORKSPACE__RP_EDUCATIONAL = true;
+  public static final Boolean WORKSPACE__RP_ETHICS = false;
   public static final String WORKSPACE__RP_INTENDED_STUDY = "foo_28";
-  public static final boolean WORKSPACE__RP_METHODS_DEVELOPMENT = false;
+  public static final Boolean WORKSPACE__RP_METHODS_DEVELOPMENT = false;
   public static final String WORKSPACE__RP_OTHER_POPULATION_DETAILS = "foo_30";
-  public static final boolean WORKSPACE__RP_OTHER_PURPOSE = false;
+  public static final Boolean WORKSPACE__RP_OTHER_PURPOSE = false;
   public static final String WORKSPACE__RP_OTHER_PURPOSE_DETAILS = "foo_32";
-  public static final boolean WORKSPACE__RP_POPULATION_HEALTH = false;
+  public static final Boolean WORKSPACE__RP_POPULATION_HEALTH = false;
   public static final String WORKSPACE__RP_REASON_FOR_ALL_OF_US = "foo_34";
-  public static final boolean WORKSPACE__RP_REVIEW_REQUESTED = false;
+  public static final Boolean WORKSPACE__RP_REVIEW_REQUESTED = false;
   public static final String WORKSPACE__RP_SCIENTIFIC_APPROACH = "foo_36";
-  public static final boolean WORKSPACE__RP_SOCIAL_BEHAVIORAL = false;
+  public static final Boolean WORKSPACE__RP_SOCIAL_BEHAVIORAL = false;
   public static final Timestamp WORKSPACE__RP_TIME_REQUESTED =
       Timestamp.from(Instant.parse("2015-06-12T00:00:00.00Z"));
-  public static final long WORKSPACE__VERSION = 39L;
-  public static final long WORKSPACE__WORKSPACE_ID = 40L;
+  public static final Short WORKSPACE__VERSION = 39;
+  public static final Long WORKSPACE__WORKSPACE_ID = 40L;
   public static final String WORKSPACE__WORKSPACE_NAMESPACE = "foo_41";
 
   public static void assertUserFields(BqDtoUser user) {
@@ -448,5 +452,59 @@ public class ReportingTestUtils {
         .version(WORKSPACE__VERSION)
         .workspaceId(WORKSPACE__WORKSPACE_ID)
         .workspaceNamespace(WORKSPACE__WORKSPACE_NAMESPACE);
+  }
+
+  public static DbWorkspace createDbWorkspace() {
+    final DbCdrVersion cdrVersion = new DbCdrVersion();
+    cdrVersion.setCdrVersionId(WORKSPACE__CDR_VERSION_ID);
+
+    final DbUser creator = new DbUser();
+    creator.setUserId(WORKSPACE__CREATOR_ID);
+
+    final DbWorkspace workspace = new DbWorkspace();
+    workspace.setActiveStatus(
+        DbStorageEnums.workspaceActiveStatusFromStorage(WORKSPACE__ACTIVE_STATUS));
+    workspace.setBillingAccountName(WORKSPACE__BILLING_ACCOUNT_NAME);
+    workspace.setBillingAccountType(WORKSPACE__BILLING_ACCOUNT_TYPE);
+    workspace.setBillingMigrationStatus(WORKSPACE__BILLING_MIGRATION_STATUS);
+    workspace.setBillingStatus(WORKSPACE__BILLING_STATUS);
+    workspace.setCdrVersion(cdrVersion);
+    workspace.setCreationTime(WORKSPACE__CREATION_TIME);
+    workspace.setCreator(creator);
+    workspace.setDataAccessLevel(WORKSPACE__DATA_ACCESS_LEVEL);
+    workspace.setDisseminateResearchOther(WORKSPACE__DISSEMINATE_RESEARCH_OTHER);
+    workspace.setFirecloudName(WORKSPACE__FIRECLOUD_NAME);
+    workspace.setFirecloudUuid(WORKSPACE__FIRECLOUD_UUID);
+    workspace.setLastAccessedTime(WORKSPACE__LAST_ACCESSED_TIME);
+    workspace.setLastModifiedTime(WORKSPACE__LAST_MODIFIED_TIME);
+    workspace.setName(WORKSPACE__NAME);
+    workspace.setNeedsResearchPurposeReviewPrompt(WORKSPACE__NEEDS_RP_REVIEW_PROMPT);
+    workspace.setPublished(WORKSPACE__PUBLISHED);
+    workspace.setAdditionalNotes(WORKSPACE__RP_ADDITIONAL_NOTES);
+    workspace.setAncestry(WORKSPACE__RP_ANCESTRY);
+    workspace.setAnticipatedFindings(WORKSPACE__RP_ANTICIPATED_FINDINGS);
+    workspace.setApproved(WORKSPACE__RP_APPROVED);
+    workspace.setCommercialPurpose(WORKSPACE__RP_COMMERCIAL_PURPOSE);
+    workspace.setControlSet(WORKSPACE__RP_CONTROL_SET);
+    workspace.setDiseaseFocusedResearch(WORKSPACE__RP_DISEASE_FOCUSED_RESEARCH);
+    workspace.setDiseaseOfFocus(WORKSPACE__RP_DISEASE_OF_FOCUS);
+    workspace.setDrugDevelopment(WORKSPACE__RP_DRUG_DEVELOPMENT);
+    workspace.setEducational(WORKSPACE__RP_EDUCATIONAL);
+    workspace.setEthics(WORKSPACE__RP_ETHICS);
+    workspace.setIntendedStudy(WORKSPACE__RP_INTENDED_STUDY);
+    workspace.setMethodsDevelopment(WORKSPACE__RP_METHODS_DEVELOPMENT);
+    workspace.setOtherPopulationDetails(WORKSPACE__RP_OTHER_POPULATION_DETAILS);
+    workspace.setOtherPurpose(WORKSPACE__RP_OTHER_PURPOSE);
+    workspace.setOtherPurposeDetails(WORKSPACE__RP_OTHER_PURPOSE_DETAILS);
+    workspace.setPopulationHealth(WORKSPACE__RP_POPULATION_HEALTH);
+    workspace.setReasonForAllOfUs(WORKSPACE__RP_REASON_FOR_ALL_OF_US);
+    workspace.setReviewRequested(WORKSPACE__RP_REVIEW_REQUESTED);
+    workspace.setScientificApproach(WORKSPACE__RP_SCIENTIFIC_APPROACH);
+    workspace.setSocialBehavioral(WORKSPACE__RP_SOCIAL_BEHAVIORAL);
+    workspace.setTimeRequested(WORKSPACE__RP_TIME_REQUESTED);
+    workspace.setVersion(WORKSPACE__VERSION);
+    workspace.setWorkspaceId(WORKSPACE__WORKSPACE_ID);
+    workspace.setWorkspaceNamespace(WORKSPACE__WORKSPACE_NAMESPACE);
+    return workspace;
   }
 }

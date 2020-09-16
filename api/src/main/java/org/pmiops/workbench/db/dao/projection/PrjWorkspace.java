@@ -3,87 +3,87 @@ package org.pmiops.workbench.db.dao.projection;
 import java.sql.Timestamp;
 
 public interface PrjWorkspace {
-  long getWorkspaceId();
+  long getActiveStatus();
 
-  String getName();
+  String getBillingAccountName();
 
-  String getWorkspaceNamespace();
+  long getBillingAccountType();
 
-  String getFirecloudName();
+  long getBillingMigrationStatus();
 
-  long getDataAccessLevel();
+  long getBillingStatus();
 
   long getCdrVersionId();
 
-  long getCreatorId();
-
   Timestamp getCreationTime();
 
-  Timestamp getLastModifiedTime();
+  long getCreatorId();
 
-  String getRpIntendedStudy();
+  long getDataAccessLevel();
 
-  boolean getRpDiseaseFocusedResearch();
+  String getDisseminateResearchOther();
 
-  String getRpDiseaseOfFocus();
-
-  boolean getRpMethodsDevelopment();
-
-  boolean getRpControlSet();
-
-  boolean getRpAncestry();
-
-  boolean getRpCommercialPurpose();
-
-  String getRpAdditionalNotes();
-
-  boolean getRpReviewRequested();
-
-  boolean getRpApproved();
-
-  Timestamp getRpTimeRequested();
-
-  long getVersion();
+  String getFirecloudName();
 
   String getFirecloudUuid();
 
   Timestamp getLastAccessedTime();
 
-  long getActiveStatus();
+  Timestamp getLastModifiedTime();
 
-  boolean getRpSocialBehavioral();
+  String getName();
 
-  boolean getRpPopulationHealth();
-
-  boolean getRpEducational();
-
-  boolean getRpOtherPurpose();
-
-  boolean getRpDrugDevelopment();
-
-  String getRpOtherPurposeDetails();
-
-  String getRpReasonForAllOfUs();
-
-  String getRpAnticipatedFindings();
-
-  long getBillingMigrationStatus();
-
-  String getRpOtherPopulationDetails();
+  long getNeedsRpReviewPrompt();
 
   boolean getPublished();
 
-  long getBillingStatus();
+  String getRpAdditionalNotes();
 
-  long getBillingAccountType();
+  boolean getRpAncestry();
 
-  String getBillingAccountName();
+  String getRpAnticipatedFindings();
+
+  boolean getRpApproved();
+
+  boolean getRpCommercialPurpose();
+
+  boolean getRpControlSet();
+
+  boolean getRpDiseaseFocusedResearch();
+
+  String getRpDiseaseOfFocus();
+
+  boolean getRpDrugDevelopment();
+
+  boolean getRpEducational();
 
   boolean getRpEthics();
 
-  String getDisseminateResearchOther();
+  String getRpIntendedStudy();
+
+  boolean getRpMethodsDevelopment();
+
+  String getRpOtherPopulationDetails();
+
+  boolean getRpOtherPurpose();
+
+  String getRpOtherPurposeDetails();
+
+  boolean getRpPopulationHealth();
+
+  String getRpReasonForAllOfUs();
+
+  boolean getRpReviewRequested();
 
   String getRpScientificApproach();
 
-  long getNeedsRpReviewPrompt();
+  boolean getRpSocialBehavioral();
+
+  Timestamp getRpTimeRequested();
+
+  long getVersion();
+
+  long getWorkspaceId();
+
+  String getWorkspaceNamespace();
 }

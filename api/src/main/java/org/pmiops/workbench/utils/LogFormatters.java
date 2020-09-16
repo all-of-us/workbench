@@ -14,6 +14,7 @@ public class LogFormatters {
   }
 
   public static String durationToSecondsWithMillis(Duration duration) {
-    return String.format("%d.%3ds", duration.toMillis() / 1000, duration.toMillis() % 1000);
+    return duration.toString();
+    //    return String.format("%d.%3ds", duration.toMillis() / 1000, duration.toMillis() % 1000);
   }
 }
