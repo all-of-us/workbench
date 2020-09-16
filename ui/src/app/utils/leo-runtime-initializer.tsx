@@ -174,7 +174,9 @@ export class LeoRuntimeInitializer {
       throw new ExceededActionCountError(
         `Reached max runtime create count (${this.maxCreateCount})`, this.currentRuntime);
     }
-    await runtimeApi().createRuntime(this.workspaceNamespace, {configurationType: RuntimeConfigurationType.DefaultDataproc},  {signal: this.abortSignal});
+    await runtimeApi().createRuntime(this.workspaceNamespace,
+      {configurationType: RuntimeConfigurationType.DefaultDataproc},
+      {signal: this.abortSignal});
     this.createCount++;
   }
 
