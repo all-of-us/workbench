@@ -485,7 +485,9 @@ public class RuntimeControllerTest {
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
 
     runtimeController.createRuntime(BILLING_PROJECT_ID, new Runtime());
-    verify(userRuntimesApi).createRuntime(eq(BILLING_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+    verify(userRuntimesApi)
+        .createRuntime(
+            eq(BILLING_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
   }
 
   @Test
