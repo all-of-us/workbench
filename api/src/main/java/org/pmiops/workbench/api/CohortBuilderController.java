@@ -188,6 +188,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   @Override
   public ResponseEntity<DomainInfoResponse> findDomainInfos(Long cdrVersionId, String term) {
     cdrVersionService.setCdrVersion(cdrVersionId);
+    validateTerm(term);
     return ResponseEntity.ok(
         new DomainInfoResponse().items(cohortBuilderService.findDomainInfos(term)));
   }

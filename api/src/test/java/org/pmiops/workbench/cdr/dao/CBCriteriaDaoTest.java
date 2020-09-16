@@ -67,6 +67,7 @@ public class CBCriteriaDaoTest {
                 .addStandard(false)
                 .addCode("120")
                 .addConceptId("12")
+                .addFullText("term[CONDITION_rank1]")
                 .build());
     standardCriteria =
         cbCriteriaDao.save(
@@ -171,8 +172,10 @@ public class CBCriteriaDaoTest {
 
   @Test
   public void findCountByDomainAndStandardAndTerm() {
-    cbCriteriaDao.findCountByDomainAndStandardAndTerm(
-        Domain.CONDITION.toString(), ImmutableList.of(false), "term");
+    assertThat(
+            cbCriteriaDao.findCountByDomainAndStandardAndTerm(
+                Domain.CONDITION.toString(), ImmutableList.of(false), "term"))
+        .isEqualTo(1);
   }
 
   @Test

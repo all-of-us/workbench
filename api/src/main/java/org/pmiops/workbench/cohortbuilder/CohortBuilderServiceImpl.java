@@ -9,6 +9,7 @@ import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Ordering;
 import java.util.ArrayList;
@@ -275,15 +276,27 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   @Override
   public List<DomainInfo> findDomainInfos(String term) {
+    ImmutableList<Boolean> standard = ImmutableList.of(true);
+    ImmutableList<Boolean> all = ImmutableList.of(true, false);
+    String searchTerm = modifyTermMatch(term);
     // read domain infos
     List<DomainInfo> domainInfos =
         domainInfoDao.findByOrderByDomainId().stream()
             .map(cohortBuilderMapper::dbModelToClient)
             .collect(Collectors.toList());
     // read standard concept count
-
+    domainInfos.forEach(
+        di ->
+            di.setAllConceptCount(
+                cbCriteriaDao.findCountByDomainAndStandardAndTerm(
+                    di.getDomain().toString(), standard, searchTerm)));
     // read all concept count
-    return null;
+    domainInfos.forEach(
+        di ->
+            di.setAllConceptCount(
+                cbCriteriaDao.findCountByDomainAndStandardAndTerm(
+                    di.getDomain().toString(), all, searchTerm)));
+    return domainInfos;
   }
 
   @Override
