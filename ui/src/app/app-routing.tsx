@@ -104,7 +104,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           path='/admin/workspaces/:workspaceNamespace/:nbName'
           component={() => <AdminNotebookViewPage routeData={{
             pathElementForTitle: 'nbName',
-            notebookHelpSidebarStyles: true,  // TODO: remove?
             minimizeChrome: true
           }}/>}
       />
