@@ -44,9 +44,9 @@ interface Props {
 
 const AdminNotebookViewComponent = (props: Props) => {
   const {workspaceNamespace, nbName, accessReason} = props;
-  const [notebookHtml, setHtml] = useState(undefined);
-  const [workspaceName, setWorkspaceName] = useState(undefined);
-  const [errorMessage, setErrorMessage] = useState(undefined);
+  const [notebookHtml, setHtml] = useState('');
+  const [workspaceName, setWorkspaceName] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const Header = () => {
     const location = workspaceName ? `Workspace ${workspaceNamespace}/${workspaceName}` : workspaceNamespace;
