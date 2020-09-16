@@ -1,3 +1,4 @@
+import {SpinnerOverlay} from 'app/components/spinners';
 import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
@@ -54,6 +55,14 @@ const AdminNotebookViewComponent = (props: Props) => {
     return <div style={styles.heading}>Viewing {nbName} in {link} for reason: {accessReason}</div>;
   };
 
+  const Main = () => {
+    if (notebookHtml) {
+      return <iframe id='notebook-frame' style={styles.notebook} srcDoc={notebookHtml}/>;
+    } else {
+      return <SpinnerOverlay />;
+    }
+  };
+
   useEffect(() => {
     workspaceAdminApi().getWorkspaceAdminView(workspaceNamespace)
       .then(workspaceAdminView => setWorkspaceName(workspaceAdminView.workspace.name));
@@ -62,11 +71,6 @@ const AdminNotebookViewComponent = (props: Props) => {
   useEffect(() => {
     if (!accessReason || !accessReason.trim()) {
       setErrorMessage('Error: must include accessReason query parameter in URL');
-    }
-  }, [accessReason]);
-
-  useEffect(() => {
-    if (!accessReason || !accessReason.trim()) {
       return;
     }
 
@@ -86,7 +90,7 @@ const AdminNotebookViewComponent = (props: Props) => {
   return <React.Fragment>
     <Header/>
     {errorMessage && <div style={styles.error}>{errorMessage}</div>}
-    {notebookHtml && <iframe id='notebook-frame' style={styles.notebook} srcDoc={notebookHtml}/>}
+    <Main/>
   </React.Fragment>;
 };
 
