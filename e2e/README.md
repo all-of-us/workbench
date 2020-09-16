@@ -51,7 +51,7 @@ PUPPETEER_TIMEOUT=90000
 ### Few notable preconfigured scripts
 * Run all tests in parallel **in headless Chrome** on deployed AoU "test" environment <div class="text-blue">`yarn test`</div>
 * Run one test in headless Chrome with node `--inspect-brk` argument. It pauses test playback at breakpoints which is useful for debugging or/and writing new tests <div class="text-blue">`yarn test:debugTest [TEST_FILE]` </div>
-* Run one test on your local server <div class="text-blue">`yarn test:local [TEST_FILE]` </div>
+* Run one test on your local server <div class="text-blue">`yarn test-local [TEST_FILE]` </div>
 * Run one test on deployed AoU "test" environment <div class="text-blue">`yarn test:debug [TEST_FILE]` </div>
 
 ## Few examples of how to run tests on localhost (from `e2e` directory)
@@ -61,7 +61,7 @@ PUPPETEER_TIMEOUT=90000
 
 * Run all tests on "test" environment <div class="text-blue">`yarn test`</div>
 
-* Run "login.spec.ts" test against the local server. Optionally specify your own userid and password <div class="text-blue">`USER_NAME=<YOUR_USERID> PASSWORD=<YOUR_USER_PASSWORD> yarn test:local tests/user/login.spec.ts`</div>
+* Run "login.spec.ts" test against the local server. Optionally specify your own userid and password <div class="text-blue">`USER_NAME=<YOUR_USERID> PASSWORD=<YOUR_USER_PASSWORD> yarn test-local tests/user/login.spec.ts`</div>
 
 
 
