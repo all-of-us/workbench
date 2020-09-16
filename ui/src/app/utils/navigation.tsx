@@ -112,9 +112,15 @@ export const navigateSignOut = (continuePath: string = '/login') => {
     `https://appengine.google.com/_ah/logout?continue=${window.location.origin}${continuePath}`);
 };
 
+/**
+ * Retrieve query parameters from the React Router.
+ *
+ * Example: 
+ *  my/query/page?user=alice123
+ *  reactRouterUrlSearchParams.get('user') -> value is 'alice123'
+ */
 export const reactRouterUrlSearchParams = (): URLSearchParams => {
-  const {search} = useLocation();
-  return new URLSearchParams(search);
+  return new URLSearchParams(useLocation().search);
 };
 
 export enum BreadcrumbType {
