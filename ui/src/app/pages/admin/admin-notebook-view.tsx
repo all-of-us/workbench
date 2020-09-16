@@ -58,6 +58,8 @@ const AdminNotebookViewComponent = (props: Props) => {
   const Main = () => {
     if (notebookHtml) {
       return <iframe id='notebook-frame' style={styles.notebook} srcDoc={notebookHtml}/>;
+    } else if (errorMessage) {
+      return <div style={styles.error}>{errorMessage}</div>;
     } else {
       return <SpinnerOverlay />;
     }
@@ -89,7 +91,6 @@ const AdminNotebookViewComponent = (props: Props) => {
 
   return <React.Fragment>
     <Header/>
-    {errorMessage && <div style={styles.error}>{errorMessage}</div>}
     <Main/>
   </React.Fragment>;
 };
