@@ -15,7 +15,8 @@ export class RuntimeApiStub extends RuntimeApi {
       runtimeName: 'Runtime Name',
       googleProject: 'Namespace',
       status: RuntimeStatus.Running,
-      createdDate: '08/08/2018'
+      createdDate: '08/08/2018',
+      toolDockerImage: 'docker'
     };
   }
 

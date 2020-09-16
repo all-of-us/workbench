@@ -21,7 +21,8 @@ const baseRuntime: Runtime = {
   runtimeName: 'aou-rw-3',
   googleProject: 'aou-rw-12345',
   status: RuntimeStatus.Running,
-  createdDate: '08/08/2018'
+  createdDate: '08/08/2018',
+  toolDockerImage: 'docker'
 };
 
 describe('RuntimeInitializer', () => {

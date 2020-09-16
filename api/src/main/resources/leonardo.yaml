@@ -1932,7 +1932,7 @@ components:
             $ref: "#/components/schemas/CreateRuntimeRequest"
           example:
             runtimeConfig:
-              cloudService: gce
+              cloudService: GCE
               machineType: n1-standard-4
               diskSize: 100
     UpdateRuntimeRequest:
@@ -1943,7 +1943,7 @@ components:
           example:
             allowStop: true
             runtimeConfig:
-              cloudService: gce
+              cloudService: GCE
               machineType: n1-highmem-16
               diskSize: 500
     CreateDiskRequest:
@@ -2717,7 +2717,7 @@ components:
       properties:
         cloudService:
           type: string
-          enum: [gce, dataproc]
+          enum: [GCE, DATAPROC]
         machineType:
           type: string
           description: >
@@ -2735,7 +2735,7 @@ components:
       properties:
         cloudService:
           type: string
-          enum: [gce, dataproc]
+          enum: [GCE, DATAPROC]
         masterMachineType:
           type: string
           description: >
@@ -2762,7 +2762,7 @@ components:
       properties:
         cloudService:
           type: string
-          enum: [gce, dataproc]
+          enum: [GCE, DATAPROC]
     UpdateRuntimeRequest:
       description: Updates a runtime
       type: object
@@ -2880,7 +2880,7 @@ components:
       properties:
         cloudService:
           type: string
-          enum: [gce, dataproc]
+          enum: [GCE, DATAPROC]
     RuntimeImage:
       type: object
       properties:
@@ -2900,7 +2900,7 @@ components:
       properties:
         cloudService:
           type: string
-          enum: [gce, dataproc]
+          enum: [GCE, DATAPROC]
         diskSize:
           type: integer
           description: >
@@ -2925,7 +2925,7 @@ components:
       properties:
         cloudService:
           type: string
-          enum: [gce, dataproc]
+          enum: [GCE, DATAPROC]
         persistentDisk:
           $ref: "#/components/schemas/PersistentDiskRequest"
         bootDiskSize:
@@ -2947,7 +2947,7 @@ components:
       properties:
         cloudService:
           type: string
-          enum: [gce, dataproc]
+          enum: [GCE, DATAPROC]
         numberOfWorkers:
           type: integer
           description: >
