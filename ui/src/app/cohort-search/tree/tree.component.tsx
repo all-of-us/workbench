@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import {SearchBar} from 'app/cohort-search/search-bar/search-bar.component';
+import {ppiSurveys} from 'app/cohort-search/search-state.service';
 import {TreeNode} from 'app/cohort-search/tree-node/tree-node.component';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -125,6 +126,13 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
         this.setState({children});
       } else {
         this.setState({children: resp.items});
+        if (domainId === DomainType.SURVEY.toString()) {
+          const rootSurveys = ppiSurveys.getValue();
+          if (!rootSurveys[cdrVersionId]) {
+            rootSurveys[cdrVersionId] = resp.items;
+            ppiSurveys.next(rootSurveys);
+          }
+        }
       }
     })
     .catch(error => {

@@ -3,7 +3,7 @@ import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 
 import {PM_UNITS, PREDEFINED_ATTRIBUTES} from 'app/cohort-search/constant';
-import {ppiQuestions} from 'app/cohort-search/search-state.service';
+import {ppiQuestions, ppiSurveys} from 'app/cohort-search/search-state.service';
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {
   mapParameter,
@@ -245,13 +245,38 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
     initAttributeForm() {
       const {node: {subtype}} = this.props;
       const {form} = this.state;
-      if (this.hasRange) {
+      if (this.isSurvey) {
+        this.getSurveyAttributes();
+      } else if (this.isMeasurement) {
         this.getAttributes();
       } else {
         form.num = subtype === CriteriaSubType[CriteriaSubType.BP]
           ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
           : [{name: subtype, operator: 'ANY', operands: []}];
         this.setState({form, count: this.nodeCount, loading: false});
+      }
+    }
+
+    getSurveyAttributes() {
+      const {node: {conceptId, path}} = this.props;
+      const {form} = this.state;
+      const {cdrVersionId} = currentWorkspaceStore.getValue();
+      const surveyId = path.split('.')[0];
+      const surveyNode = ppiSurveys.getValue()[cdrVersionId].find(n => n.id === +surveyId);
+      if (surveyNode.subtype === CriteriaSubType.SURVEY.toString() && surveyNode.name.includes('COPE')) {
+        cohortBuilderApi().findSurveyVersionByQuestionConceptId(+cdrVersionId, surveyNode.conceptId, conceptId).then(resp => {
+          console.log(resp);
+          form.cat = resp.items.map(attr => ({
+            checked: false,
+            conceptName: attr.version,
+            estCount: attr.itemCount,
+            valueAsConceptId: conceptId
+          }));
+          const count = this.isSurvey ? this.nodeCount : null;
+          this.setState({count, form, loading: false});
+        });
+      } else {
+        this.getAttributes();
       }
     }
 
@@ -469,7 +494,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
         selectionDisplay.push(name);
       }
       form.cat.filter(ca => ca.checked).forEach(attr => selectionDisplay.push(attr.conceptName));
-      const nodeName = this.isSurvey ? ppiQuestions.getValue()[node.parentId].name : node.name;
+      const nodeName = node.subtype === CriteriaSubType.ANSWER ? ppiQuestions.getValue()[node.parentId].name : node.name;
       return nodeName + ' (' + selectionDisplay.join(', ') +
         (this.hasUnits && form.num[0].operator !== AttrName.ANY ? ' ' + PM_UNITS[node.subtype] : '') + ')';
     }
