@@ -62,6 +62,11 @@ const styles = reactStyles({
     height: '1.5rem',
     margin: '0.25rem 0.5rem'
   },
+  growl: {
+    position: 'absolute',
+    right: '0',
+    top: 0
+  },
   panelLeft: {
     display: 'none',
     flex: 1,
@@ -77,6 +82,12 @@ const styles = reactStyles({
     flexWrap: 'wrap',
     height: '70vh',
     width: '100%',
+  },
+  searchContent: {
+    height: '100%',
+    padding: '0 0.5rem',
+    position: 'relative',
+    width: '100%'
   },
   titleBar: {
     color: colors.primary,
@@ -145,6 +156,7 @@ interface State {
   count: number;
   disableFinish: boolean;
   groupSelections: Array<number>;
+  growlVisible: boolean;
   hierarchyNode: Criteria;
   loadingSubtree: boolean;
   mode: string;
@@ -161,9 +173,7 @@ const css = `
   .p-growl.p-growl-topright {
     height: 1rem;
     width: 6.4rem;
-    padding-top: 0.4rem;
     line-height: 0.7rem;
-    margin-right: 2.5rem;
   }
   .p-growl .p-growl-item-container .p-growl-item .p-growl-image {
     font-size: 1rem !important;
@@ -199,6 +209,7 @@ const css = `
 export const CohortSearch = withCurrentCohortSearchContext()(class extends React.Component<Props, State> {
   subscription: Subscription;
   growl: any;
+  growlTimer: NodeJS.Timer;
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -207,6 +218,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
       count: 0,
       disableFinish: false,
       groupSelections: [],
+      growlVisible: false,
       hierarchyNode: undefined,
       loadingSubtree: false,
       mode: 'list',
@@ -342,9 +354,14 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
       }
     }
     selections = [...selections, param];
-    this.growl.show({ severity: 'success', detail: 'Criteria Added', closable: false, life: 2000});
+    this.growl.show({severity: 'success', detail: 'Criteria Added', closable: false, life: 2000});
+    if (!!this.growlTimer) {
+      clearTimeout(this.growlTimer);
+    }
+    // This is to set style display: 'none' on the growl so it doesn't block the nav icons in the sidebar
+    this.growlTimer = setTimeout(() => this.setState({growlVisible: false}), 2500);
     currentCohortCriteriaStore.next(selections);
-    this.setState({groupSelections, selections, selectedIds});
+    this.setState({groupSelections, growlVisible: true, selections, selectedIds});
   }
 
   selectDeceased() {
@@ -370,16 +387,14 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
 
   render() {
     const {cohortContext} = this.props;
-    const {autocompleteSelection, count, groupSelections, hierarchyNode, loadingSubtree, selectedIds, selections, title, treeSearchTerms}
-      = this.state;
+    const {autocompleteSelection, count, groupSelections, growlVisible, hierarchyNode, loadingSubtree, selectedIds, selections, title,
+      treeSearchTerms} = this.state;
     return !!cohortContext && <FlexRowWrap style={styles.searchContainer}>
-      <div id='cohort-search-container' style={{height: '100%', padding: '0 0.5rem', width: '100%'}}>
-        <div style={{position: 'absolute', right: '0'}}>
-          <style>
-            {css}
-          </style>
-          <Growl ref={(el) => this.growl = el}/>
-        </div>
+      <style>
+        {css}
+      </style>
+      <div id='cohort-search-container' style={styles.searchContent}>
+        <Growl ref={(el) => this.growl = el} style={!growlVisible ? {...styles.growl, display: 'none'} : styles.growl}/>
         <div style={styles.titleBar}>
           <Clickable style={styles.backArrow} onClick={() => this.closeSearch()}>
             <img src={arrowIcon} style={styles.arrowIcon} alt='Go back' />
