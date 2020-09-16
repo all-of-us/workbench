@@ -38,12 +38,12 @@ const styles = reactStyles({
 
 interface Props {
   workspaceNamespace: string;
-  nbName: string;
+  notebookName: string;
   accessReason: string;
 }
 
 const AdminNotebookViewComponent = (props: Props) => {
-  const {workspaceNamespace, nbName, accessReason} = props;
+  const {workspaceNamespace, notebookName, accessReason} = props;
   const [notebookHtml, setHtml] = useState('');
   const [workspaceName, setWorkspaceName] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -52,7 +52,7 @@ const AdminNotebookViewComponent = (props: Props) => {
     const location = workspaceName ? `Workspace ${workspaceNamespace}/${workspaceName}` : workspaceNamespace;
     const link = <a href={`/admin/workspaces/${workspaceNamespace}`}>{location}</a>;
 
-    return <div style={styles.heading}>Viewing {nbName} in {link} for reason: {accessReason}</div>;
+    return <div style={styles.heading}>Viewing {notebookName} in {link} for reason: {accessReason}</div>;
   };
 
   const Main = () => {
@@ -76,11 +76,11 @@ const AdminNotebookViewComponent = (props: Props) => {
       return;
     }
 
-    workspaceAdminApi().adminReadOnlyNotebook(workspaceNamespace, nbName, {reason: accessReason})
+    workspaceAdminApi().adminReadOnlyNotebook(workspaceNamespace, notebookName, {reason: accessReason})
       .then(response => setHtml(response.html))
       .catch((e) => {
         if (e.status === 404) {
-          setErrorMessage(`Notebook ${nbName} was not found`);
+          setErrorMessage(`Notebook ${notebookName} was not found`);
         } else if (e.status === 412) {
           setErrorMessage('Notebook is too large to display in preview mode');
         } else {
@@ -101,7 +101,7 @@ const AdminNotebookView = () => {
 
   return <AdminNotebookViewComponent
       workspaceNamespace={workspaceNamespace}
-      nbName={nbName}
+      notebookName={nbName}
       accessReason={accessReason}/>;
 };
 
