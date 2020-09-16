@@ -35,17 +35,6 @@ const styles = reactStyles({
   },
 });
 
-interface HeaderProps extends Props {
-  workspaceName: string;
-}
-
-const Header = (props: HeaderProps) => {
-  const {workspaceNamespace, workspaceName, nbName, accessReason} = props;
-  const location = workspaceName ? `Workspace ${workspaceNamespace}/${workspaceName}` : workspaceNamespace;
-
-  return <div style={styles.heading}>Viewing {nbName} in <a href={`/admin/workspaces/${workspaceNamespace}`}>{location}</a> for reason: {accessReason}</div>;
-}
-
 interface Props {
   workspaceNamespace: string;
   nbName: string;
@@ -57,6 +46,13 @@ const AdminNotebookViewComponent = (props: Props) => {
   const [notebookHtml, setHtml] = useState(undefined);
   const [workspaceName, setWorkspaceName] = useState(undefined);
   const [errorMessage, setErrorMessage] = useState(undefined);
+
+  const Header = () => {
+    const location = workspaceName ? `Workspace ${workspaceNamespace}/${workspaceName}` : workspaceNamespace;
+    const link = <a href={`/admin/workspaces/${workspaceNamespace}`}>{location}</a>;
+
+    return <div style={styles.heading}>Viewing {nbName} in {link} for reason: {accessReason}</div>;
+  };
 
   useEffect(() => {
     workspaceAdminApi().adminReadOnlyNotebook(workspaceNamespace, nbName, {reason: accessReason})
@@ -74,11 +70,11 @@ const AdminNotebookViewComponent = (props: Props) => {
 
   useEffect(() => {
     workspaceAdminApi().getWorkspaceAdminView(workspaceNamespace)
-        .then(workspaceAdminView => setWorkspaceName(workspaceAdminView.workspace.name));
-  }, [])
+      .then(workspaceAdminView => setWorkspaceName(workspaceAdminView.workspace.name));
+  }, []);
 
   return <React.Fragment>
-    <Header workspaceNamespace={workspaceNamespace} workspaceName={workspaceName} nbName={nbName} accessReason={accessReason} />
+    <Header/>
     {errorMessage && <div style={styles.error}>{errorMessage}</div>}
     {notebookHtml && <iframe id='notebook-frame' style={styles.notebook} srcDoc={notebookHtml}/>}
   </React.Fragment>;
