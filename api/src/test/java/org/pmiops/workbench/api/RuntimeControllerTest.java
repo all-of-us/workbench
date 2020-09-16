@@ -486,7 +486,11 @@ public class RuntimeControllerTest {
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
 
     runtimeController.createRuntime(BILLING_PROJECT_ID, null);
-    verify(userRuntimesApi).createRuntime(eq(BILLING_PROJECT_ID), eq(getRuntimeName()), any());
+    verify(userRuntimesApi).createRuntime(eq(BILLING_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+
+    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    assertThat(((Map<String, String>) createRuntimeRequest.getLabels()).get("all-of-us-config"))
+        .isEqualTo("default");
   }
 
   @Test
