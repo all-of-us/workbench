@@ -115,7 +115,7 @@ export const navigateSignOut = (continuePath: string = '/login') => {
 /**
  * Retrieve query parameters from the React Router.
  *
- * Example: 
+ * Example:
  *  my/query/page?user=alice123
  *  reactRouterUrlSearchParams.get('user') -> value is 'alice123'
  */
