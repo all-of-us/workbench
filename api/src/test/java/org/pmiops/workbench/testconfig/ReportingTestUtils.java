@@ -3,7 +3,6 @@ package org.pmiops.workbench.testconfig;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.pmiops.workbench.db.model.DbStorageEnums.billingAccountTypeFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.billingMigrationStatusFromStorage;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
@@ -16,6 +15,7 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.BqDtoUser;
 import org.pmiops.workbench.model.BqDtoWorkspace;
@@ -89,7 +89,8 @@ public class ReportingTestUtils {
 
   public static final Short WORKSPACE__ACTIVE_STATUS = 0;
   public static final String WORKSPACE__BILLING_ACCOUNT_NAME = "foo_1";
-  public static final Short WORKSPACE__BILLING_ACCOUNT_TYPE = 1;
+  public static final BillingAccountType WORKSPACE__BILLING_ACCOUNT_TYPE =
+      BillingAccountType.FREE_TIER;
   public static final Short WORKSPACE__BILLING_MIGRATION_STATUS = 1;
   public static final BillingStatus WORKSPACE__BILLING_STATUS = BillingStatus.ACTIVE;
   public static final Long WORKSPACE__CDR_VERSION_ID = 5L;
@@ -246,7 +247,7 @@ public class ReportingTestUtils {
       long actualCreatorId) {
     assertThat(workspace.getActiveStatus()).isEqualTo(WORKSPACE__ACTIVE_STATUS);
     assertThat(workspace.getBillingAccountName()).isEqualTo(WORKSPACE__BILLING_ACCOUNT_NAME);
-    //    assertThat(workspace.getBillingAccountType()).isEqualTo(WORKSPACE__BILLING_ACCOUNT_TYPE);
+    assertThat(workspace.getBillingAccountType()).isEqualTo(WORKSPACE__BILLING_ACCOUNT_TYPE);
     assertThat(workspace.getBillingMigrationStatus())
         .isEqualTo(WORKSPACE__BILLING_MIGRATION_STATUS);
     assertThat(workspace.getBillingStatus()).isEqualTo(WORKSPACE__BILLING_STATUS);
@@ -468,7 +469,7 @@ public class ReportingTestUtils {
     return new BqDtoWorkspace()
         .activeStatus(WORKSPACE__ACTIVE_STATUS.longValue())
         .billingAccountName(WORKSPACE__BILLING_ACCOUNT_NAME)
-        .billingAccountType(WORKSPACE__BILLING_ACCOUNT_TYPE.longValue())
+        .billingAccountType(WORKSPACE__BILLING_ACCOUNT_TYPE)
         .billingMigrationStatus(WORKSPACE__BILLING_MIGRATION_STATUS.longValue())
         .billingStatus(WORKSPACE__BILLING_STATUS)
         .cdrVersionId(WORKSPACE__CDR_VERSION_ID)
@@ -511,17 +512,11 @@ public class ReportingTestUtils {
   }
 
   public static DbWorkspace createDbWorkspace(DbUser creator, DbCdrVersion cdrVersion) {
-    //    final DbCdrVersion cdrVersion = new DbCdrVersion();
-    //    cdrVersion.setCdrVersionId(WORKSPACE__CDR_VERSION_ID);
-
-    //    final DbUser creator = new DbUser();
-    //    creator.setUserId(WORKSPACE__CREATOR_ID);
-
     final DbWorkspace workspace = new DbWorkspace();
     workspace.setWorkspaceActiveStatusEnum(
         DbStorageEnums.workspaceActiveStatusFromStorage(WORKSPACE__ACTIVE_STATUS));
     workspace.setBillingAccountName(WORKSPACE__BILLING_ACCOUNT_NAME);
-    workspace.setBillingAccountType(billingAccountTypeFromStorage(WORKSPACE__BILLING_ACCOUNT_TYPE));
+    workspace.setBillingAccountType(WORKSPACE__BILLING_ACCOUNT_TYPE);
     workspace.setBillingMigrationStatusEnum(
         billingMigrationStatusFromStorage(WORKSPACE__BILLING_MIGRATION_STATUS));
     workspace.setBillingStatus(WORKSPACE__BILLING_STATUS);

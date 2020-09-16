@@ -19,7 +19,7 @@ public enum WorkspaceParameterColumn implements QueryParameterColumn<BqDtoWorksp
   BILLING_ACCOUNT_TYPE(
       "billing_account_type",
       BqDtoWorkspace::getBillingAccountType,
-      w -> QueryParameterValue.int64(w.getBillingAccountType())),
+      w -> QueryParameterValue.string(w.getBillingAccountType().toString())),
   BILLING_MIGRATION_STATUS(
       "billing_migration_status",
       BqDtoWorkspace::getBillingMigrationStatus,
@@ -176,7 +176,7 @@ public enum WorkspaceParameterColumn implements QueryParameterColumn<BqDtoWorksp
     this.parameterName = parameterName;
     this.rowToInsertValueFunction = rowToInsertValueFunction;
     this.parameterValueFunction = parameterValueFunction;
-  };
+  }
 
   @Override
   public String getParameterName() {

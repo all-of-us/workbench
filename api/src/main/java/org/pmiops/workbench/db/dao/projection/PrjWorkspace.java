@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.dao.projection;
 
 import java.sql.Timestamp;
+import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 
 public interface PrjWorkspace {
@@ -8,7 +9,7 @@ public interface PrjWorkspace {
 
   String getBillingAccountName();
 
-  Short getBillingAccountType();
+  BillingAccountType getBillingAccountType();
 
   Short getBillingMigrationStatus();
 
