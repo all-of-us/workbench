@@ -55,6 +55,21 @@ const AdminNotebookViewComponent = (props: Props) => {
   };
 
   useEffect(() => {
+    workspaceAdminApi().getWorkspaceAdminView(workspaceNamespace)
+      .then(workspaceAdminView => setWorkspaceName(workspaceAdminView.workspace.name));
+  }, []);
+
+  useEffect(() => {
+    if (!accessReason || !accessReason.trim()) {
+      setErrorMessage('Error: must include accessReason query parameter in URL');
+    }
+  }, [accessReason]);
+
+  useEffect(() => {
+    if (!accessReason || !accessReason.trim()) {
+      return;
+    }
+
     workspaceAdminApi().adminReadOnlyNotebook(workspaceNamespace, nbName, {reason: accessReason})
       .then(response => setHtml(response.html))
       .catch((e) => {
@@ -68,11 +83,6 @@ const AdminNotebookViewComponent = (props: Props) => {
       });
   }, []);
 
-  useEffect(() => {
-    workspaceAdminApi().getWorkspaceAdminView(workspaceNamespace)
-      .then(workspaceAdminView => setWorkspaceName(workspaceAdminView.workspace.name));
-  }, []);
-
   return <React.Fragment>
     <Header/>
     {errorMessage && <div style={styles.error}>{errorMessage}</div>}
@@ -84,14 +94,10 @@ const AdminNotebookView = () => {
   const {workspaceNamespace, nbName} = useParams();
   const accessReason = reactRouterUrlSearchParams().get('accessReason');
 
-  if (accessReason && accessReason.trim()) {
-    return <AdminNotebookViewComponent
-        workspaceNamespace={workspaceNamespace}
-        nbName={nbName}
-        accessReason={accessReason}/>;
-  } else {
-    return <div style={styles.error}>Error: must include accessReason query parameter in URL</div>;
-  }
+  return <AdminNotebookViewComponent
+      workspaceNamespace={workspaceNamespace}
+      nbName={nbName}
+      accessReason={accessReason}/>;
 };
 
 export {
