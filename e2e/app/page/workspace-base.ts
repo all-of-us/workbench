@@ -1,4 +1,9 @@
+import DataResourceCard from 'app/component/data-resource-card';
+import Modal from 'app/component/modal';
 import Link from 'app/element/link';
+import Textarea from 'app/element/textarea';
+import Textbox from 'app/element/textbox';
+import {EllipsisMenuAction, LinkText, ResourceCard} from 'app/text-labels';
 import {buildXPath} from 'app/xpath-builders';
 import {ElementType} from 'app/xpath-options';
 import {Page} from 'puppeteer';
@@ -19,7 +24,7 @@ export enum TabLabels {
 
 export default abstract class WorkspaceBase extends AuthenticatedPage {
 
-  constructor(page: Page) {
+  protected constructor(page: Page) {
     super(page);
   }
 
@@ -92,6 +97,119 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
   async isOpen(pageTabName: TabLabels): Promise<boolean> {
     const selector = buildXPath({name: pageTabName, type: ElementType.Tab});
     return waitForAttributeEquality(this.page, {xpath: selector}, 'aria-selected', 'true');
+  }
+
+  /**
+   * Delete Notebook, Concept Set, Dataset or Cohort, Cohort Review thru Ellipsis menu located inside the data resource card.
+   * @param {string} resourceName
+   * @param {ResourceCard} resourceType
+   */
+  async deleteResource(resourceName: string, resourceType: ResourceCard): Promise<string[]> {
+    const resourceCard = new DataResourceCard(this.page);
+    const card = await resourceCard.findCard(resourceName, resourceType);
+    if (!card) {
+      throw new Error(`Failed to find ${resourceType} card "${resourceName}"`);
+    }
+
+    await card.clickEllipsisAction(EllipsisMenuAction.Delete, {waitForNav: false});
+
+    const modal = new Modal(this.page);
+    await modal.waitForLoad();
+    const modalTextContent = await modal.getTextContent();
+
+    let link;
+    switch (resourceType) {
+      case ResourceCard.Cohort:
+        link = LinkText.DeleteCohort;
+        break;
+      case ResourceCard.ConceptSet:
+        link = LinkText.DeleteConceptSet;
+        break;
+      case ResourceCard.Dataset:
+        link = LinkText.DeleteDataset;
+        break;
+      case ResourceCard.Notebook:
+        link = LinkText.DeleteNotebook;
+        break;
+      case ResourceCard.CohortReview:
+        link = EllipsisMenuAction.Delete;
+        break;
+      default:
+        throw new Error(`Case ${resourceType} handling is not defined.`);
+    }
+
+    await modal.clickButton(link, {waitForClose: true});
+    await waitWhileLoading(this.page);
+
+    console.log(`Deleted ${resourceType} card "${resourceName}"`);
+    await this.waitForLoad();
+    return modalTextContent;
+  }
+
+  /**
+   * Rename Notebook, Concept Set, Dataset or Cohorts thru the Ellipsis menu located inside the Dataset Resource card.
+   * @param {string} resourceName
+   * @param {string} newResourceName
+   */
+  async renameResource(resourceName: string, newResourceName: string, resourceType: ResourceCard): Promise<string[]> {
+    // Find the Data resource card that match the resource name.
+    const resourceCard = new DataResourceCard(this.page);
+    const card = await resourceCard.findCard(resourceName, resourceType);
+    if (!card) {
+      throw new Error(`Failed to find ${resourceType} card "${resourceName}"`);
+    }
+
+    let menuLink: EllipsisMenuAction;
+    switch (resourceType) {
+      case ResourceCard.Dataset:
+        menuLink = EllipsisMenuAction.RenameDataset;
+        break;
+      default:
+        menuLink = EllipsisMenuAction.Rename;
+        break;
+    }
+    await card.clickEllipsisAction(menuLink, {waitForNav: false});
+
+    const modal = new Modal(this.page);
+    await modal.waitForLoad();
+
+    const modalTextContents = await modal.getTextContent();
+
+    // Type new name.
+    const newNameTextbox = new Textbox(this.page, `${modal.getXpath()}//*[@id="new-name"]`);
+    await newNameTextbox.type(newResourceName);
+
+    // Type description. Notebook rename modal does not have Description textarea.
+    if (resourceType !== ResourceCard.Notebook) {
+      const descriptionTextarea = await Textarea.findByName(this.page, {containsText: 'Description:'}, modal);
+      await descriptionTextarea.type(`Puppeteer automation test. Rename ${resourceName}.`);
+    }
+
+    let buttonLink;
+    switch (resourceType) {
+      case ResourceCard.Cohort:
+        buttonLink = LinkText.RenameCohort;
+        break;
+      case ResourceCard.ConceptSet:
+        buttonLink = LinkText.RenameConceptSet;
+        break;
+      case ResourceCard.Dataset:
+        buttonLink = LinkText.RenameDataset;
+        break;
+      case ResourceCard.Notebook:
+        buttonLink = LinkText.RenameNotebook;
+        break;
+      case ResourceCard.CohortReview:
+        buttonLink = LinkText.RenameCohortReview;
+        break;
+      default:
+        throw new Error(`Case ${resourceType} handling is not defined.`);
+    }
+
+    await modal.clickButton(buttonLink, {waitForClose: true});
+    await waitWhileLoading(this.page);
+    console.log(`Renamed resource ${resourceType} "${resourceName}" to "${newResourceName}"`);
+    return modalTextContents;
   }
 
 

@@ -1,13 +1,17 @@
 package org.pmiops.workbench.utils.mappers;
 
 import java.util.List;
-import java.util.Map;
+import com.google.gson.Gson;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
+import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
+import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig;
+import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig.CloudServiceEnum;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeImage;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.DataprocConfig;
@@ -18,6 +22,11 @@ import org.pmiops.workbench.model.RuntimeStatus;
 
 @Mapper(config = MapStructConfig.class)
 public interface LeonardoMapper {
+
+  DataprocConfig toDataprocConfig(LeonardoMachineConfig leonardoMachineConfig);
+
+  GceConfig toGceConfig(LeonardoGceConfig leonardoGceConfig);
+
   @Mapping(target = "patchInProgress", ignore = true)
   LeonardoListRuntimeResponse toListRuntimeResponse(LeonardoGetRuntimeResponse runtime);
 
@@ -33,46 +42,31 @@ public interface LeonardoMapper {
   @Mapping(target = "dataprocConfig", ignore = true)
   Runtime toApiRuntime(LeonardoGetRuntimeResponse runtime);
 
-  default Integer extractIntField(Map<String, Object> map, String field) {
-    if (map.get(field) == null) {
-      return null;
-    }
-
-    return ((Number) map.get(field)).intValue();
-  }
-
   @AfterMapping
   default void mapRuntimeConfig(
       @MappingTarget Runtime runtime, LeonardoGetRuntimeResponse leonardoGetRuntimeResponse) {
-    // There's a lot of unchecked casting happening here but I couldn't find a way around it
-    // This is primarily due to the fact that Swagger generates the `runtimeConfig` object as a
-    // generic Java object.
-    // From manual testing, it seems like it is generated as a LinkedTreeMap.
+    Gson gson = new Gson();
+    LeonardoRuntimeConfig runtimeConfig =
+        gson.fromJson(
+            gson.toJson(leonardoGetRuntimeResponse.getRuntimeConfig()),
+            LeonardoRuntimeConfig.class);
 
-    Map<String, Object> runtimeConfig =
-        (Map<String, Object>) leonardoGetRuntimeResponse.getRuntimeConfig();
-
-    if (runtimeConfig.get("cloudService").equals("DATAPROC")) {
+    if (CloudServiceEnum.DATAPROC.equals(runtimeConfig.getCloudService())) {
       runtime.dataprocConfig(
-          new DataprocConfig()
-              .numberOfWorkers(extractIntField(runtimeConfig, "numberOfWorkers"))
-              .masterMachineType((String) runtimeConfig.get("masterMachineType"))
-              .masterDiskSize(extractIntField(runtimeConfig, "masterDiskSize"))
-              .workerMachineType((String) runtimeConfig.get("workerMachineType"))
-              .workerDiskSize(extractIntField(runtimeConfig, "workerDiskSize"))
-              .numberOfWorkerLocalSSDs(extractIntField(runtimeConfig, "numberOfWorkerLocalSSDs"))
-              .numberOfPreemptibleWorkers(
-                  extractIntField(runtimeConfig, "numberOfPreemptibleWorkers")));
-    } else if (runtimeConfig.get("cloudService").equals("GCE")) {
+          toDataprocConfig(
+              gson.fromJson(
+                  gson.toJson(leonardoGetRuntimeResponse.getRuntimeConfig()),
+                  LeonardoMachineConfig.class)));
+    } else if (CloudServiceEnum.GCE.equals(runtimeConfig.getCloudService())) {
       runtime.gceConfig(
-          new GceConfig()
-              .diskSize(extractIntField(runtimeConfig, "diskSize"))
-              .bootDiskSize(extractIntField(runtimeConfig, "bootDiskSize"))
-              .machineType((String) runtimeConfig.get("machineType")));
+          toGceConfig(
+              gson.fromJson(
+                  gson.toJson(leonardoGetRuntimeResponse.getRuntimeConfig()),
+                  LeonardoGceConfig.class)));
     } else {
       throw new IllegalArgumentException(
           "Invalid LeonardoGetRuntimeResponse.RuntimeConfig.cloudService : "
-              + runtimeConfig.get("cloudService"));
+              + runtimeConfig.getCloudService());
     }
   }
 
@@ -85,7 +79,7 @@ public interface LeonardoMapper {
 
   default String getJupyterImage(List<LeonardoRuntimeImage> images) {
     return images.stream()
-        .filter(image -> image.getImageType().equals("Jupyter"))
+        .filter(image -> "Jupyter".equals(image.getImageType()))
         .findFirst()
         .get()
         .getImageUrl();

@@ -104,6 +104,8 @@ public interface FireCloudService {
 
   String staticNotebooksConvert(byte[] notebook);
 
+  String staticNotebooksConvertAsService(byte[] notebook);
+
   /**
    * Fetches the status of the currently-authenticated user's linkage to NIH's eRA Commons system.
    *

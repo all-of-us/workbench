@@ -46,6 +46,7 @@ import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.StandardFlag;
+import org.pmiops.workbench.model.SurveyVersion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -335,6 +336,26 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
             .map(c -> c.getConceptId().toString())
             .collect(Collectors.toList());
     return demoList;
+  }
+
+  @Override
+  public List<SurveyVersion> findSurveyVersionByQuestionConceptId(
+      Long surveyConceptId, Long questionConceptId) {
+    return cbCriteriaDao.findSurveyVersionByQuestionConceptId(surveyConceptId, questionConceptId)
+        .stream()
+        .map(cohortBuilderMapper::dbModelToClient)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<SurveyVersion> findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
+      Long surveyConceptId, Long questionConceptId, Long answerConceptId) {
+    return cbCriteriaDao
+        .findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
+            surveyConceptId, questionConceptId, answerConceptId)
+        .stream()
+        .map(cohortBuilderMapper::dbModelToClient)
+        .collect(Collectors.toList());
   }
 
   private String modifyTermMatch(String term) {

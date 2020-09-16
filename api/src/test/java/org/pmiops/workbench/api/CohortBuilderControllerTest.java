@@ -38,6 +38,7 @@ import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.model.SurveyVersionListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -94,7 +95,7 @@ public class CohortBuilderControllerTest {
         DbCriteria.builder()
             .addDomainId(DomainType.CONDITION.toString())
             .addType(CriteriaType.ICD9CM.toString())
-            .addCount("0")
+            .addCount(0L)
             .addHierarchy(true)
             .addStandard(false)
             .addParentId(0L)
@@ -104,7 +105,7 @@ public class CohortBuilderControllerTest {
         DbCriteria.builder()
             .addDomainId(DomainType.CONDITION.toString())
             .addType(CriteriaType.ICD9CM.toString())
-            .addCount("0")
+            .addCount(0L)
             .addHierarchy(true)
             .addStandard(false)
             .addParentId(icd9CriteriaParent.getId())
@@ -169,7 +170,7 @@ public class CohortBuilderControllerTest {
         DbCriteria.builder()
             .addDomainId(DomainType.PERSON.toString())
             .addType(CriteriaType.AGE.toString())
-            .addCount("0")
+            .addCount(0L)
             .addParentId(0L)
             .build();
     cbCriteriaDao.save(demoCriteria);
@@ -190,7 +191,7 @@ public class CohortBuilderControllerTest {
         DbCriteria.builder()
             .addDomainId(DomainType.MEASUREMENT.toString())
             .addType(CriteriaType.LOINC.toString())
-            .addCount("0")
+            .addCount(0L)
             .addHierarchy(true)
             .addStandard(true)
             .addSynonyms("LP12*[MEASUREMENT_rank1]")
@@ -218,7 +219,7 @@ public class CohortBuilderControllerTest {
         DbCriteria.builder()
             .addDomainId(DomainType.MEASUREMENT.toString())
             .addType(CriteriaType.LOINC.toString())
-            .addCount("0")
+            .addCount(0L)
             .addHierarchy(true)
             .addStandard(true)
             .addCode("LP123")
@@ -247,7 +248,7 @@ public class CohortBuilderControllerTest {
         DbCriteria.builder()
             .addDomainId(DomainType.CONDITION.toString())
             .addType(CriteriaType.SNOMED.toString())
-            .addCount("0")
+            .addCount(0L)
             .addHierarchy(true)
             .addStandard(true)
             .addSynonyms("LP12*[CONDITION_rank1]")
@@ -305,7 +306,7 @@ public class CohortBuilderControllerTest {
     DbCriteria criteria =
         DbCriteria.builder()
             .addCode("001")
-            .addCount("10")
+            .addCount(10L)
             .addConceptId("123")
             .addDomainId(DomainType.CONDITION.toString())
             .addGroup(Boolean.TRUE)
@@ -333,7 +334,7 @@ public class CohortBuilderControllerTest {
     DbCriteria criteria =
         DbCriteria.builder()
             .addCode("00")
-            .addCount("10")
+            .addCount(10L)
             .addConceptId("123")
             .addDomainId(DomainType.CONDITION.toString())
             .addGroup(Boolean.TRUE)
@@ -362,7 +363,7 @@ public class CohortBuilderControllerTest {
     DbCriteria criteria1 =
         DbCriteria.builder()
             .addCode("672535")
-            .addCount("-1")
+            .addCount(-1L)
             .addConceptId("19001487")
             .addDomainId(DomainType.DRUG.toString())
             .addGroup(Boolean.FALSE)
@@ -390,7 +391,7 @@ public class CohortBuilderControllerTest {
     DbCriteria criteria =
         DbCriteria.builder()
             .addCode("LP12")
-            .addCount("10")
+            .addCount(10L)
             .addConceptId("123")
             .addDomainId(DomainType.CONDITION.toString())
             .addGroup(Boolean.TRUE)
@@ -418,7 +419,7 @@ public class CohortBuilderControllerTest {
     DbCriteria criteria =
         DbCriteria.builder()
             .addCode("001")
-            .addCount("10")
+            .addCount(10L)
             .addConceptId("123")
             .addDomainId(DomainType.CONDITION.toString())
             .addGroup(Boolean.TRUE)
@@ -448,7 +449,7 @@ public class CohortBuilderControllerTest {
     DbCriteria criteria =
         DbCriteria.builder()
             .addCode("001")
-            .addCount("10")
+            .addCount(10L)
             .addConceptId("123")
             .addDomainId(DomainType.DRUG.toString())
             .addGroup(Boolean.TRUE)
@@ -483,7 +484,7 @@ public class CohortBuilderControllerTest {
             .addDomainId(DomainType.CONDITION.toString())
             .addType(CriteriaType.ICD10CM.toString())
             .addStandard(true)
-            .addCount("1")
+            .addCount(1L)
             .addConceptId("1")
             .addSynonyms("[CONDITION_rank1]")
             .build();
@@ -510,7 +511,7 @@ public class CohortBuilderControllerTest {
             .addConceptId("12345")
             .addGroup(true)
             .addSelectable(true)
-            .addCount("12")
+            .addCount(12L)
             .build();
     cbCriteriaDao.save(drugATCCriteria);
     DbCriteria drugBrandCriteria =
@@ -523,7 +524,7 @@ public class CohortBuilderControllerTest {
             .addConceptId("1235")
             .addGroup(true)
             .addSelectable(true)
-            .addCount("33")
+            .addCount(33L)
             .build();
     cbCriteriaDao.save(drugBrandCriteria);
 
@@ -630,6 +631,45 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
+  public void findSurveyVersionByQuestionConceptId() {
+    jdbcTemplate.execute(
+        "create table cb_survey_version(survey_id integer, concept_id integer, version varchar(50), display_order integer)");
+    jdbcTemplate.execute(
+        "create table cb_survey_attribute(id integer, question_concept_id integer, answer_concept_id integer, survey_id integer, item_count integer)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_version(survey_id, concept_id, version, display_order) values (100, 1333342, 'May 2020', 1)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_version(survey_id, concept_id, version, display_order) values (101, 1333342, 'June 2020', 2)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_version(survey_id, concept_id, version, display_order) values (102, 1333342, 'July 2020', 3)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (1, 715713, 0, 100, 291)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (2, 715713, 0, 101, 148)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (3, 715713, 0, 102, 150)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (4, 715713, 903096, 100, 154)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (5, 715713, 903096, 101, 82)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (6, 715713, 903096, 102, 31)");
+    SurveyVersionListResponse response =
+        controller.findSurveyVersionByQuestionConceptId(1L, 1333342L, 715713L).getBody();
+    assertEquals(response.getItems().get(0).getSurveyId(), new Long("100"));
+    assertEquals(response.getItems().get(0).getVersion(), "May 2020");
+    assertEquals(response.getItems().get(0).getItemCount(), new Long("445"));
+    assertEquals(response.getItems().get(1).getSurveyId(), new Long("101"));
+    assertEquals(response.getItems().get(1).getVersion(), "June 2020");
+    assertEquals(response.getItems().get(1).getItemCount(), new Long("230"));
+    assertEquals(response.getItems().get(2).getSurveyId(), new Long("102"));
+    assertEquals(response.getItems().get(2).getVersion(), "July 2020");
+    assertEquals(response.getItems().get(2).getItemCount(), new Long("181"));
+    jdbcTemplate.execute("drop table cb_survey_version");
+    jdbcTemplate.execute("drop table cb_survey_attribute");
+  }
+
+  @Test
   public void isApproximate() {
     SearchParameter inSearchParameter = new SearchParameter();
     SearchParameter exSearchParameter = new SearchParameter();
@@ -680,6 +720,8 @@ public class CohortBuilderControllerTest {
         .code(dbCriteria.getCode())
         .conceptId(dbCriteria.getConceptId() == null ? null : new Long(dbCriteria.getConceptId()))
         .count(new Long(dbCriteria.getCount()))
+        .parentCount(dbCriteria.getParentCount())
+        .childCount(dbCriteria.getChildCount())
         .domainId(dbCriteria.getDomainId())
         .group(dbCriteria.getGroup())
         .hasAttributes(dbCriteria.getAttribute())
