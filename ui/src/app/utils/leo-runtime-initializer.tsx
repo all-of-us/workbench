@@ -1,7 +1,7 @@
 import {leoRuntimesApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import {isAbortError, reportError} from 'app/utils/errors';
-import {Runtime, RuntimeStatus} from 'generated/fetch';
+import {Runtime, RuntimeConfigurationType, RuntimeStatus} from 'generated/fetch';
 
 // We're only willing to wait 20 minutes total for a runtime to initialize. After that we return
 // a rejected promise no matter what.
@@ -174,7 +174,7 @@ export class LeoRuntimeInitializer {
       throw new ExceededActionCountError(
         `Reached max runtime create count (${this.maxCreateCount})`, this.currentRuntime);
     }
-    await runtimeApi().createRuntime(this.workspaceNamespace, {signal: this.abortSignal});
+    await runtimeApi().createRuntime(this.workspaceNamespace, {configurationType: RuntimeConfigurationType.DefaultDataproc},  {signal: this.abortSignal});
     this.createCount++;
   }
 

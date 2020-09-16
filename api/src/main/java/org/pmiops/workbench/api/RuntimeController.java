@@ -181,12 +181,6 @@ public class RuntimeController implements RuntimeApiDelegate {
 
   @Override
   public ResponseEntity<EmptyResponse> createRuntime(String workspaceNamespace, Runtime runtime) {
-    // Just create an empty Runtime for now since we're not implementing the
-    // behavior anyways. We'll support it soon with RW-5404
-    if (runtime == null) {
-      runtime = new Runtime();
-    }
-
     String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
     workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);

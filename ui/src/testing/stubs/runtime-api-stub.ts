@@ -1,6 +1,7 @@
 import {
   Runtime,
   RuntimeApi,
+  RuntimeConfigurationType,
   RuntimeLocalizeRequest,
   RuntimeLocalizeResponse,
   RuntimeStatus
@@ -16,7 +17,8 @@ export class RuntimeApiStub extends RuntimeApi {
       googleProject: 'Namespace',
       status: RuntimeStatus.Running,
       createdDate: '08/08/2018',
-      toolDockerImage: 'docker'
+      toolDockerImage: 'docker',
+      configurationType: RuntimeConfigurationType.DefaultDataproc
     };
   }
 

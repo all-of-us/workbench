@@ -5355,12 +5355,7 @@ definitions:
       - DefaultDataproc
   Runtime:
     required:
-      - googleProject
-      - runtimeName
-      - createdDate
-      - status
       - configurationType
-      - toolDockerImage
     properties:
       googleProject:
         type: string
