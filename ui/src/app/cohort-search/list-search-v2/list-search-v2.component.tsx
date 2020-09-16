@@ -149,7 +149,7 @@ const columnBodyStyle =  {
 const columnHeaderStyle = {
   ...styles.columnNameHeader,
   width: '9%'
-}
+};
 
 interface Props {
   cdrVersionListResponse: CdrVersionListResponse;
@@ -332,7 +332,6 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
         </td>
         <td style={{...columnBodyStyle, paddingLeft: '0.2rem'}}>{row.code}</td>
         <td style={columnBodyStyle}>{!brand && row.type}</td>
-        <td style={{...columnBodyStyle, paddingLeft: '0.2rem'}}>{row.count > -1 && row.count.toLocaleString()}</td>
         <td style={{...columnBodyStyle, width: '10%', paddingRight: '0.5rem'}}>{row.isStandard ? 'Standard' : 'Source'}</td>
         <td style={{...columnBodyStyle, paddingLeft: '0.2rem'}}>{row.parentCount > -1 && row.parentCount.toLocaleString()}</td>
         <td style={{...columnBodyStyle, paddingLeft: '0.2rem'}}>{row.childCount > -1 && row.childCount.toLocaleString()}</td>
@@ -393,7 +392,6 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
                   <th style={{...styles.columnNameHeader, width: '31%', borderLeft: 0}}>Name</th>
                   <th style={columnHeaderStyle}>Code</th>
                   <th style={columnHeaderStyle}>Vocab</th>
-                  <th style={columnHeaderStyle}>Count</th>
                   <th style={{...styles.columnNameHeader, width: '10%', paddingLeft: '0.2rem',
                     paddingRight: '0.5rem'}}>Source/ Standard</th>
                   <th style={columnHeaderStyle}>Parent Count</th>
