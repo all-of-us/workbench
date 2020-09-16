@@ -83,10 +83,15 @@ const AdminNotebookViewComponent = (props: Props) => {
 const AdminNotebookView = () => {
   const {workspaceNamespace, nbName} = useParams();
   const accessReason = reactRouterUrlSearchParams().get('accessReason');
-  return <AdminNotebookViewComponent
+
+  if (accessReason && accessReason.trim()) {
+    return <AdminNotebookViewComponent
         workspaceNamespace={workspaceNamespace}
         nbName={nbName}
         accessReason={accessReason}/>;
+  } else {
+    return <div style={styles.error}>Error: must include accessReason query parameter in URL</div>;
+  }
 };
 
 export {
