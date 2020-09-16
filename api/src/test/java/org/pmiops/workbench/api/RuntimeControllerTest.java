@@ -485,7 +485,7 @@ public class RuntimeControllerTest {
         .thenThrow(new NotFoundException());
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
 
-    runtimeController.createRuntime(BILLING_PROJECT_ID, new Runtime());
+    runtimeController.createRuntime(BILLING_PROJECT_ID, null);
     verify(userRuntimesApi).createRuntime(eq(BILLING_PROJECT_ID), eq(getRuntimeName()), any());
   }
 
