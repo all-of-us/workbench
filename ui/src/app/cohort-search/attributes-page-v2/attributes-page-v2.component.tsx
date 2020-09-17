@@ -200,6 +200,7 @@ interface State {
   count: number;
   countError: boolean;
   form: AttributeForm;
+  isCOPESurvey: boolean;
   loading: boolean;
   options: any;
 }
@@ -212,6 +213,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
         count: null,
         countError: false,
         form: {exists: false, num: [], cat: []},
+        isCOPESurvey: false,
         loading: true,
         options: [
           {label: 'Equals', value: Operator.EQUAL},
@@ -294,7 +296,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
             [attr.conceptName]: parseInt(attr.estCount, 10)
           }));
         }
-        this.setState({count: this.nodeCount, form, loading: false});
+        this.setState({count: this.nodeCount, form, isCOPESurvey: true, loading: false});
       } else {
         this.getAttributes();
       }
@@ -598,7 +600,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
 
     render() {
       const {close, node: {domainId, name, parentId, subtype}} = this.props;
-      const {calculating, count, countError, form, loading, options} = this.state;
+      const {calculating, count, countError, form, isCOPESurvey, loading, options} = this.state;
       const {formErrors, formValid} = this.validateForm();
       const disableAdd = calculating || !formValid;
       const disableCalculate = disableAdd || form.exists || form.num.every(attr => attr.operator === 'ANY');
@@ -618,9 +620,9 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
               {err}
             </div>)}
           </div>}
-          {this.isMeasurement && <div>
+          {(this.isMeasurement || isCOPESurvey) && <div>
             <div style={styles.label}>{this.displayName}</div>
-            <CheckBox onChange={(v) => this.toggleCheckbox(v)}/> Any value (lab exists)
+            <CheckBox onChange={(v) => this.toggleCheckbox(v)}/> Any value {this.isMeasurement && <span>(lab exists)</span>}
             {!form.exists && form.num.length > 0 && <div style={styles.orCircle}>OR</div>}
           </div>}
           {!form.exists && <div style={{minHeight: '10rem'}}>
