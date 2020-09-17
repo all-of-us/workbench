@@ -1697,10 +1697,9 @@ paths:
           description: HTML Read Only version of the notebook
           schema:
             "$ref": "#/definitions/ReadOnlyNotebookResponse"
-  "/v1/admin/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/readonly":
+  "/v1/admin/workspaces/{workspaceNamespace}/notebooks/{notebookName}/readonly":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
-      - "$ref": "#/parameters/workspaceId"
     post:
       tags:
         - workspaceAdmin
