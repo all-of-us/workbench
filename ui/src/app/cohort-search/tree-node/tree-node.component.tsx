@@ -153,7 +153,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
   }
 
   loadChildren() {
-    const {node: {count, domainId, id, isStandard, name, type}} = this.props;
+    const {node: {conceptId, count, domainId, id, isStandard, name, type}} = this.props;
     this.setState({loading: true});
     const {cdrVersionId} = (currentWorkspaceStore.getValue());
     const criteriaType = domainId === DomainType.DRUG.toString() ? CriteriaType.ATC.toString() : type;
@@ -170,7 +170,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
           if (resp.items.length > 0 && domainId === DomainType.SURVEY.toString() && !resp.items[0].group) {
             // save questions in the store so we can display them along with answers if selected
             const questions = ppiQuestions.getValue();
-            questions[id] = {count, name};
+            questions[id] = {conceptId, count, name};
             ppiQuestions.next(questions);
           }
         }
@@ -279,7 +279,8 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     }
   }
 
-  setAttributes(node: NodeProp) {
+  setAttributes(event: Event, node: NodeProp) {
+    event.stopPropagation();
     if (serverConfigStore.getValue().enableCohortBuilderV2) {
       delete node.children;
       attributesSelectionStore.next(node);
@@ -327,7 +328,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
             {hasAttributes
               ? <ClrIcon style={{color: colors.accent}}
                   shape='slider' dir='right' size='20'
-                  onClick={() => this.setAttributes(node)}/>
+                  onClick={(e) => this.setAttributes(e, node)}/>
               : selected
                 ? <ClrIcon style={{...styles.selectIcon, ...styles.selected}}
                     shape='check-circle' size='20'/>

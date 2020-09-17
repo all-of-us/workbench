@@ -257,24 +257,31 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
       }
     }
 
-    getSurveyAttributes() {
-      const {node: {conceptId, path}} = this.props;
+    async getSurveyAttributes() {
+      const {node: {conceptId, parentId, path, subtype, value}} = this.props;
       const {form} = this.state;
       const {cdrVersionId} = currentWorkspaceStore.getValue();
       const surveyId = path.split('.')[0];
-      const surveyNode = ppiSurveys.getValue()[cdrVersionId].find(n => n.id === +surveyId);
-      if (surveyNode.subtype === CriteriaSubType.SURVEY.toString() && surveyNode.name.includes('COPE')) {
-        cohortBuilderApi().findSurveyVersionByQuestionConceptId(+cdrVersionId, surveyNode.conceptId, conceptId).then(resp => {
-          console.log(resp);
-          form.cat = resp.items.map(attr => ({
-            checked: false,
-            conceptName: attr.version,
-            estCount: attr.itemCount,
-            valueAsConceptId: conceptId
-          }));
-          const count = this.isSurvey ? this.nodeCount : null;
-          this.setState({count, form, loading: false});
-        });
+      const surveyNode = !!ppiSurveys.getValue()[cdrVersionId] && ppiSurveys.getValue()[cdrVersionId].find(n => n.id === +surveyId);
+      if (!!surveyNode && surveyNode.name.includes('COPE')) {
+        let response;
+        if (subtype === CriteriaSubType.QUESTION) {
+          response = await cohortBuilderApi().findSurveyVersionByQuestionConceptId(+cdrVersionId, surveyNode.conceptId, conceptId);
+        } else if (subtype === CriteriaSubType.ANSWER && !!ppiQuestions.getValue()[parentId]) {
+          response = await cohortBuilderApi().findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
+            +cdrVersionId,
+            surveyNode.conceptId,
+            ppiQuestions.getValue()[parentId].conceptId,
+            +value
+          );
+        }
+        form.cat = response.items.map(attr => ({
+          checked: false,
+          conceptName: attr.version,
+          estCount: attr.itemCount,
+          valueAsConceptId: subtype === CriteriaSubType.QUESTION ? conceptId : +value
+        }));
+        this.setState({count: this.nodeCount, form, loading: false});
       } else {
         this.getAttributes();
       }
