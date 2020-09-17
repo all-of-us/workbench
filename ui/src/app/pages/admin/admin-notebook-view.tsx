@@ -32,7 +32,7 @@ const styles = reactStyles({
     boxSizing: 'border-box',
     color: colors.primary,
     borderColor: colors.warning,
-    backgroundColor: colorWithWhiteness(colors.danger, .95),
+    backgroundColor: colorWithWhiteness(colors.danger, .9),
     borderWidth: '1px',
     borderStyle: 'solid',
     borderRadius: '5px',
