@@ -486,9 +486,7 @@ public class RuntimeControllerTest {
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
 
     runtimeController.createRuntime(BILLING_PROJECT_ID, new Runtime());
-    verify(userRuntimesApi)
-        .createRuntime(
-            eq(BILLING_PROJECT_ID), eq(getRuntimeName()), any());
+    verify(userRuntimesApi).createRuntime(eq(BILLING_PROJECT_ID), eq(getRuntimeName()), any());
   }
 
   @Test
@@ -498,9 +496,7 @@ public class RuntimeControllerTest {
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
 
     runtimeController.createRuntime(BILLING_PROJECT_ID, null);
-    verify(userRuntimesApi)
-        .createRuntime(
-            eq(BILLING_PROJECT_ID), eq(getRuntimeName()), any());
+    verify(userRuntimesApi).createRuntime(eq(BILLING_PROJECT_ID), eq(getRuntimeName()), any());
   }
 
   @Test
@@ -510,9 +506,7 @@ public class RuntimeControllerTest {
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
 
     runtimeController.createRuntime(BILLING_PROJECT_ID, new Runtime());
-    verify(userRuntimesApi)
-        .createRuntime(
-            eq(BILLING_PROJECT_ID), eq(getRuntimeName()), any());
+    verify(userRuntimesApi).createRuntime(eq(BILLING_PROJECT_ID), eq(getRuntimeName()), any());
   }
 
   @Test

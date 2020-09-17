@@ -44,11 +44,12 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   private static final String RUNTIME_LABEL_AOU_CONFIG = "all-of-us-config";
   private static final String RUNTIME_LABEL_CREATED_BY = "created-by";
   private static final String WORKSPACE_CDR = "WORKSPACE_CDR";
-  public static final Map<RuntimeConfigurationType, String> RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP = ImmutableMap.of(
-      RuntimeConfigurationType.USEROVERRIDE, "user-override",
-      RuntimeConfigurationType.DEFAULTGCE, "default-gce",
-      RuntimeConfigurationType.DEFAULTDATAPROC, "default-dataproc"
-  );
+  public static final Map<RuntimeConfigurationType, String>
+      RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP =
+          ImmutableMap.of(
+              RuntimeConfigurationType.USEROVERRIDE, "user-override",
+              RuntimeConfigurationType.DEFAULTGCE, "default-gce",
+              RuntimeConfigurationType.DEFAULTDATAPROC, "default-dataproc");
 
   private static final Logger log = Logger.getLogger(LeonardoNotebooksClientImpl.class.getName());
 
@@ -111,33 +112,35 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     runtimeLabels.put(RUNTIME_LABEL_CREATED_BY, userEmail);
 
     if (runtime.getConfigurationType() != null) {
-      runtimeLabels.put(RUNTIME_LABEL_AOU_CONFIG, RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(runtime.getConfigurationType()));
+      runtimeLabels.put(
+          RUNTIME_LABEL_AOU_CONFIG,
+          RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(runtime.getConfigurationType()));
     }
 
     return new LeonardoCreateRuntimeRequest()
-            .labels(runtimeLabels)
-            .defaultClientId(config.server.oauthClientId)
-            // Note: Filenames must be kept in sync with files in api/src/main/webapp/static.
-            .jupyterUserScriptUri(assetsBaseUrl + "/initialize_notebook_runtime.sh")
-            .jupyterStartUserScriptUri(assetsBaseUrl + "/start_notebook_runtime.sh")
-            .userJupyterExtensionConfig(
-                new LeonardoUserJupyterExtensionConfig().nbExtensions(nbExtensions))
-            // Matches Terra UI's scopes, see RW-3531 for rationale.
-            .addScopesItem("https://www.googleapis.com/auth/cloud-platform")
-            .addScopesItem("https://www.googleapis.com/auth/userinfo.email")
-            .addScopesItem("https://www.googleapis.com/auth/userinfo.profile")
-            .runtimeConfig(
-                new LeonardoMachineConfig()
-                    .cloudService(CloudServiceEnum.DATAPROC)
-                    .masterDiskSize(
-                        Optional.ofNullable(clusterOverride.masterDiskSize)
-                            .orElse(config.firecloud.notebookRuntimeDefaultDiskSizeGb))
-                    .masterMachineType(
-                        Optional.ofNullable(clusterOverride.machineType)
-                            .orElse(config.firecloud.notebookRuntimeDefaultMachineType)))
-            .toolDockerImage(workbenchConfigProvider.get().firecloud.jupyterDockerImage)
-            .welderDockerImage(workbenchConfigProvider.get().firecloud.welderDockerImage)
-            .customEnvironmentVariables(customEnvironmentVariables);
+        .labels(runtimeLabels)
+        .defaultClientId(config.server.oauthClientId)
+        // Note: Filenames must be kept in sync with files in api/src/main/webapp/static.
+        .jupyterUserScriptUri(assetsBaseUrl + "/initialize_notebook_runtime.sh")
+        .jupyterStartUserScriptUri(assetsBaseUrl + "/start_notebook_runtime.sh")
+        .userJupyterExtensionConfig(
+            new LeonardoUserJupyterExtensionConfig().nbExtensions(nbExtensions))
+        // Matches Terra UI's scopes, see RW-3531 for rationale.
+        .addScopesItem("https://www.googleapis.com/auth/cloud-platform")
+        .addScopesItem("https://www.googleapis.com/auth/userinfo.email")
+        .addScopesItem("https://www.googleapis.com/auth/userinfo.profile")
+        .runtimeConfig(
+            new LeonardoMachineConfig()
+                .cloudService(CloudServiceEnum.DATAPROC)
+                .masterDiskSize(
+                    Optional.ofNullable(clusterOverride.masterDiskSize)
+                        .orElse(config.firecloud.notebookRuntimeDefaultDiskSizeGb))
+                .masterMachineType(
+                    Optional.ofNullable(clusterOverride.machineType)
+                        .orElse(config.firecloud.notebookRuntimeDefaultMachineType)))
+        .toolDockerImage(workbenchConfigProvider.get().firecloud.jupyterDockerImage)
+        .welderDockerImage(workbenchConfigProvider.get().firecloud.welderDockerImage)
+        .customEnvironmentVariables(customEnvironmentVariables);
   }
 
   @Override
