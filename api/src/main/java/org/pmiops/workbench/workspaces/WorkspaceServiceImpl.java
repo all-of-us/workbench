@@ -312,8 +312,15 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     maybeDeleteRecentWorkspace(dbWorkspace.getWorkspaceId());
 
     String billingProjectName = dbWorkspace.getWorkspaceNamespace();
-    fireCloudService.deleteBillingProject(billingProjectName);
-    billingProjectAuditor.fireDeleteAction(billingProjectName);
+    try {
+      fireCloudService.deleteBillingProject(billingProjectName);
+      billingProjectAuditor.fireDeleteAction(billingProjectName);
+    } catch (Exception e) {
+      String msg =
+          String.format(
+              "Error deleting billing project %s: %s", billingProjectName, e.getMessage());
+      log.warning(msg);
+    }
   }
 
   @Override
