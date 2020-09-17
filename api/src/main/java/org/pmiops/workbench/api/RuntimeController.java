@@ -181,6 +181,10 @@ public class RuntimeController implements RuntimeApiDelegate {
 
   @Override
   public ResponseEntity<EmptyResponse> createRuntime(String workspaceNamespace, Runtime runtime) {
+    if (runtime == null) {
+      runtime = new Runtime();
+    }
+
     String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
     workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);

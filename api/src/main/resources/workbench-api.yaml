@@ -5354,8 +5354,6 @@ definitions:
       - DefaultGce
       - DefaultDataproc
   Runtime:
-    required:
-      - configurationType
     properties:
       googleProject:
         type: string

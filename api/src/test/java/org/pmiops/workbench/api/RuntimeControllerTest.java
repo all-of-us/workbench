@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -487,7 +488,31 @@ public class RuntimeControllerTest {
     runtimeController.createRuntime(BILLING_PROJECT_ID, new Runtime());
     verify(userRuntimesApi)
         .createRuntime(
-            eq(BILLING_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+            eq(BILLING_PROJECT_ID), eq(getRuntimeName()), any());
+  }
+
+  @Test
+  public void testCreateRuntime_nullRuntime() throws ApiException {
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
+
+    runtimeController.createRuntime(BILLING_PROJECT_ID, null);
+    verify(userRuntimesApi)
+        .createRuntime(
+            eq(BILLING_PROJECT_ID), eq(getRuntimeName()), any());
+  }
+
+  @Test
+  public void testCreateRuntime_emptyRuntime() throws ApiException {
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
+
+    runtimeController.createRuntime(BILLING_PROJECT_ID, new Runtime());
+    verify(userRuntimesApi)
+        .createRuntime(
+            eq(BILLING_PROJECT_ID), eq(getRuntimeName()), any());
   }
 
   @Test
@@ -505,7 +530,7 @@ public class RuntimeControllerTest {
 
     LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
     assertThat(((Map<String, String>) createRuntimeRequest.getLabels()).get("all-of-us-config"))
-        .isEqualTo("default");
+        .isEqualTo("default-dataproc");
   }
 
   @Test
@@ -522,7 +547,7 @@ public class RuntimeControllerTest {
 
     LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
     assertThat(((Map<String, String>) createRuntimeRequest.getLabels()).get("all-of-us-config"))
-        .isEqualTo("default");
+        .isEqualTo("default-gce");
   }
 
   @Test
