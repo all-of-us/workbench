@@ -269,7 +269,9 @@ paths:
       tags:
         - Billing
       summary: delete billing project
-      description: delete billing project
+      description: >
+        Immediately delete the Billing Project and all of its resources, as well as the underlying Google Project.
+        Requires that there are no Workspaces associated with this Project.
       operationId: deleteBillingProject
       parameters:
         - in: path
