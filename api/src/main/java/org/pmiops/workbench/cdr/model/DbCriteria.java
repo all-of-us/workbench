@@ -188,7 +188,7 @@ public class DbCriteria {
     this.synonyms = synonyms;
   }
 
-  @Column(name = "fullText")
+  @Column(name = "full_text")
   public String getFullText() {
     return fullText;
   }
