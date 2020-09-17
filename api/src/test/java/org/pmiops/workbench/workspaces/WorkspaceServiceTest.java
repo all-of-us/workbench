@@ -1,9 +1,12 @@
 package org.pmiops.workbench.workspaces;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import java.sql.Timestamp;
@@ -33,6 +36,7 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
@@ -401,5 +405,27 @@ public class WorkspaceServiceTest {
     verify(mockFireCloudService).deleteWorkspace(eq(billingProject), eq(ws.getName()));
     verify(mockFireCloudService).deleteBillingProject(eq(billingProject));
     verify(mockBillingProjectAuditor).fireDeleteAction(eq(billingProject));
+  }
+
+  @Test
+  public void deleteWorkspace_failedProjectDeletion() {
+    DbWorkspace ws = dbWorkspaces.get(1); // arbitrary choice of those defined for testing
+    String billingProject = ws.getWorkspaceNamespace();
+
+    doThrow(new BadRequestException("arbitrary"))
+        .when(mockFireCloudService)
+        .deleteBillingProject(anyString());
+
+    workspaceService.deleteWorkspace(ws);
+
+    // deletion succeeds
+
+    assertThat(ws.getWorkspaceActiveStatusEnum()).isEqualTo(WorkspaceActiveStatus.DELETED);
+    verify(mockFireCloudService).deleteWorkspace(eq(billingProject), eq(ws.getName()));
+    verify(mockFireCloudService).deleteBillingProject(eq(billingProject));
+
+    // but the billing project is not deleted
+
+    verify(mockBillingProjectAuditor, never()).fireDeleteAction(eq(billingProject));
   }
 }
