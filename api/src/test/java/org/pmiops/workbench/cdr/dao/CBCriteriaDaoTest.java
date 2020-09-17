@@ -52,12 +52,27 @@ public class CBCriteriaDaoTest {
             DbCriteria.builder()
                 .addDomainId(DomainType.SURVEY.toString())
                 .addType(CriteriaType.PPI.toString())
-                .addSubtype(CriteriaSubType.SURVEY.toString())
+                .addSubtype(CriteriaSubType.QUESTION.toString())
                 .addGroup(false)
+                .addConceptId("1")
                 .addStandard(false)
                 .addSelectable(true)
                 .addName("The Basics")
                 .build());
+    // adding a survey answer
+    cbCriteriaDao.save(
+        DbCriteria.builder()
+            .addDomainId(DomainType.SURVEY.toString())
+            .addType(CriteriaType.PPI.toString())
+            .addSubtype(CriteriaSubType.ANSWER.toString())
+            .addGroup(false)
+            .addConceptId("1")
+            .addStandard(false)
+            .addSelectable(true)
+            .addName("Answer")
+            .addPath(String.valueOf(surveyCriteria.getId()))
+            .addFullText("term[SURVEY_rank1]")
+            .build());
     sourceCriteria =
         cbCriteriaDao.save(
             DbCriteria.builder()
@@ -183,6 +198,20 @@ public class CBCriteriaDaoTest {
     assertThat(
             cbCriteriaDao.findCriteriaByDomainIdAndConceptIds("CONDITION", ImmutableList.of("12")))
         .containsExactly(sourceCriteria);
+  }
+
+  @Test
+  public void findIdByDomainAndConceptIdAndName() {
+    assertThat(
+        cbCriteriaDao.findIdByDomainAndConceptIdAndName(
+            Domain.SURVEY.toString(), surveyCriteria.getConceptId(), surveyCriteria.getName()))
+        .isEqualTo(surveyCriteria.getId());
+  }
+
+  @Test
+  public void findQuestionCountByDomainAndIdAndTerm() {
+    assertThat(cbCriteriaDao.findQuestionCountByDomainAndIdAndTerm(surveyCriteria.getId(), "term"))
+        .isEqualTo(1L);
   }
 
   @Test

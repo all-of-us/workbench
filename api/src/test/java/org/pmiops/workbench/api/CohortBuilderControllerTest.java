@@ -17,9 +17,11 @@ import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.CBDataFilterDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.PersonDao;
+import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cdr.model.DbDomainInfo;
+import org.pmiops.workbench.cdr.model.DbSurveyModule;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
@@ -41,6 +43,7 @@ import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersionListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -66,6 +69,7 @@ public class CohortBuilderControllerTest {
   @Autowired private CBDataFilterDao cbDataFilterDao;
   @Autowired private DomainInfoDao domainInfoDao;
   @Autowired private PersonDao personDao;
+  @Autowired private SurveyModuleDao surveyModuleDao;
   @Autowired private JdbcTemplate jdbcTemplate;
   @Autowired private CohortBuilderMapper cohortBuilderMapper;
   @Mock private Provider<WorkbenchConfig> configProvider;
@@ -88,6 +92,7 @@ public class CohortBuilderControllerTest {
             cbDataFilterDao,
             domainInfoDao,
             personDao,
+            surveyModuleDao,
             cohortBuilderMapper);
     controller =
         new CohortBuilderController(
@@ -96,17 +101,16 @@ public class CohortBuilderControllerTest {
 
   @Test
   public void findDomainInfos() {
-    DbCriteria icd9Criteria =
-        cbCriteriaDao.save(
-            DbCriteria.builder()
-                .addDomainId(DomainType.CONDITION.toString())
-                .addType(CriteriaType.ICD9CM.toString())
-                .addCount(0L)
-                .addHierarchy(true)
-                .addStandard(false)
-                .addParentId(0)
-                .addFullText("term*[CONDITION_rank1]")
-                .build());
+    cbCriteriaDao.save(
+        DbCriteria.builder()
+            .addDomainId(DomainType.CONDITION.toString())
+            .addType(CriteriaType.ICD9CM.toString())
+            .addCount(0L)
+            .addHierarchy(true)
+            .addStandard(false)
+            .addParentId(0)
+            .addFullText("term*[CONDITION_rank1]")
+            .build());
     DbDomainInfo dbDomainInfo =
         domainInfoDao.save(
             new DbDomainInfo()
@@ -125,6 +129,52 @@ public class CohortBuilderControllerTest {
     assertEquals(domainInfo.getParticipantCount().longValue(), dbDomainInfo.getParticipantCount());
     assertEquals(domainInfo.getAllConceptCount().longValue(), 1);
     assertEquals(domainInfo.getStandardConceptCount().longValue(), 0);
+  }
+
+  @Test
+  public void findSurveyModules() {
+    DbCriteria surveyCriteria =
+        cbCriteriaDao.save(
+            DbCriteria.builder()
+                .addDomainId(DomainType.SURVEY.toString())
+                .addType(CriteriaType.PPI.toString())
+                .addSubtype(CriteriaSubType.QUESTION.toString())
+                .addCount(0L)
+                .addHierarchy(true)
+                .addStandard(false)
+                .addParentId(0)
+                .addConceptId("1")
+                .addName("The Basics")
+                .build());
+    cbCriteriaDao.save(
+        DbCriteria.builder()
+            .addDomainId(DomainType.SURVEY.toString())
+            .addType(CriteriaType.PPI.toString())
+            .addSubtype(CriteriaSubType.ANSWER.toString())
+            .addCount(0L)
+            .addHierarchy(true)
+            .addStandard(false)
+            .addParentId(0)
+            .addConceptId("1")
+            .addFullText("term*[SURVEY_rank1]")
+            .addPath(String.valueOf(surveyCriteria.getId()))
+            .build());
+    DbSurveyModule dbSurveyModule =
+        surveyModuleDao.save(
+            new DbSurveyModule()
+                .conceptId(1L)
+                .name("The Basics")
+                .description("descr")
+                .questionCount(1)
+                .participantCount(1000));
+
+    SurveyModule surveyModule =
+        controller.findSurveyModules(1L, "term").getBody().getItems().get(0);
+    assertEquals(surveyModule.getName(), dbSurveyModule.getName());
+    assertEquals(surveyModule.getDescription(), dbSurveyModule.getDescription());
+    assertEquals(
+        surveyModule.getParticipantCount().longValue(), dbSurveyModule.getParticipantCount());
+    assertEquals(surveyModule.getQuestionCount().longValue(), 1);
   }
 
   @Test

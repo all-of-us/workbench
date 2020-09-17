@@ -36,6 +36,7 @@ import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.SurveyVersionListResponse;
+import org.pmiops.workbench.model.SurveysResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -217,6 +218,13 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   public ResponseEntity<ParticipantDemographics> findParticipantDemographics(Long cdrVersionId) {
     cdrVersionService.setCdrVersion(cdrVersionId);
     return ResponseEntity.ok(cohortBuilderService.findParticipantDemographics());
+  }
+
+  @Override
+  public ResponseEntity<SurveysResponse> findSurveyModules(Long cdrVersionId, String term) {
+    cdrVersionService.setCdrVersion(cdrVersionId);
+    return ResponseEntity.ok(
+        new SurveysResponse().items(cohortBuilderService.findSurveyModules(term)));
   }
 
   @Override

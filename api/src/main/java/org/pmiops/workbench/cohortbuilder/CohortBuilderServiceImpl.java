@@ -30,6 +30,7 @@ import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.CBDataFilterDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.PersonDao;
+import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cdr.model.DbMenuOption;
@@ -51,6 +52,7 @@ import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.StandardFlag;
+import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -71,6 +73,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   private CBDataFilterDao cbDataFilterDao;
   private DomainInfoDao domainInfoDao;
   private PersonDao personDao;
+  private SurveyModuleDao surveyModuleDao;
   private CohortBuilderMapper cohortBuilderMapper;
 
   @Autowired
@@ -82,6 +85,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       CBDataFilterDao cbDataFilterDao,
       DomainInfoDao domainInfoDao,
       PersonDao personDao,
+      SurveyModuleDao surveyModuleDao,
       CohortBuilderMapper cohortBuilderMapper) {
     this.bigQueryService = bigQueryService;
     this.cohortQueryBuilder = cohortQueryBuilder;
@@ -90,6 +94,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     this.cbDataFilterDao = cbDataFilterDao;
     this.domainInfoDao = domainInfoDao;
     this.personDao = personDao;
+    this.surveyModuleDao = surveyModuleDao;
     this.cohortBuilderMapper = cohortBuilderMapper;
   }
 
@@ -378,6 +383,25 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
             .map(c -> c.getConceptId().toString())
             .collect(Collectors.toList());
     return demoList;
+  }
+
+  @Override
+  public List<SurveyModule> findSurveyModules(String term) {
+    List<SurveyModule> surveyModules =
+        surveyModuleDao.findByParticipantCountNotOrderByOrderNumberAsc(0L).stream()
+            .map(cohortBuilderMapper::dbModelToClient)
+            .collect(Collectors.toList());
+    // read question counts
+    surveyModules.forEach(
+        sm -> {
+          Long criteriaId =
+              cbCriteriaDao.findIdByDomainAndConceptIdAndName(
+                  DomainType.SURVEY.toString(), sm.getConceptId().toString(), sm.getName());
+          sm.setQuestionCount(
+              cbCriteriaDao.findQuestionCountByDomainAndIdAndTerm(
+                  criteriaId, modifyTermMatch(term)));
+        });
+    return surveyModules;
   }
 
   @Override
