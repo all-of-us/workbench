@@ -1,6 +1,6 @@
 import {SpinnerOverlay} from 'app/components/spinners';
 import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {reactRouterUrlSearchParams} from 'app/utils/navigation';
 import * as React from 'react';
@@ -22,17 +22,20 @@ const styles = reactStyles({
   error: {
     marginLeft: 'auto',
     marginRight: 'auto',
-    marginTop: '56px',
-    background: colors.warning,
-    border: '1px solid #ebafa6',
-    borderRadius: '5px',
-    color: colors.white,
-    display: 'flex',
-    fontSize: '14px',
-    fontWeight: 500,
+    height: '40px',
     maxWidth: '550px',
-    padding: '8px',
-    textAlign: 'left'
+    paddingLeft: '8px',
+    fontFamily: 'Font Awesome 5 Pro',
+    fontSize: '16px',
+    letterSpacing: 0,
+    lineHeight: '40px',
+    boxSizing: 'border-box',
+    color: colors.primary,
+    borderColor: colors.warning,
+    backgroundColor: colorWithWhiteness(colors.danger, .95),
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderRadius: '5px',
   },
 });
 
@@ -49,9 +52,8 @@ const AdminNotebookViewComponent = (props: Props) => {
   const [errorMessage, setErrorMessage] = useState('');
 
   const Header = () => {
-    const location = workspaceName ? `Workspace ${workspaceNamespace}/${workspaceName}` : workspaceNamespace;
-    const link = <a href={`/admin/workspaces/${workspaceNamespace}`}>{location}</a>;
-
+    const workspace = workspaceName ? `Workspace ${workspaceName}` : 'Workspace';
+    const link = <a href={`/admin/workspaces/${workspaceNamespace}`}>{workspace} with namespace {workspaceNamespace}</a>;
     return <div style={styles.heading}>Viewing {notebookName} in {link} for reason:<div>{accessReason}</div></div>;
   };
 
