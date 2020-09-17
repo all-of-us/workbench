@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 import com.google.cloud.Date;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.internal.LinkedTreeMap;
 import java.time.Clock;
 import java.time.Instant;
@@ -360,6 +361,127 @@ public class RuntimeControllerTest {
         .thenReturn(testLeoRuntime);
 
     assertThat(runtimeController.getRuntime(BILLING_PROJECT_ID).getBody()).isEqualTo(testRuntime);
+  }
+
+  @Test
+  public void testGetRuntime_noLabel() throws ApiException {
+    testLeoRuntime.setLabels(ImmutableMap.of());
+
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenReturn(testLeoRuntime);
+
+    assertThat(runtimeController.getRuntime(BILLING_PROJECT_ID).getBody().getConfigurationType())
+        .isEqualTo(RuntimeConfigurationType.DEFAULTDATAPROC);
+  }
+
+  @Test
+  public void testGetRuntime_defaultLabel_dataproc() throws ApiException {
+    testLeoRuntime.setLabels(ImmutableMap.of("all-of-us-config", "default"));
+    testLeoRuntime.setRuntimeConfig(ImmutableMap.of("cloudService", "DATAPROC"));
+
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenReturn(testLeoRuntime);
+
+    assertThat(runtimeController.getRuntime(BILLING_PROJECT_ID).getBody().getConfigurationType())
+        .isEqualTo(RuntimeConfigurationType.DEFAULTDATAPROC);
+  }
+
+  @Test
+  public void testGetRuntime_defaultLabel_gce() throws ApiException {
+    testLeoRuntime.setLabels(ImmutableMap.of("all-of-us-config", "default"));
+    testLeoRuntime.setRuntimeConfig(ImmutableMap.of("cloudService", "GCE"));
+
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenReturn(testLeoRuntime);
+
+    assertThat(runtimeController.getRuntime(BILLING_PROJECT_ID).getBody().getConfigurationType())
+        .isEqualTo(RuntimeConfigurationType.DEFAULTGCE);
+  }
+
+  @Test
+  public void testGetRuntime_overrideLabel() throws ApiException {
+    testLeoRuntime.setLabels(ImmutableMap.of("all-of-us-config", "user-override"));
+
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenReturn(testLeoRuntime);
+
+    assertThat(runtimeController.getRuntime(BILLING_PROJECT_ID).getBody().getConfigurationType())
+        .isEqualTo(RuntimeConfigurationType.USEROVERRIDE);
+  }
+
+  @Test
+  public void testGetRuntime_noGetRuntime_emptyListRuntimes() throws ApiException {
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new ApiException(404, "Not found"));
+    when(userRuntimesApi.listRuntimesByProject(BILLING_PROJECT_ID, null, true))
+        .thenReturn(Collections.emptyList());
+
+    assertThrows(NotFoundException.class, () -> runtimeController.getRuntime(BILLING_PROJECT_ID));
+  }
+
+  @Test
+  public void testGetRuntime_noGetRuntime_hasListRuntimesWithMostRecentOverride() throws ApiException {
+    String olderTimestamp = "2020-09-13T19:19:57.347Z";
+    String newerTimestamp = "2020-09-14T19:19:57.347Z";
+
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new ApiException(404, "Not found"));
+    when(userRuntimesApi.listRuntimesByProject(BILLING_PROJECT_ID, null, true))
+        .thenReturn(ImmutableList.of(
+            new LeonardoListRuntimeResponse()
+                .runtimeName("override-runtime")
+                .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp))
+                .labels(ImmutableMap.of("all-of-us-config", "user-override")),
+            new LeonardoListRuntimeResponse()
+                .runtimeName("default-runtime")
+                .auditInfo(new LeonardoAuditInfo().createdDate(olderTimestamp))
+                .labels(ImmutableMap.of("all-of-us-config", "default"))
+        ));
+
+    assertThat(runtimeController.getRuntime(BILLING_PROJECT_ID).getBody().getRuntimeName()).isEqualTo("expected-runtime");
+  }
+
+  @Test
+  public void testGetRuntime_noGetRuntime_hasListRuntimesWithOldOverride() throws ApiException {
+    String olderTimestamp = "2020-09-13T19:19:57.347Z";
+    String newerTimestamp = "2020-09-14T19:19:57.347Z";
+
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new ApiException(404, "Not found"));
+    when(userRuntimesApi.listRuntimesByProject(BILLING_PROJECT_ID, null, true))
+        .thenReturn(ImmutableList.of(
+            new LeonardoListRuntimeResponse()
+                .runtimeName("override-runtime")
+                .auditInfo(new LeonardoAuditInfo().createdDate(olderTimestamp))
+                .labels(ImmutableMap.of("all-of-us-config", "user-override")),
+            new LeonardoListRuntimeResponse()
+                .runtimeName("default-runtime")
+                .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp))
+                .labels(ImmutableMap.of("all-of-us-config", "default"))
+        ));
+
+    assertThrows(NotFoundException.class, () -> runtimeController.getRuntime(BILLING_PROJECT_ID));
+  }
+
+  @Test
+  public void testGetRuntime_noGetRuntime_hasListRuntimesWithNoOverride() throws ApiException {
+    String olderTimestamp = "2020-09-13T19:19:57.347Z";
+    String newerTimestamp = "2020-09-14T19:19:57.347Z";
+
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new ApiException(404, "Not found"));
+    when(userRuntimesApi.listRuntimesByProject(BILLING_PROJECT_ID, null, true))
+        .thenReturn(ImmutableList.of(
+            new LeonardoListRuntimeResponse()
+                .runtimeName("override-runtime")
+                .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp)),
+            new LeonardoListRuntimeResponse()
+                .runtimeName("default-runtime")
+                .auditInfo(new LeonardoAuditInfo().createdDate(olderTimestamp))
+                .labels(ImmutableMap.of("all-of-us-config", "default"))
+        ));
+
+    assertThrows(NotFoundException.class, () -> runtimeController.getRuntime(BILLING_PROJECT_ID));
   }
 
   @Test

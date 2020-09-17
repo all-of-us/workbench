@@ -16,6 +16,8 @@ public interface LeonardoNotebooksClient {
   /** lists all notebook runtimes as the appengine SA, to be used only for admin operations */
   List<LeonardoListRuntimeResponse> listRuntimesByProjectAsService(String googleProject);
 
+  List<LeonardoListRuntimeResponse> listRuntimesByProject(String googleProject);
+
   /**
    * Creates a notebooks runtime owned by the current authenticated user.
    *
