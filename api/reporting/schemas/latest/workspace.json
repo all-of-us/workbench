@@ -9,20 +9,12 @@
     "type": "INT64"
   },
   {
-    "name": "billing_account_name",
+    "name": "billing_account_type",
     "type": "STRING"
   },
   {
-    "name": "billing_account_type",
-    "type": "INT64"
-  },
-  {
-    "name": "billing_migration_status",
-    "type": "INT64"
-  },
-  {
     "name": "billing_status",
-    "type": "INT64"
+    "type": "STRING"
   },
   {
     "name": "cdr_version_id",
@@ -38,7 +30,7 @@
   },
   {
     "name": "data_access_level",
-    "type": "INT64"
+    "type": "STRING"
   },
   {
     "name": "disseminate_research_other",
@@ -159,10 +151,6 @@
   {
     "name": "rp_time_requested",
     "type": "TIMESTAMP"
-  },
-  {
-    "name": "version",
-    "type": "INT64"
   },
   {
     "name": "workspace_id",
