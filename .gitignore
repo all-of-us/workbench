@@ -55,10 +55,6 @@ client/py/.pydevproject
 **/gradlew.bat
 **/.gradle
 **/*.orig
-pheweb2/**
-pheweb/**
-pheweb-test/env/**
 pheweb-test/generated-by-pheweb/**
-pheweb-test/**/*.gz
 pheweb-test/.cache/**
 pheweb-test/__pycache__/**
