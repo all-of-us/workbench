@@ -1,3 +1,15 @@
+# Pheweb Integration
+
+## What will Pheweb do?
+
+Pheweb shows correlations between genotypes and phenotypes by looking at gene variants
+
+e.g. What is the correclation between the Braca-1 gene and Breast Cancer?
+
+Pheweb also provides the abilito to search by gene, mutation and phenotype to see what correlations are calculated
+
+Pheweb is strictly a viewer/visulizer, it does not perform any analysis.
+
 ## Dependency list
 
 These are some of the dependency issues I ran into while trying different things out with PheWeb:
@@ -9,7 +21,7 @@ These are some of the dependency issues I ran into while trying different things
 5. pyliblzma
 6. liblzma-dev
 
-All of those dependencies seem to be available on app engine standard
+All of these dependencies seem to be available on app engine standard.
 
 ### Google Cloud Dependencies for Local Development
 
@@ -23,14 +35,16 @@ It should be noted that PheWeb is finicky about the Python version in use. I hav
 1. Pheweb can run off of gunicorn
 2. Requires Python 3.8 (or 3.6)
 
-You must first run PheWeb wsgi to utilize gunicorn
+If you want to run pheweb with gunicorn you must first run `PheWeb wsgi`
 
 ### Drawback
 It will be difficult to customize how pheweb runs in its current state. Changes to the code may be necessary
 
 ## Can it host static content?
 
-While I do not believe PheWeb itself is setup to host static content, Appengine can be configured to host static content
+While I do not believe PheWeb itself is setup to host static content, Appengine can be configured to host static content.
+
+Pheweb is [not designed for static content](https://github.com/statgen/pheweb/issues/132)
 
 ## How are sessions handled?
 
@@ -79,8 +93,6 @@ It looks like Pheweb can scale on App Engine, but a bit more research into this 
 
 We may need to rebuild the association files and rerun `pheweb process`
 
-## How do we deploy without breaking?
-
 # Integration
 
 ## What inputs do we need to run
@@ -88,24 +100,14 @@ Association files are needed in the pheweb csv/tsv formats
 
 ## How do we get the files over to Pheweb
 
-# What will Pheweb do?
+The pheweb files are be generated and deployed to the server.
+This may not be an ideal approach for large files. But without data it is difficult to tell.
 
-Pheweb shows correlations between genotypes and phenotypes
-by looking at gene variants
-
-e.g. Braca-1 gene - how correlated with Breast Cancer is this gene?
-
-Pheweb also provides the abilito to search by gene, mutation and phenotype to see what correlations are calculated
-
-Pheweb is strictly a viewer/visulizer, it does not perform any analysis.
 
 ## Where Will The Files Come From
 
 * Data Science team will generate the files/data
-- Who will determine if the data is suitable for public consumption?
 
-
-
-
-
-
+## Other Considerations
+1. Pheweb will need to support hg38, which it currently does not.
+2. Who will determine if the data is suitable for public consumption?
