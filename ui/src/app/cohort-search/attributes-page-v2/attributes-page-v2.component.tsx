@@ -264,23 +264,36 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
       const surveyId = path.split('.')[0];
       const surveyNode = !!ppiSurveys.getValue()[cdrVersionId] && ppiSurveys.getValue()[cdrVersionId].find(n => n.id === +surveyId);
       if (!!surveyNode && surveyNode.name.includes('COPE')) {
-        let response;
+        let promises: Array<Promise<any>>;
         if (subtype === CriteriaSubType.QUESTION) {
-          response = await cohortBuilderApi().findSurveyVersionByQuestionConceptId(+cdrVersionId, surveyNode.conceptId, conceptId);
+          promises = [cohortBuilderApi().findSurveyVersionByQuestionConceptId(+cdrVersionId, surveyNode.conceptId, conceptId)];
         } else if (subtype === CriteriaSubType.ANSWER && !!ppiQuestions.getValue()[parentId]) {
-          response = await cohortBuilderApi().findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
-            +cdrVersionId,
-            surveyNode.conceptId,
-            ppiQuestions.getValue()[parentId].conceptId,
-            +value
-          );
+          promises = [
+            cohortBuilderApi().findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
+              +cdrVersionId,
+              surveyNode.conceptId,
+              ppiQuestions.getValue()[parentId].conceptId,
+              +value
+            ),
+            cohortBuilderApi().findCriteriaAttributeByConceptId(+cdrVersionId, conceptId)
+          ];
         }
-        form.cat = response.items.map(attr => ({
+        const [surveyVersions, numericalAttributes] = await Promise.all(promises);
+        form.cat = surveyVersions.items.map(attr => ({
           checked: false,
           conceptName: attr.version,
           estCount: attr.itemCount,
           valueAsConceptId: subtype === CriteriaSubType.QUESTION ? conceptId : +value
         }));
+        if (numericalAttributes) {
+          form.num = numericalAttributes.items.map(attr => ({
+            name: AttrName.NUM,
+            operator: 'ANY',
+            operands: [],
+            conceptId: +value,
+            [attr.conceptName]: parseInt(attr.estCount, 10)
+          }));
+        }
         this.setState({count: this.nodeCount, form, loading: false});
       } else {
         this.getAttributes();
