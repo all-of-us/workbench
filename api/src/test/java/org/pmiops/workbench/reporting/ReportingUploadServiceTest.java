@@ -44,6 +44,7 @@ import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.reporting.insertion.UserParameterColumn;
 import org.pmiops.workbench.reporting.insertion.WorkspaceParameterColumn;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -85,21 +86,13 @@ public class ReportingUploadServiceTest {
   private static final int WORKSPACE_COLUMN_COUNT = WorkspaceParameterColumn.values().length;
 
   @TestConfiguration
-  @Import({ReportingUploadServiceDmlImpl.class, ReportingUploadServiceStreamingImpl.class})
+  @Import({ReportingUploadServiceDmlImpl.class, ReportingUploadServiceStreamingImpl.class,
+      ReportingTestConfig.class})
   @MockBean(Stopwatch.class)
   public static class config {
     @Bean
     public Clock getClock() {
       return new FakeClock(NOW);
-    }
-
-    @Bean
-    public WorkbenchConfig workbenchConfig() {
-      final WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
-      workbenchConfig.reporting.dataset = "wb_reporting";
-      workbenchConfig.reporting.maxRowsPerInsert = 5;
-      workbenchConfig.server.projectId = "rw-wb-unit-test";
-      return workbenchConfig;
     }
   }
 

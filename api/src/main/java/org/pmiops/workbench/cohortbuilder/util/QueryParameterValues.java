@@ -113,6 +113,14 @@ public final class QueryParameterValues {
     return OffsetDateTime.of(localDateTime, ZoneOffset.UTC);
   }
 
+  @Nullable
+  public static <T extends Enum<T>> QueryParameterValue enumToQpv(T enumValue) {
+    return Optional.ofNullable(enumValue)
+        .map(T::toString)
+        .map(QueryParameterValue::string)
+        .orElse(null);
+  }
+
   private static String getReplacementString(QueryParameterValue parameterValue) {
     final String value =
         Optional.ofNullable(parameterValue).map(QueryParameterValue::getValue).orElse("NULL");

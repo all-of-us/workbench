@@ -93,15 +93,30 @@ MYSQL_TO_TYPES = {
     }
 }.freeze
 
-
-BIGQUERY_TYPE_TO_JAVA  = {
-    'STRING' => 'String',
-    'INT64' => 'long',
-    'TIMESTAMP' =>  'Timestamp',
-    'BOOLEAN' =>  'boolean',
-    'FLOAT64' => 'double'
+# Enumerated types should be the enum in Java and the DTO, but a STRING in BQ.
+# We could either try to remap to the enum type when writing to BQ, but we still
+# have to handle getting the value into the projection, and the only way I've been
+# able to do that is to use the exact same type.
+ENUM_TYPES = {
+     'workspace' => {
+        'billing_account_status' => {
+            :bigquery => 'STRING',
+            :java => 'BillingAccountStatus'
+        },
+        'billing_account_type' => {
+            :bigquery => 'STRING',
+            :java => 'BillingAccountType'
+        },
+        'data_access_level' => {
+            :bigquery => 'STRING',
+            :java => 'DataAccessLevel'
+        },
+        'billing_migration_status' => {
+            :bigquery => 'STRING',
+            :java => 'BillingMigrationStatus'
+        }
+     }
 }.freeze
-
 # strip size/kind
 def simple_mysql_type(mysql_type)
   type_pattern = Regexp.new("(?<type>\\w+)(\\(\\d+\\))?")
@@ -135,7 +150,8 @@ TABLE_INFO = {
     :entity_class => "Db#{root_class_name}",
     :mock => "mock#{root_class_name}",
     :projection_interface => "Prj#{root_class_name}",
-    :sql_alias => table_name[0].downcase
+    :sql_alias => table_name[0].downcase,
+    :enum_column_info => ENUM_TYPES[table_name]
 }.freeze
 
 
@@ -155,13 +171,14 @@ COLUMNS = describe_rows.filter{ |row| include_field?(excluded_fields, row[0]) } 
   .map{ |row| \
     col_name = row[0]
     mysql_type = simple_mysql_type(row[1])
+    type_override = TABLE_INFO[:enum_column_info] && TABLE_INFO[:enum_column_info][col_name]
     type_info = MYSQL_TO_TYPES[mysql_type]
     {
         :name => col_name, \
         :lambda_var => table_name[0].downcase, \
         :mysql_type => mysql_type, \
-        :big_query_type => type_info[:bigquery], \
-        :java_type => type_info[:java], \
+        :big_query_type => type_override ? type_override[:bigquery] : type_info[:bigquery], \
+        :java_type => type_override ? type_override[:java] : type_info[:java], \
         :java_field_name => "#{to_camel_case(col_name, false)}", \
         :java_constant_name => "#{table_name.upcase}__#{col_name.upcase}", \
         :getter => "get#{to_camel_case(col_name, true)}",

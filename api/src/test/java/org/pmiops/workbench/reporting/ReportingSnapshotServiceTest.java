@@ -15,12 +15,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.projection.PrjUser;
 import org.pmiops.workbench.model.BqDtoUser;
 import org.pmiops.workbench.model.BqDtoWorkspace;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -42,7 +44,10 @@ public class ReportingSnapshotServiceTest {
   @Autowired private ReportingSnapshotService reportingSnapshotService;
 
   @TestConfiguration
-  @Import({CommonMappers.class, ReportingMapperImpl.class, ReportingSnapshotServiceImpl.class})
+  @Import({CommonMappers.class,
+      ReportingMapperImpl.class,
+      ReportingTestConfig.class,
+      ReportingSnapshotServiceImpl.class})
   @MockBean({BigQueryService.class})
   public static class config {
     @Bean
