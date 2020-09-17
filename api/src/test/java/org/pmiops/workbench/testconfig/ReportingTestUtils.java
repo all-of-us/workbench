@@ -15,6 +15,7 @@ import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.BillingAccountType;
+import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.BqDtoUser;
 import org.pmiops.workbench.model.BqDtoWorkspace;
 import org.pmiops.workbench.model.DataAccessLevel;
@@ -87,21 +88,17 @@ public class ReportingTestUtils {
   public static final String USER__ZIP_CODE = "foo_5";
 
   public static final Short WORKSPACE__ACTIVE_STATUS = 0;
-  public static final BillingAccountType WORKSPACE__BILLING_ACCOUNT_TYPE =
-      BillingAccountType.FREE_TIER;
-  public static final Short WORKSPACE__BILLING_STATUS = 2;
+  public static final BillingAccountType WORKSPACE__BILLING_ACCOUNT_TYPE = BillingAccountType.FREE_TIER;
+  public static final BillingStatus WORKSPACE__BILLING_STATUS = BillingStatus.ACTIVE;
   public static final Long WORKSPACE__CDR_VERSION_ID = 3L;
-  public static final Timestamp WORKSPACE__CREATION_TIME =
-      Timestamp.from(Instant.parse("2015-05-09T00:00:00.00Z"));
+  public static final Timestamp WORKSPACE__CREATION_TIME = Timestamp.from(Instant.parse("2015-05-09T00:00:00.00Z"));
   public static final Long WORKSPACE__CREATOR_ID = 5L;
   public static final DataAccessLevel WORKSPACE__DATA_ACCESS_LEVEL = DataAccessLevel.REGISTERED;
   public static final String WORKSPACE__DISSEMINATE_RESEARCH_OTHER = "foo_7";
   public static final String WORKSPACE__FIRECLOUD_NAME = "foo_8";
   public static final String WORKSPACE__FIRECLOUD_UUID = "foo_9";
-  public static final Timestamp WORKSPACE__LAST_ACCESSED_TIME =
-      Timestamp.from(Instant.parse("2015-05-15T00:00:00.00Z"));
-  public static final Timestamp WORKSPACE__LAST_MODIFIED_TIME =
-      Timestamp.from(Instant.parse("2015-05-16T00:00:00.00Z"));
+  public static final Timestamp WORKSPACE__LAST_ACCESSED_TIME = Timestamp.from(Instant.parse("2015-05-15T00:00:00.00Z"));
+  public static final Timestamp WORKSPACE__LAST_MODIFIED_TIME = Timestamp.from(Instant.parse("2015-05-16T00:00:00.00Z"));
   public static final String WORKSPACE__NAME = "foo_12";
   public static final Short WORKSPACE__NEEDS_RP_REVIEW_PROMPT = 13;
   public static final Boolean WORKSPACE__PUBLISHED = true;
@@ -126,8 +123,7 @@ public class ReportingTestUtils {
   public static final Boolean WORKSPACE__RP_REVIEW_REQUESTED = false;
   public static final String WORKSPACE__RP_SCIENTIFIC_APPROACH = "foo_34";
   public static final Boolean WORKSPACE__RP_SOCIAL_BEHAVIORAL = false;
-  public static final Timestamp WORKSPACE__RP_TIME_REQUESTED =
-      Timestamp.from(Instant.parse("2015-06-10T00:00:00.00Z"));
+  public static final Timestamp WORKSPACE__RP_TIME_REQUESTED = Timestamp.from(Instant.parse("2015-06-10T00:00:00.00Z"));
   public static final Long WORKSPACE__WORKSPACE_ID = 37L;
   public static final String WORKSPACE__WORKSPACE_NAMESPACE = "foo_38";
 
@@ -453,7 +449,7 @@ public class ReportingTestUtils {
     return new BqDtoWorkspace()
         .activeStatus(WORKSPACE__ACTIVE_STATUS.longValue())
         .billingAccountType(WORKSPACE__BILLING_ACCOUNT_TYPE)
-        .billingStatus(WORKSPACE__BILLING_STATUS.longValue())
+        .billingStatus(WORKSPACE__BILLING_STATUS)
         .cdrVersionId(WORKSPACE__CDR_VERSION_ID)
         .creationTime(offsetDateTimeUtc(WORKSPACE__CREATION_TIME))
         .creatorId(WORKSPACE__CREATOR_ID)

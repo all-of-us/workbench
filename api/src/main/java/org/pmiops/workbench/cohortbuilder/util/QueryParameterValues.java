@@ -44,43 +44,46 @@ public final class QueryParameterValues {
     return decorateParameterName(parameterName);
   }
 
-  @Nullable
+  // QueryParameterValue can have a null value, so no need to return an Optional.
   public static QueryParameterValue instantToQPValue(@Nullable Instant instant) {
-    return Optional.ofNullable(instant)
+    final Long epochMicros = Optional.ofNullable(instant)
         .map(Instant::toEpochMilli)
         .map(milli -> milli * MICROSECONDS_IN_MILLISECOND)
-        .map(QueryParameterValue::timestamp)
         .orElse(null);
+    return QueryParameterValue.timestamp(epochMicros);
   }
 
+  // Will return an empty Optional for null input, but parse errors will still throw
+  // DateTimeParseException.
   @Nullable
-  public static Instant timestampStringToInstant(@Nullable String timestamp) {
+  public static Optional<Instant> timestampStringToInstant(@Nullable String timestamp) {
     return Optional.ofNullable(timestamp)
         .map(s -> ZonedDateTime.parse(s, ROW_TO_INSERT_TIMESTAMP_FORMATTER))
-        .map(ZonedDateTime::toInstant)
-        .orElse(null);
+        .map(ZonedDateTime::toInstant);
   }
 
-  @Nullable
-  public static Instant timestampQpvToInstant(@Nullable QueryParameterValue queryParameterValue) {
-    if (queryParameterValue == null || queryParameterValue.getValue() == null) {
-      return null;
-    }
-    if (!isTimestampQpv(queryParameterValue)) {
+  public static Optional<Instant> timestampQpvToInstant(@Nullable QueryParameterValue qpv) {
+    verifyQpvType(qpv, StandardSQLTypeName.TIMESTAMP);
+    return Optional.ofNullable(qpv)
+        .map(QueryParameterValue::getValue)
+        .map(s -> ZonedDateTime.parse(s, QPV_TIMESTAMP_FORMATTER))
+        .map(ZonedDateTime::toInstant);
+  }
+
+  public static void verifyQpvType(@NotNull QueryParameterValue queryParameterValue, StandardSQLTypeName expectedType) {
+    if (!matchesQpvType(queryParameterValue, expectedType)) {
       throw new IllegalArgumentException(
           String.format(
               "QueryParameterValue %s is not a timestamp", queryParameterValue.getValue()));
     }
-    return ZonedDateTime.parse(queryParameterValue.getValue(), QPV_TIMESTAMP_FORMATTER).toInstant();
   }
 
-  @Nullable
-  public static OffsetDateTime timestampQpvToOffsetDateTime(
+  public static Optional<OffsetDateTime> timestampQpvToOffsetDateTime(
       @Nullable QueryParameterValue queryParameterValue) {
+    verifyQpvType(queryParameterValue, StandardSQLTypeName.TIMESTAMP);
     return Optional.ofNullable(queryParameterValue)
-        .map(QueryParameterValues::timestampQpvToInstant)
-        .map(i -> OffsetDateTime.ofInstant(i, ZoneOffset.UTC))
-        .orElse(null);
+        .flatMap(QueryParameterValues::timestampQpvToInstant)
+        .map(i -> OffsetDateTime.ofInstant(i, ZoneOffset.UTC));
   }
 
   // Since BigQuery doesn't expose the literal query string built from a QueryJobConfiguration,
@@ -111,11 +114,14 @@ public final class QueryParameterValues {
 
   @Nullable
   public static QueryParameterValue toTimestampQpv(@Nullable OffsetDateTime offsetDateTime) {
-    return Optional.ofNullable(offsetDateTime)
-        .map(t -> QueryParameterValue.timestamp(QPV_TIMESTAMP_FORMATTER.format(t)))
+    final String arg = Optional.ofNullable(offsetDateTime)
+        .map(QPV_TIMESTAMP_FORMATTER::format)
         .orElse(null);
+    return  QueryParameterValue.timestamp(arg);
   }
 
+  // Return null instead of Optional.empty() so the return value can go directly into
+  // the content map of an InsertAllRequest.RowToInsert.
   @Nullable
   public static String toInsertRowString(@Nullable OffsetDateTime offsetDateTime) {
     return Optional.ofNullable(offsetDateTime)
@@ -123,39 +129,42 @@ public final class QueryParameterValues {
         .orElse(null);
   }
 
-  @Nullable
-  public static OffsetDateTime rowToInsertStringToOffsetTimestamp(@Nullable String timeString) {
-    return Optional.ofNullable(timeString)
+  // BigQuery TIMESTAMP types don't include a zone or offset, but are always UTC.
+  public static Optional<OffsetDateTime> rowToInsertStringToOffsetTimestamp(@Nullable String bqTimeString) {
+    return Optional.ofNullable(bqTimeString)
         .filter(s -> s.length() > 0)
         .map(ROW_TO_INSERT_TIMESTAMP_FORMATTER::parse)
         .map(LocalDateTime::from)
-        .map(ldt -> OffsetDateTime.of(ldt, ZoneOffset.UTC))
-        .orElse(null);
+        .map(ldt -> OffsetDateTime.of(ldt, ZoneOffset.UTC));
   }
 
-  @Nullable
   public static <T extends Enum<T>> QueryParameterValue enumToQpv(T enumValue) {
-    return Optional.ofNullable(enumValue)
+    final String value = Optional.ofNullable(enumValue)
         .map(T::toString)
-        .map(QueryParameterValue::string)
         .orElse(null);
+    return QueryParameterValue.string(value);
   }
 
   private static String getReplacementString(QueryParameterValue parameterValue) {
     final String value =
         Optional.ofNullable(parameterValue).map(QueryParameterValue::getValue).orElse("NULL");
 
-    if (isTimestampQpv(parameterValue)) {
+    if (isQpvTimestamp(parameterValue)) {
       return String.format("TIMESTAMP '%s'", value);
     } else {
       return value;
     }
   }
 
-  private static boolean isTimestampQpv(QueryParameterValue parameterValue) {
+  private static boolean isQpvTimestamp(QueryParameterValue parameterValue) {
+    return matchesQpvType(parameterValue, StandardSQLTypeName.TIMESTAMP);
+  }
+
+  // return false if teh parameterValue is non-null does not match the expected type.
+  private static boolean matchesQpvType(QueryParameterValue parameterValue, StandardSQLTypeName expectedType) {
     return Optional.ofNullable(parameterValue)
         .map(QueryParameterValue::getType)
-        .map(t -> t == StandardSQLTypeName.TIMESTAMP)
-        .orElse(false);
+        .map(t -> t == expectedType)
+        .orElse(true);
   }
 }

@@ -116,6 +116,7 @@ ENUM_TYPES = {
         }
      }
 }.freeze
+
 # strip size/kind
 def simple_mysql_type(mysql_type)
   type_pattern = Regexp.new("(?<type>\\w+)(\\(\\d+\\))?")
@@ -138,6 +139,14 @@ def include_field?(excluded_fields, field)
   !excluded_fields.include?(field)
 end
 
+ENTITY_MODIFIED_COLUMNS = {
+    'workspace' => {
+        'cdr_version_id' => 'cdrVersion.cdrVersionId AS cdrVersionId',
+        'creator_id' => 'creator.userId AS creatorId',
+        'needs_rp_review_prompt' => 'needsResearchPurposeReviewPrompt AS needsRpReviewPrompt'
+    }
+}
+
 ## BigQuery schema
 describe_rows = CSV.new(File.read(INPUTS[:describe_csv])).sort_by { |row| row[0]  }
 
@@ -150,9 +159,9 @@ TABLE_INFO = {
     :mock => "mock#{root_class_name}",
     :projection_interface => "Prj#{root_class_name}",
     :sql_alias => table_name[0].downcase,
-    :enum_column_info => ENUM_TYPES[table_name]
+    :enum_column_info => ENUM_TYPES[table_name] || {},
+    :entity_modified_columns => ENTITY_MODIFIED_COLUMNS[:table_name] || {}
 }.freeze
-
 
 def to_swagger_name(snake_case, is_class_name)
   result =  snake_case.split('_').collect(&:capitalize).join
@@ -170,7 +179,7 @@ COLUMNS = describe_rows.filter{ |row| include_field?(excluded_fields, row[0]) } 
   .map{ |row| \
     col_name = row[0]
     mysql_type = simple_mysql_type(row[1])
-    type_override = TABLE_INFO[:enum_column_info] && TABLE_INFO[:enum_column_info][col_name]
+    type_override = TABLE_INFO[:enum_column_info][col_name]
     type_info = MYSQL_TO_TYPES[mysql_type]
     {
         :name => col_name, \
@@ -272,14 +281,16 @@ def hibernate_column_name(field)
 end
 
 # Fix up research purpose entity fields, which don't match the column names (i.e. there's no 'rp' prefix)
-def adjust_rp_col(field)
+def adjust_col(field)
   md = field.match(/^rp_(?<root>\w+$)/)
   projection_field = to_camel_case(field, false)
   entity_property = projection_field
   if md and md['root']
     entity_property = to_camel_case(md['root'], false)
     "#{TABLE_INFO[:sql_alias]}.#{entity_property} AS #{projection_field}"
-  else
+  elsif TABLE_INFO[:entity_modified_columns][field]
+     "#{TABLE_INFO[:sql_alias]}.#{TABLE_INFO[:entity_modified_columns][field]}"
+   else
     "#{TABLE_INFO[:sql_alias]}.#{entity_property}"
   end
 end
@@ -287,7 +298,7 @@ end
 def to_query()
   "@Query(\"SELECT\\n\"\n" \
     + COLUMNS.map do |field|
-      "+ \"  #{adjust_rp_col(field[:name])}"
+      "+ \"  #{adjust_col(field[:name])}"
     end \
     .join(",\\n\"\n") \
     + "\\n\"\n" \
@@ -302,7 +313,7 @@ write_output(OUTPUTS[:projection_query], sql, 'Projection Query')
 # Unit Test Constants
 #
 BASE_TIMESTAMP = Time.new(2015, 5, 5).freeze
-TIMESTAMP_DELTA_SECONDS = (24 * 60 * 60).freeze # seconds in day
+TIMESTAMP_DELTA_SECONDS = 24 * 60 * 60 # .freeze # seconds in day
 
 # N.B. some Short fields are only valid up to the number of associated enum values - 1. Fixing these
 # up by hand for now.
@@ -401,7 +412,7 @@ end
 
 QPC_ENUM = (COLUMNS.map do |col|
   query_parameter_column_entry(col)
-end.join(",\n") + ';').freeze
+end.join(",\n")).freeze
 
 write_output(OUTPUTS[:query_parameter_COLUMNS], QPC_ENUM, "QueryParameterValue Enum Entries")
 
@@ -410,23 +421,23 @@ DTO_SETTERS = COLUMNS.map do |col|
   value = case col[:java_type]
       when 'Timestamp'
             "offsetDateTimeUtc(#{col[:java_constant_name]})"
-          else
-            "#{col[:java_constant_name]}"
-          end
+      else
+        "#{col[:java_constant_name]}"
+      end
   "    .#{col[:java_field_name]}(#{value})"
 end.freeze
 
 DTO_DECL = ["new #{TABLE_INFO[:dto_class]}()"]
 DTO_DECL << DTO_SETTERS
 
-DTO_DECL_STR = DTO_DECL.join("\n") + ';'
-write_output(OUTPUTS[:dto_decl], DTO_DECL_STR, "DTO Object Construction")
+dto_decl_str = (DTO_DECL.join("\n") + ';').freeze
+write_output(OUTPUTS[:dto_decl], dto_decl_str, "DTO Object Construction")
 
 ### Entity Field Settings for DAO Test
 ENTITY_DECL = (["final #{TABLE_INFO[:entity_class]} #{TABLE_INFO[:instance_name]} = new #{TABLE_INFO[:entity_class]}();"] \
   << COLUMNS.map do |col|
     "#{TABLE_INFO[:instance_name]}.#{col[:setter]}(#{col[:java_constant_name]});"
-  end) \
-.join("\n").freeze
+  end \
+.join("\n")).freeze
 
 write_output(OUTPUTS[:entity_decl], ENTITY_DECL, "Entity Class Instance Declaration")

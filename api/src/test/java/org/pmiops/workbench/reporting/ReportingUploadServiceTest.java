@@ -1,6 +1,7 @@
 package org.pmiops.workbench.reporting;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
@@ -29,6 +30,7 @@ import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.IntStream;
 import org.junit.Before;
 import org.junit.Test;
@@ -216,9 +218,8 @@ public class ReportingUploadServiceTest {
         QueryParameterValues.formatQuery(QueryParameterValues.replaceNamedParameters(job0));
     assertThat(expandedQuery).containsMatch("INSERT\\s+INTO");
 
-    assertTimeApprox(
-        timestampQpvToOffsetDateTime(jobs.get(1).getNamedParameters().get("creation_time__0")),
-        THEN);
+    final OffsetDateTime convertedOdt = timestampQpvToOffsetDateTime(jobs.get(1).getNamedParameters().get("creation_time__0")).get();
+    assertTimeApprox(convertedOdt, THEN);
   }
 
   @Test
@@ -261,7 +262,9 @@ public class ReportingUploadServiceTest {
     final QueryParameterValue creationTime =
         jobs.get(5).getNamedParameters().get("creation_time__0");
     assertThat(creationTime).isNotNull();
-    assertTimeApprox(QueryParameterValues.timestampQpvToOffsetDateTime(creationTime), THEN);
+    final Optional<OffsetDateTime> creationOdt = QueryParameterValues.timestampQpvToOffsetDateTime(creationTime);
+    assertThat(creationOdt).isPresent();
+    assertTimeApprox(creationOdt.get(), THEN);
   }
 
   @Test
@@ -308,7 +311,7 @@ public class ReportingUploadServiceTest {
         rowToInsertStringToOffsetTimestamp(
             (String)
                 workspaceColumnValues.get(
-                    WorkspaceParameterColumn.CREATION_TIME.getParameterName())),
+                    WorkspaceParameterColumn.CREATION_TIME.getParameterName())).get(),
         THEN);
     assertThat(workspaceColumnValues.get(WorkspaceParameterColumn.CREATOR_ID.getParameterName()))
         .isEqualTo(101L);

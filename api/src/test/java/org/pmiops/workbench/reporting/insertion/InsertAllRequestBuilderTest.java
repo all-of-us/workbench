@@ -1,6 +1,7 @@
 package org.pmiops.workbench.reporting.insertion;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.rowToInsertStringToOffsetTimestamp;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.USER__DISABLED;
@@ -24,6 +25,7 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cohortbuilder.util.QueryParameterValues;
@@ -76,9 +78,10 @@ public class InsertAllRequestBuilderTest {
     assertThat(contentMap.get("free_tier_credits_limit_days_override"))
         .isEqualTo(USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE);
     assertThat(contentMap.get("disabled")).isEqualTo(USER__DISABLED);
-    assertTimeApprox(
-        rowToInsertStringToOffsetTimestamp(
-            (String) contentMap.get("demographic_survey_completion_time")),
+    final Optional<OffsetDateTime> odt = rowToInsertStringToOffsetTimestamp(
+        (String) contentMap.get("demographic_survey_completion_time"));
+    assertThat(odt).isPresent();
+    assertTimeApprox(odt.get(),
         offsetDateTimeUtc(USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME));
   }
 
@@ -100,7 +103,7 @@ public class InsertAllRequestBuilderTest {
 
     final String timeString = (String) contentMap.get("last_accessed_time");
     final OffsetDateTime offsetDateTime =
-        QueryParameterValues.rowToInsertStringToOffsetTimestamp(timeString);
+        QueryParameterValues.rowToInsertStringToOffsetTimestamp(timeString).get();
     assertTimeApprox(offsetDateTime, WORKSPACE__LAST_ACCESSED_TIME);
   }
 }
