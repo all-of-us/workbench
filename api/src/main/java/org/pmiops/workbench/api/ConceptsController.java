@@ -12,7 +12,6 @@ import org.pmiops.workbench.cdr.model.DbDomainInfo;
 import org.pmiops.workbench.cdr.model.DbSurveyModule;
 import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptListResponse;
 import org.pmiops.workbench.model.DomainCount;
 import org.pmiops.workbench.model.DomainCountsListResponse;
@@ -120,7 +119,7 @@ public class ConceptsController implements ConceptsApiDelegate {
         new ConceptListResponse()
             .items(
                 concepts.getContent().stream()
-                    .map(ConceptsController::toClientConcept)
+                    .map(ConceptService::toClientConcept)
                     .collect(Collectors.toList())));
   }
 
@@ -131,21 +130,6 @@ public class ConceptsController implements ConceptsApiDelegate {
       throw new BadRequestException("Invalid value for maxResults: " + maxResults);
     }
     return maxResults;
-  }
-
-  public static Concept toClientConcept(DbConcept dbConcept) {
-    boolean standard = STANDARD_CONCEPT_CODES.contains(dbConcept.getStandardConcept());
-    return new Concept()
-        .conceptClassId(dbConcept.getConceptClassId())
-        .conceptCode(dbConcept.getConceptCode())
-        .conceptName(dbConcept.getConceptName())
-        .conceptId(dbConcept.getConceptId())
-        .countValue(standard ? dbConcept.getCountValue() : dbConcept.getSourceCountValue())
-        .domainId(dbConcept.getDomainId())
-        .prevalence(dbConcept.getPrevalence())
-        .standardConcept(standard)
-        .vocabularyId(dbConcept.getVocabularyId())
-        .conceptSynonyms(dbConcept.getSynonyms());
   }
 
   private SurveyQuestions toClientSurveyQuestions(DbConcept dbConcept) {

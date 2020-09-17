@@ -65,6 +65,7 @@ public class CBCriteriaDaoTest {
                 .addCount(100L)
                 .addStandard(false)
                 .addCode("120")
+                .addConceptId("12")
                 .build());
     standardCriteria =
         cbCriteriaDao.save(
@@ -165,6 +166,13 @@ public class CBCriteriaDaoTest {
                 .addStandard(true)
                 .addParentId(1)
                 .build());
+  }
+
+  @Test
+  public void findCriteriaByDomainIdAndConceptIds() {
+    assertThat(
+            cbCriteriaDao.findCriteriaByDomainIdAndConceptIds("CONDITION", ImmutableList.of("12")))
+        .containsExactly(sourceCriteria);
   }
 
   @Test

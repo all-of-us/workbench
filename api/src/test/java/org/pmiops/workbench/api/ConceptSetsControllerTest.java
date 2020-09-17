@@ -26,6 +26,7 @@ import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cdrselector.WorkspaceResourcesServiceImpl;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortCloningService;
@@ -208,6 +209,7 @@ public class ConceptSetsControllerTest {
   })
   @MockBean({
     BillingProjectBufferService.class,
+    CohortBuilderService.class,
     CohortCloningService.class,
     CohortFactoryImpl.class,
     CohortMapperImpl.class,
