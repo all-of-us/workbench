@@ -518,10 +518,6 @@
   resolved "https://registry.yarnpkg.com/@types/eslint-visitor-keys/-/eslint-visitor-keys-1.0.0.tgz#1ee30d79544ca84d68d4b3cdb0af4f205663dd2d"
   integrity sha512-OCutwjDZ4aFS6PB1UZ988C4YgwlBHJd6wCeQqaLdmadZ/7e+w79+hbMUFC1QXDNCmdyoRfAFdm0RypzwR+Qpag==
 
-"@types/geojson@*":
-  version "7946.0.7"
-  resolved "https://registry.yarnpkg.com/@types/geojson/-/geojson-7946.0.7.tgz#c8fa532b60a0042219cdf173ca21a975ef0666ad"
-
 "@types/geojson@^1.0.6":
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/@types/geojson/-/geojson-1.0.6.tgz#3e02972728c69248c2af08d60a48cbb8680fffdf"
@@ -529,12 +525,6 @@
 "@types/google.analytics@0.0.39":
   version "0.0.39"
   resolved "https://registry.yarnpkg.com/@types/google.analytics/-/google.analytics-0.0.39.tgz#19a952003dbf3c7373d655a5c3203b4726b8b802"
-
-"@types/highcharts@^4.2.47":
-  version "4.2.57"
-  resolved "https://registry.yarnpkg.com/@types/highcharts/-/highcharts-4.2.57.tgz#f756907fc1756c3148a6226efabd3520a8929db9"
-  dependencies:
-    "@types/geojson" "*"
 
 "@types/history@*":
   version "4.7.6"
@@ -1038,13 +1028,6 @@ ajv@^6.5.5:
 amdefine@>=0.0.4:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/amdefine/-/amdefine-1.0.1.tgz#4a5282ac164729e93619bcfd3ad151f817ce91f5"
-
-angular2-highcharts@^0.5.5:
-  version "0.5.5"
-  resolved "https://registry.yarnpkg.com/angular2-highcharts/-/angular2-highcharts-0.5.5.tgz#f4a19ea96d63524420fd5c65136ac027b05266fd"
-  dependencies:
-    "@types/highcharts" "^4.2.47"
-    highcharts "^5.0.7"
 
 ansi-colors@^3.0.0:
   version "3.2.3"
@@ -4537,10 +4520,6 @@ highcharts-react-official@3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/highcharts-react-official/-/highcharts-react-official-3.0.0.tgz#f2e81ed59d299c3473a0dd5ba5df24028875226a"
   integrity sha512-VefJgDY2hkT9gfppsQGrRF2g5u8d9dtfHGcx2/xqiP+PkZXCqalw9xOeKVCRvJKTOh0coiDFwvVjOvB7KaGl4A==
-
-highcharts@^5.0.7:
-  version "5.0.15"
-  resolved "https://registry.yarnpkg.com/highcharts/-/highcharts-5.0.15.tgz#a9af11538a85b85f300e66f7a0e048a7ef8ab381"
 
 highcharts@^8.1.1:
   version "8.1.1"
