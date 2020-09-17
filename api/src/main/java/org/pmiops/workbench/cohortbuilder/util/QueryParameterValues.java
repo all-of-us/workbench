@@ -9,7 +9,6 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -25,9 +24,11 @@ public final class QueryParameterValues {
 
   // For creating a Timestamp QueryParameterValue, use this formatter.
   // example error when using the RowToInsert version (below): "Invalid format:
-  // "1989-02-17 00:00:00.000000" is too short".
+  // "1989-02-17 00:00:00.000000" is too short". See https://stackoverflow.com/a/55155067/611672
+  // for a nice walkthrough of the machinations involved.
   public static final DateTimeFormatter QPV_TIMESTAMP_FORMATTER =
-      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSSZZ").withZone(ZoneOffset.UTC);
+      DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss.SSSSSSxxx");
+
   // For inserting a Timestamp in a RowToInsert map for an InsertAllRequest, use this format
   public static final DateTimeFormatter ROW_TO_INSERT_TIMESTAMP_FORMATTER =
       DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")
@@ -37,33 +38,49 @@ public final class QueryParameterValues {
   /** Generate a unique parameter name and add it to the parameter map provided. */
   public static String buildParameter(
       Map<String, QueryParameterValue> queryParameterValueMap,
-      QueryParameterValue queryParameterValue) {
+      @NotNull QueryParameterValue queryParameterValue) {
     String parameterName = "p" + queryParameterValueMap.size();
     queryParameterValueMap.put(parameterName, queryParameterValue);
     return decorateParameterName(parameterName);
   }
 
-  public static QueryParameterValue instantToQPValue(Instant instant) {
-    return QueryParameterValue.timestamp(instant.toEpochMilli() * MICROSECONDS_IN_MILLISECOND);
+  @Nullable
+  public static QueryParameterValue instantToQPValue(@Nullable Instant instant) {
+    return Optional.ofNullable(instant)
+        .map(Instant::toEpochMilli)
+        .map(milli -> milli * MICROSECONDS_IN_MILLISECOND)
+        .map(QueryParameterValue::timestamp)
+        .orElse(null);
   }
 
-  public static Instant timestampStringToInstant(String timestamp) {
-    return ZonedDateTime.parse(timestamp, ROW_TO_INSERT_TIMESTAMP_FORMATTER).toInstant();
+  @Nullable
+  public static Instant timestampStringToInstant(@Nullable String timestamp) {
+    return Optional.ofNullable(timestamp)
+        .map(s -> ZonedDateTime.parse(s, ROW_TO_INSERT_TIMESTAMP_FORMATTER))
+        .map(ZonedDateTime::toInstant)
+        .orElse(null);
   }
 
-  public static Instant timestampQpvToInstant(QueryParameterValue queryParameterValue) {
+  @Nullable
+  public static Instant timestampQpvToInstant(@Nullable QueryParameterValue queryParameterValue) {
+    if (queryParameterValue == null || queryParameterValue.getValue() == null) {
+      return null;
+    }
     if (!isTimestampQpv(queryParameterValue)) {
       throw new IllegalArgumentException(
           String.format(
-              "QueryParameterValue %s is not a timestamp",
-              queryParameterValue == null ? "null" : queryParameterValue.getValue()));
+              "QueryParameterValue %s is not a timestamp", queryParameterValue.getValue()));
     }
     return ZonedDateTime.parse(queryParameterValue.getValue(), QPV_TIMESTAMP_FORMATTER).toInstant();
   }
 
+  @Nullable
   public static OffsetDateTime timestampQpvToOffsetDateTime(
-      QueryParameterValue queryParameterValue) {
-    return OffsetDateTime.ofInstant(timestampQpvToInstant(queryParameterValue), ZoneOffset.UTC);
+      @Nullable QueryParameterValue queryParameterValue) {
+    return Optional.ofNullable(queryParameterValue)
+        .map(QueryParameterValues::timestampQpvToInstant)
+        .map(i -> OffsetDateTime.ofInstant(i, ZoneOffset.UTC))
+        .orElse(null);
   }
 
   // Since BigQuery doesn't expose the literal query string built from a QueryJobConfiguration,
@@ -106,11 +123,14 @@ public final class QueryParameterValues {
         .orElse(null);
   }
 
-  @NotNull
-  public static OffsetDateTime rowToInsertStringToOffsetTimestamp(String timeString) {
-    final TemporalAccessor temporalAccessor = ROW_TO_INSERT_TIMESTAMP_FORMATTER.parse(timeString);
-    final LocalDateTime localDateTime = LocalDateTime.from(temporalAccessor);
-    return OffsetDateTime.of(localDateTime, ZoneOffset.UTC);
+  @Nullable
+  public static OffsetDateTime rowToInsertStringToOffsetTimestamp(@Nullable String timeString) {
+    return Optional.ofNullable(timeString)
+        .filter(s -> s.length() > 0)
+        .map(ROW_TO_INSERT_TIMESTAMP_FORMATTER::parse)
+        .map(LocalDateTime::from)
+        .map(ldt -> OffsetDateTime.of(ldt, ZoneOffset.UTC))
+        .orElse(null);
   }
 
   @Nullable

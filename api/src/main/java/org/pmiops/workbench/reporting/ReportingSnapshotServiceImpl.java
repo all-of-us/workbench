@@ -2,7 +2,6 @@ package org.pmiops.workbench.reporting;
 
 import com.google.common.base.Stopwatch;
 import java.time.Clock;
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 import javax.inject.Provider;

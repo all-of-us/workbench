@@ -99,21 +99,20 @@ MYSQL_TO_TYPES = {
 # able to do that is to use the exact same type.
 ENUM_TYPES = {
      'workspace' => {
-        'billing_account_status' => {
+        'billing_status' => {
             :bigquery => 'STRING',
-            :java => 'BillingAccountStatus'
+            :java => 'BillingStatus',
+            :constant => 'BillingStatus.ACTIVE'
         },
         'billing_account_type' => {
             :bigquery => 'STRING',
-            :java => 'BillingAccountType'
+            :java => 'BillingAccountType',
+            :constant => 'BillingAccountType.FREE_TIER'
         },
         'data_access_level' => {
             :bigquery => 'STRING',
-            :java => 'DataAccessLevel'
-        },
-        'billing_migration_status' => {
-            :bigquery => 'STRING',
-            :java => 'BillingMigrationStatus'
+            :java => 'DataAccessLevel',
+            :constant => 'DataAccessLevel.REGISTERED'
         }
      }
 }.freeze
@@ -178,12 +177,14 @@ COLUMNS = describe_rows.filter{ |row| include_field?(excluded_fields, row[0]) } 
         :lambda_var => table_name[0].downcase, \
         :mysql_type => mysql_type, \
         :big_query_type => type_override ? type_override[:bigquery] : type_info[:bigquery], \
+        :is_enum => !type_override.nil?,
         :java_type => type_override ? type_override[:java] : type_info[:java], \
         :java_field_name => "#{to_camel_case(col_name, false)}", \
         :java_constant_name => "#{table_name.upcase}__#{col_name.upcase}", \
         :getter => "get#{to_camel_case(col_name, true)}",
         :setter => "set#{to_camel_case(col_name, true)}",
-        :property => to_property_name(col_name)
+        :property => to_property_name(col_name),
+        :default_enum => type_override && type_override[:constant]
     }
 }.freeze
 
@@ -222,8 +223,15 @@ BIGQUERY_TYPE_TO_SWAGGER  = {
 
 
 def to_swagger_property(column)
+  if column[:is_enum]
+    swagger_value = {
+        '$ref' => "#/definitions/#{column[:java_type]}"
+    }
+  else
+    swagger_value = BIGQUERY_TYPE_TO_SWAGGER[column[:big_query_type]]
+  end
   { 'description' => column[:description] || '' } \
-    .merge(BIGQUERY_TYPE_TO_SWAGGER[column[:big_query_type]])
+    .merge(swagger_value)
 end
 
 swagger_object =  {  TABLE_INFO[:dto_class] => {
@@ -315,7 +323,11 @@ def to_constant_declaration(column, index)
             timestamp = BASE_TIMESTAMP + TIMESTAMP_DELTA_SECONDS * index
             "Timestamp.from(Instant.parse(\"#{timestamp.strftime("%Y-%m-%dT00:00:00.00Z")}\"))"
           else
-            index.to_s
+            if column[:is_enum]
+              column[:default_enum]
+            else
+              index.to_s
+            end
           end
   "public static final #{column[:java_type]} #{column[:java_constant_name]} = #{value};"
 end
@@ -363,26 +375,33 @@ def object_value_function(col)
   end
 end
 
+# enum types are special
 JAVA_TYPE_TO_QPV_FACTORY = {
-    'int' => 'QueryParameterValue.int64',
-    'long' => 'QueryParameterValue.int64',
+    'Integer' => 'QueryParameterValue.int64',
+    'Long' => 'QueryParameterValue.int64',
+    'Short' => 'QueryParameterValue.int64',
     'String' => 'QueryParameterValue.string',
-    'double' => 'QueryParameterValue.float64',
-    'boolean' => 'QueryParameterValue.bool',
+    'Double' => 'QueryParameterValue.float64',
+    'Boolean' => 'QueryParameterValue.bool',
     'Timestamp' => 'toTimestampQpv'
 }
 
 def qpv_function(col)
-  "#{col[:lambda_var]} -> #{JAVA_TYPE_TO_QPV_FACTORY[col[:java_type]]}(#{col[:lambda_var]}.#{col[:getter]}())"
+  if col[:is_enum]
+    convert_fn = 'enumToQpv'
+  else
+    convert_fn = "#{JAVA_TYPE_TO_QPV_FACTORY[col[:java_type]]}"
+  end
+  "#{col[:lambda_var]} -> #{convert_fn}(#{col[:lambda_var]}.#{col[:getter]}())"
 end
 
 def query_parameter_column_entry(col)
   "#{col[:name].upcase}(\"#{col[:name]}\", #{object_value_function(col)}, #{qpv_function(col)})"
 end
 
-QPC_ENUM = COLUMNS.map do |col|
+QPC_ENUM = (COLUMNS.map do |col|
   query_parameter_column_entry(col)
-end.join(",\n").freeze
+end.join(",\n") + ';').freeze
 
 write_output(OUTPUTS[:query_parameter_COLUMNS], QPC_ENUM, "QueryParameterValue Enum Entries")
 

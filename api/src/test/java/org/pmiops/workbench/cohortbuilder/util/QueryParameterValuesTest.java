@@ -3,8 +3,17 @@ package org.pmiops.workbench.cohortbuilder.util;
 import static com.google.common.truth.Truth.assertThat;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.buildParameter;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.decorateParameterName;
+import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.instantToQPValue;
+import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.rowToInsertStringToOffsetTimestamp;
+import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.timestampQpvToInstant;
+import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.timestampQpvToOffsetDateTime;
+import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.timestampStringToInstant;
+import static org.pmiops.workbench.utils.FieldValues.MICROSECONDS_IN_MILLISECOND;
+import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 
 import com.google.cloud.bigquery.QueryParameterValue;
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.After;
@@ -17,6 +26,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class QueryParameterValuesTest {
 
   private static final Map<String, QueryParameterValue> PARAM_MAP = new HashMap<>();
+  private static final Instant INSTANT = Instant.parse("2012-12-13T00:00:00.00Z");
+  private static final QueryParameterValue TIMESTAMP_QPV =
+      QueryParameterValue.timestamp(INSTANT.toEpochMilli() * MICROSECONDS_IN_MILLISECOND);
 
   @Before
   public void setup() {
@@ -44,5 +56,64 @@ public class QueryParameterValuesTest {
     assertThat(PARAM_MAP.get("p2")).isEqualTo(newParameter);
   }
 
+  @Test
+  public void testBuildParameter_emptyMap_nullQpv() {
+    PARAM_MAP.clear();
+    final QueryParameterValue nullString = QueryParameterValue.string(null);
+    final String parameterName = buildParameter(PARAM_MAP, nullString);
+    assertThat(parameterName).isEqualTo("@p0");
+    assertThat(PARAM_MAP).hasSize(1);
+    assertThat(PARAM_MAP.get("p0")).isEqualTo(nullString);
+  }
 
+  @Test
+  public void testInstantToQpvValue() {
+    final QueryParameterValue qpv = instantToQPValue(INSTANT);
+
+    final Instant roundTripInstant = timestampQpvToInstant(qpv);
+    assertTimeApprox(roundTripInstant, INSTANT);
+  }
+
+  @Test
+  public void testInstantToQpvValue_nullInput() {
+    final QueryParameterValue qpv = instantToQPValue(null);
+    assertThat(qpv).isNull();
+  }
+
+  @Test
+  public void testTimestampQpvToInstant_nullInput() {
+    final Instant roundTripInstant = timestampQpvToInstant(null);
+    assertThat(roundTripInstant).isNull();
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testTimestampQpvToInstant_wrongQpvType() {
+    timestampQpvToInstant(QueryParameterValue.bool(false));
+  }
+
+  @Test
+  public void testTimestampQpvToOffsetDateTime() {
+    final OffsetDateTime offsetDateTime = timestampQpvToOffsetDateTime(TIMESTAMP_QPV);
+    assertTimeApprox(offsetDateTime.toInstant(), INSTANT);
+  }
+
+  @Test
+  public void testTimestampQpvToOffset_nullInput() {
+    assertThat(timestampQpvToOffsetDateTime(null)).isNull();
+  }
+
+  @Test
+  public void testRowToInsertStringToOffsetTimestamp() {
+    final String timestampString = "2020-09-17 04:30:15.000000";
+    final OffsetDateTime offsetDateTime = rowToInsertStringToOffsetTimestamp(timestampString);
+    final OffsetDateTime expected = OffsetDateTime.parse("2020-09-17T04:30:15Z");
+    assertTimeApprox(offsetDateTime, expected);
+
+    assertThat(rowToInsertStringToOffsetTimestamp(null)).isNull();
+  }
+
+  @Test
+  public void testTimestampStringToInstant_nullInput() {
+    assertThat(timestampStringToInstant(null)).isNull();
+  }
 }

@@ -37,7 +37,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cohortbuilder.util.QueryParameterValues;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.BqDtoUser;
 import org.pmiops.workbench.model.BqDtoWorkspace;
 import org.pmiops.workbench.model.ReportingSnapshot;
@@ -86,8 +85,11 @@ public class ReportingUploadServiceTest {
   private static final int WORKSPACE_COLUMN_COUNT = WorkspaceParameterColumn.values().length;
 
   @TestConfiguration
-  @Import({ReportingUploadServiceDmlImpl.class, ReportingUploadServiceStreamingImpl.class,
-      ReportingTestConfig.class})
+  @Import({
+    ReportingUploadServiceDmlImpl.class,
+    ReportingUploadServiceStreamingImpl.class,
+    ReportingTestConfig.class
+  })
   @MockBean(Stopwatch.class)
   public static class config {
     @Bean

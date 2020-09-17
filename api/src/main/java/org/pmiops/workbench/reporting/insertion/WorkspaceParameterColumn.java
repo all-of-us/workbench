@@ -1,5 +1,6 @@
 package org.pmiops.workbench.reporting.insertion;
 
+import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.enumToQpv;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.toInsertRowString;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.toTimestampQpv;
 
@@ -12,22 +13,14 @@ public enum WorkspaceParameterColumn implements QueryParameterColumn<BqDtoWorksp
       "active_status",
       BqDtoWorkspace::getActiveStatus,
       w -> QueryParameterValue.int64(w.getActiveStatus())),
-  BILLING_ACCOUNT_NAME(
-      "billing_account_name",
-      BqDtoWorkspace::getBillingAccountName,
-      w -> QueryParameterValue.string(w.getBillingAccountName())),
   BILLING_ACCOUNT_TYPE(
       "billing_account_type",
       BqDtoWorkspace::getBillingAccountType,
-      w -> QueryParameterValue.string(w.getBillingAccountType().toString())),
-  BILLING_MIGRATION_STATUS(
-      "billing_migration_status",
-      BqDtoWorkspace::getBillingMigrationStatus,
-      w -> QueryParameterValue.int64(w.getBillingMigrationStatus())),
+      w -> enumToQpv(w.getBillingAccountType())),
   BILLING_STATUS(
       "billing_status",
       BqDtoWorkspace::getBillingStatus,
-      w -> QueryParameterValue.string(w.getBillingStatus().toString())),
+      w -> QueryParameterValue.int64(w.getBillingStatus())),
   CDR_VERSION_ID(
       "cdr_version_id",
       BqDtoWorkspace::getCdrVersionId,
@@ -41,7 +34,7 @@ public enum WorkspaceParameterColumn implements QueryParameterColumn<BqDtoWorksp
   DATA_ACCESS_LEVEL(
       "data_access_level",
       BqDtoWorkspace::getDataAccessLevel,
-      w -> QueryParameterValue.int64(w.getDataAccessLevel())),
+      w -> enumToQpv(w.getDataAccessLevel())),
   DISSEMINATE_RESEARCH_OTHER(
       "disseminate_research_other",
       BqDtoWorkspace::getDisseminateResearchOther,
@@ -155,7 +148,6 @@ public enum WorkspaceParameterColumn implements QueryParameterColumn<BqDtoWorksp
       "rp_time_requested",
       w -> toInsertRowString(w.getRpTimeRequested()),
       w -> toTimestampQpv(w.getRpTimeRequested())),
-  VERSION("version", BqDtoWorkspace::getVersion, w -> QueryParameterValue.int64(w.getVersion())),
   WORKSPACE_ID(
       "workspace_id",
       BqDtoWorkspace::getWorkspaceId,
@@ -164,7 +156,6 @@ public enum WorkspaceParameterColumn implements QueryParameterColumn<BqDtoWorksp
       "workspace_namespace",
       BqDtoWorkspace::getWorkspaceNamespace,
       w -> QueryParameterValue.string(w.getWorkspaceNamespace()));
-
   private final String parameterName;
   private final Function<BqDtoWorkspace, Object> rowToInsertValueFunction;
   private final Function<BqDtoWorkspace, QueryParameterValue> parameterValueFunction;

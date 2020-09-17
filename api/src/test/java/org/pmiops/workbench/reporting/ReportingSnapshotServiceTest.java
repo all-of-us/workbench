@@ -15,7 +15,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryService;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.projection.PrjUser;
 import org.pmiops.workbench.model.BqDtoUser;
@@ -44,10 +43,12 @@ public class ReportingSnapshotServiceTest {
   @Autowired private ReportingSnapshotService reportingSnapshotService;
 
   @TestConfiguration
-  @Import({CommonMappers.class,
-      ReportingMapperImpl.class,
-      ReportingTestConfig.class,
-      ReportingSnapshotServiceImpl.class})
+  @Import({
+    CommonMappers.class,
+    ReportingMapperImpl.class,
+    ReportingTestConfig.class,
+    ReportingSnapshotServiceImpl.class
+  })
   @MockBean({BigQueryService.class})
   public static class config {
     @Bean

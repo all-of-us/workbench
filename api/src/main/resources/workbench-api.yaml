@@ -7914,6 +7914,56 @@ definitions:
         description: Datetime at creation of this user's accont
         type: string
         format: date-time
+  AccountPropertyUpdate:
+    description: >
+      A group of changes an admin can make to a user in the Edit Information card of the individual-user admin page.
+      Updates to the contact email or the institutional affiliation will be rejected if they do not validate.
+    type: object
+    required:
+      - username
+      - accessBypassRequests
+    properties:
+      username:
+        description: The full system-assigned ID of a user, including email domain
+        type: string
+      freeCreditsLimit:
+        description: When set, overrides the default free credits dollar limit for this user.
+        type: number
+        format: double
+      contactEmail:
+        description: When set, replaces the user's contact email.  Must validate against the user's Institutional Affiliation, if one exists.
+        type: string
+      affiliation:
+        description: When set, replaces the user's verified institutional affiliation.  Must validate against the user's contact email.
+        "$ref": '#/definitions/VerifiedInstitutionalAffiliation'
+      accessBypassRequests:
+        description: Updates the user's bypass status for the given access modules.
+        type: array
+        items:
+          "$ref": '#/definitions/AccessBypassRequest'
+  AccessReason:
+    type: object
+    properties:
+      reason:
+        type: string
+        description: 'The administrative purpose for accessing this notebook'
+  ReportingSnapshot:
+    description: >
+      Payload for upload to BigQuery reporting dataset. Internal use only (not part of the API).
+    type: object
+    properties:
+      captureTimestamp:
+        description: Time at which snapshot is retrieved. Epoch millis.
+        type: integer
+        format: int64
+      users:
+        type: array
+        items:
+          "$ref": "#/definitions/BqDtoUser"
+      workspaces:
+        type: array
+        items:
+          "$ref": "#/definitions/BqDtoWorkspace"
   BqDtoUser:
     type: object
     properties:
@@ -8084,19 +8134,13 @@ definitions:
         description: ''
         type: integer
         format: int64
-      billingAccountName:
-        description: ''
-        type: string
       billingAccountType:
         description: ''
         "$ref": "#/definitions/BillingAccountType"
-      billingMigrationStatus:
+      billingStatus:
         description: ''
         type: integer
         format: int64
-      billingStatus:
-        description: ''
-        "$ref": "#/definitions/BillingStatus"
       cdrVersionId:
         description: ''
         type: integer
@@ -8111,8 +8155,7 @@ definitions:
         format: int64
       dataAccessLevel:
         description: ''
-        type: integer
-        format: int64
+        "$ref": "#/definitions/DataAccessLevel"
       disseminateResearchOther:
         description: ''
         type: string
@@ -8221,10 +8264,6 @@ definitions:
         description: ''
         type: string
         format: date-time
-      version:
-        description: ''
-        type: integer
-        format: int64
       workspaceId:
         description: ''
         type: integer
@@ -8232,53 +8271,3 @@ definitions:
       workspaceNamespace:
         description: ''
         type: string
-  ReportingSnapshot:
-    description: >
-      Payload for upload to BigQuery reporting dataset. Internal use only (not part of the API).
-    type: object
-    properties:
-      captureTimestamp:
-        description: Time at which snapshot is retrieved. Epoch millis.
-        type: integer
-        format: int64
-      users:
-        type: array
-        items:
-          "$ref": "#/definitions/BqDtoUser"
-      workspaces:
-        type: array
-        items:
-          "$ref": "#/definitions/BqDtoWorkspace"
-  AccountPropertyUpdate:
-    description: >
-      A group of changes an admin can make to a user in the Edit Information card of the individual-user admin page.
-      Updates to the contact email or the institutional affiliation will be rejected if they do not validate.
-    type: object
-    required:
-      - username
-      - accessBypassRequests
-    properties:
-      username:
-        description: The full system-assigned ID of a user, including email domain
-        type: string
-      freeCreditsLimit:
-        description: When set, overrides the default free credits dollar limit for this user.
-        type: number
-        format: double
-      contactEmail:
-        description: When set, replaces the user's contact email.  Must validate against the user's Institutional Affiliation, if one exists.
-        type: string
-      affiliation:
-        description: When set, replaces the user's verified institutional affiliation.  Must validate against the user's contact email.
-        "$ref": '#/definitions/VerifiedInstitutionalAffiliation'
-      accessBypassRequests:
-        description: Updates the user's bypass status for the given access modules.
-        type: array
-        items:
-          "$ref": '#/definitions/AccessBypassRequest'
-  AccessReason:
-    type: object
-    properties:
-      reason:
-        type: string
-        description: 'The administrative purpose for accessing this notebook'

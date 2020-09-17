@@ -6,9 +6,9 @@ import static org.pmiops.workbench.testconfig.ReportingTestUtils.USER__DEMOGRAPH
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.USER__DISABLED;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.USER__PROFESSIONAL_URL;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__BILLING_ACCOUNT_NAME;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__CDR_VERSION_ID;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__LAST_ACCESSED_TIME;
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__NAME;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__PUBLISHED;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDtoUser;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDtoWorkspace;
@@ -94,8 +94,8 @@ public class InsertAllRequestBuilderTest {
     final Map<String, Object> contentMap = rowToInsert.getContent();
     assertTimeApprox((long) contentMap.get("snapshot_timestamp"), PRINCE_PARTY_TIME.toEpochMilli());
     assertThat(contentMap).hasSize(FIXED_VALUES.size() + WorkspaceParameterColumn.values().length);
-    assertThat(contentMap.get("billing_account_name")).isEqualTo(WORKSPACE__BILLING_ACCOUNT_NAME);
     assertThat(contentMap.get("cdr_version_id")).isEqualTo(WORKSPACE__CDR_VERSION_ID);
+    assertThat(contentMap.get("name")).isEqualTo(WORKSPACE__NAME);
     assertThat(contentMap.get("published")).isEqualTo(WORKSPACE__PUBLISHED);
 
     final String timeString = (String) contentMap.get("last_accessed_time");
