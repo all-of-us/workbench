@@ -12,6 +12,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -64,14 +65,16 @@ public class DeleteWorkspaces {
 
   @Bean
   public WorkspaceService workspaceService(
-      FireCloudService fireCloudService,
+      BillingProjectAuditor billingProjectAuditor,
       Clock clock,
-      WorkspaceDao workspaceDao,
+      FireCloudService fireCloudService,
+      Provider<DbUser> dbUserProvider,
       UserRecentWorkspaceDao userRecentWorkspaceDao,
-      Provider<DbUser> dbUserProvider) {
+      WorkspaceDao workspaceDao) {
     return new WorkspaceServiceImpl(
         null,
         null,
+        billingProjectAuditor,
         clock,
         null,
         null,
@@ -79,11 +82,11 @@ public class DeleteWorkspaces {
         fireCloudService,
         null,
         dbUserProvider,
+        null,
+        null,
+        null,
         userRecentWorkspaceDao,
-        null,
         workspaceDao,
-        null,
-        null,
         null);
   }
 

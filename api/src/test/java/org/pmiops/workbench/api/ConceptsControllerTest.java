@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
@@ -270,24 +271,25 @@ public class ConceptsControllerTest {
   @Import({
     CohortMapperImpl.class,
     CohortReviewMapperImpl.class,
+    CommonMappers.class,
     ConceptSetMapperImpl.class,
     DataSetMapperImpl.class,
     FirecloudMapperImpl.class,
     UserMapperImpl.class,
-    WorkspaceServiceImpl.class,
     WorkspaceMapperImpl.class,
-    CommonMappers.class
+    WorkspaceServiceImpl.class,
   })
   @MockBean({
     BigQueryService.class,
-    FireCloudService.class,
+    BillingProjectAuditor.class,
+    Clock.class,
     CohortCloningService.class,
-    ConceptSetService.class,
     CohortService.class,
     ConceptBigQueryService.class,
-    Clock.class,
+    ConceptSetService.class,
     DataSetService.class,
-    FreeTierBillingService.class
+    FireCloudService.class,
+    FreeTierBillingService.class,
   })
   static class Configuration {
     @Bean

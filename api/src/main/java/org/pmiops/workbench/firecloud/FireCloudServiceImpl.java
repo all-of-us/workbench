@@ -271,6 +271,16 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
+  public void deleteBillingProject(String billingProject) {
+    BillingApi billingApi = billingApiProvider.get();
+    retryHandler.run(
+        (context) -> {
+          billingApi.deleteBillingProject(billingProject);
+          return null;
+        });
+  }
+
+  @Override
   public FirecloudBillingProjectStatus getBillingProjectStatus(String projectName) {
     return retryHandler.run(
         (context) -> billingApiProvider.get().billingProjectStatus(projectName));
