@@ -1,9 +1,8 @@
 import DataResourceCard from 'app/component/data-resource-card';
 import Modal from 'app/component/modal';
-import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {LinkText, ResourceCard} from 'app/text-labels';
-import {extractNamespace, makeRandomName} from 'utils/str-utils';
+import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn} from 'utils/test-utils';
 
 // Notebook server start may take a long time. Set maximum test running time to 20 minutes.
@@ -36,18 +35,7 @@ describe('Workspace owner Jupyter notebook action tests', () => {
     const copyFromNotebookName = makeRandomName('pytest');
     const dataPage = new WorkspaceDataPage(page);
 
-    // Get the billing project name from page url.
-    const fromWorkspaceNamespace = extractNamespace(new URL(page.url()));
-
     const copyFromNotebookPage = await dataPage.createNotebook(copyFromNotebookName);
-
-    // Run code to print out Workspace namespace.
-    const code =
-       'import os\n' +
-       'print(os.getenv(\'WORKSPACE_NAMESPACE\'))';
-
-    const codeOutput1 = await copyFromNotebookPage.runCodeCell(1, {code});
-    expect(codeOutput1).toEqual(fromWorkspaceNamespace);
 
     // Exit notebook and returns to the Workspace Analysis tab.
     const analysisPage = await copyFromNotebookPage.goAnalysisPage();
@@ -72,8 +60,6 @@ describe('Workspace owner Jupyter notebook action tests', () => {
     // Perform actions in copied notebook.
     // Open destination Workspace
     await findWorkspace(page, {workspaceName: toWorkspace}).then(card => card.clickWorkspaceName());
-    // Get the destination Workspace namespace.
-    const toWorkspaceNamespace = extractNamespace(new URL(page.url()));
 
     // Verify copy-to notebook exists in destination Workspace
     await dataPage.openAnalysisPage();
@@ -81,18 +67,6 @@ describe('Workspace owner Jupyter notebook action tests', () => {
     const notebookCard = await dataResourceCard.findCard(copiedNotebookName, ResourceCard.Notebook);
     expect(notebookCard).toBeTruthy();
 
-    // Open copied notebook and run code to verify billing project name.
-    await notebookCard.clickResourceName();
-    const notebookPreviewPage = new NotebookPreviewPage(page);
-    await notebookPreviewPage.waitForLoad();
-    const copyNotebookPage = await notebookPreviewPage.openEditMode(copiedNotebookName);
-
-    // Run same code and compare namespace.
-    const codeOutput2 = await copyNotebookPage.runCodeCell(-1, {code});
-    expect(codeOutput2).toEqual(toWorkspaceNamespace);
-
-    // Exit notebook. Returns to the Workspace Analysis tab.
-    await copyNotebookPage.goAnalysisPage();
     // Delete notebook
     const modalTextContent = await analysisPage.deleteResource(copiedNotebookName, ResourceCard.Notebook);
     expect(modalTextContent).toContain('This will permanently delete the Notebook.');
