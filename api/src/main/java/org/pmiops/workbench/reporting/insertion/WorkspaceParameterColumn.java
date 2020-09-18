@@ -1,12 +1,14 @@
 package org.pmiops.workbench.reporting.insertion;
 
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.enumToQpv;
+import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.enumToString;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.toInsertRowString;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.toTimestampQpv;
 
 import com.google.cloud.bigquery.QueryParameterValue;
 import java.util.function.Function;
 import org.pmiops.workbench.model.BqDtoWorkspace;
+import org.pmiops.workbench.model.DataAccessLevel;
 
 public enum WorkspaceParameterColumn implements QueryParameterColumn<BqDtoWorkspace> {
   ACTIVE_STATUS(
@@ -15,7 +17,7 @@ public enum WorkspaceParameterColumn implements QueryParameterColumn<BqDtoWorksp
       w -> QueryParameterValue.int64(w.getActiveStatus())),
   BILLING_ACCOUNT_TYPE(
       "billing_account_type",
-      BqDtoWorkspace::getBillingAccountType,
+      w -> enumToString(w.getBillingAccountType()),
       w -> enumToQpv(w.getBillingAccountType())),
   BILLING_STATUS(
       "billing_status", BqDtoWorkspace::getBillingStatus, w -> enumToQpv(w.getBillingStatus())),
@@ -31,7 +33,7 @@ public enum WorkspaceParameterColumn implements QueryParameterColumn<BqDtoWorksp
       "creator_id", BqDtoWorkspace::getCreatorId, w -> QueryParameterValue.int64(w.getCreatorId())),
   DATA_ACCESS_LEVEL(
       "data_access_level",
-      BqDtoWorkspace::getDataAccessLevel,
+      w -> enumToString(w.getDataAccessLevel()),
       w -> enumToQpv(w.getDataAccessLevel())),
   DISSEMINATE_RESEARCH_OTHER(
       "disseminate_research_other",
