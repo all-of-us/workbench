@@ -15,7 +15,6 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import javax.validation.constraints.Null;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.utils.Matchers;
@@ -93,7 +92,8 @@ public final class QueryParameterValues {
   // Since BigQuery doesn't expose the literal query string built from a QueryJobConfiguration,
   // this method does the next best thing. Useful for diagnostics, logging, testing, etc.
   @NotNull
-  public static String replaceNamedParameters(@NotNull QueryJobConfiguration queryJobConfiguration) {
+  public static String replaceNamedParameters(
+      @NotNull QueryJobConfiguration queryJobConfiguration) {
     String result = queryJobConfiguration.getQuery();
     final Map<Pattern, String> patternToReplacement =
         queryJobConfiguration.getNamedParameters().entrySet().stream()

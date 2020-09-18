@@ -614,6 +614,11 @@ public class DbUser {
     this.eraCommonsBypassTime = eraCommonsBypassTime;
   }
 
+  /*
+   * This column and attribute appear to be disused. We should drop teh column and the code here
+   * together.
+   */
+  @Deprecated
   @Column(name = "id_verification_completion_time")
   public Timestamp getIdVerificationCompletionTime() {
     return idVerificationCompletionTime;

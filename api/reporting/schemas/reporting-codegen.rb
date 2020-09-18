@@ -114,6 +114,18 @@ ENUM_TYPES = {
             :java => 'DataAccessLevel',
             :constant => 'DataAccessLevel.REGISTERED'
         }
+     },
+     'user' => {
+         'data_access_level' => {
+             :bigquery => 'STRING',
+             :java => 'DataAccessLevel',
+             :constant => 'DataAccessLevel.REGISTERED'
+         },
+         'email_verification_status' => {
+             :bigquery => 'STRING',
+             :java => 'EmailVerificationStatus',
+             :constant => 'EmailVerificationStatus.SUBSCRIBED'
+         }
      }
 }.freeze
 
@@ -208,6 +220,7 @@ end
 write_output(OUTPUTS[:big_query_json], schema_json, 'BigQuery JSON Schema')
 
 ## Swagger DTO Objects
+# TODO: handle this better, as we're losing track of long vs int
 BIGQUERY_TYPE_TO_SWAGGER  = {
     'STRING' =>  {
         'type'  => 'string'
@@ -221,8 +234,7 @@ BIGQUERY_TYPE_TO_SWAGGER  = {
         'format' => 'date-time'
     },
     'BOOLEAN' =>  {
-        'type'  => 'boolean',
-        'default' => false
+        'type'  => 'boolean'
     },
     'FLOAT64' => {
         'type' =>  'number',
@@ -239,8 +251,8 @@ def to_swagger_property(column)
   else
     swagger_value = BIGQUERY_TYPE_TO_SWAGGER[column[:big_query_type]]
   end
-  { 'description' => column[:description] || '' } \
-    .merge(swagger_value)
+  # { 'description' => column[:description] || '' } \
+  {}.merge(swagger_value)
 end
 
 swagger_object =  {  TABLE_INFO[:dto_class] => {
@@ -378,11 +390,15 @@ write_output(OUTPUTS[:dto_assertions], dto_assertions, 'Unit Test DTO Assertions
 
 ### Parameter Column Enum
 def object_value_function(col)
-  case col[:java_type]
-  when 'Timestamp' # actually OffsetDateTime on the DTO
-    "#{col[:lambda_var]} -> toInsertRowString(#{col[:lambda_var]}.#{col[:getter]}())"
+  if col[:is_enum]
+    "#{col[:lambda_var]} -> enumToString(#{col[:lambda_var]}.#{col[:getter]}())"
   else
-    "#{TABLE_INFO[:dto_class]}::#{col[:getter]}"
+    case col[:java_type]
+    when 'Timestamp' # actually OffsetDateTime on the DTO
+      "#{col[:lambda_var]} -> toInsertRowString(#{col[:lambda_var]}.#{col[:getter]}())"
+    else
+      "#{TABLE_INFO[:dto_class]}::#{col[:getter]}"
+    end
   end
 end
 

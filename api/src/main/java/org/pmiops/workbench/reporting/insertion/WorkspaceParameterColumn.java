@@ -8,19 +8,16 @@ import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.toTim
 import com.google.cloud.bigquery.QueryParameterValue;
 import java.util.function.Function;
 import org.pmiops.workbench.model.BqDtoWorkspace;
-import org.pmiops.workbench.model.DataAccessLevel;
 
 public enum WorkspaceParameterColumn implements QueryParameterColumn<BqDtoWorkspace> {
-  ACTIVE_STATUS(
-      "active_status",
-      BqDtoWorkspace::getActiveStatus,
-      w -> QueryParameterValue.int64(w.getActiveStatus())),
   BILLING_ACCOUNT_TYPE(
       "billing_account_type",
       w -> enumToString(w.getBillingAccountType()),
       w -> enumToQpv(w.getBillingAccountType())),
   BILLING_STATUS(
-      "billing_status", BqDtoWorkspace::getBillingStatus, w -> enumToQpv(w.getBillingStatus())),
+      "billing_status",
+      w -> enumToString(w.getBillingStatus()),
+      w -> enumToQpv(w.getBillingStatus())),
   CDR_VERSION_ID(
       "cdr_version_id",
       BqDtoWorkspace::getCdrVersionId,
@@ -39,14 +36,6 @@ public enum WorkspaceParameterColumn implements QueryParameterColumn<BqDtoWorksp
       "disseminate_research_other",
       BqDtoWorkspace::getDisseminateResearchOther,
       w -> QueryParameterValue.string(w.getDisseminateResearchOther())),
-  FIRECLOUD_NAME(
-      "firecloud_name",
-      BqDtoWorkspace::getFirecloudName,
-      w -> QueryParameterValue.string(w.getFirecloudName())),
-  FIRECLOUD_UUID(
-      "firecloud_uuid",
-      BqDtoWorkspace::getFirecloudUuid,
-      w -> QueryParameterValue.string(w.getFirecloudUuid())),
   LAST_ACCESSED_TIME(
       "last_accessed_time",
       w -> toInsertRowString(w.getLastAccessedTime()),
@@ -151,11 +140,8 @@ public enum WorkspaceParameterColumn implements QueryParameterColumn<BqDtoWorksp
   WORKSPACE_ID(
       "workspace_id",
       BqDtoWorkspace::getWorkspaceId,
-      w -> QueryParameterValue.int64(w.getWorkspaceId())),
-  WORKSPACE_NAMESPACE(
-      "workspace_namespace",
-      BqDtoWorkspace::getWorkspaceNamespace,
-      w -> QueryParameterValue.string(w.getWorkspaceNamespace()));
+      w -> QueryParameterValue.int64(w.getWorkspaceId()));
+
   private final String parameterName;
   private final Function<BqDtoWorkspace, Object> rowToInsertValueFunction;
   private final Function<BqDtoWorkspace, QueryParameterValue> parameterValueFunction;

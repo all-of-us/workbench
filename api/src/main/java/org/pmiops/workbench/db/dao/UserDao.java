@@ -71,9 +71,6 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
     Long getUserCount();
   }
 
-  //          + "FROM DbUser AS u\n"
-  //          + "  LEFT OUTER JOIN DbAddress AS a ON u.userId = a.user.userId\n"
-  //          + "  ORDER BY u.userId")
   @Query(
       "SELECT\n"
           + "  u.aboutYou,\n"

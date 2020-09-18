@@ -7968,305 +7968,193 @@ definitions:
     type: object
     properties:
       aboutYou:
-        description: ''
         type: string
       areaOfResearch:
-        description: ''
         type: string
       betaAccessBypassTime:
-        description: ''
         type: string
         format: date-time
       betaAccessRequestTime:
-        description: ''
         type: string
         format: date-time
       complianceTrainingBypassTime:
-        description: ''
         type: string
         format: date-time
       complianceTrainingCompletionTime:
-        description: ''
         type: string
         format: date-time
       complianceTrainingExpirationTime:
-        description: ''
         type: string
         format: date-time
       contactEmail:
-        description: ''
         type: string
       creationTime:
-        description: ''
         type: string
         format: date-time
       currentPosition:
-        description: ''
         type: string
       dataAccessLevel:
-        description: ''
-        type: integer
-        format: int64
+        "$ref": "#/definitions/DataAccessLevel"
       dataUseAgreementBypassTime:
-        description: ''
         type: string
         format: date-time
       dataUseAgreementCompletionTime:
-        description: ''
         type: string
         format: date-time
       dataUseAgreementSignedVersion:
-        description: ''
         type: integer
         format: int64
       demographicSurveyCompletionTime:
-        description: ''
         type: string
         format: date-time
       disabled:
-        description: ''
         type: boolean
-        default: false
       emailVerificationBypassTime:
-        description: ''
         type: string
         format: date-time
       emailVerificationCompletionTime:
-        description: ''
         type: string
         format: date-time
       emailVerificationStatus:
-        description: ''
-        type: integer
-        format: int64
+        "$ref": "#/definitions/EmailVerificationStatus"
       eraCommonsBypassTime:
-        description: ''
         type: string
         format: date-time
       eraCommonsCompletionTime:
-        description: ''
         type: string
         format: date-time
       eraCommonsLinkExpireTime:
-        description: ''
         type: string
         format: date-time
       familyName:
-        description: ''
         type: string
       firstRegistrationCompletionTime:
-        description: ''
         type: string
         format: date-time
       firstSignInTime:
-        description: ''
         type: string
         format: date-time
       freeTierCreditsLimitDaysOverride:
-        description: ''
         type: integer
         format: int64
       freeTierCreditsLimitDollarsOverride:
-        description: ''
         type: number
         format: double
       givenName:
-        description: ''
         type: string
       idVerificationBypassTime:
-        description: ''
-        type: string
-        format: date-time
-      idVerificationCompletionTime:
-        description: ''
         type: string
         format: date-time
       lastModifiedTime:
-        description: ''
         type: string
         format: date-time
       organization:
-        description: ''
         type: string
       phoneNumber:
-        description: ''
         type: string
       professionalUrl:
-        description: ''
         type: string
       twoFactorAuthBypassTime:
-        description: ''
         type: string
         format: date-time
       twoFactorAuthCompletionTime:
-        description: ''
         type: string
         format: date-time
       userId:
-        description: ''
         type: integer
         format: int64
       username:
-        description: ''
         type: string
       city:
-        description: ''
         type: string
       country:
-        description: ''
         type: string
       state:
-        description: ''
         type: string
       streetAddress1:
-        description: ''
         type: string
       streetAddress2:
-        description: ''
         type: string
       zipCode:
-        description: ''
         type: string
   BqDtoWorkspace:
     type: object
     properties:
-      activeStatus:
-        description: ''
-        type: integer
-        format: int64
       billingAccountType:
-        description: ''
         "$ref": "#/definitions/BillingAccountType"
       billingStatus:
-        description: ''
         "$ref": "#/definitions/BillingStatus"
       cdrVersionId:
-        description: ''
         type: integer
         format: int64
       creationTime:
-        description: ''
         type: string
         format: date-time
       creatorId:
-        description: ''
         type: integer
         format: int64
       dataAccessLevel:
-        description: ''
         "$ref": "#/definitions/DataAccessLevel"
       disseminateResearchOther:
-        description: ''
-        type: string
-      firecloudName:
-        description: ''
-        type: string
-      firecloudUuid:
-        description: ''
         type: string
       lastAccessedTime:
-        description: ''
         type: string
         format: date-time
       lastModifiedTime:
-        description: ''
         type: string
         format: date-time
       name:
-        description: ''
         type: string
       needsRpReviewPrompt:
-        description: ''
         type: integer
         format: int64
       published:
-        description: ''
         type: boolean
-        default: false
       rpAdditionalNotes:
-        description: ''
         type: string
       rpAncestry:
-        description: ''
         type: boolean
-        default: false
       rpAnticipatedFindings:
-        description: ''
         type: string
       rpApproved:
-        description: ''
         type: boolean
-        default: false
       rpCommercialPurpose:
-        description: ''
         type: boolean
-        default: false
       rpControlSet:
-        description: ''
         type: boolean
-        default: false
       rpDiseaseFocusedResearch:
-        description: ''
         type: boolean
-        default: false
       rpDiseaseOfFocus:
-        description: ''
         type: string
       rpDrugDevelopment:
-        description: ''
         type: boolean
-        default: false
       rpEducational:
-        description: ''
         type: boolean
-        default: false
       rpEthics:
-        description: ''
         type: boolean
-        default: false
       rpIntendedStudy:
-        description: ''
         type: string
       rpMethodsDevelopment:
-        description: ''
         type: boolean
-        default: false
       rpOtherPopulationDetails:
-        description: ''
         type: string
       rpOtherPurpose:
-        description: ''
         type: boolean
-        default: false
       rpOtherPurposeDetails:
-        description: ''
         type: string
       rpPopulationHealth:
-        description: ''
         type: boolean
-        default: false
       rpReasonForAllOfUs:
-        description: ''
         type: string
       rpReviewRequested:
-        description: ''
         type: boolean
-        default: false
       rpScientificApproach:
-        description: ''
         type: string
       rpSocialBehavioral:
-        description: ''
         type: boolean
-        default: false
       rpTimeRequested:
-        description: ''
         type: string
         format: date-time
       workspaceId:
-        description: ''
         type: integer
         format: int64
-      workspaceNamespace:
-        description: ''
-        type: string

@@ -1,5 +1,7 @@
 package org.pmiops.workbench.reporting.insertion;
 
+import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.enumToQpv;
+import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.enumToString;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.toInsertRowString;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.toTimestampQpv;
 
@@ -47,8 +49,8 @@ public enum UserParameterColumn implements QueryParameterColumn<BqDtoUser> {
       u -> QueryParameterValue.string(u.getCurrentPosition())),
   DATA_ACCESS_LEVEL(
       "data_access_level",
-      BqDtoUser::getDataAccessLevel,
-      u -> QueryParameterValue.int64(u.getDataAccessLevel())),
+      u -> enumToString(u.getDataAccessLevel()),
+      u -> enumToQpv(u.getDataAccessLevel())),
   DATA_USE_AGREEMENT_BYPASS_TIME(
       "data_use_agreement_bypass_time",
       u -> toInsertRowString(u.getDataUseAgreementBypassTime()),
@@ -76,8 +78,8 @@ public enum UserParameterColumn implements QueryParameterColumn<BqDtoUser> {
       u -> toTimestampQpv(u.getEmailVerificationCompletionTime())),
   EMAIL_VERIFICATION_STATUS(
       "email_verification_status",
-      BqDtoUser::getEmailVerificationStatus,
-      u -> QueryParameterValue.int64(u.getEmailVerificationStatus())),
+      u -> enumToString(u.getEmailVerificationStatus()),
+      u -> enumToQpv(u.getEmailVerificationStatus())),
   ERA_COMMONS_BYPASS_TIME(
       "era_commons_bypass_time",
       u -> toInsertRowString(u.getEraCommonsBypassTime()),
@@ -114,10 +116,6 @@ public enum UserParameterColumn implements QueryParameterColumn<BqDtoUser> {
       "id_verification_bypass_time",
       u -> toInsertRowString(u.getIdVerificationBypassTime()),
       u -> toTimestampQpv(u.getIdVerificationBypassTime())),
-  ID_VERIFICATION_COMPLETION_TIME(
-      "id_verification_completion_time",
-      u -> toInsertRowString(u.getIdVerificationCompletionTime()),
-      u -> toTimestampQpv(u.getIdVerificationCompletionTime())),
   LAST_MODIFIED_TIME(
       "last_modified_time",
       u -> toInsertRowString(u.getLastModifiedTime()),

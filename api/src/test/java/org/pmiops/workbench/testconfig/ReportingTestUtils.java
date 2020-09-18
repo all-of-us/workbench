@@ -11,7 +11,6 @@ import java.time.Instant;
 import org.pmiops.workbench.db.dao.projection.PrjUser;
 import org.pmiops.workbench.db.dao.projection.PrjWorkspace;
 import org.pmiops.workbench.db.model.DbCdrVersion;
-import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.BillingAccountType;
@@ -19,11 +18,12 @@ import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.BqDtoUser;
 import org.pmiops.workbench.model.BqDtoWorkspace;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.EmailVerificationStatus;
 
 public class ReportingTestUtils {
   // The code generator should ensure that no  values repeat
   // across columns. This was done to ensure nothing goes wrong
-  // with the prorjection inteface or mapper, since all nulls look
+  // with the projection interface or mapper, since all nulls look
   // alike.
   public static final String USER__ABOUT_YOU = "foo_0";
   public static final String USER__AREA_OF_RESEARCH = "foo_1";
@@ -41,7 +41,7 @@ public class ReportingTestUtils {
   public static final Timestamp USER__CREATION_TIME =
       Timestamp.from(Instant.parse("2015-05-13T00:00:00.00Z"));
   public static final String USER__CURRENT_POSITION = "foo_9";
-  public static final Short USER__DATA_ACCESS_LEVEL = 10;
+  public static final DataAccessLevel USER__DATA_ACCESS_LEVEL = DataAccessLevel.REGISTERED;
   public static final Timestamp USER__DATA_USE_AGREEMENT_BYPASS_TIME =
       Timestamp.from(Instant.parse("2015-05-16T00:00:00.00Z"));
   public static final Timestamp USER__DATA_USE_AGREEMENT_COMPLETION_TIME =
@@ -54,7 +54,8 @@ public class ReportingTestUtils {
       Timestamp.from(Instant.parse("2015-05-21T00:00:00.00Z"));
   public static final Timestamp USER__EMAIL_VERIFICATION_COMPLETION_TIME =
       Timestamp.from(Instant.parse("2015-05-22T00:00:00.00Z"));
-  public static final Short USER__EMAIL_VERIFICATION_STATUS = 18;
+  public static final EmailVerificationStatus USER__EMAIL_VERIFICATION_STATUS =
+      EmailVerificationStatus.SUBSCRIBED;
   public static final Timestamp USER__ERA_COMMONS_BYPASS_TIME =
       Timestamp.from(Instant.parse("2015-05-24T00:00:00.00Z"));
   public static final Timestamp USER__ERA_COMMONS_COMPLETION_TIME =
@@ -91,50 +92,46 @@ public class ReportingTestUtils {
   public static final String USER__STREET_ADDRESS_2 = "foo_4";
   public static final String USER__ZIP_CODE = "foo_5";
 
-  public static final Short WORKSPACE__ACTIVE_STATUS = 0;
   public static final BillingAccountType WORKSPACE__BILLING_ACCOUNT_TYPE =
       BillingAccountType.FREE_TIER;
   public static final BillingStatus WORKSPACE__BILLING_STATUS = BillingStatus.ACTIVE;
-  public static final Long WORKSPACE__CDR_VERSION_ID = 3L;
+  public static final Long WORKSPACE__CDR_VERSION_ID = 2L;
   public static final Timestamp WORKSPACE__CREATION_TIME =
-      Timestamp.from(Instant.parse("2015-05-09T00:00:00.00Z"));
-  public static final Long WORKSPACE__CREATOR_ID = 5L;
+      Timestamp.from(Instant.parse("2015-05-08T00:00:00.00Z"));
+  public static final Long WORKSPACE__CREATOR_ID = 4L;
   public static final DataAccessLevel WORKSPACE__DATA_ACCESS_LEVEL = DataAccessLevel.REGISTERED;
-  public static final String WORKSPACE__DISSEMINATE_RESEARCH_OTHER = "foo_7";
-  public static final String WORKSPACE__FIRECLOUD_NAME = "foo_8";
-  public static final String WORKSPACE__FIRECLOUD_UUID = "foo_9";
+  public static final String WORKSPACE__DISSEMINATE_RESEARCH_OTHER = "foo_6";
   public static final Timestamp WORKSPACE__LAST_ACCESSED_TIME =
-      Timestamp.from(Instant.parse("2015-05-15T00:00:00.00Z"));
+      Timestamp.from(Instant.parse("2015-05-12T00:00:00.00Z"));
   public static final Timestamp WORKSPACE__LAST_MODIFIED_TIME =
-      Timestamp.from(Instant.parse("2015-05-16T00:00:00.00Z"));
-  public static final String WORKSPACE__NAME = "foo_12";
-  public static final Short WORKSPACE__NEEDS_RP_REVIEW_PROMPT = 13;
-  public static final Boolean WORKSPACE__PUBLISHED = true;
-  public static final String WORKSPACE__RP_ADDITIONAL_NOTES = "foo_15";
-  public static final Boolean WORKSPACE__RP_ANCESTRY = true;
-  public static final String WORKSPACE__RP_ANTICIPATED_FINDINGS = "foo_17";
-  public static final Boolean WORKSPACE__RP_APPROVED = true;
-  public static final Boolean WORKSPACE__RP_COMMERCIAL_PURPOSE = false;
-  public static final Boolean WORKSPACE__RP_CONTROL_SET = true;
-  public static final Boolean WORKSPACE__RP_DISEASE_FOCUSED_RESEARCH = false;
-  public static final String WORKSPACE__RP_DISEASE_OF_FOCUS = "foo_22";
-  public static final Boolean WORKSPACE__RP_DRUG_DEVELOPMENT = false;
-  public static final Boolean WORKSPACE__RP_EDUCATIONAL = true;
-  public static final Boolean WORKSPACE__RP_ETHICS = false;
-  public static final String WORKSPACE__RP_INTENDED_STUDY = "foo_26";
-  public static final Boolean WORKSPACE__RP_METHODS_DEVELOPMENT = false;
-  public static final String WORKSPACE__RP_OTHER_POPULATION_DETAILS = "foo_28";
-  public static final Boolean WORKSPACE__RP_OTHER_PURPOSE = false;
-  public static final String WORKSPACE__RP_OTHER_PURPOSE_DETAILS = "foo_30";
-  public static final Boolean WORKSPACE__RP_POPULATION_HEALTH = false;
-  public static final String WORKSPACE__RP_REASON_FOR_ALL_OF_US = "foo_32";
-  public static final Boolean WORKSPACE__RP_REVIEW_REQUESTED = false;
-  public static final String WORKSPACE__RP_SCIENTIFIC_APPROACH = "foo_34";
-  public static final Boolean WORKSPACE__RP_SOCIAL_BEHAVIORAL = false;
+      Timestamp.from(Instant.parse("2015-05-13T00:00:00.00Z"));
+  public static final String WORKSPACE__NAME = "foo_9";
+  public static final Short WORKSPACE__NEEDS_RP_REVIEW_PROMPT = 10;
+  public static final Boolean WORKSPACE__PUBLISHED = false;
+  public static final String WORKSPACE__RP_ADDITIONAL_NOTES = "foo_12";
+  public static final Boolean WORKSPACE__RP_ANCESTRY = false;
+  public static final String WORKSPACE__RP_ANTICIPATED_FINDINGS = "foo_14";
+  public static final Boolean WORKSPACE__RP_APPROVED = false;
+  public static final Boolean WORKSPACE__RP_COMMERCIAL_PURPOSE = true;
+  public static final Boolean WORKSPACE__RP_CONTROL_SET = false;
+  public static final Boolean WORKSPACE__RP_DISEASE_FOCUSED_RESEARCH = true;
+  public static final String WORKSPACE__RP_DISEASE_OF_FOCUS = "foo_19";
+  public static final Boolean WORKSPACE__RP_DRUG_DEVELOPMENT = true;
+  public static final Boolean WORKSPACE__RP_EDUCATIONAL = false;
+  public static final Boolean WORKSPACE__RP_ETHICS = true;
+  public static final String WORKSPACE__RP_INTENDED_STUDY = "foo_23";
+  public static final Boolean WORKSPACE__RP_METHODS_DEVELOPMENT = true;
+  public static final String WORKSPACE__RP_OTHER_POPULATION_DETAILS = "foo_25";
+  public static final Boolean WORKSPACE__RP_OTHER_PURPOSE = true;
+  public static final String WORKSPACE__RP_OTHER_PURPOSE_DETAILS = "foo_27";
+  public static final Boolean WORKSPACE__RP_POPULATION_HEALTH = true;
+  public static final String WORKSPACE__RP_REASON_FOR_ALL_OF_US = "foo_29";
+  public static final Boolean WORKSPACE__RP_REVIEW_REQUESTED = true;
+  public static final String WORKSPACE__RP_SCIENTIFIC_APPROACH = "foo_31";
+  public static final Boolean WORKSPACE__RP_SOCIAL_BEHAVIORAL = true;
   public static final Timestamp WORKSPACE__RP_TIME_REQUESTED =
-      Timestamp.from(Instant.parse("2015-06-10T00:00:00.00Z"));
-  public static final Long WORKSPACE__WORKSPACE_ID = 37L;
-  public static final String WORKSPACE__WORKSPACE_NAMESPACE = "foo_38";
+      Timestamp.from(Instant.parse("2015-06-07T00:00:00.00Z"));
+  public static final Long WORKSPACE__WORKSPACE_ID = 34L;
 
   public static void assertDtoUserFields(BqDtoUser user) {
     assertThat(user.getAboutYou()).isEqualTo(USER__ABOUT_YOU);
@@ -175,7 +172,6 @@ public class ReportingTestUtils {
         .isEqualTo(USER__FREE_TIER_CREDITS_LIMIT_DOLLARS_OVERRIDE);
     assertThat(user.getGivenName()).isEqualTo(USER__GIVEN_NAME);
     assertTimeApprox(user.getIdVerificationBypassTime(), USER__ID_VERIFICATION_BYPASS_TIME);
-    assertTimeApprox(user.getIdVerificationCompletionTime(), USER__ID_VERIFICATION_COMPLETION_TIME);
     assertTimeApprox(user.getLastModifiedTime(), USER__LAST_MODIFIED_TIME);
     assertThat(user.getOrganization()).isEqualTo(USER__ORGANIZATION);
     assertThat(user.getPhoneNumber()).isEqualTo(USER__PHONE_NUMBER);
@@ -184,16 +180,9 @@ public class ReportingTestUtils {
     assertTimeApprox(user.getTwoFactorAuthCompletionTime(), USER__TWO_FACTOR_AUTH_COMPLETION_TIME);
     assertThat(user.getUserId()).isEqualTo(USER__USER_ID);
     assertThat(user.getUsername()).isEqualTo(USER__USERNAME);
-    assertThat(user.getCity()).isEqualTo(USER__CITY);
-    assertThat(user.getCountry()).isEqualTo(USER__COUNTRY);
-    assertThat(user.getState()).isEqualTo(USER__STATE);
-    assertThat(user.getStreetAddress1()).isEqualTo(USER__STREET_ADDRESS_1);
-    assertThat(user.getStreetAddress2()).isEqualTo(USER__STREET_ADDRESS_2);
-    assertThat(user.getZipCode()).isEqualTo(USER__ZIP_CODE);
   }
 
   public static void assertDtoWorkspaceFields(BqDtoWorkspace workspace) {
-    assertThat(workspace.getActiveStatus()).isEqualTo(WORKSPACE__ACTIVE_STATUS);
     assertThat(workspace.getBillingAccountType()).isEqualTo(WORKSPACE__BILLING_ACCOUNT_TYPE);
     assertThat(workspace.getBillingStatus()).isEqualTo(WORKSPACE__BILLING_STATUS);
     assertThat(workspace.getCdrVersionId()).isEqualTo(WORKSPACE__CDR_VERSION_ID);
@@ -202,8 +191,6 @@ public class ReportingTestUtils {
     assertThat(workspace.getDataAccessLevel()).isEqualTo(WORKSPACE__DATA_ACCESS_LEVEL);
     assertThat(workspace.getDisseminateResearchOther())
         .isEqualTo(WORKSPACE__DISSEMINATE_RESEARCH_OTHER);
-    assertThat(workspace.getFirecloudName()).isEqualTo(WORKSPACE__FIRECLOUD_NAME);
-    assertThat(workspace.getFirecloudUuid()).isEqualTo(WORKSPACE__FIRECLOUD_UUID);
     assertTimeApprox(workspace.getLastAccessedTime(), WORKSPACE__LAST_ACCESSED_TIME);
     assertTimeApprox(workspace.getLastModifiedTime(), WORKSPACE__LAST_MODIFIED_TIME);
     assertThat(workspace.getName()).isEqualTo(WORKSPACE__NAME);
@@ -234,7 +221,6 @@ public class ReportingTestUtils {
     assertThat(workspace.getRpSocialBehavioral()).isEqualTo(WORKSPACE__RP_SOCIAL_BEHAVIORAL);
     assertTimeApprox(workspace.getRpTimeRequested(), WORKSPACE__RP_TIME_REQUESTED);
     assertThat(workspace.getWorkspaceId()).isEqualTo(WORKSPACE__WORKSPACE_ID);
-    assertThat(workspace.getWorkspaceNamespace()).isEqualTo(WORKSPACE__WORKSPACE_NAMESPACE);
   }
 
   // TODO: put these override values into the scaffold script
@@ -243,7 +229,6 @@ public class ReportingTestUtils {
       long actualWorkspaceId,
       long actualCdrVersionId,
       long actualCreatorId) {
-    assertThat(workspace.getActiveStatus()).isEqualTo(WORKSPACE__ACTIVE_STATUS);
     assertThat(workspace.getBillingAccountType()).isEqualTo(WORKSPACE__BILLING_ACCOUNT_TYPE);
     assertThat(workspace.getBillingStatus()).isEqualTo(WORKSPACE__BILLING_STATUS);
     assertThat(workspace.getCdrVersionId()).isEqualTo(actualCdrVersionId);
@@ -252,8 +237,6 @@ public class ReportingTestUtils {
     assertThat(workspace.getDataAccessLevel()).isEqualTo(WORKSPACE__DATA_ACCESS_LEVEL);
     assertThat(workspace.getDisseminateResearchOther())
         .isEqualTo(WORKSPACE__DISSEMINATE_RESEARCH_OTHER);
-    assertThat(workspace.getFirecloudName()).isEqualTo(WORKSPACE__FIRECLOUD_NAME);
-    assertThat(workspace.getFirecloudUuid()).isEqualTo(WORKSPACE__FIRECLOUD_UUID);
     assertTimeApprox(workspace.getLastAccessedTime(), WORKSPACE__LAST_ACCESSED_TIME);
     assertTimeApprox(workspace.getLastModifiedTime(), WORKSPACE__LAST_MODIFIED_TIME);
     assertThat(workspace.getName()).isEqualTo(WORKSPACE__NAME);
@@ -284,7 +267,6 @@ public class ReportingTestUtils {
     assertThat(workspace.getRpSocialBehavioral()).isEqualTo(WORKSPACE__RP_SOCIAL_BEHAVIORAL);
     assertTimeApprox(workspace.getRpTimeRequested(), WORKSPACE__RP_TIME_REQUESTED);
     assertThat(workspace.getWorkspaceId()).isEqualTo(actualWorkspaceId);
-    assertThat(workspace.getWorkspaceNamespace()).isEqualTo(WORKSPACE__WORKSPACE_NAMESPACE);
   }
 
   public static PrjUser mockPrjUser() {
@@ -360,7 +342,6 @@ public class ReportingTestUtils {
 
   public static PrjWorkspace mockPrjWorkspace() {
     final PrjWorkspace mockWorkspace = mock(PrjWorkspace.class);
-    doReturn(WORKSPACE__ACTIVE_STATUS).when(mockWorkspace).getActiveStatus();
     doReturn(WORKSPACE__BILLING_ACCOUNT_TYPE).when(mockWorkspace).getBillingAccountType();
     doReturn(WORKSPACE__BILLING_STATUS).when(mockWorkspace).getBillingStatus();
     doReturn(WORKSPACE__CDR_VERSION_ID).when(mockWorkspace).getCdrVersionId();
@@ -370,8 +351,6 @@ public class ReportingTestUtils {
     doReturn(WORKSPACE__DISSEMINATE_RESEARCH_OTHER)
         .when(mockWorkspace)
         .getDisseminateResearchOther();
-    doReturn(WORKSPACE__FIRECLOUD_NAME).when(mockWorkspace).getFirecloudName();
-    doReturn(WORKSPACE__FIRECLOUD_UUID).when(mockWorkspace).getFirecloudUuid();
     doReturn(WORKSPACE__LAST_ACCESSED_TIME).when(mockWorkspace).getLastAccessedTime();
     doReturn(WORKSPACE__LAST_MODIFIED_TIME).when(mockWorkspace).getLastModifiedTime();
     doReturn(WORKSPACE__NAME).when(mockWorkspace).getName();
@@ -404,7 +383,6 @@ public class ReportingTestUtils {
     doReturn(WORKSPACE__RP_SOCIAL_BEHAVIORAL).when(mockWorkspace).getRpSocialBehavioral();
     doReturn(WORKSPACE__RP_TIME_REQUESTED).when(mockWorkspace).getRpTimeRequested();
     doReturn(WORKSPACE__WORKSPACE_ID).when(mockWorkspace).getWorkspaceId();
-    doReturn(WORKSPACE__WORKSPACE_NAMESPACE).when(mockWorkspace).getWorkspaceNamespace();
     return mockWorkspace;
   }
 
@@ -422,7 +400,7 @@ public class ReportingTestUtils {
         .contactEmail(USER__CONTACT_EMAIL)
         .creationTime(offsetDateTimeUtc(USER__CREATION_TIME))
         .currentPosition(USER__CURRENT_POSITION)
-        .dataAccessLevel(USER__DATA_ACCESS_LEVEL.longValue())
+        .dataAccessLevel(USER__DATA_ACCESS_LEVEL)
         .dataUseAgreementBypassTime(offsetDateTimeUtc(USER__DATA_USE_AGREEMENT_BYPASS_TIME))
         .dataUseAgreementCompletionTime(offsetDateTimeUtc(USER__DATA_USE_AGREEMENT_COMPLETION_TIME))
         .dataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION.longValue())
@@ -432,7 +410,7 @@ public class ReportingTestUtils {
         .emailVerificationBypassTime(offsetDateTimeUtc(USER__EMAIL_VERIFICATION_BYPASS_TIME))
         .emailVerificationCompletionTime(
             offsetDateTimeUtc(USER__EMAIL_VERIFICATION_COMPLETION_TIME))
-        .emailVerificationStatus(USER__EMAIL_VERIFICATION_STATUS.longValue())
+        .emailVerificationStatus(USER__EMAIL_VERIFICATION_STATUS)
         .eraCommonsBypassTime(offsetDateTimeUtc(USER__ERA_COMMONS_BYPASS_TIME))
         .eraCommonsCompletionTime(offsetDateTimeUtc(USER__ERA_COMMONS_COMPLETION_TIME))
         .eraCommonsLinkExpireTime(offsetDateTimeUtc(USER__ERA_COMMONS_LINK_EXPIRE_TIME))
@@ -444,7 +422,6 @@ public class ReportingTestUtils {
         .freeTierCreditsLimitDollarsOverride(USER__FREE_TIER_CREDITS_LIMIT_DOLLARS_OVERRIDE)
         .givenName(USER__GIVEN_NAME)
         .idVerificationBypassTime(offsetDateTimeUtc(USER__ID_VERIFICATION_BYPASS_TIME))
-        .idVerificationCompletionTime(offsetDateTimeUtc(USER__ID_VERIFICATION_COMPLETION_TIME))
         .lastModifiedTime(offsetDateTimeUtc(USER__LAST_MODIFIED_TIME))
         .organization(USER__ORGANIZATION)
         .phoneNumber(USER__PHONE_NUMBER)
@@ -452,12 +429,17 @@ public class ReportingTestUtils {
         .twoFactorAuthBypassTime(offsetDateTimeUtc(USER__TWO_FACTOR_AUTH_BYPASS_TIME))
         .twoFactorAuthCompletionTime(offsetDateTimeUtc(USER__TWO_FACTOR_AUTH_COMPLETION_TIME))
         .userId(USER__USER_ID)
-        .username(USER__USERNAME);
+        .username(USER__USERNAME)
+        .city(USER__CITY)
+        .country(USER__COUNTRY)
+        .state(USER__STATE)
+        .streetAddress1(USER__STREET_ADDRESS_1)
+        .streetAddress2(USER__STREET_ADDRESS_2)
+        .zipCode(USER__ZIP_CODE);
   }
 
   public static BqDtoWorkspace createDtoWorkspace() {
     return new BqDtoWorkspace()
-        .activeStatus(WORKSPACE__ACTIVE_STATUS.longValue())
         .billingAccountType(WORKSPACE__BILLING_ACCOUNT_TYPE)
         .billingStatus(WORKSPACE__BILLING_STATUS)
         .cdrVersionId(WORKSPACE__CDR_VERSION_ID)
@@ -465,8 +447,6 @@ public class ReportingTestUtils {
         .creatorId(WORKSPACE__CREATOR_ID)
         .dataAccessLevel(WORKSPACE__DATA_ACCESS_LEVEL)
         .disseminateResearchOther(WORKSPACE__DISSEMINATE_RESEARCH_OTHER)
-        .firecloudName(WORKSPACE__FIRECLOUD_NAME)
-        .firecloudUuid(WORKSPACE__FIRECLOUD_UUID)
         .lastAccessedTime(offsetDateTimeUtc(WORKSPACE__LAST_ACCESSED_TIME))
         .lastModifiedTime(offsetDateTimeUtc(WORKSPACE__LAST_MODIFIED_TIME))
         .name(WORKSPACE__NAME)
@@ -494,22 +474,17 @@ public class ReportingTestUtils {
         .rpScientificApproach(WORKSPACE__RP_SCIENTIFIC_APPROACH)
         .rpSocialBehavioral(WORKSPACE__RP_SOCIAL_BEHAVIORAL)
         .rpTimeRequested(offsetDateTimeUtc(WORKSPACE__RP_TIME_REQUESTED))
-        .workspaceId(WORKSPACE__WORKSPACE_ID)
-        .workspaceNamespace(WORKSPACE__WORKSPACE_NAMESPACE);
+        .workspaceId(WORKSPACE__WORKSPACE_ID);
   }
 
   public static DbWorkspace createDbWorkspace(DbUser creator, DbCdrVersion cdrVersion) {
     final DbWorkspace workspace = new DbWorkspace();
-    workspace.setWorkspaceActiveStatusEnum(
-        DbStorageEnums.workspaceActiveStatusFromStorage(WORKSPACE__ACTIVE_STATUS));
     workspace.setBillingAccountType(WORKSPACE__BILLING_ACCOUNT_TYPE);
     workspace.setCdrVersion(cdrVersion);
     workspace.setCreationTime(WORKSPACE__CREATION_TIME);
     workspace.setCreator(creator);
     workspace.setDataAccessLevel(WORKSPACE__DATA_ACCESS_LEVEL);
     workspace.setDisseminateResearchOther(WORKSPACE__DISSEMINATE_RESEARCH_OTHER);
-    workspace.setFirecloudName(WORKSPACE__FIRECLOUD_NAME);
-    workspace.setFirecloudUuid(WORKSPACE__FIRECLOUD_UUID);
     workspace.setLastAccessedTime(WORKSPACE__LAST_ACCESSED_TIME);
     workspace.setLastModifiedTime(WORKSPACE__LAST_MODIFIED_TIME);
     workspace.setName(WORKSPACE__NAME);
@@ -538,7 +513,6 @@ public class ReportingTestUtils {
     workspace.setSocialBehavioral(WORKSPACE__RP_SOCIAL_BEHAVIORAL);
     workspace.setTimeRequested(WORKSPACE__RP_TIME_REQUESTED);
     workspace.setWorkspaceId(WORKSPACE__WORKSPACE_ID);
-    workspace.setWorkspaceNamespace(WORKSPACE__WORKSPACE_NAMESPACE);
     return workspace;
   }
 }

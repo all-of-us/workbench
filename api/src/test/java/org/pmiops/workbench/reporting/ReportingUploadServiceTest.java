@@ -39,10 +39,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cohortbuilder.util.QueryParameterValues;
+import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.BqDtoUser;
 import org.pmiops.workbench.model.BqDtoWorkspace;
 import org.pmiops.workbench.model.ReportingSnapshot;
-import org.pmiops.workbench.reporting.insertion.UserParameterColumn;
 import org.pmiops.workbench.reporting.insertion.WorkspaceParameterColumn;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
@@ -83,8 +83,6 @@ public class ReportingUploadServiceTest {
 
   @Captor private ArgumentCaptor<QueryJobConfiguration> queryJobConfigurationCaptor;
   @Captor private ArgumentCaptor<InsertAllRequest> insertAllRequestCaptor;
-  private static final int USER_COLUMN_COUNT = UserParameterColumn.values().length;
-  private static final int WORKSPACE_COLUMN_COUNT = WorkspaceParameterColumn.values().length;
 
   @TestConfiguration
   @Import({
@@ -184,6 +182,13 @@ public class ReportingUploadServiceTest {
         .executeQuery(any(QueryJobConfiguration.class), anyLong());
 
     TestMockFactory.stubStopwatch(mockStopwatch, Duration.ofMillis(250));
+
+    final InsertAllResponse mockInsertAllResponse = mock(InsertAllResponse.class);
+    doReturn(Collections.emptyMap()).when(mockInsertAllResponse).getInsertErrors();
+
+    doReturn(mockInsertAllResponse)
+        .when(mockBigQueryService)
+        .insertAll(any(InsertAllRequest.class));
   }
 
   @Test
@@ -318,5 +323,26 @@ public class ReportingUploadServiceTest {
         THEN);
     assertThat(workspaceColumnValues.get(WorkspaceParameterColumn.CREATOR_ID.getParameterName()))
         .isEqualTo(101L);
+  }
+
+  @Test
+  public void testUploadSnapshot_nullEnum() {
+    final BqDtoWorkspace workspace = new BqDtoWorkspace();
+    workspace.setWorkspaceId(101L);
+    workspace.setBillingStatus(null);
+    final ReportingSnapshot snapshot =
+        new ReportingSnapshot()
+            .captureTimestamp(0L)
+            .users(Collections.emptyList())
+            .workspaces(ImmutableList.of(workspace));
+    reportingUploadServiceStreamingImpl.uploadSnapshot(snapshot);
+    verify(mockBigQueryService).insertAll(insertAllRequestCaptor.capture());
+
+    final InsertAllRequest insertAllRequest = insertAllRequestCaptor.getValue();
+    assertThat(insertAllRequest.getRows()).hasSize(1);
+    final Map<String, Object> content = insertAllRequest.getRows().get(0).getContent();
+    assertThat(content).hasSize(2);
+    assertThat(content.getOrDefault("billing_status", BillingStatus.INACTIVE))
+        .isEqualTo(BillingStatus.INACTIVE);
   }
 }

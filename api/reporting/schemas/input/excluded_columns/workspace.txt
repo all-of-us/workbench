@@ -1,4 +1,8 @@
+active_status
 rp_population
 billing_migration_status
 version
 billing_account_name
+workspace_namespace
+firecloud_name
+firecloud_uuid
