@@ -228,6 +228,7 @@ public class ReportingTestUtils {
     assertThat(workspace.getWorkspaceNamespace()).isEqualTo(WORKSPACE__WORKSPACE_NAMESPACE);
   }
 
+  // TODO: put these override values into the scaffold script
   public static void assertWorkspaceFields(
       PrjWorkspace workspace,
       long actualWorkspaceId,
@@ -236,9 +237,9 @@ public class ReportingTestUtils {
     assertThat(workspace.getActiveStatus()).isEqualTo(WORKSPACE__ACTIVE_STATUS);
     assertThat(workspace.getBillingAccountType()).isEqualTo(WORKSPACE__BILLING_ACCOUNT_TYPE);
     assertThat(workspace.getBillingStatus()).isEqualTo(WORKSPACE__BILLING_STATUS);
-    assertThat(workspace.getCdrVersionId()).isEqualTo(WORKSPACE__CDR_VERSION_ID);
+    assertThat(workspace.getCdrVersionId()).isEqualTo(actualCdrVersionId);
     assertTimeApprox(workspace.getCreationTime(), WORKSPACE__CREATION_TIME);
-    assertThat(workspace.getCreatorId()).isEqualTo(WORKSPACE__CREATOR_ID);
+    assertThat(workspace.getCreatorId()).isEqualTo(actualCreatorId);
     assertThat(workspace.getDataAccessLevel()).isEqualTo(WORKSPACE__DATA_ACCESS_LEVEL);
     assertThat(workspace.getDisseminateResearchOther())
         .isEqualTo(WORKSPACE__DISSEMINATE_RESEARCH_OTHER);
@@ -273,7 +274,7 @@ public class ReportingTestUtils {
     assertThat(workspace.getRpScientificApproach()).isEqualTo(WORKSPACE__RP_SCIENTIFIC_APPROACH);
     assertThat(workspace.getRpSocialBehavioral()).isEqualTo(WORKSPACE__RP_SOCIAL_BEHAVIORAL);
     assertTimeApprox(workspace.getRpTimeRequested(), WORKSPACE__RP_TIME_REQUESTED);
-    assertThat(workspace.getWorkspaceId()).isEqualTo(WORKSPACE__WORKSPACE_ID);
+    assertThat(workspace.getWorkspaceId()).isEqualTo(actualWorkspaceId);
     assertThat(workspace.getWorkspaceNamespace()).isEqualTo(WORKSPACE__WORKSPACE_NAMESPACE);
   }
 

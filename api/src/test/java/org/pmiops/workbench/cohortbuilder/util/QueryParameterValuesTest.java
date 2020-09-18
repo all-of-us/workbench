@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.buildParameter;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.decorateParameterName;
+import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.enumToQpv;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.instantToQPValue;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.rowToInsertStringToOffsetTimestamp;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.timestampQpvToInstant;
@@ -26,6 +27,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -123,15 +125,32 @@ public class QueryParameterValuesTest {
   @Test
   public void testRowToInsertStringToOffsetTimestamp() {
     final String timestampString = "2020-09-17 04:30:15.000000";
-    final OffsetDateTime offsetDateTime = rowToInsertStringToOffsetTimestamp(timestampString).orElse(null);
+    final Optional<OffsetDateTime> convertedOdt = rowToInsertStringToOffsetTimestamp(timestampString);
+    assertThat(convertedOdt).isPresent();
+
     final OffsetDateTime expected = OffsetDateTime.parse("2020-09-17T04:30:15Z");
-    assertTimeApprox(offsetDateTime, expected);
+    assertTimeApprox(convertedOdt.get(), expected);
 
     assertThat(rowToInsertStringToOffsetTimestamp(null)).isEmpty();
   }
 
   @Test
   public void testTimestampStringToInstant_nullInput() {
-    assertThat(timestampStringToInstant(null)).isNull();
+    assertThat(timestampStringToInstant(null)).isEmpty();
   }
+
+  @Test
+  public void testEnumToQpv() {
+    final QueryParameterValue qpv = enumToQpv(WorkspaceAccessLevel.READER);
+    assertThat(qpv.getType()).isEqualTo(StandardSQLTypeName.STRING);
+    assertThat(qpv.getValue()).isEqualTo("READER");
+  }
+
+  @Test
+  public void testEnumToQpv_nullInput() {
+    final QueryParameterValue qpv = enumToQpv(null);
+    assertThat(qpv.getType()).isEqualTo(StandardSQLTypeName.STRING);
+    assertThat(qpv.getValue()).isNull();
+  }
+
 }
