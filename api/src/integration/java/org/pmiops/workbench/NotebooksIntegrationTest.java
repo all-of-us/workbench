@@ -9,6 +9,7 @@ import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClientImpl;
+import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -27,6 +28,7 @@ public class NotebooksIntegrationTest extends BaseIntegrationTest {
   @MockBean FireCloudService mockFireCloudService;
   @MockBean UserRecentResourceService mockUserRecentResourceService;
   @MockBean MonitoringService mockMonitoringService;
+  @MockBean LeonardoMapper leonardoMapper;
 
   @TestConfiguration
   // N.B. in the other integration test classes we add a @ComponentScan which scans the package
