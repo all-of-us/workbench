@@ -141,6 +141,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
     if (workbenchConfigProvider.get().featureFlags.enableCustomRuntimes) {
       if (runtime.getGceConfig() == null && runtime.getDataprocConfig() == null) {
+        // There's probably a code smell here where I'm throwing an exception that we're only
+        // expecting to handle as a response from Leo but this was the quickest path forward for now.
         throw new ApiException(400, "Either a GceConfig or DataprocConfig must be provided");
       }
 
