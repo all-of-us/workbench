@@ -299,10 +299,9 @@ public class ReportingUploadServiceTest {
 
     assertThat(requests).hasSize(2);
 
-    final List<RowToInsert> researcherRows = requests.get(0).getRows();
-    assertThat(researcherRows).hasSize(3);
-    assertThat(researcherRows.get(0).getId()).hasLength(16);
-    assertThat(researcherRows.get(0).getContent()).hasSize(USER_COLUMN_COUNT + 1);
+    final List<RowToInsert> userRows = requests.get(0).getRows();
+    assertThat(userRows).hasSize(3);
+    assertThat(userRows.get(0).getId()).hasLength(16);
 
     final List<RowToInsert> workspaceRows = requests.get(1).getRows();
     assertThat(workspaceRows).hasSize(3);

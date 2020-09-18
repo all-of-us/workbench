@@ -7,7 +7,6 @@ import com.google.cloud.bigquery.TableId;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -64,11 +63,6 @@ public class ReportingUploadServiceStreamingImpl implements ReportingUploadServi
       stopwatch.reset();
     }
     return computeOverallResult(responseMapBuilder.build());
-  }
-
-  public void logDuration(Duration duration, String description) {
-    final long millis = duration.toMillis();
-    log.info(String.format("%s: %d.%d seconds", description, millis / 1000, millis % 1000));
   }
 
   private List<InsertAllRequest> getInsertAllRequests(ReportingSnapshot reportingSnapshot) {

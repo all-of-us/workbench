@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -35,6 +36,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 public class InsertAllRequestBuilderTest {
+
   private static final InsertAllRequestBuilder<BqDtoUser> USER_INSERT_ALL_REQUEST_BUILDER =
       UserParameterColumn::values;
   private static final InsertAllRequestBuilder<BqDtoWorkspace> WORKSPACE_REQUEST_BUILDER =
@@ -43,22 +45,40 @@ public class InsertAllRequestBuilderTest {
   private static final Map<String, Object> FIXED_VALUES =
       ImmutableMap.of("snapshot_timestamp", PRINCE_PARTY_TIME.toEpochMilli());
 
-  private static final List<BqDtoUser> USERS =
+  private static final List<BqDtoUser> USERS_WITH_NULL_FIELDS =
       ImmutableList.of(
           new BqDtoUser().username("user1").givenName("Onceler").disabled(false).userId(1L),
           new BqDtoUser().username(null).givenName("Nullson").disabled(false).userId(111L),
           new BqDtoUser().username("america@usa.gov").givenName(null).disabled(false).userId(212L),
           new BqDtoUser().username(null).givenName(null).disabled(true).userId(313L));
   private static final TableId TABLE_ID = TableId.of("project ID", "dataset", "researcher");
+  public static final int INCOMPLETE_USER_SIZE = 5; // includes snapshot_timestamp
 
   // regression test for RW-5437
   @Test
   public void build_tolerates_nulls() {
-    InsertAllRequest request = USER_INSERT_ALL_REQUEST_BUILDER.build(TABLE_ID, USERS, FIXED_VALUES);
+    final InsertAllRequest request =
+        USER_INSERT_ALL_REQUEST_BUILDER.build(TABLE_ID, USERS_WITH_NULL_FIELDS, FIXED_VALUES);
+    assertThat(request.getTable()).isEqualTo(TABLE_ID);
+    assertThat(request.ignoreUnknownValues()).isTrue();
 
-    assertThat(request.getRows()).hasSize(USERS.size());
-    assertThat(request.getRows().get(0).getContent().get("phone_number")).isNull();
-    assertThat(request.getRows().get(0).getContent().get("username")).isEqualTo("user1");
+    assertThat(request.getRows()).hasSize(USERS_WITH_NULL_FIELDS.size());
+
+    final Map<String, Object> row0ContentMap = request.getRows().get(0).getContent();
+    assertThat(row0ContentMap).hasSize(INCOMPLETE_USER_SIZE);
+    assertThat(row0ContentMap.get("phone_number")).isNull();
+    assertThat(row0ContentMap.get("username")).isEqualTo("user1");
+  }
+
+  @Test
+  public void testBuild_emptyInputs() {
+    final InsertAllRequest request =
+        USER_INSERT_ALL_REQUEST_BUILDER.build(
+            TABLE_ID, Collections.emptyList(), Collections.emptyMap());
+    assertThat(request).isNotNull();
+    assertThat(request.getTable()).isEqualTo(TABLE_ID);
+    assertThat(request.ignoreUnknownValues()).isTrue();
+    assertThat(request.getRows()).isEmpty();
   }
 
   @Test
@@ -73,7 +93,7 @@ public class InsertAllRequestBuilderTest {
 
     final Map<String, Object> contentMap = rowToInsert.getContent();
     assertTimeApprox((long) contentMap.get("snapshot_timestamp"), PRINCE_PARTY_TIME.toEpochMilli());
-    assertThat(contentMap).hasSize(FIXED_VALUES.size() + UserParameterColumn.values().length);
+    assertThat(contentMap).isNotEmpty();
     assertThat(contentMap.get("professional_url")).isEqualTo(USER__PROFESSIONAL_URL);
     assertThat(contentMap.get("free_tier_credits_limit_days_override"))
         .isEqualTo(USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE);
