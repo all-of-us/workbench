@@ -185,6 +185,16 @@ public class RuntimeController implements RuntimeApiDelegate {
       runtime = new Runtime();
     }
 
+    if (workbenchConfigProvider.get().featureFlags.enableCustomRuntimes) {
+      if (runtime.getGceConfig() == null && runtime.getDataprocConfig() == null) {
+        throw new BadRequestException("Either a GceConfig or DataprocConfig must be provided");
+      }
+
+      if (runtime.getGceConfig() != null && runtime.getDataprocConfig() != null) {
+        throw new BadRequestException("Only one of GceConfig or DataprocConfig must be provided");
+      }
+    }
+
     String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
     workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
