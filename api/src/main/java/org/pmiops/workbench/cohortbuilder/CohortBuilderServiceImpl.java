@@ -401,7 +401,10 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
               cbCriteriaDao.findQuestionCountByDomainAndIdAndTerm(
                   criteriaId, modifyTermMatch(term)));
         });
-    return surveyModules;
+    // remove any with zero question counts
+    return surveyModules.stream()
+        .filter(sm -> sm.getQuestionCount() > 0)
+        .collect(Collectors.toList());
   }
 
   @Override
