@@ -203,8 +203,8 @@ public class CBCriteriaDaoTest {
   @Test
   public void findIdByDomainAndConceptIdAndName() {
     assertThat(
-        cbCriteriaDao.findIdByDomainAndConceptIdAndName(
-            Domain.SURVEY.toString(), surveyCriteria.getConceptId(), surveyCriteria.getName()))
+            cbCriteriaDao.findIdByDomainAndConceptIdAndName(
+                Domain.SURVEY.toString(), surveyCriteria.getConceptId(), surveyCriteria.getName()))
         .isEqualTo(surveyCriteria.getId());
   }
 
@@ -220,7 +220,7 @@ public class CBCriteriaDaoTest {
         cbCriteriaDao.findCriteriaLeavesByDomainAndTypeAndSubtype(
             DomainType.SURVEY.toString(),
             CriteriaType.PPI.toString(),
-            CriteriaSubType.SURVEY.toString());
+            CriteriaSubType.QUESTION.toString());
     assertThat(criteriaList).containsExactly(surveyCriteria);
   }
 
