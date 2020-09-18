@@ -27,6 +27,12 @@ public interface LeonardoMapper {
 
   @Mapping(
       target = "cloudService",
+      // I wanted to use constant/defaultValue here but MapStruct will only accept a static string,
+      // not an Enum value. This is a problem because we have 3 definitions of `CloudServiceEnum`
+      // and MapStruct doesn't know that this mapper should use the one from LeonardoMachineConfig
+      // while the mapper for LeonardoGceConfig should use its own `CloudServiceEnum` class.
+      // This `expression` field feels kind of hacky since I'm expressing code as a string but
+      // it works since it lets me specify the more fully qualified class name.
       expression = "java(LeonardoMachineConfig.CloudServiceEnum.DATAPROC)")
   @Mapping(target = "properties", ignore = true)
   LeonardoMachineConfig toLeonardoMachineConfig(DataprocConfig dataprocConfig);
