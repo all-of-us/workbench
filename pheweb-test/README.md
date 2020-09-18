@@ -37,6 +37,11 @@ It should be noted that PheWeb is finicky about the Python version in use. I hav
 
 If you want to run pheweb with gunicorn you must first run `PheWeb wsgi`
 
+This will startup a [Flask](https://flask.palletsprojects.com/) server. The server will serve up static HTML files ([example](https://github.com/statgen/pheweb/blob/master/pheweb/serve/templates/gene.html)) that manually pull in all required javascript files using `script` tags.
+
+The server needs to have the `generated-by-pheweb` directory available (by running `pheweb process`).
+ The server will then allow users to query for a variant, gene or phenotype and route to the appropriate path based on the user query.
+
 ### Drawback
 It will be difficult to customize how pheweb runs in its current state. Changes to the code may be necessary
 
@@ -45,6 +50,10 @@ It will be difficult to customize how pheweb runs in its current state. Changes 
 While I do not believe PheWeb itself is setup to host static content, Appengine can be configured to host static content.
 
 Pheweb is [not designed for static content](https://github.com/statgen/pheweb/issues/132)
+
+## What does rendering look like in Pheweb?
+
+Pheweb renders its visualizations on the client using Javascript and the D3 library. The code can be found in the {pheweb/serve/static](https://github.com/statgen/pheweb/tree/master/pheweb/serve/static) directory. 
 
 ## How are sessions handled?
 
