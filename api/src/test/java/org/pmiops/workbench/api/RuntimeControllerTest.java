@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.Date;
 import com.google.common.collect.ImmutableList;
+import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
 import java.time.Clock;
 import java.time.Instant;
@@ -48,6 +49,7 @@ import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -60,8 +62,11 @@ import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
+import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
+import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeImage;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.DataprocConfig;
@@ -83,6 +88,7 @@ import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
+import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -204,6 +210,7 @@ public class RuntimeControllerTest {
 
   @Autowired UserDao userDao;
   @Autowired RuntimeController runtimeController;
+  @Autowired LeonardoMapper leonardoMapper;
 
   private DbCdrVersion cdrVersion;
   private LeonardoGetRuntimeResponse testLeoRuntime;
@@ -480,13 +487,113 @@ public class RuntimeControllerTest {
   }
 
   @Test
-  public void testCreateRuntime() throws ApiException {
+  public void testCreateRuntime_customRuntimeEnabled_noRuntimes() throws ApiException {
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
+    config.featureFlags.enableCustomRuntimes = true;
 
-    runtimeController.createRuntime(BILLING_PROJECT_ID, new Runtime());
-    verify(userRuntimesApi).createRuntime(eq(BILLING_PROJECT_ID), eq(getRuntimeName()), any());
+    assertThrows(
+        BadRequestException.class,
+        () -> runtimeController.createRuntime(BILLING_PROJECT_ID, new Runtime()));
+  }
+
+  @Test
+  public void testCreateRuntime_customRuntimeEnabled_twoRuntimes() throws ApiException {
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
+    config.featureFlags.enableCustomRuntimes = true;
+
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            runtimeController.createRuntime(
+                BILLING_PROJECT_ID,
+                new Runtime()
+                    .dataprocConfig(new DataprocConfig().masterMachineType("standard"))
+                    .gceConfig(new GceConfig().machineType("standard"))));
+  }
+
+  @Test
+  public void testCreateRuntime_dataproc() throws ApiException {
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
+    config.featureFlags.enableCustomRuntimes = true;
+
+    runtimeController.createRuntime(
+        BILLING_PROJECT_ID,
+        new Runtime()
+            .dataprocConfig(
+                new DataprocConfig()
+                    .numberOfWorkers(5)
+                    .workerMachineType("worker")
+                    .workerDiskSize(10)
+                    .numberOfWorkerLocalSSDs(1)
+                    .numberOfPreemptibleWorkers(3)
+                    .masterDiskSize(100)
+                    .masterMachineType("standard")));
+
+    verify(userRuntimesApi)
+        .createRuntime(
+            eq(BILLING_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+
+    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+
+    Gson gson = new Gson();
+    LeonardoMachineConfig createLeonardoMachineConfig =
+        gson.fromJson(
+            gson.toJson(createRuntimeRequest.getRuntimeConfig()), LeonardoMachineConfig.class);
+
+    assertThat(
+            gson.fromJson(
+                    gson.toJson(createRuntimeRequest.getRuntimeConfig()),
+                    LeonardoRuntimeConfig.class)
+                .getCloudService())
+        .isEqualTo(LeonardoRuntimeConfig.CloudServiceEnum.DATAPROC);
+    assertThat(createLeonardoMachineConfig.getNumberOfWorkers()).isEqualTo(5);
+    assertThat(createLeonardoMachineConfig.getWorkerMachineType()).isEqualTo("worker");
+    assertThat(createLeonardoMachineConfig.getWorkerDiskSize()).isEqualTo(10);
+    assertThat(createLeonardoMachineConfig.getNumberOfWorkerLocalSSDs()).isEqualTo(1);
+    assertThat(createLeonardoMachineConfig.getNumberOfPreemptibleWorkers()).isEqualTo(3);
+    assertThat(createLeonardoMachineConfig.getMasterDiskSize()).isEqualTo(100);
+    assertThat(createLeonardoMachineConfig.getMasterMachineType()).isEqualTo("standard");
+  }
+
+  @Test
+  public void testCreateRuntime_gce() throws ApiException {
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
+    config.featureFlags.enableCustomRuntimes = true;
+
+    runtimeController.createRuntime(
+        BILLING_PROJECT_ID,
+        new Runtime()
+            .gceConfig(new GceConfig().bootDiskSize(10).diskSize(50).machineType("standard")));
+
+    verify(userRuntimesApi)
+        .createRuntime(
+            eq(BILLING_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+
+    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+
+    Gson gson = new Gson();
+    LeonardoGceConfig createLeonardoGceConfig =
+        gson.fromJson(
+            gson.toJson(createRuntimeRequest.getRuntimeConfig()), LeonardoGceConfig.class);
+
+    assertThat(
+            gson.fromJson(
+                    gson.toJson(createRuntimeRequest.getRuntimeConfig()),
+                    LeonardoRuntimeConfig.class)
+                .getCloudService())
+        .isEqualTo(LeonardoRuntimeConfig.CloudServiceEnum.GCE);
+    assertThat(createLeonardoGceConfig.getBootDiskSize()).isEqualTo(10);
+    assertThat(createLeonardoGceConfig.getDiskSize()).isEqualTo(50);
+
+    assertThat(createLeonardoGceConfig.getMachineType()).isEqualTo("standard");
   }
 
   @Test

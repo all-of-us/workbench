@@ -32,6 +32,7 @@ import org.pmiops.workbench.notebooks.api.ProxyApi;
 import org.pmiops.workbench.notebooks.model.LocalizationEntry;
 import org.pmiops.workbench.notebooks.model.Localize;
 import org.pmiops.workbench.notebooks.model.StorageLink;
+import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -60,6 +61,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Provider<DbUser> userProvider;
   private final NotebooksRetryHandler notebooksRetryHandler;
+  private final LeonardoMapper leonardoMapper;
   private final LeonardoRetryHandler leonardoRetryHandler;
   private final WorkspaceService workspaceService;
 
@@ -73,6 +75,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<DbUser> userProvider,
       NotebooksRetryHandler notebooksRetryHandler,
+      LeonardoMapper leonardoMapper,
       LeonardoRetryHandler leonardoRetryHandler,
       WorkspaceService workspaceService) {
     this.runtimesApiProvider = runtimesApiProvider;
@@ -82,6 +85,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userProvider = userProvider;
     this.notebooksRetryHandler = notebooksRetryHandler;
+    this.leonardoMapper = leonardoMapper;
     this.leonardoRetryHandler = leonardoRetryHandler;
     this.workspaceService = workspaceService;
   }
@@ -90,7 +94,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
       String userEmail,
       @Nullable ClusterConfig clusterOverride,
       Runtime runtime,
-      Map<String, String> customEnvironmentVariables) {
+      Map<String, String> customEnvironmentVariables)
+      throws ApiException {
     // TODO(RW-5406): Remove cluster override.
     if (clusterOverride == null) {
       clusterOverride = new ClusterConfig();
@@ -117,30 +122,51 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
           RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(runtime.getConfigurationType()));
     }
 
-    return new LeonardoCreateRuntimeRequest()
-        .labels(runtimeLabels)
-        .defaultClientId(config.server.oauthClientId)
-        // Note: Filenames must be kept in sync with files in api/src/main/webapp/static.
-        .jupyterUserScriptUri(assetsBaseUrl + "/initialize_notebook_runtime.sh")
-        .jupyterStartUserScriptUri(assetsBaseUrl + "/start_notebook_runtime.sh")
-        .userJupyterExtensionConfig(
-            new LeonardoUserJupyterExtensionConfig().nbExtensions(nbExtensions))
-        // Matches Terra UI's scopes, see RW-3531 for rationale.
-        .addScopesItem("https://www.googleapis.com/auth/cloud-platform")
-        .addScopesItem("https://www.googleapis.com/auth/userinfo.email")
-        .addScopesItem("https://www.googleapis.com/auth/userinfo.profile")
-        .runtimeConfig(
-            new LeonardoMachineConfig()
-                .cloudService(CloudServiceEnum.DATAPROC)
-                .masterDiskSize(
-                    Optional.ofNullable(clusterOverride.masterDiskSize)
-                        .orElse(config.firecloud.notebookRuntimeDefaultDiskSizeGb))
-                .masterMachineType(
-                    Optional.ofNullable(clusterOverride.machineType)
-                        .orElse(config.firecloud.notebookRuntimeDefaultMachineType)))
-        .toolDockerImage(workbenchConfigProvider.get().firecloud.jupyterDockerImage)
-        .welderDockerImage(workbenchConfigProvider.get().firecloud.welderDockerImage)
-        .customEnvironmentVariables(customEnvironmentVariables);
+    LeonardoCreateRuntimeRequest request =
+        new LeonardoCreateRuntimeRequest()
+            .labels(runtimeLabels)
+            .defaultClientId(config.server.oauthClientId)
+            // Note: Filenames must be kept in sync with files in api/src/main/webapp/static.
+            .jupyterUserScriptUri(assetsBaseUrl + "/initialize_notebook_runtime.sh")
+            .jupyterStartUserScriptUri(assetsBaseUrl + "/start_notebook_runtime.sh")
+            .userJupyterExtensionConfig(
+                new LeonardoUserJupyterExtensionConfig().nbExtensions(nbExtensions))
+            // Matches Terra UI's scopes, see RW-3531 for rationale.
+            .addScopesItem("https://www.googleapis.com/auth/cloud-platform")
+            .addScopesItem("https://www.googleapis.com/auth/userinfo.email")
+            .addScopesItem("https://www.googleapis.com/auth/userinfo.profile")
+            .toolDockerImage(workbenchConfigProvider.get().firecloud.jupyterDockerImage)
+            .welderDockerImage(workbenchConfigProvider.get().firecloud.welderDockerImage)
+            .customEnvironmentVariables(customEnvironmentVariables);
+
+    if (workbenchConfigProvider.get().featureFlags.enableCustomRuntimes) {
+      if (runtime.getGceConfig() == null && runtime.getDataprocConfig() == null) {
+        throw new ApiException(400, "Either a GceConfig or DataprocConfig must be provided");
+      }
+
+      if (runtime.getGceConfig() != null && runtime.getDataprocConfig() != null) {
+        throw new ApiException(400, "Only one of GceConfig or DataprocConfig must be provided");
+      }
+
+      if (runtime.getGceConfig() != null) {
+        request.setRuntimeConfig(leonardoMapper.toLeonardoGceConfig(runtime.getGceConfig()));
+      } else {
+        request.setRuntimeConfig(
+            leonardoMapper.toLeonardoMachineConfig(runtime.getDataprocConfig()));
+      }
+    } else {
+      request.setRuntimeConfig(
+          new LeonardoMachineConfig()
+              .cloudService(CloudServiceEnum.DATAPROC)
+              .masterDiskSize(
+                  Optional.ofNullable(clusterOverride.masterDiskSize)
+                      .orElse(config.firecloud.notebookRuntimeDefaultDiskSizeGb))
+              .masterMachineType(
+                  Optional.ofNullable(clusterOverride.machineType)
+                      .orElse(config.firecloud.notebookRuntimeDefaultMachineType)));
+    }
+
+    return request;
   }
 
   @Override

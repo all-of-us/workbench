@@ -25,7 +25,16 @@ public interface LeonardoMapper {
 
   DataprocConfig toDataprocConfig(LeonardoMachineConfig leonardoMachineConfig);
 
+  @Mapping(
+      target = "cloudService",
+      expression = "java(LeonardoMachineConfig.CloudServiceEnum.DATAPROC)")
+  @Mapping(target = "properties", ignore = true)
+  LeonardoMachineConfig toLeonardoMachineConfig(DataprocConfig dataprocConfig);
+
   GceConfig toGceConfig(LeonardoGceConfig leonardoGceConfig);
+
+  @Mapping(target = "cloudService", expression = "java(LeonardoGceConfig.CloudServiceEnum.GCE)")
+  LeonardoGceConfig toLeonardoGceConfig(GceConfig gceConfig);
 
   @Mapping(target = "patchInProgress", ignore = true)
   LeonardoListRuntimeResponse toListRuntimeResponse(LeonardoGetRuntimeResponse runtime);

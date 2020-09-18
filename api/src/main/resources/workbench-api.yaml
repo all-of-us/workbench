@@ -5354,6 +5354,8 @@ definitions:
       - DefaultGce
       - DefaultDataproc
   Runtime:
+    # Add required properties after enableCustomRuntimes feature fully released
+    # We need to allow null/empty Runtimes while we support enableCustomRuntimes=false
     properties:
       googleProject:
         type: string
