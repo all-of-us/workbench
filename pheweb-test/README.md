@@ -60,7 +60,7 @@ Pheweb is [not designed for static content](https://github.com/statgen/pheweb/is
 
 ## What does rendering look like in Pheweb?
 
-Pheweb renders its visualizations on the client using Javascript and the D3 library. The code can be found in the {pheweb/serve/static](https://github.com/statgen/pheweb/tree/master/pheweb/serve/static) directory. 
+Pheweb renders its visualizations on the client using Javascript and the D3 library. The code can be found in the [pheweb/serve/static](https://github.com/statgen/pheweb/tree/master/pheweb/serve/static) directory. 
 
 ## How are sessions handled?
 
