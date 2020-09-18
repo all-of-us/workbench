@@ -85,6 +85,7 @@ There are utilities that can scan directories and create the pheno-list.json fil
 `pheweb phenolist extract-phenocode-from-filepath --simple`
 
 We do need to take care here - these commands did not work from an "out of the box" tutorial. I am not sure whether Pheweb conforms to semver standards.
+
 2. Run `pheweb process`
 2. Run `pheweb wsgi`
 2. The yaml file should utilize gunicorn to run off of the wsgi file that gets created in the `generate-by-pheweb` directory
