@@ -222,13 +222,11 @@ export default class NotebookPage extends AuthenticatedPage {
     if (mode === Mode.Command) {
       await this.page.keyboard.press('Escape');
       await this.getIFrame().then(frame => frame.waitForSelector('body.notebook_app.command_mode'));
-      console.log('Notebook in command mode');
       return;
     }
     // Press Enter key to activate edit mode
     await this.page.keyboard.press('Enter');
     await this.getIFrame().then(frame => frame.waitForSelector('body.notebook_app.edit_mode'));
-    console.log('Notebook in edit mode');
     return;
   }
 
