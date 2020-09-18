@@ -80,19 +80,21 @@ public class ReportingSnapshotServiceTest {
 
     assertThat(snapshot.getUsers()).hasSize(2);
     final BqDtoUser user = snapshot.getUsers().get(0);
-    assertUserFields(user);
+    assertDtoUserFields(user);
 
     assertThat(snapshot.getWorkspaces()).hasSize(1);
     final BqDtoWorkspace workspace = snapshot.getWorkspaces().get(0);
-    assertWorkspaceFields(workspace);
+    assertDtoWorkspaceFields(workspace);
   }
 
   private void mockUsers() {
-    final List<PrjUser> users = ImmutableList.of(mockUserProjection(), mockUserProjection());
+    final List<PrjUser> users = ImmutableList.of(mockPrjUser(), mockPrjUser());
     doReturn(users).when(mockUserService).getRepotingUsers();
   }
 
   private void mockWorkspaces() {
-    doReturn(ImmutableList.of(mockWorkspace())).when(mockWorkspaceService).getReportingWorkspaces();
+    doReturn(ImmutableList.of(mockPrjWorkspace()))
+        .when(mockWorkspaceService)
+        .getReportingWorkspaces();
   }
 }

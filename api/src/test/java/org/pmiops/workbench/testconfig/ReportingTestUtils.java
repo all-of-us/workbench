@@ -21,6 +21,10 @@ import org.pmiops.workbench.model.BqDtoWorkspace;
 import org.pmiops.workbench.model.DataAccessLevel;
 
 public class ReportingTestUtils {
+  // The code generator should ensure that no  values repeat
+  // across columns. This was done to ensure nothing goes wrong
+  // with the prorjection inteface or mapper, since all nulls look
+  // alike.
   public static final String USER__ABOUT_YOU = "foo_0";
   public static final String USER__AREA_OF_RESEARCH = "foo_1";
   public static final Timestamp USER__BETA_ACCESS_BYPASS_TIME =
@@ -88,17 +92,21 @@ public class ReportingTestUtils {
   public static final String USER__ZIP_CODE = "foo_5";
 
   public static final Short WORKSPACE__ACTIVE_STATUS = 0;
-  public static final BillingAccountType WORKSPACE__BILLING_ACCOUNT_TYPE = BillingAccountType.FREE_TIER;
+  public static final BillingAccountType WORKSPACE__BILLING_ACCOUNT_TYPE =
+      BillingAccountType.FREE_TIER;
   public static final BillingStatus WORKSPACE__BILLING_STATUS = BillingStatus.ACTIVE;
   public static final Long WORKSPACE__CDR_VERSION_ID = 3L;
-  public static final Timestamp WORKSPACE__CREATION_TIME = Timestamp.from(Instant.parse("2015-05-09T00:00:00.00Z"));
+  public static final Timestamp WORKSPACE__CREATION_TIME =
+      Timestamp.from(Instant.parse("2015-05-09T00:00:00.00Z"));
   public static final Long WORKSPACE__CREATOR_ID = 5L;
   public static final DataAccessLevel WORKSPACE__DATA_ACCESS_LEVEL = DataAccessLevel.REGISTERED;
   public static final String WORKSPACE__DISSEMINATE_RESEARCH_OTHER = "foo_7";
   public static final String WORKSPACE__FIRECLOUD_NAME = "foo_8";
   public static final String WORKSPACE__FIRECLOUD_UUID = "foo_9";
-  public static final Timestamp WORKSPACE__LAST_ACCESSED_TIME = Timestamp.from(Instant.parse("2015-05-15T00:00:00.00Z"));
-  public static final Timestamp WORKSPACE__LAST_MODIFIED_TIME = Timestamp.from(Instant.parse("2015-05-16T00:00:00.00Z"));
+  public static final Timestamp WORKSPACE__LAST_ACCESSED_TIME =
+      Timestamp.from(Instant.parse("2015-05-15T00:00:00.00Z"));
+  public static final Timestamp WORKSPACE__LAST_MODIFIED_TIME =
+      Timestamp.from(Instant.parse("2015-05-16T00:00:00.00Z"));
   public static final String WORKSPACE__NAME = "foo_12";
   public static final Short WORKSPACE__NEEDS_RP_REVIEW_PROMPT = 13;
   public static final Boolean WORKSPACE__PUBLISHED = true;
@@ -123,11 +131,12 @@ public class ReportingTestUtils {
   public static final Boolean WORKSPACE__RP_REVIEW_REQUESTED = false;
   public static final String WORKSPACE__RP_SCIENTIFIC_APPROACH = "foo_34";
   public static final Boolean WORKSPACE__RP_SOCIAL_BEHAVIORAL = false;
-  public static final Timestamp WORKSPACE__RP_TIME_REQUESTED = Timestamp.from(Instant.parse("2015-06-10T00:00:00.00Z"));
+  public static final Timestamp WORKSPACE__RP_TIME_REQUESTED =
+      Timestamp.from(Instant.parse("2015-06-10T00:00:00.00Z"));
   public static final Long WORKSPACE__WORKSPACE_ID = 37L;
   public static final String WORKSPACE__WORKSPACE_NAMESPACE = "foo_38";
 
-  public static void assertUserFields(BqDtoUser user) {
+  public static void assertDtoUserFields(BqDtoUser user) {
     assertThat(user.getAboutYou()).isEqualTo(USER__ABOUT_YOU);
     assertThat(user.getAreaOfResearch()).isEqualTo(USER__AREA_OF_RESEARCH);
     assertTimeApprox(user.getBetaAccessBypassTime(), USER__BETA_ACCESS_BYPASS_TIME);
@@ -183,7 +192,7 @@ public class ReportingTestUtils {
     assertThat(user.getZipCode()).isEqualTo(USER__ZIP_CODE);
   }
 
-  public static void assertWorkspaceFields(BqDtoWorkspace workspace) {
+  public static void assertDtoWorkspaceFields(BqDtoWorkspace workspace) {
     assertThat(workspace.getActiveStatus()).isEqualTo(WORKSPACE__ACTIVE_STATUS);
     assertThat(workspace.getBillingAccountType()).isEqualTo(WORKSPACE__BILLING_ACCOUNT_TYPE);
     assertThat(workspace.getBillingStatus()).isEqualTo(WORKSPACE__BILLING_STATUS);
@@ -229,7 +238,7 @@ public class ReportingTestUtils {
   }
 
   // TODO: put these override values into the scaffold script
-  public static void assertWorkspaceFields(
+  public static void assertDtoWorkspaceFields(
       PrjWorkspace workspace,
       long actualWorkspaceId,
       long actualCdrVersionId,
@@ -278,7 +287,7 @@ public class ReportingTestUtils {
     assertThat(workspace.getWorkspaceNamespace()).isEqualTo(WORKSPACE__WORKSPACE_NAMESPACE);
   }
 
-  public static PrjUser mockUserProjection() {
+  public static PrjUser mockPrjUser() {
     final PrjUser mockUser = mock(PrjUser.class);
     doReturn(USER__ABOUT_YOU).when(mockUser).getAboutYou();
     doReturn(USER__AREA_OF_RESEARCH).when(mockUser).getAreaOfResearch();
@@ -349,7 +358,7 @@ public class ReportingTestUtils {
     return mockUser;
   }
 
-  public static PrjWorkspace mockWorkspace() {
+  public static PrjWorkspace mockPrjWorkspace() {
     final PrjWorkspace mockWorkspace = mock(PrjWorkspace.class);
     doReturn(WORKSPACE__ACTIVE_STATUS).when(mockWorkspace).getActiveStatus();
     doReturn(WORKSPACE__BILLING_ACCOUNT_TYPE).when(mockWorkspace).getBillingAccountType();
@@ -497,7 +506,7 @@ public class ReportingTestUtils {
     workspace.setCdrVersion(cdrVersion);
     workspace.setCreationTime(WORKSPACE__CREATION_TIME);
     workspace.setCreator(creator);
-    workspace.setDataAccessLevelEnum(WORKSPACE__DATA_ACCESS_LEVEL);
+    workspace.setDataAccessLevel(WORKSPACE__DATA_ACCESS_LEVEL);
     workspace.setDisseminateResearchOther(WORKSPACE__DISSEMINATE_RESEARCH_OTHER);
     workspace.setFirecloudName(WORKSPACE__FIRECLOUD_NAME);
     workspace.setFirecloudUuid(WORKSPACE__FIRECLOUD_UUID);

@@ -233,7 +233,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     setLiveCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
 
     // TODO: enforce data access level authorization
-    dbWorkspace.setDataAccessLevelEnum(workspace.getDataAccessLevel());
+    dbWorkspace.setDataAccessLevel(workspace.getDataAccessLevel());
     dbWorkspace.setName(workspace.getName());
 
     // Ignore incoming fields pertaining to review status; clients can only request a review.
@@ -363,7 +363,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new ConflictException("Attempted to modify outdated workspace version");
     }
     if (workspace.getDataAccessLevel() != null
-        && !dbWorkspace.getDataAccessLevelEnum().equals(workspace.getDataAccessLevel())) {
+        && !dbWorkspace.getDataAccessLevel().equals(workspace.getDataAccessLevel())) {
       throw new BadRequestException("Attempted to change data access level");
     }
     if (workspace.getName() != null) {
@@ -489,7 +489,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       dbWorkspace.setDataAccessLevel(fromWorkspace.getDataAccessLevel());
     } else {
       DbCdrVersion reqCdrVersion = setLiveCdrVersionId(dbWorkspace, reqCdrVersionId);
-      dbWorkspace.setDataAccessLevelEnum(reqCdrVersion.getDataAccessLevelEnum());
+      dbWorkspace.setDataAccessLevel(reqCdrVersion.getDataAccessLevelEnum());
     }
 
     dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);

@@ -78,11 +78,11 @@ public class InsertAllRequestBuilderTest {
     assertThat(contentMap.get("free_tier_credits_limit_days_override"))
         .isEqualTo(USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE);
     assertThat(contentMap.get("disabled")).isEqualTo(USER__DISABLED);
-    final Optional<OffsetDateTime> odt = rowToInsertStringToOffsetTimestamp(
-        (String) contentMap.get("demographic_survey_completion_time"));
+    final Optional<OffsetDateTime> odt =
+        rowToInsertStringToOffsetTimestamp(
+            (String) contentMap.get("demographic_survey_completion_time"));
     assertThat(odt).isPresent();
-    assertTimeApprox(odt.get(),
-        offsetDateTimeUtc(USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME));
+    assertTimeApprox(odt.get(), offsetDateTimeUtc(USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME));
   }
 
   @Test

@@ -102,9 +102,8 @@ public interface WorkspaceMapper {
       source = "researchOutcomeList",
       nullValuePropertyMappingStrategy = SET_TO_DEFAULT)
 
-  // Normally using ignore should be frowned upon. In a merge method
-  // like this one, it's unavoidable; otherwise we'd just make a straight-up translation.
-  // However,
+  // This method isn't a full conversion, so we need to mask out the values that don't
+  // get set here.
   @Mapping(target = "approved", ignore = true)
   @Mapping(target = "billingAccountName", ignore = true)
   @Mapping(target = "billingAccountType", ignore = true)
@@ -116,7 +115,6 @@ public interface WorkspaceMapper {
   @Mapping(target = "creationTime", ignore = true)
   @Mapping(target = "creator", ignore = true)
   @Mapping(target = "dataAccessLevel", ignore = true)
-  @Mapping(target = "dataAccessLevelEnum", ignore = true)
   @Mapping(target = "dataSets", ignore = true)
   @Mapping(target = "disseminateResearchSet", ignore = true)
   @Mapping(target = "firecloudName", ignore = true)

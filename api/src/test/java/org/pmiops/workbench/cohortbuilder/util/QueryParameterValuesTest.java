@@ -14,7 +14,6 @@ import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.toTim
 import static org.pmiops.workbench.utils.FieldValues.MICROSECONDS_IN_MILLISECOND;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 
-import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.StandardSQLTypeName;
 import java.time.Instant;
@@ -26,17 +25,14 @@ import java.util.Optional;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 public class QueryParameterValuesTest {
 
   private static final Map<String, QueryParameterValue> PARAM_MAP = new HashMap<>();
   private static final Instant INSTANT = Instant.parse("2012-12-13T00:00:00.00Z");
-  private static final OffsetDateTime OFFSET_DATE_TIME = OffsetDateTime.ofInstant(INSTANT,
-      ZoneOffset.UTC);
+  private static final OffsetDateTime OFFSET_DATE_TIME =
+      OffsetDateTime.ofInstant(INSTANT, ZoneOffset.UTC);
   private static final QueryParameterValue TIMESTAMP_QPV =
       QueryParameterValue.timestamp(INSTANT.toEpochMilli() * MICROSECONDS_IN_MILLISECOND);
 
@@ -125,7 +121,8 @@ public class QueryParameterValuesTest {
   @Test
   public void testRowToInsertStringToOffsetTimestamp() {
     final String timestampString = "2020-09-17 04:30:15.000000";
-    final Optional<OffsetDateTime> convertedOdt = rowToInsertStringToOffsetTimestamp(timestampString);
+    final Optional<OffsetDateTime> convertedOdt =
+        rowToInsertStringToOffsetTimestamp(timestampString);
     assertThat(convertedOdt).isPresent();
 
     final OffsetDateTime expected = OffsetDateTime.parse("2020-09-17T04:30:15Z");
@@ -152,5 +149,4 @@ public class QueryParameterValuesTest {
     assertThat(qpv.getType()).isEqualTo(StandardSQLTypeName.STRING);
     assertThat(qpv.getValue()).isNull();
   }
-
 }

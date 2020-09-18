@@ -37,7 +37,6 @@ public class WorkspaceDaoTest {
   @Autowired UserDao userDao;
 
   @TestConfiguration
-  //  @Import(BillingAccountTypeConverter.class)
   public static class conifg {}
 
   @Test
@@ -80,7 +79,7 @@ public class WorkspaceDaoTest {
     final List<PrjWorkspace> workspaces = workspaceDao.getReportingWorkspaces();
 
     assertThat(workspaces).hasSize(1);
-    ReportingTestUtils.assertWorkspaceFields(
+    ReportingTestUtils.assertDtoWorkspaceFields(
         workspaces.get(0),
         dbWorkspace.getWorkspaceId(),
         cdrVersion.getCdrVersionId(),

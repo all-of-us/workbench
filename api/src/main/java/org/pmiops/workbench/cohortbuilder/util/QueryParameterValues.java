@@ -46,10 +46,11 @@ public final class QueryParameterValues {
 
   // QueryParameterValue can have a null value, so no need to return an Optional.
   public static QueryParameterValue instantToQPValue(@Nullable Instant instant) {
-    final Long epochMicros = Optional.ofNullable(instant)
-        .map(Instant::toEpochMilli)
-        .map(milli -> milli * MICROSECONDS_IN_MILLISECOND)
-        .orElse(null);
+    final Long epochMicros =
+        Optional.ofNullable(instant)
+            .map(Instant::toEpochMilli)
+            .map(milli -> milli * MICROSECONDS_IN_MILLISECOND)
+            .orElse(null);
     return QueryParameterValue.timestamp(epochMicros);
   }
 
@@ -70,7 +71,8 @@ public final class QueryParameterValues {
         .map(ZonedDateTime::toInstant);
   }
 
-  public static void verifyQpvType(@NotNull QueryParameterValue queryParameterValue, StandardSQLTypeName expectedType) {
+  public static void verifyQpvType(
+      @NotNull QueryParameterValue queryParameterValue, StandardSQLTypeName expectedType) {
     if (!matchesQpvType(queryParameterValue, expectedType)) {
       throw new IllegalArgumentException(
           String.format(
@@ -114,10 +116,9 @@ public final class QueryParameterValues {
 
   @Nullable
   public static QueryParameterValue toTimestampQpv(@Nullable OffsetDateTime offsetDateTime) {
-    final String arg = Optional.ofNullable(offsetDateTime)
-        .map(QPV_TIMESTAMP_FORMATTER::format)
-        .orElse(null);
-    return  QueryParameterValue.timestamp(arg);
+    final String arg =
+        Optional.ofNullable(offsetDateTime).map(QPV_TIMESTAMP_FORMATTER::format).orElse(null);
+    return QueryParameterValue.timestamp(arg);
   }
 
   // Return null instead of Optional.empty() so the return value can go directly into
@@ -130,7 +131,8 @@ public final class QueryParameterValues {
   }
 
   // BigQuery TIMESTAMP types don't include a zone or offset, but are always UTC.
-  public static Optional<OffsetDateTime> rowToInsertStringToOffsetTimestamp(@Nullable String bqTimeString) {
+  public static Optional<OffsetDateTime> rowToInsertStringToOffsetTimestamp(
+      @Nullable String bqTimeString) {
     return Optional.ofNullable(bqTimeString)
         .filter(s -> s.length() > 0)
         .map(ROW_TO_INSERT_TIMESTAMP_FORMATTER::parse)
@@ -139,9 +141,7 @@ public final class QueryParameterValues {
   }
 
   public static <T extends Enum<T>> QueryParameterValue enumToQpv(T enumValue) {
-    final String value = Optional.ofNullable(enumValue)
-        .map(T::toString)
-        .orElse(null);
+    final String value = Optional.ofNullable(enumValue).map(T::toString).orElse(null);
     return QueryParameterValue.string(value);
   }
 
@@ -161,7 +161,8 @@ public final class QueryParameterValues {
   }
 
   // return false if teh parameterValue is non-null does not match the expected type.
-  private static boolean matchesQpvType(QueryParameterValue parameterValue, StandardSQLTypeName expectedType) {
+  private static boolean matchesQpvType(
+      QueryParameterValue parameterValue, StandardSQLTypeName expectedType) {
     return Optional.ofNullable(parameterValue)
         .map(QueryParameterValue::getType)
         .map(t -> t == expectedType)

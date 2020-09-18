@@ -105,7 +105,7 @@ public class AnnotationQueryBuilderTest {
     DbWorkspace workspace = new DbWorkspace();
     workspace.setCdrVersion(cdrVersion);
     workspace.setName("name");
-    workspace.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
+    workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspaceDao.save(workspace);
 
     DbCohort cohort = new DbCohort();

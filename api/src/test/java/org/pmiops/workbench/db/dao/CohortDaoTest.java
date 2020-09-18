@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.DirtiesContext;
@@ -30,7 +31,7 @@ public class CohortDaoTest {
     dbWorkspace.setName("name");
     dbWorkspace.setWorkspaceNamespace("name");
     dbWorkspace.setFirecloudName("name");
-    dbWorkspace.setDataAccessLevel((short) 1);
+    dbWorkspace.setDataAccessLevel(DataAccessLevel.REGISTERED);
     dbWorkspace.setCreationTime(timestamp);
     dbWorkspace.setLastModifiedTime(timestamp);
     workspaceDao.save(dbWorkspace);
