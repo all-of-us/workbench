@@ -323,6 +323,11 @@ const routes: Routes = [
             component: AppRouting,
             data: {}
           },
+          {
+            path: 'workspaces/:workspaceNamespace/:nbName',
+            component: AppRouting,
+            data: {}
+          },
           // non-migrated routes go HERE
           {
             path: 'review-workspace',

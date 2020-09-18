@@ -1,8 +1,13 @@
 package org.pmiops.workbench.workspaces;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -12,10 +17,10 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
-import javax.inject.Provider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortCloningService;
@@ -27,11 +32,11 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
@@ -62,23 +67,24 @@ public class WorkspaceServiceTest {
   @Import({
     CohortMapperImpl.class,
     CohortReviewMapperImpl.class,
-    ConceptSetMapperImpl.class,
     CommonMappers.class,
+    ConceptSetMapperImpl.class,
     DataSetMapperImpl.class,
     WorkspaceMapperImpl.class,
-    WorkspaceServiceImpl.class
+    WorkspaceServiceImpl.class,
   })
   @MockBean({
-    ConceptSetService.class,
-    CohortService.class,
+    BillingProjectAuditor.class,
     CohortCloningService.class,
+    CohortService.class,
+    ConceptSetService.class,
     DataSetService.class,
-    FirecloudMapper.class,
     FireCloudService.class,
+    FirecloudMapper.class,
+    FreeTierBillingService.class,
     ProfileMapper.class,
     UserDao.class,
-    FreeTierBillingService.class,
-    UserMapper.class
+    UserMapper.class,
   })
   static class Configuration {
     @Bean
@@ -98,11 +104,10 @@ public class WorkspaceServiceTest {
     }
   }
 
+  @MockBean private BillingProjectAuditor mockBillingProjectAuditor;
   @MockBean private Clock mockClock;
   @MockBean private FireCloudService mockFireCloudService;
 
-  @Autowired private Provider<DbUser> userProvider;
-  @Autowired private UserRecentWorkspaceDao userRecentWorkspaceDao;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private WorkspaceService workspaceService;
 
@@ -388,5 +393,39 @@ public class WorkspaceServiceTest {
     List<DbUserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces();
     assertThat(recentWorkspaces.size()).isEqualTo(1);
     assertThat(recentWorkspaces.get(0).getWorkspaceId()).isEqualTo(ownedId);
+  }
+
+  @Test
+  public void deleteWorkspace() {
+    DbWorkspace ws = dbWorkspaces.get(0); // arbitrary choice of those defined for testing
+    workspaceService.deleteWorkspace(ws);
+    assertThat(ws.getWorkspaceActiveStatusEnum()).isEqualTo(WorkspaceActiveStatus.DELETED);
+
+    String billingProject = ws.getWorkspaceNamespace();
+    verify(mockFireCloudService).deleteWorkspace(eq(billingProject), eq(ws.getName()));
+    verify(mockFireCloudService).deleteBillingProject(eq(billingProject));
+    verify(mockBillingProjectAuditor).fireDeleteAction(eq(billingProject));
+  }
+
+  @Test
+  public void deleteWorkspace_failedProjectDeletion() {
+    DbWorkspace ws = dbWorkspaces.get(1); // arbitrary choice of those defined for testing
+    String billingProject = ws.getWorkspaceNamespace();
+
+    doThrow(new BadRequestException("arbitrary"))
+        .when(mockFireCloudService)
+        .deleteBillingProject(anyString());
+
+    workspaceService.deleteWorkspace(ws);
+
+    // deletion succeeds
+
+    assertThat(ws.getWorkspaceActiveStatusEnum()).isEqualTo(WorkspaceActiveStatus.DELETED);
+    verify(mockFireCloudService).deleteWorkspace(eq(billingProject), eq(ws.getName()));
+    verify(mockFireCloudService).deleteBillingProject(eq(billingProject));
+
+    // but the billing project is not deleted
+
+    verify(mockBillingProjectAuditor, never()).fireDeleteAction(eq(billingProject));
   }
 }

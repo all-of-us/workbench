@@ -442,7 +442,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
       form.cat.filter(ca => ca.checked).forEach(attr => selectionDisplay.push(attr.conceptName));
       const nodeName = this.isSurvey ? ppiQuestions.getValue()[node.parentId].name : node.name;
       return nodeName + ' (' + selectionDisplay.join(', ') +
-        (this.isPhysicalMeasurement && form.num[0].operator !== AttrName.ANY ? PM_UNITS[node.subtype] : '') + ')';
+        (this.hasUnits && form.num[0].operator !== AttrName.ANY ? ' ' + PM_UNITS[node.subtype] : '') + ')';
     }
 
     requestPreview() {
@@ -495,7 +495,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
 
     get hasUnits() {
       const {node: {subtype}} = this.props;
-      return typeof PM_UNITS[subtype] !== 'undefined';
+      return this.isPhysicalMeasurement && typeof PM_UNITS[subtype] !== 'undefined';
     }
 
     get isMeasurement() {

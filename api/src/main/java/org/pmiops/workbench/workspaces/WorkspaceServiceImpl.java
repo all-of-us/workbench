@@ -35,6 +35,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cohorts.CohortCloningService;
@@ -94,6 +95,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   private static final Logger log = Logger.getLogger(WorkspaceService.class.getName());
   private static final String FC_OWNER_ROLE = "OWNER";
 
+  private final BillingProjectAuditor billingProjectAuditor;
   private final Clock clock;
   private final CohortCloningService cohortCloningService;
   private final ConceptSetService conceptSetService;
@@ -115,34 +117,36 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       @Qualifier(END_USER_CLOUD_BILLING) Provider<Cloudbilling> endUserCloudbillingProvider,
       @Qualifier(SERVICE_ACCOUNT_CLOUD_BILLING)
           Provider<Cloudbilling> serviceAccountCloudbillingProvider,
+      BillingProjectAuditor billingProjectAuditor,
       Clock clock,
       CohortCloningService cohortCloningService,
       ConceptSetService conceptSetService,
       DataSetService dataSetService,
       FireCloudService fireCloudService,
-      UserDao userDao,
-      Provider<DbUser> userProvider,
-      UserRecentWorkspaceDao userRecentWorkspaceDao,
-      Provider<WorkbenchConfig> workbenchConfigProvider,
-      WorkspaceDao workspaceDao,
-      WorkspaceMapper workspaceMapper,
       FreeTierBillingService freeTierBillingService,
-      UserMapper userMapper) {
+      Provider<DbUser> userProvider,
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      UserDao userDao,
+      UserMapper userMapper,
+      UserRecentWorkspaceDao userRecentWorkspaceDao,
+      WorkspaceDao workspaceDao,
+      WorkspaceMapper workspaceMapper) {
     this.endUserCloudbillingProvider = endUserCloudbillingProvider;
     this.serviceAccountCloudbillingProvider = serviceAccountCloudbillingProvider;
+    this.billingProjectAuditor = billingProjectAuditor;
     this.clock = clock;
     this.cohortCloningService = cohortCloningService;
     this.conceptSetService = conceptSetService;
     this.dataSetService = dataSetService;
     this.fireCloudService = fireCloudService;
+    this.freeTierBillingService = freeTierBillingService;
     this.userDao = userDao;
+    this.userMapper = userMapper;
     this.userProvider = userProvider;
     this.userRecentWorkspaceDao = userRecentWorkspaceDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
-    this.freeTierBillingService = freeTierBillingService;
-    this.userMapper = userMapper;
   }
 
   /**
@@ -306,6 +310,17 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
     dbWorkspace = saveWithLastModified(dbWorkspace);
     maybeDeleteRecentWorkspace(dbWorkspace.getWorkspaceId());
+
+    String billingProjectName = dbWorkspace.getWorkspaceNamespace();
+    try {
+      fireCloudService.deleteBillingProject(billingProjectName);
+      billingProjectAuditor.fireDeleteAction(billingProjectName);
+    } catch (Exception e) {
+      String msg =
+          String.format(
+              "Error deleting billing project %s: %s", billingProjectName, e.getMessage());
+      log.warning(msg);
+    }
   }
 
   @Override

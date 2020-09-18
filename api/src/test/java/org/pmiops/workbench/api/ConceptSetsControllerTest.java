@@ -18,6 +18,7 @@ import java.util.Random;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
@@ -26,6 +27,7 @@ import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cdrselector.WorkspaceResourcesServiceImpl;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortCloningService;
@@ -196,32 +198,34 @@ public class ConceptSetsControllerTest {
     CommonMappers.class,
     ConceptService.class,
     ConceptSetMapperImpl.class,
-    ConceptSetsController.class,
     ConceptSetService.class,
+    ConceptSetsController.class,
     LogsBasedMetricServiceFakeImpl.class,
     UserMapperImpl.class,
     UserServiceTestConfiguration.class,
     WorkspaceMapperImpl.class,
     WorkspaceResourcesServiceImpl.class,
-    WorkspacesController.class,
     WorkspaceServiceImpl.class,
+    WorkspacesController.class,
   })
   @MockBean({
+    BillingProjectAuditor.class,
     BillingProjectBufferService.class,
+    CloudStorageService.class,
+    CohortBuilderService.class,
     CohortCloningService.class,
     CohortFactoryImpl.class,
     CohortMapperImpl.class,
     CohortReviewMapperImpl.class,
     CohortReviewServiceImpl.class,
-    CloudStorageService.class,
+    CohortService.class,
     ComplianceService.class,
     ConceptBigQueryService.class,
-    CohortService.class,
     DataSetMapperImpl.class,
-    FirecloudMapperImpl.class,
     DataSetService.class,
     DirectoryService.class,
     FireCloudService.class,
+    FirecloudMapperImpl.class,
     FreeTierBillingService.class,
     NotebooksService.class,
     UserRecentResourceService.class,

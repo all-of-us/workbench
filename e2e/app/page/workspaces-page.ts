@@ -7,6 +7,7 @@ import {makeWorkspaceName} from 'utils/str-utils';
 import RadioButton from 'app/element/radiobutton';
 import {findWorkspace, waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle, waitForText} from 'utils/waits-utils';
+import ReactSelect from 'app/element/react-select';
 import WorkspaceDataPage from './workspace-data-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
 
@@ -167,4 +168,12 @@ export default class WorkspacesPage extends WorkspaceEditPage {
     await waitWhileLoading(this.page);
     return contentText;
   }
+
+  async filterByAccessLevel(level: string): Promise<string> {
+    const selectMenu = new ReactSelect(this.page, {name: 'Filter by'});
+    await selectMenu.selectOption(level);
+    await waitWhileLoading(this.page);
+    return selectMenu.getSelectedOption();
+  }
+
 }

@@ -16,6 +16,7 @@ import {SelectionList} from 'app/cohort-search/selection-list/selection-list.com
 import {FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
+import {RuntimePanel} from 'app/pages/analysis/runtime-panel';
 import {SidebarContent} from 'app/pages/data/cohort-review/sidebar-content.component';
 import {participantStore} from 'app/services/review-state.service';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -44,7 +45,7 @@ import canWrite = WorkspacePermissionsUtil.canWrite;
 
 const proIcons = {
   arrowLeft: '/assets/icons/arrow-left-regular.svg',
-  thunderstorm: '/assets/icons/thunderstorm-solid.svg',
+  runtime: '/assets/icons/thunderstorm-solid.svg',
   times: '/assets/icons/times-light.svg'
 };
 const sidebarContent = require('assets/json/help-sidebar.json');
@@ -206,63 +207,82 @@ const iconStyles = {
 
 export const NOTEBOOK_HELP_CONTENT = 'notebookStorage';
 
-// TODO uncomment 'thunderstorm' icon when runtime configuration function is ready
-// helpContentKey is the json key for the block of help content that is being displayed on this
-// sidebar. If the block of help content is about notebook storage, we want to display a different
-// icon on the sidebar and different tooltip, etc.
+const iconConfigs = {
+  'criteria': {
+    disabled: false,
+    faIcon: faInbox,
+    label: 'Selected Criteria',
+    page: 'criteria',
+    style: {fontSize: '21px'},
+    tooltip: 'Selected Criteria',
+    contentPadding: '0.5rem 0.5rem 0',
+    contentWidthRem: '20',
+    hideSidebarFooter: true
+  },
+  'help': {
+    disabled: false,
+    faIcon: faInfoCircle,
+    label: 'Help Icon',
+    page: null,
+    style: {fontSize: '21px'},
+    tooltip: 'Help Tips',
+  },
+  'notebooksHelp': {
+    disabled: false,
+    faIcon: faFolderOpen,
+    label: 'Storage Icon',
+    page: null,
+    style: {fontSize: '21px'},
+    tooltip: 'Workspace Storage',
+  },
+  'dataDictionary': {
+    disabled: false,
+    faIcon: faBook,
+    label: 'Data Dictionary Icon',
+    page: null,
+    style: {color: colors.white, fontSize: '20px', marginTop: '5px'},
+    tooltip: 'Data Dictionary',
+  },
+  'annotations': {
+    disabled: false,
+    faIcon: faEdit,
+    label: 'Annotations Icon',
+    page: 'reviewParticipantDetail',
+    style: {fontSize: '20px', marginLeft: '3px'},
+    tooltip: 'Annotations',
+  },
+  'runtime': {
+    disabled: false,
+    faIcon: null,
+    label: 'Cloud Icon',
+    page: null,
+    style: {height: '22px', width: '22px', marginTop: '0.25rem'},
+    tooltip: 'Compute Configuration',
+    contentPadding: '1.25rem',
+    contentWidthRem: '30',
+    hideSidebarFooter: true
+  }
+};
+
+const helpIconName = (helpContentKey: string) => {
+  return helpContentKey === NOTEBOOK_HELP_CONTENT ? 'notebooksHelp' : 'help';
+};
+
 const icons = (
   helpContentKey: string,
   enableCustomRuntimes: boolean,
   workspaceAccessLevel: WorkspaceAccessLevel
 ) => {
-  const iconsList = [
-    {
-      id: 'criteria',
-      disabled: false,
-      faIcon: faInbox,
-      label: 'Selected Criteria',
-      page: 'criteria',
-      style: {fontSize: '21px'},
-      tooltip: 'Selected Criteria'
-    },
-    {
-      id: 'help',
-      disabled: false,
-      faIcon: helpContentKey === NOTEBOOK_HELP_CONTENT ? faFolderOpen : faInfoCircle,
-      label: helpContentKey === NOTEBOOK_HELP_CONTENT ? 'Storage Icon' : 'Help Icon',
-      page: null,
-      style: {fontSize: '21px'},
-      tooltip: helpContentKey === NOTEBOOK_HELP_CONTENT ? 'Workspace Storage' : 'Help Tips',
-    }, {
-      id: 'dataDictionary',
-      disabled: false,
-      faIcon: faBook,
-      label: 'Data Dictionary Icon',
-      page: null,
-      style: {color: colors.white, fontSize: '20px', marginTop: '5px'},
-      tooltip: 'Data Dictionary',
-    }, {
-      id: 'annotations',
-      disabled: false,
-      faIcon: faEdit,
-      label: 'Annotations Icon',
-      page: 'reviewParticipantDetail',
-      style: {fontSize: '20px', marginLeft: '3px'},
-      tooltip: 'Annotations',
-    }];
+  const keys = [
+    'criteria',
+    helpIconName(helpContentKey),
+    'dataDictionary',
+    'annotations'
+  ];
   if (enableCustomRuntimes && canWrite(workspaceAccessLevel)) {
-    return [...iconsList, {
-      id: 'thunderstorm',
-      disabled: false,
-      faIcon: null,
-      label: 'Cloud Icon',
-      page: null,
-      style: {height: '22px', width: '22px', marginTop: '0.25rem'},
-      tooltip: 'Compute Configuration',
-    }];
-  } else {
-    return iconsList;
+    keys.push('runtime');
   }
+  return keys.map(k => ({...iconConfigs[k], id: k}));
 };
 
 const analyticsLabels = {
@@ -302,7 +322,8 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
     constructor(props: Props) {
       super(props);
       this.state = {
-        activeIcon: props.sidebarOpen ? 'help' : undefined,
+        // TODO(RW-5607): Remember which icon was active.
+        activeIcon: props.sidebarOpen ? helpIconName(props.helpContentKey) : undefined,
         filteredContent: undefined,
         participant: undefined,
         searchTerm: '',
@@ -524,7 +545,10 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
     }
 
     get sidebarWidth() {
-      return this.state.activeIcon === 'criteria' ? '20' : '14';
+      if (this.state.activeIcon && iconConfigs[this.state.activeIcon].contentWidthRem) {
+        return iconConfigs[this.state.activeIcon].contentWidthRem;
+      }
+      return '14';
     }
 
     render() {
@@ -536,7 +560,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
         display: activeIcon === tab ? 'block' : 'none',
         height: 'calc(100% - 1rem)',
         overflow: 'auto',
-        padding: '0.5rem 0.5rem ' + (tab === 'criteria' ? '0' : '5.5rem'),
+        padding: iconConfigs[tab].contentPadding || '0.5rem 0.5rem 5.5rem'
       });
       return <div id='help-sidebar'>
         <div style={notebookStyles ? {...styles.iconContainer, ...styles.notebookOverrides} : {...styles.iconContainer}}>
@@ -576,7 +600,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
                      alt='Close'/>
               </Clickable>
             </FlexRow>}
-            <div style={contentStyle('help')}>
+            <div style={contentStyle(helpIconName(helpContentKey))}>
               <h3 style={{...styles.sectionTitle, marginTop: 0}}>{helpContentKey === NOTEBOOK_HELP_CONTENT ? 'Workspace storage' : 'Help Tips'}</h3>
               {helpContentKey !== NOTEBOOK_HELP_CONTENT &&
                 <div style={styles.textSearch}>
@@ -606,6 +630,9 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
                 : <div style={{marginTop: '0.5rem'}}><em>No results found</em></div>
               }
             </div>
+            <div style={contentStyle('runtime')}>
+              {<RuntimePanel />}
+            </div>
             <div style={contentStyle('annotations')}>
               {participant && <SidebarContent />}
             </div>
@@ -614,7 +641,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
                 {!!currentCohortSearchContextStore.getValue() && <SelectionList back={() => setSidebarState(false)} selections={[]}/>}
               </div>
             </div>
-            {activeIcon !== 'criteria' && <div style={styles.footer}>
+            {(iconConfigs[activeIcon] || {}).hideSidebarFooter || <div style={styles.footer}>
               <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
               <p style={styles.contentItem}>
                 Visit our <StyledAnchorTag href={supportUrls.helpCenter}

@@ -149,10 +149,10 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       // the user it was created for.
       userName = fireCloudService.getMe().getUserInfo().getUserEmail();
       if (!userName.endsWith(gsuiteDomainSuffix)) {
-        log.log(
-            Level.INFO,
-            "User {0} isn't in domain {1}, can't access the workbench",
-            new Object[] {userName, gsuiteDomainSuffix});
+        log.info(
+            String.format(
+                "User %s isn't in domain %s, can't access the workbench",
+                userName, gsuiteDomainSuffix));
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
         return false;
       }

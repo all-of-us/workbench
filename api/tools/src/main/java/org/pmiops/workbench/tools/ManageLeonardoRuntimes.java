@@ -1,6 +1,5 @@
 package org.pmiops.workbench.tools;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
@@ -20,6 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.leonardo.ApiClient;
 import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.ApiResponse;
@@ -53,18 +53,14 @@ public class ManageLeonardoRuntimes {
   private static final Gson PRETTY_GSON = new GsonBuilder().setPrettyPrinting().create();
 
   private static Set<String> commaDelimitedStringToSet(String str) {
-    return Arrays.asList(str.split(",")).stream()
-        .filter(s -> !s.isEmpty())
-        .collect(Collectors.toSet());
+    return Arrays.stream(str.split(",")).filter(s -> !s.isEmpty()).collect(Collectors.toSet());
   }
 
   private static RuntimesApi newApiClient(String apiUrl) throws IOException {
     ApiClient apiClient = new ApiClient();
     apiClient.setBasePath(apiUrl);
-    GoogleCredential credential =
-        GoogleCredential.getApplicationDefault().createScoped(Arrays.asList(BILLING_SCOPES));
-    credential.refreshToken();
-    apiClient.setAccessToken(credential.getAccessToken());
+    apiClient.setAccessToken(
+        ServiceAccounts.getScopedServiceAccessToken(Arrays.asList(BILLING_SCOPES)));
     apiClient.setDebugging(true);
     RuntimesApi api = new RuntimesApi();
     api.setApiClient(apiClient);
@@ -150,7 +146,7 @@ public class ManageLeonardoRuntimes {
     AtomicInteger deleted = new AtomicInteger();
     RuntimesApi api = newApiClient(apiUrl);
     api.listRuntimes(null, false).stream()
-        .sorted(Comparator.comparing(r -> r.getRuntimeName()))
+        .sorted(Comparator.comparing(LeonardoListRuntimeResponse::getRuntimeName))
         .filter(
             (r) -> {
               Instant createdDate = Instant.parse(r.getAuditInfo().getCreatedDate());
@@ -232,7 +228,7 @@ public class ManageLeonardoRuntimes {
 
           // Note: IDs are optional, this set may be empty.
           Set<String> ids = commaDelimitedStringToSet(args[2]);
-          boolean dryRun = Boolean.valueOf(args[3]);
+          boolean dryRun = Boolean.parseBoolean(args[3]);
 
           if (oldest == null && ids.isEmpty()) {
             throw new IllegalArgumentException(

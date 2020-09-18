@@ -10,7 +10,9 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Ordering;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -83,6 +85,15 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     this.cbDataFilterDao = cbDataFilterDao;
     this.personDao = personDao;
     this.cohortBuilderMapper = cohortBuilderMapper;
+  }
+
+  @Override
+  public List<Criteria> findCriteriaByDomainIdAndConceptIds(
+      String domainId, Collection<String> conceptIds) {
+    return cbCriteriaDao.findCriteriaByDomainIdAndConceptIds(domainId, conceptIds).stream()
+        .map(cohortBuilderMapper::dbModelToClient)
+        .sorted(Ordering.from(String.CASE_INSENSITIVE_ORDER).onResultOf(Criteria::getName))
+        .collect(Collectors.toList());
   }
 
   @Override

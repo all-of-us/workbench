@@ -5,6 +5,7 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConfigResponse} from 'generated';
 import {CdrVersionListResponse, Cohort, ConceptSet, Criteria, ErrorResponse, Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';
+import {useLocation} from 'react-router';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
 
@@ -109,6 +110,17 @@ export const navigateAndPreventDefaultIfNoKeysPressed = (e: React.MouseEvent, ur
 export const navigateSignOut = (continuePath: string = '/login') => {
   window.location.assign(`https://www.google.com/accounts/Logout?continue=` +
     `https://appengine.google.com/_ah/logout?continue=${window.location.origin}${continuePath}`);
+};
+
+/**
+ * Retrieve query parameters from the React Router.
+ *
+ * Example:
+ *  my/query/page?user=alice123
+ *  reactRouterUrlSearchParams.get('user') -> value is 'alice123'
+ */
+export const reactRouterUrlSearchParams = (): URLSearchParams => {
+  return new URLSearchParams(useLocation().search);
 };
 
 export enum BreadcrumbType {
