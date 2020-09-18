@@ -42,6 +42,13 @@ This will startup a [Flask](https://flask.palletsprojects.com/) server. The serv
 The server needs to have the `generated-by-pheweb` directory available (by running `pheweb process`).
  The server will then allow users to query for a variant, gene or phenotype and route to the appropriate path based on the user query.
 
+## Architecture of the application
+
+1. Flask is used for the server
+2. The client side does not seem to use any javascript frameworks or build tools - it consists of HTML files directly pulling in Javascript using `script` tags
+3. The two visualization libraries being used are [LocusZoom](http://locuszoom.org/) and [D3](https://d3js.org/)
+4. There are various routes/endpoints that will handle things like autocompletion, or serving up the HTML pages. They can be found [here](https://github.com/statgen/pheweb/blob/master/pheweb/serve/server.py)
+
 ### Drawback
 It will be difficult to customize how pheweb runs in its current state. Changes to the code may be necessary
 
@@ -88,11 +95,18 @@ The above process does the complete build locally and deploys to app engine. It 
 
 There are a few other caveats:
 1. A config.py file will need to be created to setup the cache location or disable the cache.
+   a. Pheweb defines the cache as "a directory where files common to all datasets can be stored"
+      But I am unsure of exactly how the cache is used at this time.
 2. If you do keep the cache, you will need to adjust the path location of the cache when you:
    a. Run the process locally
    b. Before you deploy to app engine so the app can find the cache when it gets uploaded
 
 Some files can be quite large and may take some time to deploy.
+I think we will need to work with some real data sets to determine the horizontal scalability and whether we can modify Pheweb to better work with our data.
+
+## SSL
+
+When deployed the app server is able to successfully use SSL.
 
 ### Scalability
 
