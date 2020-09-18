@@ -319,7 +319,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
             ? <Spinner size={16}/>
             : <ClrIcon style={{color: colors.disabled}}
               shape={'angle ' + (expanded ? 'down' : 'right')}
-              size='16' onClick={() => this.toggleExpanded()}/>}
+              size='16'/>}
         </button>}
         <div style={hover ? {...styles.treeNodeContent, background: colors.light} : styles.treeNodeContent}
           onMouseEnter={() => this.setState({hover: true})}

@@ -17,7 +17,7 @@ import {ClrIcon} from 'app/components/icons';
 import {CheckBox, NumberInput} from 'app/components/inputs';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
-import colors, {colorWithWhiteness} from 'app/styles/colors';
+import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentCohortCriteria, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentCohortCriteriaStore, currentWorkspaceStore} from 'app/utils/navigation';
@@ -38,17 +38,19 @@ const styles = reactStyles({
     color: colors.primary,
     fontWeight: 600,
     display: 'flex',
+    lineHeight: '0.75rem',
   },
   orCircle: {
-    backgroundColor: colors.primary,
+    backgroundColor: `${addOpacity(colors.primary, 0.25)}`,
     borderRadius: '50%',
-    color: colors.white,
-    width: '1.25rem',
-    height: '1.25rem',
-    margin: '0.75rem auto 0.25rem',
-    lineHeight: '1.35rem',
+    color: colors.primary,
+    width: '2.25rem',
+    height: '2.25rem',
+    margin: '0.5rem 0',
+    lineHeight: '2.25rem',
     textAlign: 'center',
-    fontSize: '0.45rem',
+    fontSize: '12px',
+    fontWeight: 600
   },
   container: {
     display: 'flex',
@@ -124,6 +126,13 @@ const styles = reactStyles({
   errorItem: {
     lineHeight: '16px',
   },
+  moreInfo: {
+    color: colors.accent,
+    cursor: 'pointer',
+    fontWeight: 300,
+    margin: '0.75rem 0',
+    textDecoration: 'underline'
+  }
 });
 
 interface CalculateFooterProps {
@@ -246,22 +255,23 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
 
     initAttributeForm() {
       const {node: {subtype}} = this.props;
-      const {form} = this.state;
+      const {form, options} = this.state;
       if (this.isSurvey) {
         this.getSurveyAttributes();
       } else if (this.isMeasurement) {
         this.getAttributes();
       } else {
+        options.unshift({label: optionUtil.ANY.display, value: AttrName[AttrName.ANY]});
         form.num = subtype === CriteriaSubType[CriteriaSubType.BP]
           ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
           : [{name: subtype, operator: 'ANY', operands: []}];
-        this.setState({form, count: this.nodeCount, loading: false});
+        this.setState({form, count: this.nodeCount, loading: false, options});
       }
     }
 
     async getSurveyAttributes() {
       const {node: {conceptId, parentId, path, subtype, value}} = this.props;
-      const {form} = this.state;
+      const {form, options} = this.state;
       const {cdrVersionId} = currentWorkspaceStore.getValue();
       const surveyId = path.split('.')[0];
       const surveyNode = !!ppiSurveys.getValue()[cdrVersionId] && ppiSurveys.getValue()[cdrVersionId].find(n => n.id === +surveyId);
@@ -277,7 +287,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
               ppiQuestions.getValue()[parentId].conceptId,
               +value
             ),
-            cohortBuilderApi().findCriteriaAttributeByConceptId(+cdrVersionId, conceptId)
+            cohortBuilderApi().findCriteriaAttributeByConceptId(+cdrVersionId, +value)
           ];
         }
         const [surveyVersions, numericalAttributes] = await Promise.all(promises);
@@ -288,17 +298,24 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
           valueAsConceptId: subtype === CriteriaSubType.QUESTION ? conceptId : +value
         }));
         if (numericalAttributes) {
-          form.num = numericalAttributes.items.map(attr => ({
-            name: AttrName.NUM,
-            operator: 'ANY',
-            operands: [],
-            conceptId: +value,
-            [attr.conceptName]: parseInt(attr.estCount, 10)
-          }));
+          numericalAttributes.items.forEach(attr => {
+            if (!form.num.length) {
+              form.num.push({
+                name: AttrName.NUM,
+                operator: null,
+                operands: [],
+                conceptId: +value,
+                [attr.conceptName]: parseInt(attr.estCount, 10)
+              });
+            } else {
+              form.num[0][attr.conceptName] = parseInt(attr.estCount, 10);
+            }
+          });
         }
         this.setState({count: this.nodeCount, form, isCOPESurvey: true, loading: false});
       } else {
-        this.getAttributes();
+        options.unshift({label: optionUtil.ANY.display, value: AttrName[AttrName.ANY]});
+        this.setState({options}, () => this.getAttributes());
       }
     }
 
@@ -607,9 +624,26 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
       return (loading ?
         <SpinnerOverlay/> :
         <div id='attributes-form' style={{marginTop: '0.5rem'}}>
-          <h3 style={{fontWeight: 600, margin: '0 0 0.5rem', textTransform: 'capitalize'}}>
+          {isCOPESurvey ? <div>
+            <h3 style={{fontWeight: 600, margin: '0 0 0.5rem', textTransform: 'capitalize'}}>
+              COPE Survey (COVID-19) attribute
+            </h3>
+            <div style={{lineHeight: '0.75rem', paddingRight: '1.5rem'}}>
+              The COPE survey is longitudinal and will change over time. Use the following attributes to select data from one or more
+               versions.
+            </div>
+            <div style={styles.moreInfo}>
+              More info
+            </div>
+          </div> : <h3 style={{fontWeight: 600, margin: '0 0 0.5rem', textTransform: 'capitalize'}}>
             {this.isPhysicalMeasurement ? name : domainId.toString().toLowerCase()} Detail
-          </h3>
+          </h3>}
+          {this.isSurvey && <div style={{...styles.label, marginBottom: '0.5rem'}}>
+            {subtype === CriteriaSubType.ANSWER
+              ? `${ppiQuestions.getValue()[parentId].name} - ${name}`
+              : name
+            }
+          </div>}
           {countError && <div style={styles.error}>
             <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
               shape='exclamation-triangle' size='22'/>
@@ -621,14 +655,13 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
             </div>)}
           </div>}
           {(this.isMeasurement || isCOPESurvey) && <div>
-            <div style={styles.label}>{this.displayName}</div>
+            {!isCOPESurvey && <div style={styles.label}>{this.displayName}</div>}
             <CheckBox onChange={(v) => this.toggleCheckbox(v)}/> Any value {this.isMeasurement && <span>(lab exists)</span>}
             {!form.exists && form.num.length > 0 && <div style={styles.orCircle}>OR</div>}
           </div>}
           {!form.exists && <div style={{minHeight: '10rem'}}>
             {form.num.map((attr, a) => <div key={a}>
               {this.isMeasurement && <div style={styles.label}>Numeric Values</div>}
-              {this.isSurvey && <div style={styles.label}>{ppiQuestions.getValue()[parentId].name}</div>}
               {this.isBloodPressure && <div style={styles.label}>{attr.name}</div>}
               <Dropdown style={{marginBottom: '0.5rem', width: '100%'}}
                         value={attr.operator}
@@ -660,15 +693,13 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
             </div>)}
             {form.cat.length > 0 && <React.Fragment>
               <div style={styles.orCircle}>OR</div>
-              <div style={styles.label}>Categorical Values</div>
-              <div style={{marginLeft: '0.5rem'}}>
-                {form.cat.map((attr, a) => <div key={a} style={styles.categorical}>
-                  <CheckBox checked={attr.checked} style={{marginRight: '3px'}}
-                    onChange={(v) => this.checkboxChange(v, a)} />
-                  {attr.conceptName}&nbsp;
-                  <span style={styles.badge}> {parseInt(attr.estCount, 10).toLocaleString()}</span>
-                </div>)}
-              </div>
+              {!isCOPESurvey && <div style={styles.label}>Categorical Values</div>}
+              {form.cat.map((attr, a) => <div key={a} style={styles.categorical}>
+                <CheckBox checked={attr.checked} style={{marginRight: '3px'}}
+                  onChange={(v) => this.checkboxChange(v, a)} />
+                {attr.conceptName}&nbsp;
+                <span style={styles.badge}> {parseInt(attr.estCount, 10).toLocaleString()}</span>
+              </div>)}
             </React.Fragment>}
           </div>}
           <CalculateFooter addButtonText='ADD THIS'
