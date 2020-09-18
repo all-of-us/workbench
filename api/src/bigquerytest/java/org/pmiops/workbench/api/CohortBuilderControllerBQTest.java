@@ -616,6 +616,23 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .conceptId(22L);
   }
 
+  private static SearchParameter copeSurvey() {
+    return new SearchParameter()
+        .domain(DomainType.SURVEY.toString())
+        .type(CriteriaType.PPI.toString())
+        .subtype(CriteriaSubType.QUESTION.toString())
+        .ancestorData(false)
+        .standard(false)
+        .group(true)
+        .conceptId(44L)
+        .attributes(
+            ImmutableList.of(
+                new Attribute()
+                    .name(AttrName.SURVEY_ID)
+                    .operator(Operator.IN)
+                    .operands(ImmutableList.of("100"))));
+  }
+
   private static Modifier ageModifier() {
     return new Modifier()
         .name(ModifierType.AGE_AT_EVENT)
@@ -1914,6 +1931,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.SURVEY.toString(), ImmutableList.of(survey()), new ArrayList<>());
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+    assertParticipants(response, 1);
+  }
+
+  @Test
+  public void countSubjectsCopeSurvey() {
+    // Cope Survey
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.SURVEY.toString(), ImmutableList.of(copeSurvey()), new ArrayList<>());
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     assertParticipants(response, 1);

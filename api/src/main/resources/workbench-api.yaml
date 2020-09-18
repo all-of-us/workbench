@@ -7654,6 +7654,7 @@ definitions:
     - AGE
     - AGE_AT_CONSENT
     - AGE_AT_CDR
+    - SURVEY_ID
   AgeType:
     type: string
     description: Different age types
