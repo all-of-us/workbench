@@ -15,15 +15,14 @@ describe('Clone workspace', () => {
    * - Select "Duplicate" thru the Ellipsis menu located inside the Workspace card.
    * - Enter a new workspace name and save the clone.
    */
-  describe('From "Your Workspaces" page using Workspace card ellipsis menu', () => {
-
-    test('As OWNER, user can clone workspace', async () => {
+    test('Workspace OWNER can clone workspace in Workspace card', async () => {
       const workspaceCard = await findWorkspace(page);
+
       await workspaceCard.asElementHandle().hover();
-      // click on Ellipsis "Duplicate"
+      // Click on Ellipsis menu "Duplicate" option.
       await workspaceCard.clickEllipsisAction(EllipsisMenuAction.Duplicate);
 
-      // fill out Workspace Name should be just enough for clone successfully
+      // Fill out Workspace Name should be just enough for clone successfully
       const workspacesPage = new WorkspacesPage(page);
       await (await workspacesPage.getWorkspaceNameTextbox()).clear();
       const cloneWorkspaceName = await workspacesPage.fillOutWorkspaceName();
@@ -32,26 +31,13 @@ describe('Clone workspace', () => {
       await finishButton.waitUntilEnabled();
       await workspacesPage.clickCreateFinishButton(finishButton);
 
-      // wait for Data page
+      // Page load clone workspace automatically.
       const dataPage = new WorkspaceDataPage(page);
       await dataPage.waitForLoad();
-      // save Data page URL for comparison
-      const workspaceDataUrl1 = page.url();
-
-      // verify new workspace was created and now can be opened successfully
-      await workspacesPage.load();
-      const workspaceLink = await workspaceCard.getWorkspaceNameLink(cloneWorkspaceName);
-      await workspaceLink.click();
-      await dataPage.waitForLoad();
-      const workspaceDataUrl2 = page.url();
-
-      expect(workspaceDataUrl1).toEqual(workspaceDataUrl2);
+      expect(page.url()).toContain(cloneWorkspaceName.replace(/-/g, '')); // Remove dash from workspace name
     });
-  });
 
-  describe('From "Data" page using side ellipsis menu', () => {
-
-    test('As OWNER, user can clone workspace', async () => {
+    test('Workspace OWNER can clone workspace thru side ellipsis menu', async () => {
       const workspaceCard = await findWorkspace(page);
       await workspaceCard.clickWorkspaceName();
 
@@ -60,7 +46,7 @@ describe('Clone workspace', () => {
 
       const workspacesPage = new WorkspacesPage(page);
 
-      // fill out Workspace Name
+      // Fill out Workspace Name
       await (await workspacesPage.getWorkspaceNameTextbox()).clear();
       const cloneWorkspaceName = await workspacesPage.fillOutWorkspaceName();
       // select "Share workspace with same set of collaborators radiobutton
@@ -70,28 +56,9 @@ describe('Clone workspace', () => {
       await finishButton.waitUntilEnabled();
       await workspacesPage.clickCreateFinishButton(finishButton);
 
-      // wait for Data page
+      // Page load clone workspace automatically.
       await dataPage.waitForLoad();
-      // save Data page URL for comparison after sign out then sign in back
-      const workspaceDataUrl = page.url();
-      // strips out dash from workspace name
-      expect(workspaceDataUrl).toContain(cloneWorkspaceName.replace(/-/g, ''));
-
-      // starting a new incognito page
-      await page.deleteCookie(...await page.cookies());
-      await jestPuppeteer.resetBrowser();
-      await page.waitFor(2000);
-      const newBrowser = await browser.createIncognitoBrowserContext();
-      const newPage = await newBrowser.newPage();
-      const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36';
-      await newPage.setUserAgent(userAgent);
-      await signIn(newPage);
-
-      const response = await newPage.goto(workspaceDataUrl, {waitUntil: ['domcontentloaded','networkidle0'], timeout: 60000});
-      expect(await response.status()).toEqual(200);
-
-      await newPage.close();
+      expect(page.url()).toContain(cloneWorkspaceName.replace(/-/g, '')); // Remove dash from workspace name
     });
-  });
 
 });
