@@ -6038,6 +6038,8 @@ definitions:
   AdminWorkspaceCloudStorageCounts:
     type: object
     properties:
+      storageBucketPath:
+        type: string
       notebookFileCount:
         type: integer
       nonNotebookFileCount:
