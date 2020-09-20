@@ -16,12 +16,9 @@ import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.support.SimpleThreadScope;
 
 /**
  * A tool that takes a Workspace namespace / Firecloud Project ID and returns details for any
@@ -66,8 +63,7 @@ public class FetchWorkspaceDetails {
       StringBuilder sb = new StringBuilder();
       sb.append(String.join("\n", Collections.nCopies(10, "***")));
 
-      for (DbWorkspace workspace :
-          workspaceDao.findAllByWorkspaceNamespace(workspaceNamespace)) {
+      for (DbWorkspace workspace : workspaceDao.findAllByWorkspaceNamespace(workspaceNamespace)) {
         Map<String, FirecloudWorkspaceAccessEntry> acl =
             FirecloudTransforms.extractAclResponse(
                 workspacesApi.getWorkspaceAcl(
