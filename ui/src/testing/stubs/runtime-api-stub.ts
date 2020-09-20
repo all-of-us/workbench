@@ -1,6 +1,7 @@
 import {
   Runtime,
   RuntimeApi,
+  RuntimeConfigurationType,
   RuntimeLocalizeRequest,
   RuntimeLocalizeResponse,
   RuntimeStatus
@@ -17,6 +18,7 @@ export class RuntimeApiStub extends RuntimeApi {
       status: RuntimeStatus.Running,
       createdDate: '08/08/2018',
       toolDockerImage: 'broadinstitute/terra-jupyter-aou:1.0.999',
+      configurationType: RuntimeConfigurationType.DefaultDataproc,
       dataprocConfig: {
         masterMachineType: 'n1-standard-4',
         masterDiskSize: 80,

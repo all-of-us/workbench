@@ -5,6 +5,7 @@ import java.util.Map;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.notebooks.model.StorageLink;
 
 /**
@@ -18,13 +19,11 @@ public interface LeonardoNotebooksClient {
   /**
    * Creates a notebooks runtime owned by the current authenticated user.
    *
-   * @param googleProject the google project that will be used for this notebooks runtime
-   * @param runtimeName the user assigned/auto-generated name for this notebooks runtime
+   * @param runtime the details for the runtime to create
    * @param workspaceFirecloudName the firecloudName of the workspace this runtime is associated
    *     with
    */
-  void createRuntime(String googleProject, String runtimeName, String workspaceFirecloudName)
-      throws WorkbenchException;
+  void createRuntime(Runtime runtime, String workspaceFirecloudName) throws WorkbenchException;
 
   /** Deletes a notebook runtime */
   void deleteRuntime(String googleProject, String runtimeName) throws WorkbenchException;
