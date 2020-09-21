@@ -234,17 +234,10 @@ def to_swagger_property(column)
   if column[:is_enum]
     swagger_value = {
         '$ref' => "#/definitions/#{column[:java_type]}"
-    }
-  # elsif column[:name] == 'data_access_level' && TABLE_INFO[:name] == 'workspace'
-  #   # we're mapping to the enum in MapStruct b/c the entity class is wonky
-  #   # TODO: make this kind of override more formally supported if there are other places to do it.
-  #   swagger_value = {
-  #       '$ref' => "#/definitions/DataAccessLevel"
-  #   }
+  }
   else
     swagger_value = BIGQUERY_TYPE_TO_SWAGGER[column[:big_query_type]]
   end
-  # { 'description' => column[:description] || '' } \
   {}.merge(swagger_value)
 end
 

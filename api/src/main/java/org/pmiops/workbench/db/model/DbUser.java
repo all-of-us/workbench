@@ -615,7 +615,7 @@ public class DbUser {
   }
 
   /*
-   * This column and attribute appear to be disused. We should drop teh column and the code here
+   * This column and attribute appear to be disused. We should drop the column and the code here
    * together.
    */
   @Deprecated
