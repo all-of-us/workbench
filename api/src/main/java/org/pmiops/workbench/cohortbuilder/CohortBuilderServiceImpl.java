@@ -410,8 +410,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   @Override
   public List<SurveyVersion> findSurveyVersionByQuestionConceptId(
       Long surveyConceptId, Long questionConceptId) {
-    return findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
-        surveyConceptId, questionConceptId, null);
+    return findSurveyVersionByQuestionConceptId(surveyConceptId, questionConceptId);
   }
 
   @Override

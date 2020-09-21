@@ -297,16 +297,24 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
               + "join cb_survey_attribute csa on csv.survey_id = csa.survey_id "
               + "where csv.concept_id = :surveyConceptId "
               + "and csa.question_concept_id = :questionConceptId "
-              + "and (csa.answer_concept_id = :answerConceptId or :answerConceptId is null) "
+              + "and csa.answer_concept_id is null "
               + "order by csv.display_order) innerSql",
       nativeQuery = true)
-  /**
-   * Regarding (csa.answer_concept_id = :answerConceptId or :answerConceptId is null), this is
-   * ignoring null parameters using the @Query annotation. This allows us to avoid creating
-   * additional methods just to handle null params. If the :answerConceptId parameter is null, then
-   * the clause is always true and allows us to handle both null and non null parameters for
-   * :answerConceptId. See: https://www.baeldung.com/spring-data-jpa-null-parameters
-   */
+  List<DbSurveyVersion> findSurveyVersionByQuestionConceptId(
+      @Param("surveyConceptId") Long surveyConceptId,
+      @Param("questionConceptId") Long questionConceptId);
+
+  @Query(
+      value =
+          "select surveyId, version, itemCount from( "
+              + "select distinct csv.survey_id as surveyId, csv.version as version, csa.item_count as itemCount, csv.display_order "
+              + "from cb_survey_version csv "
+              + "join cb_survey_attribute csa on csv.survey_id = csa.survey_id "
+              + "where csv.concept_id = :surveyConceptId "
+              + "and csa.question_concept_id = :questionConceptId "
+              + "and csa.answer_concept_id = :answerConceptId "
+              + "order by csv.display_order) innerSql",
+      nativeQuery = true)
   List<DbSurveyVersion> findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
       @Param("surveyConceptId") Long surveyConceptId,
       @Param("questionConceptId") Long questionConceptId,

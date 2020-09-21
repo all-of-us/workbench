@@ -415,7 +415,7 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findSurveyVersionByQuestionConceptIdAndAnswerConceptIdNull() {
+  public void findSurveyVersionByQuestionConceptId() {
     jdbcTemplate.execute(
         "create table cb_survey_version(survey_id integer, concept_id integer, version varchar(50), display_order integer)");
     jdbcTemplate.execute(
@@ -433,10 +433,9 @@ public class CBCriteriaDaoTest {
     jdbcTemplate.execute(
         "insert into cb_survey_attribute(id, question_concept_id, survey_id, item_count) values (3, 715713, 102, 150)");
     jdbcTemplate.execute(
-        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (1, 715713, 0, 100, 291)");
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (1, 715713, 0, 100, 491)");
     List<DbSurveyVersion> dbSurveyVersions =
-        cbCriteriaDao.findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
-            1333342L, 715713L, null);
+        cbCriteriaDao.findSurveyVersionByQuestionConceptId(1333342L, 715713L);
     assertThat(dbSurveyVersions).hasSize(3);
     assertThat(dbSurveyVersions.get(0).getSurveyId()).isEqualTo(100);
     assertThat(dbSurveyVersions.get(0).getVersion()).isEqualTo("May 2020");
