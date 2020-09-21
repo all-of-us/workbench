@@ -251,23 +251,33 @@ public final class SearchGroupItemQueryBuilder {
     SearchParameter param = parameters.get(0);
     switch (CriteriaType.valueOf(param.getType())) {
       case AGE:
-        Attribute attribute = param.getAttributes().get(0);
-        String ageNamedParameter =
-            QueryParameterUtil.addQueryParameterValue(
-                queryParams, QueryParameterValue.int64(new Long(attribute.getOperands().get(0))));
-        if (attribute.getOperands().size() > 1) {
-          String ageNamedParameter1 =
-              QueryParameterUtil.addQueryParameterValue(
-                  queryParams, QueryParameterValue.int64(new Long(attribute.getOperands().get(1))));
-          ageNamedParameter = ageNamedParameter + AND + ageNamedParameter1;
-        }
-        String ageSql =
-            String.format(
-                AGE_SQL,
-                AGE_COLUMN_SQL_MAP.get(attribute.getName()),
-                OperatorUtils.getSqlOperator(attribute.getOperator()),
-                ageNamedParameter);
-        return AttrName.AGE_AT_CONSENT.equals(attribute.getName()) ? ageSql : ageSql + AGE_DEC_SQL;
+        List<String> queryParts = new ArrayList<>();
+        parameters.forEach(
+            searchParameter -> {
+              Attribute attribute = searchParameter.getAttributes().get(0);
+              String ageNamedParameter =
+                  QueryParameterUtil.addQueryParameterValue(
+                      queryParams,
+                      QueryParameterValue.int64(new Long(attribute.getOperands().get(0))));
+              if (attribute.getOperands().size() > 1) {
+                String ageNamedParameter1 =
+                    QueryParameterUtil.addQueryParameterValue(
+                        queryParams,
+                        QueryParameterValue.int64(new Long(attribute.getOperands().get(1))));
+                ageNamedParameter = ageNamedParameter + AND + ageNamedParameter1;
+              }
+              String ageSql =
+                  String.format(
+                      AGE_SQL,
+                      AGE_COLUMN_SQL_MAP.get(attribute.getName()),
+                      OperatorUtils.getSqlOperator(attribute.getOperator()),
+                      ageNamedParameter);
+              queryParts.add(
+                  AttrName.AGE_AT_CONSENT.equals(attribute.getName())
+                      ? ageSql
+                      : ageSql + AGE_DEC_SQL);
+            });
+        return String.join(UNION_TEMPLATE, queryParts);
       case GENDER:
       case SEX:
       case ETHNICITY:
