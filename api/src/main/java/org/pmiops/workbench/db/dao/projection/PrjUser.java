@@ -28,7 +28,7 @@ public interface PrjUser {
 
   String getCurrentPosition();
 
-  DataAccessLevel getDataAccessLevel();
+  Short getDataAccessLevel();
 
   Timestamp getDataUseAgreementBypassTime();
 

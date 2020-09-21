@@ -11,6 +11,7 @@ import java.time.Instant;
 import org.pmiops.workbench.db.dao.projection.PrjUser;
 import org.pmiops.workbench.db.dao.projection.PrjWorkspace;
 import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.BillingAccountType;
@@ -41,7 +42,7 @@ public class ReportingTestUtils {
   public static final Timestamp USER__CREATION_TIME =
       Timestamp.from(Instant.parse("2015-05-13T00:00:00.00Z"));
   public static final String USER__CURRENT_POSITION = "foo_9";
-  public static final DataAccessLevel USER__DATA_ACCESS_LEVEL = DataAccessLevel.REGISTERED;
+  public static final Short USER__DATA_ACCESS_LEVEL = DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED);
   public static final Timestamp USER__DATA_USE_AGREEMENT_BYPASS_TIME =
       Timestamp.from(Instant.parse("2015-05-16T00:00:00.00Z"));
   public static final Timestamp USER__DATA_USE_AGREEMENT_COMPLETION_TIME =
@@ -145,7 +146,7 @@ public class ReportingTestUtils {
     assertThat(user.getContactEmail()).isEqualTo(USER__CONTACT_EMAIL);
     assertTimeApprox(user.getCreationTime(), USER__CREATION_TIME);
     assertThat(user.getCurrentPosition()).isEqualTo(USER__CURRENT_POSITION);
-    assertThat(user.getDataAccessLevel()).isEqualTo(USER__DATA_ACCESS_LEVEL);
+    assertThat(user.getDataAccessLevel()).isEqualTo(DbStorageEnums.dataAccessLevelFromStorage(USER__DATA_ACCESS_LEVEL));
     assertTimeApprox(user.getDataUseAgreementBypassTime(), USER__DATA_USE_AGREEMENT_BYPASS_TIME);
     assertTimeApprox(
         user.getDataUseAgreementCompletionTime(), USER__DATA_USE_AGREEMENT_COMPLETION_TIME);
@@ -404,7 +405,7 @@ public class ReportingTestUtils {
         .contactEmail(USER__CONTACT_EMAIL)
         .creationTime(offsetDateTimeUtc(USER__CREATION_TIME))
         .currentPosition(USER__CURRENT_POSITION)
-        .dataAccessLevel(USER__DATA_ACCESS_LEVEL)
+        .dataAccessLevel(DbStorageEnums.dataAccessLevelFromStorage(USER__DATA_ACCESS_LEVEL))
         .dataUseAgreementBypassTime(offsetDateTimeUtc(USER__DATA_USE_AGREEMENT_BYPASS_TIME))
         .dataUseAgreementCompletionTime(offsetDateTimeUtc(USER__DATA_USE_AGREEMENT_COMPLETION_TIME))
         .dataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION.longValue())
