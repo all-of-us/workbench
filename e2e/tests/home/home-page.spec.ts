@@ -1,8 +1,6 @@
 import BaseElement from 'app/element/base-element';
 import HomePage from 'app/page/home-page';
 import WorkspaceCard from 'app/component/workspace-card';
-import WorkspaceEditPage from 'app/page/workspace-edit-page';
-import WorkspacesPage from 'app/page/workspaces-page';
 import {signIn} from 'utils/test-utils';
 
 
@@ -34,7 +32,7 @@ describe('Home page ui tests', () => {
 
       // check workspace name has characters
       const cardName = await card.getWorkspaceName();
-      expect(cardName).toMatch(new RegExp(/^[a-zA-Z]+/));
+      await expect(cardName).toMatch(new RegExp(/^[a-zA-Z]+/));
 
       // check Workspace Action menu for listed actions
       const ellipsis = card.getEllipsis();
@@ -43,29 +41,6 @@ describe('Home page ui tests', () => {
       const links = await ellipsis.getAvaliableActions();
       expect(links).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
     }
-  });
-
-   // Click See All workspaces link => Opens Your Workspaces page
-  test('Click on See All workspace link', async () => {
-    const homePage = new HomePage(page);
-    const seeAllWorkspacesLink = await homePage.getSeeAllWorkspacesLink();
-    await seeAllWorkspacesLink.click();
-    const workspaces = new WorkspacesPage(page);
-    await workspaces.waitForLoad();
-    expect(await workspaces.isLoaded()).toBe(true);
-    await seeAllWorkspacesLink.dispose();
-  });
-
-   // Click Create New Workspace link => Opens Create Workspace page
-  test('Click on Create New Workspace link', async () => {
-    const home = new HomePage(page);
-    await home.getCreateNewWorkspaceLink().then((link) => link.clickAndWait());
-
-    const workspaceEdit = new WorkspaceEditPage(page);
-    await workspaceEdit.waitForLoad();
-    // expect Workspace name Input textfield exists
-    const workspaceNameTextbox = await workspaceEdit.getWorkspaceNameTextbox();
-    expect(await workspaceNameTextbox.isVisible()).toBe(true);
   });
 
   test('Check Create New Workspace link on Home page', async () => {
