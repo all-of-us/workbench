@@ -3,7 +3,7 @@ package org.pmiops.workbench.actionaudit;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
-import static org.pmiops.workbench.utils.TimeAssertions.assertTimeWithinTolerance;
+import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 
 import com.google.api.gax.paging.Page;
 import com.google.cloud.bigquery.EmptyTableResult;
@@ -149,7 +149,7 @@ public class ActionAuditQueryServiceTest {
     assertThat(row1.getTargetType()).isEqualTo("WORKSPACE");
     assertThat(row1.getPreviousValue()).isNull();
     assertThat(row1.getAgentId()).isEqualTo(AGENT_ID);
-    assertTimeWithinTolerance(row1.getEventTime().toInstant(), EVENT_INSTANT);
+    assertTimeApprox(row1.getEventTime().toInstant(), EVENT_INSTANT);
 
     final AuditLogEntry row2 = response.getLogEntries().get(1);
     assertThat(row2.getActionId()).isEqualTo(ACTION_ID_1);
