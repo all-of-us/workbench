@@ -297,7 +297,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
               + "join cb_survey_attribute csa on csv.survey_id = csa.survey_id "
               + "where csv.concept_id = :surveyConceptId "
               + "and csa.question_concept_id = :questionConceptId "
-              + "and (csa.answer_concept_id = :answerConceptId or :answerConceptId is null)"
+              + "and (csa.answer_concept_id = :answerConceptId or :answerConceptId is null) "
               + "order by csv.display_order) innerSql",
       nativeQuery = true)
   /**
