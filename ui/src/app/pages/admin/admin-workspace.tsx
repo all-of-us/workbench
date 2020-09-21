@@ -89,6 +89,7 @@ const formatMB = (fileSize: number): string => {
 
 const NOTEBOOKS_DIRECTORY = 'notebooks';
 const NOTEBOOKS_SUFFIX = '.ipynb';
+const MAX_NOTEBOOK_READ_SIZE_BYTES = 5 * 1000 * 1000; // see NotebooksServiceImpl
 
 interface FileDetailsProps {
   workspaceNamespace: string;
@@ -118,8 +119,18 @@ const FileDetailsTable = (props: FileDetailsProps) => {
     return file.path.substring(start, end);
   };
 
+  const formatMB = (fileSize: number): string => {
+    const mb = fileSize / 1000000.0;
+    if (mb < 1.0) {
+      return '<1';
+    } else {
+      return mb.toFixed(2);
+    }
+  };
+
   const nameCell = (file: FileDetail): React.ReactFragment => {
     const filename = file.name.trim();
+    const filenameText = <span>{filename}</span>;
     const navigateToPreview = () => {
       navigate(['admin', 'workspaces', workspaceNamespace, filename],
           { queryParams: { accessReason: accessReason } });
@@ -127,23 +138,25 @@ const FileDetailsTable = (props: FileDetailsProps) => {
 
     // remove first check after RW-5626
     if (NOTEBOOKS_DIRECTORY === parseLocation(file) && filename.endsWith(NOTEBOOKS_SUFFIX)) {
-      return <FlexRow>
-        <span>{filename}</span>
-        <TooltipTrigger content='Please enter an access reason below' disabled={accessReason && accessReason.trim()}>
-          <Button style={styles.button} disabled={!accessReason || !accessReason.trim()} onClick={navigateToPreview}>Preview</Button>
-        </TooltipTrigger>
-      </FlexRow>;
+      if (file.rawSize > MAX_NOTEBOOK_READ_SIZE_BYTES) {
+        return <FlexRow>
+          {filenameText}
+          <TooltipTrigger
+            content={`Files larger than ${formatMB(MAX_NOTEBOOK_READ_SIZE_BYTES)} MB are too large to preview`}
+          ><Button style={styles.button} disabled={true}>Preview</Button>
+          </TooltipTrigger>
+        </FlexRow>;
+      } else {
+        return <FlexRow>
+          {filenameText}
+          <TooltipTrigger content='Please enter an access reason below' disabled={accessReason && accessReason.trim()}>
+            <Button style={styles.button} disabled={!accessReason || !accessReason.trim()}
+                    onClick={navigateToPreview}>Preview</Button>
+          </TooltipTrigger>
+        </FlexRow>;
+      }
     } else {
-      return <span>{filename}</span>;
-    }
-  };
-
-  const formatMB = (fileSize: number): string => {
-    const mb = fileSize / 1000000.0;
-    if (mb < 1.0) {
-      return '<1';
-    } else {
-      return mb.toFixed(2);
+      return filenameText;
     }
   };
 
