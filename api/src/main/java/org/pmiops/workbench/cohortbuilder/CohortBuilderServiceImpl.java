@@ -9,6 +9,7 @@ import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Ordering;
 import java.util.ArrayList;
@@ -27,7 +28,9 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.CBDataFilterDao;
+import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.PersonDao;
+import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cdr.model.DbMenuOption;
@@ -42,12 +45,14 @@ import org.pmiops.workbench.model.CriteriaMenuOption;
 import org.pmiops.workbench.model.CriteriaMenuSubOption;
 import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DemoChartInfo;
+import org.pmiops.workbench.model.DomainInfo;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.StandardFlag;
+import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -66,7 +71,9 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   private CBCriteriaAttributeDao cbCriteriaAttributeDao;
   private CBCriteriaDao cbCriteriaDao;
   private CBDataFilterDao cbDataFilterDao;
+  private DomainInfoDao domainInfoDao;
   private PersonDao personDao;
+  private SurveyModuleDao surveyModuleDao;
   private CohortBuilderMapper cohortBuilderMapper;
 
   @Autowired
@@ -76,14 +83,18 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       CBCriteriaAttributeDao cbCriteriaAttributeDao,
       CBCriteriaDao cbCriteriaDao,
       CBDataFilterDao cbDataFilterDao,
+      DomainInfoDao domainInfoDao,
       PersonDao personDao,
+      SurveyModuleDao surveyModuleDao,
       CohortBuilderMapper cohortBuilderMapper) {
     this.bigQueryService = bigQueryService;
     this.cohortQueryBuilder = cohortQueryBuilder;
     this.cbCriteriaAttributeDao = cbCriteriaAttributeDao;
     this.cbCriteriaDao = cbCriteriaDao;
     this.cbDataFilterDao = cbDataFilterDao;
+    this.domainInfoDao = domainInfoDao;
     this.personDao = personDao;
+    this.surveyModuleDao = surveyModuleDao;
     this.cohortBuilderMapper = cohortBuilderMapper;
   }
 
@@ -269,6 +280,31 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
+  public List<DomainInfo> findDomainInfos(String term) {
+    ImmutableList<Boolean> standard = ImmutableList.of(true);
+    ImmutableList<Boolean> all = ImmutableList.of(true, false);
+    String searchTerm = modifyTermMatch(term);
+    // read domain infos
+    List<DomainInfo> domainInfos =
+        domainInfoDao.findByOrderByDomainId().stream()
+            .map(cohortBuilderMapper::dbModelToClient)
+            .collect(Collectors.toList());
+    // read standard concept count
+    domainInfos.forEach(
+        di ->
+            di.setAllConceptCount(
+                cbCriteriaDao.findCountByDomainAndStandardAndTerm(
+                    di.getDomain().toString(), standard, searchTerm)));
+    // read all concept count
+    domainInfos.forEach(
+        di ->
+            di.setAllConceptCount(
+                cbCriteriaDao.findCountByDomainAndStandardAndTerm(
+                    di.getDomain().toString(), all, searchTerm)));
+    return domainInfos;
+  }
+
+  @Override
   public List<Criteria> findDrugBrandOrIngredientByValue(String value, Integer limit) {
     List<DbCriteria> criteriaList =
         cbCriteriaDao.findDrugBrandOrIngredientByValue(
@@ -347,6 +383,28 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
             .map(c -> c.getConceptId().toString())
             .collect(Collectors.toList());
     return demoList;
+  }
+
+  @Override
+  public List<SurveyModule> findSurveyModules(String term) {
+    List<SurveyModule> surveyModules =
+        surveyModuleDao.findByParticipantCountNotOrderByOrderNumberAsc(0L).stream()
+            .map(cohortBuilderMapper::dbModelToClient)
+            .collect(Collectors.toList());
+    // read question counts
+    surveyModules.forEach(
+        sm -> {
+          Long criteriaId =
+              cbCriteriaDao.findIdByDomainAndConceptIdAndName(
+                  DomainType.SURVEY.toString(), sm.getConceptId().toString(), sm.getName());
+          sm.setQuestionCount(
+              cbCriteriaDao.findQuestionCountByDomainAndIdAndTerm(
+                  criteriaId, modifyTermMatch(term)));
+        });
+    // remove any with zero question counts
+    return surveyModules.stream()
+        .filter(sm -> sm.getQuestionCount() > 0)
+        .collect(Collectors.toList());
   }
 
   @Override
