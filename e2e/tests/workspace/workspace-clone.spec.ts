@@ -31,7 +31,7 @@ describe('Clone workspace', () => {
       await finishButton.waitUntilEnabled();
       await workspacesPage.clickCreateFinishButton(finishButton);
 
-      // Page load clone workspace automatically.
+      // Clone workspace Data page is loaded.
       const dataPage = new WorkspaceDataPage(page);
       await dataPage.waitForLoad();
       expect(page.url()).toContain(cloneWorkspaceName.replace(/-/g, '')); // Remove dash from workspace name
@@ -56,7 +56,7 @@ describe('Clone workspace', () => {
       await finishButton.waitUntilEnabled();
       await workspacesPage.clickCreateFinishButton(finishButton);
 
-      // Page load clone workspace automatically.
+      // Clone workspace Data page is loaded.
       await dataPage.waitForLoad();
       expect(page.url()).toContain(cloneWorkspaceName.replace(/-/g, '')); // Remove dash from workspace name
     });
