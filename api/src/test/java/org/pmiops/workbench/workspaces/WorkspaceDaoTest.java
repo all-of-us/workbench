@@ -100,7 +100,11 @@ public class WorkspaceDaoTest {
     // check that the projection built by the DAO satisfies the mapper. Very frequently, projection
     // issues show up in the mapper first (though the assertions above *should* be sufficient.
     final BqDtoWorkspace dtoWorkspace = reportingMapper.toDto(workspaces.get(0));
-    ReportingTestUtils.assertDtoWorkspaceFields(dtoWorkspace, dbWorkspace.getWorkspaceId(), cdrVersion.getCdrVersionId(), creator.getUserId());
+    ReportingTestUtils.assertDtoWorkspaceFields(
+        dtoWorkspace,
+        dbWorkspace.getWorkspaceId(),
+        cdrVersion.getCdrVersionId(),
+        creator.getUserId());
   }
 
   public DbUser getDbUser() {

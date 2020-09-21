@@ -5,10 +5,6 @@
     "type": "INTEGER"
   },
   {
-    "name": "active_status",
-    "type": "INT64"
-  },
-  {
     "name": "billing_account_type",
     "type": "STRING"
   },
@@ -29,19 +25,7 @@
     "type": "INT64"
   },
   {
-    "name": "data_access_level",
-    "type": "STRING"
-  },
-  {
     "name": "disseminate_research_other",
-    "type": "STRING"
-  },
-  {
-    "name": "firecloud_name",
-    "type": "STRING"
-  },
-  {
-    "name": "firecloud_uuid",
     "type": "STRING"
   },
   {
@@ -155,9 +139,5 @@
   {
     "name": "workspace_id",
     "type": "INT64"
-  },
-  {
-    "name": "workspace_namespace",
-    "type": "STRING"
   }
 ]

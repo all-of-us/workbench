@@ -1,8 +1,6 @@
 package org.pmiops.workbench.db.dao.projection;
 
 import java.sql.Timestamp;
-import org.pmiops.workbench.model.DataAccessLevel;
-import org.pmiops.workbench.model.EmailVerificationStatus;
 
 public interface PrjUser {
   /*
@@ -28,7 +26,7 @@ public interface PrjUser {
 
   String getCurrentPosition();
 
-  Short getDataAccessLevel();
+  Short getDataAccessLevel(); // manual type override
 
   Timestamp getDataUseAgreementBypassTime();
 
@@ -44,7 +42,7 @@ public interface PrjUser {
 
   Timestamp getEmailVerificationCompletionTime();
 
-  EmailVerificationStatus getEmailVerificationStatus();
+  Short getEmailVerificationStatus(); // manual type override
 
   Timestamp getEraCommonsBypassTime();
 

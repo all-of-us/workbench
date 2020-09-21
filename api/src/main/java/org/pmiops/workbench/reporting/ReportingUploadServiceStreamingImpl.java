@@ -49,7 +49,8 @@ public class ReportingUploadServiceStreamingImpl implements ReportingUploadServi
     final Stopwatch stopwatch = stopwatchProvider.get();
     final ImmutableMap.Builder<TableId, InsertAllResponse> responseMapBuilder =
         ImmutableMap.builder();
-    for (InsertAllRequest request : getInsertAllRequests(reportingSnapshot)) {
+    final List<InsertAllRequest> insertAllRequests = getInsertAllRequests(reportingSnapshot);
+    for (InsertAllRequest request : insertAllRequests) {
       stopwatch.start();
       final InsertAllResponse currentResponse = bigQueryService.insertAll(request);
       responseMapBuilder.put(request.getTable(), currentResponse);

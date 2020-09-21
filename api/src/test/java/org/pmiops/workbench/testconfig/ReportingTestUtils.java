@@ -42,7 +42,8 @@ public class ReportingTestUtils {
   public static final Timestamp USER__CREATION_TIME =
       Timestamp.from(Instant.parse("2015-05-13T00:00:00.00Z"));
   public static final String USER__CURRENT_POSITION = "foo_9";
-  public static final Short USER__DATA_ACCESS_LEVEL = DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED);
+  public static final Short USER__DATA_ACCESS_LEVEL =
+      DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED);
   public static final Timestamp USER__DATA_USE_AGREEMENT_BYPASS_TIME =
       Timestamp.from(Instant.parse("2015-05-16T00:00:00.00Z"));
   public static final Timestamp USER__DATA_USE_AGREEMENT_COMPLETION_TIME =
@@ -146,7 +147,8 @@ public class ReportingTestUtils {
     assertThat(user.getContactEmail()).isEqualTo(USER__CONTACT_EMAIL);
     assertTimeApprox(user.getCreationTime(), USER__CREATION_TIME);
     assertThat(user.getCurrentPosition()).isEqualTo(USER__CURRENT_POSITION);
-    assertThat(user.getDataAccessLevel()).isEqualTo(DbStorageEnums.dataAccessLevelFromStorage(USER__DATA_ACCESS_LEVEL));
+    assertThat(user.getDataAccessLevel())
+        .isEqualTo(DbStorageEnums.dataAccessLevelFromStorage(USER__DATA_ACCESS_LEVEL));
     assertTimeApprox(user.getDataUseAgreementBypassTime(), USER__DATA_USE_AGREEMENT_BYPASS_TIME);
     assertTimeApprox(
         user.getDataUseAgreementCompletionTime(), USER__DATA_USE_AGREEMENT_COMPLETION_TIME);
@@ -227,7 +229,8 @@ public class ReportingTestUtils {
   }
 
   public static void assertDtoWorkspaceFields(BqDtoWorkspace workspace) {
-    assertDtoWorkspaceFields(workspace, WORKSPACE__WORKSPACE_ID, WORKSPACE__CDR_VERSION_ID, WORKSPACE__CREATOR_ID);
+    assertDtoWorkspaceFields(
+        workspace, WORKSPACE__WORKSPACE_ID, WORKSPACE__CDR_VERSION_ID, WORKSPACE__CREATOR_ID);
   }
 
   // TODO: put these override values into the scaffold script
@@ -309,7 +312,9 @@ public class ReportingTestUtils {
     doReturn(USER__EMAIL_VERIFICATION_COMPLETION_TIME)
         .when(mockUser)
         .getEmailVerificationCompletionTime();
-    doReturn(USER__EMAIL_VERIFICATION_STATUS).when(mockUser).getEmailVerificationStatus();
+    doReturn(DbStorageEnums.emailVerificationStatusToStorage(USER__EMAIL_VERIFICATION_STATUS))
+        .when(mockUser)
+        .getEmailVerificationStatus();
     doReturn(USER__ERA_COMMONS_BYPASS_TIME).when(mockUser).getEraCommonsBypassTime();
     doReturn(USER__ERA_COMMONS_COMPLETION_TIME).when(mockUser).getEraCommonsCompletionTime();
     doReturn(USER__ERA_COMMONS_LINK_EXPIRE_TIME).when(mockUser).getEraCommonsLinkExpireTime();

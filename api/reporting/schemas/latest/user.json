@@ -46,7 +46,7 @@
   },
   {
     "name": "data_access_level",
-    "type": "INT64"
+    "type": "STRING"
   },
   {
     "name": "data_use_agreement_bypass_time",
@@ -78,7 +78,7 @@
   },
   {
     "name": "email_verification_status",
-    "type": "INT64"
+    "type": "STRING"
   },
   {
     "name": "era_commons_bypass_time",
@@ -115,14 +115,6 @@
   {
     "name": "given_name",
     "type": "STRING"
-  },
-  {
-    "name": "id_verification_bypass_time",
-    "type": "TIMESTAMP"
-  },
-  {
-    "name": "id_verification_completion_time",
-    "type": "TIMESTAMP"
   },
   {
     "name": "last_modified_time",
