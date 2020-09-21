@@ -51,14 +51,13 @@ public class ReportingUploadServiceDmlImpl implements ReportingUploadService {
         insertJobs.stream()
             .collect(ImmutableMap.toImmutableMap(Function.identity(), this::executeWithTimeout));
 
-    // TODO: pipe more useful diagnostic info to the log
-    insertResults.forEach(
-        (job, result) -> logger.info(String.format("Inserted %d rows", result.getTotalRows())));
-
+    // TODO: pipe useful diagnostic info to the log. Apparently the total rows and destination table
+    //   aren't populated in these structures in this usage.
     return ReportingJobResult.SUCCEEDED;
   }
 
   private TableResult executeWithTimeout(QueryJobConfiguration job) {
+
     return bigQueryService.executeQuery(job, MAX_WAIT_TIME);
   }
 

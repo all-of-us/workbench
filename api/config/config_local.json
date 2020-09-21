@@ -126,6 +126,6 @@
   "reporting": {
     "dataset": "reporting_local",
     "maxRowsPerInsert": 200,
-    "uploadMethod": "DML"
+    "uploadMethod": "STREAMING"
   }
 }
