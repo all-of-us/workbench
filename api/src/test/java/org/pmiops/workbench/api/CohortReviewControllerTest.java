@@ -306,7 +306,7 @@ public class CohortReviewControllerTest {
     workspace.setWorkspaceNamespace(WORKSPACE_NAMESPACE);
     workspace.setName(WORKSPACE_NAME);
     workspace.setFirecloudName(WORKSPACE_NAME);
-    workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
+    workspace.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
     workspaceDao.save(workspace);
 
     cohort = new DbCohort();

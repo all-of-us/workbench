@@ -121,7 +121,7 @@ public class WorkspaceMapperTest {
     sourceDbWorkspace.setVersion(WORKSPACE_VERSION);
     sourceDbWorkspace.setName(WORKSPACE_AOU_NAME);
     sourceDbWorkspace.setFirecloudName(WORKSPACE_FIRECLOUD_NAME);
-    sourceDbWorkspace.setDataAccessLevel(DATA_ACCESS_LEVEL);
+    sourceDbWorkspace.setDataAccessLevelEnum(DATA_ACCESS_LEVEL);
     sourceDbWorkspace.setCdrVersion(cdrVersion);
     sourceDbWorkspace.setCreator(creatorUser);
     sourceDbWorkspace.setCreationTime(DB_CREATION_TIMESTAMP);

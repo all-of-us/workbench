@@ -191,7 +191,6 @@ public class ReportingTestUtils {
     assertThat(workspace.getCdrVersionId()).isEqualTo(expectedCdrVersionId);
     assertTimeApprox(workspace.getCreationTime(), WORKSPACE__CREATION_TIME);
     assertThat(workspace.getCreatorId()).isEqualTo(expectedCreatorId);
-    assertThat(workspace.getDataAccessLevel()).isEqualTo(WORKSPACE__DATA_ACCESS_LEVEL);
     assertThat(workspace.getDisseminateResearchOther())
         .isEqualTo(WORKSPACE__DISSEMINATE_RESEARCH_OTHER);
     assertTimeApprox(workspace.getLastAccessedTime(), WORKSPACE__LAST_ACCESSED_TIME);
@@ -450,7 +449,6 @@ public class ReportingTestUtils {
         .cdrVersionId(WORKSPACE__CDR_VERSION_ID)
         .creationTime(offsetDateTimeUtc(WORKSPACE__CREATION_TIME))
         .creatorId(WORKSPACE__CREATOR_ID)
-        .dataAccessLevel(WORKSPACE__DATA_ACCESS_LEVEL)
         .disseminateResearchOther(WORKSPACE__DISSEMINATE_RESEARCH_OTHER)
         .lastAccessedTime(offsetDateTimeUtc(WORKSPACE__LAST_ACCESSED_TIME))
         .lastModifiedTime(offsetDateTimeUtc(WORKSPACE__LAST_MODIFIED_TIME))
@@ -488,7 +486,6 @@ public class ReportingTestUtils {
     workspace.setCdrVersion(cdrVersion);
     workspace.setCreationTime(WORKSPACE__CREATION_TIME);
     workspace.setCreator(creator);
-    workspace.setDataAccessLevel(WORKSPACE__DATA_ACCESS_LEVEL);
     workspace.setDisseminateResearchOther(WORKSPACE__DISSEMINATE_RESEARCH_OTHER);
     workspace.setLastAccessedTime(WORKSPACE__LAST_ACCESSED_TIME);
     workspace.setLastModifiedTime(WORKSPACE__LAST_MODIFIED_TIME);

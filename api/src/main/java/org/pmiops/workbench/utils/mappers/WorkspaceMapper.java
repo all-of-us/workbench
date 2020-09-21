@@ -41,6 +41,7 @@ import org.pmiops.workbench.model.WorkspaceResponse;
 public interface WorkspaceMapper {
 
   @Mapping(target = "researchPurpose", source = "dbWorkspace")
+  @Mapping(target = "dataAccessLevel", source = "dbWorkspace.dataAccessLevelEnum")
   @Mapping(target = "etag", source = "dbWorkspace.version", qualifiedByName = "cdrVersionToEtag")
   @Mapping(target = "name", source = "dbWorkspace.name")
   @Mapping(target = "id", source = "fcWorkspace.name")
@@ -115,6 +116,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "creationTime", ignore = true)
   @Mapping(target = "creator", ignore = true)
   @Mapping(target = "dataAccessLevel", ignore = true)
+  @Mapping(target = "dataAccessLevelEnum", ignore = true)
   @Mapping(target = "dataSets", ignore = true)
   @Mapping(target = "disseminateResearchSet", ignore = true)
   @Mapping(target = "firecloudName", ignore = true)
