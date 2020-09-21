@@ -5408,11 +5408,45 @@ WHERE domain_id = 'MEASUREMENT'
 ################################################
 # CB_SURVEY_ATTRIBUTE
 ################################################
-echo "CB_SURVEY_ATTRIBUTE - adding data"
+echo "CB_SURVEY_ATTRIBUTE - adding data for questions"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_survey_attribute\`
+    (
+          id
+        , question_concept_id
+        , survey_id
+        , item_count
+    )
+SELECT
+        ROW_NUMBER() OVER (ORDER BY question_concept_id) as id
+      , question_concept_id
+      , survey_id
+      , cnt
+FROM
+    (
+        SELECT
+              concept_id as question_concept_id
+            , survey_id
+            , count(distinct person_id) cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+        WHERE
+            concept_id in
+                (
+                    SELECT concept_id
+                    FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                    WHERE domain_id = 'SURVEY'
+                )
+            and survey_id is not null
+            and is_standard = 0
+        GROUP BY 1,2
+    )"
+
+echo "CB_SURVEY_ATTRIBUTE - adding data for answers"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_survey_attribute\`
 SELECT
-        ROW_NUMBER() OVER (ORDER BY question_concept_id, answer_concept_id, survey_id) as id
+        ROW_NUMBER() OVER (ORDER BY question_concept_id, answer_concept_id) +
+            (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_survey_attribute\`) as id
       , question_concept_id
       , answer_concept_id
       , survey_id
