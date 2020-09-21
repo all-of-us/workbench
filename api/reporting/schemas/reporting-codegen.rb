@@ -100,29 +100,20 @@ MYSQL_TO_TYPES = {
 ENUM_TYPES = {
      'workspace' => {
         'billing_status' => {
-            :bigquery => 'STRING',
             :java => 'BillingStatus',
             :constant => 'BillingStatus.ACTIVE'
         },
         'billing_account_type' => {
-            :bigquery => 'STRING',
             :java => 'BillingAccountType',
             :constant => 'BillingAccountType.FREE_TIER'
-        },
-        'data_access_level' => {
-            :bigquery => 'STRING',
-            :java => 'DataAccessLevel',
-            :constant => 'DataAccessLevel.REGISTERED'
         }
      },
      'user' => {
          'data_access_level' => {
-             :bigquery => 'STRING',
              :java => 'DataAccessLevel',
              :constant => 'DataAccessLevel.REGISTERED'
          },
          'email_verification_status' => {
-             :bigquery => 'STRING',
              :java => 'EmailVerificationStatus',
              :constant => 'EmailVerificationStatus.SUBSCRIBED'
          }
@@ -136,10 +127,6 @@ def simple_mysql_type(mysql_type)
   result = match_data[:type]
   raise "MySQL type #{mysql_type} not recognized." if result.nil?
   result
-end
-
-def to_bq_type(mysql_type)
-  MYSQL_TO_TYPES[simple_mysql_type(mysql_type)][:bigquery]
 end
 
 excluded_fields = File.exist?(INPUTS[:excluded_columns]) \
@@ -248,6 +235,12 @@ def to_swagger_property(column)
     swagger_value = {
         '$ref' => "#/definitions/#{column[:java_type]}"
     }
+  # elsif column[:name] == 'data_access_level' && TABLE_INFO[:name] == 'workspace'
+  #   # we're mapping to the enum in MapStruct b/c the entity class is wonky
+  #   # TODO: make this kind of override more formally supported if there are other places to do it.
+  #   swagger_value = {
+  #       '$ref' => "#/definitions/DataAccessLevel"
+  #   }
   else
     swagger_value = BIGQUERY_TYPE_TO_SWAGGER[column[:big_query_type]]
   end
@@ -273,19 +266,17 @@ write_output(OUTPUTS[:swagger_yaml], indented_yaml, 'DTO Swagger Definition')
 
 ### Projection Interface
 def to_getter(field)
-  "  #{field[:java_type]} get#{to_camel_case(field[:name], true)}();"
+  property_type = field[:java_type]
+  "  #{property_type} #{field[:getter]}();"
 end
 
-getters = COLUMNS.map { |field|
+projection_decl = "public interface #{TABLE_INFO[:projection_interface]} {\n"
+projection_decl << COLUMNS.map { |field|
   to_getter(field)
-}
+}.join("\n")
+projection_decl << "\n}\n"
 
-
-java = "public interface #{TABLE_INFO[:projection_interface]} {\n"
-java << getters.join("\n")
-java << "\n}\n"
-
-write_output(OUTPUTS[:projection_interface], java, 'Spring Data Projection Interface')
+write_output(OUTPUTS[:projection_interface], projection_decl, 'Spring Data Projection Interface')
 
 ### Projection query
 def hibernate_column_name(field)
@@ -450,7 +441,7 @@ dto_decl_str = (DTO_DECL.join("\n") + ';').freeze
 write_output(OUTPUTS[:dto_decl], dto_decl_str, "DTO Object Construction")
 
 ### Entity Field Settings for DAO Test
-ENTITY_DECL = (["final #{TABLE_INFO[:entity_class]} #{TABLE_INFO[:instance_name]} = new #{TABLE_INFO[:entity_class]}();"] \
+ENTITY_DECL = ("final #{TABLE_INFO[:entity_class]} #{TABLE_INFO[:instance_name]} = new #{TABLE_INFO[:entity_class]}();\n" \
   << COLUMNS.map do |col|
     "#{TABLE_INFO[:instance_name]}.#{col[:setter]}(#{col[:java_constant_name]});"
   end \

@@ -8093,8 +8093,6 @@ definitions:
       creatorId:
         type: integer
         format: int64
-      dataAccessLevel:
-        "$ref": "#/definitions/DataAccessLevel"
       disseminateResearchOther:
         type: string
       lastAccessedTime:
@@ -8158,3 +8156,4 @@ definitions:
       workspaceId:
         type: integer
         format: int64
+

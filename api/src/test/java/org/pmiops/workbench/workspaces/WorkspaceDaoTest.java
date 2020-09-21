@@ -3,6 +3,7 @@ package org.pmiops.workbench.workspaces;
 import static com.google.common.truth.Truth.assertThat;
 import static org.springframework.test.util.AssertionErrors.fail;
 
+import java.time.Clock;
 import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,10 +14,17 @@ import org.pmiops.workbench.db.dao.projection.PrjWorkspace;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.model.BqDtoWorkspace;
+import org.pmiops.workbench.reporting.ReportingMapper;
+import org.pmiops.workbench.reporting.ReportingMapperImpl;
+import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.testconfig.ReportingTestUtils;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -33,10 +41,14 @@ public class WorkspaceDaoTest {
   private static final String WORKSPACE_NAMESPACE = "aou-1";
 
   @Autowired WorkspaceDao workspaceDao;
+  @Autowired ReportingMapper reportingMapper;
+
   @Autowired CdrVersionDao cdrVersionDao;
   @Autowired UserDao userDao;
 
   @TestConfiguration
+  @Import({CommonMappers.class, ReportingMapperImpl.class, ReportingTestConfig.class})
+  @MockBean({Clock.class})
   public static class conifg {}
 
   @Test
@@ -72,18 +84,23 @@ public class WorkspaceDaoTest {
   public void testGetReportingWorkspaces() {
     final DbCdrVersion cdrVersion = getDbCdrVersion();
 
-    final DbUser user = getDbUser();
+    final DbUser creator = getDbUser();
 
     final DbWorkspace dbWorkspace =
-        workspaceDao.save(ReportingTestUtils.createDbWorkspace(user, cdrVersion));
+        workspaceDao.save(ReportingTestUtils.createDbWorkspace(creator, cdrVersion));
     final List<PrjWorkspace> workspaces = workspaceDao.getReportingWorkspaces();
 
     assertThat(workspaces).hasSize(1);
-    ReportingTestUtils.assertDtoWorkspaceFields(
+    ReportingTestUtils.assertPrjWorkspaceFields(
         workspaces.get(0),
         dbWorkspace.getWorkspaceId(),
         cdrVersion.getCdrVersionId(),
-        user.getUserId());
+        creator.getUserId());
+
+    // check that the projection built by the DAO satisfies the mapper. Very frequently, projection
+    // issues show up in the mapper first (though the assertions above *should* be sufficient.
+    final BqDtoWorkspace dtoWorkspace = reportingMapper.toDto(workspaces.get(0));
+    ReportingTestUtils.assertDtoWorkspaceFields(dtoWorkspace, dbWorkspace.getWorkspaceId(), cdrVersion.getCdrVersionId(), creator.getUserId());
   }
 
   public DbUser getDbUser() {

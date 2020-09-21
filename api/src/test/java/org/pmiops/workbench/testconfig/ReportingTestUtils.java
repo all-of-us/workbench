@@ -99,7 +99,6 @@ public class ReportingTestUtils {
   public static final Timestamp WORKSPACE__CREATION_TIME =
       Timestamp.from(Instant.parse("2015-05-08T00:00:00.00Z"));
   public static final Long WORKSPACE__CREATOR_ID = 4L;
-  public static final DataAccessLevel WORKSPACE__DATA_ACCESS_LEVEL = DataAccessLevel.REGISTERED;
   public static final String WORKSPACE__DISSEMINATE_RESEARCH_OTHER = "foo_6";
   public static final Timestamp WORKSPACE__LAST_ACCESSED_TIME =
       Timestamp.from(Instant.parse("2015-05-12T00:00:00.00Z"));
@@ -182,12 +181,16 @@ public class ReportingTestUtils {
     assertThat(user.getUsername()).isEqualTo(USER__USERNAME);
   }
 
-  public static void assertDtoWorkspaceFields(BqDtoWorkspace workspace) {
+  public static void assertDtoWorkspaceFields(
+      BqDtoWorkspace workspace,
+      long expectedWorkspaceId,
+      long expectedCdrVersionId,
+      long expectedCreatorId) {
     assertThat(workspace.getBillingAccountType()).isEqualTo(WORKSPACE__BILLING_ACCOUNT_TYPE);
     assertThat(workspace.getBillingStatus()).isEqualTo(WORKSPACE__BILLING_STATUS);
-    assertThat(workspace.getCdrVersionId()).isEqualTo(WORKSPACE__CDR_VERSION_ID);
+    assertThat(workspace.getCdrVersionId()).isEqualTo(expectedCdrVersionId);
     assertTimeApprox(workspace.getCreationTime(), WORKSPACE__CREATION_TIME);
-    assertThat(workspace.getCreatorId()).isEqualTo(WORKSPACE__CREATOR_ID);
+    assertThat(workspace.getCreatorId()).isEqualTo(expectedCreatorId);
     assertThat(workspace.getDataAccessLevel()).isEqualTo(WORKSPACE__DATA_ACCESS_LEVEL);
     assertThat(workspace.getDisseminateResearchOther())
         .isEqualTo(WORKSPACE__DISSEMINATE_RESEARCH_OTHER);
@@ -220,21 +223,24 @@ public class ReportingTestUtils {
     assertThat(workspace.getRpScientificApproach()).isEqualTo(WORKSPACE__RP_SCIENTIFIC_APPROACH);
     assertThat(workspace.getRpSocialBehavioral()).isEqualTo(WORKSPACE__RP_SOCIAL_BEHAVIORAL);
     assertTimeApprox(workspace.getRpTimeRequested(), WORKSPACE__RP_TIME_REQUESTED);
-    assertThat(workspace.getWorkspaceId()).isEqualTo(WORKSPACE__WORKSPACE_ID);
+    assertThat(workspace.getWorkspaceId()).isEqualTo(expectedWorkspaceId);
+  }
+
+  public static void assertDtoWorkspaceFields(BqDtoWorkspace workspace) {
+    assertDtoWorkspaceFields(workspace, WORKSPACE__WORKSPACE_ID, WORKSPACE__CDR_VERSION_ID, WORKSPACE__CREATOR_ID);
   }
 
   // TODO: put these override values into the scaffold script
-  public static void assertDtoWorkspaceFields(
+  public static void assertPrjWorkspaceFields(
       PrjWorkspace workspace,
-      long actualWorkspaceId,
-      long actualCdrVersionId,
-      long actualCreatorId) {
+      long expectedWorkspaceId,
+      long expectedCdrVersionId,
+      long expectedCreatorId) {
     assertThat(workspace.getBillingAccountType()).isEqualTo(WORKSPACE__BILLING_ACCOUNT_TYPE);
     assertThat(workspace.getBillingStatus()).isEqualTo(WORKSPACE__BILLING_STATUS);
-    assertThat(workspace.getCdrVersionId()).isEqualTo(actualCdrVersionId);
+    assertThat(workspace.getCdrVersionId()).isEqualTo(expectedCdrVersionId);
     assertTimeApprox(workspace.getCreationTime(), WORKSPACE__CREATION_TIME);
-    assertThat(workspace.getCreatorId()).isEqualTo(actualCreatorId);
-    assertThat(workspace.getDataAccessLevel()).isEqualTo(WORKSPACE__DATA_ACCESS_LEVEL);
+    assertThat(workspace.getCreatorId()).isEqualTo(expectedCreatorId);
     assertThat(workspace.getDisseminateResearchOther())
         .isEqualTo(WORKSPACE__DISSEMINATE_RESEARCH_OTHER);
     assertTimeApprox(workspace.getLastAccessedTime(), WORKSPACE__LAST_ACCESSED_TIME);
@@ -266,7 +272,7 @@ public class ReportingTestUtils {
     assertThat(workspace.getRpScientificApproach()).isEqualTo(WORKSPACE__RP_SCIENTIFIC_APPROACH);
     assertThat(workspace.getRpSocialBehavioral()).isEqualTo(WORKSPACE__RP_SOCIAL_BEHAVIORAL);
     assertTimeApprox(workspace.getRpTimeRequested(), WORKSPACE__RP_TIME_REQUESTED);
-    assertThat(workspace.getWorkspaceId()).isEqualTo(actualWorkspaceId);
+    assertThat(workspace.getWorkspaceId()).isEqualTo(expectedWorkspaceId);
   }
 
   public static PrjUser mockPrjUser() {
@@ -347,7 +353,6 @@ public class ReportingTestUtils {
     doReturn(WORKSPACE__CDR_VERSION_ID).when(mockWorkspace).getCdrVersionId();
     doReturn(WORKSPACE__CREATION_TIME).when(mockWorkspace).getCreationTime();
     doReturn(WORKSPACE__CREATOR_ID).when(mockWorkspace).getCreatorId();
-    doReturn(WORKSPACE__DATA_ACCESS_LEVEL).when(mockWorkspace).getDataAccessLevel();
     doReturn(WORKSPACE__DISSEMINATE_RESEARCH_OTHER)
         .when(mockWorkspace)
         .getDisseminateResearchOther();

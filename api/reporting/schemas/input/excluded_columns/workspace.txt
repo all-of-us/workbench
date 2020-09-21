@@ -6,3 +6,4 @@ billing_account_name
 workspace_namespace
 firecloud_name
 firecloud_uuid
+data_access_level

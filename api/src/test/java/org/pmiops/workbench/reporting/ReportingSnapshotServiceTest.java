@@ -22,6 +22,7 @@ import org.pmiops.workbench.model.BqDtoWorkspace;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
+import org.pmiops.workbench.testconfig.ReportingTestUtils;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -84,7 +85,7 @@ public class ReportingSnapshotServiceTest {
 
     assertThat(snapshot.getWorkspaces()).hasSize(1);
     final BqDtoWorkspace workspace = snapshot.getWorkspaces().get(0);
-    assertDtoWorkspaceFields(workspace);
+    ReportingTestUtils.assertDtoWorkspaceFields(workspace);
   }
 
   private void mockUsers() {

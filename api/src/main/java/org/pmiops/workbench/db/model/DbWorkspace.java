@@ -180,12 +180,21 @@ public class DbWorkspace {
   }
 
   @Column(name = "data_access_level")
-  public DataAccessLevel getDataAccessLevel() {
-    return DbStorageEnums.dataAccessLevelFromStorage(dataAccessLevel);
+  public Short getDataAccessLevel() {
+    return dataAccessLevel;
   }
 
-  public void setDataAccessLevel(DataAccessLevel dataAccessLevel) {
-    this.dataAccessLevel = DbStorageEnums.dataAccessLevelToStorage(dataAccessLevel);
+  public void setDataAccessLevel(Short dataAccessLevel) {
+    this.dataAccessLevel = dataAccessLevel;
+  }
+
+  @Transient
+  public DataAccessLevel getDataAccessLevelEnum() {
+    return DbStorageEnums.dataAccessLevelFromStorage(getDataAccessLevel());
+  }
+
+  public void setDataAccessLevelEnum(DataAccessLevel dataAccessLevel) {
+    setDataAccessLevel(DbStorageEnums.dataAccessLevelToStorage(dataAccessLevel));
   }
 
   @ManyToOne
