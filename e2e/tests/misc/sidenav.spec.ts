@@ -11,7 +11,7 @@ describe('Sidebar Navigation', () => {
     await signIn(page);
   });
 
-  test('SideNav menu works', async () => {
+  test('SideNav menu', async () => {
     const homePage = new HomePage(page);
     // Select Profile link
     await Navigation.navMenu(page, NavLink.PROFILE);
