@@ -229,7 +229,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
   async deleteWorkspace(): Promise<string[]> {
     await this.selectWorkspaceAction(EllipsisMenuAction.Delete, { waitForNav: false });
     // Handle Delete Confirmation modal
-    return this.dismissWorkspaceModal();
+    return this.dismissDeleteWorkspaceModal();
   }
 
 
@@ -237,7 +237,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * Dismss Delete Workspace Confirmation modal by click a button.
    * @return {LinkText} clickButtonText Button to click.
    */
-  async dismissWorkspaceModal(clickButtonText: LinkText = LinkText.DeleteWorkspace): Promise<string[]> {
+  async dismissDeleteWorkspaceModal(clickButtonText: LinkText = LinkText.DeleteWorkspace): Promise<string[]> {
     const modal = new Modal(this.page);
     const contentText = await modal.getTextContent();
     await modal.clickButton(clickButtonText, {waitForClose: true});

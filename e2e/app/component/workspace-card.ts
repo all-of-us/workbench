@@ -30,7 +30,7 @@ export default class WorkspaceCard extends CardBase {
     const card = await WorkspaceCard.findCard(page, workspaceName);
     await (card.getEllipsis()).clickAction(EllipsisMenuAction.Delete, { waitForNav: false });
     // Handle Delete Confirmation modal
-    return new WorkspacesPage(page).dismissWorkspaceModal();
+    return new WorkspacesPage(page).dismissDeleteWorkspaceModal();
   }
 
   /**
