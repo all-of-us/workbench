@@ -27,6 +27,20 @@ import {DataTable} from 'primereact/datatable';
 import {ReactFragment} from 'react';
 
 const styles = reactStyles({
+  infoRow: {
+    width: '80%',
+    maxWidth: '1000px'
+  },
+  infoLabel: {
+    width: '300px',
+    minWidth: '180px',
+    textAlign: 'right',
+    marginRight: '1rem',
+  },
+  infoValue: {
+    flex: 1,
+    wordWrap: 'break-word',
+  },
   wideWithMargin: {
     width: '20rem',
     marginRight: '1rem'
@@ -48,25 +62,9 @@ const PurpleLabel = ({style = {}, children}) => {
 };
 
 const workspaceInfoField = (labelText: string, divContents: React.ReactFragment) => {
-  return <FlexRow style={{width: '80%', maxWidth: '1000px'}}>
-    <PurpleLabel
-        style={{
-          width: '250px',
-          minWidth: '180px',
-          textAlign: 'right',
-          marginRight: '1rem',
-        }}
-    >
-      {labelText}
-    </PurpleLabel>
-    <div
-        style={{
-          flex: 1,
-          wordWrap: 'break-word',
-        }}
-    >
-      {divContents}
-    </div>
+  return <FlexRow style={styles.infoRow}>
+    <PurpleLabel style={styles.infoLabel}>{labelText}</PurpleLabel>
+    <div style={styles.infoValue}>{divContents}</div>
   </FlexRow>;
 };
 
@@ -292,8 +290,8 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
           <h3>Cloud Storage Objects</h3>
           <div className='cloud-storage-objects' style={{marginTop: '1rem'}}>
             {workspaceInfoField('GCS bucket path', resources.cloudStorage.storageBucketPath)}
-            {workspaceInfoField('# of Notebook Files', resources.cloudStorage.notebookFileCount)}
-            {workspaceInfoField('# of Non-Notebook Files', resources.cloudStorage.nonNotebookFileCount)}
+            {workspaceInfoField('# of Workbench-managed notebook files', resources.cloudStorage.notebookFileCount)}
+            {workspaceInfoField('# of other files', resources.cloudStorage.nonNotebookFileCount)}
             {workspaceInfoField('Storage used (bytes)', resources.cloudStorage.storageBytesUsed)}
           </div>
           {files && <FileDetailsTable data={files} bucket={resources.cloudStorage.storageBucketPath}/>}
