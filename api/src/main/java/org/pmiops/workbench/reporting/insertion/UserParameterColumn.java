@@ -112,10 +112,6 @@ public enum UserParameterColumn implements QueryParameterColumn<BqDtoUser> {
       u -> QueryParameterValue.float64(u.getFreeTierCreditsLimitDollarsOverride())),
   GIVEN_NAME(
       "given_name", BqDtoUser::getGivenName, u -> QueryParameterValue.string(u.getGivenName())),
-  ID_VERIFICATION_BYPASS_TIME(
-      "id_verification_bypass_time",
-      u -> toInsertRowString(u.getIdVerificationBypassTime()),
-      u -> toTimestampQpv(u.getIdVerificationBypassTime())),
   LAST_MODIFIED_TIME(
       "last_modified_time",
       u -> toInsertRowString(u.getLastModifiedTime()),
@@ -155,6 +151,7 @@ public enum UserParameterColumn implements QueryParameterColumn<BqDtoUser> {
       a -> QueryParameterValue.string(a.getStreetAddress2())),
   ZIP_CODE("zip_code", BqDtoUser::getZipCode, a -> QueryParameterValue.string(a.getZipCode()));
 
+  public static final String TABLE_NAME = "user";
   private final String parameterName;
   private final Function<BqDtoUser, Object> objectValueFunction;
   private final Function<BqDtoUser, QueryParameterValue> parameterValueFunction;

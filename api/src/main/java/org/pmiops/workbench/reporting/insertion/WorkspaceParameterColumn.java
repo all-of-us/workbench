@@ -138,6 +138,7 @@ public enum WorkspaceParameterColumn implements QueryParameterColumn<BqDtoWorksp
       BqDtoWorkspace::getWorkspaceId,
       w -> QueryParameterValue.int64(w.getWorkspaceId()));
 
+  public static final String TABLE_NAME = "workspace";
   private final String parameterName;
   private final Function<BqDtoWorkspace, Object> rowToInsertValueFunction;
   private final Function<BqDtoWorkspace, QueryParameterValue> parameterValueFunction;

@@ -43,9 +43,11 @@ import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.BqDtoUser;
 import org.pmiops.workbench.model.BqDtoWorkspace;
 import org.pmiops.workbench.model.ReportingSnapshot;
+import org.pmiops.workbench.reporting.insertion.InsertAllRequestBuilder;
 import org.pmiops.workbench.reporting.insertion.WorkspaceParameterColumn;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
+import org.pmiops.workbench.testconfig.ReportingTestUtils;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -115,7 +117,8 @@ public class ReportingUploadServiceTest {
                         .username("socrates@aou.biz")
                         .givenName("So-Crates")
                         .disabled(false)
-                        .userId(303L)))
+                        .userId(303L),
+                    ReportingTestUtils.createDtoUser()))
             .workspaces(
                 ImmutableList.of(
                     new BqDtoWorkspace()
@@ -305,8 +308,8 @@ public class ReportingUploadServiceTest {
     assertThat(requests).hasSize(2);
 
     final List<RowToInsert> userRows = requests.get(0).getRows();
-    assertThat(userRows).hasSize(3);
-    assertThat(userRows.get(0).getId()).hasLength(16);
+    assertThat(userRows).hasSize(snapshot.getUsers().size());
+    assertThat(userRows.get(0).getId()).hasLength(InsertAllRequestBuilder.INSERT_ID_LENGTH);
 
     final List<RowToInsert> workspaceRows = requests.get(1).getRows();
     assertThat(workspaceRows).hasSize(3);

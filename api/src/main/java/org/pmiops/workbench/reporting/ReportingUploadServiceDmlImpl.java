@@ -27,14 +27,14 @@ import org.springframework.stereotype.Service;
 @Service("REPORTING_UPLOAD_SERVICE_DML_IMPL")
 @Primary
 public class ReportingUploadServiceDmlImpl implements ReportingUploadService {
+
   private static final Logger logger = Logger.getLogger("ReportingUploadServiceInsertQueryImpl");
   private static final long MAX_WAIT_TIME = Duration.ofSeconds(60).toMillis();
 
   private final BigQueryService bigQueryService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
-  private static final DmlInsertJobBuilder<BqDtoUser> researcherJobBuilder =
-      UserParameterColumn::values;
+  private static final DmlInsertJobBuilder<BqDtoUser> userJobBuilder = UserParameterColumn::values;
   private static final DmlInsertJobBuilder<BqDtoWorkspace> workspaceJobBuilder =
       WorkspaceParameterColumn::values;
 
@@ -70,14 +70,17 @@ public class ReportingUploadServiceDmlImpl implements ReportingUploadService {
     Lists.partition(reportingSnapshot.getUsers(), partitionSize).stream()
         .map(
             batch ->
-                researcherJobBuilder.build(
-                    qualifyTableName("researcher"), batch, snapshotTimestamp))
+                userJobBuilder.build(
+                    qualifyTableName(UserParameterColumn.TABLE_NAME), batch, snapshotTimestamp))
         .forEach(resultBuilder::add);
 
     Lists.partition(reportingSnapshot.getWorkspaces(), partitionSize).stream()
         .map(
             batch ->
-                workspaceJobBuilder.build(qualifyTableName("workspace"), batch, snapshotTimestamp))
+                workspaceJobBuilder.build(
+                    qualifyTableName(WorkspaceParameterColumn.TABLE_NAME),
+                    batch,
+                    snapshotTimestamp))
         .forEach(resultBuilder::add);
     return resultBuilder.build();
   }
