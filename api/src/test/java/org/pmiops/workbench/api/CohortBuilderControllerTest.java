@@ -731,11 +731,11 @@ public class CohortBuilderControllerTest {
     jdbcTemplate.execute(
         "insert into cb_survey_version(survey_id, concept_id, version, display_order) values (102, 1333342, 'July 2020', 3)");
     jdbcTemplate.execute(
-        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (1, 715713, 0, 100, 291)");
+        "insert into cb_survey_attribute(id, question_concept_id, survey_id, item_count) values (1, 715713, 100, 291)");
     jdbcTemplate.execute(
-        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (2, 715713, 0, 101, 148)");
+        "insert into cb_survey_attribute(id, question_concept_id, survey_id, item_count) values (2, 715713, 101, 148)");
     jdbcTemplate.execute(
-        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (3, 715713, 0, 102, 150)");
+        "insert into cb_survey_attribute(id, question_concept_id, survey_id, item_count) values (3, 715713, 102, 150)");
     jdbcTemplate.execute(
         "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (4, 715713, 903096, 100, 154)");
     jdbcTemplate.execute(
@@ -746,13 +746,13 @@ public class CohortBuilderControllerTest {
         controller.findSurveyVersionByQuestionConceptId(1L, 1333342L, 715713L).getBody();
     assertEquals(response.getItems().get(0).getSurveyId(), new Long("100"));
     assertEquals(response.getItems().get(0).getVersion(), "May 2020");
-    assertEquals(response.getItems().get(0).getItemCount(), new Long("445"));
+    assertEquals(response.getItems().get(0).getItemCount(), new Long("291"));
     assertEquals(response.getItems().get(1).getSurveyId(), new Long("101"));
     assertEquals(response.getItems().get(1).getVersion(), "June 2020");
-    assertEquals(response.getItems().get(1).getItemCount(), new Long("230"));
+    assertEquals(response.getItems().get(1).getItemCount(), new Long("148"));
     assertEquals(response.getItems().get(2).getSurveyId(), new Long("102"));
     assertEquals(response.getItems().get(2).getVersion(), "July 2020");
-    assertEquals(response.getItems().get(2).getItemCount(), new Long("181"));
+    assertEquals(response.getItems().get(2).getItemCount(), new Long("150"));
     jdbcTemplate.execute("drop table cb_survey_version");
     jdbcTemplate.execute("drop table cb_survey_attribute");
   }
