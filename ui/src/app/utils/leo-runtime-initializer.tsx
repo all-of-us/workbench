@@ -2,6 +2,10 @@ import {leoRuntimesApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import {isAbortError, reportError} from 'app/utils/errors';
 import {Runtime, RuntimeConfigurationType, RuntimeStatus} from 'generated/fetch';
+import {
+  markRuntimeOperationCompleteForWorkspace,
+  updateRuntimeOpsStoreForWorkspaceNamespace
+} from "./stores";
 
 // We're only willing to wait 20 minutes total for a runtime to initialize. After that we return
 // a rejected promise no matter what.
@@ -66,7 +70,7 @@ export interface LeoRuntimeInitializerOptions {
   onStatusUpdate?: (RuntimeStatus?) => void;
   // An optional abort signal which allows the caller to abort the initialization process, including
   // cancelling any outstanding Ajax requests.
-  abortSignal?: AbortSignal;
+  pollAbortSignal?: AbortSignal;
 
   // Override options. These options all have sensible defaults, but may be overridden for testing
   // or special scenarios (such as an initialization flow which should not take any actions).
@@ -110,7 +114,7 @@ export class LeoRuntimeInitializer {
   // Core properties for interacting with the caller and the runtime APIs.
   private readonly workspaceNamespace: string;
   private readonly onStatusUpdate: (RuntimeStatus?) => void;
-  private readonly abortSignal?: AbortSignal;
+  private readonly pollAbortSignal?: AbortSignal;
 
   // Properties to track & control the polling loop. We use a capped exponential backoff strategy
   // and a series of "maxFoo" limits to ensure the initialization flow doesn't get out of control.
@@ -155,7 +159,7 @@ export class LeoRuntimeInitializer {
 
     this.workspaceNamespace = options.workspaceNamespace;
     this.onStatusUpdate = options.onStatusUpdate ? options.onStatusUpdate : () => {};
-    this.abortSignal = options.abortSignal;
+    this.pollAbortSignal = options.pollAbortSignal;
     this.currentDelay = options.initialPollingDelay;
     this.maxDelay = options.maxPollingDelay;
     this.overallTimeout = options.overallTimeout;
@@ -166,7 +170,16 @@ export class LeoRuntimeInitializer {
   }
 
   private async getRuntime(): Promise<Runtime> {
-    return await runtimeApi().getRuntime(this.workspaceNamespace, {signal: this.abortSignal});
+    const aborter = new AbortController();
+    const promise = runtimeApi().getRuntime(this.workspaceNamespace, {signal: aborter.signal});
+    updateRuntimeOpsStoreForWorkspaceNamespace(this.workspaceNamespace, {
+      promise: promise,
+      operation: 'get',
+      aborter: aborter
+    });
+    await promise;
+    markRuntimeOperationCompleteForWorkspace(this.workspaceNamespace);
+    return promise;
   }
 
   private async createRuntime(): Promise<void> {
@@ -174,10 +187,18 @@ export class LeoRuntimeInitializer {
       throw new ExceededActionCountError(
         `Reached max runtime create count (${this.maxCreateCount})`, this.currentRuntime);
     }
-    await runtimeApi().createRuntime(this.workspaceNamespace,
+    const aborter = new AbortController();
+    const promise = runtimeApi().createRuntime(this.workspaceNamespace,
       {configurationType: RuntimeConfigurationType.DefaultDataproc},
-      {signal: this.abortSignal});
+      {signal: this.pollAbortSignal});
+    updateRuntimeOpsStoreForWorkspaceNamespace(this.workspaceNamespace, {
+      promise: promise,
+      operation: 'create',
+      aborter: aborter
+    });
     this.createCount++;
+    await promise;
+    markRuntimeOperationCompleteForWorkspace(this.workspaceNamespace);
   }
 
   private async resumeRuntime(): Promise<void> {
@@ -185,9 +206,17 @@ export class LeoRuntimeInitializer {
       throw new ExceededActionCountError(
         `Reached max runtime resume count (${this.maxResumeCount})`, this.currentRuntime);
     }
-    await leoRuntimesApi().startRuntime(
-      this.currentRuntime.googleProject, this.currentRuntime.runtimeName, {signal: this.abortSignal});
+    const aborter = new AbortController();
+    const promise = leoRuntimesApi().startRuntime(
+      this.currentRuntime.googleProject, this.currentRuntime.runtimeName, {signal: this.pollAbortSignal});
+    updateRuntimeOpsStoreForWorkspaceNamespace(this.workspaceNamespace, {
+      promise: promise,
+      operation: 'resume',
+      aborter: aborter
+    });
     this.resumeCount++;
+    await promise;
+    markRuntimeOperationCompleteForWorkspace(this.workspaceNamespace);
   }
 
   private async deleteRuntime(): Promise<void> {
@@ -195,8 +224,16 @@ export class LeoRuntimeInitializer {
       throw new ExceededActionCountError(
         `Reached max runtime delete count (${this.maxDeleteCount})`, this.currentRuntime);
     }
-    await runtimeApi().deleteRuntime(this.workspaceNamespace, {signal: this.abortSignal});
+    const aborter = new AbortController();
+    const promise = runtimeApi().deleteRuntime(this.workspaceNamespace, {signal: this.pollAbortSignal});
+    updateRuntimeOpsStoreForWorkspaceNamespace(this.workspaceNamespace, {
+      promise: promise,
+      operation: 'delete',
+      aborter: aborter
+    });
     this.deleteCount++;
+    await promise;
+    markRuntimeOperationCompleteForWorkspace(this.workspaceNamespace);
   }
 
   private isRuntimeRunning(): boolean {
@@ -257,7 +294,7 @@ export class LeoRuntimeInitializer {
     //
     // Certain runtime states require active intervention, such as deleting or resuming the runtime;
     // these are handled within the the polling loop.
-    if (this.abortSignal && this.abortSignal.aborted) {
+    if (this.pollAbortSignal && this.pollAbortSignal.aborted) {
       // We'll bail out early if an abort signal was triggered while waiting for the poll cycle.
       return this.reject(
         new LeoRuntimeInitializationFailedError('Request was aborted', this.currentRuntime));

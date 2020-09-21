@@ -120,7 +120,7 @@ enum PreviewErrorMode {
 export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace())(
   class extends React.Component<Props, State> {
     private runRuntimeTimer: NodeJS.Timeout;
-    private aborter = new AbortController();
+    private pollAborter = new AbortController();
 
     constructor(props) {
       super(props);
@@ -164,14 +164,14 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
 
     componentWillUnmount(): void {
       clearTimeout(this.runRuntimeTimer);
-      this.aborter.abort();
+      this.pollAborter.abort();
     }
 
     private async runRuntime(onRuntimeReady: Function): Promise<void> {
       await LeoRuntimeInitializer.initialize({
         workspaceNamespace: this.props.urlParams.ns,
         onStatusUpdate: (status) => this.setState({runtimeStatus: status}),
-        abortSignal: this.aborter.signal
+        pollAbortSignal: this.pollAborter.signal
       });
       onRuntimeReady();
     }

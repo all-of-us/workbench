@@ -15,6 +15,10 @@ import {Runtime} from 'generated/fetch';
 
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {
+  markRuntimeOperationCompleteForWorkspace,
+  updateRuntimeOpsStoreForWorkspaceNamespace
+} from "../../utils/stores";
 
 
 const styles = reactStyles({
@@ -72,7 +76,13 @@ export const RuntimePanel = withCurrentWorkspace()(
       let runtime = null;
       let error = false;
       try {
-        runtime = await runtimeApi().getRuntime(this.props.workspace.namespace, {signal: this.aborter.signal});
+        runtime = runtimeApi().getRuntime(this.props.workspace.namespace, {signal: this.aborter.signal});
+        updateRuntimeOpsStoreForWorkspaceNamespace(this.props.workspace.namespace, {
+          promise: runtime,
+          operation: 'get',
+          aborter: this.aborter
+        });
+        await runtime;
       } catch (e) {
         // 404 is expected if the runtime doesn't exist, represent this as a null
         // runtime rather than an error mode.
@@ -80,6 +90,7 @@ export const RuntimePanel = withCurrentWorkspace()(
           error = true;
         }
       }
+      markRuntimeOperationCompleteForWorkspace(this.props.workspace.namespace);
       this.setState({
         runtime,
         error,

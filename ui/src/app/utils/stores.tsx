@@ -30,6 +30,44 @@ interface ProfileStore {
 
 export const profileStore = atom<ProfileStore>({});
 
+export interface RuntimeOperation {
+  promise: Promise<any>,
+  operation: string,
+  aborter: AbortController
+}
+
+interface WorkspaceRuntimeOperation {
+  [workspaceNamespace: string]: RuntimeOperation
+}
+
+interface RuntimeOpsStore {
+  opsByWorkspaceNamespace: WorkspaceRuntimeOperation;
+}
+
+export const runtimeOpsStore = atom<RuntimeOpsStore>({opsByWorkspaceNamespace: {}});
+
+export const updateRuntimeOpsStoreForWorkspaceNamespace = (workspaceNamespace: string, runtimeOperation: RuntimeOperation) => {
+  const opsByWorkspaceNamespace = runtimeOpsStore.get().opsByWorkspaceNamespace;
+  opsByWorkspaceNamespace[workspaceNamespace] = runtimeOperation;
+  runtimeOpsStore.set({...runtimeOpsStore.get(), opsByWorkspaceNamespace: opsByWorkspaceNamespace});
+}
+
+export const markRuntimeOperationCompleteForWorkspace = (workspaceNamespace: string) => {
+  const opsByWorkspaceNamespace = runtimeOpsStore.get().opsByWorkspaceNamespace;
+  if (!!opsByWorkspaceNamespace[workspaceNamespace]) {
+    delete opsByWorkspaceNamespace[workspaceNamespace];
+  }
+}
+
+export const abortRuntimeOperationForWorkspace = (workspaceNamespace: string) => {
+  const opsByWorkspaceNamespace = runtimeOpsStore.get().opsByWorkspaceNamespace;
+  if (!!opsByWorkspaceNamespace[workspaceNamespace]) {
+    const runtimeOperation = opsByWorkspaceNamespace[workspaceNamespace];
+    runtimeOperation.aborter.abort();
+    delete opsByWorkspaceNamespace[workspaceNamespace];
+  }
+}
+
 /**
  * @name useStore
  * @description React hook that will trigger a render when the corresponding store's value changes

@@ -36,7 +36,7 @@ interface State {
 }
 
 export class ResetRuntimeButton extends React.Component<Props, State> {
-  private aborter = new AbortController();
+  private pollAborter = new AbortController();
 
   constructor(props) {
     super(props);
@@ -63,7 +63,7 @@ export class ResetRuntimeButton extends React.Component<Props, State> {
       await LeoRuntimeInitializer.initialize({
         workspaceNamespace: this.props.workspaceNamespace,
         onStatusUpdate: (runtimeStatus: RuntimeStatus) => {
-          if (this.aborter.signal.aborted) {
+          if (this.pollAborter.signal.aborted) {
             // IF we've been unmounted, don't try to update state.
             return;
           }
@@ -71,7 +71,7 @@ export class ResetRuntimeButton extends React.Component<Props, State> {
             runtimeStatus: runtimeStatus,
           });
         },
-        abortSignal: this.aborter.signal,
+        pollAbortSignal: this.pollAborter.signal,
         // For the reset button, we never want to affect the runtime state. With the maxFooCount set
         // to zero, the initializer will reject the promise when it reaches a non-transitional state.
         maxDeleteCount: maxActionCount,
@@ -98,7 +98,7 @@ export class ResetRuntimeButton extends React.Component<Props, State> {
   }
 
   componentWillUnmount() {
-    this.aborter.abort();
+    this.pollAborter.abort();
   }
 
   private createTooltip(content: React.ReactFragment, children: React.ReactFragment): React.ReactFragment {
