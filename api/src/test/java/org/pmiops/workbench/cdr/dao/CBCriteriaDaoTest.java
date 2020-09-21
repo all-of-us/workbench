@@ -432,6 +432,8 @@ public class CBCriteriaDaoTest {
         "insert into cb_survey_attribute(id, question_concept_id, survey_id, item_count) values (2, 715713, 101, 148)");
     jdbcTemplate.execute(
         "insert into cb_survey_attribute(id, question_concept_id, survey_id, item_count) values (3, 715713, 102, 150)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (1, 715713, 0, 100, 291)");
     List<DbSurveyVersion> dbSurveyVersions =
         cbCriteriaDao.findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
             1333342L, 715713L, null);

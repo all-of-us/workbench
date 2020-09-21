@@ -300,6 +300,12 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
               + "and (csa.answer_concept_id = :answerConceptId or :answerConceptId is null)"
               + "order by csv.display_order) innerSql",
       nativeQuery = true)
+  /**
+   * This is ignoring null parameters using the @Query annotation. This allows us to avoid creating
+   * additional methods just to handle null params. If the :answerConceptId parameter is null, then
+   * the clause is always true and allows us to handle both null and non null parameters for
+   * :answerConceptId
+   */
   List<DbSurveyVersion> findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
       @Param("surveyConceptId") Long surveyConceptId,
       @Param("questionConceptId") Long questionConceptId,
