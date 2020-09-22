@@ -78,17 +78,21 @@ public interface LeonardoMapper {
   }
 
   @AfterMapping
-  default void listRuntimeAfterMapper(@MappingTarget Runtime runtime, LeonardoListRuntimeResponse leonardoListRuntimeResponse) {
+  default void listRuntimeAfterMapper(
+      @MappingTarget Runtime runtime, LeonardoListRuntimeResponse leonardoListRuntimeResponse) {
     mapLabels(runtime, (Map<String, String>) leonardoListRuntimeResponse.getLabels());
     mapRuntimeConfig(runtime, leonardoListRuntimeResponse.getRuntimeConfig());
   }
 
   default void mapLabels(Runtime runtime, Map<String, String> runtimeLabels) {
-    if (runtimeLabels == null || runtimeLabels.get(LeonardoNotebooksClientImpl.RUNTIME_LABEL_AOU_CONFIG) == null) {
+    if (runtimeLabels == null
+        || runtimeLabels.get(LeonardoNotebooksClientImpl.RUNTIME_LABEL_AOU_CONFIG) == null) {
       runtime.setConfigurationType(RuntimeConfigurationType.DEFAULTDATAPROC);
     } else {
       runtime.setConfigurationType(
-          LeonardoNotebooksClientImpl.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.inverse().get(runtimeLabels.get(LeonardoNotebooksClientImpl.RUNTIME_LABEL_AOU_CONFIG)));
+          LeonardoNotebooksClientImpl.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP
+              .inverse()
+              .get(runtimeLabels.get(LeonardoNotebooksClientImpl.RUNTIME_LABEL_AOU_CONFIG)));
     }
   }
 
@@ -99,22 +103,15 @@ public interface LeonardoMapper {
 
     Gson gson = new Gson();
     LeonardoRuntimeConfig runtimeConfig =
-        gson.fromJson(
-            gson.toJson(runtimeConfigObj),
-            LeonardoRuntimeConfig.class);
+        gson.fromJson(gson.toJson(runtimeConfigObj), LeonardoRuntimeConfig.class);
 
     if (CloudServiceEnum.DATAPROC.equals(runtimeConfig.getCloudService())) {
       runtime.dataprocConfig(
           toDataprocConfig(
-              gson.fromJson(
-                  gson.toJson(runtimeConfigObj),
-                  LeonardoMachineConfig.class)));
+              gson.fromJson(gson.toJson(runtimeConfigObj), LeonardoMachineConfig.class)));
     } else if (CloudServiceEnum.GCE.equals(runtimeConfig.getCloudService())) {
       runtime.gceConfig(
-          toGceConfig(
-              gson.fromJson(
-                  gson.toJson(runtimeConfigObj),
-                  LeonardoGceConfig.class)));
+          toGceConfig(gson.fromJson(gson.toJson(runtimeConfigObj), LeonardoGceConfig.class)));
     } else {
       throw new IllegalArgumentException(
           "Invalid LeonardoGetRuntimeResponse.RuntimeConfig.cloudService : "

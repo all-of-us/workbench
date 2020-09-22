@@ -186,20 +186,31 @@ public class RuntimeController implements RuntimeApiDelegate {
         throw e;
       }
 
-      List<LeonardoListRuntimeResponse> runtimes = leonardoNotebooksClient.listRuntimesByProject(workspaceNamespace);
+      List<LeonardoListRuntimeResponse> runtimes =
+          leonardoNotebooksClient.listRuntimesByProject(workspaceNamespace);
       if (runtimes.isEmpty()) {
         throw e;
       }
 
-      LeonardoListRuntimeResponse mostRecentRuntime = runtimes.stream()
-          .sorted((a,b) -> b.getAuditInfo().getCreatedDate().compareTo(a.getAuditInfo().getCreatedDate()))
-          .findFirst()
-          .get();
+      LeonardoListRuntimeResponse mostRecentRuntime =
+          runtimes.stream()
+              .sorted(
+                  (a, b) ->
+                      b.getAuditInfo()
+                          .getCreatedDate()
+                          .compareTo(a.getAuditInfo().getCreatedDate()))
+              .findFirst()
+              .get();
 
-      final String OVERRIDE_LABEL = LeonardoNotebooksClientImpl.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(RuntimeConfigurationType.USEROVERRIDE);
+      final String OVERRIDE_LABEL =
+          LeonardoNotebooksClientImpl.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(
+              RuntimeConfigurationType.USEROVERRIDE);
       Map<String, String> runtimeLabels = (Map<String, String>) mostRecentRuntime.getLabels();
-      if (runtimeLabels != null && OVERRIDE_LABEL.equals(runtimeLabels.get(LeonardoNotebooksClientImpl.RUNTIME_LABEL_AOU_CONFIG))) {
-        return ResponseEntity.ok(leonardoMapper.toApiRuntime(mostRecentRuntime).status(RuntimeStatus.DELETED));
+      if (runtimeLabels != null
+          && OVERRIDE_LABEL.equals(
+              runtimeLabels.get(LeonardoNotebooksClientImpl.RUNTIME_LABEL_AOU_CONFIG))) {
+        return ResponseEntity.ok(
+            leonardoMapper.toApiRuntime(mostRecentRuntime).status(RuntimeStatus.DELETED));
       } else {
         throw e;
       }

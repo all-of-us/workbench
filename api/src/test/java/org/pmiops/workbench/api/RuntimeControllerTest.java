@@ -267,10 +267,7 @@ public class RuntimeControllerTest {
     dataprocConfigObj.put("masterMachineType", "n1-standard-4");
     dataprocConfigObj.put("masterDiskSize", 50.0);
 
-    gceConfig = new GceConfig()
-        .bootDiskSize(10)
-        .diskSize(100)
-        .machineType("n1-standard-2");
+    gceConfig = new GceConfig().bootDiskSize(10).diskSize(100).machineType("n1-standard-2");
 
     gceConfigObj = new LinkedTreeMap<>();
     gceConfigObj.put("cloudService", "GCE");
@@ -443,14 +440,14 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenThrow(new ApiException(404, "Not found"));
     when(userRuntimesApi.listRuntimesByProject(BILLING_PROJECT_ID, null, true))
-        .thenReturn(ImmutableList.of(
-            new LeonardoListRuntimeResponse()
-                .googleProject("google-project")
-                .runtimeName("expected-runtime")
-                .status(LeonardoRuntimeStatus.CREATING)
-                .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
-                .labels(ImmutableMap.of("all-of-us-config", "user-override"))
-        ));
+        .thenReturn(
+            ImmutableList.of(
+                new LeonardoListRuntimeResponse()
+                    .googleProject("google-project")
+                    .runtimeName("expected-runtime")
+                    .status(LeonardoRuntimeStatus.CREATING)
+                    .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
+                    .labels(ImmutableMap.of("all-of-us-config", "user-override"))));
 
     Runtime runtime = runtimeController.getRuntime(BILLING_PROJECT_ID).getBody();
 
@@ -468,12 +465,12 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenThrow(new ApiException(404, "Not found"));
     when(userRuntimesApi.listRuntimesByProject(BILLING_PROJECT_ID, null, true))
-        .thenReturn(ImmutableList.of(
-            new LeonardoListRuntimeResponse()
-                .runtimeConfig(gceConfigObj)
-                .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
-                .labels(ImmutableMap.of("all-of-us-config", "user-override"))
-        ));
+        .thenReturn(
+            ImmutableList.of(
+                new LeonardoListRuntimeResponse()
+                    .runtimeConfig(gceConfigObj)
+                    .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
+                    .labels(ImmutableMap.of("all-of-us-config", "user-override"))));
 
     Runtime runtime = runtimeController.getRuntime(BILLING_PROJECT_ID).getBody();
 
@@ -498,12 +495,12 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenThrow(new ApiException(404, "Not found"));
     when(userRuntimesApi.listRuntimesByProject(BILLING_PROJECT_ID, null, true))
-        .thenReturn(ImmutableList.of(
-            new LeonardoListRuntimeResponse()
-                .runtimeConfig(dataProcConfigObj)
-                .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
-                .labels(ImmutableMap.of("all-of-us-config", "user-override"))
-        ));
+        .thenReturn(
+            ImmutableList.of(
+                new LeonardoListRuntimeResponse()
+                    .runtimeConfig(dataProcConfigObj)
+                    .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
+                    .labels(ImmutableMap.of("all-of-us-config", "user-override"))));
 
     Runtime runtime = runtimeController.getRuntime(BILLING_PROJECT_ID).getBody();
 
@@ -525,18 +522,19 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenThrow(new ApiException(404, "Not found"));
     when(userRuntimesApi.listRuntimesByProject(BILLING_PROJECT_ID, null, true))
-        .thenReturn(ImmutableList.of(
-            new LeonardoListRuntimeResponse()
-                .runtimeName("expected-runtime")
-                .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp))
-                .labels(ImmutableMap.of("all-of-us-config", "user-override")),
-            new LeonardoListRuntimeResponse()
-                .runtimeName("default-runtime")
-                .auditInfo(new LeonardoAuditInfo().createdDate(olderTimestamp))
-                .labels(ImmutableMap.of("all-of-us-config", "default"))
-        ));
+        .thenReturn(
+            ImmutableList.of(
+                new LeonardoListRuntimeResponse()
+                    .runtimeName("expected-runtime")
+                    .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp))
+                    .labels(ImmutableMap.of("all-of-us-config", "user-override")),
+                new LeonardoListRuntimeResponse()
+                    .runtimeName("default-runtime")
+                    .auditInfo(new LeonardoAuditInfo().createdDate(olderTimestamp))
+                    .labels(ImmutableMap.of("all-of-us-config", "default"))));
 
-    assertThat(runtimeController.getRuntime(BILLING_PROJECT_ID).getBody().getRuntimeName()).isEqualTo("expected-runtime");
+    assertThat(runtimeController.getRuntime(BILLING_PROJECT_ID).getBody().getRuntimeName())
+        .isEqualTo("expected-runtime");
   }
 
   @Test
@@ -547,16 +545,16 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenThrow(new ApiException(404, "Not found"));
     when(userRuntimesApi.listRuntimesByProject(BILLING_PROJECT_ID, null, true))
-        .thenReturn(ImmutableList.of(
-            new LeonardoListRuntimeResponse()
-                .runtimeName("override-runtime")
-                .auditInfo(new LeonardoAuditInfo().createdDate(olderTimestamp))
-                .labels(ImmutableMap.of("all-of-us-config", "user-override")),
-            new LeonardoListRuntimeResponse()
-                .runtimeName("default-runtime")
-                .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp))
-                .labels(ImmutableMap.of("all-of-us-config", "default"))
-        ));
+        .thenReturn(
+            ImmutableList.of(
+                new LeonardoListRuntimeResponse()
+                    .runtimeName("override-runtime")
+                    .auditInfo(new LeonardoAuditInfo().createdDate(olderTimestamp))
+                    .labels(ImmutableMap.of("all-of-us-config", "user-override")),
+                new LeonardoListRuntimeResponse()
+                    .runtimeName("default-runtime")
+                    .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp))
+                    .labels(ImmutableMap.of("all-of-us-config", "default"))));
 
     assertThrows(NotFoundException.class, () -> runtimeController.getRuntime(BILLING_PROJECT_ID));
   }
@@ -569,15 +567,15 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenThrow(new ApiException(404, "Not found"));
     when(userRuntimesApi.listRuntimesByProject(BILLING_PROJECT_ID, null, true))
-        .thenReturn(ImmutableList.of(
-            new LeonardoListRuntimeResponse()
-                .runtimeName("override-runtime")
-                .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp)),
-            new LeonardoListRuntimeResponse()
-                .runtimeName("default-runtime")
-                .auditInfo(new LeonardoAuditInfo().createdDate(olderTimestamp))
-                .labels(ImmutableMap.of("all-of-us-config", "default"))
-        ));
+        .thenReturn(
+            ImmutableList.of(
+                new LeonardoListRuntimeResponse()
+                    .runtimeName("override-runtime")
+                    .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp)),
+                new LeonardoListRuntimeResponse()
+                    .runtimeName("default-runtime")
+                    .auditInfo(new LeonardoAuditInfo().createdDate(olderTimestamp))
+                    .labels(ImmutableMap.of("all-of-us-config", "default"))));
 
     assertThrows(NotFoundException.class, () -> runtimeController.getRuntime(BILLING_PROJECT_ID));
   }
@@ -839,7 +837,9 @@ public class RuntimeControllerTest {
 
     runtimeController.createRuntime(
         BILLING_PROJECT_ID,
-        new Runtime().configurationType(RuntimeConfigurationType.DEFAULTDATAPROC).dataprocConfig(testRuntime.getDataprocConfig()));
+        new Runtime()
+            .configurationType(RuntimeConfigurationType.DEFAULTDATAPROC)
+            .dataprocConfig(testRuntime.getDataprocConfig()));
     verify(userRuntimesApi)
         .createRuntime(
             eq(BILLING_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
@@ -856,7 +856,10 @@ public class RuntimeControllerTest {
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
 
     runtimeController.createRuntime(
-        BILLING_PROJECT_ID, new Runtime().configurationType(RuntimeConfigurationType.DEFAULTGCE).dataprocConfig(dataprocConfig));
+        BILLING_PROJECT_ID,
+        new Runtime()
+            .configurationType(RuntimeConfigurationType.DEFAULTGCE)
+            .dataprocConfig(dataprocConfig));
     verify(userRuntimesApi)
         .createRuntime(
             eq(BILLING_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
@@ -873,7 +876,10 @@ public class RuntimeControllerTest {
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
 
     runtimeController.createRuntime(
-        BILLING_PROJECT_ID, new Runtime().configurationType(RuntimeConfigurationType.USEROVERRIDE).dataprocConfig(dataprocConfig));
+        BILLING_PROJECT_ID,
+        new Runtime()
+            .configurationType(RuntimeConfigurationType.USEROVERRIDE)
+            .dataprocConfig(dataprocConfig));
     verify(userRuntimesApi)
         .createRuntime(
             eq(BILLING_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
