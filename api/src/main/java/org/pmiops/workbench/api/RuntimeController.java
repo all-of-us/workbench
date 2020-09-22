@@ -206,11 +206,12 @@ public class RuntimeController implements RuntimeApiDelegate {
               RuntimeConfigurationType.USEROVERRIDE);
       Map<String, String> runtimeLabels = (Map<String, String>) mostRecentRuntime.getLabels();
       if (runtimeLabels != null
-          && OVERRIDE_LABEL.equals(
-              runtimeLabels.get(LeonardoMapper.RUNTIME_LABEL_AOU_CONFIG))) {
+          && OVERRIDE_LABEL.equals(runtimeLabels.get(LeonardoMapper.RUNTIME_LABEL_AOU_CONFIG))) {
         Runtime runtime = leonardoMapper.toApiRuntime(mostRecentRuntime);
         if (!runtime.getStatus().equals(RuntimeStatus.DELETED)) {
-          log.warning("Runtimes returned from ListRuntimes should be DELETED but found " + runtime.getStatus());
+          log.warning(
+              "Runtimes returned from ListRuntimes should be DELETED but found "
+                  + runtime.getStatus());
         }
 
         return ResponseEntity.ok(

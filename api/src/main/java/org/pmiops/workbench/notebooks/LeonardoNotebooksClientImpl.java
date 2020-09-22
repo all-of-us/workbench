@@ -108,7 +108,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     if (runtime.getConfigurationType() != null) {
       runtimeLabels.put(
           LeonardoMapper.RUNTIME_LABEL_AOU_CONFIG,
-          LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(runtime.getConfigurationType()));
+          LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(
+              runtime.getConfigurationType()));
     }
 
     LeonardoCreateRuntimeRequest request =

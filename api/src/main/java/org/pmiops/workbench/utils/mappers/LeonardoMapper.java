@@ -30,12 +30,11 @@ public interface LeonardoMapper {
   String RUNTIME_LABEL_AOU = "all-of-us";
   String RUNTIME_LABEL_AOU_CONFIG = "all-of-us-config";
   String RUNTIME_LABEL_CREATED_BY = "created-by";
-  BiMap<RuntimeConfigurationType, String>
-      RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP =
-          ImmutableBiMap.of(
-              RuntimeConfigurationType.USEROVERRIDE, "user-override",
-              RuntimeConfigurationType.DEFAULTGCE, "default-gce",
-              RuntimeConfigurationType.DEFAULTDATAPROC, "default-dataproc");
+  BiMap<RuntimeConfigurationType, String> RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP =
+      ImmutableBiMap.of(
+          RuntimeConfigurationType.USEROVERRIDE, "user-override",
+          RuntimeConfigurationType.DEFAULTGCE, "default-gce",
+          RuntimeConfigurationType.DEFAULTDATAPROC, "default-dataproc");
 
   DataprocConfig toDataprocConfig(LeonardoMachineConfig leonardoMachineConfig);
 
@@ -96,8 +95,7 @@ public interface LeonardoMapper {
   }
 
   default void mapLabels(Runtime runtime, Map<String, String> runtimeLabels) {
-    if (runtimeLabels == null
-        || runtimeLabels.get(RUNTIME_LABEL_AOU_CONFIG) == null) {
+    if (runtimeLabels == null || runtimeLabels.get(RUNTIME_LABEL_AOU_CONFIG) == null) {
       runtime.setConfigurationType(RuntimeConfigurationType.DEFAULTDATAPROC);
     } else {
       runtime.setConfigurationType(
