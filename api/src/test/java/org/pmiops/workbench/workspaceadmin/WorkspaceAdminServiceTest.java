@@ -5,16 +5,21 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.BlobId;
+import com.google.common.collect.ImmutableList;
 import com.google.monitoring.v3.Point;
 import com.google.monitoring.v3.TimeInterval;
 import com.google.monitoring.v3.TimeSeries;
 import com.google.monitoring.v3.TypedValue;
 import com.google.protobuf.util.Timestamps;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -45,6 +50,7 @@ import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.AdminWorkspaceResources;
 import org.pmiops.workbench.model.CloudStorageTraffic;
+import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.Workspace;
@@ -73,6 +79,7 @@ public class WorkspaceAdminServiceTest {
   private static final String WORKSPACE_NAME = "Gone with the Wind";
 
   @MockBean private CloudMonitoringService mockCloudMonitoringService;
+  @MockBean private CloudStorageService mockCloudStorageService;
   @MockBean private FireCloudService mockFirecloudService;
   @MockBean private NotebooksService mockNotebooksService;
   @MockBean private WorkspaceDao mockWorkspaceDao;
@@ -89,7 +96,6 @@ public class WorkspaceAdminServiceTest {
   @MockBean({
     ActionAuditQueryService.class,
     AdminAuditor.class,
-    CloudStorageService.class,
     CohortDao.class,
     CohortReviewMapper.class,
     CommonMappers.class,
@@ -128,6 +134,9 @@ public class WorkspaceAdminServiceTest {
     doReturn(Optional.of(dbWorkspace))
         .when(mockWorkspaceDao)
         .findFirstByWorkspaceNamespaceOrderByFirecloudNameAsc(WORKSPACE_NAMESPACE);
+
+    // required to enable the use of default method blobToFileDetail()
+    when(mockCloudStorageService.blobToFileDetail(any(), anyString())).thenCallRealMethod();
   }
 
   @Test
@@ -203,5 +212,54 @@ public class WorkspaceAdminServiceTest {
 
     List<ListRuntimeResponse> runtimes = resources.getRuntimes();
     assertThat(runtimes).isEmpty();
+  }
+
+  private final long dummyTime = Instant.now().toEpochMilli();
+
+  private Blob mockBlob(String bucket, String path, Long size) {
+    Blob blob = mock(Blob.class);
+    when(blob.getBlobId()).thenReturn(BlobId.of(bucket, path));
+    when(blob.getBucket()).thenReturn(bucket);
+    when(blob.getName()).thenReturn(path);
+    when(blob.getSize()).thenReturn(size);
+    when(blob.getUpdateTime()).thenReturn(dummyTime);
+    return blob;
+  }
+
+  @Test
+  public void testGetFiles() {
+    final List<Blob> blobs =
+        ImmutableList.of(
+            mockBlob("bucket", "notebooks/test.ipynb", 1000L),
+            mockBlob("bucket", "notebooks/test2.ipynb", 2000L),
+            mockBlob("bucket", "notebooks/scratch.txt", 123L),
+            mockBlob("bucket", "notebooks/hidden/sneaky.ipynb", 1000L * 1000L));
+    when(mockCloudStorageService.getBlobList("bucket")).thenReturn(blobs);
+
+    final List<FileDetail> expectedFiles =
+        ImmutableList.of(
+            new FileDetail()
+                .name("test.ipynb")
+                .path("gs://bucket/notebooks/test.ipynb")
+                .size(1000L)
+                .lastModifiedTime(dummyTime),
+            new FileDetail()
+                .name("test2.ipynb")
+                .path("gs://bucket/notebooks/test2.ipynb")
+                .size(2000L)
+                .lastModifiedTime(dummyTime),
+            new FileDetail()
+                .name("scratch.txt")
+                .path("gs://bucket/notebooks/scratch.txt")
+                .size(123L)
+                .lastModifiedTime(dummyTime),
+            new FileDetail()
+                .name("sneaky.ipynb")
+                .path("gs://bucket/notebooks/hidden/sneaky.ipynb")
+                .size(1000L * 1000L)
+                .lastModifiedTime(dummyTime));
+
+    final List<FileDetail> files = workspaceAdminService.getFiles(WORKSPACE_NAMESPACE);
+    assertThat(files).containsExactlyElementsIn(expectedFiles);
   }
 }

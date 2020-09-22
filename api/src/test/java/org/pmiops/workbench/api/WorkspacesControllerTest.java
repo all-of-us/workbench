@@ -475,15 +475,6 @@ public class WorkspacesControllerTest {
     doReturn(entry).when(billingProjectBufferService).assignBillingProject(any());
   }
 
-  private Blob mockBlob(String bucket, String path) {
-    Blob blob = mock(Blob.class);
-    when(blob.getBlobId()).thenReturn(BlobId.of(bucket, path));
-    when(blob.getBucket()).thenReturn(bucket);
-    when(blob.getName()).thenReturn(path);
-    when(blob.getSize()).thenReturn(5_000L);
-    return blob;
-  }
-
   private void stubFcUpdateWorkspaceACL() {
     when(fireCloudService.updateWorkspaceACL(anyString(), anyString(), anyList()))
         .thenReturn(new FirecloudWorkspaceACLUpdateResponseList());
