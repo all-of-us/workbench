@@ -1,6 +1,5 @@
 import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
 import DataResourceCard from 'app/component/data-resource-card';
-import EllipsisMenu from 'app/component/ellipsis-menu';
 import ClrIconLink from 'app/element/clr-icon-link';
 import {EllipsisMenuAction, Language, ResourceCard} from 'app/text-labels';
 import {ElementHandle, Page} from 'puppeteer';
@@ -43,11 +42,6 @@ export default class WorkspaceDataPage extends WorkspaceBase {
       this.page.waitForXPath('//img[@src="/assets/images/dataset-diagram.svg"]', {visible: true}),
       this.page.waitForXPath('//img[@src="/assets/images/cohort-diagram.svg"]', {visible: true}),
     ]);
-  }
-
-  async selectWorkspaceAction(action: EllipsisMenuAction): Promise<void> {
-    const ellipsisMenu = new EllipsisMenu(this.page, './/*[@data-test-id="workspace-menu-button"]');
-    return ellipsisMenu.clickAction(action);
   }
 
   async getAddDatasetButton(): Promise<ClrIconLink> {

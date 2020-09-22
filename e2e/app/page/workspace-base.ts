@@ -9,6 +9,7 @@ import {ElementType} from 'app/xpath-options';
 import {Page} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForAttributeEquality} from 'utils/waits-utils';
+import EllipsisMenu from 'app/component/ellipsis-menu';
 import AuthenticatedPage from './authenticated-page';
 
 export enum TabLabels {
@@ -212,5 +213,36 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
     return modalTextContents;
   }
 
+  /**
+   * Select Workspace action dropdown menu option.
+   * @param {EllipsisMenuAction} menuOption
+   * @param opts
+   */
+  async selectWorkspaceAction(menuOption: EllipsisMenuAction, opts?: { waitForNav: false }): Promise<void> {
+    const ellipsisMenu = new EllipsisMenu(this.page, './/*[@data-test-id="workspace-menu-button"]');
+    return ellipsisMenu.clickAction(menuOption, opts);
+  }
+
+  /**
+   * Delete workspace via Workspace action menu "Delete" option.
+   */
+  async deleteWorkspace(): Promise<string[]> {
+    await this.selectWorkspaceAction(EllipsisMenuAction.Delete, { waitForNav: false });
+    // Handle Delete Confirmation modal
+    return this.dismissDeleteWorkspaceModal();
+  }
+
+
+  /**
+   * Dismss Delete Workspace Confirmation modal by click a button.
+   * @return {LinkText} clickButtonText Button to click.
+   */
+  async dismissDeleteWorkspaceModal(clickButtonText: LinkText = LinkText.DeleteWorkspace): Promise<string[]> {
+    const modal = new Modal(this.page);
+    const contentText = await modal.getTextContent();
+    await modal.clickButton(clickButtonText, {waitForClose: true});
+    await waitWhileLoading(this.page);
+    return contentText;
+  }
 
 }

@@ -4,13 +4,13 @@ import Checkbox from 'app/element/checkbox';
 import Select from 'app/element/select';
 import Textbox from 'app/element/textbox';
 import WebComponent from 'app/element/web-component';
-import AuthenticatedPage from 'app/page/authenticated-page';
 import {ElementType} from 'app/xpath-options';
 import {ElementHandle, Page} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
 import {buildXPath} from 'app/xpath-builders';
 import {LinkText} from 'app/text-labels';
+import WorkspaceBase from './workspace-base';
 
 const faker = require('faker/locale/en_US');
 
@@ -221,7 +221,7 @@ export const FIELD = {
 };
 
 
-export default class WorkspaceEditPage extends AuthenticatedPage {
+export default class WorkspaceEditPage extends WorkspaceBase {
 
   constructor(page: Page) {
     super(page);

@@ -1,8 +1,9 @@
 import {ElementHandle, Page} from 'puppeteer';
-import {WorkspaceAccessLevel} from 'app/text-labels';
+import {EllipsisMenuAction, WorkspaceAccessLevel} from 'app/text-labels';
 import * as fp from 'lodash/fp';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {getPropValue} from 'utils/element-utils';
+import WorkspacesPage from 'app/page/workspaces-page';
 import CardBase from './card-base';
 
 const WorkspaceCardSelector = {
@@ -21,6 +22,16 @@ export default class WorkspaceCard extends CardBase {
   // **********************
   // static functions
   // **********************
+
+  /**
+   * Delete workspace via Workspace card "Delete" dropdown menu option.
+   */
+  static async deleteWorkspace(page: Page, workspaceName: string): Promise<string[]> {
+    const card = await WorkspaceCard.findCard(page, workspaceName);
+    await (card.getEllipsis()).clickAction(EllipsisMenuAction.Delete, { waitForNav: false });
+    // Handle Delete Confirmation modal
+    return new WorkspacesPage(page).dismissDeleteWorkspaceModal();
+  }
 
   /**
    * Find all visible Workspace Cards. Assume at least one Card exists.
