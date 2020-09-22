@@ -36,12 +36,16 @@ export default class NotebookDownloadModal {
 
   async clickPolicyCheckbox(): Promise<void> {
     const checkbox = await this.getPolicyCheckbox();
+
+    // XXX: All of this fails to actually dynamically update the checkbox value in
+    // headless mode. Simply clicking the element works fine in debug mode.
     await checkbox.focus();
     await checkbox.hover();
     await checkbox.click();
-    await this.frame.evaluate(e => {
-      (window as any).$(e).change();
-    }, checkbox);
+    console.log(await this.frame.evaluate(e => {
+      console.log(e);
+      return (window as any).$(e).change();
+    }, checkbox));
     await this.page.waitFor(500);
   }
 

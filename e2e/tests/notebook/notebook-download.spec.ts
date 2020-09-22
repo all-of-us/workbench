@@ -18,6 +18,9 @@ describe('Jupyter notebook download test', () => {
     downloadBtn = await modal.getDownloadButton();
     const btnProps = await downloadBtn.getProperties();
     expect(btnProps['disabled']).toBeFalsy();
+    // XXX: In debug mode, test execution completely stops when a new tab is
+    // opened for this download. Test can be resumed by closing the tab or
+    // clicking back into the notebooks tab.
     await downloadBtn.click();
 
     // Ideally we'd verify that the file was downloaded. Unfortunately this
