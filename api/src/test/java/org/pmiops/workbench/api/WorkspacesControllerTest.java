@@ -148,6 +148,7 @@ import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.NotebookLockingMetadataResponse;
 import org.pmiops.workbench.model.NotebookRename;
 import org.pmiops.workbench.model.PageFilterRequest;
@@ -432,6 +433,9 @@ public class WorkspacesControllerTest {
     testMockFactory.stubCreateFcWorkspace(fireCloudService);
     endUserCloudbilling = TestMockFactory.createMockedCloudbilling();
     serviceAccountCloudbilling = TestMockFactory.createMockedCloudbilling();
+
+    // required to enable the use of default method blobToFileDetail()
+    when(cloudStorageService.blobToFileDetail(any(), anyString())).thenCallRealMethod();
   }
 
   private DbUser createUser(String email) {
@@ -2433,7 +2437,7 @@ public class WorkspacesControllerTest {
     // Will return 1 entry as only python files in notebook folder are return
     List<String> gotNames =
         workspacesController.getNoteBookList("project", "workspace").getBody().stream()
-            .map(details -> details.getName())
+            .map(FileDetail::getName)
             .collect(Collectors.toList());
     assertEquals(
         gotNames,
@@ -2458,7 +2462,7 @@ public class WorkspacesControllerTest {
 
     List<String> gotNames =
         workspacesController.getNoteBookList("project", "workspace").getBody().stream()
-            .map(details -> details.getName())
+            .map(FileDetail::getName)
             .collect(Collectors.toList());
     assertEquals(gotNames, ImmutableList.of(NotebooksService.withNotebookExtension("foo")));
   }
