@@ -292,12 +292,12 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
   @Query(
       value =
           "select surveyId, version, itemCount from( "
-              + "select csv.survey_id as surveyId, csv.version as version, sum(csa.item_count) as itemCount, csv.display_order "
+              + "select distinct csv.survey_id as surveyId, csv.version as version, csa.item_count as itemCount, csv.display_order "
               + "from cb_survey_version csv "
               + "join cb_survey_attribute csa on csv.survey_id = csa.survey_id "
               + "where csv.concept_id = :surveyConceptId "
               + "and csa.question_concept_id = :questionConceptId "
-              + "group by csv.survey_id, csv.version, csv.display_order "
+              + "and csa.answer_concept_id is null "
               + "order by csv.display_order) innerSql",
       nativeQuery = true)
   List<DbSurveyVersion> findSurveyVersionByQuestionConceptId(

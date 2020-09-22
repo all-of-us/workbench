@@ -427,29 +427,25 @@ public class CBCriteriaDaoTest {
     jdbcTemplate.execute(
         "insert into cb_survey_version(survey_id, concept_id, version, display_order) values (102, 1333342, 'July 2020', 3)");
     jdbcTemplate.execute(
-        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (1, 715713, 0, 100, 291)");
+        "insert into cb_survey_attribute(id, question_concept_id, survey_id, item_count) values (1, 715713, 100, 291)");
     jdbcTemplate.execute(
-        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (2, 715713, 0, 101, 148)");
+        "insert into cb_survey_attribute(id, question_concept_id, survey_id, item_count) values (2, 715713, 101, 148)");
     jdbcTemplate.execute(
-        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (3, 715713, 0, 102, 150)");
+        "insert into cb_survey_attribute(id, question_concept_id, survey_id, item_count) values (3, 715713, 102, 150)");
     jdbcTemplate.execute(
-        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (4, 715713, 903096, 100, 154)");
-    jdbcTemplate.execute(
-        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (5, 715713, 903096, 101, 82)");
-    jdbcTemplate.execute(
-        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (6, 715713, 903096, 102, 31)");
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (1, 715713, 0, 100, 491)");
     List<DbSurveyVersion> dbSurveyVersions =
         cbCriteriaDao.findSurveyVersionByQuestionConceptId(1333342L, 715713L);
     assertThat(dbSurveyVersions).hasSize(3);
     assertThat(dbSurveyVersions.get(0).getSurveyId()).isEqualTo(100);
     assertThat(dbSurveyVersions.get(0).getVersion()).isEqualTo("May 2020");
-    assertThat(dbSurveyVersions.get(0).getItemCount()).isEqualTo(445);
+    assertThat(dbSurveyVersions.get(0).getItemCount()).isEqualTo(291);
     assertThat(dbSurveyVersions.get(1).getSurveyId()).isEqualTo(101);
     assertThat(dbSurveyVersions.get(1).getVersion()).isEqualTo("June 2020");
-    assertThat(dbSurveyVersions.get(1).getItemCount()).isEqualTo(230);
+    assertThat(dbSurveyVersions.get(1).getItemCount()).isEqualTo(148);
     assertThat(dbSurveyVersions.get(2).getSurveyId()).isEqualTo(102);
     assertThat(dbSurveyVersions.get(2).getVersion()).isEqualTo("July 2020");
-    assertThat(dbSurveyVersions.get(2).getItemCount()).isEqualTo(181);
+    assertThat(dbSurveyVersions.get(2).getItemCount()).isEqualTo(150);
     jdbcTemplate.execute("drop table cb_survey_version");
     jdbcTemplate.execute("drop table cb_survey_attribute");
   }
