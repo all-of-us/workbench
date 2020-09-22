@@ -138,7 +138,7 @@ const FileDetailsTable = (props: FileDetailsProps) => {
 
     // remove first check after RW-5626
     if (NOTEBOOKS_DIRECTORY === parseLocation(file) && filename.endsWith(NOTEBOOKS_SUFFIX)) {
-      if (file.rawSize > MAX_NOTEBOOK_READ_SIZE_BYTES) {
+      if (file.sizeInBytes > MAX_NOTEBOOK_READ_SIZE_BYTES) {
         return <FlexRow>
           {filenameText}
           <TooltipTrigger
