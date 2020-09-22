@@ -2422,7 +2422,7 @@ public class WorkspacesControllerTest {
     when(mockBlob2.getName()).thenReturn("notebooks/mockFile.text");
     when(mockBlob3.getName())
         .thenReturn(NotebooksService.withNotebookExtension("notebooks/two words"));
-    when(cloudStorageService.getBlobListForPrefix("bucket", "notebooks"))
+    when(cloudStorageService.getBlobPageForPrefix("bucket", "notebooks"))
         .thenReturn(ImmutableList.of(mockBlob1, mockBlob2, mockBlob3));
 
     // Will return 1 entry as only python files in notebook folder are return
@@ -2448,7 +2448,7 @@ public class WorkspacesControllerTest {
     when(mockBlob1.getName())
         .thenReturn(NotebooksService.withNotebookExtension("notebooks/extra/nope"));
     when(mockBlob2.getName()).thenReturn(NotebooksService.withNotebookExtension("notebooks/foo"));
-    when(cloudStorageService.getBlobListForPrefix("bucket", "notebooks"))
+    when(cloudStorageService.getBlobPageForPrefix("bucket", "notebooks"))
         .thenReturn(ImmutableList.of(mockBlob1, mockBlob2));
 
     List<String> gotNames =

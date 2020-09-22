@@ -233,7 +233,7 @@ public class WorkspaceAdminServiceTest {
             mockBlob("bucket", "notebooks/test2.ipynb", 2000L),
             mockBlob("bucket", "notebooks/scratch.txt", 123L),
             mockBlob("bucket", "notebooks/hidden/sneaky.ipynb", 1000L * 1000L));
-    when(mockCloudStorageService.getBlobList("bucket")).thenReturn(blobs);
+    when(mockCloudStorageService.getBlobPage("bucket")).thenReturn(blobs);
 
     final List<FileDetail> expectedFiles =
         ImmutableList.of(

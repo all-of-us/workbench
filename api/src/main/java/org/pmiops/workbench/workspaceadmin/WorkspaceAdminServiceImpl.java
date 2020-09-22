@@ -252,7 +252,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             .getWorkspace()
             .getBucketName();
 
-    return cloudStorageService.getBlobList(bucketName).stream()
+    return cloudStorageService.getBlobPage(bucketName).stream()
         .map(blob -> cloudStorageService.blobToFileDetail(blob, bucketName))
         .collect(Collectors.toList());
   }
@@ -260,14 +260,14 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private int getNonNotebookFileCount(String bucketName) {
     return (int)
         cloudStorageService
-            .getBlobListForPrefix(bucketName, NotebooksService.NOTEBOOKS_WORKSPACE_DIRECTORY)
+            .getBlobPageForPrefix(bucketName, NotebooksService.NOTEBOOKS_WORKSPACE_DIRECTORY)
             .stream()
             .filter(((Predicate<Blob>) notebooksService::isNotebookBlob).negate())
             .count();
   }
 
   private long getStorageSizeBytes(String bucketName) {
-    return cloudStorageService.getBlobList(bucketName).stream()
+    return cloudStorageService.getBlobPage(bucketName).stream()
         .map(BlobInfo::getSize)
         .reduce(0L, Long::sum);
   }

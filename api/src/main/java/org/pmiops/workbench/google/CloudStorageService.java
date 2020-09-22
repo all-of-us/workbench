@@ -19,9 +19,43 @@ public interface CloudStorageService {
 
   String getImageUrl(String image_name);
 
-  List<Blob> getBlobList(String bucketName);
+  /**
+   * Get the first {@link com.google.api.gax.paging.Page} of results returned when listing the files
+   * in a bucket
+   *
+   * @param bucketName the google bucket to list
+   * @return the first Page of file Blobs, as a List
+   */
+  List<Blob> getBlobPage(String bucketName);
 
-  List<Blob> getBlobListForPrefix(String bucketName, String directory);
+  /**
+   * Get an Iterable for all file Blobs in a bucket. Automatically refetches results from Google
+   * when the individual Pages are exhausted.
+   *
+   * @param bucketName the google bucket to list
+   * @return an Iterable for all Blobs in the bucket
+   */
+  Iterable<Blob> getBlobs(String bucketName);
+
+  /**
+   * Get the first {@link com.google.api.gax.paging.Page} of results returned when listing the files
+   * in a directory in a bucket
+   *
+   * @param bucketName the google bucket to list
+   * @param directory the bucket directory to subset results to
+   * @return the first Page of file Blobs, as a List
+   */
+  List<Blob> getBlobPageForPrefix(String bucketName, String directory);
+
+  /**
+   * Get an Iterable for all file Blobs in a directory in a bucket. Automatically refetches results
+   * from Google when the individual Pages are exhausted.
+   *
+   * @param bucketName the google bucket to list
+   * @param directory the bucket directory to subset results to
+   * @return an Iterable for all Blobs in the directory
+   */
+  Iterable<Blob> getBlobsForPrefix(String bucketName, String directory);
 
   Set<BlobId> getExistingBlobIdsIn(List<BlobId> id);
 

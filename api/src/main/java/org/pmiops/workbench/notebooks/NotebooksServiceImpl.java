@@ -106,7 +106,7 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   @Override
   public List<FileDetail> getNotebooksAsService(String bucketName) {
-    return cloudStorageService.getBlobListForPrefix(bucketName, NOTEBOOKS_WORKSPACE_DIRECTORY)
+    return cloudStorageService.getBlobPageForPrefix(bucketName, NOTEBOOKS_WORKSPACE_DIRECTORY)
         .stream()
         .filter(this::isNotebookBlob)
         .map(blob -> cloudStorageService.blobToFileDetail(blob, bucketName))
