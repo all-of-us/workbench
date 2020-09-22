@@ -41,6 +41,8 @@ describe('Clone workspace', () => {
 
       // Delete clone workspace via Workspace card in Your Workspaces page.
       await Navigation.navMenu(page, NavLink.YOUR_WORKSPACES);
+      await workspacesPage.waitForLoad();
+
       await WorkspaceCard.deleteWorkspace(page, cloneWorkspaceName);
 
       // Verify Delete action was successful.
