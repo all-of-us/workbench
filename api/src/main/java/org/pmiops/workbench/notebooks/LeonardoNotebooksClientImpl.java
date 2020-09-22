@@ -1,6 +1,7 @@
 package org.pmiops.workbench.notebooks;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,12 +43,12 @@ import org.springframework.stereotype.Service;
 public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
   private static final String RUNTIME_LABEL_AOU = "all-of-us";
-  private static final String RUNTIME_LABEL_AOU_CONFIG = "all-of-us-config";
+  public static final String RUNTIME_LABEL_AOU_CONFIG = "all-of-us-config";
   private static final String RUNTIME_LABEL_CREATED_BY = "created-by";
   private static final String WORKSPACE_CDR = "WORKSPACE_CDR";
-  public static final Map<RuntimeConfigurationType, String>
+  public static final BiMap<RuntimeConfigurationType, String>
       RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP =
-          ImmutableMap.of(
+          ImmutableBiMap.of(
               RuntimeConfigurationType.USEROVERRIDE, "user-override",
               RuntimeConfigurationType.DEFAULTGCE, "default-gce",
               RuntimeConfigurationType.DEFAULTDATAPROC, "default-dataproc");
@@ -203,7 +204,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   public List<LeonardoListRuntimeResponse> listRuntimesByProject(String googleProject) {
     RuntimesApi runtimesApi = runtimesApiProvider.get();
     return leonardoRetryHandler.run(
-        (context) -> runtimesApi.listRuntimesByProject(googleProject, null, false));
+        (context) -> runtimesApi.listRuntimesByProject(googleProject, null, true));
   }
 
   @Override

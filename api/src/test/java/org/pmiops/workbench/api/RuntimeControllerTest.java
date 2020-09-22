@@ -15,8 +15,8 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.Date;
 import com.google.common.collect.ImmutableList;
-import com.google.gson.Gson;
 import com.google.common.collect.ImmutableMap;
+import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
 import java.time.Clock;
 import java.time.Instant;
@@ -224,6 +224,12 @@ public class RuntimeControllerTest {
   private Runtime testRuntime;
   private DbWorkspace testWorkspace;
 
+  private DataprocConfig dataprocConfig;
+  private LinkedTreeMap<String, Object> dataprocConfigObj;
+
+  private GceConfig gceConfig;
+  private LinkedTreeMap<String, Object> gceConfigObj;
+
   @Before
   public void setUp() {
     config = WorkbenchConfig.createEmptyConfig();
@@ -232,6 +238,7 @@ public class RuntimeControllerTest {
     config.firecloud.notebookRuntimeDefaultMachineType = "n1-standard-4";
     config.firecloud.notebookRuntimeDefaultDiskSizeGb = 50;
     config.access.enableComplianceTraining = true;
+    config.featureFlags.enableCustomRuntimes = true;
 
     user = new DbUser();
     user.setUsername(LOGGED_IN_USER_EMAIL);
@@ -248,17 +255,28 @@ public class RuntimeControllerTest {
 
     String createdDate = Date.fromYearMonthDay(1988, 12, 26).toString();
 
-    DataprocConfig dataprocConfig =
+    dataprocConfig =
         new DataprocConfig()
             .numberOfWorkers(0)
             .masterMachineType("n1-standard-4")
             .masterDiskSize(50);
 
-    LinkedTreeMap<String, Object> dataProcConfigObj = new LinkedTreeMap<>();
-    dataProcConfigObj.put("cloudService", "DATAPROC");
-    dataProcConfigObj.put("numberOfWorkers", 0);
-    dataProcConfigObj.put("masterMachineType", "n1-standard-4");
-    dataProcConfigObj.put("masterDiskSize", 50.0);
+    dataprocConfigObj = new LinkedTreeMap<>();
+    dataprocConfigObj.put("cloudService", "DATAPROC");
+    dataprocConfigObj.put("numberOfWorkers", 0);
+    dataprocConfigObj.put("masterMachineType", "n1-standard-4");
+    dataprocConfigObj.put("masterDiskSize", 50.0);
+
+    gceConfig = new GceConfig()
+        .bootDiskSize(10)
+        .diskSize(100)
+        .machineType("n1-standard-2");
+
+    gceConfigObj = new LinkedTreeMap<>();
+    gceConfigObj.put("cloudService", "GCE");
+    gceConfigObj.put("bootDiskSize", 10.0);
+    gceConfigObj.put("diskSize", 100.0);
+    gceConfigObj.put("machineType", "n1-standard-2");
 
     testLeoRuntime =
         new LeonardoGetRuntimeResponse()
@@ -267,7 +285,7 @@ public class RuntimeControllerTest {
             .status(LeonardoRuntimeStatus.DELETING)
             .runtimeImages(Collections.singletonList(RUNTIME_IMAGE))
             .autopauseThreshold(AUTOPAUSE_THRESHOLD)
-            .runtimeConfig(dataProcConfigObj)
+            .runtimeConfig(dataprocConfigObj)
             .auditInfo(new LeonardoAuditInfo().createdDate(createdDate));
     testLeoListRuntimeResponse =
         new LeonardoListRuntimeResponse()
@@ -277,6 +295,7 @@ public class RuntimeControllerTest {
     testRuntime =
         new Runtime()
             .runtimeName(getRuntimeName())
+            .configurationType(RuntimeConfigurationType.DEFAULTDATAPROC)
             .googleProject(BILLING_PROJECT_ID)
             .status(RuntimeStatus.DELETING)
             .toolDockerImage(TOOL_DOCKER_IMAGE)
@@ -376,8 +395,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testGetRuntime_defaultLabel_dataproc() throws ApiException {
-    testLeoRuntime.setLabels(ImmutableMap.of("all-of-us-config", "default"));
-    testLeoRuntime.setRuntimeConfig(ImmutableMap.of("cloudService", "DATAPROC"));
+    testLeoRuntime.setLabels(ImmutableMap.of("all-of-us-config", "default-dataproc"));
 
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime);
@@ -388,8 +406,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testGetRuntime_defaultLabel_gce() throws ApiException {
-    testLeoRuntime.setLabels(ImmutableMap.of("all-of-us-config", "default"));
-    testLeoRuntime.setRuntimeConfig(ImmutableMap.of("cloudService", "GCE"));
+    testLeoRuntime.setLabels(ImmutableMap.of("all-of-us-config", "default-gce"));
 
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime);
@@ -420,7 +437,88 @@ public class RuntimeControllerTest {
   }
 
   @Test
-  public void testGetRuntime_noGetRuntime_hasListRuntimesWithMostRecentOverride() throws ApiException {
+  public void testGetRuntime_fromListRuntimes() throws ApiException {
+    String timestamp = "2020-09-13T19:19:57.347Z";
+
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new ApiException(404, "Not found"));
+    when(userRuntimesApi.listRuntimesByProject(BILLING_PROJECT_ID, null, true))
+        .thenReturn(ImmutableList.of(
+            new LeonardoListRuntimeResponse()
+                .googleProject("google-project")
+                .runtimeName("expected-runtime")
+                .status(LeonardoRuntimeStatus.CREATING)
+                .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
+                .labels(ImmutableMap.of("all-of-us-config", "user-override"))
+        ));
+
+    Runtime runtime = runtimeController.getRuntime(BILLING_PROJECT_ID).getBody();
+
+    assertThat(runtime.getRuntimeName()).isEqualTo("expected-runtime");
+    assertThat(runtime.getGoogleProject()).isEqualTo("google-project");
+    assertThat(runtime.getStatus()).isEqualTo(RuntimeStatus.DELETED);
+    assertThat(runtime.getConfigurationType()).isEqualTo(RuntimeConfigurationType.USEROVERRIDE);
+    assertThat(runtime.getCreatedDate()).isEqualTo(timestamp);
+  }
+
+  @Test
+  public void testGetRuntime_fromListRuntimes_gceConfig() throws ApiException {
+    String timestamp = "2020-09-13T19:19:57.347Z";
+
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new ApiException(404, "Not found"));
+    when(userRuntimesApi.listRuntimesByProject(BILLING_PROJECT_ID, null, true))
+        .thenReturn(ImmutableList.of(
+            new LeonardoListRuntimeResponse()
+                .runtimeConfig(gceConfigObj)
+                .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
+                .labels(ImmutableMap.of("all-of-us-config", "user-override"))
+        ));
+
+    Runtime runtime = runtimeController.getRuntime(BILLING_PROJECT_ID).getBody();
+
+    assertThat(runtime.getGceConfig()).isEqualTo(gceConfig);
+    assertThat(runtime.getDataprocConfig()).isNull();
+  }
+
+  @Test
+  public void testGetRuntime_fromListRuntimes_dataprocConfig() throws ApiException {
+    String timestamp = "2020-09-13T19:19:57.347Z";
+
+    LinkedTreeMap<String, Object> dataProcConfigObj = new LinkedTreeMap<>();
+    dataProcConfigObj.put("cloudService", "DATAPROC");
+    dataProcConfigObj.put("masterDiskSize", 50.0);
+    dataProcConfigObj.put("masterMachineType", "n1-standard-4");
+    dataProcConfigObj.put("numberOfPreemptibleWorkers", 4);
+    dataProcConfigObj.put("numberOfWorkerLocalSSDs", 8);
+    dataProcConfigObj.put("numberOfWorkers", 3);
+    dataProcConfigObj.put("workerDiskSize", 30);
+    dataProcConfigObj.put("workerMachineType", "n1-standard-2");
+
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new ApiException(404, "Not found"));
+    when(userRuntimesApi.listRuntimesByProject(BILLING_PROJECT_ID, null, true))
+        .thenReturn(ImmutableList.of(
+            new LeonardoListRuntimeResponse()
+                .runtimeConfig(dataProcConfigObj)
+                .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
+                .labels(ImmutableMap.of("all-of-us-config", "user-override"))
+        ));
+
+    Runtime runtime = runtimeController.getRuntime(BILLING_PROJECT_ID).getBody();
+
+    assertThat(runtime.getDataprocConfig().getMasterDiskSize()).isEqualTo(50);
+    assertThat(runtime.getDataprocConfig().getMasterMachineType()).isEqualTo("n1-standard-4");
+    assertThat(runtime.getDataprocConfig().getNumberOfPreemptibleWorkers()).isEqualTo(4);
+    assertThat(runtime.getDataprocConfig().getNumberOfWorkerLocalSSDs()).isEqualTo(8);
+    assertThat(runtime.getDataprocConfig().getNumberOfWorkers()).isEqualTo(3);
+    assertThat(runtime.getDataprocConfig().getWorkerDiskSize()).isEqualTo(30);
+    assertThat(runtime.getDataprocConfig().getWorkerMachineType()).isEqualTo("n1-standard-2");
+    assertThat(runtime.getGceConfig()).isNull();
+  }
+
+  @Test
+  public void testGetRuntime_fromListRuntimes_checkMostRecent() throws ApiException {
     String olderTimestamp = "2020-09-13T19:19:57.347Z";
     String newerTimestamp = "2020-09-14T19:19:57.347Z";
 
@@ -429,7 +527,7 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.listRuntimesByProject(BILLING_PROJECT_ID, null, true))
         .thenReturn(ImmutableList.of(
             new LeonardoListRuntimeResponse()
-                .runtimeName("override-runtime")
+                .runtimeName("expected-runtime")
                 .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp))
                 .labels(ImmutableMap.of("all-of-us-config", "user-override")),
             new LeonardoListRuntimeResponse()
@@ -442,7 +540,7 @@ public class RuntimeControllerTest {
   }
 
   @Test
-  public void testGetRuntime_noGetRuntime_hasListRuntimesWithOldOverride() throws ApiException {
+  public void testGetRuntime_fromListRuntime_mostRecentIsDefaultLabel() throws ApiException {
     String olderTimestamp = "2020-09-13T19:19:57.347Z";
     String newerTimestamp = "2020-09-14T19:19:57.347Z";
 
@@ -464,7 +562,7 @@ public class RuntimeControllerTest {
   }
 
   @Test
-  public void testGetRuntime_noGetRuntime_hasListRuntimesWithNoOverride() throws ApiException {
+  public void testGetRuntime_fromListRuntime_mostRecentHasNoLabel() throws ApiException {
     String olderTimestamp = "2020-09-13T19:19:57.347Z";
     String newerTimestamp = "2020-09-14T19:19:57.347Z";
 
@@ -486,15 +584,6 @@ public class RuntimeControllerTest {
 
   @Test
   public void testGetRuntime_gceConfig() throws ApiException {
-    GceConfig gceConfig =
-        new GceConfig().bootDiskSize(10).diskSize(100).machineType("n1-standard-2");
-
-    LinkedTreeMap<String, Object> gceConfigObj = new LinkedTreeMap<>();
-    gceConfigObj.put("bootDiskSize", 10.0);
-    gceConfigObj.put("diskSize", 100.0);
-    gceConfigObj.put("machineType", "n1-standard-2");
-    gceConfigObj.put("cloudService", "GCE");
-
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime.runtimeConfig(gceConfigObj));
 
@@ -720,6 +809,8 @@ public class RuntimeControllerTest {
 
   @Test
   public void testCreateRuntime_nullRuntime() throws ApiException {
+    config.featureFlags.enableCustomRuntimes = false;
+
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
@@ -730,6 +821,8 @@ public class RuntimeControllerTest {
 
   @Test
   public void testCreateRuntime_emptyRuntime() throws ApiException {
+    config.featureFlags.enableCustomRuntimes = false;
+
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
@@ -746,7 +839,7 @@ public class RuntimeControllerTest {
 
     runtimeController.createRuntime(
         BILLING_PROJECT_ID,
-        new Runtime().configurationType(RuntimeConfigurationType.DEFAULTDATAPROC));
+        new Runtime().configurationType(RuntimeConfigurationType.DEFAULTDATAPROC).dataprocConfig(testRuntime.getDataprocConfig()));
     verify(userRuntimesApi)
         .createRuntime(
             eq(BILLING_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
@@ -763,7 +856,7 @@ public class RuntimeControllerTest {
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
 
     runtimeController.createRuntime(
-        BILLING_PROJECT_ID, new Runtime().configurationType(RuntimeConfigurationType.DEFAULTGCE));
+        BILLING_PROJECT_ID, new Runtime().configurationType(RuntimeConfigurationType.DEFAULTGCE).dataprocConfig(dataprocConfig));
     verify(userRuntimesApi)
         .createRuntime(
             eq(BILLING_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
@@ -780,7 +873,7 @@ public class RuntimeControllerTest {
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
 
     runtimeController.createRuntime(
-        BILLING_PROJECT_ID, new Runtime().configurationType(RuntimeConfigurationType.USEROVERRIDE));
+        BILLING_PROJECT_ID, new Runtime().configurationType(RuntimeConfigurationType.USEROVERRIDE).dataprocConfig(dataprocConfig));
     verify(userRuntimesApi)
         .createRuntime(
             eq(BILLING_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());

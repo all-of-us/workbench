@@ -38,11 +38,14 @@ import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.Runtime;
+import org.pmiops.workbench.model.RuntimeConfigurationType;
 import org.pmiops.workbench.model.RuntimeLocalizeRequest;
 import org.pmiops.workbench.model.RuntimeLocalizeResponse;
+import org.pmiops.workbench.model.RuntimeStatus;
 import org.pmiops.workbench.model.UpdateClusterConfigRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
+import org.pmiops.workbench.notebooks.LeonardoNotebooksClientImpl;
 import org.pmiops.workbench.notebooks.model.StorageLink;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -173,10 +176,34 @@ public class RuntimeController implements RuntimeApiDelegate {
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
     workspaceService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
 
-    return ResponseEntity.ok(
-        leonardoMapper.toApiRuntime(
-            leonardoNotebooksClient.getRuntime(
-                workspaceNamespace, userProvider.get().getRuntimeName())));
+    try {
+      return ResponseEntity.ok(
+          leonardoMapper.toApiRuntime(
+              leonardoNotebooksClient.getRuntime(
+                  workspaceNamespace, userProvider.get().getRuntimeName())));
+    } catch (NotFoundException e) {
+      if (!workbenchConfigProvider.get().featureFlags.enableCustomRuntimes) {
+        throw e;
+      }
+
+      List<LeonardoListRuntimeResponse> runtimes = leonardoNotebooksClient.listRuntimesByProject(workspaceNamespace);
+      if (runtimes.isEmpty()) {
+        throw e;
+      }
+
+      LeonardoListRuntimeResponse mostRecentRuntime = runtimes.stream()
+          .sorted((a,b) -> b.getAuditInfo().getCreatedDate().compareTo(a.getAuditInfo().getCreatedDate()))
+          .findFirst()
+          .get();
+
+      final String OVERRIDE_LABEL = LeonardoNotebooksClientImpl.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(RuntimeConfigurationType.USEROVERRIDE);
+      Map<String, String> runtimeLabels = (Map<String, String>) mostRecentRuntime.getLabels();
+      if (runtimeLabels != null && OVERRIDE_LABEL.equals(runtimeLabels.get(LeonardoNotebooksClientImpl.RUNTIME_LABEL_AOU_CONFIG))) {
+        return ResponseEntity.ok(leonardoMapper.toApiRuntime(mostRecentRuntime).status(RuntimeStatus.DELETED));
+      } else {
+        throw e;
+      }
+    }
   }
 
   @Override

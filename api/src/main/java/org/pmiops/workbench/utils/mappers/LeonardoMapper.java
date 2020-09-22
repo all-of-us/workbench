@@ -2,6 +2,7 @@ package org.pmiops.workbench.utils.mappers;
 
 import com.google.gson.Gson;
 import java.util.List;
+import java.util.Map;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -18,7 +19,9 @@ import org.pmiops.workbench.model.DataprocConfig;
 import org.pmiops.workbench.model.GceConfig;
 import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.Runtime;
+import org.pmiops.workbench.model.RuntimeConfigurationType;
 import org.pmiops.workbench.model.RuntimeStatus;
+import org.pmiops.workbench.notebooks.LeonardoNotebooksClientImpl;
 
 @Mapper(config = MapStructConfig.class)
 public interface LeonardoMapper {
@@ -59,26 +62,58 @@ public interface LeonardoMapper {
   @Mapping(target = "dataprocConfig", ignore = true)
   Runtime toApiRuntime(LeonardoGetRuntimeResponse runtime);
 
+  @Mapping(target = "createdDate", source = "auditInfo.createdDate")
+  @Mapping(target = "autopauseThreshold", ignore = true)
+  @Mapping(target = "toolDockerImage", ignore = true)
+  @Mapping(target = "configurationType", ignore = true)
+  @Mapping(target = "gceConfig", ignore = true)
+  @Mapping(target = "dataprocConfig", ignore = true)
+  Runtime toApiRuntime(LeonardoListRuntimeResponse runtime);
+
   @AfterMapping
-  default void mapRuntimeConfig(
+  default void getRuntimeAfterMapper(
       @MappingTarget Runtime runtime, LeonardoGetRuntimeResponse leonardoGetRuntimeResponse) {
+    mapLabels(runtime, (Map<String, String>) leonardoGetRuntimeResponse.getLabels());
+    mapRuntimeConfig(runtime, leonardoGetRuntimeResponse.getRuntimeConfig());
+  }
+
+  @AfterMapping
+  default void listRuntimeAfterMapper(@MappingTarget Runtime runtime, LeonardoListRuntimeResponse leonardoListRuntimeResponse) {
+    mapLabels(runtime, (Map<String, String>) leonardoListRuntimeResponse.getLabels());
+    mapRuntimeConfig(runtime, leonardoListRuntimeResponse.getRuntimeConfig());
+  }
+
+  default void mapLabels(Runtime runtime, Map<String, String> runtimeLabels) {
+    if (runtimeLabels == null || runtimeLabels.get(LeonardoNotebooksClientImpl.RUNTIME_LABEL_AOU_CONFIG) == null) {
+      runtime.setConfigurationType(RuntimeConfigurationType.DEFAULTDATAPROC);
+    } else {
+      runtime.setConfigurationType(
+          LeonardoNotebooksClientImpl.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.inverse().get(runtimeLabels.get(LeonardoNotebooksClientImpl.RUNTIME_LABEL_AOU_CONFIG)));
+    }
+  }
+
+  default void mapRuntimeConfig(Runtime runtime, Object runtimeConfigObj) {
+    if (runtimeConfigObj == null) {
+      return;
+    }
+
     Gson gson = new Gson();
     LeonardoRuntimeConfig runtimeConfig =
         gson.fromJson(
-            gson.toJson(leonardoGetRuntimeResponse.getRuntimeConfig()),
+            gson.toJson(runtimeConfigObj),
             LeonardoRuntimeConfig.class);
 
     if (CloudServiceEnum.DATAPROC.equals(runtimeConfig.getCloudService())) {
       runtime.dataprocConfig(
           toDataprocConfig(
               gson.fromJson(
-                  gson.toJson(leonardoGetRuntimeResponse.getRuntimeConfig()),
+                  gson.toJson(runtimeConfigObj),
                   LeonardoMachineConfig.class)));
     } else if (CloudServiceEnum.GCE.equals(runtimeConfig.getCloudService())) {
       runtime.gceConfig(
           toGceConfig(
               gson.fromJson(
-                  gson.toJson(leonardoGetRuntimeResponse.getRuntimeConfig()),
+                  gson.toJson(runtimeConfigObj),
                   LeonardoGceConfig.class)));
     } else {
       throw new IllegalArgumentException(
