@@ -1725,6 +1725,23 @@ paths:
           description: HTML Read Only version of the notebook
           schema:
             "$ref": "#/definitions/ReadOnlyNotebookResponse"
+  "/v1/admin/workspaces/{workspaceNamespace}/files":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+    get:
+      tags:
+        - workspaceAdmin
+      description: >
+        Get a list of files corresponding to the storage objects associated with the Workspace.
+        RESEARCHER_DATA_VIEW authority required.
+      operationId: getFiles
+      responses:
+        200:
+          description: List of files in this Workspace's storage bucket
+          schema:
+            type: array
+            items:
+              "$ref": "#/definitions/FileDetail"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/lockingMetadata":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -5513,6 +5530,10 @@ definitions:
         type: integer
         format: int64
         description: Milliseconds since the UNIX epoch.
+      size:
+        type: integer
+        format: int64
+        description: File size in bytes.
   ListRuntimeResponse:
     description: This is a subset of options in a full runtimes response, copied from leonardo.yaml.
     required:

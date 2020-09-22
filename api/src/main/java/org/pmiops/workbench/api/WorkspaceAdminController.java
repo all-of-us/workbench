@@ -1,10 +1,12 @@
 package org.pmiops.workbench.api;
 
+import java.util.List;
 import javax.annotation.Nullable;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.model.AccessReason;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloudStorageTraffic;
+import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
@@ -63,5 +65,11 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
     final String notebookHtml =
         workspaceAdminService.getReadOnlyNotebook(workspaceNamespace, notebookName, accessReason);
     return ResponseEntity.ok(new ReadOnlyNotebookResponse().html(notebookHtml));
+  }
+
+  @Override
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
+  public ResponseEntity<List<FileDetail>> getFiles(String workspaceNamespace) {
+    return ResponseEntity.ok(workspaceAdminService.getFiles(workspaceNamespace));
   }
 }

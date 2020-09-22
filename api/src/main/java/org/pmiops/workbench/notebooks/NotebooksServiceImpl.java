@@ -109,22 +109,13 @@ public class NotebooksServiceImpl implements NotebooksService {
     return cloudStorageService.getBlobListForPrefix(bucketName, NOTEBOOKS_WORKSPACE_DIRECTORY)
         .stream()
         .filter(this::isNotebookBlob)
-        .map(blob -> blobToFileDetail(blob, bucketName))
+        .map(blob -> cloudStorageService.blobToFileDetail(blob, bucketName))
         .collect(Collectors.toList());
   }
 
   @Override
   public boolean isNotebookBlob(Blob blob) {
     return NOTEBOOK_PATTERN.matcher(blob.getName()).matches();
-  }
-
-  private FileDetail blobToFileDetail(Blob blob, String bucketName) {
-    String[] parts = blob.getName().split("/");
-    FileDetail fileDetail = new FileDetail();
-    fileDetail.setName(parts[parts.length - 1]);
-    fileDetail.setPath("gs://" + bucketName + "/" + blob.getName());
-    fileDetail.setLastModifiedTime(blob.getUpdateTime());
-    return fileDetail;
   }
 
   @Override

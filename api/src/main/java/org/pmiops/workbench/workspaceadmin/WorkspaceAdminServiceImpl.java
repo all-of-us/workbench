@@ -34,6 +34,7 @@ import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.AdminWorkspaceResources;
 import org.pmiops.workbench.model.CloudStorageTraffic;
+import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.UserRole;
@@ -239,6 +240,21 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     adminAuditor.fireViewNotebookAction(
         workspaceNamespace, workspaceName, notebookName, accessReason);
     return notebooksService.adminGetReadOnlyHtml(workspaceNamespace, workspaceName, notebookName);
+  }
+
+  @Override
+  public List<FileDetail> getFiles(String workspaceNamespace) {
+    final String workspaceName =
+        getWorkspaceByNamespaceOrThrow(workspaceNamespace).getFirecloudName();
+    final String bucketName =
+        fireCloudService
+            .getWorkspaceAsService(workspaceNamespace, workspaceName)
+            .getWorkspace()
+            .getBucketName();
+
+    return cloudStorageService.getBlobList(bucketName).stream()
+        .map(blob -> cloudStorageService.blobToFileDetail(blob, bucketName))
+        .collect(Collectors.toList());
   }
 
   private int getNonNotebookFileCount(String bucketName) {

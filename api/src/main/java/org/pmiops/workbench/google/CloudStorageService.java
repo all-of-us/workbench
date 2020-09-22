@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.json.JSONObject;
+import org.pmiops.workbench.model.FileDetail;
 
 /** Encapsulate Google APIs for interfacing with Google Cloud Storage. */
 public interface CloudStorageService {
@@ -56,4 +57,14 @@ public interface CloudStorageService {
   String getMoodleApiKey();
 
   String getCaptchaServerKey();
+
+  default FileDetail blobToFileDetail(Blob blob, String bucketName) {
+    String[] parts = blob.getName().split("/");
+    FileDetail fileDetail = new FileDetail();
+    fileDetail.setName(parts[parts.length - 1]);
+    fileDetail.setPath("gs://" + bucketName + "/" + blob.getName());
+    fileDetail.setLastModifiedTime(blob.getUpdateTime());
+    fileDetail.setSize(blob.getSize());
+    return fileDetail;
+  }
 }
