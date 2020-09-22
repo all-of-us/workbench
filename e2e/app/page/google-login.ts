@@ -94,7 +94,10 @@ export default class GoogleLoginPage {
       this.page.waitForNavigation({waitUntil: ['networkidle2', 'load'], timeout: 180000}),
       submitButton.click(),
     ]);
-    console.log(`Login response status: ${response.status()}`);
+    const status = response.status();
+    if (status !== 200) {
+      console.error(`Login navigation response status: ${status}`);
+    }
     await submitButton.dispose();
   }
 
