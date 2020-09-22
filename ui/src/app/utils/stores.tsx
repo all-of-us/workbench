@@ -31,17 +31,17 @@ interface ProfileStore {
 export const profileStore = atom<ProfileStore>({});
 
 export interface RuntimeOperation {
-  promise: Promise<any>,
-  operation: string,
-  aborter: AbortController
+  promise: Promise<any>;
+  operation: string;
+  aborter: AbortController;
 }
 
-interface WorkspaceRuntimeOperation {
-  [workspaceNamespace: string]: RuntimeOperation
+export interface WorkspaceRuntimeOperationMap {
+  [workspaceNamespace: string]: RuntimeOperation;
 }
 
 interface RuntimeOpsStore {
-  opsByWorkspaceNamespace: WorkspaceRuntimeOperation;
+  opsByWorkspaceNamespace: WorkspaceRuntimeOperationMap;
 }
 
 export const runtimeOpsStore = atom<RuntimeOpsStore>({opsByWorkspaceNamespace: {}});
@@ -49,15 +49,16 @@ export const runtimeOpsStore = atom<RuntimeOpsStore>({opsByWorkspaceNamespace: {
 export const updateRuntimeOpsStoreForWorkspaceNamespace = (workspaceNamespace: string, runtimeOperation: RuntimeOperation) => {
   const opsByWorkspaceNamespace = runtimeOpsStore.get().opsByWorkspaceNamespace;
   opsByWorkspaceNamespace[workspaceNamespace] = runtimeOperation;
+  debugger;
   runtimeOpsStore.set({...runtimeOpsStore.get(), opsByWorkspaceNamespace: opsByWorkspaceNamespace});
-}
+};
 
 export const markRuntimeOperationCompleteForWorkspace = (workspaceNamespace: string) => {
   const opsByWorkspaceNamespace = runtimeOpsStore.get().opsByWorkspaceNamespace;
   if (!!opsByWorkspaceNamespace[workspaceNamespace]) {
     delete opsByWorkspaceNamespace[workspaceNamespace];
   }
-}
+};
 
 export const abortRuntimeOperationForWorkspace = (workspaceNamespace: string) => {
   const opsByWorkspaceNamespace = runtimeOpsStore.get().opsByWorkspaceNamespace;
@@ -66,7 +67,7 @@ export const abortRuntimeOperationForWorkspace = (workspaceNamespace: string) =>
     runtimeOperation.aborter.abort();
     delete opsByWorkspaceNamespace[workspaceNamespace];
   }
-}
+};
 
 /**
  * @name useStore

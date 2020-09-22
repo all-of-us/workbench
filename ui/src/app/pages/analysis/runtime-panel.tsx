@@ -7,6 +7,15 @@ import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {allMachineTypes, validLeonardoMachineTypes} from 'app/utils/machines';
+import {
+  abortRuntimeOperationForWorkspace,
+  markRuntimeOperationCompleteForWorkspace,
+  RuntimeOperation,
+  runtimeOpsStore,
+  updateRuntimeOpsStoreForWorkspaceNamespace,
+  withStore,
+  WorkspaceRuntimeOperationMap
+} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Dropdown} from 'primereact/dropdown';
 import {InputNumber} from 'primereact/inputnumber';
@@ -15,10 +24,6 @@ import {Runtime} from 'generated/fetch';
 
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {
-  markRuntimeOperationCompleteForWorkspace,
-  updateRuntimeOpsStoreForWorkspaceNamespace
-} from "../../utils/stores";
 
 
 const styles = reactStyles({
@@ -45,6 +50,7 @@ const styles = reactStyles({
 const defaultMachineType = allMachineTypes.find(({name}) => name === 'n1-standard-4');
 
 export interface Props {
+  opsByWorkspaceNamespace: WorkspaceRuntimeOperationMap;
   workspace: WorkspaceData;
 }
 
@@ -58,7 +64,7 @@ interface State {
   runtime: Runtime|null;
 }
 
-export const RuntimePanel = withCurrentWorkspace()(
+export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOpsStore, 'opsByWorkspaceNamespace'))(
   class extends React.Component<Props, State> {
     private aborter = new AbortController();
 
@@ -76,13 +82,13 @@ export const RuntimePanel = withCurrentWorkspace()(
       let runtime = null;
       let error = false;
       try {
-        runtime = runtimeApi().getRuntime(this.props.workspace.namespace, {signal: this.aborter.signal});
+        const promise = runtimeApi().getRuntime(this.props.workspace.namespace, {signal: this.aborter.signal});
         updateRuntimeOpsStoreForWorkspaceNamespace(this.props.workspace.namespace, {
-          promise: runtime,
+          promise: promise,
           operation: 'get',
           aborter: this.aborter
         });
-        await runtime;
+        runtime = await promise;
       } catch (e) {
         // 404 is expected if the runtime doesn't exist, represent this as a null
         // runtime rather than an error mode.
@@ -99,6 +105,7 @@ export const RuntimePanel = withCurrentWorkspace()(
     }
 
     render() {
+      const {opsByWorkspaceNamespace, workspace} = this.props;
       const {loading, error, runtime} = this.state;
       if (loading) {
         return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
@@ -121,6 +128,9 @@ export const RuntimePanel = withCurrentWorkspace()(
         masterDiskSize = runtime.gceConfig.bootDiskSize;
       }
       const machineType = allMachineTypes.find(({name}) => name === masterMachineName) || defaultMachineType;
+
+      const outstandingRuntimeOp: RuntimeOperation = opsByWorkspaceNamespace[workspace.namespace];
+      debugger;
 
       return <div data-test-id='runtime-panel'>
         <h3 style={styles.sectionHeader}>Cloud analysis environment</h3>
@@ -210,6 +220,20 @@ export const RuntimePanel = withCurrentWorkspace()(
         <FlexRow style={{justifyContent: 'flex-end', marginTop: '.75rem'}}>
           <Button disabled={true}>Create</Button>
         </FlexRow>
+        <hr/>
+        {outstandingRuntimeOp && <FlexColumn>
+          <h3 style={styles.sectionHeader}>Outstanding Runtime Operations</h3>
+          <FlexRow>
+            <span>
+              {outstandingRuntimeOp.operation} in progress
+            </span>
+            <Button
+                onClick={() => abortRuntimeOperationForWorkspace(workspace.namespace)}
+            >
+              Cancel
+            </Button>
+          </FlexRow>
+        </FlexColumn>}
       </div>;
     }
 

@@ -5,7 +5,7 @@ import {Runtime, RuntimeConfigurationType, RuntimeStatus} from 'generated/fetch'
 import {
   markRuntimeOperationCompleteForWorkspace,
   updateRuntimeOpsStoreForWorkspaceNamespace
-} from "./stores";
+} from './stores';
 
 // We're only willing to wait 20 minutes total for a runtime to initialize. After that we return
 // a rejected promise no matter what.
@@ -172,6 +172,7 @@ export class LeoRuntimeInitializer {
   private async getRuntime(): Promise<Runtime> {
     const aborter = new AbortController();
     const promise = runtimeApi().getRuntime(this.workspaceNamespace, {signal: aborter.signal});
+    debugger;
     updateRuntimeOpsStoreForWorkspaceNamespace(this.workspaceNamespace, {
       promise: promise,
       operation: 'get',
@@ -309,8 +310,10 @@ export class LeoRuntimeInitializer {
     // Fetch the current runtime status, with some graceful error handling for NOT_FOUND response
     // and abort signals.
     try {
+      debugger;
       this.currentRuntime = await this.getRuntime();
       this.onStatusUpdate(this.currentRuntime.status);
+      debugger;
     } catch (e) {
       if (isAbortError(e)) {
         return this.reject(
