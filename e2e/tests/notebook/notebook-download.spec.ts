@@ -18,10 +18,11 @@ describe('Jupyter notebook download test', () => {
     downloadBtn = await modal.getDownloadButton();
     const btnProps = await downloadBtn.getProperties();
     expect(btnProps['disabled']).toBeFalsy();
-    // XXX: In debug mode, test execution completely stops when a new tab is
-    // opened for this download. Test can be resumed by closing the tab or
-    // clicking back into the notebooks tab.
-    await downloadBtn.click();
+    await modal.clickDownloadButton();
+
+    // Clicking download opens the notebook download in a new tab. Bring the
+    // main tab back to the front, otherwise the test just stalls out.
+    await page.bringToFront();
 
     // Ideally we'd verify that the file was downloaded. Unfortunately this
     // seems to be non-trivial in Puppeteer: https://github.com/puppeteer/puppeteer/issues/299
@@ -38,14 +39,8 @@ describe('Jupyter notebook download test', () => {
    *   - Verify policy warnings modal interactions.
    */
   test('download notebook with policy warnings', async () => {
-    // Event listener for taargetCreated events (new pages/popups)
-    // adds the new page to the global.pages variable so it can be accessed immediately in the test that created it
-    browser.on('targetcreated', async () => {
-        console.log('New Tab Created');
-        const pages = await browser.pages();
-      console.log('global.pages.length', pages.length);
-      console.log(pages.map(p => p.url()));
-    });
+    // Viewport necessary for headless dialog positioning.
+    await page.setViewport({height: 1280, width: 1280});
 
     const workspaceCard = await findWorkspace(page);
     await workspaceCard.clickWorkspaceName();
@@ -60,9 +55,32 @@ describe('Jupyter notebook download test', () => {
     // Save and download.
     await notebook.save();
 
+    // Event listener for new pages. Jupyter downloads yield new tabs for
+    // each file download.
+    const newTabUrls = [];
+    browser.on('targetcreated', async (t) => {
+      if (t.type() === 'page') {
+        const p = await t.page();
+        newTabUrls.push(p.url());
+      }
+    });
+
+    console.log('downloading as ipynb');
     await testDownloadModal(await notebook.downloadAsIpynb());
-    console.log(page.url());
+
+    console.log('downloading as pdf');
     await testDownloadModal(await notebook.downloadAsPdf());
+
+    // Wait a bit to process new tab creation events.
+    await page.waitFor(500);
+
+    // ipynb is special, and doesn't yield a recognizable URL for download.
+    // As of 9/22/20 I was unable to find a clear mechanism for validating ipynb
+    // download. All other formats, however, go through nbconvert - resulting
+    // in a recognizable URL.
+    expect(newTabUrls.find(url => {
+      return url.includes('nbconvert/pdf') && url.includes(notebookName);
+    })).toBeTruthy();
   }, 20 * 60 * 1000);
 
 })

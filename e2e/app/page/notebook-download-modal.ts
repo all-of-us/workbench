@@ -36,21 +36,20 @@ export default class NotebookDownloadModal {
 
   async clickPolicyCheckbox(): Promise<void> {
     const checkbox = await this.getPolicyCheckbox();
-
-    // XXX: All of this fails to actually dynamically update the checkbox value in
-    // headless mode. Simply clicking the element works fine in debug mode.
-    await checkbox.focus();
-    await checkbox.hover();
     await checkbox.click();
-    console.log(await this.frame.evaluate(e => {
-      console.log(e);
-      return (window as any).$(e).change();
-    }, checkbox));
-    await this.page.waitFor(500);
   }
 
   async getPolicyCheckbox(): Promise<ElementHandle> {
     return this.frame.waitForXPath(Xpath.modal + Xpath.policyCheckbox, {visible: true});
+  }
+
+  async clickDownloadButton(): Promise<void> {
+    // Chrome headless is unable to click this button properly using standard
+    // ElementHandle.click(). Even a standard element click() doesn't do it,
+    // likely because the Jupyter UI heavily uses jQuery event handling.
+    await this.frame.evaluate(() => {
+      return (window as any).$('#aou-download').click();
+    });
   }
 
   async getDownloadButton(): Promise<ElementHandle> {
