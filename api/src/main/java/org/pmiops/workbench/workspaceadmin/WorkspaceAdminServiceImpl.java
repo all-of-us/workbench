@@ -132,6 +132,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             .getWorkspace()
             .getBucketName();
 
+    // NOTE: all of these may be undercounts, because we're only looking at the first Page of Storage List results
     int notebookFilesCount = notebooksService.getNotebooksAsService(bucketName).size();
     int nonNotebookFilesCount = getNonNotebookFileCount(bucketName);
     long storageSizeBytes = getStorageSizeBytes(bucketName);
@@ -242,6 +243,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     return notebooksService.adminGetReadOnlyHtml(workspaceNamespace, workspaceName, notebookName);
   }
 
+  // NOTE: may be an undercount, because we're only looking at the first Page of Storage List results
   @Override
   public List<FileDetail> listFiles(String workspaceNamespace) {
     final String workspaceName =
@@ -257,6 +259,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         .collect(Collectors.toList());
   }
 
+  // NOTE: may be an undercount, because we're only looking at the first Page of Storage List results
   private int getNonNotebookFileCount(String bucketName) {
     return (int)
         cloudStorageService
@@ -266,6 +269,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             .count();
   }
 
+  // NOTE: may be an undercount, because we're only looking at the first Page of Storage List results
   private long getStorageSizeBytes(String bucketName) {
     return cloudStorageService.getBlobPage(bucketName).stream()
         .map(BlobInfo::getSize)

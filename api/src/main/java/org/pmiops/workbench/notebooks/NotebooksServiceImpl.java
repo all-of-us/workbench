@@ -94,6 +94,7 @@ public class NotebooksServiceImpl implements NotebooksService {
     this.logsBasedMetricService = logsBasedMetricService;
   }
 
+  // NOTE: may be an undercount, because we're only looking at the first Page of Storage List results
   @Override
   public List<FileDetail> getNotebooks(String workspaceNamespace, String workspaceName) {
     String bucketName =
@@ -104,6 +105,7 @@ public class NotebooksServiceImpl implements NotebooksService {
     return getNotebooksAsService(bucketName);
   }
 
+  // NOTE: may be an undercount, because we're only looking at the first Page of Storage List results
   @Override
   public List<FileDetail> getNotebooksAsService(String bucketName) {
     return cloudStorageService.getBlobPageForPrefix(bucketName, NOTEBOOKS_WORKSPACE_DIRECTORY)
