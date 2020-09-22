@@ -66,7 +66,7 @@ export default class GoogleLoginPage {
 
     const emailInput = await this.email();
     await emailInput.focus();
-    await emailInput.type(userEmail);
+    await emailInput.type(userEmail, {delay: 15});
     await emailInput.dispose();
 
     const nextButton = await this.page.waitForXPath(FieldSelector.NextButton, {visible: true});
@@ -81,7 +81,7 @@ export default class GoogleLoginPage {
   async enterPassword(pwd: string) : Promise<void> {
     const input = await this.password();
     await input.focus();
-    await input.type(pwd);
+    await input.type(pwd, {delay: 15});
     await input.dispose();
   }
 
@@ -90,10 +90,12 @@ export default class GoogleLoginPage {
    */
   async submit() : Promise<void> {
     const submitButton = new Button(this.page, FieldSelector.SubmitButton);
-    await Promise.all([
+    const [response] = await Promise.all([
       this.page.waitForNavigation({waitUntil: ['networkidle2', 'load'], timeout: 180000}),
       submitButton.click(),
     ]);
+    console.log(`Login response status: ${response.status()}`);
+    await submitButton.dispose();
   }
 
   /**
@@ -122,9 +124,8 @@ export default class GoogleLoginPage {
     await this.loginButton().then(button => button.click());
 
     try {
-      console.log(`Sign in as ${user}`);
       await this.enterEmail(user);
-      await this.page.waitFor(500); // to reduce probablity of getting Google login recaptcha
+      await this.page.waitFor(500); // to reduce probablity of getting Google login captcha
       await this.enterPassword(pwd);
       await this.page.waitFor(500);
       await this.submit();
@@ -149,7 +150,6 @@ export default class GoogleLoginPage {
       ]);
       await this.page.waitForSelector('app-signed-in');
     }
-
   }
 
   async loginAs(email, paswd) {
@@ -160,4 +160,5 @@ export default class GoogleLoginPage {
     const button = await Button.findByName(this.page, {name: 'Create Account'});
     await button.clickWithEval();
   }
+  
 }
