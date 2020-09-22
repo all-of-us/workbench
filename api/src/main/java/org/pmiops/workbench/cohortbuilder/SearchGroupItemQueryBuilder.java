@@ -103,6 +103,8 @@ public final class SearchGroupItemQueryBuilder {
       "is_standard = %s and concept_id = %s and value_as_concept_id %s unnest(%s)\n";
   private static final String VALUE_SOURCE_CONCEPT_ID =
       "is_standard = %s and concept_id = %s and value_source_concept_id %s unnest(%s)\n";
+  private static final String SOURCE_CONCEPT_SURVEY_ID =
+      "is_standard = %s and concept_id = %s and survey_id %s unnest(%s)\n";
   private static final String BP_SQL = "is_standard = %s and concept_id in unnest(%s)";
   private static final String SYSTOLIC_SQL = " and systolic %s %s";
   private static final String DIASTOLIC_SQL = " and diastolic %s %s";
@@ -199,8 +201,11 @@ public final class SearchGroupItemQueryBuilder {
       if (param.getAttributes().isEmpty()) {
         if (param.getStandard()) {
           standardSearchParameters.add(param);
+          addParamValueAndFormat(
+              domain, queryParams, standardSearchParameters, queryParts, STANDARD);
         } else {
           sourceSearchParameters.add(param);
+          addParamValueAndFormat(domain, queryParams, sourceSearchParameters, queryParts, SOURCE);
         }
       } else {
         StringBuilder bpSql = new StringBuilder(BP_SQL);
@@ -214,7 +219,8 @@ public final class SearchGroupItemQueryBuilder {
             processBloodPressureSql(queryParams, bpSql, attribute);
           } else if (AttrName.NUM.equals(attribute.getName())) {
             queryParts.add(processNumericalSql(queryParams, param, attribute));
-          } else {
+          } else if (AttrName.CAT.equals(attribute.getName())
+              || AttrName.SURVEY_ID.equals(attribute.getName())) {
             queryParts.add(processCategoricalSql(queryParams, param, attribute));
           }
         }
@@ -230,8 +236,6 @@ public final class SearchGroupItemQueryBuilder {
         }
       }
     }
-    addParamValueAndFormat(domain, queryParams, standardSearchParameters, queryParts, STANDARD);
-    addParamValueAndFormat(domain, queryParams, sourceSearchParameters, queryParts, SOURCE);
     // need to OR all query parts together since they exist in the same search group item
     String queryPartsSql = "(" + String.join(OR, queryParts) + ")";
     // format the base sql with all query parts
@@ -453,10 +457,15 @@ public final class SearchGroupItemQueryBuilder {
                 attribute.getOperands().stream().map(Long::parseLong).toArray(Long[]::new),
                 Long.class));
     // if the search parameter is ppi/survey then we need to use different column.
-    return String.format(
-        (DomainType.SURVEY.toString().equals(parameter.getDomain())
+    String sqlString =
+        DomainType.SURVEY.toString().equals(parameter.getDomain())
             ? VALUE_SOURCE_CONCEPT_ID
-            : VALUE_AS_CONCEPT_ID),
+            : VALUE_AS_CONCEPT_ID;
+    if (AttrName.SURVEY_ID.equals(attribute.getName())) {
+      sqlString = SOURCE_CONCEPT_SURVEY_ID;
+    }
+    return String.format(
+        sqlString,
         standardParam,
         conceptIdParam,
         OperatorUtils.getSqlOperator(attribute.getOperator()),
@@ -589,55 +598,49 @@ public final class SearchGroupItemQueryBuilder {
       Set<SearchParameter> searchParameters,
       List<String> queryParts,
       int standardOrSource) {
-    if (!searchParameters.isEmpty()) {
-      String domainParam =
-          QueryParameterUtil.addQueryParameterValue(
-              queryParams, QueryParameterValue.string(domain));
-      String standardOrSourceParam =
-          QueryParameterUtil.addQueryParameterValue(
-              queryParams, QueryParameterValue.int64(standardOrSource));
+    String domainParam =
+        QueryParameterUtil.addQueryParameterValue(queryParams, QueryParameterValue.string(domain));
+    String standardOrSourceParam =
+        QueryParameterUtil.addQueryParameterValue(
+            queryParams, QueryParameterValue.int64(standardOrSource));
 
-      List<String> lookupSqlParts = new ArrayList<>();
-      Map<Boolean, List<SearchParameter>> parentsAndChildren =
-          searchParameters.stream().collect(Collectors.partitioningBy(SearchParameter::getGroup));
-      List<Long> parents =
-          parentsAndChildren.get(true).stream()
-              .map(SearchParameter::getConceptId)
-              .collect(Collectors.toList());
-      List<Long> children =
-          parentsAndChildren.get(false).stream()
-              .map(SearchParameter::getConceptId)
-              .collect(Collectors.toList());
-      // Only children exist so no need to do lookups
-      if (!parents.isEmpty() || DomainType.DRUG.toString().equals(domain)) {
-        // Parent nodes exist need to do lookups
-        if (!parents.isEmpty()) {
-          lookupSqlParts.add(
-              generateLookupSql(queryParams, parents, domainParam, standardOrSourceParam, GROUP));
-        }
-        if (!children.isEmpty()) {
-          lookupSqlParts.add(
-              generateLookupSql(
-                  queryParams, children, domainParam, standardOrSourceParam, NOT_GROUP));
-        }
-
-        String lookupSql =
-            String.format(
-                DomainType.DRUG.toString().equals(domain)
-                    ? DRUG_SQL
-                    : PARENT_STANDARD_OR_SOURCE_SQL,
-                standardOrSourceParam,
-                domainParam,
-                standardOrSourceParam);
-        queryParts.add(
-            lookupSql.replace("${childLookup}", String.join(UNION_TEMPLATE, lookupSqlParts)));
-      } else {
-        String conceptIdsParam =
-            QueryParameterUtil.addQueryParameterValue(
-                queryParams, QueryParameterValue.array(children.toArray(new Long[0]), Long.class));
-        queryParts.add(
-            String.format(STANDARD_OR_SOURCE_SQL, standardOrSourceParam, conceptIdsParam));
+    List<String> lookupSqlParts = new ArrayList<>();
+    Map<Boolean, List<SearchParameter>> parentsAndChildren =
+        searchParameters.stream().collect(Collectors.partitioningBy(SearchParameter::getGroup));
+    List<Long> parents =
+        parentsAndChildren.get(true).stream()
+            .map(SearchParameter::getConceptId)
+            .collect(Collectors.toList());
+    List<Long> children =
+        parentsAndChildren.get(false).stream()
+            .map(SearchParameter::getConceptId)
+            .collect(Collectors.toList());
+    // Only children exist so no need to do lookups
+    if (!parents.isEmpty() || DomainType.DRUG.toString().equals(domain)) {
+      // Parent nodes exist need to do lookups
+      if (!parents.isEmpty()) {
+        lookupSqlParts.add(
+            generateLookupSql(queryParams, parents, domainParam, standardOrSourceParam, GROUP));
       }
+      if (!children.isEmpty()) {
+        lookupSqlParts.add(
+            generateLookupSql(
+                queryParams, children, domainParam, standardOrSourceParam, NOT_GROUP));
+      }
+
+      String lookupSql =
+          String.format(
+              DomainType.DRUG.toString().equals(domain) ? DRUG_SQL : PARENT_STANDARD_OR_SOURCE_SQL,
+              standardOrSourceParam,
+              domainParam,
+              standardOrSourceParam);
+      queryParts.add(
+          lookupSql.replace("${childLookup}", String.join(UNION_TEMPLATE, lookupSqlParts)));
+    } else {
+      String conceptIdsParam =
+          QueryParameterUtil.addQueryParameterValue(
+              queryParams, QueryParameterValue.array(children.toArray(new Long[0]), Long.class));
+      queryParts.add(String.format(STANDARD_OR_SOURCE_SQL, standardOrSourceParam, conceptIdsParam));
     }
   }
 
