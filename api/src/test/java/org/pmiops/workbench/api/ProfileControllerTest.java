@@ -469,6 +469,18 @@ public class ProfileControllerTest extends BaseControllerTest {
     verify(mockProfileAuditor).fireCreateAction(any(Profile.class));
   }
 
+  @Test(expected = Exception.class)
+  public void testCreateAccount_dbUserFailure() {
+    // Exercises a scenario where the userService throws an unexpected exception (e.g. a SQL error),
+    // ensuring we attempt to clean up the orphaned G Suite user after catching the exception.
+    createAccountRequest.getProfile().getAddress().setZipCode("12345678901234567890");
+
+    createAccountAndDbUserWithAffiliation();
+
+    // The G Suite user should be deleted after the DbUser creation fails.
+    verify(mockDirectoryService).deleteUser(anyString());
+  }
+
   @Test
   public void testSubmitDataUseAgreement_success() {
     createAccountAndDbUserWithAffiliation();

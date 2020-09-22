@@ -243,43 +243,59 @@ public class ProfileController implements ProfileApiDelegate {
     profileService.cleanProfile(profile);
     profileService.validateNewProfile(profile);
 
+    String gSuiteUsername =
+        profile.getUsername()
+            + "@"
+            + workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain;
+
     com.google.api.services.directory.model.User googleUser =
         directoryService.createUser(
             profile.getGivenName(),
             profile.getFamilyName(),
-            profile.getUsername()
-                + "@"
-                + workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain,
+            gSuiteUsername,
             profile.getContactEmail());
 
-    // Create a user that has no data access or FC user associated.
-    // We create this account before they sign in so we can keep track of which users we have
-    // created Google accounts for. This can be used subsequently to delete orphaned accounts.
-
-    // We store this information in our own database so that:
-    // 1) we can support bring-your-own account in future (when we won't be using directory service)
-    // 2) we can easily generate lists of researchers for the storefront, without joining to Google
-
-    // It's possible for the profile information to become out of sync with the user's Google
-    // profile, since it can be edited in our UI as well as the Google UI,  and we're fine with
-    // that; the expectation is their profile in AofU will be managed in AofU, not in Google.
-
-    DbUser user =
-        userService.createUser(
-            profile.getGivenName(),
-            profile.getFamilyName(),
-            googleUser.getPrimaryEmail(),
-            profile.getContactEmail(),
-            profile.getCurrentPosition(),
-            profile.getOrganization(),
-            profile.getAreaOfResearch(),
-            profile.getProfessionalUrl(),
-            profile.getDegrees(),
-            FROM_CLIENT_ADDRESS.apply(profile.getAddress()),
-            demographicSurveyMapper.demographicSurveyToDbDemographicSurvey(
-                profile.getDemographicSurvey()),
-            verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
-                profile.getVerifiedInstitutionalAffiliation(), institutionService));
+    DbUser user;
+    try {
+      user =
+          userService.createUser(
+              profile.getGivenName(),
+              profile.getFamilyName(),
+              googleUser.getPrimaryEmail(),
+              profile.getContactEmail(),
+              profile.getCurrentPosition(),
+              profile.getOrganization(),
+              profile.getAreaOfResearch(),
+              profile.getProfessionalUrl(),
+              profile.getDegrees(),
+              FROM_CLIENT_ADDRESS.apply(profile.getAddress()),
+              demographicSurveyMapper.demographicSurveyToDbDemographicSurvey(
+                  profile.getDemographicSurvey()),
+              verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
+                  profile.getVerifiedInstitutionalAffiliation(), institutionService));
+    } catch (Exception e) {
+      // If the creation of a User row in the RW database fails, we want to attempt to remove the
+      // G Suite account to avoid having an orphaned account with no record in our database.
+      log.severe(
+          String.format(
+              "An error occurred when creating DbUser for %s. Attempting to delete "
+                  + "orphaned G Suite account",
+              gSuiteUsername));
+      try {
+        directoryService.deleteUser(gSuiteUsername);
+        log.severe("Orphaned G Suite account has been deleted.");
+      } catch (Exception e2) {
+        log.severe(
+            String.format(
+                "Orphaned G Suite account %s could not be deleted. "
+                    + "Manual intervention may be required",
+                gSuiteUsername));
+        log.log(Level.SEVERE, e2.getMessage(), e2);
+        // Throw the original error rather than the G Suite error.
+        throw e;
+      }
+      throw e;
+    }
 
     if (request.getTermsOfServiceVersion() != null) {
       userService.submitTermsOfService(user, request.getTermsOfServiceVersion());
