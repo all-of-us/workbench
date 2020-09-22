@@ -23,14 +23,14 @@ export default class GoogleLoginPage {
    * Login email input field.
    */
   async email(): Promise<ElementHandle> {
-    return this.page.waitForXPath(FieldSelector.EmailInput, {visible: true});
+    return this.page.waitForXPath(FieldSelector.EmailInput, {visible: true, timeout: 60000});
   }
 
   /**
    * Login password input field.
    */
   async password(): Promise<ElementHandle> {
-    return this.page.waitForXPath(FieldSelector.PasswordInput, {visible: true});
+    return this.page.waitForXPath(FieldSelector.PasswordInput, {visible: true, timeout: 60000});
   }
 
   /**
@@ -66,10 +66,12 @@ export default class GoogleLoginPage {
 
     const emailInput = await this.email();
     await emailInput.focus();
-    await emailInput.type(userEmail);
+    await emailInput.type(userEmail, {delay: 15});
+    await emailInput.dispose();
 
-    const nextButton = await this.page.waitForXPath(FieldSelector.NextButton);
+    const nextButton = await this.page.waitForXPath(FieldSelector.NextButton, {visible: true});
     await (BaseElement.asBaseElement(this.page, nextButton)).clickAndWait();
+    await nextButton.dispose();
   }
 
   /**
@@ -79,14 +81,24 @@ export default class GoogleLoginPage {
   async enterPassword(pwd: string) : Promise<void> {
     const input = await this.password();
     await input.focus();
-    await input.type(pwd);
+    await input.type(pwd, {delay: 15});
+    await input.dispose();
   }
 
   /**
    * Click Next button to submit login credential.
    */
   async submit() : Promise<void> {
-    return (new Button(this.page, FieldSelector.SubmitButton)).clickAndWait();
+    const submitButton = new Button(this.page, FieldSelector.SubmitButton);
+    const [response] = await Promise.all([
+      this.page.waitForNavigation({waitUntil: ['networkidle2', 'load'], timeout: 180000}),
+      submitButton.click(),
+    ]);
+    const status = response.status();
+    if (status !== 200) {
+      console.error(`Login navigation response status: ${status}`);
+    }
+    await submitButton.dispose();
   }
 
   /**
@@ -107,21 +119,18 @@ export default class GoogleLoginPage {
     const user = email || config.userEmail;
     const pwd = paswd || config.userPassword;
 
-    try {
-      await this.load(); // load the Google Sign In page
-      const googleLoginButton = await this.loginButton().catch((err) => {
-        console.error('Google login button not found. ' + err);
-        throw err;
-      });
-      await (BaseElement.asBaseElement(this.page, googleLoginButton)).clickAndWait();
+    if (!user || user.trim().length === 0) {
+      console.warn('Login user email: value is empty!!!')
+    }
 
-      if (!user || user.trim().length === 0) {
-        console.warn('Login user email: value is empty!!!')
-      }
-      console.log(`Sign in as ${user}`);
+    await this.load(); // Load the Google Sign In page.
+    await this.loginButton().then(button => button.click());
+
+    try {
       await this.enterEmail(user);
-      await this.page.waitFor(1000); // to reduce probablity of getting Google login recaptcha
+      await this.page.waitFor(500); // to reduce probablity of getting Google login captcha
       await this.enterPassword(pwd);
+      await this.page.waitFor(500);
       await this.submit();
     } catch (err) {
       await takeScreenshot(this.page);
@@ -144,7 +153,6 @@ export default class GoogleLoginPage {
       ]);
       await this.page.waitForSelector('app-signed-in');
     }
-
   }
 
   async loginAs(email, paswd) {
@@ -155,4 +163,5 @@ export default class GoogleLoginPage {
     const button = await Button.findByName(this.page, {name: 'Create Account'});
     await button.clickWithEval();
   }
+  
 }
