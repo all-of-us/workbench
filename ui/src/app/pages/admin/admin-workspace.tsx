@@ -77,7 +77,7 @@ const FileDetailsTable = (props: {data: Array<FileDetail>, bucket: string}) => {
     location: string;
   }
 
-  const getLocation = (file: FileDetail): string => {
+  const parseLocation = (file: FileDetail): string => {
     const prefix = `${bucket}/`;
     const suffix = `/${file.name}`;
     return file.path.replace(prefix, '').replace(suffix, '');
@@ -96,7 +96,7 @@ const FileDetailsTable = (props: {data: Array<FileDetail>, bucket: string}) => {
     return {
       name: file.name,
       size: formatMB(file.sizeInBytes),
-      location: getLocation(file)
+      location: parseLocation(file)
     };
   });
 
