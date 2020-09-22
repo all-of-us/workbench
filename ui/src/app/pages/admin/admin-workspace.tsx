@@ -119,7 +119,7 @@ const FileDetailsTable = (props: {data: Array<FileDetail>, bucket: string}) => {
       currentPageReportTemplate='Showing {first} to {last} of {totalRecords} entries'>
     <Column field='location' header='Location'/>
     <Column field='name' header='Filename'/>
-    <Column field='size' header='File size (MB)'/>
+    <Column field='size' header='File size (MB)' style={{textAlign: 'right'}}/>
   </DataTable>;
 };
 
