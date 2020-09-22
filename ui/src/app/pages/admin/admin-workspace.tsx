@@ -68,6 +68,15 @@ const workspaceInfoField = (labelText: string, divContents: React.ReactFragment)
   </FlexRow>;
 };
 
+const formatMB = (fileSize: number): string => {
+  const mb = fileSize / 1000000.0;
+  if (mb < 1.0) {
+    return '<1';
+  } else {
+    return mb.toFixed(2);
+  }
+};
+
 const FileDetailsTable = (props: {data: Array<FileDetail>, bucket: string}) => {
   const {data, bucket} = props;
 
@@ -81,15 +90,6 @@ const FileDetailsTable = (props: {data: Array<FileDetail>, bucket: string}) => {
     const prefix = `${bucket}/`;
     const suffix = `/${file.name}`;
     return file.path.replace(prefix, '').replace(suffix, '');
-  };
-
-  const formatMB = (fileSize: number): string => {
-    const mb = fileSize / 1000000.0;
-    if (mb < 1.0) {
-      return '<1';
-    } else {
-      return mb.toFixed(2);
-    }
   };
 
   const formattedData: Array<TableEntry> = data.map(file => {
@@ -301,7 +301,7 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
             {workspaceInfoField('GCS bucket path', resources.cloudStorage.storageBucketPath)}
             {workspaceInfoField('# of Workbench-managed notebook files', resources.cloudStorage.notebookFileCount)}
             {workspaceInfoField('# of other files', resources.cloudStorage.nonNotebookFileCount)}
-            {workspaceInfoField('Storage used (bytes)', resources.cloudStorage.storageBytesUsed)}
+            {workspaceInfoField('Storage used (MB)', formatMB(resources.cloudStorage.storageBytesUsed))}
           </div>
           {files && <FileDetailsTable data={files} bucket={resources.cloudStorage.storageBucketPath}/>}
           <h3>Research Purpose</h3>
