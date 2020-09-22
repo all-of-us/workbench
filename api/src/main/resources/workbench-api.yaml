@@ -1734,7 +1734,7 @@ paths:
       description: >
         Get a list of files corresponding to the storage objects associated with the Workspace.
         RESEARCHER_DATA_VIEW authority required.
-      operationId: getFiles
+      operationId: listFiles
       responses:
         200:
           description: List of files in this Workspace's storage bucket

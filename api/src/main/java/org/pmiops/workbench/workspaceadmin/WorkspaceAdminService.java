@@ -33,5 +33,5 @@ public interface WorkspaceAdminService {
   String getReadOnlyNotebook(
       String workspaceNamespace, String notebookName, AccessReason accessReason);
 
-  List<FileDetail> getFiles(String workspaceNamespace);
+  List<FileDetail> listFiles(String workspaceNamespace);
 }

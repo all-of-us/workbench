@@ -226,7 +226,7 @@ public class WorkspaceAdminServiceTest {
   }
 
   @Test
-  public void testGetFiles() {
+  public void testlistFiles() {
     final List<Blob> blobs =
         ImmutableList.of(
             mockBlob("bucket", "notebooks/test.ipynb", 1000L),
@@ -258,7 +258,7 @@ public class WorkspaceAdminServiceTest {
                 .sizeInBytes(1000L * 1000L)
                 .lastModifiedTime(dummyTime));
 
-    final List<FileDetail> files = workspaceAdminService.getFiles(WORKSPACE_NAMESPACE);
+    final List<FileDetail> files = workspaceAdminService.listFiles(WORKSPACE_NAMESPACE);
     assertThat(files).containsExactlyElementsIn(expectedFiles);
   }
 }

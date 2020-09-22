@@ -243,7 +243,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   }
 
   @Override
-  public List<FileDetail> getFiles(String workspaceNamespace) {
+  public List<FileDetail> listFiles(String workspaceNamespace) {
     final String workspaceName =
         getWorkspaceByNamespaceOrThrow(workspaceNamespace).getFirecloudName();
     final String bucketName =

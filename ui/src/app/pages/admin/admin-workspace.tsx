@@ -158,7 +158,7 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
       // Fire off all requests in parallel
       const workspaceDetailsPromise = workspaceAdminApi().getWorkspaceAdminView(workspaceNamespace);
       const cloudStorageTrafficPromise = workspaceAdminApi().getCloudStorageTraffic(workspaceNamespace);
-      const filesPromise = workspaceAdminApi().getFiles(workspaceNamespace);
+      const filesPromise = workspaceAdminApi().listFiles(workspaceNamespace);
       // Wait for all promises to complete before updating state.
       const [workspaceDetails, cloudStorageTraffic, files] =
           await Promise.all([workspaceDetailsPromise, cloudStorageTrafficPromise, filesPromise]);
