@@ -52,7 +52,12 @@ public class DbAddress {
     this.streetAddress2 = streetAddress2;
   }
 
-  @Column(name = "zip_code")
+  // Most @Column annotations in our codebase don't have a length specification. This is included
+  // on the zip_code field to allow test cases (where an in-memory H2 database is used instead of
+  // MySQL) to trigger an exception when a user attempts to save a DbUser row with too-large field
+  // payloads. See ProfileControllerTest for the test case, and the Liquibase changelogs for the
+  // SQL definition of this field.
+  @Column(name = "zip_code", length = 10)
   public String getZipCode() {
     return zipCode;
   }

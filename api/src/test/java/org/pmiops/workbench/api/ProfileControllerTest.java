@@ -31,6 +31,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
@@ -45,7 +46,6 @@ import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
@@ -181,7 +181,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     ProfileController.class,
     ProfileMapperImpl.class,
     ProfileService.class,
-    UserServiceImpl.class,
     UserServiceTestConfiguration.class,
     VerifiedInstitutionalAffiliationMapperImpl.class,
   })
@@ -216,6 +215,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Override
   public void setUp() throws IOException {
     super.setUp();
+    MockitoAnnotations.initMocks(this);
 
     config.googleDirectoryService.gSuiteDomain = GSUITE_DOMAIN;
 
@@ -467,6 +467,18 @@ public class ProfileControllerTest extends BaseControllerTest {
         "Username should be at least 3 characters and not more than 64 characters");
     createAccountAndDbUserWithAffiliation();
     verify(mockProfileAuditor).fireCreateAction(any(Profile.class));
+  }
+
+  @Test(expected = Exception.class)
+  public void testCreateAccount_dbUserFailure() {
+    // Exercises a scenario where the userService throws an unexpected exception (e.g. a SQL error),
+    // ensuring we attempt to clean up the orphaned G Suite user after catching the exception.
+    createAccountRequest.getProfile().getAddress().setZipCode("12345678901234567890");
+
+    createAccountAndDbUserWithAffiliation();
+
+    // The G Suite user should be deleted after the DbUser creation fails.
+    verify(mockDirectoryService).deleteUser(anyString());
   }
 
   @Test
