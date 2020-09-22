@@ -95,7 +95,7 @@ const FileDetailsTable = (props: {data: Array<FileDetail>, bucket: string}) => {
   const formattedData: Array<TableEntry> = data.map(file => {
     return {
       name: file.name,
-      size: formatMB(file.size),
+      size: formatMB(file.sizeInBytes),
       location: getLocation(file)
     };
   });

@@ -5530,7 +5530,7 @@ definitions:
         type: integer
         format: int64
         description: Milliseconds since the UNIX epoch.
-      size:
+      sizeInBytes:
         type: integer
         format: int64
         description: File size in bytes.

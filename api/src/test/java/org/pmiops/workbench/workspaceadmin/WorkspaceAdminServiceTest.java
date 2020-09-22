@@ -240,22 +240,22 @@ public class WorkspaceAdminServiceTest {
             new FileDetail()
                 .name("test.ipynb")
                 .path("gs://bucket/notebooks/test.ipynb")
-                .size(1000L)
+                .sizeInBytes(1000L)
                 .lastModifiedTime(dummyTime),
             new FileDetail()
                 .name("test2.ipynb")
                 .path("gs://bucket/notebooks/test2.ipynb")
-                .size(2000L)
+                .sizeInBytes(2000L)
                 .lastModifiedTime(dummyTime),
             new FileDetail()
                 .name("scratch.txt")
                 .path("gs://bucket/notebooks/scratch.txt")
-                .size(123L)
+                .sizeInBytes(123L)
                 .lastModifiedTime(dummyTime),
             new FileDetail()
                 .name("sneaky.ipynb")
                 .path("gs://bucket/notebooks/hidden/sneaky.ipynb")
-                .size(1000L * 1000L)
+                .sizeInBytes(1000L * 1000L)
                 .lastModifiedTime(dummyTime));
 
     final List<FileDetail> files = workspaceAdminService.getFiles(WORKSPACE_NAMESPACE);

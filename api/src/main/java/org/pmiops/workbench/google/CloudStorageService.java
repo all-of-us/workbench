@@ -64,7 +64,7 @@ public interface CloudStorageService {
     fileDetail.setName(parts[parts.length - 1]);
     fileDetail.setPath("gs://" + bucketName + "/" + blob.getName());
     fileDetail.setLastModifiedTime(blob.getUpdateTime());
-    fileDetail.setSize(blob.getSize());
+    fileDetail.setSizeInBytes(blob.getSize());
     return fileDetail;
   }
 }
