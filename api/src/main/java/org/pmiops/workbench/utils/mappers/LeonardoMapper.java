@@ -25,7 +25,24 @@ public interface LeonardoMapper {
 
   DataprocConfig toDataprocConfig(LeonardoMachineConfig leonardoMachineConfig);
 
+  @Mapping(target = "cloudService", ignore = true)
+  @Mapping(target = "properties", ignore = true)
+  LeonardoMachineConfig toLeonardoMachineConfig(DataprocConfig dataprocConfig);
+
+  @AfterMapping
+  default void addCloudServiceEnum(@MappingTarget LeonardoMachineConfig leonardoMachineConfig) {
+    leonardoMachineConfig.setCloudService(LeonardoMachineConfig.CloudServiceEnum.DATAPROC);
+  }
+
   GceConfig toGceConfig(LeonardoGceConfig leonardoGceConfig);
+
+  @Mapping(target = "cloudService", ignore = true)
+  LeonardoGceConfig toLeonardoGceConfig(GceConfig gceConfig);
+
+  @AfterMapping
+  default void addCloudServiceEnum(@MappingTarget LeonardoGceConfig leonardoGceConfig) {
+    leonardoGceConfig.setCloudService(LeonardoGceConfig.CloudServiceEnum.GCE);
+  }
 
   @Mapping(target = "patchInProgress", ignore = true)
   LeonardoListRuntimeResponse toListRuntimeResponse(LeonardoGetRuntimeResponse runtime);
@@ -37,6 +54,7 @@ public interface LeonardoMapper {
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "toolDockerImage", source = "runtimeImages")
+  @Mapping(target = "configurationType", ignore = true)
   @Mapping(target = "gceConfig", ignore = true)
   @Mapping(target = "dataprocConfig", ignore = true)
   Runtime toApiRuntime(LeonardoGetRuntimeResponse runtime);

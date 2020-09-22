@@ -632,9 +632,14 @@ paths:
       - runtime
       parameters:
       - "$ref": "#/parameters/workspaceNamespace"
+      - in: body
+        name: runtime
+        description: notebooks runtime definition
+        schema:
+          "$ref": "#/definitions/Runtime"
       responses:
         200:
-          description: Returns the runtime that was created for this user and workspace.
+          description: Runtime was created successfully
           schema:
             "$ref": "#/definitions/EmptyResponse"
         409:
@@ -1697,10 +1702,9 @@ paths:
           description: HTML Read Only version of the notebook
           schema:
             "$ref": "#/definitions/ReadOnlyNotebookResponse"
-  "/v1/admin/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/readonly":
+  "/v1/admin/workspaces/{workspaceNamespace}/notebooks/{notebookName}/readonly":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
-      - "$ref": "#/parameters/workspaceId"
     post:
       tags:
         - workspaceAdmin
@@ -3136,6 +3140,44 @@ paths:
           description: A collection of criteria menu options
           schema:
             "$ref": "#/definitions/CriteriaMenuOptionsListResponse"
+  "/v1/cohortbuilder/{cdrVersionId}/criteria/domaininfo":
+    parameters:
+    - "$ref": "#/parameters/cdrVersionId"
+    get:
+      tags:
+      - cohortBuilder
+      description: 'Returns a collection of DomainInfo'
+      operationId: findDomainInfos
+      parameters:
+      - in: query
+        name: term
+        type: string
+        required: true
+        description: the term to search for
+      responses:
+        200:
+          description: A collection of DomainInfo
+          schema:
+            "$ref": "#/definitions/DomainInfoResponse"
+  "/v1/cohortbuilder/{cdrVersionId}/criteria/surveymodule":
+    parameters:
+    - "$ref": "#/parameters/cdrVersionId"
+    get:
+      tags:
+      - cohortBuilder
+      description: 'Returns a collection of SurveyModule'
+      operationId: findSurveyModules
+      parameters:
+      - in: query
+        name: term
+        type: string
+        required: true
+        description: the term to search for
+      responses:
+        200:
+          description: A collection of SurveyModule
+          schema:
+            "$ref": "#/definitions/SurveysResponse"
   "/v1/cohortbuilder/{cdrVersionId}/criteria/{domain}/search/term":
     parameters:
     - "$ref": "#/parameters/cdrVersionId"
@@ -4626,6 +4668,11 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/Concept"
+      criteriums:
+        description: Criteriums in the concept set, in conceptName order.
+        type: array
+        items:
+          "$ref": "#/definitions/Criteria"
   CreateConceptSetRequest:
     type: object
     required:
@@ -5336,13 +5383,21 @@ definitions:
     - Deleting
     - Deleted
     - Unknown
+  RuntimeConfigurationType:
+    description: >
+      The configuration type for this runtime. Namely, whether there was a user
+      override of a specific cloud service type, or whether one of the preset
+      system defaults was used. This distinction is meaningful for display
+      purposes, and allows the user to pickup natural upgrades to the default
+      configuration.
+    type: string
+    enum:
+      - UserOverride
+      - DefaultGce
+      - DefaultDataproc
   Runtime:
-    required:
-      - googleProject
-      - runtimeName
-      - createdDate
-      - status
-      - toolDockerImage
+    # TODO: Add required properties after enableCustomRuntimes feature fully released
+    # We need to allow null/empty Runtimes while we support enableCustomRuntimes=false
     properties:
       googleProject:
         type: string
@@ -5361,6 +5416,13 @@ definitions:
         description: The number of minutes of idle time to elapse before the cluster is
           autopaused. If autopause is set to false, this value is disregarded.
           A value of 0 is equivalent to autopause being turned off.
+      configurationType:
+        description: >
+          This field is primarily for provenance purposes. Regardless of the
+          configuration type, other configuration parameters should still be
+          provided during creation. The API will only perform limited validation
+          that the configuration type and configuration details are consistent.
+        "$ref": "#/definitions/RuntimeConfigurationType"
       toolDockerImage:
         type: string
         description: The tool docker image to install. May be Dockerhub or GCR. If not

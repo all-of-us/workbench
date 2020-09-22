@@ -21,6 +21,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
@@ -103,30 +104,31 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     CohortMapperImpl.class,
     CohortQueryBuilder.class,
     CohortReviewMapperImpl.class,
+    CohortReviewMapperImpl.class,
     CohortReviewServiceImpl.class,
+    CommonMappers.class,
     CommonMappers.class,
     ConceptSetMapperImpl.class,
     DataSetMapperImpl.class,
     FirecloudMapperImpl.class,
+    ParticipantCohortAnnotationMapperImpl.class,
+    ParticipantCohortStatusMapperImpl.class,
     ReviewQueryBuilder.class,
     SearchGroupItemQueryBuilder.class,
     UserMapperImpl.class,
     WorkspaceMapperImpl.class,
     WorkspaceServiceImpl.class,
-    ParticipantCohortStatusMapperImpl.class,
-    CohortReviewMapperImpl.class,
-    ParticipantCohortAnnotationMapperImpl.class,
-    CommonMappers.class
   })
   @MockBean({
-    CohortFactory.class,
+    BillingProjectAuditor.class,
     CohortBuilderService.class,
+    CohortFactory.class,
     CohortService.class,
     ConceptSetService.class,
     DataSetService.class,
     FireCloudService.class,
     FreeTierBillingService.class,
-    UserRecentResourceService.class
+    UserRecentResourceService.class,
   })
   static class Configuration {
 

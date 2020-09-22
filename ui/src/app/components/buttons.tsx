@@ -189,7 +189,7 @@ export const Button = ({type = 'primary', style = {}, disabled = false, ...props
   />;
 };
 
-export const MenuItem = ({icon, tooltip = '', disabled = false, children, ...props}) => {
+export const MenuItem = ({icon = null, tooltip = '', disabled = false, children, style = {}, ...props}) => {
   return <TooltipTrigger side='left' content={tooltip}>
     <Clickable
       // data-test-id is the text within the MenuItem, with whitespace removed
@@ -201,12 +201,13 @@ export const MenuItem = ({icon, tooltip = '', disabled = false, children, ...pro
         fontSize: 12, minWidth: 125, height: 32,
         color: disabled ? colorWithWhiteness(colors.dark, disabledAlpha) : 'black',
         padding: '0 12px',
-        cursor: disabled ? 'not-allowed' : 'pointer'
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        ...style
       }}
       hover={!disabled ? {backgroundColor: colorWithWhiteness(colors.accent, 0.92)} : undefined}
       {...props}
     >
-      <ClrIcon shape={icon} style={{marginRight: 8}} size={15}/>
+      {icon && <ClrIcon shape={icon} style={{marginRight: 8}} size={15}/>}
       {children}
     </Clickable>
   </TooltipTrigger>;

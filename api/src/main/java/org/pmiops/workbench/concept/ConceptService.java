@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import org.pmiops.workbench.api.ConceptsController;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
@@ -119,15 +118,11 @@ public class ConceptService {
     return query2.toString();
   }
 
-  public Iterable<DbConcept> findAll(Collection<Long> conceptIds) {
-    return conceptDao.findAll(conceptIds);
-  }
-
-  public List<Concept> findAll(Collection<Long> conceptIds, Ordering<Concept> ordering) {
+  public List<Concept> findAll(Collection<Long> conceptIds) {
     Iterable<DbConcept> concepts = conceptDao.findAll(conceptIds);
     return Streams.stream(concepts)
-        .map(ConceptsController::toClientConcept)
-        .sorted(ordering)
+        .map(ConceptService::toClientConcept)
+        .sorted(Ordering.from(String.CASE_INSENSITIVE_ORDER).onResultOf(Concept::getConceptName))
         .collect(Collectors.toList());
   }
 
@@ -221,6 +216,21 @@ public class ConceptService {
               }
             });
     return new ConceptIds(standardConceptIds.build(), sourceConceptIds.build());
+  }
+
+  public static Concept toClientConcept(DbConcept dbConcept) {
+    boolean standard = STANDARD_CONCEPT_CODES.contains(dbConcept.getStandardConcept());
+    return new Concept()
+        .conceptClassId(dbConcept.getConceptClassId())
+        .conceptCode(dbConcept.getConceptCode())
+        .conceptName(dbConcept.getConceptName())
+        .conceptId(dbConcept.getConceptId())
+        .countValue(standard ? dbConcept.getCountValue() : dbConcept.getSourceCountValue())
+        .domainId(dbConcept.getDomainId())
+        .prevalence(dbConcept.getPrevalence())
+        .standardConcept(standard)
+        .vocabularyId(dbConcept.getVocabularyId())
+        .conceptSynonyms(dbConcept.getSynonyms());
   }
 
   private ImmutableList<String> getConceptTypes(StandardConceptFilter standardConceptFilter) {

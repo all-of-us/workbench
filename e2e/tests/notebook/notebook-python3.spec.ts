@@ -1,9 +1,9 @@
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn} from 'utils/test-utils';
-
-// Notebook server start may take a long time. Set maximum test running time to 20 minutes.
-jest.setTimeout(20 * 60 * 1000);
+import DataResourceCard from 'app/component/data-resource-card';
+import NotebookPreviewPage from 'app/page/notebook-preview-page';
+import {ResourceCard} from 'app/text-labels';
 
 describe('Jupyter notebook tests in Python language', () => {
 
@@ -11,6 +11,15 @@ describe('Jupyter notebook tests in Python language', () => {
     await signIn(page);
   });
 
+  /**
+   * Test:
+   * - Find an existing workspace.
+   * - Create a new Notebook in Python language.
+   * - Run python from .py files.
+   * - Save notebook. Exit notebook.
+   * - Reopen notebook in Edit mode.
+   * - Verify contents are unchanged.
+   */
   test('Run code from file', async () => {
     const workspaceCard = await findWorkspace(page);
     await workspaceCard.clickWorkspaceName();
@@ -18,6 +27,10 @@ describe('Jupyter notebook tests in Python language', () => {
     const dataPage = new WorkspaceDataPage(page);
     const notebookName = makeRandomName('py');
     const notebook = await dataPage.createNotebook(notebookName);
+
+    // Verify kernel name.
+    const kernelName = await notebook.getKernelName();
+    expect(kernelName).toBe('Python 3');
 
     const cell1OutputText = await notebook.runCodeCell(1, {codeFile: 'resources/python-code/import-os.py'});
     expect(cell1OutputText).toContain('success');
@@ -37,7 +50,25 @@ describe('Jupyter notebook tests in Python language', () => {
     const codeSnippetOutput = await notebook.runCodeCell(4, {code: codeSnippet});
     expect(codeSnippetOutput).toEqual(expect.stringContaining('/usr/local/share/jupyter/kernels/python3'));
 
+    // Save, exit notebook then come back from Analysis page.
+    await notebook.save();
+    await notebook.goAnalysisPage();
+
+    // Find notebook card.
+    const resourceCard = new DataResourceCard(page);
+    const notebookCard = await resourceCard.findCard(notebookName, ResourceCard.Notebook);
+    await notebookCard.clickResourceName();
+
+    // Open notebook in Edit mode
+    const notebookPreviewPage = new NotebookPreviewPage(page);
+    await notebookPreviewPage.waitForLoad();
+    await notebookPreviewPage.openEditMode(notebookName);
+
+    // Verify Code cell [1] output.
+    const [, newCellOutput] = await notebook.getCellInputOutput(1);
+    expect(newCellOutput).toEqual(cell1OutputText);
+
     await notebook.deleteNotebook(notebookName);
-  });
+  }, 20 * 60 * 1000);
 
 })

@@ -47,6 +47,8 @@ public interface FireCloudService {
   /** Creates a billing project owned by AllOfUs. */
   void createAllOfUsBillingProject(String projectName);
 
+  void deleteBillingProject(String billingProject);
+
   /** Get Billing Project Status */
   FirecloudBillingProjectStatus getBillingProjectStatus(String projectName);
 

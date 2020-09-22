@@ -180,14 +180,30 @@ public class RuntimeController implements RuntimeApiDelegate {
   }
 
   @Override
-  public ResponseEntity<EmptyResponse> createRuntime(String workspaceNamespace) {
+  public ResponseEntity<EmptyResponse> createRuntime(String workspaceNamespace, Runtime runtime) {
+    if (runtime == null) {
+      runtime = new Runtime();
+    }
+
+    if (workbenchConfigProvider.get().featureFlags.enableCustomRuntimes) {
+      if (runtime.getGceConfig() == null && runtime.getDataprocConfig() == null) {
+        throw new BadRequestException("Either a GceConfig or DataprocConfig must be provided");
+      }
+
+      if (runtime.getGceConfig() != null && runtime.getDataprocConfig() != null) {
+        throw new BadRequestException("Only one of GceConfig or DataprocConfig must be provided");
+      }
+    }
+
     String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
     workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
     workspaceService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
 
-    leonardoNotebooksClient.createRuntime(
-        workspaceNamespace, userProvider.get().getRuntimeName(), firecloudWorkspaceName);
+    runtime.setGoogleProject(workspaceNamespace);
+    runtime.setRuntimeName(userProvider.get().getRuntimeName());
+
+    leonardoNotebooksClient.createRuntime(runtime, firecloudWorkspaceName);
     return ResponseEntity.ok(new EmptyResponse());
   }
 

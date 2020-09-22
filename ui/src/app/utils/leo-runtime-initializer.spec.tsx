@@ -11,6 +11,7 @@ import expect = jest.Expect;
 import {RuntimesApi as LeoRuntimesApi} from 'notebooks-generated/fetch';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {LeoRuntimesApiStub} from 'testing/stubs/leo-runtimes-api-stub';
+import {RuntimeConfigurationType} from '../../generated/fetch';
 
 let mockGetRuntime: SpyInstance;
 let mockCreateRuntime: SpyInstance;
@@ -22,7 +23,8 @@ const baseRuntime: Runtime = {
   googleProject: 'aou-rw-12345',
   status: RuntimeStatus.Running,
   createdDate: '08/08/2018',
-  toolDockerImage: 'docker'
+  toolDockerImage: 'docker',
+  configurationType: RuntimeConfigurationType.DefaultDataproc
 };
 
 describe('RuntimeInitializer', () => {

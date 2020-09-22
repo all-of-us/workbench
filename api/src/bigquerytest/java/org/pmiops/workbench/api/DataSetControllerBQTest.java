@@ -25,6 +25,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -134,9 +135,10 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     DataSetMapperImpl.class,
     DataSetServiceImpl.class,
     TestBigQueryCdrSchemaConfig.class,
-    WorkspaceServiceImpl.class
+    WorkspaceServiceImpl.class,
   })
   @MockBean({
+    BillingProjectAuditor.class,
     CohortCloningService.class,
     CohortService.class,
     CommonMappers.class,
@@ -148,7 +150,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     NotebooksServiceImpl.class,
     Provider.class,
     UserMapper.class,
-    WorkspaceMapperImpl.class
+    WorkspaceMapperImpl.class,
   })
   static class Configuration {
     @Bean

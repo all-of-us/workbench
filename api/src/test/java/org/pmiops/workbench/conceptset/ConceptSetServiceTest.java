@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
@@ -39,7 +40,12 @@ public class ConceptSetServiceTest {
 
   @TestConfiguration
   @Import({ConceptSetService.class, ConceptService.class, ConceptSetMapperImpl.class})
-  @MockBean({CommonMappers.class, ConceptBigQueryService.class, Clock.class})
+  @MockBean({
+    CommonMappers.class,
+    ConceptBigQueryService.class,
+    Clock.class,
+    CohortBuilderService.class
+  })
   static class Configuration {}
 
   @Test

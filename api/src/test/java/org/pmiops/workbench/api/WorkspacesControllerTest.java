@@ -62,6 +62,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.FreeTierBillingService;
@@ -310,6 +311,7 @@ public class WorkspacesControllerTest {
   })
   @MockBean({
     BigQueryService.class,
+    BillingProjectAuditor.class,
     BillingProjectBufferService.class,
     CdrBigQuerySchemaConfigService.class,
     CloudStorageService.class,

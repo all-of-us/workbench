@@ -47,6 +47,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
+import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
@@ -203,15 +204,15 @@ public class DataSetControllerTest {
     CohortMapperImpl.class,
     CohortReviewMapperImpl.class,
     CohortReviewServiceImpl.class,
-    CohortsController.class,
     CohortService.class,
+    CohortsController.class,
     CommonMappers.class,
     ConceptService.class,
     ConceptSetMapperImpl.class,
-    ConceptSetsController.class,
     ConceptSetService.class,
-    DataSetMapperImpl.class,
+    ConceptSetsController.class,
     DataSetController.class,
+    DataSetMapperImpl.class,
     DataSetServiceImpl.class,
     FirecloudMapperImpl.class,
     LogsBasedMetricServiceFakeImpl.class,
@@ -220,10 +221,11 @@ public class DataSetControllerTest {
     UserServiceTestConfiguration.class,
     WorkspaceMapperImpl.class,
     WorkspaceResourcesServiceImpl.class,
+    WorkspaceServiceImpl.class,
     WorkspacesController.class,
-    WorkspaceServiceImpl.class
   })
   @MockBean({
+    BillingProjectAuditor.class,
     CdrBigQuerySchemaConfigService.class,
     CdrVersionService.class,
     CloudStorageService.class,

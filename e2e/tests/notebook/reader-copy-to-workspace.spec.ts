@@ -3,10 +3,9 @@ import Modal from 'app/component/modal';
 import Navigation, {NavLink} from 'app/component/navigation';
 import WorkspaceCard from 'app/component/workspace-card';
 import Link from 'app/element/link';
-import WorkspaceDataPage from 'app/page/workspace-data-page';
-import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {EllipsisMenuAction, Language, LinkText, ResourceCard, WorkspaceAccessLevel} from 'app/text-labels';
 import {config} from 'resources/workbench-config';
 import {makeRandomName} from 'utils/str-utils';
@@ -29,7 +28,6 @@ describe('Workspace reader Jupyter notebook action tests', () => {
    * - Verify Workspace and notebook permissions.
    * - Copy notebook to collaborator Workspace.
    * - Full Edit rights to clone notebook.
-   * - Verify original notebook contents are unchaged in clone notebook.
    * - Delete clone notebook.
    */
   test('Workspace reader copy notebook to another workspace', async () => {
@@ -37,16 +35,17 @@ describe('Workspace reader Jupyter notebook action tests', () => {
 
     const dataPage = new WorkspaceDataPage(page);
     const notebookName = makeRandomName('pyAdd');
-    let notebook = await dataPage.createNotebook(notebookName, Language.Python);
+    const notebook = await dataPage.createNotebook(notebookName, Language.Python);
 
      // Run code: 1 + 1.
     const code = 'print(1+1)';
     const cellOutput = await notebook.runCodeCell(1, {code});
+    expect(Number.parseInt(cellOutput, 10)).toEqual(2);
     await notebook.save();
-    await notebook.goAnalysisPage();
 
-    const aboutLink = await Link.findByName(page, {name: 'About'});
-    await aboutLink.clickAndWait();
+    const analysisPage = await notebook.goAnalysisPage();
+    await analysisPage.openAboutPage();
+
     const aboutPage = new WorkspaceAboutPage(page);
     await aboutPage.waitForLoad();
 
@@ -88,9 +87,9 @@ describe('Workspace reader Jupyter notebook action tests', () => {
     await menu.clickEllipsis(); // close ellipsis menu.
 
     // Copy notebook to another Workspace and give notebook a new name.
-    const analysisPage = new WorkspaceAnalysisPage(newPage);
+    const newAnalysisPage = new WorkspaceAnalysisPage(newPage);
     const copiedNotebookName = `copy-of-${notebookName}`;
-    await analysisPage.copyNotebookToWorkspace(notebookName, collaboratorWorkspaceName, copiedNotebookName);
+    await newAnalysisPage.copyNotebookToWorkspace(notebookName, collaboratorWorkspaceName, copiedNotebookName);
 
     // Verify Copy Success modal.
     const modal = new Modal(newPage);
@@ -104,7 +103,7 @@ describe('Workspace reader Jupyter notebook action tests', () => {
     await modal.clickButton(LinkText.GoToCopiedNotebook, {waitForClose: true});
 
     // Verify current workspace is collaborator Workspace.
-    await analysisPage.waitForLoad();
+    await newAnalysisPage.waitForLoad();
     const workspaceLink = await Link.findByName(newPage, {name: collaboratorWorkspaceName});
     const linkDisplayed = await workspaceLink.isDisplayed();
     expect(linkDisplayed).toBe(true);
@@ -122,20 +121,7 @@ describe('Workspace reader Jupyter notebook action tests', () => {
     expect(await copyNotebookCardMenu.isDisabled(EllipsisMenuAction.CopyToAnotherWorkspace)).toBe(false);
     await copyNotebookCardMenu.clickEllipsis(); // close menu
 
-    // Open copied notebook, verify original notebook contents unchanged.
-    await notebookCard.clickResourceName();
-    const notebookPreviewPage = new NotebookPreviewPage(newPage);
-    await notebookPreviewPage.waitForLoad();
-    notebook = await notebookPreviewPage.openEditMode(copiedNotebookName);
-
-    // Get Code cell [1] input and output.
-    const [newCellInput, newCellOutput] = await notebook.getCellInputOutput(1);
-
-    // Verify Code cell [1] input and output.
-    expect(newCellInput).toEqual(code);
-    expect(newCellOutput).toEqual(cellOutput);
-
-    await notebook.deleteNotebook(copiedNotebookName);
+    await newAnalysisPage.deleteResource(copiedNotebookName, ResourceCard.Notebook);
   })
 
 });

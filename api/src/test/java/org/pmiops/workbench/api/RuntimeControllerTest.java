@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -14,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.Date;
 import com.google.common.collect.ImmutableList;
+import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
 import java.time.Clock;
 import java.time.Instant;
@@ -47,6 +49,7 @@ import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -54,35 +57,50 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
+import org.pmiops.workbench.leonardo.ApiException;
+import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
+import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
+import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
+import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
+import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeImage;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.DataprocConfig;
 import org.pmiops.workbench.model.GceConfig;
 import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.Runtime;
+import org.pmiops.workbench.model.RuntimeConfigurationType;
 import org.pmiops.workbench.model.RuntimeLocalizeRequest;
 import org.pmiops.workbench.model.RuntimeLocalizeResponse;
 import org.pmiops.workbench.model.RuntimeStatus;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
+import org.pmiops.workbench.notebooks.LeonardoNotebooksClientImpl;
+import org.pmiops.workbench.notebooks.NotebooksConfig;
+import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
+import org.pmiops.workbench.notebooks.api.ProxyApi;
+import org.pmiops.workbench.notebooks.model.Localize;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
+import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.retry.backoff.NoBackOffPolicy;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -136,7 +154,11 @@ public class RuntimeControllerTest {
     CommonMappers.class,
     PublicInstitutionDetailsMapperImpl.class,
     UserServiceTestConfiguration.class,
-    LeonardoMapperImpl.class
+    LeonardoMapperImpl.class,
+    LeonardoNotebooksClientImpl.class,
+    NotebooksRetryHandler.class,
+    LeonardoRetryHandler.class,
+    NoBackOffPolicy.class
   })
   @MockBean({ConceptSetService.class, CohortService.class})
   static class Configuration {
@@ -164,20 +186,31 @@ public class RuntimeControllerTest {
     }
   }
 
-  @Captor private ArgumentCaptor<Map<String, String>> mapCaptor;
+  @Captor private ArgumentCaptor<Localize> welderReqCaptor;
+  @Captor private ArgumentCaptor<LeonardoCreateRuntimeRequest> createRuntimeRequestCaptor;
 
   @MockBean AdminActionHistoryDao mockAdminActionHistoryDao;
   @MockBean LeonardoRuntimeAuditor mockLeonardoRuntimeAuditor;
   @MockBean ComplianceService mockComplianceService;
   @MockBean DirectoryService mockDirectoryService;
   @MockBean FireCloudService mockFireCloudService;
-  @MockBean LeonardoNotebooksClient mockLeoNotebooksClient;
   @MockBean UserRecentResourceService mockUserRecentResourceService;
   @MockBean UserServiceAuditor mockUserServiceAuditor;
   @MockBean WorkspaceService mockWorkspaceService;
 
+  @Qualifier(NotebooksConfig.USER_RUNTIMES_API)
+  @MockBean
+  RuntimesApi userRuntimesApi;
+
+  @Qualifier(NotebooksConfig.SERVICE_RUNTIMES_API)
+  @MockBean
+  RuntimesApi serviceRuntimesApi;
+
+  @MockBean ProxyApi proxyApi;
+
   @Autowired UserDao userDao;
   @Autowired RuntimeController runtimeController;
+  @Autowired LeonardoMapper leonardoMapper;
 
   private DbCdrVersion cdrVersion;
   private LeonardoGetRuntimeResponse testLeoRuntime;
@@ -322,15 +355,15 @@ public class RuntimeControllerTest {
   }
 
   @Test
-  public void testGetRuntime() {
-    when(mockLeoNotebooksClient.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+  public void testGetRuntime() throws ApiException {
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime);
 
     assertThat(runtimeController.getRuntime(BILLING_PROJECT_ID).getBody()).isEqualTo(testRuntime);
   }
 
   @Test
-  public void testGetRuntime_gceConfig() {
+  public void testGetRuntime_gceConfig() throws ApiException {
     GceConfig gceConfig =
         new GceConfig().bootDiskSize(10).diskSize(100).machineType("n1-standard-2");
 
@@ -340,7 +373,7 @@ public class RuntimeControllerTest {
     gceConfigObj.put("machineType", "n1-standard-2");
     gceConfigObj.put("cloudService", "GCE");
 
-    when(mockLeoNotebooksClient.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime.runtimeConfig(gceConfigObj));
 
     assertThat(runtimeController.getRuntime(BILLING_PROJECT_ID).getBody())
@@ -348,8 +381,8 @@ public class RuntimeControllerTest {
   }
 
   @Test
-  public void testGetRuntime_UnknownStatus() {
-    when(mockLeoNotebooksClient.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+  public void testGetRuntime_UnknownStatus() throws ApiException {
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime.status(null));
 
     assertThat(runtimeController.getRuntime(BILLING_PROJECT_ID).getBody().getStatus())
@@ -362,18 +395,18 @@ public class RuntimeControllerTest {
   }
 
   @Test
-  public void testDeleteRuntimesInProject() {
+  public void testDeleteRuntimesInProject() throws ApiException {
     List<LeonardoListRuntimeResponse> listRuntimeResponseList =
         ImmutableList.of(testLeoListRuntimeResponse);
-    when(mockLeoNotebooksClient.listRuntimesByProjectAsService(BILLING_PROJECT_ID))
+    when(serviceRuntimesApi.listRuntimesByProject(BILLING_PROJECT_ID, null, false))
         .thenReturn(listRuntimeResponseList);
 
     runtimeController.deleteRuntimesInProject(
         BILLING_PROJECT_ID,
         new ListRuntimeDeleteRequest()
             .runtimesToDelete(ImmutableList.of(testLeoRuntime.getRuntimeName())));
-    verify(mockLeoNotebooksClient)
-        .deleteRuntimeAsService(BILLING_PROJECT_ID, testLeoRuntime.getRuntimeName());
+    verify(serviceRuntimesApi)
+        .deleteRuntime(BILLING_PROJECT_ID, testLeoRuntime.getRuntimeName(), false);
     verify(mockLeonardoRuntimeAuditor)
         .fireDeleteRuntimesInProject(
             BILLING_PROJECT_ID,
@@ -383,49 +416,49 @@ public class RuntimeControllerTest {
   }
 
   @Test
-  public void testDeleteRuntimesInProject_DeleteSome() {
+  public void testDeleteRuntimesInProject_DeleteSome() throws ApiException {
     List<LeonardoListRuntimeResponse> listRuntimeResponseList =
         ImmutableList.of(testLeoListRuntimeResponse, testLeoListRuntimeResponse2);
     List<String> runtimesToDelete = ImmutableList.of(testLeoRuntime.getRuntimeName());
-    when(mockLeoNotebooksClient.listRuntimesByProjectAsService(BILLING_PROJECT_ID))
+    when(serviceRuntimesApi.listRuntimesByProject(BILLING_PROJECT_ID, null, false))
         .thenReturn(listRuntimeResponseList);
 
     runtimeController.deleteRuntimesInProject(
         BILLING_PROJECT_ID, new ListRuntimeDeleteRequest().runtimesToDelete(runtimesToDelete));
-    verify(mockLeoNotebooksClient, times(runtimesToDelete.size()))
-        .deleteRuntimeAsService(BILLING_PROJECT_ID, testLeoRuntime.getRuntimeName());
+    verify(serviceRuntimesApi, times(runtimesToDelete.size()))
+        .deleteRuntime(BILLING_PROJECT_ID, testLeoRuntime.getRuntimeName(), false);
     verify(mockLeonardoRuntimeAuditor, times(1))
         .fireDeleteRuntimesInProject(BILLING_PROJECT_ID, runtimesToDelete);
   }
 
   @Test
-  public void testDeleteRuntimesInProject_DeleteDoesNotAffectOtherProjects() {
+  public void testDeleteRuntimesInProject_DeleteDoesNotAffectOtherProjects() throws ApiException {
     List<LeonardoListRuntimeResponse> listRuntimeResponseList =
         ImmutableList.of(testLeoListRuntimeResponse, testLeoListRuntimeResponse2);
     List<String> runtimesToDelete =
         ImmutableList.of(testLeoRuntimeDifferentProject.getRuntimeName());
-    when(mockLeoNotebooksClient.listRuntimesByProjectAsService(BILLING_PROJECT_ID))
+    when(serviceRuntimesApi.listRuntimesByProject(BILLING_PROJECT_ID, null, false))
         .thenReturn(listRuntimeResponseList);
 
     runtimeController.deleteRuntimesInProject(
         BILLING_PROJECT_ID, new ListRuntimeDeleteRequest().runtimesToDelete(runtimesToDelete));
-    verify(mockLeoNotebooksClient, times(0))
-        .deleteRuntimeAsService(BILLING_PROJECT_ID, testLeoRuntime.getRuntimeName());
+    verify(serviceRuntimesApi, times(0))
+        .deleteRuntime(BILLING_PROJECT_ID, testLeoRuntime.getRuntimeName(), false);
     verify(mockLeonardoRuntimeAuditor, times(0))
         .fireDeleteRuntimesInProject(BILLING_PROJECT_ID, runtimesToDelete);
   }
 
   @Test
-  public void testDeleteRuntimesInProject_NoRuntimes() {
+  public void testDeleteRuntimesInProject_NoRuntimes() throws ApiException {
     List<LeonardoListRuntimeResponse> listRuntimeResponseList =
         ImmutableList.of(testLeoListRuntimeResponse);
-    when(mockLeoNotebooksClient.listRuntimesByProjectAsService(BILLING_PROJECT_ID))
+    when(serviceRuntimesApi.listRuntimesByProject(BILLING_PROJECT_ID, null, false))
         .thenReturn(listRuntimeResponseList);
 
     runtimeController.deleteRuntimesInProject(
         BILLING_PROJECT_ID, new ListRuntimeDeleteRequest().runtimesToDelete(ImmutableList.of()));
-    verify(mockLeoNotebooksClient, never())
-        .deleteRuntimeAsService(BILLING_PROJECT_ID, testLeoRuntime.getRuntimeName());
+    verify(serviceRuntimesApi, never())
+        .deleteRuntime(BILLING_PROJECT_ID, testLeoRuntime.getRuntimeName(), false);
     verify(mockLeonardoRuntimeAuditor, never())
         .fireDeleteRuntimesInProject(
             BILLING_PROJECT_ID,
@@ -435,16 +468,16 @@ public class RuntimeControllerTest {
   }
 
   @Test
-  public void testDeleteRuntimesInProject_NullRuntimesList() {
+  public void testDeleteRuntimesInProject_NullRuntimesList() throws ApiException {
     List<LeonardoListRuntimeResponse> listRuntimeResponseList =
         ImmutableList.of(testLeoListRuntimeResponse);
-    when(mockLeoNotebooksClient.listRuntimesByProjectAsService(BILLING_PROJECT_ID))
+    when(serviceRuntimesApi.listRuntimesByProject(BILLING_PROJECT_ID, null, false))
         .thenReturn(listRuntimeResponseList);
 
     runtimeController.deleteRuntimesInProject(
         BILLING_PROJECT_ID, new ListRuntimeDeleteRequest().runtimesToDelete(null));
-    verify(mockLeoNotebooksClient)
-        .deleteRuntimeAsService(BILLING_PROJECT_ID, testLeoRuntime.getRuntimeName());
+    verify(serviceRuntimesApi)
+        .deleteRuntime(BILLING_PROJECT_ID, testLeoRuntime.getRuntimeName(), false);
     verify(mockLeonardoRuntimeAuditor)
         .fireDeleteRuntimesInProject(
             BILLING_PROJECT_ID,
@@ -454,24 +487,195 @@ public class RuntimeControllerTest {
   }
 
   @Test
-  public void testCreateRuntime() {
-    when(mockLeoNotebooksClient.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+  public void testCreateRuntime_customRuntimeEnabled_noRuntimes() throws ApiException {
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
+    config.featureFlags.enableCustomRuntimes = true;
+
+    assertThrows(
+        BadRequestException.class,
+        () -> runtimeController.createRuntime(BILLING_PROJECT_ID, new Runtime()));
+  }
+
+  @Test
+  public void testCreateRuntime_customRuntimeEnabled_twoRuntimes() throws ApiException {
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
+    config.featureFlags.enableCustomRuntimes = true;
+
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            runtimeController.createRuntime(
+                BILLING_PROJECT_ID,
+                new Runtime()
+                    .dataprocConfig(new DataprocConfig().masterMachineType("standard"))
+                    .gceConfig(new GceConfig().machineType("standard"))));
+  }
+
+  @Test
+  public void testCreateRuntime_dataproc() throws ApiException {
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
+    config.featureFlags.enableCustomRuntimes = true;
+
+    runtimeController.createRuntime(
+        BILLING_PROJECT_ID,
+        new Runtime()
+            .dataprocConfig(
+                new DataprocConfig()
+                    .numberOfWorkers(5)
+                    .workerMachineType("worker")
+                    .workerDiskSize(10)
+                    .numberOfWorkerLocalSSDs(1)
+                    .numberOfPreemptibleWorkers(3)
+                    .masterDiskSize(100)
+                    .masterMachineType("standard")));
+
+    verify(userRuntimesApi)
+        .createRuntime(
+            eq(BILLING_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+
+    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+
+    Gson gson = new Gson();
+    LeonardoMachineConfig createLeonardoMachineConfig =
+        gson.fromJson(
+            gson.toJson(createRuntimeRequest.getRuntimeConfig()), LeonardoMachineConfig.class);
+
+    assertThat(
+            gson.fromJson(
+                    gson.toJson(createRuntimeRequest.getRuntimeConfig()),
+                    LeonardoRuntimeConfig.class)
+                .getCloudService())
+        .isEqualTo(LeonardoRuntimeConfig.CloudServiceEnum.DATAPROC);
+    assertThat(createLeonardoMachineConfig.getNumberOfWorkers()).isEqualTo(5);
+    assertThat(createLeonardoMachineConfig.getWorkerMachineType()).isEqualTo("worker");
+    assertThat(createLeonardoMachineConfig.getWorkerDiskSize()).isEqualTo(10);
+    assertThat(createLeonardoMachineConfig.getNumberOfWorkerLocalSSDs()).isEqualTo(1);
+    assertThat(createLeonardoMachineConfig.getNumberOfPreemptibleWorkers()).isEqualTo(3);
+    assertThat(createLeonardoMachineConfig.getMasterDiskSize()).isEqualTo(100);
+    assertThat(createLeonardoMachineConfig.getMasterMachineType()).isEqualTo("standard");
+  }
+
+  @Test
+  public void testCreateRuntime_gce() throws ApiException {
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
+    config.featureFlags.enableCustomRuntimes = true;
+
+    runtimeController.createRuntime(
+        BILLING_PROJECT_ID,
+        new Runtime()
+            .gceConfig(new GceConfig().bootDiskSize(10).diskSize(50).machineType("standard")));
+
+    verify(userRuntimesApi)
+        .createRuntime(
+            eq(BILLING_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+
+    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+
+    Gson gson = new Gson();
+    LeonardoGceConfig createLeonardoGceConfig =
+        gson.fromJson(
+            gson.toJson(createRuntimeRequest.getRuntimeConfig()), LeonardoGceConfig.class);
+
+    assertThat(
+            gson.fromJson(
+                    gson.toJson(createRuntimeRequest.getRuntimeConfig()),
+                    LeonardoRuntimeConfig.class)
+                .getCloudService())
+        .isEqualTo(LeonardoRuntimeConfig.CloudServiceEnum.GCE);
+    assertThat(createLeonardoGceConfig.getBootDiskSize()).isEqualTo(10);
+    assertThat(createLeonardoGceConfig.getDiskSize()).isEqualTo(50);
+
+    assertThat(createLeonardoGceConfig.getMachineType()).isEqualTo("standard");
+  }
+
+  @Test
+  public void testCreateRuntime_nullRuntime() throws ApiException {
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
 
-    runtimeController.createRuntime(BILLING_PROJECT_ID);
-    verify(mockLeoNotebooksClient)
-        .createRuntime(eq(BILLING_PROJECT_ID), eq(getRuntimeName()), eq(WORKSPACE_ID));
+    runtimeController.createRuntime(BILLING_PROJECT_ID, null);
+    verify(userRuntimesApi).createRuntime(eq(BILLING_PROJECT_ID), eq(getRuntimeName()), any());
   }
 
   @Test
-  public void testDeleteRuntime() {
+  public void testCreateRuntime_emptyRuntime() throws ApiException {
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
+
+    runtimeController.createRuntime(BILLING_PROJECT_ID, new Runtime());
+    verify(userRuntimesApi).createRuntime(eq(BILLING_PROJECT_ID), eq(getRuntimeName()), any());
+  }
+
+  @Test
+  public void testCreateRuntime_defaultLabel_dataproc() throws ApiException {
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
+
+    runtimeController.createRuntime(
+        BILLING_PROJECT_ID,
+        new Runtime().configurationType(RuntimeConfigurationType.DEFAULTDATAPROC));
+    verify(userRuntimesApi)
+        .createRuntime(
+            eq(BILLING_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+
+    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    assertThat(((Map<String, String>) createRuntimeRequest.getLabels()).get("all-of-us-config"))
+        .isEqualTo("default-dataproc");
+  }
+
+  @Test
+  public void testCreateRuntime_defaultLabel_gce() throws ApiException {
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
+
+    runtimeController.createRuntime(
+        BILLING_PROJECT_ID, new Runtime().configurationType(RuntimeConfigurationType.DEFAULTGCE));
+    verify(userRuntimesApi)
+        .createRuntime(
+            eq(BILLING_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+
+    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    assertThat(((Map<String, String>) createRuntimeRequest.getLabels()).get("all-of-us-config"))
+        .isEqualTo("default-gce");
+  }
+
+  @Test
+  public void testCreateRuntime_overrideLabel() throws ApiException {
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
+
+    runtimeController.createRuntime(
+        BILLING_PROJECT_ID, new Runtime().configurationType(RuntimeConfigurationType.USEROVERRIDE));
+    verify(userRuntimesApi)
+        .createRuntime(
+            eq(BILLING_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+
+    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    assertThat(((Map<String, String>) createRuntimeRequest.getLabels()).get("all-of-us-config"))
+        .isEqualTo("user-override");
+  }
+
+  @Test
+  public void testDeleteRuntime() throws ApiException {
     runtimeController.deleteRuntime(BILLING_PROJECT_ID);
-    verify(mockLeoNotebooksClient).deleteRuntime(BILLING_PROJECT_ID, getRuntimeName());
+    verify(userRuntimesApi).deleteRuntime(BILLING_PROJECT_ID, getRuntimeName(), false);
   }
 
   @Test
-  public void testLocalize() {
+  public void testLocalize() throws org.pmiops.workbench.notebooks.ApiException {
     RuntimeLocalizeRequest req =
         new RuntimeLocalizeRequest()
             .notebookNames(ImmutableList.of("foo.ipynb"))
@@ -480,19 +684,40 @@ public class RuntimeControllerTest {
     RuntimeLocalizeResponse resp = runtimeController.localize(BILLING_PROJECT_ID, req).getBody();
     assertThat(resp.getRuntimeLocalDirectory()).isEqualTo("workspaces/myfirstworkspace");
 
-    verify(mockLeoNotebooksClient)
-        .localize(eq(BILLING_PROJECT_ID), eq(getRuntimeName()), mapCaptor.capture());
-    Map<String, String> localizeMap = mapCaptor.getValue();
-    assertThat(localizeMap.keySet())
+    verify(proxyApi)
+        .welderLocalize(eq(BILLING_PROJECT_ID), eq(getRuntimeName()), welderReqCaptor.capture());
+
+    Localize welderReq = welderReqCaptor.getValue();
+    assertThat(
+            welderReq.getEntries().stream()
+                .map(e -> e.getLocalDestinationPath())
+                .collect(Collectors.toList()))
         .containsExactly(
             "workspaces/myfirstworkspace/foo.ipynb",
             "workspaces_playground/myfirstworkspace/.all_of_us_config.json",
             "workspaces/myfirstworkspace/.all_of_us_config.json");
-    assertThat(localizeMap)
-        .containsEntry(
-            "workspaces/myfirstworkspace/foo.ipynb", "gs://workspace-bucket/notebooks/foo.ipynb");
+
+    assertThat(
+            welderReq.getEntries().stream()
+                .filter(
+                    e ->
+                        e.getSourceUri().equals("gs://workspace-bucket/notebooks/foo.ipynb")
+                            && e.getLocalDestinationPath()
+                                .equals("workspaces/myfirstworkspace/foo.ipynb"))
+                .count())
+        .isAtLeast(1L);
+
     JSONObject aouJson =
-        dataUriToJson(localizeMap.get("workspaces/myfirstworkspace/.all_of_us_config.json"));
+        dataUriToJson(
+            welderReq.getEntries().stream()
+                .filter(
+                    e ->
+                        e.getLocalDestinationPath()
+                            .equals("workspaces/myfirstworkspace/.all_of_us_config.json"))
+                .findFirst()
+                .get()
+                .getSourceUri());
+
     assertThat(aouJson.getString("WORKSPACE_ID")).isEqualTo(WORKSPACE_ID);
     assertThat(aouJson.getString("BILLING_CLOUD_PROJECT")).isEqualTo(BILLING_PROJECT_ID);
     assertThat(aouJson.getString("API_HOST")).isEqualTo(API_HOST);
@@ -501,7 +726,7 @@ public class RuntimeControllerTest {
   }
 
   @Test
-  public void testLocalize_playgroundMode() {
+  public void testLocalize_playgroundMode() throws org.pmiops.workbench.notebooks.ApiException {
     RuntimeLocalizeRequest req =
         new RuntimeLocalizeRequest()
             .notebookNames(ImmutableList.of("foo.ipynb"))
@@ -509,22 +734,33 @@ public class RuntimeControllerTest {
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
     RuntimeLocalizeResponse resp = runtimeController.localize(BILLING_PROJECT_ID, req).getBody();
     assertThat(resp.getRuntimeLocalDirectory()).isEqualTo("workspaces_playground/myfirstworkspace");
-    verify(mockLeoNotebooksClient)
-        .localize(eq(BILLING_PROJECT_ID), eq(getRuntimeName()), mapCaptor.capture());
-    Map<String, String> localizeMap = mapCaptor.getValue();
-    assertThat(localizeMap.keySet())
+    verify(proxyApi)
+        .welderLocalize(eq(BILLING_PROJECT_ID), eq(getRuntimeName()), welderReqCaptor.capture());
+
+    Localize welderReq = welderReqCaptor.getValue();
+
+    assertThat(
+            welderReq.getEntries().stream()
+                .map(e -> e.getLocalDestinationPath())
+                .collect(Collectors.toList()))
         .containsExactly(
             "workspaces_playground/myfirstworkspace/foo.ipynb",
             "workspaces_playground/myfirstworkspace/.all_of_us_config.json",
             "workspaces/myfirstworkspace/.all_of_us_config.json");
-    assertThat(localizeMap)
-        .containsEntry(
-            "workspaces_playground/myfirstworkspace/foo.ipynb",
-            "gs://workspace-bucket/notebooks/foo.ipynb");
+
+    assertThat(
+            welderReq.getEntries().stream()
+                .filter(
+                    e ->
+                        e.getLocalDestinationPath()
+                                .equals("workspaces_playground/myfirstworkspace/foo.ipynb")
+                            && e.getSourceUri().equals("gs://workspace-bucket/notebooks/foo.ipynb"))
+                .count())
+        .isAtLeast(1L);
   }
 
   @Test
-  public void testLocalize_differentNamespace() {
+  public void testLocalize_differentNamespace() throws org.pmiops.workbench.notebooks.ApiException {
     RuntimeLocalizeRequest req =
         new RuntimeLocalizeRequest()
             .notebookNames(ImmutableList.of("foo.ipynb"))
@@ -532,39 +768,63 @@ public class RuntimeControllerTest {
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
     stubGetWorkspace("other-proj", "myotherworkspace", LOGGED_IN_USER_EMAIL);
     RuntimeLocalizeResponse resp = runtimeController.localize("other-proj", req).getBody();
-    verify(mockLeoNotebooksClient)
-        .localize(eq("other-proj"), eq(getRuntimeName()), mapCaptor.capture());
+    verify(proxyApi)
+        .welderLocalize(eq("other-proj"), eq(getRuntimeName()), welderReqCaptor.capture());
 
-    Map<String, String> localizeMap = mapCaptor.getValue();
-    assertThat(localizeMap.keySet())
+    Localize welderReq = welderReqCaptor.getValue();
+
+    assertThat(
+            welderReq.getEntries().stream()
+                .map(e -> e.getLocalDestinationPath())
+                .collect(Collectors.toList()))
         .containsExactly(
             "workspaces/myotherworkspace/foo.ipynb",
             "workspaces/myotherworkspace/.all_of_us_config.json",
             "workspaces_playground/myotherworkspace/.all_of_us_config.json");
-    assertThat(localizeMap)
-        .containsEntry(
-            "workspaces/myotherworkspace/foo.ipynb", "gs://workspace-bucket/notebooks/foo.ipynb");
+
+    assertThat(
+            welderReq.getEntries().stream()
+                .filter(
+                    e ->
+                        e.getLocalDestinationPath().equals("workspaces/myotherworkspace/foo.ipynb")
+                            && e.getSourceUri().equals("gs://workspace-bucket/notebooks/foo.ipynb"))
+                .count())
+        .isAtLeast(1L);
+
     assertThat(resp.getRuntimeLocalDirectory()).isEqualTo("workspaces/myotherworkspace");
     JSONObject aouJson =
-        dataUriToJson(localizeMap.get("workspaces/myotherworkspace/.all_of_us_config.json"));
+        dataUriToJson(
+            welderReq.getEntries().stream()
+                .filter(
+                    e ->
+                        e.getLocalDestinationPath()
+                            .equals("workspaces/myotherworkspace/.all_of_us_config.json"))
+                .findFirst()
+                .get()
+                .getSourceUri());
     assertThat(aouJson.getString("BILLING_CLOUD_PROJECT")).isEqualTo("other-proj");
   }
 
   @Test
-  public void testLocalize_noNotebooks() {
+  public void testLocalize_noNotebooks() throws org.pmiops.workbench.notebooks.ApiException {
     RuntimeLocalizeRequest req = new RuntimeLocalizeRequest();
     req.setPlaygroundMode(false);
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
     RuntimeLocalizeResponse resp = runtimeController.localize(BILLING_PROJECT_ID, req).getBody();
-    verify(mockLeoNotebooksClient)
-        .localize(eq(BILLING_PROJECT_ID), eq(getRuntimeName()), mapCaptor.capture());
+    verify(proxyApi)
+        .welderLocalize(eq(BILLING_PROJECT_ID), eq(getRuntimeName()), welderReqCaptor.capture());
 
     // Config files only.
-    Map<String, String> localizeMap = mapCaptor.getValue();
-    assertThat(localizeMap.keySet())
+    Localize welderReq = welderReqCaptor.getValue();
+
+    assertThat(
+            welderReq.getEntries().stream()
+                .map(e -> e.getLocalDestinationPath())
+                .collect(Collectors.toList()))
         .containsExactly(
             "workspaces_playground/myfirstworkspace/.all_of_us_config.json",
             "workspaces/myfirstworkspace/.all_of_us_config.json");
+
     assertThat(resp.getRuntimeLocalDirectory()).isEqualTo("workspaces/myfirstworkspace");
   }
 

@@ -13,6 +13,7 @@ import org.pmiops.workbench.cdr.model.DbMenuOption;
 import org.pmiops.workbench.cdr.model.DbSurveyVersion;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.FilterColumns;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,12 +52,27 @@ public class CBCriteriaDaoTest {
             DbCriteria.builder()
                 .addDomainId(DomainType.SURVEY.toString())
                 .addType(CriteriaType.PPI.toString())
-                .addSubtype(CriteriaSubType.SURVEY.toString())
+                .addSubtype(CriteriaSubType.QUESTION.toString())
                 .addGroup(false)
+                .addConceptId("1")
                 .addStandard(false)
                 .addSelectable(true)
                 .addName("The Basics")
                 .build());
+    // adding a survey answer
+    cbCriteriaDao.save(
+        DbCriteria.builder()
+            .addDomainId(DomainType.SURVEY.toString())
+            .addType(CriteriaType.PPI.toString())
+            .addSubtype(CriteriaSubType.ANSWER.toString())
+            .addGroup(false)
+            .addConceptId("1")
+            .addStandard(false)
+            .addSelectable(true)
+            .addName("Answer")
+            .addPath(String.valueOf(surveyCriteria.getId()))
+            .addFullText("term[SURVEY_rank1]")
+            .build());
     sourceCriteria =
         cbCriteriaDao.save(
             DbCriteria.builder()
@@ -65,6 +81,8 @@ public class CBCriteriaDaoTest {
                 .addCount(100L)
                 .addStandard(false)
                 .addCode("120")
+                .addConceptId("12")
+                .addFullText("term[CONDITION_rank1]")
                 .build());
     standardCriteria =
         cbCriteriaDao.save(
@@ -168,12 +186,41 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
+  public void findCountByDomainAndStandardAndTerm() {
+    assertThat(
+            cbCriteriaDao.findCountByDomainAndStandardAndTerm(
+                Domain.CONDITION.toString(), ImmutableList.of(false), "term"))
+        .isEqualTo(1);
+  }
+
+  @Test
+  public void findCriteriaByDomainIdAndConceptIds() {
+    assertThat(
+            cbCriteriaDao.findCriteriaByDomainIdAndConceptIds("CONDITION", ImmutableList.of("12")))
+        .containsExactly(sourceCriteria);
+  }
+
+  @Test
+  public void findIdByDomainAndConceptIdAndName() {
+    assertThat(
+            cbCriteriaDao.findIdByDomainAndConceptIdAndName(
+                Domain.SURVEY.toString(), surveyCriteria.getConceptId(), surveyCriteria.getName()))
+        .isEqualTo(surveyCriteria.getId());
+  }
+
+  @Test
+  public void findQuestionCountByDomainAndIdAndTerm() {
+    assertThat(cbCriteriaDao.findQuestionCountByDomainAndIdAndTerm(surveyCriteria.getId(), "term"))
+        .isEqualTo(1L);
+  }
+
+  @Test
   public void findCriteriaLeavesByDomainAndTypeAndSubtype() {
     List<DbCriteria> criteriaList =
         cbCriteriaDao.findCriteriaLeavesByDomainAndTypeAndSubtype(
             DomainType.SURVEY.toString(),
             CriteriaType.PPI.toString(),
-            CriteriaSubType.SURVEY.toString());
+            CriteriaSubType.QUESTION.toString());
     assertThat(criteriaList).containsExactly(surveyCriteria);
   }
 
