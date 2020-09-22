@@ -13,9 +13,9 @@ import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.model.BqDtoUser;
-import org.pmiops.workbench.model.BqDtoWorkspace;
 import org.pmiops.workbench.model.ReportingSnapshot;
+import org.pmiops.workbench.model.ReportingUser;
+import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.reporting.insertion.InsertAllRequestBuilder;
 import org.pmiops.workbench.reporting.insertion.UserParameterColumn;
 import org.pmiops.workbench.reporting.insertion.WorkspaceParameterColumn;
@@ -26,9 +26,9 @@ import org.springframework.stereotype.Service;
 public class ReportingUploadServiceStreamingImpl implements ReportingUploadService {
   private static final Logger log =
       Logger.getLogger(ReportingUploadServiceStreamingImpl.class.getName());
-  private static final InsertAllRequestBuilder<BqDtoUser> userRequestBuilder =
+  private static final InsertAllRequestBuilder<ReportingUser> userRequestBuilder =
       UserParameterColumn::values;
-  private static final InsertAllRequestBuilder<BqDtoWorkspace> workspaceRequestBuilder =
+  private static final InsertAllRequestBuilder<ReportingWorkspace> workspaceRequestBuilder =
       WorkspaceParameterColumn::values;
 
   private final BigQueryService bigQueryService;

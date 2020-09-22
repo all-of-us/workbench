@@ -10,11 +10,11 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.dao.projection.PrjWorkspace;
+import org.pmiops.workbench.db.dao.projection.ProjectedReportingWorkspace;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.model.BqDtoWorkspace;
+import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.reporting.ReportingMapper;
 import org.pmiops.workbench.reporting.ReportingMapperImpl;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
@@ -88,7 +88,7 @@ public class WorkspaceDaoTest {
 
     final DbWorkspace dbWorkspace =
         workspaceDao.save(ReportingTestUtils.createDbWorkspace(creator, cdrVersion));
-    final List<PrjWorkspace> workspaces = workspaceDao.getReportingWorkspaces();
+    final List<ProjectedReportingWorkspace> workspaces = workspaceDao.getReportingWorkspaces();
 
     assertThat(workspaces).hasSize(1);
     ReportingTestUtils.assertPrjWorkspaceFields(
@@ -99,7 +99,7 @@ public class WorkspaceDaoTest {
 
     // check that the projection built by the DAO satisfies the mapper. Very frequently, projection
     // issues show up in the mapper first (though the assertions above *should* be sufficient.
-    final BqDtoWorkspace dtoWorkspace = reportingMapper.toDto(workspaces.get(0));
+    final ReportingWorkspace dtoWorkspace = reportingMapper.toDto(workspaces.get(0));
     ReportingTestUtils.assertDtoWorkspaceFields(
         dtoWorkspace,
         dbWorkspace.getWorkspaceId(),

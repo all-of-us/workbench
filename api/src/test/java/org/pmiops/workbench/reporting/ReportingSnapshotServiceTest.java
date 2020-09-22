@@ -16,10 +16,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.dao.projection.PrjUser;
-import org.pmiops.workbench.model.BqDtoUser;
-import org.pmiops.workbench.model.BqDtoWorkspace;
+import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
 import org.pmiops.workbench.model.ReportingSnapshot;
+import org.pmiops.workbench.model.ReportingUser;
+import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.testconfig.ReportingTestUtils;
@@ -80,16 +80,17 @@ public class ReportingSnapshotServiceTest {
     assertTimeApprox(snapshot.getCaptureTimestamp(), NOW_INSTANT.toEpochMilli());
 
     assertThat(snapshot.getUsers()).hasSize(2);
-    final BqDtoUser user = snapshot.getUsers().get(0);
+    final ReportingUser user = snapshot.getUsers().get(0);
     assertDtoUserFields(user);
 
     assertThat(snapshot.getWorkspaces()).hasSize(1);
-    final BqDtoWorkspace workspace = snapshot.getWorkspaces().get(0);
+    final ReportingWorkspace workspace = snapshot.getWorkspaces().get(0);
     ReportingTestUtils.assertDtoWorkspaceFields(workspace);
   }
 
   private void mockUsers() {
-    final List<PrjUser> users = ImmutableList.of(mockPrjUser(), mockPrjUser());
+    final List<ProjectedReportingUser> users =
+        ImmutableList.of(mockProjectedjUser(), mockProjectedjUser());
     doReturn(users).when(mockUserService).getRepotingUsers();
   }
 

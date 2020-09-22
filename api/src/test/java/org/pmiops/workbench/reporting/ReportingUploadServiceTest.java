@@ -40,9 +40,9 @@ import org.mockito.Captor;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cohortbuilder.util.QueryParameterValues;
 import org.pmiops.workbench.model.BillingStatus;
-import org.pmiops.workbench.model.BqDtoUser;
-import org.pmiops.workbench.model.BqDtoWorkspace;
 import org.pmiops.workbench.model.ReportingSnapshot;
+import org.pmiops.workbench.model.ReportingUser;
+import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.reporting.insertion.InsertAllRequestBuilder;
 import org.pmiops.workbench.reporting.insertion.WorkspaceParameterColumn;
 import org.pmiops.workbench.test.FakeClock;
@@ -108,12 +108,12 @@ public class ReportingUploadServiceTest {
             .users(
                 ImmutableList.of(
                     createDtoUser(),
-                    new BqDtoUser()
+                    new ReportingUser()
                         .username("ted@aou.biz")
                         .givenName("Ted")
                         .disabled(true)
                         .userId(202L),
-                    new BqDtoUser()
+                    new ReportingUser()
                         .username("socrates@aou.biz")
                         .givenName("So-Crates")
                         .disabled(false)
@@ -121,17 +121,17 @@ public class ReportingUploadServiceTest {
                     ReportingTestUtils.createDtoUser()))
             .workspaces(
                 ImmutableList.of(
-                    new BqDtoWorkspace()
+                    new ReportingWorkspace()
                         .workspaceId(201L)
                         .name("Circle K")
                         .creationTime(THEN)
                         .creatorId(101L),
-                    new BqDtoWorkspace()
+                    new ReportingWorkspace()
                         .workspaceId(202L)
                         .name("Wyld Stallyns")
                         .creationTime(THEN)
                         .creatorId(101L),
-                    new BqDtoWorkspace()
+                    new ReportingWorkspace()
                         .workspaceId(203L)
                         .name("You-us said what we-us are saying right now.")
                         .creationTime(THEN)
@@ -142,30 +142,30 @@ public class ReportingUploadServiceTest {
             .captureTimestamp(NOW.toEpochMilli())
             .users(
                 ImmutableList.of(
-                    new BqDtoUser()
+                    new ReportingUser()
                         .username(null)
                         .givenName("Nullson")
                         .disabled(false)
                         .userId(101L),
-                    new BqDtoUser()
+                    new ReportingUser()
                         .username("america@usa.gov")
                         .givenName(null)
                         .disabled(false)
                         .userId(202L),
-                    new BqDtoUser().username(null).givenName(null).disabled(true).userId(303L)))
+                    new ReportingUser().username(null).givenName(null).disabled(true).userId(303L)))
             .workspaces(
                 ImmutableList.of(
-                    new BqDtoWorkspace()
+                    new ReportingWorkspace()
                         .workspaceId(201L)
                         .name(null)
                         .creationTime(THEN)
                         .creatorId(101L),
-                    new BqDtoWorkspace()
+                    new ReportingWorkspace()
                         .workspaceId(202L)
                         .name("Work Work Work")
                         .creationTime(THEN)
                         .creatorId(101L),
-                    new BqDtoWorkspace()
+                    new ReportingWorkspace()
                         .workspaceId(203L)
                         .name(null)
                         .creationTime(THEN)
@@ -239,11 +239,11 @@ public class ReportingUploadServiceTest {
     // It's certainly possible to make the batch size an environment configuration value and
     // inject it so that we don't need this many rows in the test, but I didn't think that was
     // necessarily a good enoughh reason to add configurable state.
-    final List<BqDtoUser> users =
+    final List<ReportingUser> users =
         IntStream.range(0, 21)
             .mapToObj(
                 id ->
-                    new BqDtoUser()
+                    new ReportingUser()
                         .username("bill@aou.biz")
                         .givenName("Bill")
                         .disabled(false)
@@ -252,7 +252,7 @@ public class ReportingUploadServiceTest {
     largeSnapshot.setUsers(users);
     largeSnapshot.setWorkspaces(
         ImmutableList.of(
-            new BqDtoWorkspace()
+            new ReportingWorkspace()
                 .workspaceId(303L)
                 .name("Circle K")
                 .creationTime(THEN)
@@ -330,7 +330,7 @@ public class ReportingUploadServiceTest {
 
   @Test
   public void testUploadSnapshot_nullEnum() {
-    final BqDtoWorkspace workspace = new BqDtoWorkspace();
+    final ReportingWorkspace workspace = new ReportingWorkspace();
     workspace.setWorkspaceId(101L);
     workspace.setBillingStatus(null);
     final ReportingSnapshot snapshot =

@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.dao.UserDao.UserCountGaugeLabelsAndValue;
-import org.pmiops.workbench.db.dao.projection.PrjUser;
+import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
@@ -150,9 +150,9 @@ public class UserDaoTest {
   @Test
   public void testGetReportingUsers() {
     insertMultipleUsers();
-    final List<PrjUser> projections = userDao.getReportingUsers();
+    final List<ProjectedReportingUser> projections = userDao.getReportingUsers();
     assertThat(projections).isNotEmpty();
-    final PrjUser user = projections.get(0);
+    final ProjectedReportingUser user = projections.get(0);
     assertThat(user.getFamilyName()).isEqualTo("Foo");
     assertThat(user.getStreetAddress1()).isEqualTo(STREET_ADDRESS_1);
     assertThat(user.getStreetAddress2()).isEqualTo(STREET_ADDRESS_2);

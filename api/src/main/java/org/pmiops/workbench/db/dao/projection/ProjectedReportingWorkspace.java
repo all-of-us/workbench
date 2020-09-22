@@ -4,7 +4,7 @@ import java.sql.Timestamp;
 import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 
-public interface PrjWorkspace {
+public interface ProjectedReportingWorkspace {
   BillingAccountType getBillingAccountType();
 
   BillingStatus getBillingStatus();

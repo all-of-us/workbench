@@ -1,9 +1,10 @@
 active_status
-rp_population
-billing_migration_status
-version
+beta_access
 billing_account_name
-workspace_namespace
+billing_migration_status
+data_access_level
 firecloud_name
 firecloud_uuid
-data_access_level
+rp_population
+version
+workspace_namespace

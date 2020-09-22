@@ -8,18 +8,16 @@ import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc
 
 import java.sql.Timestamp;
 import java.time.Instant;
-import org.pmiops.workbench.db.dao.projection.PrjUser;
-import org.pmiops.workbench.db.dao.projection.PrjWorkspace;
+import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
+import org.pmiops.workbench.db.dao.projection.ProjectedReportingWorkspace;
 import org.pmiops.workbench.db.model.DbCdrVersion;
-import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
-import org.pmiops.workbench.model.BqDtoUser;
-import org.pmiops.workbench.model.BqDtoWorkspace;
 import org.pmiops.workbench.model.DataAccessLevel;
-import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.ReportingUser;
+import org.pmiops.workbench.model.ReportingWorkspace;
 
 public class ReportingTestUtils {
   // The code generator should ensure that no  values repeat
@@ -28,65 +26,47 @@ public class ReportingTestUtils {
   // alike.
   public static final String USER__ABOUT_YOU = "foo_0";
   public static final String USER__AREA_OF_RESEARCH = "foo_1";
-  public static final Timestamp USER__BETA_ACCESS_BYPASS_TIME =
-      Timestamp.from(Instant.parse("2015-05-07T00:00:00.00Z"));
-  public static final Timestamp USER__BETA_ACCESS_REQUEST_TIME =
-      Timestamp.from(Instant.parse("2015-05-08T00:00:00.00Z"));
   public static final Timestamp USER__COMPLIANCE_TRAINING_BYPASS_TIME =
-      Timestamp.from(Instant.parse("2015-05-09T00:00:00.00Z"));
+      Timestamp.from(Instant.parse("2015-05-07T00:00:00.00Z"));
   public static final Timestamp USER__COMPLIANCE_TRAINING_COMPLETION_TIME =
-      Timestamp.from(Instant.parse("2015-05-10T00:00:00.00Z"));
+      Timestamp.from(Instant.parse("2015-05-08T00:00:00.00Z"));
   public static final Timestamp USER__COMPLIANCE_TRAINING_EXPIRATION_TIME =
-      Timestamp.from(Instant.parse("2015-05-11T00:00:00.00Z"));
-  public static final String USER__CONTACT_EMAIL = "foo_7";
+      Timestamp.from(Instant.parse("2015-05-09T00:00:00.00Z"));
+  public static final String USER__CONTACT_EMAIL = "foo_5";
   public static final Timestamp USER__CREATION_TIME =
-      Timestamp.from(Instant.parse("2015-05-13T00:00:00.00Z"));
-  public static final String USER__CURRENT_POSITION = "foo_9";
-  public static final Short USER__DATA_ACCESS_LEVEL =
-      DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED);
+      Timestamp.from(Instant.parse("2015-05-11T00:00:00.00Z"));
+  public static final String USER__CURRENT_POSITION = "foo_7";
+  public static final DataAccessLevel USER__DATA_ACCESS_LEVEL = DataAccessLevel.REGISTERED;
   public static final Timestamp USER__DATA_USE_AGREEMENT_BYPASS_TIME =
-      Timestamp.from(Instant.parse("2015-05-16T00:00:00.00Z"));
+      Timestamp.from(Instant.parse("2015-05-14T00:00:00.00Z"));
   public static final Timestamp USER__DATA_USE_AGREEMENT_COMPLETION_TIME =
-      Timestamp.from(Instant.parse("2015-05-17T00:00:00.00Z"));
-  public static final Integer USER__DATA_USE_AGREEMENT_SIGNED_VERSION = 13;
+      Timestamp.from(Instant.parse("2015-05-15T00:00:00.00Z"));
+  public static final Integer USER__DATA_USE_AGREEMENT_SIGNED_VERSION = 11;
   public static final Timestamp USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME =
-      Timestamp.from(Instant.parse("2015-05-19T00:00:00.00Z"));
+      Timestamp.from(Instant.parse("2015-05-17T00:00:00.00Z"));
   public static final Boolean USER__DISABLED = false;
-  public static final Timestamp USER__EMAIL_VERIFICATION_BYPASS_TIME =
-      Timestamp.from(Instant.parse("2015-05-21T00:00:00.00Z"));
-  public static final Timestamp USER__EMAIL_VERIFICATION_COMPLETION_TIME =
-      Timestamp.from(Instant.parse("2015-05-22T00:00:00.00Z"));
-  public static final EmailVerificationStatus USER__EMAIL_VERIFICATION_STATUS =
-      EmailVerificationStatus.SUBSCRIBED;
   public static final Timestamp USER__ERA_COMMONS_BYPASS_TIME =
-      Timestamp.from(Instant.parse("2015-05-24T00:00:00.00Z"));
+      Timestamp.from(Instant.parse("2015-05-19T00:00:00.00Z"));
   public static final Timestamp USER__ERA_COMMONS_COMPLETION_TIME =
-      Timestamp.from(Instant.parse("2015-05-25T00:00:00.00Z"));
-  public static final Timestamp USER__ERA_COMMONS_LINK_EXPIRE_TIME =
-      Timestamp.from(Instant.parse("2015-05-26T00:00:00.00Z"));
-  public static final String USER__FAMILY_NAME = "foo_22";
+      Timestamp.from(Instant.parse("2015-05-20T00:00:00.00Z"));
+  public static final String USER__FAMILY_NAME = "foo_16";
   public static final Timestamp USER__FIRST_REGISTRATION_COMPLETION_TIME =
-      Timestamp.from(Instant.parse("2015-05-28T00:00:00.00Z"));
+      Timestamp.from(Instant.parse("2015-05-22T00:00:00.00Z"));
   public static final Timestamp USER__FIRST_SIGN_IN_TIME =
-      Timestamp.from(Instant.parse("2015-05-29T00:00:00.00Z"));
-  public static final Short USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE = 25;
-  public static final Double USER__FREE_TIER_CREDITS_LIMIT_DOLLARS_OVERRIDE = 26.500000;
-  public static final String USER__GIVEN_NAME = "foo_27";
-  public static final Timestamp USER__ID_VERIFICATION_BYPASS_TIME =
-      Timestamp.from(Instant.parse("2015-06-02T00:00:00.00Z"));
-  public static final Timestamp USER__ID_VERIFICATION_COMPLETION_TIME =
-      Timestamp.from(Instant.parse("2015-06-03T00:00:00.00Z"));
+      Timestamp.from(Instant.parse("2015-05-23T00:00:00.00Z"));
+  public static final Short USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE = 19;
+  public static final Double USER__FREE_TIER_CREDITS_LIMIT_DOLLARS_OVERRIDE = 20.500000;
+  public static final String USER__GIVEN_NAME = "foo_21";
   public static final Timestamp USER__LAST_MODIFIED_TIME =
-      Timestamp.from(Instant.parse("2015-06-04T00:00:00.00Z"));
-  public static final String USER__ORGANIZATION = "foo_31";
-  public static final String USER__PHONE_NUMBER = "foo_32";
-  public static final String USER__PROFESSIONAL_URL = "foo_33";
+      Timestamp.from(Instant.parse("2015-05-27T00:00:00.00Z"));
+  public static final String USER__PROFESSIONAL_URL = "foo_23";
   public static final Timestamp USER__TWO_FACTOR_AUTH_BYPASS_TIME =
-      Timestamp.from(Instant.parse("2015-06-08T00:00:00.00Z"));
+      Timestamp.from(Instant.parse("2015-05-29T00:00:00.00Z"));
   public static final Timestamp USER__TWO_FACTOR_AUTH_COMPLETION_TIME =
-      Timestamp.from(Instant.parse("2015-06-09T00:00:00.00Z"));
-  public static final Long USER__USER_ID = 36L;
-  public static final String USER__USERNAME = "foo_37";
+      Timestamp.from(Instant.parse("2015-05-30T00:00:00.00Z"));
+  public static final Long USER__USER_ID = 26L;
+  public static final String USER__USERNAME = "foo_27";
+  // Address fields - manually renamed
   public static final String USER__CITY = "foo_0";
   public static final String USER__COUNTRY = "foo_1";
   public static final String USER__STATE = "foo_2";
@@ -134,58 +114,10 @@ public class ReportingTestUtils {
       Timestamp.from(Instant.parse("2015-06-07T00:00:00.00Z"));
   public static final Long WORKSPACE__WORKSPACE_ID = 34L;
 
-  public static void assertDtoUserFields(BqDtoUser user) {
-    assertThat(user.getAboutYou()).isEqualTo(USER__ABOUT_YOU);
-    assertThat(user.getAreaOfResearch()).isEqualTo(USER__AREA_OF_RESEARCH);
-    assertTimeApprox(user.getBetaAccessBypassTime(), USER__BETA_ACCESS_BYPASS_TIME);
-    assertTimeApprox(user.getBetaAccessRequestTime(), USER__BETA_ACCESS_REQUEST_TIME);
-    assertTimeApprox(user.getComplianceTrainingBypassTime(), USER__COMPLIANCE_TRAINING_BYPASS_TIME);
-    assertTimeApprox(
-        user.getComplianceTrainingCompletionTime(), USER__COMPLIANCE_TRAINING_COMPLETION_TIME);
-    assertTimeApprox(
-        user.getComplianceTrainingExpirationTime(), USER__COMPLIANCE_TRAINING_EXPIRATION_TIME);
-    assertThat(user.getContactEmail()).isEqualTo(USER__CONTACT_EMAIL);
-    assertTimeApprox(user.getCreationTime(), USER__CREATION_TIME);
-    assertThat(user.getCurrentPosition()).isEqualTo(USER__CURRENT_POSITION);
-    assertThat(user.getDataAccessLevel())
-        .isEqualTo(DbStorageEnums.dataAccessLevelFromStorage(USER__DATA_ACCESS_LEVEL));
-    assertTimeApprox(user.getDataUseAgreementBypassTime(), USER__DATA_USE_AGREEMENT_BYPASS_TIME);
-    assertTimeApprox(
-        user.getDataUseAgreementCompletionTime(), USER__DATA_USE_AGREEMENT_COMPLETION_TIME);
-    assertThat(user.getDataUseAgreementSignedVersion())
-        .isEqualTo(USER__DATA_USE_AGREEMENT_SIGNED_VERSION);
-    assertTimeApprox(
-        user.getDemographicSurveyCompletionTime(), USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME);
-    assertThat(user.getDisabled()).isEqualTo(USER__DISABLED);
-    assertTimeApprox(user.getEmailVerificationBypassTime(), USER__EMAIL_VERIFICATION_BYPASS_TIME);
-    assertTimeApprox(
-        user.getEmailVerificationCompletionTime(), USER__EMAIL_VERIFICATION_COMPLETION_TIME);
-    assertThat(user.getEmailVerificationStatus()).isEqualTo(USER__EMAIL_VERIFICATION_STATUS);
-    assertTimeApprox(user.getEraCommonsBypassTime(), USER__ERA_COMMONS_BYPASS_TIME);
-    assertTimeApprox(user.getEraCommonsCompletionTime(), USER__ERA_COMMONS_COMPLETION_TIME);
-    assertTimeApprox(user.getEraCommonsLinkExpireTime(), USER__ERA_COMMONS_LINK_EXPIRE_TIME);
-    assertThat(user.getFamilyName()).isEqualTo(USER__FAMILY_NAME);
-    assertTimeApprox(
-        user.getFirstRegistrationCompletionTime(), USER__FIRST_REGISTRATION_COMPLETION_TIME);
-    assertTimeApprox(user.getFirstSignInTime(), USER__FIRST_SIGN_IN_TIME);
-    assertThat(user.getFreeTierCreditsLimitDaysOverride())
-        .isEqualTo(USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE);
-    assertThat(user.getFreeTierCreditsLimitDollarsOverride())
-        .isEqualTo(USER__FREE_TIER_CREDITS_LIMIT_DOLLARS_OVERRIDE);
-    assertThat(user.getGivenName()).isEqualTo(USER__GIVEN_NAME);
-    assertTimeApprox(user.getIdVerificationBypassTime(), USER__ID_VERIFICATION_BYPASS_TIME);
-    assertTimeApprox(user.getLastModifiedTime(), USER__LAST_MODIFIED_TIME);
-    assertThat(user.getOrganization()).isEqualTo(USER__ORGANIZATION);
-    assertThat(user.getPhoneNumber()).isEqualTo(USER__PHONE_NUMBER);
-    assertThat(user.getProfessionalUrl()).isEqualTo(USER__PROFESSIONAL_URL);
-    assertTimeApprox(user.getTwoFactorAuthBypassTime(), USER__TWO_FACTOR_AUTH_BYPASS_TIME);
-    assertTimeApprox(user.getTwoFactorAuthCompletionTime(), USER__TWO_FACTOR_AUTH_COMPLETION_TIME);
-    assertThat(user.getUserId()).isEqualTo(USER__USER_ID);
-    assertThat(user.getUsername()).isEqualTo(USER__USERNAME);
-  }
+  public static void assertDtoUserFields(ReportingUser user) {}
 
   public static void assertDtoWorkspaceFields(
-      BqDtoWorkspace workspace,
+      ReportingWorkspace workspace,
       long expectedWorkspaceId,
       long expectedCdrVersionId,
       long expectedCreatorId) {
@@ -228,14 +160,14 @@ public class ReportingTestUtils {
     assertThat(workspace.getWorkspaceId()).isEqualTo(expectedWorkspaceId);
   }
 
-  public static void assertDtoWorkspaceFields(BqDtoWorkspace workspace) {
+  public static void assertDtoWorkspaceFields(ReportingWorkspace workspace) {
     assertDtoWorkspaceFields(
         workspace, WORKSPACE__WORKSPACE_ID, WORKSPACE__CDR_VERSION_ID, WORKSPACE__CREATOR_ID);
   }
 
   // TODO: put these override values into the scaffold script
   public static void assertPrjWorkspaceFields(
-      PrjWorkspace workspace,
+      ProjectedReportingWorkspace workspace,
       long expectedWorkspaceId,
       long expectedCdrVersionId,
       long expectedCreatorId) {
@@ -278,12 +210,10 @@ public class ReportingTestUtils {
     assertThat(workspace.getWorkspaceId()).isEqualTo(expectedWorkspaceId);
   }
 
-  public static PrjUser mockPrjUser() {
-    final PrjUser mockUser = mock(PrjUser.class);
+  public static ProjectedReportingUser mockProjectedjUser() {
+    final ProjectedReportingUser mockUser = mock(ProjectedReportingUser.class);
     doReturn(USER__ABOUT_YOU).when(mockUser).getAboutYou();
     doReturn(USER__AREA_OF_RESEARCH).when(mockUser).getAreaOfResearch();
-    doReturn(USER__BETA_ACCESS_BYPASS_TIME).when(mockUser).getBetaAccessBypassTime();
-    doReturn(USER__BETA_ACCESS_REQUEST_TIME).when(mockUser).getBetaAccessRequestTime();
     doReturn(USER__COMPLIANCE_TRAINING_BYPASS_TIME)
         .when(mockUser)
         .getComplianceTrainingBypassTime();
@@ -308,16 +238,8 @@ public class ReportingTestUtils {
         .when(mockUser)
         .getDemographicSurveyCompletionTime();
     doReturn(USER__DISABLED).when(mockUser).getDisabled();
-    doReturn(USER__EMAIL_VERIFICATION_BYPASS_TIME).when(mockUser).getEmailVerificationBypassTime();
-    doReturn(USER__EMAIL_VERIFICATION_COMPLETION_TIME)
-        .when(mockUser)
-        .getEmailVerificationCompletionTime();
-    doReturn(DbStorageEnums.emailVerificationStatusToStorage(USER__EMAIL_VERIFICATION_STATUS))
-        .when(mockUser)
-        .getEmailVerificationStatus();
     doReturn(USER__ERA_COMMONS_BYPASS_TIME).when(mockUser).getEraCommonsBypassTime();
     doReturn(USER__ERA_COMMONS_COMPLETION_TIME).when(mockUser).getEraCommonsCompletionTime();
-    doReturn(USER__ERA_COMMONS_LINK_EXPIRE_TIME).when(mockUser).getEraCommonsLinkExpireTime();
     doReturn(USER__FAMILY_NAME).when(mockUser).getFamilyName();
     doReturn(USER__FIRST_REGISTRATION_COMPLETION_TIME)
         .when(mockUser)
@@ -330,29 +252,17 @@ public class ReportingTestUtils {
         .when(mockUser)
         .getFreeTierCreditsLimitDollarsOverride();
     doReturn(USER__GIVEN_NAME).when(mockUser).getGivenName();
-    doReturn(USER__ID_VERIFICATION_BYPASS_TIME).when(mockUser).getIdVerificationBypassTime();
-    doReturn(USER__ID_VERIFICATION_COMPLETION_TIME)
-        .when(mockUser)
-        .getIdVerificationCompletionTime();
     doReturn(USER__LAST_MODIFIED_TIME).when(mockUser).getLastModifiedTime();
-    doReturn(USER__ORGANIZATION).when(mockUser).getOrganization();
-    doReturn(USER__PHONE_NUMBER).when(mockUser).getPhoneNumber();
     doReturn(USER__PROFESSIONAL_URL).when(mockUser).getProfessionalUrl();
     doReturn(USER__TWO_FACTOR_AUTH_BYPASS_TIME).when(mockUser).getTwoFactorAuthBypassTime();
     doReturn(USER__TWO_FACTOR_AUTH_COMPLETION_TIME).when(mockUser).getTwoFactorAuthCompletionTime();
     doReturn(USER__USER_ID).when(mockUser).getUserId();
     doReturn(USER__USERNAME).when(mockUser).getUsername();
-    doReturn(USER__CITY).when(mockUser).getCity();
-    doReturn(USER__COUNTRY).when(mockUser).getCountry();
-    doReturn(USER__STATE).when(mockUser).getState();
-    doReturn(USER__STREET_ADDRESS_1).when(mockUser).getStreetAddress1();
-    doReturn(USER__STREET_ADDRESS_2).when(mockUser).getStreetAddress2();
-    doReturn(USER__ZIP_CODE).when(mockUser).getZipCode();
     return mockUser;
   }
 
-  public static PrjWorkspace mockPrjWorkspace() {
-    final PrjWorkspace mockWorkspace = mock(PrjWorkspace.class);
+  public static ProjectedReportingWorkspace mockPrjWorkspace() {
+    final ProjectedReportingWorkspace mockWorkspace = mock(ProjectedReportingWorkspace.class);
     doReturn(WORKSPACE__BILLING_ACCOUNT_TYPE).when(mockWorkspace).getBillingAccountType();
     doReturn(WORKSPACE__BILLING_STATUS).when(mockWorkspace).getBillingStatus();
     doReturn(WORKSPACE__CDR_VERSION_ID).when(mockWorkspace).getCdrVersionId();
@@ -396,12 +306,10 @@ public class ReportingTestUtils {
     return mockWorkspace;
   }
 
-  public static BqDtoUser createDtoUser() {
-    return new BqDtoUser()
+  public static ReportingUser createDtoUser() {
+    return new ReportingUser()
         .aboutYou(USER__ABOUT_YOU)
         .areaOfResearch(USER__AREA_OF_RESEARCH)
-        .betaAccessBypassTime(offsetDateTimeUtc(USER__BETA_ACCESS_BYPASS_TIME))
-        .betaAccessRequestTime(offsetDateTimeUtc(USER__BETA_ACCESS_REQUEST_TIME))
         .complianceTrainingBypassTime(offsetDateTimeUtc(USER__COMPLIANCE_TRAINING_BYPASS_TIME))
         .complianceTrainingCompletionTime(
             offsetDateTimeUtc(USER__COMPLIANCE_TRAINING_COMPLETION_TIME))
@@ -410,20 +318,15 @@ public class ReportingTestUtils {
         .contactEmail(USER__CONTACT_EMAIL)
         .creationTime(offsetDateTimeUtc(USER__CREATION_TIME))
         .currentPosition(USER__CURRENT_POSITION)
-        .dataAccessLevel(DbStorageEnums.dataAccessLevelFromStorage(USER__DATA_ACCESS_LEVEL))
+        .dataAccessLevel(USER__DATA_ACCESS_LEVEL)
         .dataUseAgreementBypassTime(offsetDateTimeUtc(USER__DATA_USE_AGREEMENT_BYPASS_TIME))
         .dataUseAgreementCompletionTime(offsetDateTimeUtc(USER__DATA_USE_AGREEMENT_COMPLETION_TIME))
         .dataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION.longValue())
         .demographicSurveyCompletionTime(
             offsetDateTimeUtc(USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME))
         .disabled(USER__DISABLED)
-        .emailVerificationBypassTime(offsetDateTimeUtc(USER__EMAIL_VERIFICATION_BYPASS_TIME))
-        .emailVerificationCompletionTime(
-            offsetDateTimeUtc(USER__EMAIL_VERIFICATION_COMPLETION_TIME))
-        .emailVerificationStatus(USER__EMAIL_VERIFICATION_STATUS)
         .eraCommonsBypassTime(offsetDateTimeUtc(USER__ERA_COMMONS_BYPASS_TIME))
         .eraCommonsCompletionTime(offsetDateTimeUtc(USER__ERA_COMMONS_COMPLETION_TIME))
-        .eraCommonsLinkExpireTime(offsetDateTimeUtc(USER__ERA_COMMONS_LINK_EXPIRE_TIME))
         .familyName(USER__FAMILY_NAME)
         .firstRegistrationCompletionTime(
             offsetDateTimeUtc(USER__FIRST_REGISTRATION_COMPLETION_TIME))
@@ -431,25 +334,16 @@ public class ReportingTestUtils {
         .freeTierCreditsLimitDaysOverride(USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE.longValue())
         .freeTierCreditsLimitDollarsOverride(USER__FREE_TIER_CREDITS_LIMIT_DOLLARS_OVERRIDE)
         .givenName(USER__GIVEN_NAME)
-        .idVerificationBypassTime(offsetDateTimeUtc(USER__ID_VERIFICATION_BYPASS_TIME))
         .lastModifiedTime(offsetDateTimeUtc(USER__LAST_MODIFIED_TIME))
-        .organization(USER__ORGANIZATION)
-        .phoneNumber(USER__PHONE_NUMBER)
         .professionalUrl(USER__PROFESSIONAL_URL)
         .twoFactorAuthBypassTime(offsetDateTimeUtc(USER__TWO_FACTOR_AUTH_BYPASS_TIME))
         .twoFactorAuthCompletionTime(offsetDateTimeUtc(USER__TWO_FACTOR_AUTH_COMPLETION_TIME))
         .userId(USER__USER_ID)
-        .username(USER__USERNAME)
-        .city(USER__CITY)
-        .country(USER__COUNTRY)
-        .state(USER__STATE)
-        .streetAddress1(USER__STREET_ADDRESS_1)
-        .streetAddress2(USER__STREET_ADDRESS_2)
-        .zipCode(USER__ZIP_CODE);
+        .username(USER__USERNAME);
   }
 
-  public static BqDtoWorkspace createDtoWorkspace() {
-    return new BqDtoWorkspace()
+  public static ReportingWorkspace createDtoWorkspace() {
+    return new ReportingWorkspace()
         .billingAccountType(WORKSPACE__BILLING_ACCOUNT_TYPE)
         .billingStatus(WORKSPACE__BILLING_STATUS)
         .cdrVersionId(WORKSPACE__CDR_VERSION_ID)

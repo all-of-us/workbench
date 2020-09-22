@@ -8021,24 +8021,22 @@ definitions:
       users:
         type: array
         items:
-          "$ref": "#/definitions/BqDtoUser"
+          "$ref": "#/definitions/ReportingUser"
       workspaces:
         type: array
         items:
-          "$ref": "#/definitions/BqDtoWorkspace"
-  BqDtoUser:
+          "$ref": "#/definitions/ReportingWorkspace"
+  ReportingUser:
+    x-aou-note: |-
+      This code was generated using reporting-wizard.rb at 2020-09-22T11:17:29-04:00.
+      Manual modification should be avoided if possible as this is a one-time generation
+      and does not run on every build and updates must be merged manually for now.
     type: object
     properties:
       aboutYou:
         type: string
       areaOfResearch:
         type: string
-      betaAccessBypassTime:
-        type: string
-        format: date-time
-      betaAccessRequestTime:
-        type: string
-        format: date-time
       complianceTrainingBypassTime:
         type: string
         format: date-time
@@ -8071,21 +8069,10 @@ definitions:
         format: date-time
       disabled:
         type: boolean
-      emailVerificationBypassTime:
-        type: string
-        format: date-time
-      emailVerificationCompletionTime:
-        type: string
-        format: date-time
-      emailVerificationStatus:
-        "$ref": "#/definitions/EmailVerificationStatus"
       eraCommonsBypassTime:
         type: string
         format: date-time
       eraCommonsCompletionTime:
-        type: string
-        format: date-time
-      eraCommonsLinkExpireTime:
         type: string
         format: date-time
       familyName:
@@ -8104,16 +8091,9 @@ definitions:
         format: double
       givenName:
         type: string
-      idVerificationBypassTime:
-        type: string
-        format: date-time
       lastModifiedTime:
         type: string
         format: date-time
-      organization:
-        type: string
-      phoneNumber:
-        type: string
       professionalUrl:
         type: string
       twoFactorAuthBypassTime:
@@ -8139,7 +8119,7 @@ definitions:
         type: string
       zipCode:
         type: string
-  BqDtoWorkspace:
+  ReportingWorkspace:
     type: object
     properties:
       billingAccountType:

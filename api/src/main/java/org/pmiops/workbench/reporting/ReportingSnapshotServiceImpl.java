@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.dao.projection.PrjUser;
-import org.pmiops.workbench.db.dao.projection.PrjWorkspace;
+import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
+import org.pmiops.workbench.db.dao.projection.ProjectedReportingWorkspace;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.utils.LogFormatters;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -27,19 +27,20 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
   // Define immutable value class to hold results of queries within a transaction. Mapping to
   // Reporting DTO classes will happen outside the transaction.
   private static class QueryResultBundle {
-    private final List<PrjUser> users;
-    private final List<PrjWorkspace> workspaces;
+    private final List<ProjectedReportingUser> users;
+    private final List<ProjectedReportingWorkspace> workspaces;
 
-    public QueryResultBundle(List<PrjUser> users, List<PrjWorkspace> workspaces) {
+    public QueryResultBundle(
+        List<ProjectedReportingUser> users, List<ProjectedReportingWorkspace> workspaces) {
       this.users = users;
       this.workspaces = workspaces;
     }
 
-    public List<PrjUser> getUsers() {
+    public List<ProjectedReportingUser> getUsers() {
       return users;
     }
 
-    public List<PrjWorkspace> getWorkspaces() {
+    public List<ProjectedReportingWorkspace> getWorkspaces() {
       return workspaces;
     }
   }

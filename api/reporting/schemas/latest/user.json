@@ -13,14 +13,6 @@
     "type": "STRING"
   },
   {
-    "name": "beta_access_bypass_time",
-    "type": "TIMESTAMP"
-  },
-  {
-    "name": "beta_access_request_time",
-    "type": "TIMESTAMP"
-  },
-  {
     "name": "compliance_training_bypass_time",
     "type": "TIMESTAMP"
   },
@@ -69,18 +61,6 @@
     "type": "BOOLEAN"
   },
   {
-    "name": "email_verification_bypass_time",
-    "type": "TIMESTAMP"
-  },
-  {
-    "name": "email_verification_completion_time",
-    "type": "TIMESTAMP"
-  },
-  {
-    "name": "email_verification_status",
-    "type": "STRING"
-  },
-  {
     "name": "era_commons_bypass_time",
     "type": "TIMESTAMP"
   },
@@ -119,14 +99,6 @@
   {
     "name": "last_modified_time",
     "type": "TIMESTAMP"
-  },
-  {
-    "name": "organization",
-    "type": "STRING"
-  },
-  {
-    "name": "phone_number",
-    "type": "STRING"
   },
   {
     "name": "professional_url",

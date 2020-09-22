@@ -3,10 +3,10 @@ package org.pmiops.workbench.reporting;
 import java.time.Clock;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.db.dao.projection.PrjUser;
-import org.pmiops.workbench.db.dao.projection.PrjWorkspace;
-import org.pmiops.workbench.model.BqDtoUser;
-import org.pmiops.workbench.model.BqDtoWorkspace;
+import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
+import org.pmiops.workbench.db.dao.projection.ProjectedReportingWorkspace;
+import org.pmiops.workbench.model.ReportingUser;
+import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.testconfig.ReportingTestUtils;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -27,15 +27,15 @@ public class ReportingMapperTest {
 
   @Test
   public void testPrjWorkspace_toDto() {
-    final PrjWorkspace prjWorkspace = ReportingTestUtils.mockPrjWorkspace();
-    final BqDtoWorkspace bqDtoWorkspace = reportingMapper.toDto(prjWorkspace);
+    final ProjectedReportingWorkspace prjWorkspace = ReportingTestUtils.mockPrjWorkspace();
+    final ReportingWorkspace bqDtoWorkspace = reportingMapper.toDto(prjWorkspace);
     ReportingTestUtils.assertDtoWorkspaceFields(bqDtoWorkspace);
   }
 
   @Test
   public void testPrjUser_toDto() {
-    final PrjUser prjUser = ReportingTestUtils.mockPrjUser();
-    final BqDtoUser dtoUser = reportingMapper.toDto(prjUser);
+    final ProjectedReportingUser prjUser = ReportingTestUtils.mockProjectedjUser();
+    final ReportingUser dtoUser = reportingMapper.toDto(prjUser);
     ReportingTestUtils.assertDtoUserFields(dtoUser);
   }
 }

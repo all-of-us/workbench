@@ -2,7 +2,7 @@ package org.pmiops.workbench.db.dao;
 
 import java.util.List;
 import java.util.Set;
-import org.pmiops.workbench.db.dao.projection.PrjUser;
+import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
 import org.pmiops.workbench.db.model.DbUser;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
@@ -75,8 +75,6 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
       "SELECT\n"
           + "  u.aboutYou,\n"
           + "  u.areaOfResearch,\n"
-          + "  u.betaAccessBypassTime,\n"
-          + "  u.betaAccessRequestTime,\n"
           + "  u.complianceTrainingBypassTime,\n"
           + "  u.complianceTrainingCompletionTime,\n"
           + "  u.complianceTrainingExpirationTime,\n"
@@ -89,23 +87,15 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
           + "  u.dataUseAgreementSignedVersion,\n"
           + "  u.demographicSurveyCompletionTime,\n"
           + "  u.disabled,\n"
-          + "  u.emailVerificationBypassTime,\n"
-          + "  u.emailVerificationCompletionTime,\n"
-          + "  u.emailVerificationStatus,\n"
           + "  u.eraCommonsBypassTime,\n"
           + "  u.eraCommonsCompletionTime,\n"
-          + "  u.eraCommonsLinkExpireTime,\n"
           + "  u.familyName,\n"
           + "  u.firstRegistrationCompletionTime,\n"
           + "  u.firstSignInTime,\n"
           + "  u.freeTierCreditsLimitDaysOverride,\n"
           + "  u.freeTierCreditsLimitDollarsOverride,\n"
           + "  u.givenName,\n"
-          + "  u.idVerificationBypassTime,\n"
-          + "  u.idVerificationCompletionTime,\n"
           + "  u.lastModifiedTime,\n"
-          + "  u.organization,\n"
-          + "  u.phoneNumber,\n"
           + "  u.professionalUrl,\n"
           + "  u.twoFactorAuthBypassTime,\n"
           + "  u.twoFactorAuthCompletionTime,\n"
@@ -120,5 +110,5 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
           + "FROM DbUser u\n"
           + "  LEFT OUTER JOIN DbAddress AS a ON u.userId = a.user.userId\n"
           + "  ORDER BY u.userId")
-  List<PrjUser> getReportingUsers();
+  List<ProjectedReportingUser> getReportingUsers();
 }

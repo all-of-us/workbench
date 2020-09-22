@@ -15,9 +15,9 @@ import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.model.BqDtoUser;
-import org.pmiops.workbench.model.BqDtoWorkspace;
 import org.pmiops.workbench.model.ReportingSnapshot;
+import org.pmiops.workbench.model.ReportingUser;
+import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.reporting.insertion.DmlInsertJobBuilder;
 import org.pmiops.workbench.reporting.insertion.UserParameterColumn;
 import org.pmiops.workbench.reporting.insertion.WorkspaceParameterColumn;
@@ -34,8 +34,9 @@ public class ReportingUploadServiceDmlImpl implements ReportingUploadService {
   private final BigQueryService bigQueryService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
-  private static final DmlInsertJobBuilder<BqDtoUser> userJobBuilder = UserParameterColumn::values;
-  private static final DmlInsertJobBuilder<BqDtoWorkspace> workspaceJobBuilder =
+  private static final DmlInsertJobBuilder<ReportingUser> userJobBuilder =
+      UserParameterColumn::values;
+  private static final DmlInsertJobBuilder<ReportingWorkspace> workspaceJobBuilder =
       WorkspaceParameterColumn::values;
 
   public ReportingUploadServiceDmlImpl(

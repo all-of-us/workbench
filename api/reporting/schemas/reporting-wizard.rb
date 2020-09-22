@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 require 'csv'
 require 'json'
+require 'time'
 require 'yaml'
 require 'enumerator'
 
@@ -40,7 +41,7 @@ OUTPUTS = {
     :unit_test_constants => to_output_path(File.join(output_dir, 'unit_test_constants'), table_name, 'java'),
     :unit_test_mocks => to_output_path(File.join(output_dir, 'unit_test_mocks'), table_name, 'java'),
     :dto_assertions => to_output_path(File.join(output_dir, 'dto_assertions'), table_name, 'java'),
-    :query_parameter_COLUMNS => to_output_path(File.join(output_dir, 'query_parameter_COLUMNS'), table_name, 'java'),
+    :query_parameter_COLUMNS => to_output_path(File.join(output_dir, 'query_parameter_columns'), table_name, 'java'),
     :dto_decl => to_output_path(File.join(output_dir, 'dto_decl'), table_name, 'java'),
     :entity_decl => to_output_path(File.join(output_dir, 'entity_decl'), table_name, 'java'),
 }.freeze
@@ -153,14 +154,24 @@ root_class_name = to_camel_case(table_name, true)
 TABLE_INFO = {
     :name => table_name,
     :instance_name => to_camel_case(table_name, false),
-    :dto_class => "BqDto#{root_class_name}",
+    :dto_class => "Reporting#{root_class_name}",
     :entity_class => "Db#{root_class_name}",
     :mock => "mock#{root_class_name}",
-    :projection_interface => "Prj#{root_class_name}",
+    :projection_interface => "ProjectedReporting#{root_class_name}",
     :sql_alias => table_name[0].downcase,
     :enum_column_info => ENUM_TYPES[table_name] || {},
     :entity_modified_columns => ENTITY_MODIFIED_COLUMNS[:table_name] || {}
 }.freeze
+
+def provenance_text
+  "This code was generated using #{File.basename($PROGRAM_NAME)} at #{Time.now.iso8601}.\n" +
+      "Manual modification should be avoided if possible as this is a one-time generation\n" +
+      "and does not run on every build and updates must be merged manually for now."
+end
+
+def provenance_yaml
+  { 'x-aou-note' => provenance_text }
+end
 
 def to_swagger_name(snake_case, is_class_name)
   result =  snake_case.split('_').collect(&:capitalize).join
@@ -241,12 +252,12 @@ def to_swagger_property(column)
   {}.merge(swagger_value)
 end
 
-swagger_object =  {  TABLE_INFO[:dto_class] => {
+swagger_object =  {  TABLE_INFO[:dto_class] => provenance_yaml.merge({
     'type'  =>  'object',
     'properties' => COLUMNS.to_h  { |field|
       [field[:property], to_swagger_property(field)]
     }
-  }
+  }) # .merge(provenance_yaml)
 }
 
 indented_yaml = swagger_object.to_yaml \

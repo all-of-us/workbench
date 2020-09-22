@@ -1,18 +1,15 @@
 package org.pmiops.workbench.db.dao.projection;
 
 import java.sql.Timestamp;
+import org.pmiops.workbench.model.DataAccessLevel;
 
-public interface PrjUser {
+public interface ProjectedReportingUser {
   /*
    * User columns
    */
   String getAboutYou();
 
   String getAreaOfResearch();
-
-  Timestamp getBetaAccessBypassTime();
-
-  Timestamp getBetaAccessRequestTime();
 
   Timestamp getComplianceTrainingBypassTime();
 
@@ -26,7 +23,7 @@ public interface PrjUser {
 
   String getCurrentPosition();
 
-  Short getDataAccessLevel(); // manual type override
+  DataAccessLevel getDataAccessLevel();
 
   Timestamp getDataUseAgreementBypassTime();
 
@@ -38,17 +35,9 @@ public interface PrjUser {
 
   Boolean getDisabled();
 
-  Timestamp getEmailVerificationBypassTime();
-
-  Timestamp getEmailVerificationCompletionTime();
-
-  Short getEmailVerificationStatus(); // manual type override
-
   Timestamp getEraCommonsBypassTime();
 
   Timestamp getEraCommonsCompletionTime();
-
-  Timestamp getEraCommonsLinkExpireTime();
 
   String getFamilyName();
 
@@ -62,15 +51,7 @@ public interface PrjUser {
 
   String getGivenName();
 
-  Timestamp getIdVerificationBypassTime();
-
-  Timestamp getIdVerificationCompletionTime();
-
   Timestamp getLastModifiedTime();
-
-  String getOrganization();
-
-  String getPhoneNumber();
 
   String getProfessionalUrl();
 
@@ -81,6 +62,7 @@ public interface PrjUser {
   Long getUserId();
 
   String getUsername();
+
   /*
    * Address columns
    */

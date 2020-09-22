@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.dao.projection.PrjWorkspace;
+import org.pmiops.workbench.db.dao.projection.ProjectedReportingWorkspace;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ForbiddenException;
@@ -110,5 +110,5 @@ public interface WorkspaceService {
 
   List<DbWorkspace> getAllActiveWorkspaces();
 
-  List<PrjWorkspace> getReportingWorkspaces();
+  List<ProjectedReportingWorkspace> getReportingWorkspaces();
 }

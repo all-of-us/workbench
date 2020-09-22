@@ -30,27 +30,31 @@ import java.util.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cohortbuilder.util.QueryParameterValues;
-import org.pmiops.workbench.model.BqDtoUser;
-import org.pmiops.workbench.model.BqDtoWorkspace;
+import org.pmiops.workbench.model.ReportingUser;
+import org.pmiops.workbench.model.ReportingWorkspace;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 public class InsertAllRequestBuilderTest {
 
-  private static final InsertAllRequestBuilder<BqDtoUser> USER_INSERT_ALL_REQUEST_BUILDER =
+  private static final InsertAllRequestBuilder<ReportingUser> USER_INSERT_ALL_REQUEST_BUILDER =
       UserParameterColumn::values;
-  private static final InsertAllRequestBuilder<BqDtoWorkspace> WORKSPACE_REQUEST_BUILDER =
+  private static final InsertAllRequestBuilder<ReportingWorkspace> WORKSPACE_REQUEST_BUILDER =
       WorkspaceParameterColumn::values;
   private static final Instant PRINCE_PARTY_TIME = Instant.parse("1999-12-31T23:59:59.99Z");
   private static final Map<String, Object> FIXED_VALUES =
       ImmutableMap.of("snapshot_timestamp", PRINCE_PARTY_TIME.toEpochMilli());
 
-  private static final List<BqDtoUser> USERS_WITH_NULL_FIELDS =
+  private static final List<ReportingUser> USERS_WITH_NULL_FIELDS =
       ImmutableList.of(
-          new BqDtoUser().username("user1").givenName("Onceler").disabled(false).userId(1L),
-          new BqDtoUser().username(null).givenName("Nullson").disabled(false).userId(111L),
-          new BqDtoUser().username("america@usa.gov").givenName(null).disabled(false).userId(212L),
-          new BqDtoUser().username(null).givenName(null).disabled(true).userId(313L));
+          new ReportingUser().username("user1").givenName("Onceler").disabled(false).userId(1L),
+          new ReportingUser().username(null).givenName("Nullson").disabled(false).userId(111L),
+          new ReportingUser()
+              .username("america@usa.gov")
+              .givenName(null)
+              .disabled(false)
+              .userId(212L),
+          new ReportingUser().username(null).givenName(null).disabled(true).userId(313L));
   private static final TableId TABLE_ID = TableId.of("project ID", "dataset", "researcher");
   public static final int INCOMPLETE_USER_SIZE = 5; // includes snapshot_timestamp
 
@@ -83,7 +87,7 @@ public class InsertAllRequestBuilderTest {
 
   @Test
   public void testBuildUser_AllFields() {
-    final BqDtoUser user_all_fields = createDtoUser();
+    final ReportingUser user_all_fields = createDtoUser();
     final InsertAllRequest request =
         USER_INSERT_ALL_REQUEST_BUILDER.build(
             TABLE_ID, ImmutableList.of(user_all_fields), FIXED_VALUES);
@@ -107,7 +111,7 @@ public class InsertAllRequestBuilderTest {
 
   @Test
   public void testWorkspace_allFields() {
-    final BqDtoWorkspace workspace = createDtoWorkspace();
+    final ReportingWorkspace workspace = createDtoWorkspace();
     final InsertAllRequest request =
         WORKSPACE_REQUEST_BUILDER.build(TABLE_ID, ImmutableList.of(workspace), FIXED_VALUES);
     assertThat(request.getRows()).hasSize(1);
