@@ -5,6 +5,7 @@ import * as React from 'react';
 import {PM_UNITS, PREDEFINED_ATTRIBUTES} from 'app/cohort-search/constant';
 import {ppiQuestions, ppiSurveys} from 'app/cohort-search/search-state.service';
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
+import {COPE_SURVEY_GROUP_NAME} from 'app/cohort-search/tree-node/tree-node.component';
 import {
   mapParameter,
   sanitizeNumericalInput,
@@ -234,13 +235,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
     }
 
     componentDidMount() {
-      const{options} = this.state;
-      if (!this.isMeasurement) {
-        options.unshift({label: optionUtil.ANY.display, value: AttrName[AttrName.ANY]});
-        this.setState({options}, () => this.initAttributeForm());
-      } else {
-        this.initAttributeForm();
-      }
+      this.initAttributeForm();
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
@@ -275,27 +270,29 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
       const {cdrVersionId} = currentWorkspaceStore.getValue();
       const surveyId = path.split('.')[0];
       const surveyNode = !!ppiSurveys.getValue()[cdrVersionId] && ppiSurveys.getValue()[cdrVersionId].find(n => n.id === +surveyId);
-      if (!!surveyNode && surveyNode.name.includes('COPE')) {
-        let promises: Array<Promise<any>>;
-        if (subtype === CriteriaSubType.QUESTION) {
-          promises = [cohortBuilderApi().findSurveyVersionByQuestionConceptId(+cdrVersionId, surveyNode.conceptId, conceptId)];
-        } else if (subtype === CriteriaSubType.ANSWER && !!ppiQuestions.getValue()[parentId]) {
-          promises = [
+      if (!!surveyNode && surveyNode.name === COPE_SURVEY_GROUP_NAME) {
+        const promises = [];
+        if (subtype === CriteriaSubType.QUESTION || (subtype === CriteriaSubType.ANSWER && !value)) {
+          promises.push(cohortBuilderApi().findSurveyVersionByQuestionConceptId(+cdrVersionId, surveyNode.conceptId, conceptId));
+        } else {
+          promises.push(
             cohortBuilderApi().findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
               +cdrVersionId,
               surveyNode.conceptId,
               ppiQuestions.getValue()[parentId].conceptId,
               +value
-            ),
-            cohortBuilderApi().findCriteriaAttributeByConceptId(+cdrVersionId, +value)
-          ];
+            )
+          );
+        }
+        if (subtype === CriteriaSubType.ANSWER) {
+          promises.push(cohortBuilderApi().findCriteriaAttributeByConceptId(+cdrVersionId, conceptId));
         }
         const [surveyVersions, numericalAttributes] = await Promise.all(promises);
         form.cat = surveyVersions.items.map(attr => ({
           checked: false,
           conceptName: attr.version,
           estCount: attr.itemCount,
-          valueAsConceptId: subtype === CriteriaSubType.QUESTION ? conceptId : +value
+          valueAsConceptId: attr.surveyId
         }));
         if (numericalAttributes) {
           numericalAttributes.items.forEach(attr => {
@@ -312,7 +309,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
             }
           });
         }
-        this.setState({count: this.nodeCount, form, isCOPESurvey: true, loading: false});
+        this.setState({count: null, form, isCOPESurvey: true, loading: false});
       } else {
         options.unshift({label: optionUtil.ANY.display, value: AttrName[AttrName.ANY]});
         this.setState({options}, () => this.getAttributes());
@@ -402,8 +399,8 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
     }
 
     validateForm() {
-      const {form} = this.state;
-      let formErrors = new Set(), formValid = true, operatorSelected = true;
+      const {form, isCOPESurvey} = this.state;
+      let formErrors = new Set(), formValid = true, operatorSelected = form.num.length !== 0;
       if (form.exists) {
         return {formValid, formErrors};
       }
@@ -440,9 +437,9 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
         }
         return acc;
       }, formErrors);
-      // The second condition sets formValid to false if this is a Measurements attribute with no operator selected from the dropdown and
-      // no categorical checkboxes checked
-      formValid = formValid && !(this.isMeasurement && !operatorSelected && !form.cat.some(attr => attr.checked));
+      // The second condition sets formValid to false if this is a Measurements or COPE attribute with no operator selected from the
+      // dropdown and no categorical checkboxes checked
+      formValid = formValid && !((this.isMeasurement || isCOPESurvey) && !operatorSelected && !form.cat.some(attr => attr.checked));
       return {formErrors, formValid};
     }
 
@@ -620,7 +617,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
       const {calculating, count, countError, form, isCOPESurvey, loading, options} = this.state;
       const {formErrors, formValid} = this.validateForm();
       const disableAdd = calculating || !formValid;
-      const disableCalculate = disableAdd || form.exists || form.num.every(attr => attr.operator === 'ANY');
+      const disableCalculate = disableAdd || form.exists || (form.num.length && form.num.every(attr => attr.operator === 'ANY'));
       return (loading ?
         <SpinnerOverlay/> :
         <div id='attributes-form' style={{marginTop: '0.5rem'}}>

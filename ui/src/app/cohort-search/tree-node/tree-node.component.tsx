@@ -14,7 +14,7 @@ import {attributesSelectionStore, currentCohortCriteriaStore, currentWorkspaceSt
 import {AttrName, Criteria, CriteriaSubType, CriteriaType, DomainType, Operator} from 'generated/fetch';
 
 const COPE_SURVEY_ID = 1333342;
-const COPE_SURVEY_GROUP_NAME = 'COVID-19 Participant Experience (COPE) Survey';
+export const COPE_SURVEY_GROUP_NAME = 'COVID-19 Participant Experience (COPE) Survey';
 const styles = reactStyles({
   code: {
     color: colors.dark,
