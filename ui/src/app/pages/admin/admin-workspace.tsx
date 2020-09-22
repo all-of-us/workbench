@@ -73,7 +73,7 @@ const FileDetailsTable = (props: {data: Array<FileDetail>, bucket: string}) => {
 
   interface TableEntry {
     name: string;
-    size: number;
+    size: string;
     location: string;
   }
 
@@ -83,10 +83,19 @@ const FileDetailsTable = (props: {data: Array<FileDetail>, bucket: string}) => {
     return file.path.replace(prefix, '').replace(suffix, '');
   };
 
+  const formatMB = (fileSize: number): string => {
+    const mb = fileSize / 1000000.0;
+    if (mb < 1.0) {
+      return '<1';
+    } else {
+      return mb.toFixed(2);
+    }
+  };
+
   const formattedData: Array<TableEntry> = data.map(file => {
     return {
       name: file.name,
-      size: file.size,
+      size: formatMB(file.size),
       location: getLocation(file)
     };
   });
@@ -110,7 +119,7 @@ const FileDetailsTable = (props: {data: Array<FileDetail>, bucket: string}) => {
       currentPageReportTemplate='Showing {first} to {last} of {totalRecords} entries'>
     <Column field='location' header='Location'/>
     <Column field='name' header='Filename'/>
-    <Column field='size' header='File size (bytes)'/>
+    <Column field='size' header='File size (MB)'/>
   </DataTable>;
 };
 
