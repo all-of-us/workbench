@@ -138,7 +138,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     return new AdminWorkspaceCloudStorageCounts()
         .notebookFileCount(notebookFilesCount)
         .nonNotebookFileCount(nonNotebookFilesCount)
-        .storageBytesUsed(storageSizeBytes);
+        .storageBytesUsed(storageSizeBytes)
+        .storageBucketPath(String.format("gs://%s", bucketName));
   }
 
   @Override

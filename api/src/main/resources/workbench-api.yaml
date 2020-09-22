@@ -6038,6 +6038,9 @@ definitions:
   AdminWorkspaceCloudStorageCounts:
     type: object
     properties:
+      storageBucketPath:
+        type: string
+        description: Full gs:// path to the workspace-associated GCS bucket.
       notebookFileCount:
         type: integer
       nonNotebookFileCount:

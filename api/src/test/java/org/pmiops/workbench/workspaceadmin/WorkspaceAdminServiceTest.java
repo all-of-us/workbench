@@ -166,7 +166,8 @@ public class WorkspaceAdminServiceTest {
             new AdminWorkspaceCloudStorageCounts()
                 .nonNotebookFileCount(0)
                 .notebookFileCount(0)
-                .storageBytesUsed(0L));
+                .storageBytesUsed(0L)
+                .storageBucketPath("gs://bucket"));
     verify(mockNotebooksService, atLeastOnce()).getNotebooksAsService(any());
 
     // Regression check: the admin service should never call the end-user variants of these methods.

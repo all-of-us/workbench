@@ -1,0 +1,2 @@
+# Use a custom ApplicationRunListener to create a "request" scope for CLI-based tools.
+org.springframework.boot.SpringApplicationRunListener=org.pmiops.workbench.tools.CommandLineToolApplicationRunListener

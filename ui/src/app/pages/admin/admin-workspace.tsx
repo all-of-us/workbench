@@ -260,6 +260,12 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
           <div className='cloud-storage-objects' style={{marginTop: '1rem'}}>
             {
               this.workspaceInfoField(
+                'GCS bucket path',
+                resources.cloudStorage.storageBucketPath
+              )
+            }
+            {
+              this.workspaceInfoField(
                 '# of Notebook Files',
                 resources.cloudStorage.notebookFileCount
               )
