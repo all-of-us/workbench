@@ -20,16 +20,16 @@ import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
 
 public class ReportingTestUtils {
-// All constant values, mocking statements, and assertions in this file are generated. The values
-// are chosen so that errors with transposed columns can be caught.
-// Mapping Short values with valid enums can be tricky, and currently there are
-// a handful of places where we have to use use a Short in the projection interface but an Enum
-//  type in the model class. An example of such a manual fix is the following:
-// .dataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION.longValue())
+  // All constant values, mocking statements, and assertions in this file are generated. The values
+  // are chosen so that errors with transposed columns can be caught.
+  // Mapping Short values with valid enums can be tricky, and currently there are
+  // a handful of places where we have to use use a Short in the projection interface but an Enum
+  //  type in the model class. An example of such a manual fix is the following:
+  // .dataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION.longValue())
 
-// This code was generated using reporting-wizard.rb at 2020-09-22T12:36:42-04:00.
-// Manual modification should be avoided if possible as this is a one-time generation
-// and does not run on every build and updates must be merged manually for now.
+  // This code was generated using reporting-wizard.rb at 2020-09-22T12:36:42-04:00.
+  // Manual modification should be avoided if possible as this is a one-time generation
+  // and does not run on every build and updates must be merged manually for now.
   public static final String USER__ABOUT_YOU = "foo_0";
   public static final String USER__AREA_OF_RESEARCH = "foo_1";
   public static final Timestamp USER__COMPLIANCE_TRAINING_BYPASS_TIME =

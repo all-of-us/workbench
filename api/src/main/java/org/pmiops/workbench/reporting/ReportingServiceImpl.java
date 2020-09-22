@@ -6,12 +6,16 @@ import org.pmiops.workbench.model.ReportingSnapshot;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+/*
+ * Calls the ReportingSnapshotService to obtain the application data from MySQL, Terra (soon),
+ * and possibly other sources, then calls the uploadSnapshot() method on the configured ReportingUploadService
+ * to upload to various tables in the BigQuery dataset.
+ */
 @Service
 public class ReportingServiceImpl implements ReportingService {
 
   // Describe whether to upload via Data Manipulation Language (DML, i.e. Insert
-  // QueryJobConfiguration)
-  // or Streaming upload via InsertAllRequest.
+  // QueryJobConfiguration) or Streaming upload via InsertAllRequest.
   private enum UploadMethod {
     DML,
     STREAMING;
@@ -41,6 +45,11 @@ public class ReportingServiceImpl implements ReportingService {
     return getConfiguredUploadService().uploadSnapshot(snapshot);
   }
 
+  /*
+   * Currently, we can't access appplication config values at initialization time (since they're
+   * all request-scoped). This method is a workaround, and selects the upload service implementation
+   * whenever a request comes in. The main cost is an extra configured Bean in the ApplicationContext.
+   */
   private ReportingUploadService getConfiguredUploadService() {
     final String uploadMethod = workbenchConfigProvider.get().reporting.uploadMethod;
     if (UploadMethod.DML.name().equals(uploadMethod)) {

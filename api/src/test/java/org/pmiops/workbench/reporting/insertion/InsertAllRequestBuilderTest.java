@@ -37,10 +37,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 public class InsertAllRequestBuilderTest {
 
-  private static final InsertAllRequestBuilder<ReportingUser> USER_INSERT_ALL_REQUEST_BUILDER =
-      UserParameterColumn::values;
-  private static final InsertAllRequestBuilder<ReportingWorkspace> WORKSPACE_REQUEST_BUILDER =
-      WorkspaceParameterColumn::values;
+  private static final InsertAllRequestPayloadTransformer<ReportingUser>
+      USER_INSERT_ALL_REQUEST_BUILDER = UserColumnValueExtractor::values;
+  private static final InsertAllRequestPayloadTransformer<ReportingWorkspace>
+      WORKSPACE_REQUEST_BUILDER = WorkspaceColumnValueExtractor::values;
   private static final Instant PRINCE_PARTY_TIME = Instant.parse("1999-12-31T23:59:59.99Z");
   private static final Map<String, Object> FIXED_VALUES =
       ImmutableMap.of("snapshot_timestamp", PRINCE_PARTY_TIME.toEpochMilli());
@@ -120,7 +120,8 @@ public class InsertAllRequestBuilderTest {
 
     final Map<String, Object> contentMap = rowToInsert.getContent();
     assertTimeApprox((long) contentMap.get("snapshot_timestamp"), PRINCE_PARTY_TIME.toEpochMilli());
-    assertThat(contentMap).hasSize(FIXED_VALUES.size() + WorkspaceParameterColumn.values().length);
+    assertThat(contentMap)
+        .hasSize(FIXED_VALUES.size() + WorkspaceColumnValueExtractor.values().length);
     assertThat(contentMap.get("cdr_version_id")).isEqualTo(WORKSPACE__CDR_VERSION_ID);
     assertThat(contentMap.get("name")).isEqualTo(WORKSPACE__NAME);
     assertThat(contentMap.get("published")).isEqualTo(WORKSPACE__PUBLISHED);

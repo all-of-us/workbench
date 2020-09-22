@@ -12,7 +12,7 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import java.util.function.Function;
 import org.pmiops.workbench.model.ReportingWorkspace;
 
-public enum WorkspaceParameterColumn implements QueryParameterColumn<ReportingWorkspace> {
+public enum WorkspaceColumnValueExtractor implements ColumnValueExtractor<ReportingWorkspace> {
   BILLING_ACCOUNT_TYPE(
       "billing_account_type",
       w -> enumToString(w.getBillingAccountType()),
@@ -22,17 +22,12 @@ public enum WorkspaceParameterColumn implements QueryParameterColumn<ReportingWo
       w -> enumToString(w.getBillingStatus()),
       w -> enumToQpv(w.getBillingStatus())),
   CDR_VERSION_ID(
-      "cdr_version_id",
-      ReportingWorkspace::getCdrVersionId,
-      w -> int64(w.getCdrVersionId())),
+      "cdr_version_id", ReportingWorkspace::getCdrVersionId, w -> int64(w.getCdrVersionId())),
   CREATION_TIME(
       "creation_time",
       w -> toInsertRowString(w.getCreationTime()),
       w -> toTimestampQpv(w.getCreationTime())),
-  CREATOR_ID(
-      "creator_id",
-      ReportingWorkspace::getCreatorId,
-      w -> int64(w.getCreatorId())),
+  CREATOR_ID("creator_id", ReportingWorkspace::getCreatorId, w -> int64(w.getCreatorId())),
   DISSEMINATE_RESEARCH_OTHER(
       "disseminate_research_other",
       ReportingWorkspace::getDisseminateResearchOther,
@@ -50,34 +45,23 @@ public enum WorkspaceParameterColumn implements QueryParameterColumn<ReportingWo
       "needs_rp_review_prompt",
       ReportingWorkspace::getNeedsRpReviewPrompt,
       w -> int64(w.getNeedsRpReviewPrompt())),
-  PUBLISHED(
-      "published",
-      ReportingWorkspace::getPublished,
-      w -> bool(w.getPublished())),
+  PUBLISHED("published", ReportingWorkspace::getPublished, w -> bool(w.getPublished())),
   RP_ADDITIONAL_NOTES(
       "rp_additional_notes",
       ReportingWorkspace::getRpAdditionalNotes,
       w -> string(w.getRpAdditionalNotes())),
-  RP_ANCESTRY(
-      "rp_ancestry",
-      ReportingWorkspace::getRpAncestry,
-      w -> bool(w.getRpAncestry())),
+  RP_ANCESTRY("rp_ancestry", ReportingWorkspace::getRpAncestry, w -> bool(w.getRpAncestry())),
   RP_ANTICIPATED_FINDINGS(
       "rp_anticipated_findings",
       ReportingWorkspace::getRpAnticipatedFindings,
       w -> string(w.getRpAnticipatedFindings())),
-  RP_APPROVED(
-      "rp_approved",
-      ReportingWorkspace::getRpApproved,
-      w -> bool(w.getRpApproved())),
+  RP_APPROVED("rp_approved", ReportingWorkspace::getRpApproved, w -> bool(w.getRpApproved())),
   RP_COMMERCIAL_PURPOSE(
       "rp_commercial_purpose",
       ReportingWorkspace::getRpCommercialPurpose,
       w -> bool(w.getRpCommercialPurpose())),
   RP_CONTROL_SET(
-      "rp_control_set",
-      ReportingWorkspace::getRpControlSet,
-      w -> bool(w.getRpControlSet())),
+      "rp_control_set", ReportingWorkspace::getRpControlSet, w -> bool(w.getRpControlSet())),
   RP_DISEASE_FOCUSED_RESEARCH(
       "rp_disease_focused_research",
       ReportingWorkspace::getRpDiseaseFocusedResearch,
@@ -91,11 +75,8 @@ public enum WorkspaceParameterColumn implements QueryParameterColumn<ReportingWo
       ReportingWorkspace::getRpDrugDevelopment,
       w -> bool(w.getRpDrugDevelopment())),
   RP_EDUCATIONAL(
-      "rp_educational",
-      ReportingWorkspace::getRpEducational,
-      w -> bool(w.getRpEducational())),
-  RP_ETHICS(
-      "rp_ethics", ReportingWorkspace::getRpEthics, w -> bool(w.getRpEthics())),
+      "rp_educational", ReportingWorkspace::getRpEducational, w -> bool(w.getRpEducational())),
+  RP_ETHICS("rp_ethics", ReportingWorkspace::getRpEthics, w -> bool(w.getRpEthics())),
   RP_INTENDED_STUDY(
       "rp_intended_study",
       ReportingWorkspace::getRpIntendedStudy,
@@ -109,9 +90,7 @@ public enum WorkspaceParameterColumn implements QueryParameterColumn<ReportingWo
       ReportingWorkspace::getRpOtherPopulationDetails,
       w -> string(w.getRpOtherPopulationDetails())),
   RP_OTHER_PURPOSE(
-      "rp_other_purpose",
-      ReportingWorkspace::getRpOtherPurpose,
-      w -> bool(w.getRpOtherPurpose())),
+      "rp_other_purpose", ReportingWorkspace::getRpOtherPurpose, w -> bool(w.getRpOtherPurpose())),
   RP_OTHER_PURPOSE_DETAILS(
       "rp_other_purpose_details",
       ReportingWorkspace::getRpOtherPurposeDetails,
@@ -140,17 +119,14 @@ public enum WorkspaceParameterColumn implements QueryParameterColumn<ReportingWo
       "rp_time_requested",
       w -> toInsertRowString(w.getRpTimeRequested()),
       w -> toTimestampQpv(w.getRpTimeRequested())),
-  WORKSPACE_ID(
-      "workspace_id",
-      ReportingWorkspace::getWorkspaceId,
-      w -> int64(w.getWorkspaceId()));
+  WORKSPACE_ID("workspace_id", ReportingWorkspace::getWorkspaceId, w -> int64(w.getWorkspaceId()));
 
   public static final String TABLE_NAME = "workspace";
   private final String parameterName;
   private final Function<ReportingWorkspace, Object> rowToInsertValueFunction;
   private final Function<ReportingWorkspace, QueryParameterValue> parameterValueFunction;
 
-  WorkspaceParameterColumn(
+  WorkspaceColumnValueExtractor(
       String parameterName,
       Function<ReportingWorkspace, Object> rowToInsertValueFunction,
       Function<ReportingWorkspace, QueryParameterValue> parameterValueFunction) {

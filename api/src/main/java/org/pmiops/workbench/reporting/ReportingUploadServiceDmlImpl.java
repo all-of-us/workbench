@@ -19,8 +19,8 @@ import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.reporting.insertion.DmlInsertJobBuilder;
-import org.pmiops.workbench.reporting.insertion.UserParameterColumn;
-import org.pmiops.workbench.reporting.insertion.WorkspaceParameterColumn;
+import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
@@ -35,9 +35,9 @@ public class ReportingUploadServiceDmlImpl implements ReportingUploadService {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   private static final DmlInsertJobBuilder<ReportingUser> userJobBuilder =
-      UserParameterColumn::values;
+      UserColumnValueExtractor::values;
   private static final DmlInsertJobBuilder<ReportingWorkspace> workspaceJobBuilder =
-      WorkspaceParameterColumn::values;
+      WorkspaceColumnValueExtractor::values;
 
   public ReportingUploadServiceDmlImpl(
       BigQueryService bigQueryService, Provider<WorkbenchConfig> workbenchConfigProvider) {
@@ -71,14 +71,16 @@ public class ReportingUploadServiceDmlImpl implements ReportingUploadService {
         .map(
             batch ->
                 userJobBuilder.build(
-                    qualifyTableName(UserParameterColumn.TABLE_NAME), batch, snapshotTimestamp))
+                    qualifyTableName(UserColumnValueExtractor.TABLE_NAME),
+                    batch,
+                    snapshotTimestamp))
         .forEach(resultBuilder::add);
 
     Lists.partition(reportingSnapshot.getWorkspaces(), partitionSize).stream()
         .map(
             batch ->
                 workspaceJobBuilder.build(
-                    qualifyTableName(WorkspaceParameterColumn.TABLE_NAME),
+                    qualifyTableName(WorkspaceColumnValueExtractor.TABLE_NAME),
                     batch,
                     snapshotTimestamp))
         .forEach(resultBuilder::add);

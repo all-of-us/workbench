@@ -16,9 +16,9 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
-import org.pmiops.workbench.reporting.insertion.InsertAllRequestBuilder;
-import org.pmiops.workbench.reporting.insertion.UserParameterColumn;
-import org.pmiops.workbench.reporting.insertion.WorkspaceParameterColumn;
+import org.pmiops.workbench.reporting.insertion.InsertAllRequestPayloadTransformer;
+import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
 import org.pmiops.workbench.utils.LogFormatters;
 import org.springframework.stereotype.Service;
 
@@ -26,10 +26,10 @@ import org.springframework.stereotype.Service;
 public class ReportingUploadServiceStreamingImpl implements ReportingUploadService {
   private static final Logger log =
       Logger.getLogger(ReportingUploadServiceStreamingImpl.class.getName());
-  private static final InsertAllRequestBuilder<ReportingUser> userRequestBuilder =
-      UserParameterColumn::values;
-  private static final InsertAllRequestBuilder<ReportingWorkspace> workspaceRequestBuilder =
-      WorkspaceParameterColumn::values;
+  private static final InsertAllRequestPayloadTransformer<ReportingUser> userRequestBuilder =
+      UserColumnValueExtractor::values;
+  private static final InsertAllRequestPayloadTransformer<ReportingWorkspace>
+      workspaceRequestBuilder = WorkspaceColumnValueExtractor::values;
 
   private final BigQueryService bigQueryService;
   private final Provider<WorkbenchConfig> configProvider;

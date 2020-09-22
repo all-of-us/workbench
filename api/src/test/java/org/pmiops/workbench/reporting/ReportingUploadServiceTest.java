@@ -43,8 +43,8 @@ import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
-import org.pmiops.workbench.reporting.insertion.InsertAllRequestBuilder;
-import org.pmiops.workbench.reporting.insertion.WorkspaceParameterColumn;
+import org.pmiops.workbench.reporting.insertion.InsertAllRequestPayloadTransformer;
+import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.testconfig.ReportingTestUtils;
@@ -309,22 +309,26 @@ public class ReportingUploadServiceTest {
 
     final List<RowToInsert> userRows = requests.get(0).getRows();
     assertThat(userRows).hasSize(snapshot.getUsers().size());
-    assertThat(userRows.get(0).getId()).hasLength(InsertAllRequestBuilder.INSERT_ID_LENGTH);
+    assertThat(userRows.get(0).getId())
+        .hasLength(InsertAllRequestPayloadTransformer.INSERT_ID_LENGTH);
 
     final List<RowToInsert> workspaceRows = requests.get(1).getRows();
     assertThat(workspaceRows).hasSize(3);
 
     final Map<String, Object> workspaceColumnValues = workspaceRows.get(0).getContent();
-    assertThat(workspaceColumnValues.get(WorkspaceParameterColumn.WORKSPACE_ID.getParameterName()))
+    assertThat(
+            workspaceColumnValues.get(
+                WorkspaceColumnValueExtractor.WORKSPACE_ID.getParameterName()))
         .isEqualTo(201L);
     assertTimeApprox(
         rowToInsertStringToOffsetTimestamp(
                 (String)
                     workspaceColumnValues.get(
-                        WorkspaceParameterColumn.CREATION_TIME.getParameterName()))
+                        WorkspaceColumnValueExtractor.CREATION_TIME.getParameterName()))
             .get(),
         THEN);
-    assertThat(workspaceColumnValues.get(WorkspaceParameterColumn.CREATOR_ID.getParameterName()))
+    assertThat(
+            workspaceColumnValues.get(WorkspaceColumnValueExtractor.CREATOR_ID.getParameterName()))
         .isEqualTo(101L);
   }
 

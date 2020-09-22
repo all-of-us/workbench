@@ -13,11 +13,11 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public interface DmlInsertJobBuilder<T> extends ColumnDrivenBuilder<T> {
+public interface DmlInsertJobBuilder<T> extends BigQueryInsertionPayloadTransformer<T> {
 
   default String getColumnNameList() {
     return Arrays.stream(getQueryParameterColumns())
-        .map(QueryParameterColumn::getParameterName)
+        .map(ColumnValueExtractor::getParameterName)
         .collect(Collectors.joining(", "));
   }
 
@@ -25,7 +25,7 @@ public interface DmlInsertJobBuilder<T> extends ColumnDrivenBuilder<T> {
       String tableName, List<T> models, QueryParameterValue snapshotTimestamp) {
     final List<String> columnNames =
         Arrays.stream(getQueryParameterColumns())
-            .map(QueryParameterColumn::getParameterName)
+            .map(ColumnValueExtractor::getParameterName)
             .collect(ImmutableList.toImmutableList());
     final String query =
         "INSERT INTO "

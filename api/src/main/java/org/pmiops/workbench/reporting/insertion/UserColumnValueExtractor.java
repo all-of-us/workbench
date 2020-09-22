@@ -1,5 +1,6 @@
 package org.pmiops.workbench.reporting.insertion;
 
+import static com.google.cloud.bigquery.QueryParameterValue.*;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.enumToQpv;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.enumToString;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.toInsertRowString;
@@ -9,13 +10,15 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import java.util.function.Function;
 import org.pmiops.workbench.model.ReportingUser;
 
-public enum UserParameterColumn implements QueryParameterColumn<ReportingUser> {
-  ABOUT_YOU(
-      "about_you", ReportingUser::getAboutYou, u -> QueryParameterValue.string(u.getAboutYou())),
+/*
+ * BigQuery user table columns. This list contains some values that are in other tables
+ * but joined in the user projection, and omits others that are not exposed in the analytics
+ * dataset.
+ */
+public enum UserColumnValueExtractor implements ColumnValueExtractor<ReportingUser> {
+  ABOUT_YOU("about_you", ReportingUser::getAboutYou, u -> string(u.getAboutYou())),
   AREA_OF_RESEARCH(
-      "area_of_research",
-      ReportingUser::getAreaOfResearch,
-      u -> QueryParameterValue.string(u.getAreaOfResearch())),
+      "area_of_research", ReportingUser::getAreaOfResearch, u -> string(u.getAreaOfResearch())),
   COMPLIANCE_TRAINING_BYPASS_TIME(
       "compliance_training_bypass_time",
       u -> toInsertRowString(u.getComplianceTrainingBypassTime()),
@@ -28,18 +31,13 @@ public enum UserParameterColumn implements QueryParameterColumn<ReportingUser> {
       "compliance_training_expiration_time",
       u -> toInsertRowString(u.getComplianceTrainingExpirationTime()),
       u -> toTimestampQpv(u.getComplianceTrainingExpirationTime())),
-  CONTACT_EMAIL(
-      "contact_email",
-      ReportingUser::getContactEmail,
-      u -> QueryParameterValue.string(u.getContactEmail())),
+  CONTACT_EMAIL("contact_email", ReportingUser::getContactEmail, u -> string(u.getContactEmail())),
   CREATION_TIME(
       "creation_time",
       u -> toInsertRowString(u.getCreationTime()),
       u -> toTimestampQpv(u.getCreationTime())),
   CURRENT_POSITION(
-      "current_position",
-      ReportingUser::getCurrentPosition,
-      u -> QueryParameterValue.string(u.getCurrentPosition())),
+      "current_position", ReportingUser::getCurrentPosition, u -> string(u.getCurrentPosition())),
   DATA_ACCESS_LEVEL(
       "data_access_level",
       u -> enumToString(u.getDataAccessLevel()),
@@ -55,12 +53,12 @@ public enum UserParameterColumn implements QueryParameterColumn<ReportingUser> {
   DATA_USE_AGREEMENT_SIGNED_VERSION(
       "data_use_agreement_signed_version",
       ReportingUser::getDataUseAgreementSignedVersion,
-      u -> QueryParameterValue.int64(u.getDataUseAgreementSignedVersion())),
+      u -> int64(u.getDataUseAgreementSignedVersion())),
   DEMOGRAPHIC_SURVEY_COMPLETION_TIME(
       "demographic_survey_completion_time",
       u -> toInsertRowString(u.getDemographicSurveyCompletionTime()),
       u -> toTimestampQpv(u.getDemographicSurveyCompletionTime())),
-  DISABLED("disabled", ReportingUser::getDisabled, u -> QueryParameterValue.bool(u.getDisabled())),
+  DISABLED("disabled", ReportingUser::getDisabled, u -> bool(u.getDisabled())),
   ERA_COMMONS_BYPASS_TIME(
       "era_commons_bypass_time",
       u -> toInsertRowString(u.getEraCommonsBypassTime()),
@@ -69,10 +67,7 @@ public enum UserParameterColumn implements QueryParameterColumn<ReportingUser> {
       "era_commons_completion_time",
       u -> toInsertRowString(u.getEraCommonsCompletionTime()),
       u -> toTimestampQpv(u.getEraCommonsCompletionTime())),
-  FAMILY_NAME(
-      "family_name",
-      ReportingUser::getFamilyName,
-      u -> QueryParameterValue.string(u.getFamilyName())),
+  FAMILY_NAME("family_name", ReportingUser::getFamilyName, u -> string(u.getFamilyName())),
   FIRST_REGISTRATION_COMPLETION_TIME(
       "first_registration_completion_time",
       u -> toInsertRowString(u.getFirstRegistrationCompletionTime()),
@@ -84,21 +79,18 @@ public enum UserParameterColumn implements QueryParameterColumn<ReportingUser> {
   FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE(
       "free_tier_credits_limit_days_override",
       ReportingUser::getFreeTierCreditsLimitDaysOverride,
-      u -> QueryParameterValue.int64(u.getFreeTierCreditsLimitDaysOverride())),
+      u -> int64(u.getFreeTierCreditsLimitDaysOverride())),
   FREE_TIER_CREDITS_LIMIT_DOLLARS_OVERRIDE(
       "free_tier_credits_limit_dollars_override",
       ReportingUser::getFreeTierCreditsLimitDollarsOverride,
-      u -> QueryParameterValue.float64(u.getFreeTierCreditsLimitDollarsOverride())),
-  GIVEN_NAME(
-      "given_name", ReportingUser::getGivenName, u -> QueryParameterValue.string(u.getGivenName())),
+      u -> float64(u.getFreeTierCreditsLimitDollarsOverride())),
+  GIVEN_NAME("given_name", ReportingUser::getGivenName, u -> string(u.getGivenName())),
   LAST_MODIFIED_TIME(
       "last_modified_time",
       u -> toInsertRowString(u.getLastModifiedTime()),
       u -> toTimestampQpv(u.getLastModifiedTime())),
   PROFESSIONAL_URL(
-      "professional_url",
-      ReportingUser::getProfessionalUrl,
-      u -> QueryParameterValue.string(u.getProfessionalUrl())),
+      "professional_url", ReportingUser::getProfessionalUrl, u -> string(u.getProfessionalUrl())),
   TWO_FACTOR_AUTH_BYPASS_TIME(
       "two_factor_auth_bypass_time",
       u -> toInsertRowString(u.getTwoFactorAuthBypassTime()),
@@ -107,16 +99,17 @@ public enum UserParameterColumn implements QueryParameterColumn<ReportingUser> {
       "two_factor_auth_completion_time",
       u -> toInsertRowString(u.getTwoFactorAuthCompletionTime()),
       u -> toTimestampQpv(u.getTwoFactorAuthCompletionTime())),
-  USER_ID("user_id", ReportingUser::getUserId, u -> QueryParameterValue.int64(u.getUserId())),
-  USERNAME(
-      "username", ReportingUser::getUsername, u -> QueryParameterValue.string(u.getUsername()));
+  USER_ID("user_id", ReportingUser::getUserId, u -> int64(u.getUserId())),
+  USERNAME("username", ReportingUser::getUsername, u -> string(u.getUsername()));
 
+  // Much of the repetitive boilerplate below (constructor, setters, etc) can't really be helped,
+  // as enums can't be abstract or extend abstract classes.
   public static final String TABLE_NAME = "user";
   private final String parameterName;
   private final Function<ReportingUser, Object> objectValueFunction;
   private final Function<ReportingUser, QueryParameterValue> parameterValueFunction;
 
-  UserParameterColumn(
+  UserColumnValueExtractor(
       String parameterName,
       Function<ReportingUser, Object> objectValueFunction,
       Function<ReportingUser, QueryParameterValue> parameterValueFunction) {
