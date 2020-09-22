@@ -6,8 +6,7 @@ const timeOut = parseInt(process.env.PUPPETEER_TIMEOUT, 10) || 90000;
 const isDebugMode = process.argv.includes('--debug');
 
 /**
- * Set up page common properties:
- * - Page view port
+ * Set up page properties:
  * - Page user-agent
  * - Page navigation timeout
  * - waitFor functions timeout
@@ -21,7 +20,6 @@ beforeEach(async () => {
 
 /**
  * At the end of each test completion, do:
- * - Disable network interception.
  * - Delete broswer cookies.
  * - Reset global page and browser variables.
  */
@@ -36,7 +34,7 @@ afterEach(async () => {
  */
 beforeAll(async () => {
   await page.setRequestInterception(true);
-  
+
   // Log failed requests: 4xx and 5xx status code.
   page.on('requestfailed', request => {
     console.error(`❌ Failed request => ${request.method()} ${request.url()} ${request.response().status()}`);
@@ -50,6 +48,10 @@ beforeAll(async () => {
   });
 });
 
+/**
+ * At the end of test suite, do:
+ * - Disable network interception.
+ */
 afterAll(async () => {
   await page.setRequestInterception(false);
 });
