@@ -55,11 +55,11 @@ const styles = reactStyles({
     maxWidth: '1000px',
     marginTop: '1rem',
   },
-  textArea: {
+  accessReasonText: {
     maxWidth: '1000px',
     height: '3rem',
   },
-  button: {
+  previewButton: {
     marginLeft: '20px',
     height: '1rem',
   },
@@ -143,14 +143,14 @@ const FileDetailsTable = (props: FileDetailsProps) => {
           {filenameText}
           <TooltipTrigger
             content={`Files larger than ${formatMB(MAX_NOTEBOOK_READ_SIZE_BYTES)} MB are too large to preview`}
-          ><Button style={styles.button} disabled={true}>Preview</Button>
+          ><Button style={styles.previewButton} disabled={true}>Preview</Button>
           </TooltipTrigger>
         </FlexRow>;
       } else {
         return <FlexRow>
           {filenameText}
           <TooltipTrigger content='Please enter an access reason below' disabled={accessReason && accessReason.trim()}>
-            <Button style={styles.button} disabled={!accessReason || !accessReason.trim()}
+            <Button style={styles.previewButton} disabled={!accessReason || !accessReason.trim()}
                     onClick={navigateToPreview}>Preview</Button>
           </TooltipTrigger>
         </FlexRow>;
@@ -196,7 +196,7 @@ const FileDetailsTable = (props: FileDetailsProps) => {
       <Column field='size' header='File size (MB)' style={{textAlign: 'right'}}/>
     </DataTable>
     <PurpleLabel>To preview notebooks, enter Access Reason (for auditing purposes)</PurpleLabel>
-    <TextArea style={styles.textArea} value={accessReason} onChange={setAccessReason}/>
+    <TextArea style={styles.accessReasonText} value={accessReason} onChange={setAccessReason}/>
   </FlexColumn>;
 };
 
