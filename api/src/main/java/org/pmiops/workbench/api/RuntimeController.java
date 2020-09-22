@@ -45,7 +45,6 @@ import org.pmiops.workbench.model.RuntimeStatus;
 import org.pmiops.workbench.model.UpdateClusterConfigRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
-import org.pmiops.workbench.notebooks.LeonardoNotebooksClientImpl;
 import org.pmiops.workbench.notebooks.model.StorageLink;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -203,12 +202,17 @@ public class RuntimeController implements RuntimeApiDelegate {
               .get();
 
       final String OVERRIDE_LABEL =
-          LeonardoNotebooksClientImpl.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(
+          LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(
               RuntimeConfigurationType.USEROVERRIDE);
       Map<String, String> runtimeLabels = (Map<String, String>) mostRecentRuntime.getLabels();
       if (runtimeLabels != null
           && OVERRIDE_LABEL.equals(
-              runtimeLabels.get(LeonardoNotebooksClientImpl.RUNTIME_LABEL_AOU_CONFIG))) {
+              runtimeLabels.get(LeonardoMapper.RUNTIME_LABEL_AOU_CONFIG))) {
+        Runtime runtime = leonardoMapper.toApiRuntime(mostRecentRuntime);
+        if (!runtime.getStatus().equals(RuntimeStatus.DELETED)) {
+          log.warning("Runtimes returned from ListRuntimes should be DELETED but found " + runtime.getStatus());
+        }
+
         return ResponseEntity.ok(
             leonardoMapper.toApiRuntime(mostRecentRuntime).status(RuntimeStatus.DELETED));
       } else {
