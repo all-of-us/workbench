@@ -6,17 +6,26 @@ import {waitForDocumentTitle} from 'utils/waits-utils';
 import {ResourceCard} from 'app/text-labels';
 import AuthenticatedPage from './authenticated-page';
 import NotebookCell, {CellType} from './notebook-cell';
+import NotebookDownloadModal from './notebook-download-modal';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
 
 // CSS selectors
 enum CssSelector {
   body = 'body.notebook_app',
   notebookContainer = '#notebook-container',
+
   toolbarContainer = '#maintoolbar-container',
   runCellButton = 'button[data-jupyter-action="jupyter-notebook:run-cell-and-select-next"]',
   saveNotebookButton = 'button[data-jupyter-action="jupyter-notebook:save-notebook"]',
   kernelIcon = '#kernel_indicator_icon',
   kernelName = '.kernel_indicator_name',
+}
+
+enum Xpath {
+  fileMenuDropdown = '//a[text()="File"]',
+  downloadMenuDropdown = '//a[text()="Download as"]',
+  downloadIpynbButton = '//*[@id="download_ipynb"]/a',
+  downloadPdfButton = '//*[@id="download_pdf"]/a',
 }
 
 export enum Mode {
@@ -79,6 +88,25 @@ export default class NotebookPage extends AuthenticatedPage {
     const saveButton = await frame.waitForSelector(CssSelector.saveNotebookButton, {visible: true});
     await saveButton.click();
     await saveButton.dispose();
+  }
+
+  private async downloadAs(formatXpath: string): Promise<NotebookDownloadModal> {
+    const frame = await this.getIFrame();
+
+    await (await frame.waitForXPath(Xpath.fileMenuDropdown, {visible: true})).click();
+    await (await frame.waitForXPath(Xpath.downloadMenuDropdown, {visible: true})).hover();
+    await (await frame.waitForXPath(formatXpath, {visible: true})).click();
+
+    const modal = new NotebookDownloadModal(this.page, frame);
+    return await modal.waitForLoad();
+  }
+
+  async downloadAsIpynb(): Promise<NotebookDownloadModal> {
+    return this.downloadAs(Xpath.downloadIpynbButton)
+  }
+
+  async downloadAsPdf(): Promise<NotebookDownloadModal> {
+    return this.downloadAs(Xpath.downloadPdfButton);
   }
 
   /**
