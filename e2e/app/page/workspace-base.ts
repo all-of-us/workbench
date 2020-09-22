@@ -242,7 +242,6 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
     const contentText = await modal.getTextContent();
     await modal.clickButton(clickButtonText, {waitForClose: true});
     await waitWhileLoading(this.page);
-    console.log(`Dismiss Delete Workspace modal by click ${clickButtonText} button`);
     return contentText;
   }
 
