@@ -1,5 +1,8 @@
 package org.pmiops.workbench.reporting.insertion;
 
+import static com.google.cloud.bigquery.QueryParameterValue.bool;
+import static com.google.cloud.bigquery.QueryParameterValue.int64;
+import static com.google.cloud.bigquery.QueryParameterValue.string;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.enumToQpv;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.enumToString;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.toInsertRowString;
@@ -21,7 +24,7 @@ public enum WorkspaceParameterColumn implements QueryParameterColumn<ReportingWo
   CDR_VERSION_ID(
       "cdr_version_id",
       ReportingWorkspace::getCdrVersionId,
-      w -> QueryParameterValue.int64(w.getCdrVersionId())),
+      w -> int64(w.getCdrVersionId())),
   CREATION_TIME(
       "creation_time",
       w -> toInsertRowString(w.getCreationTime()),
@@ -29,11 +32,11 @@ public enum WorkspaceParameterColumn implements QueryParameterColumn<ReportingWo
   CREATOR_ID(
       "creator_id",
       ReportingWorkspace::getCreatorId,
-      w -> QueryParameterValue.int64(w.getCreatorId())),
+      w -> int64(w.getCreatorId())),
   DISSEMINATE_RESEARCH_OTHER(
       "disseminate_research_other",
       ReportingWorkspace::getDisseminateResearchOther,
-      w -> QueryParameterValue.string(w.getDisseminateResearchOther())),
+      w -> string(w.getDisseminateResearchOther())),
   LAST_ACCESSED_TIME(
       "last_accessed_time",
       w -> toInsertRowString(w.getLastAccessedTime()),
@@ -42,97 +45,97 @@ public enum WorkspaceParameterColumn implements QueryParameterColumn<ReportingWo
       "last_modified_time",
       w -> toInsertRowString(w.getLastModifiedTime()),
       w -> toTimestampQpv(w.getLastModifiedTime())),
-  NAME("name", ReportingWorkspace::getName, w -> QueryParameterValue.string(w.getName())),
+  NAME("name", ReportingWorkspace::getName, w -> string(w.getName())),
   NEEDS_RP_REVIEW_PROMPT(
       "needs_rp_review_prompt",
       ReportingWorkspace::getNeedsRpReviewPrompt,
-      w -> QueryParameterValue.int64(w.getNeedsRpReviewPrompt())),
+      w -> int64(w.getNeedsRpReviewPrompt())),
   PUBLISHED(
       "published",
       ReportingWorkspace::getPublished,
-      w -> QueryParameterValue.bool(w.getPublished())),
+      w -> bool(w.getPublished())),
   RP_ADDITIONAL_NOTES(
       "rp_additional_notes",
       ReportingWorkspace::getRpAdditionalNotes,
-      w -> QueryParameterValue.string(w.getRpAdditionalNotes())),
+      w -> string(w.getRpAdditionalNotes())),
   RP_ANCESTRY(
       "rp_ancestry",
       ReportingWorkspace::getRpAncestry,
-      w -> QueryParameterValue.bool(w.getRpAncestry())),
+      w -> bool(w.getRpAncestry())),
   RP_ANTICIPATED_FINDINGS(
       "rp_anticipated_findings",
       ReportingWorkspace::getRpAnticipatedFindings,
-      w -> QueryParameterValue.string(w.getRpAnticipatedFindings())),
+      w -> string(w.getRpAnticipatedFindings())),
   RP_APPROVED(
       "rp_approved",
       ReportingWorkspace::getRpApproved,
-      w -> QueryParameterValue.bool(w.getRpApproved())),
+      w -> bool(w.getRpApproved())),
   RP_COMMERCIAL_PURPOSE(
       "rp_commercial_purpose",
       ReportingWorkspace::getRpCommercialPurpose,
-      w -> QueryParameterValue.bool(w.getRpCommercialPurpose())),
+      w -> bool(w.getRpCommercialPurpose())),
   RP_CONTROL_SET(
       "rp_control_set",
       ReportingWorkspace::getRpControlSet,
-      w -> QueryParameterValue.bool(w.getRpControlSet())),
+      w -> bool(w.getRpControlSet())),
   RP_DISEASE_FOCUSED_RESEARCH(
       "rp_disease_focused_research",
       ReportingWorkspace::getRpDiseaseFocusedResearch,
-      w -> QueryParameterValue.bool(w.getRpDiseaseFocusedResearch())),
+      w -> bool(w.getRpDiseaseFocusedResearch())),
   RP_DISEASE_OF_FOCUS(
       "rp_disease_of_focus",
       ReportingWorkspace::getRpDiseaseOfFocus,
-      w -> QueryParameterValue.string(w.getRpDiseaseOfFocus())),
+      w -> string(w.getRpDiseaseOfFocus())),
   RP_DRUG_DEVELOPMENT(
       "rp_drug_development",
       ReportingWorkspace::getRpDrugDevelopment,
-      w -> QueryParameterValue.bool(w.getRpDrugDevelopment())),
+      w -> bool(w.getRpDrugDevelopment())),
   RP_EDUCATIONAL(
       "rp_educational",
       ReportingWorkspace::getRpEducational,
-      w -> QueryParameterValue.bool(w.getRpEducational())),
+      w -> bool(w.getRpEducational())),
   RP_ETHICS(
-      "rp_ethics", ReportingWorkspace::getRpEthics, w -> QueryParameterValue.bool(w.getRpEthics())),
+      "rp_ethics", ReportingWorkspace::getRpEthics, w -> bool(w.getRpEthics())),
   RP_INTENDED_STUDY(
       "rp_intended_study",
       ReportingWorkspace::getRpIntendedStudy,
-      w -> QueryParameterValue.string(w.getRpIntendedStudy())),
+      w -> string(w.getRpIntendedStudy())),
   RP_METHODS_DEVELOPMENT(
       "rp_methods_development",
       ReportingWorkspace::getRpMethodsDevelopment,
-      w -> QueryParameterValue.bool(w.getRpMethodsDevelopment())),
+      w -> bool(w.getRpMethodsDevelopment())),
   RP_OTHER_POPULATION_DETAILS(
       "rp_other_population_details",
       ReportingWorkspace::getRpOtherPopulationDetails,
-      w -> QueryParameterValue.string(w.getRpOtherPopulationDetails())),
+      w -> string(w.getRpOtherPopulationDetails())),
   RP_OTHER_PURPOSE(
       "rp_other_purpose",
       ReportingWorkspace::getRpOtherPurpose,
-      w -> QueryParameterValue.bool(w.getRpOtherPurpose())),
+      w -> bool(w.getRpOtherPurpose())),
   RP_OTHER_PURPOSE_DETAILS(
       "rp_other_purpose_details",
       ReportingWorkspace::getRpOtherPurposeDetails,
-      w -> QueryParameterValue.string(w.getRpOtherPurposeDetails())),
+      w -> string(w.getRpOtherPurposeDetails())),
   RP_POPULATION_HEALTH(
       "rp_population_health",
       ReportingWorkspace::getRpPopulationHealth,
-      w -> QueryParameterValue.bool(w.getRpPopulationHealth())),
+      w -> bool(w.getRpPopulationHealth())),
   RP_REASON_FOR_ALL_OF_US(
       "rp_reason_for_all_of_us",
       ReportingWorkspace::getRpReasonForAllOfUs,
-      w -> QueryParameterValue.string(w.getRpReasonForAllOfUs())),
+      w -> string(w.getRpReasonForAllOfUs())),
   RP_REVIEW_REQUESTED(
       "rp_review_requested",
       ReportingWorkspace::getRpReviewRequested,
-      w -> QueryParameterValue.bool(w.getRpReviewRequested())),
+      w -> bool(w.getRpReviewRequested())),
   RP_SCIENTIFIC_APPROACH(
       "rp_scientific_approach",
       ReportingWorkspace::getRpScientificApproach,
-      w -> QueryParameterValue.string(w.getRpScientificApproach())),
+      w -> string(w.getRpScientificApproach())),
   RP_SOCIAL_BEHAVIORAL(
       "rp_social_behavioral",
       ReportingWorkspace::getRpSocialBehavioral,
-      w -> QueryParameterValue.bool(w.getRpSocialBehavioral())),
+      w -> bool(w.getRpSocialBehavioral())),
   RP_TIME_REQUESTED(
       "rp_time_requested",
       w -> toInsertRowString(w.getRpTimeRequested()),
@@ -140,7 +143,7 @@ public enum WorkspaceParameterColumn implements QueryParameterColumn<ReportingWo
   WORKSPACE_ID(
       "workspace_id",
       ReportingWorkspace::getWorkspaceId,
-      w -> QueryParameterValue.int64(w.getWorkspaceId()));
+      w -> int64(w.getWorkspaceId()));
 
   public static final String TABLE_NAME = "workspace";
   private final String parameterName;

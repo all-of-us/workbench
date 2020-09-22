@@ -173,6 +173,17 @@ def provenance_yaml
   { 'x-aou-note' => provenance_text }
 end
 
+def java_inline_comment(block_text)
+  block_text.split("\n").map do |line|
+    '// ' + line
+end.join("\n") + "\n\n"
+
+end
+
+def provenance_java
+  java_inline_comment(provenance_text)
+end
+
 def to_swagger_name(snake_case, is_class_name)
   result =  snake_case.split('_').collect(&:capitalize).join
   unless is_class_name
@@ -207,7 +218,16 @@ COLUMNS = describe_rows.filter{ |row| include_field?(excluded_fields, row[0]) } 
     }
 }.freeze
 
-big_query_schema = COLUMNS.map{ |col| { :name => col[:name], :type => col[:big_query_type]} }
+FIXED_COLUMNS = [
+    :description => 'Time snapshot was taken, in Epoch milliseconds. Same across all rows and all tables in the snapshot, ' +
+        'and uniquely defines a particular snapshot.',
+    :name => 'snapshot_timestamp',
+    :type => 'INTEGER'
+]
+big_query_schema = FIXED_COLUMNS.concat(COLUMNS.map do |col|
+  { :name => col[:name], :type => col[:big_query_type]}
+end)
+
 schema_json = JSON.pretty_generate(big_query_schema)
 
 def write_output(path, contents, description)
@@ -247,7 +267,7 @@ def to_swagger_property(column)
         '$ref' => "#/definitions/#{column[:java_type]}"
   }
   else
-    swagger_value = BIGQUERY_TYPE_TO_SWAGGER[column[:big_query_type]]
+    swagger_value = BIGQUERY_TYPE_TO_SWAGGER[column[:big_query_type]] || 'STRING'
   end
   {}.merge(swagger_value)
 end
@@ -274,7 +294,13 @@ def to_getter(field)
   "  #{property_type} #{field[:getter]}();"
 end
 
-projection_decl = "public interface #{TABLE_INFO[:projection_interface]} {\n"
+projection_info = "This is a Spring Data projection interface for the Hibernate entity\nclass #{TABLE_INFO[:entity_class]}. " +
+    "The properties listed correspond to query results\nthat will be mapped into BigQuery rows in a (mostly) 1:1 fashion.\n" +
+    "Fields may not be renamed or reordered or have their types\nchanged unless both the entity class and any queries returning\n" +
+    "this projection type are in complete agreement."
+projection_decl = java_inline_comment(projection_info)
+projection_decl << provenance_java + "\n"
+projection_decl << "public interface #{TABLE_INFO[:projection_interface]} {\n"
 projection_decl << COLUMNS.map { |field|
   to_getter(field)
 }.join("\n")
@@ -302,18 +328,19 @@ def adjust_col(field)
   end
 end
 
-def to_query()
-  "@Query(\"SELECT\\n\"\n" \
-    + COLUMNS.map do |field|
-      "+ \"  #{adjust_col(field[:name])}"
-    end \
-    .join(",\\n\"\n") \
-    + "\\n\"\n" \
-    + "+ \"FROM #{TABLE_INFO[:entity_class]} #{TABLE_INFO[:sql_alias]}\")\n" \
-    + "  List<#{TABLE_INFO[:projection_interface]}> getReporting#{to_camel_case(TABLE_INFO[:name], true)}s();"
-end
-
-sql = to_query
+query_description = \
+"This JPQL query corresponds to the projection interface #{TABLE_INFO[:projection_interface]}. Its\n" +
+  "types and argument order must match the column names selected exactly, in name,\n" +
+  "type, and order."
+query_comment = java_inline_comment(query_description) + provenance_java
+sql = query_comment + "\n" +
+    "@Query(\"SELECT\\n\"\n" +
+    COLUMNS.map do |field| \
+      "+ \"  #{adjust_col(field[:name])}" \
+    end.join(",\\n\"\n") +
+    "\\n\"\n" +
+    "+ \"FROM #{TABLE_INFO[:entity_class]} #{TABLE_INFO[:sql_alias]}\")\n" +
+    "  List<#{TABLE_INFO[:projection_interface]}> getReporting#{to_camel_case(TABLE_INFO[:name], true)}s();"
 
 write_output(OUTPUTS[:projection_query], sql, 'Projection Query')
 
@@ -350,9 +377,18 @@ def to_constant_declaration(column, index)
   "public static final #{column[:java_type]} #{column[:java_constant_name]} = #{value};"
 end
 
-constants = COLUMNS.enum_for(:each_with_index) \
-  .map { |col, index| to_constant_declaration(col, index) } \
-  .join("\n")
+constant_descriptions = java_inline_comment( \
+  "All constant values, mocking statements, and assertions in this file are generated. The values\n" +
+     "are chosen so that errors with transposed columns can be caught. \n" +
+    "Mapping Short values with valid enums can be tricky, and currently there are\n" +
+    "a handful of places where we have to use use a Short in the projection interface but an Enum\n" +
+    " type in the model class. An example of such a manual fix is the following:\n" +
+    ".dataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION.longValue())")
+
+constants = constant_descriptions + "\n\n" + provenance_java + "\n" +
+    COLUMNS.enum_for(:each_with_index) \
+      .map { |col, index| to_constant_declaration(col, index) } \
+    .join("\n")
 
 write_output(OUTPUTS[:unit_test_constants], constants, 'Unit Test Constants')
 
@@ -362,7 +398,11 @@ mocks = COLUMNS.map { |col|
   "doReturn(#{col[:java_constant_name]}).when(#{TABLE_INFO[:mock]}).#{col[:getter]}();"
 }
 
-lines = []
+mock_comment = "Projection interface query objects can't be instantiated and must be mocked instead.\n" +
+    "This is slightly unfortunate, as the most common issue with projections is a column/type mismatch\n" +
+    "in the query, which only shows up when calling the accessors on the proxy. So live DAO tests are\n" +
+    " essential as well."
+lines = [java_inline_comment(mock_comment), provenance_java]
 lines << "final #{TABLE_INFO[:projection_interface]} #{TABLE_INFO[:mock]} = mock(#{TABLE_INFO[:projection_interface]}.class);"
 lines << mocks
 lines.flatten!
@@ -397,14 +437,15 @@ def object_value_function(col)
   end
 end
 
-# enum types are special
+# enum types are special. This assumes static imports of QueryParameterValue.int64 et al.
+# Repeating that long class name clutters up the enum listing.
 JAVA_TYPE_TO_QPV_FACTORY = {
-    'Integer' => 'QueryParameterValue.int64',
-    'Long' => 'QueryParameterValue.int64',
-    'Short' => 'QueryParameterValue.int64',
-    'String' => 'QueryParameterValue.string',
-    'Double' => 'QueryParameterValue.float64',
-    'Boolean' => 'QueryParameterValue.bool',
+    'Integer' => 'int64',
+    'Long' => 'int64',
+    'Short' => 'int64',
+    'String' => 'string',
+    'Double' => 'float64',
+    'Boolean' => 'bool',
     'Timestamp' => 'toTimestampQpv'
 }
 
