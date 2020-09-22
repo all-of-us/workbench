@@ -130,7 +130,6 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOps
       const machineType = allMachineTypes.find(({name}) => name === masterMachineName) || defaultMachineType;
 
       const outstandingRuntimeOp: RuntimeOperation = opsByWorkspaceNamespace[workspace.namespace];
-      debugger;
 
       return <div data-test-id='runtime-panel'>
         <h3 style={styles.sectionHeader}>Cloud analysis environment</h3>

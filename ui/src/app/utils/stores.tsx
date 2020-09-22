@@ -49,7 +49,6 @@ export const runtimeOpsStore = atom<RuntimeOpsStore>({opsByWorkspaceNamespace: {
 export const updateRuntimeOpsStoreForWorkspaceNamespace = (workspaceNamespace: string, runtimeOperation: RuntimeOperation) => {
   const opsByWorkspaceNamespace = runtimeOpsStore.get().opsByWorkspaceNamespace;
   opsByWorkspaceNamespace[workspaceNamespace] = runtimeOperation;
-  debugger;
   runtimeOpsStore.set({...runtimeOpsStore.get(), opsByWorkspaceNamespace: opsByWorkspaceNamespace});
 };
 
