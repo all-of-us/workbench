@@ -224,7 +224,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
   }
 
   /**
-   * Delete workspace via Workspace card "Delete" dropdown menu option.
+   * Delete workspace via Workspace action menu "Delete" option.
    */
   async deleteWorkspace(): Promise<string[]> {
     await this.selectWorkspaceAction(EllipsisMenuAction.Delete, { waitForNav: false });
