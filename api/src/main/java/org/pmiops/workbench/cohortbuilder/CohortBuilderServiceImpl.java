@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
@@ -35,6 +36,7 @@ import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cdr.model.DbMenuOption;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AgeTypeCount;
 import org.pmiops.workbench.model.ConceptIdName;
@@ -65,6 +67,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   private static final Integer DEFAULT_TREE_SEARCH_LIMIT = 100;
   private static final Integer DEFAULT_CRITERIA_SEARCH_LIMIT = 250;
+  private static final ImmutableList<String> MYSQL_FULL_TEXT_CHARS =
+      ImmutableList.of("\"", "+", "-", "*", "(", ")");
 
   private BigQueryService bigQueryService;
   private CohortQueryBuilder cohortQueryBuilder;
@@ -137,6 +141,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   @Override
   public List<Criteria> findCriteriaAutoComplete(
       String domain, String term, String type, Boolean standard, Integer limit) {
+    validateSearchTerm(term);
     PageRequest pageRequest =
         new PageRequest(0, Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT));
     List<DbCriteria> criteriaList =
@@ -171,6 +176,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   @Override
   public CriteriaListWithCountResponse findCriteriaByDomainAndSearchTerm(
       String domain, String term, Integer limit) {
+    validateSearchTerm(term);
     Page<DbCriteria> dbCriteriaPage;
     PageRequest pageRequest =
         new PageRequest(0, Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT));
@@ -427,7 +433,22 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         .collect(Collectors.toList());
   }
 
+  private void validateSearchTerm(String term) {
+    if (StringUtils.isEmpty(term)) {
+      throw new BadRequestException(
+          String.format(
+              "Bad Request: Please provide a valid search term: \"%s\" is not valid.", term));
+    }
+  }
+
   private String modifyTermMatch(String term) {
+    if (!MYSQL_FULL_TEXT_CHARS.stream()
+        .filter(term::contains)
+        .collect(Collectors.toList())
+        .isEmpty()) {
+      return term;
+    }
+
     String[] keywords = term.split("\\W+");
     if (keywords.length == 1 && keywords[0].length() <= 3) {
       return "+\"" + keywords[0];
