@@ -164,6 +164,7 @@ public class WorkspaceAdminServiceTest {
     assertThat(resp)
         .isEqualTo(
             new AdminWorkspaceCloudStorageCounts()
+                .storageBucketPath("gs://bucket")
                 .nonNotebookFileCount(0)
                 .notebookFileCount(0)
                 .storageBytesUsed(0L)
@@ -195,6 +196,7 @@ public class WorkspaceAdminServiceTest {
     assertThat(objectsCounts.getDatasetCount()).isEqualTo(0);
 
     AdminWorkspaceCloudStorageCounts cloudStorageCounts = resources.getCloudStorage();
+    assertThat(cloudStorageCounts.getStorageBucketPath()).isEqualTo("gs://bucket");
     assertThat(cloudStorageCounts.getNotebookFileCount()).isEqualTo(0);
     assertThat(cloudStorageCounts.getNonNotebookFileCount()).isEqualTo(0);
     assertThat(cloudStorageCounts.getStorageBytesUsed()).isEqualTo(0L);
