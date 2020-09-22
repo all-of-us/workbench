@@ -87,9 +87,12 @@ const FileDetailsTable = (props: {data: Array<FileDetail>, bucket: string}) => {
   }
 
   const parseLocation = (file: FileDetail): string => {
-    const prefix = `${bucket}/`;
-    const suffix = `/${file.name}`;
-    return file.path.replace(prefix, '').replace(suffix, '');
+    const prefixLength = bucket.length;
+    const start = prefixLength + 1;  // slash after bucket name
+    const suffixPos = file.path.lastIndexOf(file.name);
+    const end = suffixPos - 1;  // slash before filename
+
+    return file.path.substring(start, end);
   };
 
   const formattedData: Array<TableEntry> = data.map(file => {
