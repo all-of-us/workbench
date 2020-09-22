@@ -217,30 +217,56 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         presence: {
           allowEmpty: false,
           message: '^Street address cannot be blank'
+        },
+        length: {
+          maximum: 95,
+          message: '^Street address must be 95 characters or fewer'
+        }
+      },
+      'address.streetAddress2': {
+        length: {
+          maximum: 95,
+          message: '^Street address 2 must be 95 characters or fewer'
         }
       },
       'address.city': {
         presence: {
           allowEmpty: false,
           message: '^City cannot be blank'
+        },
+        length: {
+          maximum: 95,
+          message: '^City must be 95 characters or fewer'
         }
       },
       'address.state': {
         presence: {
           allowEmpty: false,
           message: '^State cannot be blank'
+        },
+        length: {
+          maximum: 95,
+          message: '^State must be 95 characters or fewer'
         }
       },
       'address.zipCode': {
         presence: {
           allowEmpty: false,
           message: '^Zip code cannot be blank'
+        },
+        length: {
+          maximum: 10,
+          message: '^Zip code must be 10 characters or fewer'
         }
       },
       'address.country': {
         presence: {
           allowEmpty: false,
           message: '^Country cannot be blank'
+        },
+        length: {
+          maximum: 95,
+          message: '^Country must be 95 characters or fewer'
         }
       }
     };
