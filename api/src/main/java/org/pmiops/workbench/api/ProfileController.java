@@ -290,6 +290,7 @@ public class ProfileController implements ProfileApiDelegate {
                 "Orphaned G Suite account %s could not be deleted. "
                     + "Manual intervention may be required",
                 gSuiteUsername));
+        log.log(Level.SEVERE, e2.getMessage(), e2);
         // Throw the original error rather than the G Suite error.
         throw e;
       }
