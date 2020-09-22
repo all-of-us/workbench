@@ -61,10 +61,10 @@ const PurpleLabel = ({style = {}, children}) => {
   </label>;
 };
 
-const workspaceInfoField = (labelText: string, divContents: React.ReactFragment) => {
+const WorkspaceInfoField = ({labelText, children}) => {
   return <FlexRow style={styles.infoRow}>
     <PurpleLabel style={styles.infoLabel}>{labelText}</PurpleLabel>
-    <div style={styles.infoValue}>{divContents}</div>
+    <div style={styles.infoValue}>{...children}</div>
   </FlexRow>;
 };
 
@@ -273,14 +273,16 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
           <h2>Workspace</h2>
           <h3>Basic Information</h3>
           <div className='basic-info' style={{marginTop: '1rem'}}>
-            {workspaceInfoField('Workspace Name', workspace.name)}
-            {workspaceInfoField('Google Project Id', workspace.namespace)}
-            {workspaceInfoField('Billing Status', workspace.billingStatus)}
-            {workspaceInfoField('Billing Account Type', workspace.billingAccountType)}
-            {workspaceInfoField('Creation Time', new Date(workspace.creationTime).toDateString())}
-            {workspaceInfoField('Last Modified Time', new Date(workspace.lastModifiedTime).toDateString())}
-            {workspaceInfoField('Workspace Published', workspace.published ? 'Yes' : 'No')}
-            {workspaceInfoField('Audit', <a href={`/admin/workspace-audit/${workspace.namespace}`}>Audit History</a>)}
+            <WorkspaceInfoField labelText={'Workspace Name'}>{workspace.name}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText={'Google Project Id'}>{workspace.namespace}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText={'Billing Status'}>{workspace.billingStatus}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText={'Billing Account Type'}>{workspace.billingAccountType}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText={'Creation Time'}>{new Date(workspace.creationTime).toDateString()}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText={'Last Modified Time'}>{new Date(workspace.lastModifiedTime).toDateString()}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText={'Workspace Published'}>{workspace.published ? 'Yes' : 'No'}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText={'Audit'}>
+              <a href={`/admin/workspace-audit/${workspace.namespace}`}>Audit History</a>
+            </WorkspaceInfoField>
           </div>
           <h3>Collaborators</h3>
           <div className='collaborators' style={{marginTop: '1rem'}}>
@@ -292,30 +294,45 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
           </div>
           <h3>Cohort Builder</h3>
           <div className='cohort-builder' style={{marginTop: '1rem'}}>
-            {workspaceInfoField('# of Cohorts', resources.workspaceObjects.cohortCount)}
-            {workspaceInfoField('# of Concept Sets', resources.workspaceObjects.conceptSetCount)}
-            {workspaceInfoField('# of Data Sets', resources.workspaceObjects.datasetCount)}
+            <WorkspaceInfoField labelText={'# of Cohorts'}>{resources.workspaceObjects.cohortCount}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText={'# of Concept Sets'}>{resources.workspaceObjects.conceptSetCount}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText={'# of Data Sets'}>{resources.workspaceObjects.datasetCount}</WorkspaceInfoField>
           </div>
           <h3>Cloud Storage Objects</h3>
           <div className='cloud-storage-objects' style={{marginTop: '1rem'}}>
-            {workspaceInfoField('GCS bucket path', resources.cloudStorage.storageBucketPath)}
-            {workspaceInfoField('# of Workbench-managed notebook files', resources.cloudStorage.notebookFileCount)}
-            {workspaceInfoField('# of other files', resources.cloudStorage.nonNotebookFileCount)}
-            {workspaceInfoField('Storage used (MB)', formatMB(resources.cloudStorage.storageBytesUsed))}
+            <WorkspaceInfoField labelText={'GCS bucket path'}>
+              {resources.cloudStorage.storageBucketPath}
+            </WorkspaceInfoField>
+            <WorkspaceInfoField labelText={'# of Workbench-managed notebook files'}>
+              {resources.cloudStorage.notebookFileCount}
+            </WorkspaceInfoField>
+            <WorkspaceInfoField labelText={'# of other files'}>
+              {resources.cloudStorage.nonNotebookFileCount}
+            </WorkspaceInfoField>
+            <WorkspaceInfoField labelText={'Storage used (MB)'}>
+              {formatMB(resources.cloudStorage.storageBytesUsed)}
+            </WorkspaceInfoField>
           </div>
           {files && <FileDetailsTable data={files} bucket={resources.cloudStorage.storageBucketPath}/>}
           <h3>Research Purpose</h3>
           <div className='research-purpose' style={{marginTop: '1rem'}}>
-            {workspaceInfoField('Primary purpose of project',
-              getSelectedPrimaryPurposeItems(workspace.researchPurpose).map((researchPurposeItem, i) =>
-                      <div key={i}>{researchPurposeItem}</div>))
-            }
-            {workspaceInfoField('Reason for choosing All of Us', workspace.researchPurpose.reasonForAllOfUs)}
-            {workspaceInfoField('Area of intended study', workspace.researchPurpose.intendedStudy)}
-            {workspaceInfoField('Anticipated findings', workspace.researchPurpose.anticipatedFindings)}
+            <WorkspaceInfoField labelText={'Primary purpose of project'}>
+              {getSelectedPrimaryPurposeItems(workspace.researchPurpose).map((researchPurposeItem, i) =>
+                  <div key={i}>{researchPurposeItem}</div>)}
+            </WorkspaceInfoField>
+            <WorkspaceInfoField labelText={'Reason for choosing All of Us'}>
+              {workspace.researchPurpose.reasonForAllOfUs}
+            </WorkspaceInfoField>
+            <WorkspaceInfoField labelText={'Area of intended study'}>
+              {workspace.researchPurpose.intendedStudy}
+            </WorkspaceInfoField>
+            <WorkspaceInfoField labelText={'Anticipated findings'}>
+              {workspace.researchPurpose.anticipatedFindings}
+            </WorkspaceInfoField>
             {workspace.researchPurpose.populationDetails.length > 0 &&
-              workspaceInfoField('Population area(s) of focus', getSelectedPopulations(workspace.researchPurpose))
-            }
+              <WorkspaceInfoField labelText={'Population area(s) of focus'}>
+                {getSelectedPopulations(workspace.researchPurpose)}
+              </WorkspaceInfoField>}
           </div>
         </div>
 
