@@ -173,7 +173,6 @@ public class WorkspaceAdminServiceTest {
     assertThat(resp)
         .isEqualTo(
             new AdminWorkspaceCloudStorageCounts()
-                .storageBucketPath("gs://bucket")
                 .nonNotebookFileCount(0)
                 .notebookFileCount(0)
                 .storageBytesUsed(0L)
