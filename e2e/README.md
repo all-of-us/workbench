@@ -20,8 +20,8 @@ e2e tests are run using pre-existing users (rather than by generating new users)
 so we must supply their credentials using an environment property file `.env`.  See [.env.sample](.env.sample) for an example. 
 
 ### CircleCI Test Users
-CircleCI uses the user `puppetcitester6@fake-research-aou.org` to run the e2e tests on every PR and 
-`puppetcilocaltester1@fake-research-aou.org` for running tests on master after every merge.  **DO NOT**
+CircleCI uses the user `puppetcilocaltester1@fake-research-aou.org` to run the e2e tests on every PR and 
+`puppetcitester6@fake-research-aou.org` for running tests on master after every merge.  **DO NOT**
 use these users for local development.
 
 ### Local Test Users
