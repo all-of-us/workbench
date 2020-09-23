@@ -49,13 +49,14 @@ export const runtimeOpsStore = atom<RuntimeOpsStore>({opsByWorkspaceNamespace: {
 export const updateRuntimeOpsStoreForWorkspaceNamespace = (workspaceNamespace: string, runtimeOperation: RuntimeOperation) => {
   const opsByWorkspaceNamespace = runtimeOpsStore.get().opsByWorkspaceNamespace;
   opsByWorkspaceNamespace[workspaceNamespace] = runtimeOperation;
-  runtimeOpsStore.set({...runtimeOpsStore.get(), opsByWorkspaceNamespace: opsByWorkspaceNamespace});
+  runtimeOpsStore.set({opsByWorkspaceNamespace: opsByWorkspaceNamespace});
 };
 
 export const markRuntimeOperationCompleteForWorkspace = (workspaceNamespace: string) => {
   const opsByWorkspaceNamespace = runtimeOpsStore.get().opsByWorkspaceNamespace;
   if (!!opsByWorkspaceNamespace[workspaceNamespace]) {
     delete opsByWorkspaceNamespace[workspaceNamespace];
+    runtimeOpsStore.set({opsByWorkspaceNamespace: opsByWorkspaceNamespace});
   }
 };
 
@@ -65,6 +66,7 @@ export const abortRuntimeOperationForWorkspace = (workspaceNamespace: string) =>
     const runtimeOperation = opsByWorkspaceNamespace[workspaceNamespace];
     runtimeOperation.aborter.abort();
     delete opsByWorkspaceNamespace[workspaceNamespace];
+    runtimeOpsStore.set({opsByWorkspaceNamespace: opsByWorkspaceNamespace});
   }
 };
 
