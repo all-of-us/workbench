@@ -6,6 +6,7 @@ import {
   markRuntimeOperationCompleteForWorkspace,
   updateRuntimeOpsStoreForWorkspaceNamespace
 } from './stores';
+import {serverConfigStore} from "./navigation";
 
 // We're only willing to wait 20 minutes total for a runtime to initialize. After that we return
 // a rejected promise no matter what.
@@ -188,8 +189,21 @@ export class LeoRuntimeInitializer {
         `Reached max runtime create count (${this.maxCreateCount})`, this.currentRuntime);
     }
     const aborter = new AbortController();
+    let runtime: Runtime;
+    if (serverConfigStore.getValue().enableCustomRuntimes) {
+      // TODO(RW-3418): allow custom runtimes, maybe plumb default through serverConfigStore?
+      runtime = {
+        gceConfig: {
+          diskSize: 50,
+          machineType: 'n1-standard-4'
+        }
+      }
+    }
+    else {
+      runtime = {configurationType: RuntimeConfigurationType.DefaultDataproc};
+    }
     const promise = runtimeApi().createRuntime(this.workspaceNamespace,
-      {configurationType: RuntimeConfigurationType.DefaultDataproc},
+      runtime,
       {signal: this.pollAbortSignal});
     updateRuntimeOpsStoreForWorkspaceNamespace(this.workspaceNamespace, {
       promise: promise,

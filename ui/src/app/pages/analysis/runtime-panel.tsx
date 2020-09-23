@@ -129,7 +129,8 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOps
       }
       const machineType = allMachineTypes.find(({name}) => name === masterMachineName) || defaultMachineType;
 
-      const outstandingRuntimeOp: RuntimeOperation = opsByWorkspaceNamespace[workspace.namespace];
+      // const outstandingRuntimeOp: RuntimeOperation = opsByWorkspaceNamespace[workspace.namespace];
+      const outstandingRuntimeOp: RuntimeOperation = runtimeOpsStore.get().opsByWorkspaceNamespace[workspace.namespace];
 
       return <div data-test-id='runtime-panel'>
         <h3 style={styles.sectionHeader}>Cloud analysis environment</h3>
@@ -219,11 +220,11 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOps
         <FlexRow style={{justifyContent: 'flex-end', marginTop: '.75rem'}}>
           <Button disabled={true}>Create</Button>
         </FlexRow>
-        <hr/>
+        {outstandingRuntimeOp && <hr/>}
         {outstandingRuntimeOp && <FlexColumn>
           <h3 style={styles.sectionHeader}>Outstanding Runtime Operations</h3>
           <FlexRow>
-            <span>
+            <span style={{'marginRight': '1rem'}}>
               {outstandingRuntimeOp.operation} in progress
             </span>
             <Button

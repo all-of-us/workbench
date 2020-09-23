@@ -107,7 +107,7 @@
     "enableConceptSetSearchV2": false,
     "enableReportingUploadCron": true,
     "enableCOPESurvey": true,
-    "enableCustomRuntimes": false
+    "enableCustomRuntimes": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local",
