@@ -94,6 +94,7 @@ public class NotebooksServiceImpl implements NotebooksService {
     this.logsBasedMetricService = logsBasedMetricService;
   }
 
+  // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
   @Override
   public List<FileDetail> getNotebooks(String workspaceNamespace, String workspaceName) {
     String bucketName =
@@ -104,27 +105,19 @@ public class NotebooksServiceImpl implements NotebooksService {
     return getNotebooksAsService(bucketName);
   }
 
+  // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
   @Override
   public List<FileDetail> getNotebooksAsService(String bucketName) {
-    return cloudStorageService.getBlobListForPrefix(bucketName, NOTEBOOKS_WORKSPACE_DIRECTORY)
+    return cloudStorageService.getBlobPageForPrefix(bucketName, NOTEBOOKS_WORKSPACE_DIRECTORY)
         .stream()
         .filter(this::isNotebookBlob)
-        .map(blob -> blobToFileDetail(blob, bucketName))
+        .map(blob -> cloudStorageService.blobToFileDetail(blob, bucketName))
         .collect(Collectors.toList());
   }
 
   @Override
   public boolean isNotebookBlob(Blob blob) {
     return NOTEBOOK_PATTERN.matcher(blob.getName()).matches();
-  }
-
-  private FileDetail blobToFileDetail(Blob blob, String bucketName) {
-    String[] parts = blob.getName().split("/");
-    FileDetail fileDetail = new FileDetail();
-    fileDetail.setName(parts[parts.length - 1]);
-    fileDetail.setPath("gs://" + bucketName + "/" + blob.getName());
-    fileDetail.setLastModifiedTime(blob.getUpdateTime());
-    return fileDetail;
   }
 
   @Override

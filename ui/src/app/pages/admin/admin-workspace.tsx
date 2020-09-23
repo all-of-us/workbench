@@ -18,11 +18,29 @@ import {
 } from 'app/utils/research-purpose';
 import {
   CloudStorageTraffic,
-  ListRuntimeResponse, WorkspaceAdminView,
+  FileDetail,
+  ListRuntimeResponse,
+  WorkspaceAdminView,
 } from 'generated/fetch';
+import {Column} from 'primereact/column';
+import {DataTable} from 'primereact/datatable';
 import {ReactFragment} from 'react';
 
 const styles = reactStyles({
+  infoRow: {
+    width: '80%',
+    maxWidth: '1000px'
+  },
+  infoLabel: {
+    width: '300px',
+    minWidth: '180px',
+    textAlign: 'right',
+    marginRight: '1rem',
+  },
+  infoValue: {
+    flex: 1,
+    wordWrap: 'break-word',
+  },
   wideWithMargin: {
     width: '20rem',
     marginRight: '1rem'
@@ -30,13 +48,82 @@ const styles = reactStyles({
   narrowWithMargin: {
     width: '10rem',
     marginRight: '1rem'
-  }
+  },
+  fileDetailsTable: {
+    maxWidth: '1000px',
+    marginTop: '1rem',
+  },
 });
 
 const PurpleLabel = ({style = {}, children}) => {
   return <label style={{color: colors.primary, ...style}}>
     {...children}
   </label>;
+};
+
+const WorkspaceInfoField = ({labelText, children}) => {
+  return <FlexRow style={styles.infoRow}>
+    <PurpleLabel style={styles.infoLabel}>{labelText}</PurpleLabel>
+    <div style={styles.infoValue}>{...children}</div>
+  </FlexRow>;
+};
+
+const formatMB = (fileSize: number): string => {
+  const mb = fileSize / 1000000.0;
+  if (mb < 1.0) {
+    return '<1';
+  } else {
+    return mb.toFixed(2);
+  }
+};
+
+const FileDetailsTable = (props: {data: Array<FileDetail>, bucket: string}) => {
+  const {data, bucket} = props;
+
+  interface TableEntry {
+    name: string;
+    size: string;
+    location: string;
+  }
+
+  const parseLocation = (file: FileDetail): string => {
+    const prefixLength = bucket.length;
+    const start = prefixLength + 1;  // slash after bucket name
+    const suffixPos = file.path.lastIndexOf(file.name);
+    const end = suffixPos - 1;  // slash before filename
+
+    return file.path.substring(start, end);
+  };
+
+  const formattedData: Array<TableEntry> = data.map(file => {
+    return {
+      name: file.name,
+      size: formatMB(file.sizeInBytes),
+      location: parseLocation(file)
+    };
+  });
+
+  const sortedData = formattedData.sort((a, b) => {
+    const locCmp = a.location.localeCompare(b.location);
+    if (locCmp === 0) {
+      return a.name.localeCompare(b.name);
+    } else {
+      return locCmp;
+    }
+  });
+
+  return <DataTable
+      data-test-id='object-details-table'
+      value={sortedData}
+      style={styles.fileDetailsTable}
+      scrollable={true}
+      paginator={true}
+      paginatorTemplate='CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown'
+      currentPageReportTemplate='Showing {first} to {last} of {totalRecords} entries'>
+    <Column field='location' header='Location'/>
+    <Column field='name' header='Filename'/>
+    <Column field='size' header='File size (MB)' style={{textAlign: 'right'}}/>
+  </DataTable>;
 };
 
 interface State {
@@ -46,6 +133,7 @@ interface State {
   runtimeToDelete?: ListRuntimeResponse;
   confirmDeleteRuntime?: boolean;
   dataLoadError?: Response;
+  files?: Array<FileDetail>;
 }
 
 class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
@@ -70,13 +158,14 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
     });
 
     try {
-      // Fire off both requests in parallel
+      // Fire off all requests in parallel
       const workspaceDetailsPromise = workspaceAdminApi().getWorkspaceAdminView(workspaceNamespace);
       const cloudStorageTrafficPromise = workspaceAdminApi().getCloudStorageTraffic(workspaceNamespace);
-      // Wait for both promises to complete before updating state.
-      const workspaceDetails = await workspaceDetailsPromise;
-      const cloudStorageTraffic = await cloudStorageTrafficPromise;
-      this.setState({cloudStorageTraffic, workspaceDetails});
+      const filesPromise = workspaceAdminApi().listFiles(workspaceNamespace);
+      // Wait for all promises to complete before updating state.
+      const [workspaceDetails, cloudStorageTraffic, files] =
+          await Promise.all([workspaceDetailsPromise, cloudStorageTrafficPromise, filesPromise]);
+      this.setState({workspaceDetails, cloudStorageTraffic, files});
     } catch (error) {
       if (error instanceof Response) {
         console.log('error', error, await error.json());
@@ -91,29 +180,6 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
     if (event.key === 'Enter') {
       return this.getFederatedWorkspaceInformation();
     }
-  }
-
-  workspaceInfoField(labelText, divContents) {
-    return <FlexRow style={{width: '80%', maxWidth: '1000px'}}>
-      <PurpleLabel
-        style={{
-          width: '250px',
-          minWidth: '180px',
-          textAlign: 'right',
-          marginRight: '1rem',
-        }}
-      >
-        {labelText}
-      </PurpleLabel>
-      <div
-        style={{
-          flex: 1,
-          wordWrap: 'break-word',
-        }}
-      >
-        {divContents}
-      </div>
-    </FlexRow>;
   }
 
   renderHighChart(cloudStorageTraffic: CloudStorageTraffic): ReactFragment {
@@ -193,6 +259,7 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
       confirmDeleteRuntime,
       loadingData,
       dataLoadError,
+      files,
       workspaceDetails: {collaborators, resources, workspace},
     } = this.state;
     return <div style={{marginTop: '1rem', marginBottom: '1rem'}}>
@@ -209,23 +276,16 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
           <h2>Workspace</h2>
           <h3>Basic Information</h3>
           <div className='basic-info' style={{marginTop: '1rem'}}>
-            {this.workspaceInfoField('Workspace Name', workspace.name)}
-            {this.workspaceInfoField('Google Project Id', workspace.namespace)}
-            {this.workspaceInfoField('Billing Status', workspace.billingStatus)}
-            {this.workspaceInfoField('Billing Account Type', workspace.billingAccountType)}
-            {this.workspaceInfoField(
-              'Creation Time',
-              new Date(workspace.creationTime).toDateString()
-            )}
-            {this.workspaceInfoField(
-              'Last Modified Time',
-              new Date(workspace.lastModifiedTime).toDateString()
-            )}
-            {this.workspaceInfoField(
-              'Workspace Published',
-              workspace.published ? 'Yes' : 'No'
-            )}
-            {this.workspaceInfoField('Audit', <a href={`/admin/workspace-audit/${workspace.namespace}`}>Audit History</a>)}
+            <WorkspaceInfoField labelText='Workspace Name'>{workspace.name}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText='Google Project Id'>{workspace.namespace}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText='Billing Status'>{workspace.billingStatus}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText='Billing Account Type'>{workspace.billingAccountType}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText='Creation Time'>{new Date(workspace.creationTime).toDateString()}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText='Last Modified Time'>{new Date(workspace.lastModifiedTime).toDateString()}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText='Workspace Published'>{workspace.published ? 'Yes' : 'No'}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText='Audit'>
+              <a href={`/admin/workspace-audit/${workspace.namespace}`}>Audit History</a>
+            </WorkspaceInfoField>
           </div>
           <h3>Collaborators</h3>
           <div className='collaborators' style={{marginTop: '1rem'}}>
@@ -237,89 +297,49 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
           </div>
           <h3>Cohort Builder</h3>
           <div className='cohort-builder' style={{marginTop: '1rem'}}>
-            {
-              this.workspaceInfoField(
-                '# of Cohorts',
-                resources.workspaceObjects.cohortCount
-              )
-            }
-            {
-              this.workspaceInfoField(
-                '# of Concept Sets',
-                resources.workspaceObjects.conceptSetCount
-              )
-            }
-            {
-              this.workspaceInfoField(
-                '# of Data Sets',
-                resources.workspaceObjects.datasetCount
-              )
-            }
+            <WorkspaceInfoField labelText='# of Cohorts'>{resources.workspaceObjects.cohortCount}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText='# of Concept Sets'>{resources.workspaceObjects.conceptSetCount}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText='# of Data Sets'>{resources.workspaceObjects.datasetCount}</WorkspaceInfoField>
           </div>
           <h3>Cloud Storage Objects</h3>
           <div className='cloud-storage-objects' style={{marginTop: '1rem'}}>
-            {
-              this.workspaceInfoField(
-                'GCS bucket path',
-                resources.cloudStorage.storageBucketPath
-              )
-            }
-            {
-              this.workspaceInfoField(
-                '# of Notebook Files',
-                resources.cloudStorage.notebookFileCount
-              )
-            }
-            {
-              this.workspaceInfoField(
-                '# of Non-Notebook Files',
-                resources.cloudStorage.nonNotebookFileCount
-              )
-            }
-            {
-              this.workspaceInfoField(
-                'Storage used (bytes)',
-                resources.cloudStorage.storageBytesUsed
-              )
-            }
+            <div style={{color: colors.warning, fontWeight: 'bold', maxWidth: '1000px'}}>
+              NOTE: if there are more than ~1000 files in the bucket, these counts and the table below may be
+              incomplete because we process only a single page of storage list results.
+            </div>
+            <WorkspaceInfoField labelText='GCS bucket path'>
+              {resources.cloudStorage.storageBucketPath}
+            </WorkspaceInfoField>
+            <WorkspaceInfoField labelText='# of Workbench-managed notebook files'>
+              {resources.cloudStorage.notebookFileCount}
+            </WorkspaceInfoField>
+            <WorkspaceInfoField labelText='# of other files'>
+              {resources.cloudStorage.nonNotebookFileCount}
+            </WorkspaceInfoField>
+            <WorkspaceInfoField labelText='Storage used (MB)'>
+              {formatMB(resources.cloudStorage.storageBytesUsed)}
+            </WorkspaceInfoField>
           </div>
+          {files && <FileDetailsTable data={files} bucket={resources.cloudStorage.storageBucketPath}/>}
           <h3>Research Purpose</h3>
           <div className='research-purpose' style={{marginTop: '1rem'}}>
-            {
-              this.workspaceInfoField(
-                'Primary purpose of project',
-                getSelectedPrimaryPurposeItems(
-                  workspace.researchPurpose).map(
-                    (
-                      researchPurposeItem, i) =>
-                      <div key={i}>{researchPurposeItem}</div>
-                    )
-                )
-            }
-            {
-              this.workspaceInfoField(
-                'Reason for choosing All of Us',
-                workspace.researchPurpose.reasonForAllOfUs
-              )
-            }
-            {
-              this.workspaceInfoField(
-                'Area of intended study',
-                workspace.researchPurpose.intendedStudy
-              )
-            }
-            {
-              this.workspaceInfoField(
-                'Anticipated findings',
-                workspace.researchPurpose.anticipatedFindings
-              )
-            }
-            {
-              workspace.researchPurpose.populationDetails.length > 0 && this.workspaceInfoField(
-                'Population area(s) of focus',
-                getSelectedPopulations(workspace.researchPurpose)
-              )
-            }
+            <WorkspaceInfoField labelText='Primary purpose of project'>
+              {getSelectedPrimaryPurposeItems(workspace.researchPurpose).map((researchPurposeItem, i) =>
+                  <div key={i}>{researchPurposeItem}</div>)}
+            </WorkspaceInfoField>
+            <WorkspaceInfoField labelText='Reason for choosing All of Us'>
+              {workspace.researchPurpose.reasonForAllOfUs}
+            </WorkspaceInfoField>
+            <WorkspaceInfoField labelText='Area of intended study'>
+              {workspace.researchPurpose.intendedStudy}
+            </WorkspaceInfoField>
+            <WorkspaceInfoField labelText='Anticipated findings'>
+              {workspace.researchPurpose.anticipatedFindings}
+            </WorkspaceInfoField>
+            {workspace.researchPurpose.populationDetails.length > 0 &&
+              <WorkspaceInfoField labelText='Population area(s) of focus'>
+                {getSelectedPopulations(workspace.researchPurpose)}
+              </WorkspaceInfoField>}
           </div>
         </div>
 

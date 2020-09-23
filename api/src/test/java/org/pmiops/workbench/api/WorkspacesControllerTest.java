@@ -148,6 +148,7 @@ import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.NotebookLockingMetadataResponse;
 import org.pmiops.workbench.model.NotebookRename;
 import org.pmiops.workbench.model.PageFilterRequest;
@@ -432,6 +433,9 @@ public class WorkspacesControllerTest {
     testMockFactory.stubCreateFcWorkspace(fireCloudService);
     endUserCloudbilling = TestMockFactory.createMockedCloudbilling();
     serviceAccountCloudbilling = TestMockFactory.createMockedCloudbilling();
+
+    // required to enable the use of default method blobToFileDetail()
+    when(cloudStorageService.blobToFileDetail(any(), anyString())).thenCallRealMethod();
   }
 
   private DbUser createUser(String email) {
@@ -469,15 +473,6 @@ public class WorkspacesControllerTest {
     DbBillingProjectBufferEntry entry = mock(DbBillingProjectBufferEntry.class);
     doReturn(projectName).when(entry).getFireCloudProjectName();
     doReturn(entry).when(billingProjectBufferService).assignBillingProject(any());
-  }
-
-  private Blob mockBlob(String bucket, String path) {
-    Blob blob = mock(Blob.class);
-    when(blob.getBlobId()).thenReturn(BlobId.of(bucket, path));
-    when(blob.getBucket()).thenReturn(bucket);
-    when(blob.getName()).thenReturn(path);
-    when(blob.getSize()).thenReturn(5_000L);
-    return blob;
   }
 
   private void stubFcUpdateWorkspaceACL() {
@@ -2427,13 +2422,13 @@ public class WorkspacesControllerTest {
     when(mockBlob2.getName()).thenReturn("notebooks/mockFile.text");
     when(mockBlob3.getName())
         .thenReturn(NotebooksService.withNotebookExtension("notebooks/two words"));
-    when(cloudStorageService.getBlobListForPrefix("bucket", "notebooks"))
+    when(cloudStorageService.getBlobPageForPrefix("bucket", "notebooks"))
         .thenReturn(ImmutableList.of(mockBlob1, mockBlob2, mockBlob3));
 
     // Will return 1 entry as only python files in notebook folder are return
     List<String> gotNames =
         workspacesController.getNoteBookList("project", "workspace").getBody().stream()
-            .map(details -> details.getName())
+            .map(FileDetail::getName)
             .collect(Collectors.toList());
     assertEquals(
         gotNames,
@@ -2453,12 +2448,12 @@ public class WorkspacesControllerTest {
     when(mockBlob1.getName())
         .thenReturn(NotebooksService.withNotebookExtension("notebooks/extra/nope"));
     when(mockBlob2.getName()).thenReturn(NotebooksService.withNotebookExtension("notebooks/foo"));
-    when(cloudStorageService.getBlobListForPrefix("bucket", "notebooks"))
+    when(cloudStorageService.getBlobPageForPrefix("bucket", "notebooks"))
         .thenReturn(ImmutableList.of(mockBlob1, mockBlob2));
 
     List<String> gotNames =
         workspacesController.getNoteBookList("project", "workspace").getBody().stream()
-            .map(details -> details.getName())
+            .map(FileDetail::getName)
             .collect(Collectors.toList());
     assertEquals(gotNames, ImmutableList.of(NotebooksService.withNotebookExtension("foo")));
   }

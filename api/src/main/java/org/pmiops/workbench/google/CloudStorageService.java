@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.json.JSONObject;
+import org.pmiops.workbench.model.FileDetail;
 
 /** Encapsulate Google APIs for interfacing with Google Cloud Storage. */
 public interface CloudStorageService {
@@ -18,9 +19,24 @@ public interface CloudStorageService {
 
   String getImageUrl(String image_name);
 
-  List<Blob> getBlobList(String bucketName);
+  /**
+   * Get the first {@link com.google.api.gax.paging.Page} of results returned when listing the files
+   * in a bucket
+   *
+   * @param bucketName the google bucket to list
+   * @return the first Page of file Blobs, as a List
+   */
+  List<Blob> getBlobPage(String bucketName);
 
-  List<Blob> getBlobListForPrefix(String bucketName, String directory);
+  /**
+   * Get the first {@link com.google.api.gax.paging.Page} of results returned when listing the files
+   * in a directory in a bucket
+   *
+   * @param bucketName the google bucket to list
+   * @param directory the bucket directory to subset results to
+   * @return the first Page of file Blobs, as a List
+   */
+  List<Blob> getBlobPageForPrefix(String bucketName, String directory);
 
   Set<BlobId> getExistingBlobIdsIn(List<BlobId> id);
 
@@ -56,4 +72,14 @@ public interface CloudStorageService {
   String getMoodleApiKey();
 
   String getCaptchaServerKey();
+
+  default FileDetail blobToFileDetail(Blob blob, String bucketName) {
+    String[] parts = blob.getName().split("/");
+    FileDetail fileDetail = new FileDetail();
+    fileDetail.setName(parts[parts.length - 1]);
+    fileDetail.setPath("gs://" + bucketName + "/" + blob.getName());
+    fileDetail.setLastModifiedTime(blob.getUpdateTime());
+    fileDetail.setSizeInBytes(blob.getSize());
+    return fileDetail;
+  }
 }

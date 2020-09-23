@@ -34,6 +34,7 @@ import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.AdminWorkspaceResources;
 import org.pmiops.workbench.model.CloudStorageTraffic;
+import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.UserRole;
@@ -131,6 +132,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             .getWorkspace()
             .getBucketName();
 
+    // NOTE: all of these may be undercounts, because we're only looking at the first Page of
+    // Storage List results
     int notebookFilesCount = notebooksService.getNotebooksAsService(bucketName).size();
     int nonNotebookFilesCount = getNonNotebookFileCount(bucketName);
     long storageSizeBytes = getStorageSizeBytes(bucketName);
@@ -241,17 +244,35 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     return notebooksService.adminGetReadOnlyHtml(workspaceNamespace, workspaceName, notebookName);
   }
 
+  // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
+  @Override
+  public List<FileDetail> listFiles(String workspaceNamespace) {
+    final String workspaceName =
+        getWorkspaceByNamespaceOrThrow(workspaceNamespace).getFirecloudName();
+    final String bucketName =
+        fireCloudService
+            .getWorkspaceAsService(workspaceNamespace, workspaceName)
+            .getWorkspace()
+            .getBucketName();
+
+    return cloudStorageService.getBlobPage(bucketName).stream()
+        .map(blob -> cloudStorageService.blobToFileDetail(blob, bucketName))
+        .collect(Collectors.toList());
+  }
+
+  // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
   private int getNonNotebookFileCount(String bucketName) {
     return (int)
         cloudStorageService
-            .getBlobListForPrefix(bucketName, NotebooksService.NOTEBOOKS_WORKSPACE_DIRECTORY)
+            .getBlobPageForPrefix(bucketName, NotebooksService.NOTEBOOKS_WORKSPACE_DIRECTORY)
             .stream()
             .filter(((Predicate<Blob>) notebooksService::isNotebookBlob).negate())
             .count();
   }
 
+  // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
   private long getStorageSizeBytes(String bucketName) {
-    return cloudStorageService.getBlobList(bucketName).stream()
+    return cloudStorageService.getBlobPage(bucketName).stream()
         .map(BlobInfo::getSize)
         .reduce(0L, Long::sum);
   }
