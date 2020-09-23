@@ -40,7 +40,7 @@ export interface WorkspaceRuntimeOperationMap {
   [workspaceNamespace: string]: RuntimeOperation;
 }
 
-interface RuntimeOpsStore {
+export interface RuntimeOpsStore {
   opsByWorkspaceNamespace: WorkspaceRuntimeOperationMap;
 }
 

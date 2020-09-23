@@ -323,7 +323,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
       super(props);
       this.state = {
         // TODO(RW-5607): Remember which icon was active.
-        activeIcon: helpIconName('runtime'),//props.sidebarOpen ? helpIconName(props.helpContentKey) : undefined,
+        activeIcon: props.sidebarOpen ? helpIconName(props.helpContentKey) : undefined,
         filteredContent: undefined,
         participant: undefined,
         searchTerm: '',

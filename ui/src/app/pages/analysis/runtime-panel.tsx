@@ -10,7 +10,7 @@ import {allMachineTypes, validLeonardoMachineTypes} from 'app/utils/machines';
 import {
   abortRuntimeOperationForWorkspace,
   markRuntimeOperationCompleteForWorkspace,
-  RuntimeOperation,
+  RuntimeOperation, RuntimeOpsStore,
   runtimeOpsStore,
   updateRuntimeOpsStoreForWorkspaceNamespace,
   withStore,
@@ -50,7 +50,7 @@ const styles = reactStyles({
 const defaultMachineType = allMachineTypes.find(({name}) => name === 'n1-standard-4');
 
 export interface Props {
-  opsByWorkspaceNamespace: WorkspaceRuntimeOperationMap;
+  runtimeOpsStore: RuntimeOpsStore;
   workspace: WorkspaceData;
 }
 
@@ -64,7 +64,7 @@ interface State {
   runtime: Runtime|null;
 }
 
-export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOpsStore, 'opsByWorkspaceNamespace'))(
+export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOpsStore, 'runtimeOpsStore'))(
   class extends React.Component<Props, State> {
     private aborter = new AbortController();
 
@@ -105,7 +105,7 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOps
     }
 
     render() {
-      const {opsByWorkspaceNamespace, workspace} = this.props;
+      const {runtimeOpsStore, workspace} = this.props;
       const {loading, error, runtime} = this.state;
       if (loading) {
         return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
@@ -129,8 +129,7 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOps
       }
       const machineType = allMachineTypes.find(({name}) => name === masterMachineName) || defaultMachineType;
 
-      // const outstandingRuntimeOp: RuntimeOperation = opsByWorkspaceNamespace[workspace.namespace];
-      const outstandingRuntimeOp: RuntimeOperation = runtimeOpsStore.get().opsByWorkspaceNamespace[workspace.namespace];
+      const outstandingRuntimeOp: RuntimeOperation = runtimeOpsStore.opsByWorkspaceNamespace[workspace.namespace];
 
       return <div data-test-id='runtime-panel'>
         <h3 style={styles.sectionHeader}>Cloud analysis environment</h3>
@@ -221,9 +220,9 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOps
           <Button disabled={true}>Create</Button>
         </FlexRow>
         {outstandingRuntimeOp && <hr/>}
-        {outstandingRuntimeOp && <FlexColumn>
+        {outstandingRuntimeOp && <div>
           <h3 style={styles.sectionHeader}>Outstanding Runtime Operations</h3>
-          <FlexRow>
+          <FlexRow style={{'alignItems': 'center'}}>
             <span style={{'marginRight': '1rem'}}>
               {outstandingRuntimeOp.operation} in progress
             </span>
@@ -233,7 +232,7 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOps
               Cancel
             </Button>
           </FlexRow>
-        </FlexColumn>}
+        </div>}
       </div>;
     }
 
