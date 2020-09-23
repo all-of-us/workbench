@@ -64,7 +64,7 @@ public class InsertAllRequestBuilderTest {
     final InsertAllRequest request =
         USER_INSERT_ALL_REQUEST_BUILDER.build(TABLE_ID, USERS_WITH_NULL_FIELDS, FIXED_VALUES);
     assertThat(request.getTable()).isEqualTo(TABLE_ID);
-    assertThat(request.ignoreUnknownValues()).isTrue();
+    assertThat(request.ignoreUnknownValues()).isFalse();
 
     assertThat(request.getRows()).hasSize(USERS_WITH_NULL_FIELDS.size());
 
@@ -81,7 +81,7 @@ public class InsertAllRequestBuilderTest {
             TABLE_ID, Collections.emptyList(), Collections.emptyMap());
     assertThat(request).isNotNull();
     assertThat(request.getTable()).isEqualTo(TABLE_ID);
-    assertThat(request.ignoreUnknownValues()).isTrue();
+    assertThat(request.ignoreUnknownValues()).isFalse();
     assertThat(request.getRows()).isEmpty();
   }
 
