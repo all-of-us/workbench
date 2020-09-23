@@ -42,7 +42,7 @@ const styles = reactStyles({
     lineHeight: '0.75rem',
   },
   orCircle: {
-    backgroundColor: `${addOpacity(colors.primary, 0.25)}`,
+    backgroundColor: colorWithWhiteness(colors.primary, 0.75),
     borderRadius: '50%',
     color: colors.primary,
     width: '2.25rem',
@@ -52,6 +52,25 @@ const styles = reactStyles({
     textAlign: 'center',
     fontSize: '12px',
     fontWeight: 600
+  },
+  andCircle: {
+    backgroundColor: colorWithWhiteness(colors.primary, 0.75),
+    borderRadius: '50%',
+    color: colors.primary,
+    width: '2.25rem',
+    height: '2.25rem',
+    lineHeight: '2.25rem',
+    textAlign: 'center',
+    fontSize: '12px',
+    fontWeight: 600,
+    position: 'absolute',
+    left: '42%'
+  },
+  andDivider: {
+    height: '1.15rem',
+    marginBottom: '1.15rem',
+    width: '100%',
+    borderBottom: `2px solid ${colorWithWhiteness(colors.primary, 0.75)}`
   },
   container: {
     display: 'flex',
@@ -295,6 +314,30 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
           estCount: attr.itemCount,
           valueAsConceptId: attr.surveyId
         }));
+        if (!form.cat.length) {
+          // Mock survey versions for testing COPE attributes layout
+          // TODO remove before merging
+          form.cat = [
+            {
+              checked: false,
+              conceptName: 'May 2020',
+              estCount: 4622,
+              valueAsConceptId: 100,
+            },
+            {
+              checked: false,
+              conceptName: 'June 2020',
+              estCount: 2080,
+              valueAsConceptId: 101,
+            },
+            {
+              checked: false,
+              conceptName: 'July 2020',
+              estCount: 1621,
+              valueAsConceptId: 102
+            }
+          ];
+        }
         if (numericalAttributes) {
           numericalAttributes.items.forEach(attr => {
             if (!form.num.length) {
@@ -623,41 +666,44 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
     renderNumericalAttributes() {
       const {node: {count, subtype}} = this.props;
       const {form, isCOPESurvey, options} = this.state;
-      return form.num.length > 0 && form.num.map((attr, a) => <div key={a}>
+      return form.num.length > 0 && <React.Fragment>
         {this.isMeasurement && <div style={styles.label}>Numeric Values</div>}
-        {this.isBloodPressure && <div style={styles.label}>{attr.name}</div>}
         {isCOPESurvey && <div>
           <CheckBox onChange={(v) => this.toggleAnyValueCheckbox(v)}/> Any value
-          <span style={styles.badge}> {count.toLocaleString()}</span>
+          {count > -1 && <span style={styles.badge}> {count.toLocaleString()}</span>}
         </div>}
-        <Dropdown style={{marginBottom: '0.5rem', width: '100%'}}
-                  value={attr.operator}
-                  options={options}
-                  placeholder='Select Operator'
-                  onChange={(e) => this.selectChange(a, e.value)}/>
-        <FlexRowWrap>
-          {![null, 'ANY'].includes(attr.operator) && <div style={{width: '33%'}}>
-            <NumberInput style={{padding: '0 0.25rem', ...(this.hasUnits ? {width: '70%'} : {})}}
-                         value={attr.operands[0] || ''}
-                         min={attr.MIN} max={attr.MAX}
-                         onChange={(v) => this.inputChange(v, a, 0)}/>
-            {this.hasUnits && <span> {PM_UNITS[subtype]}</span>}
-          </div>}
-          {attr.operator === Operator.BETWEEN && <React.Fragment>
-            <div style={{padding: '0.2rem 1.5rem 0 1rem'}}>and</div>
-            <div style={{width: '33%'}}>
+        {!(isCOPESurvey && form.anyValue) && form.num.map((attr, a) => <div key={a}>
+          {this.isBloodPressure && <div style={styles.label}>{attr.name}</div>}
+          {isCOPESurvey && <div style={styles.orCircle}>OR</div>}
+          <Dropdown style={{marginBottom: '0.5rem', width: '100%'}}
+                    value={attr.operator}
+                    options={options}
+                    placeholder='Select Operator'
+                    onChange={(e) => this.selectChange(a, e.value)}/>
+          <FlexRowWrap>
+            {![null, 'ANY'].includes(attr.operator) && <div style={{width: '33%'}}>
               <NumberInput style={{padding: '0 0.25rem', ...(this.hasUnits ? {width: '70%'} : {})}}
-                           value={attr.operands[1] || ''}
+                           value={attr.operands[0] || ''}
                            min={attr.MIN} max={attr.MAX}
-                           onChange={(v) => this.inputChange(v, a, 1)}/>
+                           onChange={(v) => this.inputChange(v, a, 0)}/>
               {this.hasUnits && <span> {PM_UNITS[subtype]}</span>}
-            </div>
-          </React.Fragment>}
-        </FlexRowWrap>
-        {this.hasRange && ![null, 'ANY'].includes(attr.operator) && <div style={{paddingTop: '0.2rem'}}>
-          Range: {attr.MIN.toLocaleString()} - {attr.MAX.toLocaleString()}
-        </div>}
-      </div>);
+            </div>}
+            {attr.operator === Operator.BETWEEN && <React.Fragment>
+              <div style={{padding: '0.2rem 1.5rem 0 1rem'}}>and</div>
+              <div style={{width: '33%'}}>
+                <NumberInput style={{padding: '0 0.25rem', ...(this.hasUnits ? {width: '70%'} : {})}}
+                             value={attr.operands[1] || ''}
+                             min={attr.MIN} max={attr.MAX}
+                             onChange={(v) => this.inputChange(v, a, 1)}/>
+                {this.hasUnits && <span> {PM_UNITS[subtype]}</span>}
+              </div>
+            </React.Fragment>}
+          </FlexRowWrap>
+          {this.hasRange && ![null, 'ANY'].includes(attr.operator) && <div style={{paddingTop: '0.2rem'}}>
+            Range: {attr.MIN.toLocaleString()} - {attr.MAX.toLocaleString()}
+          </div>}
+        </div>)}
+      </React.Fragment>;
     }
 
     renderCategoricalAttributes() {
@@ -666,18 +712,18 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
       return form.cat.length > 0 && <React.Fragment>
         {isCOPESurvey && <div>
           <CheckBox onChange={(v) => this.toggleAnyVersionCheckbox(v)}/> Any version
-          <span style={styles.badge}>{count.toLocaleString()}</span>
+          {count > -1 && <span style={styles.badge}>{count.toLocaleString()}</span>}
         </div>}
-        <div style={styles.orCircle}>OR</div>
-        {!isCOPESurvey && <div style={styles.label}>Categorical Values</div>}
-        {form.cat.map((attr, a) => <div key={a} style={styles.categorical}>
-          <CheckBox checked={attr.checked} style={{marginRight: '3px'}}
-                    onChange={(v) => this.checkboxChange(v, a)}
-                    disabled={isCOPESurvey && form.anyVersion}
-                    manageOwnState={false}/>
-          {attr.conceptName}
-          <span style={styles.badge}>{parseInt(attr.estCount, 10).toLocaleString()}</span>
-        </div>)}
+        {!(isCOPESurvey && form.anyVersion) && <React.Fragment>
+          <div style={styles.orCircle}>OR</div>
+          {!isCOPESurvey && <div style={styles.label}>Categorical Values</div>}
+          {form.cat.map((attr, a) => <div key={a} style={styles.categorical}>
+            <CheckBox checked={attr.checked} style={{marginRight: '3px'}}
+                      onChange={(v) => this.checkboxChange(v, a)}/>
+            {attr.conceptName}
+            <span style={styles.badge}>{parseInt(attr.estCount, 10).toLocaleString()}</span>
+          </div>)}
+        </React.Fragment>}
       </React.Fragment>;
     }
 
@@ -723,7 +769,10 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
           {isCOPESurvey
             ? <div>
               {this.renderCategoricalAttributes()}
-              {form.num.length > 0 && form.cat.length > 0 && <div style={styles.orCircle}>AND</div>}
+              {form.num.length > 0 && form.cat.length > 0 && <div style={{position: 'relative'}}>
+                <div style={styles.andCircle}>AND</div>
+                <div style={styles.andDivider}/>
+              </div>}
               {this.renderNumericalAttributes()}
             </div>
             : <div>
