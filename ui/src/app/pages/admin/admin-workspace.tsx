@@ -159,7 +159,7 @@ const FileDetailsTable = (props: FileDetailsProps) => {
   interface TableEntry {
     location: string;
     rawName: string;
-    nameCell: any;
+    nameCell: JSX.Element;
     size: string;
   }
 
