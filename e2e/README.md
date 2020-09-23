@@ -140,5 +140,5 @@ the command line jest runner will often give an XPath associated with the failur
 can be combined to learn more about the failure:
 1. Load the HTML into Chrome
 2. Open the Chrome Javascript console
-3. Execute an XPath search: `$x.(<xpath>)`
+3. Execute an XPath search: `$x.(<XPath from jest>)`
 
