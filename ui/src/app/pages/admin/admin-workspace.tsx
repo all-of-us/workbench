@@ -161,12 +161,9 @@ const FileDetailsTable = (props: FileDetailsProps) => {
           size: formatMB(file.sizeInBytes),
         }; })
       .sort((a, b) => {
-        const locCmp = a.location.localeCompare(b.location);
-        if (locCmp === 0) {
-          return a.rawName.localeCompare(b.rawName);
-        } else {
-          return locCmp;
-        }}));
+        const locationComparison = a.location.localeCompare(b.location);
+        return locationComparison === 0 ? a.rawName.localeCompare(b.rawName) : locationComparison;
+        }));
   };
 
   useEffect(() => {
