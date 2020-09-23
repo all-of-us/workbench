@@ -119,15 +119,6 @@ const FileDetailsTable = (props: FileDetailsProps) => {
     return file.path.substring(start, end);
   };
 
-  const formatMB = (fileSize: number): string => {
-    const mb = fileSize / 1000000.0;
-    if (mb < 1.0) {
-      return '<1';
-    } else {
-      return mb.toFixed(2);
-    }
-  };
-
   const nameCell = (file: FileDetail): React.ReactFragment => {
     const filename = file.name.trim();
     const filenameText = <span>{filename}</span>;
@@ -162,20 +153,20 @@ const FileDetailsTable = (props: FileDetailsProps) => {
 
   const setupTable = () => {
     setTableData(data
-        .map(file => {
-          return {
-            location: parseLocation(file),
-            rawName: file.name,
-            nameCell: nameCell(file),
-            size: formatMB(file.sizeInBytes),
-          }; })
-        .sort((a, b) => {
-          const locCmp = a.location.localeCompare(b.location);
-          if (locCmp === 0) {
-            return a.rawName.localeCompare(b.rawName);
-          } else {
-            return locCmp;
-          }}));
+      .map(file => {
+        return {
+          location: parseLocation(file),
+          rawName: file.name,
+          nameCell: nameCell(file),
+          size: formatMB(file.sizeInBytes),
+        }; })
+      .sort((a, b) => {
+        const locCmp = a.location.localeCompare(b.location);
+        if (locCmp === 0) {
+          return a.rawName.localeCompare(b.rawName);
+        } else {
+          return locCmp;
+        }}));
   };
 
   useEffect(() => {
