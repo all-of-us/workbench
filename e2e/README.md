@@ -44,6 +44,7 @@ interactions visible to you.
 * Run one test on deployed AoU "test" environment <div class="text-blue">`yarn test:debug [TEST_FILE]` </div>
 * Run one test on your local server <div class="text-blue">`yarn test-local [TEST_FILE]` </div>
 * Run one test in headless Chrome with node `--inspect-brk` argument. It pauses test playback at breakpoints which is useful for debugging or/and writing new tests <div class="text-blue">`yarn test:debugTest [TEST_FILE]` </div>
+  * Navigate to `chrome://inspect` after launching the tests to debug test code
 * If you don't want to use the `.env` file, you can also specify `USER_NAME` and `PASSWORD` as environment variables. <div class="text-blue">`USER_NAME=<YOUR_USERID> PASSWORD=<YOUR_USER_PASSWORD> yarn test-local tests/user/login.spec.ts`</div>
 
 ### Debugging
@@ -54,3 +55,90 @@ interactions visible to you.
 ## Features
 * One retry running failed test by [jest-circus](https://github.com/facebook/jest/blob/f45d1c939cbf55a71dbfdfc316d2be62b590197f/docs/JestObjectAPI.md#jestretrytimes).
 * Take screenshot and save the html page to `/log` directory if test fails.
+
+## Test Development
+
+The `e2e` code has the following directory structure:
+* `app/component` - interactions with UI React Components such as `Modal` and `Table`
+* `app/element` - interactions with UI Form Elements such as `Button` and `TextBox`
+* `app/page` - high-level access to pages in the UI through awareness of page layouts and constants
+* `resources` - test data and configurations
+* `tests` - **the e2e tests**, sorted by theme 
+* `utils` - test utility functions 
+
+### Development Tips
+
+#### Initial state
+Page tests typically begin by navigating to the desired page (which will differ depending
+on the page) and then ensuring that the desired page has loaded.
+
+Example:
+```   
+await signIn(page);
+await navigation.navMenu(page, NavLink.PROFILE);
+profilePage = new ProfilePage(page);
+await profilePage.waitForLoad();
+``` 
+
+`page` is the global `jest` context.  When constructing a RW page (such as `ProfilePage`), it is 
+ saved as `this.page`.
+ 
+The `ProfilePage` is only accessible to signed-in users, so we start by signing in.
+ 
+We navigate to the `ProfilePage` by accessing the correct link from the `navMenu` (the Hamburger menu).
+
+A `ProfilePage` object will give us helpful accessors for our test, so we create one using the global `page` context
+and use `ProfilePage`'s knowledge of what a successful page load looks like to determine that it has done so.
+
+#### Page accessors
+A common testing need is to find an element or component on a page and interact with it in some way: 
+click it, read its value, or wait for a state update.  These should have well-defined accessors, so please create
+them as needed.
+
+Example:
+```
+async getFirstNameInput(): Promise<Textbox> {
+    return Textbox.findByName(this.page, {dataTestId: DataTestIdAlias.FirstName});
+}
+```
+
+Many element types have a `findByName()` method to locate them using `XPathOptions` to match by name,
+text, `data-test-id`, or other means. These are all ultimately converted to [XPath](https://www.w3schools.com/xml/xpath_syntax.asp) notation,
+which you can use directly if you need additional control, but using the higher-level finders (or adding one!) is preferred.
+
+```
+async getResearchBackgroundTextarea(): Promise<Textarea> {
+    return Textarea.findByName(this.page, {normalizeSpace: LabelAlias.ResearchBackground});
+}
+```
+
+`normalizeSpace` is one of the `XPathOptions` worth calling out explicitly here: use this to match text
+which may be broken up by formatting.  This skips over the formatting and only matches the text.
+
+#### Spinners/Loading
+Many UI actions take some time to execute and display a spinner.  Use `waitWhileLoading()` to
+pause test execution while there is a spinner present. 
+
+#### type() and paste()
+`paste()` is an action available to all elements, which directly sets the value of the element
+to the string in the parameter.  This is suitable for large amounts of text and executes quickly.
+
+Some elements also have `type()` which simulates individual keypresses, with a small delay between 
+them.
+
+#### Test strings
+`str-utils` has useful functions for generating random text that fits expected patterns: `makeString()`,
+`makeUrl()`, `makeWorkspaceName()`, etc
+
+#### Slow Motion
+If the screens go by too quickly when debugging by running headful, set the `PUPPETEER_SLOWMO` env variable.  Units
+are in ms between keypresses.
+
+#### Debugging test failures
+Failed tests capture the screen state at time of failure, in screenshot and HTML form.  In addition,
+the command line jest runner will often give an XPath associated with the failure.  These
+can be combined to learn more about the failure:
+1. Load the HTML into Chrome
+2. Open the Chrome Javascript console
+3. Execute an XPath search: `$x.(<XPath from jest>)`
+
