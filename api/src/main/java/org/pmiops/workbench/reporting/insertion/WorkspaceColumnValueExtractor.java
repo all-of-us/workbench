@@ -12,6 +12,9 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import java.util.function.Function;
 import org.pmiops.workbench.model.ReportingWorkspace;
 
+/*
+ * Column data and metadata convertors for BigQuery workspace table in reporting dataset.
+ */
 public enum WorkspaceColumnValueExtractor implements ColumnValueExtractor<ReportingWorkspace> {
   BILLING_ACCOUNT_TYPE(
       "billing_account_type",

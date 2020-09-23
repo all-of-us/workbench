@@ -9,7 +9,8 @@ import org.springframework.stereotype.Service;
 /*
  * Calls the ReportingSnapshotService to obtain the application data from MySQL, Terra (soon),
  * and possibly other sources, then calls the uploadSnapshot() method on the configured ReportingUploadService
- * to upload to various tables in the BigQuery dataset.
+ * to upload to various tables in the BigQuery dataset. There is virtually no business logic in this class
+ * except for the method for choosing the correct upload implementation.
  */
 @Service
 public class ReportingServiceImpl implements ReportingService {

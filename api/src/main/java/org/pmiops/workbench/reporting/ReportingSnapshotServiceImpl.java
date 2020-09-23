@@ -64,8 +64,11 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
   @Override
   public ReportingSnapshot takeSnapshot() {
     final QueryResultBundle queryResultBundle = getApplicationDbData();
-    final Stopwatch stopwatch = stopwatchProvider.get().start();
+    return convertToReportingSnapshot(queryResultBundle);
+  }
 
+  public ReportingSnapshot convertToReportingSnapshot(QueryResultBundle queryResultBundle) {
+    final Stopwatch stopwatch = stopwatchProvider.get().start();
     final ReportingSnapshot result =
         new ReportingSnapshot()
             .captureTimestamp(clock.millis())
@@ -77,6 +80,11 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
     return result;
   }
 
+  /*
+   * Gather all the projection instances from the DB rows needed for the current snapshot. Bundle
+   * them all together for conversion all at once, and also to allow timing the downloads separately
+   * from the conversion
+   */
   private QueryResultBundle getApplicationDbData() {
     final Stopwatch stopwatch = stopwatchProvider.get().start();
     final QueryResultBundle result =
