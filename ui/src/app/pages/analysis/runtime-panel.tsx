@@ -13,8 +13,7 @@ import {
   RuntimeOperation, RuntimeOpsStore,
   runtimeOpsStore,
   updateRuntimeOpsStoreForWorkspaceNamespace,
-  withStore,
-  WorkspaceRuntimeOperationMap
+  withStore
 } from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Dropdown} from 'primereact/dropdown';
@@ -48,6 +47,22 @@ const styles = reactStyles({
 });
 
 const defaultMachineType = allMachineTypes.find(({name}) => name === 'n1-standard-4');
+
+const OutstandingRuntimeOp = ({operation, workspaceNamespace}) => {
+  return <React.Fragment>
+    <h3 style={styles.sectionHeader}>Outstanding Runtime Operations</h3>
+    <FlexRow style={{'alignItems': 'center'}}>
+            <span style={{'marginRight': '1rem'}}>
+              {operation} in progress
+            </span>
+      <Button
+          onClick={() => abortRuntimeOperationForWorkspace(workspaceNamespace)}
+      >
+        Cancel
+      </Button>
+    </FlexRow>
+  </React.Fragment>
+}
 
 export interface Props {
   runtimeOpsStore: RuntimeOpsStore;
@@ -107,13 +122,21 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOps
     render() {
       const {runtimeOpsStore, workspace} = this.props;
       const {loading, error, runtime} = this.state;
+      const outstandingRuntimeOp: RuntimeOperation = runtimeOpsStore.opsByWorkspaceNamespace[workspace.namespace];
+
       if (loading) {
         return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
       } else if (error) {
         return <div>Error loading compute configuration</div>;
       } else if (!runtime) {
         // TODO(RW-5591): Create runtime page goes here.
-        return <div>No runtime exists yet</div>;
+        return <React.Fragment>
+          <div>No runtime exists yet</div>
+          {outstandingRuntimeOp && <hr/>}
+          {outstandingRuntimeOp && <div>
+            <OutstandingRuntimeOp operation={outstandingRuntimeOp.operation} workspaceNamespace={workspace.namespace}/>
+          </div>}
+        </React.Fragment>;
       }
 
       const isDataproc = !!runtime.dataprocConfig;
@@ -128,8 +151,6 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOps
         masterDiskSize = runtime.gceConfig.bootDiskSize;
       }
       const machineType = allMachineTypes.find(({name}) => name === masterMachineName) || defaultMachineType;
-
-      const outstandingRuntimeOp: RuntimeOperation = runtimeOpsStore.opsByWorkspaceNamespace[workspace.namespace];
 
       return <div data-test-id='runtime-panel'>
         <h3 style={styles.sectionHeader}>Cloud analysis environment</h3>
@@ -221,17 +242,7 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOps
         </FlexRow>
         {outstandingRuntimeOp && <hr/>}
         {outstandingRuntimeOp && <div>
-          <h3 style={styles.sectionHeader}>Outstanding Runtime Operations</h3>
-          <FlexRow style={{'alignItems': 'center'}}>
-            <span style={{'marginRight': '1rem'}}>
-              {outstandingRuntimeOp.operation} in progress
-            </span>
-            <Button
-                onClick={() => abortRuntimeOperationForWorkspace(workspace.namespace)}
-            >
-              Cancel
-            </Button>
-          </FlexRow>
+          <OutstandingRuntimeOp operation={outstandingRuntimeOp.operation} workspaceNamespace={workspace.namespace}/>
         </div>}
       </div>;
     }
