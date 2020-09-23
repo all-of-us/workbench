@@ -273,7 +273,7 @@ public class ProfileController implements ProfileApiDelegate {
                   profile.getDemographicSurvey()),
               verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
                   profile.getVerifiedInstitutionalAffiliation(), institutionService));
-    } catch (Exception e) {
+    } catch (Exception userException) {
       // If the creation of a User row in the RW database fails, we want to attempt to remove the
       // G Suite account to avoid having an orphaned account with no record in our database.
       log.severe(
@@ -284,17 +284,17 @@ public class ProfileController implements ProfileApiDelegate {
       try {
         directoryService.deleteUser(gSuiteUsername);
         log.severe("Orphaned G Suite account has been deleted.");
-      } catch (Exception e2) {
+      } catch (Exception gSuiteException) {
         log.severe(
             String.format(
                 "Orphaned G Suite account %s could not be deleted. "
                     + "Manual intervention may be required",
                 gSuiteUsername));
-        log.log(Level.SEVERE, e2.getMessage(), e2);
-        // Throw the original error rather than the G Suite error.
-        throw e;
+        log.log(Level.SEVERE, gSuiteException.getMessage(), gSuiteException);
+        // Throw the original user-saving error rather than the G Suite error.
+        throw userException;
       }
-      throw e;
+      throw userException;
     }
 
     if (request.getTermsOfServiceVersion() != null) {
