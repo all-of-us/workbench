@@ -1,6 +1,6 @@
 [
   {
-    "description": "Time snapshot was taken. Same across all rows in the snapshot, and can be used for partitioning.",
+    "description": "Time snapshot was taken, in Epoch milliseconds. Same across all rows and all tables in the snapshot, and uniquely defines a particular snapshot.",
     "name": "snapshot_timestamp",
     "type": "INTEGER"
   },
@@ -66,10 +66,6 @@
   },
   {
     "name": "era_commons_completion_time",
-    "type": "TIMESTAMP"
-  },
-  {
-    "name": "era_commons_link_expire_time",
     "type": "TIMESTAMP"
   },
   {

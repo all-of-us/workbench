@@ -5,11 +5,11 @@ require 'time'
 require 'yaml'
 require 'enumerator'
 
-table_name = ARGV[0]
-input_dir = File.expand_path(ARGV[1])
-output_dir = File.expand_path(ARGV[2])
-puts "Generate types for #{table_name}..."
-Dir.mkdir(output_dir) unless Dir.exist?(output_dir)
+TABLE_NAME = ARGV[0]
+INPUT_DIR = File.expand_path(ARGV[1])
+OUTPUT_DIR = File.expand_path(ARGV[2])
+puts "Generate types for #{TABLE_NAME}..."
+Dir.mkdir(OUTPUT_DIR) unless Dir.exist?(OUTPUT_DIR)
 
 def to_camel_case(snake_case, capitalize_initial)
   result =  snake_case.split('_').collect(&:capitalize).join
@@ -19,78 +19,122 @@ def to_camel_case(snake_case, capitalize_initial)
   result
 end
 
-def to_input_path(dir_name, table_name, suffix)
-  File.expand_path(File.join(dir_name, "#{table_name}.#{suffix}"))
+def to_input_path(dir_name, suffix)
+  File.expand_path(File.join(dir_name, "#{TABLE_NAME}.#{suffix}"))
 end
 
-def to_output_path(dir_name, table_name, suffix)
+def to_output_path(subdir_name, suffix)
+  dir_name = File.join(OUTPUT_DIR, subdir_name)
   Dir.mkdir(dir_name) unless Dir.exist?(dir_name)
-  File.expand_path(File.join(dir_name, "#{table_name}.#{suffix}"))
+  File.expand_path(File.join(dir_name, "#{TABLE_NAME}.#{suffix}"))
 end
 
 INPUTS = {
-    :describe_csv => to_input_path(File.join(input_dir, 'mysql_describe_csv'), table_name,'csv'),
-    :excluded_columns => to_input_path(File.join(input_dir, 'excluded_COLUMNS'), table_name,'txt')
+    :describe_csv => to_input_path(File.join(INPUT_DIR, 'mysql_describe_csv'), 'csv'),
+    :excluded_columns => to_input_path(File.join(INPUT_DIR, 'excluded_COLUMNS'), 'txt')
 }.freeze
 
 OUTPUTS = {
-    :big_query_json => to_output_path(File.join(output_dir, 'big_query_json'), table_name,'json'),
-    :swagger_yaml => to_output_path(File.join(output_dir, 'swagger_yaml'), table_name,'yaml'),
-    :projection_interface => to_output_path(File.join(output_dir, 'projection_interface'), table_name, 'java'),
-    :projection_query => to_output_path(File.join(output_dir, 'projection_query'), table_name,'java'),
-    :unit_test_constants => to_output_path(File.join(output_dir, 'unit_test_constants'), table_name, 'java'),
-    :unit_test_mocks => to_output_path(File.join(output_dir, 'unit_test_mocks'), table_name, 'java'),
-    :dto_assertions => to_output_path(File.join(output_dir, 'dto_assertions'), table_name, 'java'),
-    :query_parameter_COLUMNS => to_output_path(File.join(output_dir, 'query_parameter_columns'), table_name, 'java'),
-    :dto_decl => to_output_path(File.join(output_dir, 'dto_decl'), table_name, 'java'),
-    :entity_decl => to_output_path(File.join(output_dir, 'entity_decl'), table_name, 'java'),
+    :big_query_json => to_output_path('big_query_json', 'json'),
+    :swagger_yaml => to_output_path('swagger_yaml', 'yaml'),
+    :projection_interface => to_output_path('projection_interface',  'java'),
+    :projection_query => to_output_path('projection_query', 'java'),
+    :unit_test_constants => to_output_path('unit_test_constants',  'java'),
+    :unit_test_mocks => to_output_path('unit_test_mocks',  'java'),
+    :dto_assertions => to_output_path('dto_assertions',  'java'),
+    :query_parameter_COLUMNS => to_output_path('query_parameter_columns',  'java'),
+    :dto_decl => to_output_path('dto_decl',  'java'),
+    :entity_decl => to_output_path('entity_decl',  'java'),
 }.freeze
 
-# This is the canonical type map, but there are places where we assign a tinyint MySql column a Long Entity field, etc.
-MYSQL_TO_TYPES = {
+# This is the canonical type map, but there are places where we assign a tinyint MySql column a Long
+# Entity field, etc.
+#
+# Some columns are enums in the entity class and are exposed as either an enum value or Short. We need
+# to handle this separately.
+MYSQL_TYPE_TO_SIMPLE_TYPE = {
     'varchar' => {
         :bigquery => 'STRING',
-        :java => 'String'
+        :projection => 'String',
+        :swagger => {
+            'type'  => 'string'
+        }
     },
     'datetime' => {
         :bigquery => 'TIMESTAMP',
-        :java => 'Timestamp'
+        :projection => 'Timestamp',
+        :swagger => {
+            'type' => 'string',
+            'format' => 'date-time'
+        }
     },
     'bigint' => {
         :bigquery => 'INT64',
-        :java => 'Long'
+        :projection => 'Long',
+        :swagger => {
+            'type'  => 'integer',
+            'format' => 'int64'
+        }
     },
     'smallint' => {
         :bigquery => 'INT64',
-        :java => 'Short'
-    },
-    'longtext' => {
-        :bigquery => 'STRING',
-        :java => 'String'
+        :projection => 'Short',
+        :swagger => {
+            'type'  => 'integer',
+            'format' => 'int32' # Swagger has no int16 type
+        }
     },
     'int' => {
         :bigquery => 'INT64',
-        :java => 'Integer'
+        :projection => 'Integer',
+        :swagger => {
+            'type'  => 'integer',
+            'format' => 'int32'
+        },
     },
     'tinyint' => {
         :bigquery => 'INT64',
-        :java => 'Short'
+        :projection => 'Short',
+        :swagger => {
+            'type'  => 'integer',
+            'format' => 'int32' # Swagger has no int8 type. This is generally overrridden by an enum type anyway.
+        },
     },
     'bit' => {
         :bigquery => 'BOOLEAN',
-        :java => 'Boolean'
+        :projection => 'Boolean',
+        :swagger => {
+            'type' => 'boolean'
+        }
     },
     'double' => {
         :bigquery =>  'FLOAT64',
-        :java => 'Double'
+        :projection => 'Double',
+        :swagger => {
+            'type' =>  'number',
+            'format' =>  'double'
+        }
     },
     'text' => {
         :bigquery => 'STRING',
-        :java => 'String'
+        :projection => 'String',
+        :swagger =>  {
+            'type'  => 'string'
+        }
+    },
+    'longtext' => {
+        :bigquery => 'STRING',
+        :projection => 'String',
+        :swagger => {
+          'type' => 'string'
+        },
     },
     'mediumblob' => {
         :bigquery => 'STRING',
-        :java => 'String'
+        :projection => 'String',
+        :swagger => {
+            'type'  => 'string'
+        },
     }
 }.freeze
 
@@ -98,25 +142,33 @@ MYSQL_TO_TYPES = {
 # We could either try to remap to the enum type when writing to BQ, but we still
 # have to handle getting the value into the projection, and the only way I've been
 # able to do that is to use the exact same type.
+#
+# All enum values should map to
+#   * the type of the @Column-annotated property in the entity class in a Projection interface,
+#     usually Short or EnumTypeName
+#   * the definition reference of the enum tupe in Swagger, e.g. `"#/definitions/StatusResponse"`
+#   * a STRING in BigQuery
 ENUM_TYPES = {
      'workspace' => {
         'billing_status' => {
-            :java => 'BillingStatus',
-            :constant => 'BillingStatus.ACTIVE'
+            :projection => 'BillingStatus',
+            :swagger => 'BillingStatus',
+            :bigquery => 'STRING',
+            :default_constant_value => 'BillingStatus.ACTIVE'
         },
         'billing_account_type' => {
-            :java => 'BillingAccountType',
-            :constant => 'BillingAccountType.FREE_TIER'
+            :projection => 'BillingAccountType',
+            :swagger => 'BillingAccountType',
+            :bigquery => 'STRING',
+            :default_constant_value => 'BillingAccountType.FREE_TIER'
         }
      },
      'user' => {
          'data_access_level' => {
-             :java => 'DataAccessLevel',
-             :constant => 'DataAccessLevel.REGISTERED'
-         },
-         'email_verification_status' => {
-             :java => 'EmailVerificationStatus',
-             :constant => 'EmailVerificationStatus.SUBSCRIBED'
+             :projection => 'Short',
+             :swagger => 'DataAccessLevel',
+             :bigquery => 'STRING',
+             :default_constant_value => 1 # REGISTERED
          }
      }
 }.freeze
@@ -145,22 +197,22 @@ ENTITY_MODIFIED_COLUMNS = {
         'creator_id' => 'creator.userId AS creatorId',
         'needs_rp_review_prompt' => 'needsResearchPurposeReviewPrompt AS needsRpReviewPrompt'
     }
-}
+}.freeze
 
 ## BigQuery schema
-describe_rows = CSV.new(File.read(INPUTS[:describe_csv])).sort_by { |row| row[0]  }
+DESCRIBE_ROWS = CSV.new(File.read(INPUTS[:describe_csv])).sort_by { |row| row[0]  }
 
-root_class_name = to_camel_case(table_name, true)
+root_class_name = to_camel_case(TABLE_NAME, true)
 TABLE_INFO = {
-    :name => table_name,
-    :instance_name => to_camel_case(table_name, false),
+    :name => TABLE_NAME,
+    :instance_name => to_camel_case(TABLE_NAME, false),
     :dto_class => "Reporting#{root_class_name}",
     :entity_class => "Db#{root_class_name}",
     :mock => "mock#{root_class_name}",
     :projection_interface => "ProjectedReporting#{root_class_name}",
-    :sql_alias => table_name[0].downcase,
-    :enum_column_info => ENUM_TYPES[table_name] || {},
-    :entity_modified_columns => ENTITY_MODIFIED_COLUMNS[:table_name] || {}
+    :sql_alias => TABLE_NAME[0].downcase,
+    :enum_column_info => ENUM_TYPES[TABLE_NAME] || {},
+    :entity_modified_columns => ENTITY_MODIFIED_COLUMNS[:TABLE_NAME] || {}
 }.freeze
 
 def provenance_text
@@ -196,25 +248,28 @@ def to_property_name(column_name)
   to_swagger_name(column_name, false)
 end
 
-COLUMNS = describe_rows.filter{ |row| include_field?(excluded_fields, row[0]) } \
+# One row in the describe output looks like `street_address_1,varchar(95),NO,"",,""`.
+# Currently this script only uses the column name and type(length) columns.
+COLUMNS = DESCRIBE_ROWS.filter{ |row| include_field?(excluded_fields, row[0]) } \
   .map{ |row| \
     col_name = row[0]
     mysql_type = simple_mysql_type(row[1])
-    type_override = TABLE_INFO[:enum_column_info][col_name]
-    type_info = MYSQL_TO_TYPES[mysql_type]
+    type_info = MYSQL_TYPE_TO_SIMPLE_TYPE[mysql_type]
+    enum_type_override = TABLE_INFO[:enum_column_info][col_name]
     {
         :name => col_name, \
-        :lambda_var => table_name[0].downcase, \
+        :lambda_var => TABLE_NAME[0].downcase, \
         :mysql_type => mysql_type, \
-        :big_query_type => type_override ? type_override[:bigquery] : type_info[:bigquery], \
-        :is_enum => !type_override.nil?,
-        :java_type => type_override ? type_override[:java] : type_info[:java], \
+        :big_query_type => enum_type_override ? enum_type_override[:bigquery] : type_info[:bigquery], \
+        :swagger_type => enum_type_override ? enum_type_override[:swagger] : type_info[:swagger], \
+        :is_enum => !enum_type_override.nil?,
+        :java_type => enum_type_override ? enum_type_override[:projection] : type_info[:projection], \
         :java_field_name => "#{to_camel_case(col_name, false)}", \
-        :java_constant_name => "#{table_name.upcase}__#{col_name.upcase}", \
+        :java_constant_name => "#{TABLE_NAME.upcase}__#{col_name.upcase}", \
         :getter => "get#{to_camel_case(col_name, true)}",
         :setter => "set#{to_camel_case(col_name, true)}",
         :property => to_property_name(col_name),
-        :default_enum => type_override && type_override[:constant]
+        :default_enum => enum_type_override && enum_type_override[:default_constant_value]
     }
 }.freeze
 
@@ -224,11 +279,12 @@ FIXED_COLUMNS = [
     :name => 'snapshot_timestamp',
     :type => 'INTEGER'
 ]
-big_query_schema = FIXED_COLUMNS.concat(COLUMNS.map do |col|
-  { :name => col[:name], :type => col[:big_query_type]}
-end)
 
-schema_json = JSON.pretty_generate(big_query_schema)
+BIG_QUERY_SCHEMA = FIXED_COLUMNS.concat(COLUMNS.map do |col|
+  { :name => col[:name], :type => col[:big_query_type]}
+end).freeze
+
+schema_json = JSON.pretty_generate(BIG_QUERY_SCHEMA)
 
 def write_output(path, contents, description)
   IO.write(path, contents)
@@ -238,44 +294,22 @@ end
 write_output(OUTPUTS[:big_query_json], schema_json, 'BigQuery JSON Schema')
 
 ## Swagger DTO Objects
-# TODO: handle this better, as we're losing track of long vs int
-BIGQUERY_TYPE_TO_SWAGGER  = {
-    'STRING' =>  {
-        'type'  => 'string'
-    },
-    'INT64' => {
-        'type'  => 'integer',
-        'format' => 'int64'
-    },
-    'TIMESTAMP' =>  {
-        'type' => 'string',
-        'format' => 'date-time'
-    },
-    'BOOLEAN' =>  {
-        'type'  => 'boolean'
-    },
-    'FLOAT64' => {
-        'type' =>  'number',
-        'format' =>  'double'
-    }
-}.freeze
-
 
 def to_swagger_property(column)
   if column[:is_enum]
     swagger_value = {
-        '$ref' => "#/definitions/#{column[:java_type]}"
+        '$ref' => "#/definitions/#{column[:swagger_type]}"
   }
   else
-    swagger_value = BIGQUERY_TYPE_TO_SWAGGER[column[:big_query_type]] || 'STRING'
+    swagger_value = MYSQL_TYPE_TO_SIMPLE_TYPE[column[:mysql_type]][:swagger]
   end
   {}.merge(swagger_value)
 end
 
 swagger_object =  {  TABLE_INFO[:dto_class] => provenance_yaml.merge({
     'type'  =>  'object',
-    'properties' => COLUMNS.to_h  { |field|
-      [field[:property], to_swagger_property(field)]
+    'properties' => COLUMNS.to_h  { |col|
+      [col[:property], to_swagger_property(col)]
     }
   }) # .merge(provenance_yaml)
 }
@@ -411,7 +445,7 @@ write_output(OUTPUTS[:unit_test_mocks], lines.join("\n"), 'Unit Test Mocks')
 
 ### Assertions
 dto_assertions = COLUMNS.map{ |col|
-  getter_call = "#{to_camel_case(table_name, false)}.#{col[:getter]}()"
+  getter_call = "#{to_camel_case(TABLE_NAME, false)}.#{col[:getter]}()"
   expected = col[:java_constant_name]
   if col[:java_type].eql?('Timestamp')
     "    assertTimeApprox(#{getter_call}, #{expected});"

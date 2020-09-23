@@ -175,10 +175,8 @@ public final class QueryParameterValues {
   }
 
   // return false if teh parameterValue is non-null does not match the expected type.
-  private static boolean matchesQpvType(
-      @Nullable QueryParameterValue parameterValue, @Nullable StandardSQLTypeName expectedType) {
-    return Optional.ofNullable(parameterValue)
-        .map(QueryParameterValue::getType)
+  private static boolean matchesQpvType(QueryParameterValue parameterValue, StandardSQLTypeName expectedType) {
+    return Optional.ofNullable(parameterValue.getType())
         .map(t -> t == expectedType)
         .orElse(true);
   }
