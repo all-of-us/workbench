@@ -9,7 +9,7 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {RuntimeApi} from 'generated/fetch/api';
 import {WorkspaceAccessLevel} from 'generated/fetch';
-
+import {markRuntimeOperationCompleteForWorkspace} from "../../utils/stores";
 
 describe('RuntimePanel', () => {
   let props: Props;
@@ -21,7 +21,8 @@ describe('RuntimePanel', () => {
 
   beforeEach(() => {
     props = {
-      workspace: {...workspaceStubs[0], accessLevel: WorkspaceAccessLevel.WRITER}
+      workspace: {...workspaceStubs[0], accessLevel: WorkspaceAccessLevel.WRITER},
+      runtimeOps: {opsByWorkspaceNamespace: {}}
     };
     runtimeApiStub = new RuntimeApiStub();
     registerApiClient(RuntimeApi, runtimeApiStub);

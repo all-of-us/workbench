@@ -52,7 +52,7 @@ export const updateRuntimeOpsStoreForWorkspaceNamespace = (workspaceNamespace: s
   runtimeOpsStore.set({opsByWorkspaceNamespace: opsByWorkspaceNamespace});
 };
 
-export const markRuntimeOperationCompleteForWorkspace = (workspaceNamespace: string) => {
+export let markRuntimeOperationCompleteForWorkspace = (workspaceNamespace: string) => {
   const opsByWorkspaceNamespace = runtimeOpsStore.get().opsByWorkspaceNamespace;
   if (!!opsByWorkspaceNamespace[workspaceNamespace]) {
     delete opsByWorkspaceNamespace[workspaceNamespace];
