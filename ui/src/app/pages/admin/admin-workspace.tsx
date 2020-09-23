@@ -110,34 +110,40 @@ interface NameCellProps {
 const NameCell = (props: NameCellProps) => {
   const {file, bucket, workspaceNamespace, accessReason} = props;
   const filename = file.name.trim();
-  const filenameText = <span>{filename}</span>;
+
+  const filenameSpan = <span>{filename}</span>;
+
+  const fileTooLarge = <FlexRow>
+    {filenameSpan}
+    <TooltipTrigger
+        content={`Files larger than ${formatMB(MAX_NOTEBOOK_READ_SIZE_BYTES)} MB are too large to preview`}
+    ><Button style={styles.previewButton} disabled={true}>Preview</Button>
+    </TooltipTrigger>
+  </FlexRow>;
 
   const navigateToPreview = () => {
     navigate(['admin', 'workspaces', workspaceNamespace, filename],
         { queryParams: { accessReason: accessReason } });
   };
 
+  const fileWithPreviewButton = <FlexRow>
+    {filenameSpan}
+    <TooltipTrigger content='Please enter an access reason below' disabled={accessReason && accessReason.trim()}>
+      <Button style={styles.previewButton}
+              disabled={!accessReason || !accessReason.trim()}
+              onClick={navigateToPreview}>Preview</Button>
+    </TooltipTrigger>
+  </FlexRow>;
+
   // remove first check after RW-5626
   if (NOTEBOOKS_DIRECTORY === parseLocation(file, bucket) && filename.endsWith(NOTEBOOKS_SUFFIX)) {
     if (file.sizeInBytes > MAX_NOTEBOOK_READ_SIZE_BYTES) {
-      return <FlexRow>
-        {filenameText}
-        <TooltipTrigger
-          content={`Files larger than ${formatMB(MAX_NOTEBOOK_READ_SIZE_BYTES)} MB are too large to preview`}
-        ><Button style={styles.previewButton} disabled={true}>Preview</Button>
-        </TooltipTrigger>
-      </FlexRow>;
+      return fileTooLarge;
     } else {
-      return <FlexRow>
-        {filenameText}
-        <TooltipTrigger content='Please enter an access reason below' disabled={accessReason && accessReason.trim()}>
-          <Button style={styles.previewButton} disabled={!accessReason || !accessReason.trim()}
-                  onClick={navigateToPreview}>Preview</Button>
-        </TooltipTrigger>
-      </FlexRow>;
+      return fileWithPreviewButton;
     }
   } else {
-    return filenameText;
+    return filenameSpan;
   }
 };
 
