@@ -26,7 +26,7 @@ import {
 } from 'generated/fetch';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
-import {ReactFragment, useEffect, useState} from 'react';
+import {ReactFragment, useState} from 'react';
 
 const styles = reactStyles({
   infoRow: {
@@ -100,6 +100,47 @@ const NOTEBOOKS_DIRECTORY = 'notebooks';
 const NOTEBOOKS_SUFFIX = '.ipynb';
 const MAX_NOTEBOOK_READ_SIZE_BYTES = 5 * 1000 * 1000; // see NotebooksServiceImpl
 
+interface NameCellProps {
+  file: FileDetail;
+  bucket: string;
+  workspaceNamespace: string;
+  accessReason: string;
+}
+
+const NameCell = (props: NameCellProps) => {
+  const {file, bucket, workspaceNamespace, accessReason} = props;
+  const filename = file.name.trim();
+  const filenameText = <span>{filename}</span>;
+
+  const navigateToPreview = () => {
+    navigate(['admin', 'workspaces', workspaceNamespace, filename],
+        { queryParams: { accessReason: accessReason } });
+  };
+
+  // remove first check after RW-5626
+  if (NOTEBOOKS_DIRECTORY === parseLocation(file, bucket) && filename.endsWith(NOTEBOOKS_SUFFIX)) {
+    if (file.sizeInBytes > MAX_NOTEBOOK_READ_SIZE_BYTES) {
+      return <FlexRow>
+        {filenameText}
+        <TooltipTrigger
+          content={`Files larger than ${formatMB(MAX_NOTEBOOK_READ_SIZE_BYTES)} MB are too large to preview`}
+        ><Button style={styles.previewButton} disabled={true}>Preview</Button>
+        </TooltipTrigger>
+      </FlexRow>;
+    } else {
+      return <FlexRow>
+        {filenameText}
+        <TooltipTrigger content='Please enter an access reason below' disabled={accessReason && accessReason.trim()}>
+          <Button style={styles.previewButton} disabled={!accessReason || !accessReason.trim()}
+                  onClick={navigateToPreview}>Preview</Button>
+        </TooltipTrigger>
+      </FlexRow>;
+    }
+  } else {
+    return filenameText;
+  }
+};
+
 interface FileDetailsProps {
   workspaceNamespace: string;
   data: Array<FileDetail>;
@@ -112,63 +153,30 @@ const FileDetailsTable = (props: FileDetailsProps) => {
   interface TableEntry {
     location: string;
     rawName: string;
-    nameCell: ReactFragment;
+    nameCell: any;
     size: string;
   }
 
-  const [tableData, setTableData] = useState<Array<TableEntry>>();
-  const [accessReason, setAccessReason] = useState('');
-
-  const nameCell = (file: FileDetail): React.ReactFragment => {
-    const filename = file.name.trim();
-    const filenameText = <span>{filename}</span>;
-    const navigateToPreview = () => {
-      navigate(['admin', 'workspaces', workspaceNamespace, filename],
-          { queryParams: { accessReason: accessReason } });
-    };
-
-    // remove first check after RW-5626
-    if (NOTEBOOKS_DIRECTORY === parseLocation(file, bucket) && filename.endsWith(NOTEBOOKS_SUFFIX)) {
-      if (file.sizeInBytes > MAX_NOTEBOOK_READ_SIZE_BYTES) {
-        return <FlexRow>
-          {filenameText}
-          <TooltipTrigger
-            content={`Files larger than ${formatMB(MAX_NOTEBOOK_READ_SIZE_BYTES)} MB are too large to preview`}
-          ><Button style={styles.previewButton} disabled={true}>Preview</Button>
-          </TooltipTrigger>
-        </FlexRow>;
-      } else {
-        return <FlexRow>
-          {filenameText}
-          <TooltipTrigger content='Please enter an access reason below' disabled={accessReason && accessReason.trim()}>
-            <Button style={styles.previewButton} disabled={!accessReason || !accessReason.trim()}
-                    onClick={navigateToPreview}>Preview</Button>
-          </TooltipTrigger>
-        </FlexRow>;
-      }
-    } else {
-      return filenameText;
-    }
-  };
-
-  const setupTable = () => {
-    setTableData(data
+  const initTable = (accessReason: string): Array<TableEntry> => {
+    return data
       .map(file => {
         return {
           location: parseLocation(file, bucket),
           rawName: file.name,
-          nameCell: nameCell(file),
+          nameCell: <NameCell
+              file={file}
+              bucket={bucket}
+              workspaceNamespace={workspaceNamespace}
+              accessReason={accessReason}/>,
           size: formatMB(file.sizeInBytes),
         }; })
       .sort((a, b) => {
         const locationComparison = a.location.localeCompare(b.location);
         return locationComparison === 0 ? a.rawName.localeCompare(b.rawName) : locationComparison;
-        }));
+      });
   };
 
-  useEffect(() => {
-    setupTable();
-  }, [accessReason]);
+  const [tableData, setTable] = useState<Array<TableEntry>>(initTable(''));
 
   return <FlexColumn>
     <DataTable
@@ -184,7 +192,7 @@ const FileDetailsTable = (props: FileDetailsProps) => {
       <Column field='size' header='File size (MB)' style={{textAlign: 'right'}}/>
     </DataTable>
     <PurpleLabel>To preview notebooks, enter Access Reason (for auditing purposes)</PurpleLabel>
-    <TextArea style={styles.accessReasonText} value={accessReason} onChange={setAccessReason}/>
+    <TextArea style={styles.accessReasonText} onChange={v => setTable(initTable(v))}/>
   </FlexColumn>;
 };
 
