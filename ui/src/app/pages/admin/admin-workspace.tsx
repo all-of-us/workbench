@@ -304,7 +304,8 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
           <h3>Cloud Storage Objects</h3>
           <div className='cloud-storage-objects' style={{marginTop: '1rem'}}>
             <div style={{color: colors.warning, fontWeight: 'bold'}}>
-              NOTE: these may be undercounts, because we process only a single page of storage list results.
+              NOTE: these may be undercounts if there are more than ~1000 files in the bucket,
+              because we process only a single page of storage list results.
             </div>
             <WorkspaceInfoField labelText='GCS bucket path'>
               {resources.cloudStorage.storageBucketPath}
