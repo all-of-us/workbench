@@ -2,6 +2,7 @@ import NotebookDownloadModal from 'app/page/notebook-download-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn} from 'utils/test-utils';
+import {waitForFn} from 'utils/waits-utils';
 
 describe('Jupyter notebook download test', () => {
 
@@ -72,15 +73,16 @@ describe('Jupyter notebook download test', () => {
     await testDownloadModal(await notebook.downloadAsPdf());
 
     // Wait a bit to process new tab creation events.
-    await page.waitFor(500);
-
     // ipynb is special, and doesn't yield a recognizable URL for download.
     // As of 9/22/20 I was unable to find a clear mechanism for validating ipynb
     // download. All other formats, however, go through nbconvert - resulting
     // in a recognizable URL.
-    expect(newTabUrls.find(url => {
+    const sawPdf = await waitForFn(() => newTabUrls.find(url => {
       return url.includes('nbconvert/pdf') && url.includes(notebookName);
-    })).toBeTruthy();
+    }));
+    if (!sawPdf) {
+      fail(`did not see new tab for PDF download, got: ${newTabUrls}`);
+    }
   }, 20 * 60 * 1000);
 
 })
