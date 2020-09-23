@@ -87,6 +87,15 @@ const formatMB = (fileSize: number): string => {
   }
 };
 
+const parseLocation = (file: FileDetail, bucket: string): string => {
+  const prefixLength = bucket.length;
+  const start = prefixLength + 1;  // slash after bucket name
+  const suffixPos = file.path.lastIndexOf(file.name);
+  const end = suffixPos - 1;  // slash before filename
+
+  return file.path.substring(start, end);
+};
+
 const NOTEBOOKS_DIRECTORY = 'notebooks';
 const NOTEBOOKS_SUFFIX = '.ipynb';
 const MAX_NOTEBOOK_READ_SIZE_BYTES = 5 * 1000 * 1000; // see NotebooksServiceImpl
@@ -110,15 +119,6 @@ const FileDetailsTable = (props: FileDetailsProps) => {
   const [tableData, setTableData] = useState<Array<TableEntry>>();
   const [accessReason, setAccessReason] = useState('');
 
-  const parseLocation = (file: FileDetail): string => {
-    const prefixLength = bucket.length;
-    const start = prefixLength + 1;  // slash after bucket name
-    const suffixPos = file.path.lastIndexOf(file.name);
-    const end = suffixPos - 1;  // slash before filename
-
-    return file.path.substring(start, end);
-  };
-
   const nameCell = (file: FileDetail): React.ReactFragment => {
     const filename = file.name.trim();
     const filenameText = <span>{filename}</span>;
@@ -128,7 +128,7 @@ const FileDetailsTable = (props: FileDetailsProps) => {
     };
 
     // remove first check after RW-5626
-    if (NOTEBOOKS_DIRECTORY === parseLocation(file) && filename.endsWith(NOTEBOOKS_SUFFIX)) {
+    if (NOTEBOOKS_DIRECTORY === parseLocation(file, bucket) && filename.endsWith(NOTEBOOKS_SUFFIX)) {
       if (file.sizeInBytes > MAX_NOTEBOOK_READ_SIZE_BYTES) {
         return <FlexRow>
           {filenameText}
@@ -155,7 +155,7 @@ const FileDetailsTable = (props: FileDetailsProps) => {
     setTableData(data
       .map(file => {
         return {
-          location: parseLocation(file),
+          location: parseLocation(file, bucket),
           rawName: file.name,
           nameCell: nameCell(file),
           size: formatMB(file.sizeInBytes),
