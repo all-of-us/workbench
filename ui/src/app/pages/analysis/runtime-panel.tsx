@@ -61,11 +61,11 @@ const OutstandingRuntimeOp = ({operation, workspaceNamespace}) => {
         Cancel
       </Button>
     </FlexRow>
-  </React.Fragment>
-}
+  </React.Fragment>;
+};
 
 export interface Props {
-  runtimeOpsStore: RuntimeOpsStore;
+  runtimeOps: RuntimeOpsStore;
   workspace: WorkspaceData;
 }
 
@@ -79,7 +79,7 @@ interface State {
   runtime: Runtime|null;
 }
 
-export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOpsStore, 'runtimeOpsStore'))(
+export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOpsStore, 'runtimeOps'))(
   class extends React.Component<Props, State> {
     private aborter = new AbortController();
 
@@ -120,9 +120,10 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOps
     }
 
     render() {
-      const {runtimeOpsStore, workspace} = this.props;
+      const {runtimeOps, workspace} = this.props;
       const {loading, error, runtime} = this.state;
-      const outstandingRuntimeOp: RuntimeOperation = runtimeOpsStore.opsByWorkspaceNamespace[workspace.namespace];
+
+      const outstandingRuntimeOp: RuntimeOperation = runtimeOps.opsByWorkspaceNamespace[workspace.namespace];
 
       if (loading) {
         return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;

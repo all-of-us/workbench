@@ -2,11 +2,11 @@ import {leoRuntimesApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import {isAbortError, reportError} from 'app/utils/errors';
 import {Runtime, RuntimeConfigurationType, RuntimeStatus} from 'generated/fetch';
+import {serverConfigStore} from './navigation';
 import {
   markRuntimeOperationCompleteForWorkspace,
   updateRuntimeOpsStoreForWorkspaceNamespace
 } from './stores';
-import {serverConfigStore} from "./navigation";
 
 // We're only willing to wait 20 minutes total for a runtime to initialize. After that we return
 // a rejected promise no matter what.
@@ -197,9 +197,8 @@ export class LeoRuntimeInitializer {
           diskSize: 50,
           machineType: 'n1-standard-4'
         }
-      }
-    }
-    else {
+      };
+    } else {
       runtime = {configurationType: RuntimeConfigurationType.DefaultDataproc};
     }
     const promise = runtimeApi().createRuntime(this.workspaceNamespace,
