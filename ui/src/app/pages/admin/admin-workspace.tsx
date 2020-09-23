@@ -139,11 +139,12 @@ const NameCell = (props: NameCellProps) => {
   const isNotebook = () => (NOTEBOOKS_DIRECTORY === parseLocation(file, bucket)) && filename.endsWith(NOTEBOOKS_SUFFIX);
   const isTooLargeNotebook = () => isNotebook() && (file.sizeInBytes > MAX_NOTEBOOK_READ_SIZE_BYTES);
 
+  const dummyValue = undefined;
   return fp.cond([
     [isTooLargeNotebook, fileTooLarge],
     [isNotebook, fileWithPreviewButton],
     [fp.stubTrue, filenameSpan]
-  ]);
+  ])(dummyValue);
 };
 
 interface FileDetailsProps {
