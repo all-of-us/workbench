@@ -44,6 +44,7 @@ interactions visible to you.
 * Run one test on deployed AoU "test" environment <div class="text-blue">`yarn test:debug [TEST_FILE]` </div>
 * Run one test on your local server <div class="text-blue">`yarn test-local [TEST_FILE]` </div>
 * Run one test in headless Chrome with node `--inspect-brk` argument. It pauses test playback at breakpoints which is useful for debugging or/and writing new tests <div class="text-blue">`yarn test:debugTest [TEST_FILE]` </div>
+  * Navigate to `chrome://inspect` after launching the tests to debug test code
 * If you don't want to use the `.env` file, you can also specify `USER_NAME` and `PASSWORD` as environment variables. <div class="text-blue">`USER_NAME=<YOUR_USERID> PASSWORD=<YOUR_USER_PASSWORD> yarn test-local tests/user/login.spec.ts`</div>
 
 ### Debugging
