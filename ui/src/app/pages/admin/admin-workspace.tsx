@@ -1,6 +1,7 @@
 import {Component} from '@angular/core';
 import * as HighCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
+import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import * as React from 'react';
 
@@ -111,23 +112,22 @@ const NameCell = (props: NameCellProps) => {
   const {file, bucket, workspaceNamespace, accessReason} = props;
   const filename = file.name.trim();
 
-  const filenameSpan = <span>{filename}</span>;
+  const filenameSpan = () => <span>{filename}</span>;
 
-  const fileTooLarge = <FlexRow>
-    {filenameSpan}
+  const fileTooLarge = () => <FlexRow>
+    {filenameSpan()}
     <TooltipTrigger
         content={`Files larger than ${formatMB(MAX_NOTEBOOK_READ_SIZE_BYTES)} MB are too large to preview`}
     ><Button style={styles.previewButton} disabled={true}>Preview</Button>
     </TooltipTrigger>
   </FlexRow>;
 
-  const navigateToPreview = () => {
-    navigate(['admin', 'workspaces', workspaceNamespace, filename],
-        { queryParams: { accessReason: accessReason } });
-  };
+  const navigateToPreview = () => navigate(
+      ['admin', 'workspaces', workspaceNamespace, filename],
+      { queryParams: { accessReason: accessReason } });
 
-  const fileWithPreviewButton = <FlexRow>
-    {filenameSpan}
+  const fileWithPreviewButton = () => <FlexRow>
+    {filenameSpan()}
     <TooltipTrigger content='Please enter an access reason below' disabled={accessReason && accessReason.trim()}>
       <Button style={styles.previewButton}
               disabled={!accessReason || !accessReason.trim()}
@@ -136,15 +136,14 @@ const NameCell = (props: NameCellProps) => {
   </FlexRow>;
 
   // remove first check after RW-5626
-  if (NOTEBOOKS_DIRECTORY === parseLocation(file, bucket) && filename.endsWith(NOTEBOOKS_SUFFIX)) {
-    if (file.sizeInBytes > MAX_NOTEBOOK_READ_SIZE_BYTES) {
-      return fileTooLarge;
-    } else {
-      return fileWithPreviewButton;
-    }
-  } else {
-    return filenameSpan;
-  }
+  const isNotebook = () => (NOTEBOOKS_DIRECTORY === parseLocation(file, bucket)) && filename.endsWith(NOTEBOOKS_SUFFIX);
+  const isTooLargeNotebook = () => isNotebook() && (file.sizeInBytes > MAX_NOTEBOOK_READ_SIZE_BYTES);
+
+  return fp.cond([
+    [isTooLargeNotebook, fileTooLarge],
+    [isNotebook, fileWithPreviewButton],
+    [fp.stubTrue, filenameSpan]
+  ]);
 };
 
 interface FileDetailsProps {
