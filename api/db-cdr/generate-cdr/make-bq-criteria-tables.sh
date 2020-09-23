@@ -5414,12 +5414,14 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
     (
           id
         , question_concept_id
+        , answer_concept_id
         , survey_id
         , item_count
     )
 SELECT
         ROW_NUMBER() OVER (ORDER BY question_concept_id) as id
       , question_concept_id
+      , 0
       , survey_id
       , cnt
 FROM
@@ -5468,6 +5470,7 @@ FROM
                 )
             and survey_id is not null
             and is_standard = 0
+            and value_source_concept_id != 0
         GROUP BY 1,2,3
     )"
 
