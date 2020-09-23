@@ -91,6 +91,7 @@ public class QueryParameterValuesTest {
   @Test
   public void testToTimestampQpv() {
     final QueryParameterValue qpv = toTimestampQpv(OFFSET_DATE_TIME);
+    assertThat(qpv).isNotNull();
     assertThat(qpv.getType()).isEqualTo(StandardSQLTypeName.TIMESTAMP);
     final Optional<OffsetDateTime> roundTripOdt = timestampQpvToOffsetDateTime(qpv);
     assertThat(roundTripOdt).isPresent();
@@ -98,8 +99,8 @@ public class QueryParameterValuesTest {
   }
 
   @Test
-  public void testTimestampQpvToInstant_nullInput() {
-    assertThat(timestampQpvToInstant(null)).isEmpty();
+  public void testTimestampQpvToInstant_nullQpvValue() {
+    assertThat(timestampQpvToInstant(QueryParameterValue.timestamp((String) null))).isEmpty();
   }
 
   @Test(expected = IllegalArgumentException.class)

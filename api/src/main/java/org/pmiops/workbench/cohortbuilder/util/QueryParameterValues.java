@@ -64,17 +64,16 @@ public final class QueryParameterValues {
         .map(ZonedDateTime::toInstant);
   }
 
-  public static Optional<Instant> timestampQpvToInstant(@Nullable QueryParameterValue qpv) {
+  public static Optional<Instant> timestampQpvToInstant(@NotNull QueryParameterValue qpv) {
     verifyQpvType(qpv, StandardSQLTypeName.TIMESTAMP);
-    return Optional.ofNullable(qpv)
-        .map(QueryParameterValue::getValue)
+    return Optional.ofNullable(qpv.getValue())
         .map(s -> ZonedDateTime.parse(s, QPV_TIMESTAMP_FORMATTER))
         .map(ZonedDateTime::toInstant);
   }
 
   public static void verifyQpvType(
-      @NotNull QueryParameterValue queryParameterValue, StandardSQLTypeName expectedType) {
-    if (!matchesQpvType(queryParameterValue, expectedType)) {
+      @Nullable QueryParameterValue queryParameterValue, StandardSQLTypeName expectedType) {
+    if (queryParameterValue != null && !matchesQpvType(queryParameterValue, expectedType)) {
       throw new IllegalArgumentException(
           String.format(
               "QueryParameterValue %s is not a timestamp", queryParameterValue.getValue()));
@@ -175,9 +174,8 @@ public final class QueryParameterValues {
   }
 
   // return false if teh parameterValue is non-null does not match the expected type.
-  private static boolean matchesQpvType(QueryParameterValue parameterValue, StandardSQLTypeName expectedType) {
-    return Optional.ofNullable(parameterValue.getType())
-        .map(t -> t == expectedType)
-        .orElse(true);
+  private static boolean matchesQpvType(
+      QueryParameterValue parameterValue, StandardSQLTypeName expectedType) {
+    return Optional.ofNullable(parameterValue.getType()).map(t -> t == expectedType).orElse(true);
   }
 }

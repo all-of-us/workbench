@@ -11,7 +11,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.rowToInsertStringToOffsetTimestamp;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.timestampQpvToOffsetDateTime;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDtoUser;
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingUser;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 
 import com.google.cloud.bigquery.InsertAllRequest;
@@ -107,7 +107,7 @@ public class ReportingUploadServiceTest {
             .captureTimestamp(NOW.toEpochMilli())
             .users(
                 ImmutableList.of(
-                    createDtoUser(),
+                    createReportingUser(),
                     new ReportingUser()
                         .username("ted@aou.biz")
                         .givenName("Ted")
@@ -118,7 +118,7 @@ public class ReportingUploadServiceTest {
                         .givenName("So-Crates")
                         .disabled(false)
                         .userId(303L),
-                    ReportingTestUtils.createDtoUser()))
+                    ReportingTestUtils.createReportingUser()))
             .workspaces(
                 ImmutableList.of(
                     new ReportingWorkspace()

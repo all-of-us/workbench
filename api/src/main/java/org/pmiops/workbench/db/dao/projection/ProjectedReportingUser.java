@@ -1,7 +1,6 @@
 package org.pmiops.workbench.db.dao.projection;
 
 import java.sql.Timestamp;
-import org.pmiops.workbench.model.DataAccessLevel;
 
 // This is a Spring Data projection interface for the Hibernate entity
 // class DbUser. The properties listed correspond to query results
@@ -33,7 +32,7 @@ public interface ProjectedReportingUser {
 
   String getCurrentPosition();
 
-  DataAccessLevel getDataAccessLevel();
+  Short getDataAccessLevel();
 
   Timestamp getDataUseAgreementBypassTime();
 

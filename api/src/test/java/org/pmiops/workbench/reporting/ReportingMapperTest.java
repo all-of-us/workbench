@@ -26,15 +26,15 @@ public class ReportingMapperTest {
   public static class conifg {}
 
   @Test
-  public void testPrjWorkspace_toDto() {
-    final ProjectedReportingWorkspace prjWorkspace = ReportingTestUtils.mockPrjWorkspace();
+  public void testProjectedReportingWorkspace_toDto() {
+    final ProjectedReportingWorkspace prjWorkspace = ReportingTestUtils.mockProjectedWorkspace();
     final ReportingWorkspace bqDtoWorkspace = reportingMapper.toDto(prjWorkspace);
     ReportingTestUtils.assertDtoWorkspaceFields(bqDtoWorkspace);
   }
 
   @Test
-  public void testPrjUser_toDto() {
-    final ProjectedReportingUser prjUser = ReportingTestUtils.mockProjectedjUser();
+  public void testProjectedReportingUser_toDto() {
+    final ProjectedReportingUser prjUser = ReportingTestUtils.mockProjectedUser();
     final ReportingUser dtoUser = reportingMapper.toDto(prjUser);
     ReportingTestUtils.assertDtoUserFields(dtoUser);
   }

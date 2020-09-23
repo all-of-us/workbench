@@ -78,6 +78,14 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
   // This code was generated using reporting-wizard.rb at 2020-09-22T12:14:40-04:00.
   // Manual modification should be avoided if possible as this is a one-time generation
   // and does not run on every build and updates must be merged manually for now.
+  // This JPQL query corresponds to the projection interface ProjectedReportingUser. Its
+  // types and argument order must match the column names selected exactly, in name,
+  // type, and order.
+
+  // This code was generated using reporting-wizard.rb at 2020-09-23T15:56:47-04:00.
+  // Manual modification should be avoided if possible as this is a one-time generation
+  // and does not run on every build and updates must be merged manually for now.
+
   @Query(
       "SELECT\n"
           + "  u.aboutYou,\n"

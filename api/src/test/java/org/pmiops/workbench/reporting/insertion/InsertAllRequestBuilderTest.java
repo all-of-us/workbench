@@ -11,8 +11,8 @@ import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__CDR_
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__LAST_ACCESSED_TIME;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__NAME;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__PUBLISHED;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDtoUser;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDtoWorkspace;
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingUser;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
 
@@ -87,7 +87,7 @@ public class InsertAllRequestBuilderTest {
 
   @Test
   public void testBuildUser_AllFields() {
-    final ReportingUser user_all_fields = createDtoUser();
+    final ReportingUser user_all_fields = createReportingUser();
     final InsertAllRequest request =
         USER_INSERT_ALL_REQUEST_BUILDER.build(
             TABLE_ID, ImmutableList.of(user_all_fields), FIXED_VALUES);

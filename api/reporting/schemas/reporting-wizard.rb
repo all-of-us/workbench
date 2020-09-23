@@ -42,7 +42,7 @@ OUTPUTS = {
     :unit_test_constants => to_output_path('unit_test_constants',  'java'),
     :unit_test_mocks => to_output_path('unit_test_mocks',  'java'),
     :dto_assertions => to_output_path('dto_assertions',  'java'),
-    :query_parameter_COLUMNS => to_output_path('query_parameter_columns',  'java'),
+    :bigquery_insertion_payload_transformer => to_output_path('query_parameter_columns', 'java'),
     :dto_decl => to_output_path('dto_decl',  'java'),
     :entity_decl => to_output_path('entity_decl',  'java'),
 }.freeze
@@ -97,7 +97,7 @@ MYSQL_TYPE_TO_SIMPLE_TYPE = {
         :projection => 'Short',
         :swagger => {
             'type'  => 'integer',
-            'format' => 'int32' # Swagger has no int8 type. This is generally overrridden by an enum type anyway.
+            'format' => 'int32' # Swagger has no int8 type. This is generally overridden by an enum type anyway.
         },
     },
     'bit' => {
@@ -248,28 +248,28 @@ def to_property_name(column_name)
   to_swagger_name(column_name, false)
 end
 
-# One row in the describe output looks like `street_address_1,varchar(95),NO,"",,""`.
+# The COLUMNS hash contains essentially all the transformed representations of a column
+# in various languages and forms. One row in the describe output looks like `street_address_1,varchar(95),NO,"",,""`.
 # Currently this script only uses the column name and type(length) columns.
 COLUMNS = DESCRIBE_ROWS.filter{ |row| include_field?(excluded_fields, row[0]) } \
   .map{ |row| \
     col_name = row[0]
-    mysql_type = simple_mysql_type(row[1])
-    type_info = MYSQL_TYPE_TO_SIMPLE_TYPE[mysql_type]
+    primitive_type = MYSQL_TYPE_TO_SIMPLE_TYPE[simple_mysql_type(row[1])]
     enum_type_override = TABLE_INFO[:enum_column_info][col_name]
     {
         :name => col_name, \
         :lambda_var => TABLE_NAME[0].downcase, \
-        :mysql_type => mysql_type, \
-        :big_query_type => enum_type_override ? enum_type_override[:bigquery] : type_info[:bigquery], \
-        :swagger_type => enum_type_override ? enum_type_override[:swagger] : type_info[:swagger], \
+        :mysql_type => simple_mysql_type(row[1]), \
+        :big_query_type => enum_type_override ? enum_type_override[:bigquery] : primitive_type[:bigquery], \
+        :swagger_type => enum_type_override ? enum_type_override[:swagger] : primitive_type[:swagger], \
         :is_enum => !enum_type_override.nil?,
-        :java_type => enum_type_override ? enum_type_override[:projection] : type_info[:projection], \
+        :projection_type => enum_type_override ? enum_type_override[:projection] : primitive_type[:projection], \
         :java_field_name => "#{to_camel_case(col_name, false)}", \
         :java_constant_name => "#{TABLE_NAME.upcase}__#{col_name.upcase}", \
         :getter => "get#{to_camel_case(col_name, true)}",
         :setter => "set#{to_camel_case(col_name, true)}",
-        :property => to_property_name(col_name),
-        :default_enum => enum_type_override && enum_type_override[:default_constant_value]
+        :swagger_property_name => to_property_name(col_name),
+        :default_enum_value => enum_type_override && enum_type_override[:default_constant_value]
     }
 }.freeze
 
@@ -309,7 +309,7 @@ end
 swagger_object =  {  TABLE_INFO[:dto_class] => provenance_yaml.merge({
     'type'  =>  'object',
     'properties' => COLUMNS.to_h  { |col|
-      [col[:property], to_swagger_property(col)]
+      [col[:swagger_property_name], to_swagger_property(col)]
     }
   }) # .merge(provenance_yaml)
 }
@@ -324,7 +324,7 @@ write_output(OUTPUTS[:swagger_yaml], indented_yaml, 'DTO Swagger Definition')
 
 ### Projection Interface
 def to_getter(field)
-  property_type = field[:java_type]
+  property_type = field[:projection_type]
   "  #{property_type} #{field[:getter]}();"
 end
 
@@ -365,9 +365,11 @@ end
 query_description = \
 "This JPQL query corresponds to the projection interface #{TABLE_INFO[:projection_interface]}. Its\n" +
   "types and argument order must match the column names selected exactly, in name,\n" +
-  "type, and order."
+  "type, and order. Note that in some cases a projection query should JOIN one or more\n" +
+  "other tables. Currently this is done by hand (with suitable renamings of the other entries\n" +
+  " in the projection"
 query_comment = java_inline_comment(query_description) + provenance_java
-sql = query_comment + "\n" +
+projection_query = query_comment + "\n" +
     "@Query(\"SELECT\\n\"\n" +
     COLUMNS.map do |field| \
       "+ \"  #{adjust_col(field[:name])}" \
@@ -376,7 +378,7 @@ sql = query_comment + "\n" +
     "+ \"FROM #{TABLE_INFO[:entity_class]} #{TABLE_INFO[:sql_alias]}\")\n" +
     "  List<#{TABLE_INFO[:projection_interface]}> getReporting#{to_camel_case(TABLE_INFO[:name], true)}s();"
 
-write_output(OUTPUTS[:projection_query], sql, 'Projection Query')
+write_output(OUTPUTS[:projection_query], projection_query, 'Projection Query')
 
 # Unit Test Constants
 #
@@ -386,7 +388,7 @@ TIMESTAMP_DELTA_SECONDS = 24 * 60 * 60 # .freeze # seconds in day
 # N.B. some Short fields are only valid up to the number of associated enum values - 1. Fixing these
 # up by hand for now.
 def to_constant_declaration(column, index)
-  value = case column[:java_type]
+  value = case column[:projection_type]
           when 'String'
             "\"foo_#{index}\""
           when 'Integer'
@@ -403,12 +405,12 @@ def to_constant_declaration(column, index)
             "Timestamp.from(Instant.parse(\"#{timestamp.strftime("%Y-%m-%dT00:00:00.00Z")}\"))"
           else
             if column[:is_enum]
-              column[:default_enum]
+              column[:default_enum_value]
             else
               index.to_s
             end
           end
-  "public static final #{column[:java_type]} #{column[:java_constant_name]} = #{value};"
+  "public static final #{column[:projection_type]} #{column[:java_constant_name]} = #{value};"
 end
 
 constant_descriptions = java_inline_comment( \
@@ -447,7 +449,7 @@ write_output(OUTPUTS[:unit_test_mocks], lines.join("\n"), 'Unit Test Mocks')
 dto_assertions = COLUMNS.map{ |col|
   getter_call = "#{to_camel_case(TABLE_NAME, false)}.#{col[:getter]}()"
   expected = col[:java_constant_name]
-  if col[:java_type].eql?('Timestamp')
+  if col[:projection_type].eql?('Timestamp')
     "    assertTimeApprox(#{getter_call}, #{expected});"
   else
     "    assertThat(#{getter_call}).isEqualTo(#{expected});"
@@ -462,7 +464,7 @@ def object_value_function(col)
   if col[:is_enum]
     "#{col[:lambda_var]} -> enumToString(#{col[:lambda_var]}.#{col[:getter]}())"
   else
-    case col[:java_type]
+    case col[:projection_type]
     when 'Timestamp' # actually OffsetDateTime on the DTO
       "#{col[:lambda_var]} -> toInsertRowString(#{col[:lambda_var]}.#{col[:getter]}())"
     else
@@ -487,7 +489,11 @@ def qpv_function(col)
   if col[:is_enum]
     convert_fn = 'enumToQpv'
   else
-    convert_fn = "#{JAVA_TYPE_TO_QPV_FACTORY[col[:java_type]]}"
+    # TODO: this hash is keyed off the projection type, but the type we care about is actually
+    #   the Swagger-generated DTO model type. In some cases, a Short in the projection could be an
+    #   Integer in the DTO model because of its trip through Swagger (which only has Integer and Long).
+    #   It's something of a cosmetic issue, but does require manual fixup in a couple of places for now.
+    convert_fn = "#{JAVA_TYPE_TO_QPV_FACTORY[col[:projection_type]]}"
   end
   "#{col[:lambda_var]} -> #{convert_fn}(#{col[:lambda_var]}.#{col[:getter]}())"
 end
@@ -500,11 +506,13 @@ QPC_ENUM = (COLUMNS.map do |col|
   query_parameter_column_entry(col)
 end.join(",\n")).freeze
 
-write_output(OUTPUTS[:query_parameter_COLUMNS], QPC_ENUM, "QueryParameterValue Enum Entries")
+write_output(OUTPUTS[:bigquery_insertion_payload_transformer], QPC_ENUM, "BigQueryInsertionPayloadTransformer Enum Entries")
 
 ### DTO Fluent Setters
+# TODO: handle the case where projection type does not match the model, e.g.
+#         .dataAccessLevel(DbStorageEnums.dataAccessLevelFromStorage(USER__DATA_ACCESS_LEVEL))
 DTO_SETTERS = COLUMNS.map do |col|
-  value = case col[:java_type]
+  value = case col[:projection_type]
       when 'Timestamp'
             "offsetDateTimeUtc(#{col[:java_constant_name]})"
       else

@@ -11,11 +11,11 @@ import java.time.Instant;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingWorkspace;
 import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
 
@@ -27,9 +27,10 @@ public class ReportingTestUtils {
   //  type in the model class. An example of such a manual fix is the following:
   // .dataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION.longValue())
 
-  // This code was generated using reporting-wizard.rb at 2020-09-22T12:36:42-04:00.
+  // This code was generated using reporting-wizard.rb at 2020-09-23T15:56:47-04:00.
   // Manual modification should be avoided if possible as this is a one-time generation
   // and does not run on every build and updates must be merged manually for now.
+
   public static final String USER__ABOUT_YOU = "foo_0";
   public static final String USER__AREA_OF_RESEARCH = "foo_1";
   public static final Timestamp USER__COMPLIANCE_TRAINING_BYPASS_TIME =
@@ -42,7 +43,7 @@ public class ReportingTestUtils {
   public static final Timestamp USER__CREATION_TIME =
       Timestamp.from(Instant.parse("2015-05-11T00:00:00.00Z"));
   public static final String USER__CURRENT_POSITION = "foo_7";
-  public static final DataAccessLevel USER__DATA_ACCESS_LEVEL = DataAccessLevel.REGISTERED;
+  public static final Short USER__DATA_ACCESS_LEVEL = 1;
   public static final Timestamp USER__DATA_USE_AGREEMENT_BYPASS_TIME =
       Timestamp.from(Instant.parse("2015-05-14T00:00:00.00Z"));
   public static final Timestamp USER__DATA_USE_AGREEMENT_COMPLETION_TIME =
@@ -120,7 +121,47 @@ public class ReportingTestUtils {
       Timestamp.from(Instant.parse("2015-06-07T00:00:00.00Z"));
   public static final Long WORKSPACE__WORKSPACE_ID = 34L;
 
-  public static void assertDtoUserFields(ReportingUser user) {}
+  public static void assertDtoUserFields(ReportingUser user) {
+    assertThat(user.getAboutYou()).isEqualTo(USER__ABOUT_YOU);
+    assertThat(user.getAreaOfResearch()).isEqualTo(USER__AREA_OF_RESEARCH);
+    assertTimeApprox(user.getComplianceTrainingBypassTime(), USER__COMPLIANCE_TRAINING_BYPASS_TIME);
+    assertTimeApprox(
+        user.getComplianceTrainingCompletionTime(), USER__COMPLIANCE_TRAINING_COMPLETION_TIME);
+    assertTimeApprox(
+        user.getComplianceTrainingExpirationTime(), USER__COMPLIANCE_TRAINING_EXPIRATION_TIME);
+    assertThat(user.getContactEmail()).isEqualTo(USER__CONTACT_EMAIL);
+    assertTimeApprox(user.getCreationTime(), USER__CREATION_TIME);
+    assertThat(user.getCurrentPosition()).isEqualTo(USER__CURRENT_POSITION);
+    assertThat(user.getDataAccessLevel())
+        .isEqualTo(
+            DbStorageEnums.dataAccessLevelFromStorage(
+                USER__DATA_ACCESS_LEVEL)); // manual adjustment
+    assertTimeApprox(user.getDataUseAgreementBypassTime(), USER__DATA_USE_AGREEMENT_BYPASS_TIME);
+    assertTimeApprox(
+        user.getDataUseAgreementCompletionTime(), USER__DATA_USE_AGREEMENT_COMPLETION_TIME);
+    assertThat(user.getDataUseAgreementSignedVersion())
+        .isEqualTo(USER__DATA_USE_AGREEMENT_SIGNED_VERSION);
+    assertTimeApprox(
+        user.getDemographicSurveyCompletionTime(), USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME);
+    assertThat(user.getDisabled()).isEqualTo(USER__DISABLED);
+    assertTimeApprox(user.getEraCommonsBypassTime(), USER__ERA_COMMONS_BYPASS_TIME);
+    assertTimeApprox(user.getEraCommonsCompletionTime(), USER__ERA_COMMONS_COMPLETION_TIME);
+    assertThat(user.getFamilyName()).isEqualTo(USER__FAMILY_NAME);
+    assertTimeApprox(
+        user.getFirstRegistrationCompletionTime(), USER__FIRST_REGISTRATION_COMPLETION_TIME);
+    assertTimeApprox(user.getFirstSignInTime(), USER__FIRST_SIGN_IN_TIME);
+    assertThat(user.getFreeTierCreditsLimitDaysOverride())
+        .isEqualTo(USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE);
+    assertThat(user.getFreeTierCreditsLimitDollarsOverride())
+        .isEqualTo(USER__FREE_TIER_CREDITS_LIMIT_DOLLARS_OVERRIDE);
+    assertThat(user.getGivenName()).isEqualTo(USER__GIVEN_NAME);
+    assertTimeApprox(user.getLastModifiedTime(), USER__LAST_MODIFIED_TIME);
+    assertThat(user.getProfessionalUrl()).isEqualTo(USER__PROFESSIONAL_URL);
+    assertTimeApprox(user.getTwoFactorAuthBypassTime(), USER__TWO_FACTOR_AUTH_BYPASS_TIME);
+    assertTimeApprox(user.getTwoFactorAuthCompletionTime(), USER__TWO_FACTOR_AUTH_COMPLETION_TIME);
+    assertThat(user.getUserId()).isEqualTo(USER__USER_ID);
+    assertThat(user.getUsername()).isEqualTo(USER__USERNAME);
+  }
 
   public static void assertDtoWorkspaceFields(
       ReportingWorkspace workspace,
@@ -216,7 +257,10 @@ public class ReportingTestUtils {
     assertThat(workspace.getWorkspaceId()).isEqualTo(expectedWorkspaceId);
   }
 
-  public static ProjectedReportingUser mockProjectedjUser() {
+  public static ProjectedReportingUser mockProjectedUser() {
+    // This code was generated using reporting-wizard.rb at 2020-09-23T15:56:47-04:00.
+    // Manual modification should be avoided if possible as this is a one-time generation
+    // and does not run on every build and updates must be merged manually for now.
     final ProjectedReportingUser mockUser = mock(ProjectedReportingUser.class);
     doReturn(USER__ABOUT_YOU).when(mockUser).getAboutYou();
     doReturn(USER__AREA_OF_RESEARCH).when(mockUser).getAreaOfResearch();
@@ -274,7 +318,7 @@ public class ReportingTestUtils {
     return mockUser;
   }
 
-  public static ProjectedReportingWorkspace mockPrjWorkspace() {
+  public static ProjectedReportingWorkspace mockProjectedWorkspace() {
     final ProjectedReportingWorkspace mockWorkspace = mock(ProjectedReportingWorkspace.class);
     doReturn(WORKSPACE__BILLING_ACCOUNT_TYPE).when(mockWorkspace).getBillingAccountType();
     doReturn(WORKSPACE__BILLING_STATUS).when(mockWorkspace).getBillingStatus();
@@ -319,7 +363,7 @@ public class ReportingTestUtils {
     return mockWorkspace;
   }
 
-  public static ReportingUser createDtoUser() {
+  public static ReportingUser createReportingUser() {
     return new ReportingUser()
         .aboutYou(USER__ABOUT_YOU)
         .areaOfResearch(USER__AREA_OF_RESEARCH)
@@ -331,10 +375,10 @@ public class ReportingTestUtils {
         .contactEmail(USER__CONTACT_EMAIL)
         .creationTime(offsetDateTimeUtc(USER__CREATION_TIME))
         .currentPosition(USER__CURRENT_POSITION)
-        .dataAccessLevel(USER__DATA_ACCESS_LEVEL)
+        .dataAccessLevel(DbStorageEnums.dataAccessLevelFromStorage(USER__DATA_ACCESS_LEVEL))
         .dataUseAgreementBypassTime(offsetDateTimeUtc(USER__DATA_USE_AGREEMENT_BYPASS_TIME))
         .dataUseAgreementCompletionTime(offsetDateTimeUtc(USER__DATA_USE_AGREEMENT_COMPLETION_TIME))
-        .dataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION.longValue())
+        .dataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION)
         .demographicSurveyCompletionTime(
             offsetDateTimeUtc(USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME))
         .disabled(USER__DISABLED)
@@ -344,7 +388,8 @@ public class ReportingTestUtils {
         .firstRegistrationCompletionTime(
             offsetDateTimeUtc(USER__FIRST_REGISTRATION_COMPLETION_TIME))
         .firstSignInTime(offsetDateTimeUtc(USER__FIRST_SIGN_IN_TIME))
-        .freeTierCreditsLimitDaysOverride(USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE.longValue())
+        .freeTierCreditsLimitDaysOverride(
+            USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE.longValue()) // manual adjustment
         .freeTierCreditsLimitDollarsOverride(USER__FREE_TIER_CREDITS_LIMIT_DOLLARS_OVERRIDE)
         .givenName(USER__GIVEN_NAME)
         .lastModifiedTime(offsetDateTimeUtc(USER__LAST_MODIFIED_TIME))
@@ -366,7 +411,7 @@ public class ReportingTestUtils {
         .lastAccessedTime(offsetDateTimeUtc(WORKSPACE__LAST_ACCESSED_TIME))
         .lastModifiedTime(offsetDateTimeUtc(WORKSPACE__LAST_MODIFIED_TIME))
         .name(WORKSPACE__NAME)
-        .needsRpReviewPrompt(WORKSPACE__NEEDS_RP_REVIEW_PROMPT.longValue())
+        .needsRpReviewPrompt(WORKSPACE__NEEDS_RP_REVIEW_PROMPT.intValue()) // manual adjustment
         .published(WORKSPACE__PUBLISHED)
         .rpAdditionalNotes(WORKSPACE__RP_ADDITIONAL_NOTES)
         .rpAncestry(WORKSPACE__RP_ANCESTRY)
