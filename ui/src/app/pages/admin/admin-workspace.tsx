@@ -112,18 +112,24 @@ const FileDetailsTable = (props: {data: Array<FileDetail>, bucket: string}) => {
     }
   });
 
-  return <DataTable
-      data-test-id='object-details-table'
-      value={sortedData}
-      style={styles.fileDetailsTable}
-      scrollable={true}
-      paginator={true}
-      paginatorTemplate='CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown'
-      currentPageReportTemplate='Showing {first} to {last} of {totalRecords} entries'>
-    <Column field='location' header='Location'/>
-    <Column field='name' header='Filename'/>
-    <Column field='size' header='File size (MB)' style={{textAlign: 'right'}}/>
-  </DataTable>;
+  return <React.Fragment>
+    <div style={{color: colors.warning, fontWeight: 'bold'}}>
+      NOTE: this table may be incomplete if there are more than ~1000 files in the bucket,
+      because we process only a single page of storage list results.
+    </div>
+    <DataTable
+        data-test-id='object-details-table'
+        value={sortedData}
+        style={styles.fileDetailsTable}
+        scrollable={true}
+        paginator={true}
+        paginatorTemplate='CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown'
+        currentPageReportTemplate='Showing {first} to {last} of {totalRecords} entries'>
+      <Column field='location' header='Location'/>
+      <Column field='name' header='Filename'/>
+      <Column field='size' header='File size (MB)' style={{textAlign: 'right'}}/>
+    </DataTable>
+  </React.Fragment>;
 };
 
 interface State {
