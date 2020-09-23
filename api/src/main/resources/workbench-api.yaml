@@ -5732,6 +5732,8 @@ definitions:
         type: string
       workspaceBillingStatus:
         "$ref": "#/definitions/BillingStatus"
+      cdrVersionId:
+        type: string
       permission:
         type: string
       cohort:

@@ -139,6 +139,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "workspaceId", source = "dbWorkspace.workspaceId")
   @Mapping(target = "workspaceFirecloudName", source = "dbWorkspace.firecloudName")
   @Mapping(target = "workspaceBillingStatus", source = "dbWorkspace.billingStatus")
+  @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
   @Mapping(target = "permission", source = "accessLevel")
   @Mapping(target = "cohort", source = "dbCohort")
   // All workspaceResources have one object and all others are null.
@@ -154,6 +155,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "workspaceId", source = "dbWorkspace.workspaceId")
   @Mapping(target = "workspaceFirecloudName", source = "dbWorkspace.firecloudName")
   @Mapping(target = "workspaceBillingStatus", source = "dbWorkspace.billingStatus")
+  @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
   @Mapping(target = "permission", source = "accessLevel")
   @Mapping(target = "cohortReview", source = "cohortReview")
   // All workspaceResources have one object and all others are null.
@@ -169,6 +171,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "workspaceId", source = "dbWorkspace.workspaceId")
   @Mapping(target = "workspaceFirecloudName", source = "dbWorkspace.firecloudName")
   @Mapping(target = "workspaceBillingStatus", source = "dbWorkspace.billingStatus")
+  @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
   @Mapping(target = "permission", source = "accessLevel")
   @Mapping(target = "conceptSet", source = "conceptSet")
   // All workspaceResources have one object and all others are null.
@@ -184,6 +187,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "workspaceId", source = "dbWorkspace.workspaceId")
   @Mapping(target = "workspaceFirecloudName", source = "dbWorkspace.firecloudName")
   @Mapping(target = "workspaceBillingStatus", source = "dbWorkspace.billingStatus")
+  @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
   @Mapping(target = "permission", source = "accessLevel")
   @Mapping(target = "dataSet", source = "dbDataset", qualifiedByName = "dbModelToClientLight")
   // All workspaceResources have one object and all others are null.
