@@ -124,6 +124,11 @@ class CopyModalComponent extends React.Component<Props, State> {
     };
   }
 
+  isDestinationSameWorkspace(workspace: Workspace): boolean {
+    const {fromWorkspaceFirecloudName, fromWorkspaceNamespace} = this.props;
+    return workspace.id === fromWorkspaceFirecloudName && workspace.namespace === fromWorkspaceNamespace;
+  }
+
   cdrName(cdrVersionId: string): string {
     const {cdrVersionListResponse} = this.props;
     const version = cdrVersionListResponse.items.find(v => v.cdrVersionId === cdrVersionId);
@@ -151,7 +156,8 @@ class CopyModalComponent extends React.Component<Props, State> {
       label: this.cdrName(versionId),
       options: workspacesByCdr[versionId].map(workspace => ({
         'value': workspace,
-        'label': workspace.name,
+        'label': this.isDestinationSameWorkspace(workspace) ?
+            `${workspace.name} (current workspace)` : workspace.name,
       })),
     }));
   }
@@ -318,6 +324,7 @@ class CopyModalComponent extends React.Component<Props, State> {
           value={destination}
           options={workspaceOptions}
           onChange={(destWorkspace) => this.validateAndSetDestination(destWorkspace)}
+          isOptionDisabled={(option) => this.isDestinationSameWorkspace(option.value)}
         />
         {cdrMismatch && resourceType === ResourceType.CONCEPTSET && <ConceptSetCdrMismatch text={cdrMismatch}/>}
         <div style={headerStyles.formLabel}>Name *</div>
