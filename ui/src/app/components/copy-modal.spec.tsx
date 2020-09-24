@@ -9,57 +9,64 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 
 import {dropNotebookFileSuffix} from 'app/pages/analysis/util';
-import {CopyModal, CopyModalProps, CopyModalState} from './copy-modal';
+import {CopyModalComponent, CopyModalProps, CopyModalState} from './copy-modal';
 import {ResourceType} from 'generated/fetch';
+import {cdrVersionListResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 
 describe('CopyModal', () => {
   let props: CopyModalProps;
 
   const component = () => {
-    return mount<CopyModal, CopyModalProps, CopyModalState>
-    (<CopyModal {...props}/>);
+    return mount<CopyModalComponent, CopyModalProps, CopyModalState>
+    (<CopyModalComponent {...props}/>);
   };
 
   const workspaces = [
     {
       namespace: 'El Capitan',
       name: 'Freerider',
-      id: 'freerider'
+      id: 'freerider',
+      cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
     },
     {
       namespace: 'El Capitan',
       name: 'Dawn Wall',
-      id: 'dawn wall'
+      id: 'dawn wall',
+      cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
     },
     {
       namespace: 'El Capitan',
       name: 'Zodiac',
-      id: 'zodiac'
+      id: 'zodiac',
+      cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
     },
     {
       namespace: 'El Capitan',
       name: 'The Nose',
-      id: 'the nose'
+      id: 'the nose',
+      cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
     }
   ];
-  const fromWorkspaceNamespace = 'namespace';
-  const fromWorkspaceName = 'name';
+  const fromWorkspaceNamespace = workspaces[0].namespace;
+  const fromWorkspaceFCName = workspaces[0].id;
   const fromResourceName = 'notebook';
 
   beforeEach(() => {
     const apiStub = new WorkspacesApiStub(workspaces);
     registerApiClient(WorkspacesApi, apiStub);
     props = {
+      cdrVersionListResponse: cdrVersionListResponse,
       fromWorkspaceNamespace: fromWorkspaceNamespace,
-      fromWorkspaceName: fromWorkspaceName,
+      fromWorkspaceFCName: fromWorkspaceFCName,
       fromResourceName: fromResourceName,
+      fromCdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
       resourceType: ResourceType.NOTEBOOK,
       onClose: () => {},
       onCopy: () => {},
       saveFunction: (copyRequest) => {
         return workspacesApi().copyNotebook(
           fromWorkspaceNamespace,
-          fromWorkspaceName,
+          fromWorkspaceFCName,
           dropNotebookFileSuffix(fromResourceName),
           copyRequest
         );
@@ -113,7 +120,7 @@ describe('CopyModal', () => {
 
     expect(spy).toHaveBeenCalledWith(
       props.fromWorkspaceNamespace,
-      props.fromWorkspaceName,
+      props.fromWorkspaceFCName,
       props.fromResourceName,
       {
         toWorkspaceName: workspaces[2].id,
