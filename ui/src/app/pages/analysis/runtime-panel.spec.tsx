@@ -13,6 +13,7 @@ import {
   markRuntimeOperationCompleteForWorkspace,
   updateRuntimeOpsStoreForWorkspaceNamespace
 } from "../../utils/stores";
+import {act} from "react-dom/test-utils";
 
 describe('RuntimePanel', () => {
   let props: Props;
@@ -71,6 +72,7 @@ describe('RuntimePanel', () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     updateRuntimeOpsStoreForWorkspaceNamespace(props.workspace.namespace, {promise: Promise.resolve(), operation: 'get', aborter: new AbortController()});
+    await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
     const outstandingRuntimeOp = wrapper.find('[data-test-id="outstanding-runtime-operation"]');
     expect(outstandingRuntimeOp.length).toEqual(1);
