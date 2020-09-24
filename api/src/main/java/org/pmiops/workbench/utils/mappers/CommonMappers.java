@@ -13,7 +13,6 @@ import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.model.BillingStatus;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -106,13 +105,5 @@ public class CommonMappers {
   @Named("etagToCdrVersion")
   public int etagToCdrVersion(String etag) {
     return Strings.isNullOrEmpty(etag) ? 1 : Etags.toVersion(etag);
-  }
-
-  public BillingStatus checkBillingFeatureFlag(BillingStatus billingStatus) {
-    if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout) {
-      return BillingStatus.ACTIVE;
-    } else {
-      return billingStatus;
-    }
   }
 }
