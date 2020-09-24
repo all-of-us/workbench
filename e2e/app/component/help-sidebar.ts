@@ -26,7 +26,7 @@ export default class HelpSidebar extends Container {
   async getPhysicalMeasurementParticipantResult(filterSign: FilterSign, filterValue: number): Promise<string> {
     await this.waitUntilSectionVisible(SectionSelectors.AttributesForm);
 
-    const selectMenu = await SelectMenu.findByName(this.page, {ancestorLevel: 2}, this);
+    const selectMenu = await SelectMenu.findByName(this.page, {ancestorLevel: 0}, this);
     await selectMenu.clickMenuItem(filterSign);
 
     const numberField = await this.page.waitForXPath(`${this.xpath}//input[@type="number"]`, {visible: true});
@@ -56,7 +56,7 @@ export default class HelpSidebar extends Container {
     await this.clickSidebarButton(LinkText.ApplyModifiers);
     await this.waitUntilSectionVisible(SectionSelectors.ModifiersForm);
 
-    const selectMenu = await SelectMenu.findByName(this.page, {name: 'Age At Event', ancestorLevel: 2}, this);
+    const selectMenu = await SelectMenu.findByName(this.page, {name: 'Age At Event', ancestorLevel: 1}, this);
     await selectMenu.clickMenuItem(filterSign);
     const numberField = await this.page.waitForXPath(`${this.xpath}//input[@type="number"]`, {visible: true});
     // Issue with Puppeteer type() function: typing value in this textbox doesn't always trigger change event. workaround is needed.
@@ -82,9 +82,14 @@ export default class HelpSidebar extends Container {
   }
 
   async clickSidebarButton(buttonLabel: LinkText): Promise<void> {
-    const button = await Button.findByName(this.page, {normalizeSpace: buttonLabel}, this);
-    await button.click();
+    await this.findSidebarButton(buttonLabel).then(butn => butn.click());
     await waitWhileLoading(this.page);
+  }
+
+  async findSidebarButton(buttonLabel: LinkText): Promise<Button> {
+    const button = await Button.findByName(this.page, {normalizeSpace: buttonLabel}, this);
+    await button.waitUntilEnabled();
+    return button;
   }
 
   async clickSaveCriteriaButton(): Promise<void> {

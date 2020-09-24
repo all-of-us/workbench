@@ -66,12 +66,12 @@ export const FieldSelector = {
   },
   InstitutionSelect: {
     textOption: {
-      type:ElementType.Dropdown, name:'Select your institution', ancestorLevel:2
+      type:ElementType.Dropdown, name:'Select your institution', ancestorLevel:1
     }
   },
   DescribeRole: {
     textOption: {
-      type: ElementType.Dropdown, containsText: 'describes your role', ancestorLevel: 2
+      type: ElementType.Dropdown, containsText: 'describes your role', ancestorLevel: 1
     }
   }
 };
