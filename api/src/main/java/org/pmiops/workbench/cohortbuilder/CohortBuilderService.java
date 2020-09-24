@@ -60,8 +60,8 @@ public interface CohortBuilderService {
    */
   Map<Long, String> findAllDemographicsMap();
 
-  List<String> findSortedConceptIdsByDomainIdAndTypeAndParentIdNotIn(
-      String domainId, Long parentId, String sortColumn, String sortName);
+  List<String> findSortedConceptIdsByDomainIdAndType(
+      String domainId, String sortColumn, String sortName);
 
   List<SurveyModule> findSurveyModules(String term);
 
