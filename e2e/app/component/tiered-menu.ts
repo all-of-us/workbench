@@ -14,11 +14,13 @@ export default class TieredMenu extends Container {
    * @param {string[]} menuItems
    */
   async clickMenuItem(menuItems: string[]): Promise<void> {
+    const menuXpath = `${this.xpath}//ul`;
+
     // menu dropdown must be open and visible
-    await this.page.waitForXPath(`${this.xpath}/ul`, {visible: true});
+    await this.page.waitForXPath(menuXpath, {visible: true});
 
     const findLink = async (menuItemText): Promise<ElementHandle> => {
-      const selector = `${this.xpath}//ul/li[contains(concat(" ", normalize-space()), " ${menuItemText}")]`;
+      const selector = `${menuXpath}/li[contains(concat(" ", normalize-space()), " ${menuItemText}")]`;
       const elem = await this.page.waitForXPath(selector, {visible: true});
       await elem.hover();
       await elem.focus();
@@ -35,6 +37,7 @@ export default class TieredMenu extends Container {
       await menuItem.dispose();
     }
 
+    await this.page.waitForXPath(menuXpath, {hidden: true});
   }
 
 
