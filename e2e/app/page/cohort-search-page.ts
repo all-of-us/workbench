@@ -74,6 +74,7 @@ export default class CohortSearchPage extends AuthenticatedPage {
     try {
       await Promise.all([
         this.page.waitForXPath('//*[@id="cohort-search-container"]', {visible: true}),
+        this.page.waitForXPath('//*[@role="button"]/img[@alt="Go back"]', {visible: true}),
         waitWhileLoading(this.page),
       ]);
       return true;
@@ -105,10 +106,10 @@ export default class CohortSearchPage extends AuthenticatedPage {
                                        filterSign: FilterSign,
                                        filterValue: number): Promise<string> {
 
+    await waitWhileLoading(this.page);
     const link = await this.waitForPhysicalMeasurementCriteriaLink(criteriaName);
     await link.click();
-    await waitWhileLoading(this.page);
-
+    
     // Delay to make sure correct sidebar content is showing
     await this.page.waitFor(1000);
 
