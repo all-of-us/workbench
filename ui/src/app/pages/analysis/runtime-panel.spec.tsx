@@ -9,7 +9,10 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {RuntimeApi} from 'generated/fetch/api';
 import {WorkspaceAccessLevel} from 'generated/fetch';
-import {markRuntimeOperationCompleteForWorkspace} from "../../utils/stores";
+import {
+  markRuntimeOperationCompleteForWorkspace,
+  updateRuntimeOpsStoreForWorkspaceNamespace
+} from "../../utils/stores";
 
 describe('RuntimePanel', () => {
   let props: Props;
@@ -62,5 +65,14 @@ describe('RuntimePanel', () => {
     // See app/utils/machines.ts, these are the valid memory options for an 8
     // CPU machine in GCE.
     expect(memoryOptions.map(m => m.text())).toEqual(['7.2', '30', '52']);
+  });
+
+  it('should show the presence of an outstanding runtime operation', async() => {
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    updateRuntimeOpsStoreForWorkspaceNamespace(props.workspace.namespace, {promise: Promise.resolve(), operation: 'get', aborter: new AbortController()});
+    await waitOneTickAndUpdate(wrapper);
+    const outstandingRuntimeOp = wrapper.find('[data-test-id="outstanding-runtime-operation"]');
+    expect(outstandingRuntimeOp.length).toEqual(1);
   });
 });

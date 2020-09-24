@@ -13,6 +13,7 @@ import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {LeoRuntimesApiStub} from 'testing/stubs/leo-runtimes-api-stub';
 import {RuntimeConfigurationType} from '../../generated/fetch';
 import {runtimeOpsStore} from "./stores";
+import {serverConfigStore} from "./navigation";
 
 let mockGetRuntime: SpyInstance;
 let mockCreateRuntime: SpyInstance;
@@ -43,6 +44,8 @@ describe('RuntimeInitializer', () => {
     mockCreateRuntime = jest.spyOn(runtimeApi(), 'createRuntime');
     mockDeleteRuntime = jest.spyOn(runtimeApi(), 'deleteRuntime');
     mockStartRuntime = jest.spyOn(leoRuntimesApi(), 'startRuntime');
+
+    serverConfigStore.next({gsuiteDomain: 'researchallofus.org', enableCustomRuntimes: false});
   });
 
   afterEach(() => {
@@ -318,7 +321,7 @@ describe('RuntimeInitializer', () => {
   it('should use and clean the runtimeOpsStore for get', async() => {
     mockGetRuntimeCalls([baseRuntime]);
     await runInitializerAndTimers();
-    expect(mockSetRuntimeOpsStore).toHaveBeenCalledTimes(1);
+    expect(mockSetRuntimeOpsStore).toHaveBeenCalled();
     expect(runtimeOpsStore.get().opsByWorkspaceNamespace[workspaceNamespace]).toBeUndefined();
   });
 
@@ -328,14 +331,14 @@ describe('RuntimeInitializer', () => {
       return {status: RuntimeStatus.Creating};
     });
     await runInitializerAndTimers();
-    expect(mockSetRuntimeOpsStore).toHaveBeenCalledTimes(3);
+    expect(mockSetRuntimeOpsStore).toHaveBeenCalled();
     expect(runtimeOpsStore.get().opsByWorkspaceNamespace[workspaceNamespace]).toBeUndefined();
   });
 
   it('should use and clean the runtimeOpsStore for resume', async() => {
     mockGetRuntimeCalls([{status: RuntimeStatus.Stopped}]);
     await runInitializerAndTimers();
-    expect(mockSetRuntimeOpsStore).toHaveBeenCalledTimes(3);
+    expect(mockSetRuntimeOpsStore).toHaveBeenCalled();
     expect(runtimeOpsStore.get().opsByWorkspaceNamespace[workspaceNamespace]).toBeUndefined();
   });
 
@@ -345,7 +348,7 @@ describe('RuntimeInitializer', () => {
       return {};
     });
     await runInitializerAndTimers();
-    expect(mockSetRuntimeOpsStore).toHaveBeenCalledTimes(3);
+    expect(mockSetRuntimeOpsStore).toHaveBeenCalled();
     expect(runtimeOpsStore.get().opsByWorkspaceNamespace[workspaceNamespace]).toBeUndefined();
   });
 });

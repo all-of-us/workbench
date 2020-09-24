@@ -51,12 +51,13 @@ const defaultMachineType = allMachineTypes.find(({name}) => name === 'n1-standar
 const OutstandingRuntimeOp = ({operation, workspaceNamespace}) => {
   return <React.Fragment>
     <h3 style={styles.sectionHeader}>Outstanding Runtime Operations</h3>
-    <FlexRow style={{'alignItems': 'center'}} data-test-id='outstanding-runtime-operation'>
-            <span style={{'marginRight': '1rem'}}>
-              {operation} in progress
-            </span>
+    <FlexRow style={{'alignItems': 'center'}}>
+      <span style={{'marginRight': '1rem'}}>
+        {operation} in progress
+      </span>
       <Button
           onClick={() => abortRuntimeOperationForWorkspace(workspaceNamespace)}
+          data-test-id='outstanding-runtime-operation'
       >
         Cancel
       </Button>
