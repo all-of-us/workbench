@@ -18,19 +18,20 @@ import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {RuntimePanel} from 'app/pages/analysis/runtime-panel';
 import {SidebarContent} from 'app/pages/data/cohort-review/sidebar-content.component';
+import {ConceptListPage} from 'app/pages/data/concept/concept-list';
 import {participantStore} from 'app/services/review-state.service';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   highlightSearchTerm,
   reactStyles,
   ReactWrapperBase,
-  withCurrentCohortCriteria,
+  withCurrentCohortCriteria, withCurrentConcept,
   withCurrentWorkspace,
   withUserProfile
 } from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {
-  currentCohortSearchContextStore,
+  currentCohortSearchContextStore, currentConceptStore,
   NavStore,
   serverConfigStore,
   setSidebarActiveIconStore
@@ -38,7 +39,7 @@ import {
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
-import {ParticipantCohortStatus, WorkspaceAccessLevel} from 'generated/fetch';
+import {Concept, ParticipantCohortStatus, WorkspaceAccessLevel} from 'generated/fetch';
 import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
 import {PopupTrigger} from './popups';
 import canWrite = WorkspacePermissionsUtil.canWrite;
@@ -219,6 +220,17 @@ const iconConfigs = {
     contentWidthRem: '20',
     hideSidebarFooter: true
   },
+  'concept': {
+    disabled: false,
+    faIcon: faInbox,
+    label: 'Selected Concepts',
+    page: 'concept',
+    style: {fontSize: '21px'},
+    tooltip: 'Selected Concepts',
+    contentPadding: '0.5rem 0.5rem 0',
+    contentWidthRem: '20',
+    hideSidebarFooter: true
+  },
   'help': {
     disabled: false,
     faIcon: faInfoCircle,
@@ -275,6 +287,7 @@ const icons = (
 ) => {
   const keys = [
     'criteria',
+    'concept',
     helpIconName(helpContentKey),
     'dataDictionary',
     'annotations'
@@ -306,6 +319,7 @@ interface Props {
   notebookStyles: boolean;
   workspace: WorkspaceData;
   criteria: Array<Selection>;
+  concept?: Array<Concept>;
 }
 
 interface State {
@@ -316,7 +330,7 @@ interface State {
   showCriteria: boolean;
   tooltipId: number;
 }
-export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), withCurrentCohortCriteria())(
+export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), withCurrentCohortCriteria(), withCurrentConcept())(
   class extends React.Component<Props, State> {
     subscription: Subscription;
     constructor(props: Props) {
@@ -360,7 +374,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
           }
         }, 300);
       }
-      if (!this.props.criteria && !!prevProps.criteria) {
+      if ((!this.props.criteria && !!prevProps.criteria ) || (!this.props.concept && !!prevProps.concept)) {
         this.props.setSidebarState(false);
       }
     }
@@ -520,17 +534,20 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
     }
 
     showIcon(icon) {
-      const {criteria, helpContentKey} = this.props;
-      return !icon.page || icon.page === helpContentKey || (criteria && icon.page === 'criteria');
+      const {concept, criteria, helpContentKey} = this.props;
+      return !icon.page || icon.page === helpContentKey || (criteria && icon.page === 'criteria') || (concept && icon.page === 'concept');
     }
 
     displayIcon(icon, i) {
-      const {criteria} = this.props;
+      const {concept, criteria} = this.props;
 
       return <React.Fragment>
         {(criteria && icon.page === 'criteria') && <span data-test-id='criteria-count'
                                                          style={styles.criteriaCount}>
           {criteria.length}</span>}
+        {(concept && icon.page === 'concept') && <span data-test-id='concept-count'
+                                                         style={styles.criteriaCount}>
+          {concept.length}</span>}
             <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + icon.id} icon={icon.faIcon} style={icon.style} />
           </React.Fragment> ;
     }
@@ -552,7 +569,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
     }
 
     render() {
-      const {criteria, helpContentKey, notebookStyles, setSidebarState, workspace} = this.props;
+      const {concept, criteria, helpContentKey, notebookStyles, setSidebarState, workspace} = this.props;
       const {activeIcon, filteredContent, participant, searchTerm, tooltipId} = this.state;
       const displayContent = filteredContent !== undefined ? filteredContent : sidebarContent[helpContentKey];
 
@@ -564,7 +581,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
       });
       return <div id='help-sidebar'>
         <div style={notebookStyles ? {...styles.iconContainer, ...styles.notebookOverrides} : {...styles.iconContainer}}>
-          {!criteria && this.renderWorkspaceMenu()}
+          {!(criteria || concept)  && this.renderWorkspaceMenu()}
           {icons(helpContentKey, serverConfigStore.getValue().enableCustomRuntimes, workspace.accessLevel).map((icon, i) =>
           this.showIcon(icon) && <div key={i} style={{display: 'table'}}>
                 <TooltipTrigger content={<div>{tooltipId === i && icon.tooltip}</div>} side='left'>
@@ -592,7 +609,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
         </div>
         <div style={this.sidebarContainerStyles(activeIcon, notebookStyles)}>
           <div style={this.sidebarStyle} data-test-id='sidebar-content'>
-            {activeIcon !== 'criteria' && <FlexRow style={styles.navIcons}>
+            {!(activeIcon === 'criteria' || activeIcon === 'concept') && <FlexRow style={styles.navIcons}>
               <Clickable style={{marginRight: '1rem'}}
                          onClick={() => setSidebarState(false)}>
                 <img src={proIcons.times}
@@ -639,6 +656,11 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
             <div style={contentStyle('criteria')}>
               <div style={{padding: '0.25rem 0.25rem 0rem'}}>
                 {!!currentCohortSearchContextStore.getValue() && <SelectionList back={() => setSidebarState(false)} selections={[]}/>}
+              </div>
+            </div>
+            <div style={contentStyle('concept')}>
+              <div style={{padding: '0.25rem 0.25rem 0rem'}}>
+                {!!currentConceptStore.getValue() && <ConceptListPage/>}
               </div>
             </div>
             {(iconConfigs[activeIcon] || {}).hideSidebarFooter || <div style={styles.footer}>
