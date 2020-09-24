@@ -7,19 +7,18 @@ import com.google.cloud.bigquery.TableId;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.model.ReportingResearcher;
 import org.pmiops.workbench.model.ReportingSnapshot;
+import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
-import org.pmiops.workbench.reporting.insertion.InsertAllRequestBuilder;
-import org.pmiops.workbench.reporting.insertion.ResearcherParameter;
-import org.pmiops.workbench.reporting.insertion.WorkspaceParameter;
+import org.pmiops.workbench.reporting.insertion.InsertAllRequestPayloadTransformer;
+import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
 import org.pmiops.workbench.utils.LogFormatters;
 import org.springframework.stereotype.Service;
 
@@ -27,10 +26,10 @@ import org.springframework.stereotype.Service;
 public class ReportingUploadServiceStreamingImpl implements ReportingUploadService {
   private static final Logger log =
       Logger.getLogger(ReportingUploadServiceStreamingImpl.class.getName());
-  private static final InsertAllRequestBuilder<ReportingResearcher> researcherRequestBuilder =
-      ResearcherParameter::values;
-  private static final InsertAllRequestBuilder<ReportingWorkspace> workspaceRequestBuilder =
-      WorkspaceParameter::values;
+  private static final InsertAllRequestPayloadTransformer<ReportingUser> userRequestBuilder =
+      UserColumnValueExtractor::values;
+  private static final InsertAllRequestPayloadTransformer<ReportingWorkspace>
+      workspaceRequestBuilder = WorkspaceColumnValueExtractor::values;
 
   private final BigQueryService bigQueryService;
   private final Provider<WorkbenchConfig> configProvider;
@@ -50,7 +49,8 @@ public class ReportingUploadServiceStreamingImpl implements ReportingUploadServi
     final Stopwatch stopwatch = stopwatchProvider.get();
     final ImmutableMap.Builder<TableId, InsertAllResponse> responseMapBuilder =
         ImmutableMap.builder();
-    for (InsertAllRequest request : getInsertAllRequests(reportingSnapshot)) {
+    final List<InsertAllRequest> insertAllRequests = getInsertAllRequests(reportingSnapshot);
+    for (InsertAllRequest request : insertAllRequests) {
       stopwatch.start();
       final InsertAllResponse currentResponse = bigQueryService.insertAll(request);
       responseMapBuilder.put(request.getTable(), currentResponse);
@@ -66,11 +66,6 @@ public class ReportingUploadServiceStreamingImpl implements ReportingUploadServi
     return computeOverallResult(responseMapBuilder.build());
   }
 
-  public void logDuration(Duration duration, String description) {
-    final long millis = duration.toMillis();
-    log.info(String.format("%s: %d.%d seconds", description, millis / 1000, millis % 1000));
-  }
-
   private List<InsertAllRequest> getInsertAllRequests(ReportingSnapshot reportingSnapshot) {
     final String projectId = configProvider.get().server.projectId;
     final String dataset = configProvider.get().reporting.dataset;
@@ -78,10 +73,8 @@ public class ReportingUploadServiceStreamingImpl implements ReportingUploadServi
         ImmutableMap.of("snapshot_timestamp", reportingSnapshot.getCaptureTimestamp());
 
     return ImmutableList.of(
-            researcherRequestBuilder.build(
-                TableId.of(projectId, dataset, "researcher"),
-                reportingSnapshot.getResearchers(),
-                fixedValues),
+            userRequestBuilder.build(
+                TableId.of(projectId, dataset, "user"), reportingSnapshot.getUsers(), fixedValues),
             workspaceRequestBuilder.build(
                 TableId.of(projectId, dataset, "workspace"),
                 reportingSnapshot.getWorkspaces(),

@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.dao;
 
 import java.util.List;
 import java.util.Set;
+import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
 import org.pmiops.workbench.db.model.DbUser;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
@@ -20,8 +21,6 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
   DbUser findUserByUsername(String username);
 
   DbUser findUserByUserId(long userId);
-
-  List<DbUser> findUserByContactEmail(String contactEmail);
 
   @Query("SELECT user FROM DbUser user")
   List<DbUser> findUsers();
@@ -71,4 +70,60 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
 
     Long getUserCount();
   }
+
+  // This JPQL query corresponds to the projection interface ProjectedReportingUser. Its
+  // types and argument order must match the column names selected exactly, in name,
+  // type, and order.
+
+  // This code was generated using reporting-wizard.rb at 2020-09-22T12:14:40-04:00.
+  // Manual modification should be avoided if possible as this is a one-time generation
+  // and does not run on every build and updates must be merged manually for now.
+  // This JPQL query corresponds to the projection interface ProjectedReportingUser. Its
+  // types and argument order must match the column names selected exactly, in name,
+  // type, and order.
+
+  // This code was generated using reporting-wizard.rb at 2020-09-23T15:56:47-04:00.
+  // Manual modification should be avoided if possible as this is a one-time generation
+  // and does not run on every build and updates must be merged manually for now.
+
+  @Query(
+      "SELECT\n"
+          + "  u.aboutYou,\n"
+          + "  u.areaOfResearch,\n"
+          + "  u.complianceTrainingBypassTime,\n"
+          + "  u.complianceTrainingCompletionTime,\n"
+          + "  u.complianceTrainingExpirationTime,\n"
+          + "  u.contactEmail,\n"
+          + "  u.creationTime,\n"
+          + "  u.currentPosition,\n"
+          + "  u.dataAccessLevel,\n"
+          + "  u.dataUseAgreementBypassTime,\n"
+          + "  u.dataUseAgreementCompletionTime,\n"
+          + "  u.dataUseAgreementSignedVersion,\n"
+          + "  u.demographicSurveyCompletionTime,\n"
+          + "  u.disabled,\n"
+          + "  u.eraCommonsBypassTime,\n"
+          + "  u.eraCommonsCompletionTime,\n"
+          + "  u.familyName,\n"
+          + "  u.firstRegistrationCompletionTime,\n"
+          + "  u.firstSignInTime,\n"
+          + "  u.freeTierCreditsLimitDaysOverride,\n"
+          + "  u.freeTierCreditsLimitDollarsOverride,\n"
+          + "  u.givenName,\n"
+          + "  u.lastModifiedTime,\n"
+          + "  u.professionalUrl,\n"
+          + "  u.twoFactorAuthBypassTime,\n"
+          + "  u.twoFactorAuthCompletionTime,\n"
+          + "  u.userId,\n"
+          + "  u.username,\n"
+          + "  a.city,\n"
+          + "  a.country,\n"
+          + "  a.state,\n"
+          + "  a.streetAddress1,\n"
+          + "  a.streetAddress2,\n"
+          + "  a.zipCode\n"
+          + "FROM DbUser u\n"
+          + "  LEFT OUTER JOIN DbAddress AS a ON u.userId = a.user.userId\n"
+          + "  ORDER BY u.userId")
+  List<ProjectedReportingUser> getReportingUsers();
 }

@@ -212,6 +212,8 @@ public class TestMockFactory {
   // The Stopwatch class is final, so we can't create a fake implementation. The
   // next best thing is this helper method for setting all the method stubs in
   // a test's @Before method.
+  // Deprecated in favor of Stopwatch.createStarted() et al.
+  @Deprecated
   public static void stubStopwatch(Stopwatch mockStopwatch, Duration elapsed) {
     doReturn(elapsed).when(mockStopwatch).elapsed();
 

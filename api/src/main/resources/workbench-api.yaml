@@ -8001,67 +8001,6 @@ definitions:
         description: Datetime at creation of this user's accont
         type: string
         format: date-time
-  ReportingResearcher:
-    description: >
-      Payload for the researcher table in the BigQuery reporting dataset.
-      Internal use only (not part of the API).
-    type: object
-    properties:
-      username:
-        description: full Username (GSuite)
-        type: string
-      firstName:
-        description: First name for the researcher
-        type: string
-      researcherId:
-        description: ID (PK) for this researcher.
-        type: integer
-        format: int64
-      isDisabled:
-        description: true if this researcher has a disabled account
-        type: boolean
-  ReportingSnapshot:
-    description: >
-      Payload for upload to BigQuery reporting dataset. Internal use only (not part of the API).
-    type: object
-    properties:
-      captureTimestamp:
-        description: Time at which snapshot is retrieved. Epoch millis.
-        type: integer
-        format: int64
-      researchers:
-        type: array
-        items:
-          "$ref": "#/definitions/ReportingResearcher"
-      workspaces:
-        type: array
-        items:
-          "$ref": "#/definitions/ReportingWorkspace"
-  ReportingWorkspace:
-    description: >
-    type: object
-    properties:
-      workspaceId:
-        description: PK for workspace table.
-        type: integer
-        format: int64
-      creatorId:
-        description: FK researcher ID for creator of workspace.
-        type: integer
-        format: int64
-      name:
-        description: user-generated name for workspace
-        type: string
-      fakeSize:
-        description: >
-          Fake numerical quantity for smoke testing.
-        type: integer
-        format: int64
-      creationTime:
-        description: >
-          timestamp (epoch millis) at workspace creation
-        type: integer
-        format: int64
   AccountPropertyUpdate:
     description: >
       A group of changes an admin can make to a user in the Edit Information card of the individual-user admin page.
@@ -8095,3 +8034,193 @@ definitions:
       reason:
         type: string
         description: 'The administrative purpose for accessing this notebook'
+  ReportingSnapshot:
+    description: >
+      Payload for upload to BigQuery reporting dataset. Internal use only (not part of the API).
+    type: object
+    properties:
+      captureTimestamp:
+        description: Time at which snapshot is retrieved. Epoch millis.
+        type: integer
+        format: int64
+      users:
+        type: array
+        items:
+          "$ref": "#/definitions/ReportingUser"
+      workspaces:
+        type: array
+        items:
+          "$ref": "#/definitions/ReportingWorkspace"
+  ReportingUser:
+    x-aou-note: |-
+      This code was generated using reporting-wizard.rb at 2020-09-22T11:17:29-04:00.
+      Manual modification should be avoided if possible as this is a one-time generation
+      and does not run on every build and updates must be merged manually for now.
+    type: object
+    properties:
+      aboutYou:
+        type: string
+      areaOfResearch:
+        type: string
+      complianceTrainingBypassTime:
+        type: string
+        format: date-time
+      complianceTrainingCompletionTime:
+        type: string
+        format: date-time
+      complianceTrainingExpirationTime:
+        type: string
+        format: date-time
+      contactEmail:
+        type: string
+      creationTime:
+        type: string
+        format: date-time
+      currentPosition:
+        type: string
+      dataAccessLevel:
+        "$ref": "#/definitions/DataAccessLevel"
+      dataUseAgreementBypassTime:
+        type: string
+        format: date-time
+      dataUseAgreementCompletionTime:
+        type: string
+        format: date-time
+      dataUseAgreementSignedVersion:
+        type: integer
+        format: int32
+      demographicSurveyCompletionTime:
+        type: string
+        format: date-time
+      disabled:
+        type: boolean
+      eraCommonsBypassTime:
+        type: string
+        format: date-time
+      eraCommonsCompletionTime:
+        type: string
+        format: date-time
+      familyName:
+        type: string
+      firstRegistrationCompletionTime:
+        type: string
+        format: date-time
+      firstSignInTime:
+        type: string
+        format: date-time
+      freeTierCreditsLimitDaysOverride:
+        type: integer
+        format: int64
+      freeTierCreditsLimitDollarsOverride:
+        type: number
+        format: double
+      givenName:
+        type: string
+      lastModifiedTime:
+        type: string
+        format: date-time
+      professionalUrl:
+        type: string
+      twoFactorAuthBypassTime:
+        type: string
+        format: date-time
+      twoFactorAuthCompletionTime:
+        type: string
+        format: date-time
+      userId:
+        type: integer
+        format: int64
+      username:
+        type: string
+      city:
+        type: string
+      country:
+        type: string
+      state:
+        type: string
+      streetAddress1:
+        type: string
+      streetAddress2:
+        type: string
+      zipCode:
+        type: string
+  ReportingWorkspace:
+    type: object
+    properties:
+      billingAccountType:
+        "$ref": "#/definitions/BillingAccountType"
+      billingStatus:
+        "$ref": "#/definitions/BillingStatus"
+      cdrVersionId:
+        type: integer
+        format: int64
+      creationTime:
+        type: string
+        format: date-time
+      creatorId:
+        type: integer
+        format: int64
+      disseminateResearchOther:
+        type: string
+      lastAccessedTime:
+        type: string
+        format: date-time
+      lastModifiedTime:
+        type: string
+        format: date-time
+      name:
+        type: string
+      needsRpReviewPrompt:
+        type: integer
+        format: int32
+      published:
+        type: boolean
+      rpAdditionalNotes:
+        type: string
+      rpAncestry:
+        type: boolean
+      rpAnticipatedFindings:
+        type: string
+      rpApproved:
+        type: boolean
+      rpCommercialPurpose:
+        type: boolean
+      rpControlSet:
+        type: boolean
+      rpDiseaseFocusedResearch:
+        type: boolean
+      rpDiseaseOfFocus:
+        type: string
+      rpDrugDevelopment:
+        type: boolean
+      rpEducational:
+        type: boolean
+      rpEthics:
+        type: boolean
+      rpIntendedStudy:
+        type: string
+      rpMethodsDevelopment:
+        type: boolean
+      rpOtherPopulationDetails:
+        type: string
+      rpOtherPurpose:
+        type: boolean
+      rpOtherPurposeDetails:
+        type: string
+      rpPopulationHealth:
+        type: boolean
+      rpReasonForAllOfUs:
+        type: string
+      rpReviewRequested:
+        type: boolean
+      rpScientificApproach:
+        type: string
+      rpSocialBehavioral:
+        type: boolean
+      rpTimeRequested:
+        type: string
+        format: date-time
+      workspaceId:
+        type: integer
+        format: int64
+

@@ -1,0 +1,143 @@
+[
+  {
+    "description": "Time snapshot was taken, in Epoch milliseconds. Same across all rows and all tables in the snapshot, and uniquely defines a particular snapshot.",
+    "name": "snapshot_timestamp",
+    "type": "INTEGER"
+  },
+  {
+    "name": "about_you",
+    "type": "STRING"
+  },
+  {
+    "name": "area_of_research",
+    "type": "STRING"
+  },
+  {
+    "name": "compliance_training_bypass_time",
+    "type": "TIMESTAMP"
+  },
+  {
+    "name": "compliance_training_completion_time",
+    "type": "TIMESTAMP"
+  },
+  {
+    "name": "compliance_training_expiration_time",
+    "type": "TIMESTAMP"
+  },
+  {
+    "name": "contact_email",
+    "type": "STRING"
+  },
+  {
+    "name": "creation_time",
+    "type": "TIMESTAMP"
+  },
+  {
+    "name": "current_position",
+    "type": "STRING"
+  },
+  {
+    "name": "data_access_level",
+    "type": "STRING"
+  },
+  {
+    "name": "data_use_agreement_bypass_time",
+    "type": "TIMESTAMP"
+  },
+  {
+    "name": "data_use_agreement_completion_time",
+    "type": "TIMESTAMP"
+  },
+  {
+    "name": "data_use_agreement_signed_version",
+    "type": "INT64"
+  },
+  {
+    "name": "demographic_survey_completion_time",
+    "type": "TIMESTAMP"
+  },
+  {
+    "name": "disabled",
+    "type": "BOOLEAN"
+  },
+  {
+    "name": "era_commons_bypass_time",
+    "type": "TIMESTAMP"
+  },
+  {
+    "name": "era_commons_completion_time",
+    "type": "TIMESTAMP"
+  },
+  {
+    "name": "family_name",
+    "type": "STRING"
+  },
+  {
+    "name": "first_registration_completion_time",
+    "type": "TIMESTAMP"
+  },
+  {
+    "name": "first_sign_in_time",
+    "type": "TIMESTAMP"
+  },
+  {
+    "name": "free_tier_credits_limit_days_override",
+    "type": "INT64"
+  },
+  {
+    "name": "free_tier_credits_limit_dollars_override",
+    "type": "FLOAT64"
+  },
+  {
+    "name": "given_name",
+    "type": "STRING"
+  },
+  {
+    "name": "last_modified_time",
+    "type": "TIMESTAMP"
+  },
+  {
+    "name": "professional_url",
+    "type": "STRING"
+  },
+  {
+    "name": "two_factor_auth_bypass_time",
+    "type": "TIMESTAMP"
+  },
+  {
+    "name": "two_factor_auth_completion_time",
+    "type": "TIMESTAMP"
+  },
+  {
+    "name": "user_id",
+    "type": "INT64"
+  },
+  {
+    "name": "username",
+    "type": "STRING"
+  },
+  {
+    "name": "city",
+    "type": "STRING"
+  },
+  {
+    "name": "country",
+    "type": "STRING"
+  },
+  {
+    "name": "state",
+    "type": "STRING"
+  },
+  {
+    "name": "street_address_1",
+    "type": "STRING"
+  },
+  {
+    "name": "street_address_2",
+    "type": "STRING"
+  },
+  {
+    "name": "zip_code",
+    "type": "STRING"
+  }
+]

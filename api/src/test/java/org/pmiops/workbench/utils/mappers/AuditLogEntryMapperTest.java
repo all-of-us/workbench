@@ -2,7 +2,6 @@ package org.pmiops.workbench.utils.mappers;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
-import static org.pmiops.workbench.utils.TimeAssertions.assertTimeWithinTolerance;
 
 import com.google.common.collect.ImmutableList;
 import java.time.OffsetDateTime;
@@ -17,6 +16,7 @@ import org.pmiops.workbench.model.AuditEventBundle;
 import org.pmiops.workbench.model.AuditEventBundleHeader;
 import org.pmiops.workbench.model.AuditLogEntry;
 import org.pmiops.workbench.model.AuditTargetPropertyChange;
+import org.pmiops.workbench.utils.TimeAssertions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
@@ -263,7 +263,7 @@ public class AuditLogEntryMapperTest {
             .filter(a -> a.getActionId().equals(ACTION_ID_1))
             .findFirst()
             .orElseThrow(() -> new NotFoundException("Action not found"));
-    assertTimeWithinTolerance(action1.getActionTime(), EVENT_TIME_1);
+    TimeAssertions.assertTimeApprox(action1.getActionTime(), EVENT_TIME_1);
     assertThat(action1.getEventBundles()).hasSize(1);
     assertThat(action1.getActionTime()).isEqualTo(EVENT_TIME_1);
     assertThat(action1.getEventBundles()).hasSize(1);
@@ -285,7 +285,7 @@ public class AuditLogEntryMapperTest {
             .filter(a -> a.getActionId().equals(ACTION_ID_2))
             .findFirst()
             .orElseThrow(() -> new NotFoundException("Action not found"));
-    assertTimeWithinTolerance(action2.getActionTime(), EVENT_TIME_2);
+    TimeAssertions.assertTimeApprox(action2.getActionTime(), EVENT_TIME_2);
     final AuditEventBundle bundle2 = action2.getEventBundles().get(0);
     assertThat(bundle2.getHeader().getActionType()).isEqualTo(ACTION_TYPE_DELETE);
 

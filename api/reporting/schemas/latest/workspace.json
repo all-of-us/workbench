@@ -1,0 +1,143 @@
+[
+  {
+    "description": "Time snapshot was taken. Same across all rows in the snapshot, and can be used for partitioning.",
+    "name": "snapshot_timestamp",
+    "type": "INTEGER"
+  },
+  {
+    "name": "billing_account_type",
+    "type": "STRING"
+  },
+  {
+    "name": "billing_status",
+    "type": "STRING"
+  },
+  {
+    "name": "cdr_version_id",
+    "type": "INT64"
+  },
+  {
+    "name": "creation_time",
+    "type": "TIMESTAMP"
+  },
+  {
+    "name": "creator_id",
+    "type": "INT64"
+  },
+  {
+    "name": "disseminate_research_other",
+    "type": "STRING"
+  },
+  {
+    "name": "last_accessed_time",
+    "type": "TIMESTAMP"
+  },
+  {
+    "name": "last_modified_time",
+    "type": "TIMESTAMP"
+  },
+  {
+    "name": "name",
+    "type": "STRING"
+  },
+  {
+    "name": "needs_rp_review_prompt",
+    "type": "INT64"
+  },
+  {
+    "name": "published",
+    "type": "BOOLEAN"
+  },
+  {
+    "name": "rp_additional_notes",
+    "type": "STRING"
+  },
+  {
+    "name": "rp_ancestry",
+    "type": "BOOLEAN"
+  },
+  {
+    "name": "rp_anticipated_findings",
+    "type": "STRING"
+  },
+  {
+    "name": "rp_approved",
+    "type": "BOOLEAN"
+  },
+  {
+    "name": "rp_commercial_purpose",
+    "type": "BOOLEAN"
+  },
+  {
+    "name": "rp_control_set",
+    "type": "BOOLEAN"
+  },
+  {
+    "name": "rp_disease_focused_research",
+    "type": "BOOLEAN"
+  },
+  {
+    "name": "rp_disease_of_focus",
+    "type": "STRING"
+  },
+  {
+    "name": "rp_drug_development",
+    "type": "BOOLEAN"
+  },
+  {
+    "name": "rp_educational",
+    "type": "BOOLEAN"
+  },
+  {
+    "name": "rp_ethics",
+    "type": "BOOLEAN"
+  },
+  {
+    "name": "rp_intended_study",
+    "type": "STRING"
+  },
+  {
+    "name": "rp_methods_development",
+    "type": "BOOLEAN"
+  },
+  {
+    "name": "rp_other_population_details",
+    "type": "STRING"
+  },
+  {
+    "name": "rp_other_purpose",
+    "type": "BOOLEAN"
+  },
+  {
+    "name": "rp_other_purpose_details",
+    "type": "STRING"
+  },
+  {
+    "name": "rp_population_health",
+    "type": "BOOLEAN"
+  },
+  {
+    "name": "rp_reason_for_all_of_us",
+    "type": "STRING"
+  },
+  {
+    "name": "rp_review_requested",
+    "type": "BOOLEAN"
+  },
+  {
+    "name": "rp_scientific_approach",
+    "type": "STRING"
+  },
+  {
+    "name": "rp_social_behavioral",
+    "type": "BOOLEAN"
+  },
+  {
+    "name": "rp_time_requested",
+    "type": "TIMESTAMP"
+  },
+  {
+    "name": "workspace_id",
+    "type": "INT64"
+  }
+]

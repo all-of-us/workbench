@@ -15,28 +15,29 @@ import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.model.ReportingResearcher;
 import org.pmiops.workbench.model.ReportingSnapshot;
+import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.reporting.insertion.DmlInsertJobBuilder;
-import org.pmiops.workbench.reporting.insertion.ResearcherParameter;
-import org.pmiops.workbench.reporting.insertion.WorkspaceParameter;
+import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 @Service("REPORTING_UPLOAD_SERVICE_DML_IMPL")
 @Primary
 public class ReportingUploadServiceDmlImpl implements ReportingUploadService {
+
   private static final Logger logger = Logger.getLogger("ReportingUploadServiceInsertQueryImpl");
   private static final long MAX_WAIT_TIME = Duration.ofSeconds(60).toMillis();
 
   private final BigQueryService bigQueryService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
-  private static final DmlInsertJobBuilder<ReportingResearcher> researcherJobBuilder =
-      ResearcherParameter::values;
+  private static final DmlInsertJobBuilder<ReportingUser> userJobBuilder =
+      UserColumnValueExtractor::values;
   private static final DmlInsertJobBuilder<ReportingWorkspace> workspaceJobBuilder =
-      WorkspaceParameter::values;
+      WorkspaceColumnValueExtractor::values;
 
   public ReportingUploadServiceDmlImpl(
       BigQueryService bigQueryService, Provider<WorkbenchConfig> workbenchConfigProvider) {
@@ -51,14 +52,13 @@ public class ReportingUploadServiceDmlImpl implements ReportingUploadService {
         insertJobs.stream()
             .collect(ImmutableMap.toImmutableMap(Function.identity(), this::executeWithTimeout));
 
-    // TODO: pipe more useful diagnostic info to the log
-    insertResults.forEach(
-        (job, result) -> logger.info(String.format("Inserted %d rows", result.getTotalRows())));
-
+    // TODO: pipe useful diagnostic info to the log. Apparently the total rows and destination table
+    //   aren't populated in these structures in this usage.
     return ReportingJobResult.SUCCEEDED;
   }
 
   private TableResult executeWithTimeout(QueryJobConfiguration job) {
+
     return bigQueryService.executeQuery(job, MAX_WAIT_TIME);
   }
 
@@ -67,17 +67,22 @@ public class ReportingUploadServiceDmlImpl implements ReportingUploadService {
     final ImmutableList.Builder<QueryJobConfiguration> resultBuilder = new Builder<>();
     final int partitionSize = workbenchConfigProvider.get().reporting.maxRowsPerInsert;
 
-    Lists.partition(reportingSnapshot.getResearchers(), partitionSize).stream()
+    Lists.partition(reportingSnapshot.getUsers(), partitionSize).stream()
         .map(
             batch ->
-                researcherJobBuilder.build(
-                    qualifyTableName("researcher"), batch, snapshotTimestamp))
+                userJobBuilder.build(
+                    qualifyTableName(UserColumnValueExtractor.TABLE_NAME),
+                    batch,
+                    snapshotTimestamp))
         .forEach(resultBuilder::add);
 
     Lists.partition(reportingSnapshot.getWorkspaces(), partitionSize).stream()
         .map(
             batch ->
-                workspaceJobBuilder.build(qualifyTableName("workspace"), batch, snapshotTimestamp))
+                workspaceJobBuilder.build(
+                    qualifyTableName(WorkspaceColumnValueExtractor.TABLE_NAME),
+                    batch,
+                    snapshotTimestamp))
         .forEach(resultBuilder::add);
     return resultBuilder.build();
   }
