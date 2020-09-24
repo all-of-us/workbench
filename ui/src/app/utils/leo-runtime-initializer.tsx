@@ -193,7 +193,7 @@ export class LeoRuntimeInitializer {
     if (serverConfigStore.getValue().enableCustomRuntimes) {
       // TODO(RW-3418): allow custom runtimes, maybe plumb default through serverConfigStore?
       runtime = {
-        gceConfig: {
+        dataprocConfig: {
           diskSize: 50,
           machineType: 'n1-standard-4'
         }
