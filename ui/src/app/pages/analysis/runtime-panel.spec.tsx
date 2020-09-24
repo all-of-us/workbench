@@ -72,7 +72,7 @@ describe('RuntimePanel', () => {
     updateRuntimeOpsStoreForWorkspaceNamespace(props.workspace.namespace, {promise: Promise.resolve(), operation: 'get', aborter: new AbortController()});
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
-    const outstandingRuntimeOp = wrapper.find('[data-test-id="outstanding-runtime-operation"]');
-    expect(outstandingRuntimeOp.length).toEqual(1);
+    const activeRuntimeOp = wrapper.find('[data-test-id="active-runtime-operation"]');
+    expect(activeRuntimeOp.length).toEqual(1);
   });
 });

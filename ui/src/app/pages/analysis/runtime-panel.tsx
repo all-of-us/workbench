@@ -58,7 +58,7 @@ const ActiveRuntimeOp = ({operation, workspaceNamespace}) => {
       </span>
       <Button
           onClick={() => abortRuntimeOperationForWorkspace(workspaceNamespace)}
-          data-test-id='outstanding-runtime-operation'
+          data-test-id='active-runtime-operation'
       >
         Cancel
       </Button>
@@ -125,7 +125,7 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOps
       const {runtimeOps, workspace} = this.props;
       const {loading, error, runtime} = this.state;
 
-      const outstandingRuntimeOp: RuntimeOperation = runtimeOps.opsByWorkspaceNamespace[workspace.namespace];
+      const activeRuntimeOp: RuntimeOperation = runtimeOps.opsByWorkspaceNamespace[workspace.namespace];
 
       if (loading) {
         return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
@@ -135,9 +135,9 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOps
         // TODO(RW-5591): Create runtime page goes here.
         return <React.Fragment>
           <div>No runtime exists yet</div>
-          {outstandingRuntimeOp && <hr/>}
-          {outstandingRuntimeOp && <div>
-            <ActiveRuntimeOp operation={outstandingRuntimeOp.operation} workspaceNamespace={workspace.namespace}/>
+          {activeRuntimeOp && <hr/>}
+          {activeRuntimeOp && <div>
+            <ActiveRuntimeOp operation={activeRuntimeOp.operation} workspaceNamespace={workspace.namespace}/>
           </div>}
         </React.Fragment>;
       }
@@ -243,9 +243,9 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOps
         <FlexRow style={{justifyContent: 'flex-end', marginTop: '.75rem'}}>
           <Button disabled={true}>Create</Button>
         </FlexRow>
-        {outstandingRuntimeOp && <React.Fragment>
+        {activeRuntimeOp && <React.Fragment>
           <hr/>
-          <ActiveRuntimeOp operation={outstandingRuntimeOp.operation} workspaceNamespace={workspace.namespace}/>
+          <ActiveRuntimeOp operation={activeRuntimeOp.operation} workspaceNamespace={workspace.namespace}/>
         </React.Fragment>}
       </div>;
     }
