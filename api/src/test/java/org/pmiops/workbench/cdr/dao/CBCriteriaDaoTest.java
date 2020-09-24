@@ -38,7 +38,6 @@ public class CBCriteriaDaoTest {
   private DbCriteria icd9Criteria;
   private DbCriteria icd10Criteria;
   private DbCriteria measurementCriteria;
-  private DbCriteria raceParent;
   private DbCriteria raceAsian;
   private DbCriteria raceWhite;
   private DbCriteria gender;
@@ -129,15 +128,6 @@ public class CBCriteriaDaoTest {
                 .addCode("LP123")
                 .addSynonyms("001[MEASUREMENT_rank1]")
                 .build());
-    raceParent =
-        cbCriteriaDao.save(
-            DbCriteria.builder()
-                .addDomainId(DomainType.PERSON.toString())
-                .addType(CriteriaType.RACE.toString())
-                .addName("Race")
-                .addStandard(true)
-                .addParentId(0)
-                .build());
     raceAsian =
         cbCriteriaDao.save(
             DbCriteria.builder()
@@ -145,7 +135,6 @@ public class CBCriteriaDaoTest {
                 .addType(CriteriaType.RACE.toString())
                 .addName("Asian")
                 .addStandard(true)
-                .addParentId(raceParent.getId())
                 .build());
     raceWhite =
         cbCriteriaDao.save(
@@ -154,7 +143,6 @@ public class CBCriteriaDaoTest {
                 .addType(CriteriaType.RACE.toString())
                 .addName("White")
                 .addStandard(true)
-                .addParentId(raceParent.getId())
                 .build());
     gender =
         cbCriteriaDao.save(
@@ -286,7 +274,7 @@ public class CBCriteriaDaoTest {
     final List<DbCriteria> demoList =
         cbCriteriaDao.findCriteriaByDomainAndTypeOrderByIdAsc(
             DomainType.PERSON.toString(), CriteriaType.RACE.toString());
-    assertThat(demoList).containsExactly(raceParent, raceAsian, raceWhite);
+    assertThat(demoList).containsExactly(raceAsian, raceWhite);
   }
 
   @Test
@@ -350,18 +338,18 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findByDomainIdAndTypeAndParentIdNotIn() {
+  public void findByDomainIdAndType() {
     Sort sort = new Sort(Direction.ASC, "name");
     List<DbCriteria> criteriaList =
-        cbCriteriaDao.findByDomainIdAndTypeAndParentIdNotIn(
-            DomainType.PERSON.toString(), FilterColumns.RACE.toString(), 0L, sort);
+        cbCriteriaDao.findByDomainIdAndType(
+            DomainType.PERSON.toString(), FilterColumns.RACE.toString(), sort);
     assertThat(criteriaList).containsExactly(raceAsian, raceWhite).inOrder();
 
     // reverse
     sort = new Sort(Direction.DESC, "name");
     criteriaList =
-        cbCriteriaDao.findByDomainIdAndTypeAndParentIdNotIn(
-            DomainType.PERSON.toString(), FilterColumns.RACE.toString(), 0L, sort);
+        cbCriteriaDao.findByDomainIdAndType(
+            DomainType.PERSON.toString(), FilterColumns.RACE.toString(), sort);
     assertThat(criteriaList).containsExactly(raceWhite, raceAsian).inOrder();
   }
 

@@ -363,15 +363,14 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public List<String> findSortedConceptIdsByDomainIdAndTypeAndParentIdNotIn(
-      String domainId, Long parentId, String sortColumn, String sortName) {
+  public List<String> findSortedConceptIdsByDomainIdAndType(
+      String domainId, String sortColumn, String sortName) {
     Sort sort =
         sortName.equalsIgnoreCase(Sort.Direction.ASC.toString())
             ? new Sort(Sort.Direction.ASC, "name")
             : new Sort(Sort.Direction.DESC, "name");
     List<DbCriteria> criteriaList =
-        cbCriteriaDao.findByDomainIdAndTypeAndParentIdNotIn(
-            DomainType.PERSON.toString(), sortColumn, 0L, sort);
+        cbCriteriaDao.findByDomainIdAndType(DomainType.PERSON.toString(), sortColumn, sort);
     List<String> demoList =
         criteriaList.stream()
             .map(
