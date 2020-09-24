@@ -438,7 +438,6 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
               {loadingSubtree && <SpinnerOverlay/>}
               <div style={loadingSubtree ? {height: '100%', pointerEvents: 'none', opacity: 0.3} : {height: '100%'}}>
                 {/* Tree View */}
-                {/*<div style={this.searchContentStyle('tree')}>*/}
                   {hierarchyNode && <CriteriaTree
                       autocompleteSelection={autocompleteSelection}
                       back={this.back}
@@ -450,7 +449,6 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
                       selectedIds={selectedIds}
                       selectOption={this.setAutocompleteSelection}
                       setSearchTerms={this.setTreeSearchTerms}/>}
-                {/*</div>*/}
                 {/* List View (using duplicated version of ListSearch) */}
                 <div style={this.searchContentStyle('list')}>
                   <ListSearchV2 hierarchy={this.showHierarchy}
