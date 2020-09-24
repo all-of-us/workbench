@@ -225,7 +225,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
 
     private pollTimer: NodeJS.Timer;
     private redirectTimer: NodeJS.Timer;
-    private aborter = new AbortController();
+    private pollAborter = new AbortController();
 
     constructor(props) {
       super(props);
@@ -279,7 +279,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
         withCredentials: true,
         crossDomain: true,
         credentials: 'include',
-        signal: this.aborter.signal
+        signal: this.pollAborter.signal
       }));
     }
 
@@ -297,7 +297,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
     componentWillUnmount() {
       clearTimeout(this.pollTimer);
       clearTimeout(this.redirectTimer);
-      this.aborter.abort();
+      this.pollAborter.abort();
     }
 
     onRuntimeStatusUpdate(status: RuntimeStatus) {
@@ -316,7 +316,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       const runtime = await LeoRuntimeInitializer.initialize({
         workspaceNamespace: billingProjectId,
         onStatusUpdate: (status) => this.onRuntimeStatusUpdate(status),
-        abortSignal: this.aborter.signal
+        pollAbortSignal: this.pollAborter.signal
       });
       await this.connectToRunningRuntime(runtime);
     }
@@ -372,7 +372,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
           'format': 'text',
           'content': JSON.stringify(fileContent)
         },
-        {signal: this.aborter.signal}));
+        {signal: this.pollAborter.signal}));
       return `${localizedDir}/${jupyterResp.name}`;
     }
 
@@ -382,7 +382,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
         workspace.namespace, {
           notebookNames, playgroundMode: this.isPlaygroundMode()
         },
-        {signal: this.aborter.signal}));
+        {signal: this.pollAborter.signal}));
       return resp.runtimeLocalDirectory;
     }
 

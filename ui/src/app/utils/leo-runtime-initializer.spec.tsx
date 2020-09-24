@@ -12,11 +12,14 @@ import {RuntimesApi as LeoRuntimesApi} from 'notebooks-generated/fetch';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {LeoRuntimesApiStub} from 'testing/stubs/leo-runtimes-api-stub';
 import {RuntimeConfigurationType} from '../../generated/fetch';
+import {runtimeOpsStore} from "./stores";
+import {serverConfigStore} from "./navigation";
 
 let mockGetRuntime: SpyInstance;
 let mockCreateRuntime: SpyInstance;
 let mockDeleteRuntime: SpyInstance;
 let mockStartRuntime: SpyInstance;
+const mockSetRuntimeOpsStore = jest.spyOn(runtimeOpsStore, 'set');
 
 const baseRuntime: Runtime = {
   runtimeName: 'aou-rw-3',
@@ -26,6 +29,8 @@ const baseRuntime: Runtime = {
   toolDockerImage: 'docker',
   configurationType: RuntimeConfigurationType.DefaultDataproc
 };
+
+const workspaceNamespace = 'aou-rw-12345';
 
 describe('RuntimeInitializer', () => {
 
@@ -39,6 +44,8 @@ describe('RuntimeInitializer', () => {
     mockCreateRuntime = jest.spyOn(runtimeApi(), 'createRuntime');
     mockDeleteRuntime = jest.spyOn(runtimeApi(), 'deleteRuntime');
     mockStartRuntime = jest.spyOn(leoRuntimesApi(), 'startRuntime');
+
+    serverConfigStore.next({gsuiteDomain: 'researchallofus.org', enableCustomRuntimes: false});
   });
 
   afterEach(() => {
@@ -84,7 +91,7 @@ describe('RuntimeInitializer', () => {
 
   const runInitializerAndTimers = async(options?: Partial<LeoRuntimeInitializerOptions>, maxLoops?: number): Promise<Runtime> => {
     const runtimePromise = LeoRuntimeInitializer.initialize({
-      workspaceNamespace: 'aou-rw-12345',
+      workspaceNamespace: workspaceNamespace,
       ...options
     });
     await runTimersUntilSettled(runtimePromise, maxLoops);
@@ -247,7 +254,7 @@ describe('RuntimeInitializer', () => {
     });
     const aborter = new AbortController();
 
-    const initializePromise = runInitializerAndTimers({abortSignal: aborter.signal});
+    const initializePromise = runInitializerAndTimers({pollAbortSignal: aborter.signal});
     // Wait a reasonably-short amount of time, at least one polling delay period, before sending
     // an abort signal.
     await new Promise(resolve => setTimeout(resolve, 20));
@@ -311,4 +318,37 @@ describe('RuntimeInitializer', () => {
     }
   });
 
+  it('should use and clean the runtimeOpsStore for get', async() => {
+    mockGetRuntimeCalls([baseRuntime]);
+    await runInitializerAndTimers();
+    expect(mockSetRuntimeOpsStore).toHaveBeenCalled();
+    expect(runtimeOpsStore.get().opsByWorkspaceNamespace[workspaceNamespace]).toBeUndefined();
+  });
+
+  it('should use and clean the runtimeOpsStore for create', async() => {
+    mockGetRuntime.mockRejectedValueOnce(new Response(null, {status: 404}));
+    mockCreateRuntime.mockImplementationOnce(async(workspaceNamespace) => {
+      return {status: RuntimeStatus.Creating};
+    });
+    await runInitializerAndTimers();
+    expect(mockSetRuntimeOpsStore).toHaveBeenCalled();
+    expect(runtimeOpsStore.get().opsByWorkspaceNamespace[workspaceNamespace]).toBeUndefined();
+  });
+
+  it('should use and clean the runtimeOpsStore for resume', async() => {
+    mockGetRuntimeCalls([{status: RuntimeStatus.Stopped}]);
+    await runInitializerAndTimers();
+    expect(mockSetRuntimeOpsStore).toHaveBeenCalled();
+    expect(runtimeOpsStore.get().opsByWorkspaceNamespace[workspaceNamespace]).toBeUndefined();
+  });
+
+  it('should use and clean the runtimeOpsStore for delete', async() => {
+    mockGetRuntimeCalls([{status: RuntimeStatus.Error}]);
+    mockDeleteRuntime.mockImplementationOnce(async(workspaceNamespace) => {
+      return {};
+    });
+    await runInitializerAndTimers();
+    expect(mockSetRuntimeOpsStore).toHaveBeenCalled();
+    expect(runtimeOpsStore.get().opsByWorkspaceNamespace[workspaceNamespace]).toBeUndefined();
+  });
 });

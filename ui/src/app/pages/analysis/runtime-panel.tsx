@@ -7,6 +7,15 @@ import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {allMachineTypes, validLeonardoMachineTypes} from 'app/utils/machines';
+import {
+  abortRuntimeOperationForWorkspace,
+  markRuntimeOperationCompleteForWorkspace,
+  RuntimeOperation,
+  RuntimeOpsStore,
+  runtimeOpsStore,
+  updateRuntimeOpsStoreForWorkspaceNamespace,
+  withStore
+} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Dropdown} from 'primereact/dropdown';
 import {InputNumber} from 'primereact/inputnumber';
@@ -40,7 +49,25 @@ const styles = reactStyles({
 
 const defaultMachineType = allMachineTypes.find(({name}) => name === 'n1-standard-4');
 
+const ActiveRuntimeOp = ({operation, workspaceNamespace}) => {
+  return <React.Fragment>
+    <h3 style={styles.sectionHeader}>Active Runtime Operations</h3>
+    <FlexRow style={{'alignItems': 'center'}}>
+      <span style={{'marginRight': '1rem'}}>
+        {operation} in progress
+      </span>
+      <Button
+          onClick={() => abortRuntimeOperationForWorkspace(workspaceNamespace)}
+          data-test-id='active-runtime-operation'
+      >
+        Cancel
+      </Button>
+    </FlexRow>
+  </React.Fragment>;
+};
+
 export interface Props {
+  runtimeOps: RuntimeOpsStore;
   workspace: WorkspaceData;
 }
 
@@ -54,7 +81,7 @@ interface State {
   runtime: Runtime|null;
 }
 
-export const RuntimePanel = withCurrentWorkspace()(
+export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOpsStore, 'runtimeOps'))(
   class extends React.Component<Props, State> {
     private aborter = new AbortController();
 
@@ -72,7 +99,13 @@ export const RuntimePanel = withCurrentWorkspace()(
       let runtime = null;
       let error = false;
       try {
-        runtime = await runtimeApi().getRuntime(this.props.workspace.namespace, {signal: this.aborter.signal});
+        const promise = runtimeApi().getRuntime(this.props.workspace.namespace, {signal: this.aborter.signal});
+        updateRuntimeOpsStoreForWorkspaceNamespace(this.props.workspace.namespace, {
+          promise: promise,
+          operation: 'get',
+          aborter: this.aborter
+        });
+        runtime = await promise;
       } catch (e) {
         // 404 is expected if the runtime doesn't exist, represent this as a null
         // runtime rather than an error mode.
@@ -80,6 +113,7 @@ export const RuntimePanel = withCurrentWorkspace()(
           error = true;
         }
       }
+      markRuntimeOperationCompleteForWorkspace(this.props.workspace.namespace);
       this.setState({
         runtime,
         error,
@@ -88,14 +122,24 @@ export const RuntimePanel = withCurrentWorkspace()(
     }
 
     render() {
+      const {runtimeOps, workspace} = this.props;
       const {loading, error, runtime} = this.state;
+
+      const activeRuntimeOp: RuntimeOperation = runtimeOps.opsByWorkspaceNamespace[workspace.namespace];
+
       if (loading) {
         return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
       } else if (error) {
         return <div>Error loading compute configuration</div>;
       } else if (!runtime) {
         // TODO(RW-5591): Create runtime page goes here.
-        return <div>No runtime exists yet</div>;
+        return <React.Fragment>
+          <div>No runtime exists yet</div>
+          {activeRuntimeOp && <hr/>}
+          {activeRuntimeOp && <div>
+            <ActiveRuntimeOp operation={activeRuntimeOp.operation} workspaceNamespace={workspace.namespace}/>
+          </div>}
+        </React.Fragment>;
       }
 
       const isDataproc = !!runtime.dataprocConfig;
@@ -199,6 +243,10 @@ export const RuntimePanel = withCurrentWorkspace()(
         <FlexRow style={{justifyContent: 'flex-end', marginTop: '.75rem'}}>
           <Button disabled={true}>Create</Button>
         </FlexRow>
+        {activeRuntimeOp && <React.Fragment>
+          <hr/>
+          <ActiveRuntimeOp operation={activeRuntimeOp.operation} workspaceNamespace={workspace.namespace}/>
+        </React.Fragment>}
       </div>;
     }
 
