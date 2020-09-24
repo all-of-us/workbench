@@ -194,7 +194,7 @@ export class LeoRuntimeInitializer {
       // TODO(RW-3418): allow custom runtimes, maybe plumb default through serverConfigStore?
       runtime = {
         dataprocConfig: {
-          machineType: 'n1-standard-4'
+          masterMachineType: 'n1-standard-4'
         }
       };
     } else {
