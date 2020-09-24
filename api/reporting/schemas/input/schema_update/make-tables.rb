@@ -12,14 +12,19 @@ def qualify_table_name(project, dataset, table_name)
   "#{project}:#{dataset}.#{table_name}"
 end
 
-def make_table(project, dataset, table_name, description, schema_path)
+def make_table(qualified_table_name, description, schema_path)
   commands = %W[bq mk \
     --description "#{description}" \
     --table \
-    #{qualify_table_name(project, dataset, table_name)} \
+    #{qualified_table_name} \
     #{schema_path}]
   command_line = commands.map(&:strip).join(' ')
   run_command_line(command_line)
+end
+
+def show_table(qualified_table_name)
+  commands = %W[bq show --format prettyjson #{qualified_table_name}]
+  run_command_line(commands.join(' '))
 end
 
 def run_command_line(command_line)
@@ -31,5 +36,8 @@ end
 
 JOB = INPUT['job']
 JOB['tables'].each do |table|
-  make_table(JOB['project'], JOB['dataset'], table['name'], table['description'], table['schemaPath'])
+  qualified_table_name = qualify_table_name(JOB['project'], JOB['dataset'], table['name'])
+  make_table(qualified_table_name, table['description'], table['schemaPath'])
+  show_table(qualified_table_name)
+  puts
 end
