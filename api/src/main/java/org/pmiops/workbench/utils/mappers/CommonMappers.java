@@ -13,7 +13,6 @@ import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.model.BillingStatus;
 import org.springframework.stereotype.Service;
 
 @Service
