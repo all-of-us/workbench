@@ -314,30 +314,6 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
           estCount: attr.itemCount,
           valueAsConceptId: attr.surveyId
         }));
-        if (!form.cat.length) {
-          // Mock survey versions for testing COPE attributes layout
-          // TODO remove before merging
-          form.cat = [
-            {
-              checked: false,
-              conceptName: 'May 2020',
-              estCount: 4622,
-              valueAsConceptId: 100,
-            },
-            {
-              checked: false,
-              conceptName: 'June 2020',
-              estCount: 2080,
-              valueAsConceptId: 101,
-            },
-            {
-              checked: false,
-              conceptName: 'July 2020',
-              estCount: 1621,
-              valueAsConceptId: 102
-            }
-          ];
-        }
         if (numericalAttributes) {
           numericalAttributes.items.forEach(attr => {
             if (!form.num.length) {
