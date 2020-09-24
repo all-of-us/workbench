@@ -91,7 +91,7 @@ public class ReportingSnapshotServiceTest {
   private void mockUsers() {
     final List<ProjectedReportingUser> users =
         ImmutableList.of(mockProjectedUser(), mockProjectedUser());
-    doReturn(users).when(mockUserService).getRepotingUsers();
+    doReturn(users).when(mockUserService).getReportingUsers();
   }
 
   private void mockWorkspaces() {

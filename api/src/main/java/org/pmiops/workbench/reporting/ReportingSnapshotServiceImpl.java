@@ -89,7 +89,7 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
     final Stopwatch stopwatch = stopwatchProvider.get().start();
     final QueryResultBundle result =
         new QueryResultBundle(
-            userService.getRepotingUsers(), workspaceService.getReportingWorkspaces());
+            userService.getReportingUsers(), workspaceService.getReportingWorkspaces());
     stopwatch.stop();
     log.info(LogFormatters.duration("Application DB Queries", stopwatch.elapsed()));
     return result;

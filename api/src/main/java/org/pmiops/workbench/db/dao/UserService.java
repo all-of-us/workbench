@@ -121,5 +121,5 @@ public interface UserService {
 
   Optional<DbUser> findUserWithAuthoritiesAndPageVisits(long userId);
 
-  List<ProjectedReportingUser> getRepotingUsers();
+  List<ProjectedReportingUser> getReportingUsers();
 }

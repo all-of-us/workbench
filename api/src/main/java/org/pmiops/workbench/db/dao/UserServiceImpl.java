@@ -1032,7 +1032,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   @Override
-  public List<ProjectedReportingUser> getRepotingUsers() {
+  public List<ProjectedReportingUser> getReportingUsers() {
     return userDao.getReportingUsers();
   }
 }

@@ -7,8 +7,8 @@ package org.pmiops.workbench.reporting.insertion;
  *
  * Builder interfaces for separate BigQuery upload paths are possible.
  */
-public interface BigQueryInsertionPayloadTransformer<MODEL_TYPE> {
+public interface BigQueryInsertionPayloadTransformer<MODEL_T> {
   // Extending classes need only provide an  array of QueryParameterColumns, such
   // as an enum class's values() array.
-  ColumnValueExtractor<MODEL_TYPE>[] getQueryParameterColumns();
+  ColumnValueExtractor<MODEL_T>[] getQueryParameterColumns();
 }
