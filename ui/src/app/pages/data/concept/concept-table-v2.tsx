@@ -131,7 +131,6 @@ const domainColumns = [
     field: 'conceptName',
     header: 'Name',
     headerStyle: styles.headerStyle,
-    selectionMode: null,
     testId: 'conceptName'
   },
   {
@@ -140,7 +139,6 @@ const domainColumns = [
     field: 'conceptCode',
     header: 'Code',
     headerStyle: styles.headerStyle,
-    selectionMode: null,
     testId: 'conceptCode'
   },
   {
@@ -149,7 +147,6 @@ const domainColumns = [
     field: 'vocabularyId',
     header: 'Vocabulary',
     headerStyle: styles.headerStyle,
-    selectionMode: null,
     testId: null
   },
   {
@@ -158,7 +155,6 @@ const domainColumns = [
     field: 'countValue',
     header: 'Participant Count',
     headerStyle: styles.headerStyle,
-    selectionMode: null,
     testId: null
   }
 ];
@@ -350,7 +346,7 @@ export const ConceptTableV2  = withCurrentConcept()(class extends React.Componen
     if (!!this.growlTimer) {
       clearTimeout(this.growlTimer);
     }
-    // // This is to set style display: 'none' on the growl so it doesn't block the nav icons in the sidebar
+    // This is to set style display: 'none' on the growl so it doesn't block the nav icons in the sidebar
     this.growlTimer = setTimeout(() => this.setState({growlVisible: false}), 2500);
 
     currentConceptStore.next(selectedConcepts);
@@ -363,7 +359,7 @@ export const ConceptTableV2  = withCurrentConcept()(class extends React.Componen
     return <div style={styles.selectDiv}>
       {index.toString() === '-1'  ? <ClrIcon style={styles.selectIcon}
                shape='plus-circle' size='20' onClick={() => this.selectItem(rowData)}/> :
-        <ClrIcon style={styles.selectIcon} shape='check-circle' size='20'/>
+        <ClrIcon style={{...styles.selectIcon, ...styles.selected}} shape='check-circle' size='20'/>
       }
      </div>;
   }
@@ -377,7 +373,6 @@ export const ConceptTableV2  = withCurrentConcept()(class extends React.Componen
         field: concepts.length && !!concepts[0].question ? 'question' : 'conceptName',
         header: 'Question',
         headerStyle: styles.headerStyle,
-        selectionMode: null,
         testId: 'question'
       },
       {
@@ -386,7 +381,6 @@ export const ConceptTableV2  = withCurrentConcept()(class extends React.Componen
         field: 'countValue',
         header: 'Participant Count',
         headerStyle: {...styles.headerStyle, width: '20%'},
-        selectionMode: null,
         testId: null
       }
     ];
@@ -397,7 +391,6 @@ export const ConceptTableV2  = withCurrentConcept()(class extends React.Componen
         header={col.header}
         headerStyle={col.headerStyle}
         key={c}
-       // selectionMode={col.selectionMode}
         data-test-id={col.testId}
     />);
   }
@@ -408,10 +401,6 @@ export const ConceptTableV2  = withCurrentConcept()(class extends React.Componen
     return <React.Fragment>
       <style>
         {css}
-      </style>
-      <Growl ref={(el) => this.growl = el} style={!this.state.growlVisible ? {...styles.growl, display: 'none'} : styles.growl}/>
-      <div data-test-id='conceptTable' key={reactKey} style={{position: 'relative', minHeight: '8rem'}}>
-      <style>
         {`
           body .p-datatable .p-datatable-tbody > tr:nth-child(even),
           body .p-datatable .p-datatable-tbody > tr:nth-child(even).p-highlight,
@@ -434,7 +423,8 @@ export const ConceptTableV2  = withCurrentConcept()(class extends React.Componen
             max-height: 18rem !important;
         `}
       </style>
-
+      <Growl ref={(el) => this.growl = el} style={!this.state.growlVisible ? {...styles.growl, display: 'none'} : styles.growl}/>
+      <div data-test-id='conceptTable' key={reactKey} style={{position: 'relative', minHeight: '8rem'}}>
       {loading ? <SpinnerOverlay /> : <DataTable ref={tableRef} emptyMessage={loading || error ? '' : placeholderValue}
                                                  style={styles.datatable}
                                                  value={error ? null : concepts.map(formatCounts)}
@@ -452,7 +442,8 @@ export const ConceptTableV2  = withCurrentConcept()(class extends React.Componen
                                                  onValueChange={(value) => this.onPageChange()}
                                                  onSelectionChange={e => this.updateSelectedConceptList(e.value, 'table')}
                                                  footer={this.errorMessage()}>
-        <Column header={''} style={{...styles.colStyle, width: '2rem'}} body={(rowData) => this.addTemplate(rowData)}/>
+        <Column headerStyle={{...styles.headerStyle, width: '2rem'}}
+           style={{...styles.colStyle, width: '2rem'}} body={(rowData) => this.addTemplate(rowData)}/>
         {this.renderColumns()}
       </DataTable>}
 
