@@ -3937,6 +3937,18 @@ definitions:
         type: boolean
         default: false
         description: Whether user should be able to customize notebook runtime settings.
+      runtimeImages:
+        type: array
+        items:
+          "$ref": "#/definitions/RuntimeImage"
+
+  RuntimeImage:
+    type: object
+    properties:
+      cloudService:
+        type: string
+      name:
+        type: string
 
   FeaturedWorkspacesConfigResponse:
     type: object

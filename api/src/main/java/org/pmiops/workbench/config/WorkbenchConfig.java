@@ -1,6 +1,7 @@
 package org.pmiops.workbench.config;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A class representing the main workbench configuration; parsed from JSON stored in the database.
@@ -128,6 +129,13 @@ public class WorkbenchConfig {
     // This is the base URL that a browser client should be redirected to in order to complete
     // an authentication round trip with eRA Commons.
     public String shibbolethUiBaseUrl;
+
+    public RuntimeImages runtimeImages;
+  }
+
+  public static class RuntimeImages {
+    public ArrayList<String> gce;
+    public ArrayList<String> dataproc;
   }
 
   public static class AuthConfig {
