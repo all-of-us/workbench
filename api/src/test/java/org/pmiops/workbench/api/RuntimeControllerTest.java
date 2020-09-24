@@ -459,6 +459,23 @@ public class RuntimeControllerTest {
   }
 
   @Test
+  public void testGetRuntime_fromListRuntimes_invalidRutime() throws ApiException {
+    String timestamp = "2020-09-13T19:19:57.347Z";
+
+    dataprocConfigObj.put("cloudService", "notACloudService");
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new ApiException(404, "Not found"));
+    when(userRuntimesApi.listRuntimesByProject(BILLING_PROJECT_ID, null, true))
+        .thenReturn(
+            ImmutableList.of(
+                new LeonardoListRuntimeResponse()
+                    .runtimeConfig(dataprocConfigObj)
+                    .labels(ImmutableMap.of("all-of-us-config", "user-override"))));
+
+    assertThrows(NotFoundException.class, () -> runtimeController.getRuntime(BILLING_PROJECT_ID));
+  }
+
+  @Test
   public void testGetRuntime_fromListRuntimes_gceConfig() throws ApiException {
     String timestamp = "2020-09-13T19:19:57.347Z";
 
@@ -531,6 +548,71 @@ public class RuntimeControllerTest {
                 new LeonardoListRuntimeResponse()
                     .runtimeName("default-runtime")
                     .auditInfo(new LeonardoAuditInfo().createdDate(olderTimestamp))
+                    .labels(ImmutableMap.of("all-of-us-config", "default"))));
+
+    assertThat(runtimeController.getRuntime(BILLING_PROJECT_ID).getBody().getRuntimeName())
+        .isEqualTo("expected-runtime");
+  }
+
+  @Test
+  public void testGetRuntime_fromListRuntimes_checkMostRecent_nullAuditInfo() throws ApiException {
+    String newerTimestamp = "2020-09-14T19:19:57.347Z";
+
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new ApiException(404, "Not found"));
+    when(userRuntimesApi.listRuntimesByProject(BILLING_PROJECT_ID, null, true))
+        .thenReturn(
+            ImmutableList.of(
+                new LeonardoListRuntimeResponse()
+                    .runtimeName("expected-runtime")
+                    .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp))
+                    .labels(ImmutableMap.of("all-of-us-config", "user-override")),
+                new LeonardoListRuntimeResponse()
+                    .runtimeName("default-runtime")
+                    .labels(ImmutableMap.of("all-of-us-config", "default"))));
+
+    assertThat(runtimeController.getRuntime(BILLING_PROJECT_ID).getBody().getRuntimeName())
+        .isEqualTo("expected-runtime");
+  }
+
+  @Test
+  public void testGetRuntime_fromListRuntimes_checkMostRecent_nullTimestamp() throws ApiException {
+    String newerTimestamp = "2020-09-14T19:19:57.347Z";
+
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new ApiException(404, "Not found"));
+    when(userRuntimesApi.listRuntimesByProject(BILLING_PROJECT_ID, null, true))
+        .thenReturn(
+            ImmutableList.of(
+                new LeonardoListRuntimeResponse()
+                    .runtimeName("expected-runtime")
+                    .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp))
+                    .labels(ImmutableMap.of("all-of-us-config", "user-override")),
+                new LeonardoListRuntimeResponse()
+                    .runtimeName("default-runtime")
+                    .auditInfo(new LeonardoAuditInfo().createdDate(null))
+                    .labels(ImmutableMap.of("all-of-us-config", "default"))));
+
+    assertThat(runtimeController.getRuntime(BILLING_PROJECT_ID).getBody().getRuntimeName())
+        .isEqualTo("expected-runtime");
+  }
+
+  @Test
+  public void testGetRuntime_fromListRuntimes_checkMostRecent_emptyTimestamp() throws ApiException {
+    String newerTimestamp = "2020-09-14T19:19:57.347Z";
+
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new ApiException(404, "Not found"));
+    when(userRuntimesApi.listRuntimesByProject(BILLING_PROJECT_ID, null, true))
+        .thenReturn(
+            ImmutableList.of(
+                new LeonardoListRuntimeResponse()
+                    .runtimeName("expected-runtime")
+                    .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp))
+                    .labels(ImmutableMap.of("all-of-us-config", "user-override")),
+                new LeonardoListRuntimeResponse()
+                    .runtimeName("default-runtime")
+                    .auditInfo(new LeonardoAuditInfo().createdDate(""))
                     .labels(ImmutableMap.of("all-of-us-config", "default"))));
 
     assertThat(runtimeController.getRuntime(BILLING_PROJECT_ID).getBody().getRuntimeName())
