@@ -353,14 +353,14 @@ public class CBCriteriaDaoTest {
   public void findByDomainIdAndTypeAndParentIdNotIn() {
     Sort sort = new Sort(Direction.ASC, "name");
     List<DbCriteria> criteriaList =
-        cbCriteriaDao.findByDomainIdAndTypeAndParentIdNotIn(
+        cbCriteriaDao.findByDomainIdAndType(
             DomainType.PERSON.toString(), FilterColumns.RACE.toString(), 0L, sort);
     assertThat(criteriaList).containsExactly(raceAsian, raceWhite).inOrder();
 
     // reverse
     sort = new Sort(Direction.DESC, "name");
     criteriaList =
-        cbCriteriaDao.findByDomainIdAndTypeAndParentIdNotIn(
+        cbCriteriaDao.findByDomainIdAndType(
             DomainType.PERSON.toString(), FilterColumns.RACE.toString(), 0L, sort);
     assertThat(criteriaList).containsExactly(raceWhite, raceAsian).inOrder();
   }

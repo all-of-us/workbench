@@ -623,8 +623,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
               ? CriteriaType.SEX.toString()
               : sortColumn;
       List<String> demoList =
-          cohortBuilderService.findSortedConceptIdsByDomainIdAndTypeAndParentIdNotIn(
-              DomainType.PERSON.toString(), 0L, criteriaSortColumn, sortName);
+          cohortBuilderService.findSortedConceptIdsByDomainIdAndType(
+              DomainType.PERSON.toString(), criteriaSortColumn, sortName);
       if (!demoList.isEmpty()) {
         pageRequest.setSortColumn(
             "FIELD("
