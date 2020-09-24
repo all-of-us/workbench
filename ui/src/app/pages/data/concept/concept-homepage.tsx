@@ -501,9 +501,8 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
     }
 
     get activeSelectedConceptCount(): number {
-      const enableConcept = serverConfigStore.getValue().enableConceptSetSearchV2;
       const {activeDomainTab, selectedConceptDomainMap} = this.state;
-      if (!enableConcept || !this.props.concept) {
+      if (!serverConfigStore.getValue().enableConceptSetSearchV2 || !this.props.concept) {
         if (!activeDomainTab || !activeDomainTab.domain || !selectedConceptDomainMap[activeDomainTab.domain]) {
           return 0;
         }
@@ -576,7 +575,7 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
             })}
           </FlexRow>
           {!this.domainLoading(activeDomainTab) && activeDomainTab.conceptCount > 1000 && !domainError &&
-            <label style={styles.conceptCounts}>Showing top {concepts.length.toLocaleString()} {activeDomainTab.name}</label>
+            <div style={styles.conceptCounts}>Showing top {concepts.length.toLocaleString()} {activeDomainTab.name}</div>
           }
           <ConceptTable concepts={concepts}
                         domain={activeDomainTab.domain}

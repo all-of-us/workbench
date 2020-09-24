@@ -332,31 +332,6 @@ export const ConceptTableV2  = withCurrentConcept()(class extends React.Componen
       </span>);
   }
 
-  selectAll() {
-    this.setState({selectAll: !this.state.selectAll});
-    const selectedConcept = this.state.selectAll ? [] : this.props.concepts;
-    this.updateSelectedConceptList(selectedConcept, 'link');
-  }
-
-  selectAllHeader() {
-    const {concepts} = this.props;
-    const {selectAll, showBanner} = this.state;
-    if (showBanner && concepts.length > ROWS_TO_DISPLAY) {
-      const selectedConceptSize = selectAll ? concepts.length : ROWS_TO_DISPLAY;
-      const text = selectAll ? '.' : 'on this page.';
-      const clickableText = selectAll ? 'Clear Selection' :
-          'Select all ' + concepts.length + ' concepts';
-      return <div data-test-id='selection'><FlexRow style={{fontWeight: '200'}}>
-        You’ve selected all {selectedConceptSize} concepts {text} &nbsp;
-        <Clickable data-test-id='banner-link' style={{color: 'blue'}} onClick={() => this.selectAll()}>
-          {clickableText}
-        </Clickable>
-        {!selectAll && <div> &nbsp;in this domain </div>}
-      </FlexRow></div>;
-    }
-    return;
-  }
-
   onPageChange() {
     this.setState({showBanner: false});
   }
@@ -385,10 +360,9 @@ export const ConceptTableV2  = withCurrentConcept()(class extends React.Componen
   }
 
   addTemplate(rowData) {
-    const i = fp.findIndex(rowData , this.props.concept);
-    console.log(i);
+    const index = fp.findIndex(rowData , this.props.concept);
     return <div style={styles.selectDiv}>
-      {i.toString() === '-1'  ? <ClrIcon style={styles.selectIcon}
+      {index.toString() === '-1'  ? <ClrIcon style={styles.selectIcon}
                shape='plus-circle' size='20' onClick={() => this.selectItem(rowData)}/> :
         <ClrIcon style={styles.selectIcon} shape='check-circle' size='20'/>
       }
@@ -464,7 +438,6 @@ export const ConceptTableV2  = withCurrentConcept()(class extends React.Componen
 
       {loading ? <SpinnerOverlay /> : <DataTable ref={tableRef} emptyMessage={loading || error ? '' : placeholderValue}
                                                  style={styles.datatable}
-                                                 header={this.selectAllHeader()}
                                                  value={error ? null : concepts.map(formatCounts)}
                                                  scrollable={true}
                                                  scrollHeight='150px'
