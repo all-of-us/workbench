@@ -18,7 +18,7 @@ import {ClrIcon} from 'app/components/icons';
 import {CheckBox, NumberInput} from 'app/components/inputs';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
-import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentCohortCriteria, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentCohortCriteriaStore, currentWorkspaceStore} from 'app/utils/navigation';
@@ -401,8 +401,10 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
           ({...attr, operator: this.isPhysicalMeasurement ? 'ANY' : null, operands: []}));
         form.cat = form.cat.map(attr => ({...attr, checked: false}));
       } else {
-        count = null;
         form.anyValue = false;
+      }
+      if (!checked || count === -1) {
+        count = null;
       }
       this.setState({form, count});
     }
@@ -410,7 +412,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
     toggleAnyVersionCheckbox(checked: boolean) {
       const {form} = this.state;
       form.anyVersion = checked;
-      form.cat = form.cat.map(attr => ({...attr, checked}));
+      form.cat = form.cat.map(attr => ({...attr, checked: false}));
       this.setState({form});
     }
 
@@ -446,13 +448,13 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
     checkboxChange(checked: boolean, index: number) {
       const {form} = this.state;
       form.cat[index].checked = checked;
-      this.setState({form});
+      this.setState({form, count: null});
     }
 
     validateForm() {
       const {form, isCOPESurvey} = this.state;
       let formErrors = new Set(), formValid = true, operatorSelected = form.num.length !== 0;
-      if (form.anyValue) {
+      if (form.anyValue && (!isCOPESurvey || form.anyVersion)) {
         return {formValid, formErrors};
       }
       formErrors = form.num.reduce((acc, attr) => {
@@ -523,11 +525,13 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
 
     get paramWithAttributes() {
       const {node, node: {name, subtype}} = this.props;
-      const {form} = this.state;
+      const {form, isCOPESurvey} = this.state;
       let paramName;
       const attrs = [];
-      if (form.anyValue) {
+      if (!isCOPESurvey && form.anyValue) {
         paramName = name + ` (${optionUtil.ANY.display})`;
+      } else if (isCOPESurvey && form.anyValue && form.anyVersion) {
+        paramName = name + ` (Any version AND any value)`;
       } else {
         form.num.filter(at => at.operator).forEach(({operator, operands, conceptId}) => {
           const attr = {name: AttrName.NUM, operator, operands};
@@ -729,10 +733,13 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
 
     render() {
       const {close, node: {domainId, name, parentId, subtype}} = this.props;
-      const {calculating, count, countError, form, isCOPESurvey, loading, options} = this.state;
+      const {calculating, count, countError, form, isCOPESurvey, loading} = this.state;
       const {formErrors, formValid} = this.validateForm();
       const disableAdd = calculating || !formValid;
-      const disableCalculate = disableAdd || form.anyValue || (form.num.length && form.num.every(attr => attr.operator === 'ANY'));
+      const disableCalculate = disableAdd
+        || (form.anyValue && count !== null)
+        || (isCOPESurvey && !form.anyVersion && !form.cat.some(attr => attr.checked))
+        || (form.num.length && form.num.every(attr => attr.operator === 'ANY'));
       return (loading ?
         <SpinnerOverlay/> :
         <div id='attributes-form' style={{marginTop: '0.5rem'}}>
