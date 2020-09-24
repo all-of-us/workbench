@@ -1,5 +1,4 @@
-import {Clickable, Link} from 'app/components/buttons';
-import {FlexRow} from 'app/components/flex';
+import {Link} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
