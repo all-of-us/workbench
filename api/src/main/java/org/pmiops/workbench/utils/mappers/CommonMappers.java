@@ -107,12 +107,4 @@ public class CommonMappers {
   public int etagToCdrVersion(String etag) {
     return Strings.isNullOrEmpty(etag) ? 1 : Etags.toVersion(etag);
   }
-
-  public BillingStatus checkBillingFeatureFlag(BillingStatus billingStatus) {
-    if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout) {
-      return BillingStatus.ACTIVE;
-    } else {
-      return billingStatus;
-    }
-  }
 }
