@@ -1,17 +1,20 @@
 import {Component} from '@angular/core';
 import * as HighCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
+import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {Error as ErrorDiv} from 'app/components/inputs';
+import {Error as ErrorDiv, TextArea} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
+import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {runtimeApi, workspaceAdminApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, UrlParamsProps, withUrlParams} from 'app/utils';
+import {navigate} from 'app/utils/navigation';
 import {
   getSelectedPopulations,
   getSelectedPrimaryPurposeItems
@@ -24,7 +27,7 @@ import {
 } from 'generated/fetch';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
-import {ReactFragment} from 'react';
+import {ReactFragment, useState} from 'react';
 
 const styles = reactStyles({
   infoRow: {
@@ -53,6 +56,14 @@ const styles = reactStyles({
     maxWidth: '1000px',
     marginTop: '1rem',
   },
+  accessReasonText: {
+    maxWidth: '1000px',
+    height: '3rem',
+  },
+  previewButton: {
+    marginLeft: '20px',
+    height: '1rem',
+  },
 });
 
 const PurpleLabel = ({style = {}, children}) => {
@@ -77,53 +88,121 @@ const formatMB = (fileSize: number): string => {
   }
 };
 
-const FileDetailsTable = (props: {data: Array<FileDetail>, bucket: string}) => {
-  const {data, bucket} = props;
+const parseLocation = (file: FileDetail, bucket: string): string => {
+  const prefixLength = bucket.length;
+  const start = prefixLength + 1;  // slash after bucket name
+  const suffixPos = file.path.lastIndexOf(file.name);
+  const end = suffixPos - 1;  // slash before filename
+
+  return file.path.substring(start, end);
+};
+
+const NOTEBOOKS_DIRECTORY = 'notebooks';
+const NOTEBOOKS_SUFFIX = '.ipynb';
+const MAX_NOTEBOOK_READ_SIZE_BYTES = 5 * 1000 * 1000; // see NotebooksServiceImpl
+
+interface NameCellProps {
+  file: FileDetail;
+  bucket: string;
+  workspaceNamespace: string;
+  accessReason: string;
+}
+
+const NameCell = (props: NameCellProps) => {
+  const {file, bucket, workspaceNamespace, accessReason} = props;
+  const filename = file.name.trim();
+
+  const filenameSpan = () => <span>{filename}</span>;
+
+  const fileTooLarge = () => <FlexRow>
+    {filenameSpan()}
+    <TooltipTrigger
+        content={`Files larger than ${formatMB(MAX_NOTEBOOK_READ_SIZE_BYTES)} MB are too large to preview`}
+    ><Button style={styles.previewButton} disabled={true}>Preview</Button>
+    </TooltipTrigger>
+  </FlexRow>;
+
+  const navigateToPreview = () => navigate(
+      ['admin', 'workspaces', workspaceNamespace, filename],
+      { queryParams: { accessReason: accessReason } });
+
+  const fileWithPreviewButton = () => <FlexRow>
+    {filenameSpan()}
+    <TooltipTrigger content='Please enter an access reason below' disabled={accessReason && accessReason.trim()}>
+      <Button style={styles.previewButton}
+              disabled={!accessReason || !accessReason.trim()}
+              onClick={navigateToPreview}>Preview</Button>
+    </TooltipTrigger>
+  </FlexRow>;
+
+  // remove first check after RW-5626
+  const isNotebook = () => (NOTEBOOKS_DIRECTORY === parseLocation(file, bucket)) && filename.endsWith(NOTEBOOKS_SUFFIX);
+  const isTooLargeNotebook = () => isNotebook() && (file.sizeInBytes > MAX_NOTEBOOK_READ_SIZE_BYTES);
+
+  // if (tooLarge()) fileTooLarge();
+  // else if (isNotebook()) fileWithPreviewButton();
+  // else filenameSpan();
+  const requiredDummyParameter = undefined;
+  return fp.cond([
+    [isTooLargeNotebook, fileTooLarge],
+    [isNotebook, fileWithPreviewButton],
+    [fp.stubTrue, filenameSpan]
+  ])(requiredDummyParameter);
+};
+
+interface FileDetailsProps {
+  workspaceNamespace: string;
+  data: Array<FileDetail>;
+  bucket: string;
+}
+
+const FileDetailsTable = (props: FileDetailsProps) => {
+  const {workspaceNamespace, data, bucket} = props;
 
   interface TableEntry {
-    name: string;
-    size: string;
     location: string;
+    rawName: string;
+    nameCell: JSX.Element;
+    size: string;
   }
 
-  const parseLocation = (file: FileDetail): string => {
-    const prefixLength = bucket.length;
-    const start = prefixLength + 1;  // slash after bucket name
-    const suffixPos = file.path.lastIndexOf(file.name);
-    const end = suffixPos - 1;  // slash before filename
-
-    return file.path.substring(start, end);
+  const initTable = (accessReason: string): Array<TableEntry> => {
+    return data
+      .map(file => {
+        return {
+          location: parseLocation(file, bucket),
+          rawName: file.name,
+          nameCell: <NameCell
+              file={file}
+              bucket={bucket}
+              workspaceNamespace={workspaceNamespace}
+              accessReason={accessReason}/>,
+          size: formatMB(file.sizeInBytes),
+        }; })
+      .sort((a, b) => {
+        const locationComparison = a.location.localeCompare(b.location);
+        return locationComparison === 0 ? a.rawName.localeCompare(b.rawName) : locationComparison;
+      });
   };
 
-  const formattedData: Array<TableEntry> = data.map(file => {
-    return {
-      name: file.name,
-      size: formatMB(file.sizeInBytes),
-      location: parseLocation(file)
-    };
-  });
+  const [tableData, setTable] = useState<Array<TableEntry>>(initTable(''));
 
-  const sortedData = formattedData.sort((a, b) => {
-    const locCmp = a.location.localeCompare(b.location);
-    if (locCmp === 0) {
-      return a.name.localeCompare(b.name);
-    } else {
-      return locCmp;
-    }
-  });
-
-  return <DataTable
-      data-test-id='object-details-table'
-      value={sortedData}
-      style={styles.fileDetailsTable}
-      scrollable={true}
-      paginator={true}
-      paginatorTemplate='CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown'
-      currentPageReportTemplate='Showing {first} to {last} of {totalRecords} entries'>
-    <Column field='location' header='Location'/>
-    <Column field='name' header='Filename'/>
-    <Column field='size' header='File size (MB)' style={{textAlign: 'right'}}/>
-  </DataTable>;
+  return <FlexColumn>
+    <DataTable
+        data-test-id='object-details-table'
+        value={tableData}
+        style={styles.fileDetailsTable}
+        scrollable={true}
+        paginator={true}
+        paginatorTemplate='CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown'
+        currentPageReportTemplate='Showing {first} to {last} of {totalRecords} entries'>
+      <Column field='location' header='Location'/>
+      <Column field='nameCell' header='Filename'/>
+      <Column field='size' header='File size (MB)' style={{textAlign: 'right'}}/>
+    </DataTable>
+    <PurpleLabel>To preview notebooks, enter Access Reason (for auditing purposes)</PurpleLabel>
+    <TextArea style={styles.accessReasonText} onChange={v => setTable(initTable(v))}/>
+  </FlexColumn>;
 };
 
 interface State {
@@ -320,7 +399,10 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
               {formatMB(resources.cloudStorage.storageBytesUsed)}
             </WorkspaceInfoField>
           </div>
-          {files && <FileDetailsTable data={files} bucket={resources.cloudStorage.storageBucketPath}/>}
+          {files && <FileDetailsTable
+              workspaceNamespace={workspace.namespace}
+              data={files}
+              bucket={resources.cloudStorage.storageBucketPath}/>}
           <h3>Research Purpose</h3>
           <div className='research-purpose' style={{marginTop: '1rem'}}>
             <WorkspaceInfoField labelText='Primary purpose of project'>
