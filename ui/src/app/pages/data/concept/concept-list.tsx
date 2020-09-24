@@ -43,8 +43,8 @@ export const  ConceptListPage = fp.flow(withCurrentConcept())(
     }
 
     removeSelection(conceptToDel) {
-      const newArr = this.props.concept.filter((concept) => concept !== conceptToDel);
-      currentConceptStore.next(newArr);
+      const updatedConceptList = this.props.concept.filter((concept) => concept !== conceptToDel);
+      currentConceptStore.next(updatedConceptList);
     }
 
     render() {
