@@ -15,7 +15,11 @@
     "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.0.6",
     "welderDockerImage": "broadinstitute/welder-server:7ae1a62",
     "shibbolethApiBaseUrl": "",
-    "shibbolethUiBaseUrl": ""
+    "shibbolethUiBaseUrl": "",
+    "runtimeImages": {
+      "gce": [],
+      "dataproc": []
+    }
   },
   "billing": {
     "accountId": "00293C-5DEA2D-6887E7",

@@ -128,6 +128,13 @@ public class WorkbenchConfig {
     // This is the base URL that a browser client should be redirected to in order to complete
     // an authentication round trip with eRA Commons.
     public String shibbolethUiBaseUrl;
+
+    public RuntimeImages runtimeImages;
+  }
+
+  public static class RuntimeImages {
+    public ArrayList<String> gce;
+    public ArrayList<String> dataproc;
   }
 
   public static class AuthConfig {

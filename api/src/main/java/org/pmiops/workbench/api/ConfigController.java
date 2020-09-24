@@ -1,8 +1,12 @@
 package org.pmiops.workbench.api;
 
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig.CloudServiceEnum;
 import org.pmiops.workbench.model.ConfigResponse;
+import org.pmiops.workbench.model.RuntimeImage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,6 +47,21 @@ public class ConfigController implements ConfigApiDelegate {
             .enableConceptSetSearchV2(config.featureFlags.enableConceptSetSearchV2)
             .enableResearchReviewPrompt(config.featureFlags.enableResearchPurposePrompt)
             .enableCOPESurvey(config.featureFlags.enableCOPESurvey)
-            .enableCustomRuntimes(config.featureFlags.enableCustomRuntimes));
+            .enableCustomRuntimes(config.featureFlags.enableCustomRuntimes)
+            .runtimeImages(
+                Stream.concat(
+                        config.firecloud.runtimeImages.dataproc.stream()
+                            .map(
+                                imageName ->
+                                    new RuntimeImage()
+                                        .cloudService(CloudServiceEnum.DATAPROC.toString())
+                                        .name(imageName)),
+                        config.firecloud.runtimeImages.gce.stream()
+                            .map(
+                                imageName ->
+                                    new RuntimeImage()
+                                        .cloudService(CloudServiceEnum.GCE.toString())
+                                        .name(imageName)))
+                    .collect(Collectors.toList())));
   }
 }
