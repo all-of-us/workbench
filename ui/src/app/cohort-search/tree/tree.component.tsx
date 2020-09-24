@@ -205,7 +205,8 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
                                                             searchTerms={searchTerms}
                                                             select={(s) => select(s)}
                                                             selectedIds={selectedIds}
-                                                                       setAttributes={setAttributes}/>)}</div>
+                                                            setAttributes={setAttributes}/>)}
+        </div>
       </div>}
       {loading && !this.showHeader && <SpinnerOverlay/>}
     </React.Fragment>;
