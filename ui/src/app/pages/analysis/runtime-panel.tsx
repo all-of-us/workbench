@@ -10,7 +10,8 @@ import {allMachineTypes, validLeonardoMachineTypes} from 'app/utils/machines';
 import {
   abortRuntimeOperationForWorkspace,
   markRuntimeOperationCompleteForWorkspace,
-  RuntimeOperation, RuntimeOpsStore,
+  RuntimeOperation,
+  RuntimeOpsStore,
   runtimeOpsStore,
   updateRuntimeOpsStoreForWorkspaceNamespace,
   withStore
@@ -48,9 +49,9 @@ const styles = reactStyles({
 
 const defaultMachineType = allMachineTypes.find(({name}) => name === 'n1-standard-4');
 
-const OutstandingRuntimeOp = ({operation, workspaceNamespace}) => {
+const ActiveRuntimeOp = ({operation, workspaceNamespace}) => {
   return <React.Fragment>
-    <h3 style={styles.sectionHeader}>Outstanding Runtime Operations</h3>
+    <h3 style={styles.sectionHeader}>Active Runtime Operations</h3>
     <FlexRow style={{'alignItems': 'center'}}>
       <span style={{'marginRight': '1rem'}}>
         {operation} in progress
@@ -136,7 +137,7 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOps
           <div>No runtime exists yet</div>
           {outstandingRuntimeOp && <hr/>}
           {outstandingRuntimeOp && <div>
-            <OutstandingRuntimeOp operation={outstandingRuntimeOp.operation} workspaceNamespace={workspace.namespace}/>
+            <ActiveRuntimeOp operation={outstandingRuntimeOp.operation} workspaceNamespace={workspace.namespace}/>
           </div>}
         </React.Fragment>;
       }
@@ -242,10 +243,10 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOps
         <FlexRow style={{justifyContent: 'flex-end', marginTop: '.75rem'}}>
           <Button disabled={true}>Create</Button>
         </FlexRow>
-        {outstandingRuntimeOp && <hr/>}
-        {outstandingRuntimeOp && <div>
-          <OutstandingRuntimeOp operation={outstandingRuntimeOp.operation} workspaceNamespace={workspace.namespace}/>
-        </div>}
+        {outstandingRuntimeOp && <React.Fragment>
+          <hr/>
+          <ActiveRuntimeOp operation={outstandingRuntimeOp.operation} workspaceNamespace={workspace.namespace}/>
+        </React.Fragment>}
       </div>;
     }
 

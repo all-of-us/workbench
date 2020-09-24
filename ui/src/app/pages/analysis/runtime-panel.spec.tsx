@@ -10,10 +10,8 @@ import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {RuntimeApi} from 'generated/fetch/api';
 import {WorkspaceAccessLevel} from 'generated/fetch';
 import {
-  markRuntimeOperationCompleteForWorkspace,
   updateRuntimeOpsStoreForWorkspaceNamespace
-} from "../../utils/stores";
-import {act} from "react-dom/test-utils";
+} from "app/utils/stores";
 
 describe('RuntimePanel', () => {
   let props: Props;
