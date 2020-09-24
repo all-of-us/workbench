@@ -1,7 +1,6 @@
 package org.pmiops.workbench.config;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A class representing the main workbench configuration; parsed from JSON stored in the database.

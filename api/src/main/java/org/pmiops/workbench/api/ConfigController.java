@@ -50,13 +50,18 @@ public class ConfigController implements ConfigApiDelegate {
             .enableCustomRuntimes(config.featureFlags.enableCustomRuntimes)
             .runtimeImages(
                 Stream.concat(
-                    config.firecloud.runtimeImages.dataproc.stream().map(imageName -> new RuntimeImage()
-                        .cloudService(CloudServiceEnum.DATAPROC.toString())
-                        .name(imageName)),
-                    config.firecloud.runtimeImages.gce.stream().map(imageName -> new RuntimeImage()
-                        .cloudService(CloudServiceEnum.GCE.toString())
-                        .name(imageName))
-                ).collect(Collectors.toList()))
-    );
+                        config.firecloud.runtimeImages.dataproc.stream()
+                            .map(
+                                imageName ->
+                                    new RuntimeImage()
+                                        .cloudService(CloudServiceEnum.DATAPROC.toString())
+                                        .name(imageName)),
+                        config.firecloud.runtimeImages.gce.stream()
+                            .map(
+                                imageName ->
+                                    new RuntimeImage()
+                                        .cloudService(CloudServiceEnum.GCE.toString())
+                                        .name(imageName)))
+                    .collect(Collectors.toList())));
   }
 }
