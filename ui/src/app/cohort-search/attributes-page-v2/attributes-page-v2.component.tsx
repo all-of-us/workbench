@@ -230,6 +230,8 @@ interface State {
   count: number;
   countError: boolean;
   form: AttributeForm;
+  formErrors: Array<string>;
+  formValid: boolean;
   isCOPESurvey: boolean;
   loading: boolean;
   options: any;
@@ -243,6 +245,8 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
         count: null,
         countError: false,
         form: {anyValue: false, anyVersion: false, num: [], cat: []},
+        formErrors: [],
+        formValid: true,
         isCOPESurvey: false,
         loading: true,
         options: [
@@ -371,25 +375,23 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
     toggleAnyValueCheckbox(checked: boolean) {
       const {form} = this.state;
       let {node: {count}} = this.props;
+      form.anyValue = checked;
       if (checked) {
-        form.anyValue = true;
         form.num = form.num.map(attr =>
           ({...attr, operator: this.isPhysicalMeasurement ? 'ANY' : null, operands: []}));
         form.cat = form.cat.map(attr => ({...attr, checked: false}));
-      } else {
-        form.anyValue = false;
       }
       if (!checked || count === -1) {
         count = null;
       }
-      this.setState({form, count});
+      this.setState({form, count}, () => this.validateForm());
     }
 
     toggleAnyVersionCheckbox(checked: boolean) {
       const {form} = this.state;
       form.anyVersion = checked;
       form.cat = form.cat.map(attr => ({...attr, checked: false}));
-      this.setState({form});
+      this.setState({form}, () => this.validateForm());
     }
 
     selectChange(attributeIndex: number, value: string) {
@@ -412,64 +414,65 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
         form.num[attributeIndex].operands.splice(1);
       }
       const count = value === 'ANY' ? this.nodeCount : null;
-      this.setState({form, count});
+      this.setState({form, count}, () => this.validateForm());
     }
 
     inputChange(input: string, attributeIndex: number, operandIndex: number) {
       const {form} = this.state;
       form.num[attributeIndex].operands[operandIndex] = sanitizeNumericalInput(input);
-      this.setState({form, count: null});
+      this.setState({form, count: null}, () => this.validateForm());
     }
 
     checkboxChange(checked: boolean, index: number) {
       const {form} = this.state;
       form.cat[index].checked = checked;
-      this.setState({form, count: null});
+      this.setState({form, count: null}, () => this.validateForm());
     }
 
     validateForm() {
       const {form, isCOPESurvey} = this.state;
-      let formErrors = new Set(), formValid = true, operatorSelected = form.num.length !== 0;
       if (form.anyValue && (!isCOPESurvey || form.anyVersion)) {
-        return {formValid, formErrors};
+        this.setState({formValid: true, formErrors: []});
+      } else {
+        let formValid = true, operatorSelected = form.num.length !== 0;
+        const formErrors = form.num.reduce((acc, attr) => {
+          const {MIN, MAX, operator} = attr;
+          const operands = attr.operands.map(op => parseInt(op, 10));
+          switch (operator) {
+            case null:
+              operatorSelected = false;
+              return acc;
+            case 'ANY':
+              return acc;
+            case Operator.BETWEEN:
+              if (operands.length < 2) {
+                formValid = false;
+              }
+              break;
+            default:
+              if (operands.length === 0) {
+                formValid = false;
+              }
+          }
+          if (operands.includes(NaN)) {
+            formValid = false;
+            acc.add('Form can only accept valid numbers');
+          }
+          if (this.isPhysicalMeasurement && operands.some(op => op < 0)) {
+            formValid = false;
+            acc.add('Form cannot accept negative values');
+          }
+          if (this.hasRange && operands.some(op => op < MIN || op > MAX)) {
+            formValid = false;
+            acc.add(`Values must be between ${MIN.toLocaleString()} and ${MAX.toLocaleString()}`);
+          }
+          return acc;
+        }, new Set());
+        // The second condition sets formValid to false if this is a Measurements or COPE attribute with no operator selected from the
+        // dropdown and no categorical checkboxes checked
+        formValid = formValid && !((this.isMeasurement || isCOPESurvey) && !operatorSelected && !form.cat.some(attr => attr.checked));
+        this.setState({formErrors: Array.from(formErrors), formValid});
       }
-      formErrors = form.num.reduce((acc, attr) => {
-        const {MIN, MAX, operator} = attr;
-        const operands = attr.operands.map(op => parseInt(op, 10));
-        switch (operator) {
-          case null:
-            operatorSelected = false;
-            return acc;
-          case 'ANY':
-            return acc;
-          case Operator.BETWEEN:
-            if (operands.length < 2) {
-              formValid = false;
-            }
-            break;
-          default:
-            if (operands.length === 0) {
-              formValid = false;
-            }
-        }
-        if (operands.includes(NaN)) {
-          formValid = false;
-          acc.add('Form can only accept valid numbers');
-        }
-        if (this.isPhysicalMeasurement && operands.some(op => op < 0)) {
-          formValid = false;
-          acc.add('Form cannot accept negative values');
-        }
-        if (this.hasRange && operands.some(op => op < MIN || op > MAX)) {
-          formValid = false;
-          acc.add(`Values must be between ${MIN.toLocaleString()} and ${MAX.toLocaleString()}`);
-        }
-        return acc;
-      }, formErrors);
-      // The second condition sets formValid to false if this is a Measurements or COPE attribute with no operator selected from the
-      // dropdown and no categorical checkboxes checked
-      formValid = formValid && !((this.isMeasurement || isCOPESurvey) && !operatorSelected && !form.cat.some(attr => attr.checked));
-      return {formErrors, formValid};
     }
 
     get nodeCount() {
@@ -643,6 +646,19 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
       return this.isMeasurement || this.isSurvey;
     }
 
+    get disableAddButton() {
+      const {calculating, formValid} = this.state;
+      return calculating || !formValid;
+    }
+
+    get disableCalculateButton() {
+      const {calculating, count, form, formValid, isCOPESurvey} = this.state;
+      return calculating || !formValid
+        || (form.anyValue && count !== null)
+        || (isCOPESurvey && !form.anyVersion && !form.cat.some(attr => attr.checked))
+        || (form.num.length && form.num.every(attr => attr.operator === 'ANY'));
+    }
+
     renderNumericalAttributes() {
       const {node: {count, subtype}} = this.props;
       const {form, isCOPESurvey, options} = this.state;
@@ -709,13 +725,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
 
     render() {
       const {close, node: {domainId, name, parentId, subtype}} = this.props;
-      const {calculating, count, countError, form, isCOPESurvey, loading} = this.state;
-      const {formErrors, formValid} = this.validateForm();
-      const disableAdd = calculating || !formValid;
-      const disableCalculate = disableAdd
-        || (form.anyValue && count !== null)
-        || (isCOPESurvey && !form.anyVersion && !form.cat.some(attr => attr.checked))
-        || (form.num.length && form.num.every(attr => attr.operator === 'ANY'));
+      const {calculating, count, countError, form, formErrors, isCOPESurvey, loading} = this.state;
       return (loading ?
         <SpinnerOverlay/> :
         <div id='attributes-form' style={{marginTop: '0.5rem'}}>
@@ -744,8 +754,8 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
               shape='exclamation-triangle' size='22'/>
             Sorry, the request cannot be completed.
           </div>}
-          {!!formErrors.size && <div style={styles.errors}>
-            {Array.from(formErrors).map((err, e) => <div key={e} style={styles.errorItem}>
+          {formErrors.length > 0 && <div style={styles.errors}>
+            {formErrors.map((err, e) => <div key={e} style={styles.errorItem}>
               {err}
             </div>)}
           </div>}
@@ -776,8 +786,8 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
                            calculateFn={() => this.requestPreview()}
                            calculating={calculating}
                            count={count}
-                           disableAdd={disableAdd}
-                           disableCalculate={disableCalculate}/>
+                           disableAdd={this.disableAddButton}
+                           disableCalculate={this.disableCalculateButton}/>
         </div>
       );
     }
