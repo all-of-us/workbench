@@ -190,10 +190,11 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   }
 
   @Override
-  public List<LeonardoListRuntimeResponse> listRuntimesByProject(String googleProject) {
+  public List<LeonardoListRuntimeResponse> listRuntimesByProject(
+      String googleProject, boolean includeDeleted) {
     RuntimesApi runtimesApi = runtimesApiProvider.get();
     return leonardoRetryHandler.run(
-        (context) -> runtimesApi.listRuntimesByProject(googleProject, null, true));
+        (context) -> runtimesApi.listRuntimesByProject(googleProject, null, includeDeleted));
   }
 
   @Override
