@@ -391,8 +391,8 @@ public class RuntimeControllerTest {
   }
 
   @Test
-  public void testGetRuntime_defaultLabel_dataproc() throws ApiException {
-    testLeoRuntime.setLabels(ImmutableMap.of("all-of-us-config", "default-dataproc"));
+  public void testGetRuntime_defaultLabel_hail() throws ApiException {
+    testLeoRuntime.setLabels(ImmutableMap.of("all-of-us-config", "preset-hail-genomic-analysis"));
 
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime);
@@ -402,8 +402,8 @@ public class RuntimeControllerTest {
   }
 
   @Test
-  public void testGetRuntime_defaultLabel_gce() throws ApiException {
-    testLeoRuntime.setLabels(ImmutableMap.of("all-of-us-config", "default-gce"));
+  public void testGetRuntime_defaultLabel_generalAnalysis() throws ApiException {
+    testLeoRuntime.setLabels(ImmutableMap.of("all-of-us-config", "preset-general-analysis"));
 
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime);
@@ -928,7 +928,7 @@ public class RuntimeControllerTest {
     Runtime capturedRuntimeConfig = new Runtime();
     leonardoMapper.mapRuntimeConfig(
         capturedRuntimeConfig, createRuntimeRequestCaptor.getValue().getRuntimeConfig());
-    assertThat(capturedRuntimeConfig.getGceConfig())
+    assertThat(capturedRuntimeConfig.getDataprocConfig())
         .isEqualTo(
             new DataprocConfig()
                 .masterMachineType(config.firecloud.notebookRuntimeDefaultMachineType)
@@ -960,7 +960,7 @@ public class RuntimeControllerTest {
   }
 
   @Test
-  public void testCreateRuntime_defaultLabel_dataproc() throws ApiException {
+  public void testCreateRuntime_defaultLabel_hail() throws ApiException {
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
@@ -976,11 +976,11 @@ public class RuntimeControllerTest {
 
     LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
     assertThat(((Map<String, String>) createRuntimeRequest.getLabels()).get("all-of-us-config"))
-        .isEqualTo("default-dataproc");
+        .isEqualTo("preset-hail-genomic-analysis");
   }
 
   @Test
-  public void testCreateRuntime_defaultLabel_gce() throws ApiException {
+  public void testCreateRuntime_defaultLabel_generalAnalysis() throws ApiException {
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
@@ -996,7 +996,7 @@ public class RuntimeControllerTest {
 
     LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
     assertThat(((Map<String, String>) createRuntimeRequest.getLabels()).get("all-of-us-config"))
-        .isEqualTo("default-gce");
+        .isEqualTo("preset-general-analysis");
   }
 
   @Test

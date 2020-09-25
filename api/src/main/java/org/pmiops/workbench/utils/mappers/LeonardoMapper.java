@@ -33,8 +33,8 @@ public interface LeonardoMapper {
   BiMap<RuntimeConfigurationType, String> RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP =
       ImmutableBiMap.of(
           RuntimeConfigurationType.USEROVERRIDE, "user-override",
-          RuntimeConfigurationType.GENERALANALYSIS, "general-analysis",
-          RuntimeConfigurationType.HAILGENOMICANALYSIS, "hail-genomic-analysis");
+          RuntimeConfigurationType.GENERALANALYSIS, "preset-general-analysis",
+          RuntimeConfigurationType.HAILGENOMICANALYSIS, "preset-hail-genomic-analysis");
 
   DataprocConfig toDataprocConfig(LeonardoMachineConfig leonardoMachineConfig);
 
