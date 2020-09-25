@@ -1,5 +1,5 @@
 
-import {UpdateConceptSetRequest} from 'generated';
+import {CopyRequest, UpdateConceptSetRequest} from 'generated';
 import {
   ConceptSet,
   ConceptSetListResponse,
@@ -165,5 +165,15 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
       resolve(target);
     });
   }
+
+  copyConceptSet(fromWorkspaceNamespace: string,
+    fromWorkspaceId: string,
+    fromNotebookName: String,
+    copyRequest: CopyRequest): Promise<any> {
+    return new Promise<any>(resolve => {
+      resolve({});
+    });
+  }
+
 
 }

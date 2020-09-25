@@ -79,9 +79,11 @@ const styles = reactStyles({
   },
 });
 
-const ConceptSetCdrMismatch = (props: {text: string}) => <div style={styles.conceptSetCdrMismatch}>{props.text}</div>;
+const ConceptSetCdrMismatch = (props: {text: string}) =>
+    <div data-test-id='concept-set-cdr-mismatch-error' style={styles.conceptSetCdrMismatch}>{props.text}</div>;
 
-const NotebookCdrMismatch = (props: {text: string}) => <div style={styles.notebookCdrMismatch}>{props.text}</div>;
+const NotebookCdrMismatch = (props: {text: string}) =>
+    <div data-test-id='notebook-cdr-mismatch-warning' style={styles.notebookCdrMismatch}>{props.text}</div>;
 
 class CopyModalComponent extends React.Component<Props, State> {
   constructor(props: Props) {
