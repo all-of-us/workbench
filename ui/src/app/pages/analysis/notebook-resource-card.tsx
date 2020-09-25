@@ -178,8 +178,9 @@ export const NotebookResourceCard = fp.flow(
       {this.state.showCopyNotebookModal &&
       <CopyModal
         fromWorkspaceNamespace={this.props.resource.workspaceNamespace}
-        fromWorkspaceName={this.props.resource.workspaceFirecloudName}
+        fromWorkspaceFirecloudName={this.props.resource.workspaceFirecloudName}
         fromResourceName={dropNotebookFileSuffix(this.props.resource.notebook.name)}
+        fromCdrVersionId={this.props.resource.cdrVersionId}
         resourceType={this.resourceType}
         onClose={() => this.setState({showCopyNotebookModal: false})}
         onCopy={() => this.props.onUpdate()}

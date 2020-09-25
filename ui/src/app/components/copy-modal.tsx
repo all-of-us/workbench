@@ -1,18 +1,20 @@
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import { Button } from 'app/components/buttons';
 import { styles as headerStyles } from 'app/components/headers';
 import { Select, TextInput, ValidationError } from 'app/components/inputs';
 import { Modal, ModalBody, ModalFooter, ModalTitle } from 'app/components/modals';
-import {ConceptSet, FileDetail, ResourceType, Workspace} from 'generated/fetch';
+import {CdrVersionListResponse, ConceptSet, FileDetail, ResourceType, Workspace} from 'generated/fetch';
 
 import { Spinner } from 'app/components/spinners';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
+import {reactStyles, withCdrVersions} from 'app/utils';
 import { navigate } from 'app/utils/navigation';
 import {toDisplay} from 'app/utils/resourceActions';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
 
-enum RequestState { UNSENT, ERROR, SUCCESS }
+enum RequestState { UNSENT, COPY_ERROR, SUCCESS }
 
 const ResourceTypeHomeTabs = new Map()
   .set(ResourceType.NOTEBOOK, 'notebooks')
@@ -21,52 +23,110 @@ const ResourceTypeHomeTabs = new Map()
   .set(ResourceType.DATASET, 'data');
 
 export interface Props {
+  cdrVersionListResponse: CdrVersionListResponse;
   fromWorkspaceNamespace: string;
-  fromWorkspaceName: string;
+  fromWorkspaceFirecloudName: string;
   fromResourceName: string;
+  fromCdrVersionId: string;
   onClose: Function;
   onCopy: Function;
   resourceType: ResourceType;
   saveFunction: (CopyRequest) => Promise<FileDetail | ConceptSet>;
 }
 
+interface WorkspaceOptions {
+  label: string;
+  options: Array<{label: string, value: Workspace}>;
+}
+
 interface State {
-  writeableWorkspaces: Array<Workspace>;
+  workspaceOptions: Array<WorkspaceOptions>;
   destination: Workspace;
   newName: string;
   requestState: RequestState;
-  errorMsg: string;
+  copyErrorMsg: string;
   loading: boolean;
 }
 
-const boldStyle = {
-  fontWeight: 600
-};
+const styles = reactStyles({
+  bold: {
+    fontWeight: 600
+  },
+});
 
-class CopyModal extends React.Component<Props, State> {
+class CopyModalComponent extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
     this.state = {
-      writeableWorkspaces: [],
+      workspaceOptions: [],
       newName: props.fromResourceName,
       destination: null,
       requestState: RequestState.UNSENT,
-      errorMsg: '',
-      loading: true
+      copyErrorMsg: '',
+      loading: true,
     };
+  }
+
+  cdrName(cdrVersionId: string): string {
+    const {cdrVersionListResponse} = this.props;
+    const version = cdrVersionListResponse.items.find(v => v.cdrVersionId === cdrVersionId);
+    return version ? version.name : '[CDR version not found]';
+  }
+
+  groupWorkspacesByCdrVersion(workspaces: Workspace[]): Array<WorkspaceOptions> {
+    const {fromCdrVersionId} = this.props;
+    const workspacesByCdr = fp.groupBy(w => w.cdrVersionId, workspaces);
+    const cdrVersions = Array.from(new Set(workspaces.map(w => w.cdrVersionId)));
+
+    // list the "from" CDR version first.
+    const fromCdrVersionFirst = (cdrv1: string, cdrv2: string) => {
+      if (cdrv1 === fromCdrVersionId && cdrv2 !== fromCdrVersionId) {
+        return -1;
+      } else if (cdrv1 !== fromCdrVersionId && cdrv2 === fromCdrVersionId) {
+        return 1;
+      } else {
+        // TODO: a meaningful ordering, possibly as part of RW-5563
+        return cdrv1.localeCompare(cdrv2);
+      }
+    };
+
+    return cdrVersions.sort(fromCdrVersionFirst).map(versionId => ({
+      label: this.cdrName(versionId),
+      options: workspacesByCdr[versionId].map(workspace => ({
+        'value': workspace,
+        'label': workspace.name,
+      })),
+    }));
   }
 
   componentDidMount() {
     workspacesApi().getWorkspaces()
       .then((response) => {
-        this.setState({
-          writeableWorkspaces: response.items
+        const writeableWorkspaces = response.items
             .filter(item => new WorkspacePermissions(item).canWrite)
-            .map(workspaceResponse => workspaceResponse.workspace),
+            .map(workspaceResponse => workspaceResponse.workspace);
+
+        this.setState({
+          workspaceOptions: this.groupWorkspacesByCdrVersion(writeableWorkspaces),
           loading: false
         });
       });
+  }
+
+  setCopyError(errorMsg: string) {
+    this.setState({
+      copyErrorMsg: errorMsg,
+      requestState: RequestState.COPY_ERROR,
+      loading: false
+    });
+  }
+
+  clearCopyError() {
+    this.setState({
+      copyErrorMsg: '',
+      requestState: RequestState.UNSENT,
+    });
   }
 
   save() {
@@ -89,11 +149,7 @@ class CopyModal extends React.Component<Props, State> {
             `original workspace.` :
           'An error occurred while copying. Please try again.';
 
-      this.setState({
-        errorMsg: errorMsg,
-        requestState: RequestState.ERROR,
-        loading: false
-      });
+      this.setCopyError(errorMsg);
     });
   }
 
@@ -109,15 +165,16 @@ class CopyModal extends React.Component<Props, State> {
   }
 
   render() {
+    const {loading, requestState} = this.state;
+
     return (
       <Modal onRequestClose={this.props.onClose}>
         <ModalTitle>Copy to Workspace</ModalTitle>
-        { this.state.loading ?
+        {loading ?
           <ModalBody style={{ textAlign: 'center' }}><Spinner /></ModalBody> :
           <ModalBody>
-            {(this.state.requestState === RequestState.UNSENT ||
-            this.state.requestState === RequestState.ERROR) && this.renderFormBody()}
-            {this.state.requestState === RequestState.SUCCESS && this.renderSuccessBody()}
+            {(requestState === RequestState.UNSENT || requestState === RequestState.COPY_ERROR) && this.renderFormBody()}
+            {requestState === RequestState.SUCCESS && this.renderSuccessBody()}
           </ModalBody>
         }
         <ModalFooter>
@@ -132,7 +189,7 @@ class CopyModal extends React.Component<Props, State> {
 
   getCloseButtonText() {
     if (this.state.requestState === RequestState.UNSENT ||
-      this.state.requestState === RequestState.ERROR) {
+      this.state.requestState === RequestState.COPY_ERROR) {
       return 'Close';
     } else if (this.state.requestState === RequestState.SUCCESS) {
       return 'Stay Here';
@@ -142,7 +199,7 @@ class CopyModal extends React.Component<Props, State> {
   renderActionButton() {
     const resourceType = toDisplay(this.props.resourceType);
     if (this.state.requestState === RequestState.UNSENT ||
-      this.state.requestState === RequestState.ERROR) {
+      this.state.requestState === RequestState.COPY_ERROR) {
       return (
         <Button style={{ marginLeft: '0.5rem' }}
                 disabled={this.state.destination === null || this.state.loading}
@@ -161,25 +218,29 @@ class CopyModal extends React.Component<Props, State> {
     }
   }
 
+  setDestination(destination: Workspace) {
+    this.clearCopyError();
+    this.setState({destination: destination});
+  }
+
   renderFormBody() {
+    const {destination, workspaceOptions, requestState, copyErrorMsg, newName} = this.state;
     return (
       <div>
         <div style={headerStyles.formLabel}>Destination *</div>
         <Select
-          value={this.state.destination}
-          options={this.state.writeableWorkspaces.map(workspace => ({
-            'value': workspace,
-            'label': workspace.name
-          }))}
-          onChange={(value) => { this.setState({ destination: value }); }} />
+          value={destination}
+          options={workspaceOptions}
+          onChange={(destWorkspace) => this.setDestination(destWorkspace)}
+        />
         <div style={headerStyles.formLabel}>Name *</div>
         <TextInput
           autoFocus
-          value={this.state.newName}
+          value={newName}
           onChange={v => this.setState({ newName: v })}
         />
-        {this.state.requestState === RequestState.ERROR &&
-        <ValidationError> {this.state.errorMsg} </ValidationError>}
+        {requestState === RequestState.COPY_ERROR &&
+        <ValidationError> {copyErrorMsg} </ValidationError>}
       </div>
     );
   }
@@ -188,15 +249,18 @@ class CopyModal extends React.Component<Props, State> {
     const {fromResourceName, resourceType} = this.props;
     return (
       <div> Successfully copied
-        <b style={boldStyle}> {fromResourceName} </b> to
-        <b style={boldStyle}> {this.state.destination.name} </b>.
+        <b style={styles.bold}> {fromResourceName} </b> to
+        <b style={styles.bold}> {this.state.destination.name} </b>.
         Do you want to view the copied {toDisplay(resourceType)}?</div>
     );
   }
 }
 
+const CopyModal = fp.flow(withCdrVersions())(CopyModalComponent);
+
 export {
   CopyModal,
+  CopyModalComponent,
   Props as CopyModalProps,
   State as CopyModalState,
 };

@@ -62,6 +62,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
 
   // TODO(jaycarlton): migrate these private functions to MapStruct
   // Converts DB model to client Model
+  // RW-5638
   private final Function<DbUserRecentResource, WorkspaceResource> TO_CLIENT =
       userRecentResource -> {
         WorkspaceResource resource = new WorkspaceResource();
@@ -260,24 +261,37 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         .orElse(true);
   }
 
+  // TODO RW-5638 reimplement all this in MapStruct
   private WorkspaceResource buildRecentResource(
       Map<Long, DbWorkspace> idToDbWorkspace,
       Map<Long, FirecloudWorkspaceResponse> idToFcWorkspaceResponse,
       DbUserRecentResource dbUserRecentResource) {
+
     WorkspaceResource resource = TO_CLIENT.apply(dbUserRecentResource);
-    FirecloudWorkspaceResponse workspaceDetails =
-        idToFcWorkspaceResponse.get(dbUserRecentResource.getWorkspaceId());
+    final long workspaceId = dbUserRecentResource.getWorkspaceId();
+
+    buildFromDbWorkspace(resource, idToDbWorkspace.get(workspaceId));
+    buildFromFcWorkspace(resource, idToFcWorkspaceResponse.get(workspaceId));
+
+    return resource;
+  }
+
+  private void buildFromDbWorkspace(WorkspaceResource resource, DbWorkspace dbWorkspace) {
+    resource.setCdrVersionId(commonMappers.cdrVersionToId(dbWorkspace.getCdrVersion()));
+
     if (workbenchConfigProvider.get().featureFlags.enableBillingLockout) {
-      resource.setWorkspaceBillingStatus(
-          idToDbWorkspace.get(dbUserRecentResource.getWorkspaceId()).getBillingStatus());
+      resource.setWorkspaceBillingStatus(dbWorkspace.getBillingStatus());
     } else {
       resource.setWorkspaceBillingStatus(BillingStatus.ACTIVE);
     }
+  }
+
+  private void buildFromFcWorkspace(
+      WorkspaceResource resource, FirecloudWorkspaceResponse workspaceDetails) {
     resource.setPermission(
         firecloudMapper.fcToApiWorkspaceAccessLevel(workspaceDetails.getAccessLevel()).toString());
     resource.setWorkspaceNamespace(workspaceDetails.getWorkspace().getNamespace());
     resource.setWorkspaceFirecloudName(workspaceDetails.getWorkspace().getName());
-    return resource;
   }
 
   // Retrieves Database workspace ID
