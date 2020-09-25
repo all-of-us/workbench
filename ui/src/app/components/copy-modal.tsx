@@ -80,6 +80,7 @@ class CopyModalComponent extends React.Component<Props, State> {
       } else if (cdrv1 !== fromCdrVersionId && cdrv2 === fromCdrVersionId) {
         return 1;
       } else {
+        // TODO: a meaningful ordering, possibly as part of RW-5563
         return cdrv1.localeCompare(cdrv2);
       }
     };
