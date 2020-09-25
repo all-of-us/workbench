@@ -1,7 +1,10 @@
 import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
+import Modal from 'app/component/modal';
+import Textarea from 'app/element/textarea';
+import Textbox from 'app/element/textbox';
 import DataResourceCard from 'app/component/data-resource-card';
 import ClrIconLink from 'app/element/clr-icon-link';
-import {EllipsisMenuAction, Language, ResourceCard} from 'app/text-labels';
+import {EllipsisMenuAction, Language, ResourceCard, LinkText} from 'app/text-labels';
 import {ElementHandle, Page} from 'puppeteer';
 import {makeRandomName} from 'utils/str-utils';
 import {waitWhileLoading} from 'utils/test-utils';
@@ -142,6 +145,39 @@ export default class WorkspaceDataPage extends WorkspaceBase {
     await this.openAnalysisPage();
     const analysisPage = new WorkspaceAnalysisPage(this.page);
     return analysisPage.createNotebook(notebookName, lang);
+  }
+
+  // rename cohort-review thru the Ellipsis menu located inside the cohort-review card
+
+  async renameCohortReview(cohortName: string, newCohortReviewName: string): Promise<void> {
+    const cohortReviewCard = await DataResourceCard.findCard(this.page, cohortName);
+    const menu = cohortReviewCard.getEllipsis();
+    await menu.clickAction(EllipsisMenuAction.Rename, {waitForNav: false});
+    const modal = new Modal(this.page);
+    await modal.getTextContent();
+    const newNameInput = new Textbox(this.page, `${modal.getXpath()}//*[@id="new-name"]`);
+    await newNameInput.type(newCohortReviewName);
+    const descriptionTextarea = await Textarea.findByName(this.page, {containsText: 'Description:'}, modal);
+    await descriptionTextarea.type('Puppeteer automation rename cohort review.');
+    await modal.clickButton(LinkText.RenameCohortReview, {waitForClose: true});
+    await waitWhileLoading(this.page);
+    console.log(`Cohort Review Card " ${cohortName}" renamed to " ${newCohortReviewName}"`);
+  }
+
+  /**
+   * Delete cohort-review thru the Ellipsis menu located inside the cohort-review card
+   */
+  async deleteCohortReview(newCohortReviewName: string): Promise<void> {
+    const cohortReviewCard = await DataResourceCard.findCard(this.page, newCohortReviewName);
+    if (cohortReviewCard == null) {
+      throw new Error(`Failed to find Cohort: "${cohortReviewCard}".`);
+    }
+    const menu = cohortReviewCard.getEllipsis();
+    await menu.clickAction(EllipsisMenuAction.Delete, {waitForNav: false});
+    const modal = new Modal(this.page);
+    await modal.getTextContent();
+    console.log(`Deleted Cohort Review "${newCohortReviewName}"`);
+    
   }
 
 }
