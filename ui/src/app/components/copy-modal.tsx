@@ -70,8 +70,8 @@ class CopyModalComponent extends React.Component<Props, State> {
 
   cdrName(cdrVersionId: string): string {
     const {cdrVersionListResponse} = this.props;
-    const version = cdrVersionListResponse.items.find(version => version.cdrVersionId === cdrVersionId);
-    return version ? version.name : "[CDR version not found]";
+    const version = cdrVersionListResponse.items.find(v => v.cdrVersionId === cdrVersionId);
+    return version ? version.name : '[CDR version not found]';
   }
 
   groupWorkspacesByCdrVersion(workspaces: Workspace[]): Array<WorkspaceOptions> {
