@@ -34,8 +34,13 @@ export interface Props {
   saveFunction: (CopyRequest) => Promise<FileDetail | ConceptSet>;
 }
 
+interface WorkspaceOptions {
+  label: string;
+  options: Array<{label: string, value: Workspace}>;
+}
+
 interface State {
-  workspaceOptions: Array<Object>;
+  workspaceOptions: Array<WorkspaceOptions>;
   destination: Workspace;
   newName: string;
   requestState: RequestState;
@@ -68,7 +73,7 @@ class CopyModalComponent extends React.Component<Props, State> {
     return cdrVersionListResponse.items.find(version => version.cdrVersionId === cdrVersionId).name;
   }
 
-  groupWorkspacesByCdrVersion(workspaces: Workspace[]): Array<Object> {
+  groupWorkspacesByCdrVersion(workspaces: Workspace[]): Array<WorkspaceOptions> {
     const {fromCdrVersionId} = this.props;
     const workspacesByCdr = fp.groupBy(w => w.cdrVersionId, workspaces);
     const cdrVersions = Array.from(new Set(workspaces.map(w => w.cdrVersionId)));
