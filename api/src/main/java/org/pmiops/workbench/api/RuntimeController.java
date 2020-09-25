@@ -186,11 +186,7 @@ public class RuntimeController implements RuntimeApiDelegate {
         throw e;
       }
 
-      try {
-        return ResponseEntity.ok(getOverrideFromListRuntimes(workspaceNamespace));
-      } catch (RuntimeException e2) {
-        throw e;
-      }
+      return ResponseEntity.ok(getOverrideFromListRuntimes(workspaceNamespace));
     }
   }
 
@@ -199,20 +195,20 @@ public class RuntimeController implements RuntimeApiDelegate {
         leonardoNotebooksClient.listRuntimesByProject(workspaceNamespace, true).stream()
             .sorted(
                 (a, b) -> {
-                  String a_createdDate, b_createdDate;
+                  String aCreatedDate, bCreatedDate;
                   if (a.getAuditInfo() == null || a.getAuditInfo().getCreatedDate() == null) {
-                    a_createdDate = "";
+                    aCreatedDate = "";
                   } else {
-                    a_createdDate = a.getAuditInfo().getCreatedDate();
+                    aCreatedDate = a.getAuditInfo().getCreatedDate();
                   }
 
                   if (b.getAuditInfo() == null || b.getAuditInfo().getCreatedDate() == null) {
-                    b_createdDate = "";
+                    bCreatedDate = "";
                   } else {
-                    b_createdDate = b.getAuditInfo().getCreatedDate();
+                    bCreatedDate = b.getAuditInfo().getCreatedDate();
                   }
 
-                  return b_createdDate.compareTo(a_createdDate);
+                  return bCreatedDate.compareTo(aCreatedDate);
                 })
             .findFirst();
 
@@ -228,14 +224,20 @@ public class RuntimeController implements RuntimeApiDelegate {
 
     if (runtimeLabels != null
         && OVERRIDE_LABEL.equals(runtimeLabels.get(LeonardoMapper.RUNTIME_LABEL_AOU_CONFIG))) {
-      Runtime runtime = leonardoMapper.toApiRuntime(mostRecentRuntime);
-      if (!RuntimeStatus.DELETED.equals(runtime.getStatus())) {
-        log.warning(
-            "Runtimes returned from ListRuntimes should be DELETED but found "
-                + runtime.getStatus());
-      }
 
-      return runtime.status(RuntimeStatus.DELETED);
+      try {
+        Runtime runtime = leonardoMapper.toApiRuntime(mostRecentRuntime);
+        if (!RuntimeStatus.DELETED.equals(runtime.getStatus())) {
+          log.warning(
+              "Runtimes returned from ListRuntimes should be DELETED but found "
+                  + runtime.getStatus());
+        }
+        return runtime.status(RuntimeStatus.DELETED);
+      } catch (RuntimeException e) {
+        log.warning(
+            "RuntimeException during LeonardoListRuntimeResponse -> Runtime mapping "
+                + e.toString());
+      }
     }
 
     throw new NotFoundException();

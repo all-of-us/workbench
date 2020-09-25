@@ -255,11 +255,7 @@ public class RuntimeControllerTest {
 
     String createdDate = Date.fromYearMonthDay(1988, 12, 26).toString();
 
-    dataprocConfig =
-        new DataprocConfig()
-            .numberOfWorkers(0)
-            .masterMachineType("n1-standard-4")
-            .masterDiskSize(50);
+    Runtime tmpRuntime = new Runtime();
 
     dataprocConfigObj = new LinkedTreeMap<>();
     dataprocConfigObj.put("cloudService", "DATAPROC");
@@ -267,13 +263,17 @@ public class RuntimeControllerTest {
     dataprocConfigObj.put("masterMachineType", "n1-standard-4");
     dataprocConfigObj.put("masterDiskSize", 50.0);
 
-    gceConfig = new GceConfig().bootDiskSize(10).diskSize(100).machineType("n1-standard-2");
+    leonardoMapper.mapRuntimeConfig(tmpRuntime, dataprocConfigObj);
+    dataprocConfig = tmpRuntime.getDataprocConfig();
 
     gceConfigObj = new LinkedTreeMap<>();
     gceConfigObj.put("cloudService", "GCE");
     gceConfigObj.put("bootDiskSize", 10.0);
     gceConfigObj.put("diskSize", 100.0);
     gceConfigObj.put("machineType", "n1-standard-2");
+
+    leonardoMapper.mapRuntimeConfig(tmpRuntime, gceConfigObj);
+    gceConfig = tmpRuntime.getGceConfig();
 
     testLeoRuntime =
         new LeonardoGetRuntimeResponse()

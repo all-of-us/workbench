@@ -96,6 +96,8 @@ public interface LeonardoMapper {
 
   default void mapLabels(Runtime runtime, Map<String, String> runtimeLabels) {
     if (runtimeLabels == null || runtimeLabels.get(RUNTIME_LABEL_AOU_CONFIG) == null) {
+      // If there's no label, fall back onto the old behavior where every Runtime was created with a
+      // default Dataproc config
       runtime.setConfigurationType(RuntimeConfigurationType.DEFAULTDATAPROC);
     } else {
       runtime.setConfigurationType(
