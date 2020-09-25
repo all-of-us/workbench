@@ -4,7 +4,9 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.springframework.test.util.AssertionErrors.fail;
 
 import java.time.Clock;
+import java.util.ArrayList;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -105,6 +107,36 @@ public class WorkspaceDaoTest {
         dbWorkspace.getWorkspaceId(),
         cdrVersion.getCdrVersionId(),
         creator.getUserId());
+  }
+
+  @Test public void stressTestProjection() {
+    workspaceDao.deleteAll();
+    final int numBatches = 4;
+    final int batchSize = 25;
+    final int totalInserted = numBatches  *  batchSize;
+    final DbCdrVersion cdrVersion = getDbCdrVersion();
+
+    final DbUser creator = getDbUser();
+
+    for (int i = 0; i < numBatches;  ++i)  {
+      List<DbWorkspace> batch = insertBatch(batchSize,
+          cdrVersion, creator);
+    }
+
+    assertThat(workspaceDao.count()).isEqualTo(totalInserted);
+    final List<ProjectedReportingWorkspace> projections = workspaceDao.getReportingWorkspaces();
+    assertThat(projections).hasSize(totalInserted);
+  }
+
+  @NotNull
+  public List<DbWorkspace> insertBatch(int batchSize, DbCdrVersion cdrVersion, DbUser creator) {
+    List<DbWorkspace> batch = new ArrayList<>();
+    final DbWorkspace prototype  = ReportingTestUtils.createDbWorkspace(creator, cdrVersion);
+    for (int i = 0; i  < batchSize; ++i) {
+      batch.add(prototype);
+    }
+    workspaceDao.save(batch);
+    return batch;
   }
 
   public DbUser getDbUser() {
