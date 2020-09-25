@@ -377,7 +377,7 @@ export class ResourceCard extends React.Component<Props, State> {
                           closeFunction={() => this.closeConfirmDelete()}/>}
       {this.state.copyingConceptSet && <CopyModal
         fromWorkspaceNamespace={this.props.resourceCard.workspaceNamespace}
-        fromWorkspaceFCName={this.props.resourceCard.workspaceFirecloudName}
+        fromWorkspaceFirecloudName={this.props.resourceCard.workspaceFirecloudName}
         fromResourceName={this.props.resourceCard.conceptSet.name}
         fromCdrVersionId={this.props.resourceCard.cdrVersionId}
         resourceType={this.resourceType}

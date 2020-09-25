@@ -25,7 +25,7 @@ const ResourceTypeHomeTabs = new Map()
 export interface Props {
   cdrVersionListResponse: CdrVersionListResponse;
   fromWorkspaceNamespace: string;
-  fromWorkspaceFCName: string;
+  fromWorkspaceFirecloudName: string;
   fromResourceName: string;
   fromCdrVersionId: string;
   onClose: Function;

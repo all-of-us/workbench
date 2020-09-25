@@ -48,7 +48,7 @@ describe('CopyModal', () => {
     }
   ];
   const fromWorkspaceNamespace = workspaces[0].namespace;
-  const fromWorkspaceFCName = workspaces[0].id;
+  const fromWorkspaceFirecloudName = workspaces[0].id;
   const fromResourceName = 'notebook';
 
   beforeEach(() => {
@@ -57,7 +57,7 @@ describe('CopyModal', () => {
     props = {
       cdrVersionListResponse: cdrVersionListResponse,
       fromWorkspaceNamespace: fromWorkspaceNamespace,
-      fromWorkspaceFCName: fromWorkspaceFCName,
+      fromWorkspaceFirecloudName: fromWorkspaceFirecloudName,
       fromResourceName: fromResourceName,
       fromCdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
       resourceType: ResourceType.NOTEBOOK,
@@ -66,7 +66,7 @@ describe('CopyModal', () => {
       saveFunction: (copyRequest) => {
         return workspacesApi().copyNotebook(
           fromWorkspaceNamespace,
-          fromWorkspaceFCName,
+          fromWorkspaceFirecloudName,
           dropNotebookFileSuffix(fromResourceName),
           copyRequest
         );
@@ -120,7 +120,7 @@ describe('CopyModal', () => {
 
     expect(spy).toHaveBeenCalledWith(
       props.fromWorkspaceNamespace,
-      props.fromWorkspaceFCName,
+      props.fromWorkspaceFirecloudName,
       props.fromResourceName,
       {
         toWorkspaceName: workspaces[2].id,

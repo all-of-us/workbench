@@ -372,7 +372,7 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
           </Modal>}
           {copying && <CopyModal
             fromWorkspaceNamespace={workspace.namespace}
-            fromWorkspaceFCName={workspace.id}
+            fromWorkspaceFirecloudName={workspace.id}
             fromResourceName={conceptSet.name}
             fromCdrVersionId={workspace.cdrVersionId}
             resourceType={ResourceType.CONCEPTSET}
