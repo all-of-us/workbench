@@ -7,17 +7,21 @@ import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.toTim
 
 import com.google.cloud.bigquery.QueryParameterValue;
 import java.util.function.Function;
-import org.pmiops.workbench.cohortbuilder.util.QueryParameterValues;
 import org.pmiops.workbench.model.ReportingCohort;
-import org.pmiops.workbench.model.ReportingUser;
 
 public enum CohortColumnValueExtractor implements ColumnValueExtractor<ReportingCohort> {
   COHORT_ID("cohort_id", ReportingCohort::getCohortId, c -> int64(c.getCohortId())),
-  CREATION_TIME("creation_time", c -> toInsertRowString(c.getCreationTime()), c -> toTimestampQpv(c.getCreationTime())),
+  CREATION_TIME(
+      "creation_time",
+      c -> toInsertRowString(c.getCreationTime()),
+      c -> toTimestampQpv(c.getCreationTime())),
   CREATOR_ID("creator_id", ReportingCohort::getCreatorId, c -> int64(c.getCreatorId())),
   CRITERIA("criteria", ReportingCohort::getCriteria, c -> string(c.getCriteria())),
   DESCRIPTION("description", ReportingCohort::getDescription, c -> string(c.getDescription())),
-  LAST_MODIFIED_TIME("last_modified_time", c -> toInsertRowString(c.getLastModifiedTime()), c -> toTimestampQpv(c.getLastModifiedTime())),
+  LAST_MODIFIED_TIME(
+      "last_modified_time",
+      c -> toInsertRowString(c.getLastModifiedTime()),
+      c -> toTimestampQpv(c.getLastModifiedTime())),
   NAME("name", ReportingCohort::getName, c -> string(c.getName())),
   TYPE("type", ReportingCohort::getType, c -> string(c.getType())),
   VERSION("version", ReportingCohort::getVersion, c -> int64(c.getVersion())),
@@ -53,5 +57,4 @@ public enum CohortColumnValueExtractor implements ColumnValueExtractor<Reporting
   public Function<ReportingCohort, QueryParameterValue> getQueryParameterValueFunction() {
     return parameterValueFunction;
   }
-
 }

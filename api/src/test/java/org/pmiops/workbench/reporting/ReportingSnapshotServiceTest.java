@@ -2,14 +2,11 @@ package org.pmiops.workbench.reporting;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.*;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 
-import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import java.time.Clock;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import org.junit.Before;
@@ -20,14 +17,12 @@ import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingCohort;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
-import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.testconfig.ReportingTestUtils;
-import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,8 +59,7 @@ public class ReportingSnapshotServiceTest {
   }
 
   @Before
-  public void setup() {
-  }
+  public void setup() {}
 
   @Test
   public void testGetSnapshot_noEntries() {

@@ -77,16 +77,18 @@ public class ReportingUploadServiceStreamingImpl implements ReportingUploadServi
         ImmutableMap.of("snapshot_timestamp", reportingSnapshot.getCaptureTimestamp());
 
     return ImmutableList.of(
-        cohortRequestBuilder.build(
-            TableId.of(projectId, dataset, CohortColumnValueExtractor.TABLE_NAME),
-            reportingSnapshot.getCohorts(), fixedValues),
-        userRequestBuilder.build(
-            TableId.of(projectId, dataset, UserColumnValueExtractor.TABLE_NAME),
-            reportingSnapshot.getUsers(), fixedValues),
-        workspaceRequestBuilder.build(
-            TableId.of(projectId, dataset, WorkspaceColumnValueExtractor.TABLE_NAME),
-            reportingSnapshot.getWorkspaces(),
-            fixedValues))
+            cohortRequestBuilder.build(
+                TableId.of(projectId, dataset, CohortColumnValueExtractor.TABLE_NAME),
+                reportingSnapshot.getCohorts(),
+                fixedValues),
+            userRequestBuilder.build(
+                TableId.of(projectId, dataset, UserColumnValueExtractor.TABLE_NAME),
+                reportingSnapshot.getUsers(),
+                fixedValues),
+            workspaceRequestBuilder.build(
+                TableId.of(projectId, dataset, WorkspaceColumnValueExtractor.TABLE_NAME),
+                reportingSnapshot.getWorkspaces(),
+                fixedValues))
         .stream()
         .filter(r -> r.getRows().size() > 0)
         .collect(ImmutableList.toImmutableList());

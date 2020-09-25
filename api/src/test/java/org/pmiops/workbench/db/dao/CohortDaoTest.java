@@ -1,8 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
@@ -32,6 +30,7 @@ public class CohortDaoTest {
   private DbCohort dbCohort;
   private DbUser dbUser;
   private DbWorkspace dbWorkspace;
+
   @Before
   public void setUp() {
     Timestamp timestamp = new Timestamp(System.currentTimeMillis());
@@ -83,6 +82,7 @@ public class CohortDaoTest {
     final DbCohort cohort = cohortDao.save(cohortToSave);
     final List<ProjectedReportingCohort> cohorts = cohortDao.getReportingCohorts();
     assertThat(cohorts).hasSize(1);
-    ReportingTestUtils.assertCohortFields(cohorts.get(0), cohort.getCohortId(), dbUser.getUserId(), dbWorkspace.getWorkspaceId());
+    ReportingTestUtils.assertCohortFields(
+        cohorts.get(0), cohort.getCohortId(), dbUser.getUserId(), dbWorkspace.getWorkspaceId());
   }
 }

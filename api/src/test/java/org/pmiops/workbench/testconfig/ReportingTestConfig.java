@@ -1,10 +1,6 @@
 package org.pmiops.workbench.testconfig;
 
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-
 import com.google.common.base.Stopwatch;
-import com.google.common.base.Ticker;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;

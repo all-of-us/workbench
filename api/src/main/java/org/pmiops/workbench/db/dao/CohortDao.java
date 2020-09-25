@@ -18,27 +18,28 @@ public interface CohortDao extends CrudRepository<DbCohort, Long> {
 
   int countByWorkspaceId(long workspaceId);
 
-// This JPQL query corresponds to the projection interface ProjectedReportingCohort. Its
-// types and argument order must match the column names selected exactly, in name,
-// type, and order. Note that in some cases a projection query should JOIN one or more
-// other tables. Currently this is done by hand (with suitable renamings of the other entries
-//  in the projection
+  // This JPQL query corresponds to the projection interface ProjectedReportingCohort. Its
+  // types and argument order must match the column names selected exactly, in name,
+  // type, and order. Note that in some cases a projection query should JOIN one or more
+  // other tables. Currently this is done by hand (with suitable renamings of the other entries
+  //  in the projection
 
-// This code was generated using reporting-wizard.rb at 2020-09-24T13:40:02-04:00.
-// Manual modification should be avoided if possible as this is a one-time generation
-// and does not run on every build and updates must be merged manually for now.
+  // This code was generated using reporting-wizard.rb at 2020-09-24T13:40:02-04:00.
+  // Manual modification should be avoided if possible as this is a one-time generation
+  // and does not run on every build and updates must be merged manually for now.
 
-  @Query("SELECT\n"
-      + "  c.cohortId,\n"
-      + "  c.creationTime,\n"
-      + "  c.creator.userId AS creatorId,\n"
-      + "  c.criteria,\n"
-      + "  c.description,\n"
-      + "  c.lastModifiedTime,\n"
-      + "  c.name,\n"
-      + "  c.type,\n"
-      + "  c.version,\n"
-      + "  c.workspaceId\n"
-      + "FROM DbCohort c")
+  @Query(
+      "SELECT\n"
+          + "  c.cohortId,\n"
+          + "  c.creationTime,\n"
+          + "  c.creator.userId AS creatorId,\n"
+          + "  c.criteria,\n"
+          + "  c.description,\n"
+          + "  c.lastModifiedTime,\n"
+          + "  c.name,\n"
+          + "  c.type,\n"
+          + "  c.version,\n"
+          + "  c.workspaceId\n"
+          + "FROM DbCohort c")
   List<ProjectedReportingCohort> getReportingCohorts();
 }

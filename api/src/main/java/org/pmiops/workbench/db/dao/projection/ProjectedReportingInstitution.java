@@ -13,9 +13,14 @@ package org.pmiops.workbench.db.dao.projection;
 
 public interface ProjectedReportingInstitution {
   String getDisplayName();
+
   Short getDuaTypeEnum();
+
   Long getInstitutionId();
+
   Short getOrganizationTypeEnum();
+
   String getOrganizationTypeOtherText();
+
   String getShortName();
 }

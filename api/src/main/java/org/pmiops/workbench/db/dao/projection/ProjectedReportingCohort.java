@@ -10,18 +10,26 @@ package org.pmiops.workbench.db.dao.projection;
 // Manual modification should be avoided if possible as this is a one-time generation
 // and does not run on every build and updates must be merged manually for now.
 
-
 import java.sql.Timestamp;
 
 public interface ProjectedReportingCohort {
   Long getCohortId();
+
   Timestamp getCreationTime();
+
   Long getCreatorId();
+
   String getCriteria();
+
   String getDescription();
+
   Timestamp getLastModifiedTime();
+
   String getName();
+
   String getType();
+
   Short getVersion();
+
   Long getWorkspaceId();
 }
