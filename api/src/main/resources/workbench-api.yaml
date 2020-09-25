@@ -8051,10 +8051,6 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/ReportingUser"
-      institutions:
-        type: array
-        items:
-          "$ref": "#/definitions/ReportingInstitution"
       workspaces:
         type: array
         items:
@@ -8264,25 +8260,3 @@ definitions:
       workspaceId:
         type: integer
         format: int64
-  ReportingInstitution:
-    x-aou-note: |-
-      This code was generated using reporting-wizard.rb at 2020-09-24T13:40:01-04:00.
-      Manual modification should be avoided if possible as this is a one-time generation
-      and does not run on every build and updates must be merged manually for now.
-    type: object
-    properties:
-      displayName:
-        type: string
-      duaTypeEnum:
-        type: integer
-        format: int32
-      institutionId:
-        type: integer
-        format: int64
-      organizationTypeEnum:
-        type: integer
-        format: int32
-      organizationTypeOtherText:
-        type: string
-      shortName:
-        type: string
