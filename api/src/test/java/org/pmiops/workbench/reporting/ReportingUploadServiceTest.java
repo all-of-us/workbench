@@ -11,6 +11,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.rowToInsertStringToOffsetTimestamp;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.timestampQpvToOffsetDateTime;
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingCohort;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingUser;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 
@@ -48,7 +49,6 @@ import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.testconfig.ReportingTestUtils;
-import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -73,7 +73,6 @@ public class ReportingUploadServiceTest {
   private ReportingSnapshot emptySnapshot;
 
   @MockBean private BigQueryService mockBigQueryService;
-  @MockBean private Stopwatch mockStopwatch;
 
   @Autowired
   @Qualifier("REPORTING_UPLOAD_SERVICE_DML_IMPL")
@@ -92,7 +91,6 @@ public class ReportingUploadServiceTest {
     ReportingUploadServiceStreamingImpl.class,
     ReportingTestConfig.class
   })
-  @MockBean(Stopwatch.class)
   public static class config {
     @Bean
     public Clock getClock() {
@@ -105,6 +103,9 @@ public class ReportingUploadServiceTest {
     reportingSnapshot =
         new ReportingSnapshot()
             .captureTimestamp(NOW.toEpochMilli())
+            .cohorts(ImmutableList.of(
+                createReportingCohort()
+            ))
             .users(
                 ImmutableList.of(
                     createReportingUser(),
@@ -183,8 +184,6 @@ public class ReportingUploadServiceTest {
     doReturn(mockTableResult)
         .when(mockBigQueryService)
         .executeQuery(any(QueryJobConfiguration.class), anyLong());
-
-    TestMockFactory.stubStopwatch(mockStopwatch, Duration.ofMillis(250));
 
     final InsertAllResponse mockInsertAllResponse = mock(InsertAllResponse.class);
     doReturn(Collections.emptyMap()).when(mockInsertAllResponse).getInsertErrors();
@@ -340,6 +339,7 @@ public class ReportingUploadServiceTest {
     final ReportingSnapshot snapshot =
         new ReportingSnapshot()
             .captureTimestamp(0L)
+            .cohorts(Collections.emptyList())
             .users(Collections.emptyList())
             .workspaces(ImmutableList.of(workspace));
     reportingUploadServiceStreamingImpl.uploadSnapshot(snapshot);

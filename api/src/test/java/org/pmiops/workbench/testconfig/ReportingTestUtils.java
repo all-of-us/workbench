@@ -8,14 +8,17 @@ import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import org.pmiops.workbench.db.dao.projection.ProjectedReportingCohort;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingWorkspace;
 import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
+import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
 
@@ -120,6 +123,29 @@ public class ReportingTestUtils {
   public static final Timestamp WORKSPACE__RP_TIME_REQUESTED =
       Timestamp.from(Instant.parse("2015-06-07T00:00:00.00Z"));
   public static final Long WORKSPACE__WORKSPACE_ID = 34L;
+
+// All constant values, mocking statements, and assertions in this file are generated. The values
+// are chosen so that errors with transposed columns can be caught.
+// Mapping Short values with valid enums can be tricky, and currently there are
+// a handful of places where we have to use use a Short in the projection interface but an Enum
+//  type in the model class. An example of such a manual fix is the following:
+// .dataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION.longValue())
+
+// This code was generated using reporting-wizard.rb at 2020-09-24T13:40:02-04:00.
+// Manual modification should be avoided if possible as this is a one-time generation
+// and does not run on every build and updates must be merged manually for now.
+
+
+  public static final Long COHORT__COHORT_ID = 0L;
+  public static final Timestamp COHORT__CREATION_TIME = Timestamp.from(Instant.parse("2015-05-06T00:00:00.00Z"));
+  public static final Long COHORT__CREATOR_ID = 2L;
+  public static final String COHORT__CRITERIA = "foo_3";
+  public static final String COHORT__DESCRIPTION = "foo_4";
+  public static final Timestamp COHORT__LAST_MODIFIED_TIME = Timestamp.from(Instant.parse("2015-05-10T00:00:00.00Z"));
+  public static final String COHORT__NAME = "foo_6";
+  public static final String COHORT__TYPE = "foo_7";
+  public static final Short COHORT__VERSION = 8;
+  public static final Long COHORT__WORKSPACE_ID = 9L;
 
   public static void assertDtoUserFields(ReportingUser user) {
     assertThat(user.getAboutYou()).isEqualTo(USER__ABOUT_YOU);
@@ -318,6 +344,39 @@ public class ReportingTestUtils {
     return mockUser;
   }
 
+  public static DbUser createDbUser() {
+    final DbUser user = new DbUser();
+    user.setAboutYou(USER__ABOUT_YOU);
+    user.setAreaOfResearch(USER__AREA_OF_RESEARCH);
+    user.setComplianceTrainingBypassTime(USER__COMPLIANCE_TRAINING_BYPASS_TIME);
+    user.setComplianceTrainingCompletionTime(USER__COMPLIANCE_TRAINING_COMPLETION_TIME);
+    user.setComplianceTrainingExpirationTime(USER__COMPLIANCE_TRAINING_EXPIRATION_TIME);
+    user.setContactEmail(USER__CONTACT_EMAIL);
+    user.setCreationTime(USER__CREATION_TIME);
+    user.setCurrentPosition(USER__CURRENT_POSITION);
+    user.setDataAccessLevel(USER__DATA_ACCESS_LEVEL);
+    user.setDataUseAgreementBypassTime(USER__DATA_USE_AGREEMENT_BYPASS_TIME);
+    user.setDataUseAgreementCompletionTime(USER__DATA_USE_AGREEMENT_COMPLETION_TIME);
+    user.setDataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION);
+    user.setDemographicSurveyCompletionTime(USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME);
+    user.setDisabled(USER__DISABLED);
+    user.setEraCommonsBypassTime(USER__ERA_COMMONS_BYPASS_TIME);
+    user.setEraCommonsCompletionTime(USER__ERA_COMMONS_COMPLETION_TIME);
+    user.setFamilyName(USER__FAMILY_NAME);
+    user.setFirstRegistrationCompletionTime(USER__FIRST_REGISTRATION_COMPLETION_TIME);
+    user.setFirstSignInTime(USER__FIRST_SIGN_IN_TIME);
+    user.setFreeTierCreditsLimitDaysOverride(USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE);
+    user.setFreeTierCreditsLimitDollarsOverride(USER__FREE_TIER_CREDITS_LIMIT_DOLLARS_OVERRIDE);
+    user.setGivenName(USER__GIVEN_NAME);
+    user.setLastModifiedTime(USER__LAST_MODIFIED_TIME);
+    user.setProfessionalUrl(USER__PROFESSIONAL_URL);
+    user.setTwoFactorAuthBypassTime(USER__TWO_FACTOR_AUTH_BYPASS_TIME);
+    user.setTwoFactorAuthCompletionTime(USER__TWO_FACTOR_AUTH_COMPLETION_TIME);
+//    user.setUserId(USER__USER_ID);
+    user.setUsername(USER__USERNAME);
+    return user;
+  }
+
   public static ProjectedReportingWorkspace mockProjectedWorkspace() {
     final ProjectedReportingWorkspace mockWorkspace = mock(ProjectedReportingWorkspace.class);
     doReturn(WORKSPACE__BILLING_ACCOUNT_TYPE).when(mockWorkspace).getBillingAccountType();
@@ -474,5 +533,85 @@ public class ReportingTestUtils {
     workspace.setTimeRequested(WORKSPACE__RP_TIME_REQUESTED);
     workspace.setWorkspaceId(WORKSPACE__WORKSPACE_ID);
     return workspace;
+  }
+
+  public static ProjectedReportingCohort mockProjectedReportingCohort() {
+    // Projection interface query objects can't be instantiated and must be mocked instead.
+// This is slightly unfortunate, as the most common issue with projections is a column/type mismatch
+// in the query, which only shows up when calling the accessors on the proxy. So live DAO tests are
+//  essential as well.
+
+// This code was generated using reporting-wizard.rb at 2020-09-24T13:40:02-04:00.
+// Manual modification should be avoided if possible as this is a one-time generation
+// and does not run on every build and updates must be merged manually for now.
+
+
+    final ProjectedReportingCohort mockCohort = mock(ProjectedReportingCohort.class);
+    doReturn(COHORT__COHORT_ID).when(mockCohort).getCohortId();
+    doReturn(COHORT__CREATION_TIME).when(mockCohort).getCreationTime();
+    doReturn(COHORT__CREATOR_ID).when(mockCohort).getCreatorId();
+    doReturn(COHORT__CRITERIA).when(mockCohort).getCriteria();
+    doReturn(COHORT__DESCRIPTION).when(mockCohort).getDescription();
+    doReturn(COHORT__LAST_MODIFIED_TIME).when(mockCohort).getLastModifiedTime();
+    doReturn(COHORT__NAME).when(mockCohort).getName();
+    doReturn(COHORT__TYPE).when(mockCohort).getType();
+    doReturn(COHORT__VERSION).when(mockCohort).getVersion();
+    doReturn(COHORT__WORKSPACE_ID).when(mockCohort).getWorkspaceId();
+    return mockCohort;
+  }
+
+  public static void assertCohortFields(ProjectedReportingCohort cohort, Long expectedCohortId, Long expectedCreatorId, Long expectedWorkspaceId) {
+    assertThat(cohort.getCohortId()).isEqualTo(expectedCohortId);
+    assertTimeApprox(cohort.getCreationTime(), COHORT__CREATION_TIME);
+    assertThat(cohort.getCreatorId()).isEqualTo(expectedCreatorId);
+    assertThat(cohort.getCriteria()).isEqualTo(COHORT__CRITERIA);
+    assertThat(cohort.getDescription()).isEqualTo(COHORT__DESCRIPTION);
+    assertTimeApprox(cohort.getLastModifiedTime(), COHORT__LAST_MODIFIED_TIME);
+    assertThat(cohort.getName()).isEqualTo(COHORT__NAME);
+    assertThat(cohort.getType()).isEqualTo(COHORT__TYPE);
+    assertThat(cohort.getVersion()).isEqualTo(COHORT__VERSION);
+    assertThat(cohort.getWorkspaceId()).isEqualTo(expectedWorkspaceId);
+  }
+
+  public static void assertCohortFields(ReportingCohort cohort) {
+    assertThat(cohort.getCohortId()).isEqualTo(COHORT__COHORT_ID);
+    assertTimeApprox(cohort.getCreationTime(), COHORT__CREATION_TIME);
+    assertThat(cohort.getCreatorId()).isEqualTo(COHORT__CREATOR_ID);
+    assertThat(cohort.getCriteria()).isEqualTo(COHORT__CRITERIA);
+    assertThat(cohort.getDescription()).isEqualTo(COHORT__DESCRIPTION);
+    assertTimeApprox(cohort.getLastModifiedTime(), COHORT__LAST_MODIFIED_TIME);
+    assertThat(cohort.getName()).isEqualTo(COHORT__NAME);
+    assertThat(cohort.getType()).isEqualTo(COHORT__TYPE);
+    assertThat(cohort.getVersion()).isEqualTo(COHORT__VERSION);
+    assertThat(cohort.getWorkspaceId()).isEqualTo(COHORT__WORKSPACE_ID);
+  }
+
+  public static ReportingCohort createReportingCohort() {
+return new ReportingCohort()
+    .cohortId(COHORT__COHORT_ID)
+    .creationTime(offsetDateTimeUtc(COHORT__CREATION_TIME))
+    .creatorId(COHORT__CREATOR_ID)
+    .criteria(COHORT__CRITERIA)
+    .description(COHORT__DESCRIPTION)
+    .lastModifiedTime(offsetDateTimeUtc(COHORT__LAST_MODIFIED_TIME))
+    .name(COHORT__NAME)
+    .type(COHORT__TYPE)
+    .version(COHORT__VERSION.intValue()) // manual fixup
+    .workspaceId(COHORT__WORKSPACE_ID);
+  }
+
+  public static DbCohort createDbCohort(DbUser creator, DbWorkspace dbWorkspace) {
+    final DbCohort cohort = new DbCohort();
+    cohort.setCohortId(COHORT__COHORT_ID);
+    cohort.setCreationTime(COHORT__CREATION_TIME);
+    cohort.setCreator(creator);
+    cohort.setCriteria(COHORT__CRITERIA);
+    cohort.setDescription(COHORT__DESCRIPTION);
+    cohort.setLastModifiedTime(COHORT__LAST_MODIFIED_TIME);
+    cohort.setName(COHORT__NAME);
+    cohort.setType(COHORT__TYPE);
+    cohort.setVersion(COHORT__VERSION);
+    cohort.setWorkspaceId(dbWorkspace.getWorkspaceId());
+    return cohort;
   }
 }

@@ -5,7 +5,9 @@ import java.time.Clock;
 import java.util.List;
 import java.util.logging.Logger;
 import javax.inject.Provider;
+import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.dao.projection.ProjectedReportingCohort;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingWorkspace;
 import org.pmiops.workbench.model.ReportingSnapshot;
@@ -19,6 +21,7 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
   private static final Logger log = Logger.getLogger(ReportingSnapshotServiceImpl.class.getName());
 
   private final Clock clock;
+  private final CohortService cohortService;
   private final ReportingMapper reportingMapper;
   private final Provider<Stopwatch> stopwatchProvider;
   private final UserService userService;
@@ -27,13 +30,21 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
   // Define immutable value class to hold results of queries within a transaction. Mapping to
   // Reporting DTO classes will happen outside the transaction.
   private static class QueryResultBundle {
+    private final List<ProjectedReportingCohort> cohorts;
     private final List<ProjectedReportingUser> users;
     private final List<ProjectedReportingWorkspace> workspaces;
 
     public QueryResultBundle(
-        List<ProjectedReportingUser> users, List<ProjectedReportingWorkspace> workspaces) {
+        List<ProjectedReportingCohort> cohorts,
+        List<ProjectedReportingUser> users,
+        List<ProjectedReportingWorkspace> workspaces) {
+      this.cohorts = cohorts;
       this.users = users;
       this.workspaces = workspaces;
+    }
+
+    public List<ProjectedReportingCohort> getCohorts() {
+      return cohorts;
     }
 
     public List<ProjectedReportingUser> getUsers() {
@@ -47,11 +58,13 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
 
   public ReportingSnapshotServiceImpl(
       Clock clock,
+      CohortService cohortService,
       ReportingMapper reportingMapper,
       Provider<Stopwatch> stopwatchProvider,
       UserService userService,
       WorkspaceService workspaceService) {
     this.clock = clock;
+    this.cohortService = cohortService;
     this.reportingMapper = reportingMapper;
     this.stopwatchProvider = stopwatchProvider;
     this.userService = userService;
@@ -72,6 +85,7 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
     final ReportingSnapshot result =
         new ReportingSnapshot()
             .captureTimestamp(clock.millis())
+            .cohorts(reportingMapper.toModelList(queryResultBundle.getCohorts()))
             .users(reportingMapper.toReportingUserList(queryResultBundle.getUsers()))
             .workspaces(
                 reportingMapper.toReportingWorkspaceList(queryResultBundle.getWorkspaces()));
@@ -89,7 +103,9 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
     final Stopwatch stopwatch = stopwatchProvider.get().start();
     final QueryResultBundle result =
         new QueryResultBundle(
-            userService.getReportingUsers(), workspaceService.getReportingWorkspaces());
+            cohortService.getReportingCohorts(),
+            userService.getReportingUsers(),
+            workspaceService.getReportingWorkspaces());
     stopwatch.stop();
     log.info(LogFormatters.duration("Application DB Queries", stopwatch.elapsed()));
     return result;

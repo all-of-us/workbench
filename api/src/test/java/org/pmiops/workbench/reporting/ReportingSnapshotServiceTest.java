@@ -2,6 +2,7 @@ package org.pmiops.workbench.reporting;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.*;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 
@@ -15,8 +16,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryService;
+import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.dao.projection.ProjectedReportingCohort;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
+import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
@@ -38,9 +42,10 @@ public class ReportingSnapshotServiceTest {
   private static final long NOW_EPOCH_MILLI = 1594404482000L;
   private static final Instant NOW_INSTANT = Instant.ofEpochMilli(NOW_EPOCH_MILLI);
 
+  @MockBean private CohortService mockCohortService;
   @MockBean private UserService mockUserService;
-  @MockBean private Stopwatch mockStopwatch;
   @MockBean private WorkspaceService mockWorkspaceService;
+
   @Autowired private ReportingSnapshotService reportingSnapshotService;
 
   @TestConfiguration
@@ -60,7 +65,6 @@ public class ReportingSnapshotServiceTest {
 
   @Before
   public void setup() {
-    TestMockFactory.stubStopwatch(mockStopwatch, Duration.ofMillis(100));
   }
 
   @Test
@@ -75,9 +79,13 @@ public class ReportingSnapshotServiceTest {
   public void testGetSnapshot_someEntries() {
     mockUsers();
     mockWorkspaces();
+    mockCohorts();
 
     final ReportingSnapshot snapshot = reportingSnapshotService.takeSnapshot();
     assertTimeApprox(snapshot.getCaptureTimestamp(), NOW_INSTANT.toEpochMilli());
+
+    assertThat(snapshot.getCohorts()).hasSize(1);
+    assertCohortFields(snapshot.getCohorts().get(0));
 
     assertThat(snapshot.getUsers()).hasSize(2);
     final ReportingUser user = snapshot.getUsers().get(0);
@@ -98,5 +106,10 @@ public class ReportingSnapshotServiceTest {
     doReturn(ImmutableList.of(mockProjectedWorkspace()))
         .when(mockWorkspaceService)
         .getReportingWorkspaces();
+  }
+
+  private void mockCohorts() {
+    final ProjectedReportingCohort mockCohort = mockProjectedReportingCohort();
+    doReturn(ImmutableList.of(mockCohort)).when(mockCohortService).getReportingCohorts();
   }
 }

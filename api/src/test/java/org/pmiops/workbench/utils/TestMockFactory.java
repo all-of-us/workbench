@@ -208,21 +208,4 @@ public class TestMockFactory {
     dbWorkspace.setAnticipatedFindings(researchPurpose.getAnticipatedFindings());
     return dbWorkspace;
   }
-
-  // The Stopwatch class is final, so we can't create a fake implementation. The
-  // next best thing is this helper method for setting all the method stubs in
-  // a test's @Before method.
-  // Deprecated in favor of Stopwatch.createStarted() et al.
-  @Deprecated
-  public static void stubStopwatch(Stopwatch mockStopwatch, Duration elapsed) {
-    doReturn(elapsed).when(mockStopwatch).elapsed();
-
-    // Just use millis unconditionally. This method is not recommended and not used currently,
-    // so I'm not investing in making this correct yet.
-    doReturn(elapsed.toMillis()).when(mockStopwatch).elapsed(any(TimeUnit.class));
-
-    doReturn(mockStopwatch).when(mockStopwatch).start();
-    doReturn(mockStopwatch).when(mockStopwatch).stop();
-    doReturn(mockStopwatch).when(mockStopwatch).reset();
-  }
 }
