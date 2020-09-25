@@ -9,6 +9,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -38,8 +39,10 @@ import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.Runtime;
+import org.pmiops.workbench.model.RuntimeConfigurationType;
 import org.pmiops.workbench.model.RuntimeLocalizeRequest;
 import org.pmiops.workbench.model.RuntimeLocalizeResponse;
+import org.pmiops.workbench.model.RuntimeStatus;
 import org.pmiops.workbench.model.UpdateClusterConfigRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
@@ -173,10 +176,71 @@ public class RuntimeController implements RuntimeApiDelegate {
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
     workspaceService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
 
-    return ResponseEntity.ok(
-        leonardoMapper.toApiRuntime(
-            leonardoNotebooksClient.getRuntime(
-                workspaceNamespace, userProvider.get().getRuntimeName())));
+    try {
+      return ResponseEntity.ok(
+          leonardoMapper.toApiRuntime(
+              leonardoNotebooksClient.getRuntime(
+                  workspaceNamespace, userProvider.get().getRuntimeName())));
+    } catch (NotFoundException e) {
+      if (!workbenchConfigProvider.get().featureFlags.enableCustomRuntimes) {
+        throw e;
+      }
+
+      return ResponseEntity.ok(getOverrideFromListRuntimes(workspaceNamespace));
+    }
+  }
+
+  private Runtime getOverrideFromListRuntimes(String workspaceNamespace) {
+    Optional<LeonardoListRuntimeResponse> mostRecentRuntimeMaybe =
+        leonardoNotebooksClient.listRuntimesByProject(workspaceNamespace, true).stream()
+            .sorted(
+                (a, b) -> {
+                  String aCreatedDate, bCreatedDate;
+                  if (a.getAuditInfo() == null || a.getAuditInfo().getCreatedDate() == null) {
+                    aCreatedDate = "";
+                  } else {
+                    aCreatedDate = a.getAuditInfo().getCreatedDate();
+                  }
+
+                  if (b.getAuditInfo() == null || b.getAuditInfo().getCreatedDate() == null) {
+                    bCreatedDate = "";
+                  } else {
+                    bCreatedDate = b.getAuditInfo().getCreatedDate();
+                  }
+
+                  return bCreatedDate.compareTo(aCreatedDate);
+                })
+            .findFirst();
+
+    if (!mostRecentRuntimeMaybe.isPresent()) {
+      throw new NotFoundException();
+    }
+
+    LeonardoListRuntimeResponse mostRecentRuntime = mostRecentRuntimeMaybe.get();
+    final String OVERRIDE_LABEL =
+        LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(
+            RuntimeConfigurationType.USEROVERRIDE);
+    Map<String, String> runtimeLabels = (Map<String, String>) mostRecentRuntime.getLabels();
+
+    if (runtimeLabels != null
+        && OVERRIDE_LABEL.equals(runtimeLabels.get(LeonardoMapper.RUNTIME_LABEL_AOU_CONFIG))) {
+
+      try {
+        Runtime runtime = leonardoMapper.toApiRuntime(mostRecentRuntime);
+        if (!RuntimeStatus.DELETED.equals(runtime.getStatus())) {
+          log.warning(
+              "Runtimes returned from ListRuntimes should be DELETED but found "
+                  + runtime.getStatus());
+        }
+        return runtime.status(RuntimeStatus.DELETED);
+      } catch (RuntimeException e) {
+        log.warning(
+            "RuntimeException during LeonardoListRuntimeResponse -> Runtime mapping "
+                + e.toString());
+      }
+    }
+
+    throw new NotFoundException();
   }
 
   @Override

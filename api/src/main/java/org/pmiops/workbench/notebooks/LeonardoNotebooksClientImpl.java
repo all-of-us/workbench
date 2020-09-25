@@ -1,6 +1,5 @@
 package org.pmiops.workbench.notebooks;
 
-import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +26,6 @@ import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig.CloudServiceEnum;
 import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
 import org.pmiops.workbench.model.Runtime;
-import org.pmiops.workbench.model.RuntimeConfigurationType;
 import org.pmiops.workbench.notebooks.api.ProxyApi;
 import org.pmiops.workbench.notebooks.model.LocalizationEntry;
 import org.pmiops.workbench.notebooks.model.Localize;
@@ -41,16 +39,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
-  private static final String RUNTIME_LABEL_AOU = "all-of-us";
-  private static final String RUNTIME_LABEL_AOU_CONFIG = "all-of-us-config";
-  private static final String RUNTIME_LABEL_CREATED_BY = "created-by";
   private static final String WORKSPACE_CDR = "WORKSPACE_CDR";
-  public static final Map<RuntimeConfigurationType, String>
-      RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP =
-          ImmutableMap.of(
-              RuntimeConfigurationType.USEROVERRIDE, "user-override",
-              RuntimeConfigurationType.DEFAULTGCE, "default-gce",
-              RuntimeConfigurationType.DEFAULTDATAPROC, "default-dataproc");
 
   private static final Logger log = Logger.getLogger(LeonardoNotebooksClientImpl.class.getName());
 
@@ -113,13 +102,14 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
         "aou-upload-policy-extension", assetsBaseUrl + "/aou-upload-policy-extension.js");
 
     Map<String, String> runtimeLabels = new HashMap<>();
-    runtimeLabels.put(RUNTIME_LABEL_AOU, "true");
-    runtimeLabels.put(RUNTIME_LABEL_CREATED_BY, userEmail);
+    runtimeLabels.put(LeonardoMapper.RUNTIME_LABEL_AOU, "true");
+    runtimeLabels.put(LeonardoMapper.RUNTIME_LABEL_CREATED_BY, userEmail);
 
     if (runtime.getConfigurationType() != null) {
       runtimeLabels.put(
-          RUNTIME_LABEL_AOU_CONFIG,
-          RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(runtime.getConfigurationType()));
+          LeonardoMapper.RUNTIME_LABEL_AOU_CONFIG,
+          LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(
+              runtime.getConfigurationType()));
     }
 
     LeonardoCreateRuntimeRequest request =
@@ -197,6 +187,14 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     RuntimesApi runtimesApi = serviceRuntimesApiProvider.get();
     return leonardoRetryHandler.run(
         (context) -> runtimesApi.listRuntimesByProject(googleProject, null, false));
+  }
+
+  @Override
+  public List<LeonardoListRuntimeResponse> listRuntimesByProject(
+      String googleProject, boolean includeDeleted) {
+    RuntimesApi runtimesApi = runtimesApiProvider.get();
+    return leonardoRetryHandler.run(
+        (context) -> runtimesApi.listRuntimesByProject(googleProject, null, includeDeleted));
   }
 
   @Override
