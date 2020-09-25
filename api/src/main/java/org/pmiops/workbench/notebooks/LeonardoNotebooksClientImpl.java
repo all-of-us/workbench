@@ -20,6 +20,7 @@ import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.api.ServiceInfoApi;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
+import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
@@ -136,6 +137,16 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
         request.setRuntimeConfig(
             leonardoMapper.toLeonardoMachineConfig(runtime.getDataprocConfig()));
       }
+    } else if (workbenchConfigProvider.get().featureFlags.enableGceAsNotebookRuntimeDefault) {
+      request.setRuntimeConfig(
+          new LeonardoGceConfig()
+              .cloudService(LeonardoGceConfig.CloudServiceEnum.GCE)
+              .diskSize(
+                  Optional.ofNullable(clusterOverride.masterDiskSize)
+                      .orElse(config.firecloud.notebookRuntimeDefaultDiskSizeGb))
+              .machineType(
+                  Optional.ofNullable(clusterOverride.machineType)
+                      .orElse(config.firecloud.notebookRuntimeDefaultMachineType)));
     } else {
       request.setRuntimeConfig(
           new LeonardoMachineConfig()

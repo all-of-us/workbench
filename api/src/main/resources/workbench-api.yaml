@@ -3937,6 +3937,10 @@ definitions:
         type: boolean
         default: false
         description: Whether user should be able to customize notebook runtime settings.
+      enableGceAsNotebookRuntimeDefault:
+        type: boolean
+        default: false
+        description: Whether the notebook runtime should default to GCE (vs Dataproc).
       runtimeImages:
         type: array
         items:
@@ -5422,6 +5426,10 @@ definitions:
     type: string
     enum:
       - UserOverride
+      - GeneralAnalysis
+      - HailGenomicAnalysis
+      # Deprecated.
+      # TODO(calbach): Remove after next release.
       - DefaultGce
       - DefaultDataproc
   Runtime:

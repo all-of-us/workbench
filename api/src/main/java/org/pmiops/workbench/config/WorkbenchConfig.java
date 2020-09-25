@@ -268,6 +268,8 @@ public class WorkbenchConfig {
     public boolean enableCOPESurvey;
     // Whether users should be able to customize notebook runtime settings.
     public boolean enableCustomRuntimes;
+    // Whether Leonardo notebooks runtimes should default to GCE (instead of Dataproc).
+    public boolean enableGceAsNotebookRuntimeDefault;
   }
 
   public static class ActionAuditConfig {

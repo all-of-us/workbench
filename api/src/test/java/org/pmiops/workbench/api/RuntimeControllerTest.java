@@ -292,7 +292,7 @@ public class RuntimeControllerTest {
     testRuntime =
         new Runtime()
             .runtimeName(getRuntimeName())
-            .configurationType(RuntimeConfigurationType.DEFAULTDATAPROC)
+            .configurationType(RuntimeConfigurationType.HAILGENOMICANALYSIS)
             .googleProject(BILLING_PROJECT_ID)
             .status(RuntimeStatus.DELETING)
             .toolDockerImage(TOOL_DOCKER_IMAGE)
@@ -387,7 +387,7 @@ public class RuntimeControllerTest {
         .thenReturn(testLeoRuntime);
 
     assertThat(runtimeController.getRuntime(BILLING_PROJECT_ID).getBody().getConfigurationType())
-        .isEqualTo(RuntimeConfigurationType.DEFAULTDATAPROC);
+        .isEqualTo(RuntimeConfigurationType.HAILGENOMICANALYSIS);
   }
 
   @Test
@@ -398,7 +398,7 @@ public class RuntimeControllerTest {
         .thenReturn(testLeoRuntime);
 
     assertThat(runtimeController.getRuntime(BILLING_PROJECT_ID).getBody().getConfigurationType())
-        .isEqualTo(RuntimeConfigurationType.DEFAULTDATAPROC);
+        .isEqualTo(RuntimeConfigurationType.HAILGENOMICANALYSIS);
   }
 
   @Test
@@ -409,7 +409,7 @@ public class RuntimeControllerTest {
         .thenReturn(testLeoRuntime);
 
     assertThat(runtimeController.getRuntime(BILLING_PROJECT_ID).getBody().getConfigurationType())
-        .isEqualTo(RuntimeConfigurationType.DEFAULTGCE);
+        .isEqualTo(RuntimeConfigurationType.GENERALANALYSIS);
   }
 
   @Test
@@ -912,6 +912,54 @@ public class RuntimeControllerTest {
   }
 
   @Test
+  public void testCreateRuntime_emptyRuntime_legacyDataproc() throws ApiException {
+    config.featureFlags.enableCustomRuntimes = false;
+    config.featureFlags.enableGceAsNotebookRuntimeDefault = false;
+
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
+
+    runtimeController.createRuntime(BILLING_PROJECT_ID, new Runtime());
+    verify(userRuntimesApi)
+        .createRuntime(
+            eq(BILLING_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+
+    Runtime capturedRuntimeConfig = new Runtime();
+    leonardoMapper.mapRuntimeConfig(
+        capturedRuntimeConfig, createRuntimeRequestCaptor.getValue().getRuntimeConfig());
+    assertThat(capturedRuntimeConfig.getGceConfig())
+        .isEqualTo(
+            new DataprocConfig()
+                .masterMachineType(config.firecloud.notebookRuntimeDefaultMachineType)
+                .masterDiskSize(config.firecloud.notebookRuntimeDefaultDiskSizeGb));
+  }
+
+  @Test
+  public void testCreateRuntime_emptyRuntime_enableGce() throws ApiException {
+    config.featureFlags.enableCustomRuntimes = false;
+    config.featureFlags.enableGceAsNotebookRuntimeDefault = true;
+
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
+
+    runtimeController.createRuntime(BILLING_PROJECT_ID, new Runtime());
+    verify(userRuntimesApi)
+        .createRuntime(
+            eq(BILLING_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+
+    Runtime capturedRuntimeConfig = new Runtime();
+    leonardoMapper.mapRuntimeConfig(
+        capturedRuntimeConfig, createRuntimeRequestCaptor.getValue().getRuntimeConfig());
+    assertThat(capturedRuntimeConfig.getGceConfig())
+        .isEqualTo(
+            new GceConfig()
+                .machineType(config.firecloud.notebookRuntimeDefaultMachineType)
+                .diskSize(config.firecloud.notebookRuntimeDefaultDiskSizeGb));
+  }
+
+  @Test
   public void testCreateRuntime_defaultLabel_dataproc() throws ApiException {
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
@@ -920,7 +968,7 @@ public class RuntimeControllerTest {
     runtimeController.createRuntime(
         BILLING_PROJECT_ID,
         new Runtime()
-            .configurationType(RuntimeConfigurationType.DEFAULTDATAPROC)
+            .configurationType(RuntimeConfigurationType.HAILGENOMICANALYSIS)
             .dataprocConfig(testRuntime.getDataprocConfig()));
     verify(userRuntimesApi)
         .createRuntime(
@@ -940,7 +988,7 @@ public class RuntimeControllerTest {
     runtimeController.createRuntime(
         BILLING_PROJECT_ID,
         new Runtime()
-            .configurationType(RuntimeConfigurationType.DEFAULTGCE)
+            .configurationType(RuntimeConfigurationType.GENERALANALYSIS)
             .dataprocConfig(dataprocConfig));
     verify(userRuntimesApi)
         .createRuntime(
