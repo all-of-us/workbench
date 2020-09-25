@@ -1,6 +1,7 @@
 import {leoRuntimesApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import {isAbortError, reportError} from 'app/utils/errors';
+import {runtimePresets} from 'app/utils/runtime-presets';
 import {Runtime, RuntimeConfigurationType, RuntimeStatus} from 'generated/fetch';
 import {serverConfigStore} from './navigation';
 import {
@@ -192,11 +193,7 @@ export class LeoRuntimeInitializer {
     let runtime: Runtime;
     if (serverConfigStore.getValue().enableCustomRuntimes) {
       // TODO(RW-3418): allow custom runtimes, maybe plumb default through serverConfigStore?
-      runtime = {
-        dataprocConfig: {
-          masterMachineType: 'n1-standard-4'
-        }
-      };
+      runtime = {...runtimePresets.generalAnalysis.runtimeTemplate};
     } else {
       runtime = {configurationType: RuntimeConfigurationType.DefaultDataproc};
     }
