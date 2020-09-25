@@ -6,6 +6,7 @@ import static org.springframework.test.util.AssertionErrors.fail;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.EntityManager;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,7 +38,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
-@Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class WorkspaceDaoTest {
   private static final String WORKSPACE_1_NAME = "Foo";
   private static final String WORKSPACE_NAMESPACE = "aou-1";
@@ -47,6 +47,9 @@ public class WorkspaceDaoTest {
 
   @Autowired CdrVersionDao cdrVersionDao;
   @Autowired UserDao userDao;
+
+  @Autowired
+  EntityManager entityManager;
 
   @TestConfiguration
   @Import({CommonMappers.class, ReportingMapperImpl.class, ReportingTestConfig.class})
@@ -109,7 +112,9 @@ public class WorkspaceDaoTest {
         creator.getUserId());
   }
 
-  @Test public void stressTestProjection() {
+  @Test
+  @Transactional
+  public void stressTestProjection() {
     workspaceDao.deleteAll();
     final int numBatches = 4;
     final int batchSize = 25;
@@ -129,6 +134,7 @@ public class WorkspaceDaoTest {
   }
 
   @NotNull
+  @Transactional
   public List<DbWorkspace> insertBatch(int batchSize, DbCdrVersion cdrVersion, DbUser creator) {
     List<DbWorkspace> batch = new ArrayList<>();
     final DbWorkspace prototype  = ReportingTestUtils.createDbWorkspace(creator, cdrVersion);
@@ -136,6 +142,7 @@ public class WorkspaceDaoTest {
       batch.add(prototype);
     }
     workspaceDao.save(batch);
+    entityManager.flush();
     return batch;
   }
 
