@@ -9,6 +9,7 @@ import {CdrVersionListResponse, ConceptSet, FileDetail, ResourceType, Workspace}
 
 import { Spinner } from 'app/components/spinners';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCdrVersions} from 'app/utils';
 import { navigate } from 'app/utils/navigation';
 import {toDisplay} from 'app/utils/resourceActions';
@@ -46,13 +47,41 @@ interface State {
   requestState: RequestState;
   copyErrorMsg: string;
   loading: boolean;
+  cdrMismatch: string;
 }
 
 const styles = reactStyles({
   bold: {
     fontWeight: 600
   },
+  conceptSetCdrMismatch: {
+    color: colors.danger,
+    marginLeft: '0.5rem',
+    marginTop: '0.25rem',
+    fontFamily: 'Montserrat',
+    fontSize: '12px',
+    letterSpacing: 0,
+    lineHeight: '22px',
+  },
+  notebookCdrMismatch: {
+    padding: '8px',
+    fontFamily: 'Font Awesome 5 Pro',
+    letterSpacing: 0,
+    boxSizing: 'border-box',
+    color: colors.primary,
+    borderColor: colors.warning,
+    backgroundColor: colorWithWhiteness(colors.danger, .9),
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderRadius: '5px',
+    lineHeight: '24px',
+    marginTop: '1rem',
+  },
 });
+
+const ConceptSetCdrMismatch = (props: {text: string}) => <div style={styles.conceptSetCdrMismatch}>{props.text}</div>;
+
+const NotebookCdrMismatch = (props: {text: string}) => <div style={styles.notebookCdrMismatch}>{props.text}</div>;
 
 class CopyModalComponent extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -65,6 +94,7 @@ class CopyModalComponent extends React.Component<Props, State> {
       requestState: RequestState.UNSENT,
       copyErrorMsg: '',
       loading: true,
+      cdrMismatch: '',
     };
   }
 
@@ -218,27 +248,57 @@ class CopyModalComponent extends React.Component<Props, State> {
     }
   }
 
-  setDestination(destination: Workspace) {
+  // OK to copy a notebook with a mismatch, but show a warning message
+  setNotebookCdrMismatchWarning(destination: Workspace, fromCdrVersionId: string) {
+    const warningMsg = `The selected destination workspace uses a different dataset version ` +
+        `(${this.cdrName(destination.cdrVersionId)}) than the current workspace (${this.cdrName(fromCdrVersionId)}). ` +
+        'Edits may be required to ensure your analysis is functional and accurate.';
+    this.setState({ cdrMismatch: warningMsg, destination: destination });
+  }
+
+  // not OK to copy a Concept Set with a mismatch.  Show an error message and prevent copy
+  setConceptSetCdrMismatchError(destination: Workspace, fromCdrVersionId: string) {
+    const errorMsg = `Can’t copy to that workspace. It uses a different dataset version ` +
+        `(${this.cdrName(destination.cdrVersionId)}) than the current workspace (${this.cdrName(fromCdrVersionId)}).`;
+    this.setState({ cdrMismatch: errorMsg, destination: null });
+  }
+
+  validateAndSetDestination(destination: Workspace) {
+    const {fromCdrVersionId, resourceType} = this.props;
+
     this.clearCopyError();
-    this.setState({destination: destination});
+
+    if (fromCdrVersionId === destination.cdrVersionId) {
+      this.setState({cdrMismatch: '', destination: destination});
+      return;
+    }
+
+    if (resourceType === ResourceType.NOTEBOOK) {
+      this.setNotebookCdrMismatchWarning(destination, fromCdrVersionId);
+    } else if (resourceType === ResourceType.CONCEPTSET) {
+      this.setConceptSetCdrMismatchError(destination, fromCdrVersionId);
+    }
   }
 
   renderFormBody() {
-    const {destination, workspaceOptions, requestState, copyErrorMsg, newName} = this.state;
+    const {resourceType} = this.props;
+    const {destination, workspaceOptions, requestState, cdrMismatch, copyErrorMsg, newName} = this.state;
     return (
       <div>
         <div style={headerStyles.formLabel}>Destination *</div>
         <Select
           value={destination}
           options={workspaceOptions}
-          onChange={(destWorkspace) => this.setDestination(destWorkspace)}
+          onChange={(destWorkspace) => this.validateAndSetDestination(destWorkspace)}
         />
+        {cdrMismatch && resourceType === ResourceType.CONCEPTSET && <ConceptSetCdrMismatch text={cdrMismatch}/>}
         <div style={headerStyles.formLabel}>Name *</div>
         <TextInput
           autoFocus
           value={newName}
           onChange={v => this.setState({ newName: v })}
         />
+        {cdrMismatch && resourceType === ResourceType.NOTEBOOK && <NotebookCdrMismatch text={cdrMismatch}/>}
         {requestState === RequestState.COPY_ERROR &&
         <ValidationError> {copyErrorMsg} </ValidationError>}
       </div>
