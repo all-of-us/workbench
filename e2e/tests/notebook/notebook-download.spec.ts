@@ -2,6 +2,7 @@ import NotebookDownloadModal from 'app/page/notebook-download-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn} from 'utils/test-utils';
+import {getPropValue} from 'utils/element-utils';
 import {waitForFn} from 'utils/waits-utils';
 
 describe('Jupyter notebook download test', () => {
@@ -11,14 +12,17 @@ describe('Jupyter notebook download test', () => {
   });
 
   const testDownloadModal = async (modal: NotebookDownloadModal): Promise<void> => {
-    let downloadBtn = await modal.getDownloadButton();
-    expect(await downloadBtn.getProperty('disabled')).toBeTruthy();
+    const checkDownloadDisabledState = async (wantDisabled: boolean) => {
+      expect(await waitForFn(async () => {
+        let downloadBtn = await modal.getDownloadButton();
+        return wantDisabled == await getPropValue<boolean>(downloadBtn, 'disabled');
+      })).toBe(true);
+    };
 
+    await checkDownloadDisabledState(true);
     await modal.clickPolicyCheckbox();
 
-    downloadBtn = await modal.getDownloadButton();
-    const btnProps = await downloadBtn.getProperties();
-    expect(btnProps['disabled']).toBeFalsy();
+    await checkDownloadDisabledState(false);
     await modal.clickDownloadButton();
 
     // Clicking download opens the notebook download in a new tab. Bring the
@@ -35,7 +39,7 @@ describe('Jupyter notebook download test', () => {
    * - Find an existing workspace.
    * - Create a new Notebook and add code.
    * - Save notebook.
-   * - for ipynb, pdf:
+   * - for ipynb, markdown:
    *   - Download notebook.
    *   - Verify policy warnings modal interactions.
    */
@@ -56,33 +60,16 @@ describe('Jupyter notebook download test', () => {
     // Save and download.
     await notebook.save();
 
-    // Event listener for new pages. Jupyter downloads yield new tabs for
-    // each file download.
-    const newTabUrls = [];
-    browser.on('targetcreated', async (t) => {
-      if (t.type() === 'page') {
-        const p = await t.page();
-        newTabUrls.push(p.url());
-      }
-    });
-
     console.log('downloading as ipynb');
     await testDownloadModal(await notebook.downloadAsIpynb());
 
-    console.log('downloading as pdf');
-    await testDownloadModal(await notebook.downloadAsPdf());
+    console.log('downloading as Markdown');
+    await testDownloadModal(await notebook.downloadAsMarkdown());
 
-    // Wait a bit to process new tab creation events.
-    // ipynb is special, and doesn't yield a recognizable URL for download.
-    // As of 9/22/20 I was unable to find a clear mechanism for validating ipynb
-    // download. All other formats, however, go through nbconvert - resulting
-    // in a recognizable URL.
-    const sawPdf = await waitForFn(() => newTabUrls.find(url => {
-      return url.includes('nbconvert/pdf') && url.includes(notebookName);
-    }));
-    if (!sawPdf) {
-      fail(`did not see new tab for PDF download, got: ${newTabUrls}`);
-    }
+    // Ideally we would validate the download URLs or download content here.
+    // As of 9/25/20 I was unable to find a clear mechanism for accessing this.
+
+    await notebook.deleteNotebook(notebookName);
   }, 20 * 60 * 1000);
 
 })

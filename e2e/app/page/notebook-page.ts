@@ -25,7 +25,7 @@ enum Xpath {
   fileMenuDropdown = '//a[text()="File"]',
   downloadMenuDropdown = '//a[text()="Download as"]',
   downloadIpynbButton = '//*[@id="download_ipynb"]/a',
-  downloadPdfButton = '//*[@id="download_pdf"]/a',
+  downloadMarkdownButton = '//*[@id="download_markdown"]/a',
 }
 
 export enum Mode {
@@ -105,8 +105,8 @@ export default class NotebookPage extends AuthenticatedPage {
     return this.downloadAs(Xpath.downloadIpynbButton)
   }
 
-  async downloadAsPdf(): Promise<NotebookDownloadModal> {
-    return this.downloadAs(Xpath.downloadPdfButton);
+  async downloadAsMarkdown(): Promise<NotebookDownloadModal> {
+    return this.downloadAs(Xpath.downloadMarkdownButton);
   }
 
   /**
