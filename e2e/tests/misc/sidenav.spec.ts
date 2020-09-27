@@ -11,7 +11,7 @@ describe('Sidebar Navigation', () => {
     await signIn(page);
   });
 
-  test('SideNav menu works', async () => {
+  test('SideNav menu', async () => {
     const homePage = new HomePage(page);
     // Select Profile link
     await Navigation.navMenu(page, NavLink.PROFILE);
@@ -40,9 +40,7 @@ describe('Sidebar Navigation', () => {
     await Navigation.navMenu(page, NavLink.HOME);
     await homePage.waitForLoad();
     expect(await homePage.isLoaded()).toBe(true);
-  });
 
-  test('User can Sign Out', async () => {
     // Select Sign Out link
     await Navigation.navMenu(page, NavLink.SIGN_OUT);
     await waitForDocumentTitle(page, 'Redirect Notice');
