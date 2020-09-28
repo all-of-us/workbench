@@ -126,8 +126,8 @@ const styles = reactStyles({
   },
 });
 
-export const CalculateFooter = ({addButtonText, addFn, calculateFn, calculating, count, disableAdd = false, disableCalculate}) => {
-  return <React.Fragment>
+export const CalculateFooter = ({addButtonText, addFn, calculateFn, calculating, count, disableAdd, disableCalculate}) => {
+  return <div style={{background: colorWithWhiteness(colors.primary, .87), bottom: 0, position: 'sticky'}}>
     <FlexRowWrap style={styles.countPreview}>
       <div style={styles.resultsContainer}>
         <Button id='attributes-calculate'
@@ -157,7 +157,7 @@ export const CalculateFooter = ({addButtonText, addFn, calculateFn, calculating,
         BACK
       </Button>
     </FlexRowWrap>
-  </React.Fragment>;
+  </div>;
 };
 
 const optionUtil = {
@@ -610,15 +610,13 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
               </div>
             </React.Fragment>}
           </div>}
-          <div style={{background: colorWithWhiteness(colors.primary, .87), bottom: 0, position: 'sticky'}}>
-            <CalculateFooter addButtonText='ADD THIS'
-                             addFn={() => this.addParameterToSearchItem()}
-                             calculateFn={() => this.requestPreview()}
-                             calculating={calculating}
-                             count={count}
-                             disableAdd={disableAdd}
-                             disableCalculate={disableCalculate}/>
-          </div>
+          <CalculateFooter addButtonText='ADD THIS'
+                           addFn={() => this.addParameterToSearchItem()}
+                           calculateFn={() => this.requestPreview()}
+                           calculating={calculating}
+                           count={count}
+                           disableAdd={disableAdd}
+                           disableCalculate={disableCalculate}/>
         </div>
       );
     }

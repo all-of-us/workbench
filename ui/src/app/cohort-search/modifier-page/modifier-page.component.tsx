@@ -13,7 +13,7 @@ import {DatePicker, NumberInput} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentCohortSearchContext, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentCohortSearchContextStore, serverConfigStore} from 'app/utils/navigation';
@@ -533,6 +533,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
                            calculateFn={() => this.props.closeModifiers()}
                            calculating={calculating}
                            count={count}
+                           disableAdd={formErrors.length > 0 || formUntouched}
                            disableCalculate={disableCalculate}/>
         </div>
       </div>;
