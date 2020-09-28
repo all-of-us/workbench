@@ -56,12 +56,12 @@ export const FieldSelector = {
   },
   EducationLevelSelect: {
     textOption: {
-      type: ElementType.Dropdown, name: LabelAlias.EducationLevel, ancestorLevel: 2
+      type: ElementType.Dropdown, name: LabelAlias.EducationLevel, ancestorLevel: 1
     }
   },
   BirthYearSelect: {
     textOption: {
-      type: ElementType.Dropdown, name: LabelAlias.YearOfBirth, ancestorLevel: 2
+      type: ElementType.Dropdown, name: LabelAlias.YearOfBirth, ancestorLevel: 1
     }
   },
   InstitutionSelect: {
@@ -96,17 +96,17 @@ export default class CreateAccountPage extends BasePage {
   }
 
   async getSubmitButton(): Promise<Button> {
-    return await Button.findByName(this.page, {name: LinkText.Submit});
+    return Button.findByName(this.page, {name: LinkText.Submit});
   }
 
   async getNextButton(): Promise<Button> {
-    return await Button.findByName(this.page, {name: LinkText.Next});
+    return Button.findByName(this.page, {name: LinkText.Next});
   }
 
   async agreementLoaded(): Promise<boolean> {
     const iframe = await findIframe(this.page, 'terms of service agreement');
     const bodyHandle = await iframe.$('body');
-    return await iframe.evaluate(body => body.scrollHeight > 0, bodyHandle);
+    return iframe.evaluate(body => body.scrollHeight > 0, bodyHandle);
   }
 
   async readAgreement(): Promise<Frame> {
@@ -127,11 +127,11 @@ export default class CreateAccountPage extends BasePage {
   }
 
   async getInstitutionNameInput(): Promise<Textbox> {
-    return await Textbox.findByName(this.page, {name: LabelAlias.InstitutionName});
+    return Textbox.findByName(this.page, {name: LabelAlias.InstitutionName});
   }
 
   async getResearchBackgroundTextarea(): Promise<Textarea> {
-    return await Textarea.findByName(this.page, {normalizeSpace: LabelAlias.ResearchBackground});
+    return Textarea.findByName(this.page, {normalizeSpace: LabelAlias.ResearchBackground});
   }
 
   async getUsernameDomain(): Promise<string> {
@@ -156,29 +156,29 @@ export default class CreateAccountPage extends BasePage {
   // select Institution Affiliation from a dropdown
   async selectInstitution(selectTextValue: string): Promise<void> {
     const dropdown = await SelectMenu.findByName(this.page, FieldSelector.InstitutionSelect.textOption);
-    await dropdown.clickMenuItem(selectTextValue);
+    return dropdown.clickMenuItem(selectTextValue);
   }
 
   async getInstitutionValue(): Promise<string> {
     const dropdown = await SelectMenu.findByName(this.page, FieldSelector.InstitutionSelect.textOption);
-    return await dropdown.getSelectedValue();
+    return dropdown.getSelectedValue();
   }
 
   // select Education Level from a dropdown
   async selectEducationLevel(selectTextValue: string): Promise<void> {
     const dropdown = await SelectMenu.findByName(this.page, FieldSelector.EducationLevelSelect.textOption);
-    await dropdown.clickMenuItem(selectTextValue);
+    return dropdown.clickMenuItem(selectTextValue);
   }
 
   // select Year of Birth from a dropdown
   async selectYearOfBirth(year: string): Promise<void> {
     const dropdown = await SelectMenu.findByName(this.page, FieldSelector.BirthYearSelect.textOption);
-    await dropdown.clickMenuItem(year);
+    return dropdown.clickMenuItem(year);
   }
 
   // Combined steps to make test code cleaner and shorter
 
-  // Step 1: Fill out institution affiliation details
+  // Step 2: Fill out institution affiliation details
   async fillOutInstitution(): Promise<void> {
     await Promise.all([
       waitForText(this.page, 'complete Step 1 of 3', {css: 'body'}),
@@ -196,7 +196,7 @@ export default class CreateAccountPage extends BasePage {
     await roleSelect.clickMenuItem(InstitutionRoleSelectValue.UndergraduteStudent);
   }
 
-  // Step 3: Accepting Terms of Use and Privacy statement.
+  // Step 1: Accepting Terms of Use and Privacy statement.
   async acceptTermsOfUseAgreement(): Promise<void> {
     const privacyStatementCheckbox = this.getPrivacyStatementCheckbox();
     const termsOfUseCheckbox = this.getTermsOfUseCheckbox();
