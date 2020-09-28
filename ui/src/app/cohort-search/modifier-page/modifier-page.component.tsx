@@ -528,20 +528,12 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
               </div>;
             })
           }
-          <CalculateFooter disabled={disableCalculate} calculating={calculating}
-                           calculate={() => this.calculate()} count={count}/>
-          <FlexRowWrap style={{flexDirection: 'row-reverse', marginTop: '2rem'}}>
-            <Button type='primary'
-                    style={styles.addButton}
-                    onClick={() => this.updateMods()}>
-              APPLY MODIFIERS
-            </Button>
-            <Button type='link'
-                    style={{color: colors.primary, marginRight: '0.5rem'}}
-                    onClick={() => this.props.closeModifiers()}>
-              BACK
-            </Button>
-          </FlexRowWrap>
+          <CalculateFooter addButtonText='APPLY MODIFIERS'
+                           addFn={() => this.updateMods()}
+                           calculateFn={() => this.props.closeModifiers()}
+                           calculating={calculating}
+                           count={count}
+                           disableCalculate={disableCalculate}/>
         </div>
       </div>;
     }
