@@ -7,6 +7,7 @@ import colors from 'app/styles/colors';
 import { useDebounce, useToggle } from 'app/utils';
 import {downloadTextFile} from 'app/utils/audit-utils';
 import {navigate} from 'app/utils/navigation';
+import {fixSwaggerDate} from 'app/utils/swagger-date';
 import {AuditAction, AuditLogEntry} from 'generated';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
@@ -176,7 +177,11 @@ export const AuditPageComponent = (props: AuditPageProps) => {
   }, [initialAuditSubject]);
 
   const getTitle = () => {
-    const timesMillis = actions.map(action => action.actionTime.getTime());
+    const timesMillis = fp.map(
+      fp.flow(
+        fp.get('actionTime'),
+        (o) => fixSwaggerDate(o),
+        (d: Date) => d.getTime()))(actions);
     const minTime = new Date(Math.min(...timesMillis)).toDateString();
     const maxTime = new Date(Math.max(...timesMillis)).toDateString();
     return initialAuditSubject

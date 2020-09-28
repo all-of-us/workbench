@@ -4,6 +4,7 @@ import {CheckBox} from 'app/components/inputs';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {usernameWithoutDomain} from 'app/utils/audit-utils';
+import {fixSwaggerDate} from 'app/utils/swagger-date';
 import {
   AuditAction,
   AuditAgent,
@@ -13,6 +14,7 @@ import {
   AuditTargetPropertyChange
 } from 'generated';
 import * as fp from 'lodash/fp';
+import {Moment} from 'moment';
 import * as moment from 'moment';
 import * as React from 'react';
 import {useState} from 'react';
@@ -180,10 +182,13 @@ const EventBundleView = (props: {eventBundle: AuditEventBundle}) => {
 
 const AuditActionCard = (props: { action: AuditAction }) => {
   const {action} = props;
-  // Something in the codegen is wonky here. the actionTime field is typed as a Date,
-  // but turns out to be a number for some reason here. In other contexts it appears
-  // to format itself happily though.
-  const timeString = moment(action.actionTime).format('YYYY-MM-DD hh:mm:ss');
+  const timeString  = fp.flow(
+    fp.get('actionTime'),
+    fixSwaggerDate,
+    (d: Date) => moment(d),
+    (m: Moment) => m.format('YYYY-MM-DD hh:mm:ss')
+  )(action);
+
   const actionTypes = fp.flow(
     fp.map(fp.get('header.actionType')),
     fp.sortedUniq,
