@@ -36,10 +36,19 @@ constructor(
      * flow logs. Empirically, an "-m" suffix is added to the VM name, due to Leo team's use
      * of Dataproc (see https://cloud.google.com/dataproc/docs/concepts/configuring-clusters/metadata).
      *
-     * TODO(RW-4848): Update this to account for GCE naming conventions.
+     * TODO(RW-4848): How do egress alerts interact with worker nodes?
      */
-    private fun dbUserToVmName(dbUser: DbUser): String {
+    private fun dbUserToDataprocMasterVmName(dbUser: DbUser): String {
         return dbUser.runtimeName + DATAPROC_MASTER_NODE_SUFFIX
+    }
+
+    /**
+     * Converts the AoU-chosen runtime name into the actual VM name as reported by Google Cloud's
+     * flow logs. Empirically, an "-m" suffix is added to the VM name, due to Leo team's use
+     * of Dataproc (see https://cloud.google.com/dataproc/docs/concepts/configuring-clusters/metadata).
+     */
+    private fun dbUserToGceVmName(dbUser: DbUser): String {
+        return dbUser.runtimeName
     }
 
     override fun fireEgressEvent(event: EgressEvent) {
@@ -62,7 +71,10 @@ constructor(
                 dbWorkspace.firecloudName)
         val vmOwner = userRoles
                 .map { userDao.findUserByUsername(it.email) }
-                .filter { dbUserToVmName(it).equals(event.vmName) }
+                .filter {
+                        dbUserToGceVmName(it).equals(event.vmName) ||
+                        dbUserToDataprocMasterVmName(it).equals(event.vmName)
+                }
                 .firstOrNull()
 
         var agentEmail: String? = null
