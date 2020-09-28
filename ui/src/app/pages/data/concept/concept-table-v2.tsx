@@ -214,6 +214,7 @@ export class SynonymsObject extends React.Component<{}, SynonymsObjectState> {
 
 interface Props {
   concepts: any[];
+  surveyName?: string;
   domain: Domain;
   loading: boolean;
   onSelectConcepts: Function;
@@ -289,7 +290,11 @@ export const ConceptTableV2  = withCurrentConcept()(class extends React.Componen
       if (nextProps.concepts !== this.props.concepts && nextProps.concepts.length > 0 ) {
         this.setState({totalRecords: nextProps.concepts.length});
       }
-      currentConceptStore.next(nextProps.selectedConcepts);
+      if (nextProps.domain === this.props.domain && this.state.selectedConcepts) {
+        currentConceptStore.next(this.state.selectedConcepts);
+      } else {
+        currentConceptStore.next([]);
+      }
     }
     if (nextProps.reactKey !== this.props.reactKey) {
       this.setState({showBanner: false});
@@ -348,8 +353,20 @@ export const ConceptTableV2  = withCurrentConcept()(class extends React.Componen
     }
     // This is to set style display: 'none' on the growl so it doesn't block the nav icons in the sidebar
     this.growlTimer = setTimeout(() => this.setState({growlVisible: false}), 2500);
-
-    currentConceptStore.next(selectedConcepts);
+    if (selectedConcepts && selectedConcepts.length > 0 && !selectedConcepts[0].conceptName) {
+      // If its a survey append surveyName information
+      const selectedSurveys = [];
+      selectedConcepts.map((selectedConcept) => {
+        const selectedSurvey = {
+          ...selectedConcept,
+          surveyName: this.props.surveyName
+        };
+        selectedSurveys.push(selectedSurvey);
+      });
+      currentConceptStore.next(selectedSurveys);
+    } else {
+      currentConceptStore.next(selectedConcepts);
+    }
     this.setState({growlVisible: true});
     this.props.onSelectConcepts(selectedConcepts);
   }

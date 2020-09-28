@@ -27,7 +27,7 @@ import {
   currentConceptStore,
   NavStore,
   queryParamsStore,
-  serverConfigStore
+  serverConfigStore, setSidebarActiveIconStore
 } from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
@@ -391,6 +391,7 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
       const {namespace, id} = this.props.workspace;
       this.setState({completedDomainSearches: [], concepts: [], countsError: false,
         domainErrors: [], countsLoading: true, searching: true});
+      currentConceptStore.next([]);
       const standardConceptFilter = standardConceptsOnly ? StandardConceptFilter.STANDARDCONCEPTS : StandardConceptFilter.ALLCONCEPTS;
       const completedDomainSearches = [];
       const request = {query: currentSearchString, standardConceptFilter: standardConceptFilter, maxResults: this.MAX_CONCEPT_FETCH};
@@ -601,6 +602,7 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
               Showing 1000 of {domain.conceptCount.toLocaleString()}</label>}
             <ConceptTableV2 concepts={concepts}
                             domain={activeDomainTab.domain}
+                            surveyName={this.state.selectedSurvey}
                             loading={this.domainLoading(activeDomainTab)}
                             onSelectConcepts={this.selectConcepts.bind(this)}
                             placeholderValue={this.noConceptsConstant}
@@ -611,7 +613,7 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
               {!this.domainLoading(activeDomainTab) && <Button style={{float: 'right', marginBottom: '2rem'}}
                     disabled={this.activeSelectedConceptCount === 0 ||
                     !this.state.workspacePermissions.canWrite}
-                    onClick={() => this.setState({conceptAddModalOpen: true})}>Finish</Button>}
+                    onClick={() => setSidebarActiveIconStore.next('concept')}>Finish & Review</Button>}
             </React.Fragment>; })} </React.Fragment>
         }</React.Fragment>;
     }
