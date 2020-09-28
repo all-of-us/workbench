@@ -528,7 +528,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
           <CalculateFooter addButtonText='APPLY MODIFIERS'
                            addFn={() => this.updateMods()}
                            backFn={() => this.props.closeModifiers()}
-                           calculateFn={() => this.props.closeModifiers()}
+                           calculateFn={() => this.calculate()}
                            calculating={calculating}
                            count={count}
                            disableAdd={formErrors.length > 0 || formUntouched}
