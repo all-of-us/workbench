@@ -56,12 +56,12 @@ export const FieldSelector = {
   },
   EducationLevelSelect: {
     textOption: {
-      type: ElementType.Dropdown, name: LabelAlias.EducationLevel, ancestorLevel: 2
+      type: ElementType.Dropdown, name: LabelAlias.EducationLevel, ancestorLevel: 1
     }
   },
   BirthYearSelect: {
     textOption: {
-      type: ElementType.Dropdown, name: LabelAlias.YearOfBirth, ancestorLevel: 2
+      type: ElementType.Dropdown, name: LabelAlias.YearOfBirth, ancestorLevel: 1
     }
   },
   InstitutionSelect: {
