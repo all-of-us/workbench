@@ -2,7 +2,7 @@ version: 2.1
 
 # https://circleci.com/orbs/registry/
 orbs:
-  browser-tools: circleci/browser-tools@1.0.0
+  browser-tools: circleci/browser-tools@1.0.1
 
 # -------------------------
 #   PARAMETERS
@@ -601,8 +601,7 @@ jobs:
     parallelism: << parameters.parallel_num >>
     steps:
       - checkout_init_git
-      - browser-tools/install-browser-tools:
-          firefox-version: "78.0" # https://github.com/CircleCI-Public/browser-tools-orb/issues/14
+      - browser-tools/install-browser-tools
       - run_e2e_test:
           env_name: << parameters.env_name >>
 
@@ -623,9 +622,7 @@ jobs:
           name: Halt job if not a pull request
           command: bash .circleci/pr-skip-ci.sh
       - halt_if_code_unchanged
-      - browser-tools/install-browser-tools:
-          firefox-version: "78.0" # https://github.com/CircleCI-Public/browser-tools-orb/issues/14
-          background: true
+      - browser-tools/install-browser-tools
       - start_local_ui
       - run_e2e_test:
           env_name: local
@@ -634,7 +631,7 @@ workflows:
   build-test-deploy:
     jobs:
       - puppeteer-e2e-local-ui
-      
+
   deploy-staging:
     jobs:
       - api-local-test:
