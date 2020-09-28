@@ -639,14 +639,14 @@ workflows:
       #- api-integration-test
       #- puppeteer-e2e-local-ui
       # Run deployment to "test" on master merges.
-      - api-deploy-to-test:
-          filters: *filter_only_master_branch
-          requires:
-            - api-unit-test
-      - ui-deploy-to-test:
-          filters: *filter_only_master_branch
-          requires:
-            - ui-unit-test
+      #- api-deploy-to-test:
+          #filters: *filter_only_master_branch
+          #requires:
+            #- api-unit-test
+      #- ui-deploy-to-test:
+          #filters: *filter_only_master_branch
+          #requires:
+            #- ui-unit-test
       # On master branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully.
       - puppeteer-e2e-test:
           parallel_num: 4
