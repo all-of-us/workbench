@@ -196,6 +196,9 @@ ENTITY_MODIFIED_COLUMNS = {
         'cdr_version_id' => 'cdrVersion.cdrVersionId AS cdrVersionId',
         'creator_id' => 'creator.userId AS creatorId',
         'needs_rp_review_prompt' => 'needsResearchPurposeReviewPrompt AS needsRpReviewPrompt'
+    },
+    'cohort' => {
+        'creator_id' => 'creator.userId AS creatorId'
     }
 }.freeze
 

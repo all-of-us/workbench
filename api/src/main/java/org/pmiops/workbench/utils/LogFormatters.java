@@ -11,7 +11,8 @@ public class LogFormatters {
   public static String rate(String description, Duration duration, double count, String unit) {
     final double rate = 1000.0 * count / duration.toMillis();
     return String.format(
-        "%s: %s (%f %s/sec)", description, formatDurationPretty(duration), rate, unit);
+        "%s: %d in %s (%f %s/sec)",
+        description, (int) count, formatDurationPretty(duration), rate, unit);
   }
 
   // see https://stackoverflow.com/a/51026056. Better options are available in Java 9+

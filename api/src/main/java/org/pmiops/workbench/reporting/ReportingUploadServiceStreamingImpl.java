@@ -13,9 +13,11 @@ import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
+import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.InsertAllRequestPayloadTransformer;
 import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
@@ -24,6 +26,8 @@ import org.springframework.stereotype.Service;
 
 @Service("REPORTING_UPLOAD_SERVICE_STREAMING_IMPL")
 public class ReportingUploadServiceStreamingImpl implements ReportingUploadService {
+  private static final InsertAllRequestPayloadTransformer<ReportingCohort> cohortRequestBuilder =
+      CohortColumnValueExtractor::values;
   private static final Logger log =
       Logger.getLogger(ReportingUploadServiceStreamingImpl.class.getName());
   private static final InsertAllRequestPayloadTransformer<ReportingUser> userRequestBuilder =
@@ -73,10 +77,16 @@ public class ReportingUploadServiceStreamingImpl implements ReportingUploadServi
         ImmutableMap.of("snapshot_timestamp", reportingSnapshot.getCaptureTimestamp());
 
     return ImmutableList.of(
+            cohortRequestBuilder.build(
+                TableId.of(projectId, dataset, CohortColumnValueExtractor.TABLE_NAME),
+                reportingSnapshot.getCohorts(),
+                fixedValues),
             userRequestBuilder.build(
-                TableId.of(projectId, dataset, "user"), reportingSnapshot.getUsers(), fixedValues),
+                TableId.of(projectId, dataset, UserColumnValueExtractor.TABLE_NAME),
+                reportingSnapshot.getUsers(),
+                fixedValues),
             workspaceRequestBuilder.build(
-                TableId.of(projectId, dataset, "workspace"),
+                TableId.of(projectId, dataset, WorkspaceColumnValueExtractor.TABLE_NAME),
                 reportingSnapshot.getWorkspaces(),
                 fixedValues))
         .stream()

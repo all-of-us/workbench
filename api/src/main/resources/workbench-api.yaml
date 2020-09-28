@@ -8057,6 +8057,10 @@ definitions:
         description: Time at which snapshot is retrieved. Epoch millis.
         type: integer
         format: int64
+      cohorts:
+        type: array
+        items:
+          "$ref": "#/definitions/ReportingCohort"
       users:
         type: array
         items:
@@ -8237,4 +8241,36 @@ definitions:
       workspaceId:
         type: integer
         format: int64
-
+  ReportingCohort:
+    x-aou-note: |-
+      This code was generated using reporting-wizard.rb at 2020-09-24T13:40:02-04:00.
+      Manual modification should be avoided if possible as this is a one-time generation
+      and does not run on every build and updates must be merged manually for now.
+    type: object
+    properties:
+      cohortId:
+        type: integer
+        format: int64
+      creationTime:
+        type: string
+        format: date-time
+      creatorId:
+        type: integer
+        format: int64
+      criteria:
+        type: string
+      description:
+        type: string
+      lastModifiedTime:
+        type: string
+        format: date-time
+      name:
+        type: string
+      type:
+        type: string
+      version:
+        type: integer
+        format: int32
+      workspaceId:
+        type: integer
+        format: int64
