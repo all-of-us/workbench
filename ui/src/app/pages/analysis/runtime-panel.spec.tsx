@@ -66,7 +66,8 @@ describe('RuntimePanel', () => {
     expect(memoryOptions.map(m => m.text())).toEqual(['7.2', '30', '52']);
   });
 
-  it('should show the presence of an outstanding runtime operation', async() => {
+  // TODO(RW-5660): Fix flakiness and re-enable.
+  it.skip('should show the presence of an outstanding runtime operation', async() => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     updateRuntimeOpsStoreForWorkspaceNamespace(props.workspace.namespace, {promise: Promise.resolve(), operation: 'get', aborter: new AbortController()});
