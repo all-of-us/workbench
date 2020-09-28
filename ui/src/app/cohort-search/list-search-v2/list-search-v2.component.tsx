@@ -4,6 +4,7 @@ import {Key} from 'ts-key-enum';
 
 import {domainToTitle} from 'app/cohort-search/utils';
 import {Clickable} from 'app/components/buttons';
+import {FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
@@ -138,6 +139,10 @@ const styles = reactStyles({
     display: 'table-cell',
     height: '100%',
     verticalAlign: 'middle',
+  },
+  infoIcon: {
+    color: colorWithWhiteness(colors.accent, 0.1),
+    marginLeft: '0.25rem'
   }
 });
 
@@ -333,12 +338,22 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
         <td style={{...columnBodyStyle, paddingLeft: '0.2rem'}}>{row.code}</td>
         <td style={columnBodyStyle}>{!brand && row.type}</td>
         <td style={{...columnBodyStyle, width: '10%', paddingRight: '0.5rem'}}>{row.isStandard ? 'Standard' : 'Source'}</td>
+        <td style={{...columnBodyStyle, width: '10%', paddingRight: '0.5rem'}}>{row.conceptId}</td>
         <td style={{...columnBodyStyle, paddingLeft: '0.2rem'}}>{row.parentCount > -1 && row.parentCount.toLocaleString()}</td>
         <td style={{...columnBodyStyle, paddingLeft: '0.2rem'}}>{row.childCount > -1 && row.childCount.toLocaleString()}</td>
         <td style={{...columnBodyStyle, textAlign: 'center', width: '12%'}}>
           {row.hasHierarchy && <i className='pi pi-sitemap' style={styles.treeIcon} onClick={() => this.showHierarchy(row)}/>}
         </td>
       </tr>;
+    }
+
+    renderColumnWithToolTip(columnLabel, toolTip) {
+      return <FlexRow>
+        <label>{columnLabel}</label>
+        <TooltipTrigger side='top' content={<div>{toolTip}</div>}>
+          <ClrIcon style={styles.infoIcon} className='is-solid' shape='info-standard'/>
+        </TooltipTrigger>
+      </FlexRow>;
     }
 
     render() {
@@ -390,12 +405,20 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
               <thead className='p-datatable-thead'>
                 <tr style={{height: '2rem'}}>
                   <th style={{...styles.columnNameHeader, width: '31%', borderLeft: 0}}>Name</th>
-                  <th style={columnHeaderStyle}>Code</th>
-                  <th style={columnHeaderStyle}>Vocab</th>
-                  <th style={{...styles.columnNameHeader, width: '10%', paddingLeft: '0.2rem',
+                  <th style={columnHeaderStyle}>
+                    {this.renderColumnWithToolTip('Code', 'Unique code for OMOP' )}
+                  </th>
+                  <th style={{...columnHeaderStyle, paddingLeft: '0'}}>Vocab</th>
+                  <th style={{...styles.columnNameHeader, width: '10%', paddingLeft: '0',
                     paddingRight: '0.5rem'}}>Source/ Standard</th>
-                  <th style={columnHeaderStyle}>Parent Count</th>
-                  <th style={columnHeaderStyle}>Child Count</th>
+                  <th style={{...styles.columnNameHeader, width: '10%', paddingLeft: '0',
+                    paddingRight: '0.5rem'}}>Concept Id</th>
+                  <th style={columnHeaderStyle}>
+                    Roll-up Count
+                  </th>
+                  <th style={columnHeaderStyle}>
+                    {this.renderColumnWithToolTip('Item Count', 'Number of distinct participants for this concept' )}
+                  </th>
                   <th style={{...styles.columnNameHeader, textAlign: 'center', width: '12%'}}>View Hierarchy</th>
                 </tr>
               </thead>
