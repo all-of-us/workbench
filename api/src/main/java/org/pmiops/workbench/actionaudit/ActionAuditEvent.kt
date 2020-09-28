@@ -1,6 +1,6 @@
 package org.pmiops.workbench.actionaudit
 
-data class ActionAuditEvent constructor(
+data class  ActionAuditEvent constructor(
     val timestamp: Long,
     val agentType: AgentType,
     val agentIdMaybe: Long?,
