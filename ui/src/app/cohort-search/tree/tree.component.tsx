@@ -61,7 +61,8 @@ const styles = reactStyles({
   node: {
     height: '16rem',
     overflow: 'auto',
-    border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`
+    border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`,
+    borderTop: 'none'
   }
 });
 
@@ -195,7 +196,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
           <ClrIcon style={{color: colors.white}} className='is-solid' shape='exclamation-triangle' />
           Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
         </div>}
-        <div style={!this.showHeader ? styles.node : {...styles.node, borderTop: 'none'}}>
+        <div style={this.showHeader ? styles.node : {...styles.node, border: 'none'}}>
         {!!children && children.map((child, c) => this.showNode(child) && <TreeNode key={c}
                                                             autocompleteSelection={autocompleteSelection}
                                                             groupSelections={groupSelections}
