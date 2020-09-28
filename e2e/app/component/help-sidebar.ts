@@ -10,7 +10,7 @@ import {ElementType} from 'app/xpath-options';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForNumericalString} from 'utils/waits-utils';
 
-const defaultXpath = '//*[@id="help-sidebar"]';
+const defaultXpath = '//*[@id="help-sidebar"]//*[@id="selection-list"]';
 enum SectionSelectors {
   AttributesForm = '//*[@id="attributes-form"]',
   ModifiersForm = '//*[@id="modifiers-form"]',
