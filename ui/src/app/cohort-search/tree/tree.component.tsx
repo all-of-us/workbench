@@ -48,8 +48,8 @@ const styles = reactStyles({
     zIndex: 1,
   },
   treeContainer: {
-    margin: '3rem 0 1rem',
     width: '99%',
+    paddingTop: '2.5rem'
   },
   treeHeader: {
     position: 'sticky',
@@ -61,8 +61,7 @@ const styles = reactStyles({
   node: {
     height: '16rem',
     overflow: 'auto',
-    border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`,
-    borderTop: 'none'
+    border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`
   }
 });
 
@@ -196,7 +195,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
           <ClrIcon style={{color: colors.white}} className='is-solid' shape='exclamation-triangle' />
           Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
         </div>}
-        <div style={styles.node}>
+        <div style={!this.showHeader ? styles.node : {...styles.node, borderTop: 'none'}}>
         {!!children && children.map((child, c) => this.showNode(child) && <TreeNode key={c}
                                                             autocompleteSelection={autocompleteSelection}
                                                             groupSelections={groupSelections}
