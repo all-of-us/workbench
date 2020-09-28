@@ -126,7 +126,7 @@ const styles = reactStyles({
   },
 });
 
-export const CalculateFooter = ({addButtonText, addFn, calculateFn, calculating, count, disableAdd, disableCalculate}) => {
+export const CalculateFooter = ({addButtonText, addFn, backFn, calculateFn, calculating, count, disableAdd, disableCalculate}) => {
   return <div style={{background: colorWithWhiteness(colors.primary, .87), bottom: 0, position: 'sticky'}}>
     <FlexRowWrap style={styles.countPreview}>
       <div style={styles.resultsContainer}>
@@ -153,7 +153,7 @@ export const CalculateFooter = ({addButtonText, addFn, calculateFn, calculating,
       </Button>
       <Button type='link'
               style={{color: colors.primary, marginRight: '0.75rem'}}
-              onClick={() => close()}>
+              onClick={() => backFn()}>
         BACK
       </Button>
     </FlexRowWrap>
@@ -612,6 +612,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
           </div>}
           <CalculateFooter addButtonText='ADD THIS'
                            addFn={() => this.addParameterToSearchItem()}
+                           backFn={() => close()}
                            calculateFn={() => this.requestPreview()}
                            calculating={calculating}
                            count={count}

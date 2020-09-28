@@ -6,14 +6,11 @@ import * as React from 'react';
 import {CalculateFooter} from 'app/cohort-search/attributes-page-v2/attributes-page-v2.component';
 import {encountersStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, mapParameter} from 'app/cohort-search/utils';
-import {Button} from 'app/components/buttons';
-import {FlexRowWrap} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {DatePicker, NumberInput} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
-import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentCohortSearchContext, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentCohortSearchContextStore, serverConfigStore} from 'app/utils/navigation';
@@ -530,6 +527,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
           }
           <CalculateFooter addButtonText='APPLY MODIFIERS'
                            addFn={() => this.updateMods()}
+                           backFn={() => this.props.closeModifiers()}
                            calculateFn={() => this.props.closeModifiers()}
                            calculating={calculating}
                            count={count}
