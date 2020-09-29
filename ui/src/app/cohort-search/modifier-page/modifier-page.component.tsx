@@ -346,10 +346,8 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
       this.setState({count: null, formState}, () => this.validateValues());
     }
 
-    updateMods() {
-      const {cohortContext} = this.props;
-      const {formState} = this.state;
-      cohortContext.item.modifiers = formState.reduce((acc, mod) => {
+    getModifiersFromForm() {
+      return this.state.formState.reduce((acc, mod) => {
         const {name, operator, values} = mod;
         if (operator) {
           switch (name) {
@@ -358,15 +356,20 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
               break;
             case ModifierType.EVENTDATE:
               const formatted = values.map(val => moment(val, 'YYYY-MM-DD', true).isValid()
-                    ? moment(val).format('YYYY-MM-DD') : undefined);
+                ? moment(val).format('YYYY-MM-DD') : undefined);
               acc.push({name, operator, operands: formatted.filter(val => !!val)});
               break;
             default:
-              acc.push({name, operator, operands: values.filter(val => !!val)});
+              acc.push({name, operator, operands: values.filter(val => !['', null, undefined].includes(val))});
           }
         }
         return acc;
       }, []);
+    }
+
+    updateMods() {
+      const {cohortContext} = this.props;
+      cohortContext.item.modifiers = this.getModifiersFromForm();
       currentCohortSearchContextStore.next(cohortContext);
       this.props.closeModifiers();
     }
@@ -377,11 +380,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
     }
 
     calculate = async() => {
-      const {
-        selections,
-        cohortContext: {domain, item: {modifiers}, role},
-        workspace: {cdrVersionId}
-      } = this.props;
+      const {selections, cohortContext: {domain, role}, workspace: {cdrVersionId}} = this.props;
       this.trackEvent('Calculate');
       try {
         this.setState({calculating: true, count: null, calculateError: false});
@@ -392,7 +391,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
             items: [{
               type: domain,
               searchParameters: selections.map(mapParameter),
-              modifiers: modifiers
+              modifiers: this.getModifiersFromForm()
             }]
           }],
           dataFilters: []
@@ -536,4 +535,5 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
         </div>
       </div>;
     }
-  });
+  }
+);

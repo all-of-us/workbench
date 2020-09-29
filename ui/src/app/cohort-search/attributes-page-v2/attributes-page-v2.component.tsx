@@ -126,14 +126,28 @@ const styles = reactStyles({
   },
 });
 
-export const CalculateFooter = ({addButtonText, addFn, backFn, calculateFn, calculating, count, disableAdd, disableCalculate}) => {
+interface CalculateFooterProps {
+  addButtonText: string;
+  addFn: () => void;
+  backFn: () => void;
+  calculateFn: () => void;
+  calculating: boolean;
+  count: number;
+  disableAdd: boolean;
+  disableCalculate: boolean;
+}
+
+export const CalculateFooter = (props: CalculateFooterProps) => {
+  const {addButtonText, addFn, backFn, calculateFn, calculating, count, disableAdd, disableCalculate} = props;
   return <div style={{background: colorWithWhiteness(colors.primary, .87), bottom: 0, position: 'sticky'}}>
     <FlexRowWrap style={styles.countPreview}>
       <div style={styles.resultsContainer}>
         <Button id='attributes-calculate'
           type='secondaryLight'
           disabled={disableCalculate}
-          style={{...styles.calculateButton, ...(disableCalculate ? {borderColor: colorWithWhiteness(colors.dark, 0.6)} : {})}}
+          style={disableCalculate
+            ? {...styles.calculateButton, borderColor: colorWithWhiteness(colors.dark, 0.6)}
+            : styles.calculateButton}
           onClick={() => calculateFn()}>
           {calculating && <Spinner size={16} style={styles.spinner}/>} Calculate
         </Button>
