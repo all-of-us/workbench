@@ -1,5 +1,5 @@
 import {findWorkspace, isValidDate, signIn, waitWhileLoading} from 'utils/test-utils';
-import {EllipsisMenuAction, LinkText} from 'app/text-labels';
+import {EllipsisMenuAction, LinkText, ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import CohortParticipantDetailPage from 'app/page/cohort-participant-detail-page';
@@ -90,17 +90,21 @@ describe('Cohort review tests', () => {
     await dataPage.openDataPage();
     await dataPage.openCohortReviewsSubtab({waitPageChange: false});
 
-    // Rename Cohort Review
+    // Rename Cohort Review 
     const newCohortReviewName = makeRandomName();
+    await dataPage.renameResource(cohortName, newCohortReviewName, ResourceCard.CohortReview);
 
-    // rename the cohort review card
-    await dataPage.renameCohortReview(cohortName, newCohortReviewName);
-
-    // Verify rename is successful.
+    // Verify Rename Cohort Review is successful.
     expect(await DataResourceCard.findCard(page, newCohortReviewName)).toBeTruthy();
 
-    // delete the cohort review card
-    await dataPage.deleteCohortReview(newCohortReviewName);
+     // Delete Cohort Review
+     const modalTextContent = await dataPage.deleteResource(newCohortReviewName, ResourceCard.CohortReview);
+
+     // Verify Delete Cohort Review dialog content text
+     expect(modalTextContent).toContain(`Are you sure you want to delete Cohort Review: ${newCohortReviewName}?`);
+ 
+     // Verify Delete Cohort Review successful.
+     expect(await DataResourceCard.findCard(page, newCohortReviewName, 5000)).toBeFalsy();
 
   });
 
