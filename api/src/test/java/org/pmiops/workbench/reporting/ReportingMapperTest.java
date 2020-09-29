@@ -1,6 +1,9 @@
 package org.pmiops.workbench.reporting;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import java.time.Clock;
+import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
@@ -38,4 +41,21 @@ public class ReportingMapperTest {
     final ReportingUser dtoUser = reportingMapper.toDto(prjUser);
     ReportingTestUtils.assertDtoUserFields(dtoUser);
   }
+
+  @Test
+  public void testProjectedReportingUser_manyUsers() {
+    final int numUsers = 100000;
+    final List<ProjectedReportingUser> users = ReportingTestUtils.createMockUserProjections(numUsers);
+    final List<ReportingUser> userModels = reportingMapper.toReportingUserList(users); // no batch
+    assertThat(userModels).hasSize(numUsers);
+  }
+
+  @Test
+  public void testProjectedReportingUser_manyUsers_batch() {
+    final int numUsers = 100000;
+    final List<ProjectedReportingUser> users = ReportingTestUtils.createMockUserProjections(numUsers);
+    final List<ReportingUser> userModels = reportingMapper.mapList(users, reportingMapper::toReportingUserList);
+    assertThat(userModels).hasSize(numUsers);
+  }
+
 }

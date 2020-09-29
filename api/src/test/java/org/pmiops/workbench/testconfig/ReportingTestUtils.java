@@ -9,6 +9,7 @@ import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.List;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingCohort;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingWorkspace;
@@ -636,5 +637,10 @@ public class ReportingTestUtils {
     return (reportingSnapshot.getCohorts().isEmpty() ? 0 : 1)
         + (reportingSnapshot.getUsers().isEmpty() ? 0 : 1)
         + (reportingSnapshot.getWorkspaces().isEmpty() ? 0 : 1);
+  }
+
+  public static List<ProjectedReportingUser> createMockUserProjections(int userCount) {
+    final ProjectedReportingUser user = mockProjectedUser();
+    return Collections.nCopies(userCount, user);
   }
 }

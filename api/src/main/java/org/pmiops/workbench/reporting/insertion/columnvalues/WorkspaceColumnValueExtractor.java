@@ -1,4 +1,4 @@
-package org.pmiops.workbench.reporting.insertion;
+package org.pmiops.workbench.reporting.insertion.columnvalues;
 
 import static com.google.cloud.bigquery.QueryParameterValue.bool;
 import static com.google.cloud.bigquery.QueryParameterValue.int64;
@@ -11,6 +11,7 @@ import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.toTim
 import com.google.cloud.bigquery.QueryParameterValue;
 import java.util.function.Function;
 import org.pmiops.workbench.model.ReportingWorkspace;
+import org.pmiops.workbench.reporting.insertion.columnvalues.ColumnValueExtractor;
 
 /*
  * Column data and metadata convertors for BigQuery workspace table in reporting dataset.

@@ -17,10 +17,10 @@ import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
-import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
-import org.pmiops.workbench.reporting.insertion.InsertAllRequestPayloadTransformer;
-import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
-import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.columnvalues.CohortColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.payloadtransforrmers.InsertAllRequestPayloadTransformer;
+import org.pmiops.workbench.reporting.insertion.columnvalues.UserColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.columnvalues.WorkspaceColumnValueExtractor;
 import org.pmiops.workbench.utils.LogFormatters;
 import org.springframework.stereotype.Service;
 

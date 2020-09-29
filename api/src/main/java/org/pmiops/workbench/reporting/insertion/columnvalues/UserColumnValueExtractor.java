@@ -1,4 +1,4 @@
-package org.pmiops.workbench.reporting.insertion;
+package org.pmiops.workbench.reporting.insertion.columnvalues;
 
 import static com.google.cloud.bigquery.QueryParameterValue.*;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.enumToQpv;
@@ -9,6 +9,7 @@ import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.toTim
 import com.google.cloud.bigquery.QueryParameterValue;
 import java.util.function.Function;
 import org.pmiops.workbench.model.ReportingUser;
+import org.pmiops.workbench.reporting.insertion.columnvalues.ColumnValueExtractor;
 
 /*
  * BigQuery user table columns. This list contains some values that are in other tables

@@ -1,4 +1,6 @@
-package org.pmiops.workbench.reporting.insertion;
+package org.pmiops.workbench.reporting.insertion.payloadtransforrmers;
+
+import org.pmiops.workbench.reporting.insertion.columnvalues.ColumnValueExtractor;
 
 /*
  * Base interface for BigQuery payload builders. Parameterized class is a payload model type,

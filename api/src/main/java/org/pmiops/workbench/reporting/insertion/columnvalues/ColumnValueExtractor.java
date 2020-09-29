@@ -1,4 +1,4 @@
-package org.pmiops.workbench.reporting.insertion;
+package org.pmiops.workbench.reporting.insertion.columnvalues;
 
 import com.google.cloud.bigquery.QueryParameterValue;
 import java.util.function.Function;

@@ -18,9 +18,9 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
-import org.pmiops.workbench.reporting.insertion.DmlInsertJobBuilder;
-import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
-import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.payloadtransforrmers.DmlInsertJobPayloadTransformer;
+import org.pmiops.workbench.reporting.insertion.columnvalues.UserColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.columnvalues.WorkspaceColumnValueExtractor;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
@@ -34,9 +34,9 @@ public class ReportingUploadServiceDmlImpl implements ReportingUploadService {
   private final BigQueryService bigQueryService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
-  private static final DmlInsertJobBuilder<ReportingUser> userJobBuilder =
+  private static final DmlInsertJobPayloadTransformer<ReportingUser> userJobBuilder =
       UserColumnValueExtractor::values;
-  private static final DmlInsertJobBuilder<ReportingWorkspace> workspaceJobBuilder =
+  private static final DmlInsertJobPayloadTransformer<ReportingWorkspace> workspaceJobBuilder =
       WorkspaceColumnValueExtractor::values;
 
   public ReportingUploadServiceDmlImpl(

@@ -85,10 +85,9 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
     final ReportingSnapshot result =
         new ReportingSnapshot()
             .captureTimestamp(clock.millis())
-            .cohorts(reportingMapper.toModelList(queryResultBundle.getCohorts()))
-            .users(reportingMapper.toReportingUserList(queryResultBundle.getUsers()))
-            .workspaces(
-                reportingMapper.toReportingWorkspaceList(queryResultBundle.getWorkspaces()));
+            .cohorts(reportingMapper.mapList(queryResultBundle.getCohorts(), reportingMapper::toModelList))
+            .users(reportingMapper.mapList(queryResultBundle.getUsers(), reportingMapper::toReportingUserList))
+            .workspaces(reportingMapper.mapList(queryResultBundle.workspaces, reportingMapper::toReportingWorkspaceList));
     stopwatch.stop();
     log.info(LogFormatters.duration("Conversion to ReportingSnapshot", stopwatch.elapsed()));
     return result;

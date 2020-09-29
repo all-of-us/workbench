@@ -1,4 +1,4 @@
-package org.pmiops.workbench.reporting.insertion;
+package org.pmiops.workbench.reporting.insertion.columnvalues;
 
 import static com.google.cloud.bigquery.QueryParameterValue.int64;
 import static com.google.cloud.bigquery.QueryParameterValue.string;

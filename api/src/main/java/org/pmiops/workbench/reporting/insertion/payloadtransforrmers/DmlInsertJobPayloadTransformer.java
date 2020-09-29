@@ -1,4 +1,4 @@
-package org.pmiops.workbench.reporting.insertion;
+package org.pmiops.workbench.reporting.insertion.payloadtransforrmers;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
@@ -12,8 +12,10 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import org.pmiops.workbench.reporting.insertion.columnvalues.ColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.payloadtransforrmers.BigQueryInsertionPayloadTransformer;
 
-public interface DmlInsertJobBuilder<T> extends BigQueryInsertionPayloadTransformer<T> {
+public interface DmlInsertJobPayloadTransformer<T> extends BigQueryInsertionPayloadTransformer<T> {
 
   default String getColumnNameList() {
     return Arrays.stream(getQueryParameterColumns())

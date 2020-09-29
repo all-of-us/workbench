@@ -1,0 +1,47 @@
+[
+  {
+    "description": "Time snapshot was taken, in Epoch milliseconds. Same across all rows and all tables in the snapshot, and uniquely defines a particular snapshot.",
+    "name": "snapshot_timestamp",
+    "type": "INTEGER"
+  },
+  {
+    "name": "cohort_id",
+    "type": "INT64"
+  },
+  {
+    "name": "creation_time",
+    "type": "TIMESTAMP"
+  },
+  {
+    "name": "creator_id",
+    "type": "INT64"
+  },
+  {
+    "name": "criteria",
+    "type": "STRING"
+  },
+  {
+    "name": "description",
+    "type": "STRING"
+  },
+  {
+    "name": "last_modified_time",
+    "type": "TIMESTAMP"
+  },
+  {
+    "name": "name",
+    "type": "STRING"
+  },
+  {
+    "name": "type",
+    "type": "STRING"
+  },
+  {
+    "name": "version",
+    "type": "INT64"
+  },
+  {
+    "name": "workspace_id",
+    "type": "INT64"
+  }
+]

@@ -32,6 +32,9 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.cohortbuilder.util.QueryParameterValues;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
+import org.pmiops.workbench.reporting.insertion.columnvalues.UserColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.columnvalues.WorkspaceColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.payloadtransforrmers.InsertAllRequestPayloadTransformer;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)

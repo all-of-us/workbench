@@ -1,4 +1,4 @@
-package org.pmiops.workbench.reporting.insertion;
+package org.pmiops.workbench.reporting.insertion.payloadtransforrmers;
 
 import com.google.cloud.bigquery.InsertAllRequest;
 import com.google.cloud.bigquery.InsertAllRequest.RowToInsert;
@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import org.pmiops.workbench.reporting.insertion.payloadtransforrmers.BigQueryInsertionPayloadTransformer;
 import org.pmiops.workbench.utils.RandomUtils;
 
 /*
