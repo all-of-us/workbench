@@ -126,23 +126,52 @@ const styles = reactStyles({
   },
 });
 
-export const CalculateFooter = (props) => {
-  return <FlexRowWrap style={styles.countPreview}>
-     <div style={styles.resultsContainer}>
-     <Button id='attributes-calculate'
-       type='secondaryLight'
-    disabled={props.disabled}
-    style={{...styles.calculateButton, ...(props.disabled ? {borderColor: colorWithWhiteness(colors.dark, 0.6)} : {})}}
-    onClick={() => props.calculate()}>
-    {props.calculating && <Spinner size={16} style={styles.spinner}/>} Calculate
-    </Button>
-    </div>
-    <div style={styles.resultsContainer}>
-      <div style={{fontWeight: 600}}>Number of Participants:
-        <span> {props.count === null ? '--' : props.count.toLocaleString()} </span>
+interface CalculateFooterProps {
+  addButtonText: string;
+  addFn: () => void;
+  backFn: () => void;
+  calculateFn: () => void;
+  calculating: boolean;
+  count: number;
+  disableAdd: boolean;
+  disableCalculate: boolean;
+}
+
+export const CalculateFooter = (props: CalculateFooterProps) => {
+  const {addButtonText, addFn, backFn, calculateFn, calculating, count, disableAdd, disableCalculate} = props;
+  return <div style={{background: colorWithWhiteness(colors.primary, .87), bottom: 0, position: 'sticky'}}>
+    <FlexRowWrap style={styles.countPreview}>
+      <div style={styles.resultsContainer}>
+        <Button id='attributes-calculate'
+          type='secondaryLight'
+          disabled={disableCalculate}
+          style={disableCalculate
+            ? {...styles.calculateButton, borderColor: colorWithWhiteness(colors.dark, 0.6)}
+            : styles.calculateButton}
+          onClick={() => calculateFn()}>
+          {calculating && <Spinner size={16} style={styles.spinner}/>} Calculate
+        </Button>
       </div>
-    </div>
-  </FlexRowWrap>;
+      <div style={styles.resultsContainer}>
+        <div style={{fontWeight: 600}}>Number of Participants:
+          <span> {count === null ? '--' : count.toLocaleString()} </span>
+        </div>
+      </div>
+    </FlexRowWrap>
+    <FlexRowWrap style={{flexDirection: 'row-reverse', marginTop: '0.5rem'}}>
+      <Button type='primary'
+              disabled={disableAdd}
+              style={styles.addButton}
+              onClick={() => addFn()}>
+        {addButtonText}
+      </Button>
+      <Button type='link'
+              style={{color: colors.primary, marginRight: '0.75rem'}}
+              onClick={() => backFn()}>
+        BACK
+      </Button>
+    </FlexRowWrap>
+  </div>;
 };
 
 const optionUtil = {
@@ -595,20 +624,14 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
               </div>
             </React.Fragment>}
           </div>}
-          <CalculateFooter disabled={disableCalculate} calculating={calculating} calculate={() => this.requestPreview()} count={count}/>
-          <FlexRowWrap style={{flexDirection: 'row-reverse', marginTop: '2rem'}}>
-            <Button type='primary'
-                    disabled={disableAdd}
-                    style={styles.addButton}
-                    onClick={() => this.addParameterToSearchItem()}>
-              ADD THIS
-            </Button>
-            <Button type='link'
-                    style={{color: colors.primary, marginRight: '0.75rem'}}
-                    onClick={() => close()}>
-              BACK
-            </Button>
-          </FlexRowWrap>
+          <CalculateFooter addButtonText='ADD THIS'
+                           addFn={() => this.addParameterToSearchItem()}
+                           backFn={() => close()}
+                           calculateFn={() => this.requestPreview()}
+                           calculating={calculating}
+                           count={count}
+                           disableAdd={disableAdd}
+                           disableCalculate={disableCalculate}/>
         </div>
       );
     }
