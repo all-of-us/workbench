@@ -20,6 +20,7 @@ import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.api.ServiceInfoApi;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
+import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest.WelderRegistryEnum;
 import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
@@ -127,7 +128,9 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
             .addScopesItem("https://www.googleapis.com/auth/userinfo.email")
             .addScopesItem("https://www.googleapis.com/auth/userinfo.profile")
             .toolDockerImage(workbenchConfigProvider.get().firecloud.jupyterDockerImage)
-            .welderDockerImage(workbenchConfigProvider.get().firecloud.welderDockerImage)
+            // Note: DockerHub must be used over GCR here, since VPC-SC restricts
+            // pulling external images via GCR (since it counts as GCS traffic).
+            .welderRegistry(WelderRegistryEnum.DOCKERHUB)
             .customEnvironmentVariables(customEnvironmentVariables);
 
     if (workbenchConfigProvider.get().featureFlags.enableCustomRuntimes) {
