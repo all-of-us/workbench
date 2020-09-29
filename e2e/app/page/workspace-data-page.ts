@@ -147,37 +147,4 @@ export default class WorkspaceDataPage extends WorkspaceBase {
     return analysisPage.createNotebook(notebookName, lang);
   }
 
-  // rename cohort-review thru the Ellipsis menu located inside the cohort-review card
-
-  async renameCohortReview(cohortName: string, newCohortReviewName: string): Promise<void> {
-    const cohortReviewCard = await DataResourceCard.findCard(this.page, cohortName);
-    const menu = cohortReviewCard.getEllipsis();
-    await menu.clickAction(EllipsisMenuAction.Rename, {waitForNav: false});
-    const modal = new Modal(this.page);
-    await modal.getTextContent();
-    const newNameInput = new Textbox(this.page, `${modal.getXpath()}//*[@id="new-name"]`);
-    await newNameInput.type(newCohortReviewName);
-    const descriptionTextarea = await Textarea.findByName(this.page, {containsText: 'Description:'}, modal);
-    await descriptionTextarea.type('Puppeteer automation rename cohort review.');
-    await modal.clickButton(LinkText.RenameCohortReview, {waitForClose: true});
-    await waitWhileLoading(this.page);
-    console.log(`Cohort Review Card " ${cohortName}" renamed to " ${newCohortReviewName}"`);
-  }
-
-  /**
-   * Delete cohort-review thru the Ellipsis menu located inside the cohort-review card
-   */
-  async deleteCohortReview(newCohortReviewName: string): Promise<void> {
-    const cohortReviewCard = await DataResourceCard.findCard(this.page, newCohortReviewName);
-    if (cohortReviewCard == null) {
-      throw new Error(`Failed to find Cohort: "${cohortReviewCard}".`);
-    }
-    const menu = cohortReviewCard.getEllipsis();
-    await menu.clickAction(EllipsisMenuAction.Delete, {waitForNav: false});
-    const modal = new Modal(this.page);
-    await modal.getTextContent();
-    console.log(`Deleted Cohort Review "${newCohortReviewName}"`);
-    
-  }
-
 }
