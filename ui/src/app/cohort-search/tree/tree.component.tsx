@@ -48,13 +48,21 @@ const styles = reactStyles({
     zIndex: 1,
   },
   treeContainer: {
-    margin: '3rem 0 1rem',
     width: '99%',
+    paddingTop: '2.5rem'
   },
   treeHeader: {
+    position: 'sticky',
+    top: 0,
     overflow: 'auto',
     background: colorWithWhiteness(colors.black, 0.97),
     borderBottom: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`,
+  },
+  node: {
+    height: '16rem',
+    overflow: 'auto',
+    border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`,
+    borderTop: 'none'
   }
 });
 
@@ -176,9 +184,9 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
         </div>
       }
       {!loading && <div style={this.showHeader
-        ? {...styles.treeContainer, border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`}
+        ? {...styles.treeContainer, paddingTop: '3rem', marginTop: '0rem'}
         : styles.treeContainer}>
-        {this.showHeader && <div style={styles.treeHeader}>
+        {this.showHeader && <div style={{...styles.treeHeader, border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`}}>
           {!!ingredients && <div style={styles.ingredients}>
             Ingredients in this brand: {ingredients.join(', ')}
           </div>}
@@ -188,6 +196,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
           <ClrIcon style={{color: colors.white}} className='is-solid' shape='exclamation-triangle' />
           Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
         </div>}
+        <div style={this.showHeader ? styles.node : {...styles.node, border: 'none'}}>
         {!!children && children.map((child, c) => this.showNode(child) && <TreeNode key={c}
                                                             autocompleteSelection={autocompleteSelection}
                                                             groupSelections={groupSelections}
@@ -197,6 +206,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
                                                             select={(s) => select(s)}
                                                             selectedIds={selectedIds}
                                                             setAttributes={setAttributes}/>)}
+        </div>
       </div>}
       {loading && !this.showHeader && <SpinnerOverlay/>}
     </React.Fragment>;
