@@ -25,13 +25,15 @@ import {
   highlightSearchTerm,
   reactStyles,
   ReactWrapperBase,
-  withCurrentCohortCriteria, withCurrentConcept,
+  withCurrentCohortCriteria,
+  withCurrentConcept,
   withCurrentWorkspace,
   withUserProfile
 } from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {
-  currentCohortSearchContextStore, currentConceptStore,
+  currentCohortSearchContextStore,
+  currentConceptStore,
   NavStore,
   serverConfigStore,
   setSidebarActiveIconStore

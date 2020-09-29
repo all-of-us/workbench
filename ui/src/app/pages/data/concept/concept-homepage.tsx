@@ -27,7 +27,8 @@ import {
   currentConceptStore,
   NavStore,
   queryParamsStore,
-  serverConfigStore, setSidebarActiveIconStore
+  serverConfigStore,
+  setSidebarActiveIconStore
 } from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
@@ -391,7 +392,9 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
       const {namespace, id} = this.props.workspace;
       this.setState({completedDomainSearches: [], concepts: [], countsError: false,
         domainErrors: [], countsLoading: true, searching: true});
-      currentConceptStore.next([]);
+      if (serverConfigStore.getValue().enableConceptSetSearchV2) {
+        currentConceptStore.next([]);
+      }
       const standardConceptFilter = standardConceptsOnly ? StandardConceptFilter.STANDARDCONCEPTS : StandardConceptFilter.ALLCONCEPTS;
       const completedDomainSearches = [];
       const request = {query: currentSearchString, standardConceptFilter: standardConceptFilter, maxResults: this.MAX_CONCEPT_FETCH};
