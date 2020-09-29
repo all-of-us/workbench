@@ -3,7 +3,7 @@ import {ActivatedRouteSnapshot, DetachedRouteHandle, RouteReuseStrategy} from '@
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConfigResponse} from 'generated';
-import {CdrVersionListResponse, Cohort, ConceptSet, Criteria, ErrorResponse, Profile} from 'generated/fetch';
+import {CdrVersionListResponse, Cohort, Concept, ConceptSet, Criteria, ErrorResponse, Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {useLocation} from 'react-router';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
@@ -30,6 +30,7 @@ export const queryParamsStore = new BehaviorSubject<any>({});
 export const routeConfigDataStore = new BehaviorSubject<any>({});
 export const serverConfigStore = new BehaviorSubject<ConfigResponse>(undefined);
 export const currentCohortCriteriaStore = new BehaviorSubject<Array<Selection>>(undefined);
+export const currentConceptStore = new BehaviorSubject<Array<Concept>>(undefined);
 export const attributesSelectionStore = new BehaviorSubject<Criteria>(undefined);
 export const currentCohortSearchContextStore = new BehaviorSubject<any>(undefined);
 export const setSidebarActiveIconStore = new BehaviorSubject<string>(null);
