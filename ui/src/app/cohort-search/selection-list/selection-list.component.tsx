@@ -471,7 +471,7 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
               </Button>
             </FlexRowWrap>
           </React.Fragment>}
-          {showModifiersSlide && <ModifierPage selections={criteria}
+          {showModifiersSlide && !attributesSelection && <ModifierPage selections={criteria}
                                                closeModifiers={() => {
                                                  this.setState({showModifiersSlide: false});
                                                  this.checkCriteriaChanges();
