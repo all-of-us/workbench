@@ -576,7 +576,6 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
       const displayContent = filteredContent !== undefined ? filteredContent : sidebarContent[helpContentKey];
 
       const contentStyle = (tab: string) => ({
-        display: activeIcon === tab ? 'block' : 'none',
         height: 'calc(100% - 1rem)',
         overflow: 'auto',
         padding: iconConfigs[tab].contentPadding || '0.5rem 0.5rem 5.5rem'
@@ -619,7 +618,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
                      alt='Close'/>
               </Clickable>
             </FlexRow>}
-            <div style={contentStyle(helpIconName(helpContentKey))}>
+            {activeIcon === helpIconName(helpContentKey) && <div style={contentStyle(helpIconName(helpContentKey))}>
               <h3 style={{...styles.sectionTitle, marginTop: 0}}>{helpContentKey === NOTEBOOK_HELP_CONTENT ? 'Workspace storage' : 'Help Tips'}</h3>
               {helpContentKey !== NOTEBOOK_HELP_CONTENT &&
                 <div style={styles.textSearch}>
@@ -648,23 +647,23 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
                   </div>)
                 : <div style={{marginTop: '0.5rem'}}><em>No results found</em></div>
               }
-            </div>
-            <div style={contentStyle('runtime')}>
+            </div>}
+            {activeIcon === 'runtime' && <div style={contentStyle('runtime')}>
               {<RuntimePanel />}
-            </div>
-            <div style={contentStyle('annotations')}>
+            </div>}
+            {activeIcon === 'annotations' && <div style={contentStyle('annotations')}>
               {participant && <SidebarContent />}
-            </div>
-            <div style={contentStyle('criteria')}>
+            </div>}
+            {activeIcon === 'criteria' && <div style={contentStyle('criteria')}>
               <div style={{padding: '0.25rem 0.25rem 0rem'}}>
                 {!!currentCohortSearchContextStore.getValue() && <SelectionList back={() => setSidebarState(false)} selections={[]}/>}
               </div>
-            </div>
-            <div style={contentStyle('concept')}>
+            </div>}
+            {activeIcon === 'concept' && <div style={contentStyle('concept')}>
               <div style={{padding: '0.25rem 0.25rem 0rem'}}>
                 {!!currentConceptStore.getValue() && <ConceptListPage/>}
               </div>
-            </div>
+            </div>}
             {(iconConfigs[activeIcon] || {}).hideSidebarFooter || <div style={styles.footer}>
               <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
               <p style={styles.contentItem}>
