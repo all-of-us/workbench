@@ -70,6 +70,14 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
   }
 
   /**
+   * Click Cohorts Reviews subtab in Data page.
+   * @param opts
+   */
+  async openCohortReviewsSubtab(opts: {waitPageChange?: boolean} = {}): Promise<void> {
+    return this.openTab(TabLabels.CohortReviews, opts);
+  }
+
+  /**
    * Click Concept Sets subtab in Data page.
    * @param opts
    */

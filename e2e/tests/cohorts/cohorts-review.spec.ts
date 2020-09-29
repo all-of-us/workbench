@@ -1,9 +1,11 @@
 import {findWorkspace, isValidDate, signIn, waitWhileLoading} from 'utils/test-utils';
-import {EllipsisMenuAction, LinkText} from 'app/text-labels';
+import {EllipsisMenuAction, LinkText, ResourceCard} from 'app/text-labels';
+import {makeRandomName} from 'utils/str-utils';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import CohortParticipantDetailPage from 'app/page/cohort-participant-detail-page';
 import CohortReviewModal from 'app/page/cohort-review-modal';
 import CohortReviewPage from 'app/page/cohort-review-page';
+import DataResourceCard from 'app/component/data-resource-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {waitForText} from 'utils/waits-utils';
 import {getPropValue} from 'utils/element-utils';
@@ -84,11 +86,26 @@ describe('Cohort review tests', () => {
     const cohortBuildPage = new CohortBuildPage(page);
     await cohortBuildPage.waitForLoad();
 
-    // Delete cohort.
-    await cohortBuildPage.deleteCohort();
-    // Land in Data page.
-    await dataPage.waitForLoad();
-    console.log(`Deleted Cohort: "${cohortName}"`);
+    // Land on the Data Page & click the Cohort Reviews SubTab
+    await dataPage.openDataPage();
+    await dataPage.openCohortReviewsSubtab({waitPageChange: false});
+
+    // Rename Cohort Review 
+    const newCohortReviewName = makeRandomName();
+    await dataPage.renameResource(cohortName, newCohortReviewName, ResourceCard.CohortReview);
+
+    // Verify Rename Cohort Review is successful.
+    expect(await DataResourceCard.findCard(page, newCohortReviewName)).toBeTruthy();
+
+     // Delete Cohort Review
+     const modalTextContent = await dataPage.deleteResource(newCohortReviewName, ResourceCard.CohortReview);
+
+     // Verify Delete Cohort Review dialog content text
+     expect(modalTextContent).toContain(`Are you sure you want to delete Cohort Review: ${newCohortReviewName}?`);
+ 
+     // Verify Delete Cohort Review successful.
+     expect(await DataResourceCard.findCard(page, newCohortReviewName, 5000)).toBeFalsy();
+
   });
 
 });
