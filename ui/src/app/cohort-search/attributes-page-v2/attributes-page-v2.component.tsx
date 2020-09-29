@@ -336,7 +336,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
         this.setState({count: null, form, isCOPESurvey: true, loading: false});
       } else {
         options.unshift({label: optionUtil.ANY.display, value: AttrName[AttrName.ANY]});
-        this.setState({options}, () => this.getAttributes());
+        this.setState({isCOPESurvey: false, options}, () => this.getAttributes());
       }
     }
 
