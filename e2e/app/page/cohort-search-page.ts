@@ -113,7 +113,7 @@ export default class CohortSearchPage extends AuthenticatedPage {
     // Delay to make sure correct sidebar content is showing
     await this.page.waitFor(1000);
 
-    const helpSidebar = new HelpSidebar(this.page, '//*[@id="help-sidebar"]//*[@id="selection-list"]');
+    const helpSidebar = new HelpSidebar(this.page);
     const participantResult = await helpSidebar.getPhysicalMeasurementParticipantResult(filterSign, filterValue);
     // return participants count for comparing
     return participantResult;
@@ -132,7 +132,7 @@ export default class CohortSearchPage extends AuthenticatedPage {
     await finishAndReviewButton.click();
 
     // Click Save Criteria button in sidebar
-    const helpSidebar = new HelpSidebar(this.page, '//*[@id="help-sidebar"]//*[@id="selection-list"]');
+    const helpSidebar = new HelpSidebar(this.page);
     await helpSidebar.clickSaveCriteriaButton();
   }
 
@@ -215,7 +215,7 @@ export default class CohortSearchPage extends AuthenticatedPage {
     await finishAndReviewButton.click();
 
     // Click SAVE CRITERIA button. Sidebar closes.
-    const helpSidebar = await new HelpSidebar(this.page, '//*[@id="help-sidebar"]//*[@id="selection-list"]');
+    const helpSidebar = await new HelpSidebar(this.page);
     await helpSidebar.clickSaveCriteriaButton();
     return count;
   }

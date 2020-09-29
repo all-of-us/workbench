@@ -62,7 +62,7 @@ export function buildXPath(xOpts: XPathOptions, container?: Container): string {
     selector = `${textExpr}//${type}`;
     break;
   case ElementType.Dropdown:
-    selector = `${textExpr}${nodeLevel}//*[contains(concat(" ", normalize-space(@class), " "), " p-dropdown ")]`;
+    selector = `${textExpr}${nodeLevel}//*[${classNameContains('p-dropdown')} and not(${classNameContains('p-disabled')})]`;
     break;
   case ElementType.Tab:
     selector = `//*[(@aria-selected | @tabindex) and @role="button" and text()="${name}"]`;
@@ -80,4 +80,8 @@ export function buildXPath(xOpts: XPathOptions, container?: Container): string {
   }
 
   return this.xpath = selector;
+}
+
+function classNameContains(attrName: string): string {
+  return `contains(concat(" ", normalize-space(@class), " "), " ${attrName} ")`
 }
