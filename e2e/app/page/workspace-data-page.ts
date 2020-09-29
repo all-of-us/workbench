@@ -1,10 +1,8 @@
 import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
-import Modal from 'app/component/modal';
-import Textarea from 'app/element/textarea';
-import Textbox from 'app/element/textbox';
+
 import DataResourceCard from 'app/component/data-resource-card';
 import ClrIconLink from 'app/element/clr-icon-link';
-import {EllipsisMenuAction, Language, ResourceCard, LinkText} from 'app/text-labels';
+import {EllipsisMenuAction, Language, ResourceCard} from 'app/text-labels';
 import {ElementHandle, Page} from 'puppeteer';
 import {makeRandomName} from 'utils/str-utils';
 import {waitWhileLoading} from 'utils/test-utils';
