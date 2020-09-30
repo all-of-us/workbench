@@ -13,7 +13,7 @@ import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCdrVersions, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {attributesSelectionStore} from 'app/utils/navigation';
+import {attributesSelectionStore, setSidebarActiveIconStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CdrVersion, CdrVersionListResponse, CriteriaType, DomainType} from 'generated/fetch';
 
@@ -247,6 +247,11 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
       this.props.select(param);
     }
 
+    setAttributes(node: any) {
+      attributesSelectionStore.next(node);
+      setSidebarActiveIconStore.next('criteria');
+    }
+
     showHierarchy = (row: any) => {
       this.trackEvent('More Info');
       this.props.hierarchy(row);
@@ -316,7 +321,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
         <td style={{...columnStyle, width: '31%', textAlign: 'left', borderLeft: 0, padding: '0 0.25rem'}}>
           {row.selectable && <div style={{...styles.selectDiv}}>
             {attributes &&
-              <ClrIcon style={styles.attrIcon} shape='slider' dir='right' size='20' onClick={() => attributesSelectionStore.next(row)}/>
+              <ClrIcon style={styles.attrIcon} shape='slider' dir='right' size='20' onClick={() => this.setAttributes(row)}/>
             }
             {selected && <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>}
             {unselected && <ClrIcon style={styles.selectIcon} shape='plus-circle' size='16' onClick={() => this.selectItem(row)}/>}
