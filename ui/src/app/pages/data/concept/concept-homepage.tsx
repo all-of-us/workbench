@@ -15,7 +15,7 @@ import {ConceptAddModal} from 'app/pages/data/concept/concept-add-modal';
 import {ConceptSurveyAddModal} from 'app/pages/data/concept/concept-survey-add-modal';
 import {ConceptTable} from 'app/pages/data/concept/concept-table';
 import {CriteriaSearch} from 'app/pages/data/criteria-search';
-import {conceptsApi} from 'app/services/swagger-fetch-clients';
+import {cohortBuilderApi, conceptsApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {
   reactStyles,
@@ -341,6 +341,17 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
       this.setState({loadingDomains: false});
     }
 
+    async updateCardCounts() {
+      const {cdrVersionId} = this.props.workspace;
+      const {currentInputString} = this.state;
+      this.setState({loadingDomains: true});
+      const [domains, surveys] = await Promise.all([
+        cohortBuilderApi().findDomainInfos(+cdrVersionId, currentInputString),
+        cohortBuilderApi().findSurveyModules(+cdrVersionId, currentInputString),
+      ]);
+      this.setState({conceptDomainList: domains.items, conceptSurveysList: surveys.items, loadingDomains: false});
+    }
+
     browseDomainFromQueryParams() {
       const queryParams = queryParamsStore.getValue();
       if (queryParams.survey) {
@@ -356,7 +367,7 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
     }
 
     handleSearchKeyPress(e) {
-      const {currentInputString} = this.state;
+      const {currentInputString, selectedDomain, selectedSurvey} = this.state;
       // search on enter key if no forbidden characters are present
       if (e.key === Key.Enter) {
         if (currentInputString.trim().length < 3) {
@@ -365,7 +376,13 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
           const inputErrors = validateInputForMySQL(currentInputString);
           this.setState({inputErrors, showSearchError: false});
           if (inputErrors.length === 0) {
-            this.setState({currentSearchString: currentInputString}, () => this.searchConcepts());
+            this.setState({currentSearchString: currentInputString}, () => {
+              if (serverConfigStore.getValue().enableConceptSetSearchV2 && !(selectedDomain || selectedSurvey)) {
+                this.updateCardCounts();
+              } else {
+                this.searchConcepts();
+              }
+            });
           }
         }
       }
