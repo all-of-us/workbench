@@ -16,9 +16,6 @@ enum SectionSelectors {
   ModifiersForm = '//*[@id="modifiers-form"]',
   SelectionList = '//*[@id="selection-list"]',
 }
-enum TabSelectors {
-  Criteria = '//*[@data-test-id="help-sidebar-icon-criteria"]'
-}
 
 export default class HelpSidebar extends Container {
 
@@ -26,13 +23,7 @@ export default class HelpSidebar extends Container {
     super(page, xpath);
   }
 
-  async clickTabIcon(xpath: string): Promise<void> {
-    const icon = await this.page.waitForXPath(xpath, {visible: true});
-    await icon.click();
-  }
-
   async getPhysicalMeasurementParticipantResult(filterSign: FilterSign, filterValue: number): Promise<string> {
-    await this.clickTabIcon(TabSelectors.Criteria);
     await this.waitUntilSectionVisible(SectionSelectors.AttributesForm);
 
     const selectMenu = await SelectMenu.findByName(this.page, {ancestorLevel: 0}, this);
