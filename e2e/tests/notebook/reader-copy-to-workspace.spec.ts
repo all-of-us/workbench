@@ -6,7 +6,7 @@ import Link from 'app/element/link';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {EllipsisMenuAction, Language, LinkText, ResourceCard, WorkspaceAccessLevel} from 'app/text-labels';
+import {Option, Language, LinkText, ResourceCard, WorkspaceAccessLevel} from 'app/text-labels';
 import {config} from 'resources/workbench-config';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn, signInAs, waitWhileLoading} from 'utils/test-utils';
@@ -34,7 +34,7 @@ describe('Workspace reader Jupyter notebook action tests', () => {
     const workspaceName = await findWorkspace(page, {create: true}).then(card => card.clickWorkspaceName());
 
     const dataPage = new WorkspaceDataPage(page);
-    const notebookName = makeRandomName('pyAdd');
+    const notebookName = makeRandomName('py');
     const notebook = await dataPage.createNotebook(notebookName, Language.Python);
 
      // Run code: 1 + 1.
@@ -75,16 +75,17 @@ describe('Workspace reader Jupyter notebook action tests', () => {
     await workspaceCard.clickWorkspaceName();
     await new WorkspaceDataPage(newPage).openAnalysisPage();
 
-    // Notebook actions Rename, Duplicate and Delete actions are disabled.
+    // Notebook actions Rename, Duplicate and Delete are disabled.
     const dataResourceCard = new DataResourceCard(newPage);
-    const menu = await dataResourceCard.findCard(notebookName, ResourceCard.Notebook).then(card => card.getEllipsis());
-    await menu.clickEllipsis(); // open ellipsis menu.
-    expect(await menu.isDisabled(EllipsisMenuAction.Rename)).toBe(true);
-    expect(await menu.isDisabled(EllipsisMenuAction.Duplicate)).toBe(true);
-    expect(await menu.isDisabled(EllipsisMenuAction.Delete)).toBe(true);
+    let notebookCard = await dataResourceCard.findCard(notebookName, ResourceCard.Notebook);
+    // open Snowman menu.
+    const snowmanMenu = await notebookCard.getSnowmanMenu();
+    expect(await snowmanMenu.isOptionDisabled(Option.Rename)).toBe(true);
+    expect(await snowmanMenu.isOptionDisabled(Option.Duplicate)).toBe(true);
+    expect(await snowmanMenu.isOptionDisabled(Option.Delete)).toBe(true);
     // But the Copy to another Workspace action is available for click.
-    expect(await menu.isDisabled(EllipsisMenuAction.CopyToAnotherWorkspace)).toBe(false);
-    await menu.clickEllipsis(); // close ellipsis menu.
+    expect(await snowmanMenu.isOptionDisabled(Option.CopyToAnotherWorkspace)).toBe(false);
+    await notebookCard.clickSnowmanIcon(); // close Snowman menu.
 
     // Copy notebook to another Workspace and give notebook a new name.
     const newAnalysisPage = new WorkspaceAnalysisPage(newPage);
@@ -109,17 +110,16 @@ describe('Workspace reader Jupyter notebook action tests', () => {
     expect(linkDisplayed).toBe(true);
 
     // Verify copied notebook exists in collaborator Workspace.
-    const notebookCard = await dataResourceCard.findCard(copiedNotebookName, ResourceCard.Notebook);
+    notebookCard = await dataResourceCard.findCard(copiedNotebookName, ResourceCard.Notebook);
     expect(notebookCard).toBeTruthy();
 
     // Notebook actions Rename, Duplicate, Delete and Copy to another Workspace actions are avaliable to click.
-    const copyNotebookCardMenu = notebookCard.getEllipsis();
-    await copyNotebookCardMenu.clickEllipsis();
-    expect(await copyNotebookCardMenu.isDisabled(EllipsisMenuAction.Rename)).toBe(false);
-    expect(await copyNotebookCardMenu.isDisabled(EllipsisMenuAction.Duplicate)).toBe(false);
-    expect(await copyNotebookCardMenu.isDisabled(EllipsisMenuAction.Delete)).toBe(false);
-    expect(await copyNotebookCardMenu.isDisabled(EllipsisMenuAction.CopyToAnotherWorkspace)).toBe(false);
-    await copyNotebookCardMenu.clickEllipsis(); // close menu
+    const copyNotebookCardMenu = await notebookCard.getSnowmanMenu();
+    expect(await copyNotebookCardMenu.isOptionDisabled(Option.Rename)).toBe(false);
+    expect(await copyNotebookCardMenu.isOptionDisabled(Option.Duplicate)).toBe(false);
+    expect(await copyNotebookCardMenu.isOptionDisabled(Option.Delete)).toBe(false);
+    expect(await copyNotebookCardMenu.isOptionDisabled(Option.CopyToAnotherWorkspace)).toBe(false);
+    await notebookCard.clickSnowmanIcon(); // close menu
 
     await newAnalysisPage.deleteResource(copiedNotebookName, ResourceCard.Notebook);
   })

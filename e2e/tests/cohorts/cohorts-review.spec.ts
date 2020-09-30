@@ -1,5 +1,5 @@
 import {findWorkspace, isValidDate, signIn, waitWhileLoading} from 'utils/test-utils';
-import {EllipsisMenuAction, LinkText, ResourceCard} from 'app/text-labels';
+import {Option, LinkText, ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import CohortParticipantDetailPage from 'app/page/cohort-participant-detail-page';
@@ -34,7 +34,7 @@ describe('Cohort review tests', () => {
     const cohortName = await cohortCard.getResourceName();
     console.log(`Created Cohort: "${cohortName}"`);
 
-    await cohortCard.clickEllipsisAction(EllipsisMenuAction.Review);
+    await cohortCard.selectSnowmanMenu(Option.Review);
     const modal = new CohortReviewModal(page);
     await modal.fillInNumberOfPartcipants(reviewSetNumberOfParticipants);
     await modal.clickButton(LinkText.CreateSet);
