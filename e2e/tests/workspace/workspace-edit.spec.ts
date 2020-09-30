@@ -6,7 +6,7 @@ import {findWorkspace, performActions, signIn} from 'utils/test-utils';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 
 
-describe('Editing workspace thru workspace card ellipsis menu', () => {
+describe('Editing workspace via workspace card snowman menu', () => {
 
   beforeEach(async () => {
     await signIn(page);

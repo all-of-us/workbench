@@ -109,7 +109,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
   }
 
   /**
-   * Delete Notebook, Concept Set, Dataset or Cohort, Cohort Review thru Ellipsis menu located inside the data resource card.
+   * Delete Notebook, Concept Set, Dataset or Cohort, Cohort Review via snowman menu located inside the data resource card.
    * @param {string} resourceName
    * @param {ResourceCard} resourceType
    */
@@ -156,7 +156,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
   }
 
   /**
-   * Rename Notebook, Concept Set, Dataset or Cohorts thru the Ellipsis menu located inside the Dataset Resource card.
+   * Rename Notebook, Concept Set, Dataset or Cohorts thru the snowman menu located inside the Dataset Resource card.
    * @param {string} resourceName
    * @param {string} newResourceName
    */
@@ -168,16 +168,16 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
       throw new Error(`Failed to find ${resourceType} card "${resourceName}"`);
     }
 
-    let menuLink: Option;
+    let option: Option;
     switch (resourceType) {
       case ResourceCard.Dataset:
-        menuLink = Option.RenameDataset;
+        option = Option.RenameDataset;
         break;
       default:
-        menuLink = Option.Rename;
+        option = Option.Rename;
         break;
     }
-    await card.selectSnowmanMenu(menuLink, {waitForNav: false});
+    await card.selectSnowmanMenu(option, {waitForNav: false});
 
     const modal = new Modal(this.page);
     await modal.waitForLoad();
@@ -222,19 +222,19 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
   }
 
   /**
-   * Select Workspace action snowman menuitem.
-   * @param {Option} menuItem
+   * Select Workspace action snowman menu option.
+   * @param {Option} option
    * @param opts
    */
-  async selectWorkspaceAction(menuItem: Option, opts?: { waitForNav: false }): Promise<void> {
+  async selectWorkspaceAction(option: Option, opts?: { waitForNav: false }): Promise<void> {
     const iconXpath = './/*[@data-test-id="workspace-menu-button"]';
     await this.page.waitForXPath(iconXpath, {visible: true}).then(icon => icon.click());
     const snowmanMenu = new SnowmanMenu(this.page);
-    return snowmanMenu.select(menuItem, opts);
+    return snowmanMenu.select(option, opts);
   }
 
   /**
-   * Delete workspace via Workspace action snowman "Delete" menuitem.
+   * Delete workspace via Workspace Actions snowman menu "Delete" option.
    */
   async deleteWorkspace(): Promise<string[]> {
     await this.selectWorkspaceAction(Option.Delete, { waitForNav: false });
