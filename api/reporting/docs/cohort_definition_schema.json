@@ -162,11 +162,11 @@
           "type": "string"
         },
         "type": {
-          "description": "The vocabulary type",
+          "description": "The OMOP vocabulary type",
           "type": "string"
         },
         "group": {
-          "description": "Is the concept a parent or child",
+          "description": "Is the concept a parent or child. A parent subsumes children and a child subsumes nothing",
           "type": "boolean"
         },
         "attributes": {
@@ -183,19 +183,67 @@
           "type": "boolean"
         },
         "standard": {
-          "description": "Is the search parameter source or standard",
+          "description": "Is the search parameter source or standard. Source indicates that this is what the originating source code.\n Standard is an OMOP deliniation that helps to group items across vocabularies",
           "type": "boolean"
         },
         "conceptId": {
-          "description": "The concept id",
+          "description": "Uniquely identifies an OMOP concept",
           "type": "integer"
         },
         "value": {
-          "description": "For PPI questions this holds the answer concept id",
+          "description": "For PPI questions this holds the answer concept id for CAT attributes and a number for NUM attributes.\n This property has been deprecated in favor of using the attributes.",
           "type": "string"
         }
       },
-      "required": ["parameterId", "name", "domain", "type", "group", "ancestorData", "standard", "conceptId"]
+      "required": ["parameterId", "name", "domain", "type", "group", "ancestorData", "standard", "conceptId"],
+      "examples": [
+        {
+          "parameterId": "param8532",
+          "name": "Female",
+          "domain": "PERSON",
+          "type": "GENDER",
+          "group": false,
+          "ancestorData": false,
+          "standard": true,
+          "conceptId": 8532
+        },
+        {
+          "parameterId": "param325139",
+          "name": "In the past 7 days, how would you rate your pain on average (0= No pain, 10= Worst pain imaginable)?",
+          "domain": "SURVEY",
+          "type": "PPI",
+          "subtype": "ANSWER",
+          "group": false,
+          "attributes": [
+            {
+              "name": "NUM",
+              "operator": "EQUAL",
+              "operands": ["5"]
+            }
+          ],
+          "ancestorData": false,
+          "standard": false,
+          "conceptId": 1585747
+        },
+        {
+          "parameterId": "param324839",
+          "name": "In what country were you born? - Other",
+          "domain": "SURVEY",
+          "type": "PPI",
+          "subtype": "ANSWER",
+          "group": false,
+          "attributes": [
+            {
+              "name": "CAT",
+              "operator": "IN",
+              "operands": ["1586137"]
+            }
+          ],
+          "ancestorData": false,
+          "standard": false,
+          "conceptId": 1586135
+        }
+      ]
     }
   }
 }
