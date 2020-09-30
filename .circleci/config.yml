@@ -77,6 +77,12 @@ anchors:
       # Workbench release tag format example: v5-3-rc1
       only: /^v[0-9]+-[0-9]+-rc[0-9]+$/
 
+  # Job runs for PR branches only
+  filter_only_pr_branch: &filter_only_pr_branch
+    tags:
+      ignore: /.*/
+    branches:
+      ignore: master
 
 # -------------------------
 #   COMMANDS
@@ -213,6 +219,7 @@ commands:
         enum: ["local", "test", "staging"]
     steps:
       - install_e2e_dependencies
+      - browser-tools/install-browser-tools
       - run:
           name: Update test user environment variables
           command: |
@@ -291,6 +298,20 @@ commands:
           name: Wait for local UI server to start
           command: dockerize -wait tcp://localhost:4200 -timeout 4m
 
+  skip_e2e_commit:
+    description: "Halt job if commit message contains 'SKIP E2E'"
+    steps:
+      - run:
+          name: "Halt job if commit message contains 'SKIP E2E'"
+          command: |
+            echo 'export COMMIT_MESSAGE=$(git log -1 --pretty=format:"%s")' >> $BASH_ENV
+            source $BASH_ENV
+            echo "Git commit message: $COMMIT_MESSAGE"
+
+            if [[ "${COMMIT_MESSAGE,,}" == *"skip e2e"* ]]; then
+              echo "Halting e2e test."
+              circleci step halt
+            fi
 
 # -------------------------
 #        JOBS
@@ -574,14 +595,14 @@ jobs:
       - manage_api_cache:
           save: true
 
-  # Run Puppeteer e2e UI tests on deployed "test" or "staging" environment.
+  # Run Puppeteer e2e UI tests on deployed "local", "test" or "staging" environment.
   puppeteer-e2e-test:
     parameters:
       env_name:
-        description: The target environment for run Puppeteer tests. Must be one of "test", "staging".
+        description: The target environment for run Puppeteer tests. Must be one of "test", "staging", "local".
         default: "test"
         type: enum
-        enum: ["test", "staging"]
+        enum: ["test", "staging", "local"]
       test_mode:
         description: Switching between "nightly-integration" and normal "integration" test mode.
         default: "integration"
@@ -590,6 +611,9 @@ jobs:
       parallel_num:
         type: integer
         default: 1
+      require_local_ui:
+        type: boolean
+        default: false
     <<: *defaults
     environment:
       <<: *e2e_env
@@ -601,31 +625,19 @@ jobs:
     parallelism: << parameters.parallel_num >>
     steps:
       - checkout_init_git
-      - browser-tools/install-browser-tools
+      - when:
+          # Deploy local UI server then run Puppeteer tests against "local ui" + "test api" environment.
+          condition: << parameters.require_local_ui >>
+          steps:
+            - skip_e2e_commit
+            - run:
+                name: Halt job if not a pull request
+                command: bash .circleci/pr-skip-ci.sh
+            - halt_if_code_unchanged
+            - start_local_ui
       - run_e2e_test:
           env_name: << parameters.env_name >>
 
-  # Deploy UI local server then run Puppeteer tests against "local ui" + "test api" environment.
-  puppeteer-e2e-local-ui:
-    <<: *defaults
-    environment:
-      <<: *e2e_env
-      WORKBENCH_ENV: local
-      CI: true
-      NODE_ENV: development
-    resource_class: medium+
-    working_directory: ~/workbench
-    parallelism: 2
-    steps:
-      - checkout_init_git
-      - run:
-          name: Halt job if not a pull request
-          command: bash .circleci/pr-skip-ci.sh
-      - halt_if_code_unchanged
-      - browser-tools/install-browser-tools
-      - start_local_ui
-      - run_e2e_test:
-          env_name: local
 
 workflows:
   build-test-deploy:
@@ -637,7 +649,6 @@ workflows:
       - ui-unit-test
       - api-bigquery-test
       - api-integration-test
-      - puppeteer-e2e-local-ui
       # Run deployment to "test" on master merges.
       - api-deploy-to-test:
           filters: *filter_only_master_branch
@@ -647,9 +658,16 @@ workflows:
           filters: *filter_only_master_branch
           requires:
             - ui-unit-test
+      # Run Puppeteer tests against local UI server for PR commits only.
+      - puppeteer-e2e-test:
+          filters: *filter_only_pr_branch
+          require_local_ui: true
+          parallel_num: 2
+          env_name: "local"
       # On master branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully.
       - puppeteer-e2e-test:
           parallel_num: 4
+          env_name: "test"
           filters: *filter_only_master_branch
           requires:
             - api-deploy-to-test
