@@ -4,7 +4,6 @@ import {CheckBox} from 'app/components/inputs';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {usernameWithoutDomain} from 'app/utils/audit-utils';
-import {fixSwaggerDate} from 'app/utils/swagger-date';
 import {
   AuditAction,
   AuditAgent,
@@ -14,7 +13,6 @@ import {
   AuditTargetPropertyChange
 } from 'generated';
 import * as fp from 'lodash/fp';
-import {Moment} from 'moment';
 import * as moment from 'moment';
 import * as React from 'react';
 import {useState} from 'react';
@@ -184,9 +182,8 @@ const AuditActionCard = (props: { action: AuditAction }) => {
   const {action} = props;
   const timeString  = fp.flow(
     fp.get('actionTime'),
-    fixSwaggerDate,
-    (d: Date) => moment(d),
-    (m: Moment) => m.format('YYYY-MM-DD hh:mm:ss')
+    moment,
+    m => m.format('YYYY-MM-DD hh:mm:ss')
   )(action);
 
   const actionTypes = fp.flow(
