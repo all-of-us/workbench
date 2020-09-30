@@ -1,7 +1,8 @@
 import {leoRuntimesApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import {isAbortError, reportError} from 'app/utils/errors';
-import {Runtime, RuntimeConfigurationType, RuntimeStatus} from 'generated/fetch';
+import {runtimePresets} from 'app/utils/runtime-presets';
+import {Runtime, RuntimeStatus} from 'generated/fetch';
 import {serverConfigStore} from './navigation';
 import {
   markRuntimeOperationCompleteForWorkspace,
@@ -190,15 +191,10 @@ export class LeoRuntimeInitializer {
     }
     const aborter = new AbortController();
     let runtime: Runtime;
-    if (serverConfigStore.getValue().enableCustomRuntimes) {
-      // TODO(RW-3418): allow custom runtimes, maybe plumb default through serverConfigStore?
-      runtime = {
-        dataprocConfig: {
-          masterMachineType: 'n1-standard-4'
-        }
-      };
+    if (serverConfigStore.getValue().enableGceAsNotebookRuntimeDefault) {
+      runtime = {...runtimePresets.generalAnalysis.runtimeTemplate};
     } else {
-      runtime = {configurationType: RuntimeConfigurationType.DefaultDataproc};
+      runtime = {...runtimePresets.legacyGeneralAnalysis.runtimeTemplate};
     }
     const promise = runtimeApi().createRuntime(this.workspaceNamespace,
       runtime,

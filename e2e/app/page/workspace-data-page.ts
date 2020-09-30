@@ -1,4 +1,5 @@
 import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
+
 import DataResourceCard from 'app/component/data-resource-card';
 import ClrIconLink from 'app/element/clr-icon-link';
 import {EllipsisMenuAction, Language, ResourceCard} from 'app/text-labels';

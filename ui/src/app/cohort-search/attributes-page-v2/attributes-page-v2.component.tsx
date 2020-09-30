@@ -3,8 +3,9 @@ import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 
 import {PM_UNITS, PREDEFINED_ATTRIBUTES} from 'app/cohort-search/constant';
-import {ppiQuestions} from 'app/cohort-search/search-state.service';
+import {ppiQuestions, ppiSurveys} from 'app/cohort-search/search-state.service';
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
+import {COPE_SURVEY_GROUP_NAME} from 'app/cohort-search/tree-node/tree-node.component';
 import {
   mapParameter,
   sanitizeNumericalInput,
@@ -38,17 +39,38 @@ const styles = reactStyles({
     color: colors.primary,
     fontWeight: 600,
     display: 'flex',
+    lineHeight: '0.75rem',
   },
   orCircle: {
-    backgroundColor: colors.primary,
+    backgroundColor: colorWithWhiteness(colors.primary, 0.75),
     borderRadius: '50%',
-    color: colors.white,
-    width: '1.25rem',
-    height: '1.25rem',
-    margin: '0.75rem auto 0.25rem',
-    lineHeight: '1.35rem',
+    color: colors.primary,
+    width: '2.25rem',
+    height: '2.25rem',
+    margin: '0.5rem 0',
+    lineHeight: '2.25rem',
     textAlign: 'center',
-    fontSize: '0.45rem',
+    fontSize: '12px',
+    fontWeight: 600
+  },
+  andCircle: {
+    backgroundColor: colorWithWhiteness(colors.primary, 0.75),
+    borderRadius: '50%',
+    color: colors.primary,
+    width: '2.25rem',
+    height: '2.25rem',
+    lineHeight: '2.25rem',
+    textAlign: 'center',
+    fontSize: '12px',
+    fontWeight: 600,
+    position: 'absolute',
+    left: '42%'
+  },
+  andDivider: {
+    height: '1.15rem',
+    marginBottom: '1.15rem',
+    width: '100%',
+    borderBottom: `2px solid ${colorWithWhiteness(colors.primary, 0.75)}`
   },
   container: {
     display: 'flex',
@@ -69,7 +91,7 @@ const styles = reactStyles({
     fontSize: '10px',
     height: '0.625rem',
     padding: '0 4px',
-    marginRight: '0.5rem',
+    marginLeft: '0.25rem',
     borderRadius: '10px',
     display: 'inline-flex',
     verticalAlign: 'middle',
@@ -124,25 +146,61 @@ const styles = reactStyles({
   errorItem: {
     lineHeight: '16px',
   },
+  moreInfo: {
+    color: colors.accent,
+    cursor: 'pointer',
+    fontWeight: 300,
+    margin: '0.75rem 0',
+    textDecoration: 'underline'
+  }
 });
 
-export const CalculateFooter = (props) => {
-  return <FlexRowWrap style={styles.countPreview}>
-     <div style={styles.resultsContainer}>
-     <Button id='attributes-calculate'
-       type='secondaryLight'
-    disabled={props.disabled}
-    style={{...styles.calculateButton, ...(props.disabled ? {borderColor: colorWithWhiteness(colors.dark, 0.6)} : {})}}
-    onClick={() => props.calculate()}>
-    {props.calculating && <Spinner size={16} style={styles.spinner}/>} Calculate
-    </Button>
-    </div>
-    <div style={styles.resultsContainer}>
-      <div style={{fontWeight: 600}}>Number of Participants:
-        <span> {props.count === null ? '--' : props.count.toLocaleString()} </span>
+interface CalculateFooterProps {
+  addButtonText: string;
+  addFn: () => void;
+  backFn: () => void;
+  calculateFn: () => void;
+  calculating: boolean;
+  count: number;
+  disableAdd: boolean;
+  disableCalculate: boolean;
+}
+
+export const CalculateFooter = (props: CalculateFooterProps) => {
+  const {addButtonText, addFn, backFn, calculateFn, calculating, count, disableAdd, disableCalculate} = props;
+  return <div style={{background: colorWithWhiteness(colors.primary, .87), bottom: 0, position: 'sticky'}}>
+    <FlexRowWrap style={styles.countPreview}>
+      <div style={styles.resultsContainer}>
+        <Button id='attributes-calculate'
+          type='secondaryLight'
+          disabled={disableCalculate}
+          style={disableCalculate
+            ? {...styles.calculateButton, borderColor: colorWithWhiteness(colors.dark, 0.6)}
+            : styles.calculateButton}
+          onClick={() => calculateFn()}>
+          {calculating && <Spinner size={16} style={styles.spinner}/>} Calculate
+        </Button>
       </div>
-    </div>
-  </FlexRowWrap>;
+      <div style={styles.resultsContainer}>
+        <div style={{fontWeight: 600}}>Number of Participants:
+          <span> {count === null ? '--' : count.toLocaleString()} </span>
+        </div>
+      </div>
+    </FlexRowWrap>
+    <FlexRowWrap style={{flexDirection: 'row-reverse', marginTop: '0.5rem'}}>
+      <Button type='primary'
+              disabled={disableAdd}
+              style={styles.addButton}
+              onClick={() => addFn()}>
+        {addButtonText}
+      </Button>
+      <Button type='link'
+              style={{color: colors.primary, marginRight: '0.75rem'}}
+              onClick={() => backFn()}>
+        BACK
+      </Button>
+    </FlexRowWrap>
+  </div>;
 };
 
 const optionUtil = {
@@ -154,8 +212,9 @@ const optionUtil = {
 };
 
 interface AttributeForm {
-  exists: boolean; // Check if attribute values exist (Measurements only)
-  num: Array<any>; // Numerical attributes (Physical Measurements or Measurements)
+  anyValue: boolean; // Include any values that exist (Measurements and COPE only)
+  anyVersion: boolean; // Include any version that exist (COPE only)
+  num: Array<any>; // Numerical attributes (Physical Measurements, Measurements or COPE)
   cat: Array<any>; // Categorical attributes (Measurements only)
 }
 
@@ -171,6 +230,9 @@ interface State {
   count: number;
   countError: boolean;
   form: AttributeForm;
+  formErrors: Array<string>;
+  formValid: boolean;
+  isCOPESurvey: boolean;
   loading: boolean;
   options: any;
 }
@@ -182,7 +244,10 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
         calculating: false,
         count: null,
         countError: false,
-        form: {exists: false, num: [], cat: []},
+        form: {anyValue: false, anyVersion: false, num: [], cat: []},
+        formErrors: [],
+        formValid: true,
+        isCOPESurvey: false,
         loading: true,
         options: [
           {label: 'Equals', value: Operator.EQUAL},
@@ -194,20 +259,14 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
     }
 
     componentDidMount() {
-      const{options} = this.state;
-      if (!this.isMeasurement) {
-        options.unshift({label: optionUtil.ANY.display, value: AttrName[AttrName.ANY]});
-        this.setState({options}, () => this.initAttributeForm());
-      } else {
-        this.initAttributeForm();
-      }
+      this.initAttributeForm();
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
       if (this.props.node !== prevProps.node) {
         // A different node has been selected, so we reset the form and load the new attributes
         this.setState({
-          form: {exists: false, num: [], cat: []},
+          form: {anyValue: false, anyVersion: false, num: [], cat: []},
           loading: true
         }, () => this.initAttributeForm());
       }
@@ -215,14 +274,69 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
 
     initAttributeForm() {
       const {node: {subtype}} = this.props;
-      const {form} = this.state;
-      if (this.hasRange) {
+      const {form, options} = this.state;
+      if (this.isSurvey) {
+        this.getSurveyAttributes();
+      } else if (this.isMeasurement) {
         this.getAttributes();
       } else {
+        options.unshift({label: optionUtil.ANY.display, value: AttrName[AttrName.ANY]});
         form.num = subtype === CriteriaSubType[CriteriaSubType.BP]
           ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
           : [{name: subtype, operator: 'ANY', operands: []}];
-        this.setState({form, count: this.nodeCount, loading: false});
+        this.setState({form, count: this.nodeCount, loading: false, options});
+      }
+    }
+
+    async getSurveyAttributes() {
+      const {node: {conceptId, parentId, path, subtype, value}} = this.props;
+      const {form, options} = this.state;
+      const {cdrVersionId} = currentWorkspaceStore.getValue();
+      const surveyId = path.split('.')[0];
+      const surveyNode = !!ppiSurveys.getValue()[cdrVersionId] && ppiSurveys.getValue()[cdrVersionId].find(n => n.id === +surveyId);
+      if (!!surveyNode && surveyNode.name === COPE_SURVEY_GROUP_NAME) {
+        const promises = [];
+        if (subtype === CriteriaSubType.QUESTION || (subtype === CriteriaSubType.ANSWER && !value)) {
+          promises.push(cohortBuilderApi().findSurveyVersionByQuestionConceptId(+cdrVersionId, surveyNode.conceptId, conceptId));
+        } else {
+          promises.push(
+            cohortBuilderApi().findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
+              +cdrVersionId,
+              surveyNode.conceptId,
+              ppiQuestions.getValue()[parentId].conceptId,
+              +value
+            )
+          );
+        }
+        if (subtype === CriteriaSubType.ANSWER) {
+          promises.push(cohortBuilderApi().findCriteriaAttributeByConceptId(+cdrVersionId, conceptId));
+        }
+        const [surveyVersions, numericalAttributes] = await Promise.all(promises);
+        form.cat = surveyVersions.items.map(attr => ({
+          checked: false,
+          conceptName: attr.version,
+          estCount: attr.itemCount,
+          valueAsConceptId: attr.surveyId
+        }));
+        if (numericalAttributes) {
+          numericalAttributes.items.forEach(attr => {
+            if (!form.num.length) {
+              form.num.push({
+                name: AttrName.NUM,
+                operator: null,
+                operands: [],
+                conceptId: +value,
+                [attr.conceptName]: parseInt(attr.estCount, 10)
+              });
+            } else {
+              form.num[0][attr.conceptName] = parseInt(attr.estCount, 10);
+            }
+          });
+        }
+        this.setState({count: null, form, isCOPESurvey: true, loading: false});
+      } else {
+        options.unshift({label: optionUtil.ANY.display, value: AttrName[AttrName.ANY]});
+        this.setState({isCOPESurvey: false, options}, () => this.getAttributes());
       }
     }
 
@@ -258,19 +372,26 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
       });
     }
 
-    toggleCheckbox(checked: boolean) {
+    toggleAnyValueCheckbox(checked: boolean) {
       const {form} = this.state;
       let {node: {count}} = this.props;
+      form.anyValue = checked;
       if (checked) {
-        form.exists = true;
         form.num = form.num.map(attr =>
           ({...attr, operator: this.isPhysicalMeasurement ? 'ANY' : null, operands: []}));
         form.cat = form.cat.map(attr => ({...attr, checked: false}));
-      } else {
-        count = null;
-        form.exists = false;
       }
-      this.setState({form, count});
+      if (!checked || count === -1) {
+        count = null;
+      }
+      this.setState({form, count}, () => this.validateForm());
+    }
+
+    toggleAnyVersionCheckbox(checked: boolean) {
+      const {form} = this.state;
+      form.anyVersion = checked;
+      form.cat = form.cat.map(attr => ({...attr, checked: false}));
+      this.setState({form}, () => this.validateForm());
     }
 
     selectChange(attributeIndex: number, value: string) {
@@ -293,64 +414,65 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
         form.num[attributeIndex].operands.splice(1);
       }
       const count = value === 'ANY' ? this.nodeCount : null;
-      this.setState({form, count});
+      this.setState({form, count}, () => this.validateForm());
     }
 
     inputChange(input: string, attributeIndex: number, operandIndex: number) {
       const {form} = this.state;
       form.num[attributeIndex].operands[operandIndex] = sanitizeNumericalInput(input);
-      this.setState({form, count: null});
+      this.setState({form, count: null}, () => this.validateForm());
     }
 
     checkboxChange(checked: boolean, index: number) {
       const {form} = this.state;
       form.cat[index].checked = checked;
-      this.setState({form});
+      this.setState({form, count: null}, () => this.validateForm());
     }
 
     validateForm() {
-      const {form} = this.state;
-      let formErrors = new Set(), formValid = true, operatorSelected = true;
-      if (form.exists) {
-        return {formValid, formErrors};
+      const {form, isCOPESurvey} = this.state;
+      if (form.anyValue && (!isCOPESurvey || form.anyVersion)) {
+        this.setState({formValid: true, formErrors: []});
+      } else {
+        let formValid = true, operatorSelected = form.num.length !== 0;
+        const formErrors = form.num.reduce((acc, attr) => {
+          const {MIN, MAX, operator} = attr;
+          const operands = attr.operands.map(op => parseInt(op, 10));
+          switch (operator) {
+            case null:
+              operatorSelected = false;
+              return acc;
+            case 'ANY':
+              return acc;
+            case Operator.BETWEEN:
+              if (operands.length < 2) {
+                formValid = false;
+              }
+              break;
+            default:
+              if (operands.length === 0) {
+                formValid = false;
+              }
+          }
+          if (operands.includes(NaN)) {
+            formValid = false;
+            acc.add('Form can only accept valid numbers');
+          }
+          if (this.isPhysicalMeasurement && operands.some(op => op < 0)) {
+            formValid = false;
+            acc.add('Form cannot accept negative values');
+          }
+          if (this.hasRange && operands.some(op => op < MIN || op > MAX)) {
+            formValid = false;
+            acc.add(`Values must be between ${MIN.toLocaleString()} and ${MAX.toLocaleString()}`);
+          }
+          return acc;
+        }, new Set());
+        // The second condition sets formValid to false if this is a Measurements or COPE attribute with no operator selected from the
+        // dropdown and no categorical checkboxes checked
+        formValid = formValid && !((this.isMeasurement || isCOPESurvey) && !operatorSelected && !form.cat.some(attr => attr.checked));
+        this.setState({formErrors: Array.from(formErrors), formValid});
       }
-      formErrors = form.num.reduce((acc, attr) => {
-        const {MIN, MAX, operator} = attr;
-        const operands = attr.operands.map(op => parseInt(op, 10));
-        switch (operator) {
-          case null:
-            operatorSelected = false;
-            return acc;
-          case 'ANY':
-            return acc;
-          case Operator.BETWEEN:
-            if (operands.length < 2) {
-              formValid = false;
-            }
-            break;
-          default:
-            if (operands.length === 0) {
-              formValid = false;
-            }
-        }
-        if (operands.includes(NaN)) {
-          formValid = false;
-          acc.add('Form can only accept valid numbers');
-        }
-        if (this.isPhysicalMeasurement && operands.some(op => op < 0)) {
-          formValid = false;
-          acc.add('Form cannot accept negative values');
-        }
-        if (this.hasRange && operands.some(op => op < MIN || op > MAX)) {
-          formValid = false;
-          acc.add(`Values must be between ${MIN.toLocaleString()} and ${MAX.toLocaleString()}`);
-        }
-        return acc;
-      }, formErrors);
-      // The second condition sets formValid to false if this is a Measurements attribute with no operator selected from the dropdown and
-      // no categorical checkboxes checked
-      formValid = formValid && !(this.isMeasurement && !operatorSelected && !form.cat.some(attr => attr.checked));
-      return {formErrors, formValid};
     }
 
     get nodeCount() {
@@ -366,7 +488,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
     get paramId() {
       const {node: {conceptId, id}} = this.props;
       const {form} = this.state;
-      const code = form.exists ? 'Any' : form.num.reduce((acc, attr) => {
+      const code = form.anyValue ? 'Any' : form.num.reduce((acc, attr) => {
         if (attr.operator) {
           acc += optionUtil[attr.operator].code;
         }
@@ -382,11 +504,13 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
 
     get paramWithAttributes() {
       const {node, node: {name, subtype}} = this.props;
-      const {form} = this.state;
+      const {form, isCOPESurvey} = this.state;
       let paramName;
       const attrs = [];
-      if (form.exists) {
+      if (!isCOPESurvey && form.anyValue) {
         paramName = name + ` (${optionUtil.ANY.display})`;
+      } else if (isCOPESurvey && form.anyValue && form.anyVersion) {
+        paramName = name + ` (Any version AND any value)`;
       } else {
         form.num.filter(at => at.operator).forEach(({operator, operands, conceptId}) => {
           const attr = {name: AttrName.NUM, operator, operands};
@@ -440,7 +564,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
         selectionDisplay.push(name);
       }
       form.cat.filter(ca => ca.checked).forEach(attr => selectionDisplay.push(attr.conceptName));
-      const nodeName = this.isSurvey ? ppiQuestions.getValue()[node.parentId].name : node.name;
+      const nodeName = node.subtype === CriteriaSubType.ANSWER ? ppiQuestions.getValue()[node.parentId].name : node.name;
       return nodeName + ' (' + selectionDisplay.join(', ') +
         (this.hasUnits && form.num[0].operator !== AttrName.ANY ? ' ' + PM_UNITS[node.subtype] : '') + ')';
     }
@@ -522,93 +646,148 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
       return this.isMeasurement || this.isSurvey;
     }
 
+    get disableAddButton() {
+      const {calculating, formValid} = this.state;
+      return calculating || !formValid;
+    }
+
+    get disableCalculateButton() {
+      const {calculating, count, form, formValid, isCOPESurvey} = this.state;
+      return calculating || !formValid
+        || (form.anyValue && count !== null)
+        || (isCOPESurvey && !form.anyVersion && !form.cat.some(attr => attr.checked))
+        || (form.num.length && form.num.every(attr => attr.operator === 'ANY'));
+    }
+
+    renderNumericalAttributes() {
+      const {node: {count, subtype}} = this.props;
+      const {form, isCOPESurvey, options} = this.state;
+      return form.num.length > 0 && <React.Fragment>
+        {this.isMeasurement && <div style={styles.label}>Numeric Values</div>}
+        {isCOPESurvey && <div>
+          <CheckBox onChange={(v) => this.toggleAnyValueCheckbox(v)}/> Any value
+          {count > -1 && <span style={styles.badge}> {count.toLocaleString()}</span>}
+        </div>}
+        {!(isCOPESurvey && form.anyValue) && form.num.map((attr, a) => <div key={a}>
+          {this.isBloodPressure && <div style={styles.label}>{attr.name}</div>}
+          {isCOPESurvey && <div style={styles.orCircle}>OR</div>}
+          <Dropdown style={{marginBottom: '0.5rem', width: '100%'}}
+                    value={attr.operator}
+                    options={options}
+                    placeholder='Select Operator'
+                    onChange={(e) => this.selectChange(a, e.value)}/>
+          <FlexRowWrap>
+            {![null, 'ANY'].includes(attr.operator) && <div style={{width: '33%'}}>
+              <NumberInput style={{padding: '0 0.25rem', ...(this.hasUnits ? {width: '70%'} : {})}}
+                           value={attr.operands[0] || ''}
+                           min={attr.MIN} max={attr.MAX}
+                           onChange={(v) => this.inputChange(v, a, 0)}/>
+              {this.hasUnits && <span> {PM_UNITS[subtype]}</span>}
+            </div>}
+            {attr.operator === Operator.BETWEEN && <React.Fragment>
+              <div style={{padding: '0.2rem 1.5rem 0 1rem'}}>and</div>
+              <div style={{width: '33%'}}>
+                <NumberInput style={{padding: '0 0.25rem', ...(this.hasUnits ? {width: '70%'} : {})}}
+                             value={attr.operands[1] || ''}
+                             min={attr.MIN} max={attr.MAX}
+                             onChange={(v) => this.inputChange(v, a, 1)}/>
+                {this.hasUnits && <span> {PM_UNITS[subtype]}</span>}
+              </div>
+            </React.Fragment>}
+          </FlexRowWrap>
+          {this.hasRange && ![null, 'ANY'].includes(attr.operator) && <div style={{paddingTop: '0.2rem'}}>
+            Range: {attr.MIN.toLocaleString()} - {attr.MAX.toLocaleString()}
+          </div>}
+        </div>)}
+      </React.Fragment>;
+    }
+
+    renderCategoricalAttributes() {
+      const {node: {count}} = this.props;
+      const {form, isCOPESurvey} = this.state;
+      return form.cat.length > 0 && <React.Fragment>
+        {isCOPESurvey && <div>
+          <CheckBox onChange={(v) => this.toggleAnyVersionCheckbox(v)}/> Any version
+          {count > -1 && <span style={styles.badge}>{count.toLocaleString()}</span>}
+        </div>}
+        {!(isCOPESurvey && form.anyVersion) && <React.Fragment>
+          <div style={styles.orCircle}>OR</div>
+          {!isCOPESurvey && <div style={styles.label}>Categorical Values</div>}
+          {form.cat.map((attr, a) => <div key={a} style={styles.categorical}>
+            <CheckBox checked={attr.checked} style={{marginRight: '3px'}}
+                      onChange={(v) => this.checkboxChange(v, a)}/>
+            {attr.conceptName}
+            <span style={styles.badge}>{parseInt(attr.estCount, 10).toLocaleString()}</span>
+          </div>)}
+        </React.Fragment>}
+      </React.Fragment>;
+    }
+
     render() {
       const {close, node: {domainId, name, parentId, subtype}} = this.props;
-      const {calculating, count, countError, form, loading, options} = this.state;
-      const {formErrors, formValid} = this.validateForm();
-      const disableAdd = calculating || !formValid;
-      const disableCalculate = disableAdd || form.exists || form.num.every(attr => attr.operator === 'ANY');
+      const {calculating, count, countError, form, formErrors, isCOPESurvey, loading} = this.state;
       return (loading ?
         <SpinnerOverlay/> :
         <div id='attributes-form' style={{marginTop: '0.5rem'}}>
-          <h3 style={{fontWeight: 600, margin: '0 0 0.5rem', textTransform: 'capitalize'}}>
+          {isCOPESurvey ? <div>
+            <h3 style={{fontWeight: 600, margin: '0 0 0.5rem', textTransform: 'capitalize'}}>
+              COPE Survey (COVID-19) attribute
+            </h3>
+            <div style={{lineHeight: '0.75rem', paddingRight: '1.5rem'}}>
+              The COPE survey is longitudinal and will change over time. Use the following attributes to select data from one or more
+               versions.
+            </div>
+            <div style={styles.moreInfo}>
+              More info
+            </div>
+          </div> : <h3 style={{fontWeight: 600, margin: '0 0 0.5rem', textTransform: 'capitalize'}}>
             {this.isPhysicalMeasurement ? name : domainId.toString().toLowerCase()} Detail
-          </h3>
+          </h3>}
+          {this.isSurvey && <div style={{...styles.label, marginBottom: '0.5rem'}}>
+            {subtype === CriteriaSubType.ANSWER
+              ? `${ppiQuestions.getValue()[parentId].name} - ${name}`
+              : name
+            }
+          </div>}
           {countError && <div style={styles.error}>
             <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
               shape='exclamation-triangle' size='22'/>
             Sorry, the request cannot be completed.
           </div>}
-          {!!formErrors.size && <div style={styles.errors}>
-            {Array.from(formErrors).map((err, e) => <div key={e} style={styles.errorItem}>
+          {formErrors.length > 0 && <div style={styles.errors}>
+            {formErrors.map((err, e) => <div key={e} style={styles.errorItem}>
               {err}
             </div>)}
           </div>}
-          {this.isMeasurement && <div>
-            <div style={styles.label}>{this.displayName}</div>
-            <CheckBox onChange={(v) => this.toggleCheckbox(v)}/> Any value (lab exists)
-            {!form.exists && form.num.length > 0 && <div style={styles.orCircle}>OR</div>}
-          </div>}
-          {!form.exists && <div style={{minHeight: '10rem'}}>
-            {form.num.map((attr, a) => <div key={a}>
-              {this.isMeasurement && <div style={styles.label}>Numeric Values</div>}
-              {this.isSurvey && <div style={styles.label}>{ppiQuestions.getValue()[parentId].name}</div>}
-              {this.isBloodPressure && <div style={styles.label}>{attr.name}</div>}
-              <Dropdown style={{marginBottom: '0.5rem', width: '100%'}}
-                        value={attr.operator}
-                        options={options}
-                        placeholder='Select Operator'
-                        onChange={(e) => this.selectChange(a, e.value)}/>
-              <FlexRowWrap>
-                {![null, 'ANY'].includes(attr.operator) && <div style={{width: '33%'}}>
-                  <NumberInput style={{padding: '0 0.25rem', ...(this.hasUnits ? {width: '70%'} : {})}}
-                               value={attr.operands[0] || ''}
-                               min={attr.MIN} max={attr.MAX}
-                               onChange={(v) => this.inputChange(v, a, 0)}/>
-                  {this.hasUnits && <span> {PM_UNITS[subtype]}</span>}
-                </div>}
-                {attr.operator === Operator.BETWEEN && <React.Fragment>
-                  <div style={{padding: '0.2rem 1.5rem 0 1rem'}}>and</div>
-                  <div style={{width: '33%'}}>
-                    <NumberInput style={{padding: '0 0.25rem', ...(this.hasUnits ? {width: '70%'} : {})}}
-                                 value={attr.operands[1] || ''}
-                                 min={attr.MIN} max={attr.MAX}
-                                 onChange={(v) => this.inputChange(v, a, 1)}/>
-                    {this.hasUnits && <span> {PM_UNITS[subtype]}</span>}
-                  </div>
-                </React.Fragment>}
-              </FlexRowWrap>
-              {this.hasRange && ![null, 'ANY'].includes(attr.operator) && <div style={{paddingTop: '0.2rem'}}>
-                Range: {attr.MIN.toLocaleString()} - {attr.MAX.toLocaleString()}
+          {isCOPESurvey
+            ? <div>
+              {this.renderCategoricalAttributes()}
+              {form.num.length > 0 && form.cat.length > 0 && <div style={{position: 'relative'}}>
+                <div style={styles.andCircle}>AND</div>
+                <div style={styles.andDivider}/>
               </div>}
-            </div>)}
-            {form.cat.length > 0 && <React.Fragment>
-              <div style={styles.orCircle}>OR</div>
-              <div style={styles.label}>Categorical Values</div>
-              <div style={{marginLeft: '0.5rem'}}>
-                {form.cat.map((attr, a) => <div key={a} style={styles.categorical}>
-                  <CheckBox checked={attr.checked} style={{marginRight: '3px'}}
-                    onChange={(v) => this.checkboxChange(v, a)} />
-                  {attr.conceptName}&nbsp;
-                  <span style={styles.badge}> {parseInt(attr.estCount, 10).toLocaleString()}</span>
-                </div>)}
-              </div>
-            </React.Fragment>}
-          </div>}
-          <CalculateFooter disabled={disableCalculate} calculating={calculating} calculate={() => this.requestPreview()} count={count}/>
-          <FlexRowWrap style={{flexDirection: 'row-reverse', marginTop: '2rem'}}>
-            <Button type='primary'
-                    disabled={disableAdd}
-                    style={styles.addButton}
-                    onClick={() => this.addParameterToSearchItem()}>
-              ADD THIS
-            </Button>
-            <Button type='link'
-                    style={{color: colors.primary, marginRight: '0.75rem'}}
-                    onClick={() => close()}>
-              BACK
-            </Button>
-          </FlexRowWrap>
+              {this.renderNumericalAttributes()}
+            </div>
+            : <div>
+              {this.isMeasurement && <div>
+                <div style={styles.label}>{this.displayName}</div>
+                <CheckBox onChange={(v) => this.toggleAnyValueCheckbox(v)}/> Any value (lab exists)
+                {!form.anyValue && form.num.length > 0 && <div style={styles.orCircle}>OR</div>}
+              </div>}
+              {!form.anyValue && <div style={{minHeight: '10rem'}}>
+                {this.renderNumericalAttributes()}
+                {this.renderCategoricalAttributes()}
+              </div>}
+            </div>
+          }
+          <CalculateFooter addButtonText='ADD THIS'
+                           addFn={() => this.addParameterToSearchItem()}
+                           backFn={() => close()}
+                           calculateFn={() => this.requestPreview()}
+                           calculating={calculating}
+                           count={count}
+                           disableAdd={this.disableAddButton}
+                           disableCalculate={this.disableCalculateButton}/>
         </div>
       );
     }

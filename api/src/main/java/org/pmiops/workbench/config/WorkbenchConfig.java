@@ -116,7 +116,8 @@ public class WorkbenchConfig {
     // The docker image that we use for our jupyter images
     public String jupyterDockerImage;
     // The docker image that we use for our welder images
-    public String welderDockerImage;
+    // TODO(RW-5098): Remove after next release.
+    @Deprecated public String welderDockerImage;
     // Base URL for the Shibboleth API server, e.g.
     // https://profile-dot-broad-shibboleth-prod.appspot.com
     // See RW-4257 for more details on Terra's Shibboleth-specific API.
@@ -268,6 +269,8 @@ public class WorkbenchConfig {
     public boolean enableCOPESurvey;
     // Whether users should be able to customize notebook runtime settings.
     public boolean enableCustomRuntimes;
+    // Whether Leonardo notebooks runtimes should default to GCE (instead of Dataproc).
+    public boolean enableGceAsNotebookRuntimeDefault;
   }
 
   public static class ActionAuditConfig {

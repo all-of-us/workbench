@@ -111,7 +111,8 @@
     "enableConceptSetSearchV2": false,
     "enableReportingUploadCron": false,
     "enableCOPESurvey": false,
-    "enableCustomRuntimes": false
+    "enableCustomRuntimes": false,
+    "enableGceAsNotebookRuntimeDefault": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-staging",
