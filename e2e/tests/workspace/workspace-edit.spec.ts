@@ -1,6 +1,6 @@
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import WorkspacesPage from 'app/page/workspaces-page';
-import {EllipsisMenuAction} from 'app/text-labels';
+import {Option} from 'app/text-labels';
 import * as testData from 'resources/data/workspace-data';
 import {findWorkspace, performActions, signIn} from 'utils/test-utils';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
@@ -21,7 +21,7 @@ describe('Editing workspace thru workspace card ellipsis menu', () => {
    */
   test('User as OWNER can edit workspace', async () => {
     const workspaceCard = await findWorkspace(page, {create: true});
-    await workspaceCard.clickEllipsisAction(EllipsisMenuAction.Edit);
+    await workspaceCard.selectSnowmanMenu(Option.Edit);
 
     const workspacesPage = new WorkspacesPage(page);
 

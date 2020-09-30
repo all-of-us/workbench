@@ -2,7 +2,7 @@ import DataResourceCard from 'app/component/data-resource-card';
 import ClrIconLink from 'app/element/clr-icon-link';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {EllipsisMenuAction, ResourceCard} from 'app/text-labels';
+import {Option, ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
@@ -115,7 +115,7 @@ describe('Create Dataset', () => {
 
     // Edit the dataset to include "All Participants".
     const datasetCard = await resourceCard.findCard(datasetName)
-    await datasetCard.clickEllipsisAction(EllipsisMenuAction.Edit);
+    await datasetCard.selectSnowmanMenu(Option.Edit);
     await waitWhileLoading(page);
 
     await datasetPage.selectCohorts(['All Participants']);

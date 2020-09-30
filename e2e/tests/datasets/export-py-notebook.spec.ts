@@ -2,7 +2,7 @@ import DataResourceCard from 'app/component/data-resource-card';
 import ExportToNotebookModal from 'app/component/export-to-notebook-modal';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {EllipsisMenuAction, ResourceCard} from 'app/text-labels';
+import {Option, ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
@@ -78,9 +78,9 @@ describe('Create Dataset', () => {
   /**
    * Test:
    * - Create dataset.
-   * - Export dataset to notebook thru the ellipsis menu.
+   * - Export dataset to notebook thru snowman menu.
    */
-  test('Export dataset to notebook thru ellipsis menu', async () => {
+  test('Export dataset to notebook thru snowman menu', async () => {
     await findWorkspace(page).then(card => card.clickWorkspaceName());
 
     // Click Add Datasets button.
@@ -95,7 +95,7 @@ describe('Create Dataset', () => {
 
     const resourceCard = new DataResourceCard(page);
     const datasetCard = await resourceCard.findCard(datasetName, ResourceCard.Dataset);
-    await datasetCard.clickEllipsisAction(EllipsisMenuAction.exportToNotebook, {waitForNav: false});
+    await datasetCard.selectSnowmanMenu(Option.exportToNotebook, {waitForNav: false});
 
     const exportModal = new ExportToNotebookModal(page);
     await exportModal.waitForLoad();

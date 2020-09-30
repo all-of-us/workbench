@@ -1,26 +1,36 @@
 import {ElementHandle, Page} from 'puppeteer';
-import {EllipsisMenuAction} from 'app/text-labels';
-import EllipsisMenu from './ellipsis-menu';
+import {Option} from 'app/text-labels';
+import Container from 'app/container';
+import SnowmanMenu from './snowman-menu';
 
 
-export default abstract class CardBase {
+export default abstract class CardBase extends Container {
 
-  ellipsisXpath = './/clr-icon[@shape="ellipsis-vertical"]';
+  private snowmanIconXpath = './/clr-icon[@shape="ellipsis-vertical"]';
   protected cardElement: ElementHandle;
 
-  protected constructor(protected readonly page: Page) {
+  protected constructor(page: Page, xpath?: string) {
+    super(page, xpath);
   }
 
   asElementHandle(): ElementHandle {
     return this.cardElement.asElement();
   }
 
-  getEllipsis(): EllipsisMenu {
-    return new EllipsisMenu(this.page, this.ellipsisXpath, this.asElementHandle());
+  async clickSnowmanIcon(): Promise<this> {
+    const [snowmanIcon] = await this.asElementHandle().$x(this.snowmanIconXpath)
+    await snowmanIcon.click();
+    await snowmanIcon.dispose();
+    return this;
   }
 
-  async clickEllipsisAction(action: EllipsisMenuAction, opt: { waitForNav?: boolean } = {}): Promise<void> {
-    return this.getEllipsis().clickAction(action, opt);
+  async getSnowmanMenu(): Promise<SnowmanMenu> {
+    await this.clickSnowmanIcon();
+    return new SnowmanMenu(this.page);
+  }
+
+  async selectSnowmanMenu(option: Option, opt: { waitForNav?: boolean } = {}): Promise<void> {
+    return this.getSnowmanMenu().then(menu => menu.select(option, opt));
   }
 
 
