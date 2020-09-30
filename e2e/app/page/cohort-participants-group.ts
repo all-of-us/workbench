@@ -6,6 +6,7 @@ import CohortSearchPage, {FilterSign, PhysicalMeasurementsCriteria} from 'app/pa
 import TieredMenu from 'app/component/tiered-menu';
 import {waitWhileLoading} from 'utils/test-utils';
 import {LinkText} from 'app/text-labels';
+import {snowmanIconXpath} from 'app/component/snowman-menu';
 
 enum GroupMenuOption {
    EditGroupName  = 'Edit group name',
@@ -38,7 +39,7 @@ export default class CohortParticipantsGroup {
   }
 
   async clickSnowmanIcon(): Promise<void> {
-    const iconXpath = `${this.rootXpath}//clr-icon[@shape="ellipsis-vertical"]`;
+    const iconXpath = `${this.rootXpath}${snowmanIconXpath}`;
     await this.page.waitForXPath(iconXpath, {visible: true})
        .then(icon => icon.click());
   }

@@ -4,7 +4,7 @@ import Link from 'app/element/link';
 import {getPropValue} from 'utils/element-utils';
 import Container from 'app/container';
 
-
+export const snowmanIconXpath = '//clr-icon[@shape="ellipsis-vertical"]';
 const defaultXpath = '//*[@id="popup-root"]';
 
 export default class SnowmanMenu extends Container {

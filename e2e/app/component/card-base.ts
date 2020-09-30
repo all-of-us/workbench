@@ -1,12 +1,10 @@
 import {ElementHandle, Page} from 'puppeteer';
 import {Option} from 'app/text-labels';
 import Container from 'app/container';
-import SnowmanMenu from './snowman-menu';
+import SnowmanMenu, {snowmanIconXpath} from './snowman-menu';
 
 
 export default abstract class CardBase extends Container {
-
-  private snowmanIconXpath = './/clr-icon[@shape="ellipsis-vertical"]';
   protected cardElement: ElementHandle;
 
   protected constructor(page: Page, xpath?: string) {
@@ -18,7 +16,8 @@ export default abstract class CardBase extends Container {
   }
 
   async clickSnowmanIcon(): Promise<this> {
-    const [snowmanIcon] = await this.asElementHandle().$x(this.snowmanIconXpath)
+    const iconXpath = `.$${snowmanIconXpath}`
+    const [snowmanIcon] = await this.asElementHandle().$x(iconXpath)
     await snowmanIcon.click();
     await snowmanIcon.dispose();
     return this;
