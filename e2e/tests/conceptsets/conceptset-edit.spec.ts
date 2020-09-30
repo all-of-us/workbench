@@ -19,13 +19,13 @@ describe('Editing and Copying Concept Sets', () => {
 
   /**
    * Test:
-   * - Find an existing workspace.
+   * - Create new workspace.
    * - Create first new Concept Set in Procedure domain.
    * - Create second new Concept Set in Procedure domain. Add to first Concept Set.
    */
   test('Add to existing Concept Set in same workspace', async () => {
     // Create a workspace
-    const workspaceName = await findWorkspace(page).then(card => card.clickWorkspaceName());
+    const workspaceName = await findWorkspace(page, {create: true}).then(card => card.clickWorkspaceName());
 
     const dataPage = new WorkspaceDataPage(page);
     let conceptSearchPage = await dataPage.openConceptSearch(Domain.Procedures);

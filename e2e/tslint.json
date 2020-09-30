@@ -46,9 +46,6 @@
     "no-consecutive-blank-lines": [
       true,
       2
-    ],
-    "triple-equals": [
-      false
     ]
   }
 }
