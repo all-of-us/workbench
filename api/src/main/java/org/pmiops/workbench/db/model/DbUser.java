@@ -112,7 +112,7 @@ public class DbUser {
   private Timestamp lastModifiedTime;
   private Timestamp twoFactorAuthBypassTime;
   private DbDemographicSurvey demographicSurvey;
-  private Set<DbAddress> addresses;
+  private Set<DbAddress> addresses = new HashSet<>();
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -697,6 +697,14 @@ public class DbUser {
     this.professionalUrl = professionalUrl;
   }
 
+  /**
+   * The mapping from user:address is logically 1:1 in the app, but is modeled as 1:many in the DB.
+   * As a workaround until we're ready to correrct the constraint in the schema, I've added a
+   * binding to a Set to allow multiple addresses to be stored and also exposed a transient setter
+   * and getter for a single address.
+   *
+   * @return
+   */
   @OneToMany(
       cascade = CascadeType.ALL,
       orphanRemoval = true,
@@ -710,7 +718,14 @@ public class DbUser {
     this.addresses = address;
   }
 
+  /**
+   * This set may be initially null, but if this method is called with a null parameter, we set it
+   * to empty.
+   *
+   * @param address
+   */
   @Transient
+  @Nullable
   public void setAddress(DbAddress address) {
     if (address != null) {
       setAddresses(Collections.singleton(address));

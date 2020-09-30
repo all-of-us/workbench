@@ -168,7 +168,7 @@ public class UserDaoTest {
     final DbAddress address = ReportingTestUtils.createDbAddress();
     DbUser user = ReportingTestUtils.createDbUser();
     assertThat(user.getAddress()).isNull();
-    assertThat(user.getAddresses()).isNull(); // no ctor
+    assertThat(user.getAddresses()).isEmpty();
     user.setAddress(address);
     address.setUser(user);
     user = userDao.save(user);
