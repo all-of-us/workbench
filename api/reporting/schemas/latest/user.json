@@ -146,26 +146,32 @@
   },
   {
     "name": "city",
-    "type": "STRING"
+    "type": "STRING",
+    "description": "User-reported city of residence."
   },
   {
     "name": "country",
-    "type": "STRING"
+    "type": "STRING",
+    "description": "User-reported country of residence."
   },
   {
     "name": "state",
-    "type": "STRING"
+    "type": "STRING",
+    "description": "User-reported state or province. Not guaranteed to match official abbreviations or spellings."
   },
   {
     "name": "street_address_1",
-    "type": "STRING"
+    "type": "STRING",
+    "description": "First line of user street address."
   },
   {
     "name": "street_address_2",
-    "type": "STRING"
+    "type": "STRING",
+    "description": "Second line of user street address."
   },
   {
     "name": "zip_code",
-    "type": "STRING"
+    "type": "STRING",
+    "description": "Up to 10-digit zip code for use residence."
   }
 ]

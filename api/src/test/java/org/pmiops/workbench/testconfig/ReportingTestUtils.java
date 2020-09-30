@@ -450,7 +450,7 @@ public class ReportingTestUtils {
             offsetDateTimeUtc(USER__FIRST_REGISTRATION_COMPLETION_TIME))
         .firstSignInTime(offsetDateTimeUtc(USER__FIRST_SIGN_IN_TIME))
         .freeTierCreditsLimitDaysOverride(
-            USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE.longValue()) // manual adjustment
+            USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE.intValue()) // manual adjustment
         .freeTierCreditsLimitDollarsOverride(USER__FREE_TIER_CREDITS_LIMIT_DOLLARS_OVERRIDE)
         .givenName(USER__GIVEN_NAME)
         .lastModifiedTime(offsetDateTimeUtc(USER__LAST_MODIFIED_TIME))
