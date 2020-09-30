@@ -8251,7 +8251,7 @@ definitions:
         format: int64
   ReportingCohort:
     x-aou-note: |-
-      This code was generated using reporting-wizard.rb at 2020-09-24T13:40:02-04:00.
+      This code was generated using reporting-wizard.rb at 2020-09-30T12:33:39-04:00.
       Manual modification should be avoided if possible as this is a one-time generation
       and does not run on every build and updates must be merged manually for now.
     type: object
@@ -8259,26 +8259,35 @@ definitions:
       cohortId:
         type: integer
         format: int64
+        description: Unique ID of this cohort in the application DB. Should be unique
+          within each snapshot.
       creationTime:
         type: string
         format: date-time
+        description: Timestamp for creation of this cohort.
       creatorId:
         type: integer
         format: int64
+        description: User ID of cohort crerator. Should be a foreign key into the user
+          table.
       criteria:
         type: string
+        description: |-
+          JSON serialization of the selection criteria for this cohort. Schema is defined at
+          https://github.com/all-of-us/workbench/pull/4076/files.  TODO: update with permanent URL.
       description:
         type: string
+        description: User-provided cohort description from the Save Cohort dialog.
       lastModifiedTime:
         type: string
         format: date-time
+        description: Timestamp of last user modification to the cohort definition.
       name:
         type: string
-      type:
-        type: string
-      version:
-        type: integer
-        format: int32
+        description: User-provided human-readable name for this cohort.
       workspaceId:
         type: integer
         format: int64
+        description: |-
+          Application workspace ID of the workspace containing this cohort. Should be a foreign
+          key into the workspace table.

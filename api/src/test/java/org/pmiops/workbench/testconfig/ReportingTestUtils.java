@@ -12,6 +12,7 @@ import java.util.Collections;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingCohort;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingWorkspace;
+import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbStorageEnums;
@@ -146,9 +147,7 @@ public class ReportingTestUtils {
   public static final Timestamp COHORT__LAST_MODIFIED_TIME =
       Timestamp.from(Instant.parse("2015-05-10T00:00:00.00Z"));
   public static final String COHORT__NAME = "foo_6";
-  public static final String COHORT__TYPE = "foo_7";
-  public static final Short COHORT__VERSION = 8;
-  public static final Long COHORT__WORKSPACE_ID = 9L;
+  public static final Long COHORT__WORKSPACE_ID = 7L;
 
   public static void assertDtoUserFields(ReportingUser user) {
     assertThat(user.getAboutYou()).isEqualTo(USER__ABOUT_YOU);
@@ -558,8 +557,6 @@ public class ReportingTestUtils {
     doReturn(COHORT__DESCRIPTION).when(mockCohort).getDescription();
     doReturn(COHORT__LAST_MODIFIED_TIME).when(mockCohort).getLastModifiedTime();
     doReturn(COHORT__NAME).when(mockCohort).getName();
-    doReturn(COHORT__TYPE).when(mockCohort).getType();
-    doReturn(COHORT__VERSION).when(mockCohort).getVersion();
     doReturn(COHORT__WORKSPACE_ID).when(mockCohort).getWorkspaceId();
     return mockCohort;
   }
@@ -576,8 +573,6 @@ public class ReportingTestUtils {
     assertThat(cohort.getDescription()).isEqualTo(COHORT__DESCRIPTION);
     assertTimeApprox(cohort.getLastModifiedTime(), COHORT__LAST_MODIFIED_TIME);
     assertThat(cohort.getName()).isEqualTo(COHORT__NAME);
-    assertThat(cohort.getType()).isEqualTo(COHORT__TYPE);
-    assertThat(cohort.getVersion()).isEqualTo(COHORT__VERSION);
     assertThat(cohort.getWorkspaceId()).isEqualTo(expectedWorkspaceId);
   }
 
@@ -589,8 +584,6 @@ public class ReportingTestUtils {
     assertThat(cohort.getDescription()).isEqualTo(COHORT__DESCRIPTION);
     assertTimeApprox(cohort.getLastModifiedTime(), COHORT__LAST_MODIFIED_TIME);
     assertThat(cohort.getName()).isEqualTo(COHORT__NAME);
-    assertThat(cohort.getType()).isEqualTo(COHORT__TYPE);
-    assertThat(cohort.getVersion()).isEqualTo(COHORT__VERSION);
     assertThat(cohort.getWorkspaceId()).isEqualTo(COHORT__WORKSPACE_ID);
   }
 
@@ -603,8 +596,6 @@ public class ReportingTestUtils {
         .description(COHORT__DESCRIPTION)
         .lastModifiedTime(offsetDateTimeUtc(COHORT__LAST_MODIFIED_TIME))
         .name(COHORT__NAME)
-        .type(COHORT__TYPE)
-        .version(COHORT__VERSION.intValue()) // manual fixup
         .workspaceId(COHORT__WORKSPACE_ID);
   }
 
@@ -617,8 +608,6 @@ public class ReportingTestUtils {
     cohort.setDescription(COHORT__DESCRIPTION);
     cohort.setLastModifiedTime(COHORT__LAST_MODIFIED_TIME);
     cohort.setName(COHORT__NAME);
-    cohort.setType(COHORT__TYPE);
-    cohort.setVersion(COHORT__VERSION);
     cohort.setWorkspaceId(dbWorkspace.getWorkspaceId());
     return cohort;
   }
@@ -636,5 +625,16 @@ public class ReportingTestUtils {
     return (reportingSnapshot.getCohorts().isEmpty() ? 0 : 1)
         + (reportingSnapshot.getUsers().isEmpty() ? 0 : 1)
         + (reportingSnapshot.getWorkspaces().isEmpty() ? 0 : 1);
+  }
+
+  public static DbAddress createDbAddress() {
+    final DbAddress address = new DbAddress();
+    address.setCity(USER__CITY);
+    address.setCountry(USER__COUNTRY);
+    address.setState(USER__STATE);
+    address.setStreetAddress1(USER__STREET_ADDRESS_1);
+    address.setStreetAddress2(USER__STREET_ADDRESS_2);
+    address.setZipCode(USER__ZIP_CODE);
+    return address;
   }
 }

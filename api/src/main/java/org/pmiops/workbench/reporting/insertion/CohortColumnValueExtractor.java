@@ -23,8 +23,6 @@ public enum CohortColumnValueExtractor implements ColumnValueExtractor<Reporting
       c -> toInsertRowString(c.getLastModifiedTime()),
       c -> toTimestampQpv(c.getLastModifiedTime())),
   NAME("name", ReportingCohort::getName, c -> string(c.getName())),
-  TYPE("type", ReportingCohort::getType, c -> string(c.getType())),
-  VERSION("version", ReportingCohort::getVersion, c -> int64(c.getVersion())),
   WORKSPACE_ID("workspace_id", ReportingCohort::getWorkspaceId, c -> int64(c.getWorkspaceId()));
 
   // Much of the repetitive boilerplate below (constructor, setters, etc) can't really be helped,
