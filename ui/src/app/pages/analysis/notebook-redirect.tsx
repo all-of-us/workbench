@@ -300,8 +300,8 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       this.pollAborter.abort();
     }
 
-    onRuntimeStatusUpdate(status: RuntimeStatus) {
-      if (this.isRuntimeInProgress(status)) {
+    onPollCycleComplete(runtime: Runtime) {
+      if (this.isRuntimeInProgress(!!runtime ? runtime.status : undefined)) {
         this.incrementProgress(Progress.Resuming);
       } else {
         this.incrementProgress(Progress.Initializing);
@@ -315,7 +315,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
 
       const runtime = await LeoRuntimeInitializer.initialize({
         workspaceNamespace: billingProjectId,
-        onStatusUpdate: (status) => this.onRuntimeStatusUpdate(status),
+        onPollCycleComplete: (runtime) => this.onPollCycleComplete(runtime),
         pollAbortSignal: this.pollAborter.signal
       });
       await this.connectToRunningRuntime(runtime);

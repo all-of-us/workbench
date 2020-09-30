@@ -1,5 +1,4 @@
-import {Profile} from 'generated';
-import { Runtime } from 'generated/fetch';
+import {Profile, Runtime} from 'generated';
 import * as React from 'react';
 import { BreadcrumbType } from './navigation';
 import {atom, Atom} from './subscribable';
@@ -37,7 +36,7 @@ export interface RuntimeOperation {
   aborter: AbortController;
 }
 
-export interface WorkspaceRuntimeOperationMap {
+interface WorkspaceRuntimeOperationMap {
   [workspaceNamespace: string]: RuntimeOperation;
 }
 
@@ -79,6 +78,11 @@ interface RuntimeStore {
 
 export const runtimeStore = atom<RuntimeStore>(undefined);
 
+interface CurrentRuntimeStore {
+  currentRuntime: Runtime
+}
+
+export const currentRuntimeStore = atom<CurrentRuntimeStore>({currentRuntime: null});
 
 /**
  * @name useStore

@@ -69,7 +69,7 @@ export interface LeoRuntimeInitializerOptions {
   workspaceNamespace: string;
   // Callback which is called every time the runtime updates its status. When no runtime is found,
   // the callback is called with a null value.
-  onStatusUpdate?: (RuntimeStatus?) => void;
+  onPollCycleComplete?: (Runtime?) => void;
   // An optional abort signal which allows the caller to abort the initialization process, including
   // cancelling any outstanding Ajax requests.
   pollAbortSignal?: AbortSignal;
@@ -86,7 +86,7 @@ export interface LeoRuntimeInitializerOptions {
 }
 
 const DEFAULT_OPTIONS: Partial<LeoRuntimeInitializerOptions> = {
-  onStatusUpdate: () => {},
+  onPollCycleComplete: () => {},
   initialPollingDelay: DEFAULT_INITIAL_POLLING_DELAY,
   maxPollingDelay: DEFAULT_MAX_POLLING_DELAY,
   overallTimeout: DEFAULT_OVERALL_TIMEOUT,
@@ -115,7 +115,7 @@ const DEFAULT_OPTIONS: Partial<LeoRuntimeInitializerOptions> = {
 export class LeoRuntimeInitializer {
   // Core properties for interacting with the caller and the runtime APIs.
   private readonly workspaceNamespace: string;
-  private readonly onStatusUpdate: (RuntimeStatus?) => void;
+  private readonly onPollCycleComplete: (Runtime?) => void;
   private readonly pollAbortSignal?: AbortSignal;
 
   // Properties to track & control the polling loop. We use a capped exponential backoff strategy
@@ -160,7 +160,7 @@ export class LeoRuntimeInitializer {
     options = {...DEFAULT_OPTIONS, ...options};
 
     this.workspaceNamespace = options.workspaceNamespace;
-    this.onStatusUpdate = options.onStatusUpdate ? options.onStatusUpdate : () => {};
+    this.onPollCycleComplete = options.onPollCycleComplete ? options.onPollCycleComplete : () => {};
     this.pollAbortSignal = options.pollAbortSignal;
     this.currentDelay = options.initialPollingDelay;
     this.maxDelay = options.maxPollingDelay;
@@ -318,7 +318,7 @@ export class LeoRuntimeInitializer {
     // and abort signals.
     try {
       this.currentRuntime = await this.getRuntime();
-      this.onStatusUpdate(this.currentRuntime.status);
+      this.onPollCycleComplete(this.currentRuntime);
     } catch (e) {
       if (isAbortError(e)) {
         return this.reject(
@@ -328,7 +328,7 @@ export class LeoRuntimeInitializer {
         // A not-found error is somewhat expected, if a runtime has recently been deleted or
         // hasn't been created yet.
         this.currentRuntime = null;
-        this.onStatusUpdate(null);
+        this.onPollCycleComplete(null);
       } else {
         this.handleUnknownError(e);
         if (this.hasTooManyServerErrors()) {

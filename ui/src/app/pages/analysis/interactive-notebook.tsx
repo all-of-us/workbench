@@ -170,7 +170,7 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
     private async runRuntime(onRuntimeReady: Function): Promise<void> {
       await LeoRuntimeInitializer.initialize({
         workspaceNamespace: this.props.urlParams.ns,
-        onStatusUpdate: (status) => this.setState({runtimeStatus: status}),
+        onPollCycleComplete: (runtime) => this.setState({runtimeStatus: !!runtime ? runtime.status : undefined}),
         pollAbortSignal: this.pollAborter.signal
       });
       onRuntimeReady();

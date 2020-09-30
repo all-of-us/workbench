@@ -12,7 +12,8 @@ import {
 } from 'app/utils/leo-runtime-initializer';
 import {
   RuntimeStatus,
-} from 'generated/fetch/api';
+} from 'generated/fetch';
+import {Runtime} from "generated/fetch";
 
 const RESTART_LABEL = 'Reset server';
 const CREATE_LABEL = 'Create server';
@@ -62,13 +63,13 @@ export class ResetRuntimeButton extends React.Component<Props, State> {
       this.setState({isPollingRuntime: true, runtimeStatus: null});
       await LeoRuntimeInitializer.initialize({
         workspaceNamespace: this.props.workspaceNamespace,
-        onStatusUpdate: (runtimeStatus: RuntimeStatus) => {
+        onPollCycleComplete: (runtime: Runtime) => {
           if (this.pollAborter.signal.aborted) {
             // IF we've been unmounted, don't try to update state.
             return;
           }
           this.setState({
-            runtimeStatus: runtimeStatus,
+            runtimeStatus: !!runtime ? runtime.status : undefined,
           });
         },
         pollAbortSignal: this.pollAborter.signal,
