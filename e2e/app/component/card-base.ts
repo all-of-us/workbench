@@ -16,8 +16,8 @@ export default abstract class CardBase extends Container {
   }
 
   async clickSnowmanIcon(): Promise<this> {
-    const iconXpath = `.${snowmanIconXpath}`
-    const [snowmanIcon] = await this.asElementHandle().$x(iconXpath)
+    const iconXpath = `.${snowmanIconXpath}`;
+    const [snowmanIcon] = await this.asElementHandle().$x(iconXpath);
     await snowmanIcon.click();
     await snowmanIcon.dispose();
     return this;
