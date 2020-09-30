@@ -14,8 +14,6 @@ cohort:
     Timestamp of last user modification to the cohort definition.
   name: |
     User-provided human-readable name for this cohort.
-  type: ''
-  version: ''
   workspace_id: |
     Application workspace ID of the workspace containing this cohort. Should be a foreign
     key into the workspace table.
