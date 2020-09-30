@@ -43,9 +43,8 @@ constructor(
     }
 
     /**
-     * Converts the AoU-chosen runtime name into the actual VM name as reported by Google Cloud's
-     * flow logs. Empirically, an "-m" suffix is added to the VM name, due to Leo team's use
-     * of Dataproc (see https://cloud.google.com/dataproc/docs/concepts/configuring-clusters/metadata).
+     * Returns the standard VM name for a researcher GCE instance assigned by AoU. Leo uses the
+     * exact runtime name for this purpose.
      */
     private fun dbUserToGceVmName(dbUser: DbUser): String {
         return dbUser.runtimeName
@@ -72,8 +71,8 @@ constructor(
         val vmOwner = userRoles
                 .map { userDao.findUserByUsername(it.email) }
                 .filter {
-                        dbUserToGceVmName(it).equals(event.vmName) ||
-                        dbUserToDataprocMasterVmName(it).equals(event.vmName)
+                    dbUserToGceVmName(it).equals(event.vmName) ||
+                            dbUserToDataprocMasterVmName(it).equals(event.vmName)
                 }
                 .firstOrNull()
 
