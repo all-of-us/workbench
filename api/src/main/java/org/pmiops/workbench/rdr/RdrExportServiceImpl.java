@@ -198,14 +198,17 @@ public class RdrExportServiceImpl implements RdrExportService {
       researcher.setEmail(dbUser.getContactEmail());
     }
 
-    if (dbUser.getAddress() != null) {
-      researcher.setStreetAddress1(dbUser.getAddress().getStreetAddress1());
-      researcher.setStreetAddress2(dbUser.getAddress().getStreetAddress2());
-      researcher.setCity(dbUser.getAddress().getCity());
-      researcher.setState(dbUser.getAddress().getState());
-      researcher.setCountry(dbUser.getAddress().getCountry());
-      researcher.setZipCode(dbUser.getAddress().getZipCode());
-    }
+    Optional.ofNullable(dbUser.getAddress())
+        .ifPresent(
+            a -> {
+              researcher.setStreetAddress1(a.getStreetAddress1());
+              researcher.setStreetAddress2(a.getStreetAddress2());
+              researcher.setCity(a.getCity());
+              researcher.setState(a.getState());
+              researcher.setCountry(a.getCountry());
+              researcher.setZipCode(a.getZipCode());
+            });
+
     DbDemographicSurvey dbDemographicSurvey = dbUser.getDemographicSurvey();
     if (null != dbDemographicSurvey) {
       researcher.setDisability(

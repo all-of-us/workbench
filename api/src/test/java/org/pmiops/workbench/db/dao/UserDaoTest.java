@@ -15,6 +15,7 @@ import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.testconfig.ReportingTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.DirtiesContext;
@@ -124,7 +125,7 @@ public class UserDaoTest {
       user.setBetaAccessRequestTime(BETA_ACCESS_REQUEST_TIME);
       final DbAddress address = stubAddress();
       address.setUser(user);
-      user.setAddress(address); // ?
+      user.setAddress(address);
       user.setDisabled(isDisabled);
       if (isBetaBypassed) {
         user.setBetaAccessBypassTime(NOW);
@@ -159,5 +160,21 @@ public class UserDaoTest {
     assertThat(user.getCity()).isEqualTo(CITY);
     assertThat(user.getState()).isEqualTo(STATE);
     assertThat(user.getCountry()).isEqualTo(COUNTRY);
+  }
+
+  @Test
+  public void testAddressWorkaround() {
+
+    final DbAddress address = ReportingTestUtils.createDbAddress();
+    DbUser user = ReportingTestUtils.createDbUser();
+    assertThat(user.getAddress()).isNull();
+    assertThat(user.getAddresses()).isNull(); // no ctor
+    user.setAddress(address);
+    address.setUser(user);
+    user = userDao.save(user);
+
+    assertThat(user.getAddress()).isEqualTo(address);
+    assertThat(user.getAddress().getUser()).isEqualTo(user);
+    assertThat(user.getAddresses()).hasSize(1);
   }
 }

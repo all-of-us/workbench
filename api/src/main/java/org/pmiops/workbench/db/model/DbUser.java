@@ -4,12 +4,14 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.Gson;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -110,7 +112,7 @@ public class DbUser {
   private Timestamp lastModifiedTime;
   private Timestamp twoFactorAuthBypassTime;
   private DbDemographicSurvey demographicSurvey;
-  private DbAddress address;
+  private Set<DbAddress> addresses;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -695,17 +697,41 @@ public class DbUser {
     this.professionalUrl = professionalUrl;
   }
 
-  @OneToOne(
+  @OneToMany(
       cascade = CascadeType.ALL,
       orphanRemoval = true,
       fetch = FetchType.LAZY,
       mappedBy = "user")
-  public DbAddress getAddress() {
-    return address;
+  public Set<DbAddress> getAddresses() {
+    return addresses;
   }
 
+  public void setAddresses(Set<DbAddress> address) {
+    this.addresses = address;
+  }
+
+  @Transient
   public void setAddress(DbAddress address) {
-    this.address = address;
+    if (address != null) {
+      setAddresses(Collections.singleton(address));
+    } else {
+      setAddresses(Collections.emptySet());
+    }
+  }
+
+  /**
+   * Currently the schema allows multiple addresses for each user, so it's not truly one-to-one.
+   * Annotating it as OneToOne instead of OneToMany was preventing us from using eager evaluation in
+   * DbUser projection querires on the DbAddress fields.
+   *
+   * @return
+   */
+  @Transient
+  @Nullable
+  public DbAddress getAddress() {
+    return Optional.ofNullable(addresses).orElse(Collections.emptySet()).stream()
+        .findAny()
+        .orElse(null);
   }
 
   // null-friendly versions of equals() and hashCode() for DbVerifiedInstitutionalAffiliation
