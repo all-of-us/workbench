@@ -49,7 +49,8 @@ public class EgressEventAuditorTest {
   private static final String WORKSPACE_FIRECLOUD_NAME = "mytestworkspacename";
 
   private static final String EGRESS_EVENT_PROJECT_NAME = WORKSPACE_NAMESPACE;
-  private static final String EGRESS_EVENT_VM_NAME = "all-of-us-" + USER_ID + "-m";
+  private static final String EGRESS_EVENT_DATAPROC_VM_NAME = "all-of-us-" + USER_ID + "-m";
+  private static final String EGRESS_EVENT_GCE_VM_NAME = "all-of-us-" + USER_ID;
 
   // Pre-built data objects for test.
   private DbUser dbUser;
@@ -103,7 +104,7 @@ public class EgressEventAuditorTest {
     egressEventAuditor.fireEgressEvent(
         new EgressEvent()
             .projectName(EGRESS_EVENT_PROJECT_NAME)
-            .vmName(EGRESS_EVENT_VM_NAME)
+            .vmName(EGRESS_EVENT_DATAPROC_VM_NAME)
             .timeWindowStart(0l)
             .egressMib(12.3));
     verify(mockActionAuditService).send(eventsCaptor.capture());
@@ -139,7 +140,24 @@ public class EgressEventAuditorTest {
                             == EgressEventTargetProperty.VM_NAME.getPropertyName())
                 .map(event -> event.getNewValueMaybe())
                 .collect(Collectors.toSet()))
-        .containsExactly(EGRESS_EVENT_VM_NAME);
+        .containsExactly(EGRESS_EVENT_DATAPROC_VM_NAME);
+  }
+
+  @Test
+  public void testFireEgressEventFromGce() {
+    egressEventAuditor.fireEgressEvent(
+        new EgressEvent()
+            .projectName(EGRESS_EVENT_PROJECT_NAME)
+            .vmName(EGRESS_EVENT_GCE_VM_NAME)
+            .timeWindowStart(0l)
+            .egressMib(12.3));
+    verify(mockActionAuditService).send(eventsCaptor.capture());
+    Collection<ActionAuditEvent> events = eventsCaptor.getValue();
+
+    assertThat(events.stream().map(event -> event.getAgentIdMaybe()).collect(Collectors.toSet()))
+        .containsExactly(USER_ID);
+    assertThat(events.stream().map(event -> event.getAgentEmailMaybe()).collect(Collectors.toSet()))
+        .containsExactly(USER_EMAIL);
   }
 
   @Test
@@ -150,7 +168,9 @@ public class EgressEventAuditorTest {
     // empty target ID.
     when(mockWorkspaceService.getByNamespace(WORKSPACE_NAMESPACE)).thenReturn(Optional.empty());
     egressEventAuditor.fireEgressEvent(
-        new EgressEvent().projectName(EGRESS_EVENT_PROJECT_NAME).vmName(EGRESS_EVENT_VM_NAME));
+        new EgressEvent()
+            .projectName(EGRESS_EVENT_PROJECT_NAME)
+            .vmName(EGRESS_EVENT_DATAPROC_VM_NAME));
     verify(mockActionAuditService).send(eventsCaptor.capture());
     Collection<ActionAuditEvent> events = eventsCaptor.getValue();
 
