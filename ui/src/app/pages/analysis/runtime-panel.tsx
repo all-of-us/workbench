@@ -6,7 +6,7 @@ import {Spinner} from 'app/components/spinners';
 import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
-import {allMachineTypes, validLeonardoMachineTypes} from 'app/utils/machines';
+import {allMachineTypes, validLeonardoMachineTypes, Machine} from 'app/utils/machines';
 import {
   abortRuntimeOperationForWorkspace,
   markRuntimeOperationCompleteForWorkspace,
@@ -24,7 +24,10 @@ import {Runtime} from 'generated/fetch';
 
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import { initial } from 'lodash';
+import { Machine } from 'src/app/utils/machines';
 
+const {useState, Fragment} = React;
 
 const styles = reactStyles({
   sectionHeader: {
@@ -79,6 +82,85 @@ interface State {
   // The runtime. null if none exists, or if there was an error in loading the
   // runtime.
   runtime: Runtime|null;
+  // machine: Machine;
+  currentDiskSize: number;
+  currentMachine: Machine;
+}
+
+ const MachineSelector = ({onChange, currentMachine, runtime}) => {
+  const {dataprocConfig, gceConfig} = runtime;
+  const masterMachineName = !!dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType
+  // What happens when a config changes? If the user chooses 4 cpus, but that that machine type is changed to 6 cpus? Can this happen?
+  const initialMachineType = fp.find(({name}) => name === masterMachineName, allMachineTypes) || defaultMachineType;  
+  const {cpu, memory} = currentMachine || initialMachineType;
+  const maybeGetMachine = selectedMachine => fp.equals(selectedMachine, initialMachineType) ? null : selectedMachine;
+
+  return <Fragment>
+    <div>
+      <label htmlFor='runtime-cpu'
+            style={{marginRight: '.25rem'}}>CPUs</label>
+      <Dropdown id='runtime-cpu'
+                // disabled={true}
+                options={fp.flow(
+                  // Show all CPU options.
+                  fp.map('cpu'),
+                  // In the event that was remove a machine type from our set of valid
+                  // configs, we want to continue to allow rendering of the value here.
+                  // Union also makes the CPU values unique.
+                  fp.union([cpu]), 
+                  fp.sortBy(fp.identity)
+                )(validLeonardoMachineTypes)}
+                onChange={ 
+                  ({value}) => fp.flow(
+                    fp.sortBy('memory'), 
+                    fp.find({cpu: value}), 
+                    maybeGetMachine,
+                    onChange)(validLeonardoMachineTypes) 
+                }
+                value={cpu}/>
+    </div>
+    <div>
+      <label htmlFor='runtime-ram'
+            style={{marginRight: '.25rem'}}>RAM (GB)</label>
+      <Dropdown id='runtime-ram'
+                // disabled={true}
+                options={fp.flow(
+                  // Show valid memory options as constrained by the currently selected CPU.
+                  fp.filter(({cpu: availableCpu}) => availableCpu === cpu),
+                  fp.map('memory'),
+                  // See above comment on CPU union.
+                  fp.union([memory]),
+                  fp.sortBy(fp.identity)
+                )(validLeonardoMachineTypes)}
+                onChange={ 
+                  ({value}) => fp.flow(
+                    fp.find({cpu, memory: value}), 
+                    maybeGetMachine,
+                    onChange
+                    )(validLeonardoMachineTypes) }
+                value={memory}
+                />
+    </div>
+  </Fragment>
+}
+
+const DiskSizeSelection = ({onChange, currentDiskSize, runtime}) => {
+  const {dataprocConfig, gceConfig} = runtime;
+  const masterDiskSize = !!dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.bootDiskSize
+
+  return <div>
+    <label htmlFor='runtime-disk'
+          style={{marginRight: '.25rem'}}>Disk (GB)</label>
+      <InputNumber id='runtime-disk'
+                //  disabled={true}
+                showButtons
+                decrementButtonClassName='p-button-secondary'
+                incrementButtonClassName='p-button-secondary'
+                value={currentDiskSize || masterDiskSize}
+                inputStyle={{padding: '.75rem .5rem', width: '2rem'}}
+                onChange={({value}) => onChange(value === masterDiskSize ? null : value)}
+                min={50 /* Runtime API has a minimum 50GB requirement. */}/>
+  </div>
 }
 
 export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOpsStore, 'runtimeOps'))(
@@ -90,7 +172,9 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOps
       this.state = {
         loading: true,
         error: false,
-        runtime: null
+        runtime: null,
+        currentDiskSize: null,
+        currentMachine: null
       };
     }
 
@@ -123,7 +207,7 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOps
 
     render() {
       const {runtimeOps, workspace} = this.props;
-      const {loading, error, runtime} = this.state;
+      const {loading, error, runtime, currentDiskSize, currentMachine} = this.state;
 
       const activeRuntimeOp: RuntimeOperation = runtimeOps.opsByWorkspaceNamespace[workspace.namespace];
 
@@ -143,17 +227,7 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOps
       }
 
       const isDataproc = !!runtime.dataprocConfig;
-
-      let masterMachineName;
-      let masterDiskSize;
-      if (isDataproc) {
-        masterMachineName = runtime.dataprocConfig.masterMachineType;
-        masterDiskSize = runtime.dataprocConfig.masterDiskSize;
-      } else {
-        masterMachineName = runtime.gceConfig.machineType;
-        masterDiskSize = runtime.gceConfig.bootDiskSize;
-      }
-      const machineType = allMachineTypes.find(({name}) => name === masterMachineName) || defaultMachineType;
+      const runtimeChanged = currentMachine || currentDiskSize;
 
       return <div data-test-id='runtime-panel'>
         <h3 style={styles.sectionHeader}>Cloud analysis environment</h3>
@@ -184,52 +258,11 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOps
                     disabled={true}
                     options={[runtime.toolDockerImage]}
                     value={runtime.toolDockerImage}/>
-          {/* Runtime customization: change detailed machine configuration options. */}
+          {/* Runtime customization: change detailed machine configuration options. */}  
           <h3 style={styles.sectionHeader}>Cloud compute profile</h3>
           <FlexRow style={{justifyContent: 'space-between'}}>
-            <div>
-              <label htmlFor='runtime-cpu'
-                     style={{marginRight: '.25rem'}}>CPUs</label>
-              <Dropdown id='runtime-cpu'
-                        disabled={true}
-                        options={fp.flow(
-                          // Show all CPU options.
-                          fp.map('cpu'),
-                          // In the event that was remove a machine type from our set of valid
-                          // configs, we want to continue to allow rendering of the value here.
-                          // Union also makes the CPU values unique.
-                          fp.union([machineType.cpu]),
-                          fp.sortBy(fp.identity)
-                        )(validLeonardoMachineTypes)}
-                        value={machineType.cpu}/>
-            </div>
-            <div>
-              <label htmlFor='runtime-ram'
-                     style={{marginRight: '.25rem'}}>RAM (GB)</label>
-              <Dropdown id='runtime-ram'
-                        disabled={true}
-                        options={fp.flow(
-                          // Show valid memory options as constrained by the currently selected CPU.
-                          fp.filter(({cpu}) => cpu === machineType.cpu),
-                          fp.map('memory'),
-                          // See above comment on CPU union.
-                          fp.union([machineType.memory]),
-                          fp.sortBy(fp.identity)
-                        )(validLeonardoMachineTypes)}
-                        value={machineType.memory}/>
-            </div>
-            <div>
-              <label htmlFor='runtime-disk'
-                     style={{marginRight: '.25rem'}}>Disk (GB)</label>
-              <InputNumber id='runtime-disk'
-                           disabled={true}
-                           showButtons
-                           decrementButtonClassName='p-button-secondary'
-                           incrementButtonClassName='p-button-secondary'
-                           value={masterDiskSize}
-                           inputStyle={{padding: '.75rem .5rem', width: '2rem'}}
-                           min={50 /* Runtime API has a minimum 50GB requirement. */}/>
-            </div>
+            <MachineSelector currentMachine={currentMachine} onChange={v => this.setState({currentMachine: v})} runtime={runtime}/>
+            <DiskSizeSelection currentDiskSize={currentDiskSize} onChange={v => this.setState({currentDiskSize: v})} runtime={runtime}/>
           </FlexRow>
           <FlexColumn style={{marginTop: '1rem'}}>
             <label htmlFor='runtime-compute'>Compute type</label>
@@ -241,7 +274,7 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOps
           </FlexColumn>
         </div>
         <FlexRow style={{justifyContent: 'flex-end', marginTop: '.75rem'}}>
-          <Button disabled={true}>Create</Button>
+          <Button disabled={!runtimeChanged}>Create</Button>
         </FlexRow>
         {activeRuntimeOp && <React.Fragment>
           <hr/>
