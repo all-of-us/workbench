@@ -665,9 +665,8 @@ workflows:
           env_name: "local"
           parallel_num: 2
           optional_steps:
-            steps:
-              - e2e_presubmit_check
-              - start_local_ui
+            - e2e_presubmit_check
+            - start_local_ui
       # On master branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully.
       - puppeteer-e2e-test:
           parallel_num: 4
