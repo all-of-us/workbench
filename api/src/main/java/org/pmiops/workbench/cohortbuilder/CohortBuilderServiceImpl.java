@@ -15,6 +15,7 @@ import com.google.common.collect.Ordering;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +35,10 @@ import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
+import org.pmiops.workbench.cdr.model.DbCriteriaPath;
+import org.pmiops.workbench.cdr.model.DbDomainCount;
 import org.pmiops.workbench.cdr.model.DbMenuOption;
+import org.pmiops.workbench.cdr.model.DbSurveyParent;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AgeType;
@@ -287,26 +291,31 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   @Override
   public List<DomainInfo> findDomainInfos(String term) {
-    ImmutableList<Boolean> standard = ImmutableList.of(true);
-    ImmutableList<Boolean> all = ImmutableList.of(true, false);
     String searchTerm = modifyTermMatch(term);
     // read domain infos
     List<DomainInfo> domainInfos =
         domainInfoDao.findByOrderByDomainId().stream()
             .map(cohortBuilderMapper::dbModelToClient)
             .collect(Collectors.toList());
-    // read standard concept count
+    List<DbDomainCount> domainCounts = cbCriteriaDao.findCountByTerm(searchTerm);
+    // set standard concept count
     domainInfos.forEach(
-        di ->
-            di.setAllConceptCount(
-                cbCriteriaDao.findCountByDomainAndStandardAndTerm(
-                    di.getDomain().toString(), standard, searchTerm)));
-    // read all concept count
-    domainInfos.forEach(
-        di ->
-            di.setAllConceptCount(
-                cbCriteriaDao.findCountByDomainAndStandardAndTerm(
-                    di.getDomain().toString(), all, searchTerm)));
+        di -> {
+          Optional<DbDomainCount> dbStandardDomainCount =
+              domainCounts.stream()
+                  .filter(
+                      c ->
+                          di.getDomain().toString().equals(c.getDomainId()) && c.getStandard() == 1)
+                  .findFirst();
+          di.setStandardConceptCount(dbStandardDomainCount.map(DbDomainCount::getCount).orElse(0L));
+          Optional<DbDomainCount> dbAllDomainCount =
+              domainCounts.stream()
+                  .filter(
+                      c ->
+                          di.getDomain().toString().equals(c.getDomainId()) && c.getStandard() == 0)
+                  .findFirst();
+          di.setAllConceptCount(dbAllDomainCount.map(DbDomainCount::getCount).orElse(0L));
+        });
     return domainInfos;
   }
 
@@ -393,23 +402,32 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   @Override
   public List<SurveyModule> findSurveyModules(String term) {
     List<SurveyModule> surveyModules =
-        surveyModuleDao.findByParticipantCountNotOrderByOrderNumberAsc(0L).stream()
+        surveyModuleDao.findByOrderByOrderNumberAsc().stream()
             .map(cohortBuilderMapper::dbModelToClient)
             .collect(Collectors.toList());
-    // read question counts
+    Map<Long, Long> countMap = new HashMap<>();
+    List<DbSurveyParent> dbSurveyParents = cbCriteriaDao.findSurveyParents();
+    List<DbCriteriaPath> dbCriteriaPaths =
+        cbCriteriaDao.findQuestionCountByTerm(modifyTermMatch(term));
+    dbSurveyParents.stream()
+        .forEach(
+            ps ->
+                dbCriteriaPaths.stream()
+                    .forEach(
+                        cp -> {
+                          if (cp.getPath().contains(String.valueOf(ps.getCriteriaId()))) {
+                            long count =
+                                countMap.containsKey(ps.getConceptId())
+                                    ? countMap.get(ps.getConceptId())
+                                    : 0;
+                            countMap.put(ps.getConceptId(), count + 1);
+                          }
+                        }));
     surveyModules.forEach(
-        sm -> {
-          Long criteriaId =
-              cbCriteriaDao.findIdByDomainAndConceptIdAndName(
-                  DomainType.SURVEY.toString(), sm.getConceptId().toString(), sm.getName());
-          sm.setQuestionCount(
-              cbCriteriaDao.findQuestionCountByDomainAndIdAndTerm(
-                  criteriaId, modifyTermMatch(term)));
-        });
-    // remove any with zero question counts
-    return surveyModules.stream()
-        .filter(sm -> sm.getQuestionCount() > 0)
-        .collect(Collectors.toList());
+        sm ->
+            sm.setQuestionCount(
+                countMap.get(sm.getConceptId()) == null ? 0L : countMap.get(sm.getConceptId())));
+    return surveyModules;
   }
 
   @Override

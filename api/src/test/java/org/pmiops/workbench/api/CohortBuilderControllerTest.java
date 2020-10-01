@@ -20,7 +20,6 @@ import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
-import org.pmiops.workbench.cdr.model.DbDomainInfo;
 import org.pmiops.workbench.cdr.model.DbSurveyModule;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
@@ -36,7 +35,6 @@ import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
-import org.pmiops.workbench.model.DomainInfo;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchGroup;
@@ -97,38 +95,6 @@ public class CohortBuilderControllerTest {
     controller =
         new CohortBuilderController(
             cdrVersionService, elasticSearchService, configProvider, cohortBuilderService);
-  }
-
-  @Test
-  public void findDomainInfos() {
-    cbCriteriaDao.save(
-        DbCriteria.builder()
-            .addDomainId(DomainType.CONDITION.toString())
-            .addType(CriteriaType.ICD9CM.toString())
-            .addCount(0L)
-            .addHierarchy(true)
-            .addStandard(false)
-            .addParentId(0)
-            .addFullText("term*[CONDITION_rank1]")
-            .build());
-    DbDomainInfo dbDomainInfo =
-        domainInfoDao.save(
-            new DbDomainInfo()
-                .conceptId(1L)
-                .domain((short) 0)
-                .domainId("CONDITION")
-                .name("Conditions")
-                .description("descr")
-                .allConceptCount(0)
-                .standardConceptCount(0)
-                .participantCount(1000));
-
-    DomainInfo domainInfo = controller.findDomainInfos(1L, "term").getBody().getItems().get(0);
-    assertEquals(domainInfo.getName(), dbDomainInfo.getName());
-    assertEquals(domainInfo.getDescription(), dbDomainInfo.getDescription());
-    assertEquals(domainInfo.getParticipantCount().longValue(), dbDomainInfo.getParticipantCount());
-    assertEquals(domainInfo.getAllConceptCount().longValue(), 1);
-    assertEquals(domainInfo.getStandardConceptCount().longValue(), 0);
   }
 
   @Test
