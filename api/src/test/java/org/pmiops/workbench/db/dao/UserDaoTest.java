@@ -28,11 +28,11 @@ public class UserDaoTest {
   private static final Timestamp NOW = Timestamp.from(Instant.parse("2000-01-01T00:00:00.00Z"));
   private static final Timestamp BETA_ACCESS_REQUEST_TIME =
       Timestamp.from(Instant.parse("2000-01-01T00:00:00.00Z"));
-  private static final String STREET_ADDRESS_1 = "101 Main St";
-  private static final String STREET_ADDRESS_2 = "# 202";
-  private static final String CITY = "New Braunfels";
+  private static final String STREET_ADDRESS_1 = "111 Cactus Dr.";
+  private static final String STREET_ADDRESS_2 = "# 333";
+  private static final String CITY = "San Antonio";
   private static final String STATE = "TX";
-  private static final String COUNTRY = "US";
+  private static final String COUNTRY = "USA";
 
   @Autowired private UserDao userDao;
 
