@@ -298,14 +298,21 @@ commands:
           name: Wait for local UI server to start
           command: dockerize -wait tcp://localhost:4200 -timeout 4m
 
-  e2e_skip_commit:
-    description: "Halt job if commit message contains 'SKIP E2E'"
+  store_commit_message:
     steps:
       - run:
-          name: "Halt job if commit message contains 'SKIP E2E'"
+          name: "Store Git commit message in an environment variable"
           command: |
             echo 'export COMMIT_MESSAGE=$(git log -1 --pretty=format:"%s")' >> $BASH_ENV
             source $BASH_ENV
+
+  e2e_skip:
+    description: "Halt job if commit message contains 'SKIP E2E'"
+    steps:
+      - store_commit_message
+      - run:
+          name: "Halt job if commit message contains 'SKIP E2E'"
+          command: |
             echo "Git commit message: $COMMIT_MESSAGE"
             # Double comma is called "Parameter Expansion" in Bash version 4+. It converts string to lowercase letters.
             if [[ "${COMMIT_MESSAGE,,}" == *"skip e2e"* ]]; then
@@ -313,10 +320,9 @@ commands:
               circleci step halt
             fi
 
-
   e2e_presubmit_check:
     steps:
-      - e2e_skip_commit
+      - e2e_skip
       - halt_if_code_unchanged
       - run:
           name: "Halt job if not a pull request"
@@ -636,6 +642,12 @@ jobs:
     steps:
       - checkout_init_git
       - steps: << parameters.optional_steps >>
+      - when:
+          # Deploy local UI server then run Puppeteer tests against "local UI" + "test API" environment.
+          condition:
+            equal: [ "local", << parameters.env_name >>]
+          steps:
+            - start_local_ui
       - run_e2e_test:
           env_name: << parameters.env_name >>
 
@@ -666,7 +678,6 @@ workflows:
           parallel_num: 2
           optional_steps:
             - e2e_presubmit_check
-            - start_local_ui
       # On master branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully.
       - puppeteer-e2e-test:
           parallel_num: 4
