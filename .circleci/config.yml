@@ -706,7 +706,7 @@ workflows:
           # Run this command once every day at 4:00AM UTC
           cron: "0 4 * * *"
           filters:
-            branches
+            branches:
               only:
                 - master
     jobs:
