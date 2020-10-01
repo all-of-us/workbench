@@ -1,7 +1,7 @@
 version: 2.1
 
 slack/notify-on-failure:
-  only_for_branches: "master"
+  only_for_branches: ""
 
 # https://circleci.com/orbs/registry/
 orbs:
