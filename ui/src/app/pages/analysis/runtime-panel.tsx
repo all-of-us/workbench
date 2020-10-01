@@ -14,7 +14,6 @@ import {
   RuntimeOpsStore,
   runtimeOpsStore,
   updateRuntimeOpsStoreForWorkspaceNamespace,
-  withStore,
   currentRuntimeStore,
   useStore
 } from 'app/utils/stores';
@@ -92,8 +91,8 @@ interface State {
   selectedMachine: Machine;
 }
 
- const MachineSelector = ({onChange, selectedMachine, runtime}) => {
-  const {dataprocConfig, gceConfig} = runtime;
+ const MachineSelector = ({onChange, selectedMachine, currentRuntime}) => {
+  const {dataprocConfig, gceConfig} = currentRuntime;
   const masterMachineName = !!dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType
   // What happens when a config changes? If the user chooses 4 cpus, but that that machine type is changed to 6 cpus? Can this happen?
   const initialMachineType = fp.find(({name}) => name === masterMachineName, allMachineTypes) || defaultMachineType;  
@@ -149,8 +148,8 @@ interface State {
   </Fragment>
 }
 
-const DiskSizeSelection = ({onChange, selectedDiskSize, runtime}) => {
-  const {dataprocConfig, gceConfig} = runtime;
+const DiskSizeSelection = ({onChange, selectedDiskSize, currentRuntime}) => {
+  const {dataprocConfig, gceConfig} = currentRuntime;
   const masterDiskSize = !!dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.bootDiskSize
 
   return <div>
@@ -168,10 +167,11 @@ const DiskSizeSelection = ({onChange, selectedDiskSize, runtime}) => {
   </div>
 }
 
-const updateRuntime = async ({workspaceNamespace, runtime, selectedDiskSize, selectedMachine, pollAbortSignal}) => {
-  const {dataprocConfig: {masterDiskSize, masterMachineType}} = runtime;
+const updateRuntime = async ({workspaceNamespace, currentRuntime, selectedDiskSize, selectedMachine}) => {
+  const {dataprocConfig: {masterDiskSize, masterMachineType}} = currentRuntime;
   const nextMachineType = selectedMachine && selectedMachine.name;
-  
+  const pollAbortSignal = new AbortController();
+
   await runtimeApi().deleteRuntime(workspaceNamespace);
 
   await LeoRuntimeInitializer.initialize({
@@ -180,7 +180,7 @@ const updateRuntime = async ({workspaceNamespace, runtime, selectedDiskSize, sel
       masterMachineType: nextMachineType || masterMachineType,
       masterDiskSize: selectedDiskSize || masterDiskSize
     },
-    pollAbortSignal,
+    pollAbortSignal: pollAbortSignal.signal,
     onStatusUpdate: status => status === 'Running' && pollAbortSignal.abort()
   });
 }
@@ -193,8 +193,7 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
   const runtimeOps = useStore(runtimeOpsStore);
   const currentRuntime = useStore(currentRuntimeStore);
   const activeRuntimeOp: RuntimeOperation = runtimeOps.opsByWorkspaceNamespace[workspace.namespace];
-  const pollAbortSignal = new AbortController();
-  const {status} = currentRuntime;
+  const {status = null } = currentRuntime || {};
 
   // How do we reflect the state of the runtime to the user?
   // How should we handle errors?
@@ -211,7 +210,7 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
             operation: 'get',
             aborter: aborter
           });
-          await promise;
+          currentRuntimeStore.set(await promise);
         } catch (e) {
           // 404 is expected if the runtime doesn't exist, represent this as a null
           // runtime rather than an error mode.
@@ -244,9 +243,9 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
   }
 
   const isDataproc = (currentRuntime && !!currentRuntime.dataprocConfig);
-  const runtimeChanged = status !== 'Running' || selectedMachine || selectedDiskSize;
+  const runtimeChanged = selectedMachine || selectedDiskSize;
 
-  console.log(currentRuntime);
+  console.log('Status:', currentRuntime, status);
   return <div data-test-id='runtime-panel'>
     <h3 style={styles.sectionHeader}>Cloud analysis environment</h3>
     <div>
@@ -279,8 +278,8 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
       {/* Runtime customization: change detailed machine configuration options. */}  
       <h3 style={styles.sectionHeader}>Cloud compute profile</h3>
       <FlexRow style={{justifyContent: 'space-between'}}>
-        <MachineSelector selectedMachine={selectedMachine} onChange={setselectedMachine} runtime={currentRuntime}/>
-        <DiskSizeSelection selectedDiskSize={selectedDiskSize} onChange={setSelectedDiskSize} runtime={currentRuntime}/>
+        <MachineSelector selectedMachine={selectedMachine} onChange={setselectedMachine} currentRuntime={currentRuntime}/>
+        <DiskSizeSelection selectedDiskSize={selectedDiskSize} onChange={setSelectedDiskSize} currentRuntime={currentRuntime}/>
       </FlexRow>
       <FlexColumn style={{marginTop: '1rem'}}>
         <label htmlFor='runtime-compute'>Compute type</label>
@@ -293,11 +292,10 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
     </div>
     <FlexRow style={{justifyContent: 'flex-end', marginTop: '.75rem'}}>
       <Button 
-        disabled={!runtimeChanged}
+        disabled={status !== 'Running' || !runtimeChanged}
         onClick={async () => {
           await updateRuntime({
-            pollAbortSignal,
-            runtime: currentRuntime, 
+            currentRuntime, 
             workspaceNamespace: workspace.namespace, 
             selectedDiskSize, 
             selectedMachine});
