@@ -74,7 +74,8 @@ public class WorkspaceAdminControllerTest {
                       .agentId(1111L)
                       .agentType("ADMINISTRATOR")
                       .agentUsername(FIRECLOUD_WORKSPACE_CREATOR_USERNAME)
-                      .eventTime(OffsetDateTime.parse("2020-02-10T01:20+02:00").toInstant().toEpochMilli())
+                      .eventTime(
+                          OffsetDateTime.parse("2020-02-10T01:20+02:00").toInstant().toEpochMilli())
                       .newValue("true")
                       .previousValue(null)
                       .targetId(DB_WORKSPACE_ID)

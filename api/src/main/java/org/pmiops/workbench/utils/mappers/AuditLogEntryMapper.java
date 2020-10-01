@@ -108,7 +108,8 @@ public interface AuditLogEntryMapper {
     FieldValues.getLong(row, "agent_id").ifPresent(entry::setAgentId);
     FieldValues.getString(row, "agent_type").ifPresent(entry::setAgentType);
     FieldValues.getString(row, "agent_username").ifPresent(entry::setAgentUsername);
-    FieldValues.getDateTime(row, "event_time").ifPresent(odt -> entry.setEventTime(odt.toInstant().toEpochMilli()));
+    FieldValues.getDateTime(row, "event_time")
+        .ifPresent(odt -> entry.setEventTime(odt.toInstant().toEpochMilli()));
     FieldValues.getString(row, "new_value").ifPresent(entry::setNewValue);
     FieldValues.getString(row, "prev_value").ifPresent(entry::setPreviousValue);
     FieldValues.getLong(row, "target_id").ifPresent(entry::setTargetId);
