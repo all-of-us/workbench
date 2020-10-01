@@ -194,6 +194,7 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
   const currentRuntime = useStore(currentRuntimeStore);
   const activeRuntimeOp: RuntimeOperation = runtimeOps.opsByWorkspaceNamespace[workspace.namespace];
   const pollAbortSignal = new AbortController();
+  const {status} = currentRuntime;
 
   // How do we reflect the state of the runtime to the user?
   // How should we handle errors?
@@ -243,8 +244,9 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
   }
 
   const isDataproc = (currentRuntime && !!currentRuntime.dataprocConfig);
-  const runtimeChanged = selectedMachine || selectedDiskSize;
+  const runtimeChanged = status !== 'Running' || selectedMachine || selectedDiskSize;
 
+  console.log(currentRuntime);
   return <div data-test-id='runtime-panel'>
     <h3 style={styles.sectionHeader}>Cloud analysis environment</h3>
     <div>
@@ -309,128 +311,3 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
   </div>;
 
 })
-
-export const RuntimePanelx = fp.flow(withCurrentWorkspace(), withStore(runtimeOpsStore, 'runtimeOps'))(
-  class extends React.Component<Props, State> {
-    private aborter = new AbortController();
-
-    constructor(props: Props) {
-      super(props);
-      this.state = {
-        loading: true,
-        error: false,
-        runtime: null,
-        selectedDiskSize: null,
-        selectedMachine: null
-      };
-    }
-
-    async componentDidMount() {
-      // TODO(RW-5420): Centralize a runtimeStore.
-      let runtime = null;
-      let error = false;
-      try {
-        const promise = runtimeApi().getRuntime(this.props.workspace.namespace, {signal: this.aborter.signal});
-        updateRuntimeOpsStoreForWorkspaceNamespace(this.props.workspace.namespace, {
-          promise: promise,
-          operation: 'get',
-          aborter: this.aborter
-        });
-        runtime = await promise;
-      } catch (e) {
-        // 404 is expected if the runtime doesn't exist, represent this as a null
-        // runtime rather than an error mode.
-        if (e.status !== 404) {
-          error = true;
-        }
-      }
-      markRuntimeOperationCompleteForWorkspace(this.props.workspace.namespace);
-      this.setState({
-        runtime,
-        error,
-        loading: false
-      });
-    }
-
-    render() {
-      const {runtimeOps, workspace} = this.props;
-      const {loading, error, runtime, selectedDiskSize, selectedMachine} = this.state;
-
-      const activeRuntimeOp: RuntimeOperation = runtimeOps.opsByWorkspaceNamespace[workspace.namespace];
-
-      if (loading) {
-        return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
-      } else if (error) {
-        return <div>Error loading compute configuration</div>;
-      } else if (!runtime) {
-        // TODO(RW-5591): Create runtime page goes here.
-        return <React.Fragment>
-          <div>No runtime exists yet</div>
-          {activeRuntimeOp && <hr/>}
-          {activeRuntimeOp && <div>
-            <ActiveRuntimeOp operation={activeRuntimeOp.operation} workspaceNamespace={workspace.namespace}/>
-          </div>}
-        </React.Fragment>;
-      }
-
-      const isDataproc = !!runtime.dataprocConfig;
-      const runtimeChanged = selectedMachine || selectedDiskSize;
-
-      return <div data-test-id='runtime-panel'>
-        <h3 style={styles.sectionHeader}>Cloud analysis environment</h3>
-        <div>
-          Your analysis environment consists of an application and compute resources.
-          Your cloud environment is unique to this workspace and not shared with other users.
-        </div>
-        {/* TODO(RW-5419): Cost estimates go here. */}
-        <div style={styles.controlSection}>
-          {/* Recommended runtime: pick from default templates or change the image. */}
-          <PopupTrigger side='bottom'
-                        closeOnClick
-                        content={
-                          <React.Fragment>
-                            <MenuItem style={styles.presetMenuItem}>General purpose analysis</MenuItem>
-                            <MenuItem style={styles.presetMenuItem}>Genomics analysis</MenuItem>
-                          </React.Fragment>
-                        }>
-            <Clickable data-test-id='runtime-presets-menu'
-                       disabled={true}>
-              Recommended environments <ClrIcon shape='caret down'/>
-            </Clickable>
-          </PopupTrigger>
-          <h3 style={styles.sectionHeader}>Application configuration</h3>
-          {/* TODO(RW-5413): Populate the image list with server driven options. */}
-          <Dropdown style={{width: '100%'}}
-                    data-test-id='runtime-image-dropdown'
-                    disabled={true}
-                    options={[runtime.toolDockerImage]}
-                    value={runtime.toolDockerImage}/>
-          {/* Runtime customization: change detailed machine configuration options. */}  
-          <h3 style={styles.sectionHeader}>Cloud compute profile</h3>
-          <FlexRow style={{justifyContent: 'space-between'}}>
-            <MachineSelector selectedMachine={selectedMachine} onChange={v => this.setState({selectedMachine: v})} runtime={runtime}/>
-            <DiskSizeSelection selectedDiskSize={selectedDiskSize} onChange={v => this.setState({selectedDiskSize: v})} runtime={runtime}/>
-          </FlexRow>
-          <FlexColumn style={{marginTop: '1rem'}}>
-            <label htmlFor='runtime-compute'>Compute type</label>
-            <Dropdown id='runtime-compute'
-                      style={{width: '10rem'}}
-                      disabled={true}
-                      options={['Dataproc cluster', 'Standard VM']}
-                      value={isDataproc ? 'Dataproc cluster' : 'Standard VM'}/>
-          </FlexColumn>
-        </div>
-        <FlexRow style={{justifyContent: 'flex-end', marginTop: '.75rem'}}>
-          <Button disabled={!runtimeChanged}>Create</Button>
-        </FlexRow>
-        {activeRuntimeOp && <React.Fragment>
-          <hr/>
-          <ActiveRuntimeOp operation={activeRuntimeOp.operation} workspaceNamespace={workspace.namespace}/>
-        </React.Fragment>}
-      </div>;
-    }
-
-    componentWillUnmount() { 
-      this.aborter.abort();
-    }
-  });

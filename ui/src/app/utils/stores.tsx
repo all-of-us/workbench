@@ -71,7 +71,7 @@ export const abortRuntimeOperationForWorkspace = (workspaceNamespace: string) =>
 };
 
 
-export const currentRuntimeStore = atom<any>(null);
+export const currentRuntimeStore = atom<any>({});
 
 /**
  * @name useStore
