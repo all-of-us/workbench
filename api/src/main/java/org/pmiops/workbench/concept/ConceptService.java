@@ -131,7 +131,7 @@ public class ConceptService {
   }
 
   public List<DbSurveyModule> getSurveyInfo() {
-    return surveyModuleDao.findByParticipantCountNotOrderByOrderNumberAsc(0L);
+    return surveyModuleDao.findByOrderByOrderNumberAsc();
   }
 
   public Slice<DbConcept> searchConcepts(
