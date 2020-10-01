@@ -394,6 +394,10 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
       }
     }
 
+    componentWillUnmount() {
+      attributesSelectionStore.next(undefined);
+    }
+
     checkCriteriaChanges() {
       const {cohortContext, criteria} = this.props;
       if (criteria.length === 0) {
@@ -417,6 +421,11 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
       currentCohortCriteriaStore.next(updateList);
     }
 
+    closeSidebar() {
+      attributesSelectionStore.next(undefined);
+      setSidebarActiveIconStore.next(undefined);
+    }
+
     get showModifierButton() {
       const {criteria} = this.props;
       return criteria && criteria.length > 0 &&
@@ -434,16 +443,16 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
       const {attributesSelection, disableSave, showModifiersSlide} = this.state;
       return <div id='selection-list' style={{height: '100%'}}>
         <FlexRow style={styles.navIcons}>
-          {this.showAttributesOrModifiers &&
+          {showModifiersSlide &&
             <Clickable style={{marginRight: '1rem'}}
-                       onClick={() => this.setState({attributesSelection: undefined, showModifiersSlide: false})}>
+                       onClick={() => this.setState({showModifiersSlide: false})}>
               <img src={proIcons.arrowLeft}
                    style={{height: '21px', width: '18px'}}
                    alt='Go back'/>
             </Clickable>
           }
           <Clickable style={{marginRight: '1rem'}}
-                     onClick={() => setSidebarActiveIconStore.next(undefined)}>
+                     onClick={() => this.closeSidebar()}>
             <img src={proIcons.times}
                  style={{height: '27px', width: '17px'}}
                  alt='Close'/>
