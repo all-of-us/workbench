@@ -4,7 +4,7 @@ import {ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn} from 'utils/test-utils';
 
-describe('Create Dataset', () => {
+describe('Dataset test', () => {
 
   beforeEach(async () => {
     await signIn(page);
@@ -16,9 +16,9 @@ describe('Create Dataset', () => {
    * - Create a new Dataset from All Participants and All Surveys.
    * - Save dataset without Export to Notebook.
    * - Rename dataset.
-   * - Delete Dataset.
+   * - Delete dataset.
    */
-  test('Can create Dataset with defaults selections', async () => {
+  test('Can create and rename Dataset', async () => {
     const workspaceCard = await findWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 

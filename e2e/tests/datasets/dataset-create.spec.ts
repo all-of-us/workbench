@@ -6,7 +6,7 @@ import {Option, ResourceCard} from 'app/text-labels';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
 
-describe('Create Dataset', () => {
+describe('Dataset test', () => {
 
   beforeEach(async () => {
     await signIn(page);
@@ -21,7 +21,7 @@ describe('Create Dataset', () => {
    * - Edit dataset. Save dataset without Export to Notebook.
    * - Delete Dataset.
    */
-  test('Can create Dataset with user-defined cohort', async () => {
+  test('Can create Dataset with user-defined Cohorts', async () => {
     const workspaceCard = await findWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 
@@ -38,7 +38,7 @@ describe('Create Dataset', () => {
 
     // Search for drug hydroxychloroquine
     const searchResultsTable = await searchPage.searchCondition('hydroxychloroquine');
-    // Add drug in first row result
+    // Add a drug in Result table first row. Drug name ignored.
     const nameValue = await searchResultsTable.getCellValue(1, 1);
     const addIcon = await ClrIconLink.findByName(page, {containsText: nameValue, iconShape: 'plus-circle'}, searchResultsTable);
     await addIcon.click();
