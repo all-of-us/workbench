@@ -48,5 +48,6 @@
   <automatic-scaling>
     <min-idle-instances>${GAE_MIN_IDLE_INSTANCES}</min-idle-instances>
     <max-instances>${GAE_MAX_INSTANCES}</max-instances>
+    <instance-class>${GAE_INSTANCE_CLASS}</instance-class>
   </automatic-scaling>
 </appengine-web-app>
