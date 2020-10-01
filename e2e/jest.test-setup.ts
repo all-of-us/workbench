@@ -1,8 +1,6 @@
 const url = require('url');
 const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36';
 
-const navTimeOut = parseInt(process.env.PUPPETEER_NAVIGATION_TIMEOUT, 10) || 90000;
-const timeOut = parseInt(process.env.PUPPETEER_TIMEOUT, 10) || 10000;
 const isDebugMode = process.argv.includes('--debug');
 
 /**
@@ -15,8 +13,8 @@ const isDebugMode = process.argv.includes('--debug');
 beforeEach(async () => {
   await page.setUserAgent(userAgent);
   // See https://github.com/puppeteer/puppeteer/blob/master/docs/api.md#pagesetdefaultnavigationtimeouttimeout
-  page.setDefaultNavigationTimeout(navTimeOut);
-  page.setDefaultTimeout(timeOut);
+  page.setDefaultNavigationTimeout(30000);
+  page.setDefaultTimeout(10000);
 });
 
 /**
