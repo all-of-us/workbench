@@ -14,20 +14,25 @@ import {
   RuntimeOpsStore,
   runtimeOpsStore,
   updateRuntimeOpsStoreForWorkspaceNamespace,
-  withStore
+  withStore,
+  currentRuntimeStore,
+  useStore
 } from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Dropdown} from 'primereact/dropdown';
 import {InputNumber} from 'primereact/inputnumber';
+import {
+  LeoRuntimeInitializationAbortedError,
+  LeoRuntimeInitializationFailedError,
+  LeoRuntimeInitializer,
+} from 'app/utils/leo-runtime-initializer';
 
 import {Runtime} from 'generated/fetch';
 
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import { initial } from 'lodash';
-import { Machine } from 'src/app/utils/machines';
 
-const {useState, Fragment} = React;
+const {useState, useEffect, Fragment} = React;
 
 const styles = reactStyles({
   sectionHeader: {
@@ -83,16 +88,16 @@ interface State {
   // runtime.
   runtime: Runtime|null;
   // machine: Machine;
-  currentDiskSize: number;
-  currentMachine: Machine;
+  selectedDiskSize: number;
+  selectedMachine: Machine;
 }
 
- const MachineSelector = ({onChange, currentMachine, runtime}) => {
+ const MachineSelector = ({onChange, selectedMachine, runtime}) => {
   const {dataprocConfig, gceConfig} = runtime;
   const masterMachineName = !!dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType
   // What happens when a config changes? If the user chooses 4 cpus, but that that machine type is changed to 6 cpus? Can this happen?
   const initialMachineType = fp.find(({name}) => name === masterMachineName, allMachineTypes) || defaultMachineType;  
-  const {cpu, memory} = currentMachine || initialMachineType;
+  const {cpu, memory} = selectedMachine || initialMachineType;
   const maybeGetMachine = selectedMachine => fp.equals(selectedMachine, initialMachineType) ? null : selectedMachine;
 
   return <Fragment>
@@ -144,7 +149,7 @@ interface State {
   </Fragment>
 }
 
-const DiskSizeSelection = ({onChange, currentDiskSize, runtime}) => {
+const DiskSizeSelection = ({onChange, selectedDiskSize, runtime}) => {
   const {dataprocConfig, gceConfig} = runtime;
   const masterDiskSize = !!dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.bootDiskSize
 
@@ -156,14 +161,156 @@ const DiskSizeSelection = ({onChange, currentDiskSize, runtime}) => {
                 showButtons
                 decrementButtonClassName='p-button-secondary'
                 incrementButtonClassName='p-button-secondary'
-                value={currentDiskSize || masterDiskSize}
+                value={selectedDiskSize || masterDiskSize}
                 inputStyle={{padding: '.75rem .5rem', width: '2rem'}}
                 onChange={({value}) => onChange(value === masterDiskSize ? null : value)}
                 min={50 /* Runtime API has a minimum 50GB requirement. */}/>
   </div>
 }
 
-export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOpsStore, 'runtimeOps'))(
+const updateRuntime = async ({workspaceNamespace, runtime, selectedDiskSize, selectedMachine, pollAbortSignal}) => {
+  const {dataprocConfig: {masterDiskSize, masterMachineType}} = runtime;
+  const nextMachineType = selectedMachine && selectedMachine.name;
+  
+  await runtimeApi().deleteRuntime(workspaceNamespace);
+
+  await LeoRuntimeInitializer.initialize({
+    workspaceNamespace,
+    dataprocConfig: {
+      masterMachineType: nextMachineType || masterMachineType,
+      masterDiskSize: selectedDiskSize || masterDiskSize
+    },
+    pollAbortSignal,
+    onStatusUpdate: status => status === 'Running' && pollAbortSignal.abort()
+  });
+}
+
+export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [selectedDiskSize, setSelectedDiskSize] = useState(null);
+  const [selectedMachine, setselectedMachine] = useState(null);
+  const runtimeOps = useStore(runtimeOpsStore);
+  const currentRuntime = useStore(currentRuntimeStore);
+  const activeRuntimeOp: RuntimeOperation = runtimeOps.opsByWorkspaceNamespace[workspace.namespace];
+  const pollAbortSignal = new AbortController();
+
+  // How do we reflect the state of the runtime to the user?
+  // How should we handle errors?
+
+  useEffect(() => {
+      const aborter = new AbortController();
+      const {namespace} = workspace;
+      const loadRuntime = async () => {
+        // TODO(RW-5420): Centralize a runtimeStore.
+        try {
+          const promise = runtimeApi().getRuntime(namespace, {signal: aborter.signal});
+          updateRuntimeOpsStoreForWorkspaceNamespace(namespace, {
+            promise: promise,
+            operation: 'get',
+            aborter: aborter
+          });
+          await promise;
+        } catch (e) {
+          // 404 is expected if the runtime doesn't exist, represent this as a null
+          // runtime rather than an error mode.
+          if (e.status !== 404) {
+            setError(true);
+          }
+        } finally {
+          setLoading(false);
+        }
+        markRuntimeOperationCompleteForWorkspace(namespace);
+      }
+
+      loadRuntime()
+      return () => aborter.abort();
+  }, []);
+
+  if (loading) {
+    return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
+  } else if (error) {
+    return <div>Error loading compute configuration</div>;
+  } else if (!currentRuntime) {
+    // TODO(RW-5591): Create runtime page goes here.
+    return <React.Fragment>
+      <div>No runtime exists yet</div>
+      {activeRuntimeOp && <hr/>}
+      {activeRuntimeOp && <div>
+        <ActiveRuntimeOp operation={activeRuntimeOp.operation} workspaceNamespace={workspace.namespace}/>
+      </div>}
+    </React.Fragment>;
+  }
+
+  const isDataproc = (currentRuntime && !!currentRuntime.dataprocConfig);
+  const runtimeChanged = selectedMachine || selectedDiskSize;
+
+  return <div data-test-id='runtime-panel'>
+    <h3 style={styles.sectionHeader}>Cloud analysis environment</h3>
+    <div>
+      Your analysis environment consists of an application and compute resources.
+      Your cloud environment is unique to this workspace and not shared with other users.
+    </div>
+    {/* TODO(RW-5419): Cost estimates go here. */}
+    <div style={styles.controlSection}>
+      {/* Recommended runtime: pick from default templates or change the image. */}
+      <PopupTrigger side='bottom'
+                    closeOnClick
+                    content={
+                      <React.Fragment>
+                        <MenuItem style={styles.presetMenuItem}>General purpose analysis</MenuItem>
+                        <MenuItem style={styles.presetMenuItem}>Genomics analysis</MenuItem>
+                      </React.Fragment>
+                    }>
+        <Clickable data-test-id='runtime-presets-menu'
+                   disabled={true}>
+          Recommended environments <ClrIcon shape='caret down'/>
+        </Clickable>
+      </PopupTrigger>
+      <h3 style={styles.sectionHeader}>Application configuration</h3>
+      {/* TODO(RW-5413): Populate the image list with server driven options. */}
+      <Dropdown style={{width: '100%'}}
+                data-test-id='runtime-image-dropdown'
+                disabled={true}
+                options={[currentRuntime.toolDockerImage]}
+                value={currentRuntime.toolDockerImage}/>
+      {/* Runtime customization: change detailed machine configuration options. */}  
+      <h3 style={styles.sectionHeader}>Cloud compute profile</h3>
+      <FlexRow style={{justifyContent: 'space-between'}}>
+        <MachineSelector selectedMachine={selectedMachine} onChange={setselectedMachine} runtime={currentRuntime}/>
+        <DiskSizeSelection selectedDiskSize={selectedDiskSize} onChange={setSelectedDiskSize} runtime={currentRuntime}/>
+      </FlexRow>
+      <FlexColumn style={{marginTop: '1rem'}}>
+        <label htmlFor='runtime-compute'>Compute type</label>
+        <Dropdown id='runtime-compute'
+                  style={{width: '10rem'}}
+                  disabled={true}
+                  options={['Dataproc cluster', 'Standard VM']}
+                  value={isDataproc ? 'Dataproc cluster' : 'Standard VM'}/>
+      </FlexColumn>
+    </div>
+    <FlexRow style={{justifyContent: 'flex-end', marginTop: '.75rem'}}>
+      <Button 
+        disabled={!runtimeChanged}
+        onClick={async () => {
+          await updateRuntime({
+            pollAbortSignal,
+            runtime: currentRuntime, 
+            workspaceNamespace: workspace.namespace, 
+            selectedDiskSize, 
+            selectedMachine});
+        }}
+      >{currentRuntime ? 'Update' : 'Create'}</Button>
+    </FlexRow>
+    {activeRuntimeOp && <React.Fragment>
+      <hr/>
+      <ActiveRuntimeOp operation={activeRuntimeOp.operation} workspaceNamespace={workspace.namespace}/>
+    </React.Fragment>}
+  </div>;
+
+})
+
+export const RuntimePanelx = fp.flow(withCurrentWorkspace(), withStore(runtimeOpsStore, 'runtimeOps'))(
   class extends React.Component<Props, State> {
     private aborter = new AbortController();
 
@@ -173,8 +320,8 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOps
         loading: true,
         error: false,
         runtime: null,
-        currentDiskSize: null,
-        currentMachine: null
+        selectedDiskSize: null,
+        selectedMachine: null
       };
     }
 
@@ -207,7 +354,7 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOps
 
     render() {
       const {runtimeOps, workspace} = this.props;
-      const {loading, error, runtime, currentDiskSize, currentMachine} = this.state;
+      const {loading, error, runtime, selectedDiskSize, selectedMachine} = this.state;
 
       const activeRuntimeOp: RuntimeOperation = runtimeOps.opsByWorkspaceNamespace[workspace.namespace];
 
@@ -227,7 +374,7 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOps
       }
 
       const isDataproc = !!runtime.dataprocConfig;
-      const runtimeChanged = currentMachine || currentDiskSize;
+      const runtimeChanged = selectedMachine || selectedDiskSize;
 
       return <div data-test-id='runtime-panel'>
         <h3 style={styles.sectionHeader}>Cloud analysis environment</h3>
@@ -261,8 +408,8 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOps
           {/* Runtime customization: change detailed machine configuration options. */}  
           <h3 style={styles.sectionHeader}>Cloud compute profile</h3>
           <FlexRow style={{justifyContent: 'space-between'}}>
-            <MachineSelector currentMachine={currentMachine} onChange={v => this.setState({currentMachine: v})} runtime={runtime}/>
-            <DiskSizeSelection currentDiskSize={currentDiskSize} onChange={v => this.setState({currentDiskSize: v})} runtime={runtime}/>
+            <MachineSelector selectedMachine={selectedMachine} onChange={v => this.setState({selectedMachine: v})} runtime={runtime}/>
+            <DiskSizeSelection selectedDiskSize={selectedDiskSize} onChange={v => this.setState({selectedDiskSize: v})} runtime={runtime}/>
           </FlexRow>
           <FlexColumn style={{marginTop: '1rem'}}>
             <label htmlFor='runtime-compute'>Compute type</label>
@@ -283,7 +430,7 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOps
       </div>;
     }
 
-    componentWillUnmount() {
+    componentWillUnmount() { 
       this.aborter.abort();
     }
   });

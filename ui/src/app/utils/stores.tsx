@@ -1,4 +1,4 @@
-import {Profile} from 'generated';
+import {Profile, Runtime} from 'generated';
 import * as React from 'react';
 import { BreadcrumbType } from './navigation';
 import {atom, Atom} from './subscribable';
@@ -69,6 +69,9 @@ export const abortRuntimeOperationForWorkspace = (workspaceNamespace: string) =>
     runtimeOpsStore.set({opsByWorkspaceNamespace: opsByWorkspaceNamespace});
   }
 };
+
+
+export const currentRuntimeStore = atom<any>(null);
 
 /**
  * @name useStore
