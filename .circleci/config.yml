@@ -313,13 +313,14 @@ commands:
               circleci step halt
             fi
 
+
   e2e_presubmit_check:
     steps:
       - e2e_skip_commit
       - halt_if_code_unchanged
       - run:
-        name: "Halt job if not a pull request"
-        command: bash .circleci/pr-skip-ci.sh
+          name: "Halt job if not a pull request"
+          command: bash .circleci/pr-skip-ci.sh
 
 
 # -------------------------
