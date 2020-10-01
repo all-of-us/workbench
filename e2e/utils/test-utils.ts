@@ -14,11 +14,13 @@ import {WorkspaceAccessLevel} from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
 import {makeWorkspaceName} from './str-utils';
 
+const waitForTimeOut = Number(process.env.PUPPETEER_WAITFORFUNCTION_TIMEOUT);
+
 export async function signIn(page: Page, userId?: string, passwd?: string): Promise<void> {
   const loginPage = new GoogleLoginPage(page);
   await loginPage.login(userId, passwd);
   // this element exists in DOM after user has logged in
-  await page.waitForFunction(() => !!document.querySelector('app-signed-in'));
+  await page.waitForFunction(() => !!document.querySelector('app-signed-in'), {timeout: waitForTimeOut});
   const homePage = new HomePage(page);
   await homePage.waitForLoad();
 }
