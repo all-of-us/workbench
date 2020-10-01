@@ -123,7 +123,7 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
           + "  a.streetAddress2,\n"
           + "  a.zipCode\n"
           + "FROM DbUser u\n"
-          + "  LEFT OUTER JOIN DbAddress AS a ON u.userId = a.user.userId\n"
+          + "  LEFT OUTER JOIN FETCH DbAddress AS a ON u.userId = a.user.userId\n"
           + "  ORDER BY u.userId")
   List<ProjectedReportingUser> getReportingUsers();
 }

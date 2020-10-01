@@ -52,8 +52,8 @@ describe('Workspace ui tests', () => {
     const accessLevel = await card.getWorkspaceAccessLevel();
     expect(levels).toContain(accessLevel);
 
-    const ellipsis = card.getEllipsis();
-    const links = await ellipsis.getAvaliableActions();
+    const snowmanMenu = await card.getSnowmanMenu();
+    const links = await snowmanMenu.getAllOptionTexts();
     expect(links).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
   });
 
