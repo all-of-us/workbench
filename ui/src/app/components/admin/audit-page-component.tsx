@@ -176,7 +176,7 @@ export const AuditPageComponent = (props: AuditPageProps) => {
   }, [initialAuditSubject]);
 
   const getTitle = () => {
-    const timesMillis = actions.map(action => new Date(action.actionTime).getTime());
+    const timesMillis = fp.map(fp.get('actionTime'))(actions);
     const minTime = new Date(Math.min(...timesMillis)).toDateString();
     const maxTime = new Date(Math.max(...timesMillis)).toDateString();
     return initialAuditSubject

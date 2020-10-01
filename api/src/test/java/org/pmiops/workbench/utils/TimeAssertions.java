@@ -48,6 +48,10 @@ public class TimeAssertions {
     assertTimeApprox(actual.toInstant(), expected.toInstant());
   }
 
+  public static void assertTimeApprox(long actualMillis, OffsetDateTime expected) {
+    assertTimeApprox(Instant.ofEpochMilli(actualMillis), expected.toInstant());
+  }
+
   public static void assertTimeApprox(Instant actual, Instant expected) {
     assertTimeApprox(actual, expected, DEFAULT_TOLERANCE);
   }
