@@ -298,7 +298,7 @@ commands:
           name: Wait for local UI server to start
           command: dockerize -wait tcp://localhost:4200 -timeout 4m
 
-  skip_e2e_commit:
+  e2e_skip_commit:
     description: "Halt job if commit message contains 'SKIP E2E'"
     steps:
       - run:
@@ -307,11 +307,20 @@ commands:
             echo 'export COMMIT_MESSAGE=$(git log -1 --pretty=format:"%s")' >> $BASH_ENV
             source $BASH_ENV
             echo "Git commit message: $COMMIT_MESSAGE"
-
+            # Double comma is called "Parameter Expansion" in Bash version 4+. It converts string to lowercase letters.
             if [[ "${COMMIT_MESSAGE,,}" == *"skip e2e"* ]]; then
               echo "Halting e2e test."
               circleci step halt
             fi
+
+  e2e_presubmit_check:
+    steps:
+      - e2e_skip_commit
+      - halt_if_code_unchanged
+      - run:
+        name: "Halt job if not a pull request"
+        command: bash .circleci/pr-skip-ci.sh
+
 
 # -------------------------
 #        JOBS
@@ -629,20 +638,6 @@ jobs:
       - run_e2e_test:
           env_name: << parameters.env_name >>
 
-  # Deploy local UI server then run Puppeteer tests against "local ui" + "test api" environment.
-  puppeteer-e2e-local-ui:
-    steps:
-      - puppeteer-e2e-test:
-          env_name: "local"
-          parallel_num: 2
-          optional_steps:
-            steps:
-              - skip_e2e_commit
-              - halt_if_code_unchanged
-              - run:
-                  name: Halt job if not a pull request
-                  command: bash .circleci/pr-skip-ci.sh
-              - start_local_ui
 
 workflows:
   build-test-deploy:
@@ -663,9 +658,15 @@ workflows:
           filters: *filter_only_master_branch
           requires:
             - ui-unit-test
-      # Run Puppeteer tests against local UI server for PR commits only.
-      - puppeteer-e2e-local-ui:
+      # Deploy local UI server then run Puppeteer tests against "local ui" + "test api" environment for PR commits only.
+      - puppeteer-e2e-test:
           filters: *filter_only_pr_branch
+          env_name: "local"
+          parallel_num: 2
+          optional_steps:
+            steps:
+              - e2e_presubmit_check
+              - start_local_ui
       # On master branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully.
       - puppeteer-e2e-test:
           parallel_num: 4
