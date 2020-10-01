@@ -544,7 +544,7 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<UserListResponse> getAllUsers() {
-    return ResponseEntity.ok(new UserListResponse().profileList(profileService.listAllProfiles()));
+    return ResponseEntity.ok(new UserListResponse().users(profileService.listAllProfiles()));
   }
 
   @Override

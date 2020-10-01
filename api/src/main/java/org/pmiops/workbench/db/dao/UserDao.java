@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Set;
 import org.pmiops.workbench.db.model.DbUser;
@@ -72,4 +73,70 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
 
     Long getUserCount();
   }
+
+  interface DbAdminTableUser {
+    Long getUserId();
+
+    String getUsername();
+
+    Short getDataAccessLevel();
+
+    Boolean getDisabled();
+
+    String getGivenName();
+
+    String getFamilyName();
+
+    String getContactEmail();
+
+    String getInstitutionName();
+
+    Timestamp getFirstRegistrationCompletionTime();
+
+    Timestamp getFirstSignInTime();
+
+    Timestamp getCreationTime();
+
+    Timestamp getDataUseAgreementBypassTime();
+
+    Timestamp getDataUseAgreementCompletionTime();
+
+    Timestamp getComplianceTrainingBypassTime();
+
+    Timestamp getComplianceTrainingCompletionTime();
+
+    Timestamp getBetaAccessBypassTime();
+
+    Timestamp getEmailVerificationBypassTime();
+
+    Timestamp getEmailVerificationCompletionTime();
+
+    Timestamp getEraCommonsBypassTime();
+
+    Timestamp getEraCommonsCompletionTime();
+
+    Timestamp getIdVerificationBypassTime();
+
+    Timestamp getIdVerificationCompletionTime();
+
+    Timestamp getTwoFactorAuthBypassTime();
+
+    Timestamp getTwoFactorAuthCompletionTime();
+  }
+
+  @Query(
+      "SELECT u.userId, u.username, u.dataAccessLevel, u.disabled, u.givenName, u.familyName, "
+          + "u.contactEmail, i.displayName AS institutionName, "
+          + "u.firstRegistrationCompletionTime, u.creationTime, u.firstSignInTime, "
+          + "u.dataUseAgreementBypassTime, u.dataUseAgreementCompletionTime, "
+          + "u.complianceTrainingBypassTime, u.complianceTrainingCompletionTime, "
+          + "u.betaAccessBypassTime, "
+          + "u.emailVerificationBypassTime, u.emailVerificationCompletionTime, "
+          + "u.eraCommonsBypassTime, u.eraCommonsCompletionTime, "
+          + "u.idVerificationBypassTime, u.idVerificationCompletionTime, "
+          + "u.twoFactorAuthBypassTime, u.twoFactorAuthCompletionTime "
+          + "FROM DbUser u "
+          + "LEFT JOIN DbVerifiedInstitutionalAffiliation AS a ON u.userId = a.user.userId "
+          + "LEFT JOIN DbInstitution AS i ON i.institutionId = a.institution.institutionId")
+  List<DbAdminTableUser> getAdminTableUsers();
 }

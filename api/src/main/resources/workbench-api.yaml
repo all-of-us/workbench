@@ -5096,6 +5096,77 @@ definitions:
       jwt:
         type: string
         description: the encoded/signed JWT
+  AdminTableUser:
+    type: object
+    properties:
+      userId:
+        type: integer
+        format: int64
+      username:
+        type: string
+      dataAccessLevel:
+        "$ref": "#/definitions/DataAccessLevel"
+      givenName:
+        type: string
+      familyName:
+        type: string
+      disabled:
+        type: boolean
+        default: false
+      contactEmail:
+        type: string
+      institutionName:
+        description: Verified institution name
+        type: string
+      firstRegistrationCompletionTime:
+        type: integer
+        format: int64
+      firstSignInTime:
+        type: integer
+        format: int64
+      creationTime:
+        type: integer
+        format: int64
+      idVerificationBypassTime:
+        type: integer
+        format: int64
+      idVerificationCompletionTime:
+        type: integer
+        format: int64
+      twoFactorAuthBypassTime:
+        type: integer
+        format: int64
+      twoFactorAuthCompletionTime:
+        type: integer
+        format: int64
+      eraCommonsBypassTime:
+        type: integer
+        format: int64
+      eraCommonsCompletionTime:
+        type: integer
+        format: int64
+      complianceTrainingBypassTime:
+        type: integer
+        format: int64
+      complianceTrainingCompletionTime:
+        type: integer
+        format: int64
+      betaAccessBypassTime:
+        type: integer
+        format: int64
+      emailVerificationBypassTime:
+        type: integer
+        format: int64
+      emailVerificationCompletionTime:
+        type: integer
+        format: int64
+      dataUseAgreementBypassTime:
+        type: integer
+        format: int64
+      dataUseAgreementCompletionTime:
+        type: integer
+        format: int64
+
   Profile:
     type: object
     required:
@@ -5601,12 +5672,12 @@ definitions:
   UserListResponse:
     type: object
     required:
-    - profileList
+    - users
     properties:
-      profileList:
+      users:
         type: array
         items:
-          "$ref": "#/definitions/Profile"
+          "$ref": "#/definitions/AdminTableUser"
   UpdateUserDisabledRequest:
     type: object
     required:

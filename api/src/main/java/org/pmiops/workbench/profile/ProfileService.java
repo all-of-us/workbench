@@ -2,18 +2,11 @@ package org.pmiops.workbench.profile;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.StreamSupport;
+import java.util.logging.Logger;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
@@ -41,6 +34,7 @@ import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.model.AccountPropertyUpdate;
 import org.pmiops.workbench.model.Address;
+import org.pmiops.workbench.model.AdminTableUser;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.model.InstitutionalRole;
@@ -51,6 +45,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ProfileService {
+
+  private static final Logger log = Logger.getLogger(ProfileService.class.getName());
 
   private final AddressMapper addressMapper;
   private final Clock clock;
@@ -459,51 +455,9 @@ public class ProfileService {
     validateProfileForCorrectness(dummyProfile, profile);
   }
 
-  // Get all the profiles. Best we can do without surgery on the entity classes is to do one query
-  // per table and join them in code.
-  public List<Profile> listAllProfiles() {
-    final Set<DbUser> usersHeavy = userService.findAllUsersWithAuthoritiesAndPageVisits();
-    final Map<Long, VerifiedInstitutionalAffiliation> userIdToAffiliationModel =
-        StreamSupport.stream(verifiedInstitutionalAffiliationDao.findAll().spliterator(), false)
-            .collect(
-                ImmutableMap.toImmutableMap(
-                    (DbVerifiedInstitutionalAffiliation a) -> a.getUser().getUserId(),
-                    verifiedInstitutionalAffiliationMapper::dbToModel));
-
-    // A user may have signed the TOS many times. Pick only the latest.
-    final Multimap<Long, DbUserTermsOfService> userIdToTosRecords =
-        Multimaps.index(userTermsOfServiceDao.findAll(), DbUserTermsOfService::getUserId);
-
-    final Map<Long, DbUserTermsOfService> userIdToMostRecentTos =
-        userIdToTosRecords.asMap().entrySet().stream()
-            .collect(
-                ImmutableMap.toImmutableMap(
-                    Entry::getKey,
-                    e ->
-                        e.getValue().stream()
-                            .max(Comparator.comparing(DbUserTermsOfService::getAgreementTime))
-                            .orElse(
-                                null))); // not reachable since  Multimaps.index() will always give
-    // a non-empty value set
-
-    // The cached free tier usage aka total cost for each user, by ID
-    final Map<Long, Double> userIdToFreeTierUsage = freeTierBillingService.getUserIdToTotalCost();
-
-    final Map<Long, Double> userIdToQuota =
-        usersHeavy.stream()
-            .collect(
-                ImmutableMap.toImmutableMap(
-                    DbUser::getUserId, freeTierBillingService::getUserFreeTierDollarLimit));
-
-    return usersHeavy.stream()
-        .map(
-            dbUser ->
-                profileMapper.toModel(
-                    dbUser,
-                    userIdToAffiliationModel.get(dbUser.getUserId()),
-                    userIdToMostRecentTos.get(dbUser.getUserId()),
-                    userIdToFreeTierUsage.get(dbUser.getUserId()),
-                    userIdToQuota.get(dbUser.getUserId())))
+  public List<AdminTableUser> listAllProfiles() {
+    return userDao.getAdminTableUsers().stream()
+        .map(dbUser -> profileMapper.adminViewToModel(dbUser))
         .collect(ImmutableList.toImmutableList());
   }
   /**

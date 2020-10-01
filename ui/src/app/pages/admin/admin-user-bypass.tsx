@@ -7,7 +7,7 @@ import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {serverConfigStore} from 'app/utils/navigation';
-import {AccessModule, Profile} from 'generated/fetch';
+import {AccessModule, AdminTableUser} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
@@ -22,20 +22,24 @@ const styles = reactStyles({
   }
 });
 
+interface Props {
+  user: AdminTableUser;
+}
+
 export class AdminUserBypass extends React.Component<
-    { profile: Profile},
+    Props,
     { initialModules: AccessModule[], selectedModules: AccessModule[],
       open: boolean} > {
 
-  constructor(props) {
+  constructor(props: Props) {
     super(props);
-    const {profile} = props;
+    const {user} = props;
     const initialModules = [
-      ...(profile.betaAccessBypassTime ? [AccessModule.BETAACCESS] : []),
-      ...(profile.complianceTrainingBypassTime ? [AccessModule.COMPLIANCETRAINING] : []),
-      ...(profile.dataUseAgreementBypassTime ? [AccessModule.DATAUSEAGREEMENT] : []),
-      ...(profile.eraCommonsBypassTime ? [AccessModule.ERACOMMONS] : []),
-      ...(profile.twoFactorAuthBypassTime ? [AccessModule.TWOFACTORAUTH] : []),
+      ...(user.betaAccessBypassTime ? [AccessModule.BETAACCESS] : []),
+      ...(user.complianceTrainingBypassTime ? [AccessModule.COMPLIANCETRAINING] : []),
+      ...(user.dataUseAgreementBypassTime ? [AccessModule.DATAUSEAGREEMENT] : []),
+      ...(user.eraCommonsBypassTime ? [AccessModule.ERACOMMONS] : []),
+      ...(user.twoFactorAuthBypassTime ? [AccessModule.TWOFACTORAUTH] : []),
     ];
     this.state = {
       open: false,
@@ -51,11 +55,11 @@ export class AdminUserBypass extends React.Component<
 
   save() {
     const {initialModules, selectedModules} = this.state;
-    const {profile} = this.props;
+    const {user} = this.props;
     const changedModules = fp.xor(initialModules, selectedModules);
     changedModules.forEach(async module => {
       await profileApi()
-        .bypassAccessRequirement(profile.userId,
+        .bypassAccessRequirement(user.userId,
           {isBypassed: selectedModules.includes(module), moduleName: module});
     });
 
@@ -123,7 +127,7 @@ export class AdminUserBypass extends React.Component<
                         disabled={!this.hasEdited()}/>
           </div>
         </FlexColumn>}>
-      <Button type='secondaryLight' data-test-id='bypass-popup'>
+      <Button type='secondaryLight' data-test-id='bypass-popup' style={{height: '40px'}}>
         <ClrIcon shape={open ? 'caret down' : 'caret right'} size={19}
                  style={{color: colors.accent, marginRight: '1px', cursor: 'pointer'}}/>
         Bypass
