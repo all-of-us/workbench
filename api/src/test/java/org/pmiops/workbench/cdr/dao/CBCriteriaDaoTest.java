@@ -174,14 +174,6 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findCountByDomainAndStandardAndTerm() {
-    assertThat(
-            cbCriteriaDao.findCountByDomainAndStandardAndTerm(
-                Domain.CONDITION.toString(), ImmutableList.of(false), "term"))
-        .isEqualTo(1);
-  }
-
-  @Test
   public void findCriteriaByDomainIdAndConceptIds() {
     assertThat(
             cbCriteriaDao.findCriteriaByDomainIdAndConceptIds("CONDITION", ImmutableList.of("12")))

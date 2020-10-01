@@ -42,9 +42,8 @@ public class SurveyModuleDaoTest {
   }
 
   @Test
-  public void findByParticipantCountNotOrderByOrderNumberAsc() {
-    List<DbSurveyModule> moduleList =
-        surveyModuleDao.findByParticipantCountNotOrderByOrderNumberAsc(0L);
+  public void findByOrderByOrderNumberAsc() {
+    List<DbSurveyModule> moduleList = surveyModuleDao.findByOrderByOrderNumberAsc();
     assertThat(moduleList).hasSize(1);
     assertThat(moduleList.get(0)).isEqualTo(expectedDbSurveyModule);
   }
