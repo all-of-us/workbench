@@ -375,7 +375,7 @@ curl -H "Content-Type: application/json" "localhost:9200/cdr_person/_doc/_search
 ## Cohort Builder
 
 #### Cohort Definition Schema
-[Documented here](https://github.com/all-of-us/workbench/blob/freemabd/cd-schema/api/reporting/docs/cohort_definition_schema.json)
+[Documented here](https://github.com/all-of-us/workbench/blob/master/api/reporting/docs/cohort_definition_schema.json)
 
 During ```./project dev-up``` the schema activity is the only activity run, which only creates tables for the cdr schema.
 
