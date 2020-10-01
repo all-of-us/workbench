@@ -26,7 +26,7 @@
     "projectNamePrefix": "aou-rw-test-",
     "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.rw_test_firecloud_view",
     "retryCount": 2,
-    "bufferCapacity": 0,
+    "bufferCapacity": 100,
     "bufferRefillProjectsPerTask": 1,
     "defaultFreeCreditsDollarLimit": 300.0,
     "freeTierCostAlertThresholds": [
