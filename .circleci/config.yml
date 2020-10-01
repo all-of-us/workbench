@@ -702,7 +702,7 @@ workflows:
           # Run this command once every day at 4:00AM UTC
           cron: "0 4 * * *"
           filters:
-            branches:
+            branches
               only:
                 - master
     jobs:
@@ -711,9 +711,3 @@ workflows:
           parallel_num: 1
           test_mode: "nightly-integration"
           env_name: "test"
-
-experimental:
-  notify:
-    branches:
-      only:
-        - master
