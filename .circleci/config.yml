@@ -611,9 +611,9 @@ jobs:
       parallel_num:
         type: integer
         default: 1
-      require_local_ui:
-        type: boolean
-        default: false
+      optional_steps:
+        type: steps
+        default: [ ]
     <<: *defaults
     environment:
       <<: *e2e_env
@@ -625,19 +625,24 @@ jobs:
     parallelism: << parameters.parallel_num >>
     steps:
       - checkout_init_git
-      - when:
-          # Deploy local UI server then run Puppeteer tests against "local ui" + "test api" environment.
-          condition: << parameters.require_local_ui >>
-          steps:
-            - skip_e2e_commit
-            - run:
-                name: Halt job if not a pull request
-                command: bash .circleci/pr-skip-ci.sh
-            - halt_if_code_unchanged
-            - start_local_ui
+      - steps: << parameters.optional_steps >>
       - run_e2e_test:
           env_name: << parameters.env_name >>
 
+  # Deploy local UI server then run Puppeteer tests against "local ui" + "test api" environment.
+  puppeteer-e2e-local-ui:
+    steps:
+      - puppeteer-e2e-test:
+          env_name: "local"
+          parallel_num: 2
+          optional_steps:
+            steps:
+              - skip_e2e_commit
+              - halt_if_code_unchanged
+              - run:
+                  name: Halt job if not a pull request
+                  command: bash .circleci/pr-skip-ci.sh
+              - start_local_ui
 
 workflows:
   build-test-deploy:
@@ -659,11 +664,8 @@ workflows:
           requires:
             - ui-unit-test
       # Run Puppeteer tests against local UI server for PR commits only.
-      - puppeteer-e2e-test:
+      - puppeteer-e2e-local-ui:
           filters: *filter_only_pr_branch
-          require_local_ui: true
-          parallel_num: 2
-          env_name: "local"
       # On master branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully.
       - puppeteer-e2e-test:
           parallel_num: 4
