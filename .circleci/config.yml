@@ -659,7 +659,7 @@ workflows:
           filters: *filter_only_master_branch
           requires:
             - ui-unit-test
-      # Deploy local UI server then run Puppeteer tests against "local ui" + "test api" environment for PR commits only.
+      # Deploy local ui server then run Puppeteer tests against "local ui" + "test api" environment for PR commits only.
       - puppeteer-e2e-test:
           filters: *filter_only_pr_branch
           env_name: "local"
