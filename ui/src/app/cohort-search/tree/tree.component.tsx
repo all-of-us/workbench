@@ -71,6 +71,7 @@ interface Props {
   back: Function;
   groupSelections: Array<number>;
   node: Criteria;
+  source?: string;
   scrollToMatch: Function;
   searchTerms: string;
   select: Function;
@@ -198,6 +199,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
         </div>}
         <div style={this.showHeader ? styles.node : {...styles.node, border: 'none'}}>
         {!!children && children.map((child, c) => this.showNode(child) && <TreeNode key={c}
+                                                            source={this.props.source}
                                                             autocompleteSelection={autocompleteSelection}
                                                             groupSelections={groupSelections}
                                                             node={child}

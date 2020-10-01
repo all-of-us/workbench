@@ -159,6 +159,7 @@ const columnHeaderStyle = {
 interface Props {
   cdrVersionListResponse: CdrVersionListResponse;
   hierarchy: Function;
+  source: string;
   searchContext: any;
   select: Function;
   selectedIds: Array<string>;
@@ -356,6 +357,14 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
       </FlexRow>;
     }
 
+    get isConcept() {
+      return this.props.source && this.props.source === 'concept';
+    }
+
+    hideAttributesRow(row) {
+      return !row.hasAttributes || !this.isConcept;
+    }
+
     render() {
       const {searchContext: {domain}} = this.props;
       const {cdrVersion, data, error, ingredients, loading, standardOnly, sourceMatch, standardData, totalCount} = this.state;
@@ -430,9 +439,11 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
                   const open = ingredients[row.id] && ingredients[row.id].open;
                   const err = ingredients[row.id] && ingredients[row.id].error;
                   return <React.Fragment key={index}>
-                    {this.renderRow(row, false, index)}
+                    {this.hideAttributesRow(row)  && this.renderRow(row, false, index)}
                     {open && !err && ingredients[row.id].items.map((item, i) => {
-                      return <React.Fragment key={i}>{this.renderRow(item, true, `${index}.${i}`)}</React.Fragment>;
+                      return <React.Fragment key={i}>
+                        {this.hideAttributesRow(row) && this.renderRow(item, true, `${index}.${i}`)}
+                      </React.Fragment>;
                     })}
                     {open && err && <tr>
                       <td colSpan={5}>

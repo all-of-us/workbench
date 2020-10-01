@@ -10,7 +10,12 @@ import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {highlightSearchTerm, reactStyles} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {attributesSelectionStore, currentCohortCriteriaStore, currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
+import {
+  attributesSelectionStore,
+  currentCohortCriteriaStore,
+  currentWorkspaceStore,
+  serverConfigStore
+} from 'app/utils/navigation';
 import {AttrName, Criteria, CriteriaSubType, CriteriaType, DomainType, Operator} from 'generated/fetch';
 
 const COPE_SURVEY_ID = 1333342;
@@ -102,6 +107,7 @@ interface TreeNodeProps {
   expand?: Function;
   groupSelections: Array<number>;
   node: NodeProp;
+  source?: string;
   scrollToMatch: Function;
   searchTerms: string;
   select: Function;
@@ -296,7 +302,8 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 
   render() {
     const {autocompleteSelection, groupSelections, node,
-      node: {code, count, domainId, id, group, hasAttributes, name, parentId, selectable}, scrollToMatch, searchTerms, select, selectedIds,
+      node: {code, count, domainId, id, group, hasAttributes, name, parentId, selectable},
+      source, scrollToMatch, searchTerms, select, selectedIds,
       setAttributes} = this.props;
     const {children, error, expanded, hover, loading, searchMatch} = this.state;
     const nodeChildren = domainId === DomainType.PHYSICALMEASUREMENT.toString() ? node.children : children;
@@ -320,11 +327,12 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
               shape={'angle ' + (expanded ? 'down' : 'right')}
               size='16' onClick={() => this.toggleExpanded()}/>}
         </button>}
+        {(!hasAttributes || this.props.source !== 'concept') &&
         <div style={hover ? {...styles.treeNodeContent, background: colors.light} : styles.treeNodeContent}
           onMouseEnter={() => this.setState({hover: true})}
           onMouseLeave={() => this.setState({hover: false})}>
           {selectable && <button style={styles.iconButton}>
-            {hasAttributes
+            {(hasAttributes && (source !== 'concept'))
               ? <ClrIcon style={{color: colors.accent}}
                   shape='slider' dir='right' size='20'
                   onClick={() => this.setAttributes(node)}/>
@@ -347,8 +355,8 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
           {this.showCount && <div style={{whiteSpace: 'nowrap'}}>
             <span style={styles.count}>{count.toLocaleString()}</span>
           </div>}
-        </div>
-      </div>
+        </div>}
+      </div>}
       {!!nodeChildren && nodeChildren.length > 0 &&
         <div style={{display: expanded ? 'block' : 'none', marginLeft: nodeChildren[0].group ? '0.875rem' : '2rem'}}>
           {nodeChildren.map((child, c) => <TreeNode key={c}

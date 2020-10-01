@@ -41,7 +41,7 @@ import {
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
-import {Concept, ParticipantCohortStatus, WorkspaceAccessLevel} from 'generated/fetch';
+import {Criteria, ParticipantCohortStatus, WorkspaceAccessLevel} from 'generated/fetch';
 import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
 import {PopupTrigger} from './popups';
 import canWrite = WorkspacePermissionsUtil.canWrite;
@@ -321,7 +321,7 @@ interface Props {
   notebookStyles: boolean;
   workspace: WorkspaceData;
   criteria: Array<Selection>;
-  concept?: Array<Concept>;
+  concept?: Array<Criteria>;
 }
 
 interface State {
