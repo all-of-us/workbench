@@ -655,7 +655,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
               {participant && <SidebarContent />}
             </div>}
             {activeIcon === 'criteria' && <div style={contentStyle('criteria')}>
-              <div style={{padding: '0.25rem 0.25rem 0rem'}}>
+              <div style={{height: '100%', padding: '0.25rem 0.25rem 0rem'}}>
                 {!!currentCohortSearchContextStore.getValue() && <SelectionList back={() => setSidebarState(false)} selections={[]}/>}
               </div>
             </div>}
