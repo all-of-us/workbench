@@ -14,22 +14,18 @@ import {
   RuntimeOpsStore,
   runtimeOpsStore,
   updateRuntimeOpsStoreForWorkspaceNamespace,
-  currentRuntimeStore,
+  runtimeStore,
   useStore
 } from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Dropdown} from 'primereact/dropdown';
 import {InputNumber} from 'primereact/inputnumber';
-import {
-  LeoRuntimeInitializationAbortedError,
-  LeoRuntimeInitializationFailedError,
-  LeoRuntimeInitializer,
-} from 'app/utils/leo-runtime-initializer';
-
+import {useRuntime} from 'app/utils/runtime-utils';
 import {Runtime} from 'generated/fetch';
 
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import { RuntimeStatus } from 'generated';
 
 const {useState, useEffect, Fragment} = React;
 
@@ -139,6 +135,7 @@ interface State {
                 onChange={ 
                   ({value}) => fp.flow(
                     fp.find({cpu, memory: value}), 
+                    // If the selected machine is not different from the current machine return null
                     maybeGetMachine,
                     onChange
                     )(validLeonardoMachineTypes) }
@@ -167,33 +164,16 @@ const DiskSizeSelection = ({onChange, selectedDiskSize, currentRuntime}) => {
   </div>
 }
 
-const updateRuntime = async ({workspaceNamespace, currentRuntime, selectedDiskSize, selectedMachine}) => {
-  const {dataprocConfig: {masterDiskSize, masterMachineType}} = currentRuntime;
-  const nextMachineType = selectedMachine && selectedMachine.name;
-  const pollAbortSignal = new AbortController();
-
-  await runtimeApi().deleteRuntime(workspaceNamespace);
-
-  await LeoRuntimeInitializer.initialize({
-    workspaceNamespace,
-    dataprocConfig: {
-      masterMachineType: nextMachineType || masterMachineType,
-      masterDiskSize: selectedDiskSize || masterDiskSize
-    },
-    pollAbortSignal: pollAbortSignal.signal,
-    onStatusUpdate: status => status === 'Running' && pollAbortSignal.abort()
-  });
-}
-
 export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [selectedDiskSize, setSelectedDiskSize] = useState(null);
   const [selectedMachine, setselectedMachine] = useState(null);
   const runtimeOps = useStore(runtimeOpsStore);
-  const currentRuntime = useStore(currentRuntimeStore);
+  const [currentRuntime, setRequestedRuntime] = useRuntime(workspace.namespace);
   const activeRuntimeOp: RuntimeOperation = runtimeOps.opsByWorkspaceNamespace[workspace.namespace];
-  const {status = null } = currentRuntime || {};
+  const {status = null, dataprocConfig: {masterDiskSize, masterMachineType}} = currentRuntime || { dataprocConfig: {}};
+  const nextMachineType = selectedMachine && selectedMachine.name;
 
   // How do we reflect the state of the runtime to the user?
   // How should we handle errors?
@@ -210,7 +190,7 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
             operation: 'get',
             aborter: aborter
           });
-          currentRuntimeStore.set(await promise);
+          runtimeStore.set(await promise);
         } catch (e) {
           // 404 is expected if the runtime doesn't exist, represent this as a null
           // runtime rather than an error mode.
@@ -245,7 +225,6 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
   const isDataproc = (currentRuntime && !!currentRuntime.dataprocConfig);
   const runtimeChanged = selectedMachine || selectedDiskSize;
 
-  console.log('Status:', currentRuntime, status);
   return <div data-test-id='runtime-panel'>
     <h3 style={styles.sectionHeader}>Cloud analysis environment</h3>
     <div>
@@ -292,14 +271,13 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
     </div>
     <FlexRow style={{justifyContent: 'flex-end', marginTop: '.75rem'}}>
       <Button 
-        disabled={status !== 'Running' || !runtimeChanged}
-        onClick={async () => {
-          await updateRuntime({
-            currentRuntime, 
-            workspaceNamespace: workspace.namespace, 
-            selectedDiskSize, 
-            selectedMachine});
-        }}
+        disabled={status !== RuntimeStatus.Running || !runtimeChanged}
+        onClick={async () => setRequestedRuntime({dataprocConfig: {
+              masterMachineType: nextMachineType || masterMachineType,
+              masterDiskSize: selectedDiskSize || masterDiskSize
+            }
+          })
+        }
       >{currentRuntime ? 'Update' : 'Create'}</Button>
     </FlexRow>
     {activeRuntimeOp && <React.Fragment>

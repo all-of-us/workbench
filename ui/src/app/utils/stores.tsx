@@ -70,8 +70,12 @@ export const abortRuntimeOperationForWorkspace = (workspaceNamespace: string) =>
   }
 };
 
-
 export const currentRuntimeStore = atom<any>({});
+
+// TODO: set type 
+// runtime store states: undefined(initial state) -> Runtime (user selected) <--> null (delete only - no recreate)
+export const runtimeStore = atom<any|null|undefined>(undefined)
+
 
 /**
  * @name useStore
