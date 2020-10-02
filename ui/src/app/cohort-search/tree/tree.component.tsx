@@ -127,7 +127,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
         });
         this.setState({children});
       } else if (domainId === DomainType.SURVEY.toString() &&  selectedSurvey) {
-        // Temp: This shoud be hanlde in API
+        // Temp: This should be handle in API
         const selectedSurveyChild = resp.items.filter(child => child.name === selectedSurvey);
         if (selectedSurveyChild && selectedSurveyChild.length > 0) {
           cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, selectedSurveyChild[0].id)
