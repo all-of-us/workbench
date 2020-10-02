@@ -25,15 +25,15 @@ SELECT
                    u.compliance_training_bypass_time AS bypass_time,
                    u.compliance_training_expiration_time AS expiration_time) AS compliance_training,
             STRUCT(data_use_agreement_signed_version AS signed_version,
-                   data_use_agreement_completion_time AS completion_timei,
+                   data_use_agreement_completion_time AS completion_time,
                    data_use_agreement_bypass_time AS bypass_time) AS data_use_agreement,
             STRUCT(u.era_commons_completion_time AS completion_time,
                    u.era_commons_bypass_time AS bypass_time) AS era_commons,
             STRUCT(u.two_factor_auth_completion_time AS completion_time,
                    u.two_factor_auth_bypass_time AS bypass_time) AS two_factor_auth,
-            u.data_access_level,
-            STRUCT(u.free_tier_credits_limit_days_override AS days,
-                   u.free_tier_credits_limit_dollars_override AS dollars) AS free_tier_credits_limit_override) AS compliance
+            u.data_access_level) AS compliance,
+    STRUCT(u.free_tier_credits_limit_days_override AS days,
+           u.free_tier_credits_limit_dollars_override AS dollars) AS free_tier_credits_limit_override
 FROM
     reporting_test.latest_users u
 ORDER BY

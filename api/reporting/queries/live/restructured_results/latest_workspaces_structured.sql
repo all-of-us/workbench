@@ -11,7 +11,6 @@ SELECT
     STRUCT( w.rp_additional_notes AS additional_notes,
             w.rp_ancestry AS ancestry,
             w.rp_anticipated_findings AS anticipated_findings,
-            w.rp_approved AS approved,
             w.rp_commercial_purpose AS commercial_purpose,
             w.rp_control_set AS control_set,
             w.rp_disease_focused_research AS disease_focused_research,
@@ -27,12 +26,13 @@ SELECT
             w.rp_other_purpose_details AS other_purpose_details,
             w.rp_population_health AS population_health,
             w.rp_reason_for_all_of_us AS reason_for_all_of_us,
-            w.rp_review_requested AS review_requested,
             w.rp_scientific_approach AS scientific_approach,
             w.rp_social_behavioral AS social_behavioral,
-            w.rp_time_requested AS time_requested ) AS research_purpose,
+            STRUCT(w.rp_review_requested AS rerquested,
+                   w.rp_time_requested AS time_requested,
+                   w.rp_approved AS approved,
+                   w.needs_rp_review_prompt AS needs_user_prompt) AS review_rerquest ) AS research_purpose,
     STRUCT(w.billing_status AS status,
            w.billing_account_type AS account_type ) AS billing,
-    STRUCT(w.needs_rp_review_prompt) AS process_status
 FROM
     `reporting_test.latest_workspaces` w;
