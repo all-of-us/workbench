@@ -12,7 +12,8 @@ import {highlightSearchTerm, reactStyles} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {
   attributesSelectionStore,
-  currentCohortCriteriaStore, currentConceptStore,
+  currentCohortCriteriaStore,
+  currentConceptStore,
   currentWorkspaceStore,
   serverConfigStore,
   setSidebarActiveIconStore
@@ -346,7 +347,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
               shape={'angle ' + (expanded ? 'down' : 'right')}
               size='16'/>}
         </button>}
-        {(!hasAttributes || this.props.source !== 'concept') &&
+        {(!hasAttributes || source !== 'concept') &&
         <div style={hover ? {...styles.treeNodeContent, background: colors.light} : styles.treeNodeContent}
           onMouseEnter={() => this.setState({hover: true})}
           onMouseLeave={() => this.setState({hover: false})}>

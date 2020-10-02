@@ -20,6 +20,12 @@ const styles = reactStyles({
     position: 'absolute',
     right: '0',
     top: 0
+  },
+  loadingSubTree: {
+    height: '100%',
+    minHeight: '15rem',
+    pointerEvents: 'none',
+    opacity: 0.3
   }
 });
 const css = `
@@ -221,31 +227,31 @@ export class CriteriaSearch extends React.Component<Props, State>  {
       selectedIds, treeSearchTerms, growlVisible} = this.state;
     return <div>
       {loadingSubtree && <SpinnerOverlay/>}
-      <div style={loadingSubtree ?
-          {height: '100%', minHeight: '15rem', pointerEvents: 'none', opacity: 0.3} : {height: '100%', minHeight: '15rem'}}>
-      <style>{css}</style>
-       <Growl ref={(el) => this.growl = el} style={!growlVisible ? {...this.getGrowlStyle(), display: 'none'} : this.getGrowlStyle()}/>
-      {hierarchyNode && <CriteriaTree
-          source={source}
-          selectedSurvey={selectedSurvey}
-          autocompleteSelection={autocompleteSelection}
-          back={this.back}
-          groupSelections={groupSelections}
-          node={hierarchyNode}
-          scrollToMatch={this.setScroll}
-          searchTerms={treeSearchTerms}
-          select={this.addSelection}
-          selectedIds={selectedIds}
-          selectOption={this.setAutocompleteSelection}
-          setSearchTerms={this.setTreeSearchTerms}/>}
-       {/* List View (using duplicated version of ListSearch) */}
-      <div style={this.searchContentStyle('list')}>
-         <ListSearchV2 source={source}
-                       hierarchy={this.showHierarchy}
-                       searchContext={cohortContext}
-                       select={this.addSelection}
-                       selectedIds={this.getListSearchSelectedIds()}/>
-      </div>
+      <div style={loadingSubtree ? styles.loadingSubTree : {height: '100%', minHeight: '15rem'}}>
+        <style>{css}</style>
+        <Growl ref={(el) => this.growl = el}
+               style={!growlVisible ? {...this.getGrowlStyle(), display: 'none'} : this.getGrowlStyle()}/>
+        {hierarchyNode && <CriteriaTree
+            source={source}
+            selectedSurvey={selectedSurvey}
+            autocompleteSelection={autocompleteSelection}
+            back={this.back}
+            groupSelections={groupSelections}
+            node={hierarchyNode}
+            scrollToMatch={this.setScroll}
+            searchTerms={treeSearchTerms}
+            select={this.addSelection}
+            selectedIds={selectedIds}
+            selectOption={this.setAutocompleteSelection}
+            setSearchTerms={this.setTreeSearchTerms}/>}
+        {/* List View (using duplicated version of ListSearch) */}
+        <div style={this.searchContentStyle('list')}>
+          <ListSearchV2 source={source}
+                        hierarchy={this.showHierarchy}
+                        searchContext={cohortContext}
+                        select={this.addSelection}
+                        selectedIds={this.getListSearchSelectedIds()}/>
+        </div>
       </div>
      </div>;
   }
