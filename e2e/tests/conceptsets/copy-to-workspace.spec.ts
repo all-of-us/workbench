@@ -10,7 +10,7 @@ import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn} from 'utils/test-utils';
 
 
-describe('Workspace OWNER can copy Concept Sets to another workspace', () => {
+describe('Copy Concept Set to another workspace', () => {
 
   beforeEach(async () => {
     await signIn(page);
@@ -20,7 +20,7 @@ describe('Workspace OWNER can copy Concept Sets to another workspace', () => {
    * Test:
    * - Copy Concept Set from one workspace to another workspace.
    */
-  test('Copy Concept Set', async () => {
+  test('Workspace OWNER can copy Concept Set', async () => {
 
     // Need two workspaces. workspace1 is the Copy to workspace. workspace2 is the Copy from workspace.
     const workspace1: WorkspaceCard = await findWorkspace(page, {create: true});

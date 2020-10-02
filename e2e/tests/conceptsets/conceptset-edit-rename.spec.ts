@@ -8,7 +8,7 @@ import {makeRandomName, makeString} from 'utils/str-utils';
 import {findWorkspace, signIn} from 'utils/test-utils';
 
 
-describe('Editing and rename Concept Sets', () => {
+describe('Editing and rename Concept Set', () => {
 
   beforeEach(async () => {
     await signIn(page);
@@ -19,11 +19,11 @@ describe('Editing and rename Concept Sets', () => {
    * - Create new workspace.
    * - Create first new Concept Set in Procedure domain.
    * - Add new concept to first (existing) Concept Set.
-   * - Rename first Concept Set.
-   * - Delete first Concept Set.
+   * - Rename Concept Set.
+   * - Delete Concept Set.
    */
   test('Workspace OWNER can edit Concept Set', async () => {
-    // Create a workspace
+
     const workspaceName = await findWorkspace(page, {create: true}).then(card => card.clickWorkspaceName());
 
     const dataPage = new WorkspaceDataPage(page);
