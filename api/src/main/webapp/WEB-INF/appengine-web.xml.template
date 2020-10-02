@@ -4,6 +4,11 @@
   <threadsafe>true</threadsafe>
   <!-- Deploy complains about this tag, bug BigQuery needs it. -->
   <application>all-of-us-workbench-test</application>
+
+  <env-variables>
+    <env-var name="GAE_PROFILER_MODE" value="cpu,heap" />
+  </env-variables>
+
   <system-properties>
     <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
 
@@ -40,6 +45,7 @@
     <exclude path="static/README.md"/>
   </static-files>
 
+  <instance-class>${GAE_INSTANCE_CLASS}</instance-class>
   <automatic-scaling>
     <min-idle-instances>${GAE_MIN_IDLE_INSTANCES}</min-idle-instances>
     <max-instances>${GAE_MAX_INSTANCES}</max-instances>

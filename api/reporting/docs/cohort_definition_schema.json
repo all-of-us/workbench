@@ -1,0 +1,249 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "The cohort definition. It contains two arrays(includes and excludes)",
+  "type": "object",
+  "properties": {
+    "includes": {
+      "description": "A collection of search groups which can be 'AND'ed together",
+      "type": "array",
+      "items": [
+        {
+          "$ref": "#/definitions/search_group"
+        }
+      ]
+    },
+    "excludes": {
+      "description": "A collection of search groups which can be 'AND'ed together",
+      "type": "array",
+      "items": [
+        {
+          "$ref": "#/definitions/search_group"
+        }
+      ]
+    },
+    "dataFilters": {
+      "description": "Flags EHR or Physical Measurement data",
+      "type": "array",
+      "items": [
+        {
+          "description": "'has_ehr_data' or 'has_physical_measurement_data'",
+          "type": "string"
+        }
+      ]
+    }
+  },
+  "required": ["includes", "excludes"],
+  "definitions": {
+    "attribute": {
+      "description": "An attribute is a categorical/numerical property that contains name, operator and operands",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The name of the attribute",
+          "type": "string"
+        },
+        "operator": {
+          "description": "An operator, ex: =, !=, <, <=, >, >=, between, like, in",
+          "type": "string"
+        },
+        "operands": {
+          "description": "A collection of operands",
+          "type": "array",
+          "items": [
+            {
+              "description": "An operand",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": ["name", "operator", "operands"]
+    },
+    "modifier": {
+      "description": "A modifier can be age at event, number of occurrences or visit type",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "Name of the modifier",
+          "type": "string"
+        },
+        "operator": {
+          "description": "An operator, ex: =, !=, <, <=, >, >=, between, like, in",
+          "type": "string"
+        },
+        "operands": {
+          "description": "A collection of operands",
+          "type": "array",
+          "items": [
+            {
+              "description": "An operand",
+              "type": "integer"
+            }
+          ]
+        }
+      },
+      "required": ["name", "operator", "operands"]
+    },
+    "search_group": {
+      "description": "A search group is a collection of concepts which can be 'OR'ed together",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "A unique identifier for the search group",
+          "type": "string"
+        },
+        "items": {
+          "description": "A collection of search group items",
+          "type": "array",
+          "items": [
+            {
+              "$ref": "#/definitions/search_group_item"
+            }
+          ]
+        },
+        "temporal": {
+          "description": "Is the search group temporal(relating groups within a time frame). ",
+          "type": "boolean"
+        }
+      },
+      "required": ["id", "items", "temporal"]
+    },
+    "search_group_item": {
+      "description": "A search group item is a collection of concepts of the same domain which can be 'OR'ed together",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The unique identifier for the search group item",
+          "type": "string"
+        },
+        "type": {
+          "description": "The description for this search group item",
+          "type": "string"
+        },
+        "searchParameters": {
+          "description": "A collection search parameters",
+          "type": "array",
+          "items": [
+            {
+              "$ref": "#/definitions/search_parameter"
+            }
+          ]
+        },
+        "modifiers": {
+          "description": "A collection of modifiers that refine the search",
+          "type": "array",
+          "items": [
+            {
+              "$ref": "#/definitions/modifier"
+            }
+          ]
+        },
+        "temporalGroup": {
+          "description": "Temporal group index for the search group item",
+          "type": "integer"
+        }
+      },
+      "required": ["id", "type", "searchParameters", "modifiers"]
+    },
+    "search_parameter": {
+      "description": "A search parameter contains metadata about a specific concept",
+      "type": "object",
+      "properties": {
+        "parameterId": {
+          "description": "The unique identifier for the search parameter",
+          "type": "string"
+        },
+        "name": {
+          "description": "The concept name",
+          "type": "string"
+        },
+        "domain": {
+          "description": "The domain for this concept",
+          "type": "string"
+        },
+        "type": {
+          "description": "The OMOP vocabulary type",
+          "type": "string"
+        },
+        "group": {
+          "description": "Is the concept a parent or child. A parent subsumes children and a child subsumes nothing",
+          "type": "boolean"
+        },
+        "attributes": {
+          "description": "A collection of attributes that can be searched for specific domains, ex: labs",
+          "type": "array",
+          "items": [
+            {
+              "$ref": "#/definitions/attribute"
+            }
+          ]
+        },
+        "ancestorData": {
+          "description": "Does the search parameter contain data in the ancestor table",
+          "type": "boolean"
+        },
+        "standard": {
+          "description": "Is the search parameter source or standard. Source indicates that this is what the originating source code.\n Standard is an OMOP deliniation that helps to group items across vocabularies",
+          "type": "boolean"
+        },
+        "conceptId": {
+          "description": "Uniquely identifies an OMOP concept",
+          "type": "integer"
+        },
+        "value": {
+          "description": "For PPI questions this holds the answer concept id for CAT attributes and a number for NUM attributes.\n This property has been deprecated in favor of using the attributes.",
+          "type": "string"
+        }
+      },
+      "required": ["parameterId", "name", "domain", "type", "group", "ancestorData", "standard", "conceptId"],
+      "examples": [
+        {
+          "parameterId": "param8532",
+          "name": "Female",
+          "domain": "PERSON",
+          "type": "GENDER",
+          "group": false,
+          "ancestorData": false,
+          "standard": true,
+          "conceptId": 8532
+        },
+        {
+          "parameterId": "param325139",
+          "name": "In the past 7 days, how would you rate your pain on average (0= No pain, 10= Worst pain imaginable)?",
+          "domain": "SURVEY",
+          "type": "PPI",
+          "subtype": "ANSWER",
+          "group": false,
+          "attributes": [
+            {
+              "name": "NUM",
+              "operator": "EQUAL",
+              "operands": ["5"]
+            }
+          ],
+          "ancestorData": false,
+          "standard": false,
+          "conceptId": 1585747
+        },
+        {
+          "parameterId": "param324839",
+          "name": "In what country were you born? - Other",
+          "domain": "SURVEY",
+          "type": "PPI",
+          "subtype": "ANSWER",
+          "group": false,
+          "attributes": [
+            {
+              "name": "CAT",
+              "operator": "IN",
+              "operands": ["1586137"]
+            }
+          ],
+          "ancestorData": false,
+          "standard": false,
+          "conceptId": 1586135
+        }
+      ]
+    }
+  }
+}

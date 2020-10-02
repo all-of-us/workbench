@@ -3,13 +3,13 @@ import Modal from 'app/component/modal';
 import Link from 'app/element/link';
 import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
-import {EllipsisMenuAction, LinkText, ResourceCard} from 'app/text-labels';
+import {Option, LinkText, ResourceCard} from 'app/text-labels';
 import {buildXPath} from 'app/xpath-builders';
 import {ElementType} from 'app/xpath-options';
 import {Page} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForAttributeEquality} from 'utils/waits-utils';
-import EllipsisMenu from 'app/component/ellipsis-menu';
+import SnowmanMenu from 'app/component/snowman-menu';
 import AuthenticatedPage from './authenticated-page';
 
 export enum TabLabels {
@@ -109,7 +109,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
   }
 
   /**
-   * Delete Notebook, Concept Set, Dataset or Cohort, Cohort Review thru Ellipsis menu located inside the data resource card.
+   * Delete Notebook, Concept Set, Dataset or Cohort, Cohort Review via snowman menu located inside the data resource card.
    * @param {string} resourceName
    * @param {ResourceCard} resourceType
    */
@@ -120,7 +120,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
       throw new Error(`Failed to find ${resourceType} card "${resourceName}"`);
     }
 
-    await card.clickEllipsisAction(EllipsisMenuAction.Delete, {waitForNav: false});
+    await card.selectSnowmanMenu(Option.Delete, {waitForNav: false});
 
     const modal = new Modal(this.page);
     await modal.waitForLoad();
@@ -141,7 +141,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
         link = LinkText.DeleteNotebook;
         break;
       case ResourceCard.CohortReview:
-        link = EllipsisMenuAction.Delete;
+        link = Option.Delete;
         break;
       default:
         throw new Error(`Case ${resourceType} handling is not defined.`);
@@ -156,7 +156,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
   }
 
   /**
-   * Rename Notebook, Concept Set, Dataset or Cohorts thru the Ellipsis menu located inside the Dataset Resource card.
+   * Rename Notebook, Concept Set, Dataset or Cohorts thru the snowman menu located inside the Dataset Resource card.
    * @param {string} resourceName
    * @param {string} newResourceName
    */
@@ -168,16 +168,16 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
       throw new Error(`Failed to find ${resourceType} card "${resourceName}"`);
     }
 
-    let menuLink: EllipsisMenuAction;
+    let option: Option;
     switch (resourceType) {
       case ResourceCard.Dataset:
-        menuLink = EllipsisMenuAction.RenameDataset;
+        option = Option.RenameDataset;
         break;
       default:
-        menuLink = EllipsisMenuAction.Rename;
+        option = Option.Rename;
         break;
     }
-    await card.clickEllipsisAction(menuLink, {waitForNav: false});
+    await card.selectSnowmanMenu(option, {waitForNav: false});
 
     const modal = new Modal(this.page);
     await modal.waitForLoad();
@@ -222,20 +222,22 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
   }
 
   /**
-   * Select Workspace action dropdown menu option.
-   * @param {EllipsisMenuAction} menuOption
+   * Select Workspace action snowman menu option.
+   * @param {Option} option
    * @param opts
    */
-  async selectWorkspaceAction(menuOption: EllipsisMenuAction, opts?: { waitForNav: false }): Promise<void> {
-    const ellipsisMenu = new EllipsisMenu(this.page, './/*[@data-test-id="workspace-menu-button"]');
-    return ellipsisMenu.clickAction(menuOption, opts);
+  async selectWorkspaceAction(option: Option, opts?: { waitForNav: false }): Promise<void> {
+    const iconXpath = './/*[@data-test-id="workspace-menu-button"]';
+    await this.page.waitForXPath(iconXpath, {visible: true}).then(icon => icon.click());
+    const snowmanMenu = new SnowmanMenu(this.page);
+    return snowmanMenu.select(option, opts);
   }
 
   /**
-   * Delete workspace via Workspace action menu "Delete" option.
+   * Delete workspace via Workspace Actions snowman menu "Delete" option.
    */
   async deleteWorkspace(): Promise<string[]> {
-    await this.selectWorkspaceAction(EllipsisMenuAction.Delete, { waitForNav: false });
+    await this.selectWorkspaceAction(Option.Delete, { waitForNav: false });
     // Handle Delete Confirmation modal
     return this.dismissDeleteWorkspaceModal();
   }

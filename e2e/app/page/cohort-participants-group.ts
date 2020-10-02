@@ -1,14 +1,14 @@
 import {ElementHandle, Page} from 'puppeteer';
 import {FieldSelector} from 'app/page/cohort-build-page';
 import Modal from 'app/component/modal';
-import EllipsisMenu from 'app/component/ellipsis-menu';
 import {waitForNumericalString, waitForText} from 'utils/waits-utils';
 import CohortSearchPage, {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/cohort-search-page';
 import TieredMenu from 'app/component/tiered-menu';
 import {waitWhileLoading} from 'utils/test-utils';
 import {LinkText} from 'app/text-labels';
+import {snowmanIconXpath} from 'app/component/snowman-menu';
 
-export enum GroupAction {
+enum GroupMenuOption {
    EditGroupName  = 'Edit group name',
    SuppressGroupFromTotalCount = 'Suppress group from total count',
    DeleteGroup = 'Delete group',
@@ -38,19 +38,29 @@ export default class CohortParticipantsGroup {
     return `${this.rootXpath}/ancestor::node()[1]${FieldSelector.GroupCount}`;
   }
 
-  getGroupEllipsisMenu(): EllipsisMenu {
-    const ellipsisXpath = `${this.rootXpath}//clr-icon[@shape="ellipsis-vertical"]`;
-    return new EllipsisMenu(this.page, ellipsisXpath);
+  async clickSnowmanIcon(): Promise<void> {
+    const iconXpath = `${this.rootXpath}${snowmanIconXpath}`;
+    await this.page.waitForXPath(iconXpath, {visible: true})
+       .then(icon => icon.click());
   }
 
-   /**
-    * Update Group name.
-    * @param {string} newGroupName
-    * @return {boolean} Returns TRUE if rename was successful.
-    */
+  /**
+   * Build Cohort Criteria page: Group snowman menu
+   * @param {GroupMenuOption} option
+   */
+  async selectGroupSnowmanMenu(option: GroupMenuOption): Promise<void> {
+    const menu = new TieredMenu(this.page);
+    return menu.clickMenuItem([option.toString()]);
+  }
+
+  /**
+   * Update Group name.
+   * @param {string} newGroupName
+   * @return {boolean} Returns TRUE if rename was successful.
+   */
   async editGroupName(newGroupName: string): Promise<void> {
-    const menu = this.getGroupEllipsisMenu();
-    await menu.clickParticipantsGroupAction(GroupAction.EditGroupName);
+    await this.clickSnowmanIcon();
+    await this.selectGroupSnowmanMenu(GroupMenuOption.EditGroupName);
     const modal = new Modal(this.page);
     const textbox = await modal.waitForTextbox('New Name:');
     await textbox.type(newGroupName);
@@ -62,8 +72,8 @@ export default class CohortParticipantsGroup {
    * @return Returns array of criterias in this group.
    */
   async deleteGroup(): Promise<ElementHandle[]> {
-    const menu = this.getGroupEllipsisMenu();
-    await menu.clickParticipantsGroupAction(GroupAction.DeleteGroup);
+    await this.clickSnowmanIcon();
+    await this.selectGroupSnowmanMenu(GroupMenuOption.DeleteGroup);
     await waitForText(this.page, 'This group has been deleted');
     await waitWhileLoading(this.page);
     return this.getGroupCriteriasList();

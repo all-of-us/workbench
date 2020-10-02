@@ -374,6 +374,9 @@ curl -H "Content-Type: application/json" "localhost:9200/cdr_person/_doc/_search
 ###
 ## Cohort Builder
 
+#### Cohort Definition Schema
+[Documented here](api/reporting/docs/cohort_definition_schema.json)
+
 During ```./project dev-up``` the schema activity is the only activity run, which only creates tables for the cdr schema.
 
 Loading of cloud data for the criteria trees and cdr version happens in a manual goal(deletes and inserts tree data into the criteria table):

@@ -83,18 +83,20 @@ public interface LeonardoMapper {
   @AfterMapping
   default void getRuntimeAfterMapper(
       @MappingTarget Runtime runtime, LeonardoGetRuntimeResponse leonardoGetRuntimeResponse) {
-    mapLabels(runtime, (Map<String, String>) leonardoGetRuntimeResponse.getLabels());
+    mapLabels(runtime, leonardoGetRuntimeResponse.getLabels());
     mapRuntimeConfig(runtime, leonardoGetRuntimeResponse.getRuntimeConfig());
   }
 
   @AfterMapping
   default void listRuntimeAfterMapper(
       @MappingTarget Runtime runtime, LeonardoListRuntimeResponse leonardoListRuntimeResponse) {
-    mapLabels(runtime, (Map<String, String>) leonardoListRuntimeResponse.getLabels());
+    mapLabels(runtime, leonardoListRuntimeResponse.getLabels());
     mapRuntimeConfig(runtime, leonardoListRuntimeResponse.getRuntimeConfig());
   }
 
-  default void mapLabels(Runtime runtime, Map<String, String> runtimeLabels) {
+  default void mapLabels(Runtime runtime, Object runtimeLabelsObj) {
+    @SuppressWarnings("unchecked")
+    final Map<String, String> runtimeLabels = (Map<String, String>) runtimeLabelsObj;
     if (runtimeLabels == null || runtimeLabels.get(RUNTIME_LABEL_AOU_CONFIG) == null) {
       // If there's no label, fall back onto the old behavior where every Runtime was created with a
       // default Dataproc config
