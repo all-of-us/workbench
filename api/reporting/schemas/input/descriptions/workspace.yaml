@@ -95,5 +95,5 @@ workspace:
   rp_time_requested: |
       Time user  requested a research purpose review, or null if never requested.
   workspace_id: |
-      Prirmary key of the workspace table in Workrbench application database. Along with
+      Primary key of the workspace table in Workrbench application database. Along with
       snapshot_timestamp, serves as a pseudo-primary key for this table.
