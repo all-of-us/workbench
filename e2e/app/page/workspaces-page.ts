@@ -80,7 +80,7 @@ export default class WorkspacesPage extends WorkspaceEditPage {
 
     const editPage = await this.clickCreateNewWorkspace();
     // wait for Billing Account default selected value
-    await waitForText(this.page, 'Use All of Us free credits');
+    await waitForText(this.page, 'Use All of Us free credits', );
 
     await (await editPage.getWorkspaceNameTextbox()).type(workspaceName);
     await (await editPage.getWorkspaceNameTextbox()).pressTab();
