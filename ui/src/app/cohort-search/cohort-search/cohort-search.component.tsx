@@ -3,15 +3,14 @@ import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
 
 import {DemographicsV2} from 'app/cohort-search/demographics/demographics-v2.component';
-import {ListSearchV2} from 'app/cohort-search/list-search-v2/list-search-v2.component';
 import {searchRequestStore} from 'app/cohort-search/search-state.service';
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
-import {CriteriaTree} from 'app/cohort-search/tree/tree.component';
 import {domainToTitle, generateId, typeToTitle} from 'app/cohort-search/utils';
 import {Button, Clickable, StyledAnchorTag} from 'app/components/buttons';
 import {FlexRowWrap} from 'app/components/flex';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AoU} from 'app/components/text-wrappers';
+import {CriteriaSearch} from 'app/pages/data/criteria-search';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentCohortSearchContext} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
@@ -320,17 +319,6 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
     return style;
   }
 
-  showHierarchy = (criterion: Criteria) => {
-    this.setState({
-      autocompleteSelection: criterion,
-      backMode: 'tree',
-      hierarchyNode: {...criterion, id: 0},
-      mode: 'tree',
-      loadingSubtree: true,
-      treeSearchTerms: criterion.name
-    });
-  }
-
   modifiersFlag = (disabled: boolean) => {
     this.setState({disableFinish: disabled});
   }
@@ -387,8 +375,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
 
   render() {
     const {cohortContext} = this.props;
-    const {autocompleteSelection, count, groupSelections, growlVisible, hierarchyNode, loadingSubtree, selectedIds, selections, title,
-      treeSearchTerms} = this.state;
+    const {count, growlVisible, loadingSubtree, selectedIds, selections, title} = this.state;
     return !!cohortContext && <FlexRowWrap style={styles.searchContainer}>
       <style>
         {css}
@@ -437,25 +424,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
             : <React.Fragment>
               {loadingSubtree && <SpinnerOverlay/>}
               <div style={loadingSubtree ? {height: '100%', pointerEvents: 'none', opacity: 0.3} : {height: '100%'}}>
-                {/* Tree View */}
-                  {hierarchyNode && <CriteriaTree
-                      autocompleteSelection={autocompleteSelection}
-                      back={this.back}
-                      groupSelections={groupSelections}
-                      node={hierarchyNode}
-                      scrollToMatch={this.setScroll}
-                      searchTerms={treeSearchTerms}
-                      select={this.addSelection}
-                      selectedIds={selectedIds}
-                      selectOption={this.setAutocompleteSelection}
-                      setSearchTerms={this.setTreeSearchTerms}/>}
-                {/* List View (using duplicated version of ListSearch) */}
-                <div style={this.searchContentStyle('list')}>
-                  <ListSearchV2 hierarchy={this.showHierarchy}
-                              searchContext={cohortContext}
-                              select={this.addSelection}
-                              selectedIds={selectedIds}/>
-                </div>
+                  <CriteriaSearch cohortContext={cohortContext} source={'criteria'}/>
               </div>
             </React.Fragment>}
         </div>

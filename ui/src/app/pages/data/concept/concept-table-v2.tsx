@@ -5,7 +5,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentConcept} from 'app/utils';
 import {currentConceptStore} from 'app/utils/navigation';
-import {Concept, Domain} from 'generated/fetch';
+import {Domain} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
@@ -223,14 +223,14 @@ interface Props {
   searchTerm?: string;
   selectedConcepts: any[];
   error: boolean;
-  concept: Array<Concept>;
+  concept: Array<any>;
 }
 
 interface State {
   first: number;
   pageLoading: boolean;
   growlVisible: boolean;
-  selectedConcepts: Array<Concept>;
+  selectedConcepts: Array<any>;
   showBanner: boolean;
   selectAll: boolean;
   totalRecords: number;
