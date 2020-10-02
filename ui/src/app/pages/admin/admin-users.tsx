@@ -199,7 +199,7 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
                style={{marginBottom: '.5em', width: '300px'}}
                type='text'
                placeholder='Search'
-               onChange={e => this.setState({filter: e.target.value})}
+               onChange={fp.debounce(300, e => this.setState({filter: e.target.value}))}
         />
         <DataTable value={this.convertProfilesToFields(users)}
                    paginator={true}
