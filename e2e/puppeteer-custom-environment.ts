@@ -1,6 +1,5 @@
 const PuppeteerEnvironment = require('jest-environment-puppeteer');
 const fs = require('fs-extra');
-const fp = require('lodash/fp');
 require('jest-circus');
 
 // jest-circus retryTimes. No retry on failed test if env DEBUG=true. e.g. "yarn test:debug"
@@ -20,26 +19,26 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
   // Take a screenshot right after failure
   async handleTestEvent(event, state) {
     switch (event.name) {
-    case 'test_fn_failure':
-      if (state.currentlyRunningTest.invocations > retryTimes) {
-        console.error(`Failed test:  "${event.test.name}"`);
-        const testName = fp.startCase(state.currentlyRunningTest.name).replace(/[^A-Z0-9]+/ig, '');
-        const screenshotDir = 'logs/screenshot';
-        await fs.ensureDir(screenshotDir);
+      case 'test_fn_failure':
+      case 'hook_failure':
+      case 'test_done':
+        if (state.currentlyRunningTest.invocations > retryTimes || event.test.errors.length > 0) {
+          console.error(`handleTestEvent case: ${event.name}`);
+          console.error(`Failed test:  "${event.test.name}"`);
+          const testName = state.currentlyRunningTest.name.replace(/\W/g, '-');
+          const screenshotDir = 'logs/screenshot';
+          await fs.ensureDir(screenshotDir);
           // move create-filename to helper.ts
-        const timestamp = new Date().getTime();
-        const fileName = `${testName}_${timestamp}.png`;
-
-        const screenshotFile = `${screenshotDir}/${fileName}`;
-        await this.global.page.screenshot({path: screenshotFile, fullPage: true});
-        console.error(`Saved screenshot ${screenshotFile}`);
-
-        const htmlFileName = `${testName}_${timestamp}.html`;
-        await this.savePageToFile(htmlFileName);
-      }
-      break;
-    default:
-      break;
+          const timestamp = new Date().getTime();
+          const screenshotFileName = `${screenshotDir}/${testName}_${timestamp}.png`;
+          await this.global.page.screenshot({path: screenshotFileName, fullPage: true});
+          console.error(`Saved screenshot ${screenshotFileName}`);
+          const htmlFileName = `${testName}_${timestamp}.html`;
+          await this.savePageToFile(htmlFileName);
+        }
+        break;
+      default:
+        break;
     }
   }
 

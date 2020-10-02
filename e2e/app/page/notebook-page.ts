@@ -24,7 +24,7 @@ enum CssSelector {
 enum Xpath {
   fileMenuDropdown = '//a[text()="File"]',
   downloadMenuDropdown = '//a[text()="Download as"]',
-  downloadIpynbButton = '//*[@id="download_ipynb"]/a',
+  downloadIpynbButton = '//*[@id="download_script"]/a',
   downloadMarkdownButton = '//*[@id="download_markdown"]/a',
 }
 

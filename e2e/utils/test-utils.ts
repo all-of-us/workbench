@@ -14,12 +14,11 @@ import {WorkspaceAccessLevel} from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
 import {makeWorkspaceName} from './str-utils';
 
-
 export async function signIn(page: Page, userId?: string, passwd?: string): Promise<void> {
   const loginPage = new GoogleLoginPage(page);
   await loginPage.login(userId, passwd);
-  // this element exists in DOM after user has logged in
-  await page.waitForFunction(() => !!document.querySelector('app-signed-in'), {timeout: 60000});
+  // This element exists in DOM after user has logged in. But it could takes a while.
+  await page.waitForFunction(() => !!document.querySelector('app-signed-in'), {timeout: 120000});
   const homePage = new HomePage(page);
   await homePage.waitForLoad();
 }

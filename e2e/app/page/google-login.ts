@@ -1,8 +1,7 @@
 import { ElementHandle, Page } from 'puppeteer';
 import {config} from 'resources/workbench-config';
-import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
-import BaseElement from 'app/element/base-element';
 import Button from 'app/element/button';
+import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
 
 export enum FieldSelector {
   LoginButton= '//*[@role="button"]/*[contains(normalize-space(text()),"Sign In")]',
@@ -49,29 +48,38 @@ export default class GoogleLoginPage {
    * @param email
    */
   async enterEmail(userEmail: string) : Promise<void> {
-    // Handle Google "Use another account" dialog if it exists
-    const useAnotherAccountXpath = '//*[@role="link"]//*[text()="Use another account"]';
-    const elemt1 = await Promise.race([
-      this.page.waitForXPath(FieldSelector.EmailInput, {visible: true, timeout: 60000}),
-      this.page.waitForXPath(useAnotherAccountXpath, {visible: true, timeout: 60000}),
-    ]);
+    try {
+      // Handle Google "Use another account" modal if it exists
+      const useAnotherAccountXpath = '//*[@role="link"]//*[text()="Use another account"]';
+      const elemt1 = await Promise.race([
+        this.page.waitForXPath(FieldSelector.EmailInput, {visible: true, timeout: 60000}),
+        this.page.waitForXPath(useAnotherAccountXpath, {visible: true, timeout: 60000}),
+      ]);
 
-    // compare to the Use another account link
-    const [link] = await this.page.$x(useAnotherAccountXpath);
-    const isLink = await this.page.evaluate((e1, e2) => e1 === e2, elemt1, link);
-    if (isLink) {
-      // click " Use another Account " link
-      await (BaseElement.asBaseElement(this.page, link)).clickAndWait();
+      // compare to the "Use another Account" link
+      const [link] = await this.page.$x(useAnotherAccountXpath);
+      if (link) {
+        const isLink = await this.page.evaluate((e1, e2) => e1 === e2, elemt1, link);
+        if (isLink) {
+          // click "Use another Account" link and wait for navigation.
+          await link.click();
+        }
+        await link.dispose();
+      }
+
+      const emailInput = await this.email();
+      await emailInput.focus();
+      await emailInput.type(userEmail, {delay: 15});
+      await emailInput.dispose();
+
+      const nextButton = await this.page.waitForXPath(FieldSelector.NextButton, {visible: true});
+      await nextButton.click();
+      await nextButton.dispose();
+    } catch(error) {
+      await takeScreenshot(this.page);
+      await savePageToFile(this.page);
+      throw error;
     }
-
-    const emailInput = await this.email();
-    await emailInput.focus();
-    await emailInput.type(userEmail, {delay: 15});
-    await emailInput.dispose();
-
-    const nextButton = await this.page.waitForXPath(FieldSelector.NextButton, {visible: true});
-    await (BaseElement.asBaseElement(this.page, nextButton)).clickAndWait();
-    await nextButton.dispose();
   }
 
   /**
@@ -79,26 +87,47 @@ export default class GoogleLoginPage {
    * @param pwd
    */
   async enterPassword(pwd: string) : Promise<void> {
-    const input = await this.password();
-    await input.focus();
-    await input.type(pwd, {delay: 15});
-    await input.dispose();
+    try {
+      const input = await this.password();
+      await input.focus();
+      await input.type(pwd, {delay: 15});
+      await input.dispose();
+    } catch (error) {
+      await takeScreenshot(this.page);
+      await savePageToFile(this.page);
+      throw error;
+    }
   }
 
   /**
    * Click Next button to submit login credential.
    */
-  async submit() : Promise<void> {
-    const submitButton = new Button(this.page, FieldSelector.SubmitButton);
-    const [response] = await Promise.all([
-      this.page.waitForNavigation({waitUntil: ['networkidle2', 'load'], timeout: 180000}),
-      submitButton.click(),
-    ]);
-    const status = response.status();
-    if (status !== 200) {
-      console.error(`Login navigation response status: ${status}`);
+  async submit(): Promise<void> {
+    try {
+      const submitButton = new Button(this.page, FieldSelector.SubmitButton);
+      await Promise.all([
+        this.page.waitForNavigation({waitUntil: ['networkidle2', 'load'], timeout: 60000}),
+        submitButton.click()
+      ]);
+      await submitButton.dispose();
+    } catch (err) {
+      // If navigation errored, it could be because prompted with "Enter Recovery Email" page.
+      const recoverEmailXpath = '//input[@type="email" and @aria-label="Enter recovery email address"]';
+      await Promise.race([
+        this.page.waitForSelector('app-signed-in'),
+        this.page.waitForXPath(recoverEmailXpath, {visible: true})
+      ]);
+      const [elementHandle] = await this.page.$x(recoverEmailXpath);
+      if (elementHandle) {
+        await elementHandle.type(config.institutionContactEmail);
+        await Promise.all([
+          this.page.waitForNavigation({waitUntil: ['networkidle2', 'load'], timeout: 60000}),
+          this.page.keyboard.press(String.fromCharCode(13)), // press Enter key
+          this.page.waitForSelector('app-signed-in')
+        ]);
+        await elementHandle.dispose();
+      }
     }
-    await submitButton.dispose();
   }
 
   /**
@@ -126,33 +155,11 @@ export default class GoogleLoginPage {
     await this.load(); // Load the Google Sign In page.
     await this.loginButton().then(button => button.click());
 
-    try {
-      await this.enterEmail(user);
-      await this.page.waitFor(500); // to reduce probablity of getting Google login captcha
-      await this.enterPassword(pwd);
-      await this.page.waitFor(500);
-      await this.submit();
-    } catch (err) {
-      await takeScreenshot(this.page);
-      await savePageToFile(this.page);
-      throw new Error(err);
-    }
-
-    // Sometimes, user is prompted with "Enter Recovery Email" page. Handle the page if found.
-    const recoverEmailXpath = '//input[@type="email" and @aria-label="Enter recovery email address"]';
-    await Promise.race([
-      this.page.waitForSelector('app-signed-in'),
-      this.page.waitForXPath(recoverEmailXpath, {visible: true})
-    ]);
-    const elementHandles = await this.page.$x(recoverEmailXpath);
-    if (elementHandles.length > 0) {
-      await elementHandles[0].type(config.institutionContactEmail);
-      await Promise.all([
-        this.page.waitForNavigation(),
-        this.page.keyboard.press(String.fromCharCode(13)), // press Enter key
-      ]);
-      await this.page.waitForSelector('app-signed-in');
-    }
+    await this.enterEmail(user);
+    await this.page.waitFor(500); // Reduces probablity of getting Google login captcha
+    await this.enterPassword(pwd);
+    await this.page.waitFor(500);
+    await this.submit();
   }
 
   async loginAs(email, paswd) {
