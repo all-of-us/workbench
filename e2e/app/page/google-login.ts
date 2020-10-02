@@ -1,5 +1,6 @@
 import { ElementHandle, Page } from 'puppeteer';
 import {config} from 'resources/workbench-config';
+import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
 import BaseElement from 'app/element/base-element';
 import Button from 'app/element/button';
 
@@ -89,7 +90,14 @@ export default class GoogleLoginPage {
    */
   async submit() : Promise<void> {
     const submitButton = new Button(this.page, FieldSelector.SubmitButton);
-    await submitButton.click();
+    const [response] = await Promise.all([
+      this.page.waitForNavigation({waitUntil: ['networkidle2', 'load'], timeout: 180000}),
+      submitButton.click(),
+    ]);
+    const status = response.status();
+    if (status !== 200) {
+      console.error(`Login navigation response status: ${status}`);
+    }
     await submitButton.dispose();
   }
 
@@ -118,11 +126,17 @@ export default class GoogleLoginPage {
     await this.load(); // Load the Google Sign In page.
     await this.loginButton().then(button => button.click());
 
+    try {
       await this.enterEmail(user);
       await this.page.waitFor(500); // to reduce probablity of getting Google login captcha
       await this.enterPassword(pwd);
       await this.page.waitFor(500);
       await this.submit();
+    } catch (err) {
+      await takeScreenshot(this.page);
+      await savePageToFile(this.page);
+      throw new Error(err);
+    }
 
     // Sometimes, user is prompted with "Enter Recovery Email" page. Handle the page if found.
     const recoverEmailXpath = '//input[@type="email" and @aria-label="Enter recovery email address"]';
@@ -134,10 +148,10 @@ export default class GoogleLoginPage {
     if (elementHandles.length > 0) {
       await elementHandles[0].type(config.institutionContactEmail);
       await Promise.all([
-        this.page.waitForNavigation({waitUntil: ['networkidle2', 'load'], timeout: 180000}),
+        this.page.waitForNavigation(),
         this.page.keyboard.press(String.fromCharCode(13)), // press Enter key
-        this.page.waitForSelector('app-signed-in')
       ]);
+      await this.page.waitForSelector('app-signed-in');
     }
   }
 
