@@ -605,8 +605,7 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
         {this.isConceptSetFlagEnable() && <React.Fragment>
           {conceptDomainCounts.filter(domain => !selectedDomain || selectedDomain === domain.domain).map((domain) => {
             const tabError = countsError || domainErrors.includes(domain.domain);
-            return <React.Fragment> {!tabError && !this.domainLoading(activeDomainTab) && <label style={{color: colors.accent, lineHeight: '1.5rem'}}>
-              Showing 1000 of {domain.conceptCount.toLocaleString()}</label>}
+            return <React.Fragment>
               <CriteriaSearch
                 cohortContext={{domain: activeDomainTab.domain, type: 'PPI', standard: this.state.standardConceptsOnly}}
                 source='concept'/>
