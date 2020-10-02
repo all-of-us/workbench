@@ -2,10 +2,8 @@ const PuppeteerEnvironment = require('jest-environment-puppeteer');
 const fs = require('fs-extra');
 require('jest-circus');
 
-// jest-circus retryTimes. No retry on failed test if env DEBUG=true. e.g. "yarn test:debug"
-const retryTimes = process.env.DEBUG === 'true' ? 0 : 1;
-
 class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
+
   async setup() {
     await super.setup();
   }
@@ -22,7 +20,7 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
       case 'test_fn_failure':
       case 'hook_failure':
       case 'test_done':
-        if (state.currentlyRunningTest.invocations > retryTimes || event.test.errors.length > 0) {
+        if (event.test.errors.length > 0) {
           console.error(`handleTestEvent case: ${event.name}`);
           console.error(`Failed test:  "${event.test.name}"`);
           const testName = state.currentlyRunningTest.name.replace(/\W/g, '-');
