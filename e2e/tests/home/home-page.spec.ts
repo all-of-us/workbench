@@ -35,10 +35,10 @@ describe('Home page ui tests', () => {
       await expect(cardName).toMatch(new RegExp(/^[a-zA-Z]+/));
 
       // check Workspace Action menu for listed actions
-      const ellipsis = card.getEllipsis();
+      const snowmanMenu = await card.getSnowmanMenu();
       // Assumption: test user is workspace Owner.
-      // Check Workspace Actions ellipsis dropdown displayes the right set of options
-      const links = await ellipsis.getAvaliableActions();
+      // Check Workspace Actions snowman menu displayes the right set of options.
+      const links = await snowmanMenu.getAllOptionTexts();
       expect(links).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
     }
   });

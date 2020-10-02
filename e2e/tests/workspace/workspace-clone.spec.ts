@@ -1,6 +1,6 @@
 import WorkspacesPage from 'app/page/workspaces-page';
 import {findWorkspace, signIn} from 'utils/test-utils';
-import {EllipsisMenuAction} from 'app/text-labels';
+import {Option} from 'app/text-labels';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import Navigation, {NavLink} from 'app/component/navigation';
 import WorkspaceCard from 'app/component/workspace-card';
@@ -23,7 +23,7 @@ describe('Clone workspace', () => {
 
       await workspaceCard.asElementHandle().hover();
       // Click on Ellipsis menu "Duplicate" option.
-      await workspaceCard.clickEllipsisAction(EllipsisMenuAction.Duplicate);
+      await workspaceCard.selectSnowmanMenu(Option.Duplicate);
 
       // Fill out Workspace Name should be just enough for clone successfully
       const workspacesPage = new WorkspacesPage(page);
@@ -54,7 +54,7 @@ describe('Clone workspace', () => {
       await workspaceCard.clickWorkspaceName();
 
       const dataPage = new WorkspaceDataPage(page);
-      await dataPage.selectWorkspaceAction(EllipsisMenuAction.Duplicate);
+      await dataPage.selectWorkspaceAction(Option.Duplicate);
 
       const workspacesPage = new WorkspacesPage(page);
 

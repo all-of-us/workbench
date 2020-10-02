@@ -5,7 +5,7 @@ import Link from 'app/element/link';
 import HomePage from 'app/page/home-page';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspacesPage from 'app/page/workspaces-page';
-import {EllipsisMenuAction, LinkText, WorkspaceAccessLevel} from 'app/text-labels';
+import {Option, LinkText, WorkspaceAccessLevel} from 'app/text-labels';
 import {config} from 'resources/workbench-config';
 import {findWorkspace, signIn, signInAs, waitWhileLoading} from 'utils/test-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
@@ -40,8 +40,7 @@ describe('Share workspace', () => {
       }
 
       let shareModal = await aboutPage.openShareModal();
-      await shareModal.shareWithUser(
-        config.collaboratorUsername, WorkspaceAccessLevel.Owner);
+      await shareModal.shareWithUser(config.collaboratorUsername, WorkspaceAccessLevel.Owner);
       // Collab list is refreshed.
       await waitWhileLoading(page);
 
@@ -70,7 +69,7 @@ describe('Share workspace', () => {
       const workspaceName = await workspaceCard.getWorkspaceName();
 
       // Open the Share modal
-      await workspaceCard.clickEllipsisAction(EllipsisMenuAction.Share, {waitForNav: false});
+      await workspaceCard.selectSnowmanMenu(Option.Share, {waitForNav: false});
 
       const shareModal = new ShareModal(page);
       await shareModal.waitUntilVisible();
@@ -99,14 +98,13 @@ describe('Share workspace', () => {
       expect(accessLevel).toBe(WorkspaceAccessLevel.Reader);
 
       // Share, Edit and Delete actions are not available for click.
-      const menu2 = workspaceCard2.getEllipsis();
-      await menu2.clickEllipsis();
-      expect(await menu2.isDisabled(EllipsisMenuAction.Share)).toBe(true);
-      expect(await menu2.isDisabled(EllipsisMenuAction.Edit)).toBe(true);
-      expect(await menu2.isDisabled(EllipsisMenuAction.Delete)).toBe(true);
+      const snowmanMenu = await workspaceCard2.getSnowmanMenu();
+      expect(await snowmanMenu.isOptionDisabled(Option.Share)).toBe(true);
+      expect(await snowmanMenu.isOptionDisabled(Option.Edit)).toBe(true);
+      expect(await snowmanMenu.isOptionDisabled(Option.Delete)).toBe(true);
 
       // Duplicate action is available for click.
-      expect(await menu2.isDisabled(EllipsisMenuAction.Duplicate)).toBe(false);
+      expect(await snowmanMenu.isOptionDisabled(Option.Duplicate)).toBe(false);
 
       // Make sure the Search input-field in Share modal is disabled.
       await workspaceCard2.clickWorkspaceName();

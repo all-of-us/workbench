@@ -1,10 +1,10 @@
 import {Page} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
-import EllipsisMenu from 'app/component/ellipsis-menu';
+import SnowmanMenu from 'app/component/snowman-menu';
 import {buildXPath} from 'app/xpath-builders';
 import {ElementType} from 'app/xpath-options';
-import {EllipsisMenuAction} from 'app/text-labels';
+import {Option} from 'app/text-labels';
 import Button from 'app/element/button';
 import Textbox from 'app/element/textbox';
 import {getPropValue} from 'utils/element-utils';
@@ -34,14 +34,17 @@ export default class ConceptsetPage extends AuthenticatedPage {
   }
 
   async openCopyToWorkspaceModal(conceptName: string): Promise<CopyModal> {
-    await this.getEllipsisMenu(conceptName).clickAction(EllipsisMenuAction.CopyToAnotherWorkspace, {waitForNav: false});
+    await this.getSnowmanMenu(conceptName).then(menu => menu.select(Option.CopyToAnotherWorkspace, {waitForNav: false}));
     return new CopyModal(this.page);
   }
 
-  // Get Concept Ellipsis dropdown menu
-  getEllipsisMenu(conceptName: string): EllipsisMenu {
-    const ellipsisXpath = buildXPath( {name: conceptName, ancestorLevel: 2, type: ElementType.Icon, iconShape: 'ellipsis-vertical'});
-    return new EllipsisMenu(this.page, ellipsisXpath);
+  /**
+   * Get Concept snowman menu after click Snowman icon to open the menu.
+   */
+  async getSnowmanMenu(conceptName: string): Promise<SnowmanMenu> {
+    const iconXpath = buildXPath( {name: conceptName, ancestorLevel: 2, type: ElementType.Icon, iconShape: 'ellipsis-vertical'});
+    await this.page.waitForXPath(iconXpath, {visible: true}).then(icon => icon.click());
+    return new SnowmanMenu(this.page);
   }
 
   async getConceptName(): Promise<string> {

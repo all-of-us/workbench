@@ -7878,10 +7878,10 @@ definitions:
         format: email
       eventTime:
         description: >
-          Timestamp recorded at time of the event. Called timestamp in the BigQuery table. Even
-          though it says string, it's actually a integer over the wire.
-        type: string
-        format: date-time
+          Timestamp recorded at time of the event. Called timestamp in the BigQuery table. Epoch
+          millis.
+        type: integer
+        format: int64
       newValue:
         description: Value of the target property (if any) after the event.
         type: string
@@ -7919,9 +7919,9 @@ definitions:
         type: string
       actionTime:
         description: Time of the earliest event (row) for this action. It's assumed that all rows in
-          an action occur at the same time.
-        type: string
-        format: date-time
+          an action occur at the same time. Epoch millis.
+        type: integer
+        format: int64
       eventBundles:
         description: >
           Within an action there might be sub-actions, or event bundles, that describe effects on

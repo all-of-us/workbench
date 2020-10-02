@@ -180,10 +180,12 @@ const EventBundleView = (props: {eventBundle: AuditEventBundle}) => {
 
 const AuditActionCard = (props: { action: AuditAction }) => {
   const {action} = props;
-  // Something in the codegen is wonky here. the actionTime field is typed as a Date,
-  // but turns out to be a number for some reason here. In other contexts it appears
-  // to format itself happily though.
-  const timeString = moment(new Date(action.actionTime)).format('YYYY-MM-DD hh:mm:ss');
+  const timeString  = fp.flow(
+    fp.get('actionTime'),
+    moment,
+    m => m.format('YYYY-MM-DD hh:mm:ss')
+  )(action);
+
   const actionTypes = fp.flow(
     fp.map(fp.get('header.actionType')),
     fp.sortedUniq,

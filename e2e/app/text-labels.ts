@@ -12,7 +12,8 @@ export enum WorkspaceAccessLevel {
    Writer = 'WRITER',
 }
 
-export enum EllipsisMenuAction {
+// Options in dropdown select.
+export enum Option {
    CopyToAnotherWorkspace = 'Copy to another Workspace',
    Delete = 'Delete',
    Duplicate  = 'Duplicate',
@@ -24,6 +25,7 @@ export enum EllipsisMenuAction {
    exportToNotebook = 'Export to Notebook',
 }
 
+// Button or link text labels.
 export enum LinkText {
    AddSelection = 'Add Selection',
    AddThis = 'ADD THIS',
@@ -73,11 +75,13 @@ export enum LinkText {
    Update = 'Update',
 }
 
+// Notebook programming language.
 export enum Language {
    Python = 'Python',
    R = 'R',
 }
 
+// Data resource card.
 export enum ResourceCard {
    Cohort = 'Cohort',
    ConceptSet = 'Concept Set',

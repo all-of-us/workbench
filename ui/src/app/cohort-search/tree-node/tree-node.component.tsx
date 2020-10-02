@@ -10,7 +10,13 @@ import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {highlightSearchTerm, reactStyles} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {attributesSelectionStore, currentCohortCriteriaStore, currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
+import {
+  attributesSelectionStore,
+  currentCohortCriteriaStore,
+  currentWorkspaceStore,
+  serverConfigStore,
+  setSidebarActiveIconStore
+} from 'app/utils/navigation';
 import {AttrName, Criteria, CriteriaSubType, CriteriaType, DomainType, Operator} from 'generated/fetch';
 
 const COPE_SURVEY_ID = 1333342;
@@ -284,6 +290,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     if (serverConfigStore.getValue().enableCohortBuilderV2) {
       delete node.children;
       attributesSelectionStore.next(node);
+      setSidebarActiveIconStore.next('criteria');
     } else {
       this.props.setAttributes(node);
     }

@@ -1,5 +1,5 @@
 import {ElementHandle, Page} from 'puppeteer';
-import {EllipsisMenuAction, WorkspaceAccessLevel} from 'app/text-labels';
+import {Option, WorkspaceAccessLevel} from 'app/text-labels';
 import * as fp from 'lodash/fp';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {getPropValue} from 'utils/element-utils';
@@ -28,7 +28,7 @@ export default class WorkspaceCard extends CardBase {
    */
   static async deleteWorkspace(page: Page, workspaceName: string): Promise<string[]> {
     const card = await WorkspaceCard.findCard(page, workspaceName);
-    await (card.getEllipsis()).clickAction(EllipsisMenuAction.Delete, { waitForNav: false });
+    await card.selectSnowmanMenu(Option.Delete, { waitForNav: false });
     // Handle Delete Confirmation modal
     return new WorkspacesPage(page).dismissDeleteWorkspaceModal();
   }
