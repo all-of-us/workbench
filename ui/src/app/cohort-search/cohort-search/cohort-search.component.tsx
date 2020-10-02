@@ -271,15 +271,6 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
     }
   }
 
-  setScroll = (id: string) => {
-    const nodeId = `node${id}`;
-    const node = document.getElementById(nodeId);
-    if (node) {
-      setTimeout(() => node.scrollIntoView({behavior: 'smooth', block: 'center'}), 200);
-    }
-    this.setState({loadingSubtree: false});
-  }
-
   back = () => {
     if (this.state.mode === 'tree') {
       this.setState({autocompleteSelection: undefined, backMode: 'list', hierarchyNode: undefined, mode: 'list'});

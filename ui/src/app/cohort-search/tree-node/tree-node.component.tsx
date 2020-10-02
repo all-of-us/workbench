@@ -12,7 +12,7 @@ import {highlightSearchTerm, reactStyles} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {
   attributesSelectionStore,
-  currentCohortCriteriaStore,
+  currentCohortCriteriaStore, currentConceptStore,
   currentWorkspaceStore,
   serverConfigStore
 } from 'app/utils/navigation';
@@ -214,13 +214,14 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
   }
 
   toggleExpanded() {
-    const {node: {domainId, group, name, parentId, subtype}} = this.props;
+    const {node: {domainId, group, name, parentId, subtype}, source} = this.props;
     if (group) {
       const {children, expanded} = this.state;
       if (!expanded) {
         if (parentId === 0) {
           const labelName = domainId === DomainType.SURVEY.toString() ? name : subTypeToTitle(subtype);
-          triggerEvent('Cohort Builder Search', 'Click', `${domainToTitle(domainId)} - ${labelName} - Expand`);
+          const message = source === 'concept' ? 'Concept Search' : 'Cohort Builder Search';
+          triggerEvent(message, 'Click', `${domainToTitle(domainId)} - ${labelName} - Expand`);
         }
         if (domainId !== DomainType.PHYSICALMEASUREMENT.toString() && !children) {
           this.loadChildren();
@@ -300,6 +301,26 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
        name === COPE_SURVEY_GROUP_NAME;
   }
 
+  getSelectedValues() {
+    const {node: {parentId}} = this.props;
+    if (this.props.source === 'concept') {
+      if (currentConceptStore.getValue()) {
+        return currentConceptStore.getValue()
+          .some(crit => parentId.toString() === this.paramId
+            );
+      } else {
+        return [];
+      }
+    } else {
+      return currentCohortCriteriaStore.getValue()
+        .some(crit =>
+              crit.parameterId === this.paramId ||
+              parentId.toString() === this.paramId
+          );
+    }
+
+  }
+
   render() {
     const {autocompleteSelection, groupSelections, node,
       node: {code, count, domainId, id, group, hasAttributes, name, parentId, selectable},
@@ -308,11 +329,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     const {children, error, expanded, hover, loading, searchMatch} = this.state;
     const nodeChildren = domainId === DomainType.PHYSICALMEASUREMENT.toString() ? node.children : children;
     const selected = serverConfigStore.getValue().enableCohortBuilderV2
-      ? currentCohortCriteriaStore.getValue()
-        .some(crit =>
-          crit.parameterId === this.paramId ||
-          parentId.toString() === this.paramId
-        )
+      ? this.getSelectedValues()
       : selectedIds.includes(this.paramId) ||
         groupSelections.includes(parentId);
     const displayName = domainId === DomainType.PHYSICALMEASUREMENT.toString() && !!searchTerms
@@ -356,10 +373,11 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
             <span style={styles.count}>{count.toLocaleString()}</span>
           </div>}
         </div>}
-      </div>}
+      </div>
       {!!nodeChildren && nodeChildren.length > 0 &&
         <div style={{display: expanded ? 'block' : 'none', marginLeft: nodeChildren[0].group ? '0.875rem' : '2rem'}}>
           {nodeChildren.map((child, c) => <TreeNode key={c}
+                                                      source={source}
                                                       autocompleteSelection={autocompleteSelection}
                                                       expand={() => this.setState({expanded: true})}
                                                       groupSelections={groupSelections}

@@ -607,7 +607,7 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
             return <React.Fragment>
               <CriteriaSearch
                 cohortContext={{domain: activeDomainTab.domain, type: 'PPI', standard: this.state.standardConceptsOnly}}
-                source='concept'/>
+                source='concept' selectedSurvey={this.state.selectedSurvey}/>
               <Button style={{float: 'right', marginBottom: '2rem'}}
                     disabled={this.activeSelectedConceptCount === 0 ||
                     !this.state.workspacePermissions.canWrite}
