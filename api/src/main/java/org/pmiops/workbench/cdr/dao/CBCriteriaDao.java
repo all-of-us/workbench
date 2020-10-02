@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Set;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaLookup;
-import org.pmiops.workbench.cdr.model.DbCriteriaPath;
 import org.pmiops.workbench.cdr.model.DbDomainCount;
 import org.pmiops.workbench.cdr.model.DbMenuOption;
 import org.pmiops.workbench.cdr.model.DbSurveyParent;
@@ -254,11 +253,11 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(
       value =
-          "select domain_id as domainId, count(*) as count, (1=1) as standard from cb_criteria c where is_standard in (1) and match(full_text) against(concat(:term, '+([CONDITION_rank1] [PROCEDURE_rank1] [DRUG_rank1] [MEASUREMENT_rank1] [OBSERVATION_rank1] [PHYSICAL_MEASUREMENT_rank1])') in boolean mode) group by domain_id "
+          "select domain_id as domainId, count(*) as count, 1 as standard from cb_criteria where is_standard in (1) and match(full_text) against(concat(:term, '+([CONDITION_rank1] [PROCEDURE_rank1] [DRUG_rank1] [MEASUREMENT_rank1] [OBSERVATION_rank1])') in boolean mode) group by domain_id "
               + "union "
-              + "select domain_id as domainId, count(*) as count, (0=1) as standard from cb_criteria c where is_standard in (0, 1) and match(full_text) against(concat(:term, '+([CONDITION_rank1] [PROCEDURE_rank1] [DRUG_rank1] [MEASUREMENT_rank1] [OBSERVATION_rank1] [PHYSICAL_MEASUREMENT_rank1])') in boolean mode) group by domain_id",
+              + "select domain_id as domainId, count(*) as count, 0 as standard from cb_criteria where match(full_text) against(concat(:term, '+([CONDITION_rank1] [PROCEDURE_rank1] [DRUG_rank1] [MEASUREMENT_rank1] [OBSERVATION_rank1] [PHYSICAL_MEASUREMENT_rank1])') in boolean mode) group by domain_id",
       nativeQuery = true)
-  List<DbDomainCount> findCountByTerm(@Param("term") String term);
+  List<DbDomainCount> findDomainCountByTerm(@Param("term") String term);
 
   @Query(
       value =
@@ -267,7 +266,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(
       value =
-          "select id, path "
+          "select path "
               + "from DbCriteria "
               + "where domainId = 'SURVEY' "
               + "and subtype = 'QUESTION' "
@@ -276,7 +275,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
               + "from DbCriteria "
               + "where domainId = 'SURVEY' "
               + "and match(fullText, concat(:term, '+[SURVEY_rank1]')) > 0)")
-  List<DbCriteriaPath> findQuestionCountByTerm(@Param("term") String term);
+  List<String> findSurveyCriteriaPathByTerm(@Param("term") String term);
 
   @Query(
       value =

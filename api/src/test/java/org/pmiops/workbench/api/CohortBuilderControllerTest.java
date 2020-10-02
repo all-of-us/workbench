@@ -112,6 +112,8 @@ public class CohortBuilderControllerTest {
                 .addConceptId("1")
                 .addName("The Basics")
                 .build());
+    surveyCriteria.setPath(String.valueOf(surveyCriteria.getId()));
+    surveyCriteria = cbCriteriaDao.save(surveyCriteria);
     cbCriteriaDao.save(
         DbCriteria.builder()
             .addDomainId(DomainType.SURVEY.toString())
