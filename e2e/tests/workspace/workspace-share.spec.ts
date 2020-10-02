@@ -18,10 +18,9 @@ describe('Share workspace', () => {
 
   // Assume there is at least one workspace preexist
   describe('From the workspace about page', () => {
-    test('As OWNER, user can share a workspace', async () => {
-      // Using the share modal requires a viewport be set, due to react-select weirdness.
-      await page.setViewport({height: 1280, width: 1280});
 
+    test('As OWNER, user can share a workspace', async () => {
+      
       const workspaceCard = await findWorkspace(page);
       await workspaceCard.clickWorkspaceName();
 
