@@ -76,6 +76,7 @@ interface Props {
   scrollToMatch: Function;
   searchTerms: string;
   select: Function;
+  selectedSurvey?: string;
   selectedIds: Array<string>;
   selectOption: Function;
   setAttributes?: Function;
@@ -107,7 +108,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
   }
 
   loadRootNodes() {
-    const {node: {domainId, id, isStandard, type}} = this.props;
+    const {node: {domainId, id, isStandard, type}, selectedSurvey} = this.props;
     this.setState({loading: true});
     const {cdrVersionId} = (currentWorkspaceStore.getValue());
     const criteriaType = domainId === DomainType.DRUG.toString() ? CriteriaType.ATC.toString() : type;
@@ -125,6 +126,24 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
           }
         });
         this.setState({children});
+      } else if (domainId === DomainType.SURVEY.toString() &&  selectedSurvey) {
+        // Temp: This shoud be hanlde in API
+        const selectedSurveyChild = resp.items.filter(child => child.name === selectedSurvey);
+        if (selectedSurveyChild && selectedSurveyChild.length > 0) {
+          cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, selectedSurveyChild[0].id)
+              .then(surveyResponse => {
+                this.setState({children: surveyResponse.items});
+              });
+        } else {
+          this.setState({children: resp.items});
+          if (domainId === DomainType.SURVEY.toString()) {
+            const rootSurveys = ppiSurveys.getValue();
+            if (!rootSurveys[cdrVersionId]) {
+              rootSurveys[cdrVersionId] = resp.items;
+              ppiSurveys.next(rootSurveys);
+            }
+          }
+        }
       } else {
         this.setState({children: resp.items});
         if (domainId === DomainType.SURVEY.toString()) {

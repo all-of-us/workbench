@@ -8,7 +8,6 @@ import {Selection} from 'app/cohort-search/selection-list/selection-list.compone
 import {domainToTitle, generateId, typeToTitle} from 'app/cohort-search/utils';
 import {Button, Clickable, StyledAnchorTag} from 'app/components/buttons';
 import {FlexRowWrap} from 'app/components/flex';
-import {SpinnerOverlay} from 'app/components/spinners';
 import {AoU} from 'app/components/text-wrappers';
 import {CriteriaSearch} from 'app/pages/data/criteria-search';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
@@ -375,7 +374,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
 
   render() {
     const {cohortContext} = this.props;
-    const {count, growlVisible, loadingSubtree, selectedIds, selections, title} = this.state;
+    const {count, growlVisible, selectedIds, selections, title} = this.state;
     return !!cohortContext && <FlexRowWrap style={styles.searchContainer}>
       <style>
         {css}
@@ -421,12 +420,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
                 selectedIds={selectedIds}
                 selections={selections}/>
             </div>
-            : <React.Fragment>
-              {loadingSubtree && <SpinnerOverlay/>}
-              <div style={loadingSubtree ? {height: '100%', pointerEvents: 'none', opacity: 0.3} : {height: '100%'}}>
-                  <CriteriaSearch cohortContext={cohortContext} source={'criteria'}/>
-              </div>
-            </React.Fragment>}
+            : <CriteriaSearch cohortContext={cohortContext} source={'criteria'}/>}
         </div>
       </div>
       <Button type='primary'

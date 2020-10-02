@@ -1,6 +1,7 @@
 import {ListSearchV2} from 'app/cohort-search/list-search-v2/list-search-v2.component';
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {CriteriaTree} from 'app/cohort-search/tree/tree.component';
+import {SpinnerOverlay} from 'app/components/spinners';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {
@@ -63,6 +64,7 @@ const css = `
 
 interface Props {
   cohortContext: any;
+  selectedSurvey?: string;
   source: string;
 }
 
@@ -214,13 +216,18 @@ export class CriteriaSearch extends React.Component<Props, State>  {
   }
 
   render() {
-    const {cohortContext, source} = this.props;
-    const {autocompleteSelection, groupSelections, hierarchyNode, selectedIds, treeSearchTerms, growlVisible} = this.state;
-    return <React.Fragment>
-       <style>{css}</style>
+    const {cohortContext, selectedSurvey, source} = this.props;
+    const {autocompleteSelection, groupSelections, hierarchyNode, loadingSubtree,
+      selectedIds, treeSearchTerms, growlVisible} = this.state;
+    return <div>
+      {loadingSubtree && <SpinnerOverlay/>}
+      <div style={loadingSubtree ?
+          {height: '100%', minHeight: '15rem', pointerEvents: 'none', opacity: 0.3} : {height: '100%', minHeight: '15rem'}}>
+      <style>{css}</style>
        <Growl ref={(el) => this.growl = el} style={!growlVisible ? {...this.getGrowlStyle(), display: 'none'} : this.getGrowlStyle()}/>
       {hierarchyNode && <CriteriaTree
           source={source}
+          selectedSurvey={selectedSurvey}
           autocompleteSelection={autocompleteSelection}
           back={this.back}
           groupSelections={groupSelections}
@@ -239,6 +246,7 @@ export class CriteriaSearch extends React.Component<Props, State>  {
                        select={this.addSelection}
                        selectedIds={this.getListSearchSelectedIds()}/>
       </div>
-     </React.Fragment>;
+      </div>
+     </div>;
   }
 }
