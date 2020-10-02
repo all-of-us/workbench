@@ -35,7 +35,6 @@ import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
-import org.pmiops.workbench.cdr.model.DbCriteriaPath;
 import org.pmiops.workbench.cdr.model.DbDomainCount;
 import org.pmiops.workbench.cdr.model.DbMenuOption;
 import org.pmiops.workbench.cdr.model.DbSurveyParent;
@@ -297,7 +296,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         domainInfoDao.findByOrderByDomainId().stream()
             .map(cohortBuilderMapper::dbModelToClient)
             .collect(Collectors.toList());
-    List<DbDomainCount> domainCounts = cbCriteriaDao.findCountByTerm(searchTerm);
+    List<DbDomainCount> domainCounts = cbCriteriaDao.findDomainCountByTerm(searchTerm);
     // set standard concept count
     domainInfos.forEach(
         di -> {
@@ -305,14 +304,16 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
               domainCounts.stream()
                   .filter(
                       c ->
-                          di.getDomain().toString().equals(c.getDomainId()) && c.getStandard() == 1)
+                          di.getDomain().toString().equals(c.getDomainId().replace("_", ""))
+                              && c.getStandard() == 1)
                   .findFirst();
           di.setStandardConceptCount(dbStandardDomainCount.map(DbDomainCount::getCount).orElse(0L));
           Optional<DbDomainCount> dbAllDomainCount =
               domainCounts.stream()
                   .filter(
                       c ->
-                          di.getDomain().toString().equals(c.getDomainId()) && c.getStandard() == 0)
+                          di.getDomain().toString().equals(c.getDomainId().replace("_", ""))
+                              && c.getStandard() == 0)
                   .findFirst();
           di.setAllConceptCount(dbAllDomainCount.map(DbDomainCount::getCount).orElse(0L));
         });
@@ -407,15 +408,15 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
             .collect(Collectors.toList());
     Map<Long, Long> countMap = new HashMap<>();
     List<DbSurveyParent> dbSurveyParents = cbCriteriaDao.findSurveyParents();
-    List<DbCriteriaPath> dbCriteriaPaths =
-        cbCriteriaDao.findQuestionCountByTerm(modifyTermMatch(term));
+    List<String> dbCriteriaPaths =
+        cbCriteriaDao.findSurveyCriteriaPathByTerm(modifyTermMatch(term));
     dbSurveyParents.stream()
         .forEach(
             ps ->
                 dbCriteriaPaths.stream()
                     .forEach(
                         cp -> {
-                          if (cp.getPath().contains(String.valueOf(ps.getCriteriaId()))) {
+                          if (cp.contains(String.valueOf(ps.getCriteriaId()))) {
                             long count =
                                 countMap.containsKey(ps.getConceptId())
                                     ? countMap.get(ps.getConceptId())

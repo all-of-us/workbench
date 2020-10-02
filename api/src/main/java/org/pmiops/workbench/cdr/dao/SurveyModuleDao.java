@@ -7,5 +7,4 @@ import org.springframework.data.repository.CrudRepository;
 public interface SurveyModuleDao extends CrudRepository<DbSurveyModule, Long> {
 
   List<DbSurveyModule> findByOrderByOrderNumberAsc();
-  ;
 }

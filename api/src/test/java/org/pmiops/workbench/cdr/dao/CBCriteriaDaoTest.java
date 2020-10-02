@@ -10,10 +10,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbMenuOption;
+import org.pmiops.workbench.cdr.model.DbSurveyParent;
 import org.pmiops.workbench.cdr.model.DbSurveyVersion;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
-import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.FilterColumns;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +57,7 @@ public class CBCriteriaDaoTest {
                 .addStandard(false)
                 .addSelectable(true)
                 .addName("The Basics")
+                .addPath("99")
                 .build());
     // adding a survey answer
     cbCriteriaDao.save(
@@ -181,17 +182,18 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findIdByDomainAndConceptIdAndName() {
-    assertThat(
-            cbCriteriaDao.findIdByDomainAndConceptIdAndName(
-                Domain.SURVEY.toString(), surveyCriteria.getConceptId(), surveyCriteria.getName()))
-        .isEqualTo(surveyCriteria.getId());
+  public void findSurveyParents() {
+    List<DbSurveyParent> surveyParents = cbCriteriaDao.findSurveyParents();
+    assertThat(surveyParents.get(0).getConceptId())
+        .isEqualTo(Long.valueOf(surveyCriteria.getConceptId()));
+    assertThat(surveyParents.get(0).getCriteriaId())
+        .isEqualTo(Long.valueOf(surveyCriteria.getId()));
   }
 
   @Test
-  public void findQuestionCountByDomainAndIdAndTerm() {
-    assertThat(cbCriteriaDao.findQuestionCountByDomainAndIdAndTerm(surveyCriteria.getId(), "term"))
-        .isEqualTo(1L);
+  public void findSurveyCriteriaPathByTerm() {
+    assertThat(cbCriteriaDao.findSurveyCriteriaPathByTerm("term").size()).isEqualTo(1);
+    assertThat(cbCriteriaDao.findSurveyCriteriaPathByTerm("term").get(0)).isEqualTo("99");
   }
 
   @Test
