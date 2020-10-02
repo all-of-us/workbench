@@ -10,7 +10,7 @@ import {Button, Clickable, StyledAnchorTag} from 'app/components/buttons';
 import {FlexRowWrap} from 'app/components/flex';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AoU} from 'app/components/text-wrappers';
-import {CriteriaSearch} from 'app/pages/data/criteria-Search';
+import {CriteriaSearch} from 'app/pages/data/criteria-search';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentCohortSearchContext} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
@@ -319,16 +319,6 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
     return style;
   }
 
-  showHierarchy = (criterion: Criteria) => {
-    this.setState({
-      autocompleteSelection: criterion,
-      backMode: 'tree',
-      hierarchyNode: {...criterion, id: 0},
-      mode: 'tree',
-      loadingSubtree: true,
-      treeSearchTerms: criterion.name
-    });
-  }
 
   modifiersFlag = (disabled: boolean) => {
     this.setState({disableFinish: disabled});
@@ -435,8 +425,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
             : <React.Fragment>
               {loadingSubtree && <SpinnerOverlay/>}
               <div style={loadingSubtree ? {height: '100%', pointerEvents: 'none', opacity: 0.3} : {height: '100%'}}>
-                  <CriteriaSearch cohortContext={cohortContext} source={'criteria'}
-                                  showHierarchy={this.showHierarchy}/>
+                  <CriteriaSearch cohortContext={cohortContext} source={'criteria'}/>
               </div>
             </React.Fragment>}
         </div>

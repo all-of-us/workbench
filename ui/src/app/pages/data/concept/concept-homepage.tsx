@@ -14,7 +14,7 @@ import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {ConceptAddModal} from 'app/pages/data/concept/concept-add-modal';
 import {ConceptSurveyAddModal} from 'app/pages/data/concept/concept-survey-add-modal';
 import {ConceptTable} from 'app/pages/data/concept/concept-table';
-import {CriteriaSearch} from 'app/pages/data/criteria-Search';
+import {CriteriaSearch} from 'app/pages/data/criteria-search';
 import {conceptsApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {
@@ -604,7 +604,6 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
         </FadeBox>}
         {this.isConceptSetFlagEnable() && <React.Fragment>
           {conceptDomainCounts.filter(domain => !selectedDomain || selectedDomain === domain.domain).map((domain) => {
-            const tabError = countsError || domainErrors.includes(domain.domain);
             return <React.Fragment>
               <CriteriaSearch
                 cohortContext={{domain: activeDomainTab.domain, type: 'PPI', standard: this.state.standardConceptsOnly}}

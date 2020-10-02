@@ -64,7 +64,6 @@ const css = `
 interface Props {
   cohortContext: any;
   source: string;
-  showHierarchy?: Function;
 }
 
 interface State {
@@ -151,6 +150,17 @@ export class CriteriaSearch extends React.Component<Props, State>  {
     return style;
   }
 
+  showHierarchy = (criterion: Criteria) => {
+    this.setState({
+      autocompleteSelection: criterion,
+      backMode: 'tree',
+      hierarchyNode: {...criterion, id: 0},
+      mode: 'tree',
+      loadingSubtree: true,
+      treeSearchTerms: criterion.name
+    });
+  }
+
   addSelection = (selectCriteria)  => {
     let criteriaList = this.state.selectedCriteriaList;
     if (criteriaList && criteriaList.length > 0) {
@@ -206,7 +216,7 @@ export class CriteriaSearch extends React.Component<Props, State>  {
   render() {
     const {cohortContext, source} = this.props;
     const {autocompleteSelection, groupSelections, hierarchyNode, selectedIds, treeSearchTerms, growlVisible} = this.state;
-    return <React.Fragment>
+    return <div style={{minHeight: '15rem'}}>
        <style>{css}</style>
        <Growl ref={(el) => this.growl = el} style={!growlVisible ? {...this.getGrowlStyle(), display: 'none'} : this.getGrowlStyle()}/>
       {hierarchyNode && <CriteriaTree
@@ -224,11 +234,11 @@ export class CriteriaSearch extends React.Component<Props, State>  {
        {/* List View (using duplicated version of ListSearch) */}
       <div style={this.searchContentStyle('list')}>
          <ListSearchV2 source={source}
-                       hierarchy={this.props.showHierarchy}
+                       hierarchy={this.showHierarchy}
                        searchContext={cohortContext}
                        select={this.addSelection}
                        selectedIds={this.getListSearchSelectedIds()}/>
       </div>
-     </React.Fragment>;
+     </div>;
   }
 }
