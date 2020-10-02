@@ -1,0 +1,17 @@
+---
+job:
+  tables:
+    - description: |
+        All user objects eligible for reporting. Includes several denomralized columns.
+      name: user
+      schemaPath: /user.json
+    - description: |
+        All active (non-deleted) workspaces, whether associated with an existing user or not.
+      name: workspace
+      schemaPath: workspace.json
+    - description: A cohort created by the Cohort Builder
+      name: cohort
+      schemaPath: cohort.json
+    - description: Institution registered with the workbench and available to sponsor users.
+      name: institution
+      schemaPath: institution.yaml
