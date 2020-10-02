@@ -2,7 +2,7 @@
 user:
   about_you: User's description of  their research background, experience and research interests.
   area_of_research: |
-
+    User's research area of focus.
   compliance_training_bypass_time: |
         Time Compliance Training administratively bypassed, or null if this requirement
         was never bypassed for this user.
