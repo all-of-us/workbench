@@ -700,12 +700,15 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
               <div style={styles.cardList}>
                 {domainInfoError
                   ? this.errorMessage()
-                  : conceptDomainList.filter(item => item.domain !== Domain.PHYSICALMEASUREMENT).map((domain, i) => {
-                    return <DomainCard conceptDomainInfo={domain}
-                                         standardConceptsOnly={standardConceptsOnly}
-                                         browseInDomain={() => this.browseDomain(domain)}
-                                         key={i} data-test-id='domain-box'/>;
-                  })
+                  : conceptDomainList
+                    .filter(item => item.domain !== Domain.PHYSICALMEASUREMENT
+                      && (item.allConceptCount > 0 || item.standardConceptCount > 0))
+                    .map((domain, i) => {
+                      return <DomainCard conceptDomainInfo={domain}
+                                           standardConceptsOnly={standardConceptsOnly}
+                                           browseInDomain={() => this.browseDomain(domain)}
+                                           key={i} data-test-id='domain-box'/>;
+                    })
                 }
               </div>
               <div style={styles.sectionHeader}>
@@ -714,9 +717,11 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
               <div style={styles.cardList}>
                 {surveyInfoError
                   ? this.errorMessage()
-                  : conceptSurveysList.map((surveys) => {
-                    return <SurveyCard survey={surveys} key={surveys.orderNumber} browseSurvey={() => this.browseSurvey(surveys.name)} />;
-                  })
+                  : conceptSurveysList
+                    .filter(survey => survey.questionCount > 0)
+                    .map((surveys) =>
+                      <SurveyCard survey={surveys} key={surveys.orderNumber} browseSurvey={() => this.browseSurvey(surveys.name)} />
+                    )
                 }
                </div>
               {environment.enableNewConceptTabs && <React.Fragment>
