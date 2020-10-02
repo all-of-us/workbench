@@ -202,11 +202,12 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
                onChange={fp.debounce(300, e => this.setState({filter: e.target.value}))}
         />
         <DataTable value={this.convertProfilesToFields(users)}
-                   paginator={true}
-                   rows={100}
                    frozenWidth='200px'
                    globalFilter={filter}
+                   paginator={true}
+                   rows={50}
                    scrollable
+                   sortField={'firstRegistrationCompletionTimestamp'}
                    style={styles.tableStyle}>
           <Column field='name'
                   bodyStyle={{...styles.colStyle}}
