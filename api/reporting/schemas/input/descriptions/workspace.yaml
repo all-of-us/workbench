@@ -13,7 +13,7 @@ workspace:
   creator_id: |
       User ID of user who initially created this workspace.
   disseminate_research_other: |
-      Description of user-defined research dissemination option (when "Other" is selected).
+      Description of user-defined research dissemination option.
   last_accessed_time: |
       No longer in use. Column should be ignored.
   last_modified_time: |
@@ -22,7 +22,8 @@ workspace:
       to the last modified time.
   name: |
       User-defined name for this workspace. Human-readable.
-  needs_rp_review_prompt: ''
+  needs_rp_review_prompt: |
+    If true, the owner of the workspace will be asked to review the Research purpose.
   published: |
       If true, this workspace has been published.
   rp_additional_notes: |
@@ -91,7 +92,8 @@ workspace:
       your scientific question(s)."
   rp_social_behavioral: |
       If true, user states the research focuses on the social or behavioral phenomena or determinants of health.
-  rp_time_requested: ''
+  rp_time_requested: |
+      Time user  requested a research purpose review, or null if never requested.
   workspace_id: |
       Prirmary key of the workspace table in Workrbench application database. Along with
       snapshot_timestamp, serves as a pseudo-primary key for this table.

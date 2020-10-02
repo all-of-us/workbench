@@ -1,14 +1,15 @@
 ---
 user:
-  about_you: User's description of themselves.
-  area_of_research: 
+  about_you: User's description of  their research background, experience and research interests.
+  area_of_research: |
+
   compliance_training_bypass_time: |
         Time Compliance Training administratively bypassed, or null if this requirement
         was never bypassed for this user.
   compliance_training_completion_time: |
     Time Compliance Training completed, or null if never completed.
   compliance_training_expiration_time: |
-      Time  User's compliance training will expire, or null training not taken or if bypassed
+      Time  User's compliance training will expire, or null if training not taken or if bypassed
   contact_email: User's external email address on file.
   creation_time: Timestamp of account creation.
   current_position: User's current role/position.
