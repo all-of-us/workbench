@@ -26,6 +26,7 @@ import {Runtime} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import { RuntimeStatus } from 'generated';
+import { useOnMount } from 'app/utils';
 
 const {useState, useEffect, Fragment} = React;
 
@@ -90,7 +91,6 @@ interface State {
  const MachineSelector = ({onChange, selectedMachine, currentRuntime}) => {
   const {dataprocConfig, gceConfig} = currentRuntime;
   const masterMachineName = !!dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType
-  // What happens when a config changes? If the user chooses 4 cpus, but that that machine type is changed to 6 cpus? Can this happen?
   const initialMachineType = fp.find(({name}) => name === masterMachineName, allMachineTypes) || defaultMachineType;  
   const {cpu, memory} = selectedMachine || initialMachineType;
   const maybeGetMachine = selectedMachine => fp.equals(selectedMachine, initialMachineType) ? null : selectedMachine;
@@ -178,7 +178,7 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
   // How do we reflect the state of the runtime to the user?
   // How should we handle errors?
 
-  useEffect(() => {
+  useOnMount(() => {
       const aborter = new AbortController();
       const {namespace} = workspace;
       const loadRuntime = async () => {
@@ -205,7 +205,7 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
 
       loadRuntime()
       return () => aborter.abort();
-  }, []);
+  });
 
   if (loading) {
     return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
