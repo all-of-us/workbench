@@ -30,7 +30,6 @@ export const useRuntime = (workspaceNamespace) => {
   });
 
   useEffect(() => {
-    console.log('REQ:', requestedRuntime)
     const action = requestedRuntime === null 
     ? async () => {
         await runtimeApi().deleteRuntime(workspaceNamespace);
