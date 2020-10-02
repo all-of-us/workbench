@@ -1,7 +1,8 @@
-import {Profile, Runtime} from 'generated';
+import { BreadcrumbType } from 'app/utils/navigation';
+import {atom, Atom} from 'app/utils/subscribable';
+import {Profile} from 'generated';
+import {Runtime} from 'generated/fetch';
 import * as React from 'react';
-import { BreadcrumbType } from './navigation';
-import {atom, Atom} from './subscribable';
 
 const {useEffect, useState} = React;
 
@@ -78,8 +79,8 @@ interface RuntimeStore {
 
 export const runtimeStore = atom<RuntimeStore>(undefined);
 
-interface CurrentRuntimeStore {
-  currentRuntime: Runtime
+export interface CurrentRuntimeStore {
+  currentRuntime: Runtime;
 }
 
 export const currentRuntimeStore = atom<CurrentRuntimeStore>({currentRuntime: null});

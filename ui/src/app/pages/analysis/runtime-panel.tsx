@@ -2,25 +2,17 @@ import {Button, Clickable, MenuItem} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {PopupTrigger} from 'app/components/popups';
-import {Spinner} from 'app/components/spinners';
-import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {allMachineTypes, validLeonardoMachineTypes} from 'app/utils/machines';
 import {
-  abortRuntimeOperationForWorkspace,
-  markRuntimeOperationCompleteForWorkspace,
-  RuntimeOperation,
-  RuntimeOpsStore,
-  runtimeOpsStore,
-  updateRuntimeOpsStoreForWorkspaceNamespace,
+  CurrentRuntimeStore, currentRuntimeStore,
   withStore
 } from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Dropdown} from 'primereact/dropdown';
 import {InputNumber} from 'primereact/inputnumber';
 
-import {Runtime} from 'generated/fetch';
 
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -49,96 +41,27 @@ const styles = reactStyles({
 
 const defaultMachineType = allMachineTypes.find(({name}) => name === 'n1-standard-4');
 
-const ActiveRuntimeOp = ({operation, workspaceNamespace}) => {
-  return <React.Fragment>
-    <h3 style={styles.sectionHeader}>Active Runtime Operations</h3>
-    <FlexRow style={{'alignItems': 'center'}}>
-      <span style={{'marginRight': '1rem'}}>
-        {operation} in progress
-      </span>
-      <Button
-          onClick={() => abortRuntimeOperationForWorkspace(workspaceNamespace)}
-          data-test-id='active-runtime-operation'
-      >
-        Cancel
-      </Button>
-    </FlexRow>
-  </React.Fragment>;
-};
-
 export interface Props {
-  runtimeOps: RuntimeOpsStore;
+  runtimeStore: CurrentRuntimeStore;
   workspace: WorkspaceData;
 }
 
-interface State {
-  // Whether the initial runtime load is still in progress.
-  loading: boolean;
-  // Whether there was an error in loading the runtime data.
-  error: boolean;
-  // The runtime. null if none exists, or if there was an error in loading the
-  // runtime.
-  runtime: Runtime|null;
-}
-
-export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOpsStore, 'runtimeOps'))(
-  class extends React.Component<Props, State> {
+export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(currentRuntimeStore, 'runtimeStore'))(
+  class extends React.Component<Props> {
     private aborter = new AbortController();
 
     constructor(props: Props) {
       super(props);
-      this.state = {
-        loading: true,
-        error: false,
-        runtime: null
-      };
-    }
-
-    async componentDidMount() {
-      // TODO(RW-5420): Centralize a runtimeStore.
-      let runtime = null;
-      let error = false;
-      try {
-        const promise = runtimeApi().getRuntime(this.props.workspace.namespace, {signal: this.aborter.signal});
-        updateRuntimeOpsStoreForWorkspaceNamespace(this.props.workspace.namespace, {
-          promise: promise,
-          operation: 'get',
-          aborter: this.aborter
-        });
-        runtime = await promise;
-      } catch (e) {
-        // 404 is expected if the runtime doesn't exist, represent this as a null
-        // runtime rather than an error mode.
-        if (e.status !== 404) {
-          error = true;
-        }
-      }
-      markRuntimeOperationCompleteForWorkspace(this.props.workspace.namespace);
-      this.setState({
-        runtime,
-        error,
-        loading: false
-      });
     }
 
     render() {
-      const {runtimeOps, workspace} = this.props;
-      const {loading, error, runtime} = this.state;
+      const {runtimeStore} = this.props;
+      const runtime = runtimeStore.currentRuntime;
 
-      const activeRuntimeOp: RuntimeOperation = runtimeOps.opsByWorkspaceNamespace[workspace.namespace];
-
-      if (loading) {
-        return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
-      } else if (error) {
-        return <div>Error loading compute configuration</div>;
-      } else if (!runtime) {
+      if (!runtime) {
         // TODO(RW-5591): Create runtime page goes here.
         return <React.Fragment>
           <div>No runtime exists yet</div>
-          {activeRuntimeOp && <hr/>}
-          {activeRuntimeOp && <div>
-            <ActiveRuntimeOp operation={activeRuntimeOp.operation} workspaceNamespace={workspace.namespace}/>
-          </div>}
         </React.Fragment>;
       }
 
@@ -243,10 +166,6 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeOps
         <FlexRow style={{justifyContent: 'flex-end', marginTop: '.75rem'}}>
           <Button disabled={true}>Create</Button>
         </FlexRow>
-        {activeRuntimeOp && <React.Fragment>
-          <hr/>
-          <ActiveRuntimeOp operation={activeRuntimeOp.operation} workspaceNamespace={workspace.namespace}/>
-        </React.Fragment>}
       </div>;
     }
 

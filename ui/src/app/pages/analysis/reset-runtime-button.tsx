@@ -13,7 +13,7 @@ import {
 import {
   RuntimeStatus,
 } from 'generated/fetch';
-import {Runtime} from "generated/fetch";
+import {Runtime} from 'generated/fetch';
 
 const RESTART_LABEL = 'Reset server';
 const CREATE_LABEL = 'Create server';
@@ -69,7 +69,7 @@ export class ResetRuntimeButton extends React.Component<Props, State> {
             return;
           }
           this.setState({
-            runtimeStatus: !!runtime ? runtime.status : undefined,
+            runtimeStatus: !!runtime ? runtime.status : null,
           });
         },
         pollAbortSignal: this.pollAborter.signal,

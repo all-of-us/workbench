@@ -5,6 +5,7 @@ import {runtimePresets} from 'app/utils/runtime-presets';
 import {Runtime, RuntimeStatus} from 'generated/fetch';
 import {serverConfigStore} from './navigation';
 import {
+  currentRuntimeStore,
   markRuntimeOperationCompleteForWorkspace,
   updateRuntimeOpsStoreForWorkspaceNamespace
 } from './stores';
@@ -179,8 +180,9 @@ export class LeoRuntimeInitializer {
       operation: 'get',
       aborter: aborter
     });
-    await promise;
+    const runtime = await promise;
     markRuntimeOperationCompleteForWorkspace(this.workspaceNamespace);
+    currentRuntimeStore.set({currentRuntime: runtime});
     return promise;
   }
 

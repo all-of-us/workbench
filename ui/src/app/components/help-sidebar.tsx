@@ -12,10 +12,13 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
 
+import {faCircle} from '@fortawesome/free-solid-svg-icons/faCircle';
+import {faSyncAlt} from '@fortawesome/free-solid-svg-icons/faSyncAlt';
 import {SelectionList} from 'app/cohort-search/selection-list/selection-list.component';
 import {FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
+import {PopupTrigger} from 'app/components/popups';
 import {RuntimePanel} from 'app/pages/analysis/runtime-panel';
 import {SidebarContent} from 'app/pages/data/cohort-review/sidebar-content.component';
 import {ConceptListPage} from 'app/pages/data/concept/concept-list';
@@ -38,13 +41,13 @@ import {
   serverConfigStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
+import {CurrentRuntimeStore, currentRuntimeStore, withStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
-import {Criteria, ParticipantCohortStatus, WorkspaceAccessLevel} from 'generated/fetch';
+
+import {Criteria, ParticipantCohortStatus, RuntimeStatus, WorkspaceAccessLevel} from 'generated/fetch';
 import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
-import {PopupTrigger} from './popups';
-import canWrite = WorkspacePermissionsUtil.canWrite;
 
 const proIcons = {
   arrowLeft: '/assets/icons/arrow-left-regular.svg',
@@ -105,6 +108,16 @@ const styles = reactStyles({
     textAlign: 'center',
     transition: 'background 0.2s linear',
     verticalAlign: 'middle'
+  },
+  runtimeStatusIcon: {
+    width: '.5rem',
+    height: '.5rem',
+    margin: '0px .1rem .1rem auto',
+    alignSelf: 'flex-end'
+  },
+  runtimeStatusIconOutline: {
+    border: `1px solid ${colors.white}`,
+    borderRadius: '.25rem',
   },
   navIcons: {
     position: 'absolute',
@@ -294,7 +307,7 @@ const icons = (
     'dataDictionary',
     'annotations'
   ];
-  if (enableCustomRuntimes && canWrite(workspaceAccessLevel)) {
+  if (enableCustomRuntimes && WorkspacePermissionsUtil.canWrite(workspaceAccessLevel)) {
     keys.push('runtime');
   }
   return keys.map(k => ({...iconConfigs[k], id: k}));
@@ -322,6 +335,7 @@ interface Props {
   workspace: WorkspaceData;
   criteria: Array<Selection>;
   concept?: Array<Criteria>;
+  runtimeStore: CurrentRuntimeStore;
 }
 
 interface State {
@@ -332,7 +346,8 @@ interface State {
   showCriteria: boolean;
   tooltipId: number;
 }
-export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), withCurrentCohortCriteria(), withCurrentConcept())(
+
+export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), withCurrentCohortCriteria(), withCurrentConcept(), withStore(currentRuntimeStore, 'runtimeStore'))(
   class extends React.Component<Props, State> {
     subscription: Subscription;
     constructor(props: Props) {
@@ -540,7 +555,60 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
       return !icon.page || icon.page === helpContentKey || (criteria && icon.page === 'criteria') || (concept && icon.page === 'concept');
     }
 
-    displayIcon(icon, i) {
+    displayCustomSvgIcon(icon) {
+      const {runtimeStore} = this.props;
+      if (icon.id === 'runtime') {
+        return <FlexRow style={{height: '100%', alignItems: 'center', justifyContent: 'space-around'}}>
+          <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={{...icon.style, position: 'absolute'}} />
+          {
+            runtimeStore.currentRuntime
+            && (
+                runtimeStore.currentRuntime.status === RuntimeStatus.Creating
+                || runtimeStore.currentRuntime.status === RuntimeStatus.Starting
+                || runtimeStore.currentRuntime.status === RuntimeStatus.Updating
+            ) && <FontAwesomeIcon icon={faSyncAlt} style={{
+              ...styles.runtimeStatusIcon,
+              color: '#9FFF00',
+            }}/>
+          }
+          {runtimeStore.currentRuntime && runtimeStore.currentRuntime.status === RuntimeStatus.Stopped
+            && <FontAwesomeIcon icon={faCircle} style={{
+              ...styles.runtimeStatusIcon,
+              ...styles.runtimeStatusIconOutline,
+              color: '#F8C954',
+            }}/>
+          }
+          {runtimeStore.currentRuntime && runtimeStore.currentRuntime.status === RuntimeStatus.Running
+            && <FontAwesomeIcon icon={faCircle} style={{
+              ...styles.runtimeStatusIcon,
+              ...styles.runtimeStatusIconOutline,
+              color: '#73EF0A',
+            }}/>
+          }
+          {
+            runtimeStore.currentRuntime
+            && (
+                runtimeStore.currentRuntime.status === RuntimeStatus.Stopping
+                || runtimeStore.currentRuntime.status === RuntimeStatus.Deleting
+            ) && <FontAwesomeIcon icon={faSyncAlt} style={{
+              ...styles.runtimeStatusIcon,
+              color: '#FFD700',
+            }}/>
+          }
+          {runtimeStore.currentRuntime && runtimeStore.currentRuntime.status === RuntimeStatus.Error
+            && <FontAwesomeIcon icon={faCircle} style={{
+              ...styles.runtimeStatusIcon,
+              ...styles.runtimeStatusIconOutline,
+              color: '#DB3214',
+            }}/>
+          }
+        </FlexRow>;
+      } else {
+        return <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={icon.style} />;
+      }
+    }
+
+    displayFontAwesomeIcon(icon) {
       const {concept, criteria} = this.props;
 
       return <React.Fragment>
@@ -599,8 +667,8 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
                           <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + icon.id} icon={icon.faIcon} style={icon.style} />
                         </a>
                       : icon.faIcon === null
-                        ? <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={icon.style} />
-                        : this.displayIcon(icon, i)
+                        ? this.displayCustomSvgIcon(icon)
+                        : this.displayFontAwesomeIcon(icon)
                     }
                   </div>
                 </TooltipTrigger>
