@@ -608,10 +608,10 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
               <CriteriaSearch
                 cohortContext={{domain: activeDomainTab.domain, type: 'PPI', standard: this.state.standardConceptsOnly}}
                 source='concept'/>
-              {!this.domainLoading(activeDomainTab) && <Button style={{float: 'right', marginBottom: '2rem'}}
+              <Button style={{float: 'right', marginBottom: '2rem'}}
                     disabled={this.activeSelectedConceptCount === 0 ||
                     !this.state.workspacePermissions.canWrite}
-                    onClick={() => setSidebarActiveIconStore.next('concept')}>Finish & Review</Button>}
+                    onClick={() => setSidebarActiveIconStore.next('concept')}>Finish & Review</Button>
             </React.Fragment>; })} </React.Fragment>
         }</React.Fragment>;
     }
