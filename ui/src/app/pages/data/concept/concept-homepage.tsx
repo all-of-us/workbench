@@ -14,6 +14,7 @@ import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {ConceptAddModal} from 'app/pages/data/concept/concept-add-modal';
 import {ConceptSurveyAddModal} from 'app/pages/data/concept/concept-survey-add-modal';
 import {ConceptTable} from 'app/pages/data/concept/concept-table';
+import {CriteriaSearch} from 'app/pages/data/criteria-search';
 import {conceptsApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {
@@ -35,7 +36,6 @@ import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import {environment} from 'environments/environment';
 import {Concept, ConceptSet, Domain, DomainCount, DomainInfo, StandardConceptFilter, SurveyModule, SurveyQuestions} from 'generated/fetch';
 import {Key} from 'ts-key-enum';
-import {ConceptTableV2} from './concept-table-v2';
 import {SurveyDetails} from './survey-details';
 
 const styles = reactStyles({
@@ -293,6 +293,10 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
       currentConceptStore.next(null);
     }
 
+    isConceptSetFlagEnable() {
+      return serverConfigStore.getValue().enableConceptSetSearchV2;
+    }
+
     async loadDomainsAndSurveys() {
       const {namespace, id} = this.props.workspace;
       const getDomainInfo = conceptsApi().getDomainInfo(namespace, id)
@@ -392,7 +396,7 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
       const {namespace, id} = this.props.workspace;
       this.setState({completedDomainSearches: [], concepts: [], countsError: false,
         domainErrors: [], countsLoading: true, searching: true});
-      if (serverConfigStore.getValue().enableConceptSetSearchV2) {
+      if (this.isConceptSetFlagEnable()) {
         currentConceptStore.next([]);
       }
       const standardConceptFilter = standardConceptsOnly ? StandardConceptFilter.STANDARDCONCEPTS : StandardConceptFilter.ALLCONCEPTS;
@@ -466,7 +470,7 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
         showSearchError: false,
         searching: false // reset the search result table to show browse/domain cards instead
       });
-      if (serverConfigStore.getValue().enableConceptSetSearchV2) {
+      if (this.isConceptSetFlagEnable()) {
         currentConceptStore.next(null);
       }
     }
@@ -506,7 +510,7 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
 
     get activeSelectedConceptCount(): number {
       const {activeDomainTab, selectedConceptDomainMap} = this.state;
-      if (!serverConfigStore.getValue().enableConceptSetSearchV2 || !this.props.concept) {
+      if (!this.isConceptSetFlagEnable() || !this.props.concept) {
         if (!activeDomainTab || !activeDomainTab.domain || !selectedConceptDomainMap[activeDomainTab.domain]) {
           return 0;
         }
@@ -548,7 +552,7 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
         = this.state;
       const domainError = domainErrors.includes(activeDomainTab.domain);
       return <React.Fragment>
-        {!serverConfigStore.getValue().enableConceptSetSearchV2 && <FadeBox>
+        {!this.isConceptSetFlagEnable() && <FadeBox>
           <FlexRow style={{justifyContent: 'flex-start'}}>
             {conceptDomainCounts.filter(domain => !selectedDomain || selectedDomain === domain.domain).map((domain) => {
               const tabError = countsError || domainErrors.includes(domain.domain);
@@ -598,25 +602,16 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
                            disable={this.activeSelectedConceptCount === 0 ||
                            !this.state.workspacePermissions.canWrite}/>
         </FadeBox>}
-        {serverConfigStore.getValue().enableConceptSetSearchV2 && <React.Fragment>
+        {this.isConceptSetFlagEnable() && <React.Fragment>
           {conceptDomainCounts.filter(domain => !selectedDomain || selectedDomain === domain.domain).map((domain) => {
-            const tabError = countsError || domainErrors.includes(domain.domain);
-            return <React.Fragment> {!tabError && !this.domainLoading(activeDomainTab) && <label style={{color: colors.accent, lineHeight: '1.5rem'}}>
-              Showing 1000 of {domain.conceptCount.toLocaleString()}</label>}
-            <ConceptTableV2 concepts={concepts}
-                            domain={activeDomainTab.domain}
-                            surveyName={this.state.selectedSurvey}
-                            loading={this.domainLoading(activeDomainTab)}
-                            onSelectConcepts={this.selectConcepts.bind(this)}
-                            placeholderValue={this.noConceptsConstant}
-                            searchTerm={this.state.currentSearchString}
-                            selectedConcepts={selectedConceptDomainMap[activeDomainTab.domain]}
-                            reactKey={activeDomainTab.name}
-                            error={domainError}/>
-              {!this.domainLoading(activeDomainTab) && <Button style={{float: 'right', marginBottom: '2rem'}}
+            return <React.Fragment>
+              <CriteriaSearch
+                cohortContext={{domain: activeDomainTab.domain, type: 'PPI', standard: this.state.standardConceptsOnly}}
+                source='concept' selectedSurvey={this.state.selectedSurvey}/>
+              <Button style={{float: 'right', marginBottom: '2rem'}}
                     disabled={this.activeSelectedConceptCount === 0 ||
                     !this.state.workspacePermissions.canWrite}
-                    onClick={() => setSidebarActiveIconStore.next('concept')}>Finish & Review</Button>}
+                    onClick={() => setSidebarActiveIconStore.next('concept')}>Finish & Review</Button>
             </React.Fragment>; })} </React.Fragment>
         }</React.Fragment>;
     }
@@ -639,7 +634,7 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
             </Header>
           </FlexRow>
           <div style={{margin: '1rem 0'}}>
-            <div style={{display: 'flex', alignItems: 'center'}}>
+            {!this.isConceptSetFlagEnable() && <div style={{display: 'flex', alignItems: 'center'}}>
               <ClrIcon shape='search' style={{position: 'absolute', height: '1rem', width: '1rem',
                 fill: colors.accent, left: 'calc(1rem + 3.5%)'}}/>
               <TextInput style={styles.searchBar} data-test-id='concept-search-input'
@@ -658,7 +653,7 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
                         style={{marginLeft: '0.5rem', height: '16px', width: '16px'}}
                         manageOwnState={false}
                         onChange={() => this.handleCheckboxChange()}/>
-            </div>
+            </div>}
             {inputErrors.map((error, e) => <AlertDanger key={e} style={styles.inputAlert}>
               <span data-test-id='input-error-alert'>{error}</span>
             </AlertDanger>)}

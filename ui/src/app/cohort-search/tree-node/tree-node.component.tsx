@@ -13,6 +13,7 @@ import {triggerEvent} from 'app/utils/analytics';
 import {
   attributesSelectionStore,
   currentCohortCriteriaStore,
+  currentConceptStore,
   currentWorkspaceStore,
   serverConfigStore,
   setSidebarActiveIconStore
@@ -108,6 +109,7 @@ interface TreeNodeProps {
   expand?: Function;
   groupSelections: Array<number>;
   node: NodeProp;
+  source?: string;
   scrollToMatch: Function;
   searchTerms: string;
   select: Function;
@@ -214,13 +216,14 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
   }
 
   toggleExpanded() {
-    const {node: {domainId, group, name, parentId, subtype}} = this.props;
+    const {node: {domainId, group, name, parentId, subtype}, source} = this.props;
     if (group) {
       const {children, expanded} = this.state;
       if (!expanded) {
         if (parentId === 0) {
           const labelName = domainId === DomainType.SURVEY.toString() ? name : subTypeToTitle(subtype);
-          triggerEvent('Cohort Builder Search', 'Click', `${domainToTitle(domainId)} - ${labelName} - Expand`);
+          const message = source === 'concept' ? 'Concept Search' : 'Cohort Builder Search';
+          triggerEvent(message, 'Click', `${domainToTitle(domainId)} - ${labelName} - Expand`);
         }
         if (domainId !== DomainType.PHYSICALMEASUREMENT.toString() && !children) {
           this.loadChildren();
@@ -302,18 +305,34 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
        name === COPE_SURVEY_GROUP_NAME;
   }
 
+  getSelectedValues() {
+    const {node: {parentId}} = this.props;
+    if (this.props.source === 'concept') {
+      if (currentConceptStore.getValue()) {
+        return currentConceptStore.getValue()
+          .some(crit => parentId.toString() === this.paramId);
+      } else {
+        return [];
+      }
+    } else {
+      return currentCohortCriteriaStore.getValue()
+        .some(crit =>
+          crit.parameterId === this.paramId ||
+          parentId.toString() === this.paramId
+        );
+    }
+
+  }
+
   render() {
     const {autocompleteSelection, groupSelections, node,
-      node: {code, count, domainId, id, group, hasAttributes, name, parentId, selectable}, scrollToMatch, searchTerms, select, selectedIds,
+      node: {code, count, domainId, id, group, hasAttributes, name, parentId, selectable},
+      source, scrollToMatch, searchTerms, select, selectedIds,
       setAttributes} = this.props;
     const {children, error, expanded, hover, loading, searchMatch} = this.state;
     const nodeChildren = domainId === DomainType.PHYSICALMEASUREMENT.toString() ? node.children : children;
     const selected = serverConfigStore.getValue().enableCohortBuilderV2
-      ? currentCohortCriteriaStore.getValue()
-        .some(crit =>
-          crit.parameterId === this.paramId ||
-          parentId.toString() === this.paramId
-        )
+      ? this.getSelectedValues()
       : selectedIds.includes(this.paramId) ||
         groupSelections.includes(parentId);
     const displayName = domainId === DomainType.PHYSICALMEASUREMENT.toString() && !!searchTerms
@@ -328,11 +347,12 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
               shape={'angle ' + (expanded ? 'down' : 'right')}
               size='16'/>}
         </button>}
+        {(!hasAttributes || source !== 'concept') &&
         <div style={hover ? {...styles.treeNodeContent, background: colors.light} : styles.treeNodeContent}
           onMouseEnter={() => this.setState({hover: true})}
           onMouseLeave={() => this.setState({hover: false})}>
           {selectable && <button style={styles.iconButton}>
-            {hasAttributes
+            {(hasAttributes && (source !== 'concept'))
               ? <ClrIcon style={{color: colors.accent}}
                   shape='slider' dir='right' size='20'
                   onClick={(e) => this.setAttributes(e, node)}/>
@@ -355,7 +375,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
           {this.showCount && <div style={{whiteSpace: 'nowrap'}}>
             <span style={styles.count}>{count.toLocaleString()}</span>
           </div>}
-        </div>
+        </div>}
       </div>
       {!!nodeChildren && nodeChildren.length > 0 &&
         <div style={{display: expanded ? 'block' : 'none', marginLeft: nodeChildren[0].group ? '0.875rem' : '2rem'}}>
@@ -364,6 +384,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
                                                       expand={() => this.setState({expanded: true})}
                                                       groupSelections={groupSelections}
                                                       node={child}
+                                                      source={source}
                                                       scrollToMatch={scrollToMatch}
                                                       searchTerms={searchTerms}
                                                       select={(s) => select(s)}
