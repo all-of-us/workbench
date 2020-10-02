@@ -47,9 +47,10 @@ interface Props {
 }
 
 interface State {
-  users: AdminTableUser[];
   contentLoaded: boolean;
+  filter: string;
   loading: boolean;
+  users: AdminTableUser[];
 }
 
 /**
@@ -62,9 +63,10 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
   constructor(props) {
     super(props);
     this.state = {
-      users: [],
       contentLoaded: false,
+      filter: '',
       loading: false,
+      users: [],
     };
   }
 
@@ -160,13 +162,16 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
       dataUseAgreement: this.getAccessModuleString(user, 'dataUseAgreement'),
       eraCommons: this.getAccessModuleString(user, 'eraCommons'),
       firstRegistrationCompletionTime: moment.unix(user.firstRegistrationCompletionTime / 1000).format('lll'),
+      firstRegistrationCompletionTimestamp: user.firstRegistrationCompletionTime,
       firstSignInTime: moment.unix(user.firstSignInTime / 1000).format('lll'),
+      firstSignInTimetsamp: user.firstSignInTime,
       institutionName: user.institutionName,
       name: <a
         href={`/admin/users/${usernameWithoutDomain(user.username)}`}
         target='_blank'>
         {user.familyName + ', ' + user.givenName}
       </a>,
+      nameText: user.familyName + ' ' + user.givenName,
       status: user.disabled ? 'Disabled' : 'Active',
       twoFactorAuth: this.getAccessModuleString(user, 'twoFactorAuth'),
       username: user.username,
@@ -176,25 +181,46 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
     }));
   }
 
+  filter(query: string) {
+
+  }
+
   render() {
-    const {contentLoaded, loading, users} = this.state;
+    const {contentLoaded, filter, loading, users} = this.state;
     return <div style={{position: 'relative'}}>
       <h2>User Admin Table</h2>
-      {loading && <SpinnerOverlay opacity={0.6} />}
-      {contentLoaded ?
+      {loading &&
+        <SpinnerOverlay opacity={0.6}
+                        overrideStylesOverlay={{alignItems: 'flex-start', marginTop: '2rem'}}/>
+      }
+      {!contentLoaded && <div>Loading user profiles...</div>}
+      {contentLoaded && <div>
+        <input data-test-id='search'
+               style={{marginBottom: '.5em', width: '300px'}}
+               type='text'
+               placeholder='Search'
+               onChange={e => this.setState({filter: e.target.value})}
+        />
         <DataTable value={this.convertProfilesToFields(users)}
+                   paginator={true}
+                   rows={100}
                    frozenWidth='200px'
+                   globalFilter={filter}
                    scrollable
                    style={styles.tableStyle}>
           <Column field='name'
                   bodyStyle={{...styles.colStyle}}
+                  filterField={'nameText'}
+                  filterMatchMode={'contains'}
                   frozen={true}
                   header='Name'
                   headerStyle={{...styles.colStyle, width: '200px'}}
                   sortable={true}
+                  sortField={'nameText'}
           />
           <Column field='status'
                   bodyStyle={{...styles.colStyle}}
+                  excludeGlobalFilter={true}
                   header='Status'
                   headerStyle={{...styles.colStyle, width: '80px'}}
           />
@@ -202,11 +228,15 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
                   bodyStyle={{...styles.colStyle}}
                   header='Institution'
                   headerStyle={{...styles.colStyle, width: '180px'}}
+                  sortable={true}
           />
           <Column field='firstRegistrationCompletionTime'
                   bodyStyle={{...styles.colStyle}}
+                  excludeGlobalFilter={true}
                   header='Registration date'
                   headerStyle={{...styles.colStyle, width: '180px'}}
+                  sortable={true}
+                  sortField={'firstRegistrationCompletionTimestamp'}
           />
           <Column field='username'
                   bodyStyle={{...styles.colStyle}}
@@ -222,50 +252,57 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
           />
           <Column field='userLockout'
                   bodyStyle={{...styles.colStyle}}
+                  excludeGlobalFilter={true}
                   header='User Lockout'
                   headerStyle={{...styles.colStyle, width: '150px'}}
           />
           <Column field='firstSignInTime'
                   bodyStyle={{...styles.colStyle}}
+                  excludeGlobalFilter={true}
                   header='First Sign-in'
                   headerStyle={{...styles.colStyle, width: '180px'}}
+                  sortable={true}
+                  sortField={'firstSignInTimestamp'}
           />
           <Column field='twoFactorAuth'
-                  bodyStyle={{...styles.colStyle}}
+                  bodyStyle={{...styles.colStyle, textAlign: 'center'}}
+                  excludeGlobalFilter={true}
                   header='2FA'
                   headerStyle={{...styles.colStyle, width: '80px'}}
           />
           <Column field='complianceTraining'
-                  bodyStyle={{...styles.colStyle}}
+                  bodyStyle={{...styles.colStyle, textAlign: 'center'}}
+                  excludeGlobalFilter={true}
                   header='Training'
                   headerStyle={{...styles.colStyle, width: '80px'}}
           />
           <Column field='eraCommons'
-                  bodyStyle={{...styles.colStyle}}
+                  bodyStyle={{...styles.colStyle, textAlign: 'center'}}
+                  excludeGlobalFilter={true}
                   header='eRA Commons'
                   headerStyle={{...styles.colStyle, width: '80px'}}
           />
           <Column field='dataUseAgreement'
-                  bodyStyle={{...styles.colStyle}}
+                  bodyStyle={{...styles.colStyle, textAlign: 'center'}}
+                  excludeGlobalFilter={true}
                   header='DUCC'
                   headerStyle={{...styles.colStyle, width: '80px'}}
           />
           <Column field='bypass'
                   bodyStyle={{...styles.colStyle}}
+                  excludeGlobalFilter={true}
                   header='Bypass'
                   headerStyle={{...styles.colStyle, width: '150px'}}
           />
           <Column field='audit'
                   bodyStyle={{...styles.colStyle}}
+                  excludeGlobalFilter={true}
                   header='Audit'
                   headerStyle={{width: '60px'}}
           />
-        </DataTable> :
-        <div>
-          Loading user profiles...
-          <SpinnerOverlay
-            overrideStylesOverlay={{alignItems: 'flex-start', marginTop: '2rem'}}/>
-        </div>}
+        </DataTable>
+      </div>
+      }
     </div>;
   }
 
