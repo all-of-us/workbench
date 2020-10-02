@@ -11,14 +11,9 @@ public enum BigQueryDataSetTableInfo {
       Domain.PROCEDURE,
       "ds_procedure_occurrence",
       " (procedure_concept_id in unnest(@conceptIds) or procedure_source_concept_id in unnest(@conceptIds))"),
-  DRUG(
-      Domain.DRUG,
-      "ds_drug_exposure",
-      " (drug_concept_id in unnest(@conceptIds) or drug_source_concept_id in unnest(@conceptIds))"),
+  DRUG(Domain.DRUG, "ds_drug_exposure", " (drug_concept_id in unnest(@conceptIds))"),
   MEASUREMENT(
-      Domain.MEASUREMENT,
-      "ds_measurement",
-      " (measurement_concept_id in unnest(@conceptIds) or measurement_source_concept_id in unnest(@conceptIds))"),
+      Domain.MEASUREMENT, "ds_measurement", " (measurement_concept_id in unnest(@conceptIds))"),
   SURVEY(Domain.SURVEY, "ds_survey", " question_concept_id in unnest(@conceptIds)"),
   PERSON(Domain.PERSON, "ds_person", null),
   OBSERVATION(
