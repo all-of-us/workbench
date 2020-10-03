@@ -70,6 +70,7 @@ const css = `
 
 interface Props {
   cohortContext: any;
+  conceptSearchTerms?: string;
   selectedSurvey?: string;
   source: string;
 }
@@ -93,7 +94,7 @@ export class CriteriaSearch extends React.Component<Props, State>  {
   growlTimer: NodeJS.Timer;
   subscription: Subscription;
 
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props);
     this.state = {
       autocompleteSelection: undefined,
@@ -105,7 +106,7 @@ export class CriteriaSearch extends React.Component<Props, State>  {
       selectedIds: [],
       selections: [],
       selectedCriteriaList: [],
-      treeSearchTerms: '',
+      treeSearchTerms: props.source === 'concept' ? props.conceptSearchTerms : '',
       loadingSubtree: false
     };
   }
@@ -222,7 +223,7 @@ export class CriteriaSearch extends React.Component<Props, State>  {
   }
 
   render() {
-    const {cohortContext, selectedSurvey, source} = this.props;
+    const {cohortContext, conceptSearchTerms, selectedSurvey, source} = this.props;
     const {autocompleteSelection, groupSelections, hierarchyNode, loadingSubtree,
       selectedIds, treeSearchTerms, growlVisible} = this.state;
     return <div>
@@ -249,6 +250,7 @@ export class CriteriaSearch extends React.Component<Props, State>  {
           <ListSearchV2 source={source}
                         hierarchy={this.showHierarchy}
                         searchContext={cohortContext}
+                        searchTerms={conceptSearchTerms}
                         select={this.addSelection}
                         selectedIds={this.getListSearchSelectedIds()}/>
         </div>
