@@ -257,7 +257,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(
       value =
-          "select count(distinct id) "
+          "select path "
               + "from DbCriteria "
               + "where domainId = 'SURVEY' "
               + "and subtype = 'QUESTION' "
