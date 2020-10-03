@@ -35,7 +35,7 @@ import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
-import org.pmiops.workbench.cdr.model.DbDomainCount;
+import org.pmiops.workbench.cdr.model.DbDomainInfo;
 import org.pmiops.workbench.cdr.model.DbMenuOption;
 import org.pmiops.workbench.cdr.model.DbSurveyParent;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
@@ -292,31 +292,19 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   public List<DomainInfo> findDomainInfos(String term) {
     String searchTerm = modifyTermMatch(term);
     // read domain infos
+    List<DbDomainInfo> dbDomainInfos =
+        domainInfoDao.findCriteriaCounts(
+            searchTerm,
+            "+([CONDITION_rank1] [PROCEDURE_rank1] [OBSERVATION_rank1] [PHYSICAL_MEASUREMENT_rank1])",
+            ImmutableList.of(true, false));
+    dbDomainInfos.addAll(
+        domainInfoDao.findCriteriaCounts(
+            searchTerm, "+([DRUG_rank1] [MEASUREMENT_rank1])", ImmutableList.of(true)));
     List<DomainInfo> domainInfos =
-        domainInfoDao.findByOrderByDomainId().stream()
+        dbDomainInfos.stream()
             .map(cohortBuilderMapper::dbModelToClient)
+            .sorted(Comparator.comparing(DomainInfo::getName))
             .collect(Collectors.toList());
-    List<DbDomainCount> domainCounts = cbCriteriaDao.findDomainCountByTerm(searchTerm);
-    // set standard concept count
-    domainInfos.forEach(
-        di -> {
-          Optional<DbDomainCount> dbStandardDomainCount =
-              domainCounts.stream()
-                  .filter(
-                      c ->
-                          di.getDomain().toString().equals(c.getDomainId().replace("_", ""))
-                              && c.getStandard() == 1)
-                  .findFirst();
-          di.setStandardConceptCount(dbStandardDomainCount.map(DbDomainCount::getCount).orElse(0L));
-          Optional<DbDomainCount> dbAllDomainCount =
-              domainCounts.stream()
-                  .filter(
-                      c ->
-                          di.getDomain().toString().equals(c.getDomainId().replace("_", ""))
-                              && c.getStandard() == 0)
-                  .findFirst();
-          di.setAllConceptCount(dbAllDomainCount.map(DbDomainCount::getCount).orElse(0L));
-        });
     return domainInfos;
   }
 

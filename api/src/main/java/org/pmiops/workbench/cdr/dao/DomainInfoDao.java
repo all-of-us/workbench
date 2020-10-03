@@ -32,6 +32,18 @@ public interface DomainInfoDao extends CrudRepository<DbDomainInfo, Long> {
               + "order by d.domainId")
   List<DbDomainInfo> findConceptCounts(String matchExpression, List<String> conceptTypes);
 
+  @Query(
+      value =
+          "select new DbDomainInfo(\n"
+              + "d.domain, d.domainId, d.name, d.description,\n"
+              + "d.conceptId, COUNT(*), COUNT(*), d.participantCount)\n"
+              + "from DbDomainInfo d\n"
+              + "join DbCriteria c ON d.domainId = c.domainId\n"
+              + "where match(c.fullText, concat(?1, ?2)) > 0 "
+              + "and c.standard IN (?3)\n"
+              + "group by d.domain, d.domainId, d.name, d.description, d.conceptId")
+  List<DbDomainInfo> findCriteriaCounts(String term, String rank, List<Boolean> standards);
+
   /**
    * Returns domain metadata and concept counts for domains, matching only PM concepts by name,
    * code, or concept ID. allConceptCount is populated; standardConceptCount are not needed and set

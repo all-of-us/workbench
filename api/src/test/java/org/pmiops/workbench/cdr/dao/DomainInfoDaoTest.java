@@ -8,7 +8,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.model.DbConcept;
+import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbDomainInfo;
+import org.pmiops.workbench.model.Domain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.DirtiesContext;
@@ -21,12 +23,19 @@ public class DomainInfoDaoTest {
 
   @Autowired private DomainInfoDao domainInfoDao;
   @Autowired private ConceptDao conceptDao;
+  @Autowired private CBCriteriaDao cbCriteriaDao;
   private DbDomainInfo domainInfoObservation;
   private DbDomainInfo domainInfoCondition;
   private DbDomainInfo domainInfoPM;
 
   @Before
   public void setUp() {
+    cbCriteriaDao.save(
+        DbCriteria.builder()
+            .addDomainId(Domain.CONDITION.toString())
+            .addFullText("term[CONDITION_rank1]")
+            .addStandard(true)
+            .build());
     conceptDao.save(
         new DbConcept()
             .conceptId(1L)

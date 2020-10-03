@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Set;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaLookup;
-import org.pmiops.workbench.cdr.model.DbDomainCount;
 import org.pmiops.workbench.cdr.model.DbMenuOption;
 import org.pmiops.workbench.cdr.model.DbSurveyParent;
 import org.pmiops.workbench.cdr.model.DbSurveyVersion;
@@ -250,14 +249,6 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   List<DbCriteria> findByDomainIdAndType(
       @Param("domainId") String domainId, @Param("type") String type, Sort sort);
-
-  @Query(
-      value =
-          "select domain_id as domainId, count(*) as count, 1 as standard from cb_criteria where is_standard in (1) and match(full_text) against(concat(:term, '+([CONDITION_rank1] [PROCEDURE_rank1] [DRUG_rank1] [MEASUREMENT_rank1] [OBSERVATION_rank1])') in boolean mode) group by domain_id "
-              + "union "
-              + "select domain_id as domainId, count(*) as count, 0 as standard from cb_criteria where match(full_text) against(concat(:term, '+([CONDITION_rank1] [PROCEDURE_rank1] [DRUG_rank1] [MEASUREMENT_rank1] [OBSERVATION_rank1] [PHYSICAL_MEASUREMENT_rank1])') in boolean mode) group by domain_id",
-      nativeQuery = true)
-  List<DbDomainCount> findDomainCountByTerm(@Param("term") String term);
 
   @Query(
       value =
