@@ -109,7 +109,7 @@
     "enableResearchPurposePrompt": false,
     "enableCohortBuilderV2": false,
     "enableConceptSetSearchV2": false,
-    "enableReportingUploadCron": false,
+    "enableReportingUploadCron": true,
     "enableCOPESurvey": false,
     "enableCustomRuntimes": false,
     "enableGceAsNotebookRuntimeDefault": false

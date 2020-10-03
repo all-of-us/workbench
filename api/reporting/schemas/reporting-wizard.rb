@@ -31,7 +31,8 @@ end
 
 INPUTS = {
     :describe_csv => to_input_path(File.join(INPUT_DIR, 'mysql_describe_csv'), 'csv'),
-    :excluded_columns => to_input_path(File.join(INPUT_DIR, 'excluded_COLUMNS'), 'txt')
+    :excluded_columns => to_input_path(File.join(INPUT_DIR, 'excluded_COLUMNS'), 'txt'),
+    :descriptions => to_input_path(File.join(INPUT_DIR, 'descriptions'), 'yaml')
 }.freeze
 
 OUTPUTS = {
@@ -45,6 +46,7 @@ OUTPUTS = {
     :bigquery_insertion_payload_transformer => to_output_path('query_parameter_columns', 'java'),
     :dto_decl => to_output_path('dto_decl',  'java'),
     :entity_decl => to_output_path('entity_decl',  'java'),
+    :yaml_template => to_output_path('yaml_template', 'yaml')
 }.freeze
 
 # This is the canonical type map, but there are places where we assign a tinyint MySql column a Long
@@ -251,6 +253,10 @@ def to_property_name(column_name)
   to_swagger_name(column_name, false)
 end
 
+DESCRIPTIONS = File.exist?(INPUTS[:descriptions]) ?
+                   YAML.load_file(INPUTS[:descriptions])[TABLE_INFO[:name]] :
+                   {}
+
 # The COLUMNS hash contains essentially all the transformed representations of a column
 # in various languages and forms. One row in the describe output looks like `street_address_1,varchar(95),NO,"",,""`.
 # Currently this script only uses the column name and type(length) columns.
@@ -260,8 +266,9 @@ COLUMNS = DESCRIBE_ROWS.filter{ |row| include_field?(excluded_fields, row[0]) } 
     primitive_type = MYSQL_TYPE_TO_SIMPLE_TYPE[simple_mysql_type(row[1])]
     enum_type_override = TABLE_INFO[:enum_column_info][col_name]
     {
-        :name => col_name, \
-        :lambda_var => TABLE_NAME[0].downcase, \
+        :name => col_name,
+        :description => DESCRIPTIONS[col_name] ? DESCRIPTIONS[col_name].strip : '',
+        :lambda_var => TABLE_NAME[0].downcase,
         :mysql_type => simple_mysql_type(row[1]), \
         :big_query_type => enum_type_override ? enum_type_override[:bigquery] : primitive_type[:bigquery], \
         :swagger_type => enum_type_override ? enum_type_override[:swagger] : primitive_type[:swagger], \
@@ -284,7 +291,7 @@ FIXED_COLUMNS = [
 ]
 
 BIG_QUERY_SCHEMA = FIXED_COLUMNS.concat(COLUMNS.map do |col|
-  { :name => col[:name], :type => col[:big_query_type]}
+  { :name => col[:name], :type => col[:big_query_type], :description => col[:description].strip}
 end).freeze
 
 schema_json = JSON.pretty_generate(BIG_QUERY_SCHEMA)
@@ -301,12 +308,14 @@ write_output(OUTPUTS[:big_query_json], schema_json, 'BigQuery JSON Schema')
 def to_swagger_property(column)
   if column[:is_enum]
     swagger_value = {
+        'description' => column[:description],
         '$ref' => "#/definitions/#{column[:swagger_type]}"
   }
   else
-    swagger_value = MYSQL_TYPE_TO_SIMPLE_TYPE[column[:mysql_type]][:swagger]
+    swagger_value = MYSQL_TYPE_TO_SIMPLE_TYPE[column[:mysql_type]][:swagger] \
+      .merge({ 'description' => column[:description]})
   end
-  {}.merge(swagger_value)
+  swagger_value
 end
 
 swagger_object =  {  TABLE_INFO[:dto_class] => provenance_yaml.merge({
@@ -317,13 +326,16 @@ swagger_object =  {  TABLE_INFO[:dto_class] => provenance_yaml.merge({
   }) # .merge(provenance_yaml)
 }
 
-indented_yaml = swagger_object.to_yaml \
+def indent_yaml(yaml)
+  yaml \
+  .to_yaml \
   .split("\n") \
   .reject{ |line| '---'.eql?(line)} \
   .map{ |line| '  ' + line } \
   .join("\n")
+end
 
-write_output(OUTPUTS[:swagger_yaml], indented_yaml, 'DTO Swagger Definition')
+write_output(OUTPUTS[:swagger_yaml], indent_yaml(swagger_object), 'DTO Swagger Definition')
 
 ### Projection Interface
 def to_getter(field)
@@ -538,3 +550,13 @@ ENTITY_DECL = ("final #{TABLE_INFO[:entity_class]} #{TABLE_INFO[:instance_name]}
 .join("\n")).freeze
 
 write_output(OUTPUTS[:entity_decl], ENTITY_DECL, "Entity Class Instance Declaration")
+
+### Empty schema description input file
+
+DESCRIPTION_YAML_TEMPLATE = {
+    TABLE_INFO[:name] => COLUMNS.to_h do |col|
+        [col[:name], '']
+    end
+}
+
+write_output(OUTPUTS[:yaml_template], indent_yaml(DESCRIPTION_YAML_TEMPLATE), 'YAML Description Input Template')

@@ -3,11 +3,10 @@ import ClrIconLink from 'app/element/clr-icon-link';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {Option, ResourceCard} from 'app/text-labels';
-import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
 
-describe('Create Dataset', () => {
+describe('Dataset test', () => {
 
   beforeEach(async () => {
     await signIn(page);
@@ -16,56 +15,13 @@ describe('Create Dataset', () => {
   /**
    * Test:
    * - Find an existing workspace. Create a new workspace if none exists.
-   * - Create a new Dataset from All Participants and All Surveys. Save dataset without Export to Notebook.
-   * - Rename dataset.
-   * - Delete Dataset.
-   */
-  test('Can create Dataset with defaults selections', async () => {
-    const workspaceCard = await findWorkspace(page);
-    await workspaceCard.clickWorkspaceName();
-
-    // Click Add Datasets button
-    const dataPage = new WorkspaceDataPage(page);
-    const datasetPage = await dataPage.clickAddDatasetButton();
-
-    await datasetPage.selectCohorts(['All Participants']);
-    await datasetPage.selectConceptSets(['Demographics', 'All Surveys']);
-    const saveModal = await datasetPage.clickSaveAndAnalyzeButton();
-    const datasetName = await saveModal.saveDataset();
-
-    // Verify create successful
-    const resourceCard = new DataResourceCard(page);
-    const dataSetExists = await resourceCard.cardExists(datasetName, ResourceCard.Dataset);
-    expect(dataSetExists).toBe(true);
-
-    // Rename Dataset
-    const newDatasetName = makeRandomName();
-    await dataPage.renameResource(datasetName, newDatasetName, ResourceCard.Dataset);
-
-    await dataPage.openDatasetsSubtab({waitPageChange: false});
-
-    // Verify rename successful
-    const newDatasetExists = await resourceCard.cardExists(newDatasetName, ResourceCard.Dataset);
-    expect(newDatasetExists).toBe(true);
-
-    const oldDatasetExists = await resourceCard.cardExists(datasetName, ResourceCard.Dataset);
-    expect(oldDatasetExists).toBe(false);
-
-    // Delete Dataset
-    const textContent = await dataPage.deleteResource(newDatasetName, ResourceCard.Dataset);
-    expect(textContent).toContain(`Are you sure you want to delete Dataset: ${newDatasetName}?`);
-
-  });
-
-  /**
-   * Test:
-   * - Find an existing workspace. Create a new workspace if none exists.
-   * - Create a new Cohort from drug "hydroxychloroquine".
-   * - Create a new Dataset from All Participants and All Surveys. Save dataset without Export to Notebook.
+   * - Create a new Cohort from searching for drug name "hydroxychloroquine".
+   * - Create a new Dataset from All Participants and All Surveys.
+   * - Save dataset without Export to Notebook.
    * - Edit dataset. Save dataset without Export to Notebook.
    * - Delete Dataset.
    */
-  test('Can create Dataset with user-defined cohort', async () => {
+  test('Can create Dataset with user-defined Cohorts', async () => {
     const workspaceCard = await findWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 
@@ -82,7 +38,7 @@ describe('Create Dataset', () => {
 
     // Search for drug hydroxychloroquine
     const searchResultsTable = await searchPage.searchCondition('hydroxychloroquine');
-    // Add drug in first row result
+    // Add a drug in Result table first row. Drug name ignored.
     const nameValue = await searchResultsTable.getCellValue(1, 1);
     const addIcon = await ClrIconLink.findByName(page, {containsText: nameValue, iconShape: 'plus-circle'}, searchResultsTable);
     await addIcon.click();

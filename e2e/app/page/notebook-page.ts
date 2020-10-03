@@ -190,10 +190,11 @@ export default class NotebookPage extends AuthenticatedPage {
     }
     await cellInput.dispose();
     await this.run();
-    await this.waitForKernelIdle(opts.timeOut);
+    const {timeOut = 120000} = opts;
+    await this.waitForKernelIdle(timeOut);
     const [output] = await Promise.all([
-      cell.waitForOutput(opts.timeOut),
-      this.waitForKernelIdle(opts.timeOut), // Wait for kernel idle again because sometimes kernel turns unexpectely.
+      cell.waitForOutput(timeOut),
+      this.waitForKernelIdle(timeOut), // Wait for kernel idle again because sometimes kernel turns unexpectely.
     ]);
     return output;
   }

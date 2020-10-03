@@ -89,7 +89,7 @@ export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConce
     }
 
     openSaveDialog() {
-      this.props.concept[0].conceptName ?
+      this.props.concept[0].name ?
          this.setState({conceptAddModalOpen: true}) :
          this.setState({surveyAddModalOpen: true}) ;
     }
@@ -121,7 +121,7 @@ export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConce
               <ClrIcon shape='times-circle'/>
             </button>
             <b style={{paddingRight: '0.25rem'}}>{con.conceptCode}</b>
-            {con.conceptName ? con.conceptName : con.question}
+            {con.name ? con.name : con.question}
           </FlexRow>)}
         </div>
         <FlexRowWrap style={{flexDirection: 'row-reverse', marginTop: '1rem'}}>

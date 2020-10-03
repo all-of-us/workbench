@@ -37,8 +37,6 @@ public interface CohortDao extends CrudRepository<DbCohort, Long> {
           + "  c.description,\n"
           + "  c.lastModifiedTime,\n"
           + "  c.name,\n"
-          + "  c.type,\n"
-          + "  c.version,\n"
           + "  c.workspaceId\n"
           + "FROM DbCohort c")
   List<ProjectedReportingCohort> getReportingCohorts();

@@ -12,7 +12,14 @@ import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {Concept, ConceptSet, CreateConceptSetRequest, Domain, DomainCount, UpdateConceptSetRequest} from 'generated/fetch';
+import {
+  ConceptSet,
+  CreateConceptSetRequest,
+  Criteria,
+  Domain,
+  DomainCount,
+  UpdateConceptSetRequest
+} from 'generated/fetch';
 import {validate} from 'validate.js';
 
 const styles = reactStyles({
@@ -37,7 +44,7 @@ export const ConceptAddModal = withCurrentWorkspace()
 (class extends React.Component<{
   workspace: WorkspaceData,
   activeDomainTab: DomainCount,
-  selectedConcepts: Concept[],
+  selectedConcepts: Criteria[],
   onSave: Function,
   onClose: Function,
 }, {
@@ -51,7 +58,7 @@ export const ConceptAddModal = withCurrentWorkspace()
   name: string,
   saving: boolean,
   selectedSet: ConceptSet,
-  selectedConceptsInDomain: Concept[]
+  selectedConceptsInDomain: Criteria[]
 }> {
 
   constructor(props) {

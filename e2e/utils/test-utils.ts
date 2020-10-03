@@ -14,11 +14,12 @@ import {WorkspaceAccessLevel} from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
 import {makeWorkspaceName} from './str-utils';
 
+
 export async function signIn(page: Page, userId?: string, passwd?: string): Promise<void> {
   const loginPage = new GoogleLoginPage(page);
   await loginPage.login(userId, passwd);
   // this element exists in DOM after user has logged in
-  await page.waitForFunction(() => !!document.querySelector('app-signed-in'));
+  await page.waitForFunction(() => !!document.querySelector('app-signed-in'), {timeout: 60000});
   const homePage = new HomePage(page);
   await homePage.waitForLoad();
 }
@@ -44,7 +45,7 @@ export async function signInAs(userId: string, passwd: string): Promise<Page> {
  * It usually indicates the page is ready for user interaction.
  * </pre>
  */
-export async function waitWhileLoading(page: Page, timeOut?: number): Promise<void> {
+export async function waitWhileLoading(page: Page, timeOut: number = 90000): Promise<void> {
   const notBlankPageSelector = '[data-test-id="sign-in-container"], title:not(empty), div.spinner, svg[viewBox]';
   const spinElementsSelector = '[style*="running spin"], .spinner:empty, [style*="running rotation"]';
 
