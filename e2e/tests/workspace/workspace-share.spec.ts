@@ -1,4 +1,3 @@
-import Navigation, {NavLink} from 'app/component/navigation';
 import ShareModal from 'app/component/share-modal';
 import WorkspaceCard from 'app/component/workspace-card';
 import Link from 'app/element/link';
@@ -7,7 +6,7 @@ import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspacesPage from 'app/page/workspaces-page';
 import {Option, LinkText, WorkspaceAccessLevel} from 'app/text-labels';
 import {config} from 'resources/workbench-config';
-import {findWorkspace, signIn, signInAs, waitWhileLoading} from 'utils/test-utils';
+import {findWorkspace, signIn, signInAs, signOut, waitWhileLoading} from 'utils/test-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 
 describe('Share workspace', () => {
@@ -75,15 +74,10 @@ describe('Share workspace', () => {
 
       await shareModal.shareWithUser(config.collaboratorUsername, WorkspaceAccessLevel.Reader);
       await waitWhileLoading(page);
-      await Navigation.navMenu(page, NavLink.SIGN_OUT);
-
-      // browser and page reset.
-      await page.deleteCookie(...await page.cookies());
-      await jestPuppeteer.resetPage();
-      await jestPuppeteer.resetBrowser();
+      await signOut(page);
 
       // To verify READER role assigned correctly, user with READER role will sign in in new Incognito page.
-      const newPage = await signInAs(config.collaboratorUsername, config.userPassword);
+      const newPage = await signInAs(page, config.collaboratorUsername, config.userPassword);
 
       const homePage = new HomePage(newPage);
       await homePage.getSeeAllWorkspacesLink().then((link) => link.click());
@@ -115,8 +109,7 @@ describe('Share workspace', () => {
       expect(await searchInput.isDisabled()).toBe(true);
       await modal2.clickButton(LinkText.Cancel);
 
-      await Navigation.navMenu(newPage, NavLink.SIGN_OUT);
-      await newPage.close();
+      await signOut(newPage);
     });
 
   });
