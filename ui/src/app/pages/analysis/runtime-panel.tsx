@@ -172,7 +172,7 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
   const runtimeOps = useStore(runtimeOpsStore);
   const [currentRuntime, setRequestedRuntime] = useRuntime(workspace.namespace);
   const activeRuntimeOp: RuntimeOperation = runtimeOps.opsByWorkspaceNamespace[workspace.namespace];
-  const {status = null, dataprocConfig: {masterDiskSize, masterMachineType}} = currentRuntime || { dataprocConfig: {}};
+  const {status = null, dataprocConfig: {masterDiskSize = null, masterMachineType = null}} = currentRuntime || { dataprocConfig: {}};
   const nextMachineType = selectedMachine && selectedMachine.name;
 
   // How do we reflect the state of the runtime to the user?
