@@ -181,7 +181,6 @@ public class DataSetController implements DataSetApiDelegate {
       String workspaceNamespace, String workspaceId, DataSetPreviewRequest dataSetPreviewRequest) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    DataSetPreviewResponse previewQueryResponse = new DataSetPreviewResponse();
     List<DataSetPreviewValueList> valuePreviewList = new ArrayList<>();
 
     QueryJobConfiguration previewBigQueryJobConfig =
@@ -213,10 +212,10 @@ public class DataSetController implements DataSetApiDelegate {
           valuePreviewList,
           Comparator.comparing(item -> dataSetPreviewRequest.getValues().indexOf(item.getValue())));
     }
-
-    previewQueryResponse.setDomain(dataSetPreviewRequest.getDomain());
-    previewQueryResponse.setValues(valuePreviewList);
-    return ResponseEntity.ok(previewQueryResponse);
+    return ResponseEntity.ok(
+        new DataSetPreviewResponse()
+            .domain(dataSetPreviewRequest.getDomain())
+            .values(valuePreviewList));
   }
 
   @VisibleForTesting
