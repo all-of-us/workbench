@@ -73,7 +73,7 @@ export const abortRuntimeOperationForWorkspace = (workspaceNamespace: string) =>
 
 // runtime store states: undefined(initial state) -> Runtime (user selected) <--> null (delete only - no recreate)
 interface RuntimeStore {
-  workspace: string,
+  workspaceNamespace: string,
   runtime: Runtime | null | undefined
 }
 
