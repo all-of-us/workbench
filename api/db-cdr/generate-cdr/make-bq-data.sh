@@ -80,14 +80,14 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.cb_survey_version\`"
 echo "Inserting domain_info"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\`
-(concept_id,domain,domain_id,name,description,all_concept_count,standard_concept_count,participant_count)
+(concept_id,domain,domain_id,domain_enum,name,description,all_concept_count,standard_concept_count,participant_count)
 VALUES
-(19,0,'Condition','Conditions','Conditions are records of a Person suggesting the presence of a disease or medical condition stated as a diagnosis, a sign or a symptom, which is either observed by a Provider or reported by the patient.',0,0,0),
-(13,3,'Drug','Drug Exposures','Drugs biochemical substance formulated in such a way that when administered to a Person it will exert a certain physiological or biochemical effect. The drug exposure domain concepts capture records about the utilization of a Drug when ingested or otherwise introduced into the body.',0,0,0),
-(21,4,'Measurement','Labs and Measurements','Labs and Measurements',0,0,0),
-(10,6,'Procedure','Procedures','Procedure',0,0,0),
-(27,5,'Observation','Observations','Observation',0,0,0),
-(0,10,'Physical Measurements','Physical Measurements','Participants have the option to provide a standard set of physical measurements as part of the enrollment process',0,0,0)"
+(19,0,'Condition','CONDITION','Conditions','Conditions are records of a Person suggesting the presence of a disease or medical condition stated as a diagnosis, a sign or a symptom, which is either observed by a Provider or reported by the patient.',0,0,0),
+(13,3,'Drug','DRUG','Drug Exposures','Drugs biochemical substance formulated in such a way that when administered to a Person it will exert a certain physiological or biochemical effect. The drug exposure domain concepts capture records about the utilization of a Drug when ingested or otherwise introduced into the body.',0,0,0),
+(21,4,'Measurement','MEASUREMENT','Labs and Measurements','Labs and Measurements',0,0,0),
+(10,6,'Procedure','PROCEDURE','Procedures','Procedure',0,0,0),
+(27,5,'Observation','OBSERVATION','Observations','Observation',0,0,0),
+(0,10,'Physical Measurements','PHYSICAL_MEASUREMENT','Physical Measurements','Participants have the option to provide a standard set of physical measurements as part of the enrollment process',0,0,0)"
 
 # Populate survey_module
 #################
@@ -441,26 +441,33 @@ where count_value > 0 or source_count_value > 0"
 # Set all_concept_count and standard_concept_count on domain_info
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d
-set d.all_concept_count = c.all_concept_count, d.standard_concept_count = c.standard_concept_count from
-(select c.domain_id as domain_id, COUNT(DISTINCT c.concept_id) as all_concept_count,
-SUM(CASE WHEN c.standard_concept IN ('S', 'C') THEN 1 ELSE 0 END) as standard_concept_count from
-\`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept\` c
+set d.all_concept_count = c.all_concept_count
+from (select c.domain_id as domain_id, COUNT(DISTINCT c.concept_id) as all_concept_count
+from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\` c
 join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d2
-on d2.domain_id = c.domain_id
-and (c.count_value > 0 or c.source_count_value > 0)
+on d2.domain_enum = c.domain_id
 group by c.domain_id) c
-where d.domain_id = c.domain_id"
+where d.domain_enum = c.domain_id"
 
-# Set all_concept_count and standard_concept_count on domain_info for Physical Measurements
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d
-set d.all_concept_count = c.all_concept_count, d.standard_concept_count = c.standard_concept_count from
-(SELECT count(distinct concept_id) as all_concept_count, SUM(CASE WHEN standard_concept IN ('S', 'C') THEN 1 ELSE 0 END) as standard_concept_count
-FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
-WHERE vocabulary_id = 'PPI'
-AND domain_id = 'Measurement'
-AND concept_class_id = 'Clinical Observation') c
-where d.domain = 8"
+set d.standard_concept_count = c.standard_concept_count
+from (select c.domain_id as domain_id, COUNT(DISTINCT c.concept_id) as standard_concept_count
+from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\` c
+join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d2
+on d2.domain_enum = c.domain_id and c.is_standard = 1
+group by c.domain_id) c
+where d.domain_enum = c.domain_id"
+
+# Set all_concept_count on domain_info for Physical Measurements
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d
+set d.all_concept_count = c.all_concept_count
+from (SELECT count(distinct concept_id) as all_concept_count
+FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+WHERE type = 'PPI'
+AND domain_id = 'PHYSICAL_MEASUREMENT') c
+where d.domain = 10"
 
 # Set participant counts for Condition domain
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -510,11 +517,10 @@ set d.participant_count = r.count from
 FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\`
 WHERE measurement_source_concept_id IN (
 SELECT concept_id
-FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
-WHERE vocabulary_id = 'PPI'
-AND domain_id = 'Measurement'
-AND concept_class_id = 'Clinical Observation')) as r
-where d.domain = 8"
+FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+WHERE type = 'PPI'
+AND domain_id = 'PHYSICAL_MEASUREMENT')) as r
+where d.domain = 10"
 
 ##########################################
 # survey count updates                   #
