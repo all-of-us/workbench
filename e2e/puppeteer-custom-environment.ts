@@ -17,8 +17,6 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
   // Take a screenshot right after failure
   async handleTestEvent(event) {
     switch (event.name) {
-      // case 'test_fn_failure':
-      // case 'hook_failure':
       case 'test_done':
         if (event.test.errors.length > 0) {
           console.error(`handleTestEvent case: ${event.name}`);
@@ -26,7 +24,6 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
           const testName = event.test.name.replace(/\W/g, '-');
           const screenshotDir = 'logs/screenshot';
           await fs.ensureDir(screenshotDir);
-          // move create-filename to helper.ts
           const timestamp = new Date().getTime();
           const screenshotFileName = `${screenshotDir}/${testName}_${timestamp}.png`;
           await this.global.page.screenshot({path: screenshotFileName, fullPage: true});

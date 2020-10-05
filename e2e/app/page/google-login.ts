@@ -106,26 +106,17 @@ export default class GoogleLoginPage {
     try {
       const submitButton = new Button(this.page, FieldSelector.SubmitButton);
       await Promise.all([
-        this.page.waitForNavigation({waitUntil: ['networkidle2', 'load'], timeout: 60000}),
-        submitButton.click()
+        this.page.waitForNavigation({waitUntil: ['networkidle2', 'load'], timeout: 30000}),
+        submitButton.click(),
+        this.page.waitForSelector('app-signed-in', {timeout: 30000}),
       ]);
       await submitButton.dispose();
     } catch (err) {
-      // If navigation errored, it could be because prompted with "Enter Recovery Email" page.
-      const recoverEmailXpath = '//input[@type="email" and @aria-label="Enter recovery email address"]';
-      await Promise.race([
-        this.page.waitForSelector('app-signed-in'),
-        this.page.waitForXPath(recoverEmailXpath, {visible: true})
-      ]);
-      const [elementHandle] = await this.page.$x(recoverEmailXpath);
-      if (elementHandle) {
-        await elementHandle.type(config.institutionContactEmail);
-        await Promise.all([
-          this.page.waitForNavigation({waitUntil: ['networkidle2', 'load'], timeout: 60000}),
-          this.page.keyboard.press(String.fromCharCode(13)), // press Enter key
-          this.page.waitForSelector('app-signed-in')
-        ]);
-        await elementHandle.dispose();
+      // Two main reasons why error is throw are caused by "Enter Recovery Email" page or login captcha.
+      // At this time, we can only handle "Enter Recover Email" page if it exists.
+      const found = await this.fillOutRecoverEmail();
+      if (!found) {
+        throw err;
       }
     }
   }
@@ -170,5 +161,26 @@ export default class GoogleLoginPage {
     const button = await Button.findByName(this.page, {name: 'Create Account'});
     await button.clickWithEval();
   }
-  
+
+  /**
+   * Fill out "Enter Recover Email" input if found.
+   * @private
+   */
+  private async fillOutRecoverEmail(): Promise<boolean> {
+    const recoverEmailXpath = '//input[@type="email" and @aria-label="Enter recovery email address"]';
+    const [elementHandle] = await this.page.$x(recoverEmailXpath);
+    if (elementHandle) {
+      await elementHandle.type(config.institutionContactEmail);
+      await Promise.all([
+        this.page.waitForNavigation({waitUntil: ['networkidle2', 'load'], timeout: 30000}),
+        this.page.keyboard.press(String.fromCharCode(13)), // press Enter key
+        this.page.waitForSelector('app-signed-in', {timeout: 30000}),
+      ]);
+      await elementHandle.dispose();
+      return true;
+    }
+    // "Enter Recover Email" input not found.
+    return false;
+  }
+
 }
