@@ -1,5 +1,6 @@
 import {Profile} from 'generated';
 import * as React from 'react';
+import { Runtime } from 'generated/fetch';
 import { BreadcrumbType } from './navigation';
 import {atom, Atom} from './subscribable';
 
@@ -69,6 +70,10 @@ export const abortRuntimeOperationForWorkspace = (workspaceNamespace: string) =>
     runtimeOpsStore.set({opsByWorkspaceNamespace: opsByWorkspaceNamespace});
   }
 };
+
+// runtime store states: undefined(initial state) -> Runtime (user selected) <--> null (delete only - no recreate)
+export const runtimeStore = atom<Runtime|null|undefined>(undefined)
+
 
 /**
  * @name useStore
