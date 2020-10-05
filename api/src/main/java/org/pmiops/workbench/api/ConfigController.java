@@ -48,6 +48,8 @@ public class ConfigController implements ConfigApiDelegate {
             .enableResearchReviewPrompt(config.featureFlags.enableResearchPurposePrompt)
             .enableCOPESurvey(config.featureFlags.enableCOPESurvey)
             .enableCustomRuntimes(config.featureFlags.enableCustomRuntimes)
+            .enableGceAsNotebookRuntimeDefault(
+                config.featureFlags.enableGceAsNotebookRuntimeDefault)
             .runtimeImages(
                 Stream.concat(
                         config.firecloud.runtimeImages.dataproc.stream()

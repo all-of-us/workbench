@@ -10,11 +10,18 @@ import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {highlightSearchTerm, reactStyles} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {attributesSelectionStore, currentCohortCriteriaStore, currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
+import {
+  attributesSelectionStore,
+  currentCohortCriteriaStore,
+  currentConceptStore,
+  currentWorkspaceStore,
+  serverConfigStore,
+  setSidebarActiveIconStore
+} from 'app/utils/navigation';
 import {AttrName, Criteria, CriteriaSubType, CriteriaType, DomainType, Operator} from 'generated/fetch';
 
 const COPE_SURVEY_ID = 1333342;
-const COPE_SURVEY_GROUP_NAME = 'COVID-19 Participant Experience (COPE) Survey';
+export const COPE_SURVEY_GROUP_NAME = 'COVID-19 Participant Experience (COPE) Survey';
 const styles = reactStyles({
   code: {
     color: colors.dark,
@@ -102,6 +109,7 @@ interface TreeNodeProps {
   expand?: Function;
   groupSelections: Array<number>;
   node: NodeProp;
+  source?: string;
   scrollToMatch: Function;
   searchTerms: string;
   select: Function;
@@ -153,7 +161,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
   }
 
   loadChildren() {
-    const {node: {count, domainId, id, isStandard, name, type}} = this.props;
+    const {node: {conceptId, count, domainId, id, isStandard, name, type}} = this.props;
     this.setState({loading: true});
     const {cdrVersionId} = (currentWorkspaceStore.getValue());
     const criteriaType = domainId === DomainType.DRUG.toString() ? CriteriaType.ATC.toString() : type;
@@ -170,7 +178,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
           if (resp.items.length > 0 && domainId === DomainType.SURVEY.toString() && !resp.items[0].group) {
             // save questions in the store so we can display them along with answers if selected
             const questions = ppiQuestions.getValue();
-            questions[id] = {count, name};
+            questions[id] = {conceptId, count, name};
             ppiQuestions.next(questions);
           }
         }
@@ -208,13 +216,14 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
   }
 
   toggleExpanded() {
-    const {node: {domainId, group, name, parentId, subtype}} = this.props;
+    const {node: {domainId, group, name, parentId, subtype}, source} = this.props;
     if (group) {
       const {children, expanded} = this.state;
       if (!expanded) {
         if (parentId === 0) {
           const labelName = domainId === DomainType.SURVEY.toString() ? name : subTypeToTitle(subtype);
-          triggerEvent('Cohort Builder Search', 'Click', `${domainToTitle(domainId)} - ${labelName} - Expand`);
+          const message = source === 'concept' ? 'Concept Search' : 'Cohort Builder Search';
+          triggerEvent(message, 'Click', `${domainToTitle(domainId)} - ${labelName} - Expand`);
         }
         if (domainId !== DomainType.PHYSICALMEASUREMENT.toString() && !children) {
           this.loadChildren();
@@ -279,10 +288,12 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     }
   }
 
-  setAttributes(node: NodeProp) {
+  setAttributes(event: Event, node: NodeProp) {
+    event.stopPropagation();
     if (serverConfigStore.getValue().enableCohortBuilderV2) {
       delete node.children;
       attributesSelectionStore.next(node);
+      setSidebarActiveIconStore.next('criteria');
     } else {
       this.props.setAttributes(node);
     }
@@ -294,18 +305,34 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
        name === COPE_SURVEY_GROUP_NAME;
   }
 
+  getSelectedValues() {
+    const {node: {parentId}} = this.props;
+    if (this.props.source === 'concept') {
+      if (currentConceptStore.getValue()) {
+        return currentConceptStore.getValue()
+          .some(crit => parentId.toString() === this.paramId);
+      } else {
+        return [];
+      }
+    } else {
+      return currentCohortCriteriaStore.getValue()
+        .some(crit =>
+          crit.parameterId === this.paramId ||
+          parentId.toString() === this.paramId
+        );
+    }
+
+  }
+
   render() {
     const {autocompleteSelection, groupSelections, node,
-      node: {code, count, domainId, id, group, hasAttributes, name, parentId, selectable}, scrollToMatch, searchTerms, select, selectedIds,
+      node: {code, count, domainId, id, group, hasAttributes, name, parentId, selectable},
+      source, scrollToMatch, searchTerms, select, selectedIds,
       setAttributes} = this.props;
     const {children, error, expanded, hover, loading, searchMatch} = this.state;
     const nodeChildren = domainId === DomainType.PHYSICALMEASUREMENT.toString() ? node.children : children;
     const selected = serverConfigStore.getValue().enableCohortBuilderV2
-      ? currentCohortCriteriaStore.getValue()
-        .some(crit =>
-          crit.parameterId === this.paramId ||
-          parentId.toString() === this.paramId
-        )
+      ? this.getSelectedValues()
       : selectedIds.includes(this.paramId) ||
         groupSelections.includes(parentId);
     const displayName = domainId === DomainType.PHYSICALMEASUREMENT.toString() && !!searchTerms
@@ -318,16 +345,17 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
             ? <Spinner size={16}/>
             : <ClrIcon style={{color: colors.disabled}}
               shape={'angle ' + (expanded ? 'down' : 'right')}
-              size='16' onClick={() => this.toggleExpanded()}/>}
+              size='16'/>}
         </button>}
+        {(!hasAttributes || source !== 'concept') &&
         <div style={hover ? {...styles.treeNodeContent, background: colors.light} : styles.treeNodeContent}
           onMouseEnter={() => this.setState({hover: true})}
           onMouseLeave={() => this.setState({hover: false})}>
           {selectable && <button style={styles.iconButton}>
-            {hasAttributes
+            {(hasAttributes && (source !== 'concept'))
               ? <ClrIcon style={{color: colors.accent}}
                   shape='slider' dir='right' size='20'
-                  onClick={() => this.setAttributes(node)}/>
+                  onClick={(e) => this.setAttributes(e, node)}/>
               : selected
                 ? <ClrIcon style={{...styles.selectIcon, ...styles.selected}}
                     shape='check-circle' size='20'/>
@@ -347,7 +375,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
           {this.showCount && <div style={{whiteSpace: 'nowrap'}}>
             <span style={styles.count}>{count.toLocaleString()}</span>
           </div>}
-        </div>
+        </div>}
       </div>
       {!!nodeChildren && nodeChildren.length > 0 &&
         <div style={{display: expanded ? 'block' : 'none', marginLeft: nodeChildren[0].group ? '0.875rem' : '2rem'}}>
@@ -356,6 +384,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
                                                       expand={() => this.setState({expanded: true})}
                                                       groupSelections={groupSelections}
                                                       node={child}
+                                                      source={source}
                                                       scrollToMatch={scrollToMatch}
                                                       searchTerms={searchTerms}
                                                       select={(s) => select(s)}

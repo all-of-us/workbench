@@ -54,6 +54,12 @@ const styles = reactStyles({
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap'
   },
+  modifierButtonContainer: {
+    bottom: '0.5rem',
+    paddingLeft: '0.5rem',
+    position: 'absolute',
+    width: 'calc(100% - 1.5rem)'
+  },
   removeSelection: {
     background: 'none',
     border: 0,
@@ -72,12 +78,11 @@ const styles = reactStyles({
     background: colors.white,
     border: `2px solid ${colors.primary}`,
     borderRadius: '5px',
-    height: 'calc(100% - 17rem)',
+    height: '80%',
     lineHeight: '0.75rem',
-    minHeight: 'calc(100vh - 15rem)',
+    marginTop: '0.5rem',
     padding: '0.5rem',
-    overflowX: 'hidden',
-    overflowY: 'auto',
+    position: 'relative',
   },
   selectionItem: {
     display: 'flex',
@@ -85,6 +90,11 @@ const styles = reactStyles({
     padding: '0',
     width: '100%',
     color: 'rgb(38, 34, 98)'
+  },
+  selectionList: {
+    height: '100%',
+    overflow: 'hidden auto',
+    paddingLeft: '0.5rem',
   },
   selectionPanel: {
     height: '35rem',
@@ -96,9 +106,9 @@ const styles = reactStyles({
     padding: '0.5rem 0'
   },
   modifierButton: {
-    position: 'absolute',
-    bottom: '1rem' ,
-    width: '80%',
+    height: '1.75rem',
+    maxWidth: '100%',
+    width: '100%',
     backgroundColor: colors.white,
     border: '0.1rem solid' + colors.accent,
     color: colors.accent
@@ -384,6 +394,10 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
       }
     }
 
+    componentWillUnmount() {
+      attributesSelectionStore.next(undefined);
+    }
+
     checkCriteriaChanges() {
       const {cohortContext, criteria} = this.props;
       if (criteria.length === 0) {
@@ -407,6 +421,11 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
       currentCohortCriteriaStore.next(updateList);
     }
 
+    closeSidebar() {
+      attributesSelectionStore.next(undefined);
+      setSidebarActiveIconStore.next(undefined);
+    }
+
     get showModifierButton() {
       const {criteria} = this.props;
       return criteria && criteria.length > 0 &&
@@ -422,18 +441,18 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
     render() {
       const {back, cohortContext, criteria} = this.props;
       const {attributesSelection, disableSave, showModifiersSlide} = this.state;
-      return <div id='selection-list'>
+      return <div id='selection-list' style={{height: '100%'}}>
         <FlexRow style={styles.navIcons}>
-          {this.showAttributesOrModifiers &&
+          {showModifiersSlide &&
             <Clickable style={{marginRight: '1rem'}}
-                       onClick={() => this.setState({attributesSelection: undefined, showModifiersSlide: false})}>
+                       onClick={() => this.setState({showModifiersSlide: false})}>
               <img src={proIcons.arrowLeft}
                    style={{height: '21px', width: '18px'}}
                    alt='Go back'/>
             </Clickable>
           }
           <Clickable style={{marginRight: '1rem'}}
-                     onClick={() => setSidebarActiveIconStore.next(undefined)}>
+                     onClick={() => this.closeSidebar()}>
             <img src={proIcons.times}
                  style={{height: '27px', width: '17px'}}
                  alt='Close'/>
@@ -441,23 +460,25 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
         </FlexRow>
           {!this.showAttributesOrModifiers && <React.Fragment>
             <h3 style={{...styles.sectionTitle, marginTop: 0}}>Add selected criteria to cohort</h3>
-            <div style={{paddingTop: '0.5rem', position: 'relative'}}>
-              <div style={styles.selectionContainer}>
-                {!!criteria && criteria.map((selection, s) => <SelectionInfo key={s}
+            <div style={styles.selectionContainer}>
+              {!!criteria && <div style={this.showModifierButton
+                ? {...styles.selectionList, height: 'calc(100% - 2rem)'}
+                : styles.selectionList}>
+                {criteria.map((selection, s) => <SelectionInfo key={s}
                   index={s}
                   selection={selection}
                   removeSelection={() => this.removeCriteria(selection)}/>
                 )}
-                {this.showModifierButton && <div style={{paddingLeft: '0.6rem'}}>
-                  <Button type='secondaryLight' style={styles.modifierButton}
-                          onClick={() => this.setState({showModifiersSlide: true})}>
-                    {cohortContext.item.modifiers.length > 0
-                      ? '(' + cohortContext.item.modifiers.length + ')  MODIFIERS APPLIED'
-                      : 'APPLY MODIFIERS'
-                    }
-                  </Button>
-                </div>}
-              </div>
+              </div>}
+              {this.showModifierButton && <div style={styles.modifierButtonContainer}>
+                <Button type='secondaryLight' style={styles.modifierButton}
+                        onClick={() => this.setState({showModifiersSlide: true})}>
+                  {cohortContext.item.modifiers.length > 0
+                    ? '(' + cohortContext.item.modifiers.length + ')  MODIFIERS APPLIED'
+                    : 'APPLY MODIFIERS'
+                  }
+                </Button>
+              </div>}
             </div>
             <FlexRowWrap style={{flexDirection: 'row-reverse', marginTop: '1rem'}}>
               <Button type='primary'
@@ -471,7 +492,7 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
               </Button>
             </FlexRowWrap>
           </React.Fragment>}
-          {showModifiersSlide && <ModifierPage selections={criteria}
+          {showModifiersSlide && !attributesSelection && <ModifierPage selections={criteria}
                                                closeModifiers={() => {
                                                  this.setState({showModifiersSlide: false});
                                                  this.checkCriteriaChanges();

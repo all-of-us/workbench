@@ -27,7 +27,7 @@ const baseRuntime: Runtime = {
   status: RuntimeStatus.Running,
   createdDate: '08/08/2018',
   toolDockerImage: 'docker',
-  configurationType: RuntimeConfigurationType.DefaultDataproc
+  configurationType: RuntimeConfigurationType.GeneralAnalysis
 };
 
 const workspaceNamespace = 'aou-rw-12345';

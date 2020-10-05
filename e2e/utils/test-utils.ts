@@ -12,13 +12,14 @@ import {waitForText} from 'utils/waits-utils';
 import WorkspaceCard from 'app/component/workspace-card';
 import {WorkspaceAccessLevel} from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
+import Navigation, {NavLink} from 'app/component/navigation';
 import {makeWorkspaceName} from './str-utils';
 
 export async function signIn(page: Page, userId?: string, passwd?: string): Promise<void> {
   const loginPage = new GoogleLoginPage(page);
   await loginPage.login(userId, passwd);
-  // this element exists in DOM after user has logged in
-  await page.waitForFunction(() => !!document.querySelector('app-signed-in'));
+  // This element exists in DOM after user has logged in. But it could takes a while.
+  await page.waitForFunction(() => !!document.querySelector('app-signed-in'), {timeout: 30000});
   const homePage = new HomePage(page);
   await homePage.waitForLoad();
 }
@@ -28,7 +29,14 @@ export async function signIn(page: Page, userId?: string, passwd?: string): Prom
  * @param {string} userId
  * @param {string} passwd
  */
-export async function signInAs(userId: string, passwd: string): Promise<Page> {
+export async function signInAs(page: Page, userId: string, passwd: string, opts: {reset?: boolean} = {}): Promise<Page> {
+  const {reset = true} = opts;
+  if (reset) {
+    // browser and page reset.
+    await page.deleteCookie(...await page.cookies());
+    await jestPuppeteer.resetPage();
+    await jestPuppeteer.resetBrowser();
+  }
   const incognitoBrowser = await browser.createIncognitoBrowserContext();
   const newPage = await incognitoBrowser.newPage();
   const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36';
@@ -38,13 +46,18 @@ export async function signInAs(userId: string, passwd: string): Promise<Page> {
   return newPage;
 }
 
+export async function signOut(page: Page) {
+  await Navigation.navMenu(page, NavLink.SIGN_OUT);
+  await page.waitFor(1000);
+}
+
 /**
  * <pre>
  * Wait while the page is loading (spinner is spinning and visible). Waiting stops when spinner stops spinning or when timed out.
  * It usually indicates the page is ready for user interaction.
  * </pre>
  */
-export async function waitWhileLoading(page: Page, timeOut?: number): Promise<void> {
+export async function waitWhileLoading(page: Page, timeOut: number = 90000): Promise<void> {
   const notBlankPageSelector = '[data-test-id="sign-in-container"], title:not(empty), div.spinner, svg[viewBox]';
   const spinElementsSelector = '[style*="running spin"], .spinner:empty, [style*="running rotation"]';
 
@@ -62,25 +75,28 @@ export async function waitWhileLoading(page: Page, timeOut?: number): Promise<vo
 }
 
 
-export async function clickEvalXpath(page: Page, xpathSelector: string) {
-  return page.evaluate((selector) => {
-    const node: any = document.evaluate(
-       selector,
-       document,
-       null,
-       XPathResult.FIRST_ORDERED_NODE_TYPE,
-       null
-    ).singleNodeValue;
-    document.evaluate(selector, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-    node.click();
-  }, xpathSelector);
-}
+export async function click(page: Page, opts: {xpath?: string, css?: string}) {
+  const {xpath, css} = opts;
+  if (xpath) {
+    return page.evaluate((selector) => {
+      const node: any = document.evaluate(
+         selector,
+         document,
+         null,
+         XPathResult.FIRST_ORDERED_NODE_TYPE,
+         null
+      ).singleNodeValue;
+      document.evaluate(selector, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+      node.click();
+    }, xpath);
+  }
 
-export async function clickEvalCss(page: Page, cssSelector: string) {
-  return page.evaluate((selector) => {
-    const node: any = document.querySelector(selector);
-    node.click();
-  }, cssSelector);
+  if  (css) {
+    return page.evaluate((selector) => {
+      const node: any = document.querySelector(selector);
+      node.click();
+    }, css);
+  }
 }
 
 /**

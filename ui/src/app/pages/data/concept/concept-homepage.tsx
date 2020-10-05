@@ -1,8 +1,9 @@
 import {Component} from '@angular/core';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {AlertClose, AlertDanger} from 'app/components/alert';
-import {Clickable, SlidingFabReact} from 'app/components/buttons';
+import {Button, Clickable, SlidingFabReact} from 'app/components/buttons';
 import {DomainCardBase} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -13,10 +14,23 @@ import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {ConceptAddModal} from 'app/pages/data/concept/concept-add-modal';
 import {ConceptSurveyAddModal} from 'app/pages/data/concept/concept-survey-add-modal';
 import {ConceptTable} from 'app/pages/data/concept/concept-table';
+import {CriteriaSearch} from 'app/pages/data/criteria-search';
 import {conceptsApi} from 'app/services/swagger-fetch-clients';
-import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, validateInputForMySQL, withCurrentWorkspace} from 'app/utils';
-import {NavStore, queryParamsStore} from 'app/utils/navigation';
+import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
+import {
+  reactStyles,
+  ReactWrapperBase,
+  validateInputForMySQL,
+  withCurrentConcept,
+  withCurrentWorkspace
+} from 'app/utils';
+import {
+  currentConceptStore,
+  NavStore,
+  queryParamsStore,
+  serverConfigStore,
+  setSidebarActiveIconStore
+} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import {environment} from 'environments/environment';
@@ -25,6 +39,20 @@ import {Key} from 'ts-key-enum';
 import {SurveyDetails} from './survey-details';
 
 const styles = reactStyles({
+  arrowIcon: {
+    height: '21px',
+    marginTop: '-0.2rem',
+    width: '18px'
+  },
+  backArrow: {
+    background: `${addOpacity(colors.accent, 0.15)}`,
+    borderRadius: '50%',
+    display: 'inline-block',
+    height: '1.5rem',
+    lineHeight: '1.6rem',
+    textAlign: 'center',
+    width: '1.5rem'
+  },
   searchBar: {
     boxShadow: '0 4px 12px 0 rgba(0,0,0,0.15)', height: '3rem', width: '64.3%', lineHeight: '19px', paddingLeft: '2rem',
     backgroundColor: colorWithWhiteness(colors.secondary, 0.85), fontSize: '16px'
@@ -159,6 +187,7 @@ const PhysicalMeasurementsCard: React.FunctionComponent<{physicalMeasurement: Do
 
 interface Props {
   workspace: WorkspaceData;
+  concept?: Array<Concept>;
 }
 
 interface State {
@@ -218,7 +247,7 @@ interface State {
   workspacePermissions: WorkspacePermissions;
 }
 
-export const ConceptHomepage = withCurrentWorkspace()(
+export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcept())(
   class extends React.Component<Props, State> {
 
     private MAX_CONCEPT_FETCH = 1000;
@@ -258,6 +287,14 @@ export const ConceptHomepage = withCurrentWorkspace()(
 
     componentDidMount() {
       this.loadDomainsAndSurveys();
+    }
+
+    componentWillUnmount() {
+      currentConceptStore.next(null);
+    }
+
+    isConceptSetFlagEnable() {
+      return serverConfigStore.getValue().enableConceptSetSearchV2;
     }
 
     async loadDomainsAndSurveys() {
@@ -359,6 +396,9 @@ export const ConceptHomepage = withCurrentWorkspace()(
       const {namespace, id} = this.props.workspace;
       this.setState({completedDomainSearches: [], concepts: [], countsError: false,
         domainErrors: [], countsLoading: true, searching: true});
+      if (this.isConceptSetFlagEnable()) {
+        currentConceptStore.next([]);
+      }
       const standardConceptFilter = standardConceptsOnly ? StandardConceptFilter.STANDARDCONCEPTS : StandardConceptFilter.ALLCONCEPTS;
       const completedDomainSearches = [];
       const request = {query: currentSearchString, standardConceptFilter: standardConceptFilter, maxResults: this.MAX_CONCEPT_FETCH};
@@ -430,6 +470,9 @@ export const ConceptHomepage = withCurrentWorkspace()(
         showSearchError: false,
         searching: false // reset the search result table to show browse/domain cards instead
       });
+      if (this.isConceptSetFlagEnable()) {
+        currentConceptStore.next(null);
+      }
     }
 
     browseDomain(domain: DomainInfo) {
@@ -467,10 +510,18 @@ export const ConceptHomepage = withCurrentWorkspace()(
 
     get activeSelectedConceptCount(): number {
       const {activeDomainTab, selectedConceptDomainMap} = this.state;
-      if (!activeDomainTab || !activeDomainTab.domain || !selectedConceptDomainMap[activeDomainTab.domain]) {
-        return 0;
+      if (!this.isConceptSetFlagEnable() || !this.props.concept) {
+        if (!activeDomainTab || !activeDomainTab.domain || !selectedConceptDomainMap[activeDomainTab.domain]) {
+          return 0;
+        }
+        return selectedConceptDomainMap[activeDomainTab.domain].length;
+      } else {
+        const selectedConcept = this.props.concept;
+        if (!activeDomainTab && selectedConcept && selectedConcept.length === 0) {
+          return 0;
+        }
+        return selectedConcept.length;
       }
-      return selectedConceptDomainMap[activeDomainTab.domain].length;
     }
 
     get addToSetText(): string {
@@ -501,10 +552,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
         = this.state;
       const domainError = domainErrors.includes(activeDomainTab.domain);
       return <React.Fragment>
-        <button style={styles.backBtn} type='button' onClick={() => this.clearSearch()}>
-          &lt; Back to Concept Set Homepage
-        </button>
-        <FadeBox>
+        {!this.isConceptSetFlagEnable() && <FadeBox>
           <FlexRow style={{justifyContent: 'flex-start'}}>
             {conceptDomainCounts.filter(domain => !selectedDomain || selectedDomain === domain.domain).map((domain) => {
               const tabError = countsError || domainErrors.includes(domain.domain);
@@ -553,8 +601,19 @@ export const ConceptHomepage = withCurrentWorkspace()(
                            expanded={this.addToSetText}
                            disable={this.activeSelectedConceptCount === 0 ||
                            !this.state.workspacePermissions.canWrite}/>
-        </FadeBox>
-      </React.Fragment>;
+        </FadeBox>}
+        {this.isConceptSetFlagEnable() && <React.Fragment>
+          {conceptDomainCounts.filter(domain => !selectedDomain || selectedDomain === domain.domain).map((domain) => {
+            return <React.Fragment>
+              <CriteriaSearch
+                cohortContext={{domain: activeDomainTab.domain, type: 'PPI', standard: this.state.standardConceptsOnly}}
+                source='concept' selectedSurvey={this.state.selectedSurvey}/>
+              <Button style={{float: 'right', marginBottom: '2rem'}}
+                    disabled={this.activeSelectedConceptCount === 0 ||
+                    !this.state.workspacePermissions.canWrite}
+                    onClick={() => setSidebarActiveIconStore.next('concept')}>Finish & Review</Button>
+            </React.Fragment>; })} </React.Fragment>
+        }</React.Fragment>;
     }
 
     render() {
@@ -564,11 +623,18 @@ export const ConceptHomepage = withCurrentWorkspace()(
         surveyAddModalOpen} = this.state;
       return <React.Fragment>
         <FadeBox style={{margin: 'auto', paddingTop: '1rem', width: '95.7%'}}>
-          <Header style={{fontSize: '20px', marginTop: 0, fontWeight: 600}}>
-            Search {selectedDomain ? (selectedSurvey ? selectedSurvey : activeDomainTab.name) : 'Concepts'}
-          </Header>
+          <FlexRow>
+            {(selectedSurvey || selectedDomain) &&
+            <Clickable style={styles.backArrow} onClick={() => this.clearSearch()}>
+              <img src='/assets/icons/arrow-left-regular.svg' style={styles.arrowIcon}
+                   alt='Go back'/>
+            </Clickable>}
+            <Header style={{fontSize: '24px', marginTop: 0, fontWeight: 600, paddingLeft: '0.4rem', paddingTop: '0.2rem'}}>
+              Search {selectedDomain ? (selectedSurvey ? selectedSurvey : activeDomainTab.name) : 'Concepts'}
+            </Header>
+          </FlexRow>
           <div style={{margin: '1rem 0'}}>
-            <div style={{display: 'flex', alignItems: 'center'}}>
+            {!this.isConceptSetFlagEnable() && <div style={{display: 'flex', alignItems: 'center'}}>
               <ClrIcon shape='search' style={{position: 'absolute', height: '1rem', width: '1rem',
                 fill: colors.accent, left: 'calc(1rem + 3.5%)'}}/>
               <TextInput style={styles.searchBar} data-test-id='concept-search-input'
@@ -587,7 +653,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
                         style={{marginLeft: '0.5rem', height: '16px', width: '16px'}}
                         manageOwnState={false}
                         onChange={() => this.handleCheckboxChange()}/>
-            </div>
+            </div>}
             {inputErrors.map((error, e) => <AlertDanger key={e} style={styles.inputAlert}>
               <span data-test-id='input-error-alert'>{error}</span>
             </AlertDanger>)}

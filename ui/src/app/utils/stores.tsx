@@ -1,4 +1,5 @@
-import {Profile, Runtime} from 'generated';
+import {Profile} from 'generated';
+import { Runtime } from 'generated/fetch';
 import * as React from 'react';
 import { BreadcrumbType } from './navigation';
 import {atom, Atom} from './subscribable';
@@ -70,11 +71,13 @@ export const abortRuntimeOperationForWorkspace = (workspaceNamespace: string) =>
   }
 };
 
-export const currentRuntimeStore = atom<any>({});
-
-// TODO: set type 
 // runtime store states: undefined(initial state) -> Runtime (user selected) <--> null (delete only - no recreate)
-export const runtimeStore = atom<any|null|undefined>(undefined)
+interface RuntimeStore {
+  workspaceNamespace: string;
+  runtime: Runtime | null | undefined;
+}
+
+export const runtimeStore = atom<RuntimeStore>(undefined);
 
 
 /**

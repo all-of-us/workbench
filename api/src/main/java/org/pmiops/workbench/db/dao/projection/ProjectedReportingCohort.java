@@ -6,7 +6,7 @@ package org.pmiops.workbench.db.dao.projection;
 // changed unless both the entity class and any queries returning
 // this projection type are in complete agreement.
 
-// This code was generated using reporting-wizard.rb at 2020-09-24T13:40:02-04:00.
+// This code was generated using reporting-wizard.rb at 2020-09-30T12:33:39-04:00.
 // Manual modification should be avoided if possible as this is a one-time generation
 // and does not run on every build and updates must be merged manually for now.
 
@@ -26,10 +26,6 @@ public interface ProjectedReportingCohort {
   Timestamp getLastModifiedTime();
 
   String getName();
-
-  String getType();
-
-  Short getVersion();
 
   Long getWorkspaceId();
 }

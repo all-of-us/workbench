@@ -374,6 +374,9 @@ curl -H "Content-Type: application/json" "localhost:9200/cdr_person/_doc/_search
 ###
 ## Cohort Builder
 
+#### Cohort Definition Schema
+[Documented here](api/reporting/docs/cohort_definition_schema.json)
+
 During ```./project dev-up``` the schema activity is the only activity run, which only creates tables for the cdr schema.
 
 Loading of cloud data for the criteria trees and cdr version happens in a manual goal(deletes and inserts tree data into the criteria table):
@@ -528,3 +531,5 @@ To supporrt analytics, we have a reporting pipeline that exports data to a BigQu
 The main source of documentation is the [design document (internal)](https://docs.google.com/document/d/1EKGApPC55X-KTHwVsv_saBQty4m-HCP2Kd5o6JHKDnQ/edit?usp=sharing).
 Some [codegen utilities](./api/reporting/schemas/REPORTING-SCHEMA-TOOLS.md) exist to assist
 with keeping types for all phases of the pipeline consistent.
+
+Queries and views of interest in the BigQuery  dataset(s) are described [here](api/reporting/queries/REPORTING-QUERIES.md).

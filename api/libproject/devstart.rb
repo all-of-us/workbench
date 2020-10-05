@@ -26,13 +26,13 @@ SERVICES = %W{servicemanagement.googleapis.com storage-component.googleapis.com 
               clouderrorreporting.googleapis.com bigquery-json.googleapis.com}
 DRY_RUN_CMD = %W{echo [DRY_RUN]}
 
-def make_gae_vars(min, max)
+def make_gae_vars(min_idle_instances = 0, max_instances = 10, instance_class = 'F1')
   {
-    "GAE_MIN_IDLE_INSTANCES" => min.to_s,
-    "GAE_MAX_INSTANCES" => max.to_s
+    "GAE_MIN_IDLE_INSTANCES" => min_idle_instances.to_s,
+    "GAE_MAX_INSTANCES" => max_instances.to_s,
+    'GAE_INSTANCE_CLASS' => instance_class
   }
 end
-TEST_GAE_VARS = make_gae_vars(0, 10)
 
 # TODO: Make environment/project flags consistent across commands, consider
 # using a environment keywords as dict keys here, e.g. :test, :staging, etc.
@@ -44,7 +44,7 @@ ENVIRONMENTS = {
     :config_json => "config_local.json",
     :cdr_versions_json => "cdr_versions_local.json",
     :featured_workspaces_json => "featured_workspaces_local.json",
-    :gae_vars => TEST_GAE_VARS
+    :gae_vars => make_gae_vars
   },
   "all-of-us-workbench-test" => {
     :env_name => "test",
@@ -53,7 +53,7 @@ ENVIRONMENTS = {
     :config_json => "config_test.json",
     :cdr_versions_json => "cdr_versions_test.json",
     :featured_workspaces_json => "featured_workspaces_test.json",
-    :gae_vars => TEST_GAE_VARS
+    :gae_vars => make_gae_vars(0, 10, 'F4_1G')
   },
   "all-of-us-rw-staging" => {
     :env_name => "staging",
@@ -62,7 +62,7 @@ ENVIRONMENTS = {
     :config_json => "config_staging.json",
     :cdr_versions_json => "cdr_versions_staging.json",
     :featured_workspaces_json => "featured_workspaces_staging.json",
-    :gae_vars => TEST_GAE_VARS
+    :gae_vars => make_gae_vars
   },
   "all-of-us-rw-perf" => {
     :env_name => "perf",
@@ -80,7 +80,7 @@ ENVIRONMENTS = {
     :config_json => "config_stable.json",
     :cdr_versions_json => "cdr_versions_stable.json",
     :featured_workspaces_json => "featured_workspaces_stable.json",
-    :gae_vars => TEST_GAE_VARS
+    :gae_vars => make_gae_vars
   },
   "all-of-us-rw-preprod" => {
     :env_name => "preprod",
@@ -89,7 +89,7 @@ ENVIRONMENTS = {
     :config_json => "config_preprod.json",
     :cdr_versions_json => "cdr_versions_preprod.json",
     :featured_workspaces_json => "featured_workspaces_preprod.json",
-    :gae_vars => TEST_GAE_VARS
+    :gae_vars => make_gae_vars
   },
   "all-of-us-rw-prod" => {
     :env_name => "prod",

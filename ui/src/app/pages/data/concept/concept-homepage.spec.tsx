@@ -5,6 +5,7 @@ import {SlidingFabReact} from 'app/components/buttons';
 import {ConceptHomepage} from 'app/pages/data/concept/concept-homepage';
 import {conceptsApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/navigation';
 import {
   ConceptsApi,
   ConceptSetsApi,
@@ -12,6 +13,7 @@ import {
   StandardConceptFilter,
   WorkspacesApi
 } from 'generated/fetch';
+import defaultServerConfig from 'testing/default-server-config';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {
@@ -59,6 +61,7 @@ describe('ConceptHomepage', () => {
     registerApiClient(ConceptsApi, new ConceptsApiStub());
     registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
     currentWorkspaceStore.next(workspaceDataStub);
+    serverConfigStore.next({...defaultServerConfig, enableConceptSetSearchV2: false});
   });
 
   it('should render', () => {

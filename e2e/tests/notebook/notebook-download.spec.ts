@@ -14,7 +14,8 @@ describe('Jupyter notebook download test', () => {
   const testDownloadModal = async (modal: NotebookDownloadModal): Promise<void> => {
     const checkDownloadDisabledState = async (wantDisabled: boolean) => {
       expect(await waitForFn(async () => {
-        let downloadBtn = await modal.getDownloadButton();
+        const downloadBtn = await modal.getDownloadButton();
+        // tslint:disable-next-line:triple-equals
         return wantDisabled == await getPropValue<boolean>(downloadBtn, 'disabled');
       })).toBe(true);
     };
@@ -44,8 +45,6 @@ describe('Jupyter notebook download test', () => {
    *   - Verify policy warnings modal interactions.
    */
   test('download notebook with policy warnings', async () => {
-    // Viewport necessary for headless dialog positioning.
-    await page.setViewport({height: 1280, width: 1280});
 
     const workspaceCard = await findWorkspace(page);
     await workspaceCard.clickWorkspaceName();

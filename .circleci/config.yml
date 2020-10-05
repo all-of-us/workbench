@@ -2,7 +2,7 @@ version: 2.1
 
 # https://circleci.com/orbs/registry/
 orbs:
-  browser-tools: circleci/browser-tools@1.0.0
+  browser-tools: circleci/browser-tools@1.0.1
 
 # -------------------------
 #   PARAMETERS
@@ -77,6 +77,12 @@ anchors:
       # Workbench release tag format example: v5-3-rc1
       only: /^v[0-9]+-[0-9]+-rc[0-9]+$/
 
+  # Job runs for PR branches only
+  filter_only_pr_branch: &filter_only_pr_branch
+    tags:
+      ignore: /.*/
+    branches:
+      ignore: master
 
 # -------------------------
 #   COMMANDS
@@ -213,6 +219,7 @@ commands:
         enum: ["local", "test", "staging"]
     steps:
       - install_e2e_dependencies
+      - browser-tools/install-browser-tools
       - run:
           name: Update test user environment variables
           command: |
@@ -290,6 +297,36 @@ commands:
       - run:
           name: Wait for local UI server to start
           command: dockerize -wait tcp://localhost:4200 -timeout 4m
+
+  store_commit_message:
+    steps:
+      - run:
+          name: "Store Git commit message in an environment variable"
+          command: |
+            echo 'export COMMIT_MESSAGE=$(git log -1 --pretty=format:"%s")' >> $BASH_ENV
+            source $BASH_ENV
+
+  e2e_skip:
+    description: "Halt job if commit message contains 'SKIP E2E'"
+    steps:
+      - store_commit_message
+      - run:
+          name: "Halt job if commit message contains 'SKIP E2E'"
+          command: |
+            echo "Git commit message: $COMMIT_MESSAGE"
+            # Double comma is called "Parameter Expansion" in Bash version 4+. It converts string to lowercase letters.
+            if [[ "${COMMIT_MESSAGE,,}" == *"skip e2e"* ]]; then
+              echo "Halting e2e test."
+              circleci step halt
+            fi
+
+  e2e_presubmit_check:
+    steps:
+      - e2e_skip
+      - halt_if_code_unchanged
+      - run:
+          name: "Halt job if not a pull request"
+          command: bash .circleci/pr-skip-ci.sh
 
 
 # -------------------------
@@ -574,14 +611,14 @@ jobs:
       - manage_api_cache:
           save: true
 
-  # Run Puppeteer e2e UI tests on deployed "test" or "staging" environment.
+  # Run Puppeteer e2e UI tests on deployed "local", "test" or "staging" environment.
   puppeteer-e2e-test:
     parameters:
       env_name:
-        description: The target environment for run Puppeteer tests. Must be one of "test", "staging".
+        description: The target environment for run Puppeteer tests. Must be one of "test", "staging", "local".
         default: "test"
         type: enum
-        enum: ["test", "staging"]
+        enum: ["test", "staging", "local"]
       test_mode:
         description: Switching between "nightly-integration" and normal "integration" test mode.
         default: "integration"
@@ -590,6 +627,9 @@ jobs:
       parallel_num:
         type: integer
         default: 1
+      optional_steps:
+        type: steps
+        default: [ ]
     <<: *defaults
     environment:
       <<: *e2e_env
@@ -601,33 +641,15 @@ jobs:
     parallelism: << parameters.parallel_num >>
     steps:
       - checkout_init_git
-      - browser-tools/install-browser-tools:
-          firefox-version: "78.0" # https://github.com/CircleCI-Public/browser-tools-orb/issues/14
+      - steps: << parameters.optional_steps >>
+      - when:
+          condition:
+            equal: [ "local", << parameters.env_name >>]
+          steps:
+            - start_local_ui
       - run_e2e_test:
           env_name: << parameters.env_name >>
 
-  # Deploy UI local server then run Puppeteer tests against "local ui" + "test api" environment.
-  puppeteer-e2e-local-ui:
-    <<: *defaults
-    environment:
-      <<: *e2e_env
-      WORKBENCH_ENV: local
-      CI: true
-      NODE_ENV: development
-    resource_class: medium+
-    working_directory: ~/workbench
-    parallelism: 2
-    steps:
-      - checkout_init_git
-      - run:
-          name: Halt job if not a pull request
-          command: bash .circleci/pr-skip-ci.sh
-      - halt_if_code_unchanged
-      - browser-tools/install-browser-tools:
-          firefox-version: "78.0" # https://github.com/CircleCI-Public/browser-tools-orb/issues/14
-      - start_local_ui
-      - run_e2e_test:
-          env_name: local
 
 workflows:
   build-test-deploy:
@@ -639,7 +661,6 @@ workflows:
       - ui-unit-test
       - api-bigquery-test
       - api-integration-test
-      - puppeteer-e2e-local-ui
       # Run deployment to "test" on master merges.
       - api-deploy-to-test:
           filters: *filter_only_master_branch
@@ -649,9 +670,17 @@ workflows:
           filters: *filter_only_master_branch
           requires:
             - ui-unit-test
+      # Deploy local UI server connected to "test" API server. Run Puppeteer tests for PR commits only.
+      - puppeteer-e2e-test:
+          filters: *filter_only_pr_branch
+          env_name: "local"
+          parallel_num: 2
+          optional_steps:
+            - e2e_presubmit_check
       # On master branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully.
       - puppeteer-e2e-test:
           parallel_num: 4
+          env_name: "test"
           filters: *filter_only_master_branch
           requires:
             - api-deploy-to-test

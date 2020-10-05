@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import {SearchBar} from 'app/cohort-search/search-bar/search-bar.component';
+import {ppiSurveys} from 'app/cohort-search/search-state.service';
 import {TreeNode} from 'app/cohort-search/tree-node/tree-node.component';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -71,9 +72,11 @@ interface Props {
   back: Function;
   groupSelections: Array<number>;
   node: Criteria;
+  source?: string;
   scrollToMatch: Function;
   searchTerms: string;
   select: Function;
+  selectedSurvey?: string;
   selectedIds: Array<string>;
   selectOption: Function;
   setAttributes?: Function;
@@ -105,7 +108,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
   }
 
   loadRootNodes() {
-    const {node: {domainId, id, isStandard, type}} = this.props;
+    const {node: {domainId, id, isStandard, type}, selectedSurvey} = this.props;
     this.setState({loading: true});
     const {cdrVersionId} = (currentWorkspaceStore.getValue());
     const criteriaType = domainId === DomainType.DRUG.toString() ? CriteriaType.ATC.toString() : type;
@@ -123,8 +126,33 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
           }
         });
         this.setState({children});
+      } else if (domainId === DomainType.SURVEY.toString() &&  selectedSurvey) {
+        // Temp: This should be handle in API
+        const selectedSurveyChild = resp.items.filter(child => child.name === selectedSurvey);
+        if (selectedSurveyChild && selectedSurveyChild.length > 0) {
+          cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, selectedSurveyChild[0].id)
+              .then(surveyResponse => {
+                this.setState({children: surveyResponse.items});
+              });
+        } else {
+          this.setState({children: resp.items});
+          if (domainId === DomainType.SURVEY.toString()) {
+            const rootSurveys = ppiSurveys.getValue();
+            if (!rootSurveys[cdrVersionId]) {
+              rootSurveys[cdrVersionId] = resp.items;
+              ppiSurveys.next(rootSurveys);
+            }
+          }
+        }
       } else {
         this.setState({children: resp.items});
+        if (domainId === DomainType.SURVEY.toString()) {
+          const rootSurveys = ppiSurveys.getValue();
+          if (!rootSurveys[cdrVersionId]) {
+            rootSurveys[cdrVersionId] = resp.items;
+            ppiSurveys.next(rootSurveys);
+          }
+        }
       }
     })
     .catch(error => {
@@ -198,6 +226,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
         </div>}
         <div style={this.showHeader ? styles.node : {...styles.node, border: 'none'}}>
         {!!children && children.map((child, c) => this.showNode(child) && <TreeNode key={c}
+                                                            source={this.props.source}
                                                             autocompleteSelection={autocompleteSelection}
                                                             groupSelections={groupSelections}
                                                             node={child}

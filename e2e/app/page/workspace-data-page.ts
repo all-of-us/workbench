@@ -1,7 +1,8 @@
 import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
+
 import DataResourceCard from 'app/component/data-resource-card';
 import ClrIconLink from 'app/element/clr-icon-link';
-import {EllipsisMenuAction, Language, ResourceCard} from 'app/text-labels';
+import {Option, Language, ResourceCard} from 'app/text-labels';
 import {ElementHandle, Page} from 'puppeteer';
 import {makeRandomName} from 'utils/str-utils';
 import {waitWhileLoading} from 'utils/test-utils';
@@ -72,7 +73,7 @@ export default class WorkspaceDataPage extends WorkspaceBase {
   async exportToNotebook(datasetName: string, notebookName: string): Promise<void> {
     const resourceCard = new DataResourceCard(this.page);
     const datasetCard = await resourceCard.findCard(datasetName, ResourceCard.Dataset);
-    await datasetCard.clickEllipsisAction(EllipsisMenuAction.exportToNotebook, {waitForNav: false});
+    await datasetCard.selectSnowmanMenu(Option.exportToNotebook, {waitForNav: false});
     console.log(`Exported Dataset "${datasetName}" to notebook "${notebookName}"`);
   }
 

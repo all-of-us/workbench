@@ -13,7 +13,7 @@ import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCdrVersions, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {attributesSelectionStore} from 'app/utils/navigation';
+import {attributesSelectionStore, setSidebarActiveIconStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CdrVersion, CdrVersionListResponse, CriteriaType, DomainType} from 'generated/fetch';
 
@@ -159,6 +159,7 @@ const columnHeaderStyle = {
 interface Props {
   cdrVersionListResponse: CdrVersionListResponse;
   hierarchy: Function;
+  source: string;
   searchContext: any;
   select: Function;
   selectedIds: Array<string>;
@@ -247,6 +248,11 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
       this.props.select(param);
     }
 
+    setAttributes(node: any) {
+      attributesSelectionStore.next(node);
+      setSidebarActiveIconStore.next('criteria');
+    }
+
     showHierarchy = (row: any) => {
       this.trackEvent('More Info');
       this.props.hierarchy(row);
@@ -316,7 +322,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
         <td style={{...columnStyle, width: '31%', textAlign: 'left', borderLeft: 0, padding: '0 0.25rem'}}>
           {row.selectable && <div style={{...styles.selectDiv}}>
             {attributes &&
-              <ClrIcon style={styles.attrIcon} shape='slider' dir='right' size='20' onClick={() => attributesSelectionStore.next(row)}/>
+              <ClrIcon style={styles.attrIcon} shape='slider' dir='right' size='20' onClick={() => this.setAttributes(row)}/>
             }
             {selected && <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>}
             {unselected && <ClrIcon style={styles.selectIcon} shape='plus-circle' size='16' onClick={() => this.selectItem(row)}/>}
@@ -354,6 +360,14 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
           <ClrIcon style={styles.infoIcon} className='is-solid' shape='info-standard'/>
         </TooltipTrigger>
       </FlexRow>;
+    }
+
+    get isConcept() {
+      return this.props.source && this.props.source === 'concept';
+    }
+
+    hideAttributesRow(row) {
+      return !row.hasAttributes || !this.isConcept;
     }
 
     render() {
@@ -430,9 +444,11 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
                   const open = ingredients[row.id] && ingredients[row.id].open;
                   const err = ingredients[row.id] && ingredients[row.id].error;
                   return <React.Fragment key={index}>
-                    {this.renderRow(row, false, index)}
+                    {this.hideAttributesRow(row)  && this.renderRow(row, false, index)}
                     {open && !err && ingredients[row.id].items.map((item, i) => {
-                      return <React.Fragment key={i}>{this.renderRow(item, true, `${index}.${i}`)}</React.Fragment>;
+                      return <React.Fragment key={i}>
+                        {this.hideAttributesRow(row) && this.renderRow(item, true, `${index}.${i}`)}
+                      </React.Fragment>;
                     })}
                     {open && err && <tr>
                       <td colSpan={5}>

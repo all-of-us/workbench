@@ -6,14 +6,11 @@ import * as React from 'react';
 import {CalculateFooter} from 'app/cohort-search/attributes-page-v2/attributes-page-v2.component';
 import {encountersStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, mapParameter} from 'app/cohort-search/utils';
-import {Button} from 'app/components/buttons';
-import {FlexRowWrap} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {DatePicker, NumberInput} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
 import {reactStyles, withCurrentCohortSearchContext, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentCohortSearchContextStore, serverConfigStore} from 'app/utils/navigation';
@@ -349,10 +346,8 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
       this.setState({count: null, formState}, () => this.validateValues());
     }
 
-    updateMods() {
-      const {cohortContext} = this.props;
-      const {formState} = this.state;
-      cohortContext.item.modifiers = formState.reduce((acc, mod) => {
+    getModifiersFromForm() {
+      return this.state.formState.reduce((acc, mod) => {
         const {name, operator, values} = mod;
         if (operator) {
           switch (name) {
@@ -361,15 +356,20 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
               break;
             case ModifierType.EVENTDATE:
               const formatted = values.map(val => moment(val, 'YYYY-MM-DD', true).isValid()
-                    ? moment(val).format('YYYY-MM-DD') : undefined);
+                ? moment(val).format('YYYY-MM-DD') : undefined);
               acc.push({name, operator, operands: formatted.filter(val => !!val)});
               break;
             default:
-              acc.push({name, operator, operands: values.filter(val => !!val)});
+              acc.push({name, operator, operands: values.filter(val => !['', null, undefined].includes(val))});
           }
         }
         return acc;
       }, []);
+    }
+
+    updateMods() {
+      const {cohortContext} = this.props;
+      cohortContext.item.modifiers = this.getModifiersFromForm();
       currentCohortSearchContextStore.next(cohortContext);
       this.props.closeModifiers();
     }
@@ -380,11 +380,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
     }
 
     calculate = async() => {
-      const {
-        selections,
-        cohortContext: {domain, item: {modifiers}, role},
-        workspace: {cdrVersionId}
-      } = this.props;
+      const {selections, cohortContext: {domain, role}, workspace: {cdrVersionId}} = this.props;
       this.trackEvent('Calculate');
       try {
         this.setState({calculating: true, count: null, calculateError: false});
@@ -395,7 +391,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
             items: [{
               type: domain,
               searchParameters: selections.map(mapParameter),
-              modifiers: modifiers
+              modifiers: this.getModifiersFromForm()
             }]
           }],
           dataFilters: []
@@ -528,21 +524,16 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
               </div>;
             })
           }
-          <CalculateFooter disabled={disableCalculate} calculating={calculating}
-                           calculate={() => this.calculate()} count={count}/>
-          <FlexRowWrap style={{flexDirection: 'row-reverse', marginTop: '2rem'}}>
-            <Button type='primary'
-                    style={styles.addButton}
-                    onClick={() => this.updateMods()}>
-              APPLY MODIFIERS
-            </Button>
-            <Button type='link'
-                    style={{color: colors.primary, marginRight: '0.5rem'}}
-                    onClick={() => this.props.closeModifiers()}>
-              BACK
-            </Button>
-          </FlexRowWrap>
+          <CalculateFooter addButtonText='APPLY MODIFIERS'
+                           addFn={() => this.updateMods()}
+                           backFn={() => this.props.closeModifiers()}
+                           calculateFn={() => this.calculate()}
+                           calculating={calculating}
+                           count={count}
+                           disableAdd={formErrors.length > 0 || formUntouched}
+                           disableCalculate={disableCalculate}/>
         </div>
       </div>;
     }
-  });
+  }
+);

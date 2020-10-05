@@ -6,7 +6,7 @@ import {
   currentCohortCriteriaStore,
   currentCohortSearchContextStore,
   currentCohortStore,
-  currentConceptSetStore,
+  currentConceptSetStore, currentConceptStore,
   currentWorkspaceStore,
   globalErrorStore,
   queryParamsStore,
@@ -358,6 +358,10 @@ export const withCurrentCohort = () => {
 // HOC that provides a 'criteria' prop with current Cohort
 export const withCurrentCohortCriteria = () => {
   return connectBehaviorSubject(currentCohortCriteriaStore, 'criteria');
+};
+
+export const withCurrentConcept = () => {
+  return connectBehaviorSubject(currentConceptStore, 'concept');
 };
 
 export const withCurrentCohortSearchContext = () => {

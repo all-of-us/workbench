@@ -220,6 +220,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     final String OVERRIDE_LABEL =
         LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(
             RuntimeConfigurationType.USEROVERRIDE);
+    @SuppressWarnings("unchecked")
     Map<String, String> runtimeLabels = (Map<String, String>) mostRecentRuntime.getLabels();
 
     if (runtimeLabels != null

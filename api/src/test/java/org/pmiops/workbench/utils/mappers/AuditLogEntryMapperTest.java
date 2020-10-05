@@ -2,6 +2,7 @@ package org.pmiops.workbench.utils.mappers;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 
 import com.google.common.collect.ImmutableList;
 import java.time.OffsetDateTime;
@@ -16,7 +17,6 @@ import org.pmiops.workbench.model.AuditEventBundle;
 import org.pmiops.workbench.model.AuditEventBundleHeader;
 import org.pmiops.workbench.model.AuditLogEntry;
 import org.pmiops.workbench.model.AuditTargetPropertyChange;
-import org.pmiops.workbench.utils.TimeAssertions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
@@ -147,14 +147,14 @@ public class AuditLogEntryMapperTest {
                     .agentId(AGENT_ID)
                     .agentType(USER_AGENT_TYPE)
                     .agentUsername(AGENT_USERNAME)
-                    .eventTime(EVENT_TIME_1)
+                    .eventTime(EVENT_TIME_1.toInstant().toEpochMilli())
                     .newValue(null)
                     .previousValue(null)
                     .targetId(null)
                     .targetProperty(null)
                     .targetType(WORKBENCH_TARGET_TYPE)));
     assertThat(auditAction.getActionId()).isEqualTo(ACTION_ID_1);
-    assertThat(auditAction.getActionTime()).isEqualTo(EVENT_TIME_1);
+    assertTimeApprox(auditAction.getActionTime(), EVENT_TIME_1);
 
     assertThat(auditAction.getEventBundles()).hasSize(1);
 
@@ -179,7 +179,7 @@ public class AuditLogEntryMapperTest {
                 .agentId(AGENT_ID)
                 .agentType(USER_AGENT_TYPE)
                 .agentUsername(AGENT_USERNAME)
-                .eventTime(EVENT_TIME_1)
+                .eventTime(EVENT_TIME_1.toInstant().toEpochMilli())
                 .newValue("The Grapes of Wrath")
                 .previousValue(null)
                 .targetId(TARGET_ID)
@@ -191,7 +191,7 @@ public class AuditLogEntryMapperTest {
                 .agentId(AGENT_ID)
                 .agentType(USER_AGENT_TYPE)
                 .agentUsername(AGENT_USERNAME)
-                .eventTime(EVENT_TIME_1)
+                .eventTime(EVENT_TIME_1.toInstant().toEpochMilli())
                 .newValue(ETAG)
                 .previousValue(null)
                 .targetId(TARGET_ID)
@@ -199,7 +199,7 @@ public class AuditLogEntryMapperTest {
                 .targetType(WORKSPACE_TARGET_TYPE));
 
     final AuditAction auditAction = auditLogEntryMapper.buildAuditAction(logEntries);
-    assertThat(auditAction.getActionTime()).isEqualTo(EVENT_TIME_1);
+    assertTimeApprox(auditAction.getActionTime(), EVENT_TIME_1);
     assertThat(auditAction.getEventBundles()).hasSize(1);
 
     final AuditEventBundle eventBundle = auditAction.getEventBundles().get(0);
@@ -224,7 +224,7 @@ public class AuditLogEntryMapperTest {
                 .agentId(AGENT_ID)
                 .agentType(USER_AGENT_TYPE)
                 .agentUsername(AGENT_USERNAME)
-                .eventTime(EVENT_TIME_1)
+                .eventTime(EVENT_TIME_1.toInstant().toEpochMilli())
                 .newValue("The Grapes of Wrath")
                 .previousValue(null)
                 .targetId(TARGET_ID)
@@ -236,7 +236,7 @@ public class AuditLogEntryMapperTest {
                 .agentId(AGENT_ID)
                 .agentType(USER_AGENT_TYPE)
                 .agentUsername(AGENT_USERNAME)
-                .eventTime(EVENT_TIME_1)
+                .eventTime(EVENT_TIME_1.toInstant().toEpochMilli())
                 .newValue(ETAG)
                 .previousValue(null)
                 .targetId(TARGET_ID)
@@ -248,7 +248,7 @@ public class AuditLogEntryMapperTest {
                 .agentId(AGENT_ID)
                 .agentType(USER_AGENT_TYPE)
                 .agentUsername(AGENT_USERNAME)
-                .eventTime(EVENT_TIME_2)
+                .eventTime(EVENT_TIME_2.toInstant().toEpochMilli())
                 .newValue(ETAG)
                 .previousValue(null)
                 .targetId(TARGET_ID)
@@ -263,9 +263,9 @@ public class AuditLogEntryMapperTest {
             .filter(a -> a.getActionId().equals(ACTION_ID_1))
             .findFirst()
             .orElseThrow(() -> new NotFoundException("Action not found"));
-    TimeAssertions.assertTimeApprox(action1.getActionTime(), EVENT_TIME_1);
+    assertTimeApprox(action1.getActionTime(), EVENT_TIME_1);
     assertThat(action1.getEventBundles()).hasSize(1);
-    assertThat(action1.getActionTime()).isEqualTo(EVENT_TIME_1);
+    assertTimeApprox(action1.getActionTime(), EVENT_TIME_1);
     assertThat(action1.getEventBundles()).hasSize(1);
 
     final AuditEventBundle eventBundle1 = action1.getEventBundles().get(0);
@@ -285,7 +285,7 @@ public class AuditLogEntryMapperTest {
             .filter(a -> a.getActionId().equals(ACTION_ID_2))
             .findFirst()
             .orElseThrow(() -> new NotFoundException("Action not found"));
-    TimeAssertions.assertTimeApprox(action2.getActionTime(), EVENT_TIME_2);
+    assertTimeApprox(action2.getActionTime(), EVENT_TIME_2.toInstant().toEpochMilli());
     final AuditEventBundle bundle2 = action2.getEventBundles().get(0);
     assertThat(bundle2.getHeader().getActionType()).isEqualTo(ACTION_TYPE_DELETE);
 
