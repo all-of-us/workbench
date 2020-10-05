@@ -1,7 +1,7 @@
 import {Page} from 'puppeteer';
 import Container from 'app/container';
 import {ElementType, XPathOptions} from 'app/xpath-options';
-import {waitForFn} from '../../utils/waits-utils';
+import {waitForFn} from 'utils/waits-utils';
 import BaseElement from './base-element';
 import {buildXPath} from 'app/xpath-builders';
 

@@ -1,6 +1,5 @@
 import DataResourceCard from 'app/component/data-resource-card';
 import Modal from 'app/component/modal';
-import Navigation, {NavLink} from 'app/component/navigation';
 import WorkspaceCard from 'app/component/workspace-card';
 import Link from 'app/element/link';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
@@ -9,7 +8,7 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {Option, Language, LinkText, ResourceCard, WorkspaceAccessLevel} from 'app/text-labels';
 import {config} from 'resources/workbench-config';
 import {makeRandomName} from 'utils/str-utils';
-import {findWorkspace, signIn, signInAs, waitWhileLoading} from 'utils/test-utils';
+import {findWorkspace, signIn, signInAs, signOut, waitWhileLoading} from 'utils/test-utils';
 
 jest.setTimeout(20 * 60 * 1000);
 
@@ -53,15 +52,10 @@ describe('Workspace reader Jupyter notebook action tests', () => {
     const shareModal = await aboutPage.openShareModal();
     await shareModal.shareWithUser(config.collaboratorUsername, WorkspaceAccessLevel.Reader);
     await waitWhileLoading(page);
-    await Navigation.navMenu(page, NavLink.SIGN_OUT);
-
-     // browser and page reset.
-    await page.deleteCookie(...await page.cookies());
-    await jestPuppeteer.resetPage();
-    await jestPuppeteer.resetBrowser();
+    await signOut(page);
 
     // Sign in as collaborator in new Incognito page.
-    const newPage = await signInAs(config.collaboratorUsername, config.userPassword);
+    const newPage = await signInAs(page, config.collaboratorUsername, config.userPassword);
 
     // Create a new Workspace. This is the copy to workspace.
     const collaboratorWorkspaceName = await findWorkspace(newPage, {create: true}).then(card => card.getWorkspaceName());

@@ -1,7 +1,7 @@
 import HomePage from 'app/page/home-page';
 import ProfilePage from 'app/page/profile-page';
 import WorkspacesPage from 'app/page/workspaces-page';
-import {signIn} from 'utils/test-utils';
+import {signIn, signOut} from 'utils/test-utils';
 import Navigation, {NavLink} from 'app/component/navigation';
 import {waitForDocumentTitle} from 'utils/waits-utils';
 
@@ -42,7 +42,7 @@ describe('Sidebar Navigation', () => {
     expect(await homePage.isLoaded()).toBe(true);
 
     // Select Sign Out link
-    await Navigation.navMenu(page, NavLink.SIGN_OUT);
+    await signOut(page);
     await waitForDocumentTitle(page, 'Redirect Notice');
     const href = await page.evaluate(() => location.href);
     expect(href).toEqual(expect.stringMatching(/(\/|%2F)login$/));
