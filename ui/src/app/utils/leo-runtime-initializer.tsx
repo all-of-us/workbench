@@ -2,7 +2,7 @@ import {leoRuntimesApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import {isAbortError, reportError} from 'app/utils/errors';
 import {runtimePresets} from 'app/utils/runtime-presets';
-import {Runtime, RuntimeStatus, DataprocConfig} from 'generated/fetch';
+import {Runtime, RuntimeStatus} from 'generated/fetch';
 import {serverConfigStore} from './navigation';
 import {
   markRuntimeOperationCompleteForWorkspace,
@@ -23,7 +23,7 @@ const DEFAULT_MAX_DELETE_COUNT = 2;
 const DEFAULT_MAX_RESUME_COUNT = 2;
 // We allow a certain # of server errors to occur before we error-out of the initialization flow.
 const DEFAULT_MAX_SERVER_ERROR_COUNT = 10;
-const DEFAULT_DATAPROC_CONFIG = {masterMachineType: 'n1-standard-4', masterDiskSize: 100};
+const DEFAULT_RUNTIME_CONFIG = runtimePresets.generalAnalysis.runtimeTemplate;
 
 export class LeoRuntimeInitializationFailedError extends Error {
   constructor(message: string, public readonly runtime?: Runtime) {
@@ -85,7 +85,7 @@ export interface LeoRuntimeInitializerOptions {
   maxDeleteCount?: number;
   maxResumeCount?: number;
   maxServerErrorCount?: number;
-  dataprocConfig?: DataprocConfig;
+  runtime?: Runtime;
 }
 
 const DEFAULT_OPTIONS: Partial<LeoRuntimeInitializerOptions> = {
@@ -97,7 +97,7 @@ const DEFAULT_OPTIONS: Partial<LeoRuntimeInitializerOptions> = {
   maxDeleteCount: DEFAULT_MAX_DELETE_COUNT,
   maxResumeCount: DEFAULT_MAX_RESUME_COUNT,
   maxServerErrorCount: DEFAULT_MAX_SERVER_ERROR_COUNT,
-  dataprocConfig: DEFAULT_DATAPROC_CONFIG
+  runtime: DEFAULT_RUNTIME_CONFIG
 };
 
 /**
@@ -138,7 +138,24 @@ export class LeoRuntimeInitializer {
   private resumeCount = 0;
   private serverErrorCount = 0;
   private initializeStartTime?: number;
-  private dataprocConfig?: DataprocConfig;
+  private runtime?: Runtime;
+  // The latest runtime retrieved from getRuntime. If the last getRuntime call returned a NOT_FOUND
+  // response, this will be null.
+  private _currentRuntime?: Runtime;
+
+  private get currentRuntime(): Runtime | null {
+    return this._currentRuntime;
+  }
+
+  private set currentRuntime(nextRuntime: Runtime | null) {
+    this._currentRuntime = nextRuntime;
+    console.log('Maybe Set:', runtimeStore.get().workspaceNamespace, this.workspaceNamespace);
+    const storeWorkspaceNamespace = runtimeStore.get().workspaceNamespace
+    if (storeWorkspaceNamespace === this.workspaceNamespace || storeWorkspaceNamespace === undefined ) {
+      console.log('Setting:', this._currentRuntime)
+      runtimeStore.set({workspaceNamespace: this.workspaceNamespace, runtime: this._currentRuntime});
+    }
+  }
 
   // Properties to control the initialization and promise resolution flow.
   //
@@ -171,7 +188,7 @@ export class LeoRuntimeInitializer {
     this.maxDeleteCount = options.maxDeleteCount;
     this.maxResumeCount = options.maxResumeCount;
     this.maxServerErrorCount = options.maxServerErrorCount;
-    this.dataprocConfig = options.dataprocConfig;
+    this.runtime = options.runtime;
   }
 
   private async getRuntime(): Promise<Runtime> {
@@ -190,12 +207,14 @@ export class LeoRuntimeInitializer {
   private async createRuntime(): Promise<void> {
     if (this.createCount >= this.maxCreateCount) {
       throw new ExceededActionCountError(
-        `Reached max runtime create count (${this.maxCreateCount})`, runtimeStore.get());
+        `Reached max runtime create count (${this.maxCreateCount})`, this.currentRuntime);
     }
     const aborter = new AbortController();
     let runtime: Runtime;
     if (serverConfigStore.getValue().enableGceAsNotebookRuntimeDefault) {
       runtime = {...runtimePresets.generalAnalysis.runtimeTemplate};
+    } else if (serverConfigStore.getValue().enableCustomRuntimes) {
+      runtime = this.runtime;
     } else {
       runtime = {...runtimePresets.legacyGeneralAnalysis.runtimeTemplate};
     }
@@ -215,11 +234,11 @@ export class LeoRuntimeInitializer {
   private async resumeRuntime(): Promise<void> {
     if (this.resumeCount >= this.maxResumeCount) {
       throw new ExceededActionCountError(
-        `Reached max runtime resume count (${this.maxResumeCount})`, runtimeStore.get());
+        `Reached max runtime resume count (${this.maxResumeCount})`, this.currentRuntime);
     }
     const aborter = new AbortController();
     const promise = leoRuntimesApi().startRuntime(
-      runtimeStore.get().googleProject, runtimeStore.get().runtimeName, {signal: this.pollAbortSignal});
+      this.currentRuntime.googleProject, this.currentRuntime.runtimeName, {signal: this.pollAbortSignal});
     updateRuntimeOpsStoreForWorkspaceNamespace(this.workspaceNamespace, {
       promise: promise,
       operation: 'resume',
@@ -233,7 +252,7 @@ export class LeoRuntimeInitializer {
   private async deleteRuntime(): Promise<void> {
     if (this.deleteCount >= this.maxDeleteCount) {
       throw new ExceededActionCountError(
-        `Reached max runtime delete count (${this.maxDeleteCount})`, runtimeStore.get());
+        `Reached max runtime delete count (${this.maxDeleteCount})`, this.currentRuntime);
     }
     const aborter = new AbortController();
     const promise = runtimeApi().deleteRuntime(this.workspaceNamespace, {signal: this.pollAbortSignal});
@@ -248,15 +267,15 @@ export class LeoRuntimeInitializer {
   }
 
   private isRuntimeRunning(): boolean {
-    return runtimeStore.get() && runtimeStore.get().status === RuntimeStatus.Running;
+    return this.currentRuntime && this.currentRuntime.status === RuntimeStatus.Running;
   }
 
   private isRuntimeStopped(): boolean {
-    return runtimeStore.get() && runtimeStore.get().status === RuntimeStatus.Stopped;
+    return this.currentRuntime && this.currentRuntime.status === RuntimeStatus.Stopped;
   }
 
   private isRuntimeErrored(): boolean {
-    return runtimeStore.get() && runtimeStore.get().status === RuntimeStatus.Error;
+    return this.currentRuntime && this.currentRuntime.status === RuntimeStatus.Error;
   }
 
   private isNotFoundError(e: any): boolean {
@@ -308,61 +327,61 @@ export class LeoRuntimeInitializer {
     if (this.pollAbortSignal && this.pollAbortSignal.aborted) {
       // We'll bail out early if an abort signal was triggered while waiting for the poll cycle.
       return this.reject(
-        new LeoRuntimeInitializationFailedError('Request was aborted', runtimeStore.get()));
+        new LeoRuntimeInitializationFailedError('Request was aborted', this.currentRuntime));
     }
     if (Date.now() - this.initializeStartTime > this.overallTimeout) {
       return this.reject(
         new LeoRuntimeInitializationFailedError(
           `Initialization attempt took longer than the max time allowed (${this.overallTimeout}ms)`,
-          runtimeStore.get()));
+          this.currentRuntime));
     }
 
     // Fetch the current runtime status, with some graceful error handling for NOT_FOUND response
     // and abort signals.
     try {
-      runtimeStore.set(await this.getRuntime());
-      this.onStatusUpdate(runtimeStore.get().status);
+      this.currentRuntime = await this.getRuntime();
+      this.onStatusUpdate(this.currentRuntime.status);
     } catch (e) {
       if (isAbortError(e)) {
         return this.reject(
           new LeoRuntimeInitializationAbortedError('Abort signal received during runtime API call',
-            runtimeStore.get()));
+            this.currentRuntime));
       } else if (this.isNotFoundError(e)) {
         // A not-found error is somewhat expected, if a runtime has recently been deleted or
         // hasn't been created yet.
-        runtimeStore.set(null)
+        this.currentRuntime = null;
         this.onStatusUpdate(null);
       } else {
         this.handleUnknownError(e);
         if (this.hasTooManyServerErrors()) {
           return this.reject(
             new ExceededErrorCountError(
-              `Reached max server error count (${this.maxServerErrorCount})`, runtimeStore.get()));
+              `Reached max server error count (${this.maxServerErrorCount})`, this.currentRuntime));
         }
       }
     }
 
     // Attempt to take the appropriate next action given the current runtime status.
     try {
-      if (runtimeStore.get() === null) {
+      if (this.currentRuntime === null) {
         await this.createRuntime();
       } else if (this.isRuntimeStopped()) {
         await this.resumeRuntime();
       } else if (this.isRuntimeErrored()) {
         // If runtime is in error state, delete it so it can be re-created at the next poll loop.
         reportError(
-          `Runtime ${runtimeStore.get().googleProject}/${runtimeStore.get().runtimeName}` +
+          `Runtime ${this.currentRuntime.googleProject}/${this.currentRuntime.runtimeName}` +
           ` has reached an ERROR status`);
         await this.deleteRuntime();
       } else if (this.isRuntimeRunning()) {
         // We've reached the goal - resolve the Promise.
-        return this.resolve(runtimeStore.get());
+        return this.resolve(this.currentRuntime);
       }
     } catch (e) {
       if (isAbortError(e)) {
         return this.reject(
           new LeoRuntimeInitializationFailedError('Abort signal received during runtime API call',
-          runtimeStore.get()));
+          this.currentRuntime));
       } else if (e instanceof ExceededActionCountError) {
         // This is a signal that we should hard-abort the polling loop due to reaching the max
         // number of delete or create actions allowed.
@@ -372,7 +391,7 @@ export class LeoRuntimeInitializer {
         if (this.hasTooManyServerErrors()) {
           return this.reject(
             new ExceededErrorCountError(
-              `Reached max server error count (${this.maxServerErrorCount})`, runtimeStore.get()));
+              `Reached max server error count (${this.maxServerErrorCount})`, this.currentRuntime));
         }
       }
     }

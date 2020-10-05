@@ -21,7 +21,7 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {Dropdown} from 'primereact/dropdown';
 import {InputNumber} from 'primereact/inputnumber';
 import {useRuntime} from 'app/utils/runtime-utils';
-import {Runtime} from 'generated/fetch';
+// import {Runtime} from 'generated/fetch';
 
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -29,7 +29,7 @@ import { RuntimeStatus } from 'generated';
 import { useOnMount } from 'app/utils';
 
 const {useState, useEffect, Fragment} = React;
-
+ 
 const styles = reactStyles({
   sectionHeader: {
     color: colors.primary,
@@ -73,19 +73,6 @@ const ActiveRuntimeOp = ({operation, workspaceNamespace}) => {
 export interface Props {
   runtimeOps: RuntimeOpsStore;
   workspace: WorkspaceData;
-}
-
-interface State {
-  // Whether the initial runtime load is still in progress.
-  loading: boolean;
-  // Whether there was an error in loading the runtime data.
-  error: boolean;
-  // The runtime. null if none exists, or if there was an error in loading the
-  // runtime.
-  runtime: Runtime|null;
-  // machine: Machine;
-  selectedDiskSize: number;
-  selectedMachine: Machine;
 }
 
  const MachineSelector = ({onChange, selectedMachine, currentRuntime}) => {
@@ -172,7 +159,8 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
   const runtimeOps = useStore(runtimeOpsStore);
   const [currentRuntime, setRequestedRuntime] = useRuntime(workspace.namespace);
   const activeRuntimeOp: RuntimeOperation = runtimeOps.opsByWorkspaceNamespace[workspace.namespace];
-  const {status = null, dataprocConfig: {masterDiskSize = null, masterMachineType = null}} = currentRuntime || { dataprocConfig: {}};
+
+  const {status = null, toolDockerImage = null, dataprocConfig: {masterDiskSize = null, masterMachineType = null }} = currentRuntime || { dataprocConfig: {}};
   const nextMachineType = selectedMachine && selectedMachine.name;
 
   // How do we reflect the state of the runtime to the user?
@@ -190,7 +178,7 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
             operation: 'get',
             aborter: aborter
           });
-          runtimeStore.set(await promise);
+          runtimeStore.set({runtime: await promise, workspaceNamespace: workspace.namespace});
         } catch (e) {
           // 404 is expected if the runtime doesn't exist, represent this as a null
           // runtime rather than an error mode.
@@ -252,8 +240,8 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
       <Dropdown style={{width: '100%'}}
                 data-test-id='runtime-image-dropdown'
                 disabled={true}
-                options={[currentRuntime.toolDockerImage]}
-                value={currentRuntime.toolDockerImage}/>
+                options={[toolDockerImage]}
+                value={toolDockerImage}/>
       {/* Runtime customization: change detailed machine configuration options. */}  
       <h3 style={styles.sectionHeader}>Cloud compute profile</h3>
       <FlexRow style={{justifyContent: 'space-between'}}>

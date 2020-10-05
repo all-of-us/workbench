@@ -6,7 +6,7 @@ import {useOnMount} from 'app/utils';
 import {
   LeoRuntimeInitializer,
 } from 'app/utils/leo-runtime-initializer';
-import {Runtime} from 'generated';
+import {Runtime} from 'generated/fetch';
 import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import * as fp from 'lodash/fp';
 
@@ -18,13 +18,17 @@ const {useState, useEffect} = React;
 // The runtime can be set to null to delete a runtime, or a new runtime config
 // The LeoRuntimeInitializer could potentially be rolled into this code to completely manage
 // all runtime state.
-export const useRuntime = (workspaceNamespace) => {
-  const runtime = useStore(runtimeStore);
-  const [requestedRuntime, setRequestedRuntime] = useState<Runtime|null>()
+export const useRuntime = (initialWorkspaceNamespace) => {
+  const {runtime, workspaceNamespace} = useStore(runtimeStore);
+  const [requestedRuntime, setRequestedRuntime] = useState<Runtime|null>();
 
   useOnMount(() => {
     const getRuntime = async () => {
-      runtime === undefined && runtimeStore.set(await runtimeApi().getRuntime(workspaceNamespace));
+      const leoRuntime = await runtimeApi().getRuntime(initialWorkspaceNamespace)
+      runtimeStore.set({
+        workspaceNamespace: initialWorkspaceNamespace,
+        runtime: leoRuntime 
+      });
     }
     getRuntime();
   });
@@ -39,19 +43,23 @@ export const useRuntime = (workspaceNamespace) => {
         await runtimeApi().deleteRuntime(workspaceNamespace);
         await LeoRuntimeInitializer.initialize({
           workspaceNamespace,
-          dataprocConfig: runtime.dataprocConfig
+          runtime: requestedRuntime
         });
       }; 
 
     const runAction = async () => {
       await action();
       const currentRuntime = await runtimeApi().getRuntime(workspaceNamespace);
-      runtimeStore.set(currentRuntime);
+      if (initialWorkspaceNamespace === workspaceNamespace) {
+        runtimeStore.set({        
+          workspaceNamespace: initialWorkspaceNamespace,
+          runtime: currentRuntime
+        });
+      }
     }
 
     requestedRuntime !== undefined && !fp.equals(requestedRuntime, runtime) && runAction();
   }, [requestedRuntime]);
-
 
 
   return [runtime, setRequestedRuntime]
