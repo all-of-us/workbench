@@ -22,7 +22,7 @@
   {
     "name": "criteria",
     "type": "STRING",
-    "description": "JSON serialization of the selection criteria for this cohort. Schema is defined at\nhttps://github.com/all-of-us/workbench/pull/4076/files.  TODO: update with permanent URL."
+    "description": "JSON serialization of the selection criteria for this cohort. Schema is defined at\nhttps://github.com/all-of-us/workbench/blob/master/api/reporting/docs/cohort_definition_schema.json."
   },
   {
     "name": "description",

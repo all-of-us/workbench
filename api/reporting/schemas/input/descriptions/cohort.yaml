@@ -7,7 +7,7 @@ cohort:
     User ID of cohort crerator. Should be a foreign key into the user table.
   criteria: |
     JSON serialization of the selection criteria for this cohort. Schema is defined at
-    https://github.com/all-of-us/workbench/pull/4076/files.  TODO: update with permanent URL.
+    https://github.com/all-of-us/workbench/blob/master/api/reporting/docs/cohort_definition_schema.json.
   description: |
     User-provided cohort description from the Save Cohort dialog.
   last_modified_time: |
