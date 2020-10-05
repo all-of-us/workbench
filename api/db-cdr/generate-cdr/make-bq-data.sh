@@ -445,7 +445,7 @@ set d.all_concept_count = c.all_concept_count
 from (select c.domain_id as domain_id, COUNT(DISTINCT c.concept_id) as all_concept_count
 from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\` c
 join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d2
-on d2.domain_enum = c.domain_id
+on d2.domain_enum = c.domain_id and c.is_selectable = 1
 group by c.domain_id) c
 where d.domain_enum = c.domain_id"
 
@@ -455,7 +455,7 @@ set d.standard_concept_count = c.standard_concept_count
 from (select c.domain_id as domain_id, COUNT(DISTINCT c.concept_id) as standard_concept_count
 from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\` c
 join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d2
-on d2.domain_enum = c.domain_id and c.is_standard = 1
+on d2.domain_enum = c.domain_id and c.is_standard = 1 and c.is_selectable = 1
 group by c.domain_id) c
 where d.domain_enum = c.domain_id"
 
@@ -466,7 +466,8 @@ set d.all_concept_count = c.all_concept_count
 from (SELECT count(distinct concept_id) as all_concept_count
 FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 WHERE type = 'PPI'
-AND domain_id = 'PHYSICAL_MEASUREMENT') c
+AND domain_id = 'PHYSICAL_MEASUREMENT'
+AND is_selectable = 1) c
 where d.domain = 10"
 
 # Set participant counts for Condition domain
@@ -519,7 +520,8 @@ WHERE measurement_source_concept_id IN (
 SELECT concept_id
 FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 WHERE type = 'PPI'
-AND domain_id = 'PHYSICAL_MEASUREMENT')) as r
+AND domain_id = 'PHYSICAL_MEASUREMENT'
+AND is_selectable = 1)) as r
 where d.domain = 10"
 
 ##########################################
