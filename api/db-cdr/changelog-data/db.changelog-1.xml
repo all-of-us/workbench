@@ -34,6 +34,7 @@
       <column name="concept_id" type="NUMERIC"/>
       <column name="domain" type="NUMERIC"/>
       <column name="domain_id" type="STRING"/>
+      <column name="domain_enum" type="STRING"/>
       <column name="name" type="STRING"/>
       <column name="description" type="STRING"/>
       <column name="all_concept_count" type="NUMERIC"/>
