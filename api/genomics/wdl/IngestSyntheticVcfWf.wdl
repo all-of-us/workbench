@@ -17,40 +17,32 @@ workflow IngestSyntheticVcfWf {
         sample_names = sample_names
   }
 
-  call SplitFileIntoNParts {
+  call SplitFileIntoNSizeParts {
     input:
       file = AddSampleIds.sample_map,
-      n = num_partitions
+      n = batch_size
   }
 
-  scatter (partitioned_sample_map in SplitFileIntoNParts.partitions) {
-    call SplitFileIntoNSizeParts {
+  scatter (sample_map in SplitFileIntoNSizeParts.partitions) {
+    call ExtractSampleNamesFromMap {
       input:
-        file = partitioned_sample_map,
-        n = batch_size
+        sample_map = sample_map
     }
 
-    scatter (sample_map in SplitFileIntoNSizeParts.partitions) {
-      call ExtractSampleNamesFromMap {
-        input:
-          sample_map = sample_map
-      }
+    call RandomizeVcf {
+      input:
+        base_vcf = base_vcf,
+        base_vcf_index = base_vcf_index,
+        file_of_sample_names = ExtractSampleNamesFromMap.sample_names,
+        number_of_samples = batch_size, # Not necessarily correct but its close enough to get a usable disk size
+    }
 
-      call RandomizeVcf {
+    call CreateImportTsvs {
         input:
-          base_vcf = base_vcf,
-          base_vcf_index = base_vcf_index,
-          file_of_sample_names = ExtractSampleNamesFromMap.sample_names,
-          number_of_samples = batch_size, # Not necessarily correct but its close enough to get a usable disk size
-      }
-
-      call CreateImportTsvs {
-          input:
-            input_vcf = RandomizeVcf.randomized_vcf,
-            sample_map = sample_map,
-            probe_info_file = probe_info_file,
-            output_root_directory = output_bucket 
-      }
+          input_vcf = RandomizeVcf.randomized_vcf,
+          sample_map = sample_map,
+          probe_info_file = probe_info_file,
+          output_root_directory = output_bucket
     }
   }
 
@@ -239,9 +231,7 @@ task CreateImportTsvs {
       mv *.tsv output_tsvs
     done < ~{sample_map}
 
-    partition_number=`echo ~{basename(sample_map)} | awk -F'_' '{print $(NF-1) + 0}'`
-
-    gsutil cp output_tsvs/*.tsv ~{outdir}/import/${partition_number}/ready/
+    gsutil cp output_tsvs/*.tsv ~{outdir}/import/
   >>>
 
   runtime {
