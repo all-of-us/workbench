@@ -1,4 +1,5 @@
 import {mount} from 'enzyme';
+import { act } from 'react-dom/test-utils';
 import * as React from 'react';
 
 import {Spinner} from 'app/components/spinners';
@@ -21,10 +22,16 @@ describe('RuntimePanel', () => {
     return mount(<RuntimePanel {...props}/>);
   };
 
+  const handleUseEffect = async (component) => {
+    await act(async () => {
+      await Promise.resolve(component);
+      await new Promise(resolve => setImmediate(resolve));
+    });
+  }
+
   beforeEach(() => {
     props = {
-      workspace: {...workspaceStubs[0], accessLevel: WorkspaceAccessLevel.WRITER},
-      runtimeOps: {opsByWorkspaceNamespace: {}}
+      workspace: {...workspaceStubs[0], accessLevel: WorkspaceAccessLevel.WRITER}
     };
     runtimeApiStub = new RuntimeApiStub();
     registerApiClient(RuntimeApi, runtimeApiStub);
@@ -32,9 +39,10 @@ describe('RuntimePanel', () => {
 
   it('should show loading spinner while loading', async() => {
     const wrapper = component();
+    await handleUseEffect(wrapper);   
 
     // Check before ticking - stub returns the runtime asynchronously.
-    expect(!wrapper.exists({'data-test-id': 'runtime-panel'}))
+    expect(!wrapper.exists({'data-test-id': 'runtime-panel'}));
     expect(wrapper.exists(Spinner));
 
     // Now getRuntime returns.
@@ -45,6 +53,7 @@ describe('RuntimePanel', () => {
 
   it('should render runtime details', async() => {
     const wrapper = component();
+    await handleUseEffect(wrapper);   
     await waitOneTickAndUpdate(wrapper);
     const imageDropdown = wrapper.find({'data-test-id': 'runtime-image-dropdown'}).find('label').first();
     expect(imageDropdown.exists()).toBeTruthy();
@@ -56,6 +65,7 @@ describe('RuntimePanel', () => {
     runtimeApiStub.runtime.dataprocConfig.masterMachineType = 'n1-standard-8';
 
     const wrapper = component();
+    await handleUseEffect(wrapper);   
     await waitOneTickAndUpdate(wrapper);
 
     const memoryOptions = wrapper.find('#runtime-ram .p-dropdown-item');

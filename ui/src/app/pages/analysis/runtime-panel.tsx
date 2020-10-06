@@ -26,7 +26,7 @@ import { RuntimeStatus } from 'generated';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-const {useState, Fragment} = React;
+const {useState, useEffect, Fragment} = React;
 
 const styles = reactStyles({
   sectionHeader: {
@@ -69,7 +69,6 @@ const ActiveRuntimeOp = ({operation, workspaceNamespace}) => {
 };
 
 export interface Props {
-  runtimeOps: RuntimeOpsStore;
   workspace: WorkspaceData;
 }
 
@@ -158,7 +157,7 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
   const [currentRuntime, setRequestedRuntime] = useCustomRuntime(workspace.namespace);
 
   const activeRuntimeOp: RuntimeOperation = runtimeOps.opsByWorkspaceNamespace[workspace.namespace];
-  const {status = RuntimeStatus.Unknown, toolDockerImage = null, dataprocConfig = {}, gceConfig = {}} = currentRuntime || {};
+  const {status = RuntimeStatus.Unknown, toolDockerImage = '', dataprocConfig = null, gceConfig = {}} = currentRuntime || {};
   const masterMachineType = !!dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
   const masterDiskSize = !!dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.bootDiskSize;
   const selectedMachineType = selectedMachine && selectedMachine.name;
@@ -175,14 +174,13 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
           operation: 'get',
           aborter: aborter
         });
+        await promise;
       } catch (e) {
         // 404 is expected if the runtime doesn't exist, represent this as a null
         // runtime rather than an error mode.
         if (e.status !== 404) {
           setError(true);
         }
-      } finally {
-        setLoading(false);
       }
       markRuntimeOperationCompleteForWorkspace(namespace);
     };
@@ -190,6 +188,12 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
     loadRuntime();
     return () => aborter.abort();
   });
+
+  useEffect(() => {
+    if (currentRuntime) {
+      setLoading(false);
+    }
+  },[currentRuntime])
 
   if (loading) {
     return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
