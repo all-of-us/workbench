@@ -35,8 +35,8 @@ export default class HomePage extends AuthenticatedPage {
       ]);
       return true;
     } catch (err) {
-      console.log(`HomePage isLoaded() encountered ${err}`);
-      return false;
+      console.error(`HomePage isLoaded() encountered ${err}`);
+      throw err;
     }
   }
 

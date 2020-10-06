@@ -51,8 +51,8 @@ export default class ProfilePage extends AuthenticatedPage {
       ]);
       return true;
     } catch (err) {
-      console.log(`ProfilePage isLoaded() encountered ${err}`);
-      return false;
+      console.error(`ProfilePage isLoaded() encountered ${err}`);
+      throw err;
     }
   }
 

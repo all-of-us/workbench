@@ -24,9 +24,9 @@ export default class CohortActionsPage extends AuthenticatedPage {
         this.getCreateDatasetButton().then(elemt => elemt.asElementHandle()),
       ]);
       return true;
-    } catch (e) {
-      console.log(`CohortActionsPage isLoaded() encountered ${e}`);
-      return false;
+    } catch (err) {
+      console.error(`CohortActionsPage isLoaded() encountered ${err}`);
+      throw err;
     }
   }
 

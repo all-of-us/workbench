@@ -34,9 +34,9 @@ export default class CohortBuildPage extends AuthenticatedPage {
         waitWhileLoading(this.page),
       ]);
       return true;
-    } catch (e) {
-      console.log(`CohortBuildPage isLoaded() encountered ${e}`);
-      return false;
+    } catch (err) {
+      console.error(`CohortBuildPage isLoaded() encountered ${err}`);
+      throw err;
     }
   }
 

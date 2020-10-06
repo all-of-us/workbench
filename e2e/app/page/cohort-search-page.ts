@@ -79,7 +79,8 @@ export default class CohortSearchPage extends AuthenticatedPage {
       ]);
       return true;
     } catch (err) {
-      throw new Error(`CohortSearchPage isLoaded() encountered error.\n ${err}`);
+      console.error(`CohortSearchPage isLoaded() encountered ${err}`);
+      throw err;
     }
   }
 

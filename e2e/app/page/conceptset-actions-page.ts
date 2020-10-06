@@ -27,9 +27,9 @@ export default class ConceptsetActionsPage extends AuthenticatedPage {
         this.getCreateDatasetButton(),
       ]);
       return true;
-    } catch (e) {
-      console.log(`ConceptsetActionsPage isLoaded() encountered ${e}`);
-      return false;
+    } catch (err) {
+      console.error(`ConceptsetActionsPage isLoaded() encountered ${err}`);
+      throw err;
     }
   }
 

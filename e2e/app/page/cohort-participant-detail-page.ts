@@ -20,9 +20,9 @@ export default class CohortParticipantDetailPage extends AuthenticatedPage {
         waitWhileLoading(this.page),
       ]);
       return true;
-    } catch (e) {
-      console.log(`CohortParticipantDetailPage isLoaded() encountered ${e}`);
-      return false;
+    } catch (err) {
+      console.error(`CohortParticipantDetailPage isLoaded() encountered ${err}`);
+      throw err;
     }
   }
 

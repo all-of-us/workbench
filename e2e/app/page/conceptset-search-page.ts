@@ -25,9 +25,9 @@ export default class ConceptsetSearchPage extends AuthenticatedPage{
         waitWhileLoading(this.page),
       ]);
       return true;
-    } catch (e) {
-      console.error(`ConceptsetSearchPage isLoaded() encountered ${e}`);
-      return false;
+    } catch (err) {
+      console.error(`ConceptsetSearchPage isLoaded() encountered ${err}`);
+      throw err;
     }
   }
 

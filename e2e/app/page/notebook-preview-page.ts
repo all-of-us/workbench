@@ -25,9 +25,9 @@ export default class NotebookPreviewPage extends AuthenticatedPage {
         waitWhileLoading(this.page),
       ]);
       return true;
-    } catch (e) {
-      console.error(`NotebookPreviewPage isLoaded() encountered ${e}`);
-      throw new Error(e);
+    } catch (err) {
+      console.error(`NotebookPreviewPage isLoaded() encountered ${err}`);
+      throw err;
     }
   }
 

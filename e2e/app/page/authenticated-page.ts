@@ -18,7 +18,7 @@ export default abstract class AuthenticatedPage extends BasePage {
   }
 
   protected async isSignedIn(): Promise<boolean> {
-    return this.page.waitForSelector(signedInIndicator)
+    return this.page.waitForSelector(signedInIndicator, {timeout: 30000})
       .then( (elemt) => elemt.asElement() !== null);
   }
 
@@ -33,10 +33,8 @@ export default abstract class AuthenticatedPage extends BasePage {
    */
   async waitForLoad(): Promise<this> {
     try {
-      await Promise.all([
-        this.isSignedIn(),
-        this.isLoaded(),
-      ]);
+      await this.isSignedIn();
+      await this.isLoaded();
       return this;
     } catch (err) {
       await savePageToFile(this.page);

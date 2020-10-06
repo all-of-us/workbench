@@ -27,9 +27,9 @@ export default class ConceptsetPage extends AuthenticatedPage {
         waitWhileLoading(this.page),
       ]);
       return true;
-    } catch (e) {
-      console.log(`ConceptsetPage isLoaded() encountered ${e}`);
-      return false;
+    } catch (err) {
+      console.error(`ConceptsetPage isLoaded() encountered ${err}`);
+      throw err;
     }
   }
 

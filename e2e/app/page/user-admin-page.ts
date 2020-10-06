@@ -19,8 +19,8 @@ export default class UserAdminPage extends AuthenticatedPage {
       ]);
       return true;
     } catch (err) {
-      console.log(`UserAdminPage isLoaded() encountered ${err}`);
-      return false;
+      console.error(`UserAdminPage isLoaded() encountered ${err}`);
+      throw err;
     }
   }
 

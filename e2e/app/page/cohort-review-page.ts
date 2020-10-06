@@ -23,9 +23,9 @@ export default class CohortReviewPage extends AuthenticatedPage {
         this.getDataTable().exists(),
       ]);
       return true;
-    } catch (e) {
-      console.log(`CohortReviewPage isLoaded() encountered ${e}`);
-      return false;
+    } catch (err) {
+      console.error(`CohortReviewPage isLoaded() encountered ${err}`);
+      throw err;
     }
   }
 

@@ -20,9 +20,9 @@ export default class FeaturedWorkspacesPage extends AuthenticatedPage {
         waitWhileLoading(this.page),
       ]);
       return true;
-    } catch (e) {
-      console.log(`FeaturedWorkspacesPage isLoaded() encountered ${e}`);
-      return false;
+    } catch (err) {
+      console.error(`FeaturedWorkspacesPage isLoaded() encountered ${err}`);
+      throw err;
     }
   }
 

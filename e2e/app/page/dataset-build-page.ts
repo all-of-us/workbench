@@ -28,9 +28,9 @@ export default class DatasetBuildPage extends AuthenticatedPage {
         waitWhileLoading(this.page),
       ]);
       return true;
-    } catch (e) {
-      console.log(`DatasetBuildPage isLoaded() encountered ${e}`);
-      return false;
+    } catch (err) {
+      console.error(`DatasetBuildPage isLoaded() encountered ${err}`);
+      throw err;
     }
   }
 
