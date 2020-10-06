@@ -9,8 +9,8 @@ import org.pmiops.workbench.model.EgressEvent
  */
 enum class EgressEventTargetProperty
 constructor(
-        override val propertyName: String,
-        override val extractor: (EgressEvent) -> String?
+    override val propertyName: String,
+    override val extractor: (EgressEvent) -> String?
 ) : ModelBackedTargetProperty<EgressEvent> {
     EGRESS_MIB("egress_mib",
             { it.egressMib?.toString() }),

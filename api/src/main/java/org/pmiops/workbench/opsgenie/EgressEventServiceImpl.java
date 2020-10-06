@@ -140,28 +140,28 @@ public class EgressEventServiceImpl implements EgressEventService {
             .collect(Collectors.joining("\n\n"));
 
     return String.format(
-        "Workspace \"%s\", Age = %d Days\n",
-        workspace.getName(), getAgeInDays(Instant.ofEpochMilli(workspace.getCreationTime())))
+            "Workspace \"%s\", Age = %d Days\n",
+            workspace.getName(), getAgeInDays(Instant.ofEpochMilli(workspace.getCreationTime())))
         + String.format(
-        "GCP Billing Project/Firecloud Namespace: %s\n", egressEvent.getProjectName())
+            "GCP Billing Project/Firecloud Namespace: %s\n", egressEvent.getProjectName())
         + String.format("Notebook server VM prefix: %s\n", egressEvent.getVmPrefix())
         + String.format("MySQL workspace_id: %d\n", adminWorkspace.getWorkspaceDatabaseId())
         + String.format(
-        "Total egress detected: %.2f MiB in %d secs\n",
-        egressEvent.getEgressMib(), egressEvent.getTimeWindowDuration())
+            "Total egress detected: %.2f MiB in %d secs\n",
+            egressEvent.getEgressMib(), egressEvent.getTimeWindowDuration())
         + String.format(
-        "egress breakdown: GCE - %.2f MiB, Dataproc - %.2fMiB via master, %.2fMiB via workers\n\nn",
-        egressEvent.getGceEgressMib(),
-        egressEvent.getDataprocMasterEgressMib(),
-        egressEvent.getDataprocWorkerEgressMib())
+            "egress breakdown: GCE - %.2f MiB, Dataproc - %.2fMiB via master, %.2fMiB via workers\n\nn",
+            egressEvent.getGceEgressMib(),
+            egressEvent.getDataprocMasterEgressMib(),
+            egressEvent.getDataprocWorkerEgressMib())
         + String.format(
-        "Runtime Prefix: %s\n", executor.map(DbUser::getRuntimeName).orElse("unknown"))
+            "Runtime Prefix: %s\n", executor.map(DbUser::getRuntimeName).orElse("unknown"))
         + String.format("User Running Notebook: %s\n\n", executorDetails)
         + String.format("Workspace Creator: %s\n\n", creatorDetails)
         + String.format("Collaborators: \n%s\n", collaboratorDetails)
         + String.format(
-        "Workspace Admin Console (Prod Admin User): %s/admin/workspaces/%s/\n",
-        workbenchConfigProvider.get().server.uiBaseUrl, egressEvent.getProjectName())
+            "Workspace Admin Console (Prod Admin User): %s/admin/workspaces/%s/\n",
+            workbenchConfigProvider.get().server.uiBaseUrl, egressEvent.getProjectName())
         + "Playbook Entry: https://broad.io/aou-high-egress-event";
   }
 

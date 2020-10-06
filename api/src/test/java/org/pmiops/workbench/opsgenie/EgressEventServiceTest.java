@@ -63,22 +63,15 @@ public class EgressEventServiceTest {
           .timeWindowDuration(600L);
   private static final Clock CLOCK = new FakeClock(NOW);
 
-  @MockBean
-  private AlertApi mockAlertApi;
-  @MockBean
-  private EgressEventAuditor egressEventAuditor;
-  @MockBean
-  private InstitutionService mockInstitutionService;
-  @MockBean
-  private UserService mockUserService;
-  @MockBean
-  private WorkspaceAdminService mockWorkspaceAdminService;
+  @MockBean private AlertApi mockAlertApi;
+  @MockBean private EgressEventAuditor egressEventAuditor;
+  @MockBean private InstitutionService mockInstitutionService;
+  @MockBean private UserService mockUserService;
+  @MockBean private WorkspaceAdminService mockWorkspaceAdminService;
 
-  @Captor
-  private ArgumentCaptor<CreateAlertRequest> alertRequestCaptor;
+  @Captor private ArgumentCaptor<CreateAlertRequest> alertRequestCaptor;
 
-  @Autowired
-  private EgressEventService egressEventService;
+  @Autowired private EgressEventService egressEventService;
   private static final TestMockFactory TEST_MOCK_FACTORY = new TestMockFactory();
   private static final User USER_1 =
       new User()
