@@ -38,13 +38,15 @@ import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
-import org.pmiops.workbench.dataset.DataSetService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetServiceImpl;
 import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
+import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
+import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
@@ -91,17 +93,24 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   private static final String WORKSPACE_NAME = "name";
 
   private DataSetController controller;
+  private DataSetServiceImpl dataSetServiceImpl;
   @Autowired private BigQueryService bigQueryService;
+  @Autowired private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private CdrVersionService cdrVersionService;
   @Autowired private CohortDao cohortDao;
+  @Autowired private CohortQueryBuilder cohortQueryBuilder;
+  @Autowired private ConceptBigQueryService conceptBigQueryService;
   @Autowired private ConceptSetDao conceptSetDao;
+  @Autowired private DataDictionaryEntryDao dataDictionaryEntryDao;
+  @Autowired private DataSetDao dataSetDao;
+  @Autowired private DataSetMapperImpl dataSetMapper;
   @Autowired private DSLinkingDao dsLinkingDao;
-  @Autowired private DataSetService dataSetService;
   @Autowired private FireCloudService fireCloudService;
   @Autowired private NotebooksService notebooksService;
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
   @Autowired private Provider<DbUser> userProvider;
+  @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   @Qualifier(DatasetConfig.DATASET_PREFIX_CODE)
@@ -135,7 +144,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     DataSetMapperImpl.class,
     DataSetServiceImpl.class,
     TestBigQueryCdrSchemaConfig.class,
-    WorkspaceServiceImpl.class,
+    WorkspaceServiceImpl.class
   })
   @MockBean({
     BillingProjectAuditor.class,
@@ -186,12 +195,27 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   @Before
   public void setUp() {
+    workbenchConfigProvider.get().featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
+    dataSetServiceImpl =
+        new DataSetServiceImpl(
+            bigQueryService,
+            cdrBigQuerySchemaConfigService,
+            cohortDao,
+            conceptBigQueryService,
+            conceptSetDao,
+            cohortQueryBuilder,
+            dataDictionaryEntryDao,
+            dataSetDao,
+            dsLinkingDao,
+            dataSetMapper,
+            CLOCK,
+            workbenchConfigProvider);
     controller =
         spy(
             new DataSetController(
                 bigQueryService,
                 cdrVersionService,
-                dataSetService,
+                dataSetServiceImpl,
                 fireCloudService,
                 notebooksService,
                 userProvider,

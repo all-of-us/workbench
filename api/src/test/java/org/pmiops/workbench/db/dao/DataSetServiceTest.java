@@ -122,6 +122,13 @@ public class DataSetServiceTest {
     Clock clock() {
       return CLOCK;
     }
+
+    @Bean
+    WorkbenchConfig workbenchConfig() {
+      WorkbenchConfig workbenchConfig = new WorkbenchConfig();
+      workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
+      return workbenchConfig;
+    }
   }
 
   @Before
