@@ -520,6 +520,8 @@ task bigQueryTest(type: Test) {
   description = 'Runs BigQery test suite.'
   testClassesDirs = sourceSets.__bigQueryTest__.output.classesDirs
   classpath = sourceSets.__bigQueryTest__.runtimeClasspath
+
+  outputs.upToDateWhen { false }
 }
 
 tasks.withType(Test) {
