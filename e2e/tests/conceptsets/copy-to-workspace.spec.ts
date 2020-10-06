@@ -33,7 +33,7 @@ describe('Copy Concept Set to another workspace', () => {
     await workspace2.clickWorkspaceName();
     // Open Concept Sets tab.
     const dataPage = new WorkspaceDataPage(page);
-    await dataPage.openConceptSetsSubtab({waitPageChange: false});
+    await dataPage.openConceptSetsSubtab();
 
     // Create new Concept Set
     const conceptSearchPage = await dataPage.openConceptSearch(Domain.Procedures);
