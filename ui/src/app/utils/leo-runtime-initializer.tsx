@@ -2,13 +2,13 @@ import {leoRuntimesApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import {isAbortError, reportError} from 'app/utils/errors';
 import {runtimePresets} from 'app/utils/runtime-presets';
-import {Runtime, RuntimeStatus} from 'generated/fetch';
-import {serverConfigStore} from './navigation';
 import {
   markRuntimeOperationCompleteForWorkspace,
-  updateRuntimeOpsStoreForWorkspaceNamespace,
-  runtimeStore
+  runtimeStore,
+  updateRuntimeOpsStoreForWorkspaceNamespace
 } from 'app/utils/stores';
+import {Runtime, RuntimeStatus} from 'generated/fetch';
+import {serverConfigStore} from './navigation';
 
 // We're only willing to wait 20 minutes total for a runtime to initialize. After that we return
 // a rejected promise no matter what.
@@ -149,7 +149,7 @@ export class LeoRuntimeInitializer {
 
   private set currentRuntime(nextRuntime: Runtime | null) {
     this._currentRuntime = nextRuntime;
-    const storeWorkspaceNamespace = runtimeStore.get().workspaceNamespace
+    const storeWorkspaceNamespace = runtimeStore.get().workspaceNamespace;
     if (storeWorkspaceNamespace === this.workspaceNamespace || storeWorkspaceNamespace === undefined ) {
       runtimeStore.set({workspaceNamespace: this.workspaceNamespace, runtime: this._currentRuntime});
     }

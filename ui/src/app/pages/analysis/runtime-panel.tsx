@@ -7,6 +7,7 @@ import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {allMachineTypes, validLeonardoMachineTypes} from 'app/utils/machines';
+import {useCustomRuntime} from 'app/utils/runtime-utils';
 import {
   abortRuntimeOperationForWorkspace,
   markRuntimeOperationCompleteForWorkspace,
@@ -19,12 +20,11 @@ import {
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Dropdown} from 'primereact/dropdown';
 import {InputNumber} from 'primereact/inputnumber';
-import {useCustomRuntime} from 'app/utils/runtime-utils';
 
+import { useOnMount } from 'app/utils';
+import { RuntimeStatus } from 'generated';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import { RuntimeStatus } from 'generated';
-import { useOnMount } from 'app/utils';
 
 const {useState, Fragment} = React;
 
@@ -73,12 +73,12 @@ export interface Props {
   workspace: WorkspaceData;
 }
 
- const MachineSelector = ({onChange, selectedMachine, currentRuntime}) => {
+const MachineSelector = ({onChange, selectedMachine, currentRuntime}) => {
   const {dataprocConfig, gceConfig} = currentRuntime;
-  const masterMachineName = !!dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType
+  const masterMachineName = !!dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
   const initialMachineType = fp.find(({name}) => name === masterMachineName, allMachineTypes) || defaultMachineType;
   const {cpu, memory} = selectedMachine || initialMachineType;
-  const maybeGetMachine = selectedMachine => fp.equals(selectedMachine, initialMachineType) ? null : selectedMachine;
+  const maybeGetMachine = machineRequested => fp.equals(machineRequested, initialMachineType) ? null : machineRequested;
 
   return <Fragment>
     <div>
@@ -127,12 +127,12 @@ export interface Props {
                 value={memory}
                 />
     </div>
-  </Fragment>
-}
+  </Fragment>;
+};
 
 const DiskSizeSelection = ({onChange, selectedDiskSize, currentRuntime}) => {
   const {dataprocConfig, gceConfig} = currentRuntime;
-  const masterDiskSize = !!dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.bootDiskSize
+  const masterDiskSize = !!dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.bootDiskSize;
 
   return <div>
     <label htmlFor='runtime-disk'
@@ -146,8 +146,8 @@ const DiskSizeSelection = ({onChange, selectedDiskSize, currentRuntime}) => {
                 inputStyle={{padding: '.75rem .5rem', width: '2rem'}}
                 onChange={({value}) => onChange(value === masterDiskSize ? null : value)}
                 min={50 /* Runtime API has a minimum 50GB requirement. */}/>
-  </div>
-}
+  </div>;
+};
 
 export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
   const [loading, setLoading] = useState(true);
@@ -159,36 +159,36 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
 
   const activeRuntimeOp: RuntimeOperation = runtimeOps.opsByWorkspaceNamespace[workspace.namespace];
   const {status = RuntimeStatus.Unknown, toolDockerImage = null, dataprocConfig = {}, gceConfig = {}} = currentRuntime || {};
-  const masterMachineType = !!dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType
-  const masterDiskSize = !!dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.bootDiskSize
+  const masterMachineType = !!dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
+  const masterDiskSize = !!dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.bootDiskSize;
   const selectedMachineType = selectedMachine && selectedMachine.name;
 
   useOnMount(() => {
-      const aborter = new AbortController();
-      const {namespace} = workspace;
-      const loadRuntime = async () => {
+    const aborter = new AbortController();
+    const {namespace} = workspace;
+    const loadRuntime = async() => {
         // TODO(RW-5420): Centralize a runtimeStore.
-        try {
-          const promise = runtimeApi().getRuntime(namespace, {signal: aborter.signal});
-          updateRuntimeOpsStoreForWorkspaceNamespace(namespace, {
-            promise: promise,
-            operation: 'get',
-            aborter: aborter
-          });
-        } catch (e) {
-          // 404 is expected if the runtime doesn't exist, represent this as a null
-          // runtime rather than an error mode.
-          if (e.status !== 404) {
-            setError(true);
-          }
-        } finally {
-          setLoading(false);
+      try {
+        const promise = runtimeApi().getRuntime(namespace, {signal: aborter.signal});
+        updateRuntimeOpsStoreForWorkspaceNamespace(namespace, {
+          promise: promise,
+          operation: 'get',
+          aborter: aborter
+        });
+      } catch (e) {
+        // 404 is expected if the runtime doesn't exist, represent this as a null
+        // runtime rather than an error mode.
+        if (e.status !== 404) {
+          setError(true);
         }
-        markRuntimeOperationCompleteForWorkspace(namespace);
+      } finally {
+        setLoading(false);
       }
+      markRuntimeOperationCompleteForWorkspace(namespace);
+    };
 
-      loadRuntime()
-      return () => aborter.abort();
+    loadRuntime();
+    return () => aborter.abort();
   });
 
   if (loading) {
@@ -257,10 +257,10 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
       <Button
         disabled={status !== RuntimeStatus.Running || !runtimeChanged}
         onClick={() => setRequestedRuntime({dataprocConfig: {
-              masterMachineType: selectedMachineType || masterMachineType,
-              masterDiskSize: selectedDiskSize || masterDiskSize
-            }
-          })
+          masterMachineType: selectedMachineType || masterMachineType,
+          masterDiskSize: selectedDiskSize || masterDiskSize
+        }
+        })
         }
       >{currentRuntime ? 'Update' : 'Create'}</Button>
     </FlexRow>
@@ -270,4 +270,4 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
     </React.Fragment>}
   </div>;
 
-})
+});

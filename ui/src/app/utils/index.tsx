@@ -566,8 +566,8 @@ export const useToggle = (): [boolean, Function] => {
 };
 
 export const useOnMount = (fn: Function) => {
-    useEffect(() => fn(), []);
-}
+  useEffect(() => fn(), []);
+};
 
 // Takes a search string and validates for the most common MySQL use cases.
 // Checks for unbalanced (), unclosed "", trailing + or -, and breaking special characters.
