@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
 import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
@@ -36,6 +37,7 @@ import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.mapper.DataSetMapper;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
@@ -81,10 +83,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private static final Map<KernelTypeEnum, String> KERNEL_TYPE_TO_ENV_VARIABLE_MAP =
       ImmutableMap.of(
           KernelTypeEnum.R, R_CDR_ENV_VARIABLE, KernelTypeEnum.PYTHON, PYTHON_CDR_ENV_VARIABLE);
-
-  private static final String SELECT_ALL_FROM_DS_LINKING_WHERE_DOMAIN_MATCHES_LIST =
-      "SELECT * FROM `${projectId}.${dataSetId}.ds_linking` "
-          + "WHERE DOMAIN = @pDomain AND DENORMALIZED_NAME in unnest(@pValuesList)";
 
   private static final String PREVIEW_QUERY =
       "SELECT ${columns} FROM `${projectId}.${dataSetId}.${tableName}`";
@@ -183,18 +181,18 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     }
   }
 
-  private CohortQueryBuilder cohortQueryBuilder;
-  private ConceptBigQueryService conceptBigQueryService;
-  private BigQueryService bigQueryService;
-  private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
-
-  private final DataSetDao dataSetDao;
-  private final ConceptSetDao conceptSetDao;
+  private final BigQueryService bigQueryService;
+  private final CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
   private final CohortDao cohortDao;
+  private final ConceptBigQueryService conceptBigQueryService;
+  private final ConceptSetDao conceptSetDao;
+  private final CohortQueryBuilder cohortQueryBuilder;
   private final DataDictionaryEntryDao dataDictionaryEntryDao;
+  private final DataSetDao dataSetDao;
   private final DSLinkingDao dsLinkingDao;
   private final DataSetMapper dataSetMapper;
   private final Clock clock;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   @VisibleForTesting
@@ -209,7 +207,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       DataSetDao dataSetDao,
       DSLinkingDao dsLinkingDao,
       DataSetMapper dataSetMapper,
-      Clock clock) {
+      Clock clock,
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.bigQueryService = bigQueryService;
     this.cdrBigQuerySchemaConfigService = cdrBigQuerySchemaConfigService;
     this.cohortDao = cohortDao;
@@ -221,6 +220,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     this.dsLinkingDao = dsLinkingDao;
     this.dataSetMapper = dataSetMapper;
     this.clock = clock;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @Override
@@ -301,7 +301,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     if (!domain.equals(Domain.PERSON)) {
       mergedQueryParameterValues.put(
           "conceptIds", QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
-      queryBuilder.append(" WHERE ").append(BigQueryDataSetTableInfo.getConceptIdIn(domain));
+      queryBuilder
+          .append(" WHERE ")
+          .append(
+              workbenchConfigProvider.get().featureFlags.enableConceptSetSearchV2
+                  ? BigQueryDataSetTableInfo.getConceptIdIn(domain)
+                  : BigQueryDataSetTableInfo.getConceptIdInOld(domain));
     }
 
     if (!request.getIncludesAllParticipants()) {
@@ -542,18 +547,22 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       // This adds the where clauses for cohorts and concept sets.
       conceptSetSqlInClauseMaybe.ifPresent(
           clause -> {
-            queryBuilder
-                .append(" WHERE \n(")
-                .append(domainConceptIdInfo.getStandardConceptIdColumn())
-                .append(clause);
-            if (Domain.SURVEY.equals(domain)) {
-              queryBuilder.append(")");
+            if (workbenchConfigProvider.get().featureFlags.enableConceptSetSearchV2) {
+              queryBuilder.append(" WHERE \n").append(clause);
             } else {
               queryBuilder
-                  .append(" OR \n")
-                  .append(domainConceptIdInfo.getSourceConceptIdColumn())
-                  .append(clause)
-                  .append(")");
+                  .append(" WHERE \n(")
+                  .append(domainConceptIdInfo.getStandardConceptIdColumn())
+                  .append(clause);
+              if (Domain.SURVEY.equals(domain)) {
+                queryBuilder.append(")");
+              } else {
+                queryBuilder
+                    .append(" OR \n")
+                    .append(domainConceptIdInfo.getSourceConceptIdColumn())
+                    .append(clause)
+                    .append(")");
+              }
             }
           });
 
@@ -614,6 +623,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     if (conceptSetIDs.isEmpty()) {
       return Optional.empty();
     } else {
+      if (workbenchConfigProvider.get().featureFlags.enableConceptSetSearchV2) {
+        String conceptIdInClause = BigQueryDataSetTableInfo.getConceptIdIn(domain);
+        return Optional.of(
+            conceptIdInClause.replaceAll("unnest", "").replaceAll("(@conceptIds)", conceptSetIDs));
+      }
       return Optional.of(String.format(" IN (%s)", conceptSetIDs));
     }
   }

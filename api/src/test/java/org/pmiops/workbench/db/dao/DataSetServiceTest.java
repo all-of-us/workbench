@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import javax.inject.Provider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,6 +43,7 @@ import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetServiceImpl;
 import org.pmiops.workbench.dataset.DataSetServiceImpl.QueryAndParameters;
 import org.pmiops.workbench.dataset.mapper.DataSetMapper;
@@ -96,6 +98,7 @@ public class DataSetServiceTest {
   @Autowired private DataSetDao dataSetDao;
   @Autowired private DSLinkingDao dsLinkingDao;
   @Autowired private DataSetMapper dataSetMapper;
+  @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @MockBean private BigQueryService mockBigQueryService;
   @MockBean private CohortDao mockCohortDao;
@@ -135,7 +138,8 @@ public class DataSetServiceTest {
             dataSetDao,
             dsLinkingDao,
             dataSetMapper,
-            CLOCK);
+            CLOCK,
+            workbenchConfigProvider);
 
     final DbCohort cohort = buildSimpleCohort();
     when(cohortDao.findCohortByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(cohort);
