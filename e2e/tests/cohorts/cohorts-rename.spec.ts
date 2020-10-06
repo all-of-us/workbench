@@ -89,8 +89,7 @@ describe('User can create, modify, rename and delete Cohort', () => {
     const cohortActionsPage = new CohortActionsPage(page);
     await cohortActionsPage.waitForLoad();
 
-    await dataPage.openDataPage();
-    await dataPage.openCohortsSubtab({waitPageChange: false});
+    await dataPage.openCohortsSubtab();
 
     // Rename cohort.
     const newCohortName = makeRandomName();
