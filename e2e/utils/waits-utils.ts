@@ -112,7 +112,7 @@ export async function waitForPropertyExists(page: Page, xpathSelector: string, p
     return true;
   } catch (err) {
     console.error(`Failed waiting element (XPath="${xpathSelector}") property: ${propertyName} exists. ${err}`);
-    throw new Error(err);
+    throw (err);
   }
 }
 
