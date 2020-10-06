@@ -6,7 +6,7 @@ import {useOnMount} from 'app/utils';
 import {
   LeoRuntimeInitializer,
 } from 'app/utils/leo-runtime-initializer';
-import {Runtime} from 'generated/fetch';
+import {Runtime, RuntimeStatus} from 'generated/fetch';
 import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import * as fp from 'lodash/fp';
 import {switchCase} from 'app/utils';
@@ -29,7 +29,7 @@ const useRuntime = (currentWorkspaceNamespace) => {
       const leoRuntime = await runtimeApi().getRuntime(currentWorkspaceNamespace)
       runtimeStore.set({
         workspaceNamespace: currentWorkspaceNamespace,
-        runtime: leoRuntime 
+        runtime: leoRuntime
       });
     }
     getRuntime();
@@ -38,21 +38,22 @@ const useRuntime = (currentWorkspaceNamespace) => {
 
 // useRuntimeState hook can be used to change the state of the runtime
 // Only 'Delete' is supported at the moment
-export const useRuntimeState = (currentWorkspaceNamespace): [RuntimeStatusRequest, Function]  => {
+export const useRuntimeState = (currentWorkspaceNamespace): [RuntimeStatus, Function]  => {
   const [requestedRuntimeState, setRuntimeState] = useState<RuntimeStatusRequest>();
+  const {runtime} = useStore(runtimeStore);
   useRuntime(currentWorkspaceNamespace)
 
   useEffect(() => {
     // Additional state changes can be put here
-    !!requestedRuntimeState && switchCase(requestedRuntimeState, 
+    !!requestedRuntimeState && switchCase(requestedRuntimeState,
       [RuntimeStateRequest.Delete, async () => {
         await runtimeApi().deleteRuntime(currentWorkspaceNamespace);
         await LeoRuntimeInitializer.initialize({workspaceNamespace: currentWorkspaceNamespace, maxCreateCount: 0});
       }])
-    
+
   }, [requestedRuntimeState])
 
-  return [requestedRuntimeState, setRuntimeState]
+  return [runtime.status, setRuntimeState]
 }
 
 // useCustomRuntime Hook can request a new runtime config
@@ -70,10 +71,10 @@ export const useCustomRuntime = (currentWorkspaceNamespace): [Runtime, Function]
         workspaceNamespace,
         runtime: requestedRuntime
       });
-      
+
       const currentRuntime = await runtimeApi().getRuntime(currentWorkspaceNamespace);
       if (currentWorkspaceNamespace === workspaceNamespace) {
-        runtimeStore.set({        
+        runtimeStore.set({
           workspaceNamespace: currentWorkspaceNamespace,
           runtime: currentRuntime
         });

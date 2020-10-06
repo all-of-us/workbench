@@ -27,7 +27,7 @@ import { RuntimeStatus } from 'generated';
 import { useOnMount } from 'app/utils';
 
 const {useState, Fragment} = React;
- 
+
 const styles = reactStyles({
   sectionHeader: {
     color: colors.primary,
@@ -76,7 +76,7 @@ export interface Props {
  const MachineSelector = ({onChange, selectedMachine, currentRuntime}) => {
   const {dataprocConfig, gceConfig} = currentRuntime;
   const masterMachineName = !!dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType
-  const initialMachineType = fp.find(({name}) => name === masterMachineName, allMachineTypes) || defaultMachineType;  
+  const initialMachineType = fp.find(({name}) => name === masterMachineName, allMachineTypes) || defaultMachineType;
   const {cpu, memory} = selectedMachine || initialMachineType;
   const maybeGetMachine = selectedMachine => fp.equals(selectedMachine, initialMachineType) ? null : selectedMachine;
 
@@ -92,15 +92,15 @@ export interface Props {
                   // In the event that was remove a machine type from our set of valid
                   // configs, we want to continue to allow rendering of the value here.
                   // Union also makes the CPU values unique.
-                  fp.union([cpu]), 
+                  fp.union([cpu]),
                   fp.sortBy(fp.identity)
                 )(validLeonardoMachineTypes)}
-                onChange={ 
+                onChange={
                   ({value}) => fp.flow(
-                    fp.sortBy('memory'), 
-                    fp.find({cpu: value}), 
+                    fp.sortBy('memory'),
+                    fp.find({cpu: value}),
                     maybeGetMachine,
-                    onChange)(validLeonardoMachineTypes) 
+                    onChange)(validLeonardoMachineTypes)
                 }
                 value={cpu}/>
     </div>
@@ -117,9 +117,9 @@ export interface Props {
                   fp.union([memory]),
                   fp.sortBy(fp.identity)
                 )(validLeonardoMachineTypes)}
-                onChange={ 
+                onChange={
                   ({value}) => fp.flow(
-                    fp.find({cpu, memory: value}), 
+                    fp.find({cpu, memory: value}),
                     // If the selected machine is not different from the current machine return null
                     maybeGetMachine,
                     onChange
@@ -156,7 +156,7 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
   const [selectedMachine, setselectedMachine] = useState(null);
   const runtimeOps = useStore(runtimeOpsStore);
   const [currentRuntime, setRequestedRuntime] = useCustomRuntime(workspace.namespace);
-  
+
   const activeRuntimeOp: RuntimeOperation = runtimeOps.opsByWorkspaceNamespace[workspace.namespace];
   const {status = RuntimeStatus.Unknown, toolDockerImage = null, dataprocConfig = {}, gceConfig = {}} = currentRuntime || {};
   const masterMachineType = !!dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType
@@ -238,7 +238,7 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
                 disabled={true}
                 options={[toolDockerImage]}
                 value={toolDockerImage}/>
-      {/* Runtime customization: change detailed machine configuration options. */}  
+      {/* Runtime customization: change detailed machine configuration options. */}
       <h3 style={styles.sectionHeader}>Cloud compute profile</h3>
       <FlexRow style={{justifyContent: 'space-between'}}>
         <MachineSelector selectedMachine={selectedMachine} onChange={setselectedMachine} currentRuntime={currentRuntime}/>
@@ -254,9 +254,9 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
       </FlexColumn>
     </div>
     <FlexRow style={{justifyContent: 'flex-end', marginTop: '.75rem'}}>
-      <Button 
+      <Button
         disabled={status !== RuntimeStatus.Running || !runtimeChanged}
-        onClick={async () => setRequestedRuntime({dataprocConfig: { 
+        onClick={() => setRequestedRuntime({dataprocConfig: {
               masterMachineType: selectedMachineType || masterMachineType,
               masterDiskSize: selectedDiskSize || masterDiskSize
             }
