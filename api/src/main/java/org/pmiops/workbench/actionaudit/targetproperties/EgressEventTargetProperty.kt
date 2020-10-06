@@ -9,8 +9,8 @@ import org.pmiops.workbench.model.EgressEvent
  */
 enum class EgressEventTargetProperty
 constructor(
-    override val propertyName: String,
-    override val extractor: (EgressEvent) -> String?
+        override val propertyName: String,
+        override val extractor: (EgressEvent) -> String?
 ) : ModelBackedTargetProperty<EgressEvent> {
     EGRESS_MIB("egress_mib",
             { it.egressMib?.toString() }),
@@ -22,7 +22,7 @@ constructor(
             }),
     TIME_WINDOW_DURATION("time_window_duration",
             { it.timeWindowDuration?.toString() }),
-    VM_NAME("vm_name", { it.vmName });
+    VM_NAME("vm_prefix", { it.vmPrefix });
 }
 
 /**

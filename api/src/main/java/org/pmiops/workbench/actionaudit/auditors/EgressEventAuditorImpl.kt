@@ -9,7 +9,6 @@ import org.pmiops.workbench.actionaudit.targetproperties.EgressEventCommentTarge
 import org.pmiops.workbench.actionaudit.targetproperties.EgressEventTargetProperty
 import org.pmiops.workbench.actionaudit.targetproperties.TargetPropertyExtractor
 import org.pmiops.workbench.db.dao.UserDao
-import org.pmiops.workbench.db.model.DbUser
 import org.pmiops.workbench.exceptions.BadRequestException
 import org.pmiops.workbench.model.EgressEvent
 import org.pmiops.workbench.model.EgressEventRequest
@@ -24,22 +23,12 @@ import javax.inject.Provider
 @Service
 class EgressEventAuditorImpl @Autowired
 constructor(
-    private val actionAuditService: ActionAuditService,
-    private val workspaceService: WorkspaceService,
-    private val userDao: UserDao,
-    private val clock: Clock,
-    @Qualifier("ACTION_ID") private val actionIdProvider: Provider<String>
+        private val actionAuditService: ActionAuditService,
+        private val workspaceService: WorkspaceService,
+        private val userDao: UserDao,
+        private val clock: Clock,
+        @Qualifier("ACTION_ID") private val actionIdProvider: Provider<String>
 ) : EgressEventAuditor {
-
-    /**
-     * Returns the prefix for a user's VM which captures the following situations:
-     * 1. GCE VMs: all-of-us-<user_id>
-     * 2. Dataproc master nodes: all-of-us-<user_id>-m
-     * 3. Dataproc worker nodes: all-of-us-<user_id>-w-<index>
-     */
-    private fun dbUserToVmPrefix(dbUser: DbUser): String {
-        return dbUser.runtimeName
-    }
 
     override fun fireEgressEvent(event: EgressEvent) {
         // Load the workspace via the GCP project name
@@ -60,7 +49,13 @@ constructor(
         val userRoles = workspaceService.getFirecloudUserRoles(dbWorkspace.workspaceNamespace,
                 dbWorkspace.firecloudName)
         val vmOwner = userRoles
-                .map { userDao.findUserByUsername(it.email) }.firstOrNull { dbUserToVmPrefix(it).equals(event.vmPrefix) }
+                .map { userDao.findUserByUsername(it.email) }.firstOrNull {
+                    // The user's runtime name is used as a common VM prefix across all Leo machine types, and covers the following situations:
+                    // 1. GCE VMs: all-of-us-<user_id>
+                    // 2. Dataproc master nodes: all-of-us-<user_id>-m
+                    // 3. Dataproc worker nodes: all-of-us-<user_id>-w-<index>
+                    it.runtimeName.equals(event.vmPrefix)
+                }
 
         var agentEmail: String? = null
         var agentId = 0L
@@ -68,9 +63,9 @@ constructor(
             agentEmail = vmOwner.username
             agentId = vmOwner.userId
         } else {
-            // If the VM name doesn't match a user on the workspace, we'll still log an
+            // If the VM prefix doesn't match a user on the workspace, we'll still log an
             // event in the target workspace, but with nulled-out user info.
-            logger.warning(String.format("Could not find a user for VM name %s in project %s", event.vmName, event.projectName))
+            logger.warning(String.format("Could not find a user for VM prefix %s in project %s", event.vmPrefix, event.projectName))
         }
 
         val actionId = actionIdProvider.get()

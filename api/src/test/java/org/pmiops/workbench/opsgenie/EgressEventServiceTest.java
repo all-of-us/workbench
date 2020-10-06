@@ -57,21 +57,28 @@ public class EgressEventServiceTest {
   private static final EgressEvent EGRESS_EVENT_1 =
       new EgressEvent()
           .projectName("aou-rw-test-c7dec260")
-          .vmName("all-of-us-111-m")
+          .vmPrefix("all-of-us-111")
           .egressMib(120.7)
           .egressMibThreshold(100.0)
           .timeWindowDuration(600L);
   private static final Clock CLOCK = new FakeClock(NOW);
 
-  @MockBean private AlertApi mockAlertApi;
-  @MockBean private EgressEventAuditor egressEventAuditor;
-  @MockBean private InstitutionService mockInstitutionService;
-  @MockBean private UserService mockUserService;
-  @MockBean private WorkspaceAdminService mockWorkspaceAdminService;
+  @MockBean
+  private AlertApi mockAlertApi;
+  @MockBean
+  private EgressEventAuditor egressEventAuditor;
+  @MockBean
+  private InstitutionService mockInstitutionService;
+  @MockBean
+  private UserService mockUserService;
+  @MockBean
+  private WorkspaceAdminService mockWorkspaceAdminService;
 
-  @Captor private ArgumentCaptor<CreateAlertRequest> alertRequestCaptor;
+  @Captor
+  private ArgumentCaptor<CreateAlertRequest> alertRequestCaptor;
 
-  @Autowired private EgressEventService egressEventService;
+  @Autowired
+  private EgressEventService egressEventService;
   private static final TestMockFactory TEST_MOCK_FACTORY = new TestMockFactory();
   private static final User USER_1 =
       new User()
@@ -109,6 +116,7 @@ public class EgressEventServiceTest {
   @TestConfiguration
   @Import({EgressEventServiceImpl.class})
   static class Configuration {
+
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     WorkbenchConfig getWorkbenchConfig() {
@@ -167,7 +175,7 @@ public class EgressEventServiceTest {
         .containsMatch(
             Pattern.compile(
                 "user_id:\\s+111,\\s+Institution:\\s+Verily\\s+Life\\s+Sciences,\\s+Account\\s+Age:\\s+651\\s+days"));
-    assertThat(request.getAlias()).isEqualTo("aou-rw-test-c7dec260 | all-of-us-111-m");
+    assertThat(request.getAlias()).isEqualTo("aou-rw-test-c7dec260 | all-of-us-111");
   }
 
   @Test
@@ -187,7 +195,7 @@ public class EgressEventServiceTest {
         .containsMatch(
             Pattern.compile(
                 "user_id:\\s+111,\\s+Institution:\\s+not\\s+found,\\s+Account\\s+Age:\\s+651\\s+days"));
-    assertThat(request.getAlias()).isEqualTo("aou-rw-test-c7dec260 | all-of-us-111-m");
+    assertThat(request.getAlias()).isEqualTo("aou-rw-test-c7dec260 | all-of-us-111");
   }
 
   // I thought about adding this to a mapper, but it's such a backwards, test-only conversion,

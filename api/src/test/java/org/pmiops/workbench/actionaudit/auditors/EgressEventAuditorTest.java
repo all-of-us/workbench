@@ -49,32 +49,39 @@ public class EgressEventAuditorTest {
   private static final String WORKSPACE_FIRECLOUD_NAME = "mytestworkspacename";
 
   private static final String EGRESS_EVENT_PROJECT_NAME = WORKSPACE_NAMESPACE;
-  private static final String EGRESS_EVENT_DATAPROC_VM_NAME = "all-of-us-" + USER_ID + "-m";
-  private static final String EGRESS_EVENT_GCE_VM_NAME = "all-of-us-" + USER_ID;
+  private static final String EGRESS_EVENT_VM_PREFIX = "all-of-us-" + USER_ID;
 
   // Pre-built data objects for test.
   private DbUser dbUser;
   private DbWorkspace dbWorkspace;
   private List<UserRole> firecloudUserRoles = new ArrayList<>();
 
-  @Autowired private EgressEventAuditor egressEventAuditor;
+  @Autowired
+  private EgressEventAuditor egressEventAuditor;
 
-  @MockBean private ActionAuditService mockActionAuditService;
-  @MockBean private WorkspaceService mockWorkspaceService;
-  @MockBean private UserDao mockUserDao;
+  @MockBean
+  private ActionAuditService mockActionAuditService;
+  @MockBean
+  private WorkspaceService mockWorkspaceService;
+  @MockBean
+  private UserDao mockUserDao;
 
-  @Captor private ArgumentCaptor<Collection<ActionAuditEvent>> eventsCaptor;
+  @Captor
+  private ArgumentCaptor<Collection<ActionAuditEvent>> eventsCaptor;
 
-  @Rule public final ExpectedException exception = ExpectedException.none();
+  @Rule
+  public final ExpectedException exception = ExpectedException.none();
 
   @TestConfiguration
   @Import({
-    // Import the impl class to allow autowiring the bean.
-    EgressEventAuditorImpl.class,
-    // Import common action audit beans.
-    ActionAuditTestConfig.class
+      // Import the impl class to allow autowiring the bean.
+      EgressEventAuditorImpl.class,
+      // Import common action audit beans.
+      ActionAuditTestConfig.class
   })
-  static class Configuration {}
+  static class Configuration {
+
+  }
 
   @Before
   public void setUp() {
@@ -104,9 +111,12 @@ public class EgressEventAuditorTest {
     egressEventAuditor.fireEgressEvent(
         new EgressEvent()
             .projectName(EGRESS_EVENT_PROJECT_NAME)
-            .vmName(EGRESS_EVENT_DATAPROC_VM_NAME)
+            .vmPrefix(EGRESS_EVENT_VM_PREFIX)
             .timeWindowStart(0l)
-            .egressMib(12.3));
+            .egressMib(12.3)
+            .gceEgressMib(0.0)
+            .dataprocMasterEgressMib(10.0)
+            .dataprocWorkerEgressMib(2.3));
     verify(mockActionAuditService).send(eventsCaptor.capture());
     Collection<ActionAuditEvent> events = eventsCaptor.getValue();
 
@@ -124,40 +134,23 @@ public class EgressEventAuditorTest {
 
     // We should have distinct event rows with values from the egress event.
     assertThat(
-            events.stream()
-                .filter(
-                    event ->
-                        event.getTargetPropertyMaybe()
-                            == EgressEventTargetProperty.EGRESS_MIB.getPropertyName())
-                .map(event -> event.getNewValueMaybe())
-                .collect(Collectors.toSet()))
+        events.stream()
+            .filter(
+                event ->
+                    event.getTargetPropertyMaybe()
+                        == EgressEventTargetProperty.EGRESS_MIB.getPropertyName())
+            .map(event -> event.getNewValueMaybe())
+            .collect(Collectors.toSet()))
         .containsExactly("12.3");
     assertThat(
-            events.stream()
-                .filter(
-                    event ->
-                        event.getTargetPropertyMaybe()
-                            == EgressEventTargetProperty.VM_NAME.getPropertyName())
-                .map(event -> event.getNewValueMaybe())
-                .collect(Collectors.toSet()))
-        .containsExactly(EGRESS_EVENT_DATAPROC_VM_NAME);
-  }
-
-  @Test
-  public void testFireEgressEventFromGce() {
-    egressEventAuditor.fireEgressEvent(
-        new EgressEvent()
-            .projectName(EGRESS_EVENT_PROJECT_NAME)
-            .vmName(EGRESS_EVENT_GCE_VM_NAME)
-            .timeWindowStart(0l)
-            .egressMib(12.3));
-    verify(mockActionAuditService).send(eventsCaptor.capture());
-    Collection<ActionAuditEvent> events = eventsCaptor.getValue();
-
-    assertThat(events.stream().map(event -> event.getAgentIdMaybe()).collect(Collectors.toSet()))
-        .containsExactly(USER_ID);
-    assertThat(events.stream().map(event -> event.getAgentEmailMaybe()).collect(Collectors.toSet()))
-        .containsExactly(USER_EMAIL);
+        events.stream()
+            .filter(
+                event ->
+                    event.getTargetPropertyMaybe()
+                        == EgressEventTargetProperty.VM_NAME.getPropertyName())
+            .map(event -> event.getNewValueMaybe())
+            .collect(Collectors.toSet()))
+        .containsExactly(EGRESS_EVENT_VM_PREFIX);
   }
 
   @Test
@@ -170,7 +163,7 @@ public class EgressEventAuditorTest {
     egressEventAuditor.fireEgressEvent(
         new EgressEvent()
             .projectName(EGRESS_EVENT_PROJECT_NAME)
-            .vmName(EGRESS_EVENT_DATAPROC_VM_NAME));
+            .vmPrefix(EGRESS_EVENT_VM_PREFIX));
     verify(mockActionAuditService).send(eventsCaptor.capture());
     Collection<ActionAuditEvent> events = eventsCaptor.getValue();
 
@@ -179,29 +172,29 @@ public class EgressEventAuditorTest {
     assertThat(events.stream().map(event -> event.getAgentIdMaybe()).collect(Collectors.toSet()))
         .containsExactly(0);
     assertThat(
-            events.stream()
-                .map(event -> event.getAgentEmailMaybe())
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet()))
+        events.stream()
+            .map(event -> event.getAgentEmailMaybe())
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet()))
         .isEmpty();
     assertThat(
-            events.stream()
-                .map(event -> event.getTargetIdMaybe())
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet()))
+        events.stream()
+            .map(event -> event.getTargetIdMaybe())
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet()))
         .isEmpty();
 
     // We expect to see an audit event row with a comment describing the issue encountered when
     // trying to handle the high-egress message.
     assertThat(
-            events.stream()
-                .filter(
-                    event ->
-                        event.getTargetPropertyMaybe()
-                            == EgressEventCommentTargetProperty.COMMENT.getPropertyName())
-                .map(event -> event.getNewValueMaybe())
-                .findFirst()
-                .get())
+        events.stream()
+            .filter(
+                event ->
+                    event.getTargetPropertyMaybe()
+                        == EgressEventCommentTargetProperty.COMMENT.getPropertyName())
+            .map(event -> event.getNewValueMaybe())
+            .findFirst()
+            .get())
         .contains("Failed to find workspace");
   }
 
@@ -215,15 +208,15 @@ public class EgressEventAuditorTest {
     Collection<ActionAuditEvent> events = eventsCaptor.getValue();
 
     assertThat(
-            events.stream()
-                .filter(
-                    event ->
-                        EgressEventCommentTargetProperty.COMMENT
-                            .getPropertyName()
-                            .equals(event.getTargetPropertyMaybe()))
-                .map(event -> event.getNewValueMaybe())
-                .findFirst()
-                .get())
+        events.stream()
+            .filter(
+                event ->
+                    EgressEventCommentTargetProperty.COMMENT
+                        .getPropertyName()
+                        .equals(event.getTargetPropertyMaybe()))
+            .map(event -> event.getNewValueMaybe())
+            .findFirst()
+            .get())
         .contains("Failed to parse egress event");
   }
 
@@ -236,15 +229,15 @@ public class EgressEventAuditorTest {
     Collection<ActionAuditEvent> events = eventsCaptor.getValue();
 
     assertThat(
-            events.stream()
-                .filter(
-                    event ->
-                        EgressEventCommentTargetProperty.COMMENT
-                            .getPropertyName()
-                            .equals(event.getTargetPropertyMaybe()))
-                .map(event -> event.getNewValueMaybe())
-                .findFirst()
-                .get())
+        events.stream()
+            .filter(
+                event ->
+                    EgressEventCommentTargetProperty.COMMENT
+                        .getPropertyName()
+                        .equals(event.getTargetPropertyMaybe()))
+            .map(event -> event.getNewValueMaybe())
+            .findFirst()
+            .get())
         .contains("Received bad API key");
   }
 }
