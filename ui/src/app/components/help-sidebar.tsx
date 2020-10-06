@@ -119,6 +119,9 @@ const styles = reactStyles({
     border: `1px solid ${colors.white}`,
     borderRadius: '.25rem',
   },
+  rotate: {
+    animation: "rotation 2s infinite linear"
+  },
   navIcons: {
     position: 'absolute',
     right: '0',
@@ -582,21 +585,22 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
               || runtimeStore.currentRuntime.status === RuntimeStatus.Updating
           ) && <FontAwesomeIcon icon={faSyncAlt} style={{
             ...styles.runtimeStatusIcon,
-            color: '#9FFF00',
+            ...styles.rotate,
+            color: colors.runtimeStarting,
           }}/>
         }
         {runtimeStore.currentRuntime && runtimeStore.currentRuntime.status === RuntimeStatus.Stopped
         && <FontAwesomeIcon icon={faCircle} style={{
           ...styles.runtimeStatusIcon,
           ...styles.runtimeStatusIconOutline,
-          color: '#F8C954',
+          color: colors.runtimeStopped,
         }}/>
         }
         {runtimeStore.currentRuntime && runtimeStore.currentRuntime.status === RuntimeStatus.Running
         && <FontAwesomeIcon icon={faCircle} style={{
           ...styles.runtimeStatusIcon,
           ...styles.runtimeStatusIconOutline,
-          color: '#73EF0A',
+          color: colors.runtimeRunning,
         }}/>
         }
         {
@@ -606,14 +610,15 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
               || runtimeStore.currentRuntime.status === RuntimeStatus.Deleting
           ) && <FontAwesomeIcon icon={faSyncAlt} style={{
             ...styles.runtimeStatusIcon,
-            color: '#FFD700',
+            ...styles.rotate,
+            color: colors.runtimeStopping,
           }}/>
         }
         {runtimeStore.currentRuntime && runtimeStore.currentRuntime.status === RuntimeStatus.Error
         && <FontAwesomeIcon icon={faCircle} style={{
           ...styles.runtimeStatusIcon,
           ...styles.runtimeStatusIconOutline,
-          color: '#DB3214',
+          color: colors.runtimeError,
         }}/>
         }
       </FlexRow>
