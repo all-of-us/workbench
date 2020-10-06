@@ -6,7 +6,7 @@ import {Spinner} from 'app/components/spinners';
 import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
-import {allMachineTypes, validLeonardoMachineTypes, Machine} from 'app/utils/machines';
+import {allMachineTypes, validLeonardoMachineTypes} from 'app/utils/machines';
 import {
   abortRuntimeOperationForWorkspace,
   markRuntimeOperationCompleteForWorkspace,
@@ -14,21 +14,19 @@ import {
   RuntimeOpsStore,
   runtimeOpsStore,
   updateRuntimeOpsStoreForWorkspaceNamespace,
-  runtimeStore,
   useStore
 } from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Dropdown} from 'primereact/dropdown';
 import {InputNumber} from 'primereact/inputnumber';
-import {useRuntime} from 'app/utils/runtime-utils';
-// import {Runtime} from 'generated/fetch';
+import {useCustomRuntime} from 'app/utils/runtime-utils';
 
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import { RuntimeStatus } from 'generated';
 import { useOnMount } from 'app/utils';
 
-const {useState, useEffect, Fragment} = React;
+const {useState, Fragment} = React;
  
 const styles = reactStyles({
   sectionHeader: {
@@ -157,14 +155,13 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
   const [selectedDiskSize, setSelectedDiskSize] = useState(null);
   const [selectedMachine, setselectedMachine] = useState(null);
   const runtimeOps = useStore(runtimeOpsStore);
-  const [currentRuntime, setRequestedRuntime] = useRuntime(workspace.namespace);
+  const [currentRuntime, setRequestedRuntime] = useCustomRuntime(workspace.namespace);
+  
   const activeRuntimeOp: RuntimeOperation = runtimeOps.opsByWorkspaceNamespace[workspace.namespace];
-
-  const {status = null, toolDockerImage = null, dataprocConfig: {masterDiskSize = null, masterMachineType = null }} = currentRuntime || { dataprocConfig: {}};
-  const nextMachineType = selectedMachine && selectedMachine.name;
-
-  // How do we reflect the state of the runtime to the user?
-  // How should we handle errors?
+  const {status = RuntimeStatus.Unknown, toolDockerImage = null, dataprocConfig = {}, gceConfig = {}} = currentRuntime || {};
+  const masterMachineType = !!dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType
+  const masterDiskSize = !!dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.bootDiskSize
+  const selectedMachineType = selectedMachine && selectedMachine.name;
 
   useOnMount(() => {
       const aborter = new AbortController();
@@ -178,7 +175,6 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
             operation: 'get',
             aborter: aborter
           });
-          runtimeStore.set({runtime: await promise, workspaceNamespace: workspace.namespace});
         } catch (e) {
           // 404 is expected if the runtime doesn't exist, represent this as a null
           // runtime rather than an error mode.
@@ -260,8 +256,8 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
     <FlexRow style={{justifyContent: 'flex-end', marginTop: '.75rem'}}>
       <Button 
         disabled={status !== RuntimeStatus.Running || !runtimeChanged}
-        onClick={async () => setRequestedRuntime({dataprocConfig: {
-              masterMachineType: nextMachineType || masterMachineType,
+        onClick={async () => setRequestedRuntime({dataprocConfig: { 
+              masterMachineType: selectedMachineType || masterMachineType,
               masterDiskSize: selectedDiskSize || masterDiskSize
             }
           })

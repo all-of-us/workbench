@@ -149,10 +149,8 @@ export class LeoRuntimeInitializer {
 
   private set currentRuntime(nextRuntime: Runtime | null) {
     this._currentRuntime = nextRuntime;
-    console.log('Maybe Set:', runtimeStore.get().workspaceNamespace, this.workspaceNamespace);
     const storeWorkspaceNamespace = runtimeStore.get().workspaceNamespace
     if (storeWorkspaceNamespace === this.workspaceNamespace || storeWorkspaceNamespace === undefined ) {
-      console.log('Setting:', this._currentRuntime)
       runtimeStore.set({workspaceNamespace: this.workspaceNamespace, runtime: this._currentRuntime});
     }
   }

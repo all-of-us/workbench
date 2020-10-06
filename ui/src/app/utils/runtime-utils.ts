@@ -9,50 +9,72 @@ import {
 import {Runtime} from 'generated/fetch';
 import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import * as fp from 'lodash/fp';
+import {switchCase} from 'app/utils';
 
 import * as React from 'react';
 
 const {useState, useEffect} = React;
 
-// Hook used to manage runtime state.
-// The runtime can be set to null to delete a runtime, or a new runtime config
-// The LeoRuntimeInitializer could potentially be rolled into this code to completely manage
-// all runtime state.
-export const useRuntime = (initialWorkspaceNamespace) => {
-  const {runtime, workspaceNamespace} = useStore(runtimeStore);
-  const [requestedRuntime, setRequestedRuntime] = useState<Runtime|null>();
+export type RuntimeStatusRequest = 'Delete';
 
+export const RuntimeStateRequest= {
+    Delete: 'Delete' as RuntimeStatusRequest
+};
+
+// useRuntime hook is a simple hook to populate the runtime store.
+// This is only used by other runtime hooks
+const useRuntime = (currentWorkspaceNamespace) => {
   useOnMount(() => {
     const getRuntime = async () => {
-      const leoRuntime = await runtimeApi().getRuntime(initialWorkspaceNamespace)
+      const leoRuntime = await runtimeApi().getRuntime(currentWorkspaceNamespace)
       runtimeStore.set({
-        workspaceNamespace: initialWorkspaceNamespace,
+        workspaceNamespace: currentWorkspaceNamespace,
         runtime: leoRuntime 
       });
     }
     getRuntime();
   });
+}
+
+// useRuntimeState hook can be used to change the state of the runtime
+// Only 'Delete' is supported at the moment
+export const useRuntimeState = (currentWorkspaceNamespace): [RuntimeStatusRequest, Function]  => {
+  const [requestedRuntimeState, setRuntimeState] = useState<RuntimeStatusRequest>();
+  useRuntime(currentWorkspaceNamespace)
 
   useEffect(() => {
-    const action = requestedRuntime === null 
-    ? async () => {
-        await runtimeApi().deleteRuntime(workspaceNamespace);
-        await LeoRuntimeInitializer.initialize({workspaceNamespace, maxCreateCount: 0});
-      }
-    : async () => {
-        await runtimeApi().deleteRuntime(workspaceNamespace);
-        await LeoRuntimeInitializer.initialize({
-          workspaceNamespace,
-          runtime: requestedRuntime
-        });
-      }; 
+    // Additional state changes can be put here
+    !!requestedRuntimeState && switchCase(requestedRuntimeState, 
+      [RuntimeStateRequest.Delete, async () => {
+        await runtimeApi().deleteRuntime(currentWorkspaceNamespace);
+        await LeoRuntimeInitializer.initialize({workspaceNamespace: currentWorkspaceNamespace, maxCreateCount: 0});
+      }])
+    
+  }, [requestedRuntimeState])
 
+  return [requestedRuntimeState, setRuntimeState]
+}
+
+// useCustomRuntime Hook can request a new runtime config
+// The LeoRuntimeInitializer could potentially be rolled into this code to completely manage
+// all runtime state.
+export const useCustomRuntime = (currentWorkspaceNamespace): [Runtime, Function] => {
+  const {runtime, workspaceNamespace} = useStore(runtimeStore);
+  const [requestedRuntime, setRequestedRuntime] = useState<Runtime>();
+  useRuntime(currentWorkspaceNamespace)
+
+  useEffect(() => {
     const runAction = async () => {
-      await action();
-      const currentRuntime = await runtimeApi().getRuntime(workspaceNamespace);
-      if (initialWorkspaceNamespace === workspaceNamespace) {
+      await runtimeApi().deleteRuntime(currentWorkspaceNamespace);
+      await LeoRuntimeInitializer.initialize({
+        workspaceNamespace,
+        runtime: requestedRuntime
+      });
+      
+      const currentRuntime = await runtimeApi().getRuntime(currentWorkspaceNamespace);
+      if (currentWorkspaceNamespace === workspaceNamespace) {
         runtimeStore.set({        
-          workspaceNamespace: initialWorkspaceNamespace,
+          workspaceNamespace: currentWorkspaceNamespace,
           runtime: currentRuntime
         });
       }
