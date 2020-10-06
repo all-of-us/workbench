@@ -93,7 +93,7 @@ public class CBCriteriaDaoTest {
                 .addConceptId("1")
                 .addStandard(true)
                 .addCode("120")
-                .addSynonyms("myMatch[CONDITION_rank1]")
+                .addFullText("myMatch[CONDITION_rank1]")
                 .build());
     icd9Criteria =
         cbCriteriaDao.save(
@@ -103,7 +103,7 @@ public class CBCriteriaDaoTest {
                 .addCount(100L)
                 .addStandard(false)
                 .addCode("001")
-                .addSynonyms("+[CONDITION_rank1]")
+                .addFullText("+[CONDITION_rank1]")
                 .addPath("1.5.99")
                 .build());
     icd10Criteria =
@@ -115,7 +115,7 @@ public class CBCriteriaDaoTest {
                 .addStandard(false)
                 .addConceptId("1")
                 .addCode("122")
-                .addSynonyms("+[CONDITION_rank1]")
+                .addFullText("+[CONDITION_rank1]")
                 .build());
     measurementCriteria =
         cbCriteriaDao.save(
@@ -126,7 +126,7 @@ public class CBCriteriaDaoTest {
                 .addHierarchy(true)
                 .addStandard(true)
                 .addCode("LP123")
-                .addSynonyms("001[MEASUREMENT_rank1]")
+                .addFullText("001[MEASUREMENT_rank1]")
                 .build());
     raceAsian =
         cbCriteriaDao.save(
@@ -247,11 +247,11 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findCriteriaByDomainAndSynonyms() {
+  public void findCriteriaByDomainAndFullText() {
     PageRequest page = new PageRequest(0, 10);
     List<DbCriteria> measurements =
         cbCriteriaDao
-            .findCriteriaByDomainAndSynonyms(
+            .findCriteriaByDomainAndFullText(
                 DomainType.MEASUREMENT.toString(), Boolean.TRUE, "001", page)
             .getContent();
     assertThat(measurements).containsExactly(measurementCriteria);
@@ -287,10 +287,10 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findCriteriaByDomainAndTypeAndStandardAndSynonyms() {
+  public void findCriteriaByDomainAndTypeAndStandardAndFullText() {
     PageRequest page = new PageRequest(0, 10);
     List<DbCriteria> conditions =
-        cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndSynonyms(
+        cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndFullText(
             DomainType.CONDITION.toString(), CriteriaType.SNOMED.toString(), true, "myMatch", page);
     assertThat(conditions).containsExactly(standardCriteria);
   }

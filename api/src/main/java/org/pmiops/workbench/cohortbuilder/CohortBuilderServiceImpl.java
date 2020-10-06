@@ -145,7 +145,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     PageRequest pageRequest =
         new PageRequest(0, Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT));
     List<DbCriteria> criteriaList =
-        cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndSynonyms(
+        cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndFullText(
             domain, type, standard, modifyTermMatch(term), pageRequest);
     if (criteriaList.isEmpty()) {
       criteriaList =
@@ -206,12 +206,12 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         cbCriteriaDao.findCriteriaByDomainAndCode(domain, isStandard, term, pageRequest);
     if (dbCriteriaPage.getContent().isEmpty() && !term.contains(".")) {
       dbCriteriaPage =
-          cbCriteriaDao.findCriteriaByDomainAndSynonyms(
+          cbCriteriaDao.findCriteriaByDomainAndFullText(
               domain, isStandard, modifyTermMatch(term), pageRequest);
     }
     if (dbCriteriaPage.getContent().isEmpty() && !term.contains(".")) {
       dbCriteriaPage =
-          cbCriteriaDao.findCriteriaByDomainAndSynonyms(
+          cbCriteriaDao.findCriteriaByDomainAndFullText(
               domain, !isStandard, modifyTermMatch(term), pageRequest);
     }
     return new CriteriaListWithCountResponse()
