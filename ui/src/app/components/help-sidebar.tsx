@@ -555,59 +555,6 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
       return !icon.page || icon.page === helpContentKey || (criteria && icon.page === 'criteria') || (concept && icon.page === 'concept');
     }
 
-    displayCustomSvgIcon(icon) {
-      const {runtimeStore} = this.props;
-      if (icon.id === 'runtime') {
-        return <FlexRow style={{height: '100%', alignItems: 'center', justifyContent: 'space-around'}}>
-          <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={{...icon.style, position: 'absolute'}} />
-          {
-            runtimeStore.currentRuntime
-            && (
-                runtimeStore.currentRuntime.status === RuntimeStatus.Creating
-                || runtimeStore.currentRuntime.status === RuntimeStatus.Starting
-                || runtimeStore.currentRuntime.status === RuntimeStatus.Updating
-            ) && <FontAwesomeIcon icon={faSyncAlt} style={{
-              ...styles.runtimeStatusIcon,
-              color: '#9FFF00',
-            }}/>
-          }
-          {runtimeStore.currentRuntime && runtimeStore.currentRuntime.status === RuntimeStatus.Stopped
-            && <FontAwesomeIcon icon={faCircle} style={{
-              ...styles.runtimeStatusIcon,
-              ...styles.runtimeStatusIconOutline,
-              color: '#F8C954',
-            }}/>
-          }
-          {runtimeStore.currentRuntime && runtimeStore.currentRuntime.status === RuntimeStatus.Running
-            && <FontAwesomeIcon icon={faCircle} style={{
-              ...styles.runtimeStatusIcon,
-              ...styles.runtimeStatusIconOutline,
-              color: '#73EF0A',
-            }}/>
-          }
-          {
-            runtimeStore.currentRuntime
-            && (
-                runtimeStore.currentRuntime.status === RuntimeStatus.Stopping
-                || runtimeStore.currentRuntime.status === RuntimeStatus.Deleting
-            ) && <FontAwesomeIcon icon={faSyncAlt} style={{
-              ...styles.runtimeStatusIcon,
-              color: '#FFD700',
-            }}/>
-          }
-          {runtimeStore.currentRuntime && runtimeStore.currentRuntime.status === RuntimeStatus.Error
-            && <FontAwesomeIcon icon={faCircle} style={{
-              ...styles.runtimeStatusIcon,
-              ...styles.runtimeStatusIconOutline,
-              color: '#DB3214',
-            }}/>
-          }
-        </FlexRow>;
-      } else {
-        return <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={icon.style} />;
-      }
-    }
-
     displayFontAwesomeIcon(icon) {
       const {concept, criteria} = this.props;
 
@@ -620,6 +567,56 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
           {concept.length}</span>}
             <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + icon.id} icon={icon.faIcon} style={icon.style} />
           </React.Fragment> ;
+    }
+
+    displayRuntimeIcon(icon) {
+      const {runtimeStore} = this.props;
+
+      return <FlexRow style={{height: '100%', alignItems: 'center', justifyContent: 'space-around'}}>
+        <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={{...icon.style, position: 'absolute'}} />
+        {
+          runtimeStore.currentRuntime
+          && (
+              runtimeStore.currentRuntime.status === RuntimeStatus.Creating
+              || runtimeStore.currentRuntime.status === RuntimeStatus.Starting
+              || runtimeStore.currentRuntime.status === RuntimeStatus.Updating
+          ) && <FontAwesomeIcon icon={faSyncAlt} style={{
+            ...styles.runtimeStatusIcon,
+            color: '#9FFF00',
+          }}/>
+        }
+        {runtimeStore.currentRuntime && runtimeStore.currentRuntime.status === RuntimeStatus.Stopped
+        && <FontAwesomeIcon icon={faCircle} style={{
+          ...styles.runtimeStatusIcon,
+          ...styles.runtimeStatusIconOutline,
+          color: '#F8C954',
+        }}/>
+        }
+        {runtimeStore.currentRuntime && runtimeStore.currentRuntime.status === RuntimeStatus.Running
+        && <FontAwesomeIcon icon={faCircle} style={{
+          ...styles.runtimeStatusIcon,
+          ...styles.runtimeStatusIconOutline,
+          color: '#73EF0A',
+        }}/>
+        }
+        {
+          runtimeStore.currentRuntime
+          && (
+              runtimeStore.currentRuntime.status === RuntimeStatus.Stopping
+              || runtimeStore.currentRuntime.status === RuntimeStatus.Deleting
+          ) && <FontAwesomeIcon icon={faSyncAlt} style={{
+            ...styles.runtimeStatusIcon,
+            color: '#FFD700',
+          }}/>
+        }
+        {runtimeStore.currentRuntime && runtimeStore.currentRuntime.status === RuntimeStatus.Error
+        && <FontAwesomeIcon icon={faCircle} style={{
+          ...styles.runtimeStatusIcon,
+          ...styles.runtimeStatusIconOutline,
+          color: '#DB3214',
+        }}/>
+        }
+      </FlexRow>
     }
 
     get sidebarStyle() {
@@ -666,9 +663,11 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
                       ? <a href={supportUrls.dataDictionary} target='_blank'>
                           <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + icon.id} icon={icon.faIcon} style={icon.style} />
                         </a>
-                      : icon.faIcon === null
-                        ? this.displayCustomSvgIcon(icon)
-                        : this.displayFontAwesomeIcon(icon)
+                      : icon.id === 'runtime'
+                        ? this.displayRuntimeIcon(icon)
+                        : icon.faIcon === null
+                          ? <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={icon.style} />
+                          : this.displayFontAwesomeIcon(icon)
                     }
                   </div>
                 </TooltipTrigger>
