@@ -38,11 +38,10 @@ export default abstract class AuthenticatedPage extends BasePage {
         this.isLoaded(),
       ]);
       return this;
-    } catch (e) {
+    } catch (err) {
       await savePageToFile(this.page);
       await takeScreenshot(this.page);
-      const title = await this.page.title();
-      throw new Error(`"${title}" page waitForLoad() encountered ${e}.`);
+      throw (err);
     }
   }
 

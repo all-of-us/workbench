@@ -39,7 +39,7 @@ export async function waitForDocumentTitle(page: Page, titleSubstr: string): Pro
     const jsHandle = await page.waitForFunction(t => {
       const actualTitle = document.title;
       return actualTitle.includes(t);
-    }, {}, titleSubstr);
+    }, {timeout: 30000}, titleSubstr);
     return (await jsHandle.jsonValue()) as boolean;
   } catch (e) {
     console.error(`Wait for document title contains "${titleSubstr}" failed. ${e}`);
@@ -112,7 +112,7 @@ export async function waitForPropertyExists(page: Page, xpathSelector: string, p
     return true;
   } catch (err) {
     console.error(`Failed waiting element (XPath="${xpathSelector}") property: ${propertyName} exists. ${err}`);
-    throw new Error(err);
+    throw (err);
   }
 }
 

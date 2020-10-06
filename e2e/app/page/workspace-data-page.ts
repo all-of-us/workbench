@@ -78,8 +78,7 @@ export default class WorkspaceDataPage extends WorkspaceBase {
   }
 
   async findCohortCard(cohortName?: string): Promise<DataResourceCard> {
-    await this.openDataPage();
-    await this.openCohortsSubtab({waitPageChange: false});
+    await this.openCohortsSubtab();
     if (cohortName === undefined) {
       // if cohort name isn't specified, find any existing cohort.
       return DataResourceCard.findAnyCard(this.page);
@@ -142,6 +141,7 @@ export default class WorkspaceDataPage extends WorkspaceBase {
   async createNotebook(notebookName: string, lang: Language = Language.Python): Promise<NotebookPage> {
     await this.openAnalysisPage();
     const analysisPage = new WorkspaceAnalysisPage(this.page);
+    await analysisPage.waitForLoad();
     return analysisPage.createNotebook(notebookName, lang);
   }
 

@@ -87,7 +87,7 @@ describe('Editing and rename Concept Set', () => {
     // Navigate to workspace Data page, then delete Concept Set
     await (new Link(page, `//a[text()="${workspaceName}"]`)).click();
     await dataPage.waitForLoad();
-    await dataPage.openConceptSetsSubtab({waitPageChange: false});
+    await dataPage.openConceptSetsSubtab();
     await dataPage.deleteResource(newName, ResourceCard.ConceptSet);
   });
 

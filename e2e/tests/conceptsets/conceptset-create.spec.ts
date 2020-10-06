@@ -67,8 +67,7 @@ describe('Create Concept Sets from Domains', () => {
     console.log(`Created Concept Set "${conceptName}"`);
 
     // Delete Concept Set
-    await dataPage.openDataPage();
-    await dataPage.openConceptSetsSubtab({waitPageChange: false});
+    await dataPage.openConceptSetsSubtab();
 
     const modalTextContent = await dataPage.deleteResource(conceptName, ResourceCard.ConceptSet);
     expect(modalTextContent).toContain(`Are you sure you want to delete Concept Set: ${conceptName}?`);
@@ -149,8 +148,7 @@ describe('Create Concept Sets from Domains', () => {
     const datasetName = await saveModal.saveDataset();
 
     // Verify Dataset created successful.
-    await dataPage.openDataPage();
-    await dataPage.openDatasetsSubtab({waitPageChange: false});
+    await dataPage.openDatasetsSubtab();
 
     const resourceCard = new DataResourceCard(page);
     const dataSetExists = await resourceCard.cardExists(datasetName, ResourceCard.Dataset);
@@ -161,7 +159,7 @@ describe('Create Concept Sets from Domains', () => {
     expect(textContent).toContain(`Are you sure you want to delete Dataset: ${datasetName}?`);
 
     // Delete Concept Set.
-    await dataPage.openConceptSetsSubtab({waitPageChange: false});
+    await dataPage.openConceptSetsSubtab();
 
     await dataPage.deleteResource(conceptName1, ResourceCard.ConceptSet);
     await dataPage.deleteResource(conceptName2, ResourceCard.ConceptSet);

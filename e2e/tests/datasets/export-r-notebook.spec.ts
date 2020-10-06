@@ -85,14 +85,13 @@ describe('Create Dataset', () => {
     await analysisPage.deleteResource(newNotebookName, ResourceCard.Notebook);
 
     // Delete Dataset
-    await dataPage.openDataPage();
-    await dataPage.openDatasetsSubtab({waitPageChange: false});
+    await dataPage.openDatasetsSubtab();
 
     const datasetDeleteDialogText = await dataPage.deleteResource(newDatasetName, ResourceCard.Dataset);
     expect(datasetDeleteDialogText).toContain(`Are you sure you want to delete Dataset: ${newDatasetName}?`);
 
     // Delete Cohort
-    await dataPage.openCohortsSubtab({waitPageChange: false});
+    await dataPage.openCohortsSubtab();
 
     const cohortDeleteDialogText = await dataPage.deleteResource(newCohortName, ResourceCard.Cohort);
     expect(cohortDeleteDialogText).toContain(`Are you sure you want to delete Cohort: ${newCohortName}?`);

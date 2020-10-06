@@ -10,6 +10,7 @@ import {Page} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForAttributeEquality} from 'utils/waits-utils';
 import SnowmanMenu from 'app/component/snowman-menu';
+import {getPropValue} from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
 
 export enum TabLabels {
@@ -57,32 +58,32 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * Click Datasets subtab in Data page.
    * @param opts
    */
-  async openDatasetsSubtab(opts: {waitPageChange?: boolean} = {}): Promise<void> {
-    return this.openTab(TabLabels.Datasets, opts);
+  async openDatasetsSubtab(): Promise<void> {
+    return this.openDataPage().then(() => this.openTab(TabLabels.Datasets, {waitPageChange: false}));
   }
 
   /**
    * Click Cohorts subtab in Data page.
    * @param opts
    */
-  async openCohortsSubtab(opts: {waitPageChange?: boolean} = {}): Promise<void> {
-    return this.openTab(TabLabels.Cohorts, opts);
+  async openCohortsSubtab(): Promise<void> {
+    return this.openDataPage().then(() => this.openTab(TabLabels.Cohorts, {waitPageChange: false}));
   }
 
   /**
    * Click Cohorts Reviews subtab in Data page.
    * @param opts
    */
-  async openCohortReviewsSubtab(opts: {waitPageChange?: boolean} = {}): Promise<void> {
-    return this.openTab(TabLabels.CohortReviews, opts);
+  async openCohortReviewsSubtab(): Promise<void> {
+    return this.openDataPage().then(() => this.openTab(TabLabels.CohortReviews, {waitPageChange: false}));
   }
 
   /**
    * Click Concept Sets subtab in Data page.
    * @param opts
    */
-  async openConceptSetsSubtab(opts: {waitPageChange?: boolean} = {}): Promise<void> {
-    return this.openTab(TabLabels.ConceptSets, opts);
+  async openConceptSetsSubtab(): Promise<void> {
+    return this.openDataPage().then(() => this.openTab(TabLabels.ConceptSets, {waitPageChange: false}));
   }
 
   /**
@@ -94,6 +95,10 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
     const { waitPageChange = true } = opts;
     const selector = buildXPath({name: pageTabName, type: ElementType.Tab});
     const tab = new Link(this.page, selector);
+    const isSelected = await getPropValue<boolean>(await tab.asElementHandle(), 'ariaSelected');
+    if (isSelected === true) {
+      return; // Tab is already open.
+    }
     waitPageChange ? await tab.clickAndWait() : await tab.click();
     await tab.dispose();
     return waitWhileLoading(this.page);
