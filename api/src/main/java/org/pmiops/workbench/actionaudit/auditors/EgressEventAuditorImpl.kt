@@ -32,21 +32,12 @@ constructor(
 ) : EgressEventAuditor {
 
     /**
-     * Converts the AoU-chosen runtime name into the actual VM name as reported by Google Cloud's
-     * flow logs. Empirically, an "-m" suffix is added to the VM name, due to Leo team's use
-     * of Dataproc (see https://cloud.google.com/dataproc/docs/concepts/configuring-clusters/metadata).
-     *
-     * TODO(RW-4848): How do egress alerts interact with worker nodes?
+     * Returns the prefix for a user's VM which captures the following situations:
+     * 1. GCE VMs: all-of-us-<user_id>
+     * 2. Dataproc master nodes: all-of-us-<user_id>-m
+     * 3. Dataproc worker nodes: all-of-us-<user_id>-w-<index>
      */
-    private fun dbUserToDataprocMasterVmName(dbUser: DbUser): String {
-        return dbUser.runtimeName + DATAPROC_MASTER_NODE_SUFFIX
-    }
-
-    /**
-     * Returns the standard VM name for a researcher GCE instance assigned by AoU. Leo uses the
-     * exact runtime name for this purpose.
-     */
-    private fun dbUserToGceVmName(dbUser: DbUser): String {
+    private fun dbUserToVmPrefix(dbUser: DbUser): String {
         return dbUser.runtimeName
     }
 
@@ -69,12 +60,7 @@ constructor(
         val userRoles = workspaceService.getFirecloudUserRoles(dbWorkspace.workspaceNamespace,
                 dbWorkspace.firecloudName)
         val vmOwner = userRoles
-                .map { userDao.findUserByUsername(it.email) }
-                .filter {
-                    dbUserToGceVmName(it).equals(event.vmName) ||
-                            dbUserToDataprocMasterVmName(it).equals(event.vmName)
-                }
-                .firstOrNull()
+                .map { userDao.findUserByUsername(it.email) }.firstOrNull { dbUserToVmPrefix(it).equals(event.vmPrefix) }
 
         var agentEmail: String? = null
         var agentId = 0L
@@ -162,8 +148,6 @@ constructor(
     }
 
     companion object {
-        //
-        private val DATAPROC_MASTER_NODE_SUFFIX = "-m"
         private val logger = Logger.getLogger(EgressEventAuditorImpl::class.java.name)
     }
 }

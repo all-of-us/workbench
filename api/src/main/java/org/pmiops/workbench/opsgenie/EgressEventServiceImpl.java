@@ -32,6 +32,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EgressEventServiceImpl implements EgressEventService {
+
   private static final Logger logger = Logger.getLogger(EgressEventServiceImpl.class.getName());
   private static final Pattern VM_NAME_PATTERN = Pattern.compile("all-of-us-(?<userid>\\d+)-m");
   private static final String USER_ID_GROUP_NAME = "userid";
@@ -146,10 +147,15 @@ public class EgressEventServiceImpl implements EgressEventService {
         + String.format("Notebook Jupyter VM name: %s\n", egressEvent.getVmName())
         + String.format("MySQL workspace_id: %d\n", adminWorkspace.getWorkspaceDatabaseId())
         + String.format(
-            "Egress detected: %.2f MiB in %d secs\n\n",
+            "Total egress detected: %.2f MiB in %d secs\n\n",
             egressEvent.getEgressMib(), egressEvent.getTimeWindowDuration())
         + String.format(
-            "Runtime Name: %s\n", executor.map(DbUser::getRuntimeName).orElse("unknown"))
+            "egress breakdown: GCE - %.2f MiB, Dataproc - %.2fMiB via master, %.2fMiB via workers\n\nn",
+            egressEvent.getGceEgressMib(),
+            egressEvent.getDataprocMasterEgressMib(),
+            egressEvent.getDataprocWorkerEgressMib())
+        + String.format(
+            "Runtime Prefix: %s\n", executor.map(DbUser::getRuntimeName).orElse("unknown"))
         + String.format("User Running Notebook: %s\n\n", executorDetails)
         + String.format("Workspace Creator: %s\n\n", creatorDetails)
         + String.format("Collaborators: \n%s\n", collaboratorDetails)
