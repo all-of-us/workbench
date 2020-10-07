@@ -1,7 +1,8 @@
 import Container from 'app/container';
 import {ElementHandle, Page} from 'puppeteer';
+import {waitWhileLoading} from 'utils/test-utils';
 
-const defaultXpath = '//*[contains(concat(" ", normalize-space(@class)), " p-menu-overlay-visible")]';
+const defaultXpath = '//*[contains(concat(" ", normalize-space(@class), " "), " p-menu-overlay-visible ")]';
 
 export default class TieredMenu extends Container {
 
@@ -10,13 +11,13 @@ export default class TieredMenu extends Container {
   }
 
   /**
-   * Select menu item(s).
-   * @param {string[]} menuItems
+   * Select options in menu.
+   * @param {string[]} options
    */
-  async clickMenuItem(menuItems: string[]): Promise<void> {
+  async select(options: string[]): Promise<void> {
     const menuXpath = `${this.xpath}//ul`;
 
-    // menu dropdown must be open and visible
+    // Make sure menu dropdown is open and visible.
     await this.page.waitForXPath(menuXpath, {visible: true});
 
     const findLink = async (menuItemText): Promise<ElementHandle> => {
@@ -27,14 +28,15 @@ export default class TieredMenu extends Container {
       return elem;
     };
 
-    // iterate thru array in an orderly fashion
-    const num = menuItems.length;
+    // Iterate thru array in an orderly fashion. Hover over menu option. Click on last menu option.
+    const num = options.length;
     for (let i=0; i<num; i++) {
-      const menuItem = await findLink(menuItems[i]);
+      const link = await findLink(options[i]);
       if (i >= (num - 1)) {
-        await menuItem.click();
+        await link.click();
+        await waitWhileLoading(this.page);
       }
-      await menuItem.dispose();
+      await link.dispose();
     }
 
     await this.page.waitForXPath(menuXpath, {hidden: true});
