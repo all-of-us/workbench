@@ -339,11 +339,11 @@ commands:
           command: |
             IFS=$'\n'
             if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} != "master" ]; then
-              ALL_CHANGES=( $(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH})) )
+              ALL_CHANGES=$(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}))
               echo $ALL_CHANGES
 
               echo "</br>"
-              E2E_CHANGES=( $(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) -- e2e) )
+              E2E_CHANGES=$(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) -- e2e)
               echo $E2E_CHANGES
 
               # Compare list length of two lists
@@ -703,7 +703,7 @@ workflows:
           parallel_num: 2
           optional_steps:
             - e2e_presubmit_check
-      
+
   deploy-staging:
     jobs:
       - api-local-test:
