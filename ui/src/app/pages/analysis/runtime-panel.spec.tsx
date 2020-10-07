@@ -2,6 +2,8 @@ import {mount} from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import * as React from 'react';
 
+import {Button} from 'app/components/buttons';
+import {InputNumber} from 'primereact/inputnumber';
 import {Spinner} from 'app/components/spinners';
 import {RuntimePanel, Props} from 'app/pages/analysis/runtime-panel';
 import {workspaceStubs} from 'testing/stubs/workspaces-api-stub';
@@ -62,11 +64,12 @@ describe('RuntimePanel', () => {
   });
 
   it('should restrict memory options by cpu', async() => {
-    runtimeApiStub.runtime.dataprocConfig.masterMachineType = 'n1-standard-8';
-
     const wrapper = component();
     await handleUseEffect(wrapper);   
     await waitOneTickAndUpdate(wrapper);
+
+    wrapper.find('#runtime-cpu .p-dropdown').first().simulate('click');
+    wrapper.find('.p-dropdown-item').find({'aria-label': 8}).first().simulate('click');
 
     const memoryOptions = wrapper.find('#runtime-ram .p-dropdown-item');
     expect(memoryOptions.exists()).toBeTruthy();
@@ -74,6 +77,32 @@ describe('RuntimePanel', () => {
     // See app/utils/machines.ts, these are the valid memory options for an 8
     // CPU machine in GCE.
     expect(memoryOptions.map(m => m.text())).toEqual(['7.2', '30', '52']);
+  });
+
+  it('should should toggle the disabled state of the update button when the configuration changes', async() => {
+    const wrapper = component();
+    await handleUseEffect(wrapper);   
+    await waitOneTickAndUpdate(wrapper);
+
+    const updateButton = () => wrapper.find(Button).find({'aria-label': 'Update'}).first();
+    expect(updateButton().prop('disabled')).toBeTruthy();
+
+    wrapper.find('#runtime-cpu .p-dropdown').first().simulate('click');
+    wrapper.find('.p-dropdown-item').find({'aria-label': 8}).first().simulate('click');
+    expect(updateButton().prop('disabled')).toBeFalsy();
+
+    wrapper.find('#runtime-cpu .p-dropdown').first().simulate('click');
+    wrapper.find('.p-dropdown-item').find({'aria-label': 4}).first().simulate('click');
+    expect(updateButton().prop('disabled')).toBeTruthy();
+
+    wrapper.find('#runtime-ram .p-dropdown').first().simulate('click');
+    wrapper.find('.p-dropdown-item').find({'aria-label': 26}).first().simulate('click');
+    expect(updateButton().prop('disabled')).toBeFalsy();
+
+    wrapper.find('#runtime-ram .p-dropdown').first().simulate('click');
+    wrapper.find('.p-dropdown-item').find({'aria-label': 15}).first().simulate('click');
+    expect(updateButton().prop('disabled')).toBeTruthy();
+
   });
 
   // TODO(RW-5660): Fix flakiness and re-enable.

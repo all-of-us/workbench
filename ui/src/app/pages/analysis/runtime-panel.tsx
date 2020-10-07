@@ -209,6 +209,7 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
     </div>
     <FlexRow style={{justifyContent: 'flex-end', marginTop: '.75rem'}}>
       <Button
+        aria-label={currentRuntime ? 'Update' : 'Create'}
         disabled={status !== RuntimeStatus.Running || !runtimeChanged}
         onClick={() =>
           setRequestedRuntime({dataprocConfig: {
