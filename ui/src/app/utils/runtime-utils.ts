@@ -1,5 +1,6 @@
 import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import {switchCase} from 'app/utils';
+import { withErrorHandling } from 'app/utils';
 import {
   LeoRuntimeInitializer,
 } from 'app/utils/leo-runtime-initializer';
@@ -16,26 +17,32 @@ const {useState, useEffect} = React;
 
 export enum RuntimeStatusRequest {
   Delete = 'Delete'
-};
+}
 
 // useRuntime hook is a simple hook to populate the runtime store.
 // This is only used by other runtime hooks
 const useRuntime = (currentWorkspaceNamespace) => {
   useEffect(() => {
-    const getRuntime = async() => {
-      const leoRuntime = await runtimeApi().getRuntime(currentWorkspaceNamespace);
-      runtimeStore.set({
-        workspaceNamespace: currentWorkspaceNamespace,
-        runtime: leoRuntime
+    const getRuntime = withErrorHandling(
+      () => runtimeStore.set({workspaceNamespace: null, runtime: null}),
+      async() => {
+        const leoRuntime = await runtimeApi().getRuntime(currentWorkspaceNamespace);
+        runtimeStore.set({
+          workspaceNamespace: currentWorkspaceNamespace,
+          runtime: leoRuntime
+        });
       });
-    };
-    getRuntime();
+
+    if (currentWorkspaceNamespace !== runtimeStore.get().workspaceNamespace) {
+      runtimeStore.set({workspaceNamespace: currentWorkspaceNamespace, runtime: undefined});
+      getRuntime();
+    }
   }, []);
 };
 
 // useRuntimeState hook can be used to change the state of the runtime
 // Only 'Delete' is supported at the moment
-export const useRuntimeState = (currentWorkspaceNamespace): [RuntimeStatus, Function]  => {
+export const useRuntimeState = (currentWorkspaceNamespace): [RuntimeStatus | undefined, Function]  => {
   const [runtimeStatus, setRuntimeState] = useState<RuntimeStatusRequest>();
   const {runtime} = useStore(runtimeStore);
   useRuntime(currentWorkspaceNamespace);
@@ -52,7 +59,7 @@ export const useRuntimeState = (currentWorkspaceNamespace): [RuntimeStatus, Func
 
   }, [runtimeStatus]);
 
-  return [runtime.status, setRuntimeState];
+  return [runtime ? runtime.status : undefined, setRuntimeState];
 };
 
 // useCustomRuntime Hook can request a new runtime config
@@ -84,7 +91,6 @@ export const useCustomRuntime = (currentWorkspaceNamespace): [Runtime, Function]
       runAction();
     }
   }, [requestedRuntime]);
-
 
   return [runtime, setRequestedRuntime];
 };

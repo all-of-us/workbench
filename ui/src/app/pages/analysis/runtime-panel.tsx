@@ -3,17 +3,14 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {PopupTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
-import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {allMachineTypes, validLeonardoMachineTypes} from 'app/utils/machines';
 import {useCustomRuntime} from 'app/utils/runtime-utils';
 import {
   abortRuntimeOperationForWorkspace,
-  markRuntimeOperationCompleteForWorkspace,
   RuntimeOperation,
   runtimeOpsStore,
-  updateRuntimeOpsStoreForWorkspaceNamespace,
   useStore
 } from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -70,10 +67,8 @@ export interface Props {
   workspace: WorkspaceData;
 }
 
-const MachineSelector = ({onChange, selectedMachine, currentRuntime}) => {
-  const {dataprocConfig, gceConfig} = currentRuntime;
-  const masterMachineName = !!dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
-  const initialMachineType = fp.find(({name}) => name === masterMachineName, allMachineTypes) || defaultMachineType;
+const MachineSelector = ({onChange, selectedMachine, masterMachineType}) => {
+  const initialMachineType = fp.find(({name}) => name === masterMachineType, allMachineTypes) || defaultMachineType;
   const {cpu, memory} = selectedMachine || initialMachineType;
   const maybeGetMachine = machineRequested => fp.equals(machineRequested, initialMachineType) ? null : machineRequested;
 
@@ -82,7 +77,6 @@ const MachineSelector = ({onChange, selectedMachine, currentRuntime}) => {
       <label htmlFor='runtime-cpu'
             style={{marginRight: '.25rem'}}>CPUs</label>
       <Dropdown id='runtime-cpu'
-                // disabled={true}
                 options={fp.flow(
                   // Show all CPU options.
                   fp.map('cpu'),
@@ -105,7 +99,6 @@ const MachineSelector = ({onChange, selectedMachine, currentRuntime}) => {
       <label htmlFor='runtime-ram'
             style={{marginRight: '.25rem'}}>RAM (GB)</label>
       <Dropdown id='runtime-ram'
-                // disabled={true}
                 options={fp.flow(
                   // Show valid memory options as constrained by the currently selected CPU.
                   fp.filter(({cpu: availableCpu}) => availableCpu === cpu),
@@ -127,15 +120,11 @@ const MachineSelector = ({onChange, selectedMachine, currentRuntime}) => {
   </Fragment>;
 };
 
-const DiskSizeSelection = ({onChange, selectedDiskSize, currentRuntime}) => {
-  const {dataprocConfig, gceConfig} = currentRuntime;
-  const masterDiskSize = !!dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.bootDiskSize;
-
+const DiskSizeSelection = ({onChange, selectedDiskSize, masterDiskSize}) => {
   return <div>
     <label htmlFor='runtime-disk'
           style={{marginRight: '.25rem'}}>Disk (GB)</label>
       <InputNumber id='runtime-disk'
-                //  disabled={true}
                 showButtons
                 decrementButtonClassName='p-button-secondary'
                 incrementButtonClassName='p-button-secondary'
@@ -147,8 +136,6 @@ const DiskSizeSelection = ({onChange, selectedDiskSize, currentRuntime}) => {
 };
 
 export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
   const [selectedDiskSize, setSelectedDiskSize] = useState(null);
   const [selectedMachine, setselectedMachine] = useState(null);
   const runtimeOps = useStore(runtimeOpsStore);
@@ -160,44 +147,9 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
   const masterDiskSize = !!dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.bootDiskSize;
   const selectedMachineType = selectedMachine && selectedMachine.name;
 
-  useEffect(() => {
-    const aborter = new AbortController();
-    const {namespace} = workspace;
-    const loadRuntime = async() => {
-        // TODO(RW-5420): Centralize a runtimeStore.
-      try {
-        const promise = runtimeApi().getRuntime(namespace, {signal: aborter.signal});
-        updateRuntimeOpsStoreForWorkspaceNamespace(namespace, {
-          promise: promise,
-          operation: 'get',
-          aborter: aborter
-        });
-        await promise;
-      } catch (e) {
-        // 404 is expected if the runtime doesn't exist, represent this as a null
-        // runtime rather than an error mode.
-        if (e.status !== 404) {
-          setError(true);
-        }
-      }
-      markRuntimeOperationCompleteForWorkspace(namespace);
-    };
-
-    loadRuntime();
-    return () => aborter.abort();
-  }, []);
-
-  useEffect(() => {
-    if (currentRuntime) {
-      setLoading(false);
-    }
-  }, [currentRuntime]);
-
-  if (loading) {
+  if (currentRuntime === undefined) {
     return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
-  } else if (error) {
-    return <div>Error loading compute configuration</div>;
-  } else if (!currentRuntime) {
+  } else if (currentRuntime === null) {
     // TODO(RW-5591): Create runtime page goes here.
     return <React.Fragment>
       <div>No runtime exists yet</div>
@@ -243,8 +195,8 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
       {/* Runtime customization: change detailed machine configuration options. */}
       <h3 style={styles.sectionHeader}>Cloud compute profile</h3>
       <FlexRow style={{justifyContent: 'space-between'}}>
-        <MachineSelector selectedMachine={selectedMachine} onChange={setselectedMachine} currentRuntime={currentRuntime}/>
-        <DiskSizeSelection selectedDiskSize={selectedDiskSize} onChange={setSelectedDiskSize} currentRuntime={currentRuntime}/>
+        <MachineSelector selectedMachine={selectedMachine} onChange={setselectedMachine} masterMachineType={masterMachineType}/>
+        <DiskSizeSelection selectedDiskSize={selectedDiskSize} onChange={setSelectedDiskSize} masterDiskSize={masterDiskSize}/>
       </FlexRow>
       <FlexColumn style={{marginTop: '1rem'}}>
         <label htmlFor='runtime-compute'>Compute type</label>
@@ -258,11 +210,11 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
     <FlexRow style={{justifyContent: 'flex-end', marginTop: '.75rem'}}>
       <Button
         disabled={status !== RuntimeStatus.Running || !runtimeChanged}
-        onClick={() => setRequestedRuntime({dataprocConfig: {
-          masterMachineType: selectedMachineType || masterMachineType,
-          masterDiskSize: selectedDiskSize || masterDiskSize
-        }
-        })
+        onClick={() =>
+          setRequestedRuntime({dataprocConfig: {
+            masterMachineType: selectedMachineType || masterMachineType,
+            masterDiskSize: selectedDiskSize || masterDiskSize
+          }})
         }
       >{currentRuntime ? 'Update' : 'Create'}</Button>
     </FlexRow>

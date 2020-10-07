@@ -141,17 +141,17 @@ export class LeoRuntimeInitializer {
   private runtime?: Runtime;
   // The latest runtime retrieved from getRuntime. If the last getRuntime call returned a NOT_FOUND
   // response, this will be null.
-  private _currentRuntime?: Runtime;
+  private currentRuntimeValue?: Runtime;
 
   private get currentRuntime(): Runtime | null {
-    return this._currentRuntime;
+    return this.currentRuntimeValue;
   }
 
   private set currentRuntime(nextRuntime: Runtime | null) {
-    this._currentRuntime = nextRuntime;
+    this.currentRuntimeValue = nextRuntime;
     const storeWorkspaceNamespace = runtimeStore.get().workspaceNamespace;
     if (storeWorkspaceNamespace === this.workspaceNamespace || storeWorkspaceNamespace === undefined ) {
-      runtimeStore.set({workspaceNamespace: this.workspaceNamespace, runtime: this._currentRuntime});
+      runtimeStore.set({workspaceNamespace: this.workspaceNamespace, runtime: this.currentRuntimeValue});
     }
   }
 

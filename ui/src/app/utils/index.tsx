@@ -565,9 +565,14 @@ export const useToggle = (): [boolean, Function] => {
   return [state, setState];
 };
 
-export const useOnMount = (fn: Function) => {
-  useEffect(() => fn(), []);
-};
+export const withErrorHandling = fp.curry((handler, fn) => async(...args) => {
+  try {
+    return await fn(...args);
+  } catch (error) {
+    handler(error);
+  }
+});
+
 
 // Takes a search string and validates for the most common MySQL use cases.
 // Checks for unbalanced (), unclosed "", trailing + or -, and breaking special characters.
