@@ -4,6 +4,7 @@ import {waitWhileLoading} from 'utils/test-utils';
 
 const defaultXpath = '//*[contains(concat(" ", normalize-space(@class), " "), " p-menu-overlay-visible ")]';
 
+// Cascading menus
 export default class TieredMenu extends Container {
 
   constructor(page: Page, xpath: string = defaultXpath) {
