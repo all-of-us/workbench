@@ -11,6 +11,7 @@ import {waitForDocumentTitle} from 'utils/waits-utils';
 import {buildXPath} from 'app/xpath-builders';
 import {LinkText} from 'app/text-labels';
 import WorkspaceBase from './workspace-base';
+import {config} from 'resources/workbench-config';
 
 const faker = require('faker/locale/en_US');
 
@@ -314,10 +315,10 @@ export default class WorkspaceEditPage extends WorkspaceBase {
   }
 
   /**
-   * Select Synthetic Dataset.
-   * @param {string} value Option texts: "Synthetic Dataset 1", "Synthetic Dataset 2" and "Synthetic Dataset v3".
+   * Select Synthetic Dataset by name.
+   * @param {string} value
    */
-  async selectDataset(value: string = 'Synthetic Dataset v3'): Promise<string> {
+  async selectDataset(value: string = config.defaultCDRVersionName): Promise<string> {
     const dataSetSelect = await this.getDatasetSelect();
     return dataSetSelect.selectOption(value);
   }
