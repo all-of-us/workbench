@@ -337,9 +337,9 @@ commands:
       - run:
           name: "Halt job if changed files in PR contain only Puppeteer e2e tests in e2e dir"
           command: |
-          
+
             if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} != "master" ]; then
-              ALL_CHANGES=$(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}))
+              ALL_CHANGES=$(readarray -t arr2 < <(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH})))
               echo $ALL_CHANGES
 
               echo "</br>"
@@ -696,13 +696,7 @@ workflows:
       # Always run basic test/lint/compilation (open PRs, master merge).
       # Note: by default tags are not picked up.
       - api-local-test
-      # Deploy local UI server connected to "test" API server. Run Puppeteer tests for PR commits only.
-      - puppeteer-e2e-test:
-          filters: *filter_only_pr_branch
-          env_name: "local"
-          parallel_num: 2
-          optional_steps:
-            - e2e_presubmit_check
+     
 
   deploy-staging:
     jobs:
