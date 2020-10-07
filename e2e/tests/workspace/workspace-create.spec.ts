@@ -38,8 +38,8 @@ describe('Creating new workspaces', () => {
     // fill out new workspace name
     const newWorkspaceName = await workspacesPage.fillOutWorkspaceName();
 
-    // select the default Synthetic Dataset
-    await workspacesPage.selectDataset();
+    // select the default CDR Version
+    await workspacesPage.selectCdrVersion();
 
     // select Billing Account
     await workspacesPage.selectBillingAccount('Use All of Us free credits');
