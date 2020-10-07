@@ -88,6 +88,7 @@ anchors:
     branches:
       ignore: master
 
+
 # -------------------------
 #   COMMANDS
 # Refers to https://circleci.com/docs/2.0/reusing-config/#authoring-reusable-commands
@@ -331,6 +332,26 @@ commands:
           name: "Halt job if not a pull request"
           command: bash .circleci/pr-skip-ci.sh
 
+  halt_on_e2e_changes:
+    steps:
+      - run:
+          name: "Halt job if changed files in PR contain only Puppeteer e2e tests in e2e dir"
+          command: |
+            if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} != "master" ]; then
+              ALL_CHANGES=$(git diff --name-only master...${CIRCLE_BRANCH})
+              E2E_CHANGES=$(git diff --name-only master...${CIRCLE_BRANCH} -- e2e)
+
+              echo ALL_CHANGES
+              echo ""
+              echo E2E_CHANGES
+
+              # Compare list length of two lists
+              if [ "${#ALL_CHANGES[@]}" -eq "${#E2E_CHANGES[@]}" ]; then
+                echo "No changes in application code. Stop job now."
+                circleci step halt
+              fi
+            fi
+
 
 # -------------------------
 #        JOBS
@@ -341,6 +362,7 @@ jobs:
     <<: *java_defaults
     steps:
       - checkout_init_git
+      - halt_on_e2e_changes
       - ensure_branch_has_changes:
           dir_name: "api"
       - manage_api_cache:
@@ -427,6 +449,7 @@ jobs:
       <<: *java_env
     steps:
       - checkout_init_git
+      - halt_on_e2e_changes
       - activate_service_account_credential
       - start_local_api
       - run:
@@ -440,6 +463,7 @@ jobs:
     <<: *java_defaults
     steps:
       - checkout_init_git
+      - halt_on_e2e_changes
       # Note: most of the time spent here appears to be in Gradle / App Engine
       # deployment. We tried more aggressively caching outputs via Circle
       # workspaces, but that seemed to have a negligible effect on speed. It's
@@ -465,6 +489,7 @@ jobs:
     <<: *java_defaults
     steps:
       - checkout_init_git
+      - halt_on_e2e_changes
       - manage_api_cache:
           restore: true
       - run:
@@ -476,6 +501,7 @@ jobs:
     <<: *java_defaults
     steps:
       - checkout_init_git
+      - halt_on_e2e_changes
       - ensure_branch_has_changes:
           dir_name: "api"
       - manage_api_cache:
@@ -494,6 +520,7 @@ jobs:
     <<: *java_defaults
     steps:
       - checkout_init_git
+      - halt_on_e2e_changes
       - ensure_branch_has_changes:
           dir_name: "api"
       - manage_api_cache:
@@ -510,6 +537,7 @@ jobs:
     <<: *defaults
     steps:
       - checkout_init_git
+      - halt_on_e2e_changes
       - ensure_branch_has_changes:
           dir_name: "ui"
       - run:
