@@ -85,7 +85,7 @@ export interface LeoRuntimeInitializerOptions {
   maxDeleteCount?: number;
   maxResumeCount?: number;
   maxServerErrorCount?: number;
-  runtime?: Runtime;
+  targetRuntime?: Runtime;
 }
 
 const DEFAULT_OPTIONS: Partial<LeoRuntimeInitializerOptions> = {
@@ -97,7 +97,7 @@ const DEFAULT_OPTIONS: Partial<LeoRuntimeInitializerOptions> = {
   maxDeleteCount: DEFAULT_MAX_DELETE_COUNT,
   maxResumeCount: DEFAULT_MAX_RESUME_COUNT,
   maxServerErrorCount: DEFAULT_MAX_SERVER_ERROR_COUNT,
-  runtime: DEFAULT_RUNTIME_CONFIG
+  targetRuntime: DEFAULT_RUNTIME_CONFIG
 };
 
 /**
@@ -138,7 +138,7 @@ export class LeoRuntimeInitializer {
   private resumeCount = 0;
   private serverErrorCount = 0;
   private initializeStartTime?: number;
-  private runtime?: Runtime;
+  private targetRuntime?: Runtime;
   // The latest runtime retrieved from getRuntime. If the last getRuntime call returned a NOT_FOUND
   // response, this will be null.
   private currentRuntimeValue?: Runtime;
@@ -186,7 +186,7 @@ export class LeoRuntimeInitializer {
     this.maxDeleteCount = options.maxDeleteCount;
     this.maxResumeCount = options.maxResumeCount;
     this.maxServerErrorCount = options.maxServerErrorCount;
-    this.runtime = options.runtime;
+    this.targetRuntime = options.targetRuntime;
   }
 
   private async getRuntime(): Promise<Runtime> {
@@ -212,7 +212,7 @@ export class LeoRuntimeInitializer {
     if (serverConfigStore.getValue().enableGceAsNotebookRuntimeDefault) {
       runtime = {...runtimePresets.generalAnalysis.runtimeTemplate};
     } else if (serverConfigStore.getValue().enableCustomRuntimes) {
-      runtime = this.runtime;
+      runtime = this.targetRuntime;
     } else {
       runtime = {...runtimePresets.legacyGeneralAnalysis.runtimeTemplate};
     }

@@ -22,6 +22,8 @@ export enum RuntimeStatusRequest {
 // useRuntime hook is a simple hook to populate the runtime store.
 // This is only used by other runtime hooks
 const useRuntime = (currentWorkspaceNamespace) => {
+  // No cleanup is being handled at the moment.
+  // When the user initiates a runtime change we want that change to take place even if they navigate away
   useEffect(() => {
     const getRuntime = withErrorHandling(
       () => runtimeStore.set({workspaceNamespace: null, runtime: null}),
@@ -42,7 +44,7 @@ const useRuntime = (currentWorkspaceNamespace) => {
 
 // useRuntimeState hook can be used to change the state of the runtime
 // Only 'Delete' is supported at the moment
-export const useRuntimeState = (currentWorkspaceNamespace): [RuntimeStatus | undefined, Function]  => {
+export const useRuntimeState = (currentWorkspaceNamespace): [RuntimeStatus | undefined, (statusRequest: RuntimeStatusRequest) => void]  => {
   const [runtimeStatus, setRuntimeState] = useState<RuntimeStatusRequest>();
   const {runtime} = useStore(runtimeStore);
   useRuntime(currentWorkspaceNamespace);
@@ -65,7 +67,7 @@ export const useRuntimeState = (currentWorkspaceNamespace): [RuntimeStatus | und
 // useCustomRuntime Hook can request a new runtime config
 // The LeoRuntimeInitializer could potentially be rolled into this code to completely manage
 // all runtime state.
-export const useCustomRuntime = (currentWorkspaceNamespace): [Runtime, Function] => {
+export const useCustomRuntime = (currentWorkspaceNamespace): [Runtime, (runtime: Runtime) => void] => {
   const {runtime, workspaceNamespace} = useStore(runtimeStore);
   const [requestedRuntime, setRequestedRuntime] = useState<Runtime>();
   useRuntime(currentWorkspaceNamespace);
@@ -73,12 +75,11 @@ export const useCustomRuntime = (currentWorkspaceNamespace): [Runtime, Function]
   useEffect(() => {
     const runAction = async() => {
       await runtimeApi().deleteRuntime(currentWorkspaceNamespace);
-      await LeoRuntimeInitializer.initialize({
+      const currentRuntime = await LeoRuntimeInitializer.initialize({
         workspaceNamespace,
-        runtime: requestedRuntime
+        targetRuntime: requestedRuntime
       });
 
-      const currentRuntime = await runtimeApi().getRuntime(currentWorkspaceNamespace);
       if (currentWorkspaceNamespace === workspaceNamespace) {
         runtimeStore.set({
           workspaceNamespace: currentWorkspaceNamespace,

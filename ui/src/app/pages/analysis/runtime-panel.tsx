@@ -21,7 +21,7 @@ import { RuntimeStatus } from 'generated';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-const {useState, useEffect, Fragment} = React;
+const {useState, Fragment} = React;
 
 const styles = reactStyles({
   sectionHeader: {
@@ -67,9 +67,9 @@ export interface Props {
   workspace: WorkspaceData;
 }
 
-const MachineSelector = ({onChange, selectedMachine, masterMachineType}) => {
+const MachineSelector = ({onChange, updatedMachine, masterMachineType}) => {
   const initialMachineType = fp.find(({name}) => name === masterMachineType, allMachineTypes) || defaultMachineType;
-  const {cpu, memory} = selectedMachine || initialMachineType;
+  const {cpu, memory} = updatedMachine || initialMachineType;
   const maybeGetMachine = machineRequested => fp.equals(machineRequested, initialMachineType) ? null : machineRequested;
 
   return <Fragment>
@@ -120,7 +120,7 @@ const MachineSelector = ({onChange, selectedMachine, masterMachineType}) => {
   </Fragment>;
 };
 
-const DiskSizeSelection = ({onChange, selectedDiskSize, masterDiskSize}) => {
+const DiskSizeSelection = ({onChange, updatedDiskSize, masterDiskSize}) => {
   return <div>
     <label htmlFor='runtime-disk'
           style={{marginRight: '.25rem'}}>Disk (GB)</label>
@@ -128,7 +128,7 @@ const DiskSizeSelection = ({onChange, selectedDiskSize, masterDiskSize}) => {
                 showButtons
                 decrementButtonClassName='p-button-secondary'
                 incrementButtonClassName='p-button-secondary'
-                value={selectedDiskSize || masterDiskSize}
+                value={updatedDiskSize || masterDiskSize}
                 inputStyle={{padding: '.75rem .5rem', width: '2rem'}}
                 onChange={({value}) => onChange(value === masterDiskSize ? null : value)}
                 min={50 /* Runtime API has a minimum 50GB requirement. */}/>
@@ -136,8 +136,8 @@ const DiskSizeSelection = ({onChange, selectedDiskSize, masterDiskSize}) => {
 };
 
 export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
-  const [selectedDiskSize, setSelectedDiskSize] = useState(null);
-  const [selectedMachine, setselectedMachine] = useState(null);
+  const [updatedDiskSize, setUpdatedDiskSize] = useState(null);
+  const [updatedMachine, setUpdatedMachine] = useState(null);
   const runtimeOps = useStore(runtimeOpsStore);
   const [currentRuntime, setRequestedRuntime] = useCustomRuntime(workspace.namespace);
 
@@ -145,7 +145,10 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
   const {status = RuntimeStatus.Unknown, toolDockerImage = '', dataprocConfig = null, gceConfig = {}} = currentRuntime || {};
   const masterMachineType = !!dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
   const masterDiskSize = !!dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.bootDiskSize;
-  const selectedMachineType = selectedMachine && selectedMachine.name;
+  const updatedMachineType = updatedMachine && updatedMachine.name;
+
+  const isDataproc = (currentRuntime && !!currentRuntime.dataprocConfig);
+  const runtimeChanged = updatedMachine || updatedDiskSize;
 
   if (currentRuntime === undefined) {
     return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
@@ -159,9 +162,6 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
       </div>}
     </React.Fragment>;
   }
-
-  const isDataproc = (currentRuntime && !!currentRuntime.dataprocConfig);
-  const runtimeChanged = selectedMachine || selectedDiskSize;
 
   return <div data-test-id='runtime-panel'>
     <h3 style={styles.sectionHeader}>Cloud analysis environment</h3>
@@ -195,8 +195,8 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
       {/* Runtime customization: change detailed machine configuration options. */}
       <h3 style={styles.sectionHeader}>Cloud compute profile</h3>
       <FlexRow style={{justifyContent: 'space-between'}}>
-        <MachineSelector selectedMachine={selectedMachine} onChange={setselectedMachine} masterMachineType={masterMachineType}/>
-        <DiskSizeSelection selectedDiskSize={selectedDiskSize} onChange={setSelectedDiskSize} masterDiskSize={masterDiskSize}/>
+        <MachineSelector updatedMachine={updatedMachine} onChange={setUpdatedMachine} masterMachineType={masterMachineType}/>
+        <DiskSizeSelection updatedDiskSize={updatedDiskSize} onChange={setUpdatedDiskSize} masterDiskSize={masterDiskSize}/>
       </FlexRow>
       <FlexColumn style={{marginTop: '1rem'}}>
         <label htmlFor='runtime-compute'>Compute type</label>
@@ -212,8 +212,8 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
         disabled={status !== RuntimeStatus.Running || !runtimeChanged}
         onClick={() =>
           setRequestedRuntime({dataprocConfig: {
-            masterMachineType: selectedMachineType || masterMachineType,
-            masterDiskSize: selectedDiskSize || masterDiskSize
+            masterMachineType: updatedMachineType || masterMachineType,
+            masterDiskSize: updatedDiskSize || masterDiskSize
           }})
         }
       >{currentRuntime ? 'Update' : 'Create'}</Button>
