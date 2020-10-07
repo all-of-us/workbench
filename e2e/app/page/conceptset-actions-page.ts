@@ -19,18 +19,15 @@ export default class ConceptsetActionsPage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    try {
-      await Promise.all([
-        waitForDocumentTitle(this.page, PageTitle),
-        waitWhileLoading(this.page),
-        this.getCreateAnotherConceptSetButton(),
-        this.getCreateDatasetButton(),
-      ]);
-      return true;
-    } catch (e) {
-      console.log(`ConceptsetActionsPage isLoaded() encountered ${e}`);
-      return false;
-    }
+    await Promise.all([
+      waitForDocumentTitle(this.page, PageTitle),
+      waitWhileLoading(this.page)
+    ]);
+    await Promise.all([
+      this.getCreateAnotherConceptSetButton(),
+      this.getCreateDatasetButton()
+    ]);
+    return true;
   }
 
   async clickCreateAnotherConceptSetButton(): Promise<void> {

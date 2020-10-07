@@ -83,16 +83,12 @@ export default class CreateAccountPage extends BasePage {
   }
 
   async isLoaded(): Promise<boolean> {
-    try {
-      await Promise.all([
-        waitForText(this.page, 'Please read through the entire agreement to continue'),
-        this.page.waitForXPath('//*[@data-test-id="account-creation-tos"]', {visible: true}),
-      ])
-      return true;
-    } catch (err) {
-      console.log(`CreateAccountPage isLoaded() encountered ${err}`);
-      return false;
-    }
+    await Promise.all([
+      waitForText(this.page, 'Please read through the entire agreement to continue'),
+      this.page.waitForXPath('//*[@data-test-id="account-creation-tos"]', {visible: true}),
+    ]);
+    await waitWhileLoading(this.page);
+    return true;
   }
 
   async getSubmitButton(): Promise<Button> {

@@ -18,17 +18,12 @@ export default class NotebookPreviewPage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    try {
-      await Promise.all([
-        this.page.waitForXPath(Selector.editButton),
-        this.page.waitForXPath(Selector.playgroundButton),
-        waitWhileLoading(this.page),
-      ]);
-      return true;
-    } catch (e) {
-      console.error(`NotebookPreviewPage isLoaded() encountered ${e}`);
-      throw new Error(e);
-    }
+    await waitWhileLoading(this.page);
+    await Promise.all([
+      this.page.waitForXPath(Selector.editButton),
+      this.page.waitForXPath(Selector.playgroundButton)
+    ]);
+    return true;
   }
 
   /**

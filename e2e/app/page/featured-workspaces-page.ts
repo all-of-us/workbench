@@ -13,17 +13,12 @@ export default class FeaturedWorkspacesPage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    try {
-      await Promise.all([
-        waitForDocumentTitle(this.page, PageTitle),
-        waitForText(this.page, PageHeader),
-        waitWhileLoading(this.page),
-      ]);
-      return true;
-    } catch (e) {
-      console.log(`FeaturedWorkspacesPage isLoaded() encountered ${e}`);
-      return false;
-    }
+    await Promise.all([
+      waitForDocumentTitle(this.page, PageTitle),
+      waitForText(this.page, PageHeader),
+      waitWhileLoading(this.page)
+    ]);
+    return true;
   }
 
 }

@@ -25,17 +25,12 @@ export default class WorkspaceDataPage extends WorkspaceBase {
   }
 
   async isLoaded(): Promise<boolean> {
-    try {
-      await Promise.all([
-        waitForDocumentTitle(this.page, PageTitle),
-        this.imgDiagramLoaded(),
-        waitWhileLoading(this.page),
-      ]);
-      return true;
-    } catch (e) {
-      console.log(`DataPage isLoaded() encountered ${e}`);
-      return false;
-    }
+    await Promise.all([
+      waitForDocumentTitle(this.page, PageTitle),
+      waitWhileLoading(this.page)
+    ]);
+    await this.imgDiagramLoaded();
+    return true;
   }
 
   async imgDiagramLoaded(): Promise<ElementHandle[]> {

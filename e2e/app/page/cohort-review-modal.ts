@@ -14,16 +14,11 @@ export default class CohortReviewModal extends Modal {
 
   async isLoaded(): Promise<boolean> {
     const titleXpath = `${this.getXpath()}/div[normalize-space()="${title}"]`;
-    try {
-      await Promise.all([
-        waitForText(this.page, titleXpath),
-        waitWhileLoading(this.page),
-      ]);
-      return true;
-    } catch (e) {
-      console.log(`CohortReviewModal isLoaded() encountered ${e}`);
-      return false;
-    }
+    await Promise.all([
+      waitForText(this.page, titleXpath),
+      waitWhileLoading(this.page),
+    ]);
+    return true;
   }
 
   async fillInNumberOfPartcipants(numOfparticipants: number): Promise<void> {

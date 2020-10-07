@@ -16,16 +16,11 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
   }
 
   async isLoaded(): Promise<boolean> {
-    try {
-      await Promise.all([
-        waitForDocumentTitle(this.page, PageTitle),
-        waitWhileLoading(this.page),
-      ]);
-      return true;
-    } catch (err) {
-      console.log(`WorkspaceAboutPage isLoaded() encountered ${err}`);
-      return false;
-    }
+    await Promise.all([
+      waitForDocumentTitle(this.page, PageTitle),
+      waitWhileLoading(this.page)
+    ]);
+    return true;
   }
 
   async findUserInCollaboratorList(username: string): Promise<WorkspaceAccessLevel> {

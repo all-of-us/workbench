@@ -228,21 +228,18 @@ export default class WorkspaceEditPage extends WorkspaceBase {
   }
 
   async isLoaded(): Promise<boolean> {
+    await Promise.all([
+      waitForDocumentTitle(this.page, PageTitle),
+      waitWhileLoading(this.page)
+    ]);
     const selectXpath = buildXPath(FIELD.billingAccountSelect.textOption);
     const select = new Select(this.page, selectXpath);
-    try {
-      await Promise.all([
-        waitForDocumentTitle(this.page, PageTitle),
-        this.getWorkspaceNameTextbox(),
-        select.asElementHandle(),
-        this.getCreateWorkspaceButton(),
-        waitWhileLoading(this.page),
-      ]);
-      return true;
-    } catch (err) {
-      console.log(`WorkspaceEditPage isLoaded() encountered ${err}`);
-      return false;
-    }
+    await Promise.all([
+      this.getWorkspaceNameTextbox(),
+      select.asElementHandle(),
+      this.getCreateWorkspaceButton()
+    ]);
+    return true;
   }
 
   /**

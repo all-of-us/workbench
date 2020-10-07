@@ -17,18 +17,13 @@ export default class ConceptsetSearchPage extends AuthenticatedPage{
   }
 
   async isLoaded(): Promise<boolean> {
+    await Promise.all([
+      waitForDocumentTitle(this.page, PageTitle),
+      waitWhileLoading(this.page)
+    ]);
     const searchTextbox = this.getSearchTextbox();
-    try {
-      await Promise.all([
-        waitForDocumentTitle(this.page, PageTitle),
-        searchTextbox.waitForXPath(),
-        waitWhileLoading(this.page),
-      ]);
-      return true;
-    } catch (e) {
-      console.error(`ConceptsetSearchPage isLoaded() encountered ${e}`);
-      return false;
-    }
+    await searchTextbox.waitForXPath();
+    return true;
   }
 
   async saveConcept(saveOption?: SaveOption, existingConceptName?: string): Promise<string> {
