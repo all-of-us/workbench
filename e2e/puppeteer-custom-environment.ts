@@ -17,32 +17,28 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
   // Take a screenshot right after failure
   async handleTestEvent(event, state) {
     if (event.name === 'test_fn_failure') {
+      const testParentName = state.currentlyRunningTest.parent.name.replace(/\W/g, '-');
+      const testName = state.currentlyRunningTest.name.replace(/\W/g, '-');
 
-        console.log(`event.name = ${event.name}`);
+      const screenshotDir = `logs/screenshot/${testParentName}`;
+      const htmlDir = `logs/html/${testParentName}`;
+      await fs.ensureDir(screenshotDir);
+      await fs.ensureDir(htmlDir);
 
-        const testParentName = state.currentlyRunningTest.parent.name.replace(/\W/g, '-');
-        const testName = state.currentlyRunningTest.name.replace(/\W/g, '-');
+      const timestamp = new Date().getTime();
+      console.error(`Failed test:  "${testParentName}/${testName}"`);
 
-        const screenshotDir = `logs/screenshot/${testParentName}`;
-        const htmlDir = `logs/html/${testParentName}`;
-        await fs.ensureDir(screenshotDir);
-        await fs.ensureDir(htmlDir);
+      const screenshotFile = `${screenshotDir}/${testName}_${timestamp}.png`;
+      await this.takeScreenshot(screenshotFile);
 
-        console.error(`Failed test:  "${testParentName}/${testName}"`);
-
-        const timestamp = new Date().getTime();
-
-        const screenshotFile = `${screenshotDir}/${testName}_${timestamp}.png`;
-        await this.takeScreenshot(screenshotFile);
-
-        const htmlFile = `${htmlDir}/${testName}_${timestamp}.html`;
-        await this.savePageToFile(htmlFile);
+      const htmlFile = `${htmlDir}/${testName}_${timestamp}.html`;
+      await this.savePageToFile(htmlFile);
     }
   }
 
   async takeScreenshot(filePath) {
     await this.global.page.screenshot({path: filePath, fullPage: true});
-    console.info(`Saved screenshot ${filePath}`);
+    console.info(`Saved screenshot: ${filePath}`);
   }
 
   async savePageToFile(htmlFile) {
@@ -53,7 +49,7 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
           console.error(`Failed to save html file. ` + error);
           reject(false);
         } else {
-          console.info('Saved html file ' + htmlFile);
+          console.info('Saved html file: ' + htmlFile);
           resolve(true);
         }
       })
