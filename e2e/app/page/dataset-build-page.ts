@@ -22,16 +22,11 @@ enum LabelAlias {
 export default class DatasetBuildPage extends AuthenticatedPage {
 
   async isLoaded(): Promise<boolean> {
-    try {
-      await Promise.all([
-        waitForDocumentTitle(this.page, PageTitle),
-        waitWhileLoading(this.page),
-      ]);
-      return true;
-    } catch (err) {
-      console.error(`DatasetBuildPage isLoaded() encountered ${err}`);
-      throw err;
-    }
+    await Promise.all([
+      waitForDocumentTitle(this.page, PageTitle),
+      waitWhileLoading(this.page),
+    ]);
+    return true;
   }
 
   async clickAddCohortsButton(): Promise<CohortBuildPage> {

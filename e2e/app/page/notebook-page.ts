@@ -45,14 +45,9 @@ export default class NotebookPage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    try {
-      await waitForDocumentTitle(this.page, this.documentTitle);
-      await this.waitForKernelIdle();
-      return true;
-    } catch (err) {
-      console.error(`NotebookPage isLoaded() encountered ${err}`);
-      throw err;
-    }
+    await waitForDocumentTitle(this.page, this.documentTitle);
+    await this.waitForKernelIdle();
+    return true;
   }
 
   /**

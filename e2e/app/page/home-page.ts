@@ -21,23 +21,20 @@ export default class HomePage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    try {
-      await Promise.all([
-        waitForDocumentTitle(this.page, PageTitle),
-        // Look for "See All Workspacess" link.
-        this.getSeeAllWorkspacesLink().then( (element) => element.asElementHandle()),
-        // Look for either a workspace card or msg.
-        Promise.race([
-          this.page.waitForXPath('//*[@data-test-id="workspace-card"]', {visible: true}),
-          this.page.waitForXPath('//text()[contains(., "Create your first workspace")]', {visible: true}),
-        ]),
-        waitWhileLoading(this.page),
-      ]);
-      return true;
-    } catch (err) {
-      console.error(`HomePage isLoaded() encountered ${err}`);
-      throw err;
-    }
+    await Promise.all([
+      waitForDocumentTitle(this.page, PageTitle),
+      waitWhileLoading(this.page)
+    ]);
+    await Promise.all([
+      // Look for "See All Workspacess" link.
+      this.getSeeAllWorkspacesLink().then( (element) => element.asElementHandle()),
+      // Look for either a workspace card or msg.
+      Promise.race([
+        this.page.waitForXPath('//*[@data-test-id="workspace-card"]', {visible: true}),
+        this.page.waitForXPath('//text()[contains(., "Create your first workspace")]', {visible: true}),
+      ])
+    ]);
+    return true;
   }
 
   async getCreateNewWorkspaceLink(): Promise<ClrIconLink> {

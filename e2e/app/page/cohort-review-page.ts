@@ -16,17 +16,12 @@ export default class CohortReviewPage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    try {
-      await Promise.all([
-        waitForDocumentTitle(this.page, PageTitle),
-        waitWhileLoading(this.page),
-        this.getDataTable().exists(),
-      ]);
-      return true;
-    } catch (err) {
-      console.error(`CohortReviewPage isLoaded() encountered ${err}`);
-      throw err;
-    }
+    await Promise.all([
+      waitForDocumentTitle(this.page, PageTitle),
+      waitWhileLoading(this.page)
+    ]);
+    await this.getDataTable().exists();
+    return true;
   }
 
   getDataTable(): DataTable {

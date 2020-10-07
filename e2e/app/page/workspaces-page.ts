@@ -28,18 +28,15 @@ export default class WorkspacesPage extends WorkspaceEditPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    try {
-      await Promise.all([
-        waitForDocumentTitle(this.page, PageTitle),
-        this.page.waitForXPath('//a[text()="Workspaces"]', {visible: true}),
-        this.page.waitForXPath('//h3[normalize-space(text())="Workspaces"]', {visible: true}),  // Texts above Filter By Select
-        waitWhileLoading(this.page),
-      ]);
-      return true;
-    } catch (err) {
-      console.log(`WorkspacesPage isLoaded() encountered ${err}`);
-      return false;
-    }
+    await Promise.all([
+      waitForDocumentTitle(this.page, PageTitle),
+      waitWhileLoading(this.page)
+    ]);
+    await Promise.all([
+      this.page.waitForXPath('//a[text()="Workspaces"]', {visible: true}),
+      this.page.waitForXPath('//h3[normalize-space(text())="Workspaces"]', {visible: true})  // Texts above Filter By Select
+    ]);
+    return true;
   }
 
 

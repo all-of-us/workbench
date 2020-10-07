@@ -156,7 +156,6 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
     await waitWhileLoading(this.page);
 
     console.log(`Deleted ${resourceType} "${resourceName}"`);
-    await this.waitForLoad();
     return modalTextContent;
   }
 

@@ -71,17 +71,12 @@ export default class CohortSearchPage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    try {
-      await Promise.all([
-        this.page.waitForXPath('//*[@id="cohort-search-container"]', {visible: true}),
-        this.page.waitForXPath('//*[@role="button"]/img[@alt="Go back"]', {visible: true}),
-        waitWhileLoading(this.page),
-      ]);
-      return true;
-    } catch (err) {
-      console.error(`CohortSearchPage isLoaded() encountered ${err}`);
-      throw err;
-    }
+    await Promise.all([
+      this.page.waitForXPath('//*[@id="cohort-search-container"]', {visible: true}),
+      this.page.waitForXPath('//*[@role="button"]/img[@alt="Go back"]', {visible: true})
+    ]);
+    await waitWhileLoading(this.page);
+    return true;
   }
 
 

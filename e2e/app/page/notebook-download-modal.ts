@@ -21,11 +21,10 @@ export default class NotebookDownloadModal {
   async waitForLoad(): Promise<this> {
     try {
       await this.waitUntilVisible();
-    } catch (e) {
+    } catch (err) {
       await savePageToFile(this.page);
       await takeScreenshot(this.page);
-      const title = await this.page.title();
-      throw new Error(`"${title}" modal waitForLoad() encountered ${e}`);
+      throw err;
     }
     return this;
   }

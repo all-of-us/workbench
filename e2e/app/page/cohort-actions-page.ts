@@ -15,19 +15,16 @@ export default class CohortActionsPage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    try {
-      await Promise.all([
-        waitForDocumentTitle(this.page, PageTitle),
-        waitWhileLoading(this.page),
-        this.getCreateAnotherCohortButton().then(elemt => elemt.asElementHandle()),
-        this.getCreateReviewSetsButton().then(elemt => elemt.asElementHandle()),
-        this.getCreateDatasetButton().then(elemt => elemt.asElementHandle()),
-      ]);
-      return true;
-    } catch (err) {
-      console.error(`CohortActionsPage isLoaded() encountered ${err}`);
-      throw err;
-    }
+    await Promise.all([
+      waitForDocumentTitle(this.page, PageTitle),
+      waitWhileLoading(this.page),
+    ]);
+    await Promise.all([
+      this.getCreateAnotherCohortButton().then(elemt => elemt.asElementHandle()),
+      this.getCreateReviewSetsButton().then(elemt => elemt.asElementHandle()),
+      this.getCreateDatasetButton().then(elemt => elemt.asElementHandle()),
+    ]);
+    return true;
   }
 
   async clickCreateDatasetButton(): Promise<DatasetBuildPage> {
