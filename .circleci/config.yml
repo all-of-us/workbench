@@ -339,8 +339,9 @@ commands:
           command: |
 
             if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} != "master" ]; then
-              ALL_CHANGES=($(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH})))
-              echo $ALL_CHANGES
+              ALL_CHANGES=$(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}))
+              CHANGES=($ALL_CHANGES)
+              echo $CHANGES
 
               echo "</br>"
               E2E_CHANGES=$(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) -- e2e)
@@ -349,7 +350,7 @@ commands:
               # Compare list length of two lists
 
               if [ -n "$E2E_CHANGES" ]; then
-                if [ "${#ALL_CHANGES[@]}" -eq "${#E2E_CHANGES[@]}" ]; then
+                if [ "${#CHANGES[@]}" -eq "${#E2E_CHANGES[@]}" ]; then
                   echo "No changes in application code. Stop job now."
                   circleci step halt
                 else
