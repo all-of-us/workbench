@@ -294,12 +294,14 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     // read domain infos
     List<DbDomainInfo> dbDomainInfos =
         domainInfoDao.findCriteriaCounts(
-            searchTerm,
-            "+([CONDITION_rank1] [PROCEDURE_rank1] [OBSERVATION_rank1] [PHYSICAL_MEASUREMENT_rank1])",
-            ImmutableList.of(true, false));
+            searchTerm, "+([CONDITION_rank1] [PROCEDURE_rank1])", ImmutableList.of(true, false));
     dbDomainInfos.addAll(
         domainInfoDao.findCriteriaCounts(
-            searchTerm, "+([DRUG_rank1] [MEASUREMENT_rank1])", ImmutableList.of(true)));
+            searchTerm,
+            "+([DRUG_rank1] [MEASUREMENT_rank1] [OBSERVATION_rank1])",
+            ImmutableList.of(true)));
+    dbDomainInfos.add(
+        domainInfoDao.findPhysicalMeasurementConceptCounts(searchTerm, ImmutableList.of("")));
     List<DomainInfo> domainInfos =
         dbDomainInfos.stream()
             .map(cohortBuilderMapper::dbModelToClient)

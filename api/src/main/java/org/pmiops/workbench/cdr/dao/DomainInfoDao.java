@@ -21,7 +21,7 @@ public interface DomainInfoDao extends CrudRepository<DbDomainInfo, Long> {
   @Query(
       value =
           "select new DbDomainInfo(\n"
-              + "d.domain, d.domainId, d.name, d.description,\n"
+              + "d.domain, d.domainId, d.domainEnumValue, d.name, d.description,\n"
               + "d.conceptId, COUNT(*), COUNT(*), d.participantCount)\n"
               + "from DbDomainInfo d\n"
               + "join DbConcept c ON d.domainId = c.domainId\n"
@@ -35,10 +35,10 @@ public interface DomainInfoDao extends CrudRepository<DbDomainInfo, Long> {
   @Query(
       value =
           "select new DbDomainInfo(\n"
-              + "d.domain, d.domainId, d.name, d.description,\n"
+              + "d.domain, d.domainId, d.domainEnumValue, d.name, d.description,\n"
               + "d.conceptId, COUNT(*), COUNT(*), d.participantCount)\n"
               + "from DbDomainInfo d\n"
-              + "join DbCriteria c ON d.domainId = c.domainId\n"
+              + "join DbCriteria c ON d.domainEnumValue = c.domainId\n"
               + "where match(c.fullText, concat(?1, ?2)) > 0 "
               + "and c.standard IN (?3)\n"
               + "group by d.domain, d.domainId, d.name, d.description, d.conceptId")
@@ -55,7 +55,7 @@ public interface DomainInfoDao extends CrudRepository<DbDomainInfo, Long> {
   @Query(
       value =
           "select new DbDomainInfo(\n"
-              + "d.domain, d.domainId, d.name, d.description,\n"
+              + "d.domain, d.domainId, d.domainEnumValue, d.name, d.description,\n"
               + "d.conceptId, COUNT(*), COUNT(*), d.participantCount)\n"
               + "from DbDomainInfo d\n"
               + "join DbConcept c ON 'Measurement' = c.domainId\n"
