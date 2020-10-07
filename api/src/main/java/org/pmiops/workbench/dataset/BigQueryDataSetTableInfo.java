@@ -46,7 +46,7 @@ public enum BigQueryDataSetTableInfo {
   DRUG(
       Domain.DRUG,
       "ds_drug_exposure",
-      " (drug_concept_id in (select distinct ca.descendant_id\n"
+      " drug_concept_id in (select distinct ca.descendant_id\n"
           + "from `${projectId}.${dataSetId}.cb_criteria_ancestor` ca\n"
           + "join (select distinct c.concept_id\n"
           + "from `${projectId}.${dataSetId}.cb_criteria` c\n"
@@ -56,7 +56,7 @@ public enum BigQueryDataSetTableInfo {
           + "and concept_id in unnest(@conceptIds)\n"
           + ") a\n"
           + "on (c.path like concat('%.', a.id, '.%') or c.path like concat('%.', a.id) or c.path like concat(a.id, '.%') or c.path = a.id)\n"
-          + ") b on (ca.ancestor_id = b.concept_id)))",
+          + ") b on (ca.ancestor_id = b.concept_id))",
       " (drug_concept_id in unnest(@conceptIds) or drug_source_concept_id in unnest(@conceptIds))"),
   MEASUREMENT(
       Domain.MEASUREMENT,
@@ -79,7 +79,7 @@ public enum BigQueryDataSetTableInfo {
   OBSERVATION(
       Domain.OBSERVATION,
       "ds_observation",
-      " (observation_concept_id in unnest(@conceptIds) or observation_source_concept_id in unnest(@conceptIds))",
+      " observation_concept_id in unnest(@conceptIds)",
       " (observation_concept_id in unnest(@conceptIds) or observation_source_concept_id in unnest(@conceptIds))");
 
   private final Domain domain;
