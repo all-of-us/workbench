@@ -77,7 +77,7 @@ interface RuntimeStore {
   runtime: Runtime | null | undefined;
 }
 
-export const runtimeStore = atom<RuntimeStore>({workspaceNamespace: undefined, runtime: { dataprocConfig: {}}});
+export const runtimeStore = atom<RuntimeStore>({workspaceNamespace: undefined, runtime: undefined});
 
 
 /**

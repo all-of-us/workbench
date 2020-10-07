@@ -12,7 +12,6 @@ import {
   abortRuntimeOperationForWorkspace,
   markRuntimeOperationCompleteForWorkspace,
   RuntimeOperation,
-  RuntimeOpsStore,
   runtimeOpsStore,
   updateRuntimeOpsStoreForWorkspaceNamespace,
   useStore
@@ -21,7 +20,6 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {Dropdown} from 'primereact/dropdown';
 import {InputNumber} from 'primereact/inputnumber';
 
-import { useOnMount } from 'app/utils';
 import { RuntimeStatus } from 'generated';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -162,7 +160,7 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
   const masterDiskSize = !!dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.bootDiskSize;
   const selectedMachineType = selectedMachine && selectedMachine.name;
 
-  useOnMount(() => {
+  useEffect(() => {
     const aborter = new AbortController();
     const {namespace} = workspace;
     const loadRuntime = async() => {
@@ -187,13 +185,13 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
 
     loadRuntime();
     return () => aborter.abort();
-  });
+  }, []);
 
   useEffect(() => {
     if (currentRuntime) {
       setLoading(false);
     }
-  },[currentRuntime])
+  }, [currentRuntime]);
 
   if (loading) {
     return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;

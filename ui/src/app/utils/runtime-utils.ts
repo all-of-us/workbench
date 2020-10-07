@@ -1,5 +1,4 @@
 import {runtimeApi} from 'app/services/swagger-fetch-clients';
-import {useOnMount} from 'app/utils';
 import {switchCase} from 'app/utils';
 import {
   LeoRuntimeInitializer,
@@ -15,16 +14,14 @@ import * as React from 'react';
 
 const {useState, useEffect} = React;
 
-export type RuntimeStatusRequest = 'Delete';
-
-export const RuntimeStateRequest = {
-  Delete: 'Delete' as RuntimeStatusRequest
+export enum RuntimeStatusRequest {
+  Delete = 'Delete'
 };
 
 // useRuntime hook is a simple hook to populate the runtime store.
 // This is only used by other runtime hooks
 const useRuntime = (currentWorkspaceNamespace) => {
-  useOnMount(() => {
+  useEffect(() => {
     const getRuntime = async() => {
       const leoRuntime = await runtimeApi().getRuntime(currentWorkspaceNamespace);
       runtimeStore.set({
@@ -33,27 +30,27 @@ const useRuntime = (currentWorkspaceNamespace) => {
       });
     };
     getRuntime();
-  });
+  }, []);
 };
 
 // useRuntimeState hook can be used to change the state of the runtime
 // Only 'Delete' is supported at the moment
 export const useRuntimeState = (currentWorkspaceNamespace): [RuntimeStatus, Function]  => {
-  const [requestedRuntimeState, setRuntimeState] = useState<RuntimeStatusRequest>();
+  const [runtimeStatus, setRuntimeState] = useState<RuntimeStatusRequest>();
   const {runtime} = useStore(runtimeStore);
   useRuntime(currentWorkspaceNamespace);
 
   useEffect(() => {
     // Additional state changes can be put here
-    if (!!requestedRuntimeState) {
-      switchCase(requestedRuntimeState,
-        [RuntimeStateRequest.Delete, async() => {
+    if (!!runtimeStatus) {
+      switchCase(runtimeStatus,
+        [RuntimeStatusRequest.Delete, async() => {
           await runtimeApi().deleteRuntime(currentWorkspaceNamespace);
           await LeoRuntimeInitializer.initialize({workspaceNamespace: currentWorkspaceNamespace, maxCreateCount: 0});
         }]);
     }
 
-  }, [requestedRuntimeState]);
+  }, [runtimeStatus]);
 
   return [runtime.status, setRuntimeState];
 };
