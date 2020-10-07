@@ -339,7 +339,7 @@ commands:
           command: |
 
             if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} != "master" ]; then
-              ALL_CHANGES=($(readarray -t arr2 < <(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}))))
+              ALL_CHANGES=($(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH})))
               echo $ALL_CHANGES
 
               echo "</br>"
