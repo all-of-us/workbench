@@ -337,6 +337,7 @@ commands:
       - run:
           name: "Halt job if changed files in PR contain only Puppeteer e2e tests in e2e dir"
           command: |
+            IFS=$'\n'
             if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} != "master" ]; then
               ALL_CHANGES=($(git diff --name-only origin/master...${CIRCLE_BRANCH}))
               E2E_CHANGES=($(git diff --name-only origin/master...${CIRCLE_BRANCH} -- e2e))
