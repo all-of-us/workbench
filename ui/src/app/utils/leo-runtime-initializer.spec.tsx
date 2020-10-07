@@ -136,7 +136,7 @@ describe('RuntimeInitializer', () => {
       {status: RuntimeStatus.Running}
     ]);
     const statuses = [];
-    await runInitializerAndTimers({onPollCycleComplete: (runtime) => statuses.push(!!runtime ? runtime.status : null)});
+    await runInitializerAndTimers({onPollCycleComplete: (runtime) => statuses.push(runtime ? runtime.status : null)});
 
     expect(statuses).toEqual([
       RuntimeStatus.Stopped,

@@ -35,11 +35,13 @@ export default {
   },
   chartColors: ['#216FB4', '#6CACE4', '#8BC990', '#F8C954', '#F7981C', '#F0718B', '#F38D7A', '#A27DB7', '#CAB2D6'],
   // High-contrast colors for runtime status icon
-  runtimeStarting: '#9FFF00',
-  runtimeRunning: '#73EF0A',
-  runtimeStopping: '#FFD700',
-  runtimeStopped: '#F8C954',
-  runtimeError: '#DB3214',
+  runtimeStatus: {
+    starting: '#9FFF00',
+    running: '#73EF0A',
+    stopping: '#FFD700',
+    stopped: '#F8C954',
+    error: '#DB3214',
+  }
 };
 
 class Rgba {

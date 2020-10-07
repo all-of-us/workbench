@@ -350,7 +350,13 @@ interface State {
   tooltipId: number;
 }
 
-export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), withCurrentCohortCriteria(), withCurrentConcept(), withStore(currentRuntimeStore, 'runtimeStore'))(
+export const HelpSidebar = fp.flow(
+    withCurrentCohortCriteria(),
+    withCurrentConcept(),
+    withCurrentWorkspace(),
+    withStore(currentRuntimeStore, 'runtimeStore'),
+    withUserProfile()
+)(
   class extends React.Component<Props, State> {
     subscription: Subscription;
     constructor(props: Props) {
@@ -574,51 +580,55 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile(), wi
 
     displayRuntimeIcon(icon) {
       const {runtimeStore} = this.props;
+      const {currentRuntime} = runtimeStore;
 
+      // We always want to show the thunderstorm icon.
+      // For most runtime statuses (Deleting and Unknown currently excepted), we will show a small
+      // overlay icon in the bottom right of the tab showing the runtime status.
       return <FlexRow style={{height: '100%', alignItems: 'center', justifyContent: 'space-around'}}>
         <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={{...icon.style, position: 'absolute'}} />
         {
-          runtimeStore.currentRuntime
+          currentRuntime
           && (
-              runtimeStore.currentRuntime.status === RuntimeStatus.Creating
-              || runtimeStore.currentRuntime.status === RuntimeStatus.Starting
-              || runtimeStore.currentRuntime.status === RuntimeStatus.Updating
+              currentRuntime.status === RuntimeStatus.Creating
+              || currentRuntime.status === RuntimeStatus.Starting
+              || currentRuntime.status === RuntimeStatus.Updating
           ) && <FontAwesomeIcon icon={faSyncAlt} style={{
             ...styles.runtimeStatusIcon,
             ...styles.rotate,
-            color: colors.runtimeStarting,
+            color: colors.runtimeStatus.starting,
           }}/>
         }
-        {runtimeStore.currentRuntime && runtimeStore.currentRuntime.status === RuntimeStatus.Stopped
+        {currentRuntime && currentRuntime.status === RuntimeStatus.Stopped
         && <FontAwesomeIcon icon={faCircle} style={{
           ...styles.runtimeStatusIcon,
           ...styles.runtimeStatusIconOutline,
-          color: colors.runtimeStopped,
+          color: colors.runtimeStatus.stopped,
         }}/>
         }
-        {runtimeStore.currentRuntime && runtimeStore.currentRuntime.status === RuntimeStatus.Running
+        {currentRuntime && currentRuntime.status === RuntimeStatus.Running
         && <FontAwesomeIcon icon={faCircle} style={{
           ...styles.runtimeStatusIcon,
           ...styles.runtimeStatusIconOutline,
-          color: colors.runtimeRunning,
+          color: colors.runtimeStatus.running,
         }}/>
         }
         {
-          runtimeStore.currentRuntime
+          currentRuntime
           && (
-              runtimeStore.currentRuntime.status === RuntimeStatus.Stopping
-              || runtimeStore.currentRuntime.status === RuntimeStatus.Deleting
+              currentRuntime.status === RuntimeStatus.Stopping
+              || currentRuntime.status === RuntimeStatus.Deleting
           ) && <FontAwesomeIcon icon={faSyncAlt} style={{
             ...styles.runtimeStatusIcon,
             ...styles.rotate,
-            color: colors.runtimeStopping,
+            color: colors.runtimeStatus.stopping,
           }}/>
         }
-        {runtimeStore.currentRuntime && runtimeStore.currentRuntime.status === RuntimeStatus.Error
+        {currentRuntime && currentRuntime.status === RuntimeStatus.Error
         && <FontAwesomeIcon icon={faCircle} style={{
           ...styles.runtimeStatusIcon,
           ...styles.runtimeStatusIconOutline,
-          color: colors.runtimeError,
+          color: colors.runtimeStatus.error,
         }}/>
         }
       </FlexRow>
