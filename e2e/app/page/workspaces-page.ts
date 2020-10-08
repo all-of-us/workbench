@@ -9,6 +9,7 @@ import {waitForDocumentTitle, waitForText, waitWhileLoading} from 'utils/waits-u
 import ReactSelect from 'app/element/react-select';
 import WorkspaceDataPage from './workspace-data-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
+import {config} from 'resources/workbench-config';
 import {UseFreeCredits} from './workspace-base';
 
 const faker = require('faker/locale/en_US');
@@ -73,6 +74,7 @@ export default class WorkspacesPage extends WorkspaceEditPage {
    */
   async createWorkspace(
      workspaceName: string,
+     cdrVersionName: string = config.defaultCdrVersionName,
      billingAccount: string = UseFreeCredits,
      reviewRequest: boolean = false): Promise<string[]> {
 
@@ -83,8 +85,8 @@ export default class WorkspacesPage extends WorkspaceEditPage {
     await (await editPage.getWorkspaceNameTextbox()).type(workspaceName);
     await (await editPage.getWorkspaceNameTextbox()).pressTab();
 
-    // select the default CDR Version
-    await editPage.selectCdrVersion();
+    // select the chosen CDR Version
+    await editPage.selectCdrVersion(cdrVersionName);
 
     // select Billing Account
     await editPage.selectBillingAccount(billingAccount);
