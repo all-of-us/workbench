@@ -672,6 +672,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         throw new BadRequestException(
             "Kernel Type " + kernelTypeEnum.toString() + " not supported");
     }
+
     return queryJobConfigurationMap.entrySet().stream()
         .map(
             entry ->

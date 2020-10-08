@@ -4807,6 +4807,17 @@ definitions:
         default: false
       kernelType:
         "$ref": "#/definitions/KernelTypeEnum"
+      includeMicroarrayData:
+        type: boolean
+        default: false
+      genomicsAnalysisTool:
+        type: string
+        default: NONE
+        enum:
+          - NONE
+          - PLINK
+          - HAIL
+
   MarkDataSetRequest:
     type: object
     properties:
