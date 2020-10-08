@@ -22,7 +22,7 @@ constructor(
             }),
     TIME_WINDOW_DURATION("time_window_duration",
             { it.timeWindowDuration?.toString() }),
-    VM_NAME("vm_name", { it.vmName });
+    VM_NAME("vm_prefix", { it.vmPrefix });
 }
 
 /**

@@ -5854,8 +5854,26 @@ definitions:
         type: integer
         format: int64
       egress_mib:
-        description: The amount of egress detected during the window, in mebibytes
-          (MiB).
+        description: The total amount of egress detected during the window, in
+          mebibytes (MiB). This total subsumes the per-machine type egress
+          values provided here. The egress threshold is triggered against this
+          value.
+        type: number
+        format: double
+      gce_egress_mib:
+        description: The amount of egress detected via raw GCE VM during the
+          window, in mebibytes (MiB). Does NOT include Dataproc egress (Dataproc
+          technically uses GCE).
+        type: number
+        format: double
+      dataproc_master_egress_mib:
+        description: The amount of egress detected via Dataproc master nodes
+          during the window, in mebibytes (MiB).
+        type: number
+        format: double
+      dataproc_worker_egress_mib:
+        description: The amount of egress detected via Dataproc worker nodes
+          during the window, in mebibytes (MiB).
         type: number
         format: double
       egress_mib_threshold:
@@ -5867,8 +5885,9 @@ definitions:
         description: 'The Google Cloud project name associated with the workspace,
           e.g. aou-rw-6b66533d. Always present.'
         type: string
-      vm_name:
-        description: The name of the Jupyter VM which generated egress, e.g. all-of-us-260-m.
+      vm_prefix:
+        description: Prefix of the research VM(s) that generated egress, including
+          the user ID, e.g. all-of-us-260.
         type: string
   ArrayOfLong:
     type: array
