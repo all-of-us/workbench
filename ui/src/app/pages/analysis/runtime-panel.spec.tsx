@@ -3,7 +3,6 @@ import { act } from 'react-dom/test-utils';
 import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
-import {InputNumber} from 'primereact/inputnumber';
 import {Spinner} from 'app/components/spinners';
 import {RuntimePanel, Props} from 'app/pages/analysis/runtime-panel';
 import {workspaceStubs} from 'testing/stubs/workspaces-api-stub';
