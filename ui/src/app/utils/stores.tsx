@@ -72,18 +72,12 @@ export const abortRuntimeOperationForWorkspace = (workspaceNamespace: string) =>
 };
 
 // runtime store states: undefined(initial state) -> Runtime (user selected) <--> null (delete only - no recreate)
-interface RuntimeStore {
+export interface RuntimeStore {
   workspaceNamespace: string;
   runtime: Runtime | null | undefined;
 }
 
 export const runtimeStore = atom<RuntimeStore>(undefined);
-
-export interface CurrentRuntimeStore {
-  currentRuntime: Runtime;
-}
-
-export const currentRuntimeStore = atom<CurrentRuntimeStore>({currentRuntime: null});
 
 /**
  * @name useStore

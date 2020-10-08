@@ -13,7 +13,7 @@ import {
   userProfileStore
 } from 'app/utils/navigation';
 
-import {currentRuntimeStore, routeDataStore} from 'app/utils/stores';
+import {currentRuntimeStore, routeDataStore, runtimeStore} from 'app/utils/stores';
 
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {LeoRuntimeInitializer} from 'app/utils/leo-runtime-initializer';
@@ -156,7 +156,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
         LeoRuntimeInitializer.initialize({
           workspaceNamespace: workspace.namespace,
           onPollCycleComplete: (runtime) => {
-            currentRuntimeStore.set({currentRuntime: runtime});
+            runtimeStore.set({runtime: runtime, workspaceNamespace: workspace.namespace});
           },
           pollAbortSignal: this.pollAborter.signal,
           maxCreateCount: 0,

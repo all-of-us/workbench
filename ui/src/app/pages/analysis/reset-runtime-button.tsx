@@ -14,6 +14,8 @@ import {
   RuntimeStatus,
 } from 'generated/fetch';
 import {Runtime} from 'generated/fetch';
+import {serverConfigStore} from "../../utils/navigation";
+import {runtimePresets} from "../../utils/runtime-presets";
 
 const RESTART_LABEL = 'Reset server';
 const CREATE_LABEL = 'Create server';
@@ -193,7 +195,13 @@ export class ResetRuntimeButton extends React.Component<Props, State> {
     try {
       this.setState({resetRuntimePending: true});
       if (this.state.runtimeStatus === null) {
-        await runtimeApi().createRuntime(this.props.workspaceNamespace);
+        let runtime: Runtime;
+        if (serverConfigStore.getValue().enableGceAsNotebookRuntimeDefault) {
+          runtime = {...runtimePresets.generalAnalysis.runtimeTemplate};
+        } else {
+          runtime = {...runtimePresets.legacyGeneralAnalysis.runtimeTemplate};
+        }
+        await runtimeApi().createRuntime(this.props.workspaceNamespace, runtime);
       } else {
         await runtimeApi().deleteRuntime(this.props.workspaceNamespace);
       }

@@ -6,7 +6,8 @@ import colors, {addOpacity} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {allMachineTypes, validLeonardoMachineTypes} from 'app/utils/machines';
 import {
-  CurrentRuntimeStore, currentRuntimeStore,
+  runtimeStore,
+  RuntimeStore,
   withStore
 } from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -42,11 +43,11 @@ const styles = reactStyles({
 const defaultMachineType = allMachineTypes.find(({name}) => name === 'n1-standard-4');
 
 export interface Props {
-  runtimeStore: CurrentRuntimeStore;
+  currentRuntimeStore: RuntimeStore;
   workspace: WorkspaceData;
 }
 
-export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(currentRuntimeStore, 'runtimeStore'))(
+export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(runtimeStore, 'currentRuntimeStore'))(
   class extends React.Component<Props> {
     private aborter = new AbortController();
 
@@ -55,8 +56,8 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withStore(currentRun
     }
 
     render() {
-      const {runtimeStore} = this.props;
-      const runtime = runtimeStore.currentRuntime;
+      const {currentRuntimeStore} = this.props;
+      const runtime = currentRuntimeStore.runtime;
 
       if (!runtime) {
         // TODO(RW-5591): Create runtime page goes here.
