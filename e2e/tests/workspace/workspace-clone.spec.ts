@@ -1,5 +1,5 @@
 import WorkspacesPage from 'app/page/workspaces-page';
-import {findWorkspace, signIn} from 'utils/test-utils';
+import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
 import {Option} from 'app/text-labels';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import Navigation, {NavLink} from 'app/component/navigation';
@@ -19,7 +19,7 @@ describe('Clone workspace', () => {
    * - Delete clone workspace.
    */
     test('OWNER can clone workspace via Workspace card', async () => {
-      const workspaceCard = await findWorkspace(page);
+      const workspaceCard = await findOrCreateWorkspace(page);
 
       await workspaceCard.asElementHandle().hover();
       // Click on Ellipsis menu "Duplicate" option.
@@ -50,7 +50,7 @@ describe('Clone workspace', () => {
     });
 
     test('OWNER can clone workspace via Workspace action menu', async () => {
-      const workspaceCard = await findWorkspace(page);
+      const workspaceCard = await findOrCreateWorkspace(page);
       await workspaceCard.clickWorkspaceName();
 
       const dataPage = new WorkspaceDataPage(page);

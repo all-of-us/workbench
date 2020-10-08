@@ -7,7 +7,7 @@ import Link from 'app/element/link';
 import {Option, LinkText, ResourceCard} from 'app/text-labels';
 import CohortBuildPage, {FieldSelector} from 'app/page/cohort-build-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {findWorkspace, signIn} from 'utils/test-utils';
+import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
 import {waitForText, waitWhileLoading} from 'utils/waits-utils';
 
 
@@ -27,7 +27,7 @@ describe('User can create new Cohorts', () => {
    */
   test('Add Cohort of Physical Measurements BMI', async () => {
 
-    const workspaceCard = await findWorkspace(page);
+    const workspaceCard = await findOrCreateWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 
     // Wait for the Data page.
@@ -115,7 +115,7 @@ describe('User can create new Cohorts', () => {
    */
   test('Add Cohort of EKG condition with modifiers', async () => {
 
-    const workspaceCard = await findWorkspace(page);
+    const workspaceCard = await findOrCreateWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 
     // Wait for the Data page.
