@@ -25,8 +25,8 @@ import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {WorkspacesApiStub, WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
 
 import {findElements} from 'testing/react-testing-utility';
-import {setupModals, updateAndTick} from 'testing/test-helpers';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
+import {setupModals, updateAndTick} from 'testing/test-helpers';
 
 @Component({
   selector: 'app-test',
