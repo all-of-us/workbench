@@ -23,8 +23,7 @@ describe('RuntimePanel', () => {
   beforeEach(() => {
     runtimeApiStub = new RuntimeApiStub();
     registerApiClient(RuntimeApi, runtimeApiStub);
-    const runtime: Runtime = {status: RuntimeStatus.Creating, gceConfig: {machineType: "n1-standard-4"}};
-    runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
+    runtimeStore.set({runtime: runtimeApiStub.runtime, workspaceNamespace: workspaceStubs[0].namespace});
     props = {
       workspace: {...workspaceStubs[0], accessLevel: WorkspaceAccessLevel.WRITER}
     };
