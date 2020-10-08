@@ -10,9 +10,12 @@ import {
   LeoRuntimeInitializationFailedError,
   LeoRuntimeInitializer,
 } from 'app/utils/leo-runtime-initializer';
+import {serverConfigStore} from 'app/utils/navigation';
+import {runtimePresets} from 'app/utils/runtime-presets';
 import {
   RuntimeStatus,
-} from 'generated/fetch/api';
+} from 'generated/fetch';
+import {Runtime} from 'generated/fetch';
 
 const RESTART_LABEL = 'Reset server';
 const CREATE_LABEL = 'Create server';
@@ -62,13 +65,13 @@ export class ResetRuntimeButton extends React.Component<Props, State> {
       this.setState({isPollingRuntime: true, runtimeStatus: null});
       await LeoRuntimeInitializer.initialize({
         workspaceNamespace: this.props.workspaceNamespace,
-        onStatusUpdate: (runtimeStatus: RuntimeStatus) => {
+        onPoll: (runtime: Runtime) => {
           if (this.pollAborter.signal.aborted) {
             // IF we've been unmounted, don't try to update state.
             return;
           }
           this.setState({
-            runtimeStatus: runtimeStatus,
+            runtimeStatus: !!runtime ? runtime.status : null,
           });
         },
         pollAbortSignal: this.pollAborter.signal,
@@ -192,7 +195,13 @@ export class ResetRuntimeButton extends React.Component<Props, State> {
     try {
       this.setState({resetRuntimePending: true});
       if (this.state.runtimeStatus === null) {
-        await runtimeApi().createRuntime(this.props.workspaceNamespace);
+        let runtime: Runtime;
+        if (serverConfigStore.getValue().enableGceAsNotebookRuntimeDefault) {
+          runtime = {...runtimePresets.generalAnalysis.runtimeTemplate};
+        } else {
+          runtime = {...runtimePresets.legacyGeneralAnalysis.runtimeTemplate};
+        }
+        await runtimeApi().createRuntime(this.props.workspaceNamespace, runtime);
       } else {
         await runtimeApi().deleteRuntime(this.props.workspaceNamespace);
       }

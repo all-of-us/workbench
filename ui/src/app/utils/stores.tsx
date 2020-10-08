@@ -1,8 +1,8 @@
+import { BreadcrumbType } from 'app/utils/navigation';
+import {atom, Atom} from 'app/utils/subscribable';
 import {Profile} from 'generated';
-import { Runtime } from 'generated/fetch';
+import {Runtime} from 'generated/fetch';
 import * as React from 'react';
-import { BreadcrumbType } from './navigation';
-import {atom, Atom} from './subscribable';
 
 const {useEffect, useState} = React;
 
@@ -37,7 +37,7 @@ export interface RuntimeOperation {
   aborter: AbortController;
 }
 
-export interface WorkspaceRuntimeOperationMap {
+interface WorkspaceRuntimeOperationMap {
   [workspaceNamespace: string]: RuntimeOperation;
 }
 
@@ -72,13 +72,12 @@ export const abortRuntimeOperationForWorkspace = (workspaceNamespace: string) =>
 };
 
 // runtime store states: undefined(initial state) -> Runtime (user selected) <--> null (delete only - no recreate)
-interface RuntimeStore {
+export interface RuntimeStore {
   workspaceNamespace: string;
   runtime: Runtime | null | undefined;
 }
 
 export const runtimeStore = atom<RuntimeStore>(undefined);
-
 
 /**
  * @name useStore

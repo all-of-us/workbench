@@ -6,6 +6,7 @@ import {Runtime, RuntimeStatus} from 'generated/fetch';
 import {serverConfigStore} from './navigation';
 import {
   markRuntimeOperationCompleteForWorkspace,
+  runtimeStore,
   updateRuntimeOpsStoreForWorkspaceNamespace
 } from './stores';
 
@@ -69,7 +70,7 @@ export interface LeoRuntimeInitializerOptions {
   workspaceNamespace: string;
   // Callback which is called every time the runtime updates its status. When no runtime is found,
   // the callback is called with a null value.
-  onStatusUpdate?: (RuntimeStatus?) => void;
+  onPoll?: (Runtime?) => void;
   // An optional abort signal which allows the caller to abort the initialization process, including
   // cancelling any outstanding Ajax requests.
   pollAbortSignal?: AbortSignal;
@@ -86,7 +87,7 @@ export interface LeoRuntimeInitializerOptions {
 }
 
 const DEFAULT_OPTIONS: Partial<LeoRuntimeInitializerOptions> = {
-  onStatusUpdate: () => {},
+  onPoll: () => {},
   initialPollingDelay: DEFAULT_INITIAL_POLLING_DELAY,
   maxPollingDelay: DEFAULT_MAX_POLLING_DELAY,
   overallTimeout: DEFAULT_OVERALL_TIMEOUT,
@@ -115,7 +116,7 @@ const DEFAULT_OPTIONS: Partial<LeoRuntimeInitializerOptions> = {
 export class LeoRuntimeInitializer {
   // Core properties for interacting with the caller and the runtime APIs.
   private readonly workspaceNamespace: string;
-  private readonly onStatusUpdate: (RuntimeStatus?) => void;
+  private readonly onPoll: (Runtime?) => void;
   private readonly pollAbortSignal?: AbortSignal;
 
   // Properties to track & control the polling loop. We use a capped exponential backoff strategy
@@ -160,7 +161,7 @@ export class LeoRuntimeInitializer {
     options = {...DEFAULT_OPTIONS, ...options};
 
     this.workspaceNamespace = options.workspaceNamespace;
-    this.onStatusUpdate = options.onStatusUpdate ? options.onStatusUpdate : () => {};
+    this.onPoll = options.onPoll ? options.onPoll : () => {};
     this.pollAbortSignal = options.pollAbortSignal;
     this.currentDelay = options.initialPollingDelay;
     this.maxDelay = options.maxPollingDelay;
@@ -179,8 +180,9 @@ export class LeoRuntimeInitializer {
       operation: 'get',
       aborter: aborter
     });
-    await promise;
+    const runtime = await promise;
     markRuntimeOperationCompleteForWorkspace(this.workspaceNamespace);
+    runtimeStore.set({runtime: runtime, workspaceNamespace: this.workspaceNamespace});
     return promise;
   }
 
@@ -318,7 +320,7 @@ export class LeoRuntimeInitializer {
     // and abort signals.
     try {
       this.currentRuntime = await this.getRuntime();
-      this.onStatusUpdate(this.currentRuntime.status);
+      this.onPoll(this.currentRuntime);
     } catch (e) {
       if (isAbortError(e)) {
         return this.reject(
@@ -328,7 +330,7 @@ export class LeoRuntimeInitializer {
         // A not-found error is somewhat expected, if a runtime has recently been deleted or
         // hasn't been created yet.
         this.currentRuntime = null;
-        this.onStatusUpdate(null);
+        this.onPoll(null);
       } else {
         this.handleUnknownError(e);
         if (this.hasTooManyServerErrors()) {
