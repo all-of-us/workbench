@@ -13,7 +13,7 @@ import {
   userProfileStore
 } from 'app/utils/navigation';
 
-import {currentRuntimeStore, routeDataStore, runtimeStore} from 'app/utils/stores';
+import {routeDataStore, runtimeStore} from 'app/utils/stores';
 
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {LeoRuntimeInitializer} from 'app/utils/leo-runtime-initializer';
