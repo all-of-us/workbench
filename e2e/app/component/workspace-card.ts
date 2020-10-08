@@ -132,7 +132,7 @@ export default class WorkspaceCard extends CardBase {
     const [elemt] = await this.asElementHandle().$x(`.//*[${WorkspaceCardSelector.cardNameXpath}]`);
     const name = await getPropValue<string>(elemt, 'textContent');
     await Promise.all([
-      this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0']}),
+      this.page.waitForNavigation({waitUntil: ['load', 'domcontentloaded', 'networkidle0']}),
       elemt.click(),
     ]);
     if (waitForDataPage) {
