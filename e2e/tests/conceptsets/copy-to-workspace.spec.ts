@@ -37,7 +37,7 @@ describe('Copy Concept Set to another workspace', () => {
     await dataPage.openConceptSetsSubtab();
 
     // Create new Concept Set
-    const conceptSearchPage = await dataPage.openConceptSearch(Domain.Procedures);
+    const conceptSearchPage = await dataPage.openConceptSetSearch(Domain.Procedures);
     await conceptSearchPage.dataTableSelectAllRows();
     const addButtonLabel = await conceptSearchPage.clickAddToSetButton();
     // Table pagination displays 20 rows. If this changes, then update the check below.

@@ -27,7 +27,7 @@ describe('Editing and rename Concept Set', () => {
     const workspaceName = await findWorkspace(page, {create: true}).then(card => card.clickWorkspaceName());
 
     const dataPage = new WorkspaceDataPage(page);
-    let conceptSearchPage = await dataPage.openConceptSearch(Domain.Procedures);
+    let conceptSearchPage = await dataPage.openConceptSetSearch(Domain.Procedures);
 
     // Select first two rows.
     const row1 = await conceptSearchPage.dataTableSelectRow(1, 1);

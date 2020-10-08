@@ -116,8 +116,8 @@ describe('Create Concept Sets from Domains', () => {
     await conceptSearchPage.clickAddToSetButton();
 
     // Save
-    const conceptName1 = await conceptSearchPage.saveConceptSet();
-    console.log(`Created Concept Set "${conceptName1}"`);
+    const conceptSet1 = await conceptSearchPage.saveConceptSet();
+    console.log(`Created Concept Set "${conceptSet1}"`);
 
     // Start: Create new Concept Set 2
     const conceptActionPage = new ConceptSetActionsPage(page);
@@ -137,13 +137,13 @@ describe('Create Concept Sets from Domains', () => {
     await conceptSearchPage.clickAddToSetButton();
 
     // Save
-    const conceptName2 = await conceptSearchPage.saveConceptSet();
-    console.log(`Created Concept Set "${conceptName2}"`);
+    const conceptSet2 = await conceptSearchPage.saveConceptSet();
+    console.log(`Created Concept Set "${conceptSet2}"`);
 
     // Create new Dataset with two new Concept Sets
     await conceptActionPage.clickCreateDatasetButton();
     await datasetBuildPage.selectCohorts(['All Participants']);
-    await datasetBuildPage.selectConceptSets([conceptName1, conceptName2]);
+    await datasetBuildPage.selectConceptSets([conceptSet1, conceptSet2]);
     const saveModal = await datasetBuildPage.clickSaveAndAnalyzeButton();
     const datasetName = await saveModal.saveDataset();
 
@@ -161,8 +161,8 @@ describe('Create Concept Sets from Domains', () => {
     // Delete Concept Set.
     await dataPage.openConceptSetsSubtab();
 
-    await dataPage.deleteResource(conceptName1, ResourceCard.ConceptSet);
-    await dataPage.deleteResource(conceptName2, ResourceCard.ConceptSet);
+    await dataPage.deleteResource(conceptSet1, ResourceCard.ConceptSet);
+    await dataPage.deleteResource(conceptSet2, ResourceCard.ConceptSet);
   });
 
 });

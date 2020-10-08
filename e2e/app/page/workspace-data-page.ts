@@ -111,18 +111,18 @@ export default class WorkspaceDataPage extends WorkspaceBase {
    * Click Domain card.
    * @param {Domain} domain
    */
-  async openConceptSearch(domain: Domain): Promise<ConceptSetSearchPage> {
+  async openConceptSetSearch(domain: Domain): Promise<ConceptSetSearchPage> {
     // Click Add Datasets button.
     const datasetBuildPage = await this.clickAddDatasetButton();
 
     // Click Add Concept Sets button.
-    const conceptSearchPage = await datasetBuildPage.clickAddConceptSetsButton();
+    const conceptSetSearchPage = await datasetBuildPage.clickAddConceptSetsButton();
 
     // Add Concept Set in domain.
     const procedures = await ConceptDomainCard.findDomainCard(this.page, domain);
     await procedures.clickSelectConceptButton();
 
-    return conceptSearchPage;
+    return conceptSetSearchPage;
   }
 
   /**
