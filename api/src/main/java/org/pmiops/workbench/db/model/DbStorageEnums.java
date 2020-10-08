@@ -566,6 +566,10 @@ public final class DbStorageEnums {
           .put(Surveys.THE_BASICS, (short) 0)
           .put(Surveys.LIFESTYLE, (short) 1)
           .put(Surveys.OVERALL_HEALTH, (short) 2)
+          .put(Surveys.FAMILY_HISTORY, (short) 3)
+          .put(Surveys.HEALTHCARE_ACCESS_AND_UTILIZATION, (short) 4)
+          .put(Surveys.PERSONAL_MEDICAL_HISTORY, (short) 5)
+          .put(Surveys.COVID_19_PARTICIPANT_EXPERIENCE_COPE_SURVEY, (short) 6)
           .build();
 
   public static Surveys surveysFromStorage(Short survey) {

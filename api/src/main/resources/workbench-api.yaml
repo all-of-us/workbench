@@ -3157,15 +3157,20 @@ paths:
           description: A collection of criteria menu options
           schema:
             "$ref": "#/definitions/CriteriaMenuOptionsListResponse"
-  "/v1/cohortbuilder/{cdrVersionId}/criteria/domaininfo":
+  "/v1/cohortbuilder/{cdrVersionId}/criteria/domaininfo/{domain}":
     parameters:
     - "$ref": "#/parameters/cdrVersionId"
     get:
       tags:
       - cohortBuilder
-      description: 'Returns a collection of DomainInfo'
-      operationId: findDomainInfos
+      description: 'Returns a count of term matches per domain'
+      operationId: findDomainCount
       parameters:
+      - in: path
+        name: domain
+        type: string
+        required: true
+        description: the specific type of domain
       - in: query
         name: term
         type: string
@@ -3173,18 +3178,23 @@ paths:
         description: the term to search for
       responses:
         200:
-          description: A collection of DomainInfo
+          description: A count of matching concepts in this domain
           schema:
-            "$ref": "#/definitions/DomainInfoResponse"
-  "/v1/cohortbuilder/{cdrVersionId}/criteria/surveymodule":
+            "$ref": "#/definitions/DomainCount"
+  "/v1/cohortbuilder/{cdrVersionId}/criteria/surveymodule/{name}":
     parameters:
     - "$ref": "#/parameters/cdrVersionId"
     get:
       tags:
       - cohortBuilder
-      description: 'Returns a collection of SurveyModule'
-      operationId: findSurveyModules
+      description: 'Returns a count of term matches per survey name'
+      operationId: findSurveyCount
       parameters:
+      - in: path
+        name: name
+        type: string
+        required: true
+        description: the name of the survey
       - in: query
         name: term
         type: string
@@ -3192,9 +3202,9 @@ paths:
         description: the term to search for
       responses:
         200:
-          description: A collection of SurveyModule
+          description: A count of matching concepts per survey
           schema:
-            "$ref": "#/definitions/SurveysResponse"
+            "$ref": "#/definitions/SurveyCount"
   "/v1/cohortbuilder/{cdrVersionId}/criteria/{domain}/search/term":
     parameters:
     - "$ref": "#/parameters/cdrVersionId"
@@ -3602,6 +3612,10 @@ definitions:
     - THE BASICS
     - LIFESTYLE
     - OVERALL HEALTH
+    - FAMILY HISTORY
+    - HEALTHCARE ACCESS AND UTILIZATION
+    - PERSONAL MEDICAL HISTORY
+    - COVID-19 PARTICIPANT EXPERIENCE (COPE) SURVEY
   Race:
     type: string
     enum:
@@ -6542,6 +6556,19 @@ definitions:
       domain:
         description: the domain ID
         "$ref": "#/definitions/Domain"
+      name:
+        description: display name of the domain
+        type: string
+      conceptCount:
+        description: number of concepts matching the search query in this domain
+        type: integer
+        format: int64
+  SurveyCount:
+    type: object
+    required:
+    - name
+    - conceptCount
+    properties:
       name:
         description: display name of the domain
         type: string

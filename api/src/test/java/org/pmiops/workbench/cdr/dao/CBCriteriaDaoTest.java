@@ -10,7 +10,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbMenuOption;
-import org.pmiops.workbench.cdr.model.DbSurveyParent;
 import org.pmiops.workbench.cdr.model.DbSurveyVersion;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
@@ -179,21 +178,6 @@ public class CBCriteriaDaoTest {
     assertThat(
             cbCriteriaDao.findCriteriaByDomainIdAndConceptIds("CONDITION", ImmutableList.of("12")))
         .containsExactly(sourceCriteria);
-  }
-
-  @Test
-  public void findSurveyParents() {
-    List<DbSurveyParent> surveyParents = cbCriteriaDao.findSurveyParents();
-    assertThat(surveyParents.get(0).getConceptId())
-        .isEqualTo(Long.valueOf(surveyCriteria.getConceptId()));
-    assertThat(surveyParents.get(0).getCriteriaId())
-        .isEqualTo(Long.valueOf(surveyCriteria.getId()));
-  }
-
-  @Test
-  public void findSurveyCriteriaPathByTerm() {
-    assertThat(cbCriteriaDao.findSurveyCriteriaPathByTerm("term").size()).isEqualTo(1);
-    assertThat(cbCriteriaDao.findSurveyCriteriaPathByTerm("term").get(0)).isEqualTo("99");
   }
 
   @Test
