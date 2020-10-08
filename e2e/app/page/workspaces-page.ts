@@ -82,8 +82,8 @@ export default class WorkspacesPage extends WorkspaceEditPage {
     await (await editPage.getWorkspaceNameTextbox()).type(workspaceName);
     await (await editPage.getWorkspaceNameTextbox()).pressTab();
 
-    // select the default Synthetic Dataset
-    await editPage.selectDataset();
+    // select the default CDR Version
+    await editPage.selectCdrVersion();
 
     // select Billing Account
     await editPage.selectBillingAccount(billingAccount);

@@ -22,15 +22,16 @@ describe('Copy Concept Set to another workspace', () => {
    */
   test('Workspace OWNER can copy Concept Set', async () => {
 
-    // Need two workspaces. workspace1 is the Copy to workspace. workspace2 is the Copy from workspace.
-    const workspace1: WorkspaceCard = await findWorkspace(page, {create: true});
-    const copyToWorkspace = await workspace1.getWorkspaceName();
+    // Need a source and a destination workspace.
 
-    const workspace2: WorkspaceCard = await findWorkspace(page, {create: true});
-    const copyFromWorkspace = await workspace2.getWorkspaceName();
+    const destWorkspaceCard: WorkspaceCard = await findWorkspace(page, {create: true});
+    const destWorkspace = await destWorkspaceCard.getWorkspaceName();
 
-    // Open workspace2 Data Page.
-    await workspace2.clickWorkspaceName();
+    const srcWorkspaceCard: WorkspaceCard = await findWorkspace(page, {create: true});
+    const srcWorkspace = await srcWorkspaceCard.getWorkspaceName();
+
+    // Open Source Workspace Data Page.
+    await srcWorkspaceCard.clickWorkspaceName();
     // Open Concept Sets tab.
     const dataPage = new WorkspaceDataPage(page);
     await dataPage.openConceptSetsSubtab();
@@ -55,24 +56,24 @@ describe('Copy Concept Set to another workspace', () => {
     const conceptSetCopyName = makeRandomName();
 
     const conceptCopyModal = await conceptsetPage.openCopyToWorkspaceModal(conceptName);
-    await conceptCopyModal.copyToAnotherWorkspace(copyToWorkspace, conceptSetCopyName);
+    await conceptCopyModal.copyToAnotherWorkspace(destWorkspace, conceptSetCopyName);
 
     // Click "Go to Copied Concept Set" button.
     await conceptCopyModal.waitForButton(LinkText.GoToCopiedConceptSet).then(butn => butn.click());
 
     await dataPage.waitForLoad();
 
-    // Verify copyToWorkspace is open.
+    // Verify destWorkspace is open.
     const url = page.url();
-    expect(url).toContain(copyToWorkspace.replace(/-/g, ''));
+    expect(url).toContain(destWorkspace.replace(/-/g, ''));
 
     const resourceCard = new DataResourceCard(page);
     const exists = await resourceCard.cardExists(conceptSetCopyName, ResourceCard.ConceptSet);
     expect(exists).toBe(true);
 
-    console.log(`Copied Concept Set: "${conceptName} from workspace: "${copyFromWorkspace}" to Concept Set: "${conceptSetCopyName}" in another workspace: "${copyToWorkspace}"`)
+    console.log(`Copied Concept Set: "${conceptName} from workspace: "${srcWorkspace}" to Concept Set: "${conceptSetCopyName}" in another workspace: "${destWorkspace}"`)
 
-    // Delete Concept Set in copyToWorkspace.
+    // Delete Concept Set in destWorkspace.
     await dataPage.deleteResource(conceptSetCopyName, ResourceCard.ConceptSet);
   });
 

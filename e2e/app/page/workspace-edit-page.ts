@@ -11,13 +11,14 @@ import {waitForDocumentTitle} from 'utils/waits-utils';
 import {buildXPath} from 'app/xpath-builders';
 import {LinkText} from 'app/text-labels';
 import WorkspaceBase from './workspace-base';
+import {config} from 'resources/workbench-config';
 
 const faker = require('faker/locale/en_US');
 
 export const PageTitle = 'Create Workspace';
 
 export const LabelAlias = {
-  SYNTHETIC_DATASET: 'Workspace Name',  // select Synthetic Dataset
+  CDR_VERSION: 'Workspace Name',  // select CDR Version
   SELECT_BILLING: 'Select account',   // select billing account
   WORKSPACE_NAME: 'Workspace Name',  // Workspace name input textbox
   RESEARCH_PURPOSE: 'Research purpose',
@@ -76,8 +77,8 @@ export const FIELD = {
   workspaceNameTextbox: {
     textOption: {name: LabelAlias.WORKSPACE_NAME, ancestorLevel: 2, type: ElementType.Textbox}
   },
-  dataSetSelect: {
-    textOption: {name: LabelAlias.SYNTHETIC_DATASET, type: ElementType.Select}
+  cdrVersionSelect: {
+    textOption: {name: LabelAlias.CDR_VERSION, type: ElementType.Select}
   },
   billingAccountSelect: {
     textOption: {name: LabelAlias.SELECT_BILLING, type: ElementType.Select}
@@ -243,10 +244,10 @@ export default class WorkspaceEditPage extends WorkspaceBase {
   }
 
   /**
-   * Find the Synthetic Dataset Select element.
+   * Find the CDR Version Select element.
    */
-  async getDatasetSelect(): Promise<Select> {
-    return Select.findByName(this.page, FIELD.dataSetSelect.textOption);
+  async getCdrVersionSelect(): Promise<Select> {
+    return Select.findByName(this.page, FIELD.cdrVersionSelect.textOption);
   }
 
   async getCreateWorkspaceButton(): Promise<Button> {
@@ -314,12 +315,12 @@ export default class WorkspaceEditPage extends WorkspaceBase {
   }
 
   /**
-   * Select Synthetic Dataset.
-   * @param {string} value Option texts: "Synthetic Dataset 1", "Synthetic Dataset 2" and "Synthetic Dataset v3".
+   * Select CDR Version by name.
+   * @param {string} value
    */
-  async selectDataset(value: string = 'Synthetic Dataset v3'): Promise<string> {
-    const dataSetSelect = await this.getDatasetSelect();
-    return dataSetSelect.selectOption(value);
+  async selectCdrVersion(value: string = config.defaultCdrVersionName): Promise<string> {
+    const select = await this.getCdrVersionSelect();
+    return select.selectOption(value);
   }
 
   /**
