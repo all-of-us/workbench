@@ -140,6 +140,10 @@ commands:
               fi
             fi
           name: "Halt job if no code changes detected in << parameters.dir_name >> directory on non-master branch"
+
+  e2e_test_changes:
+    description: ""
+    steps:
       - run:
           command: |
             if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} != "master" ]; then
@@ -677,7 +681,9 @@ workflows:
     jobs:
       # Always run basic test/lint/compilation (open PRs, master merge).
       # Note: by default tags are not picked up.
-      - api-local-test
+      - api-local-test:
+          pre-steps:
+            - e2e_test_changes
       - api-unit-test
       - ui-unit-test
       - api-bigquery-test
