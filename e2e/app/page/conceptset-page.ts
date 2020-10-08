@@ -14,7 +14,7 @@ import CopyModal from 'app/component/copy-modal';
 
 const PageTitle = 'Concept Set';
 
-export default class ConceptsetPage extends AuthenticatedPage {
+export default class ConceptSetPage extends AuthenticatedPage {
 
   constructor(page: Page) {
     super(page);
@@ -28,8 +28,8 @@ export default class ConceptsetPage extends AuthenticatedPage {
     return true;
   }
 
-  async openCopyToWorkspaceModal(conceptName: string): Promise<CopyModal> {
-    await this.getSnowmanMenu(conceptName).then(menu => menu.select(Option.CopyToAnotherWorkspace, {waitForNav: false}));
+  async openCopyToWorkspaceModal(conceptSetName: string): Promise<CopyModal> {
+    await this.getSnowmanMenu(conceptSetName).then(menu => menu.select(Option.CopyToAnotherWorkspace, {waitForNav: false}));
     return new CopyModal(this.page);
   }
 
@@ -42,7 +42,7 @@ export default class ConceptsetPage extends AuthenticatedPage {
     return new SnowmanMenu(this.page);
   }
 
-  async getConceptName(): Promise<string> {
+  async getConceptSetName(): Promise<string> {
     const xpath = `//*[@data-test-id="concept-set-title"]`;
     const title = await this.page.waitForXPath(xpath, {visible: true});
     return getPropValue<string>(title, 'innerText');

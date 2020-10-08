@@ -10,7 +10,7 @@ import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
 import {buildXPath} from 'app/xpath-builders';
 import {LinkText} from 'app/text-labels';
-import WorkspaceBase from './workspace-base';
+import WorkspaceBase, {UseFreeCredits} from './workspace-base';
 import {config} from 'resources/workbench-config';
 
 const faker = require('faker/locale/en_US');
@@ -327,7 +327,7 @@ export default class WorkspaceEditPage extends WorkspaceBase {
    * Select Billing Account
    * @param {string} billingAccount
    */
-  async selectBillingAccount(billingAccount: string = 'Use All of Us free credits') {
+  async selectBillingAccount(billingAccount: string = UseFreeCredits) {
     const billingAccountSelect = await Select.findByName(this.page, FIELD.billingAccountSelect.textOption);
     await billingAccountSelect.selectOption(billingAccount);
   }

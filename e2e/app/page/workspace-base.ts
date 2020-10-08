@@ -3,7 +3,7 @@ import Modal from 'app/component/modal';
 import Link from 'app/element/link';
 import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
-import {Option, LinkText, ResourceCard} from 'app/text-labels';
+import {LinkText, Option, ResourceCard} from 'app/text-labels';
 import {buildXPath} from 'app/xpath-builders';
 import {ElementType} from 'app/xpath-options';
 import {Page} from 'puppeteer';
@@ -12,6 +12,8 @@ import {waitForAttributeEquality} from 'utils/waits-utils';
 import SnowmanMenu from 'app/component/snowman-menu';
 import {getPropValue} from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
+
+export const UseFreeCredits = 'Use All of Us free credits';
 
 export enum TabLabels {
   Data = 'Data',

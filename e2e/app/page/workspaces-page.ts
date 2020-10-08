@@ -9,6 +9,7 @@ import {waitForDocumentTitle, waitForText} from 'utils/waits-utils';
 import ReactSelect from 'app/element/react-select';
 import WorkspaceDataPage from './workspace-data-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
+import {UseFreeCredits} from './workspace-base';
 
 const faker = require('faker/locale/en_US');
 export const PageTitle = 'View Workspace';
@@ -72,12 +73,12 @@ export default class WorkspacesPage extends WorkspaceEditPage {
    */
   async createWorkspace(
      workspaceName: string,
-     billingAccount: string = 'Use All of Us free credits',
+     billingAccount: string = UseFreeCredits,
      reviewRequest: boolean = false): Promise<string[]> {
 
     const editPage = await this.clickCreateNewWorkspace();
     // wait for Billing Account default selected value
-    await waitForText(this.page, 'Use All of Us free credits');
+    await waitForText(this.page, UseFreeCredits);
 
     await (await editPage.getWorkspaceNameTextbox()).type(workspaceName);
     await (await editPage.getWorkspaceNameTextbox()).pressTab();

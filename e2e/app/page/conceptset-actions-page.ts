@@ -6,13 +6,13 @@ import {LinkText} from 'app/text-labels';
 import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
 import Link from 'app/element/link';
 import AuthenticatedPage from './authenticated-page';
-import ConceptsetPage from './conceptset-page';
-import ConceptsetSearchPage from './conceptset-search-page';
+import ConceptSetPage from './conceptset-page';
+import ConceptSetSearchPage from './conceptset-search-page';
 import DatasetBuildPage from './dataset-build-page';
 
 const PageTitle = 'Concept Set Actions';
 
-export default class ConceptsetActionsPage extends AuthenticatedPage {
+export default class ConceptSetActionsPage extends AuthenticatedPage {
 
   constructor(page: Page) {
     super(page);
@@ -50,12 +50,12 @@ export default class ConceptsetActionsPage extends AuthenticatedPage {
     return Button.findByName(this.page, {name: LinkText.CreateDataset});
   }
 
-  async openConceptSet(conceptName: string): Promise<ConceptsetPage> {
+  async openConceptSet(conceptName: string): Promise<ConceptSetPage> {
     const link = new Link(this.page, `//a[text()="${conceptName}"]`);
     await link.click();
-    const conceptsetPage = new ConceptsetPage(this.page);
-    await conceptsetPage.waitForLoad();
-    return conceptsetPage;
+    const conceptSetPage = new ConceptSetPage(this.page);
+    await conceptSetPage.waitForLoad();
+    return conceptSetPage;
   }
 
   /**
@@ -63,13 +63,13 @@ export default class ConceptsetActionsPage extends AuthenticatedPage {
    * Click Domain card.
    * @param {Domain} domain
    */
-  async openConceptSearch(domain: Domain): Promise<ConceptsetSearchPage> {
+  async openConceptSearch(domain: Domain): Promise<ConceptSetSearchPage> {
     await this.clickCreateAnotherConceptSetButton();
 
     const procedures = await ConceptDomainCard.findDomainCard(this.page, domain);
     await procedures.clickSelectConceptButton();
 
-    const conceptSearchPage = new ConceptsetSearchPage(this.page);
+    const conceptSearchPage = new ConceptSetSearchPage(this.page);
     await conceptSearchPage.waitForLoad();
     return conceptSearchPage;
   }

@@ -10,7 +10,7 @@ import {waitForDocumentTitle} from 'utils/waits-utils';
 import CohortActionsPage from './cohort-actions-page';
 import CohortBuildPage from './cohort-build-page';
 import {Visits} from './cohort-search-page';
-import ConceptsetSearchPage from './conceptset-search-page';
+import ConceptSetSearchPage from './conceptset-search-page';
 import DatasetBuildPage from './dataset-build-page';
 import NotebookPage from './notebook-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
@@ -111,7 +111,7 @@ export default class WorkspaceDataPage extends WorkspaceBase {
    * Click Domain card.
    * @param {Domain} domain
    */
-  async openConceptSearch(domain: Domain): Promise<ConceptsetSearchPage> {
+  async openConceptSearch(domain: Domain): Promise<ConceptSetSearchPage> {
     // Click Add Datasets button.
     const datasetBuildPage = await this.clickAddDatasetButton();
 
