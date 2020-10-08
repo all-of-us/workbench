@@ -63,7 +63,7 @@ describe('Copy Concept Set to another workspace', () => {
 
     await dataPage.waitForLoad();
 
-    // Verify copyToWorkspace is open.
+    // Verify destWorkspace is open.
     const url = page.url();
     expect(url).toContain(destWorkspace.replace(/-/g, ''));
 
@@ -73,7 +73,7 @@ describe('Copy Concept Set to another workspace', () => {
 
     console.log(`Copied Concept Set: "${conceptName} from workspace: "${srcWorkspace}" to Concept Set: "${conceptSetCopyName}" in another workspace: "${destWorkspace}"`)
 
-    // Delete Concept Set in copyToWorkspace.
+    // Delete Concept Set in destWorkspace.
     await dataPage.deleteResource(conceptSetCopyName, ResourceCard.ConceptSet);
   });
 
