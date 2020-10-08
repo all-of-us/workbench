@@ -468,7 +468,7 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
 WHERE vocabulary_id = 'PPI'
 AND domain_id = 'Measurement'
 AND concept_class_id = 'Clinical Observation') c
-where d.domain = 8"
+where d.domain = 10"
 
 # Set participant counts for Condition domain
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
