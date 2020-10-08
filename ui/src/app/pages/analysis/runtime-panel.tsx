@@ -7,7 +7,6 @@ import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {allMachineTypes, validLeonardoMachineTypes} from 'app/utils/machines';
 import {
   runtimeStore,
-  RuntimeStore,
   useStore
 } from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -109,12 +108,12 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
                     disabled={true}
                     options={fp.flow(
                         // Show all CPU options.
-                        fp.map('cpu'),
+                      fp.map('cpu'),
                         // In the event that was remove a machine type from our set of valid
                         // configs, we want to continue to allow rendering of the value here.
                         // Union also makes the CPU values unique.
-                        fp.union([machineType.cpu]),
-                        fp.sortBy(fp.identity)
+                      fp.union([machineType.cpu]),
+                      fp.sortBy(fp.identity)
                     )(validLeonardoMachineTypes)}
                     value={machineType.cpu}/>
         </div>
@@ -125,11 +124,11 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
                     disabled={true}
                     options={fp.flow(
                         // Show valid memory options as constrained by the currently selected CPU.
-                        fp.filter(({cpu}) => cpu === machineType.cpu),
-                        fp.map('memory'),
+                      fp.filter(({cpu}) => cpu === machineType.cpu),
+                      fp.map('memory'),
                         // See above comment on CPU union.
-                        fp.union([machineType.memory]),
-                        fp.sortBy(fp.identity)
+                      fp.union([machineType.memory]),
+                      fp.sortBy(fp.identity)
                     )(validLeonardoMachineTypes)}
                     value={machineType.memory}/>
         </div>

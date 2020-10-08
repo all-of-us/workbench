@@ -5,8 +5,8 @@ import {runtimePresets} from 'app/utils/runtime-presets';
 import {Runtime, RuntimeStatus} from 'generated/fetch';
 import {serverConfigStore} from './navigation';
 import {
-  runtimeStore,
   markRuntimeOperationCompleteForWorkspace,
+  runtimeStore,
   updateRuntimeOpsStoreForWorkspaceNamespace
 } from './stores';
 

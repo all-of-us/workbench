@@ -120,7 +120,7 @@ const styles = reactStyles({
     borderRadius: '.25rem',
   },
   rotate: {
-    animation: "rotation 2s infinite linear"
+    animation: 'rotation 2s infinite linear'
   },
   navIcons: {
     position: 'absolute',
@@ -351,11 +351,11 @@ interface State {
 }
 
 export const HelpSidebar = fp.flow(
-    withCurrentCohortCriteria(),
-    withCurrentConcept(),
-    withCurrentWorkspace(),
-    withStore(runtimeStore, 'currentRuntimeStore'),
-    withUserProfile()
+  withCurrentCohortCriteria(),
+  withCurrentConcept(),
+  withCurrentWorkspace(),
+  withStore(runtimeStore, 'currentRuntimeStore'),
+  withUserProfile()
 )(
   class extends React.Component<Props, State> {
     subscription: Subscription;
@@ -625,7 +625,7 @@ export const HelpSidebar = fp.flow(
             color: colors.runtimeStatus.error,
           }}/>
         }
-      </FlexRow>
+      </FlexRow>;
     }
 
     get sidebarStyle() {

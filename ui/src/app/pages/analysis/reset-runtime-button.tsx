@@ -10,12 +10,12 @@ import {
   LeoRuntimeInitializationFailedError,
   LeoRuntimeInitializer,
 } from 'app/utils/leo-runtime-initializer';
+import {serverConfigStore} from 'app/utils/navigation';
+import {runtimePresets} from 'app/utils/runtime-presets';
 import {
   RuntimeStatus,
 } from 'generated/fetch';
 import {Runtime} from 'generated/fetch';
-import {serverConfigStore} from "../../utils/navigation";
-import {runtimePresets} from "../../utils/runtime-presets";
 
 const RESTART_LABEL = 'Reset server';
 const CREATE_LABEL = 'Create server';
