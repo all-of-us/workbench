@@ -339,18 +339,17 @@ commands:
           command: |
 
             if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} != "master" ]; then
-              ALL_CHANGES=$(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}))
-              CHANGES=$(echo $ALL_CHANGES | cut -d " " -f 1-)
-              echo $CHANGES
+              CHANGED_COUNT=$(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | wc -l | xargs)
+              echo $CHANGED_COUNT
 
               echo "</br>"
-              E2E_CHANGES=$(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) -- e2e)
-              echo $E2E_CHANGES
+              E2E_CHANGED_COUNT=$(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) -- e2e | wc -l | xargs)
+              echo $E2E_CHANGED_COUNT
 
               # Compare list length of two lists
 
-              if [ -n "$E2E_CHANGES" ]; then
-                if [ "${#CHANGES[@]}" -eq "${#E2E_CHANGES[@]}" ]; then
+              if [ $E2E_CHANGED_COUNT > 0 ]; then
+                if [ $E2E_CHANGED_COUNT == CHANGED_COUNT ]; then
                   echo "No changes in application code. Stop job now."
                   circleci step halt
                 else
