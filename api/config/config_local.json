@@ -117,7 +117,7 @@
   "actionAudit": {
     "logName": "workbench-action-audit-local",
     "bigQueryDataset": "workbench_action_audit_local",
-    "bigQueryTable": "workbench_actiogin_audit_local"
+    "bigQueryTable": "workbench_action_audit_local"
   },
   "rdrExport": {
     "host": "pmi-drc-api-test.appspot.com",

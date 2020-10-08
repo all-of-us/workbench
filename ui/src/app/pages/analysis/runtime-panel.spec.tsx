@@ -9,7 +9,7 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {RuntimeApi} from 'generated/fetch/api';
 import {WorkspaceAccessLevel} from 'generated/fetch';
-import {currentRuntimeStore} from "app/utils/stores";
+import {runtimeStore} from "app/utils/stores";
 
 describe('RuntimePanel', () => {
   let props: Props;
@@ -23,7 +23,7 @@ describe('RuntimePanel', () => {
     runtimeApiStub = new RuntimeApiStub();
     registerApiClient(RuntimeApi, runtimeApiStub);
     props = {
-      runtimeStore: {currentRuntime: {...runtimeApiStub.runtime}},
+      currentRuntimeStore: {runtime: {...runtimeApiStub.runtime}, workspaceNamespace: workspaceStubs[0].namespace},
       workspace: {...workspaceStubs[0], accessLevel: WorkspaceAccessLevel.WRITER}
     };
   });
@@ -50,7 +50,7 @@ describe('RuntimePanel', () => {
 
     expect(imageDropdown.text()).toContain(runtimeApiStub.runtime.toolDockerImage);
   });
-p
+
   it('should restrict memory options by cpu', async() => {
     runtimeApiStub.runtime.dataprocConfig.masterMachineType = 'n1-standard-8';
 
