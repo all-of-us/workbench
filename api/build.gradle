@@ -20,6 +20,7 @@ buildscript {
     OPENCENSUS_VERSION = '0.23.0'
     SPRINGFOX_VERSION = '2.6.1'
     SPRING_BOOT_VERSION = '1.5.22.RELEASE'
+    SPRING_SECURITY_VERSION = '4.2.18.RELEASE'
     SWAGGER_2_CODEGEN_VERSION = '2.2.3'
     SWAGGER_3_CODEGEN_VERSION = '3.0.21'
   }
@@ -440,7 +441,8 @@ dependencies {
   }
 
   compile "org.springframework.retry:spring-retry:1.1.5.RELEASE"
-  compile "org.springframework.security:spring-security-web:4.2.15.RELEASE"
+  compile "org.springframework.security:spring-security-core:$project.ext.SPRING_SECURITY_VERSION"
+  compile "org.springframework.security:spring-security-web:$project.ext.SPRING_SECURITY_VERSION"
 
   implementation "org.mapstruct:mapstruct:$project.ext.MAPSTRUCT_VERSION"
   testAnnotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
