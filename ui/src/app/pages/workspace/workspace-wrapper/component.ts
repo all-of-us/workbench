@@ -155,7 +155,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
         this.pollAborter = new AbortController();
         LeoRuntimeInitializer.initialize({
           workspaceNamespace: workspace.namespace,
-          onPollCycleComplete: (runtime) => {
+          onPoll: (runtime) => {
             runtimeStore.set({runtime: runtime, workspaceNamespace: workspace.namespace});
           },
           pollAbortSignal: this.pollAborter.signal,

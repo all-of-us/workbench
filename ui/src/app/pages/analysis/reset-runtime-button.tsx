@@ -65,7 +65,7 @@ export class ResetRuntimeButton extends React.Component<Props, State> {
       this.setState({isPollingRuntime: true, runtimeStatus: null});
       await LeoRuntimeInitializer.initialize({
         workspaceNamespace: this.props.workspaceNamespace,
-        onPollCycleComplete: (runtime: Runtime) => {
+        onPoll: (runtime: Runtime) => {
           if (this.pollAborter.signal.aborted) {
             // IF we've been unmounted, don't try to update state.
             return;
