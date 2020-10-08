@@ -331,6 +331,24 @@ commands:
           name: "Halt job if not a pull request"
           command: bash .circleci/pr-skip-ci.sh
 
+  halt_on_e2e_changes:
+    steps:
+      - run:
+          name: "Halt non-e2e job if changed files in PR contain only Puppeteer e2e tests in e2e dir"
+          command: |
+            if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} != "master" ]; then
+              # Count total number of files changed.
+              CHANGED_COUNT=$(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | wc -l | xargs)
+              # Number of chagned files in e2e/ dir.
+              E2E_CHANGED_COUNT=$(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) -- e2e | wc -l | xargs)
+              # Compare two counts
+              if [ $E2E_CHANGED_COUNT > 0 ]; then
+                if [ $E2E_CHANGED_COUNT == CHANGED_COUNT ]; then
+                  echo "No changes in application code. Stop job now."
+                  circleci step halt
+                fi
+              fi
+            fi
 
 # -------------------------
 #        JOBS
@@ -341,6 +359,7 @@ jobs:
     <<: *java_defaults
     steps:
       - checkout_init_git
+      - halt_on_e2e_changes
       - ensure_branch_has_changes:
           dir_name: "api"
       - manage_api_cache:
@@ -427,6 +446,7 @@ jobs:
       <<: *java_env
     steps:
       - checkout_init_git
+      - halt_on_e2e_changes
       - activate_service_account_credential
       - start_local_api
       - run:
@@ -465,6 +485,7 @@ jobs:
     <<: *java_defaults
     steps:
       - checkout_init_git
+      - halt_on_e2e_changes
       - manage_api_cache:
           restore: true
       - run:
@@ -476,6 +497,7 @@ jobs:
     <<: *java_defaults
     steps:
       - checkout_init_git
+      - halt_on_e2e_changes
       - ensure_branch_has_changes:
           dir_name: "api"
       - manage_api_cache:
@@ -494,6 +516,7 @@ jobs:
     <<: *java_defaults
     steps:
       - checkout_init_git
+      - halt_on_e2e_changes
       - ensure_branch_has_changes:
           dir_name: "api"
       - manage_api_cache:
@@ -510,6 +533,7 @@ jobs:
     <<: *defaults
     steps:
       - checkout_init_git
+      - halt_on_e2e_changes
       - ensure_branch_has_changes:
           dir_name: "ui"
       - run:
