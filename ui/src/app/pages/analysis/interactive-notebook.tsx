@@ -59,7 +59,7 @@ const styles = reactStyles({
     border: 0
   },
   previewFrame: {
-    width: '100%',
+    width: 'calc(100% - 45px)',
     height: 'calc(100% - 40px)',
     position: 'absolute',
     border: 0
