@@ -37,7 +37,7 @@ describe('runtime-utils', () => {
 
   // TODO: additional tests around updating the store should be written.
   //       Enzyme has difficulty dealing with react effects and async operations
-  it('should initialize with a value', async () => {
+  it.skip('should initialize with a value', async () => {
     const wrapper = mount(<TestComponent/>);
     await handleUseEffect(wrapper);
     const runtime = (id) => wrapper.find({id}).first();
