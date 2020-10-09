@@ -53,7 +53,7 @@ public class ElasticFiltersTest {
         .addType(CriteriaType.ICD9CM.toString())
         .addAttribute(Boolean.FALSE)
         .addStandard(false)
-        .addSynonyms("[CONDITION_rank1]")
+        .addFullText("[CONDITION_rank1]")
         .build();
   }
 
@@ -73,7 +73,7 @@ public class ElasticFiltersTest {
         .addSubtype(CriteriaSubType.SURVEY.toString())
         .addAttribute(Boolean.FALSE)
         .addStandard(false)
-        .addSynonyms("+[SURVEY_rank1]")
+        .addFullText("+[SURVEY_rank1]")
         .build();
   }
 

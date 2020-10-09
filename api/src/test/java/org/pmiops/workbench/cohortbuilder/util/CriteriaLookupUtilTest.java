@@ -184,7 +184,7 @@ public class CriteriaLookupUtilTest {
             .addSelectable(true)
             .addStandard(false)
             .addConceptId("44829696")
-            .addSynonyms("[CONDITION_rank1]")
+            .addFullText("[CONDITION_rank1]")
             .build();
     saveCriteriaWithPath("0", icd9Parent);
     DbCriteria icd9Child1 =
@@ -196,7 +196,7 @@ public class CriteriaLookupUtilTest {
             .addSelectable(true)
             .addStandard(false)
             .addConceptId("44829697")
-            .addSynonyms("[CONDITION_rank1]")
+            .addFullText("[CONDITION_rank1]")
             .build();
     saveCriteriaWithPath(icd9Parent.getPath(), icd9Child1);
     DbCriteria icd9Child2 =
@@ -208,7 +208,7 @@ public class CriteriaLookupUtilTest {
             .addSelectable(true)
             .addStandard(false)
             .addConceptId("44835564")
-            .addSynonyms("[CONDITION_rank1]")
+            .addFullText("[CONDITION_rank1]")
             .build();
     saveCriteriaWithPath(icd9Parent.getPath(), icd9Child2);
 
