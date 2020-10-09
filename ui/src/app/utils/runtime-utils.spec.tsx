@@ -29,7 +29,7 @@ const handleUseEffect = async (component) => {
 
 describe('runtime-utils', () => {
   let runtimeApiStub: RuntimeApiStub;
-  
+
   beforeEach(() => {
     runtimeApiStub = new RuntimeApiStub();
     registerApiClient(RuntimeApi, runtimeApiStub);

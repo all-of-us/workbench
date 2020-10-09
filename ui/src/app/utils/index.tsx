@@ -565,13 +565,14 @@ export const useToggle = (): [boolean, Function] => {
   return [state, setState];
 };
 
-export const withAsyncErrorHandling = fp.curry((handler: (error: Error) => void, fnToTry: (...args: any[]) => Promise<any>) => async(...args) => {
-  try {
-    return await fnToTry(...args);
-  } catch (error) {
-    handler(error);
-  }
-});
+export const withAsyncErrorHandling = fp.curry(
+  (handler: (error: Error) => void, fnToTry: (...args: any[]) => Promise<any>) => async(...args) => {
+    try {
+      return await fnToTry(...args);
+    } catch (error) {
+      handler(error);
+    }
+  });
 
 
 // Takes a search string and validates for the most common MySQL use cases.

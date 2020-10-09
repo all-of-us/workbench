@@ -42,7 +42,7 @@ describe('RuntimePanel', () => {
 
   it('should show loading spinner while loading', async() => {
     const wrapper = component();
-    await handleUseEffect(wrapper);   
+    await handleUseEffect(wrapper);
 
     // Check before ticking - stub returns the runtime asynchronously.
     expect(!wrapper.exists({'data-test-id': 'runtime-panel'}));
@@ -56,7 +56,7 @@ describe('RuntimePanel', () => {
 
   it('should render runtime details', async() => {
     const wrapper = component();
-    await handleUseEffect(wrapper);   
+    await handleUseEffect(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
     const imageDropdown = wrapper.find({'data-test-id': 'runtime-image-dropdown'}).find('label').first();
@@ -67,7 +67,7 @@ describe('RuntimePanel', () => {
 
   it('should restrict memory options by cpu', async() => {
     const wrapper = component();
-    await handleUseEffect(wrapper);   
+    await handleUseEffect(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
     wrapper.find('#runtime-cpu .p-dropdown').first().simulate('click');
@@ -83,7 +83,7 @@ describe('RuntimePanel', () => {
 
   it('should should toggle the disabled state of the update button when the configuration changes', async() => {
     const wrapper = component();
-    await handleUseEffect(wrapper);   
+    await handleUseEffect(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
     const updateButton = () => wrapper.find(Button).find({'aria-label': 'Update'}).first();
