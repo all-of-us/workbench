@@ -219,10 +219,6 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
         }
       >{currentRuntime ? 'Update' : 'Create'}</Button>
     </FlexRow>
-    {activeRuntimeOp && <React.Fragment>
-      <hr/>
-      <ActiveRuntimeOp operation={activeRuntimeOp.operation} workspaceNamespace={workspace.namespace}/>
-    </React.Fragment>}
   </div>;
 
 });
