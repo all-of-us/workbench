@@ -208,10 +208,10 @@ export class LeoRuntimeInitializer {
     }
     const aborter = new AbortController();
     let runtime: Runtime;
-    if (serverConfigStore.getValue().enableGceAsNotebookRuntimeDefault) {
-      runtime = {...runtimePresets.generalAnalysis.runtimeTemplate};
-    } else if (serverConfigStore.getValue().enableCustomRuntimes) {
+    if (serverConfigStore.getValue().enableCustomRuntimes && this.targetRuntime) {
       runtime = this.targetRuntime;
+    } else if (serverConfigStore.getValue().enableGceAsNotebookRuntimeDefault) {
+      runtime = {...runtimePresets.generalAnalysis.runtimeTemplate};
     } else {
       runtime = {...runtimePresets.legacyGeneralAnalysis.runtimeTemplate};
     }
