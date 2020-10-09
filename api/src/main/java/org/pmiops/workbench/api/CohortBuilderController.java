@@ -30,6 +30,7 @@ import org.pmiops.workbench.model.DataFiltersResponse;
 import org.pmiops.workbench.model.DemoChartInfoListResponse;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCount;
+import org.pmiops.workbench.model.DomainInfoResponse;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
@@ -38,6 +39,7 @@ import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.SurveyCount;
 import org.pmiops.workbench.model.SurveyVersionListResponse;
+import org.pmiops.workbench.model.SurveysResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -202,6 +204,14 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
+  public ResponseEntity<DomainInfoResponse> findDomainInfos(Long cdrVersionId, String term) {
+    cdrVersionService.setCdrVersion(cdrVersionId);
+    validateTerm(term);
+    return ResponseEntity.ok(
+        new DomainInfoResponse().items(cohortBuilderService.findDomainInfos(term)));
+  }
+
+  @Override
   public ResponseEntity<CriteriaAttributeListResponse> findCriteriaAttributeByConceptId(
       Long cdrVersionId, Long conceptId) {
     cdrVersionService.setCdrVersion(cdrVersionId);
@@ -225,6 +235,13 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   public ResponseEntity<ParticipantDemographics> findParticipantDemographics(Long cdrVersionId) {
     cdrVersionService.setCdrVersion(cdrVersionId);
     return ResponseEntity.ok(cohortBuilderService.findParticipantDemographics());
+  }
+
+  @Override
+  public ResponseEntity<SurveysResponse> findSurveyModules(Long cdrVersionId, String term) {
+    cdrVersionService.setCdrVersion(cdrVersionId);
+    return ResponseEntity.ok(
+        new SurveysResponse().items(cohortBuilderService.findSurveyModules(term)));
   }
 
   @Override

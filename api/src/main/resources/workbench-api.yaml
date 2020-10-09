@@ -3205,6 +3205,44 @@ paths:
           description: A count of matching concepts per survey
           schema:
             "$ref": "#/definitions/SurveyCount"
+  "/v1/cohortbuilder/{cdrVersionId}/criteria/domaininfo":
+    parameters:
+    - "$ref": "#/parameters/cdrVersionId"
+    get:
+      tags:
+      - cohortBuilder
+      description: 'Returns a collection of DomainInfo'
+      operationId: findDomainInfos
+      parameters:
+      - in: query
+        name: term
+        type: string
+        required: true
+        description: the term to search for
+      responses:
+        200:
+          description: A collection of DomainInfo
+          schema:
+            "$ref": "#/definitions/DomainInfoResponse"
+  "/v1/cohortbuilder/{cdrVersionId}/criteria/surveymodule":
+    parameters:
+    - "$ref": "#/parameters/cdrVersionId"
+    get:
+      tags:
+      - cohortBuilder
+      description: 'Returns a collection of SurveyModule'
+      operationId: findSurveyModules
+      parameters:
+      - in: query
+        name: term
+        type: string
+        required: true
+        description: the term to search for
+      responses:
+        200:
+          description: A collection of SurveyModule
+          schema:
+            "$ref": "#/definitions/SurveysResponse"
   "/v1/cohortbuilder/{cdrVersionId}/criteria/{domain}/search/term":
     parameters:
     - "$ref": "#/parameters/cdrVersionId"
