@@ -5652,6 +5652,7 @@ FROM
             , STRING_AGG(b.concept_synonym_name,'; ') as display_synonyms
         FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` a
         LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` b on a.concept_id = b.concept_id
+        WHERE NOT REGEXP_CONTAINS(b.concept_synonym_name, r'\p{Han}') --remove items with chinese characters
         GROUP BY a.id, a.name, a.code, a.concept_id, a.domain_id
     ) y
 WHERE x.id = y.id"
