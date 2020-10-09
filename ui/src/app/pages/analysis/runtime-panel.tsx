@@ -8,7 +8,6 @@ import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {allMachineTypes, validLeonardoMachineTypes} from 'app/utils/machines';
 import {useCustomRuntime} from 'app/utils/runtime-utils';
 import {
-  abortRuntimeOperationForWorkspace,
   RuntimeOperation,
   runtimeOpsStore,
   useStore
@@ -194,9 +193,9 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
         aria-label={currentRuntime ? 'Update' : 'Create'}
         disabled={status !== RuntimeStatus.Running || !runtimeChanged}
         onClick={() =>
-          setRequestedRuntime({dataprocConfig: {
-            masterMachineType: updatedMachineType || masterMachineType,
-            masterDiskSize: updatedDiskSize || masterDiskSize
+          setRequestedRuntime({gceConfig: {
+            machineType: updatedMachineType || masterMachineType,
+            diskSize: updatedDiskSize || masterDiskSize
           }})
         }
       >{currentRuntime ? 'Update' : 'Create'}</Button>

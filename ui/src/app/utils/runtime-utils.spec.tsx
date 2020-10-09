@@ -1,27 +1,14 @@
-import { atom } from './subscribable';
 import { act } from 'react-dom/test-utils';
 import {mount} from 'enzyme';
 import {useCustomRuntime} from 'app/utils/runtime-utils';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {RuntimeApi} from 'generated/fetch/api';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import * as React from 'react';
 
-export const delay = ms => {
-  return new Promise(resolve => setTimeout(resolve, ms));
-};
-
-const promiseComplete = () => {
-  let resolveHandler;
-  const promise = new Promise<void>((resolve) => {
-    resolveHandler = value => value && resolve();
-  });
-  return {promise, resolveHandler};
-};
-
 const Runtime = ({id}) => {
-  const [runtime, setRuntime] = useCustomRuntime('test')
-
+  const [runtime, ] = useCustomRuntime('test')
   const {runtimeName = ''} = runtime || {};
   return <div id={id}>{runtimeName}</div>
 }
@@ -42,21 +29,22 @@ const handleUseEffect = async (component) => {
 
 describe('runtime-utils', () => {
   let runtimeApiStub: RuntimeApiStub;
-
   
   beforeEach(() => {
     runtimeApiStub = new RuntimeApiStub();
     registerApiClient(RuntimeApi, runtimeApiStub);
   });
 
+  // TODO: additional tests around updating the store should be written.
+  //       Enzyme has difficulty dealing with react effects and async operations
   it('should initialize with a value', async () => {
-
     const wrapper = mount(<TestComponent/>);
     await handleUseEffect(wrapper);
-    const runtime = wrapper.find({id:'1'}).first();
+    const runtime = (id) => wrapper.find({id}).first();
 
-    expect(runtime.text()).toEqual('Runtime Name');
-    expect({value: 1}).toEqual({value: 1});
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(runtime('1').text()).toEqual('Runtime Name');
+    expect(runtime('2').text()).toEqual('Runtime Name');
   });
-
 });

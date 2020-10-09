@@ -197,9 +197,7 @@ export class LeoRuntimeInitializer {
       operation: 'get',
       aborter: aborter
     });
-    const runtime = await promise;
     markRuntimeOperationCompleteForWorkspace(this.workspaceNamespace);
-    runtimeStore.set({runtime: runtime, workspaceNamespace: this.workspaceNamespace});
     return promise;
   }
 
