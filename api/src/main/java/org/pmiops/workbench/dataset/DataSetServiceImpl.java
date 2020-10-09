@@ -687,14 +687,26 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   @Override
-  public List<String> generateMicroarrayCohortExtractCodeCells(DbWorkspace dbWorkspace, String qualifier, Map<String, QueryJobConfiguration> queriesByDomain) {
-    String joinedDatasetVariableNames = queriesByDomain.entrySet().stream()
-        .map(e -> "dataset_" + qualifier + "_" + Domain.fromValue(e.getKey()).toString().toLowerCase() + "_df")
-        .collect(Collectors.joining(", "));
+  public List<String> generateMicroarrayCohortExtractCodeCells(
+      DbWorkspace dbWorkspace,
+      String qualifier,
+      Map<String, QueryJobConfiguration> queriesByDomain) {
+    String joinedDatasetVariableNames =
+        queriesByDomain.entrySet().stream()
+            .map(
+                e ->
+                    "dataset_"
+                        + qualifier
+                        + "_"
+                        + Domain.fromValue(e.getKey()).toString().toLowerCase()
+                        + "_df")
+            .collect(Collectors.joining(", "));
 
     return ImmutableList.of(
         "person_ids = set()\n"
-            + "datasets = [" + joinedDatasetVariableNames + "]\n"
+            + "datasets = ["
+            + joinedDatasetVariableNames
+            + "]\n"
             + "\n"
             + "for dataset in datasets:\n"
             + "    if 'PERSON_ID' in dataset:\n"
@@ -713,7 +725,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             + "python3 /genomics/microarray/raw_array_cohort_extract.py \\\n"
             + "          --dataset fc-aou-cdr-synth-test.microarray_data \\\n"
             + "          --fq_destination_table ${EXPORT_TABLE} \\\n"
-            + "          --query_project " + dbWorkspace.getWorkspaceNamespace() + " \\\n"
+            + "          --query_project "
+            + dbWorkspace.getWorkspaceNamespace()
+            + " \\\n"
             + "          --sample_mapping_table fc-aou-cdr-synth-test.microarray_data.sample_list \\\n"
             + "          --cohort_sample_names_file cohort_sample_names.txt \\\n"
             + "          --sample_map_outfile cohort_sample_map.csv\n"
@@ -726,8 +740,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             + "        --cohort-sample-file cohort_sample_map.csv \\\n"
             + "        --use-compressed-data \"false\" \\\n"
             + "        --cohort-extract-table ${EXPORT_TABLE} \\\n"
-            + "        --local-sort-max-records-in-ram \"1000000\""
-    );
+            + "        --local-sort-max-records-in-ram \"1000000\"");
   }
 
   @Override
@@ -750,11 +763,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             + "\n"
             + "head results.P1.assoc\n"
             + "head results.P2.assoc");
-
-
-    queriesAsStrings.add(""
-);
-
   }
 
   @Override

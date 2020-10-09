@@ -337,15 +337,16 @@ public class DataSetController implements DataSetApiDelegate {
             qualifier,
             queriesByDomain);
 
-
-    if (dataSetExportRequest.getIncludeMicroarrayData()) {
+    if (!dataSetExportRequest.getIncludeMicroarrayData()) {
       if (!dataSetExportRequest.getKernelType().equals(KernelTypeEnum.PYTHON)) {
         throw new BadRequestException("Genomics code generation is only supported in Python");
       }
 
-      queriesAsStrings.addAll(dataSetService.generateMicroarrayCohortExtractCodeCells(dbWorkspace, qualifier, queriesByDomain));
+      queriesAsStrings.addAll(
+          dataSetService.generateMicroarrayCohortExtractCodeCells(
+              dbWorkspace, qualifier, queriesByDomain));
 
-      if (dataSetExportRequest.getGenomicsAnalysisTool().equals(GenomicsAnalysisToolEnum.PLINK)) {
+      if (!dataSetExportRequest.getGenomicsAnalysisTool().equals(GenomicsAnalysisToolEnum.PLINK)) {
         queriesAsStrings.addAll(dataSetService.generatePlinkDemoCode());
       }
     }
