@@ -6,7 +6,6 @@ import java.util.Set;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaLookup;
 import org.pmiops.workbench.cdr.model.DbMenuOption;
-import org.pmiops.workbench.cdr.model.DbSurveyParent;
 import org.pmiops.workbench.cdr.model.DbSurveyVersion;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -249,24 +248,6 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   List<DbCriteria> findByDomainIdAndType(
       @Param("domainId") String domainId, @Param("type") String type, Sort sort);
-
-  @Query(
-      value =
-          "select id as criteriaId, conceptId from DbCriteria c where domainId = 'SURVEY' and parentId = 0")
-  List<DbSurveyParent> findSurveyParents();
-
-  @Query(
-      value =
-          "select path "
-              + "from DbCriteria "
-              + "where domainId = 'SURVEY' "
-              + "and subtype = 'QUESTION' "
-              + "and conceptId in ( "
-              + "select conceptId "
-              + "from DbCriteria "
-              + "where domainId = 'SURVEY' "
-              + "and match(fullText, concat(:term, '+[SURVEY_rank1]')) > 0)")
-  List<String> findSurveyCriteriaPathByTerm(@Param("term") String term);
 
   @Query(
       value =
