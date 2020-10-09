@@ -1,17 +1,19 @@
 package org.pmiops.workbench.testconfig;
 
 import com.google.common.base.Ticker;
+import java.util.concurrent.TimeUnit;
 
 public class FakeTicker extends Ticker {
-  private final long elapsedMillis;
+  private long currentNanos;
 
-  protected FakeTicker(long elapsedMillis) {
+  protected FakeTicker(long tickNanos) {
     super();
-    this.elapsedMillis = elapsedMillis;
+    this.currentNanos = tickNanos;
   }
 
   @Override
   public long read() {
-    return elapsedMillis;
+    currentNanos += TimeUnit.MILLISECONDS.toNanos(200);
+    return currentNanos;
   }
 }

@@ -41,9 +41,9 @@ public class ReportingServiceImpl implements ReportingService {
   }
 
   @Override
-  public ReportingJobResult takeAndUploadSnapshot() {
+  public void takeAndUploadSnapshot() {
     final ReportingSnapshot snapshot = reportingSnapshotService.takeSnapshot();
-    return getConfiguredUploadService().uploadSnapshot(snapshot);
+    getConfiguredUploadService().uploadSnapshot(snapshot);
   }
 
   /*

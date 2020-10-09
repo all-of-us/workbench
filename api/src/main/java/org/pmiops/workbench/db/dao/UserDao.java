@@ -121,9 +121,13 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
           + "  a.state,\n"
           + "  a.streetAddress1,\n"
           + "  a.streetAddress2,\n"
-          + "  a.zipCode\n"
+          + "  a.zipCode,\n"
+          + "  via.institution.institutionId AS institutionId,\n"
+          + "  via.institutionalRoleEnum,\n"
+          + "  via.institutionalRoleOtherText\n"
           + "FROM DbUser u\n"
           + "  LEFT OUTER JOIN FETCH DbAddress AS a ON u.userId = a.user.userId\n"
+          + "  LEFT OUTER JOIN FETCH DbVerifiedInstitutionalAffiliation AS via on u.userId = via.user.userId"
           + "  ORDER BY u.userId")
   List<ProjectedReportingUser> getReportingUsers();
 }
