@@ -24,11 +24,10 @@ export default class Modal extends Container {
     try {
       await this.waitUntilVisible();
       await waitWhileLoading(this.page);
-    } catch (e) {
+    } catch (err) {
       await savePageToFile(this.page);
       await takeScreenshot(this.page);
-      const title = await this.page.title();
-      throw new Error(`"${title}" modal waitForLoad() encountered ${e}`);
+      throw err;
     }
     return this;
   }
