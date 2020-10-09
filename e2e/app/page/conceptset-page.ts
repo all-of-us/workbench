@@ -30,7 +30,9 @@ export default class ConceptSetPage extends AuthenticatedPage {
 
   async openCopyToWorkspaceModal(conceptSetName: string): Promise<CopyModal> {
     await this.getSnowmanMenu(conceptSetName).then(menu => menu.select(Option.CopyToAnotherWorkspace, {waitForNav: false}));
-    return new CopyModal(this.page);
+    const modal = new CopyModal(this.page);
+    await modal.waitForLoad();
+    return modal;
   }
 
   /**

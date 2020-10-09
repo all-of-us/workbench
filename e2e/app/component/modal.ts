@@ -8,6 +8,7 @@ import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
 import {LinkText} from 'app/text-labels';
 import {getPropValue} from 'utils/element-utils';
 import * as fp from 'lodash/fp';
+import {waitWhileLoading} from 'utils/test-utils';
 
 const Selector = {
   defaultDialog: '//*[@role="dialog"]',
@@ -22,6 +23,7 @@ export default class Modal extends Container {
   async waitForLoad(): Promise<this> {
     try {
       await this.waitUntilVisible();
+      await waitWhileLoading(this.page);
     } catch (e) {
       await savePageToFile(this.page);
       await takeScreenshot(this.page);
