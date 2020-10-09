@@ -46,8 +46,7 @@ class ServiceAccountContext
       yield(self)
       return
     end
-
-    if @service_account == "all-of-us-workbench-test@appspot.gserviceaccount.com"
+    if @service_account == "all-of-us-workbench-test@appspot.gserviceaccount.com" || @service_account == "aou-db-test@appspot.gserviceaccount.com"
       common.status "Copying key from GCS for #{@service_account} @ #{@keyfile_path}"
       common.run_inline %W{gsutil cp gs://#{@project}-credentials/app-engine-default-sa.json
             #{@keyfile_path}}
