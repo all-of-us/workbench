@@ -1,6 +1,6 @@
 import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import {switchCase} from 'app/utils';
-import { withErrorHandling } from 'app/utils';
+import { withAsyncErrorHandling } from 'app/utils';
 import {
   LeoRuntimeInitializer,
 } from 'app/utils/leo-runtime-initializer';
@@ -25,7 +25,7 @@ const useRuntime = (currentWorkspaceNamespace) => {
   // No cleanup is being handled at the moment.
   // When the user initiates a runtime change we want that change to take place even if they navigate away
   useEffect(() => {
-    const getRuntime = withErrorHandling(
+    const getRuntime = withAsyncErrorHandling(
       () => runtimeStore.set({workspaceNamespace: null, runtime: null}),
       async() => {
         const leoRuntime = await runtimeApi().getRuntime(currentWorkspaceNamespace);
