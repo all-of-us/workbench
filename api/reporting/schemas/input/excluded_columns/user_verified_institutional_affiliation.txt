@@ -1,0 +1,2 @@
+user_id
+user_verified_institutional_affiliation_id

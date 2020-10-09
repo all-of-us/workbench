@@ -12,9 +12,14 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.dao.UserDao.UserCountGaugeLabelsAndValue;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
 import org.pmiops.workbench.db.model.DbAddress;
+import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.DuaType;
+import org.pmiops.workbench.model.InstitutionalRole;
+import org.pmiops.workbench.model.OrganizationType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.DirtiesContext;
@@ -34,6 +39,8 @@ public class UserDaoTest {
   private static final String STATE = "TX";
   private static final String COUNTRY = "US";
 
+  @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+  @Autowired private InstitutionDao institutionDao;
   @Autowired private UserDao userDao;
 
   @Test
@@ -106,14 +113,19 @@ public class UserDaoTest {
   }
 
   public void insertMultipleUsers() {
-    insertTestUsers(false, DataAccessLevel.PROTECTED, true, 2);
-    insertTestUsers(false, DataAccessLevel.REGISTERED, false, 1);
-    insertTestUsers(true, DataAccessLevel.PROTECTED, false, 5);
-    insertTestUsers(false, DataAccessLevel.UNREGISTERED, true, 10);
+    final DbInstitution institution = createInstitution();
+    insertTestUsers(false, DataAccessLevel.PROTECTED, true, 2, institution);
+    insertTestUsers(false, DataAccessLevel.REGISTERED, false, 1, institution);
+    insertTestUsers(true, DataAccessLevel.PROTECTED, false, 5, institution);
+    insertTestUsers(false, DataAccessLevel.UNREGISTERED, true, 10, institution);
   }
 
   private List<DbUser> insertTestUsers(
-      boolean isDisabled, DataAccessLevel dataAccessLevel, boolean isBetaBypassed, long numUsers) {
+      boolean isDisabled,
+      DataAccessLevel dataAccessLevel,
+      boolean isBetaBypassed,
+      long numUsers,
+      DbInstitution institution) {
     ImmutableList.Builder<DbUser> resultList = ImmutableList.builder();
 
     for (int i = 0; i < numUsers; ++i) {
@@ -122,7 +134,7 @@ public class UserDaoTest {
       user.setFamilyName("Foo");
       user.setUsername("jaycarlton@aou.biz");
       user.setBetaAccessRequestTime(BETA_ACCESS_REQUEST_TIME);
-      final DbAddress address = stubAddress();
+      final DbAddress address = createAddress();
       address.setUser(user);
       user.setAddress(address); // ?
       user.setDisabled(isDisabled);
@@ -130,13 +142,14 @@ public class UserDaoTest {
         user.setBetaAccessBypassTime(NOW);
       }
       user.setDataAccessLevel(DbStorageEnums.dataAccessLevelToStorage(dataAccessLevel));
+      createAffiliation(user, institution);
       resultList.add(userDao.save(user));
     }
     return resultList.build();
   }
 
   @NotNull
-  private DbAddress stubAddress() {
+  private DbAddress createAddress() {
     final DbAddress address = new DbAddress();
     address.setStreetAddress1(STREET_ADDRESS_1);
     address.setStreetAddress2(STREET_ADDRESS_2);
@@ -145,6 +158,25 @@ public class UserDaoTest {
     address.setState(STATE);
     address.setCountry(COUNTRY);
     return address;
+  }
+
+  private DbVerifiedInstitutionalAffiliation createAffiliation(
+      DbUser user, DbInstitution institution) {
+    final DbVerifiedInstitutionalAffiliation affiliation = new DbVerifiedInstitutionalAffiliation();
+    affiliation.setInstitutionalRoleEnum(InstitutionalRole.FELLOW);
+    affiliation.setUser(user);
+    affiliation.setInstitution(institution);
+    userDao.save(user);
+    return verifiedInstitutionalAffiliationDao.save(affiliation);
+  }
+
+  private DbInstitution createInstitution() {
+    final DbInstitution institution = new DbInstitution();
+    institution.setShortName("aa");
+    institution.setDisplayName("MIT");
+    institution.setOrganizationTypeEnum(OrganizationType.EDUCATIONAL_INSTITUTION);
+    institution.setDuaTypeEnum(DuaType.MASTER);
+    return institutionDao.save(institution);
   }
 
   @Test
@@ -159,5 +191,8 @@ public class UserDaoTest {
     assertThat(user.getCity()).isEqualTo(CITY);
     assertThat(user.getState()).isEqualTo(STATE);
     assertThat(user.getCountry()).isEqualTo(COUNTRY);
+    assertThat(user.getInstitutionId()).isGreaterThan(0L);
+    assertThat(user.getInstitutionalRoleEnum()).isEqualTo(InstitutionalRole.FELLOW);
+    assertThat(user.getInstitutionalRoleOtherText()).isNull();
   }
 }

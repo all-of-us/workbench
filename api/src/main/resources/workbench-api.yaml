@@ -8088,6 +8088,10 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/ReportingCohort"
+      institutions:
+        type: array
+        items:
+          "$ref": "#/definitions/ReportingInstitution"
       users:
         type: array
         items:
@@ -8241,6 +8245,23 @@ definitions:
       zipCode:
         type: string
         description: Up to 10-digit zip code for use residence.
+      institutionId:
+        type: integer
+        format: int64
+        description: |-
+          Foreign key into institution table. Each user is only affiliated
+          with a single institution.
+      institutionalRoleEnum:
+        description: |-
+          Description of the user's role at the institution they are
+          affiliated with. Selected from a list of predefined values. If "other", see institutional_role_other_text
+          for custom description.
+        "$ref": "#/definitions/InstitutionalRole"
+      institutionalRoleOtherText:
+        type: string
+        description: |-
+          If the institutional_role_enum is "other", custom description
+          of this user's role in the institution.
   ReportingWorkspace:
     x-aou-note: |-
       This code was generated using reporting-wizard.rb at 2020-09-30T16:18:28-04:00.
@@ -8412,7 +8433,7 @@ definitions:
           snapshot_timestamp, serves as a pseudo-primary key for this table.
   ReportingCohort:
     x-aou-note: |-
-      This code was generated using reporting-wizard.rb at 2020-09-30T12:33:39-04:00.
+      This code was generated using reporting-wizard.rb at 2020-10-09T09:09:12-04:00.
       Manual modification should be avoided if possible as this is a one-time generation
       and does not run on every build and updates must be merged manually for now.
     type: object
@@ -8452,3 +8473,36 @@ definitions:
         description: |-
           Application workspace ID of the workspace containing this cohort. Should be a foreign
           key into the workspace table.
+  ReportingInstitution:
+    x-aou-note: |-
+      This code was generated using reporting-wizard.rb at 2020-10-05T10:34:34-04:00.
+      Manual modification should be avoided if possible as this is a one-time generation
+      and does not run on every build and updates must be merged manually for now.
+    type: object
+    properties:
+      displayName:
+        type: string
+        description: Human-readable name  for the institution, as shown in the UI.
+      duaTypeEnum:
+        description: Data Use Agreement type.
+        "$ref": "#/definitions/DuaType"
+      institutionId:
+        type: integer
+        format: int64
+        description: |-
+          Unique PK for institution table in  application DB. Note that in foreign key relationships,
+          the short_name is typically used in place of this identifier.
+      organizationTypeEnum:
+        description: Organization type. If Other, then organization_type_other_text
+          describes this organization's type.
+        "$ref": "#/definitions/OrganizationType"
+      organizationTypeOtherText:
+        type: string
+        description: |-
+          If organization_type_enum is Other, this field describes organization's type. Value is not valid
+          otherwise.
+      shortName:
+        type: string
+        description: |-
+          A unique string identifier used in the API to map a user affiliation to an institution. (Database
+          identifiers are not typically exposed in the workbench API).

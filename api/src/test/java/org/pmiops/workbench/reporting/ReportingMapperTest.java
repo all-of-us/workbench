@@ -3,8 +3,12 @@ package org.pmiops.workbench.reporting;
 import java.time.Clock;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.db.dao.projection.ProjectedReportingCohort;
+import org.pmiops.workbench.db.dao.projection.ProjectedReportingInstitution;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingWorkspace;
+import org.pmiops.workbench.model.ReportingCohort;
+import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
@@ -26,16 +30,33 @@ public class ReportingMapperTest {
   public static class conifg {}
 
   @Test
-  public void testProjectedReportingWorkspace_toDto() {
-    final ProjectedReportingWorkspace prjWorkspace = ReportingTestUtils.mockProjectedWorkspace();
-    final ReportingWorkspace bqDtoWorkspace = reportingMapper.toDto(prjWorkspace);
-    ReportingTestUtils.assertDtoWorkspaceFields(bqDtoWorkspace);
+  public void testToReportingCohort() {
+    final ProjectedReportingCohort projectedReportingCohort =
+        ReportingTestUtils.mockProjectedReportingCohort();
+    final ReportingCohort cohort = reportingMapper.toReportingCohort(projectedReportingCohort);
+    ReportingTestUtils.assertCohortFields(cohort);
   }
 
   @Test
-  public void testProjectedReportingUser_toDto() {
+  public void testReportingInstitution() {
+    final ProjectedReportingInstitution projectedReportingInstitution =
+        ReportingTestUtils.mockProjectedReportingInstitution();
+    final ReportingInstitution reportingInstitution =
+        reportingMapper.toReportingInstitution(projectedReportingInstitution);
+    ReportingTestUtils.assertInstitutionFields(reportingInstitution);
+  }
+
+  @Test
+  public void testToReportingUser() {
     final ProjectedReportingUser prjUser = ReportingTestUtils.mockProjectedUser();
-    final ReportingUser dtoUser = reportingMapper.toDto(prjUser);
+    final ReportingUser dtoUser = reportingMapper.toReportingUser(prjUser);
     ReportingTestUtils.assertDtoUserFields(dtoUser);
+  }
+
+  @Test
+  public void testToReportingWorkspace() {
+    final ProjectedReportingWorkspace prjWorkspace = ReportingTestUtils.mockProjectedWorkspace();
+    final ReportingWorkspace bqDtoWorkspace = reportingMapper.toReportingWorkspace(prjWorkspace);
+    ReportingTestUtils.assertDtoWorkspaceFields(bqDtoWorkspace);
   }
 }
