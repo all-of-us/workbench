@@ -77,6 +77,11 @@ const styles = reactStyles({
     lineHeight: '24px',
     marginTop: '1rem',
   },
+  conceptSetsRestriction: {
+    color: colors.primary,
+    fontFamily: 'Montserrat',
+    fontSize: '14px',
+  },
 });
 
 const ConceptSetCdrMismatch = (props: {text: string}) =>
@@ -84,6 +89,10 @@ const ConceptSetCdrMismatch = (props: {text: string}) =>
 
 const NotebookCdrMismatch = (props: {text: string}) =>
     <div data-test-id='notebook-cdr-mismatch-warning' style={styles.notebookCdrMismatch}>{props.text}</div>;
+
+const ConceptSetRestrictionText = () => <div style={styles.conceptSetsRestriction}>
+  Concept sets can only be copied to workspaces using the same CDR version.
+</div>;
 
 class CopyModalComponent extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -197,11 +206,13 @@ class CopyModalComponent extends React.Component<Props, State> {
   }
 
   render() {
+    const {resourceType} = this.props;
     const {loading, requestState} = this.state;
 
     return (
       <Modal onRequestClose={this.props.onClose}>
-        <ModalTitle>Copy to Workspace</ModalTitle>
+        <ModalTitle style={{marginBottom: '0.5rem'}}>Copy to Workspace</ModalTitle>
+        {resourceType === ResourceType.CONCEPTSET && <ConceptSetRestrictionText/>}
         {loading ?
           <ModalBody style={{ textAlign: 'center' }}><Spinner /></ModalBody> :
           <ModalBody>
