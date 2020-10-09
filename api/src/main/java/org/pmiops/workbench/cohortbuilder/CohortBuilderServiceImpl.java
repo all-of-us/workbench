@@ -48,12 +48,14 @@ import org.pmiops.workbench.model.CriteriaMenuSubOption;
 import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.DomainInfo;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.StandardFlag;
+import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -297,6 +299,13 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
+  public List<DomainInfo> findDomainInfos() {
+    return domainInfoDao.findByOrderByDomainId().stream()
+        .map(cohortBuilderMapper::dbModelToClient)
+        .collect(Collectors.toList());
+  }
+
+  @Override
   public List<Criteria> findDrugBrandOrIngredientByValue(String value, Integer limit) {
     List<DbCriteria> criteriaList =
         cbCriteriaDao.findDrugBrandOrIngredientByValue(
@@ -374,6 +383,13 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   @Override
   public Long findSurveyCount(String name, String term) {
     return cbCriteriaDao.findSurveyCount(name, modifyTermMatch(term));
+  }
+
+  @Override
+  public List<SurveyModule> findSurveyModules() {
+    return surveyModuleDao.findByOrderByOrderNumberAsc().stream()
+        .map(cohortBuilderMapper::dbModelToClient)
+        .collect(Collectors.toList());
   }
 
   @Override

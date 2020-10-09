@@ -11,9 +11,11 @@ import org.pmiops.workbench.model.CriteriaListWithCountResponse;
 import org.pmiops.workbench.model.CriteriaMenuOption;
 import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DemoChartInfo;
+import org.pmiops.workbench.model.DomainInfo;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersion;
 
 public interface CohortBuilderService {
@@ -44,6 +46,8 @@ public interface CohortBuilderService {
 
   Long findDomainCount(String domain, String term);
 
+  List<DomainInfo> findDomainInfos();
+
   List<Criteria> findDrugBrandOrIngredientByValue(String value, Integer limit);
 
   List<Criteria> findDrugIngredientByConceptId(Long conceptId);
@@ -62,6 +66,8 @@ public interface CohortBuilderService {
       String domainId, String sortColumn, String sortName);
 
   Long findSurveyCount(String name, String term);
+
+  List<SurveyModule> findSurveyModules();
 
   List<SurveyVersion> findSurveyVersionByQuestionConceptId(
       Long surveyConceptId, Long questionConceptId);

@@ -781,8 +781,8 @@ paths:
 
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/markResearchPurposeReviewed":
     parameters:
-    - "$ref": "#/parameters/workspaceNamespace"
-    - "$ref": "#/parameters/workspaceId"
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
     get:
       tags:
       - workspaces
@@ -796,16 +796,16 @@ paths:
 
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/resources":
     parameters:
-    - "$ref": "#/parameters/workspaceNamespace"
-    - "$ref": "#/parameters/workspaceId"
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
     post:
       parameters:
-      - in: body
-        name: resourceTypesToFetch
-        description: Types of workspace resources to fetch. Currently only supports
-          Cohorts, Cohort Reviews, Concept Sets, and Datasets
-        schema:
-          "$ref": "#/definitions/WorkspaceResourcesRequest"
+        - in: body
+          name: resourceTypesToFetch
+          description: Types of workspace resources to fetch. Currently only supports
+            Cohorts, Cohort Reviews, Concept Sets, and Datasets
+          schema:
+            "$ref": "#/definitions/WorkspaceResourcesRequest"
       tags:
       - workspaces
       description: Gets a user defined selection of objects contained within a workspace
@@ -817,8 +817,8 @@ paths:
             "$ref": "#/definitions/WorkspaceResourceResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/billing-usage":
     parameters:
-    - "$ref": "#/parameters/workspaceNamespace"
-    - "$ref": "#/parameters/workspaceId"
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
     get:
       tags:
       - workspaces
@@ -941,45 +941,45 @@ paths:
   "/v1/admin/workspaces/{workspaceNamespace}/audit":
     get:
       tags:
-      - workspaceAdmin
+        - workspaceAdmin
       description: >
         Fetch audit logs involving this workspace as either a subject or object. Requires the
         RESEARCHER_DATA_VIEW authority.
       operationId: getAuditLogEntries
       parameters:
-      - name: workspaceNamespace
-        in: path
-        type: string
-        required: true
-        description: >
-          Firecloud Namespace for the AoU workspace to be queried.
-      - name: limit
-        in: query
-        type: integer
-        required: false
-        default: 100
-        description: >
-          Maximum number of entries to return, sorted by timestamp descending.
-      - name: after
-        description: >
-          Earliest time matched by the query (inclusive). Epoch millis.
+        - name: workspaceNamespace
+          in: path
+          type: string
+          required: true
+          description: >
+            Firecloud Namespace for the AoU workspace to be queried.
+        - name: limit
+          in: query
+          type: integer
+          required: false
+          default: 100
+          description: >
+            Maximum number of entries to return, sorted by timestamp descending.
+        - name: after
+          description: >
+            Earliest time matched by the query (inclusive). Epoch millis.
 
-          Note that while Swagger allows a date-time formatted string query parameter,
-          it appears Spring doesn't handle that well today. It gives the error message described
-          at https://github.com/swagger-api/swagger-codegen/issues/4113.
-        in: query
-        type: integer
-        format: int64
-        required: false
-        default: 0
-      - name: before
-        description: >
-          Upper bound on timestamp of most recent result (exclusive). Specified as milliseconds
-          since Epoch (though declared as a string). Defaults to current timestamp.
-        in: query
-        type: integer
-        format: int64
-        required: false
+            Note that while Swagger allows a date-time formatted string query parameter,
+            it appears Spring doesn't handle that well today. It gives the error message described
+            at https://github.com/swagger-api/swagger-codegen/issues/4113.
+          in: query
+          type: integer
+          format: int64
+          required: false
+          default: 0
+        - name: before
+          description: >
+             Upper bound on timestamp of most recent result (exclusive). Specified as milliseconds
+             since Epoch (though declared as a string). Defaults to current timestamp.
+          in: query
+          type: integer
+          format: int64
+          required: false
       responses:
         200:
           description: >
@@ -1053,48 +1053,48 @@ paths:
   "/v1/admin/users/{usernameWithoutGsuiteDomain}/audit":
     get:
       tags:
-      - profile
+        - profile
       description: >
         Fetch audit logs involving this user as either a subject or object. Requires the
         RESEARCHER_DATA_VIEW authority.
       operationId: getAuditLogEntries
       parameters:
-      - name: usernameWithoutGsuiteDomain
-        in: path
-        type: string
-        required: true
-        description: >
-          Username of user, not including the environment-specific domain, e.g.
-          "@fake-research-aou.org".
-      - name: limit
-        in: query
-        type: integer
-        required: false
-        default: 100
-        description: >
-          Maximum number of entries to return, sorted by timestamp descending. This entry count
-          also determines (in a less predictable way) how many bundled actions are in the
-          response.
-      - name: after
-        description: >
-          Earliest time matched by the query (inclusive). Epoch millis.
+        - name: usernameWithoutGsuiteDomain
+          in: path
+          type: string
+          required: true
+          description: >
+            Username of user, not including the environment-specific domain, e.g.
+            "@fake-research-aou.org".
+        - name: limit
+          in: query
+          type: integer
+          required: false
+          default: 100
+          description: >
+            Maximum number of entries to return, sorted by timestamp descending. This entry count
+            also determines (in a less predictable way) how many bundled actions are in the
+            response.
+        - name: after
+          description: >
+            Earliest time matched by the query (inclusive). Epoch millis.
 
-          Note that while Swagger allows a date-time formatted string query parameter,
-          it appears Spring doesn't handle that well today. It gives the error message described
-          at https://github.com/swagger-api/swagger-codegen/issues/4113.
-        in: query
-        type: integer
-        format: int64
-        required: false
-        default: 0
-      - name: before
-        description: >
-          Upper bound on timestamp of most recent result (exclusive). Specified as milliseconds
-          since Epoch (though declared as a string). Defaults to current timestamp.
-        in: query
-        type: integer
-        format: int64
-        required: false
+            Note that while Swagger allows a date-time formatted string query parameter,
+            it appears Spring doesn't handle that well today. It gives the error message described
+            at https://github.com/swagger-api/swagger-codegen/issues/4113.
+          in: query
+          type: integer
+          format: int64
+          required: false
+          default: 0
+        - name: before
+          description: >
+            Upper bound on timestamp of most recent result (exclusive). Specified as milliseconds
+            since Epoch (though declared as a string). Defaults to current timestamp.
+          in: query
+          type: integer
+          format: int64
+          required: false
       responses:
         200:
           description: >
@@ -1136,16 +1136,16 @@ paths:
   "/v1/admin/users/updateAccount":
     post:
       tags:
-      - profile
+        - profile
       consumes:
-      - application/json
+        - application/json
       description: 'Updates a subset of a user''s account metadata, as defined by the AccountPropertyUpdate object.  Requires ACCESS_CONTROL_ADMIN authority.'
       parameters:
-      - in: body
-        name: request
-        description: The admin edit request to perform on a user
-        schema:
-          "$ref": "#/definitions/AccountPropertyUpdate"
+        - in: body
+          name: request
+          description: The admin edit request to perform on a user
+          schema:
+            "$ref": "#/definitions/AccountPropertyUpdate"
       operationId: updateAccountProperties
       responses:
         200:
@@ -1181,13 +1181,13 @@ paths:
   "/v1/admin/users/getUserByUsername":
     get:
       tags:
-      - profile
+        - profile
       description: 'Returns a user''s profile for review. Requires ACCESS_CONTROL_ADMIN authority.'
       parameters:
-      - in: query
-        name: username
-        type: string
-        required: true
+        - in: query
+          name: username
+          type: string
+          required: true
       operationId: getUserByUsername
       responses:
         200:
@@ -1563,8 +1563,8 @@ paths:
   "/v1/cron/uploadReportingSnapshot":
     get:
       tags:
-      - offlineReporting
-      - cron
+        - offlineReporting
+        - cron
       description: >
         Capture a reporting snapshot and beging the upload task to BigQuery reporting dataset.
       operationId: uploadReportingSnapshot
@@ -1704,10 +1704,10 @@ paths:
             "$ref": "#/definitions/ReadOnlyNotebookResponse"
   "/v1/admin/workspaces/{workspaceNamespace}/notebooks/{notebookName}/readonly":
     parameters:
-    - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceNamespace"
     post:
       tags:
-      - workspaceAdmin
+        - workspaceAdmin
       description: Get the HTML for a read only view of the notebook. RESEARCHER_DATA_VIEW authority required.
       operationId: adminReadOnlyNotebook
       parameters:
@@ -1727,10 +1727,10 @@ paths:
             "$ref": "#/definitions/ReadOnlyNotebookResponse"
   "/v1/admin/workspaces/{workspaceNamespace}/files":
     parameters:
-    - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceNamespace"
     get:
       tags:
-      - workspaceAdmin
+        - workspaceAdmin
       description: >
         Get a list of files corresponding to the storage objects associated with the Workspace.
         RESEARCHER_DATA_VIEW authority required.
@@ -2607,7 +2607,7 @@ paths:
       required: true
     post:
       tags:
-      - institution
+        - institution
       operationId: checkEmail
       description: Checks whether the given email address is a verified member of an institution.
       x-aou-note: This endpoint is publicly-accessible and called by clients during user registration.
@@ -2627,19 +2627,19 @@ paths:
             "$ref": "#/definitions/CheckEmailResponse"
   "/v1/institutions/{shortName}/checkEmail/{email}/":
     parameters:
-    - in: path
-      name: shortName
-      type: string
-      description: 'The short name / key of the institution to check, e.g. "VUMC"'
-      required: true
-    - in: path
-      name: email
-      type: string
-      description: Institutional contact email address to check.
-      required: true
+      - in: path
+        name: shortName
+        type: string
+        description: 'The short name / key of the institution to check, e.g. "VUMC"'
+        required: true
+      - in: path
+        name: email
+        type: string
+        description: Institutional contact email address to check.
+        required: true
     get:
       tags:
-      - institution
+        - institution
       operationId: deprecatedCheckEmail
       description: Checks whether the given email address is a verified member of an institution. DEPRECATED in favor of the POST endpoint.
       x-aou-note: This endpoint is publicly-accessible and called by clients during user registration.
@@ -2652,16 +2652,16 @@ paths:
   "/v1/institutions/instructionsEmail":
     post:
       tags:
-      - institution
+        - institution
       description: 'Sets or updates the Institution-specific user instructions to be sent
         by email after registration. Requires INSTITUTION_ADMIN authority.'
       operationId: setInstitutionUserInstructions
       parameters:
-      - in: body
-        name: userInstructions
-        description: 'Text to include in an email sent to users for an Institution after they are registered.'
-        schema:
-          "$ref": "#/definitions/InstitutionUserInstructions"
+        - in: body
+          name: userInstructions
+          description: 'Text to include in an email sent to users for an Institution after they are registered.'
+          schema:
+            "$ref": "#/definitions/InstitutionUserInstructions"
       responses:
         200:
           description: 'Successfully set or updated the Institution-specific user instructions to be sent
@@ -2670,15 +2670,15 @@ paths:
             "$ref": "#/definitions/InstitutionUserInstructions"
   "/v1/institutions/instructionsEmail/{shortName}":
     parameters:
-    - in: path
-      name: shortName
-      required: true
-      type: string
-      description: 'A short unique name for the Institution used as an identifier,
+      - in: path
+        name: shortName
+        required: true
+        type: string
+        description: 'A short unique name for the Institution used as an identifier,
           such as "VUMC"'
     delete:
       tags:
-      - institution
+        - institution
       description: 'Remove the Institution-specific user instructions to be sent
         by email after registration. Requires INSTITUTION_ADMIN authority.'
       operationId: deleteInstitutionUserInstructions
@@ -3006,46 +3006,46 @@ paths:
           schema:
             "$ref": "#/definitions/ParticipantDataCountResponse"
   ? "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/annotations/{annotationId}"
-    : parameters:
-      - "$ref": "#/parameters/workspaceNamespace"
-      - "$ref": "#/parameters/workspaceId"
-      - "$ref": "#/parameters/cohortReviewId"
-      - "$ref": "#/parameters/participantId"
-      - in: path
-        name: annotationId
-        type: integer
-        format: int64
+  : parameters:
+    - "$ref": "#/parameters/workspaceNamespace"
+    - "$ref": "#/parameters/workspaceId"
+    - "$ref": "#/parameters/cohortReviewId"
+    - "$ref": "#/parameters/participantId"
+    - in: path
+      name: annotationId
+      type: integer
+      format: int64
+      required: true
+      description: specifies which annotation
+    put:
+      tags:
+      - cohortReview
+      consumes:
+      - application/json
+      description: This endpoint will modify a ParticipantCohortAnnotation.
+      operationId: updateParticipantCohortAnnotation
+      parameters:
+      - in: body
+        name: request
         required: true
-        description: specifies which annotation
-      put:
-        tags:
-        - cohortReview
-        consumes:
-        - application/json
-        description: This endpoint will modify a ParticipantCohortAnnotation.
-        operationId: updateParticipantCohortAnnotation
-        parameters:
-        - in: body
-          name: request
-          required: true
-          description: ParticipantCohortAnnotation modification request body
+        description: ParticipantCohortAnnotation modification request body
+        schema:
+          "$ref": "#/definitions/ModifyParticipantCohortAnnotationRequest"
+      responses:
+        200:
+          description: A ParticipantCohortAnnotation.
           schema:
-            "$ref": "#/definitions/ModifyParticipantCohortAnnotationRequest"
-        responses:
-          200:
-            description: A ParticipantCohortAnnotation.
-            schema:
-              "$ref": "#/definitions/ParticipantCohortAnnotation"
-      delete:
-        tags:
-        - cohortReview
-        description: Deletes the ParticipantCohortAnnotation with the specified ID
-        operationId: deleteParticipantCohortAnnotation
-        responses:
-          202:
-            description: ParticipantCohortAnnotation deletion request accepted
-            schema:
-              "$ref": "#/definitions/EmptyResponse"
+            "$ref": "#/definitions/ParticipantCohortAnnotation"
+    delete:
+      tags:
+      - cohortReview
+      description: Deletes the ParticipantCohortAnnotation with the specified ID
+      operationId: deleteParticipantCohortAnnotation
+      responses:
+        202:
+          description: ParticipantCohortAnnotation deletion request accepted
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/vocabularies":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -3157,6 +3157,20 @@ paths:
           description: A collection of criteria menu options
           schema:
             "$ref": "#/definitions/CriteriaMenuOptionsListResponse"
+  "/v1/cohortbuilder/{cdrVersionId}/criteria/domaininfo":
+    get:
+      tags:
+      - cohortBuilder
+      description: 'Returns information on the domains of data in the workspace''s
+        CDR version along with participant and concept counts'
+      operationId: findDomainInfos
+      parameters:
+      - "$ref": "#/parameters/cdrVersionId"
+      responses:
+        200:
+          description: information on the domains
+          schema:
+            "$ref": "#/definitions/DomainInfoResponse"
   "/v1/cohortbuilder/{cdrVersionId}/criteria/domaininfo/{domain}":
     parameters:
     - "$ref": "#/parameters/cdrVersionId"
@@ -3181,6 +3195,20 @@ paths:
           description: A count of matching concepts in this domain
           schema:
             "$ref": "#/definitions/DomainCount"
+  "/v1/cohortbuilder/{cdrVersionId}/criteria/surveymodule":
+    get:
+      tags:
+      - cohortBuilder
+      description: 'Returns survey information in the workspace''s CDR version along
+        with participant and question count'
+      operationId: findSurveyModules
+      parameters:
+      - "$ref": "#/parameters/cdrVersionId"
+      responses:
+        200:
+          description: information about the surveys
+          schema:
+            "$ref": "#/definitions/SurveysResponse"
   "/v1/cohortbuilder/{cdrVersionId}/criteria/surveymodule/{name}":
     parameters:
     - "$ref": "#/parameters/cdrVersionId"
@@ -3612,10 +3640,6 @@ definitions:
     - THE BASICS
     - LIFESTYLE
     - OVERALL HEALTH
-    - FAMILY HISTORY
-    - HEALTHCARE ACCESS AND UTILIZATION
-    - PERSONAL MEDICAL HISTORY
-    - COVID-19 PARTICIPANT EXPERIENCE (COPE) SURVEY
   Race:
     type: string
     enum:
@@ -5439,13 +5463,13 @@ definitions:
       configuration.
     type: string
     enum:
-    - UserOverride
-    - GeneralAnalysis
-    - HailGenomicAnalysis
-    # Deprecated.
-    # TODO(calbach): Remove after next release.
-    - DefaultGce
-    - DefaultDataproc
+      - UserOverride
+      - GeneralAnalysis
+      - HailGenomicAnalysis
+      # Deprecated.
+      # TODO(calbach): Remove after next release.
+      - DefaultGce
+      - DefaultDataproc
   Runtime:
     # TODO: Add required properties after enableCustomRuntimes feature fully released
     # We need to allow null/empty Runtimes while we support enableCustomRuntimes=false
@@ -5868,8 +5892,26 @@ definitions:
         type: integer
         format: int64
       egress_mib:
-        description: The amount of egress detected during the window, in mebibytes
-          (MiB).
+        description: The total amount of egress detected during the window, in
+          mebibytes (MiB). This total subsumes the per-machine type egress
+          values provided here. The egress threshold is triggered against this
+          value.
+        type: number
+        format: double
+      gce_egress_mib:
+        description: The amount of egress detected via raw GCE VM during the
+          window, in mebibytes (MiB). Does NOT include Dataproc egress (Dataproc
+          technically uses GCE).
+        type: number
+        format: double
+      dataproc_master_egress_mib:
+        description: The amount of egress detected via Dataproc master nodes
+          during the window, in mebibytes (MiB).
+        type: number
+        format: double
+      dataproc_worker_egress_mib:
+        description: The amount of egress detected via Dataproc worker nodes
+          during the window, in mebibytes (MiB).
         type: number
         format: double
       egress_mib_threshold:
@@ -5881,8 +5923,9 @@ definitions:
         description: 'The Google Cloud project name associated with the workspace,
           e.g. aou-rw-6b66533d. Always present.'
         type: string
-      vm_name:
-        description: The name of the Jupyter VM which generated egress, e.g. all-of-us-260-m.
+      vm_prefix:
+        description: Prefix of the research VM(s) that generated egress, including
+          the user ID, e.g. all-of-us-260.
         type: string
   ArrayOfLong:
     type: array
@@ -5962,8 +6005,8 @@ definitions:
     type: object
     description: Institution-specific instructions for users to perform after registration.
     required:
-    - institutionShortName
-    - instructions
+      - institutionShortName
+      - instructions
     properties:
       institutionShortName:
         type: string
@@ -6003,8 +6046,8 @@ definitions:
     type: string
     description: 'Type of Data Use Agreement Institution has signed, Applicable to all researchers or restricted to  just few'
     enum:
-    - MASTER
-    - RESTRICTED
+      - MASTER
+      - RESTRICTED
 
   InstitutionalRole:
     type: string
@@ -6570,10 +6613,10 @@ definitions:
     - conceptCount
     properties:
       name:
-        description: display name of the domain
+        description: display name of the survey
         type: string
       conceptCount:
-        description: number of concepts matching the search query in this domain
+        description: number of concepts matching the search query in this survey
         type: integer
         format: int64
   CreateReviewRequest:
@@ -7840,10 +7883,10 @@ definitions:
       Represents the results of a query into the audit dataset in BigQuery without
       filtering or transformation.
     required:
-    - actions
-    - logEntries
-    - query
-    - userDatabaseId
+      - actions
+      - logEntries
+      - query
+      - userDatabaseId
     properties:
       actions:
         description: Re-constructed objects for each composite action in the query results.
@@ -8029,9 +8072,9 @@ definitions:
   WorkspaceUserAdminView:
     type: object
     required:
-    - userModel
-    - role
-    - userDatabaseId
+      - userModel
+      - role
+      - userDatabaseId
     properties:
       userModel:
         description: User API model
@@ -8056,8 +8099,8 @@ definitions:
       Updates to the contact email or the institutional affiliation will be rejected if they do not validate.
     type: object
     required:
-    - username
-    - accessBypassRequests
+      - username
+      - accessBypassRequests
     properties:
       username:
         description: The full system-assigned ID of a user, including email domain
@@ -8096,6 +8139,10 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/ReportingCohort"
+      institutions:
+        type: array
+        items:
+          "$ref": "#/definitions/ReportingInstitution"
       users:
         type: array
         items:
@@ -8249,6 +8296,23 @@ definitions:
       zipCode:
         type: string
         description: Up to 10-digit zip code for use residence.
+      institutionId:
+        type: integer
+        format: int64
+        description: |-
+          Foreign key into institution table. Each user is only affiliated
+          with a single institution.
+      institutionalRoleEnum:
+        description: |-
+          Description of the user's role at the institution they are
+          affiliated with. Selected from a list of predefined values. If "other", see institutional_role_other_text
+          for custom description.
+        "$ref": "#/definitions/InstitutionalRole"
+      institutionalRoleOtherText:
+        type: string
+        description: |-
+          If the institutional_role_enum is "other", custom description
+          of this user's role in the institution.
   ReportingWorkspace:
     x-aou-note: |-
       This code was generated using reporting-wizard.rb at 2020-09-30T16:18:28-04:00.
@@ -8420,7 +8484,7 @@ definitions:
           snapshot_timestamp, serves as a pseudo-primary key for this table.
   ReportingCohort:
     x-aou-note: |-
-      This code was generated using reporting-wizard.rb at 2020-09-30T12:33:39-04:00.
+      This code was generated using reporting-wizard.rb at 2020-10-09T09:09:12-04:00.
       Manual modification should be avoided if possible as this is a one-time generation
       and does not run on every build and updates must be merged manually for now.
     type: object
@@ -8460,3 +8524,36 @@ definitions:
         description: |-
           Application workspace ID of the workspace containing this cohort. Should be a foreign
           key into the workspace table.
+  ReportingInstitution:
+    x-aou-note: |-
+      This code was generated using reporting-wizard.rb at 2020-10-05T10:34:34-04:00.
+      Manual modification should be avoided if possible as this is a one-time generation
+      and does not run on every build and updates must be merged manually for now.
+    type: object
+    properties:
+      displayName:
+        type: string
+        description: Human-readable name  for the institution, as shown in the UI.
+      duaTypeEnum:
+        description: Data Use Agreement type.
+        "$ref": "#/definitions/DuaType"
+      institutionId:
+        type: integer
+        format: int64
+        description: |-
+          Unique PK for institution table in  application DB. Note that in foreign key relationships,
+          the short_name is typically used in place of this identifier.
+      organizationTypeEnum:
+        description: Organization type. If Other, then organization_type_other_text
+          describes this organization's type.
+        "$ref": "#/definitions/OrganizationType"
+      organizationTypeOtherText:
+        type: string
+        description: |-
+          If organization_type_enum is Other, this field describes organization's type. Value is not valid
+          otherwise.
+      shortName:
+        type: string
+        description: |-
+          A unique string identifier used in the API to map a user affiliation to an institution. (Database
+          identifiers are not typically exposed in the workbench API).
