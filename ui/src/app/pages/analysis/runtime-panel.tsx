@@ -46,23 +46,6 @@ const styles = reactStyles({
 
 const defaultMachineType = allMachineTypes.find(({name}) => name === 'n1-standard-4');
 
-const ActiveRuntimeOp = ({operation, workspaceNamespace}) => {
-  return <React.Fragment>
-    <h3 style={styles.sectionHeader}>Active Runtime Operations</h3>
-    <FlexRow style={{'alignItems': 'center'}}>
-      <span style={{'marginRight': '1rem'}}>
-        {operation} in progress
-      </span>
-      <Button
-          onClick={() => abortRuntimeOperationForWorkspace(workspaceNamespace)}
-          data-test-id='active-runtime-operation'
-      >
-        Cancel
-      </Button>
-    </FlexRow>
-  </React.Fragment>;
-};
-
 export interface Props {
   workspace: WorkspaceData;
 }
@@ -158,7 +141,6 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
       <div>No runtime exists yet</div>
       {activeRuntimeOp && <hr/>}
       {activeRuntimeOp && <div>
-        <ActiveRuntimeOp operation={activeRuntimeOp.operation} workspaceNamespace={workspace.namespace}/>
       </div>}
     </React.Fragment>;
   }

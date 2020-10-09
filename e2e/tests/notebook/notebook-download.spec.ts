@@ -15,8 +15,7 @@ describe('Jupyter notebook download test', () => {
     const checkDownloadDisabledState = async (wantDisabled: boolean) => {
       expect(await waitForFn(async () => {
         const downloadBtn = await modal.getDownloadButton();
-        // tslint:disable-next-line:triple-equals
-        return wantDisabled == await getPropValue<boolean>(downloadBtn, 'disabled');
+        return wantDisabled === !!(await getPropValue<boolean>(downloadBtn, 'disabled'));
       })).toBe(true);
     };
 

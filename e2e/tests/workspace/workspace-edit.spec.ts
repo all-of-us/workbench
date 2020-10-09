@@ -25,10 +25,10 @@ describe('Editing workspace via workspace card snowman menu', () => {
 
     const workspacesPage = new WorkspacesPage(page);
 
-    // Synthetic Dataset Select is readonly. Get selected value.
-    const selectedOption = await workspacesPage.selectDataset();
-    const datasetSelect = await workspacesPage.getDatasetSelect();
-    const selectedValue = await datasetSelect.getOptionValue(selectedOption);
+    // CDR Version Select is readonly. Get selected value.
+    const selectedOption = await workspacesPage.selectCdrVersion();
+    const cdrVersionSelect = await workspacesPage.getCdrVersionSelect();
+    const selectedValue = await cdrVersionSelect.getOptionValue(selectedOption);
 
     // Change question #2 answer
     await performActions(page, testData.defaultAnswersResearchPurposeSummary);

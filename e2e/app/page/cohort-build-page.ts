@@ -28,16 +28,11 @@ export default class CohortBuildPage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    try {
-      await Promise.all([
-        waitForDocumentTitle(this.page, PageTitle),
-        waitWhileLoading(this.page),
-      ]);
-      return true;
-    } catch (e) {
-      console.log(`CohortBuildPage isLoaded() encountered ${e}`);
-      return false;
-    }
+    await Promise.all([
+      waitForDocumentTitle(this.page, PageTitle),
+      waitWhileLoading(this.page),
+    ]);
+    return true;
   }
 
   /**

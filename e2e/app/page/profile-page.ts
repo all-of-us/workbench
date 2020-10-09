@@ -43,17 +43,12 @@ export default class ProfilePage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    try {
-      await Promise.all([
-        waitForUrl(this.page, '/profile'),
-        waitForDocumentTitle(this.page, PageTitle),
-        waitWhileLoading(this.page),
-      ]);
-      return true;
-    } catch (err) {
-      console.log(`ProfilePage isLoaded() encountered ${err}`);
-      return false;
-    }
+    await Promise.all([
+      waitForUrl(this.page, '/profile'),
+      waitForDocumentTitle(this.page, PageTitle),
+      waitWhileLoading(this.page)
+    ]);
+    return true;
   }
 
   async getFirstNameInput(): Promise<Textbox> {

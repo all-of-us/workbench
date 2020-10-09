@@ -63,7 +63,7 @@ describe('Dataset test', () => {
     let datasetName = await saveModal.saveDataset({exportToNotebook: false});
 
     // Verify create successful.
-    await dataPage.openDatasetsSubtab({waitPageChange: false});
+    await dataPage.openDatasetsSubtab();
 
     const resourceCard = new DataResourceCard(page);
     const dataSetExists = await resourceCard.cardExists(datasetName, ResourceCard.Dataset);
@@ -81,7 +81,7 @@ describe('Dataset test', () => {
     datasetName = await saveModal.saveDataset({exportToNotebook: false}, true);
     await dataPage.waitForLoad();
 
-    await dataPage.openDatasetsSubtab({waitPageChange: false});
+    await dataPage.openDatasetsSubtab();
     await dataPage.deleteResource(datasetName, ResourceCard.Dataset);
   });
 

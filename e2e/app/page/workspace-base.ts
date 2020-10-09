@@ -3,14 +3,17 @@ import Modal from 'app/component/modal';
 import Link from 'app/element/link';
 import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
-import {Option, LinkText, ResourceCard} from 'app/text-labels';
+import {LinkText, Option, ResourceCard} from 'app/text-labels';
 import {buildXPath} from 'app/xpath-builders';
 import {ElementType} from 'app/xpath-options';
 import {Page} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForAttributeEquality} from 'utils/waits-utils';
 import SnowmanMenu from 'app/component/snowman-menu';
+import {getPropValue} from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
+
+export const UseFreeCredits = 'Use All of Us free credits';
 
 export enum TabLabels {
   Data = 'Data',
@@ -57,32 +60,32 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * Click Datasets subtab in Data page.
    * @param opts
    */
-  async openDatasetsSubtab(opts: {waitPageChange?: boolean} = {}): Promise<void> {
-    return this.openTab(TabLabels.Datasets, opts);
+  async openDatasetsSubtab(): Promise<void> {
+    return this.openDataPage().then(() => this.openTab(TabLabels.Datasets, {waitPageChange: false}));
   }
 
   /**
    * Click Cohorts subtab in Data page.
    * @param opts
    */
-  async openCohortsSubtab(opts: {waitPageChange?: boolean} = {}): Promise<void> {
-    return this.openTab(TabLabels.Cohorts, opts);
+  async openCohortsSubtab(): Promise<void> {
+    return this.openDataPage().then(() => this.openTab(TabLabels.Cohorts, {waitPageChange: false}));
   }
 
   /**
    * Click Cohorts Reviews subtab in Data page.
    * @param opts
    */
-  async openCohortReviewsSubtab(opts: {waitPageChange?: boolean} = {}): Promise<void> {
-    return this.openTab(TabLabels.CohortReviews, opts);
+  async openCohortReviewsSubtab(): Promise<void> {
+    return this.openDataPage().then(() => this.openTab(TabLabels.CohortReviews, {waitPageChange: false}));
   }
 
   /**
    * Click Concept Sets subtab in Data page.
    * @param opts
    */
-  async openConceptSetsSubtab(opts: {waitPageChange?: boolean} = {}): Promise<void> {
-    return this.openTab(TabLabels.ConceptSets, opts);
+  async openConceptSetsSubtab(): Promise<void> {
+    return this.openDataPage().then(() => this.openTab(TabLabels.ConceptSets, {waitPageChange: false}));
   }
 
   /**
@@ -94,6 +97,10 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
     const { waitPageChange = true } = opts;
     const selector = buildXPath({name: pageTabName, type: ElementType.Tab});
     const tab = new Link(this.page, selector);
+    const isSelected = await getPropValue<boolean>(await tab.asElementHandle(), 'ariaSelected');
+    if (isSelected === true) {
+      return; // Tab is already open.
+    }
     waitPageChange ? await tab.clickAndWait() : await tab.click();
     await tab.dispose();
     return waitWhileLoading(this.page);
@@ -151,7 +158,6 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
     await waitWhileLoading(this.page);
 
     console.log(`Deleted ${resourceType} "${resourceName}"`);
-    await this.waitForLoad();
     return modalTextContent;
   }
 

@@ -57,7 +57,7 @@ public class EgressEventServiceTest {
   private static final EgressEvent EGRESS_EVENT_1 =
       new EgressEvent()
           .projectName("aou-rw-test-c7dec260")
-          .vmName("all-of-us-111-m")
+          .vmPrefix("all-of-us-111")
           .egressMib(120.7)
           .egressMibThreshold(100.0)
           .timeWindowDuration(600L);
@@ -109,6 +109,7 @@ public class EgressEventServiceTest {
   @TestConfiguration
   @Import({EgressEventServiceImpl.class})
   static class Configuration {
+
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     WorkbenchConfig getWorkbenchConfig() {
@@ -167,7 +168,7 @@ public class EgressEventServiceTest {
         .containsMatch(
             Pattern.compile(
                 "user_id:\\s+111,\\s+Institution:\\s+Verily\\s+Life\\s+Sciences,\\s+Account\\s+Age:\\s+651\\s+days"));
-    assertThat(request.getAlias()).isEqualTo("aou-rw-test-c7dec260 | all-of-us-111-m");
+    assertThat(request.getAlias()).isEqualTo("aou-rw-test-c7dec260 | all-of-us-111");
   }
 
   @Test
@@ -187,7 +188,7 @@ public class EgressEventServiceTest {
         .containsMatch(
             Pattern.compile(
                 "user_id:\\s+111,\\s+Institution:\\s+not\\s+found,\\s+Account\\s+Age:\\s+651\\s+days"));
-    assertThat(request.getAlias()).isEqualTo("aou-rw-test-c7dec260 | all-of-us-111-m");
+    assertThat(request.getAlias()).isEqualTo("aou-rw-test-c7dec260 | all-of-us-111");
   }
 
   // I thought about adding this to a mapper, but it's such a backwards, test-only conversion,

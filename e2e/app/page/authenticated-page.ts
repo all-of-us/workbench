@@ -1,7 +1,6 @@
 import {Page} from 'puppeteer';
 import {PageUrl} from 'app/text-labels';
 import BasePage from 'app/page/base-page';
-import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
 import {getPropValue} from 'utils/element-utils';
 
 const signedInIndicator = 'app-signed-in';
@@ -18,7 +17,7 @@ export default abstract class AuthenticatedPage extends BasePage {
   }
 
   protected async isSignedIn(): Promise<boolean> {
-    return this.page.waitForSelector(signedInIndicator)
+    return this.page.waitForSelector(signedInIndicator, {timeout: 30000})
       .then( (elemt) => elemt.asElement() !== null);
   }
 
@@ -32,18 +31,9 @@ export default abstract class AuthenticatedPage extends BasePage {
    * Wait until current page is loaded and without spinners spinning.
    */
   async waitForLoad(): Promise<this> {
-    try {
-      await Promise.all([
-        this.isSignedIn(),
-        this.isLoaded(),
-      ]);
-      return this;
-    } catch (e) {
-      await savePageToFile(this.page);
-      await takeScreenshot(this.page);
-      const title = await this.page.title();
-      throw new Error(`"${title}" page waitForLoad() encountered ${e}.`);
-    }
+    await this.isSignedIn();
+    await this.isLoaded();
+    return this;
   }
 
   /**

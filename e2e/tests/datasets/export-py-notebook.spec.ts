@@ -69,8 +69,7 @@ describe('Create Dataset', () => {
     expect(newCardsCount).toBe(origCardsCount - 1);
 
     // Delete Dataset.
-    await dataPage.openDataPage();
-    await dataPage.openDatasetsSubtab({waitPageChange: false});
+    await dataPage.openDatasetsSubtab();
 
     await dataPage.deleteResource(newDatasetName, ResourceCard.Dataset);
   });
@@ -116,8 +115,7 @@ describe('Create Dataset', () => {
     await analysisPage.deleteResource(notebookName, ResourceCard.Notebook);
 
     // Delete Dataset
-    await analysisPage.openDataPage();
-    await analysisPage.openDatasetsSubtab({waitPageChange: false});
+    await analysisPage.openDatasetsSubtab();
     await analysisPage.deleteResource(datasetName, ResourceCard.Dataset);
   });
 

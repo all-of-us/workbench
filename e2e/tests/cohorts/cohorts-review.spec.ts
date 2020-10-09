@@ -87,8 +87,7 @@ describe('Cohort review tests', () => {
     await cohortBuildPage.waitForLoad();
 
     // Land on the Data Page & click the Cohort Reviews SubTab
-    await dataPage.openDataPage();
-    await dataPage.openCohortReviewsSubtab({waitPageChange: false});
+    await dataPage.openCohortReviewsSubtab();
 
     // Rename Cohort Review 
     const newCohortReviewName = makeRandomName();

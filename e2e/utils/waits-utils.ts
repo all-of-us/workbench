@@ -24,7 +24,7 @@ export async function waitForUrl(page: Page, urlSubstr: string): Promise<boolean
     }, {}, urlSubstr);
     return (await jsHandle.jsonValue()) as boolean;
   } catch (e) {
-    console.error(`Wait for URL contains "${urlSubstr}" failed. ${e}`);
+    console.error(`waitForUrl contains "${urlSubstr}" failed. ${e}`);
     throw e;
   }
 }
@@ -39,10 +39,10 @@ export async function waitForDocumentTitle(page: Page, titleSubstr: string): Pro
     const jsHandle = await page.waitForFunction(t => {
       const actualTitle = document.title;
       return actualTitle.includes(t);
-    }, {}, titleSubstr);
+    }, {timeout: 30000}, titleSubstr);
     return (await jsHandle.jsonValue()) as boolean;
   } catch (e) {
-    console.error(`Wait for document title contains "${titleSubstr}" failed. ${e}`);
+    console.error(`waitForDocumentTitle contains "${titleSubstr}" failed. ${e}`);
     throw e;
   }
 }
@@ -112,7 +112,7 @@ export async function waitForPropertyExists(page: Page, xpathSelector: string, p
     return true;
   } catch (err) {
     console.error(`Failed waiting element (XPath="${xpathSelector}") property: ${propertyName} exists. ${err}`);
-    throw new Error(err);
+    throw (err);
   }
 }
 
@@ -136,7 +136,7 @@ export async function waitForVisible(page: Page, cssSelector: string): Promise<b
     await jsHandle.jsonValue();
     return true;
   } catch (e) {
-    console.error(`Wait for element matching CSS="${cssSelector}" visible failed. ${e}`);
+    console.error(`waitForVisible CSS="${cssSelector}" failed. ${e}`);
     throw e;
   }
 }
@@ -155,7 +155,7 @@ export async function waitForHidden(page: Page, cssSelector: string): Promise<bo
     }, {}, cssSelector);
     return (await jsHandle.jsonValue()) as boolean;
   } catch (e) {
-    console.error(`Wait for element matching CSS="${cssSelector}" hidden. ${e}`);
+    console.error(`waitForHidden CSS="${cssSelector}" failed. ${e}`);
     throw e;
   }
 }

@@ -11,9 +11,8 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {RuntimeApi} from 'generated/fetch/api';
 import {WorkspaceAccessLevel} from 'generated/fetch';
-import {
-  updateRuntimeOpsStoreForWorkspaceNamespace
-} from "app/utils/stores";
+import {runtimeStore} from "app/utils/stores";
+import {Runtime, RuntimeStatus} from "generated/fetch";
 
 describe('RuntimePanel', () => {
   let props: Props;
@@ -31,11 +30,12 @@ describe('RuntimePanel', () => {
   }
 
   beforeEach(() => {
+    runtimeApiStub = new RuntimeApiStub();
+    registerApiClient(RuntimeApi, runtimeApiStub);
+    runtimeStore.set({runtime: runtimeApiStub.runtime, workspaceNamespace: workspaceStubs[0].namespace});
     props = {
       workspace: {...workspaceStubs[0], accessLevel: WorkspaceAccessLevel.WRITER}
     };
-    runtimeApiStub = new RuntimeApiStub();
-    registerApiClient(RuntimeApi, runtimeApiStub);
   });
 
   it('should show loading spinner while loading', async() => {
@@ -56,6 +56,7 @@ describe('RuntimePanel', () => {
     const wrapper = component();
     await handleUseEffect(wrapper);   
     await waitOneTickAndUpdate(wrapper);
+
     const imageDropdown = wrapper.find({'data-test-id': 'runtime-image-dropdown'}).find('label').first();
     expect(imageDropdown.exists()).toBeTruthy();
 
@@ -104,14 +105,4 @@ describe('RuntimePanel', () => {
 
   });
 
-  // TODO(RW-5660): Fix flakiness and re-enable.
-  it.skip('should show the presence of an outstanding runtime operation', async() => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    updateRuntimeOpsStoreForWorkspaceNamespace(props.workspace.namespace, {promise: Promise.resolve(), operation: 'get', aborter: new AbortController()});
-    await waitOneTickAndUpdate(wrapper);
-    await waitOneTickAndUpdate(wrapper);
-    const activeRuntimeOp = wrapper.find('[data-test-id="active-runtime-operation"]');
-    expect(activeRuntimeOp.length).toEqual(1);
-  });
 });

@@ -9,6 +9,7 @@ import {waitForDocumentTitle, waitForText} from 'utils/waits-utils';
 import ReactSelect from 'app/element/react-select';
 import WorkspaceDataPage from './workspace-data-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
+import {UseFreeCredits} from './workspace-base';
 
 const faker = require('faker/locale/en_US');
 export const PageTitle = 'View Workspace';
@@ -28,18 +29,15 @@ export default class WorkspacesPage extends WorkspaceEditPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    try {
-      await Promise.all([
-        waitForDocumentTitle(this.page, PageTitle),
-        this.page.waitForXPath('//a[text()="Workspaces"]', {visible: true}),
-        this.page.waitForXPath('//h3[normalize-space(text())="Workspaces"]', {visible: true}),  // Texts above Filter By Select
-        waitWhileLoading(this.page),
-      ]);
-      return true;
-    } catch (err) {
-      console.log(`WorkspacesPage isLoaded() encountered ${err}`);
-      return false;
-    }
+    await Promise.all([
+      waitForDocumentTitle(this.page, PageTitle),
+      waitWhileLoading(this.page)
+    ]);
+    await Promise.all([
+      this.page.waitForXPath('//a[text()="Workspaces"]', {visible: true}),
+      this.page.waitForXPath('//h3[normalize-space(text())="Workspaces"]', {visible: true})  // Texts above Filter By Select
+    ]);
+    return true;
   }
 
 
@@ -75,18 +73,18 @@ export default class WorkspacesPage extends WorkspaceEditPage {
    */
   async createWorkspace(
      workspaceName: string,
-     billingAccount: string = 'Use All of Us free credits',
+     billingAccount: string = UseFreeCredits,
      reviewRequest: boolean = false): Promise<string[]> {
 
     const editPage = await this.clickCreateNewWorkspace();
     // wait for Billing Account default selected value
-    await waitForText(this.page, 'Use All of Us free credits');
+    await waitForText(this.page, UseFreeCredits);
 
     await (await editPage.getWorkspaceNameTextbox()).type(workspaceName);
     await (await editPage.getWorkspaceNameTextbox()).pressTab();
 
-    // select the default Synthetic Dataset
-    await editPage.selectDataset();
+    // select the default CDR Version
+    await editPage.selectCdrVersion();
 
     // select Billing Account
     await editPage.selectBillingAccount(billingAccount);
