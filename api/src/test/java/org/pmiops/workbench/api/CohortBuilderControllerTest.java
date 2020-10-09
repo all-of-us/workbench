@@ -282,7 +282,7 @@ public class CohortBuilderControllerTest {
             .addCount(0L)
             .addHierarchy(true)
             .addStandard(true)
-            .addSynonyms("LP12*[MEASUREMENT_rank1]")
+            .addFullText("LP12*[MEASUREMENT_rank1]")
             .build();
     cbCriteriaDao.save(criteria);
 
@@ -311,7 +311,7 @@ public class CohortBuilderControllerTest {
             .addHierarchy(true)
             .addStandard(true)
             .addCode("LP123")
-            .addSynonyms("+[MEASUREMENT_rank1]")
+            .addFullText("+[MEASUREMENT_rank1]")
             .build();
     cbCriteriaDao.save(criteria);
 
@@ -339,7 +339,7 @@ public class CohortBuilderControllerTest {
             .addCount(0L)
             .addHierarchy(true)
             .addStandard(true)
-            .addSynonyms("LP12*[CONDITION_rank1]")
+            .addFullText("LP12*[CONDITION_rank1]")
             .build();
     cbCriteriaDao.save(criteria);
 
@@ -404,7 +404,7 @@ public class CohortBuilderControllerTest {
             .addType(CriteriaType.ICD9CM.toString())
             .addAttribute(Boolean.FALSE)
             .addStandard(false)
-            .addSynonyms("[CONDITION_rank1]")
+            .addFullText("[CONDITION_rank1]")
             .build();
     cbCriteriaDao.save(criteria);
 
@@ -432,7 +432,7 @@ public class CohortBuilderControllerTest {
             .addType(CriteriaType.ICD9CM.toString())
             .addAttribute(Boolean.FALSE)
             .addStandard(false)
-            .addSynonyms("+[CONDITION_rank1]")
+            .addFullText("+[CONDITION_rank1]")
             .build();
     cbCriteriaDao.save(criteria);
 
@@ -461,7 +461,7 @@ public class CohortBuilderControllerTest {
             .addType(CriteriaType.BRAND.toString())
             .addAttribute(Boolean.FALSE)
             .addStandard(true)
-            .addSynonyms("[DRUG_rank1]")
+            .addFullText("[DRUG_rank1]")
             .build();
     cbCriteriaDao.save(criteria1);
 
@@ -489,7 +489,7 @@ public class CohortBuilderControllerTest {
             .addType(CriteriaType.LOINC.toString())
             .addAttribute(Boolean.FALSE)
             .addStandard(true)
-            .addSynonyms("[CONDITION_rank1]")
+            .addFullText("[CONDITION_rank1]")
             .build();
     cbCriteriaDao.save(criteria);
 
@@ -517,7 +517,7 @@ public class CohortBuilderControllerTest {
             .addType(CriteriaType.LOINC.toString())
             .addAttribute(Boolean.FALSE)
             .addStandard(true)
-            .addSynonyms("LP12*[CONDITION_rank1]")
+            .addFullText("LP12*[CONDITION_rank1]")
             .build();
     cbCriteriaDao.save(criteria);
 
@@ -547,7 +547,7 @@ public class CohortBuilderControllerTest {
             .addType(CriteriaType.ATC.toString())
             .addAttribute(Boolean.FALSE)
             .addStandard(true)
-            .addSynonyms("LP12*[DRUG_rank1]")
+            .addFullText("LP12*[DRUG_rank1]")
             .build();
     cbCriteriaDao.save(criteria);
 
@@ -574,7 +574,7 @@ public class CohortBuilderControllerTest {
             .addStandard(true)
             .addCount(1L)
             .addConceptId("1")
-            .addSynonyms("[CONDITION_rank1]")
+            .addFullText("[CONDITION_rank1]")
             .build();
     cbCriteriaDao.save(criteria);
     assertEquals(
