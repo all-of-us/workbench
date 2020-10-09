@@ -27,7 +27,7 @@ export default class ConceptsetSaveModal extends Modal {
    * @param {SaveOption} saveOption
    * @return {string} Concept name.
    */
-  async fillOutSaveModal(saveOption: SaveOption = SaveOption.CreateNewSet, existingConceptName: string = '0'): Promise<string> {
+  async fillOutSaveModal(saveOption: SaveOption = SaveOption.CreateNewSet, existingConceptSetName: string = '0'): Promise<string> {
     const createNewSetRadioButton = await RadioButton.findByName(this.page, {name: saveOption}, this);
     await createNewSetRadioButton.select();
 
@@ -43,7 +43,7 @@ export default class ConceptsetSaveModal extends Modal {
       const descriptionTextarea = await Textarea.findByName(this.page, {containsText: 'Description'}, this);
       await descriptionTextarea.type(faker.lorem.words());
     } else {
-      const [selectedValue] = await this.page.select('[data-test-id="add-to-existing"] select', existingConceptName);
+      const [selectedValue] = await this.page.select('[data-test-id="add-to-existing"] select', existingConceptSetName);
       const elem = await this.page.waitForSelector(`[data-test-id="add-to-existing"] select option[value="${selectedValue}"]`);
       conceptName = await getPropValue<string>(elem, 'textContent');
     }

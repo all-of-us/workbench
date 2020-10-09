@@ -1,8 +1,8 @@
 import {Domain} from 'app/component/concept-domain-card';
 import DataResourceCard from 'app/component/data-resource-card';
 import WorkspaceCard from 'app/component/workspace-card';
-import ConceptsetActionsPage from 'app/page/conceptset-actions-page';
-import ConceptsetPage from 'app/page/conceptset-page';
+import ConceptSetActionsPage from 'app/page/conceptset-actions-page';
+import ConceptSetPage from 'app/page/conceptset-page';
 import {SaveOption} from 'app/page/conceptset-save-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {LinkText, ResourceCard} from 'app/text-labels';
@@ -37,29 +37,29 @@ describe('Copy Concept Set to another workspace', () => {
     await dataPage.openConceptSetsSubtab();
 
     // Create new Concept Set
-    const conceptSearchPage = await dataPage.openConceptSearch(Domain.Procedures);
+    const conceptSearchPage = await dataPage.openConceptSetSearch(Domain.Procedures);
     await conceptSearchPage.dataTableSelectAllRows();
     const addButtonLabel = await conceptSearchPage.clickAddToSetButton();
     // Table pagination displays 20 rows. If this changes, then update the check below.
     expect(addButtonLabel).toBe('Add (20) to set');
-    const conceptName = await conceptSearchPage.saveConcept(SaveOption.CreateNewSet);
-    console.log(`Created Concept Set: "${conceptName}"`);
+    const conceptSetName = await conceptSearchPage.saveConceptSet(SaveOption.CreateNewSet);
+    console.log(`Created Concept Set: "${conceptSetName}"`);
     // Click on link to open Concept Set page.
-    const conceptsetActionPage = new ConceptsetActionsPage(page);
-    await conceptsetActionPage.openConceptSet(conceptName);
+    const conceptSetActionsPage = new ConceptSetActionsPage(page);
+    await conceptSetActionsPage.openConceptSet(conceptSetName);
 
     // Concept Set page is open.
-    const conceptsetPage = new ConceptsetPage(page);
-    await conceptsetPage.waitForLoad();
+    const conceptSetPage = new ConceptSetPage(page);
+    await conceptSetPage.waitForLoad();
 
     // Copy Concept Set to another workspace with new Concept name.
     const conceptSetCopyName = makeRandomName();
 
-    const conceptCopyModal = await conceptsetPage.openCopyToWorkspaceModal(conceptName);
-    await conceptCopyModal.copyToAnotherWorkspace(destWorkspace, conceptSetCopyName);
+    const conceptSetCopyModal = await conceptSetPage.openCopyToWorkspaceModal(conceptSetName);
+    await conceptSetCopyModal.copyToAnotherWorkspace(destWorkspace, conceptSetCopyName);
 
     // Click "Go to Copied Concept Set" button.
-    await conceptCopyModal.waitForButton(LinkText.GoToCopiedConceptSet).then(butn => butn.click());
+    await conceptSetCopyModal.waitForButton(LinkText.GoToCopiedConceptSet).then(butn => butn.click());
 
     await dataPage.waitForLoad();
 
@@ -71,7 +71,7 @@ describe('Copy Concept Set to another workspace', () => {
     const exists = await resourceCard.cardExists(conceptSetCopyName, ResourceCard.ConceptSet);
     expect(exists).toBe(true);
 
-    console.log(`Copied Concept Set: "${conceptName} from workspace: "${srcWorkspace}" to Concept Set: "${conceptSetCopyName}" in another workspace: "${destWorkspace}"`)
+    console.log(`Copied Concept Set: "${conceptSetName} from workspace: "${srcWorkspace}" to Concept Set: "${conceptSetCopyName}" in another workspace: "${destWorkspace}"`)
 
     // Delete Concept Set in destWorkspace.
     await dataPage.deleteResource(conceptSetCopyName, ResourceCard.ConceptSet);

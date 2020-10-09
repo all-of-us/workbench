@@ -8,7 +8,7 @@ import {buildXPath} from 'app/xpath-builders';
 import {ElementType} from 'app/xpath-options';
 import AuthenticatedPage from './authenticated-page';
 import CohortBuildPage from './cohort-build-page';
-import ConceptsetSearchPage from './conceptset-search-page';
+import ConceptSetSearchPage from './conceptset-search-page';
 import DatasetSaveModal from './dataset-save-modal';
 
 const PageTitle = 'Dataset Page';
@@ -56,12 +56,12 @@ export default class DatasetBuildPage extends AuthenticatedPage {
   /**
    * Click Add Concept Sets button, opened the Concept Sets page.
    */
-  async clickAddConceptSetsButton(): Promise<ConceptsetSearchPage> {
+  async clickAddConceptSetsButton(): Promise<ConceptSetSearchPage> {
     const addConceptSetsButton = await ClrIconLink.findByName(this.page, {name: LabelAlias.SelectConceptSets, ancestorLevel: 3, iconShape: 'plus-circle'});
     await addConceptSetsButton.clickAndWait();
-    const conceptPage = new ConceptsetSearchPage(this.page);
-    await conceptPage.waitForLoad();
-    return conceptPage;
+    const conceptSetSearchPage = new ConceptSetSearchPage(this.page);
+    await conceptSetSearchPage.waitForLoad();
+    return conceptSetSearchPage;
   }
 
   /**
