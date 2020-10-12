@@ -6606,6 +6606,19 @@ definitions:
         description: number of concepts matching the search query in this domain
         type: integer
         format: int64
+  SurveyCount:
+    type: object
+    required:
+    - name
+    - conceptCount
+    properties:
+      name:
+        description: display name of the survey
+        type: string
+      conceptCount:
+        description: number of concepts matching the search query in this survey
+        type: integer
+        format: int64
   CreateReviewRequest:
     type: object
     required:
