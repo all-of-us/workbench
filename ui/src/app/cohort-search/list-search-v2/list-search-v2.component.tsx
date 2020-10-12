@@ -161,6 +161,7 @@ interface Props {
   hierarchy: Function;
   source: string;
   searchContext: any;
+  searchTerms: string;
   select: Function;
   selectedIds: Array<string>;
   setAttributes: Function;
@@ -174,6 +175,7 @@ interface State {
   hoverId: string;
   ingredients: any;
   loading: boolean;
+  searchTerms: string;
   standardOnly: boolean;
   sourceMatch: any;
   standardData: any;
@@ -182,7 +184,7 @@ interface State {
 
 export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
   class extends React.Component<Props, State> {
-    constructor(props: any) {
+    constructor(props: Props) {
       super(props);
       this.state = {
         cdrVersion: undefined,
@@ -191,6 +193,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
         ingredients: {},
         hoverId: undefined,
         loading: false,
+        searchTerms: props.searchTerms,
         standardOnly: false,
         sourceMatch: undefined,
         standardData: null,
@@ -198,9 +201,12 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
       };
     }
     componentDidMount(): void {
-      const {cdrVersionListResponse, workspace: {cdrVersionId}} = this.props;
+      const {cdrVersionListResponse, searchTerms, source, workspace: {cdrVersionId}} = this.props;
       const cdrVersions = cdrVersionListResponse.items;
       this.setState({cdrVersion: cdrVersions.find(cdr => cdr.cdrVersionId === cdrVersionId)});
+      if (source === 'concept' && searchTerms !== '') {
+        this.getResults(searchTerms);
+      }
     }
 
     handleInput = (event: any) => {
@@ -372,7 +378,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
 
     render() {
       const {searchContext: {domain}} = this.props;
-      const {cdrVersion, data, error, ingredients, loading, standardOnly, sourceMatch, standardData, totalCount} = this.state;
+      const {cdrVersion, data, error, ingredients, loading, searchTerms, standardOnly, sourceMatch, standardData, totalCount} = this.state;
       const showStandardOption = !standardOnly && !!standardData && standardData.length > 0;
       const displayData = standardOnly ? standardData : data;
       return <div style={{overflow: 'auto'}}>
@@ -380,8 +386,10 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
           <div style={styles.searchBar}>
             <ClrIcon shape='search' size='18'/>
             <TextInput style={styles.searchInput}
-              placeholder={`Search ${domainToTitle(domain)} by code or description`}
-              onKeyPress={this.handleInput} />
+                       value={searchTerms}
+                       placeholder={`Search ${domainToTitle(domain)} by code or description`}
+                       onChange={(e) => this.setState({searchTerms: e})}
+                       onKeyPress={this.handleInput} />
           </div>
         </div>
         <div style={{display: 'table', height: '100%', width: '100%'}}>
