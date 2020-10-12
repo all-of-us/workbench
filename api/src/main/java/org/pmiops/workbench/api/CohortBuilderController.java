@@ -205,6 +205,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   @Override
   public ResponseEntity<DomainInfoResponse> findDomainInfos(Long cdrVersionId) {
+    cdrVersionService.setCdrVersion(cdrVersionId);
     return ResponseEntity.ok(
         new DomainInfoResponse().items(cohortBuilderService.findDomainInfos()));
   }
@@ -245,6 +246,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   @Override
   public ResponseEntity<SurveysResponse> findSurveyModules(Long cdrVersionId) {
+    cdrVersionService.setCdrVersion(cdrVersionId);
     return ResponseEntity.ok(new SurveysResponse().items(cohortBuilderService.findSurveyModules()));
   }
 
