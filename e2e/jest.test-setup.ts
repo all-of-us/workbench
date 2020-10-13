@@ -40,9 +40,9 @@ beforeAll(async () => {
   //  request.continue();
   //});
   //// Emitted when the page crashed
-  //page.on('error', error => console.error(`❌ ${error}`));
+  page.on('error', error => console.error(`❌ ${error}`));
   //// Emitted when a script has uncaught exception
-  //page.on('pageerror', error => console.error(`❌ ${error}`));
+  page.on('pageerror', error => console.error(`❌ ${error}`));
 });
 
 afterAll(async () => {
