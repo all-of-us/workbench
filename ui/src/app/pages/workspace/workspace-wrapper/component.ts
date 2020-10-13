@@ -16,7 +16,7 @@ import {
 import {routeDataStore, runtimeStore} from 'app/utils/stores';
 
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {LeoRuntimeInitializer} from 'app/utils/leo-runtime-initializer';
+import {ExceededActionCountError, LeoRuntimeInitializer} from 'app/utils/leo-runtime-initializer';
 import {ResourceType, UserRole, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
 
 const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
@@ -143,7 +143,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
           };
         });
       })
-      .subscribe(workspace => {
+      .subscribe(async (workspace) => {
         if (workspace === null) {
           // This handles the empty urlParamsStore story.
           return;
@@ -153,16 +153,25 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
         currentWorkspaceStore.next(workspace);
         this.pollAborter.abort();
         this.pollAborter = new AbortController();
-        LeoRuntimeInitializer.initialize({
-          workspaceNamespace: workspace.namespace,
-          onPoll: (runtime) => {
-            runtimeStore.set({runtime: runtime, workspaceNamespace: workspace.namespace});
-          },
-          pollAbortSignal: this.pollAborter.signal,
-          maxCreateCount: 0,
-          maxDeleteCount: 0,
-          maxResumeCount: 0
-        });
+        try {
+          await LeoRuntimeInitializer.initialize({
+            workspaceNamespace: workspace.namespace,
+            onPoll: (runtime) => {
+              runtimeStore.set({runtime: runtime, workspaceNamespace: workspace.namespace});
+            },
+            pollAbortSignal: this.pollAborter.signal,
+            maxCreateCount: 0,
+            maxDeleteCount: 0,
+            maxResumeCount: 0
+          });
+        } catch (e) {
+          // Ignore ExceededActionCountError. This is thrown when the runtime doesn't exist, or
+          // isn't started. Both of these scenarios are expected, since we don't want to do any lazy
+          // initialization here.
+          if (!(e instanceof ExceededActionCountError)) {
+            throw e;
+          }
+        }
       })
     );
     this.subscriptions.push(currentWorkspaceStore.subscribe((workspace) => {
