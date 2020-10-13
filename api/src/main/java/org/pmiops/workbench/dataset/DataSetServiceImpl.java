@@ -910,11 +910,10 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     String domainAsString = domain.toString().toLowerCase();
     String namespace = "dataset_" + qualifier + "_" + domainAsString + "_";
     // Comments in R and Python have the same syntax
-    String descriptiveComment = String.format(
-        "# This query represents dataset \"%s\" for domain \"%s\" and was generated for %s",
-        dataSetName,
-        domainAsString,
-        cdrVersionName);
+    String descriptiveComment =
+        String.format(
+            "# This query represents dataset \"%s\" for domain \"%s\" and was generated for %s",
+            dataSetName, domainAsString, cdrVersionName);
     String sqlSection;
     String dataFrameSection;
     String displayHeadSection;
