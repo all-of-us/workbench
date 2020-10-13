@@ -34,15 +34,35 @@ afterEach(async () => {
  */
 beforeAll(async () => {
   await page.setRequestInterception(true);
-  // Emitted when a request failed. Warning: blocked requests from above will be logged as failed requests, safe to ignore these.
-  //page.on('requestfailed', request => {
-  //  console.error(`❌ Failed request => ${request.method()} ${request.url()}`);
-  //  request.continue();
-  //});
-  //// Emitted when the page crashed
-  page.on('error', error => console.error(`❌ ${error}`));
-  //// Emitted when a script has uncaught exception
-  page.on('pageerror', error => console.error(`❌ ${error}`));
+  page.on('request', (request) => {
+    const requestUrl = url.parse(request.url(), true);
+    const host = requestUrl.hostname;
+    // to improve page load performance, block network requests unrelated to application.
+    try {
+      if (host === 'www.google-analytics.com'
+           || host === 'accounts.youtube.com'
+           || host === 'static.zdassets.com'
+           || host === 'play.google.com'
+           || request.url().endsWith('content-security-index-report')) {
+        request.abort();
+      } else {
+        request.continue();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  });
+  if (isDebugMode) {
+    // Emitted when a request failed. Warning: blocked requests from above will be logged as failed requests, safe to ignore these.
+    page.on('requestfailed', request => {
+      console.error(`❌ Failed request => ${request.method()} ${request.url()}`);
+      request.continue();
+    });
+    // Emitted when the page crashed
+    page.on('error', error => console.error(`❌ ${error}`));
+    // Emitted when a script has uncaught exception
+    page.on('pageerror', error => console.error(`❌ ${error}`));
+  }
 });
 
 afterAll(async () => {
