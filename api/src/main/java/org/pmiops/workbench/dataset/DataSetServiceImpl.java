@@ -672,6 +672,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   public List<String> generateCodeCells(
       KernelTypeEnum kernelTypeEnum,
       String dataSetName,
+      String cdrVersionName,
       String qualifier,
       Map<String, QueryJobConfiguration> queryJobConfigurationMap) {
     String prerequisites;
@@ -695,6 +696,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                         entry.getValue(),
                         Domain.fromValue(entry.getKey()),
                         dataSetName,
+                        cdrVersionName,
                         qualifier,
                         kernelTypeEnum))
         .collect(Collectors.toList());
@@ -899,6 +901,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       QueryJobConfiguration queryJobConfiguration,
       Domain domain,
       String dataSetName,
+      String cdrVersionName,
       String qualifier,
       KernelTypeEnum kernelTypeEnum) {
 
@@ -907,13 +910,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     String domainAsString = domain.toString().toLowerCase();
     String namespace = "dataset_" + qualifier + "_" + domainAsString + "_";
     // Comments in R and Python have the same syntax
-    String descriptiveComment =
-        new StringBuilder("# This query represents dataset \"")
-            .append(dataSetName)
-            .append("\" for domain \"")
-            .append(domainAsString)
-            .append("\"")
-            .toString();
+    String descriptiveComment = String.format(
+        "# This query represents dataset \"%s\" for domain \"%s\" and was generated for %s",
+        dataSetName,
+        domainAsString,
+        cdrVersionName);
     String sqlSection;
     String dataFrameSection;
     String displayHeadSection;

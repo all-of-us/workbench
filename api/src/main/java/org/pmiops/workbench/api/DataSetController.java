@@ -169,7 +169,11 @@ public class DataSetController implements DataSetApiDelegate {
     final ImmutableList<String> codeCells =
         ImmutableList.copyOf(
             dataSetService.generateCodeCells(
-                kernelTypeEnum, dataSetRequest.getName(), qualifier, bigQueryJobConfigsByDomain));
+                kernelTypeEnum,
+                dataSetRequest.getName(),
+                dbWorkspace.getCdrVersion().getName(),
+                qualifier,
+                bigQueryJobConfigsByDomain));
     final String generatedCode = String.join("\n\n", codeCells);
 
     return ResponseEntity.ok(
@@ -332,6 +336,7 @@ public class DataSetController implements DataSetApiDelegate {
         dataSetService.generateCodeCells(
             dataSetExportRequest.getKernelType(),
             dataSetExportRequest.getDataSetRequest().getName(),
+            dbWorkspace.getCdrVersion().getName(),
             qualifier,
             queriesByDomain);
 
