@@ -143,7 +143,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
           };
         });
       })
-      .subscribe(async (workspace) => {
+      .subscribe(async(workspace) => {
         if (workspace === null) {
           // This handles the empty urlParamsStore story.
           return;
