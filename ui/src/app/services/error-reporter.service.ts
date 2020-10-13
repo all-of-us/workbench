@@ -31,7 +31,13 @@ export class ErrorReporterService extends ErrorHandler {
     });
   }
 
-  handleError(error: any) {
+  async handleError(error: any) {
+    if (error.rejection && error.rejection.json) {
+      const httpErr = error.rejection;
+      const got = JSON.stringify(await httpErr.json());
+      error = new Error(`${httpErr.status} @ ${httpErr.url}: ${got}`)
+    }
+
     // Always log to console regardless of whether Stackdriver is enabled.
     super.handleError(error);
     const cavemanErrorEl = document.createElement('div');
