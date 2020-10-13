@@ -2,7 +2,7 @@ import {Page} from 'puppeteer';
 import Button from 'app/element/button';
 import Container from 'app/container';
 import {getPropValue} from 'utils/element-utils';
-import {waitWhileLoading} from '../../utils/waits-utils';
+import {waitWhileLoading} from 'utils/waits-utils';
 
 export enum Domain {
    Conditions = 'Conditions',

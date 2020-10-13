@@ -9,7 +9,7 @@ import {Option, Language, LinkText, ResourceCard, WorkspaceAccessLevel} from 'ap
 import {config} from 'resources/workbench-config';
 import {makeRandomName} from 'utils/str-utils';
 import {findWorkspace, signIn, signInAs, signOut} from 'utils/test-utils';
-import {waitWhileLoading} from '../../utils/waits-utils';
+import {waitWhileLoading} from 'utils/waits-utils';
 
 jest.setTimeout(20 * 60 * 1000);
 

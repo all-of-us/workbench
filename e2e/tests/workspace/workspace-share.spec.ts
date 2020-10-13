@@ -8,7 +8,7 @@ import {Option, LinkText, WorkspaceAccessLevel} from 'app/text-labels';
 import {config} from 'resources/workbench-config';
 import {findWorkspace, signIn, signInAs, signOut} from 'utils/test-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {waitWhileLoading} from '../../utils/waits-utils';
+import {waitWhileLoading} from 'utils/waits-utils';
 
 describe('Share workspace', () => {
 

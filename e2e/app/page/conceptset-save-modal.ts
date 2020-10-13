@@ -6,7 +6,7 @@ import Textbox from 'app/element/textbox';
 import Textarea from 'app/element/textarea';
 import {LinkText} from 'app/text-labels';
 import {getPropValue} from 'utils/element-utils';
-import {waitWhileLoading} from '../../utils/waits-utils';
+import {waitWhileLoading} from 'utils/waits-utils';
 
 const faker = require('faker/locale/en_US');
 

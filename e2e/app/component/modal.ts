@@ -8,7 +8,7 @@ import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
 import {LinkText} from 'app/text-labels';
 import {getPropValue} from 'utils/element-utils';
 import * as fp from 'lodash/fp';
-import {waitWhileLoading} from '../../utils/waits-utils';
+import {waitWhileLoading} from 'utils/waits-utils';
 
 const Selector = {
   defaultDialog: '//*[@role="dialog"]',
