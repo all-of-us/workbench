@@ -52,17 +52,15 @@ beforeAll(async () => {
       console.error(err);
     }
   });
-  if (isDebugMode) {
-    // Emitted when a request failed. Warning: blocked requests from above will be logged as failed requests, safe to ignore these.
-    page.on('requestfailed', request => {
-      console.error(`❌ Failed request => ${request.method()} ${request.url()}`);
-      request.continue();
-    });
-    // Emitted when the page crashed
-    page.on('error', error => console.error(`❌ ${error}`));
-    // Emitted when a script has uncaught exception
-    page.on('pageerror', error => console.error(`❌ ${error}`));
-  }
+  // Emitted when a request failed. Warning: blocked requests from above will be logged as failed requests, safe to ignore these.
+  page.on('requestfailed', request => {
+    console.error(`❌ Failed request => ${request.method()} ${request.url()}`);
+    request.continue();
+  });
+  // Emitted when the page crashed
+  page.on('error', error => console.error(`❌ ${error}`));
+  // Emitted when a script has uncaught exception
+  page.on('pageerror', error => console.error(`❌ ${error}`));
 });
 
 afterAll(async () => {
