@@ -15,7 +15,7 @@ export enum SaveOption {
   ChooseExistingSet = 'Choose existing set',
 }
 
-export default class ConceptsetSaveModal extends Modal {
+export default class ConceptSetSaveModal extends Modal {
 
   constructor(page: Page) {
     super(page);
