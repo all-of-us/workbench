@@ -4,8 +4,8 @@ import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {Option, ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
-import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
-import {waitForText} from 'utils/waits-utils';
+import {findWorkspace, signIn} from 'utils/test-utils';
+import {waitForText, waitWhileLoading} from 'utils/waits-utils';
 
 describe('Create Dataset', () => {
 

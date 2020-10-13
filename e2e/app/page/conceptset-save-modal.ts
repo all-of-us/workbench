@@ -6,7 +6,7 @@ import Textbox from 'app/element/textbox';
 import Textarea from 'app/element/textarea';
 import {LinkText} from 'app/text-labels';
 import {getPropValue} from 'utils/element-utils';
-import {waitWhileLoading} from 'utils/test-utils';
+import {waitWhileLoading} from 'utils/waits-utils';
 
 const faker = require('faker/locale/en_US');
 
@@ -15,7 +15,7 @@ export enum SaveOption {
   ChooseExistingSet = 'Choose existing set',
 }
 
-export default class ConceptsetSaveModal extends Modal {
+export default class ConceptSetSaveModal extends Modal {
 
   constructor(page: Page) {
     super(page);

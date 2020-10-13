@@ -10,8 +10,7 @@ import {ElementType} from 'app/xpath-options';
 import {Frame, Page} from 'puppeteer';
 import {defaultFieldValues} from 'resources/data/user-registration-data';
 import {config} from 'resources/workbench-config';
-import {waitWhileLoading} from 'utils/test-utils';
-import {waitForText} from 'utils/waits-utils';
+import {waitForText, waitWhileLoading} from 'utils/waits-utils';
 import {LinkText} from 'app/text-labels';
 import {getPropValue} from 'utils/element-utils';
 

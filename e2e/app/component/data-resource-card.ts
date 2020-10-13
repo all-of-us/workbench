@@ -1,9 +1,9 @@
 import {ElementHandle, Page} from 'puppeteer';
 import * as fp from 'lodash/fp';
-import {waitWhileLoading} from 'utils/test-utils';
 import {getPropValue} from 'utils/element-utils';
 import {ResourceCard} from 'app/text-labels';
 import CardBase from './card-base';
+import {waitWhileLoading} from 'utils/waits-utils';
 
 const DataResourceCardSelector = {
   cardRootXpath: '//*[@data-test-id="card"]',

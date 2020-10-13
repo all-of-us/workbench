@@ -1,13 +1,12 @@
 import {Page} from 'puppeteer';
 import Modal from 'app/component/modal';
 import {makeRandomName} from 'utils/str-utils';
-import {waitWhileLoading} from 'utils/test-utils';
 import RadioButton from 'app/element/radiobutton';
 import Textbox from 'app/element/textbox';
 import {Language, LinkText} from 'app/text-labels';
 import Button from 'app/element/button';
 import {waitUntilChanged} from 'utils/element-utils';
-import {waitForPropertyExists} from 'utils/waits-utils';
+import {waitForPropertyExists, waitWhileLoading} from 'utils/waits-utils';
 import Textarea from 'app/element/textarea';
 
 export default class DatasetSaveModal extends Modal {

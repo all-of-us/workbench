@@ -7,8 +7,7 @@ import {FilterSign} from 'app/page/cohort-search-page';
 import {LinkText} from 'app/text-labels';
 import {buildXPath} from 'app/xpath-builders';
 import {ElementType} from 'app/xpath-options';
-import {waitWhileLoading} from 'utils/test-utils';
-import {waitForNumericalString} from 'utils/waits-utils';
+import {waitForNumericalString, waitWhileLoading} from 'utils/waits-utils';
 
 const defaultXpath = '//*[@id="help-sidebar"]';
 enum SectionSelectors {

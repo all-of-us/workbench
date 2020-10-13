@@ -1,10 +1,9 @@
 import {ElementHandle, Page} from 'puppeteer';
 import {FieldSelector} from 'app/page/cohort-build-page';
 import Modal from 'app/component/modal';
-import {waitForNumericalString, waitForText} from 'utils/waits-utils';
+import {waitForNumericalString, waitForText, waitWhileLoading} from 'utils/waits-utils';
 import CohortSearchPage, {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/cohort-search-page';
 import TieredMenu from 'app/component/tiered-menu';
-import {waitWhileLoading} from 'utils/test-utils';
 import {LinkText} from 'app/text-labels';
 import {snowmanIconXpath} from 'app/component/snowman-menu';
 

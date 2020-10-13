@@ -3,8 +3,7 @@ import {PageUrl} from 'app/text-labels';
 import Link from 'app/element/link';
 import AuthenticatedPage from 'app/page/authenticated-page';
 import ClrIconLink from 'app/element/clr-icon-link';
-import {waitWhileLoading} from 'utils/test-utils';
-import {waitForDocumentTitle} from 'utils/waits-utils';
+import {waitForDocumentTitle, waitWhileLoading} from 'utils/waits-utils';
 
 export const PageTitle = 'Homepage';
 

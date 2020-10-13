@@ -1,6 +1,5 @@
 import {Page} from 'puppeteer';
-import {waitWhileLoading} from 'utils/test-utils';
-import {waitForDocumentTitle} from 'utils/waits-utils';
+import {waitForDocumentTitle, waitWhileLoading} from 'utils/waits-utils';
 import {WorkspaceAccessLevel} from 'app/text-labels';
 import {getPropValue} from 'utils/element-utils';
 import WorkspaceBase from './workspace-base';

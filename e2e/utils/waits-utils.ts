@@ -255,3 +255,26 @@ export async function waitForText(page: Page,
 
 
 }
+
+/**
+ * <pre>
+ * Wait while the page is loading (spinner is spinning and visible). Waiting stops when spinner stops spinning or when timed out.
+ * It usually indicates the page is ready for user interaction.
+ * </pre>
+ */
+export async function waitWhileLoading(page: Page, timeOut: number = 90000): Promise<void> {
+  const notBlankPageSelector = '[data-test-id="sign-in-container"], title:not(empty), div.spinner, svg[viewBox]';
+  const spinElementsSelector = '[style*="running spin"], .spinner:empty, [style*="running rotation"]';
+
+  await Promise.race([
+    // To prevent checking on blank page, wait for elements exist in DOM.
+    page.waitForSelector(notBlankPageSelector),
+    page.waitForSelector(spinElementsSelector),
+  ]);
+
+  // Wait for spinners stop and gone.
+  await page.waitForFunction((css) => {
+    const elements = document.querySelectorAll(css);
+    return elements && elements.length === 0;
+  }, {polling: 'mutation', timeout: timeOut}, spinElementsSelector);
+}

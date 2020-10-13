@@ -1,7 +1,6 @@
 import {Page} from 'puppeteer';
 import Modal from 'app/component/modal';
-import {waitWhileLoading} from 'utils/test-utils';
-import {waitForText} from 'utils/waits-utils';
+import {waitForText, waitWhileLoading} from 'utils/waits-utils';
 import InputNumber from 'app/element/input-number';
 
 const title = 'Create Review Set';

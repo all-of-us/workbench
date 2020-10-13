@@ -7,8 +7,8 @@ import Link from 'app/element/link';
 import {Option, LinkText, ResourceCard} from 'app/text-labels';
 import CohortBuildPage, {FieldSelector} from 'app/page/cohort-build-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
-import {waitForText} from 'utils/waits-utils';
+import {findWorkspace, signIn} from 'utils/test-utils';
+import {waitForText, waitWhileLoading} from 'utils/waits-utils';
 
 
 describe('User can create new Cohorts', () => {

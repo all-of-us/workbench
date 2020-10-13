@@ -5,8 +5,7 @@ import Link from 'app/element/link';
 import {Option, Language, LinkText, ResourceCard} from 'app/text-labels';
 import {Page} from 'puppeteer';
 import {getPropValue} from 'utils/element-utils';
-import {waitWhileLoading} from 'utils/test-utils';
-import {waitForDocumentTitle} from 'utils/waits-utils';
+import {waitForDocumentTitle, waitWhileLoading} from 'utils/waits-utils';
 import NotebookPage from './notebook-page';
 import WorkspaceBase from './workspace-base';
 
