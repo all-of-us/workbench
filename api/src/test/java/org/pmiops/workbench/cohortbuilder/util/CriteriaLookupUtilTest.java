@@ -14,7 +14,7 @@ import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CriteriaType;
-import org.pmiops.workbench.model.DomainType;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
@@ -66,7 +66,7 @@ public class CriteriaLookupUtilTest {
     DbCriteria drugNode1 =
         DbCriteria.builder()
             .addParentId(99999)
-            .addDomainId(DomainType.DRUG.toString())
+            .addDomainId(Domain.DRUG.toString())
             .addType(CriteriaType.ATC.toString())
             .addConceptId("21600002")
             .addGroup(true)
@@ -76,7 +76,7 @@ public class CriteriaLookupUtilTest {
     DbCriteria drugNode2 =
         DbCriteria.builder()
             .addParentId(drugNode1.getId())
-            .addDomainId(DomainType.DRUG.toString())
+            .addDomainId(Domain.DRUG.toString())
             .addType(CriteriaType.RXNORM.toString())
             .addConceptId("19069022")
             .addGroup(false)
@@ -86,7 +86,7 @@ public class CriteriaLookupUtilTest {
     DbCriteria drugNode3 =
         DbCriteria.builder()
             .addParentId(drugNode1.getId())
-            .addDomainId(DomainType.DRUG.toString())
+            .addDomainId(Domain.DRUG.toString())
             .addType(CriteriaType.RXNORM.toString())
             .addConceptId("1036094")
             .addGroup(false)
@@ -106,7 +106,7 @@ public class CriteriaLookupUtilTest {
     List<Long> childConceptIds = ImmutableList.of(19069022L, 1036094L);
     SearchParameter searchParameter =
         new SearchParameter()
-            .domain(DomainType.DRUG.toString())
+            .domain(Domain.DRUG.toString())
             .type(CriteriaType.ATC.toString())
             .group(true)
             .ancestorData(true)
@@ -127,7 +127,7 @@ public class CriteriaLookupUtilTest {
     DbCriteria drugNode1 =
         DbCriteria.builder()
             .addParentId(99999)
-            .addDomainId(DomainType.DRUG.toString())
+            .addDomainId(Domain.DRUG.toString())
             .addType(CriteriaType.ATC.toString())
             .addConceptId("21600002")
             .addGroup(true)
@@ -137,7 +137,7 @@ public class CriteriaLookupUtilTest {
     DbCriteria drugNode2 =
         DbCriteria.builder()
             .addParentId(drugNode1.getId())
-            .addDomainId(DomainType.DRUG.toString())
+            .addDomainId(Domain.DRUG.toString())
             .addType(CriteriaType.RXNORM.toString())
             .addConceptId("19069022")
             .addGroup(false)
@@ -157,7 +157,7 @@ public class CriteriaLookupUtilTest {
     List<Long> childConceptIds = ImmutableList.of(1666666L);
     SearchParameter searchParameter =
         new SearchParameter()
-            .domain(DomainType.DRUG.toString())
+            .domain(Domain.DRUG.toString())
             .type(CriteriaType.RXNORM.toString())
             .group(true)
             .ancestorData(true)
@@ -178,7 +178,7 @@ public class CriteriaLookupUtilTest {
     DbCriteria icd9Parent =
         DbCriteria.builder()
             .addParentId(0)
-            .addDomainId(DomainType.CONDITION.toString())
+            .addDomainId(Domain.CONDITION.toString())
             .addType(CriteriaType.ICD9CM.toString())
             .addGroup(true)
             .addSelectable(true)
@@ -190,7 +190,7 @@ public class CriteriaLookupUtilTest {
     DbCriteria icd9Child1 =
         DbCriteria.builder()
             .addParentId(icd9Parent.getId())
-            .addDomainId(DomainType.CONDITION.toString())
+            .addDomainId(Domain.CONDITION.toString())
             .addType(CriteriaType.ICD9CM.toString())
             .addGroup(false)
             .addSelectable(true)
@@ -202,7 +202,7 @@ public class CriteriaLookupUtilTest {
     DbCriteria icd9Child2 =
         DbCriteria.builder()
             .addParentId(icd9Parent.getId())
-            .addDomainId(DomainType.CONDITION.toString())
+            .addDomainId(Domain.CONDITION.toString())
             .addType(CriteriaType.ICD9CM.toString())
             .addGroup(false)
             .addSelectable(true)
@@ -215,7 +215,7 @@ public class CriteriaLookupUtilTest {
     List<Long> childConceptIds = ImmutableList.of(44829697L, 44835564L);
     SearchParameter searchParameter =
         new SearchParameter()
-            .domain(DomainType.CONDITION.toString())
+            .domain(Domain.CONDITION.toString())
             .type(CriteriaType.ICD9CM.toString())
             .group(true)
             .standard(false)

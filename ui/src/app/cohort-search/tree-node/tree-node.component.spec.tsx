@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
-import {CohortBuilderApi, DomainType} from 'generated/fetch';
+import {CohortBuilderApi, Domain} from 'generated/fetch';
 import defaultServerConfig from 'testing/default-server-config';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
@@ -31,7 +31,7 @@ const surveyCOPETreeNodeStub = {
   code: '',
   conceptId: 1333342,
   count: 0,
-  domainId: DomainType.SURVEY.toString(),
+  domainId: Domain.SURVEY.toString(),
   group: true,
   hasAttributes: false,
   id: 328232,

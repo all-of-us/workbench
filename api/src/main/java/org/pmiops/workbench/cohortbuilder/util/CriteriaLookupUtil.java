@@ -19,7 +19,7 @@ import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.model.DbCriteriaLookup;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
-import org.pmiops.workbench.model.DomainType;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
@@ -37,13 +37,13 @@ public final class CriteriaLookupUtil {
   private final CBCriteriaDao cbCriteriaDao;
 
   private static class FullTreeType {
-    final DomainType domain;
+    final Domain domain;
     final CriteriaType type;
     final CriteriaSubType subType;
     final Boolean isStandard;
 
     private FullTreeType(
-        DomainType domain, CriteriaType type, CriteriaSubType subType, Boolean isStandard) {
+        Domain domain, CriteriaType type, CriteriaSubType subType, Boolean isStandard) {
       this.domain = domain;
       this.type = type;
       this.subType = subType;
@@ -52,7 +52,7 @@ public final class CriteriaLookupUtil {
 
     static CriteriaLookupUtil.FullTreeType fromParam(SearchParameter param) {
       return new CriteriaLookupUtil.FullTreeType(
-          DomainType.valueOf(param.getDomain()),
+          Domain.valueOf(param.getDomain()),
           CriteriaType.valueOf(param.getType().toUpperCase()),
           param.getSubtype() == null ? null : CriteriaSubType.valueOf(param.getSubtype()),
           param.getStandard());

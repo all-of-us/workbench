@@ -2,7 +2,7 @@ import {domainToTitle} from 'app/cohort-search/utils';
 import {cohortReviewStore} from 'app/services/review-state.service';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {CriteriaType, DomainType} from 'generated/fetch';
+import {CriteriaType, Domain} from 'generated/fetch';
 import * as React from 'react';
 
 const css = `
@@ -82,7 +82,7 @@ export class CohortDefinition extends React.Component<{}, {definition: any}> {
   }
 
   mapParams(domain: string, params: Array<any>, mod) {
-    const groupedData = domain === DomainType[DomainType.DRUG]
+    const groupedData = domain === Domain[Domain.DRUG]
       ? this.getGroupedData(params, 'group')
       : this.getGroupedData(params, 'domain');
     if (mod.length) {
@@ -95,7 +95,7 @@ export class CohortDefinition extends React.Component<{}, {definition: any}> {
   getModifierFormattedData(groupedData, params, mod, domain) {
     let typeMatched;
     const modArray =  params.map(eachParam => {
-      if (eachParam.domain === DomainType.DRUG) {
+      if (eachParam.domain === Domain.DRUG) {
         typeMatched = groupedData.find( matched => matched.group === eachParam.group.toString());
       } else {
         typeMatched = groupedData.find( matched => matched.group === eachParam.domain);
@@ -125,22 +125,22 @@ export class CohortDefinition extends React.Component<{}, {definition: any}> {
   getOtherTreeFormattedData(groupedData, params, domain) {
     let typeMatched;
     const noModArray = params.map(param => {
-      if (param.domain === DomainType.DRUG) {
+      if (param.domain === Domain.DRUG) {
         typeMatched = groupedData.find( matched => matched.group === param.group.toString());
       } else {
         typeMatched = groupedData.find( matched => matched.group === param.domain);
       }
-      if (param.domain === DomainType.PERSON) {
+      if (param.domain === Domain.PERSON) {
         return {items: param.type === CriteriaType.DECEASED ? `${domainToTitle(domain)}
                       | ${param.name}` :
             `${domainToTitle(domain)}
                       | ${this.operatorConversion(param.type)} | ${param.name}`,
           domain: param.domain};
-      } else if (param.domain === DomainType.VISIT) {
+      } else if (param.domain === Domain.VISIT) {
         return {items: `${domainToTitle(domain)} | ${typeMatched.customString}`,
           domain: param.domain};
       } else {
-        return domain === DomainType.CONDITION || domain === DomainType.PROCEDURE ?
+        return domain === Domain.CONDITION || domain === Domain.PROCEDURE ?
         {items: `${domainToTitle(domain)} | ${param.type} | ${typeMatched.customString}`,
           domain: param.domain} :
         {items: `${domainToTitle(domain)} | ${typeMatched.customString}`,
@@ -171,15 +171,15 @@ export class CohortDefinition extends React.Component<{}, {definition: any}> {
   }
 
   getFormattedString(acc, d) {
-    if (d.domain === DomainType.DRUG) {
+    if (d.domain === Domain.DRUG) {
       if (d.group === false) {
         return acc === '' ? `RXNORM | ${d.value}` : `${acc}, ${d.value}`;
       } else {
         return acc === '' ? `ATC | ${d.value}` : `${acc}, ${d.value}`;
       }
-    } else if (d.domain === DomainType.PHYSICALMEASUREMENT || d.domain === DomainType.VISIT) {
+    } else if (d.domain === Domain.PHYSICALMEASUREMENT || d.domain === Domain.VISIT) {
       return acc === '' ? `${d.name}` : `${acc}, ${d.name}`;
-    } else if (d.domain === DomainType.SURVEY) {
+    } else if (d.domain === Domain.SURVEY) {
       if (!d.group) {
         return  acc === '' ? `${d.name}` :
           `${acc}, ${d.name}`;
@@ -257,8 +257,8 @@ export class CohortDefinition extends React.Component<{}, {definition: any}> {
                       {param.map((crit, c) => (
                         <React.Fragment key={c}>
                           {c > 0 && <React.Fragment>
-                            {crit.domain === DomainType.PERSON && <div>AND</div>}
-                            {crit.domain !== DomainType.PERSON && <div>OR</div>}
+                            {crit.domain === Domain.PERSON && <div>AND</div>}
+                            {crit.domain !== Domain.PERSON && <div>OR</div>}
                           </React.Fragment>}
                           <div>{crit.items}</div>
                         </React.Fragment>

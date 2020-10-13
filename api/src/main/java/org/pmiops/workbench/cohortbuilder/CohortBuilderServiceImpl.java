@@ -49,7 +49,6 @@ import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainInfo;
-import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
@@ -293,7 +292,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         (domainToCount.equals(Domain.CONDITION) || domainToCount.equals(Domain.PROCEDURE))
             ? ImmutableList.of(true, false)
             : ImmutableList.of(true);
-    return (domainToCount.equals(Domain.PHYSICALMEASUREMENT))
+    return (domainToCount.equals(Domain.PHYSICAL_MEASUREMENT))
         ? cbCriteriaDao.findPhysicalMeasurementCount(modifyTermMatch(term))
         : cbCriteriaDao.findDomainCount(modifyTermMatch(term), domain, standards);
   }
@@ -371,7 +370,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
             ? new Sort(Sort.Direction.ASC, "name")
             : new Sort(Sort.Direction.DESC, "name");
     List<DbCriteria> criteriaList =
-        cbCriteriaDao.findByDomainIdAndType(DomainType.PERSON.toString(), sortColumn, sort);
+        cbCriteriaDao.findByDomainIdAndType(Domain.PERSON.toString(), sortColumn, sort);
     return criteriaList.stream()
         .map(
             c -> new ConceptIdName().conceptId(new Long(c.getConceptId())).conceptName(c.getName()))

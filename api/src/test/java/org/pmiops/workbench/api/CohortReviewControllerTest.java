@@ -70,7 +70,7 @@ import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DataAccessLevel;
-import org.pmiops.workbench.model.DomainType;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FilterColumns;
@@ -232,7 +232,7 @@ public class CohortReviewControllerTest {
 
     cbCriteriaDao.save(
         DbCriteria.builder()
-            .addDomainId(DomainType.PERSON.toString())
+            .addDomainId(Domain.PERSON.toString())
             .addType(CriteriaType.RACE.toString())
             .addParentId(1L)
             .addConceptId(String.valueOf(TestConcepts.ASIAN.conceptId))
@@ -240,7 +240,7 @@ public class CohortReviewControllerTest {
             .build());
     cbCriteriaDao.save(
         DbCriteria.builder()
-            .addDomainId(DomainType.PERSON.toString())
+            .addDomainId(Domain.PERSON.toString())
             .addType(CriteriaType.GENDER.toString())
             .addParentId(1L)
             .addConceptId(String.valueOf(TestConcepts.FEMALE.conceptId))
@@ -248,7 +248,7 @@ public class CohortReviewControllerTest {
             .build());
     cbCriteriaDao.save(
         DbCriteria.builder()
-            .addDomainId(DomainType.PERSON.toString())
+            .addDomainId(Domain.PERSON.toString())
             .addType(CriteriaType.GENDER.toString())
             .addParentId(1L)
             .addConceptId(String.valueOf(TestConcepts.MALE.conceptId))
@@ -256,7 +256,7 @@ public class CohortReviewControllerTest {
             .build());
     cbCriteriaDao.save(
         DbCriteria.builder()
-            .addDomainId(DomainType.PERSON.toString())
+            .addDomainId(Domain.PERSON.toString())
             .addType(CriteriaType.ETHNICITY.toString())
             .addParentId(1L)
             .addConceptId(String.valueOf(TestConcepts.NOT_HISPANIC.conceptId))
@@ -264,7 +264,7 @@ public class CohortReviewControllerTest {
             .build());
     cbCriteriaDao.save(
         DbCriteria.builder()
-            .addDomainId(DomainType.PERSON.toString())
+            .addDomainId(Domain.PERSON.toString())
             .addType(CriteriaType.RACE.toString())
             .addParentId(1L)
             .addConceptId(String.valueOf(TestConcepts.WHITE.conceptId))
@@ -272,7 +272,7 @@ public class CohortReviewControllerTest {
             .build());
     cbCriteriaDao.save(
         DbCriteria.builder()
-            .addDomainId(DomainType.PERSON.toString())
+            .addDomainId(Domain.PERSON.toString())
             .addType(CriteriaType.RACE.toString())
             .addParentId(1L)
             .addConceptId(String.valueOf(TestConcepts.PREFER_NOT_TO_ANSWER_RACE.conceptId))
@@ -280,7 +280,7 @@ public class CohortReviewControllerTest {
             .build());
     cbCriteriaDao.save(
         DbCriteria.builder()
-            .addDomainId(DomainType.PERSON.toString())
+            .addDomainId(Domain.PERSON.toString())
             .addType(CriteriaType.RACE.toString())
             .addParentId(1L)
             .addConceptId(String.valueOf(TestConcepts.PREFER_NOT_TO_ANSWER_ETH.conceptId))
@@ -288,7 +288,7 @@ public class CohortReviewControllerTest {
             .build());
     cbCriteriaDao.save(
         DbCriteria.builder()
-            .addDomainId(DomainType.PERSON.toString())
+            .addDomainId(Domain.PERSON.toString())
             .addType(CriteriaType.SEX.toString())
             .addParentId(1L)
             .addConceptId(String.valueOf(TestConcepts.SEX_AT_BIRTH.conceptId))

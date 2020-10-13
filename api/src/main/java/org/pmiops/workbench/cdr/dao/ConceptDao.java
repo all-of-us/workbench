@@ -97,7 +97,7 @@ public interface ConceptDao extends CrudRepository<DbConcept, Long> {
    */
   default Page<DbConcept> findConcepts(
       String keyword, ImmutableList<String> conceptTypes, Domain domainId, Pageable pageable) {
-    if (Domain.PHYSICALMEASUREMENT.equals(domainId)) {
+    if (Domain.PHYSICAL_MEASUREMENT.equals(domainId)) {
       return StringUtils.isBlank(keyword)
           ? findPhysicalMeasurementConcepts(conceptTypes, pageable)
           : findPhysicalMeasurementConcepts(keyword, conceptTypes, pageable);

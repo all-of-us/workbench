@@ -13,7 +13,7 @@ import {
   AgeType,
   Cohort,
   CohortReview,
-  DomainType,
+  Domain,
   GenderOrSexType,
   SearchRequest
 } from 'generated/fetch';
@@ -176,10 +176,10 @@ const demoTitle = {
   paddingBottom: '0.5rem'
 };
 
-const domains = [DomainType[DomainType.CONDITION],
-  DomainType[DomainType.PROCEDURE],
-  DomainType[DomainType.DRUG],
-  DomainType[DomainType.LAB]];
+const domains = [Domain[Domain.CONDITION],
+  Domain[Domain.PROCEDURE],
+  Domain[Domain.DRUG],
+  Domain[Domain.LAB]];
 
 export interface QueryReportProps {
   workspace: WorkspaceData;

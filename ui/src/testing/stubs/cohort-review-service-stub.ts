@@ -3,7 +3,7 @@ import {
   CohortReview,
   CohortReviewApi, CohortReviewListResponse,
   CohortStatus,
-  DomainType,
+  Domain,
   EmptyResponse,
   ParticipantChartDataListResponse,
   ParticipantCohortAnnotation,
@@ -62,7 +62,7 @@ const participantDataStub = {
   itemDate: '',
   standardName: '',
   ageAtEvent: 22,
-  domainType: DomainType.CONDITION
+  domainType: Domain.CONDITION
 };
 
 const participantDataListResponseStub = {

@@ -18,7 +18,7 @@ import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {isAbortError} from 'app/utils/errors';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {DomainType, ResourceType, SearchRequest, TemporalMention, TemporalTime} from 'generated/fetch';
+import {Domain, ResourceType, SearchRequest, TemporalMention, TemporalTime} from 'generated/fetch';
 
 const styles = reactStyles({
   card: {
@@ -325,7 +325,7 @@ export const SearchGroup = withCurrentWorkspace()(
     }
 
     get disableTemporal() {
-      return this.items.some(it => [DomainType.PHYSICALMEASUREMENT, DomainType.PERSON, DomainType.SURVEY].includes(it.type));
+      return this.items.some(it => [Domain.PHYSICALMEASUREMENT, Domain.PERSON, Domain.SURVEY].includes(it.type));
     }
 
     remove() {
@@ -388,7 +388,7 @@ export const SearchGroup = withCurrentWorkspace()(
       } else {
         const category = `${role === 'includes' ? 'Add' : 'Excludes'} Criteria`;
         // If domain is PERSON, list the type as well as the domain in the label
-        const label = `${domainToTitle(domain)} ${(domain === DomainType.PERSON ? `- ${typeToTitle(type)}` : '')} - Cohort Builder`;
+        const label = `${domainToTitle(domain)} ${(domain === Domain.PERSON ? `- ${typeToTitle(type)}` : '')} - Cohort Builder`;
         triggerEvent(category, 'Click', `${category} - ${label}`);
       }
       const itemId = generateId('items');
