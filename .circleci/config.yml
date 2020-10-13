@@ -155,12 +155,6 @@ commands:
           name: "workbench/ui: yarn install dependencies"
           working_directory: ~/workbench/ui
           command: yarn install --verbose --frozen-lockfile --non-interactive
-      - save_cache:
-          name: "save ui cache"
-          paths:
-            - ~/.cache/yarn
-            - ui/node_modules
-          key: v1-ui-cache-{{ .Branch }}-{{ checksum "~/workbench/ui/yarn.lock" }}
 
   install_e2e_dependencies:
     description: "workbench/e2e: yarn install, save and restore cache"
@@ -175,12 +169,6 @@ commands:
           name: "workbench/e2e: yarn install dependencies"
           working_directory: ~/workbench/e2e
           command: yarn install --frozen-lockfile --non-interactive
-      - save_cache:
-          name: "save e2e cache"
-          paths:
-            - ~/.cache/yarn
-            - e2e/node_modules
-          key: v1-e2e-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
 
   manage_api_cache:
     description: "workbench/api: save or restore gradle cache"
@@ -238,7 +226,7 @@ commands:
           name: Run puppeteer e2e tests
           working_directory: ~/workbench/e2e
           command: |
-            circleci tests glob "tests/**/*.spec.ts" | circleci tests split --split-by=timings > /tmp/tests-to-run
+            circleci tests glob "tests/notebook/*.ts" | circleci tests split --split-by=timings > /tmp/tests-to-run
             yarn test:ci $(cat /tmp/tests-to-run)
           no_output_timeout: 15m
       - store_artifacts:
