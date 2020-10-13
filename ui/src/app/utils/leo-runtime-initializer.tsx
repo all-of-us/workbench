@@ -2,13 +2,13 @@ import {leoRuntimesApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import {isAbortError, reportError} from 'app/utils/errors';
 import {runtimePresets} from 'app/utils/runtime-presets';
-import {Runtime, RuntimeStatus} from 'generated/fetch';
-import {serverConfigStore} from './navigation';
 import {
   markRuntimeOperationCompleteForWorkspace,
   runtimeStore,
   updateRuntimeOpsStoreForWorkspaceNamespace
-} from './stores';
+} from 'app/utils/stores';
+import {Runtime, RuntimeStatus} from 'generated/fetch';
+import {serverConfigStore} from './navigation';
 
 // We're only willing to wait 20 minutes total for a runtime to initialize. After that we return
 // a rejected promise no matter what.
@@ -23,6 +23,7 @@ const DEFAULT_MAX_DELETE_COUNT = 2;
 const DEFAULT_MAX_RESUME_COUNT = 2;
 // We allow a certain # of server errors to occur before we error-out of the initialization flow.
 const DEFAULT_MAX_SERVER_ERROR_COUNT = 10;
+const DEFAULT_RUNTIME_CONFIG = runtimePresets.generalAnalysis.runtimeTemplate;
 
 export class LeoRuntimeInitializationFailedError extends Error {
   constructor(message: string, public readonly runtime?: Runtime) {
@@ -84,6 +85,7 @@ export interface LeoRuntimeInitializerOptions {
   maxDeleteCount?: number;
   maxResumeCount?: number;
   maxServerErrorCount?: number;
+  targetRuntime?: Runtime;
 }
 
 const DEFAULT_OPTIONS: Partial<LeoRuntimeInitializerOptions> = {
@@ -94,7 +96,8 @@ const DEFAULT_OPTIONS: Partial<LeoRuntimeInitializerOptions> = {
   maxCreateCount: DEFAULT_MAX_CREATE_COUNT,
   maxDeleteCount: DEFAULT_MAX_DELETE_COUNT,
   maxResumeCount: DEFAULT_MAX_RESUME_COUNT,
-  maxServerErrorCount: DEFAULT_MAX_SERVER_ERROR_COUNT
+  maxServerErrorCount: DEFAULT_MAX_SERVER_ERROR_COUNT,
+  targetRuntime: DEFAULT_RUNTIME_CONFIG
 };
 
 /**
@@ -135,9 +138,22 @@ export class LeoRuntimeInitializer {
   private resumeCount = 0;
   private serverErrorCount = 0;
   private initializeStartTime?: number;
+  private targetRuntime?: Runtime;
   // The latest runtime retrieved from getRuntime. If the last getRuntime call returned a NOT_FOUND
   // response, this will be null.
-  private currentRuntime?: Runtime;
+  private currentRuntimeValue?: Runtime;
+
+  private get currentRuntime(): Runtime | null {
+    return this.currentRuntimeValue;
+  }
+
+  private set currentRuntime(nextRuntime: Runtime | null) {
+    this.currentRuntimeValue = nextRuntime;
+    const storeWorkspaceNamespace = runtimeStore.get().workspaceNamespace;
+    if (storeWorkspaceNamespace === this.workspaceNamespace || storeWorkspaceNamespace === undefined ) {
+      runtimeStore.set({workspaceNamespace: this.workspaceNamespace, runtime: this.currentRuntimeValue});
+    }
+  }
 
   // Properties to control the initialization and promise resolution flow.
   //
@@ -170,6 +186,7 @@ export class LeoRuntimeInitializer {
     this.maxDeleteCount = options.maxDeleteCount;
     this.maxResumeCount = options.maxResumeCount;
     this.maxServerErrorCount = options.maxServerErrorCount;
+    this.targetRuntime = options.targetRuntime;
   }
 
   private async getRuntime(): Promise<Runtime> {
@@ -180,9 +197,7 @@ export class LeoRuntimeInitializer {
       operation: 'get',
       aborter: aborter
     });
-    const runtime = await promise;
     markRuntimeOperationCompleteForWorkspace(this.workspaceNamespace);
-    runtimeStore.set({runtime: runtime, workspaceNamespace: this.workspaceNamespace});
     return promise;
   }
 
@@ -193,7 +208,9 @@ export class LeoRuntimeInitializer {
     }
     const aborter = new AbortController();
     let runtime: Runtime;
-    if (serverConfigStore.getValue().enableGceAsNotebookRuntimeDefault) {
+    if (serverConfigStore.getValue().enableCustomRuntimes && this.targetRuntime) {
+      runtime = this.targetRuntime;
+    } else if (serverConfigStore.getValue().enableGceAsNotebookRuntimeDefault) {
       runtime = {...runtimePresets.generalAnalysis.runtimeTemplate};
     } else {
       runtime = {...runtimePresets.legacyGeneralAnalysis.runtimeTemplate};
