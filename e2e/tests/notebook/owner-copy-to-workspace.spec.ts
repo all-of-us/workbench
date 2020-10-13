@@ -9,7 +9,17 @@ import {config} from 'resources/workbench-config';
 // Notebook server start may take a long time. Set maximum test running time to 20 minutes.
 jest.setTimeout(20 * 60 * 1000);
 
-async function copyNotebook(srcCdrVersionName: string, destCdrVersionName: string) {
+/**
+ * Test:
+ * - Create new Workspace as the copy-to destination Workspace.
+ * - Create new Workspace as copy-from Workspace and create new notebook in this Workspace.
+ * - Run code to print WORKSPACE_NAMESPACE. It should match Workspace namespace from Workspace URL.
+ * - Copy notebook to destination Workspace and give copied notebook a new name.
+ * - Verify copied notebook is in destination Workspace.
+ * - Open copied notebook and run code to print WORKSPACE_NAMESPACE. It should match destination Workspace namespace.
+ * - Delete notebooks.
+ */
+async function copyNotebookTest(srcCdrVersionName: string, destCdrVersionName: string) {
   const destWorkspace = await createWorkspace(page, destCdrVersionName).then(card => card.getWorkspaceName());
 
   await createWorkspace(page, srcCdrVersionName).then(card => card.clickWorkspaceName());
@@ -61,18 +71,11 @@ describe('Workspace owner Jupyter notebook action tests', () => {
     await signIn(page);
   });
 
-  /**
-   * Test:
-   * - Create new Workspace as the copy-to destination Workspace.
-   * - Create new Workspace as copy-from Workspace and create new notebook in this Workspace.
-   * - Run code to print WORKSPACE_NAMESPACE. It should match Workspace namespace from Workspace URL.
-   * - Copy notebook to destination Workspace and give copied notebook a new name.
-   * - Verify copied notebook is in destination Workspace.
-   * - Open copied notebook and run code to print WORKSPACE_NAMESPACE. It should match destination Workspace namespace.
-   * - Delete notebooks.
-   */
   test('Copy notebook to another Workspace when CDR versions match', async () => {
-    await copyNotebook(config.defaultCdrVersionName, config.defaultCdrVersionName);
+    await copyNotebookTest(config.defaultCdrVersionName, config.defaultCdrVersionName);
   })
 
+  test('Copy notebook to another Workspace when CDR versions differ', async () => {
+    await copyNotebookTest(config.defaultCdrVersionName, config.altCdrVersionName);
+  })
 });
