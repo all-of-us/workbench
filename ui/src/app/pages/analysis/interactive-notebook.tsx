@@ -59,7 +59,8 @@ const styles = reactStyles({
     border: 0
   },
   previewFrame: {
-    width: '100%',
+    // at 100% the frame's scrollbar is hidden under the minimized sidebar.  Subtract the sidebar's width.
+    width: 'calc(100% - 45px)',
     height: 'calc(100% - 40px)',
     position: 'absolute',
     border: 0
