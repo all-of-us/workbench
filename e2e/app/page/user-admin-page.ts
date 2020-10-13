@@ -1,7 +1,6 @@
 import {Page} from 'puppeteer';
 import AuthenticatedPage from 'app/page/authenticated-page';
-import {waitWhileLoading} from 'utils/test-utils';
-import {waitForDocumentTitle} from 'utils/waits-utils';
+import {waitForDocumentTitle, waitWhileLoading} from 'utils/waits-utils';
 
 export const PageTitle = 'User Admin Table';
 

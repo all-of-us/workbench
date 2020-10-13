@@ -2,7 +2,7 @@ import Modal from 'app/component/modal';
 import Textbox from 'app/element/textbox';
 import {LinkText} from 'app/text-labels';
 import {ElementHandle, Page} from 'puppeteer';
-import {waitWhileLoading} from 'utils/test-utils';
+import {waitWhileLoading} from '../../utils/waits-utils';
 
 
 export default class CopyModal extends Modal {

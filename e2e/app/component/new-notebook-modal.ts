@@ -1,12 +1,11 @@
 import {Page} from 'puppeteer';
 import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
-import {waitForPropertyExists, waitForText} from 'utils/waits-utils';
+import {waitForPropertyExists, waitForText, waitWhileLoading} from 'utils/waits-utils';
 import RadioButton from 'app/element/radiobutton';
 import {Language, LinkText} from 'app/text-labels';
 import Button from 'app/element/button';
 import Textbox from 'app/element/textbox';
 import {waitUntilChanged} from 'utils/element-utils';
-import {waitWhileLoading} from 'utils/test-utils';
 import Textarea from 'app/element/textarea';
 import Modal from './modal';
 

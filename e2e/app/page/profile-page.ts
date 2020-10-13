@@ -1,8 +1,7 @@
 import {Page} from 'puppeteer';
 import Textbox from 'app/element/textbox';
 import AuthenticatedPage from 'app/page/authenticated-page';
-import {waitWhileLoading} from 'utils/test-utils';
-import {waitForDocumentTitle, waitForUrl} from 'utils/waits-utils';
+import {waitForDocumentTitle, waitForUrl, waitWhileLoading} from 'utils/waits-utils';
 import Button from 'app/element/button';
 import Textarea from 'app/element/textarea';
 

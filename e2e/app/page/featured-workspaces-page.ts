@@ -1,7 +1,6 @@
 import {Page} from 'puppeteer';
 import AuthenticatedPage from 'app/page/authenticated-page';
-import {waitForDocumentTitle, waitForText} from 'utils/waits-utils';
-import {waitWhileLoading} from 'utils/test-utils';
+import {waitForDocumentTitle, waitForText, waitWhileLoading} from 'utils/waits-utils';
 
 export const PageHeader = 'Researcher Workbench Workspace Library';
 export const PageTitle = 'Workspace Library';

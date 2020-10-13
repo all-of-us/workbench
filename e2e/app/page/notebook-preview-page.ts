@@ -1,10 +1,10 @@
 import {ElementHandle, Frame, Page, WaitForSelectorOptions} from 'puppeteer';
-import {waitWhileLoading} from 'utils/test-utils';
 import Link from 'app/element/link';
 import {getPropValue} from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
 import NotebookPage from './notebook-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
+import {waitWhileLoading} from '../../utils/waits-utils';
 
 const Selector = {
   editButton: '//div[normalize-space(text())="Edit"]',

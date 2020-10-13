@@ -1,6 +1,5 @@
 import {Page} from 'puppeteer';
-import {waitWhileLoading} from 'utils/test-utils';
-import {waitForDocumentTitle} from 'utils/waits-utils';
+import {waitForDocumentTitle, waitWhileLoading} from 'utils/waits-utils';
 import DataTable from 'app/component/data-table';
 import Button from 'app/element/button';
 import {LinkText} from 'app/text-labels';

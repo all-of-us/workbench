@@ -1,8 +1,7 @@
 import * as fs from 'fs';
 import {Frame, Page} from 'puppeteer';
 import {getPropValue} from 'utils/element-utils';
-import {waitWhileLoading} from 'utils/test-utils';
-import {waitForDocumentTitle} from 'utils/waits-utils';
+import {waitForDocumentTitle, waitWhileLoading} from 'utils/waits-utils';
 import {ResourceCard} from 'app/text-labels';
 import AuthenticatedPage from './authenticated-page';
 import NotebookCell, {CellType} from './notebook-cell';

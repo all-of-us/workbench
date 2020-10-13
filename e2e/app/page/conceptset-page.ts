@@ -1,6 +1,5 @@
 import {Page} from 'puppeteer';
-import {waitWhileLoading} from 'utils/test-utils';
-import {waitForDocumentTitle} from 'utils/waits-utils';
+import {waitForDocumentTitle, waitWhileLoading} from 'utils/waits-utils';
 import SnowmanMenu from 'app/component/snowman-menu';
 import {buildXPath} from 'app/xpath-builders';
 import {ElementType} from 'app/xpath-options';
