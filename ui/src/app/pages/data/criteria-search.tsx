@@ -112,7 +112,7 @@ export class CriteriaSearch extends React.Component<Props, State>  {
   }
 
   componentDidMount(): void {
-    const {cohortContext: {domain, standard, type}} = this.props;
+    const {cohortContext: {domain, standard, type}, source} = this.props;
     let {backMode, mode} = this.state;
     let hierarchyNode;
     if (this.initTree) {
@@ -126,6 +126,20 @@ export class CriteriaSearch extends React.Component<Props, State>  {
       mode = 'tree';
     }
     this.setState({backMode, hierarchyNode, mode});
+    this.subscription = currentCohortCriteriaStore.subscribe(currentCohortCriteria => {
+      if (source === 'criteria') {
+        this.setState({selectedCriteriaList: currentCohortCriteria});
+      }
+    });
+    this.subscription.add(currentConceptStore.subscribe(currentConcepts => {
+      if (source === 'concept') {
+        this.setState({selectedCriteriaList: currentConcepts});
+      }
+    }));
+  }
+
+  componentWillUnmount() {
+    this.subscription.unsubscribe();
   }
 
   get initTree() {
