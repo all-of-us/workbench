@@ -14,6 +14,8 @@ import {reactStyles, withCdrVersions} from 'app/utils';
 import { navigate } from 'app/utils/navigation';
 import {toDisplay} from 'app/utils/resourceActions';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
+import {ClrIcon} from "./icons";
+import {FlexRow} from "./flex";
 
 enum RequestState { UNSENT, COPY_ERROR, SUCCESS }
 
@@ -82,13 +84,26 @@ const styles = reactStyles({
     fontFamily: 'Montserrat',
     fontSize: '14px',
   },
+  warningIcon: {
+    color: colors.warning,
+    height: '20px',
+    width: '20px',
+    align: 'top',
+  },
 });
 
 const ConceptSetCdrMismatch = (props: {text: string}) =>
     <div data-test-id='concept-set-cdr-mismatch-error' style={styles.conceptSetCdrMismatch}>{props.text}</div>;
 
 const NotebookCdrMismatch = (props: {text: string}) =>
-    <div data-test-id='notebook-cdr-mismatch-warning' style={styles.notebookCdrMismatch}>{props.text}</div>;
+    <div data-test-id='notebook-cdr-mismatch-warning' style={styles.notebookCdrMismatch}>
+      <FlexRow>
+        <div style={{paddingRight: '0.5rem'}}>
+          <ClrIcon shape='warning-standard' class='is-solid' style={styles.warningIcon}/>
+        </div>
+        {props.text}
+      </FlexRow>
+    </div>;
 
 const ConceptSetRestrictionText = () => <div style={styles.conceptSetsRestriction}>
   Concept sets can only be copied to workspaces using the same CDR version.
