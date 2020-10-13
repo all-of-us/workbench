@@ -34,6 +34,10 @@ export class ErrorReporterService extends ErrorHandler {
   handleError(error: any) {
     // Always log to console regardless of whether Stackdriver is enabled.
     super.handleError(error);
+    const cavemanErrorEl = document.createElement('div');
+    cavemanErrorEl.style.display = 'none';
+    cavemanErrorEl.innerText = String(error);
+    document.body.appendChild(cavemanErrorEl);
     if (!this.stackdriverReporter) {
       return;
     }
