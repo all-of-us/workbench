@@ -11,12 +11,7 @@ import {
   DomainType,
   ParticipantDemographics, SurveyCount, SurveysResponse
 } from 'generated/fetch';
-import {
-  ConceptsApiStub,
-  ConceptStubVariables,
-  DomainStubVariables,
-  SurveyStubVariables
-} from 'testing/stubs/concepts-api-stub';
+import {DomainStubVariables, SurveyStubVariables} from 'testing/stubs/concepts-api-stub';
 
 export const cohortStub = {
   name: 'Test Cohort',
