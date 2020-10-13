@@ -123,11 +123,11 @@ public class CohortBuilderControllerTest {
                 .standardConceptCount(0)
                 .participantCount(1000));
 
-    DomainInfo domainInfo = controller.findDomainInfos(1L, "term").getBody().getItems().get(0);
+    DomainInfo domainInfo = controller.findDomainInfos(1L).getBody().getItems().get(0);
     assertEquals(domainInfo.getName(), dbDomainInfo.getName());
     assertEquals(domainInfo.getDescription(), dbDomainInfo.getDescription());
     assertEquals(domainInfo.getParticipantCount().longValue(), dbDomainInfo.getParticipantCount());
-    assertEquals(domainInfo.getAllConceptCount().longValue(), 1);
+    assertEquals(domainInfo.getAllConceptCount().longValue(), 0);
     assertEquals(domainInfo.getStandardConceptCount().longValue(), 0);
   }
 
@@ -168,8 +168,7 @@ public class CohortBuilderControllerTest {
                 .questionCount(1)
                 .participantCount(1000));
 
-    SurveyModule surveyModule =
-        controller.findSurveyModules(1L, "term").getBody().getItems().get(0);
+    SurveyModule surveyModule = controller.findSurveyModules(1L).getBody().getItems().get(0);
     assertEquals(surveyModule.getName(), dbSurveyModule.getName());
     assertEquals(surveyModule.getDescription(), dbSurveyModule.getDescription());
     assertEquals(

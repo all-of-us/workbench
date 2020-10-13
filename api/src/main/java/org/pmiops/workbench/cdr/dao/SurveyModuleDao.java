@@ -7,6 +7,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface SurveyModuleDao extends CrudRepository<DbSurveyModule, Long> {
 
+  List<DbSurveyModule> findByOrderByOrderNumberAsc();
+
   List<DbSurveyModule> findByParticipantCountNotOrderByOrderNumberAsc(
       @Param("participantCount") Long participantCount);
 }

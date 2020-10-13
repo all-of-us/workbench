@@ -3158,33 +3158,33 @@ paths:
           schema:
             "$ref": "#/definitions/CriteriaMenuOptionsListResponse"
   "/v1/cohortbuilder/{cdrVersionId}/criteria/domaininfo":
-    parameters:
-    - "$ref": "#/parameters/cdrVersionId"
     get:
       tags:
       - cohortBuilder
-      description: 'Returns a collection of DomainInfo'
+      description: 'Returns information on the domains of data in the workspace''s
+        CDR version along with participant and concept counts'
       operationId: findDomainInfos
       parameters:
-      - in: query
-        name: term
-        type: string
-        required: true
-        description: the term to search for
+      - "$ref": "#/parameters/cdrVersionId"
       responses:
         200:
-          description: A collection of DomainInfo
+          description: information on the domains
           schema:
             "$ref": "#/definitions/DomainInfoResponse"
-  "/v1/cohortbuilder/{cdrVersionId}/criteria/surveymodule":
+  "/v1/cohortbuilder/{cdrVersionId}/criteria/domaininfo/{domain}":
     parameters:
     - "$ref": "#/parameters/cdrVersionId"
     get:
       tags:
       - cohortBuilder
-      description: 'Returns a collection of SurveyModule'
-      operationId: findSurveyModules
+      description: 'Returns a count of term matches per domain'
+      operationId: findDomainCount
       parameters:
+      - in: path
+        name: domain
+        type: string
+        required: true
+        description: the specific type of domain
       - in: query
         name: term
         type: string
@@ -3192,9 +3192,47 @@ paths:
         description: the term to search for
       responses:
         200:
-          description: A collection of SurveyModule
+          description: A count of matching concepts in this domain
+          schema:
+            "$ref": "#/definitions/DomainCount"
+  "/v1/cohortbuilder/{cdrVersionId}/criteria/surveymodule":
+    get:
+      tags:
+      - cohortBuilder
+      description: 'Returns survey information in the workspace''s CDR version along
+        with participant and question count'
+      operationId: findSurveyModules
+      parameters:
+      - "$ref": "#/parameters/cdrVersionId"
+      responses:
+        200:
+          description: information about the surveys
           schema:
             "$ref": "#/definitions/SurveysResponse"
+  "/v1/cohortbuilder/{cdrVersionId}/criteria/surveymodule/{name}":
+    parameters:
+    - "$ref": "#/parameters/cdrVersionId"
+    get:
+      tags:
+      - cohortBuilder
+      description: 'Returns a count of term matches per survey name'
+      operationId: findSurveyCount
+      parameters:
+      - in: path
+        name: name
+        type: string
+        required: true
+        description: the name of the survey
+      - in: query
+        name: term
+        type: string
+        required: true
+        description: the term to search for
+      responses:
+        200:
+          description: A count of matching concepts per survey
+          schema:
+            "$ref": "#/definitions/SurveyCount"
   "/v1/cohortbuilder/{cdrVersionId}/criteria/{domain}/search/term":
     parameters:
     - "$ref": "#/parameters/cdrVersionId"
@@ -6566,6 +6604,19 @@ definitions:
         type: string
       conceptCount:
         description: number of concepts matching the search query in this domain
+        type: integer
+        format: int64
+  SurveyCount:
+    type: object
+    required:
+    - name
+    - conceptCount
+    properties:
+      name:
+        description: display name of the survey
+        type: string
+      conceptCount:
+        description: number of concepts matching the search query in this survey
         type: integer
         format: int64
   CreateReviewRequest:

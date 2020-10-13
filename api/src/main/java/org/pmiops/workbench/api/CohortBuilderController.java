@@ -28,6 +28,8 @@ import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DataFiltersResponse;
 import org.pmiops.workbench.model.DemoChartInfoListResponse;
+import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.DomainCount;
 import org.pmiops.workbench.model.DomainInfoResponse;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.GenderOrSexType;
@@ -35,6 +37,7 @@ import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.model.SurveyCount;
 import org.pmiops.workbench.model.SurveyVersionListResponse;
 import org.pmiops.workbench.model.SurveysResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +72,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   public ResponseEntity<CriteriaListResponse> findCriteriaAutoComplete(
       Long cdrVersionId, String domain, String term, String type, Boolean standard, Integer limit) {
     cdrVersionService.setCdrVersion(cdrVersionId);
-    validateDomain(domain);
+    validateDomainType(domain);
     validateType(type);
     validateTerm(term);
     return ResponseEntity.ok(
@@ -127,7 +130,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   public ResponseEntity<CriteriaListWithCountResponse> findCriteriaByDomainAndSearchTerm(
       Long cdrVersionId, String domain, String term, Integer limit) {
     cdrVersionService.setCdrVersion(cdrVersionId);
-    validateDomain(domain);
+    validateDomainType(domain);
     validateTerm(term);
     return ResponseEntity.ok(
         cohortBuilderService.findCriteriaByDomainAndSearchTerm(domain, term, limit));
@@ -153,7 +156,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   public ResponseEntity<CriteriaListResponse> findStandardCriteriaByDomainAndConceptId(
       Long cdrVersionId, String domain, Long conceptId) {
     cdrVersionService.setCdrVersion(cdrVersionId);
-    validateDomain(domain);
+    validateDomainType(domain);
     return ResponseEntity.ok(
         new CriteriaListResponse()
             .items(
@@ -187,11 +190,24 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<DomainInfoResponse> findDomainInfos(Long cdrVersionId, String term) {
+  public ResponseEntity<DomainCount> findDomainCount(
+      Long cdrVersionId, String domain, String term) {
     cdrVersionService.setCdrVersion(cdrVersionId);
+    validateDomain(domain);
     validateTerm(term);
+    Long count = cohortBuilderService.findDomainCount(domain, term);
     return ResponseEntity.ok(
-        new DomainInfoResponse().items(cohortBuilderService.findDomainInfos(term)));
+        new DomainCount()
+            .conceptCount(count == null ? 0 : count)
+            .domain(Domain.valueOf(domain))
+            .name(domain));
+  }
+
+  @Override
+  public ResponseEntity<DomainInfoResponse> findDomainInfos(Long cdrVersionId) {
+    cdrVersionService.setCdrVersion(cdrVersionId);
+    return ResponseEntity.ok(
+        new DomainInfoResponse().items(cohortBuilderService.findDomainInfos()));
   }
 
   @Override
@@ -207,7 +223,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   public ResponseEntity<CriteriaListResponse> findCriteriaBy(
       Long cdrVersionId, String domain, String type, Boolean standard, Long parentId) {
     cdrVersionService.setCdrVersion(cdrVersionId);
-    validateDomain(domain);
+    validateDomainType(domain);
     validateType(type);
     return ResponseEntity.ok(
         new CriteriaListResponse()
@@ -221,10 +237,17 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<SurveysResponse> findSurveyModules(Long cdrVersionId, String term) {
+  public ResponseEntity<SurveyCount> findSurveyCount(Long cdrVersionId, String name, String term) {
     cdrVersionService.setCdrVersion(cdrVersionId);
+    Long surveyCount = cohortBuilderService.findSurveyCount(name, term);
     return ResponseEntity.ok(
-        new SurveysResponse().items(cohortBuilderService.findSurveyModules(term)));
+        new SurveyCount().conceptCount(surveyCount == null ? 0 : surveyCount).name(name));
+  }
+
+  @Override
+  public ResponseEntity<SurveysResponse> findSurveyModules(Long cdrVersionId) {
+    cdrVersionService.setCdrVersion(cdrVersionId);
+    return ResponseEntity.ok(new SurveysResponse().items(cohortBuilderService.findSurveyModules()));
   }
 
   @Override
@@ -266,8 +289,16 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         || allParams.stream().anyMatch(sp -> CriteriaSubType.BP.toString().equals(sp.getSubtype()));
   }
 
-  private void validateDomain(String domain) {
+  private void validateDomainType(String domain) {
     Arrays.stream(DomainType.values())
+        .filter(domainType -> domainType.toString().equalsIgnoreCase(domain))
+        .findFirst()
+        .orElseThrow(
+            () -> new BadRequestException(String.format(BAD_REQUEST_MESSAGE, "domain", domain)));
+  }
+
+  private void validateDomain(String domain) {
+    Arrays.stream(Domain.values())
         .filter(domainType -> domainType.toString().equalsIgnoreCase(domain))
         .findFirst()
         .orElseThrow(

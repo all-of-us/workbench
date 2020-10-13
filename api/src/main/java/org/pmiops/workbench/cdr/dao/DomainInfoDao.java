@@ -21,7 +21,7 @@ public interface DomainInfoDao extends CrudRepository<DbDomainInfo, Long> {
   @Query(
       value =
           "select new DbDomainInfo(\n"
-              + "d.domain, d.domainId, d.name, d.description,\n"
+              + "d.domain, d.domainId, d.domainEnumValue, d.name, d.description,\n"
               + "d.conceptId, COUNT(*), COUNT(*), d.participantCount)\n"
               + "from DbDomainInfo d\n"
               + "join DbConcept c ON d.domainId = c.domainId\n"
@@ -43,7 +43,7 @@ public interface DomainInfoDao extends CrudRepository<DbDomainInfo, Long> {
   @Query(
       value =
           "select new DbDomainInfo(\n"
-              + "d.domain, d.domainId, d.name, d.description,\n"
+              + "d.domain, d.domainId, d.domainEnumValue, d.name, d.description,\n"
               + "d.conceptId, COUNT(*), COUNT(*), d.participantCount)\n"
               + "from DbDomainInfo d\n"
               + "join DbConcept c ON 'Measurement' = c.domainId\n"

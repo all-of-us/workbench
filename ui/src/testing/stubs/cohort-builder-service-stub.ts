@@ -5,9 +5,13 @@ import {
   CriteriaListResponse, CriteriaMenuOptionsListResponse,
   CriteriaType,
   DemoChartInfoListResponse,
+  Domain,
+  DomainCount,
+  DomainInfoResponse,
   DomainType,
-  ParticipantDemographics
+  ParticipantDemographics, SurveyCount, SurveysResponse
 } from 'generated/fetch';
+import {DomainStubVariables, SurveyStubVariables} from 'testing/stubs/concepts-api-stub';
 
 export const cohortStub = {
   name: 'Test Cohort',
@@ -29,6 +33,17 @@ const criteriaStub = {
   domainId: DomainType[DomainType.CONDITION],
   hasAttributes: false,
   path: '0',
+};
+
+const domainCountStub = {
+  domain: Domain.CONDITION,
+  name: Domain.CONDITION.toString(),
+  conceptCount: 1
+};
+
+const surveyCountStub = {
+  name: 'The Basics',
+  conceptCount: 1
 };
 
 export class CohortBuilderServiceStub extends CohortBuilderApi {
@@ -75,5 +90,21 @@ export class CohortBuilderServiceStub extends CohortBuilderApi {
 
   findCriteriaMenuOptions(): Promise<CriteriaMenuOptionsListResponse> {
     return new Promise<CriteriaMenuOptionsListResponse>(resolve => resolve({items: []}));
+  }
+
+  findDomainInfos(): Promise<DomainInfoResponse> {
+    return new Promise<DomainInfoResponse>(resolve => resolve({items: DomainStubVariables.STUB_DOMAINS}));
+  }
+
+  findSurveyModules(): Promise<SurveysResponse> {
+    return new Promise<SurveysResponse>(resolve => resolve({items: SurveyStubVariables.STUB_SURVEYS}));
+  }
+
+  findDomainCount(): Promise<DomainCount> {
+    return new Promise<DomainCount>(resolve => resolve(domainCountStub));
+  }
+
+  findSurveyCount(): Promise<SurveyCount> {
+    return new Promise<SurveyCount>(resolve => resolve(surveyCountStub));
   }
 }

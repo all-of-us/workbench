@@ -7,6 +7,7 @@ import {conceptsApi, registerApiClient} from 'app/services/swagger-fetch-clients
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/navigation';
 import {
+  CohortBuilderApi,
   ConceptsApi,
   ConceptSetsApi,
   DomainInfo,
@@ -15,6 +16,7 @@ import {
 } from 'generated/fetch';
 import defaultServerConfig from 'testing/default-server-config';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {
   ConceptsApiStub,
@@ -60,6 +62,7 @@ describe('ConceptHomepage', () => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     registerApiClient(ConceptsApi, new ConceptsApiStub());
     registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
+    registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     currentWorkspaceStore.next(workspaceDataStub);
     serverConfigStore.next({...defaultServerConfig, enableConceptSetSearchV2: false});
   });

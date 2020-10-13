@@ -47,6 +47,7 @@ import org.pmiops.workbench.model.CriteriaMenuOption;
 import org.pmiops.workbench.model.CriteriaMenuSubOption;
 import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DemoChartInfo;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainInfo;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.FilterColumns;
@@ -286,28 +287,22 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public List<DomainInfo> findDomainInfos(String term) {
-    ImmutableList<Boolean> standard = ImmutableList.of(true);
-    ImmutableList<Boolean> all = ImmutableList.of(true, false);
-    String searchTerm = modifyTermMatch(term);
-    // read domain infos
-    List<DomainInfo> domainInfos =
-        domainInfoDao.findByOrderByDomainId().stream()
-            .map(cohortBuilderMapper::dbModelToClient)
-            .collect(Collectors.toList());
-    // read standard concept count
-    domainInfos.forEach(
-        di ->
-            di.setAllConceptCount(
-                cbCriteriaDao.findCountByDomainAndStandardAndTerm(
-                    di.getDomain().toString(), standard, searchTerm)));
-    // read all concept count
-    domainInfos.forEach(
-        di ->
-            di.setAllConceptCount(
-                cbCriteriaDao.findCountByDomainAndStandardAndTerm(
-                    di.getDomain().toString(), all, searchTerm)));
-    return domainInfos;
+  public Long findDomainCount(String domain, String term) {
+    Domain domainToCount = Domain.valueOf(domain);
+    List<Boolean> standards =
+        (domainToCount.equals(Domain.CONDITION) || domainToCount.equals(Domain.PROCEDURE))
+            ? ImmutableList.of(true, false)
+            : ImmutableList.of(true);
+    return (domainToCount.equals(Domain.PHYSICALMEASUREMENT))
+        ? cbCriteriaDao.findPhysicalMeasurementCount(modifyTermMatch(term))
+        : cbCriteriaDao.findDomainCount(modifyTermMatch(term), domain, standards);
+  }
+
+  @Override
+  public List<DomainInfo> findDomainInfos() {
+    return domainInfoDao.findByOrderByDomainId().stream()
+        .map(cohortBuilderMapper::dbModelToClient)
+        .collect(Collectors.toList());
   }
 
   @Override
@@ -377,38 +372,23 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
             : new Sort(Sort.Direction.DESC, "name");
     List<DbCriteria> criteriaList =
         cbCriteriaDao.findByDomainIdAndType(DomainType.PERSON.toString(), sortColumn, sort);
-    List<String> demoList =
-        criteriaList.stream()
-            .map(
-                c ->
-                    new ConceptIdName()
-                        .conceptId(new Long(c.getConceptId()))
-                        .conceptName(c.getName()))
-            .sorted(Comparator.comparing(ConceptIdName::getConceptName))
-            .map(c -> c.getConceptId().toString())
-            .collect(Collectors.toList());
-    return demoList;
+    return criteriaList.stream()
+        .map(
+            c -> new ConceptIdName().conceptId(new Long(c.getConceptId())).conceptName(c.getName()))
+        .sorted(Comparator.comparing(ConceptIdName::getConceptName))
+        .map(c -> c.getConceptId().toString())
+        .collect(Collectors.toList());
   }
 
   @Override
-  public List<SurveyModule> findSurveyModules(String term) {
-    List<SurveyModule> surveyModules =
-        surveyModuleDao.findByParticipantCountNotOrderByOrderNumberAsc(0L).stream()
-            .map(cohortBuilderMapper::dbModelToClient)
-            .collect(Collectors.toList());
-    // read question counts
-    surveyModules.forEach(
-        sm -> {
-          Long criteriaId =
-              cbCriteriaDao.findIdByDomainAndConceptIdAndName(
-                  DomainType.SURVEY.toString(), sm.getConceptId().toString(), sm.getName());
-          sm.setQuestionCount(
-              cbCriteriaDao.findQuestionCountByDomainAndIdAndTerm(
-                  criteriaId, modifyTermMatch(term)));
-        });
-    // remove any with zero question counts
-    return surveyModules.stream()
-        .filter(sm -> sm.getQuestionCount() > 0)
+  public Long findSurveyCount(String name, String term) {
+    return cbCriteriaDao.findSurveyCount(name, modifyTermMatch(term));
+  }
+
+  @Override
+  public List<SurveyModule> findSurveyModules() {
+    return surveyModuleDao.findByOrderByOrderNumberAsc().stream()
+        .map(cohortBuilderMapper::dbModelToClient)
         .collect(Collectors.toList());
   }
 
