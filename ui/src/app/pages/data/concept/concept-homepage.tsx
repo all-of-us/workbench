@@ -172,14 +172,17 @@ const SurveyCard: React.FunctionComponent<{survey: SurveyModule, browseSurvey: F
       </DomainCardBase>;
     };
 
-const PhysicalMeasurementsCard: React.FunctionComponent<{physicalMeasurement: DomainInfo, browsePhysicalMeasurements: Function}> =
-    ({physicalMeasurement, browsePhysicalMeasurements}) => {
+const PhysicalMeasurementsCard: React.FunctionComponent<{physicalMeasurement: DomainInfo,
+  browsePhysicalMeasurements: Function, updating: boolean}> =
+    ({physicalMeasurement, browsePhysicalMeasurements, updating}) => {
       return <DomainCardBase style={{maxHeight: 'auto', width: '11.5rem'}}>
         <Clickable style={styles.domainBoxHeader}
           onClick={browsePhysicalMeasurements}
           data-test-id='pm-box-name'>{physicalMeasurement.name}</Clickable>
         <div style={styles.conceptText}>
-          <span style={{fontSize: 30}}>{physicalMeasurement.allConceptCount.toLocaleString()}</span> physical measurements.
+          {updating ? <Spinner size={42}/> : <React.Fragment>
+            <span style={{fontSize: 30}}>{physicalMeasurement.allConceptCount.toLocaleString()}</span> physical measurements.
+          </React.Fragment>}
           <div><b>{physicalMeasurement.participantCount.toLocaleString()}</b> participants in this domain</div>
         </div>
         <div style={{...styles.conceptText, height: 'auto'}}>
@@ -512,6 +515,21 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
       });
       if (this.isConceptSetFlagEnable()) {
         currentConceptStore.next(null);
+        this.setState({loadingDomains: true}, () => this.loadDomainsAndSurveys());
+      }
+    }
+
+    back() {
+      if (this.isConceptSetFlagEnable()) {
+        this.setState({
+          inputErrors: [],
+          selectedDomain: undefined,
+          selectedSurvey: '',
+          showSearchError: false,
+          searching: false // reset the search result table to show browse/domain cards instead
+        });
+      } else {
+        this.clearSearch();
       }
     }
 
@@ -669,7 +687,7 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
         <FadeBox style={{margin: 'auto', paddingTop: '1rem', width: '95.7%'}}>
           <FlexRow>
             {(selectedSurvey || selectedDomain) &&
-            <Clickable style={styles.backArrow} onClick={() => this.clearSearch()}>
+            <Clickable style={styles.backArrow} onClick={() => this.back()}>
               <img src='/assets/icons/arrow-left-regular.svg' style={styles.arrowIcon}
                    alt='Go back'/>
             </Clickable>}
@@ -757,10 +775,13 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
                 <div style={styles.cardList}>
                   {domainInfoError
                     ? this.errorMessage()
-                    : conceptDomainList.filter(item => item.domain === Domain.PHYSICALMEASUREMENT).map((physicalMeasurement, p) => {
-                      return <PhysicalMeasurementsCard physicalMeasurement={physicalMeasurement} key={p}
-                                         browsePhysicalMeasurements={() => this.browseDomain(physicalMeasurement)}/>;
-                    })
+                    : conceptDomainList
+                      .filter(item => item.domain === Domain.PHYSICALMEASUREMENT && item.allConceptCount !== 0)
+                      .map((physicalMeasurement, p) =>
+                        <PhysicalMeasurementsCard physicalMeasurement={physicalMeasurement}
+                                                  key={p}
+                                                  browsePhysicalMeasurements={() => this.browseDomain(physicalMeasurement)}
+                                                  updating={domainsLoading.includes(Domain.PHYSICALMEASUREMENT)}/>)
                   }
                 </div>
               </React.Fragment>}
