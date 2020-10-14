@@ -14,6 +14,7 @@ import {WorkspaceAccessLevel} from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
 import Navigation, {NavLink} from 'app/component/navigation';
 import {makeWorkspaceName} from './str-utils';
+import {config} from 'resources/workbench-config';
 
 export async function signIn(page: Page, userId?: string, passwd?: string): Promise<void> {
   const loginPage = new GoogleLoginPage(page);
@@ -176,6 +177,20 @@ export async function performAction(
     throw new Error(`${identifier} is not recognized.`);
   }
 
+}
+
+export async function createWorkspace(page: Page, cdrVersionName: string = config.defaultCdrVersionName): Promise<WorkspaceCard> {
+  const workspacesPage = new WorkspacesPage(page);
+  await workspacesPage.load();
+
+  const name = makeWorkspaceName();
+
+  await workspacesPage.createWorkspace(name, cdrVersionName);
+  console.log(`Created workspace "${name}" with CDR Version "${cdrVersionName}"`);
+  await workspacesPage.load();
+
+  const workspaceCard = new WorkspaceCard(page);
+  return workspaceCard.findCard(name);
 }
 
 /**
