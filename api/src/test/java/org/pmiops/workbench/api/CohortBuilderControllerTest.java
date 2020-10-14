@@ -397,7 +397,7 @@ public class CohortBuilderControllerTest {
                 .conceptCode("myTerm")
                 .standardConcept("")
                 .sourceCountValue(10L)
-                .domainId(Domain.MEASUREMENT.toString())
+                .domainId("Measurement")
                 .vocabularyId(CriteriaType.ICD9CM.toString()));
 
     Criteria criteria =
@@ -405,9 +405,11 @@ public class CohortBuilderControllerTest {
             .code(dbConcept.getConceptCode())
             .conceptId(dbConcept.getConceptId())
             .childCount(dbConcept.getSourceCountValue())
+            .parentCount(0L)
             .domainId(dbConcept.getDomainId())
             .name(dbConcept.getConceptName())
             .type(dbConcept.getVocabularyId())
+            .selectable(true)
             .isStandard(ImmutableList.of("S", "C").contains(dbConcept.getStandardConcept()));
 
     assertEquals(
