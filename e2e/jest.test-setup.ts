@@ -19,17 +19,22 @@ beforeEach(async () => {
 
 
   page.on('request', (request) => {
-    console.info(`👉 Request: ${request.method()} ${request.url()}`);
+    console.info(`👉 Request started: ${request.method()} ${request.url()}`);
     request.continue();
+  });
+
+  page.on('requestfinished', request => {
+    console.info(`👉 Request finished: ${request.method()} ${request.url()}`);
+  });
+
+  page.on('requestfailed', request => {
+    console.error(`❌ Request failed: url: ${request.url()}, errText: ${request.failure().errorText}, method: ${request.method()}, status: ${request.failure().errorText}`)
   });
 
   page.on('console', message => console[message.type()](`👉 ${message.text()}`));
 
   page.on('error', error => console.error(`❌ ${error.toString()}`));
 
-  page.on('requestfailed', request => {
-    console.error(`url: ${request.url()}, errText: ${request.failure().errorText}, method: ${request.method()}, status: ${request.failure().errorText}`)
-  });
 
   // Catch console log errors
   page.on('pageerror', err => {
