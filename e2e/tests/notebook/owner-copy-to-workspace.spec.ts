@@ -50,9 +50,9 @@ async function copyNotebookTest(srcCdrVersionName: string, destCdrVersionName: s
   const deleteModalTextContent = await analysisPage.deleteResource(sourceNotebookName, ResourceCard.Notebook);
   expect(deleteModalTextContent).toContain(`Are you sure you want to delete Notebook: ${sourceNotebookName}?`);
 
-    // Perform actions in copied notebook.
-    // Open destination Workspace
-    await findOrCreateWorkspace(page, {workspaceName: destWorkspace}).then(card => card.clickWorkspaceName());
+  // Perform actions in copied notebook.
+  // Open destination Workspace
+  await findOrCreateWorkspace(page, {workspaceName: destWorkspace}).then(card => card.clickWorkspaceName());
 
   // Verify copy-to notebook exists in destination Workspace
   await dataPage.openAnalysisPage();

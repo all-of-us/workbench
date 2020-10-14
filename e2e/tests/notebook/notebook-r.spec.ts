@@ -2,7 +2,6 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {Language} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
-import {CellType} from 'app/page/notebook-cell';
 
 // Notebook server start may take a long time. Set maximum test running time to 20 minutes.
 jest.setTimeout(20 * 60 * 1000);
