@@ -2,9 +2,8 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import WorkspacesPage from 'app/page/workspaces-page';
 import {Option} from 'app/text-labels';
 import * as testData from 'resources/data/workspace-data';
-import {findOrCreateWorkspace, performActions, signIn} from 'utils/test-utils';
+import {createWorkspace, performActions, signIn} from 'utils/test-utils';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
-
 
 describe('Editing workspace via workspace card snowman menu', () => {
 
@@ -20,7 +19,7 @@ describe('Editing workspace via workspace card snowman menu', () => {
    * - Verify Workspace Information in ABOUT tab.
    */
   test('User as OWNER can edit workspace', async () => {
-    const workspaceCard = await findOrCreateWorkspace(page, {alwaysCreate: true});
+    const workspaceCard = await createWorkspace(page);
     await workspaceCard.selectSnowmanMenu(Option.Edit);
 
     const workspacesPage = new WorkspacesPage(page);

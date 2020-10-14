@@ -5,8 +5,7 @@ import {SaveOption} from 'app/page/conceptset-save-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {ResourceCard} from 'app/text-labels';
 import {makeRandomName, makeString} from 'utils/str-utils';
-import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
-
+import {createWorkspace, signIn} from 'utils/test-utils';
 
 describe('Editing and rename Concept Set', () => {
 
@@ -24,7 +23,7 @@ describe('Editing and rename Concept Set', () => {
    */
   test('Workspace OWNER can edit Concept Set', async () => {
 
-    const workspaceName = await findOrCreateWorkspace(page, {alwaysCreate: true}).then(card => card.clickWorkspaceName());
+    const workspaceName = await createWorkspace(page).then(card => card.clickWorkspaceName());
 
     const dataPage = new WorkspaceDataPage(page);
     let conceptSearchPage = await dataPage.openConceptSetSearch(Domain.Procedures);
