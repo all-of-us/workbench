@@ -26,7 +26,7 @@ import {
   withUrlParams
 } from 'app/utils';
 import {
-  currentConceptSetStore,
+  currentConceptSetStore, currentConceptStore,
   navigate,
   navigateByUrl,
   serverConfigStore, setSidebarActiveIconStore
@@ -144,6 +144,10 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
 
     componentDidMount() {
       this.getConceptSet();
+    }
+
+    componentWillUnmount() {
+      currentConceptStore.next(null);
     }
 
     async getConceptSet() {
