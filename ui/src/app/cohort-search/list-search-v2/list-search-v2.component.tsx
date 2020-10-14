@@ -426,17 +426,29 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
             <table className='p-datatable' style={styles.table}>
               <thead className='p-datatable-thead'>
                 <tr style={{height: '2rem'}}>
-                  <th style={{...styles.columnNameHeader, width: '31%', borderLeft: 0}}>Name</th>
-                  <th style={columnHeaderStyle}>
-                    {this.renderColumnWithToolTip('Code', 'Unique code for OMOP' )}
+                  <th style={{...styles.columnNameHeader, width: '31%', borderLeft: 0}}>
+                    {this.renderColumnWithToolTip('Name', 'Name from vocabulary')}
                   </th>
-                  <th style={{...columnHeaderStyle, paddingLeft: '0'}}>Vocab</th>
-                  <th style={{...styles.columnNameHeader, width: '10%', paddingLeft: '0',
-                    paddingRight: '0.5rem'}}>Source/ Standard</th>
-                  <th style={{...styles.columnNameHeader, width: '10%', paddingLeft: '0',
-                    paddingRight: '0.5rem'}}>Concept Id</th>
                   <th style={columnHeaderStyle}>
-                    Roll-up Count
+                    {this.renderColumnWithToolTip('Code', 'Unique code for OMOP')}
+                  </th>
+                  <th style={{...columnHeaderStyle, paddingLeft: '0'}}>
+                    {this.renderColumnWithToolTip('Vocab', 'Vocabulary for concept')}
+                  </th>
+                  <th style={{...styles.columnNameHeader, width: '10%', paddingLeft: '0', paddingRight: '0.5rem'}}>
+                    {this.renderColumnWithToolTip(
+                      'Source/Standard',
+                      'Indicates if code is an OMOP standard or a source vocabulary code (ICD9/10, CPT, etc)'
+                    )}
+                  </th>
+                  <th style={{...styles.columnNameHeader, width: '10%', paddingLeft: '0', paddingRight: '0.5rem'}}>
+                    {this.renderColumnWithToolTip('Concept Id', 'Unique ID for concept in OMOP')}
+                  </th>
+                  <th style={columnHeaderStyle}>
+                    {this.renderColumnWithToolTip(
+                      'Roll-up Count',
+                      'Number of distinct participants that have either the parent concept OR any of the parent’s child concepts'
+                    )}
                   </th>
                   <th style={columnHeaderStyle}>
                     {this.renderColumnWithToolTip('Item Count', 'Number of distinct participants for this concept' )}
