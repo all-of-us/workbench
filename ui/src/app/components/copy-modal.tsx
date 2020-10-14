@@ -301,11 +301,10 @@ class CopyModalComponent extends React.Component<Props, State> {
       return;
     }
 
-    if (resourceType === ResourceType.NOTEBOOK) {
-      this.setNotebookCdrMismatchWarning(destination, fromCdrVersionId);
-    } else if (resourceType === ResourceType.CONCEPTSET) {
-      this.setConceptSetCdrMismatchError(destination, fromCdrVersionId);
-    }
+    fp.cond([
+      [rt => rt === ResourceType.NOTEBOOK, () => this.setNotebookCdrMismatchWarning(destination, fromCdrVersionId)],
+      [rt => rt === ResourceType.CONCEPTSET, () => this.setConceptSetCdrMismatchError(destination, fromCdrVersionId)],
+    ])(resourceType);
   }
 
   renderFormBody() {
