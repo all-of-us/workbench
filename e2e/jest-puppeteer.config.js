@@ -16,7 +16,8 @@ const NEW_CHROME_SWITCHES = [
   '--no-zygote',
   '--no-sandbox', // required for --no-zygote flag
   '--safebrowsing-disable-auto-update',
-  '--window-size=1280,1024'
+  '--window-size=1280,1024',
+  '--window-position=0,0'
 ];
 
 // Append to Puppeteer default chrome flags.
@@ -39,10 +40,11 @@ const SWITCHES = (process.env.CI === 'true') ? CI_SWITCHES : DEFAULT_SWITCHES;
 
 module.exports = {
   launch: {
-    headless: isHeadless,
+    headless: false,
     slowMo: slowMotion, // slow down creation of browser to free up heap memory. https://github.com/puppeteer/puppeteer/issues/4684#issuecomment-511255786
     defaultViewport: null,
     ignoreDefaultArgs: true,
+    devtools: true,
     args: SWITCHES, // Chrome switches to pass to the browser instance
   },
   browser: 'chromium',

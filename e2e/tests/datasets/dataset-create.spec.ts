@@ -21,7 +21,7 @@ describe('Dataset test', () => {
    * - Edit dataset. Save dataset without Export to Notebook.
    * - Delete Dataset.
    */
-  test('Can create Dataset with user-defined Cohorts', async () => {
+  xtest('Can create Dataset with user-defined Cohorts', async () => {
     const workspaceCard = await findWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 

@@ -126,7 +126,7 @@ export default class GoogleLoginPage {
    */
   async load(): Promise<void> {
     const url = config.uiBaseUrl + config.loginUrlPath;
-    await this.page.goto(url, {waitUntil: ['networkidle0', 'domcontentloaded', 'load'], timeout: 180000});
+    await this.page.goto(url);
   }
 
   /**
