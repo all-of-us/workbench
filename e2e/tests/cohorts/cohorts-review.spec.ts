@@ -1,4 +1,4 @@
-import {findOrCreateWorkspace, isValidDate, signIn, waitWhileLoading} from 'utils/test-utils';
+import {findOrCreateWorkspace, isValidDate, signIn} from 'utils/test-utils';
 import {Option, LinkText, ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import CohortBuildPage from 'app/page/cohort-build-page';
