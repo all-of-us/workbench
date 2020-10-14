@@ -15,7 +15,7 @@ import org.pmiops.workbench.model.CriteriaAttribute;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DataFilter;
-import org.pmiops.workbench.model.DomainType;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.SurveyVersion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -47,7 +47,7 @@ public class CohortBuilderMapperTest {
             .parentCount(100L)
             .childCount(0L)
             .conceptId(12345L)
-            .domainId(DomainType.CONDITION.toString())
+            .domainId(Domain.CONDITION.toString())
             .hasAttributes(true)
             .path("path")
             .value("value")
@@ -70,7 +70,7 @@ public class CohortBuilderMapperTest {
                     .addParentCount(100L)
                     .addChildCount(null)
                     .addConceptId("12345")
-                    .addDomainId(DomainType.CONDITION.toString())
+                    .addDomainId(Domain.CONDITION.toString())
                     .addAttribute(true)
                     .addPath("path")
                     .addSynonyms("syn")

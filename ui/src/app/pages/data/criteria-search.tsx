@@ -9,7 +9,7 @@ import {
   currentCohortCriteriaStore,
   currentConceptStore
 } from 'app/utils/navigation';
-import {Criteria, DomainType} from 'generated/fetch';
+import {Criteria, Domain} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {Growl} from 'primereact/growl';
 import * as React from 'react';
@@ -144,9 +144,9 @@ export class CriteriaSearch extends React.Component<Props, State>  {
 
   get initTree() {
     const {cohortContext: {domain}} = this.props;
-    return domain === DomainType.PHYSICALMEASUREMENT
-        || domain === DomainType.SURVEY
-        || domain === DomainType.VISIT;
+    return domain === Domain.PHYSICALMEASUREMENT
+        || domain === Domain.SURVEY
+        || domain === Domain.VISIT;
   }
 
   get isConcept() {

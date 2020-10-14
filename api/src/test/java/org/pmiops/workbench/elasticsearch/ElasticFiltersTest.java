@@ -20,7 +20,7 @@ import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
-import org.pmiops.workbench.model.DomainType;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.ModifierType;
 import org.pmiops.workbench.model.Operator;
@@ -49,7 +49,7 @@ public class ElasticFiltersTest {
 
   private static DbCriteria icd9Criteria() {
     return DbCriteria.builder()
-        .addDomainId(DomainType.CONDITION.toString())
+        .addDomainId(Domain.CONDITION.toString())
         .addType(CriteriaType.ICD9CM.toString())
         .addAttribute(Boolean.FALSE)
         .addStandard(false)
@@ -59,7 +59,7 @@ public class ElasticFiltersTest {
 
   private static DbCriteria drugCriteria() {
     return DbCriteria.builder()
-        .addDomainId(DomainType.DRUG.toString())
+        .addDomainId(Domain.DRUG.toString())
         .addType(CriteriaType.ATC.toString())
         .addAttribute(Boolean.FALSE)
         .addStandard(true)
@@ -68,7 +68,7 @@ public class ElasticFiltersTest {
 
   private static DbCriteria basicsCriteria() {
     return DbCriteria.builder()
-        .addDomainId(DomainType.SURVEY.toString())
+        .addDomainId(Domain.SURVEY.toString())
         .addType(CriteriaType.PPI.toString())
         .addSubtype(CriteriaSubType.SURVEY.toString())
         .addAttribute(Boolean.FALSE)
@@ -114,7 +114,7 @@ public class ElasticFiltersTest {
         DbCriteria.builder()
             .addCode("005")
             .addConceptId("775")
-            .addDomainId(DomainType.CONDITION.toString())
+            .addDomainId(Domain.CONDITION.toString())
             .addType(CriteriaType.SNOMED.toString())
             .addAttribute(Boolean.FALSE)
             .addGroup(false)
@@ -200,7 +200,7 @@ public class ElasticFiltersTest {
     leafParam2 =
         new SearchParameter()
             .conceptId(772L)
-            .domain(DomainType.CONDITION.toString())
+            .domain(Domain.CONDITION.toString())
             .type(CriteriaType.ICD9CM.toString())
             .ancestorData(false)
             .standard(false)
@@ -303,7 +303,7 @@ public class ElasticFiltersTest {
                                 .addSearchParametersItem(
                                     new SearchParameter()
                                         .conceptId(21600002L)
-                                        .domain(DomainType.DRUG.toString())
+                                        .domain(Domain.DRUG.toString())
                                         .type(CriteriaType.ATC.toString())
                                         .ancestorData(true)
                                         .standard(true)
@@ -330,7 +330,7 @@ public class ElasticFiltersTest {
                                     new SearchParameter()
                                         .value("001")
                                         .conceptId(771L)
-                                        .domain(DomainType.CONDITION.toString())
+                                        .domain(Domain.CONDITION.toString())
                                         .type(CriteriaType.ICD9CM.toString())
                                         .group(true)
                                         .ancestorData(false)
@@ -357,7 +357,7 @@ public class ElasticFiltersTest {
                                     new SearchParameter()
                                         .value("001")
                                         .conceptId(771L)
-                                        .domain(DomainType.CONDITION.toString())
+                                        .domain(Domain.CONDITION.toString())
                                         .type(CriteriaType.ICD9CM.toString())
                                         .group(false)
                                         .ancestorData(false)
@@ -365,7 +365,7 @@ public class ElasticFiltersTest {
                                 .addSearchParametersItem(
                                     new SearchParameter()
                                         .conceptId(477L)
-                                        .domain(DomainType.CONDITION.toString())
+                                        .domain(Domain.CONDITION.toString())
                                         .type(CriteriaType.SNOMED.toString())
                                         .group(false)
                                         .ancestorData(false)
@@ -410,7 +410,7 @@ public class ElasticFiltersTest {
                             new SearchGroupItem()
                                 .addSearchParametersItem(
                                     new SearchParameter()
-                                        .domain(DomainType.SURVEY.toString())
+                                        .domain(Domain.SURVEY.toString())
                                         .type(CriteriaType.PPI.toString())
                                         .subtype(CriteriaSubType.ANSWER.toString())
                                         .conceptId(7771L)
@@ -439,7 +439,7 @@ public class ElasticFiltersTest {
                             new SearchGroupItem()
                                 .addSearchParametersItem(
                                     new SearchParameter()
-                                        .domain(DomainType.SURVEY.toString())
+                                        .domain(Domain.SURVEY.toString())
                                         .type(CriteriaType.PPI.toString())
                                         .subtype(CriteriaSubType.ANSWER.toString())
                                         .conceptId(777L)
@@ -559,7 +559,7 @@ public class ElasticFiltersTest {
     SearchParameter heightAnyParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+            .domain(Domain.PHYSICAL_MEASUREMENT.toString())
             .type(CriteriaType.PPI.toString())
             .standard(false)
             .ancestorData(false)
@@ -589,7 +589,7 @@ public class ElasticFiltersTest {
     SearchParameter heightParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+            .domain(Domain.PHYSICAL_MEASUREMENT.toString())
             .type(CriteriaType.PPI.toString())
             .group(false)
             .ancestorData(false)
@@ -623,7 +623,7 @@ public class ElasticFiltersTest {
     SearchParameter weightParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+            .domain(Domain.PHYSICAL_MEASUREMENT.toString())
             .type(CriteriaType.PPI.toString())
             .standard(false)
             .ancestorData(false)
@@ -650,7 +650,7 @@ public class ElasticFiltersTest {
     SearchParameter genderParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .domain(DomainType.PERSON.toString())
+            .domain(Domain.PERSON.toString())
             .type(CriteriaType.GENDER.toString())
             .standard(true)
             .ancestorData(false)
@@ -674,7 +674,7 @@ public class ElasticFiltersTest {
     SearchParameter genderParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .domain(DomainType.PERSON.toString())
+            .domain(Domain.PERSON.toString())
             .type(CriteriaType.GENDER.toString())
             .group(false)
             .ancestorData(false)
@@ -698,7 +698,7 @@ public class ElasticFiltersTest {
     SearchParameter genderParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .domain(DomainType.PERSON.toString())
+            .domain(Domain.PERSON.toString())
             .type(CriteriaType.GENDER.toString())
             .group(false)
             .ancestorData(false)
@@ -725,7 +725,7 @@ public class ElasticFiltersTest {
     SearchParameter raceParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .domain(DomainType.PERSON.toString())
+            .domain(Domain.PERSON.toString())
             .type(CriteriaType.RACE.toString())
             .group(false)
             .ancestorData(false)
@@ -749,7 +749,7 @@ public class ElasticFiltersTest {
     SearchParameter ethParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .domain(DomainType.PERSON.toString())
+            .domain(Domain.PERSON.toString())
             .type(CriteriaType.ETHNICITY.toString())
             .group(false)
             .ancestorData(false)
@@ -771,7 +771,7 @@ public class ElasticFiltersTest {
   public void testDeceasedQuery() {
     SearchParameter deceasedParam =
         new SearchParameter()
-            .domain(DomainType.PERSON.toString())
+            .domain(Domain.PERSON.toString())
             .type(CriteriaType.DECEASED.toString())
             .standard(true)
             .ancestorData(false)
@@ -799,7 +799,7 @@ public class ElasticFiltersTest {
     SearchParameter pregParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+            .domain(Domain.PHYSICAL_MEASUREMENT.toString())
             .type(CriteriaType.PPI.toString())
             .group(false)
             .ancestorData(false)
@@ -833,7 +833,7 @@ public class ElasticFiltersTest {
     SearchParameter measParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .domain(DomainType.MEASUREMENT.toString())
+            .domain(Domain.MEASUREMENT.toString())
             .type(CriteriaType.LOINC.toString())
             .group(false)
             .ancestorData(false)
@@ -861,7 +861,7 @@ public class ElasticFiltersTest {
     SearchParameter visitParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .domain(DomainType.VISIT.toString())
+            .domain(Domain.VISIT.toString())
             .type(CriteriaType.VISIT.toString())
             .ancestorData(false)
             .standard(true)
@@ -887,7 +887,7 @@ public class ElasticFiltersTest {
     Object right = now.minusYears(20).toLocalDate();
     SearchParameter ageParam =
         new SearchParameter()
-            .domain(DomainType.PERSON.toString())
+            .domain(Domain.PERSON.toString())
             .type(CriteriaType.AGE.toString())
             .group(false)
             .ancestorData(false)
@@ -922,7 +922,7 @@ public class ElasticFiltersTest {
     Object right = 34;
     SearchParameter ageAtConsentParam =
         new SearchParameter()
-            .domain(DomainType.PERSON.toString())
+            .domain(Domain.PERSON.toString())
             .type(CriteriaType.AGE.toString())
             .group(false)
             .ancestorData(false)
@@ -954,7 +954,7 @@ public class ElasticFiltersTest {
     Object right = now.minusYears(20).toLocalDate();
     SearchParameter ageParam =
         new SearchParameter()
-            .domain(DomainType.PERSON.toString())
+            .domain(Domain.PERSON.toString())
             .type(CriteriaType.AGE.toString())
             .group(false)
             .ancestorData(false)
@@ -968,7 +968,7 @@ public class ElasticFiltersTest {
     SearchParameter ethParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .domain(DomainType.PERSON.toString())
+            .domain(Domain.PERSON.toString())
             .type(CriteriaType.ETHNICITY.toString())
             .group(false)
             .ancestorData(false)

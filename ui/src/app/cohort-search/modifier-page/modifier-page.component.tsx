@@ -15,7 +15,7 @@ import {reactStyles, withCurrentCohortSearchContext, withCurrentWorkspace} from 
 import {triggerEvent} from 'app/utils/analytics';
 import {currentCohortSearchContextStore, serverConfigStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {Criteria, CriteriaType, DomainType, ModifierType, Operator} from 'generated/fetch';
+import {Criteria, CriteriaType, Domain, ModifierType, Operator} from 'generated/fetch';
 
 
 const styles = reactStyles({
@@ -215,7 +215,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
     async componentDidMount() {
       const {cohortContext: {domain}, workspace: {cdrVersionId}} = this.props;
       const {formState} = this.state;
-      if (domain !== DomainType.SURVEY) {
+      if (domain !== Domain.SURVEY) {
         formState.push({
           name: ModifierType.NUMOFOCCURRENCES,
           label: 'Has Occurrences',
@@ -258,7 +258,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
         if (!encountersOptions) {
           // get options for visit modifier from api
           const res = await cohortBuilderApi().findCriteriaBy(
-            +cdrVersionId, DomainType[DomainType.VISIT], CriteriaType[CriteriaType.VISIT]);
+            +cdrVersionId, Domain[Domain.VISIT], CriteriaType[CriteriaType.VISIT]);
           encountersOptions = res.items;
           encountersStore.next(encountersOptions);
         }
@@ -293,7 +293,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
     get formState() {
       const {cohortContext: {domain}} = this.props;
       const {formState} = this.state;
-      return domain === DomainType.SURVEY ?
+      return domain === Domain.SURVEY ?
         formState.filter(form => SURVEY_MODIFIERS.indexOf(form.name) > -1) : formState;
     }
 
@@ -376,7 +376,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
 
     get addEncounters() {
       const {cohortContext: {domain}} = this.props;
-      return ![DomainType.PHYSICALMEASUREMENT, DomainType.SURVEY, DomainType.VISIT].includes(domain);
+      return ![Domain.PHYSICALMEASUREMENT, Domain.SURVEY, Domain.VISIT].includes(domain);
     }
 
     calculate = async() => {

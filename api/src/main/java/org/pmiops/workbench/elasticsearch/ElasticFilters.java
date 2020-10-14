@@ -22,7 +22,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.CriteriaType;
-import org.pmiops.workbench.model.DomainType;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.ModifierType;
 import org.pmiops.workbench.model.SearchGroup;
@@ -135,7 +135,7 @@ public final class ElasticFilters {
           b.filter(QueryBuilders.termQuery("is_deceased", isDeceased));
         }
         for (Attribute attr : param.getAttributes()) {
-          b.filter(attributeToQuery(attr, DomainType.SURVEY.toString().equals(param.getDomain())));
+          b.filter(attributeToQuery(attr, Domain.SURVEY.toString().equals(param.getDomain())));
         }
         for (QueryBuilder f : modFilters) {
           b.filter(f);
@@ -281,8 +281,8 @@ public final class ElasticFilters {
   }
 
   private static boolean isNonNestedSchema(SearchParameter param) {
-    DomainType domainType = DomainType.valueOf(param.getDomain());
-    return DomainType.PERSON.equals(domainType);
+    Domain domain = Domain.valueOf(param.getDomain());
+    return Domain.PERSON.equals(domain);
   }
 
   private Set<String> toleafConceptIds(List<SearchParameter> params) {

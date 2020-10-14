@@ -3632,7 +3632,10 @@ definitions:
     - VISIT
     - SURVEY
     - PERSON
-    - PHYSICALMEASUREMENT
+    - PHYSICAL_MEASUREMENT
+    - ALL_EVENTS
+    - LAB
+    - VITAL
   Surveys:
     type: string
     description: a survey for concepts
@@ -6713,7 +6716,7 @@ definitions:
       filters:
         "$ref": "#/definitions/FilterList"
       domain:
-        "$ref": "#/definitions/DomainType"
+        "$ref": "#/definitions/Domain"
         description: Different domain types in omop
   FilterColumns:
     type: string
@@ -6750,22 +6753,6 @@ definitions:
     - SURVEY_NAME
     - QUESTION
     - ANSWER
-  DomainType:
-    type: string
-    enum:
-    - CONDITION
-    - PROCEDURE
-    - OBSERVATION
-    - DRUG
-    - ALL_EVENTS
-    - DEVICE
-    - VISIT
-    - MEASUREMENT
-    - PHYSICAL_MEASUREMENT
-    - LAB
-    - VITAL
-    - SURVEY
-    - PERSON
   SortOrder:
     type: string
     enum:

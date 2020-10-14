@@ -9,7 +9,7 @@ import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
-import {Criteria, CriteriaSubType, CriteriaType, DomainType} from 'generated/fetch';
+import {Criteria, CriteriaSubType, CriteriaType, Domain} from 'generated/fetch';
 
 const styles = reactStyles({
   error: {
@@ -111,11 +111,11 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
     const {node: {domainId, id, isStandard, type}, selectedSurvey} = this.props;
     this.setState({loading: true});
     const {cdrVersionId} = (currentWorkspaceStore.getValue());
-    const criteriaType = domainId === DomainType.DRUG.toString() ? CriteriaType.ATC.toString() : type;
-    const parentId = domainId === DomainType.PHYSICALMEASUREMENT.toString() ? null : id;
+    const criteriaType = domainId === Domain.DRUG.toString() ? CriteriaType.ATC.toString() : type;
+    const parentId = domainId === Domain.PHYSICALMEASUREMENT.toString() ? null : id;
     cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, parentId)
     .then(resp => {
-      if (domainId === DomainType.PHYSICALMEASUREMENT.toString()) {
+      if (domainId === Domain.PHYSICALMEASUREMENT.toString()) {
         let children = [];
         resp.items.forEach(child => {
           child['children'] = [];
@@ -126,7 +126,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
           }
         });
         this.setState({children});
-      } else if (domainId === DomainType.SURVEY.toString() &&  selectedSurvey) {
+      } else if (domainId === Domain.SURVEY.toString() &&  selectedSurvey) {
         // Temp: This should be handle in API
         const selectedSurveyChild = resp.items.filter(child => child.name === selectedSurvey);
         if (selectedSurveyChild && selectedSurveyChild.length > 0) {
@@ -136,7 +136,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
               });
         } else {
           this.setState({children: resp.items});
-          if (domainId === DomainType.SURVEY.toString()) {
+          if (domainId === Domain.SURVEY.toString()) {
             const rootSurveys = ppiSurveys.getValue();
             if (!rootSurveys[cdrVersionId]) {
               rootSurveys[cdrVersionId] = resp.items;
@@ -146,7 +146,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
         }
       } else {
         this.setState({children: resp.items});
-        if (domainId === DomainType.SURVEY.toString()) {
+        if (domainId === Domain.SURVEY.toString()) {
           const rootSurveys = ppiSurveys.getValue();
           if (!rootSurveys[cdrVersionId]) {
             rootSurveys[cdrVersionId] = resp.items;
@@ -183,9 +183,9 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
 
   get showHeader() {
     const {node: {domainId}} = this.props;
-    return domainId !== DomainType.PHYSICALMEASUREMENT.toString()
-      && domainId !== DomainType.SURVEY.toString()
-      && domainId !== DomainType.VISIT.toString();
+    return domainId !== Domain.PHYSICALMEASUREMENT.toString()
+      && domainId !== Domain.SURVEY.toString()
+      && domainId !== Domain.VISIT.toString();
   }
 
   // Hides the tree node for COPE survey if enableCOPESurvey config flag is set to false
@@ -200,7 +200,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
       setSearchTerms} = this.props;
     const {children, error, ingredients, loading} = this.state;
     return <React.Fragment>
-      {node.domainId !== DomainType.VISIT.toString() &&
+      {node.domainId !== Domain.VISIT.toString() &&
         <div style={serverConfigStore.getValue().enableCohortBuilderV2
           ? {...styles.searchBarContainer, backgroundColor: 'transparent', width: '65%'}
           : styles.searchBarContainer}>

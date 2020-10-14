@@ -15,7 +15,7 @@ import {reactStyles, withCdrVersions, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {attributesSelectionStore, setSidebarActiveIconStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {CdrVersion, CdrVersionListResponse, CriteriaType, DomainType} from 'generated/fetch';
+import {CdrVersion, CdrVersionListResponse, CriteriaType, Domain} from 'generated/fetch';
 
 const borderStyle = `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`;
 const styles = reactStyles({
@@ -246,7 +246,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
     }
 
     get checkSource() {
-      return [DomainType.CONDITION, DomainType.PROCEDURE].includes(this.props.searchContext.domain);
+      return [Domain.CONDITION, Domain.PROCEDURE].includes(this.props.searchContext.domain);
     }
 
     selectItem = (row: any) => {
@@ -413,7 +413,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
                 Return to source code
               </Clickable>.
             </div>}
-            {domain === DomainType.DRUG && <div>
+            {domain === Domain.DRUG && <div>
               Your search may bring back brand names, generics and ingredients. Only ingredients may be added to your search criteria.
             </div>}
             {!!totalCount && <div>
@@ -475,7 +475,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
           {!standardOnly && !displayData.length && <div>No results found</div>}
         </div>}
         {loading && <SpinnerOverlay/>}
-        {error && <div style={{...styles.error, ...(domain === DomainType.DRUG ? {marginTop: '3.75rem'} : {})}}>
+        {error && <div style={{...styles.error, ...(domain === Domain.DRUG ? {marginTop: '3.75rem'} : {})}}>
           <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid' shape='exclamation-triangle' size='22'/>
           Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
           {standardOnly && <Clickable style={styles.vocabLink} onClick={() => this.getResults(sourceMatch.code)}>

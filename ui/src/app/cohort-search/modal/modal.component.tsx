@@ -16,7 +16,7 @@ import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {environment} from 'environments/environment';
-import {Criteria, CriteriaType, DomainType, TemporalMention, TemporalTime} from 'generated/fetch';
+import {Criteria, CriteriaType, Domain, TemporalMention, TemporalTime} from 'generated/fetch';
 
 const styles = reactStyles({
   footer: {
@@ -218,7 +218,7 @@ export class CBModal extends React.Component<Props, State> {
       if (type === CriteriaType.DECEASED) {
         this.selectDeceased();
       } else {
-        const title = domain === DomainType.PERSON ? typeToTitle(type) : domainToTitle(domain);
+        const title = domain === Domain.PERSON ? typeToTitle(type) : domainToTitle(domain);
         let {backMode, mode} = this.state;
         let hierarchyNode;
         if (this.initTree) {
@@ -256,7 +256,7 @@ export class CBModal extends React.Component<Props, State> {
   finish = () => {
     const {searchContext: {domain, groupId, item, role, type}} = this.props;
     const {selections} = this.state;
-    if (domain === DomainType.PERSON) {
+    if (domain === Domain.PERSON) {
       triggerEvent('Cohort Builder Search', 'Click', `Demo - ${typeToTitle(type)} - Finish`);
     }
     const searchRequest = searchRequestStore.getValue();
@@ -280,36 +280,36 @@ export class CBModal extends React.Component<Props, State> {
 
   get attributeTitle() {
     const {attributesNode: {domainId, name}} = this.state;
-    return domainId === DomainType.PHYSICALMEASUREMENT.toString() ? stripHtml(name) : domainId + ' Detail';
+    return domainId === Domain.PHYSICALMEASUREMENT.toString() ? stripHtml(name) : domainId + ' Detail';
   }
 
   get showModifiers() {
     const {searchContext: {domain}} = this.props;
-    return domain !== DomainType.PHYSICALMEASUREMENT &&
-      domain !== DomainType.PERSON;
+    return domain !== Domain.PHYSICALMEASUREMENT &&
+      domain !== Domain.PERSON;
   }
 
   get initTree() {
     const {searchContext: {domain}} = this.props;
-    return domain === DomainType.PHYSICALMEASUREMENT
-      || domain === DomainType.SURVEY
-      || domain === DomainType.VISIT;
+    return domain === Domain.PHYSICALMEASUREMENT
+      || domain === Domain.SURVEY
+      || domain === Domain.VISIT;
   }
 
   get showDataBrowserLink() {
     const {searchContext: {domain}} = this.props;
     const {mode} = this.state;
-    return (domain === DomainType.CONDITION
-      || domain === DomainType.PROCEDURE
-      || domain === DomainType.MEASUREMENT
-      || domain === DomainType.DRUG)
+    return (domain === Domain.CONDITION
+      || domain === Domain.PROCEDURE
+      || domain === Domain.MEASUREMENT
+      || domain === Domain.DRUG)
       && (mode === 'list' || mode === 'tree');
   }
 
   get leftColumnStyle() {
     const {searchContext: {domain, type}} = this.props;
     let width = '66.66667%';
-    if (domain === DomainType.PERSON) {
+    if (domain === Domain.PERSON) {
       width = type === CriteriaType.AGE ? '100%' : '50%';
     }
     return {
@@ -321,7 +321,7 @@ export class CBModal extends React.Component<Props, State> {
   }
 
   get rightColumnStyle() {
-    const width = this.props.searchContext.domain === DomainType.PERSON ? '50%' : '33.33333%';
+    const width = this.props.searchContext.domain === Domain.PERSON ? '50%' : '33.33333%';
     return {
       flex: `0 0 ${width}`,
       maxWidth: width,
@@ -422,7 +422,7 @@ export class CBModal extends React.Component<Props, State> {
       type: CriteriaType.DECEASED.toString(),
       name: 'Deceased',
       group: false,
-      domainId: DomainType.PERSON.toString(),
+      domainId: Domain.PERSON.toString(),
       hasAttributes: false,
       selectable: true,
       attributes: []
@@ -443,7 +443,7 @@ export class CBModal extends React.Component<Props, State> {
         ...(open ? {opacity: 1, visibility: 'visible', transform: 'scale(1.0'} : {})
       }}>
         <div style={styles.modalContainer}
-          className={`modal-container${domain === DomainType.PERSON ? ' demographics' : ''}${type === CriteriaType.AGE ? ' age' : ''}`}>
+          className={`modal-container${domain === Domain.PERSON ? ' demographics' : ''}${type === CriteriaType.AGE ? ' age' : ''}`}>
           <div style={styles.modalContent}>
             <div style={this.leftColumnStyle}>
               <div style={styles.titleBar}>
@@ -474,7 +474,7 @@ export class CBModal extends React.Component<Props, State> {
                 </div>
                 <div style={{display: 'table', height: '100%'}}>
                   <div style={{display: 'table-cell', height: '100%', verticalAlign: 'middle'}}>
-                    {domain === DomainType.DRUG && <div>
+                    {domain === Domain.DRUG && <div>
                       <a href='https://mor.nlm.nih.gov/RxNav/' target='_blank' rel='noopener noreferrer'>
                         Explore
                       </a>
@@ -490,8 +490,8 @@ export class CBModal extends React.Component<Props, State> {
                   <ClrIcon size='24' shape='close'/>
                 </Button>}
               </div>
-              <div style={(domain === DomainType.PERSON && type !== CriteriaType.AGE) ? {marginBottom: '3.5rem'} : {height: 'calc(100% - 3.5rem)'}}>
-                {domain === DomainType.PERSON ? <div style={{flex: 1, overflow: 'auto'}}>
+              <div style={(domain === Domain.PERSON && type !== CriteriaType.AGE) ? {marginBottom: '3.5rem'} : {height: 'calc(100% - 3.5rem)'}}>
+                {domain === Domain.PERSON ? <div style={{flex: 1, overflow: 'auto'}}>
                   <Demographics
                     count={count}
                     criteriaType={type}

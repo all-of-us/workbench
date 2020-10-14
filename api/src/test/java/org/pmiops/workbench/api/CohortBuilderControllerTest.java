@@ -36,8 +36,8 @@ import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainInfo;
-import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
@@ -103,7 +103,7 @@ public class CohortBuilderControllerTest {
   public void findDomainInfos() {
     cbCriteriaDao.save(
         DbCriteria.builder()
-            .addDomainId(DomainType.CONDITION.toString())
+            .addDomainId(Domain.CONDITION.toString())
             .addType(CriteriaType.ICD9CM.toString())
             .addCount(0L)
             .addHierarchy(true)
@@ -136,7 +136,7 @@ public class CohortBuilderControllerTest {
     DbCriteria surveyCriteria =
         cbCriteriaDao.save(
             DbCriteria.builder()
-                .addDomainId(DomainType.SURVEY.toString())
+                .addDomainId(Domain.SURVEY.toString())
                 .addType(CriteriaType.PPI.toString())
                 .addSubtype(CriteriaSubType.QUESTION.toString())
                 .addCount(0L)
@@ -148,7 +148,7 @@ public class CohortBuilderControllerTest {
                 .build());
     cbCriteriaDao.save(
         DbCriteria.builder()
-            .addDomainId(DomainType.SURVEY.toString())
+            .addDomainId(Domain.SURVEY.toString())
             .addType(CriteriaType.PPI.toString())
             .addSubtype(CriteriaSubType.ANSWER.toString())
             .addCount(0L)
@@ -180,7 +180,7 @@ public class CohortBuilderControllerTest {
   public void findCriteriaBy() {
     DbCriteria icd9CriteriaParent =
         DbCriteria.builder()
-            .addDomainId(DomainType.CONDITION.toString())
+            .addDomainId(Domain.CONDITION.toString())
             .addType(CriteriaType.ICD9CM.toString())
             .addCount(0L)
             .addHierarchy(true)
@@ -190,7 +190,7 @@ public class CohortBuilderControllerTest {
     cbCriteriaDao.save(icd9CriteriaParent);
     DbCriteria icd9Criteria =
         DbCriteria.builder()
-            .addDomainId(DomainType.CONDITION.toString())
+            .addDomainId(Domain.CONDITION.toString())
             .addType(CriteriaType.ICD9CM.toString())
             .addCount(0L)
             .addHierarchy(true)
@@ -203,7 +203,7 @@ public class CohortBuilderControllerTest {
         createResponseCriteria(icd9CriteriaParent),
         controller
             .findCriteriaBy(
-                1L, DomainType.CONDITION.toString(), CriteriaType.ICD9CM.toString(), false, 0L)
+                1L, Domain.CONDITION.toString(), CriteriaType.ICD9CM.toString(), false, 0L)
             .getBody()
             .getItems()
             .get(0));
@@ -212,7 +212,7 @@ public class CohortBuilderControllerTest {
         controller
             .findCriteriaBy(
                 1L,
-                DomainType.CONDITION.toString(),
+                Domain.CONDITION.toString(),
                 CriteriaType.ICD9CM.toString(),
                 false,
                 icd9CriteriaParent.getId())
@@ -242,7 +242,7 @@ public class CohortBuilderControllerTest {
     }
 
     try {
-      controller.findCriteriaBy(1L, DomainType.CONDITION.toString(), "blah", false, null);
+      controller.findCriteriaBy(1L, Domain.CONDITION.toString(), "blah", false, null);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       // success
@@ -255,7 +255,7 @@ public class CohortBuilderControllerTest {
   public void findCriteriaByDemo() {
     DbCriteria demoCriteria =
         DbCriteria.builder()
-            .addDomainId(DomainType.PERSON.toString())
+            .addDomainId(Domain.PERSON.toString())
             .addType(CriteriaType.AGE.toString())
             .addCount(0L)
             .addParentId(0L)
@@ -265,8 +265,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
         createResponseCriteria(demoCriteria),
         controller
-            .findCriteriaBy(
-                1L, DomainType.PERSON.toString(), CriteriaType.AGE.toString(), false, null)
+            .findCriteriaBy(1L, Domain.PERSON.toString(), CriteriaType.AGE.toString(), false, null)
             .getBody()
             .getItems()
             .get(0));
@@ -276,7 +275,7 @@ public class CohortBuilderControllerTest {
   public void findCriteriaAutoCompleteMatchesSynonyms() {
     DbCriteria criteria =
         DbCriteria.builder()
-            .addDomainId(DomainType.MEASUREMENT.toString())
+            .addDomainId(Domain.MEASUREMENT.toString())
             .addType(CriteriaType.LOINC.toString())
             .addCount(0L)
             .addHierarchy(true)
@@ -290,7 +289,7 @@ public class CohortBuilderControllerTest {
         controller
             .findCriteriaAutoComplete(
                 1L,
-                DomainType.MEASUREMENT.toString(),
+                Domain.MEASUREMENT.toString(),
                 "LP12",
                 CriteriaType.LOINC.toString(),
                 true,
@@ -304,7 +303,7 @@ public class CohortBuilderControllerTest {
   public void findCriteriaAutoCompleteMatchesCode() {
     DbCriteria criteria =
         DbCriteria.builder()
-            .addDomainId(DomainType.MEASUREMENT.toString())
+            .addDomainId(Domain.MEASUREMENT.toString())
             .addType(CriteriaType.LOINC.toString())
             .addCount(0L)
             .addHierarchy(true)
@@ -319,7 +318,7 @@ public class CohortBuilderControllerTest {
         controller
             .findCriteriaAutoComplete(
                 1L,
-                DomainType.MEASUREMENT.toString(),
+                Domain.MEASUREMENT.toString(),
                 "LP12",
                 CriteriaType.LOINC.toString(),
                 true,
@@ -333,7 +332,7 @@ public class CohortBuilderControllerTest {
   public void findCriteriaAutoCompleteSnomed() {
     DbCriteria criteria =
         DbCriteria.builder()
-            .addDomainId(DomainType.CONDITION.toString())
+            .addDomainId(Domain.CONDITION.toString())
             .addType(CriteriaType.SNOMED.toString())
             .addCount(0L)
             .addHierarchy(true)
@@ -346,12 +345,7 @@ public class CohortBuilderControllerTest {
         createResponseCriteria(criteria),
         controller
             .findCriteriaAutoComplete(
-                1L,
-                DomainType.CONDITION.toString(),
-                "LP12",
-                CriteriaType.SNOMED.toString(),
-                true,
-                null)
+                1L, Domain.CONDITION.toString(), "LP12", CriteriaType.SNOMED.toString(), true, null)
             .getBody()
             .getItems()
             .get(0));
@@ -379,7 +373,7 @@ public class CohortBuilderControllerTest {
 
     try {
       controller.findCriteriaAutoComplete(
-          1L, DomainType.CONDITION.toString(), "blah", "blah", null, null);
+          1L, Domain.CONDITION.toString(), "blah", "blah", null, null);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       // success
@@ -395,7 +389,7 @@ public class CohortBuilderControllerTest {
             .addCode("001")
             .addCount(10L)
             .addConceptId("123")
-            .addDomainId(DomainType.CONDITION.toString())
+            .addDomainId(Domain.CONDITION.toString())
             .addGroup(Boolean.TRUE)
             .addSelectable(Boolean.TRUE)
             .addName("chol blah")
@@ -410,7 +404,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
         createResponseCriteria(criteria),
         controller
-            .findCriteriaByDomainAndSearchTerm(1L, DomainType.CONDITION.name(), "001", null)
+            .findCriteriaByDomainAndSearchTerm(1L, Domain.CONDITION.name(), "001", null)
             .getBody()
             .getItems()
             .get(0));
@@ -423,7 +417,7 @@ public class CohortBuilderControllerTest {
             .addCode("00")
             .addCount(10L)
             .addConceptId("123")
-            .addDomainId(DomainType.CONDITION.toString())
+            .addDomainId(Domain.CONDITION.toString())
             .addGroup(Boolean.TRUE)
             .addSelectable(Boolean.TRUE)
             .addName("chol blah")
@@ -437,7 +431,7 @@ public class CohortBuilderControllerTest {
 
     List<Criteria> results =
         controller
-            .findCriteriaByDomainAndSearchTerm(1L, DomainType.CONDITION.name(), "00", null)
+            .findCriteriaByDomainAndSearchTerm(1L, Domain.CONDITION.name(), "00", null)
             .getBody()
             .getItems();
 
@@ -452,7 +446,7 @@ public class CohortBuilderControllerTest {
             .addCode("672535")
             .addCount(-1L)
             .addConceptId("19001487")
-            .addDomainId(DomainType.DRUG.toString())
+            .addDomainId(Domain.DRUG.toString())
             .addGroup(Boolean.FALSE)
             .addSelectable(Boolean.TRUE)
             .addName("4-Way")
@@ -466,7 +460,7 @@ public class CohortBuilderControllerTest {
 
     List<Criteria> results =
         controller
-            .findCriteriaByDomainAndSearchTerm(1L, DomainType.DRUG.name(), "672535", null)
+            .findCriteriaByDomainAndSearchTerm(1L, Domain.DRUG.name(), "672535", null)
             .getBody()
             .getItems();
     assertEquals(1, results.size());
@@ -480,7 +474,7 @@ public class CohortBuilderControllerTest {
             .addCode("LP12")
             .addCount(10L)
             .addConceptId("123")
-            .addDomainId(DomainType.CONDITION.toString())
+            .addDomainId(Domain.CONDITION.toString())
             .addGroup(Boolean.TRUE)
             .addSelectable(Boolean.TRUE)
             .addName("chol blah")
@@ -495,7 +489,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
         createResponseCriteria(criteria),
         controller
-            .findCriteriaByDomainAndSearchTerm(1L, DomainType.CONDITION.name(), "LP12", null)
+            .findCriteriaByDomainAndSearchTerm(1L, Domain.CONDITION.name(), "LP12", null)
             .getBody()
             .getItems()
             .get(0));
@@ -508,7 +502,7 @@ public class CohortBuilderControllerTest {
             .addCode("001")
             .addCount(10L)
             .addConceptId("123")
-            .addDomainId(DomainType.CONDITION.toString())
+            .addDomainId(Domain.CONDITION.toString())
             .addGroup(Boolean.TRUE)
             .addSelectable(Boolean.TRUE)
             .addName("chol blah")
@@ -523,7 +517,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
         createResponseCriteria(criteria),
         controller
-            .findCriteriaByDomainAndSearchTerm(1L, DomainType.CONDITION.name(), "LP12", null)
+            .findCriteriaByDomainAndSearchTerm(1L, Domain.CONDITION.name(), "LP12", null)
             .getBody()
             .getItems()
             .get(0));
@@ -538,7 +532,7 @@ public class CohortBuilderControllerTest {
             .addCode("001")
             .addCount(10L)
             .addConceptId("123")
-            .addDomainId(DomainType.DRUG.toString())
+            .addDomainId(Domain.DRUG.toString())
             .addGroup(Boolean.TRUE)
             .addSelectable(Boolean.TRUE)
             .addName("chol blah")
@@ -553,7 +547,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
         createResponseCriteria(criteria),
         controller
-            .findCriteriaByDomainAndSearchTerm(1L, DomainType.DRUG.name(), "LP12", null)
+            .findCriteriaByDomainAndSearchTerm(1L, Domain.DRUG.name(), "LP12", null)
             .getBody()
             .getItems()
             .get(0));
@@ -568,7 +562,7 @@ public class CohortBuilderControllerTest {
         "insert into cb_criteria_relationship(concept_id_1, concept_id_2) values (12345, 1)");
     DbCriteria criteria =
         DbCriteria.builder()
-            .addDomainId(DomainType.CONDITION.toString())
+            .addDomainId(Domain.CONDITION.toString())
             .addType(CriteriaType.ICD10CM.toString())
             .addStandard(true)
             .addCount(1L)
@@ -579,7 +573,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
         createResponseCriteria(criteria),
         controller
-            .findStandardCriteriaByDomainAndConceptId(1L, DomainType.CONDITION.toString(), 12345L)
+            .findStandardCriteriaByDomainAndConceptId(1L, Domain.CONDITION.toString(), 12345L)
             .getBody()
             .getItems()
             .get(0));
@@ -590,7 +584,7 @@ public class CohortBuilderControllerTest {
   public void findDrugBrandOrIngredientByName() {
     DbCriteria drugATCCriteria =
         DbCriteria.builder()
-            .addDomainId(DomainType.DRUG.toString())
+            .addDomainId(Domain.DRUG.toString())
             .addType(CriteriaType.ATC.toString())
             .addParentId(0L)
             .addCode("LP12345")
@@ -603,7 +597,7 @@ public class CohortBuilderControllerTest {
     cbCriteriaDao.save(drugATCCriteria);
     DbCriteria drugBrandCriteria =
         DbCriteria.builder()
-            .addDomainId(DomainType.DRUG.toString())
+            .addDomainId(Domain.DRUG.toString())
             .addType(CriteriaType.BRAND.toString())
             .addParentId(0L)
             .addCode("LP6789")
@@ -670,7 +664,7 @@ public class CohortBuilderControllerTest {
   public void findParticipantDemographics() {
     cbCriteriaDao.save(
         DbCriteria.builder()
-            .addDomainId(DomainType.PERSON.toString())
+            .addDomainId(Domain.PERSON.toString())
             .addType(CriteriaType.GENDER.toString())
             .addName("Male")
             .addStandard(true)
@@ -679,7 +673,7 @@ public class CohortBuilderControllerTest {
             .build());
     cbCriteriaDao.save(
         DbCriteria.builder()
-            .addDomainId(DomainType.PERSON.toString())
+            .addDomainId(Domain.PERSON.toString())
             .addType(CriteriaType.RACE.toString())
             .addName("African American")
             .addStandard(true)
@@ -688,7 +682,7 @@ public class CohortBuilderControllerTest {
             .build());
     cbCriteriaDao.save(
         DbCriteria.builder()
-            .addDomainId(DomainType.PERSON.toString())
+            .addDomainId(Domain.PERSON.toString())
             .addType(CriteriaType.ETHNICITY.toString())
             .addName("Not Hispanic or Latino")
             .addStandard(true)
@@ -697,7 +691,7 @@ public class CohortBuilderControllerTest {
             .build());
     cbCriteriaDao.save(
         DbCriteria.builder()
-            .addDomainId(DomainType.PERSON.toString())
+            .addDomainId(Domain.PERSON.toString())
             .addType(CriteriaType.SEX.toString())
             .addName("Male")
             .addStandard(true)
