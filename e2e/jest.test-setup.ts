@@ -23,8 +23,14 @@ beforeEach(async () => {
     request.continue();
   });
 
+  /*
   page.on('requestfinished', request => {
     console.info(`👉 Request finished: ${request.method()} ${request.url()}`);
+    console.info(`${request.response().text().toString()}`);
+  }); */
+  page.on('requestfinished', async (request) => {
+    const response = await request.response();
+    console.info(`👉 Request finished: ${await response.status()} ${request.method()} ${request.url()}`);
   });
 
   page.on('requestfailed', request => {
