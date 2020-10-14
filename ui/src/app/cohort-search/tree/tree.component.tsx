@@ -1,7 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-
 import {SearchBar} from 'app/cohort-search/search-bar/search-bar.component';
 import {ppiSurveys} from 'app/cohort-search/search-state.service';
 import {TreeNode} from 'app/cohort-search/tree-node/tree-node.component';

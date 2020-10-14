@@ -346,7 +346,7 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
             </Button>}</React.Fragment>}
             {this.isConceptFlagEnable && !!conceptSet.criteriums && <React.Fragment>
               <CriteriaSearch cohortContext={{domain: conceptSet.domain, type: 'PPI', standard: true}} source='conceptSetDetails' />
-              <Button style={{float: 'right', marginBottom: '2rem'}}
+              <Button style={{width: '6.5rem', alignSelf: 'flex-end', marginBottom: '2rem'}}
                       onClick={() => setSidebarActiveIconStore.next('concept')}>Finish & Review</Button>
             </React.Fragment>
             }

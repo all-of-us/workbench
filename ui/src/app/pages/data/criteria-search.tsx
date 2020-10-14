@@ -133,15 +133,11 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
     }
     if (source === 'criteria') {
       this.subscription = currentCohortCriteriaStore.subscribe(currentCohortCriteria => {
-        if (source === 'criteria') {
-          this.setState({selectedCriteriaList: currentCohortCriteria});
-        }
+        this.setState({selectedCriteriaList: currentCohortCriteria});
       });
     } else {
       this.subscription = currentConceptStore.subscribe(currentConcepts => {
-        if (source !== 'criteria') {
-          this.setState({selectedCriteriaList: currentConcepts});
-        }
+        this.setState({selectedCriteriaList: currentConcepts});
       });
     }
   }
