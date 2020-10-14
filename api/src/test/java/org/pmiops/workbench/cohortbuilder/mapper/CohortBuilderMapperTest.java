@@ -138,6 +138,8 @@ public class CohortBuilderMapperTest {
                 .type("vocab")
                 .conceptId(12345L)
                 .isStandard(false)
+                .selectable(true)
+                .parentCount(0L)
                 .childCount(100L));
   }
 
