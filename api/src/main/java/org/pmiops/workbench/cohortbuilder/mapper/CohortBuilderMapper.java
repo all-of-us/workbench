@@ -62,6 +62,7 @@ public interface CohortBuilderMapper {
     criteria.setIsStandard(isStandard);
     criteria.setChildCount(childCount);
     criteria.setParentCount(0L);
+    criteria.setSelectable(true);
   }
 
   CriteriaAttribute dbModelToClient(DbCriteriaAttribute source);
