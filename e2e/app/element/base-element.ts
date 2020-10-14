@@ -185,7 +185,9 @@ export default class BaseElement extends Container {
   }
 
   async pressReturn(): Promise<void> {
-    return this.pressKeyboard(String.fromCharCode(13));
+    const handle = await this.asElementHandle();
+    await handle.focus();
+    await this.page.keyboard.press('Enter');
   }
 
   /**
