@@ -14,8 +14,8 @@ import {reactStyles, withCdrVersions} from 'app/utils';
 import { navigate } from 'app/utils/navigation';
 import {toDisplay} from 'app/utils/resourceActions';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
-import {ClrIcon} from "./icons";
-import {FlexRow} from "./flex";
+import {FlexRow} from './flex';
+import {ClrIcon} from './icons';
 
 enum RequestState { UNSENT, COPY_ERROR, SUCCESS }
 
