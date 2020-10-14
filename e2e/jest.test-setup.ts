@@ -11,7 +11,7 @@ const isDebugMode = process.argv.includes('--debug');
  * - waitFor functions timeout
  */
 beforeEach(async () => {
-   await page.setRequestInterception(true);
+  await page.setRequestInterception(true);
   await page.setUserAgent(userAgent);
   await page.setViewport({width: 1280, height: 0});
   page.setDefaultNavigationTimeout(60000); // Puppeteer default timeout is 30 seconds.
@@ -41,6 +41,10 @@ beforeEach(async () => {
 
   page.on('error', error => console.error(`❌ ${error.toString()}`));
 
+  page.on('response', async(response) => {
+    const request = response.request();
+      console.log(`👉 Response: ${response.status()} ${request.url()}\n `);
+  });
 
   // Catch console log errors
   page.on('pageerror', err => {
