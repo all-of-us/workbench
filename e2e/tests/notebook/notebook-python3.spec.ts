@@ -33,10 +33,12 @@ describe('Jupyter notebook tests in Python language', () => {
     expect(kernelName).toBe('Python 3');
 
     const cell1OutputText = await notebook.runCodeCell(1, {codeFile: 'resources/python-code/import-os.py'});
-    expect(cell1OutputText).toContain('success');
+    // toContain() is not a strong enough check: error text also includes "success" because it's in the code
+    expect(cell1OutputText.endsWith('success')).toBeTruthy();
 
     const cell2OutputText = await notebook.runCodeCell(2, {codeFile: 'resources/python-code/import-libs.py'});
-    expect(cell2OutputText).toContain('success');
+    // toContain() is not a strong enough check: error text also includes "success" because it's in the code
+    expect(cell2OutputText.endsWith('success')).toBeTruthy();
 
     await notebook.runCodeCell(3, {codeFile: 'resources/python-code/simple-pyplot.py'});
 

@@ -175,14 +175,16 @@ export default class NotebookPage extends AuthenticatedPage {
    */
   async runCodeCell(cellIndex: number, opts: { code?: string, codeFile?: string, timeOut?: number } = {}): Promise<string> {
     const cell = cellIndex === -1 ? await this.findLastCell() : await this.findCell(cellIndex);
-    const cellInput = await cell.focus();
+    const inputCell = await cell.focus();
+    let codeToRun;
     if (opts.code !== undefined) {
-      await cellInput.type(opts.code);
+      codeToRun = opts.code;
     } else if (opts.codeFile !== undefined) {
-      const code = fs.readFileSync(opts.codeFile, 'utf8');
-      await cellInput.type(code);
+      codeToRun = fs.readFileSync(opts.codeFile, 'ascii');
     }
-    await cellInput.dispose();
+
+    await inputCell.type(codeToRun);
+    await inputCell.dispose();
     await this.run();
     const {timeOut = 120000} = opts;
     await this.waitForKernelIdle(timeOut);
