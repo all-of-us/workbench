@@ -6,6 +6,7 @@ print_env_var <- function(var) {
 
 vars <- c('OWNER_EMAIL',
           'WORKSPACE_CDR',
+          'WORKSPACE_CDR_VERSION_ID',
           'WORKSPACE_NAMESPACE',
           'GOOGLE_PROJECT', # same as WORKSPACE_NAMESPACE
           'CLUSTER_NAME',

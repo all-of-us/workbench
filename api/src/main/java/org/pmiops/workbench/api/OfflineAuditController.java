@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.model.AuditBigQueryResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -102,7 +103,7 @@ public class OfflineAuditController implements OfflineAuditApiDelegate {
     // purposes within the CDR project itself.
     Set<String> cdrProjects =
         ImmutableList.copyOf(cdrVersionDao.findAll()).stream()
-            .map(v -> v.getBigqueryProject())
+            .map(DbCdrVersion::getBigqueryProject)
             .collect(Collectors.toSet());
     Set<String> whitelist = Sets.union(workspaceDao.findAllWorkspaceNamespaces(), cdrProjects);
 
