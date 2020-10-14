@@ -45,6 +45,7 @@ module.exports = {
     defaultViewport: null,
     ignoreDefaultArgs: true,
     devtools: true,
+    ignoreHTTPSErrors: true,
     args: SWITCHES, // Chrome switches to pass to the browser instance
   },
   browser: 'chromium',

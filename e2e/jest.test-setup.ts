@@ -11,6 +11,7 @@ const isDebugMode = process.argv.includes('--debug');
  * - waitFor functions timeout
  */
 beforeEach(async () => {
+   await page.setRequestInterception(true);
   await page.setUserAgent(userAgent);
   await page.setViewport({width: 1280, height: 0});
   page.setDefaultNavigationTimeout(60000); // Puppeteer default timeout is 30 seconds.
@@ -23,7 +24,7 @@ beforeEach(async () => {
   page.on('error', error => console.error(`❌ ${error.toString()}`));
 
   page.on('requestfailed', request => {
-    console.error(`url: ${request.url()}, errText: ${request.failure().errorText}, method: ${request.method()}`)
+    console.error(`url: ${request.url()}, errText: ${request.failure().errorText}, method: ${request.method()}, status: ${request.failure().errorText}`)
   });
 
   // Catch console log errors
@@ -43,16 +44,5 @@ afterEach(async () => {
   await page.deleteCookie(...await page.cookies());
   await jestPuppeteer.resetPage();
   await jestPuppeteer.resetBrowser();
-});
-
-/**
- * Enable network interception in new page and block unwanted requests.
- */
-beforeAll(async () => {
-  await page.setRequestInterception(true);
-
-});
-
-afterAll(async () => {
   await page.setRequestInterception(false);
 });
