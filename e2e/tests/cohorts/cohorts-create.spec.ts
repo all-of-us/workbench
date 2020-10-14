@@ -1,11 +1,10 @@
 import HelpSidebar from 'app/component/help-sidebar';
-import {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/cohort-search-page';
+import {FilterSign} from 'app/page/cohort-search-page';
 import DataResourceCard from 'app/component/data-resource-card';
 import Button from 'app/element/button';
 import ClrIconLink from 'app/element/clr-icon-link';
-import Link from 'app/element/link';
 import {Option, LinkText, ResourceCard} from 'app/text-labels';
-import CohortBuildPage, {FieldSelector} from 'app/page/cohort-build-page';
+import CohortBuildPage from 'app/page/cohort-build-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {findWorkspace, signIn} from 'utils/test-utils';
 import {waitForText, waitWhileLoading} from 'utils/waits-utils';
@@ -17,102 +16,6 @@ describe('User can create new Cohorts', () => {
     await signIn(page);
   });
 
-  /**
-   * Test:
-   * Find an existing workspace or create a new workspace if none exists.
-   * Add criteria in Group 1: Physical Measurements criteria => BMI (>= 30).
-   * Add criteria in Group 2: Demographics => Deceased.
-   * Checking counts.
-   * Renaming Group 1 and 2 names.
-   */
-  test('Add Cohort of Physical Measurements BMI', async () => {
-
-    const workspaceCard = await findWorkspace(page);
-    await workspaceCard.clickWorkspaceName();
-
-    // Wait for the Data page.
-    const dataPage = new WorkspaceDataPage(page);
-
-    // Click Add Cohorts button
-    const addCohortsButton = await dataPage.getAddCohortsButton();
-    await addCohortsButton.clickAndWait();
-
-    // In Build Cohort Criteria page.
-    const cohortPage = new CohortBuildPage(page);
-    await cohortPage.waitForLoad();
-
-    // Include Participants Group 1.
-    const group1 = cohortPage.findIncludeParticipantsGroup('Group 1');
-    const group1Count = await group1.includePhysicalMeasurement(PhysicalMeasurementsCriteria.BMI, 30);
-
-    // Checking Group 1 Count. should match Group 1 participants count.
-    await waitForText(page, group1Count, {xpath: group1.getGroupCountXpath()});
-    const group1CountInt = Number(group1Count.replace(/,/g, ''));
-    expect(group1CountInt).toBeGreaterThan(1);
-    console.log('Group 1: Physical Measurement -> BMI count: ' + group1CountInt);
-
-    // Checking Total Count: should match Group 1 participants count.
-    await waitForText(page, group1Count, {xpath: FieldSelector.TotalCount});
-    console.log('Total Count: ' + group1CountInt);
-
-    // Include Participants Group 2: Select menu Demographics -> Deceased
-    const group2 = cohortPage.findIncludeParticipantsGroup('Group 2');
-    const group2Count = await group2.includeDemographicsDeceased();
-    const group2CountInt = Number(group2Count.replace(/,/g, ''));
-    expect(group2CountInt).toBeGreaterThan(1);
-    console.log('Group 2: Demographics -> Deceased count: ' + group2CountInt);
-
-    // Compare the new Total Count with the old Total Count.
-    const newTotalCount = await cohortPage.getTotalCount();
-    const newTotalCountInt = Number(newTotalCount.replace(/,/g, ''));
-    // Adding additional group decreased Total Count.
-    expect(newTotalCountInt).toBeLessThan(group1CountInt);
-    console.log('New Total Count: ' + newTotalCountInt);
-
-    // Save new cohort.
-    const cohortName = await cohortPage.saveCohortAs();
-    console.log(`Created Cohort "${cohortName}"`);
-
-    // Open Cohort details.
-    const cohortLink = await Link.findByName(page, {name: cohortName});
-    await cohortLink.clickAndWait();
-    await waitForText(page, newTotalCount, {xpath: FieldSelector.TotalCount});
-
-    // Modify Cohort: Edit Group 1 name successfully.
-    const newName1 = 'Group 1: BMI';
-    await group1.editGroupName(newName1);
-    // Check new named group
-    const groupBMI = cohortPage.findIncludeParticipantsGroup(newName1);
-    expect(await groupBMI.exists()).toBe(true);
-
-    // Modify Cohort: Edit Group 2 name successfully.
-    const newName2 = 'Group 2: Deceased';
-    await group2.editGroupName(newName2);
-    // Check new name
-    const groupDeceased = cohortPage.findIncludeParticipantsGroup(newName2);
-    expect(await groupDeceased.exists()).toBe(true);
-
-    // Check Total Count is unaffected by group name rename.
-    const newTotalCount2 = await cohortPage.getTotalCount();
-    const newTotalCountInt2 = Number(newTotalCount2.replace(/,/g, ''));
-    expect(newTotalCountInt2).toBe(newTotalCountInt);
-
-    // Clean up: delete cohort
-    const modalContent = await cohortPage.deleteCohort();
-    // Verify dialog content text
-    expect(modalContent).toContain(`Are you sure you want to delete Cohort: ${cohortName}?`);
-    console.log(`Deleted Cohort "${cohortName}"`);
-  });
-
-  /**
-   * Test:
-   * Find an existing workspace.
-   * Create new cohort with Condition = EKG.
-   * Check Group and Total Count.
-   * Check cohort open okay.
-   * Duplicate cohort.
-   * Delete cohort.
-   */
   test('Add Cohort of EKG condition with modifiers', async () => {
 
     const workspaceCard = await findWorkspace(page);
