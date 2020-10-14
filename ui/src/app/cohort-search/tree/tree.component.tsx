@@ -1,4 +1,6 @@
+import * as fp from 'lodash/fp';
 import * as React from 'react';
+
 
 import {SearchBar} from 'app/cohort-search/search-bar/search-bar.component';
 import {ppiSurveys} from 'app/cohort-search/search-state.service';
@@ -7,8 +9,8 @@ import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, withCurrentWorkspace} from 'app/utils';
-import {currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
+import {reactStyles, withCurrentConcept, withCurrentWorkspace} from 'app/utils';
+import {currentConceptStore, currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
 import {Criteria, CriteriaSubType, CriteriaType, DomainType} from 'generated/fetch';
 
 const styles = reactStyles({
@@ -81,6 +83,7 @@ interface Props {
   selectOption: Function;
   setAttributes?: Function;
   setSearchTerms: Function;
+  concept: Array<any>;
 }
 
 interface State {
@@ -91,7 +94,7 @@ interface State {
   loading: boolean;
 }
 
-export const CriteriaTree = withCurrentWorkspace()(class extends React.Component<Props, State> {
+export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept())(class extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -104,7 +107,35 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
   }
 
   componentDidMount(): void {
-    this.loadRootNodes();
+    const {source} = this.props;
+    if (source === 'conceptSetDetails') {
+      this.setState({children: currentConceptStore.getValue()});
+    } else {
+      this.loadRootNodes();
+    }
+  }
+
+  componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any) {
+    const {concept, node: {domainId}, source} = this.props;
+    if (source === 'conceptSetDetails') {
+      if (prevProps.concept !== concept) {
+        const {cdrVersionId} = (currentWorkspaceStore.getValue());
+        this.setState({children: concept, loading: false});
+        if (domainId === DomainType.SURVEY.toString()) {
+          const rootSurveys = ppiSurveys.getValue();
+          if (!rootSurveys[cdrVersionId]) {
+            rootSurveys[cdrVersionId] = concept;
+            ppiSurveys.next(rootSurveys);
+          }
+          const surveyParentList = concept.filter((survey) => {
+            return survey.parentCount !== 0;
+          });
+          if (surveyParentList.length !== concept.length) {
+            currentConceptStore.next(surveyParentList);
+          }
+        }
+      }
+    }
   }
 
   loadRootNodes() {

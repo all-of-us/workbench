@@ -307,19 +307,19 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 
   getSelectedValues() {
     const {node: {parentId}} = this.props;
-    if (this.props.source === 'concept') {
+    if (this.props.source === 'criteria') {
+      return currentCohortCriteriaStore.getValue()
+        .some(crit =>
+              crit.parameterId === this.paramId ||
+              parentId.toString() === this.paramId
+          );
+    } else {
       if (currentConceptStore.getValue()) {
         return currentConceptStore.getValue()
           .some(crit => parentId.toString() === this.paramId);
       } else {
         return [];
       }
-    } else {
-      return currentCohortCriteriaStore.getValue()
-        .some(crit =>
-          crit.parameterId === this.paramId ||
-          parentId.toString() === this.paramId
-        );
     }
 
   }

@@ -11,11 +11,21 @@ import {TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, withCdrVersions, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, withCdrVersions, withCurrentConcept, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {attributesSelectionStore, setSidebarActiveIconStore} from 'app/utils/navigation';
+import {
+  attributesSelectionStore,
+  currentConceptStore,
+  setSidebarActiveIconStore
+} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {CdrVersion, CdrVersionListResponse, CriteriaType, DomainType} from 'generated/fetch';
+import {
+  CdrVersion,
+  CdrVersionListResponse,
+  Criteria,
+  CriteriaType,
+  DomainType
+} from 'generated/fetch';
 
 const borderStyle = `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`;
 const styles = reactStyles({
@@ -158,6 +168,7 @@ const columnHeaderStyle = {
 
 interface Props {
   cdrVersionListResponse: CdrVersionListResponse;
+  concept?: Array<Criteria>;
   hierarchy: Function;
   source: string;
   searchContext: any;
@@ -182,7 +193,7 @@ interface State {
   totalCount: number;
 }
 
-export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
+export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), withCurrentConcept())(
   class extends React.Component<Props, State> {
     constructor(props: Props) {
       super(props);
@@ -206,7 +217,21 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
       this.setState({cdrVersion: cdrVersions.find(cdr => cdr.cdrVersionId === cdrVersionId)});
       if (source === 'concept' && searchTerms !== '') {
         this.getResults(searchTerms);
+      } else if (source === 'conceptSetDetails') {
+        this.setState({data: this.props.concept});
       }
+    }
+
+    componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any) {
+      if (this.props.source === 'conceptSetDetails') {
+        if (prevProps.concept !== this.props.concept) {
+          this.setState({data: this.props.concept});
+        }
+      }
+    }
+
+    componentWillUnmount() {
+      currentConceptStore.next([]);
     }
 
     handleInput = (event: any) => {

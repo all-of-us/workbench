@@ -2,8 +2,9 @@ import {ListSearchV2} from 'app/cohort-search/list-search-v2/list-search-v2.comp
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {CriteriaTree} from 'app/cohort-search/tree/tree.component';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles} from 'app/utils';
+import {reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {
   attributesSelectionStore,
   currentCohortCriteriaStore,
@@ -73,6 +74,7 @@ interface Props {
   conceptSearchTerms?: string;
   selectedSurvey?: string;
   source: string;
+  urlParams: any;
 }
 
 interface State {
@@ -89,7 +91,7 @@ interface State {
   loadingSubtree: boolean;
 
 }
-export class CriteriaSearch extends React.Component<Props, State>  {
+export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(class extends React.Component<Props, State>  {
   growl: any;
   growlTimer: NodeJS.Timer;
   subscription: Subscription;
@@ -126,16 +128,34 @@ export class CriteriaSearch extends React.Component<Props, State>  {
       mode = 'tree';
     }
     this.setState({backMode, hierarchyNode, mode});
-    this.subscription = currentCohortCriteriaStore.subscribe(currentCohortCriteria => {
-      if (source === 'criteria') {
-        this.setState({selectedCriteriaList: currentCohortCriteria});
-      }
-    });
-    this.subscription.add(currentConceptStore.subscribe(currentConcepts => {
-      if (source === 'concept') {
-        this.setState({selectedCriteriaList: currentConcepts});
-      }
-    }));
+    if (source === 'conceptSetDetails') {
+      this.getConceptSet();
+    }
+    if (source === 'criteria') {
+      this.subscription = currentCohortCriteriaStore.subscribe(currentCohortCriteria => {
+        if (source === 'criteria') {
+          this.setState({selectedCriteriaList: currentCohortCriteria});
+        }
+      });
+    } else {
+      this.subscription = currentConceptStore.subscribe(currentConcepts => {
+        if (source !== 'criteria') {
+          this.setState({selectedCriteriaList: currentConcepts});
+        }
+      });
+    }
+  }
+
+  async getConceptSet() {
+    const {urlParams: {ns, wsid, csid}} = this.props;
+    try {
+      const resp = await conceptSetsApi().getConceptSet(ns, wsid, csid);
+      currentConceptStore.next(resp.criteriums);
+    } catch (error) {
+      console.log(error);
+      // TODO: what do we do with resources not found?  Currently we just have an endless spinner
+      // Maybe want to think about designing an AoU not found page for better UX
+    }
   }
 
   componentWillUnmount() {
@@ -259,7 +279,7 @@ export class CriteriaSearch extends React.Component<Props, State>  {
             selectedIds={selectedIds}
             selectOption={this.setAutocompleteSelection}
             setSearchTerms={this.setTreeSearchTerms}/>}
-        {/* List View (using duplicated version of ListSearch) */}
+         {/*List View (using duplicated version of ListSearch) */}
         <div style={this.searchContentStyle('list')}>
           <ListSearchV2 source={source}
                         hierarchy={this.showHierarchy}
@@ -271,4 +291,4 @@ export class CriteriaSearch extends React.Component<Props, State>  {
       </div>
      </div>;
   }
-}
+});
