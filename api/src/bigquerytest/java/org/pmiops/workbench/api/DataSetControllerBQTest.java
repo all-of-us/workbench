@@ -374,11 +374,12 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void testGenerateCodeR() {
-    String expected = String.format(
-        "library(bigrquery)\n"
-            + "\n# This query represents dataset \"null\" for domain \"condition\" and was generated for %s\n"
-            + "dataset_00000000_condition_sql <- paste(\"",
-        dbCdrVersion.getName());
+    String expected =
+        String.format(
+            "library(bigrquery)\n"
+                + "\n# This query represents dataset \"null\" for domain \"condition\" and was generated for %s\n"
+                + "dataset_00000000_condition_sql <- paste(\"",
+            dbCdrVersion.getName());
 
     String code =
         controller
@@ -394,7 +395,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     PrePackagedConceptSetEnum.NONE))
             .getBody()
             .getCode();
-   assertThat(code).contains(expected);
+    assertThat(code).contains(expected);
 
     String query =
         extractRQuery(
@@ -515,15 +516,16 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   }
 
   private void assertAndExecutePythonQuery(String code, int index, Domain domain) {
-    String expected = String.format(
-        "import pandas\n"
-        + "import os\n"
-        + "\n"
-        + "# This query represents dataset \"null\" for domain \"%s\" and was generated for %s\n"
-        + "dataset_00000000_%s_sql =",
-        domain.toString().toLowerCase(),
-        dbCdrVersion.getName(),
-        domain.toString().toLowerCase());
+    String expected =
+        String.format(
+            "import pandas\n"
+                + "import os\n"
+                + "\n"
+                + "# This query represents dataset \"null\" for domain \"%s\" and was generated for %s\n"
+                + "dataset_00000000_%s_sql =",
+            domain.toString().toLowerCase(),
+            dbCdrVersion.getName(),
+            domain.toString().toLowerCase());
     assertThat(code).contains(expected);
 
     String query = extractPythonQuery(code, index);
