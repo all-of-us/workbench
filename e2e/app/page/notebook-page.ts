@@ -168,25 +168,42 @@ export default class NotebookPage extends AuthenticatedPage {
    * Click Run button in toolbar. Run focused code cell and insert a new code cell below.
    *
    * @param {number} cellIndex Code Cell index. (first index is 1). Use -1 to find last cell.
-   * @param {string} code The code to run.
-   * @param {string} codeFile The full path to file that contains code to run.
-   * @param {number} timeOut The timeout time in milliseconds.
-   * @returns {string} Run output.
+   * @param opts
+   *  {string} code The code to run.
+   *  {string} codeFile The full path to a file that contains the code to run.
+   *  {number} timeOut The timeout time in milliseconds (default 120 sec).
+   *  {boolean} markdownWorkaround Convert to Markdown before typing (default false)
    */
-  async runCodeCell(cellIndex: number, opts: { code?: string, codeFile?: string, timeOut?: number } = {}): Promise<string> {
+  async runCodeCell(
+      cellIndex: number,
+      opts: { code?: string, codeFile?: string, timeOut?: number, markdownWorkaround?: boolean } = {}): Promise<string> {
     const cell = cellIndex === -1 ? await this.findLastCell() : await this.findCell(cellIndex);
     const inputCell = await cell.focus();
+
+    const {code, codeFile, timeOut = 120000, markdownWorkaround = false} = opts;
+
     let codeToRun;
-    if (opts.code !== undefined) {
-      codeToRun = opts.code;
-    } else if (opts.codeFile !== undefined) {
-      codeToRun = fs.readFileSync(opts.codeFile, 'ascii');
+    if (code !== undefined) {
+      codeToRun = code;
+    } else if (codeFile !== undefined) {
+      codeToRun = fs.readFileSync(codeFile, 'ascii');
     }
 
-    await inputCell.type(codeToRun);
+    // autoCloseBrackets is true by default for R code cells.
+    // Puppeteer types in every character of code, resulting in extra brackets.
+    // Workaround: Type code in Markdown cell, then change to Code cell to run.
+    if (markdownWorkaround) {
+      await this.changeToMarkdownCell();
+      const markdownCell = await this.findCell(cellIndex, CellType.Markdown);
+      const markdownCellInput = await markdownCell.focus();
+      await markdownCellInput.type(codeToRun);
+      await this.changeToCodeCell();
+    } else {
+      await inputCell.type(codeToRun);
+    }
+
     await inputCell.dispose();
     await this.run();
-    const {timeOut = 120000} = opts;
     await this.waitForKernelIdle(timeOut);
     const [output] = await Promise.all([
       cell.waitForOutput(timeOut),
@@ -196,7 +213,7 @@ export default class NotebookPage extends AuthenticatedPage {
   }
 
   /**
-   * Returnss cell input and output texts in an array. Not waiting for output rendered.
+   * Returns cell input and output texts in an array. Not waiting for output rendered.
    * @param {number} cellIndex Code Cell index. (first index is 1)
    * @param {CellType} cellType: Markdown or Code. Default value is Code cell.
    */
