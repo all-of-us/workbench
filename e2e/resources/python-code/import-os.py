@@ -1,15 +1,6 @@
 import sys
 import os
 
-# This is what I want to do, but there's a bug preventing it: RW-5740
-# def print_env_var_or_fail(var):
-#   val = os.getenv(var)
-#
-#   if not val:
-#     raise ValueError
-#
-#   print(val)
-
 print(sys.version)
 print(sys.executable)
 
