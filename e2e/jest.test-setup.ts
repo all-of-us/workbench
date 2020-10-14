@@ -21,6 +21,8 @@ beforeEach(async () => {
         request.continue();
   });
 
+  page.on('console', message => console[message.type()](`👉 ${message.text()}`));
+  
   page.on('error', error => console.error(`❌ ${error.toString()}`));
 
   page.on('requestfailed', request => {
