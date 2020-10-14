@@ -22,8 +22,8 @@ const local = {
   apiBaseUrl: process.env.DEV_API_URL || 'http://localhost/v1',
   userEmailDomain: '@fake-research-aou.org',
   collaboratorUsername: 'puppetmaster@fake-research-aou.org',
-  defaultCdrVersionName: 'Synthetic Dataset v1',
-  altCdrVersionName: 'Synthetic Dataset v1 with Microarray',
+  defaultCdrVersionName: 'Synthetic Dataset v3',
+  altCdrVersionName: 'Synthetic Dataset v2',
 };
 
 // workbench test environment

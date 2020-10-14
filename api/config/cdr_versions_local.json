@@ -1,42 +1,51 @@
 [
   {
     "cdrVersionId": 1,
-    "name": "Synthetic Dataset v1 (Archived)",
+    "name": "Synthetic Dataset v1",
     "dataAccessLevel": 1,
-    "archivalStatus": 1,
     "bigqueryProject": "fc-aou-cdr-synth-test",
-    "bigqueryDataset": "SR2019q4r3",
+    "bigqueryDataset": "synthetic_cdr20180606",
     "creationTime": "2018-06-06 00:00:00Z",
     "releaseNumber": 1,
     "numParticipants": 946237,
-    "cdrDbName": "cdr",
-    "elasticIndexBaseName": "cdr"
+    "cdrDbName": "synth_r_2020q1_3",
+    "elasticIndexBaseName": "synth_r_2020q1_1"
   },
   {
     "cdrVersionId": 2,
+    "name": "Synthetic Dataset v2",
+    "dataAccessLevel": 1,
+    "bigqueryProject": "fc-aou-cdr-synth-test",
+    "bigqueryDataset": "synthetic_cdr20180606",
+    "creationTime": "2018-06-06 00:00:00Z",
+    "releaseNumber": 2,
+    "numParticipants": 946237,
+    "cdrDbName": "synth_r_2020q1_3",
+    "elasticIndexBaseName": "synth_r_2019q1_1"
+  },
+  {
+    "cdrVersionId": 3,
     "isDefault": true,
-    "name": "Synthetic Dataset v1",
+    "name": "Synthetic Dataset v3",
     "dataAccessLevel": 1,
     "bigqueryProject": "fc-aou-cdr-synth-test",
     "bigqueryDataset": "SR2019q4r3",
     "creationTime": "2019-09-30 00:00:00Z",
-    "releaseNumber": 1,
-    "numParticipants": 946237,
-    "cdrDbName": "cdr",
-    "elasticIndexBaseName": "cdr"
+    "releaseNumber": 3,
+    "numParticipants": 234525,
+    "cdrDbName": "synth_r_2019q4_8"
   },
   {
-    "cdrVersionId": 3,
+    "cdrVersionId": 4,
     "isDefault": false,
-    "name": "Synthetic Dataset v1 with Microarray",
+    "name": "Synthetic Dataset v3 with Microarray",
     "dataAccessLevel": 1,
     "bigqueryProject": "fc-aou-cdr-synth-test",
     "bigqueryDataset": "SR2019q4r3",
     "microarrayBigqueryDataset": "microarray_data",
     "creationTime": "2020-08-26 00:09:51Z",
-    "releaseNumber": 1,
-    "numParticipants": 946237,
-    "cdrDbName": "cdr",
-    "elasticIndexBaseName": "cdr"
+    "releaseNumber": 3,
+    "numParticipants": 234525,
+    "cdrDbName": "synth_r_2019q4_8"
   }
 ]
