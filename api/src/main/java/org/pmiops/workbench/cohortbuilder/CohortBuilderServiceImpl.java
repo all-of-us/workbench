@@ -23,20 +23,20 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.CBDataFilterDao;
+import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
+import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cdr.model.DbMenuOption;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AgeTypeCount;
 import org.pmiops.workbench.model.ConceptIdName;
@@ -60,6 +60,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -67,13 +68,16 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   private static final Integer DEFAULT_TREE_SEARCH_LIMIT = 100;
   private static final Integer DEFAULT_CRITERIA_SEARCH_LIMIT = 250;
+  private static final String MEASUREMENT = "Measurement";
   private static final ImmutableList<String> MYSQL_FULL_TEXT_CHARS =
       ImmutableList.of("\"", "+", "-", "*", "(", ")");
+  private static final ImmutableList<String> STANDARD_CONCEPTS = ImmutableList.of("S", "C");
 
   private BigQueryService bigQueryService;
   private CohortQueryBuilder cohortQueryBuilder;
   private CBCriteriaAttributeDao cbCriteriaAttributeDao;
   private CBCriteriaDao cbCriteriaDao;
+  private ConceptDao conceptDao;
   private CBDataFilterDao cbDataFilterDao;
   private DomainInfoDao domainInfoDao;
   private PersonDao personDao;
@@ -86,6 +90,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       CohortQueryBuilder cohortQueryBuilder,
       CBCriteriaAttributeDao cbCriteriaAttributeDao,
       CBCriteriaDao cbCriteriaDao,
+      ConceptDao conceptDao,
       CBDataFilterDao cbDataFilterDao,
       DomainInfoDao domainInfoDao,
       PersonDao personDao,
@@ -95,6 +100,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     this.cohortQueryBuilder = cohortQueryBuilder;
     this.cbCriteriaAttributeDao = cbCriteriaAttributeDao;
     this.cbCriteriaDao = cbCriteriaDao;
+    this.conceptDao = conceptDao;
     this.cbDataFilterDao = cbDataFilterDao;
     this.domainInfoDao = domainInfoDao;
     this.personDao = personDao;
@@ -141,7 +147,6 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   @Override
   public List<Criteria> findCriteriaAutoComplete(
       String domain, String term, String type, Boolean standard, Integer limit) {
-    validateSearchTerm(term);
     PageRequest pageRequest =
         new PageRequest(0, Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT));
     List<DbCriteria> criteriaList =
@@ -176,10 +181,32 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   @Override
   public CriteriaListWithCountResponse findCriteriaByDomainAndSearchTerm(
       String domain, String term, Integer limit) {
-    validateSearchTerm(term);
-    Page<DbCriteria> dbCriteriaPage;
+    if (Domain.fromValue(domain).equals(Domain.PHYSICAL_MEASUREMENT)) {
+      final String keyword = modifyTermMatch(term);
+      PageRequest pageRequest =
+          new PageRequest(
+              0,
+              Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT),
+              new Sort(Direction.DESC, "countValue"));
+      Page<DbConcept> dbConcepts = conceptDao.findConcepts(keyword, MEASUREMENT, pageRequest);
+      return new CriteriaListWithCountResponse()
+          .items(
+              dbConcepts.getContent().stream()
+                  .map(
+                      c -> {
+                        boolean isStandard = STANDARD_CONCEPTS.contains(c.getStandardConcept());
+                        return cohortBuilderMapper.dbModelToClient(
+                            c,
+                            isStandard,
+                            isStandard ? c.getCountValue() : c.getSourceCountValue());
+                      })
+                  .collect(Collectors.toList()))
+          .totalCount(dbConcepts.getTotalElements());
+    }
+
     PageRequest pageRequest =
         new PageRequest(0, Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT));
+    Page<DbCriteria> dbCriteriaPage;
     List<DbCriteria> exactMatchByCode = cbCriteriaDao.findExactMatchByCode(domain, term);
     boolean isStandard = exactMatchByCode.isEmpty() || exactMatchByCode.get(0).getStandard();
 
@@ -409,14 +436,6 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         .collect(Collectors.toList());
   }
 
-  private void validateSearchTerm(String term) {
-    if (StringUtils.isEmpty(term)) {
-      throw new BadRequestException(
-          String.format(
-              "Bad Request: Please provide a valid search term: \"%s\" is not valid.", term));
-    }
-  }
-
   private String modifyTermMatch(String term) {
     if (!MYSQL_FULL_TEXT_CHARS.stream()
         .filter(term::contains)
@@ -427,7 +446,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
     String[] keywords = term.split("\\W+");
     if (keywords.length == 1 && keywords[0].length() <= 3) {
-      return "+\"" + keywords[0];
+      return "+\"" + keywords[0] + "+\"";
     }
 
     return IntStream.range(0, keywords.length)
