@@ -392,7 +392,9 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     assertThat(code)
         .contains(
             "library(bigrquery)\n"
-                + "\n# This query represents dataset \"null\" for domain \"condition\"\n"
+                + "\n# This query represents dataset \"null\" for domain \"condition\" and was generated for "
+                + dbCdrVersion.getName()
+                + "\n"
                 + "dataset_00000000_condition_sql <- paste(\"");
     String query =
         extractRQuery(
@@ -513,6 +515,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   }
 
   private void assertAndExecutePythonQuery(String code, int index, Domain domain) {
+
     assertThat(code)
         .contains(
             "import pandas\n"
@@ -520,7 +523,9 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                 + "\n"
                 + "# This query represents dataset \"null\" for domain \""
                 + domain.toString().toLowerCase()
-                + "\"\n"
+                + "\" and was generated for "
+                + dbCdrVersion.getName()
+                + "\n"
                 + "dataset_00000000_"
                 + domain.toString().toLowerCase()
                 + "_sql =");
