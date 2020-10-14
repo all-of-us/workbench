@@ -17,12 +17,14 @@ beforeEach(async () => {
   page.setDefaultNavigationTimeout(60000); // Puppeteer default timeout is 30 seconds.
   page.setDefaultTimeout(10000);
 
+
   page.on('request', (request) => {
-        request.continue();
+    console.info(`👉 Request: ${request.method()} ${request.url()}`);
+    request.continue();
   });
 
   page.on('console', message => console[message.type()](`👉 ${message.text()}`));
-  
+
   page.on('error', error => console.error(`❌ ${error.toString()}`));
 
   page.on('requestfailed', request => {
