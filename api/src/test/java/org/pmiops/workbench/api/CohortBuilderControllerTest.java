@@ -397,7 +397,7 @@ public class CohortBuilderControllerTest {
                 .conceptCode("myTerm")
                 .standardConcept("")
                 .sourceCountValue(10L)
-                .domainId(DomainType.PHYSICAL_MEASUREMENT.toString())
+                .domainId(Domain.MEASUREMENT.toString())
                 .vocabularyId(CriteriaType.ICD9CM.toString()));
 
     Criteria criteria =
@@ -414,7 +414,7 @@ public class CohortBuilderControllerTest {
         criteria,
         controller
             .findCriteriaByDomainAndSearchTerm(
-                1L, DomainType.PHYSICAL_MEASUREMENT.name(), "myTerm", null)
+                1L, Domain.PHYSICAL_MEASUREMENT.name(), "myTerm", null)
             .getBody()
             .getItems()
             .get(0));

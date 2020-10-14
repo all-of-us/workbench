@@ -68,6 +68,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   private static final Integer DEFAULT_TREE_SEARCH_LIMIT = 100;
   private static final Integer DEFAULT_CRITERIA_SEARCH_LIMIT = 250;
+  private static final String MEASUREMENT = "Measurement";
   private static final ImmutableList<String> MYSQL_FULL_TEXT_CHARS =
       ImmutableList.of("\"", "+", "-", "*", "(", ")");
   private static final ImmutableList<String> STANDARD_CONCEPTS = ImmutableList.of("S", "C");
@@ -180,14 +181,14 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   @Override
   public CriteriaListWithCountResponse findCriteriaByDomainAndSearchTerm(
       String domain, String term, Integer limit) {
-    if (DomainType.fromValue(domain).equals(DomainType.PHYSICAL_MEASUREMENT)) {
+    if (Domain.fromValue(domain).equals(Domain.PHYSICAL_MEASUREMENT)) {
       final String keyword = modifyTermMatch(term);
       PageRequest pageRequest =
           new PageRequest(
               0,
               Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT),
               new Sort(Direction.DESC, "countValue"));
-      Page<DbConcept> dbConcepts = conceptDao.findConcepts(keyword, domain, pageRequest);
+      Page<DbConcept> dbConcepts = conceptDao.findConcepts(keyword, MEASUREMENT, pageRequest);
       return new CriteriaListWithCountResponse()
           .items(
               dbConcepts.getContent().stream()

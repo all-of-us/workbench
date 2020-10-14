@@ -61,6 +61,7 @@ public interface CohortBuilderMapper {
       @MappingTarget Criteria criteria, @Context Boolean isStandard, @Context Long childCount) {
     criteria.setIsStandard(isStandard);
     criteria.setChildCount(childCount);
+    criteria.setParentCount(0L);
   }
 
   CriteriaAttribute dbModelToClient(DbCriteriaAttribute source);
