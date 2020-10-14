@@ -163,36 +163,15 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(
       value =
-          "select c from DbCriteria c where domainId=:domain and code=:term order by standard desc")
-  List<DbCriteria> findExactMatchByCode(@Param("domain") String domain, @Param("term") String term);
-
-  @Query(
-      value =
-          "select c from DbCriteria c where domainId=:domain and type=:type and standard=:standard and code like upper(concat(:term,'%')) and match(fullText, concat('+[', :domain, '_rank1]')) > 0 order by c.count desc")
+          "select c from DbCriteria c where domainId=:domain and code like upper(concat(:term,'%')) and match(fullText, concat('+[', :domain, '_rank1]')) > 0 order by c.count desc")
   Page<DbCriteria> findCriteriaByDomainAndTypeAndCode(
-      @Param("domain") String domain,
-      @Param("type") String type,
-      @Param("standard") Boolean isStandard,
-      @Param("term") String term,
-      Pageable page);
+      @Param("domain") String domain, @Param("term") String term, Pageable page);
 
   @Query(
       value =
-          "select c from DbCriteria c where domainId=:domain and standard=:standard and code like upper(concat(:term,'%')) and match(fullText, concat('+[', :domain, '_rank1]')) > 0 order by c.count desc")
-  Page<DbCriteria> findCriteriaByDomainAndCode(
-      @Param("domain") String domain,
-      @Param("standard") Boolean isStandard,
-      @Param("term") String term,
-      Pageable page);
-
-  @Query(
-      value =
-          "select c from DbCriteria c where domainId=:domain and standard=:standard and match(fullText, concat(:term, '+[', :domain, '_rank1]')) > 0 order by c.count desc, c.name asc")
+          "select c from DbCriteria c where domainId=:domain and match(fullText, concat(:term, '+[', :domain, '_rank1]')) > 0 order by c.count desc, c.name asc")
   Page<DbCriteria> findCriteriaByDomainAndFullText(
-      @Param("domain") String domain,
-      @Param("standard") Boolean isStandard,
-      @Param("term") String term,
-      Pageable page);
+      @Param("domain") String domain, @Param("term") String term, Pageable page);
 
   @Query(
       value =
@@ -288,11 +267,13 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(
       value =
-          "select count(*) from DbCriteria where standard IN (:standards) and match(fullText, concat(:term, '+[', :domain, '_rank1]')) > 0)")
-  Long findDomainCount(
-      @Param("term") String term,
-      @Param("domain") String domain,
-      @Param("standards") List<Boolean> standards);
+          "select count(*) from DbCriteria where match(fullText, concat(:term, '+[', :domain, '_rank1]')) > 0)")
+  Long findDomainCount(@Param("term") String term, @Param("domain") String domain);
+
+  @Query(
+      value =
+          "select count(*) from DbCriteria where code like upper(concat(:term,'%')) and match(fullText, concat('+[', :domain, '_rank1]')) > 0)")
+  Long findDomainCountOnCode(@Param("term") String term, @Param("domain") String domain);
 
   @Query(
       value =

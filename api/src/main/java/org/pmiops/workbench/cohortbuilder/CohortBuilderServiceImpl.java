@@ -199,40 +199,11 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
           .totalCount(dbConcepts.getTotalElements());
     }
 
-    Page<DbCriteria> dbCriteriaPage;
-    List<DbCriteria> exactMatchByCode = cbCriteriaDao.findExactMatchByCode(domain, term);
-    boolean isStandard = exactMatchByCode.isEmpty() || exactMatchByCode.get(0).getStandard();
-
-    if (!isStandard) {
-      // source search
-      dbCriteriaPage =
-          cbCriteriaDao.findCriteriaByDomainAndTypeAndCode(
-              domain, exactMatchByCode.get(0).getType(), isStandard, term, pageRequest);
-      Map<Boolean, List<DbCriteria>> groups =
-          dbCriteriaPage.getContent().stream()
-              .collect(Collectors.partitioningBy(c -> c.getCode().equals(term)));
-      List<DbCriteria> dbCriteriaList = groups.get(true);
-      dbCriteriaList.addAll(groups.get(false));
-      return new CriteriaListWithCountResponse()
-          .items(
-              dbCriteriaList.stream()
-                  .map(cohortBuilderMapper::dbModelToClient)
-                  .collect(Collectors.toList()))
-          .totalCount(dbCriteriaPage.getTotalElements());
-    }
-
-    // standard search
-    dbCriteriaPage =
-        cbCriteriaDao.findCriteriaByDomainAndCode(domain, isStandard, term, pageRequest);
+    Page<DbCriteria> dbCriteriaPage =
+        cbCriteriaDao.findCriteriaByDomainAndTypeAndCode(domain, term, pageRequest);
     if (dbCriteriaPage.getContent().isEmpty() && !term.contains(".")) {
       dbCriteriaPage =
-          cbCriteriaDao.findCriteriaByDomainAndFullText(
-              domain, isStandard, modifyTermMatch(term), pageRequest);
-    }
-    if (dbCriteriaPage.getContent().isEmpty() && !term.contains(".")) {
-      dbCriteriaPage =
-          cbCriteriaDao.findCriteriaByDomainAndFullText(
-              domain, !isStandard, modifyTermMatch(term), pageRequest);
+          cbCriteriaDao.findCriteriaByDomainAndFullText(domain, modifyTermMatch(term), pageRequest);
     }
     return new CriteriaListWithCountResponse()
         .items(
@@ -308,13 +279,11 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   @Override
   public Long findDomainCount(String domain, String term) {
     Domain domainToCount = Domain.valueOf(domain);
-    List<Boolean> standards =
-        (domainToCount.equals(Domain.CONDITION) || domainToCount.equals(Domain.PROCEDURE))
-            ? ImmutableList.of(true, false)
-            : ImmutableList.of(true);
-    return (domainToCount.equals(Domain.PHYSICAL_MEASUREMENT))
-        ? cbCriteriaDao.findPhysicalMeasurementCount(modifyTermMatch(term))
-        : cbCriteriaDao.findDomainCount(modifyTermMatch(term), domain, standards);
+    if (domainToCount.equals(Domain.PHYSICAL_MEASUREMENT)) {
+      return cbCriteriaDao.findPhysicalMeasurementCount(modifyTermMatch(term));
+    }
+    Long count = cbCriteriaDao.findDomainCountOnCode(term, domain);
+    return count == null ? cbCriteriaDao.findDomainCount(modifyTermMatch(term), domain) : count;
   }
 
   @Override

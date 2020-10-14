@@ -212,34 +212,11 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findExactMatchByCode() {
-    // test that we match both source and standard codes
-    List<DbCriteria> exactMatchByCode =
-        cbCriteriaDao.findExactMatchByCode(Domain.CONDITION.toString(), "120");
-    assertThat(exactMatchByCode).containsExactly(standardCriteria, sourceCriteria);
-  }
-
-  @Test
   public void findCriteriaByDomainAndTypeAndCode() {
     PageRequest page = new PageRequest(0, 10);
     List<DbCriteria> criteriaList =
         cbCriteriaDao
-            .findCriteriaByDomainAndTypeAndCode(
-                Domain.CONDITION.toString(),
-                CriteriaType.ICD9CM.toString(),
-                Boolean.FALSE,
-                "00",
-                page)
-            .getContent();
-    assertThat(criteriaList).containsExactly(icd9Criteria);
-  }
-
-  @Test
-  public void findCriteriaByDomainAndCode() {
-    PageRequest page = new PageRequest(0, 10);
-    List<DbCriteria> criteriaList =
-        cbCriteriaDao
-            .findCriteriaByDomainAndCode(Domain.CONDITION.toString(), Boolean.FALSE, "001", page)
+            .findCriteriaByDomainAndTypeAndCode(Domain.CONDITION.toString(), "00", page)
             .getContent();
     assertThat(criteriaList).containsExactly(icd9Criteria);
   }
@@ -249,8 +226,7 @@ public class CBCriteriaDaoTest {
     PageRequest page = new PageRequest(0, 10);
     List<DbCriteria> measurements =
         cbCriteriaDao
-            .findCriteriaByDomainAndFullText(
-                Domain.MEASUREMENT.toString(), Boolean.TRUE, "001", page)
+            .findCriteriaByDomainAndFullText(Domain.MEASUREMENT.toString(), "001", page)
             .getContent();
     assertThat(measurements).containsExactly(measurementCriteria);
   }
