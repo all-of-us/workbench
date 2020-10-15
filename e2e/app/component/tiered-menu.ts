@@ -1,6 +1,6 @@
 import Container from 'app/container';
 import {ElementHandle, Page} from 'puppeteer';
-import {waitWhileLoading} from 'utils/test-utils';
+import {waitWhileLoading} from 'utils/waits-utils';
 
 const defaultXpath = '//*[contains(concat(" ", normalize-space(@class), " "), " p-menu-overlay-visible ")]';
 
