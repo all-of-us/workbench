@@ -16,6 +16,7 @@ import {triggerEvent} from 'app/utils/analytics';
 import {attributesSelectionStore, setSidebarActiveIconStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CdrVersion, CdrVersionListResponse, CriteriaType, Domain} from 'generated/fetch';
+import {CSSProperties} from 'react';
 
 const borderStyle = `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`;
 const styles = reactStyles({
@@ -155,6 +156,49 @@ const columnHeaderStyle = {
   ...styles.columnNameHeader,
   width: '9%'
 };
+
+const columns = [
+  {
+    name: 'Name',
+    tooltip: 'Name from vocabulary',
+    style: {...styles.columnNameHeader, width: '31%', borderLeft: 0},
+  },
+  {
+    name: 'Code',
+    tooltip: 'Unique code for OMOP',
+    style: columnHeaderStyle,
+  },
+  {
+    name: 'Vocab',
+    tooltip: 'Vocabulary for concept',
+    style: {...columnHeaderStyle, paddingLeft: '0'},
+  },
+  {
+    name: 'Source/Standard',
+    tooltip: 'Indicates if code is an OMOP standard or a source vocabulary code (ICD9/10, CPT, etc)',
+    style: {...styles.columnNameHeader, width: '10%', paddingLeft: '0', paddingRight: '0.5rem'},
+  },
+  {
+    name: 'Concept Id',
+    tooltip: 'Unique ID for concept in OMOP',
+    style: {...styles.columnNameHeader, width: '10%', paddingLeft: '0', paddingRight: '0.5rem'},
+  },
+  {
+    name: 'Roll-up Count',
+    tooltip: 'Number of distinct participants that have either the parent concept OR any of the parent’s child concepts',
+    style: columnHeaderStyle,
+  },
+  {
+    name: 'Item Count',
+    tooltip: 'Number of distinct participants for this concept',
+    style: columnHeaderStyle,
+  },
+  {
+    name: 'View Hierarchy',
+    tooltip: null,
+    style: {...styles.columnNameHeader, textAlign: 'center', width: '12%'},
+  },
+];
 
 interface Props {
   cdrVersionListResponse: CdrVersionListResponse;
@@ -426,22 +470,9 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
             <table className='p-datatable' style={styles.table}>
               <thead className='p-datatable-thead'>
                 <tr style={{height: '2rem'}}>
-                  <th style={{...styles.columnNameHeader, width: '31%', borderLeft: 0}}>Name</th>
-                  <th style={columnHeaderStyle}>
-                    {this.renderColumnWithToolTip('Code', 'Unique code for OMOP' )}
-                  </th>
-                  <th style={{...columnHeaderStyle, paddingLeft: '0'}}>Vocab</th>
-                  <th style={{...styles.columnNameHeader, width: '10%', paddingLeft: '0',
-                    paddingRight: '0.5rem'}}>Source/ Standard</th>
-                  <th style={{...styles.columnNameHeader, width: '10%', paddingLeft: '0',
-                    paddingRight: '0.5rem'}}>Concept Id</th>
-                  <th style={columnHeaderStyle}>
-                    Roll-up Count
-                  </th>
-                  <th style={columnHeaderStyle}>
-                    {this.renderColumnWithToolTip('Item Count', 'Number of distinct participants for this concept' )}
-                  </th>
-                  <th style={{...styles.columnNameHeader, textAlign: 'center', width: '12%'}}>View Hierarchy</th>
+                  {columns.map((column, index) => <th key={index} style={column.style as CSSProperties}>
+                    {column.tooltip !== null ? this.renderColumnWithToolTip(column.name, column.tooltip) : column.name}
+                  </th>)}
                 </tr>
               </thead>
             </table>
