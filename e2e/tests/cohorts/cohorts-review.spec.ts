@@ -1,4 +1,4 @@
-import {findWorkspace, isValidDate, signIn} from 'utils/test-utils';
+import {findOrCreateWorkspace, isValidDate, signIn} from 'utils/test-utils';
 import {Option, LinkText, ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import CohortBuildPage from 'app/page/cohort-build-page';
@@ -27,7 +27,7 @@ describe('Cohort review tests', () => {
   test('Create Cohort and a Review Set for 100 participants', async () => {
     const reviewSetNumberOfParticipants = 100;
 
-    await findWorkspace(page).then(card => card.clickWorkspaceName());
+    await findOrCreateWorkspace(page).then(card => card.clickWorkspaceName());
 
     const dataPage = new WorkspaceDataPage(page);
     const cohortCard = await dataPage.createCohort();

@@ -194,12 +194,26 @@ export async function createWorkspace(page: Page, cdrVersionName: string = confi
 }
 
 /**
- * Find an exsting workspace. Create a new workspace if none exists.
- * @param {boolean} create Create a new workspace, regardless any workspace exists or not.
- * @param {string} workspaceName The name of a Workspace to find. If not found and create parameter is true, create new and returns it.
+ * Find a suitable existing workspace, or create one if it does not exist.
+ *
+ * TODO: this function does a lot of different things.  refactor and split up according to use cases.
+ *
+ * If the caller specifies a workspace name and it can be found, return it.
+ *
+ * If the workspace is not found (or no name is given), search for a workspace where the user
+ * has Owner access.
+ *
+ * If no such workspace exists or the caller specifies alwaysCreate, create a new workspace and return it.
+ *
+ * Else choose one of the suitable workspaces randomly.
+ *
+ * @param page
+ * @param opts (all are optional)
+ *  alwaysCreate - create a new workspace, regardless of whether a suitable workspace exists
+ *  workspaceName - return the workspace with this name if it can be found; default behavior otherwise
  */
-export async function findWorkspace(page: Page, opts: {create?: boolean, workspaceName?: string} = {}): Promise<WorkspaceCard> {
-  const {create = false, workspaceName} = opts;
+export async function findOrCreateWorkspace(page: Page, opts: {alwaysCreate?: boolean, workspaceName?: string} = {}): Promise<WorkspaceCard> {
+  const {alwaysCreate = false, workspaceName} = opts;
 
   const workspacesPage = new WorkspacesPage(page);
   await workspacesPage.load();
@@ -214,8 +228,10 @@ export async function findWorkspace(page: Page, opts: {create?: boolean, workspa
     }
   }
 
+  // workspace name not found, or none was specified
+
   const existingWorkspaces = await workspaceCard.getWorkspaceMatchAccessLevel(WorkspaceAccessLevel.Owner);
-  if (create || existingWorkspaces.length === 0) {
+  if (alwaysCreate || existingWorkspaces.length === 0) {
     // Create new workspace
     const name = workspaceName || makeWorkspaceName();
     await workspacesPage.createWorkspace(name);

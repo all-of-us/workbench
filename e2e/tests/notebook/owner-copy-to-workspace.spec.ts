@@ -3,7 +3,7 @@ import Modal from 'app/component/modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {LinkText, ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
-import {createWorkspace, findWorkspace, signIn} from 'utils/test-utils';
+import {createWorkspace, findOrCreateWorkspace, signIn} from 'utils/test-utils';
 import {config} from 'resources/workbench-config';
 
 // Notebook server start may take a long time. Set maximum test running time to 20 minutes.
@@ -52,7 +52,7 @@ async function copyNotebookTest(srcCdrVersionName: string, destCdrVersionName: s
 
   // Perform actions in copied notebook.
   // Open destination Workspace
-  await findWorkspace(page, {workspaceName: destWorkspace}).then(card => card.clickWorkspaceName());
+  await findOrCreateWorkspace(page, {workspaceName: destWorkspace}).then(card => card.clickWorkspaceName());
 
   // Verify copy-to notebook exists in destination Workspace
   await dataPage.openAnalysisPage();

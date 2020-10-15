@@ -1,7 +1,7 @@
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {Language} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
-import {findWorkspace, signIn} from 'utils/test-utils';
+import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
 
 // Notebook server start may take a long time. Set maximum test running time to 20 minutes.
 jest.setTimeout(20 * 60 * 1000);
@@ -13,7 +13,7 @@ describe('Jupyter notebook tests in R language', () => {
   });
 
   test('Run code from file', async () => {
-    const workspaceCard = await findWorkspace(page);
+    const workspaceCard = await findOrCreateWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 
     const notebookName = makeRandomName('r-notebook');
