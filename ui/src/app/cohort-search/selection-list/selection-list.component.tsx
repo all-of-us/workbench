@@ -381,16 +381,18 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
           setSidebarActiveIconStore.next('criteria');
         }
       });
+      this.subscription.add(currentCohortCriteriaStore.subscribe(() => {
+        if (!!cohortContext) {
+          // Each time the criteria changes, we check for disabling the Save Criteria button again
+          setTimeout(() => this.checkCriteriaChanges());
+        }
+      }));
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
-      const {cohortContext, criteria} = this.props;
+      const {criteria} = this.props;
       if (!criteria && !!prevProps.criteria) {
         this.setState({showModifiersSlide: false});
-      }
-      if (!!cohortContext && !!criteria && criteria !== prevProps.criteria) {
-        // Each time the criteria changes, we check for disabling the Save Criteria button again
-        this.checkCriteriaChanges();
       }
     }
 
