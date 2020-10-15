@@ -141,6 +141,7 @@ export default class CohortSearchPage extends AuthenticatedPage {
     return new Table(this.page, '//table[@class="p-datatable"]');
   }
 
+  // DO NOT USE. This function fails in CI.
   async searchCondition(searchWord: string): Promise<Table> {
     const resultsTable = this.getConditionSearchResultsTable();
     const exists = await resultsTable.exists();
