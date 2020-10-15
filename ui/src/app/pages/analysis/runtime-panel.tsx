@@ -1,3 +1,5 @@
+import * as fp from 'lodash/fp';
+
 import {Button, Clickable, MenuItem} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
@@ -19,6 +21,8 @@ import {InputNumber} from 'primereact/inputnumber';
 import { RuntimeStatus } from 'generated';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {runtimePresets} from "../../utils/runtime-presets";
+import {RuntimeConfigurationType} from "../../../generated/model/runtimeConfigurationType";
 
 const {useState, Fragment} = React;
 
@@ -120,6 +124,7 @@ const DiskSizeSelection = ({onChange, updatedDiskSize, masterDiskSize}) => {
 export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
   const [updatedDiskSize, setUpdatedDiskSize] = useState(null);
   const [updatedMachine, setUpdatedMachine] = useState(null);
+  const [runtimeConfigurationType, setRuntimeConfigurationType] = useState(null);
   const runtimeOps = useStore(runtimeOpsStore);
   const [currentRuntime, setRequestedRuntime] = useCustomRuntime(workspace.namespace);
 
@@ -157,12 +162,35 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
                     closeOnClick
                     content={
                       <React.Fragment>
-                        <MenuItem style={styles.presetMenuItem}>General purpose analysis</MenuItem>
-                        <MenuItem style={styles.presetMenuItem}>Genomics analysis</MenuItem>
+                        {
+                          fp.filter(['displayName', 'General Analysis'], runtimePresets)
+                            // regular .map used here bc fp map won't provide index as an iteratee argument
+                            .map((preset, i) => {
+                              return <MenuItem
+                                  style={styles.presetMenuItem}
+                                  key={i}
+                                  onClick={() => {
+                                    // renaming to avoid shadowing
+                                    const presetDiskSize = preset.runtimeTemplate.gceConfig.bootDiskSize || preset.runtimeTemplate.dataprocConfig.masterDiskSize;
+                                    const presetMachineName = preset.runtimeTemplate.gceConfig.machineType || preset.runtimeTemplate.dataprocConfig.masterMachineType;
+                                    const presetMachineType = fp.find(({name}) => name === presetMachineName, validLeonardoMachineTypes);
+                                    if (presetDiskSize !== masterDiskSize) {
+                                      setUpdatedDiskSize(presetDiskSize);
+                                      setRuntimeConfigurationType(RuntimeConfigurationType.GeneralAnalysis);
+                                    }
+                                    if (presetMachineName !== masterMachineType) {
+                                      setUpdatedMachine(presetMachineType);
+                                      setRuntimeConfigurationType(RuntimeConfigurationType.GeneralAnalysis);
+                                    }
+                                  }}>
+                                {preset.displayName}
+                              </MenuItem>
+                            })
+                        }
                       </React.Fragment>
                     }>
         <Clickable data-test-id='runtime-presets-menu'
-                   disabled={true}>
+                   disabled={false}>
           Recommended environments <ClrIcon shape='caret down'/>
         </Clickable>
       </PopupTrigger>
@@ -171,13 +199,31 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
       <Dropdown style={{width: '100%'}}
                 data-test-id='runtime-image-dropdown'
                 disabled={true}
-                options={[toolDockerImage]}
+                options={toolDockerImage ? [toolDockerImage] : []}
                 value={toolDockerImage}/>
       {/* Runtime customization: change detailed machine configuration options. */}
       <h3 style={styles.sectionHeader}>Cloud compute profile</h3>
       <FlexRow style={{justifyContent: 'space-between'}}>
-        <MachineSelector updatedMachine={updatedMachine} onChange={setUpdatedMachine} masterMachineType={masterMachineType}/>
-        <DiskSizeSelection updatedDiskSize={updatedDiskSize} onChange={setUpdatedDiskSize} masterDiskSize={masterDiskSize}/>
+        <MachineSelector
+            updatedMachine={updatedMachine}
+            onChange={(value) => {
+              setUpdatedMachine(value);
+              if (value !== updatedMachine && value !== masterDiskSize) {
+                setRuntimeConfigurationType(RuntimeConfigurationType.UserOverride);
+              }
+            }}
+            masterMachineType={masterMachineType}
+        />
+        <DiskSizeSelection
+            updatedDiskSize={updatedDiskSize}
+            onChange={(value) => {
+              setUpdatedDiskSize(value);
+              if (value !== updatedDiskSize && value !== masterDiskSize) {
+                setRuntimeConfigurationType(RuntimeConfigurationType.UserOverride);
+              }
+            }}
+            masterDiskSize={masterDiskSize}
+        />
       </FlexRow>
       <FlexColumn style={{marginTop: '1rem'}}>
         <label htmlFor='runtime-compute'>Compute type</label>
@@ -191,12 +237,24 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
     <FlexRow style={{justifyContent: 'flex-end', marginTop: '.75rem'}}>
       <Button
         aria-label={currentRuntime ? 'Update' : 'Create'}
-        disabled={status !== RuntimeStatus.Running || !runtimeChanged}
+        disabled={
+          !runtimeChanged
+          || status in [
+            RuntimeStatus.Creating,
+            RuntimeStatus.Updating,
+            RuntimeStatus.Stopping,
+            RuntimeStatus.Starting,
+            RuntimeStatus.Deleting
+          ]
+        }
         onClick={() =>
-          setRequestedRuntime({gceConfig: {
-            machineType: updatedMachineType || masterMachineType,
-            diskSize: updatedDiskSize || masterDiskSize
-          }})
+          setRequestedRuntime({
+            configurationType: runtimeConfigurationType,
+            gceConfig: {
+              machineType: updatedMachineType || masterMachineType,
+              diskSize: updatedDiskSize || masterDiskSize
+            }
+          })
         }
       >{currentRuntime ? 'Update' : 'Create'}</Button>
     </FlexRow>
