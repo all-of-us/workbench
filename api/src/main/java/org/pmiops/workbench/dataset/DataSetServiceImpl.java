@@ -718,13 +718,16 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             + "    elif 'person_id' in dataset:\n"
             + "        person_ids = person_ids.union(dataset['person_id']) \n"
             + "\n\n"
-            + "with open('" + cohortSampleNamesFilename + "', 'w') as cohort_file:\n"
+            + "with open('"
+            + cohortSampleNamesFilename
+            + "', 'w') as cohort_file:\n"
             + "    for person_id in person_ids:\n"
             + "        cohort_file.write(str(person_id) + '\\n')\n"
             + "    cohort_file.close()\n",
         "%%bash\n\n"
             + "uuid=$(cat /proc/sys/kernel/random/uuid | sed s/-/_/g)\n"
-            // TODO: Writing to the "tmp" dataset is a temporary workaround until an alternative, RW-5735
+            // TODO: Writing to the "tmp" dataset is a temporary workaround until an alternative,
+            // RW-5735
             + "EXPORT_TABLE=\"fc-aou-cdr-synth-test.tmp_shared_cohort_extract.${uuid}\"\n"
             + "\n"
             + "python3 /genomics/microarray/raw_array_cohort_extract.py \\\n"
@@ -733,20 +736,29 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             + "          --query_project ${GOOGLE_PROJECT} \\\n"
             // TODO: Replace hardcoded dataset reference: RW-5748
             + "          --sample_mapping_table fc-aou-cdr-synth-test.microarray_data.sample_list \\\n"
-            + "          --cohort_sample_names_file " + cohortSampleNamesFilename + " \\\n"
-            + "          --sample_map_outfile " + cohortSampleMapFilename + "\n"
+            + "          --cohort_sample_names_file "
+            + cohortSampleNamesFilename
+            + " \\\n"
+            + "          --sample_map_outfile "
+            + cohortSampleMapFilename
+            + "\n"
             + "\n"
             + "gatk ArrayExtractCohort \\\n"
             + "        -R gs://fc-aou-cdr-synth-test-genomics/extract_resources/Homo_sapiens_assembly19.fasta \\\n"
-            + "        -O " + cohortVcfFilename + " \\\n"
+            + "        -O "
+            + cohortVcfFilename
+            + " \\\n"
             + "        --probe-info-csv /genomics/microarray/probe_info.csv \\\n"
             + "        --project-id ${GOOGLE_PROJECT} \\\n"
-            + "        --cohort-sample-file " + cohortSampleMapFilename + " \\\n"
+            + "        --cohort-sample-file "
+            + cohortSampleMapFilename
+            + " \\\n"
             + "        --use-compressed-data \"false\" \\\n"
             + "        --cohort-extract-table ${EXPORT_TABLE} \\\n"
             + "\n"
-            + "gsutil cp " + cohortVcfFilename + " ${WORKSPACE_BUCKET}/"
-    );
+            + "gsutil cp "
+            + cohortVcfFilename
+            + " ${WORKSPACE_BUCKET}/");
   }
 
   @Override
@@ -766,12 +778,22 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             + "    phenotypes_table.append([family_id, person_id, phenotype_1, phenotype_2])\n"
             + "\n"
             + "cohort_phenotypes = pandas.DataFrame(phenotypes_table) \n"
-            + "cohort_phenotypes.to_csv('" + phenotypeFilename + "', header=False, index=False, sep=' ')",
+            + "cohort_phenotypes.to_csv('"
+            + phenotypeFilename
+            + "', header=False, index=False, sep=' ')",
         "%%bash\n\n"
             + "# Convert VCF info plink binary files \n"
-            + "plink --vcf-half-call m --const-fid 0 --vcf " + cohortVcfFilename + " --out " + cohortQualifier + "\n"
+            + "plink --vcf-half-call m --const-fid 0 --vcf "
+            + cohortVcfFilename
+            + " --out "
+            + cohortQualifier
+            + "\n"
             + "# Run GWAS \n"
-            + "plink --bfile " + cohortQualifier + " --pheno " + phenotypeFilename + " --all-pheno --allow-no-sex --assoc --out results\n"
+            + "plink --bfile "
+            + cohortQualifier
+            + " --pheno "
+            + phenotypeFilename
+            + " --all-pheno --allow-no-sex --assoc --out results\n"
             + "\n"
             + "head results.P1.assoc\n"
             + "head results.P2.assoc");
