@@ -42,6 +42,7 @@ import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetCodeResponse;
 import org.pmiops.workbench.model.DataSetExportRequest;
 import org.pmiops.workbench.model.DataSetExportRequest.GenomicsAnalysisToolEnum;
+import org.pmiops.workbench.model.DataSetExportRequest.GenomicsDataTypeEnum;
 import org.pmiops.workbench.model.DataSetListResponse;
 import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetPreviewResponse;
@@ -337,7 +338,7 @@ public class DataSetController implements DataSetApiDelegate {
             qualifier,
             queriesByDomain);
 
-    if (dataSetExportRequest.getIncludeMicroarrayData()) {
+    if (GenomicsDataTypeEnum.MICROARRAY.equals(dataSetExportRequest.getGenomicsDataType())) {
       if (!dataSetExportRequest.getKernelType().equals(KernelTypeEnum.PYTHON)) {
         throw new BadRequestException("Genomics code generation is only supported in Python");
       }
@@ -346,8 +347,8 @@ public class DataSetController implements DataSetApiDelegate {
           dataSetService.generateMicroarrayCohortExtractCodeCells(
               dbWorkspace, qualifier, queriesByDomain));
 
-      if (dataSetExportRequest.getGenomicsAnalysisTool().equals(GenomicsAnalysisToolEnum.PLINK)) {
-        queriesAsStrings.addAll(dataSetService.generatePlinkDemoCode());
+      if (GenomicsAnalysisToolEnum.PLINK.equals(dataSetExportRequest.getGenomicsAnalysisTool())) {
+        queriesAsStrings.addAll(dataSetService.generatePlinkDemoCode(qualifier));
       }
     }
 

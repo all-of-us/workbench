@@ -153,6 +153,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     } else {
       request.setRuntimeConfig(
           new LeonardoMachineConfig()
+              .numberOfWorkers(2)
               .cloudService(CloudServiceEnum.DATAPROC)
               .masterDiskSize(
                   Optional.ofNullable(clusterOverride.masterDiskSize)

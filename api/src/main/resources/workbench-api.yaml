@@ -4807,9 +4807,12 @@ definitions:
         default: false
       kernelType:
         "$ref": "#/definitions/KernelTypeEnum"
-      includeMicroarrayData:
-        type: boolean
-        default: false
+      genomicsDataType:
+        type: string
+        default: NONE
+        enum:
+          - NONE
+          - MICROARRAY
       genomicsAnalysisTool:
         type: string
         default: NONE
