@@ -142,9 +142,6 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
     // TODO(RW-5591): Create runtime page goes here.
     return <React.Fragment>
       <div>No runtime exists yet</div>
-      {activeRuntimeOp && <hr/>}
-      {activeRuntimeOp && <div>
-      </div>}
     </React.Fragment>;
   }
 
@@ -192,8 +189,7 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
                         }
                       </React.Fragment>
                     }>
-        <Clickable data-test-id='runtime-presets-menu'
-                   disabled={false}>
+        <Clickable data-test-id='runtime-presets-menu'>
           Recommended environments <ClrIcon shape='caret down'/>
         </Clickable>
       </PopupTrigger>
