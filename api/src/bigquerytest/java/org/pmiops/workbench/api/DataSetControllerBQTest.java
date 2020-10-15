@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -16,6 +17,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -431,7 +433,14 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
     assertThat(code).contains(expected);
 
-    String query =
+    final String expectedSqlStart =
+        String.format(
+            "# This query represents dataset \"%s\" for domain \"condition\" and was generated for %s\n"
+                + "dataset_00000000_condition_sql <- paste(\"",
+            DATASET_NAME, dbCdrVersion.getName());
+    assertThat(code).contains(expectedSqlStart);
+
+    final String query =
         extractRQuery(
             code,
             "condition_occurrence",
@@ -667,18 +676,18 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   }
 
   private void assertAndExecutePythonQuery(String code, int index, Domain domain) {
-    String expected =
+    final String expectedIntro = "import pandas\nimport os";
+    assertThat(code).startsWith(expectedIntro);
+
+    final String expectedSqlStart =
         String.format(
-            "import pandas\n"
-                + "import os\n"
-                + "\n"
-                + "# This query represents dataset \"%s\" for domain \"%s\" and was generated for %s\n"
+            "# This query represents dataset \"%s\" for domain \"%s\" and was generated for %s\n"
                 + "dataset_00000000_%s_sql =",
             DATASET_NAME,
             domain.toString().toLowerCase(),
             dbCdrVersion.getName(),
             domain.toString().toLowerCase());
-    assertThat(code).contains(expected);
+    assertThat(code).contains(expectedSqlStart);
 
     String query = extractPythonQuery(code, index);
 
@@ -722,7 +731,11 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   @NotNull
   private String extractRQuery(String code, String... tableNames) {
-    String query = code.split("\"")[5];
+    final String sqlStart = "\n    SELECT\n";
+    Optional<String> query =
+        Arrays.stream(code.split("\"")).filter(line -> line.startsWith(sqlStart)).findFirst();
+    assertThat(query).isPresent();
+
     return Arrays.stream(tableNames)
         .map(
             tableName ->
@@ -734,7 +747,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                             testWorkbenchConfig.bigquery.projectId,
                             testWorkbenchConfig.bigquery.dataSetId))
         .reduce(Function.identity(), Function::andThen)
-        .apply(query);
+        .apply(query.get());
   }
 
   private static String replaceTableName(
