@@ -31,7 +31,6 @@ public class CBCriteriaDaoTest {
 
   @Autowired private CBCriteriaDao cbCriteriaDao;
   @Autowired private JdbcTemplate jdbcTemplate;
-  private DbCriteria surveyCriteria;
   private DbCriteria sourceCriteria;
   private DbCriteria standardCriteria;
   private DbCriteria icd9Criteria;
@@ -45,7 +44,7 @@ public class CBCriteriaDaoTest {
 
   @Before
   public void setUp() {
-    surveyCriteria =
+    DbCriteria surveyCriteria =
         cbCriteriaDao.save(
             DbCriteria.builder()
                 .addDomainId(Domain.SURVEY.toString())
@@ -173,42 +172,10 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findCountByDomainAndStandardAndTerm() {
-    assertThat(
-            cbCriteriaDao.findCountByDomainAndStandardAndTerm(
-                Domain.CONDITION.toString(), ImmutableList.of(false), "term"))
-        .isEqualTo(1);
-  }
-
-  @Test
   public void findCriteriaByDomainIdAndConceptIds() {
     assertThat(
             cbCriteriaDao.findCriteriaByDomainIdAndConceptIds("CONDITION", ImmutableList.of("12")))
         .containsExactly(sourceCriteria);
-  }
-
-  @Test
-  public void findIdByDomainAndConceptIdAndName() {
-    assertThat(
-            cbCriteriaDao.findIdByDomainAndConceptIdAndName(
-                Domain.SURVEY.toString(), surveyCriteria.getConceptId(), surveyCriteria.getName()))
-        .isEqualTo(surveyCriteria.getId());
-  }
-
-  @Test
-  public void findQuestionCountByDomainAndIdAndTerm() {
-    assertThat(cbCriteriaDao.findQuestionCountByDomainAndIdAndTerm(surveyCriteria.getId(), "term"))
-        .isEqualTo(1L);
-  }
-
-  @Test
-  public void findCriteriaLeavesByDomainAndTypeAndSubtype() {
-    List<DbCriteria> criteriaList =
-        cbCriteriaDao.findCriteriaLeavesByDomainAndTypeAndSubtype(
-            Domain.SURVEY.toString(),
-            CriteriaType.PPI.toString(),
-            CriteriaSubType.QUESTION.toString());
-    assertThat(criteriaList).containsExactly(surveyCriteria);
   }
 
   @Test
@@ -298,11 +265,6 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findCriteriaLeavesAndParentsByPath() {
-    assertThat(cbCriteriaDao.findCriteriaLeavesAndParentsByPath("5")).containsExactly(icd9Criteria);
-  }
-
-  @Test
   public void findParticipantDemographics() {
     List<DbCriteria> criteriaList = cbCriteriaDao.findAllDemographics();
     assertThat(criteriaList).containsExactly(gender, sexAtBirth, ethnicity, raceAsian, raceWhite);
@@ -322,6 +284,17 @@ public class CBCriteriaDaoTest {
         cbCriteriaDao.findByDomainIdAndType(
             Domain.PERSON.toString(), FilterColumns.RACE.toString(), sort);
     assertThat(criteriaList).containsExactly(raceWhite, raceAsian).inOrder();
+  }
+
+  @Test
+  public void findDomainCount() {
+    assertThat(cbCriteriaDao.findDomainCount("term", Domain.CONDITION.toString())).isEqualTo(1);
+  }
+
+  @Test
+  public void findDomainCountOnCode() {
+    assertThat(cbCriteriaDao.findDomainCountOnCode("120", Domain.CONDITION.toString()))
+        .isEqualTo(2);
   }
 
   @Test

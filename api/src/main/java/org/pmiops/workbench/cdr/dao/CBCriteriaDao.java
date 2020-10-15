@@ -101,9 +101,6 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
       @Param("standard") Boolean isStandard,
       @Param("parentConceptIds") Set<String> parentConceptIds);
 
-  @Query(value = "select c from DbCriteria c where match(path, :path) > 0 order by id asc")
-  List<DbCriteria> findCriteriaLeavesAndParentsByPath(@Param("path") String path);
-
   @Query(
       value =
           "select distinct c.concept_id as conceptId, c2.id as parentId "
@@ -127,12 +124,6 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
       @Param("domain") String domain,
       @Param("type") String type,
       @Param("parentIds") List<Long> parentIds);
-
-  @Query(
-      value =
-          "select cr from DbCriteria cr where domain_id = ?1 and type = ?2 and subtype = ?3 and is_group = 0 and is_selectable = 1")
-  List<DbCriteria> findCriteriaLeavesByDomainAndTypeAndSubtype(
-      String domain, String type, String subtype);
 
   @Query(
       value = "select concept_id_2 from cb_criteria_relationship where concept_id_1 = :conceptId",
@@ -230,34 +221,11 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(
       value =
-          "select count(c) from DbCriteria c where domainId = :domain and standard in (:flags) and match(fullText, concat(:term, '+[', :domain, '_rank1]')) > 0")
-  Long findCountByDomainAndStandardAndTerm(
-      @Param("domain") String domain,
-      @Param("flags") List<Boolean> flags,
-      @Param("term") String term);
-
-  @Query(
-      value =
           "select c.id from DbCriteria c where domainId = :domainId and conceptId = :conceptId and name = :name")
   Long findIdByDomainAndConceptIdAndName(
       @Param("domainId") String domainId,
       @Param("conceptId") String conceptId,
       @Param("name") String name);
-
-  @Query(
-      value =
-          "select count(distinct id) "
-              + "from DbCriteria "
-              + "where domainId = 'SURVEY' "
-              + "and subtype = 'QUESTION' "
-              + "and conceptId in ( "
-              + "select conceptId "
-              + "from DbCriteria "
-              + "where domainId = 'SURVEY' "
-              + "and match(path, :criteriaId) > 0 "
-              + "and match(fullText, concat(:term, '+[SURVEY_rank1]')) > 0)")
-  Long findQuestionCountByDomainAndIdAndTerm(
-      @Param("criteriaId") Long criteriaId, @Param("term") String term);
 
   @Query(
       value =
