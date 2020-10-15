@@ -264,7 +264,7 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
         case RuntimeStatus.Deleting:
         case RuntimeStatus.Creating:
         case RuntimeStatus.Deleted:
-          return 'Preparing your Jupyter environment. This may take up to 10 minutes.';
+          return 'Preparing your Jupyter environment. This may take up to 5 minutes.';
         case RuntimeStatus.Error:
           return 'Error creating your jupyter environment. Please try clicking' +
             ' the reset notebook server on Workspace About Page.';
