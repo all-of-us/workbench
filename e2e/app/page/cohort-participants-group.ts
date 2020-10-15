@@ -49,7 +49,7 @@ export default class CohortParticipantsGroup {
    */
   async selectGroupSnowmanMenu(option: GroupMenuOption): Promise<void> {
     const menu = new TieredMenu(this.page);
-    return menu.clickMenuItem([option.toString()]);
+    return menu.select([option.toString()]);
   }
 
   /**
@@ -133,7 +133,7 @@ export default class CohortParticipantsGroup {
 
   private async clickCriteriaMenuItems(menuItemLinks: string[]): Promise<void> {
     const menu = await this.openTieredMenu();
-    await menu.clickMenuItem(menuItemLinks);
+    await menu.select(menuItemLinks);
   }
 
   private async openTieredMenu(): Promise<TieredMenu> {
