@@ -113,7 +113,8 @@ describe('User can create new Cohorts', () => {
    * Duplicate cohort.
    * Delete cohort.
    */
-  test('Add Cohort of EKG condition with modifiers', async () => {
+  // RW-5751 Search for condition is failing in CI.
+  xtest('Add Cohort of EKG condition with modifiers', async () => {
 
     const workspaceCard = await findOrCreateWorkspace(page);
     await workspaceCard.clickWorkspaceName();

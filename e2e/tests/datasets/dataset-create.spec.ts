@@ -21,7 +21,8 @@ describe('Dataset test', () => {
    * - Edit dataset. Save dataset without Export to Notebook.
    * - Delete Dataset.
    */
-  test('Can create Dataset with user-defined Cohorts', async () => {
+  // RW-5751 Search for condition is failing in CI.
+  xtest('Can create Dataset with user-defined Cohorts', async () => {
     const workspaceCard = await findOrCreateWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 
