@@ -91,6 +91,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
   private static final String WORKSPACE_NAMESPACE = "namespace";
   private static final String WORKSPACE_NAME = "name";
+  private static final String DATASET_NAME = "Arbitrary Dataset v1.0";
 
   private DataSetController controller;
   private DataSetServiceImpl dataSetServiceImpl;
@@ -377,9 +378,9 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     String expected =
         String.format(
             "library(bigrquery)\n"
-                + "\n# This query represents dataset \"null\" for domain \"condition\" and was generated for %s\n"
+                + "\n# This query represents dataset \"%s\" for domain \"condition\" and was generated for %s\n"
                 + "dataset_00000000_condition_sql <- paste(\"",
-            dbCdrVersion.getName());
+            DATASET_NAME, dbCdrVersion.getName());
 
     String code =
         controller
@@ -521,8 +522,9 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
             "import pandas\n"
                 + "import os\n"
                 + "\n"
-                + "# This query represents dataset \"null\" for domain \"%s\" and was generated for %s\n"
+                + "# This query represents dataset \"%s\" for domain \"%s\" and was generated for %s\n"
                 + "dataset_00000000_%s_sql =",
+            DATASET_NAME,
             domain.toString().toLowerCase(),
             dbCdrVersion.getName(),
             domain.toString().toLowerCase());
@@ -547,6 +549,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
       boolean allParticipants,
       PrePackagedConceptSetEnum prePackagedConceptSetEnum) {
     return new DataSetRequest()
+        .name(DATASET_NAME)
         .conceptSetIds(
             dbConceptSets.stream().map(DbConceptSet::getConceptSetId).collect(Collectors.toList()))
         .cohortIds(dbCohorts.stream().map(DbCohort::getCohortId).collect(Collectors.toList()))
