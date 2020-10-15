@@ -8,8 +8,8 @@
     "creationTime": "2018-06-06 00:00:00Z",
     "releaseNumber": 1,
     "numParticipants": 946237,
-    "cdrDbName": "synth_r_2020q1_3",
-    "elasticIndexBaseName": "synth_r_2020q1_1"
+    "cdrDbName": "cdr",
+    "elasticIndexBaseName": "cdr"
   },
   {
     "cdrVersionId": 2,
@@ -20,8 +20,8 @@
     "creationTime": "2018-06-06 00:00:00Z",
     "releaseNumber": 2,
     "numParticipants": 946237,
-    "cdrDbName": "synth_r_2020q1_3",
-    "elasticIndexBaseName": "synth_r_2019q1_1"
+    "cdrDbName": "cdr",
+    "elasticIndexBaseName": "cdr"
   },
   {
     "cdrVersionId": 3,
@@ -33,7 +33,8 @@
     "creationTime": "2019-09-30 00:00:00Z",
     "releaseNumber": 3,
     "numParticipants": 234525,
-    "cdrDbName": "synth_r_2019q4_8"
+    "cdrDbName": "cdr",
+    "elasticIndexBaseName": "cdr"
   },
   {
     "cdrVersionId": 4,
@@ -46,6 +47,7 @@
     "creationTime": "2020-08-26 00:09:51Z",
     "releaseNumber": 3,
     "numParticipants": 234525,
-    "cdrDbName": "synth_r_2019q4_8"
+    "cdrDbName": "cdr",
+    "elasticIndexBaseName": "cdr"
   }
 ]
