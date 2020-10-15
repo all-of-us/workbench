@@ -205,7 +205,9 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
     question_concept_id INT64,
     question            STRING,
     answer_concept_id   INT64,
-    answer              STRING
+    answer              STRING,
+    survey_version_id   INT64,
+    survey_version_name STRING
 )"
 
 echo "CREATE TABLE - ds_visit_occurrence"
@@ -376,14 +378,16 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c5 on a.PROCEDURE_SOURCE_CONCEPT_I
 echo "ds_survey - inserting data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_survey\`
-   (person_id, survey_datetime, survey, question_concept_id, question, answer_concept_id, answer)
+   (person_id, survey_datetime, survey, question_concept_id, question, answer_concept_id, answer, survey_version_id, survey_version_name)
 SELECT  a.person_id,
         a.observation_datetime as survey_datetime,
         c.name as survey,
         d.concept_id as question_concept_id,
         d.concept_name as question,
         e.concept_id as answer_concept_id,
-        case when a.value_as_number is not null then CAST(a.value_as_number as STRING) else e.concept_name END as answer
+        case when a.value_as_number is not null then CAST(a.value_as_number as STRING) else e.concept_name END as answer,
+        g.survey_id as survey_version_id,
+        g.version as survey_version_name
 FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
 JOIN
     (
@@ -399,7 +403,9 @@ JOIN
     ) b on a.observation_source_concept_id = b.descendant_concept_id
 JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c ON b.ancestor_concept_id = c.concept_id
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on a.observation_source_concept_id = d.concept_id
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on a.value_source_concept_id = e.concept_id"
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on a.value_source_concept_id = e.concept_id
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.cope_survey_version\` f on a.questionnaire_response_id = f.questionnaire_response_id
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_survey_version\` g on f.cope_survey_month = g.version"
 
 echo "ds_visit_occurrence - inserting data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
