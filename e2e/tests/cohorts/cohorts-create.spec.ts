@@ -46,14 +46,13 @@ describe('User can create new Cohorts', () => {
     const group1Count = await group1.includePhysicalMeasurement(PhysicalMeasurementsCriteria.BMI, 30);
 
     // Checking Group 1 Count. should match Group 1 participants count.
-    await waitForText(page, group1Count, {xpath: group1.getGroupCountXpath()});
-    const group1CountInt = Number(group1Count.replace(/,/g, ''));
+    const group1CountInt = Number((await group1.getGroupCount()).replace(/,/g, ''));
     expect(group1CountInt).toBeGreaterThan(1);
     console.log('Group 1: Physical Measurement -> BMI count: ' + group1CountInt);
 
     // Checking Total Count: should match Group 1 participants count.
-    await waitForText(page, group1Count, {xpath: FieldSelector.TotalCount});
-    console.log('Total Count: ' + group1CountInt);
+    const totalCount = await cohortPage.getTotalCount();
+    expect(group1Count).toEqual(totalCount);
 
     // Include Participants Group 2: Select menu Demographics -> Deceased
     const group2 = cohortPage.findIncludeParticipantsGroup('Group 2');
@@ -76,7 +75,7 @@ describe('User can create new Cohorts', () => {
     // Open Cohort details.
     const cohortLink = await Link.findByName(page, {name: cohortName});
     await cohortLink.clickAndWait();
-    await waitForText(page, newTotalCount, {xpath: FieldSelector.TotalCount});
+    await waitForText(page, newTotalCount, {xpath: FieldSelector.TotalCount}, 60000);
 
     // Modify Cohort: Edit Group 1 name successfully.
     const newName1 = 'Group 1: BMI';
