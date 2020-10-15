@@ -18,11 +18,10 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {Dropdown} from 'primereact/dropdown';
 import {InputNumber} from 'primereact/inputnumber';
 
-import { RuntimeStatus } from 'generated';
+import {runtimePresets} from 'app/utils/runtime-presets';
+import { RuntimeConfigurationType, RuntimeStatus } from 'generated';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {runtimePresets} from "../../utils/runtime-presets";
-import {RuntimeConfigurationType} from "../../../generated/model/runtimeConfigurationType";
 
 const {useState, Fragment} = React;
 
@@ -171,8 +170,12 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
                                   key={i}
                                   onClick={() => {
                                     // renaming to avoid shadowing
-                                    const presetDiskSize = preset.runtimeTemplate.gceConfig.bootDiskSize || preset.runtimeTemplate.dataprocConfig.masterDiskSize;
-                                    const presetMachineName = preset.runtimeTemplate.gceConfig.machineType || preset.runtimeTemplate.dataprocConfig.masterMachineType;
+                                    const presetDiskSize =
+                                        preset.runtimeTemplate.gceConfig.bootDiskSize
+                                        || preset.runtimeTemplate.dataprocConfig.masterDiskSize;
+                                    const presetMachineName =
+                                        preset.runtimeTemplate.gceConfig.machineType
+                                        || preset.runtimeTemplate.dataprocConfig.masterMachineType;
                                     const presetMachineType = fp.find(({name}) => name === presetMachineName, validLeonardoMachineTypes);
                                     if (presetDiskSize !== masterDiskSize) {
                                       setUpdatedDiskSize(presetDiskSize);
@@ -184,7 +187,7 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
                                     }
                                   }}>
                                 {preset.displayName}
-                              </MenuItem>
+                              </MenuItem>;
                             })
                         }
                       </React.Fragment>

@@ -337,7 +337,6 @@ export class LeoRuntimeInitializer {
           this.currentRuntime));
     }
 
-    debugger;
     // Fetch the current runtime status, with some graceful error handling for NOT_FOUND response
     // and abort signals.
     try {
