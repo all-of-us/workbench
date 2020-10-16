@@ -190,11 +190,8 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
   const [updatedDataprocConfig, setUpdatedDataprocConfig] = useState();
 
   const updatedMachineType = updatedMachine && updatedMachine.name;
-
-  const {workerMachineType = null, workerDiskSize = null, numberOfWorkers = null, numberOfPreemptibleWorkers = null} = dataprocConfig || {};
   const runtimeChanged = updatedMachine || updatedDiskSize !== masterDiskSize || updatedDataprocConfig;
 
-  console.log(updatedDataprocConfig)
   if (currentRuntime === undefined) {
     return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
   } else if (currentRuntime === null) {
@@ -207,6 +204,7 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
     </React.Fragment>;
   }
 
+  console.log(currentRuntime);
   return <div data-test-id='runtime-panel'>
     <h3 style={styles.sectionHeader}>Cloud analysis environment</h3>
     <div>
@@ -257,13 +255,14 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
       <Button
         aria-label={currentRuntime ? 'Update' : 'Create'}
         disabled={status !== RuntimeStatus.Running || !runtimeChanged}
-        onClick={() =>
-          setRequestedRuntime({gceConfig: {
+        onClick={() =>{
+          const runtimeToRequest = updatedDataprocConfig ? {dataprocConfig: updatedDataprocConfig} : {gceConfig:{
             machineType: updatedMachineType || masterMachineType,
             diskSize: updatedDiskSize || masterDiskSize
-          }})
+          }};
+          setRequestedRuntime(runtimeToRequest);
         }
-      >{currentRuntime ? 'Update' : 'Create'}</Button>
+      }>{currentRuntime ? 'Update' : 'Create'}</Button>
     </FlexRow>
   </div>;
 
