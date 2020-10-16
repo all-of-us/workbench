@@ -305,7 +305,7 @@ commands:
           destination: logs
           when: always
       - store_test_results:
-          path: ~/workbench/e2e/logs
+          path: ~/workbench/e2e/logs/*
 
   store-commit-message:
     description: "Export Git commit message to environment variable"
