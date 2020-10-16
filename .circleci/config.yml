@@ -597,30 +597,30 @@ workflows:
     jobs:
       # Always run basic test/lint/compilation (open PRs, master branch merge)
       # Note: by default tags are not picked up.
-      - api-local-test:
-          post-steps:
-            - slack-notify-failure
-      - api-unit-test:
-          post-steps:
-            - slack-notify-failure
-      - ui-unit-test:
-          post-steps:
-            - slack-notify-failure
-      - api-bigquery-test:
-          post-steps:
-            - slack-notify-failure
-      - api-integration-test:
-          post-steps:
-            - slack-notify-failure
+      #- api-local-test:
+          #post-steps:
+            #- slack-notify-failure
+      #- api-unit-test:
+          #post-steps:
+            #- slack-notify-failure
+      #- ui-unit-test:
+          #post-steps:
+            #- slack-notify-failure
+      #- api-bigquery-test:
+          #post-steps:
+            #- slack-notify-failure
+      #- api-integration-test:
+          #post-steps:
+            #- slack-notify-failure
       # Deploy to "test" on master branch merges
       - api-deploy-to-test:
           <<: *filter-master-branch
-          requires:
-            - api-unit-test
+          #requires:
+            #- api-unit-test
       - ui-deploy-to-test:
           <<: *filter-master-branch
-          requires:
-            - ui-unit-test
+          #requires:
+            #- ui-unit-test
       # Deploy local UI server connected to "test" API server. Run Puppeteer tests for PR commits only
       - puppeteer-test:
           <<: *filter-pr-branch
@@ -635,9 +635,9 @@ workflows:
           parallel_num: 4
           env_name: "test"
           <<: *filter-master-branch
-          requires:
-            - api-deploy-to-test
-            - ui-deploy-to-test
+          #requires:
+            #- api-deploy-to-test
+            #- ui-deploy-to-test
           post-steps:
             - slack-notify-failure
 
