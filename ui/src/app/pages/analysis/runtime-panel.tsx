@@ -19,7 +19,6 @@ import {InputNumber} from 'primereact/inputnumber';
 import { RuntimeStatus } from 'generated';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import { worker } from 'cluster';
 
 const {useState, useEffect, Fragment} = React;
 
@@ -44,8 +43,8 @@ const styles = reactStyles({
   },
   formGrid: {
     display: 'grid',
-    gridTemplateColumns: '1fr 1fr 1fr 1fr 3rem 1fr', 
-    gridGap: '1rem', 
+    gridTemplateColumns: '1fr 1fr 1fr 1fr 3rem 1fr',
+    gridGap: '1rem',
     alignItems: 'center'
   },
   workerConfigLabel: {
@@ -58,7 +57,7 @@ const defaultMachineType = allMachineTypes.find(({name}) => name === 'n1-standar
 enum ComputeType {
   standard = 'Standard VM',
   dataproc = 'Dataproc Cluster'
-};
+}
 
 export interface Props {
   workspace: WorkspaceData;
@@ -126,22 +125,32 @@ const DiskSizeSelection = ({onChange, updatedDiskSize, diskSize}) => {
 };
 
 const DataProcConfig = ({onChange, dataprocConfig}) => {
-  const {workerMachineType = defaultMachineType, workerDiskSize = 50, numberOfWorkers = 2, numberOfPreemptibleWorkers = 0} = dataprocConfig || {};
-  const [workers, setWorkers] = useState(numberOfWorkers);
-  const [preemtible, setPreemptible] = useState(numberOfPreemptibleWorkers);
+  const {
+    workerMachineType = defaultMachineType,
+    workerDiskSize = 50,
+    numberOfWorkers = 2,
+    numberOfPreemptibleWorkers = 0
+  } = dataprocConfig || {};
+  const [updatedNumWorkers, setUpdatedNumWorkers] = useState(numberOfWorkers);
+  const [updatedPreemtible, setUpdatedPreemptible] = useState(numberOfPreemptibleWorkers);
   const [updatedWorkerMachine, setUpdatedWorkerMachine] = useState(null);
   const [updatedDiskSize, setUpdatedDiskSize] = useState(workerDiskSize);
 
   useEffect(() => {
     const machineType = updatedWorkerMachine && updatedWorkerMachine.name;
-    const dataprocConfigChanged = workers !== numberOfWorkers ||
-    preemtible !== numberOfPreemptibleWorkers ||
-    updatedDiskSize !== workerDiskSize || 
-    updatedWorkerMachine || 
+    const dataprocConfigChanged = updatedNumWorkers !== numberOfWorkers ||
+    updatedPreemtible !== numberOfPreemptibleWorkers ||
+    updatedDiskSize !== workerDiskSize ||
+    updatedWorkerMachine ||
     !dataprocConfig;
 
-    onChange(dataprocConfigChanged ? {workerMachineType: machineType, workerDiskSize: updatedDiskSize, numberOfWorkers: workers, numberOfPreemptibleWorkers: preemtible} : null);
-  }, [workers, preemtible, updatedWorkerMachine, updatedDiskSize]);
+    onChange(dataprocConfigChanged ? {
+      workerMachineType: machineType,
+      workerDiskSize: updatedDiskSize,
+      numberOfWorkers: updatedNumWorkers,
+      numberOfPreemptibleWorkers: updatedPreemtible
+    } : null);
+  }, [updatedNumWorkers, updatedPreemtible, updatedWorkerMachine, updatedDiskSize]);
 
 
   return <fieldset style={{marginTop: '0.75rem'}}>
@@ -152,12 +161,12 @@ const DataProcConfig = ({onChange, dataprocConfig}) => {
         showButtons
         decrementButtonClassName='p-button-secondary'
         incrementButtonClassName='p-button-secondary'
-        value={workers}
+        value={updatedNumWorkers}
         inputStyle={{padding: '.75rem .5rem', width: '2rem'}}
         onChange={({value}) => {
-          setWorkers(value);
-          if (workers < preemtible) {
-            setPreemptible(workers);
+          setUpdatedNumWorkers(value);
+          if (updatedNumWorkers < updatedPreemtible) {
+            setUpdatedPreemptible(updatedNumWorkers);
           }
         }}
         min={2}/>
@@ -166,17 +175,17 @@ const DataProcConfig = ({onChange, dataprocConfig}) => {
         showButtons
         decrementButtonClassName='p-button-secondary'
         incrementButtonClassName='p-button-secondary'
-        value={workers < preemtible ? workers : preemtible}
+        value={updatedNumWorkers < updatedPreemtible ? updatedNumWorkers : updatedPreemtible}
         inputStyle={{padding: '.75rem .5rem', width: '2rem'}}
-        onChange={({value}) => setPreemptible(value)}
+        onChange={({value}) => setUpdatedPreemptible(value)}
         min={0}
-        max={workers}/>
+        max={updatedNumWorkers}/>
       <div style={{gridColumnEnd: 'span 2'}}/>
       <MachineSelector machineType={workerMachineType} onChange={setUpdatedWorkerMachine} updatedMachine={updatedWorkerMachine}/>
       <DiskSizeSelection diskSize={workerDiskSize} onChange={setUpdatedDiskSize} updatedDiskSize={updatedDiskSize} />
     </div>
   </fieldset>;
-}
+};
 
 export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
   const runtimeOps = useStore(runtimeOpsStore);
@@ -207,7 +216,6 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
     </React.Fragment>;
   }
 
-  console.log(currentRuntime);
   return <div data-test-id='runtime-panel'>
     <h3 style={styles.sectionHeader}>Cloud analysis environment</h3>
     <div>
@@ -258,8 +266,8 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
       <Button
         aria-label={currentRuntime ? 'Update' : 'Create'}
         disabled={status !== RuntimeStatus.Running || !runtimeChanged}
-        onClick={() =>{
-          const runtimeToRequest = updatedDataprocConfig ? {dataprocConfig: updatedDataprocConfig} : {gceConfig:{
+        onClick={() => {
+          const runtimeToRequest = updatedDataprocConfig ? {dataprocConfig: updatedDataprocConfig} : {gceConfig: {
             machineType: updatedMachineType || masterMachineType,
             diskSize: updatedDiskSize || masterDiskSize
           }};
