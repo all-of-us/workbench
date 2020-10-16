@@ -41,6 +41,16 @@ const styles = reactStyles({
   presetMenuItem: {
     color: colors.primary,
     fontSize: '14px'
+  },
+  formGrid: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr 1fr 1fr 3rem 1fr', 
+    gridGap: '1rem', 
+    alignItems: 'center'
+  },
+  workerConfigLabel: {
+    fontWeight: 600,
+    marginBottom: '0.5rem'
   }
 });
 
@@ -60,7 +70,6 @@ const MachineSelector = ({onChange, updatedMachine, machineType}) => {
   const maybeGetMachine = machineRequested => fp.equals(machineRequested, initialMachineType) ? null : machineRequested;
 
   return <Fragment>
-    <div>
       <label htmlFor='runtime-cpu' style={{marginRight: '.25rem'}}>CPUs</label>
       <Dropdown id='runtime-cpu'
         options={fp.flow(
@@ -80,8 +89,6 @@ const MachineSelector = ({onChange, updatedMachine, machineType}) => {
             onChange)(validLeonardoMachineTypes)
         }
         value={cpu}/>
-    </div>
-    <div>
       <label htmlFor='runtime-ram' style={{marginRight: '.25rem'}}>RAM (GB)</label>
       <Dropdown id='runtime-ram'
         options={fp.flow(
@@ -101,22 +108,21 @@ const MachineSelector = ({onChange, updatedMachine, machineType}) => {
             )(validLeonardoMachineTypes) }
         value={memory}
         />
-    </div>
   </Fragment>;
 };
 
 const DiskSizeSelection = ({onChange, updatedDiskSize, diskSize}) => {
-  return <div>
+  return <Fragment>
     <label htmlFor='runtime-disk' style={{marginRight: '.25rem'}}>Disk (GB)</label>
-      <InputNumber id='runtime-disk'
-        showButtons
-        decrementButtonClassName='p-button-secondary'
-        incrementButtonClassName='p-button-secondary'
-        value={updatedDiskSize || diskSize}
-        inputStyle={{padding: '.75rem .5rem', width: '2rem'}}
-        onChange={({value}) => onChange(value)}
-        min={50 /* Runtime API has a minimum 50GB requirement. */}/>
-  </div>;
+    <InputNumber id='runtime-disk'
+      showButtons
+      decrementButtonClassName='p-button-secondary'
+      incrementButtonClassName='p-button-secondary'
+      value={updatedDiskSize || diskSize}
+      inputStyle={{padding: '.75rem .5rem', width: '2rem'}}
+      onChange={({value}) => onChange(value)}
+      min={50 /* Runtime API has a minimum 50GB requirement. */}/>
+  </Fragment>;
 };
 
 const DataProcConfig = ({onChange, dataprocConfig}) => {
@@ -137,42 +143,39 @@ const DataProcConfig = ({onChange, dataprocConfig}) => {
     onChange(dataprocConfigChanged ? {workerMachineType: machineType, workerDiskSize: updatedDiskSize, numberOfWorkers: workers, numberOfPreemptibleWorkers: preemtible} : null);
   }, [workers, preemtible, updatedWorkerMachine, updatedDiskSize]);
 
-  return <div>
-    <FlexRow style={{justifyContent: 'space-between'}}>
-      <div>
-        <label htmlFor='num-workers' style={{marginRight: '.25rem'}}>Workers</label>
-        <InputNumber id='num-workers'
-          showButtons
-          decrementButtonClassName='p-button-secondary'
-          incrementButtonClassName='p-button-secondary'
-          value={workers}
-          inputStyle={{padding: '.75rem .5rem', width: '2rem'}}
-          onChange={({value}) => {
-            setWorkers(value);
-            if (workers < preemtible) {
-              setPreemptible(workers);
-            }
-          }}
-          min={2}/>
-      </div>
-      <div>
-        <label htmlFor='num-preemptible' style={{marginRight: '.25rem'}}>Preemptible</label>
-        <InputNumber id='num-preemptible'
-          showButtons
-          decrementButtonClassName='p-button-secondary'
-          incrementButtonClassName='p-button-secondary'
-          value={workers < preemtible ? workers : preemtible}
-          inputStyle={{padding: '.75rem .5rem', width: '2rem'}}
-          onChange={({value}) => setPreemptible(value)}
-          min={0}
-          max={workers}/>
-      </div>
-    </FlexRow>
-    <FlexRow style={{justifyContent: 'space-between'}}>
+
+  return <fieldset style={{marginTop: '0.75rem'}}>
+    <legend style={styles.workerConfigLabel}>Worker Config</legend>
+    <div style={styles.formGrid}>
+      <label htmlFor='num-workers' style={{marginRight: '.25rem'}}>Workers</label>
+      <InputNumber id='num-workers'
+        showButtons
+        decrementButtonClassName='p-button-secondary'
+        incrementButtonClassName='p-button-secondary'
+        value={workers}
+        inputStyle={{padding: '.75rem .5rem', width: '2rem'}}
+        onChange={({value}) => {
+          setWorkers(value);
+          if (workers < preemtible) {
+            setPreemptible(workers);
+          }
+        }}
+        min={2}/>
+      <label htmlFor='num-preemptible' style={{marginRight: '.25rem'}}>Preemptible</label>
+      <InputNumber id='num-preemptible'
+        showButtons
+        decrementButtonClassName='p-button-secondary'
+        incrementButtonClassName='p-button-secondary'
+        value={workers < preemtible ? workers : preemtible}
+        inputStyle={{padding: '.75rem .5rem', width: '2rem'}}
+        onChange={({value}) => setPreemptible(value)}
+        min={0}
+        max={workers}/>
+      <div style={{gridColumnEnd: 'span 2'}}/>
       <MachineSelector machineType={workerMachineType} onChange={setUpdatedWorkerMachine} updatedMachine={updatedWorkerMachine}/>
       <DiskSizeSelection diskSize={workerDiskSize} onChange={setUpdatedDiskSize} updatedDiskSize={updatedDiskSize} />
-    </FlexRow> 
-  </div>;
+    </div>
+  </fieldset>;
 }
 
 export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
@@ -236,10 +239,10 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
                 value={toolDockerImage}/>
       {/* Runtime customization: change detailed machine configuration options. */}
       <h3 style={styles.sectionHeader}>Cloud compute profile</h3>
-      <FlexRow style={{justifyContent: 'space-between'}}>
+      <div style={styles.formGrid}>
         <MachineSelector updatedMachine={updatedMachine} onChange={setUpdatedMachine} machineType={masterMachineType}/>
         <DiskSizeSelection updatedDiskSize={updatedDiskSize} onChange={setUpdatedDiskSize} diskSize={masterDiskSize}/>
-      </FlexRow>
+      </div>
       <FlexColumn style={{marginTop: '1rem'}}>
         <label htmlFor='runtime-compute'>Compute type</label>
         <Dropdown id='runtime-compute'
