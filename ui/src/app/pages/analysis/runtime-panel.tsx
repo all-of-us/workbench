@@ -150,6 +150,8 @@ const DataProcConfig = ({onChange, dataprocConfig}) => {
       numberOfWorkers: updatedNumWorkers,
       numberOfPreemptibleWorkers: updatedPreemtible
     } : null);
+
+    return () => onChange(null);
   }, [updatedNumWorkers, updatedPreemtible, updatedWorkerMachine, updatedDiskSize]);
 
 
