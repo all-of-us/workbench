@@ -1402,12 +1402,14 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                     + "runtime_cdr <- Sys.getenv(\"WORKSPACE_CDR\")\n"
                     + "\n"
                     + "if(runtime_cdr != notebook_cdr) {\n"
-                    + "    print(paste(\"WARNING: CDR Version mismatch - your query is running in a workspace with a different\",\n"
-                    + "          \"CDR version (\", runtime_cdr,\") from the one where it was first generated. This may\",\n"
-                    + "          \"result in the query becoming invalid or inaccurate if the CDR schema has changed.\",\n"
-                    + "          \"If you've reviewed the query for correct performance, you can remove\",\n"
+                    + "    writeLines(c(\n"
+                    + "        paste(\"WARNING: CDR Version mismatch - your query is running in a workspace with a different\",\n"
+                    + "            \"CDR version (\", runtime_cdr,\") from the one where it was first generated. This may\",\n"
+                    + "            \"result in the query becoming invalid or inaccurate if the CDR schema has changed.\"),\n"
+                    + "        \"\",\n"
+                    + "        paste(\"If you've reviewed the query for correct performance, you can remove\",\n"
                     + "          \"this warning by updating the version number in the notebook_cdr variable above\",\n"
-                    + "          \"to\", runtime_cdr, \".\"))\n"
+                    + "          \"to\", runtime_cdr, \".\")))\n"
                     + "}",
                 cdrVersion.getBigqueryProject(), cdrVersion.getBigqueryDataset());
         sqlSection =
