@@ -195,11 +195,12 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
       </PopupTrigger>
       <h3 style={styles.sectionHeader}>Application configuration</h3>
       {/* TODO(RW-5413): Populate the image list with server driven options. */}
-      <Dropdown style={{width: '100%'}}
+      {toolDockerImage && <Dropdown style={{width: '100%'}}
                 data-test-id='runtime-image-dropdown'
                 disabled={true}
-                options={toolDockerImage ? [toolDockerImage] : []}
+                options={[toolDockerImage]}
                 value={toolDockerImage}/>
+      }
       {/* Runtime customization: change detailed machine configuration options. */}
       <h3 style={styles.sectionHeader}>Cloud compute profile</h3>
       <FlexRow style={{justifyContent: 'space-between'}}>
