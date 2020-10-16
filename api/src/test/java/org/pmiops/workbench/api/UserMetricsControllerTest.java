@@ -29,6 +29,7 @@ import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentResource;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -37,6 +38,8 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.Cohort;
+import org.pmiops.workbench.model.ConceptSet;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.RecentResourceRequest;
 import org.pmiops.workbench.model.WorkspaceResource;
 import org.pmiops.workbench.model.WorkspaceResourceResponse;
@@ -109,6 +112,14 @@ public class UserMetricsControllerTest {
     dbCohort.setLastModifiedTime(new Timestamp(fakeClock.millis()));
     dbCohort.setCreationTime(new Timestamp(fakeClock.millis()));
 
+    DbConceptSet dbConceptSet = new DbConceptSet();
+    dbConceptSet.setName("Concept Set");
+    dbConceptSet.setDescription("This is a Condition Concept Set");
+    dbConceptSet.setConceptSetId(1L);
+    dbConceptSet.setDomainEnum(Domain.CONDITION);
+    dbConceptSet.setLastModifiedTime(new Timestamp(fakeClock.millis()));
+    dbConceptSet.setCreationTime(new Timestamp(fakeClock.millis()));
+
     dbWorkspace1 = new DbWorkspace();
     dbWorkspace1.setWorkspaceId(1L);
     dbWorkspace1.setWorkspaceNamespace("workspaceNamespace1");
@@ -141,6 +152,7 @@ public class UserMetricsControllerTest {
     dbUserRecentResource3 = new DbUserRecentResource();
     dbUserRecentResource3.setNotebookName("gs://bucketFile/notebooks/notebook2.ipynb");
     dbUserRecentResource3.setCohort(null);
+    dbUserRecentResource3.setConceptSet(dbConceptSet);
     dbUserRecentResource3.setLastAccessDate(new Timestamp(fakeClock.millis() - 10000));
     dbUserRecentResource3.setUserId(dbUser.getUserId());
     dbUserRecentResource3.setWorkspaceId(dbWorkspace2.getWorkspaceId());
@@ -390,5 +402,17 @@ public class UserMetricsControllerTest {
   public void testHasValidBlobIdIfNotebookNamePresent_invalidNotebookName_fails() {
     dbUserRecentResource1.setNotebookName("invalid-notebook@name");
     assertFalse(userMetricsController.hasValidBlobIdIfNotebookNamePresent(dbUserRecentResource1));
+  }
+
+  @Test
+  public void testUserRecentConceptResourceHasDomainInformation() {
+    WorkspaceResourceResponse recentResources =
+        userMetricsController.getUserRecentResources().getBody();
+
+    ConceptSet conceptSet = new ConceptSet();
+    assertNotNull(recentResources);
+    assertEquals(3, recentResources.size());
+    assertNotNull(recentResources.get(2).getConceptSet());
+    assertEquals(recentResources.get(2).getConceptSet().getDomain(), Domain.CONDITION);
   }
 }
