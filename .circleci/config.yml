@@ -301,11 +301,11 @@ commands:
             yarn test:ci $(cat /tmp/tests-to-run)
           no_output_timeout: 15m
       - store_artifacts:
-          path: e2e/logs/*
+          path: e2e/logs
           destination: logs
           when: always
       - store_test_results:
-          path: ~/workbench/e2e/logs/*
+          path: ~/workbench/e2e/logs
 
   store-commit-message:
     description: "Export Git commit message to environment variable"
