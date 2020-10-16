@@ -160,24 +160,21 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
                               key={i}
                               onClick={() => {
                                 // renaming to avoid shadowing
-                                const presetDiskSize =
-                                    (preset.runtimeTemplate.gceConfig && preset.runtimeTemplate.gceConfig.bootDiskSize)
-                                    || (preset.runtimeTemplate.dataprocConfig && preset.runtimeTemplate.dataprocConfig.masterDiskSize);
-                                const presetMachineName =
-                                    (preset.runtimeTemplate.gceConfig && preset.runtimeTemplate.gceConfig.machineType)
-                                    || (
-                                        preset.runtimeTemplate.dataprocConfig
-                                        && preset.runtimeTemplate.dataprocConfig.masterMachineType
-                                    );
+                                let presetDiskSize;
+                                let presetMachineName;
+                                if (preset.runtimeTemplate.gceConfig) {
+                                  presetDiskSize = preset.runtimeTemplate.gceConfig.bootDiskSize;
+                                  presetMachineName = preset.runtimeTemplate.gceConfig.machineType;
+                                }
+                                else if (preset.runtimeTemplate.dataprocConfig) {
+                                  presetDiskSize = preset.runtimeTemplate.dataprocConfig.masterDiskSize;
+                                  presetMachineName = preset.runtimeTemplate.dataprocConfig.masterMachineType;
+                                }
                                 const presetMachineType = fp.find(({name}) => name === presetMachineName, validLeonardoMachineTypes);
+
                                 setUpdatedDiskSize(presetDiskSize);
-                                if (presetDiskSize !== masterDiskSize && presetDiskSize !== updatedDiskSize) {
-                                  setRuntimeConfigurationType(RuntimeConfigurationType.GeneralAnalysis);
-                                }
                                 setUpdatedMachine(presetMachineType);
-                                if (presetMachineName !== masterMachineType && presetMachineName !== updatedMachineType) {
-                                  setRuntimeConfigurationType(RuntimeConfigurationType.GeneralAnalysis);
-                                }
+                                setRuntimeConfigurationType(RuntimeConfigurationType.GeneralAnalysis);
                               }}>
                                 {preset.displayName}
                               </MenuItem>;
