@@ -165,8 +165,7 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
                                 if (preset.runtimeTemplate.gceConfig) {
                                   presetDiskSize = preset.runtimeTemplate.gceConfig.bootDiskSize;
                                   presetMachineName = preset.runtimeTemplate.gceConfig.machineType;
-                                }
-                                else if (preset.runtimeTemplate.dataprocConfig) {
+                                } else if (preset.runtimeTemplate.dataprocConfig) {
                                   presetDiskSize = preset.runtimeTemplate.dataprocConfig.masterDiskSize;
                                   presetMachineName = preset.runtimeTemplate.dataprocConfig.masterMachineType;
                                 }
