@@ -3,7 +3,6 @@ import {PhysicalMeasurementsCriteria} from 'app/page/cohort-search-page';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
-import {waitForText} from 'utils/waits-utils';
 import {TabLabels} from 'app/page/workspace-base';
 
 describe('Cohorts UI tests', () => {
@@ -36,7 +35,7 @@ describe('Cohorts UI tests', () => {
     const group1 = cohortPage.findIncludeParticipantsGroup('Group 1');
     const group1Count = await group1.includePhysicalMeasurement(PhysicalMeasurementsCriteria.Weight, 190);
     // Checking Group 1 Count.
-    await waitForText(page, group1Count, {xpath: group1.getGroupCountXpath()});
+    expect(group1Count).toEqual(await group1.getGroupCount());
 
     // Cannot verify graphical charts display, but we can check charts points existance.
     const chartPointsSelector = '//*[@class="highcharts-root"]//*[@x and @y and @width and @height and contains(@class, "highcharts-point")]';

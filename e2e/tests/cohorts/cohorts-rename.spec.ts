@@ -47,7 +47,7 @@ describe('User can create, modify, rename and delete Cohort', () => {
     await group1.includeAge(minAge, maxAge);
 
     // Checking Group 1 count is numerical and greater than 1.
-    const group1Count = await waitForNumericalString(page, group1.getGroupCountXpath());
+    const group1Count = await waitForNumericalString(page, group1.getGroupCountXpath(), 60000);
     const group1CountInt = Number(group1Count.replace(/,/g, ''));
     expect(group1CountInt).toBeGreaterThan(1);
     console.log('Include Participants Group 1 Demographics Age Count = ' + group1CountInt);
@@ -76,7 +76,7 @@ describe('User can create, modify, rename and delete Cohort', () => {
     // Click cohort link. Open cohort build page.
     const cohortLink = await Link.findByName(page, {name: cohortName});
     await cohortLink.clickAndWait();
-    await waitForText(page, totalCount, {xpath: FieldSelector.TotalCount});
+    await waitForText(page, totalCount, {xpath: FieldSelector.TotalCount}, 60000);
 
     // Remove Exclude Group 3.
     const groupCriteriasList = await group3.deleteGroup();

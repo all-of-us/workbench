@@ -107,7 +107,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
    * @return {string} Total Count.
    */
   async getTotalCount(): Promise<string> {
-    return waitForNumericalString(this.page, FieldSelector.TotalCount);
+    return waitForNumericalString(this.page, FieldSelector.TotalCount, 60000);
   }
 
   getSaveCohortButton(): Button {
