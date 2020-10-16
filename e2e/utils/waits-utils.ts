@@ -253,8 +253,6 @@ export async function waitForText(page: Page,
       throw e;
     }
   }
-
-
 }
 
 /**
