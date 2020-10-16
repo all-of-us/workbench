@@ -131,7 +131,8 @@ const DataProcConfig = ({onChange, dataprocConfig}) => {
     const dataprocConfigChanged = workers !== numberOfWorkers ||
     preemtible !== numberOfPreemptibleWorkers ||
     updatedDiskSize !== workerDiskSize || 
-    updatedWorkerMachine;
+    updatedWorkerMachine || 
+    !dataprocConfig;
 
     onChange(dataprocConfigChanged ? {workerMachineType: machineType, workerDiskSize: updatedDiskSize, numberOfWorkers: workers, numberOfPreemptibleWorkers: preemtible} : null);
   }, [workers, preemtible, updatedWorkerMachine, updatedDiskSize]);
@@ -185,14 +186,15 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
 
   const [updatedDiskSize, setUpdatedDiskSize] = useState(masterDiskSize);
   const [updatedMachine, setUpdatedMachine] = useState(null);
-  const [updatedCompute, setUpdatedCompute] = useState<ComputeType>();
-  const [updatedDataprocConfig, setUpdateDataprocConfig] = useState();
+  const [updatedCompute, setUpdatedCompute] = useState<ComputeType>(dataprocConfig ? ComputeType.dataproc : ComputeType.standard);
+  const [updatedDataprocConfig, setUpdatedDataprocConfig] = useState();
 
   const updatedMachineType = updatedMachine && updatedMachine.name;
 
   const {workerMachineType = null, workerDiskSize = null, numberOfWorkers = null, numberOfPreemptibleWorkers = null} = dataprocConfig || {};
   const runtimeChanged = updatedMachine || updatedDiskSize !== masterDiskSize || updatedDataprocConfig;
 
+  console.log(updatedDataprocConfig)
   if (currentRuntime === undefined) {
     return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
   } else if (currentRuntime === null) {
@@ -248,7 +250,7 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
                   value={updatedCompute || ComputeType.standard}
                   onChange={({value}) => setUpdatedCompute(value)}
                   />
-        {updatedCompute === ComputeType.dataproc && <DataProcConfig onChange={setUpdateDataprocConfig} dataprocConfig={dataprocConfig} /> }
+        {updatedCompute === ComputeType.dataproc && <DataProcConfig onChange={setUpdatedDataprocConfig} dataprocConfig={dataprocConfig} /> }
       </FlexColumn>
     </div>
     <FlexRow style={{justifyContent: 'flex-end', marginTop: '.75rem'}}>
