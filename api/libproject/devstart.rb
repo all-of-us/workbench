@@ -1702,6 +1702,61 @@ Common.register_command({
     :fn => ->(*args) {delete_workspaces(DELETE_WORKSPACES_CMD, *args)}
 })
 
+def delete_workspace_rdr_export(cmd_name, *args)
+  common = Common.new
+  ensure_docker cmd_name, args
+
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = true
+  op.opts.project = TEST_PROJECT
+
+  op.add_typed_option(
+      "--dry_run=[dry_run]",
+      TrueClass,
+      ->(opts, v) { opts.dry_run = v},
+      "When true, print debug lines instead of performing writes. Defaults to true.")
+
+  op.add_typed_option(
+      "--workspace-list-filename [workspace-list-filename]",
+      String,
+      ->(opts, v) { opts.workspaceListFilename = v},
+      "File containing list of workspaces to export to RDR.
+      Each line should contain a single workspace id, separated by a comma")
+
+  # Create a cloud context and apply the DB connection variables to the environment.
+  # These will be read by Gradle and passed as Spring Boot properties to the command-line.
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate()
+
+  if op.opts.dry_run
+    common.status "DRY RUN -- CHANGES WILL NOT BE PERSISTED"
+  end
+
+  flags = ([
+      ["--workspace-list-filename", op.opts.workspaceListFilename]
+  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+  if op.opts.dry_run
+    flags += ["--dry-run"]
+  end
+  # Gradle args need to be single-quote wrapped.
+  flags.map! { |f| "'#{f}'" }
+
+  with_cloud_proxy_and_db(gcc) do
+    common.run_inline %W{
+        gradle deleteWorkspaceFromRdrExport
+       -PappArgs=[#{flags.join(',')}]}
+  end
+end
+
+DELETE_WORKSPACE_RDR_EXPORT = "delete-workspace-rdr-export";
+
+Common.register_command({
+    :invocation => DELETE_WORKSPACE_RDR_EXPORT,
+    :description => "Delete workspace information from rdr_Export table, making it eligible for next Export job run.\n",
+    :fn => ->(*args) {delete_workspace_rdr_export(DELETE_WORKSPACE_RDR_EXPORT, *args)}
+})
+
 def authority_options(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.remove = false

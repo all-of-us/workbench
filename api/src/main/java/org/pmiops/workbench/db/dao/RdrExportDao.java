@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.dao;
 
 import java.math.BigInteger;
 import java.util.List;
+import javax.transaction.Transactional;
 import org.pmiops.workbench.db.model.DbRdrExport;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -25,4 +26,7 @@ public interface RdrExportDao extends CrudRepository<DbRdrExport, Long> {
   List<BigInteger> findDbWorkspaceIdsToExport();
 
   DbRdrExport findByEntityTypeAndEntityId(short entity_type, long entity_id);
+
+  @Transactional
+  void deleteDbRdrExportsByEntityTypeAndEntityId(short entity_type, Long entity_id);
 }
