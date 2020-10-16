@@ -341,7 +341,8 @@ public class DataSetController implements DataSetApiDelegate {
 
     if (GenomicsDataTypeEnum.MICROARRAY.equals(dataSetExportRequest.getGenomicsDataType())) {
       if (dbWorkspace.getCdrVersion().getMicroarrayBigqueryDataset() == null) {
-        throw new FailedPreconditionException("The workspace CDR version does not have microarray data");
+        throw new FailedPreconditionException(
+            "The workspace CDR version does not have microarray data");
       }
       if (!dataSetExportRequest.getKernelType().equals(KernelTypeEnum.PYTHON)) {
         throw new BadRequestException("Genomics code generation is only supported in Python");
