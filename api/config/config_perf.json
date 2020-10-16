@@ -115,7 +115,7 @@
     "enableReportingUploadCron": false,
     "enableCOPESurvey": false,
     "enableCustomRuntimes": false,
-    "enableGceAsNotebookRuntimeDefault": false
+    "enableGceAsNotebookRuntimeDefault": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-perf",
