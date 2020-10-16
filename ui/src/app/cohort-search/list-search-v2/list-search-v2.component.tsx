@@ -359,7 +359,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
 
     renderRow(row: any, child: boolean, elementId: string) {
       const {hoverId, ingredients} = this.state;
-      const attributes = row.hasAttributes;
+      const attributes = this.props.source === 'criteria' && row.hasAttributes;
       const brand = row.type === CriteriaType.BRAND;
       const displayName = row.name + (brand ? ' (BRAND NAME)' : '');
       const selected = !attributes && !brand && this.props.selectedIds.includes(this.getParamId(row));
@@ -410,14 +410,6 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
           <ClrIcon style={styles.infoIcon} className='is-solid' shape='info-standard'/>
         </TooltipTrigger>
       </FlexRow>;
-    }
-
-    get isConcept() {
-      return this.props.source && this.props.source === 'concept';
-    }
-
-    hideAttributesRow(row) {
-      return !row.hasAttributes || !this.isConcept;
     }
 
     render() {
@@ -483,10 +475,10 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
                   const open = ingredients[row.id] && ingredients[row.id].open;
                   const err = ingredients[row.id] && ingredients[row.id].error;
                   return <React.Fragment key={index}>
-                    {this.hideAttributesRow(row)  && this.renderRow(row, false, index)}
+                    {this.renderRow(row, false, index)}
                     {open && !err && ingredients[row.id].items.map((item, i) => {
                       return <React.Fragment key={i}>
-                        {this.hideAttributesRow(row) && this.renderRow(item, true, `${index}.${i}`)}
+                        {this.renderRow(item, true, `${index}.${i}`)}
                       </React.Fragment>;
                     })}
                     {open && err && <tr>
