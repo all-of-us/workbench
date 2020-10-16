@@ -1652,7 +1652,9 @@ def delete_workspaces(cmd_name, *args)
 
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.dry_run = true
-  op.opts.project = TEST_PROJECT
+  if op.opts.project.to_s.empty?
+    op.opts.project = TEST_PROJECT
+  end
 
   op.add_typed_option(
       "--dry_run=[dry_run]",
