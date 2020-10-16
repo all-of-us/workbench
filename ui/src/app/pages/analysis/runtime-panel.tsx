@@ -127,7 +127,6 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
   const runtimeOps = useStore(runtimeOpsStore);
   const [currentRuntime, setRequestedRuntime] = useCustomRuntime(workspace.namespace);
 
-  const activeRuntimeOp: RuntimeOperation = runtimeOps.opsByWorkspaceNamespace[workspace.namespace];
   const {status = RuntimeStatus.Unknown, toolDockerImage = '', dataprocConfig = null, gceConfig = {}} = currentRuntime || {};
   const masterMachineType = !!dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
   const masterDiskSize = !!dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.bootDiskSize;
