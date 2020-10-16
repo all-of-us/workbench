@@ -151,36 +151,38 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
                     content={
                       <React.Fragment>
                         {
-                          fp.filter(['displayName', 'General Analysis'], runtimePresets)
-                            // regular .map used here bc fp map won't provide index as an iteratee argument
-                            .map((preset, i) => {
+                          fp.flow(
+                            fp.filter(['displayName', 'General Analysis']),
+                            fp.toPairs,
+                            fp.map(([i, preset]) => {
                               return <MenuItem
-                                  style={styles.presetMenuItem}
-                                  key={i}
-                                  onClick={() => {
-                                    // renaming to avoid shadowing
-                                    const presetDiskSize =
-                                        (preset.runtimeTemplate.gceConfig && preset.runtimeTemplate.gceConfig.bootDiskSize)
-                                        || (preset.runtimeTemplate.dataprocConfig && preset.runtimeTemplate.dataprocConfig.masterDiskSize);
-                                    const presetMachineName =
-                                        (preset.runtimeTemplate.gceConfig && preset.runtimeTemplate.gceConfig.machineType)
-                                        || (
-                                          preset.runtimeTemplate.dataprocConfig
-                                          && preset.runtimeTemplate.dataprocConfig.masterMachineType
-                                        );
-                                    const presetMachineType = fp.find(({name}) => name === presetMachineName, validLeonardoMachineTypes);
-                                    if (presetDiskSize !== masterDiskSize) {
-                                      setUpdatedDiskSize(presetDiskSize);
-                                      setRuntimeConfigurationType(RuntimeConfigurationType.GeneralAnalysis);
-                                    }
-                                    if (presetMachineName !== masterMachineType) {
-                                      setUpdatedMachine(presetMachineType);
-                                      setRuntimeConfigurationType(RuntimeConfigurationType.GeneralAnalysis);
-                                    }
-                                  }}>
+                              style={styles.presetMenuItem}
+                              key={i}
+                              onClick={() => {
+                                // renaming to avoid shadowing
+                                const presetDiskSize =
+                                    (preset.runtimeTemplate.gceConfig && preset.runtimeTemplate.gceConfig.bootDiskSize)
+                                    || (preset.runtimeTemplate.dataprocConfig && preset.runtimeTemplate.dataprocConfig.masterDiskSize);
+                                const presetMachineName =
+                                    (preset.runtimeTemplate.gceConfig && preset.runtimeTemplate.gceConfig.machineType)
+                                    || (
+                                        preset.runtimeTemplate.dataprocConfig
+                                        && preset.runtimeTemplate.dataprocConfig.masterMachineType
+                                    );
+                                const presetMachineType = fp.find(({name}) => name === presetMachineName, validLeonardoMachineTypes);
+                                setUpdatedDiskSize(presetDiskSize);
+                                if (presetDiskSize !== masterDiskSize && presetDiskSize !== updatedDiskSize) {
+                                  setRuntimeConfigurationType(RuntimeConfigurationType.GeneralAnalysis);
+                                }
+                                setUpdatedMachine(presetMachineType);
+                                if (presetMachineName !== masterMachineType && presetMachineName !== updatedMachineType) {
+                                  setRuntimeConfigurationType(RuntimeConfigurationType.GeneralAnalysis);
+                                }
+                              }}>
                                 {preset.displayName}
                               </MenuItem>;
                             })
+                          )(runtimePresets)
                         }
                       </React.Fragment>
                     }>
