@@ -251,7 +251,7 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
             configurationType: runtimeConfigurationType,
             gceConfig: {
               machineType: updatedMachineType || masterMachineType,
-              bootDiskSize: updatedDiskSize || masterDiskSize
+              diskSize: updatedDiskSize || masterDiskSize
             }
           })
         }
