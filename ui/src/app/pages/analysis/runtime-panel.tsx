@@ -19,8 +19,9 @@ import {InputNumber} from 'primereact/inputnumber';
 import { RuntimeStatus } from 'generated';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import { worker } from 'cluster';
 
-const {useState, Fragment} = React;
+const {useState, useEffect, Fragment} = React;
 
 const styles = reactStyles({
   sectionHeader: {
@@ -44,82 +45,136 @@ const styles = reactStyles({
 });
 
 const defaultMachineType = allMachineTypes.find(({name}) => name === 'n1-standard-4');
+enum ComputeType {
+  standard = 'Standard VM',
+  dataproc = 'Dataproc Cluster'
+};
 
 export interface Props {
   workspace: WorkspaceData;
 }
 
-const MachineSelector = ({onChange, updatedMachine, masterMachineType}) => {
-  const initialMachineType = fp.find(({name}) => name === masterMachineType, allMachineTypes) || defaultMachineType;
+const MachineSelector = ({onChange, updatedMachine, machineType}) => {
+  const initialMachineType = fp.find(({name}) => name === machineType, allMachineTypes) || defaultMachineType;
   const {cpu, memory} = updatedMachine || initialMachineType;
   const maybeGetMachine = machineRequested => fp.equals(machineRequested, initialMachineType) ? null : machineRequested;
 
   return <Fragment>
     <div>
-      <label htmlFor='runtime-cpu'
-            style={{marginRight: '.25rem'}}>CPUs</label>
+      <label htmlFor='runtime-cpu' style={{marginRight: '.25rem'}}>CPUs</label>
       <Dropdown id='runtime-cpu'
-                options={fp.flow(
-                  // Show all CPU options.
-                  fp.map('cpu'),
-                  // In the event that was remove a machine type from our set of valid
-                  // configs, we want to continue to allow rendering of the value here.
-                  // Union also makes the CPU values unique.
-                  fp.union([cpu]),
-                  fp.sortBy(fp.identity)
-                )(validLeonardoMachineTypes)}
-                onChange={
-                  ({value}) => fp.flow(
-                    fp.sortBy('memory'),
-                    fp.find({cpu: value}),
-                    maybeGetMachine,
-                    onChange)(validLeonardoMachineTypes)
-                }
-                value={cpu}/>
+        options={fp.flow(
+          // Show all CPU options.
+          fp.map('cpu'),
+          // In the event that was remove a machine type from our set of valid
+          // configs, we want to continue to allow rendering of the value here.
+          // Union also makes the CPU values unique.
+          fp.union([cpu]),
+          fp.sortBy(fp.identity)
+        )(validLeonardoMachineTypes)}
+        onChange={
+          ({value}) => fp.flow(
+            fp.sortBy('memory'),
+            fp.find({cpu: value}),
+            maybeGetMachine,
+            onChange)(validLeonardoMachineTypes)
+        }
+        value={cpu}/>
     </div>
     <div>
-      <label htmlFor='runtime-ram'
-            style={{marginRight: '.25rem'}}>RAM (GB)</label>
+      <label htmlFor='runtime-ram' style={{marginRight: '.25rem'}}>RAM (GB)</label>
       <Dropdown id='runtime-ram'
-                options={fp.flow(
-                  // Show valid memory options as constrained by the currently selected CPU.
-                  fp.filter(({cpu: availableCpu}) => availableCpu === cpu),
-                  fp.map('memory'),
-                  // See above comment on CPU union.
-                  fp.union([memory]),
-                  fp.sortBy(fp.identity)
-                )(validLeonardoMachineTypes)}
-                onChange={
-                  ({value}) => fp.flow(
-                    fp.find({cpu, memory: value}),
-                    // If the selected machine is not different from the current machine return null
-                    maybeGetMachine,
-                    onChange
-                    )(validLeonardoMachineTypes) }
-                value={memory}
-                />
+        options={fp.flow(
+          // Show valid memory options as constrained by the currently selected CPU.
+          fp.filter(({cpu: availableCpu}) => availableCpu === cpu),
+          fp.map('memory'),
+          // See above comment on CPU union.
+          fp.union([memory]),
+          fp.sortBy(fp.identity)
+        )(validLeonardoMachineTypes)}
+        onChange={
+          ({value}) => fp.flow(
+            fp.find({cpu, memory: value}),
+            // If the selected machine is not different from the current machine return null
+            maybeGetMachine,
+            onChange
+            )(validLeonardoMachineTypes) }
+        value={memory}
+        />
     </div>
   </Fragment>;
 };
 
-const DiskSizeSelection = ({onChange, updatedDiskSize, masterDiskSize}) => {
+const DiskSizeSelection = ({onChange, updatedDiskSize, diskSize}) => {
   return <div>
-    <label htmlFor='runtime-disk'
-          style={{marginRight: '.25rem'}}>Disk (GB)</label>
+    <label htmlFor='runtime-disk' style={{marginRight: '.25rem'}}>Disk (GB)</label>
       <InputNumber id='runtime-disk'
-                showButtons
-                decrementButtonClassName='p-button-secondary'
-                incrementButtonClassName='p-button-secondary'
-                value={updatedDiskSize || masterDiskSize}
-                inputStyle={{padding: '.75rem .5rem', width: '2rem'}}
-                onChange={({value}) => onChange(value === masterDiskSize ? null : value)}
-                min={50 /* Runtime API has a minimum 50GB requirement. */}/>
+        showButtons
+        decrementButtonClassName='p-button-secondary'
+        incrementButtonClassName='p-button-secondary'
+        value={updatedDiskSize || diskSize}
+        inputStyle={{padding: '.75rem .5rem', width: '2rem'}}
+        onChange={({value}) => onChange(value)}
+        min={50 /* Runtime API has a minimum 50GB requirement. */}/>
   </div>;
 };
 
+const DataProcConfig = ({onChange, dataprocConfig}) => {
+  const {workerMachineType = defaultMachineType, workerDiskSize = 50, numberOfWorkers = 2, numberOfPreemptibleWorkers = 0} = dataprocConfig || {};
+  const [workers, setWorkers] = useState(numberOfWorkers);
+  const [preemtible, setPreemptible] = useState(numberOfPreemptibleWorkers);
+  const [updatedWorkerMachine, setUpdatedWorkerMachine] = useState(null);
+  const [updatedDiskSize, setUpdatedDiskSize] = useState(workerDiskSize);
+
+  useEffect(() => {
+    const machineType = updatedWorkerMachine && updatedWorkerMachine.name;
+    const dataprocConfigChanged = workers !== numberOfWorkers ||
+    preemtible !== numberOfPreemptibleWorkers ||
+    updatedDiskSize !== workerDiskSize || 
+    updatedWorkerMachine;
+
+    onChange(dataprocConfigChanged ? {workerMachineType: machineType, workerDiskSize: updatedDiskSize, numberOfWorkers: workers, numberOfPreemptibleWorkers: preemtible} : null);
+  }, [workers, preemtible, updatedWorkerMachine, updatedDiskSize]);
+
+  return <div>
+    <FlexRow style={{justifyContent: 'space-between'}}>
+      <div>
+        <label htmlFor='num-workers' style={{marginRight: '.25rem'}}>Workers</label>
+        <InputNumber id='num-workers'
+          showButtons
+          decrementButtonClassName='p-button-secondary'
+          incrementButtonClassName='p-button-secondary'
+          value={workers}
+          inputStyle={{padding: '.75rem .5rem', width: '2rem'}}
+          onChange={({value}) => {
+            setWorkers(value);
+            if (workers < preemtible) {
+              setPreemptible(workers);
+            }
+          }}
+          min={2}/>
+      </div>
+      <div>
+        <label htmlFor='num-preemptible' style={{marginRight: '.25rem'}}>Preemptible</label>
+        <InputNumber id='num-preemptible'
+          showButtons
+          decrementButtonClassName='p-button-secondary'
+          incrementButtonClassName='p-button-secondary'
+          value={workers < preemtible ? workers : preemtible}
+          inputStyle={{padding: '.75rem .5rem', width: '2rem'}}
+          onChange={({value}) => setPreemptible(value)}
+          min={0}
+          max={workers}/>
+      </div>
+    </FlexRow>
+    <FlexRow style={{justifyContent: 'space-between'}}>
+      <MachineSelector machineType={workerMachineType} onChange={setUpdatedWorkerMachine} updatedMachine={updatedWorkerMachine}/>
+      <DiskSizeSelection diskSize={workerDiskSize} onChange={setUpdatedDiskSize} updatedDiskSize={updatedDiskSize} />
+    </FlexRow> 
+  </div>;
+}
+
 export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
-  const [updatedDiskSize, setUpdatedDiskSize] = useState(null);
-  const [updatedMachine, setUpdatedMachine] = useState(null);
   const runtimeOps = useStore(runtimeOpsStore);
   const [currentRuntime, setRequestedRuntime] = useCustomRuntime(workspace.namespace);
 
@@ -127,10 +182,16 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
   const {status = RuntimeStatus.Unknown, toolDockerImage = '', dataprocConfig = null, gceConfig = {}} = currentRuntime || {};
   const masterMachineType = !!dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
   const masterDiskSize = !!dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.bootDiskSize;
+
+  const [updatedDiskSize, setUpdatedDiskSize] = useState(masterDiskSize);
+  const [updatedMachine, setUpdatedMachine] = useState(null);
+  const [updatedCompute, setUpdatedCompute] = useState<ComputeType>();
+  const [updatedDataprocConfig, setUpdateDataprocConfig] = useState();
+
   const updatedMachineType = updatedMachine && updatedMachine.name;
 
-  const isDataproc = (currentRuntime && !!currentRuntime.dataprocConfig);
-  const runtimeChanged = updatedMachine || updatedDiskSize;
+  const {workerMachineType = null, workerDiskSize = null, numberOfWorkers = null, numberOfPreemptibleWorkers = null} = dataprocConfig || {};
+  const runtimeChanged = updatedMachine || updatedDiskSize !== masterDiskSize || updatedDataprocConfig;
 
   if (currentRuntime === undefined) {
     return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
@@ -176,16 +237,18 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
       {/* Runtime customization: change detailed machine configuration options. */}
       <h3 style={styles.sectionHeader}>Cloud compute profile</h3>
       <FlexRow style={{justifyContent: 'space-between'}}>
-        <MachineSelector updatedMachine={updatedMachine} onChange={setUpdatedMachine} masterMachineType={masterMachineType}/>
-        <DiskSizeSelection updatedDiskSize={updatedDiskSize} onChange={setUpdatedDiskSize} masterDiskSize={masterDiskSize}/>
+        <MachineSelector updatedMachine={updatedMachine} onChange={setUpdatedMachine} machineType={masterMachineType}/>
+        <DiskSizeSelection updatedDiskSize={updatedDiskSize} onChange={setUpdatedDiskSize} diskSize={masterDiskSize}/>
       </FlexRow>
       <FlexColumn style={{marginTop: '1rem'}}>
         <label htmlFor='runtime-compute'>Compute type</label>
         <Dropdown id='runtime-compute'
                   style={{width: '10rem'}}
-                  disabled={true}
-                  options={['Dataproc cluster', 'Standard VM']}
-                  value={isDataproc ? 'Dataproc cluster' : 'Standard VM'}/>
+                  options={[ComputeType.dataproc, ComputeType.standard]}
+                  value={updatedCompute || ComputeType.standard}
+                  onChange={({value}) => setUpdatedCompute(value)}
+                  />
+        {updatedCompute === ComputeType.dataproc && <DataProcConfig onChange={setUpdateDataprocConfig} dataprocConfig={dataprocConfig} /> }
       </FlexColumn>
     </div>
     <FlexRow style={{justifyContent: 'flex-end', marginTop: '.75rem'}}>
