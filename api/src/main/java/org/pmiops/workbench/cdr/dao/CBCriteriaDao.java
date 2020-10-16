@@ -18,7 +18,7 @@ import org.springframework.data.repository.query.Param;
  * Some of our trees are polyhierarchical(Snomed and drug). Since a node may exist multiple times in
  * this scenario with the same concept_id we only want to return it once from a user search. The
  * query to rank/min this to a single row was expensive. Instead, when building the cb_criteria
- * table we add domain_rank1 to the synonyms column for the first node that matches in the tree for
+ * table we add domain_rank1 to the full_text column for the first node that matches in the tree for
  * a specific concept_id. This allows us to use the full text index and makes the query much faster.
  */
 public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
@@ -86,7 +86,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(
       value =
-          "select c from DbCriteria c where domainId = :domainId and conceptId in (:conceptIds)")
+          "select c from DbCriteria c where domainId = :domainId and conceptId in (:conceptIds) and match(fullText, concat('+[', :domainId, '_rank1]')) > 0")
   List<DbCriteria> findCriteriaByDomainIdAndConceptIds(
       @Param("domainId") String domainId, @Param("conceptIds") Collection<String> conceptIds);
 
@@ -94,7 +94,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
   @Query(
       value =
           "select c from DbCriteria c where conceptId in (:parentConceptIds) and domainId = :domain and type = :type and standard = :standard and "
-              + "match(synonyms, concat('+[', :domain, '_rank1]')) > 0")
+              + "match(fullText, concat('+[', :domain, '_rank1]')) > 0")
   List<DbCriteria> findCriteriaParentsByDomainAndTypeAndParentConceptIds(
       @Param("domain") String domain,
       @Param("type") String type,
@@ -141,7 +141,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(
       value =
-          "select cr from DbCriteria cr where cr.conceptId in (:conceptIds) and cr.standard = :standard and cr.domainId = :domain and match(cr.synonyms, concat('+[', :domain, '_rank1]')) > 0)")
+          "select cr from DbCriteria cr where cr.conceptId in (:conceptIds) and cr.standard = :standard and cr.domainId = :domain and match(cr.fullText, concat('+[', :domain, '_rank1]')) > 0)")
   List<DbCriteria> findStandardCriteriaByDomainAndConceptId(
       @Param("domain") String domain,
       @Param("standard") Boolean isStandard,
@@ -168,7 +168,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(
       value =
-          "select c from DbCriteria c where domainId=:domain and type=:type and standard=:standard and code like upper(concat(:term,'%')) and match(synonyms, concat('+[', :domain, '_rank1]')) > 0 order by c.count desc")
+          "select c from DbCriteria c where domainId=:domain and type=:type and standard=:standard and code like upper(concat(:term,'%')) and match(fullText, concat('+[', :domain, '_rank1]')) > 0 order by c.count desc")
   Page<DbCriteria> findCriteriaByDomainAndTypeAndCode(
       @Param("domain") String domain,
       @Param("type") String type,
@@ -178,7 +178,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(
       value =
-          "select c from DbCriteria c where domainId=:domain and standard=:standard and code like upper(concat(:term,'%')) and match(synonyms, concat('+[', :domain, '_rank1]')) > 0 order by c.count desc")
+          "select c from DbCriteria c where domainId=:domain and standard=:standard and code like upper(concat(:term,'%')) and match(fullText, concat('+[', :domain, '_rank1]')) > 0 order by c.count desc")
   Page<DbCriteria> findCriteriaByDomainAndCode(
       @Param("domain") String domain,
       @Param("standard") Boolean isStandard,
@@ -187,8 +187,8 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(
       value =
-          "select c from DbCriteria c where domainId=:domain and standard=:standard and match(synonyms, concat(:term, '+[', :domain, '_rank1]')) > 0 order by c.count desc, c.name asc")
-  Page<DbCriteria> findCriteriaByDomainAndSynonyms(
+          "select c from DbCriteria c where domainId=:domain and standard=:standard and match(fullText, concat(:term, '+[', :domain, '_rank1]')) > 0 order by c.count desc, c.name asc")
+  Page<DbCriteria> findCriteriaByDomainAndFullText(
       @Param("domain") String domain,
       @Param("standard") Boolean isStandard,
       @Param("term") String term,
@@ -196,7 +196,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(
       value =
-          "select c from DbCriteria c where domainId=:domain and type=:type and standard=:standard and hierarchy=1 and code like upper(concat(:term,'%')) and match(synonyms, concat('+[', :domain, '_rank1]')) > 0 order by c.count desc")
+          "select c from DbCriteria c where domainId=:domain and type=:type and standard=:standard and hierarchy=1 and code like upper(concat(:term,'%')) and match(fullText, concat('+[', :domain, '_rank1]')) > 0 order by c.count desc")
   List<DbCriteria> findCriteriaByDomainAndTypeAndStandardAndCode(
       @Param("domain") String domain,
       @Param("type") String type,
@@ -206,8 +206,8 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(
       value =
-          "select c from DbCriteria c where domainId = :domain and type = :type and standard = :standard and hierarchy=1 and match(synonyms, concat(:term, '+[', :domain, '_rank1]')) > 0 order by c.count desc")
-  List<DbCriteria> findCriteriaByDomainAndTypeAndStandardAndSynonyms(
+          "select c from DbCriteria c where domainId = :domain and type = :type and standard = :standard and hierarchy=1 and match(fullText, concat(:term, '+[', :domain, '_rank1]')) > 0 order by c.count desc")
+  List<DbCriteria> findCriteriaByDomainAndTypeAndStandardAndFullText(
       @Param("domain") String domain,
       @Param("type") String type,
       @Param("standard") Boolean standard,
@@ -236,7 +236,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
               + "join concept c1 on (cr.concept_id_2 = c1.concept_id "
               + "and cr.concept_id_1 = :conceptId "
               + "and c1.concept_class_id = 'Ingredient') ) cr1 on c.concept_id = cr1.concept_id_2 "
-              + "and c.domain_id = 'DRUG' and c.type = 'RXNORM' and match(synonyms) against('+[drug_rank1]' in boolean mode) order by c.est_count desc",
+              + "and c.domain_id = 'DRUG' and c.type = 'RXNORM' and match(full_text) against('+[drug_rank1]' in boolean mode) order by c.est_count desc",
       nativeQuery = true)
   List<DbCriteria> findDrugIngredientByConceptId(@Param("conceptId") Long conceptId);
 
@@ -285,6 +285,42 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
           "select distinct domain_id as domain, type, is_standard as standard from cb_criteria order by domain, type, is_standard",
       nativeQuery = true)
   List<DbMenuOption> findMenuOptions();
+
+  @Query(
+      value =
+          "select count(*) from DbCriteria where standard IN (:standards) and match(fullText, concat(:term, '+[', :domain, '_rank1]')) > 0)")
+  Long findDomainCount(
+      @Param("term") String term,
+      @Param("domain") String domain,
+      @Param("standards") List<Boolean> standards);
+
+  @Query(
+      value =
+          "select count(*) from concept c "
+              + "where (c.count_value > 0 or c.source_count_value > 0) "
+              + "and match(c.concept_name, c.concept_code, c.vocabulary_id, c.synonyms) against(:term in boolean mode) "
+              + "and c.vocabulary_id = 'PPI' "
+              + "and c.concept_class_id = 'Clinical Observation' "
+              + "and c.standard_concept IN ('')",
+      nativeQuery = true)
+  Long findPhysicalMeasurementCount(@Param("term") String term);
+
+  @Query(
+      value =
+          "select count from cb_criteria c "
+              + "join(select substring_index(path,'.',1) as survey_id, count(*) as count "
+              + "       from cb_criteria "
+              + "      where domain_id = 'SURVEY' "
+              + "        and subtype = 'QUESTION' "
+              + "        and concept_id in ( select concept_id "
+              + "                              from cb_criteria "
+              + "                             where domain_id = 'SURVEY' "
+              + "                               and match(full_text) against(concat(:term, '+[survey_rank1]') in boolean mode)) "
+              + "   group by survey_id) a "
+              + "on c.id = a.survey_id "
+              + "where name = :surveyName",
+      nativeQuery = true)
+  Long findSurveyCount(@Param("surveyName") String surveyName, @Param("term") String term);
 
   @Query(
       value =

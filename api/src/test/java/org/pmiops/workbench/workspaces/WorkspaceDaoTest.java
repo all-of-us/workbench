@@ -99,7 +99,7 @@ public class WorkspaceDaoTest {
 
     // check that the projection built by the DAO satisfies the mapper. Very frequently, projection
     // issues show up in the mapper first (though the assertions above *should* be sufficient.
-    final ReportingWorkspace dtoWorkspace = reportingMapper.toDto(workspaces.get(0));
+    final ReportingWorkspace dtoWorkspace = reportingMapper.toReportingWorkspace(workspaces.get(0));
     ReportingTestUtils.assertDtoWorkspaceFields(
         dtoWorkspace,
         dbWorkspace.getWorkspaceId(),

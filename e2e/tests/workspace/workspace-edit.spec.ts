@@ -2,9 +2,8 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import WorkspacesPage from 'app/page/workspaces-page';
 import {Option} from 'app/text-labels';
 import * as testData from 'resources/data/workspace-data';
-import {findWorkspace, performActions, signIn} from 'utils/test-utils';
+import {createWorkspace, performActions, signIn} from 'utils/test-utils';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
-
 
 describe('Editing workspace via workspace card snowman menu', () => {
 
@@ -20,15 +19,15 @@ describe('Editing workspace via workspace card snowman menu', () => {
    * - Verify Workspace Information in ABOUT tab.
    */
   test('User as OWNER can edit workspace', async () => {
-    const workspaceCard = await findWorkspace(page, {create: true});
+    const workspaceCard = await createWorkspace(page);
     await workspaceCard.selectSnowmanMenu(Option.Edit);
 
     const workspacesPage = new WorkspacesPage(page);
 
-    // Synthetic Dataset Select is readonly. Get selected value.
-    const selectedOption = await workspacesPage.selectDataset();
-    const datasetSelect = await workspacesPage.getDatasetSelect();
-    const selectedValue = await datasetSelect.getOptionValue(selectedOption);
+    // CDR Version Select is readonly. Get selected value.
+    const selectedOption = await workspacesPage.selectCdrVersion();
+    const cdrVersionSelect = await workspacesPage.getCdrVersionSelect();
+    const selectedValue = await cdrVersionSelect.getOptionValue(selectedOption);
 
     // Change question #2 answer
     await performActions(page, testData.defaultAnswersResearchPurposeSummary);

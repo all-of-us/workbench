@@ -2,7 +2,15 @@ import * as fp from 'lodash/fp';
 
 // Copied from https://github.com/DataBiosphere/terra-ui/blob/219b063b07d56499ccc38013fd88f4f0b88f8cd6/src/data/machines.js
 
-const machineBases = [
+export interface Machine {
+  name: string;
+  cpu: number;
+  memory: number;
+  price: number;
+  preemptiblePrice: number;
+}
+
+const machineBases: Machine[] = [
   { name: 'n1-standard-1', cpu: 1, memory: 3.75, price: 0.0475, preemptiblePrice: 0.0100 },
   { name: 'n1-standard-2', cpu: 2, memory: 7.50, price: 0.0950, preemptiblePrice: 0.0200 },
   { name: 'n1-standard-4', cpu: 4, memory: 15, price: 0.1900, preemptiblePrice: 0.0400 },

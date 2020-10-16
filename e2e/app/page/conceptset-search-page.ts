@@ -1,39 +1,33 @@
 import {Page} from 'puppeteer';
-import {waitWhileLoading} from 'utils/test-utils';
-import {waitForDocumentTitle} from 'utils/waits-utils';
+import {waitForDocumentTitle, waitWhileLoading} from 'utils/waits-utils';
 import Textbox from 'app/element/textbox';
 import DataTable from 'app/component/data-table';
 import Button from 'app/element/button';
 import {getPropValue, waitUntilChanged} from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
-import ConceptsetSaveModal, {SaveOption} from './conceptset-save-modal';
+import ConceptSetSaveModal, {SaveOption} from './conceptset-save-modal';
 
 const PageTitle = 'Search Concepts';
 
-export default class ConceptsetSearchPage extends AuthenticatedPage{
+export default class ConceptSetSearchPage extends AuthenticatedPage{
 
   constructor(page: Page) {
     super(page);
   }
 
   async isLoaded(): Promise<boolean> {
+    await Promise.all([
+      waitForDocumentTitle(this.page, PageTitle),
+      waitWhileLoading(this.page)
+    ]);
     const searchTextbox = this.getSearchTextbox();
-    try {
-      await Promise.all([
-        waitForDocumentTitle(this.page, PageTitle),
-        searchTextbox.waitForXPath(),
-        waitWhileLoading(this.page),
-      ]);
-      return true;
-    } catch (e) {
-      console.error(`ConceptsetSearchPage isLoaded() encountered ${e}`);
-      return false;
-    }
+    await searchTextbox.waitForXPath();
+    return true;
   }
 
-  async saveConcept(saveOption?: SaveOption, existingConceptName?: string): Promise<string> {
-    const modal = new ConceptsetSaveModal(this.page);
-    return modal.fillOutSaveModal(saveOption, existingConceptName);
+  async saveConceptSet(saveOption?: SaveOption, existingConceptSetName?: string): Promise<string> {
+    const modal = new ConceptSetSaveModal(this.page);
+    return modal.fillOutSaveModal(saveOption, existingConceptSetName);
   }
 
   async getAddToSetButton(): Promise<Button> {

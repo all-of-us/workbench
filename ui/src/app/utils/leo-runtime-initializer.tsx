@@ -2,12 +2,13 @@ import {leoRuntimesApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import {isAbortError, reportError} from 'app/utils/errors';
 import {runtimePresets} from 'app/utils/runtime-presets';
-import {Runtime, RuntimeStatus} from 'generated/fetch';
-import {serverConfigStore} from './navigation';
 import {
   markRuntimeOperationCompleteForWorkspace,
+  runtimeStore,
   updateRuntimeOpsStoreForWorkspaceNamespace
-} from './stores';
+} from 'app/utils/stores';
+import {Runtime, RuntimeStatus} from 'generated/fetch';
+import {serverConfigStore} from './navigation';
 
 // We're only willing to wait 20 minutes total for a runtime to initialize. After that we return
 // a rejected promise no matter what.
@@ -22,6 +23,7 @@ const DEFAULT_MAX_DELETE_COUNT = 2;
 const DEFAULT_MAX_RESUME_COUNT = 2;
 // We allow a certain # of server errors to occur before we error-out of the initialization flow.
 const DEFAULT_MAX_SERVER_ERROR_COUNT = 10;
+const DEFAULT_RUNTIME_CONFIG = runtimePresets.generalAnalysis.runtimeTemplate;
 
 export class LeoRuntimeInitializationFailedError extends Error {
   constructor(message: string, public readonly runtime?: Runtime) {
@@ -69,7 +71,7 @@ export interface LeoRuntimeInitializerOptions {
   workspaceNamespace: string;
   // Callback which is called every time the runtime updates its status. When no runtime is found,
   // the callback is called with a null value.
-  onStatusUpdate?: (RuntimeStatus?) => void;
+  onPoll?: (Runtime?) => void;
   // An optional abort signal which allows the caller to abort the initialization process, including
   // cancelling any outstanding Ajax requests.
   pollAbortSignal?: AbortSignal;
@@ -83,17 +85,19 @@ export interface LeoRuntimeInitializerOptions {
   maxDeleteCount?: number;
   maxResumeCount?: number;
   maxServerErrorCount?: number;
+  targetRuntime?: Runtime;
 }
 
 const DEFAULT_OPTIONS: Partial<LeoRuntimeInitializerOptions> = {
-  onStatusUpdate: () => {},
+  onPoll: () => {},
   initialPollingDelay: DEFAULT_INITIAL_POLLING_DELAY,
   maxPollingDelay: DEFAULT_MAX_POLLING_DELAY,
   overallTimeout: DEFAULT_OVERALL_TIMEOUT,
   maxCreateCount: DEFAULT_MAX_CREATE_COUNT,
   maxDeleteCount: DEFAULT_MAX_DELETE_COUNT,
   maxResumeCount: DEFAULT_MAX_RESUME_COUNT,
-  maxServerErrorCount: DEFAULT_MAX_SERVER_ERROR_COUNT
+  maxServerErrorCount: DEFAULT_MAX_SERVER_ERROR_COUNT,
+  targetRuntime: DEFAULT_RUNTIME_CONFIG
 };
 
 /**
@@ -115,7 +119,7 @@ const DEFAULT_OPTIONS: Partial<LeoRuntimeInitializerOptions> = {
 export class LeoRuntimeInitializer {
   // Core properties for interacting with the caller and the runtime APIs.
   private readonly workspaceNamespace: string;
-  private readonly onStatusUpdate: (RuntimeStatus?) => void;
+  private readonly onPoll: (Runtime?) => void;
   private readonly pollAbortSignal?: AbortSignal;
 
   // Properties to track & control the polling loop. We use a capped exponential backoff strategy
@@ -134,9 +138,22 @@ export class LeoRuntimeInitializer {
   private resumeCount = 0;
   private serverErrorCount = 0;
   private initializeStartTime?: number;
+  private targetRuntime?: Runtime;
   // The latest runtime retrieved from getRuntime. If the last getRuntime call returned a NOT_FOUND
   // response, this will be null.
-  private currentRuntime?: Runtime;
+  private currentRuntimeValue?: Runtime;
+
+  private get currentRuntime(): Runtime | null {
+    return this.currentRuntimeValue;
+  }
+
+  private set currentRuntime(nextRuntime: Runtime | null) {
+    this.currentRuntimeValue = nextRuntime;
+    const storeWorkspaceNamespace = runtimeStore.get().workspaceNamespace;
+    if (storeWorkspaceNamespace === this.workspaceNamespace || storeWorkspaceNamespace === undefined ) {
+      runtimeStore.set({workspaceNamespace: this.workspaceNamespace, runtime: this.currentRuntimeValue});
+    }
+  }
 
   // Properties to control the initialization and promise resolution flow.
   //
@@ -160,7 +177,7 @@ export class LeoRuntimeInitializer {
     options = {...DEFAULT_OPTIONS, ...options};
 
     this.workspaceNamespace = options.workspaceNamespace;
-    this.onStatusUpdate = options.onStatusUpdate ? options.onStatusUpdate : () => {};
+    this.onPoll = options.onPoll ? options.onPoll : () => {};
     this.pollAbortSignal = options.pollAbortSignal;
     this.currentDelay = options.initialPollingDelay;
     this.maxDelay = options.maxPollingDelay;
@@ -169,6 +186,7 @@ export class LeoRuntimeInitializer {
     this.maxDeleteCount = options.maxDeleteCount;
     this.maxResumeCount = options.maxResumeCount;
     this.maxServerErrorCount = options.maxServerErrorCount;
+    this.targetRuntime = options.targetRuntime;
   }
 
   private async getRuntime(): Promise<Runtime> {
@@ -179,7 +197,6 @@ export class LeoRuntimeInitializer {
       operation: 'get',
       aborter: aborter
     });
-    await promise;
     markRuntimeOperationCompleteForWorkspace(this.workspaceNamespace);
     return promise;
   }
@@ -191,7 +208,9 @@ export class LeoRuntimeInitializer {
     }
     const aborter = new AbortController();
     let runtime: Runtime;
-    if (serverConfigStore.getValue().enableGceAsNotebookRuntimeDefault) {
+    if (serverConfigStore.getValue().enableCustomRuntimes && this.targetRuntime) {
+      runtime = this.targetRuntime;
+    } else if (serverConfigStore.getValue().enableGceAsNotebookRuntimeDefault) {
       runtime = {...runtimePresets.generalAnalysis.runtimeTemplate};
     } else {
       runtime = {...runtimePresets.legacyGeneralAnalysis.runtimeTemplate};
@@ -318,7 +337,7 @@ export class LeoRuntimeInitializer {
     // and abort signals.
     try {
       this.currentRuntime = await this.getRuntime();
-      this.onStatusUpdate(this.currentRuntime.status);
+      this.onPoll(this.currentRuntime);
     } catch (e) {
       if (isAbortError(e)) {
         return this.reject(
@@ -328,7 +347,7 @@ export class LeoRuntimeInitializer {
         // A not-found error is somewhat expected, if a runtime has recently been deleted or
         // hasn't been created yet.
         this.currentRuntime = null;
-        this.onStatusUpdate(null);
+        this.onPoll(null);
       } else {
         this.handleUnknownError(e);
         if (this.hasTooManyServerErrors()) {

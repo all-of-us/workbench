@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {CohortBuilderApi, DomainType} from 'generated/fetch';
+import {CohortBuilderApi, Domain} from 'generated/fetch';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 import {SearchGroup} from './search-group.component';
@@ -11,7 +11,7 @@ import {SearchGroup} from './search-group.component';
 const itemsStub = [
   {
     id: 'itemA',
-    type: DomainType.MEASUREMENT,
+    type: Domain.MEASUREMENT,
     searchParameters: [],
     modifiers: [],
     count: 1,
@@ -21,7 +21,7 @@ const itemsStub = [
   },
   {
     id: 'itemB',
-    type: DomainType.MEASUREMENT,
+    type: Domain.MEASUREMENT,
     searchParameters: [],
     modifiers: [],
     count: 2,
@@ -31,7 +31,7 @@ const itemsStub = [
   },
   {
     id: 'itemC',
-    type: DomainType.MEASUREMENT,
+    type: Domain.MEASUREMENT,
     searchParameters: [],
     modifiers: [],
     count: 3,
@@ -40,7 +40,7 @@ const itemsStub = [
     status: 'active'
   }
 ];
-const groupStub = {id: 'group_id', items: itemsStub, status: 'active', type: DomainType.CONDITION};
+const groupStub = {id: 'group_id', items: itemsStub, status: 'active', type: Domain.CONDITION};
 describe('SearchGroup', () => {
   beforeEach(() => {
     registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());

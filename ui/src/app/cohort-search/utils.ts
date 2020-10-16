@@ -3,7 +3,7 @@ import {
   AgeType,
   CriteriaSubType,
   CriteriaType,
-  DomainType, GenderOrSexType,
+  Domain, GenderOrSexType,
   SearchGroup,
   SearchGroupItem,
   SearchParameter,
@@ -14,7 +14,7 @@ import {
 import {idsInUse} from './search-state.service';
 
 export function typeDisplay(parameter): string {
-  if ([DomainType.CONDITION, DomainType.PROCEDURE, DomainType.MEASUREMENT].includes(parameter.domainId)) {
+  if ([Domain.CONDITION, Domain.PROCEDURE, Domain.MEASUREMENT].includes(parameter.domainId)) {
     return parameter.code;
   }
 }
@@ -55,40 +55,40 @@ export function attributeDisplay(parameter): string {
 
 export function domainToTitle(domain: any): string {
   switch (domain) {
-    case DomainType.PERSON:
+    case Domain.PERSON:
       domain = 'Demographics';
       break;
-    case DomainType.MEASUREMENT:
+    case Domain.MEASUREMENT:
       domain = 'Labs and Measurements';
       break;
-    case DomainType.PHYSICALMEASUREMENT:
+    case Domain.PHYSICALMEASUREMENT:
       domain = 'Physical Measurements';
       break;
-    case DomainType.VISIT:
+    case Domain.VISIT:
       domain = 'Visits';
       break;
-    case DomainType.DRUG:
+    case Domain.DRUG:
       domain = 'Drugs';
       break;
-    case DomainType.CONDITION:
+    case Domain.CONDITION:
       domain = 'Conditions';
       break;
-    case DomainType.PROCEDURE:
+    case Domain.PROCEDURE:
       domain = 'Procedures';
       break;
-    case DomainType.OBSERVATION:
+    case Domain.OBSERVATION:
       domain = 'Observations';
       break;
-    case DomainType.LAB:
+    case Domain.LAB:
       domain = 'Labs';
       break;
-    case DomainType.VITAL:
+    case Domain.VITAL:
       domain = 'Vitals';
       break;
-    case DomainType.SURVEY:
+    case Domain.SURVEY:
       domain = 'Surveys';
       break;
-    case DomainType.ALLEVENTS:
+    case Domain.ALLEVENTS:
       domain = 'All Events';
       break;
   }
@@ -339,7 +339,7 @@ export function mapParameter(sp: any) {
   if (conceptId !== null && conceptId !== undefined) {
     param.conceptId = conceptId;
   }
-  if (domainId === DomainType.SURVEY) {
+  if (domainId === Domain.SURVEY) {
     param.subtype = subtype;
   }
   if (value) {
@@ -354,17 +354,17 @@ export function hasActiveItems(group: any) {
   return group.items.some(it => it.status === 'active');
 }
 
-export function getTypeAndStandard(searchParameters: Array<any>, type: DomainType) {
+export function getTypeAndStandard(searchParameters: Array<any>, type: Domain) {
   switch (type) {
-    case DomainType.PERSON:
+    case Domain.PERSON:
       const _type = searchParameters[0].type === CriteriaType.DECEASED
         ? CriteriaType.AGE : searchParameters[0].type;
       return {type: _type, standard: false};
-    case DomainType.PHYSICALMEASUREMENT:
+    case Domain.PHYSICALMEASUREMENT:
       return {type: searchParameters[0].type, standard: false};
-    case DomainType.SURVEY:
+    case Domain.SURVEY:
       return {type: searchParameters[0].type, standard: false};
-    case DomainType.VISIT:
+    case Domain.VISIT:
       return {type: searchParameters[0].type, standard: true};
     default:
       return {type: null, standard: null};

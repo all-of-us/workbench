@@ -21,7 +21,7 @@ import {
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
 import {environment} from 'environments/environment';
-import {Criteria, CriteriaType, DomainType, TemporalMention, TemporalTime} from 'generated/fetch';
+import {Criteria, CriteriaType, Domain, TemporalMention, TemporalTime} from 'generated/fetch';
 
 const styles = reactStyles({
   arrowIcon: {
@@ -120,7 +120,7 @@ function initGroup(role: string, item: any) {
 
 export function saveCriteria(selections?: Array<Selection>) {
   const {domain, groupId, item, role, type} = currentCohortSearchContextStore.getValue();
-  if (domain === DomainType.PERSON) {
+  if (domain === Domain.PERSON) {
     triggerEvent('Cohort Builder Search', 'Click', `Demo - ${typeToTitle(type)} - Finish`);
   }
   const searchRequest = searchRequestStore.getValue();
@@ -236,12 +236,13 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
 
   componentDidMount(): void {
     const {cohortContext: {domain, item, standard, type}} = this.props;
-    const selections = item.searchParameters;
+    // JSON stringify and parse prevents changes to selections from being passed to the cohortContext
+    const selections = JSON.parse(JSON.stringify(item.searchParameters));
     const selectedIds = selections.map(s => s.parameterId);
     if (type === CriteriaType.DECEASED) {
       this.selectDeceased();
     } else {
-      const title = domain === DomainType.PERSON ? typeToTitle(type) : domainToTitle(domain);
+      const title = domain === Domain.PERSON ? typeToTitle(type) : domainToTitle(domain);
       let {backMode, mode} = this.state;
       let hierarchyNode;
       if (this.initTree) {
@@ -297,9 +298,9 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
 
   get initTree() {
     const {cohortContext: {domain}} = this.props;
-    return domain === DomainType.PHYSICALMEASUREMENT
-      || domain === DomainType.SURVEY
-      || domain === DomainType.VISIT;
+    return domain === Domain.PHYSICALMEASUREMENT
+      || domain === Domain.SURVEY
+      || domain === Domain.VISIT;
   }
 
   searchContentStyle(mode: string) {
@@ -359,7 +360,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
       type: CriteriaType.DECEASED.toString(),
       name: 'Deceased',
       group: false,
-      domainId: DomainType.PERSON.toString(),
+      domainId: Domain.PERSON.toString(),
       hasAttributes: false,
       selectable: true,
       attributes: []
@@ -368,7 +369,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
   }
 
   get showDataBrowserLink() {
-    return [DomainType.CONDITION, DomainType.PROCEDURE, DomainType.MEASUREMENT, DomainType.DRUG]
+    return [Domain.CONDITION, Domain.PROCEDURE, Domain.MEASUREMENT, Domain.DRUG]
     .includes(this.props.cohortContext.domain);
   }
 
@@ -387,7 +388,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
           </Clickable>
           <h2 style={styles.titleHeader}>{title}</h2>
           <div style={styles.externalLinks}>
-            {cohortContext.domain === DomainType.DRUG && <div>
+            {cohortContext.domain === Domain.DRUG && <div>
               <StyledAnchorTag
                   href='https://mor.nlm.nih.gov/RxNav/'
                   target='_blank'
@@ -408,11 +409,11 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
           </div>
         </div>
         <div style={
-          (cohortContext.domain === DomainType.PERSON && cohortContext.type !== CriteriaType.AGE)
+          (cohortContext.domain === Domain.PERSON && cohortContext.type !== CriteriaType.AGE)
             ? {marginBottom: '3.5rem'}
             : {height: 'calc(100% - 3.5rem)'}
         }>
-          {cohortContext.domain === DomainType.PERSON ? <div style={{flex: 1, overflow: 'auto'}}>
+          {cohortContext.domain === Domain.PERSON ? <div style={{flex: 1, overflow: 'auto'}}>
               <DemographicsV2
                 count={count}
                 criteriaType={cohortContext.type}

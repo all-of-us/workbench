@@ -37,7 +37,7 @@ import java.util.StringJoiner;
 import org.pmiops.workbench.cohortbuilder.util.QueryParameterValues;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.model.DomainType;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.Filter;
 import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.Operator;
@@ -179,17 +179,17 @@ public class ReviewQueryBuilder {
   private static final String CLOSE_PAREN = ")";
 
   public QueryJobConfiguration buildQuery(
-      Long participantId, DomainType domain, PageRequest pageRequest) {
+      Long participantId, Domain domain, PageRequest pageRequest) {
     return buildQueryJobConfiguration(participantId, domain, pageRequest, false);
   }
 
   public QueryJobConfiguration buildCountQuery(
-      Long participantId, DomainType domain, PageRequest pageRequest) {
+      Long participantId, Domain domain, PageRequest pageRequest) {
     return buildQueryJobConfiguration(participantId, domain, pageRequest, true);
   }
 
   public QueryJobConfiguration buildChartDataQuery(
-      Long participantId, DomainType domain, Integer limit) {
+      Long participantId, Domain domain, Integer limit) {
     Map<String, QueryParameterValue> params = new HashMap<>();
     params.put(PART_ID, QueryParameterValue.int64(participantId));
     params.put(DOMAIN_PARAM, QueryParameterValue.string(domain.name()));
@@ -207,7 +207,7 @@ public class ReviewQueryBuilder {
   }
 
   private QueryJobConfiguration buildQueryJobConfiguration(
-      Long participantId, DomainType domain, PageRequest pageRequest, boolean isCountQuery) {
+      Long participantId, Domain domain, PageRequest pageRequest, boolean isCountQuery) {
     String finalSql;
     Map<String, QueryParameterValue> params = new HashMap<>();
     List<Filter> filters = pageRequest.getFilters();

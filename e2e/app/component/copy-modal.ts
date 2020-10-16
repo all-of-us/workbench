@@ -2,7 +2,7 @@ import Modal from 'app/component/modal';
 import Textbox from 'app/element/textbox';
 import {LinkText} from 'app/text-labels';
 import {ElementHandle, Page} from 'puppeteer';
-import {waitWhileLoading} from 'utils/test-utils';
+import {waitWhileLoading} from 'utils/waits-utils';
 
 
 export default class CopyModal extends Modal {
@@ -19,12 +19,12 @@ export default class CopyModal extends Modal {
     return new Textbox(this.page, `${this.getXpath()}//*[contains(text(), "Name")]/ancestor::node()[1]/input[@type="text"]`);
   }
 
- /**
-  *
-  * @param {string} workspaceName Destination Workspace name.
-  * @param {string} newName New name.
-  */
-  async copyToAnotherWorkspace(workspaceName: string, newName?: string): Promise<void> {
+  /**
+   *
+   * @param {string} workspaceName Destination Workspace name.
+   * @param {string} newName New name.
+   */
+  async beginCopyToAnotherWorkspace(workspaceName: string, newName?: string): Promise<void> {
     // Click dropdown trigger.
     const destinationInput = await this.getDestinationTextbox();
     await destinationInput.click();
@@ -38,6 +38,15 @@ export default class CopyModal extends Modal {
       const nameInput = await this.getNameTextbox();
       await nameInput.type(newName);
     }
+  }
+
+ /**
+  *
+  * @param {string} workspaceName Destination Workspace name.
+  * @param {string} newName New name.
+  */
+  async copyToAnotherWorkspace(workspaceName: string, newName?: string): Promise<void> {
+    await this.beginCopyToAnotherWorkspace(workspaceName, newName);
 
     await this.clickButton(LinkText.Copy);
     await waitWhileLoading(this.page);

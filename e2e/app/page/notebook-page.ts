@@ -1,8 +1,7 @@
 import * as fs from 'fs';
 import {Frame, Page} from 'puppeteer';
 import {getPropValue} from 'utils/element-utils';
-import {waitWhileLoading} from 'utils/test-utils';
-import {waitForDocumentTitle} from 'utils/waits-utils';
+import {waitForDocumentTitle, waitWhileLoading} from 'utils/waits-utils';
 import {ResourceCard} from 'app/text-labels';
 import AuthenticatedPage from './authenticated-page';
 import NotebookCell, {CellType} from './notebook-cell';
@@ -45,14 +44,9 @@ export default class NotebookPage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    try {
-      await waitForDocumentTitle(this.page, this.documentTitle);
-      await this.waitForKernelIdle();
-      return true;
-    } catch (e) {
-      console.error(`NotebookPage isLoaded() encountered ${e}`);
-      return false;
-    }
+    await waitForDocumentTitle(this.page, this.documentTitle);
+    await this.waitForKernelIdle();
+    return true;
   }
 
   /**
@@ -174,23 +168,42 @@ export default class NotebookPage extends AuthenticatedPage {
    * Click Run button in toolbar. Run focused code cell and insert a new code cell below.
    *
    * @param {number} cellIndex Code Cell index. (first index is 1). Use -1 to find last cell.
-   * @param {string} code The code to run.
-   * @param {string} codeFile The full path to file that contains code to run.
-   * @param {number} timeOut The timeout time in milliseconds.
-   * @returns {string} Run output.
+   * @param opts
+   *  {string} code The code to run.
+   *  {string} codeFile The full path to a file that contains the code to run.
+   *  {number} timeOut The timeout time in milliseconds (default 120 sec).
+   *  {boolean} markdownWorkaround Convert to Markdown before typing (default false)
    */
-  async runCodeCell(cellIndex: number, opts: { code?: string, codeFile?: string, timeOut?: number } = {}): Promise<string> {
+  async runCodeCell(
+      cellIndex: number,
+      opts: { code?: string, codeFile?: string, timeOut?: number, markdownWorkaround?: boolean } = {}): Promise<string> {
     const cell = cellIndex === -1 ? await this.findLastCell() : await this.findCell(cellIndex);
-    const cellInput = await cell.focus();
-    if (opts.code !== undefined) {
-      await cellInput.type(opts.code);
-    } else if (opts.codeFile !== undefined) {
-      const code = fs.readFileSync(opts.codeFile, 'utf8');
-      await cellInput.type(code);
+    const inputCell = await cell.focus();
+
+    const {code, codeFile, timeOut = 120000, markdownWorkaround = false} = opts;
+
+    let codeToRun;
+    if (code !== undefined) {
+      codeToRun = code;
+    } else if (codeFile !== undefined) {
+      codeToRun = fs.readFileSync(codeFile, 'ascii');
     }
-    await cellInput.dispose();
+
+    // autoCloseBrackets is true by default for R code cells.
+    // Puppeteer types in every character of code, resulting in extra brackets.
+    // Workaround: Type code in Markdown cell, then change to Code cell to run.
+    if (markdownWorkaround) {
+      await this.changeToMarkdownCell();
+      const markdownCell = await this.findCell(cellIndex, CellType.Markdown);
+      const markdownCellInput = await markdownCell.focus();
+      await markdownCellInput.type(codeToRun);
+      await this.changeToCodeCell();
+    } else {
+      await inputCell.type(codeToRun);
+    }
+
+    await inputCell.dispose();
     await this.run();
-    const {timeOut = 120000} = opts;
     await this.waitForKernelIdle(timeOut);
     const [output] = await Promise.all([
       cell.waitForOutput(timeOut),
@@ -200,7 +213,7 @@ export default class NotebookPage extends AuthenticatedPage {
   }
 
   /**
-   * Returnss cell input and output texts in an array. Not waiting for output rendered.
+   * Returns cell input and output texts in an array. Not waiting for output rendered.
    * @param {number} cellIndex Code Cell index. (first index is 1)
    * @param {CellType} cellType: Markdown or Code. Default value is Code cell.
    */

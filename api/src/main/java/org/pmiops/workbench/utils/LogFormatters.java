@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 public class LogFormatters {
   public static String duration(String description, Duration duration) {
-    return String.format("%s: %s", description, duration.toString());
+    return String.format("%s: %s", description, formatDurationPretty(duration));
   }
 
   public static String rate(String description, Duration duration, double count, String unit) {
@@ -22,11 +22,25 @@ public class LogFormatters {
     if (duration.toDays() > 0) {
       result += String.format("%d days ", duration.toDays());
     }
-    return result
-        + String.format(
-            "%sh %sm %ds",
-            duration.toHours() - TimeUnit.DAYS.toHours(duration.toDays()),
-            duration.toMinutes() - TimeUnit.HOURS.toMinutes(duration.toHours()),
-            duration.getSeconds() - TimeUnit.MINUTES.toSeconds(duration.toMinutes()));
+
+    if (result.length() > 0 || duration.toHours() > 0) {
+      result +=
+          String.format("%dh ", duration.toHours() - TimeUnit.DAYS.toHours(duration.toDays()));
+    }
+
+    if (result.length() > 0 || duration.toMinutes() > 0) {
+      result +=
+          String.format(
+              "%dm ", duration.toMinutes() - TimeUnit.HOURS.toMinutes(duration.toHours()));
+    }
+    if (result.length() > 0 || duration.getSeconds() > 0) {
+      result +=
+          String.format(
+              "%ds ", duration.getSeconds() - TimeUnit.MINUTES.toSeconds(duration.toMinutes()));
+    }
+    // always include millis
+    result += String.format("%dms", duration.toMillis() % TimeUnit.SECONDS.toMillis(1));
+
+    return result;
   }
 }

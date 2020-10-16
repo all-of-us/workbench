@@ -15,7 +15,8 @@ import {reactStyles, withCdrVersions, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {attributesSelectionStore, setSidebarActiveIconStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {CdrVersion, CdrVersionListResponse, CriteriaType, DomainType} from 'generated/fetch';
+import {CdrVersion, CdrVersionListResponse, CriteriaType, Domain} from 'generated/fetch';
+import {CSSProperties} from 'react';
 
 const borderStyle = `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`;
 const styles = reactStyles({
@@ -156,11 +157,55 @@ const columnHeaderStyle = {
   width: '9%'
 };
 
+const columns = [
+  {
+    name: 'Name',
+    tooltip: 'Name from vocabulary',
+    style: {...styles.columnNameHeader, width: '31%', borderLeft: 0},
+  },
+  {
+    name: 'Code',
+    tooltip: 'Unique code for OMOP',
+    style: columnHeaderStyle,
+  },
+  {
+    name: 'Vocab',
+    tooltip: 'Vocabulary for concept',
+    style: {...columnHeaderStyle, paddingLeft: '0'},
+  },
+  {
+    name: 'Source/Standard',
+    tooltip: 'Indicates if code is an OMOP standard or a source vocabulary code (ICD9/10, CPT, etc)',
+    style: {...styles.columnNameHeader, width: '10%', paddingLeft: '0', paddingRight: '0.5rem'},
+  },
+  {
+    name: 'Concept Id',
+    tooltip: 'Unique ID for concept in OMOP',
+    style: {...styles.columnNameHeader, width: '10%', paddingLeft: '0', paddingRight: '0.5rem'},
+  },
+  {
+    name: 'Roll-up Count',
+    tooltip: 'Number of distinct participants that have either the parent concept OR any of the parent’s child concepts',
+    style: columnHeaderStyle,
+  },
+  {
+    name: 'Item Count',
+    tooltip: 'Number of distinct participants for this concept',
+    style: columnHeaderStyle,
+  },
+  {
+    name: 'View Hierarchy',
+    tooltip: null,
+    style: {...styles.columnNameHeader, textAlign: 'center', width: '12%'},
+  },
+];
+
 interface Props {
   cdrVersionListResponse: CdrVersionListResponse;
   hierarchy: Function;
   source: string;
   searchContext: any;
+  searchTerms: string;
   select: Function;
   selectedIds: Array<string>;
   setAttributes: Function;
@@ -174,6 +219,7 @@ interface State {
   hoverId: string;
   ingredients: any;
   loading: boolean;
+  searchTerms: string;
   standardOnly: boolean;
   sourceMatch: any;
   standardData: any;
@@ -182,7 +228,7 @@ interface State {
 
 export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
   class extends React.Component<Props, State> {
-    constructor(props: any) {
+    constructor(props: Props) {
       super(props);
       this.state = {
         cdrVersion: undefined,
@@ -191,6 +237,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
         ingredients: {},
         hoverId: undefined,
         loading: false,
+        searchTerms: props.searchTerms,
         standardOnly: false,
         sourceMatch: undefined,
         standardData: null,
@@ -198,9 +245,12 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
       };
     }
     componentDidMount(): void {
-      const {cdrVersionListResponse, workspace: {cdrVersionId}} = this.props;
+      const {cdrVersionListResponse, searchTerms, source, workspace: {cdrVersionId}} = this.props;
       const cdrVersions = cdrVersionListResponse.items;
       this.setState({cdrVersion: cdrVersions.find(cdr => cdr.cdrVersionId === cdrVersionId)});
+      if (source === 'concept' && searchTerms !== '') {
+        this.getResults(searchTerms);
+      }
     }
 
     handleInput = (event: any) => {
@@ -240,7 +290,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
     }
 
     get checkSource() {
-      return [DomainType.CONDITION, DomainType.PROCEDURE].includes(this.props.searchContext.domain);
+      return [Domain.CONDITION, Domain.PROCEDURE].includes(this.props.searchContext.domain);
     }
 
     selectItem = (row: any) => {
@@ -309,7 +359,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
 
     renderRow(row: any, child: boolean, elementId: string) {
       const {hoverId, ingredients} = this.state;
-      const attributes = row.hasAttributes;
+      const attributes = this.props.source === 'criteria' && row.hasAttributes;
       const brand = row.type === CriteriaType.BRAND;
       const displayName = row.name + (brand ? ' (BRAND NAME)' : '');
       const selected = !attributes && !brand && this.props.selectedIds.includes(this.getParamId(row));
@@ -362,17 +412,9 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
       </FlexRow>;
     }
 
-    get isConcept() {
-      return this.props.source && this.props.source === 'concept';
-    }
-
-    hideAttributesRow(row) {
-      return !row.hasAttributes || !this.isConcept;
-    }
-
     render() {
       const {searchContext: {domain}} = this.props;
-      const {cdrVersion, data, error, ingredients, loading, standardOnly, sourceMatch, standardData, totalCount} = this.state;
+      const {cdrVersion, data, error, ingredients, loading, searchTerms, standardOnly, sourceMatch, standardData, totalCount} = this.state;
       const showStandardOption = !standardOnly && !!standardData && standardData.length > 0;
       const displayData = standardOnly ? standardData : data;
       return <div style={{overflow: 'auto'}}>
@@ -380,8 +422,10 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
           <div style={styles.searchBar}>
             <ClrIcon shape='search' size='18'/>
             <TextInput style={styles.searchInput}
-              placeholder={`Search ${domainToTitle(domain)} by code or description`}
-              onKeyPress={this.handleInput} />
+                       value={searchTerms}
+                       placeholder={`Search ${domainToTitle(domain)} by code or description`}
+                       onChange={(e) => this.setState({searchTerms: e})}
+                       onKeyPress={this.handleInput} />
           </div>
         </div>
         <div style={{display: 'table', height: '100%', width: '100%'}}>
@@ -405,7 +449,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
                 Return to source code
               </Clickable>.
             </div>}
-            {domain === DomainType.DRUG && <div>
+            {domain === Domain.DRUG && <div>
               Your search may bring back brand names, generics and ingredients. Only ingredients may be added to your search criteria.
             </div>}
             {!!totalCount && <div>
@@ -418,22 +462,9 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
             <table className='p-datatable' style={styles.table}>
               <thead className='p-datatable-thead'>
                 <tr style={{height: '2rem'}}>
-                  <th style={{...styles.columnNameHeader, width: '31%', borderLeft: 0}}>Name</th>
-                  <th style={columnHeaderStyle}>
-                    {this.renderColumnWithToolTip('Code', 'Unique code for OMOP' )}
-                  </th>
-                  <th style={{...columnHeaderStyle, paddingLeft: '0'}}>Vocab</th>
-                  <th style={{...styles.columnNameHeader, width: '10%', paddingLeft: '0',
-                    paddingRight: '0.5rem'}}>Source/ Standard</th>
-                  <th style={{...styles.columnNameHeader, width: '10%', paddingLeft: '0',
-                    paddingRight: '0.5rem'}}>Concept Id</th>
-                  <th style={columnHeaderStyle}>
-                    Roll-up Count
-                  </th>
-                  <th style={columnHeaderStyle}>
-                    {this.renderColumnWithToolTip('Item Count', 'Number of distinct participants for this concept' )}
-                  </th>
-                  <th style={{...styles.columnNameHeader, textAlign: 'center', width: '12%'}}>View Hierarchy</th>
+                  {columns.map((column, index) => <th key={index} style={column.style as CSSProperties}>
+                    {column.tooltip !== null ? this.renderColumnWithToolTip(column.name, column.tooltip) : column.name}
+                  </th>)}
                 </tr>
               </thead>
             </table>
@@ -444,10 +475,10 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
                   const open = ingredients[row.id] && ingredients[row.id].open;
                   const err = ingredients[row.id] && ingredients[row.id].error;
                   return <React.Fragment key={index}>
-                    {this.hideAttributesRow(row)  && this.renderRow(row, false, index)}
+                    {this.renderRow(row, false, index)}
                     {open && !err && ingredients[row.id].items.map((item, i) => {
                       return <React.Fragment key={i}>
-                        {this.hideAttributesRow(row) && this.renderRow(item, true, `${index}.${i}`)}
+                        {this.renderRow(item, true, `${index}.${i}`)}
                       </React.Fragment>;
                     })}
                     {open && err && <tr>
@@ -467,7 +498,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
           {!standardOnly && !displayData.length && <div>No results found</div>}
         </div>}
         {loading && <SpinnerOverlay/>}
-        {error && <div style={{...styles.error, ...(domain === DomainType.DRUG ? {marginTop: '3.75rem'} : {})}}>
+        {error && <div style={{...styles.error, ...(domain === Domain.DRUG ? {marginTop: '3.75rem'} : {})}}>
           <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid' shape='exclamation-triangle' size='22'/>
           Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
           {standardOnly && <Clickable style={styles.vocabLink} onClick={() => this.getResults(sourceMatch.code)}>

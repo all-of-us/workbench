@@ -177,7 +177,7 @@ public class ConceptService {
     for (DbDomainInfo allDbDomainInfo : allDbDomainInfos) {
       Domain domain = allDbDomainInfo.getDomainEnum();
       DbDomainInfo matchingDbDomainInfo = domainCountMap.get(domain);
-      if (domain.equals(Domain.PHYSICALMEASUREMENT) && pmDomainInfo != null) {
+      if (domain.equals(Domain.PHYSICAL_MEASUREMENT) && pmDomainInfo != null) {
         matchingDbDomainInfo = pmDomainInfo;
       }
       domainCountList.add(

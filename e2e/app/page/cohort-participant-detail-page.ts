@@ -1,6 +1,5 @@
 import {Page} from 'puppeteer';
-import {waitWhileLoading} from 'utils/test-utils';
-import {waitForDocumentTitle} from 'utils/waits-utils';
+import {waitForDocumentTitle, waitWhileLoading} from 'utils/waits-utils';
 import Button from 'app/element/button';
 import {LinkText} from 'app/text-labels';
 import AuthenticatedPage from './authenticated-page';
@@ -14,16 +13,11 @@ export default class CohortParticipantDetailPage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    try {
-      await Promise.all([
-        waitForDocumentTitle(this.page, PageTitle),
-        waitWhileLoading(this.page),
-      ]);
-      return true;
-    } catch (e) {
-      console.log(`CohortParticipantDetailPage isLoaded() encountered ${e}`);
-      return false;
-    }
+    await Promise.all([
+      waitForDocumentTitle(this.page, PageTitle),
+      waitWhileLoading(this.page),
+    ]);
+    return true;
   }
 
   async getBackToReviewSetButton(): Promise<Button> {

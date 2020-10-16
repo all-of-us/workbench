@@ -44,7 +44,9 @@ public interface CohortBuilderService {
   List<DemoChartInfo> findDemoChartInfo(
       GenderOrSexType genderOrSexType, AgeType ageType, SearchRequest request);
 
-  List<DomainInfo> findDomainInfos(String term);
+  Long findDomainCount(String domain, String term);
+
+  List<DomainInfo> findDomainInfos();
 
   List<Criteria> findDrugBrandOrIngredientByValue(String value, Integer limit);
 
@@ -63,7 +65,9 @@ public interface CohortBuilderService {
   List<String> findSortedConceptIdsByDomainIdAndType(
       String domainId, String sortColumn, String sortName);
 
-  List<SurveyModule> findSurveyModules(String term);
+  Long findSurveyCount(String name, String term);
+
+  List<SurveyModule> findSurveyModules();
 
   List<SurveyVersion> findSurveyVersionByQuestionConceptId(
       Long surveyConceptId, Long questionConceptId);

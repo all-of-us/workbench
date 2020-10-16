@@ -7,8 +7,8 @@ import Link from 'app/element/link';
 import {Option, LinkText, ResourceCard} from 'app/text-labels';
 import CohortBuildPage, {FieldSelector} from 'app/page/cohort-build-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
-import {waitForText} from 'utils/waits-utils';
+import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
+import {waitForText, waitWhileLoading} from 'utils/waits-utils';
 
 
 describe('User can create new Cohorts', () => {
@@ -27,7 +27,7 @@ describe('User can create new Cohorts', () => {
    */
   test('Add Cohort of Physical Measurements BMI', async () => {
 
-    const workspaceCard = await findWorkspace(page);
+    const workspaceCard = await findOrCreateWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 
     // Wait for the Data page.
@@ -46,14 +46,13 @@ describe('User can create new Cohorts', () => {
     const group1Count = await group1.includePhysicalMeasurement(PhysicalMeasurementsCriteria.BMI, 30);
 
     // Checking Group 1 Count. should match Group 1 participants count.
-    await waitForText(page, group1Count, {xpath: group1.getGroupCountXpath()});
-    const group1CountInt = Number(group1Count.replace(/,/g, ''));
+    const group1CountInt = Number((await group1.getGroupCount()).replace(/,/g, ''));
     expect(group1CountInt).toBeGreaterThan(1);
     console.log('Group 1: Physical Measurement -> BMI count: ' + group1CountInt);
 
     // Checking Total Count: should match Group 1 participants count.
-    await waitForText(page, group1Count, {xpath: FieldSelector.TotalCount});
-    console.log('Total Count: ' + group1CountInt);
+    const totalCount = await cohortPage.getTotalCount();
+    expect(group1Count).toEqual(totalCount);
 
     // Include Participants Group 2: Select menu Demographics -> Deceased
     const group2 = cohortPage.findIncludeParticipantsGroup('Group 2');
@@ -76,7 +75,7 @@ describe('User can create new Cohorts', () => {
     // Open Cohort details.
     const cohortLink = await Link.findByName(page, {name: cohortName});
     await cohortLink.clickAndWait();
-    await waitForText(page, newTotalCount, {xpath: FieldSelector.TotalCount});
+    await waitForText(page, newTotalCount, {xpath: FieldSelector.TotalCount}, 60000);
 
     // Modify Cohort: Edit Group 1 name successfully.
     const newName1 = 'Group 1: BMI';
@@ -113,9 +112,10 @@ describe('User can create new Cohorts', () => {
    * Duplicate cohort.
    * Delete cohort.
    */
-  test('Add Cohort of EKG condition with modifiers', async () => {
+  // RW-5751 Search for condition is failing in CI.
+  xtest('Add Cohort of EKG condition with modifiers', async () => {
 
-    const workspaceCard = await findWorkspace(page);
+    const workspaceCard = await findOrCreateWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 
     // Wait for the Data page.

@@ -3,7 +3,7 @@ import {mount, shallow} from 'enzyme';
 import {cohortBuilderApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, serverConfigStore, urlParamsStore} from 'app/utils/navigation';
 import {
-  CohortBuilderApi, CohortsApi, DomainType, ModifierType,
+  CohortBuilderApi, CohortsApi, Domain, ModifierType,
   WorkspacesApi
 } from 'generated/fetch';
 import * as React from 'react';
@@ -40,7 +40,7 @@ describe('ListModifierPage', () => {
   });
 
   it('should display Only Age Event modifier for SURVEY', async() => {
-    const survey = DomainType.SURVEY;
+    const survey = Domain.SURVEY;
     const wrapper = mount(<ModifierPageModal disabled={() => {
     }} wizard={{}}
                                         searchContext={{domain: survey, item: {modifiers: []}}}/>);

@@ -17,7 +17,7 @@ import {
   serverConfigStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
-import {Attribute, Criteria, DomainType, Modifier} from 'generated/fetch';
+import {Attribute, Criteria, Domain, Modifier} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 
 const proIcons = {
@@ -201,15 +201,15 @@ export class SelectionInfoModal extends React.Component<SelectionInfoProps, Sele
 
   get showType() {
     return ![
-      DomainType.PHYSICALMEASUREMENT.toString(),
-      DomainType.DRUG.toString(),
-      DomainType.SURVEY.toString()
+      Domain.PHYSICALMEASUREMENT.toString(),
+      Domain.DRUG.toString(),
+      Domain.SURVEY.toString()
     ].includes(this.props.selection.domainId);
   }
 
   get showOr() {
     const {index, selection} = this.props;
-    return index > 0 && selection.domainId !== DomainType.PERSON.toString();
+    return index > 0 && selection.domainId !== Domain.PERSON.toString();
   }
 
   render() {
@@ -249,9 +249,9 @@ export class SelectionInfo extends React.Component<SelectionInfoProps, Selection
 
   get showType() {
     return ![
-      DomainType.PHYSICALMEASUREMENT.toString(),
-      DomainType.DRUG.toString(),
-      DomainType.SURVEY.toString()
+      Domain.PHYSICALMEASUREMENT.toString(),
+      Domain.DRUG.toString(),
+      Domain.SURVEY.toString()
     ].includes(this.props.selection.domainId);
   }
 
@@ -283,7 +283,7 @@ interface Props {
   back: Function;
   close: Function;
   disableFinish: boolean;
-  domain: DomainType;
+  domain: Domain;
   finish: Function;
   removeSelection: Function;
   selections: Array<Selection>;
@@ -307,7 +307,7 @@ export class SelectionListModalVersion extends React.Component<Props> {
   }
 
   get showModifiers() {
-    return ![DomainType.PHYSICALMEASUREMENT, DomainType.PERSON, DomainType.SURVEY].includes(this.props.domain);
+    return ![Domain.PHYSICALMEASUREMENT, Domain.PERSON, Domain.SURVEY].includes(this.props.domain);
   }
 
   get showNext() {
@@ -381,16 +381,18 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
           setSidebarActiveIconStore.next('criteria');
         }
       });
+      this.subscription.add(currentCohortCriteriaStore.subscribe(() => {
+        if (!!cohortContext) {
+          // Each time the criteria changes, we check for disabling the Save Criteria button again
+          setTimeout(() => this.checkCriteriaChanges());
+        }
+      }));
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
-      const {cohortContext, criteria} = this.props;
+      const {criteria} = this.props;
       if (!criteria && !!prevProps.criteria) {
         this.setState({showModifiersSlide: false});
-      }
-      if (!!cohortContext && !!criteria && criteria !== prevProps.criteria) {
-        // Each time the criteria changes, we check for disabling the Save Criteria button again
-        this.checkCriteriaChanges();
       }
     }
 
@@ -429,8 +431,8 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
     get showModifierButton() {
       const {criteria} = this.props;
       return criteria && criteria.length > 0 &&
-        criteria[0].domainId !== DomainType.PHYSICALMEASUREMENT.toString()
-        && criteria[0].domainId !== DomainType.PERSON.toString();
+        criteria[0].domainId !== Domain.PHYSICALMEASUREMENT.toString()
+        && criteria[0].domainId !== Domain.PERSON.toString();
     }
 
     get showAttributesOrModifiers() {

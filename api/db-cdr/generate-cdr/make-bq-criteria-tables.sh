@@ -5017,6 +5017,66 @@ WHERE x.concept_id = y.concept_id
     and x.is_standard = 1
     and x.is_group = 1"
 
+
+################################################
+# OBSERVATION
+################################################
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (
+          id
+        , parent_id
+        , domain_id
+        , is_standard
+        , type
+        , concept_id
+        , code
+        , name
+        , rollup_count
+        , item_count
+        , est_count
+        , is_group
+        , is_selectable
+        , has_attribute
+        , has_hierarchy
+        , path
+    )
+SELECT
+    ROW_NUMBER() OVER(order by vocabulary_id, concept_name) +
+        (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as id
+    , -1
+    , 'OBSERVATION'
+    , 1
+    , vocabulary_id
+    , concept_id
+    , concept_code
+    , concept_name
+    , 0
+    , cnt
+    , cnt
+    , 0
+    , 1
+    , 0
+    , 0
+    , CAST(ROW_NUMBER() OVER(order by vocabulary_id,concept_name) +
+        (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING) as path
+FROM
+    (
+        SELECT
+              b.concept_name
+            , b.vocabulary_id
+            , b.concept_id
+            , b.concept_code
+            , count(DISTINCT a.person_id) cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
+        JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.observation_concept_id = b.concept_id
+        WHERE b.standard_concept = 'S'
+            and b.domain_id = 'Observation'
+            and a.observation_concept_id != 0
+        GROUP BY 1,2,3,4
+    ) x"
+
+
 ################################################
 # CB_CRITERIA_ANCESTOR
 ################################################
@@ -5592,6 +5652,7 @@ FROM
             , STRING_AGG(b.concept_synonym_name,'; ') as display_synonyms
         FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` a
         LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` b on a.concept_id = b.concept_id
+        WHERE NOT REGEXP_CONTAINS(b.concept_synonym_name, r'\p{Han}') --remove items with chinese characters
         GROUP BY a.id, a.name, a.code, a.concept_id, a.domain_id
     ) y
 WHERE x.id = y.id"

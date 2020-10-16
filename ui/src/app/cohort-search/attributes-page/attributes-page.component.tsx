@@ -19,7 +19,7 @@ import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {AttrName, CriteriaSubType, DomainType, Operator} from 'generated/fetch';
+import {AttrName, CriteriaSubType, Domain, Operator} from 'generated/fetch';
 
 const styles = reactStyles({
   countPreview: {
@@ -459,17 +459,17 @@ export const AttributesPage = withCurrentWorkspace() (
 
     get isMeasurement() {
       const {node: {domainId}} = this.props;
-      return domainId === DomainType.MEASUREMENT;
+      return domainId === Domain.MEASUREMENT;
     }
 
     get isPhysicalMeasurement() {
       const {node: {domainId}} = this.props;
-      return domainId === DomainType.PHYSICALMEASUREMENT;
+      return domainId === Domain.PHYSICALMEASUREMENT;
     }
 
     get isSurvey() {
       const {node: {domainId}} = this.props;
-      return domainId === DomainType.SURVEY;
+      return domainId === Domain.SURVEY;
     }
 
     get isBloodPressure() {

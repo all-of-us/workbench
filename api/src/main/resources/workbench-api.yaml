@@ -3158,33 +3158,33 @@ paths:
           schema:
             "$ref": "#/definitions/CriteriaMenuOptionsListResponse"
   "/v1/cohortbuilder/{cdrVersionId}/criteria/domaininfo":
-    parameters:
-    - "$ref": "#/parameters/cdrVersionId"
     get:
       tags:
       - cohortBuilder
-      description: 'Returns a collection of DomainInfo'
+      description: 'Returns information on the domains of data in the workspace''s
+        CDR version along with participant and concept counts'
       operationId: findDomainInfos
       parameters:
-      - in: query
-        name: term
-        type: string
-        required: true
-        description: the term to search for
+      - "$ref": "#/parameters/cdrVersionId"
       responses:
         200:
-          description: A collection of DomainInfo
+          description: information on the domains
           schema:
             "$ref": "#/definitions/DomainInfoResponse"
-  "/v1/cohortbuilder/{cdrVersionId}/criteria/surveymodule":
+  "/v1/cohortbuilder/{cdrVersionId}/criteria/domaininfo/{domain}":
     parameters:
     - "$ref": "#/parameters/cdrVersionId"
     get:
       tags:
       - cohortBuilder
-      description: 'Returns a collection of SurveyModule'
-      operationId: findSurveyModules
+      description: 'Returns a count of term matches per domain'
+      operationId: findDomainCount
       parameters:
+      - in: path
+        name: domain
+        type: string
+        required: true
+        description: the specific type of domain
       - in: query
         name: term
         type: string
@@ -3192,9 +3192,47 @@ paths:
         description: the term to search for
       responses:
         200:
-          description: A collection of SurveyModule
+          description: A count of matching concepts in this domain
+          schema:
+            "$ref": "#/definitions/DomainCount"
+  "/v1/cohortbuilder/{cdrVersionId}/criteria/surveymodule":
+    get:
+      tags:
+      - cohortBuilder
+      description: 'Returns survey information in the workspace''s CDR version along
+        with participant and question count'
+      operationId: findSurveyModules
+      parameters:
+      - "$ref": "#/parameters/cdrVersionId"
+      responses:
+        200:
+          description: information about the surveys
           schema:
             "$ref": "#/definitions/SurveysResponse"
+  "/v1/cohortbuilder/{cdrVersionId}/criteria/surveymodule/{name}":
+    parameters:
+    - "$ref": "#/parameters/cdrVersionId"
+    get:
+      tags:
+      - cohortBuilder
+      description: 'Returns a count of term matches per survey name'
+      operationId: findSurveyCount
+      parameters:
+      - in: path
+        name: name
+        type: string
+        required: true
+        description: the name of the survey
+      - in: query
+        name: term
+        type: string
+        required: true
+        description: the term to search for
+      responses:
+        200:
+          description: A count of matching concepts per survey
+          schema:
+            "$ref": "#/definitions/SurveyCount"
   "/v1/cohortbuilder/{cdrVersionId}/criteria/{domain}/search/term":
     parameters:
     - "$ref": "#/parameters/cdrVersionId"
@@ -3594,7 +3632,10 @@ definitions:
     - VISIT
     - SURVEY
     - PERSON
-    - PHYSICALMEASUREMENT
+    - PHYSICAL_MEASUREMENT
+    - ALL_EVENTS
+    - LAB
+    - VITAL
   Surveys:
     type: string
     description: a survey for concepts
@@ -5868,8 +5909,26 @@ definitions:
         type: integer
         format: int64
       egress_mib:
-        description: The amount of egress detected during the window, in mebibytes
-          (MiB).
+        description: The total amount of egress detected during the window, in
+          mebibytes (MiB). This total subsumes the per-machine type egress
+          values provided here. The egress threshold is triggered against this
+          value.
+        type: number
+        format: double
+      gce_egress_mib:
+        description: The amount of egress detected via raw GCE VM during the
+          window, in mebibytes (MiB). Does NOT include Dataproc egress (Dataproc
+          technically uses GCE).
+        type: number
+        format: double
+      dataproc_master_egress_mib:
+        description: The amount of egress detected via Dataproc master nodes
+          during the window, in mebibytes (MiB).
+        type: number
+        format: double
+      dataproc_worker_egress_mib:
+        description: The amount of egress detected via Dataproc worker nodes
+          during the window, in mebibytes (MiB).
         type: number
         format: double
       egress_mib_threshold:
@@ -5881,8 +5940,9 @@ definitions:
         description: 'The Google Cloud project name associated with the workspace,
           e.g. aou-rw-6b66533d. Always present.'
         type: string
-      vm_name:
-        description: The name of the Jupyter VM which generated egress, e.g. all-of-us-260-m.
+      vm_prefix:
+        description: Prefix of the research VM(s) that generated egress, including
+          the user ID, e.g. all-of-us-260.
         type: string
   ArrayOfLong:
     type: array
@@ -6563,6 +6623,19 @@ definitions:
         description: number of concepts matching the search query in this domain
         type: integer
         format: int64
+  SurveyCount:
+    type: object
+    required:
+    - name
+    - conceptCount
+    properties:
+      name:
+        description: display name of the survey
+        type: string
+      conceptCount:
+        description: number of concepts matching the search query in this survey
+        type: integer
+        format: int64
   CreateReviewRequest:
     type: object
     required:
@@ -6657,7 +6730,7 @@ definitions:
       filters:
         "$ref": "#/definitions/FilterList"
       domain:
-        "$ref": "#/definitions/DomainType"
+        "$ref": "#/definitions/Domain"
         description: Different domain types in omop
   FilterColumns:
     type: string
@@ -6694,22 +6767,6 @@ definitions:
     - SURVEY_NAME
     - QUESTION
     - ANSWER
-  DomainType:
-    type: string
-    enum:
-    - CONDITION
-    - PROCEDURE
-    - OBSERVATION
-    - DRUG
-    - ALL_EVENTS
-    - DEVICE
-    - VISIT
-    - MEASUREMENT
-    - PHYSICAL_MEASUREMENT
-    - LAB
-    - VITAL
-    - SURVEY
-    - PERSON
   SortOrder:
     type: string
     enum:
@@ -8083,6 +8140,10 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/ReportingCohort"
+      institutions:
+        type: array
+        items:
+          "$ref": "#/definitions/ReportingInstitution"
       users:
         type: array
         items:
@@ -8236,6 +8297,23 @@ definitions:
       zipCode:
         type: string
         description: Up to 10-digit zip code for use residence.
+      institutionId:
+        type: integer
+        format: int64
+        description: |-
+          Foreign key into institution table. Each user is only affiliated
+          with a single institution.
+      institutionalRoleEnum:
+        description: |-
+          Description of the user's role at the institution they are
+          affiliated with. Selected from a list of predefined values. If "other", see institutional_role_other_text
+          for custom description.
+        "$ref": "#/definitions/InstitutionalRole"
+      institutionalRoleOtherText:
+        type: string
+        description: |-
+          If the institutional_role_enum is "other", custom description
+          of this user's role in the institution.
   ReportingWorkspace:
     x-aou-note: |-
       This code was generated using reporting-wizard.rb at 2020-09-30T16:18:28-04:00.
@@ -8407,7 +8485,7 @@ definitions:
           snapshot_timestamp, serves as a pseudo-primary key for this table.
   ReportingCohort:
     x-aou-note: |-
-      This code was generated using reporting-wizard.rb at 2020-09-30T12:33:39-04:00.
+      This code was generated using reporting-wizard.rb at 2020-10-09T09:09:12-04:00.
       Manual modification should be avoided if possible as this is a one-time generation
       and does not run on every build and updates must be merged manually for now.
     type: object
@@ -8447,3 +8525,36 @@ definitions:
         description: |-
           Application workspace ID of the workspace containing this cohort. Should be a foreign
           key into the workspace table.
+  ReportingInstitution:
+    x-aou-note: |-
+      This code was generated using reporting-wizard.rb at 2020-10-05T10:34:34-04:00.
+      Manual modification should be avoided if possible as this is a one-time generation
+      and does not run on every build and updates must be merged manually for now.
+    type: object
+    properties:
+      displayName:
+        type: string
+        description: Human-readable name  for the institution, as shown in the UI.
+      duaTypeEnum:
+        description: Data Use Agreement type.
+        "$ref": "#/definitions/DuaType"
+      institutionId:
+        type: integer
+        format: int64
+        description: |-
+          Unique PK for institution table in  application DB. Note that in foreign key relationships,
+          the short_name is typically used in place of this identifier.
+      organizationTypeEnum:
+        description: Organization type. If Other, then organization_type_other_text
+          describes this organization's type.
+        "$ref": "#/definitions/OrganizationType"
+      organizationTypeOtherText:
+        type: string
+        description: |-
+          If organization_type_enum is Other, this field describes organization's type. Value is not valid
+          otherwise.
+      shortName:
+        type: string
+        description: |-
+          A unique string identifier used in the API to map a user affiliation to an institution. (Database
+          identifiers are not typically exposed in the workbench API).

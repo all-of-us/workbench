@@ -10,8 +10,7 @@ import {ElementType} from 'app/xpath-options';
 import {Frame, Page} from 'puppeteer';
 import {defaultFieldValues} from 'resources/data/user-registration-data';
 import {config} from 'resources/workbench-config';
-import {waitWhileLoading} from 'utils/test-utils';
-import {waitForText} from 'utils/waits-utils';
+import {waitForText, waitWhileLoading} from 'utils/waits-utils';
 import {LinkText} from 'app/text-labels';
 import {getPropValue} from 'utils/element-utils';
 
@@ -83,16 +82,12 @@ export default class CreateAccountPage extends BasePage {
   }
 
   async isLoaded(): Promise<boolean> {
-    try {
-      await Promise.all([
-        waitForText(this.page, 'Please read through the entire agreement to continue'),
-        this.page.waitForXPath('//*[@data-test-id="account-creation-tos"]', {visible: true}),
-      ])
-      return true;
-    } catch (err) {
-      console.log(`CreateAccountPage isLoaded() encountered ${err}`);
-      return false;
-    }
+    await Promise.all([
+      waitForText(this.page, 'Please read through the entire agreement to continue'),
+      this.page.waitForXPath('//*[@data-test-id="account-creation-tos"]', {visible: true}),
+    ]);
+    await waitWhileLoading(this.page);
+    return true;
   }
 
   async getSubmitButton(): Promise<Button> {

@@ -49,6 +49,13 @@ OUTPUTS = {
     :yaml_template => to_output_path('yaml_template', 'yaml')
 }.freeze
 
+# N.B.: the bq command-line tool accepts 'INT64' in the schema
+# files for integer fields, but the console's "Edit as Text"
+# UI for table schemas expects 'INTEGER'. Also, whereas QueryParameterValue
+# docs and function names use `int64`, the schema view
+# in the console uses 'INTEGER'. From this point forward, I want to  specify
+# 'INTEGER' in the schemas so that  the `bq show` output  matches.
+
 # This is the canonical type map, but there are places where we assign a tinyint MySql column a Long
 # Entity field, etc.
 #
@@ -71,7 +78,7 @@ MYSQL_TYPE_TO_SIMPLE_TYPE = {
         }
     },
     'bigint' => {
-        :bigquery => 'INT64',
+        :bigquery => 'INTEGER',
         :projection => 'Long',
         :swagger => {
             'type'  => 'integer',
@@ -79,7 +86,7 @@ MYSQL_TYPE_TO_SIMPLE_TYPE = {
         }
     },
     'smallint' => {
-        :bigquery => 'INT64',
+        :bigquery => 'INTEGER',
         :projection => 'Short',
         :swagger => {
             'type'  => 'integer',
@@ -87,7 +94,7 @@ MYSQL_TYPE_TO_SIMPLE_TYPE = {
         }
     },
     'int' => {
-        :bigquery => 'INT64',
+        :bigquery => 'INTEGER',
         :projection => 'Integer',
         :swagger => {
             'type'  => 'integer',
@@ -95,7 +102,7 @@ MYSQL_TYPE_TO_SIMPLE_TYPE = {
         },
     },
     'tinyint' => {
-        :bigquery => 'INT64',
+        :bigquery => 'INTEGER',
         :projection => 'Short',
         :swagger => {
             'type'  => 'integer',
@@ -171,6 +178,29 @@ ENUM_TYPES = {
              :swagger => 'DataAccessLevel',
              :bigquery => 'STRING',
              :default_constant_value => 1 # REGISTERED
+         }
+     },
+     # Unlike some other entity  classes, DbInstitution exposes typed enum values.
+     'institution' => {
+         'dua_type_enum' => {
+             :projection => 'DuaType',
+             :swagger => 'DuaType',
+             :bigquery => 'STRING',
+             :default_constant_value => 'DuaType.MASTER'
+         },
+         'organization_type_enum' => {
+             :projection => 'OrganizationType',
+             :swagger => 'OrganizationType',
+             :bigquery => 'STRING',
+             :default_constant_value => 'OrganizationType.ACADEMIC_RESEARCH_INSTITUTION'
+         }
+     },
+     'user_verified_institutional_affiliation' => {
+         'institutional_role_enum' => {
+             :projection => 'InstitutionalRole',
+             :swagger => 'InstitutionalRole',
+             :bigquery => 'STRING',
+             :default_constant_value => 'InstitutionalRole.UNDERGRADUATE'
          }
      }
 }.freeze

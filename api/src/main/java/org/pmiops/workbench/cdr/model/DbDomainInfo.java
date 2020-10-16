@@ -1,7 +1,6 @@
 package org.pmiops.workbench.cdr.model;
 
 import java.util.Objects;
-import java.util.function.Function;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -10,25 +9,15 @@ import javax.persistence.Transient;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.DomainInfo;
 
 @Entity
 @Table(name = "domain_info")
 public class DbDomainInfo {
 
-  public static final Function<DbDomainInfo, DomainInfo> TO_CLIENT_DOMAIN_INFO =
-      (domain) ->
-          new DomainInfo()
-              .domain(domain.getDomainEnum())
-              .name(domain.getName())
-              .description(domain.getDescription())
-              .allConceptCount(domain.getAllConceptCount())
-              .standardConceptCount(domain.getStandardConceptCount())
-              .participantCount(domain.getParticipantCount());
-
   private long conceptId;
   private short domain;
   private String domainId;
+  private String domainEnumValue;
   private String name;
   private String description;
   private long allConceptCount;
@@ -41,6 +30,7 @@ public class DbDomainInfo {
   public DbDomainInfo(
       short domain,
       String domainId,
+      String domainEnumValue,
       String name,
       String description,
       long conceptId,
@@ -50,6 +40,7 @@ public class DbDomainInfo {
     this.conceptId = conceptId;
     this.domain = domain;
     this.domainId = domainId;
+    this.domainEnumValue = domainEnumValue;
     this.name = name;
     this.description = description;
     this.allConceptCount = allConceptCount;
@@ -107,6 +98,20 @@ public class DbDomainInfo {
 
   public DbDomainInfo domainId(String domainId) {
     this.domainId = domainId;
+    return this;
+  }
+
+  @Column(name = "domain_enum")
+  public String getDomainEnumValue() {
+    return domainEnumValue;
+  }
+
+  public void setDomainEnumValue(String domainEnumValue) {
+    this.domainEnumValue = domainEnumValue;
+  }
+
+  public DbDomainInfo domainEnumValue(String domainEnumValue) {
+    this.domainEnumValue = domainEnumValue;
     return this;
   }
 

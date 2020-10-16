@@ -8,6 +8,7 @@ import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
 import {LinkText} from 'app/text-labels';
 import {getPropValue} from 'utils/element-utils';
 import * as fp from 'lodash/fp';
+import {waitWhileLoading} from 'utils/waits-utils';
 
 const Selector = {
   defaultDialog: '//*[@role="dialog"]',
@@ -22,11 +23,11 @@ export default class Modal extends Container {
   async waitForLoad(): Promise<this> {
     try {
       await this.waitUntilVisible();
-    } catch (e) {
+      await waitWhileLoading(this.page);
+    } catch (err) {
       await savePageToFile(this.page);
       await takeScreenshot(this.page);
-      const title = await this.page.title();
-      throw new Error(`"${title}" modal waitForLoad() encountered ${e}`);
+      throw err;
     }
     return this;
   }
@@ -79,7 +80,7 @@ export default class Modal extends Container {
   }
 
   async waitUntilClose(): Promise<void> {
-    await this.page.waitForXPath(this.xpath, {hidden: true});
+    await this.page.waitForXPath(this.xpath, {hidden: true, timeout: 45000});
   }
 
   async waitUntilVisible(): Promise<ElementHandle> {

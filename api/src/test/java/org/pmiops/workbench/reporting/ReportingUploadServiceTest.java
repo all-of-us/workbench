@@ -11,8 +11,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.rowToInsertStringToOffsetTimestamp;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.timestampQpvToOffsetDateTime;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.countPopulatedTableLists;
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.INSTITUTION__SHORT_NAME;
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.USER__CITY;
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.USER__INSTITUTION_ID;
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.countPopulatedTables;
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.createEmptySnapshot;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingCohort;
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingInstitution;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingUser;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 
@@ -69,7 +74,6 @@ public class ReportingUploadServiceTest {
   private static final Instant NOW = Instant.parse("2000-01-01T00:00:00.00Z");
   private static final Instant THEN_INSTANT = Instant.parse("1989-02-17T00:00:00.00Z");
   private static final OffsetDateTime THEN = OffsetDateTime.ofInstant(THEN_INSTANT, ZoneOffset.UTC);
-  public static final int BIG_QUERY_TABLE_COUNT = 3;
 
   private ReportingSnapshot reportingSnapshot;
   private ReportingSnapshot snapshotWithNulls;
@@ -106,6 +110,7 @@ public class ReportingUploadServiceTest {
         new ReportingSnapshot()
             .captureTimestamp(NOW.toEpochMilli())
             .cohorts(ImmutableList.of(createReportingCohort()))
+            .institutions(ImmutableList.of(createReportingInstitution()))
             .users(
                 ImmutableList.of(
                     createReportingUser(),
@@ -119,7 +124,7 @@ public class ReportingUploadServiceTest {
                         .givenName("So-Crates")
                         .disabled(false)
                         .userId(303L),
-                    ReportingTestUtils.createReportingUser()))
+                    createReportingUser()))
             .workspaces(
                 ImmutableList.of(
                     new ReportingWorkspace()
@@ -139,16 +144,13 @@ public class ReportingUploadServiceTest {
                         .creatorId(202L)));
 
     snapshotWithNulls =
-        new ReportingSnapshot()
+        createEmptySnapshot()
             .captureTimestamp(NOW.toEpochMilli())
             .cohorts(Collections.emptyList())
+            .institutions(ImmutableList.of(createReportingInstitution().displayName(null)))
             .users(
                 ImmutableList.of(
-                    new ReportingUser()
-                        .username(null)
-                        .givenName("Nullson")
-                        .disabled(false)
-                        .userId(101L),
+                    createReportingUser(),
                     new ReportingUser()
                         .username("america@usa.gov")
                         .givenName(null)
@@ -190,12 +192,12 @@ public class ReportingUploadServiceTest {
 
   @Test
   public void testUploadSnapshot_dml() {
-    testUploadSnapshot_dml(reportingSnapshot);
+    testUploadSnapshot_dml(reportingSnapshot, 3);
   }
 
   @Test
   public void testUploadSnapshot_dml_with_nulls() {
-    testUploadSnapshot_dml(snapshotWithNulls);
+    testUploadSnapshot_dml(snapshotWithNulls, 2);
   }
 
   @Test
@@ -204,13 +206,13 @@ public class ReportingUploadServiceTest {
     verify(mockBigQueryService, never()).executeQuery(any(), anyLong());
   }
 
-  private void testUploadSnapshot_dml(ReportingSnapshot snapshot) {
+  private void testUploadSnapshot_dml(ReportingSnapshot snapshot, int expectedWorkspaceJobIndex) {
     reportingUploadServiceDmlImpl.uploadSnapshot(snapshot);
-    verify(mockBigQueryService, times(2))
+    verify(mockBigQueryService, times(ReportingTestUtils.countPopulatedTables(snapshot)))
         .executeQuery(queryJobConfigurationCaptor.capture(), anyLong());
 
     final List<QueryJobConfiguration> jobs = queryJobConfigurationCaptor.getAllValues();
-    assertThat(jobs).hasSize(2);
+    assertThat(jobs).hasSize(countPopulatedTables(snapshot)); // assumes small payload
 
     final QueryJobConfiguration job0 = jobs.get(0);
     final String query0 = job0.getQuery();
@@ -220,51 +222,52 @@ public class ReportingUploadServiceTest {
         QueryParameterValues.formatQuery(QueryParameterValues.replaceNamedParameters(job0));
     assertThat(expandedQuery).containsMatch("INSERT\\s+INTO");
 
-    final OffsetDateTime convertedOdt =
-        timestampQpvToOffsetDateTime(jobs.get(1).getNamedParameters().get("creation_time__0"))
-            .get();
-    assertTimeApprox(convertedOdt, THEN);
+    final QueryJobConfiguration workspaceJob = jobs.get(expectedWorkspaceJobIndex);
+    final Optional<OffsetDateTime> creationTime0 =
+        timestampQpvToOffsetDateTime(workspaceJob.getNamedParameters().get("creation_time__0"));
+    assertThat(creationTime0).isPresent();
+    assertTimeApprox(creationTime0.get(), THEN);
   }
 
   @Test
   public void testUploadSnapshot_dmlBatchInserts() {
     final ReportingSnapshot largeSnapshot =
-        new ReportingSnapshot().captureTimestamp(NOW.toEpochMilli());
-    // It's certainly possible to make the batch size an environment configuration value and
-    // inject it so that we don't need this many rows in the test, but I didn't think that was
-    // necessarily a good enoughh reason to add configurable state.
-    final List<ReportingUser> users =
-        IntStream.range(0, 21)
-            .mapToObj(
-                id ->
-                    new ReportingUser()
-                        .username("bill@aou.biz")
-                        .givenName("Bill")
-                        .disabled(false)
-                        .userId((long) id))
-            .collect(ImmutableList.toImmutableList());
-    largeSnapshot.setUsers(users);
-    largeSnapshot.setWorkspaces(
-        ImmutableList.of(
-            new ReportingWorkspace()
-                .workspaceId(303L)
-                .name("Circle K")
-                .creationTime(THEN)
-                .creatorId(101L)));
+        createEmptySnapshot()
+            .captureTimestamp(NOW.toEpochMilli())
+            .users(
+                IntStream.range(0, 21)
+                    .mapToObj(
+                        id ->
+                            new ReportingUser()
+                                .username("bill@aou.biz")
+                                .givenName("Bill")
+                                .disabled(false)
+                                .userId((long) id))
+                    .collect(ImmutableList.toImmutableList()))
+            .workspaces(
+                ImmutableList.of(
+                    new ReportingWorkspace()
+                        .workspaceId(303L)
+                        .name("Circle K")
+                        .creationTime(THEN)
+                        .creatorId(101L)))
+            .cohorts(ImmutableList.of(ReportingTestUtils.createReportingCohort()))
+            .institutions(ImmutableList.of(ReportingTestUtils.createReportingInstitution()));
 
     reportingUploadServiceDmlImpl.uploadSnapshot(largeSnapshot);
-    verify(mockBigQueryService, times(6))
+    final int expectedInsertions = 8;
+    verify(mockBigQueryService, times(expectedInsertions))
         .executeQuery(queryJobConfigurationCaptor.capture(), anyLong());
 
     final List<QueryJobConfiguration> jobs = queryJobConfigurationCaptor.getAllValues();
-    assertThat(jobs).hasSize(6);
+    assertThat(jobs).hasSize(expectedInsertions);
 
     // Since null values are omitted, map sizes will vary
     assertThat(jobs.get(0).getNamedParameters()).isNotEmpty();
     assertThat(jobs.get(4).getNamedParameters()).isNotEmpty();
 
     final QueryParameterValue creationTime =
-        jobs.get(5).getNamedParameters().get("creation_time__0");
+        jobs.get(7).getNamedParameters().get("creation_time__0");
     assertThat(creationTime).isNotNull();
     final Optional<OffsetDateTime> creationOdt =
         QueryParameterValues.timestampQpvToOffsetDateTime(creationTime);
@@ -295,14 +298,13 @@ public class ReportingUploadServiceTest {
     doReturn(mockInsertAllResponse)
         .when(mockBigQueryService)
         .insertAll(any(InsertAllRequest.class));
-    final ReportingJobResult result = reportingUploadServiceStreamingImpl.uploadSnapshot(snapshot);
-    assertThat(result).isEqualTo(ReportingJobResult.SUCCEEDED);
+    reportingUploadServiceStreamingImpl.uploadSnapshot(snapshot);
 
-    verify(mockBigQueryService, times(countPopulatedTableLists(snapshot)))
+    verify(mockBigQueryService, times(countPopulatedTables(snapshot)))
         .insertAll(insertAllRequestCaptor.capture());
     final List<InsertAllRequest> requests = insertAllRequestCaptor.getAllValues();
 
-    assertThat(requests).hasSize(countPopulatedTableLists(snapshot));
+    assertThat(requests).hasSize(countPopulatedTables(snapshot));
 
     final Map<String, InsertAllRequest> tableIdToInsertAllRequest =
         requests.stream()
@@ -316,6 +318,9 @@ public class ReportingUploadServiceTest {
     assertThat(userRows).hasSize(snapshot.getUsers().size());
     assertThat(userRows.get(0).getId())
         .hasLength(InsertAllRequestPayloadTransformer.INSERT_ID_LENGTH);
+    final Map<String, Object> userColumnToValue = userRows.get(0).getContent();
+    assertThat((String) userColumnToValue.get("city")).isEqualTo(USER__CITY);
+    assertThat((long) userColumnToValue.get("institution_id")).isEqualTo(USER__INSTITUTION_ID);
 
     final InsertAllRequest workspaceRequest = tableIdToInsertAllRequest.get("workspace");
     assertThat(workspaceRequest).isNotNull();
@@ -337,6 +342,13 @@ public class ReportingUploadServiceTest {
     assertThat(
             workspaceColumnValues.get(WorkspaceColumnValueExtractor.CREATOR_ID.getParameterName()))
         .isEqualTo(101L);
+
+    final InsertAllRequest institutionRequest = tableIdToInsertAllRequest.get("institution");
+    assertThat(institutionRequest).isNotNull();
+    assertThat(institutionRequest.getRows()).hasSize(1);
+    final RowToInsert firstInstitutionRow = institutionRequest.getRows().get(0);
+    assertThat(firstInstitutionRow.getContent().get("short_name"))
+        .isEqualTo(INSTITUTION__SHORT_NAME);
   }
 
   @Test
@@ -345,11 +357,7 @@ public class ReportingUploadServiceTest {
     workspace.setWorkspaceId(101L);
     workspace.setBillingStatus(null);
     final ReportingSnapshot snapshot =
-        new ReportingSnapshot()
-            .captureTimestamp(0L)
-            .cohorts(Collections.emptyList())
-            .users(Collections.emptyList())
-            .workspaces(ImmutableList.of(workspace));
+        createEmptySnapshot().captureTimestamp(0L).workspaces(ImmutableList.of(workspace));
     reportingUploadServiceStreamingImpl.uploadSnapshot(snapshot);
     verify(mockBigQueryService).insertAll(insertAllRequestCaptor.capture());
 

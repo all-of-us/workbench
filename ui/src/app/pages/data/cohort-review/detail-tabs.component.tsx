@@ -11,7 +11,7 @@ import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {DomainType, FilterColumns} from 'generated/fetch';
+import {Domain, FilterColumns} from 'generated/fetch';
 import {TabPanel, TabView} from 'primereact/tabview';
 import {Observable} from 'rxjs/Observable';
 import {from} from 'rxjs/observable/from';
@@ -184,7 +184,7 @@ const graph = {
 const tabs = [
   {
     name: 'All Events',
-    domain: DomainType.ALLEVENTS,
+    domain: Domain.ALLEVENTS,
     columns: {
       standard: [
         itemDate, visitType, standardCode, standardVocabulary, standardName, value,
@@ -196,7 +196,7 @@ const tabs = [
     }
   }, {
     name: 'Conditions',
-    domain: DomainType.CONDITION,
+    domain: Domain.CONDITION,
     columns: {
       standard: [
         itemDate, standardCode, standardVocabulary, standardName, ageAtEvent, visitType
@@ -207,7 +207,7 @@ const tabs = [
     }
   }, {
     name: 'Procedures',
-    domain: DomainType.PROCEDURE,
+    domain: Domain.PROCEDURE,
     columns: {
       standard: [
         itemDate, standardCode, standardVocabulary, standardName, ageAtEvent, visitType
@@ -218,7 +218,7 @@ const tabs = [
     }
   }, {
     name: 'Drugs',
-    domain: DomainType.DRUG,
+    domain: Domain.DRUG,
     columns: {
       standard: [
         itemDate, standardName, ageAtEvent, numMentions, firstMention, lastMention, visitType
@@ -229,7 +229,7 @@ const tabs = [
     }
   }, {
     name: 'Observations',
-    domain: DomainType.OBSERVATION,
+    domain: Domain.OBSERVATION,
     columns: {
       standard: [
         itemDate, standardName, standardCode, standardVocabulary, ageAtEvent, visitType
@@ -240,7 +240,7 @@ const tabs = [
     }
   }, {
     name: 'Physical Measurements',
-    domain: DomainType.PHYSICALMEASUREMENT,
+    domain: Domain.PHYSICALMEASUREMENT,
     columns: {
       standard: [
         itemDate, standardCode, standardVocabulary, standardName, value, ageAtEvent
@@ -251,7 +251,7 @@ const tabs = [
     }
   }, {
     name: 'Labs',
-    domain: DomainType.LAB,
+    domain: Domain.LAB,
     columns: {
       standard: [
         itemDate, itemTime, standardName, graph, value, ageAtEvent, visitType
@@ -262,7 +262,7 @@ const tabs = [
     }
   }, {
     name: 'Vitals',
-    domain: DomainType.VITAL,
+    domain: Domain.VITAL,
     columns: {
       standard: [
         itemDate, itemTime, standardName, graph, value, ageAtEvent, visitType
@@ -273,7 +273,7 @@ const tabs = [
     }
   }, {
     name: 'Surveys',
-    domain: DomainType.SURVEY,
+    domain: Domain.SURVEY,
     columns: {
       standard: [
         itemDate, survey, question, answer
@@ -286,9 +286,9 @@ const tabs = [
 ];
 
 const domainList = [
-  DomainType[DomainType.CONDITION],
-  DomainType[DomainType.PROCEDURE],
-  DomainType[DomainType.DRUG]
+  Domain[Domain.CONDITION],
+  Domain[Domain.PROCEDURE],
+  Domain[Domain.DRUG]
 ];
 const EVENT_CATEGORY = 'Review Individual';
 

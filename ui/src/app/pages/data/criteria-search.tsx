@@ -9,7 +9,7 @@ import {
   currentCohortCriteriaStore,
   currentConceptStore
 } from 'app/utils/navigation';
-import {Criteria, DomainType} from 'generated/fetch';
+import {Criteria, Domain} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {Growl} from 'primereact/growl';
 import * as React from 'react';
@@ -70,6 +70,7 @@ const css = `
 
 interface Props {
   cohortContext: any;
+  conceptSearchTerms?: string;
   selectedSurvey?: string;
   source: string;
 }
@@ -93,7 +94,7 @@ export class CriteriaSearch extends React.Component<Props, State>  {
   growlTimer: NodeJS.Timer;
   subscription: Subscription;
 
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props);
     this.state = {
       autocompleteSelection: undefined,
@@ -105,13 +106,13 @@ export class CriteriaSearch extends React.Component<Props, State>  {
       selectedIds: [],
       selections: [],
       selectedCriteriaList: [],
-      treeSearchTerms: '',
+      treeSearchTerms: props.source === 'concept' ? props.conceptSearchTerms : '',
       loadingSubtree: false
     };
   }
 
   componentDidMount(): void {
-    const {cohortContext: {domain, standard, type}} = this.props;
+    const {cohortContext: {domain, standard, type}, source} = this.props;
     let {backMode, mode} = this.state;
     let hierarchyNode;
     if (this.initTree) {
@@ -125,13 +126,27 @@ export class CriteriaSearch extends React.Component<Props, State>  {
       mode = 'tree';
     }
     this.setState({backMode, hierarchyNode, mode});
+    this.subscription = currentCohortCriteriaStore.subscribe(currentCohortCriteria => {
+      if (source === 'criteria') {
+        this.setState({selectedCriteriaList: currentCohortCriteria});
+      }
+    });
+    this.subscription.add(currentConceptStore.subscribe(currentConcepts => {
+      if (source === 'concept') {
+        this.setState({selectedCriteriaList: currentConcepts});
+      }
+    }));
+  }
+
+  componentWillUnmount() {
+    this.subscription.unsubscribe();
   }
 
   get initTree() {
-    const {cohortContext: {domain}} = this.props;
-    return domain === DomainType.PHYSICALMEASUREMENT
-        || domain === DomainType.SURVEY
-        || domain === DomainType.VISIT;
+    const {cohortContext: {domain}, source} = this.props;
+    return (domain === Domain.PHYSICALMEASUREMENT && source === 'criteria')
+      || domain === Domain.SURVEY
+        || domain === Domain.VISIT;
   }
 
   get isConcept() {
@@ -222,7 +237,7 @@ export class CriteriaSearch extends React.Component<Props, State>  {
   }
 
   render() {
-    const {cohortContext, selectedSurvey, source} = this.props;
+    const {cohortContext, conceptSearchTerms, selectedSurvey, source} = this.props;
     const {autocompleteSelection, groupSelections, hierarchyNode, loadingSubtree,
       selectedIds, treeSearchTerms, growlVisible} = this.state;
     return <div>
@@ -249,6 +264,7 @@ export class CriteriaSearch extends React.Component<Props, State>  {
           <ListSearchV2 source={source}
                         hierarchy={this.showHierarchy}
                         searchContext={cohortContext}
+                        searchTerms={conceptSearchTerms}
                         select={this.addSelection}
                         selectedIds={this.getListSearchSelectedIds()}/>
         </div>

@@ -11,7 +11,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {highlightSearchTerm, reactStyles} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {Criteria, CriteriaType, DomainType} from 'generated/fetch';
+import {Criteria, CriteriaType, Domain} from 'generated/fetch';
 import {Key} from 'ts-key-enum';
 
 const styles = reactStyles({
@@ -178,7 +178,7 @@ export class SearchBar extends React.Component<Props, State> {
   componentDidUpdate(prevProps: Readonly<Props>): void {
     const {node: {domainId}, searchTerms} = this.props;
     if (searchTerms !== prevProps.searchTerms) {
-      if (domainId === DomainType.PHYSICALMEASUREMENT.toString()) {
+      if (domainId === Domain.PHYSICALMEASUREMENT.toString()) {
         triggerEvent(`Cohort Builder Search - Physical Measurements`, 'Search', searchTerms);
       } else if (this.state.optionSelected) {
         this.setState({optionSelected: false});
@@ -193,7 +193,7 @@ export class SearchBar extends React.Component<Props, State> {
     triggerEvent(`Cohort Builder Search - ${domainToTitle(domainId)}`, 'Search', searchTerms);
     this.setState({loading: true});
     const {cdrVersionId} = currentWorkspaceStore.getValue();
-    const apiCall = domainId === DomainType.DRUG.toString()
+    const apiCall = domainId === Domain.DRUG.toString()
       ? cohortBuilderApi().findDrugBrandOrIngredientByValue(+cdrVersionId, searchTerms)
       : cohortBuilderApi().findCriteriaAutoComplete(+cdrVersionId, domainId, searchTerms, type, isStandard);
     apiCall.then(resp => {

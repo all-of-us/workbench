@@ -1,6 +1,5 @@
 import {Page} from 'puppeteer';
-import {waitWhileLoading} from 'utils/test-utils';
-import {waitForDocumentTitle} from 'utils/waits-utils';
+import {waitForDocumentTitle, waitWhileLoading} from 'utils/waits-utils';
 import DataTable from 'app/component/data-table';
 import Button from 'app/element/button';
 import {LinkText} from 'app/text-labels';
@@ -16,17 +15,12 @@ export default class CohortReviewPage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    try {
-      await Promise.all([
-        waitForDocumentTitle(this.page, PageTitle),
-        waitWhileLoading(this.page),
-        this.getDataTable().exists(),
-      ]);
-      return true;
-    } catch (e) {
-      console.log(`CohortReviewPage isLoaded() encountered ${e}`);
-      return false;
-    }
+    await Promise.all([
+      waitForDocumentTitle(this.page, PageTitle),
+      waitWhileLoading(this.page)
+    ]);
+    await this.getDataTable().exists();
+    return true;
   }
 
   getDataTable(): DataTable {

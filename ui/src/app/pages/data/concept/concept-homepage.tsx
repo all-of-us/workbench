@@ -15,7 +15,7 @@ import {ConceptAddModal} from 'app/pages/data/concept/concept-add-modal';
 import {ConceptSurveyAddModal} from 'app/pages/data/concept/concept-survey-add-modal';
 import {ConceptTable} from 'app/pages/data/concept/concept-table';
 import {CriteriaSearch} from 'app/pages/data/criteria-search';
-import {conceptsApi} from 'app/services/swagger-fetch-clients';
+import {cohortBuilderApi, conceptsApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {
   reactStyles,
@@ -134,8 +134,8 @@ interface ConceptCacheItem {
 }
 
 const DomainCard: React.FunctionComponent<{conceptDomainInfo: DomainInfo,
-  standardConceptsOnly: boolean, browseInDomain: Function}> =
-    ({conceptDomainInfo, standardConceptsOnly, browseInDomain}) => {
+  standardConceptsOnly: boolean, browseInDomain: Function, updating: boolean}> =
+    ({conceptDomainInfo, standardConceptsOnly, browseInDomain, updating}) => {
       const conceptCount = standardConceptsOnly ?
           conceptDomainInfo.standardConceptCount.toLocaleString() : conceptDomainInfo.allConceptCount.toLocaleString();
       return <DomainCardBase style={{width: 'calc(25% - 1rem)'}} data-test-id='domain-box'>
@@ -143,7 +143,9 @@ const DomainCard: React.FunctionComponent<{conceptDomainInfo: DomainInfo,
              onClick={browseInDomain}
              data-test-id='domain-box-name'>{conceptDomainInfo.name}</Clickable>
         <div style={styles.conceptText}>
-          <span style={{fontSize: 30}}>{conceptCount.toLocaleString()}</span> concepts in this domain. <p/>
+          {updating ? <Spinner size={42}/> : <React.Fragment>
+            <span style={{fontSize: 30}}>{conceptCount.toLocaleString()}</span> concepts in this domain. <p/>
+          </React.Fragment>}
           <div><b>{conceptDomainInfo.participantCount.toLocaleString()}</b> participants in domain.</div>
         </div>
         <Clickable style={styles.domainBoxLink}
@@ -151,14 +153,16 @@ const DomainCard: React.FunctionComponent<{conceptDomainInfo: DomainInfo,
       </DomainCardBase>;
     };
 
-const SurveyCard: React.FunctionComponent<{survey: SurveyModule, browseSurvey: Function}> =
-    ({survey, browseSurvey}) => {
+const SurveyCard: React.FunctionComponent<{survey: SurveyModule, browseSurvey: Function, updating: boolean}> =
+    ({survey, browseSurvey, updating}) => {
       return <DomainCardBase style={{maxHeight: 'auto', width: 'calc(25% - 1rem)'}}>
         <Clickable style={styles.domainBoxHeader}
           onClick={browseSurvey}
           data-test-id='survey-box-name'>{survey.name}</Clickable>
         <div style={styles.conceptText}>
-          <span style={{fontSize: 30}}>{survey.questionCount.toLocaleString()}</span> survey questions with
+          {updating ? <Spinner size={42}/> : <React.Fragment>
+            <span style={{fontSize: 30}}>{survey.questionCount.toLocaleString()}</span> survey questions with
+          </React.Fragment>}
           <div><b>{survey.participantCount.toLocaleString()}</b> participants</div>
         </div>
         <div style={{...styles.conceptText, height: '3.5rem'}}>
@@ -168,14 +172,17 @@ const SurveyCard: React.FunctionComponent<{survey: SurveyModule, browseSurvey: F
       </DomainCardBase>;
     };
 
-const PhysicalMeasurementsCard: React.FunctionComponent<{physicalMeasurement: DomainInfo, browsePhysicalMeasurements: Function}> =
-    ({physicalMeasurement, browsePhysicalMeasurements}) => {
+const PhysicalMeasurementsCard: React.FunctionComponent<{physicalMeasurement: DomainInfo,
+  browsePhysicalMeasurements: Function, updating: boolean}> =
+    ({physicalMeasurement, browsePhysicalMeasurements, updating}) => {
       return <DomainCardBase style={{maxHeight: 'auto', width: '11.5rem'}}>
         <Clickable style={styles.domainBoxHeader}
           onClick={browsePhysicalMeasurements}
           data-test-id='pm-box-name'>{physicalMeasurement.name}</Clickable>
         <div style={styles.conceptText}>
-          <span style={{fontSize: 30}}>{physicalMeasurement.allConceptCount.toLocaleString()}</span> physical measurements.
+          {updating ? <Spinner size={42}/> : <React.Fragment>
+            <span style={{fontSize: 30}}>{physicalMeasurement.allConceptCount.toLocaleString()}</span> physical measurements.
+          </React.Fragment>}
           <div><b>{physicalMeasurement.participantCount.toLocaleString()}</b> participants in this domain</div>
         </div>
         <div style={{...styles.conceptText, height: 'auto'}}>
@@ -220,6 +227,8 @@ interface State {
   domainErrors: Domain[];
   // True if the getDomainInfo call fails
   domainInfoError: boolean;
+  // List of domains loading updated counts for domain cards
+  domainsLoading: Array<Domain>;
   // List of error messages to display if the search input is invalid
   inputErrors: Array<string>;
   // If concept metadata is still being gathered for any domain
@@ -244,6 +253,8 @@ interface State {
   surveyAddModalOpen: boolean;
   // True if the getSurveyInfo call fails
   surveyInfoError: boolean;
+  // List of surveys loading updated counts for survey cards
+  surveysLoading: Array<string>;
   workspacePermissions: WorkspacePermissions;
 }
 
@@ -269,6 +280,7 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
         currentSearchString: '',
         domainErrors: [],
         domainInfoError: false,
+        domainsLoading: [],
         inputErrors: [],
         loadingDomains: true,
         countsLoading: false,
@@ -278,9 +290,10 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
         selectedSurvey: '',
         selectedSurveyQuestions: [],
         showSearchError: false,
-        standardConceptsOnly: true,
+        standardConceptsOnly: !this.isConceptSetFlagEnable(),
         surveyAddModalOpen: false,
         surveyInfoError: false,
+        surveysLoading: [],
         workspacePermissions: new WorkspacePermissions(props.workspace),
       };
     }
@@ -298,8 +311,8 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
     }
 
     async loadDomainsAndSurveys() {
-      const {namespace, id} = this.props.workspace;
-      const getDomainInfo = conceptsApi().getDomainInfo(namespace, id)
+      const {cdrVersionId} = this.props.workspace;
+      const getDomainInfo = cohortBuilderApi().findDomainInfos(+cdrVersionId)
         .then(conceptDomainInfo => {
           let conceptsCache: ConceptCacheItem[] = conceptDomainInfo.items.map((domain) => ({
             domain: domain.domain,
@@ -330,7 +343,7 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
           this.setState({domainInfoError: true});
           console.error(e);
         });
-      const getSurveyInfo = conceptsApi().getSurveyInfo(namespace, id)
+      const getSurveyInfo = cohortBuilderApi().findSurveyModules(+cdrVersionId)
         .then(surveysInfo => this.setState({conceptSurveysList: surveysInfo.items}))
         .catch((e) => {
           this.setState({surveyInfoError: true});
@@ -339,6 +352,33 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
       await Promise.all([getDomainInfo, getSurveyInfo]);
       this.browseDomainFromQueryParams();
       this.setState({loadingDomains: false});
+    }
+
+    async updateCardCounts() {
+      const {cdrVersionId} = this.props.workspace;
+      const {conceptDomainList, conceptSurveysList, currentInputString} = this.state;
+      this.setState({
+        domainsLoading: conceptDomainList.map(domain => domain.domain),
+        surveysLoading: conceptSurveysList.map(survey => survey.name),
+      });
+      const promises = [];
+      conceptDomainList.forEach(conceptDomain => {
+        promises.push(cohortBuilderApi().findDomainCount(+cdrVersionId, conceptDomain.domain.toString(), currentInputString)
+          .then(domainCount => {
+            conceptDomain.allConceptCount = domainCount.conceptCount;
+            this.setState({domainsLoading: this.state.domainsLoading.filter(domain => domain !== conceptDomain.domain)});
+          })
+        );
+      });
+      conceptSurveysList.forEach(conceptSurvey => {
+        promises.push(cohortBuilderApi().findSurveyCount(+cdrVersionId, conceptSurvey.name, currentInputString)
+          .then(surveyCount => {
+            conceptSurvey.questionCount = surveyCount.conceptCount;
+            this.setState({surveysLoading: this.state.surveysLoading.filter(survey => survey !== conceptSurvey.name)});
+          }));
+      });
+      await Promise.all(promises);
+      this.setState({conceptDomainList, conceptSurveysList});
     }
 
     browseDomainFromQueryParams() {
@@ -356,7 +396,7 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
     }
 
     handleSearchKeyPress(e) {
-      const {currentInputString} = this.state;
+      const {currentInputString, selectedDomain, selectedSurvey} = this.state;
       // search on enter key if no forbidden characters are present
       if (e.key === Key.Enter) {
         if (currentInputString.trim().length < 3) {
@@ -365,7 +405,13 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
           const inputErrors = validateInputForMySQL(currentInputString);
           this.setState({inputErrors, showSearchError: false});
           if (inputErrors.length === 0) {
-            this.setState({currentSearchString: currentInputString}, () => this.searchConcepts());
+            this.setState({currentSearchString: currentInputString}, () => {
+              if (this.isConceptSetFlagEnable() && !(selectedDomain || selectedSurvey)) {
+                this.updateCardCounts();
+              } else {
+                this.searchConcepts();
+              }
+            });
           }
         }
       }
@@ -396,9 +442,6 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
       const {namespace, id} = this.props.workspace;
       this.setState({completedDomainSearches: [], concepts: [], countsError: false,
         domainErrors: [], countsLoading: true, searching: true});
-      if (this.isConceptSetFlagEnable()) {
-        currentConceptStore.next([]);
-      }
       const standardConceptFilter = standardConceptsOnly ? StandardConceptFilter.STANDARDCONCEPTS : StandardConceptFilter.ALLCONCEPTS;
       const completedDomainSearches = [];
       const request = {query: currentSearchString, standardConceptFilter: standardConceptFilter, maxResults: this.MAX_CONCEPT_FETCH};
@@ -472,20 +515,40 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
       });
       if (this.isConceptSetFlagEnable()) {
         currentConceptStore.next(null);
+        this.setState({loadingDomains: true}, () => this.loadDomainsAndSurveys());
+      }
+    }
+
+    back() {
+      if (this.isConceptSetFlagEnable()) {
+        this.setState({
+          inputErrors: [],
+          selectedDomain: undefined,
+          selectedSurvey: '',
+          showSearchError: false,
+          searching: false // reset the search result table to show browse/domain cards instead
+        });
+      } else {
+        this.clearSearch();
       }
     }
 
     browseDomain(domain: DomainInfo) {
       const {conceptDomainCounts} = this.state;
       const activeDomainTab = conceptDomainCounts.find(domainCount => domainCount.domain === domain.domain);
-      this.setState({
-        activeDomainTab: activeDomainTab,
-        currentInputString: '',
-        currentSearchString: '',
-        inputErrors: [],
-        selectedDomain: domain.domain,
-        selectedSurvey: ''
-      }, () => this.searchConcepts());
+      if (this.isConceptSetFlagEnable()) {
+        currentConceptStore.next([]);
+        this.setState({activeDomainTab: activeDomainTab, searching: true, selectedDomain: domain.domain});
+      } else {
+        this.setState({
+          activeDomainTab: activeDomainTab,
+          currentInputString: '',
+          currentSearchString: '',
+          inputErrors: [],
+          selectedDomain: domain.domain,
+          selectedSurvey: ''
+        }, () => this.searchConcepts());
+      }
     }
 
     browseSurvey(surveyName) {
@@ -548,8 +611,8 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
     }
 
     renderConcepts() {
-      const {activeDomainTab, conceptDomainCounts, concepts, countsError, domainErrors, selectedDomain, selectedConceptDomainMap}
-        = this.state;
+      const {activeDomainTab, conceptDomainCounts, concepts, countsError, currentSearchString, domainErrors, selectedDomain,
+        selectedConceptDomainMap} = this.state;
       const domainError = domainErrors.includes(activeDomainTab.domain);
       return <React.Fragment>
         {!this.isConceptSetFlagEnable() && <FadeBox>
@@ -603,29 +666,28 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
                            !this.state.workspacePermissions.canWrite}/>
         </FadeBox>}
         {this.isConceptSetFlagEnable() && <React.Fragment>
-          {conceptDomainCounts.filter(domain => !selectedDomain || selectedDomain === domain.domain).map((domain) => {
-            return <React.Fragment>
-              <CriteriaSearch
-                cohortContext={{domain: activeDomainTab.domain, type: 'PPI', standard: this.state.standardConceptsOnly}}
-                source='concept' selectedSurvey={this.state.selectedSurvey}/>
-              <Button style={{float: 'right', marginBottom: '2rem'}}
-                    disabled={this.activeSelectedConceptCount === 0 ||
-                    !this.state.workspacePermissions.canWrite}
-                    onClick={() => setSidebarActiveIconStore.next('concept')}>Finish & Review</Button>
-            </React.Fragment>; })} </React.Fragment>
-        }</React.Fragment>;
+          <CriteriaSearch
+            cohortContext={{domain: activeDomainTab.domain, type: 'PPI', standard: this.state.standardConceptsOnly}}
+            conceptSearchTerms={currentSearchString}
+            source='concept' selectedSurvey={this.state.selectedSurvey}/>
+          <Button style={{float: 'right', marginBottom: '2rem'}}
+                disabled={this.activeSelectedConceptCount === 0 ||
+                !this.state.workspacePermissions.canWrite}
+                onClick={() => setSidebarActiveIconStore.next('concept')}>Finish & Review</Button>
+        </React.Fragment>}
+      </React.Fragment>;
     }
 
     render() {
       const {activeDomainTab, browsingSurvey, conceptAddModalOpen, conceptDomainList, conceptsSavedText, conceptSurveysList,
-        currentInputString, currentSearchString, domainInfoError, inputErrors, loadingDomains, surveyInfoError,
+        currentInputString, currentSearchString, domainInfoError, domainsLoading, inputErrors, loadingDomains, surveyInfoError,
         standardConceptsOnly, showSearchError, searching, selectedDomain, selectedSurvey, selectedConceptDomainMap, selectedSurveyQuestions,
-        surveyAddModalOpen} = this.state;
+        surveyAddModalOpen, surveysLoading} = this.state;
       return <React.Fragment>
         <FadeBox style={{margin: 'auto', paddingTop: '1rem', width: '95.7%'}}>
           <FlexRow>
             {(selectedSurvey || selectedDomain) &&
-            <Clickable style={styles.backArrow} onClick={() => this.clearSearch()}>
+            <Clickable style={styles.backArrow} onClick={() => this.back()}>
               <img src='/assets/icons/arrow-left-regular.svg' style={styles.arrowIcon}
                    alt='Go back'/>
             </Clickable>}
@@ -634,7 +696,7 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
             </Header>
           </FlexRow>
           <div style={{margin: '1rem 0'}}>
-            {!this.isConceptSetFlagEnable() && <div style={{display: 'flex', alignItems: 'center'}}>
+            {!(this.isConceptSetFlagEnable() && searching) && <div style={{display: 'flex', alignItems: 'center'}}>
               <ClrIcon shape='search' style={{position: 'absolute', height: '1rem', width: '1rem',
                 fill: colors.accent, left: 'calc(1rem + 3.5%)'}}/>
               <TextInput style={styles.searchBar} data-test-id='concept-search-input'
@@ -646,13 +708,13 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
                                                         data-test-id='clear-search'>
                   <ClrIcon shape='times-circle' style={styles.clearSearchIcon}/>
               </Clickable>}
-              <CheckBox checked={standardConceptsOnly}
+              {!this.isConceptSetFlagEnable() && <CheckBox checked={standardConceptsOnly}
                         label='Standard concepts only'
                         labelStyle={{marginLeft: '0.2rem'}}
                         data-test-id='standardConceptsCheckBox'
                         style={{marginLeft: '0.5rem', height: '16px', width: '16px'}}
                         manageOwnState={false}
-                        onChange={() => this.handleCheckboxChange()}/>
+                        onChange={() => this.handleCheckboxChange()}/>}
             </div>}
             {inputErrors.map((error, e) => <AlertDanger key={e} style={styles.inputAlert}>
               <span data-test-id='input-error-alert'>{error}</span>
@@ -683,12 +745,13 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
               <div style={styles.cardList}>
                 {domainInfoError
                   ? this.errorMessage()
-                  : conceptDomainList.filter(item => item.domain !== Domain.PHYSICALMEASUREMENT).map((domain, i) => {
-                    return <DomainCard conceptDomainInfo={domain}
-                                         standardConceptsOnly={standardConceptsOnly}
-                                         browseInDomain={() => this.browseDomain(domain)}
-                                         key={i} data-test-id='domain-box'/>;
-                  })
+                  : conceptDomainList
+                    .filter(item => item.domain !== Domain.PHYSICALMEASUREMENT && item.allConceptCount !== 0)
+                    .map((domain, i) => <DomainCard conceptDomainInfo={domain}
+                                                    standardConceptsOnly={standardConceptsOnly}
+                                                    browseInDomain={() => this.browseDomain(domain)}
+                                                    key={i} data-test-id='domain-box'
+                                                    updating={domainsLoading.includes(domain.domain)}/>)
                 }
               </div>
               <div style={styles.sectionHeader}>
@@ -697,9 +760,12 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
               <div style={styles.cardList}>
                 {surveyInfoError
                   ? this.errorMessage()
-                  : conceptSurveysList.map((surveys) => {
-                    return <SurveyCard survey={surveys} key={surveys.orderNumber} browseSurvey={() => this.browseSurvey(surveys.name)} />;
-                  })
+                  : conceptSurveysList
+                    .filter(survey => survey.questionCount > 0)
+                    .map((survey) => <SurveyCard survey={survey}
+                                                  key={survey.orderNumber}
+                                                  browseSurvey={() => this.browseSurvey(survey.name)}
+                                                  updating={surveysLoading.includes(survey.name)}/>)
                 }
                </div>
               {environment.enableNewConceptTabs && <React.Fragment>
@@ -709,10 +775,13 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
                 <div style={styles.cardList}>
                   {domainInfoError
                     ? this.errorMessage()
-                    : conceptDomainList.filter(item => item.domain === Domain.PHYSICALMEASUREMENT).map((physicalMeasurement, p) => {
-                      return <PhysicalMeasurementsCard physicalMeasurement={physicalMeasurement} key={p}
-                                         browsePhysicalMeasurements={() => this.browseDomain(physicalMeasurement)}/>;
-                    })
+                    : conceptDomainList
+                      .filter(item => item.domain === Domain.PHYSICALMEASUREMENT && item.allConceptCount !== 0)
+                      .map((physicalMeasurement, p) =>
+                        <PhysicalMeasurementsCard physicalMeasurement={physicalMeasurement}
+                                                  key={p}
+                                                  browsePhysicalMeasurements={() => this.browseDomain(physicalMeasurement)}
+                                                  updating={domainsLoading.includes(Domain.PHYSICALMEASUREMENT)}/>)
                   }
                 </div>
               </React.Fragment>}

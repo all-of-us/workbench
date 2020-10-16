@@ -172,7 +172,11 @@ public class DataSetController implements DataSetApiDelegate {
     final ImmutableList<String> codeCells =
         ImmutableList.copyOf(
             dataSetService.generateCodeCells(
-                kernelTypeEnum, dataSetRequest.getName(), qualifier, bigQueryJobConfigsByDomain));
+                kernelTypeEnum,
+                dataSetRequest.getName(),
+                dbWorkspace.getCdrVersion().getName(),
+                qualifier,
+                bigQueryJobConfigsByDomain));
     final String generatedCode = String.join("\n\n", codeCells);
 
     return ResponseEntity.ok(
@@ -184,7 +188,6 @@ public class DataSetController implements DataSetApiDelegate {
       String workspaceNamespace, String workspaceId, DataSetPreviewRequest dataSetPreviewRequest) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    DataSetPreviewResponse previewQueryResponse = new DataSetPreviewResponse();
     List<DataSetPreviewValueList> valuePreviewList = new ArrayList<>();
 
     QueryJobConfiguration previewBigQueryJobConfig =
@@ -216,10 +219,10 @@ public class DataSetController implements DataSetApiDelegate {
           valuePreviewList,
           Comparator.comparing(item -> dataSetPreviewRequest.getValues().indexOf(item.getValue())));
     }
-
-    previewQueryResponse.setDomain(dataSetPreviewRequest.getDomain());
-    previewQueryResponse.setValues(valuePreviewList);
-    return ResponseEntity.ok(previewQueryResponse);
+    return ResponseEntity.ok(
+        new DataSetPreviewResponse()
+            .domain(dataSetPreviewRequest.getDomain())
+            .values(valuePreviewList));
   }
 
   @VisibleForTesting
@@ -336,6 +339,7 @@ public class DataSetController implements DataSetApiDelegate {
         dataSetService.generateCodeCells(
             dataSetExportRequest.getKernelType(),
             dataSetExportRequest.getDataSetRequest().getName(),
+            dbWorkspace.getCdrVersion().getName(),
             qualifier,
             queriesByDomain);
 

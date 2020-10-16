@@ -1,10 +1,9 @@
 import {ElementHandle, Page} from 'puppeteer';
 import {FieldSelector} from 'app/page/cohort-build-page';
 import Modal from 'app/component/modal';
-import {waitForNumericalString, waitForText} from 'utils/waits-utils';
+import {waitForNumericalString, waitForText, waitWhileLoading} from 'utils/waits-utils';
 import CohortSearchPage, {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/cohort-search-page';
 import TieredMenu from 'app/component/tiered-menu';
-import {waitWhileLoading} from 'utils/test-utils';
 import {LinkText} from 'app/text-labels';
 import {snowmanIconXpath} from 'app/component/snowman-menu';
 
@@ -50,7 +49,7 @@ export default class CohortParticipantsGroup {
    */
   async selectGroupSnowmanMenu(option: GroupMenuOption): Promise<void> {
     const menu = new TieredMenu(this.page);
-    return menu.clickMenuItem([option.toString()]);
+    return menu.select([option.toString()]);
   }
 
   /**
@@ -113,7 +112,7 @@ export default class CohortParticipantsGroup {
   }
 
   async getGroupCount(): Promise<string> {
-    return waitForNumericalString(this.page, this.getGroupCountXpath());
+    return waitForNumericalString(this.page, this.getGroupCountXpath(), 60000);
   }
 
   async includeAge(minAge: number, maxAge: number): Promise<string> {
@@ -134,7 +133,7 @@ export default class CohortParticipantsGroup {
 
   private async clickCriteriaMenuItems(menuItemLinks: string[]): Promise<void> {
     const menu = await this.openTieredMenu();
-    await menu.clickMenuItem(menuItemLinks);
+    await menu.select(menuItemLinks);
   }
 
   private async openTieredMenu(): Promise<TieredMenu> {

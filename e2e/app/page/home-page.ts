@@ -3,8 +3,7 @@ import {PageUrl} from 'app/text-labels';
 import Link from 'app/element/link';
 import AuthenticatedPage from 'app/page/authenticated-page';
 import ClrIconLink from 'app/element/clr-icon-link';
-import {waitWhileLoading} from 'utils/test-utils';
-import {waitForDocumentTitle} from 'utils/waits-utils';
+import {waitForDocumentTitle, waitWhileLoading} from 'utils/waits-utils';
 
 export const PageTitle = 'Homepage';
 
@@ -21,23 +20,20 @@ export default class HomePage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    try {
-      await Promise.all([
-        waitForDocumentTitle(this.page, PageTitle),
-        // Look for "See All Workspacess" link.
-        this.getSeeAllWorkspacesLink().then( (element) => element.asElementHandle()),
-        // Look for either a workspace card or msg.
-        Promise.race([
-          this.page.waitForXPath('//*[@data-test-id="workspace-card"]', {visible: true}),
-          this.page.waitForXPath('//text()[contains(., "Create your first workspace")]', {visible: true}),
-        ]),
-        waitWhileLoading(this.page),
-      ]);
-      return true;
-    } catch (err) {
-      console.log(`HomePage isLoaded() encountered ${err}`);
-      return false;
-    }
+    await Promise.all([
+      waitForDocumentTitle(this.page, PageTitle),
+      waitWhileLoading(this.page)
+    ]);
+    await Promise.all([
+      // Look for "See All Workspacess" link.
+      this.getSeeAllWorkspacesLink().then( (element) => element.asElementHandle()),
+      // Look for either a workspace card or msg.
+      Promise.race([
+        this.page.waitForXPath('//*[@data-test-id="workspace-card"]', {visible: true}),
+        this.page.waitForXPath('//text()[contains(., "Create your first workspace")]', {visible: true}),
+      ])
+    ]);
+    return true;
   }
 
   async getCreateNewWorkspaceLink(): Promise<ClrIconLink> {

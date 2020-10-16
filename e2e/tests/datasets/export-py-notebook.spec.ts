@@ -4,8 +4,8 @@ import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {Option, ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
-import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
-import {waitForText} from 'utils/waits-utils';
+import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
+import {waitForText, waitWhileLoading} from 'utils/waits-utils';
 
 describe('Create Dataset', () => {
 
@@ -18,7 +18,7 @@ describe('Create Dataset', () => {
     * Finally delete Dataset.
     */
   test('Export dataset to notebook in Python language', async () => {
-    const workspaceCard = await findWorkspace(page);
+    const workspaceCard = await findOrCreateWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 
     // Click Add Datasets button.
@@ -80,7 +80,7 @@ describe('Create Dataset', () => {
    * - Export dataset to notebook thru snowman menu.
    */
   test('Export dataset to notebook thru snowman menu', async () => {
-    await findWorkspace(page).then(card => card.clickWorkspaceName());
+    await findOrCreateWorkspace(page).then(card => card.clickWorkspaceName());
 
     // Click Add Datasets button.
     const dataPage = new WorkspaceDataPage(page);

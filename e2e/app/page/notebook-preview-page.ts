@@ -1,10 +1,10 @@
 import {ElementHandle, Frame, Page, WaitForSelectorOptions} from 'puppeteer';
-import {waitWhileLoading} from 'utils/test-utils';
 import Link from 'app/element/link';
 import {getPropValue} from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
 import NotebookPage from './notebook-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
+import {waitWhileLoading} from 'utils/waits-utils';
 
 const Selector = {
   editButton: '//div[normalize-space(text())="Edit"]',
@@ -18,17 +18,12 @@ export default class NotebookPreviewPage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    try {
-      await Promise.all([
-        this.page.waitForXPath(Selector.editButton),
-        this.page.waitForXPath(Selector.playgroundButton),
-        waitWhileLoading(this.page),
-      ]);
-      return true;
-    } catch (e) {
-      console.error(`NotebookPreviewPage isLoaded() encountered ${e}`);
-      throw new Error(e);
-    }
+    await waitWhileLoading(this.page);
+    await Promise.all([
+      this.page.waitForXPath(Selector.editButton),
+      this.page.waitForXPath(Selector.playgroundButton)
+    ]);
+    return true;
   }
 
   /**

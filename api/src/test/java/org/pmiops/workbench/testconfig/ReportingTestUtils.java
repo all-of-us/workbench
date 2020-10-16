@@ -8,19 +8,26 @@ import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc
 
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Collection;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingCohort;
+import org.pmiops.workbench.db.dao.projection.ProjectedReportingInstitution;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingWorkspace;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
+import org.pmiops.workbench.model.DuaType;
+import org.pmiops.workbench.model.InstitutionalRole;
+import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.ReportingCohort;
+import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
@@ -86,6 +93,10 @@ public class ReportingTestUtils {
   public static final String USER__STREET_ADDRESS_1 = "foo_3";
   public static final String USER__STREET_ADDRESS_2 = "foo_4";
   public static final String USER__ZIP_CODE = "foo_5";
+  public static final Long USER__INSTITUTION_ID = 0L;
+  public static final InstitutionalRole USER__INSTITUTIONAL_ROLE_ENUM =
+      InstitutionalRole.UNDERGRADUATE;
+  public static final String USER__INSTITUTIONAL_ROLE_OTHER_TEXT = "foo_2";
 
   public static final BillingAccountType WORKSPACE__BILLING_ACCOUNT_TYPE =
       BillingAccountType.FREE_TIER;
@@ -149,6 +160,25 @@ public class ReportingTestUtils {
   public static final String COHORT__NAME = "foo_6";
   public static final Long COHORT__WORKSPACE_ID = 7L;
 
+  // All constant values, mocking statements, and assertions in this file are generated. The values
+  // are chosen so that errors with transposed columns can be caught.
+  // Mapping Short values with valid enums can be tricky, and currently there are
+  // a handful of places where we have to use use a Short in the projection interface but an Enum
+  //  type in the model class. An example of such a manual fix is the following:
+  // .dataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION.longValue())
+
+  // This code was generated using reporting-wizard.rb at 2020-10-05T09:51:25-04:00.
+  // Manual modification should be avoided if possible as this is a one-time generation
+  // and does not run on every build and updates must be merged manually for now.
+
+  public static final String INSTITUTION__DISPLAY_NAME = "foo_0";
+  public static final DuaType INSTITUTION__DUA_TYPE_ENUM = DuaType.MASTER;
+  public static final Long INSTITUTION__INSTITUTION_ID = 2L;
+  public static final OrganizationType INSTITUTION__ORGANIZATION_TYPE_ENUM =
+      OrganizationType.ACADEMIC_RESEARCH_INSTITUTION;
+  public static final String INSTITUTION__ORGANIZATION_TYPE_OTHER_TEXT = "foo_4";
+  public static final String INSTITUTION__SHORT_NAME = "foo_5";
+
   public static void assertDtoUserFields(ReportingUser user) {
     assertThat(user.getAboutYou()).isEqualTo(USER__ABOUT_YOU);
     assertThat(user.getAreaOfResearch()).isEqualTo(USER__AREA_OF_RESEARCH);
@@ -189,6 +219,9 @@ public class ReportingTestUtils {
     assertTimeApprox(user.getTwoFactorAuthCompletionTime(), USER__TWO_FACTOR_AUTH_COMPLETION_TIME);
     assertThat(user.getUserId()).isEqualTo(USER__USER_ID);
     assertThat(user.getUsername()).isEqualTo(USER__USERNAME);
+    assertThat(user.getInstitutionId()).isEqualTo(USER__INSTITUTION_ID);
+    assertThat(user.getInstitutionalRoleEnum()).isEqualTo(USER__INSTITUTIONAL_ROLE_ENUM);
+    assertThat(user.getInstitutionalRoleOtherText()).isEqualTo(USER__INSTITUTIONAL_ROLE_OTHER_TEXT);
   }
 
   public static void assertDtoWorkspaceFields(
@@ -343,6 +376,10 @@ public class ReportingTestUtils {
     doReturn(USER__STREET_ADDRESS_1).when(mockUser).getStreetAddress1();
     doReturn(USER__STREET_ADDRESS_2).when(mockUser).getStreetAddress2();
     doReturn(USER__ZIP_CODE).when(mockUser).getZipCode();
+    // affiliation fields
+    doReturn(USER__INSTITUTION_ID).when(mockUser).getInstitutionId();
+    doReturn(USER__INSTITUTIONAL_ROLE_ENUM).when(mockUser).getInstitutionalRoleEnum();
+    doReturn(USER__INSTITUTIONAL_ROLE_OTHER_TEXT).when(mockUser).getInstitutionalRoleOtherText();
     return mockUser;
   }
 
@@ -458,7 +495,16 @@ public class ReportingTestUtils {
         .twoFactorAuthBypassTime(offsetDateTimeUtc(USER__TWO_FACTOR_AUTH_BYPASS_TIME))
         .twoFactorAuthCompletionTime(offsetDateTimeUtc(USER__TWO_FACTOR_AUTH_COMPLETION_TIME))
         .userId(USER__USER_ID)
-        .username(USER__USERNAME);
+        .username(USER__USERNAME)
+        .city(USER__CITY)
+        .country(USER__COUNTRY)
+        .state(USER__STATE)
+        .streetAddress1(USER__STREET_ADDRESS_1)
+        .streetAddress2(USER__STREET_ADDRESS_2)
+        .zipCode(USER__ZIP_CODE)
+        .institutionId(USER__INSTITUTION_ID)
+        .institutionalRoleEnum(USER__INSTITUTIONAL_ROLE_ENUM)
+        .institutionalRoleOtherText(USER__INSTITUTIONAL_ROLE_OTHER_TEXT);
   }
 
   public static ReportingWorkspace createDtoWorkspace() {
@@ -615,16 +661,17 @@ public class ReportingTestUtils {
   public static final Instant SNAPSHOT_INSTANT = Instant.parse("2020-01-01T00:00:00.00Z");
 
   public static ReportingSnapshot EMPTY_SNAPSHOT =
-      new ReportingSnapshot()
-          .captureTimestamp(SNAPSHOT_INSTANT.toEpochMilli())
-          .cohorts(Collections.emptyList())
-          .users(Collections.emptyList())
-          .workspaces(Collections.emptyList());
+      createEmptySnapshot().captureTimestamp(SNAPSHOT_INSTANT.toEpochMilli());
 
-  public static int countPopulatedTableLists(ReportingSnapshot reportingSnapshot) {
-    return (reportingSnapshot.getCohorts().isEmpty() ? 0 : 1)
-        + (reportingSnapshot.getUsers().isEmpty() ? 0 : 1)
-        + (reportingSnapshot.getWorkspaces().isEmpty() ? 0 : 1);
+  private static <T> int oneForNonEmpty(Collection<T> collection) {
+    return Math.min(collection.size(), 1);
+  }
+
+  public static int countPopulatedTables(ReportingSnapshot reportingSnapshot) {
+    return oneForNonEmpty(reportingSnapshot.getCohorts())
+        + oneForNonEmpty(reportingSnapshot.getInstitutions())
+        + oneForNonEmpty(reportingSnapshot.getUsers())
+        + oneForNonEmpty(reportingSnapshot.getWorkspaces());
   }
 
   public static DbAddress createDbAddress() {
@@ -636,5 +683,79 @@ public class ReportingTestUtils {
     address.setStreetAddress2(USER__STREET_ADDRESS_2);
     address.setZipCode(USER__ZIP_CODE);
     return address;
+  }
+  // Projection interface query objects can't be instantiated and must be mocked instead.
+  // This is slightly unfortunate, as the most common issue with projections is a column/type
+  // mismatch
+  // in the query, which only shows up when calling the accessors on the proxy. So live DAO tests
+  // are
+  //  essential as well.
+
+  // This code was generated using reporting-wizard.rb at 2020-10-01T12:18:28-04:00.
+  // Manual modification should be avoided if possible as this is a one-time generation
+  // and does not run on every build and updates must be merged manually for now.
+
+  public static ProjectedReportingInstitution mockProjectedReportingInstitution() {
+    final ProjectedReportingInstitution mockInstitution = mock(ProjectedReportingInstitution.class);
+    doReturn(INSTITUTION__DISPLAY_NAME).when(mockInstitution).getDisplayName();
+    doReturn(INSTITUTION__DUA_TYPE_ENUM).when(mockInstitution).getDuaTypeEnum();
+    doReturn(INSTITUTION__INSTITUTION_ID).when(mockInstitution).getInstitutionId();
+    doReturn(INSTITUTION__ORGANIZATION_TYPE_ENUM).when(mockInstitution).getOrganizationTypeEnum();
+    doReturn(INSTITUTION__ORGANIZATION_TYPE_OTHER_TEXT)
+        .when(mockInstitution)
+        .getOrganizationTypeOtherText();
+    doReturn(INSTITUTION__SHORT_NAME).when(mockInstitution).getShortName();
+    return mockInstitution;
+  }
+
+  public static ReportingInstitution createReportingInstitution() {
+    return new ReportingInstitution()
+        .displayName(INSTITUTION__DISPLAY_NAME)
+        .duaTypeEnum(INSTITUTION__DUA_TYPE_ENUM)
+        .institutionId(INSTITUTION__INSTITUTION_ID)
+        .organizationTypeEnum(INSTITUTION__ORGANIZATION_TYPE_ENUM)
+        .organizationTypeOtherText(INSTITUTION__ORGANIZATION_TYPE_OTHER_TEXT)
+        .shortName(INSTITUTION__SHORT_NAME);
+  }
+
+  public static DbInstitution createDbInstitution() {
+    final DbInstitution institution = new DbInstitution();
+    institution.setDisplayName(INSTITUTION__DISPLAY_NAME);
+    institution.setDuaTypeEnum(INSTITUTION__DUA_TYPE_ENUM);
+    institution.setInstitutionId(INSTITUTION__INSTITUTION_ID);
+    institution.setOrganizationTypeEnum(INSTITUTION__ORGANIZATION_TYPE_ENUM);
+    institution.setOrganizationTypeOtherText(INSTITUTION__ORGANIZATION_TYPE_OTHER_TEXT);
+    institution.setShortName(INSTITUTION__SHORT_NAME);
+    return institution;
+  }
+
+  public static void assertInstitutionFields(ProjectedReportingInstitution institution) {
+    assertThat(institution.getDisplayName()).isEqualTo(INSTITUTION__DISPLAY_NAME);
+    assertThat(institution.getDuaTypeEnum()).isEqualTo(INSTITUTION__DUA_TYPE_ENUM);
+    assertThat(institution.getInstitutionId()).isEqualTo(INSTITUTION__INSTITUTION_ID);
+    assertThat(institution.getOrganizationTypeEnum())
+        .isEqualTo(INSTITUTION__ORGANIZATION_TYPE_ENUM);
+    assertThat(institution.getOrganizationTypeOtherText())
+        .isEqualTo(INSTITUTION__ORGANIZATION_TYPE_OTHER_TEXT);
+    assertThat(institution.getShortName()).isEqualTo(INSTITUTION__SHORT_NAME);
+  }
+
+  public static void assertInstitutionFields(ReportingInstitution institution) {
+    assertThat(institution.getDisplayName()).isEqualTo(INSTITUTION__DISPLAY_NAME);
+    assertThat(institution.getDuaTypeEnum()).isEqualTo(INSTITUTION__DUA_TYPE_ENUM);
+    assertThat(institution.getInstitutionId()).isEqualTo(INSTITUTION__INSTITUTION_ID);
+    assertThat(institution.getOrganizationTypeEnum())
+        .isEqualTo(INSTITUTION__ORGANIZATION_TYPE_ENUM);
+    assertThat(institution.getOrganizationTypeOtherText())
+        .isEqualTo(INSTITUTION__ORGANIZATION_TYPE_OTHER_TEXT);
+    assertThat(institution.getShortName()).isEqualTo(INSTITUTION__SHORT_NAME);
+  }
+
+  public static ReportingSnapshot createEmptySnapshot() {
+    return new ReportingSnapshot()
+        .cohorts(new ArrayList<>())
+        .institutions(new ArrayList<>())
+        .users(new ArrayList<>())
+        .workspaces(new ArrayList<>());
   }
 }
