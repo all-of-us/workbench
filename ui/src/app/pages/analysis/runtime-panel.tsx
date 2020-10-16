@@ -164,7 +164,10 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
                                         || (preset.runtimeTemplate.dataprocConfig && preset.runtimeTemplate.dataprocConfig.masterDiskSize);
                                     const presetMachineName =
                                         (preset.runtimeTemplate.gceConfig && preset.runtimeTemplate.gceConfig.machineType)
-                                        || (preset.runtimeTemplate.dataprocConfig && preset.runtimeTemplate.dataprocConfig.masterMachineType);
+                                        || (
+                                          preset.runtimeTemplate.dataprocConfig
+                                          && preset.runtimeTemplate.dataprocConfig.masterMachineType
+                                        );
                                     const presetMachineType = fp.find(({name}) => name === presetMachineName, validLeonardoMachineTypes);
                                     if (presetDiskSize !== masterDiskSize) {
                                       setUpdatedDiskSize(presetDiskSize);
