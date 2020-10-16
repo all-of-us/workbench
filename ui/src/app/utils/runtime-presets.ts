@@ -1,7 +1,10 @@
-import {RuntimeConfigurationType} from 'generated/fetch';
+import {Runtime, RuntimeConfigurationType} from 'generated/fetch';
 
-export const runtimePresets = {
-  // TODO(RW-5658): Remove this preset.
+
+export const runtimePresets: {
+  [runtimePresetName: string] : {displayName: string, runtimeTemplate: Runtime}
+} = {
+  // TODO(RW-5658): Remove this preset. Do a stringy search - the type checking here prevents cmd-clicking through from working
   legacyGeneralAnalysis: {
     displayName: 'General Analysis (Legacy)',
     runtimeTemplate: {
