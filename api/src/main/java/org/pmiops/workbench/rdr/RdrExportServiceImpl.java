@@ -351,8 +351,12 @@ public class RdrExportServiceImpl implements RdrExportService {
   public void deleteWorkspaceExportEntries(List<Long> workspaceIds) {
     workspaceIds.forEach(
         workspaceId -> {
-          rdrExportDao.deleteDbRdrExportsByEntityTypeAndEntityId(
-              RdrEntityEnums.entityToStorage(RdrEntity.WORKSPACE), workspaceId);
+          try {
+            rdrExportDao.deleteDbRdrExportsByEntityTypeAndEntityId(
+                RdrEntityEnums.entityToStorage(RdrEntity.WORKSPACE), workspaceId);
+          } catch (Exception ex) {
+            log.severe(String.format("Error while trying to delete workspace %s", workspaceId));
+          }
         });
   }
 
