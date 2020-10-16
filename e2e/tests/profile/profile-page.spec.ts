@@ -1,6 +1,5 @@
 import ProfilePage, {MissingErrorAlias} from 'app/page/profile-page';
 import {signIn} from 'utils/test-utils';
-import navigation, {NavLink} from 'app/component/navigation';
 import {makeString, makeUrl} from 'utils/str-utils';
 import Button from 'app/element/button';
 
@@ -29,7 +28,7 @@ describe('Profile', () => {
 
   beforeEach(async () => {
     await signIn(page);
-    await navigation.navMenu(page, NavLink.PROFILE);
+    // await navigation.navMenu(page, NavLink.PROFILE);
     profilePage = new ProfilePage(page);
     await profilePage.waitForLoad();
 
