@@ -34,6 +34,7 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
@@ -41,6 +42,8 @@ import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetCodeResponse;
 import org.pmiops.workbench.model.DataSetExportRequest;
+import org.pmiops.workbench.model.DataSetExportRequest.GenomicsAnalysisToolEnum;
+import org.pmiops.workbench.model.DataSetExportRequest.GenomicsDataTypeEnum;
 import org.pmiops.workbench.model.DataSetListResponse;
 import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetPreviewResponse;
@@ -339,6 +342,24 @@ public class DataSetController implements DataSetApiDelegate {
             dbWorkspace.getCdrVersion().getName(),
             qualifier,
             queriesByDomain);
+
+    if (GenomicsDataTypeEnum.MICROARRAY.equals(dataSetExportRequest.getGenomicsDataType())) {
+      if (dbWorkspace.getCdrVersion().getMicroarrayBigqueryDataset() == null) {
+        throw new FailedPreconditionException(
+            "The workspace CDR version does not have microarray data");
+      }
+      if (!dataSetExportRequest.getKernelType().equals(KernelTypeEnum.PYTHON)) {
+        throw new BadRequestException("Genomics code generation is only supported in Python");
+      }
+
+      queriesAsStrings.addAll(
+          dataSetService.generateMicroarrayCohortExtractCodeCells(
+              dbWorkspace, qualifier, queriesByDomain));
+
+      if (GenomicsAnalysisToolEnum.PLINK.equals(dataSetExportRequest.getGenomicsAnalysisTool())) {
+        queriesAsStrings.addAll(dataSetService.generatePlinkDemoCode(qualifier));
+      }
+    }
 
     if (dataSetExportRequest.getNewNotebook()) {
       notebookFile =
