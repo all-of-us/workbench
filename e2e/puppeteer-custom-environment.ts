@@ -16,24 +16,29 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
 
   // Take a screenshot right after failure
   async handleTestEvent(event, state) {
-    if (event.name === 'test_fn_failure') {
-      const testParentName = state.currentlyRunningTest.parent.name.replace(/\W/g, '-');
-      const testName = state.currentlyRunningTest.name.replace(/\W/g, '-');
+    switch (event.name) {
+      case 'test_fn_failure':
+      case 'hook_failure':
+        const testParentName = state.currentlyRunningTest.parent.name.replace(/\W/g, '-');
+        const testName = state.currentlyRunningTest.name.replace(/\W/g, '-');
+        console.error(`Failed test:  "${testParentName}/${testName}"\n${event.error}`);
 
-      const screenshotDir = `logs/screenshot/${testParentName}`;
-      const htmlDir = `logs/html/${testParentName}`;
-      await fs.ensureDir(screenshotDir);
-      await fs.ensureDir(htmlDir);
+        const screenshotDir = `logs/screenshot/${testParentName}`;
+        const htmlDir = `logs/html/${testParentName}`;
+        await fs.ensureDir(screenshotDir);
+        await fs.ensureDir(htmlDir);
 
-      const timestamp = new Date().getTime();
-      console.error(`Failed test:  "${testParentName}/${testName}"`);
+        const timestamp = new Date().getTime();
+        const screenshotFile = `${screenshotDir}/${testName}_${timestamp}.png`;
+        await this.takeScreenshot(screenshotFile);
 
-      const screenshotFile = `${screenshotDir}/${testName}_${timestamp}.png`;
-      await this.takeScreenshot(screenshotFile);
-
-      const htmlFile = `${htmlDir}/${testName}_${timestamp}.html`;
-      await this.savePageToFile(htmlFile);
+        const htmlFile = `${htmlDir}/${testName}_${timestamp}.html`;
+        await this.savePageToFile(htmlFile);
+        break;
+      default:
+        break;
     }
+
   }
 
   async takeScreenshot(filePath) {
