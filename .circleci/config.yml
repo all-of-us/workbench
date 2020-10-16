@@ -6,6 +6,7 @@ version: 2.1
 # https://circleci.com/orbs/registry/
 orbs:
   browser-tools: circleci/browser-tools@1.0.1
+  slack: circleci/slack@4.0.1
 
 # -------------------------
 #   PIPELINE PARAMETERS
@@ -331,6 +332,14 @@ commands:
             - ui/node_modules
           key: v5-ui-cache-{{ .Branch }}-{{ checksum "~/workbench/ui/yarn.lock" }}
 
+  slack-notify-failure:
+    description: "Send Slack notification to #workbench-builds channel when failure occurred on master branch"
+    steps:
+      - slack/notify:
+          branch_pattern: master
+          event: fail
+          template: basic_fail_1
+
 # -------------------------
 #        JOBS
 # -------------------------
@@ -588,11 +597,21 @@ workflows:
     jobs:
       # Always run basic test/lint/compilation (open PRs, master branch merge)
       # Note: by default tags are not picked up.
-      - api-local-test
-      - api-unit-test
-      - ui-unit-test
-      - api-bigquery-test
-      - api-integration-test
+      - api-local-test:
+          post-steps:
+            - slack-notify-failure
+      - api-unit-test:
+          post-steps:
+            - slack-notify-failure
+      - ui-unit-test:
+          post-steps:
+            - slack-notify-failure
+      - api-bigquery-test:
+          post-steps:
+            - slack-notify-failure
+      - api-integration-test:
+          post-steps:
+            - slack-notify-failure
       # Deploy to "test" on master branch merges
       - api-deploy-to-test:
           <<: *filter-master-branch
@@ -609,6 +628,8 @@ workflows:
           parallel_num: 2
           optional_steps:
             - halt-puppeteer-check
+          post-steps:
+            - slack-notify-failure
       # On master branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully
       - puppeteer-test:
           parallel_num: 4
@@ -617,6 +638,8 @@ workflows:
           requires:
             - api-deploy-to-test
             - ui-deploy-to-test
+          post-steps:
+            - slack-notify-failure
 
   deploy-staging:
     jobs:
