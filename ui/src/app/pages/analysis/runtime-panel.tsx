@@ -1,5 +1,3 @@
-import * as fp from 'lodash/fp';
-
 import {Button, Clickable, MenuItem} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
@@ -8,17 +6,13 @@ import {Spinner} from 'app/components/spinners';
 import colors, {addOpacity} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {allMachineTypes, validLeonardoMachineTypes} from 'app/utils/machines';
+import {runtimePresets} from 'app/utils/runtime-presets';
 import {useCustomRuntime} from 'app/utils/runtime-utils';
-import {
-  RuntimeOperation,
-  runtimeOpsStore,
-  useStore
-} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
+
 import {Dropdown} from 'primereact/dropdown';
 import {InputNumber} from 'primereact/inputnumber';
 
-import {runtimePresets} from 'app/utils/runtime-presets';
 import { RuntimeConfigurationType, RuntimeStatus } from 'generated';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -124,7 +118,6 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
   const [updatedDiskSize, setUpdatedDiskSize] = useState(null);
   const [updatedMachine, setUpdatedMachine] = useState(null);
   const [runtimeConfigurationType, setRuntimeConfigurationType] = useState(null);
-  const runtimeOps = useStore(runtimeOpsStore);
   const [currentRuntime, setRequestedRuntime] = useCustomRuntime(workspace.namespace);
 
   const {status = RuntimeStatus.Unknown, toolDockerImage = '', dataprocConfig = null, gceConfig = {}} = currentRuntime || {};
@@ -167,11 +160,11 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
                                   onClick={() => {
                                     // renaming to avoid shadowing
                                     const presetDiskSize =
-                                        preset.runtimeTemplate.gceConfig.bootDiskSize
-                                        || preset.runtimeTemplate.dataprocConfig.masterDiskSize;
+                                        (preset.runtimeTemplate.gceConfig && preset.runtimeTemplate.gceConfig.bootDiskSize)
+                                        || (preset.runtimeTemplate.dataprocConfig && preset.runtimeTemplate.dataprocConfig.masterDiskSize);
                                     const presetMachineName =
-                                        preset.runtimeTemplate.gceConfig.machineType
-                                        || preset.runtimeTemplate.dataprocConfig.masterMachineType;
+                                        (preset.runtimeTemplate.gceConfig && preset.runtimeTemplate.gceConfig.machineType)
+                                        || (preset.runtimeTemplate.dataprocConfig && preset.runtimeTemplate.dataprocConfig.masterMachineType);
                                     const presetMachineType = fp.find(({name}) => name === presetMachineName, validLeonardoMachineTypes);
                                     if (presetDiskSize !== masterDiskSize) {
                                       setUpdatedDiskSize(presetDiskSize);
