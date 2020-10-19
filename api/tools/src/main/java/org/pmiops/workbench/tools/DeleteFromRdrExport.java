@@ -25,6 +25,21 @@ import org.pmiops.workbench.rdr.api.RdrApi;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 
+/**
+ * Workbench send recently created/modified workspace information to RDR daily. The workspaces
+ * picked up for export are as follows:
+ *
+ * <p>1) workspace id does not exist in rdr_export OR 2) workspace lastModifiedTime >
+ * export_date_time in rdr_export table
+ *
+ * <p>There are sometimes (maybe in case of bugs), where already exported workspace data are not in
+ * sync between workbench and RDR . In such cases, we need to make the workspace eligible for
+ * re-export. The best way to do that without manipulating real workspace data is to remove the
+ * entry from rdr_export table.
+ *
+ * <p>DeleteFromRdrExport takes in the list of workspaceIds as an argument and deletes them from
+ * rdr_export table
+ */
 public class DeleteFromRdrExport {
   private static final Logger log = Logger.getLogger(DeleteWorkspaces.class.getName());
 
