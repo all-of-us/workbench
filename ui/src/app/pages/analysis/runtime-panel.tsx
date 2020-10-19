@@ -5,7 +5,7 @@ import {PopupTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import colors, {addOpacity} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
-import {allMachineTypes, validLeonardoMachineTypes} from 'app/utils/machines';
+import {Machine, allMachineTypes, validLeonardoMachineTypes} from 'app/utils/machines';
 import {useCustomRuntime} from 'app/utils/runtime-utils';
 import {
   RuntimeOperation,
@@ -17,6 +17,7 @@ import {Dropdown} from 'primereact/dropdown';
 import {InputNumber} from 'primereact/inputnumber';
 
 import { RuntimeStatus } from 'generated';
+import { DataprocConfig } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
@@ -53,7 +54,8 @@ const styles = reactStyles({
   }
 });
 
-const defaultMachineType = allMachineTypes.find(({name}) => name === 'n1-standard-4');
+const defaultMachineName = 'n1-standard-4'
+const defaultMachineType = allMachineTypes.find(({name}) => name === defaultMachineName);
 const findMachineByName = machineToFind => fp.find(({name}) => name === machineToFind, allMachineTypes) || defaultMachineType;
 
 enum ComputeType {
@@ -124,36 +126,30 @@ const DiskSizeSelector = ({onChange, selectedDiskSize, diskSize}) => {
   </Fragment>;
 };
 
-const DataProcConfig = ({onChange, dataprocConfig}) => {
+const DataProcConfigSelector = ({onChange, dataprocConfig})  => {
   const {
-    workerMachineType = defaultMachineType,
+    workerMachineType = defaultMachineName,
     workerDiskSize = 50,
     numberOfWorkers = 2,
     numberOfPreemptibleWorkers = 0
   } = dataprocConfig || {};
-  const [selectedNumWorkers, setSelectedNumWorkers] = useState(numberOfWorkers);
-  const [selectedPreemtible, setUpdatedPreemptible] = useState(numberOfPreemptibleWorkers);
-  const [selectedWorkerMachine, setSelectedWorkerMachine] = useState(workerMachineType);
-  const [selectedDiskSize, setSelectedDiskSize] = useState(workerDiskSize);
+  const initialMachine = findMachineByName(workerMachineType);
+  const [selectedNumWorkers, setSelectedNumWorkers] = useState<number>(numberOfWorkers);
+  const [selectedPreemtible, setUpdatedPreemptible] = useState<number>(numberOfPreemptibleWorkers);
+  const [selectedWorkerMachine, setSelectedWorkerMachine] = useState<Machine>(initialMachine);
+  const [selectedDiskSize, setSelectedDiskSize] = useState<number>(workerDiskSize);
 
+  // On unmount clear the config - the user is no longer configuring a dataproc cluster
+  useEffect(() => () => onChange(null), []);
+  
   useEffect(() => {
-    const machineType = selectedWorkerMachine && selectedWorkerMachine.name;
-    const dataprocConfigChanged = selectedNumWorkers !== numberOfWorkers ||
-    selectedPreemtible !== numberOfPreemptibleWorkers ||
-    selectedDiskSize !== workerDiskSize ||
-    selectedWorkerMachine.name !== workerMachineType.name ||
-    !dataprocConfig;
-
-    onChange(dataprocConfigChanged ? {
-      workerMachineType: machineType,
-      workerDiskSize: selectedDiskSize,
-      numberOfWorkers: selectedNumWorkers,
-      numberOfPreemptibleWorkers: selectedPreemtible
-    } : null);
-
-    return () => onChange(null);
+      onChange({
+        workerMachineType: selectedWorkerMachine && selectedWorkerMachine.name,
+        workerDiskSize: selectedDiskSize,
+        numberOfWorkers: selectedNumWorkers,
+        numberOfPreemptibleWorkers: selectedPreemtible
+      });
   }, [selectedNumWorkers, selectedPreemtible, selectedWorkerMachine, selectedDiskSize]);
-
 
   return <fieldset style={{marginTop: '0.75rem'}}>
     <legend style={styles.workerConfigLabel}>Worker Config</legend>
@@ -183,6 +179,8 @@ const DataProcConfig = ({onChange, dataprocConfig}) => {
         min={0}
         max={selectedNumWorkers}/>
       <div style={{gridColumnEnd: 'span 2'}}/>
+      {/* TODO: Do the worker nodes have the same minimum requirements as the master node?
+       to https://precisionmedicineinitiative.atlassian.net/browse/RW-5763 */}
       <MachineSelector machineType={workerMachineType} onChange={setSelectedWorkerMachine} selectedMachine={selectedWorkerMachine}/>
       <DiskSizeSelector diskSize={workerDiskSize} onChange={setSelectedDiskSize} selectedDiskSize={selectedDiskSize} />
     </div>
@@ -202,10 +200,12 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
   const [selectedDiskSize, setSelectedDiskSize] = useState(masterDiskSize);
   const [selectedMachine, setSelectedMachine] = useState(initialMasterMachine);
   const [selectedCompute, setSelectedCompute] = useState<ComputeType>(dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard);
-  const [selectedDataprocConfig, setSelectedDataprocConfig] = useState();
+  const [selectedDataprocConfig, setSelectedDataprocConfig] = useState<DataprocConfig | null>(dataprocConfig);
 
   const selectedMachineType = selectedMachine && selectedMachine.name;
-  const runtimeChanged = !fp.equals(selectedMachine, initialMasterMachine) || selectedDiskSize !== masterDiskSize || selectedDataprocConfig;
+  const runtimeChanged = !fp.equals(selectedMachine, initialMasterMachine) || 
+    selectedDiskSize !== masterDiskSize || 
+    !fp.equals(selectedDataprocConfig, dataprocConfig);
 
   if (currentRuntime === undefined) {
     return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
@@ -262,7 +262,7 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
                   value={selectedCompute || ComputeType.Standard}
                   onChange={({value}) => setSelectedCompute(value)}
                   />
-        {selectedCompute === ComputeType.Dataproc && <DataProcConfig onChange={setSelectedDataprocConfig} dataprocConfig={dataprocConfig} /> }
+        {selectedCompute === ComputeType.Dataproc && <DataProcConfigSelector onChange={setSelectedDataprocConfig} dataprocConfig={dataprocConfig} /> }
       </FlexColumn>
     </div>
     <FlexRow style={{justifyContent: 'flex-end', marginTop: '.75rem'}}>
