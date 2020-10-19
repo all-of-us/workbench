@@ -54,9 +54,11 @@ const styles = reactStyles({
 });
 
 const defaultMachineType = allMachineTypes.find(({name}) => name === 'n1-standard-4');
+const findMachineByName = machineToFind => fp.find(({name}) => name === machineToFind, allMachineTypes) || defaultMachineType;
+
 enum ComputeType {
-  standard = 'Standard VM',
-  dataproc = 'Dataproc Cluster'
+  Standard = 'Standard VM',
+  Dataproc = 'Dataproc Cluster'
 }
 
 export interface Props {
@@ -66,7 +68,6 @@ export interface Props {
 const MachineSelector = ({onChange, updatedMachine, machineType}) => {
   const initialMachineType = fp.find(({name}) => name === machineType, allMachineTypes) || defaultMachineType;
   const {cpu, memory} = updatedMachine || initialMachineType;
-  const maybeGetMachine = machineRequested => fp.equals(machineRequested, initialMachineType) ? null : machineRequested;
 
   return <Fragment>
       <label htmlFor='runtime-cpu' style={{marginRight: '.25rem'}}>CPUs</label>
@@ -84,7 +85,6 @@ const MachineSelector = ({onChange, updatedMachine, machineType}) => {
           ({value}) => fp.flow(
             fp.sortBy('memory'),
             fp.find({cpu: value}),
-            maybeGetMachine,
             onChange)(validLeonardoMachineTypes)
         }
         value={cpu}/>
@@ -102,7 +102,7 @@ const MachineSelector = ({onChange, updatedMachine, machineType}) => {
           ({value}) => fp.flow(
             fp.find({cpu, memory: value}),
             // If the selected machine is not different from the current machine return null
-            maybeGetMachine,
+            // maybeGetMachine,
             onChange
             )(validLeonardoMachineTypes) }
         value={memory}
@@ -110,7 +110,7 @@ const MachineSelector = ({onChange, updatedMachine, machineType}) => {
   </Fragment>;
 };
 
-const DiskSizeSelection = ({onChange, updatedDiskSize, diskSize}) => {
+const DiskSizeSelector = ({onChange, updatedDiskSize, diskSize}) => {
   return <Fragment>
     <label htmlFor='runtime-disk' style={{marginRight: '.25rem'}}>Disk (GB)</label>
     <InputNumber id='runtime-disk'
@@ -133,7 +133,7 @@ const DataProcConfig = ({onChange, dataprocConfig}) => {
   } = dataprocConfig || {};
   const [updatedNumWorkers, setUpdatedNumWorkers] = useState(numberOfWorkers);
   const [updatedPreemtible, setUpdatedPreemptible] = useState(numberOfPreemptibleWorkers);
-  const [updatedWorkerMachine, setUpdatedWorkerMachine] = useState(null);
+  const [updatedWorkerMachine, setUpdatedWorkerMachine] = useState(workerMachineType);
   const [updatedDiskSize, setUpdatedDiskSize] = useState(workerDiskSize);
 
   useEffect(() => {
@@ -141,7 +141,7 @@ const DataProcConfig = ({onChange, dataprocConfig}) => {
     const dataprocConfigChanged = updatedNumWorkers !== numberOfWorkers ||
     updatedPreemtible !== numberOfPreemptibleWorkers ||
     updatedDiskSize !== workerDiskSize ||
-    updatedWorkerMachine ||
+    updatedWorkerMachine.name !== workerMachineType.name ||
     !dataprocConfig;
 
     onChange(dataprocConfigChanged ? {
@@ -184,7 +184,7 @@ const DataProcConfig = ({onChange, dataprocConfig}) => {
         max={updatedNumWorkers}/>
       <div style={{gridColumnEnd: 'span 2'}}/>
       <MachineSelector machineType={workerMachineType} onChange={setUpdatedWorkerMachine} updatedMachine={updatedWorkerMachine}/>
-      <DiskSizeSelection diskSize={workerDiskSize} onChange={setUpdatedDiskSize} updatedDiskSize={updatedDiskSize} />
+      <DiskSizeSelector diskSize={workerDiskSize} onChange={setUpdatedDiskSize} updatedDiskSize={updatedDiskSize} />
     </div>
   </fieldset>;
 };
@@ -197,14 +197,15 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
   const {status = RuntimeStatus.Unknown, toolDockerImage = '', dataprocConfig = null, gceConfig = {}} = currentRuntime || {};
   const masterMachineType = !!dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
   const masterDiskSize = !!dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.bootDiskSize;
+  const initialMasterMachine = findMachineByName(masterMachineType);
 
   const [updatedDiskSize, setUpdatedDiskSize] = useState(masterDiskSize);
-  const [updatedMachine, setUpdatedMachine] = useState(null);
-  const [updatedCompute, setUpdatedCompute] = useState<ComputeType>(dataprocConfig ? ComputeType.dataproc : ComputeType.standard);
+  const [updatedMachine, setUpdatedMachine] = useState(initialMasterMachine);
+  const [updatedCompute, setUpdatedCompute] = useState<ComputeType>(dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard);
   const [updatedDataprocConfig, setUpdatedDataprocConfig] = useState();
 
   const updatedMachineType = updatedMachine && updatedMachine.name;
-  const runtimeChanged = updatedMachine || updatedDiskSize !== masterDiskSize || updatedDataprocConfig;
+  const runtimeChanged = !fp.equals(updatedMachine, initialMasterMachine) || updatedDiskSize !== masterDiskSize || updatedDataprocConfig;
 
   if (currentRuntime === undefined) {
     return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
@@ -251,17 +252,17 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
       <h3 style={styles.sectionHeader}>Cloud compute profile</h3>
       <div style={styles.formGrid}>
         <MachineSelector updatedMachine={updatedMachine} onChange={setUpdatedMachine} machineType={masterMachineType}/>
-        <DiskSizeSelection updatedDiskSize={updatedDiskSize} onChange={setUpdatedDiskSize} diskSize={masterDiskSize}/>
+        <DiskSizeSelector updatedDiskSize={updatedDiskSize} onChange={setUpdatedDiskSize} diskSize={masterDiskSize}/>
       </div>
       <FlexColumn style={{marginTop: '1rem'}}>
         <label htmlFor='runtime-compute'>Compute type</label>
         <Dropdown id='runtime-compute'
                   style={{width: '10rem'}}
-                  options={[ComputeType.dataproc, ComputeType.standard]}
-                  value={updatedCompute || ComputeType.standard}
+                  options={[ComputeType.Dataproc, ComputeType.Standard]}
+                  value={updatedCompute || ComputeType.Standard}
                   onChange={({value}) => setUpdatedCompute(value)}
                   />
-        {updatedCompute === ComputeType.dataproc && <DataProcConfig onChange={setUpdatedDataprocConfig} dataprocConfig={dataprocConfig} /> }
+        {updatedCompute === ComputeType.Dataproc && <DataProcConfig onChange={setUpdatedDataprocConfig} dataprocConfig={dataprocConfig} /> }
       </FlexColumn>
     </div>
     <FlexRow style={{justifyContent: 'flex-end', marginTop: '.75rem'}}>
