@@ -232,13 +232,9 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
         aria-label={currentRuntime ? 'Update' : 'Create'}
         disabled={
           !runtimeChanged
-          || status in [
-            RuntimeStatus.Creating,
-            RuntimeStatus.Updating,
-            RuntimeStatus.Stopping,
-            RuntimeStatus.Starting,
-            RuntimeStatus.Deleting
-          ]
+          // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
+          // where we get 'status' from
+          || ![null, RuntimeStatus.Deleted, RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus)
         }
         onClick={() =>
           setRequestedRuntime({
