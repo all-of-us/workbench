@@ -628,7 +628,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .attributes(
             ImmutableList.of(
                 new Attribute()
-                    .name(AttrName.SURVEY_ID)
+                    .name(AttrName.SURVEY_VERSION_CONCEPT_ID)
                     .operator(Operator.IN)
                     .operands(ImmutableList.of("100"))));
   }

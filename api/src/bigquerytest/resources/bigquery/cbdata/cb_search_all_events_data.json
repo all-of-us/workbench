@@ -427,6 +427,6 @@
     "visit_concept_id": 1,
     "visit_occurrence_id": 1,
     "is_standard": 0,
-    "survey_id": 100
+    "survey_version_concept_id": 100
   }
 ]

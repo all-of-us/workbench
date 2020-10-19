@@ -7387,19 +7387,19 @@ definitions:
   SurveyVersion:
     type: object
     required:
-    - surveyId
-    - version
+    - surveyVersionConceptId
+    - displayName
     - itemCount
     properties:
-      surveyId:
-        description: id of the cope survey
+      surveyVersionConceptId:
+        description: unique concept id of the cope survey
         type: integer
         format: int64
-      version:
-        description: name of the verion
+      displayName:
+        description: name of the version
         type: string
       itemCount:
-        description: name of concept
+        description: item count
         type: integer
         format: int64
   SearchRequest:
@@ -7771,7 +7771,7 @@ definitions:
     - AGE
     - AGE_AT_CONSENT
     - AGE_AT_CDR
-    - SURVEY_ID
+    - SURVEY_VERSION_CONCEPT_ID
   AgeType:
     type: string
     description: Different age types

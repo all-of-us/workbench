@@ -58,8 +58,8 @@ done
 echo "Inserting cb_survey_attribute"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_survey_attribute\`
-(id,question_concept_id,answer_concept_id,survey_id,item_count)
-SELECT id,question_concept_id,answer_concept_id,survey_id,item_count
+(id,question_concept_id,answer_concept_id,survey_version_concept_id,item_count)
+SELECT id,question_concept_id,answer_concept_id,survey_version_concept_id,item_count
 FROM \`$BQ_PROJECT.$BQ_DATASET.cb_survey_attribute\`"
 
 # Populate cb_survey_version
@@ -69,8 +69,8 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.cb_survey_attribute\`"
 echo "Inserting cb_survey_version"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_survey_version\`
-(survey_id,concept_id,version,display_order)
-SELECT survey_id,concept_id,version,display_order
+(survey_version_concept_id,survey_concept_id,display_name,display_order)
+SELECT survey_version_concept_id,survey_concept_id,display_name,display_order
 FROM \`$BQ_PROJECT.$BQ_DATASET.cb_survey_version\`"
 
 # Populate domain_info

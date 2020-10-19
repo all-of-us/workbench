@@ -370,15 +370,15 @@
       <column name="id" type="NUMERIC"/>
       <column name="question_concept_id" type="NUMERIC"/>
       <column name="answer_concept_id" type="NUMERIC"/>
-      <column name="survey_id" type="NUMERIC"/>
+      <column name="survey_version_concept_id" type="NUMERIC"/>
       <column name="item_count" type="NUMERIC"/>
     </loadData>
 
     <loadData tableName="cb_survey_version" file="csv/cb_survey_version.csv" encoding="UTF-8"
       quotchar='"'>
-      <column name="survey_id" type="NUMERIC"/>
-      <column name="concept_id" type="NUMERIC"/>
-      <column name="version" type="STRING"/>
+      <column name="survey_version_concept_id" type="NUMERIC"/>
+      <column name="survey_concept_id" type="NUMERIC"/>
+      <column name="display_name" type="STRING"/>
       <column name="display_order" type="NUMERIC"/>
     </loadData>
 
