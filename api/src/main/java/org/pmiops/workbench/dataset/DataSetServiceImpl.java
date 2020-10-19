@@ -845,7 +845,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         "import hail as hl\n"
             + "import os\n"
             + "from hail.plot import show\n"
-            + "from pprint import pprint\n"
             + "\n"
             + "hl.plot.output_notebook()\n"
             + "bucket = os.environ['WORKSPACE_BUCKET']\n"
