@@ -121,8 +121,8 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
   const [currentRuntime, setRequestedRuntime] = useCustomRuntime(workspace.namespace);
 
   const {status = RuntimeStatus.Unknown, toolDockerImage = '', dataprocConfig = null, gceConfig = {}} = currentRuntime || {};
-  const masterMachineType = !!dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
-  const masterDiskSize = !!dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.bootDiskSize;
+  const machineName = !!dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
+  const diskSize = !!dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.bootDiskSize;
   const updatedMachineType = updatedMachine && updatedMachine.name;
 
   const isDataproc = (currentRuntime && !!currentRuntime.dataprocConfig);
@@ -170,7 +170,7 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
                                     presetDiskSize: masterDiskSize,
                                     presetMachineName: masterMachineType
                                   })]
-                                ])(runtimeTemplate)
+                                ])(runtimeTemplate);
                                 const presetMachineType = fp.find(({name}) => name === presetMachineName, validLeonardoMachineTypes);
 
                                 setUpdatedDiskSize(presetDiskSize);
@@ -203,21 +203,21 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
             updatedMachine={updatedMachine}
             onChange={(value) => {
               setUpdatedMachine(value);
-              if (value !== updatedMachine && value !== masterDiskSize) {
+              if (value !== updatedMachine && value !== diskSize) {
                 setRuntimeConfigurationType(RuntimeConfigurationType.UserOverride);
               }
             }}
-            masterMachineType={masterMachineType}
+            masterMachineType={machineName}
         />
         <DiskSizeSelection
             updatedDiskSize={updatedDiskSize}
             onChange={(value) => {
               setUpdatedDiskSize(value);
-              if (value !== updatedDiskSize && value !== masterDiskSize) {
+              if (value !== updatedDiskSize && value !== diskSize) {
                 setRuntimeConfigurationType(RuntimeConfigurationType.UserOverride);
               }
             }}
-            masterDiskSize={masterDiskSize}
+            masterDiskSize={diskSize}
         />
       </FlexRow>
       <FlexColumn style={{marginTop: '1rem'}}>
@@ -242,8 +242,8 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
           setRequestedRuntime({
             configurationType: runtimeConfigurationType,
             gceConfig: {
-              machineType: updatedMachineType || masterMachineType,
-              diskSize: updatedDiskSize || masterDiskSize
+              machineType: updatedMachineType || machineName,
+              diskSize: updatedDiskSize || diskSize
             }
           })
         }
