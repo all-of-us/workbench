@@ -33,7 +33,7 @@ const styles = reactStyles({
     border: 0,
     color: colors.accent,
     cursor: 'pointer',
-    float: 'right',
+    float: 'left',
     fontSize: '12px',
     height: '1.5rem',
     margin: '0.25rem 0',

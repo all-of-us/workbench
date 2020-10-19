@@ -45,6 +45,7 @@ const styles = reactStyles({
     verticalAlign: 'middle'
   },
   finishButton: {
+    marginTop: '24px',
     borderRadius: '5px',
     bottom: '1rem',
     position: 'absolute',
