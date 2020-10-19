@@ -344,7 +344,7 @@ public class DataSetController implements DataSetApiDelegate {
             queriesByDomain);
 
     if (GenomicsDataTypeEnum.MICROARRAY.equals(dataSetExportRequest.getGenomicsDataType())) {
-      if (dbWorkspace.getCdrVersion().getMicroarrayBigqueryDataset() != null) {
+      if (dbWorkspace.getCdrVersion().getMicroarrayBigqueryDataset() == null) {
         throw new FailedPreconditionException(
             "The workspace CDR version does not have microarray data");
       }
