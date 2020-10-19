@@ -65,9 +65,9 @@ export interface Props {
   workspace: WorkspaceData;
 }
 
-const MachineSelector = ({onChange, updatedMachine, machineType}) => {
+const MachineSelector = ({onChange, selectedMachine, machineType}) => {
   const initialMachineType = fp.find(({name}) => name === machineType, allMachineTypes) || defaultMachineType;
-  const {cpu, memory} = updatedMachine || initialMachineType;
+  const {cpu, memory} = selectedMachine || initialMachineType;
 
   return <Fragment>
       <label htmlFor='runtime-cpu' style={{marginRight: '.25rem'}}>CPUs</label>
@@ -110,14 +110,14 @@ const MachineSelector = ({onChange, updatedMachine, machineType}) => {
   </Fragment>;
 };
 
-const DiskSizeSelector = ({onChange, updatedDiskSize, diskSize}) => {
+const DiskSizeSelector = ({onChange, selectedDiskSize, diskSize}) => {
   return <Fragment>
     <label htmlFor='runtime-disk' style={{marginRight: '.25rem'}}>Disk (GB)</label>
     <InputNumber id='runtime-disk'
       showButtons
       decrementButtonClassName='p-button-secondary'
       incrementButtonClassName='p-button-secondary'
-      value={updatedDiskSize || diskSize}
+      value={selectedDiskSize || diskSize}
       inputStyle={{padding: '.75rem .5rem', width: '2rem'}}
       onChange={({value}) => onChange(value)}
       min={50 /* Runtime API has a minimum 50GB requirement. */}/>
@@ -131,28 +131,28 @@ const DataProcConfig = ({onChange, dataprocConfig}) => {
     numberOfWorkers = 2,
     numberOfPreemptibleWorkers = 0
   } = dataprocConfig || {};
-  const [updatedNumWorkers, setUpdatedNumWorkers] = useState(numberOfWorkers);
-  const [updatedPreemtible, setUpdatedPreemptible] = useState(numberOfPreemptibleWorkers);
-  const [updatedWorkerMachine, setUpdatedWorkerMachine] = useState(workerMachineType);
-  const [updatedDiskSize, setUpdatedDiskSize] = useState(workerDiskSize);
+  const [selectedNumWorkers, setSelectedNumWorkers] = useState(numberOfWorkers);
+  const [selectedPreemtible, setUpdatedPreemptible] = useState(numberOfPreemptibleWorkers);
+  const [selectedWorkerMachine, setSelectedWorkerMachine] = useState(workerMachineType);
+  const [selectedDiskSize, setSelectedDiskSize] = useState(workerDiskSize);
 
   useEffect(() => {
-    const machineType = updatedWorkerMachine && updatedWorkerMachine.name;
-    const dataprocConfigChanged = updatedNumWorkers !== numberOfWorkers ||
-    updatedPreemtible !== numberOfPreemptibleWorkers ||
-    updatedDiskSize !== workerDiskSize ||
-    updatedWorkerMachine.name !== workerMachineType.name ||
+    const machineType = selectedWorkerMachine && selectedWorkerMachine.name;
+    const dataprocConfigChanged = selectedNumWorkers !== numberOfWorkers ||
+    selectedPreemtible !== numberOfPreemptibleWorkers ||
+    selectedDiskSize !== workerDiskSize ||
+    selectedWorkerMachine.name !== workerMachineType.name ||
     !dataprocConfig;
 
     onChange(dataprocConfigChanged ? {
       workerMachineType: machineType,
-      workerDiskSize: updatedDiskSize,
-      numberOfWorkers: updatedNumWorkers,
-      numberOfPreemptibleWorkers: updatedPreemtible
+      workerDiskSize: selectedDiskSize,
+      numberOfWorkers: selectedNumWorkers,
+      numberOfPreemptibleWorkers: selectedPreemtible
     } : null);
 
     return () => onChange(null);
-  }, [updatedNumWorkers, updatedPreemtible, updatedWorkerMachine, updatedDiskSize]);
+  }, [selectedNumWorkers, selectedPreemtible, selectedWorkerMachine, selectedDiskSize]);
 
 
   return <fieldset style={{marginTop: '0.75rem'}}>
@@ -163,12 +163,12 @@ const DataProcConfig = ({onChange, dataprocConfig}) => {
         showButtons
         decrementButtonClassName='p-button-secondary'
         incrementButtonClassName='p-button-secondary'
-        value={updatedNumWorkers}
+        value={selectedNumWorkers}
         inputStyle={{padding: '.75rem .5rem', width: '2rem'}}
         onChange={({value}) => {
-          setUpdatedNumWorkers(value);
-          if (updatedNumWorkers < updatedPreemtible) {
-            setUpdatedPreemptible(updatedNumWorkers);
+          setSelectedNumWorkers(value);
+          if (selectedNumWorkers < selectedPreemtible) {
+            setUpdatedPreemptible(selectedNumWorkers);
           }
         }}
         min={2}/>
@@ -177,14 +177,14 @@ const DataProcConfig = ({onChange, dataprocConfig}) => {
         showButtons
         decrementButtonClassName='p-button-secondary'
         incrementButtonClassName='p-button-secondary'
-        value={updatedNumWorkers < updatedPreemtible ? updatedNumWorkers : updatedPreemtible}
+        value={selectedNumWorkers < selectedPreemtible ? selectedNumWorkers : selectedPreemtible}
         inputStyle={{padding: '.75rem .5rem', width: '2rem'}}
         onChange={({value}) => setUpdatedPreemptible(value)}
         min={0}
-        max={updatedNumWorkers}/>
+        max={selectedNumWorkers}/>
       <div style={{gridColumnEnd: 'span 2'}}/>
-      <MachineSelector machineType={workerMachineType} onChange={setUpdatedWorkerMachine} updatedMachine={updatedWorkerMachine}/>
-      <DiskSizeSelector diskSize={workerDiskSize} onChange={setUpdatedDiskSize} updatedDiskSize={updatedDiskSize} />
+      <MachineSelector machineType={workerMachineType} onChange={setSelectedWorkerMachine} selectedMachine={selectedWorkerMachine}/>
+      <DiskSizeSelector diskSize={workerDiskSize} onChange={setSelectedDiskSize} selectedDiskSize={selectedDiskSize} />
     </div>
   </fieldset>;
 };
@@ -199,13 +199,13 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
   const masterDiskSize = !!dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.bootDiskSize;
   const initialMasterMachine = findMachineByName(masterMachineType);
 
-  const [updatedDiskSize, setUpdatedDiskSize] = useState(masterDiskSize);
-  const [updatedMachine, setUpdatedMachine] = useState(initialMasterMachine);
-  const [updatedCompute, setUpdatedCompute] = useState<ComputeType>(dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard);
-  const [updatedDataprocConfig, setUpdatedDataprocConfig] = useState();
+  const [selectedDiskSize, setSelectedDiskSize] = useState(masterDiskSize);
+  const [selectedMachine, setSelectedMachine] = useState(initialMasterMachine);
+  const [selectedCompute, setSelectedCompute] = useState<ComputeType>(dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard);
+  const [selectedDataprocConfig, setSelectedDataprocConfig] = useState();
 
-  const updatedMachineType = updatedMachine && updatedMachine.name;
-  const runtimeChanged = !fp.equals(updatedMachine, initialMasterMachine) || updatedDiskSize !== masterDiskSize || updatedDataprocConfig;
+  const selectedMachineType = selectedMachine && selectedMachine.name;
+  const runtimeChanged = !fp.equals(selectedMachine, initialMasterMachine) || selectedDiskSize !== masterDiskSize || selectedDataprocConfig;
 
   if (currentRuntime === undefined) {
     return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
@@ -251,18 +251,18 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
       {/* Runtime customization: change detailed machine configuration options. */}
       <h3 style={styles.sectionHeader}>Cloud compute profile</h3>
       <div style={styles.formGrid}>
-        <MachineSelector updatedMachine={updatedMachine} onChange={setUpdatedMachine} machineType={masterMachineType}/>
-        <DiskSizeSelector updatedDiskSize={updatedDiskSize} onChange={setUpdatedDiskSize} diskSize={masterDiskSize}/>
+        <MachineSelector selectedMachine={selectedMachine} onChange={setSelectedMachine} machineType={masterMachineType}/>
+        <DiskSizeSelector selectedDiskSize={selectedDiskSize} onChange={setSelectedDiskSize} diskSize={masterDiskSize}/>
       </div>
       <FlexColumn style={{marginTop: '1rem'}}>
         <label htmlFor='runtime-compute'>Compute type</label>
         <Dropdown id='runtime-compute'
                   style={{width: '10rem'}}
                   options={[ComputeType.Dataproc, ComputeType.Standard]}
-                  value={updatedCompute || ComputeType.Standard}
-                  onChange={({value}) => setUpdatedCompute(value)}
+                  value={selectedCompute || ComputeType.Standard}
+                  onChange={({value}) => setSelectedCompute(value)}
                   />
-        {updatedCompute === ComputeType.Dataproc && <DataProcConfig onChange={setUpdatedDataprocConfig} dataprocConfig={dataprocConfig} /> }
+        {selectedCompute === ComputeType.Dataproc && <DataProcConfig onChange={setSelectedDataprocConfig} dataprocConfig={dataprocConfig} /> }
       </FlexColumn>
     </div>
     <FlexRow style={{justifyContent: 'flex-end', marginTop: '.75rem'}}>
@@ -270,9 +270,9 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
         aria-label={currentRuntime ? 'Update' : 'Create'}
         disabled={status !== RuntimeStatus.Running || !runtimeChanged}
         onClick={() => {
-          const runtimeToRequest = updatedDataprocConfig ? {dataprocConfig: updatedDataprocConfig} : {gceConfig: {
-            machineType: updatedMachineType || masterMachineType,
-            diskSize: updatedDiskSize || masterDiskSize
+          const runtimeToRequest = selectedDataprocConfig ? {dataprocConfig: selectedDataprocConfig} : {gceConfig: {
+            machineType: selectedMachineType || masterMachineType,
+            diskSize: selectedDiskSize || masterDiskSize
           }};
           setRequestedRuntime(runtimeToRequest);
         }
