@@ -2,13 +2,19 @@ import {Component, Input} from '@angular/core';
 
 import {Clickable} from 'app/components/buttons';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withUrlParams} from 'app/utils';
+import {
+  cdrVersion,
+  reactStyles,
+  ReactWrapperBase,
+  withCdrVersions,
+  withCurrentWorkspace,
+  withUrlParams
+} from 'app/utils';
 import {NavStore} from 'app/utils/navigation';
 
 import {serverConfigStore} from 'app/utils/navigation';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-
 
 const styles = reactStyles({
   container: {
@@ -53,10 +59,10 @@ function restrictTab(workspace, tab) {
 export const WorkspaceNavBarReact = fp.flow(
   withCurrentWorkspace(),
   withUrlParams(),
+  withCdrVersions(),
 )(props => {
-  const {tabPath, urlParams: {ns: namespace, wsid: id}} = props;
+  const {tabPath, workspace, urlParams: {ns: namespace, wsid: id}, cdrVersionListResponse} = props;
   const activeTabIndex = fp.findIndex(['link', tabPath], tabs);
-
 
   const navTab = (currentTab, disabled) => {
     const {name, link} = currentTab;
@@ -81,6 +87,7 @@ export const WorkspaceNavBarReact = fp.flow(
     {activeTabIndex > 0 && navSeparator}
     {fp.map(tab => navTab(tab, restrictTab(props.workspace, tab)), tabs)}
     <div style={{flexGrow: 1}}/>
+    {workspace && <div>{cdrVersion(workspace, cdrVersionListResponse).name}</div>}
   </div>;
 });
 
