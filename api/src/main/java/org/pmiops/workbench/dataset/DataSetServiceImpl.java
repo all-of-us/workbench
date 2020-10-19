@@ -765,7 +765,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             + cohortVcfFilename
             + " \\\n"
             + "        --probe-info-csv /genomics/microarray/probe_info.csv \\\n"
-            + "        --project-id ${GOOGLE_PROJECT} \\\n"
+            + "        --read-project-id ${GOOGLE_PROJECT} \\\n"
             + "        --cohort-sample-file "
             + cohortSampleMapFilename
             + " \\\n"
