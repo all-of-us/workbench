@@ -154,7 +154,6 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
       request.setRuntimeConfig(
           new LeonardoMachineConfig()
               .cloudService(CloudServiceEnum.DATAPROC)
-              .numberOfWorkers(2)
               .masterDiskSize(
                   Optional.ofNullable(clusterOverride.masterDiskSize)
                       .orElse(config.firecloud.notebookRuntimeDefaultDiskSizeGb))

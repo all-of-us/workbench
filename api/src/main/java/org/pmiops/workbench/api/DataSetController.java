@@ -343,7 +343,7 @@ public class DataSetController implements DataSetApiDelegate {
             qualifier,
             queriesByDomain);
 
-    if (!GenomicsDataTypeEnum.MICROARRAY.equals(dataSetExportRequest.getGenomicsDataType())) {
+    if (GenomicsDataTypeEnum.MICROARRAY.equals(dataSetExportRequest.getGenomicsDataType())) {
       if (dbWorkspace.getCdrVersion().getMicroarrayBigqueryDataset() != null) {
         throw new FailedPreconditionException(
             "The workspace CDR version does not have microarray data");
@@ -358,7 +358,7 @@ public class DataSetController implements DataSetApiDelegate {
 
       if (GenomicsAnalysisToolEnum.PLINK.equals(dataSetExportRequest.getGenomicsAnalysisTool())) {
         queriesAsStrings.addAll(dataSetService.generatePlinkDemoCode(qualifier));
-      } else if (!GenomicsAnalysisToolEnum.HAIL.equals(
+      } else if (GenomicsAnalysisToolEnum.HAIL.equals(
           dataSetExportRequest.getGenomicsAnalysisTool())) {
         queriesAsStrings.addAll(dataSetService.generateHailDemoCode(qualifier));
       }
