@@ -16,7 +16,7 @@
   },
   {
     "mode": "NULLABLE",
-    "name": "survey_id",
+    "name": "survey_version_concept_id",
     "type": "INTEGER"
   },
   {

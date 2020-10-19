@@ -754,37 +754,37 @@ public class CohortBuilderControllerTest {
   @Test
   public void findSurveyVersionByQuestionConceptId() {
     jdbcTemplate.execute(
-        "create table cb_survey_version(survey_id integer, concept_id integer, version varchar(50), display_order integer)");
+        "create table cb_survey_version(survey_version_concept_id integer, survey_concept_id integer, display_name varchar(50), display_order integer)");
     jdbcTemplate.execute(
-        "create table cb_survey_attribute(id integer, question_concept_id integer, answer_concept_id integer, survey_id integer, item_count integer)");
+        "create table cb_survey_attribute(id integer, question_concept_id integer, answer_concept_id integer, survey_version_concept_id integer, item_count integer)");
     jdbcTemplate.execute(
-        "insert into cb_survey_version(survey_id, concept_id, version, display_order) values (100, 1333342, 'May 2020', 1)");
+        "insert into cb_survey_version(survey_version_concept_id, survey_concept_id, display_name, display_order) values (100, 1333342, 'May 2020', 1)");
     jdbcTemplate.execute(
-        "insert into cb_survey_version(survey_id, concept_id, version, display_order) values (101, 1333342, 'June 2020', 2)");
+        "insert into cb_survey_version(survey_version_concept_id, survey_concept_id, display_name, display_order) values (101, 1333342, 'June 2020', 2)");
     jdbcTemplate.execute(
-        "insert into cb_survey_version(survey_id, concept_id, version, display_order) values (102, 1333342, 'July 2020', 3)");
+        "insert into cb_survey_version(survey_version_concept_id, survey_concept_id, display_name, display_order) values (102, 1333342, 'July 2020', 3)");
     jdbcTemplate.execute(
-        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (1, 715713, 0, 100, 291)");
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_version_concept_id, item_count) values (1, 715713, 0, 100, 291)");
     jdbcTemplate.execute(
-        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (2, 715713, 0, 101, 148)");
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_version_concept_id, item_count) values (2, 715713, 0, 101, 148)");
     jdbcTemplate.execute(
-        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (3, 715713, 0, 102, 150)");
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_version_concept_id, item_count) values (3, 715713, 0, 102, 150)");
     jdbcTemplate.execute(
-        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (4, 715713, 903096, 100, 154)");
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_version_concept_id, item_count) values (4, 715713, 903096, 100, 154)");
     jdbcTemplate.execute(
-        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (5, 715713, 903096, 101, 82)");
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_version_concept_id, item_count) values (5, 715713, 903096, 101, 82)");
     jdbcTemplate.execute(
-        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (6, 715713, 903096, 102, 31)");
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_version_concept_id, item_count) values (6, 715713, 903096, 102, 31)");
     SurveyVersionListResponse response =
         controller.findSurveyVersionByQuestionConceptId(1L, 1333342L, 715713L).getBody();
-    assertEquals(response.getItems().get(0).getSurveyId(), new Long("100"));
-    assertEquals(response.getItems().get(0).getVersion(), "May 2020");
+    assertEquals(response.getItems().get(0).getSurveyVersionConceptId(), new Long("100"));
+    assertEquals(response.getItems().get(0).getDisplayName(), "May 2020");
     assertEquals(response.getItems().get(0).getItemCount(), new Long("291"));
-    assertEquals(response.getItems().get(1).getSurveyId(), new Long("101"));
-    assertEquals(response.getItems().get(1).getVersion(), "June 2020");
+    assertEquals(response.getItems().get(1).getSurveyVersionConceptId(), new Long("101"));
+    assertEquals(response.getItems().get(1).getDisplayName(), "June 2020");
     assertEquals(response.getItems().get(1).getItemCount(), new Long("148"));
-    assertEquals(response.getItems().get(2).getSurveyId(), new Long("102"));
-    assertEquals(response.getItems().get(2).getVersion(), "July 2020");
+    assertEquals(response.getItems().get(2).getSurveyVersionConceptId(), new Long("102"));
+    assertEquals(response.getItems().get(2).getDisplayName(), "July 2020");
     assertEquals(response.getItems().get(2).getItemCount(), new Long("150"));
     jdbcTemplate.execute("drop table cb_survey_version");
     jdbcTemplate.execute("drop table cb_survey_attribute");

@@ -339,7 +339,7 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.observation_ext\` c on a.observation_id = c.
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` d on a.visit_occurrence_id = d.visit_occurrence_id
 WHERE a.observation_source_concept_id is not null
     and a.observation_source_concept_id != 0
-    and questionnaire_response_id is not null"
+    and a.questionnaire_response_id is not null"
 
 ################################################################
 #   insert standard observation data into cb_search_all_events

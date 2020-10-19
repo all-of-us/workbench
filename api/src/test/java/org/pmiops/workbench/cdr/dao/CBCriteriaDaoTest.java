@@ -400,34 +400,34 @@ public class CBCriteriaDaoTest {
   @Test
   public void findSurveyVersionByQuestionConceptId() {
     jdbcTemplate.execute(
-        "create table cb_survey_version(survey_id integer, concept_id integer, version varchar(50), display_order integer)");
+        "create table cb_survey_version(survey_version_concept_id integer, survey_concept_id integer, display_name varchar(50), display_order integer)");
     jdbcTemplate.execute(
-        "create table cb_survey_attribute(id integer, question_concept_id integer, answer_concept_id integer, survey_id integer, item_count integer)");
+        "create table cb_survey_attribute(id integer, question_concept_id integer, answer_concept_id integer, survey_version_concept_id integer, item_count integer)");
     jdbcTemplate.execute(
-        "insert into cb_survey_version(survey_id, concept_id, version, display_order) values (100, 1333342, 'May 2020', 1)");
+        "insert into cb_survey_version(survey_version_concept_id, survey_concept_id, display_name, display_order) values (100, 1333342, 'May 2020', 1)");
     jdbcTemplate.execute(
-        "insert into cb_survey_version(survey_id, concept_id, version, display_order) values (101, 1333342, 'June 2020', 2)");
+        "insert into cb_survey_version(survey_version_concept_id, survey_concept_id, display_name, display_order) values (101, 1333342, 'June 2020', 2)");
     jdbcTemplate.execute(
-        "insert into cb_survey_version(survey_id, concept_id, version, display_order) values (102, 1333342, 'July 2020', 3)");
+        "insert into cb_survey_version(survey_version_concept_id, survey_concept_id, display_name, display_order) values (102, 1333342, 'July 2020', 3)");
     jdbcTemplate.execute(
-        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (1, 715713, 0, 100, 291)");
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_version_concept_id, item_count) values (1, 715713, 0, 100, 291)");
     jdbcTemplate.execute(
-        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (2, 715713, 0, 101, 148)");
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_version_concept_id, item_count) values (2, 715713, 0, 101, 148)");
     jdbcTemplate.execute(
-        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (3, 715713, 0, 102, 150)");
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_version_concept_id, item_count) values (3, 715713, 0, 102, 150)");
     jdbcTemplate.execute(
-        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (1, 715713, 1, 100, 491)");
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_version_concept_id, item_count) values (1, 715713, 1, 100, 491)");
     List<DbSurveyVersion> dbSurveyVersions =
         cbCriteriaDao.findSurveyVersionByQuestionConceptIdAndAnswerConceptId(1333342L, 715713L, 0L);
     assertThat(dbSurveyVersions).hasSize(3);
-    assertThat(dbSurveyVersions.get(0).getSurveyId()).isEqualTo(100);
-    assertThat(dbSurveyVersions.get(0).getVersion()).isEqualTo("May 2020");
+    assertThat(dbSurveyVersions.get(0).getSurveyVersionConceptId()).isEqualTo(100);
+    assertThat(dbSurveyVersions.get(0).getDisplayName()).isEqualTo("May 2020");
     assertThat(dbSurveyVersions.get(0).getItemCount()).isEqualTo(291);
-    assertThat(dbSurveyVersions.get(1).getSurveyId()).isEqualTo(101);
-    assertThat(dbSurveyVersions.get(1).getVersion()).isEqualTo("June 2020");
+    assertThat(dbSurveyVersions.get(1).getSurveyVersionConceptId()).isEqualTo(101);
+    assertThat(dbSurveyVersions.get(1).getDisplayName()).isEqualTo("June 2020");
     assertThat(dbSurveyVersions.get(1).getItemCount()).isEqualTo(148);
-    assertThat(dbSurveyVersions.get(2).getSurveyId()).isEqualTo(102);
-    assertThat(dbSurveyVersions.get(2).getVersion()).isEqualTo("July 2020");
+    assertThat(dbSurveyVersions.get(2).getSurveyVersionConceptId()).isEqualTo(102);
+    assertThat(dbSurveyVersions.get(2).getDisplayName()).isEqualTo("July 2020");
     assertThat(dbSurveyVersions.get(2).getItemCount()).isEqualTo(150);
     jdbcTemplate.execute("drop table cb_survey_version");
     jdbcTemplate.execute("drop table cb_survey_attribute");
@@ -436,38 +436,38 @@ public class CBCriteriaDaoTest {
   @Test
   public void findSurveyVersionByQuestionConceptIdAndAnswerConceptId() {
     jdbcTemplate.execute(
-        "create table cb_survey_version(survey_id integer, concept_id integer, version varchar(50), display_order integer)");
+        "create table cb_survey_version(survey_version_concept_id integer, survey_concept_id integer, display_name varchar(50), display_order integer)");
     jdbcTemplate.execute(
-        "create table cb_survey_attribute(id integer, question_concept_id integer, answer_concept_id integer, survey_id integer, item_count integer)");
+        "create table cb_survey_attribute(id integer, question_concept_id integer, answer_concept_id integer, survey_version_concept_id integer, item_count integer)");
     jdbcTemplate.execute(
-        "insert into cb_survey_version(survey_id, concept_id, version, display_order) values (100, 1333342, 'May 2020', 1)");
+        "insert into cb_survey_version(survey_version_concept_id, survey_concept_id, display_name, display_order) values (100, 1333342, 'May 2020', 1)");
     jdbcTemplate.execute(
-        "insert into cb_survey_version(survey_id, concept_id, version, display_order) values (101, 1333342, 'June 2020', 2)");
+        "insert into cb_survey_version(survey_version_concept_id, survey_concept_id, display_name, display_order) values (101, 1333342, 'June 2020', 2)");
     jdbcTemplate.execute(
-        "insert into cb_survey_version(survey_id, concept_id, version, display_order) values (102, 1333342, 'July 2020', 3)");
+        "insert into cb_survey_version(survey_version_concept_id, survey_concept_id, display_name, display_order) values (102, 1333342, 'July 2020', 3)");
     jdbcTemplate.execute(
-        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (1, 715713, 0, 100, 291)");
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_version_concept_id, item_count) values (1, 715713, 0, 100, 291)");
     jdbcTemplate.execute(
-        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (2, 715713, 0, 101, 148)");
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_version_concept_id, item_count) values (2, 715713, 0, 101, 148)");
     jdbcTemplate.execute(
-        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (3, 715713, 0, 102, 150)");
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_version_concept_id, item_count) values (3, 715713, 0, 102, 150)");
     jdbcTemplate.execute(
-        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (4, 715713, 903096, 100, 154)");
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_version_concept_id, item_count) values (4, 715713, 903096, 100, 154)");
     jdbcTemplate.execute(
-        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (5, 715713, 903096, 101, 82)");
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_version_concept_id, item_count) values (5, 715713, 903096, 101, 82)");
     jdbcTemplate.execute(
-        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_id, item_count) values (6, 715713, 903096, 102, 31)");
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_version_concept_id, item_count) values (6, 715713, 903096, 102, 31)");
     List<DbSurveyVersion> dbSurveyVersions =
         cbCriteriaDao.findSurveyVersionByQuestionConceptIdAndAnswerConceptId(1333342L, 715713L, 0L);
     assertThat(dbSurveyVersions).hasSize(3);
-    assertThat(dbSurveyVersions.get(0).getSurveyId()).isEqualTo(100);
-    assertThat(dbSurveyVersions.get(0).getVersion()).isEqualTo("May 2020");
+    assertThat(dbSurveyVersions.get(0).getSurveyVersionConceptId()).isEqualTo(100);
+    assertThat(dbSurveyVersions.get(0).getDisplayName()).isEqualTo("May 2020");
     assertThat(dbSurveyVersions.get(0).getItemCount()).isEqualTo(291);
-    assertThat(dbSurveyVersions.get(1).getSurveyId()).isEqualTo(101);
-    assertThat(dbSurveyVersions.get(1).getVersion()).isEqualTo("June 2020");
+    assertThat(dbSurveyVersions.get(1).getSurveyVersionConceptId()).isEqualTo(101);
+    assertThat(dbSurveyVersions.get(1).getDisplayName()).isEqualTo("June 2020");
     assertThat(dbSurveyVersions.get(1).getItemCount()).isEqualTo(148);
-    assertThat(dbSurveyVersions.get(2).getSurveyId()).isEqualTo(102);
-    assertThat(dbSurveyVersions.get(2).getVersion()).isEqualTo("July 2020");
+    assertThat(dbSurveyVersions.get(2).getSurveyVersionConceptId()).isEqualTo(102);
+    assertThat(dbSurveyVersions.get(2).getDisplayName()).isEqualTo("July 2020");
     assertThat(dbSurveyVersions.get(2).getItemCount()).isEqualTo(150);
     jdbcTemplate.execute("drop table cb_survey_version");
     jdbcTemplate.execute("drop table cb_survey_attribute");

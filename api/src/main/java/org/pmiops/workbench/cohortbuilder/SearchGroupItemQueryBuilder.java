@@ -104,7 +104,7 @@ public final class SearchGroupItemQueryBuilder {
   private static final String VALUE_SOURCE_CONCEPT_ID =
       "is_standard = %s and concept_id = %s and value_source_concept_id %s unnest(%s)\n";
   private static final String SOURCE_CONCEPT_SURVEY_ID =
-      "is_standard = %s and concept_id = %s and survey_id %s unnest(%s)\n";
+      "is_standard = %s and concept_id = %s and survey_version_concept_id %s unnest(%s)\n";
   private static final String BP_SQL = "is_standard = %s and concept_id in unnest(%s)";
   private static final String SYSTOLIC_SQL = " and systolic %s %s";
   private static final String DIASTOLIC_SQL = " and diastolic %s %s";
@@ -220,7 +220,7 @@ public final class SearchGroupItemQueryBuilder {
           } else if (AttrName.NUM.equals(attribute.getName())) {
             queryParts.add(processNumericalSql(queryParams, param, attribute));
           } else if (AttrName.CAT.equals(attribute.getName())
-              || AttrName.SURVEY_ID.equals(attribute.getName())) {
+              || AttrName.SURVEY_VERSION_CONCEPT_ID.equals(attribute.getName())) {
             queryParts.add(processCategoricalSql(queryParams, param, attribute));
           }
         }
@@ -461,7 +461,7 @@ public final class SearchGroupItemQueryBuilder {
         Domain.SURVEY.toString().equals(parameter.getDomain())
             ? VALUE_SOURCE_CONCEPT_ID
             : VALUE_AS_CONCEPT_ID;
-    if (AttrName.SURVEY_ID.equals(attribute.getName())) {
+    if (AttrName.SURVEY_VERSION_CONCEPT_ID.equals(attribute.getName())) {
       sqlString = SOURCE_CONCEPT_SURVEY_ID;
     }
     return String.format(
