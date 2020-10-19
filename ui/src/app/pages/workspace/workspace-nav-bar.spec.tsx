@@ -1,8 +1,9 @@
 import {WorkspaceNavBarReact} from 'app/pages/workspace/workspace-nav-bar';
-import {currentWorkspaceStore, NavStore, serverConfigStore, urlParamsStore} from 'app/utils/navigation';
+import {cdrVersionStore, currentWorkspaceStore, NavStore, serverConfigStore, urlParamsStore} from 'app/utils/navigation';
 import {mount} from 'enzyme';
 import * as React from 'react';
 import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
+import {cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
 
 describe('WorkspaceNavBarComponent', () => {
 
@@ -19,6 +20,7 @@ describe('WorkspaceNavBarComponent', () => {
     urlParamsStore.next({ns: workspaceDataStub.namespace, wsid: workspaceDataStub.id});
     serverConfigStore.next({
       gsuiteDomain: 'fake-research-aou.org', enableResearchReviewPrompt: true});
+    cdrVersionStore.next(cdrVersionListResponse);
   });
 
   it('should render', () => {
