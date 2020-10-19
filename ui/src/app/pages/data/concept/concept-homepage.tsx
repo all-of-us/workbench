@@ -760,12 +760,20 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
               <div style={styles.cardList}>
                 {surveyInfoError
                   ? this.errorMessage()
-                  : conceptSurveysList
-                    .filter(survey => survey.questionCount > 0)
-                    .map((survey) => <SurveyCard survey={survey}
-                                                  key={survey.orderNumber}
-                                                  browseSurvey={() => this.browseSurvey(survey.name)}
-                                                  updating={surveysLoading.includes(survey.name)}/>)
+                  : <React.Fragment>
+                    {conceptSurveysList
+                      .filter(survey => survey.questionCount > 0)
+                      .map((survey) => <SurveyCard survey={survey}
+                                                   key={survey.orderNumber}
+                                                   browseSurvey={() => this.browseSurvey(survey.name)}
+                                                   updating={surveysLoading.includes(survey.name)}/>)}
+                    {conceptSurveysList.every(survey => survey.questionCount === 0) && <div>
+                      {conceptSurveysList.some(survey => surveysLoading.includes(survey.name))
+                        ? <Spinner size={42}/>
+                        : 'No Survey Questions found'
+                      }
+                    </div>}
+                  </React.Fragment>
                 }
                </div>
               {environment.enableNewConceptTabs && <React.Fragment>
