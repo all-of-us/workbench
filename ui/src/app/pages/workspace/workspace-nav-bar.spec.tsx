@@ -4,9 +4,7 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 import {cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
-import {CdrVersionsStubVariables} from "../../../testing/stubs/cdr-versions-api-stub";
-import {WorkspaceAccessLevel} from "../../../generated/fetch";
-import {workspaceStubs} from "../../../testing/stubs/workspaces-api-stub";
+import {CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 
 describe('WorkspaceNavBarComponent', () => {
 
