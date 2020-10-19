@@ -263,6 +263,10 @@ export class LeoRuntimeInitializer {
     markRuntimeOperationCompleteForWorkspace(this.workspaceNamespace);
   }
 
+  private isRuntimeDeleted(): boolean {
+    return this.currentRuntime && this.currentRuntime.status === RuntimeStatus.Deleted;
+  }
+
   private isRuntimeRunning(): boolean {
     return this.currentRuntime && this.currentRuntime.status === RuntimeStatus.Running;
   }
@@ -360,7 +364,7 @@ export class LeoRuntimeInitializer {
 
     // Attempt to take the appropriate next action given the current runtime status.
     try {
-      if (this.currentRuntime === null) {
+      if (this.currentRuntime === null || this.isRuntimeDeleted()) {
         await this.createRuntime();
       } else if (this.isRuntimeStopped()) {
         await this.resumeRuntime();
