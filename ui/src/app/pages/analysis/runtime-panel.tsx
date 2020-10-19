@@ -160,15 +160,17 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
                               key={i}
                               onClick={() => {
                                 // renaming to avoid shadowing
-                                let presetDiskSize;
-                                let presetMachineName;
-                                if (preset.runtimeTemplate.gceConfig) {
-                                  presetDiskSize = preset.runtimeTemplate.gceConfig.bootDiskSize;
-                                  presetMachineName = preset.runtimeTemplate.gceConfig.machineType;
-                                } else if (preset.runtimeTemplate.dataprocConfig) {
-                                  presetDiskSize = preset.runtimeTemplate.dataprocConfig.masterDiskSize;
-                                  presetMachineName = preset.runtimeTemplate.dataprocConfig.masterMachineType;
-                                }
+                                const {runtimeTemplate} = preset;
+                                const {presetDiskSize, presetMachineName} = fp.cond([
+                                  [() => !!runtimeTemplate.gceConfig, ({gceConfig: {bootDiskSize, machineType}}) => ({
+                                    presetDiskSize: bootDiskSize,
+                                    presetMachineName: machineType
+                                  })],
+                                  [() => !!runtimeTemplate.dataprocConfig, ({dataprocConfig: {masterDiskSize, masterMachineType}}) => ({
+                                    presetDiskSize: masterDiskSize,
+                                    presetMachineName: masterMachineType
+                                  })]
+                                ])(runtimeTemplate)
                                 const presetMachineType = fp.find(({name}) => name === presetMachineName, validLeonardoMachineTypes);
 
                                 setUpdatedDiskSize(presetDiskSize);
