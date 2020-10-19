@@ -631,6 +631,6 @@ export function validateInputForMySQL(searchString: string): Array<string> {
   return Array.from(inputErrors);
 }
 
-export function cdrVersion(workspace: Workspace, cdrs: CdrVersionListResponse): CdrVersion {
+export function getCdrVersion(workspace: Workspace, cdrs: CdrVersionListResponse): CdrVersion {
   return cdrs.items.find(v => v.cdrVersionId === workspace.cdrVersionId);
 }

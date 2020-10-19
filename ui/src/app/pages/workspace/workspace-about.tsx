@@ -16,7 +16,7 @@ import {ResetRuntimeButton} from 'app/pages/analysis/reset-runtime-button';
 import {ResearchPurpose} from 'app/pages/workspace/research-purpose';
 import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {cdrVersion, reactStyles, ReactWrapperBase, withCdrVersions, withUrlParams, withUserProfile} from 'app/utils';
+import {getCdrVersion, reactStyles, ReactWrapperBase, withCdrVersions, withUrlParams, withUserProfile} from 'app/utils';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {
   Authority,
@@ -239,7 +239,9 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
           </h3>
           <div style={styles.infoBox} data-test-id='cdrVersion'>
             <div style={styles.infoBoxHeader}>Dataset</div>
-            <div style={{fontSize: '0.5rem'}}>{workspace ? cdrVersion(workspace, cdrVersionListResponse).name : 'Loading...'}</div>
+            <div style={{fontSize: '0.5rem'}}>
+              {workspace ? getCdrVersion(workspace, cdrVersionListResponse).name : 'Loading...'}
+            </div>
           </div>
           <div style={styles.infoBox} data-test-id='creationDate'>
             <div style={styles.infoBoxHeader}>Creation Date</div>

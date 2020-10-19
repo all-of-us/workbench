@@ -3,7 +3,7 @@ import {Component, Input} from '@angular/core';
 import {Clickable} from 'app/components/buttons';
 import colors from 'app/styles/colors';
 import {
-  cdrVersion,
+  getCdrVersion,
   reactStyles,
   ReactWrapperBase,
   withCdrVersions,
@@ -104,9 +104,9 @@ export const WorkspaceNavBarReact = fp.flow(
     {activeTabIndex > 0 && navSeparator}
     {fp.map(tab => navTab(tab, restrictTab(props.workspace, tab)), tabs)}
     <div style={{flexGrow: 1}}/>
-    {workspace && <div data-test-id='cdr-version' style={{textTransform: 'none'}}>
-      {cdrVersion(workspace, cdrVersionListResponse).name}
-    </div>}
+    <div data-test-id='cdr-version' style={{textTransform: 'none'}}>
+      {getCdrVersion(workspace, cdrVersionListResponse).name}
+    </div>
   </div>;
 });
 
