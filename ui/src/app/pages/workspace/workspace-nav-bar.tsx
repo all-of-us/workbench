@@ -18,25 +18,42 @@ import * as React from 'react';
 
 const styles = reactStyles({
   container: {
-    display: 'flex', alignItems: 'center', backgroundColor: colors.secondary,
-    fontWeight: 500, color: 'white', textTransform: 'uppercase',
-    height: 60, paddingRight: 16,
+    display: 'flex',
+    alignItems: 'center',
+    backgroundColor: colors.secondary,
+    fontWeight: 500,
+    color: 'white',
+    textTransform: 'uppercase',
+    height: 60,
+    paddingRight: 16,
     boxShadow: 'inset rgba(0, 0, 0, 0.12) 0px 3px 2px 0px',
     width: 'calc(100% + 1.2rem)',
     marginLeft: '-0.6rem',
-    paddingLeft: 80, borderBottom: `5px solid ${colors.accent}`, flex: 'none'
+    paddingLeft: 80,
+    borderBottom: `5px solid ${colors.accent}`,
+    flex: 'none'
   },
   tab: {
-    minWidth: 140, flexGrow: 0, padding: '0 20px',
+    minWidth: 140,
+    flexGrow: 0,
+    padding: '0 20px',
     color: colors.white,
-    alignSelf: 'stretch', display: 'flex', justifyContent: 'center', alignItems: 'center'
+    alignSelf: 'stretch',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   active: {
-    backgroundColor: 'rgba(255,255,255,0.15)', color: 'unset',
-    borderBottom: `4px solid ${colors.accent}`, fontWeight: 'bold'
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    color: 'unset',
+    borderBottom: `4px solid ${colors.accent}`,
+    fontWeight: 'bold'
   },
   separator: {
-    background: 'rgba(255,255,255,0.15)', width: 1, height: 48, flexShrink: 0
+    background: 'rgba(255,255,255,0.15)',
+    width: 1,
+    height: 48,
+    flexShrink: 0
   },
   disabled: {
     color: colors.disabled
@@ -87,7 +104,7 @@ export const WorkspaceNavBarReact = fp.flow(
     {activeTabIndex > 0 && navSeparator}
     {fp.map(tab => navTab(tab, restrictTab(props.workspace, tab)), tabs)}
     <div style={{flexGrow: 1}}/>
-    {workspace && <div>{cdrVersion(workspace, cdrVersionListResponse).name}</div>}
+    {workspace && <div style={{textTransform: 'none'}}>{cdrVersion(workspace, cdrVersionListResponse).name}</div>}
   </div>;
 });
 
