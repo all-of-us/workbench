@@ -355,7 +355,10 @@ public class RdrExportServiceImpl implements RdrExportService {
             rdrExportDao.deleteDbRdrExportsByEntityTypeAndEntityId(
                 RdrEntityEnums.entityToStorage(RdrEntity.WORKSPACE), workspaceId);
           } catch (Exception ex) {
-            log.severe(String.format("Error while trying to delete workspace %s", workspaceId));
+            log.severe(
+                String.format(
+                    "Error while trying to delete workspace entry from rdr_export %s",
+                    workspaceId));
           }
         });
   }

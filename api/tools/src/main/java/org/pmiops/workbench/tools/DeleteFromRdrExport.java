@@ -3,7 +3,10 @@ package org.pmiops.workbench.tools;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.time.Clock;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -67,24 +70,38 @@ public class DeleteFromRdrExport {
 
   @Bean
   public CommandLineRunner run(RdrExportService rdrExportService) {
+    AtomicInteger counter = new AtomicInteger();
+
     return (args) -> {
       CommandLine opts = new DefaultParser().parse(options, args);
       boolean dryRun = opts.hasOption(dryRunOpt.getLongOpt());
       try (BufferedReader reader =
           new BufferedReader(
               new FileReader(opts.getOptionValue(workspaceListFilename.getLongOpt())))) {
+        List<Long> workspaceIdListToDelete = new ArrayList<Long>();
         reader
             .lines()
             .forEach(
                 line -> {
-                  List<Long> workspaceIds =
-                      Stream.of(line.split(",")).map(Long::parseLong).collect(Collectors.toList());
+                  workspaceIdListToDelete.addAll(
+                      Stream.of(line.split(",")).map(Long::parseLong).collect(Collectors.toList()));
+                });
+        Collection<List<Long>> result =
+            workspaceIdListToDelete.stream()
+                .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / 20))
+                .values();
+        result
+            .parallelStream()
+            .forEach(
+                (workspaceIdList) -> {
                   if (!dryRun) {
-                    rdrExportService.deleteWorkspaceExportEntries(workspaceIds);
+                    System.out.println("Deleting following workspace Ids from rdr_export");
+                    workspaceIdList.forEach(System.out::println);
+                    rdrExportService.deleteWorkspaceExportEntries(workspaceIdList);
                   } else {
                     System.out.println(
                         "Dry RUN TRUE: Deleting following workspace Ids from rdr_export");
-                    workspaceIds.forEach(System.out::println);
+                    workspaceIdList.forEach(System.out::println);
                   }
                 });
       }

@@ -690,7 +690,7 @@ task deleteWorkspaces(type: JavaExec) {
   }
 }
 
-// See project.rb command: delete_workspace_rdr_export
+// See project.rb command: delete-workspace-rdr-export
 task deleteWorkspaceFromRdrExport(type: JavaExec) {
   classpath = sourceSets.__tools__.runtimeClasspath
   main = "org.pmiops.workbench.tools.DeleteFromRdrExport"
