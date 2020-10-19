@@ -144,6 +144,7 @@ const DataProcConfigSelector = ({onChange, dataprocConfig})  => {
   
   useEffect(() => {
       onChange({
+        ...dataprocConfig,
         workerMachineType: selectedWorkerMachine && selectedWorkerMachine.name,
         workerDiskSize: selectedDiskSize,
         numberOfWorkers: selectedNumWorkers,
@@ -219,6 +220,7 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
     </React.Fragment>;
   }
 
+  console.log(selectedDataprocConfig, dataprocConfig, fp.equals(selectedDataprocConfig, dataprocConfig));
   return <div data-test-id='runtime-panel'>
     <h3 style={styles.sectionHeader}>Cloud analysis environment</h3>
     <div>
