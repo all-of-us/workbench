@@ -817,10 +817,10 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   @Override
   public List<String> generateHailDemoCode(String qualifier) {
-    final String phenotypeFilename = "phenotypes_annotations_" + qualifier + ".txt";
+    final String phenotypeFilename = "phenotypes_annotations_" + qualifier + ".tsv";
     final String cohortQualifier = "cohort_" + qualifier;
     final String cohortVcfFilename = cohortQualifier + ".vcf";
-    final String cohortMtFilename = cohortQualifier + ".mt";
+    final String cohortMatrixFilename = cohortQualifier + ".mt";
 
     return ImmutableList.of(
         "import subprocess, os\n"
@@ -829,7 +829,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             + "# Creating phenotype annotations file\n"
             + "phenotypes_table = []\n"
             + "for person_id in person_ids:\n"
-            + "    person_id = person_id\n"
             + "    phenotype_1 = random.randint(0, 2) # Change this value to what makes sense for your research by looking through the dataset(s)\n"
             + "    phenotype_2 = random.randint(0, 2) # Change this value as well or remove if you are only processing one phenotype \n"
             + "    phenotypes_table.append([person_id, phenotype_1, phenotype_2])\n"
@@ -851,18 +850,19 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             + "hl.import_vcf(f'{bucket}/"
             + cohortVcfFilename
             + "').write(f'{bucket}/"
-            + cohortMtFilename
+            + cohortMatrixFilename
             + "')\n"
             + "table = hl.import_table(f'{bucket}/"
             + phenotypeFilename
             + "', types={'sample_name': hl.tstr}, impute=True, key='sample_name')\n"
             + "\n"
             + "mt = hl.read_matrix_table(f'{bucket}/"
-            + cohortMtFilename
+            + cohortMatrixFilename
             + "');\n"
             + "mt = mt.annotate_cols(pheno = table[mt.s])\n"
             + "\n"
-            + "gwas = hl.linear_regression_rows(y=mt.pheno.phenotype1, x=mt.GT.n_alt_alleles(), covariates=[1.0])\n"
+            + "covariates = [1, mt.pheno.phenotype2]\n"
+            + "gwas = hl.linear_regression_rows(y=mt.pheno.phenotype1, x=mt.GT.n_alt_alleles(), covariates=covariates)\n"
             + "p = hl.plot.manhattan(gwas.p_value)\n"
             + "show(p)");
   }
