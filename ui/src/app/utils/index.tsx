@@ -17,9 +17,12 @@ import {
 } from 'app/utils/navigation';
 import {DataAccessLevel, Domain} from 'generated';
 import {
+  CdrVersion,
+  CdrVersionListResponse,
   ConfigResponse,
   DataAccessLevel as FetchDataAccessLevel,
   Domain as FetchDomain,
+  Workspace,
 } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -626,4 +629,8 @@ export function validateInputForMySQL(searchString: string): Array<string> {
     inputErrors.add('There is an unclosed " in the search string');
   }
   return Array.from(inputErrors);
+}
+
+export function getCdrVersion(workspace: Workspace, cdrs: CdrVersionListResponse): CdrVersion {
+  return cdrs.items.find(v => v.cdrVersionId === workspace.cdrVersionId);
 }

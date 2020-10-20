@@ -1,8 +1,10 @@
 import {WorkspaceNavBarReact} from 'app/pages/workspace/workspace-nav-bar';
-import {currentWorkspaceStore, NavStore, serverConfigStore, urlParamsStore} from 'app/utils/navigation';
+import {cdrVersionStore, currentWorkspaceStore, NavStore, serverConfigStore, urlParamsStore} from 'app/utils/navigation';
 import {mount} from 'enzyme';
 import * as React from 'react';
 import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
+import {cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
+import {CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 
 describe('WorkspaceNavBarComponent', () => {
 
@@ -19,6 +21,7 @@ describe('WorkspaceNavBarComponent', () => {
     urlParamsStore.next({ns: workspaceDataStub.namespace, wsid: workspaceDataStub.id});
     serverConfigStore.next({
       gsuiteDomain: 'fake-research-aou.org', enableResearchReviewPrompt: true});
+    cdrVersionStore.next(cdrVersionListResponse);
   });
 
   it('should render', () => {
@@ -54,5 +57,21 @@ describe('WorkspaceNavBarComponent', () => {
     expect(wrapper.find({'data-test-id': 'About'}).first().props().disabled).toBeFalsy();
 
   });
+
+  it('should display the default CDR Version', () => {
+    const wrapper = component();
+    expect(wrapper.find({'data-test-id': 'cdr-version'}).first().text())
+        .toEqual(CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION);
+  })
+
+  it('should display an alternative CDR Version', () => {
+    const altWorkspace = workspaceDataStub;
+    altWorkspace.cdrVersionId = CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION_ID;
+    currentWorkspaceStore.next(altWorkspace);
+
+    const wrapper = component();
+    expect(wrapper.find({'data-test-id': 'cdr-version'}).first().text())
+        .toEqual(CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION);
+  })
 
 });
