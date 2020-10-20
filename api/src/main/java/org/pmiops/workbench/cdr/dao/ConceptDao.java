@@ -39,7 +39,8 @@ public interface ConceptDao extends CrudRepository<DbConcept, Long> {
               + "where (c.countValue > 0 or c.sourceCountValue > 0) "
               + "and matchConcept(c.conceptName, c.conceptCode, c.vocabularyId, c.synonymsStr, ?1) > 0 "
               + "and c.domainId = ?2 "
-              + "and c.standardConcept IN ('')")
+              + "and c.standardConcept IN ('') "
+              + "order by c.sourceCountValue desc")
   Page<DbConcept> findConcepts(String keyword, String domainId, Pageable page);
 
   /**

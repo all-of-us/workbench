@@ -60,7 +60,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -181,65 +180,30 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   @Override
   public CriteriaListWithCountResponse findCriteriaByDomainAndSearchTerm(
       String domain, String term, Integer limit) {
+    PageRequest pageRequest =
+        new PageRequest(0, Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT));
     if (Domain.fromValue(domain).equals(Domain.PHYSICAL_MEASUREMENT)) {
-      final String keyword = modifyTermMatch(term);
-      PageRequest pageRequest =
-          new PageRequest(
-              0,
-              Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT),
-              new Sort(Direction.DESC, "countValue"));
-      Page<DbConcept> dbConcepts = conceptDao.findConcepts(keyword, MEASUREMENT, pageRequest);
+      Page<DbConcept> dbConcepts =
+          conceptDao.findConcepts(modifyTermMatch(term), MEASUREMENT, pageRequest);
+      List<Criteria> criteriaList =
+          dbConcepts.getContent().stream()
+              .map(
+                  c -> {
+                    boolean isStandard = STANDARD_CONCEPTS.contains(c.getStandardConcept());
+                    return cohortBuilderMapper.dbModelToClient(
+                        c, isStandard, isStandard ? c.getCountValue() : c.getSourceCountValue());
+                  })
+              .collect(Collectors.toList());
       return new CriteriaListWithCountResponse()
-          .items(
-              dbConcepts.getContent().stream()
-                  .map(
-                      c -> {
-                        boolean isStandard = STANDARD_CONCEPTS.contains(c.getStandardConcept());
-                        return cohortBuilderMapper.dbModelToClient(
-                            c,
-                            isStandard,
-                            isStandard ? c.getCountValue() : c.getSourceCountValue());
-                      })
-                  .collect(Collectors.toList()))
+          .items(criteriaList)
           .totalCount(dbConcepts.getTotalElements());
     }
 
-    PageRequest pageRequest =
-        new PageRequest(0, Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT));
-    Page<DbCriteria> dbCriteriaPage;
-    List<DbCriteria> exactMatchByCode = cbCriteriaDao.findExactMatchByCode(domain, term);
-    boolean isStandard = exactMatchByCode.isEmpty() || exactMatchByCode.get(0).getStandard();
-
-    if (!isStandard) {
-      // source search
-      dbCriteriaPage =
-          cbCriteriaDao.findCriteriaByDomainAndTypeAndCode(
-              domain, exactMatchByCode.get(0).getType(), isStandard, term, pageRequest);
-      Map<Boolean, List<DbCriteria>> groups =
-          dbCriteriaPage.getContent().stream()
-              .collect(Collectors.partitioningBy(c -> c.getCode().equals(term)));
-      List<DbCriteria> dbCriteriaList = groups.get(true);
-      dbCriteriaList.addAll(groups.get(false));
-      return new CriteriaListWithCountResponse()
-          .items(
-              dbCriteriaList.stream()
-                  .map(cohortBuilderMapper::dbModelToClient)
-                  .collect(Collectors.toList()))
-          .totalCount(dbCriteriaPage.getTotalElements());
-    }
-
-    // standard search
-    dbCriteriaPage =
-        cbCriteriaDao.findCriteriaByDomainAndCode(domain, isStandard, term, pageRequest);
+    Page<DbCriteria> dbCriteriaPage =
+        cbCriteriaDao.findCriteriaByDomainAndTypeAndCode(domain, term, pageRequest);
     if (dbCriteriaPage.getContent().isEmpty() && !term.contains(".")) {
       dbCriteriaPage =
-          cbCriteriaDao.findCriteriaByDomainAndFullText(
-              domain, isStandard, modifyTermMatch(term), pageRequest);
-    }
-    if (dbCriteriaPage.getContent().isEmpty() && !term.contains(".")) {
-      dbCriteriaPage =
-          cbCriteriaDao.findCriteriaByDomainAndFullText(
-              domain, !isStandard, modifyTermMatch(term), pageRequest);
+          cbCriteriaDao.findCriteriaByDomainAndFullText(domain, modifyTermMatch(term), pageRequest);
     }
     return new CriteriaListWithCountResponse()
         .items(
@@ -315,13 +279,11 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   @Override
   public Long findDomainCount(String domain, String term) {
     Domain domainToCount = Domain.valueOf(domain);
-    List<Boolean> standards =
-        (domainToCount.equals(Domain.CONDITION) || domainToCount.equals(Domain.PROCEDURE))
-            ? ImmutableList.of(true, false)
-            : ImmutableList.of(true);
-    return (domainToCount.equals(Domain.PHYSICAL_MEASUREMENT))
-        ? cbCriteriaDao.findPhysicalMeasurementCount(modifyTermMatch(term))
-        : cbCriteriaDao.findDomainCount(modifyTermMatch(term), domain, standards);
+    if (domainToCount.equals(Domain.PHYSICAL_MEASUREMENT)) {
+      return cbCriteriaDao.findPhysicalMeasurementCount(modifyTermMatch(term));
+    }
+    Long count = cbCriteriaDao.findDomainCountOnCode(term, domain);
+    return count == null ? cbCriteriaDao.findDomainCount(modifyTermMatch(term), domain) : count;
   }
 
   @Override
