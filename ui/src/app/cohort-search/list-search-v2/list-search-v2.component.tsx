@@ -430,31 +430,33 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
         </div>
         <div style={{display: 'table', height: '100%', width: '100%'}}>
           <div style={styles.helpText}>
-            {sourceMatch && !standardOnly && <div>
-              There are {sourceMatch.count.toLocaleString()} participants with source code {sourceMatch.code}.
-              {showStandardOption && <span> For more results, browse
-                &nbsp;<Clickable style={styles.vocabLink} onClick={() => this.showStandardResults()}>Standard Vocabulary</Clickable>.
-              </span>}
-            </div>}
-            {standardOnly && <div>
-              {!!displayData.length && <span>
-                There are {displayData[0].count.toLocaleString()} participants for the standard version of the code you searched.
-              </span>}
-              {!displayData.length && <span>
-                There are no standard matches for source code {sourceMatch.code}.
-              </span>}
-              &nbsp;<Clickable style={styles.vocabLink}
-                               onMouseDown={() => this.trackEvent('Source Vocab Hyperlink')}
-                               onClick={() => this.setState({standardOnly: false})}>
-                Return to source code
-              </Clickable>.
-            </div>}
             {domain === Domain.DRUG && <div>
-              Your search may bring back brand names, generics and ingredients. Only ingredients may be added to your search criteria.
+              Your search may bring back brand names, generics and ingredients. Only ingredients may be added to your search criteria
             </div>}
-            {!!totalCount && <div>
-              There are {totalCount.toLocaleString()} results{!!cdrVersion && <span> in {cdrVersion.name}</span>}.
-            </div>}
+            {!loading && <React.Fragment>
+              {sourceMatch && !standardOnly && <div>
+                There are {sourceMatch.count.toLocaleString()} participants with source code {sourceMatch.code}.
+                {showStandardOption && <span> For more results, browse
+                  &nbsp;<Clickable style={styles.vocabLink} onClick={() => this.showStandardResults()}>Standard Vocabulary</Clickable>.
+                </span>}
+              </div>}
+              {standardOnly && <div>
+                {!!displayData.length && <span>
+                  There are {displayData[0].count.toLocaleString()} participants for the standard version of the code you searched
+                </span>}
+                {!displayData.length && <span>
+                  There are no standard matches for source code {sourceMatch.code}
+                </span>}
+                &nbsp;<Clickable style={styles.vocabLink}
+                                 onMouseDown={() => this.trackEvent('Source Vocab Hyperlink')}
+                                 onClick={() => this.setState({standardOnly: false})}>
+                  Return to source code
+                </Clickable>.
+              </div>}
+              {!!totalCount && <div>
+                There are {totalCount.toLocaleString()} results{!!cdrVersion && <span> in {cdrVersion.name}</span>}
+              </div>}
+            </React.Fragment>}
           </div>
         </div>
         {!loading && !!displayData && <div style={styles.listContainer}>

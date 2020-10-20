@@ -188,6 +188,15 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
       && domainId !== Domain.VISIT.toString();
   }
 
+  get treeContainerStyle() {
+    const {node: {domainId}} = this.props;
+    const treeContainerStyle = {paddingTop: '3rem', width: '99%'};
+    if (!this.showHeader) {
+      treeContainerStyle.paddingTop = domainId === Domain.VISIT.toString() ? '0.5rem' : '2.5rem';
+    }
+    return treeContainerStyle;
+  }
+
   // Hides the tree node for COPE survey if enableCOPESurvey config flag is set to false
   showNode(node: Criteria) {
     return node.subtype === CriteriaSubType.SURVEY.toString() && node.name.includes('COPE')
@@ -211,9 +220,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
                      setInput={(v) => setSearchTerms(v)}/>
         </div>
       }
-      {!loading && <div style={this.showHeader
-        ? {...styles.treeContainer, paddingTop: '3rem', marginTop: '0rem'}
-        : styles.treeContainer}>
+      {!loading && <div style={this.treeContainerStyle}>
         {this.showHeader && <div style={{...styles.treeHeader, border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`}}>
           {!!ingredients && <div style={styles.ingredients}>
             Ingredients in this brand: {ingredients.join(', ')}
@@ -222,7 +229,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
         </div>}
         {error && <div style={styles.error}>
           <ClrIcon style={{color: colors.white}} className='is-solid' shape='exclamation-triangle' />
-          Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
+          Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation
         </div>}
         <div style={this.showHeader ? styles.node : {...styles.node, border: 'none'}}>
         {!!children && children.map((child, c) => this.showNode(child) && <TreeNode key={c}

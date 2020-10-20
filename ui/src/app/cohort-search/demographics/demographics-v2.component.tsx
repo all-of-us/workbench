@@ -68,7 +68,7 @@ const styles = reactStyles({
     display: 'flex',
     marginRight: '1rem',
     maxHeight: '15rem',
-    padding: '0.5rem 0 0 1rem'
+    padding: '0.5rem 0 0 0.25rem'
   },
   slider: {
     flex: 1,
