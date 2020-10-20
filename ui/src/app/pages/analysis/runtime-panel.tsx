@@ -5,7 +5,7 @@ import {PopupTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import colors, {addOpacity} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
-import {Machine, allMachineTypes, validLeonardoMachineTypes} from 'app/utils/machines';
+import {allMachineTypes, Machine, validLeonardoMachineTypes} from 'app/utils/machines';
 import {useCustomRuntime} from 'app/utils/runtime-utils';
 import {
   RuntimeOperation,
@@ -54,7 +54,7 @@ const styles = reactStyles({
   }
 });
 
-const defaultMachineName = 'n1-standard-4'
+const defaultMachineName = 'n1-standard-4';
 const defaultMachineType = allMachineTypes.find(({name}) => name === defaultMachineName);
 const findMachineByName = machineToFind => fp.find(({name}) => name === machineToFind, allMachineTypes) || defaultMachineType;
 
@@ -141,15 +141,15 @@ const DataProcConfigSelector = ({onChange, dataprocConfig})  => {
 
   // On unmount clear the config - the user is no longer configuring a dataproc cluster
   useEffect(() => () => onChange(null), []);
-  
+
   useEffect(() => {
-      onChange({
-        ...dataprocConfig,
-        workerMachineType: selectedWorkerMachine && selectedWorkerMachine.name,
-        workerDiskSize: selectedDiskSize,
-        numberOfWorkers: selectedNumWorkers,
-        numberOfPreemptibleWorkers: selectedPreemtible
-      });
+    onChange({
+      ...dataprocConfig,
+      workerMachineType: selectedWorkerMachine && selectedWorkerMachine.name,
+      workerDiskSize: selectedDiskSize,
+      numberOfWorkers: selectedNumWorkers,
+      numberOfPreemptibleWorkers: selectedPreemtible
+    });
   }, [selectedNumWorkers, selectedPreemtible, selectedWorkerMachine, selectedDiskSize]);
 
   return <fieldset style={{marginTop: '0.75rem'}}>
@@ -198,8 +198,8 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
   const [selectedDataprocConfig, setSelectedDataprocConfig] = useState<DataprocConfig | null>(dataprocConfig);
 
   const selectedMachineType = selectedMachine && selectedMachine.name;
-  const runtimeChanged = !fp.equals(selectedMachine, initialMasterMachine) || 
-    selectedDiskSize !== masterDiskSize || 
+  const runtimeChanged = !fp.equals(selectedMachine, initialMasterMachine) ||
+    selectedDiskSize !== masterDiskSize ||
     !fp.equals(selectedDataprocConfig, dataprocConfig);
 
   if (currentRuntime === undefined) {
@@ -214,7 +214,6 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
     </React.Fragment>;
   }
 
-  console.log(selectedDataprocConfig, dataprocConfig, fp.equals(selectedDataprocConfig, dataprocConfig));
   return <div data-test-id='runtime-panel'>
     <h3 style={styles.sectionHeader}>Cloud analysis environment</h3>
     <div>
@@ -258,7 +257,10 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
                   value={selectedCompute || ComputeType.Standard}
                   onChange={({value}) => setSelectedCompute(value)}
                   />
-        {selectedCompute === ComputeType.Dataproc && <DataProcConfigSelector onChange={setSelectedDataprocConfig} dataprocConfig={dataprocConfig} /> }
+        {
+          selectedCompute === ComputeType.Dataproc &&
+          <DataProcConfigSelector onChange={setSelectedDataprocConfig} dataprocConfig={dataprocConfig} />
+        }
       </FlexColumn>
     </div>
     <FlexRow style={{justifyContent: 'flex-end', marginTop: '.75rem'}}>
