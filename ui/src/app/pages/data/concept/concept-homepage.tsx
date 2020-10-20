@@ -683,6 +683,8 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
         currentInputString, currentSearchString, domainInfoError, domainsLoading, inputErrors, loadingDomains, surveyInfoError,
         standardConceptsOnly, showSearchError, searching, selectedDomain, selectedSurvey, selectedConceptDomainMap, selectedSurveyQuestions,
         surveyAddModalOpen, surveysLoading} = this.state;
+      const conceptDomainCards = conceptDomainList.filter(domain => domain.domain !== Domain.PHYSICALMEASUREMENT);
+      const physicalMeasurementsCard = conceptDomainList.find(domain => domain.domain === Domain.PHYSICALMEASUREMENT);
       return <React.Fragment>
         <FadeBox style={{margin: 'auto', paddingTop: '1rem', width: '95.7%'}}>
           <FlexRow>
@@ -745,13 +747,21 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
               <div style={styles.cardList}>
                 {domainInfoError
                   ? this.errorMessage()
-                  : conceptDomainList
-                    .filter(item => item.domain !== Domain.PHYSICALMEASUREMENT && item.allConceptCount !== 0)
-                    .map((domain, i) => <DomainCard conceptDomainInfo={domain}
-                                                    standardConceptsOnly={standardConceptsOnly}
-                                                    browseInDomain={() => this.browseDomain(domain)}
-                                                    key={i} data-test-id='domain-box'
-                                                    updating={domainsLoading.includes(domain.domain)}/>)
+                  : <React.Fragment>
+                    {conceptDomainCards
+                      .filter(domain => domain.allConceptCount !== 0)
+                      .map((domain, i) => <DomainCard conceptDomainInfo={domain}
+                                                      standardConceptsOnly={standardConceptsOnly}
+                                                      browseInDomain={() => this.browseDomain(domain)}
+                                                      key={i} data-test-id='domain-box'
+                                                      updating={domainsLoading.includes(domain.domain)}/>)}
+                    {conceptDomainCards.every(domain => domain.allConceptCount === 0) && <div>
+                      {conceptDomainCards.some(domain => domainsLoading.includes(domain.domain))
+                        ? <Spinner size={42}/>
+                        : 'No Domain Results. Please type in a new search term.'
+                      }
+                    </div>}
+                  </React.Fragment>
                 }
               </div>
               <div style={styles.sectionHeader}>
@@ -770,7 +780,7 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
                     {conceptSurveysList.every(survey => survey.questionCount === 0) && <div>
                       {conceptSurveysList.some(survey => surveysLoading.includes(survey.name))
                         ? <Spinner size={42}/>
-                        : 'No Survey Questions found'
+                        : 'No Survey Question Results. Please type in a new search term.'
                       }
                     </div>}
                   </React.Fragment>
@@ -783,13 +793,16 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
                 <div style={styles.cardList}>
                   {domainInfoError
                     ? this.errorMessage()
-                    : conceptDomainList
-                      .filter(item => item.domain === Domain.PHYSICALMEASUREMENT && item.allConceptCount !== 0)
-                      .map((physicalMeasurement, p) =>
-                        <PhysicalMeasurementsCard physicalMeasurement={physicalMeasurement}
-                                                  key={p}
-                                                  browsePhysicalMeasurements={() => this.browseDomain(physicalMeasurement)}
-                                                  updating={domainsLoading.includes(Domain.PHYSICALMEASUREMENT)}/>)
+                    : !!physicalMeasurementsCard && (physicalMeasurementsCard.allConceptCount !== 0
+                      ? <PhysicalMeasurementsCard physicalMeasurement={physicalMeasurementsCard}
+                                                browsePhysicalMeasurements={() => this.browseDomain(physicalMeasurementsCard)}
+                                                updating={domainsLoading.includes(Domain.PHYSICALMEASUREMENT)}/>
+                    : <div style={{marginBottom: '1rem'}}>
+                      {domainsLoading.includes(Domain.PHYSICALMEASUREMENT)
+                        ? <Spinner size={42}/>
+                        : 'No Program Physical Measurement Results. Please type in a new search term.'
+                      }
+                    </div>)
                   }
                 </div>
               </React.Fragment>}
