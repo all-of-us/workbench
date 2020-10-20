@@ -104,9 +104,9 @@ export const WorkspaceNavBarReact = fp.flow(
     {activeTabIndex > 0 && navSeparator}
     {fp.map(tab => navTab(tab, restrictTab(props.workspace, tab)), tabs)}
     <div style={{flexGrow: 1}}/>
-    <div data-test-id='cdr-version' style={{textTransform: 'none'}}>
+    {workspace && cdrVersionListResponse && <div data-test-id='cdr-version' style={{textTransform: 'none'}}>
       {getCdrVersion(workspace, cdrVersionListResponse).name}
-    </div>
+    </div>}
   </div>;
 });
 
