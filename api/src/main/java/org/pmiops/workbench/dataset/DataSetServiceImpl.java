@@ -765,7 +765,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             + cohortVcfFilename
             + " \\\n"
             + "        --probe-info-csv /genomics/microarray/probe_info.csv \\\n"
-            + "        --project-id ${GOOGLE_PROJECT} \\\n"
+            + "        --read-project-id ${GOOGLE_PROJECT} \\\n"
             + "        --cohort-sample-file "
             + cohortSampleMapFilename
             + " \\\n"
@@ -813,6 +813,58 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             + "\n"
             + "head results.P1.assoc\n"
             + "head results.P2.assoc");
+  }
+
+  @Override
+  public List<String> generateHailDemoCode(String qualifier) {
+    final String phenotypeFilename = "phenotypes_annotations_" + qualifier + ".tsv";
+    final String cohortQualifier = "cohort_" + qualifier;
+    final String cohortVcfFilename = cohortQualifier + ".vcf";
+    final String cohortMatrixFilename = cohortQualifier + ".mt";
+
+    return ImmutableList.of(
+        "import subprocess, os\n"
+            + "import random\n"
+            + "\n"
+            + "# Creating phenotype annotations file\n"
+            + "phenotypes_table = []\n"
+            + "for person_id in person_ids:\n"
+            + "    phenotype_1 = random.randint(0, 2) # Change this value to what makes sense for your research by looking through the dataset(s)\n"
+            + "    phenotype_2 = random.randint(0, 2) # Change this value as well or remove if you are only processing one phenotype \n"
+            + "    phenotypes_table.append([person_id, phenotype_1, phenotype_2])\n"
+            + "\n"
+            + "cohort_phenotypes = pandas.DataFrame(phenotypes_table,columns=[\"sample_name\", \"phenotype1\", \"phenotype2\"]) \n"
+            + "cohort_phenotypes.to_csv('"
+            + phenotypeFilename
+            + "', index=False, sep='\\t')\n"
+            + "\n"
+            + "subprocess.run([\"gsutil\", \"cp\", \""
+            + phenotypeFilename
+            + "\", os.environ['WORKSPACE_BUCKET']])",
+        "import hail as hl\n"
+            + "import os\n"
+            + "from hail.plot import show\n"
+            + "\n"
+            + "hl.plot.output_notebook()\n"
+            + "bucket = os.environ['WORKSPACE_BUCKET']\n"
+            + "hl.import_vcf(f'{bucket}/"
+            + cohortVcfFilename
+            + "').write(f'{bucket}/"
+            + cohortMatrixFilename
+            + "')\n"
+            + "table = hl.import_table(f'{bucket}/"
+            + phenotypeFilename
+            + "', types={'sample_name': hl.tstr}, impute=True, key='sample_name')\n"
+            + "\n"
+            + "mt = hl.read_matrix_table(f'{bucket}/"
+            + cohortMatrixFilename
+            + "');\n"
+            + "mt = mt.annotate_cols(pheno = table[mt.s])\n"
+            + "\n"
+            + "covariates = [1, mt.pheno.phenotype2]\n"
+            + "gwas = hl.linear_regression_rows(y=mt.pheno.phenotype1, x=mt.GT.n_alt_alleles(), covariates=covariates)\n"
+            + "p = hl.plot.manhattan(gwas.p_value)\n"
+            + "show(p)");
   }
 
   @Override
