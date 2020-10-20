@@ -240,7 +240,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
           <div style={styles.infoBox} data-test-id='cdrVersion'>
             <div style={styles.infoBoxHeader}>Dataset</div>
             <div style={{fontSize: '0.5rem'}}>
-              {(workspace && cdrVersionListResponse) ? getCdrVersion(workspace, cdrVersionListResponse).name : 'Loading...'}
+              {workspace ? getCdrVersion(workspace, cdrVersionListResponse).name : 'Loading...'}
             </div>
           </div>
           <div style={styles.infoBox} data-test-id='creationDate'>
