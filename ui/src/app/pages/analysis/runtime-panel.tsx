@@ -162,23 +162,17 @@ const DataProcConfigSelector = ({onChange, dataprocConfig})  => {
         incrementButtonClassName='p-button-secondary'
         value={selectedNumWorkers}
         inputStyle={{padding: '.75rem .5rem', width: '2rem'}}
-        onChange={({value}) => {
-          setSelectedNumWorkers(value);
-          if (selectedNumWorkers < selectedPreemtible) {
-            setUpdatedPreemptible(selectedNumWorkers);
-          }
-        }}
+        onChange={({value}) => setSelectedNumWorkers(value)}
         min={2}/>
       <label htmlFor='num-preemptible' style={{marginRight: '.25rem'}}>Preemptible</label>
       <InputNumber id='num-preemptible'
         showButtons
         decrementButtonClassName='p-button-secondary'
         incrementButtonClassName='p-button-secondary'
-        value={selectedNumWorkers < selectedPreemtible ? selectedNumWorkers : selectedPreemtible}
+        value={selectedPreemtible}
         inputStyle={{padding: '.75rem .5rem', width: '2rem'}}
         onChange={({value}) => setUpdatedPreemptible(value)}
-        min={0}
-        max={selectedNumWorkers}/>
+        min={0}/>
       <div style={{gridColumnEnd: 'span 2'}}/>
       {/* TODO: Do the worker nodes have the same minimum requirements as the master node?
        to https://precisionmedicineinitiative.atlassian.net/browse/RW-5763 */}
