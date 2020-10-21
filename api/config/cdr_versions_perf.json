@@ -16,6 +16,7 @@
     "cdrVersionId": 2,
     "name": "[Removed] Synthetic Dataset v2",
     "dataAccessLevel": 1,
+    "archivalStatus": 1,
     "bigqueryProject": "",
     "bigqueryDataset": "",
     "creationTime": "2018-06-06 00:00:00Z",
