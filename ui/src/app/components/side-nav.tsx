@@ -2,9 +2,10 @@ import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {hasRegisteredAccessFetch, reactStyles} from 'app/utils';
+import {AuthGuardedAction, hasAuthorityForAction} from 'app/utils/auth';
 import {navigate, navigateSignOut, signInStore} from 'app/utils/navigation';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
-import {Authority, Profile} from 'generated/fetch';
+import {Profile} from 'generated/fetch';
 import * as React from 'react';
 
 const styles = reactStyles({
@@ -317,11 +318,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         onToggleSideNav={() => this.props.onToggleSideNav()}
         parentOnClick={() => this.openContactWidget()}
       />
-      {
-        (profile.authorities.includes(Authority.ACCESSCONTROLADMIN)
-          || profile.authorities.includes(Authority.COMMUNICATIONSADMIN)
-          || profile.authorities.includes(Authority.RESEARCHERDATAVIEW)
-          || profile.authorities.includes(Authority.INSTITUTIONADMIN)) && <SideNavItem
+      {hasAuthorityForAction(profile, AuthGuardedAction.SHOW_ADMIN_MENU) && <SideNavItem
                 icon='user'
                 content='Admin'
                 parentOnClick={() => this.onToggleAdmin()}
@@ -331,7 +328,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         />
       }
       {
-        profile.authorities.includes(Authority.ACCESSCONTROLADMIN) && this.state.showAdminOptions && <SideNavItem
+        hasAuthorityForAction(profile, AuthGuardedAction.USER_ADMIN) && this.state.showAdminOptions && <SideNavItem
           content={'User Admin'}
           onToggleSideNav={() => this.props.onToggleSideNav()}
           href={'/admin/user'}
@@ -339,7 +336,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         />
       }
       {
-        profile.authorities.includes(Authority.ACCESSCONTROLADMIN) && this.state.showAdminOptions && <SideNavItem
+        hasAuthorityForAction(profile, AuthGuardedAction.USER_AUDIT) && this.state.showAdminOptions && <SideNavItem
             content={'User Audit'}
             onToggleSideNav={() => this.props.onToggleSideNav()}
             href={'/admin/user-audit/'}
@@ -347,7 +344,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         />
       }
       {
-        profile.authorities.includes(Authority.COMMUNICATIONSADMIN) && this.state.showAdminOptions && <SideNavItem
+        hasAuthorityForAction(profile, AuthGuardedAction.SERVICE_BANNER) && this.state.showAdminOptions && <SideNavItem
             content={'Service Banners'}
             onToggleSideNav={() => this.props.onToggleSideNav()}
             href={'/admin/banner'}
@@ -355,7 +352,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         />
       }
       {
-        profile.authorities.includes(Authority.RESEARCHERDATAVIEW) && this.state.showAdminOptions && <SideNavItem
+        hasAuthorityForAction(profile, AuthGuardedAction.WORKSPACE_ADMIN) && this.state.showAdminOptions && <SideNavItem
             content={'Workspaces'}
             onToggleSideNav={() => this.props.onToggleSideNav()}
             href={'admin/workspaces'}
@@ -363,7 +360,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         />
       }
       {
-        profile.authorities.includes(Authority.ACCESSCONTROLADMIN) && this.state.showAdminOptions && <SideNavItem
+        hasAuthorityForAction(profile, AuthGuardedAction.WORKSPACE_AUDIT) && this.state.showAdminOptions && <SideNavItem
             content={'Workspace Audit'}
             onToggleSideNav={() => this.props.onToggleSideNav()}
             href={'/admin/workspace-audit/'}
@@ -371,7 +368,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         />
       }
       {
-        profile.authorities.includes(Authority.INSTITUTIONADMIN) && this.state.showAdminOptions && <SideNavItem
+        hasAuthorityForAction(profile, AuthGuardedAction.INSTITUTION_ADMIN) && this.state.showAdminOptions && <SideNavItem
             content={'Institution Admin'}
             onToggleSideNav={() => this.props.onToggleSideNav()}
             href={'admin/institution'}
