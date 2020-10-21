@@ -33,6 +33,7 @@ describe('RuntimePanel', () => {
 
   beforeEach(() => {
     runtimeApiStub = new RuntimeApiStub();
+    runtimeApiStub.runtime.dataprocConfig = null;
     registerApiClient(RuntimeApi, runtimeApiStub);
     runtimeStore.set({runtime: runtimeApiStub.runtime, workspaceNamespace: workspaceStubs[0].namespace});
     props = {
@@ -73,7 +74,7 @@ describe('RuntimePanel', () => {
     wrapper.find('#runtime-cpu .p-dropdown').first().simulate('click');
     wrapper.find('.p-dropdown-item').find({'aria-label': 8}).first().simulate('click');
 
-    const memoryOptions = wrapper.find('#runtime-ram .p-dropdown-item');
+    const memoryOptions = wrapper.find('#runtime-ram').first().find('.p-dropdown-item');
     expect(memoryOptions.exists()).toBeTruthy();
 
     // See app/utils/machines.ts, these are the valid memory options for an 8
@@ -81,7 +82,7 @@ describe('RuntimePanel', () => {
     expect(memoryOptions.map(m => m.text())).toEqual(['7.2', '30', '52']);
   });
 
-  it('should should toggle the disabled state of the update button when the configuration changes', async() => {
+  it('should toggle the disabled state of the update button when the configuration changes', async() => {
     const wrapper = component();
     await handleUseEffect(wrapper);
     await waitOneTickAndUpdate(wrapper);
@@ -93,7 +94,7 @@ describe('RuntimePanel', () => {
     wrapper.find('.p-dropdown-item').find({'aria-label': 8}).first().simulate('click');
     expect(updateButton().prop('disabled')).toBeFalsy();
 
-    wrapper.find('#runtime-cpu .p-dropdown').first().simulate('click');
+    wrapper.find('#runtime-ram').first().find('.p-dropdown-item').first().simulate('click');
     wrapper.find('.p-dropdown-item').find({'aria-label': 4}).first().simulate('click');
     expect(updateButton().prop('disabled')).toBeTruthy();
 
@@ -105,6 +106,32 @@ describe('RuntimePanel', () => {
     wrapper.find('.p-dropdown-item').find({'aria-label': 15}).first().simulate('click');
     expect(updateButton().prop('disabled')).toBeTruthy();
 
+    wrapper.find('#runtime-ram .p-dropdown').first().simulate('click');
+    wrapper.find('.p-dropdown-item').find({'aria-label': 15}).first().simulate('click');
+    expect(updateButton().prop('disabled')).toBeTruthy();
+
+    wrapper.find('#runtime-compute .p-dropdown').first().simulate('click');
+    wrapper.find('.p-dropdown-item').find({'aria-label': 'Dataproc Cluster'}).first().simulate('click');
+    expect(updateButton().prop('disabled')).toBeFalsy();
+
+    wrapper.find('#runtime-compute .p-dropdown').first().simulate('click');
+    wrapper.find('.p-dropdown-item').find({'aria-label': 'Standard VM'}).first().simulate('click');
+    expect(updateButton().prop('disabled')).toBeTruthy();
+
   });
 
+    it('should add additional options when the compute type changes', async() => {
+    const wrapper = component();
+    await handleUseEffect(wrapper);
+    await waitOneTickAndUpdate(wrapper);
+
+    wrapper.find('#runtime-compute .p-dropdown').first().simulate('click');
+    wrapper.find('.p-dropdown-item').find({'aria-label': 'Dataproc Cluster'}).first().simulate('click');
+
+    expect(wrapper.exists('span[id="num-workers"]')).toBeTruthy();
+    expect(wrapper.exists('span[id="num-preemptible"]')).toBeTruthy();
+    expect(wrapper.exists('div[id="worker-cpu"]')).toBeTruthy();
+    expect(wrapper.exists('div[id="worker-ram"]')).toBeTruthy();
+    expect(wrapper.exists('span[id="worker-disk"]')).toBeTruthy();
+  });
 });

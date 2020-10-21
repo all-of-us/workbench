@@ -67,13 +67,13 @@ export interface Props {
   workspace: WorkspaceData;
 }
 
-const MachineSelector = ({onChange, selectedMachine, machineType}) => {
+const MachineSelector = ({onChange, selectedMachine, machineType, id}) => {
   const initialMachineType = fp.find(({name}) => name === machineType, allMachineTypes) || defaultMachineType;
   const {cpu, memory} = selectedMachine || initialMachineType;
 
   return <Fragment>
-      <label htmlFor='runtime-cpu' style={{marginRight: '.25rem'}}>CPUs</label>
-      <Dropdown id='runtime-cpu'
+      <label htmlFor={`${id}-cpu`} style={{marginRight: '.25rem'}}>CPUs</label>
+      <Dropdown id={`${id}-cpu`}
         options={fp.flow(
           // Show all CPU options.
           fp.map('cpu'),
@@ -90,8 +90,8 @@ const MachineSelector = ({onChange, selectedMachine, machineType}) => {
             onChange)(validLeonardoMachineTypes)
         }
         value={cpu}/>
-      <label htmlFor='runtime-ram' style={{marginRight: '.25rem'}}>RAM (GB)</label>
-      <Dropdown id='runtime-ram'
+      <label htmlFor={`${id}-ram`} style={{marginRight: '.25rem'}}>RAM (GB)</label>
+      <Dropdown id={`${id}-ram`}
         options={fp.flow(
           // Show valid memory options as constrained by the currently selected CPU.
           fp.filter(({cpu: availableCpu}) => availableCpu === cpu),
@@ -112,10 +112,10 @@ const MachineSelector = ({onChange, selectedMachine, machineType}) => {
   </Fragment>;
 };
 
-const DiskSizeSelector = ({onChange, selectedDiskSize, diskSize}) => {
+const DiskSizeSelector = ({onChange, selectedDiskSize, diskSize, id}) => {
   return <Fragment>
-    <label htmlFor='runtime-disk' style={{marginRight: '.25rem'}}>Disk (GB)</label>
-    <InputNumber id='runtime-disk'
+    <label htmlFor={`${id}-disk`} style={{marginRight: '.25rem'}}>Disk (GB)</label>
+    <InputNumber id={`${id}-disk`}
       showButtons
       decrementButtonClassName='p-button-secondary'
       incrementButtonClassName='p-button-secondary'
@@ -176,8 +176,8 @@ const DataProcConfigSelector = ({onChange, dataprocConfig})  => {
       <div style={{gridColumnEnd: 'span 2'}}/>
       {/* TODO: Do the worker nodes have the same minimum requirements as the master node?
        to https://precisionmedicineinitiative.atlassian.net/browse/RW-5763 */}
-      <MachineSelector machineType={workerMachineType} onChange={setSelectedWorkerMachine} selectedMachine={selectedWorkerMachine}/>
-      <DiskSizeSelector diskSize={workerDiskSize} onChange={setSelectedDiskSize} selectedDiskSize={selectedDiskSize} />
+      <MachineSelector machineType={workerMachineType} onChange={setSelectedWorkerMachine} selectedMachine={selectedWorkerMachine} id='worker'/>
+      <DiskSizeSelector diskSize={workerDiskSize} onChange={setSelectedDiskSize} selectedDiskSize={selectedDiskSize} id='worker'/>
     </div>
   </fieldset>;
 };
@@ -246,8 +246,8 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
       {/* Runtime customization: change detailed machine configuration options. */}
       <h3 style={styles.sectionHeader}>Cloud compute profile</h3>
       <div style={styles.formGrid}>
-        <MachineSelector selectedMachine={selectedMachine} onChange={setSelectedMachine} machineType={masterMachineType}/>
-        <DiskSizeSelector selectedDiskSize={selectedDiskSize} onChange={setSelectedDiskSize} diskSize={masterDiskSize}/>
+        <MachineSelector selectedMachine={selectedMachine} onChange={setSelectedMachine} machineType={masterMachineType} id='runtime'/>
+        <DiskSizeSelector selectedDiskSize={selectedDiskSize} onChange={setSelectedDiskSize} diskSize={masterDiskSize} id='runtime'/>
       </div>
       <FlexColumn style={{marginTop: '1rem'}}>
         <label htmlFor='runtime-compute'>Compute type</label>
