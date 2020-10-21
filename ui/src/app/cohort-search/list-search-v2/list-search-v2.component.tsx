@@ -422,9 +422,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
           <div style={styles.searchBar}>
             <ClrIcon shape='search' size='18'/>
             <TextInput style={styles.searchInput}
-                       value={searchTerms}
                        placeholder={`Search ${domainToTitle(domain)} by code or description`}
-                       onChange={(e) => this.setState({searchTerms: e})}
                        onKeyPress={this.handleInput} />
           </div>
         </div>
