@@ -43,6 +43,8 @@ public interface DataSetService {
 
   List<String> generatePlinkDemoCode(String qualifier);
 
+  List<String> generateHailDemoCode(String qualifier);
+
   DbDataset cloneDataSetToWorkspace(
       DbDataset fromDataSet, DbWorkspace toWorkspace, Set<Long> cohortIds, Set<Long> conceptSetIds);
 
