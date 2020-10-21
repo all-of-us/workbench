@@ -17,7 +17,7 @@ import {WorkspaceShareComponent} from 'app/pages/workspace/workspace-share';
 import {WorkspaceWrapperComponent} from 'app/pages/workspace/workspace-wrapper/component';
 
 import {UserService, WorkspaceAccessLevel} from 'generated';
-import {WorkspacesApi} from 'generated/fetch';
+import {RuntimeApi, WorkspacesApi} from 'generated/fetch';
 
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {UserServiceStub} from 'testing/stubs/user-service-stub';
@@ -25,6 +25,7 @@ import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {WorkspacesApiStub, WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
 
 import {findElements} from 'testing/react-testing-utility';
+import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {setupModals, updateAndTick} from 'testing/test-helpers';
 
 @Component({
@@ -67,6 +68,7 @@ describe('WorkspaceWrapperComponent', () => {
       ]
     }).compileComponents().then(() => {
       registerApiClient(WorkspacesApi, new WorkspacesApiStub());
+      registerApiClient(RuntimeApi, new RuntimeApiStub());
       fixture = TestBed.createComponent(WorkspaceWrapperComponent);
       setupModals(fixture);
 

@@ -4,11 +4,13 @@ import {Language, LinkText, PageUrl} from 'app/text-labels';
 import WorkspaceEditPage, {FIELD as EDIT_FIELD} from 'app/page/workspace-edit-page';
 import {makeWorkspaceName} from 'utils/str-utils';
 import RadioButton from 'app/element/radiobutton';
-import {findWorkspace, waitWhileLoading} from 'utils/test-utils';
-import {waitForDocumentTitle, waitForText} from 'utils/waits-utils';
+import {findOrCreateWorkspace} from 'utils/test-utils';
+import {waitForDocumentTitle, waitForText, waitWhileLoading} from 'utils/waits-utils';
 import ReactSelect from 'app/element/react-select';
 import WorkspaceDataPage from './workspace-data-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
+import {config} from 'resources/workbench-config';
+import {UseFreeCredits} from './workspace-base';
 
 const faker = require('faker/locale/en_US');
 export const PageTitle = 'View Workspace';
@@ -28,18 +30,15 @@ export default class WorkspacesPage extends WorkspaceEditPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    try {
-      await Promise.all([
-        waitForDocumentTitle(this.page, PageTitle),
-        this.page.waitForXPath('//a[text()="Workspaces"]', {visible: true}),
-        this.page.waitForXPath('//h3[normalize-space(text())="Workspaces"]', {visible: true}),  // Texts above Filter By Select
-        waitWhileLoading(this.page),
-      ]);
-      return true;
-    } catch (err) {
-      console.log(`WorkspacesPage isLoaded() encountered ${err}`);
-      return false;
-    }
+    await Promise.all([
+      waitForDocumentTitle(this.page, PageTitle),
+      waitWhileLoading(this.page)
+    ]);
+    await Promise.all([
+      this.page.waitForXPath('//a[text()="Workspaces"]', {visible: true}),
+      this.page.waitForXPath('//h3[normalize-space(text())="Workspaces"]', {visible: true})  // Texts above Filter By Select
+    ]);
+    return true;
   }
 
 
@@ -75,18 +74,19 @@ export default class WorkspacesPage extends WorkspaceEditPage {
    */
   async createWorkspace(
      workspaceName: string,
-     billingAccount: string = 'Use All of Us free credits',
+     cdrVersionName: string = config.defaultCdrVersionName,
+     billingAccount: string = UseFreeCredits,
      reviewRequest: boolean = false): Promise<string[]> {
 
     const editPage = await this.clickCreateNewWorkspace();
     // wait for Billing Account default selected value
-    await waitForText(this.page, 'Use All of Us free credits');
+    await waitForText(this.page, UseFreeCredits);
 
     await (await editPage.getWorkspaceNameTextbox()).type(workspaceName);
     await (await editPage.getWorkspaceNameTextbox()).pressTab();
 
-    // select the default Synthetic Dataset
-    await editPage.selectDataset();
+    // select the chosen CDR Version
+    await editPage.selectCdrVersion(cdrVersionName);
 
     // select Billing Account
     await editPage.selectBillingAccount(billingAccount);
@@ -146,7 +146,7 @@ export default class WorkspacesPage extends WorkspaceEditPage {
    */
   async createNotebook(opts: {workspaceName: string, notebookName: string, lang?: Language}): Promise<WorkspaceAnalysisPage> {
     const {workspaceName, notebookName, lang} = opts;
-    const workspaceCard = await findWorkspace(this.page, {workspaceName, create: true});
+    const workspaceCard = await findOrCreateWorkspace(this.page, {workspaceName, alwaysCreate: true});
     await workspaceCard.clickWorkspaceName();
 
     const dataPage = new WorkspaceDataPage(this.page);

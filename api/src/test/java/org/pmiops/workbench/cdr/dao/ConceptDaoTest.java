@@ -12,7 +12,6 @@ import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.DomainType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.PageRequest;
@@ -105,7 +104,7 @@ public class ConceptDaoTest {
     DbCriteria surveyCriteria =
         cbCriteriaDao.save(
             DbCriteria.builder()
-                .addDomainId(DomainType.SURVEY.toString())
+                .addDomainId(Domain.SURVEY.toString())
                 .addType(CriteriaType.PPI.toString())
                 .addSubtype(CriteriaSubType.SURVEY.toString())
                 .addGroup(true)
@@ -117,7 +116,7 @@ public class ConceptDaoTest {
     DbCriteria questionCriteria =
         cbCriteriaDao.save(
             DbCriteria.builder()
-                .addDomainId(DomainType.SURVEY.toString())
+                .addDomainId(Domain.SURVEY.toString())
                 .addType(CriteriaType.PPI.toString())
                 .addSubtype(CriteriaSubType.QUESTION.toString())
                 .addGroup(true)
@@ -131,7 +130,7 @@ public class ConceptDaoTest {
 
     cbCriteriaDao.save(
         DbCriteria.builder()
-            .addDomainId(DomainType.SURVEY.toString())
+            .addDomainId(Domain.SURVEY.toString())
             .addType(CriteriaType.PPI.toString())
             .addSubtype(CriteriaSubType.ANSWER.toString())
             .addGroup(false)
@@ -193,7 +192,7 @@ public class ConceptDaoTest {
     Pageable page = new PageRequest(0, 100, new Sort(Direction.DESC, "countValue"));
     Slice<DbConcept> concepts =
         conceptDao.findConcepts(
-            "height", ImmutableList.of("S", "C"), Domain.PHYSICALMEASUREMENT, page);
+            "height", ImmutableList.of("S", "C"), Domain.PHYSICAL_MEASUREMENT, page);
     assertThat(concepts).hasSize(0);
   }
 
@@ -201,7 +200,8 @@ public class ConceptDaoTest {
   public void findStandardConceptsPhysicalMeasurementsWithoutKeyword() {
     Pageable page = new PageRequest(0, 100, new Sort(Direction.DESC, "countValue"));
     Slice<DbConcept> concepts =
-        conceptDao.findConcepts(null, ImmutableList.of("S", "C"), Domain.PHYSICALMEASUREMENT, page);
+        conceptDao.findConcepts(
+            null, ImmutableList.of("S", "C"), Domain.PHYSICAL_MEASUREMENT, page);
     assertThat(concepts).hasSize(0);
   }
 
@@ -210,11 +210,11 @@ public class ConceptDaoTest {
     Pageable page = new PageRequest(0, 100, new Sort(Direction.DESC, "countValue"));
     Slice<DbConcept> concepts =
         conceptDao.findConcepts(
-            "Height", ImmutableList.of("S", "C", ""), Domain.PHYSICALMEASUREMENT, page);
+            "Height", ImmutableList.of("S", "C", ""), Domain.PHYSICAL_MEASUREMENT, page);
     assertThat(concepts)
         .containsExactly(
             physicalMeasurement.domainId(
-                DbStorageEnums.domainToDomainId(Domain.PHYSICALMEASUREMENT)));
+                DbStorageEnums.domainToDomainId(Domain.PHYSICAL_MEASUREMENT)));
   }
 
   @Test
@@ -222,11 +222,11 @@ public class ConceptDaoTest {
     Pageable page = new PageRequest(0, 100, new Sort(Direction.DESC, "countValue"));
     Slice<DbConcept> concepts =
         conceptDao.findConcepts(
-            null, ImmutableList.of("S", "C", ""), Domain.PHYSICALMEASUREMENT, page);
+            null, ImmutableList.of("S", "C", ""), Domain.PHYSICAL_MEASUREMENT, page);
     assertThat(concepts)
         .containsExactly(
             physicalMeasurement.domainId(
-                DbStorageEnums.domainToDomainId(Domain.PHYSICALMEASUREMENT)));
+                DbStorageEnums.domainToDomainId(Domain.PHYSICAL_MEASUREMENT)));
   }
 
   @Test

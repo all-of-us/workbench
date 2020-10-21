@@ -5,8 +5,8 @@ import Table from 'app/component/table';
 import Button from 'app/element/button';
 import ClrIconLink from 'app/element/clr-icon-link';
 import Textbox from 'app/element/textbox';
-import {centerPoint, dragDrop, waitWhileLoading} from 'utils/test-utils';
-import {waitForNumericalString} from 'utils/waits-utils';
+import {centerPoint, dragDrop} from 'utils/test-utils';
+import {waitForNumericalString, waitWhileLoading} from 'utils/waits-utils';
 import {LinkText} from 'app/text-labels';
 import {waitUntilChanged} from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
@@ -71,16 +71,12 @@ export default class CohortSearchPage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    try {
-      await Promise.all([
-        this.page.waitForXPath('//*[@id="cohort-search-container"]', {visible: true}),
-        this.page.waitForXPath('//*[@role="button"]/img[@alt="Go back"]', {visible: true}),
-        waitWhileLoading(this.page),
-      ]);
-      return true;
-    } catch (err) {
-      throw new Error(`CohortSearchPage isLoaded() encountered error.\n ${err}`);
-    }
+    await Promise.all([
+      this.page.waitForXPath('//*[@id="cohort-search-container"]', {visible: true}),
+      this.page.waitForXPath('//*[@role="button"]/img[@alt="Go back"]', {visible: true})
+    ]);
+    await waitWhileLoading(this.page);
+    return true;
   }
 
 
@@ -145,6 +141,7 @@ export default class CohortSearchPage extends AuthenticatedPage {
     return new Table(this.page, '//table[@class="p-datatable"]');
   }
 
+  // DO NOT USE. This function fails in CI.
   async searchCondition(searchWord: string): Promise<Table> {
     const resultsTable = this.getConditionSearchResultsTable();
     const exists = await resultsTable.exists();

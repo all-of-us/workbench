@@ -8,7 +8,8 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {Option, Language, LinkText, ResourceCard, WorkspaceAccessLevel} from 'app/text-labels';
 import {config} from 'resources/workbench-config';
 import {makeRandomName} from 'utils/str-utils';
-import {findWorkspace, signIn, signInAs, signOut, waitWhileLoading} from 'utils/test-utils';
+import {createWorkspace, signIn, signInAs, signOut} from 'utils/test-utils';
+import {waitWhileLoading} from 'utils/waits-utils';
 
 jest.setTimeout(20 * 60 * 1000);
 
@@ -30,7 +31,7 @@ describe('Workspace reader Jupyter notebook action tests', () => {
    * - Delete clone notebook.
    */
   test('Workspace reader copy notebook to another workspace', async () => {
-    const workspaceName = await findWorkspace(page, {create: true}).then(card => card.clickWorkspaceName());
+    const workspaceName = await createWorkspace(page).then(card => card.clickWorkspaceName());
 
     const dataPage = new WorkspaceDataPage(page);
     const notebookName = makeRandomName('py');
@@ -58,7 +59,7 @@ describe('Workspace reader Jupyter notebook action tests', () => {
     const newPage = await signInAs(page, config.collaboratorUsername, config.userPassword);
 
     // Create a new Workspace. This is the copy to workspace.
-    const collaboratorWorkspaceName = await findWorkspace(newPage, {create: true}).then(card => card.getWorkspaceName());
+    const collaboratorWorkspaceName = await createWorkspace(newPage).then(card => card.getWorkspaceName());
 
     // Verify shared Workspace Access Level is READER.
     const workspaceCard = await WorkspaceCard.findCard(newPage, workspaceName);

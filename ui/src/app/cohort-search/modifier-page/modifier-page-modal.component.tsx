@@ -15,7 +15,7 @@ import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {serverConfigStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {Criteria, CriteriaType, DomainType, ModifierType, Operator} from 'generated/fetch';
+import {Criteria, CriteriaType, Domain, ModifierType, Operator} from 'generated/fetch';
 
 const styles = reactStyles({
   header: {
@@ -279,7 +279,7 @@ export const ModifierPageModal = withCurrentWorkspace()(
         if (!encountersOptions) {
           // get options for visit modifier from api
           const res = await cohortBuilderApi().findCriteriaBy(
-            +cdrVersionId, DomainType[DomainType.VISIT], CriteriaType[CriteriaType.VISIT]);
+            +cdrVersionId, Domain[Domain.VISIT], CriteriaType[CriteriaType.VISIT]);
           encountersOptions = res.items;
           encountersStore.next(encountersOptions);
         }
@@ -314,7 +314,7 @@ export const ModifierPageModal = withCurrentWorkspace()(
     get formState() {
       const {searchContext: {domain}} = this.props;
       const {formState} = this.state;
-      return domain === DomainType.SURVEY ?
+      return domain === Domain.SURVEY ?
         formState.filter(form => SURVEY_MODIFIERS.indexOf(form.name) > -1) : formState;
     }
 
@@ -397,7 +397,7 @@ export const ModifierPageModal = withCurrentWorkspace()(
 
     get addEncounters() {
       const {searchContext: {domain}} = this.props;
-      return ![DomainType.PHYSICALMEASUREMENT, DomainType.VISIT].includes(domain);
+      return ![Domain.PHYSICALMEASUREMENT, Domain.VISIT].includes(domain);
     }
 
     calculate = async() => {

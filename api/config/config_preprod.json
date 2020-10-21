@@ -107,12 +107,12 @@
     "enableEventDateModifier": false,
     "useNewShibbolethService": true,
     "enableResearchPurposePrompt": false,
-    "enableCohortBuilderV2": false,
+    "enableCohortBuilderV2": true,
     "enableConceptSetSearchV2": false,
     "enableReportingUploadCron": true,
     "enableCOPESurvey": false,
     "enableCustomRuntimes": false,
-    "enableGceAsNotebookRuntimeDefault": false
+    "enableGceAsNotebookRuntimeDefault": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-preprod",

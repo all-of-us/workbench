@@ -17,9 +17,12 @@ import {
 } from 'app/utils/navigation';
 import {DataAccessLevel, Domain} from 'generated';
 import {
+  CdrVersion,
+  CdrVersionListResponse,
   ConfigResponse,
   DataAccessLevel as FetchDataAccessLevel,
   Domain as FetchDomain,
+  Workspace,
 } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -565,6 +568,16 @@ export const useToggle = (): [boolean, Function] => {
   return [state, setState];
 };
 
+export const withAsyncErrorHandling = fp.curry(
+  (handler: (error: Error) => void, fnToTry: (...args: any[]) => Promise<any>) => async(...args) => {
+    try {
+      return await fnToTry(...args);
+    } catch (error) {
+      handler(error);
+    }
+  });
+
+
 // Takes a search string and validates for the most common MySQL use cases.
 // Checks for unbalanced (), unclosed "", trailing + or -, and breaking special characters.
 export function validateInputForMySQL(searchString: string): Array<string> {
@@ -616,4 +629,8 @@ export function validateInputForMySQL(searchString: string): Array<string> {
     inputErrors.add('There is an unclosed " in the search string');
   }
   return Array.from(inputErrors);
+}
+
+export function getCdrVersion(workspace: Workspace, cdrs: CdrVersionListResponse): CdrVersion {
+  return cdrs.items.find(v => v.cdrVersionId === workspace.cdrVersionId);
 }

@@ -5,15 +5,16 @@ import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
 import GoogleLoginPage from 'app/page/google-login';
 import HomePage, {LabelAlias} from 'app/page/home-page';
-import {XPathOptions, ElementType} from 'app/xpath-options';
+import {ElementType, XPathOptions} from 'app/xpath-options';
 import * as fp from 'lodash/fp';
 import {ElementHandle, Page} from 'puppeteer';
-import {waitForText} from 'utils/waits-utils';
+import {waitForText, waitWhileLoading} from 'utils/waits-utils';
 import WorkspaceCard from 'app/component/workspace-card';
 import {WorkspaceAccessLevel} from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
 import Navigation, {NavLink} from 'app/component/navigation';
 import {makeWorkspaceName} from './str-utils';
+import {config} from 'resources/workbench-config';
 
 export async function signIn(page: Page, userId?: string, passwd?: string): Promise<void> {
   const loginPage = new GoogleLoginPage(page);
@@ -49,29 +50,6 @@ export async function signInAs(page: Page, userId: string, passwd: string, opts:
 export async function signOut(page: Page) {
   await Navigation.navMenu(page, NavLink.SIGN_OUT);
   await page.waitFor(1000);
-}
-
-/**
- * <pre>
- * Wait while the page is loading (spinner is spinning and visible). Waiting stops when spinner stops spinning or when timed out.
- * It usually indicates the page is ready for user interaction.
- * </pre>
- */
-export async function waitWhileLoading(page: Page, timeOut: number = 90000): Promise<void> {
-  const notBlankPageSelector = '[data-test-id="sign-in-container"], title:not(empty), div.spinner, svg[viewBox]';
-  const spinElementsSelector = '[style*="running spin"], .spinner:empty, [style*="running rotation"]';
-
-  await Promise.race([
-    // To prevent checking on blank page, wait for elements exist in DOM.
-    page.waitForSelector(notBlankPageSelector),
-    page.waitForSelector(spinElementsSelector),
-  ]);
-
-  // Wait for spinners stop and gone.
-  await page.waitForFunction((css) => {
-    const elements = document.querySelectorAll(css);
-    return elements && elements.length === 0;
-  }, {polling: 'mutation', timeout: timeOut}, spinElementsSelector);
 }
 
 
@@ -201,13 +179,41 @@ export async function performAction(
 
 }
 
+export async function createWorkspace(page: Page, cdrVersionName: string = config.defaultCdrVersionName): Promise<WorkspaceCard> {
+  const workspacesPage = new WorkspacesPage(page);
+  await workspacesPage.load();
+
+  const name = makeWorkspaceName();
+
+  await workspacesPage.createWorkspace(name, cdrVersionName);
+  console.log(`Created workspace "${name}" with CDR Version "${cdrVersionName}"`);
+  await workspacesPage.load();
+
+  const workspaceCard = new WorkspaceCard(page);
+  return workspaceCard.findCard(name);
+}
+
 /**
- * Find an exsting workspace. Create a new workspace if none exists.
- * @param {boolean} create Create a new workspace, regardless any workspace exists or not.
- * @param {string} workspaceName The name of a Workspace to find. If not found and create parameter is true, create new and returns it.
+ * Find a suitable existing workspace, or create one if it does not exist.
+ *
+ * TODO: this function does a lot of different things.  refactor and split up according to use cases.
+ *
+ * If the caller specifies a workspace name and it can be found, return it.
+ *
+ * If the workspace is not found (or no name is given), search for a workspace where the user
+ * has Owner access.
+ *
+ * If no such workspace exists or the caller specifies alwaysCreate, create a new workspace and return it.
+ *
+ * Else choose one of the suitable workspaces randomly.
+ *
+ * @param page
+ * @param opts (all are optional)
+ *  alwaysCreate - create a new workspace, regardless of whether a suitable workspace exists
+ *  workspaceName - return the workspace with this name if it can be found; default behavior otherwise
  */
-export async function findWorkspace(page: Page, opts: {create?: boolean, workspaceName?: string} = {}): Promise<WorkspaceCard> {
-  const {create = false, workspaceName} = opts;
+export async function findOrCreateWorkspace(page: Page, opts: {alwaysCreate?: boolean, workspaceName?: string} = {}): Promise<WorkspaceCard> {
+  const {alwaysCreate = false, workspaceName} = opts;
 
   const workspacesPage = new WorkspacesPage(page);
   await workspacesPage.load();
@@ -222,8 +228,10 @@ export async function findWorkspace(page: Page, opts: {create?: boolean, workspa
     }
   }
 
+  // workspace name not found, or none was specified
+
   const existingWorkspaces = await workspaceCard.getWorkspaceMatchAccessLevel(WorkspaceAccessLevel.Owner);
-  if (create || existingWorkspaces.length === 0) {
+  if (alwaysCreate || existingWorkspaces.length === 0) {
     // Create new workspace
     const name = workspaceName || makeWorkspaceName();
     await workspacesPage.createWorkspace(name);

@@ -61,7 +61,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.CohortChartData;
 import org.pmiops.workbench.model.CohortChartDataListResponse;
 import org.pmiops.workbench.model.CohortReview;
-import org.pmiops.workbench.model.DomainType;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.Filter;
 import org.pmiops.workbench.model.FilterColumns;
@@ -296,7 +296,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   private static ParticipantData expectedCondition1() {
     return new ParticipantData()
-        .domain(DomainType.CONDITION.toString())
+        .domain(Domain.CONDITION.toString())
         .value("1.0")
         .visitType("visit")
         .standardVocabulary("SNOMED")
@@ -321,7 +321,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   private static ParticipantData expectedCondition2() {
     return new ParticipantData()
-        .domain(DomainType.CONDITION.toString())
+        .domain(Domain.CONDITION.toString())
         .value("1.0")
         .visitType("visit")
         .standardVocabulary("SNOMED")
@@ -367,7 +367,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void getParticipantConditionsSorting() {
-    PageFilterRequest testFilter = new PageFilterRequest().domain(DomainType.CONDITION);
+    PageFilterRequest testFilter = new PageFilterRequest().domain(Domain.CONDITION);
 
     // no sort order or column
     ParticipantDataListResponse response =
@@ -399,7 +399,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void getParticipantConditionsCount() {
-    PageFilterRequest testFilter = new PageFilterRequest().domain(DomainType.CONDITION);
+    PageFilterRequest testFilter = new PageFilterRequest().domain(Domain.CONDITION);
 
     // no sort order or column
     ParticipantDataCountResponse response =
@@ -431,9 +431,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 .property(FilterColumns.STANDARD_VOCABULARY)
                 .values(ImmutableList.of("ICD9CM", "SNOMED")));
     PageFilterRequest testFilter =
-        new PageFilterRequest()
-            .domain(DomainType.CONDITION)
-            .filters(new FilterList().items(filters));
+        new PageFilterRequest().domain(Domain.CONDITION).filters(new FilterList().items(filters));
 
     // no sort order or column
     ParticipantDataListResponse response =
@@ -468,7 +466,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     stubMockFirecloudGetWorkspace();
 
     PageFilterRequest testFilter =
-        new PageFilterRequest().domain(DomainType.CONDITION).page(0).pageSize(1);
+        new PageFilterRequest().domain(Domain.CONDITION).page(0).pageSize(1);
 
     // page 1 should have 1 item
     ParticipantDataListResponse response =
@@ -500,7 +498,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   @Test
   public void getParticipantAllEventsPagination() {
     PageFilterRequest testFilter =
-        new PageFilterRequest().domain(DomainType.ALL_EVENTS).page(0).pageSize(1);
+        new PageFilterRequest().domain(Domain.ALL_EVENTS).page(0).pageSize(1);
 
     // page 1 should have 1 item
     ParticipantDataListResponse response =
@@ -532,7 +530,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void getParticipantAllEventsSorting() {
-    PageFilterRequest testFilter = new PageFilterRequest().domain(DomainType.ALL_EVENTS);
+    PageFilterRequest testFilter = new PageFilterRequest().domain(Domain.ALL_EVENTS);
 
     // no sort order or column
     ParticipantDataListResponse response =
@@ -571,7 +569,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 NAME,
                 reviewWithoutEHRData.getCohortReviewId(),
                 PARTICIPANT_ID,
-                DomainType.CONDITION.name(),
+                Domain.CONDITION.name(),
                 null)
             .getBody();
 
@@ -602,7 +600,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
           NAME,
           reviewWithoutEHRData.getCohortReviewId(),
           PARTICIPANT_ID,
-          DomainType.CONDITION.name(),
+          Domain.CONDITION.name(),
           -1);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
@@ -620,7 +618,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
           NAME,
           reviewWithoutEHRData.getCohortReviewId(),
           PARTICIPANT_ID,
-          DomainType.CONDITION.name(),
+          Domain.CONDITION.name(),
           101);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
@@ -634,11 +632,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   public void getCohortChartDataBadLimit() {
     try {
       controller.getCohortChartData(
-          NAMESPACE,
-          NAME,
-          reviewWithoutEHRData.getCohortReviewId(),
-          DomainType.CONDITION.name(),
-          -1);
+          NAMESPACE, NAME, reviewWithoutEHRData.getCohortReviewId(), Domain.CONDITION.name(), -1);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       // Success
@@ -651,11 +645,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   public void getCohortChartDataBadLimitOverHundred() {
     try {
       controller.getCohortChartData(
-          NAMESPACE,
-          NAME,
-          reviewWithoutEHRData.getCohortReviewId(),
-          DomainType.CONDITION.name(),
-          101);
+          NAMESPACE, NAME, reviewWithoutEHRData.getCohortReviewId(), Domain.CONDITION.name(), 101);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       // Success
@@ -669,11 +659,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     CohortChartDataListResponse response =
         controller
             .getCohortChartData(
-                NAMESPACE,
-                NAME,
-                reviewWithoutEHRData.getCohortReviewId(),
-                DomainType.LAB.name(),
-                10)
+                NAMESPACE, NAME, reviewWithoutEHRData.getCohortReviewId(), Domain.LAB.name(), 10)
             .getBody();
     assertEquals(3, response.getItems().size());
     assertEquals(
@@ -689,7 +675,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     CohortChartDataListResponse response =
         controller
             .getCohortChartData(
-                NAMESPACE, NAME, reviewWithEHRData.getCohortReviewId(), DomainType.LAB.name(), 10)
+                NAMESPACE, NAME, reviewWithEHRData.getCohortReviewId(), Domain.LAB.name(), 10)
             .getBody();
     assertEquals(3, response.getItems().size());
     assertEquals(
@@ -705,11 +691,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     CohortChartDataListResponse response =
         controller
             .getCohortChartData(
-                NAMESPACE,
-                NAME,
-                reviewWithoutEHRData.getCohortReviewId(),
-                DomainType.DRUG.name(),
-                10)
+                NAMESPACE, NAME, reviewWithoutEHRData.getCohortReviewId(), Domain.DRUG.name(), 10)
             .getBody();
     assertEquals(1, response.getItems().size());
     assertEquals(
@@ -724,7 +706,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 NAMESPACE,
                 NAME,
                 reviewWithoutEHRData.getCohortReviewId(),
-                DomainType.CONDITION.name(),
+                Domain.CONDITION.name(),
                 10)
             .getBody();
     assertEquals(2, response.getItems().size());
@@ -742,7 +724,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 NAMESPACE,
                 NAME,
                 reviewWithoutEHRData.getCohortReviewId(),
-                DomainType.PROCEDURE.name(),
+                Domain.PROCEDURE.name(),
                 10)
             .getBody();
     assertEquals(3, response.getItems().size());

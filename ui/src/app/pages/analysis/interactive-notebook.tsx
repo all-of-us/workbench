@@ -59,7 +59,8 @@ const styles = reactStyles({
     border: 0
   },
   previewFrame: {
-    width: '100%',
+    // at 100% the frame's scrollbar is hidden under the minimized sidebar.  Subtract the sidebar's width.
+    width: 'calc(100% - 45px)',
     height: 'calc(100% - 40px)',
     position: 'absolute',
     border: 0
@@ -170,7 +171,7 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
     private async runRuntime(onRuntimeReady: Function): Promise<void> {
       await LeoRuntimeInitializer.initialize({
         workspaceNamespace: this.props.urlParams.ns,
-        onStatusUpdate: (status) => this.setState({runtimeStatus: status}),
+        onPoll: (runtime) => this.setState({runtimeStatus: !!runtime ? runtime.status : null}),
         pollAbortSignal: this.pollAborter.signal
       });
       onRuntimeReady();
@@ -263,7 +264,7 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
         case RuntimeStatus.Deleting:
         case RuntimeStatus.Creating:
         case RuntimeStatus.Deleted:
-          return 'Preparing your Jupyter environment. This may take up to 10 minutes.';
+          return 'Preparing your Jupyter environment. This may take up to 5 minutes.';
         case RuntimeStatus.Error:
           return 'Error creating your jupyter environment. Please try clicking' +
             ' the reset notebook server on Workspace About Page.';

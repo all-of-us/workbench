@@ -3,15 +3,16 @@ import Modal from 'app/component/modal';
 import Link from 'app/element/link';
 import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
-import {Option, LinkText, ResourceCard} from 'app/text-labels';
+import {LinkText, Option, ResourceCard} from 'app/text-labels';
 import {buildXPath} from 'app/xpath-builders';
 import {ElementType} from 'app/xpath-options';
 import {Page} from 'puppeteer';
-import {waitWhileLoading} from 'utils/test-utils';
-import {waitForAttributeEquality} from 'utils/waits-utils';
+import {waitForAttributeEquality, waitWhileLoading} from 'utils/waits-utils';
 import SnowmanMenu from 'app/component/snowman-menu';
 import {getPropValue} from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
+
+export const UseFreeCredits = 'Use All of Us free credits';
 
 export enum TabLabels {
   Data = 'Data',
@@ -156,7 +157,6 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
     await waitWhileLoading(this.page);
 
     console.log(`Deleted ${resourceType} "${resourceName}"`);
-    await this.waitForLoad();
     return modalTextContent;
   }
 

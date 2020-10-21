@@ -38,13 +38,15 @@ import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
-import org.pmiops.workbench.dataset.DataSetService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetServiceImpl;
 import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
+import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
+import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
@@ -89,19 +91,27 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
   private static final String WORKSPACE_NAMESPACE = "namespace";
   private static final String WORKSPACE_NAME = "name";
+  private static final String DATASET_NAME = "Arbitrary Dataset v1.0";
 
   private DataSetController controller;
+  private DataSetServiceImpl dataSetServiceImpl;
   @Autowired private BigQueryService bigQueryService;
+  @Autowired private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private CdrVersionService cdrVersionService;
   @Autowired private CohortDao cohortDao;
+  @Autowired private CohortQueryBuilder cohortQueryBuilder;
+  @Autowired private ConceptBigQueryService conceptBigQueryService;
   @Autowired private ConceptSetDao conceptSetDao;
+  @Autowired private DataDictionaryEntryDao dataDictionaryEntryDao;
+  @Autowired private DataSetDao dataSetDao;
+  @Autowired private DataSetMapperImpl dataSetMapper;
   @Autowired private DSLinkingDao dsLinkingDao;
-  @Autowired private DataSetService dataSetService;
   @Autowired private FireCloudService fireCloudService;
   @Autowired private NotebooksService notebooksService;
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
   @Autowired private Provider<DbUser> userProvider;
+  @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   @Qualifier(DatasetConfig.DATASET_PREFIX_CODE)
@@ -135,7 +145,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     DataSetMapperImpl.class,
     DataSetServiceImpl.class,
     TestBigQueryCdrSchemaConfig.class,
-    WorkspaceServiceImpl.class,
+    WorkspaceServiceImpl.class
   })
   @MockBean({
     BillingProjectAuditor.class,
@@ -186,12 +196,27 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   @Before
   public void setUp() {
+    workbenchConfigProvider.get().featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
+    dataSetServiceImpl =
+        new DataSetServiceImpl(
+            bigQueryService,
+            cdrBigQuerySchemaConfigService,
+            cohortDao,
+            conceptBigQueryService,
+            conceptSetDao,
+            cohortQueryBuilder,
+            dataDictionaryEntryDao,
+            dataSetDao,
+            dsLinkingDao,
+            dataSetMapper,
+            CLOCK,
+            workbenchConfigProvider);
     controller =
         spy(
             new DataSetController(
                 bigQueryService,
                 cdrVersionService,
-                dataSetService,
+                dataSetServiceImpl,
                 fireCloudService,
                 notebooksService,
                 userProvider,
@@ -350,6 +375,13 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void testGenerateCodeR() {
+    String expected =
+        String.format(
+            "library(bigrquery)\n"
+                + "\n# This query represents dataset \"%s\" for domain \"condition\" and was generated for %s\n"
+                + "dataset_00000000_condition_sql <- paste(\"",
+            DATASET_NAME, dbCdrVersion.getName());
+
     String code =
         controller
             .generateCode(
@@ -364,12 +396,8 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     PrePackagedConceptSetEnum.NONE))
             .getBody()
             .getCode();
+    assertThat(code).contains(expected);
 
-    assertThat(code)
-        .contains(
-            "library(bigrquery)\n"
-                + "\n# This query represents dataset \"null\" for domain \"condition\"\n"
-                + "dataset_00000000_condition_sql <- paste(\"");
     String query =
         extractRQuery(
             code,
@@ -489,17 +517,18 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   }
 
   private void assertAndExecutePythonQuery(String code, int index, Domain domain) {
-    assertThat(code)
-        .contains(
+    String expected =
+        String.format(
             "import pandas\n"
                 + "import os\n"
                 + "\n"
-                + "# This query represents dataset \"null\" for domain \""
-                + domain.toString().toLowerCase()
-                + "\"\n"
-                + "dataset_00000000_"
-                + domain.toString().toLowerCase()
-                + "_sql =");
+                + "# This query represents dataset \"%s\" for domain \"%s\" and was generated for %s\n"
+                + "dataset_00000000_%s_sql =",
+            DATASET_NAME,
+            domain.toString().toLowerCase(),
+            dbCdrVersion.getName(),
+            domain.toString().toLowerCase());
+    assertThat(code).contains(expected);
 
     String query = extractPythonQuery(code, index);
 
@@ -520,6 +549,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
       boolean allParticipants,
       PrePackagedConceptSetEnum prePackagedConceptSetEnum) {
     return new DataSetRequest()
+        .name(DATASET_NAME)
         .conceptSetIds(
             dbConceptSets.stream().map(DbConceptSet::getConceptSetId).collect(Collectors.toList()))
         .cohortIds(dbCohorts.stream().map(DbCohort::getCohortId).collect(Collectors.toList()))

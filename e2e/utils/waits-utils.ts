@@ -24,7 +24,7 @@ export async function waitForUrl(page: Page, urlSubstr: string): Promise<boolean
     }, {}, urlSubstr);
     return (await jsHandle.jsonValue()) as boolean;
   } catch (e) {
-    console.error(`Wait for URL contains "${urlSubstr}" failed. ${e}`);
+    console.error(`waitForUrl contains "${urlSubstr}" failed. ${e}`);
     throw e;
   }
 }
@@ -42,7 +42,7 @@ export async function waitForDocumentTitle(page: Page, titleSubstr: string): Pro
     }, {timeout: 30000}, titleSubstr);
     return (await jsHandle.jsonValue()) as boolean;
   } catch (e) {
-    console.error(`Wait for document title contains "${titleSubstr}" failed. ${e}`);
+    console.error(`waitForDocumentTitle contains "${titleSubstr}" failed. ${e}`);
     throw e;
   }
 }
@@ -70,7 +70,7 @@ export async function waitForPropertyEquality(page: Page,
   }
 }
 
-export async function waitForNumericalString(page: Page, xpath: string): Promise<string> {
+export async function waitForNumericalString(page: Page, xpath: string, timeOut?: number): Promise<string> {
   await page.waitForXPath(xpath, {visible: true});
 
   const numbers =  await page.waitForFunction( xpathSelector => {
@@ -83,7 +83,7 @@ export async function waitForNumericalString(page: Page, xpath: string): Promise
       }
     }
     return false;
-  }, {}, xpath);
+  }, {timeout: timeOut}, xpath);
 
   return (await numbers.jsonValue()).toString();
 }
@@ -136,7 +136,7 @@ export async function waitForVisible(page: Page, cssSelector: string): Promise<b
     await jsHandle.jsonValue();
     return true;
   } catch (e) {
-    console.error(`Wait for element matching CSS="${cssSelector}" visible failed. ${e}`);
+    console.error(`waitForVisible CSS="${cssSelector}" failed. ${e}`);
     throw e;
   }
 }
@@ -155,7 +155,7 @@ export async function waitForHidden(page: Page, cssSelector: string): Promise<bo
     }, {}, cssSelector);
     return (await jsHandle.jsonValue()) as boolean;
   } catch (e) {
-    console.error(`Wait for element matching CSS="${cssSelector}" hidden. ${e}`);
+    console.error(`waitForHidden CSS="${cssSelector}" failed. ${e}`);
     throw e;
   }
 }
@@ -225,7 +225,8 @@ export async function waitForNumberElements(page: Page,
  */
 export async function waitForText(page: Page,
                                   textSubstr: string,
-                                  selector: {xpath?: string, css?: string} = {css: 'body'}): Promise<boolean> {
+                                  selector: {xpath?: string, css?: string} = {css: 'body'},
+                                  timeOut?: number): Promise<boolean> {
   if (selector.css !== undefined) {
     try {
          // wait for visible then compare texts
@@ -233,7 +234,7 @@ export async function waitForText(page: Page,
       const jsHandle = await page.waitForFunction((css, expText) => {
         const element = document.querySelector(css);
         return element && element.textContent.includes(expText);
-      }, {}, selector.css, textSubstr);
+      }, {timeout: timeOut}, selector.css, textSubstr);
       return (await jsHandle.jsonValue()) as boolean;
     } catch (e) {
       console.error(`Wait for element matching CSS=${selector.css} contains "${textSubstr}" text failed. ${e}`);
@@ -245,13 +246,34 @@ export async function waitForText(page: Page,
       const jsHandle = await page.waitForFunction((xpath, expText) => {
         const element = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
         return element && element.textContent.includes(expText);
-      }, {}, selector.xpath, textSubstr);
+      }, {timeout: timeOut}, selector.xpath, textSubstr);
       return (await jsHandle.jsonValue()) as boolean;
     } catch (e) {
       console.error(`Wait for element matching Xpath=${selector.xpath} contains "${textSubstr}" text failed. ${e}`);
       throw e;
     }
   }
+}
 
+/**
+ * <pre>
+ * Wait while the page is loading (spinner is spinning and visible). Waiting stops when spinner stops spinning or when timed out.
+ * It usually indicates the page is ready for user interaction.
+ * </pre>
+ */
+export async function waitWhileLoading(page: Page, timeOut: number = 90000): Promise<void> {
+  const notBlankPageSelector = '[data-test-id="sign-in-container"], title:not(empty), div.spinner, svg[viewBox]';
+  const spinElementsSelector = '[style*="running spin"], .spinner:empty, [style*="running rotation"]';
 
+  await Promise.race([
+    // To prevent checking on blank page, wait for elements exist in DOM.
+    page.waitForSelector(notBlankPageSelector),
+    page.waitForSelector(spinElementsSelector),
+  ]);
+
+  // Wait for spinners stop and gone.
+  await page.waitForFunction((css) => {
+    const elements = document.querySelectorAll(css);
+    return elements && elements.length === 0;
+  }, {polling: 'mutation', timeout: timeOut}, spinElementsSelector);
 }

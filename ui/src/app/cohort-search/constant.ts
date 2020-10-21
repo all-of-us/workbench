@@ -1,17 +1,17 @@
-import {AttrName, DomainType, ModifierType, Operator} from 'generated/fetch';
+import {AttrName, Domain, ModifierType, Operator} from 'generated/fetch';
 
 export const PROGRAM_TYPES = [
-  DomainType[DomainType.PERSON],
-  DomainType[DomainType.SURVEY],
-  DomainType[DomainType.PHYSICALMEASUREMENT]
+  Domain[Domain.PERSON],
+  Domain[Domain.SURVEY],
+  Domain[Domain.PHYSICALMEASUREMENT]
 ];
 
 export const DOMAIN_TYPES = [
-  DomainType[DomainType.CONDITION],
-  DomainType[DomainType.PROCEDURE],
-  DomainType[DomainType.DRUG],
-  DomainType[DomainType.MEASUREMENT],
-  DomainType[DomainType.VISIT]
+  Domain[Domain.CONDITION],
+  Domain[Domain.PROCEDURE],
+  Domain[Domain.DRUG],
+  Domain[Domain.MEASUREMENT],
+  Domain[Domain.VISIT]
 ];
 
 export const PM_UNITS = {

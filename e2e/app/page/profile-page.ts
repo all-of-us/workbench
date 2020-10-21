@@ -1,8 +1,7 @@
 import {Page} from 'puppeteer';
 import Textbox from 'app/element/textbox';
 import AuthenticatedPage from 'app/page/authenticated-page';
-import {waitWhileLoading} from 'utils/test-utils';
-import {waitForDocumentTitle, waitForUrl} from 'utils/waits-utils';
+import {waitForDocumentTitle, waitForUrl, waitWhileLoading} from 'utils/waits-utils';
 import Button from 'app/element/button';
 import Textarea from 'app/element/textarea';
 
@@ -43,17 +42,12 @@ export default class ProfilePage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    try {
-      await Promise.all([
-        waitForUrl(this.page, '/profile'),
-        waitForDocumentTitle(this.page, PageTitle),
-        waitWhileLoading(this.page),
-      ]);
-      return true;
-    } catch (err) {
-      console.log(`ProfilePage isLoaded() encountered ${err}`);
-      return false;
-    }
+    await Promise.all([
+      waitForUrl(this.page, '/profile'),
+      waitForDocumentTitle(this.page, PageTitle),
+      waitWhileLoading(this.page)
+    ]);
+    return true;
   }
 
   async getFirstNameInput(): Promise<Textbox> {

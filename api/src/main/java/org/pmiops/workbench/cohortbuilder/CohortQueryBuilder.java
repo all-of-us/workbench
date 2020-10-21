@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AgeType;
-import org.pmiops.workbench.model.DomainType;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -134,7 +134,7 @@ public class CohortQueryBuilder {
    * ParticipantCriteria}.
    */
   public QueryJobConfiguration buildDomainChartInfoCounterQuery(
-      ParticipantCriteria participantCriteria, DomainType domainType, int chartLimit) {
+      ParticipantCriteria participantCriteria, Domain domain, int chartLimit) {
     StringBuilder queryBuilder = new StringBuilder(ID_SQL_TEMPLATE);
     Map<String, QueryParameterValue> params = new HashMap<>();
     addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, queryBuilder, params);
@@ -144,7 +144,7 @@ public class CohortQueryBuilder {
         new StringBuilder(DOMAIN_CHART_INFO_SQL_TEMPLATE.replace("${innerSql}", searchPersonSql));
     String paramName =
         QueryParameterUtil.addQueryParameterValue(
-            params, QueryParameterValue.string(domainType.name()));
+            params, QueryParameterValue.string(domain.name()));
     String endSqlTemplate =
         DOMAIN_CHART_INFO_SQL_GROUP_BY
             .replace("${limit}", Integer.toString(chartLimit))

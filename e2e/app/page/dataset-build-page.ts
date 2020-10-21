@@ -2,13 +2,12 @@ import Table from 'app/component/table';
 import Button from 'app/element/button';
 import Checkbox from 'app/element/checkbox';
 import ClrIconLink from 'app/element/clr-icon-link';
-import {waitWhileLoading} from 'utils/test-utils';
-import {waitForDocumentTitle} from 'utils/waits-utils';
+import {waitForDocumentTitle, waitWhileLoading} from 'utils/waits-utils';
 import {buildXPath} from 'app/xpath-builders';
 import {ElementType} from 'app/xpath-options';
 import AuthenticatedPage from './authenticated-page';
 import CohortBuildPage from './cohort-build-page';
-import ConceptsetSearchPage from './conceptset-search-page';
+import ConceptSetSearchPage from './conceptset-search-page';
 import DatasetSaveModal from './dataset-save-modal';
 
 const PageTitle = 'Dataset Page';
@@ -22,16 +21,11 @@ enum LabelAlias {
 export default class DatasetBuildPage extends AuthenticatedPage {
 
   async isLoaded(): Promise<boolean> {
-    try {
-      await Promise.all([
-        waitForDocumentTitle(this.page, PageTitle),
-        waitWhileLoading(this.page),
-      ]);
-      return true;
-    } catch (e) {
-      console.log(`DatasetBuildPage isLoaded() encountered ${e}`);
-      return false;
-    }
+    await Promise.all([
+      waitForDocumentTitle(this.page, PageTitle),
+      waitWhileLoading(this.page),
+    ]);
+    return true;
   }
 
   async clickAddCohortsButton(): Promise<CohortBuildPage> {
@@ -61,12 +55,12 @@ export default class DatasetBuildPage extends AuthenticatedPage {
   /**
    * Click Add Concept Sets button, opened the Concept Sets page.
    */
-  async clickAddConceptSetsButton(): Promise<ConceptsetSearchPage> {
+  async clickAddConceptSetsButton(): Promise<ConceptSetSearchPage> {
     const addConceptSetsButton = await ClrIconLink.findByName(this.page, {name: LabelAlias.SelectConceptSets, ancestorLevel: 3, iconShape: 'plus-circle'});
     await addConceptSetsButton.clickAndWait();
-    const conceptPage = new ConceptsetSearchPage(this.page);
-    await conceptPage.waitForLoad();
-    return conceptPage;
+    const conceptSetSearchPage = new ConceptSetSearchPage(this.page);
+    await conceptSetSearchPage.waitForLoad();
+    return conceptSetSearchPage;
   }
 
   /**

@@ -5,6 +5,7 @@ import {signIn, performActions} from 'utils/test-utils';
 import Button from 'app/element/button';
 import * as testData from 'resources/data/workspace-data';
 import {makeWorkspaceName} from 'utils/str-utils';
+import {UseFreeCredits} from 'app/page/workspace-base';
 
 describe('Creating new workspaces', () => {
 
@@ -38,11 +39,11 @@ describe('Creating new workspaces', () => {
     // fill out new workspace name
     const newWorkspaceName = await workspacesPage.fillOutWorkspaceName();
 
-    // select the default Synthetic Dataset
-    await workspacesPage.selectDataset();
+    // select the default CDR Version
+    await workspacesPage.selectCdrVersion();
 
     // select Billing Account
-    await workspacesPage.selectBillingAccount('Use All of Us free credits');
+    await workspacesPage.selectBillingAccount(UseFreeCredits);
 
     // fill out question #1 - What is the primary purpose of your project?
     await workspacesPage.expandResearchPurposeGroup(true); // First, expand accordion: "Research purpose"

@@ -3,7 +3,6 @@ package org.pmiops.workbench.test;
 import java.util.Arrays;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.ModifierType;
 import org.pmiops.workbench.model.Operator;
@@ -25,11 +24,11 @@ public class SearchRequests {
 
   public static SearchRequest genderRequest(long... conceptIds) {
     SearchGroupItem searchGroupItem =
-        new SearchGroupItem().id("id1").type(DomainType.PERSON.toString());
+        new SearchGroupItem().id("id1").type(Domain.PERSON.toString());
     for (long conceptId : conceptIds) {
       SearchParameter parameter =
           new SearchParameter()
-              .domain(DomainType.PERSON.toString())
+              .domain(Domain.PERSON.toString())
               .type(CriteriaType.GENDER.toString())
               .conceptId(conceptId)
               .group(false)
@@ -78,7 +77,7 @@ public class SearchRequests {
   public static SearchRequest temporalRequest() {
     SearchParameter icd9 =
         new SearchParameter()
-            .domain(DomainType.CONDITION.toString())
+            .domain(Domain.CONDITION.toString())
             .type(CriteriaType.ICD9CM.toString())
             .group(false)
             .conceptId(1L)
@@ -94,7 +93,7 @@ public class SearchRequests {
             .ancestorData(false);
     SearchParameter snomed =
         new SearchParameter()
-            .domain(DomainType.CONDITION.toString())
+            .domain(Domain.CONDITION.toString())
             .type(CriteriaType.SNOMED.name())
             .group(false)
             .conceptId(4L)
@@ -103,17 +102,17 @@ public class SearchRequests {
 
     SearchGroupItem icd9SGI =
         new SearchGroupItem()
-            .type(DomainType.CONDITION.toString())
+            .type(Domain.CONDITION.toString())
             .addSearchParametersItem(icd9)
             .temporalGroup(0);
     SearchGroupItem icd10SGI =
         new SearchGroupItem()
-            .type(DomainType.CONDITION.toString())
+            .type(Domain.CONDITION.toString())
             .addSearchParametersItem(icd10)
             .temporalGroup(1);
     SearchGroupItem snomedSGI =
         new SearchGroupItem()
-            .type(DomainType.CONDITION.toString())
+            .type(Domain.CONDITION.toString())
             .addSearchParametersItem(snomed)
             .temporalGroup(0);
 
@@ -142,17 +141,17 @@ public class SearchRequests {
 
   public static SearchRequest icd9Codes() {
     return codesRequest(
-        DomainType.CONDITION.toString(), CriteriaType.ICD9CM.toString(), true, ICD9_GROUP_CODE);
+        Domain.CONDITION.toString(), CriteriaType.ICD9CM.toString(), true, ICD9_GROUP_CODE);
   }
 
   public static SearchRequest icd9CodesChildren() {
     return codesRequest(
-        DomainType.CONDITION.toString(), CriteriaType.ICD9CM.toString(), false, ICD9_GROUP_CODE);
+        Domain.CONDITION.toString(), CriteriaType.ICD9CM.toString(), false, ICD9_GROUP_CODE);
   }
 
   public static SearchRequest icd9CodeWithModifiers() {
     return modifierRequest(
-        DomainType.CONDITION.toString(),
+        Domain.CONDITION.toString(),
         CriteriaType.ICD9CM.toString(),
         ICD9_GROUP_CODE,
         new Modifier()

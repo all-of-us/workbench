@@ -13,7 +13,7 @@ public enum BigQueryTableInfo {
   PERSON(Domain.PERSON, "person"),
   OBSERVATION(Domain.OBSERVATION, "observation"),
   VISIT(Domain.VISIT, "visit_occurrence"),
-  PHYSICALMEASUREMENT(Domain.PHYSICALMEASUREMENT, "measurement");
+  PHYSICALMEASUREMENT(Domain.PHYSICAL_MEASUREMENT, "measurement");
 
   private final Domain domain;
   private final String tableName;

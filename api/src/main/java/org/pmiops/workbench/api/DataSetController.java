@@ -34,6 +34,7 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
@@ -41,6 +42,8 @@ import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetCodeResponse;
 import org.pmiops.workbench.model.DataSetExportRequest;
+import org.pmiops.workbench.model.DataSetExportRequest.GenomicsAnalysisToolEnum;
+import org.pmiops.workbench.model.DataSetExportRequest.GenomicsDataTypeEnum;
 import org.pmiops.workbench.model.DataSetListResponse;
 import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetPreviewResponse;
@@ -169,7 +172,11 @@ public class DataSetController implements DataSetApiDelegate {
     final ImmutableList<String> codeCells =
         ImmutableList.copyOf(
             dataSetService.generateCodeCells(
-                kernelTypeEnum, dataSetRequest.getName(), qualifier, bigQueryJobConfigsByDomain));
+                kernelTypeEnum,
+                dataSetRequest.getName(),
+                dbWorkspace.getCdrVersion().getName(),
+                qualifier,
+                bigQueryJobConfigsByDomain));
     final String generatedCode = String.join("\n\n", codeCells);
 
     return ResponseEntity.ok(
@@ -181,7 +188,6 @@ public class DataSetController implements DataSetApiDelegate {
       String workspaceNamespace, String workspaceId, DataSetPreviewRequest dataSetPreviewRequest) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    DataSetPreviewResponse previewQueryResponse = new DataSetPreviewResponse();
     List<DataSetPreviewValueList> valuePreviewList = new ArrayList<>();
 
     QueryJobConfiguration previewBigQueryJobConfig =
@@ -213,10 +219,10 @@ public class DataSetController implements DataSetApiDelegate {
           valuePreviewList,
           Comparator.comparing(item -> dataSetPreviewRequest.getValues().indexOf(item.getValue())));
     }
-
-    previewQueryResponse.setDomain(dataSetPreviewRequest.getDomain());
-    previewQueryResponse.setValues(valuePreviewList);
-    return ResponseEntity.ok(previewQueryResponse);
+    return ResponseEntity.ok(
+        new DataSetPreviewResponse()
+            .domain(dataSetPreviewRequest.getDomain())
+            .values(valuePreviewList));
   }
 
   @VisibleForTesting
@@ -333,8 +339,30 @@ public class DataSetController implements DataSetApiDelegate {
         dataSetService.generateCodeCells(
             dataSetExportRequest.getKernelType(),
             dataSetExportRequest.getDataSetRequest().getName(),
+            dbWorkspace.getCdrVersion().getName(),
             qualifier,
             queriesByDomain);
+
+    if (GenomicsDataTypeEnum.MICROARRAY.equals(dataSetExportRequest.getGenomicsDataType())) {
+      if (dbWorkspace.getCdrVersion().getMicroarrayBigqueryDataset() == null) {
+        throw new FailedPreconditionException(
+            "The workspace CDR version does not have microarray data");
+      }
+      if (!dataSetExportRequest.getKernelType().equals(KernelTypeEnum.PYTHON)) {
+        throw new BadRequestException("Genomics code generation is only supported in Python");
+      }
+
+      queriesAsStrings.addAll(
+          dataSetService.generateMicroarrayCohortExtractCodeCells(
+              dbWorkspace, qualifier, queriesByDomain));
+
+      if (GenomicsAnalysisToolEnum.PLINK.equals(dataSetExportRequest.getGenomicsAnalysisTool())) {
+        queriesAsStrings.addAll(dataSetService.generatePlinkDemoCode(qualifier));
+      } else if (GenomicsAnalysisToolEnum.HAIL.equals(
+          dataSetExportRequest.getGenomicsAnalysisTool())) {
+        queriesAsStrings.addAll(dataSetService.generateHailDemoCode(qualifier));
+      }
+    }
 
     if (dataSetExportRequest.getNewNotebook()) {
       notebookFile =

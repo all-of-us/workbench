@@ -32,8 +32,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EgressEventServiceImpl implements EgressEventService {
+
   private static final Logger logger = Logger.getLogger(EgressEventServiceImpl.class.getName());
-  private static final Pattern VM_NAME_PATTERN = Pattern.compile("all-of-us-(?<userid>\\d+)-m");
+  private static final Pattern VM_PREFIX_PATTERN = Pattern.compile("all-of-us-(?<userid>\\d+)");
   private static final String USER_ID_GROUP_NAME = "userid";
   private final Clock clock;
   private final EgressEventAuditor egressEventAuditor;
@@ -65,8 +66,8 @@ public class EgressEventServiceImpl implements EgressEventService {
   public void handleEvent(EgressEvent event) {
     logger.warning(
         String.format(
-            "Received an egress event from project %s (%.2fMiB, VM %s)",
-            event.getProjectName(), event.getEgressMib(), event.getVmName()));
+            "Received an egress event from project %s (%.2fMiB, VM prefix %s)",
+            event.getProjectName(), event.getEgressMib(), event.getVmPrefix()));
     this.egressEventAuditor.fireEgressEvent(event);
     this.createEgressEventAlert(event);
   }
@@ -112,7 +113,7 @@ public class EgressEventServiceImpl implements EgressEventService {
 
     // Set the alias, which is Opsgenie's string key for alert de-duplication. See
     // https://docs.opsgenie.com/docs/alert-deduplication
-    request.setAlias(egressEvent.getProjectName() + " | " + egressEvent.getVmName());
+    request.setAlias(egressEvent.getProjectName() + " | " + egressEvent.getVmPrefix());
     return request;
   }
 
@@ -128,7 +129,7 @@ public class EgressEventServiceImpl implements EgressEventService {
             .orElse("Creator not Found");
 
     final Optional<DbUser> executor =
-        vmNameToUserDatabaseId(egressEvent.getVmName()).flatMap(userService::getByDatabaseId);
+        vmNameToUserDatabaseId(egressEvent.getVmPrefix()).flatMap(userService::getByDatabaseId);
 
     final String executorDetails =
         executor.map(this::getAdminDescription).orElse("Executing User not Found");
@@ -143,13 +144,18 @@ public class EgressEventServiceImpl implements EgressEventService {
             workspace.getName(), getAgeInDays(Instant.ofEpochMilli(workspace.getCreationTime())))
         + String.format(
             "GCP Billing Project/Firecloud Namespace: %s\n", egressEvent.getProjectName())
-        + String.format("Notebook Jupyter VM name: %s\n", egressEvent.getVmName())
+        + String.format("Notebook server VM prefix: %s\n", egressEvent.getVmPrefix())
         + String.format("MySQL workspace_id: %d\n", adminWorkspace.getWorkspaceDatabaseId())
         + String.format(
-            "Egress detected: %.2f MiB in %d secs\n\n",
+            "Total egress detected: %.2f MiB in %d secs\n",
             egressEvent.getEgressMib(), egressEvent.getTimeWindowDuration())
         + String.format(
-            "Runtime Name: %s\n", executor.map(DbUser::getRuntimeName).orElse("unknown"))
+            "egress breakdown: GCE - %.2f MiB, Dataproc - %.2fMiB via master, %.2fMiB via workers\n\nn",
+            egressEvent.getGceEgressMib(),
+            egressEvent.getDataprocMasterEgressMib(),
+            egressEvent.getDataprocWorkerEgressMib())
+        + String.format(
+            "Runtime Prefix: %s\n", executor.map(DbUser::getRuntimeName).orElse("unknown"))
         + String.format("User Running Notebook: %s\n\n", executorDetails)
         + String.format("Workspace Creator: %s\n\n", creatorDetails)
         + String.format("Collaborators: \n%s\n", collaboratorDetails)
@@ -192,7 +198,7 @@ public class EgressEventServiceImpl implements EgressEventService {
     return Duration.between(creationTime, clock.instant()).toDays();
   }
 
-  private Optional<Long> vmNameToUserDatabaseId(String vmName) {
-    return Matchers.getGroup(VM_NAME_PATTERN, vmName, USER_ID_GROUP_NAME).map(Long::parseLong);
+  private Optional<Long> vmNameToUserDatabaseId(String vmPrefix) {
+    return Matchers.getGroup(VM_PREFIX_PATTERN, vmPrefix, USER_ID_GROUP_NAME).map(Long::parseLong);
   }
 }

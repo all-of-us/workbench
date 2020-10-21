@@ -16,12 +16,11 @@ import {ResetRuntimeButton} from 'app/pages/analysis/reset-runtime-button';
 import {ResearchPurpose} from 'app/pages/workspace/research-purpose';
 import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withCdrVersions, withUrlParams, withUserProfile} from 'app/utils';
+import {getCdrVersion, reactStyles, ReactWrapperBase, withCdrVersions, withUrlParams, withUserProfile} from 'app/utils';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {
   Authority,
   BillingAccountType,
-  CdrVersion,
   CdrVersionListResponse,
   Profile,
   UserRole,
@@ -36,7 +35,6 @@ interface WorkspaceProps {
 
 interface WorkspaceState {
   sharing: boolean;
-  cdrVersion: CdrVersion;
   workspace: WorkspaceData;
   workspaceFreeTierUsage: number;
   workspaceUserRoles: UserRole[];
@@ -104,7 +102,6 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
     super(props);
     this.state = {
       sharing: false,
-      cdrVersion: undefined,
       workspace: undefined,
       workspaceFreeTierUsage: undefined,
       workspaceUserRoles: [],
@@ -117,8 +114,6 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
     await this.reloadWorkspace(currentWorkspaceStore.getValue());
     this.loadFreeTierUsage();
     this.loadUserRoles();
-    const cdrs = this.props.cdrVersionListResponse.items;
-    this.setState({cdrVersion: cdrs.find(v => v.cdrVersionId === this.state.workspace.cdrVersionId)});
   }
 
   async loadFreeTierUsage() {
@@ -204,8 +199,8 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
   }
 
   render() {
-    const {profileState: {profile}} = this.props;
-    const {cdrVersion, workspace, workspaceUserRoles, sharing, publishing} = this.state;
+    const {profileState: {profile}, cdrVersionListResponse} = this.props;
+    const {workspace, workspaceUserRoles, sharing, publishing} = this.state;
     return <div style={styles.mainPage}>
       <FlexColumn style={{margin: '1rem', width: '98%'}}>
         <ResearchPurpose data-test-id='researchPurpose'/>
@@ -244,7 +239,9 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
           </h3>
           <div style={styles.infoBox} data-test-id='cdrVersion'>
             <div style={styles.infoBoxHeader}>Dataset</div>
-            <div style={{fontSize: '0.5rem'}}>{cdrVersion ? cdrVersion.name : 'Loading...'}</div>
+            <div style={{fontSize: '0.5rem'}}>
+              {workspace ? getCdrVersion(workspace, cdrVersionListResponse).name : 'Loading...'}
+            </div>
           </div>
           <div style={styles.infoBox} data-test-id='creationDate'>
             <div style={styles.infoBoxHeader}>Creation Date</div>

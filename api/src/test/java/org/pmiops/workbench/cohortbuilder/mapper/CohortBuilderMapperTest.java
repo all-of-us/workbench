@@ -5,6 +5,7 @@ import static com.google.common.truth.Truth.assertThat;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.model.DbAgeTypeCount;
+import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cdr.model.DbDataFilter;
@@ -15,7 +16,7 @@ import org.pmiops.workbench.model.CriteriaAttribute;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DataFilter;
-import org.pmiops.workbench.model.DomainType;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.SurveyVersion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -47,7 +48,7 @@ public class CohortBuilderMapperTest {
             .parentCount(100L)
             .childCount(0L)
             .conceptId(12345L)
-            .domainId(DomainType.CONDITION.toString())
+            .domainId(Domain.CONDITION.toString())
             .hasAttributes(true)
             .path("path")
             .value("value")
@@ -70,7 +71,7 @@ public class CohortBuilderMapperTest {
                     .addParentCount(100L)
                     .addChildCount(null)
                     .addConceptId("12345")
-                    .addDomainId(DomainType.CONDITION.toString())
+                    .addDomainId(Domain.CONDITION.toString())
                     .addAttribute(true)
                     .addPath("path")
                     .addSynonyms("syn")
@@ -117,6 +118,29 @@ public class CohortBuilderMapperTest {
                     .addEstCount("2")
                     .build()))
         .isEqualTo(expectedCriteriaAttribute);
+  }
+
+  @Test
+  public void dbModelToClientDbConcept() {
+    DbConcept dbConcept =
+        new DbConcept()
+            .conceptName("name")
+            .conceptCode("code")
+            .vocabularyId("vocab")
+            .standardConcept("")
+            .sourceCountValue(100L)
+            .conceptId(12345L);
+    assertThat(cohortBuilderMapper.dbModelToClient(dbConcept, false, 100L))
+        .isEqualTo(
+            new Criteria()
+                .name("name")
+                .code("code")
+                .type("vocab")
+                .conceptId(12345L)
+                .isStandard(false)
+                .selectable(true)
+                .parentCount(0L)
+                .childCount(100L));
   }
 
   @Test

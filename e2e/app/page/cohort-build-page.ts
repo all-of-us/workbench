@@ -5,8 +5,7 @@ import Button from 'app/element/button';
 import ClrIconLink from 'app/element/clr-icon-link';
 import {ElementType} from 'app/xpath-options';
 import {makeRandomName} from 'utils/str-utils';
-import {waitWhileLoading} from 'utils/test-utils';
-import {waitForDocumentTitle, waitForNumericalString} from 'utils/waits-utils';
+import {waitForDocumentTitle, waitForNumericalString, waitWhileLoading} from 'utils/waits-utils';
 import {buildXPath} from 'app/xpath-builders';
 import {LinkText} from 'app/text-labels';
 import AuthenticatedPage from './authenticated-page';
@@ -28,16 +27,11 @@ export default class CohortBuildPage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    try {
-      await Promise.all([
-        waitForDocumentTitle(this.page, PageTitle),
-        waitWhileLoading(this.page),
-      ]);
-      return true;
-    } catch (e) {
-      console.log(`CohortBuildPage isLoaded() encountered ${e}`);
-      return false;
-    }
+    await Promise.all([
+      waitForDocumentTitle(this.page, PageTitle),
+      waitWhileLoading(this.page),
+    ]);
+    return true;
   }
 
   /**
@@ -48,8 +42,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
     await createCohortButton.waitUntilEnabled();
     await createCohortButton.click(); // Click dropdown trigger to open menu
     const menu =  new TieredMenu(this.page);
-    await menu.clickMenuItem(['Save']);
-    return waitWhileLoading(this.page);
+    await menu.select(['Save']);
   }
 
   async saveCohortAs(cohortName?: string, description?: string): Promise<string> {
@@ -114,7 +107,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
    * @return {string} Total Count.
    */
   async getTotalCount(): Promise<string> {
-    return waitForNumericalString(this.page, FieldSelector.TotalCount);
+    return waitForNumericalString(this.page, FieldSelector.TotalCount, 60000);
   }
 
   getSaveCohortButton(): Button {

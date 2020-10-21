@@ -445,7 +445,7 @@ set d.all_concept_count = c.all_concept_count
 from (select c.domain_id as domain_id, COUNT(DISTINCT c.concept_id) as all_concept_count
 from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\` c
 join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d2
-on d2.domain_enum = c.domain_id and c.is_selectable = 1
+on d2.domain_enum = c.domain_id and c.is_selectable = 1 and d2.domain_enum != 'PHYSICAL_MEASUREMENT'
 group by c.domain_id) c
 where d.domain_enum = c.domain_id"
 
@@ -455,19 +455,19 @@ set d.standard_concept_count = c.standard_concept_count
 from (select c.domain_id as domain_id, COUNT(DISTINCT c.concept_id) as standard_concept_count
 from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\` c
 join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d2
-on d2.domain_enum = c.domain_id and c.is_standard = 1 and c.is_selectable = 1
+on d2.domain_enum = c.domain_id and c.is_standard = 1 and c.is_selectable = 1  and d2.domain_enum != 'PHYSICAL_MEASUREMENT'
 group by c.domain_id) c
 where d.domain_enum = c.domain_id"
 
 # Set all_concept_count on domain_info for Physical Measurements
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d
-set d.all_concept_count = c.all_concept_count
-from (SELECT count(distinct concept_id) as all_concept_count
-FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-WHERE type = 'PPI'
-AND domain_id = 'PHYSICAL_MEASUREMENT'
-AND is_selectable = 1) c
+set d.all_concept_count = c.all_concept_count, d.standard_concept_count = c.standard_concept_count from
+(SELECT count(distinct concept_id) as all_concept_count, SUM(CASE WHEN standard_concept IN ('S', 'C') THEN 1 ELSE 0 END) as standard_concept_count
+FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
+WHERE vocabulary_id = 'PPI'
+AND domain_id = 'Measurement'
+AND concept_class_id = 'Clinical Observation') c
 where d.domain = 10"
 
 # Set participant counts for Condition domain

@@ -8,5 +8,5 @@ import org.pmiops.workbench.model.ReportingSnapshot;
  * BigQuery insertion path.
  */
 public interface ReportingUploadService {
-  ReportingJobResult uploadSnapshot(ReportingSnapshot reportingSnapshot);
+  void uploadSnapshot(ReportingSnapshot reportingSnapshot);
 }

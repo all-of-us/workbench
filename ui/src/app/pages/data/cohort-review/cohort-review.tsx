@@ -10,7 +10,7 @@ import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagge
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
-import {Cohort, CriteriaType, DomainType, ReviewStatus, SortOrder, WorkspaceAccessLevel} from 'generated/fetch';
+import {Cohort, CriteriaType, Domain, ReviewStatus, SortOrder, WorkspaceAccessLevel} from 'generated/fetch';
 
 const styles = reactStyles({
   title: {
@@ -56,7 +56,7 @@ export class CohortReview extends React.Component<{}, State> {
     cohortsApi().getCohort(ns, wsid, cid).then(cohort => this.setState({cohort}));
     if (!visitsFilterOptions.getValue()) {
       cohortBuilderApi().findCriteriaBy(
-        +cdrVersionId, DomainType[DomainType.VISIT], CriteriaType[CriteriaType.VISIT]
+        +cdrVersionId, Domain[Domain.VISIT], CriteriaType[CriteriaType.VISIT]
       ).then(response => {
         visitsFilterOptions.next([
           {value: null, label: 'Any'},

@@ -1,11 +1,11 @@
 import {shallow} from 'enzyme';
 import * as React from 'react';
 
-import {DomainType} from 'generated/fetch';
+import {Domain} from 'generated/fetch';
 import {CBModal} from './modal.component';
 
 const searchContextStub = {
-  domain: DomainType.CONDITION,
+  domain: Domain.CONDITION,
   item: {
     searchParameters: []
   }

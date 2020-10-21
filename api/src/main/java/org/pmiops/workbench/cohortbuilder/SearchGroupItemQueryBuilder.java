@@ -27,7 +27,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.CriteriaType;
-import org.pmiops.workbench.model.DomainType;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.ModifierType;
 import org.pmiops.workbench.model.Operator;
@@ -193,7 +193,7 @@ public final class SearchGroupItemQueryBuilder {
     String domain = searchGroupItem.getType();
 
     // When building sql for demographics - we query against the person table
-    if (DomainType.PERSON.toString().equals(domain)) {
+    if (Domain.PERSON.toString().equals(domain)) {
       return buildDemoSql(queryParams, searchGroupItem);
     }
     // Otherwise build sql against flat denormalized search table
@@ -458,7 +458,7 @@ public final class SearchGroupItemQueryBuilder {
                 Long.class));
     // if the search parameter is ppi/survey then we need to use different column.
     String sqlString =
-        DomainType.SURVEY.toString().equals(parameter.getDomain())
+        Domain.SURVEY.toString().equals(parameter.getDomain())
             ? VALUE_SOURCE_CONCEPT_ID
             : VALUE_AS_CONCEPT_ID;
     if (AttrName.SURVEY_ID.equals(attribute.getName())) {
@@ -616,7 +616,7 @@ public final class SearchGroupItemQueryBuilder {
             .map(SearchParameter::getConceptId)
             .collect(Collectors.toList());
     // Only children exist so no need to do lookups
-    if (!parents.isEmpty() || DomainType.DRUG.toString().equals(domain)) {
+    if (!parents.isEmpty() || Domain.DRUG.toString().equals(domain)) {
       // Parent nodes exist need to do lookups
       if (!parents.isEmpty()) {
         lookupSqlParts.add(
@@ -630,7 +630,7 @@ public final class SearchGroupItemQueryBuilder {
 
       String lookupSql =
           String.format(
-              DomainType.DRUG.toString().equals(domain) ? DRUG_SQL : PARENT_STANDARD_OR_SOURCE_SQL,
+              Domain.DRUG.toString().equals(domain) ? DRUG_SQL : PARENT_STANDARD_OR_SOURCE_SQL,
               standardOrSourceParam,
               domainParam,
               standardOrSourceParam);

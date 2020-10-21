@@ -16,7 +16,9 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingCohort;
+import org.pmiops.workbench.db.dao.projection.ProjectedReportingInstitution;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
+import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
@@ -38,6 +40,7 @@ public class ReportingSnapshotServiceTest {
   private static final Instant NOW_INSTANT = Instant.ofEpochMilli(NOW_EPOCH_MILLI);
 
   @MockBean private CohortService mockCohortService;
+  @MockBean private InstitutionService mockInstitutionService;
   @MockBean private UserService mockUserService;
   @MockBean private WorkspaceService mockWorkspaceService;
 
@@ -51,7 +54,7 @@ public class ReportingSnapshotServiceTest {
     ReportingSnapshotServiceImpl.class
   })
   @MockBean({BigQueryService.class})
-  public static class config {
+  public static class Configuration {
     @Bean
     public Clock getClock() {
       return new FakeClock(NOW_INSTANT);
@@ -65,6 +68,8 @@ public class ReportingSnapshotServiceTest {
   public void testGetSnapshot_noEntries() {
     final ReportingSnapshot snapshot = reportingSnapshotService.takeSnapshot();
     assertThat(snapshot.getCaptureTimestamp()).isEqualTo(NOW_EPOCH_MILLI);
+    assertThat(snapshot.getCohorts()).isEmpty();
+    assertThat(snapshot.getInstitutions()).isEmpty();
     assertThat(snapshot.getUsers()).isEmpty();
     assertThat(snapshot.getWorkspaces()).isEmpty();
   }
@@ -74,6 +79,7 @@ public class ReportingSnapshotServiceTest {
     mockUsers();
     mockWorkspaces();
     mockCohorts();
+    mockInstitutions();
 
     final ReportingSnapshot snapshot = reportingSnapshotService.takeSnapshot();
     assertTimeApprox(snapshot.getCaptureTimestamp(), NOW_INSTANT.toEpochMilli());
@@ -88,6 +94,9 @@ public class ReportingSnapshotServiceTest {
     assertThat(snapshot.getWorkspaces()).hasSize(1);
     final ReportingWorkspace workspace = snapshot.getWorkspaces().get(0);
     ReportingTestUtils.assertDtoWorkspaceFields(workspace);
+
+    assertThat(snapshot.getInstitutions()).hasSize(1);
+    assertInstitutionFields(snapshot.getInstitutions().get(0));
   }
 
   private void mockUsers() {
@@ -105,5 +114,13 @@ public class ReportingSnapshotServiceTest {
   private void mockCohorts() {
     final ProjectedReportingCohort mockCohort = mockProjectedReportingCohort();
     doReturn(ImmutableList.of(mockCohort)).when(mockCohortService).getReportingCohorts();
+  }
+
+  private void mockInstitutions() {
+    final ProjectedReportingInstitution mockInstitution =
+        ReportingTestUtils.mockProjectedReportingInstitution();
+    doReturn(ImmutableList.of(mockInstitution))
+        .when(mockInstitutionService)
+        .getReportingInstitutions();
   }
 }

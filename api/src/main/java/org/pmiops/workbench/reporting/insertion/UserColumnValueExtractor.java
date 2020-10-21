@@ -100,7 +100,25 @@ public enum UserColumnValueExtractor implements ColumnValueExtractor<ReportingUs
       u -> toInsertRowString(u.getTwoFactorAuthCompletionTime()),
       u -> toTimestampQpv(u.getTwoFactorAuthCompletionTime())),
   USER_ID("user_id", ReportingUser::getUserId, u -> int64(u.getUserId())),
-  USERNAME("username", ReportingUser::getUsername, u -> string(u.getUsername()));
+  USERNAME("username", ReportingUser::getUsername, u -> string(u.getUsername())),
+  CITY("city", ReportingUser::getCity, a -> string(a.getCity())),
+  COUNTRY("country", ReportingUser::getCountry, a -> string(a.getCountry())),
+  STATE("state", ReportingUser::getState, a -> string(a.getState())),
+  STREET_ADDRESS_1(
+      "street_address_1", ReportingUser::getStreetAddress1, a -> string(a.getStreetAddress1())),
+  STREET_ADDRESS_2(
+      "street_address_2", ReportingUser::getStreetAddress2, a -> string(a.getStreetAddress2())),
+  ZIP_CODE("zip_code", ReportingUser::getZipCode, a -> string(a.getZipCode())),
+  INSTITUTION_ID(
+      "institution_id", ReportingUser::getInstitutionId, u -> int64(u.getInstitutionId())),
+  INSTITUTIONAL_ROLE_ENUM(
+      "institutional_role_enum",
+      u -> enumToString(u.getInstitutionalRoleEnum()),
+      u -> enumToQpv(u.getInstitutionalRoleEnum())),
+  INSTITUTIONAL_ROLE_OTHER_TEXT(
+      "institutional_role_other_text",
+      ReportingUser::getInstitutionalRoleOtherText,
+      u -> string(u.getInstitutionalRoleOtherText()));
 
   // Much of the repetitive boilerplate below (constructor, setters, etc) can't really be helped,
   // as enums can't be abstract or extend abstract classes.

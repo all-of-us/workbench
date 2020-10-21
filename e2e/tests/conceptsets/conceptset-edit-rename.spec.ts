@@ -1,12 +1,11 @@
 import {Domain} from 'app/component/concept-domain-card';
 import Link from 'app/element/link';
-import ConceptsetActionsPage from 'app/page/conceptset-actions-page';
+import ConceptSetActionsPage from 'app/page/conceptset-actions-page';
 import {SaveOption} from 'app/page/conceptset-save-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {ResourceCard} from 'app/text-labels';
 import {makeRandomName, makeString} from 'utils/str-utils';
-import {findWorkspace, signIn} from 'utils/test-utils';
-
+import {createWorkspace, signIn} from 'utils/test-utils';
 
 describe('Editing and rename Concept Set', () => {
 
@@ -24,10 +23,10 @@ describe('Editing and rename Concept Set', () => {
    */
   test('Workspace OWNER can edit Concept Set', async () => {
 
-    const workspaceName = await findWorkspace(page, {create: true}).then(card => card.clickWorkspaceName());
+    const workspaceName = await createWorkspace(page).then(card => card.clickWorkspaceName());
 
     const dataPage = new WorkspaceDataPage(page);
-    let conceptSearchPage = await dataPage.openConceptSearch(Domain.Procedures);
+    let conceptSearchPage = await dataPage.openConceptSetSearch(Domain.Procedures);
 
     // Select first two rows.
     const row1 = await conceptSearchPage.dataTableSelectRow(1, 1);
@@ -49,12 +48,12 @@ describe('Editing and rename Concept Set', () => {
     expect(addButtonLabel).toBe('Add (2) to set');
 
     // Save new Concept Set.
-    const conceptName = await conceptSearchPage.saveConcept(SaveOption.CreateNewSet);
-    console.log(`Created Concept Set: "${conceptName}"`);
+    const conceptSetName = await conceptSearchPage.saveConceptSet(SaveOption.CreateNewSet);
+    console.log(`Created Concept Set: "${conceptSetName}"`);
 
     // Add another Concept in Procedures domain.
-    const conceptsetActionPage = new ConceptsetActionsPage(page);
-    conceptSearchPage = await conceptsetActionPage.openConceptSearch(Domain.Procedures);
+    const conceptSetActionsPage = new ConceptSetActionsPage(page);
+    conceptSearchPage = await conceptSetActionsPage.openConceptSearch(Domain.Procedures);
 
     // Search in Procedures domain
     const searchWords = 'Screening for disorder';
@@ -68,21 +67,21 @@ describe('Editing and rename Concept Set', () => {
     expect(addButtonLabel).toBe('Add (1) to set');
 
     // Save to Existing Set: Only one Concept set and it is the new Concept Set created earlier in same workspace.
-    const existingConceptName = await conceptSearchPage.saveConcept(SaveOption.ChooseExistingSet);
-    expect(existingConceptName).toBe(conceptName);
-    console.log(`Added new Concept to existing Concept Set "${conceptName}"`);
+    const existingConceptSetName = await conceptSearchPage.saveConceptSet(SaveOption.ChooseExistingSet);
+    expect(existingConceptSetName).toBe(conceptSetName);
+    console.log(`Added new Concept to existing Concept Set "${conceptSetName}"`);
 
     // Concept Set saved. Click Concept Set link. Land on Concept Set page.
-    const conceptsetPage = await conceptsetActionPage.openConceptSet(conceptName);
+    const conceptSetPage = await conceptSetActionsPage.openConceptSet(conceptSetName);
 
     // Verify Concept Set name is displayed.
-    const value = await conceptsetPage.getConceptName();
-    expect(value).toBe(conceptName);
+    const value = await conceptSetPage.getConceptSetName();
+    expect(value).toBe(conceptSetName);
 
     // Edit Concept name and description.
     const newName = makeRandomName();
-    await conceptsetPage.edit(newName, makeString(20));
-    console.log(`Renamed Concept Set: "${conceptName}" to "${newName}"`);
+    await conceptSetPage.edit(newName, makeString(20));
+    console.log(`Renamed Concept Set: "${conceptSetName}" to "${newName}"`);
 
     // Navigate to workspace Data page, then delete Concept Set
     await (new Link(page, `//a[text()="${workspaceName}"]`)).click();

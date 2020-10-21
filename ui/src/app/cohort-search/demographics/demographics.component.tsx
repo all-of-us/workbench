@@ -12,7 +12,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore, serverConfigStore, setSidebarActiveIconStore} from 'app/utils/navigation';
-import {AttrName, CriteriaType, DomainType, Operator} from 'generated/fetch';
+import {AttrName, CriteriaType, Domain, Operator} from 'generated/fetch';
 
 const styles = reactStyles({
   ageContainer: {
@@ -114,7 +114,7 @@ const ageNode = {
   hasAncestorData: false,
   attributes: [],
   code: '',
-  domainId: DomainType.PERSON,
+  domainId: Domain.PERSON,
   group: false,
   name: 'Age',
   parameterId: 'age-param',
@@ -200,7 +200,7 @@ export class Demographics extends React.Component<Props, State> {
     const {criteriaType, selections} = this.props;
     const {cdrVersionId} = currentWorkspaceStore.getValue();
     this.setState({loading: true});
-    const response = await cohortBuilderApi().findCriteriaBy(+cdrVersionId, DomainType.PERSON.toString(), criteriaType.toString());
+    const response = await cohortBuilderApi().findCriteriaBy(+cdrVersionId, Domain.PERSON.toString(), criteriaType.toString());
     const nodes = response.items.filter(item => item.count !== -1)
       .sort(sortByCountThenName)
       .map(node => ({...node, parameterId: `param${node.conceptId || node.code}`}));
@@ -379,7 +379,7 @@ export class Demographics extends React.Component<Props, State> {
       excludes: [],
       includes: [{
         items: [{
-          type: DomainType.PERSON.toString(),
+          type: Domain.PERSON.toString(),
           searchParameters: [mapParameter(parameter)],
           modifiers: []
         }],
