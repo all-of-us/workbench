@@ -165,7 +165,7 @@ const columns = [
   },
   {
     name: 'Code',
-    tooltip: 'Unique code for OMOP',
+    tooltip: 'Code from vocabulary',
     style: columnHeaderStyle,
   },
   {
