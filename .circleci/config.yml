@@ -646,7 +646,7 @@ workflows:
     jobs:
       - api-bigquery-test
       - puppeteer-test:
-          parallel_num: 1
+          parallel_num: 2
           test_mode: "nightly-integration"
           env_name: "test"
 
