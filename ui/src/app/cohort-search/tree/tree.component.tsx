@@ -40,17 +40,12 @@ const styles = reactStyles({
     padding: '0 0.5rem',
   },
   searchBarContainer: {
-    position: 'absolute',
     width: '95%',
     marginTop: '-1px',
     display: 'flex',
     padding: '0.4rem 0',
     backgroundColor: colors.white,
     zIndex: 1,
-  },
-  treeContainer: {
-    width: '99%',
-    paddingTop: '2.5rem'
   },
   treeHeader: {
     position: 'sticky',
@@ -188,15 +183,6 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
       && domainId !== Domain.VISIT.toString();
   }
 
-  get treeContainerStyle() {
-    const {node: {domainId}} = this.props;
-    const treeContainerStyle = {paddingTop: '3rem', width: '99%'};
-    if (!this.showHeader) {
-      treeContainerStyle.paddingTop = domainId === Domain.VISIT.toString() ? '0.5rem' : '2.5rem';
-    }
-    return treeContainerStyle;
-  }
-
   // Hides the tree node for COPE survey if enableCOPESurvey config flag is set to false
   showNode(node: Criteria) {
     return node.subtype === CriteriaSubType.SURVEY.toString() && node.name.includes('COPE')
@@ -220,7 +206,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
                      setInput={(v) => setSearchTerms(v)}/>
         </div>
       }
-      {!loading && <div style={this.treeContainerStyle}>
+      {!loading && <div style={{paddingTop: this.showHeader ? '0.5rem' : 0, width: '99%'}}>
         {this.showHeader && <div style={{...styles.treeHeader, border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`}}>
           {!!ingredients && <div style={styles.ingredients}>
             Ingredients in this brand: {ingredients.join(', ')}
