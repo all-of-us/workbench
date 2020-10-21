@@ -259,8 +259,6 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
         const {searchContext: {domain}} = this.props;
         triggerEvent(`Cohort Builder Search - ${domainToTitle(domain)}`, 'Search', value);
         this.getResults(value);
-      } else if (value !== this.state.searchTerms) {
-        this.setState({searchTerms: value});
       }
     }
 
@@ -426,7 +424,8 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
             <TextInput style={styles.searchInput}
                        value={searchTerms}
                        placeholder={`Search ${domainToTitle(domain)} by code or description`}
-                       onKeyPress={this.handleInput}/>
+                       onChange={(e) => this.setState({searchTerms: e})}
+                       onKeyPress={this.handleInput} />
           </div>
         </div>
         <div style={{display: 'table', height: '100%', width: '100%'}}>
