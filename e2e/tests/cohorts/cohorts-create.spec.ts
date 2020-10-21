@@ -25,7 +25,7 @@ describe('User can create new Cohorts', () => {
    * Checking counts.
    * Renaming Group 1 and 2 names.
    */
-  test('Add Cohort of Physical Measurements BMI', async () => {
+  xtest('Add Cohort of Physical Measurements BMI', async () => {
 
     const workspaceCard = await findOrCreateWorkspace(page);
     await workspaceCard.clickWorkspaceName();
@@ -113,7 +113,7 @@ describe('User can create new Cohorts', () => {
    * Delete cohort.
    */
   // RW-5751 Search for condition is failing in CI.
-  xtest('Add Cohort of EKG condition with modifiers', async () => {
+  test('Add Cohort of EKG condition with modifiers', async () => {
 
     const workspaceCard = await findOrCreateWorkspace(page);
     await workspaceCard.clickWorkspaceName();
