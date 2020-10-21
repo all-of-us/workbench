@@ -1,9 +1,3 @@
-import * as React from 'react';
-
-import {validate} from 'validate.js';
-
-import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
-
 import {AlertDanger} from 'app/components/alert';
 import {Button, TabButton} from 'app/components/buttons';
 import {SmallHeader, styles as headerStyles} from 'app/components/headers';
@@ -12,6 +6,8 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
+
+import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {summarizeErrors} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
@@ -19,12 +15,22 @@ import {encodeURIComponentStrict, navigateByUrl} from 'app/utils/navigation';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {
   DataSet,
+  DataSetExportRequest,
   DataSetRequest,
   DomainValuePair,
   FileDetail,
   KernelTypeEnum,
   PrePackagedConceptSetEnum
 } from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+
+import {validate} from 'validate.js';
+import {FlexColumn} from '../../../components/flex';
+import {TextColumn} from '../../../components/text-column';
+import GenomicsAnalysisToolEnum = DataSetExportRequest.GenomicsAnalysisToolEnum;
+import GenomicsAnalysisToolEnum = DataSetExportRequest.GenomicsAnalysisToolEnum;
+import GenomicsAnalysisToolEnum = DataSetExportRequest.GenomicsAnalysisToolEnum;
 
 interface Props {
   closeFunction: Function;
@@ -53,6 +59,8 @@ interface State {
   previewedKernelType: KernelTypeEnum;
   queries: Map<KernelTypeEnum, String>;
   seePreview: boolean;
+  includeRawMicroarrayData: boolean;
+  genomicsAnalysisTool: GenomicsAnalysisToolEnum;
 }
 
 const styles = {
@@ -82,7 +90,9 @@ class NewDataSetModal extends React.Component<Props, State> {
       notebooksLoading: false,
       previewedKernelType: KernelTypeEnum.Python,
       queries: new Map([[KernelTypeEnum.Python, undefined], [KernelTypeEnum.R, undefined]]),
-      seePreview: false
+      seePreview: false,
+      includeRawMicroarrayData: false,
+      genomicsAnalysisTool: GenomicsAnalysisToolEnum.NONE
     };
   }
 
@@ -339,6 +349,40 @@ class NewDataSetModal extends React.Component<Props, State> {
                 </label>
               )}
           </React.Fragment>}
+          {this.state.kernelType === KernelTypeEnum.Python && <div style={{border: '1px solid grey'}}>
+            <TextColumn>
+              <div>Genomics Pre-alpha</div>
+              <div>(non-production only; synthetic data)</div>
+            </TextColumn>
+
+            <div style={{display: 'flex', alignItems: 'center'}}>
+              <CheckBox style={{height: 17, width: 17}}
+                        data-test-id='include-raw-microarray-data'
+                        onChange={(checked) => this.setState({includeRawMicroarrayData: checked})}
+                        checked={this.state.includeRawMicroarrayData} />
+              <div style={{marginLeft: '.5rem', color: colors.primary}}>
+                Include raw microarray data
+              </div>
+            </div>
+
+            {this.state.includeRawMicroarrayData && <React.Fragment>
+              <div style={headerStyles.formLabel}>
+                Extract genomics data for analysis using:
+              </div>
+
+              {Object.keys(GenomicsAnalysisToolEnum).map((enumKey, i) => {
+                return <React.Fragment>
+                  <label key={i} style={{display: 'block'}}>
+                    <RadioButton
+                      checked={this.state.genomicsAnalysisTool === GenomicsAnalysisToolEnum[enumKey]}
+                      onChange={() => this.setState({genomicsAnalysisTool: GenomicsAnalysisToolEnum[enumKey]})}
+                    />
+                    &nbsp; {fp.startCase(enumKey.toLowerCase())}
+                  </label>
+                </React.Fragment>;
+              })}
+            </React.Fragment>}
+          </div> }
         </React.Fragment>}
       </ModalBody>
       <ModalFooter>
