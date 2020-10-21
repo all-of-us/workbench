@@ -25,7 +25,7 @@ describe('User can create new Cohorts', () => {
    * Checking counts.
    * Renaming Group 1 and 2 names.
    */
-  xtest('Add Cohort of Physical Measurements BMI', async () => {
+  test('Add Cohort of Physical Measurements BMI', async () => {
 
     const workspaceCard = await findOrCreateWorkspace(page);
     await workspaceCard.clickWorkspaceName();
