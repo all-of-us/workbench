@@ -173,10 +173,10 @@ const DataProcConfigSelector = ({onChange, dataprocConfig})  => {
       <div style={{gridColumnEnd: 'span 2'}}/>
       {/* TODO: Do the worker nodes have the same minimum requirements as the master node?
        to https://precisionmedicineinitiative.atlassian.net/browse/RW-5763 */}
-      <MachineSelector 
-        machineType={workerMachineType} 
-        onChange={setSelectedWorkerMachine} 
-        selectedMachine={selectedWorkerMachine} 
+      <MachineSelector
+        machineType={workerMachineType}
+        onChange={setSelectedWorkerMachine}
+        selectedMachine={selectedWorkerMachine}
         idPrefix='worker'/>
       <DiskSizeSelector diskSize={workerDiskSize} onChange={setSelectedDiskSize} selectedDiskSize={selectedDiskSize} idPrefix='worker'/>
     </div>
@@ -187,11 +187,11 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
   const [currentRuntime, setRequestedRuntime] = useCustomRuntime(workspace.namespace);
 
   const {status = RuntimeStatus.Unknown, toolDockerImage = '', dataprocConfig = null, gceConfig = {}} = currentRuntime || {};
-  const masterMachineType = !!dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
-  const masterDiskSize = !!dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.bootDiskSize;
-  const initialMasterMachine = findMachineByName(masterMachineType);
+  const machineName  = !!dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
+  const diskSize = !!dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.bootDiskSize;
+  const initialMasterMachine = findMachineByName(machineName);
 
-  const [selectedDiskSize, setSelectedDiskSize] = useState(masterDiskSize);
+  const [selectedDiskSize, setSelectedDiskSize] = useState(diskSize);
   const [selectedMachine, setSelectedMachine] = useState(initialMasterMachine);
   const [runtimeConfigurationType, setRuntimeConfigurationType] = useState(null);
   const [selectedCompute, setSelectedCompute] = useState<ComputeType>(dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard);
@@ -199,7 +199,7 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
 
   const selectedMachineType = selectedMachine && selectedMachine.name;
   const runtimeChanged = !fp.equals(selectedMachine, initialMasterMachine) ||
-    selectedDiskSize !== masterDiskSize ||
+    selectedDiskSize !== diskSize ||
     !fp.equals(selectedDataprocConfig, dataprocConfig);
 
   if (currentRuntime === undefined) {
@@ -278,22 +278,22 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
             selectedMachine={selectedMachine}
             onChange={(value) => {
               setSelectedMachine(value);
-              if (value !== selectedMachine && value !== masterDiskSize) {
+              if (value !== selectedMachine && value !== diskSize) {
                 setRuntimeConfigurationType(RuntimeConfigurationType.UserOverride);
               }
             }}
-            machineType={masterMachineType}
+            machineType={machineName}
         />
         <DiskSizeSelector
             idPrefix='runtime'
             selectedDiskSize={selectedDiskSize}
             onChange={(value) => {
               setSelectedDiskSize(value);
-              if (value !== selectedDiskSize && value !== masterDiskSize) {
+              if (value !== selectedDiskSize && value !== diskSize) {
                 setRuntimeConfigurationType(RuntimeConfigurationType.UserOverride);
               }
             }}
-            diskSize={masterDiskSize}
+            diskSize={diskSize}
         />
       </FlexRow>
       <FlexColumn style={{marginTop: '1rem'}}>
@@ -316,8 +316,8 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
         disabled={status !== RuntimeStatus.Running || !runtimeChanged}
         onClick={() => {
           const runtimeToRequest = selectedDataprocConfig ? {dataprocConfig: selectedDataprocConfig} : {gceConfig: {
-            machineType: selectedMachineType || masterMachineType,
-            diskSize: selectedDiskSize || masterDiskSize
+            machineType: selectedMachineType || machineName,
+            diskSize: selectedDiskSize || diskSize
           }};
           setRequestedRuntime({configurationType: runtimeConfigurationType, ...runtimeToRequest});
         }
