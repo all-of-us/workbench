@@ -6,17 +6,14 @@ import {Spinner} from 'app/components/spinners';
 import colors, {addOpacity} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {allMachineTypes, Machine, validLeonardoMachineTypes} from 'app/utils/machines';
+import {runtimePresets} from 'app/utils/runtime-presets';
 import {useCustomRuntime} from 'app/utils/runtime-utils';
-import {
-  RuntimeOperation,
-  runtimeOpsStore,
-  useStore
-} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
+
 import {Dropdown} from 'primereact/dropdown';
 import {InputNumber} from 'primereact/inputnumber';
 
-import { RuntimeStatus } from 'generated';
+import { RuntimeConfigurationType, RuntimeStatus } from 'generated';
 import { DataprocConfig } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -67,13 +64,13 @@ export interface Props {
   workspace: WorkspaceData;
 }
 
-const MachineSelector = ({onChange, selectedMachine, machineType, id}) => {
+const MachineSelector = ({onChange, selectedMachine, machineType, idPrefix}) => {
   const initialMachineType = fp.find(({name}) => name === machineType, allMachineTypes) || defaultMachineType;
   const {cpu, memory} = selectedMachine || initialMachineType;
 
   return <Fragment>
-      <label htmlFor={`${id}-cpu`} style={{marginRight: '.25rem'}}>CPUs</label>
-      <Dropdown id={`${id}-cpu`}
+      <label htmlFor={`${idPrefix}-cpu`} style={{marginRight: '.25rem'}}>CPUs</label>
+      <Dropdown id={`${idPrefix}-cpu`}
         options={fp.flow(
           // Show all CPU options.
           fp.map('cpu'),
@@ -90,8 +87,8 @@ const MachineSelector = ({onChange, selectedMachine, machineType, id}) => {
             onChange)(validLeonardoMachineTypes)
         }
         value={cpu}/>
-      <label htmlFor={`${id}-ram`} style={{marginRight: '.25rem'}}>RAM (GB)</label>
-      <Dropdown id={`${id}-ram`}
+      <label htmlFor={`${idPrefix}-ram`} style={{marginRight: '.25rem'}}>RAM (GB)</label>
+      <Dropdown id={`${idPrefix}-ram`}
         options={fp.flow(
           // Show valid memory options as constrained by the currently selected CPU.
           fp.filter(({cpu: availableCpu}) => availableCpu === cpu),
@@ -112,10 +109,10 @@ const MachineSelector = ({onChange, selectedMachine, machineType, id}) => {
   </Fragment>;
 };
 
-const DiskSizeSelector = ({onChange, selectedDiskSize, diskSize, id}) => {
+const DiskSizeSelector = ({onChange, selectedDiskSize, diskSize, idPrefix}) => {
   return <Fragment>
-    <label htmlFor={`${id}-disk`} style={{marginRight: '.25rem'}}>Disk (GB)</label>
-    <InputNumber id={`${id}-disk`}
+    <label htmlFor={`${idPrefix}-disk`} style={{marginRight: '.25rem'}}>Disk (GB)</label>
+    <InputNumber id={`${idPrefix}-disk`}
       showButtons
       decrementButtonClassName='p-button-secondary'
       incrementButtonClassName='p-button-secondary'
@@ -176,17 +173,19 @@ const DataProcConfigSelector = ({onChange, dataprocConfig})  => {
       <div style={{gridColumnEnd: 'span 2'}}/>
       {/* TODO: Do the worker nodes have the same minimum requirements as the master node?
        to https://precisionmedicineinitiative.atlassian.net/browse/RW-5763 */}
-      <MachineSelector machineType={workerMachineType} onChange={setSelectedWorkerMachine} selectedMachine={selectedWorkerMachine} id='worker'/>
-      <DiskSizeSelector diskSize={workerDiskSize} onChange={setSelectedDiskSize} selectedDiskSize={selectedDiskSize} id='worker'/>
+      <MachineSelector 
+        machineType={workerMachineType} 
+        onChange={setSelectedWorkerMachine} 
+        selectedMachine={selectedWorkerMachine} 
+        idPrefix='worker'/>
+      <DiskSizeSelector diskSize={workerDiskSize} onChange={setSelectedDiskSize} selectedDiskSize={selectedDiskSize} idPrefix='worker'/>
     </div>
   </fieldset>;
 };
 
 export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
-  const runtimeOps = useStore(runtimeOpsStore);
   const [currentRuntime, setRequestedRuntime] = useCustomRuntime(workspace.namespace);
 
-  const activeRuntimeOp: RuntimeOperation = runtimeOps.opsByWorkspaceNamespace[workspace.namespace];
   const {status = RuntimeStatus.Unknown, toolDockerImage = '', dataprocConfig = null, gceConfig = {}} = currentRuntime || {};
   const masterMachineType = !!dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
   const masterDiskSize = !!dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.bootDiskSize;
@@ -194,6 +193,7 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
 
   const [selectedDiskSize, setSelectedDiskSize] = useState(masterDiskSize);
   const [selectedMachine, setSelectedMachine] = useState(initialMasterMachine);
+  const [runtimeConfigurationType, setRuntimeConfigurationType] = useState(null);
   const [selectedCompute, setSelectedCompute] = useState<ComputeType>(dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard);
   const [selectedDataprocConfig, setSelectedDataprocConfig] = useState<DataprocConfig | null>(dataprocConfig);
 
@@ -208,9 +208,6 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
     // TODO(RW-5591): Create runtime page goes here.
     return <React.Fragment>
       <div>No runtime exists yet</div>
-      {activeRuntimeOp && <hr/>}
-      {activeRuntimeOp && <div>
-      </div>}
     </React.Fragment>;
   }
 
@@ -227,28 +224,78 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
                     closeOnClick
                     content={
                       <React.Fragment>
-                        <MenuItem style={styles.presetMenuItem}>General purpose analysis</MenuItem>
-                        <MenuItem style={styles.presetMenuItem}>Genomics analysis</MenuItem>
+                        {
+                          fp.flow(
+                            fp.filter(['displayName', 'General Analysis']),
+                            fp.toPairs,
+                            fp.map(([i, preset]) => {
+                              return <MenuItem
+                              style={styles.presetMenuItem}
+                              key={i}
+                              onClick={() => {
+                                // renaming to avoid shadowing
+                                const {runtimeTemplate} = preset;
+                                const {presetDiskSize, presetMachineName} = fp.cond([
+                                  [() => !!runtimeTemplate.gceConfig, ({gceConfig: {bootDiskSize, machineType}}) => ({
+                                    presetDiskSize: bootDiskSize,
+                                    presetMachineName: machineType
+                                  })],
+                                  [() => !!runtimeTemplate.dataprocConfig, ({dataprocConfig: {masterDiskSize, masterMachineType}}) => ({
+                                    presetDiskSize: masterDiskSize,
+                                    presetMachineName: masterMachineType
+                                  })]
+                                ])(runtimeTemplate);
+                                const presetMachineType = fp.find(({name}) => name === presetMachineName, validLeonardoMachineTypes);
+
+                                setSelectedDiskSize(presetDiskSize);
+                                setSelectedMachine(presetMachineType);
+                                setRuntimeConfigurationType(RuntimeConfigurationType.GeneralAnalysis);
+                              }}>
+                                {preset.displayName}
+                              </MenuItem>;
+                            })
+                          )(runtimePresets)
+                        }
                       </React.Fragment>
                     }>
-        <Clickable data-test-id='runtime-presets-menu'
-                   disabled={true}>
+        <Clickable data-test-id='runtime-presets-menu'>
           Recommended environments <ClrIcon shape='caret down'/>
         </Clickable>
       </PopupTrigger>
       <h3 style={styles.sectionHeader}>Application configuration</h3>
       {/* TODO(RW-5413): Populate the image list with server driven options. */}
-      <Dropdown style={{width: '100%'}}
+      {toolDockerImage && <Dropdown style={{width: '100%'}}
                 data-test-id='runtime-image-dropdown'
                 disabled={true}
                 options={[toolDockerImage]}
                 value={toolDockerImage}/>
+      }
       {/* Runtime customization: change detailed machine configuration options. */}
       <h3 style={styles.sectionHeader}>Cloud compute profile</h3>
-      <div style={styles.formGrid}>
-        <MachineSelector selectedMachine={selectedMachine} onChange={setSelectedMachine} machineType={masterMachineType} id='runtime'/>
-        <DiskSizeSelector selectedDiskSize={selectedDiskSize} onChange={setSelectedDiskSize} diskSize={masterDiskSize} id='runtime'/>
-      </div>
+      <FlexRow style={{justifyContent: 'space-between'}}>
+        <MachineSelector
+            idPrefix='runtime'
+            selectedMachine={selectedMachine}
+            onChange={(value) => {
+              setSelectedMachine(value);
+              if (value !== selectedMachine && value !== masterDiskSize) {
+                setRuntimeConfigurationType(RuntimeConfigurationType.UserOverride);
+              }
+            }}
+            machineType={masterMachineType}
+        />
+        <DiskSizeSelector
+            idPrefix='runtime'
+            selectedDiskSize={selectedDiskSize}
+            onChange={(value) => {
+              setSelectedDiskSize(value);
+              if (value !== selectedDiskSize && value !== masterDiskSize) {
+                setRuntimeConfigurationType(RuntimeConfigurationType.UserOverride);
+              }
+            }}
+            diskSize={masterDiskSize}
+        />
+      </FlexRow>
       <FlexColumn style={{marginTop: '1rem'}}>
         <label htmlFor='runtime-compute'>Compute type</label>
         <Dropdown id='runtime-compute'
@@ -272,7 +319,7 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
             machineType: selectedMachineType || masterMachineType,
             diskSize: selectedDiskSize || masterDiskSize
           }};
-          setRequestedRuntime(runtimeToRequest);
+          setRequestedRuntime({configurationType: runtimeConfigurationType, ...runtimeToRequest});
         }
       }>{currentRuntime ? 'Update' : 'Create'}</Button>
     </FlexRow>

@@ -236,7 +236,8 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
 
   componentDidMount(): void {
     const {cohortContext: {domain, item, standard, type}} = this.props;
-    const selections = item.searchParameters;
+    // JSON stringify and parse prevents changes to selections from being passed to the cohortContext
+    const selections = JSON.parse(JSON.stringify(item.searchParameters));
     const selectedIds = selections.map(s => s.parameterId);
     if (type === CriteriaType.DECEASED) {
       this.selectDeceased();

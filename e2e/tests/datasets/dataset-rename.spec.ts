@@ -2,7 +2,7 @@ import DataResourceCard from 'app/component/data-resource-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
-import {findWorkspace, signIn} from 'utils/test-utils';
+import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
 
 describe('Dataset test', () => {
 
@@ -19,7 +19,7 @@ describe('Dataset test', () => {
    * - Delete dataset.
    */
   test('Can create and rename Dataset', async () => {
-    const workspaceCard = await findWorkspace(page);
+    const workspaceCard = await findOrCreateWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 
     // Click Add Datasets button

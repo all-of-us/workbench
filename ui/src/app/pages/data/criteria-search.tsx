@@ -143,9 +143,9 @@ export class CriteriaSearch extends React.Component<Props, State>  {
   }
 
   get initTree() {
-    const {cohortContext: {domain}} = this.props;
-    return domain === Domain.PHYSICALMEASUREMENT
-        || domain === Domain.SURVEY
+    const {cohortContext: {domain}, source} = this.props;
+    return (domain === Domain.PHYSICALMEASUREMENT && source === 'criteria')
+      || domain === Domain.SURVEY
         || domain === Domain.VISIT;
   }
 

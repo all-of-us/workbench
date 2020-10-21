@@ -7,8 +7,30 @@ import {SaveOption} from 'app/page/conceptset-save-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {LinkText, ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
-import {findWorkspace, signIn} from 'utils/test-utils';
+import {createWorkspace, signIn} from 'utils/test-utils';
+import {config} from 'resources/workbench-config';
 
+async function createConceptSet(srcWorkspaceCard: WorkspaceCard) {
+  // Open Source Workspace Data Page.
+  await srcWorkspaceCard.clickWorkspaceName();
+  // Open Concept Sets tab.
+  const dataPage = new WorkspaceDataPage(page);
+  await dataPage.openConceptSetsSubtab();
+
+  // Create new Concept Set
+  const conceptSetSearchPage = await dataPage.openConceptSetSearch(Domain.Procedures);
+  await conceptSetSearchPage.dataTableSelectAllRows();
+  const addButtonLabel = await conceptSetSearchPage.clickAddToSetButton();
+  // Table pagination displays 20 rows. If this changes, then update the check below.
+  expect(addButtonLabel).toBe('Add (20) to set');
+  const conceptSetName = await conceptSetSearchPage.saveConceptSet(SaveOption.CreateNewSet);
+  console.log(`Created Concept Set: "${conceptSetName}"`);
+  // Click on link to open Concept Set page.
+  const conceptSetActionPage = new ConceptSetActionsPage(page);
+  await conceptSetActionPage.openConceptSet(conceptSetName);
+
+  return {dataPage, conceptSetName};
+}
 
 describe('Copy Concept Set to another workspace', () => {
 
@@ -18,41 +40,26 @@ describe('Copy Concept Set to another workspace', () => {
 
   /**
    * Test:
-   * - Copy Concept Set from one workspace to another workspace.
+   * - Copy Concept Set from one workspace to another workspace when both have the same CDR Version.
    */
-  test('Workspace OWNER can copy Concept Set', async () => {
+  test('Workspace OWNER can copy Concept Set when CDR Versions match', async () => {
 
-    // Need a source and a destination workspace.
+    // Create a source and a destination workspace with the same CDR Version.
 
-    const destWorkspaceCard: WorkspaceCard = await findWorkspace(page, {create: true});
+    const destWorkspaceCard: WorkspaceCard = await createWorkspace(page, config.defaultCdrVersionName);
     const destWorkspace = await destWorkspaceCard.getWorkspaceName();
 
-    const srcWorkspaceCard: WorkspaceCard = await findWorkspace(page, {create: true});
+    const srcWorkspaceCard: WorkspaceCard = await createWorkspace(page, config.defaultCdrVersionName);
     const srcWorkspace = await srcWorkspaceCard.getWorkspaceName();
 
-    // Open Source Workspace Data Page.
-    await srcWorkspaceCard.clickWorkspaceName();
-    // Open Concept Sets tab.
-    const dataPage = new WorkspaceDataPage(page);
-    await dataPage.openConceptSetsSubtab();
-
-    // Create new Concept Set
-    const conceptSearchPage = await dataPage.openConceptSetSearch(Domain.Procedures);
-    await conceptSearchPage.dataTableSelectAllRows();
-    const addButtonLabel = await conceptSearchPage.clickAddToSetButton();
-    // Table pagination displays 20 rows. If this changes, then update the check below.
-    expect(addButtonLabel).toBe('Add (20) to set');
-    const conceptSetName = await conceptSearchPage.saveConceptSet(SaveOption.CreateNewSet);
-    console.log(`Created Concept Set: "${conceptSetName}"`);
-    // Click on link to open Concept Set page.
-    const conceptSetActionsPage = new ConceptSetActionsPage(page);
-    await conceptSetActionsPage.openConceptSet(conceptSetName);
+    const {dataPage, conceptSetName} = await createConceptSet(srcWorkspaceCard);
 
     // Concept Set page is open.
     const conceptSetPage = new ConceptSetPage(page);
     await conceptSetPage.waitForLoad();
 
     // Copy Concept Set to another workspace with new Concept name.
+
     const conceptSetCopyName = makeRandomName();
 
     const conceptSetCopyModal = await conceptSetPage.openCopyToWorkspaceModal(conceptSetName);
@@ -77,5 +84,31 @@ describe('Copy Concept Set to another workspace', () => {
     await dataPage.deleteResource(conceptSetCopyName, ResourceCard.ConceptSet);
   });
 
+  /**
+   * Test:
+   * - Fail to Copy Concept Set from one workspace to another workspace when CDR Versions mismatch.
+   */
+  test('Workspace OWNER cannot copy Concept Set when CDR Versions mismatch', async () => {
+
+    // Create a source and a destination workspace with differing CDR Versions.
+
+    const destWorkspaceCard: WorkspaceCard = await createWorkspace(page, config.defaultCdrVersionName);
+    const destWorkspace = await destWorkspaceCard.getWorkspaceName();
+
+    const srcWorkspaceCard: WorkspaceCard = await createWorkspace(page, config.altCdrVersionName);
+    await srcWorkspaceCard.getWorkspaceName();
+
+    const {conceptSetName} = await createConceptSet(srcWorkspaceCard);
+
+    // Concept Set page is open.
+    const conceptSetPage = new ConceptSetPage(page);
+    await conceptSetPage.waitForLoad();
+
+    const conceptCopyModal = await conceptSetPage.openCopyToWorkspaceModal(conceptSetName);
+    await conceptCopyModal.beginCopyToAnotherWorkspace(destWorkspace, makeRandomName());
+
+    const copyButton = await conceptCopyModal.waitForButton(LinkText.Copy);
+    expect(await copyButton.isCursorNotAllowed()).toBe(true);
+  });
 
 });

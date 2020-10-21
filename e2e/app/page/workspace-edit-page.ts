@@ -17,7 +17,6 @@ const faker = require('faker/locale/en_US');
 export const PageTitle = 'Create Workspace';
 
 export const LabelAlias = {
-  CDR_VERSION: 'Workspace Name',  // select CDR Version
   SELECT_BILLING: 'Select account',   // select billing account
   WORKSPACE_NAME: 'Workspace Name',  // Workspace name input textbox
   RESEARCH_PURPOSE: 'Research purpose',
@@ -77,7 +76,9 @@ export const FIELD = {
     textOption: {name: LabelAlias.WORKSPACE_NAME, ancestorLevel: 2, type: ElementType.Textbox}
   },
   cdrVersionSelect: {
-    textOption: {name: LabelAlias.CDR_VERSION, type: ElementType.Select}
+    // Note: The CDR Version dropdown does not have a label of its own.
+    // Use the nearby Workspace Name instead.
+    textOption: {name: LabelAlias.WORKSPACE_NAME, type: ElementType.Select}
   },
   billingAccountSelect: {
     textOption: {name: LabelAlias.SELECT_BILLING, type: ElementType.Select}
@@ -249,6 +250,10 @@ export default class WorkspaceEditPage extends WorkspaceBase {
     return Select.findByName(this.page, FIELD.cdrVersionSelect.textOption);
   }
 
+  async getBillingAccountSelect(): Promise<Select> {
+    return Select.findByName(this.page, FIELD.billingAccountSelect.textOption);
+  }
+
   async getCreateWorkspaceButton(): Promise<Button> {
     return Button.findByName(this.page, FIELD.createWorkspaceButton.textOption);
   }
@@ -327,7 +332,7 @@ export default class WorkspaceEditPage extends WorkspaceBase {
    * @param {string} billingAccount
    */
   async selectBillingAccount(billingAccount: string = UseFreeCredits) {
-    const billingAccountSelect = await Select.findByName(this.page, FIELD.billingAccountSelect.textOption);
+    const billingAccountSelect = await this.getBillingAccountSelect();
     await billingAccountSelect.selectOption(billingAccount);
   }
 

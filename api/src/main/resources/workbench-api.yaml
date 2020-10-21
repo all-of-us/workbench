@@ -4848,6 +4848,20 @@ definitions:
         default: false
       kernelType:
         "$ref": "#/definitions/KernelTypeEnum"
+      genomicsDataType:
+        type: string
+        default: NONE
+        enum:
+          - NONE
+          - MICROARRAY
+      genomicsAnalysisTool:
+        type: string
+        default: NONE
+        enum:
+          - NONE
+          - PLINK
+          - HAIL
+
   MarkDataSetRequest:
     type: object
     properties:

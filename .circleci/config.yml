@@ -1,24 +1,23 @@
 version: 2.1
 
-slack/notify-on-failure:
-  only_for_branches: "master"
-
+# -------------------------
+#   ORBS
+# -------------------------
 # https://circleci.com/orbs/registry/
 orbs:
   browser-tools: circleci/browser-tools@1.0.1
-  slack: circleci/slack@3.4.2
 
 # -------------------------
-#   PARAMETERS
+#   PIPELINE PARAMETERS
 # -------------------------
 parameters:
-  circleci_service_account:
+  circle-service-account:
     type: string
     default: "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com"
-  workbench_image:
+  workbench-image:
     type: string
     default: "allofustest/workbench:buildimage-0.0.19"
-  mysql_image:
+  db-image:
     type: string
     default: "circleci/mysql:5.7"
 
@@ -26,235 +25,180 @@ parameters:
 #   ANCHORS
 # -------------------------
 anchors:
-  java_env: &java_env
-    # As best I can tell (dmohs, 7 Feb '17), this is the only way to set a memory limit that Java
-    # processes executed within CircleCI's docker containers will respect. Very helpful resource:
-    # https://circleci.com/blog/how-to-handle-java-oom-errors/
-    #
-    # In Feb 2017, this was set to 3G. But in Feb 2019 (RW-2194) we started seeing OOM errors,
-    # so we bumped this down further to 2G.
+  env-default: &env-default
     JAVA_TOOL_OPTIONS: -Xmx2g
     # See: https://support.circleci.com/hc/en-us/articles/360021812453-Common-Android-memory-issues
     GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 -Dkotlin.incremental=false -Dkotlin.compiler.execution.strategy=in-process
     TERM: dumb
-    MYSQL_ROOT_PASSWORD: ubuntu
 
-  mysql_env: &mysql_env
+  env-db: &env-db
     MYSQL_ROOT_PASSWORD: ubuntu
     MYSQL_USER: ubuntu
     MYSQL_PASSWORD: ubuntu
 
-  e2e_env: &e2e_env
+  env-puppeteer: &env-puppeteer
     CI: true
     NODE_ENV: development
+    WORKBENCH_ENV: test
+    TEST_MODE: integration
 
-  defaults: &defaults
-    docker:
-      - image: << pipeline.parameters.workbench_image >>
-    working_directory: ~/workbench
-
-  java_defaults: &java_defaults
-    <<: *defaults
-    environment:
-      <<: *java_env
-
-  # See https://circleci.com/docs/2.0/workflows/#git-tag-job-execution
   # Job runs for master branch only
-  filter_only_master_branch: &filter_only_master_branch
-    tags:
-      ignore: /.*/
-    branches:
-      only: master
+  filter-master-branch: &filter-master-branch
+    filters:
+      tags:
+        ignore: /.*/
+      branches:
+        only: master
 
   # Job runs for no branch and only for tags starting with ‘v’
-  filter_only_release_tags: &filter_only_release_tags
-    branches:
-      ignore: /.*/
-    tags:
-      # regex explanation:
-      # "^" asserts position at start of a line.
-      # "v" matches the character "v" literally (case sensitive).
-      # "[0-9]+" match a single numerical digit (the + quantifier, matches between one and unlimited times, as many times as possible).
-      # "-" matches the character "-" literally.
-      # "rc" matches the character "rc" literally (case sensitive).
-      # "$" asserts position at the end of a line.
-      # Workbench release tag format example: v5-3-rc1
-      only: /^v[0-9]+-[0-9]+-rc[0-9]+$/
+  filter-release-tags: &filter-release-tags
+    filters:
+      branches:
+        ignore: /.*/
+      tags:
+        # Regex matches Workbench release tag. Example: v5-3-rc1
+        only: /^v[0-9]+-[0-9]+-rc[0-9]+$/
 
-  # Job runs for PR branches only
-  filter_only_pr_branch: &filter_only_pr_branch
-    tags:
-      ignore: /.*/
-    branches:
-      ignore: master
+  # Job runs for PR branch only
+  filter-pr-branch: &filter-pr-branch
+    filters:
+      tags:
+        ignore: /.*/
+      branches:
+        ignore: master
+
+# -------------------------
+#   EXECUTORS
+# -------------------------
+executors:
+  # Default workbench docker image environment which is used in all jobs
+  workbench-executor:
+    environment:
+      <<: *env-default
+    docker:
+      - image: << pipeline.parameters.workbench-image >>
+    working_directory: ~/workbench
+
+  # Default workbench environment plus MySQL database docker image
+  db-executor:
+    docker:
+      - image: << pipeline.parameters.workbench-image >>
+      - image: << pipeline.parameters.db-image >>
+        environment:
+          <<: *env-db
+    environment:
+      <<: *env-default
+      <<: *env-db
+    working_directory: ~/workbench
+
+  # Environment with browsers that is used to run Puppeteer end-to-end tests
+  puppeteer-executor:
+    docker:
+      - image: << pipeline.parameters.workbench-image >>
+    working_directory: ~/workbench
+    environment:
+      <<: *env-puppeteer
 
 # -------------------------
 #   COMMANDS
 # Refers to https://circleci.com/docs/2.0/reusing-config/#authoring-reusable-commands
 # -------------------------
 commands:
-  activate_service_account_credential:
-    description: "Activiate CircleCI service account credential"
-    steps:
-      - run:
-          name: Activate CircleCI service account credential
-          working_directory: ~/workbench
-          # Used to call gsutil from the circle environment.
-          command: ci/activate_creds.sh api/circle-sa-key.json
-
-  checkout_init_git:
+  checkout-code:
     description: "git checkout and update submodules"
     steps:
       - checkout
       - run:
-          name: Update git submodules
           command: git submodule update --init --recursive
 
-  halt_if_code_unchanged:
-    description: "Halt job if no code changed"
+  deploy-to-staging-perf:
+    description: "Deploy API and UI to staging or perf App Engine"
+    parameters:
+      project_name:
+        type: string
+        default: ""
+    steps:
+      - checkout-code
+      - attach_workspace:
+          at: .
+      - gcloud-auth-login
+      - deploy:
+          working_directory: ~/workbench/deploy
+          command: |
+            ./project.rb deploy \
+              --project << parameters.project_name >> \
+              --account << pipeline.parameters.circle-service-account >> \
+              --git-version "${CIRCLE_TAG}" \
+              --app-version "${CIRCLE_TAG}" \
+              --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
+              --key-file ~/workbench/api/circle-sa-key.json \
+              --promote
+          name: Deploy API and UI to << parameters.project_name >> App Engine
+
+  gcloud-auth-login:
+    description: "Activiate CircleCI service account credential"
     steps:
       - run:
+          working_directory: ~/workbench
+          command: ci/activate_creds.sh api/circle-sa-key.json
+
+  halt-puppeteer-check:
+    description: "Skip ignored changes"
+    steps:
+      - run:
+          name: "Skip ignored changes"
           command: |
-            if ! git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep -qvFf .circleci/e2e-job-ignore-patterns.txt; then
-              echo "Application code have not changed. halting job."
-              circleci step halt
-            else
-              git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep -vFf .circleci/e2e-job-ignore-patterns.txt
-              echo "job continuing."
+            if ! git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep -qvFf .circleci/e2e-job-ignore-patterns.txt ; then
+              echo "Workbench application code are not changed."
+              circleci-agent step halt
             fi
-          name: Halt job if no code changed
-
-  ensure_branch_has_changes:
-    description: Halt job and succeed early if no code changes in << parameters.dir_name >> directory on non-master branch
-    parameters:
-      dir_name:
-        type: enum
-        enum: ["api", "ui"]
-    steps:
+      - store-commit-message
       - run:
+          name: "Halt if commit message contains 'skip e2e'"
           command: |
-            if [ ${CIRCLE_BRANCH} != "" ] &&
-              [ ${CIRCLE_BRANCH} != "master" ] &&
-              [ $(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep << parameters.dir_name >>/ | wc -l | xargs) == 0 ]; then
-                echo "No relevant changes in << parameters.dir_name >> directory on non-master branch. halting job."
-                circleci step halt
+            echo "Git commit message: $COMMIT_MESSAGE"
+            # Double comma is "Parameter Expansion". It converts string to lowercase letters
+            if [[ "${COMMIT_MESSAGE,,}" == *"skip e2e"* ]]; then
+              echo "Halting e2e test."
+              circleci-agent step halt
             fi
-          name: Halt job and succeed early if no code changes in << parameters.dir_name >> directory on non-master branch
-
-  install_ui_dependencies:
-    description: "workbench/ui: yarn install, save and restore cache"
-    steps:
-      # caching: https://circleci.com/docs/2.0/caching/
-      - restore_cache:
-          name: "restore ui cache"
-          keys:
-            - v1-ui-cache-{{ .Branch }}-{{ checksum "~/workbench/ui/yarn.lock" }}
-            - v1-ui-cache-master
-            - v1-ui-cache-
       - run:
-          name: "workbench/ui: yarn install dependencies"
-          working_directory: ~/workbench/ui
-          command: yarn install --verbose --frozen-lockfile --non-interactive
-      - save_cache:
-          name: "save ui cache"
-          paths:
-            - ~/.cache/yarn
-            - ui/node_modules
-          key: v1-ui-cache-{{ .Branch }}-{{ checksum "~/workbench/ui/yarn.lock" }}
+          name: "Halt if branch is not a pull request"
+          command: bash .circleci/pr-skip-ci.sh
 
-  install_e2e_dependencies:
-    description: "workbench/e2e: yarn install, save and restore cache"
-    steps:
-      - restore_cache:
-          name: "restore e2e cache"
-          keys:
-            - v1-e2e-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
-            - v1-e2e-cache-master
-            - v1-e2e-cache-
-      - run:
-          name: "workbench/e2e: yarn install dependencies"
-          working_directory: ~/workbench/e2e
-          command: yarn install --frozen-lockfile --non-interactive
-      - save_cache:
-          name: "save e2e cache"
-          paths:
-            - ~/.cache/yarn
-            - e2e/node_modules
-          key: v1-e2e-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
-
-  manage_api_cache:
-    description: "workbench/api: save or restore gradle cache"
+  halt-test-check:
+    description: "Halt job and succeed early if no code changes detected in << parameters.dir_names >> directories on non-master branch"
     parameters:
-      save:
-        type: boolean
-        default: false
-      restore:
-        type: boolean
-        default: false
+      dir_names:
+        type: string
+        default: ""
     steps:
-      - when:
-          condition: << parameters.save >>
-          steps:
-            - save_cache:
-                name: "save api gradle cache"
-                # See https://docs.gradle.org/current/userguide/directory_layout.html#dir:project_root
-                # Save Project-specific cache and Global cache (for everything that’s not project-specific).
-                paths:
-                  - .gradle
-                  - ~/.gradle
-                key: v3-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
-      - when:
-          condition: << parameters.restore >>
-          steps:
-            - restore_cache:
-                name: "restore api gradle cache"
-                keys:
-                  - v3-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
-                  - v3-gradle-cache-master
-                  - v3-gradle-cache-
-
-  run_e2e_test:
-    description: "Run puppeteer e2e integration tests"
-    parameters:
-      env_name:
-        description: The target environment for run Puppeteer tests. Must be one of "local", "test", "staging".
-        default: "test"
-        type: enum
-        enum: ["local", "test", "staging"]
-    steps:
-      - install_e2e_dependencies
-      - browser-tools/install-browser-tools
       - run:
-          name: Update test user environment variables
           command: |
-            case << parameters.env_name >> in
-              "staging") echo 'export USER_NAME=$PUPPETEER_USER_STAGING' >> $BASH_ENV ;;
-              "test") echo 'export USER_NAME=$PUPPETEER_USER_TEST' >> $BASH_ENV ;;
-              "local") echo 'export USER_NAME=$PUPPETEER_USER_LOCAL' >> $BASH_ENV ;;
-            esac
-            echo 'export PASSWORD=$PUPPETEER_USER_PASSWORD' >> $BASH_ENV
-            source $BASH_ENV
-      - run:
-          name: Run puppeteer e2e tests
-          working_directory: ~/workbench/e2e
-          command: |
-            circleci tests glob "tests/**/*.spec.ts" | circleci tests split --split-by=timings > /tmp/tests-to-run
-            yarn test:ci $(cat /tmp/tests-to-run)
-          no_output_timeout: 15m
-      - store_artifacts:
-          path: e2e/logs
-          destination: logs
-      - store_test_results:
-          path: ~/workbench/e2e/logs
+            if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} != "master" ]; then
+              diff=$(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) -- api/src/main/resources | wc -l | xargs)
+              if [ ${diff} -eq 0 ]; then
+                changed=false
+                for dir_name in << parameters.dir_names >>; do
+                  dir_diff=$(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) -- ${dir_name} | wc -l | xargs)
+                  if [ ${dir_diff} -gt 0 ]; then
+                    changed=true
+                    break
+                  fi
+                done
+                if [[ $changed = false ]]; then
+                  echo "Code in '<< parameters.dir_names >>' directories are not changed"
+                  circleci-agent step halt
+                fi
+              fi
+            fi
+          name: Halt if code in '<< parameters.dir_names >>' directories are not changed
 
-  start_local_api:
-    description: "Start local API server"
+  launch-local-api:
+    description: "Launch local API server"
     steps:
-      - manage_api_cache:
-          restore: true
       - run:
-          # MySQL sometimes refuses connections by the time we attempt to apply
-          # data migrations. Watch the port for 2m for startup.
+          # Watch the port for 2m for MySQL start up
           name: Await MySQL startup
           command: dockerize -wait tcp://127.0.0.1:3306 -timeout 2m
       - run:
@@ -271,14 +215,14 @@ commands:
           name: Wait for local API server to start
           command: dockerize -wait tcp://localhost:8081/v1/status -timeout 4m
 
-  start_local_ui:
-    description: "Start local UI server"
+  launch-local-ui:
+    description: "Launch local UI server"
     parameters:
       connect_local_api:
         type: boolean
         default: false
     steps:
-      - install_ui_dependencies
+      - ui-cache
       - when:
           condition: << parameters.connect_local_api >>
           steps:
@@ -294,43 +238,98 @@ commands:
             - run:
                 name: Launch local UI server
                 working_directory: ~/workbench/ui
-                # Start local UI server that connects to "test" api
+                # Start local UI server that connects to "test" api server
                 command: yarn dev-up
                 background: true
       - run:
-          name: Wait for local UI server to start
+          name: Watch the port for 4m for local UI server start up
           command: dockerize -wait tcp://localhost:4200 -timeout 4m
 
-  store_commit_message:
+  run-api-test:
+    description: "Run api tests, reused in api-*-test jobs"
+    parameters:
+      additional_steps:
+        type: steps
+        default: []
+    steps:
+      - checkout-code
+      - halt-test-check:
+          dir_names: "api"
+      - restore_cache:
+          key: v5-gradle-wrapper-{{ .Branch }}-{{ checksum "~/workbench/api/gradle/wrapper/gradle-wrapper.properties" }}
+      - restore_cache:
+          key: v5-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
+      - steps: << parameters.additional_steps >>
+      - save_cache:
+          paths:
+            - ~/.gradle/wrapper
+          key: v5-gradle-wrapper-{{ .Branch }}-{{ checksum "~/workbench/api/gradle/wrapper/gradle-wrapper.properties" }}
+      - save_cache:
+          paths:
+            - ~/.gradle/caches
+          key: v5-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
+      - store_test_results:
+          path: ~/workbench/api/build/test-results/test
+      - store_artifacts:
+          path: ~/workbench/api/build/test-results/test
+          destination: JunitTestResult
+          when: always
+
+  run-puppeteer-test:
+    description: "Run puppeteer integration tests"
+    steps:
+      - browser-tools/install-browser-tools
+      - run:
+          command: |
+            echo "Environment parameter WORKBENCH_ENV=${WORKBENCH_ENV}"
+      - restore_cache:
+          keys:
+            - v5-e2e-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
+      - run:
+          working_directory: ~/workbench/e2e
+          command: yarn install --frozen-lockfile --non-interactive
+      - save_cache:
+          paths:
+            - ~/.cache/yarn
+            - e2e/node_modules
+          key: v5-e2e-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
+      - run:
+          name: Running Puppeteer e2e tests
+          working_directory: ~/workbench/e2e
+          command: |
+            circleci tests glob "tests/**/*.spec.ts" | circleci tests split --split-by=timings > /tmp/tests-to-run
+            yarn test:ci $(cat /tmp/tests-to-run)
+          no_output_timeout: 15m
+      - store_artifacts:
+          path: e2e/logs
+          destination: logs
+          when: always
+      - store_test_results:
+          path: ~/workbench/e2e/logs
+
+  store-commit-message:
+    description: "Export Git commit message to environment variable"
     steps:
       - run:
-          name: "Store Git commit message in an environment variable"
           command: |
             echo 'export COMMIT_MESSAGE=$(git log -1 --pretty=format:"%s")' >> $BASH_ENV
             source $BASH_ENV
+          name: "Export COMMIT_MESSAGE environment variable"
 
-  e2e_skip:
-    description: "Halt job if commit message contains 'SKIP E2E'"
+  ui-cache:
+    description: "workbench/ui: yarn install, save and restore cache"
     steps:
-      - store_commit_message
+      - restore_cache:
+          keys:
+            - v5-ui-cache-{{ .Branch }}-{{ checksum "~/workbench/ui/yarn.lock" }}
       - run:
-          name: "Halt job if commit message contains 'SKIP E2E'"
-          command: |
-            echo "Git commit message: $COMMIT_MESSAGE"
-            # Double comma is called "Parameter Expansion" in Bash version 4+. It converts string to lowercase letters.
-            if [[ "${COMMIT_MESSAGE,,}" == *"skip e2e"* ]]; then
-              echo "Halting e2e test."
-              circleci step halt
-            fi
-
-  e2e_presubmit_check:
-    steps:
-      - e2e_skip
-      - halt_if_code_unchanged
-      - run:
-          name: "Halt job if not a pull request"
-          command: bash .circleci/pr-skip-ci.sh
-
+          working_directory: ~/workbench/ui
+          command: yarn install --verbose --frozen-lockfile --non-interactive
+      - save_cache:
+          paths:
+            - ~/.cache/yarn
+            - ui/node_modules
+          key: v5-ui-cache-{{ .Branch }}-{{ checksum "~/workbench/ui/yarn.lock" }}
 
 # -------------------------
 #        JOBS
@@ -338,186 +337,111 @@ commands:
 jobs:
   api-unit-test:
     parallelism: 4
-    <<: *java_defaults
+    executor: workbench-executor
     steps:
-      - checkout_init_git
-      - ensure_branch_has_changes:
-          dir_name: "api"
-      - manage_api_cache:
-          restore: true
-      - run:
-          name: Validate Swagger definitions
-          working_directory: ~/workbench/api
-          command: |
-            if [ "$CIRCLE_NODE_INDEX" == 0 ]; then
-              ./project.rb validate-swagger --project-prop verboseTestLogging=yes
-            fi
-      - run:
-          name: Run Java genomics unit tests
-          working_directory: ~/workbench/api
-          command: |
-            CLASSNAMES=$(circleci tests glob "genomics/src/test/java/**/*Test.java" \
-              | cut -c 1- \
-              | sed 's@genomics/src/test/java/@@' \
-              | sed 's@/@.@g' \
-              | sed 's/\.[^.]*$//' \
-              | circleci tests split --split-by=timings --timings-type=classname --index=$CIRCLE_NODE_INDEX)
-            GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) print "--tests", $i }')
-            gradle -p genomics test $GRADLE_ARGS
-      - run:
-          name: Run Java api unit tests
-          working_directory: ~/workbench/api
-          # See: https://circleci.com/docs/2.0/language-java/#sample-configuration
-          # "circleci tests split" command provides each CircleCI node with a list of fully qualified test names to execute.
-          #  JUnit XML test reports provide tests timing data. CircleCI partition tests based on timing data.
-          #
-          # Formatting fully qualified test names for gradle and running them with "gradle test" command. Short explanation on commands:
-          #   Find all unit tests recursively in "api/src/test/java/" directories.
-          #   Strips off "src/test/java/" substring;
-          #   Replaces all path separator "/" with ".";
-          #   Removes file extensions.
-          #   Append "--tests" in front of file name.
-          #
-          # Example of string before formatting:
-          #   src/test/java/org/pmiops/*********/monitoring/LogsBasedMetricsServiceTest.java src/test/java/org/pmiops/*********/monitoring/MonitoringServiceTest.java
-          # Example of Gradle command after formatting:
-          #   gradle test --tests org.pmiops.*********.monitoring.LogsBasedMetricsServiceTest --tests org.pmiops.*********.monitoring.MonitoringServiceTest
-          #
-          # We exclude the :genomics:test task below because otherwise gradle will attempt to run all the regular API unit tests under the genomics
-          # submodule and will be unable to find them and will barf
-          command: |
-            CLASSNAMES=$(circleci tests glob "src/test/java/**/*Test.java" "src/test/java/**/*Test.kt" \
-              | cut -c 1- \
-              | sed 's@src/test/java/@@' \
-              | sed 's@/@.@g' \
-              | sed 's/\.[^.]*$//' \
-              | circleci tests split --split-by=timings --timings-type=classname --index=$CIRCLE_NODE_INDEX)
-            GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) print "--tests", $i }')
-            gradle :test $GRADLE_ARGS
-      - run:
-          # Lint last; it's more important to surface test failures early.
-          name: Java linting
-          working_directory: ~/workbench/api
-          command: |
-            if [ "$CIRCLE_NODE_INDEX" == 0 ]; then
-              ./gradlew spotlessCheck
-            fi
-      - store_test_results:
-           path: ~/workbench/api/build/test-results/test
-      # Save JUnit test results in artifacts because it provides the timing info on tests.
-      - store_artifacts:
-          path: ~/workbench/api/build/test-results/test
-          destination: JunitTestResult
-      - manage_api_cache:
-          save: true
+      - run-api-test:
+          additional_steps:
+            - run:
+                name: Validate Swagger definitions
+                working_directory: ~/workbench/api
+                command: |
+                  if [ "$CIRCLE_NODE_INDEX" == 0 ]; then
+                    ./project.rb validate-swagger --project-prop verboseTestLogging=yes
+                  fi
+            - run:
+                name: Run Java genomics unit tests
+                working_directory: ~/workbench/api
+                command: |
+                  CLASSNAMES=$(circleci tests glob "genomics/src/test/java/**/*Test.java" \
+                    | cut -c 1- \
+                    | sed 's@genomics/src/test/java/@@' \
+                    | sed 's@/@.@g' \
+                    | sed 's/\.[^.]*$//' \
+                    | circleci tests split --split-by=timings --index=$CIRCLE_NODE_INDEX)
+                  GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) print "--tests", $i }')
+                  gradle -p genomics test $GRADLE_ARGS
+            - run:
+                name: Run Java api unit tests
+                working_directory: ~/workbench/api
+                # For script logics and explanation, see README.
+                command: |
+                  CLASSNAMES=$(circleci tests glob "src/test/java/**/*Test.java" "src/test/java/**/*Test.kt" \
+                    | cut -c 1- \
+                    | sed 's@src/test/java/@@' \
+                    | sed 's@/@.@g' \
+                    | sed 's/\.[^.]*$//' \
+                    | circleci tests split --split-by=timings --index=$CIRCLE_NODE_INDEX)
+                  GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) print "--tests", $i }')
+                  gradle :test $GRADLE_ARGS
+            - run:
+                name: Lint Java code
+                working_directory: ~/workbench/api
+                command: |
+                  if [ "$CIRCLE_NODE_INDEX" == 0 ]; then
+                    ./gradlew spotlessCheck
+                  fi
+      - persist_to_workspace:
+          root: .
+          paths:
+            - api
 
   api-local-test:
     # The local API server starts two Java processes (the API server and the cron emulator).
-    # So we want the Java memory limit to be below half of that: other things on the
-    # machine need memory as well. The medium+ machine has 6GB.
-    # Refers to https://circleci.com/docs/2.0/configuration-reference/#resource_class
+    # And other things need memory as well. The medium+ machine has 6GB.
     resource_class: medium+
-    docker:
-      - image: << pipeline.parameters.workbench_image >>
-      - image: << pipeline.parameters.mysql_image >>
-        environment:
-          <<: *mysql_env
-    working_directory: ~/workbench
-    environment:
-      <<: *java_env
+    executor: db-executor
     steps:
-      - checkout_init_git
-      - activate_service_account_credential
-      - start_local_api
-      - run:
-          name: Local API tests on running server
-          working_directory: ~/workbench/api
-          command: ./project.rb run-local-api-tests && ./project.rb stop-local-api
-      - manage_api_cache:
-          save: true
-
-  api-deploy-to-test:
-    <<: *java_defaults
-    steps:
-      - checkout_init_git
-      # Note: most of the time spent here appears to be in Gradle / App Engine
-      # deployment. We tried more aggressively caching outputs via Circle
-      # workspaces, but that seemed to have a negligible effect on speed. It's
-      # also tricky to pick specific sub directories since the API deploy
-      # touches several top level folders {common,}api.
-      - manage_api_cache:
-          restore: true
-      - activate_service_account_credential
-      - deploy:
-          name: Deploy API to "test" App Engine
-          working_directory: ~/workbench/api
-          command: |
-            ./project.rb deploy \
-              --project all-of-us-workbench-test \
-              --account << pipeline.parameters.circleci_service_account >> \
-              --version circle-ci-test \
-              --key-file circle-sa-key.json \
-              --promote
-      - manage_api_cache:
-          save: true
+      - run-api-test:
+          additional_steps:
+            - gcloud-auth-login
+            - launch-local-api
+            - run:
+                working_directory: ~/workbench/api
+                command: ./project.rb run-local-api-tests && ./project.rb stop-local-api
 
   api-deps-check:
-    <<: *java_defaults
+    executor: workbench-executor
     steps:
-      - checkout_init_git
-      - manage_api_cache:
-          restore: true
-      - run:
-          name: Scan dependencies for vulnerabilities
-          working_directory: ~/workbench/api
-          command: ./project.rb gradle dependencyCheckAnalyze --info
+      - run-api-test:
+          additional_steps:
+            - run:
+                name: Scan dependencies for vulnerabilities
+                working_directory: ~/workbench/api
+                command: ./project.rb gradle dependencyCheckAnalyze --info
 
   api-integration-test:
-    <<: *java_defaults
+    executor: workbench-executor
     steps:
-      - checkout_init_git
-      - ensure_branch_has_changes:
-          dir_name: "api"
-      - manage_api_cache:
-          restore: true
-      - activate_service_account_credential
-      - run:
-          name: Run Integration Tests
-          working_directory: ~/workbench/api
-          command: ./project.rb integration
-      - store_test_results:
-          path: ~/workbench/api/build/test-results/integrationTest/
-      - manage_api_cache:
-          save: true
+      - run-api-test:
+          additional_steps:
+            - gcloud-auth-login
+            - run:
+                name: Run Integration Tests
+                working_directory: ~/workbench/api
+                command: ./project.rb integration
 
   api-bigquery-test:
-    <<: *java_defaults
+    executor: workbench-executor
     steps:
-      - checkout_init_git
-      - ensure_branch_has_changes:
-          dir_name: "api"
-      - manage_api_cache:
-          restore: true
-      - activate_service_account_credential
-      - run:
-          name: Run BigQuery tests
-          working_directory: ~/workbench/api
-          command: ./project.rb bigquerytest
-      - manage_api_cache:
-          save: true
+      - run-api-test:
+          additional_steps:
+            - gcloud-auth-login
+            - run:
+                name: Run BigQuery tests
+                working_directory: ~/workbench/api
+                command: ./project.rb bigquerytest
 
   ui-unit-test:
-    <<: *defaults
+    executor: workbench-executor
     steps:
-      - checkout_init_git
-      - ensure_branch_has_changes:
-          dir_name: "ui"
+      - checkout-code
+      - halt-test-check:
+          dir_names: "ui"
       - run:
           name: Download Swagger CLI
           working_directory: ~/workbench
-          command: |
-            ruby -r ./aou-utils/swagger.rb -e Workbench::Swagger.download_swagger_codegen_cli
-      - install_ui_dependencies
+          command: ruby -r ./aou-utils/swagger.rb -e Workbench::Swagger.download_swagger_codegen_cli
+      - ui-cache
       - run:
           name: Yarn codegen
           working_directory: ~/workbench/ui
@@ -525,13 +449,11 @@ jobs:
       - run:
           name: Run Angular tests
           working_directory: ~/workbench/ui
-          command: |
-            yarn test --no-watch --no-progress --browsers=ChromeHeadless
+          command: yarn test --no-watch --no-progress --browsers=ChromeHeadless
       - run:
           name: Run React jest tests
           working_directory: ~/workbench/ui
-          command: |
-            yarn test-react --detectOpenHandles --forceExit --runInBand
+          command: yarn test-react --detectOpenHandles --forceExit --runInBand
       - run:
           name: Build UI with strict compilation
           working_directory: ~/workbench/ui
@@ -547,21 +469,37 @@ jobs:
             - ui
 
   ui-deploy-to-test:
-    <<: *defaults
+    executor: workbench-executor
     steps:
-      - checkout_init_git
-      # Use "ui-unit-test" job's workspace here to avoid redoing the setup.
+      - checkout-code
       - attach_workspace:
           at: .
-      - install_ui_dependencies
-      - activate_service_account_credential
+      - gcloud-auth-login
       - deploy:
           name: Deploy UI to "test" App Engine
           working_directory: ~/workbench/ui
           command: |
             ./project.rb deploy-ui \
               --project all-of-us-workbench-test \
-              --account << pipeline.parameters.circleci_service_account >> \
+              --account << pipeline.parameters.circle-service-account >> \
+              --version circle-ci-test \
+              --key-file circle-sa-key.json \
+              --promote
+
+  api-deploy-to-test:
+    executor: workbench-executor
+    steps:
+      - checkout-code
+      - attach_workspace:
+          at: .
+      - gcloud-auth-login
+      - deploy:
+          name: Deploy API to "test" App Engine
+          working_directory: ~/workbench/api
+          command: |
+            ./project.rb deploy \
+              --project all-of-us-workbench-test \
+              --account << pipeline.parameters.circle-service-account >> \
               --version circle-ci-test \
               --key-file circle-sa-key.json \
               --promote
@@ -570,52 +508,21 @@ jobs:
   # the release for a tagged version only. In "test", we maintain individual
   # release jobs for API and UI to allow faster deploys and because we lack
   # a version tag.
-  deploy-staging:
-    <<: *defaults
+  deploy-to-staging:
+    executor: workbench-executor
     steps:
-      - checkout_init_git
-      - manage_api_cache:
-          restore: true
-      - activate_service_account_credential
-      - deploy:
-          working_directory: ~/workbench/deploy
-          name: Deploy API and UI to "staging" App Engine
-          command: |
-            ./project.rb deploy \
-              --project all-of-us-rw-staging \
-              --account << pipeline.parameters.circleci_service_account >> \
-              --git-version "${CIRCLE_TAG}" \
-              --app-version "${CIRCLE_TAG}" \
-              --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
-              --key-file ~/workbench/api/circle-sa-key.json \
-              --promote
-      - manage_api_cache:
-          save: true
+      - deploy-to-staging-perf:
+          project_name: "all-of-us-rw-staging"
 
-  deploy-perf:
-    <<: *defaults
+  deploy-to-perf:
+    executor: workbench-executor
     steps:
-      - checkout_init_git
-      - manage_api_cache:
-          restore: true
-      - activate_service_account_credential
-      - deploy:
-          name: Deploy API and UI to "perf" App Engine
-          working_directory: ~/workbench/deploy
-          command: |
-            ./project.rb deploy \
-              --project all-of-us-rw-perf \
-              --account << pipeline.parameters.circleci_service_account >> \
-              --git-version "${CIRCLE_TAG}" \
-              --app-version "${CIRCLE_TAG}" \
-              --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
-              --key-file ~/workbench/api/circle-sa-key.json \
-              --promote
-      - manage_api_cache:
-          save: true
+      - deploy-to-staging-perf:
+          project_name: "all-of-us-rw-perf"
 
-  # Run Puppeteer e2e UI tests on deployed "local", "test" or "staging" environment.
-  puppeteer-e2e-test:
+  # Run Puppeteer UI tests on deployed "local", "test" or "staging" environment.
+  puppeteer-test:
+    executor: puppeteer-executor
     parameters:
       env_name:
         description: The target environment for run Puppeteer tests. Must be one of "test", "staging", "local".
@@ -632,59 +539,81 @@ jobs:
         default: 1
       optional_steps:
         type: steps
-        default: [ ]
-    <<: *defaults
+        default: []
     environment:
-      <<: *e2e_env
       WORKBENCH_ENV: << parameters.env_name >>
       TEST_MODE: << parameters.test_mode >>
-      CI: true
-      NODE_ENV: development
-    working_directory: ~/workbench
     parallelism: << parameters.parallel_num >>
     steps:
-      - checkout_init_git
+      - checkout-code
       - steps: << parameters.optional_steps >>
+      - halt-test-check:
+          dir_names: "api ui e2e"
+      - run:
+          name: Update test user environment variables
+          command: |
+            case << parameters.env_name >> in
+              "staging") echo 'export USER_NAME=$PUPPETEER_USER_STAGING' >> $BASH_ENV ;;
+              "test") echo 'export USER_NAME=$PUPPETEER_USER_TEST' >> $BASH_ENV ;;
+              "local") echo 'export USER_NAME=$PUPPETEER_USER_LOCAL' >> $BASH_ENV ;;
+            esac
+            echo 'export PASSWORD=$PUPPETEER_USER_PASSWORD' >> $BASH_ENV
+            source $BASH_ENV
       - when:
           condition:
-            equal: [ "local", << parameters.env_name >>]
+            equal: [ "local", << parameters.env_name >> ]
           steps:
-            - start_local_ui
-      - run_e2e_test:
-          env_name: << parameters.env_name >>
+            # Local UI server is not used if WORKBENCH_ENV reset to "test" value in next step
+            - launch-local-ui
+            - run:
+                name: See if WORKBENCH_ENV environment variable should override from "local" to "test".
+                command: |
+                  if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} != "master" ]; then
+                    # Count total number of files changed.
+                    CHANGED_COUNT=$(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | wc -l | xargs)
+                    E2E_CHANGED_COUNT=$(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) -- e2e | wc -l | xargs)
+                    # If e2e tests are the only files that have changed, run e2e tests against the "test" environment.
+                    if [ $E2E_CHANGED_COUNT -gt 0 ] && [ $E2E_CHANGED_COUNT -eq $CHANGED_COUNT ]; then
+                        echo 'export WORKBENCH_ENV=test' >> $BASH_ENV
+                        echo 'export USER_NAME=$PUPPETEER_USER_TEST' >> $BASH_ENV
+                        source $BASH_ENV
+                        echo "Reset WORKBENCH_ENV=test"
+                    fi
+                  fi
+      - run-puppeteer-test
 
 
 workflows:
   build-test-deploy:
     jobs:
-      # Always run basic test/lint/compilation (open PRs, master merge).
+      # Always run basic test/lint/compilation (open PRs, master branch merge)
       # Note: by default tags are not picked up.
       - api-local-test
       - api-unit-test
       - ui-unit-test
       - api-bigquery-test
       - api-integration-test
-      # Run deployment to "test" on master merges.
+      # Deploy to "test" on master branch merges
       - api-deploy-to-test:
-          filters: *filter_only_master_branch
+          <<: *filter-master-branch
           requires:
             - api-unit-test
       - ui-deploy-to-test:
-          filters: *filter_only_master_branch
+          <<: *filter-master-branch
           requires:
             - ui-unit-test
-      # Deploy local UI server connected to "test" API server. Run Puppeteer tests for PR commits only.
-      - puppeteer-e2e-test:
-          filters: *filter_only_pr_branch
+      # Deploy local UI server connected to "test" API server. Run Puppeteer tests for PR commits only
+      - puppeteer-test:
+          <<: *filter-pr-branch
           env_name: "local"
           parallel_num: 2
           optional_steps:
-            - e2e_presubmit_check
-      # On master branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully.
-      - puppeteer-e2e-test:
+            - halt-puppeteer-check
+      # On master branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully
+      - puppeteer-test:
           parallel_num: 4
           env_name: "test"
-          filters: *filter_only_master_branch
+          <<: *filter-master-branch
           requires:
             - api-deploy-to-test
             - ui-deploy-to-test
@@ -692,20 +621,19 @@ workflows:
   deploy-staging:
     jobs:
       - api-local-test:
-          filters: *filter_only_release_tags
+          <<: *filter-release-tags
       - api-unit-test:
-          filters: *filter_only_release_tags
+          <<: *filter-release-tags
       - ui-unit-test:
-          filters: *filter_only_release_tags
-      # Run slower integration tests and dep checks on release tags only.
+          <<: *filter-release-tags
       - api-bigquery-test:
-          filters: *filter_only_release_tags
+          <<: *filter-release-tags
       - api-deps-check:
-          filters: *filter_only_release_tags
+          <<: *filter-release-tags
       - api-integration-test:
-          filters: *filter_only_release_tags
-      - deploy-staging:
-          filters: *filter_only_release_tags
+          <<: *filter-release-tags
+      - deploy-to-staging:
+          <<: *filter-release-tags
           requires:
             - api-local-test
             - api-unit-test
@@ -713,8 +641,8 @@ workflows:
             - api-deps-check
             - api-integration-test
             - ui-unit-test
-      - deploy-perf:
-          filters: *filter_only_release_tags
+      - deploy-to-perf:
+          <<: *filter-release-tags
           requires:
             - api-local-test
             - api-unit-test
@@ -723,17 +651,17 @@ workflows:
             - api-integration-test
             - ui-unit-test
       # Not ready until delete workspace script is working
-      # - puppeteer-e2e-test:
+      # - puppeteer-test:
+          # <<: *filter-release-tags
           # parallel_num: 4
           # env_name: "staging"
-          # filters: *filter_only_release_tags
           # requires:
-            # - deploy-staging
+            # - deploy-to-staging
 
   nightly-tests:
     triggers:
       - schedule:
-          # Run this command once every day at 4:00AM UTC
+          # Run once every day at 4:00AM UTC
           cron: "0 4 * * *"
           filters:
             branches:
@@ -741,7 +669,13 @@ workflows:
                 - master
     jobs:
       - api-bigquery-test
-      - puppeteer-e2e-test:
+      - puppeteer-test:
           parallel_num: 1
           test_mode: "nightly-integration"
           env_name: "test"
+
+experimental:
+  notify:
+    branches:
+      only:
+        - master

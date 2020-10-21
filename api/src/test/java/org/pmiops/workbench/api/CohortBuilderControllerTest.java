@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.common.collect.ImmutableList;
 import java.util.List;
 import javax.inject.Provider;
 import org.junit.Before;
@@ -15,9 +16,11 @@ import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.CBDataFilterDao;
+import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
+import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cdr.model.DbDomainInfo;
@@ -66,6 +69,7 @@ public class CohortBuilderControllerTest {
   @Mock private CdrVersionService cdrVersionService;
   @Autowired private CBCriteriaDao cbCriteriaDao;
   @Autowired private CBCriteriaAttributeDao cbCriteriaAttributeDao;
+  @Autowired private ConceptDao conceptDao;
   @Autowired private CBDataFilterDao cbDataFilterDao;
   @Autowired private DomainInfoDao domainInfoDao;
   @Autowired private PersonDao personDao;
@@ -89,6 +93,7 @@ public class CohortBuilderControllerTest {
             cohortQueryBuilder,
             cbCriteriaAttributeDao,
             cbCriteriaDao,
+            conceptDao,
             cbDataFilterDao,
             domainInfoDao,
             personDao,
@@ -380,6 +385,41 @@ public class CohortBuilderControllerTest {
       assertEquals(
           "Bad Request: Please provide a valid type. blah is not valid.", bre.getMessage());
     }
+  }
+
+  @Test
+  public void findCriteriaByDomainAndSearchTermPhysicalMeasurement() {
+    DbConcept dbConcept =
+        conceptDao.save(
+            new DbConcept()
+                .conceptId(123L)
+                .conceptName("chol blah")
+                .conceptCode("myTerm")
+                .standardConcept("")
+                .sourceCountValue(10L)
+                .domainId("Measurement")
+                .vocabularyId(CriteriaType.ICD9CM.toString()));
+
+    Criteria criteria =
+        new Criteria()
+            .code(dbConcept.getConceptCode())
+            .conceptId(dbConcept.getConceptId())
+            .childCount(dbConcept.getSourceCountValue())
+            .parentCount(0L)
+            .domainId(dbConcept.getDomainId())
+            .name(dbConcept.getConceptName())
+            .type(dbConcept.getVocabularyId())
+            .selectable(true)
+            .isStandard(ImmutableList.of("S", "C").contains(dbConcept.getStandardConcept()));
+
+    assertEquals(
+        criteria,
+        controller
+            .findCriteriaByDomainAndSearchTerm(
+                1L, Domain.PHYSICAL_MEASUREMENT.name(), "myTerm", null)
+            .getBody()
+            .getItems()
+            .get(0));
   }
 
   @Test

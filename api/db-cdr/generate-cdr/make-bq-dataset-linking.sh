@@ -219,7 +219,9 @@ VALUES
     ('QUESTION_CONCEPT_ID', 'answer.question_concept_id', ' ', 'Survey'),
     ('QUESTION', 'answer.question', ' ', 'Survey'),
     ('ANSWER_CONCEPT_ID', 'answer.answer_concept_id', ' ', 'Survey'),
-    ('ANSWER', 'answer.answer', ' ', 'Survey')"
+    ('ANSWER', 'answer.answer', ' ', 'Survey'),
+    ('SURVEY_VERSION_ID', 'answer.survey_version_id', ' ', 'Survey'),
+    ('SURVEY_VERSION_NAME', 'answer.survey_version_name', ' ', 'Survey')"
 
 echo "ds_linking - inserting visit data"
 

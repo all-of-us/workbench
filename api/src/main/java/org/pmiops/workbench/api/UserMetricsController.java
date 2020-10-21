@@ -103,6 +103,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         }
         ConceptSet result =
             new ConceptSet()
+                .domain(conceptSet.getDomainEnum())
                 .etag(Etags.fromVersion(conceptSet.getVersion()))
                 .lastModifiedTime(conceptSet.getLastModifiedTime().getTime())
                 .creationTime(conceptSet.getCreationTime().getTime())
