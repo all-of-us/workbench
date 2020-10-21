@@ -21,6 +21,11 @@
       oldColumnName="version"
       tableName="cb_survey_version"/>
 
+    <renameColumn columnDataType="BIGINT"
+      newColumnName="survey_version_concept_id"
+      oldColumnName="survey_id"
+      tableName="cb_survey_attribute"/>
+
   </changeSet>
 
 </databaseChangeLog>
