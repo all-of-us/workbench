@@ -142,6 +142,7 @@ describe('NewDataSetModal', () => {
       kernelType: KernelTypeEnum.Python
     });
   });
+
   it ('should have default dataSet name if dataset is passed as props', () => {
     const name = 'Update Dataset';
     dataSet = {...dataSet, name: name, description: 'dataset'};
@@ -149,7 +150,37 @@ describe('NewDataSetModal', () => {
     const dataSetName  =
         wrapper.find('[data-test-id="data-set-name-input"]').first().prop('value');
     expect(dataSetName).toBe(name);
+  });
+
+  it ('should show microarray options if the display flag is true and the kernel is Python', async() => {
+    const name = 'Update Dataset';
+    dataSet = {...dataSet, name: name, description: 'dataset'};
+    const wrapper = mount(createNewDataSetModal());
+    wrapper.setProps({displayMicroarrayOptions: true});
+    wrapper.setState({kernelType: KernelTypeEnum.Python});
+    await waitOneTickAndUpdate(wrapper);
 
 
+    expect(wrapper.find('[data-test-id="include-raw-microarray-data"]').exists()).toBeTruthy();
+  });
+
+  it ('should not show microarray options if the cdrVersion does not have microarray data', async() => {
+    const name = 'Update Dataset';
+    dataSet = {...dataSet, name: name, description: 'dataset'};
+    const wrapper = mount(createNewDataSetModal());
+    wrapper.setProps({displayMicroarrayOptions: false});
+    wrapper.setState({kernelType: KernelTypeEnum.Python});
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(wrapper.exists()).toBeTruthy();
+  });
+
+  it ('should not show microarray options if the kernel is not Python', () => {
+  });
+
+  it ('should show genomics analysis tools if include raw microarray data is checked', () => {
+  });
+
+  it ('should export to notebook with the correct microarray parameters', () => {
   });
 });

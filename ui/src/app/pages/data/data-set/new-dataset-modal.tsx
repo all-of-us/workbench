@@ -9,11 +9,18 @@ import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
 
 import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {summarizeErrors} from 'app/utils';
+import {
+  getCdrVersion,
+  summarizeErrors,
+  withCdrVersions,
+  withUrlParams,
+  withUserProfile
+} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {encodeURIComponentStrict, navigateByUrl} from 'app/utils/navigation';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {
+  CdrVersionListResponse,
   DataSet,
   DataSetExportRequest,
   DataSetRequest,
@@ -26,11 +33,9 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {validate} from 'validate.js';
-import {FlexColumn} from '../../../components/flex';
 import {TextColumn} from '../../../components/text-column';
 import GenomicsAnalysisToolEnum = DataSetExportRequest.GenomicsAnalysisToolEnum;
-import GenomicsAnalysisToolEnum = DataSetExportRequest.GenomicsAnalysisToolEnum;
-import GenomicsAnalysisToolEnum = DataSetExportRequest.GenomicsAnalysisToolEnum;
+import GenomicsDataTypeEnum = DataSetExportRequest.GenomicsDataTypeEnum;
 
 interface Props {
   closeFunction: Function;
@@ -43,6 +48,7 @@ interface Props {
   workspaceNamespace: string;
   workspaceId: string;
   billingLocked: boolean;
+  displayMicroarrayOptions: boolean;
 }
 
 interface State {
@@ -73,8 +79,8 @@ const styles = {
   }
 };
 
-
-class NewDataSetModal extends React.Component<Props, State> {
+export const NewDataSetModal = fp.flow(withCdrVersions())
+(class extends React.Component<Props, State> {
   constructor(props) {
     super(props);
     this.state = {
@@ -168,7 +174,9 @@ class NewDataSetModal extends React.Component<Props, State> {
             dataSetRequest: request,
             kernelType: this.state.kernelType,
             notebookName: this.state.notebookName,
-            newNotebook: this.state.newNotebook
+            newNotebook: this.state.newNotebook,
+            genomicsDataType: this.state.includeRawMicroarrayData ? GenomicsDataTypeEnum.MICROARRAY : GenomicsDataTypeEnum.NONE,
+            genomicsAnalysisTool: this.state.genomicsAnalysisTool
           });
         // Open notebook in a new tab and return back to the Data tab
         const notebookUrl = `/workspaces/${workspaceNamespace}/${workspaceId}/notebooks/preview/` +
@@ -349,9 +357,10 @@ class NewDataSetModal extends React.Component<Props, State> {
                 </label>
               )}
           </React.Fragment>}
-          {this.state.kernelType === KernelTypeEnum.Python && <div style={{border: '1px solid grey'}}>
+          {this.props.displayMicroarrayOptions && this.state.kernelType === KernelTypeEnum.Python &&
+          <div style={{border: '1px solid grey', padding: '.5rem', paddingTop: 0, marginTop: '.5rem'}}>
             <TextColumn>
-              <div>Genomics Pre-alpha</div>
+              <div style={headerStyles.formLabel}>Genomics Pre-alpha</div>
               <div>(non-production only; synthetic data)</div>
             </TextColumn>
 
@@ -365,10 +374,10 @@ class NewDataSetModal extends React.Component<Props, State> {
               </div>
             </div>
 
-            {this.state.includeRawMicroarrayData && <React.Fragment>
-              <div style={headerStyles.formLabel}>
+            {this.state.includeRawMicroarrayData && <div style={{marginTop: '.3rem'}}>
+              <p style={{color: colors.primary}}>
                 Extract genomics data for analysis using:
-              </div>
+              </p>
 
               {Object.keys(GenomicsAnalysisToolEnum).map((enumKey, i) => {
                 return <React.Fragment>
@@ -381,7 +390,7 @@ class NewDataSetModal extends React.Component<Props, State> {
                   </label>
                 </React.Fragment>;
               })}
-            </React.Fragment>}
+            </div>}
           </div> }
         </React.Fragment>}
       </ModalBody>
@@ -402,8 +411,5 @@ class NewDataSetModal extends React.Component<Props, State> {
       </ModalFooter>
     </Modal>;
   }
-}
+});
 
-export {
-  NewDataSetModal,
-};
