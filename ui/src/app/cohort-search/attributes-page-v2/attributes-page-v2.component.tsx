@@ -314,9 +314,9 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
         const [surveyVersions, numericalAttributes] = await Promise.all(promises);
         form.cat = surveyVersions.items.map(attr => ({
           checked: false,
-          conceptName: attr.version,
+          conceptName: attr.displayName,
           estCount: attr.itemCount,
-          valueAsConceptId: attr.surveyId
+          valueAsConceptId: attr.surveyVersionConceptId
         }));
         if (numericalAttributes) {
           numericalAttributes.items.forEach(attr => {
@@ -533,7 +533,11 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
             }
             return checked;
           }, []);
-          attrs.push({name: AttrName.CAT, operator: Operator.IN, operands: catOperands});
+          attrs.push({
+            name: isCOPESurvey ? AttrName.SURVEYVERSIONCONCEPTID : AttrName.CAT,
+            operator: Operator.IN,
+            operands: catOperands
+          });
         }
         paramName = this.paramName;
       }

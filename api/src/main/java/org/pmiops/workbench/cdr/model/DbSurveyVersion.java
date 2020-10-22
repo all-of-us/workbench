@@ -1,9 +1,9 @@
 package org.pmiops.workbench.cdr.model;
 
 public interface DbSurveyVersion {
-  public long getSurveyId();
+  public long getSurveyVersionConceptId();
 
-  public String getVersion();
+  public String getDisplayName();
 
   public long getItemCount();
 }

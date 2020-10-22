@@ -257,7 +257,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
   @Query(
       value =
           "select count from cb_criteria c "
-              + "join(select substring_index(path,'.',1) as survey_id, count(*) as count "
+              + "join(select substring_index(path,'.',1) as survey_version_concept_id, count(*) as count "
               + "       from cb_criteria "
               + "      where domain_id = 'SURVEY' "
               + "        and subtype = 'QUESTION' "
@@ -265,19 +265,19 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
               + "                              from cb_criteria "
               + "                             where domain_id = 'SURVEY' "
               + "                               and match(full_text) against(concat(:term, '+[survey_rank1]') in boolean mode)) "
-              + "   group by survey_id) a "
-              + "on c.id = a.survey_id "
+              + "   group by survey_version_concept_id) a "
+              + "on c.id = a.survey_version_concept_id "
               + "where name = :surveyName",
       nativeQuery = true)
   Long findSurveyCount(@Param("surveyName") String surveyName, @Param("term") String term);
 
   @Query(
       value =
-          "select surveyId, version, itemCount from( "
-              + "select distinct csv.survey_id as surveyId, csv.version as version, csa.item_count as itemCount, csv.display_order "
+          "select surveyVersionConceptId, displayName, itemCount from( "
+              + "select distinct csv.survey_version_concept_id as surveyVersionConceptId, csv.display_name as displayName, csa.item_count as itemCount, csv.display_order "
               + "from cb_survey_version csv "
-              + "join cb_survey_attribute csa on csv.survey_id = csa.survey_id "
-              + "where csv.concept_id = :surveyConceptId "
+              + "join cb_survey_attribute csa on csv.survey_version_concept_id = csa.survey_version_concept_id "
+              + "where csv.survey_concept_id = :surveyConceptId "
               + "and csa.question_concept_id = :questionConceptId "
               + "and csa.answer_concept_id = :answerConceptId "
               + "order by csv.display_order) innerSql",

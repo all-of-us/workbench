@@ -17,6 +17,7 @@ then
   test=$(bq show "$BQ_PROJECT:$BQ_DATASET.procedure_occurrence")
   test=$(bq show "$BQ_PROJECT:$BQ_DATASET.drug_exposure")
   test=$(bq show "$BQ_PROJECT:$BQ_DATASET.observation")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.observation_ext")
   test=$(bq show "$BQ_PROJECT:$BQ_DATASET.measurement")
   test=$(bq show "$BQ_PROJECT:$BQ_DATASET.visit_occurrence")
   exit 0
@@ -39,25 +40,25 @@ echo "cb_survey_version - creating table"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.cb_survey_version\`
 (
-      survey_id         INT64
-    , concept_id        INT64
-    , version           STRING
-    , display_order     INT64
+      survey_version_concept_id     INT64
+    , survey_concept_id             INT64
+    , display_name                  STRING
+    , display_order                 INT64
 )"
 
 echo "cb_survey_version - adding data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_survey_version\`
 (
-      survey_id
-    , concept_id
-    , version
+      survey_version_concept_id
+    , survey_concept_id
+    , display_name
     , display_order
 )
 VALUES
-      (100, 1333342, 'May 2020', 1)
-    , (101, 1333342, 'June 2020', 2)
-    , (102, 1333342, 'July 2020', 3)
+      (2100000002, 1333342, 'May 2020', 1)
+    , (2100000003, 1333342, 'June 2020', 2)
+    , (2100000004, 1333342, 'July 2020', 3)
 "
 
 
@@ -314,7 +315,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
         , value_as_number
         , value_as_concept_id
         , value_source_concept_id
-        , survey_id
+        , survey_version_concept_id
     )
 SELECT
       b.person_id
@@ -326,20 +327,19 @@ SELECT
     , DATE_DIFF(a.observation_date, DATE(b.birth_datetime), YEAR) -
         IF(EXTRACT(MONTH FROM DATE(b.birth_datetime))*100 + EXTRACT(DAY FROM DATE(b.birth_datetime))
         > EXTRACT(MONTH FROM a.observation_date)*100 + EXTRACT(DAY FROM a.observation_date), 1, 0) as age_at_event
-    , f.visit_concept_id
-    , f.visit_occurrence_id
+    , d.visit_concept_id
+    , d.visit_occurrence_id
     , a.value_as_number
     , a.value_as_concept_id
     , a.value_source_concept_id
-    , e.survey_id
+    , c.survey_version_concept_id
 FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
 JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` b on a.person_id = b.person_id
-JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on a.observation_source_concept_id = c.concept_id
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.cope_survey_version\` d on a.questionnaire_response_id = d.questionnaire_response_id
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_survey_version\` e on d.cope_survey_month = e.version
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` f on a.visit_occurrence_id = f.visit_occurrence_id
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.observation_ext\` c on a.observation_id = c.observation_id
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` d on a.visit_occurrence_id = d.visit_occurrence_id
 WHERE a.observation_source_concept_id is not null
-    and a.observation_source_concept_id != 0"
+    and a.observation_source_concept_id != 0
+    and a.questionnaire_response_id is not null"
 
 ################################################################
 #   insert standard observation data into cb_search_all_events

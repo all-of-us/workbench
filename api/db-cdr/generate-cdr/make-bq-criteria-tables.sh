@@ -100,7 +100,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
       id                    INT64
     , question_concept_id   INT64
     , answer_concept_id     INT64
-    , survey_id             INT64
+    , survey_version_concept_id INT64
     , item_count            INT64
 )"
 
@@ -5504,20 +5504,20 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
           id
         , question_concept_id
         , answer_concept_id
-        , survey_id
+        , survey_version_concept_id
         , item_count
     )
 SELECT
         ROW_NUMBER() OVER (ORDER BY question_concept_id) as id
       , question_concept_id
       , 0
-      , survey_id
+      , survey_version_concept_id
       , cnt
 FROM
     (
         SELECT
               concept_id as question_concept_id
-            , survey_id
+            , survey_version_concept_id
             , count(distinct person_id) cnt
         FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
         WHERE
@@ -5527,7 +5527,7 @@ FROM
                     FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
                     WHERE domain_id = 'SURVEY'
                 )
-            and survey_id is not null
+            and survey_version_concept_id is not null
             and is_standard = 0
         GROUP BY 1,2
     )"
@@ -5540,14 +5540,14 @@ SELECT
             (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_survey_attribute\`) as id
       , question_concept_id
       , answer_concept_id
-      , survey_id
+      , survey_version_concept_id
       , cnt
 FROM
     (
         SELECT
               concept_id as question_concept_id
             , value_source_concept_id as answer_concept_id
-            , survey_id
+            , survey_version_concept_id
             , count(distinct person_id) cnt
         FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
         WHERE
@@ -5557,7 +5557,7 @@ FROM
                     FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
                     WHERE domain_id = 'SURVEY'
                 )
-            and survey_id is not null
+            and survey_version_concept_id is not null
             and is_standard = 0
             and value_source_concept_id != 0
         GROUP BY 1,2,3

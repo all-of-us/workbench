@@ -146,26 +146,23 @@ public class CohortBuilderMapperTest {
   @Test
   public void dbModelToClientAgeTypeCount() {
     AgeTypeCount expectedAgeTypeCount = new AgeTypeCount().ageType("Age").age(22).count(2344L);
-    assertThat(
-            cohortBuilderMapper.dbModelToClient(
-                new CohortBuilderMapperTest.DbAgeTypeCountImpl("Age", 22, 2344L)))
+    assertThat(cohortBuilderMapper.dbModelToClient(new DbAgeTypeCountImpl("Age", 22, 2344L)))
         .isEqualTo(expectedAgeTypeCount);
   }
 
   @Test
   public void dbModelToClientSurveyVersion() {
     SurveyVersion expectedSurveyVersion =
-        new SurveyVersion().surveyId(100L).version("May 2020").itemCount(2344L);
+        new SurveyVersion().surveyVersionConceptId(100L).displayName("May 2020").itemCount(2344L);
     assertThat(
-            cohortBuilderMapper.dbModelToClient(
-                new CohortBuilderMapperTest.DbSurveyVersionImpl(100L, "May 2020", 2344L)))
+            cohortBuilderMapper.dbModelToClient(new DbSurveyVersionImpl(100L, "May 2020", 2344L)))
         .isEqualTo(expectedSurveyVersion);
   }
 
-  class DbAgeTypeCountImpl implements DbAgeTypeCount {
-    private String ageType;
-    private int age;
-    private long count;
+  static class DbAgeTypeCountImpl implements DbAgeTypeCount {
+    private final String ageType;
+    private final int age;
+    private final long count;
 
     public DbAgeTypeCountImpl(String ageType, int age, long count) {
       this.ageType = ageType;
@@ -189,25 +186,25 @@ public class CohortBuilderMapperTest {
     }
   }
 
-  class DbSurveyVersionImpl implements DbSurveyVersion {
-    private long surveyId;
-    private String version;
-    private long itemCount;
+  static class DbSurveyVersionImpl implements DbSurveyVersion {
+    private final long surveyVersionConceptId;
+    private final String displayName;
+    private final long itemCount;
 
-    public DbSurveyVersionImpl(long surveyId, String version, long itemCount) {
-      this.surveyId = surveyId;
-      this.version = version;
+    public DbSurveyVersionImpl(long surveyVersionConceptId, String displayName, long itemCount) {
+      this.surveyVersionConceptId = surveyVersionConceptId;
+      this.displayName = displayName;
       this.itemCount = itemCount;
     }
 
     @Override
-    public long getSurveyId() {
-      return surveyId;
+    public long getSurveyVersionConceptId() {
+      return surveyVersionConceptId;
     }
 
     @Override
-    public String getVersion() {
-      return version;
+    public String getDisplayName() {
+      return displayName;
     }
 
     @Override
