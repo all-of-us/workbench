@@ -396,7 +396,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
                   rel='noopener noreferrer'>
                 Explore
               </StyledAnchorTag>
-              &nbsp;drugs by brand names outside of <AoU/>.
+              &nbsp;drugs by brand names outside of <AoU/>
             </div>}
             {this.showDataBrowserLink && <div>
               Explore Source information on the&nbsp;
@@ -404,7 +404,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
                   href={environment.publicUiUrl}
                   target='_blank'
                   rel='noopener noreferrer'>
-                Data Browser.
+                Data Browser
               </StyledAnchorTag>
             </div>}
           </div>

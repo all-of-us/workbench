@@ -40,17 +40,12 @@ const styles = reactStyles({
     padding: '0 0.5rem',
   },
   searchBarContainer: {
-    position: 'absolute',
     width: '95%',
     marginTop: '-1px',
     display: 'flex',
     padding: '0.4rem 0',
     backgroundColor: colors.white,
     zIndex: 1,
-  },
-  treeContainer: {
-    width: '99%',
-    paddingTop: '2.5rem'
   },
   treeHeader: {
     position: 'sticky',
@@ -211,9 +206,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
                      setInput={(v) => setSearchTerms(v)}/>
         </div>
       }
-      {!loading && <div style={this.showHeader
-        ? {...styles.treeContainer, paddingTop: '3rem', marginTop: '0rem'}
-        : styles.treeContainer}>
+      {!loading && <div style={{paddingTop: this.showHeader ? '0.5rem' : 0, width: '99%'}}>
         {this.showHeader && <div style={{...styles.treeHeader, border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`}}>
           {!!ingredients && <div style={styles.ingredients}>
             Ingredients in this brand: {ingredients.join(', ')}
@@ -222,7 +215,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
         </div>}
         {error && <div style={styles.error}>
           <ClrIcon style={{color: colors.white}} className='is-solid' shape='exclamation-triangle' />
-          Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
+          Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation
         </div>}
         <div style={this.showHeader ? styles.node : {...styles.node, border: 'none'}}>
         {!!children && children.map((child, c) => this.showNode(child) && <TreeNode key={c}

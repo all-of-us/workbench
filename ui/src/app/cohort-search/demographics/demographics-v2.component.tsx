@@ -18,17 +18,12 @@ const styles = reactStyles({
     margin: '0.5rem 1rem',
     maxHeight: '15rem',
     padding: '0.5rem 0 1.5rem 1rem',
-    width: '60%'
+    width: '80%'
   },
   ageInput: {
     fontSize: '13px',
     marginTop: '0.25rem',
     padding: '0 0 0 0.5rem',
-  },
-  ageLabel: {
-    fontSize: '14px',
-    fontWeight: 600,
-    color: colors.primary
   },
   count: {
     alignItems: 'center',
@@ -73,7 +68,7 @@ const styles = reactStyles({
     display: 'flex',
     marginRight: '1rem',
     maxHeight: '15rem',
-    padding: '0.5rem 0 0 1rem'
+    padding: '0.5rem 0 0 0.25rem'
   },
   slider: {
     flex: 1,
@@ -85,7 +80,6 @@ const styles = reactStyles({
     display: 'flex',
     marginRight: '1rem',
     paddingLeft: '1rem',
-    width: '96%',
   }
 });
 // Template node used for age selections
@@ -350,9 +344,6 @@ export class DemographicsV2 extends React.Component<Props, State> {
       : criteriaType === CriteriaType.AGE
         // Age slider with number inputs
         ? <div style={styles.ageContainer}>
-          <div style={styles.ageLabel}>
-            Age Range
-          </div>
           <div style={styles.sliderContainer}>
             <div style={{width: '2.5rem'}}>
               <NumberInput style={styles.ageInput}
@@ -385,6 +376,11 @@ export class DemographicsV2 extends React.Component<Props, State> {
                 onBlur={() => this.onMaxBlur()}
                 onChange={(v) => this.onMaxChange(v)}/>
             </div>
+            <Button style={{marginLeft: '1rem'}}
+                    type='primary'
+                    onClick={() => this.addAgeSelection()}>
+              Add Selection
+            </Button>
           </div>
           <div style={{marginLeft: '1rem'}}>
             {ageTypes.map((ageTypeRadio, index) =>
@@ -396,13 +392,6 @@ export class DemographicsV2 extends React.Component<Props, State> {
                 <label>{ageTypeRadio.label}</label>
               </div>)
             }
-          </div>
-          <div>
-            <Button style={{float: 'right'}}
-                    type='primary'
-                    onClick={() => this.addAgeSelection()}>
-              Add Selection
-            </Button>
           </div>
         </div>
         // List of selectable criteria used for Race, Ethnicity, Gender and Sex
