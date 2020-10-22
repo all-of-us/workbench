@@ -205,11 +205,15 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
       <FlexColumn style={{margin: '1rem', width: '98%'}}>
         <ResearchPurpose data-test-id='researchPurpose'/>
         {hasAuthorityForAction(profile, AuthGuardedAction.PUBLISH_WORKSPACE) &&
-        <div style={{display: 'flex', justifyContent: 'flex-end'}}>
-            <Button disabled={publishing} type='secondary'
-                    onClick={() => this.publishUnpublishWorkspace(false)}>Unpublish</Button>
-            <Button onClick={() => this.publishUnpublishWorkspace(true)}
-                    disabled={publishing} style={{marginLeft: '0.5rem'}}>Publish</Button>
+          <div style={{display: 'flex', justifyContent: 'flex-end'}}>
+              <Button data-test-id='unpublish-button'
+                      disabled={publishing}
+                      type='secondary'
+                      onClick={() => this.publishUnpublishWorkspace(false)}>Unpublish</Button>
+              <Button data-test-id='publish-button'
+                      onClick={() => this.publishUnpublishWorkspace(true)}
+                      disabled={publishing}
+                      style={{marginLeft: '0.5rem'}}>Publish</Button>
         </div>}
       </FlexColumn>
       <div style={styles.rightSidebar}>
