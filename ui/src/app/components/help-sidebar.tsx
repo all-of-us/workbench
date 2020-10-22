@@ -568,10 +568,10 @@ export const HelpSidebar = fp.flow(
       const {concept, criteria} = this.props;
 
       return <React.Fragment>
-        {(criteria && icon.page === 'criteria') && <span data-test-id='criteria-count'
+        {(criteria && icon.page === 'criteria' && criteria.length > 0) && <span data-test-id='criteria-count'
                                                          style={styles.criteriaCount}>
           {criteria.length}</span>}
-        {(concept && icon.page === 'concept') && <span data-test-id='concept-count'
+        {(concept && icon.page === 'concept' && concept.length > 0) && <span data-test-id='concept-count'
                                                          style={styles.criteriaCount}>
           {concept.length}</span>}
             <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + icon.id} icon={icon.faIcon} style={icon.style} />
