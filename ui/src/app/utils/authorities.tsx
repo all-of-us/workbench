@@ -3,7 +3,7 @@
 import {Authority, Profile} from 'generated/fetch';
 
 // Admin actions guarded by a particular Authority
-enum AuthGuardedAction {
+enum AuthorityGuardedAction {
     SHOW_ADMIN_MENU,
     USER_ADMIN,
     USER_AUDIT,
@@ -22,24 +22,24 @@ const adminMenuAuthorities = new Set([
   Authority.INSTITUTIONADMIN,
 ]);
 
-const authorityByPage: Map<AuthGuardedAction, Authority> = new Map([
-    [AuthGuardedAction.USER_ADMIN, Authority.ACCESSCONTROLADMIN],
-    [AuthGuardedAction.USER_AUDIT, Authority.ACCESSCONTROLADMIN],
-    [AuthGuardedAction.WORKSPACE_ADMIN, Authority.RESEARCHERDATAVIEW],
-    [AuthGuardedAction.WORKSPACE_AUDIT, Authority.RESEARCHERDATAVIEW],
-    [AuthGuardedAction.SERVICE_BANNER, Authority.COMMUNICATIONSADMIN],
-    [AuthGuardedAction.INSTITUTION_ADMIN, Authority.INSTITUTIONADMIN],
-    [AuthGuardedAction.PUBLISH_WORKSPACE, Authority.FEATUREDWORKSPACEADMIN],
+const authorityByPage: Map<AuthorityGuardedAction, Authority> = new Map([
+    [AuthorityGuardedAction.USER_ADMIN, Authority.ACCESSCONTROLADMIN],
+    [AuthorityGuardedAction.USER_AUDIT, Authority.ACCESSCONTROLADMIN],
+    [AuthorityGuardedAction.WORKSPACE_ADMIN, Authority.RESEARCHERDATAVIEW],
+    [AuthorityGuardedAction.WORKSPACE_AUDIT, Authority.RESEARCHERDATAVIEW],
+    [AuthorityGuardedAction.SERVICE_BANNER, Authority.COMMUNICATIONSADMIN],
+    [AuthorityGuardedAction.INSTITUTION_ADMIN, Authority.INSTITUTIONADMIN],
+    [AuthorityGuardedAction.PUBLISH_WORKSPACE, Authority.FEATUREDWORKSPACEADMIN],
 ]);
 
-const hasAuthorityForAction = (profile: Profile, action: AuthGuardedAction): boolean => {
+const hasAuthorityForAction = (profile: Profile, action: AuthorityGuardedAction): boolean => {
   // DEVELOPER is the super-Authority which includes all others
   if (profile.authorities.includes(Authority.DEVELOPER)) {
     return true;
   }
 
   // return true if we have any of the menu-displaying authorities
-  if (action === AuthGuardedAction.SHOW_ADMIN_MENU) {
+  if (action === AuthorityGuardedAction.SHOW_ADMIN_MENU) {
     return profile.authorities.some(auth => adminMenuAuthorities.has(auth));
   }
 
@@ -47,6 +47,6 @@ const hasAuthorityForAction = (profile: Profile, action: AuthGuardedAction): boo
 };
 
 export {
-    AuthGuardedAction,
+    AuthorityGuardedAction,
     hasAuthorityForAction,
 };

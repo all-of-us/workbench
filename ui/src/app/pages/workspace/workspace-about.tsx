@@ -17,7 +17,7 @@ import {ResearchPurpose} from 'app/pages/workspace/research-purpose';
 import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {getCdrVersion, reactStyles, ReactWrapperBase, withCdrVersions, withUrlParams, withUserProfile} from 'app/utils';
-import {AuthGuardedAction, hasAuthorityForAction} from 'app/utils/auth';
+import {AuthorityGuardedAction, hasAuthorityForAction} from 'app/utils/authorities';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {
   BillingAccountType,
@@ -204,7 +204,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
     return <div style={styles.mainPage}>
       <FlexColumn style={{margin: '1rem', width: '98%'}}>
         <ResearchPurpose data-test-id='researchPurpose'/>
-        {hasAuthorityForAction(profile, AuthGuardedAction.PUBLISH_WORKSPACE) &&
+        {hasAuthorityForAction(profile, AuthorityGuardedAction.PUBLISH_WORKSPACE) &&
           <div style={{display: 'flex', justifyContent: 'flex-end'}}>
               <Button data-test-id='unpublish-button'
                       disabled={publishing}
