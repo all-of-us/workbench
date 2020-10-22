@@ -747,21 +747,17 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
               <div style={styles.cardList}>
                 {domainInfoError
                   ? this.errorMessage()
-                  : <React.Fragment>
-                    {conceptDomainCards
-                      .filter(domain => domain.allConceptCount !== 0)
-                      .map((domain, i) => <DomainCard conceptDomainInfo={domain}
-                                                      standardConceptsOnly={standardConceptsOnly}
-                                                      browseInDomain={() => this.browseDomain(domain)}
-                                                      key={i} data-test-id='domain-box'
-                                                      updating={domainsLoading.includes(domain.domain)}/>)}
-                    {conceptDomainCards.every(domain => domain.allConceptCount === 0) && <div>
-                      {conceptDomainCards.some(domain => domainsLoading.includes(domain.domain))
-                        ? <Spinner size={42}/>
-                        : 'No Domain Results. Please type in a new search term.'
-                      }
-                    </div>}
-                  </React.Fragment>
+                  : conceptDomainCards.some(domain => domainsLoading.includes(domain.domain))
+                    ? <Spinner size={42}/>
+                    : conceptDomainCards.every(domain => domain.allConceptCount === 0)
+                      ? 'No Domain Results. Please type in a new search term.'
+                      : conceptDomainCards
+                        .filter(domain => domain.allConceptCount !== 0)
+                        .map((domain, i) => <DomainCard conceptDomainInfo={domain}
+                                                        standardConceptsOnly={standardConceptsOnly}
+                                                        browseInDomain={() => this.browseDomain(domain)}
+                                                        key={i} data-test-id='domain-box'
+                                                        updating={domainsLoading.includes(domain.domain)}/>)
                 }
               </div>
               <div style={styles.sectionHeader}>
@@ -770,39 +766,32 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
               <div style={styles.cardList}>
                 {surveyInfoError
                   ? this.errorMessage()
-                  : <React.Fragment>
-                    {conceptSurveysList
-                      .filter(survey => survey.questionCount > 0)
-                      .map((survey) => <SurveyCard survey={survey}
-                                                   key={survey.orderNumber}
-                                                   browseSurvey={() => this.browseSurvey(survey.name)}
-                                                   updating={surveysLoading.includes(survey.name)}/>)}
-                    {conceptSurveysList.every(survey => survey.questionCount === 0) && <div>
-                      {conceptSurveysList.some(survey => surveysLoading.includes(survey.name))
-                        ? <Spinner size={42}/>
-                        : 'No Survey Question Results. Please type in a new search term.'
-                      }
-                    </div>}
-                  </React.Fragment>
+                  : conceptSurveysList.some(survey => surveysLoading.includes(survey.name))
+                    ? <Spinner size={42}/>
+                    : conceptSurveysList.every(survey => survey.questionCount === 0)
+                      ? 'No Survey Question Results. Please type in a new search term.'
+                      : conceptSurveysList
+                        .filter(survey => survey.questionCount > 0)
+                        .map((survey) => <SurveyCard survey={survey}
+                                                     key={survey.orderNumber}
+                                                     browseSurvey={() => this.browseSurvey(survey.name)}
+                                                     updating={surveysLoading.includes(survey.name)}/>)
                 }
-               </div>
-              {environment.enableNewConceptTabs && <React.Fragment>
+              </div>
+              {environment.enableNewConceptTabs && !!physicalMeasurementsCard && <React.Fragment>
                 <div style={styles.sectionHeader}>
                   Program Physical Measurements
                 </div>
-                <div style={styles.cardList}>
+                <div style={{...styles.cardList, marginBottom: '1rem'}}>
                   {domainInfoError
                     ? this.errorMessage()
-                    : !!physicalMeasurementsCard && (physicalMeasurementsCard.allConceptCount !== 0
-                      ? <PhysicalMeasurementsCard physicalMeasurement={physicalMeasurementsCard}
-                                                browsePhysicalMeasurements={() => this.browseDomain(physicalMeasurementsCard)}
-                                                updating={domainsLoading.includes(Domain.PHYSICALMEASUREMENT)}/>
-                    : <div style={{marginBottom: '1rem'}}>
-                      {domainsLoading.includes(Domain.PHYSICALMEASUREMENT)
-                        ? <Spinner size={42}/>
-                        : 'No Program Physical Measurement Results. Please type in a new search term.'
-                      }
-                    </div>)
+                    : domainsLoading.includes(Domain.PHYSICALMEASUREMENT)
+                      ? <Spinner size={42}/>
+                      : physicalMeasurementsCard.allConceptCount === 0
+                        ? 'No Program Physical Measurement Results. Please type in a new search term.'
+                        : <PhysicalMeasurementsCard physicalMeasurement={physicalMeasurementsCard}
+                                                    browsePhysicalMeasurements={() => this.browseDomain(physicalMeasurementsCard)}
+                                                    updating={domainsLoading.includes(Domain.PHYSICALMEASUREMENT)}/>
                   }
                 </div>
               </React.Fragment>}
