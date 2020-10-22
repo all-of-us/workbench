@@ -15,7 +15,7 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {Dropdown} from 'primereact/dropdown';
 import {InputNumber} from 'primereact/inputnumber';
 
-import { RuntimeConfigurationType, RuntimeStatus } from 'generated';
+import { Runtime, RuntimeConfigurationType, RuntimeStatus } from 'generated';
 import { CdrVersionListResponse, DataprocConfig } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -56,6 +56,7 @@ const styles = reactStyles({
 const defaultMachineName = 'n1-standard-4';
 const defaultMachineType = allMachineTypes.find(({name}) => name === defaultMachineName);
 const findMachineByName = machineToFind => fp.find(({name}) => name === machineToFind, allMachineTypes) || defaultMachineType;
+const defaultDiskSize = 50;
 
 enum ComputeType {
   Standard = 'Standard VM',
@@ -190,8 +191,8 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withCdrVersions())((
   const {namespace, cdrVersionId} = workspace;
   const {hasMicroarrayData} = fp.find({cdrVersionId}, cdrVersionListResponse.items) || {hasMicroarrayData: false};
   const [currentRuntime, setRequestedRuntime] = useCustomRuntime(namespace);
-  const {status = RuntimeStatus.Unknown, toolDockerImage = '', dataprocConfig = null, gceConfig = {}} = currentRuntime || {};
-  const machineName  = !!dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
+  const {status = null, dataprocConfig = null, gceConfig = {bootDiskSize: defaultDiskSize}} = currentRuntime || {} as Partial<Runtime>;
+  const machineName = !!dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
   const diskSize = !!dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.bootDiskSize;
   const initialMasterMachine = findMachineByName(machineName);
   const [selectedDiskSize, setSelectedDiskSize] = useState(diskSize);
@@ -201,17 +202,14 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withCdrVersions())((
   const [selectedDataprocConfig, setSelectedDataprocConfig] = useState<DataprocConfig | null>(dataprocConfig);
 
   const selectedMachineType = selectedMachine && selectedMachine.name;
+  const runtimeExists = status && status !== RuntimeStatus.Deleted;
   const runtimeChanged = !fp.equals(selectedMachine, initialMasterMachine) ||
     selectedDiskSize !== diskSize ||
     !fp.equals(selectedDataprocConfig, dataprocConfig);
 
+  // TODO(RW-5591): Conditionally render create runtime page if runtime null or Deleted.
   if (currentRuntime === undefined) {
     return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
-  } else if (currentRuntime === null) {
-    // TODO(RW-5591): Create runtime page goes here.
-    return <React.Fragment>
-      <div>No runtime exists yet</div>
-    </React.Fragment>;
   }
 
   return <div data-test-id='runtime-panel'>
@@ -261,18 +259,11 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withCdrVersions())((
                         }
                       </React.Fragment>
                     }>
-        <Clickable data-test-id='runtime-presets-menu'>
+        {/* inline-block aligns the popup menu beneath the clickable content, rather than the middle of the panel */}
+        <Clickable style={{display: 'inline-block'}} data-test-id='runtime-presets-menu'>
           Recommended environments <ClrIcon shape='caret down'/>
         </Clickable>
       </PopupTrigger>
-      <h3 style={styles.sectionHeader}>Application configuration</h3>
-      {/* TODO(RW-5413): Populate the image list with server driven options. */}
-      {toolDockerImage && <Dropdown style={{width: '100%'}}
-                data-test-id='runtime-image-dropdown'
-                disabled={true}
-                options={[toolDockerImage]}
-                value={toolDockerImage}/>
-      }
       {/* Runtime customization: change detailed machine configuration options. */}
       <h3 style={styles.sectionHeader}>Cloud compute profile</h3>
       <FlexRow style={{justifyContent: 'space-between'}}>
@@ -316,16 +307,21 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withCdrVersions())((
     </div>
     <FlexRow style={{justifyContent: 'flex-end', marginTop: '.75rem'}}>
       <Button
-        aria-label={currentRuntime ? 'Update' : 'Create'}
-        disabled={status !== RuntimeStatus.Running || !runtimeChanged}
+        aria-label={runtimeExists ? 'Update' : 'Create'}
+        disabled={
+          runtimeExists && (
+            !runtimeChanged
+            // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
+            // where we get 'status' from
+            || ![RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus))
+        }
         onClick={() => {
           const runtimeToRequest = selectedDataprocConfig ? {dataprocConfig: selectedDataprocConfig} : {gceConfig: {
             machineType: selectedMachineType || machineName,
             diskSize: selectedDiskSize || diskSize
           }};
           setRequestedRuntime({configurationType: runtimeConfigurationType, ...runtimeToRequest});
-        }
-      }>{currentRuntime ? 'Update' : 'Create'}</Button>
+        }}>{runtimeExists ? 'Update' : 'Create'}</Button>
     </FlexRow>
   </div>;
 
