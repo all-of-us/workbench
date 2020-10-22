@@ -79,8 +79,7 @@ const styles = {
   }
 };
 
-export const NewDataSetModal = fp.flow(withCdrVersions())
-(class extends React.Component<Props, State> {
+class NewDataSetModal extends React.Component<Props, State> {
   constructor(props) {
     super(props);
     this.state = {
@@ -383,6 +382,7 @@ export const NewDataSetModal = fp.flow(withCdrVersions())
                 return <React.Fragment>
                   <label key={i} style={{display: 'block'}}>
                     <RadioButton
+                      data-test-id={'genomics-analysis-tool-' + enumKey.toLowerCase()}
                       checked={this.state.genomicsAnalysisTool === GenomicsAnalysisToolEnum[enumKey]}
                       onChange={() => this.setState({genomicsAnalysisTool: GenomicsAnalysisToolEnum[enumKey]})}
                     />
@@ -411,5 +411,8 @@ export const NewDataSetModal = fp.flow(withCdrVersions())
       </ModalFooter>
     </Modal>;
   }
-});
+}
 
+export {
+  NewDataSetModal
+};
