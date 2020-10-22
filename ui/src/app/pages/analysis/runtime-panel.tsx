@@ -10,6 +10,8 @@ import {allMachineTypes, Machine, validLeonardoMachineTypes} from 'app/utils/mac
 import {runtimePresets} from 'app/utils/runtime-presets';
 import {useCustomRuntime} from 'app/utils/runtime-utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
+import {withCdrVersions} from 'app/utils';
+
 
 
 import {Dropdown} from 'primereact/dropdown';
