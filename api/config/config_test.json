@@ -12,7 +12,7 @@
     "xAppIdValue": "test-AoU-RW",
     "vpcServicePerimeterName": "accessPolicies/228353087260/servicePerimeters/terra_dev_aou_test",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.0.11",
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.0.13",
     "welderDockerImage": "broadinstitute/welder-server:7ae1a62",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com/dev",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com/dev",
