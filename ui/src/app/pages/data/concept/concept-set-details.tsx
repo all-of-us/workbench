@@ -38,7 +38,6 @@ import {
   ConceptSet,
   CopyRequest,
   Domain,
-  DomainType,
   ResourceType,
   WorkspaceAccessLevel
 } from 'generated/fetch';

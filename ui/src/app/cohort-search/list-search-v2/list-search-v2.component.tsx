@@ -24,8 +24,7 @@ import {
   CdrVersionListResponse,
   Criteria,
   CriteriaType,
-  Domain,
-  DomainType
+  Domain
 } from 'generated/fetch';
 import {CSSProperties} from 'react';
 

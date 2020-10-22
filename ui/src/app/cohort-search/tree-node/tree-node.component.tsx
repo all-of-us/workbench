@@ -314,8 +314,8 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
               parentId.toString() === this.paramId
           );
     } else {
-       return currentConceptStore.getValue()
-          .some(crit => 'param' + crit.id.toString() === this.paramId);
+      return currentConceptStore.getValue()
+        .some(crit => 'param' + crit.id.toString() === this.paramId);
     }
 
   }
@@ -371,7 +371,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
           {this.showCount && <div style={{whiteSpace: 'nowrap'}}>
             <span style={styles.count}>{count.toLocaleString()}</span>
           </div>}
-        </div>
+        </div>}
       </div>
       {!!nodeChildren && nodeChildren.length > 0 &&
         <div style={{display: expanded ? 'block' : 'none', marginLeft: nodeChildren[0].group ? '0.875rem' : '2rem'}}>

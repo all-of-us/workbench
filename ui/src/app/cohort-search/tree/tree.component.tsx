@@ -9,8 +9,8 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentConcept, withCurrentWorkspace} from 'app/utils';
-import {currentConceptStore, currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
-import {Criteria, CriteriaSubType, CriteriaType, DomainType} from 'generated/fetch';
+import {currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
+import {Criteria, CriteriaSubType, CriteriaType, Domain} from 'generated/fetch';
 
 const styles = reactStyles({
   error: {
@@ -110,7 +110,7 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
       if (prevProps.concept !== concept) {
         const {cdrVersionId} = (currentWorkspaceStore.getValue());
         this.setState({children: concept, loading: false});
-        if (domainId === DomainType.SURVEY.toString()) {
+        if (domainId === Domain.SURVEY.toString()) {
           const rootSurveys = ppiSurveys.getValue();
           if (!rootSurveys[cdrVersionId]) {
             rootSurveys[cdrVersionId] = concept;
@@ -122,7 +122,7 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
   }
 
   loadRootNodes() {
-    const {node: {domainId, id, isStandard, type}, source, selectedSurvey} = this.props;
+    const {node: {domainId, id, isStandard, type}, selectedSurvey} = this.props;
     this.setState({loading: true});
     const {cdrVersionId} = (currentWorkspaceStore.getValue());
     const criteriaType = domainId === Domain.DRUG.toString() ? CriteriaType.ATC.toString() : type;
@@ -143,7 +143,7 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
       } else if (domainId === Domain.SURVEY.toString() &&  selectedSurvey) {
         // Temp: This should be handle in API
         this.updatePpiSurveys(resp, resp.items.filter(child => child.name === selectedSurvey));
-      } else if (domainId === DomainType.SURVEY.toString() && this.props.source === 'conceptSetDetails') {
+      } else if (domainId === Domain.SURVEY.toString() && this.props.source === 'conceptSetDetails') {
         const selectedSurveyChild = resp.items.filter(child => child.id === this.props.node.parentId);
         this.updatePpiSurveys(resp, selectedSurveyChild);
       } else {
@@ -165,9 +165,9 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
   }
 
   updatePpiSurveys(resp, selectedSurveyChild) {
-    const {node: {domainId, id, isStandard, type}, source, selectedSurvey} = this.props;
+    const {node: {domainId, isStandard, type}} = this.props;
     const {cdrVersionId} = (currentWorkspaceStore.getValue());
-    const criteriaType = domainId === DomainType.DRUG.toString() ? CriteriaType.ATC.toString() : type;
+    const criteriaType = domainId === Domain.DRUG.toString() ? CriteriaType.ATC.toString() : type;
     if (selectedSurveyChild && selectedSurveyChild.length > 0) {
       cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, selectedSurveyChild[0].id)
           .then(surveyResponse => {
@@ -176,7 +176,7 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
           });
     } else {
       this.setState({children: resp.items});
-      if (domainId === DomainType.SURVEY.toString()) {
+      if (domainId === Domain.SURVEY.toString()) {
         const rootSurveys = ppiSurveys.getValue();
         if (!rootSurveys[cdrVersionId]) {
           rootSurveys[cdrVersionId] = resp.items;

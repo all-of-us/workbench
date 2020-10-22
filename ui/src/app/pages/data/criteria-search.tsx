@@ -2,7 +2,6 @@ import {ListSearchV2} from 'app/cohort-search/list-search-v2/list-search-v2.comp
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {CriteriaTree} from 'app/cohort-search/tree/tree.component';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {
@@ -146,8 +145,8 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
 
   get initTree() {
     const {cohortContext: {domain}} = this.props;
-    return domain === DomainType.PHYSICALMEASUREMENT
-        || domain === DomainType.VISIT;
+    return domain === Domain.PHYSICALMEASUREMENT
+        || domain === Domain.VISIT;
   }
 
   get isConcept() {
@@ -240,7 +239,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
   render() {
     const {cohortContext, conceptSearchTerms, selectedSurvey, source} = this.props;
     const {autocompleteSelection, groupSelections, hierarchyNode, loadingSubtree,
-      selectedIds, treeSearchTerms, growlVisible} = this.state;
+      treeSearchTerms, growlVisible} = this.state;
     return <div>
       {loadingSubtree && <SpinnerOverlay/>}
       <div style={loadingSubtree ? styles.loadingSubTree : {height: '100%', minHeight: '15rem'}}>
