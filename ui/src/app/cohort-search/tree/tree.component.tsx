@@ -106,12 +106,7 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
   }
 
   componentDidMount(): void {
-    const {source} = this.props;
-    if (source === 'conceptSetDetails') {
-      this.setState({children: currentConceptStore.getValue()});
-    } else {
-      this.loadRootNodes();
-    }
+    this.loadRootNodes();
   }
 
   componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any) {
@@ -126,19 +121,13 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
             rootSurveys[cdrVersionId] = concept;
             ppiSurveys.next(rootSurveys);
           }
-          const surveyParentList = concept.filter((survey) => {
-            return survey.parentCount !== 0;
-          });
-          if (surveyParentList.length !== concept.length) {
-            currentConceptStore.next(surveyParentList);
-          }
         }
       }
     }
   }
 
   loadRootNodes() {
-    const {node: {domainId, id, isStandard, type}, selectedSurvey} = this.props;
+    const {node: {domainId, id, isStandard, type}, source, selectedSurvey} = this.props;
     this.setState({loading: true});
     const {cdrVersionId} = (currentWorkspaceStore.getValue());
     const criteriaType = domainId === DomainType.DRUG.toString() ? CriteriaType.ATC.toString() : type;
@@ -158,22 +147,10 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
         this.setState({children});
       } else if (domainId === DomainType.SURVEY.toString() &&  selectedSurvey) {
         // Temp: This should be handle in API
-        const selectedSurveyChild = resp.items.filter(child => child.name === selectedSurvey);
-        if (selectedSurveyChild && selectedSurveyChild.length > 0) {
-          cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, selectedSurveyChild[0].id)
-              .then(surveyResponse => {
-                this.setState({children: surveyResponse.items});
-              });
-        } else {
-          this.setState({children: resp.items});
-          if (domainId === DomainType.SURVEY.toString()) {
-            const rootSurveys = ppiSurveys.getValue();
-            if (!rootSurveys[cdrVersionId]) {
-              rootSurveys[cdrVersionId] = resp.items;
-              ppiSurveys.next(rootSurveys);
-            }
-          }
-        }
+        this.updatePpiSurveys(resp, resp.items.filter(child => child.name === selectedSurvey));
+      } else if (domainId === DomainType.SURVEY.toString() && this.props.source === 'conceptSetDetails') {
+        const selectedSurveyChild = resp.items.filter(child => child.id === this.props.node.parentId);
+        this.updatePpiSurveys(resp, selectedSurveyChild);
       } else {
         this.setState({children: resp.items});
         if (domainId === DomainType.SURVEY.toString()) {
@@ -190,6 +167,28 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
       this.setState({error: true});
     })
     .finally(() => this.setState({loading: false}));
+  }
+
+  updatePpiSurveys(resp, selectedSurveyChild) {
+    const {node: {domainId, id, isStandard, type}, source, selectedSurvey} = this.props;
+    const {cdrVersionId} = (currentWorkspaceStore.getValue());
+    const criteriaType = domainId === DomainType.DRUG.toString() ? CriteriaType.ATC.toString() : type;
+    if (selectedSurveyChild && selectedSurveyChild.length > 0) {
+      cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, selectedSurveyChild[0].id)
+          .then(surveyResponse => {
+            console.log(surveyResponse.items);
+            this.setState({children: surveyResponse.items});
+          });
+    } else {
+      this.setState({children: resp.items});
+      if (domainId === DomainType.SURVEY.toString()) {
+        const rootSurveys = ppiSurveys.getValue();
+        if (!rootSurveys[cdrVersionId]) {
+          rootSurveys[cdrVersionId] = resp.items;
+          ppiSurveys.next(rootSurveys);
+        }
+      }
+    }
   }
 
   addChildToParent(child, nodeList) {

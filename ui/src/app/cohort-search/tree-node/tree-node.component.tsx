@@ -314,12 +314,8 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
               parentId.toString() === this.paramId
           );
     } else {
-      if (currentConceptStore.getValue()) {
-        return currentConceptStore.getValue()
-          .some(crit => parentId.toString() === this.paramId);
-      } else {
-        return [];
-      }
+       return currentConceptStore.getValue()
+          .some(crit => 'param' + crit.id.toString() === this.paramId);
     }
 
   }
@@ -347,12 +343,12 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
               shape={'angle ' + (expanded ? 'down' : 'right')}
               size='16'/>}
         </button>}
-        {(!hasAttributes || source !== 'concept') &&
+        {(!hasAttributes || source === 'criteria') &&
         <div style={hover ? {...styles.treeNodeContent, background: colors.light} : styles.treeNodeContent}
           onMouseEnter={() => this.setState({hover: true})}
           onMouseLeave={() => this.setState({hover: false})}>
-          {selectable && <button style={styles.iconButton}>
-            {(hasAttributes && (source !== 'concept'))
+          {(selectable && (source === 'criteria' || node.subtype === 'QUESTION')) && <button style={styles.iconButton}>
+            {(hasAttributes && (source === 'criteria'))
               ? <ClrIcon style={{color: colors.accent}}
                   shape='slider' dir='right' size='20'
                   onClick={(e) => this.setAttributes(e, node)}/>

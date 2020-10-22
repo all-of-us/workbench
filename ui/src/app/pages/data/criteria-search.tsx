@@ -108,7 +108,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
       selectedIds: [],
       selections: [],
       selectedCriteriaList: [],
-      treeSearchTerms: props.source === 'concept' ? props.conceptSearchTerms : '',
+      treeSearchTerms: props.source !== 'criteria' ? props.conceptSearchTerms : '',
       loadingSubtree: false
     };
   }
@@ -128,29 +128,15 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
       mode = 'tree';
     }
     this.setState({backMode, hierarchyNode, mode});
-    if (source === 'conceptSetDetails') {
-      this.getConceptSet();
-    }
     if (source === 'criteria') {
       this.subscription = currentCohortCriteriaStore.subscribe(currentCohortCriteria => {
         this.setState({selectedCriteriaList: currentCohortCriteria});
       });
     } else {
       this.subscription = currentConceptStore.subscribe(currentConcepts => {
-        this.setState({selectedCriteriaList: currentConcepts});
+        const value = fp.map(selected => selected.conceptId + '', currentConcepts);
+        this.setState({selectedCriteriaList: currentConcepts, selectedIds: value});
       });
-    }
-  }
-
-  async getConceptSet() {
-    const {urlParams: {ns, wsid, csid}} = this.props;
-    try {
-      const resp = await conceptSetsApi().getConceptSet(ns, wsid, csid);
-      currentConceptStore.next(resp.criteriums);
-    } catch (error) {
-      console.log(error);
-      // TODO: what do we do with resources not found?  Currently we just have an endless spinner
-      // Maybe want to think about designing an AoU not found page for better UX
     }
   }
 
@@ -161,12 +147,11 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
   get initTree() {
     const {cohortContext: {domain}} = this.props;
     return domain === DomainType.PHYSICALMEASUREMENT
-        || domain === DomainType.SURVEY
         || domain === DomainType.VISIT;
   }
 
   get isConcept() {
-    return this.props.source === 'concept';
+    return this.props.source === 'concept' || this.props.source === 'conceptSetDetails';
   }
 
   getGrowlStyle() {
@@ -221,8 +206,8 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
 
   getListSearchSelectedIds() {
     const {selectedCriteriaList} = this.state;
-    const vale = fp.map(selected => ('param' + selected.conceptId + selected.code), selectedCriteriaList);
-    return vale;
+    const value = fp.map(selected => ('param' + selected.conceptId + selected.code), selectedCriteriaList);
+    return value;
   }
 
   setScroll = (id: string) => {
@@ -272,7 +257,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
             scrollToMatch={this.setScroll}
             searchTerms={treeSearchTerms}
             select={this.addSelection}
-            selectedIds={selectedIds}
+            selectedIds={this.getListSearchSelectedIds()}
             selectOption={this.setAutocompleteSelection}
             setSearchTerms={this.setTreeSearchTerms}/>}
          {/*List View (using duplicated version of ListSearch) */}

@@ -231,7 +231,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
     }
 
     componentWillUnmount() {
-      currentConceptStore.next([]);
+      currentConceptStore.next(null);
     }
 
     handleInput = (event: any) => {

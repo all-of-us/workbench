@@ -33,7 +33,15 @@ import {
 } from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
-import {Concept, ConceptSet, CopyRequest, Domain, ResourceType, WorkspaceAccessLevel} from 'generated/fetch';
+import {
+  Concept,
+  ConceptSet,
+  CopyRequest,
+  Domain,
+  DomainType,
+  ResourceType,
+  WorkspaceAccessLevel
+} from 'generated/fetch';
 
 const styles = reactStyles({
   conceptSetHeader: {
@@ -157,6 +165,13 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
         this.setState({conceptSet: resp, editName: resp.name,
           editDescription: resp.description, loading: false});
         currentConceptSetStore.next(resp);
+        if (resp.domain === Domain.SURVEY) {
+          const surveyParentList = resp.criteriums.filter((survey) => {
+            return survey.parentCount !== 0;
+          });
+          this.setState({conceptSet: resp});
+          currentConceptStore.next(surveyParentList);
+        }
       } catch (error) {
         console.log(error);
         // TODO: what do we do with resources not found?  Currently we just have an endless spinner
@@ -349,7 +364,8 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
               <ClrIcon shape='search' style={{marginRight: '0.3rem'}}/>Add concepts to set
             </Button>}</React.Fragment>}
             {this.isConceptFlagEnable && !!conceptSet.criteriums && <React.Fragment>
-              <CriteriaSearch cohortContext={{domain: conceptSet.domain, type: 'PPI', standard: true}} source='conceptSetDetails' />
+              <CriteriaSearch cohortContext={{domain: conceptSet.domain, type: 'PPI', standard: true}}
+                              source='conceptSetDetails' selectedSurvey={conceptSet.survey}/>
               <Button style={{width: '6.5rem', alignSelf: 'flex-end', marginBottom: '2rem'}}
                       onClick={() => setSidebarActiveIconStore.next('concept')}>Finish & Review</Button>
             </React.Fragment>
