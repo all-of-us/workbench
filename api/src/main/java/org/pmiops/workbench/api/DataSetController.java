@@ -358,6 +358,9 @@ public class DataSetController implements DataSetApiDelegate {
 
       if (GenomicsAnalysisToolEnum.PLINK.equals(dataSetExportRequest.getGenomicsAnalysisTool())) {
         queriesAsStrings.addAll(dataSetService.generatePlinkDemoCode(qualifier));
+      } else if (GenomicsAnalysisToolEnum.HAIL.equals(
+          dataSetExportRequest.getGenomicsAnalysisTool())) {
+        queriesAsStrings.addAll(dataSetService.generateHailDemoCode(qualifier));
       }
     }
 

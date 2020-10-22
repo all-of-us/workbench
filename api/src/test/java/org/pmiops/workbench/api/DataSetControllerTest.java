@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
@@ -46,6 +47,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.invocation.InvocationOnMock;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
@@ -86,6 +89,7 @@ import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
@@ -102,6 +106,8 @@ import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DataSetCodeResponse;
 import org.pmiops.workbench.model.DataSetExportRequest;
+import org.pmiops.workbench.model.DataSetExportRequest.GenomicsAnalysisToolEnum;
+import org.pmiops.workbench.model.DataSetExportRequest.GenomicsDataTypeEnum;
 import org.pmiops.workbench.model.DataSetPreviewValueList;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
@@ -197,6 +203,8 @@ public class DataSetControllerTest {
   @MockBean private CohortQueryBuilder mockCohortQueryBuilder;
   @MockBean private FireCloudService fireCloudService;
   @MockBean private NotebooksService mockNotebooksService;
+
+  @Captor ArgumentCaptor<JSONObject> notebookContentsCaptor;
 
   @TestConfiguration
   @Import({
@@ -314,6 +322,7 @@ public class DataSetControllerTest {
     // set the db name to be empty since test cases currently
     // run in the workbench schema only.
     cdrVersion.setCdrDbName("");
+    cdrVersion.setMicroarrayBigqueryDataset("microarray");
     cdrVersion = cdrVersionDao.save(cdrVersion);
 
     workspace = new Workspace();
@@ -642,31 +651,15 @@ public class DataSetControllerTest {
 
   @Test
   public void exportToNewNotebook() {
-    DataSetRequest dataSet = buildEmptyDataSetRequest().name("blah");
-    dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
-    dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
-    List<DomainValuePair> domainValuePairs = mockDomainValuePair();
-    dataSet.setDomainValuePairs(domainValuePairs);
-
-    ArrayList<String> tables = new ArrayList<>();
-    tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");
-
-    mockLinkingTableQuery(tables);
-    String notebookName = "Hello World";
-
-    DataSetExportRequest request =
-        new DataSetExportRequest()
-            .dataSetRequest(dataSet)
-            .newNotebook(true)
-            .notebookName(notebookName)
-            .kernelType(KernelTypeEnum.PYTHON);
+    DataSetExportRequest request = setUpValidDataSetExportRequest();
 
     dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request).getBody();
     verify(mockNotebooksService, never()).getNotebookContents(any(), any());
     // I tried to have this verify against the actual expected contents of the json object, but
     // java equivalence didn't handle it well.
     verify(mockNotebooksService, times(1))
-        .saveNotebook(eq(WORKSPACE_BUCKET_NAME), eq(notebookName), any(JSONObject.class));
+        .saveNotebook(
+            eq(WORKSPACE_BUCKET_NAME), eq(request.getNotebookName()), any(JSONObject.class));
   }
 
   @Test(expected = ForbiddenException.class)
@@ -738,5 +731,170 @@ public class DataSetControllerTest {
     assertThat(domainValues)
         .containsExactly(
             new DomainValue().value("field_one"), new DomainValue().value("field_two"));
+  }
+
+  @Test
+  public void exportToNotebook_microarrayCodegen_cdrCheck() {
+    DbCdrVersion cdrVersion =
+        cdrVersionDao.findByCdrVersionId(Long.parseLong(workspace.getCdrVersionId()));
+    cdrVersion.setMicroarrayBigqueryDataset(null);
+    cdrVersionDao.save(cdrVersion);
+
+    DataSetExportRequest request =
+        setUpValidDataSetExportRequest().genomicsDataType(GenomicsDataTypeEnum.MICROARRAY);
+
+    FailedPreconditionException e =
+        assertThrows(
+            FailedPreconditionException.class,
+            () ->
+                dataSetController.exportToNotebook(
+                    workspace.getNamespace(), WORKSPACE_NAME, request));
+    assertThat(e)
+        .hasMessageThat()
+        .contains("The workspace CDR version does not have microarray data");
+  }
+
+  @Test
+  public void exportToNotebook_microarrayCodegen_kernelCheck() {
+    DataSetExportRequest request =
+        setUpValidDataSetExportRequest()
+            .kernelType(KernelTypeEnum.R)
+            .genomicsDataType(GenomicsDataTypeEnum.MICROARRAY);
+
+    BadRequestException e =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                dataSetController.exportToNotebook(
+                    workspace.getNamespace(), WORKSPACE_NAME, request));
+    assertThat(e).hasMessageThat().contains("Genomics code generation is only supported in Python");
+  }
+
+  @Test
+  public void exportToNotebook_microarrayCodegen_noGenomicsTool() {
+    DataSetExportRequest request =
+        setUpValidDataSetExportRequest()
+            .genomicsDataType(GenomicsDataTypeEnum.MICROARRAY)
+            .genomicsAnalysisTool(GenomicsAnalysisToolEnum.NONE);
+
+    dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request);
+
+    verify(mockNotebooksService, times(1))
+        .saveNotebook(
+            eq(WORKSPACE_BUCKET_NAME),
+            eq(request.getNotebookName()),
+            notebookContentsCaptor.capture());
+
+    List<String> codeCells = notebookContentsToStrings(notebookContentsCaptor.getValue());
+
+    assertThat(codeCells.size()).isEqualTo(3);
+    assertThat(codeCells.get(2)).contains("raw_array_cohort_extract.py");
+    assertThat(codeCells.get(2)).contains("gatk ArrayExtractCohort");
+    assertThat(codeCells.get(2)).contains("gsutil cp");
+  }
+
+  @Test
+  public void exportToNotebook_microarrayCodegen_plink() {
+    DataSetExportRequest request =
+        setUpValidDataSetExportRequest()
+            .genomicsDataType(GenomicsDataTypeEnum.MICROARRAY)
+            .genomicsAnalysisTool(GenomicsAnalysisToolEnum.PLINK);
+
+    dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request);
+
+    verify(mockNotebooksService, times(1))
+        .saveNotebook(
+            eq(WORKSPACE_BUCKET_NAME),
+            eq(request.getNotebookName()),
+            notebookContentsCaptor.capture());
+
+    List<String> codeCells = notebookContentsToStrings(notebookContentsCaptor.getValue());
+
+    assertThat(codeCells.size()).isEqualTo(5);
+    assertThat(codeCells.get(2)).contains("gatk ArrayExtractCohort");
+    assertThat(codeCells.get(3)).contains("cohort_phenotypes.to_csv");
+    assertThat(codeCells.get(3)).contains(".phe");
+    assertThat(codeCells.get(4)).contains("plink");
+  }
+
+  List<String> notebookContentsToStrings(JSONObject notebookContents) {
+    List<String> codeCellStrings = new ArrayList<>();
+
+    JSONArray cells = notebookContents.getJSONArray("cells");
+    for (int i = 0; i < cells.length(); i++) {
+      String cellString = "";
+      JSONArray innerCells = cells.getJSONObject(i).getJSONArray("source");
+
+      for (int j = 0; j < innerCells.length(); j++) {
+        cellString += innerCells.getString(j);
+      }
+
+      codeCellStrings.add(cellString);
+    }
+
+    return codeCellStrings;
+  }
+
+  @Test
+  public void exportToNotebook_microarrayCodegen_hail() {
+    DataSetExportRequest request =
+        setUpValidDataSetExportRequest()
+            .genomicsDataType(GenomicsDataTypeEnum.MICROARRAY)
+            .genomicsAnalysisTool(GenomicsAnalysisToolEnum.HAIL);
+
+    dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request);
+
+    verify(mockNotebooksService, times(1))
+        .saveNotebook(
+            eq(WORKSPACE_BUCKET_NAME),
+            eq(request.getNotebookName()),
+            notebookContentsCaptor.capture());
+
+    List<String> codeCells = notebookContentsToStrings(notebookContentsCaptor.getValue());
+
+    assertThat(codeCells.size()).isEqualTo(5);
+    assertThat(codeCells.get(2)).contains("gatk ArrayExtractCohort");
+    assertThat(codeCells.get(3)).contains("cohort_phenotypes.to_csv");
+    assertThat(codeCells.get(3)).contains(".tsv");
+    assertThat(codeCells.get(4)).contains("import hail as hl");
+  }
+
+  @Test
+  public void exportToNotebook_microarrayCodegen_noneGenomicsDataType() {
+    DataSetExportRequest request =
+        setUpValidDataSetExportRequest()
+            .genomicsDataType(GenomicsDataTypeEnum.NONE)
+            .genomicsAnalysisTool(GenomicsAnalysisToolEnum.HAIL);
+
+    dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request);
+
+    verify(mockNotebooksService, times(1))
+        .saveNotebook(
+            eq(WORKSPACE_BUCKET_NAME),
+            eq(request.getNotebookName()),
+            notebookContentsCaptor.capture());
+
+    List<String> codeCells = notebookContentsToStrings(notebookContentsCaptor.getValue());
+    assertThat(codeCells.size()).isEqualTo(1);
+  }
+
+  DataSetExportRequest setUpValidDataSetExportRequest() {
+    DataSetRequest dataSet = buildEmptyDataSetRequest().name("blah");
+    dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
+    dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
+    List<DomainValuePair> domainValuePairs = mockDomainValuePair();
+    dataSet.setDomainValuePairs(domainValuePairs);
+
+    ArrayList<String> tables = new ArrayList<>();
+    tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");
+
+    mockLinkingTableQuery(tables);
+    String notebookName = "Hello World";
+
+    return new DataSetExportRequest()
+        .dataSetRequest(dataSet)
+        .newNotebook(true)
+        .notebookName(notebookName)
+        .kernelType(KernelTypeEnum.PYTHON);
   }
 }
