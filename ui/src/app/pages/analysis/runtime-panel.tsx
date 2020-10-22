@@ -5,16 +5,18 @@ import {PopupTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import colors, {addOpacity} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
+import {withCdrVersions} from 'app/utils';
 import {allMachineTypes, Machine, validLeonardoMachineTypes} from 'app/utils/machines';
 import {runtimePresets} from 'app/utils/runtime-presets';
 import {useCustomRuntime} from 'app/utils/runtime-utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
+
 import {Dropdown} from 'primereact/dropdown';
 import {InputNumber} from 'primereact/inputnumber';
 
 import { RuntimeConfigurationType, RuntimeStatus } from 'generated';
-import { DataprocConfig } from 'generated/fetch';
+import { CdrVersionListResponse, DataprocConfig } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
@@ -62,6 +64,7 @@ enum ComputeType {
 
 export interface Props {
   workspace: WorkspaceData;
+  cdrVersionListResponse?: CdrVersionListResponse;
 }
 
 const MachineSelector = ({onChange, selectedMachine, machineType, idPrefix}) => {
@@ -183,14 +186,14 @@ const DataProcConfigSelector = ({onChange, dataprocConfig})  => {
   </fieldset>;
 };
 
-export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
-  const [currentRuntime, setRequestedRuntime] = useCustomRuntime(workspace.namespace);
-
+export const RuntimePanel = fp.flow(withCurrentWorkspace(), withCdrVersions())(({workspace, cdrVersionListResponse}) => {
+  const {namespace, cdrVersionId} = workspace;
+  const {hasMicroarrayData} = fp.find({cdrVersionId}, cdrVersionListResponse.items) || {hasMicroarrayData: false};
+  const [currentRuntime, setRequestedRuntime] = useCustomRuntime(namespace);
   const {status = RuntimeStatus.Unknown, toolDockerImage = '', dataprocConfig = null, gceConfig = {}} = currentRuntime || {};
   const machineName  = !!dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
   const diskSize = !!dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.bootDiskSize;
   const initialMasterMachine = findMachineByName(machineName);
-
   const [selectedDiskSize, setSelectedDiskSize] = useState(diskSize);
   const [selectedMachine, setSelectedMachine] = useState(initialMasterMachine);
   const [runtimeConfigurationType, setRuntimeConfigurationType] = useState(null);
@@ -299,6 +302,7 @@ export const RuntimePanel = withCurrentWorkspace()(({workspace}) => {
       <FlexColumn style={{marginTop: '1rem'}}>
         <label htmlFor='runtime-compute'>Compute type</label>
         <Dropdown id='runtime-compute'
+                  disabled={!hasMicroarrayData}
                   style={{width: '10rem'}}
                   options={[ComputeType.Dataproc, ComputeType.Standard]}
                   value={selectedCompute || ComputeType.Standard}

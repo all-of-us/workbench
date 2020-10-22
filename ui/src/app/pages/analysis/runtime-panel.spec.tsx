@@ -11,7 +11,11 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {RuntimeApi} from 'generated/fetch/api';
 import {WorkspaceAccessLevel} from 'generated/fetch';
-import {runtimeStore} from "app/utils/stores";
+import {runtimeStore} from 'app/utils/stores';
+import {cdrVersionListResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
+import {cdrVersionStore} from 'app/utils/navigation';
+
+
 
 describe('RuntimePanel', () => {
   let props: Props;
@@ -32,12 +36,18 @@ describe('RuntimePanel', () => {
   }
 
   beforeEach(() => {
+    cdrVersionStore.next(cdrVersionListResponse);
     runtimeApiStub = new RuntimeApiStub();
     runtimeApiStub.runtime.dataprocConfig = null;
     registerApiClient(RuntimeApi, runtimeApiStub);
     runtimeStore.set({runtime: runtimeApiStub.runtime, workspaceNamespace: workspaceStubs[0].namespace});
     props = {
-      workspace: {...workspaceStubs[0], accessLevel: WorkspaceAccessLevel.WRITER}
+      workspace: {
+        ...workspaceStubs[0],
+        accessLevel: WorkspaceAccessLevel.WRITER,
+        cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID
+      },
+      cdrVersionListResponse
     };
   });
 
@@ -71,7 +81,7 @@ describe('RuntimePanel', () => {
     await handleUseEffect(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
-    wrapper.find('#runtime-cpu .p-dropdown').first().simulate('click');
+    wrapper.find('div[id="runtime-cpu"]').first().simulate('click');
     wrapper.find('.p-dropdown-item').find({'aria-label': 8}).first().simulate('click');
 
     const memoryOptions = wrapper.find('#runtime-ram').first().find('.p-dropdown-item');
@@ -120,12 +130,12 @@ describe('RuntimePanel', () => {
 
   });
 
-    it('should add additional options when the compute type changes', async() => {
+  it('should add additional options when the compute type changes', async() => {
     const wrapper = component();
     await handleUseEffect(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
-    wrapper.find('#runtime-compute .p-dropdown').first().simulate('click');
+    wrapper.find('div[id="runtime-compute"]').first().simulate('click');
     wrapper.find('.p-dropdown-item').find({'aria-label': 'Dataproc Cluster'}).first().simulate('click');
 
     expect(wrapper.exists('span[id="num-workers"]')).toBeTruthy();
