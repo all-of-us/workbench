@@ -10,7 +10,7 @@ import {datatableStyles} from 'app/styles/datatable';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {DomainType, Operator, PageFilterRequest, SortOrder} from 'generated/fetch';
+import {Domain, Operator, PageFilterRequest, SortOrder} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import {Column} from 'primereact/column';
@@ -173,13 +173,13 @@ const filterIcons = {
 const rowsPerPage = 25;
 const lazyLoadSize = 125;
 const domains = [
-  DomainType.CONDITION,
-  DomainType.PROCEDURE,
-  DomainType.DRUG,
-  DomainType.OBSERVATION,
-  DomainType.PHYSICALMEASUREMENT,
-  DomainType.LAB,
-  DomainType.VITAL,
+  Domain.CONDITION,
+  Domain.PROCEDURE,
+  Domain.DRUG,
+  Domain.OBSERVATION,
+  Domain.PHYSICALMEASUREMENT,
+  Domain.LAB,
+  Domain.VITAL,
 ];
 
 class NameContainer extends React.Component<{data: any, vocab: string}, {showMore: boolean}> {
@@ -228,7 +228,7 @@ class NameContainer extends React.Component<{data: any, vocab: string}, {showMor
 interface Props {
   tabName: string;
   columns: Array<any>;
-  domain: DomainType;
+  domain: Domain;
   participantId: number;
   workspace: WorkspaceData;
   filterState: any;
@@ -445,7 +445,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         .getParticipantData(namespace, id, cohortReviewId, participantId, request, {signal: this.dataAborter.signal})
         .then(response => {
           data = response.items.map(item => {
-            if (domain === DomainType.VITAL || domain === DomainType.LAB) {
+            if (domain === Domain.VITAL || domain === Domain.LAB) {
               item['itemTime'] = moment(item.itemDate, 'YYYY-MM-DD HH:mm Z').format('hh:mm a z');
             }
             item.itemDate = moment(item.itemDate).format('YYYY-MM-DD');
@@ -621,13 +621,13 @@ export const DetailTabTable = withCurrentWorkspace()(
           return itemDate >= min && itemDate <= max;
         });
       }
-      if (domain !== DomainType.SURVEY && (ageMin || ageMax)) {
+      if (domain !== Domain.SURVEY && (ageMin || ageMax)) {
         const min = ageMin || 0;
         const max = ageMax || 120;
         data = data.filter(item => item.ageAtEvent >= min && item.ageAtEvent <= max);
       }
-      if (domain !== DomainType.SURVEY
-        && domain !== DomainType.PHYSICALMEASUREMENT
+      if (domain !== Domain.SURVEY
+        && domain !== Domain.PHYSICALMEASUREMENT
         && visits) {
         data = data.filter(item => visits === item.visitType);
       }
@@ -661,7 +661,7 @@ export const DetailTabTable = withCurrentWorkspace()(
                   data = [];
                   break;
                 } else if (!columnFilters[col].includes('Select All')
-                  && !(vocab === 'source' && domain === DomainType.OBSERVATION)) {
+                  && !(vocab === 'source' && domain === Domain.OBSERVATION)) {
                   data = data.filter(row => columnFilters[col].includes(row[col]));
                 }
               } else {

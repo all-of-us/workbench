@@ -24,8 +24,10 @@ import {
   CdrVersionListResponse,
   Criteria,
   CriteriaType,
+  Domain,
   DomainType
 } from 'generated/fetch';
+import {CSSProperties} from 'react';
 
 const borderStyle = `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`;
 const styles = reactStyles({
@@ -166,6 +168,49 @@ const columnHeaderStyle = {
   width: '9%'
 };
 
+const columns = [
+  {
+    name: 'Name',
+    tooltip: 'Name from vocabulary',
+    style: {...styles.columnNameHeader, width: '31%', borderLeft: 0},
+  },
+  {
+    name: 'Code',
+    tooltip: 'Code from vocabulary',
+    style: columnHeaderStyle,
+  },
+  {
+    name: 'Vocab',
+    tooltip: 'Vocabulary for concept',
+    style: {...columnHeaderStyle, paddingLeft: '0'},
+  },
+  {
+    name: 'Source/Standard',
+    tooltip: 'Indicates if code is an OMOP standard or a source vocabulary code (ICD9/10, CPT, etc)',
+    style: {...styles.columnNameHeader, width: '10%', paddingLeft: '0', paddingRight: '0.5rem'},
+  },
+  {
+    name: 'Concept Id',
+    tooltip: 'Unique ID for concept in OMOP',
+    style: {...styles.columnNameHeader, width: '10%', paddingLeft: '0', paddingRight: '0.5rem'},
+  },
+  {
+    name: 'Roll-up Count',
+    tooltip: 'Number of distinct participants that have either the parent concept OR any of the parent’s child concepts',
+    style: columnHeaderStyle,
+  },
+  {
+    name: 'Item Count',
+    tooltip: 'Number of distinct participants for this concept',
+    style: columnHeaderStyle,
+  },
+  {
+    name: 'View Hierarchy',
+    tooltip: null,
+    style: {...styles.columnNameHeader, textAlign: 'center', width: '12%'},
+  },
+];
+
 interface Props {
   cdrVersionListResponse: CdrVersionListResponse;
   concept?: Array<Criteria>;
@@ -271,7 +316,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
     }
 
     get checkSource() {
-      return [DomainType.CONDITION, DomainType.PROCEDURE].includes(this.props.searchContext.domain);
+      return [Domain.CONDITION, Domain.PROCEDURE].includes(this.props.searchContext.domain);
     }
 
     selectItem = (row: any) => {
@@ -340,7 +385,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
 
     renderRow(row: any, child: boolean, elementId: string) {
       const {hoverId, ingredients} = this.state;
-      const attributes = row.hasAttributes;
+      const attributes = this.props.source === 'criteria' && row.hasAttributes;
       const brand = row.type === CriteriaType.BRAND;
       const displayName = row.name + (brand ? ' (BRAND NAME)' : '');
       const selected = !attributes && !brand && this.props.selectedIds.includes(this.getParamId(row));
@@ -393,14 +438,6 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
       </FlexRow>;
     }
 
-    get isConcept() {
-      return this.props.source && this.props.source === 'concept';
-    }
-
-    hideAttributesRow(row) {
-      return !row.hasAttributes || !this.isConcept;
-    }
-
     render() {
       const {searchContext: {domain}} = this.props;
       const {cdrVersion, data, error, ingredients, loading, searchTerms, standardOnly, sourceMatch, standardData, totalCount} = this.state;
@@ -419,31 +456,33 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
         </div>
         <div style={{display: 'table', height: '100%', width: '100%'}}>
           <div style={styles.helpText}>
-            {sourceMatch && !standardOnly && <div>
-              There are {sourceMatch.count.toLocaleString()} participants with source code {sourceMatch.code}.
-              {showStandardOption && <span> For more results, browse
-                &nbsp;<Clickable style={styles.vocabLink} onClick={() => this.showStandardResults()}>Standard Vocabulary</Clickable>.
-              </span>}
+            {domain === Domain.DRUG && <div>
+              Your search may bring back brand names, generics and ingredients. Only ingredients may be added to your search criteria
             </div>}
-            {standardOnly && <div>
-              {!!displayData.length && <span>
-                There are {displayData[0].count.toLocaleString()} participants for the standard version of the code you searched.
-              </span>}
-              {!displayData.length && <span>
-                There are no standard matches for source code {sourceMatch.code}.
-              </span>}
-              &nbsp;<Clickable style={styles.vocabLink}
-                               onMouseDown={() => this.trackEvent('Source Vocab Hyperlink')}
-                               onClick={() => this.setState({standardOnly: false})}>
-                Return to source code
-              </Clickable>.
-            </div>}
-            {domain === DomainType.DRUG && <div>
-              Your search may bring back brand names, generics and ingredients. Only ingredients may be added to your search criteria.
-            </div>}
-            {!!totalCount && <div>
-              There are {totalCount.toLocaleString()} results{!!cdrVersion && <span> in {cdrVersion.name}</span>}.
-            </div>}
+            {!loading && <React.Fragment>
+              {sourceMatch && !standardOnly && <div>
+                There are {sourceMatch.count.toLocaleString()} participants with source code {sourceMatch.code}.
+                {showStandardOption && <span> For more results, browse
+                  &nbsp;<Clickable style={styles.vocabLink} onClick={() => this.showStandardResults()}>Standard Vocabulary</Clickable>.
+                </span>}
+              </div>}
+              {standardOnly && <div>
+                {!!displayData.length && <span>
+                  There are {displayData[0].count.toLocaleString()} participants for the standard version of the code you searched
+                </span>}
+                {!displayData.length && <span>
+                  There are no standard matches for source code {sourceMatch.code}
+                </span>}
+                &nbsp;<Clickable style={styles.vocabLink}
+                                 onMouseDown={() => this.trackEvent('Source Vocab Hyperlink')}
+                                 onClick={() => this.setState({standardOnly: false})}>
+                  Return to source code
+                </Clickable>.
+              </div>}
+              {!!totalCount && <div>
+                There are {totalCount.toLocaleString()} results{!!cdrVersion && <span> in {cdrVersion.name}</span>}
+              </div>}
+            </React.Fragment>}
           </div>
         </div>
         {!loading && !!displayData && <div style={styles.listContainer}>
@@ -451,22 +490,9 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
             <table className='p-datatable' style={styles.table}>
               <thead className='p-datatable-thead'>
                 <tr style={{height: '2rem'}}>
-                  <th style={{...styles.columnNameHeader, width: '31%', borderLeft: 0}}>Name</th>
-                  <th style={columnHeaderStyle}>
-                    {this.renderColumnWithToolTip('Code', 'Unique code for OMOP' )}
-                  </th>
-                  <th style={{...columnHeaderStyle, paddingLeft: '0'}}>Vocab</th>
-                  <th style={{...styles.columnNameHeader, width: '10%', paddingLeft: '0',
-                    paddingRight: '0.5rem'}}>Source/ Standard</th>
-                  <th style={{...styles.columnNameHeader, width: '10%', paddingLeft: '0',
-                    paddingRight: '0.5rem'}}>Concept Id</th>
-                  <th style={columnHeaderStyle}>
-                    Roll-up Count
-                  </th>
-                  <th style={columnHeaderStyle}>
-                    {this.renderColumnWithToolTip('Item Count', 'Number of distinct participants for this concept' )}
-                  </th>
-                  <th style={{...styles.columnNameHeader, textAlign: 'center', width: '12%'}}>View Hierarchy</th>
+                  {columns.map((column, index) => <th key={index} style={column.style as CSSProperties}>
+                    {column.tooltip !== null ? this.renderColumnWithToolTip(column.name, column.tooltip) : column.name}
+                  </th>)}
                 </tr>
               </thead>
             </table>
@@ -477,10 +503,10 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
                   const open = ingredients[row.id] && ingredients[row.id].open;
                   const err = ingredients[row.id] && ingredients[row.id].error;
                   return <React.Fragment key={index}>
-                    {this.hideAttributesRow(row)  && this.renderRow(row, false, index)}
+                    {this.renderRow(row, false, index)}
                     {open && !err && ingredients[row.id].items.map((item, i) => {
                       return <React.Fragment key={i}>
-                        {this.hideAttributesRow(row) && this.renderRow(item, true, `${index}.${i}`)}
+                        {this.renderRow(item, true, `${index}.${i}`)}
                       </React.Fragment>;
                     })}
                     {open && err && <tr>
@@ -500,7 +526,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
           {!standardOnly && !displayData.length && <div>No results found</div>}
         </div>}
         {loading && <SpinnerOverlay/>}
-        {error && <div style={{...styles.error, ...(domain === DomainType.DRUG ? {marginTop: '3.75rem'} : {})}}>
+        {error && <div style={{...styles.error, ...(domain === Domain.DRUG ? {marginTop: '3.75rem'} : {})}}>
           <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid' shape='exclamation-triangle' size='22'/>
           Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
           {standardOnly && <Clickable style={styles.vocabLink} onClick={() => this.getResults(sourceMatch.code)}>

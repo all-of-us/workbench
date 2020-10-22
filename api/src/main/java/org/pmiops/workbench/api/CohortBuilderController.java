@@ -31,7 +31,6 @@ import org.pmiops.workbench.model.DemoChartInfoListResponse;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCount;
 import org.pmiops.workbench.model.DomainInfoResponse;
-import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchGroup;
@@ -72,7 +71,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   public ResponseEntity<CriteriaListResponse> findCriteriaAutoComplete(
       Long cdrVersionId, String domain, String term, String type, Boolean standard, Integer limit) {
     cdrVersionService.setCdrVersion(cdrVersionId);
-    validateDomainType(domain);
+    validateDomain(domain);
     validateType(type);
     validateTerm(term);
     return ResponseEntity.ok(
@@ -130,7 +129,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   public ResponseEntity<CriteriaListWithCountResponse> findCriteriaByDomainAndSearchTerm(
       Long cdrVersionId, String domain, String term, Integer limit) {
     cdrVersionService.setCdrVersion(cdrVersionId);
-    validateDomainType(domain);
+    validateDomain(domain);
     validateTerm(term);
     return ResponseEntity.ok(
         cohortBuilderService.findCriteriaByDomainAndSearchTerm(domain, term, limit));
@@ -156,7 +155,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   public ResponseEntity<CriteriaListResponse> findStandardCriteriaByDomainAndConceptId(
       Long cdrVersionId, String domain, Long conceptId) {
     cdrVersionService.setCdrVersion(cdrVersionId);
-    validateDomainType(domain);
+    validateDomain(domain);
     return ResponseEntity.ok(
         new CriteriaListResponse()
             .items(
@@ -223,7 +222,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   public ResponseEntity<CriteriaListResponse> findCriteriaBy(
       Long cdrVersionId, String domain, String type, Boolean standard, Long parentId) {
     cdrVersionService.setCdrVersion(cdrVersionId);
-    validateDomainType(domain);
+    validateDomain(domain);
     validateType(type);
     return ResponseEntity.ok(
         new CriteriaListResponse()
@@ -287,14 +286,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
             .collect(Collectors.toList());
     return allGroups.stream().anyMatch(SearchGroup::getTemporal)
         || allParams.stream().anyMatch(sp -> CriteriaSubType.BP.toString().equals(sp.getSubtype()));
-  }
-
-  private void validateDomainType(String domain) {
-    Arrays.stream(DomainType.values())
-        .filter(domainType -> domainType.toString().equalsIgnoreCase(domain))
-        .findFirst()
-        .orElseThrow(
-            () -> new BadRequestException(String.format(BAD_REQUEST_MESSAGE, "domain", domain)));
   }
 
   private void validateDomain(String domain) {

@@ -70,7 +70,7 @@ export async function waitForPropertyEquality(page: Page,
   }
 }
 
-export async function waitForNumericalString(page: Page, xpath: string): Promise<string> {
+export async function waitForNumericalString(page: Page, xpath: string, timeOut?: number): Promise<string> {
   await page.waitForXPath(xpath, {visible: true});
 
   const numbers =  await page.waitForFunction( xpathSelector => {
@@ -83,7 +83,7 @@ export async function waitForNumericalString(page: Page, xpath: string): Promise
       }
     }
     return false;
-  }, {}, xpath);
+  }, {timeout: timeOut}, xpath);
 
   return (await numbers.jsonValue()).toString();
 }
@@ -225,7 +225,8 @@ export async function waitForNumberElements(page: Page,
  */
 export async function waitForText(page: Page,
                                   textSubstr: string,
-                                  selector: {xpath?: string, css?: string} = {css: 'body'}): Promise<boolean> {
+                                  selector: {xpath?: string, css?: string} = {css: 'body'},
+                                  timeOut?: number): Promise<boolean> {
   if (selector.css !== undefined) {
     try {
          // wait for visible then compare texts
@@ -233,7 +234,7 @@ export async function waitForText(page: Page,
       const jsHandle = await page.waitForFunction((css, expText) => {
         const element = document.querySelector(css);
         return element && element.textContent.includes(expText);
-      }, {}, selector.css, textSubstr);
+      }, {timeout: timeOut}, selector.css, textSubstr);
       return (await jsHandle.jsonValue()) as boolean;
     } catch (e) {
       console.error(`Wait for element matching CSS=${selector.css} contains "${textSubstr}" text failed. ${e}`);
@@ -245,15 +246,13 @@ export async function waitForText(page: Page,
       const jsHandle = await page.waitForFunction((xpath, expText) => {
         const element = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
         return element && element.textContent.includes(expText);
-      }, {}, selector.xpath, textSubstr);
+      }, {timeout: timeOut}, selector.xpath, textSubstr);
       return (await jsHandle.jsonValue()) as boolean;
     } catch (e) {
       console.error(`Wait for element matching Xpath=${selector.xpath} contains "${textSubstr}" text failed. ${e}`);
       throw e;
     }
   }
-
-
 }
 
 /**

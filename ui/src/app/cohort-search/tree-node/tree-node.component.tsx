@@ -18,7 +18,7 @@ import {
   serverConfigStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
-import {AttrName, Criteria, CriteriaSubType, CriteriaType, DomainType, Operator} from 'generated/fetch';
+import {AttrName, Criteria, CriteriaSubType, CriteriaType, Domain, Operator} from 'generated/fetch';
 
 const COPE_SURVEY_ID = 1333342;
 export const COPE_SURVEY_GROUP_NAME = 'COVID-19 Participant Experience (COPE) Survey';
@@ -152,7 +152,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 
   componentDidUpdate(prevProps: Readonly<TreeNodeProps>): void {
     const {autocompleteSelection, node: {domainId, group}, searchTerms} = this.props;
-    if (domainId === DomainType.PHYSICALMEASUREMENT.toString() && group && searchTerms !== prevProps.searchTerms) {
+    if (domainId === Domain.PHYSICALMEASUREMENT.toString() && group && searchTerms !== prevProps.searchTerms) {
       this.searchChildren();
     }
     if (!!autocompleteSelection && autocompleteSelection !== prevProps.autocompleteSelection) {
@@ -164,10 +164,10 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     const {node: {conceptId, count, domainId, id, isStandard, name, type}} = this.props;
     this.setState({loading: true});
     const {cdrVersionId} = (currentWorkspaceStore.getValue());
-    const criteriaType = domainId === DomainType.DRUG.toString() ? CriteriaType.ATC.toString() : type;
+    const criteriaType = domainId === Domain.DRUG.toString() ? CriteriaType.ATC.toString() : type;
     cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, id)
       .then(resp => {
-        if (resp.items.length === 0 && domainId === DomainType.DRUG.toString()) {
+        if (resp.items.length === 0 && domainId === Domain.DRUG.toString()) {
           cohortBuilderApi()
             .findCriteriaBy(+cdrVersionId, domainId, CriteriaType[CriteriaType.RXNORM], isStandard, id)
             .then(rxResp => {
@@ -175,7 +175,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
             }, () => this.setState({error: true}));
         } else {
           this.setState({children: resp.items, loading: false});
-          if (resp.items.length > 0 && domainId === DomainType.SURVEY.toString() && !resp.items[0].group) {
+          if (resp.items.length > 0 && domainId === Domain.SURVEY.toString() && !resp.items[0].group) {
             // save questions in the store so we can display them along with answers if selected
             const questions = ppiQuestions.getValue();
             questions[id] = {conceptId, count, name};
@@ -221,11 +221,11 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
       const {children, expanded} = this.state;
       if (!expanded) {
         if (parentId === 0) {
-          const labelName = domainId === DomainType.SURVEY.toString() ? name : subTypeToTitle(subtype);
+          const labelName = domainId === Domain.SURVEY.toString() ? name : subTypeToTitle(subtype);
           const message = source === 'concept' ? 'Concept Search' : 'Cohort Builder Search';
           triggerEvent(message, 'Click', `${domainToTitle(domainId)} - ${labelName} - Expand`);
         }
-        if (domainId !== DomainType.PHYSICALMEASUREMENT.toString() && !children) {
+        if (domainId !== Domain.PHYSICALMEASUREMENT.toString() && !children) {
           this.loadChildren();
         }
       }
@@ -235,7 +235,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 
   get paramId() {
     const {node: {code, conceptId, domainId, id}} = this.props;
-    return `param${!!conceptId && domainId !== DomainType.SURVEY.toString() ? (conceptId + code) : id}`;
+    return `param${!!conceptId && domainId !== Domain.SURVEY.toString() ? (conceptId + code) : id}`;
   }
 
   get isPMCat() {
@@ -268,7 +268,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
           operator: Operator.IN,
           operands: [value]
         });
-      } else if (domainId === DomainType.SURVEY.toString() && !group) {
+      } else if (domainId === Domain.SURVEY.toString() && !group) {
         const question = ppiQuestions.getValue()[parentId];
         if (question) {
           name = `${question.name} - ${name}`;
@@ -326,12 +326,12 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
       source, scrollToMatch, searchTerms, select, selectedIds,
       setAttributes} = this.props;
     const {children, error, expanded, hover, loading, searchMatch} = this.state;
-    const nodeChildren = domainId === DomainType.PHYSICALMEASUREMENT.toString() ? node.children : children;
+    const nodeChildren = domainId === Domain.PHYSICALMEASUREMENT.toString() ? node.children : children;
     const selected = serverConfigStore.getValue().enableCohortBuilderV2
       ? this.getSelectedValues()
       : selectedIds.includes(this.paramId) ||
         groupSelections.includes(parentId);
-    const displayName = domainId === DomainType.PHYSICALMEASUREMENT.toString() && !!searchTerms
+    const displayName = domainId === Domain.PHYSICALMEASUREMENT.toString() && !!searchTerms
       ? highlightSearchTerm(searchTerms, name, colors.success)
       : name;
     return <React.Fragment>
@@ -371,7 +371,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
           {this.showCount && <div style={{whiteSpace: 'nowrap'}}>
             <span style={styles.count}>{count.toLocaleString()}</span>
           </div>}
-        </div>}
+        </div>
       </div>
       {!!nodeChildren && nodeChildren.length > 0 &&
         <div style={{display: expanded ? 'block' : 'none', marginLeft: nodeChildren[0].group ? '0.875rem' : '2rem'}}>

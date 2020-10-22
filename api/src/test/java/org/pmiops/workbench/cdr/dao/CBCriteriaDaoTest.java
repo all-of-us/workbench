@@ -14,7 +14,6 @@ import org.pmiops.workbench.cdr.model.DbSurveyVersion;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.FilterColumns;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -32,7 +31,6 @@ public class CBCriteriaDaoTest {
 
   @Autowired private CBCriteriaDao cbCriteriaDao;
   @Autowired private JdbcTemplate jdbcTemplate;
-  private DbCriteria surveyCriteria;
   private DbCriteria sourceCriteria;
   private DbCriteria standardCriteria;
   private DbCriteria icd9Criteria;
@@ -46,10 +44,10 @@ public class CBCriteriaDaoTest {
 
   @Before
   public void setUp() {
-    surveyCriteria =
+    DbCriteria surveyCriteria =
         cbCriteriaDao.save(
             DbCriteria.builder()
-                .addDomainId(DomainType.SURVEY.toString())
+                .addDomainId(Domain.SURVEY.toString())
                 .addType(CriteriaType.PPI.toString())
                 .addSubtype(CriteriaSubType.QUESTION.toString())
                 .addGroup(false)
@@ -61,7 +59,7 @@ public class CBCriteriaDaoTest {
     // adding a survey answer
     cbCriteriaDao.save(
         DbCriteria.builder()
-            .addDomainId(DomainType.SURVEY.toString())
+            .addDomainId(Domain.SURVEY.toString())
             .addType(CriteriaType.PPI.toString())
             .addSubtype(CriteriaSubType.ANSWER.toString())
             .addGroup(false)
@@ -75,7 +73,7 @@ public class CBCriteriaDaoTest {
     sourceCriteria =
         cbCriteriaDao.save(
             DbCriteria.builder()
-                .addDomainId(DomainType.CONDITION.toString())
+                .addDomainId(Domain.CONDITION.toString())
                 .addType(CriteriaType.ICD9CM.toString())
                 .addCount(100L)
                 .addStandard(false)
@@ -86,7 +84,7 @@ public class CBCriteriaDaoTest {
     standardCriteria =
         cbCriteriaDao.save(
             DbCriteria.builder()
-                .addDomainId(DomainType.CONDITION.toString())
+                .addDomainId(Domain.CONDITION.toString())
                 .addType(CriteriaType.SNOMED.toString())
                 .addCount(100L)
                 .addHierarchy(true)
@@ -98,7 +96,7 @@ public class CBCriteriaDaoTest {
     icd9Criteria =
         cbCriteriaDao.save(
             DbCriteria.builder()
-                .addDomainId(DomainType.CONDITION.toString())
+                .addDomainId(Domain.CONDITION.toString())
                 .addType(CriteriaType.ICD9CM.toString())
                 .addCount(100L)
                 .addStandard(false)
@@ -109,7 +107,7 @@ public class CBCriteriaDaoTest {
     icd10Criteria =
         cbCriteriaDao.save(
             DbCriteria.builder()
-                .addDomainId(DomainType.CONDITION.toString())
+                .addDomainId(Domain.CONDITION.toString())
                 .addType(CriteriaType.ICD10CM.toString())
                 .addCount(100L)
                 .addStandard(false)
@@ -120,7 +118,7 @@ public class CBCriteriaDaoTest {
     measurementCriteria =
         cbCriteriaDao.save(
             DbCriteria.builder()
-                .addDomainId(DomainType.MEASUREMENT.toString())
+                .addDomainId(Domain.MEASUREMENT.toString())
                 .addType(CriteriaType.LOINC.toString())
                 .addCount(100L)
                 .addHierarchy(true)
@@ -131,7 +129,7 @@ public class CBCriteriaDaoTest {
     raceAsian =
         cbCriteriaDao.save(
             DbCriteria.builder()
-                .addDomainId(DomainType.PERSON.toString())
+                .addDomainId(Domain.PERSON.toString())
                 .addType(CriteriaType.RACE.toString())
                 .addName("Asian")
                 .addStandard(true)
@@ -139,7 +137,7 @@ public class CBCriteriaDaoTest {
     raceWhite =
         cbCriteriaDao.save(
             DbCriteria.builder()
-                .addDomainId(DomainType.PERSON.toString())
+                .addDomainId(Domain.PERSON.toString())
                 .addType(CriteriaType.RACE.toString())
                 .addName("White")
                 .addStandard(true)
@@ -147,7 +145,7 @@ public class CBCriteriaDaoTest {
     gender =
         cbCriteriaDao.save(
             DbCriteria.builder()
-                .addDomainId(DomainType.PERSON.toString())
+                .addDomainId(Domain.PERSON.toString())
                 .addType(CriteriaType.GENDER.toString())
                 .addName("Male")
                 .addStandard(true)
@@ -156,7 +154,7 @@ public class CBCriteriaDaoTest {
     ethnicity =
         cbCriteriaDao.save(
             DbCriteria.builder()
-                .addDomainId(DomainType.PERSON.toString())
+                .addDomainId(Domain.PERSON.toString())
                 .addType(CriteriaType.ETHNICITY.toString())
                 .addName("Not Hispanic or Latino")
                 .addStandard(true)
@@ -165,20 +163,12 @@ public class CBCriteriaDaoTest {
     sexAtBirth =
         cbCriteriaDao.save(
             DbCriteria.builder()
-                .addDomainId(DomainType.PERSON.toString())
+                .addDomainId(Domain.PERSON.toString())
                 .addType(CriteriaType.SEX.toString())
                 .addName("Male")
                 .addStandard(true)
                 .addParentId(1)
                 .build());
-  }
-
-  @Test
-  public void findCountByDomainAndStandardAndTerm() {
-    assertThat(
-            cbCriteriaDao.findCountByDomainAndStandardAndTerm(
-                Domain.CONDITION.toString(), ImmutableList.of(false), "term"))
-        .isEqualTo(1);
   }
 
   @Test
@@ -189,59 +179,11 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findIdByDomainAndConceptIdAndName() {
-    assertThat(
-            cbCriteriaDao.findIdByDomainAndConceptIdAndName(
-                Domain.SURVEY.toString(), surveyCriteria.getConceptId(), surveyCriteria.getName()))
-        .isEqualTo(surveyCriteria.getId());
-  }
-
-  @Test
-  public void findQuestionCountByDomainAndIdAndTerm() {
-    assertThat(cbCriteriaDao.findQuestionCountByDomainAndIdAndTerm(surveyCriteria.getId(), "term"))
-        .isEqualTo(1L);
-  }
-
-  @Test
-  public void findCriteriaLeavesByDomainAndTypeAndSubtype() {
-    List<DbCriteria> criteriaList =
-        cbCriteriaDao.findCriteriaLeavesByDomainAndTypeAndSubtype(
-            DomainType.SURVEY.toString(),
-            CriteriaType.PPI.toString(),
-            CriteriaSubType.QUESTION.toString());
-    assertThat(criteriaList).containsExactly(surveyCriteria);
-  }
-
-  @Test
-  public void findExactMatchByCode() {
-    // test that we match both source and standard codes
-    List<DbCriteria> exactMatchByCode =
-        cbCriteriaDao.findExactMatchByCode(DomainType.CONDITION.toString(), "120");
-    assertThat(exactMatchByCode).containsExactly(standardCriteria, sourceCriteria);
-  }
-
-  @Test
   public void findCriteriaByDomainAndTypeAndCode() {
     PageRequest page = new PageRequest(0, 10);
     List<DbCriteria> criteriaList =
         cbCriteriaDao
-            .findCriteriaByDomainAndTypeAndCode(
-                DomainType.CONDITION.toString(),
-                CriteriaType.ICD9CM.toString(),
-                Boolean.FALSE,
-                "00",
-                page)
-            .getContent();
-    assertThat(criteriaList).containsExactly(icd9Criteria);
-  }
-
-  @Test
-  public void findCriteriaByDomainAndCode() {
-    PageRequest page = new PageRequest(0, 10);
-    List<DbCriteria> criteriaList =
-        cbCriteriaDao
-            .findCriteriaByDomainAndCode(
-                DomainType.CONDITION.toString(), Boolean.FALSE, "001", page)
+            .findCriteriaByDomainAndTypeAndCode(Domain.CONDITION.toString(), "00", page)
             .getContent();
     assertThat(criteriaList).containsExactly(icd9Criteria);
   }
@@ -251,8 +193,7 @@ public class CBCriteriaDaoTest {
     PageRequest page = new PageRequest(0, 10);
     List<DbCriteria> measurements =
         cbCriteriaDao
-            .findCriteriaByDomainAndFullText(
-                DomainType.MEASUREMENT.toString(), Boolean.TRUE, "001", page)
+            .findCriteriaByDomainAndFullText(Domain.MEASUREMENT.toString(), "001", page)
             .getContent();
     assertThat(measurements).containsExactly(measurementCriteria);
   }
@@ -261,11 +202,11 @@ public class CBCriteriaDaoTest {
   public void findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc() {
     List<DbCriteria> actualIcd9s =
         cbCriteriaDao.findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc(
-            DomainType.CONDITION.toString(), CriteriaType.ICD9CM.toString(), false, 0L);
+            Domain.CONDITION.toString(), CriteriaType.ICD9CM.toString(), false, 0L);
     assertThat(actualIcd9s).containsExactly(sourceCriteria, icd9Criteria);
     List<DbCriteria> actualIcd10s =
         cbCriteriaDao.findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc(
-            DomainType.CONDITION.toString(), CriteriaType.ICD10CM.toString(), false, 0L);
+            Domain.CONDITION.toString(), CriteriaType.ICD10CM.toString(), false, 0L);
     assertThat(actualIcd10s).containsExactly(icd10Criteria);
   }
 
@@ -273,7 +214,7 @@ public class CBCriteriaDaoTest {
   public void findCriteriaByDomainAndTypeOrderByIdAsc() {
     final List<DbCriteria> demoList =
         cbCriteriaDao.findCriteriaByDomainAndTypeOrderByIdAsc(
-            DomainType.PERSON.toString(), CriteriaType.RACE.toString());
+            Domain.PERSON.toString(), CriteriaType.RACE.toString());
     assertThat(demoList).containsExactly(raceAsian, raceWhite);
   }
 
@@ -282,7 +223,7 @@ public class CBCriteriaDaoTest {
     PageRequest page = new PageRequest(0, 10);
     List<DbCriteria> labs =
         cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndCode(
-            DomainType.MEASUREMENT.toString(), CriteriaType.LOINC.toString(), true, "LP123", page);
+            Domain.MEASUREMENT.toString(), CriteriaType.LOINC.toString(), true, "LP123", page);
     assertThat(labs).containsExactly(measurementCriteria);
   }
 
@@ -291,7 +232,7 @@ public class CBCriteriaDaoTest {
     PageRequest page = new PageRequest(0, 10);
     List<DbCriteria> conditions =
         cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndFullText(
-            DomainType.CONDITION.toString(), CriteriaType.SNOMED.toString(), true, "myMatch", page);
+            Domain.CONDITION.toString(), CriteriaType.SNOMED.toString(), true, "myMatch", page);
     assertThat(conditions).containsExactly(standardCriteria);
   }
 
@@ -309,7 +250,7 @@ public class CBCriteriaDaoTest {
   public void findStandardCriteriaByDomainAndConceptId() {
     assertThat(
             cbCriteriaDao.findStandardCriteriaByDomainAndConceptId(
-                DomainType.CONDITION.toString(), false, ImmutableList.of("1")))
+                Domain.CONDITION.toString(), false, ImmutableList.of("1")))
         .containsExactly(icd10Criteria);
   }
 
@@ -319,16 +260,8 @@ public class CBCriteriaDaoTest {
     parentConceptIds.add("1");
     List<DbCriteria> results =
         cbCriteriaDao.findCriteriaParentsByDomainAndTypeAndParentConceptIds(
-            DomainType.CONDITION.toString(),
-            CriteriaType.SNOMED.toString(),
-            true,
-            parentConceptIds);
+            Domain.CONDITION.toString(), CriteriaType.SNOMED.toString(), true, parentConceptIds);
     assertThat(results).containsExactly(standardCriteria);
-  }
-
-  @Test
-  public void findCriteriaLeavesAndParentsByPath() {
-    assertThat(cbCriteriaDao.findCriteriaLeavesAndParentsByPath("5")).containsExactly(icd9Criteria);
   }
 
   @Test
@@ -342,62 +275,73 @@ public class CBCriteriaDaoTest {
     Sort sort = new Sort(Direction.ASC, "name");
     List<DbCriteria> criteriaList =
         cbCriteriaDao.findByDomainIdAndType(
-            DomainType.PERSON.toString(), FilterColumns.RACE.toString(), sort);
+            Domain.PERSON.toString(), FilterColumns.RACE.toString(), sort);
     assertThat(criteriaList).containsExactly(raceAsian, raceWhite).inOrder();
 
     // reverse
     sort = new Sort(Direction.DESC, "name");
     criteriaList =
         cbCriteriaDao.findByDomainIdAndType(
-            DomainType.PERSON.toString(), FilterColumns.RACE.toString(), sort);
+            Domain.PERSON.toString(), FilterColumns.RACE.toString(), sort);
     assertThat(criteriaList).containsExactly(raceWhite, raceAsian).inOrder();
+  }
+
+  @Test
+  public void findDomainCount() {
+    assertThat(cbCriteriaDao.findDomainCount("term", Domain.CONDITION.toString())).isEqualTo(1);
+  }
+
+  @Test
+  public void findDomainCountOnCode() {
+    assertThat(cbCriteriaDao.findDomainCountOnCode("120", Domain.CONDITION.toString()))
+        .isEqualTo(2);
   }
 
   @Test
   public void findMenuOptions() {
     List<DbMenuOption> options = cbCriteriaDao.findMenuOptions();
     DbMenuOption option1 = options.get(0);
-    assertThat(option1.getDomain()).isEqualTo(DomainType.CONDITION.toString());
+    assertThat(option1.getDomain()).isEqualTo(Domain.CONDITION.toString());
     assertThat(option1.getType()).isEqualTo("ICD10CM");
     assertThat(option1.getStandard()).isFalse();
 
     DbMenuOption option2 = options.get(1);
-    assertThat(option2.getDomain()).isEqualTo(DomainType.CONDITION.toString());
+    assertThat(option2.getDomain()).isEqualTo(Domain.CONDITION.toString());
     assertThat(option2.getType()).isEqualTo("ICD9CM");
     assertThat(option2.getStandard()).isFalse();
 
     DbMenuOption option3 = options.get(2);
-    assertThat(option3.getDomain()).isEqualTo(DomainType.CONDITION.toString());
+    assertThat(option3.getDomain()).isEqualTo(Domain.CONDITION.toString());
     assertThat(option3.getType()).isEqualTo("SNOMED");
     assertThat(option3.getStandard()).isTrue();
 
     DbMenuOption option4 = options.get(3);
-    assertThat(option4.getDomain()).isEqualTo(DomainType.MEASUREMENT.toString());
+    assertThat(option4.getDomain()).isEqualTo(Domain.MEASUREMENT.toString());
     assertThat(option4.getType()).isEqualTo("LOINC");
     assertThat(option4.getStandard()).isTrue();
 
     DbMenuOption option5 = options.get(4);
-    assertThat(option5.getDomain()).isEqualTo(DomainType.PERSON.toString());
+    assertThat(option5.getDomain()).isEqualTo(Domain.PERSON.toString());
     assertThat(option5.getType()).isEqualTo("ETHNICITY");
     assertThat(option5.getStandard()).isTrue();
 
     DbMenuOption option6 = options.get(5);
-    assertThat(option6.getDomain()).isEqualTo(DomainType.PERSON.toString());
+    assertThat(option6.getDomain()).isEqualTo(Domain.PERSON.toString());
     assertThat(option6.getType()).isEqualTo("GENDER");
     assertThat(option6.getStandard()).isTrue();
 
     DbMenuOption option7 = options.get(6);
-    assertThat(option7.getDomain()).isEqualTo(DomainType.PERSON.toString());
+    assertThat(option7.getDomain()).isEqualTo(Domain.PERSON.toString());
     assertThat(option7.getType()).isEqualTo("RACE");
     assertThat(option7.getStandard()).isTrue();
 
     DbMenuOption option8 = options.get(7);
-    assertThat(option8.getDomain()).isEqualTo(DomainType.PERSON.toString());
+    assertThat(option8.getDomain()).isEqualTo(Domain.PERSON.toString());
     assertThat(option8.getType()).isEqualTo("SEX");
     assertThat(option8.getStandard()).isTrue();
 
     DbMenuOption option9 = options.get(8);
-    assertThat(option9.getDomain()).isEqualTo(DomainType.SURVEY.toString());
+    assertThat(option9.getDomain()).isEqualTo(Domain.SURVEY.toString());
     assertThat(option9.getType()).isEqualTo("PPI");
     assertThat(option9.getStandard()).isFalse();
   }

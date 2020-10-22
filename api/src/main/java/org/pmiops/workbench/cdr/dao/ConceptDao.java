@@ -33,6 +33,16 @@ public interface ConceptDao extends CrudRepository<DbConcept, Long> {
   Page<DbConcept> findConcepts(
       String keyword, ImmutableList<String> conceptTypes, String domainId, Pageable page);
 
+  @Query(
+      value =
+          "select distinct c from DbConcept c "
+              + "where (c.countValue > 0 or c.sourceCountValue > 0) "
+              + "and matchConcept(c.conceptName, c.conceptCode, c.vocabularyId, c.synonymsStr, ?1) > 0 "
+              + "and c.domainId = ?2 "
+              + "and c.standardConcept IN ('') "
+              + "order by c.sourceCountValue desc")
+  Page<DbConcept> findConcepts(String keyword, String domainId, Pageable page);
+
   /**
    * Return standard or all concepts in each vocabulary for the specified domain matching the
    * specified expression, matching concept name, synonym, ID, or code.
@@ -97,7 +107,7 @@ public interface ConceptDao extends CrudRepository<DbConcept, Long> {
    */
   default Page<DbConcept> findConcepts(
       String keyword, ImmutableList<String> conceptTypes, Domain domainId, Pageable pageable) {
-    if (Domain.PHYSICALMEASUREMENT.equals(domainId)) {
+    if (Domain.PHYSICAL_MEASUREMENT.equals(domainId)) {
       return StringUtils.isBlank(keyword)
           ? findPhysicalMeasurementConcepts(conceptTypes, pageable)
           : findPhysicalMeasurementConcepts(keyword, conceptTypes, pageable);

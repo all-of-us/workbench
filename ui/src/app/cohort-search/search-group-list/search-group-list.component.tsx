@@ -12,7 +12,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {DomainType, SearchRequest} from 'generated/fetch';
+import {Domain, SearchRequest} from 'generated/fetch';
 
 function initItem(id: string, type: string) {
   return {
@@ -166,26 +166,26 @@ export class SearchGroupList extends React.Component<Props, State> {
     cohortBuilderApi().findCriteriaMenuOptions(+cdrVersionId).then(res => {
       criteriaMenuOptions[cdrVersionId] = res.items.reduce((acc, opt) => {
         const {domain, types} = opt;
-        if (PROGRAM_TYPES.includes(DomainType[domain])) {
+        if (PROGRAM_TYPES.includes(Domain[domain])) {
           const option = {
             name: domainToTitle(domain),
             domain,
             type: types[0].type,
             standard: types[0].standardFlags[0].standard,
-            order: PROGRAM_TYPES.indexOf(DomainType[domain])
+            order: PROGRAM_TYPES.indexOf(Domain[domain])
           };
-          if (domain === DomainType[DomainType.PERSON]) {
+          if (domain === Domain[Domain.PERSON]) {
             option['children'] = types.map(subopt => ({name: typeToTitle(subopt.type), domain, type: subopt.type}));
           }
           acc.programTypes.push(option);
         }
-        if (DOMAIN_TYPES.includes(DomainType[domain])) {
+        if (DOMAIN_TYPES.includes(Domain[domain])) {
           acc.domainTypes.push({
             name: domainToTitle(domain),
             domain,
             type: types[0].type,
             standard: types[0].standardFlags[0].standard,
-            order: DOMAIN_TYPES.indexOf(DomainType[domain])});
+            order: DOMAIN_TYPES.indexOf(Domain[domain])});
         }
         return acc;
       }, {programTypes: [], domainTypes: []});
@@ -223,7 +223,7 @@ export class SearchGroupList extends React.Component<Props, State> {
     const category = `${role === 'includes' ? 'Add' : 'Excludes'} Criteria`;
     // If domain is PERSON, list the type as well as the domain in the label
     const label = domainToTitle(domain) +
-      (domain === DomainType.PERSON ? ' - ' + typeToTitle(type) : '') +
+      (domain === Domain.PERSON ? ' - ' + typeToTitle(type) : '') +
       ' - Cohort Builder';
     triggerEvent(category, 'Click', `${category} - ${label}`);
     let context: any;

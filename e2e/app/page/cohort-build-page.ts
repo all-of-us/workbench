@@ -42,8 +42,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
     await createCohortButton.waitUntilEnabled();
     await createCohortButton.click(); // Click dropdown trigger to open menu
     const menu =  new TieredMenu(this.page);
-    await menu.clickMenuItem(['Save']);
-    return waitWhileLoading(this.page);
+    await menu.select(['Save']);
   }
 
   async saveCohortAs(cohortName?: string, description?: string): Promise<string> {
@@ -108,7 +107,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
    * @return {string} Total Count.
    */
   async getTotalCount(): Promise<string> {
-    return waitForNumericalString(this.page, FieldSelector.TotalCount);
+    return waitForNumericalString(this.page, FieldSelector.TotalCount, 60000);
   }
 
   getSaveCohortButton(): Button {

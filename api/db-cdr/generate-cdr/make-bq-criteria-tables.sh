@@ -1278,6 +1278,35 @@ FROM
 WHERE x.domain_id = 'SURVEY'
     and x.concept_id = y.ancestor_concept_id"
 
+################################################
+# FITBIT DATA
+################################################
+echo "FITBIT DATA"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (
+          id
+        , parent_id
+        , domain_id
+        , is_standard
+        , type
+        , name
+        , is_group
+        , is_selectable
+        , has_attribute
+        , has_hierarchy
+    )
+SELECT
+    (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 AS id
+    , 0
+    , 'FITBIT'
+    , 1
+    , 'FITBIT'
+    , 'Fitbit'
+    , 1
+    , 0
+    , 0
+    , 0"
 
 ################################################
 # DEMOGRAPHICS

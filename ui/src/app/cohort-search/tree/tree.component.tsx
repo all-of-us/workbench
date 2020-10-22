@@ -34,24 +34,19 @@ const styles = reactStyles({
     border: 0,
     color: colors.accent,
     cursor: 'pointer',
-    float: 'right',
+    float: 'left',
     fontSize: '12px',
     height: '1.5rem',
     margin: '0.25rem 0',
     padding: '0 0.5rem',
   },
   searchBarContainer: {
-    position: 'absolute',
     width: '95%',
     marginTop: '-1px',
     display: 'flex',
     padding: '0.4rem 0',
     backgroundColor: colors.white,
     zIndex: 1,
-  },
-  treeContainer: {
-    width: '99%',
-    paddingTop: '2.5rem'
   },
   treeHeader: {
     position: 'sticky',
@@ -130,11 +125,11 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
     const {node: {domainId, id, isStandard, type}, source, selectedSurvey} = this.props;
     this.setState({loading: true});
     const {cdrVersionId} = (currentWorkspaceStore.getValue());
-    const criteriaType = domainId === DomainType.DRUG.toString() ? CriteriaType.ATC.toString() : type;
-    const parentId = domainId === DomainType.PHYSICALMEASUREMENT.toString() ? null : id;
+    const criteriaType = domainId === Domain.DRUG.toString() ? CriteriaType.ATC.toString() : type;
+    const parentId = domainId === Domain.PHYSICALMEASUREMENT.toString() ? null : id;
     cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, parentId)
     .then(resp => {
-      if (domainId === DomainType.PHYSICALMEASUREMENT.toString()) {
+      if (domainId === Domain.PHYSICALMEASUREMENT.toString()) {
         let children = [];
         resp.items.forEach(child => {
           child['children'] = [];
@@ -145,7 +140,7 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
           }
         });
         this.setState({children});
-      } else if (domainId === DomainType.SURVEY.toString() &&  selectedSurvey) {
+      } else if (domainId === Domain.SURVEY.toString() &&  selectedSurvey) {
         // Temp: This should be handle in API
         this.updatePpiSurveys(resp, resp.items.filter(child => child.name === selectedSurvey));
       } else if (domainId === DomainType.SURVEY.toString() && this.props.source === 'conceptSetDetails') {
@@ -153,7 +148,7 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
         this.updatePpiSurveys(resp, selectedSurveyChild);
       } else {
         this.setState({children: resp.items});
-        if (domainId === DomainType.SURVEY.toString()) {
+        if (domainId === Domain.SURVEY.toString()) {
           const rootSurveys = ppiSurveys.getValue();
           if (!rootSurveys[cdrVersionId]) {
             rootSurveys[cdrVersionId] = resp.items;
@@ -212,9 +207,9 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
 
   get showHeader() {
     const {node: {domainId}} = this.props;
-    return domainId !== DomainType.PHYSICALMEASUREMENT.toString()
-      && domainId !== DomainType.SURVEY.toString()
-      && domainId !== DomainType.VISIT.toString();
+    return domainId !== Domain.PHYSICALMEASUREMENT.toString()
+      && domainId !== Domain.SURVEY.toString()
+      && domainId !== Domain.VISIT.toString();
   }
 
   // Hides the tree node for COPE survey if enableCOPESurvey config flag is set to false
@@ -229,7 +224,7 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
       setSearchTerms} = this.props;
     const {children, error, ingredients, loading} = this.state;
     return <React.Fragment>
-      {node.domainId !== DomainType.VISIT.toString() &&
+      {node.domainId !== Domain.VISIT.toString() &&
         <div style={serverConfigStore.getValue().enableCohortBuilderV2
           ? {...styles.searchBarContainer, backgroundColor: 'transparent', width: '65%'}
           : styles.searchBarContainer}>
@@ -240,9 +235,7 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
                      setInput={(v) => setSearchTerms(v)}/>
         </div>
       }
-      {!loading && <div style={this.showHeader
-        ? {...styles.treeContainer, paddingTop: '3rem', marginTop: '0rem'}
-        : styles.treeContainer}>
+      {!loading && <div style={{paddingTop: this.showHeader ? '0.5rem' : 0, width: '99%'}}>
         {this.showHeader && <div style={{...styles.treeHeader, border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`}}>
           {!!ingredients && <div style={styles.ingredients}>
             Ingredients in this brand: {ingredients.join(', ')}
@@ -251,7 +244,7 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
         </div>}
         {error && <div style={styles.error}>
           <ClrIcon style={{color: colors.white}} className='is-solid' shape='exclamation-triangle' />
-          Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
+          Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation
         </div>}
         <div style={this.showHeader ? styles.node : {...styles.node, border: 'none'}}>
         {!!children && children.map((child, c) => this.showNode(child) && <TreeNode key={c}

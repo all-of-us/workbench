@@ -4,11 +4,12 @@ import {Language, LinkText, PageUrl} from 'app/text-labels';
 import WorkspaceEditPage, {FIELD as EDIT_FIELD} from 'app/page/workspace-edit-page';
 import {makeWorkspaceName} from 'utils/str-utils';
 import RadioButton from 'app/element/radiobutton';
-import {findWorkspace} from 'utils/test-utils';
+import {findOrCreateWorkspace} from 'utils/test-utils';
 import {waitForDocumentTitle, waitForText, waitWhileLoading} from 'utils/waits-utils';
 import ReactSelect from 'app/element/react-select';
 import WorkspaceDataPage from './workspace-data-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
+import {config} from 'resources/workbench-config';
 import {UseFreeCredits} from './workspace-base';
 
 const faker = require('faker/locale/en_US');
@@ -73,6 +74,7 @@ export default class WorkspacesPage extends WorkspaceEditPage {
    */
   async createWorkspace(
      workspaceName: string,
+     cdrVersionName: string = config.defaultCdrVersionName,
      billingAccount: string = UseFreeCredits,
      reviewRequest: boolean = false): Promise<string[]> {
 
@@ -83,8 +85,8 @@ export default class WorkspacesPage extends WorkspaceEditPage {
     await (await editPage.getWorkspaceNameTextbox()).type(workspaceName);
     await (await editPage.getWorkspaceNameTextbox()).pressTab();
 
-    // select the default CDR Version
-    await editPage.selectCdrVersion();
+    // select the chosen CDR Version
+    await editPage.selectCdrVersion(cdrVersionName);
 
     // select Billing Account
     await editPage.selectBillingAccount(billingAccount);
@@ -144,7 +146,7 @@ export default class WorkspacesPage extends WorkspaceEditPage {
    */
   async createNotebook(opts: {workspaceName: string, notebookName: string, lang?: Language}): Promise<WorkspaceAnalysisPage> {
     const {workspaceName, notebookName, lang} = opts;
-    const workspaceCard = await findWorkspace(this.page, {workspaceName, create: true});
+    const workspaceCard = await findOrCreateWorkspace(this.page, {workspaceName, alwaysCreate: true});
     await workspaceCard.clickWorkspaceName();
 
     const dataPage = new WorkspaceDataPage(this.page);

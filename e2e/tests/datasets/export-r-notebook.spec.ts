@@ -3,7 +3,7 @@ import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import {makeRandomName} from 'utils/str-utils';
-import {findWorkspace, signIn} from 'utils/test-utils';
+import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
 import {waitForText, waitWhileLoading} from 'utils/waits-utils';
 import CohortActionsPage from 'app/page/cohort-actions-page';
 import {Ethnicity} from 'app/page/cohort-search-page';
@@ -21,7 +21,7 @@ describe('Create Dataset', () => {
    * Delete Cohort, Dataset, and Notebook.
    */
   test('Export dataset to notebook in R language', async () => {
-    const workspaceCard = await findWorkspace(page);
+    const workspaceCard = await findOrCreateWorkspace(page);
     const workspaceName = await workspaceCard.clickWorkspaceName();
 
     // Click Add Datasets button

@@ -268,7 +268,10 @@ public final class DbStorageEnums {
           .put(Domain.VISIT, (short) 7)
           .put(Domain.SURVEY, (short) 8)
           .put(Domain.PERSON, (short) 9)
-          .put(Domain.PHYSICALMEASUREMENT, (short) 10)
+          .put(Domain.PHYSICAL_MEASUREMENT, (short) 10)
+          .put(Domain.ALL_EVENTS, (short) 11)
+          .put(Domain.LAB, (short) 12)
+          .put(Domain.VITAL, (short) 13)
           .build();
 
   // A mapping from our Domain enum to OMOP domain ID values.
@@ -284,7 +287,10 @@ public final class DbStorageEnums {
           .put(Domain.VISIT, "Visit")
           .put(Domain.SURVEY, "Survey")
           .put(Domain.PERSON, "Person")
-          .put(Domain.PHYSICALMEASUREMENT, "Physical Measurement")
+          .put(Domain.PHYSICAL_MEASUREMENT, "Physical Measurement")
+          .put(Domain.ALL_EVENTS, "All Events")
+          .put(Domain.LAB, "Labs")
+          .put(Domain.VITAL, "Vitals")
           .build();
 
   public static Domain domainFromStorage(Short domain) {

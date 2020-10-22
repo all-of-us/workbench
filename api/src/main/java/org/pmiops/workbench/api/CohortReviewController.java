@@ -62,7 +62,7 @@ import org.pmiops.workbench.model.CohortReviewListResponse;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.CriteriaType;
-import org.pmiops.workbench.model.DomainType;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.ModifyCohortStatusRequest;
@@ -287,7 +287,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
             bigQueryService.filterBigQueryConfig(
                 cohortQueryBuilder.buildDomainChartInfoCounterQuery(
                     new ParticipantCriteria(searchRequest),
-                    Objects.requireNonNull(DomainType.fromValue(domain)),
+                    Objects.requireNonNull(Domain.fromValue(domain)),
                     chartLimit)));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
@@ -339,9 +339,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         bigQueryService.executeQuery(
             bigQueryService.filterBigQueryConfig(
                 reviewQueryBuilder.buildChartDataQuery(
-                    participantId,
-                    Objects.requireNonNull(DomainType.fromValue(domain)),
-                    chartLimit)));
+                    participantId, Objects.requireNonNull(Domain.fromValue(domain)), chartLimit)));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
     ParticipantChartDataListResponse response = new ParticipantChartDataListResponse();
@@ -624,7 +622,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
               : sortColumn;
       List<String> demoList =
           cohortBuilderService.findSortedConceptIdsByDomainIdAndType(
-              DomainType.PERSON.toString(), criteriaSortColumn, sortName);
+              Domain.PERSON.toString(), criteriaSortColumn, sortName);
       if (!demoList.isEmpty()) {
         pageRequest.setSortColumn(
             "FIELD("
@@ -655,8 +653,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
   /** Helper method to convert a collection of {@link FieldValue} to {@link ParticipantData}. */
   private ParticipantData convertRowToParticipantData(
-      Map<String, Integer> rm, List<FieldValue> row, DomainType domain) {
-    if (!domain.equals(DomainType.SURVEY)) {
+      Map<String, Integer> rm, List<FieldValue> row, Domain domain) {
+    if (!domain.equals(Domain.SURVEY)) {
       return new ParticipantData()
           .itemDate(bigQueryService.getDateTime(row, rm.get(START_DATETIME.toString())))
           .domain(bigQueryService.getString(row, rm.get(DOMAIN.toString())))

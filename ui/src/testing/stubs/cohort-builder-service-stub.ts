@@ -8,7 +8,6 @@ import {
   Domain,
   DomainCount,
   DomainInfoResponse,
-  DomainType,
   ParticipantDemographics, SurveyCount, SurveysResponse
 } from 'generated/fetch';
 import {DomainStubVariables, SurveyStubVariables} from 'testing/stubs/concepts-api-stub';
@@ -30,7 +29,7 @@ const criteriaStub = {
   group: false,
   selectable: true,
   conceptId: 123,
-  domainId: DomainType[DomainType.CONDITION],
+  domainId: Domain[Domain.CONDITION],
   hasAttributes: false,
   path: '0',
 };

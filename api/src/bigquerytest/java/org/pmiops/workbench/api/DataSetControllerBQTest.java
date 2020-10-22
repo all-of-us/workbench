@@ -91,6 +91,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
   private static final String WORKSPACE_NAMESPACE = "namespace";
   private static final String WORKSPACE_NAME = "name";
+  private static final String DATASET_NAME = "Arbitrary Dataset v1.0";
 
   private DataSetController controller;
   private DataSetServiceImpl dataSetServiceImpl;
@@ -374,6 +375,13 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void testGenerateCodeR() {
+    String expected =
+        String.format(
+            "library(bigrquery)\n"
+                + "\n# This query represents dataset \"%s\" for domain \"condition\" and was generated for %s\n"
+                + "dataset_00000000_condition_sql <- paste(\"",
+            DATASET_NAME, dbCdrVersion.getName());
+
     String code =
         controller
             .generateCode(
@@ -388,12 +396,8 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     PrePackagedConceptSetEnum.NONE))
             .getBody()
             .getCode();
+    assertThat(code).contains(expected);
 
-    assertThat(code)
-        .contains(
-            "library(bigrquery)\n"
-                + "\n# This query represents dataset \"null\" for domain \"condition\"\n"
-                + "dataset_00000000_condition_sql <- paste(\"");
     String query =
         extractRQuery(
             code,
@@ -513,17 +517,18 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   }
 
   private void assertAndExecutePythonQuery(String code, int index, Domain domain) {
-    assertThat(code)
-        .contains(
+    String expected =
+        String.format(
             "import pandas\n"
                 + "import os\n"
                 + "\n"
-                + "# This query represents dataset \"null\" for domain \""
-                + domain.toString().toLowerCase()
-                + "\"\n"
-                + "dataset_00000000_"
-                + domain.toString().toLowerCase()
-                + "_sql =");
+                + "# This query represents dataset \"%s\" for domain \"%s\" and was generated for %s\n"
+                + "dataset_00000000_%s_sql =",
+            DATASET_NAME,
+            domain.toString().toLowerCase(),
+            dbCdrVersion.getName(),
+            domain.toString().toLowerCase());
+    assertThat(code).contains(expected);
 
     String query = extractPythonQuery(code, index);
 
@@ -544,6 +549,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
       boolean allParticipants,
       PrePackagedConceptSetEnum prePackagedConceptSetEnum) {
     return new DataSetRequest()
+        .name(DATASET_NAME)
         .conceptSetIds(
             dbConceptSets.stream().map(DbConceptSet::getConceptSetId).collect(Collectors.toList()))
         .cohortIds(dbCohorts.stream().map(DbCohort::getCohortId).collect(Collectors.toList()))

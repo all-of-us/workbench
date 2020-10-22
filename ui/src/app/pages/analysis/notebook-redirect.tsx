@@ -41,7 +41,7 @@ export enum Progress {
 
 export const progressStrings: Map<Progress, string> = new Map([
   [Progress.Unknown, 'Connecting to the notebook server'],
-  [Progress.Initializing, 'Initializing notebook server, may take up to 10 minutes'],
+  [Progress.Initializing, 'Initializing notebook server, may take up to 5 minutes'],
   [Progress.Resuming, 'Resuming notebook server, may take up to 1 minute'],
   [Progress.Authenticating, 'Authenticating with the notebook server'],
   [Progress.Copying, 'Copying the notebook onto the server'],

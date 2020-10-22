@@ -12,7 +12,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {CriteriaType, DomainType} from 'generated/fetch';
+import {CriteriaType, Domain} from 'generated/fetch';
 
 const borderStyle = `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`;
 const styles = reactStyles({
@@ -212,7 +212,7 @@ export const ListSearch = withCurrentWorkspace()(
     }
 
     get checkSource() {
-      return [DomainType.CONDITION, DomainType.PROCEDURE].includes(this.props.searchContext.domain);
+      return [Domain.CONDITION, Domain.PROCEDURE].includes(this.props.searchContext.domain);
     }
 
     selectItem = (row: any) => {
@@ -320,7 +320,7 @@ export const ListSearch = withCurrentWorkspace()(
     render() {
       const {searchContext: {domain}} = this.props;
       const {data, error, ingredients, loading, standardOnly, sourceMatch, standardData} = this.state;
-      const listStyle = domain === DomainType.DRUG ? {...styles.listContainer, marginTop: '4.25rem'} : styles.listContainer;
+      const listStyle = domain === Domain.DRUG ? {...styles.listContainer, marginTop: '4.25rem'} : styles.listContainer;
       const showStandardOption = !standardOnly && !!standardData && standardData.length > 0;
       const displayData = standardOnly ? standardData : data;
       return <div style={{overflow: 'auto'}}>
@@ -331,7 +331,7 @@ export const ListSearch = withCurrentWorkspace()(
               placeholder={`Search ${domainToTitle(domain)} by code or description`}
               onKeyPress={this.handleInput} />
           </div>
-          {domain === DomainType.DRUG && <div style={styles.drugsText}>
+          {domain === Domain.DRUG && <div style={styles.drugsText}>
             Your search may bring back brand names, generics and ingredients. Only ingredients may be added to your search criteria.
           </div>}
         </div>
@@ -389,7 +389,7 @@ export const ListSearch = withCurrentWorkspace()(
           {!standardOnly && !displayData.length && <div>No results found</div>}
         </div>}
         {loading && <SpinnerOverlay/>}
-        {error && <div style={{...styles.error, ...(domain === DomainType.DRUG ? {marginTop: '3.75rem'} : {})}}>
+        {error && <div style={{...styles.error, ...(domain === Domain.DRUG ? {marginTop: '3.75rem'} : {})}}>
           <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid' shape='exclamation-triangle' size='22'/>
           Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
           {standardOnly && <Clickable style={styles.vocabLink} onClick={() => this.getResults(sourceMatch.code)}>

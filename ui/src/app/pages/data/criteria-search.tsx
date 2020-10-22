@@ -10,7 +10,7 @@ import {
   currentCohortCriteriaStore,
   currentConceptStore
 } from 'app/utils/navigation';
-import {Criteria, DomainType} from 'generated/fetch';
+import {Criteria, Domain} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {Growl} from 'primereact/growl';
 import * as React from 'react';

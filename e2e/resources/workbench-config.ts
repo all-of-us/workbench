@@ -22,7 +22,8 @@ const local = {
   apiBaseUrl: process.env.DEV_API_URL || 'http://localhost/v1',
   userEmailDomain: '@fake-research-aou.org',
   collaboratorUsername: 'puppetmaster@fake-research-aou.org',
-  defaultCdrVersionName: 'Synthetic Dataset v1',
+  defaultCdrVersionName: 'Synthetic Dataset v3',
+  altCdrVersionName: 'Synthetic Dataset v3 with Microarray',
 };
 
 // workbench test environment
@@ -32,6 +33,7 @@ const test = {
   userEmailDomain: '@fake-research-aou.org',
   collaboratorUsername: 'puppetmaster@fake-research-aou.org',
   defaultCdrVersionName: 'Synthetic Dataset v3',
+  altCdrVersionName: 'Synthetic Dataset v3 with Microarray',
 };
 
 // workbench staging environment
@@ -40,16 +42,17 @@ const staging = {
   apiBaseUrl: process.env.STAGING_API_URL || 'https://api-dot-all-of-us-rw-staging.appspot.com/v1',
   userEmailDomain: '@staging.fake-research-aou.org',
   collaboratorUsername: 'puppetcitester4@staging.fake-research-aou.org',
-  defaultCdrVersionName: 'Synthetic Dataset v3',
-}
-;
+  defaultCdrVersionName: 'Synthetic Dataset v4',
+  altCdrVersionName: 'Synthetic Dataset v3',
+};
 
 // workbench stable environment
 const stable = {
   uiBaseUrl: process.env.STABLE_LOGIN_URL,
   apiBaseUrl: process.env.STABLE_API_URL,
   userEmailDomain: '@stable.fake-research-aou.org',
-  defaultCdrVersionName: 'Synthetic Dataset v3',
+  defaultCdrVersionName: 'Synthetic Dataset v4',
+  altCdrVersionName: 'Synthetic Dataset v3',
 };
 
 

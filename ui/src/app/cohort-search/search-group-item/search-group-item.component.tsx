@@ -12,7 +12,7 @@ import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {CriteriaType, DomainType, Modifier, ModifierType, ResourceType, SearchGroupItem as Item, SearchRequest} from 'generated/fetch';
+import {CriteriaType, Domain, Modifier, ModifierType, ResourceType, SearchGroupItem as Item, SearchRequest} from 'generated/fetch';
 import {Menu} from 'primereact/menu';
 import {OverlayPanel} from 'primereact/overlaypanel';
 import Timeout = NodeJS.Timeout;
@@ -107,9 +107,9 @@ class SearchGroupItemParameter extends React.Component<{parameter: any}, {toolti
   render() {
     const {parameter, parameter: {domainId}} = this.props;
     const {tooltip} = this.state;
-    const showCode = [DomainType.CONDITION, DomainType.DRUG, DomainType.MEASUREMENT, DomainType.PROCEDURE].includes(domainId);
+    const showCode = [Domain.CONDITION, Domain.DRUG, Domain.MEASUREMENT, Domain.PROCEDURE].includes(domainId);
     return <div ref={el => this.element = el} style={styles.parameter}>
-      <span style={domainId === DomainType.PERSON ? {textTransform: 'capitalize'} : {}}
+      <span style={domainId === Domain.PERSON ? {textTransform: 'capitalize'} : {}}
             onMouseEnter={(e) => tooltip && this.overlay.show(e)} onMouseLeave={() => tooltip && this.overlay.hide()}>
         {showCode && <b>{parameter.code}</b>} {parameter.name}
       </span>
@@ -168,7 +168,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
         this.getItemCount();
       }
       if (!!modifiers && modifiers.some(mod => mod.name === ModifierType.ENCOUNTERS) && !encounters) {
-        cohortBuilderApi().findCriteriaBy(+cdrVersionId, DomainType[DomainType.VISIT], CriteriaType[CriteriaType.VISIT]).then(res => {
+        cohortBuilderApi().findCriteriaBy(+cdrVersionId, Domain[Domain.VISIT], CriteriaType[CriteriaType.VISIT]).then(res => {
           encountersStore.next(res.items);
           this.setState({encounters: res.items});
         });
@@ -297,7 +297,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
       const {item: {count, modifiers, name, searchParameters, status, type}} = this.props;
       const {error, loading, paramListOpen, renaming} = this.state;
       const codeDisplay = searchParameters.length > 1 ? 'Codes' : 'Code';
-      const titleDisplay = type === DomainType.PERSON.toString() ? typeToTitle(searchParameters[0].type) : domainToTitle(type);
+      const titleDisplay = type === Domain.PERSON.toString() ? typeToTitle(searchParameters[0].type) : domainToTitle(type);
       const itemName = !!name ? name : `Contains ${titleDisplay} ${codeDisplay}`;
       const showCount = !loading && status !== 'hidden' && count !== undefined;
       const actionItems = [
