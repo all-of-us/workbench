@@ -5,22 +5,18 @@ import {CheckBox, RadioButton, Select, TextArea, TextInput} from 'app/components
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {TextColumn} from 'app/components/text-column';
 import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
 
 import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
-  getCdrVersion,
-  summarizeErrors,
-  withCdrVersions,
-  withUrlParams,
-  withUserProfile
+  summarizeErrors
 } from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {encodeURIComponentStrict, navigateByUrl} from 'app/utils/navigation';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {
-  CdrVersionListResponse,
   DataSet,
   DataSetExportRequest,
   DataSetRequest,
@@ -33,7 +29,6 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {validate} from 'validate.js';
-import {TextColumn} from '../../../components/text-column';
 import GenomicsAnalysisToolEnum = DataSetExportRequest.GenomicsAnalysisToolEnum;
 import GenomicsDataTypeEnum = DataSetExportRequest.GenomicsDataTypeEnum;
 
