@@ -164,12 +164,16 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
         this.setState({conceptSet: resp, editName: resp.name,
           editDescription: resp.description, loading: false});
         currentConceptSetStore.next(resp);
-        if (resp.domain === Domain.SURVEY) {
-          const surveyParentList = resp.criteriums.filter((survey) => {
-            return survey.parentCount !== 0;
-          });
-          this.setState({conceptSet: resp});
-          currentConceptStore.next(surveyParentList);
+        if (serverConfigStore.getValue().enableConceptSetSearchV2) {
+          if (resp.domain === Domain.SURVEY) {
+            const surveyParentList = resp.criteriums.filter((survey) => {
+              return survey.parentCount !== 0;
+            });
+            this.setState({conceptSet: resp});
+            currentConceptStore.next(surveyParentList);
+          } else {
+            currentConceptStore.next(resp.criteriums);
+          }
         }
       } catch (error) {
         console.log(error);
