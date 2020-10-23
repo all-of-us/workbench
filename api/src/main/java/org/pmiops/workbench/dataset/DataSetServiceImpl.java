@@ -750,13 +750,13 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             + "        cohort_file.write(str(person_id) + '\\n')\n"
             + "    cohort_file.close()\n",
         "!python3 /usr/local/share/raw_array_cohort_extract.py \\\n"
-            + "          --dataset fc-aou-cdr-synth-test.microarray_data \\\n"
+            + "          --dataset fc-aou-cdr-synth-test.synthetic_microarray_data \\\n"
             + "          --fq_destination_table "
             + cohortExtractTable
             + " \\\n"
             + "          --query_project ${GOOGLE_PROJECT} \\\n"
             // TODO: Replace hardcoded dataset reference: RW-5748
-            + "          --fq_sample_mapping_table fc-aou-cdr-synth-test.microarray_data.sample_list \\\n"
+            + "          --fq_sample_mapping_table fc-aou-cdr-synth-test.synthetic_microarray_data.sample_list \\\n"
             + "          --cohort_sample_names_file "
             + cohortSampleNamesFilename
             + " \\\n"
@@ -769,7 +769,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             + "        -O "
             + cohortVcfFilename
             + " \\\n"
-            + "        --probe-info-table fc-aou-cdr-synth-test.microarray_data.probe_info \\\n"
+            + "        --probe-info-table fc-aou-cdr-synth-test.synthetic_microarray_data.probe_info \\\n"
             + "        --read-project-id ${GOOGLE_PROJECT} \\\n"
             + "        --cohort-sample-file "
             + cohortSampleMapFilename
@@ -851,7 +851,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             + "\n"
             + "hl.plot.output_notebook()\n"
             + "bucket = os.environ['WORKSPACE_BUCKET']\n"
-            + "hl.import_vcf(f'{bucket}/cohort-extract"
+            + "hl.import_vcf(f'{bucket}/cohort-extract/"
             + cohortVcfFilename
             + "').write(f'{bucket}/"
             + cohortMatrixFilename
