@@ -144,9 +144,10 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
   }
 
   get initTree() {
-    const {cohortContext: {domain}} = this.props;
+    const {cohortContext: {domain}, source} = this.props;
     return domain === Domain.PHYSICALMEASUREMENT
-        || domain === Domain.VISIT;
+      || domain === Domain.VISIT
+      || (source === 'criteria' && domain === Domain.SURVEY);
   }
 
   get isConcept() {
