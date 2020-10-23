@@ -17,7 +17,7 @@ describe('Create Concept Sets from Domains', () => {
    * - Create new Concept Set from Conditions domain.
    * - Delete Concept Set.
    */
-  test('Create Concept Set from Conditions domain', async () => {
+  xtest('Create Concept Set from Conditions domain', async () => {
     const workspaceCard = await findOrCreateWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 
@@ -80,7 +80,7 @@ describe('Create Concept Sets from Domains', () => {
    * - Create new Dataset using above two Concept Sets.
    * - Delete Dataset, Concept Set.
    */
-  test('Create Concept Sets from Drug Exposures and Measurements domains', async () => {
+  xtest('Create Concept Sets from Drug Exposures and Measurements domains', async () => {
     const workspaceCard = await findOrCreateWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 
