@@ -50,6 +50,11 @@ const styles = reactStyles({
   workerConfigLabel: {
     fontWeight: 600,
     marginBottom: '0.5rem'
+  },
+  inputNumber: {
+    backgroundColor: colors.white,
+    padding: '.75rem .5rem',
+    width: '2rem'
   }
 });
 
@@ -121,7 +126,7 @@ const DiskSizeSelector = ({onChange, selectedDiskSize, diskSize, idPrefix}) => {
       decrementButtonClassName='p-button-secondary'
       incrementButtonClassName='p-button-secondary'
       value={selectedDiskSize || diskSize}
-      inputStyle={{padding: '.75rem .5rem', width: '2rem'}}
+      inputStyle={styles.inputNumber}
       onChange={({value}) => onChange(value)}
       min={50 /* Runtime API has a minimum 50GB requirement. */}/>
   </Fragment>;
@@ -162,7 +167,7 @@ const DataProcConfigSelector = ({onChange, dataprocConfig})  => {
         decrementButtonClassName='p-button-secondary'
         incrementButtonClassName='p-button-secondary'
         value={selectedNumWorkers}
-        inputStyle={{padding: '.75rem .5rem', width: '2rem'}}
+        inputStyle={styles.inputNumber}
         onChange={({value}) => setSelectedNumWorkers(value)}
         min={2}/>
       <label htmlFor='num-preemptible' style={{marginRight: '.25rem'}}>Preemptible</label>
@@ -171,7 +176,7 @@ const DataProcConfigSelector = ({onChange, dataprocConfig})  => {
         decrementButtonClassName='p-button-secondary'
         incrementButtonClassName='p-button-secondary'
         value={selectedPreemtible}
-        inputStyle={{padding: '.75rem .5rem', width: '2rem'}}
+        inputStyle={styles.inputNumber}
         onChange={({value}) => setUpdatedPreemptible(value)}
         min={0}/>
       <div style={{gridColumnEnd: 'span 2'}}/>
@@ -295,7 +300,7 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withCdrVersions())((
         <Dropdown id='runtime-compute'
                   disabled={!hasMicroarrayData}
                   style={{width: '10rem'}}
-                  options={[ComputeType.Dataproc, ComputeType.Standard]}
+                  options={[ComputeType.Standard, ComputeType.Dataproc]}
                   value={selectedCompute || ComputeType.Standard}
                   onChange={({value}) => setSelectedCompute(value)}
                   />
