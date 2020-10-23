@@ -16,9 +16,11 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   formatDomain,
   formatDomainString,
+  getCdrVersion,
   reactStyles,
   ReactWrapperBase,
   toggleIncludes,
+  withCdrVersions,
   withCurrentWorkspace,
   withUrlParams,
   withUserProfile
@@ -31,6 +33,7 @@ import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {
   BillingStatus,
+  CdrVersionListResponse,
   Cohort,
   ConceptSet,
   DataDictionaryEntry,
@@ -402,6 +405,7 @@ interface DataSetPreviewInfo {
 
 interface Props {
   workspace: WorkspaceData;
+  cdrVersionListResponse: CdrVersionListResponse;
   urlParams: any;
   profileState: {
     profile: Profile,
@@ -433,7 +437,7 @@ interface State {
   selectedPreviewDomain: Domain;
 }
 
-const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlParams())(
+const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlParams(), withCdrVersions())(
   class extends React.Component<Props, State> {
     dt: any;
     constructor(props) {
@@ -1142,6 +1146,8 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                                            workspaceNamespace={namespace}
                                            workspaceId={id}
                                            billingLocked={this.props.workspace.billingStatus === BillingStatus.INACTIVE}
+                                           displayMicroarrayOptions={
+                                             getCdrVersion(this.props.workspace, this.props.cdrVersionListResponse).hasMicroarrayData}
                                            prePackagedConceptSet={this.getPrePackagedConceptSetApiEnum()}
                                            dataSet={dataSet ? dataSet : undefined}
                                            closeFunction={() => {
