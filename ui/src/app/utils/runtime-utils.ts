@@ -74,7 +74,12 @@ export const useCustomRuntime = (currentWorkspaceNamespace): [Runtime, (runtime:
 
   useEffect(() => {
     const runAction = async() => {
-      await runtimeApi().deleteRuntime(currentWorkspaceNamespace);
+      // Only delete if the runtime already exists.
+      // TODO: It is likely more correct here to use the LeoRuntimeInitializer wait for the runtime
+      // to reach a terminal status before attempting deletion.
+      if (runtime && runtime.status !== RuntimeStatus.Deleted) {
+        await runtimeApi().deleteRuntime(currentWorkspaceNamespace);
+      }
       const currentRuntime = await LeoRuntimeInitializer.initialize({
         workspaceNamespace,
         targetRuntime: requestedRuntime

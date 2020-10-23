@@ -62,6 +62,7 @@ describe('TreeNode', () => {
                                       searchTerms={''}
                                       select={() => {}}
                                       selectedIds={[]}
+                                      source ='criteria'
                                       setAttributes={() => {}}/>);
     expect(wrapper).toBeTruthy();
   });

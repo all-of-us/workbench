@@ -3,7 +3,7 @@ import {Selection} from 'app/cohort-search/selection-list/selection-list.compone
 import {CriteriaTree} from 'app/cohort-search/tree/tree.component';
 import {SpinnerOverlay} from 'app/components/spinners';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles} from 'app/utils';
+import {reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {
   attributesSelectionStore,
   currentCohortCriteriaStore,
@@ -73,6 +73,7 @@ interface Props {
   conceptSearchTerms?: string;
   selectedSurvey?: string;
   source: string;
+  urlParams: any;
 }
 
 interface State {
@@ -89,7 +90,7 @@ interface State {
   loadingSubtree: boolean;
 
 }
-export class CriteriaSearch extends React.Component<Props, State>  {
+export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(class extends React.Component<Props, State>  {
   growl: any;
   growlTimer: NodeJS.Timer;
   subscription: Subscription;
@@ -106,7 +107,7 @@ export class CriteriaSearch extends React.Component<Props, State>  {
       selectedIds: [],
       selections: [],
       selectedCriteriaList: [],
-      treeSearchTerms: props.source === 'concept' ? props.conceptSearchTerms : '',
+      treeSearchTerms: props.source !== 'criteria' ? props.conceptSearchTerms : '',
       loadingSubtree: false
     };
   }
@@ -126,16 +127,16 @@ export class CriteriaSearch extends React.Component<Props, State>  {
       mode = 'tree';
     }
     this.setState({backMode, hierarchyNode, mode});
-    this.subscription = currentCohortCriteriaStore.subscribe(currentCohortCriteria => {
-      if (source === 'criteria') {
+    if (source === 'criteria') {
+      this.subscription = currentCohortCriteriaStore.subscribe(currentCohortCriteria => {
         this.setState({selectedCriteriaList: currentCohortCriteria});
-      }
-    });
-    this.subscription.add(currentConceptStore.subscribe(currentConcepts => {
-      if (source === 'concept') {
-        this.setState({selectedCriteriaList: currentConcepts});
-      }
-    }));
+      });
+    } else {
+      this.subscription = currentConceptStore.subscribe(currentConcepts => {
+        const value = fp.map(selected => selected.conceptId + '', currentConcepts);
+        this.setState({selectedCriteriaList: currentConcepts, selectedIds: value});
+      });
+    }
   }
 
   componentWillUnmount() {
@@ -143,14 +144,13 @@ export class CriteriaSearch extends React.Component<Props, State>  {
   }
 
   get initTree() {
-    const {cohortContext: {domain}, source} = this.props;
-    return (domain === Domain.PHYSICALMEASUREMENT && source === 'criteria')
-      || domain === Domain.SURVEY
+    const {cohortContext: {domain}} = this.props;
+    return domain === Domain.PHYSICALMEASUREMENT
         || domain === Domain.VISIT;
   }
 
   get isConcept() {
-    return this.props.source === 'concept';
+    return this.props.source === 'concept' || this.props.source === 'conceptSetDetails';
   }
 
   getGrowlStyle() {
@@ -205,8 +205,8 @@ export class CriteriaSearch extends React.Component<Props, State>  {
 
   getListSearchSelectedIds() {
     const {selectedCriteriaList} = this.state;
-    const vale = fp.map(selected => ('param' + selected.conceptId + selected.code), selectedCriteriaList);
-    return vale;
+    const value = fp.map(selected => ('param' + selected.conceptId + selected.code), selectedCriteriaList);
+    return value;
   }
 
   setScroll = (id: string) => {
@@ -239,7 +239,7 @@ export class CriteriaSearch extends React.Component<Props, State>  {
   render() {
     const {cohortContext, conceptSearchTerms, selectedSurvey, source} = this.props;
     const {autocompleteSelection, groupSelections, hierarchyNode, loadingSubtree,
-      selectedIds, treeSearchTerms, growlVisible} = this.state;
+      treeSearchTerms, growlVisible} = this.state;
     return <div>
       {loadingSubtree && <SpinnerOverlay/>}
       <div style={loadingSubtree ? styles.loadingSubTree : {height: '100%', minHeight: '15rem'}}>
@@ -256,10 +256,10 @@ export class CriteriaSearch extends React.Component<Props, State>  {
             scrollToMatch={this.setScroll}
             searchTerms={treeSearchTerms}
             select={this.addSelection}
-            selectedIds={selectedIds}
+            selectedIds={this.getListSearchSelectedIds()}
             selectOption={this.setAutocompleteSelection}
             setSearchTerms={this.setTreeSearchTerms}/>}
-        {/* List View (using duplicated version of ListSearch) */}
+         {/*List View (using duplicated version of ListSearch) */}
         <div style={this.searchContentStyle('list')}>
           <ListSearchV2 source={source}
                         hierarchy={this.showHierarchy}
@@ -271,4 +271,4 @@ export class CriteriaSearch extends React.Component<Props, State>  {
       </div>
      </div>;
   }
-}
+});

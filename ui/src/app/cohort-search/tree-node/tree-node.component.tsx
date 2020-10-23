@@ -307,19 +307,15 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 
   getSelectedValues() {
     const {node: {parentId}} = this.props;
-    if (this.props.source === 'concept') {
-      if (currentConceptStore.getValue()) {
-        return currentConceptStore.getValue()
-          .some(crit => parentId.toString() === this.paramId);
-      } else {
-        return [];
-      }
-    } else {
+    if (this.props.source === 'criteria') {
       return currentCohortCriteriaStore.getValue()
         .some(crit =>
-          crit.parameterId === this.paramId ||
-          parentId.toString() === this.paramId
-        );
+              crit.parameterId === this.paramId ||
+              parentId.toString() === this.paramId
+          );
+    } else {
+      return currentConceptStore.getValue()
+        .some(crit => 'param' + crit.id.toString() === this.paramId);
     }
 
   }
@@ -347,11 +343,12 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
               shape={'angle ' + (expanded ? 'down' : 'right')}
               size='16'/>}
         </button>}
+        {(!hasAttributes || source === 'criteria') &&
         <div style={hover ? {...styles.treeNodeContent, background: colors.light} : styles.treeNodeContent}
           onMouseEnter={() => this.setState({hover: true})}
           onMouseLeave={() => this.setState({hover: false})}>
-          {selectable && <button style={styles.iconButton}>
-            {(hasAttributes && (source !== 'concept'))
+          {(selectable && (source === 'criteria' || node.subtype === 'QUESTION')) && <button style={styles.iconButton}>
+            {(hasAttributes && (source === 'criteria'))
               ? <ClrIcon style={{color: colors.accent}}
                   shape='slider' dir='right' size='20'
                   onClick={(e) => this.setAttributes(e, node)}/>
@@ -374,7 +371,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
           {this.showCount && <div style={{whiteSpace: 'nowrap'}}>
             <span style={styles.count}>{count.toLocaleString()}</span>
           </div>}
-        </div>
+        </div>}
       </div>
       {!!nodeChildren && nodeChildren.length > 0 &&
         <div style={{display: expanded ? 'block' : 'none', marginLeft: nodeChildren[0].group ? '0.875rem' : '2rem'}}>

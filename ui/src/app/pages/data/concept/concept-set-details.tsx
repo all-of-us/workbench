@@ -16,6 +16,7 @@ import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {EditComponentReact} from 'app/icons/edit';
 import {ConceptTable} from 'app/pages/data/concept/concept-table';
+import {CriteriaSearch} from 'app/pages/data/criteria-search';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
@@ -24,10 +25,22 @@ import {
   withCurrentWorkspace,
   withUrlParams
 } from 'app/utils';
-import {currentConceptSetStore, navigate, navigateByUrl} from 'app/utils/navigation';
+import {
+  currentConceptSetStore, currentConceptStore,
+  navigate,
+  navigateByUrl,
+  serverConfigStore, setSidebarActiveIconStore
+} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
-import {Concept, ConceptSet, CopyRequest, Domain, ResourceType, WorkspaceAccessLevel} from 'generated/fetch';
+import {
+  Concept,
+  ConceptSet,
+  CopyRequest,
+  Domain,
+  ResourceType,
+  WorkspaceAccessLevel
+} from 'generated/fetch';
 
 const styles = reactStyles({
   conceptSetHeader: {
@@ -140,6 +153,10 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
       this.getConceptSet();
     }
 
+    componentWillUnmount() {
+      currentConceptStore.next(null);
+    }
+
     async getConceptSet() {
       const {urlParams: {ns, wsid, csid}} = this.props;
       try {
@@ -147,11 +164,26 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
         this.setState({conceptSet: resp, editName: resp.name,
           editDescription: resp.description, loading: false});
         currentConceptSetStore.next(resp);
+        if (serverConfigStore.getValue().enableConceptSetSearchV2) {
+          if (resp.domain === Domain.SURVEY) {
+            const surveyParentList = resp.criteriums.filter((survey) => {
+              return survey.parentCount !== 0;
+            });
+            this.setState({conceptSet: resp});
+            currentConceptStore.next(surveyParentList);
+          } else {
+            currentConceptStore.next(resp.criteriums);
+          }
+        }
       } catch (error) {
         console.log(error);
         // TODO: what do we do with resources not found?  Currently we just have an endless spinner
         // Maybe want to think about designing an AoU not found page for better UX
       }
+    }
+
+    get isConceptFlagEnable() {
+      return serverConfigStore.getValue().enableConceptSetSearchV2;
     }
 
     async copyConceptSet(copyRequest: CopyRequest) {
@@ -313,13 +345,13 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
                   </div>
                 </div>
               </FlexRow>
-              <FlexColumn>
+              {!this.isConceptFlagEnable && <FlexColumn>
                 <Button type='secondaryLight' style={styles.buttonBoxes} onClick={() => this.addToConceptSet()}>
                   <ClrIcon shape='search' style={{marginRight: '0.3rem'}}/>Add concepts to set
                 </Button>
-              </FlexColumn>
+              </FlexColumn>}
             </div>
-            {!!conceptSet.concepts ?
+            {!this.isConceptFlagEnable && <React.Fragment>{!!conceptSet.concepts ?
             <ConceptTable concepts={conceptSet.concepts} loading={loading}
                           domain={conceptSet.domain}
                           reactKey={conceptSet.domain.toString()}
@@ -333,7 +365,14 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
                       wsid + '/data/concepts' + conceptSet.survey ?
                         ('?survey=' + conceptSet.survey) : ('?domain=' + conceptSet.domain))}>
               <ClrIcon shape='search' style={{marginRight: '0.3rem'}}/>Add concepts to set
-            </Button>}
+            </Button>}</React.Fragment>}
+            {this.isConceptFlagEnable && !!conceptSet.criteriums && <React.Fragment>
+              <CriteriaSearch cohortContext={{domain: conceptSet.domain, type: 'PPI', standard: true}}
+                              source='conceptSetDetails' selectedSurvey={conceptSet.survey}/>
+              <Button style={{width: '6.5rem', alignSelf: 'flex-end', marginBottom: '2rem'}}
+                      onClick={() => setSidebarActiveIconStore.next('concept')}>Finish & Review</Button>
+            </React.Fragment>
+            }
             {WorkspacePermissionsUtil.canWrite(workspace.accessLevel) &&
                 this.selectedConceptsCount > 0 &&
                 <SlidingFabReact submitFunction={() => this.setState({removingConcepts: true})}

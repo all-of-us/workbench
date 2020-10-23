@@ -65,15 +65,16 @@ describe('RuntimePanel', () => {
     expect(!wrapper.exists(Spinner));
   });
 
-  it('should render runtime details', async() => {
+  it('should show the create button when no runtime exists', async() => {
+    runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace});
+
     const wrapper = component();
     await handleUseEffect(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
-    const imageDropdown = wrapper.find({'data-test-id': 'runtime-image-dropdown'}).find('label').first();
-    expect(imageDropdown.exists()).toBeTruthy();
-
-    expect(imageDropdown.text()).toContain(runtimeApiStub.runtime.toolDockerImage);
+    const createButton = wrapper.find(Button).find({'aria-label': 'Create'}).first();
+    expect(createButton.exists()).toBeTruthy();
+    expect(createButton.prop('disabled')).toBeFalsy();
   });
 
   it('should restrict memory options by cpu', async() => {
