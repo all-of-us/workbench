@@ -283,7 +283,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       return cbCriteriaDao.findPhysicalMeasurementCount(modifyTermMatch(term));
     }
     Long count = cbCriteriaDao.findDomainCountOnCode(term, domain);
-    return count == null ? cbCriteriaDao.findDomainCount(modifyTermMatch(term), domain) : count;
+    return count == 0 ? cbCriteriaDao.findDomainCount(modifyTermMatch(term), domain) : count;
   }
 
   @Override

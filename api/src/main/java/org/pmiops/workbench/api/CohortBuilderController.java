@@ -196,10 +196,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     validateTerm(term);
     Long count = cohortBuilderService.findDomainCount(domain, term);
     return ResponseEntity.ok(
-        new DomainCount()
-            .conceptCount(count == null ? 0 : count)
-            .domain(Domain.valueOf(domain))
-            .name(domain));
+        new DomainCount().conceptCount(count).domain(Domain.valueOf(domain)).name(domain));
   }
 
   @Override
