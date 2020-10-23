@@ -200,6 +200,18 @@ describe('NewDataSetModal', () => {
     expect(wrapper.find('[data-test-id="genomics-analysis-tool-plink"]').exists()).toBeTruthy();
   });
 
+  it ('switching to R should uncheck microarray option', async() => {
+    const wrapper = mount(createNewDataSetModal());
+    wrapper.setProps({displayMicroarrayOptions: true});
+    wrapper.setState({kernelType: KernelTypeEnum.Python, includeRawMicroarrayData: true});
+    await waitOneTickAndUpdate(wrapper);
+
+    wrapper.find('[data-test-id="kernel-type-r"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(wrapper.instance().state['includeRawMicroarrayData']).toBeFalsy();
+  });
+
   it ('should export to notebook with the correct microarray parameters', async() => {
     const wrapper = mount(createNewDataSetModal());
     wrapper.setProps({displayMicroarrayOptions: true});
@@ -219,23 +231,24 @@ describe('NewDataSetModal', () => {
     };
 
     wrapper.find('[data-test-id="data-set-name-input"]')
-    .first().simulate('change', {target: {value: nameStub}});
+      .first().simulate('change', {target: {value: nameStub}});
     await waitOneTickAndUpdate(wrapper);
 
     wrapper.find('[data-test-id="notebook-name-input"]')
-    .first().simulate('change', {target: {value: notebookNameStub}});
+      .first().simulate('change', {target: {value: notebookNameStub}});
     await waitOneTickAndUpdate(wrapper);
 
     wrapper.find('[data-test-id="include-raw-microarray-data"]')
-    .first().simulate('change', {target: {checked: true}});
+      .first().simulate('change', {target: {checked: true}});
     await waitOneTickAndUpdate(wrapper);
 
     wrapper.find('[data-test-id="genomics-analysis-tool-hail"]')
-    .first().simulate('click');
+      .first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
 
     wrapper.find('[data-test-id="save-data-set"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
+
     expect(exportSpy).toHaveBeenCalledWith(workspaceNamespace, workspaceId, {
       dataSetRequest: dataSetRequestStub,
       newNotebook: true,

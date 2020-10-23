@@ -10,9 +10,7 @@ import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
 
 import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {
-  summarizeErrors
-} from 'app/utils';
+import {summarizeErrors} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {encodeURIComponentStrict, navigateByUrl} from 'app/utils/navigation';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
@@ -344,8 +342,14 @@ class NewDataSetModal extends React.Component<Props, State> {
               .map((kernelTypeEnum, i) =>
                 <label key={i} style={{display: 'block'}}>
                   <RadioButton
+                    data-test-id={'kernel-type-' + kernelTypeEnum.toLowerCase()}
                     checked={this.state.kernelType === kernelTypeEnum}
-                    onChange={() => this.setState({kernelType: kernelTypeEnum})}
+                    onChange={() => {
+                      this.setState({
+                        kernelType: kernelTypeEnum,
+                        includeRawMicroarrayData: kernelTypeEnum === KernelTypeEnum.R ? false : this.state.includeRawMicroarrayData
+                      });
+                    }}
                   />
                   &nbsp;{kernelTypeEnum}
                 </label>
