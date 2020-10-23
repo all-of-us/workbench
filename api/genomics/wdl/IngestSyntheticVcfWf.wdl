@@ -188,7 +188,7 @@ task CreateImportTsvs {
         --ref-version 37
 
       for i in 1 2 3;
-        do gsutil cp *.tsv ~{outdir}/import/ && break || sleep 15;
+        do gsutil -m cp *.tsv ~{outdir}/import/ && break || sleep 15;
       done
       
       rm *.tsv
