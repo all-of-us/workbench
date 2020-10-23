@@ -350,6 +350,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
         workspaceNamespace: workspaceNamespace,
         workspaceId: workspaceId,
         accessLevel: WorkspaceAccessLevel.OWNER,
+        cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
       };
       const workspaceResources = convertToResources(
         {...convertToResourcesBaseArgs, list: cohortReviewStubs, resourceType: ResourceType.COHORTREVIEW})

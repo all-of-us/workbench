@@ -84,7 +84,7 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
   }
 
   render() {
-    const {workspace, workspace: {namespace, id, accessLevel}} = this.props;
+    const {workspace, workspace: {namespace, id, accessLevel, cdrVersionId}} = this.props;
     const {notebookList, notebookNameList, creating, loading} = this.state;
     // TODO Remove this cast when we switch to fetch types
     const al = accessLevel as unknown as WorkspaceAccessLevel;
@@ -114,7 +114,7 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
           {notebookList.map((notebook, index) => {
             return <NotebookResourceCard
               key={index}
-              resource={convertToResource(notebook, namespace, id, al, ResourceType.NOTEBOOK)}
+              resource={convertToResource(notebook, namespace, id, cdrVersionId, al, ResourceType.NOTEBOOK)}
               existingNameList={notebookNameList}
               onUpdate={() => this.loadNotebooks()}
               disableDuplicate={workspace.billingStatus === BillingStatus.INACTIVE}

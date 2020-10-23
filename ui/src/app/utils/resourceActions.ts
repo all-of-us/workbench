@@ -34,6 +34,7 @@ export interface ConvertToResourcesArgs {
   list:  FileDetail[] | Cohort[] | CohortReview[] | ConceptSet[] | DataSet[];
   workspaceNamespace: string;
   workspaceId: string;
+  cdrVersionId: string;
   accessLevel: WorkspaceAccessLevel;
   resourceType: ResourceType;
 }
@@ -41,16 +42,20 @@ export interface ConvertToResourcesArgs {
 export function convertToResources(args: ConvertToResourcesArgs): WorkspaceResource[] {
   const resourceList = [];
   for (const resource of args.list) {
-    resourceList.push(convertToResource(resource, args.workspaceNamespace, args.workspaceId,
-      args.accessLevel, args.resourceType));
+    resourceList.push(convertToResource(
+      resource, args.workspaceNamespace, args.workspaceId, args.cdrVersionId, args.accessLevel, args.resourceType));
   }
   return resourceList;
 }
 
-export function convertToResource(resource: FileDetail | Cohort | CohortReview | ConceptSet
-  | DataSet, workspaceNamespace: string, workspaceId: string,
+export function convertToResource(
+  resource: FileDetail | Cohort | CohortReview | ConceptSet | DataSet,
+  workspaceNamespace: string,
+  workspaceId: string,
+  cdrVersionId: string,
   accessLevel: WorkspaceAccessLevel,
   resourceType: ResourceType): WorkspaceResource {
+
   let modifiedTime: string;
   if (!resource.lastModifiedTime) {
     modifiedTime = new Date().toDateString();
@@ -61,7 +66,8 @@ export function convertToResource(resource: FileDetail | Cohort | CohortReview |
     workspaceNamespace: workspaceNamespace,
     workspaceFirecloudName: workspaceId,
     permission: WorkspaceAccessLevel[accessLevel],
-    modifiedTime: modifiedTime
+    modifiedTime: modifiedTime,
+    cdrVersionId
   };
   if (resourceType === ResourceType.NOTEBOOK) {
     newResource.notebook = <FileDetail>resource;
