@@ -4,8 +4,9 @@ import * as React from 'react';
 import {Button, Clickable} from 'app/components/buttons';
 import {DataSetPage, COMPARE_DOMAINS_FOR_DISPLAY} from 'app/pages/data/data-set/dataset-page';
 import {dataSetApi, registerApiClient} from 'app/services/swagger-fetch-clients';
-import {currentWorkspaceStore, NavStore, urlParamsStore} from 'app/utils/navigation';
+import {cdrVersionStore, currentWorkspaceStore, NavStore, urlParamsStore} from 'app/utils/navigation';
 import {
+  CdrVersionsApi,
   CohortsApi,
   ConceptSetsApi,
   DataSetApi,
@@ -13,6 +14,7 @@ import {
   WorkspaceAccessLevel
 } from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {cdrVersionListResponse, CdrVersionsApiStub} from 'testing/stubs/cdr-versions-api-stub';
 import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
@@ -27,11 +29,13 @@ describe('DataSetPage', () => {
     registerApiClient(CohortsApi, new CohortsApiStub());
     registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
     registerApiClient(DataSetApi, new DataSetApiStub());
+    registerApiClient(CdrVersionsApi, new CdrVersionsApiStub());
     urlParamsStore.next({
       ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
       wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
     });
     currentWorkspaceStore.next(workspaceDataStub);
+    cdrVersionStore.next(cdrVersionListResponse);
   });
 
   it('should render', async() => {

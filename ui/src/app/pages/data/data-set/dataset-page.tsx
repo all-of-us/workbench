@@ -15,10 +15,12 @@ import {cohortsApi, conceptSetsApi, dataSetApi} from 'app/services/swagger-fetch
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   formatDomain,
-  formatDomainString, getCdrVersion,
+  formatDomainString,
+  getCdrVersion,
   reactStyles,
   ReactWrapperBase,
-  toggleIncludes, withCdrVersions,
+  toggleIncludes,
+  withCdrVersions,
   withCurrentWorkspace,
   withUrlParams,
   withUserProfile
@@ -30,7 +32,8 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {
-  BillingStatus, CdrVersionListResponse,
+  BillingStatus,
+  CdrVersionListResponse,
   Cohort,
   ConceptSet,
   DataDictionaryEntry,

@@ -11,7 +11,7 @@ import {
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import {DataSetExportRequest} from '../../../../generated/fetch';
+import {DataSetExportRequest} from 'generated/fetch';
 import {NewDataSetModal} from './new-dataset-modal';
 import GenomicsAnalysisToolEnum = DataSetExportRequest.GenomicsAnalysisToolEnum;
 import GenomicsDataTypeEnum = DataSetExportRequest.GenomicsDataTypeEnum;
@@ -48,7 +48,6 @@ describe('NewDataSetModal', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   it('should render', () => {
