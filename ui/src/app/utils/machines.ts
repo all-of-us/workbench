@@ -2,6 +2,11 @@ import * as fp from 'lodash/fp';
 
 // Copied from https://github.com/DataBiosphere/terra-ui/blob/219b063b07d56499ccc38013fd88f4f0b88f8cd6/src/data/machines.js
 
+export enum ComputeType {
+  Standard = 'Standard VM',
+  Dataproc = 'Dataproc Cluster'
+}
+
 export interface Machine {
   name: string;
   cpu: number;
@@ -45,5 +50,41 @@ export const allMachineTypes = fp.map(({ price, preemptiblePrice, ...details }) 
 // See https://broadworkbench.atlassian.net/browse/SATURN-1337
 export const validLeonardoMachineTypes = allMachineTypes.filter(({memory}) => memory >= 4);
 
+export const findMachineByName = machineToFind => fp.find(({name}) => name === machineToFind, allMachineTypes);
+
 export const diskPrice = 0.04 / 730; // per GB hour, from https://cloud.google.com/compute/pricing
 export const dataprocCpuPrice = 0.01; // dataproc costs $0.01 per cpu per hour
+
+export const machineStoragePrice = ({masterDiskSize, numberOfWorkers, workerDiskSize }) => {
+  if (numberOfWorkers && workerDiskSize) {
+    return (masterDiskSize + numberOfWorkers * workerDiskSize) * diskPrice;
+  }
+  else {
+    return masterDiskSize * diskPrice;
+  }
+}
+
+export const machineRunningPrice = ({
+  computeType,
+  masterDiskSize,
+  masterMachineName,
+  numberOfWorkers = 0,
+  numberOfPreemptibleWorkers = 0,
+  workerDiskSize,
+  workerMachineName
+}) => {
+  const masterMachine = findMachineByName(masterMachineName);
+  const workerMachine = workerMachineName && findMachineByName(workerMachineName);
+  const dataprocPrice = computeType === ComputeType.Dataproc
+    ? fp.sum([
+        (masterMachine.cpu + ((numberOfWorkers * numberOfPreemptibleWorkers) * workerMachine.cpu)) * dataprocCpuPrice,
+        numberOfWorkers * workerMachine.price,
+        numberOfPreemptibleWorkers * workerMachine.preemptiblePrice,
+      ])
+    : 0;
+  return fp.sum([
+    dataprocPrice,
+    masterMachine.price,
+    machineStoragePrice({masterDiskSize: masterDiskSize, numberOfWorkers: numberOfWorkers, workerDiskSize: workerDiskSize})
+  ]);
+}
