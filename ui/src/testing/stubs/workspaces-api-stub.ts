@@ -27,6 +27,7 @@ import * as fp from 'lodash/fp';
 
 import {appendNotebookFileSuffix, dropNotebookFileSuffix} from 'app/pages/analysis/util';
 import {convertToResources} from 'app/utils/resourceActions';
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {CopyRequest, EmptyResponse} from 'generated';
 import {CdrVersionsStubVariables} from './cdr-versions-api-stub';
 import {cohortReviewStubs} from './cohort-review-service-stub';
@@ -346,20 +347,21 @@ export class WorkspacesApiStub extends WorkspacesApi {
     workspaceId: string,
     resourceTypes: WorkspaceResourcesRequest): Promise<WorkspaceResourceResponse> {
     return new Promise<WorkspaceResourceResponse>(resolve => {
-      const convertToResourcesBaseArgs = {
-        workspaceNamespace: workspaceNamespace,
-        workspaceId: workspaceId,
+      const workspace: WorkspaceData = {
+        namespace: workspaceNamespace,
+        id: workspaceId,
+        name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME,
         accessLevel: WorkspaceAccessLevel.OWNER,
         cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
       };
       const workspaceResources = convertToResources(
-        {...convertToResourcesBaseArgs, list: cohortReviewStubs, resourceType: ResourceType.COHORTREVIEW})
+        {workspace, list: cohortReviewStubs, resourceType: ResourceType.COHORTREVIEW})
         .concat(convertToResources(
-          {...convertToResourcesBaseArgs, list: exampleCohortStubs, resourceType: ResourceType.COHORT}))
+          {workspace, list: exampleCohortStubs, resourceType: ResourceType.COHORT}))
         .concat(convertToResources(
-          {...convertToResourcesBaseArgs, list: DataSetApiStub.stubDataSets(), resourceType: ResourceType.DATASET}))
+          {workspace, list: DataSetApiStub.stubDataSets(), resourceType: ResourceType.DATASET}))
         .concat(convertToResources(
-          {...convertToResourcesBaseArgs, list: ConceptSetsApiStub.stubConceptSets(), resourceType: ResourceType.CONCEPTSET}));
+          {workspace, list: ConceptSetsApiStub.stubConceptSets(), resourceType: ResourceType.CONCEPTSET}));
       resolve(workspaceResources);
     });
   }

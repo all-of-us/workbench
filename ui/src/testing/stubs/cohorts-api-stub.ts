@@ -11,7 +11,6 @@ import {
   WorkspaceResource
 } from 'generated/fetch';
 import {CohortListResponse} from 'generated/fetch/api';
-import {CdrVersionsStubVariables} from './cdr-versions-api-stub';
 import {WorkspaceStubVariables} from './workspace-service-stub';
 
 export let DEFAULT_COHORT_ID = 1;
@@ -90,11 +89,8 @@ export class CohortsApiStub extends CohortsApi {
     this.workspaces = [stubWorkspace];
     const convertToResourceArgs: ConvertToResourcesArgs = {
       list: this.cohorts,
-      workspaceNamespace: stubWorkspace.namespace,
-      workspaceId: stubWorkspace.id,
-      accessLevel: WorkspaceAccessLevel.OWNER,
-      cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
-      resourceType: ResourceType.COHORT
+      resourceType: ResourceType.COHORT,
+      workspace: {...stubWorkspace, accessLevel: WorkspaceAccessLevel.OWNER},
     };
     this.resourceList = convertToResources(convertToResourceArgs);
   }

@@ -8,6 +8,7 @@ import {
   WorkspaceAccessLevel,
   WorkspaceResource
 } from 'generated/fetch';
+import {WorkspaceData} from './workspace-data';
 
 export function toDisplay(resourceType: ResourceType): string {
   switch (resourceType) {
@@ -32,30 +33,23 @@ export function toDisplay(resourceType: ResourceType): string {
 
 export interface ConvertToResourcesArgs {
   list:  FileDetail[] | Cohort[] | CohortReview[] | ConceptSet[] | DataSet[];
-  workspaceNamespace: string;
-  workspaceId: string;
-  cdrVersionId: string;
-  accessLevel: WorkspaceAccessLevel;
   resourceType: ResourceType;
+  workspace: WorkspaceData;
 }
 
 export function convertToResources(args: ConvertToResourcesArgs): WorkspaceResource[] {
   const resourceList = [];
   for (const resource of args.list) {
-    resourceList.push(convertToResource(
-      resource, args.workspaceNamespace, args.workspaceId, args.cdrVersionId, args.accessLevel, args.resourceType));
+    resourceList.push(convertToResource(resource, args.resourceType, args.workspace));
   }
   return resourceList;
 }
 
 export function convertToResource(
   resource: FileDetail | Cohort | CohortReview | ConceptSet | DataSet,
-  workspaceNamespace: string,
-  workspaceId: string,
-  cdrVersionId: string,
-  accessLevel: WorkspaceAccessLevel,
-  resourceType: ResourceType): WorkspaceResource {
-
+  resourceType: ResourceType,
+  workspace: WorkspaceData): WorkspaceResource {
+  const {namespace, id, accessLevel, cdrVersionId, billingStatus} = workspace;
   let modifiedTime: string;
   if (!resource.lastModifiedTime) {
     modifiedTime = new Date().toDateString();
@@ -63,11 +57,12 @@ export function convertToResource(
     modifiedTime = new Date(resource.lastModifiedTime).toString();
   }
   const newResource: WorkspaceResource = {
-    workspaceNamespace: workspaceNamespace,
-    workspaceFirecloudName: workspaceId,
+    workspaceNamespace: namespace,
+    workspaceFirecloudName: id,
     permission: WorkspaceAccessLevel[accessLevel],
-    modifiedTime: modifiedTime,
-    cdrVersionId
+    modifiedTime,
+    cdrVersionId,
+    workspaceBillingStatus: billingStatus,
   };
   if (resourceType === ResourceType.NOTEBOOK) {
     newResource.notebook = <FileDetail>resource;

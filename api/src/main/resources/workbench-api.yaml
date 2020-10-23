@@ -5785,6 +5785,13 @@ definitions:
       "$ref": "#/definitions/WorkspaceResource"
   WorkspaceResource:
     type: object
+    required:
+      - workspaceNamespace
+      - workspaceFirecloudName
+      - workspaceBillingStatus
+      - cdrVersionId
+      - permission
+      - modifiedTime
     properties:
       workspaceId:
         type: integer
