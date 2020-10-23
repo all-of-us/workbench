@@ -21,6 +21,7 @@ describe('Editing and rename Concept Set', () => {
    * - Rename Concept Set.
    * - Delete Concept Set.
    */
+  // Disabled temporarily, will fix as part of RW-5769
   xtest('Workspace OWNER can edit Concept Set', async () => {
 
     const workspaceName = await createWorkspace(page).then(card => card.clickWorkspaceName());
