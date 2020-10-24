@@ -5,6 +5,7 @@ import {cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
 import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {ResourceCard} from './resource-card';
+import {BillingStatus,WorkspaceResource} from 'generated/fetch';
 
 const ResourceCardWrapper = {
   cohortCard: {
@@ -12,77 +13,85 @@ const ResourceCardWrapper = {
     workspaceNamespace: 'defaultNamespace',
     workspaceFirecloudName: 'defaultFirecloudName',
     permission: 'OWNER',
+    workspaceBillingStatus: BillingStatus.ACTIVE,
     cohort: new CohortsApiStub().cohorts[0],
     modifiedTime: new Date().toISOString()
-  },
+  } as WorkspaceResource,
   readonlyCohortCard: {
     workspaceId: 1,
     workspaceNamespace: 'defaultNamespace',
     workspaceFirecloudName: 'defaultFirecloudName',
     permission: 'READER',
+    workspaceBillingStatus: BillingStatus.ACTIVE,
     cohort: new CohortsApiStub().cohorts[0],
     modifiedTime: new Date().toISOString()
-  },
+  } as WorkspaceResource,
   cohortReviewCard: {
     workspaceId: 1,
     workspaceNamespace: 'defaultNamespace',
     workspaceFirecloudName: 'defaultFirecloudName',
     permission: 'OWNER',
+    workspaceBillingStatus: BillingStatus.ACTIVE,
     cohortReview: cohortReviewStubs[0],
     modifiedTime: new Date().toISOString()
-  },
+  } as WorkspaceResource,
   readonlyCohortReviewCard: {
     workspaceId: 1,
     workspaceNamespace: 'defaultNamespace',
     workspaceFirecloudName: 'defaultFirecloudName',
     permission: 'READER',
+    workspaceBillingStatus: BillingStatus.ACTIVE,
     cohortReview: cohortReviewStubs[0],
     modifiedTime: new Date().toISOString()
-  },
+  } as WorkspaceResource,
   conceptSetCard: {
     workspaceId: 1,
     workspaceNamespace: 'defaultNamespace',
     workspaceFirecloudName: 'defaultFirecloudName',
     permission: 'OWNER',
+    workspaceBillingStatus: BillingStatus.ACTIVE,
     conceptSet: new ConceptSetsApiStub().conceptSets[0],
     modifiedTime: new Date().toISOString()
-  },
+  } as WorkspaceResource,
   readonlyConceptSetCard: {
     workspaceId: 1,
     workspaceNamespace: 'defaultNamespace',
     workspaceFirecloudName: 'defaultFire cloudName',
     permission: 'READER',
+    workspaceBillingStatus: BillingStatus.ACTIVE,
     conceptSet: new ConceptSetsApiStub().conceptSets[0],
     modifiedTime: new Date().toISOString()
-  },
+  } as WorkspaceResource,
   notebookCard: {
     workspaceId: 1,
     workspaceNamespace: 'defaultNamespace',
     workspaceFirecloudName: 'defaultFirecloudName',
     permission: 'OWNER',
+    workspaceBillingStatus: BillingStatus.ACTIVE,
     notebook: {
       'name': 'mockFile.ipynb',
       'path': 'gs://bucket/notebooks/mockFile.ipynb',
       'lastModifiedTime': 100
     },
     modifiedTime: new Date().toISOString()
-  },
+  } as WorkspaceResource,
   readonlyNotebookCard: {
     workspaceId: 1,
     workspaceNamespace: 'defaultNamespace',
     workspaceFirecloudName: 'defaultFirecloudName',
     permission: 'READER',
+    workspaceBillingStatus: BillingStatus.ACTIVE,
     notebook: {
       'name': 'mockFile.ipynb',
       'path': 'gs://bucket/notebooks/mockFile.ipynb',
       'lastModifiedTime': 100
     },
     modifiedTime: new Date().toISOString()
-  }
+  } as WorkspaceResource,
 };
 
 describe('ResourceCardComponent', () => {
-  const component = (resourceCard: Object) => {
+  const component = (resourceCard: WorkspaceResource) => {
     return mount(<ResourceCard
         onDuplicateResource={() => {}}
         resourceCard={resourceCard}
