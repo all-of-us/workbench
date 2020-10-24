@@ -6,6 +6,7 @@ import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.CopyWriter;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.Storage.CopyRequest;
+import com.google.cloud.storage.StorageOptions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.util.List;
@@ -54,6 +55,12 @@ public class CloudStorageClientImpl implements CloudStorageClient {
   }
 
   @Override
+  public Iterable<Blob> getBlobs(String bucketName) {
+    Storage storage = StorageOptions.getDefaultInstance().getService();
+    return storage.get(bucketName).list().iterateAll();
+  }
+
+  @Override
   public List<Blob> getBlobPageForPrefix(String bucketName, String directory) {
     Iterable<Blob> blobList =
         storageProvider
@@ -62,6 +69,12 @@ public class CloudStorageClientImpl implements CloudStorageClient {
             .list(Storage.BlobListOption.prefix(directory))
             .getValues();
     return ImmutableList.copyOf(blobList);
+  }
+
+  @Override
+  public Iterable<Blob> getBlobsForPrefix(String bucketName, String directory) {
+    Storage storage = StorageOptions.getDefaultInstance().getService();
+    return storage.get(bucketName).list(Storage.BlobListOption.prefix(directory)).iterateAll();
   }
 
   private String getCredentialsBucketName() {

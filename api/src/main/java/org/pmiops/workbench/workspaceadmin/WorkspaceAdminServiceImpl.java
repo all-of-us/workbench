@@ -19,6 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
@@ -407,15 +408,17 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
   private int getNonNotebookFileCount(String bucketName) {
     return (int)
-        cloudStorageClient
-            .getBlobPageForPrefix(bucketName, NotebookUtils.NOTEBOOKS_WORKSPACE_DIRECTORY).stream()
+        StreamSupport.stream(
+                cloudStorageClient
+                    .getBlobsForPrefix(bucketName, NotebooksService.NOTEBOOKS_WORKSPACE_DIRECTORY)
+                    .spliterator(),
+                false)
             .filter(((Predicate<Blob>) notebooksService::isNotebookBlob).negate())
             .count();
   }
 
-  // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
   private long getStorageSizeBytes(String bucketName) {
-    return cloudStorageClient.getBlobPage(bucketName).stream()
+    return StreamSupport.stream(cloudStorageClient.getBlobs(bucketName).spliterator(), false)
         .map(BlobInfo::getSize)
         .reduce(0L, Long::sum);
   }
