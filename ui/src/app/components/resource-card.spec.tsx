@@ -6,6 +6,7 @@ import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {ResourceCard} from './resource-card';
 import {BillingStatus,WorkspaceResource} from 'generated/fetch';
+import {CdrVersionsStubVariables} from "../../testing/stubs/cdr-versions-api-stub";
 
 const ResourceCardWrapper = {
   cohortCard: {
@@ -14,6 +15,7 @@ const ResourceCardWrapper = {
     workspaceFirecloudName: 'defaultFirecloudName',
     permission: 'OWNER',
     workspaceBillingStatus: BillingStatus.ACTIVE,
+    cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
     cohort: new CohortsApiStub().cohorts[0],
     modifiedTime: new Date().toISOString()
   } as WorkspaceResource,
@@ -23,6 +25,7 @@ const ResourceCardWrapper = {
     workspaceFirecloudName: 'defaultFirecloudName',
     permission: 'READER',
     workspaceBillingStatus: BillingStatus.ACTIVE,
+    cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
     cohort: new CohortsApiStub().cohorts[0],
     modifiedTime: new Date().toISOString()
   } as WorkspaceResource,
@@ -32,6 +35,7 @@ const ResourceCardWrapper = {
     workspaceFirecloudName: 'defaultFirecloudName',
     permission: 'OWNER',
     workspaceBillingStatus: BillingStatus.ACTIVE,
+    cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
     cohortReview: cohortReviewStubs[0],
     modifiedTime: new Date().toISOString()
   } as WorkspaceResource,
@@ -41,6 +45,7 @@ const ResourceCardWrapper = {
     workspaceFirecloudName: 'defaultFirecloudName',
     permission: 'READER',
     workspaceBillingStatus: BillingStatus.ACTIVE,
+    cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
     cohortReview: cohortReviewStubs[0],
     modifiedTime: new Date().toISOString()
   } as WorkspaceResource,
@@ -50,6 +55,7 @@ const ResourceCardWrapper = {
     workspaceFirecloudName: 'defaultFirecloudName',
     permission: 'OWNER',
     workspaceBillingStatus: BillingStatus.ACTIVE,
+    cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
     conceptSet: new ConceptSetsApiStub().conceptSets[0],
     modifiedTime: new Date().toISOString()
   } as WorkspaceResource,
@@ -59,6 +65,7 @@ const ResourceCardWrapper = {
     workspaceFirecloudName: 'defaultFire cloudName',
     permission: 'READER',
     workspaceBillingStatus: BillingStatus.ACTIVE,
+    cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
     conceptSet: new ConceptSetsApiStub().conceptSets[0],
     modifiedTime: new Date().toISOString()
   } as WorkspaceResource,
@@ -68,6 +75,7 @@ const ResourceCardWrapper = {
     workspaceFirecloudName: 'defaultFirecloudName',
     permission: 'OWNER',
     workspaceBillingStatus: BillingStatus.ACTIVE,
+    cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
     notebook: {
       'name': 'mockFile.ipynb',
       'path': 'gs://bucket/notebooks/mockFile.ipynb',
@@ -81,6 +89,7 @@ const ResourceCardWrapper = {
     workspaceFirecloudName: 'defaultFirecloudName',
     permission: 'READER',
     workspaceBillingStatus: BillingStatus.ACTIVE,
+    cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
     notebook: {
       'name': 'mockFile.ipynb',
       'path': 'gs://bucket/notebooks/mockFile.ipynb',
