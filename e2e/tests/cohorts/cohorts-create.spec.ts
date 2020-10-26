@@ -1,5 +1,5 @@
 import HelpSidebar from 'app/component/help-sidebar';
-import {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/cohort-search-page';
+import {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/criteria-search-page';
 import DataResourceCard from 'app/component/data-resource-card';
 import Button from 'app/element/button';
 import ClrIconLink from 'app/element/clr-icon-link';

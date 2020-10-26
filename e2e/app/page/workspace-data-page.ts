@@ -8,7 +8,7 @@ import {makeRandomName} from 'utils/str-utils';
 import {waitForDocumentTitle, waitWhileLoading} from 'utils/waits-utils';
 import CohortActionsPage from './cohort-actions-page';
 import CohortBuildPage from './cohort-build-page';
-import {Visits} from './cohort-search-page';
+import {Visits} from './criteria-search-page';
 import ConceptSetSearchPage from './conceptset-search-page';
 import DatasetBuildPage from './dataset-build-page';
 import NotebookPage from './notebook-page';
@@ -95,7 +95,7 @@ export default class WorkspaceDataPage extends WorkspaceBase {
     const searchPage = await group1.includeVisits();
     await searchPage.addVisits([Visits.OutpatientVisit]);
     // Open selection list and click Save Criteria button
-    await searchPage.viewAndSaveCriteria();
+    await group1.viewAndSaveCriteria();
     await waitWhileLoading(this.page);
     await cohortBuildPage.getTotalCount();
     const name = (cohortName === undefined) ? makeRandomName() : cohortName;

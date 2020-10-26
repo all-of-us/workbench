@@ -3,7 +3,7 @@ import {ElementHandle, Page} from 'puppeteer';
 import SelectMenu from 'app/component/select-menu';
 import Container from 'app/container';
 import Button from 'app/element/button';
-import {FilterSign} from 'app/page/cohort-search-page';
+import {FilterSign} from 'app/page/criteria-search-page';
 import {LinkText} from 'app/text-labels';
 import {buildXPath} from 'app/xpath-builders';
 import {ElementType} from 'app/xpath-options';
