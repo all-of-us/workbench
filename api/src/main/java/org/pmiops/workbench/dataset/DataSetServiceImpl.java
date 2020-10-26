@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -75,6 +76,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
+
   private static final String CDR_STRING = "\\$\\{projectId}.\\$\\{dataSetId}.";
   private static final String PYTHON_CDR_ENV_VARIABLE =
       "\"\"\" + os.environ[\"WORKSPACE_CDR\"] + \"\"\".";
@@ -114,6 +116,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
    */
   @VisibleForTesting
   private static class ValuesLinkingPair {
+
     private List<String> selects;
     private List<String> joins;
 
@@ -145,6 +148,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
    * A subclass used to store a source and a standard concept ID column name.
    */
   private static class DomainConceptIdInfo {
+
     private String sourceConceptIdColumn;
     private String standardConceptIdColumn;
 
@@ -164,6 +168,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   @VisibleForTesting
   public static class QueryAndParameters {
+
     private final String query;
     private final Map<String, QueryParameterValue> namedParameterValues;
 
@@ -721,6 +726,10 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     final String cohortSampleNamesFilename = "cohort_sample_names_" + qualifier + ".txt";
     final String cohortSampleMapFilename = "cohort_sample_map_" + qualifier + ".csv";
     final String cohortVcfFilename = "cohort_" + qualifier + ".vcf";
+    // TODO(RW-5735): Writing to the "tmp" dataset is a temporary workaround.
+    final String cohortExtractTable =
+        "fc-aou-cdr-synth-test.tmp_shared_cohort_extract."
+            + UUID.randomUUID().toString().replace("-", "_");
 
     return ImmutableList.of(
         "person_ids = set()\n"
@@ -740,41 +749,36 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             + "    for person_id in person_ids:\n"
             + "        cohort_file.write(str(person_id) + '\\n')\n"
             + "    cohort_file.close()\n",
-        "%%bash\n\n"
-            + "uuid=$(cat /proc/sys/kernel/random/uuid | sed s/-/_/g)\n"
-            // TODO: Writing to the "tmp" dataset is a temporary workaround until an alternative,
-            // RW-5735
-            + "EXPORT_TABLE=\"fc-aou-cdr-synth-test.tmp_shared_cohort_extract.${uuid}\"\n"
-            + "\n"
-            + "python3 /genomics/microarray/raw_array_cohort_extract.py \\\n"
-            + "          --dataset fc-aou-cdr-synth-test.microarray_data \\\n"
-            + "          --fq_destination_table ${EXPORT_TABLE} \\\n"
+        "!python3 /usr/local/share/raw_array_cohort_extract.py \\\n"
+            + "          --dataset fc-aou-cdr-synth-test.synthetic_microarray_data \\\n"
+            + "          --fq_destination_table "
+            + cohortExtractTable
+            + " \\\n"
             + "          --query_project ${GOOGLE_PROJECT} \\\n"
             // TODO: Replace hardcoded dataset reference: RW-5748
-            + "          --sample_mapping_table fc-aou-cdr-synth-test.microarray_data.sample_list \\\n"
+            + "          --fq_sample_mapping_table fc-aou-cdr-synth-test.synthetic_microarray_data.sample_list \\\n"
             + "          --cohort_sample_names_file "
             + cohortSampleNamesFilename
             + " \\\n"
             + "          --sample_map_outfile "
             + cohortSampleMapFilename
-            + "\n"
-            + "\n"
-            + "gatk ArrayExtractCohort \\\n"
+            + "\n",
+        "!java -jar ${GATK_LOCAL_JAR} ArrayExtractCohort \\\n"
+            // TODO: This value will need to be tuned per environment.
             + "        -R gs://fc-aou-cdr-synth-test-genomics/extract_resources/Homo_sapiens_assembly19.fasta \\\n"
             + "        -O "
             + cohortVcfFilename
             + " \\\n"
-            + "        --probe-info-csv /genomics/microarray/probe_info.csv \\\n"
+            + "        --probe-info-table fc-aou-cdr-synth-test.synthetic_microarray_data.probe_info \\\n"
             + "        --read-project-id ${GOOGLE_PROJECT} \\\n"
             + "        --cohort-sample-file "
             + cohortSampleMapFilename
             + " \\\n"
             + "        --use-compressed-data \"false\" \\\n"
-            + "        --cohort-extract-table ${EXPORT_TABLE} \\\n"
-            + "\n"
-            + "gsutil cp "
-            + cohortVcfFilename
-            + " ${WORKSPACE_BUCKET}/");
+            + "        --cohort-extract-table "
+            + cohortExtractTable
+            + "\n",
+        "!gsutil cp " + cohortVcfFilename + " ${WORKSPACE_BUCKET}/cohort-extract/");
   }
 
   @Override
@@ -847,7 +851,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             + "\n"
             + "hl.plot.output_notebook()\n"
             + "bucket = os.environ['WORKSPACE_BUCKET']\n"
-            + "hl.import_vcf(f'{bucket}/"
+            + "hl.import_vcf(f'{bucket}/cohort-extract/"
             + cohortVcfFilename
             + "').write(f'{bucket}/"
             + cohortMatrixFilename
