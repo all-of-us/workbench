@@ -9,7 +9,8 @@
     "age_at_cdr": 30,
     "has_ehr_data": 1,
     "has_physical_measurement_data": 1,
-    "has_ppi_survey_data": 1
+    "has_ppi_survey_data": 1,
+    "has_fitbit": 1
   },
   {
     "person_id": 2,

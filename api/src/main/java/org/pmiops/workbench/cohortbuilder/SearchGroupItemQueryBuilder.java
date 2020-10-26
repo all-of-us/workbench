@@ -164,6 +164,9 @@ public final class SearchGroupItemQueryBuilder {
           + "from `${projectId}.${dataSetId}.cb_search_person` p\nwhere %s %s %s\n";
   private static final String AGE_DEC_SQL = "and not " + DEC_SQL;
   private static final String DEMO_IN_SQL = "%s in unnest(%s)\n";
+  private static final String FITBIT_SQL =
+      "select person_id\n"
+          + "from `${projectId}.${dataSetId}.cb_search_person` p\nwhere has_fitbit = 1\n";
 
   /** Build the inner most sql using search parameters, modifiers and attributes. */
   public static void buildQuery(
@@ -197,6 +200,9 @@ public final class SearchGroupItemQueryBuilder {
     // When building sql for demographics - we query against the person table
     if (Domain.PERSON.toString().equals(domain)) {
       return buildDemoSql(queryParams, searchGroupItem);
+    }
+    if (Domain.FITBIT.toString().equals(domain)) {
+      return FITBIT_SQL;
     }
     // Otherwise build sql against flat denormalized search table
     for (SearchParameter param : searchGroupItem.getSearchParameters()) {

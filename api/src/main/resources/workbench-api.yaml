@@ -3641,6 +3641,7 @@ definitions:
     - ALL_EVENTS
     - LAB
     - VITAL
+    - FITBIT
   Surveys:
     type: string
     description: a survey for concepts
