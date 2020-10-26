@@ -24,8 +24,6 @@ import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest.WelderRe
 import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig.CloudServiceEnum;
 import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.notebooks.api.ProxyApi;
