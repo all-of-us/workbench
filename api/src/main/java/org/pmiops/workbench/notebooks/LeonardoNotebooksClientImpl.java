@@ -140,7 +140,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
         request.setRuntimeConfig(
             leonardoMapper.toLeonardoMachineConfig(runtime.getDataprocConfig()));
       }
-    } else if (workbenchConfigProvider.get().featureFlags.enableGceAsNotebookRuntimeDefault) {
+    } else {
       request.setRuntimeConfig(
           new LeonardoGceConfig()
               .cloudService(LeonardoGceConfig.CloudServiceEnum.GCE)
@@ -148,16 +148,6 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
                   Optional.ofNullable(clusterOverride.masterDiskSize)
                       .orElse(config.firecloud.notebookRuntimeDefaultDiskSizeGb))
               .machineType(
-                  Optional.ofNullable(clusterOverride.machineType)
-                      .orElse(config.firecloud.notebookRuntimeDefaultMachineType)));
-    } else {
-      request.setRuntimeConfig(
-          new LeonardoMachineConfig()
-              .cloudService(CloudServiceEnum.DATAPROC)
-              .masterDiskSize(
-                  Optional.ofNullable(clusterOverride.masterDiskSize)
-                      .orElse(config.firecloud.notebookRuntimeDefaultDiskSizeGb))
-              .masterMachineType(
                   Optional.ofNullable(clusterOverride.machineType)
                       .orElse(config.firecloud.notebookRuntimeDefaultMachineType)));
     }

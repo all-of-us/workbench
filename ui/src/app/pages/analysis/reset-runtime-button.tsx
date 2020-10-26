@@ -10,7 +10,6 @@ import {
   LeoRuntimeInitializationFailedError,
   LeoRuntimeInitializer,
 } from 'app/utils/leo-runtime-initializer';
-import {serverConfigStore} from 'app/utils/navigation';
 import {runtimePresets} from 'app/utils/runtime-presets';
 import {
   RuntimeStatus,
@@ -195,13 +194,9 @@ export class ResetRuntimeButton extends React.Component<Props, State> {
     try {
       this.setState({resetRuntimePending: true});
       if (this.state.runtimeStatus === null) {
-        let runtime: Runtime;
-        if (serverConfigStore.getValue().enableGceAsNotebookRuntimeDefault) {
-          runtime = {...runtimePresets.generalAnalysis.runtimeTemplate};
-        } else {
-          runtime = {...runtimePresets.legacyGeneralAnalysis.runtimeTemplate};
-        }
-        await runtimeApi().createRuntime(this.props.workspaceNamespace, runtime);
+        await runtimeApi().createRuntime(this.props.workspaceNamespace, {
+          ...runtimePresets.generalAnalysis.runtimeTemplate
+        });
       } else {
         await runtimeApi().deleteRuntime(this.props.workspaceNamespace);
       }
