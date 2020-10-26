@@ -267,6 +267,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
                         searchContext={cohortContext}
                         searchTerms={conceptSearchTerms}
                         select={this.addSelection}
+                        selectedSurvey={selectedSurvey}
                         selectedIds={this.getListSearchSelectedIds()}/>
         </div>
       </div>

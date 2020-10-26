@@ -89,7 +89,7 @@ export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConce
     }
 
     openSaveDialog() {
-      this.props.concept[0].name ?
+      this.props.concept[0].domainId !== 'SURVEY' ?
          this.setState({conceptAddModalOpen: true}) :
          this.setState({surveyAddModalOpen: true}) ;
     }
@@ -144,7 +144,7 @@ export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConce
         <ConceptSurveyAddModal selectedSurvey={this.props.concept}
                                onClose={() => this.setState({surveyAddModalOpen: false})}
                                onSave={(conceptSet) => this.afterConceptsSaved(conceptSet)}
-                               surveyName={this.props.concept[0].surveyName}/>}
+                               surveyName={this.props.concept[this.props.concept.length - 1].surveyName}/>}
         </div>;
     }
   });

@@ -264,6 +264,15 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
       navigateByUrl('workspaces/' + workspace.namespace + '/' + workspace.id + '/data/concepts' + queryParams);
     }
 
+    get displayDomainName() {
+      const {conceptSet} = this.state;
+      return conceptSet.domain === Domain.PHYSICALMEASUREMENT
+          ? 'Physical Measurements' :
+          conceptSet.domain === Domain.SURVEY
+              ? fp.capitalize(conceptSet.domain.toString() + '-' + conceptSet.survey) :
+              fp.capitalize(conceptSet.domain.toString()) ;
+    }
+
     render() {
       const {urlParams: {ns, wsid}, workspace} = this.props;
       const {
@@ -339,8 +348,7 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
                       Participant Count: {!!conceptSet.participantCount ? conceptSet.participantCount.toLocaleString() : ''}
                     </div>
                     <div style={{marginLeft: '2rem'}} data-test-id='concept-set-domain'>
-                      Domain: {conceptSet.domain === Domain.PHYSICALMEASUREMENT
-                        ? 'Physical Measurements' : fp.capitalize(conceptSet.domain.toString())}
+                      Domain: {this.displayDomainName}
                     </div>
                   </div>
                 </div>

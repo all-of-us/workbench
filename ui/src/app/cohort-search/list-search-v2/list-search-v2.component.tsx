@@ -1,5 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {CSSProperties} from 'react';
 import {Key} from 'ts-key-enum';
 
 import {domainToTitle} from 'app/cohort-search/utils';
@@ -26,7 +27,6 @@ import {
   CriteriaType,
   Domain
 } from 'generated/fetch';
-import {CSSProperties} from 'react';
 
 const borderStyle = `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`;
 const styles = reactStyles({
@@ -219,6 +219,7 @@ interface Props {
   searchTerms: string;
   select: Function;
   selectedIds: Array<string>;
+  selectedSurvey?: string;
   setAttributes: Function;
   workspace: WorkspaceData;
 }
@@ -319,7 +320,10 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
     }
 
     selectItem = (row: any) => {
-      const param = {parameterId: this.getParamId(row), ...row, attributes: []};
+      let param = {parameterId: this.getParamId(row), ...row, attributes: []};
+      if (row.domainId === Domain.SURVEY) {
+        param = {...param, surveyName: this.props.selectedSurvey};
+      }
       this.props.select(param);
     }
 
