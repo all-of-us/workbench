@@ -271,6 +271,8 @@ public class WorkbenchConfig {
     public boolean enableCustomRuntimes;
     // Whether Leonardo notebooks runtimes should default to GCE (instead of Dataproc).
     public boolean enableGceAsNotebookRuntimeDefault;
+    // Flag to indicate if whether to display FitBit data
+    public boolean enableFitbit;
   }
 
   public static class ActionAuditConfig {

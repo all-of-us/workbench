@@ -112,7 +112,8 @@
     "enableReportingUploadCron": true,
     "enableCOPESurvey": true,
     "enableCustomRuntimes": false,
-    "enableGceAsNotebookRuntimeDefault": true
+    "enableGceAsNotebookRuntimeDefault": true,
+    "enableFitbit": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-preprod",
