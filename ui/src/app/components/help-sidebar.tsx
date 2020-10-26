@@ -118,10 +118,8 @@ const styles = reactStyles({
     borderRadius: '.25rem',
   },
   runtimeStatusIconContainer: {
-    // This height properly aligns the status indicator vertically.
-    height: '.9rem',
     alignSelf: 'flex-end',
-    margin: '0 .1rem 0 auto'
+    margin: '0 .1rem .1rem auto'
   },
   rotate: {
     animation: 'rotation 2s infinite linear'
@@ -591,7 +589,7 @@ export const HelpSidebar = fp.flow(
       // overlay icon in the bottom right of the tab showing the runtime status.
       return <FlexRow style={{height: '100%', alignItems: 'center', justifyContent: 'space-around'}}>
         <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={{...icon.style, position: 'absolute'}} />
-        <div style={styles.runtimeStatusIconContainer}>
+        <FlexRow style={styles.runtimeStatusIconContainer}>
           {(status === RuntimeStatus.Creating
           || status === RuntimeStatus.Starting
           || status === RuntimeStatus.Updating)
@@ -630,7 +628,7 @@ export const HelpSidebar = fp.flow(
               color: colors.runtimeStatus.error,
             }}/>
           }
-        </div>
+        </FlexRow>
       </FlexRow>;
     }
 
