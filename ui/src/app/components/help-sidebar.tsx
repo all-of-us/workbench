@@ -111,13 +111,17 @@ const styles = reactStyles({
   },
   runtimeStatusIcon: {
     width: '.5rem',
-    height: '.5rem',
-    margin: '0px .1rem .1rem auto',
-    alignSelf: 'flex-end'
+    height: '.5rem'
   },
   runtimeStatusIconOutline: {
     border: `1px solid ${colors.white}`,
     borderRadius: '.25rem',
+  },
+  runtimeStatusIconContainer: {
+    // This height properly aligns the status indicator vertically.
+    height: '.9rem',
+    alignSelf: 'flex-end',
+    margin: '0 .1rem 0 auto'
   },
   rotate: {
     animation: 'rotation 2s infinite linear'
@@ -587,44 +591,46 @@ export const HelpSidebar = fp.flow(
       // overlay icon in the bottom right of the tab showing the runtime status.
       return <FlexRow style={{height: '100%', alignItems: 'center', justifyContent: 'space-around'}}>
         <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={{...icon.style, position: 'absolute'}} />
-        {(status === RuntimeStatus.Creating
-        || status === RuntimeStatus.Starting
-        || status === RuntimeStatus.Updating)
-          && <FontAwesomeIcon icon={faSyncAlt} style={{
-            ...styles.runtimeStatusIcon,
-            ...styles.rotate,
-            color: colors.runtimeStatus.starting,
-          }}/>
-        }
-        {status === RuntimeStatus.Stopped
-          && <FontAwesomeIcon icon={faCircle} style={{
-            ...styles.runtimeStatusIcon,
-            ...styles.runtimeStatusIconOutline,
-            color: colors.runtimeStatus.stopped,
-          }}/>
-        }
-        {status === RuntimeStatus.Running
-          && <FontAwesomeIcon icon={faCircle} style={{
-            ...styles.runtimeStatusIcon,
-            ...styles.runtimeStatusIconOutline,
-            color: colors.runtimeStatus.running,
-          }}/>
-        }
-        {(status === RuntimeStatus.Stopping
-        || status === RuntimeStatus.Deleting)
-          && <FontAwesomeIcon icon={faSyncAlt} style={{
-            ...styles.runtimeStatusIcon,
-            ...styles.rotate,
-            color: colors.runtimeStatus.stopping,
-          }}/>
-        }
-        {status === RuntimeStatus.Error
-          && <FontAwesomeIcon icon={faCircle} style={{
-            ...styles.runtimeStatusIcon,
-            ...styles.runtimeStatusIconOutline,
-            color: colors.runtimeStatus.error,
-          }}/>
-        }
+        <div style={styles.runtimeStatusIconContainer}>
+          {(status === RuntimeStatus.Creating
+          || status === RuntimeStatus.Starting
+          || status === RuntimeStatus.Updating)
+            && <FontAwesomeIcon icon={faSyncAlt} style={{
+              ...styles.runtimeStatusIcon,
+              ...styles.rotate,
+              color: colors.runtimeStatus.starting,
+            }}/>
+          }
+          {status === RuntimeStatus.Stopped
+            && <FontAwesomeIcon icon={faCircle} style={{
+              ...styles.runtimeStatusIcon,
+              ...styles.runtimeStatusIconOutline,
+              color: colors.runtimeStatus.stopped,
+            }}/>
+          }
+          {status === RuntimeStatus.Running
+            && <FontAwesomeIcon icon={faCircle} style={{
+              ...styles.runtimeStatusIcon,
+              ...styles.runtimeStatusIconOutline,
+              color: colors.runtimeStatus.running,
+            }}/>
+          }
+          {(status === RuntimeStatus.Stopping
+          || status === RuntimeStatus.Deleting)
+            && <FontAwesomeIcon icon={faSyncAlt} style={{
+              ...styles.runtimeStatusIcon,
+              ...styles.rotate,
+              color: colors.runtimeStatus.stopping,
+            }}/>
+          }
+          {status === RuntimeStatus.Error
+            && <FontAwesomeIcon icon={faCircle} style={{
+              ...styles.runtimeStatusIcon,
+              ...styles.runtimeStatusIconOutline,
+              color: colors.runtimeStatus.error,
+            }}/>
+          }
+        </div>
       </FlexRow>;
     }
 
