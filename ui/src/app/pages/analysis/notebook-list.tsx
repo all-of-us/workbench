@@ -13,12 +13,11 @@ import {withCurrentWorkspace} from 'app/utils';
 import {convertToResource} from 'app/utils/resourceActions';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
-
 import {NotebookResourceCard} from 'app/pages/analysis/notebook-resource-card';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
-import {BillingStatus, FileDetail, ResourceType, WorkspaceAccessLevel} from 'generated/fetch';
+import {BillingStatus, FileDetail, ResourceType} from 'generated/fetch';
 
 const styles = {
   heading: {
@@ -84,10 +83,8 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
   }
 
   render() {
-    const {workspace, workspace: {namespace, id, accessLevel}} = this.props;
+    const {workspace} = this.props;
     const {notebookList, notebookNameList, creating, loading} = this.state;
-    // TODO Remove this cast when we switch to fetch types
-    const al = accessLevel as unknown as WorkspaceAccessLevel;
     return <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
       <div style={styles.heading}>
         Notebooks&nbsp;
@@ -114,7 +111,7 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
           {notebookList.map((notebook, index) => {
             return <NotebookResourceCard
               key={index}
-              resource={convertToResource(notebook, namespace, id, al, ResourceType.NOTEBOOK)}
+              resource={convertToResource(notebook, ResourceType.NOTEBOOK, workspace)}
               existingNameList={notebookNameList}
               onUpdate={() => this.loadNotebooks()}
               disableDuplicate={workspace.billingStatus === BillingStatus.INACTIVE}

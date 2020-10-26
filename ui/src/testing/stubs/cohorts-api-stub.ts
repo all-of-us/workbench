@@ -89,10 +89,8 @@ export class CohortsApiStub extends CohortsApi {
     this.workspaces = [stubWorkspace];
     const convertToResourceArgs: ConvertToResourcesArgs = {
       list: this.cohorts,
-      workspaceNamespace: stubWorkspace.namespace,
-      workspaceId: stubWorkspace.id,
-      accessLevel: WorkspaceAccessLevel.OWNER,
-      resourceType: ResourceType.COHORT
+      resourceType: ResourceType.COHORT,
+      workspace: {...stubWorkspace, accessLevel: WorkspaceAccessLevel.OWNER},
     };
     this.resourceList = convertToResources(convertToResourceArgs);
   }
