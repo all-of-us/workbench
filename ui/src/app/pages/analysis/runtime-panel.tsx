@@ -59,6 +59,17 @@ const styles = reactStyles({
     backgroundColor: colors.white,
     padding: '.75rem .5rem',
     width: '2rem'
+  },
+  costPredictorWrapper: {
+    backgroundColor: colorWithWhiteness(colors.accent, 0.85),
+    // Not using shorthand here because react doesn't like it when you mix shorthand and non-shorthand,
+    // and the border color changes when the runtime does
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderColor: colorWithWhiteness(colors.dark, .5),
+    borderRadius: '5px',
+    color: colors.dark,
+    marginBottom: '.5rem',
   }
 });
 
@@ -209,7 +220,7 @@ const DataProcConfigSelector = ({onChange, dataprocConfig})  => {
   </fieldset>;
 };
 
-const PresetSelector = ({setSelectedDiskSize, setSelectedMachine, setRuntimeConfigurationType}) => {
+const PresetSelector = ({setSelectedDiskSize, setSelectedMachine, setSelectedCompute, setSelectedDataprocConfig}) => {
   {/* Recommended runtime: pick from default templates or change the image. */}
   return <PopupTrigger side='bottom'
                 closeOnClick
@@ -226,21 +237,24 @@ const PresetSelector = ({setSelectedDiskSize, setSelectedMachine, setRuntimeConf
                                 onClick={() => {
                                   // renaming to avoid shadowing
                                   const {runtimeTemplate} = preset;
-                                  const {presetDiskSize, presetMachineName} = fp.cond([
-                                    [() => !!runtimeTemplate.gceConfig, ({gceConfig: {bootDiskSize, machineType}}) => ({
-                                      presetDiskSize: bootDiskSize,
-                                      presetMachineName: machineType
+                                  const {presetDiskSize, presetMachineName, presetCompute} = fp.cond([
+                                    [() => !!runtimeTemplate.gceConfig, ({gceConfig}) => ({
+                                      presetDiskSize: gceConfig.bootDiskSize,
+                                      presetMachineName: gceConfig.machineType,
+                                      presetCompute: ComputeType.Standard
                                     })],
-                                    [() => !!runtimeTemplate.dataprocConfig, ({dataprocConfig: {masterDiskSize, masterMachineType}}) => ({
-                                      presetDiskSize: masterDiskSize,
-                                      presetMachineName: masterMachineType
+                                    [() => !!runtimeTemplate.dataprocConfig, ({dataprocConfig}) => ({
+                                      presetDiskSize: dataprocConfig.masterDiskSize,
+                                      presetMachineName: dataprocConfig.masterMachineType,
+                                      presetCompute: ComputeType.Dataproc
                                     })]
                                   ])(runtimeTemplate);
                                   const presetMachineType = fp.find(({name}) => name === presetMachineName, validLeonardoMachineTypes);
 
                                   setSelectedDiskSize(presetDiskSize);
                                   setSelectedMachine(presetMachineType);
-                                  setRuntimeConfigurationType(RuntimeConfigurationType.GeneralAnalysis);
+                                  setSelectedCompute(presetCompute);
+                                  setSelectedDataprocConfig(runtimeTemplate.dataprocConfig);
                                 }}>
                               {preset.displayName}
                             </MenuItem>;
@@ -255,15 +269,12 @@ const PresetSelector = ({setSelectedDiskSize, setSelectedMachine, setRuntimeConf
   </PopupTrigger>
 }
 
-const CostPredictor = ({billingAccount, freeCreditsRemaining, runningCost, storageCost}) => {
+const CostPredictor = ({billingAccount, freeCreditsRemaining, runningCost, runtimeChanged, storageCost}) => {
+  const wrapperStyle = runtimeChanged
+    ? {...styles.costPredictorWrapper, backgroundColor: colorWithWhiteness(colors.warning, .9), borderColor: colors.warning}
+    : styles.costPredictorWrapper
   return <FlexRow
-    style={{
-      backgroundColor: colorWithWhiteness(colors.accent, 0.85),
-      border: `1px solid ${colorWithWhiteness(colors.dark, .5)}`,
-      borderRadius: '5px',
-      color: colors.dark,
-      marginBottom: '.5rem'
-    }}
+    style={wrapperStyle}
   >
     <FlexRow style={{minWidth: '250px', margin: '.33rem .5rem'}}>
       <FlexColumn style={{marginRight: '1rem'}}>
@@ -288,22 +299,27 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withCdrVersions())((
   const {namespace, cdrVersionId} = workspace;
   const {hasMicroarrayData} = fp.find({cdrVersionId}, cdrVersionListResponse.items) || {hasMicroarrayData: false};
   const [currentRuntime, setRequestedRuntime] = useCustomRuntime(namespace);
-  const {status = null, dataprocConfig = null, gceConfig = {diskSize: defaultDiskSize}} = currentRuntime || {} as Partial<Runtime>;
-  const machineName = !!dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
 
+  const {status = null, dataprocConfig = null, gceConfig = {diskSize: defaultDiskSize}} = currentRuntime || {} as Partial<Runtime>;
   const diskSize = !!dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.diskSize;
-  const initialMasterMachine = findMachineByName(machineName);
+  const machineName = !!dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
+  const initialMasterMachine = findMachineByName(machineName) || defaultMachineType;
+  const initialCompute = dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard;
 
   const [selectedDiskSize, setSelectedDiskSize] = useState(diskSize);
   const [selectedMachine, setSelectedMachine] = useState(initialMasterMachine);
-  const [selectedCompute, setSelectedCompute] = useState<ComputeType>(dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard);
+  const [selectedCompute, setSelectedCompute] = useState<ComputeType>(initialCompute);
   const [selectedDataprocConfig, setSelectedDataprocConfig] = useState<DataprocConfig | null>(dataprocConfig);
 
   const selectedMachineType = selectedMachine && selectedMachine.name;
   const runtimeExists = status && status !== RuntimeStatus.Deleted;
   const runtimeChanged = !fp.equals(selectedMachine, initialMasterMachine) ||
     selectedDiskSize !== diskSize ||
-    !fp.equals(selectedDataprocConfig, dataprocConfig);
+    !fp.equals(selectedDataprocConfig, dataprocConfig) ||
+    !fp.equals(selectedCompute, initialCompute);
+  const runtimeNeedsRestart = !fp.equals(selectedMachine, initialMasterMachine) ||
+    !fp.equals(selectedDataprocConfig, dataprocConfig) ||
+    !fp.equals(selectedCompute, initialCompute);
 
   // TODO(RW-5591): Conditionally render create runtime page if runtime null or Deleted.
   if (currentRuntime === undefined) {
@@ -330,6 +346,7 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withCdrVersions())((
             workerDiskSize: selectedDataprocConfig && selectedDataprocConfig.workerDiskSize,
             workerMachineName: selectedDataprocConfig && selectedDataprocConfig.workerMachineType
           })}
+          runtimeChanged={runtimeChanged}
           storageCost={machineStoragePrice({
             masterDiskSize: selectedDiskSize,
             numberOfWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfWorkers,
@@ -339,6 +356,8 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withCdrVersions())((
       <PresetSelector
           setSelectedDiskSize={(diskSize) => setSelectedDiskSize(diskSize)}
           setSelectedMachine={(machineName) => setSelectedMachine(machineName)}
+          setSelectedCompute={(compute) => setSelectedCompute(compute)}
+          setSelectedDataprocConfig={(dataprocConfig) => setSelectedDataprocConfig(dataprocConfig)}
       />
 
       {/* Runtime customization: change detailed machine configuration options. */}
@@ -372,6 +391,25 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withCdrVersions())((
         }
       </FlexColumn>
     </div>
+    {runtimeNeedsRestart && <FlexRow
+        style={{
+          alignItems: 'center',
+          backgroundColor: colorWithWhiteness(colors.warning, .9),
+          border: `1px solid ${colors.warning}`,
+          borderRadius: '5px',
+          color: colors.dark,
+          marginTop: '.5rem',
+          padding: '.5rem 0px'
+        }}
+    >
+      <ClrIcon
+          style={{color: colors.warning, marginLeft: '.5rem'}}
+          shape={"warning-standard"}
+          size={16}
+          class={"is-solid"}
+      />
+      <div style={{marginLeft: '.5rem'}}>You've made changes that require recreating your environment to take effect.</div>
+    </FlexRow>}
     <FlexRow style={{justifyContent: 'flex-end', marginTop: '.75rem'}}>
       <Button
         aria-label={runtimeExists ? 'Update' : 'Create'}
