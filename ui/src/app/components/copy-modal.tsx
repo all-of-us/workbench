@@ -355,7 +355,7 @@ const CopyModal = fp.flow(withCdrVersions())(CopyModalComponent);
 
 export {
   CopyModal,
-  CopyModalComponent,
+  CopyModalComponent, // VisibleForTesting
   Props as CopyModalProps,
   State as CopyModalState,
 };
