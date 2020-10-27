@@ -1,10 +1,10 @@
 import {Button, Clickable, MenuItem} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
-import {PopupTrigger} from 'app/components/popups';
+import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, withCurrentWorkspace, withUserProfile} from 'app/utils';
 import {withCdrVersions} from 'app/utils';
 import {
   allMachineTypes, ComputeType, findMachineByName,
@@ -19,7 +19,7 @@ import {Dropdown} from 'primereact/dropdown';
 import {InputNumber} from 'primereact/inputnumber';
 
 import { Runtime, RuntimeConfigurationType, RuntimeStatus } from 'generated/fetch';
-import { CdrVersionListResponse, DataprocConfig } from 'generated/fetch';
+import {BillingAccountType, CdrVersionListResponse, DataprocConfig} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {formatUsd} from "../../utils/numbers";
@@ -269,7 +269,7 @@ const PresetSelector = ({setSelectedDiskSize, setSelectedMachine, setSelectedCom
   </PopupTrigger>
 }
 
-const CostPredictor = ({billingAccount, freeCreditsRemaining, runningCost, runtimeChanged, storageCost}) => {
+const CostPredictor = ({billingAccount, freeCreditsRemaining, profile, runningCost, runtimeChanged, storageCost, workspace}) => {
   const wrapperStyle = runtimeChanged
     ? {...styles.costPredictorWrapper, backgroundColor: colorWithWhiteness(colors.warning, .9), borderColor: colors.warning}
     : styles.costPredictorWrapper
@@ -286,17 +286,35 @@ const CostPredictor = ({billingAccount, freeCreditsRemaining, runningCost, runti
         <div style={{fontSize: '20px', color: colors.accent}}>{formatUsd(storageCost)}</div>
       </FlexColumn>
     </FlexRow>
-    {freeCreditsRemaining > 0 && <div style={{borderLeft: `1px solid ${colorWithWhiteness(colors.dark, .5)}`, padding: '.33rem .5rem'}}>
-      Costs will draw from your remaining {formatUsd(freeCreditsRemaining)} of free credits.
-    </div>}
+    {
+      workspace.billingAccountType === BillingAccountType.FREETIER
+      && profile.username === workspace.creator
+      && <div style={{borderLeft: `1px solid ${colorWithWhiteness(colors.dark, .5)}`, padding: '.33rem .5rem'}}>
+        Costs will draw from your remaining {formatUsd(freeCreditsRemaining)} of free credits.
+      </div>
+    }
+    {
+      workspace.billingAccountType === BillingAccountType.FREETIER
+      && profile.username !== workspace.creator
+      && <div style={{borderLeft: `1px solid ${colorWithWhiteness(colors.dark, .5)}`, padding: '.33rem .5rem'}}>
+        Costs will draw from workspace owner's remaining {formatUsd(freeCreditsRemaining)} of free credits.
+      </div>
+    }
     {freeCreditsRemaining <= 0 && <div style={{borderLeft: `1px solid ${colorWithWhiteness(colors.dark, .5)}`, padding: '.33rem .5rem'}}>
       Costs will be charged to billing account {billingAccount}.
     </div>}
   </FlexRow>;
 }
 
-export const RuntimePanel = fp.flow(withCurrentWorkspace(), withCdrVersions())(({workspace, cdrVersionListResponse}) => {
+export const RuntimePanel = fp.flow(
+    withCdrVersions(),
+    withCurrentWorkspace(),
+    withUserProfile()
+)(({cdrVersionListResponse, workspace, profileState}) => {
   const {namespace, cdrVersionId} = workspace;
+
+  const {profile} = profileState;
+
   const {hasMicroarrayData} = fp.find({cdrVersionId}, cdrVersionListResponse.items) || {hasMicroarrayData: false};
   const [currentRuntime, setRequestedRuntime] = useCustomRuntime(namespace);
 
@@ -337,6 +355,7 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withCdrVersions())((
       <CostPredictor
           billingAccount={"lol"}
           freeCreditsRemaining={300}
+          profile={profile}
           runningCost={machineRunningPrice({
             computeType: selectedCompute,
             masterDiskSize: selectedDiskSize,
@@ -352,6 +371,7 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withCdrVersions())((
             numberOfWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfWorkers,
             workerDiskSize: selectedDataprocConfig && selectedDataprocConfig.workerDiskSize
           })}
+          workspace={workspace}
       />
       <PresetSelector
           setSelectedDiskSize={(diskSize) => setSelectedDiskSize(diskSize)}
