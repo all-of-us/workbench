@@ -210,10 +210,8 @@ export class LeoRuntimeInitializer {
     let runtime: Runtime;
     if (serverConfigStore.getValue().enableCustomRuntimes && this.targetRuntime) {
       runtime = this.targetRuntime;
-    } else if (serverConfigStore.getValue().enableGceAsNotebookRuntimeDefault) {
-      runtime = {...runtimePresets.generalAnalysis.runtimeTemplate};
     } else {
-      runtime = {...runtimePresets.legacyGeneralAnalysis.runtimeTemplate};
+      runtime = {...runtimePresets.generalAnalysis.runtimeTemplate};
     }
     const promise = runtimeApi().createRuntime(this.workspaceNamespace,
       runtime,
