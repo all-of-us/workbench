@@ -347,7 +347,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
         <div style={hover ? {...styles.treeNodeContent, background: colors.light} : styles.treeNodeContent}
           onMouseEnter={() => this.setState({hover: true})}
           onMouseLeave={() => this.setState({hover: false})}>
-          {(selectable && (node.subtype !== 'ANSWER')) && <button style={styles.iconButton}>
+          {(selectable && (source === 'criteria' || node.subtype !== 'ANSWER')) && <button style={styles.iconButton}>
             {hasAttributes
               ? <ClrIcon style={{color: colors.accent}}
                   shape='slider' dir='right' size='20'
