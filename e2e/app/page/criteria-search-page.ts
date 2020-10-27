@@ -119,7 +119,7 @@ export default class CriteriaSearchPage extends AuthenticatedPage {
   }
 
   // DO NOT USE. This function fails in CI.
-  async searchCondition(searchWord: string): Promise<Table> {
+  async searchCriteria(searchWord: string): Promise<Table> {
     const resultsTable = this.getConditionSearchResultsTable();
     const exists = await resultsTable.exists();
     const searchFilterTextbox = await Textbox.findByName(this.page, {containsText: 'by code or description'});

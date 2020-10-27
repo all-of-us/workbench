@@ -137,11 +137,11 @@ describe('User can create new Cohorts', () => {
     const searchPage = await group1.includeConditions();
 
     // First, search for non-existent condition, expect returns no results.
-    const search1ResultsTable = await searchPage.searchCondition('allergist');
+    const search1ResultsTable = await searchPage.searchCriteria('allergist');
     expect(await search1ResultsTable.exists()).toBe(false);
 
     // Next, search for condition EKG
-    const search2ResultsTable = await searchPage.searchCondition('EKG');
+    const search2ResultsTable = await searchPage.searchCriteria('EKG');
     // Check cell value in column "Code" (column #2)
     const codeValue = await search2ResultsTable.getCellValue(1, 2);
     expect(Number(codeValue)).not.toBeNaN();
