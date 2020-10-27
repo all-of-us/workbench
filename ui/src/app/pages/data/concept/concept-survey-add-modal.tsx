@@ -75,7 +75,7 @@ export const ConceptSurveyAddModal = withCurrentWorkspace()
       const conceptSets = await conceptSetsApi().getSurveyConceptSetsInWorkspace(namespace, id,
         this.props.surveyName);
       const conceptSetsInSurveys = conceptSets.items
-          .filter((conceptset) => conceptset.domain === Domain.OBSERVATION);
+          .filter((conceptset) => conceptset.survey.toString() === this.props.surveyName);
 
       this.setState({
         conceptSets: conceptSetsInSurveys,
@@ -95,13 +95,7 @@ export const ConceptSurveyAddModal = withCurrentWorkspace()
     const {selectedSet, addingToExistingSet, newSetDescription, name} = this.state;
     this.setState({saving: true});
     const conceptIds = this.props.selectedSurvey.map((surveys) => surveys.conceptId);
-    let survey = Surveys.THEBASICS;
-    switch (this.props.surveyName) {
-      case 'Lifestyle': survey = Surveys.LIFESTYLE; break;
-      case 'Overall Health': survey = Surveys.OVERALLHEALTH; break;
-      case 'The Basics': survey = Surveys.THEBASICS; break;
-      default: {console.error('Survey name not found'); return; }
-    }
+
     if (addingToExistingSet) {
       const updateConceptSetReq: UpdateConceptSetRequest = {
         etag: selectedSet.etag,
@@ -116,6 +110,13 @@ export const ConceptSurveyAddModal = withCurrentWorkspace()
         console.error(error);
       }
     } else {
+      let survey = Surveys.THEBASICS;
+      switch (this.props.surveyName) {
+        case 'Lifestyle': survey = Surveys.LIFESTYLE; break;
+        case 'Overall Health': survey = Surveys.OVERALLHEALTH; break;
+        case 'The Basics': survey = Surveys.THEBASICS; break;
+        default: {console.error('Survey name not found'); return; }
+      }
       const conceptSet: ConceptSet = {
         name: name,
         description: newSetDescription,

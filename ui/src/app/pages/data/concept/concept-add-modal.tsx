@@ -11,6 +11,7 @@ import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, summarizeErrors, withCurrentWorkspace} from 'app/utils';
+import {serverConfigStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   ConceptSet,
@@ -34,7 +35,11 @@ const styles = reactStyles({
 
 const filterConcepts = (concepts: any[], domain: Domain) => {
   if (domain === Domain.SURVEY) {
-    return concepts.filter(concept => !!concept.question);
+    if (serverConfigStore.getValue().enableConceptSetSearchV2) {
+      return concepts.filter(concept => concept.subtype === 'QUESTION');
+    } else {
+      return concepts.filter(concept => !!concept.question);
+    }
   } else {
     return concepts.filter(concept => concept.domainId.replace(' ', '').toLowerCase() === Domain[domain].toLowerCase());
   }
@@ -92,6 +97,7 @@ export const ConceptAddModal = withCurrentWorkspace()
       this.setState({
         conceptSets: conceptSetsInDomain,
         addingToExistingSet: (conceptSetsInDomain.length > 0),
+        selectedConceptsInDomain: filterConcepts(this.props.selectedConcepts, this.props.activeDomainTab.domain),
         loading: false,
       });
       if (conceptSetsInDomain) {
