@@ -269,7 +269,9 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
       return conceptSet.domain === Domain.PHYSICALMEASUREMENT
           ? 'Physical Measurements' :
           conceptSet.domain === Domain.SURVEY
-              ? conceptSet.domain.toString() + ' - ' + conceptSet.survey : conceptSet.domain.toString() ;
+              ?
+              fp.startCase(fp.toLower(conceptSet.domain.toString())) + ' - ' + fp.startCase(fp.toLower(conceptSet.survey.toString()))
+              : fp.capitalize(conceptSet.domain.toString()) ;
     }
 
     render() {
@@ -346,9 +348,9 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
                     <div data-test-id='participant-count'>
                       Participant Count: {!!conceptSet.participantCount ? conceptSet.participantCount.toLocaleString() : ''}
                     </div>
-                    <FlexRow style={{marginLeft: '2rem'}} data-test-id='concept-set-domain'>
-                      Domain: <div style={{textTransform: 'capitalize', marginLeft: '0.3rem'}}>{this.displayDomainName}</div>
-                    </FlexRow>
+                    <div style={{marginLeft: '2rem'}} data-test-id='concept-set-domain'>
+                      Domain: {this.displayDomainName}
+                    </div>
                   </div>
                 </div>
               </FlexRow>
