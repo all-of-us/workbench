@@ -630,7 +630,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 new Attribute()
                     .name(AttrName.SURVEY_VERSION_CONCEPT_ID)
                     .operator(Operator.IN)
-                    .operands(ImmutableList.of("100"))));
+                    .operands(ImmutableList.of("100", "101")),
+                new Attribute()
+                    .name(AttrName.NUM)
+                    .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
+                    .operands(ImmutableList.of("10"))));
   }
 
   private static Modifier ageModifier() {
