@@ -48,7 +48,7 @@ describe('Create Concept Sets from Domains', () => {
 
     // Search by Code.
     await criteriaSearch.searchCriteria(conditionCode);
-    const rowValues = await  criteriaSearch.resultsTableSelectRow();
+    const rowValues = await criteriaSearch.resultsTableSelectRow();
     expect(rowValues.name).toBe(conditionName);
 
     await conceptSetPage.viewAndSaveConceptSet();
@@ -110,7 +110,7 @@ describe('Create Concept Sets from Domains', () => {
 
     // Search by drug name.
     await criteriaSearch.searchCriteria(drugName);
-    const drugRowValues = await  criteriaSearch.resultsTableSelectRow();
+    const drugRowValues = await criteriaSearch.resultsTableSelectRow();
     expect(drugRowValues.name).toBe(drugName);
 
     await conceptSearchPage.viewAndSaveConceptSet();
@@ -132,7 +132,7 @@ describe('Create Concept Sets from Domains', () => {
 
     // Search by Measurements name.
     await criteriaSearch.searchCriteria(measurementName);
-    const measurementRowValues = await  criteriaSearch.resultsTableSelectRow();
+    const measurementRowValues = await criteriaSearch.resultsTableSelectRow();
     expect(measurementRowValues.name).toBe(measurementName);
 
     await conceptSearchPage.viewAndSaveConceptSet();

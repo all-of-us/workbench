@@ -1,5 +1,3 @@
-import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
-
 import DataResourceCard from 'app/component/data-resource-card';
 import ClrIconLink from 'app/element/clr-icon-link';
 import {Option, Language, ResourceCard} from 'app/text-labels';
@@ -110,18 +108,12 @@ export default class WorkspaceDataPage extends WorkspaceBase {
    * Click Domain card.
    * @param {Domain} domain
    */
-  async openConceptSetSearch(domain: Domain): Promise<ConceptSetSearchPage> {
+  async openConceptSetSearch(): Promise<ConceptSetSearchPage> {
     // Click Add Datasets button.
     const datasetBuildPage = await this.clickAddDatasetButton();
 
     // Click Add Concept Sets button.
-    const conceptSetSearchPage = await datasetBuildPage.clickAddConceptSetsButton();
-
-    // Add Concept Set in domain.
-    const procedures = await ConceptDomainCard.findDomainCard(this.page, domain);
-    await procedures.clickSelectConceptButton();
-
-    return conceptSetSearchPage;
+    return await datasetBuildPage.clickAddConceptSetsButton();
   }
 
   /**
