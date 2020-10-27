@@ -45,7 +45,7 @@ export default class NotebookPage extends AuthenticatedPage {
 
   async isLoaded(): Promise<boolean> {
     await waitForDocumentTitle(this.page, this.documentTitle);
-    await this.waitForKernelIdle();
+    await this.waitForKernelIdle(30000);
     return true;
   }
 
