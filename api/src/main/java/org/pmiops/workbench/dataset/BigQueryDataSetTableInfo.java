@@ -91,7 +91,11 @@ public enum BigQueryDataSetTableInfo {
       Domain.OBSERVATION,
       "ds_observation",
       " observation_concept_id in unnest(@conceptIds)",
-      " (observation_concept_id in unnest(@conceptIds) or observation_source_concept_id in unnest(@conceptIds))");
+      " (observation_concept_id in unnest(@conceptIds) or observation_source_concept_id in unnest(@conceptIds))"),
+  FITBIT_HEART_RATE_SUMMARY(Domain.FITBIT_HEART_RATE_SUMMARY, "heart_rate_summary", null, null),
+  FITBIT_HEART_RATE_LEVEL(Domain.FITBIT_HEART_RATE_LEVEL, "heart_rate_minute_level", null, null),
+  FITBIT_ACTIVITY(Domain.FITBIT_ACTIVITY, "activity_summary", null, null),
+  FITBIT_INTRADAY_STEPS(Domain.FITBIT_INTRADAY_STEPS, "steps_intraday", null, null);
 
   private final Domain domain;
   private final String tableName;
