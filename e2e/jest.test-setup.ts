@@ -14,7 +14,7 @@ beforeEach(async () => {
   await page.setUserAgent(userAgent);
   await page.setViewport({width: 1280, height: 0});
   page.setDefaultNavigationTimeout(60000); // Puppeteer default timeout is 30 seconds.
-  page.setDefaultTimeout(10000);
+  page.setDefaultTimeout(15000);
 });
 
 /**
