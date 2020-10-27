@@ -117,7 +117,11 @@ describe('CopyModal', () => {
 
     const options = wrapper.find(Select).find({type: 'option'}).map(e => e.text());
 
-    expect(options).toEqual([workspaces[0].name, workspaces[2].name, workspaces[4].name]);
+    const currentWsOption = workspaces[0].name + ' (current workspace)';
+    const writerWsOption = workspaces[2].name;
+    const writerAltCdrWsOption = workspaces[4].name;
+
+    expect(options).toEqual([currentWsOption, writerWsOption, writerAltCdrWsOption]);
   });
 
   it('should list workspaces with the same CDR version first', async() => {
@@ -135,7 +139,11 @@ describe('CopyModal', () => {
 
     const options = wrapper.find(Select).find({type: 'option'}).map(e => e.text());
 
-    expect(options).toEqual([altCdrWorkspace.name, workspaces[0].name, workspaces[2].name]);
+    const currentWsOption = altCdrWorkspace.name + ' (current workspace)';
+    const otherCdrOwnerWsOption = workspaces[0].name;
+    const otherCdrWriterWsOption = workspaces[2].name;
+
+    expect(options).toEqual([currentWsOption, otherCdrOwnerWsOption, otherCdrWriterWsOption]);
   });
 
   it('should call correct copyNotebook() call after selecting an option and entering a name', async() => {
