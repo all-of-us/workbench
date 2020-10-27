@@ -23,6 +23,7 @@ import {BillingAccountType, CdrVersionListResponse, DataprocConfig} from 'genera
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {formatUsd} from "../../utils/numbers";
+import {workspacesApi} from "../../services/swagger-fetch-clients";
 
 const {useState, useEffect, Fragment} = React;
 
@@ -300,7 +301,7 @@ const CostPredictor = ({billingAccount, freeCreditsRemaining, profile, runningCo
         Costs will draw from workspace owner's remaining {formatUsd(freeCreditsRemaining)} of free credits.
       </div>
     }
-    {freeCreditsRemaining <= 0 && <div style={{borderLeft: `1px solid ${colorWithWhiteness(colors.dark, .5)}`, padding: '.33rem .5rem'}}>
+    {workspace.billingAccountType === BillingAccountType.USERPROVIDED && <div style={{borderLeft: `1px solid ${colorWithWhiteness(colors.dark, .5)}`, padding: '.33rem .5rem'}}>
       Costs will be charged to billing account {billingAccount}.
     </div>}
   </FlexRow>;
@@ -310,7 +311,7 @@ export const RuntimePanel = fp.flow(
     withCdrVersions(),
     withCurrentWorkspace(),
     withUserProfile()
-)(({cdrVersionListResponse, workspace, profileState}) => {
+)(({cdrVersionListResponse, workspace, profileState, workspaceCreatorFreeCreditsRemaining}) => {
   const {namespace, cdrVersionId} = workspace;
 
   const {profile} = profileState;
@@ -354,7 +355,7 @@ export const RuntimePanel = fp.flow(
     <div style={styles.controlSection}>
       <CostPredictor
           billingAccount={"lol"}
-          freeCreditsRemaining={300}
+          freeCreditsRemaining={workspaceCreatorFreeCreditsRemaining}
           profile={profile}
           runningCost={machineRunningPrice({
             computeType: selectedCompute,

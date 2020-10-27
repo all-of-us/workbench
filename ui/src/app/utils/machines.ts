@@ -56,6 +56,7 @@ export const diskPrice = 0.04 / 730; // per GB hour, from https://cloud.google.c
 export const dataprocCpuPrice = 0.01; // dataproc costs $0.01 per cpu per hour
 
 export const machineStoragePrice = ({masterDiskSize, numberOfWorkers, workerDiskSize }) => {
+  debugger;
   if (numberOfWorkers && workerDiskSize) {
     return (masterDiskSize + numberOfWorkers * workerDiskSize) * diskPrice;
   }
@@ -82,6 +83,7 @@ export const machineRunningPrice = ({
         numberOfPreemptibleWorkers * workerMachine.preemptiblePrice,
       ])
     : 0;
+  debugger;
   return fp.sum([
     dataprocPrice,
     masterMachine.price,

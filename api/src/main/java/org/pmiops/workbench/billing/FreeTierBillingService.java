@@ -24,6 +24,7 @@ import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.model.DbUser;
@@ -32,6 +33,7 @@ import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
+import org.pmiops.workbench.profile.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -66,10 +68,10 @@ public class FreeTierBillingService {
       WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao) {
     this.bigQueryService = bigQueryService;
     this.clock = clock;
-    this.userServiceAuditor = userServiceAuditor;
     this.mailService = mailService;
     this.userDao = userDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
+    this.userServiceAuditor = userServiceAuditor;
     this.workspaceDao = workspaceDao;
     this.workspaceFreeTierUsageDao = workspaceFreeTierUsageDao;
   }
@@ -347,5 +349,20 @@ public class FreeTierBillingService {
 
   public Map<Long, Double> getUserIdToTotalCost() {
     return workspaceFreeTierUsageDao.getUserIdToTotalCost();
+  }
+
+  /**
+   * Given a workspace, find the amount of free credits that the workspace creator has left.
+   *
+   * @param dbWorkspace The workspace for which to find its creator's free credits remaining
+   * @return The amount of free credits in USD the workspace creator has left, represented as a double
+   */
+  public double getWorkspaceCreatorFreeCreditsRemaining(DbWorkspace dbWorkspace) {
+    Double creatorCachedFreeTierUsage = this.getCachedFreeTierUsage(dbWorkspace.getCreator());
+    Double creatorFreeTierDollarLimit = this.getUserFreeTierDollarLimit(dbWorkspace.getCreator());
+    double creatorFreeCreditsRemaining = creatorCachedFreeTierUsage == null
+        ? creatorFreeTierDollarLimit
+        : creatorFreeTierDollarLimit - creatorCachedFreeTierUsage;
+    return creatorFreeCreditsRemaining > 0 ? creatorFreeCreditsRemaining : 0.0;
   }
 }

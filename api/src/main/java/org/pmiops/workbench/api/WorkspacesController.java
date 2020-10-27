@@ -69,6 +69,7 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceBillingUsageResponse;
+import org.pmiops.workbench.model.WorkspaceCreatorFreeCreditsRemainingResponse;
 import org.pmiops.workbench.model.WorkspaceListResponse;
 import org.pmiops.workbench.model.WorkspaceResourceResponse;
 import org.pmiops.workbench.model.WorkspaceResourcesRequest;
@@ -962,5 +963,18 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, operationName),
         DistributionMetric.WORKSPACE_OPERATION_TIME,
         operation);
+  }
+
+  public ResponseEntity<WorkspaceCreatorFreeCreditsRemainingResponse> getWorkspaceCreatorFreeCreditsRemaining(
+      String workspaceNamespace,
+      String workspaceId
+  ) {
+    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+    double freeCreditsRemaining = freeTierBillingService.getWorkspaceCreatorFreeCreditsRemaining(dbWorkspace);
+    WorkspaceCreatorFreeCreditsRemainingResponse response = new WorkspaceCreatorFreeCreditsRemainingResponse()
+        .freeCreditsRemaining(freeCreditsRemaining);
+    return ResponseEntity.ok(response);
   }
 }

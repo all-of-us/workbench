@@ -48,6 +48,7 @@ import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 
 import {Criteria, ParticipantCohortStatus, RuntimeStatus, WorkspaceAccessLevel} from 'generated/fetch';
 import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
+import {workspacesApi} from "../services/swagger-fetch-clients";
 
 const proIcons = {
   arrowLeft: '/assets/icons/arrow-left-regular.svg',
@@ -350,6 +351,7 @@ interface State {
   searchTerm: string;
   showCriteria: boolean;
   tooltipId: number;
+  workspaceCreatorFreeCreditsRemaining: number;
 }
 
 export const HelpSidebar = fp.flow(
@@ -370,7 +372,8 @@ export const HelpSidebar = fp.flow(
         participant: undefined,
         searchTerm: '',
         showCriteria: false,
-        tooltipId: undefined
+        tooltipId: undefined,
+        workspaceCreatorFreeCreditsRemaining: 0.0
       };
     }
 
@@ -382,7 +385,8 @@ export const HelpSidebar = fp.flow(
       }
     });
 
-    componentDidMount(): void {
+    async componentDidMount() {
+      const {namespace, id} = this.props.workspace;
       this.subscription = participantStore.subscribe(participant => this.setState({participant}));
       this.subscription.add(setSidebarActiveIconStore.subscribe(activeIcon => {
         if (activeIcon !== null) {
@@ -390,6 +394,8 @@ export const HelpSidebar = fp.flow(
           this.props.setSidebarState(!!activeIcon);
         }
       }));
+      const workspaceCreatorFreeCreditsRemainingResponse = await workspacesApi().getWorkspaceCreatorFreeCreditsRemaining(namespace, id);
+      this.setState({workspaceCreatorFreeCreditsRemaining: workspaceCreatorFreeCreditsRemainingResponse.freeCreditsRemaining});
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
@@ -729,7 +735,7 @@ export const HelpSidebar = fp.flow(
               }
             </div>}
             {activeIcon === 'runtime' && <div style={contentStyle('runtime')}>
-              {<RuntimePanel />}
+              {<RuntimePanel workspaceCreatorFreeCreditsRemaining={this.state.workspaceCreatorFreeCreditsRemaining} />}
             </div>}
             {activeIcon === 'annotations' && <div style={contentStyle('annotations')}>
               {participant && <SidebarContent />}
