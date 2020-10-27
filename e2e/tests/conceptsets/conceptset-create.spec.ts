@@ -18,7 +18,7 @@ describe('Create Concept Sets from Domains', () => {
    * - Delete Concept Set.
    */
   // Disabled temporarily, will fix as part of RW-5769
-  xtest('Create Concept Set from Conditions domain', async () => {
+  test('Create Concept Set from Conditions domain', async () => {
     const workspaceCard = await findOrCreateWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 
@@ -41,20 +41,19 @@ describe('Create Concept Sets from Domains', () => {
     const participantsCountInt = Number(participantsCount.replace(/,/g, ''));
     expect(participantsCountInt).toBeGreaterThan(1);
 
-    await conditionDomainCard.clickSelectConceptButton();
+    const criteriaSearch = await conditionDomainCard.clickSelectConceptButton();
 
     // Hardcode Concept Condition name and code for search and verify
     const conditionCode = '59621000';
     const conditionName = 'Essential hypertension';
 
     // Search by Code.
-    await conceptSetPage.searchConcepts(conditionCode);
-    const rowCells = await conceptSetPage.dataTableSelectRow();
-    // Verify condition name from search result
-    expect(rowCells.name).toBe(conditionName);
+    await criteriaSearch.searchCondition(conditionCode);
+    const rowValues = await  criteriaSearch.resultsTableSelectRow();
+    expect(rowValues.name).toBe(conditionName);
 
-    await conceptSetPage.clickAddToSetButton();
-
+    await conceptSetPage.viewAndSaveConceptSet();
+    
     // Save
     const conceptSetName = await conceptSetPage.saveConceptSet();
 

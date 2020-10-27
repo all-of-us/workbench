@@ -7,7 +7,7 @@ import ClrIconLink from 'app/element/clr-icon-link';
 import Textbox from 'app/element/textbox';
 import {waitForNumericalString, waitWhileLoading} from 'utils/waits-utils';
 import {LinkText} from 'app/text-labels';
-import {waitUntilChanged} from 'utils/element-utils';
+import {getPropValue, waitUntilChanged} from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
 
 
@@ -161,6 +161,38 @@ export default class CriteriaSearchPage extends AuthenticatedPage {
     for (const visit of visits) {
       await this.waitForVisitsCriteriaLink(visit).then((link) => link.click());
     }
+  }
+
+  getResultsTable(): Table {
+    return new Table(this.page, `//table[@data-test-id="list-search-results-table"]`)
+  }
+
+  async resultsTableSelectRow(rowIndex: number = 1,
+                            selectionColumnIndex = 1): Promise<{name: string, code: string; vocabulary: string; rollUpCount: string}> {
+    const resultsTable = this.getResultsTable();
+
+    // Name column #1
+    const nameCell = await resultsTable.getCell(rowIndex, 1);
+    const nameElem = (await nameCell.$x('.//div[@data-test-id="name-column-value"]'))[0];
+    const nameValue = await getPropValue<string>(nameElem, 'textContent');
+
+    // Code column #2
+    const codeCell = await resultsTable.getCell(rowIndex, 2);
+    const codeValue = await getPropValue<string>(codeCell, 'textContent');
+
+    // Vocabulary column #3
+    const vocabularyCell = await resultsTable.getCell(rowIndex, 3);
+    const vocabValue = await getPropValue<string>(vocabularyCell, 'textContent');
+
+    // Roll-up Count column #6
+    const rollUpCountCell = await resultsTable.getCell(rowIndex, 6);
+    const rollUpCountValue = await getPropValue<string>(rollUpCountCell, 'textContent');
+
+    const selectCheckCell = await resultsTable.getCell(rowIndex, selectionColumnIndex);
+    const elemt = (await selectCheckCell.$x('.//*[@shape="plus-circle"]'))[0];
+    await elemt.click();
+
+    return { name: nameValue, code: codeValue, vocabulary: vocabValue, rollUpCount: rollUpCountValue };
   }
 
 }

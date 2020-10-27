@@ -6,6 +6,8 @@ import Button from 'app/element/button';
 import {getPropValue, waitUntilChanged} from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
 import ConceptSetSaveModal, {SaveOption} from './conceptset-save-modal';
+import {LinkText} from '../text-labels';
+import HelpSidebar from '../component/help-sidebar';
 
 const PageTitle = 'Search Concepts';
 
@@ -104,6 +106,16 @@ export default class ConceptSetSearchPage extends AuthenticatedPage{
 
   private getSearchTextbox(): Textbox {
     return new Textbox(this.page, '//input[@data-test-id="concept-search-input"]');
+  }
+
+  async viewAndSaveConceptSet(): Promise<void> {
+    const finishAndReviewButton = await Button.findByName(this.page, {name: LinkText.FinishAndReview});
+    await finishAndReviewButton.waitUntilEnabled();
+    await finishAndReviewButton.click();
+
+    // Click Save Concept Set button in sidebar
+    const helpSidebar = new HelpSidebar(this.page);
+    await helpSidebar.clickSaveConceptSetButton();
   }
 
 }

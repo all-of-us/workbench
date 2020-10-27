@@ -96,6 +96,11 @@ export default class HelpSidebar extends Container {
     await this.waitUntilSectionHidden(SectionSelectors.SelectionList);
   }
 
+  async clickSaveConceptSetButton(): Promise<void> {
+    await this.clickSidebarButton(LinkText.SaveConceptSet);
+    await this.waitUntilSectionHidden(SectionSelectors.SelectionList);
+  }
+
   async waitForParticipantResult(): Promise<string> {
     const selector = `${this.xpath}//*[./*[contains(text(), "Number of Participants")]]`;
     return waitForNumericalString(this.page, selector);
