@@ -39,7 +39,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -104,7 +103,6 @@ import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
-import org.pmiops.workbench.model.DataSetCodeResponse;
 import org.pmiops.workbench.model.DataSetExportRequest;
 import org.pmiops.workbench.model.DataSetExportRequest.GenomicsAnalysisToolEnum;
 import org.pmiops.workbench.model.DataSetExportRequest.GenomicsDataTypeEnum;
@@ -157,7 +155,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class DataSetControllerTest {
 
   private static final String COHORT_ONE_NAME = "cohort";
-  private static final String COHORT_TWO_NAME = "cohort two";
   private static final String CONCEPT_SET_ONE_NAME = "concept set";
   private static final String CONCEPT_SET_TWO_NAME = "concept set two";
   private static final String CONCEPT_SET_SURVEY_NAME = "concept survey set";
@@ -175,16 +172,12 @@ public class DataSetControllerTest {
       QueryParameterValue.array(new Integer[] {2, 5}, StandardSQLTypeName.INT64);
 
   private Long COHORT_ONE_ID;
-  private Long COHORT_TWO_ID;
   private Long CONCEPT_SET_ONE_ID;
   private Long CONCEPT_SET_TWO_ID;
   private Long CONCEPT_SET_SURVEY_ID;
 
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
-  private static final BasicFormatterImpl BASIC_FORMATTER = new BasicFormatterImpl();
-  private static final String PREFIX = "00000000";
-  private static final String FULL_PREFIX = String.format("dataset_%s_condition_", PREFIX);
 
   private static DbUser currentUser;
   private Workspace workspace;
@@ -345,13 +338,6 @@ public class DataSetControllerTest {
         cohortsController.createCohort(workspace.getNamespace(), WORKSPACE_NAME, cohort).getBody();
     COHORT_ONE_ID = cohort.getId();
 
-    Cohort cohortTwo = new Cohort().name(COHORT_TWO_NAME).criteria(cohortCriteria);
-    cohortTwo =
-        cohortsController
-            .createCohort(workspace.getNamespace(), WORKSPACE_NAME, cohortTwo)
-            .getBody();
-    COHORT_TWO_ID = cohortTwo.getId();
-
     List<Concept> conceptList = new ArrayList<>();
 
     conceptList.add(
@@ -503,21 +489,6 @@ public class DataSetControllerTest {
     return domainValues;
   }
 
-  private List<DomainValuePair> mockDomainValuePairWithPerson() {
-    List<DomainValuePair> domainValues = new ArrayList<>();
-    domainValues.add(new DomainValuePair().domain(Domain.PERSON).value("PERSON_ID"));
-    return domainValues;
-  }
-
-  private List<DomainValuePair> mockSurveyDomainValuePair() {
-    List<DomainValuePair> domainValues = new ArrayList<>();
-    DomainValuePair domainValuePair = new DomainValuePair();
-    domainValuePair.setDomain(Domain.OBSERVATION);
-    domainValuePair.setValue("PERSON_ID");
-    domainValues.add(domainValuePair);
-    return domainValues;
-  }
-
   private void mockLinkingTableQuery(Collection<String> domainBaseTables) {
     final TableResult tableResultMock = mock(TableResult.class);
 
@@ -585,17 +556,16 @@ public class DataSetControllerTest {
   public void testGetQueryDropsQueriesWithNoValue() {
     final DataSetRequest dataSet =
         buildEmptyDataSetRequest()
-            .dataSetId(1l)
+            .dataSetId(1L)
             .addCohortIdsItem(COHORT_ONE_ID)
             .addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
 
     expectedException.expect(BadRequestException.class);
 
-    DataSetCodeResponse response =
-        dataSetController
-            .generateCode(
-                workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
-            .getBody();
+    dataSetController
+        .generateCode(
+            workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
+        .getBody();
   }
 
   @Test
@@ -822,14 +792,14 @@ public class DataSetControllerTest {
 
     JSONArray cells = notebookContents.getJSONArray("cells");
     for (int i = 0; i < cells.length(); i++) {
-      String cellString = "";
+      StringBuilder cellString = new StringBuilder();
       JSONArray innerCells = cells.getJSONObject(i).getJSONArray("source");
 
       for (int j = 0; j < innerCells.length(); j++) {
-        cellString += innerCells.getString(j);
+        cellString.append(innerCells.getString(j));
       }
 
-      codeCellStrings.add(cellString);
+      codeCellStrings.add(cellString.toString());
     }
 
     return codeCellStrings;

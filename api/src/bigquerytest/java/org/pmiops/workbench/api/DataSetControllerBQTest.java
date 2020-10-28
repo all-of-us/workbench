@@ -61,6 +61,7 @@ import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
@@ -186,7 +187,11 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         "cb_criteria",
         "ds_linking",
         "ds_survey",
-        "person");
+        "person",
+        "activity_summary",
+        "heart_rate_minute_level",
+        "heart_rate_summary",
+        "steps_intraday");
   }
 
   @Override
@@ -514,6 +519,86 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
             .getCode();
 
     assertAndExecutePythonQuery(code, 1, Domain.SURVEY);
+  }
+
+  @Test
+  public void getValuesFromDomainActivitySummary() {
+    List<DomainValue> domainValues =
+        controller
+            .getValuesFromDomain(
+                WORKSPACE_NAMESPACE, WORKSPACE_NAME, Domain.FITBIT_ACTIVITY.toString())
+            .getBody()
+            .getItems();
+    assertThat(
+            domainValues.containsAll(
+                ImmutableList.of(
+                    new DomainValue().value("date"),
+                    new DomainValue().value("activity_calories"),
+                    new DomainValue().value("calories_bmr"),
+                    new DomainValue().value("calories_out"),
+                    new DomainValue().value("elevation"),
+                    new DomainValue().value("fairly_active_minutes"),
+                    new DomainValue().value("floors"),
+                    new DomainValue().value("lightly_active_minutes"),
+                    new DomainValue().value("marginal_calories"),
+                    new DomainValue().value("sedentary_minutes"),
+                    new DomainValue().value("steps"),
+                    new DomainValue().value("very_active_minutes"),
+                    new DomainValue().value("person_id"))))
+        .isEqualTo(true);
+  }
+
+  @Test
+  public void getValuesFromDomainHeartRateLevel() {
+    List<DomainValue> domainValues =
+        controller
+            .getValuesFromDomain(
+                WORKSPACE_NAMESPACE, WORKSPACE_NAME, Domain.FITBIT_HEART_RATE_LEVEL.toString())
+            .getBody()
+            .getItems();
+    assertThat(
+            domainValues.containsAll(
+                ImmutableList.of(
+                    new DomainValue().value("datetime"),
+                    new DomainValue().value("person_id"),
+                    new DomainValue().value("heart_rate_value"))))
+        .isEqualTo(true);
+  }
+
+  @Test
+  public void getValuesFromDomainHeartRateSummary() {
+    List<DomainValue> domainValues =
+        controller
+            .getValuesFromDomain(
+                WORKSPACE_NAMESPACE, WORKSPACE_NAME, Domain.FITBIT_HEART_RATE_SUMMARY.toString())
+            .getBody()
+            .getItems();
+    assertThat(
+            domainValues.containsAll(
+                ImmutableList.of(
+                    new DomainValue().value("zone_name"),
+                    new DomainValue().value("min_heart_rate"),
+                    new DomainValue().value("max_heart_rate"),
+                    new DomainValue().value("minute_in_zone"),
+                    new DomainValue().value("calorie_count"))))
+        .isEqualTo(true);
+  }
+
+  @Test
+  public void getValuesFromDomainStepsIntraday() {
+    List<DomainValue> domainValues =
+        controller
+            .getValuesFromDomain(
+                WORKSPACE_NAMESPACE, WORKSPACE_NAME, Domain.FITBIT_INTRADAY_STEPS.toString())
+            .getBody()
+            .getItems();
+    assertThat(
+            domainValues.containsAll(
+                ImmutableList.of(
+                    new DomainValue().value("datetime"),
+                    new DomainValue().value("steps"),
+                    new DomainValue().value("person_id"))))
+        .isEqualTo(true);
   }
 
   private void assertAndExecutePythonQuery(String code, int index, Domain domain) {
