@@ -116,7 +116,7 @@
     "enableCOPESurvey": false,
     "enableCustomRuntimes": false,
     "enableGceAsNotebookRuntimeDefault": true,
-    "enableFitbit": true
+    "enableFitbit": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-perf",
