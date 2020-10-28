@@ -26,11 +26,7 @@ describe('Editing and rename Concept Set', () => {
     const workspaceName = await createWorkspace(page).then(card => card.clickWorkspaceName());
 
     const dataPage = new WorkspaceDataPage(page);
-    let conceptSearchPage = await dataPage.openConceptSetSearch();
-
-    // Add Concept Set in domain.
-    let procedures = await ConceptDomainCard.findDomainCard(page, Domain.Procedures);
-    let criteriaSearch = await procedures.clickSelectConceptButton();
+    let {conceptSearchPage, criteriaSearch} = await dataPage.openConceptSetSearch(Domain.Procedures);
 
     // Search by Procedure name.
     let procedureName = 'Radiologic examination';
@@ -61,7 +57,7 @@ describe('Editing and rename Concept Set', () => {
     const conceptSetActionsPage = new ConceptSetActionsPage(page);
     conceptSearchPage = await conceptSetActionsPage.openConceptSearch();
 
-    procedures = await ConceptDomainCard.findDomainCard(page, Domain.Procedures);
+    const procedures = await ConceptDomainCard.findDomainCard(page, Domain.Procedures);
     criteriaSearch = await procedures.clickSelectConceptButton();
 
     // Search in Procedures domain
