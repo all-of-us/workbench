@@ -127,12 +127,12 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   @Override
   public ResponseEntity<CriteriaListWithCountResponse> findCriteriaByDomainAndSearchTerm(
-      Long cdrVersionId, String domain, String term, Integer limit) {
+      Long cdrVersionId, String domain, String term, String surveyName, Integer limit) {
     cdrVersionService.setCdrVersion(cdrVersionId);
     validateDomain(domain);
     validateTerm(term);
     return ResponseEntity.ok(
-        cohortBuilderService.findCriteriaByDomainAndSearchTerm(domain, term, limit));
+        cohortBuilderService.findCriteriaByDomainAndSearchTerm(domain, term, surveyName, limit));
   }
 
   @Override

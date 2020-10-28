@@ -179,7 +179,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   @Override
   public CriteriaListWithCountResponse findCriteriaByDomainAndSearchTerm(
-      String domain, String term, Integer limit) {
+      String domain, String term, String surveyName, Integer limit) {
     PageRequest pageRequest =
         new PageRequest(0, Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT));
     if (Domain.fromValue(domain).equals(Domain.PHYSICAL_MEASUREMENT)) {
@@ -197,6 +197,19 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       return new CriteriaListWithCountResponse()
           .items(criteriaList)
           .totalCount(dbConcepts.getTotalElements());
+    }
+
+    if (Domain.fromValue(domain).equals(Domain.SURVEY)) {
+      Long id = cbCriteriaDao.findIdByDomainAndName(domain, surveyName);
+      Page<DbCriteria> dbCriteriaPage =
+          cbCriteriaDao.findSurveyQuestionCriteriaByDomainAndIdAndFullText(
+              domain, id, modifyTermMatch(term), pageRequest);
+      return new CriteriaListWithCountResponse()
+          .items(
+              dbCriteriaPage.getContent().stream()
+                  .map(cohortBuilderMapper::dbModelToClient)
+                  .collect(Collectors.toList()))
+          .totalCount(dbCriteriaPage.getTotalElements());
     }
 
     Page<DbCriteria> dbCriteriaPage =
