@@ -50,6 +50,7 @@ public class ConfigController implements ConfigApiDelegate {
             .enableCustomRuntimes(config.featureFlags.enableCustomRuntimes)
             .enableGceAsNotebookRuntimeDefault(
                 config.featureFlags.enableGceAsNotebookRuntimeDefault)
+            .enableFitbit(config.featureFlags.enableFitbit)
             .runtimeImages(
                 Stream.concat(
                         config.firecloud.runtimeImages.dataproc.stream()
