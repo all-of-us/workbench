@@ -552,15 +552,24 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
     }
 
     browseSurvey(surveyName) {
-      this.setState({
-        activeDomainTab: {domain: Domain.SURVEY, name: 'Surveys', conceptCount: 0},
-        currentInputString: '',
-        currentSearchString: '',
-        inputErrors: [],
-        selectedDomain: Domain.SURVEY,
-        selectedSurvey: surveyName,
-        standardConceptsOnly: false
-      }, () => this.searchConcepts());
+      if (this.isConceptSetFlagEnable()) {
+        currentConceptStore.next([]);
+        this.setState({
+          activeDomainTab: {domain: Domain.SURVEY, name: 'Surveys', conceptCount: 0},
+          searching: true,
+          selectedDomain: Domain.SURVEY
+        });
+      } else {
+        this.setState({
+          activeDomainTab: {domain: Domain.SURVEY, name: 'Surveys', conceptCount: 0},
+          currentInputString: '',
+          currentSearchString: '',
+          inputErrors: [],
+          selectedDomain: Domain.SURVEY,
+          selectedSurvey: surveyName,
+          standardConceptsOnly: false
+        }, () => this.searchConcepts());
+      }
     }
 
     domainLoading(domain) {
