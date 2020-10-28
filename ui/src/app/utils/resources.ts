@@ -3,7 +3,7 @@ import * as fp from 'lodash/fp';
 import {dropNotebookFileSuffix} from 'app/pages/analysis/util';
 import colors from 'app/styles/colors';
 import {ResourceType, WorkspaceResource} from 'generated/fetch';
-import {formatWorkspaceResourceDisplayDate, switchCase} from './index';
+import {formatWorkspaceResourceDisplayDate} from './index';
 import {encodeURIComponentStrict} from './navigation';
 
 const isCohort = (resource: WorkspaceResource): boolean => !!resource.cohort;
@@ -15,16 +15,16 @@ const isNotebook = (resource: WorkspaceResource): boolean => !!resource.notebook
 const getModifiedDate = (resource: WorkspaceResource): string => formatWorkspaceResourceDisplayDate(resource.modifiedTime);
 
 function toDisplay(resourceType: ResourceType): string {
-  return switchCase(resourceType, [
-      [ResourceType.COHORT, 'Cohort'],
-      [ResourceType.COHORTREVIEW, 'Cohort Review'],
-      [ResourceType.COHORTSEARCHGROUP, 'Group'],
-      [ResourceType.COHORTSEARCHITEM, 'Item'],
-      [ResourceType.CONCEPTSET, 'Concept Set'],
-      [ResourceType.DATASET, 'Dataset'],
-      [ResourceType.NOTEBOOK, 'Notebook'],
-      [ResourceType.WORKSPACE, 'Workspace'],
-  ]);
+  return fp.cond([
+        [rt => rt === ResourceType.COHORT, () => 'Cohort'],
+        [rt => rt === ResourceType.COHORTREVIEW, () => 'Cohort Review'],
+        [rt => rt === ResourceType.COHORTSEARCHGROUP, () => 'Group'],
+        [rt => rt === ResourceType.COHORTSEARCHITEM, () => 'Item'],
+        [rt => rt === ResourceType.CONCEPTSET, () => 'Concept Set'],
+        [rt => rt === ResourceType.DATASET, () => 'Dataset'],
+        [rt => rt === ResourceType.NOTEBOOK, () => 'Notebook'],
+        [rt => rt === ResourceType.WORKSPACE, () => 'Workspace'],
+  ])(resourceType);
 }
 
 const getTypeString = (resource: WorkspaceResource): string => toDisplay(getType(resource));

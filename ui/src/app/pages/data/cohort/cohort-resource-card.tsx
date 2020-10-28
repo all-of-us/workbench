@@ -20,7 +20,7 @@ interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSp
 
 interface State {
   showRenameModal: boolean;
-  dataSetByResourceIdList: Array<DataSet>;
+  referencingDataSets: Array<DataSet>;
 }
 
 export const CohortResourceCard = fp.flow(
@@ -33,7 +33,7 @@ export const CohortResourceCard = fp.flow(
     super(props);
     this.state = {
       showRenameModal: false,
-      dataSetByResourceIdList: [],
+      referencingDataSets: [],
     };
   }
 
@@ -78,42 +78,39 @@ export const CohortResourceCard = fp.flow(
         displayName: 'Delete',
         onClick: () => {
           this.props.showConfirmDeleteModal(getDisplayName(resource),
-            getType(resource), () => this.delete());
+            getType(resource), () => this.maybeDelete());
         },
         disabled: !canDelete(resource)
       }
     ];
   }
 
-  async getDataSetByResourceId() {
+  // check if there are any referencing data sets, and pop up a modal if so;
+  // if not, continue with deletion
+  maybeDelete() {
     const {resource} = this.props;
-    if (this.state.dataSetByResourceIdList.length === 0) {
-      const dataSetList = await dataSetApi().getDataSetByResourceId(
+    return dataSetApi().getDataSetByResourceId(
         resource.workspaceNamespace,
         resource.workspaceFirecloudName,
         getType(resource),
-        getId(resource));
-      return dataSetList.items;
-    } else {
-      this.setState({dataSetByResourceIdList: []});
-    }
-    return false;
+        getId(resource))
+        .then(dataSetList => {
+          if (dataSetList && dataSetList.items.length > 0) {
+            this.setState({referencingDataSets: dataSetList.items});
+          } else {
+            return this.deleteCohort();
+          }
+        });
   }
 
-  async delete() {
-    const dataSetByResourceIdList = await this.getDataSetByResourceId();
-    if (dataSetByResourceIdList && dataSetByResourceIdList.length > 0) {
-      this.setState({dataSetByResourceIdList: dataSetByResourceIdList});
-      return;
-    }
-
+  deleteCohort() {
     return cohortsApi().deleteCohort(
-      this.props.resource.workspaceNamespace,
-      this.props.resource.workspaceFirecloudName,
-      this.props.resource.cohort.id)
-      .then(() => {
-        this.props.onUpdate();
-      });
+        this.props.resource.workspaceNamespace,
+        this.props.resource.workspaceFirecloudName,
+        this.props.resource.cohort.id)
+        .then(() => {
+          this.props.onUpdate();
+        });
   }
 
   duplicate() {
@@ -167,13 +164,16 @@ export const CohortResourceCard = fp.flow(
                    oldName={getDisplayName(resource)}
                    existingNames={this.props.existingNameList}/>
       }
-      {this.state.dataSetByResourceIdList.length > 0 && <DataSetReferenceModal
+      {this.state.referencingDataSets.length > 0 && <DataSetReferenceModal
           referencedResource={resource}
-          dataSets={fp.join(', ' , this.state.dataSetByResourceIdList.map((data) => data.name))}
+          dataSets={fp.join(', ' , this.state.referencingDataSets.map((data) => data.name))}
           onCancel={() => {
-            this.setState({dataSetByResourceIdList: []});
+            this.setState({referencingDataSets: []});
           }}
-          deleteResource={() => this.delete()}/>
+          deleteResource={() => {
+            this.setState({referencingDataSets: []});
+            return this.deleteCohort();
+          }}/>
       }
 
       <ResourceCardTemplate

@@ -21,7 +21,7 @@ interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSp
 interface State {
   showRenameModal: boolean;
   copyingConceptSet: boolean;
-  dataSetByResourceIdList: Array<DataSet>;
+  referencingDataSets: Array<DataSet>;
 }
 
 export const ConceptSetResourceCard = fp.flow(
@@ -35,23 +35,8 @@ export const ConceptSetResourceCard = fp.flow(
     this.state = {
       showRenameModal: false,
       copyingConceptSet: false,
-      dataSetByResourceIdList: []
+      referencingDataSets: []
     };
-  }
-
-  async getDataSetByResourceId() {
-    const {resource} = this.props;
-    if (this.state.dataSetByResourceIdList.length === 0) {
-      const dataSetList = await dataSetApi().getDataSetByResourceId(
-        resource.workspaceNamespace,
-        resource.workspaceFirecloudName,
-        getType(resource),
-        getId(resource));
-      return dataSetList.items;
-    } else {
-      this.setState({dataSetByResourceIdList: []});
-    }
-    return false;
   }
 
   get actions(): Action[] {
@@ -76,7 +61,7 @@ export const ConceptSetResourceCard = fp.flow(
         displayName: 'Delete',
         onClick: () => {
           this.props.showConfirmDeleteModal(getDisplayName(resource),
-            getType(resource), () => this.delete());
+            getType(resource), () => this.maybeDelete());
         },
         disabled: !canDelete(resource)
       },
@@ -103,14 +88,27 @@ export const ConceptSetResourceCard = fp.flow(
     });
   }
 
-  async delete() {
+  // check if there are any referencing data sets, and pop up a modal if so;
+  // if not, continue with deletion
+  maybeDelete() {
     const {resource} = this.props;
-    const dataSetByResourceIdList = await this.getDataSetByResourceId();
-    if (dataSetByResourceIdList && dataSetByResourceIdList.length > 0) {
-      this.setState({dataSetByResourceIdList: dataSetByResourceIdList});
-      return;
-    }
-    conceptSetsApi().deleteConceptSet(
+    return dataSetApi().getDataSetByResourceId(
+      resource.workspaceNamespace,
+      resource.workspaceFirecloudName,
+      getType(resource),
+      getId(resource))
+      .then(dataSetList => {
+        if (dataSetList && dataSetList.items.length > 0) {
+          this.setState({referencingDataSets: dataSetList.items});
+        } else {
+          return this.deleteConceptSet();
+        }
+      });
+  }
+
+  deleteConceptSet() {
+    const {resource} = this.props;
+    return conceptSetsApi().deleteConceptSet(
         resource.workspaceNamespace,
         resource.workspaceFirecloudName,
         resource.conceptSet.id)
@@ -147,13 +145,16 @@ export const ConceptSetResourceCard = fp.flow(
           onCopy={() => this.props.onUpdate()}
           saveFunction={(copyRequest: CopyRequest) => this.copyConceptSet(copyRequest)}/>
       }
-      {this.state.dataSetByResourceIdList.length > 0 && <DataSetReferenceModal
+      {this.state.referencingDataSets.length > 0 && <DataSetReferenceModal
           referencedResource={resource}
-          dataSets={fp.join(', ' , this.state.dataSetByResourceIdList.map((data) => data.name))}
+          dataSets={fp.join(', ' , this.state.referencingDataSets.map((data) => data.name))}
           onCancel={() => {
-            this.setState({dataSetByResourceIdList: []});
+            this.setState({referencingDataSets: []});
           }}
-          deleteResource={() => this.delete()}/>
+          deleteResource={() => {
+            this.setState({referencingDataSets: []});
+            return this.deleteConceptSet();
+          }}/>
       }
 
      <ResourceCardTemplate
