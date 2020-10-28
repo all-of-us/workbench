@@ -270,7 +270,7 @@ const PresetSelector = ({setSelectedDiskSize, setSelectedMachine, setSelectedCom
   </PopupTrigger>
 }
 
-const CostPredictor = ({billingAccount, freeCreditsRemaining, profile, runningCost, runtimeChanged, storageCost, workspace}) => {
+const CostPredictor = ({freeCreditsRemaining, profile, runningCost, runtimeChanged, storageCost, workspace}) => {
   const wrapperStyle = runtimeChanged
     ? {...styles.costPredictorWrapper, backgroundColor: colorWithWhiteness(colors.warning, .9), borderColor: colors.warning}
     : styles.costPredictorWrapper
@@ -302,7 +302,7 @@ const CostPredictor = ({billingAccount, freeCreditsRemaining, profile, runningCo
       </div>
     }
     {workspace.billingAccountType === BillingAccountType.USERPROVIDED && <div style={{borderLeft: `1px solid ${colorWithWhiteness(colors.dark, .5)}`, padding: '.33rem .5rem'}}>
-      Costs will be charged to billing account {billingAccount}.
+      Costs will be charged to billing account {workspace.billingAccountName}.
     </div>}
   </FlexRow>;
 }
@@ -354,7 +354,6 @@ export const RuntimePanel = fp.flow(
     {/* TODO(RW-5419): Cost estimates go here. */}
     <div style={styles.controlSection}>
       <CostPredictor
-          billingAccount={"lol"}
           freeCreditsRemaining={workspaceCreatorFreeCreditsRemaining}
           profile={profile}
           runningCost={machineRunningPrice({
