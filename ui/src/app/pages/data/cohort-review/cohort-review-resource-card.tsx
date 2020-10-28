@@ -13,7 +13,7 @@ import {WorkspaceResource} from 'generated/fetch';
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
   resource: WorkspaceResource;
   existingNameList: string[];
-  onUpdate: Function;
+  onUpdate: () => Promise<void>;
 }
 
 interface State {
@@ -57,7 +57,7 @@ export const CohortReviewResourceCard = fp.flow(
   }
 
   async delete() {
-    cohortReviewApi().deleteCohortReview(
+    return cohortReviewApi().deleteCohortReview(
         this.props.resource.workspaceNamespace,
         this.props.resource.workspaceFirecloudName,
         this.props.resource.cohortReview.cohortReviewId)

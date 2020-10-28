@@ -1,4 +1,4 @@
-import * as fp from 'lodash';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {Clickable, MenuItem} from 'app/components/buttons';

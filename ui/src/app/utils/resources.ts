@@ -16,14 +16,14 @@ const getModifiedDate = (resource: WorkspaceResource): string => formatWorkspace
 
 function toDisplay(resourceType: ResourceType): string {
   return fp.cond([
-        [rt => rt === ResourceType.COHORT, () => 'Cohort'],
-        [rt => rt === ResourceType.COHORTREVIEW, () => 'Cohort Review'],
-        [rt => rt === ResourceType.COHORTSEARCHGROUP, () => 'Group'],
-        [rt => rt === ResourceType.COHORTSEARCHITEM, () => 'Item'],
-        [rt => rt === ResourceType.CONCEPTSET, () => 'Concept Set'],
-        [rt => rt === ResourceType.DATASET, () => 'Dataset'],
-        [rt => rt === ResourceType.NOTEBOOK, () => 'Notebook'],
-        [rt => rt === ResourceType.WORKSPACE, () => 'Workspace'],
+      [rt => rt === ResourceType.COHORT, () => 'Cohort'],
+      [rt => rt === ResourceType.COHORTREVIEW, () => 'Cohort Review'],
+      [rt => rt === ResourceType.COHORTSEARCHGROUP, () => 'Group'],
+      [rt => rt === ResourceType.COHORTSEARCHITEM, () => 'Item'],
+      [rt => rt === ResourceType.CONCEPTSET, () => 'Concept Set'],
+      [rt => rt === ResourceType.DATASET, () => 'Dataset'],
+      [rt => rt === ResourceType.NOTEBOOK, () => 'Notebook'],
+      [rt => rt === ResourceType.WORKSPACE, () => 'Workspace'],
   ])(resourceType);
 }
 

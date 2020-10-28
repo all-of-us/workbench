@@ -15,12 +15,12 @@ import {CopyRequest, DataSet, WorkspaceResource} from 'generated/fetch';
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
   resource: WorkspaceResource;
   existingNameList: string[];
-  onUpdate: Function;
+  onUpdate: () => Promise<void>;
 }
 
 interface State {
   showRenameModal: boolean;
-  copyingConceptSet: boolean;
+  showCopyModal: boolean;
   referencingDataSets: Array<DataSet>;
 }
 
@@ -34,7 +34,7 @@ export const ConceptSetResourceCard = fp.flow(
     super(props);
     this.state = {
       showRenameModal: false,
-      copyingConceptSet: false,
+      showCopyModal: false,
       referencingDataSets: []
     };
   }
@@ -53,7 +53,7 @@ export const ConceptSetResourceCard = fp.flow(
       {
         icon: 'copy',
         displayName: 'Copy to another workspace',
-        onClick: () => this.setState({copyingConceptSet: true}),
+        onClick: () => this.setState({showCopyModal: true}),
         disabled: !canDelete(resource)
       },
       {
@@ -117,7 +117,7 @@ export const ConceptSetResourceCard = fp.flow(
         });
   }
 
-  async copyConceptSet(copyRequest: CopyRequest) {
+  async copy(copyRequest: CopyRequest) {
     const {resource} = this.props;
     return conceptSetsApi().copyConceptSet(resource.workspaceNamespace,
       resource.workspaceFirecloudName,
@@ -135,15 +135,15 @@ export const ConceptSetResourceCard = fp.flow(
                    oldName={getDisplayName(resource)}
                    existingNames={this.props.existingNameList}/>
       }
-      {this.state.copyingConceptSet && <CopyModal
+      {this.state.showCopyModal && <CopyModal
           fromWorkspaceNamespace={resource.workspaceNamespace}
           fromWorkspaceFirecloudName={resource.workspaceFirecloudName}
           fromResourceName={resource.conceptSet.name}
           fromCdrVersionId={resource.cdrVersionId}
           resourceType={getType(resource)}
-          onClose={() => this.setState({copyingConceptSet: false})}
+          onClose={() => this.setState({showCopyModal: false})}
           onCopy={() => this.props.onUpdate()}
-          saveFunction={(copyRequest: CopyRequest) => this.copyConceptSet(copyRequest)}/>
+          saveFunction={(copyRequest: CopyRequest) => this.copy(copyRequest)}/>
       }
       {this.state.referencingDataSets.length > 0 && <DataSetReferenceModal
           referencedResource={resource}

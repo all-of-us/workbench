@@ -1,4 +1,4 @@
-import * as fp from 'lodash';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {CopyModal} from 'app/components/copy-modal';
@@ -22,7 +22,7 @@ import {CopyRequest, WorkspaceResource} from 'generated/fetch';
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
   resource: WorkspaceResource;
   existingNameList: string[];
-  onUpdate: Function;
+  onUpdate: () => Promise<void>;
   disableDuplicate: boolean;
 }
 

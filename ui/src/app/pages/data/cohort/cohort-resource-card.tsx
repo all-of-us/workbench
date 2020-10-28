@@ -15,7 +15,7 @@ import {DataSet, WorkspaceResource} from 'generated/fetch';
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
   resource: WorkspaceResource;
   existingNameList: string[];
-  onUpdate: Function;
+  onUpdate: () => Promise<void>;
 }
 
 interface State {

@@ -8,6 +8,7 @@ import {ConceptSetResourceCard} from 'app/pages/data/concept/concept-set-resourc
 import {DatasetResourceCard} from 'app/pages/data/data-set/dataset-resource-card';
 import {isCohort, isCohortReview, isConceptSet, isDataSet, isNotebook} from 'app/utils/resources';
 import {BillingStatus, WorkspaceResource} from 'generated/fetch';
+import {CohortReviewResourceCard} from "../pages/data/cohort-review/cohort-review-resource-card";
 
 interface GetResourceCardProps {
   resource: WorkspaceResource;
