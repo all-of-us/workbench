@@ -1051,7 +1051,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsForSurveyWithAgeModifiers() {
     SearchRequest searchRequest =
         createSearchRequests(
-            Domain.SURVEY.toString(), ImmutableList.of(survey()), ImmutableList.of(ageModifier()));
+            Domain.SURVEY.toString(),
+            ImmutableList.of(survey().conceptId(1585899L)),
+            ImmutableList.of(ageModifier()));
 
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -1933,7 +1935,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     // Survey
     SearchRequest searchRequest =
         createSearchRequests(
-            Domain.SURVEY.toString(), ImmutableList.of(survey()), new ArrayList<>());
+            Domain.SURVEY.toString(),
+            ImmutableList.of(survey().conceptId(1585899L)),
+            new ArrayList<>());
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     assertParticipants(response, 1);
@@ -2120,7 +2124,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     criteria = cbCriteriaDao.save(criteria);
     String pathEnd = String.valueOf(criteria.getId());
     criteria.setPath(path.isEmpty() ? pathEnd : path + "." + pathEnd);
-    cbCriteriaDao.save(criteria);
+    criteria = cbCriteriaDao.save(criteria);
   }
 
   private void delete(DbCriteria... criteriaList) {
