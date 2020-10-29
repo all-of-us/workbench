@@ -1040,6 +1040,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
         , type
         , subtype
         , concept_id
+        , code
         , name
         , value
         , rollup_count
@@ -1052,35 +1053,37 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
         , path
     )
 SELECT
-      id
-    , parent_id
-    , domain_id
-    , is_standard
-    , type
-    , subtype
-    , concept_id
-    , name
-    , value
+      a.id
+    , a.parent_id
+    , a.domain_id
+    , a.is_standard
+    , a.type
+    , a.subtype
+    , a.concept_id
+    , b.concept_code
+    , a.name
+    , a.value
     , CASE
-        WHEN (is_selectable = 1 and name != 'Select a value') THEN 0
+        WHEN (a.is_selectable = 1 and a.name != 'Select a value') THEN 0
         ELSE null
       END as rollup_count
       , CASE
-          WHEN (is_selectable = 1 and name != 'Select a value') THEN 0
+          WHEN (a.is_selectable = 1 and a.name != 'Select a value') THEN 0
           ELSE null
         END as item_count
     , CASE
-        WHEN (is_selectable = 1 and name != 'Select a value') THEN 0
+        WHEN (a.is_selectable = 1 and a.name != 'Select a value') THEN 0
         ELSE null
       END as est_count
-    , is_group
-    , is_selectable
-    , has_attribute
-    , has_hierarchy
-    , path
-FROM \`$BQ_PROJECT.$BQ_DATASET.prep_criteria\`
-WHERE domain_id = 'SURVEY'
-    and type = 'PPI'
+    , a.is_group
+    , a.is_selectable
+    , a.has_attribute
+    , a.has_hierarchy
+    , a.path
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_criteria\` a
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.concept_id = b.concept_id
+WHERE a.domain_id = 'SURVEY'
+    and a.type = 'PPI'
 ORDER BY 1"
 
 echo "PPI SURVEYS - insert extra answers (Skip, Prefer Not To Answer, Dont Know)"
