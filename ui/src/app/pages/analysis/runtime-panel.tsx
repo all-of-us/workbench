@@ -71,7 +71,7 @@ const presetEquals = (a: Runtime, b: Runtime): boolean => {
   const ignore = ['dataprocConfig.numberOfWorkerLocalSSDs'];
   const strip = fp.flow(fp.pick(pick), fp.omit(ignore));
   return fp.isEqual(strip(a), strip(b));
-}
+};
 
 enum ComputeType {
   Standard = 'Standard VM',
@@ -259,9 +259,9 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withCdrVersions())((
                                 // renaming to avoid shadowing
                                 const {runtimeTemplate} = preset;
                                 const {presetDiskSize, presetMachineName, presetCompute} = fp.cond([
-                                  [() => !!runtimeTemplate.gceConfig, ({gceConfig: {diskSize, machineType}}) => ({
-                                    presetDiskSize: diskSize,
-                                    presetMachineName: machineType,
+                                  [() => !!runtimeTemplate.gceConfig, ({gceConfig}) => ({
+                                    presetDiskSize: gceConfig.diskSize,
+                                    presetMachineName: gceConfig.machineType,
                                     presetCompute: ComputeType.Standard
                                   })],
                                   [() => !!runtimeTemplate.dataprocConfig, ({dataprocConfig: {masterDiskSize, masterMachineType}}) => ({
