@@ -238,6 +238,12 @@ interface State {
   totalCount: number;
 }
 
+const tableBodyStyle = `
+  body .tablebody {
+    overflow-y: overlay
+  }
+`;
+
 export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), withCurrentConcept())(
   class extends React.Component<Props, State> {
     constructor(props: Props) {
@@ -499,7 +505,10 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
                 </tr>
               </thead>
             </table>
-            <div style={{height: '15rem', overflowY: 'auto'}}>
+            <style>
+              {tableBodyStyle}
+            </style>
+            <div style={{height: '15rem'}} className='tablebody'>
               <table className='p-datatable' style={{...styles.table, ...styles.tableBody}}>
                 <tbody className='p-datatable-tbody'>
                 {displayData.map((row, index) => {
