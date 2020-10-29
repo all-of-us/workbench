@@ -2751,10 +2751,8 @@ WHERE cr.concept_id_1 = c1.concept_id
     AND r.defines_ancestry = '1'
     AND c1.vocabulary_id = 'LOINC'
     AND c2.vocabulary_id = 'LOINC'
-    AND c1.standard_concept IN ('S','C')
-    AND c2.standard_concept IN ('S','C')
-    AND c1.concept_class_id IN ('LOINC Hierarchy', 'Lab Test')
-    AND c2.concept_class_id IN ('LOINC Hierarchy', 'Lab Test')"
+    AND c1.concept_class_id IN ('LOINC Hierarchy', 'LOINC Component', 'Lab Test')
+    AND c2.concept_class_id IN ('LOINC Hierarchy', 'LOINC Component', 'Lab Test')"
 
 echo "MEASUREMENT - Labs - STANDARD LOINC - temp table adding level 0"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -2900,9 +2898,9 @@ WHERE p.type = 'LOINC'
         )"
 
 # for each loop, add all items (children/parents) directly under the items that were previously added
-# currently, there are only 11 levels, but we run it 12 times to be safe
+# currently, there are only 12 levels, but we run it 13 times to be safe
 # if this number is changed, you will need to change the number of JOINS in the query below
-for i in {1..12};
+for i in {1..13};
 do
     echo "MEASUREMENT - Labs - STANDARD LOINC - add level $i"
     bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -3062,7 +3060,7 @@ FROM
         GROUP BY 1,2,3
     ) x"
 
-# Join Count: 12 - If loop count above is changed, the number of JOINS below must be updated
+# Join Count: 13 - If loop count above is changed, the number of JOINS below must be updated
 echo "MEASUREMENT - Labs - STANDARD LOINC - add items into staging table for use in next query"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
@@ -3082,6 +3080,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
         , concept_id_9
         , concept_id_10
         , concept_id_11
+        , concept_id_12
     )
 SELECT DISTINCT a.concept_id as ancestor_concept_id
     , a.domain_id
@@ -3098,6 +3097,7 @@ SELECT DISTINCT a.concept_id as ancestor_concept_id
     , j.concept_id c9
     , k.concept_id c10
     , m.concept_id c11
+    , n.concept_id c12
 FROM
     (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB' and is_group = 1 and parent_id != 0 and concept_id is not null) a
     JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB') b on a.id = b.parent_id
@@ -3110,9 +3110,10 @@ FROM
     LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB') i on h.id = i.parent_id
     LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB') j on i.id = j.parent_id
     LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB') k on j.id = k.parent_id
-    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB') m on k.id = m.parent_id"
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB') m on k.id = m.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB') n on m.id = n.parent_id"
 
-# Count: 12 - If loop count above is changed, the number of JOINS below must be updated
+# Count: 13 - If loop count above is changed, the number of JOINS below must be updated
 echo "MEASUREMENT - Labs - STANDARD LOINC - add items into ancestor table"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
@@ -3121,6 +3122,12 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
         , descendant_concept_id
         , is_standard
     )
+SELECT DISTINCT ancestor_concept_id, concept_id_12 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
+WHERE concept_id_12 is not null
+    and type = 'LOINC'
+    and is_standard = 1
+UNION DISTINCT
 SELECT DISTINCT ancestor_concept_id, concept_id_11 as descendant_concept_id, is_standard
 FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
 WHERE concept_id_11 is not null
