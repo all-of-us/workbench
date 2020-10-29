@@ -3253,6 +3253,11 @@ paths:
         required: true
         description: the term to search for
       - in: query
+        name: surveyName
+        type: string
+        required: false
+        description: name for the survey to search
+      - in: query
         name: limit
         type: integer
         required: false

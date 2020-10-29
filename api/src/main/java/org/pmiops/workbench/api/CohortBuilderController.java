@@ -127,12 +127,12 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   @Override
   public ResponseEntity<CriteriaListWithCountResponse> findCriteriaByDomainAndSearchTerm(
-      Long cdrVersionId, String domain, String term, Integer limit) {
+      Long cdrVersionId, String domain, String term, String surveyName, Integer limit) {
     cdrVersionService.setCdrVersion(cdrVersionId);
-    validateDomain(domain);
+    validateDomain(domain, surveyName);
     validateTerm(term);
     return ResponseEntity.ok(
-        cohortBuilderService.findCriteriaByDomainAndSearchTerm(domain, term, limit));
+        cohortBuilderService.findCriteriaByDomainAndSearchTerm(domain, term, surveyName, limit));
   }
 
   @Override
@@ -291,6 +291,21 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         .findFirst()
         .orElseThrow(
             () -> new BadRequestException(String.format(BAD_REQUEST_MESSAGE, "domain", domain)));
+  }
+
+  private void validateDomain(String domain, String surveyName) {
+    Arrays.stream(Domain.values())
+        .filter(domainType -> domainType.toString().equalsIgnoreCase(domain))
+        .findFirst()
+        .orElseThrow(
+            () -> new BadRequestException(String.format(BAD_REQUEST_MESSAGE, "domain", domain)));
+    if (Domain.fromValue(domain).equals(Domain.SURVEY)) {
+      Optional.ofNullable(surveyName)
+          .orElseThrow(
+              () ->
+                  new BadRequestException(
+                      String.format(BAD_REQUEST_MESSAGE, "surveyName", surveyName)));
+    }
   }
 
   private void validateType(String type) {
