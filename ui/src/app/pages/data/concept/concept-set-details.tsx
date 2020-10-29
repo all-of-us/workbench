@@ -26,10 +26,12 @@ import {
   withUrlParams
 } from 'app/utils';
 import {
-  currentConceptSetStore, currentConceptStore,
+  currentConceptSetStore,
+  currentConceptStore,
   navigate,
   navigateByUrl,
-  serverConfigStore, setSidebarActiveIconStore
+  serverConfigStore,
+  setSidebarActiveIconStore
 } from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
@@ -155,6 +157,7 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
 
     componentWillUnmount() {
       currentConceptStore.next(null);
+      currentConceptSetStore.next(null);
     }
 
     async getConceptSet() {
@@ -163,8 +166,8 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
         const resp = await conceptSetsApi().getConceptSet(ns, wsid, csid);
         this.setState({conceptSet: resp, editName: resp.name,
           editDescription: resp.description, loading: false});
-        currentConceptSetStore.next(resp);
-        if (serverConfigStore.getValue().enableConceptSetSearchV2) {
+        currentConceptSetStore.next(JSON.parse(JSON.stringify(resp)));
+        if (this.isConceptFlagEnable) {
           if (resp.domain === Domain.SURVEY) {
             const surveyParentList = resp.criteriums.filter((survey) => {
               return survey.parentCount !== 0;

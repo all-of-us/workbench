@@ -1,19 +1,23 @@
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+
 import {Button, Clickable} from 'app/components/buttons';
 import {FlexRow, FlexRowWrap} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
+import {ConceptAddModal} from 'app/pages/data/concept/concept-add-modal';
+import {ConceptSurveyAddModal} from 'app/pages/data/concept/concept-survey-add-modal';
+import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
   reactStyles,
-  withCurrentConcept, withCurrentWorkspace
+  withCurrentConcept,
+  withCurrentConceptSet,
+  withCurrentWorkspace
 } from 'app/utils';
-import {currentConceptStore, NavStore, setSidebarActiveIconStore} from 'app/utils/navigation';
+import {currentConceptSetStore, currentConceptStore, NavStore, setSidebarActiveIconStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {Domain, DomainCount} from 'generated';
-import {ConceptSet} from 'generated/fetch';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-import {ConceptAddModal} from './concept-add-modal';
-import {ConceptSurveyAddModal} from './concept-survey-add-modal';
+import {ConceptSet, Criteria, Domain, DomainCount, UpdateConceptSetRequest} from 'generated/fetch';
+
 const styles = reactStyles({
   sectionTitle: {
     marginTop: '0',
@@ -48,23 +52,56 @@ const styles = reactStyles({
   }
 });
 
+const getConceptIdsToAddOrRemove = (conceptsToFilter: Array<Criteria>, conceptsToCompare: Array<Criteria>) => {
+  return conceptsToFilter.reduce((conceptIds, concept) => {
+    if (!conceptsToCompare.find(con => con.conceptId === concept.conceptId)) {
+      conceptIds.push(concept.conceptId);
+    }
+    return conceptIds;
+  }, []);
+};
+
 interface Props {
   workspace: WorkspaceData;
   concept: Array<any>;
+  conceptSet: ConceptSet;
 }
 
 interface State {
   conceptAddModalOpen: boolean;
   surveyAddModalOpen: boolean;
+  updating: boolean;
 }
-export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConcept())(
+export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConcept(), withCurrentConceptSet())(
   class extends React.Component<Props, State> {
     constructor(props) {
       super(props);
       this.state = {
         conceptAddModalOpen: false,
-        surveyAddModalOpen: false
+        surveyAddModalOpen: false,
+        updating: false
       };
+    }
+
+    async updateConceptSet() {
+      const {concept, conceptSet, workspace: {namespace, id}} = this.props;
+      this.setState({updating: true});
+      // Selections that don't exist on the existing concept set are added
+      const addedIds = getConceptIdsToAddOrRemove(concept, conceptSet.criteriums);
+      // Concept ids on the existing concept set that don't exist on the selections get removed
+      const removedIds = getConceptIdsToAddOrRemove(conceptSet.criteriums, concept);
+      const updateConceptSetReq: UpdateConceptSetRequest = {
+        etag: conceptSet.etag,
+        addedIds,
+        removedIds
+      };
+      try {
+        const updatedConceptSet = await conceptSetsApi().updateConceptSetConcepts(namespace, id, conceptSet.id, updateConceptSetReq);
+        currentConceptSetStore.next(updatedConceptSet);
+        NavStore.navigate(['workspaces', namespace, id, 'data', 'concepts', 'sets', conceptSet.id, 'actions']);
+      } catch (error) {
+        console.error(error);
+      }
     }
 
     removeSelection(conceptToDel) {
@@ -74,8 +111,13 @@ export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConce
 
     afterConceptsSaved(conceptSet: ConceptSet) {
       const {namespace, id} = this.props.workspace;
-      NavStore.navigate(['workspaces', namespace, id, 'data',
-        'concepts', 'sets', conceptSet.id, 'actions']);
+      NavStore.navigate(['workspaces', namespace, id, 'data', 'concepts', 'sets', conceptSet.id, 'actions']);
+    }
+
+    get disableSaveConceptButton() {
+      const {concept, conceptSet} = this.props;
+      return !concept || concept.length === 0 ||
+        (!!conceptSet && JSON.stringify(conceptSet.criteriums.sort()) === JSON.stringify(concept.sort()));
     }
 
     getDomainCount() {
@@ -88,10 +130,12 @@ export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConce
       return domainCount;
     }
 
-    openSaveDialog() {
-      this.props.concept[0].domainId !== 'SURVEY' ?
-         this.setState({conceptAddModalOpen: true}) :
-         this.setState({surveyAddModalOpen: true});
+    onSaveConceptSetClick() {
+      if (this.props.conceptSet) {
+        this.updateConceptSet();
+      } else {
+        this.setState({conceptAddModalOpen: true});
+      }
     }
 
     closeConceptAddModal() {
@@ -127,8 +171,8 @@ export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConce
         <FlexRowWrap style={{flexDirection: 'row-reverse', marginTop: '1rem'}}>
           <Button type='primary'
                   style={styles.saveButton}
-                  disabled={!this.props.concept || this.props.concept.length === 0}
-                  onClick={() => this.setState({conceptAddModalOpen: true})}>Save Concept Set</Button>
+                  disabled={this.disableSaveConceptButton}
+                  onClick={() => this.onSaveConceptSetClick()}>Save Concept Set</Button>
           <Button type='link'
                   style={{color: colors.primary, left: 0}}
                   onClick={() => setSidebarActiveIconStore.next(undefined)}>

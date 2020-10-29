@@ -45,15 +45,6 @@ const filterConcepts = (concepts: any[], domain: Domain) => {
   }
 };
 
-const getConceptIdsToAddOrRemove = (conceptsToFilter: Array<Criteria>, conceptsToCompare: Array<Criteria>) => {
-  return conceptsToFilter.reduce((conceptIds, concept) => {
-    if (!conceptsToCompare.find(con => con.conceptId === concept.conceptId)) {
-      conceptIds.push(concept.conceptId);
-    }
-    return conceptIds;
-  }, []);
-};
-
 export const ConceptAddModal = withCurrentWorkspace()
 (class extends React.Component<{
   workspace: WorkspaceData,
@@ -120,7 +111,8 @@ export const ConceptAddModal = withCurrentWorkspace()
   async saveConcepts() {
     const {workspace: {namespace, id}} = this.props;
     const {onSave, activeDomainTab} = this.props;
-    const {selectedSet, addingToExistingSet, newSetDescription, name, selectedConceptsInDomain} = this.state;
+    const {selectedSet, addingToExistingSet, newSetDescription,
+      name, selectedConceptsInDomain} = this.state;
     this.setState({saving: true});
     const conceptIds = fp.map(selected => selected.conceptId, selectedConceptsInDomain);
 
@@ -134,17 +126,13 @@ export const ConceptAddModal = withCurrentWorkspace()
       return;
     }
     if (addingToExistingSet) {
-      // Selections that don't exist on the existing concept set are added
-      const addedIds = getConceptIdsToAddOrRemove(selectedConceptsInDomain, selectedSet.criteriums);
-      // Concept ids on the existing concept set that don't exist on the selections get removed
-      const removedIds = getConceptIdsToAddOrRemove(selectedSet.criteriums, selectedConceptsInDomain);
       const updateConceptSetReq: UpdateConceptSetRequest = {
         etag: selectedSet.etag,
-        addedIds,
-        removedIds
+        addedIds: conceptIds
       };
       try {
-        const conceptSet = await conceptSetsApi().updateConceptSetConcepts(namespace, id, selectedSet.id, updateConceptSetReq);
+        const conceptSet = await conceptSetsApi().updateConceptSetConcepts(
+          namespace, id, selectedSet.id, updateConceptSetReq);
         this.setState({saving: false});
         onSave(conceptSet);
       } catch (error) {
@@ -161,7 +149,8 @@ export const ConceptAddModal = withCurrentWorkspace()
         addedIds: conceptIds
       };
       try {
-        const createdConceptSet = await conceptSetsApi().createConceptSet(namespace, id, request);
+        const createdConceptSet =
+          await conceptSetsApi().createConceptSet(namespace, id, request);
         this.setState({saving: false});
         onSave(createdConceptSet);
       } catch (error) {
