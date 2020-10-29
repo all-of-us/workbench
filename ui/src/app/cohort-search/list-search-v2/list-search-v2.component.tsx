@@ -238,7 +238,7 @@ interface State {
   totalCount: number;
 }
 
-const tableBodyStyle = `
+const tableBodyOverlayStyle = `
   body .tablebody {
     overflow-y: overlay
   }
@@ -506,7 +506,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
               </thead>
             </table>
             <style>
-              {tableBodyStyle}
+              {tableBodyOverlayStyle}
             </style>
             <div style={{height: '15rem'}} className='tablebody'>
               <table className='p-datatable' style={{...styles.table, ...styles.tableBody}}>
