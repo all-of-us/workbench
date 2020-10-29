@@ -15,7 +15,7 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {Dropdown} from 'primereact/dropdown';
 import {InputNumber} from 'primereact/inputnumber';
 
-import { Runtime, RuntimeConfigurationType, RuntimeStatus } from 'generated';
+import { Runtime, RuntimeConfigurationType, RuntimeStatus } from 'generated/fetch';
 import { CdrVersionListResponse, DataprocConfig } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -62,6 +62,16 @@ const defaultMachineName = 'n1-standard-4';
 const defaultMachineType = allMachineTypes.find(({name}) => name === defaultMachineName);
 const findMachineByName = machineToFind => fp.find(({name}) => name === machineToFind, allMachineTypes) || defaultMachineType;
 const defaultDiskSize = 50;
+
+// Returns true if two runtimes are equivalent in terms of the fields which are
+// affected by runtime presets.
+const presetEquals = (a: Runtime, b: Runtime): boolean => {
+  const pick = ['gceConfig', 'dataprocConfig'];
+  // numberOfWorkerLocalSSDs is currently part of the API spec, but is not used by the panel.
+  const ignore = ['dataprocConfig.numberOfWorkerLocalSSDs'];
+  const strip = fp.flow(fp.pick(pick), fp.omit(ignore));
+  return fp.isEqual(strip(a), strip(b));
+}
 
 enum ComputeType {
   Standard = 'Standard VM',
@@ -141,9 +151,17 @@ const DataProcConfigSelector = ({onChange, dataprocConfig})  => {
   } = dataprocConfig || {};
   const initialMachine = findMachineByName(workerMachineType);
   const [selectedNumWorkers, setSelectedNumWorkers] = useState<number>(numberOfWorkers);
-  const [selectedPreemtible, setUpdatedPreemptible] = useState<number>(numberOfPreemptibleWorkers);
+  const [selectedPreemtible, setSelectedPreemptible] = useState<number>(numberOfPreemptibleWorkers);
   const [selectedWorkerMachine, setSelectedWorkerMachine] = useState<Machine>(initialMachine);
   const [selectedDiskSize, setSelectedDiskSize] = useState<number>(workerDiskSize);
+
+  // If the dataprocConfig prop changes from externally, reset the selectors accordingly.
+  useEffect(() => {
+    setSelectedDiskSize(numberOfWorkers);
+    setSelectedPreemptible(numberOfPreemptibleWorkers);
+    setSelectedWorkerMachine(initialMachine);
+    setSelectedDiskSize(workerDiskSize);
+  }, [dataprocConfig]);
 
   // On unmount clear the config - the user is no longer configuring a dataproc cluster
   useEffect(() => () => onChange(null), []);
@@ -177,7 +195,7 @@ const DataProcConfigSelector = ({onChange, dataprocConfig})  => {
         incrementButtonClassName='p-button-secondary'
         value={selectedPreemtible}
         inputStyle={styles.inputNumber}
-        onChange={({value}) => setUpdatedPreemptible(value)}
+        onChange={({value}) => setSelectedPreemptible(value)}
         min={0}/>
       <div style={{gridColumnEnd: 'span 2'}}/>
       {/* TODO: Do the worker nodes have the same minimum requirements as the master node?
@@ -196,13 +214,12 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withCdrVersions())((
   const {namespace, cdrVersionId} = workspace;
   const {hasMicroarrayData} = fp.find({cdrVersionId}, cdrVersionListResponse.items) || {hasMicroarrayData: false};
   const [currentRuntime, setRequestedRuntime] = useCustomRuntime(namespace);
-  const {status = null, dataprocConfig = null, gceConfig = {bootDiskSize: defaultDiskSize}} = currentRuntime || {} as Partial<Runtime>;
+  const {status = null, dataprocConfig = null, gceConfig = {diskSize: defaultDiskSize}} = currentRuntime || {} as Partial<Runtime>;
   const machineName = !!dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
-  const diskSize = !!dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.bootDiskSize;
+  const diskSize = !!dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.diskSize;
   const initialMasterMachine = findMachineByName(machineName);
   const [selectedDiskSize, setSelectedDiskSize] = useState(diskSize);
   const [selectedMachine, setSelectedMachine] = useState(initialMasterMachine);
-  const [runtimeConfigurationType, setRuntimeConfigurationType] = useState(null);
   const [selectedCompute, setSelectedCompute] = useState<ComputeType>(dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard);
   const [selectedDataprocConfig, setSelectedDataprocConfig] = useState<DataprocConfig | null>(dataprocConfig);
 
@@ -232,7 +249,7 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withCdrVersions())((
                       <React.Fragment>
                         {
                           fp.flow(
-                            fp.filter(['displayName', 'General Analysis']),
+                            fp.filter(({runtimeTemplate}) => hasMicroarrayData || !runtimeTemplate.dataprocConfig),
                             fp.toPairs,
                             fp.map(([i, preset]) => {
                               return <MenuItem
@@ -241,21 +258,24 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withCdrVersions())((
                               onClick={() => {
                                 // renaming to avoid shadowing
                                 const {runtimeTemplate} = preset;
-                                const {presetDiskSize, presetMachineName} = fp.cond([
-                                  [() => !!runtimeTemplate.gceConfig, ({gceConfig: {bootDiskSize, machineType}}) => ({
-                                    presetDiskSize: bootDiskSize,
-                                    presetMachineName: machineType
+                                const {presetDiskSize, presetMachineName, presetCompute} = fp.cond([
+                                  [() => !!runtimeTemplate.gceConfig, ({gceConfig: {diskSize, machineType}}) => ({
+                                    presetDiskSize: diskSize,
+                                    presetMachineName: machineType,
+                                    presetCompute: ComputeType.Standard
                                   })],
                                   [() => !!runtimeTemplate.dataprocConfig, ({dataprocConfig: {masterDiskSize, masterMachineType}}) => ({
                                     presetDiskSize: masterDiskSize,
-                                    presetMachineName: masterMachineType
+                                    presetMachineName: masterMachineType,
+                                    presetCompute: ComputeType.Dataproc
                                   })]
                                 ])(runtimeTemplate);
                                 const presetMachineType = fp.find(({name}) => name === presetMachineName, validLeonardoMachineTypes);
 
                                 setSelectedDiskSize(presetDiskSize);
                                 setSelectedMachine(presetMachineType);
-                                setRuntimeConfigurationType(RuntimeConfigurationType.GeneralAnalysis);
+                                setSelectedCompute(presetCompute);
+                                setSelectedDataprocConfig(runtimeTemplate.dataprocConfig);
                               }}>
                                 {preset.displayName}
                               </MenuItem>;
@@ -275,23 +295,13 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withCdrVersions())((
         <MachineSelector
             idPrefix='runtime'
             selectedMachine={selectedMachine}
-            onChange={(value) => {
-              setSelectedMachine(value);
-              if (value !== selectedMachine && value !== diskSize) {
-                setRuntimeConfigurationType(RuntimeConfigurationType.UserOverride);
-              }
-            }}
+            onChange={(value) => setSelectedMachine(value)}
             machineType={machineName}
         />
         <DiskSizeSelector
             idPrefix='runtime'
             selectedDiskSize={selectedDiskSize}
-            onChange={(value) => {
-              setSelectedDiskSize(value);
-              if (value !== selectedDiskSize && value !== diskSize) {
-                setRuntimeConfigurationType(RuntimeConfigurationType.UserOverride);
-              }
-            }}
+            onChange={(value) => setSelectedDiskSize(value)}
             diskSize={diskSize}
         />
       </FlexRow>
@@ -306,7 +316,7 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withCdrVersions())((
                   />
         {
           selectedCompute === ComputeType.Dataproc &&
-          <DataProcConfigSelector onChange={setSelectedDataprocConfig} dataprocConfig={dataprocConfig} />
+          <DataProcConfigSelector onChange={setSelectedDataprocConfig} dataprocConfig={selectedDataprocConfig} />
         }
       </FlexColumn>
     </div>
@@ -321,11 +331,27 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withCdrVersions())((
             || ![RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus))
         }
         onClick={() => {
-          const runtimeToRequest = selectedDataprocConfig ? {dataprocConfig: selectedDataprocConfig} : {gceConfig: {
-            machineType: selectedMachineType || machineName,
-            diskSize: selectedDiskSize || diskSize
-          }};
-          setRequestedRuntime({configurationType: runtimeConfigurationType, ...runtimeToRequest});
+          const runtimeToRequest: Runtime = selectedDataprocConfig ? {
+            dataprocConfig: {
+              ...selectedDataprocConfig,
+              masterMachineType: selectedMachineType,
+              masterDiskSize: selectedDiskSize
+            }
+          } : {
+            gceConfig: {
+              machineType: selectedMachineType,
+              diskSize: selectedDiskSize
+            }
+          };
+
+          // If the selected runtime matches a preset, plumb through the appropriate configuration type.
+          runtimeToRequest.configurationType = fp.get(
+            'runtimeTemplate.configurationType',
+            fp.find(
+              ({runtimeTemplate}) => presetEquals(runtimeToRequest, runtimeTemplate),
+              runtimePresets)
+          ) || RuntimeConfigurationType.UserOverride;
+          setRequestedRuntime(runtimeToRequest);
         }}>{runtimeExists ? 'Update' : 'Create'}</Button>
     </FlexRow>
   </div>;
