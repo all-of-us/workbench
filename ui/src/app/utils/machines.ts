@@ -41,7 +41,7 @@ const machineBases: Machine[] = [
   { name: 'n1-highcpu-96', cpu: 96, memory: 86.4, price: 3.402, preemptiblePrice: 0.7200 }
 ];
 
-export const allMachineTypes = fp.map(({ price, preemptiblePrice, ...details }) => ({
+export const allMachineTypes: Machine[] = fp.map(({ price, preemptiblePrice, ...details }) => ({
   price: price + 0.004,
   preemptiblePrice: preemptiblePrice + 0.002,
   ...details
@@ -51,7 +51,7 @@ export const allMachineTypes = fp.map(({ price, preemptiblePrice, ...details }) 
 // See https://broadworkbench.atlassian.net/browse/SATURN-1337
 export const validLeonardoMachineTypes = allMachineTypes.filter(({memory}) => memory >= 4);
 
-export const findMachineByName = machineToFind => fp.find(({name}) => name === machineToFind, allMachineTypes);
+export const findMachineByName = (machineToFind: string) => { return fp.find(({name}) => name === machineToFind, allMachineTypes); }
 
 export const diskPrice = 0.04 / 730; // per GB hour, from https://cloud.google.com/compute/pricing
 export const dataprocCpuPrice = 0.01; // dataproc costs $0.01 per cpu per hour
@@ -88,6 +88,11 @@ export const machineRunningPrice = ({
 }) => {
   const masterMachine = findMachineByName(masterMachineName);
   const workerMachine = workerMachineName && findMachineByName(workerMachineName);
+
+  if (computeType === ComputeType.Dataproc && !workerMachine) {
+    return NaN;
+  }
+
   const dataprocPrice = computeType === ComputeType.Dataproc
     ? fp.sum([
         (masterMachine.cpu + ((numberOfWorkers + numberOfPreemptibleWorkers) * workerMachine.cpu)) * dataprocCpuPrice,
@@ -114,8 +119,11 @@ export const machineRunningCostBreakdown = ({
   const masterMachine = findMachineByName(masterMachineName);
   let costs = [];
   if (computeType === ComputeType.Dataproc) {
-    costs.push(`${formatUsd(masterMachine.price)} Master VM`);
     const workerMachine = workerMachineName && findMachineByName(workerMachineName);
+    if (!workerMachine) {
+      return costs;
+    }
+    costs.push(`${formatUsd(masterMachine.price)} Master VM`);
     numberOfWorkers > 0 && costs.push(`${formatUsd(workerMachine.price  * numberOfWorkers)} ${numberOfWorkers} Worker VM(s)`);
     numberOfPreemptibleWorkers > 0 && costs.push(`${formatUsd(workerMachine.preemptiblePrice * numberOfPreemptibleWorkers)} Preemptible Worker VM(s)`);
     const dataprocPrice = (masterMachine.cpu + ((numberOfWorkers + numberOfPreemptibleWorkers) * workerMachine.cpu)) * dataprocCpuPrice;

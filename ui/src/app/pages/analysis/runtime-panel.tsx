@@ -24,12 +24,11 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {Dropdown} from 'primereact/dropdown';
 import {InputNumber} from 'primereact/inputnumber';
 
-import { Runtime, RuntimeConfigurationType, RuntimeStatus } from 'generated/fetch';
+import {GceConfig, Runtime, RuntimeConfigurationType, RuntimeStatus} from 'generated/fetch';
 import {BillingAccountType, CdrVersionListResponse, DataprocConfig} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {formatUsd} from "../../utils/numbers";
-import {workspacesApi} from "../../services/swagger-fetch-clients";
 
 const {useState, useEffect, Fragment} = React;
 
@@ -81,7 +80,7 @@ const styles = reactStyles({
 });
 
 const defaultMachineName = 'n1-standard-4';
-const defaultMachineType = findMachineByName(defaultMachineName);
+const defaultMachineType: Machine = findMachineByName(defaultMachineName);
 const defaultDiskSize = 50;
 
 // Returns true if two runtimes are equivalent in terms of the fields which are
@@ -246,7 +245,7 @@ const PresetSelector = ({setSelectedDiskSize, setSelectedMachine, setSelectedCom
                                   const {runtimeTemplate} = preset;
                                   const {presetDiskSize, presetMachineName, presetCompute} = fp.cond([
                                     [() => !!runtimeTemplate.gceConfig, ({gceConfig}) => ({
-                                      presetDiskSize: gceConfig.bootDiskSize,
+                                      presetDiskSize: gceConfig.diskSize,
                                       presetMachineName: gceConfig.machineType,
                                       presetCompute: ComputeType.Standard
                                     })],
@@ -340,8 +339,8 @@ export const RuntimePanel = fp.flow(
   const [currentRuntime, setRequestedRuntime] = useCustomRuntime(namespace);
 
   const {status = null, dataprocConfig = null, gceConfig = {diskSize: defaultDiskSize}} = currentRuntime || {} as Partial<Runtime>;
-  const diskSize = !!dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.diskSize;
-  const machineName = !!dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
+  const diskSize = dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.diskSize;
+  const machineName = dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
   const initialMasterMachine = findMachineByName(machineName) || defaultMachineType;
   const initialCompute = dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard;
 
@@ -373,42 +372,42 @@ export const RuntimePanel = fp.flow(
     </div>
     {/* TODO(RW-5419): Cost estimates go here. */}
     <div style={styles.controlSection}>
-      {/*<CostPredictor*/}
-      {/*    freeCreditsRemaining={workspaceCreatorFreeCreditsRemaining}*/}
-      {/*    profile={profile}*/}
-      {/*    runningCost={machineRunningPrice({*/}
-      {/*      computeType: selectedCompute,*/}
-      {/*      masterDiskSize: selectedDiskSize,*/}
-      {/*      masterMachineName: selectedMachineType,*/}
-      {/*      numberOfWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfWorkers,*/}
-      {/*      numberOfPreemptibleWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfPreemptibleWorkers,*/}
-      {/*      workerDiskSize: selectedDataprocConfig && selectedDataprocConfig.workerDiskSize,*/}
-      {/*      workerMachineName: selectedDataprocConfig && selectedDataprocConfig.workerMachineType*/}
-      {/*    })}*/}
-      {/*    runningCostBreakdown={machineRunningCostBreakdown({*/}
-      {/*      computeType: selectedCompute,*/}
-      {/*      masterDiskSize: selectedDiskSize,*/}
-      {/*      masterMachineName: selectedMachineType,*/}
-      {/*      numberOfWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfWorkers,*/}
-      {/*      numberOfPreemptibleWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfPreemptibleWorkers,*/}
-      {/*      workerDiskSize: selectedDataprocConfig && selectedDataprocConfig.workerDiskSize,*/}
-      {/*      workerMachineName: selectedDataprocConfig && selectedDataprocConfig.workerMachineType*/}
-      {/*    })}*/}
-      {/*    runtimeChanged={runtimeChanged}*/}
-      {/*    storageCost={machineStoragePrice({*/}
-      {/*      masterDiskSize: selectedDiskSize,*/}
-      {/*      numberOfWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfWorkers,*/}
-      {/*      workerDiskSize: selectedDataprocConfig && selectedDataprocConfig.workerDiskSize*/}
-      {/*    })}*/}
-      {/*    storageCostBreakdown={*/}
-      {/*      machineStorageCostBreakdown({*/}
-      {/*        masterDiskSize: selectedDiskSize,*/}
-      {/*        numberOfWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfWorkers,*/}
-      {/*        workerDiskSize: selectedDataprocConfig && selectedDataprocConfig.workerDiskSize*/}
-      {/*      })*/}
-      {/*    }*/}
-      {/*    workspace={workspace}*/}
-      {/*/>*/}
+      <CostPredictor
+          freeCreditsRemaining={workspaceCreatorFreeCreditsRemaining}
+          profile={profile}
+          runningCost={machineRunningPrice({
+            computeType: selectedCompute,
+            masterDiskSize: selectedDiskSize,
+            masterMachineName: selectedMachineType,
+            numberOfWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfWorkers,
+            numberOfPreemptibleWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfPreemptibleWorkers,
+            workerDiskSize: selectedDataprocConfig && selectedDataprocConfig.workerDiskSize,
+            workerMachineName: selectedDataprocConfig && selectedDataprocConfig.workerMachineType
+          })}
+          runningCostBreakdown={machineRunningCostBreakdown({
+            computeType: selectedCompute,
+            masterDiskSize: selectedDiskSize,
+            masterMachineName: selectedMachineType,
+            numberOfWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfWorkers,
+            numberOfPreemptibleWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfPreemptibleWorkers,
+            workerDiskSize: selectedDataprocConfig && selectedDataprocConfig.workerDiskSize,
+            workerMachineName: selectedDataprocConfig && selectedDataprocConfig.workerMachineType
+          })}
+          runtimeChanged={runtimeChanged}
+          storageCost={machineStoragePrice({
+            masterDiskSize: selectedDiskSize,
+            numberOfWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfWorkers,
+            workerDiskSize: selectedDataprocConfig && selectedDataprocConfig.workerDiskSize
+          })}
+          storageCostBreakdown={
+            machineStorageCostBreakdown({
+              masterDiskSize: selectedDiskSize,
+              numberOfWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfWorkers,
+              workerDiskSize: selectedDataprocConfig && selectedDataprocConfig.workerDiskSize
+            })
+          }
+          workspace={workspace}
+      />
       <PresetSelector
           setSelectedDiskSize={(diskSize) => setSelectedDiskSize(diskSize)}
           setSelectedMachine={(machineName) => setSelectedMachine(machineName)}
