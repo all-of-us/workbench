@@ -79,7 +79,7 @@ public final class SearchGroupItemQueryBuilder {
           + "on (c.path like concat('%%.', a.id, '.%%') or c.path like concat('%%.', a.id))\n"
           + "where domain_id = %s\n"
           + "and is_standard = %s\n"
-          + "and is_selectable = 1)";
+          + "and is_selectable = 1)\n";
   private static final String DRUG_SQL =
       "is_standard = %s and concept_id in (select distinct ca.descendant_id\n"
           + "from `${projectId}.${dataSetId}.cb_criteria_ancestor` ca\n"
