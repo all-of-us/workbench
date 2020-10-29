@@ -2751,8 +2751,6 @@ WHERE cr.concept_id_1 = c1.concept_id
     AND r.defines_ancestry = '1'
     AND c1.vocabulary_id = 'LOINC'
     AND c2.vocabulary_id = 'LOINC'
-    --AND c1.standard_concept IN ('S','C')
-    --AND c2.standard_concept IN ('S','C')
     AND c1.concept_class_id IN ('LOINC Hierarchy', 'LOINC Component', 'Lab Test')
     AND c2.concept_class_id IN ('LOINC Hierarchy', 'LOINC Component', 'Lab Test')"
 
