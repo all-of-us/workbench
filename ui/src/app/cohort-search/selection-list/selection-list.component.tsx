@@ -440,6 +440,11 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
       return attributesSelection || showModifiersSlide;
     }
 
+    closeAttributes() {
+      attributesSelectionStore.next(undefined);
+      this.closeSidebar();
+    }
+
     render() {
       const {back, cohortContext, criteria} = this.props;
       const {attributesSelection, disableSave, showModifiersSlide} = this.state;
@@ -499,7 +504,7 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
                                                  this.setState({showModifiersSlide: false});
                                                  this.checkCriteriaChanges();
                                                }}/>}
-          {!!attributesSelection && <AttributesPageV2 close={() => attributesSelectionStore.next(undefined)}
+          {!!attributesSelection && <AttributesPageV2 close={() => this.closeAttributes()}
                                                       node={attributesSelection}/>}
       </div>;
     }
