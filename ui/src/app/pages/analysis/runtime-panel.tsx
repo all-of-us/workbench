@@ -66,10 +66,11 @@ const defaultDiskSize = 50;
 // Returns true if two runtimes are equivalent in terms of the fields which are
 // affected by runtime presets.
 const presetEquals = (a: Runtime, b: Runtime): boolean => {
-  const pick = ['gceConfig', 'dataprocConfig'];
-  // numberOfWorkerLocalSSDs is currently part of the API spec, but is not used by the panel.
-  const ignore = ['dataprocConfig.numberOfWorkerLocalSSDs'];
-  const strip = fp.flow(fp.pick(pick), fp.omit(ignore));
+  const strip = fp.flow(
+    // In the future, things like toolDockerImage and autopause may be considerations.
+    fp.pick(['gceConfig', 'dataprocConfig']),
+    // numberOfWorkerLocalSSDs is currently part of the API spec, but is not used by the panel.
+    fp.omit(['dataprocConfig.numberOfWorkerLocalSSDs']));
   return fp.isEqual(strip(a), strip(b));
 };
 
