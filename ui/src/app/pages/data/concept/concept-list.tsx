@@ -91,7 +91,7 @@ export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConce
     openSaveDialog() {
       this.props.concept[0].domainId !== 'SURVEY' ?
          this.setState({conceptAddModalOpen: true}) :
-         this.setState({surveyAddModalOpen: true}) ;
+         this.setState({surveyAddModalOpen: true});
     }
 
     closeConceptAddModal() {
@@ -128,7 +128,7 @@ export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConce
           <Button type='primary'
                   style={styles.saveButton}
                   disabled={!this.props.concept || this.props.concept.length === 0}
-                  onClick={() => this.openSaveDialog()}>Save Concept Set</Button>
+                  onClick={() => this.setState({conceptAddModalOpen: true})}>Save Concept Set</Button>
           <Button type='link'
                   style={{color: colors.primary, left: 0}}
                   onClick={() => setSidebarActiveIconStore.next(undefined)}>
