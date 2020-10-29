@@ -74,11 +74,6 @@ const presetEquals = (a: Runtime, b: Runtime): boolean => {
   return fp.isEqual(strip(a), strip(b));
 };
 
-export enum ComputeType {
-  Standard = 'Standard VM',
-  Dataproc = 'Dataproc Cluster'
-}
-
 export interface Props {
   workspace: WorkspaceData;
   cdrVersionListResponse?: CdrVersionListResponse;
