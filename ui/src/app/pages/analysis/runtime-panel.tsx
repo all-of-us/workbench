@@ -7,8 +7,14 @@ import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace, withUserProfile} from 'app/utils';
 import {withCdrVersions} from 'app/utils';
 import {
-  allMachineTypes, ComputeType, findMachineByName,
-  Machine, machineRunningPrice, machineStoragePrice,
+  allMachineTypes,
+  ComputeType,
+  findMachineByName,
+  Machine,
+  machineRunningCostBreakdown,
+  machineRunningPrice,
+  machineStorageCostBreakdown,
+  machineStoragePrice,
   validLeonardoMachineTypes
 } from 'app/utils/machines';
 import {runtimePresets} from 'app/utils/runtime-presets';
@@ -270,7 +276,7 @@ const PresetSelector = ({setSelectedDiskSize, setSelectedMachine, setSelectedCom
   </PopupTrigger>
 }
 
-const CostPredictor = ({freeCreditsRemaining, profile, runningCost, runtimeChanged, storageCost, workspace}) => {
+const CostPredictor = ({freeCreditsRemaining, profile, runningCost, runningCostBreakdown, runtimeChanged, storageCost, storageCostBreakdown, workspace}) => {
   const wrapperStyle = runtimeChanged
     ? {...styles.costPredictorWrapper, backgroundColor: colorWithWhiteness(colors.warning, .9), borderColor: colors.warning}
     : styles.costPredictorWrapper
@@ -280,11 +286,25 @@ const CostPredictor = ({freeCreditsRemaining, profile, runningCost, runtimeChang
     <FlexRow style={{minWidth: '250px', margin: '.33rem .5rem'}}>
       <FlexColumn style={{marginRight: '1rem'}}>
         <div style={{fontSize: '10px', fontWeight: 600}}>Cost when running</div>
-        <div style={{fontSize: '20px', color: colors.accent}}>{formatUsd(runningCost)}</div>
+        <TooltipTrigger content={
+          <div>
+            <div>Cost Breakdown</div>
+            {runningCostBreakdown.map((lineItem, i) => <div key={i}>{lineItem}</div>)}
+          </div>
+        }>
+          <div style={{fontSize: '20px', color: colors.accent}}>{formatUsd(runningCost)}</div>
+        </TooltipTrigger>
       </FlexColumn>
       <FlexColumn>
         <div style={{fontSize: '10px', fontWeight: 600}}>Cost when paused</div>
-        <div style={{fontSize: '20px', color: colors.accent}}>{formatUsd(storageCost)}</div>
+        <TooltipTrigger content={
+          <div>
+            <div>Cost Breakdown</div>
+            {storageCostBreakdown.map((lineItem, i) => <div key={i}>{lineItem}</div>)}
+          </div>
+        }>
+          <div style={{fontSize: '20px', color: colors.accent}}>{formatUsd(storageCost)}</div>
+        </TooltipTrigger>
       </FlexColumn>
     </FlexRow>
     {
@@ -353,26 +373,42 @@ export const RuntimePanel = fp.flow(
     </div>
     {/* TODO(RW-5419): Cost estimates go here. */}
     <div style={styles.controlSection}>
-      <CostPredictor
-          freeCreditsRemaining={workspaceCreatorFreeCreditsRemaining}
-          profile={profile}
-          runningCost={machineRunningPrice({
-            computeType: selectedCompute,
-            masterDiskSize: selectedDiskSize,
-            masterMachineName: selectedMachineType,
-            numberOfWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfWorkers,
-            numberOfPreemptibleWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfPreemptibleWorkers,
-            workerDiskSize: selectedDataprocConfig && selectedDataprocConfig.workerDiskSize,
-            workerMachineName: selectedDataprocConfig && selectedDataprocConfig.workerMachineType
-          })}
-          runtimeChanged={runtimeChanged}
-          storageCost={machineStoragePrice({
-            masterDiskSize: selectedDiskSize,
-            numberOfWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfWorkers,
-            workerDiskSize: selectedDataprocConfig && selectedDataprocConfig.workerDiskSize
-          })}
-          workspace={workspace}
-      />
+      {/*<CostPredictor*/}
+      {/*    freeCreditsRemaining={workspaceCreatorFreeCreditsRemaining}*/}
+      {/*    profile={profile}*/}
+      {/*    runningCost={machineRunningPrice({*/}
+      {/*      computeType: selectedCompute,*/}
+      {/*      masterDiskSize: selectedDiskSize,*/}
+      {/*      masterMachineName: selectedMachineType,*/}
+      {/*      numberOfWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfWorkers,*/}
+      {/*      numberOfPreemptibleWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfPreemptibleWorkers,*/}
+      {/*      workerDiskSize: selectedDataprocConfig && selectedDataprocConfig.workerDiskSize,*/}
+      {/*      workerMachineName: selectedDataprocConfig && selectedDataprocConfig.workerMachineType*/}
+      {/*    })}*/}
+      {/*    runningCostBreakdown={machineRunningCostBreakdown({*/}
+      {/*      computeType: selectedCompute,*/}
+      {/*      masterDiskSize: selectedDiskSize,*/}
+      {/*      masterMachineName: selectedMachineType,*/}
+      {/*      numberOfWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfWorkers,*/}
+      {/*      numberOfPreemptibleWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfPreemptibleWorkers,*/}
+      {/*      workerDiskSize: selectedDataprocConfig && selectedDataprocConfig.workerDiskSize,*/}
+      {/*      workerMachineName: selectedDataprocConfig && selectedDataprocConfig.workerMachineType*/}
+      {/*    })}*/}
+      {/*    runtimeChanged={runtimeChanged}*/}
+      {/*    storageCost={machineStoragePrice({*/}
+      {/*      masterDiskSize: selectedDiskSize,*/}
+      {/*      numberOfWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfWorkers,*/}
+      {/*      workerDiskSize: selectedDataprocConfig && selectedDataprocConfig.workerDiskSize*/}
+      {/*    })}*/}
+      {/*    storageCostBreakdown={*/}
+      {/*      machineStorageCostBreakdown({*/}
+      {/*        masterDiskSize: selectedDiskSize,*/}
+      {/*        numberOfWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfWorkers,*/}
+      {/*        workerDiskSize: selectedDataprocConfig && selectedDataprocConfig.workerDiskSize*/}
+      {/*      })*/}
+      {/*    }*/}
+      {/*    workspace={workspace}*/}
+      {/*/>*/}
       <PresetSelector
           setSelectedDiskSize={(diskSize) => setSelectedDiskSize(diskSize)}
           setSelectedMachine={(machineName) => setSelectedMachine(machineName)}
@@ -399,7 +435,7 @@ export const RuntimePanel = fp.flow(
       <FlexColumn style={{marginTop: '1rem'}}>
         <label htmlFor='runtime-compute'>Compute type</label>
         <Dropdown id='runtime-compute'
-                  disabled={!hasMicroarrayData}
+                  // disabled={!hasMicroarrayData}
                   style={{width: '10rem'}}
                   options={[ComputeType.Standard, ComputeType.Dataproc]}
                   value={selectedCompute || ComputeType.Standard}

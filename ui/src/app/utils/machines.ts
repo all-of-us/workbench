@@ -1,4 +1,5 @@
 import * as fp from 'lodash/fp';
+import {formatUsd} from "./numbers";
 
 // Copied from https://github.com/DataBiosphere/terra-ui/blob/219b063b07d56499ccc38013fd88f4f0b88f8cd6/src/data/machines.js
 
@@ -56,13 +57,24 @@ export const diskPrice = 0.04 / 730; // per GB hour, from https://cloud.google.c
 export const dataprocCpuPrice = 0.01; // dataproc costs $0.01 per cpu per hour
 
 export const machineStoragePrice = ({masterDiskSize, numberOfWorkers, workerDiskSize }) => {
-  debugger;
   if (numberOfWorkers && workerDiskSize) {
     return (masterDiskSize + numberOfWorkers * workerDiskSize) * diskPrice;
   }
   else {
     return masterDiskSize * diskPrice;
   }
+}
+
+export const machineStorageCostBreakdown = ({masterDiskSize, numberOfWorkers, workerDiskSize}) => {
+  let costs = [];
+  if (numberOfWorkers && workerDiskSize) {
+    costs.push(`${formatUsd(masterDiskSize * diskPrice)} Master Disk`)
+    costs.push(`${formatUsd((numberOfWorkers * workerDiskSize) * diskPrice)} Worker Disks`)
+  }
+  else {
+    costs.push(`${formatUsd(masterDiskSize * diskPrice)} Disk`)
+  }
+  return costs;
 }
 
 export const machineRunningPrice = ({
@@ -78,15 +90,39 @@ export const machineRunningPrice = ({
   const workerMachine = workerMachineName && findMachineByName(workerMachineName);
   const dataprocPrice = computeType === ComputeType.Dataproc
     ? fp.sum([
-        (masterMachine.cpu + ((numberOfWorkers * numberOfPreemptibleWorkers) * workerMachine.cpu)) * dataprocCpuPrice,
+        (masterMachine.cpu + ((numberOfWorkers + numberOfPreemptibleWorkers) * workerMachine.cpu)) * dataprocCpuPrice,
         numberOfWorkers * workerMachine.price,
         numberOfPreemptibleWorkers * workerMachine.preemptiblePrice,
       ])
     : 0;
-  debugger;
   return fp.sum([
     dataprocPrice,
     masterMachine.price,
     machineStoragePrice({masterDiskSize: masterDiskSize, numberOfWorkers: numberOfWorkers, workerDiskSize: workerDiskSize})
   ]);
+}
+
+export const machineRunningCostBreakdown = ({
+  computeType,
+  masterDiskSize,
+  masterMachineName,
+  numberOfWorkers = 0,
+  numberOfPreemptibleWorkers = 0,
+  workerDiskSize,
+  workerMachineName
+}) => {
+  const masterMachine = findMachineByName(masterMachineName);
+  let costs = [];
+  if (computeType === ComputeType.Dataproc) {
+    costs.push(`${formatUsd(masterMachine.price)} Master VM`);
+    const workerMachine = workerMachineName && findMachineByName(workerMachineName);
+    numberOfWorkers > 0 && costs.push(`${formatUsd(workerMachine.price  * numberOfWorkers)} ${numberOfWorkers} Worker VM(s)`);
+    numberOfPreemptibleWorkers > 0 && costs.push(`${formatUsd(workerMachine.preemptiblePrice * numberOfPreemptibleWorkers)} Preemptible Worker VM(s)`);
+    const dataprocPrice = (masterMachine.cpu + ((numberOfWorkers + numberOfPreemptibleWorkers) * workerMachine.cpu)) * dataprocCpuPrice;
+    costs.push(`${formatUsd(dataprocPrice)} Dataproc Per-CPU Surcharge`);
+  } else {
+    costs.push(`${formatUsd(masterMachine.price)} VM`);
+  }
+  costs.push(machineStorageCostBreakdown({masterDiskSize: masterDiskSize, numberOfWorkers: numberOfWorkers, workerDiskSize: workerDiskSize}));
+  return costs;
 }

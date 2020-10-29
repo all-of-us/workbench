@@ -2,7 +2,6 @@ import * as fp from 'lodash/fp';
 
 export const formatUsd = (number) => {
   if (fp.isNaN(number)) {
-    debugger;
     return 'unknown'
   } else if (number > 0 && number < 0.01) {
     return '< $0.01'
