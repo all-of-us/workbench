@@ -68,11 +68,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class DataSetController implements DataSetApiDelegate {
 
-  private BigQueryService bigQueryService;
-  private DataSetService dataSetService;
+  private final BigQueryService bigQueryService;
+  private final DataSetService dataSetService;
 
-  private Provider<DbUser> userProvider;
-  private Provider<String> prefixProvider;
+  private final Provider<DbUser> userProvider;
+  private final Provider<String> prefixProvider;
   private final WorkspaceService workspaceService;
 
   // See https://cloud.google.com/appengine/articles/deadlineexceedederrors for details
