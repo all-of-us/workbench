@@ -53,5 +53,10 @@
     "type": "integer",
     "name": "has_physical_measurement_data",
     "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "has_fitbit",
+    "mode": "nullable"
   }
 ]

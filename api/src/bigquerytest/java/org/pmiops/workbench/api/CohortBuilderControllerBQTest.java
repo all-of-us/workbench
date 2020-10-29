@@ -605,6 +605,14 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .value("Deceased");
   }
 
+  private static SearchParameter fitbit() {
+    return new SearchParameter()
+        .domain(Domain.FITBIT.toString())
+        .group(false)
+        .standard(true)
+        .ancestorData(false);
+  }
+
   private static SearchParameter survey() {
     return new SearchParameter()
         .domain(Domain.SURVEY.toString())
@@ -1382,6 +1390,15 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest =
         createSearchRequests(
             Domain.PERSON.toString(), ImmutableList.of(deceased()), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countParticipants() {
+    SearchRequest searchRequest =
+        createSearchRequests(
+            Domain.FITBIT.toString(), ImmutableList.of(fitbit()), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
