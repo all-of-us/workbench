@@ -312,7 +312,7 @@ commands:
               | jq -c . > ./logs/${FILE}
             gcloud components update
             # gcloud config set project ${PROJECT_NAME}
-            gsutil cp ${FILE} ${STORAGE_BUCKET}
+            gsutil cp ./logs/${FILE} ${STORAGE_BUCKET}
           when: always
       - store_artifacts:
           path: e2e/logs
