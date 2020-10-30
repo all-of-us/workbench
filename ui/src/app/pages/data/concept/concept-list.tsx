@@ -4,8 +4,8 @@ import * as React from 'react';
 import {Button, Clickable} from 'app/components/buttons';
 import {FlexRow, FlexRowWrap} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
+import {Spinner} from 'app/components/spinners';
 import {ConceptAddModal} from 'app/pages/data/concept/concept-add-modal';
-import {ConceptSurveyAddModal} from 'app/pages/data/concept/concept-survey-add-modal';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
@@ -17,7 +17,6 @@ import {
 import {currentConceptSetStore, currentConceptStore, NavStore, setSidebarActiveIconStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConceptSet, Criteria, Domain, DomainCount, UpdateConceptSetRequest} from 'generated/fetch';
-import {Spinner} from '../../../components/spinners';
 
 const styles = reactStyles({
   sectionTitle: {
@@ -70,7 +69,6 @@ interface Props {
 
 interface State {
   conceptAddModalOpen: boolean;
-  surveyAddModalOpen: boolean;
   updating: boolean;
 }
 export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConcept(), withCurrentConceptSet())(
@@ -79,7 +77,6 @@ export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConce
       super(props);
       this.state = {
         conceptAddModalOpen: false,
-        surveyAddModalOpen: false,
         updating: false
       };
     }
@@ -145,13 +142,8 @@ export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConce
       setSidebarActiveIconStore.next(undefined);
     }
 
-    closeSurveyAddModal() {
-      this.setState({surveyAddModalOpen: false});
-      setSidebarActiveIconStore.next(undefined);
-    }
-
     render() {
-      const {conceptAddModalOpen, surveyAddModalOpen, updating} = this.state;
+      const {conceptAddModalOpen, updating} = this.state;
       return <div>
         <FlexRow><h3 style={styles.sectionTitle}>Selected Concepts</h3>
           <Clickable style={{marginRight: '1rem', position: 'absolute', right: '0px'}}
@@ -189,11 +181,6 @@ export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConce
                          selectedConcepts={this.props.concept}
                          onSave={(conceptSet) => this.afterConceptsSaved(conceptSet)}
                          onClose={() => this.closeConceptAddModal()}/>}
-        {surveyAddModalOpen &&
-        <ConceptSurveyAddModal selectedSurvey={this.props.concept}
-                               onClose={() => this.setState({surveyAddModalOpen: false})}
-                               onSave={(conceptSet) => this.afterConceptsSaved(conceptSet)}
-                               surveyName={this.props.concept[this.props.concept.length - 1].surveyName}/>}
         </div>;
     }
   });
