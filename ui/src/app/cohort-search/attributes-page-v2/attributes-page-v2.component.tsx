@@ -219,6 +219,7 @@ interface AttributeForm {
 }
 
 interface Props {
+  back: Function;
   close: Function;
   criteria: Array<Selection>;
   node: any;
@@ -728,7 +729,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
     }
 
     render() {
-      const {close, node: {domainId, name, parentId, subtype}} = this.props;
+      const {back, node: {domainId, name, parentId, subtype}} = this.props;
       const {calculating, count, countError, form, formErrors, isCOPESurvey, loading} = this.state;
       return (loading ?
         <SpinnerOverlay/> :
@@ -786,7 +787,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
           }
           <CalculateFooter addButtonText='ADD THIS'
                            addFn={() => this.addParameterToSearchItem()}
-                           backFn={() => close()}
+                           backFn={() => back()}
                            calculateFn={() => this.requestPreview()}
                            calculating={calculating}
                            count={count}

@@ -499,7 +499,8 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
                                                  this.setState({showModifiersSlide: false});
                                                  this.checkCriteriaChanges();
                                                }}/>}
-          {!!attributesSelection && <AttributesPageV2 close={() => this.closeSidebar()}
+          {!!attributesSelection && <AttributesPageV2 back={() => this.closeSidebar()}
+                                                      close={() => attributesSelectionStore.next(undefined)}
                                                       node={attributesSelection}/>}
       </div>;
     }
