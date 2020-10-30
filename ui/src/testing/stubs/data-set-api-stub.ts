@@ -10,7 +10,6 @@ import {
   DomainValuesResponse,
   EmptyResponse,
   KernelTypeEnum,
-  MarkDataSetRequest,
 } from 'generated/fetch';
 import {StubImplementationRequired} from 'testing/stubs/stub-utils';
 
