@@ -300,6 +300,17 @@ commands:
             circleci tests glob "tests/**/*.spec.ts" | circleci tests split --split-by=timings > /tmp/tests-to-run
             yarn test:ci $(cat /tmp/tests-to-run)
           no_output_timeout: 15m
+      - gcloud-auth-login
+      - run:
+          name: Transform test-results.xml to json
+          command: |
+            PROJECT_NAME=broad-dsde-qa
+            STORAGE_BUCKET=gs://aou-automation-test-results
+            JFILE=./logs/test-results-${CIRCLE_NODE_INDEX}-${CIRCLE_BRANCH}-${CIRCLE_BUILD_NUM}.json
+            yarn --silent junit2json ./logs/test-results.xml | jq -c . > $JFILE
+            gcloud components update
+            gcloud config set project $PROJECT_NAME
+            gsutil cp $JFILE $STORAGE_BUCKET
       - store_artifacts:
           path: e2e/logs
           destination: logs
