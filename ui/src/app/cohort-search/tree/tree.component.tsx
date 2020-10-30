@@ -206,9 +206,9 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
   }
 
   get showHeader() {
-    const {node: {domainId}} = this.props;
-    return domainId !== Domain.PHYSICALMEASUREMENT.toString()
-      && domainId !== Domain.SURVEY.toString()
+    const {node: {domainId}, source} = this.props;
+    return !(source === 'criteria' && domainId === Domain.SURVEY.toString())
+      && domainId !== Domain.PHYSICALMEASUREMENT.toString()
       && domainId !== Domain.VISIT.toString();
   }
 

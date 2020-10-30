@@ -233,8 +233,9 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     }
   }
 
-  get paramId() {
-    const {node: {code, conceptId, domainId, id}} = this.props;
+  paramId(crit?: Criteria) {
+    const node = crit || this.props.node;
+    const {code, conceptId, domainId, id} = node;
     return `param${!!conceptId && domainId !== Domain.SURVEY.toString() ? (conceptId + code) : id}`;
   }
 
@@ -254,7 +255,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     event.stopPropagation();
     const {node, node: {conceptId, domainId, group, parentId, subtype, value}, select, selectedIds} = this.props;
     let {node: {name}} = this.props;
-    if (!selectedIds.includes(this.paramId)) {
+    if (!selectedIds.includes(this.paramId())) {
       let attributes = [];
       if (subtype === CriteriaSubType.BP.toString()) {
         Object.keys(PREDEFINED_ATTRIBUTES).forEach(key => {
@@ -310,12 +311,12 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     if (this.props.source === 'criteria') {
       return currentCohortCriteriaStore.getValue()
         .some(crit =>
-              crit.parameterId === this.paramId ||
-              parentId.toString() === this.paramId
+              crit.parameterId === this.paramId() ||
+              parentId.toString() === this.paramId()
           );
     } else {
       return currentConceptStore.getValue()
-        .some(crit => 'param' + crit.id.toString() === this.paramId);
+        .some(crit => this.paramId(crit) === this.paramId());
     }
 
   }
@@ -329,7 +330,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     const nodeChildren = domainId === Domain.PHYSICALMEASUREMENT.toString() ? node.children : children;
     const selected = serverConfigStore.getValue().enableCohortBuilderV2
       ? this.getSelectedValues()
-      : selectedIds.includes(this.paramId) ||
+      : selectedIds.includes(this.paramId()) ||
         groupSelections.includes(parentId);
     const displayName = domainId === Domain.PHYSICALMEASUREMENT.toString() && !!searchTerms
       ? highlightSearchTerm(searchTerms, name, colors.success)
