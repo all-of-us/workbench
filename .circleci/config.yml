@@ -278,6 +278,7 @@ commands:
   run-puppeteer-test:
     description: "Run puppeteer integration tests"
     steps:
+      - gcloud-auth-login
       - browser-tools/install-browser-tools
       - run:
           command: |
@@ -300,7 +301,6 @@ commands:
             circleci tests glob "tests/**/*.spec.ts" | circleci tests split --split-by=timings > /tmp/tests-to-run
             yarn test:ci $(cat /tmp/tests-to-run)
           no_output_timeout: 15m
-      - gcloud-auth-login
       - run:
           name: Transform test-results.xml to json
           working_directory: ~/workbench/e2e
@@ -312,6 +312,7 @@ commands:
             gcloud components update
             gcloud config set project $PROJECT_NAME
             gsutil cp $JFILE $STORAGE_BUCKET
+          when: always
       - store_artifacts:
           path: e2e/logs
           destination: logs
@@ -600,20 +601,20 @@ workflows:
     jobs:
       # Always run basic test/lint/compilation (open PRs, master branch merge)
       # Note: by default tags are not picked up.
-      - api-local-test
-      - api-unit-test
-      - ui-unit-test
-      - api-bigquery-test
-      - api-integration-test
+      #- api-local-test
+      #- api-unit-test
+      #- ui-unit-test
+      #- api-bigquery-test
+      #- api-integration-test
       # Deploy to "test" on master branch merges
-      - api-deploy-to-test:
-          <<: *filter-master-branch
-          requires:
-            - api-unit-test
-      - ui-deploy-to-test:
-          <<: *filter-master-branch
-          requires:
-            - ui-unit-test
+      #- api-deploy-to-test:
+          #<<: *filter-master-branch
+          #requires:
+            #- api-unit-test
+      #- ui-deploy-to-test:
+          #<<: *filter-master-branch
+          #requires:
+            #- ui-unit-test
       # Deploy local UI server connected to "test" API server. Run Puppeteer tests for PR commits only
       - puppeteer-test:
           <<: *filter-pr-branch
