@@ -557,7 +557,8 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
         this.setState({
           activeDomainTab: {domain: Domain.SURVEY, name: 'Surveys', conceptCount: 0},
           searching: true,
-          selectedDomain: Domain.SURVEY
+          selectedDomain: Domain.SURVEY,
+          selectedSurvey: surveyName
         });
       } else {
         this.setState({
