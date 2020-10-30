@@ -1,4 +1,3 @@
-// import ShareModal from 'app/component/share-modal';
 import WorkspaceCard from 'app/component/workspace-card';
 import HomePage from 'app/page/home-page';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
@@ -8,9 +7,8 @@ import {config} from 'resources/workbench-config';
 import {findOrCreateWorkspace, signIn, signInAs, signOut} from 'utils/test-utils';
 import {makeWorkspaceName} from 'utils/str-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-// import WorkspaceBase from 'app/component/workspace-base';
 import {waitWhileLoading} from 'utils/waits-utils';
-// import BasePage from 'app/page/base-page';
+
 
 describe('Share workspace', () => {
 
@@ -73,8 +71,8 @@ describe('Share workspace', () => {
       // create workspace with "No Review Requested" radiobutton selected
        await workspacesPage1.createWorkspace(newWorkspaceName);
   
-     const dataPage = new WorkspaceDataPage(page);
-     await dataPage.verifyWorkspaceNameOnDataPage(newWorkspaceName);
+      const dataPage = new WorkspaceDataPage(page);
+      await dataPage.verifyWorkspaceNameOnDataPage(newWorkspaceName);
      
       const shareWorkspaceModal = await dataPage.shareWorkspace();
       await shareWorkspaceModal.shareWithUser(config.collaboratorUsername, WorkspaceAccessLevel.Writer);
