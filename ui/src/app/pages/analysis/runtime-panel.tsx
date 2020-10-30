@@ -156,7 +156,7 @@ const DataProcConfigSelector = ({onChange, dataprocConfig})  => {
   const [selectedWorkerMachine, setSelectedWorkerMachine] = useState<Machine>(initialMachine);
   const [selectedDiskSize, setSelectedDiskSize] = useState<number>(workerDiskSize);
 
-  // If the dataprocConfig prop changes from externally, reset the selectors accordingly.
+  // If the dataprocConfig prop changes externally, reset the selectors accordingly.
   useEffect(() => {
     setSelectedNumWorkers(numberOfWorkers);
     setSelectedPreemptible(numberOfPreemptibleWorkers);
