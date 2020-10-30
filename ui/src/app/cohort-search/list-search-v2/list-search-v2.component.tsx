@@ -155,6 +155,12 @@ const styles = reactStyles({
   infoIcon: {
     color: colorWithWhiteness(colors.accent, 0.1),
     marginLeft: '0.25rem'
+  },
+  clearSearchIcon: {
+    color: colors.accent,
+    display: 'inline-block',
+    float: 'right',
+    marginTop: '0.25rem'
   }
 });
 
@@ -232,6 +238,7 @@ interface State {
   hoverId: string;
   ingredients: any;
   loading: boolean;
+  searching: boolean;
   searchTerms: string;
   standardOnly: boolean;
   sourceMatch: any;
@@ -256,6 +263,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
         ingredients: {},
         hoverId: undefined,
         loading: false,
+        searching: false,
         searchTerms: props.searchTerms,
         standardOnly: false,
         sourceMatch: undefined,
@@ -275,10 +283,10 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
     }
 
     componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any) {
-      if (this.props.source === 'conceptSetDetails') {
-        if (prevProps.concept !== this.props.concept) {
-          this.setState({data: this.props.concept});
-        }
+      const {concept, source} = this.props;
+      const {searching} = this.state;
+      if (source === 'conceptSetDetails' && prevProps.concept !== concept && !searching) {
+        this.setState({data: concept});
       }
     }
 
@@ -298,7 +306,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
     getResults = async(value: string) => {
       let sourceMatch;
       try {
-        this.setState({data: null, error: false, loading: true, standardOnly: false});
+        this.setState({data: null, error: false, loading: true, searching: true, standardOnly: false});
         const {searchContext: {domain}, source, workspace: {cdrVersionId}} = this.props;
         const resp = await cohortBuilderApi().findCriteriaByDomainAndSearchTerm(+cdrVersionId, domain, value.trim());
         const data = source !== 'criteria' && domain === Domain.SURVEY
@@ -395,6 +403,10 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
       }
     }
 
+    clearSearch() {
+
+    }
+
     renderRow(row: any, child: boolean, elementId: string) {
       const {hoverId, ingredients} = this.state;
       const attributes = this.props.source === 'criteria' && row.hasAttributes;
@@ -451,8 +463,9 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
     }
 
     render() {
-      const {searchContext: {domain}} = this.props;
-      const {cdrVersion, data, error, ingredients, loading, searchTerms, standardOnly, sourceMatch, standardData, totalCount} = this.state;
+      const {concept, searchContext: {domain}, source} = this.props;
+      const {cdrVersion, data, error, ingredients, loading, searching, searchTerms, standardOnly, sourceMatch, standardData, totalCount}
+        = this.state;
       const showStandardOption = !standardOnly && !!standardData && standardData.length > 0;
       const displayData = standardOnly ? standardData : data;
       return <div style={{overflow: 'auto'}}>
@@ -464,6 +477,10 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
                        placeholder={`Search ${domainToTitle(domain)} by code or description`}
                        onChange={(e) => this.setState({searchTerms: e})}
                        onKeyPress={this.handleInput} />
+            {source === 'conceptSetDetails' && searching && <Clickable style={styles.clearSearchIcon}
+                onClick={() => this.setState({data: concept, searching: false, searchTerms: ''})}>
+              <ClrIcon size={24} shape='times-circle'/>
+            </Clickable>}
           </div>
         </div>
         <div style={{display: 'table', height: '100%', width: '100%'}}>
