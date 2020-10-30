@@ -403,10 +403,6 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
       }
     }
 
-    clearSearch() {
-
-    }
-
     renderRow(row: any, child: boolean, elementId: string) {
       const {hoverId, ingredients} = this.state;
       const attributes = this.props.source === 'criteria' && row.hasAttributes;
