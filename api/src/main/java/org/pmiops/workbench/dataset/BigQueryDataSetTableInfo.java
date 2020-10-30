@@ -13,7 +13,9 @@ public enum BigQueryDataSetTableInfo {
           + "where concept_id in unnest(@conceptIds)\n"
           + "and domain_id = 'CONDITION'\n"
           + "and is_standard = 1) a\n"
-          + "on (c.path like concat('%.', a.id, '.%') or c.path like concat('%.', a.id) or c.path like concat(a.id, '.%') or c.path = a.id))\n "
+          + "on (c.path like concat('%.', a.id, '.%') or c.path like concat('%.', a.id))\n"
+          + "and domain_id = 'CONDITION'\n"
+          + "and is_standard = 1)\n "
           + "or condition_source_concept_id in(select concept_id\n"
           + "from `${projectId}.${dataSetId}.cb_criteria` c\n"
           + "join (select cast(id as string)  as id\n"
@@ -21,7 +23,9 @@ public enum BigQueryDataSetTableInfo {
           + "where concept_id in unnest(@conceptIds)\n"
           + "and domain_id = 'CONDITION'\n"
           + "and is_standard = 0) a\n"
-          + "on (c.path like concat('%.', a.id, '.%') or c.path like concat('%.', a.id) or c.path like concat(a.id, '.%') or c.path = a.id)))",
+          + "on (c.path like concat('%.', a.id, '.%') or c.path like concat('%.', a.id))"
+          + "and domain_id = 'CONDITION'\n"
+          + "and is_standard = 0))",
       " (condition_concept_id in unnest(@conceptIds) or condition_source_concept_id in unnest(@conceptIds))"),
   PROCEDURE(
       Domain.PROCEDURE,
@@ -33,7 +37,9 @@ public enum BigQueryDataSetTableInfo {
           + "where concept_id in unnest(@conceptIds)\n"
           + "and domain_id = 'PROCEDURE'\n"
           + "and is_standard = 1) a\n"
-          + "on (c.path like concat('%.', a.id, '.%') or c.path like concat('%.', a.id) or c.path like concat(a.id, '.%') or c.path = a.id))\n "
+          + "on (c.path like concat('%.', a.id, '.%') or c.path like concat('%.', a.id))\n"
+          + "and domain_id = 'PROCEDURE'\n"
+          + "and is_standard = 1)\n "
           + "or procedure_source_concept_id in (select concept_id\n"
           + "from `${projectId}.${dataSetId}.cb_criteria` c\n"
           + "join (select cast(id as string)  as id\n"
@@ -41,7 +47,9 @@ public enum BigQueryDataSetTableInfo {
           + "where concept_id in unnest(@conceptIds)\n"
           + "and domain_id = 'PROCEDURE'\n"
           + "and is_standard = 0) a\n"
-          + "on (c.path like concat('%.', a.id, '.%') or c.path like concat('%.', a.id) or c.path like concat(a.id, '.%') or c.path = a.id)))",
+          + "on (c.path like concat('%.', a.id, '.%') or c.path like concat('%.', a.id))\n"
+          + "and domain_id = 'PROCEDURE'\n"
+          + "and is_standard = 0))",
       " (procedure_concept_id in unnest(@conceptIds) or procedure_source_concept_id in unnest(@conceptIds))"),
   DRUG(
       Domain.DRUG,
@@ -55,7 +63,8 @@ public enum BigQueryDataSetTableInfo {
           + "where domain_id = 'DRUG'\n"
           + "and concept_id in unnest(@conceptIds)\n"
           + ") a\n"
-          + "on (c.path like concat('%.', a.id, '.%') or c.path like concat('%.', a.id) or c.path like concat(a.id, '.%') or c.path = a.id)\n"
+          + "on (c.path like concat('%.', a.id, '.%') or c.path like concat('%.', a.id))\n"
+          + "and domain_id = 'DRUG'\n"
           + ") b on (ca.ancestor_id = b.concept_id))",
       " (drug_concept_id in unnest(@conceptIds) or drug_source_concept_id in unnest(@conceptIds))"),
   MEASUREMENT(
@@ -68,7 +77,9 @@ public enum BigQueryDataSetTableInfo {
           + "where concept_id in unnest(@conceptIds)\n"
           + "and domain_id = 'MEASUREMENT'\n"
           + "and is_standard = 1) a\n"
-          + "on (c.path like concat('%.', a.id, '.%') or c.path like concat('%.', a.id) or c.path like concat(a.id, '.%') or c.path = a.id))",
+          + "on (c.path like concat('%.', a.id, '.%') or c.path like concat('%.', a.id))\n"
+          + "and domain_id = 'MEASUREMENT'\n"
+          + "and is_standard = 1)",
       " (measurement_concept_id in unnest(@conceptIds) or measurement_source_concept_id in unnest(@conceptIds))"),
   SURVEY(
       Domain.SURVEY,
