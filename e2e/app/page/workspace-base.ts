@@ -11,6 +11,7 @@ import {waitForAttributeEquality, waitWhileLoading} from 'utils/waits-utils';
 import SnowmanMenu from 'app/component/snowman-menu';
 import {getPropValue} from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
+import ShareModal from 'app/component/share-modal';
 
 export const UseFreeCredits = 'Use All of Us free credits';
 
@@ -258,6 +259,16 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
     await modal.clickButton(clickButtonText, {waitForClose: true});
     await waitWhileLoading(this.page);
     return contentText;
+  }
+
+  /**
+   * Share workspace via Workspace Actions snowman menu "Share" option.
+   */
+  async shareWorkspace(): Promise<ShareModal> {
+    await this.selectWorkspaceAction(Option.Share, { waitForNav: false });
+    const modal = new ShareModal(this.page);
+    await modal.waitUntilVisible();
+    return modal;
   }
 
 }
