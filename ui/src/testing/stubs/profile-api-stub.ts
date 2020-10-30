@@ -10,6 +10,7 @@ import {
 } from 'generated/fetch';
 
 import {EmptyResponse} from 'generated/fetch/api';
+import {StubImplementationRequired} from 'testing/stubs/stub-utils';
 
 export class ProfileStubVariables {
   static PROFILE_STUB = <Profile>{
@@ -53,7 +54,7 @@ export class ProfileApiStub extends ProfileApi {
   profile: Profile;
 
   constructor() {
-    super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
+    super(undefined, undefined, (..._: any[]) => { throw StubImplementationRequired; });
     this.profile = ProfileStubVariables.PROFILE_STUB;
   }
 

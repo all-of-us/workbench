@@ -4,8 +4,8 @@ import {
   FeaturedWorkspacesConfigApi,
   FeaturedWorkspacesConfigResponse
 } from 'generated/fetch';
+import {StubImplementationRequired} from 'testing/stubs/stub-utils';
 import {WorkspaceStubVariables} from './workspaces-api-stub';
-
 
 const phenotypeWorkspace = {
   name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME + ' Phenotype Library',
@@ -25,7 +25,7 @@ export class FeaturedWorkspacesConfigApiStub extends FeaturedWorkspacesConfigApi
   featuredWorkspacesList: FeaturedWorkspace[];
 
   constructor() {
-    super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
+    super(undefined, undefined, (..._: any[]) => { throw StubImplementationRequired; });
     this.featuredWorkspacesList = [phenotypeWorkspace, tutorialWorkspace];
   }
 

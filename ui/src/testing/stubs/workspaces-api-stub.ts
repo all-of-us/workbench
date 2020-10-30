@@ -1,3 +1,5 @@
+import * as fp from 'lodash/fp';
+
 import {
   CloneWorkspaceRequest,
   CloneWorkspaceResponse,
@@ -22,13 +24,10 @@ import {
   WorkspacesApi,
   WorkspaceUserRolesResponse
 } from 'generated/fetch';
-
-import * as fp from 'lodash/fp';
-
 import {appendNotebookFileSuffix, dropNotebookFileSuffix} from 'app/pages/analysis/util';
-import {convertToResources} from 'app/utils/resourceActions';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CopyRequest, EmptyResponse} from 'generated';
+import {StubImplementationRequired} from 'testing/stubs/stub-utils';
 import {CdrVersionsStubVariables} from './cdr-versions-api-stub';
 import {cohortReviewStubs} from './cohort-review-service-stub';
 import {exampleCohortStubs} from './cohorts-api-stub';
@@ -134,7 +133,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
   newWorkspaceCount = 0;
 
   constructor(workspaces?: Workspace[], workspaceUserRoles?: UserRole[]) {
-    super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
+    super(undefined, undefined, (..._: any[]) => { throw StubImplementationRequired; });
     this.workspaces = fp.defaultTo(workspaceStubs, workspaces);
     this.workspaceAccess = new Map<string, WorkspaceAccessLevel>();
     this.notebookList = WorkspacesApiStub.stubNotebookList();

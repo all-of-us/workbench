@@ -1,10 +1,11 @@
 import {ProxyApi} from 'notebooks-generated/fetch';
+import {StubImplementationRequired} from 'testing/stubs/stub-utils';
 
 export class ProxyApiStub extends ProxyApi {
 
   constructor() {
     super(undefined, undefined, (..._: any[]) => {
-      throw Error('cannot fetch in tests');
+      throw StubImplementationRequired;
     });
   }
 

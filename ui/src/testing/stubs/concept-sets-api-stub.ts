@@ -1,4 +1,3 @@
-
 import {CopyRequest, UpdateConceptSetRequest} from 'generated';
 import {
   ConceptSet,
@@ -8,6 +7,7 @@ import {
 } from 'generated/fetch';
 
 import {ConceptSetsApi, CreateConceptSetRequest, EmptyResponse} from 'generated/fetch/api';
+import {StubImplementationRequired} from 'testing/stubs/stub-utils';
 import {ConceptsApiStub, ConceptStubVariables} from './concepts-api-stub';
 
 export class ConceptSetsApiStub extends ConceptSetsApi {
@@ -17,7 +17,7 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
   public conceptsStub?: ConceptsApiStub;
 
   constructor() {
-    super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
+    super(undefined, undefined, (..._: any[]) => { throw StubImplementationRequired; });
 
     this.conceptSets = ConceptSetsApiStub.stubConceptSets();
     this.conceptsStub = new ConceptsApiStub();

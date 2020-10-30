@@ -11,6 +11,7 @@ import {
   ParticipantDemographics, SurveyCount, SurveysResponse
 } from 'generated/fetch';
 import {DomainStubVariables, SurveyStubVariables} from 'testing/stubs/concepts-api-stub';
+import {StubImplementationRequired} from 'testing/stubs/stub-utils';
 
 export const cohortStub = {
   name: 'Test Cohort',
@@ -48,7 +49,7 @@ const surveyCountStub = {
 export class CohortBuilderServiceStub extends CohortBuilderApi {
 
   constructor() {
-    super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
+    super(undefined, undefined, (..._: any[]) => { throw StubImplementationRequired; });
   }
 
   findDemoChartInfo(): Promise<DemoChartInfoListResponse> {

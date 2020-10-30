@@ -1,11 +1,11 @@
 import {RuntimesApi} from 'notebooks-generated/fetch';
-
+import {StubImplementationRequired} from 'testing/stubs/stub-utils';
 
 export class LeoRuntimesApiStub extends RuntimesApi {
 
   constructor() {
     super(undefined, undefined, (..._: any[]) => {
-      throw Error('cannot fetch in tests');
+      throw StubImplementationRequired;
     });
   }
 
