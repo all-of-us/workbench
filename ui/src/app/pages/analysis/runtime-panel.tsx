@@ -74,7 +74,7 @@ const presetEquals = (a: Runtime, b: Runtime): boolean => {
   return fp.isEqual(strip(a), strip(b));
 };
 
-enum ComputeType {
+export enum ComputeType {
   Standard = 'Standard VM',
   Dataproc = 'Dataproc Cluster'
 }
@@ -158,7 +158,7 @@ const DataProcConfigSelector = ({onChange, dataprocConfig})  => {
 
   // If the dataprocConfig prop changes from externally, reset the selectors accordingly.
   useEffect(() => {
-    setSelectedDiskSize(numberOfWorkers);
+    setSelectedNumWorkers(numberOfWorkers);
     setSelectedPreemptible(numberOfPreemptibleWorkers);
     setSelectedWorkerMachine(initialMachine);
     setSelectedDiskSize(workerDiskSize);
@@ -256,13 +256,15 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withCdrVersions())((
                               return <MenuItem
                               style={styles.presetMenuItem}
                               key={i}
+                              aria-label={preset.displayName}
                               onClick={() => {
                                 // renaming to avoid shadowing
                                 const {runtimeTemplate} = preset;
                                 const {presetDiskSize, presetMachineName, presetCompute} = fp.cond([
-                                  [() => !!runtimeTemplate.gceConfig, ({gceConfig}) => ({
-                                    presetDiskSize: gceConfig.diskSize,
-                                    presetMachineName: gceConfig.machineType,
+                                  // Can't destructure due to shadowing.
+                                  [() => !!runtimeTemplate.gceConfig, (tmpl: Runtime) => ({
+                                    presetDiskSize: tmpl.gceConfig.diskSize,
+                                    presetMachineName: tmpl.gceConfig.machineType,
                                     presetCompute: ComputeType.Standard
                                   })],
                                   [() => !!runtimeTemplate.dataprocConfig, ({dataprocConfig: {masterDiskSize, masterMachineType}}) => ({

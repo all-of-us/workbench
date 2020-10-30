@@ -859,8 +859,7 @@ public class RuntimeControllerTest {
 
     runtimeController.createRuntime(
         BILLING_PROJECT_ID,
-        new Runtime()
-            .gceConfig(new GceConfig().bootDiskSize(10).diskSize(50).machineType("standard")));
+        new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard")));
 
     verify(userRuntimesApi)
         .createRuntime(
@@ -879,7 +878,6 @@ public class RuntimeControllerTest {
                     LeonardoRuntimeConfig.class)
                 .getCloudService())
         .isEqualTo(LeonardoRuntimeConfig.CloudServiceEnum.GCE);
-    assertThat(createLeonardoGceConfig.getBootDiskSize()).isEqualTo(10);
     assertThat(createLeonardoGceConfig.getDiskSize()).isEqualTo(50);
 
     assertThat(createLeonardoGceConfig.getMachineType()).isEqualTo("standard");

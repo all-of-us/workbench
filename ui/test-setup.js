@@ -8,6 +8,8 @@ const enzyme = require("enzyme");
 const Adapter = require("enzyme-adapter-react-16");
 
 const {setupCustomValidators} = require('./src/app/services/setup');
+const {stubPopupDimensions} = require('./src/app/components/popups');
 
 setupCustomValidators();
+stubPopupDimensions();
 enzyme.configure({ adapter: new Adapter() });
