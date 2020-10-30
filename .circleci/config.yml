@@ -303,6 +303,7 @@ commands:
       - gcloud-auth-login
       - run:
           name: Transform test-results.xml to json
+          working_directory: ~/workbench/e2e
           command: |
             PROJECT_NAME=broad-dsde-qa
             STORAGE_BUCKET=gs://aou-automation-test-results
