@@ -307,7 +307,7 @@ commands:
           command: |
             PROJECT_NAME=broad-dsde-qa
             STORAGE_BUCKET=gs://aou-automation-test-results
-            JFILE=./logs/test-results-${CIRCLE_NODE_INDEX}-${CIRCLE_BRANCH}-${CIRCLE_BUILD_NUM}.json
+            JFILE=$(./logs/test-results-${CIRCLE_NODE_INDEX}-${CIRCLE_BRANCH}-${CIRCLE_BUILD_NUM}.json)
             yarn --silent junit2json ./logs/test-results.xml | jq -c . > $JFILE
             gcloud components update
             gcloud config set project $PROJECT_NAME
