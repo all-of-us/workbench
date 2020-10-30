@@ -23,11 +23,12 @@ import {
 } from 'app/utils';
 import {LeoRuntimeInitializer} from 'app/utils/leo-runtime-initializer';
 import {Kernels} from 'app/utils/notebook-kernels';
-import {runtimeStore, RuntimeStore, withStore} from 'app/utils/stores';
+import {RuntimeStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {environment} from 'environments/environment';
 import {Profile, Runtime, RuntimeStatus} from 'generated/fetch';
 import {appendNotebookFileSuffix, dropNotebookFileSuffix} from './util';
+import {withRuntimeState} from 'app/utils/runtime-utils';
 
 export enum Progress {
   Unknown,
@@ -222,7 +223,7 @@ const runtimeApiRetryTimeoutMillis = 10000;
 const runtimeApiRetryAttempts = 5;
 const redirectMillis = 1000;
 
-export const NotebookRedirect = fp.flow(withStore(runtimeStore, 'runtimeState'), withUserProfile(), withCurrentWorkspace(),
+export const NotebookRedirect = fp.flow(withUserProfile(), withRuntimeState(), withCurrentWorkspace(),
   withQueryParams())(class extends React.Component<Props, State> {
 
     private pollTimer: NodeJS.Timer;
@@ -390,9 +391,9 @@ export const NotebookRedirect = fp.flow(withStore(runtimeStore, 'runtimeState'),
 
     render() {
       const {showErrorModal, progress, progressComplete, leoUrl} = this.state;
-      const {runtimeState: {runtime = {}}} = this.props;
+      const {runtimeState} = this.props;
 
-      if (runtime && runtime.status !== RuntimeStatus.Running && progress === Progress.Loaded) {
+      if (runtimeState !== RuntimeStatus.Running && progress === Progress.Loaded) {
         this.initializeRuntimeStatusChecking(this.props.workspace.namespace);
       }
 
