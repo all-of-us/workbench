@@ -119,6 +119,8 @@ public class RdrExportEnums {
           .put(Degree.MA, org.pmiops.workbench.rdr.model.Degree.MA)
           .put(Degree.MBA, org.pmiops.workbench.rdr.model.Degree.MBA)
           .put(Degree.ME, org.pmiops.workbench.rdr.model.Degree.ME)
+          .put(Degree.MSW, org.pmiops.workbench.rdr.model.Degree.MSW)
+          .put(Degree.MPH, org.pmiops.workbench.rdr.model.Degree.MPH)
           .put(Degree.BA, org.pmiops.workbench.rdr.model.Degree.BA)
           .put(Degree.BS, org.pmiops.workbench.rdr.model.Degree.BS)
           .put(Degree.BSN, org.pmiops.workbench.rdr.model.Degree.BSN)

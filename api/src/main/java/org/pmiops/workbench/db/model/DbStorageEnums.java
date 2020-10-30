@@ -223,6 +223,8 @@ public final class DbStorageEnums {
           .put(Degree.MSN, (short) 10)
           .put(Degree.PHD, (short) 11)
           .put(Degree.NONE, (short) 12)
+          .put(Degree.MSW, (short) 13)
+          .put(Degree.MPH, (short) 14)
           .build();
 
   public static Degree degreeFromStorage(Short degree) {
