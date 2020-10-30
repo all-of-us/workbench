@@ -112,7 +112,6 @@
     "enableReportingUploadCron": true,
     "enableCOPESurvey": true,
     "enableCustomRuntimes": true,
-    "enableGceAsNotebookRuntimeDefault": true,
     "enableFitbit": false
   },
   "actionAudit": {

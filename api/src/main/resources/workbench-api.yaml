@@ -3986,10 +3986,6 @@ definitions:
         type: boolean
         default: false
         description: Whether user should be able to customize notebook runtime settings.
-      enableGceAsNotebookRuntimeDefault:
-        type: boolean
-        default: false
-        description: Whether the notebook runtime should default to GCE (vs Dataproc).
       enableFitbit:
         type: boolean
         default: false
