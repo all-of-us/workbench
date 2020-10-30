@@ -627,9 +627,9 @@ workflows:
           parallel_num: 4
           env_name: "test"
           <<: *filter-master-branch
-          requires:
-            - api-deploy-to-test
-            - ui-deploy-to-test
+          #requires:
+            #- api-deploy-to-test
+            #- ui-deploy-to-test
 
   deploy-staging:
     jobs:
