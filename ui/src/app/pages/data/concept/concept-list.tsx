@@ -17,6 +17,7 @@ import {
 import {currentConceptSetStore, currentConceptStore, NavStore, setSidebarActiveIconStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConceptSet, Criteria, Domain, DomainCount, UpdateConceptSetRequest} from 'generated/fetch';
+import {Spinner} from '../../../components/spinners';
 
 const styles = reactStyles({
   sectionTitle: {
@@ -116,7 +117,8 @@ export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConce
 
     get disableSaveConceptButton() {
       const {concept, conceptSet} = this.props;
-      return !concept || concept.length === 0 ||
+      const {updating} = this.state;
+      return updating || !concept || concept.length === 0 ||
         (!!conceptSet && JSON.stringify(conceptSet.criteriums.sort()) === JSON.stringify(concept.sort()));
     }
 
@@ -149,7 +151,7 @@ export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConce
     }
 
     render() {
-      const {conceptAddModalOpen, surveyAddModalOpen} = this.state;
+      const {conceptAddModalOpen, surveyAddModalOpen, updating} = this.state;
       return <div>
         <FlexRow><h3 style={styles.sectionTitle}>Selected Concepts</h3>
           <Clickable style={{marginRight: '1rem', position: 'absolute', right: '0px'}}
@@ -172,7 +174,10 @@ export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConce
           <Button type='primary'
                   style={styles.saveButton}
                   disabled={this.disableSaveConceptButton}
-                  onClick={() => this.onSaveConceptSetClick()}>Save Concept Set</Button>
+                  onClick={() => this.onSaveConceptSetClick()}>
+            {updating && <Spinner style={{margin: '0 0.25rem 0 -0.25rem'}} size={18}/>}
+            Save Concept Set
+          </Button>
           <Button type='link'
                   style={{color: colors.primary, left: 0}}
                   onClick={() => setSidebarActiveIconStore.next(undefined)}>
