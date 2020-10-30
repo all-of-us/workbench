@@ -29,6 +29,22 @@ const styles = {
   }
 };
 
+// Enable stubbing out dimensions for testing purposes. Enzyme does not have
+// associated DOM, and therefore cannot do bounding box computations.
+let popupDimensionsOverride = null;
+export const stubPopupDimensions = (stub = {
+  element: {width: 0, height: 0},
+  target: {top: 0, bottom: 0, left: 0, right: 0},
+  viewport: {width: 0, height: 0}
+}) => popupDimensionsOverride = stub;
+
+const computeNewDimensions = (el, target) => (popupDimensionsOverride || {
+  element: fp.pick(['width', 'height'], el.current.getBoundingClientRect()),
+  target: fp.pick(['top', 'bottom', 'left', 'right'],
+    document.getElementById(target).getBoundingClientRect()),
+  viewport: {width: window.innerWidth, height: window.innerHeight}
+});
+
 interface WithDynamicPositionProps {
   target: string;
 }
@@ -66,12 +82,7 @@ export const withDynamicPosition = () => WrappedComponent => {
       const {target} = this.props;
       const {dimensions} = this.state;
       this.animation = requestAnimationFrame(() => this.reposition());
-      const newDimensions = {
-        element: fp.pick(['width', 'height'], this.element.current.getBoundingClientRect()),
-        target: fp.pick(['top', 'bottom', 'left', 'right'],
-          document.getElementById(target).getBoundingClientRect()),
-        viewport: {width: window.innerWidth, height: window.innerHeight}
-      };
+      const newDimensions = computeNewDimensions(this.element, target);
       if (!fp.isEqual(newDimensions, dimensions)) {
         this.setState({dimensions: newDimensions});
       }

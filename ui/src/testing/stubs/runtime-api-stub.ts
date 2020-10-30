@@ -33,8 +33,9 @@ export class RuntimeApiStub extends RuntimeApi {
     });
   }
 
-  createRuntime(workspaceNamespace: string, options?: any): Promise<{}> {
+  createRuntime(workspaceNamespace: string, runtime: Runtime): Promise<{}> {
     return new Promise<{}>(resolve => {
+      this.runtime = {...runtime, status: RuntimeStatus.Creating};
       resolve({});
     });
   }

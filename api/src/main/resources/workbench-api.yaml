@@ -5545,9 +5545,6 @@ definitions:
         description: >
           Optional, the size in gigabytes of the disk on the GCE VM.
           Minimum size is 50GB. If unspecified, default size is 100GB.
-      bootDiskSize:
-        type: integer
-        description: size for boot disk. For old runtimes (prior 6/22/2020, gce runtimes don't have a separate boot disk)
       machineType:
         type: string
         description: >

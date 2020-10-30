@@ -50,6 +50,7 @@ public interface LeonardoMapper {
   GceConfig toGceConfig(LeonardoGceConfig leonardoGceConfig);
 
   @Mapping(target = "cloudService", ignore = true)
+  @Mapping(target = "bootDiskSize", ignore = true)
   LeonardoGceConfig toLeonardoGceConfig(GceConfig gceConfig);
 
   @AfterMapping
