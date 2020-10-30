@@ -4,7 +4,7 @@ import * as React from 'react';
 import {Button, Clickable} from 'app/components/buttons';
 import {FlexRow, FlexRowWrap} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
-import {Spinner} from 'app/components/spinners';
+import {SpinnerOverlay} from 'app/components/spinners';
 import {ConceptAddModal} from 'app/pages/data/concept/concept-add-modal';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -33,6 +33,7 @@ const styles = reactStyles({
     lineHeight: '0.75rem',
     minHeight: 'calc(100vh - 15rem)',
     padding: '0.5rem',
+    position: 'relative',
     overflowX: 'hidden',
     overflowY: 'auto',
   },
@@ -154,6 +155,7 @@ export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConce
           </Clickable></FlexRow>
 
         <div style={styles.selectionContainer}>
+          {updating && <SpinnerOverlay/>}
           {this.props.concept.map((con, index) => <FlexRow key={index} style={{lineHeight: '1.25rem'}}>
             <button style={styles.removeSelection} onClick={() => this.removeSelection(con)}>
               <ClrIcon shape='times-circle'/>
@@ -167,7 +169,6 @@ export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConce
                   style={styles.saveButton}
                   disabled={this.disableSaveConceptButton}
                   onClick={() => this.onSaveConceptSetClick()}>
-            {updating && <Spinner style={{margin: '0 0.25rem 0 -0.25rem'}} size={18}/>}
             Save Concept Set
           </Button>
           <Button type='link'
