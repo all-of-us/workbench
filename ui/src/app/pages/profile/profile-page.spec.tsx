@@ -83,8 +83,7 @@ describe('ProfilePageComponent', () => {
     expect(reload).toHaveBeenCalled();
   });
 
-  // TODO: fails with new version of typescript ('false' is not truthy)
-  xit('should invalidate inputs correctly', () => {
+  it('should invalidate inputs correctly', () => {
     const wrapper = component();
     wrapper.find(TextInput).first().simulate('change', {target: {value: ''}});
     expect(wrapper.find(TextInput).first().prop('invalid')).toBeTruthy();
