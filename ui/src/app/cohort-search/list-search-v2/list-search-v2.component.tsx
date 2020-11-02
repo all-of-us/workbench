@@ -62,6 +62,10 @@ const styles = reactStyles({
     color: colorWithWhiteness(colors.success, -0.5),
     cursor: 'pointer'
   },
+  disableSelectIcon: {
+    opacity: 0.4,
+    cursor: 'not-allowed'
+  },
   selectedIcon: {
     marginRight: '0.4rem',
     color: colorWithWhiteness(colors.success, -0.5),
@@ -336,6 +340,11 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
       return [Domain.CONDITION, Domain.PROCEDURE].includes(this.props.searchContext.domain);
     }
 
+    selectIconDisabled() {
+      const {selectedIds, source} = this.props;
+      return source !== 'criteria' && selectedIds && selectedIds.length === 1000;
+    }
+
     selectItem = (row: any) => {
       let param = {parameterId: this.getParamId(row), ...row, attributes: []};
       if (row.domainId === Domain.SURVEY) {
@@ -414,14 +423,16 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
       const loadingIngredients = ingredients[row.id] && ingredients[row.id].loading;
       const columnStyle = child ?
         {...styles.columnBodyName, paddingLeft: '1.25rem'} : styles.columnBodyName;
+      const selectIconStyle = this.selectIconDisabled() ? {...styles.selectIcon, ...styles.disabledIcon} : styles.selectIcon;
       return <tr style={{height: '1.75rem'}}>
         <td style={{...columnStyle, width: '31%', textAlign: 'left', borderLeft: 0, padding: '0 0.25rem'}}>
-          {row.selectable && <div style={{...styles.selectDiv}}>
+          {row.selectable && <div style={styles.selectDiv}>
             {attributes &&
               <ClrIcon style={styles.attrIcon} shape='slider' dir='right' size='20' onClick={() => this.setAttributes(row)}/>
             }
             {selected && <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>}
-            {unselected && <ClrIcon style={styles.selectIcon} shape='plus-circle' size='16' onClick={() => this.selectItem(row)}/>}
+            {unselected && <ClrIcon style={selectIconStyle} shape='plus-circle' size='16'
+                                    onClick={() => this.selectItem(row)}/>}
             {brand && !loadingIngredients &&
               <ClrIcon style={styles.brandIcon}
                 shape={'angle ' + (open ? 'down' : 'right')} size='20'
@@ -465,6 +476,9 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
       const showStandardOption = !standardOnly && !!standardData && standardData.length > 0;
       const displayData = standardOnly ? standardData : data;
       return <div style={{overflow: 'auto'}}>
+        {this.selectIconDisabled() && <div style={{color: colors.warning, fontWeight: 'bold', maxWidth: '1000px'}}>
+          NOTE: Concept Set can have only 1000 concepts. Please delete some concepts before adding more.
+        </div>}
         <div style={styles.searchContainer}>
           <div style={styles.searchBar}>
             <ClrIcon shape='search' size='18'/>
