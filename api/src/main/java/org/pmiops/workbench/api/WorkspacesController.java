@@ -965,16 +965,16 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         operation);
   }
 
-  public ResponseEntity<WorkspaceCreatorFreeCreditsRemainingResponse> getWorkspaceCreatorFreeCreditsRemaining(
-      String workspaceNamespace,
-      String workspaceId
-  ) {
+  public ResponseEntity<WorkspaceCreatorFreeCreditsRemainingResponse>
+      getWorkspaceCreatorFreeCreditsRemaining(String workspaceNamespace, String workspaceId) {
     workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
     DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
-    double freeCreditsRemaining = freeTierBillingService.getWorkspaceCreatorFreeCreditsRemaining(dbWorkspace);
-    WorkspaceCreatorFreeCreditsRemainingResponse response = new WorkspaceCreatorFreeCreditsRemainingResponse()
-        .freeCreditsRemaining(freeCreditsRemaining);
+    double freeCreditsRemaining =
+        freeTierBillingService.getWorkspaceCreatorFreeCreditsRemaining(dbWorkspace);
+    WorkspaceCreatorFreeCreditsRemainingResponse response =
+        new WorkspaceCreatorFreeCreditsRemainingResponse()
+            .freeCreditsRemaining(freeCreditsRemaining);
     return ResponseEntity.ok(response);
   }
 }
