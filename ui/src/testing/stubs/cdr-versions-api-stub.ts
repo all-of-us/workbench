@@ -1,4 +1,5 @@
 import {ArchivalStatus, CdrVersion, CdrVersionListResponse, CdrVersionsApi, DataAccessLevel} from 'generated/fetch';
+import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
 export class CdrVersionsStubVariables {
   static DEFAULT_WORKSPACE_CDR_VERSION = 'Fake CDR Version';
@@ -32,7 +33,7 @@ export const cdrVersionListResponse = {
 export class CdrVersionsApiStub extends CdrVersionsApi {
   public cdrVersions: CdrVersion[];
   constructor() {
-    super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
+    super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
     this.cdrVersions = cdrVersionListResponse.items;
   }
 

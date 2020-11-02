@@ -8,6 +8,7 @@ import {
   InstitutionApi,
   OrganizationType,
 } from 'generated/fetch';
+import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
 export const defaultInstitutions: Array<Institution> = [{
   shortName: 'VUMC',
@@ -35,7 +36,7 @@ export class InstitutionApiStub extends InstitutionApi {
   public institutions: Array<Institution>;
 
   constructor(institutions: Array<Institution> = defaultInstitutions) {
-    super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
+    super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
 
     this.institutions = institutions;
   }

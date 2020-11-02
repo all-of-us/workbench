@@ -1,9 +1,10 @@
 import {BillingStatus, UserMetricsApi, WorkspaceResource} from 'generated/fetch';
+import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 import {CdrVersionsStubVariables} from './cdr-versions-api-stub';
 
 export class UserMetricsApiStub extends UserMetricsApi {
   constructor() {
-    super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
+    super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
   }
 
   getUserRecentResources() {
