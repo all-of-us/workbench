@@ -1,6 +1,8 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
+import {Clickable} from 'app/components/buttons';
+import {getResourceCard} from 'app/components/get-resource-card';
 import {FlexRow} from 'app/components/flex';
 import {SmallHeader} from 'app/components/headers';
 import {ResourceNavigation, StyledResourceType} from 'app/components/resource-card';
@@ -8,6 +10,7 @@ import {renderResourceCard} from 'app/components/render-resource-card';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {userMetricsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {formatWorkspaceResourceDisplayDate, getCdrVersion, reactStyles, withCdrVersions} from 'app/utils';
+import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import {getDisplayName} from 'app/utils/resources';
 import {
   CdrVersionListResponse,
@@ -17,19 +20,39 @@ import {
 } from 'generated/fetch';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
-import {useEffect, useState} from 'react';
+import {CSSProperties, useEffect, useState} from 'react';
 
 const styles = reactStyles({
   menu: {
     width: '30px',
+  },
+  navigation: {
+    fontFamily: 'Montserrat',
+    fontSize: '14px',
+    letterSpacing: 0,
+    lineHeight: '22px',
   }
 });
+
+const WorkspaceNavigation = (props: {workspace: Workspace, style?: CSSProperties}) => {
+  const {workspace: {name, namespace, id}, style} = props;
+  const url = `/workspaces/${namespace}/${id}/data`;
+
+  return <Clickable>
+    <a data-test-id='workspace-navigation'
+       style={style}
+       href={url}
+       onClick={e => navigateAndPreventDefaultIfNoKeysPressed(e, url)}>
+      {name}
+    </a>
+  </Clickable>;
+};
 
 interface TableData {
   menu: JSX.Element;
   resourceType: JSX.Element;
   resourceName: JSX.Element;
-  workspaceName: string;
+  workspaceName: JSX.Element;
   formattedLastModified: string;
   cdrVersionName: string;
 }
@@ -81,8 +104,8 @@ const RecentResources = fp.flow(withCdrVersions())((props: {cdrVersionListRespon
         return {
           menu: getResourceMenu(r),
           resourceType: <ResourceNavigation resource={r}><StyledResourceType resource={r}/></ResourceNavigation>,
-          resourceName: <ResourceNavigation resource={r}>{getDisplayName(r)}</ResourceNavigation>,
-          workspaceName: getWorkspace(r).name,
+          resourceName: <ResourceNavigation resource={r} style={styles.navigation}>{getDisplayName(r)}</ResourceNavigation>,
+          workspaceName: <WorkspaceNavigation workspace={getWorkspace(r)} style={styles.navigation}/>,
           formattedLastModified: formatWorkspaceResourceDisplayDate(r.modifiedTime),
           cdrVersionName: getCdrVersionName(r),
         };

@@ -22,7 +22,7 @@ import {
   isNotebook,
 } from 'app/utils/resources';
 import {WorkspaceResource} from 'generated/fetch';
-import {PropsWithChildren} from 'react';
+import {CSSProperties, PropsWithChildren} from 'react';
 
 const styles = reactStyles({
   card: {
@@ -133,8 +133,12 @@ function canDelete(resource: WorkspaceResource): boolean {
 
 interface NavProps extends PropsWithChildren<any> {
   resource: WorkspaceResource;
+  style?: CSSProperties;
 }
 const ResourceNavigation = (props: NavProps) => {
+  const {resource, style = styles.resourceName, children} = props;
+  const url = getResourceUrl(resource);
+
   function canNavigate(): boolean {
     // can always navigate to notebooks
     return isNotebook(resource) || canWrite(resource);
@@ -146,14 +150,13 @@ const ResourceNavigation = (props: NavProps) => {
     }
   }
 
-  const {resource, children} = props;
   return <Clickable disabled={!canNavigate()}>
-    <a style={styles.resourceName}
-       data-test-id='resource-name'
-       href={getResourceUrl(resource)}
+    <a style={style}
+       data-test-id='resource-navigation'
+       href={url}
        onClick={e => {
          onNavigate();
-         navigateAndPreventDefaultIfNoKeysPressed(e, getResourceUrl(resource));
+         navigateAndPreventDefaultIfNoKeysPressed(e, url);
        }}>
       {...children}
     </a>
