@@ -53,7 +53,7 @@ const styles = reactStyles({
     width: 'max-content',
     paddingLeft: '10px',
     paddingRight: '10px',
-    borderRadius: '4px 4px 0 0',
+    borderRadius: '2px',
     display: 'flex',
     justifyContent: 'center',
     color: colors.white,
@@ -103,6 +103,22 @@ const ResourceActionsMenu = (props: {actions: Action[]}) => {
   </PopupTrigger>;
 };
 
+const StyledResourceType = (props: {resource: WorkspaceResource}) => {
+  const {resource} = props;
+
+  function getColor(): string {
+    return fp.cond([
+      [isCohort, () => colors.resourceCardHighlights.cohort],
+      [isCohortReview, () => colors.resourceCardHighlights.cohortReview],
+      [isConceptSet, () => colors.resourceCardHighlights.conceptSet],
+      [isDataSet, () => colors.resourceCardHighlights.dataSet],
+      [isNotebook, () => colors.resourceCardHighlights.notebook],
+    ])(resource);
+  }
+  return <div data-test-id='card-type'
+              style={{...styles.resourceType, backgroundColor: getColor()}}
+       >{fp.startCase(fp.camelCase(getTypeString(resource)))}</div>;
+};
 
 function canWrite(resource: WorkspaceResource): boolean {
   return resource.permission === 'OWNER' || resource.permission === 'WRITER';
@@ -112,25 +128,17 @@ function canDelete(resource: WorkspaceResource): boolean {
   return resource.permission === 'OWNER';
 }
 
-function getColor(resource: WorkspaceResource): string {
-  return fp.cond([
-    [isCohort, () => colors.resourceCardHighlights.cohort],
-    [isCohortReview, () => colors.resourceCardHighlights.cohortReview],
-    [isConceptSet, () => colors.resourceCardHighlights.conceptSet],
-    [isDataSet, () => colors.resourceCardHighlights.dataSet],
-    [isNotebook, () => colors.resourceCardHighlights.notebook],
-  ])(resource);
-}
 
 interface Props {
   actions: Action[];
   disabled: boolean;
   resource: WorkspaceResource;
   onNavigate: () => void;
+  menuOnly: boolean;  // use this component strictly for its actions, without rendering the card
 }
 
 // This will be renamed to ResourceCard once the old code is removed
-class ResourceCardTemplate extends React.Component<Props, {}> {
+class ResourceCard extends React.Component<Props, {}> {
 
   constructor(props: Props) {
     super(props);
@@ -141,42 +149,40 @@ class ResourceCardTemplate extends React.Component<Props, {}> {
   };
 
   render() {
-    const {resource} = this.props;
-    return <React.Fragment>
-      <ResourceCardBase style={styles.card}
-                        data-test-id='card'>
-        <FlexColumn style={{alignItems: 'flex-start'}}>
-          <FlexRow style={{alignItems: 'flex-start'}}>
-            <ResourceActionsMenu actions={this.props.actions}/>
-            <Clickable disabled={this.props.disabled}>
-              <a style={styles.cardName}
-                 data-test-id='card-name'
-                 href={getResourceUrl(resource)}
-                 onClick={e => {
-                   this.props.onNavigate();
-                   navigateAndPreventDefaultIfNoKeysPressed(e, getResourceUrl(resource));
-                 }}>
-                {getDisplayName(resource)}
-              </a>
-            </Clickable>
-          </FlexRow>
-          <div style={styles.cardDescription}>{getDescription(resource)}</div>
-        </FlexColumn>
-        <div style={styles.cardFooter}>
-          <div style={styles.lastModified} data-test-id='last-modified'>
-            Last Modified: {formatWorkspaceResourceDisplayDate(resource.modifiedTime)}</div>
-          <div style={{...styles.resourceType, backgroundColor: getColor(resource)}}
-               data-test-id='card-type'>
-            {fp.startCase(fp.camelCase(getTypeString(resource)))}</div>
-        </div>
-      </ResourceCardBase>
-    </React.Fragment>;
+    const {resource, menuOnly} = this.props;
+    return menuOnly ? <ResourceActionsMenu actions={this.props.actions}/> :
+        <ResourceCardBase style={styles.card}
+                          data-test-id='card'>
+          <FlexColumn style={{alignItems: 'flex-start'}}>
+            <FlexRow style={{alignItems: 'flex-start'}}>
+              <ResourceActionsMenu actions={this.props.actions}/>
+              <Clickable disabled={this.props.disabled}>
+                <a style={styles.cardName}
+                   data-test-id='card-name'
+                   href={getResourceUrl(resource)}
+                   onClick={e => {
+                     this.props.onNavigate();
+                     navigateAndPreventDefaultIfNoKeysPressed(e, getResourceUrl(resource));
+                   }}>
+                  {getDisplayName(resource)}
+                </a>
+              </Clickable>
+            </FlexRow>
+            <div style={styles.cardDescription}>{getDescription(resource)}</div>
+          </FlexColumn>
+          <div style={styles.cardFooter}>
+            <div style={styles.lastModified} data-test-id='last-modified'>
+              Last Modified: {formatWorkspaceResourceDisplayDate(resource.modifiedTime)}</div>
+            <StyledResourceType resource={resource}/>
+          </div>
+        </ResourceCardBase>;
   }
 }
 
 export {
   Action,
-  ResourceCardTemplate,
+  ResourceCard,
+  StyledResourceType,
   canWrite,
   canDelete,
 };

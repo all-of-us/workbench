@@ -3,97 +3,112 @@ import * as React from 'react';
 
 import {FlexRow} from 'app/components/flex';
 import {SmallHeader} from 'app/components/headers';
+import {StyledResourceType} from 'app/components/resource-card';
 import {renderResourceCard} from 'app/components/render-resource-card';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {Scroll} from 'app/icons/scroll';
-import {userMetricsApi} from 'app/services/swagger-fetch-clients';
-import {WorkspaceResource} from 'generated/fetch';
-import {withContentRect} from 'react-measure';
+import {userMetricsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {formatWorkspaceResourceDisplayDate, getCdrVersion, reactStyles, withCdrVersions} from 'app/utils';
+import {getDisplayName} from 'app/utils/resources';
+import {
+  CdrVersionListResponse,
+  Workspace,
+  WorkspaceResource,
+  WorkspaceResourceResponse
+} from 'generated/fetch';
+import {Column} from 'primereact/column';
+import {DataTable} from 'primereact/datatable';
+import {useEffect, useState} from 'react';
 
-export const RecentResources = (fp.flow as any)(
-  withContentRect('client'),
-)(class extends React.Component<{
-  measureRef: React.Ref<any>,
-  contentRect: {client: {width: number}},
-  dark: boolean
-}, {
-  loading: boolean,
-  offset: number,
-  resources: WorkspaceResource[],
-  existingCohortName: string[],
-  existingConceptName: string[],
-  existingNotebookName: string[]
-}> {
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      loading: false,
-      resources: [],
-      offset: 0,
-      existingCohortName: [],
-      existingConceptName: [],
-      existingNotebookName: []};
-  }
-
-  componentDidMount() {
-    this.loadResources();
-  }
-
-  async loadResources() {
-    try {
-      this.setState({loading: true});
-      const resources = await userMetricsApi().getUserRecentResources();
-      this.setState({resources});
-    } catch (error) {
-      console.error(error);
-    } finally {
-      this.setState({loading: false});
-    }
-  }
-
-  getExistingNameList(resource) {
-    if (resource.notebook) {
-      return this.state.existingNotebookName;
-    } else if (resource.conceptSet) {
-      return this.state.existingConceptName;
-    } else if (resource.cohort) {
-      return this.state.existingCohortName;
-    }
-    return [];
-  }
-
-  render() {
-    const {contentRect, measureRef} = this.props;
-    const {offset, resources, loading} = this.state;
-    const limit = (contentRect.client.width - 24) / 224;
-    return (resources !== null && resources.length > 0) || loading ?
-      <React.Fragment>
-        <SmallHeader>Recently Accessed Items</SmallHeader>
-        <div ref={measureRef} style={{display: 'flex', position: 'relative', minHeight: 247}}>
-          <FlexRow style={{position: 'relative', alignItems: 'center', marginTop: '-1rem',
-            marginLeft: '-1rem', paddingLeft: '1rem', opacity: loading ? 0.5 : 1}}>
-            {resources.slice(offset, offset + limit).map((resource, i) => {
-              return <div key={i}> {renderResourceCard({
-                resource: resource,
-                existingNameList: this.getExistingNameList(resource),
-                onUpdate: () => this.loadResources(),
-              })} </div>;
-            })}
-            {offset > 0 && <Scroll
-              dir='left'
-              onClick={() => this.setState({offset: offset - 1})}
-              style={{position: 'absolute', left: 0, paddingBottom: '0.5rem'}}
-            />}
-            {offset + limit < resources.length && <Scroll
-              dir='right'
-              onClick={() => this.setState({offset: offset + 1})}
-              style={{position: 'absolute', right: 0, paddingBottom: '0.5rem'}}
-            />}
-          </FlexRow>
-          {loading && <SpinnerOverlay dark={this.props.dark} />}
-        </div>
-      </React.Fragment> :
-      null;
+const styles = reactStyles({
+  menu: {
+    width: '30px',
   }
 });
+
+interface TableData {
+  menu: JSX.Element;
+  resourceType: JSX.Element;
+  resourceName: string;
+  workspaceName: string;
+  formattedLastModified: string;
+  cdrVersionName: string;
+}
+
+const RecentResources = fp.flow(withCdrVersions())((props: {cdrVersionListResponse: CdrVersionListResponse}) => {
+  const [loading, setLoading] = useState(true);
+  const [resources, setResources] = useState<WorkspaceResourceResponse>();
+  const [wsMap, setWorkspaceMap] = useState<Map<string, Workspace>>();
+  const [tableData, setTableData] = useState<TableData[]>();
+
+  const loadResources = () => {
+    setLoading(true);
+    return userMetricsApi().getUserRecentResources()
+      .then(setResources)
+      .then(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadResources();
+  }, []);
+
+  useEffect(() => {
+    workspacesApi().getWorkspaces().then(response => {
+      const workspaces = response.items.map(r => [r.workspace.id, r.workspace] as [string, Workspace]);
+      setWorkspaceMap(new Map(workspaces));
+    });
+  }, []);
+
+  const getResourceMenu = (resource: WorkspaceResource) => {
+    return getResourceCard({
+      resource,
+      menuOnly: true,
+      existingNameList: [],   // TODO existing bug: does not populate names for rename modal
+      onUpdate: loadResources});
+  };
+
+  useEffect(() => {
+    const getWorkspace = (r: WorkspaceResource) => {
+      return wsMap.get(r.workspaceFirecloudName);
+    };
+
+    const getCdrVersionName = (r: WorkspaceResource) => {
+      const {cdrVersionListResponse} = props;
+      return getCdrVersion(getWorkspace(r), cdrVersionListResponse).name;
+    };
+
+    if (resources && wsMap) {
+      setTableData(resources.map(r => {
+        return {
+          menu: getResourceMenu(r),
+          resourceType: <StyledResourceType resource={r}/>,
+          resourceName: getDisplayName(r),
+          workspaceName: getWorkspace(r).name,
+          formattedLastModified: formatWorkspaceResourceDisplayDate(r.modifiedTime),
+          cdrVersionName: getCdrVersionName(r),
+        };
+      }));
+    }
+  }, [resources, wsMap]);
+
+  return (resources && wsMap && !loading) ? <React.Fragment>
+    <SmallHeader>Recently Accessed Items</SmallHeader>
+      <DataTable
+          data-test-id='object-details-table'
+          value={tableData}
+          scrollable={true}
+          paginator={true}
+          paginatorTemplate='CurrentPageReport'
+          currentPageReportTemplate='Showing {totalRecords} most recent items'>
+        <Column field='menu' style={styles.menu}/>
+        <Column field='resourceType' header='Item type'/>
+        <Column field='resourceName' header='Name'/>
+        <Column field='workspaceName' header='Workspace name'/>
+        <Column field='formattedLastModified' header='Last changed'/>
+        <Column field='cdrVersionName' header='Dataset'/>
+      </DataTable>
+  </React.Fragment> : <SpinnerOverlay/>;
+});
+
+export {
+  RecentResources
+};

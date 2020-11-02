@@ -2,7 +2,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {RenameModal} from 'app/components/rename-modal';
-import {Action, canDelete, canWrite, ResourceCardTemplate} from 'app/components/resource-card-template';
+import {Action, canDelete, canWrite, ResourceCard} from 'app/components/resource-card';
 import {withConfirmDeleteModal, WithConfirmDeleteModalProps} from 'app/components/with-confirm-delete-modal';
 import {withErrorModal, WithErrorModalProps} from 'app/components/with-error-modal';
 import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
@@ -14,6 +14,7 @@ interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSp
   resource: WorkspaceResource;
   existingNameList: string[];
   onUpdate: () => Promise<void>;
+  menuOnly: boolean;
 }
 
 interface State {
@@ -86,7 +87,7 @@ export const CohortReviewResourceCard = fp.flow(
   }
 
   render() {
-    const {resource} = this.props;
+    const {resource, menuOnly} = this.props;
     return <React.Fragment>
       {this.state.showRenameModal &&
         <RenameModal onRename={(name, description) => this.rename(name, description)}
@@ -96,11 +97,11 @@ export const CohortReviewResourceCard = fp.flow(
                    oldName={getDisplayName(resource)}
                    existingNames={this.props.existingNameList}/>
       }
-
-      <ResourceCardTemplate
-        actions={this.actions}
-        disabled={!canWrite(resource)}
-        resource={resource}
+      <ResourceCard
+          resource={resource}
+          actions={this.actions}
+          menuOnly={menuOnly}
+          disabled={!canWrite(resource)}
       />
     </React.Fragment>;
   }

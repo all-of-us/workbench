@@ -7,8 +7,8 @@ import {
   Action,
   canDelete,
   canWrite,
-  ResourceCardTemplate
-} from 'app/components/resource-card-template';
+  ResourceCard
+} from 'app/components/resource-card';
 import {withConfirmDeleteModal, WithConfirmDeleteModalProps} from 'app/components/with-confirm-delete-modal';
 import {withErrorModal, WithErrorModalProps} from 'app/components/with-error-modal';
 import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
@@ -24,6 +24,7 @@ interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSp
   existingNameList: string[];
   onUpdate: () => Promise<void>;
   disableDuplicate: boolean;
+  menuOnly: boolean;
 }
 
 interface State {
@@ -153,7 +154,7 @@ export const NotebookResourceCard = fp.flow(
   }
 
   render() {
-    const {resource} = this.props;
+    const {resource, menuOnly} = this.props;
     return <React.Fragment>
       {this.state.showCopyNotebookModal &&
       <CopyModal
@@ -179,10 +180,10 @@ export const NotebookResourceCard = fp.flow(
                    nameFormat={(name) => this.fullNotebookName(name)}
                    existingNames={this.props.existingNameList}/>
       }
-
-      <ResourceCardTemplate
-          actions={this.actions}
+      <ResourceCard
           resource={resource}
+          actions={this.actions}
+          menuOnly={menuOnly}
           disabled={false} // Notebook Cards are always at least readable
           onNavigate={() => AnalyticsTracker.Notebooks.Preview()}
       />

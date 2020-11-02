@@ -17,6 +17,7 @@ describe('renderResourceCard', () => {
             resource: testCohort,
             existingNameList: [],
             onUpdate: async () => {},
+            menuOnly: false,
         });
         const wrapper = mount(card);
         expect(wrapper.exists()).toBeTruthy();
@@ -27,6 +28,7 @@ describe('renderResourceCard', () => {
             resource: stubResource,
             existingNameList: [],
             onUpdate: async () => {},
+            menuOnly: false,
         });
         expect(card).toBeFalsy();
     })
