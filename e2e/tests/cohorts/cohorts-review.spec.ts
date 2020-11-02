@@ -10,7 +10,7 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {waitForText, waitWhileLoading} from 'utils/waits-utils';
 import {getPropValue} from 'utils/element-utils';
 
-describe('Cohort review tests', () => {
+describe.skip('Cohort review tests', () => {
 
   beforeEach(async () => {
     await signIn(page);

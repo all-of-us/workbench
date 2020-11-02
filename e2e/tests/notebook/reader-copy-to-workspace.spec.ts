@@ -13,7 +13,7 @@ import {waitWhileLoading} from 'utils/waits-utils';
 
 jest.setTimeout(20 * 60 * 1000);
 
-describe('Workspace reader Jupyter notebook action tests', () => {
+describe.skip('Workspace reader Jupyter notebook action tests', () => {
 
   beforeEach(async () => {
     await signIn(page);

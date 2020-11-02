@@ -5,7 +5,7 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import Navigation, {NavLink} from 'app/component/navigation';
 import WorkspaceCard from 'app/component/workspace-card';
 
-describe('Clone workspace', () => {
+describe.skip('Clone workspace', () => {
 
   beforeEach(async () => {
     await signIn(page);

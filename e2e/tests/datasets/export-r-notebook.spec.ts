@@ -9,7 +9,7 @@ import CohortActionsPage from 'app/page/cohort-actions-page';
 import {Ethnicity} from 'app/page/cohort-search-page';
 import {Language, ResourceCard} from 'app/text-labels';
 
-describe('Create Dataset', () => {
+describe.skip('Create Dataset', () => {
 
   beforeEach(async () => {
     await signIn(page);

@@ -7,7 +7,7 @@ import {ResourceCard} from 'app/text-labels';
 import {makeRandomName, makeString} from 'utils/str-utils';
 import {createWorkspace, signIn} from 'utils/test-utils';
 
-describe('Editing and rename Concept Set', () => {
+describe.skip('Editing and rename Concept Set', () => {
 
   beforeEach(async () => {
     await signIn(page);

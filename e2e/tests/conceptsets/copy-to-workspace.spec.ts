@@ -32,7 +32,7 @@ async function createConceptSet(srcWorkspaceCard: WorkspaceCard) {
   return {dataPage, conceptSetName};
 }
 
-describe('Copy Concept Set to another workspace', () => {
+describe.skip('Copy Concept Set to another workspace', () => {
 
   beforeEach(async () => {
     await signIn(page);

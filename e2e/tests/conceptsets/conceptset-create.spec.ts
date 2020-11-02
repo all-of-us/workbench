@@ -6,7 +6,7 @@ import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
 import {ResourceCard} from 'app/text-labels';
 
-describe('Create Concept Sets from Domains', () => {
+describe.skip('Create Concept Sets from Domains', () => {
 
   beforeEach(async () => {
     await signIn(page);

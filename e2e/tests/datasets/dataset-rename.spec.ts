@@ -4,7 +4,7 @@ import {ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
 
-describe('Dataset test', () => {
+describe.skip('Dataset test', () => {
 
   beforeEach(async () => {
     await signIn(page);

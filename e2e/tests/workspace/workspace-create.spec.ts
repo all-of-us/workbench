@@ -7,7 +7,7 @@ import * as testData from 'resources/data/workspace-data';
 import {makeWorkspaceName} from 'utils/str-utils';
 import {UseFreeCredits} from 'app/page/workspace-base';
 
-describe('Creating new workspaces', () => {
+describe.skip('Creating new workspaces', () => {
 
   beforeEach(async () => {
     await signIn(page);

@@ -17,12 +17,14 @@ module.exports = {
   ],
   "reporters": [
     "default",
+    "jest-junit",
     [
       "jest-stare",
       {
         "resultDir": "logs",
         "resultJson": "test-results.json",
-        "reportTitle": "AoU integration tests"
+        "reportTitle": "AoU integration tests",
+        "report": false
       }
     ]
   ],

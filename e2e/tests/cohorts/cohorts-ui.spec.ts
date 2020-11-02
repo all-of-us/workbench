@@ -5,7 +5,7 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
 import {TabLabels} from 'app/page/workspace-base';
 
-describe('Cohorts UI tests', () => {
+describe.skip('Cohorts UI tests', () => {
 
   beforeEach(async () => {
     await signIn(page);
