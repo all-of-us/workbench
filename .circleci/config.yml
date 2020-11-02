@@ -310,15 +310,15 @@ commands:
       - run:
           name: Combine circleci_parameters.json and test-results.json
           working_directory: ~/workbench/e2e
-          command: jq -s '.[0] * .[1]' ./logs/test-results.json ./logs/circleci_parameters.json
+          command: jq -s '.[0] * .[1]' ./logs/test-results.json ./logs/circleci_parameters.json > ./logs/combined-test-results.json
       - run:
-          name: Upload test-results.json to storage bucket
+          name: Upload combined-test-results.json to storage bucket
           working_directory: ~/workbench/e2e
           command: |
             PROJECT_NAME=all-of-us-workbench-test
             STORAGE_BUCKET=gs://circleci-puppeteer-test-results
             FILE=circleci-build-${CIRCLE_BUILD_NUM}-${CIRCLE_NODE_INDEX}-test-results.json
-            mv ./logs/test-results.json ./logs/${FILE}
+            mv ./logs/combined-test-results.json ./logs/${FILE}
             # gcloud components update
             gcloud config set project ${PROJECT_NAME}
             gsutil cp ./logs/${FILE} ${STORAGE_BUCKET}
