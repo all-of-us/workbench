@@ -10,7 +10,7 @@ import {createWorkspace, findOrCreateWorkspace, signIn, signInAs, signOut} from 
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {waitWhileLoading} from 'utils/waits-utils';
 
-describe.skip('Share workspace', () => {
+describe('Share workspace', () => {
 
   beforeEach(async () => {
     await signIn(page);

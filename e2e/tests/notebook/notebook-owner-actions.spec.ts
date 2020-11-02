@@ -8,7 +8,7 @@ import {signIn} from 'utils/test-utils';
 // Notebook server start may take a long time. Set maximum test running time to 20 minutes.
 jest.setTimeout(20 * 60 * 1000);
 
-describe.skip('Workspace owner Jupyter notebook action tests', () => {
+describe('Workspace owner Jupyter notebook action tests', () => {
 
   // In order to reduce test playback time, reuse same Workspace for all tests in this file.
   // Workspace to be created in first test. If first test fails, next test will create it.

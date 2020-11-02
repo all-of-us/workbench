@@ -5,7 +5,7 @@ import * as testData from 'resources/data/workspace-data';
 import {createWorkspace, performActions, signIn} from 'utils/test-utils';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 
-describe.skip('Editing workspace via workspace card snowman menu', () => {
+describe('Editing workspace via workspace card snowman menu', () => {
 
   beforeEach(async () => {
     await signIn(page);

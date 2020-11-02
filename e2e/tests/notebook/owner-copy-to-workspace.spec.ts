@@ -65,7 +65,7 @@ async function copyNotebookTest(srcCdrVersionName: string, destCdrVersionName: s
   expect(modalTextContent).toContain('This will permanently delete the Notebook.');
 }
 
-describe.skip('Workspace owner Jupyter notebook action tests', () => {
+describe('Workspace owner Jupyter notebook action tests', () => {
 
   beforeEach(async () => {
     await signIn(page);

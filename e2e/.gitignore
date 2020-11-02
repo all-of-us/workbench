@@ -6,7 +6,6 @@ tsc-out/
 out/
 
 # logs
-jest-stare/
 screenshot/
 logs/
 *.log

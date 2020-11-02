@@ -7,7 +7,7 @@ import {makeRandomName} from 'utils/str-utils';
 import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
 import {waitForText, waitWhileLoading} from 'utils/waits-utils';
 
-describe.skip('Create Dataset', () => {
+describe('Create Dataset', () => {
 
   beforeEach(async () => {
     await signIn(page);

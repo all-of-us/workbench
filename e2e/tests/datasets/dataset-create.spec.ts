@@ -6,7 +6,7 @@ import {Option, ResourceCard} from 'app/text-labels';
 import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
 import {waitForText, waitWhileLoading} from 'utils/waits-utils';
 
-describe.skip('Dataset test', () => {
+describe('Dataset test', () => {
 
   beforeEach(async () => {
     await signIn(page);

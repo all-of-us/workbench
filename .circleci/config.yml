@@ -611,20 +611,20 @@ workflows:
     jobs:
       # Always run basic test/lint/compilation (open PRs, master branch merge)
       # Note: by default tags are not picked up.
-      #- api-local-test
-      #- api-unit-test
-      #- ui-unit-test
-      #- api-bigquery-test
-      #- api-integration-test
+      - api-local-test
+      - api-unit-test
+      - ui-unit-test
+      - api-bigquery-test
+      - api-integration-test
       # Deploy to "test" on master branch merges
-      #- api-deploy-to-test:
-          #<<: *filter-master-branch
-          #requires:
-            #- api-unit-test
-      #- ui-deploy-to-test:
-          #<<: *filter-master-branch
-          #requires:
-            #- ui-unit-test
+      - api-deploy-to-test:
+          <<: *filter-master-branch
+          requires:
+            - api-unit-test
+      - ui-deploy-to-test:
+          <<: *filter-master-branch
+          requires:
+            - ui-unit-test
       # Deploy local UI server connected to "test" API server. Run Puppeteer tests for PR commits only
       - puppeteer-test:
           <<: *filter-pr-branch
@@ -637,9 +637,9 @@ workflows:
           parallel_num: 4
           env_name: "test"
           <<: *filter-master-branch
-          #requires:
-            #- api-deploy-to-test
-            #- ui-deploy-to-test
+          requires:
+            - api-deploy-to-test
+            - ui-deploy-to-test
 
   deploy-staging:
     jobs:

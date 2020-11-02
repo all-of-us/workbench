@@ -31,5 +31,5 @@
     "esModuleInterop": true
   },
   "inclue": ["/*"],
-  "exclude": [ "tsc-out", "node_modules", "logs" ]
+  "exclude": [ "tsc-out", "node_modules" ]
 }

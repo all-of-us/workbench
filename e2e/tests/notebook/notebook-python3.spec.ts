@@ -5,7 +5,7 @@ import DataResourceCard from 'app/component/data-resource-card';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import {ResourceCard} from 'app/text-labels';
 
-describe.skip('Jupyter notebook tests in Python language', () => {
+describe('Jupyter notebook tests in Python language', () => {
 
   beforeEach(async () => {
     await signIn(page);

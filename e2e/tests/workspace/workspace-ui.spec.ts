@@ -5,7 +5,7 @@ import WorkspacesPage from 'app/page/workspaces-page';
 import {signIn} from 'utils/test-utils';
 import Navigation, {NavLink} from 'app/component/navigation';
 
-describe.skip('Workspace ui tests', () => {
+describe('Workspace ui tests', () => {
 
   beforeEach(async () => {
     await signIn(page);

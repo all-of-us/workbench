@@ -9,7 +9,7 @@ import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
 import {waitForNumericalString, waitForText} from 'utils/waits-utils';
 
 
-describe.skip('User can create, modify, rename and delete Cohort', () => {
+describe('User can create, modify, rename and delete Cohort', () => {
 
   beforeEach(async () => {
     await signIn(page);

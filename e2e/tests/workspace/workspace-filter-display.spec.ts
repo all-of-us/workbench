@@ -4,7 +4,7 @@ import WorkspaceCard from 'app/component/workspace-card';
 import ReactSelect from 'app/element/react-select';
 import {config} from 'resources/workbench-config';
 
-describe.skip('Workspaces Filter Select menu tests', () => {
+describe('Workspaces Filter Select menu tests', () => {
 
   beforeEach(async () => {
     await signIn(page, config.collaboratorUsername, config.userPassword);

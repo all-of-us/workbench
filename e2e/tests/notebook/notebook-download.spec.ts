@@ -5,7 +5,7 @@ import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
 import {getPropValue} from 'utils/element-utils';
 import {waitForFn} from 'utils/waits-utils';
 
-describe.skip('Jupyter notebook download test', () => {
+describe('Jupyter notebook download test', () => {
 
   beforeEach(async () => {
     await signIn(page);
