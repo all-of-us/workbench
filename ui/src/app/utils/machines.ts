@@ -68,11 +68,11 @@ export const machineStoragePrice = ({masterDiskSize, numberOfWorkers, workerDisk
 export const machineStorageCostBreakdown = ({masterDiskSize, numberOfWorkers, workerDiskSize}) => {
   let costs = [];
   if (numberOfWorkers && workerDiskSize) {
-    costs.push(`${formatUsd(masterDiskSize * diskPrice)} Master Disk`)
-    costs.push(`${formatUsd((numberOfWorkers * workerDiskSize) * diskPrice)} Worker Disks`)
+    costs.push(`${formatUsd(masterDiskSize * diskPrice)}/hr Master Disk`)
+    costs.push(`${formatUsd((numberOfWorkers * workerDiskSize) * diskPrice)}/hr Worker Disks`)
   }
   else {
-    costs.push(`${formatUsd(masterDiskSize * diskPrice)} Disk`)
+    costs.push(`${formatUsd(masterDiskSize * diskPrice)}/hr Disk`)
   }
   return costs;
 }
@@ -123,14 +123,14 @@ export const machineRunningCostBreakdown = ({
     if (!workerMachine) {
       return costs;
     }
-    costs.push(`${formatUsd(masterMachine.price)} Master VM`);
-    numberOfWorkers > 0 && costs.push(`${formatUsd(workerMachine.price  * numberOfWorkers)} ${numberOfWorkers} Worker VM(s)`);
-    numberOfPreemptibleWorkers > 0 && costs.push(`${formatUsd(workerMachine.preemptiblePrice * numberOfPreemptibleWorkers)} Preemptible Worker VM(s)`);
+    costs.push(`${formatUsd(masterMachine.price)}/hr Master VM`);
+    numberOfWorkers > 0 && costs.push(`${formatUsd(workerMachine.price  * numberOfWorkers)}/hr Worker VM(s) (${numberOfWorkers})`);
+    numberOfPreemptibleWorkers > 0 && costs.push(`${formatUsd(workerMachine.preemptiblePrice * numberOfPreemptibleWorkers)}/hr Preemptible Worker VM(s) (${numberOfPreemptibleWorkers})`);
     const dataprocPrice = (masterMachine.cpu + ((numberOfWorkers + numberOfPreemptibleWorkers) * workerMachine.cpu)) * dataprocCpuPrice;
-    costs.push(`${formatUsd(dataprocPrice)} Dataproc Per-CPU Surcharge`);
+    costs.push(`${formatUsd(dataprocPrice)}/hr Dataproc Per-CPU Surcharge`);
   } else {
-    costs.push(`${formatUsd(masterMachine.price)} VM`);
+    costs.push(`${formatUsd(masterMachine.price)}/hr VM`);
   }
-  costs.push(machineStorageCostBreakdown({masterDiskSize: masterDiskSize, numberOfWorkers: numberOfWorkers, workerDiskSize: workerDiskSize}));
+  costs.push(...machineStorageCostBreakdown({masterDiskSize: masterDiskSize, numberOfWorkers: numberOfWorkers, workerDiskSize: workerDiskSize}));
   return costs;
 }

@@ -291,7 +291,7 @@ const CostPredictor = ({freeCreditsRemaining, profile, runningCost, runningCostB
             {runningCostBreakdown.map((lineItem, i) => <div key={i}>{lineItem}</div>)}
           </div>
         }>
-          <div style={{fontSize: '20px', color: colors.accent}}>{formatUsd(runningCost)}</div>
+          <div style={{fontSize: '20px', color: colors.accent}}>{formatUsd(runningCost)}/hr</div>
         </TooltipTrigger>
       </FlexColumn>
       <FlexColumn>
@@ -302,7 +302,7 @@ const CostPredictor = ({freeCreditsRemaining, profile, runningCost, runningCostB
             {storageCostBreakdown.map((lineItem, i) => <div key={i}>{lineItem}</div>)}
           </div>
         }>
-          <div style={{fontSize: '20px', color: colors.accent}}>{formatUsd(storageCost)}</div>
+          <div style={{fontSize: '20px', color: colors.accent}}>{formatUsd(storageCost)}/hr</div>
         </TooltipTrigger>
       </FlexColumn>
     </FlexRow>
