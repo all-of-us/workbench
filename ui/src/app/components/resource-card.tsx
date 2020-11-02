@@ -8,6 +8,7 @@ import {SnowmanIcon} from 'app/components/icons';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import colors from 'app/styles/colors';
 import {formatWorkspaceResourceDisplayDate, reactStyles} from 'app/utils';
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import {
   getDescription,
@@ -21,6 +22,7 @@ import {
   isNotebook,
 } from 'app/utils/resources';
 import {WorkspaceResource} from 'generated/fetch';
+import {PropsWithChildren} from 'react';
 
 const styles = reactStyles({
   card: {
@@ -30,13 +32,13 @@ const styles = reactStyles({
     padding: '0.75rem 0.75rem 0rem 0.75rem',
     boxShadow: '0 0 0 0'
   },
-  cardName: {
+  resourceName: {
     fontSize: '18px', fontWeight: 500, lineHeight: '22px', color: colors.accent,
     cursor: 'pointer', wordBreak: 'break-all', textOverflow: 'ellipsis',
     overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3,
     WebkitBoxOrient: 'vertical', textDecoration: 'none'
   },
-  cardDescription: {
+  resourceDescription: {
     textOverflow: 'ellipsis', overflow: 'hidden', display: '-webkit-box',
     WebkitLineClamp: 4, WebkitBoxOrient: 'vertical'
   },
@@ -120,6 +122,7 @@ const StyledResourceType = (props: {resource: WorkspaceResource}) => {
        >{fp.startCase(fp.camelCase(getTypeString(resource)))}</div>;
 };
 
+
 function canWrite(resource: WorkspaceResource): boolean {
   return resource.permission === 'OWNER' || resource.permission === 'WRITER';
 }
@@ -128,12 +131,39 @@ function canDelete(resource: WorkspaceResource): boolean {
   return resource.permission === 'OWNER';
 }
 
+interface NavProps extends PropsWithChildren<any> {
+  resource: WorkspaceResource;
+}
+const ResourceNavigation = (props: NavProps) => {
+  function canNavigate(): boolean {
+    // can always navigate to notebooks
+    return isNotebook(resource) || canWrite(resource);
+  }
+
+  function onNavigate() {
+    if (isNotebook(resource)) {
+      AnalyticsTracker.Notebooks.Preview();
+    }
+  }
+
+  const {resource, children} = props;
+  return <Clickable disabled={!canNavigate()}>
+    <a style={styles.resourceName}
+       data-test-id='resource-name'
+       href={getResourceUrl(resource)}
+       onClick={e => {
+         onNavigate();
+         navigateAndPreventDefaultIfNoKeysPressed(e, getResourceUrl(resource));
+       }}>
+      {...children}
+    </a>
+  </Clickable>;
+};
+
 
 interface Props {
   actions: Action[];
-  disabled: boolean;
   resource: WorkspaceResource;
-  onNavigate: () => void;
   menuOnly: boolean;  // use this component strictly for its actions, without rendering the card
 }
 
@@ -144,10 +174,6 @@ class ResourceCard extends React.Component<Props, {}> {
     super(props);
   }
 
-  static defaultProps = {
-    onNavigate: () => {}
-  };
-
   render() {
     const {resource, menuOnly} = this.props;
     return menuOnly ? <ResourceActionsMenu actions={this.props.actions}/> :
@@ -156,19 +182,9 @@ class ResourceCard extends React.Component<Props, {}> {
           <FlexColumn style={{alignItems: 'flex-start'}}>
             <FlexRow style={{alignItems: 'flex-start'}}>
               <ResourceActionsMenu actions={this.props.actions}/>
-              <Clickable disabled={this.props.disabled}>
-                <a style={styles.cardName}
-                   data-test-id='card-name'
-                   href={getResourceUrl(resource)}
-                   onClick={e => {
-                     this.props.onNavigate();
-                     navigateAndPreventDefaultIfNoKeysPressed(e, getResourceUrl(resource));
-                   }}>
-                  {getDisplayName(resource)}
-                </a>
-              </Clickable>
+              <ResourceNavigation resource={resource}>{getDisplayName(resource)}</ResourceNavigation>
             </FlexRow>
-            <div style={styles.cardDescription}>{getDescription(resource)}</div>
+            <div style={styles.resourceDescription}>{getDescription(resource)}</div>
           </FlexColumn>
           <div style={styles.cardFooter}>
             <div style={styles.lastModified} data-test-id='last-modified'>
@@ -183,6 +199,7 @@ export {
   Action,
   ResourceCard,
   StyledResourceType,
+  ResourceNavigation,
   canWrite,
   canDelete,
 };

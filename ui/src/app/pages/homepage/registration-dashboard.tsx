@@ -32,7 +32,7 @@ const styles = reactStyles({
     color: colors.primary, fontSize: '16px', lineHeight: '19px', fontWeight: 600,
     marginBottom: '0.5rem'
   },
-  cardDescription: {
+  resourceDescription: {
     color: colors.primary, fontSize: '14px', lineHeight: '20px'
   },
   closeableWarning: {
@@ -366,7 +366,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
               <div style={styles.cardHeader}>{card.title}</div>
             </FlexColumn>
             {!this.allTasksCompleted() &&
-            <div style={styles.cardDescription}>{card.description}</div>}
+            <div style={styles.resourceDescription}>{card.description}</div>}
             <FlexSpacer/>
             {this.taskCompletionList[i] ?
               <Button disabled={true} data-test-id='completed-button'

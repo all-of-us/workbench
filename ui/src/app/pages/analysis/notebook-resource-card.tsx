@@ -184,8 +184,6 @@ export const NotebookResourceCard = fp.flow(
           resource={resource}
           actions={this.actions}
           menuOnly={menuOnly}
-          disabled={false} // Notebook Cards are always at least readable
-          onNavigate={() => AnalyticsTracker.Notebooks.Preview()}
       />
     </React.Fragment>;
   }

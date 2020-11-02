@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import {FlexRow} from 'app/components/flex';
 import {SmallHeader} from 'app/components/headers';
-import {StyledResourceType} from 'app/components/resource-card';
+import {ResourceNavigation, StyledResourceType} from 'app/components/resource-card';
 import {renderResourceCard} from 'app/components/render-resource-card';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {userMetricsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
@@ -28,7 +28,7 @@ const styles = reactStyles({
 interface TableData {
   menu: JSX.Element;
   resourceType: JSX.Element;
-  resourceName: string;
+  resourceName: JSX.Element;
   workspaceName: string;
   formattedLastModified: string;
   cdrVersionName: string;
@@ -80,8 +80,8 @@ const RecentResources = fp.flow(withCdrVersions())((props: {cdrVersionListRespon
       setTableData(resources.map(r => {
         return {
           menu: getResourceMenu(r),
-          resourceType: <StyledResourceType resource={r}/>,
-          resourceName: getDisplayName(r),
+          resourceType: <ResourceNavigation resource={r}><StyledResourceType resource={r}/></ResourceNavigation>,
+          resourceName: <ResourceNavigation resource={r}>{getDisplayName(r)}</ResourceNavigation>,
           workspaceName: getWorkspace(r).name,
           formattedLastModified: formatWorkspaceResourceDisplayDate(r.modifiedTime),
           cdrVersionName: getCdrVersionName(r),

@@ -101,7 +101,6 @@ export const CohortReviewResourceCard = fp.flow(
           resource={resource}
           actions={this.actions}
           menuOnly={menuOnly}
-          disabled={!canWrite(resource)}
       />
     </React.Fragment>;
   }

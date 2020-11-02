@@ -32,12 +32,12 @@ const styles = reactStyles({
     padding: '0.75rem 0.75rem 0rem 0.75rem',
     boxShadow: '0 0 0 0'
   },
-  cardName: {
+  resourceName: {
     fontSize: '18px', fontWeight: 600, lineHeight: '22px', color: colors.primary,
     wordBreak: 'break-word', textOverflow: 'ellipsis', overflow: 'hidden',
     display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical'
   },
-  cardDescription: {
+  resourceDescription: {
     marginTop: '0.5rem', textOverflow: 'ellipsis', overflow: 'hidden', display: '-webkit-box',
     WebkitLineClamp: 4, WebkitBoxOrient: 'vertical'
   },
@@ -139,9 +139,9 @@ const CohortActions = withCurrentWorkspace()(
               return <ActionCardBase key={i} style={styles.card}>
                 <FlexColumn style={{alignItems: 'flex-start'}}>
                   <FlexRow style={{alignItems: 'flex-start'}}>
-                    <div style={styles.cardName}>{card.title}</div>
+                    <div style={styles.resourceName}>{card.title}</div>
                   </FlexRow>
-                  <div style={styles.cardDescription}>{card.description}</div>
+                  <div style={styles.resourceDescription}>{card.description}</div>
                 </FlexColumn>
                 <div>
                   <Button
