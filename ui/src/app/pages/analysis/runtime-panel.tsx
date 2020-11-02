@@ -24,11 +24,11 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {Dropdown} from 'primereact/dropdown';
 import {InputNumber} from 'primereact/inputnumber';
 
-import {GceConfig, Runtime, RuntimeConfigurationType, RuntimeStatus} from 'generated/fetch';
+import {formatUsd} from 'app/utils/numbers';
+import {Runtime, RuntimeConfigurationType, RuntimeStatus} from 'generated/fetch';
 import {BillingAccountType, CdrVersionListResponse, DataprocConfig} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {formatUsd} from "../../utils/numbers";
 
 const {useState, useEffect, Fragment} = React;
 
@@ -234,10 +234,10 @@ const PresetSelector = ({setSelectedDiskSize, setSelectedMachine, setSelectedCom
                   <React.Fragment>
                     {
                       fp.flow(
-                          fp.filter(['displayName', 'General Analysis']),
-                          fp.toPairs,
-                          fp.map(([i, preset]) => {
-                            return <MenuItem
+                        fp.filter(['displayName', 'General Analysis']),
+                        fp.toPairs,
+                        fp.map(([i, preset]) => {
+                          return <MenuItem
                                 style={styles.presetMenuItem}
                                 key={i}
                                 onClick={() => {
@@ -264,7 +264,7 @@ const PresetSelector = ({setSelectedDiskSize, setSelectedMachine, setSelectedCom
                                 }}>
                               {preset.displayName}
                             </MenuItem>;
-                          })
+                        })
                       )(runtimePresets)
                     }
                   </React.Fragment>
@@ -272,13 +272,22 @@ const PresetSelector = ({setSelectedDiskSize, setSelectedMachine, setSelectedCom
     <Clickable data-test-id='runtime-presets-menu'>
       Recommended environments <ClrIcon shape='caret down'/>
     </Clickable>
-  </PopupTrigger>
-}
+  </PopupTrigger>;
+};
 
-const CostPredictor = ({freeCreditsRemaining, profile, runningCost, runningCostBreakdown, runtimeChanged, storageCost, storageCostBreakdown, workspace}) => {
+const CostPredictor = ({
+  freeCreditsRemaining,
+  profile,
+  runningCost,
+  runningCostBreakdown,
+  runtimeChanged,
+  storageCost,
+  storageCostBreakdown,
+  workspace
+}) => {
   const wrapperStyle = runtimeChanged
     ? {...styles.costPredictorWrapper, backgroundColor: colorWithWhiteness(colors.warning, .9), borderColor: colors.warning}
-    : styles.costPredictorWrapper
+    : styles.costPredictorWrapper;
   return <FlexRow
     style={wrapperStyle}
   >
@@ -324,12 +333,12 @@ const CostPredictor = ({freeCreditsRemaining, profile, runningCost, runningCostB
       Costs will be charged to billing account {workspace.billingAccountName}.
     </div>}
   </FlexRow>;
-}
+};
 
 export const RuntimePanel = fp.flow(
-    withCdrVersions(),
-    withCurrentWorkspace(),
-    withUserProfile()
+  withCdrVersions(),
+  withCurrentWorkspace(),
+  withUserProfile()
 )(({cdrVersionListResponse, workspace, profileState, workspaceCreatorFreeCreditsRemaining}) => {
   const {namespace, cdrVersionId} = workspace;
 
@@ -409,10 +418,10 @@ export const RuntimePanel = fp.flow(
           workspace={workspace}
       />
       <PresetSelector
-          setSelectedDiskSize={(diskSize) => setSelectedDiskSize(diskSize)}
-          setSelectedMachine={(machineName) => setSelectedMachine(machineName)}
+          setSelectedDiskSize={(disk) => setSelectedDiskSize(disk)}
+          setSelectedMachine={(machine) => setSelectedMachine(machine)}
           setSelectedCompute={(compute) => setSelectedCompute(compute)}
-          setSelectedDataprocConfig={(dataprocConfig) => setSelectedDataprocConfig(dataprocConfig)}
+          setSelectedDataprocConfig={(dataproc) => setSelectedDataprocConfig(dataproc)}
       />
 
       {/* Runtime customization: change detailed machine configuration options. */}
@@ -434,7 +443,7 @@ export const RuntimePanel = fp.flow(
       <FlexColumn style={{marginTop: '1rem'}}>
         <label htmlFor='runtime-compute'>Compute type</label>
         <Dropdown id='runtime-compute'
-                  // disabled={!hasMicroarrayData}
+                  disabled={!hasMicroarrayData}
                   style={{width: '10rem'}}
                   options={[ComputeType.Standard, ComputeType.Dataproc]}
                   value={selectedCompute || ComputeType.Standard}
@@ -459,9 +468,9 @@ export const RuntimePanel = fp.flow(
     >
       <ClrIcon
           style={{color: colors.warning, marginLeft: '.5rem'}}
-          shape={"warning-standard"}
+          shape={'warning-standard'}
           size={16}
-          class={"is-solid"}
+          class={'is-solid'}
       />
       <div style={{marginLeft: '.5rem'}}>You've made changes that require recreating your environment to take effect.</div>
     </FlexRow>}

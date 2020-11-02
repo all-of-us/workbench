@@ -46,9 +46,9 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 
+import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {Criteria, ParticipantCohortStatus, RuntimeStatus, WorkspaceAccessLevel} from 'generated/fetch';
 import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
-import {workspacesApi} from "../services/swagger-fetch-clients";
 
 const proIcons = {
   arrowLeft: '/assets/icons/arrow-left-regular.svg',
