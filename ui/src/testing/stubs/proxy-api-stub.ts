@@ -1,11 +1,11 @@
 import {ProxyApi} from 'notebooks-generated/fetch';
-import {StubImplementationRequired} from 'testing/stubs/stub-utils';
+import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
 export class ProxyApiStub extends ProxyApi {
 
   constructor() {
     super(undefined, undefined, (..._: any[]) => {
-      throw StubImplementationRequired;
+      throw stubNotImplementedError;
     });
   }
 

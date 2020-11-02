@@ -28,7 +28,7 @@ import {
   WorkspacesApi,
   WorkspaceUserRolesResponse
 } from 'generated/fetch';
-import {StubImplementationRequired} from 'testing/stubs/stub-utils';
+import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 import {CdrVersionsStubVariables} from './cdr-versions-api-stub';
 import {cohortReviewStubs} from './cohort-review-service-stub';
 import {exampleCohortStubs} from './cohorts-api-stub';
@@ -134,7 +134,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
   newWorkspaceCount = 0;
 
   constructor(workspaces?: Workspace[], workspaceUserRoles?: UserRole[]) {
-    super(undefined, undefined, (..._: any[]) => { throw StubImplementationRequired; });
+    super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
     this.workspaces = fp.defaultTo(workspaceStubs, workspaces);
     this.workspaceAccess = new Map<string, WorkspaceAccessLevel>();
     this.notebookList = WorkspacesApiStub.stubNotebookList();

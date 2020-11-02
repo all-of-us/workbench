@@ -3,13 +3,13 @@ import {
   ConfigResponse
 } from 'generated/fetch';
 import defaultServerConfig from 'testing/default-server-config';
-import {StubImplementationRequired} from 'testing/stubs/stub-utils';
+import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
 export class ConfigApiStub extends ConfigApi {
   public config: ConfigResponse;
 
   constructor(configOverrides: Partial<ConfigResponse> = {}) {
-    super(undefined, undefined, (..._: any[]) => { throw StubImplementationRequired; });
+    super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
     this.config = {...defaultServerConfig, ...configOverrides};
   }
 

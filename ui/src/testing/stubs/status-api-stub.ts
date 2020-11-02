@@ -1,9 +1,9 @@
 import {StatusApi, StatusResponse} from 'generated/fetch';
-import {StubImplementationRequired} from 'testing/stubs/stub-utils';
+import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
 export class StatusApiStub extends StatusApi {
   constructor() {
-    super(undefined, undefined, (..._: any[]) => { throw StubImplementationRequired; });
+    super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
   }
 
   getStatus(): Promise<StatusResponse> {

@@ -6,13 +6,13 @@ import {
   RuntimeLocalizeResponse,
   RuntimeStatus
 } from 'generated/fetch';
-import {StubImplementationRequired} from 'testing/stubs/stub-utils';
+import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
 export class RuntimeApiStub extends RuntimeApi {
   public runtime: Runtime;
 
   constructor() {
-    super(undefined, undefined, (..._: any[]) => { throw StubImplementationRequired; });
+    super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
     this.runtime = {
       runtimeName: 'Runtime Name',
       googleProject: 'Namespace',

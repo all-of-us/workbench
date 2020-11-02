@@ -1,10 +1,10 @@
 import {AuthDomainApi, UpdateUserDisabledRequest} from 'generated/fetch';
-import {StubImplementationRequired} from 'testing/stubs/stub-utils';
+import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
 
 export class AuthDomainApiStub extends AuthDomainApi {
   constructor() {
-    super(undefined, undefined, (..._: any[]) => { throw StubImplementationRequired; });
+    super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
   }
 
   public updateUserDisabledStatus(request?: UpdateUserDisabledRequest): Promise<Response> {

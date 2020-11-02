@@ -14,7 +14,7 @@ import {
   SortOrder,
   VocabularyListResponse
 } from 'generated/fetch';
-import {StubImplementationRequired} from 'testing/stubs/stub-utils';
+import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
 const criteriaStub = {
   includes: [{
@@ -97,7 +97,7 @@ export class CohortReviewServiceStub extends CohortReviewApi {
   fetch;
 
   constructor() {
-    super(undefined, undefined, (..._: any[]) => { throw StubImplementationRequired; });
+    super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
   }
 
   getParticipantCohortStatuses(): Promise<CohortReview> {

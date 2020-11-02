@@ -1,12 +1,12 @@
 import {User, UserApi, UserResponse, UserRole, WorkbenchListBillingAccountsResponse} from 'generated/fetch';
 
 import * as fp from 'lodash/fp';
-import {StubImplementationRequired} from 'testing/stubs/stub-utils';
+import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
 export class UserApiStub extends UserApi {
   existingUsers: UserRole[];
   constructor(existingUsers?: UserRole[]) {
-    super(undefined, undefined, (..._: any[]) => { throw StubImplementationRequired; });
+    super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
     if (existingUsers) {
       this.existingUsers = existingUsers;
     }

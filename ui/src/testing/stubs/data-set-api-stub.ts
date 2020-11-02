@@ -11,7 +11,7 @@ import {
   EmptyResponse,
   KernelTypeEnum,
 } from 'generated/fetch';
-import {StubImplementationRequired} from 'testing/stubs/stub-utils';
+import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
 export class DataSetApiStub extends DataSetApi {
   static stubDataSets(): DataSet[] {
@@ -31,7 +31,7 @@ export class DataSetApiStub extends DataSetApi {
   }
 
   constructor() {
-    super(undefined, undefined, (..._: any[]) => { throw StubImplementationRequired; });
+    super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
   }
 
   generateCode(workspaceNamespace: string,

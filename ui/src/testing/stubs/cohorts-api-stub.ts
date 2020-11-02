@@ -11,7 +11,7 @@ import {
   WorkspaceResource
 } from 'generated/fetch';
 import {CohortListResponse} from 'generated/fetch/api';
-import {StubImplementationRequired} from 'testing/stubs/stub-utils';
+import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 import {WorkspaceStubVariables} from './workspace-service-stub';
 
 export let DEFAULT_COHORT_ID = 1;
@@ -78,7 +78,7 @@ export class CohortsApiStub extends CohortsApi {
   public resourceList: WorkspaceResource[];
 
   constructor() {
-    super(undefined, undefined, (..._: any[]) => { throw StubImplementationRequired; });
+    super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
 
     const stubWorkspace: Workspace = {
       name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME,

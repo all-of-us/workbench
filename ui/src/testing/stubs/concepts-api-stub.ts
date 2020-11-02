@@ -12,7 +12,7 @@ import {
   SurveyModule, SurveyQuestions,
   SurveysResponse
 } from 'generated/fetch';
-import {StubImplementationRequired} from 'testing/stubs/stub-utils';
+import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
 export class ConceptStubVariables {
   static STUB_CONCEPTS: Concept[] = [
@@ -171,7 +171,7 @@ export class SurveyQuestionStubVariables {
 export class ConceptsApiStub extends ConceptsApi {
   public concepts?: Concept[];
   constructor() {
-    super(undefined, undefined, (..._: any[]) => { throw StubImplementationRequired; });
+    super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
 
     this.concepts = ConceptStubVariables.STUB_CONCEPTS;
   }
