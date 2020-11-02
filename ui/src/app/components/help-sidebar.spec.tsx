@@ -12,6 +12,7 @@ import {CohortReviewServiceStub, cohortReviewStubs} from 'testing/stubs/cohort-r
 import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 import {HelpSidebar} from './help-sidebar';
 import {WorkspaceAccessLevel} from "generated/fetch";
+import {WorkspacesApi} from "../../generated/fetch";
 
 const sidebarContent = require('assets/json/help-sidebar.json');
 
@@ -31,6 +32,7 @@ describe('HelpSidebar', () => {
     props = {};
     registerApiClient(CohortReviewApi, new CohortReviewServiceStub());
     registerApiClient(CohortAnnotationDefinitionApi, new CohortAnnotationDefinitionServiceStub());
+    registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     currentWorkspaceStore.next(workspaceDataStub);
     cohortReviewStore.next(cohortReviewStubs[0]);
     serverConfigStore.next({
