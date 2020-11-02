@@ -4,7 +4,7 @@ import {config} from 'resources/workbench-config';
 import {waitForText} from 'utils/waits-utils';
 
 
-describe('Login tests:', () => {
+describe.skip('Login tests:', () => {
 
   test('Cookie banner visible on login page', async () => {
     const loginPage = new GoogleLoginPage(page);

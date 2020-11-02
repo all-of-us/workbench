@@ -4,7 +4,7 @@ import navigation, {NavLink} from 'app/component/navigation';
 import {makeString, makeUrl} from 'utils/str-utils';
 import Button from 'app/element/button';
 
-describe('Profile', () => {
+describe.skip('Profile', () => {
   // initialized in beforeEach()
   let profilePage: ProfilePage;
 

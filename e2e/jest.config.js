@@ -16,19 +16,18 @@ module.exports = {
     "dotenv/config"
   ],
   "reporters": [
-    "default",
-    "jest-junit",
-    [
-      "jest-stare",
-      {
+    "default", [
+      "jest-stare", {
         "resultDir": "logs",
         "resultJson": "test-results.json",
         "reportTitle": "AoU integration tests",
-        "report": false
+        "report": false,
+        "additionalResultsProcessors": [
+          "jest-junit"
+        ]
       }
     ]
   ],
-  "testResultsProcessor": "./node_modules/jest-stare",
   "transform": {
     "^.+\\.(ts|tsx)$": "ts-jest"
   },
