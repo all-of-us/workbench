@@ -4,7 +4,7 @@ import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
 import {Spinner} from 'app/components/spinners';
-import {ComputeType, RuntimePanel, Props} from 'app/pages/analysis/runtime-panel';
+import {RuntimePanel, Props} from 'app/pages/analysis/runtime-panel';
 import {workspaceStubs} from 'testing/stubs/workspaces-api-stub';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import defaultServerConfig from 'testing/default-server-config';
@@ -17,6 +17,7 @@ import {runtimeStore} from 'app/utils/stores';
 import {cdrVersionListResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 import {cdrVersionStore, serverConfigStore} from 'app/utils/navigation';
 import { RuntimeConfigurationType } from 'generated/fetch';
+import {ComputeType} from "app/utils/machines";
 
 
 

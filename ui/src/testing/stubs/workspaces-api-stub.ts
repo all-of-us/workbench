@@ -363,7 +363,10 @@ export class WorkspacesApiStub extends WorkspacesApi {
     });
   }
 
-  getWorkspaceCreatorFreeCreditsRemaining(workspaceNamespace: string, workspaceId: string): Promise<WorkspaceCreatorFreeCreditsRemainingResponse> {
+  getWorkspaceCreatorFreeCreditsRemaining(
+    workspaceNamespace: string,
+    workspaceId: string
+  ): Promise<WorkspaceCreatorFreeCreditsRemainingResponse> {
     return new Promise<WorkspaceCreatorFreeCreditsRemainingResponse>(resolve => {
       resolve({freeCreditsRemaining: 123.4});
     });

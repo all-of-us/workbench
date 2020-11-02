@@ -12,7 +12,8 @@ import {CohortReviewServiceStub, cohortReviewStubs} from 'testing/stubs/cohort-r
 import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 import {HelpSidebar} from './help-sidebar';
 import {WorkspaceAccessLevel} from "generated/fetch";
-import {WorkspacesApi} from "../../generated/fetch";
+import {WorkspacesApi} from "generated/fetch";
+import {WorkspacesApiStub} from "testing/stubs/workspaces-api-stub";
 
 const sidebarContent = require('assets/json/help-sidebar.json');
 
