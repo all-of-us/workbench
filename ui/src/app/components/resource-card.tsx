@@ -170,7 +170,6 @@ interface Props {
   menuOnly: boolean;  // use this component strictly for its actions, without rendering the card
 }
 
-// This will be renamed to ResourceCard once the old code is removed
 class ResourceCard extends React.Component<Props, {}> {
 
   constructor(props: Props) {

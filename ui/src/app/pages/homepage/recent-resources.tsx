@@ -23,6 +23,13 @@ import {DataTable} from 'primereact/datatable';
 import {CSSProperties, useEffect, useState} from 'react';
 
 const styles = reactStyles({
+  column: {
+    textAlign: 'left',
+  },
+  typeColumn: {
+    textAlign: 'left',
+    width: '130px',
+  },
   menu: {
     width: '30px',
   },
@@ -116,18 +123,18 @@ const RecentResources = fp.flow(withCdrVersions())((props: {cdrVersionListRespon
   return (resources && wsMap && !loading) ? <React.Fragment>
     <SmallHeader>Recently Accessed Items</SmallHeader>
       <DataTable
-          data-test-id='object-details-table'
+          data-test-id='recent-resources-table'
           value={tableData}
           scrollable={true}
           paginator={true}
           paginatorTemplate='CurrentPageReport'
           currentPageReportTemplate='Showing {totalRecords} most recent items'>
         <Column field='menu' style={styles.menu}/>
-        <Column field='resourceType' header='Item type'/>
-        <Column field='resourceName' header='Name'/>
-        <Column field='workspaceName' header='Workspace name'/>
-        <Column field='formattedLastModified' header='Last changed'/>
-        <Column field='cdrVersionName' header='Dataset'/>
+        <Column field='resourceType' header='Item type' style={styles.typeColumn}/>
+        <Column field='resourceName' header='Name' style={styles.column}/>
+        <Column field='workspaceName' header='Workspace name' style={styles.column}/>
+        <Column field='formattedLastModified' header='Last changed' style={styles.column}/>
+        <Column field='cdrVersionName' header='Dataset' style={styles.column}/>
       </DataTable>
   </React.Fragment> : <SpinnerOverlay/>;
 });
