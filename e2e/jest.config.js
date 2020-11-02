@@ -16,7 +16,8 @@ module.exports = {
     "dotenv/config"
   ],
   "reporters": [
-    "default", [
+    "default",
+    [
       "jest-stare", {
         "resultDir": "logs",
         "resultJson": "test-results.json",
