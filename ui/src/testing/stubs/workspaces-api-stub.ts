@@ -19,6 +19,7 @@ import {
   Workspace,
   WorkspaceAccessLevel,
   WorkspaceBillingUsageResponse,
+  WorkspaceCreatorFreeCreditsRemainingResponse,
   WorkspaceListResponse,
   WorkspaceResourceResponse,
   WorkspaceResourcesRequest,
@@ -359,6 +360,12 @@ export class WorkspacesApiStub extends WorkspacesApi {
         .concat(convertToResources(DataSetApiStub.stubDataSets(), ResourceType.DATASET, workspace))
         .concat(convertToResources(ConceptSetsApiStub.stubConceptSets(), ResourceType.CONCEPTSET, workspace));
       resolve(workspaceResources);
+    });
+  }
+
+  getWorkspaceCreatorFreeCreditsRemaining(workspaceNamespace: string, workspaceId: string): Promise<WorkspaceCreatorFreeCreditsRemainingResponse> {
+    return new Promise<WorkspaceCreatorFreeCreditsRemainingResponse>(resolve => {
+      resolve({freeCreditsRemaining: 123.4});
     });
   }
 }
