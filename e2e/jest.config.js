@@ -17,8 +17,16 @@ module.exports = {
   ],
   "reporters": [
     "default",
-    "jest-junit"
+    [
+      "jest-stare",
+      {
+        "resultDir": "logs",
+        "resultJson": "test-results.json",
+        "reportTitle": "AoU integration tests"
+      }
+    ]
   ],
+  "testResultsProcessor": "./node_modules/jest-stare",
   "transform": {
     "^.+\\.(ts|tsx)$": "ts-jest"
   },
