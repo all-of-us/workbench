@@ -1,4 +1,4 @@
-import Link from 'app/element/link';
+// import Link from 'app/element/link';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import WorkspacesPage, {FieldSelector} from 'app/page/workspaces-page';
 import {signIn, performActions} from 'utils/test-utils';
@@ -26,7 +26,8 @@ describe('Creating new workspaces', () => {
     expect(modalTextContent).toContain('Primary purpose of your project (Question 1)Summary of research purpose (Question 2)Population of interest (Question 5)');
     expect(modalTextContent).toContain('You can also make changes to your answers after you create your workspace.');
 
-    await verifyWorkspaceLinkOnDataPage(newWorkspaceName);
+    const dataPage = new WorkspaceDataPage(page);
+    await dataPage.verifyWorkspaceNameOnDataPage(newWorkspaceName);
   });
 
   test('User can create a workspace using all inputs', async () => {
@@ -69,17 +70,8 @@ describe('Creating new workspaces', () => {
     await finishButton.waitUntilEnabled();
     await workspacesPage.clickCreateFinishButton(finishButton);
 
-    await verifyWorkspaceLinkOnDataPage(newWorkspaceName);
+    const dataPage1 = new WorkspaceDataPage(page);
+    await dataPage1.verifyWorkspaceNameOnDataPage(newWorkspaceName);
   });
-
-  // helper function to check visible workspace link on Data page
-  async function verifyWorkspaceLinkOnDataPage(workspaceName: string) {
-    const dataPage = new WorkspaceDataPage(page);
-    await dataPage.waitForLoad();
-
-    const workspaceLink = new Link(page, `//a[text()='${workspaceName}']`);
-    await workspaceLink.waitForXPath({visible: true});
-    expect(await workspaceLink.isVisible()).toBe(true);
-  }
 
 });
