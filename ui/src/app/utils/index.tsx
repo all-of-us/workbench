@@ -581,7 +581,7 @@ export const withAsyncErrorHandling = fp.curry(
 // Takes a search string and validates for the most common MySQL use cases.
 // Checks for unbalanced (), unclosed "", trailing + or -, and breaking special characters.
 export function validateInputForMySQL(searchString: string): Array<string> {
-  const inputErrors = new Set(); // use Set to prevent duplicate messages
+  const inputErrors = new Set<string>(); // use Set to prevent duplicate messages
   let openParensCount = 0;
   let unclosedQuotes = false;
   for (let i = 0; i < searchString.length; i++) {
