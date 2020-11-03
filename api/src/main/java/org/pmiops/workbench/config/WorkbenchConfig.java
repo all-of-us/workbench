@@ -270,7 +270,10 @@ public class WorkbenchConfig {
     // Whether users should be able to customize notebook runtime settings.
     public boolean enableCustomRuntimes;
     // Whether Leonardo notebooks runtimes should default to GCE (instead of Dataproc).
+    // TODO(RW-5658): Deprecated.
     public boolean enableGceAsNotebookRuntimeDefault;
+    // Flag to indicate if whether to display FitBit data
+    public boolean enableFitbit;
   }
 
   public static class ActionAuditConfig {

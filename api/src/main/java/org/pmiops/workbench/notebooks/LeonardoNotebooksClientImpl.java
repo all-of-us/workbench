@@ -24,8 +24,6 @@ import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest.WelderRe
 import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig.CloudServiceEnum;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
 import org.pmiops.workbench.model.Runtime;
@@ -144,29 +142,19 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     WorkbenchConfig config = workbenchConfigProvider.get();
 
     Object runtimeConfig;
-    if (config.featureFlags.enableCustomRuntimes) {
+    if (workbenchConfigProvider.get().featureFlags.enableCustomRuntimes) {
       if (runtime.getGceConfig() != null) {
         runtimeConfig = leonardoMapper.toLeonardoGceConfig(runtime.getGceConfig());
       } else {
         runtimeConfig = leonardoMapper.toLeonardoMachineConfig(runtime.getDataprocConfig());
       }
-    } else if (workbenchConfigProvider.get().featureFlags.enableGceAsNotebookRuntimeDefault) {
+    } else {
       runtimeConfig = new LeonardoGceConfig()
               .cloudService(LeonardoGceConfig.CloudServiceEnum.GCE)
               .diskSize(
                   Optional.ofNullable(clusterOverride.masterDiskSize)
                       .orElse(config.firecloud.notebookRuntimeDefaultDiskSizeGb))
               .machineType(
-                  Optional.ofNullable(clusterOverride.machineType)
-                      .orElse(config.firecloud.notebookRuntimeDefaultMachineType));
-    } else {
-      runtimeConfig =
-          new LeonardoMachineConfig()
-              .cloudService(CloudServiceEnum.DATAPROC)
-              .masterDiskSize(
-                  Optional.ofNullable(clusterOverride.masterDiskSize)
-                      .orElse(config.firecloud.notebookRuntimeDefaultDiskSizeGb))
-              .masterMachineType(
                   Optional.ofNullable(clusterOverride.machineType)
                       .orElse(config.firecloud.notebookRuntimeDefaultMachineType));
     }

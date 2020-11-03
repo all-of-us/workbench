@@ -6,12 +6,13 @@ import {
   RuntimeLocalizeResponse,
   RuntimeStatus
 } from 'generated/fetch';
+import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
 export class RuntimeApiStub extends RuntimeApi {
   public runtime: Runtime;
 
   constructor() {
-    super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
+    super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
     this.runtime = {
       runtimeName: 'Runtime Name',
       googleProject: 'Namespace',
@@ -33,8 +34,9 @@ export class RuntimeApiStub extends RuntimeApi {
     });
   }
 
-  createRuntime(workspaceNamespace: string, options?: any): Promise<{}> {
+  createRuntime(workspaceNamespace: string, runtime: Runtime): Promise<{}> {
     return new Promise<{}>(resolve => {
+      this.runtime = {...runtime, status: RuntimeStatus.Creating};
       resolve({});
     });
   }

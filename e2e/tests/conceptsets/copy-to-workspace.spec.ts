@@ -42,7 +42,8 @@ describe('Copy Concept Set to another workspace', () => {
    * Test:
    * - Copy Concept Set from one workspace to another workspace when both have the same CDR Version.
    */
-  test('Workspace OWNER can copy Concept Set when CDR Versions match', async () => {
+  // Disabled temporarily, will fix as part of RW-5769
+  xtest('Workspace OWNER can copy Concept Set when CDR Versions match', async () => {
 
     // Create a source and a destination workspace with the same CDR Version.
 
@@ -88,7 +89,8 @@ describe('Copy Concept Set to another workspace', () => {
    * Test:
    * - Fail to Copy Concept Set from one workspace to another workspace when CDR Versions mismatch.
    */
-  test('Workspace OWNER cannot copy Concept Set when CDR Versions mismatch', async () => {
+  // Disabled temporarily, will fix as part of RW-5769
+  xtest('Workspace OWNER cannot copy Concept Set when CDR Versions mismatch', async () => {
 
     // Create a source and a destination workspace with differing CDR Versions.
 

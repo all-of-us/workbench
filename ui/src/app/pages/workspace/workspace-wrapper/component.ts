@@ -75,7 +75,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
     this.subscriptions.push(routeDataStore.subscribe(
       ({minimizeChrome, helpContentKey, notebookHelpSidebarStyles, contentFullHeightOverride}) => {
         this.helpContentKey = helpContentKey;
-        this.notebookStyles = notebookHelpSidebarStyles;
+        this.notebookStyles = !!notebookHelpSidebarStyles;
         this.contentFullHeightOverride = contentFullHeightOverride;
         this.displayNavBar = !minimizeChrome;
       }
@@ -270,11 +270,15 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
 
       if (child.firstChild) {
         child = child.firstChild;
-      } else if (child.snapshot.data && child.snapshot.data.helpContentKey) {
-        this.helpContentKey = child.snapshot.data.helpContentKey;
-        child = null;
       } else {
-        this.helpContentKey = null;
+        const {
+          helpContentKey = null,
+          notebookHelpSidebarStyles = false,
+          contentFullHeightOverride = false
+        } = child.snapshot.data || {};
+        this.helpContentKey = helpContentKey;
+        this.notebookStyles = notebookHelpSidebarStyles;
+        this.contentFullHeightOverride = contentFullHeightOverride;
         child = null;
       }
     }

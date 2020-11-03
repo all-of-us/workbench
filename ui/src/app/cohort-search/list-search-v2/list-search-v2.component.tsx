@@ -1,5 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {CSSProperties} from 'react';
 import {Key} from 'ts-key-enum';
 
 import {domainToTitle} from 'app/cohort-search/utils';
@@ -11,12 +12,22 @@ import {TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, withCdrVersions, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, withCdrVersions, withCurrentConcept, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {attributesSelectionStore, setSidebarActiveIconStore} from 'app/utils/navigation';
+import {
+  attributesSelectionStore,
+  currentConceptStore,
+  setSidebarActiveIconStore
+} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {CdrVersion, CdrVersionListResponse, CriteriaType, Domain} from 'generated/fetch';
-import {CSSProperties} from 'react';
+import {
+  CdrVersion,
+  CdrVersionListResponse,
+  Criteria,
+  CriteriaSubType,
+  CriteriaType,
+  Domain
+} from 'generated/fetch';
 
 const borderStyle = `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`;
 const styles = reactStyles({
@@ -144,6 +155,12 @@ const styles = reactStyles({
   infoIcon: {
     color: colorWithWhiteness(colors.accent, 0.1),
     marginLeft: '0.25rem'
+  },
+  clearSearchIcon: {
+    color: colors.accent,
+    display: 'inline-block',
+    float: 'right',
+    marginTop: '0.25rem'
   }
 });
 
@@ -202,12 +219,14 @@ const columns = [
 
 interface Props {
   cdrVersionListResponse: CdrVersionListResponse;
+  concept?: Array<Criteria>;
   hierarchy: Function;
   source: string;
   searchContext: any;
   searchTerms: string;
   select: Function;
   selectedIds: Array<string>;
+  selectedSurvey?: string;
   setAttributes: Function;
   workspace: WorkspaceData;
 }
@@ -219,6 +238,7 @@ interface State {
   hoverId: string;
   ingredients: any;
   loading: boolean;
+  searching: boolean;
   searchTerms: string;
   standardOnly: boolean;
   sourceMatch: any;
@@ -226,7 +246,13 @@ interface State {
   totalCount: number;
 }
 
-export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
+const tableBodyOverlayStyle = `
+  body .tablebody {
+    overflow-y: overlay
+  }
+`;
+
+export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), withCurrentConcept())(
   class extends React.Component<Props, State> {
     constructor(props: Props) {
       super(props);
@@ -237,6 +263,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
         ingredients: {},
         hoverId: undefined,
         loading: false,
+        searching: false,
         searchTerms: props.searchTerms,
         standardOnly: false,
         sourceMatch: undefined,
@@ -250,7 +277,21 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
       this.setState({cdrVersion: cdrVersions.find(cdr => cdr.cdrVersionId === cdrVersionId)});
       if (source === 'concept' && searchTerms !== '') {
         this.getResults(searchTerms);
+      } else if (source === 'conceptSetDetails') {
+        this.setState({data: this.props.concept});
       }
+    }
+
+    componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any) {
+      const {concept, source} = this.props;
+      const {searching} = this.state;
+      if (source === 'conceptSetDetails' && prevProps.concept !== concept && !searching) {
+        this.setState({data: concept});
+      }
+    }
+
+    componentWillUnmount() {
+      currentConceptStore.next(null);
     }
 
     handleInput = (event: any) => {
@@ -265,10 +306,12 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
     getResults = async(value: string) => {
       let sourceMatch;
       try {
-        this.setState({data: null, error: false, loading: true, standardOnly: false});
-        const {searchContext: {domain}, workspace: {cdrVersionId}} = this.props;
-        const resp = await cohortBuilderApi().findCriteriaByDomainAndSearchTerm(+cdrVersionId, domain, value.trim());
-        const data = resp.items;
+        this.setState({data: null, error: false, loading: true, searching: true, standardOnly: false});
+        const {searchContext: {domain}, source, selectedSurvey, workspace: {cdrVersionId}} = this.props;
+        const resp = await cohortBuilderApi().findCriteriaByDomainAndSearchTerm(+cdrVersionId, domain, value.trim(), selectedSurvey);
+        const data = source !== 'criteria' && domain === Domain.SURVEY
+          ? resp.items.filter(survey => survey.subtype === CriteriaSubType.QUESTION.toString())
+          : resp.items;
         if (data.length && this.checkSource) {
           sourceMatch = data.find(item => item.code.toLowerCase() === value.trim().toLowerCase() && !item.isStandard);
           if (sourceMatch) {
@@ -294,7 +337,10 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
     }
 
     selectItem = (row: any) => {
-      const param = {parameterId: this.getParamId(row), ...row, attributes: []};
+      let param = {parameterId: this.getParamId(row), ...row, attributes: []};
+      if (row.domainId === Domain.SURVEY) {
+        param = {...param, surveyName: this.props.selectedSurvey};
+      }
       this.props.select(param);
     }
 
@@ -413,8 +459,9 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
     }
 
     render() {
-      const {searchContext: {domain}} = this.props;
-      const {cdrVersion, data, error, ingredients, loading, searchTerms, standardOnly, sourceMatch, standardData, totalCount} = this.state;
+      const {concept, searchContext: {domain}, source} = this.props;
+      const {cdrVersion, data, error, ingredients, loading, searching, searchTerms, standardOnly, sourceMatch, standardData, totalCount}
+        = this.state;
       const showStandardOption = !standardOnly && !!standardData && standardData.length > 0;
       const displayData = standardOnly ? standardData : data;
       return <div style={{overflow: 'auto'}}>
@@ -426,6 +473,10 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
                        placeholder={`Search ${domainToTitle(domain)} by code or description`}
                        onChange={(e) => this.setState({searchTerms: e})}
                        onKeyPress={this.handleInput} />
+            {source === 'conceptSetDetails' && searching && <Clickable style={styles.clearSearchIcon}
+                onClick={() => this.setState({data: concept, searching: false, searchTerms: ''})}>
+              <ClrIcon size={24} shape='times-circle'/>
+            </Clickable>}
           </div>
         </div>
         <div style={{display: 'table', height: '100%', width: '100%'}}>
@@ -470,7 +521,10 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace())(
                 </tr>
               </thead>
             </table>
-            <div style={{height: '15rem', overflowY: 'auto'}}>
+            <style>
+              {tableBodyOverlayStyle}
+            </style>
+            <div style={{height: '15rem'}} className='tablebody'>
               <table className='p-datatable' style={{...styles.table, ...styles.tableBody}}>
                 <tbody className='p-datatable-tbody'>
                 {displayData.map((row, index) => {

@@ -31,6 +31,7 @@ public class CBCriteriaDaoTest {
 
   @Autowired private CBCriteriaDao cbCriteriaDao;
   @Autowired private JdbcTemplate jdbcTemplate;
+  private DbCriteria surveyCriteria;
   private DbCriteria sourceCriteria;
   private DbCriteria standardCriteria;
   private DbCriteria icd9Criteria;
@@ -44,7 +45,7 @@ public class CBCriteriaDaoTest {
 
   @Before
   public void setUp() {
-    DbCriteria surveyCriteria =
+    surveyCriteria =
         cbCriteriaDao.save(
             DbCriteria.builder()
                 .addDomainId(Domain.SURVEY.toString())
@@ -169,6 +170,24 @@ public class CBCriteriaDaoTest {
                 .addStandard(true)
                 .addParentId(1)
                 .build());
+  }
+
+  @Test
+  public void findIdByDomainAndName() {
+    assertThat(cbCriteriaDao.findIdByDomainAndName(Domain.SURVEY.toString(), "The Basics"))
+        .isEqualTo(surveyCriteria.getId());
+  }
+
+  @Test
+  public void findSurveyQuestionCriteriaByDomainAndIdAndFullText() {
+    PageRequest pageRequest = new PageRequest(0, 100);
+    assertThat(
+            cbCriteriaDao
+                .findSurveyQuestionCriteriaByDomainAndIdAndFullText(
+                    Domain.SURVEY.toString(), surveyCriteria.getId(), "term", pageRequest)
+                .getContent()
+                .get(0))
+        .isEqualTo(surveyCriteria);
   }
 
   @Test

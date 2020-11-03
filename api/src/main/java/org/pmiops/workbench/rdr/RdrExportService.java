@@ -13,4 +13,6 @@ public interface RdrExportService {
   void exportWorkspaces(List<Long> workspacesToExport);
 
   void updateDbRdrExport(RdrEntity entity, List<Long> idList);
+
+  void deleteWorkspaceExportEntries(List<Long> workspaceIds);
 }

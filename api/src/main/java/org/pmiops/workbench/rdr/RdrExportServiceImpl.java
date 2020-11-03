@@ -342,6 +342,28 @@ public class RdrExportServiceImpl implements RdrExportService {
   }
 
   /**
+   * Delete the workspace entries from rdr_export Table to make them eligible for next export cron
+   * job
+   *
+   * @param workspaceIds
+   */
+  @Override
+  public void deleteWorkspaceExportEntries(List<Long> workspaceIds) {
+    workspaceIds.forEach(
+        workspaceId -> {
+          try {
+            rdrExportDao.deleteDbRdrExportsByEntityTypeAndEntityId(
+                RdrEntityEnums.entityToStorage(RdrEntity.WORKSPACE), workspaceId);
+          } catch (Exception ex) {
+            log.severe(
+                String.format(
+                    "Error while trying to delete workspace entry from rdr_export %s",
+                    workspaceId));
+          }
+        });
+  }
+
+  /**
    * Set excludeFromPublicDirectory to true if the workspace creator is an operational user i.e has
    * Institution as All of Us Program operational Use
    *

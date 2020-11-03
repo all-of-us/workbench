@@ -3278,6 +3278,11 @@ paths:
         required: true
         description: the term to search for
       - in: query
+        name: surveyName
+        type: string
+        required: false
+        description: name for the survey to search
+      - in: query
         name: limit
         type: integer
         required: false
@@ -3639,6 +3644,8 @@ definitions:
     - MA
     - MBA
     - ME
+    - MSW
+    - MPH
     - BA
     - BS
     - BSN
@@ -3661,6 +3668,7 @@ definitions:
     - ALL_EVENTS
     - LAB
     - VITAL
+    - FITBIT
   Surveys:
     type: string
     description: a survey for concepts
@@ -4007,6 +4015,10 @@ definitions:
         type: boolean
         default: false
         description: Whether the notebook runtime should default to GCE (vs Dataproc).
+      enableFitbit:
+        type: boolean
+        default: false
+        description: Whether to display Fitbit Data
       runtimeImages:
         type: array
         items:
@@ -5565,9 +5577,6 @@ definitions:
         description: >
           Optional, the size in gigabytes of the disk on the GCE VM.
           Minimum size is 50GB. If unspecified, default size is 100GB.
-      bootDiskSize:
-        type: integer
-        description: size for boot disk. For old runtimes (prior 6/22/2020, gce runtimes don't have a separate boot disk)
       machineType:
         type: string
         description: >
@@ -5817,6 +5826,13 @@ definitions:
       "$ref": "#/definitions/WorkspaceResource"
   WorkspaceResource:
     type: object
+    required:
+      - workspaceNamespace
+      - workspaceFirecloudName
+      - workspaceBillingStatus
+      - cdrVersionId
+      - permission
+      - modifiedTime
     properties:
       workspaceId:
         type: integer

@@ -787,10 +787,10 @@ public class DataSetControllerTest {
 
     List<String> codeCells = notebookContentsToStrings(notebookContentsCaptor.getValue());
 
-    assertThat(codeCells.size()).isEqualTo(3);
+    assertThat(codeCells.size()).isEqualTo(5);
     assertThat(codeCells.get(2)).contains("raw_array_cohort_extract.py");
-    assertThat(codeCells.get(2)).contains("gatk ArrayExtractCohort");
-    assertThat(codeCells.get(2)).contains("gsutil cp");
+    assertThat(codeCells.get(3)).contains("ArrayExtractCohort");
+    assertThat(codeCells.get(4)).contains("gsutil cp");
   }
 
   @Test
@@ -810,11 +810,11 @@ public class DataSetControllerTest {
 
     List<String> codeCells = notebookContentsToStrings(notebookContentsCaptor.getValue());
 
-    assertThat(codeCells.size()).isEqualTo(5);
-    assertThat(codeCells.get(2)).contains("gatk ArrayExtractCohort");
-    assertThat(codeCells.get(3)).contains("cohort_phenotypes.to_csv");
-    assertThat(codeCells.get(3)).contains(".phe");
-    assertThat(codeCells.get(4)).contains("plink");
+    assertThat(codeCells.size()).isEqualTo(7);
+    assertThat(codeCells.get(3)).contains("ArrayExtractCohort");
+    assertThat(codeCells.get(5)).contains("cohort_phenotypes.to_csv");
+    assertThat(codeCells.get(5)).contains(".phe");
+    assertThat(codeCells.get(6)).contains("plink");
   }
 
   List<String> notebookContentsToStrings(JSONObject notebookContents) {
@@ -852,11 +852,11 @@ public class DataSetControllerTest {
 
     List<String> codeCells = notebookContentsToStrings(notebookContentsCaptor.getValue());
 
-    assertThat(codeCells.size()).isEqualTo(5);
-    assertThat(codeCells.get(2)).contains("gatk ArrayExtractCohort");
-    assertThat(codeCells.get(3)).contains("cohort_phenotypes.to_csv");
-    assertThat(codeCells.get(3)).contains(".tsv");
-    assertThat(codeCells.get(4)).contains("import hail as hl");
+    assertThat(codeCells.size()).isEqualTo(7);
+    assertThat(codeCells.get(3)).contains("ArrayExtractCohort");
+    assertThat(codeCells.get(5)).contains("cohort_phenotypes.to_csv");
+    assertThat(codeCells.get(5)).contains(".tsv");
+    assertThat(codeCells.get(6)).contains("import hail as hl");
   }
 
   @Test

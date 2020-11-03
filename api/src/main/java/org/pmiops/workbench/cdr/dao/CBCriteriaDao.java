@@ -166,6 +166,24 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(
       value =
+          "select c1 "
+              + "from DbCriteria c1 "
+              + "where c1.domainId = :domain "
+              + "and c1.subtype = 'QUESTION' "
+              + "and c1.conceptId in ( select c.conceptId "
+              + "                      from DbCriteria c "
+              + "                     where c.domainId = :domain "
+              + "                       and match(c.fullText, concat(:term, '+[', :domain, '_rank1]')) > 0 "
+              + "                       and match(c.path, :id) > 0) "
+              + "order by c1.count desc")
+  Page<DbCriteria> findSurveyQuestionCriteriaByDomainAndIdAndFullText(
+      @Param("domain") String domain,
+      @Param("id") Long id,
+      @Param("term") String term,
+      Pageable page);
+
+  @Query(
+      value =
           "select c from DbCriteria c where domainId=:domain and type=:type and standard=:standard and hierarchy=1 and code like upper(concat(:term,'%')) and match(fullText, concat('+[', :domain, '_rank1]')) > 0 order by c.count desc")
   List<DbCriteria> findCriteriaByDomainAndTypeAndStandardAndCode(
       @Param("domain") String domain,
@@ -219,13 +237,8 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
   List<DbCriteria> findByDomainIdAndType(
       @Param("domainId") String domainId, @Param("type") String type, Sort sort);
 
-  @Query(
-      value =
-          "select c.id from DbCriteria c where domainId = :domainId and conceptId = :conceptId and name = :name")
-  Long findIdByDomainAndConceptIdAndName(
-      @Param("domainId") String domainId,
-      @Param("conceptId") String conceptId,
-      @Param("name") String name);
+  @Query(value = "select c.id from DbCriteria c where domainId = :domainId and name = :name")
+  Long findIdByDomainAndName(@Param("domainId") String domainId, @Param("name") String name);
 
   @Query(
       value =

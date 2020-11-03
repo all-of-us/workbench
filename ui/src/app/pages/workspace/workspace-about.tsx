@@ -17,9 +17,9 @@ import {ResearchPurpose} from 'app/pages/workspace/research-purpose';
 import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {getCdrVersion, reactStyles, ReactWrapperBase, withCdrVersions, withUrlParams, withUserProfile} from 'app/utils';
+import {AuthorityGuardedAction, hasAuthorityForAction} from 'app/utils/authorities';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {
-  Authority,
   BillingAccountType,
   CdrVersionListResponse,
   Profile,
@@ -204,12 +204,16 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
     return <div style={styles.mainPage}>
       <FlexColumn style={{margin: '1rem', width: '98%'}}>
         <ResearchPurpose data-test-id='researchPurpose'/>
-        {profile.authorities.includes(Authority.FEATUREDWORKSPACEADMIN) &&
-        <div style={{display: 'flex', justifyContent: 'flex-end'}}>
-            <Button disabled={publishing} type='secondary'
-                    onClick={() => this.publishUnpublishWorkspace(false)}>Unpublish</Button>
-            <Button onClick={() => this.publishUnpublishWorkspace(true)}
-                    disabled={publishing} style={{marginLeft: '0.5rem'}}>Publish</Button>
+        {hasAuthorityForAction(profile, AuthorityGuardedAction.PUBLISH_WORKSPACE) &&
+          <div style={{display: 'flex', justifyContent: 'flex-end'}}>
+              <Button data-test-id='unpublish-button'
+                      disabled={publishing}
+                      type='secondary'
+                      onClick={() => this.publishUnpublishWorkspace(false)}>Unpublish</Button>
+              <Button data-test-id='publish-button'
+                      onClick={() => this.publishUnpublishWorkspace(true)}
+                      disabled={publishing}
+                      style={{marginLeft: '0.5rem'}}>Publish</Button>
         </div>}
       </FlexColumn>
       <div style={styles.rightSidebar}>

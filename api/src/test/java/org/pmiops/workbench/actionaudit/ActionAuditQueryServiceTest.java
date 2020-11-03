@@ -99,7 +99,7 @@ public class ActionAuditQueryServiceTest {
   private static final TableResult WORKSPACE_TABLE_RESULT =
       new TableResult(
           WORKSPACE_QUERY_SCHEMA, WORKSPACE_RESULT_ROWS.size(), WORKSPACE_QUERY_RESULT_PAGE);
-  private static final TableResult EMPTY_RESULT = new EmptyTableResult();
+  private static final TableResult EMPTY_RESULT = new EmptyTableResult(null);
   private static final long DEFAULT_LIMIT = 100L;
   private static final Instant DEFAULT_AFTER = Instant.parse("2005-02-14T01:20:00.02Z");
   private static final Instant DEFAULT_BEFORE = Instant.parse("2020-08-30T01:20:00.02Z");

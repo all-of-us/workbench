@@ -460,8 +460,6 @@ public class RuntimeControllerTest {
 
   @Test
   public void testGetRuntime_fromListRuntimes_invalidRutime() throws ApiException {
-    String timestamp = "2020-09-13T19:19:57.347Z";
-
     dataprocConfigObj.put("cloudService", "notACloudService");
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenThrow(new ApiException(404, "Not found"));
@@ -861,8 +859,7 @@ public class RuntimeControllerTest {
 
     runtimeController.createRuntime(
         BILLING_PROJECT_ID,
-        new Runtime()
-            .gceConfig(new GceConfig().bootDiskSize(10).diskSize(50).machineType("standard")));
+        new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard")));
 
     verify(userRuntimesApi)
         .createRuntime(
@@ -881,7 +878,6 @@ public class RuntimeControllerTest {
                     LeonardoRuntimeConfig.class)
                 .getCloudService())
         .isEqualTo(LeonardoRuntimeConfig.CloudServiceEnum.GCE);
-    assertThat(createLeonardoGceConfig.getBootDiskSize()).isEqualTo(10);
     assertThat(createLeonardoGceConfig.getDiskSize()).isEqualTo(50);
 
     assertThat(createLeonardoGceConfig.getMachineType()).isEqualTo("standard");
@@ -902,43 +898,6 @@ public class RuntimeControllerTest {
   @Test
   public void testCreateRuntime_emptyRuntime() throws ApiException {
     config.featureFlags.enableCustomRuntimes = false;
-
-    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
-        .thenThrow(new NotFoundException());
-    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
-
-    runtimeController.createRuntime(BILLING_PROJECT_ID, new Runtime());
-    verify(userRuntimesApi).createRuntime(eq(BILLING_PROJECT_ID), eq(getRuntimeName()), any());
-  }
-
-  @Test
-  public void testCreateRuntime_emptyRuntime_legacyDataproc() throws ApiException {
-    config.featureFlags.enableCustomRuntimes = false;
-    config.featureFlags.enableGceAsNotebookRuntimeDefault = false;
-
-    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
-        .thenThrow(new NotFoundException());
-    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
-
-    runtimeController.createRuntime(BILLING_PROJECT_ID, new Runtime());
-    verify(userRuntimesApi)
-        .createRuntime(
-            eq(BILLING_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
-
-    Runtime capturedRuntimeConfig = new Runtime();
-    leonardoMapper.mapRuntimeConfig(
-        capturedRuntimeConfig, createRuntimeRequestCaptor.getValue().getRuntimeConfig());
-    assertThat(capturedRuntimeConfig.getDataprocConfig())
-        .isEqualTo(
-            new DataprocConfig()
-                .masterMachineType(config.firecloud.notebookRuntimeDefaultMachineType)
-                .masterDiskSize(config.firecloud.notebookRuntimeDefaultDiskSizeGb));
-  }
-
-  @Test
-  public void testCreateRuntime_emptyRuntime_enableGce() throws ApiException {
-    config.featureFlags.enableCustomRuntimes = false;
-    config.featureFlags.enableGceAsNotebookRuntimeDefault = true;
 
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());

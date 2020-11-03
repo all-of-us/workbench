@@ -15,6 +15,7 @@ import static org.pmiops.workbench.cohortbuilder.util.ValidationPredicates.tempo
 import com.google.api.client.util.Sets;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
 import java.util.ArrayList;
@@ -75,17 +76,17 @@ public final class SearchGroupItemQueryBuilder {
       "is_standard = %s and concept_id in (select distinct c.concept_id\n"
           + "from `${projectId}.${dataSetId}.cb_criteria` c\n"
           + "join (${childLookup}) a\n"
-          + "on (c.path like concat('%%.', a.id, '.%%') or c.path like concat('%%.', a.id) or c.path like concat(a.id, '.%%') or c.path = a.id)\n"
+          + "on (c.path like concat('%%.', a.id, '.%%') or c.path like concat('%%.', a.id))\n"
           + "where domain_id = %s\n"
           + "and is_standard = %s\n"
-          + "and is_selectable = 1)";
+          + "and is_selectable = 1)\n";
   private static final String DRUG_SQL =
       "is_standard = %s and concept_id in (select distinct ca.descendant_id\n"
           + "from `${projectId}.${dataSetId}.cb_criteria_ancestor` ca\n"
           + "join (select distinct c.concept_id\n"
           + "from `${projectId}.${dataSetId}.cb_criteria` c\n"
           + "join (${childLookup}) a\n"
-          + "on (c.path like concat('%%.', a.id, '.%%') or c.path like concat('%%.', a.id) or c.path like concat(a.id, '.%%') or c.path = a.id)\n"
+          + "on (c.path like concat('%%.', a.id, '.%%') or c.path like concat('%%.', a.id))\n"
           + "where domain_id = %s\n"
           + "and is_standard = %s\n"
           + "and is_selectable = 1) b on (ca.ancestor_id = b.concept_id))";
@@ -98,13 +99,13 @@ public final class SearchGroupItemQueryBuilder {
           + "and is_group = %s\n"
           + "and is_selectable = 1\n";
   private static final String VALUE_AS_NUMBER =
-      "is_standard = %s and concept_id = %s and value_as_number %s %s\n";
+      "is_standard = %s and concept_id = %s and value_as_number %s %s";
   private static final String VALUE_AS_CONCEPT_ID =
-      "is_standard = %s and concept_id = %s and value_as_concept_id %s unnest(%s)\n";
+      "is_standard = %s and concept_id = %s and value_as_concept_id %s unnest(%s)";
   private static final String VALUE_SOURCE_CONCEPT_ID =
-      "is_standard = %s and concept_id = %s and value_source_concept_id %s unnest(%s)\n";
+      "is_standard = %s and concept_id = %s and value_source_concept_id %s unnest(%s)";
   private static final String SOURCE_CONCEPT_SURVEY_ID =
-      "is_standard = %s and concept_id = %s and survey_version_concept_id %s unnest(%s)\n";
+      "is_standard = %s and concept_id = %s and survey_version_concept_id %s unnest(%s)";
   private static final String BP_SQL = "is_standard = %s and concept_id in unnest(%s)";
   private static final String SYSTOLIC_SQL = " and systolic %s %s";
   private static final String DIASTOLIC_SQL = " and diastolic %s %s";
@@ -163,6 +164,9 @@ public final class SearchGroupItemQueryBuilder {
           + "from `${projectId}.${dataSetId}.cb_search_person` p\nwhere %s %s %s\n";
   private static final String AGE_DEC_SQL = "and not " + DEC_SQL;
   private static final String DEMO_IN_SQL = "%s in unnest(%s)\n";
+  private static final String FITBIT_SQL =
+      "select person_id\n"
+          + "from `${projectId}.${dataSetId}.cb_search_person` p\nwhere has_fitbit = 1\n";
 
   /** Build the inner most sql using search parameters, modifiers and attributes. */
   public static void buildQuery(
@@ -189,12 +193,16 @@ public final class SearchGroupItemQueryBuilder {
       TemporalMention mention) {
     Set<SearchParameter> standardSearchParameters = new HashSet<>();
     Set<SearchParameter> sourceSearchParameters = new HashSet<>();
-    List<String> queryParts = new ArrayList<>();
+    List<String> orQueryParts = new ArrayList<>();
+    List<String> andQueryParts = new ArrayList<>();
     String domain = searchGroupItem.getType();
 
     // When building sql for demographics - we query against the person table
     if (Domain.PERSON.toString().equals(domain)) {
       return buildDemoSql(queryParams, searchGroupItem);
+    }
+    if (Domain.FITBIT.toString().equals(domain)) {
+      return FITBIT_SQL;
     }
     // Otherwise build sql against flat denormalized search table
     for (SearchParameter param : searchGroupItem.getSearchParameters()) {
@@ -202,10 +210,10 @@ public final class SearchGroupItemQueryBuilder {
         if (param.getStandard()) {
           standardSearchParameters.add(param);
           addParamValueAndFormat(
-              domain, queryParams, standardSearchParameters, queryParts, STANDARD);
+              domain, queryParams, standardSearchParameters, orQueryParts, STANDARD);
         } else {
           sourceSearchParameters.add(param);
-          addParamValueAndFormat(domain, queryParams, sourceSearchParameters, queryParts, SOURCE);
+          addParamValueAndFormat(domain, queryParams, sourceSearchParameters, orQueryParts, SOURCE);
         }
       } else {
         StringBuilder bpSql = new StringBuilder(BP_SQL);
@@ -218,10 +226,17 @@ public final class SearchGroupItemQueryBuilder {
             bpConceptIds.add(attribute.getConceptId());
             processBloodPressureSql(queryParams, bpSql, attribute);
           } else if (AttrName.NUM.equals(attribute.getName())) {
-            queryParts.add(processNumericalSql(queryParams, param, attribute));
+            if (param.getAttributes().stream()
+                .map(Attribute::getName)
+                .collect(Collectors.toSet())
+                .containsAll(ImmutableList.of(AttrName.NUM, AttrName.SURVEY_VERSION_CONCEPT_ID))) {
+              andQueryParts.add(processNumericalSql(queryParams, param, attribute));
+            } else {
+              orQueryParts.add(processNumericalSql(queryParams, param, attribute));
+            }
           } else if (AttrName.CAT.equals(attribute.getName())
               || AttrName.SURVEY_VERSION_CONCEPT_ID.equals(attribute.getName())) {
-            queryParts.add(processCategoricalSql(queryParams, param, attribute));
+            orQueryParts.add(processCategoricalSql(queryParams, param, attribute));
           }
         }
         if (!bpConceptIds.isEmpty()) {
@@ -232,20 +247,43 @@ public final class SearchGroupItemQueryBuilder {
           QueryParameterValue cids =
               QueryParameterValue.array(bpConceptIds.toArray(new Long[0]), Long.class);
           String conceptIdsParam = QueryParameterUtil.addQueryParameterValue(queryParams, cids);
-          queryParts.add(String.format(bpSql.toString(), standardParam, conceptIdsParam) + "\n");
+          orQueryParts.add(String.format(bpSql.toString(), standardParam, conceptIdsParam) + "\n");
         }
       }
     }
     // need to OR all query parts together since they exist in the same search group item
-    String queryPartsSql = "(" + String.join(OR, queryParts) + ")";
+    // except for cope surveys, they can be and'd with a numeric attribute
+    StringBuilder queryPartsSql = new StringBuilder();
+    if (!andQueryParts.isEmpty()) {
+      queryPartsSql.append("(");
+      queryPartsSql.append(
+          orQueryParts.size() > 1
+              ? "(" + String.join(OR, orQueryParts) + ")"
+              : String.join(OR, orQueryParts));
+      queryPartsSql.append(AND);
+      queryPartsSql.append(
+          andQueryParts.size() > 1
+              ? "(" + String.join(OR, andQueryParts) + ")"
+              : String.join(OR, andQueryParts));
+      queryPartsSql.append(")");
+    } else {
+      queryPartsSql.append(
+          orQueryParts.size() > 1
+              ? "(" + String.join(OR, orQueryParts) + ")"
+              : String.join(OR, orQueryParts));
+    }
     // format the base sql with all query parts
-    String baseSql = BASE_SQL + queryPartsSql;
+    String baseSql = BASE_SQL + queryPartsSql.toString();
     // build modifier sql if modifiers exists
     String modifiedSql = buildModifierSql(baseSql, queryParams, searchGroupItem.getModifiers());
     // build the inner temporal sql if this search group item is temporal
     // otherwise return modifiedSql
     return buildInnerTemporalQuery(
-        modifiedSql, queryPartsSql, queryParams, searchGroupItem.getModifiers(), mention);
+        modifiedSql,
+        queryPartsSql.toString(),
+        queryParams,
+        searchGroupItem.getModifiers(),
+        mention);
   }
 
   /** Build sql statement for demographics */
@@ -431,12 +469,15 @@ public final class SearchGroupItemQueryBuilder {
     String conceptIdParam =
         QueryParameterUtil.addQueryParameterValue(
             queryParams, QueryParameterValue.int64(parameter.getConceptId()));
-    return String.format(
-        VALUE_AS_NUMBER,
-        standardParam,
-        conceptIdParam,
-        OperatorUtils.getSqlOperator(attribute.getOperator()),
-        getOperandsExpression(queryParams, attribute));
+    String returnSql =
+        String.format(
+            VALUE_AS_NUMBER,
+            standardParam,
+            conceptIdParam,
+            OperatorUtils.getSqlOperator(attribute.getOperator()),
+            getOperandsExpression(queryParams, attribute));
+    // if more than 1 attribute preserve precedence by adding ()
+    return parameter.getAttributes().size() == 1 ? returnSql + "\n" : "(" + returnSql + ")\n";
   }
 
   /** Helper method to create sql statement for attributes of categorical type. */
@@ -464,12 +505,16 @@ public final class SearchGroupItemQueryBuilder {
     if (AttrName.SURVEY_VERSION_CONCEPT_ID.equals(attribute.getName())) {
       sqlString = SOURCE_CONCEPT_SURVEY_ID;
     }
-    return String.format(
-        sqlString,
-        standardParam,
-        conceptIdParam,
-        OperatorUtils.getSqlOperator(attribute.getOperator()),
-        operandsParam);
+
+    String returnSql =
+        String.format(
+            sqlString,
+            standardParam,
+            conceptIdParam,
+            OperatorUtils.getSqlOperator(attribute.getOperator()),
+            operandsParam);
+    // if more than 1 attribute preserve precedence by adding ()
+    return parameter.getAttributes().size() == 1 ? returnSql + "\n" : "(" + returnSql + ")\n";
   }
 
   /** Helper method to build the operand sql expression. */

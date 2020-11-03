@@ -605,6 +605,14 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .value("Deceased");
   }
 
+  private static SearchParameter fitbit() {
+    return new SearchParameter()
+        .domain(Domain.FITBIT.toString())
+        .group(false)
+        .standard(true)
+        .ancestorData(false);
+  }
+
   private static SearchParameter survey() {
     return new SearchParameter()
         .domain(Domain.SURVEY.toString())
@@ -630,7 +638,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 new Attribute()
                     .name(AttrName.SURVEY_VERSION_CONCEPT_ID)
                     .operator(Operator.IN)
-                    .operands(ImmutableList.of("100"))));
+                    .operands(ImmutableList.of("100", "101")),
+                new Attribute()
+                    .name(AttrName.NUM)
+                    .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
+                    .operands(ImmutableList.of("10"))));
   }
 
   private static Modifier ageModifier() {
@@ -1039,7 +1051,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsForSurveyWithAgeModifiers() {
     SearchRequest searchRequest =
         createSearchRequests(
-            Domain.SURVEY.toString(), ImmutableList.of(survey()), ImmutableList.of(ageModifier()));
+            Domain.SURVEY.toString(),
+            ImmutableList.of(survey().conceptId(1585899L)),
+            ImmutableList.of(ageModifier()));
 
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -1378,6 +1392,15 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest =
         createSearchRequests(
             Domain.PERSON.toString(), ImmutableList.of(deceased()), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countParticipants() {
+    SearchRequest searchRequest =
+        createSearchRequests(
+            Domain.FITBIT.toString(), ImmutableList.of(fitbit()), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -1912,7 +1935,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     // Survey
     SearchRequest searchRequest =
         createSearchRequests(
-            Domain.SURVEY.toString(), ImmutableList.of(survey()), new ArrayList<>());
+            Domain.SURVEY.toString(),
+            ImmutableList.of(survey().conceptId(1585899L)),
+            new ArrayList<>());
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     assertParticipants(response, 1);
@@ -2099,7 +2124,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     criteria = cbCriteriaDao.save(criteria);
     String pathEnd = String.valueOf(criteria.getId());
     criteria.setPath(path.isEmpty() ? pathEnd : path + "." + pathEnd);
-    cbCriteriaDao.save(criteria);
+    criteria = cbCriteriaDao.save(criteria);
   }
 
   private void delete(DbCriteria... criteriaList) {

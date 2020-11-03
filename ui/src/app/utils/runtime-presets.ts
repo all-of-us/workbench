@@ -4,17 +4,6 @@ import {Runtime, RuntimeConfigurationType} from 'generated/fetch';
 export const runtimePresets: {
   [runtimePresetName: string]: {displayName: string, runtimeTemplate: Runtime}
 } = {
-  // TODO(RW-5658): Remove this preset. Do a stringy search - the type checking here prevents cmd-clicking through from working
-  legacyGeneralAnalysis: {
-    displayName: 'General Analysis (Legacy)',
-    runtimeTemplate: {
-      configurationType: RuntimeConfigurationType.GeneralAnalysis,
-      dataprocConfig: {
-        masterMachineType: 'n1-standard-4',
-        masterDiskSize: 50
-      }
-    }
-  },
   generalAnalysis: {
     displayName: 'General Analysis',
     runtimeTemplate: {
@@ -22,7 +11,7 @@ export const runtimePresets: {
       // TODO: Support specifying toolDockerImage here.
       gceConfig: {
         machineType: 'n1-standard-4',
-        bootDiskSize: 50
+        diskSize: 50
       }
     }
   },
@@ -33,8 +22,10 @@ export const runtimePresets: {
       dataprocConfig: {
         masterMachineType: 'n1-standard-4',
         masterDiskSize: 50,
-        numberOfWorkers: 3
-        // Take the Leo defaults here, currently 100GB disk and n1-standard-4
+        workerMachineType: 'n1-standard-4',
+        workerDiskSize: 50,
+        numberOfWorkers: 2,
+        numberOfPreemptibleWorkers: 0
       }
     }
   }

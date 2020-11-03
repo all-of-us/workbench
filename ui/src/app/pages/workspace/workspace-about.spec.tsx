@@ -4,7 +4,7 @@ import * as React from 'react';
 
 import {WorkspaceAbout} from './workspace-about';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {RuntimeApi, Profile, ProfileApi, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
+import {Authority, RuntimeApi, Profile, ProfileApi, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
@@ -113,4 +113,32 @@ describe('WorkspaceAbout', () => {
     const raceSubCategoriesAfterPageLoad = SpecificPopulationItems[0].subCategory.length;
     expect(raceSubCategoriesBeforePageload).toBe(raceSubCategoriesAfterPageLoad);
   });
+
+  it('should not display Publish/Unpublish buttons without appropriate Authority', async () => {
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.exists('[data-test-id="publish-button"]')).toBeFalsy()
+    expect(wrapper.exists('[data-test-id="unpublish-button"]')).toBeFalsy()
+  });
+
+  it('should display Publish/Unpublish buttons with FEATUREDWORKSPACEADMIN Authority', async () => {
+    const profileWithAuth = {...ProfileStubVariables.PROFILE_STUB, authorities: [Authority.FEATUREDWORKSPACEADMIN]};
+    userProfileStore.next({profile: profileWithAuth, reload, updateCache});
+
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.exists('[data-test-id="publish-button"]')).toBeTruthy()
+    expect(wrapper.exists('[data-test-id="unpublish-button"]')).toBeTruthy()
+  });
+
+  it('should display Publish/Unpublish buttons with DEVELOPER Authority', async () => {
+    const profileWithAuth = {...ProfileStubVariables.PROFILE_STUB, authorities: [Authority.DEVELOPER]};
+    userProfileStore.next({profile: profileWithAuth, reload, updateCache});
+
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.exists('[data-test-id="publish-button"]')).toBeTruthy()
+    expect(wrapper.exists('[data-test-id="unpublish-button"]')).toBeTruthy()
+  });
+
 });

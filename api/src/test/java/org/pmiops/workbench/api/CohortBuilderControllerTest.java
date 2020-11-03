@@ -416,7 +416,7 @@ public class CohortBuilderControllerTest {
         criteria,
         controller
             .findCriteriaByDomainAndSearchTerm(
-                1L, Domain.PHYSICAL_MEASUREMENT.name(), "myTerm", null)
+                1L, Domain.PHYSICAL_MEASUREMENT.name(), "myTerm", null, null)
             .getBody()
             .getItems()
             .get(0));
@@ -444,7 +444,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
         createResponseCriteria(criteria),
         controller
-            .findCriteriaByDomainAndSearchTerm(1L, Domain.CONDITION.name(), "001", null)
+            .findCriteriaByDomainAndSearchTerm(1L, Domain.CONDITION.name(), "001", null, null)
             .getBody()
             .getItems()
             .get(0));
@@ -471,7 +471,7 @@ public class CohortBuilderControllerTest {
 
     List<Criteria> results =
         controller
-            .findCriteriaByDomainAndSearchTerm(1L, Domain.CONDITION.name(), "00", null)
+            .findCriteriaByDomainAndSearchTerm(1L, Domain.CONDITION.name(), "00", null, null)
             .getBody()
             .getItems();
 
@@ -500,7 +500,7 @@ public class CohortBuilderControllerTest {
 
     List<Criteria> results =
         controller
-            .findCriteriaByDomainAndSearchTerm(1L, Domain.DRUG.name(), "672535", null)
+            .findCriteriaByDomainAndSearchTerm(1L, Domain.DRUG.name(), "672535", null, null)
             .getBody()
             .getItems();
     assertEquals(1, results.size());
@@ -529,7 +529,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
         createResponseCriteria(criteria),
         controller
-            .findCriteriaByDomainAndSearchTerm(1L, Domain.CONDITION.name(), "LP12", null)
+            .findCriteriaByDomainAndSearchTerm(1L, Domain.CONDITION.name(), "LP12", null, null)
             .getBody()
             .getItems()
             .get(0));
@@ -557,7 +557,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
         createResponseCriteria(criteria),
         controller
-            .findCriteriaByDomainAndSearchTerm(1L, Domain.CONDITION.name(), "LP12", null)
+            .findCriteriaByDomainAndSearchTerm(1L, Domain.CONDITION.name(), "LP12", null, null)
             .getBody()
             .getItems()
             .get(0));
@@ -587,7 +587,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
         createResponseCriteria(criteria),
         controller
-            .findCriteriaByDomainAndSearchTerm(1L, Domain.DRUG.name(), "LP12", null)
+            .findCriteriaByDomainAndSearchTerm(1L, Domain.DRUG.name(), "LP12", null, null)
             .getBody()
             .getItems()
             .get(0));

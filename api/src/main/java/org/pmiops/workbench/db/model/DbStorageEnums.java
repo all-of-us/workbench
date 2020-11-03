@@ -223,6 +223,8 @@ public final class DbStorageEnums {
           .put(Degree.MSN, (short) 10)
           .put(Degree.PHD, (short) 11)
           .put(Degree.NONE, (short) 12)
+          .put(Degree.MSW, (short) 13)
+          .put(Degree.MPH, (short) 14)
           .build();
 
   public static Degree degreeFromStorage(Short degree) {
@@ -272,6 +274,7 @@ public final class DbStorageEnums {
           .put(Domain.ALL_EVENTS, (short) 11)
           .put(Domain.LAB, (short) 12)
           .put(Domain.VITAL, (short) 13)
+          .put(Domain.FITBIT, (short) 14)
           .build();
 
   // A mapping from our Domain enum to OMOP domain ID values.
@@ -291,6 +294,7 @@ public final class DbStorageEnums {
           .put(Domain.ALL_EVENTS, "All Events")
           .put(Domain.LAB, "Labs")
           .put(Domain.VITAL, "Vitals")
+          .put(Domain.FITBIT, "FitBit")
           .build();
 
   public static Domain domainFromStorage(Short domain) {

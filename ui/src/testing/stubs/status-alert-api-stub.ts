@@ -1,10 +1,11 @@
 import {StatusAlert, StatusAlertApi} from 'generated/fetch';
+import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
 export class StatusAlertApiStub extends StatusAlertApi {
 
   constructor() {
     super(undefined, undefined, (..._: any[]) => {
-      throw Error('cannot fetch in tests');
+      throw stubNotImplementedError;
     });
   }
 
