@@ -2,8 +2,8 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {FlexRow} from 'app/components/flex';
-import {getResourceCard} from 'app/components/get-resource-card';
 import {SmallHeader} from 'app/components/headers';
+import {renderResourceCard} from 'app/components/render-resource-card';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {Scroll} from 'app/icons/scroll';
 import {userMetricsApi} from 'app/services/swagger-fetch-clients';
@@ -74,7 +74,7 @@ export const RecentResources = (fp.flow as any)(
           <FlexRow style={{position: 'relative', alignItems: 'center', marginTop: '-1rem',
             marginLeft: '-1rem', paddingLeft: '1rem', opacity: loading ? 0.5 : 1}}>
             {resources.slice(offset, offset + limit).map((resource, i) => {
-              return <div key={i}> {getResourceCard({
+              return <div key={i}> {renderResourceCard({
                 resource: resource,
                 existingNameList: this.getExistingNameList(resource),
                 onUpdate: () => this.loadResources(),

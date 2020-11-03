@@ -1,18 +1,19 @@
 import * as React from "react";
+
 import {WorkspaceResource} from 'generated/fetch';
 import {exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
-import {getResourceCard} from "./get-resource-card";
+import {renderResourceCard} from "./render-resource-card";
 import {mount} from "enzyme";
 import {stubResource} from 'testing/stubs/resources-stub';
 
-describe('getResourceCard', () => {
+describe('renderResourceCard', () => {
     it('renders a CohortResourceCard', () => {
          const testCohort = {
             ...stubResource,
             cohort: exampleCohortStubs[0],
         } as WorkspaceResource;
 
-        const card = getResourceCard({
+        const card = renderResourceCard({
             resource: testCohort,
             existingNameList: [],
             onUpdate: async () => {},
@@ -22,7 +23,7 @@ describe('getResourceCard', () => {
     });
 
     it('does not render a card for an invalid resource', () => {
-        const card = getResourceCard({
+        const card = renderResourceCard({
             resource: stubResource,
             existingNameList: [],
             onUpdate: async () => {},

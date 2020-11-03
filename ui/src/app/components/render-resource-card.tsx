@@ -9,13 +9,13 @@ import {DatasetResourceCard} from 'app/pages/data/data-set/dataset-resource-card
 import {isCohort, isCohortReview, isConceptSet, isDataSet, isNotebook} from 'app/utils/resources';
 import {BillingStatus, WorkspaceResource} from 'generated/fetch';
 
-interface GetResourceCardProps {
+interface RenderResourceCardProps {
   resource: WorkspaceResource;
   existingNameList: string[];
   onUpdate: () => Promise<void>;
 }
 
-function getResourceCard(props: GetResourceCardProps) {
+function renderResourceCard(props: RenderResourceCardProps) {
   const {resource} = props;
   const inactiveBilling = (resource.workspaceBillingStatus === BillingStatus.INACTIVE);
 
@@ -29,5 +29,5 @@ function getResourceCard(props: GetResourceCardProps) {
 }
 
 export {
-  getResourceCard
+  renderResourceCard
 };

@@ -4,9 +4,9 @@ import * as React from 'react';
 
 import {CardButton, TabButton} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
-import {getResourceCard} from 'app/components/get-resource-card';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
+import {renderResourceCard} from 'app/components/render-resource-card';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -264,7 +264,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
           padding: '0 0.5rem 1rem'
         }}>
           {filteredList.map((resource: WorkspaceResource, index: number) => {
-            return <div key={index}> {getResourceCard({
+            return <div key={index}> {renderResourceCard({
               resource: resource,
               existingNameList: this.getExistingNameList(resource),
               onUpdate: () => this.loadResources(),
