@@ -85,7 +85,7 @@ describe('RuntimePanel', () => {
 
   const pickPreset = async(wrapper, {displayName}) => {
     act(() => { wrapper.find({'data-test-id': 'runtime-presets-menu'}).first().simulate('click') });
-    act(() => { (document.querySelector(`#popup-root [aria-label="${displayName}"]`) as HTMLElement).click() });
+    act(() => {(document.querySelector(`#popup-root [aria-label="${displayName}"]`) as HTMLElement).click()});
     await waitOneTickAndUpdate(wrapper);
   }
 

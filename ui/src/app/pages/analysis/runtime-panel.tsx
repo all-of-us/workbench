@@ -226,7 +226,7 @@ const DataProcConfigSelector = ({onChange, dataprocConfig})  => {
   </fieldset>;
 };
 
-const PresetSelector = ({setSelectedDiskSize, setSelectedMachine, setSelectedCompute, setSelectedDataprocConfig}) => {
+const PresetSelector = ({hasMicroarrayData, setSelectedDiskSize, setSelectedMachine, setSelectedCompute, setSelectedDataprocConfig}) => {
   {/* Recommended runtime: pick from default templates or change the image. */}
   return <PopupTrigger side='bottom'
                 closeOnClick
@@ -234,7 +234,7 @@ const PresetSelector = ({setSelectedDiskSize, setSelectedMachine, setSelectedCom
                   <React.Fragment>
                     {
                       fp.flow(
-                        fp.filter(['displayName', 'General Analysis']),
+                        fp.filter(({runtimeTemplate}) => hasMicroarrayData || !runtimeTemplate.dataprocConfig),
                         fp.toPairs,
                         fp.map(([i, preset]) => {
                           return <MenuItem
@@ -245,14 +245,15 @@ const PresetSelector = ({setSelectedDiskSize, setSelectedMachine, setSelectedCom
                                   // renaming to avoid shadowing
                                   const {runtimeTemplate} = preset;
                                   const {presetDiskSize, presetMachineName, presetCompute} = fp.cond([
-                                    [() => !!runtimeTemplate.gceConfig, ({gceConfig}) => ({
-                                      presetDiskSize: gceConfig.diskSize,
-                                      presetMachineName: gceConfig.machineType,
+                                    // Can't destructure due to shadowing.
+                                    [() => !!runtimeTemplate.gceConfig, (tmpl: Runtime) => ({
+                                      presetDiskSize: tmpl.gceConfig.diskSize,
+                                      presetMachineName: tmpl.gceConfig.machineType,
                                       presetCompute: ComputeType.Standard
                                     })],
-                                    [() => !!runtimeTemplate.dataprocConfig, ({dataprocConfig}) => ({
-                                      presetDiskSize: dataprocConfig.masterDiskSize,
-                                      presetMachineName: dataprocConfig.masterMachineType,
+                                    [() => !!runtimeTemplate.dataprocConfig, ({dataprocConfig: {masterDiskSize, masterMachineType}}) => ({
+                                      presetDiskSize: masterDiskSize,
+                                      presetMachineName: masterMachineType,
                                       presetCompute: ComputeType.Dataproc
                                     })]
                                   ])(runtimeTemplate);
@@ -419,6 +420,7 @@ export const RuntimePanel = fp.flow(
           workspace={workspace}
       />
       <PresetSelector
+          hasMicroarrayData={hasMicroarrayData}
           setSelectedDiskSize={(disk) => setSelectedDiskSize(disk)}
           setSelectedMachine={(machine) => setSelectedMachine(machine)}
           setSelectedCompute={(compute) => setSelectedCompute(compute)}
