@@ -17,8 +17,8 @@ const DEFAULT_OVERALL_TIMEOUT = 1000 * 60 * 20;
 // TODO(RW-5851): This value is mutable for testing purposes, to hack around a
 // unit test issue with orphaned LeoRuntimeInitializer processes. Revert this to
 // be a constant once a proper fix is put into place.
-let DEFAULT_INITIAL_POLLING_DELAY = 2000;
-export const overridePollingDelay = (d) => DEFAULT_INITIAL_POLLING_DELAY = d;
+let defaultInitialPollingDelay = 2000;
+export const overridePollingDelay = (d) => defaultInitialPollingDelay = d;
 
 const DEFAULT_MAX_POLLING_DELAY = 15000;
 // By default, we're willing to retry twice on each of the state-modifying API calls, to allow
@@ -94,9 +94,9 @@ export interface LeoRuntimeInitializerOptions {
   targetRuntime?: Runtime;
 }
 
-const DEFAULT_OPTIONS = (): Partial<LeoRuntimeInitializerOptions> => ({
+const defaultOptions = (): Partial<LeoRuntimeInitializerOptions> => ({
   onPoll: () => {},
-  initialPollingDelay: DEFAULT_INITIAL_POLLING_DELAY,
+  initialPollingDelay: defaultInitialPollingDelay,
   maxPollingDelay: DEFAULT_MAX_POLLING_DELAY,
   overallTimeout: DEFAULT_OVERALL_TIMEOUT,
   maxCreateCount: DEFAULT_MAX_CREATE_COUNT,
@@ -180,7 +180,7 @@ export class LeoRuntimeInitializer {
   private constructor(options: LeoRuntimeInitializerOptions) {
     // Assign default values to certain options, which will be overridden by the input options
     // if present.
-    options = {...DEFAULT_OPTIONS(), ...options};
+    options = {...defaultOptions(), ...options};
 
     this.workspaceNamespace = options.workspaceNamespace;
     this.onPoll = options.onPoll ? options.onPoll : () => {};
