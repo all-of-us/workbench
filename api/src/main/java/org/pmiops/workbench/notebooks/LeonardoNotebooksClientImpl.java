@@ -26,8 +26,10 @@ import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig.CloudServiceEnum;
+import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
 import org.pmiops.workbench.model.Runtime;
+import org.pmiops.workbench.model.UpdateRuntimeRequest;
 import org.pmiops.workbench.notebooks.api.ProxyApi;
 import org.pmiops.workbench.notebooks.model.LocalizationEntry;
 import org.pmiops.workbench.notebooks.model.Localize;
@@ -133,25 +135,32 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
             .welderRegistry(WelderRegistryEnum.DOCKERHUB)
             .customEnvironmentVariables(customEnvironmentVariables);
 
-    if (workbenchConfigProvider.get().featureFlags.enableCustomRuntimes) {
+    request.setRuntimeConfig(buildRuntimeConfig(clusterOverride, runtime));
+
+    return request;
+  }
+
+  private Object buildRuntimeConfig(@Nullable ClusterConfig clusterOverride, Runtime runtime) {
+    WorkbenchConfig config = workbenchConfigProvider.get();
+
+    Object runtimeConfig;
+    if (config.featureFlags.enableCustomRuntimes) {
       if (runtime.getGceConfig() != null) {
-        request.setRuntimeConfig(leonardoMapper.toLeonardoGceConfig(runtime.getGceConfig()));
+        runtimeConfig = leonardoMapper.toLeonardoGceConfig(runtime.getGceConfig());
       } else {
-        request.setRuntimeConfig(
-            leonardoMapper.toLeonardoMachineConfig(runtime.getDataprocConfig()));
+        runtimeConfig = leonardoMapper.toLeonardoMachineConfig(runtime.getDataprocConfig());
       }
     } else if (workbenchConfigProvider.get().featureFlags.enableGceAsNotebookRuntimeDefault) {
-      request.setRuntimeConfig(
-          new LeonardoGceConfig()
+      runtimeConfig = new LeonardoGceConfig()
               .cloudService(LeonardoGceConfig.CloudServiceEnum.GCE)
               .diskSize(
                   Optional.ofNullable(clusterOverride.masterDiskSize)
                       .orElse(config.firecloud.notebookRuntimeDefaultDiskSizeGb))
               .machineType(
                   Optional.ofNullable(clusterOverride.machineType)
-                      .orElse(config.firecloud.notebookRuntimeDefaultMachineType)));
+                      .orElse(config.firecloud.notebookRuntimeDefaultMachineType));
     } else {
-      request.setRuntimeConfig(
+      runtimeConfig =
           new LeonardoMachineConfig()
               .cloudService(CloudServiceEnum.DATAPROC)
               .masterDiskSize(
@@ -159,10 +168,10 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
                       .orElse(config.firecloud.notebookRuntimeDefaultDiskSizeGb))
               .masterMachineType(
                   Optional.ofNullable(clusterOverride.machineType)
-                      .orElse(config.firecloud.notebookRuntimeDefaultMachineType)));
+                      .orElse(config.firecloud.notebookRuntimeDefaultMachineType));
     }
 
-    return request;
+    return runtimeConfig;
   }
 
   @Override
@@ -194,6 +203,24 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
                   customEnvironmentVariables));
           return null;
         });
+  }
+
+  @Override
+  public void updateRuntime(String workspaceNamespace, UpdateRuntimeRequest updateRuntimeRequest) {
+    RuntimesApi runtimesApi = runtimesApiProvider.get();
+
+    DbUser user = userProvider.get();
+
+    leonardoRetryHandler.run(
+        (context) -> {
+          runtimesApi.updateRuntime(
+              updateRuntimeRequest.getRuntime().getGoogleProject(),
+              updateRuntimeRequest.getRuntime().getRuntimeName(),
+              new LeonardoUpdateRuntimeRequest()
+                  .runtimeConfig(buildRuntimeConfig(user.getClusterConfigDefault(), updateRuntimeRequest.getRuntime())));
+          return null;
+        });
+
   }
 
   @Override
