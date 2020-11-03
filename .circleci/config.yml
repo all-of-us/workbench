@@ -313,10 +313,12 @@ commands:
               \"circleNodeIndex\": \"${CIRCLE_NODE_INDEX}\" \
               }" \
               > ./logs/circleci_parameters.json
+          when: always
       - run:
           name: Add CircleCI job data to JUnit test results
           working_directory: ~/workbench/e2e
           command: jq -s '.[0] * .[1]' ./logs/test-results.json ./logs/circleci_parameters.json > ./logs/combined-test-results.json
+          when: always
       - run:
           name: Upload combined-test-results.json to storage bucket
           working_directory: ~/workbench/e2e
