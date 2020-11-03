@@ -41,7 +41,7 @@ const staging = {
   uiBaseUrl: process.env.STAGING_LOGIN_URL || 'https://all-of-us-rw-staging.appspot.com',
   apiBaseUrl: process.env.STAGING_API_URL || 'https://api-dot-all-of-us-rw-staging.appspot.com/v1',
   userEmailDomain: '@staging.fake-research-aou.org',
-  collaboratorUsername: process.env.STAGING_COLLABORATOR || 'stagingcilocalcollaborator1@staging.fake-research-aou.org',
+  collaboratorUsername: process.env.STAGING_COLLABORATOR || 'puppetcitester4@staging.fake-research-aou.org',
   defaultCdrVersionName: 'Synthetic Dataset v4',
   altCdrVersionName: 'Synthetic Dataset v3',
 };
