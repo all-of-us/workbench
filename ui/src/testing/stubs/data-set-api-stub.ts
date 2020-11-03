@@ -10,6 +10,7 @@ import {
   DomainValuesResponse,
   EmptyResponse,
   KernelTypeEnum,
+  MarkDataSetRequest
 } from 'generated/fetch';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
@@ -96,5 +97,9 @@ export class DataSetApiStub extends DataSetApi {
         break;
     }
     return Promise.resolve({items: domainValueItems});
+  }
+
+  async markDirty(workspaceNamespace: string, workspaceId: string, markDataSetRequest?: MarkDataSetRequest, options?: any) {
+    return true;
   }
 }

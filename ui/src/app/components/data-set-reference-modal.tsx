@@ -62,9 +62,7 @@ class DataSetReferenceModal extends React.Component<Props, {}> {
                     Are you sure you want to delete {resourceElem} ?
                 </div>
                 <div style={{float: 'right'}}>
-                    <Button type='secondary' style={{marginRight: '2rem'}} onClick={onCancel}>
-                        Cancel
-                    </Button>
+                    <Button type='secondary' style={{marginRight: '2rem'}} onClick={onCancel}>Cancel</Button>
                     <Button type='primary' onClick={() => this.markAndDelete()}>YES, DELETE</Button>
                 </div>
             </ModalBody>

@@ -1,9 +1,7 @@
 import * as fp from 'lodash/fp';
 
 import {dropNotebookFileSuffix} from 'app/pages/analysis/util';
-import colors from 'app/styles/colors';
 import {ResourceType, WorkspaceResource} from 'generated/fetch';
-import {formatWorkspaceResourceDisplayDate} from './index';
 import {encodeURIComponentStrict} from './navigation';
 
 const isCohort = (resource: WorkspaceResource): boolean => !!resource.cohort;
@@ -12,32 +10,21 @@ const isConceptSet = (resource: WorkspaceResource): boolean => !!resource.concep
 const isDataSet = (resource: WorkspaceResource): boolean => !!resource.dataSet;
 const isNotebook = (resource: WorkspaceResource): boolean => !!resource.notebook;
 
-const getModifiedDate = (resource: WorkspaceResource): string => formatWorkspaceResourceDisplayDate(resource.modifiedTime);
-
 function toDisplay(resourceType: ResourceType): string {
   return fp.cond([
       [rt => rt === ResourceType.COHORT, () => 'Cohort'],
       [rt => rt === ResourceType.COHORTREVIEW, () => 'Cohort Review'],
-      [rt => rt === ResourceType.COHORTSEARCHGROUP, () => 'Group'],
-      [rt => rt === ResourceType.COHORTSEARCHITEM, () => 'Item'],
       [rt => rt === ResourceType.CONCEPTSET, () => 'Concept Set'],
       [rt => rt === ResourceType.DATASET, () => 'Dataset'],
       [rt => rt === ResourceType.NOTEBOOK, () => 'Notebook'],
+
+      [rt => rt === ResourceType.COHORTSEARCHGROUP, () => 'Group'],
+      [rt => rt === ResourceType.COHORTSEARCHITEM, () => 'Item'],
       [rt => rt === ResourceType.WORKSPACE, () => 'Workspace'],
   ])(resourceType);
 }
 
 const getTypeString = (resource: WorkspaceResource): string => toDisplay(getType(resource));
-
-function getColor(resource: WorkspaceResource): string {
-  return fp.cond([
-      [isCohort, () => colors.resourceCardHighlights.cohort],
-      [isCohortReview, () => colors.resourceCardHighlights.cohortReview],
-      [isConceptSet, () => colors.resourceCardHighlights.conceptSet],
-      [isDataSet, () => colors.resourceCardHighlights.dataSet],
-      [isNotebook, () => colors.resourceCardHighlights.notebook],
-  ])(resource);
-}
 
 function getDescription(resource: WorkspaceResource): string {
   return fp.cond([
@@ -98,10 +85,8 @@ export {
     isConceptSet,
     isDataSet,
     isNotebook,
-    getModifiedDate,
     getTypeString,
     toDisplay,
-    getColor,
     getDescription,
     getDisplayName,
     getId,

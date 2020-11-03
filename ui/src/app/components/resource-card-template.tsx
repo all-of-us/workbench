@@ -7,15 +7,18 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import {SnowmanIcon} from 'app/components/icons';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import colors from 'app/styles/colors';
-import {reactStyles} from 'app/utils';
+import {formatWorkspaceResourceDisplayDate, reactStyles} from 'app/utils';
 import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import {
-  getColor,
   getDescription,
   getDisplayName,
-  getModifiedDate,
   getResourceUrl,
-  getTypeString
+  getTypeString,
+  isCohort,
+  isCohortReview,
+  isConceptSet,
+  isDataSet,
+  isNotebook,
 } from 'app/utils/resources';
 import {WorkspaceResource} from 'generated/fetch';
 
@@ -109,6 +112,16 @@ function canDelete(resource: WorkspaceResource): boolean {
   return resource.permission === 'OWNER';
 }
 
+function getColor(resource: WorkspaceResource): string {
+  return fp.cond([
+    [isCohort, () => colors.resourceCardHighlights.cohort],
+    [isCohortReview, () => colors.resourceCardHighlights.cohortReview],
+    [isConceptSet, () => colors.resourceCardHighlights.conceptSet],
+    [isDataSet, () => colors.resourceCardHighlights.dataSet],
+    [isNotebook, () => colors.resourceCardHighlights.notebook],
+  ])(resource);
+}
+
 interface Props {
   actions: Action[];
   disabled: boolean;
@@ -151,7 +164,7 @@ class ResourceCardTemplate extends React.Component<Props, {}> {
         </FlexColumn>
         <div style={styles.cardFooter}>
           <div style={styles.lastModified} data-test-id='last-modified'>
-            Last Modified: {getModifiedDate(resource)}</div>
+            Last Modified: {formatWorkspaceResourceDisplayDate(resource.modifiedTime)}</div>
           <div style={{...styles.resourceType, backgroundColor: getColor(resource)}}
                data-test-id='card-type'>
             {fp.startCase(fp.camelCase(getTypeString(resource)))}</div>
