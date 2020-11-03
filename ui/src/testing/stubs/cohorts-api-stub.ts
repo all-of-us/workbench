@@ -3,7 +3,8 @@ import {
   Cohort,
   CohortAnnotationsResponse,
   CohortsApi,
-  EmptyResponse, ResourceType,
+  EmptyResponse,
+  ResourceType,
   Workspace,
   WorkspaceAccessLevel,
   WorkspaceResource
