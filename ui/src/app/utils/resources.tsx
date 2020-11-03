@@ -1,8 +1,18 @@
 import * as fp from 'lodash/fp';
 
 import {dropNotebookFileSuffix} from 'app/pages/analysis/util';
-import {ResourceType, WorkspaceResource} from 'generated/fetch';
+import {
+    Cohort,
+    CohortReview,
+    ConceptSet,
+    DataSet,
+    FileDetail,
+    ResourceType,
+    WorkspaceAccessLevel,
+    WorkspaceResource
+} from 'generated/fetch';
 import {encodeURIComponentStrict} from './navigation';
+import {WorkspaceData} from './workspace-data';
 
 const isCohort = (resource: WorkspaceResource): boolean => !!resource.cohort;
 const isCohortReview = (resource: WorkspaceResource): boolean => !!resource.cohortReview;
@@ -79,6 +89,26 @@ function getType(resource: WorkspaceResource): ResourceType {
   ])(resource);
 }
 
+function convertToResource(
+  inputResource: FileDetail | Cohort | CohortReview | ConceptSet | DataSet,
+  resourceType: ResourceType,
+  workspace: WorkspaceData): WorkspaceResource {
+  const {namespace, id, accessLevel, cdrVersionId, billingStatus} = workspace;
+  return {
+    workspaceNamespace: namespace,
+    workspaceFirecloudName: id,
+    permission: WorkspaceAccessLevel[accessLevel],
+    modifiedTime: inputResource.lastModifiedTime ? new Date(inputResource.lastModifiedTime).toString() : new Date().toDateString(),
+    cdrVersionId,
+    workspaceBillingStatus: billingStatus,
+    cohort: resourceType === ResourceType.COHORT ? inputResource as Cohort : null,
+    cohortReview: resourceType === ResourceType.COHORTREVIEW ? inputResource as CohortReview : null,
+    conceptSet: resourceType === ResourceType.CONCEPTSET ? inputResource as ConceptSet : null,
+    dataSet: resourceType === ResourceType.DATASET ? inputResource as DataSet : null,
+    notebook: resourceType === ResourceType.NOTEBOOK ? inputResource as FileDetail : null,
+  };
+}
+
 export {
     isCohort,
     isCohortReview,
@@ -92,4 +122,5 @@ export {
     getId,
     getResourceUrl,
     getType,
+    convertToResource,
 };

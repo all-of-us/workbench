@@ -14,9 +14,10 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 
 import {NotebookResourceCard} from 'app/pages/analysis/notebook-resource-card';
 import {AnalyticsTracker} from 'app/utils/analytics';
+import {convertToResource} from 'app/utils/resources';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
-import {BillingStatus, FileDetail, WorkspaceAccessLevel, WorkspaceResource} from 'generated/fetch';
+import {BillingStatus, FileDetail, ResourceType} from 'generated/fetch';
 
 const styles = {
   heading: {
@@ -24,19 +25,6 @@ const styles = {
     fontSize: 20, fontWeight: 600, lineHeight: '24px'
   }
 };
-
-function convertToResource(inputResource: FileDetail, workspace: WorkspaceData): WorkspaceResource {
-  const {namespace, id, accessLevel, cdrVersionId, billingStatus} = workspace;
-  return {
-    workspaceNamespace: namespace,
-    workspaceFirecloudName: id,
-    permission: WorkspaceAccessLevel[accessLevel],
-    modifiedTime: inputResource.lastModifiedTime ? new Date(inputResource.lastModifiedTime).toString() : new Date().toDateString(),
-    cdrVersionId,
-    workspaceBillingStatus: billingStatus,
-    notebook: inputResource,
-  };
-}
 
 export const NotebookList = withCurrentWorkspace()(class extends React.Component<{
   workspace: WorkspaceData
@@ -123,7 +111,7 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
           {notebookList.map((notebook, index) => {
             return <NotebookResourceCard
               key={index}
-              resource={convertToResource(notebook, workspace)}
+              resource={convertToResource(notebook, ResourceType.NOTEBOOK, workspace)}
               existingNameList={notebookNameList}
               onUpdate={() => this.loadNotebooks()}
               disableDuplicate={workspace.billingStatus === BillingStatus.INACTIVE}
