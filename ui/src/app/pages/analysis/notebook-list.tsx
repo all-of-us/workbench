@@ -10,14 +10,13 @@ import {NewNotebookModal} from 'app/pages/analysis/new-notebook-modal';
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {withCurrentWorkspace} from 'app/utils';
-import {convertToResource} from 'app/utils/resourceActions';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
 import {NotebookResourceCard} from 'app/pages/analysis/notebook-resource-card';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
-import {BillingStatus, FileDetail, ResourceType} from 'generated/fetch';
+import {BillingStatus, FileDetail, WorkspaceAccessLevel, WorkspaceResource} from 'generated/fetch';
 
 const styles = {
   heading: {
@@ -25,6 +24,19 @@ const styles = {
     fontSize: 20, fontWeight: 600, lineHeight: '24px'
   }
 };
+
+function convertToResource(inputResource: FileDetail, workspace: WorkspaceData): WorkspaceResource {
+  const {namespace, id, accessLevel, cdrVersionId, billingStatus} = workspace;
+  return {
+    workspaceNamespace: namespace,
+    workspaceFirecloudName: id,
+    permission: WorkspaceAccessLevel[accessLevel],
+    modifiedTime: inputResource.lastModifiedTime ? new Date(inputResource.lastModifiedTime).toString() : new Date().toDateString(),
+    cdrVersionId,
+    workspaceBillingStatus: billingStatus,
+    notebook: inputResource,
+  };
+}
 
 export const NotebookList = withCurrentWorkspace()(class extends React.Component<{
   workspace: WorkspaceData
@@ -111,7 +123,7 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
           {notebookList.map((notebook, index) => {
             return <NotebookResourceCard
               key={index}
-              resource={convertToResource(notebook, ResourceType.NOTEBOOK, workspace)}
+              resource={convertToResource(notebook, workspace)}
               existingNameList={notebookNameList}
               onUpdate={() => this.loadNotebooks()}
               disableDuplicate={workspace.billingStatus === BillingStatus.INACTIVE}

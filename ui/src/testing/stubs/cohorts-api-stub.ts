@@ -1,17 +1,16 @@
 import {queryParamsStore} from 'app/utils/navigation';
-import {convertToResources, ConvertToResourcesArgs} from 'app/utils/resourceActions';
 import {
   Cohort,
   CohortAnnotationsResponse,
   CohortsApi,
-  EmptyResponse,
-  ResourceType,
+  EmptyResponse, ResourceType,
   Workspace,
   WorkspaceAccessLevel,
   WorkspaceResource
 } from 'generated/fetch';
 import {CohortListResponse} from 'generated/fetch/api';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
+import {convertToResources} from './resources-stub';
 import {WorkspaceStubVariables} from './workspace-service-stub';
 
 export let DEFAULT_COHORT_ID = 1;
@@ -88,12 +87,7 @@ export class CohortsApiStub extends CohortsApi {
 
     this.cohorts = exampleCohortStubs;
     this.workspaces = [stubWorkspace];
-    const convertToResourceArgs: ConvertToResourcesArgs = {
-      list: this.cohorts,
-      resourceType: ResourceType.COHORT,
-      workspace: {...stubWorkspace, accessLevel: WorkspaceAccessLevel.OWNER},
-    };
-    this.resourceList = convertToResources(convertToResourceArgs);
+    this.resourceList = convertToResources(this.cohorts, ResourceType.COHORT, {...stubWorkspace, accessLevel: WorkspaceAccessLevel.OWNER});
   }
 
   updateCohort(ns: string, wsid: string, cid: number, newCohort: Cohort): Promise<Cohort> {

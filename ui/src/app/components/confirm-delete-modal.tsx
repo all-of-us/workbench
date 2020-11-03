@@ -16,7 +16,7 @@ import {
 import {
   ReactWrapperBase
 } from 'app/utils';
-import {toDisplay} from 'app/utils/resourceActions';
+import {toDisplay} from 'app/utils/resources';
 import {ResourceType} from 'generated/fetch';
 import * as React from 'react';
 

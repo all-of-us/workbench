@@ -1,3 +1,6 @@
+import * as fp from 'lodash';
+import * as React from 'react';
+
 import {Clickable, MenuItem} from 'app/components/buttons';
 import {ResourceCardBase} from 'app/components/card';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -6,8 +9,15 @@ import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
-import * as fp from 'lodash';
-import * as React from 'react';
+import {
+  getColor,
+  getDescription,
+  getDisplayName,
+  getModifiedDate,
+  getResourceUrl,
+  getTypeString
+} from 'app/utils/resources';
+import {WorkspaceResource} from 'generated/fetch';
 
 const styles = reactStyles({
   card: {
@@ -54,7 +64,7 @@ const styles = reactStyles({
   }
 });
 
-export interface Action {
+interface Action {
   icon: string;
   displayName: string;
   onClick: () => void;
@@ -62,20 +72,52 @@ export interface Action {
   hoverText?: string;
 }
 
+const ResourceActionsMenu = (props: {actions: Action[]}) => {
+  const {actions} = props;
+  return <PopupTrigger
+      data-test-id='resource-card-menu'
+      side='bottom'
+      closeOnClick
+      content={
+        <React.Fragment>
+          {actions.map((action, i) => {
+            return (
+                <TooltipTrigger key={i} content={action.hoverText}>
+                  <MenuItem
+                      icon={action.icon}
+                      onClick={() => action.onClick()}
+                      disabled={action.disabled}>
+                    {action.displayName}
+                  </MenuItem>
+                </TooltipTrigger>);
+          })}
+        </React.Fragment>
+      }
+  >
+    <Clickable data-test-id='resource-menu'>
+      <SnowmanIcon disabled={false}/>
+    </Clickable>
+  </PopupTrigger>;
+};
+
+
+function canWrite(resource: WorkspaceResource): boolean {
+  return resource.permission === 'OWNER' || resource.permission === 'WRITER';
+}
+
+function canDelete(resource: WorkspaceResource): boolean {
+  return resource.permission === 'OWNER';
+}
+
 interface Props {
   actions: Action[];
   disabled: boolean;
-  resourceUrl: string;
+  resource: WorkspaceResource;
   onNavigate: () => void;
-  displayName: string;
-  description: string;
-  displayDate: string;
-  footerText: string;
-  footerColor: string;
 }
 
 // This will be renamed to ResourceCard once the old code is removed
-export class ResourceCardTemplate extends React.Component<Props, {}> {
+class ResourceCardTemplate extends React.Component<Props, {}> {
 
   constructor(props: Props) {
     super(props);
@@ -86,59 +128,42 @@ export class ResourceCardTemplate extends React.Component<Props, {}> {
   };
 
   render() {
+    const {resource} = this.props;
     return <React.Fragment>
       <ResourceCardBase style={styles.card}
                         data-test-id='card'>
         <FlexColumn style={{alignItems: 'flex-start'}}>
           <FlexRow style={{alignItems: 'flex-start'}}>
-            <PopupTrigger
-              data-test-id='resource-card-menu'
-              side='bottom'
-              closeOnClick
-              content={
-                <React.Fragment>
-                  {this.props.actions.map((action, i) => {
-                    return (
-                      <TooltipTrigger key={i} content={action.hoverText}>
-                        <MenuItem
-                          icon={action.icon}
-                          onClick={() => action.onClick()}
-                          disabled={action.disabled}>
-                          {action.displayName}
-                        </MenuItem>
-                      </TooltipTrigger>);
-                  })}
-                </React.Fragment>
-              }
-            >
-              <Clickable data-test-id='resource-menu'>
-                <SnowmanIcon disabled={false}/>
-              </Clickable>
-            </PopupTrigger>
-
+            <ResourceActionsMenu actions={this.props.actions}/>
             <Clickable disabled={this.props.disabled}>
               <a style={styles.cardName}
                  data-test-id='card-name'
-                 href={this.props.resourceUrl}
+                 href={getResourceUrl(resource)}
                  onClick={e => {
                    this.props.onNavigate();
-                   navigateAndPreventDefaultIfNoKeysPressed(e, this.props.resourceUrl);
+                   navigateAndPreventDefaultIfNoKeysPressed(e, getResourceUrl(resource));
                  }}>
-                {this.props.displayName}
+                {getDisplayName(resource)}
               </a>
             </Clickable>
           </FlexRow>
-          <div style={styles.cardDescription}>{this.props.description}</div>
+          <div style={styles.cardDescription}>{getDescription(resource)}</div>
         </FlexColumn>
         <div style={styles.cardFooter}>
           <div style={styles.lastModified} data-test-id='last-modified'>
-            Last Modified: {this.props.displayDate}</div>
-          <div style={{...styles.resourceType, backgroundColor: this.props.footerColor}}
+            Last Modified: {getModifiedDate(resource)}</div>
+          <div style={{...styles.resourceType, backgroundColor: getColor(resource)}}
                data-test-id='card-type'>
-            {fp.startCase(fp.camelCase(this.props.footerText))}</div>
+            {fp.startCase(fp.camelCase(getTypeString(resource)))}</div>
         </div>
       </ResourceCardBase>
     </React.Fragment>;
   }
-
 }
+
+export {
+  Action,
+  ResourceCardTemplate,
+  canWrite,
+  canDelete,
+};

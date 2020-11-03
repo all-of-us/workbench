@@ -1,19 +1,18 @@
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+
 import {RenameModal} from 'app/components/rename-modal';
-import {Action, ResourceCardTemplate} from 'app/components/resource-card-template';
+import {Action, canDelete, canWrite, ResourceCardTemplate} from 'app/components/resource-card-template';
 import {withConfirmDeleteModal, WithConfirmDeleteModalProps} from 'app/components/with-confirm-delete-modal';
 import {withErrorModal, WithErrorModalProps} from 'app/components/with-error-modal';
 import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {ExportDataSetModal} from 'app/pages/data/data-set/export-data-set-modal';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
-import {formatWorkspaceResourceDisplayDate} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {navigate} from 'app/utils/navigation';
-import {toDisplay} from 'app/utils/resourceActions';
+import {getDescription, getDisplayName, getType} from 'app/utils/resources';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
-import {ResourceType, WorkspaceResource} from 'generated/fetch';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
+import {WorkspaceResource} from 'generated/fetch';
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
   resource: WorkspaceResource;
@@ -41,30 +40,8 @@ export const DatasetResourceCard = fp.flow(
     };
   }
 
-  get resourceType(): ResourceType {
-    return ResourceType.DATASET;
-  }
-
-  get displayName(): string {
-    return this.props.resource.dataSet.name;
-  }
-
-  get canWrite(): boolean {
-    return this.props.resource.permission === 'OWNER'
-      || this.props.resource.permission === 'WRITER';
-  }
-
-  get canDelete(): boolean {
-    return this.props.resource.permission === 'OWNER';
-  }
-
-  get resourceUrl(): string {
-    const {workspaceNamespace, workspaceFirecloudName, dataSet} = this.props.resource;
-    const workspacePrefix = `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}`;
-    return `${workspacePrefix}/data/data-sets/${dataSet.id}`;
-  }
-
   get actions(): Action[] {
+    const {resource} = this.props;
     return [
       {
         icon: 'pencil',
@@ -73,7 +50,7 @@ export const DatasetResourceCard = fp.flow(
           AnalyticsTracker.DatasetBuilder.OpenRenameModal();
           this.setState({showRenameModal: true});
         },
-        disabled: !this.canWrite
+        disabled: !canWrite(resource)
       },
       {
         icon: 'pencil',
@@ -81,11 +58,11 @@ export const DatasetResourceCard = fp.flow(
         onClick: () => {
           AnalyticsTracker.DatasetBuilder.OpenEditPage('From Card Snowman');
           navigate(['workspaces',
-            this.props.resource.workspaceNamespace,
-            this.props.resource.workspaceFirecloudName,
-            'data', 'data-sets', this.props.resource.dataSet.id]);
+            resource.workspaceNamespace,
+            resource.workspaceFirecloudName,
+            'data', 'data-sets', resource.dataSet.id]);
         },
-        disabled: !this.canWrite
+        disabled: !canWrite(resource)
       },
       {
         icon: 'clipboard',
@@ -94,7 +71,7 @@ export const DatasetResourceCard = fp.flow(
           AnalyticsTracker.DatasetBuilder.OpenExportModal();
           this.setState({showExportToNotebookModal: true});
         },
-        disabled: this.props.disableExportToNotebook || !this.canWrite,
+        disabled: this.props.disableExportToNotebook || !canWrite(resource),
         hoverText: this.props.disableExportToNotebook && ACTION_DISABLED_INVALID_BILLING
       },
       {
@@ -102,10 +79,10 @@ export const DatasetResourceCard = fp.flow(
         displayName: 'Delete',
         onClick: () => {
           AnalyticsTracker.DatasetBuilder.OpenDeleteModal();
-          this.props.showConfirmDeleteModal(this.displayName,
-            this.resourceType, () => this.delete());
+          this.props.showConfirmDeleteModal(getDisplayName(resource),
+            getType(resource), () => this.delete());
         },
-        disabled: !this.canDelete
+        disabled: !canDelete(resource)
       }
     ];
   }
@@ -145,31 +122,27 @@ export const DatasetResourceCard = fp.flow(
   }
 
   render() {
+    const {resource} = this.props;
     return <React.Fragment>
       {this.state.showExportToNotebookModal &&
-      <ExportDataSetModal dataSet={this.props.resource.dataSet}
-                          workspaceNamespace={this.props.resource.workspaceNamespace}
-                          workspaceFirecloudName={this.props.resource.workspaceFirecloudName}
+      <ExportDataSetModal dataSet={resource.dataSet}
+                          workspaceNamespace={resource.workspaceNamespace}
+                          workspaceFirecloudName={resource.workspaceFirecloudName}
                           closeFunction={() => this.setState({showExportToNotebookModal: false})}/>
       }
       {this.state.showRenameModal &&
       <RenameModal onRename={(name, description) => this.rename(name, description)}
-                   resourceType={this.resourceType}
+                   resourceType={getType(resource)}
                    onCancel={() => this.setState({showRenameModal: false})}
-                   oldDescription={this.props.resource.dataSet.description}
-                   oldName={this.displayName}
+                   oldDescription={getDescription(resource)}
+                   oldName={getDisplayName(resource)}
                    existingNames={this.props.existingNameList}/>
       }
 
       <ResourceCardTemplate
         actions={this.actions}
-        disabled={!this.canWrite}
-        resourceUrl={this.resourceUrl}
-        displayName={this.displayName}
-        description={this.props.resource.dataSet.description}
-        displayDate={formatWorkspaceResourceDisplayDate(this.props.resource.modifiedTime)}
-        footerText={toDisplay(this.resourceType)}
-        footerColor={colors.resourceCardHighlights.dataSet}
+        disabled={!canWrite(resource)}
+        resource={resource}
       />
     </React.Fragment>;
   }

@@ -4,19 +4,17 @@ import * as React from 'react';
 
 import {CardButton, TabButton} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
+import {getResourceCard} from 'app/components/get-resource-card';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
-import {ResourceCard} from 'app/components/resource-card';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {CohortResourceCard} from 'app/pages/data/cohort/cohort-resource-card';
-import {DatasetResourceCard} from 'app/pages/data/data-set/dataset-resource-card';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {navigate} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {BillingStatus, ResourceType, WorkspaceAccessLevel, WorkspaceResource} from 'generated/fetch';
+import {ResourceType, WorkspaceAccessLevel, WorkspaceResource} from 'generated/fetch';
 
 const styles = {
   cardButtonArea: {
@@ -151,26 +149,6 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
     }
   }
 
-  createResourceCard(resource: WorkspaceResource) {
-    if (resource.cohort) {
-      return <CohortResourceCard resource={resource}
-                                 existingNameList={this.getExistingNameList(resource)}
-                                 onUpdate={() => this.loadResources()}/>;
-    } if (resource.dataSet) {
-      return <DatasetResourceCard resource={resource}
-                                  existingNameList={this.getExistingNameList(resource)}
-                                  disableExportToNotebook={this.props.workspace.billingStatus === BillingStatus.INACTIVE}
-                                  onUpdate={() => this.loadResources()}/>;
-    } else {
-      return <ResourceCard resourceCard={resource}
-                           onDuplicateResource={(duplicating) =>
-                             this.setState({isLoading: duplicating})}
-                           onUpdate={() => this.loadResources()}
-                           existingNameList={this.getExistingNameList(resource)}
-      />;
-    }
-  }
-
   render() {
     const {accessLevel, namespace, id} = this.props.workspace;
     const {activeTab, isLoading, resourceList} = this.state;
@@ -286,10 +264,14 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
           padding: '0 0.5rem 1rem'
         }}>
           {filteredList.map((resource: WorkspaceResource, index: number) => {
-            return <div key={index}> {this.createResourceCard(resource)} </div>;
+            return <div key={index}> {getResourceCard({
+              resource: resource,
+              existingNameList: this.getExistingNameList(resource),
+              onUpdate: () => this.loadResources(),
+            })} </div>;
           })}
 
-          {isLoading && <SpinnerOverlay></SpinnerOverlay>}
+          {isLoading && <SpinnerOverlay/>}
         </div>
       </FadeBox>
     </React.Fragment>;
