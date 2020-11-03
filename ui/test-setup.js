@@ -13,7 +13,6 @@ const {overridePollingDelay} = require('./src/app/utils/leo-runtime-initializer'
 
 setupCustomValidators();
 stubPopupDimensions();
-overridePollingDelay(
-    // 1 day, poll will not complete within a test run.
-    24 * 60 * 60 * 1000);
+// TODO(RW-5851): Revert this temporary hack. Set the poll value high enough that it will never complete within a unit test run.
+overridePollingDelay(/* 1 day */ 24 * 60 * 60 * 1000);
 enzyme.configure({ adapter: new Adapter() });
