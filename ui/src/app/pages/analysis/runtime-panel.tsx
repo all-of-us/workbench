@@ -240,6 +240,7 @@ const PresetSelector = ({setSelectedDiskSize, setSelectedMachine, setSelectedCom
                           return <MenuItem
                                 style={styles.presetMenuItem}
                                 key={i}
+                                aria-label={preset.displayName}
                                 onClick={() => {
                                   // renaming to avoid shadowing
                                   const {runtimeTemplate} = preset;
