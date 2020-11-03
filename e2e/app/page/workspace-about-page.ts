@@ -80,7 +80,7 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
   async removeCollab(): Promise<void> {  
     const accessLevel = await this.findUserInCollaboratorList(config.collaboratorUsername);
   if (accessLevel !== null) {
-    await (await (this.shareWorkspace())).removeUser(config.collaboratorUsername);
+    await (await (this.openShareModal())).removeUser(config.collaboratorUsername);
     await waitWhileLoading(page);
     }
   }
