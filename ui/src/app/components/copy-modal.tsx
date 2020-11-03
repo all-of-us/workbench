@@ -12,7 +12,7 @@ import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCdrVersions} from 'app/utils';
 import { navigate } from 'app/utils/navigation';
-import {toDisplay} from 'app/utils/resourceActions';
+import {toDisplay} from 'app/utils/resources';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
 import {FlexRow} from './flex';
 import {ClrIcon} from './icons';

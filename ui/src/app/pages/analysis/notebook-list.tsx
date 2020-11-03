@@ -10,11 +10,11 @@ import {NewNotebookModal} from 'app/pages/analysis/new-notebook-modal';
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {withCurrentWorkspace} from 'app/utils';
-import {convertToResource} from 'app/utils/resourceActions';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
 import {NotebookResourceCard} from 'app/pages/analysis/notebook-resource-card';
 import {AnalyticsTracker} from 'app/utils/analytics';
+import {convertToResource} from 'app/utils/resources';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {BillingStatus, FileDetail, ResourceType} from 'generated/fetch';
