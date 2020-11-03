@@ -149,7 +149,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
         runtimeConfig = leonardoMapper.toLeonardoMachineConfig(runtime.getDataprocConfig());
       }
     } else {
-      runtimeConfig = new LeonardoGceConfig()
+      runtimeConfig =
+          new LeonardoGceConfig()
               .cloudService(LeonardoGceConfig.CloudServiceEnum.GCE)
               .diskSize(
                   Optional.ofNullable(clusterOverride.masterDiskSize)
@@ -197,14 +198,18 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   public void updateRuntime(String workspaceNamespace, UpdateRuntimeRequest updateRuntimeRequest) {
     leonardoRetryHandler.run(
         (context) -> {
-          runtimesApiProvider.get().updateRuntime(
-              updateRuntimeRequest.getRuntime().getGoogleProject(),
-              updateRuntimeRequest.getRuntime().getRuntimeName(),
-              new LeonardoUpdateRuntimeRequest()
-                  .runtimeConfig(buildRuntimeConfig(userProvider.get().getClusterConfigDefault(), updateRuntimeRequest.getRuntime())));
+          runtimesApiProvider
+              .get()
+              .updateRuntime(
+                  updateRuntimeRequest.getRuntime().getGoogleProject(),
+                  updateRuntimeRequest.getRuntime().getRuntimeName(),
+                  new LeonardoUpdateRuntimeRequest()
+                      .runtimeConfig(
+                          buildRuntimeConfig(
+                              userProvider.get().getClusterConfigDefault(),
+                              updateRuntimeRequest.getRuntime())));
           return null;
         });
-
   }
 
   @Override

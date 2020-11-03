@@ -30,7 +30,8 @@ public interface LeonardoNotebooksClient {
    */
   void createRuntime(Runtime runtime, String workspaceFirecloudName) throws WorkbenchException;
 
-  void updateRuntime(String workspaceNamespace, UpdateRuntimeRequest updateRuntimeRequest) throws WorkbenchException;
+  void updateRuntime(String workspaceNamespace, UpdateRuntimeRequest updateRuntimeRequest)
+      throws WorkbenchException;
 
   /** Deletes a notebook runtime */
   void deleteRuntime(String googleProject, String runtimeName) throws WorkbenchException;
