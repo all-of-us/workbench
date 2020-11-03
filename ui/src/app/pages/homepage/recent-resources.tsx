@@ -1,26 +1,20 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
+import {Column} from 'primereact/column';
+import {DataTable} from 'primereact/datatable';
+import {CSSProperties, useEffect, useState} from 'react';
+
 import {Clickable} from 'app/components/buttons';
-import {getResourceCard} from 'app/components/get-resource-card';
-import {FlexRow} from 'app/components/flex';
 import {SmallHeader} from 'app/components/headers';
-import {ResourceNavigation, StyledResourceType} from 'app/components/resource-card';
 import {renderResourceCard} from 'app/components/render-resource-card';
+import {ResourceNavigation, StyledResourceType} from 'app/components/resource-card';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {userMetricsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {formatWorkspaceResourceDisplayDate, getCdrVersion, reactStyles, withCdrVersions} from 'app/utils';
 import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import {getDisplayName} from 'app/utils/resources';
-import {
-  CdrVersionListResponse,
-  Workspace,
-  WorkspaceResource,
-  WorkspaceResourceResponse
-} from 'generated/fetch';
-import {Column} from 'primereact/column';
-import {DataTable} from 'primereact/datatable';
-import {CSSProperties, useEffect, useState} from 'react';
+import {CdrVersionListResponse, Workspace, WorkspaceResource, WorkspaceResourceResponse} from 'generated/fetch';
 
 const styles = reactStyles({
   column: {
@@ -88,8 +82,8 @@ const RecentResources = fp.flow(withCdrVersions())((props: {cdrVersionListRespon
     });
   }, []);
 
-  const getResourceMenu = (resource: WorkspaceResource) => {
-    return getResourceCard({
+  const renderResourceMenu = (resource: WorkspaceResource) => {
+    return renderResourceCard({
       resource,
       menuOnly: true,
       existingNameList: [],   // TODO existing bug: does not populate names for rename modal
@@ -109,7 +103,7 @@ const RecentResources = fp.flow(withCdrVersions())((props: {cdrVersionListRespon
     if (resources && wsMap) {
       setTableData(resources.map(r => {
         return {
-          menu: getResourceMenu(r),
+          menu: renderResourceMenu(r),
           resourceType: <ResourceNavigation resource={r}><StyledResourceType resource={r}/></ResourceNavigation>,
           resourceName: <ResourceNavigation resource={r} style={styles.navigation}>{getDisplayName(r)}</ResourceNavigation>,
           workspaceName: <WorkspaceNavigation workspace={getWorkspace(r)} style={styles.navigation}/>,

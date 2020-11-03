@@ -346,7 +346,9 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
                             {this.state.userHasWorkspaces !== null &&
 
                               <React.Fragment>
-                                {this.state.userHasWorkspaces ? <RecentResources/> :
+                                {this.state.userHasWorkspaces ?
+                                <RecentResources/> :
+
                                 <div style={{
                                   backgroundColor: addOpacity(colors.primary, .1).toString(),
                                   color: colors.primary,

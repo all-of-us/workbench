@@ -1,6 +1,8 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
+import {CSSProperties, PropsWithChildren} from 'react';
+
 import {Clickable, MenuItem} from 'app/components/buttons';
 import {ResourceCardBase} from 'app/components/card';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -22,7 +24,6 @@ import {
   isNotebook,
 } from 'app/utils/resources';
 import {WorkspaceResource} from 'generated/fetch';
-import {CSSProperties, PropsWithChildren} from 'react';
 
 const styles = reactStyles({
   card: {
@@ -122,7 +123,6 @@ const StyledResourceType = (props: {resource: WorkspaceResource}) => {
        >{fp.startCase(fp.camelCase(getTypeString(resource)))}</div>;
 };
 
-
 function canWrite(resource: WorkspaceResource): boolean {
   return resource.permission === 'OWNER' || resource.permission === 'WRITER';
 }
@@ -133,10 +133,12 @@ function canDelete(resource: WorkspaceResource): boolean {
 
 interface NavProps extends PropsWithChildren<any> {
   resource: WorkspaceResource;
+  linkTestId?: string;
   style?: CSSProperties;
 }
+
 const ResourceNavigation = (props: NavProps) => {
-  const {resource, style = styles.resourceName, children} = props;
+  const {resource, linkTestId, style = styles.resourceName, children} = props;
   const url = getResourceUrl(resource);
 
   function canNavigate(): boolean {
@@ -152,7 +154,7 @@ const ResourceNavigation = (props: NavProps) => {
 
   return <Clickable disabled={!canNavigate()}>
     <a style={style}
-       data-test-id='resource-navigation'
+       data-test-id={linkTestId}
        href={url}
        onClick={e => {
          onNavigate();
@@ -162,7 +164,6 @@ const ResourceNavigation = (props: NavProps) => {
     </a>
   </Clickable>;
 };
-
 
 interface Props {
   actions: Action[];
@@ -184,7 +185,7 @@ class ResourceCard extends React.Component<Props, {}> {
           <FlexColumn style={{alignItems: 'flex-start'}}>
             <FlexRow style={{alignItems: 'flex-start'}}>
               <ResourceActionsMenu actions={this.props.actions}/>
-              <ResourceNavigation resource={resource}>{getDisplayName(resource)}</ResourceNavigation>
+              <ResourceNavigation resource={resource} linkTestId='card-name'>{getDisplayName(resource)}</ResourceNavigation>
             </FlexRow>
             <div style={styles.resourceDescription}>{getDescription(resource)}</div>
           </FlexColumn>
@@ -200,8 +201,8 @@ class ResourceCard extends React.Component<Props, {}> {
 export {
   Action,
   ResourceCard,
-  StyledResourceType,
   ResourceNavigation,
-  canWrite,
+  StyledResourceType,
   canDelete,
+  canWrite,
 };
