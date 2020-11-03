@@ -43,7 +43,7 @@ const styles = reactStyles({
   },
   formGrid: {
     display: 'grid',
-    gridTemplateColumns: '1fr 1fr 1fr 1fr 3rem 1fr',
+    gridTemplateColumns: 'repeat(6, 1fr)',
     gridGap: '1rem',
     alignItems: 'center'
   },
@@ -89,7 +89,7 @@ const MachineSelector = ({onChange, selectedMachine, machineType, idPrefix}) => 
   const {cpu, memory} = selectedMachine || initialMachineType;
 
   return <Fragment>
-      <label htmlFor={`${idPrefix}-cpu`} style={{marginRight: '.25rem'}}>CPUs</label>
+      <label htmlFor={`${idPrefix}-cpu`}>CPUs</label>
       <Dropdown id={`${idPrefix}-cpu`}
         options={fp.flow(
           // Show all CPU options.
@@ -107,7 +107,7 @@ const MachineSelector = ({onChange, selectedMachine, machineType, idPrefix}) => 
             onChange)(validLeonardoMachineTypes)
         }
         value={cpu}/>
-      <label htmlFor={`${idPrefix}-ram`} style={{marginRight: '.25rem'}}>RAM (GB)</label>
+      <label htmlFor={`${idPrefix}-ram`}>RAM (GB)</label>
       <Dropdown id={`${idPrefix}-ram`}
         options={fp.flow(
           // Show valid memory options as constrained by the currently selected CPU.
@@ -131,7 +131,7 @@ const MachineSelector = ({onChange, selectedMachine, machineType, idPrefix}) => 
 
 const DiskSizeSelector = ({onChange, selectedDiskSize, diskSize, idPrefix}) => {
   return <Fragment>
-    <label htmlFor={`${idPrefix}-disk`} style={{marginRight: '.25rem'}}>Disk (GB)</label>
+    <label htmlFor={`${idPrefix}-disk`}>Disk (GB)</label>
     <InputNumber id={`${idPrefix}-disk`}
       showButtons
       decrementButtonClassName='p-button-secondary'
@@ -180,7 +180,7 @@ const DataProcConfigSelector = ({onChange, dataprocConfig})  => {
   return <fieldset style={{marginTop: '0.75rem'}}>
     <legend style={styles.workerConfigLabel}>Worker Config</legend>
     <div style={styles.formGrid}>
-      <label htmlFor='num-workers' style={{marginRight: '.25rem'}}>Workers</label>
+      <label htmlFor='num-workers'>Workers</label>
       <InputNumber id='num-workers'
         showButtons
         decrementButtonClassName='p-button-secondary'
@@ -189,7 +189,7 @@ const DataProcConfigSelector = ({onChange, dataprocConfig})  => {
         inputStyle={styles.inputNumber}
         onChange={({value}) => setSelectedNumWorkers(value)}
         min={2}/>
-      <label htmlFor='num-preemptible' style={{marginRight: '.25rem'}}>Preemptible</label>
+      <label htmlFor='num-preemptible'>Preemptible</label>
       <InputNumber id='num-preemptible'
         showButtons
         decrementButtonClassName='p-button-secondary'
@@ -294,7 +294,7 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withCdrVersions())((
       </PopupTrigger>
       {/* Runtime customization: change detailed machine configuration options. */}
       <h3 style={styles.sectionHeader}>Cloud compute profile</h3>
-      <FlexRow style={{justifyContent: 'space-between'}}>
+      <div style={styles.formGrid}>
         <MachineSelector
             idPrefix='runtime'
             selectedMachine={selectedMachine}
@@ -307,7 +307,7 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withCdrVersions())((
             onChange={(value) => setSelectedDiskSize(value)}
             diskSize={diskSize}
         />
-      </FlexRow>
+      </div>
       <FlexColumn style={{marginTop: '1rem'}}>
         <label htmlFor='runtime-compute'>Compute type</label>
         <Dropdown id='runtime-compute'
