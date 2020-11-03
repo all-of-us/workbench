@@ -305,10 +305,16 @@ commands:
           name: Create circleci_parameters.json
           working_directory: ~/workbench/e2e
           command: |
-            echo "{ \"circleBranch\": \"${CIRCLE_BRANCH}\", \"circleJob\": \"${CIRCLE_JOB}\", \"circleBuild\": \"${CIRCLE_BUILD_NUM}\", \"circleBuildUrl\": \"${CIRCLE_BUILD_URL}\", \"circleNodeIndex\": \"${CIRCLE_NODE_INDEX}\" }" \
+            echo "{ \
+              \"circleBranch\": \"${CIRCLE_BRANCH}\", \
+              \"circleJob\": \"${CIRCLE_JOB}\", \
+              \"circleBuild\": \"${CIRCLE_BUILD_NUM}\", \
+              \"circleBuildUrl\": \"${CIRCLE_BUILD_URL}\", \
+              \"circleNodeIndex\": \"${CIRCLE_NODE_INDEX}\" \
+              }" \
               > ./logs/circleci_parameters.json
       - run:
-          name: Combine circleci_parameters.json and test-results.json
+          name: Add CircleCI job data to JUnit test results
           working_directory: ~/workbench/e2e
           command: jq -s '.[0] * .[1]' ./logs/test-results.json ./logs/circleci_parameters.json > ./logs/combined-test-results.json
       - run:
