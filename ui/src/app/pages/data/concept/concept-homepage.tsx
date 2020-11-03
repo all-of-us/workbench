@@ -880,7 +880,7 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
           <ModalTitle>Warning! </ModalTitle>
           <ModalBody>
             Your concept set has not been saved. If you’d like to save your concepts, please click CANCEL
-            and click FINISH AND REVIEW to save your criteria.
+            and save your changes in the right sidebar.
           </ModalBody>
           <ModalFooter>
             <Button type='link' onClick={onModalCancel}>Cancel</Button>
