@@ -1,6 +1,7 @@
 import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {Subscription} from 'rxjs/Subscription';
 
 import {AlertClose, AlertDanger} from 'app/components/alert';
 import {Button, Clickable, SlidingFabReact} from 'app/components/buttons';
@@ -10,6 +11,7 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Header} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox, TextInput} from 'app/components/inputs';
+import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {ConceptAddModal} from 'app/pages/data/concept/concept-add-modal';
 import {ConceptSurveyAddModal} from 'app/pages/data/concept/concept-survey-add-modal';
@@ -25,6 +27,7 @@ import {
   withCurrentWorkspace
 } from 'app/utils';
 import {
+  currentConceptSetStore,
   currentConceptStore,
   NavStore,
   queryParamsStore,
@@ -193,6 +196,8 @@ const PhysicalMeasurementsCard: React.FunctionComponent<{physicalMeasurement: Do
     };
 
 interface Props {
+  setShowUnsavedModal: (showUnsavedModal: () => Promise<boolean>) => void;
+  setUnsavedConceptChanges: (unsavedConceptChanges: boolean) => void;
   workspace: WorkspaceData;
   concept?: Array<Concept>;
 }
@@ -247,6 +252,8 @@ interface State {
   selectedSurveyQuestions: Array<SurveyQuestions>;
   // Show if a search error occurred
   showSearchError: boolean;
+  // Show if trying to navigate away with unsaved changes
+  showUnsavedModal: boolean;
   // Only search on standard concepts
   standardConceptsOnly: boolean;
   // Open modal to add survey questions to concept set
@@ -260,7 +267,8 @@ interface State {
 
 export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcept())(
   class extends React.Component<Props, State> {
-
+    resolveUnsavedModal: Function;
+    subscription: Subscription;
     private MAX_CONCEPT_FETCH = 1000;
     constructor(props) {
       super(props);
@@ -290,20 +298,32 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
         selectedSurvey: '',
         selectedSurveyQuestions: [],
         showSearchError: false,
+        showUnsavedModal: false,
         standardConceptsOnly: !this.isConceptSetFlagEnable(),
         surveyAddModalOpen: false,
         surveyInfoError: false,
         surveysLoading: [],
         workspacePermissions: new WorkspacePermissions(props.workspace),
       };
+      this.showUnsavedModal = this.showUnsavedModal.bind(this);
     }
 
     componentDidMount() {
       this.loadDomainsAndSurveys();
+      this.subscription = currentConceptStore
+        .filter(currentConcepts => ![null, undefined].includes(currentConcepts))
+        .subscribe(currentConcepts => {
+          const currentConceptSet = currentConceptSetStore.getValue();
+          const unsavedChanges = (!currentConceptSet && currentConcepts.length > 0)
+            || (!!currentConceptSet && JSON.stringify(currentConceptSet.criteriums.sort()) !== JSON.stringify(currentConcepts.sort()));
+          this.props.setUnsavedConceptChanges(unsavedChanges);
+        });
+      this.props.setShowUnsavedModal(this.showUnsavedModal);
     }
 
     componentWillUnmount() {
       currentConceptStore.next(null);
+      this.subscription.unsubscribe();
     }
 
     isConceptSetFlagEnable() {
@@ -613,6 +633,16 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
         'concepts', 'sets', conceptSet.id, 'actions']);
     }
 
+    async showUnsavedModal() {
+      this.setState({showUnsavedModal: true});
+      return await new Promise<boolean>((resolve => this.resolveUnsavedModal = resolve));
+    }
+
+    getModalResponse(res: boolean) {
+      this.setState({showUnsavedModal: false});
+      this.resolveUnsavedModal(res);
+    }
+
     errorMessage() {
       return <div style={styles.error}>
         <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid' shape='exclamation-triangle' size='22'/>
@@ -692,7 +722,7 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
       const {activeDomainTab, browsingSurvey, conceptAddModalOpen, conceptDomainList, conceptsSavedText, conceptSurveysList,
         currentInputString, currentSearchString, domainInfoError, domainsLoading, inputErrors, loadingDomains, surveyInfoError,
         standardConceptsOnly, showSearchError, searching, selectedDomain, selectedSurvey, selectedConceptDomainMap, selectedSurveyQuestions,
-        surveyAddModalOpen, surveysLoading} = this.state;
+        showUnsavedModal, surveyAddModalOpen, surveysLoading} = this.state;
       const conceptDomainCards = conceptDomainList.filter(domain => domain.domain !== Domain.PHYSICALMEASUREMENT);
       const physicalMeasurementsCard = conceptDomainList.find(domain => domain.domain === Domain.PHYSICALMEASUREMENT);
       return <React.Fragment>
@@ -818,6 +848,17 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
                                  onSave={() => this.setState({surveyAddModalOpen: false})}
                                  surveyName={selectedSurvey}/>}
         </FadeBox>
+        {showUnsavedModal && <Modal>
+          <ModalTitle>Warning! </ModalTitle>
+          <ModalBody>
+            Your concept set has not been saved. If you’d like to save your concepts, please click CANCEL
+            and click FINISH AND REVIEW to save your criteria.
+          </ModalBody>
+          <ModalFooter>
+            <Button type='link' onClick={() => this.getModalResponse(false)}>Cancel</Button>
+            <Button type='primary' onClick={() => this.getModalResponse(true)}>Discard Changes</Button>
+          </ModalFooter>
+        </Modal>}
       </React.Fragment>;
     }
   }
@@ -827,8 +868,24 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
   template: '<div #root></div>'
 })
 export class ConceptHomepageComponent extends ReactWrapperBase {
+  showUnsavedModal: () => Promise<boolean>;
+  unsavedConceptChanges: boolean;
   constructor() {
-    super(ConceptHomepage, []);
+    super(ConceptHomepage, ['setShowUnsavedModal', 'setUnsavedConceptChanges']);
+    this.setShowUnsavedModal = this.setShowUnsavedModal.bind(this);
+    this.setUnsavedConceptChanges = this.setUnsavedConceptChanges.bind(this);
+  }
+
+  setShowUnsavedModal(showUnsavedModal: () => Promise<boolean>): void {
+    this.showUnsavedModal = showUnsavedModal;
+  }
+
+  setUnsavedConceptChanges(unsavedConceptChanges: boolean): void {
+    this.unsavedConceptChanges = unsavedConceptChanges;
+  }
+
+  canDeactivate(): Promise<boolean> | boolean {
+    return !this.unsavedConceptChanges || this.showUnsavedModal();
   }
 }
 
