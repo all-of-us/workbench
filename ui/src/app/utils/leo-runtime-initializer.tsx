@@ -13,7 +13,9 @@ import {serverConfigStore} from './navigation';
 // We're only willing to wait 20 minutes total for a runtime to initialize. After that we return
 // a rejected promise no matter what.
 const DEFAULT_OVERALL_TIMEOUT = 1000 * 60 * 20;
-const DEFAULT_INITIAL_POLLING_DELAY = 2000;
+// XXX: Hack for unit testing.
+let DEFAULT_INITIAL_POLLING_DELAY = 2000;
+export const overridePollingDelay = (d) => DEFAULT_INITIAL_POLLING_DELAY = d;
 const DEFAULT_MAX_POLLING_DELAY = 15000;
 // By default, we're willing to retry twice on each of the state-modifying API calls, to allow
 // for some resilience to errored-out runtimes, while avoiding situations where we end up in an
@@ -88,7 +90,7 @@ export interface LeoRuntimeInitializerOptions {
   targetRuntime?: Runtime;
 }
 
-const DEFAULT_OPTIONS: Partial<LeoRuntimeInitializerOptions> = {
+const DEFAULT_OPTIONS = (): Partial<LeoRuntimeInitializerOptions> => ({
   onPoll: () => {},
   initialPollingDelay: DEFAULT_INITIAL_POLLING_DELAY,
   maxPollingDelay: DEFAULT_MAX_POLLING_DELAY,
@@ -98,7 +100,7 @@ const DEFAULT_OPTIONS: Partial<LeoRuntimeInitializerOptions> = {
   maxResumeCount: DEFAULT_MAX_RESUME_COUNT,
   maxServerErrorCount: DEFAULT_MAX_SERVER_ERROR_COUNT,
   targetRuntime: DEFAULT_RUNTIME_CONFIG
-};
+});
 
 /**
  * A controller class implementing client-side logic to initialize a Leonardo runtime. This class
@@ -174,7 +176,7 @@ export class LeoRuntimeInitializer {
   private constructor(options: LeoRuntimeInitializerOptions) {
     // Assign default values to certain options, which will be overridden by the input options
     // if present.
-    options = {...DEFAULT_OPTIONS, ...options};
+    options = {...DEFAULT_OPTIONS(), ...options};
 
     this.workspaceNamespace = options.workspaceNamespace;
     this.onPoll = options.onPoll ? options.onPoll : () => {};
