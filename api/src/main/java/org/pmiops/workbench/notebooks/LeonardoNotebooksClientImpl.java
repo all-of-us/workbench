@@ -195,17 +195,13 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
   @Override
   public void updateRuntime(String workspaceNamespace, UpdateRuntimeRequest updateRuntimeRequest) {
-    RuntimesApi runtimesApi = runtimesApiProvider.get();
-
-    DbUser user = userProvider.get();
-
     leonardoRetryHandler.run(
         (context) -> {
-          runtimesApi.updateRuntime(
+          runtimesApiProvider.get().updateRuntime(
               updateRuntimeRequest.getRuntime().getGoogleProject(),
               updateRuntimeRequest.getRuntime().getRuntimeName(),
               new LeonardoUpdateRuntimeRequest()
-                  .runtimeConfig(buildRuntimeConfig(user.getClusterConfigDefault(), updateRuntimeRequest.getRuntime())));
+                  .runtimeConfig(buildRuntimeConfig(userProvider.get().getClusterConfigDefault(), updateRuntimeRequest.getRuntime())));
           return null;
         });
 

@@ -297,8 +297,7 @@ public class RuntimeController implements RuntimeApiDelegate {
 
     leonardoNotebooksClient.updateRuntime(firecloudWorkspaceName, runtimeRequest);
 
-    // TODO: this should be Accepted
-    return ResponseEntity.ok(new EmptyResponse());
+    return ResponseEntity.accepted().build();
   }
 
   @Override
