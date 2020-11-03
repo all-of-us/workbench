@@ -13,7 +13,13 @@ import {serverConfigStore} from './navigation';
 // We're only willing to wait 20 minutes total for a runtime to initialize. After that we return
 // a rejected promise no matter what.
 const DEFAULT_OVERALL_TIMEOUT = 1000 * 60 * 20;
-const DEFAULT_INITIAL_POLLING_DELAY = 2000;
+
+// TODO(RW-5851): This value is mutable for testing purposes, to hack around a
+// unit test issue with orphaned LeoRuntimeInitializer processes. Revert this to
+// be a constant once a proper fix is put into place.
+let defaultInitialPollingDelay = 2000;
+export const overridePollingDelay = (d) => defaultInitialPollingDelay = d;
+
 const DEFAULT_MAX_POLLING_DELAY = 15000;
 // By default, we're willing to retry twice on each of the state-modifying API calls, to allow
 // for some resilience to errored-out runtimes, while avoiding situations where we end up in an
@@ -88,9 +94,9 @@ export interface LeoRuntimeInitializerOptions {
   targetRuntime?: Runtime;
 }
 
-const DEFAULT_OPTIONS: Partial<LeoRuntimeInitializerOptions> = {
+const defaultOptions = (): Partial<LeoRuntimeInitializerOptions> => ({
   onPoll: () => {},
-  initialPollingDelay: DEFAULT_INITIAL_POLLING_DELAY,
+  initialPollingDelay: defaultInitialPollingDelay,
   maxPollingDelay: DEFAULT_MAX_POLLING_DELAY,
   overallTimeout: DEFAULT_OVERALL_TIMEOUT,
   maxCreateCount: DEFAULT_MAX_CREATE_COUNT,
@@ -98,7 +104,7 @@ const DEFAULT_OPTIONS: Partial<LeoRuntimeInitializerOptions> = {
   maxResumeCount: DEFAULT_MAX_RESUME_COUNT,
   maxServerErrorCount: DEFAULT_MAX_SERVER_ERROR_COUNT,
   targetRuntime: DEFAULT_RUNTIME_CONFIG
-};
+});
 
 /**
  * A controller class implementing client-side logic to initialize a Leonardo runtime. This class
@@ -174,7 +180,7 @@ export class LeoRuntimeInitializer {
   private constructor(options: LeoRuntimeInitializerOptions) {
     // Assign default values to certain options, which will be overridden by the input options
     // if present.
-    options = {...DEFAULT_OPTIONS, ...options};
+    options = {...defaultOptions(), ...options};
 
     this.workspaceNamespace = options.workspaceNamespace;
     this.onPoll = options.onPoll ? options.onPoll : () => {};
