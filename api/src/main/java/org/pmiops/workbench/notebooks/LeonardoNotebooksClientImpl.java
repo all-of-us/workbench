@@ -195,7 +195,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
   @Override
   public void updateRuntime(Runtime runtime) {
-    //TODO: Apply labels on updateRuntime, https://precisionmedicineinitiative.atlassian.net/browse/RW-5852
+    // TODO: Apply labels on updateRuntime,
+    // https://precisionmedicineinitiative.atlassian.net/browse/RW-5852
 
     leonardoRetryHandler.run(
         (context) -> {
@@ -207,8 +208,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
                   new LeonardoUpdateRuntimeRequest()
                       .runtimeConfig(
                           buildRuntimeConfig(
-                              runtime,
-                              userProvider.get().getClusterConfigDefault())));
+                              runtime, userProvider.get().getClusterConfigDefault())));
           return null;
         });
   }
