@@ -211,6 +211,30 @@ const DataProcConfigSelector = ({onChange, dataprocConfig})  => {
   </fieldset>;
 };
 
+enum RuntimeDiffState {
+  NO_CHANGE,
+  CAN_UPDATE,
+  NEEDS_DELETE
+}
+
+interface RuntimeConfig {
+  machine: Machine;
+  diskSize: number;
+  dataprocConfig: DataprocConfig;
+}
+
+function getRuntimeDiff(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiffState {
+  const runtimeChanged = !fp.equals(oldRuntime.machine, newRuntime.machine) ||
+    oldRuntime.diskSize !== newRuntime.diskSize ||
+    !fp.equals(oldRuntime.dataprocConfig, newRuntime.dataprocConfig);
+
+  if (runtimeChanged) {
+    return RuntimeDiffState.NEEDS_DELETE;
+  } else {
+    return RuntimeDiffState.NO_CHANGE;
+  }
+}
+
 export const RuntimePanel = fp.flow(withCurrentWorkspace(), withCdrVersions())(({workspace, cdrVersionListResponse}) => {
   const {namespace, cdrVersionId} = workspace;
   const {hasMicroarrayData} = fp.find({cdrVersionId}, cdrVersionListResponse.items) || {hasMicroarrayData: false};
@@ -226,9 +250,20 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withCdrVersions())((
 
   const selectedMachineType = selectedMachine && selectedMachine.name;
   const runtimeExists = status && status !== RuntimeStatus.Deleted;
-  const runtimeChanged = !fp.equals(selectedMachine, initialMasterMachine) ||
-    selectedDiskSize !== diskSize ||
-    !fp.equals(selectedDataprocConfig, dataprocConfig);
+
+  const initialRuntimeConfig = {
+    machine: initialMasterMachine,
+    diskSize: diskSize,
+    dataprocConfig: dataprocConfig
+  };
+
+  const newRuntimeConfig = {
+    machine: selectedMachine,
+    diskSize: selectedDiskSize,
+    dataprocConfig: selectedDataprocConfig
+  };
+
+  const runtimeChanged = getRuntimeDiff(initialRuntimeConfig, newRuntimeConfig) === RuntimeDiffState.NEEDS_DELETE;
 
   // TODO(RW-5591): Conditionally render create runtime page if runtime null or Deleted.
   if (currentRuntime === undefined) {
