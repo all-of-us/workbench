@@ -351,10 +351,10 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
 
                                 <div data-test-id='getting-started'
                                      style={{
-                                  backgroundColor: addOpacity(colors.primary, .1).toString(),
-                                  color: colors.primary,
-                                  borderRadius: 10,
-                                  margin: '2em 0em'}}>
+                                       backgroundColor: addOpacity(colors.primary, .1).toString(),
+                                       color: colors.primary,
+                                       borderRadius: 10,
+                                       margin: '2em 0em'}}>
                                   <div style={{margin: '1em 2em'}}>
                                     <h2 style={{fontWeight: 600, marginTop: 0}}>Here are some tips to get you started:</h2>
                                     <CustomBulletList>
