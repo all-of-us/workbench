@@ -27,6 +27,7 @@ import {
   withCurrentWorkspace
 } from 'app/utils';
 import {
+  conceptSetUpdating,
   currentConceptSetStore,
   currentConceptStore,
   NavStore,
@@ -196,6 +197,7 @@ const PhysicalMeasurementsCard: React.FunctionComponent<{physicalMeasurement: Do
     };
 
 interface Props {
+  setConceptSetUpdating: (conceptSetUpdating: boolean) => void;
   setShowUnsavedModal: (showUnsavedModal: () => Promise<boolean>) => void;
   setUnsavedConceptChanges: (unsavedConceptChanges: boolean) => void;
   workspace: WorkspaceData;
@@ -328,6 +330,7 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
           this.props.setUnsavedConceptChanges(unsavedChanges);
           this.setState({unsavedChanges});
         });
+      this.subscription.add(conceptSetUpdating.subscribe(updating => this.props.setConceptSetUpdating(updating)));
       this.props.setShowUnsavedModal(this.showUnsavedModal);
     }
 
@@ -896,10 +899,12 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
   template: '<div #root></div>'
 })
 export class ConceptHomepageComponent extends ReactWrapperBase {
+  conceptSetUpdating: boolean;
   showUnsavedModal: () => Promise<boolean>;
   unsavedConceptChanges: boolean;
   constructor() {
-    super(ConceptHomepage, ['setShowUnsavedModal', 'setUnsavedConceptChanges']);
+    super(ConceptHomepage, ['setConceptSetUpdating', 'setShowUnsavedModal', 'setUnsavedConceptChanges']);
+    this.setConceptSetUpdating = this.setConceptSetUpdating.bind(this);
     this.setShowUnsavedModal = this.setShowUnsavedModal.bind(this);
     this.setUnsavedConceptChanges = this.setUnsavedConceptChanges.bind(this);
   }
@@ -908,12 +913,16 @@ export class ConceptHomepageComponent extends ReactWrapperBase {
     this.showUnsavedModal = showUnsavedModal;
   }
 
+  setConceptSetUpdating(csUpdating: boolean): void {
+    this.conceptSetUpdating = csUpdating;
+  }
+
   setUnsavedConceptChanges(unsavedConceptChanges: boolean): void {
     this.unsavedConceptChanges = unsavedConceptChanges;
   }
 
   canDeactivate(): Promise<boolean> | boolean {
-    return !this.unsavedConceptChanges || this.showUnsavedModal();
+    return !this.unsavedConceptChanges || this.conceptSetUpdating || this.showUnsavedModal();
   }
 }
 

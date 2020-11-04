@@ -11,7 +11,7 @@ import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, summarizeErrors, withCurrentWorkspace} from 'app/utils';
-import {serverConfigStore} from 'app/utils/navigation';
+import {conceptSetUpdating, serverConfigStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   ConceptSet,
@@ -111,8 +111,8 @@ export const ConceptAddModal = withCurrentWorkspace()
   async saveConcepts() {
     const {workspace: {namespace, id}} = this.props;
     const {onSave, activeDomainTab} = this.props;
-    const {selectedSet, addingToExistingSet, newSetDescription,
-      name, selectedConceptsInDomain} = this.state;
+    const {selectedSet, addingToExistingSet, newSetDescription, name, selectedConceptsInDomain} = this.state;
+    conceptSetUpdating.next(true);
     this.setState({saving: true});
     const conceptIds = fp.map(selected => selected.conceptId, selectedConceptsInDomain);
 

@@ -34,6 +34,7 @@ export const currentConceptStore = new BehaviorSubject<Array<Criteria>>(undefine
 export const attributesSelectionStore = new BehaviorSubject<Criteria>(undefined);
 export const currentCohortSearchContextStore = new BehaviorSubject<any>(undefined);
 export const setSidebarActiveIconStore = new BehaviorSubject<string>(null);
+export const conceptSetUpdating = new BehaviorSubject<boolean>(false);
 
 export const userProfileStore =
   new BehaviorSubject<{ profile: Profile, reload: Function, updateCache: Function }>({

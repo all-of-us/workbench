@@ -7,7 +7,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
-import {navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
+import {conceptSetUpdating, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConceptSet} from 'generated/fetch';
 import * as React from 'react';
@@ -79,6 +79,7 @@ export const ConceptSetActions = withCurrentWorkspace()(
     }
 
     componentDidMount(): void {
+      conceptSetUpdating.next(false);
       const csid = urlParamsStore.getValue().csid;
       this.setState({conceptSetLoading: true});
       if (csid) {
