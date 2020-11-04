@@ -73,7 +73,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
     int changeCount = 0;
     int accessLevelChangeCount = 0;
 
-    for (DbUser user : userService.getAllUsers()) {
+    for (DbUser user : userService.getAllUsersExcludingDisabled()) {
       userCount++;
       try {
         Timestamp oldTime = user.getComplianceTrainingCompletionTime();
@@ -138,7 +138,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
     int changeCount = 0;
     int accessLevelChangeCount = 0;
 
-    for (DbUser user : userService.getAllUsers()) {
+    for (DbUser user : userService.getAllUsersExcludingDisabled()) {
       userCount++;
       try {
         // User accounts are registered with Terra on first sign-in. Users who have never signed in
@@ -210,7 +210,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
     int changeCount = 0;
     int accessLevelChangeCount = 0;
 
-    for (DbUser user : userService.getAllUsers()) {
+    for (DbUser user : userService.getAllUsersExcludingDisabled()) {
       userCount++;
       try {
         Timestamp oldTime = user.getTwoFactorAuthCompletionTime();
