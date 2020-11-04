@@ -321,15 +321,15 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
 
     componentDidMount() {
       this.loadDomainsAndSurveys();
-      this.subscription = currentConceptStore
-        .filter(currentConcepts => ![null, undefined].includes(currentConcepts))
-        .subscribe(currentConcepts => {
+      this.subscription = currentConceptStore.subscribe(currentConcepts => {
+        if (![null, undefined].includes(currentConcepts)) {
           const currentConceptSet = currentConceptSetStore.getValue();
           const unsavedChanges = (!currentConceptSet && currentConcepts.length > 0)
             || (!!currentConceptSet && JSON.stringify(currentConceptSet.criteriums.sort()) !== JSON.stringify(currentConcepts.sort()));
           this.props.setUnsavedConceptChanges(unsavedChanges);
           this.setState({unsavedChanges});
-        });
+        }
+      });
       this.subscription.add(conceptSetUpdating.subscribe(updating => this.props.setConceptSetUpdating(updating)));
       this.props.setShowUnsavedModal(this.showUnsavedModal);
     }
