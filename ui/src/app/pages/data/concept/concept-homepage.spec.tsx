@@ -30,6 +30,7 @@ import {
   WorkspaceStubVariables
 } from 'testing/stubs/workspaces-api-stub';
 import {Key} from 'ts-key-enum';
+import {CohortPage} from '../../../cohort-search/cohort-page/cohort-page.component';
 
 
 function isSelectedDomain(
@@ -68,19 +69,25 @@ describe('ConceptHomepage', () => {
   });
 
   it('should render', () => {
-    const wrapper = mount(<ConceptHomepage />);
+    const wrapper = mount(<ConceptHomepage setConceptSetUpdating={() => {}}
+                                           setShowUnsavedModal={() => {}}
+                                           setUnsavedConceptChanges={() => {}}/>);
     expect(wrapper).toBeTruthy();
   });
 
   it('should have one card per domain.', async() => {
-    const wrapper = mount(<ConceptHomepage />);
+    const wrapper = mount(<ConceptHomepage setConceptSetUpdating={() => {}}
+                                           setShowUnsavedModal={() => {}}
+                                           setUnsavedConceptChanges={() => {}}/>);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="domain-box-name"]').length)
       .toBe(DomainStubVariables.STUB_DOMAINS.length);
   });
 
   it('should have one card per survey.', async() => {
-    const wrapper = mount(<ConceptHomepage />);
+    const wrapper = mount(<ConceptHomepage setConceptSetUpdating={() => {}}
+                                           setShowUnsavedModal={() => {}}
+                                           setUnsavedConceptChanges={() => {}}/>);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="survey-box-name"]').length)
       .toBe(SurveyStubVariables.STUB_SURVEYS.length);
@@ -90,7 +97,9 @@ describe('ConceptHomepage', () => {
     const conceptSpy = jest.spyOn(conceptsApi(), 'searchConcepts');
     const countSpy = jest.spyOn(conceptsApi(), 'domainCounts');
     const surveySpy = jest.spyOn(conceptsApi(), 'searchSurveys');
-    const wrapper = mount(<ConceptHomepage />);
+    const wrapper = mount(<ConceptHomepage setConceptSetUpdating={() => {}}
+                                           setShowUnsavedModal={() => {}}
+                                           setUnsavedConceptChanges={() => {}}/>);
     await waitOneTickAndUpdate(wrapper);
     searchTable(defaultSearchTerm, wrapper);
     await waitOneTickAndUpdate(wrapper);
@@ -147,7 +156,9 @@ describe('ConceptHomepage', () => {
     const conceptSpy = jest.spyOn(conceptsApi(), 'searchConcepts');
     const countSpy = jest.spyOn(conceptsApi(), 'domainCounts');
     const surveySpy = jest.spyOn(conceptsApi(), 'searchSurveys');
-    const wrapper = mount(<ConceptHomepage />);
+    const wrapper = mount(<ConceptHomepage setConceptSetUpdating={() => {}}
+                                           setShowUnsavedModal={() => {}}
+                                           setUnsavedConceptChanges={() => {}}/>);
     await waitOneTickAndUpdate(wrapper);
     const termWithInvalidChars = defaultSearchTerm + '(';
     searchTable(termWithInvalidChars, wrapper);
@@ -165,7 +176,9 @@ describe('ConceptHomepage', () => {
   it('should change search criteria when standard only not checked', async() => {
     const spy = jest.spyOn(conceptsApi(), 'searchConcepts');
     const selectedDomain = DomainStubVariables.STUB_DOMAINS[1];
-    const wrapper = mount(<ConceptHomepage />);
+    const wrapper = mount(<ConceptHomepage setConceptSetUpdating={() => {}}
+                                           setShowUnsavedModal={() => {}}
+                                           setUnsavedConceptChanges={() => {}}/>);
     await waitOneTickAndUpdate(wrapper);
 
     wrapper.find('[data-test-id="standardConceptsCheckBox"] input').first()
@@ -194,7 +207,9 @@ describe('ConceptHomepage', () => {
   });
 
   it('should display the selected concepts on header', async() => {
-    const wrapper = mount(<ConceptHomepage />);
+    const wrapper = mount(<ConceptHomepage setConceptSetUpdating={() => {}}
+                                           setShowUnsavedModal={() => {}}
+                                           setUnsavedConceptChanges={() => {}}/>);
     await waitOneTickAndUpdate(wrapper);
     searchTable(defaultSearchTerm, wrapper);
     await waitOneTickAndUpdate(wrapper);
@@ -205,7 +220,9 @@ describe('ConceptHomepage', () => {
   });
 
   it('should display the selected concepts on sliding button', async() => {
-    const wrapper = mount(<ConceptHomepage />);
+    const wrapper = mount(<ConceptHomepage setConceptSetUpdating={() => {}}
+                                           setShowUnsavedModal={() => {}}
+                                           setUnsavedConceptChanges={() => {}}/>);
     await waitOneTickAndUpdate(wrapper);
     searchTable(defaultSearchTerm, wrapper);
     await waitOneTickAndUpdate(wrapper);
@@ -221,7 +238,9 @@ describe('ConceptHomepage', () => {
   });
 
   it('should clear search and selected concepts', async() => {
-    const wrapper = mount(<ConceptHomepage />);
+    const wrapper = mount(<ConceptHomepage setConceptSetUpdating={() => {}}
+                                           setShowUnsavedModal={() => {}}
+                                           setUnsavedConceptChanges={() => {}}/>);
     await waitOneTickAndUpdate(wrapper);
     searchTable(defaultSearchTerm, wrapper);
     await waitOneTickAndUpdate(wrapper);
@@ -235,7 +254,9 @@ describe('ConceptHomepage', () => {
   });
 
   it('should clear search box and reset page to default view', async() => {
-    const wrapper = mount(<ConceptHomepage />);
+    const wrapper = mount(<ConceptHomepage setConceptSetUpdating={() => {}}
+                                           setShowUnsavedModal={() => {}}
+                                           setUnsavedConceptChanges={() => {}}/>);
     await waitOneTickAndUpdate(wrapper);
     searchTable(defaultSearchTerm, wrapper);
     await waitOneTickAndUpdate(wrapper);
@@ -256,7 +277,9 @@ describe('ConceptHomepage', () => {
   });
 
   it('should display all Concept selected message when header checkbox is selected', async() => {
-    const wrapper = mount(<ConceptHomepage />);
+    const wrapper = mount(<ConceptHomepage setConceptSetUpdating={() => {}}
+                                           setShowUnsavedModal={() => {}}
+                                           setUnsavedConceptChanges={() => {}}/>);
     await waitOneTickAndUpdate(wrapper);
     searchTable('headerText', wrapper);
     await waitOneTickAndUpdate(wrapper);
