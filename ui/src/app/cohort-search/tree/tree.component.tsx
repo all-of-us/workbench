@@ -219,6 +219,11 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
       : true;
   }
 
+  selectIconDisabled() {
+    const {selectedIds, source} = this.props;
+    return source !== 'criteria' && selectedIds && selectedIds.length >= 1000;
+  }
+
   render() {
     const {autocompleteSelection, back, groupSelections, node, scrollToMatch, searchTerms, select, selectedIds, selectOption, setAttributes,
       setSearchTerms} = this.props;

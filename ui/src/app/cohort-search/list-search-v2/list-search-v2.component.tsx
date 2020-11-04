@@ -342,7 +342,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
 
     selectIconDisabled() {
       const {selectedIds, source} = this.props;
-      return source !== 'criteria' && selectedIds && selectedIds.length === 1000;
+      return source !== 'criteria' && selectedIds && selectedIds.length >= 1000;
     }
 
     selectItem = (row: any) => {
@@ -423,7 +423,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
       const loadingIngredients = ingredients[row.id] && ingredients[row.id].loading;
       const columnStyle = child ?
         {...styles.columnBodyName, paddingLeft: '1.25rem'} : styles.columnBodyName;
-      const selectIconStyle = this.selectIconDisabled() ? {...styles.selectIcon, ...styles.disabledIcon} : styles.selectIcon;
+      const selectIconStyle = this.selectIconDisabled() ? {...styles.selectIcon, ...styles.disableSelectIcon} : styles.selectIcon;
       return <tr style={{height: '1.75rem'}}>
         <td style={{...columnStyle, width: '31%', textAlign: 'left', borderLeft: 0, padding: '0 0.25rem'}}>
           {row.selectable && <div style={styles.selectDiv}>
