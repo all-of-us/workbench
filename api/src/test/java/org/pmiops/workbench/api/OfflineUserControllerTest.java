@@ -62,6 +62,7 @@ public class OfflineUserControllerTest {
   @Before
   public void setUp() {
     when(userService.getAllUsersExcludingDisabled()).thenReturn(getUsers());
+    when(userService.getAllUsers()).thenReturn(getUsers());
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
   }
 
