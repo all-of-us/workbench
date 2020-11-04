@@ -349,7 +349,8 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
                                 {this.state.userHasWorkspaces ?
                                 <RecentResources/> :
 
-                                <div style={{
+                                <div data-test-id='getting-started'
+                                     style={{
                                   backgroundColor: addOpacity(colors.primary, .1).toString(),
                                   color: colors.primary,
                                   borderRadius: 10,

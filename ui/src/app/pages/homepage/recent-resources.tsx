@@ -116,8 +116,7 @@ const RecentResources = fp.flow(withCdrVersions())((props: {cdrVersionListRespon
 
   return (resources && wsMap && !loading) ? <React.Fragment>
     <SmallHeader>Recently Accessed Items</SmallHeader>
-      <DataTable
-          data-test-id='recent-resources-table'
+      <div data-test-id='recent-resources-table'><DataTable
           value={tableData}
           scrollable={true}
           paginator={true}
@@ -129,7 +128,7 @@ const RecentResources = fp.flow(withCdrVersions())((props: {cdrVersionListRespon
         <Column field='workspaceName' header='Workspace name' style={styles.column}/>
         <Column field='formattedLastModified' header='Last changed' style={styles.column}/>
         <Column field='cdrVersionName' header='Dataset' style={styles.column}/>
-      </DataTable>
+      </DataTable></div>
   </React.Fragment> : <SpinnerOverlay/>;
 });
 
