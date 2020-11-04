@@ -666,11 +666,11 @@ paths:
         400:
           description: Bad Request
           schema:
-            "$ref": "#/definitions/EmptyResponse"
+            "$ref": "#/definitions/ErrorResponse"
         500:
           description: Internal Server Error
           schema:
-            "$ref": "#/definitions/EmptyResponse"
+            "$ref": "#/definitions/ErrorResponse"
     delete:
       summary: Delete a workspace runtime.
       description: 'TODO(RW-3695): updateRuntime should be added as a PATCH endpoint

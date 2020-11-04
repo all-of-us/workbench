@@ -298,7 +298,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     runtimeRequest.getRuntime().setGoogleProject(workspaceNamespace);
     runtimeRequest.getRuntime().setRuntimeName(userProvider.get().getRuntimeName());
 
-    leonardoNotebooksClient.updateRuntime(firecloudWorkspaceName, runtimeRequest);
+    leonardoNotebooksClient.updateRuntime(runtimeRequest.getRuntime());
 
     return ResponseEntity.accepted().build();
   }

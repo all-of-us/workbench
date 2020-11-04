@@ -27,7 +27,6 @@ import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
 import org.pmiops.workbench.model.Runtime;
-import org.pmiops.workbench.model.UpdateRuntimeRequest;
 import org.pmiops.workbench.notebooks.api.ProxyApi;
 import org.pmiops.workbench.notebooks.model.LocalizationEntry;
 import org.pmiops.workbench.notebooks.model.Localize;
@@ -133,12 +132,12 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
             .welderRegistry(WelderRegistryEnum.DOCKERHUB)
             .customEnvironmentVariables(customEnvironmentVariables);
 
-    request.setRuntimeConfig(buildRuntimeConfig(clusterOverride, runtime));
+    request.setRuntimeConfig(buildRuntimeConfig(runtime, clusterOverride));
 
     return request;
   }
 
-  private Object buildRuntimeConfig(@Nullable ClusterConfig clusterOverride, Runtime runtime) {
+  private Object buildRuntimeConfig(Runtime runtime, @Nullable ClusterConfig clusterOverride) {
     WorkbenchConfig config = workbenchConfigProvider.get();
 
     Object runtimeConfig;
@@ -195,19 +194,21 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   }
 
   @Override
-  public void updateRuntime(String workspaceNamespace, UpdateRuntimeRequest updateRuntimeRequest) {
+  public void updateRuntime(Runtime runtime) {
+    //TODO: Apply labels on updateRuntime, https://precisionmedicineinitiative.atlassian.net/browse/RW-5852
+
     leonardoRetryHandler.run(
         (context) -> {
           runtimesApiProvider
               .get()
               .updateRuntime(
-                  updateRuntimeRequest.getRuntime().getGoogleProject(),
-                  updateRuntimeRequest.getRuntime().getRuntimeName(),
+                  runtime.getGoogleProject(),
+                  runtime.getRuntimeName(),
                   new LeonardoUpdateRuntimeRequest()
                       .runtimeConfig(
                           buildRuntimeConfig(
-                              userProvider.get().getClusterConfigDefault(),
-                              updateRuntimeRequest.getRuntime())));
+                              runtime,
+                              userProvider.get().getClusterConfigDefault())));
           return null;
         });
   }

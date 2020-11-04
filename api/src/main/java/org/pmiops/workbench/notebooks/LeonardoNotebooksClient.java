@@ -6,7 +6,6 @@ import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.model.Runtime;
-import org.pmiops.workbench.model.UpdateRuntimeRequest;
 import org.pmiops.workbench.notebooks.model.StorageLink;
 
 /**
@@ -30,8 +29,7 @@ public interface LeonardoNotebooksClient {
    */
   void createRuntime(Runtime runtime, String workspaceFirecloudName) throws WorkbenchException;
 
-  void updateRuntime(String workspaceNamespace, UpdateRuntimeRequest updateRuntimeRequest)
-      throws WorkbenchException;
+  void updateRuntime(Runtime runtime) throws WorkbenchException;
 
   /** Deletes a notebook runtime */
   void deleteRuntime(String googleProject, String runtimeName) throws WorkbenchException;
