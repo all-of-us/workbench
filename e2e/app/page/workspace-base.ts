@@ -260,4 +260,14 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
     return contentText;
   }
 
+  /** 
+   * Edit workspace via Workspace Actions snowman menu "Edit" option.
+   */
+  async editWorkspace(): Promise<void> {
+    await this.selectWorkspaceAction(Option.Edit);
+    // navigate to workspace edit page
+    const newPage = await waitWhileLoading(this.page);
+    return newPage;
+  }
+
 }
