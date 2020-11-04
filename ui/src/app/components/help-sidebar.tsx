@@ -46,7 +46,6 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 
-import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {Criteria, ParticipantCohortStatus, RuntimeStatus, WorkspaceAccessLevel} from 'generated/fetch';
 import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
 
@@ -351,7 +350,6 @@ interface State {
   searchTerm: string;
   showCriteria: boolean;
   tooltipId: number;
-  workspaceCreatorFreeCreditsRemaining: number;
 }
 
 export const HelpSidebar = fp.flow(
@@ -372,8 +370,7 @@ export const HelpSidebar = fp.flow(
         participant: undefined,
         searchTerm: '',
         showCriteria: false,
-        tooltipId: undefined,
-        workspaceCreatorFreeCreditsRemaining: 0.0
+        tooltipId: undefined
       };
     }
 
@@ -386,7 +383,6 @@ export const HelpSidebar = fp.flow(
     });
 
     async componentDidMount() {
-      const {namespace, id} = this.props.workspace;
       this.subscription = participantStore.subscribe(participant => this.setState({participant}));
       this.subscription.add(setSidebarActiveIconStore.subscribe(activeIcon => {
         if (activeIcon !== null) {
@@ -394,8 +390,6 @@ export const HelpSidebar = fp.flow(
           this.props.setSidebarState(!!activeIcon);
         }
       }));
-      const workspaceCreatorFreeCreditsRemainingResponse = await workspacesApi().getWorkspaceCreatorFreeCreditsRemaining(namespace, id);
-      this.setState({workspaceCreatorFreeCreditsRemaining: workspaceCreatorFreeCreditsRemainingResponse.freeCreditsRemaining});
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
@@ -735,7 +729,7 @@ export const HelpSidebar = fp.flow(
               }
             </div>}
             {activeIcon === 'runtime' && <div style={contentStyle('runtime')}>
-              {<RuntimePanel workspaceCreatorFreeCreditsRemaining={this.state.workspaceCreatorFreeCreditsRemaining} />}
+              {<RuntimePanel/>}
             </div>}
             {activeIcon === 'annotations' && <div style={contentStyle('annotations')}>
               {participant && <SidebarContent />}

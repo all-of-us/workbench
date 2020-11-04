@@ -24,6 +24,7 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {Dropdown} from 'primereact/dropdown';
 import {InputNumber} from 'primereact/inputnumber';
 
+import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {formatUsd} from 'app/utils/numbers';
 import {Runtime, RuntimeConfigurationType, RuntimeStatus} from 'generated/fetch';
 import {BillingAccountType, CdrVersionListResponse, DataprocConfig} from 'generated/fetch';
@@ -277,7 +278,7 @@ const PresetSelector = ({hasMicroarrayData, setSelectedDiskSize, setSelectedMach
   </PopupTrigger>;
 };
 
-const CostPredictor = ({
+const CostEstimator = ({
   freeCreditsRemaining,
   profile,
   runningCost,
@@ -328,12 +329,15 @@ const CostPredictor = ({
       workspace.billingAccountType === BillingAccountType.FREETIER
       && profile.username !== workspace.creator
       && <div style={{borderLeft: `1px solid ${colorWithWhiteness(colors.dark, .5)}`, padding: '.33rem .5rem'}}>
-        Costs will draw from workspace owner's remaining {formatUsd(freeCreditsRemaining)} of free credits.
+        Costs will draw from workspace creator's remaining {formatUsd(freeCreditsRemaining)} of free credits.
       </div>
     }
-    {workspace.billingAccountType === BillingAccountType.USERPROVIDED && <div style={{borderLeft: `1px solid ${colorWithWhiteness(colors.dark, .5)}`, padding: '.33rem .5rem'}}>
-      Costs will be charged to billing account {workspace.billingAccountName}.
-    </div>}
+    {
+      workspace.billingAccountType === BillingAccountType.USERPROVIDED
+      && <div style={{borderLeft: `1px solid ${colorWithWhiteness(colors.dark, .5)}`, padding: '.33rem .5rem'}}>
+        Costs will be charged to billing account {workspace.billingAccountName}.
+      </div>
+    }
   </FlexRow>;
 };
 
@@ -341,8 +345,8 @@ export const RuntimePanel = fp.flow(
   withCdrVersions(),
   withCurrentWorkspace(),
   withUserProfile()
-)(({cdrVersionListResponse, workspace, profileState, workspaceCreatorFreeCreditsRemaining}) => {
-  const {namespace, cdrVersionId} = workspace;
+)(({cdrVersionListResponse, workspace, profileState}) => {
+  const {namespace, id, cdrVersionId} = workspace;
 
   const {profile} = profileState;
 
@@ -366,9 +370,16 @@ export const RuntimePanel = fp.flow(
     selectedDiskSize !== diskSize ||
     !fp.equals(selectedDataprocConfig, dataprocConfig) ||
     !fp.equals(selectedCompute, initialCompute);
-  const runtimeNeedsRestart = !fp.equals(selectedMachine, initialMasterMachine) ||
-    !fp.equals(selectedDataprocConfig, dataprocConfig) ||
-    !fp.equals(selectedCompute, initialCompute);
+
+  const [creatorFreeCreditsRemaining, setCreatorFreeCreditsRemaining] = useState(0);
+  useEffect(() => {
+    const fetchFreeCredits = async() => {
+      const {freeCreditsRemaining} = await workspacesApi().getWorkspaceCreatorFreeCreditsRemaining(namespace, id);
+      setCreatorFreeCreditsRemaining(freeCreditsRemaining);
+    };
+
+    fetchFreeCredits();
+  }, []);
 
   // TODO(RW-5591): Conditionally render create runtime page if runtime null or Deleted.
   if (currentRuntime === undefined) {
@@ -383,8 +394,8 @@ export const RuntimePanel = fp.flow(
     </div>
     {/* TODO(RW-5419): Cost estimates go here. */}
     <div style={styles.controlSection}>
-      <CostPredictor
-          freeCreditsRemaining={workspaceCreatorFreeCreditsRemaining}
+      <CostEstimator
+          freeCreditsRemaining={creatorFreeCreditsRemaining}
           profile={profile}
           runningCost={machineRunningPrice({
             computeType: selectedCompute,
@@ -407,12 +418,14 @@ export const RuntimePanel = fp.flow(
           runtimeChanged={runtimeChanged}
           storageCost={machineStoragePrice({
             masterDiskSize: selectedDiskSize,
+            numberOfPreemptibleWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfPreemptibleWorkers,
             numberOfWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfWorkers,
             workerDiskSize: selectedDataprocConfig && selectedDataprocConfig.workerDiskSize
           })}
           storageCostBreakdown={
             machineStorageCostBreakdown({
               masterDiskSize: selectedDiskSize,
+              numberOfPreemptibleWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfPreemptibleWorkers,
               numberOfWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfWorkers,
               workerDiskSize: selectedDataprocConfig && selectedDataprocConfig.workerDiskSize
             })
@@ -446,7 +459,7 @@ export const RuntimePanel = fp.flow(
       <FlexColumn style={{marginTop: '1rem'}}>
         <label htmlFor='runtime-compute'>Compute type</label>
         <Dropdown id='runtime-compute'
-                  disabled={!hasMicroarrayData}
+                  // disabled={!hasMicroarrayData}
                   style={{width: '10rem'}}
                   options={[ComputeType.Standard, ComputeType.Dataproc]}
                   value={selectedCompute || ComputeType.Standard}
@@ -458,7 +471,7 @@ export const RuntimePanel = fp.flow(
         }
       </FlexColumn>
     </div>
-    {runtimeNeedsRestart && <FlexRow
+    {runtimeChanged && <FlexRow
         style={{
           alignItems: 'center',
           backgroundColor: colorWithWhiteness(colors.warning, .9),

@@ -363,6 +363,6 @@ public class FreeTierBillingService {
         creatorCachedFreeTierUsage == null
             ? creatorFreeTierDollarLimit
             : creatorFreeTierDollarLimit - creatorCachedFreeTierUsage;
-    return creatorFreeCreditsRemaining > 0 ? creatorFreeCreditsRemaining : 0.0;
+    return Math.max(creatorFreeCreditsRemaining, 0);
   }
 }

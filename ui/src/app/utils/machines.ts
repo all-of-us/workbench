@@ -56,19 +56,48 @@ export const findMachineByName = (machineToFind: string) => fp.find(({name}) => 
 export const diskPrice = 0.04 / 730; // per GB hour, from https://cloud.google.com/compute/pricing
 export const dataprocCpuPrice = 0.01; // dataproc costs $0.01 per cpu per hour
 
-export const machineStoragePrice = ({masterDiskSize, numberOfWorkers, workerDiskSize }) => {
-  if (numberOfWorkers && workerDiskSize) {
-    return (masterDiskSize + numberOfWorkers * workerDiskSize) * diskPrice;
-  } else {
-    return masterDiskSize * diskPrice;
+const dataprocSurcharge = ({masterMachine, numberOfWorkers, numberOfPreemptibleWorkers, workerMachine}) => {
+  const costs = [masterMachine.cpu * dataprocCpuPrice];
+  if (workerMachine && numberOfWorkers) {
+    costs.push(numberOfWorkers * workerMachine.cpu * dataprocCpuPrice);
   }
+  if (workerMachine && numberOfPreemptibleWorkers) {
+    costs.push(numberOfPreemptibleWorkers * workerMachine.cpu * dataprocCpuPrice);
+  }
+  return fp.sum(costs);
 };
 
-export const machineStorageCostBreakdown = ({masterDiskSize, numberOfWorkers, workerDiskSize}) => {
+// The following calculations were based off of Terra UI's cost estimator:
+// https://github.com/DataBiosphere/terra-ui/blob/cf5ec4408db3bd1fcdbcc5302da62d42e4d03ca3/src/components/ClusterManager.js#L85
+
+export const machineStoragePrice = ({
+    masterDiskSize,
+    numberOfPreemptibleWorkers,
+    numberOfWorkers,
+    workerDiskSize
+}) => {
+  return fp.sum([
+    masterDiskSize * diskPrice,
+    numberOfWorkers ? numberOfWorkers * workerDiskSize * diskPrice : 0,
+    numberOfPreemptibleWorkers ? numberOfPreemptibleWorkers * workerDiskSize * diskPrice : 0
+  ]);
+};
+
+export const machineStorageCostBreakdown = ({
+    masterDiskSize,
+    numberOfPreemptibleWorkers,
+    numberOfWorkers,
+    workerDiskSize
+}) => {
   const costs = [];
-  if (numberOfWorkers && workerDiskSize) {
+  if (workerDiskSize) {
     costs.push(`${formatUsd(masterDiskSize * diskPrice)}/hr Master Disk`);
-    costs.push(`${formatUsd((numberOfWorkers * workerDiskSize) * diskPrice)}/hr Worker Disks`);
+    if (numberOfWorkers) {
+      costs.push(`${formatUsd((numberOfWorkers * workerDiskSize) * diskPrice)}/hr Worker Disk(s)`);
+    }
+    if (numberOfPreemptibleWorkers) {
+      costs.push(`${formatUsd((numberOfPreemptibleWorkers * workerDiskSize) * diskPrice)}/hr Preemptible Worker Disk(s)`);
+    }
   } else {
     costs.push(`${formatUsd(masterDiskSize * diskPrice)}/hr Disk`);
   }
@@ -87,21 +116,31 @@ export const machineRunningPrice = ({
   const masterMachine = findMachineByName(masterMachineName);
   const workerMachine = workerMachineName && findMachineByName(workerMachineName);
 
-  if (computeType === ComputeType.Dataproc && !workerMachine) {
-    return NaN;
-  }
-
   const dataprocPrice = computeType === ComputeType.Dataproc
     ? fp.sum([
-      (masterMachine.cpu + ((numberOfWorkers + numberOfPreemptibleWorkers) * workerMachine.cpu)) * dataprocCpuPrice,
-      numberOfWorkers * workerMachine.price,
-      numberOfPreemptibleWorkers * workerMachine.preemptiblePrice,
+      dataprocSurcharge({
+        masterMachine: masterMachine,
+        numberOfWorkers: numberOfWorkers,
+        numberOfPreemptibleWorkers: numberOfPreemptibleWorkers,
+        workerMachine: workerMachine
+      }),
+      workerMachine
+          ? fp.sum([
+            numberOfWorkers * workerMachine.price,
+            numberOfPreemptibleWorkers * workerMachine.preemptiblePrice
+          ])
+          : 0
     ])
     : 0;
   return fp.sum([
     dataprocPrice,
     masterMachine.price,
-    machineStoragePrice({masterDiskSize: masterDiskSize, numberOfWorkers: numberOfWorkers, workerDiskSize: workerDiskSize})
+    machineStoragePrice({
+      masterDiskSize: masterDiskSize,
+      numberOfPreemptibleWorkers: numberOfPreemptibleWorkers,
+      numberOfWorkers: numberOfWorkers,
+      workerDiskSize: workerDiskSize
+    })
   ]);
 };
 
@@ -118,25 +157,34 @@ export const machineRunningCostBreakdown = ({
   const costs = [];
   if (computeType === ComputeType.Dataproc) {
     const workerMachine = workerMachineName && findMachineByName(workerMachineName);
-    if (!workerMachine) {
-      return costs;
+    if (workerMachine) {
+      costs.push(`${formatUsd(masterMachine.price)}/hr Master VM`);
+      if (numberOfWorkers > 0) {
+        costs.push(`${formatUsd(workerMachine.price  * numberOfWorkers)}/hr Worker VM(s) (${numberOfWorkers})`);
+      }
+      if (numberOfPreemptibleWorkers > 0) {
+        costs.push(
+          `${formatUsd(workerMachine.preemptiblePrice * numberOfPreemptibleWorkers)}/hr Preemptible Worker VM(s) (${numberOfPreemptibleWorkers})`
+        );
+      }
     }
-    costs.push(`${formatUsd(masterMachine.price)}/hr Master VM`);
-    if (numberOfWorkers > 0) {
-      costs.push(`${formatUsd(workerMachine.price  * numberOfWorkers)}/hr Worker VM(s) (${numberOfWorkers})`);
-    }
-    if (numberOfPreemptibleWorkers > 0) {
-      costs.push(
-        `${formatUsd(workerMachine.preemptiblePrice * numberOfPreemptibleWorkers)}/hr Preemptible Worker VM(s) (${numberOfPreemptibleWorkers})`
-      );
-    }
-    const dataprocPrice = (masterMachine.cpu + ((numberOfWorkers + numberOfPreemptibleWorkers) * workerMachine.cpu)) * dataprocCpuPrice;
-    costs.push(`${formatUsd(dataprocPrice)}/hr Dataproc Per-CPU Surcharge`);
+    const dataprocSurchargeAmount = dataprocSurcharge({
+      masterMachine: masterMachine,
+      numberOfWorkers: numberOfWorkers,
+      numberOfPreemptibleWorkers: numberOfPreemptibleWorkers,
+      workerMachine: workerMachine
+    });
+    costs.push(`${formatUsd(dataprocSurchargeAmount)}/hr Dataproc Per-CPU Surcharge`);
   } else {
     costs.push(`${formatUsd(masterMachine.price)}/hr VM`);
   }
   costs.push(
-    ...machineStorageCostBreakdown({masterDiskSize: masterDiskSize, numberOfWorkers: numberOfWorkers, workerDiskSize: workerDiskSize})
+    ...machineStorageCostBreakdown({
+      masterDiskSize: masterDiskSize,
+      numberOfPreemptibleWorkers: numberOfPreemptibleWorkers,
+      numberOfWorkers: numberOfWorkers,
+      workerDiskSize: workerDiskSize
+    })
   );
   return costs;
 };

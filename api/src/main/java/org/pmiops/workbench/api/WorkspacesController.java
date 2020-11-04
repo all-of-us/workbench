@@ -972,9 +972,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     double freeCreditsRemaining =
         freeTierBillingService.getWorkspaceCreatorFreeCreditsRemaining(dbWorkspace);
-    WorkspaceCreatorFreeCreditsRemainingResponse response =
+    return ResponseEntity.ok(
         new WorkspaceCreatorFreeCreditsRemainingResponse()
-            .freeCreditsRemaining(freeCreditsRemaining);
-    return ResponseEntity.ok(response);
+            .freeCreditsRemaining(freeCreditsRemaining));
   }
 }
