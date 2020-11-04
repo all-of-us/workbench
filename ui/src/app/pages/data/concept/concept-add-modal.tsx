@@ -96,7 +96,7 @@ export const ConceptAddModal = withCurrentWorkspace()
 
       this.setState({
         conceptSets: conceptSetsInDomain,
-        addingToExistingSet: (conceptSetsInDomain.length > 0),
+        addingToExistingSet: this.showAddToExist() && (conceptSetsInDomain.length > 0),
         selectedConceptsInDomain: filterConcepts(this.props.selectedConcepts, this.props.activeDomainTab.domain),
         loading: false,
       });
@@ -160,6 +160,15 @@ export const ConceptAddModal = withCurrentWorkspace()
     }
   }
 
+  showAddToExist() {
+    const {conceptSets} = this.state;
+    return serverConfigStore.getValue().enableConceptSetSearchV2 && conceptSets.length === 1
+        && conceptSets[0].criteriums && conceptSets[0].criteriums.length >= 10;
+  }
+
+  disableExistingSet(set) {
+    return serverConfigStore.getValue().enableConceptSetSearchV2 && set.criteriums && set.criteriums.length >= 2;
+  }
 
   render() {
     const {activeDomainTab, onClose} = this.props;
@@ -192,7 +201,7 @@ export const ConceptAddModal = withCurrentWorkspace()
               <div>
                 <RadioButton value={addingToExistingSet}
                             checked={addingToExistingSet}
-                            disabled={conceptSets.length === 0}
+                            disabled={conceptSets.length === 0 || this.showAddToExist()}
                             data-test-id='toggle-existing-set'
                             onChange={() => {this.setState({
                               addingToExistingSet: true,
@@ -215,7 +224,7 @@ export const ConceptAddModal = withCurrentWorkspace()
               <select style={{marginTop: '1rem', height: '1.5rem', width: '100%'}}
                       onChange={(e) => this.setState({selectedSet: conceptSets[e.target.value]})}>
                 {conceptSets.map((set: ConceptSet, i) =>
-                    <option data-test-id='existing-set' key={i} value={i}>
+                    <option data-test-id='existing-set' key={i} value={i} disabled={this.disableExistingSet(set)} style={{color: 'red'}}>
                       {set.name}
                     </option>)}
               </select>
