@@ -1,5 +1,7 @@
 package org.pmiops.workbench.db.model;
 
+import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,7 +16,7 @@ public class DbAccessPolicy {
 
   private long accessPolicyId;
   private String displayName;
-  private Set<DbAccessModule> accessModules;
+  private final Set<DbAccessModule> accessModules = new HashSet<>();
 
   public DbAccessPolicy() {}
 
@@ -38,6 +40,24 @@ public class DbAccessPolicy {
     this.displayName = displayName;
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof DbAccessPolicy)) {
+      return false;
+    }
+    DbAccessPolicy that = (DbAccessPolicy) o;
+    return accessPolicyId == that.accessPolicyId
+        && Objects.equals(displayName, that.displayName)
+        && Objects.equals(accessModules, that.accessModules);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(accessPolicyId, displayName, accessModules);
+  }
   //  @OneToMany(mappedBy = "accessModuleId")
   //  public Set<DbAccessModule> getAccessModules() {
   //    return accessModules;

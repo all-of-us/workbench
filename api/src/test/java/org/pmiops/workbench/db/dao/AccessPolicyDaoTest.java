@@ -5,9 +5,6 @@ import static com.google.common.truth.Truth.assertThat;
 import com.google.common.truth.Truth8;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.accessmodules.AccessModuleEvaluatorKey;
-import org.pmiops.workbench.accessmodules.AccessModuleType;
-import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -17,8 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DataJpaTest
 public class AccessPolicyDaoTest {
 
-  @Autowired
-  private AccessPolicyDao accessPolicyDao;
+  @Autowired private AccessPolicyDao accessPolicyDao;
 
   @Test
   public void testFindById() {
@@ -30,7 +26,7 @@ public class AccessPolicyDaoTest {
     final DbAccessPolicy saved = accessPolicyDao.save(policy);
     assertThat(saved.getAccessPolicyId()).isNotEqualTo(0);
 
-    Truth8.assertThat(accessPolicyDao.findByAccessPolicyId(saved.getAccessPolicyId())).hasValue(saved);
+    Truth8.assertThat(accessPolicyDao.findByAccessPolicyId(saved.getAccessPolicyId()))
+        .hasValue(saved);
   }
-
 }
