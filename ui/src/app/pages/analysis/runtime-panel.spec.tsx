@@ -2,18 +2,16 @@ import {mount} from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import * as React from 'react';
 
-import {Button} from 'app/components/buttons';
+import {Button, Link} from 'app/components/buttons';
 import {Spinner} from 'app/components/spinners';
-import {RuntimePanel, Props} from 'app/pages/analysis/runtime-panel';
+import {ConfirmDelete, RuntimePanel, Props} from 'app/pages/analysis/runtime-panel';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {ComputeType} from 'app/utils/machines';
 import {cdrVersionStore, serverConfigStore} from 'app/utils/navigation';
 import {runtimePresets} from 'app/utils/runtime-presets';
 import {runtimeStore} from 'app/utils/stores';
-
-import {RuntimeConfigurationType, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
+import {RuntimeConfigurationType, RuntimeStatus, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
 import {RuntimeApi} from 'generated/fetch/api';
-
 import defaultServerConfig from 'testing/default-server-config';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {cdrVersionListResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
@@ -379,7 +377,6 @@ describe('RuntimePanel', () => {
     expect(wrapper.exists('span[id="worker-disk"]')).toBeTruthy();
   });
 
-  //
   it('should update the cost estimator when the compute profile changes', async() => {
     const wrapper = component();
     await handleUseEffect(wrapper);
@@ -420,4 +417,36 @@ describe('RuntimePanel', () => {
     expect(runningCost().text()).toEqual('$2.87/hr');
     expect(storageCost().text()).toEqual('$0.13/hr');
   })
+
+  it('should allow runtime deletion', async() => {
+    const wrapper = component();
+    await handleUseEffect(wrapper);
+    await waitOneTickAndUpdate(wrapper);
+
+    wrapper.find(Link).find({'aria-label': 'Delete Environment'}).first().simulate('click');
+    expect(wrapper.find(ConfirmDelete).exists()).toBeTruthy();
+
+    // Click delete
+    wrapper.find(ConfirmDelete).find({'aria-label': 'Delete'}).first().simulate('click');
+
+    // Runtime should be deleting, and confirm page should no longer be visible.
+    expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.Deleting);
+    expect(wrapper.find(ConfirmDelete).exists()).toBeFalsy();
+  });
+
+  it('should allow cancelling runtime deletion', async() => {
+    const wrapper = component();
+    await handleUseEffect(wrapper);
+    await waitOneTickAndUpdate(wrapper);
+
+    wrapper.find(Link).find({'aria-label': 'Delete Environment'}).first().simulate('click');
+    expect(wrapper.find(ConfirmDelete).exists()).toBeTruthy();
+
+    // Click cancel
+    wrapper.find(ConfirmDelete).find({'aria-label': 'Cancel'}).first().simulate('click');
+
+    // Runtime should still be active, and confirm page should no longer be visible.
+    expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.Running);
+    expect(wrapper.find(ConfirmDelete).exists()).toBeFalsy();
+  });
 });

@@ -2,6 +2,7 @@ import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import {switchCase} from 'app/utils';
 import { withAsyncErrorHandling } from 'app/utils';
 import {
+  ExceededActionCountError,
   LeoRuntimeInitializer,
 } from 'app/utils/leo-runtime-initializer';
 import {
@@ -42,26 +43,34 @@ const useRuntime = (currentWorkspaceNamespace) => {
   }, []);
 };
 
-// useRuntimeState hook can be used to change the state of the runtime
+// useRuntimeStatus hook can be used to change the status of the runtime
 // Only 'Delete' is supported at the moment
-export const useRuntimeState = (currentWorkspaceNamespace): [RuntimeStatus | undefined, (statusRequest: RuntimeStatusRequest) => void]  => {
-  const [runtimeStatus, setRuntimeState] = useState<RuntimeStatusRequest>();
+export const useRuntimeStatus = (currentWorkspaceNamespace): [
+  RuntimeStatus | undefined, (statusRequest: RuntimeStatusRequest) => void]  => {
+  const [runtimeStatus, setRuntimeStatus] = useState<RuntimeStatusRequest>();
   const {runtime} = useStore(runtimeStore);
   useRuntime(currentWorkspaceNamespace);
 
   useEffect(() => {
-    // Additional state changes can be put here
+    // Additional status changes can be put here
     if (!!runtimeStatus) {
       switchCase(runtimeStatus,
         [RuntimeStatusRequest.Delete, async() => {
           await runtimeApi().deleteRuntime(currentWorkspaceNamespace);
-          await LeoRuntimeInitializer.initialize({workspaceNamespace: currentWorkspaceNamespace, maxCreateCount: 0});
+          try {
+            await LeoRuntimeInitializer.initialize({workspaceNamespace: currentWorkspaceNamespace, maxCreateCount: 0});
+          } catch (e) {
+            // ExceededActionCountError is expected, as we exceed our create limit of 0.
+            if (!(e instanceof ExceededActionCountError)) {
+              throw e;
+            }
+          }
         }]);
     }
 
   }, [runtimeStatus]);
 
-  return [runtime ? runtime.status : undefined, setRuntimeState];
+  return [runtime ? runtime.status : undefined, setRuntimeStatus];
 };
 
 // useCustomRuntime Hook can request a new runtime config
