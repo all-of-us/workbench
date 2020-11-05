@@ -252,9 +252,9 @@ export const ConceptAddModal = withCurrentWorkspace()
         {errorMessage && <AlertDanger>{errorMessage}</AlertDanger>}
         <ModalFooter>
           <Button type='secondary' onClick={onClose}>Cancel</Button>
-          <TooltipTrigger content={addingToExistingSet && <div>Cannot add Concepts.
-            <b> {selectedSet && selectedSet.name} </b> either already has or will have more than {CONCEPT_SET_CONCEPT_LIMIT} concepts</div>}
-                          disabled={!this.disableSave(errors)}>
+          <TooltipTrigger content={addingToExistingSet && <div>Cannot add more concepts to
+            <b> {selectedSet && selectedSet.name}. </b> Concept count exceeds {CONCEPT_SET_CONCEPT_LIMIT}</div>}
+            disabled={!this.disableSave(errors)}>
           <Button style={{marginLeft: '0.5rem'}}
                   disabled={this.disableSave(errors)}
                   data-test-id='save-concept-set'
