@@ -242,6 +242,8 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
     const selectedIds = selections.map(s => s.parameterId);
     if (type === CriteriaType.DECEASED) {
       this.selectDeceased();
+    } else if (domain === Domain.FITBIT) {
+      this.selectFitbit();
     } else {
       const title = domain === Domain.PERSON ? typeToTitle(type) : domainToTitle(domain);
       let {backMode, mode} = this.state;
@@ -362,6 +364,22 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
       name: 'Deceased',
       group: false,
       domainId: Domain.PERSON.toString(),
+      hasAttributes: false,
+      selectable: true,
+      attributes: []
+    } as Selection;
+    saveCriteria([param]);
+  }
+
+  selectFitbit() {
+    const param = {
+      id: null,
+      parentId: null,
+      parameterId: '',
+      type: CriteriaType.PPI.toString(),
+      name: 'Has any Fitbit data',
+      group: false,
+      domainId: Domain.FITBIT.toString(),
       hasAttributes: false,
       selectable: true,
       attributes: []

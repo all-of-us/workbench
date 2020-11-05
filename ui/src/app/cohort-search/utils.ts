@@ -91,6 +91,9 @@ export function domainToTitle(domain: any): string {
     case Domain.ALLEVENTS:
       domain = 'All Events';
       break;
+    case Domain.FITBIT:
+      domain = 'Fitbit';
+      break;
   }
   return domain;
 }
