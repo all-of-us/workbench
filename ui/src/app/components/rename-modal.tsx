@@ -12,7 +12,7 @@ import {
 import {TooltipTrigger} from 'app/components/popups';
 import colors from 'app/styles/colors';
 import {reactStyles, summarizeErrors} from 'app/utils';
-import {toDisplay} from 'app/utils/resourceActions';
+import {toDisplay} from 'app/utils/resources';
 import {ResourceType} from 'generated/fetch';
 import * as React from 'react';
 import {validate} from 'validate.js';

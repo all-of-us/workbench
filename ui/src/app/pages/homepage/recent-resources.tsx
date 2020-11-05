@@ -1,17 +1,14 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {withContentRect} from 'react-measure';
 
 import {FlexRow} from 'app/components/flex';
 import {SmallHeader} from 'app/components/headers';
+import {renderResourceCard} from 'app/components/render-resource-card';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {Scroll} from 'app/icons/scroll';
 import {userMetricsApi} from 'app/services/swagger-fetch-clients';
-
-import {ResourceCard} from 'app/components/resource-card';
-import {NotebookResourceCard} from 'app/pages/analysis/notebook-resource-card';
-import {CohortResourceCard} from 'app/pages/data/cohort/cohort-resource-card';
-import {BillingStatus, WorkspaceResource} from 'generated/fetch';
+import {WorkspaceResource} from 'generated/fetch';
+import {withContentRect} from 'react-measure';
 
 export const RecentResources = (fp.flow as any)(
   withContentRect('client'),
@@ -66,26 +63,6 @@ export const RecentResources = (fp.flow as any)(
     return [];
   }
 
-  createResourceCard(resource: WorkspaceResource) {
-    if (resource.notebook) {
-      return <NotebookResourceCard resource={resource}
-                                   existingNameList={this.getExistingNameList(resource)}
-                                   onUpdate={() => this.loadResources()}
-                                   disableDuplicate={resource.workspaceBillingStatus === BillingStatus.INACTIVE}
-      />;
-    } else if (resource.cohort) {
-      return <CohortResourceCard resource={resource}
-                                 existingNameList={this.getExistingNameList(resource)}
-                                 onUpdate={() => this.loadResources()}/>;
-    } else {
-      return <ResourceCard resourceCard={resource}
-                    onDuplicateResource={(duplicating) => this.setState({loading: duplicating})}
-                    onUpdate={() => this.loadResources()}
-                    existingNameList={this.getExistingNameList(resource)}
-      />;
-    }
-  }
-
   render() {
     const {contentRect, measureRef} = this.props;
     const {offset, resources, loading} = this.state;
@@ -97,7 +74,11 @@ export const RecentResources = (fp.flow as any)(
           <FlexRow style={{position: 'relative', alignItems: 'center', marginTop: '-1rem',
             marginLeft: '-1rem', paddingLeft: '1rem', opacity: loading ? 0.5 : 1}}>
             {resources.slice(offset, offset + limit).map((resource, i) => {
-              return <div key={i}> {this.createResourceCard(resource)} </div>;
+              return <div key={i}> {renderResourceCard({
+                resource: resource,
+                existingNameList: this.getExistingNameList(resource),
+                onUpdate: () => this.loadResources(),
+              })} </div>;
             })}
             {offset > 0 && <Scroll
               dir='left'
