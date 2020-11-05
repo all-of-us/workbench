@@ -347,9 +347,6 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     const selectIconStyle = this.selectIconDisabled() ? {...styles.selectIcon, ...styles.disableSelectIcon} : styles.selectIcon;
 
     return <React.Fragment>
-      {this.selectIconDisabled() && <div style={{color: colors.warning, fontWeight: 'bold', maxWidth: '1000px'}}>
-        NOTE: Concept Set can have only 1000 concepts. Please delete some concepts before adding more.
-      </div>}1
         <div style={{...styles.treeNode}} id={`node${id}`} onClick={() => this.toggleExpanded()}>
         {group && <button style={styles.iconButton}>
           {loading
@@ -368,9 +365,9 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
                   shape='slider' dir='right' size='20'
                   onClick={(e) => this.setAttributes(e, node)}/>
               : selected
-                ? <ClrIcon style={selectIconStyle}
+                ? <ClrIcon style={styles.selected}
                     shape='check-circle' size='20'/>
-                : <ClrIcon style={styles.selectIcon}
+                : <ClrIcon style={selectIconStyle}
                     shape='plus-circle' size='20'
                     onClick={(e) => this.select(e)}/>
             }

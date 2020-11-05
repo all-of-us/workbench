@@ -229,6 +229,9 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
       setSearchTerms} = this.props;
     const {children, error, ingredients, loading} = this.state;
     return <React.Fragment>
+      {this.selectIconDisabled() && <div style={{color: colors.warning, fontWeight: 'bold', maxWidth: '1000px'}}>
+        NOTE: Concept Set can have only 1000 concepts. Please delete some concepts before adding more.
+      </div>}
       {node.domainId !== Domain.VISIT.toString() &&
         <div style={serverConfigStore.getValue().enableCohortBuilderV2
           ? {...styles.searchBarContainer, backgroundColor: 'transparent', width: '65%'}
