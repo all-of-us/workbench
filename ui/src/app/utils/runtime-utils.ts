@@ -30,10 +30,12 @@ const useRuntime = (currentWorkspaceNamespace) => {
       () => runtimeStore.set({workspaceNamespace: null, runtime: null}),
       async() => {
         const leoRuntime = await runtimeApi().getRuntime(currentWorkspaceNamespace);
-        runtimeStore.set({
-          workspaceNamespace: currentWorkspaceNamespace,
-          runtime: leoRuntime
-        });
+        if (currentWorkspaceNamespace === runtimeStore.get().workspaceNamespace) {
+          runtimeStore.set({
+            workspaceNamespace: currentWorkspaceNamespace,
+            runtime: leoRuntime
+          });
+        }
       });
 
     if (currentWorkspaceNamespace !== runtimeStore.get().workspaceNamespace) {
@@ -89,17 +91,10 @@ export const useCustomRuntime = (currentWorkspaceNamespace): [Runtime, (runtime:
       if (runtime && runtime.status !== RuntimeStatus.Deleted) {
         await runtimeApi().deleteRuntime(currentWorkspaceNamespace);
       }
-      const currentRuntime = await LeoRuntimeInitializer.initialize({
+      await LeoRuntimeInitializer.initialize({
         workspaceNamespace,
         targetRuntime: requestedRuntime
       });
-
-      if (currentWorkspaceNamespace === workspaceNamespace) {
-        runtimeStore.set({
-          workspaceNamespace: currentWorkspaceNamespace,
-          runtime: currentRuntime
-        });
-      }
     };
 
     if (requestedRuntime !== undefined && !fp.equals(requestedRuntime, runtime)) {
