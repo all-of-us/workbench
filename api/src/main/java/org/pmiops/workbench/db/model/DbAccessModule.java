@@ -1,25 +1,30 @@
 package org.pmiops.workbench.db.model;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import javax.jdo.annotations.Unique;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import org.pmiops.workbench.accessmodules.AccessModuleEvaluatorKey;
 import org.pmiops.workbench.accessmodules.AccessModuleType;
 
 @Entity
-@Table(name = "access_module")
+@Table(name = "access_module", uniqueConstraints = {
+    @UniqueConstraint(columnNames = "display_name") })
 public class DbAccessModule {
 
   private long accessModuleId;
   private String displayName;
   private AccessModuleType accessModuleType;
   private AccessModuleEvaluatorKey accessModuleEvaluatorKey;
-  //  private final Set<DbAccessPolicy> accessPolicies = new HashSet<>();
+  private final Set<DbAccessPolicy> accessPolicies = new HashSet<>();
 
   public DbAccessModule() {}
 
@@ -81,16 +86,16 @@ public class DbAccessModule {
   public int hashCode() {
     return Objects.hash(accessModuleId, displayName, accessModuleType, accessModuleEvaluatorKey);
   }
-  //  @ManyToMany
-  //  @JoinTable(
-  //      name = "access_policy_module",
-  //      joinColumns = @JoinColumn(name = "access_module_member_id.access_policy_id"),
-  //      inverseJoinColumns = @JoinColumn(name = "access_module_id"))
-  //  public Set<DbAccessPolicy> getAccessPolicies() {
-  //    return accessPolicies;
-  //  }
-  //
-  //  public void setAccessPolicies(Set<DbAccessPolicy> accessPolicies) {
-  //    this.accessPolicies = accessPolicies;
-  //  }
+
+  // This class is on the "owned" side of the relationship, and is mapped by the accessModules
+  // collection.
+  @ManyToMany(mappedBy = "accessModules")
+  public Set<DbAccessPolicy> getAccessPolicies() {
+    return accessPolicies;
+  }
+
+  public void setAccessPolicies(Set<DbAccessPolicy> accessPolicies) {
+    this.accessPolicies.clear();
+    this.accessPolicies.addAll(accessPolicies);
+  }
 }
