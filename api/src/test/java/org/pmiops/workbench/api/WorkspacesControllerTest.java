@@ -3243,7 +3243,7 @@ public class WorkspacesControllerTest {
     compareCohortReviewFields(cohortReviews.get(0), cohortReview);
     assertThat(conceptSets).hasSize(1);
     // Ignore arrays in subtables.
-    assertThat(conceptSets.get(0)).isEqualTo(conceptSet.concepts(null));
+    assertThat(conceptSets.get(0)).isEqualTo(conceptSet);
     assertThat(dataSets).hasSize(1);
     compareDatasetMetadata(dataSets.get(0), dataSet);
   }

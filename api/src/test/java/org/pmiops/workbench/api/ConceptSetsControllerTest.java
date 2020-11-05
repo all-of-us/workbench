@@ -382,7 +382,7 @@ public class ConceptSetsControllerTest {
                 .getConceptSetsInWorkspace(workspace.getNamespace(), WORKSPACE_NAME)
                 .getBody()
                 .getItems())
-        .contains(conceptSet.concepts(null));
+        .contains(conceptSet);
     assertThat(
             conceptSetsController
                 .getConceptSetsInWorkspace(workspace2.getNamespace(), WORKSPACE_NAME_2)
@@ -404,7 +404,7 @@ public class ConceptSetsControllerTest {
                 .getConceptSetsInWorkspace(workspace.getNamespace(), WORKSPACE_NAME)
                 .getBody()
                 .getItems())
-        .contains(surveyConceptSet.concepts(null));
+        .contains(surveyConceptSet);
     assertThat(
             conceptSetsController
                 .getConceptSetsInWorkspace(workspace2.getNamespace(), WORKSPACE_NAME_2)
@@ -434,7 +434,7 @@ public class ConceptSetsControllerTest {
                 .getConceptSetsInWorkspace(workspace.getNamespace(), WORKSPACE_NAME)
                 .getBody()
                 .getItems())
-        .contains(conceptSet.concepts(null));
+        .contains(conceptSet);
     assertThat(
             conceptSetsController
                 .getConceptSetsInWorkspace(workspace2.getNamespace(), WORKSPACE_NAME_2)
@@ -484,7 +484,7 @@ public class ConceptSetsControllerTest {
                 .getConceptSetsInWorkspace(workspace.getNamespace(), WORKSPACE_NAME)
                 .getBody()
                 .getItems())
-        .contains(updatedConceptSet.concepts(null));
+        .contains(updatedConceptSet);
     assertThat(
             conceptSetsController
                 .getConceptSetsInWorkspace(workspace2.getNamespace(), WORKSPACE_NAME_2)
