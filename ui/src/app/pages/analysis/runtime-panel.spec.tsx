@@ -4,25 +4,26 @@ import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
 import {Spinner} from 'app/components/spinners';
-import {ComputeType, RuntimePanel, Props} from 'app/pages/analysis/runtime-panel';
-import {workspaceStubs} from 'testing/stubs/workspaces-api-stub';
+import {RuntimePanel, Props} from 'app/pages/analysis/runtime-panel';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import defaultServerConfig from 'testing/default-server-config';
-import {runtimePresets} from 'app/utils/runtime-presets';
-import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
-import {RuntimeApi} from 'generated/fetch/api';
-import {WorkspaceAccessLevel} from 'generated/fetch';
-import {runtimeStore} from 'app/utils/stores';
-import {cdrVersionListResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
+import {ComputeType} from 'app/utils/machines';
 import {cdrVersionStore, serverConfigStore} from 'app/utils/navigation';
-import { RuntimeConfigurationType } from 'generated/fetch';
+import {runtimePresets} from 'app/utils/runtime-presets';
+import {runtimeStore} from 'app/utils/stores';
 
+import {RuntimeConfigurationType, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
+import {RuntimeApi} from 'generated/fetch/api';
 
+import defaultServerConfig from 'testing/default-server-config';
+import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {cdrVersionListResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
+import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
+import {WorkspacesApiStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
 
 describe('RuntimePanel', () => {
   let props: Props;
   let runtimeApiStub: RuntimeApiStub;
+  let workspacesApiStub: WorkspacesApiStub;
 
   const component = () => {
     return mount(<RuntimePanel {...props}/>);
@@ -41,9 +42,14 @@ describe('RuntimePanel', () => {
   beforeEach(() => {
     cdrVersionStore.next(cdrVersionListResponse);
     serverConfigStore.next({...defaultServerConfig, enableCustomRuntimes: true});
+
     runtimeApiStub = new RuntimeApiStub();
     runtimeApiStub.runtime.dataprocConfig = null;
     registerApiClient(RuntimeApi, runtimeApiStub);
+
+    workspacesApiStub = new WorkspacesApiStub();
+    registerApiClient(WorkspacesApi, workspacesApiStub)
+
     runtimeStore.set({runtime: runtimeApiStub.runtime, workspaceNamespace: workspaceStubs[0].namespace});
     props = {
       workspace: {
@@ -84,7 +90,7 @@ describe('RuntimePanel', () => {
 
   const pickPreset = async(wrapper, {displayName}) => {
     act(() => { wrapper.find({'data-test-id': 'runtime-presets-menu'}).first().simulate('click') });
-    act(() => { (document.querySelector(`#popup-root [aria-label="${displayName}"]`) as HTMLElement).click() });
+    act(() => {(document.querySelector(`#popup-root [aria-label="${displayName}"]`) as HTMLElement).click()});
     await waitOneTickAndUpdate(wrapper);
   }
 
@@ -372,4 +378,46 @@ describe('RuntimePanel', () => {
     expect(wrapper.exists('div[id="worker-ram"]')).toBeTruthy();
     expect(wrapper.exists('span[id="worker-disk"]')).toBeTruthy();
   });
+
+  //
+  it('should update the cost estimator when the compute profile changes', async() => {
+    const wrapper = component();
+    await handleUseEffect(wrapper);
+    await waitOneTickAndUpdate(wrapper);
+
+    const costEstimator = () => wrapper.find('[data-test-id="cost-estimator"]');
+    expect(costEstimator()).toBeTruthy();
+
+    // Default GCE machine, n1-standard-4, makes the running cost 20 cents an hour and the storage cost less than 1 cent an hour.
+    const runningCost = () => costEstimator().find('[data-test-id="running-cost"]');
+    const storageCost = () => costEstimator().find('[data-test-id="storage-cost"]');
+    expect(runningCost().text()).toEqual('$0.20/hr');
+    expect(storageCost().text()).toEqual('< $0.01/hr');
+
+    // Change the machine to n1-standard-8 and bump the storage to 300GB. This should make the running cost 40 cents an hour and the storage cost 2 cents an hour.
+    await pickMainCpu(wrapper, 8);
+    await pickMainRam(wrapper, 30);
+    pickMainDiskSize(wrapper, 300);
+    expect(runningCost().text()).toEqual('$0.40/hr');
+    expect(storageCost().text()).toEqual('$0.02/hr');
+
+    // Selecting the General Analysis preset should bring the machine back to n1-standard-4 with 50GB storage.
+    await pickPreset(wrapper, {displayName: 'General Analysis'});
+    expect(runningCost().text()).toEqual('$0.20/hr');
+    expect(storageCost().text()).toEqual('< $0.01/hr');
+
+    // After selecting Dataproc, the Dataproc defaults should make the running cost 71 cents an hour. The storage cost should remain unchanged.
+    await pickComputeType(wrapper, ComputeType.Dataproc);
+    expect(runningCost().text()).toEqual('$0.71/hr');
+    expect(storageCost().text()).toEqual('< $0.01/hr');
+
+    // Bump up all the worker values to increase the price on everything.
+    pickNumWorkers(wrapper, 4);
+    pickNumPreemptibleWorkers(wrapper, 4);
+    await pickWorkerCpu(wrapper, 8);
+    await pickWorkerRam(wrapper, 30);
+    pickWorkerDiskSize(wrapper, 300);
+    expect(runningCost().text()).toEqual('$2.87/hr');
+    expect(storageCost().text()).toEqual('$0.13/hr');
+  })
 });
