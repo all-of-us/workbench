@@ -268,6 +268,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
               resource: resource,
               existingNameList: this.getExistingNameList(resource),
               onUpdate: () => this.loadResources(),
+              menuOnly: false,
             })} </div>;
           })}
 
