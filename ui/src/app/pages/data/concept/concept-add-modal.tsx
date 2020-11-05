@@ -45,6 +45,8 @@ const filterConcepts = (concepts: any[], domain: Domain) => {
   }
 };
 
+const CONCEPT_SET_CONCEPT_LIMIT = 1000;
+
 export const ConceptAddModal = withCurrentWorkspace()
 (class extends React.Component<{
   workspace: WorkspaceData,
@@ -96,7 +98,7 @@ export const ConceptAddModal = withCurrentWorkspace()
 
       this.setState({
         conceptSets: conceptSetsInDomain,
-        addingToExistingSet: this.showAddToExist() && (conceptSetsInDomain.length > 0),
+        addingToExistingSet: conceptSetsInDomain.length > 0,
         selectedConceptsInDomain: filterConcepts(this.props.selectedConcepts, this.props.activeDomainTab.domain),
         loading: false,
       });
@@ -160,20 +162,18 @@ export const ConceptAddModal = withCurrentWorkspace()
     }
   }
 
-  showAddToExist() {
-    const {conceptSets} = this.state;
-    return serverConfigStore.getValue().enableConceptSetSearchV2 && conceptSets.length === 1
-        && conceptSets[0].criteriums && conceptSets[0].criteriums.length >= 10;
-  }
-
-  disableExistingSet(set) {
-    return serverConfigStore.getValue().enableConceptSetSearchV2 && set.criteriums && set.criteriums.length >= 2;
+  disableSave(errors) {
+    const {addingToExistingSet, saving, selectedSet} = this.state;
+    if (serverConfigStore.getValue().enableConceptSetSearchV2 && addingToExistingSet) {
+      return selectedSet.criteriums && selectedSet.criteriums.length >= CONCEPT_SET_CONCEPT_LIMIT;
+    }
+    return (!addingToExistingSet && !!errors) || saving;
   }
 
   render() {
     const {activeDomainTab, onClose} = this.props;
     const {conceptSets, loading, nameTouched, saving, addingToExistingSet,
-      newSetDescription, name, errorMessage, errorSaving, selectedConceptsInDomain} = this.state;
+      newSetDescription, name, errorMessage, errorSaving, selectedSet, selectedConceptsInDomain} = this.state;
     const errors = validate({name}, {
       name: {
         presence: {allowEmpty: false},
@@ -201,7 +201,7 @@ export const ConceptAddModal = withCurrentWorkspace()
               <div>
                 <RadioButton value={addingToExistingSet}
                             checked={addingToExistingSet}
-                            disabled={conceptSets.length === 0 || this.showAddToExist()}
+                            disabled={conceptSets.length === 0}
                             data-test-id='toggle-existing-set'
                             onChange={() => {this.setState({
                               addingToExistingSet: true,
@@ -222,9 +222,10 @@ export const ConceptAddModal = withCurrentWorkspace()
         {addingToExistingSet ? (
             <ModalBody data-test-id='add-to-existing'>
               <select style={{marginTop: '1rem', height: '1.5rem', width: '100%'}}
+                      placeholder='Select Concept Set'
                       onChange={(e) => this.setState({selectedSet: conceptSets[e.target.value]})}>
                 {conceptSets.map((set: ConceptSet, i) =>
-                    <option data-test-id='existing-set' key={i} value={i} disabled={this.disableExistingSet(set)} style={{color: 'red'}}>
+                    <option data-test-id='existing-set' key={i} value={i}>
                       {set.name}
                     </option>)}
               </select>
@@ -250,10 +251,14 @@ export const ConceptAddModal = withCurrentWorkspace()
         {errorMessage && <AlertDanger>{errorMessage}</AlertDanger>}
         <ModalFooter>
           <Button type='secondary' onClick={onClose}>Cancel</Button>
+          <TooltipTrigger content={addingToExistingSet && <div>Cannot add more Concepts.
+            <b>{selectedSet && selectedSet.name} </b> already has {CONCEPT_SET_CONCEPT_LIMIT} concepts</div>}
+                          disabled={!this.disableSave(errors)}>
           <Button style={{marginLeft: '0.5rem'}}
-                  disabled={(!addingToExistingSet && !!errors) || saving}
+                  disabled={this.disableSave(errors)}
                   data-test-id='save-concept-set'
                   onClick={() => this.saveConcepts()}>Save</Button>
+          </TooltipTrigger>
         </ModalFooter>
       </ModalBody>}
       {saving && <SpinnerOverlay/>}
