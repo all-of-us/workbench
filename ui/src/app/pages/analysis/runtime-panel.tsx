@@ -77,6 +77,10 @@ const styles = reactStyles({
     borderRadius: '5px',
     color: colors.dark,
     marginBottom: '.5rem',
+  },
+  costsDrawnFrom: {
+    borderLeft: `1px solid ${colorWithWhiteness(colors.dark, .5)}`,
+    padding: '.33rem .5rem'
   }
 });
 
@@ -298,9 +302,9 @@ const CostEstimator = ({
     numberOfWorkers = 0,
     masterMachineType = machineType,
     masterDiskSize = diskSize,
-    workerMachineType,
-    workerDiskSize,
-    numberOfPreemptibleWorkers
+    workerMachineType = null,
+    workerDiskSize = null,
+    numberOfPreemptibleWorkers = 0
   } = dataprocConfig || {};
 
   const runningCost = machineRunningCost({
@@ -339,6 +343,7 @@ const CostEstimator = ({
 
   return <FlexRow
     style={wrapperStyle}
+    data-test-id='cost-estimator'
   >
     <FlexRow style={{minWidth: '250px', margin: '.33rem .5rem'}}>
       <FlexColumn style={{marginRight: '1rem'}}>
@@ -349,7 +354,12 @@ const CostEstimator = ({
             {runningCostBreakdown.map((lineItem, i) => <div key={i}>{lineItem}</div>)}
           </div>
         }>
-          <div style={{fontSize: '20px', color: colors.accent}}>{formatUsd(runningCost)}/hr</div>
+          <div
+              style={{fontSize: '20px', color: colors.accent}}
+              data-test-id='running-cost'
+          >
+            {formatUsd(runningCost)}/hr
+          </div>
         </TooltipTrigger>
       </FlexColumn>
       <FlexColumn>
@@ -360,27 +370,32 @@ const CostEstimator = ({
             {storageCostBreakdown.map((lineItem, i) => <div key={i}>{lineItem}</div>)}
           </div>
         }>
-          <div style={{fontSize: '20px', color: colors.accent}}>{formatUsd(storageCost)}/hr</div>
+          <div
+              style={{fontSize: '20px', color: colors.accent}}
+              data-test-id='storage-cost'
+          >
+            {formatUsd(storageCost)}/hr
+          </div>
         </TooltipTrigger>
       </FlexColumn>
     </FlexRow>
     {
       workspace.billingAccountType === BillingAccountType.FREETIER
       && profile.username === workspace.creator
-      && <div style={{borderLeft: `1px solid ${colorWithWhiteness(colors.dark, .5)}`, padding: '.33rem .5rem'}}>
+      && <div style={styles.costsDrawnFrom}>
         Costs will draw from your remaining {formatUsd(freeCreditsRemaining)} of free credits.
       </div>
     }
     {
       workspace.billingAccountType === BillingAccountType.FREETIER
       && profile.username !== workspace.creator
-      && <div style={{borderLeft: `1px solid ${colorWithWhiteness(colors.dark, .5)}`, padding: '.33rem .5rem'}}>
+      && <div style={styles.costsDrawnFrom}>
         Costs will draw from workspace creator's remaining {formatUsd(freeCreditsRemaining)} of free credits.
       </div>
     }
     {
       workspace.billingAccountType === BillingAccountType.USERPROVIDED
-      && <div style={{borderLeft: `1px solid ${colorWithWhiteness(colors.dark, .5)}`, padding: '.33rem .5rem'}}>
+      && <div style={styles.costsDrawnFrom}>
         Costs will be charged to billing account {workspace.billingAccountName}.
       </div>
     }
@@ -484,7 +499,7 @@ export const RuntimePanel = fp.flow(
       <FlexColumn style={{marginTop: '1rem'}}>
         <label htmlFor='runtime-compute'>Compute type</label>
         <Dropdown id='runtime-compute'
-                  disabled={!hasMicroarrayData}
+                  // disabled={!hasMicroarrayData}
                   style={{width: '10rem'}}
                   options={[ComputeType.Standard, ComputeType.Dataproc]}
                   value={selectedCompute || ComputeType.Standard}
