@@ -147,10 +147,13 @@
   <include file="changelog/db.changelog-136-workspace-need-researchpurpose-review.xml"/>
   <include file="changelog/db.changelog-137-sex-at-birth.xml"/>
   <include file="changelog/db.changelog-138-cdr-version-microarray-field.xml"/>
-
+  <include file="changelog/db.changelog-139-create-access-module.xml"/>
+  <include file="changelog/db.changelog-140-create-access-policy.xml"/>
+  <include file="changelog/db.changelog-141-create-access-module-policy.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`
+       or `./project.rb run-liquibase \-\-command=update`
    - Restart the local API service to generate the new API files.
    - Restart the local UI service to generate the API files.
    -->

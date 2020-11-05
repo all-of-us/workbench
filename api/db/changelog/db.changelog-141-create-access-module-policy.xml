@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="jaycarlton" id="db.changelog-140-create-access-policy">
+        <createTable tableName="access_module_policy">
+          <column name="access_module_id" type="bigint">
+            <constraints primaryKey="true" foreignKeyName="fk_access_policy_access_module"
+              references="access_module(access_module_id)"/>
+          </column>
+          <column name="access_policy_id" type="bigint">
+            <constraints primaryKey="true" foreignKeyName="fk_access_module_access_policy"
+              references="access_policy(access_policy_id)"/>
+          </column>
+        </createTable>
+  </changeSet>
+</databaseChangeLog>
