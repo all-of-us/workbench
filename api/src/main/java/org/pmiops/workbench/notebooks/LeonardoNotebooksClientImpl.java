@@ -24,6 +24,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest.WelderRe
 import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.notebooks.api.ProxyApi;
@@ -131,15 +132,23 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
             .welderRegistry(WelderRegistryEnum.DOCKERHUB)
             .customEnvironmentVariables(customEnvironmentVariables);
 
+    request.setRuntimeConfig(buildRuntimeConfig(runtime, clusterOverride));
+
+    return request;
+  }
+
+  private Object buildRuntimeConfig(Runtime runtime, @Nullable ClusterConfig clusterOverride) {
+    WorkbenchConfig config = workbenchConfigProvider.get();
+
+    Object runtimeConfig;
     if (workbenchConfigProvider.get().featureFlags.enableCustomRuntimes) {
       if (runtime.getGceConfig() != null) {
-        request.setRuntimeConfig(leonardoMapper.toLeonardoGceConfig(runtime.getGceConfig()));
+        runtimeConfig = leonardoMapper.toLeonardoGceConfig(runtime.getGceConfig());
       } else {
-        request.setRuntimeConfig(
-            leonardoMapper.toLeonardoMachineConfig(runtime.getDataprocConfig()));
+        runtimeConfig = leonardoMapper.toLeonardoMachineConfig(runtime.getDataprocConfig());
       }
     } else {
-      request.setRuntimeConfig(
+      runtimeConfig =
           new LeonardoGceConfig()
               .cloudService(LeonardoGceConfig.CloudServiceEnum.GCE)
               .diskSize(
@@ -147,10 +156,10 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
                       .orElse(config.firecloud.notebookRuntimeDefaultDiskSizeGb))
               .machineType(
                   Optional.ofNullable(clusterOverride.machineType)
-                      .orElse(config.firecloud.notebookRuntimeDefaultMachineType)));
+                      .orElse(config.firecloud.notebookRuntimeDefaultMachineType));
     }
 
-    return request;
+    return runtimeConfig;
   }
 
   @Override
@@ -180,6 +189,26 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
                   user.getClusterConfigDefault(),
                   runtime,
                   customEnvironmentVariables));
+          return null;
+        });
+  }
+
+  @Override
+  public void updateRuntime(Runtime runtime) {
+    // TODO: Apply labels on updateRuntime,
+    // https://precisionmedicineinitiative.atlassian.net/browse/RW-5852
+
+    leonardoRetryHandler.run(
+        (context) -> {
+          runtimesApiProvider
+              .get()
+              .updateRuntime(
+                  runtime.getGoogleProject(),
+                  runtime.getRuntimeName(),
+                  new LeonardoUpdateRuntimeRequest()
+                      .runtimeConfig(
+                          buildRuntimeConfig(
+                              runtime, userProvider.get().getClusterConfigDefault())));
           return null;
         });
   }
