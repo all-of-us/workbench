@@ -534,7 +534,6 @@ export const RuntimePanel = fp.flow(
         onCancel={() => setPanelContent(PanelContent.Customize)}
       />],
       [PanelContent.Customize, () => <Fragment>
-        {/* TODO(RW-5419): Cost estimates go here. */}
         <div style={styles.controlSection}>
           <CostEstimator
               freeCreditsRemaining={creatorFreeCreditsRemaining}
