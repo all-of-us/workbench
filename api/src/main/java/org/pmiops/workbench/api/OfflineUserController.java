@@ -264,6 +264,10 @@ public class OfflineUserController implements OfflineUserApiDelegate {
   @Override
   public ResponseEntity<Void> bulkAuditProjectAccess() {
     int errorCount = 0;
+    // For now, continue checking both enabled and disabled users. If needed for performance, this
+    // could be scoped down to just enabled users. However, access to other GCP resources could also
+    // indicate general Google account abuse, which may be a concern regardless of whether or not
+    // the user has been disabled in the Workbench.
     List<DbUser> users = userService.getAllUsers();
     for (DbUser user : users) {
       // TODO(RW-2062): Move to using the gcloud api for list all resources when it is available.
