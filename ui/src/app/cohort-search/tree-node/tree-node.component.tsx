@@ -281,7 +281,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
       }
       const param = {
         ...node as Object,
-        parameterId: this.paramId,
+        parameterId: this.paramId(),
         attributes,
         name
       };
