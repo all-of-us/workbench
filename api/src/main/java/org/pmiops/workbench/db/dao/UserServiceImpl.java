@@ -587,6 +587,11 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   @Override
+  public List<DbUser> getAllUsersExcludingDisabled() {
+    return userDao.findUsersExcludingDisabled();
+  }
+
+  @Override
   public void logAdminUserAction(
       long targetUserId, String targetAction, Object oldValue, Object newValue) {
     logAdminAction(targetUserId, null, targetAction, oldValue, newValue);
