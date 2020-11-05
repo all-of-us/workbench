@@ -1,3 +1,4 @@
+import {NO_CHANGE} from '@angular/core/src/render3/instructions';
 import {Button, Clickable, MenuItem} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
@@ -218,21 +219,107 @@ enum RuntimeDiffState {
 }
 
 interface RuntimeConfig {
+  computeType: ComputeType;
   machine: Machine;
   diskSize: number;
   dataprocConfig: DataprocConfig;
 }
 
-function getRuntimeDiff(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiffState {
-  const runtimeChanged = !fp.equals(oldRuntime.machine, newRuntime.machine) ||
-    oldRuntime.diskSize !== newRuntime.diskSize ||
-    !fp.equals(oldRuntime.dataprocConfig, newRuntime.dataprocConfig);
-
-  if (runtimeChanged) {
+function compareComputeTypes(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiffState {
+  if (oldRuntime.computeType !== newRuntime.computeType) {
     return RuntimeDiffState.NEEDS_DELETE;
   } else {
     return RuntimeDiffState.NO_CHANGE;
   }
+}
+
+function compareMachine(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiffState {
+  if (!fp.equals(oldRuntime.machine, newRuntime.machine)) {
+    return RuntimeDiffState.NEEDS_DELETE;
+  } else {
+    return RuntimeDiffState.NO_CHANGE;
+  }
+}
+
+function compareDiskSize(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiffState {
+  if (newRuntime.diskSize < oldRuntime.diskSize) {
+    return RuntimeDiffState.NEEDS_DELETE;
+  } else if (newRuntime.diskSize > oldRuntime.diskSize) {
+    return RuntimeDiffState.CAN_UPDATE;
+  } else {
+    return RuntimeDiffState.NO_CHANGE;
+  }
+}
+
+function compareDataprocConfig(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiffState {
+  if (oldRuntime.dataprocConfig === null && newRuntime.dataprocConfig !== null) {
+    return RuntimeDiffState.NEEDS_DELETE;
+  } else if (oldRuntime.dataprocConfig !== null && newRuntime.dataprocConfig === null) {
+    return RuntimeDiffState.NO_CHANGE;
+  }
+}
+
+function compareDataprocMasterConfig(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiffState {
+  if (oldRuntime.dataprocConfig == null && newRuntime.dataprocConfig == null) {
+    return RuntimeDiffState.NO_CHANGE;
+  }
+
+  if (oldRuntime.dataprocConfig.masterMachineType !== newRuntime.dataprocConfig.masterMachineType) {
+    return RuntimeDiffState.NEEDS_DELETE;
+  }
+
+  if (newRuntime.dataprocConfig.masterDiskSize < oldRuntime.dataprocConfig.masterDiskSize) {
+    return RuntimeDiffState.NEEDS_DELETE;
+  } else if (newRuntime.dataprocConfig.masterDiskSize > oldRuntime.dataprocConfig.masterDiskSize) {
+    return RuntimeDiffState.CAN_UPDATE;
+  } else {
+    return RuntimeDiffState.NO_CHANGE;
+  }
+}
+
+function compareDataprocWorkerConfig(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiffState {
+  if (oldRuntime.dataprocConfig == null && newRuntime.dataprocConfig == null) {
+    return RuntimeDiffState.NO_CHANGE;
+  }
+
+  if (oldRuntime.dataprocConfig.workerMachineType !== newRuntime.dataprocConfig.workerMachineType) {
+    return RuntimeDiffState.NEEDS_DELETE;
+  }
+
+  if (oldRuntime.dataprocConfig.workerDiskSize !== newRuntime.dataprocConfig.workerDiskSize) {
+    return RuntimeDiffState.NEEDS_DELETE;
+  }
+
+  if (oldRuntime.dataprocConfig.numberOfPreemptibleWorkers !== newRuntime.dataprocConfig.numberOfPreemptibleWorkers) {
+    return RuntimeDiffState.CAN_UPDATE;
+  }
+
+  if (oldRuntime.dataprocConfig.numberOfWorkers !== newRuntime.dataprocConfig.numberOfWorkers) {
+    return RuntimeDiffState.CAN_UPDATE;
+  }
+
+  // numberOfWorkerLocalSSDs not being compared ATM
+
+  return RuntimeDiffState.NO_CHANGE;
+}
+
+function getRuntimeDiff(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiffState {
+  const compareFns = [compareComputeTypes, compareMachine, compareDiskSize,
+    compareDataprocConfig, compareDataprocMasterConfig, compareDataprocWorkerConfig];
+
+  let biggestRuntimeDiff = RuntimeDiffState.NO_CHANGE;
+
+  for (const compareFn of compareFns) {
+    const runtimeDiff = compareFn(oldRuntime, newRuntime);
+    if (runtimeDiff === RuntimeDiffState.NEEDS_DELETE) {
+      console.log(compareFn);
+      return RuntimeDiffState.NEEDS_DELETE;
+    } else if (runtimeDiff === RuntimeDiffState.CAN_UPDATE) {
+      biggestRuntimeDiff = RuntimeDiffState.CAN_UPDATE;
+    }
+  }
+
+  return biggestRuntimeDiff;
 }
 
 export const RuntimePanel = fp.flow(withCurrentWorkspace(), withCdrVersions())(({workspace, cdrVersionListResponse}) => {
@@ -245,6 +332,7 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withCdrVersions())((
   const initialMasterMachine = findMachineByName(machineName);
   const [selectedDiskSize, setSelectedDiskSize] = useState(diskSize);
   const [selectedMachine, setSelectedMachine] = useState(initialMasterMachine);
+  const initialComputeType = dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard;
   const [selectedCompute, setSelectedCompute] = useState<ComputeType>(dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard);
   const [selectedDataprocConfig, setSelectedDataprocConfig] = useState<DataprocConfig | null>(dataprocConfig);
 
@@ -252,18 +340,22 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withCdrVersions())((
   const runtimeExists = status && status !== RuntimeStatus.Deleted;
 
   const initialRuntimeConfig = {
+    computeType: initialComputeType,
     machine: initialMasterMachine,
     diskSize: diskSize,
     dataprocConfig: dataprocConfig
   };
 
   const newRuntimeConfig = {
+    computeType: selectedCompute,
     machine: selectedMachine,
     diskSize: selectedDiskSize,
     dataprocConfig: selectedDataprocConfig
   };
 
   const runtimeChanged = getRuntimeDiff(initialRuntimeConfig, newRuntimeConfig) === RuntimeDiffState.NEEDS_DELETE;
+
+  console.log(getRuntimeDiff(initialRuntimeConfig, newRuntimeConfig));
 
   // TODO(RW-5591): Conditionally render create runtime page if runtime null or Deleted.
   if (currentRuntime === undefined) {
