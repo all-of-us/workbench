@@ -1,6 +1,7 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
+import {CopyModal} from 'app/components/copy-modal';
 import {DataSetReferenceModal} from 'app/components/data-set-reference-modal';
 import {RenameModal} from 'app/components/rename-modal';
 import {Action, ResourceActionsMenu} from 'app/components/resource-actions-menu';
@@ -8,10 +9,9 @@ import {canDelete, canWrite, ResourceCard} from 'app/components/resource-card';
 import {withConfirmDeleteModal, WithConfirmDeleteModalProps} from 'app/components/with-confirm-delete-modal';
 import {withErrorModal, WithErrorModalProps} from 'app/components/with-error-modal';
 import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
-import {cohortsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
-import {navigateByUrl} from 'app/utils/navigation';
-import {getDescription, getDisplayName, getId, getResourceUrl, getType} from 'app/utils/resources';
-import {DataSet, WorkspaceResource} from 'generated/fetch';
+import {conceptSetsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
+import {getDescription, getDisplayName, getId, getType} from 'app/utils/resources';
+import {CopyRequest, DataSet, WorkspaceResource} from 'generated/fetch';
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
   resource: WorkspaceResource;
@@ -22,10 +22,11 @@ interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSp
 
 interface State {
   showRenameModal: boolean;
+  showCopyModal: boolean;
   referencingDataSets: Array<DataSet>;
 }
 
-export const CohortResourceCard = fp.flow(
+export const ConceptSetResourceCard = fp.flow(
   withErrorModal(),
   withConfirmDeleteModal(),
   withSpinnerOverlay(),
@@ -35,15 +36,9 @@ export const CohortResourceCard = fp.flow(
     super(props);
     this.state = {
       showRenameModal: false,
-      referencingDataSets: [],
+      showCopyModal: false,
+      referencingDataSets: []
     };
-  }
-
-  get reviewUrlForCohort(): string {
-    const {workspaceNamespace, workspaceFirecloudName, cohort} = this.props.resource;
-
-    return `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}` +
-      `/data/cohorts/${cohort.id}/review`;
   }
 
   get actions(): Action[] {
@@ -59,21 +54,9 @@ export const CohortResourceCard = fp.flow(
       },
       {
         icon: 'copy',
-        displayName: 'Duplicate',
-        onClick: () => this.duplicate(),
-        disabled: !canWrite(resource)
-      },
-      {
-        icon: 'pencil',
-        displayName: 'Edit',
-        onClick: () => navigateByUrl(getResourceUrl(resource)),
-        disabled: !canWrite(resource)
-      },
-      {
-        icon: 'grid-view',
-        displayName: 'Review',
-        onClick: () => navigateByUrl(this.reviewUrlForCohort),
-        disabled: !canWrite(resource)
+        displayName: 'Copy to another workspace',
+        onClick: () => this.setState({showCopyModal: true}),
+        disabled: !canDelete(resource)
       },
       {
         icon: 'trash',
@@ -83,70 +66,22 @@ export const CohortResourceCard = fp.flow(
             getType(resource), () => this.maybeDelete());
         },
         disabled: !canDelete(resource)
-      }
+      },
     ];
   }
 
-  // check if there are any referencing data sets, and pop up a modal if so;
-  // if not, continue with deletion
-  maybeDelete() {
-    const {resource} = this.props;
-    return dataSetApi().getDataSetByResourceId(
-        resource.workspaceNamespace,
-        resource.workspaceFirecloudName,
-        getType(resource),
-        getId(resource))
-        .then(dataSetList => {
-          if (dataSetList && dataSetList.items.length > 0) {
-            this.setState({referencingDataSets: dataSetList.items});
-          } else {
-            return this.deleteCohort();
-          }
-        });
-  }
-
-  deleteCohort() {
-    return cohortsApi().deleteCohort(
-        this.props.resource.workspaceNamespace,
-        this.props.resource.workspaceFirecloudName,
-        this.props.resource.cohort.id)
-        .then(() => {
-          this.props.onUpdate();
-        });
-  }
-
-  duplicate() {
-    this.props.showSpinner();
-
-    return cohortsApi().duplicateCohort(
-      this.props.resource.workspaceNamespace,
-      this.props.resource.workspaceFirecloudName,
-      {
-        originalCohortId: this.props.resource.cohort.id,
-        newName: `Duplicate of ${getDisplayName(this.props.resource)}`
-      }
-    ).then(() => {
-      this.props.onUpdate();
-    }).catch(e => {
-      this.props.showErrorModal('Duplicating Cohort Error',
-        'Cohort with the same name already exists.');
-    }).finally(() => {
-      this.props.hideSpinner();
-    });
-  }
-
   rename(name, description) {
+    const {resource} = this.props;
     const request = {
-      ...this.props.resource.cohort,
+      ...resource.conceptSet,
       name: name,
       description: description
     };
-
-    return cohortsApi().updateCohort(
-      this.props.resource.workspaceNamespace,
-      this.props.resource.workspaceFirecloudName,
-      this.props.resource.cohort.id,
-      request
+    conceptSetsApi().updateConceptSet(
+        resource.workspaceNamespace,
+        resource.workspaceFirecloudName,
+        resource.conceptSet.id,
+        request
     ).then(() => {
       this.props.onUpdate();
     }).catch(error => console.error(error)
@@ -155,16 +90,62 @@ export const CohortResourceCard = fp.flow(
     });
   }
 
+  // check if there are any referencing data sets, and pop up a modal if so;
+  // if not, continue with deletion
+  maybeDelete() {
+    const {resource} = this.props;
+    return dataSetApi().getDataSetByResourceId(
+      resource.workspaceNamespace,
+      resource.workspaceFirecloudName,
+      getType(resource),
+      getId(resource))
+      .then(dataSetList => {
+        if (dataSetList && dataSetList.items.length > 0) {
+          this.setState({referencingDataSets: dataSetList.items});
+        } else {
+          return this.deleteConceptSet();
+        }
+      });
+  }
+
+  deleteConceptSet() {
+    const {resource} = this.props;
+    return conceptSetsApi().deleteConceptSet(
+        resource.workspaceNamespace,
+        resource.workspaceFirecloudName,
+        resource.conceptSet.id)
+        .then(() => {
+          this.props.onUpdate();
+        });
+  }
+
+  async copy(copyRequest: CopyRequest) {
+    const {resource} = this.props;
+    return conceptSetsApi().copyConceptSet(resource.workspaceNamespace,
+      resource.workspaceFirecloudName,
+      resource.conceptSet.id.toString(), copyRequest);
+  }
+
   render() {
     const {resource, menuOnly} = this.props;
     return <React.Fragment>
       {this.state.showRenameModal &&
-      <RenameModal onRename={(name, description) => this.rename(name, description)}
+        <RenameModal onRename={(name, description) => this.rename(name, description)}
                    resourceType={getType(resource)}
                    onCancel={() => this.setState({showRenameModal: false})}
                    oldDescription={getDescription(resource)}
                    oldName={getDisplayName(resource)}
                    existingNames={this.props.existingNameList}/>
+      }
+      {this.state.showCopyModal && <CopyModal
+          fromWorkspaceNamespace={resource.workspaceNamespace}
+          fromWorkspaceFirecloudName={resource.workspaceFirecloudName}
+          fromResourceName={resource.conceptSet.name}
+          fromCdrVersionId={resource.cdrVersionId}
+          resourceType={getType(resource)}
+          onClose={() => this.setState({showCopyModal: false})}
+          onCopy={() => this.props.onUpdate()}
+          saveFunction={(copyRequest: CopyRequest) => this.copy(copyRequest)}/>
       }
       {this.state.referencingDataSets.length > 0 && <DataSetReferenceModal
           referencedResource={resource}
@@ -174,7 +155,7 @@ export const CohortResourceCard = fp.flow(
           }}
           deleteResource={() => {
             this.setState({referencingDataSets: []});
-            return this.deleteCohort();
+            return this.deleteConceptSet();
           }}/>
       }
       {menuOnly ?

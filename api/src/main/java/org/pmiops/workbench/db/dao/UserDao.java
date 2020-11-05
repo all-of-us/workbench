@@ -25,6 +25,9 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
   @Query("SELECT user FROM DbUser user")
   List<DbUser> findUsers();
 
+  @Query("SELECT user FROM DbUser user WHERE user.disabled = FALSE")
+  List<DbUser> findUsersExcludingDisabled();
+
   /** Returns the user with their authorities loaded. */
   @Query("SELECT user FROM DbUser user LEFT JOIN FETCH user.authorities WHERE user.userId = :id")
   DbUser findUserWithAuthorities(@Param("id") long id);

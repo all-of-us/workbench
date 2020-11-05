@@ -139,8 +139,8 @@ export default class DataResourceCard extends CardBase {
   async cardExists(cardName: string, cardType: ResourceCard):  Promise<boolean> {
     const cards = await this.getResourceCard(cardType);
     const names = await Promise.all(cards.map(item => item.getResourceName()));
-    const filterdList = names.filter(name => name === cardName);
-    return filterdList.length === 1;
+    const filteredList = names.filter(name => name === cardName);
+    return filteredList.length === 1;
   }
 
   private asCard(elementHandle: ElementHandle): DataResourceCard {

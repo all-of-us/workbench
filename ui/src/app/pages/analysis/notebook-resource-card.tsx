@@ -1,26 +1,30 @@
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+
 import {CopyModal} from 'app/components/copy-modal';
 import {RenameModal} from 'app/components/rename-modal';
-import {Action, ResourceCardTemplate} from 'app/components/resource-card-template';
+import {Action, ResourceActionsMenu} from 'app/components/resource-actions-menu';
+import {
+  canDelete,
+  canWrite,
+  ResourceCard
+} from 'app/components/resource-card';
 import {withConfirmDeleteModal, WithConfirmDeleteModalProps} from 'app/components/with-confirm-delete-modal';
 import {withErrorModal, WithErrorModalProps} from 'app/components/with-error-modal';
 import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {dropNotebookFileSuffix} from 'app/pages/analysis/util';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
-import {formatWorkspaceResourceDisplayDate} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {encodeURIComponentStrict} from 'app/utils/navigation';
-import {toDisplay} from 'app/utils/resourceActions';
+import {getDisplayName, getType} from 'app/utils/resources';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
-import {CopyRequest, ResourceType, WorkspaceResource} from 'generated/fetch';
-import * as fp from 'lodash';
-import * as React from 'react';
+import {CopyRequest, WorkspaceResource} from 'generated/fetch';
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
   resource: WorkspaceResource;
   existingNameList: string[];
-  onUpdate: Function;
+  onUpdate: () => Promise<void>;
   disableDuplicate: boolean;
+  menuOnly: boolean;
 }
 
 interface State {
@@ -42,32 +46,8 @@ export const NotebookResourceCard = fp.flow(
     };
   }
 
-  get resourceType(): ResourceType {
-    return ResourceType.NOTEBOOK;
-  }
-
-  get displayName(): string {
-    return dropNotebookFileSuffix(this.props.resource.notebook.name);
-  }
-
-  get resourceUrl(): string {
-    const {workspaceNamespace, workspaceFirecloudName, notebook} =
-      this.props.resource;
-
-    return `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}` +
-    `/notebooks/preview/${encodeURIComponentStrict(notebook.name)}`;
-  }
-
-  get writePermission(): boolean {
-    return this.props.resource.permission === 'OWNER'
-      || this.props.resource.permission === 'WRITER';
-  }
-
-  get deletePermission(): boolean {
-    return this.props.resource.permission === 'OWNER';
-  }
-
   get actions(): Action[] {
+    const {resource} = this.props;
     return [
       {
         icon: 'pencil',
@@ -76,7 +56,7 @@ export const NotebookResourceCard = fp.flow(
           AnalyticsTracker.Notebooks.OpenRenameModal();
           this.setState({showRenameModal: true});
         },
-        disabled: !this.writePermission,
+        disabled: !canWrite(resource),
       },
       {
         icon: 'copy',
@@ -85,7 +65,7 @@ export const NotebookResourceCard = fp.flow(
           AnalyticsTracker.Notebooks.Duplicate();
           this.duplicateNotebook();
         },
-        disabled: this.props.disableDuplicate || !this.writePermission,
+        disabled: this.props.disableDuplicate || !canWrite(resource),
         hoverText: this.props.disableDuplicate && ACTION_DISABLED_INVALID_BILLING
       },
       {
@@ -103,14 +83,14 @@ export const NotebookResourceCard = fp.flow(
         onClick: () => {
           AnalyticsTracker.Notebooks.OpenDeleteModal();
           this.props.showConfirmDeleteModal(
-            this.displayName,
-            this.resourceType,
+            getDisplayName(resource),
+            getType(resource),
             () => {
               AnalyticsTracker.Notebooks.Delete();
               return this.deleteNotebook();
             });
         },
-        disabled: !this.deletePermission,
+        disabled: !canDelete(resource),
       }];
   }
 
@@ -174,43 +154,35 @@ export const NotebookResourceCard = fp.flow(
   }
 
   render() {
+    const {resource, menuOnly} = this.props;
     return <React.Fragment>
       {this.state.showCopyNotebookModal &&
       <CopyModal
-        fromWorkspaceNamespace={this.props.resource.workspaceNamespace}
-        fromWorkspaceFirecloudName={this.props.resource.workspaceFirecloudName}
-        fromResourceName={dropNotebookFileSuffix(this.props.resource.notebook.name)}
-        fromCdrVersionId={this.props.resource.cdrVersionId}
-        resourceType={this.resourceType}
+        fromWorkspaceNamespace={resource.workspaceNamespace}
+        fromWorkspaceFirecloudName={resource.workspaceFirecloudName}
+        fromResourceName={getDisplayName(resource)}
+        fromCdrVersionId={resource.cdrVersionId}
+        resourceType={getType(resource)}
         onClose={() => this.setState({showCopyNotebookModal: false})}
         onCopy={() => this.props.onUpdate()}
         saveFunction={(copyRequest: CopyRequest) => this.copyNotebook(copyRequest)}/>
       }
 
       {this.state.showRenameModal &&
-      <RenameModal resourceType={this.resourceType}
+      <RenameModal resourceType={getType(resource)}
                    onRename={(newName) => {
                      AnalyticsTracker.Notebooks.Rename();
                      this.renameNotebook(newName);
                    }}
                    onCancel={() => this.setState({showRenameModal: false})}
                    hideDescription={true}
-                   oldName={this.props.resource.notebook.name}
+                   oldName={getDisplayName(resource)}
                    nameFormat={(name) => this.fullNotebookName(name)}
                    existingNames={this.props.existingNameList}/>
       }
-
-      <ResourceCardTemplate
-        actions={this.actions}
-        disabled={false} // Notebook Cards are always at least readable
-        resourceUrl={this.resourceUrl}
-        onNavigate={() => AnalyticsTracker.Notebooks.Preview()}
-        displayName={this.displayName}
-        description={''}
-        displayDate={formatWorkspaceResourceDisplayDate(this.props.resource.modifiedTime)}
-        footerText={toDisplay(this.resourceType)}
-        footerColor={colors.resourceCardHighlights.notebook}
-      />
+      {menuOnly ?
+          <ResourceActionsMenu actions={this.actions}/> :
+          <ResourceCard resource={resource} actions={this.actions}/>}
     </React.Fragment>;
   }
 });

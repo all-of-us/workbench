@@ -25,13 +25,18 @@ export default class HomePage extends AuthenticatedPage {
       waitWhileLoading(this.page)
     ]);
     await Promise.all([
-      // Look for "See All Workspacess" link.
+      // Look for "See All Workspaces" link.
       this.getSeeAllWorkspacesLink().then( (element) => element.asElementHandle()),
-      // Look for either a workspace card or msg.
+      // Look for either a workspace card or the "Create your first workspace" msg.
       Promise.race([
         this.page.waitForXPath('//*[@data-test-id="workspace-card"]', {visible: true}),
         this.page.waitForXPath('//text()[contains(., "Create your first workspace")]', {visible: true}),
-      ])
+      ]),
+      // Look for either the recent-resources table or the getting-started msg.
+      Promise.race([
+        this.page.waitForXPath('//*[@data-test-id="recent-resources-table"]', {visible: true}),
+        this.page.waitForXPath('//*[@data-test-id="getting-started"]', {visible: true}),
+      ]),
     ]);
     return true;
   }
@@ -51,5 +56,4 @@ export default class HomePage extends AuthenticatedPage {
   async getSeeAllWorkspacesLink(): Promise<Link> {
     return Link.findByName(this.page, {name: LabelAlias.SeeAllWorkspaces});
   }
-
 }
