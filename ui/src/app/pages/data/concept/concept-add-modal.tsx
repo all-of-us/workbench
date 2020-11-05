@@ -163,9 +163,10 @@ export const ConceptAddModal = withCurrentWorkspace()
   }
 
   disableSave(errors) {
-    const {addingToExistingSet, saving, selectedSet} = this.state;
+    const {addingToExistingSet, saving, selectedSet, selectedConceptsInDomain} = this.state;
     if (serverConfigStore.getValue().enableConceptSetSearchV2 && addingToExistingSet) {
-      return selectedSet.criteriums && selectedSet.criteriums.length >= CONCEPT_SET_CONCEPT_LIMIT;
+      return selectedSet && selectedSet.criteriums &&
+          ((selectedSet.criteriums.length + selectedConceptsInDomain.length) > CONCEPT_SET_CONCEPT_LIMIT);
     }
     return (!addingToExistingSet && !!errors) || saving;
   }
@@ -251,8 +252,8 @@ export const ConceptAddModal = withCurrentWorkspace()
         {errorMessage && <AlertDanger>{errorMessage}</AlertDanger>}
         <ModalFooter>
           <Button type='secondary' onClick={onClose}>Cancel</Button>
-          <TooltipTrigger content={addingToExistingSet && <div>Cannot add more Concepts.
-            <b>{selectedSet && selectedSet.name} </b> already has {CONCEPT_SET_CONCEPT_LIMIT} concepts</div>}
+          <TooltipTrigger content={addingToExistingSet && <div>Cannot add Concepts.
+            <b> {selectedSet && selectedSet.name} </b> either already has or will have more than {CONCEPT_SET_CONCEPT_LIMIT} concepts</div>}
                           disabled={!this.disableSave(errors)}>
           <Button style={{marginLeft: '0.5rem'}}
                   disabled={this.disableSave(errors)}
