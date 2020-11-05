@@ -177,11 +177,9 @@ export const CohortResourceCard = fp.flow(
             return this.deleteCohort();
           }}/>
       }
-      {menuOnly ? <ResourceActionsMenu actions={this.actions}/> :
-          <ResourceCard
-          resource={resource}
-          actions={this.actions}
-      />}
+      {menuOnly ?
+          <ResourceActionsMenu actions={this.actions}/> :
+          <ResourceCard resource={resource} actions={this.actions}/>}
     </React.Fragment>;
   }
 });

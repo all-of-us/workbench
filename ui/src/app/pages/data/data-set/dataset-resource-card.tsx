@@ -140,11 +140,9 @@ export const DatasetResourceCard = fp.flow(
                    oldName={getDisplayName(resource)}
                    existingNames={this.props.existingNameList}/>
       }
-      {menuOnly ? <ResourceActionsMenu actions={this.actions}/> :
-          <ResourceCard
-          resource={resource}
-          actions={this.actions}
-      />}
+      {menuOnly ?
+          <ResourceActionsMenu actions={this.actions}/> :
+          <ResourceCard resource={resource} actions={this.actions}/>}
     </React.Fragment>;
   }
 });

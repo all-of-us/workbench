@@ -180,11 +180,9 @@ export const NotebookResourceCard = fp.flow(
                    nameFormat={(name) => this.fullNotebookName(name)}
                    existingNames={this.props.existingNameList}/>
       }
-      {menuOnly ? <ResourceActionsMenu actions={this.actions}/> :
-      <ResourceCard
-          resource={resource}
-          actions={this.actions}
-      />}
+      {menuOnly ?
+          <ResourceActionsMenu actions={this.actions}/> :
+          <ResourceCard resource={resource} actions={this.actions}/>}
     </React.Fragment>;
   }
 });

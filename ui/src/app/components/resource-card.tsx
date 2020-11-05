@@ -139,12 +139,11 @@ class ResourceCard extends React.Component<Props, {}> {
   }
 
   render() {
-    const {resource} = this.props;
-    return <ResourceCardBase style={styles.card}
-                          data-test-id='card'>
+    const {actions, resource} = this.props;
+    return <ResourceCardBase style={styles.card} data-test-id='card'>
           <FlexColumn style={{alignItems: 'flex-start'}}>
             <FlexRow style={{alignItems: 'flex-start'}}>
-              <ResourceActionsMenu actions={this.props.actions}/>
+              <ResourceActionsMenu actions={actions}/>
               <ResourceNavigation resource={resource} linkTestId='card-name'>{getDisplayName(resource)}</ResourceNavigation>
             </FlexRow>
             <div style={styles.resourceDescription}>{getDescription(resource)}</div>

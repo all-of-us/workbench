@@ -158,11 +158,9 @@ export const ConceptSetResourceCard = fp.flow(
             return this.deleteConceptSet();
           }}/>
       }
-      {menuOnly ? <ResourceActionsMenu actions={this.actions}/> :
-          <ResourceCard
-          resource={resource}
-          actions={this.actions}
-      />}
+      {menuOnly ?
+          <ResourceActionsMenu actions={this.actions}/> :
+          <ResourceCard resource={resource} actions={this.actions}/>}
     </React.Fragment>;
   }
 });
