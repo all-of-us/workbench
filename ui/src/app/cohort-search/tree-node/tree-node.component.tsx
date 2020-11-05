@@ -81,13 +81,9 @@ const styles = reactStyles({
     color: colors.select,
     margin: '5px'
   },
-  disableSelectIcon: {
+  disableIcon: {
     opacity: 0.4,
     cursor: 'not-allowed'
-  },
-  selected: {
-    cursor: 'not-allowed',
-    opacity: 0.4
   },
   treeNode: {
     alignItems: 'center',
@@ -344,10 +340,10 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     const displayName = domainId === Domain.PHYSICALMEASUREMENT.toString() && !!searchTerms
       ? highlightSearchTerm(searchTerms, name, colors.success)
       : name;
-    const selectIconStyle = this.selectIconDisabled() ? {...styles.selectIcon, ...styles.disableSelectIcon} : styles.selectIcon;
+    const selectIconStyle = this.selectIconDisabled() ? {...styles.selectIcon, ...styles.disableIcon} : styles.selectIcon;
 
     return <React.Fragment>
-        <div style={{...styles.treeNode}} id={`node${id}`} onClick={() => this.toggleExpanded()}>
+      <div style={{...styles.treeNode}} id={`node${id}`} onClick={() => this.toggleExpanded()}>
         {group && <button style={styles.iconButton}>
           {loading
             ? <Spinner size={16}/>
@@ -365,7 +361,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
                   shape='slider' dir='right' size='20'
                   onClick={(e) => this.setAttributes(e, node)}/>
               : selected
-                ? <ClrIcon style={styles.selected}
+                ? <ClrIcon style={{...styles.selectIcon, ...styles.disableIcon}}
                     shape='check-circle' size='20'/>
                 : <ClrIcon style={selectIconStyle}
                     shape='plus-circle' size='20'
