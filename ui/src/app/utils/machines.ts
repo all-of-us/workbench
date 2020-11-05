@@ -70,7 +70,7 @@ const dataprocSurcharge = ({masterMachine, numberOfWorkers, numberOfPreemptibleW
 // The following calculations were based off of Terra UI's cost estimator:
 // https://github.com/DataBiosphere/terra-ui/blob/cf5ec4408db3bd1fcdbcc5302da62d42e4d03ca3/src/components/ClusterManager.js#L85
 
-export const machineStoragePrice = ({
+export const machineStorageCost = ({
     masterDiskSize,
     numberOfPreemptibleWorkers,
     numberOfWorkers,
@@ -104,7 +104,7 @@ export const machineStorageCostBreakdown = ({
   return costs;
 };
 
-export const machineRunningPrice = ({
+export const machineRunningCost = ({
   computeType,
   masterDiskSize,
   masterMachineName,
@@ -135,7 +135,7 @@ export const machineRunningPrice = ({
   return fp.sum([
     dataprocPrice,
     masterMachine.price,
-    machineStoragePrice({
+    machineStorageCost({
       masterDiskSize: masterDiskSize,
       numberOfPreemptibleWorkers: numberOfPreemptibleWorkers,
       numberOfWorkers: numberOfWorkers,

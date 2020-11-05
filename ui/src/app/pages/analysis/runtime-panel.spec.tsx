@@ -17,7 +17,7 @@ import {runtimeStore} from 'app/utils/stores';
 import {cdrVersionListResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 import {cdrVersionStore, serverConfigStore} from 'app/utils/navigation';
 import { RuntimeConfigurationType } from 'generated/fetch';
-import {ComputeType} from "app/utils/machines";
+import {ComputeType} from 'app/utils/machines';
 
 
 

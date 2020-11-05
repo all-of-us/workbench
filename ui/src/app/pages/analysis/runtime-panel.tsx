@@ -11,10 +11,10 @@ import {
   ComputeType,
   findMachineByName,
   Machine,
+  machineRunningCost,
   machineRunningCostBreakdown,
-  machineRunningPrice,
+  machineStorageCost,
   machineStorageCostBreakdown,
-  machineStoragePrice,
   validLeonardoMachineTypes
 } from 'app/utils/machines';
 import {runtimePresets} from 'app/utils/runtime-presets';
@@ -281,16 +281,62 @@ const PresetSelector = ({hasMicroarrayData, setSelectedDiskSize, setSelectedMach
 const CostEstimator = ({
   freeCreditsRemaining,
   profile,
-  runningCost,
-  runningCostBreakdown,
+  runtimeParameters,
   runtimeChanged,
-  storageCost,
-  storageCostBreakdown,
   workspace
 }) => {
   const wrapperStyle = runtimeChanged
     ? {...styles.costPredictorWrapper, backgroundColor: colorWithWhiteness(colors.warning, .9), borderColor: colors.warning}
     : styles.costPredictorWrapper;
+  const {
+    computeType,
+    diskSize,
+    machineType,
+    dataprocConfig
+  } = runtimeParameters;
+  const {
+    numberOfWorkers = 0,
+    masterMachineType = machineType,
+    masterDiskSize = diskSize,
+    workerMachineType,
+    workerDiskSize,
+    numberOfPreemptibleWorkers
+  } = dataprocConfig || {};
+
+  const runningCost = machineRunningCost({
+    computeType: computeType,
+    masterDiskSize: masterDiskSize || diskSize,
+    masterMachineName: masterMachineType || machineType,
+    numberOfWorkers: numberOfWorkers,
+    numberOfPreemptibleWorkers: numberOfPreemptibleWorkers,
+    workerDiskSize: workerDiskSize,
+    workerMachineName: workerMachineType
+  });
+
+  const runningCostBreakdown = machineRunningCostBreakdown({
+    computeType: computeType,
+    masterDiskSize: masterDiskSize || diskSize,
+    masterMachineName: masterMachineType || machineType,
+    numberOfWorkers: numberOfWorkers,
+    numberOfPreemptibleWorkers: numberOfPreemptibleWorkers,
+    workerDiskSize: workerDiskSize,
+    workerMachineName: workerMachineType
+  });
+
+  const storageCost = machineStorageCost({
+    masterDiskSize: masterDiskSize || diskSize,
+    numberOfPreemptibleWorkers: numberOfPreemptibleWorkers,
+    numberOfWorkers: numberOfWorkers,
+    workerDiskSize: workerDiskSize
+  });
+
+  const storageCostBreakdown = machineStorageCostBreakdown({
+    masterDiskSize: masterDiskSize || diskSize,
+    numberOfPreemptibleWorkers: numberOfPreemptibleWorkers,
+    numberOfWorkers: numberOfWorkers,
+    workerDiskSize: workerDiskSize
+  });
+
   return <FlexRow
     style={wrapperStyle}
   >
@@ -373,12 +419,17 @@ export const RuntimePanel = fp.flow(
 
   const [creatorFreeCreditsRemaining, setCreatorFreeCreditsRemaining] = useState(0);
   useEffect(() => {
+    const aborter = new AbortController();
     const fetchFreeCredits = async() => {
-      const {freeCreditsRemaining} = await workspacesApi().getWorkspaceCreatorFreeCreditsRemaining(namespace, id);
+      const {freeCreditsRemaining} = await workspacesApi().getWorkspaceCreatorFreeCreditsRemaining(namespace, id, {signal: aborter.signal});
       setCreatorFreeCreditsRemaining(freeCreditsRemaining);
     };
 
     fetchFreeCredits();
+
+    return function cleanup() {
+      aborter.abort();
+    };
   }, []);
 
   // TODO(RW-5591): Conditionally render create runtime page if runtime null or Deleted.
@@ -397,39 +448,13 @@ export const RuntimePanel = fp.flow(
       <CostEstimator
           freeCreditsRemaining={creatorFreeCreditsRemaining}
           profile={profile}
-          runningCost={machineRunningPrice({
+          runtimeParameters={{
             computeType: selectedCompute,
-            masterDiskSize: selectedDiskSize,
-            masterMachineName: selectedMachineType,
-            numberOfWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfWorkers,
-            numberOfPreemptibleWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfPreemptibleWorkers,
-            workerDiskSize: selectedDataprocConfig && selectedDataprocConfig.workerDiskSize,
-            workerMachineName: selectedDataprocConfig && selectedDataprocConfig.workerMachineType
-          })}
-          runningCostBreakdown={machineRunningCostBreakdown({
-            computeType: selectedCompute,
-            masterDiskSize: selectedDiskSize,
-            masterMachineName: selectedMachineType,
-            numberOfWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfWorkers,
-            numberOfPreemptibleWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfPreemptibleWorkers,
-            workerDiskSize: selectedDataprocConfig && selectedDataprocConfig.workerDiskSize,
-            workerMachineName: selectedDataprocConfig && selectedDataprocConfig.workerMachineType
-          })}
+            diskSize: selectedDiskSize,
+            machineType: selectedMachineType,
+            dataprocConfig: selectedDataprocConfig
+          }}
           runtimeChanged={runtimeChanged}
-          storageCost={machineStoragePrice({
-            masterDiskSize: selectedDiskSize,
-            numberOfPreemptibleWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfPreemptibleWorkers,
-            numberOfWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfWorkers,
-            workerDiskSize: selectedDataprocConfig && selectedDataprocConfig.workerDiskSize
-          })}
-          storageCostBreakdown={
-            machineStorageCostBreakdown({
-              masterDiskSize: selectedDiskSize,
-              numberOfPreemptibleWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfPreemptibleWorkers,
-              numberOfWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfWorkers,
-              workerDiskSize: selectedDataprocConfig && selectedDataprocConfig.workerDiskSize
-            })
-          }
           workspace={workspace}
       />
       <PresetSelector
