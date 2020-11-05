@@ -3,8 +3,8 @@ import * as React from 'react';
 
 import {CopyModal} from 'app/components/copy-modal';
 import {RenameModal} from 'app/components/rename-modal';
+import {Action, ResourceActionsMenu} from 'app/components/resource-actions-menu';
 import {
-  Action,
   canDelete,
   canWrite,
   ResourceCard
@@ -180,11 +180,11 @@ export const NotebookResourceCard = fp.flow(
                    nameFormat={(name) => this.fullNotebookName(name)}
                    existingNames={this.props.existingNameList}/>
       }
+      {menuOnly ? <ResourceActionsMenu actions={this.actions}/> :
       <ResourceCard
           resource={resource}
           actions={this.actions}
-          menuOnly={menuOnly}
-      />
+      />}
     </React.Fragment>;
   }
 });

@@ -3,7 +3,8 @@ import * as React from 'react';
 
 import {DataSetReferenceModal} from 'app/components/data-set-reference-modal';
 import {RenameModal} from 'app/components/rename-modal';
-import {Action, canDelete, canWrite, ResourceCard} from 'app/components/resource-card';
+import {Action, ResourceActionsMenu} from 'app/components/resource-actions-menu';
+import {canDelete, canWrite, ResourceCard} from 'app/components/resource-card';
 import {withConfirmDeleteModal, WithConfirmDeleteModalProps} from 'app/components/with-confirm-delete-modal';
 import {withErrorModal, WithErrorModalProps} from 'app/components/with-error-modal';
 import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
@@ -176,11 +177,11 @@ export const CohortResourceCard = fp.flow(
             return this.deleteCohort();
           }}/>
       }
-      <ResourceCard
+      {menuOnly ? <ResourceActionsMenu actions={this.actions}/> :
+          <ResourceCard
           resource={resource}
           actions={this.actions}
-          menuOnly={menuOnly}
-      />
+      />}
     </React.Fragment>;
   }
 });
