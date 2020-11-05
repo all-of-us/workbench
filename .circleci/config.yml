@@ -315,17 +315,13 @@ commands:
               > ./logs/circleci_parameters.json
           when: always
       - run:
-          name: Add CircleCI job data to test results json before upload json to storage bucket
+          name: Upload test results json to storage bucket
           working_directory: ~/workbench/e2e/logs
           command: |
             NEW_JSON=circleci-build-${CIRCLE_BUILD_NUM}-${CIRCLE_NODE_INDEX}-test-results.json
-            jq -s '.[0] * .[1]' test-results.json circleci_parameters.json > ${NEW_JSON}
-            # Remove all whitespaces
-            cat ${NEW_JSON} | tr '\n' ' ' > tmp.json && mv tmp.json ${NEW_JSON}
-            # Upload json to storage bucket
-            PROJECT_NAME=all-of-us-workbench-test
+            jq -s -c '.[0] * .[1]' test-results.json circleci_parameters.json > ${NEW_JSON}
+            # Upload json to storage bucket in all-of-us-workbench-test project.
             STORAGE_BUCKET=gs://circleci-puppeteer-test-results
-            gcloud config set project ${PROJECT_NAME}
             gsutil cp ${NEW_JSON} ${STORAGE_BUCKET}
           when: always
       - store_artifacts:
