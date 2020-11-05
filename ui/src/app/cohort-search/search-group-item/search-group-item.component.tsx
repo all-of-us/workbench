@@ -305,12 +305,13 @@ export const SearchGroupItem = withCurrentWorkspace()(
     }
 
     render() {
-      const {item: {count, modifiers, name, searchParameters, status}} = this.props;
+      const {item: {count, modifiers, name, searchParameters, status, type}} = this.props;
       const {error, loading, paramListOpen, renaming} = this.state;
       const showCount = !loading && status !== 'hidden' && count !== undefined;
+      const hideEdit = type === Domain.FITBIT.toString() || searchParameters[0].type === CriteriaType.DECEASED.toString();
       const actionItems = [
         {label: 'Edit criteria name', command: () => this.setState({renaming: true})},
-        {label: 'Edit criteria', command: () => this.launchSearch()},
+        {label: 'Edit criteria', command: () => this.launchSearch(), style: hideEdit ? {display: 'none'} : {}},
         {label: 'Suppress criteria from total count', command: () => this.suppress()},
         {label: 'Delete criteria', command: () => this.remove()},
       ];
