@@ -14,9 +14,7 @@ public class DbAccessModuleMemberId implements Serializable {
     this.accessModuleId = accessModuleId;
   }
 
-
-  public DbAccessModuleMemberId() {
-  }
+  public DbAccessModuleMemberId() {}
 
   public long getAccessPolicyId() {
     return accessPolicyId;
@@ -43,8 +41,7 @@ public class DbAccessModuleMemberId implements Serializable {
       return false;
     }
     DbAccessModuleMemberId that = (DbAccessModuleMemberId) o;
-    return accessPolicyId == that.accessPolicyId &&
-        accessModuleId == that.accessModuleId;
+    return accessPolicyId == that.accessPolicyId && accessModuleId == that.accessModuleId;
   }
 
   @Override
@@ -54,9 +51,11 @@ public class DbAccessModuleMemberId implements Serializable {
 
   @Override
   public String toString() {
-    return "DbAccessModuleMemberId{" +
-        "accessPolicyId=" + accessPolicyId +
-        ", accessModuleId=" + accessModuleId +
-        '}';
+    return "DbAccessModuleMemberId{"
+        + "accessPolicyId="
+        + accessPolicyId
+        + ", accessModuleId="
+        + accessModuleId
+        + '}';
   }
 }
