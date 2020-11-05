@@ -113,6 +113,95 @@ describe('Share workspace', () => {
       await signOut(newPage);
     });
 
+    /**
+     * Test:
+     * - Find an existing workspace
+     * - if any collaborator already sharing the workspace, remove before continuing
+     * - As a owner share workspace with another user - give writer level access to the collaborator.
+     * - On about page, verify  if a collaborator has been added with to the workspace as a writer 
+     * - Sign out and login to the collaboartor account
+     * - Find the workspace card on "Your Workspaces" page.
+     * - Click on the card's EllipsisMenu and verify if the edit, Share and delete actions are disabled and Duplicate action is enabled.
+     * - Click on theWorkspace Card's name and navigate to the Workspace-Data-Page.
+     * - Click on the "About" tab and navigate to the About page.
+     * - Click on the "Share" button on the right side panel 
+     * - Verify that the search-input on the modal is diabled
+     * - Sign-out of the collaborator's account
+     */
+
+    test('As OWNER, user can share a workspace (writer level access) ', async () => {
+      // Using the share modal requires a viewport be set, due to react-select weirdness.
+      await page.setViewport({height: 1280, width: 1280});
+
+      const workspaceCard = await findWorkspace(page, {create: true});
+      await workspaceCard.clickWorkspaceName();
+      
+      const workspaceName1 = await workspaceCard.getWorkspaceName();
+
+      const workspaceNameLink = await Link.findByName(page, {name: 'About'});
+      await workspaceNameLink.clickAndWait();
+
+      const aboutPage1 = new WorkspaceAboutPage(page);
+      await aboutPage1.waitForLoad();
+
+      // This test is not hermetic - if the collaborator is already on this
+      // workspace, just remove them before continuing.
+      const accessLevel1 = await aboutPage1.findUserInCollaboratorList(config.collaboratorUsername);
+      if (accessLevel1 !== null) {
+        await (await aboutPage1.openShareModal()).removeUser(config.collaboratorUsername);
+        await waitWhileLoading(page);
+      }
+
+      const shareModal = await aboutPage1.openShareModal();
+      await shareModal.shareWithUser(
+        config.collaboratorUsername, WorkspaceAccessLevel.Writer);
+      // Collab list is refreshed.
+      await waitWhileLoading(page);
+      await Navigation.navMenu(page, NavLink.SIGN_OUT);
+
+      // browser and page reset.
+      await page.deleteCookie(...await page.cookies());
+      await jestPuppeteer.resetPage();
+      await jestPuppeteer.resetBrowser();
+
+      // To verify WRITER role assigned correctly, user with WRITER role will sign in in new Incognito page.
+      const newPage = await signInAs(config.collaboratorUsername, config.userPassword);
+
+      const homePage = new HomePage(newPage);
+      await homePage.getSeeAllWorkspacesLink().then((link) => link.click());
+
+      const workspacesPage = new WorkspacesPage(newPage);
+      await workspacesPage.waitForLoad();
+
+      // Verify Workspace Access Level is READER.
+      const workspaceCard2 = await WorkspaceCard.findCard(newPage, workspaceName1);
+      const accessLevel2 = await workspaceCard2.getWorkspaceAccessLevel();
+      expect(accessLevel2).toBe(WorkspaceAccessLevel.Writer);
+
+      // Share, Edit and Delete actions are not available for click.
+      const menu2 = workspaceCard2.getEllipsis();
+      await menu2.clickEllipsis();
+      expect(await menu2.isDisabled(EllipsisMenuAction.Share)).toBe(true);
+      expect(await menu2.isDisabled(EllipsisMenuAction.Edit)).toBe(true);
+      expect(await menu2.isDisabled(EllipsisMenuAction.Delete)).toBe(true);
+
+      // Duplicate action is available for click.
+      expect(await menu2.isDisabled(EllipsisMenuAction.Duplicate)).toBe(false);
+
+      // Make sure the Search input-field in Share modal is disabled.
+      await workspaceCard2.clickWorkspaceName();
+      await (new WorkspaceDataPage(newPage)).openAboutPage();
+      const aboutPage = new WorkspaceAboutPage(newPage);
+      await aboutPage.waitForLoad();
+      const modal2 = await aboutPage.openShareModal();
+      const searchInput = await modal2.waitForSearchBox();
+      expect(await searchInput.isDisabled()).toBe(true);
+      await modal2.clickButton(LinkText.Cancel);
+
+      await Navigation.navMenu(newPage, NavLink.SIGN_OUT);
+      await newPage.close();
+    });
+
   });
 
 });
