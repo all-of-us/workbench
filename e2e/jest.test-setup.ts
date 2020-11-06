@@ -48,14 +48,21 @@ beforeAll(async () => {
     // Emitted when a request failed. Warning: blocked requests from above will be logged as failed requests, safe to ignore these.
     page.on('requestfailed', request => {
       console.error(`❌ Failed request => ${request.method()} ${request.url()} ${JSON.stringify(request.failure())}`);
-      // request.continue();
     });
     // Emitted when the page crashed
     page.on('error', error => console.error(`❌ ${error}`));
     // Emitted when a script has uncaught exception
     page.on('pageerror', error => console.error(`❌ ${error.message}`));
+
     page.on('console', msg => {
       console.log(`${msg.type()}: ${msg.text()}`);
+    });
+    await page.on('response', async (response) => {
+      try {
+        console.log(`${response.url()} ${response.status()}\n Response text: ${await response.text()}`);
+      } catch (er) {
+        // ignore
+      }
     });
   }
 });
