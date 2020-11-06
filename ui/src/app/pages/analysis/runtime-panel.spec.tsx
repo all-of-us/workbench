@@ -430,6 +430,7 @@ describe('RuntimePanel', () => {
     wrapper.find(ConfirmDelete).find({'aria-label': 'Delete'}).first().simulate('click');
 
     // Runtime should be deleting, and confirm page should no longer be visible.
+    await waitOneTickAndUpdate(wrapper);
     expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.Deleting);
     expect(wrapper.find(ConfirmDelete).exists()).toBeFalsy();
   });
