@@ -1,3 +1,6 @@
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+
 import {navigate, queryParamsStore, serverConfigStore} from 'app/utils/navigation';
 
 import {
@@ -22,11 +25,7 @@ import {hasRegisteredAccessFetch, reactStyles, withUserProfile} from 'app/utils'
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
 import {supportUrls} from 'app/utils/zendesk';
-import {
-  Profile,
-} from 'generated/fetch';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
+import {Profile, WorkspaceResponseListResponse} from 'generated/fetch';
 
 export const styles = reactStyles({
   bottomBanner: {
@@ -89,9 +88,9 @@ interface State {
   quickTourResourceOffset: number;
   trainingCompleted: boolean;
   twoFactorAuthCompleted: boolean;
+  userWorkspacesResponse: WorkspaceResponseListResponse;
   videoOpen: boolean;
   videoId: string;
-  userHasWorkspaces: boolean | null;
 }
 
 export const Homepage = withUserProfile()(class extends React.Component<Props, State> {
@@ -115,9 +114,9 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
       quickTourResourceOffset: 0,
       trainingCompleted: undefined,
       twoFactorAuthCompleted: undefined,
+      userWorkspacesResponse: undefined,
       videoOpen: false,
       videoId: '',
-      userHasWorkspaces: null,
     };
   }
 
@@ -234,10 +233,13 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
   }
 
   async checkWorkspaces() {
-    const userWorkspacesResponse = (await fetchWithGlobalErrorHandler(() => workspacesApi().getWorkspaces()));
-    this.setState({
-      userHasWorkspaces: userWorkspacesResponse && userWorkspacesResponse.items.length > 0
-    });
+    return fetchWithGlobalErrorHandler(() => workspacesApi().getWorkspaces())
+        .then(response => this.setState({ userWorkspacesResponse: response}));
+  }
+
+  userHasWorkspaces(): boolean {
+    const {userWorkspacesResponse} = this.state;
+    return userWorkspacesResponse && userWorkspacesResponse.items.length > 0;
   }
 
   openVideo(videoId: string): void {
@@ -343,11 +345,11 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
                             <RecentWorkspaces />
                           </FlexColumn>
                           <FlexColumn>
-                            {this.state.userHasWorkspaces !== null &&
+                            {this.state.userWorkspacesResponse &&
 
                               <React.Fragment>
-                                {this.state.userHasWorkspaces ?
-                                <RecentResources/> :
+                                {this.userHasWorkspaces() ?
+                                <RecentResources workspaces={this.state.userWorkspacesResponse.items}/> :
 
                                 <div data-test-id='getting-started'
                                      style={{

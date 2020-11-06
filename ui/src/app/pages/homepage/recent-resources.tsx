@@ -10,11 +10,17 @@ import {SmallHeader} from 'app/components/headers';
 import {renderResourceCard} from 'app/components/render-resource-card';
 import {ResourceNavigation, StyledResourceType} from 'app/components/resource-card';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {userMetricsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {userMetricsApi} from 'app/services/swagger-fetch-clients';
 import {formatWorkspaceResourceDisplayDate, getCdrVersion, reactStyles, withCdrVersions} from 'app/utils';
 import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import {getDisplayName} from 'app/utils/resources';
-import {CdrVersionListResponse, Workspace, WorkspaceResource, WorkspaceResourceResponse} from 'generated/fetch';
+import {
+  CdrVersionListResponse,
+  Workspace,
+  WorkspaceResource,
+  WorkspaceResourceResponse,
+  WorkspaceResponse
+} from 'generated/fetch';
 
 const styles = reactStyles({
   column: {
@@ -58,7 +64,12 @@ interface TableData {
   cdrVersionName: string;
 }
 
-const RecentResources = fp.flow(withCdrVersions())((props: {cdrVersionListResponse: CdrVersionListResponse}) => {
+interface Props {
+  cdrVersionListResponse: CdrVersionListResponse;
+  workspaces: WorkspaceResponse[];
+}
+
+const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
   const [loading, setLoading] = useState(true);
   const [resources, setResources] = useState<WorkspaceResourceResponse>();
   const [wsMap, setWorkspaceMap] = useState<Map<string, Workspace>>();
@@ -72,15 +83,13 @@ const RecentResources = fp.flow(withCdrVersions())((props: {cdrVersionListRespon
   };
 
   useEffect(() => {
-    loadResources();
-  }, []);
-
-  useEffect(() => {
-    workspacesApi().getWorkspaces().then(response => {
-      const workspaces = response.items.map(r => [r.workspace.id, r.workspace] as [string, Workspace]);
-      setWorkspaceMap(new Map(workspaces));
-    });
-  }, []);
+    const {workspaces} = props;
+    if (workspaces) {
+      const workspaceTuples = workspaces.map(r => [r.workspace.id, r.workspace] as [string, Workspace]);
+      setWorkspaceMap(new Map(workspaceTuples));
+      loadResources();
+    }
+  }, [props.workspaces]);
 
   const renderResourceMenu = (resource: WorkspaceResource) => {
     return renderResourceCard({
