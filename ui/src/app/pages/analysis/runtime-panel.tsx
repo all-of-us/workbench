@@ -340,7 +340,8 @@ const PresetSelector = ({hasMicroarrayData, setSelectedDiskSize, setSelectedMach
                     }
                   </React.Fragment>
                 }>
-    <Clickable data-test-id='runtime-presets-menu'>
+    {/* inline-block aligns the popup menu beneath the clickable content, rather than the middle of the panel */}
+    <Clickable style={{display: 'inline-block'}} data-test-id='runtime-presets-menu'>
       Recommended environments <ClrIcon shape='caret down'/>
     </Clickable>
   </PopupTrigger>;
@@ -583,7 +584,7 @@ export const RuntimePanel = fp.flow(
            }
          </FlexColumn>
        </div>
-       {runtimeChanged && <FlexRow
+       {runtimeExists && runtimeChanged && <FlexRow
            style={{
              alignItems: 'center',
              backgroundColor: colorWithWhiteness(colors.warning, .9),
