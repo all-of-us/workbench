@@ -619,22 +619,6 @@ jobs:
 workflows:
   build-test-deploy:
     jobs:
-      # Always run basic test/lint/compilation (open PRs, master branch merge)
-      # Note: by default tags are not picked up.
-      - api-local-test
-      - api-unit-test
-      - ui-unit-test
-      - api-bigquery-test
-      - api-integration-test
-      # Deploy to "test" on master branch merges
-      - api-deploy-to-test:
-          <<: *filter-master-branch
-          requires:
-            - api-unit-test
-      - ui-deploy-to-test:
-          <<: *filter-master-branch
-          requires:
-            - ui-unit-test
       # Deploy local UI server connected to "test" API server. Run Puppeteer tests for PR commits only
       - puppeteer-test:
           <<: *filter-pr-branch
@@ -642,71 +626,7 @@ workflows:
           parallel_num: 2
           optional_steps:
             - halt-puppeteer-check
-      # On master branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully
-      - puppeteer-test:
-          parallel_num: 4
-          env_name: "test"
-          <<: *filter-master-branch
-          requires:
-            - api-deploy-to-test
-            - ui-deploy-to-test
-
-  deploy-staging:
-    jobs:
-      - api-local-test:
-          <<: *filter-release-tags
-      - api-unit-test:
-          <<: *filter-release-tags
-      - ui-unit-test:
-          <<: *filter-release-tags
-      - api-bigquery-test:
-          <<: *filter-release-tags
-      - api-deps-check:
-          <<: *filter-release-tags
-      - api-integration-test:
-          <<: *filter-release-tags
-      - deploy-to-staging:
-          <<: *filter-release-tags
-          requires:
-            - api-local-test
-            - api-unit-test
-            - api-bigquery-test
-            - api-deps-check
-            - api-integration-test
-            - ui-unit-test
-      - deploy-to-perf:
-          <<: *filter-release-tags
-          requires:
-            - api-local-test
-            - api-unit-test
-            - api-bigquery-test
-            - api-deps-check
-            - api-integration-test
-            - ui-unit-test
-      # Not ready until delete workspace script is working
-      # - puppeteer-test:
-          # <<: *filter-release-tags
-          # parallel_num: 4
-          # env_name: "staging"
-          # requires:
-            # - deploy-to-staging
-
-  nightly-tests:
-    triggers:
-      - schedule:
-          # Run once every day at 4:00AM UTC
-          cron: "0 4 * * *"
-          filters:
-            branches:
-              only:
-                - master
-    jobs:
-      - api-bigquery-test
-      - puppeteer-test:
-          parallel_num: 1
-          test_mode: "nightly-integration"
-          env_name: "test"
-
+   
 experimental:
   notify:
     branches:
