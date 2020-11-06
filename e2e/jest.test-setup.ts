@@ -35,19 +35,11 @@ afterEach(async () => {
 beforeAll(async () => {
   await page.setRequestInterception(true);
   page.on('request', (request) => {
-    const requestUrl = url.parse(request.url(), true);
-    const host = requestUrl.hostname;
+    // const requestUrl = url.parse(request.url(), true);
+    // const host = requestUrl.hostname;
     // to improve page load performance, block network requests unrelated to application.
     try {
-      if (host === 'www.google-analytics.com'
-           || host === 'accounts.youtube.com'
-           || host === 'static.zdassets.com'
-           || host === 'play.google.com'
-           || request.url().endsWith('content-security-index-report')) {
-        request.abort();
-      } else {
-        request.continue();
-      }
+      request.continue();
     } catch (err) {
       console.error(err);
     }
