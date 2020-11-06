@@ -13,7 +13,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {userMetricsApi} from 'app/services/swagger-fetch-clients';
 import {formatWorkspaceResourceDisplayDate, getCdrVersion, reactStyles, withCdrVersions} from 'app/utils';
 import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
-import {getDisplayName} from 'app/utils/resources';
+import {getDisplayName, isNotebook} from 'app/utils/resources';
 import {
   CdrVersionListResponse,
   Workspace,
@@ -41,9 +41,16 @@ const styles = reactStyles({
   }
 });
 
-const WorkspaceNavigation = (props: {workspace: Workspace, style?: CSSProperties}) => {
-  const {workspace: {name, namespace, id}, style} = props;
-  const url = `/workspaces/${namespace}/${id}/data`;
+interface NavProps {
+  workspace: Workspace;
+  resource: WorkspaceResource;
+  style?: CSSProperties;
+}
+
+const WorkspaceNavigation = (props: NavProps) => {
+  const {workspace: {name, namespace, id}, resource, style} = props;
+  const tab = isNotebook(resource) ? 'notebooks' : 'data';
+  const url = `/workspaces/${namespace}/${id}/${tab}`;
 
   return <Clickable>
     <a data-test-id='workspace-navigation'
@@ -115,7 +122,7 @@ const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
           menu: renderResourceMenu(r),
           resourceType: <ResourceNavigation resource={r}><StyledResourceType resource={r}/></ResourceNavigation>,
           resourceName: <ResourceNavigation resource={r} style={styles.navigation}>{getDisplayName(r)}</ResourceNavigation>,
-          workspaceName: <WorkspaceNavigation workspace={getWorkspace(r)} style={styles.navigation}/>,
+          workspaceName: <WorkspaceNavigation workspace={getWorkspace(r)} resource={r} style={styles.navigation}/>,
           formattedLastModified: formatWorkspaceResourceDisplayDate(r.modifiedTime),
           cdrVersionName: getCdrVersionName(r),
         };
