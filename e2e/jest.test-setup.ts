@@ -47,8 +47,8 @@ beforeAll(async () => {
   if (isDebugMode) {
     // Emitted when a request failed. Warning: blocked requests from above will be logged as failed requests, safe to ignore these.
     page.on('requestfailed', request => {
-      console.error(`❌ Failed request => ${request.method()} ${request.url()}`);
-      request.continue();
+      console.error(`❌ Failed request => ${request.method()} ${request.url()} Error: ${request.failure()}`);
+      // request.continue();
     });
     // Emitted when the page crashed
     page.on('error', error => console.error(`❌ ${error}`));
