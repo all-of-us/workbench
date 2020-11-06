@@ -46,9 +46,11 @@ const useRuntime = (currentWorkspaceNamespace) => {
 };
 
 // useRuntimeStatus hook can be used to change the status of the runtime
-// Only 'Delete' is supported at the moment
+// Only 'Delete' is supported at the moment. This setter returns a promise which
+// resolves when any proximal fetch has completed, but does not wait for any
+// polling, which may continue asynchronously.
 export const useRuntimeStatus = (currentWorkspaceNamespace): [
-  RuntimeStatus | undefined, (statusRequest: RuntimeStatusRequest) => void]  => {
+  RuntimeStatus | undefined, (statusRequest: RuntimeStatusRequest) => Promise<void>]  => {
   const [runtimeStatus, setRuntimeStatus] = useState<RuntimeStatusRequest>();
   const {runtime} = useStore(runtimeStore);
   useRuntime(currentWorkspaceNamespace);
@@ -58,7 +60,6 @@ export const useRuntimeStatus = (currentWorkspaceNamespace): [
     if (!!runtimeStatus) {
       switchCase(runtimeStatus,
         [RuntimeStatusRequest.Delete, async() => {
-          await runtimeApi().deleteRuntime(currentWorkspaceNamespace);
           try {
             await LeoRuntimeInitializer.initialize({workspaceNamespace: currentWorkspaceNamespace, maxCreateCount: 0});
           } catch (e) {
@@ -72,7 +73,13 @@ export const useRuntimeStatus = (currentWorkspaceNamespace): [
 
   }, [runtimeStatus]);
 
-  return [runtime ? runtime.status : undefined, setRuntimeStatus];
+  const setStatusRequest = async(req) => {
+    await switchCase(req, [
+      RuntimeStatusRequest.Delete, () => runtimeApi().deleteRuntime(currentWorkspaceNamespace)
+    ]);
+    setRuntimeStatus(req);
+  };
+  return [runtime ? runtime.status : undefined, setStatusRequest];
 };
 
 // useCustomRuntime Hook can request a new runtime config
