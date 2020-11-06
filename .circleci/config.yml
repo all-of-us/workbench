@@ -626,7 +626,7 @@ workflows:
           parallel_num: 2
           optional_steps:
             - halt-puppeteer-check
-   
+
 experimental:
   notify:
     branches:
