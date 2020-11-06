@@ -30,7 +30,6 @@ import {
   WorkspaceStubVariables
 } from 'testing/stubs/workspaces-api-stub';
 import {Key} from 'ts-key-enum';
-import {CohortPage} from '../../../cohort-search/cohort-page/cohort-page.component';
 
 
 function isSelectedDomain(
