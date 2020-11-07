@@ -135,38 +135,51 @@ export interface Props {
 }
 
 // Exported for testing only.
-export const ConfirmDelete = ({onCancel, onConfirm}) => <Fragment>
-  <div style={styles.confirmWarning}>
-    <div style={{display: 'flex', justifyContent: 'center'}}>
-    <ClrIcon style={{color: colors.warning, gridColumn: 1, gridRow: 1}} className='is-solid'
-             shape='exclamation-triangle' size='20'/>
+export const ConfirmDelete = ({onCancel, onConfirm}) => {
+  const [deleting, setDeleting] = useState(false);
+  return <Fragment>
+    <div style={styles.confirmWarning}>
+      <div style={{display: 'flex', justifyContent: 'center'}}>
+        <ClrIcon style={{color: colors.warning, gridColumn: 1, gridRow: 1}} className='is-solid'
+                 shape='exclamation-triangle' size='20'/>
+      </div>
+      <h3 style={{...styles.baseHeader, gridColumn: 2, gridRow: 1}}>Delete your environment</h3>
+      <p style={{...styles.confirmWarningText, gridColumn: 2, gridRow: 2}}>
+        You’re about to delete your cloud analysis environment.
+      </p>
+      <p style={{...styles.confirmWarningText, gridColumn: 2, gridRow: 3}}>
+        Any in-memory state and local file modifications will be erased.&nbsp;
+        Data stored in workspace buckets is never affected by changes to your cloud&nbsp;
+        environment. You’ll still be able to view notebooks in this workspace, but&nbsp;
+        editing and running notebooks will require you to create a new cloud environment.
+      </p>
     </div>
-    <h3 style={{...styles.baseHeader, gridColumn: 2, gridRow: 1}}>Delete your environment</h3>
-    <p style={{...styles.confirmWarningText, gridColumn: 2, gridRow: 2}}>
-      You’re about to delete your cloud analysis environment.
-    </p>
-    <p style={{...styles.confirmWarningText, gridColumn: 2, gridRow: 3}}>
-      Any in-memory state and local file modifications will be erased.&nbsp;
-      Data stored in workspace buckets is never affected by changes to your cloud&nbsp;
-      environment. You’ll still be able to view notebooks in this workspace, but&nbsp;
-      editing and running notebooks will require you to create a new cloud environment.
-    </p>
-  </div>
-  <FlexRow style={{justifyContent: 'flex-end'}}>
-    <Button
-      type='secondaryLight'
-      aria-label={'Cancel'}
-      style={{marginRight: '.6rem'}}
-      onClick={() => onCancel()}>
-      Cancel
-    </Button>
-    <Button
-      aria-label={'Delete'}
-      onClick={() => onConfirm()}>
-      Delete
-    </Button>
-  </FlexRow>
-</Fragment>;
+    <FlexRow style={{justifyContent: 'flex-end'}}>
+      <Button
+        type='secondaryLight'
+        aria-label={'Cancel'}
+        disabled={deleting}
+        style={{marginRight: '.6rem'}}
+        onClick={() => onCancel()}>
+        Cancel
+      </Button>
+      <Button
+        aria-label={'Delete'}
+        disabled={deleting}
+        onClick={async() => {
+          setDeleting(true);
+          try {
+            await onConfirm();
+          } catch (err) {
+            setDeleting(false);
+            throw err;
+          }
+        }}>
+        Delete
+      </Button>
+    </FlexRow>
+  </Fragment>;
+};
 
 const MachineSelector = ({onChange, selectedMachine, machineType, idPrefix}) => {
   const initialMachineType = fp.find(({name}) => name === machineType, allMachineTypes) || defaultMachineType;
@@ -528,8 +541,8 @@ export const RuntimePanel = fp.flow(
     </div>
     {switchCase(panelContent,
       [PanelContent.Delete, () => <ConfirmDelete
-        onConfirm={() => {
-          setRuntimeStatus(RuntimeStatusRequest.Delete);
+        onConfirm={async() => {
+          await setRuntimeStatus(RuntimeStatusRequest.Delete);
           setPanelContent(PanelContent.Customize);
         }}
         onCancel={() => setPanelContent(PanelContent.Customize)}
