@@ -556,11 +556,13 @@ const UpdateRuntimeButton = ({
   return <Button
       aria-label={runtimeExists ? 'Update' : 'Create'}
       disabled={
-        runtimeExists && (
-            !runtimeChanged
-            // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
-            // where we get 'status' from
-            || ![RuntimeStatus.Running, RuntimeStatus.Stopped].includes(runtimeStatus as RuntimeStatus))
+        runtimeExists
+        && (
+          !runtimeChanged
+          // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
+          // where we get 'status' from
+          || ![RuntimeStatus.Running, RuntimeStatus.Stopped].includes(runtimeStatus as RuntimeStatus)
+        )
       }
       onClick={() => {
         const runtimeToRequest: Runtime = selectedDataprocConfig ? {
@@ -665,7 +667,6 @@ export const RuntimePanel = fp.flow(
           <FlexRow style={{justifyContent: 'flex-end', marginTop: '1rem'}}>
             <UpdateRuntimeButton
                 customOnClick={() => {
-                  setRuntimeStatus(RuntimeStatusRequest.Create);
                   setPanelContent(PanelContent.Customize);
                 }}
                 runtimeExists={runtimeExists}
