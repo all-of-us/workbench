@@ -373,7 +373,7 @@ function compareMachineMemory(oldRuntime: RuntimeConfig, newRuntime: RuntimeConf
 }
 
 function compareDiskSize(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff {
-  let desc = 'Memory';
+  let desc = 'Disk Size';
   let diffType;
 
   if (newRuntime.diskSize < oldRuntime.diskSize) {
