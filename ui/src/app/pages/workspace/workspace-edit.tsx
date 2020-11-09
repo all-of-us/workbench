@@ -315,7 +315,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
      * "reviewRequested" flag, which depend on the workspace state & edit mode.
      */
     createInitialWorkspaceState(): Workspace {
-      let workspace: Workspace = this.props.workspace;
+      // copy the props into a new object so our modifications here don't affect them
+      let workspace: Workspace = {...this.props.workspace};
       if (this.isMode(WorkspaceEditMode.Create)) {
         workspace = {
           name: '',
@@ -366,13 +367,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         workspace.researchPurpose.reviewRequested = false;
       }
 
-      const selectedCdrIsLive = this.getLiveCdrVersions().some(
-        cdr => cdr.cdrVersionId === workspace.cdrVersionId);
       // We preselect the default CDR version when a new workspace is being
-      // created (via create or duplicate), but leave as-is if the selected CDR
-      // version is live.
-      if (this.isMode(WorkspaceEditMode.Create) ||
-        (this.isMode(WorkspaceEditMode.Duplicate) && !selectedCdrIsLive)) {
+      // created (via create or duplicate)
+      if (this.isMode(WorkspaceEditMode.Create) || (this.isMode(WorkspaceEditMode.Duplicate))) {
         workspace.cdrVersionId = this.props.cdrVersionListResponse.defaultCdrVersionId;
       }
 
@@ -976,7 +973,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             <TooltipTrigger
                 content='To use a different dataset version, duplicate or create a new workspace.'
                 disabled={!(this.isMode(WorkspaceEditMode.Edit))}>
-              <div style={styles.select}>
+              <div data-test-id='select-cdr-version' style={styles.select}>
                 <select style={{borderColor: 'rgb(151, 151, 151)', borderRadius: '6px',
                   height: '1.5rem', width: '12rem'}}
                   value={cdrVersionId}
