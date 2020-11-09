@@ -278,6 +278,7 @@ commands:
   run-puppeteer-test:
     description: "Run puppeteer integration tests"
     steps:
+      - gcloud-auth-login
       - browser-tools/install-browser-tools
       - run:
           command: |
@@ -300,6 +301,29 @@ commands:
             circleci tests glob "tests/**/*.spec.ts" | circleci tests split --split-by=timings > /tmp/tests-to-run
             yarn test:ci $(cat /tmp/tests-to-run)
           no_output_timeout: 15m
+      - run:
+          name: Create circleci_parameters.json
+          working_directory: ~/workbench/e2e
+          command: |
+            echo "{ \
+              \"circleBranch\": \"${CIRCLE_BRANCH}\", \
+              \"circleJob\": \"${CIRCLE_JOB}\", \
+              \"circleBuild\": \"${CIRCLE_BUILD_NUM}\", \
+              \"circleBuildUrl\": \"${CIRCLE_BUILD_URL}\", \
+              \"circleNodeIndex\": \"${CIRCLE_NODE_INDEX}\" \
+              }" \
+              > ./logs/circleci_parameters.json
+          when: always
+      - run:
+          name: Upload test results json to storage bucket
+          working_directory: ~/workbench/e2e/logs
+          command: |
+            NEW_JSON=circleci-build-${CIRCLE_BUILD_NUM}-${CIRCLE_NODE_INDEX}-test-results.json
+            jq -s -c '.[0] * .[1]' test-results.json circleci_parameters.json > ${NEW_JSON}
+            # Upload json to storage bucket in all-of-us-workbench-test project.
+            STORAGE_BUCKET=gs://circleci-puppeteer-test-results
+            gsutil cp ${NEW_JSON} ${STORAGE_BUCKET}
+          when: always
       - store_artifacts:
           path: e2e/logs
           destination: logs

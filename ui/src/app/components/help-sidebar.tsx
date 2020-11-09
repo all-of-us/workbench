@@ -382,7 +382,7 @@ export const HelpSidebar = fp.flow(
       }
     });
 
-    componentDidMount(): void {
+    async componentDidMount() {
       this.subscription = participantStore.subscribe(participant => this.setState({participant}));
       this.subscription.add(setSidebarActiveIconStore.subscribe(activeIcon => {
         if (activeIcon !== null) {
@@ -729,7 +729,7 @@ export const HelpSidebar = fp.flow(
               }
             </div>}
             {activeIcon === 'runtime' && <div style={contentStyle('runtime')}>
-              {<RuntimePanel />}
+              {<RuntimePanel/>}
             </div>}
             {activeIcon === 'annotations' && <div style={contentStyle('annotations')}>
               {participant && <SidebarContent />}

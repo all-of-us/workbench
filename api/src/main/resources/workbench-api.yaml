@@ -855,6 +855,21 @@ paths:
           schema:
             "$ref":
               "#/definitions/WorkspaceBillingUsageResponse"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/creator-free-credits-remaining":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    get:
+      tags:
+        - workspaces
+      description: Gets the free credits remaining for the creator of a specified workspace
+      operationId: getWorkspaceCreatorFreeCreditsRemaining
+      responses:
+        200:
+          description: The free credits remaining for the creator of a workspace
+          schema:
+            "$ref":
+              "#/definitions/WorkspaceCreatorFreeCreditsRemainingResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/share":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -4264,7 +4279,15 @@ definitions:
         type: number
         format: double
         description: amount of free tier money spent on this workspace in USD
-
+  WorkspaceCreatorFreeCreditsRemainingResponse:
+    type: object
+    required:
+    - freeCreditsRemaining
+    properties:
+      freeCreditsRemaining:
+        type: number
+        format: double
+        description: amount of free credits remaining for the workspace creator, in USD
   UserRole:
     type: object
     required:

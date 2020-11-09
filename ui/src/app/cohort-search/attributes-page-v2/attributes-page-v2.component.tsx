@@ -432,7 +432,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
 
     validateForm() {
       const {form, isCOPESurvey} = this.state;
-      if (form.anyValue && (!isCOPESurvey || form.anyVersion)) {
+      if ((form.anyValue || form.num.length === 0) && (!isCOPESurvey || form.anyVersion)) {
         this.setState({formValid: true, formErrors: []});
       } else {
         let formValid = true, operatorSelected = form.num.length !== 0;
