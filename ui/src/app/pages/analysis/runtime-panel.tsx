@@ -540,7 +540,7 @@ const CreatePanel = ({creatorFreeCreditsRemaining, preset, profile, setPanelCont
         <b> {workerDiskSize} GB disk</b>
       </div>
     </Fragment>}
-  </div>
+  </div>;
 };
 
 const UpdateRuntimeButton = ({
@@ -578,15 +578,15 @@ const UpdateRuntimeButton = ({
 
         // If the selected runtime matches a preset, plumb through the appropriate configuration type.
         runtimeToRequest.configurationType = fp.get(
-            'runtimeTemplate.configurationType',
-            fp.find(
-                ({runtimeTemplate}) => presetEquals(runtimeToRequest, runtimeTemplate),
-                runtimePresets)
+          'runtimeTemplate.configurationType',
+          fp.find(
+            ({runtimeTemplate}) => presetEquals(runtimeToRequest, runtimeTemplate),
+            runtimePresets)
         ) || RuntimeConfigurationType.UserOverride;
         setRequestedRuntime(runtimeToRequest);
         customOnClick();
-      }}>{runtimeExists ? 'Update' : 'Create'}</Button>
-}
+      }}>{runtimeExists ? 'Update' : 'Create'}</Button>;
+};
 
 export const RuntimePanel = fp.flow(
   withCdrVersions(),
