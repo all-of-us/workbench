@@ -8,12 +8,12 @@ import {DataPage} from 'app/pages/data/data-page';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
-import {CohortReviewApi, CohortsApi, ConceptsApi, ConceptSetsApi, DataSetApi, WorkspacesApi} from 'generated/fetch';
+import {CohortReviewApi, CohortsApi, ConceptsApi, ConceptSetsApi, DatasetApi, WorkspacesApi} from 'generated/fetch';
 import {CohortReviewServiceStub, cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
 import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {ConceptsApiStub} from 'testing/stubs/concepts-api-stub';
-import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
+import {DatasetApiStub} from 'testing/stubs/data-set-api-stub';
 import {WorkspacesApiStub, workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
@@ -25,7 +25,7 @@ describe('DataPage', () => {
     registerApiClient(CohortsApi, new CohortsApiStub());
     registerApiClient(ConceptsApi, new ConceptsApiStub());
     registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
-    registerApiClient(DataSetApi, new DataSetApiStub());
+    registerApiClient(DatasetApi, new DatasetApiStub());
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     urlParamsStore.next({
       ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
@@ -47,7 +47,7 @@ describe('DataPage', () => {
       ConceptSetsApiStub.stubConceptSets().length +
       exampleCohortStubs.length +
       cohortReviewStubs.length +
-      DataSetApiStub.stubDataSets().length;
+      DatasetApiStub.stubDatasets().length;
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find(ResourceCardBase).length).toBe(resourceCardsExpected);
@@ -83,9 +83,9 @@ describe('DataPage', () => {
     expect(wrapper.find(ResourceCardBase).length).toBe(resourceCardsExpected);
   });
 
-  it('should show only dataSets when selected', async() => {
+  it('should show only datasets when selected', async() => {
     const wrapper = mount(<DataPage />);
-    const resourceCardsExpected = DataSetApiStub.stubDataSets().length;
+    const resourceCardsExpected = DatasetApiStub.stubDatasets().length;
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="view-only-data-sets"]').first().simulate('click');

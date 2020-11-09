@@ -92,14 +92,14 @@ import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.BillingConfig;
-import org.pmiops.workbench.dataset.DataSetService;
-import org.pmiops.workbench.dataset.DataSetServiceImpl;
-import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
+import org.pmiops.workbench.dataset.DatasetService;
+import org.pmiops.workbench.dataset.DatasetServiceImpl;
+import org.pmiops.workbench.dataset.mapper.DatasetMapperImpl;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
-import org.pmiops.workbench.db.dao.DataSetDao;
+import org.pmiops.workbench.db.dao.DatasetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
@@ -142,8 +142,8 @@ import org.pmiops.workbench.model.CopyRequest;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
-import org.pmiops.workbench.model.DataSet;
-import org.pmiops.workbench.model.DataSetRequest;
+import org.pmiops.workbench.model.Dataset;
+import org.pmiops.workbench.model.DatasetRequest;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
@@ -295,9 +295,9 @@ public class WorkspacesControllerTest {
     ConceptSetMapperImpl.class,
     ConceptSetsController.class,
     ConceptSetService.class,
-    DataSetController.class,
-    DataSetMapperImpl.class,
-    DataSetServiceImpl.class,
+    DatasetController.class,
+    DatasetMapperImpl.class,
+    DatasetServiceImpl.class,
     FirecloudMapperImpl.class,
     LogsBasedMetricServiceFakeImpl.class,
     NotebooksServiceImpl.class,
@@ -378,9 +378,9 @@ public class WorkspacesControllerTest {
   @Autowired ConceptSetDao conceptSetDao;
   @Autowired ConceptSetService conceptSetService;
   @Autowired ConceptSetsController conceptSetsController;
-  @Autowired DataSetController dataSetController;
-  @Autowired DataSetDao dataSetDao;
-  @Autowired DataSetService dataSetService;
+  @Autowired DatasetController datasetController;
+  @Autowired DatasetDao datasetDao;
+  @Autowired DatasetService datasetService;
   @Autowired UserRecentResourceService userRecentResourceService;
   @Autowired CohortReviewController cohortReviewController;
   @Autowired ConceptBigQueryService conceptBigQueryService;
@@ -1773,14 +1773,14 @@ public class WorkspacesControllerTest {
     originalCohort = cohortDao.save(originalCohort);
 
     final String expectedDatasetName = "data set name";
-    DbDataset originalDataSet = new DbDataset();
-    originalDataSet.setName(expectedDatasetName);
-    originalDataSet.setVersion(1);
-    originalDataSet.setConceptSetIds(
+    DbDataset originalDataset = new DbDataset();
+    originalDataset.setName(expectedDatasetName);
+    originalDataset.setVersion(1);
+    originalDataset.setConceptSetIds(
         Collections.singletonList(originalConceptSet.getConceptSetId()));
-    originalDataSet.setCohortIds(Collections.singletonList(originalCohort.getCohortId()));
-    originalDataSet.setWorkspaceId(dbWorkspace.getWorkspaceId());
-    dataSetDao.save(originalDataSet);
+    originalDataset.setCohortIds(Collections.singletonList(originalCohort.getCohortId()));
+    originalDataset.setWorkspaceId(dbWorkspace.getWorkspaceId());
+    datasetDao.save(originalDataset);
 
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     Workspace modWorkspace = new Workspace();
@@ -1818,12 +1818,12 @@ public class WorkspacesControllerTest {
             cloned.getId(),
             DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
 
-    List<DbDataset> dataSets = dataSetService.getDataSets(clonedDbWorkspace);
-    assertThat(dataSets).hasSize(1);
-    assertThat(dataSets.get(0).getName()).isEqualTo(expectedDatasetName);
-    assertThat(dataSets.get(0).getDataSetId()).isNotEqualTo(originalDataSet.getDataSetId());
+    List<DbDataset> datasets = datasetService.getDatasets(clonedDbWorkspace);
+    assertThat(datasets).hasSize(1);
+    assertThat(datasets.get(0).getName()).isEqualTo(expectedDatasetName);
+    assertThat(datasets.get(0).getDatasetId()).isNotEqualTo(originalDataset.getDatasetId());
 
-    List<DbConceptSet> conceptSets = dataSetService.getConceptSetsForDataset(dataSets.get(0));
+    List<DbConceptSet> conceptSets = datasetService.getConceptSetsForDataset(datasets.get(0));
     assertThat(conceptSets).hasSize(1);
     assertThat(conceptSets.get(0).getName()).isEqualTo(expectedConceptSetName);
     assertThat(conceptSets.get(0).getDescription()).isEqualTo(expectedConceptSetDescription);
@@ -1833,7 +1833,7 @@ public class WorkspacesControllerTest {
     assertThat(conceptSets.get(0).getConceptSetId())
         .isNotEqualTo(originalConceptSet.getConceptSetId());
 
-    List<DbCohort> cohorts = dataSetService.getCohortsForDataset(dataSets.get(0));
+    List<DbCohort> cohorts = datasetService.getCohortsForDataset(datasets.get(0));
     assertThat(cohorts).hasSize(1);
     assertThat(cohorts.get(0).getName()).isEqualTo(expectedCohortName);
     assertThat(cohorts.get(0).getDescription()).isEqualTo(expectedCohortDescription);
@@ -3145,17 +3145,17 @@ public class WorkspacesControllerTest {
         .isEqualTo(expectedCohortReview.getMatchedParticipantCount());
   }
 
-  private void compareDatasetMetadata(DataSet observedDataSet, DataSet expectedDataSet) {
-    assertThat(observedDataSet.getDescription()).isEqualTo(expectedDataSet.getDescription());
-    assertThat(observedDataSet.getEtag()).isEqualTo(expectedDataSet.getEtag());
-    assertThat(observedDataSet.getId()).isEqualTo(expectedDataSet.getId());
-    assertThat(observedDataSet.getIncludesAllParticipants())
-        .isEqualTo(expectedDataSet.getIncludesAllParticipants());
-    assertThat(observedDataSet.getLastModifiedTime())
-        .isEqualTo(expectedDataSet.getLastModifiedTime());
-    assertThat(observedDataSet.getName()).isEqualTo(expectedDataSet.getName());
-    assertThat(observedDataSet.getPrePackagedConceptSet())
-        .isEqualTo(expectedDataSet.getPrePackagedConceptSet());
+  private void compareDatasetMetadata(Dataset observedDataset, Dataset expectedDataset) {
+    assertThat(observedDataset.getDescription()).isEqualTo(expectedDataset.getDescription());
+    assertThat(observedDataset.getEtag()).isEqualTo(expectedDataset.getEtag());
+    assertThat(observedDataset.getId()).isEqualTo(expectedDataset.getId());
+    assertThat(observedDataset.getIncludesAllParticipants())
+        .isEqualTo(expectedDataset.getIncludesAllParticipants());
+    assertThat(observedDataset.getLastModifiedTime())
+        .isEqualTo(expectedDataset.getLastModifiedTime());
+    assertThat(observedDataset.getName()).isEqualTo(expectedDataset.getName());
+    assertThat(observedDataset.getPrePackagedConceptSet())
+        .isEqualTo(expectedDataset.getPrePackagedConceptSet());
   }
 
   @Test
@@ -3188,12 +3188,12 @@ public class WorkspacesControllerTest {
                         new ConceptSet().name("cs1").description("d1").domain(Domain.CONDITION))
                     .addAddedIdsItem(CONCEPT_1.getConceptId()))
             .getBody();
-    DataSet dataSet =
-        dataSetController
-            .createDataSet(
+    Dataset dataset =
+        datasetController
+            .createDataset(
                 workspace.getNamespace(),
                 workspace.getId(),
-                new DataSetRequest()
+                new DatasetRequest()
                     .prePackagedConceptSet(PrePackagedConceptSetEnum.NONE)
                     .addConceptSetIdsItem(conceptSet.getId())
                     .addCohortIdsItem(cohort.getId())
@@ -3232,9 +3232,9 @@ public class WorkspacesControllerTest {
             .map(WorkspaceResource::getConceptSet)
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
-    List<DataSet> dataSets =
+    List<Dataset> datasets =
         workspaceResourceResponse.stream()
-            .map(WorkspaceResource::getDataSet)
+            .map(WorkspaceResource::getDataset)
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
     assertThat(cohorts).hasSize(1);
@@ -3244,7 +3244,7 @@ public class WorkspacesControllerTest {
     assertThat(conceptSets).hasSize(1);
     // Ignore arrays in subtables.
     assertThat(conceptSets.get(0)).isEqualTo(conceptSet.concepts(null));
-    assertThat(dataSets).hasSize(1);
-    compareDatasetMetadata(dataSets.get(0), dataSet);
+    assertThat(datasets).hasSize(1);
+    compareDatasetMetadata(datasets.get(0), dataset);
   }
 }

@@ -33,7 +33,7 @@ import {CdrVersionsStubVariables} from './cdr-versions-api-stub';
 import {cohortReviewStubs} from './cohort-review-service-stub';
 import {exampleCohortStubs} from './cohorts-api-stub';
 import {ConceptSetsApiStub} from './concept-sets-api-stub';
-import {DataSetApiStub} from './data-set-api-stub';
+import {DatasetApiStub} from './data-set-api-stub';
 import {convertToResources} from './resources-stub';
 
 export class WorkspaceStubVariables {
@@ -357,7 +357,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
       };
       const workspaceResources = convertToResources(cohortReviewStubs, ResourceType.COHORTREVIEW, workspace)
         .concat(convertToResources(exampleCohortStubs, ResourceType.COHORT, workspace))
-        .concat(convertToResources(DataSetApiStub.stubDataSets(), ResourceType.DATASET, workspace))
+        .concat(convertToResources(DatasetApiStub.stubDatasets(), ResourceType.DATASET, workspace))
         .concat(convertToResources(ConceptSetsApiStub.stubConceptSets(), ResourceType.CONCEPTSET, workspace));
       resolve(workspaceResources);
     });

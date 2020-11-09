@@ -21,9 +21,9 @@ public class DbDatasetValue {
     this.value = value;
   }
 
-  public DbDatasetValue(DbDatasetValue dataSetValue) {
-    setDomainId(dataSetValue.getDomainId());
-    setValue(dataSetValue.getValue());
+  public DbDatasetValue(DbDatasetValue datasetValue) {
+    setDomainId(datasetValue.getDomainId());
+    setValue(datasetValue.getValue());
   }
 
   @Column(name = "domain_id")
@@ -49,9 +49,9 @@ public class DbDatasetValue {
     this.value = value;
   }
 
-  public boolean equals(DbDatasetValue dataSetValue) {
-    return getValue().equals(dataSetValue.getValue())
-        && getDomainEnum().equals(dataSetValue.getDomainEnum());
+  public boolean equals(DbDatasetValue datasetValue) {
+    return getValue().equals(datasetValue.getValue())
+        && getDomainEnum().equals(datasetValue.getDomainEnum());
   }
 
   @Override

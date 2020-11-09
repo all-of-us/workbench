@@ -10,8 +10,8 @@ import {CheckBox} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {CircleWithText} from 'app/icons/circleWithText';
-import {NewDataSetModal} from 'app/pages/data/data-set/new-dataset-modal';
-import {cohortsApi, conceptSetsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
+import {NewDatasetModal} from 'app/pages/data/data-set/new-dataset-modal';
+import {cohortsApi, conceptSetsApi, datasetApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   formatDomain,
@@ -37,9 +37,9 @@ import {
   Cohort,
   ConceptSet,
   DataDictionaryEntry,
-  DataSet,
-  DataSetPreviewRequest,
-  DataSetPreviewValueList,
+  Dataset,
+  DatasetPreviewRequest,
+  DatasetPreviewValueList,
   Domain,
   DomainValue,
   DomainValuePair,
@@ -303,7 +303,7 @@ export class ValueListItem extends React.Component<
   fetchDataDictionaryEntry() {
     const {domain, domainValue} = this.props;
 
-    dataSetApi().getDataDictionaryEntry(
+    datasetApi().getDataDictionaryEntry(
       parseInt(currentWorkspaceStore.getValue().cdrVersionId, 10),
       domain.toString(),
       domainValue.value).then(dataDictionaryEntry => {
@@ -397,10 +397,10 @@ const PREPACKAGED_DOMAINS = {
   [PrepackagedConceptSet.SURVEYS]: Domain.SURVEY
 };
 
-interface DataSetPreviewInfo {
+interface DatasetPreviewInfo {
   isLoading: boolean;
   errorText: JSX.Element;
-  values?: Array<DataSetPreviewValueList>;
+  values?: Array<DatasetPreviewValueList>;
 }
 
 interface Props {
@@ -417,8 +417,8 @@ interface State {
   cohortList: Cohort[];
   conceptSetList: ConceptSet[];
   creatingConceptSet: boolean;
-  dataSet: DataSet;
-  dataSetTouched: boolean;
+  dataset: Dataset;
+  datasetTouched: boolean;
 
   // Lazily poplulated. This information is static, so entries are not removed
   // even if no concept sets for a given domain are actively selected.
@@ -428,7 +428,7 @@ interface State {
   includesAllParticipants: boolean;
   loadingResources: boolean;
   openSaveModal: boolean;
-  previewList: Map<Domain, DataSetPreviewInfo>;
+  previewList: Map<Domain, DatasetPreviewInfo>;
   selectedCohortIds: number[];
   selectedConceptSetIds: number[];
   selectedDomains: Set<Domain>;
@@ -437,7 +437,7 @@ interface State {
   selectedPreviewDomain: Domain;
 }
 
-const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlParams(), withCdrVersions())(
+const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlParams(), withCdrVersions())(
   class extends React.Component<Props, State> {
     dt: any;
     constructor(props) {
@@ -446,8 +446,8 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
         cohortList: [],
         conceptSetList: [],
         creatingConceptSet: false,
-        dataSet: undefined,
-        dataSetTouched: false,
+        dataset: undefined,
+        datasetTouched: false,
         domainValueSetIsLoading: new Set(),
         domainValueSetLookup: new Map(),
         includesAllParticipants: false,
@@ -464,7 +464,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
     }
 
     get editing() {
-      return this.props.urlParams.dataSetId !== undefined;
+      return this.props.urlParams.datasetId !== undefined;
     }
 
     async componentDidMount() {
@@ -474,19 +474,19 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
         return;
       }
 
-      const [, dataSet] = await Promise.all([
+      const [, dataset] = await Promise.all([
         resourcesPromise,
-        dataSetApi().getDataSet(namespace, id, this.props.urlParams.dataSetId)
+        datasetApi().getDataset(namespace, id, this.props.urlParams.datasetId)
       ]);
 
-      const selectedPrepackagedConceptSets = this.apiEnumToPrePackageConceptSets(dataSet.prePackagedConceptSet);
+      const selectedPrepackagedConceptSets = this.apiEnumToPrePackageConceptSets(dataset.prePackagedConceptSet);
       this.setState({
-        dataSet,
-        includesAllParticipants: dataSet.includesAllParticipants,
-        selectedConceptSetIds: dataSet.conceptSets.map(cs => cs.id),
-        selectedCohortIds: dataSet.cohorts.map(c => c.id),
-        selectedDomainValuePairs: dataSet.domainValuePairs,
-        selectedDomains: this.getDomainsFromDataSet(dataSet),
+        dataset,
+        includesAllParticipants: dataset.includesAllParticipants,
+        selectedConceptSetIds: dataset.conceptSets.map(cs => cs.id),
+        selectedCohortIds: dataset.cohorts.map(c => c.id),
+        selectedDomainValuePairs: dataset.domainValuePairs,
+        selectedDomains: this.getDomainsFromDataset(dataset),
         selectedPrepackagedConceptSets,
       });
     }
@@ -551,8 +551,8 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
 
     private async loadValueSetForDomain(domain: Domain) {
       const {namespace, id} = this.props.workspace;
-      const values = await dataSetApi().getValuesFromDomain(namespace, id, domain.toString());
-      this.setState(({dataSet, domainValueSetIsLoading, domainValueSetLookup, selectedDomainValuePairs}) => {
+      const values = await datasetApi().getValuesFromDomain(namespace, id, domain.toString());
+      this.setState(({dataset, domainValueSetIsLoading, domainValueSetLookup, selectedDomainValuePairs}) => {
         const newLoading = new Set(domainValueSetIsLoading);
         const newLookup = new Map(domainValueSetLookup);
 
@@ -563,7 +563,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
         // existing dataset which already covers the domain. This avoids having
         // us overwrite the selected pairs on initial load.
         let morePairs = [];
-        if (!this.editing || !this.getDomainsFromDataSet(dataSet).has(domain)) {
+        if (!this.editing || !this.getDomainsFromDataset(dataset).has(domain)) {
           morePairs = values.items.map(v => ({domain, value: v.value}));
         }
 
@@ -590,7 +590,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
       }
     }
 
-    private getDomainsFromDataSet(d: DataSet) {
+    private getDomainsFromDataset(d: Dataset) {
       const selectedPrepackagedConceptSets = this.apiEnumToPrePackageConceptSets(d.prePackagedConceptSet);
       return this.getDomainsFromConceptSets(d.conceptSets, selectedPrepackagedConceptSets);
     }
@@ -621,7 +621,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
         return {
           selectedDomains,
           selectedPrepackagedConceptSets: updatedPrepackaged,
-          dataSetTouched: true
+          datasetTouched: true
         };
       });
     }
@@ -639,7 +639,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
         return {
           selectedDomains,
           selectedConceptSetIds: updatedConceptSetIds,
-          dataSetTouched: true
+          datasetTouched: true
         };
       });
     }
@@ -649,13 +649,13 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
       // If Workspace Cohort is selected, un-select Pre packaged cohort
       if (selectedCohortList && selectedCohortList.length > 0) {
         this.setState({
-          dataSetTouched: true,
+          datasetTouched: true,
           selectedCohortIds: selectedCohortList,
           includesAllParticipants: false
         });
       } else {
         this.setState({
-          dataSetTouched: true,
+          datasetTouched: true,
           selectedCohortIds: selectedCohortList
         });
       }
@@ -687,7 +687,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
       valuesSelected = valuesSelected.sort((a, b) =>
           valueSets.findIndex(({value}) => a.value === value) -
           valueSets.findIndex(({value}) => b.value === value));
-      this.setState({selectedDomainValuePairs: valuesSelected, dataSetTouched: true});
+      this.setState({selectedDomainValuePairs: valuesSelected, datasetTouched: true});
     }
 
     // Returns true if selected values set is empty or is not equal to the total values displayed
@@ -778,8 +778,8 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
 
     async getPreviewList() {
       const domains = fp.uniq(this.state.selectedDomainValuePairs.map(domainValue => domainValue.domain));
-      const newPreviewList: Map<Domain, DataSetPreviewInfo> =
-        new Map(domains.map<[Domain, DataSetPreviewInfo]>(domain => [domain, {
+      const newPreviewList: Map<Domain, DatasetPreviewInfo> =
+        new Map(domains.map<[Domain, DatasetPreviewInfo]>(domain => [domain, {
           isLoading: true, errorText: null, values: []}]));
       this.setState({
         previewList: newPreviewList,
@@ -792,7 +792,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
 
     async getPreviewByDomain(domain: Domain) {
       const {namespace, id} = this.props.workspace;
-      const domainRequest: DataSetPreviewRequest = {
+      const domainRequest: DatasetPreviewRequest = {
         domain: domain,
         conceptSetIds: this.state.selectedConceptSetIds,
         includesAllParticipants: this.state.includesAllParticipants,
@@ -805,7 +805,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
       let newPreviewInformation;
       try {
         const domainPreviewResponse = await apiCallWithGatewayTimeoutRetries(
-          () => dataSetApi().previewDataSetByDomain(namespace, id, domainRequest));
+          () => datasetApi().previewDatasetByDomain(namespace, id, domainRequest));
         newPreviewInformation = {
           isLoading: false,
           errorText: null,
@@ -894,7 +894,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
         this.renderPreviewDataTableSectionMessage(filteredPreviewData);
     }
 
-    renderPreviewDataTable(filteredPreviewData: DataSetPreviewInfo) {
+    renderPreviewDataTable(filteredPreviewData: DatasetPreviewInfo) {
       return <DataTable ref={el => this.dt = el} key={this.state.selectedPreviewDomain}
                  scrollable={true} style={{width: '100%'}}
                  value={this.getDataTableValue(filteredPreviewData.values)}>
@@ -906,7 +906,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
       </DataTable>;
     }
 
-    renderPreviewDataTableSectionMessage(filteredPreviewData: DataSetPreviewInfo) {
+    renderPreviewDataTableSectionMessage(filteredPreviewData: DatasetPreviewInfo) {
       const domainDisplayed = formatDomain(this.state.selectedPreviewDomain);
       return <div style={styles.warningMessage}>
         {filteredPreviewData.isLoading ?
@@ -925,8 +925,8 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
       const cohortsPath = pathPrefix + '/cohorts/build';
       const conceptSetsPath = pathPrefix + '/concepts';
       const {
-        dataSet,
-        dataSetTouched,
+        dataset,
+        datasetTouched,
         domainValueSetIsLoading,
         domainValueSetLookup,
         includesAllParticipants,
@@ -943,7 +943,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
       return <React.Fragment>
         <FadeBox style={{paddingTop: '1rem'}}>
           <h2 style={{paddingTop: 0, marginTop: 0}}>Datasets{this.editing &&
-            dataSet !== undefined && ' - ' + dataSet.name}</h2>
+            dataset !== undefined && ' - ' + dataset.name}</h2>
           <div style={{color: colors.primary, fontSize: '14px'}}>Build a dataset by selecting the
             variables and values for one or more of your cohorts. Then export the completed dataset
             to Notebooks where you can perform your analysis</div>
@@ -1092,7 +1092,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                 <FlexRow style={{paddingTop: '0.5rem'}}>
                   {fp.toPairs(previewList).map((value) => {
                     const domain: string = value[0];
-                    const previewRow: DataSetPreviewInfo = value[1];
+                    const previewRow: DatasetPreviewInfo = value[1];
                     return <TooltipTrigger key={domain}
                                            content={
                                              'Preview for domain '
@@ -1134,12 +1134,12 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
           <Button style={{marginBottom: '2rem'}} data-test-id='save-button'
             onClick ={() => this.setState({openSaveModal: true})}
             disabled={this.disableSave() || !this.canWrite}>
-              {this.editing ? !(dataSetTouched && this.canWrite) ? 'Analyze' :
+              {this.editing ? !(datasetTouched && this.canWrite) ? 'Analyze' :
                 'Update and Analyze' : 'Save and Analyze'}
           </Button>
           </TooltipTrigger>
         </div>
-        {openSaveModal && <NewDataSetModal includesAllParticipants={includesAllParticipants}
+        {openSaveModal && <NewDatasetModal includesAllParticipants={includesAllParticipants}
                                            selectedConceptSetIds={selectedConceptSetIds}
                                            selectedCohortIds={selectedCohortIds}
                                            selectedDomainValuePairs={selectedDomainValuePairs}
@@ -1149,7 +1149,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                                            displayMicroarrayOptions={
                                              getCdrVersion(this.props.workspace, this.props.cdrVersionListResponse).hasMicroarrayData}
                                            prePackagedConceptSet={this.getPrePackagedConceptSetApiEnum()}
-                                           dataSet={dataSet ? dataSet : undefined}
+                                           dataset={dataset ? dataset : undefined}
                                            closeFunction={() => {
                                              this.setState({openSaveModal: false});
                                            }}
@@ -1159,14 +1159,14 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
   });
 
 export {
-  DataSetPage
+  DatasetPage
 };
 
 @Component({
   template: '<div #root></div>'
 })
-export class DataSetPageComponent extends ReactWrapperBase {
+export class DatasetPageComponent extends ReactWrapperBase {
   constructor() {
-    super(DataSetPage, []);
+    super(DatasetPage, []);
   }
 }

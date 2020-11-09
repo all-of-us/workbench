@@ -68,13 +68,13 @@ public final class SearchGroupItemQueryBuilder {
   private static final String DESC = " desc";
   private static final String BASE_SQL =
       "select distinct person_id, entry_date, concept_id\n"
-          + "from `${projectId}.${dataSetId}.cb_search_all_events`\n"
+          + "from `${projectId}.${datasetId}.cb_search_all_events`\n"
           + "where ";
   private static final String STANDARD_OR_SOURCE_SQL =
       "is_standard = %s and concept_id in unnest(%s)\n";
   private static final String PARENT_STANDARD_OR_SOURCE_SQL =
       "is_standard = %s and concept_id in (select distinct c.concept_id\n"
-          + "from `${projectId}.${dataSetId}.cb_criteria` c\n"
+          + "from `${projectId}.${datasetId}.cb_criteria` c\n"
           + "join (${childLookup}) a\n"
           + "on (c.path like concat('%%.', a.id, '.%%') or c.path like concat('%%.', a.id))\n"
           + "where domain_id = %s\n"
@@ -82,9 +82,9 @@ public final class SearchGroupItemQueryBuilder {
           + "and is_selectable = 1)\n";
   private static final String DRUG_SQL =
       "is_standard = %s and concept_id in (select distinct ca.descendant_id\n"
-          + "from `${projectId}.${dataSetId}.cb_criteria_ancestor` ca\n"
+          + "from `${projectId}.${datasetId}.cb_criteria_ancestor` ca\n"
           + "join (select distinct c.concept_id\n"
-          + "from `${projectId}.${dataSetId}.cb_criteria` c\n"
+          + "from `${projectId}.${datasetId}.cb_criteria` c\n"
           + "join (${childLookup}) a\n"
           + "on (c.path like concat('%%.', a.id, '.%%') or c.path like concat('%%.', a.id))\n"
           + "where domain_id = %s\n"
@@ -92,7 +92,7 @@ public final class SearchGroupItemQueryBuilder {
           + "and is_selectable = 1) b on (ca.ancestor_id = b.concept_id))";
   private static final String CHILD_LOOKUP =
       "select cast(cr.id as string) as id\n"
-          + "from `${projectId}.${dataSetId}.cb_criteria` cr\n"
+          + "from `${projectId}.${datasetId}.cb_criteria` cr\n"
           + "where domain_id = %s\n"
           + "and is_standard = %s\n"
           + "and concept_id in unnest(%s)\n"
@@ -134,7 +134,7 @@ public final class SearchGroupItemQueryBuilder {
           + ") temp2 on (%s)\n";
   private static final String TEMPORAL_SQL =
       "select person_id, visit_occurrence_id, entry_date%s\n"
-          + "from `${projectId}.${dataSetId}.cb_search_all_events`\n"
+          + "from `${projectId}.${datasetId}.cb_search_all_events`\n"
           + "where %s\n"
           + "and person_id in (%s)\n";
   private static final String RANK_1_SQL =
@@ -154,18 +154,18 @@ public final class SearchGroupItemQueryBuilder {
   // sql parts to help construct demographic BigQuery sql
   private static final String DEC_SQL =
       "exists (\n"
-          + "SELECT 'x' FROM `${projectId}.${dataSetId}.death` d\n"
+          + "SELECT 'x' FROM `${projectId}.${datasetId}.death` d\n"
           + "where d.person_id = p.person_id)\n";
   private static final String DEMO_BASE =
-      "select person_id\n" + "from `${projectId}.${dataSetId}.person` p\nwhere\n";
+      "select person_id\n" + "from `${projectId}.${datasetId}.person` p\nwhere\n";
   private static final String AGE_SQL =
       "select person_id\n"
-          + "from `${projectId}.${dataSetId}.cb_search_person` p\nwhere %s %s %s\n";
+          + "from `${projectId}.${datasetId}.cb_search_person` p\nwhere %s %s %s\n";
   private static final String AGE_DEC_SQL = "and not " + DEC_SQL;
   private static final String DEMO_IN_SQL = "%s in unnest(%s)\n";
   private static final String FITBIT_SQL =
       "select person_id\n"
-          + "from `${projectId}.${dataSetId}.cb_search_person` p\nwhere has_fitbit = 1\n";
+          + "from `${projectId}.${datasetId}.cb_search_person` p\nwhere has_fitbit = 1\n";
 
   /** Build the inner most sql using search parameters, modifiers and attributes. */
   public static void buildQuery(

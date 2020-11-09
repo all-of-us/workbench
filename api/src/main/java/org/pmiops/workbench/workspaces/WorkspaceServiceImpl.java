@@ -41,7 +41,7 @@ import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.dataset.DataSetService;
+import org.pmiops.workbench.dataset.DatasetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -100,7 +100,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   private final Clock clock;
   private final CohortCloningService cohortCloningService;
   private final ConceptSetService conceptSetService;
-  private final DataSetService dataSetService;
+  private final DatasetService datasetService;
   private final FireCloudService fireCloudService;
   private final FreeTierBillingService freeTierBillingService;
   private final Provider<Cloudbilling> endUserCloudbillingProvider;
@@ -122,7 +122,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       Clock clock,
       CohortCloningService cohortCloningService,
       ConceptSetService conceptSetService,
-      DataSetService dataSetService,
+      DatasetService datasetService,
       FireCloudService fireCloudService,
       FreeTierBillingService freeTierBillingService,
       Provider<DbUser> userProvider,
@@ -138,7 +138,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     this.clock = clock;
     this.cohortCloningService = cohortCloningService;
     this.conceptSetService = conceptSetService;
-    this.dataSetService = dataSetService;
+    this.datasetService = datasetService;
     this.fireCloudService = fireCloudService;
     this.freeTierBillingService = freeTierBillingService;
     this.userDao = userDao;
@@ -486,7 +486,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Override
   @Transactional
-  public DbWorkspace saveAndCloneCohortsConceptSetsAndDataSets(DbWorkspace from, DbWorkspace to) {
+  public DbWorkspace saveAndCloneCohortsConceptSetsAndDatasets(DbWorkspace from, DbWorkspace to) {
     // Save the workspace first to allocate an ID.
     to = workspaceDao.save(to);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(to.getCdrVersion());
@@ -506,16 +506,16 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
               .cloneConceptSetAndConceptIds(fromConceptSet, to, cdrVersionChanged)
               .getConceptSetId());
     }
-    for (DbDataset dataSet : dataSetService.getDataSets(from)) {
-      dataSetService.cloneDataSetToWorkspace(
-          dataSet,
+    for (DbDataset dataset : datasetService.getDatasets(from)) {
+      datasetService.cloneDatasetToWorkspace(
+          dataset,
           to,
           fromCohortIdToToCohortId.entrySet().stream()
-              .filter(cohortIdEntry -> dataSet.getCohortIds().contains(cohortIdEntry.getKey()))
+              .filter(cohortIdEntry -> dataset.getCohortIds().contains(cohortIdEntry.getKey()))
               .map(Entry::getValue)
               .collect(Collectors.toSet()),
           fromConceptSetIdToToConceptSetId.entrySet().stream()
-              .filter(conceptSetId -> dataSet.getConceptSetIds().contains(conceptSetId.getKey()))
+              .filter(conceptSetId -> dataset.getConceptSetIds().contains(conceptSetId.getKey()))
               .map(Entry::getValue)
               .collect(Collectors.toSet()));
     }

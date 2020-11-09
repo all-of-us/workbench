@@ -43,30 +43,30 @@ public abstract class BigQueryBaseTest {
 
   @BeforeAllMethods
   public void beforeAllMethodsSetUp() throws Exception {
-    createDataSet(workbenchConfig.bigquery.dataSetId);
+    createDataset(workbenchConfig.bigquery.datasetId);
     for (String tableName : getTableNames()) {
-      createTable(workbenchConfig.bigquery.dataSetId, tableName);
-      insertData(workbenchConfig.bigquery.dataSetId, tableName);
+      createTable(workbenchConfig.bigquery.datasetId, tableName);
+      insertData(workbenchConfig.bigquery.datasetId, tableName);
     }
   }
 
   @AfterAllMethods
   public void beforeAllMethodsTearDown() throws Exception {
     for (String tableName : getTableNames()) {
-      deleteTable(workbenchConfig.bigquery.dataSetId, tableName);
+      deleteTable(workbenchConfig.bigquery.datasetId, tableName);
     }
-    deleteDataSet(workbenchConfig.bigquery.dataSetId);
+    deleteDataset(workbenchConfig.bigquery.datasetId);
   }
 
   public abstract List<String> getTableNames();
 
   public abstract String getTestDataDirectory();
 
-  private void createDataSet(String dataSetId) {
-    bigquery.create(DatasetInfo.newBuilder(dataSetId).build());
+  private void createDataset(String datasetId) {
+    bigquery.create(DatasetInfo.newBuilder(datasetId).build());
   }
 
-  private void createTable(String dataSetId, String tableId) throws Exception {
+  private void createTable(String datasetId, String tableId) throws Exception {
     ObjectMapper jackson = new ObjectMapper();
     String rawJson =
         new String(
@@ -77,7 +77,7 @@ public abstract class BigQueryBaseTest {
     Gson gson = new Gson();
     Schema schema = parseSchema(gson.fromJson(newJson.toString(), Column[].class));
     StandardTableDefinition tableDef = StandardTableDefinition.of(schema);
-    bigquery.create(TableInfo.of(TableId.of(dataSetId, tableId), tableDef));
+    bigquery.create(TableInfo.of(TableId.of(datasetId, tableId), tableDef));
   }
 
   private Schema parseSchema(Column[] columns) {
@@ -112,7 +112,7 @@ public abstract class BigQueryBaseTest {
     return Schema.of(schemaFields);
   }
 
-  private void insertData(String dataSetId, String tableId) throws Exception {
+  private void insertData(String datasetId, String tableId) throws Exception {
     ObjectMapper jackson = new ObjectMapper();
     String rawJson =
         new String(
@@ -137,7 +137,7 @@ public abstract class BigQueryBaseTest {
     }
 
     InsertAllRequest insertRequest =
-        InsertAllRequest.newBuilder(TableId.of(dataSetId, tableId)).setRows(allRows).build();
+        InsertAllRequest.newBuilder(TableId.of(datasetId, tableId)).setRows(allRows).build();
 
     InsertAllResponse insertResponse = bigquery.insertAll(insertRequest);
     if (insertResponse.hasErrors()) {
@@ -146,16 +146,16 @@ public abstract class BigQueryBaseTest {
     }
   }
 
-  private void deleteTable(String dataSetId, String tableId) throws Exception {
-    if (!bigquery.delete(TableId.of(dataSetId, tableId))) {
+  private void deleteTable(String datasetId, String tableId) throws Exception {
+    if (!bigquery.delete(TableId.of(datasetId, tableId))) {
       throw new RuntimeException(
-          "Errors occurred while deleting table: " + dataSetId + ":" + tableId);
+          "Errors occurred while deleting table: " + datasetId + ":" + tableId);
     }
   }
 
-  private void deleteDataSet(String dataSetId) throws Exception {
-    if (!bigquery.delete(dataSetId)) {
-      throw new RuntimeException("Errors occurred while deleting dataset: " + dataSetId);
+  private void deleteDataset(String datasetId) throws Exception {
+    if (!bigquery.delete(datasetId)) {
+      throw new RuntimeException("Errors occurred while deleting dataset: " + datasetId);
     }
   }
 

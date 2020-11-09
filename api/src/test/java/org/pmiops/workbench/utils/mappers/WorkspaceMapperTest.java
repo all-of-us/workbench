@@ -18,7 +18,7 @@ import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
+import org.pmiops.workbench.dataset.mapper.DatasetMapperImpl;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -77,7 +77,7 @@ public class WorkspaceMapperTest {
     CohortReviewMapperImpl.class,
     CommonMappers.class,
     ConceptSetMapperImpl.class,
-    DataSetMapperImpl.class,
+    DatasetMapperImpl.class,
     FirecloudMapperImpl.class,
     WorkspaceMapperImpl.class,
   })
@@ -130,7 +130,7 @@ public class WorkspaceMapperTest {
         Timestamp.from(DB_CREATION_TIMESTAMP.toInstant().plus(Duration.ofMinutes(15))));
     sourceDbWorkspace.setCohorts(Collections.emptySet());
     sourceDbWorkspace.setConceptSets(Collections.emptySet());
-    sourceDbWorkspace.setDataSets(Collections.emptySet());
+    sourceDbWorkspace.setDatasets(Collections.emptySet());
     sourceDbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
     sourceDbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.MIGRATED);
     sourceDbWorkspace.setPublished(false);

@@ -71,9 +71,9 @@ parameters:
     format: int64
     required: true
     description: Concept set ID
-  dataSetId:
+  datasetId:
     in: path
-    name: dataSetId
+    name: datasetId
     type: integer
     format: int64
     required: true
@@ -2262,7 +2262,7 @@ paths:
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/generateCode/{kernelType}":
     post:
       tags:
-      - dataSet
+      - dataset
       description: 'Given a Data Set, return the SQL query built from it.'
       operationId: generateCode
       parameters:
@@ -2273,37 +2273,37 @@ paths:
         required: true
         type: string
       - in: body
-        name: dataSet
+        name: dataset
         required: true
         schema:
-          "$ref": "#/definitions/DataSetRequest"
+          "$ref": "#/definitions/DatasetRequest"
       responses:
         200:
           description: 'A SQL query for each domain in the Data Set'
           schema:
-            "$ref": "#/definitions/DataSetCodeResponse"
+            "$ref": "#/definitions/DatasetCodeResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/data-sets":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
     - "$ref": "#/parameters/workspaceId"
     post:
       tags:
-      - dataSet
+      - dataset
       description: 'Creates Data Set'
-      operationId: createDataSet
+      operationId: createDataset
       parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
       - in: body
-        name: dataSetRequest
+        name: datasetRequest
         required: true
         schema:
-          "$ref": "#/definitions/DataSetRequest"
+          "$ref": "#/definitions/DatasetRequest"
       responses:
         200:
           description: Data set has been created successfully
           schema:
-            "$ref": "#/definitions/DataSet"
+            "$ref": "#/definitions/Dataset"
         400:
           description: Invalid data set request
           schema:
@@ -2312,56 +2312,56 @@ paths:
           description: Data Set with the same name already exists
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/{workspaceNamespace}/{workspaceId}/data-sets/{dataSetId}":
+  "/v1/{workspaceNamespace}/{workspaceId}/data-sets/{datasetId}":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
     - "$ref": "#/parameters/workspaceId"
-    - "$ref": "#/parameters/dataSetId"
+    - "$ref": "#/parameters/datasetId"
     get:
       tags:
-      - dataSet
-      operationId: getDataSet
+      - dataset
+      operationId: getDataset
       responses:
         200:
           description: The data set with the specified ID
           schema:
-            "$ref": "#/definitions/DataSet"
+            "$ref": "#/definitions/Dataset"
     patch:
       tags:
-      - dataSet
+      - dataset
       consumes:
       - application/json
-      operationId: updateDataSet
+      operationId: updateDataset
       parameters:
       - in: body
-        name: dataSet
+        name: dataset
         description: data set definition
         schema:
-          "$ref": "#/definitions/DataSetRequest"
+          "$ref": "#/definitions/DatasetRequest"
       responses:
         200:
           description: The updated data set.
           schema:
-            "$ref": "#/definitions/DataSet"
+            "$ref": "#/definitions/Dataset"
         404:
           description: Data set to update does not exist.
           schema:
-            "$ref": "#/definitions/DataSet"
+            "$ref": "#/definitions/Dataset"
         409:
           description: Data Set with the same name already exists
           schema:
             "$ref": "#/definitions/ErrorResponse"
     delete:
       tags:
-      - dataSet
+      - dataset
       description: Deletes the data set with the specified ID
-      operationId: deleteDataSet
+      operationId: deleteDataset
       responses:
         202:
           description: ACCEPTED
           schema:
             "$ref": "#/definitions/EmptyResponse"
-  "/v1/{workspaceNamespace}/{workspaceId}/data-sets/dataSetByResourceId":
+  "/v1/{workspaceNamespace}/{workspaceId}/data-sets/datasetByResourceId":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
     - "$ref": "#/parameters/workspaceId"
@@ -2378,13 +2378,13 @@ paths:
         format: int64
         required: true
       tags:
-      - dataSet
-      operationId: getDataSetByResourceId
+      - dataset
+      operationId: getDatasetByResourceId
       responses:
         200:
           description: A list of data sets containg cohort/concept Id passed.
           schema:
-            "$ref": "#/definitions/DataSetListResponse"
+            "$ref": "#/definitions/DatasetListResponse"
   "/v1/cdrVersionId/{cdrVersionId}/domain/{domain}/domainValue/{domainValue}/dataDictionaryEntry":
     get:
       parameters:
@@ -2402,7 +2402,7 @@ paths:
         type: string
         required: true
       tags:
-      - dataSet
+      - dataset
       operationId: getDataDictionaryEntry
       responses:
         200:
@@ -2417,11 +2417,11 @@ paths:
     post:
       parameters:
       - in: body
-        name: markDataSetRequest
+        name: markDatasetRequest
         schema:
-          "$ref": "#/definitions/MarkDataSetRequest"
+          "$ref": "#/definitions/MarkDatasetRequest"
       tags:
-      - dataSet
+      - dataset
       operationId: markDirty
       responses:
         200:
@@ -2432,17 +2432,17 @@ paths:
   "/v1/{workspaceNamespace}/{workspaceId}/data-set/exportToNotebook":
     post:
       tags:
-      - dataSet
+      - dataset
       description: 'Exports a data set query to a notebook'
       operationId: exportToNotebook
       parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
       - in: body
-        name: dataSetExportRequest
+        name: datasetExportRequest
         required: true
         schema:
-          "$ref": "#/definitions/DataSetExportRequest"
+          "$ref": "#/definitions/DatasetExportRequest"
       responses:
         200:
           description: Data set has been exported correctly
@@ -2455,26 +2455,26 @@ paths:
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/preview":
     post:
       tags:
-      - dataSet
+      - dataset
       description: 'Preview data set'
-      operationId: previewDataSetByDomain
+      operationId: previewDatasetByDomain
       parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
       - in: body
-        name: dataSetPreviewRequest
+        name: datasetPreviewRequest
         required: true
         schema:
-          "$ref": "#/definitions/DataSetPreviewRequest"
+          "$ref": "#/definitions/DatasetPreviewRequest"
       responses:
         200:
           description: 'A SQL query for each domain in the Data Set'
           schema:
-            "$ref": "#/definitions/DataSetPreviewResponse"
+            "$ref": "#/definitions/DatasetPreviewResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/domainValues/{domain}":
     get:
       tags:
-      - dataSet
+      - dataset
       description: 'Returns all column names/values for a given domain.'
       operationId: getValuesFromDomain
       parameters:
@@ -4838,12 +4838,12 @@ definitions:
         items:
           type: integer
           format: int64
-  DataSetRequest:
+  DatasetRequest:
     type: object
     required:
     - name
     properties:
-      dataSetId:
+      datasetId:
         type: integer
         format: int64
       name:
@@ -4888,15 +4888,15 @@ definitions:
     - PERSON
     - SURVEY
     - BOTH
-  DataSetExportRequest:
+  DatasetExportRequest:
     type: object
     required:
-    - dataSetRequest
+    - datasetRequest
     - notebookName
     - newNotebook
     properties:
-      dataSetRequest:
-        "$ref": "#/definitions/DataSetRequest"
+      datasetRequest:
+        "$ref": "#/definitions/DatasetRequest"
       notebookName:
         type: string
       newNotebook:
@@ -4918,7 +4918,7 @@ definitions:
           - PLINK
           - HAIL
 
-  MarkDataSetRequest:
+  MarkDatasetRequest:
     type: object
     properties:
       id:
@@ -4950,7 +4950,7 @@ definitions:
         "$ref": "#/definitions/Domain"
       value:
         type: string
-  DataSet:
+  Dataset:
     type: object
     properties:
       id:
@@ -4992,14 +4992,14 @@ definitions:
           "$ref": "#/definitions/DomainValuePair"
       prePackagedConceptSet:
         "$ref": "#/definitions/PrePackagedConceptSetEnum"
-  DataSetListResponse:
+  DatasetListResponse:
     type: object
     properties:
       items:
         type: array
         items:
-          "$ref": "#/definitions/DataSet"
-  DataSetCodeResponse:
+          "$ref": "#/definitions/Dataset"
+  DatasetCodeResponse:
     type: object
     properties:
       kernelType:
@@ -5007,7 +5007,7 @@ definitions:
       code:
         type: string
         description: The code required to generate the query for the data set.
-  DataSetQuery:
+  DatasetQuery:
     type: object
     required:
     - domain
@@ -5057,7 +5057,7 @@ definitions:
       parameterValue:
         type: object
         description: Can be any value
-  DataSetPreviewRequest:
+  DatasetPreviewRequest:
     type: object
     required:
     - domain
@@ -5087,7 +5087,7 @@ definitions:
         description: 'All the selected values in the data set'
         items:
           type: string
-  DataSetPreviewResponse:
+  DatasetPreviewResponse:
     type: object
     properties:
       domain:
@@ -5095,8 +5095,8 @@ definitions:
       values:
         type: array
         items:
-          "$ref": "#/definitions/DataSetPreviewValueList"
-  DataSetPreviewValueList:
+          "$ref": "#/definitions/DatasetPreviewValueList"
+  DatasetPreviewValueList:
     type: object
     properties:
       value:
@@ -5874,8 +5874,8 @@ definitions:
         "$ref": "#/definitions/FileDetail"
       conceptSet:
         "$ref": "#/definitions/ConceptSet"
-      dataSet:
-        "$ref": "#/definitions/DataSet"
+      dataset:
+        "$ref": "#/definitions/Dataset"
       modifiedTime:
         type: string
   RecentResourceRequest:

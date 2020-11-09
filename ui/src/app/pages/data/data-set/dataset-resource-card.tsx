@@ -7,8 +7,8 @@ import {canDelete, canWrite, ResourceCard} from 'app/components/resource-card';
 import {withConfirmDeleteModal, WithConfirmDeleteModalProps} from 'app/components/with-confirm-delete-modal';
 import {withErrorModal, WithErrorModalProps} from 'app/components/with-error-modal';
 import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
-import {ExportDataSetModal} from 'app/pages/data/data-set/export-data-set-modal';
-import {dataSetApi} from 'app/services/swagger-fetch-clients';
+import {ExportDatasetModal} from 'app/pages/data/data-set/export-data-set-modal';
+import {datasetApi} from 'app/services/swagger-fetch-clients';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {navigate} from 'app/utils/navigation';
 import {getDescription, getDisplayName, getType} from 'app/utils/resources';
@@ -62,7 +62,7 @@ export const DatasetResourceCard = fp.flow(
           navigate(['workspaces',
             resource.workspaceNamespace,
             resource.workspaceFirecloudName,
-            'data', 'data-sets', resource.dataSet.id]);
+            'data', 'data-sets', resource.dataset.id]);
         },
         disabled: !canWrite(resource)
       },
@@ -91,10 +91,10 @@ export const DatasetResourceCard = fp.flow(
 
   delete() {
     AnalyticsTracker.DatasetBuilder.Delete();
-    return dataSetApi().deleteDataSet(
+    return datasetApi().deleteDataset(
       this.props.resource.workspaceNamespace,
       this.props.resource.workspaceFirecloudName,
-      this.props.resource.dataSet.id
+      this.props.resource.dataset.id
     ).then(() => {
       this.props.onUpdate();
     });
@@ -102,7 +102,7 @@ export const DatasetResourceCard = fp.flow(
 
   rename(name, description) {
     AnalyticsTracker.DatasetBuilder.Rename();
-    const dataset = this.props.resource.dataSet;
+    const dataset = this.props.resource.dataset;
 
     const request = {
       ...dataset,
@@ -110,7 +110,7 @@ export const DatasetResourceCard = fp.flow(
       description: description
     };
 
-    return dataSetApi().updateDataSet(
+    return datasetApi().updateDataset(
       this.props.resource.workspaceNamespace,
       this.props.resource.workspaceFirecloudName,
       dataset.id,
@@ -127,7 +127,7 @@ export const DatasetResourceCard = fp.flow(
     const {resource, menuOnly} = this.props;
     return <React.Fragment>
       {this.state.showExportToNotebookModal &&
-      <ExportDataSetModal dataSet={resource.dataSet}
+      <ExportDatasetModal dataset={resource.dataset}
                           workspaceNamespace={resource.workspaceNamespace}
                           workspaceFirecloudName={resource.workspaceFirecloudName}
                           closeFunction={() => this.setState({showExportToNotebookModal: false})}/>

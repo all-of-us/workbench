@@ -25,7 +25,7 @@ public class ConceptBigQueryService {
 
   private static final String SURVEY_QUESTION_CONCEPT_ID_SQL_TEMPLATE =
       "select DISTINCT(question_concept_id) as concept_id \n"
-          + "from `${projectId}.${dataSetId}.ds_survey`\n";
+          + "from `${projectId}.${datasetId}.ds_survey`\n";
 
   @Autowired
   public ConceptBigQueryService(
@@ -46,7 +46,7 @@ public class ConceptBigQueryService {
     }
     StringBuilder innerSql = new StringBuilder("select count(distinct person_id) person_count\n");
     innerSql.append("from ");
-    innerSql.append(String.format("`${projectId}.${dataSetId}.%s`", omopTable));
+    innerSql.append(String.format("`${projectId}.${datasetId}.%s`", omopTable));
     innerSql.append(" where ");
     ImmutableMap.Builder<String, QueryParameterValue> paramMap = ImmutableMap.builder();
     if (!classifiedConceptIds.getStandardConceptIds().isEmpty()) {

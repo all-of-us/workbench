@@ -1,21 +1,21 @@
 import {
   DataDictionaryEntry,
-  DataSet,
-  DataSetApi,
-  DataSetCodeResponse,
-  DataSetExportRequest,
-  DataSetPreviewRequest,
-  DataSetPreviewResponse,
-  DataSetRequest,
+  Dataset,
+  DatasetApi,
+  DatasetCodeResponse,
+  DatasetExportRequest,
+  DatasetPreviewRequest,
+  DatasetPreviewResponse,
+  DatasetRequest,
   DomainValuesResponse,
   EmptyResponse,
   KernelTypeEnum,
-  MarkDataSetRequest
+  MarkDatasetRequest
 } from 'generated/fetch';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
-export class DataSetApiStub extends DataSetApi {
-  static stubDataSets(): DataSet[] {
+export class DatasetApiStub extends DatasetApi {
+  static stubDatasets(): Dataset[] {
     return [
       {
         id: 0,
@@ -38,32 +38,32 @@ export class DataSetApiStub extends DataSetApi {
   generateCode(workspaceNamespace: string,
     workspaceId: string,
     kernelType: string,
-    dataSet: DataSetRequest): Promise<DataSetCodeResponse> {
-    return new Promise<DataSetCodeResponse>(resolve => {
+    dataset: DatasetRequest): Promise<DatasetCodeResponse> {
+    return new Promise<DatasetCodeResponse>(resolve => {
       resolve({kernelType: KernelTypeEnum[kernelType], code: ''});
     });
   }
 
-  createDataSet(workspaceNamespace: string,
+  createDataset(workspaceNamespace: string,
     workspaceId: string,
-    dataSet: DataSetRequest): Promise<DataSet> {
-    return new Promise<DataSet>(resolve => {
+    dataset: DatasetRequest): Promise<Dataset> {
+    return new Promise<Dataset>(resolve => {
       resolve({});
     });
   }
 
   exportToNotebook(workspaceNamespace: string,
     workspaceId: string,
-    dataSetExportRequest: DataSetExportRequest): Promise<EmptyResponse> {
+    datasetExportRequest: DatasetExportRequest): Promise<EmptyResponse> {
     return new Promise<EmptyResponse>(resolve => {
       resolve({});
     });
   }
 
-  previewDataSetByDomain(workspaceNamespace: string,
-    workspaceId: string, dataSetPreviewRequest: DataSetPreviewRequest): Promise<DataSetPreviewResponse> {
+  previewDatasetByDomain(workspaceNamespace: string,
+    workspaceId: string, datasetPreviewRequest: DatasetPreviewRequest): Promise<DatasetPreviewResponse> {
     return Promise.resolve({
-      domain: dataSetPreviewRequest.domain,
+      domain: datasetPreviewRequest.domain,
       values: [
         {value: 'Value1', queryValue: ['blah']},
         {value: 'Value2', queryValue: ['blah2']}
@@ -99,7 +99,7 @@ export class DataSetApiStub extends DataSetApi {
     return Promise.resolve({items: domainValueItems});
   }
 
-  async markDirty(workspaceNamespace: string, workspaceId: string, markDataSetRequest?: MarkDataSetRequest, options?: any) {
+  async markDirty(workspaceNamespace: string, workspaceId: string, markDatasetRequest?: MarkDatasetRequest, options?: any) {
     return true;
   }
 }

@@ -43,7 +43,7 @@ import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
+import org.pmiops.workbench.dataset.mapper.DatasetMapperImpl;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
@@ -151,7 +151,7 @@ public class RuntimeControllerTest {
     CohortMapperImpl.class,
     CohortReviewMapperImpl.class,
     ConceptSetMapperImpl.class,
-    DataSetMapperImpl.class,
+    DatasetMapperImpl.class,
     FirecloudMapperImpl.class,
     WorkspaceMapperImpl.class,
     CommonMappers.class,

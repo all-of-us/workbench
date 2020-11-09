@@ -5,7 +5,7 @@ import {
     Cohort,
     CohortReview,
     ConceptSet,
-    DataSet,
+    Dataset,
     FileDetail,
     ResourceType,
     WorkspaceAccessLevel,
@@ -17,7 +17,7 @@ import {WorkspaceData} from './workspace-data';
 const isCohort = (resource: WorkspaceResource): boolean => !!resource.cohort;
 const isCohortReview = (resource: WorkspaceResource): boolean => !!resource.cohortReview;
 const isConceptSet = (resource: WorkspaceResource): boolean => !!resource.conceptSet;
-const isDataSet = (resource: WorkspaceResource): boolean => !!resource.dataSet;
+const isDataset = (resource: WorkspaceResource): boolean => !!resource.dataset;
 const isNotebook = (resource: WorkspaceResource): boolean => !!resource.notebook;
 
 function toDisplay(resourceType: ResourceType): string {
@@ -41,7 +41,7 @@ function getDescription(resource: WorkspaceResource): string {
       [isCohort, r => r.cohort.description],
       [isCohortReview, r => r.cohortReview.description],
       [isConceptSet, r => r.conceptSet.description],
-      [isDataSet, r => r.dataSet.description],
+      [isDataset, r => r.dataset.description],
       [isNotebook, fp.stubString /* notebooks don't have descriptions */]
   ])(resource);
 }
@@ -51,7 +51,7 @@ function getDisplayName(resource: WorkspaceResource): string {
       [isCohort, r => r.cohort.name],
       [isCohortReview, r => r.cohortReview.cohortName],
       [isConceptSet, r => r.conceptSet.name],
-      [isDataSet, r => r.dataSet.name],
+      [isDataset, r => r.dataset.name],
       [isNotebook, r => dropNotebookFileSuffix(r.notebook.name)],
   ])(resource);
 }
@@ -62,7 +62,7 @@ function getId(resource: WorkspaceResource): number {
       [isCohort, r => r.cohort.id],
       [isCohortReview, r => r.cohortReview.cohortReviewId],
       [isConceptSet, r => r.conceptSet.id],
-      [isDataSet, r => r.dataSet.id],
+      [isDataset, r => r.dataset.id],
   ])(resource);
 }
 
@@ -74,7 +74,7 @@ function getResourceUrl(resource: WorkspaceResource): string {
       [isCohort, r => `${workspacePrefix}/data/cohorts/build?cohortId=${r.cohort.id}`],
       [isCohortReview, r => `${workspacePrefix}/data/cohorts/${r.cohortReview.cohortId}/review`],
       [isConceptSet, r => `${workspacePrefix}/data/concepts/sets/${r.conceptSet.id}`],
-      [isDataSet, r => `${workspacePrefix}/data/data-sets/${r.dataSet.id}`],
+      [isDataset, r => `${workspacePrefix}/data/data-sets/${r.dataset.id}`],
       [isNotebook, r => `${workspacePrefix}/notebooks/preview/${encodeURIComponentStrict(r.notebook.name)}`],
   ])(resource);
 }
@@ -84,13 +84,13 @@ function getType(resource: WorkspaceResource): ResourceType {
       [isCohort, () => ResourceType.COHORT],
       [isCohortReview, () => ResourceType.COHORTREVIEW],
       [isConceptSet, () => ResourceType.CONCEPTSET],
-      [isDataSet, () => ResourceType.DATASET],
+      [isDataset, () => ResourceType.DATASET],
       [isNotebook, () => ResourceType.NOTEBOOK],
   ])(resource);
 }
 
 function convertToResource(
-  inputResource: FileDetail | Cohort | CohortReview | ConceptSet | DataSet,
+  inputResource: FileDetail | Cohort | CohortReview | ConceptSet | Dataset,
   resourceType: ResourceType,
   workspace: WorkspaceData): WorkspaceResource {
   const {namespace, id, accessLevel, cdrVersionId, billingStatus} = workspace;
@@ -104,7 +104,7 @@ function convertToResource(
     cohort: resourceType === ResourceType.COHORT ? inputResource as Cohort : null,
     cohortReview: resourceType === ResourceType.COHORTREVIEW ? inputResource as CohortReview : null,
     conceptSet: resourceType === ResourceType.CONCEPTSET ? inputResource as ConceptSet : null,
-    dataSet: resourceType === ResourceType.DATASET ? inputResource as DataSet : null,
+    dataset: resourceType === ResourceType.DATASET ? inputResource as Dataset : null,
     notebook: resourceType === ResourceType.NOTEBOOK ? inputResource as FileDetail : null,
   };
 }
@@ -113,7 +113,7 @@ export {
     isCohort,
     isCohortReview,
     isConceptSet,
-    isDataSet,
+    isDataset,
     isNotebook,
     getTypeString,
     toDisplay,

@@ -28,7 +28,7 @@ import org.pmiops.workbench.audit.ActionAuditSpringConfiguration;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
-import org.pmiops.workbench.db.dao.DataSetDao;
+import org.pmiops.workbench.db.dao.DatasetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceServiceImpl;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
@@ -135,7 +135,7 @@ public class ExportWorkspaceData {
   private WorkspaceDao workspaceDao;
   private CohortDao cohortDao;
   private ConceptSetDao conceptSetDao;
-  private DataSetDao dataSetDao;
+  private DatasetDao datasetDao;
   private NotebooksService notebooksService;
   private WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
   private UserDao userDao;
@@ -149,7 +149,7 @@ public class ExportWorkspaceData {
       WorkspaceDao workspaceDao,
       CohortDao cohortDao,
       ConceptSetDao conceptSetDao,
-      DataSetDao dataSetDao,
+      DatasetDao datasetDao,
       NotebooksService notebooksService,
       WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao,
       UserDao userDao,
@@ -158,7 +158,7 @@ public class ExportWorkspaceData {
     this.workspaceDao = workspaceDao;
     this.cohortDao = cohortDao;
     this.conceptSetDao = conceptSetDao;
-    this.dataSetDao = dataSetDao;
+    this.datasetDao = datasetDao;
     this.notebooksService = notebooksService;
     this.workspaceFreeTierUsageDao = workspaceFreeTierUsageDao;
     this.userDao = userDao;
@@ -242,7 +242,7 @@ public class ExportWorkspaceData {
         conceptSets.stream().map(DbConceptSet::getName).collect(Collectors.joining(",\n")));
     row.setConceptSetCount(String.valueOf(conceptSets.size()));
 
-    Collection<DbDataset> datasets = dataSetDao.findByWorkspaceId(workspace.getWorkspaceId());
+    Collection<DbDataset> datasets = datasetDao.findByWorkspaceId(workspace.getWorkspaceId());
     row.setDatasetNames(
         datasets.stream().map(DbDataset::getName).collect(Collectors.joining(",\n")));
     row.setDatasetCount(String.valueOf(datasets.size()));

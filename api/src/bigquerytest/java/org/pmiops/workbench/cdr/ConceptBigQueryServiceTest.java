@@ -53,7 +53,7 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
   @Before
   public void setUp() {
     DbCdrVersion cdrVersion = new DbCdrVersion();
-    cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
+    cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.datasetId);
     cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 

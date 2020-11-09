@@ -44,14 +44,14 @@ import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.dataset.DataSetServiceImpl;
-import org.pmiops.workbench.dataset.DataSetServiceImpl.QueryAndParameters;
-import org.pmiops.workbench.dataset.mapper.DataSetMapper;
-import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
+import org.pmiops.workbench.dataset.DatasetServiceImpl;
+import org.pmiops.workbench.dataset.DatasetServiceImpl.QueryAndParameters;
+import org.pmiops.workbench.dataset.mapper.DatasetMapper;
+import org.pmiops.workbench.dataset.mapper.DatasetMapperImpl;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.model.DataSetRequest;
+import org.pmiops.workbench.model.DatasetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
@@ -69,11 +69,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
-public class DataSetServiceTest {
+public class DatasetServiceTest {
 
   private static final QueryJobConfiguration QUERY_JOB_CONFIGURATION_1 =
       QueryJobConfiguration.newBuilder(
-              "SELECT * FROM person_id from `${projectId}.${dataSetId}.person` person")
+              "SELECT * FROM person_id from `${projectId}.${datasetId}.person` person")
           .addNamedParameter(
               "foo",
               QueryParameterValue.newBuilder()
@@ -95,18 +95,18 @@ public class DataSetServiceTest {
   @Autowired private ConceptBigQueryService conceptBigQueryService;
   @Autowired private CohortQueryBuilder cohortQueryBuilder;
   @Autowired private DataDictionaryEntryDao dataDictionaryEntryDao;
-  @Autowired private DataSetDao dataSetDao;
+  @Autowired private DatasetDao datasetDao;
   @Autowired private DSLinkingDao dsLinkingDao;
-  @Autowired private DataSetMapper dataSetMapper;
+  @Autowired private DatasetMapper datasetMapper;
   @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @MockBean private BigQueryService mockBigQueryService;
   @MockBean private CohortDao mockCohortDao;
 
-  private DataSetServiceImpl dataSetServiceImpl;
+  private DatasetServiceImpl datasetServiceImpl;
 
   @TestConfiguration
-  @Import({DataSetMapperImpl.class})
+  @Import({DatasetMapperImpl.class})
   @MockBean({
     CdrBigQuerySchemaConfigService.class,
     CommonMappers.class,
@@ -115,7 +115,7 @@ public class DataSetServiceTest {
     ConceptSetDao.class,
     ConceptSetService.class,
     CohortQueryBuilder.class,
-    DataSetDao.class
+    DatasetDao.class
   })
   static class Configuration {
     @Bean
@@ -133,8 +133,8 @@ public class DataSetServiceTest {
 
   @Before
   public void setUp() {
-    dataSetServiceImpl =
-        new DataSetServiceImpl(
+    datasetServiceImpl =
+        new DatasetServiceImpl(
             bigQueryService,
             cdrBigQuerySchemaConfigService,
             cohortDao,
@@ -142,9 +142,9 @@ public class DataSetServiceTest {
             conceptSetDao,
             cohortQueryBuilder,
             dataDictionaryEntryDao,
-            dataSetDao,
+            datasetDao,
             dsLinkingDao,
-            dataSetMapper,
+            datasetMapper,
             CLOCK,
             workbenchConfigProvider);
 
@@ -173,8 +173,8 @@ public class DataSetServiceTest {
     return result;
   }
 
-  private static DataSetRequest buildEmptyRequest() {
-    final DataSetRequest invalidRequest = new DataSetRequest();
+  private static DatasetRequest buildEmptyRequest() {
+    final DatasetRequest invalidRequest = new DatasetRequest();
     invalidRequest.setDomainValuePairs(Collections.emptyList());
     invalidRequest.setPrePackagedConceptSet(PrePackagedConceptSetEnum.NONE);
     return invalidRequest;
@@ -182,17 +182,17 @@ public class DataSetServiceTest {
 
   @Test(expected = BadRequestException.class)
   public void testThrowsForNoCohortOrConcept() {
-    final DataSetRequest invalidRequest = buildEmptyRequest();
+    final DatasetRequest invalidRequest = buildEmptyRequest();
     invalidRequest.setDomainValuePairs(
         ImmutableList.of(new DomainValuePair().domain(Domain.CONDITION)));
-    dataSetServiceImpl.domainToBigQueryConfig(invalidRequest);
+    datasetServiceImpl.domainToBigQueryConfig(invalidRequest);
   }
 
   @Test
   public void testGetsCohortQueryStringAndCollectsNamedParameters() {
     final DbCohort cohortDbModel = buildSimpleCohort();
     final QueryAndParameters queryAndParameters =
-        dataSetServiceImpl.getCohortQueryStringAndCollectNamedParameters(cohortDbModel);
+        datasetServiceImpl.getCohortQueryStringAndCollectNamedParameters(cohortDbModel);
     assertThat(queryAndParameters.getQuery()).isNotEmpty();
     assertThat(queryAndParameters.getNamedParameterValues()).isNotEmpty();
   }
@@ -203,7 +203,7 @@ public class DataSetServiceTest {
     conceptSet1.setDomain((short) Domain.DEVICE.ordinal());
     conceptSet1.setConceptIds(Collections.emptySet());
     final boolean isValid =
-        dataSetServiceImpl.conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(
+        datasetServiceImpl.conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(
             ImmutableList.of(conceptSet1));
     assertThat(isValid).isFalse();
   }
@@ -219,7 +219,7 @@ public class DataSetServiceTest {
     conceptSet2.setConceptIds(ImmutableSet.of(4L, 5L, 6L));
 
     final boolean isValid =
-        dataSetServiceImpl.conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(
+        datasetServiceImpl.conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(
             ImmutableList.of(conceptSet1, conceptSet2));
     assertThat(isValid).isTrue();
   }
@@ -239,7 +239,7 @@ public class DataSetServiceTest {
     conceptSet3.setConceptIds(Collections.emptySet());
 
     final boolean isValid =
-        dataSetServiceImpl.conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(
+        datasetServiceImpl.conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(
             ImmutableList.of(conceptSet1, conceptSet2, conceptSet3));
     assertThat(isValid).isFalse();
   }
@@ -259,7 +259,7 @@ public class DataSetServiceTest {
     conceptSet3.setConceptIds(Collections.emptySet());
 
     final boolean isValid =
-        dataSetServiceImpl.conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(
+        datasetServiceImpl.conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(
             ImmutableList.of(conceptSet1, conceptSet2, conceptSet3));
     assertThat(isValid).isTrue();
   }
@@ -267,7 +267,7 @@ public class DataSetServiceTest {
   @Test
   public void testRejectsEmptyConceptSetList() {
     final boolean isValid =
-        dataSetServiceImpl.conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(
+        datasetServiceImpl.conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(
             Collections.emptyList());
     assertThat(isValid).isFalse();
   }
@@ -278,7 +278,7 @@ public class DataSetServiceTest {
     DbConceptSet conceptSet1 = buildConceptSet(1L, domain1, ImmutableSet.of(1L, 2L, 3L));
     DbConceptSet conceptSet2 = buildConceptSet(2L, domain1, ImmutableSet.of(4L, 5L, 6L));
     Optional<String> listClauseMaybe =
-        dataSetServiceImpl.buildConceptIdListClause(
+        datasetServiceImpl.buildConceptIdListClause(
             domain1, ImmutableList.of(conceptSet1, conceptSet2));
     assertThat(listClauseMaybe.map(String::trim).orElse("")).isEqualTo("IN (1, 2, 3, 4, 5, 6)");
   }
@@ -288,7 +288,7 @@ public class DataSetServiceTest {
     DbConceptSet conceptSet1 = buildConceptSet(1L, Domain.CONDITION, ImmutableSet.of(1L, 2L, 3L));
     DbConceptSet conceptSet2 = buildConceptSet(2L, Domain.DRUG, ImmutableSet.of(4L, 5L, 6L));
     Optional<String> listClauseMaybe =
-        dataSetServiceImpl.buildConceptIdListClause(
+        datasetServiceImpl.buildConceptIdListClause(
             Domain.CONDITION, ImmutableList.of(conceptSet1, conceptSet2));
     assertThat(listClauseMaybe.map(String::trim).orElse("")).isEqualTo("IN (1, 2, 3)");
   }
@@ -298,46 +298,46 @@ public class DataSetServiceTest {
     DbConceptSet conceptSet1 = buildConceptSet(1L, Domain.CONDITION, ImmutableSet.of(1L, 2L, 3L));
     DbConceptSet conceptSet2 = buildConceptSet(2L, Domain.DRUG, ImmutableSet.of(4L, 5L, 6L));
     Optional<String> listClauseMaybe =
-        dataSetServiceImpl.buildConceptIdListClause(
+        datasetServiceImpl.buildConceptIdListClause(
             Domain.PERSON, ImmutableList.of(conceptSet1, conceptSet2));
     assertThat(listClauseMaybe.isPresent()).isFalse();
   }
 
   @Test
   public void testcapitalizeFirstCharacterOnly_uppercaseWord() {
-    assertThat(DataSetServiceImpl.capitalizeFirstCharacterOnly("QWERTY")).isEqualTo("Qwerty");
+    assertThat(DatasetServiceImpl.capitalizeFirstCharacterOnly("QWERTY")).isEqualTo("Qwerty");
   }
 
   @Test
   public void testcapitalizeFirstCharacterOnly_mixedCaseString() {
-    assertThat(DataSetServiceImpl.capitalizeFirstCharacterOnly("aLl YouR baSE"))
+    assertThat(DatasetServiceImpl.capitalizeFirstCharacterOnly("aLl YouR baSE"))
         .isEqualTo("All your base");
   }
 
   @Test
   public void testcapitalizeFirstCharacterOnly_singleLetterStrings() {
-    assertThat(DataSetServiceImpl.capitalizeFirstCharacterOnly("a")).isEqualTo("A");
-    assertThat(DataSetServiceImpl.capitalizeFirstCharacterOnly("B")).isEqualTo("B");
+    assertThat(DatasetServiceImpl.capitalizeFirstCharacterOnly("a")).isEqualTo("A");
+    assertThat(DatasetServiceImpl.capitalizeFirstCharacterOnly("B")).isEqualTo("B");
   }
 
   @Test
   public void testcapitalizeFirstCharacterOnly_emptyString() {
-    assertThat(DataSetServiceImpl.capitalizeFirstCharacterOnly("")).isEqualTo("");
+    assertThat(DatasetServiceImpl.capitalizeFirstCharacterOnly("")).isEqualTo("");
   }
 
   @Test
   public void testCapitalizeFirstCharacterOnly_emoji() {
-    assertThat(DataSetServiceImpl.capitalizeFirstCharacterOnly("\uD83D\uDCAF"))
+    assertThat(DatasetServiceImpl.capitalizeFirstCharacterOnly("\uD83D\uDCAF"))
         .isEqualTo("\uD83D\uDCAF");
-    assertThat((DataSetServiceImpl.capitalizeFirstCharacterOnly("マリオに感謝しますが、私たちの王女は別の城にいます")))
+    assertThat((DatasetServiceImpl.capitalizeFirstCharacterOnly("マリオに感謝しますが、私たちの王女は別の城にいます")))
         .isEqualTo("マリオに感謝しますが、私たちの王女は別の城にいます");
   }
 
   @Test
   public void testDomainToBigQueryConfig() {
     mockLinkingTableQuery(ImmutableList.of("FROM `" + TEST_CDR_TABLE + ".person` person"));
-    final DataSetRequest dataSetRequest =
-        new DataSetRequest()
+    final DatasetRequest datasetRequest =
+        new DatasetRequest()
             .conceptSetIds(Collections.emptyList())
             .cohortIds(Collections.emptyList())
             .domainValuePairs(ImmutableList.of(new DomainValuePair()))
@@ -362,7 +362,7 @@ public class DataSetServiceTest {
     doReturn(ImmutableList.of(dbCohort)).when(mockCohortDao).findAllByCohortIdIn(anyList());
 
     final Map<String, QueryJobConfiguration> result =
-        dataSetServiceImpl.domainToBigQueryConfig(dataSetRequest);
+        datasetServiceImpl.domainToBigQueryConfig(datasetRequest);
     assertThat(result).hasSize(1);
     assertThat(result.get("PERSON").getNamedParameters()).hasSize(1);
     assertThat(result.get("PERSON").getNamedParameters().get("foo_101").getValue())

@@ -296,7 +296,7 @@ public class CohortReviewControllerTest {
             .build());
 
     cdrVersion = new DbCdrVersion();
-    cdrVersion.setBigqueryDataset("dataSetId");
+    cdrVersion.setBigqueryDataset("datasetId");
     cdrVersion.setBigqueryProject("projectId");
     cdrVersionDao.save(cdrVersion);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);

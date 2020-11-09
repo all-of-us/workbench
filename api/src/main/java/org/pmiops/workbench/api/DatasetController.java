@@ -28,8 +28,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.dataset.BigQueryTableInfo;
-import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.dataset.DatasetConfig;
+import org.pmiops.workbench.dataset.DatasetService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -39,22 +39,22 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.DataDictionaryEntry;
-import org.pmiops.workbench.model.DataSet;
-import org.pmiops.workbench.model.DataSetCodeResponse;
-import org.pmiops.workbench.model.DataSetExportRequest;
-import org.pmiops.workbench.model.DataSetExportRequest.GenomicsAnalysisToolEnum;
-import org.pmiops.workbench.model.DataSetExportRequest.GenomicsDataTypeEnum;
-import org.pmiops.workbench.model.DataSetListResponse;
-import org.pmiops.workbench.model.DataSetPreviewRequest;
-import org.pmiops.workbench.model.DataSetPreviewResponse;
-import org.pmiops.workbench.model.DataSetPreviewValueList;
-import org.pmiops.workbench.model.DataSetRequest;
+import org.pmiops.workbench.model.Dataset;
+import org.pmiops.workbench.model.DatasetCodeResponse;
+import org.pmiops.workbench.model.DatasetExportRequest;
+import org.pmiops.workbench.model.DatasetExportRequest.GenomicsAnalysisToolEnum;
+import org.pmiops.workbench.model.DatasetExportRequest.GenomicsDataTypeEnum;
+import org.pmiops.workbench.model.DatasetListResponse;
+import org.pmiops.workbench.model.DatasetPreviewRequest;
+import org.pmiops.workbench.model.DatasetPreviewResponse;
+import org.pmiops.workbench.model.DatasetPreviewValueList;
+import org.pmiops.workbench.model.DatasetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.DomainValuesResponse;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.KernelTypeEnum;
-import org.pmiops.workbench.model.MarkDataSetRequest;
+import org.pmiops.workbench.model.MarkDatasetRequest;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -65,11 +65,15 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * For API compatibility, keep generated parent interface name `DatasetApiDelegate` but rename to
+ * `DatasetController` for now.
+ */
 @RestController
-public class DataSetController implements DataSetApiDelegate {
+public class DatasetController implements DatasetApiDelegate {
 
   private BigQueryService bigQueryService;
-  private DataSetService dataSetService;
+  private DatasetService datasetService;
 
   private Provider<DbUser> userProvider;
   private Provider<String> prefixProvider;
@@ -81,17 +85,17 @@ public class DataSetController implements DataSetApiDelegate {
   private static final String DATE_FORMAT_STRING = "yyyy/MM/dd HH:mm:ss";
   public static final String EMPTY_CELL_MARKER = "";
 
-  private static final Logger log = Logger.getLogger(DataSetController.class.getName());
+  private static final Logger log = Logger.getLogger(DatasetController.class.getName());
 
   private final CdrVersionService cdrVersionService;
   private final FireCloudService fireCloudService;
   private final NotebooksService notebooksService;
 
   @Autowired
-  DataSetController(
+  DatasetController(
       BigQueryService bigQueryService,
       CdrVersionService cdrVersionService,
-      DataSetService dataSetService,
+      DatasetService datasetService,
       FireCloudService fireCloudService,
       NotebooksService notebooksService,
       Provider<DbUser> userProvider,
@@ -99,7 +103,7 @@ public class DataSetController implements DataSetApiDelegate {
       WorkspaceService workspaceService) {
     this.bigQueryService = bigQueryService;
     this.cdrVersionService = cdrVersionService;
-    this.dataSetService = dataSetService;
+    this.datasetService = datasetService;
     this.fireCloudService = fireCloudService;
     this.notebooksService = notebooksService;
     this.userProvider = userProvider;
@@ -108,33 +112,33 @@ public class DataSetController implements DataSetApiDelegate {
   }
 
   @Override
-  public ResponseEntity<DataSet> createDataSet(
-      String workspaceNamespace, String workspaceFirecloudName, DataSetRequest dataSetRequest) {
-    validateDataSetCreateRequest(dataSetRequest);
+  public ResponseEntity<Dataset> createDataset(
+      String workspaceNamespace, String workspaceFirecloudName, DatasetRequest datasetRequest) {
+    validateDatasetCreateRequest(datasetRequest);
     final long workspaceId =
         workspaceService
             .getWorkspaceEnforceAccessLevelAndSetCdrVersion(
                 workspaceNamespace, workspaceFirecloudName, WorkspaceAccessLevel.WRITER)
             .getWorkspaceId();
-    dataSetRequest.setWorkspaceId(workspaceId);
+    datasetRequest.setWorkspaceId(workspaceId);
     return ResponseEntity.ok(
-        dataSetService.saveDataSet(dataSetRequest, userProvider.get().getUserId()));
+        datasetService.saveDataset(datasetRequest, userProvider.get().getUserId()));
   }
 
-  private void validateDataSetCreateRequest(DataSetRequest dataSetRequest) {
+  private void validateDatasetCreateRequest(DatasetRequest datasetRequest) {
     boolean includesAllParticipants =
-        Optional.ofNullable(dataSetRequest.getIncludesAllParticipants()).orElse(false);
-    if (Strings.isNullOrEmpty(dataSetRequest.getName())) {
+        Optional.ofNullable(datasetRequest.getIncludesAllParticipants()).orElse(false);
+    if (Strings.isNullOrEmpty(datasetRequest.getName())) {
       throw new BadRequestException("Missing name");
-    } else if (dataSetRequest.getConceptSetIds() == null
-        || (dataSetRequest.getConceptSetIds().isEmpty()
-            && dataSetRequest.getPrePackagedConceptSet().equals(PrePackagedConceptSetEnum.NONE))) {
+    } else if (datasetRequest.getConceptSetIds() == null
+        || (datasetRequest.getConceptSetIds().isEmpty()
+            && datasetRequest.getPrePackagedConceptSet().equals(PrePackagedConceptSetEnum.NONE))) {
       throw new BadRequestException("Missing concept set ids");
-    } else if ((dataSetRequest.getCohortIds() == null || dataSetRequest.getCohortIds().isEmpty())
+    } else if ((datasetRequest.getCohortIds() == null || datasetRequest.getCohortIds().isEmpty())
         && !includesAllParticipants) {
       throw new BadRequestException("Missing cohort ids");
-    } else if (dataSetRequest.getDomainValuePairs() == null
-        || dataSetRequest.getDomainValuePairs().isEmpty()) {
+    } else if (datasetRequest.getDomainValuePairs() == null
+        || datasetRequest.getDomainValuePairs().isEmpty()) {
       throw new BadRequestException("Missing values");
     }
   }
@@ -144,11 +148,11 @@ public class DataSetController implements DataSetApiDelegate {
     return prefixProvider.get();
   }
 
-  public ResponseEntity<DataSetCodeResponse> generateCode(
+  public ResponseEntity<DatasetCodeResponse> generateCode(
       String workspaceNamespace,
       String workspaceId,
       String kernelTypeEnumString,
-      DataSetRequest dataSetRequest) {
+      DatasetRequest datasetRequest) {
     DbWorkspace dbWorkspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
@@ -157,41 +161,41 @@ public class DataSetController implements DataSetApiDelegate {
     // Generate query per domain for the selected concept set, cohort and values
     // TODO(jaycarlton): return better error information form this function for common validation
     // scenarios
-    if (dataSetRequest.getWorkspaceId() == null) {
-      dataSetRequest.setWorkspaceId(dbWorkspace.getWorkspaceId());
+    if (datasetRequest.getWorkspaceId() == null) {
+      datasetRequest.setWorkspaceId(dbWorkspace.getWorkspaceId());
     }
     final Map<String, QueryJobConfiguration> bigQueryJobConfigsByDomain =
-        dataSetService.domainToBigQueryConfig(dataSetRequest);
+        datasetService.domainToBigQueryConfig(datasetRequest);
 
     if (bigQueryJobConfigsByDomain.isEmpty()) {
-      log.warning("Empty query map generated for this DataSetRequest");
+      log.warning("Empty query map generated for this DatasetRequest");
     }
 
     String qualifier = generateRandomEightCharacterQualifier();
 
     final ImmutableList<String> codeCells =
         ImmutableList.copyOf(
-            dataSetService.generateCodeCells(
+            datasetService.generateCodeCells(
                 kernelTypeEnum,
-                dataSetRequest.getName(),
+                datasetRequest.getName(),
                 dbWorkspace.getCdrVersion().getName(),
                 qualifier,
                 bigQueryJobConfigsByDomain));
     final String generatedCode = String.join("\n\n", codeCells);
 
     return ResponseEntity.ok(
-        new DataSetCodeResponse().code(generatedCode).kernelType(kernelTypeEnum));
+        new DatasetCodeResponse().code(generatedCode).kernelType(kernelTypeEnum));
   }
 
   @Override
-  public ResponseEntity<DataSetPreviewResponse> previewDataSetByDomain(
-      String workspaceNamespace, String workspaceId, DataSetPreviewRequest dataSetPreviewRequest) {
+  public ResponseEntity<DatasetPreviewResponse> previewDatasetByDomain(
+      String workspaceNamespace, String workspaceId, DatasetPreviewRequest datasetPreviewRequest) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    List<DataSetPreviewValueList> valuePreviewList = new ArrayList<>();
+    List<DatasetPreviewValueList> valuePreviewList = new ArrayList<>();
 
     QueryJobConfiguration previewBigQueryJobConfig =
-        dataSetService.previewBigQueryJobConfig(dataSetPreviewRequest);
+        datasetService.previewBigQueryJobConfig(datasetPreviewRequest);
 
     TableResult queryResponse =
         bigQueryService.executeQuery(
@@ -201,7 +205,7 @@ public class DataSetController implements DataSetApiDelegate {
     if (queryResponse.getTotalRows() != 0) {
       valuePreviewList.addAll(
           queryResponse.getSchema().getFields().stream()
-              .map(fields -> new DataSetPreviewValueList().value(fields.getName()))
+              .map(fields -> new DatasetPreviewValueList().value(fields.getName()))
               .collect(Collectors.toList()));
 
       queryResponse
@@ -217,17 +221,17 @@ public class DataSetController implements DataSetApiDelegate {
 
       Collections.sort(
           valuePreviewList,
-          Comparator.comparing(item -> dataSetPreviewRequest.getValues().indexOf(item.getValue())));
+          Comparator.comparing(item -> datasetPreviewRequest.getValues().indexOf(item.getValue())));
     }
     return ResponseEntity.ok(
-        new DataSetPreviewResponse()
-            .domain(dataSetPreviewRequest.getDomain())
+        new DatasetPreviewResponse()
+            .domain(datasetPreviewRequest.getDomain())
             .values(valuePreviewList));
   }
 
   @VisibleForTesting
   public void addFieldValuesFromBigQueryToPreviewList(
-      List<DataSetPreviewValueList> valuePreviewList, FieldValueList fieldValueList) {
+      List<DatasetPreviewValueList> valuePreviewList, FieldValueList fieldValueList) {
     IntStream.range(0, fieldValueList.size())
         .forEach(
             columnNumber ->
@@ -241,8 +245,8 @@ public class DataSetController implements DataSetApiDelegate {
 
   // Iterates through all values associated with a specific field, and converts all timestamps
   // to a timestamp formatted string.
-  private void formatTimestampValues(List<DataSetPreviewValueList> valuePreviewList, Field field) {
-    DataSetPreviewValueList previewValue =
+  private void formatTimestampValues(List<DatasetPreviewValueList> valuePreviewList, Field field) {
+    DatasetPreviewValueList previewValue =
         valuePreviewList.stream()
             .filter(preview -> preview.getValue().equalsIgnoreCase(field.getName()))
             .findFirst()
@@ -271,7 +275,7 @@ public class DataSetController implements DataSetApiDelegate {
 
   @Override
   public ResponseEntity<EmptyResponse> exportToNotebook(
-      String workspaceNamespace, String workspaceId, DataSetExportRequest dataSetExportRequest) {
+      String workspaceNamespace, String workspaceId, DatasetExportRequest datasetExportRequest) {
     DbWorkspace dbWorkspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
@@ -283,10 +287,10 @@ public class DataSetController implements DataSetApiDelegate {
         fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
     JSONObject metaData = new JSONObject();
 
-    if (!dataSetExportRequest.getNewNotebook()) {
+    if (!datasetExportRequest.getNewNotebook()) {
       notebookFile =
           notebooksService.getNotebookContents(
-              workspace.getWorkspace().getBucketName(), dataSetExportRequest.getNotebookName());
+              workspace.getWorkspace().getBucketName(), datasetExportRequest.getNotebookName());
       try {
         String language =
             Optional.of(notebookFile.getJSONObject("metadata"))
@@ -294,16 +298,16 @@ public class DataSetController implements DataSetApiDelegate {
                 .map(kernelSpec -> kernelSpec.getString("language"))
                 .orElse("Python");
         if ("R".equals(language)) {
-          dataSetExportRequest.setKernelType(KernelTypeEnum.R);
+          datasetExportRequest.setKernelType(KernelTypeEnum.R);
         } else {
-          dataSetExportRequest.setKernelType(KernelTypeEnum.PYTHON);
+          datasetExportRequest.setKernelType(KernelTypeEnum.PYTHON);
         }
       } catch (JSONException e) {
         // If we can't find metadata to parse, default to python.
-        dataSetExportRequest.setKernelType(KernelTypeEnum.PYTHON);
+        datasetExportRequest.setKernelType(KernelTypeEnum.PYTHON);
       }
     } else {
-      switch (dataSetExportRequest.getKernelType()) {
+      switch (datasetExportRequest.getKernelType()) {
         case PYTHON:
           break;
         case R:
@@ -323,48 +327,48 @@ public class DataSetController implements DataSetApiDelegate {
           break;
         default:
           throw new BadRequestException(
-              "Kernel Type " + dataSetExportRequest.getKernelType() + " is not supported");
+              "Kernel Type " + datasetExportRequest.getKernelType() + " is not supported");
       }
     }
 
-    if (dataSetExportRequest.getDataSetRequest().getWorkspaceId() == null) {
-      dataSetExportRequest.getDataSetRequest().setWorkspaceId(dbWorkspace.getWorkspaceId());
+    if (datasetExportRequest.getDatasetRequest().getWorkspaceId() == null) {
+      datasetExportRequest.getDatasetRequest().setWorkspaceId(dbWorkspace.getWorkspaceId());
     }
     Map<String, QueryJobConfiguration> queriesByDomain =
-        dataSetService.domainToBigQueryConfig(dataSetExportRequest.getDataSetRequest());
+        datasetService.domainToBigQueryConfig(datasetExportRequest.getDatasetRequest());
 
     String qualifier = generateRandomEightCharacterQualifier();
 
     List<String> queriesAsStrings =
-        dataSetService.generateCodeCells(
-            dataSetExportRequest.getKernelType(),
-            dataSetExportRequest.getDataSetRequest().getName(),
+        datasetService.generateCodeCells(
+            datasetExportRequest.getKernelType(),
+            datasetExportRequest.getDatasetRequest().getName(),
             dbWorkspace.getCdrVersion().getName(),
             qualifier,
             queriesByDomain);
 
-    if (GenomicsDataTypeEnum.MICROARRAY.equals(dataSetExportRequest.getGenomicsDataType())) {
+    if (GenomicsDataTypeEnum.MICROARRAY.equals(datasetExportRequest.getGenomicsDataType())) {
       if (dbWorkspace.getCdrVersion().getMicroarrayBigqueryDataset() == null) {
         throw new FailedPreconditionException(
             "The workspace CDR version does not have microarray data");
       }
-      if (!dataSetExportRequest.getKernelType().equals(KernelTypeEnum.PYTHON)) {
+      if (!datasetExportRequest.getKernelType().equals(KernelTypeEnum.PYTHON)) {
         throw new BadRequestException("Genomics code generation is only supported in Python");
       }
 
       queriesAsStrings.addAll(
-          dataSetService.generateMicroarrayCohortExtractCodeCells(
+          datasetService.generateMicroarrayCohortExtractCodeCells(
               dbWorkspace, qualifier, queriesByDomain));
 
-      if (GenomicsAnalysisToolEnum.PLINK.equals(dataSetExportRequest.getGenomicsAnalysisTool())) {
-        queriesAsStrings.addAll(dataSetService.generatePlinkDemoCode(qualifier));
+      if (GenomicsAnalysisToolEnum.PLINK.equals(datasetExportRequest.getGenomicsAnalysisTool())) {
+        queriesAsStrings.addAll(datasetService.generatePlinkDemoCode(qualifier));
       } else if (GenomicsAnalysisToolEnum.HAIL.equals(
-          dataSetExportRequest.getGenomicsAnalysisTool())) {
-        queriesAsStrings.addAll(dataSetService.generateHailDemoCode(qualifier));
+          datasetExportRequest.getGenomicsAnalysisTool())) {
+        queriesAsStrings.addAll(datasetService.generateHailDemoCode(qualifier));
       }
     }
 
-    if (dataSetExportRequest.getNewNotebook()) {
+    if (datasetExportRequest.getNewNotebook()) {
       notebookFile =
           new JSONObject()
               .put("cells", new JSONArray())
@@ -382,7 +386,7 @@ public class DataSetController implements DataSetApiDelegate {
 
     notebooksService.saveNotebook(
         workspace.getWorkspace().getBucketName(),
-        dataSetExportRequest.getNotebookName(),
+        datasetExportRequest.getNotebookName(),
         notebookFile);
 
     return ResponseEntity.ok(new EmptyResponse());
@@ -390,62 +394,62 @@ public class DataSetController implements DataSetApiDelegate {
 
   @Override
   public ResponseEntity<Boolean> markDirty(
-      String workspaceNamespace, String workspaceId, MarkDataSetRequest markDataSetRequest) {
+      String workspaceNamespace, String workspaceId, MarkDatasetRequest markDatasetRequest) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    dataSetService.markDirty(markDataSetRequest.getResourceType(), markDataSetRequest.getId());
+    datasetService.markDirty(markDatasetRequest.getResourceType(), markDatasetRequest.getId());
     return ResponseEntity.ok(true);
   }
 
   @Override
-  public ResponseEntity<EmptyResponse> deleteDataSet(
-      String workspaceNamespace, String workspaceId, Long dataSetId) {
+  public ResponseEntity<EmptyResponse> deleteDataset(
+      String workspaceNamespace, String workspaceId, Long datasetId) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
-    dataSetService.deleteDataSet(dataSetId);
+    datasetService.deleteDataset(datasetId);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
-  public ResponseEntity<DataSet> updateDataSet(
-      String workspaceNamespace, String workspaceId, Long dataSetId, DataSetRequest request) {
+  public ResponseEntity<Dataset> updateDataset(
+      String workspaceNamespace, String workspaceId, Long datasetId, DatasetRequest request) {
     if (Strings.isNullOrEmpty(request.getEtag())) {
       throw new BadRequestException("missing required update field 'etag'");
     }
-    long dataSetWorkspaceId =
+    long datasetWorkspaceId =
         workspaceService
             .getWorkspaceEnforceAccessLevelAndSetCdrVersion(
                 workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER)
             .getWorkspaceId();
-    request.setWorkspaceId(dataSetWorkspaceId);
-    return ResponseEntity.ok(dataSetService.updateDataSet(request, dataSetId));
+    request.setWorkspaceId(datasetWorkspaceId);
+    return ResponseEntity.ok(datasetService.updateDataset(request, datasetId));
   }
 
   @Override
-  public ResponseEntity<DataSet> getDataSet(
-      String workspaceNamespace, String workspaceId, Long dataSetId) {
+  public ResponseEntity<Dataset> getDataset(
+      String workspaceNamespace, String workspaceId, Long datasetId) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    DataSet dataSet =
-        dataSetService
-            .getDbDataSet(dataSetId)
+    Dataset dataset =
+        datasetService
+            .getDbDataset(datasetId)
             .<BadRequestException>orElseThrow(
                 () -> {
-                  throw new NotFoundException("No DataSet found for dataSetId: " + dataSetId);
+                  throw new NotFoundException("No Dataset found for datasetId: " + datasetId);
                 });
-    return ResponseEntity.ok(dataSet);
+    return ResponseEntity.ok(dataset);
   }
 
   @Override
-  public ResponseEntity<DataSetListResponse> getDataSetByResourceId(
+  public ResponseEntity<DatasetListResponse> getDatasetByResourceId(
       String workspaceNamespace, String workspaceId, ResourceType resourceType, Long id) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     return ResponseEntity.ok(
-        new DataSetListResponse().items(dataSetService.getDataSets(resourceType, id)));
+        new DatasetListResponse().items(datasetService.getDatasets(resourceType, id)));
   }
 
   @Override
@@ -463,7 +467,7 @@ public class DataSetController implements DataSetApiDelegate {
       throw new BadRequestException("Invalid Domain");
     }
 
-    return ResponseEntity.ok(dataSetService.findDataDictionaryEntry(domainValue, cdrVersion));
+    return ResponseEntity.ok(datasetService.findDataDictionaryEntry(domainValue, cdrVersion));
   }
 
   @Override

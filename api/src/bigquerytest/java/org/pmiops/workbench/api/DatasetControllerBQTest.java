@@ -39,14 +39,14 @@ import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.dataset.DataSetServiceImpl;
 import org.pmiops.workbench.dataset.DatasetConfig;
-import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
+import org.pmiops.workbench.dataset.DatasetServiceImpl;
+import org.pmiops.workbench.dataset.mapper.DatasetMapperImpl;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
-import org.pmiops.workbench.db.dao.DataSetDao;
+import org.pmiops.workbench.db.dao.DatasetDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
@@ -59,7 +59,7 @@ import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
-import org.pmiops.workbench.model.DataSetRequest;
+import org.pmiops.workbench.model.DatasetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.KernelTypeEnum;
@@ -86,15 +86,15 @@ import org.springframework.context.annotation.Import;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
 @Import({TestJpaConfig.class})
-public class DataSetControllerBQTest extends BigQueryBaseTest {
+public class DatasetControllerBQTest extends BigQueryBaseTest {
 
   private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
   private static final String WORKSPACE_NAMESPACE = "namespace";
   private static final String WORKSPACE_NAME = "name";
   private static final String DATASET_NAME = "Arbitrary Dataset v1.0";
 
-  private DataSetController controller;
-  private DataSetServiceImpl dataSetServiceImpl;
+  private DatasetController controller;
+  private DatasetServiceImpl datasetServiceImpl;
   @Autowired private BigQueryService bigQueryService;
   @Autowired private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
   @Autowired private CdrVersionDao cdrVersionDao;
@@ -104,8 +104,8 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private ConceptBigQueryService conceptBigQueryService;
   @Autowired private ConceptSetDao conceptSetDao;
   @Autowired private DataDictionaryEntryDao dataDictionaryEntryDao;
-  @Autowired private DataSetDao dataSetDao;
-  @Autowired private DataSetMapperImpl dataSetMapper;
+  @Autowired private DatasetDao datasetDao;
+  @Autowired private DatasetMapperImpl datasetMapper;
   @Autowired private DSLinkingDao dsLinkingDao;
   @Autowired private FireCloudService fireCloudService;
   @Autowired private NotebooksService notebooksService;
@@ -142,8 +142,8 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     CdrVersionService.class,
     CohortQueryBuilder.class,
     ConceptBigQueryService.class,
-    DataSetMapperImpl.class,
-    DataSetServiceImpl.class,
+    DatasetMapperImpl.class,
+    DatasetServiceImpl.class,
     TestBigQueryCdrSchemaConfig.class,
     WorkspaceServiceImpl.class
   })
@@ -197,8 +197,8 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Before
   public void setUp() {
     workbenchConfigProvider.get().featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
-    dataSetServiceImpl =
-        new DataSetServiceImpl(
+    datasetServiceImpl =
+        new DatasetServiceImpl(
             bigQueryService,
             cdrBigQuerySchemaConfigService,
             cohortDao,
@@ -206,17 +206,17 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
             conceptSetDao,
             cohortQueryBuilder,
             dataDictionaryEntryDao,
-            dataSetDao,
+            datasetDao,
             dsLinkingDao,
-            dataSetMapper,
+            datasetMapper,
             CLOCK,
             workbenchConfigProvider);
     controller =
         spy(
-            new DataSetController(
+            new DatasetController(
                 bigQueryService,
                 cdrVersionService,
-                dataSetServiceImpl,
+                datasetServiceImpl,
                 fireCloudService,
                 notebooksService,
                 userProvider,
@@ -230,7 +230,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         .thenReturn(fcResponse);
 
     dbCdrVersion = new DbCdrVersion();
-    dbCdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
+    dbCdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.datasetId);
     dbCdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
     dbCdrVersion.setDataAccessLevel(
         DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED));
@@ -263,7 +263,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         DbDSLinking.builder()
             .addDenormalizedName("CORE_TABLE_FOR_DOMAIN")
             .addOmopSql("CORE_TABLE_FOR_DOMAIN")
-            .addJoinValue("from `${projectId}.${dataSetId}.condition_occurrence` c_occurrence")
+            .addJoinValue("from `${projectId}.${datasetId}.condition_occurrence` c_occurrence")
             .addDomain("Condition")
             .build();
     dsLinkingDao.save(conditionLinking1);
@@ -271,7 +271,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         DbDSLinking.builder()
             .addDenormalizedName("PERSON_ID")
             .addOmopSql("c_occurrence.PERSON_ID")
-            .addJoinValue("from `${projectId}.${dataSetId}.condition_occurrence` c_occurrence")
+            .addJoinValue("from `${projectId}.${datasetId}.condition_occurrence` c_occurrence")
             .addDomain("Condition")
             .build();
     dsLinkingDao.save(conditionLinking2);
@@ -280,7 +280,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         DbDSLinking.builder()
             .addDenormalizedName("CORE_TABLE_FOR_DOMAIN")
             .addOmopSql("CORE_TABLE_FOR_DOMAIN")
-            .addJoinValue("FROM `${projectId}.${dataSetId}.person` person")
+            .addJoinValue("FROM `${projectId}.${datasetId}.person` person")
             .addDomain("Person")
             .build();
     dsLinkingDao.save(personLinking1);
@@ -288,7 +288,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         DbDSLinking.builder()
             .addDenormalizedName("PERSON_ID")
             .addOmopSql("person.PERSON_ID")
-            .addJoinValue("FROM `${projectId}.${dataSetId}.person` person")
+            .addJoinValue("FROM `${projectId}.${datasetId}.person` person")
             .addDomain("Person")
             .build();
     dsLinkingDao.save(personLinking2);
@@ -297,7 +297,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         DbDSLinking.builder()
             .addDenormalizedName("CORE_TABLE_FOR_DOMAIN")
             .addOmopSql("CORE_TABLE_FOR_DOMAIN")
-            .addJoinValue("FROM `${projectId}.${dataSetId}.ds_survey` answer")
+            .addJoinValue("FROM `${projectId}.${datasetId}.ds_survey` answer")
             .addDomain("Survey")
             .build();
     dsLinkingDao.save(surveyLinking1);
@@ -314,7 +314,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         DbDSLinking.builder()
             .addDenormalizedName("CORE_TABLE_FOR_DOMAIN")
             .addOmopSql("CORE_TABLE_FOR_DOMAIN")
-            .addJoinValue("from `${projectId}.${dataSetId}.procedure_occurrence` procedure")
+            .addJoinValue("from `${projectId}.${datasetId}.procedure_occurrence` procedure")
             .addDomain("Procedure")
             .build();
     dsLinkingDao.save(procedureLinking1);
@@ -322,7 +322,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         DbDSLinking.builder()
             .addDenormalizedName("PERSON_ID")
             .addOmopSql("procedure.PERSON_ID")
-            .addJoinValue("from `${projectId}.${dataSetId}.procedure_occurrence` procedure")
+            .addJoinValue("from `${projectId}.${datasetId}.procedure_occurrence` procedure")
             .addDomain("Procedure")
             .build();
     dsLinkingDao.save(procedureLinking2);
@@ -362,7 +362,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_NAME,
                 KernelTypeEnum.PYTHON.toString(),
-                createDataSetRequest(
+                createDatasetRequest(
                     ImmutableList.of(dbConditionConceptSet),
                     ImmutableList.of(dbCohort1),
                     ImmutableList.of(Domain.CONDITION),
@@ -388,7 +388,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_NAME,
                 KernelTypeEnum.R.toString(),
-                createDataSetRequest(
+                createDatasetRequest(
                     ImmutableList.of(dbConditionConceptSet),
                     ImmutableList.of(dbCohort1),
                     ImmutableList.of(Domain.CONDITION),
@@ -424,7 +424,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_NAME,
                 KernelTypeEnum.PYTHON.toString(),
-                createDataSetRequest(
+                createDatasetRequest(
                     ImmutableList.of(dbConditionConceptSet, dbProcedureConceptSet),
                     ImmutableList.of(dbCohort1),
                     ImmutableList.of(Domain.CONDITION, Domain.PROCEDURE),
@@ -444,7 +444,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_NAME,
                 KernelTypeEnum.PYTHON.toString(),
-                createDataSetRequest(
+                createDatasetRequest(
                     ImmutableList.of(dbConditionConceptSet),
                     ImmutableList.of(dbCohort1, dbCohort2),
                     ImmutableList.of(Domain.CONDITION),
@@ -464,7 +464,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_NAME,
                 KernelTypeEnum.PYTHON.toString(),
-                createDataSetRequest(
+                createDatasetRequest(
                     ImmutableList.of(dbConditionConceptSet),
                     ImmutableList.of(),
                     ImmutableList.of(Domain.CONDITION),
@@ -484,7 +484,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_NAME,
                 KernelTypeEnum.PYTHON.toString(),
-                createDataSetRequest(
+                createDatasetRequest(
                     ImmutableList.of(),
                     ImmutableList.of(dbCohort1),
                     ImmutableList.of(Domain.PERSON),
@@ -504,7 +504,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_NAME,
                 KernelTypeEnum.PYTHON.toString(),
-                createDataSetRequest(
+                createDatasetRequest(
                     ImmutableList.of(),
                     ImmutableList.of(dbCohort1),
                     ImmutableList.of(Domain.SURVEY),
@@ -542,13 +542,13 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     }
   }
 
-  private DataSetRequest createDataSetRequest(
+  private DatasetRequest createDatasetRequest(
       List<DbConceptSet> dbConceptSets,
       List<DbCohort> dbCohorts,
       List<Domain> domains,
       boolean allParticipants,
       PrePackagedConceptSetEnum prePackagedConceptSetEnum) {
-    return new DataSetRequest()
+    return new DatasetRequest()
         .name(DATASET_NAME)
         .conceptSetIds(
             dbConceptSets.stream().map(DbConceptSet::getConceptSetId).collect(Collectors.toList()))
@@ -566,7 +566,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     code =
         code.replace(
             "\"\"\" + os.environ[\"WORKSPACE_CDR\"] + \"\"\"",
-            testWorkbenchConfig.bigquery.projectId + "." + testWorkbenchConfig.bigquery.dataSetId);
+            testWorkbenchConfig.bigquery.projectId + "." + testWorkbenchConfig.bigquery.datasetId);
     return code.split("\"\"\"")[index];
   }
 
@@ -582,15 +582,15 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                             s,
                             tableName,
                             testWorkbenchConfig.bigquery.projectId,
-                            testWorkbenchConfig.bigquery.dataSetId))
+                            testWorkbenchConfig.bigquery.datasetId))
         .reduce(Function.identity(), Function::andThen)
         .apply(query);
   }
 
   private static String replaceTableName(
-      String s, String tableName, String projectId, String dataSetId) {
+      String s, String tableName, String projectId, String datasetId) {
     return s.replace(
         "`" + tableName + "`",
-        String.format("`%s`", projectId + "." + dataSetId + "." + tableName));
+        String.format("`%s`", projectId + "." + datasetId + "." + tableName));
   }
 }

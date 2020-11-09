@@ -48,8 +48,8 @@ import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.BillingConfig;
-import org.pmiops.workbench.dataset.DataSetService;
-import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
+import org.pmiops.workbench.dataset.DatasetService;
+import org.pmiops.workbench.dataset.mapper.DatasetMapperImpl;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -180,7 +180,7 @@ public class CohortsControllerTest {
   @Autowired ConceptSetDao conceptSetDao;
   @Autowired ConceptDao conceptDao;
   @Autowired CohortReviewDao cohortReviewDao;
-  @Autowired DataSetService dataSetService;
+  @Autowired DatasetService datasetService;
   @Autowired UserRecentResourceService userRecentResourceService;
   @Autowired UserDao userDao;
   @Autowired CohortMaterializationService cohortMaterializationService;
@@ -203,7 +203,7 @@ public class CohortsControllerTest {
     ConceptSetMapperImpl.class,
     ConceptSetService.class,
     ConceptSetsController.class,
-    DataSetMapperImpl.class,
+    DatasetMapperImpl.class,
     FirecloudMapperImpl.class,
     LogsBasedMetricServiceFakeImpl.class,
     NotebooksServiceImpl.class,
@@ -224,7 +224,7 @@ public class CohortsControllerTest {
     CohortService.class,
     ComplianceService.class,
     ConceptBigQueryService.class,
-    DataSetService.class,
+    DatasetService.class,
     DirectoryService.class,
     FireCloudService.class,
     FreeTierBillingService.class,

@@ -20,8 +20,8 @@ import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.dataset.BigQueryTableInfo;
-import org.pmiops.workbench.dataset.DataSetServiceImpl;
-import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
+import org.pmiops.workbench.dataset.DatasetServiceImpl;
+import org.pmiops.workbench.dataset.mapper.DatasetMapperImpl;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -51,7 +51,7 @@ public class DataDictionaryTest {
 
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private DataDictionaryEntryDao dataDictionaryEntryDao;
-  @Autowired private DataSetController dataSetController;
+  @Autowired private DatasetController datasetController;
 
   @Rule public ExpectedException expectedEx = ExpectedException.none();
 
@@ -62,9 +62,9 @@ public class DataDictionaryTest {
   @Import({
     CdrVersionService.class,
     CommonMappers.class,
-    DataSetController.class,
-    DataSetServiceImpl.class,
-    DataSetMapperImpl.class
+    DatasetController.class,
+    DatasetServiceImpl.class,
+    DatasetMapperImpl.class
   })
   @MockBean({
     BigQueryService.class,
@@ -129,7 +129,7 @@ public class DataDictionaryTest {
     dataDictionaryEntryDao.save(dataDictionaryEntry);
 
     DataDictionaryEntry response =
-        dataSetController
+        datasetController
             .getDataDictionaryEntry(cdrVersion.getCdrVersionId(), domain.toString(), domainValue)
             .getBody();
 
@@ -155,7 +155,7 @@ public class DataDictionaryTest {
     expectedEx.expect(BadRequestException.class);
     expectedEx.expectMessage("Invalid CDR Version");
 
-    dataSetController.getDataDictionaryEntry(-1L, Domain.DRUG.toString(), "TEST FIELD");
+    datasetController.getDataDictionaryEntry(-1L, Domain.DRUG.toString(), "TEST FIELD");
   }
 
   @Test
@@ -163,7 +163,7 @@ public class DataDictionaryTest {
     expectedEx.expect(BadRequestException.class);
     expectedEx.expectMessage("Invalid Domain");
 
-    dataSetController.getDataDictionaryEntry(
+    datasetController.getDataDictionaryEntry(
         cdrVersionDao.findAll().iterator().next().getCdrVersionId(), "random", "TEST FIELD");
   }
 
@@ -171,6 +171,6 @@ public class DataDictionaryTest {
   public void testGetDataDictionaryEntry_notFound() {
     expectedEx.expect(NotFoundException.class);
 
-    dataSetController.getDataDictionaryEntry(1L, Domain.DRUG.toString(), "random");
+    datasetController.getDataDictionaryEntry(1L, Domain.DRUG.toString(), "random");
   }
 }

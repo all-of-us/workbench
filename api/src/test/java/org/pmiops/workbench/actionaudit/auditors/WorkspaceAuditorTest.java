@@ -31,7 +31,7 @@ import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
+import org.pmiops.workbench.dataset.mapper.DatasetMapperImpl;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -80,7 +80,7 @@ public class WorkspaceAuditorTest {
     CohortReviewMapperImpl.class,
     ConceptSetMapperImpl.class,
     CommonMappers.class,
-    DataSetMapperImpl.class,
+    DatasetMapperImpl.class,
     FirecloudMapperImpl.class,
     WorkspaceAuditorImpl.class,
     WorkspaceMapperImpl.class

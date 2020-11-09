@@ -33,10 +33,10 @@ import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapper;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.dataset.mapper.DataSetMapper;
+import org.pmiops.workbench.dataset.mapper.DatasetMapper;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
-import org.pmiops.workbench.db.dao.DataSetDao;
+import org.pmiops.workbench.db.dao.DatasetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -101,8 +101,8 @@ public class WorkspaceAdminServiceTest {
     CommonMappers.class,
     ConceptSetDao.class,
     ConceptSetMapper.class,
-    DataSetDao.class,
-    DataSetMapper.class,
+    DatasetDao.class,
+    DatasetMapper.class,
     FirecloudMapper.class,
     LeonardoNotebooksClient.class,
     UserDao.class,

@@ -111,7 +111,7 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
   }
 
   @Override
-  public DbWorkspace saveAndCloneCohortsConceptSetsAndDataSets(DbWorkspace from, DbWorkspace to) {
+  public DbWorkspace saveAndCloneCohortsConceptSetsAndDatasets(DbWorkspace from, DbWorkspace to) {
     return null;
   }
 

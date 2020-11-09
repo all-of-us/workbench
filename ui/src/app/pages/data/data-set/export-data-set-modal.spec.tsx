@@ -1,14 +1,14 @@
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {mount} from 'enzyme';
-import {DataSet, DataSetApi, PrePackagedConceptSetEnum, WorkspacesApi} from 'generated/fetch/api';
+import {Dataset, DatasetApi, PrePackagedConceptSetEnum, WorkspacesApi} from 'generated/fetch/api';
 import * as React from 'react';
-import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
+import {DatasetApiStub} from 'testing/stubs/data-set-api-stub';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import {ExportDataSetModal} from './export-data-set-modal';
+import {ExportDatasetModal} from './export-data-set-modal';
 
 const workspaceNamespace = 'workspaceNamespace';
 const workspaceFirecloudName = 'workspaceId';
-const dataSet: DataSet = {
+const dataset: Dataset = {
   name: 'hello world',
   description: 'hi',
   conceptSets: [],
@@ -18,25 +18,25 @@ const dataSet: DataSet = {
   prePackagedConceptSet: PrePackagedConceptSetEnum.SURVEY
 };
 
-const createExportDataSetModal = () => {
-  return <ExportDataSetModal
+const createExportDatasetModal = () => {
+  return <ExportDatasetModal
     closeFunction={() => {}}
     workspaceNamespace={workspaceNamespace}
     workspaceFirecloudName={workspaceFirecloudName}
-    dataSet={dataSet}
+    dataset={dataset}
   />;
 }
 
 
-describe('ExportDataSetModal', () => {
+describe('ExportDatasetModal', () => {
   beforeEach(() => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
-    registerApiClient(DataSetApi, new DataSetApiStub());
+    registerApiClient(DatasetApi, new DatasetApiStub());
   });
 
 
   it('should render', () => {
-    const wrapper = mount(createExportDataSetModal());
+    const wrapper = mount(createExportDatasetModal());
     expect(wrapper.exists()).toBeTruthy();
   });
 })

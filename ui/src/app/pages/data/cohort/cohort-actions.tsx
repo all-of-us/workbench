@@ -60,7 +60,7 @@ const actionCards = [
   }, {
     title: 'Create a Dataset',
     description: `Create an analysis ready dataset that can be exported to notebooks.`,
-    action: 'dataSet'
+    action: 'dataset'
   },
 ];
 
@@ -109,7 +109,7 @@ const CohortActions = withCurrentWorkspace()(
         case 'notebook':
           url += 'notebooks';
           break;
-        case 'dataSet':
+        case 'dataset':
           url += 'data/data-sets';
           break;
         case 'newCohort':

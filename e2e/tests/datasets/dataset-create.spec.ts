@@ -67,8 +67,8 @@ describe('Dataset test', () => {
     await dataPage.openDatasetsSubtab();
 
     const resourceCard = new DataResourceCard(page);
-    const dataSetExists = await resourceCard.cardExists(datasetName, ResourceCard.Dataset);
-    expect(dataSetExists).toBe(true);
+    const datasetExists = await resourceCard.cardExists(datasetName, ResourceCard.Dataset);
+    expect(datasetExists).toBe(true);
 
     // Edit the dataset to include "All Participants".
     const datasetCard = await resourceCard.findCard(datasetName)

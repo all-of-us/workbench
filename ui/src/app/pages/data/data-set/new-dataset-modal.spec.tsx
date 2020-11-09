@@ -1,29 +1,29 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 
-import {dataSetApi, registerApiClient} from 'app/services/swagger-fetch-clients';
+import {datasetApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {
-  DataSetApi,
-  DataSetRequest,
+  DatasetApi,
+  DatasetRequest,
   KernelTypeEnum,
   PrePackagedConceptSetEnum,
   WorkspacesApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
+import {DatasetApiStub} from 'testing/stubs/data-set-api-stub';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import {DataSetExportRequest} from 'generated/fetch';
-import {NewDataSetModal} from './new-dataset-modal';
-import GenomicsAnalysisToolEnum = DataSetExportRequest.GenomicsAnalysisToolEnum;
-import GenomicsDataTypeEnum = DataSetExportRequest.GenomicsDataTypeEnum;
+import {DatasetExportRequest} from 'generated/fetch';
+import {NewDatasetModal} from './new-dataset-modal';
+import GenomicsAnalysisToolEnum = DatasetExportRequest.GenomicsAnalysisToolEnum;
+import GenomicsDataTypeEnum = DatasetExportRequest.GenomicsDataTypeEnum;
 
 const prePackagedConceptSet = PrePackagedConceptSetEnum.NONE;
 const workspaceNamespace = 'workspaceNamespace';
 const workspaceId = 'workspaceId';
 
-let dataSet;
+let dataset;
 
-const createNewDataSetModal = () => {
-  return <NewDataSetModal
+const createNewDatasetModal = () => {
+  return <NewDatasetModal
     closeFunction={() => {}}
     includesAllParticipants={false}
     selectedConceptSetIds={[]}
@@ -31,19 +31,19 @@ const createNewDataSetModal = () => {
     selectedDomainValuePairs={[]}
     workspaceNamespace={workspaceNamespace}
     workspaceId={workspaceId}
-    dataSet={dataSet}
+    dataset={dataset}
     prePackagedConceptSet={prePackagedConceptSet}
     displayMicroarrayOptions={false}
     billingLocked={false}
   />;
 };
 
-describe('NewDataSetModal', () => {
+describe('NewDatasetModal', () => {
   beforeEach(() => {
     window.open = jest.fn();
-    dataSet = undefined;
+    dataset = undefined;
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
-    registerApiClient(DataSetApi, new DataSetApiStub());
+    registerApiClient(DatasetApi, new DatasetApiStub());
   });
 
   afterEach(() => {
@@ -51,12 +51,12 @@ describe('NewDataSetModal', () => {
   });
 
   it('should render', () => {
-    const wrapper = mount(createNewDataSetModal());
+    const wrapper = mount(createNewDatasetModal());
     expect(wrapper.exists()).toBeTruthy();
   });
 
   it('should only display code when button pressed', async() => {
-    const wrapper = mount(createNewDataSetModal());
+    const wrapper = mount(createNewDatasetModal());
     expect(wrapper.find('[data-test-id="code-text-box"]').exists()).toBeFalsy();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="code-preview-button"]')
@@ -68,9 +68,9 @@ describe('NewDataSetModal', () => {
   });
 
   it('should not allow submission if no name specified', async() => {
-    const wrapper = mount(createNewDataSetModal());
-    const createSpy = jest.spyOn(dataSetApi(), 'createDataSet');
-    const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
+    const wrapper = mount(createNewDatasetModal());
+    const createSpy = jest.spyOn(datasetApi(), 'createDataset');
+    const exportSpy = jest.spyOn(datasetApi(), 'exportToNotebook');
 
     wrapper.find('[data-test-id="save-data-set"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
@@ -79,9 +79,9 @@ describe('NewDataSetModal', () => {
   });
 
   it('should not export if export is not checked', async() => {
-    const wrapper = mount(createNewDataSetModal());
-    const createSpy = jest.spyOn(dataSetApi(), 'createDataSet');
-    const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
+    const wrapper = mount(createNewDatasetModal());
+    const createSpy = jest.spyOn(datasetApi(), 'createDataset');
+    const exportSpy = jest.spyOn(datasetApi(), 'exportToNotebook');
     const nameStub = 'Dataset Name';
 
     wrapper.find('[data-test-id="data-set-name-input"]')
@@ -104,9 +104,9 @@ describe('NewDataSetModal', () => {
   });
 
   it('should not submit if export checked but no name or selected notebook', async() => {
-    const wrapper = mount(createNewDataSetModal());
-    const createSpy = jest.spyOn(dataSetApi(), 'createDataSet');
-    const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
+    const wrapper = mount(createNewDatasetModal());
+    const createSpy = jest.spyOn(datasetApi(), 'createDataset');
+    const exportSpy = jest.spyOn(datasetApi(), 'exportToNotebook');
     const nameStub = 'Dataset Name';
 
     wrapper.find('[data-test-id="data-set-name-input"]')
@@ -119,12 +119,12 @@ describe('NewDataSetModal', () => {
   });
 
   it('should submit if export is unchecked and name specified', async() => {
-    const wrapper = mount(createNewDataSetModal());
-    const createSpy = jest.spyOn(dataSetApi(), 'createDataSet');
-    const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
+    const wrapper = mount(createNewDatasetModal());
+    const createSpy = jest.spyOn(datasetApi(), 'createDataset');
+    const exportSpy = jest.spyOn(datasetApi(), 'exportToNotebook');
     const nameStub = 'Dataset Name';
     const notebookNameStub = 'Notebook Name';
-    const dataSetRequestStub: DataSetRequest = {
+    const datasetRequestStub: DatasetRequest = {
       name: nameStub,
       includesAllParticipants: false,
       description: '',
@@ -144,7 +144,7 @@ describe('NewDataSetModal', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(createSpy).toHaveBeenCalled();
     expect(exportSpy).toHaveBeenCalledWith(workspaceNamespace, workspaceId, {
-      dataSetRequest: dataSetRequestStub,
+      datasetRequest: datasetRequestStub,
       newNotebook: true,
       notebookName: notebookNameStub,
       kernelType: KernelTypeEnum.Python,
@@ -153,17 +153,17 @@ describe('NewDataSetModal', () => {
     });
   });
 
-  it ('should have default dataSet name if dataset is passed as props', () => {
+  it ('should have default dataset name if dataset is passed as props', () => {
     const name = 'Update Dataset';
-    dataSet = {...dataSet, name: name, description: 'dataset'};
-    const wrapper = mount(createNewDataSetModal());
-    const dataSetName  =
+    dataset = {...dataset, name: name, description: 'dataset'};
+    const wrapper = mount(createNewDatasetModal());
+    const datasetName  =
       wrapper.find('[data-test-id="data-set-name-input"]').first().prop('value');
-    expect(dataSetName).toBe(name);
+    expect(datasetName).toBe(name);
   });
 
   it ('should show microarray options if the display flag is true and the kernel is Python', async() => {
-    const wrapper = mount(createNewDataSetModal());
+    const wrapper = mount(createNewDatasetModal());
     wrapper.setProps({displayMicroarrayOptions: true});
     wrapper.setState({kernelType: KernelTypeEnum.Python});
     await waitOneTickAndUpdate(wrapper);
@@ -172,7 +172,7 @@ describe('NewDataSetModal', () => {
   });
 
   it ('should not show microarray options if the cdrVersion does not have microarray data', async() => {
-    const wrapper = mount(createNewDataSetModal());
+    const wrapper = mount(createNewDatasetModal());
     wrapper.setProps({displayMicroarrayOptions: false});
     wrapper.setState({kernelType: KernelTypeEnum.Python});
     await waitOneTickAndUpdate(wrapper);
@@ -181,7 +181,7 @@ describe('NewDataSetModal', () => {
   });
 
   it ('should not show microarray options if the kernel is not Python', async() => {
-    const wrapper = mount(createNewDataSetModal());
+    const wrapper = mount(createNewDatasetModal());
     wrapper.setProps({displayMicroarrayOptions: true});
     wrapper.setState({kernelType: KernelTypeEnum.R});
     await waitOneTickAndUpdate(wrapper);
@@ -190,7 +190,7 @@ describe('NewDataSetModal', () => {
   });
 
   it ('should show genomics analysis tools if include raw microarray data is checked', async() => {
-    const wrapper = mount(createNewDataSetModal());
+    const wrapper = mount(createNewDatasetModal());
     wrapper.setProps({displayMicroarrayOptions: true});
     wrapper.setState({kernelType: KernelTypeEnum.Python, includeRawMicroarrayData: true});
     await waitOneTickAndUpdate(wrapper);
@@ -201,7 +201,7 @@ describe('NewDataSetModal', () => {
   });
 
   it ('switching to R should uncheck microarray option', async() => {
-    const wrapper = mount(createNewDataSetModal());
+    const wrapper = mount(createNewDatasetModal());
     wrapper.setProps({displayMicroarrayOptions: true});
     wrapper.setState({kernelType: KernelTypeEnum.Python, includeRawMicroarrayData: true});
     await waitOneTickAndUpdate(wrapper);
@@ -213,14 +213,14 @@ describe('NewDataSetModal', () => {
   });
 
   it ('should export to notebook with the correct microarray parameters', async() => {
-    const wrapper = mount(createNewDataSetModal());
+    const wrapper = mount(createNewDatasetModal());
     wrapper.setProps({displayMicroarrayOptions: true});
     wrapper.setState({kernelType: KernelTypeEnum.Python});
 
-    const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
+    const exportSpy = jest.spyOn(datasetApi(), 'exportToNotebook');
     const nameStub = 'Dataset Name';
     const notebookNameStub = 'Notebook Name';
-    const dataSetRequestStub: DataSetRequest = {
+    const datasetRequestStub: DatasetRequest = {
       name: nameStub,
       includesAllParticipants: false,
       description: '',
@@ -250,7 +250,7 @@ describe('NewDataSetModal', () => {
     await waitOneTickAndUpdate(wrapper);
 
     expect(exportSpy).toHaveBeenCalledWith(workspaceNamespace, workspaceId, {
-      dataSetRequest: dataSetRequestStub,
+      datasetRequest: datasetRequestStub,
       newNotebook: true,
       notebookName: notebookNameStub,
       kernelType: KernelTypeEnum.Python,

@@ -19,7 +19,7 @@ import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.AdminAuditor;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
-import org.pmiops.workbench.db.dao.DataSetDao;
+import org.pmiops.workbench.db.dao.DatasetDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -60,7 +60,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private final CohortDao cohortDao;
   private final CloudMonitoringService cloudMonitoringService;
   private final ConceptSetDao conceptSetDao;
-  private final DataSetDao dataSetDao;
+  private final DatasetDao datasetDao;
   private final LeonardoMapper leonardoMapper;
   private final FireCloudService fireCloudService;
   private final LeonardoNotebooksClient leonardoNotebooksClient;
@@ -79,7 +79,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       CohortDao cohortDao,
       CloudMonitoringService cloudMonitoringService,
       ConceptSetDao conceptSetDao,
-      DataSetDao dataSetDao,
+      DatasetDao datasetDao,
       FireCloudService fireCloudService,
       LeonardoMapper leonardoMapper,
       LeonardoNotebooksClient leonardoNotebooksClient,
@@ -95,7 +95,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     this.cohortDao = cohortDao;
     this.cloudMonitoringService = cloudMonitoringService;
     this.conceptSetDao = conceptSetDao;
-    this.dataSetDao = dataSetDao;
+    this.datasetDao = datasetDao;
     this.fireCloudService = fireCloudService;
     this.leonardoMapper = leonardoMapper;
     this.leonardoNotebooksClient = leonardoNotebooksClient;
@@ -116,11 +116,11 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   public AdminWorkspaceObjectsCounts getAdminWorkspaceObjects(long workspaceId) {
     int cohortCount = cohortDao.countByWorkspaceId(workspaceId);
     int conceptSetCount = conceptSetDao.countByWorkspaceId(workspaceId);
-    int dataSetCount = dataSetDao.countByWorkspaceId(workspaceId);
+    int datasetCount = datasetDao.countByWorkspaceId(workspaceId);
     return new AdminWorkspaceObjectsCounts()
         .cohortCount(cohortCount)
         .conceptSetCount(conceptSetCount)
-        .datasetCount(dataSetCount);
+        .datasetCount(datasetCount);
   }
 
   @Override

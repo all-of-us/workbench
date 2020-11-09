@@ -121,7 +121,7 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
   @Before
   public void setUp() {
     DbCdrVersion cdrVersion = new DbCdrVersion();
-    cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
+    cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.datasetId);
     cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
     cdrVersion = cdrVersionDao.save(cdrVersion);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);

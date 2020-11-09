@@ -526,7 +526,7 @@ public class FieldSetQueryBuilder {
       StringBuilder sql, String joinedTableAlias, JoinedTableInfo joinedTableInfo) {
     sql.append(
         String.format(
-            "\nLEFT OUTER JOIN `${projectId}.${dataSetId}.%s` %s ON %s.%s = %s.%s",
+            "\nLEFT OUTER JOIN `${projectId}.${datasetId}.%s` %s ON %s.%s = %s.%s",
             joinedTableInfo.joinedTableName,
             joinedTableAlias,
             joinedTableInfo.startTableAlias,
@@ -639,7 +639,7 @@ public class FieldSetQueryBuilder {
     StringBuilder innerSql = new StringBuilder("select ");
     innerSql.append(commaJoiner.join(innerSelectExpressions));
     innerSql.append(
-        String.format("\nfrom `${projectId}.${dataSetId}.%s` %s", tableName, tableName));
+        String.format("\nfrom `${projectId}.${datasetId}.%s` %s", tableName, tableName));
     for (Entry<String, JoinedTableInfo> entry : beforeLimitTables.entrySet()) {
       addJoin(innerSql, entry.getKey(), entry.getValue());
     }

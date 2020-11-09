@@ -23,7 +23,7 @@ import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 public class DbDataset {
   private static final int INITIAL_VERSION = 1;
 
-  private long dataSetId;
+  private long datasetId;
   private long workspaceId;
   private String name;
   private int version;
@@ -43,14 +43,14 @@ public class DbDataset {
   }
 
   public DbDataset(
-      long dataSetId,
+      long datasetId,
       long workspaceId,
       String name,
       String description,
       long creatorId,
       Timestamp creationTime,
       Boolean invalid) {
-    this.dataSetId = dataSetId;
+    this.datasetId = datasetId;
     this.workspaceId = workspaceId;
     this.name = name;
     this.version = DbDataset.INITIAL_VERSION;
@@ -60,25 +60,25 @@ public class DbDataset {
     this.invalid = invalid;
   }
 
-  public DbDataset(DbDataset dataSet) {
-    setName(dataSet.getName());
+  public DbDataset(DbDataset dataset) {
+    setName(dataset.getName());
     setVersion(DbDataset.INITIAL_VERSION);
-    setDescription(dataSet.getDescription());
-    setInvalid(dataSet.getInvalid());
-    setIncludesAllParticipants(dataSet.getIncludesAllParticipants());
-    setValues(dataSet.getValues().stream().map(DbDatasetValue::new).collect(Collectors.toList()));
-    setPrePackagedConceptSet(dataSet.getPrePackagedConceptSet());
+    setDescription(dataset.getDescription());
+    setInvalid(dataset.getInvalid());
+    setIncludesAllParticipants(dataset.getIncludesAllParticipants());
+    setValues(dataset.getValues().stream().map(DbDatasetValue::new).collect(Collectors.toList()));
+    setPrePackagedConceptSet(dataset.getPrePackagedConceptSet());
   }
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "data_set_id")
-  public long getDataSetId() {
-    return dataSetId;
+  public long getDatasetId() {
+    return datasetId;
   }
 
-  public void setDataSetId(long dataSetId) {
-    this.dataSetId = dataSetId;
+  public void setDatasetId(long datasetId) {
+    this.datasetId = datasetId;
   }
 
   @Version

@@ -39,11 +39,11 @@ import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.dataset.mapper.DataSetMapper;
+import org.pmiops.workbench.dataset.mapper.DatasetMapper;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
-import org.pmiops.workbench.db.dao.DataSetDao;
+import org.pmiops.workbench.db.dao.DatasetDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
@@ -57,9 +57,9 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.DataDictionaryEntry;
-import org.pmiops.workbench.model.DataSet;
-import org.pmiops.workbench.model.DataSetPreviewRequest;
-import org.pmiops.workbench.model.DataSetRequest;
+import org.pmiops.workbench.model.Dataset;
+import org.pmiops.workbench.model.DatasetPreviewRequest;
+import org.pmiops.workbench.model.DatasetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.KernelTypeEnum;
@@ -75,9 +75,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
+public class DatasetServiceImpl implements DatasetService, GaugeDataCollector {
 
-  private static final String CDR_STRING = "\\$\\{projectId}.\\$\\{dataSetId}.";
+  private static final String CDR_STRING = "\\$\\{projectId}.\\$\\{datasetId}.";
   private static final String PYTHON_CDR_ENV_VARIABLE =
       "\"\"\" + os.environ[\"WORKSPACE_CDR\"] + \"\"\".";
   // This is implicitly handled by bigrquery, so we don't need this variable.
@@ -87,7 +87,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           KernelTypeEnum.R, R_CDR_ENV_VARIABLE, KernelTypeEnum.PYTHON, PYTHON_CDR_ENV_VARIABLE);
 
   private static final String PREVIEW_QUERY =
-      "SELECT ${columns} FROM `${projectId}.${dataSetId}.${tableName}`";
+      "SELECT ${columns} FROM `${projectId}.${datasetId}.${tableName}`";
   private static final String LIMIT_20 = " LIMIT 20";
 
   private static final ImmutableSet<PrePackagedConceptSetEnum>
@@ -98,7 +98,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
-    Map<Boolean, Long> invalidToCount = dataSetDao.getInvalidToCountMap();
+    Map<Boolean, Long> invalidToCount = datasetDao.getInvalidToCountMap();
     return ImmutableSet.of(
         MeasurementBundle.builder()
             .addMeasurement(GaugeMetric.DATASET_COUNT, invalidToCount.getOrDefault(false, 0L))
@@ -193,15 +193,15 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private final ConceptSetDao conceptSetDao;
   private final CohortQueryBuilder cohortQueryBuilder;
   private final DataDictionaryEntryDao dataDictionaryEntryDao;
-  private final DataSetDao dataSetDao;
+  private final DatasetDao datasetDao;
   private final DSLinkingDao dsLinkingDao;
-  private final DataSetMapper dataSetMapper;
+  private final DatasetMapper datasetMapper;
   private final Clock clock;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   @VisibleForTesting
-  public DataSetServiceImpl(
+  public DatasetServiceImpl(
       BigQueryService bigQueryService,
       CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService,
       CohortDao cohortDao,
@@ -209,9 +209,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       ConceptSetDao conceptSetDao,
       CohortQueryBuilder cohortQueryBuilder,
       DataDictionaryEntryDao dataDictionaryEntryDao,
-      DataSetDao dataSetDao,
+      DatasetDao datasetDao,
       DSLinkingDao dsLinkingDao,
-      DataSetMapper dataSetMapper,
+      DatasetMapper datasetMapper,
       Clock clock,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.bigQueryService = bigQueryService;
@@ -221,24 +221,24 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     this.conceptSetDao = conceptSetDao;
     this.cohortQueryBuilder = cohortQueryBuilder;
     this.dataDictionaryEntryDao = dataDictionaryEntryDao;
-    this.dataSetDao = dataSetDao;
+    this.datasetDao = datasetDao;
     this.dsLinkingDao = dsLinkingDao;
-    this.dataSetMapper = dataSetMapper;
+    this.datasetMapper = datasetMapper;
     this.clock = clock;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @Override
-  public DataSet saveDataSet(DataSetRequest dataSetRequest, Long userId) {
-    DbDataset dbDataset = dataSetMapper.dataSetRequestToDb(dataSetRequest, null, clock);
+  public Dataset saveDataset(DatasetRequest datasetRequest, Long userId) {
+    DbDataset dbDataset = datasetMapper.datasetRequestToDb(datasetRequest, null, clock);
     dbDataset.setCreatorId(userId);
-    return saveDataSet(dbDataset);
+    return saveDataset(dbDataset);
   }
 
   @Override
-  public DataSet saveDataSet(DbDataset dataset) {
+  public Dataset saveDataset(DbDataset dataset) {
     try {
-      return dataSetMapper.dbModelToClient(dataSetDao.save(dataset));
+      return datasetMapper.dbModelToClient(datasetDao.save(dataset));
     } catch (OptimisticLockException e) {
       throw new ConflictException("Failed due to concurrent concept set modification");
     } catch (DataIntegrityViolationException ex) {
@@ -247,15 +247,15 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   @Override
-  public DataSet updateDataSet(DataSetRequest request, Long dataSetId) {
-    DbDataset dbDataSet = dataSetDao.findOne(dataSetId);
+  public Dataset updateDataset(DatasetRequest request, Long datasetId) {
+    DbDataset dbDataset = datasetDao.findOne(datasetId);
 
     int version = Etags.toVersion(request.getEtag());
-    if (dbDataSet.getVersion() != version) {
+    if (dbDataset.getVersion() != version) {
       throw new ConflictException("Attempted to modify outdated data set version");
     }
-    DbDataset dbMappingConvert = dataSetMapper.dataSetRequestToDb(request, dbDataSet, clock);
-    return saveDataSet(dbMappingConvert);
+    DbDataset dbMappingConvert = datasetMapper.datasetRequestToDb(request, dbDataset, clock);
+    return saveDataset(dbMappingConvert);
   }
 
   // For domains for which we've assigned a base table in BigQuery, we keep a map here
@@ -277,7 +277,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           .build();
 
   @Override
-  public QueryJobConfiguration previewBigQueryJobConfig(DataSetPreviewRequest request) {
+  public QueryJobConfiguration previewBigQueryJobConfig(DatasetPreviewRequest request) {
     final Domain domain = request.getDomain();
     final List<String> values = request.getValues();
     Map<String, QueryParameterValue> mergedQueryParameterValues = new HashMap<>();
@@ -294,7 +294,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         new StringBuilder(
             PREVIEW_QUERY
                 .replace("${columns}", String.join(", ", filteredDomainColumns))
-                .replace("${tableName}", BigQueryDataSetTableInfo.getTableName(domain)));
+                .replace("${tableName}", BigQueryDatasetTableInfo.getTableName(domain)));
 
     final List<Long> conceptIds =
         SURVEY.equals(request.getPrePackagedConceptSet())
@@ -310,8 +310,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           .append(" WHERE ")
           .append(
               workbenchConfigProvider.get().featureFlags.enableConceptSetSearchV2
-                  ? BigQueryDataSetTableInfo.getConceptIdIn(domain)
-                  : BigQueryDataSetTableInfo.getConceptIdInOld(domain));
+                  ? BigQueryDatasetTableInfo.getConceptIdIn(domain)
+                  : BigQueryDatasetTableInfo.getConceptIdInOld(domain));
     }
 
     if (!request.getIncludesAllParticipants()) {
@@ -342,16 +342,16 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   @Override
-  public Map<String, QueryJobConfiguration> domainToBigQueryConfig(DataSetRequest dataSetRequest) {
+  public Map<String, QueryJobConfiguration> domainToBigQueryConfig(DatasetRequest datasetRequest) {
     DbDataset dbDataset;
-    if (dataSetRequest.getDataSetId() != null) {
-      dbDataset = dataSetDao.findOne(dataSetRequest.getDataSetId());
-      // In case wrong dataSetId is passed to Api
+    if (datasetRequest.getDatasetId() != null) {
+      dbDataset = datasetDao.findOne(datasetRequest.getDatasetId());
+      // In case wrong datasetId is passed to Api
       if (dbDataset == null) {
         throw new BadRequestException("Data Set Generate code Failed: Data set not found");
       }
     } else {
-      dbDataset = dataSetMapper.dataSetRequestToDb(dataSetRequest, null, clock);
+      dbDataset = datasetMapper.datasetRequestToDb(datasetRequest, null, clock);
     }
     return buildQueriesByDomain(dbDataset);
   }
@@ -364,12 +364,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     final ImmutableList<DomainValuePair> domainValuePairs =
         ImmutableList.copyOf(
             dbDataset.getValues().stream()
-                .map(value -> dataSetMapper.createDomainValuePair(value))
+                .map(value -> datasetMapper.createDomainValuePair(value))
                 .collect(Collectors.toList()));
 
     final ImmutableList<DbConceptSet> expandedSelectedConceptSets =
         getExpandedConceptSetSelections(
-            dataSetMapper.prePackagedConceptSetFromStorage(dbDataset.getPrePackagedConceptSet()),
+            datasetMapper.prePackagedConceptSetFromStorage(dbDataset.getPrePackagedConceptSet()),
             dbDataset.getConceptSetIds(),
             cohortsSelected,
             includesAllParticipants,
@@ -629,7 +629,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       return Optional.empty();
     } else {
       if (workbenchConfigProvider.get().featureFlags.enableConceptSetSearchV2) {
-        String conceptIdInClause = BigQueryDataSetTableInfo.getConceptIdIn(domain);
+        String conceptIdInClause = BigQueryDatasetTableInfo.getConceptIdIn(domain);
         return Optional.of(
             conceptIdInClause.replaceAll("unnest", "").replaceAll("(@conceptIds)", conceptSetIDs));
       }
@@ -676,7 +676,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   @Override
   public List<String> generateCodeCells(
       KernelTypeEnum kernelTypeEnum,
-      String dataSetName,
+      String datasetName,
       String cdrVersionName,
       String qualifier,
       Map<String, QueryJobConfiguration> queryJobConfigurationMap) {
@@ -700,7 +700,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                     + generateNotebookUserCode(
                         entry.getValue(),
                         Domain.fromValue(entry.getKey()),
-                        dataSetName,
+                        datasetName,
                         cdrVersionName,
                         qualifier,
                         kernelTypeEnum))
@@ -873,77 +873,77 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   @Override
   @Transactional
-  public DbDataset cloneDataSetToWorkspace(
-      DbDataset fromDataSet,
+  public DbDataset cloneDatasetToWorkspace(
+      DbDataset fromDataset,
       DbWorkspace toWorkspace,
       Set<Long> cohortIds,
       Set<Long> conceptSetIds) {
-    DbDataset toDataSet = new DbDataset(fromDataSet);
-    toDataSet.setWorkspaceId(toWorkspace.getWorkspaceId());
-    toDataSet.setCreatorId(toWorkspace.getCreator().getUserId());
-    toDataSet.setLastModifiedTime(toWorkspace.getLastModifiedTime());
-    toDataSet.setCreationTime(toWorkspace.getCreationTime());
+    DbDataset toDataset = new DbDataset(fromDataset);
+    toDataset.setWorkspaceId(toWorkspace.getWorkspaceId());
+    toDataset.setCreatorId(toWorkspace.getCreator().getUserId());
+    toDataset.setLastModifiedTime(toWorkspace.getLastModifiedTime());
+    toDataset.setCreationTime(toWorkspace.getCreationTime());
 
-    toDataSet.setConceptSetIds(new ArrayList<>(conceptSetIds));
-    toDataSet.setCohortIds(new ArrayList<>(cohortIds));
-    return dataSetDao.save(toDataSet);
+    toDataset.setConceptSetIds(new ArrayList<>(conceptSetIds));
+    toDataset.setCohortIds(new ArrayList<>(cohortIds));
+    return datasetDao.save(toDataset);
   }
 
   @Override
-  public List<DbDataset> getDataSets(DbWorkspace workspace) {
+  public List<DbDataset> getDatasets(DbWorkspace workspace) {
     // Allows for fetching data sets for a workspace once its collection is no longer
     // bound to a session.
-    return dataSetDao.findByWorkspaceId(workspace.getWorkspaceId());
+    return datasetDao.findByWorkspaceId(workspace.getWorkspaceId());
   }
 
   @Transactional
   @Override
-  public List<DbConceptSet> getConceptSetsForDataset(DbDataset dataSet) {
+  public List<DbConceptSet> getConceptSetsForDataset(DbDataset dataset) {
     return conceptSetDao.findAllByConceptSetIdIn(
-        dataSetDao.findOne(dataSet.getDataSetId()).getCohortIds());
+        datasetDao.findOne(dataset.getDatasetId()).getCohortIds());
   }
 
   @Transactional
   @Override
-  public List<DbCohort> getCohortsForDataset(DbDataset dataSet) {
-    return cohortDao.findAllByCohortIdIn(dataSetDao.findOne(dataSet.getDataSetId()).getCohortIds());
+  public List<DbCohort> getCohortsForDataset(DbDataset dataset) {
+    return cohortDao.findAllByCohortIdIn(datasetDao.findOne(dataset.getDatasetId()).getCohortIds());
   }
 
-  public List<DataSet> getDataSets(ResourceType resourceType, long resourceId) {
-    return getDbDataSets(resourceType, resourceId).stream()
-        .map(dataSetMapper::dbModelToClient)
+  public List<Dataset> getDatasets(ResourceType resourceType, long resourceId) {
+    return getDbDatasets(resourceType, resourceId).stream()
+        .map(datasetMapper::dbModelToClient)
         .collect(Collectors.toList());
   }
 
-  public List<DbDataset> getDbDataSets(ResourceType resourceType, long resourceId) {
-    List<DbDataset> dbDataSets = new ArrayList<>();
+  public List<DbDataset> getDbDatasets(ResourceType resourceType, long resourceId) {
+    List<DbDataset> dbDatasets = new ArrayList<>();
     switch (resourceType) {
       case COHORT:
-        dbDataSets = dataSetDao.findDataSetsByCohortIds(resourceId);
+        dbDatasets = datasetDao.findDatasetsByCohortIds(resourceId);
         break;
       case CONCEPT_SET:
-        dbDataSets = dataSetDao.findDataSetsByConceptSetIds(resourceId);
+        dbDatasets = datasetDao.findDatasetsByConceptSetIds(resourceId);
         break;
     }
-    return dbDataSets;
+    return dbDatasets;
   }
 
   @Override
-  public void deleteDataSet(Long dataSetId) {
-    dataSetDao.delete(dataSetId);
+  public void deleteDataset(Long datasetId) {
+    datasetDao.delete(datasetId);
   }
 
   @Override
-  public Optional<DataSet> getDbDataSet(Long dataSetId) {
-    return Optional.of(dataSetMapper.dbModelToClient(dataSetDao.findOne(dataSetId)));
+  public Optional<Dataset> getDbDataset(Long datasetId) {
+    return Optional.of(datasetMapper.dbModelToClient(datasetDao.findOne(datasetId)));
   }
 
   @Override
   public void markDirty(ResourceType resourceType, long resourceId) {
-    List<DbDataset> dbDataSetList = getDbDataSets(resourceType, resourceId);
-    dbDataSetList.forEach(dataSet -> dataSet.setInvalid(true));
+    List<DbDataset> dbDatasetList = getDbDatasets(resourceType, resourceId);
+    dbDatasetList.forEach(dataset -> dataset.setInvalid(true));
     try {
-      dataSetDao.save(dbDataSetList);
+      datasetDao.save(dbDatasetList);
     } catch (OptimisticLockException e) {
       throw new ConflictException("Failed due to concurrent data set modification");
     }
@@ -961,7 +961,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
               + " cdr version: "
               + cdrVersion);
     }
-    return dataSetMapper.dbModelToClient(dataDictionaryEntries.get(0));
+    return datasetMapper.dbModelToClient(dataDictionaryEntries.get(0));
   }
 
   private String getColumnName(CdrBigQuerySchemaConfig.TableConfig config, String type) {
@@ -1042,7 +1042,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     String value =
         ARRAY.equals(parameter.getValue().getType())
             ? nullableListToEmpty(parameter.getValue().getArrayValues()).stream()
-                .map(DataSetServiceImpl::convertSqlTypeToString)
+                .map(DatasetServiceImpl::convertSqlTypeToString)
                 .collect(Collectors.joining(", "))
             : convertSqlTypeToString(parameter.getValue());
     String key = String.format("@%s", parameter.getKey());
@@ -1069,7 +1069,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private static String generateNotebookUserCode(
       QueryJobConfiguration queryJobConfiguration,
       Domain domain,
-      String dataSetName,
+      String datasetName,
       String cdrVersionName,
       String qualifier,
       KernelTypeEnum kernelTypeEnum) {
@@ -1082,7 +1082,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     String descriptiveComment =
         String.format(
             "# This query represents dataset \"%s\" for domain \"%s\" and was generated for %s",
-            dataSetName, domainAsString, cdrVersionName);
+            datasetName, domainAsString, cdrVersionName);
     String sqlSection;
     String dataFrameSection;
     String displayHeadSection;
@@ -1148,7 +1148,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     return surveyConceptSet;
   }
 
-  private DbDatasetValue getDataSetValuesFromDomainValueSet(DomainValuePair domainValuePair) {
+  private DbDatasetValue getDatasetValuesFromDomainValueSet(DomainValuePair domainValuePair) {
     return new DbDatasetValue(
         DbStorageEnums.domainToStorage(domainValuePair.getDomain()).toString(),
         domainValuePair.getValue());

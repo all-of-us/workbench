@@ -21,12 +21,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class DataSetDaoTest {
+public class DatasetDaoTest {
 
   private static final Timestamp NOW = Timestamp.from(Instant.parse("2000-01-01T00:00:00.00Z"));
 
   @Autowired private WorkspaceDao workspaceDao;
-  @Autowired private DataSetDao dataSetDao;
+  @Autowired private DatasetDao datasetDao;
 
   @Before
   public void setup() {
@@ -53,12 +53,12 @@ public class DataSetDaoTest {
     dataset.setValues(Collections.emptyList());
     dataset.setPrePackagedConceptSetEnum(PrePackagedConceptSetEnum.BOTH);
     dataset.setWorkspaceId(workspaceId);
-    return dataSetDao.save(dataset);
+    return datasetDao.save(dataset);
   }
 
   @Test
   public void test() {
-    final Map<Boolean, Long> map = dataSetDao.getInvalidToCountMap();
+    final Map<Boolean, Long> map = datasetDao.getInvalidToCountMap();
     assertThat(map).hasSize(Booleans.VALUE_STRINGS.size());
     assertThat(map.get(true)).isEqualTo(2L);
     assertThat(map.get(false)).isEqualTo(1L);

@@ -10,7 +10,7 @@ import * as React from 'react';
 
 const OMOPTutorialsLink = 'https://www.ohdsi.org/past-events/2017-tutorials-' +
   'omop-common-data-model-and-standardized-vocabularies/';
-const OMOPDataSetLink = 'https://www.ohdsi.org/data-standardization/the-common-data-model/';
+const OMOPDatasetLink = 'https://www.ohdsi.org/data-standardization/the-common-data-model/';
 
 const notReachedSelectorColor = colorWithWhiteness(colors.dark, 0.4);
 
@@ -32,7 +32,7 @@ export const panels = [
     content: <div>A Workspace is your place to store and analyze data for a specific project.
       You can share this Workspace with other users, allowing them to view or edit
       your work. The dataset referenced by a workspace is in
-      {' '}<StyledAnchorTag href={OMOPDataSetLink} target='_blank'>
+      {' '}<StyledAnchorTag href={OMOPDatasetLink} target='_blank'>
         OMOP common data model
       </StyledAnchorTag>{' '}
       format. Here are some

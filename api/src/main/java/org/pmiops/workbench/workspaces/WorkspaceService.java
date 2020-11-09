@@ -79,7 +79,7 @@ public interface WorkspaceService {
       Map<String, WorkspaceAccessLevel> userRoleMap,
       String registeredUsersGroup);
 
-  DbWorkspace saveAndCloneCohortsConceptSetsAndDataSets(DbWorkspace from, DbWorkspace to);
+  DbWorkspace saveAndCloneCohortsConceptSetsAndDatasets(DbWorkspace from, DbWorkspace to);
 
   WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId);
 

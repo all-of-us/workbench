@@ -153,8 +153,8 @@ describe('Create Concept Sets from Domains', () => {
     await dataPage.openDatasetsSubtab();
 
     const resourceCard = new DataResourceCard(page);
-    const dataSetExists = await resourceCard.cardExists(datasetName, ResourceCard.Dataset);
-    expect(dataSetExists).toBe(true);
+    const datasetExists = await resourceCard.cardExists(datasetName, ResourceCard.Dataset);
+    expect(datasetExists).toBe(true);
 
     // Delete Dataset.
     const textContent = await dataPage.deleteResource(datasetName, ResourceCard.Dataset);

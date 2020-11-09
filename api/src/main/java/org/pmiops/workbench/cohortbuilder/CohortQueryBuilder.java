@@ -27,7 +27,7 @@ public class CohortQueryBuilder {
 
   private static final String COUNT_SQL_TEMPLATE =
       "select count(*) as count\n"
-          + "from `${projectId}.${dataSetId}.cb_search_person` cb_search_person\n"
+          + "from `${projectId}.${datasetId}.cb_search_person` cb_search_person\n"
           + "where ";
 
   private static final String DEMO_CHART_INFO_SQL_TEMPLATE =
@@ -38,7 +38,7 @@ public class CohortQueryBuilder {
           + "else '> 65'\n"
           + "end as ageRange,\n"
           + "count(*) as count\n"
-          + "from `${projectId}.${dataSetId}.cb_search_person` cb_search_person\n"
+          + "from `${projectId}.${datasetId}.cb_search_person` cb_search_person\n"
           + "where ";
 
   private static final String DEMO_CHART_INFO_SQL_GROUP_BY =
@@ -46,7 +46,7 @@ public class CohortQueryBuilder {
 
   private static final String DOMAIN_CHART_INFO_SQL_TEMPLATE =
       "select standard_name as name, standard_concept_id as conceptId, count(distinct person_id) as count\n"
-          + "from `${projectId}.${dataSetId}.cb_review_all_events` cb_review_all_events\n"
+          + "from `${projectId}.${datasetId}.cb_review_all_events` cb_review_all_events\n"
           + "where cb_review_all_events.person_id in (${innerSql})";
 
   private static final String DOMAIN_CHART_INFO_SQL_GROUP_BY =
@@ -58,8 +58,8 @@ public class CohortQueryBuilder {
 
   private static final String RANDOM_SQL_TEMPLATE =
       "select rand() as x, person.person_id, race_concept_id, gender_concept_id, ethnicity_concept_id, sex_at_birth_concept_id, birth_datetime, case when death.person_id is null then false else true end as deceased\n"
-          + "from `${projectId}.${dataSetId}.person` person\n"
-          + "left join `${projectId}.${dataSetId}.death` death on (person.person_id = death.person_id)\n"
+          + "from `${projectId}.${datasetId}.person` person\n"
+          + "left join `${projectId}.${datasetId}.death` death on (person.person_id = death.person_id)\n"
           + "where person.person_id in (${innerSql})";
 
   private static final String RANDOM_SQL_ORDER_BY = "order by x\nlimit";
@@ -67,7 +67,7 @@ public class CohortQueryBuilder {
   private static final String OFFSET_SUFFIX = " offset ";
 
   private static final String ID_SQL_TEMPLATE =
-      "select person_id\n from `${projectId}.${dataSetId}.cb_search_person` cb_search_person\n where\n";
+      "select person_id\n from `${projectId}.${datasetId}.cb_search_person` cb_search_person\n where\n";
 
   private static final String UNION_TEMPLATE = "union all\n";
 

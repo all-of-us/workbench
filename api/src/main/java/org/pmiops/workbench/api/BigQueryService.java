@@ -26,7 +26,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.dataset.BigQueryDataSetTableInfo;
+import org.pmiops.workbench.dataset.BigQueryDatasetTableInfo;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -101,7 +101,7 @@ public class BigQueryService {
     }
     String returnSql =
         queryJobConfiguration.getQuery().replace("${projectId}", cdrVersion.getBigqueryProject());
-    returnSql = returnSql.replace("${dataSetId}", cdrVersion.getBigqueryDataset());
+    returnSql = returnSql.replace("${datasetId}", cdrVersion.getBigqueryDataset());
     return queryJobConfiguration.toBuilder().setQuery(returnSql).build();
   }
 
@@ -155,7 +155,7 @@ public class BigQueryService {
         TableId.of(
             cdrVersion.getBigqueryProject(),
             cdrVersion.getBigqueryDataset(),
-            BigQueryDataSetTableInfo.getTableName(domain));
+            BigQueryDatasetTableInfo.getTableName(domain));
 
     return getBigQueryService().getTable(tableId).getDefinition().getSchema().getFields();
   }

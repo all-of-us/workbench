@@ -181,7 +181,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(1L);
-    cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
+    cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.datasetId);
     cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
@@ -2082,7 +2082,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void filterBigQueryConfig_WithoutTableName() {
-    final String statement = "my statement ${projectId}.${dataSetId}.myTableName";
+    final String statement = "my statement ${projectId}.${datasetId}.myTableName";
     QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(statement).setUseLegacySql(false).build();
     final String expectedResult = "my statement " + getTablePrefix() + ".myTableName";

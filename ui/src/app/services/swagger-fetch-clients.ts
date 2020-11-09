@@ -31,7 +31,7 @@ import {
   ConceptsApi,
   ConceptSetsApi,
   Configuration as FetchConfiguration,
-  DataSetApi,
+  DatasetApi,
   FeaturedWorkspacesConfigApi,
   FetchAPI,
   InstitutionApi, // internal
@@ -90,7 +90,7 @@ export const cohortReviewApi = bindCtor(CohortReviewApi);
 export const cohortsApi = bindCtor(CohortsApi);
 export const conceptsApi = bindCtor(ConceptsApi);
 export const conceptSetsApi = bindCtor(ConceptSetsApi);
-export const dataSetApi = bindCtor(DataSetApi);
+export const datasetApi = bindCtor(DatasetApi);
 export const featuredWorkspacesConfigApi = bindCtor(FeaturedWorkspacesConfigApi);
 export const institutionApi = bindCtor(InstitutionApi);
 export const profileApi = bindCtor(ProfileApi);

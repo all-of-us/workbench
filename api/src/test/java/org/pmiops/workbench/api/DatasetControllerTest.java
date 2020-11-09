@@ -76,9 +76,9 @@ import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.dataset.DataSetServiceImpl;
 import org.pmiops.workbench.dataset.DatasetConfig;
-import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
+import org.pmiops.workbench.dataset.DatasetServiceImpl;
+import org.pmiops.workbench.dataset.mapper.DatasetMapperImpl;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
@@ -104,12 +104,12 @@ import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
-import org.pmiops.workbench.model.DataSetCodeResponse;
-import org.pmiops.workbench.model.DataSetExportRequest;
-import org.pmiops.workbench.model.DataSetExportRequest.GenomicsAnalysisToolEnum;
-import org.pmiops.workbench.model.DataSetExportRequest.GenomicsDataTypeEnum;
-import org.pmiops.workbench.model.DataSetPreviewValueList;
-import org.pmiops.workbench.model.DataSetRequest;
+import org.pmiops.workbench.model.DatasetCodeResponse;
+import org.pmiops.workbench.model.DatasetExportRequest;
+import org.pmiops.workbench.model.DatasetExportRequest.GenomicsAnalysisToolEnum;
+import org.pmiops.workbench.model.DatasetExportRequest.GenomicsDataTypeEnum;
+import org.pmiops.workbench.model.DatasetPreviewValueList;
+import org.pmiops.workbench.model.DatasetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.DomainValuePair;
@@ -147,14 +147,14 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-// TODO(jaycarlton): many of the tests here are testing DataSetServiceImpl more than
-//   DataSetControllerImpl, so move those tests and setup stuff into DataSetServiceTest
-//   and mock out DataSetService here.
+// TODO(jaycarlton): many of the tests here are testing DatasetServiceImpl more than
+//   DatasetControllerImpl, so move those tests and setup stuff into DatasetServiceTest
+//   and mock out DatasetService here.
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-public class DataSetControllerTest {
+public class DatasetControllerTest {
 
   private static final String COHORT_ONE_NAME = "cohort";
   private static final String COHORT_TWO_NAME = "cohort two";
@@ -192,7 +192,7 @@ public class DataSetControllerTest {
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private CohortsController cohortsController;
   @Autowired private ConceptSetsController conceptSetsController;
-  @Autowired private DataSetController dataSetController;
+  @Autowired private DatasetController datasetController;
   @Autowired private UserDao userDao;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private WorkspacesController workspacesController;
@@ -219,9 +219,9 @@ public class DataSetControllerTest {
     ConceptSetMapperImpl.class,
     ConceptSetService.class,
     ConceptSetsController.class,
-    DataSetController.class,
-    DataSetMapperImpl.class,
-    DataSetServiceImpl.class,
+    DatasetController.class,
+    DatasetMapperImpl.class,
+    DatasetServiceImpl.class,
     FirecloudMapperImpl.class,
     LogsBasedMetricServiceFakeImpl.class,
     TestBigQueryCdrSchemaConfig.class,
@@ -439,7 +439,7 @@ public class DataSetControllerTest {
     when(mockCohortQueryBuilder.buildParticipantIdQuery(any()))
         .thenReturn(
             QueryJobConfiguration.newBuilder(
-                    "SELECT * FROM person_id from `${projectId}.${dataSetId}.person` person WHERE @"
+                    "SELECT * FROM person_id from `${projectId}.${datasetId}.person` person WHERE @"
                         + NAMED_PARAMETER_NAME
                         + " IN unnest(@"
                         + NAMED_PARAMETER_ARRAY_NAME
@@ -460,13 +460,13 @@ public class DataSetControllerTest {
 
               String returnSql =
                   queryJobConfiguration.getQuery().replace("${projectId}", TEST_CDR_PROJECT_ID);
-              returnSql = returnSql.replace("${dataSetId}", TEST_CDR_DATA_SET_ID);
+              returnSql = returnSql.replace("${datasetId}", TEST_CDR_DATA_SET_ID);
               return queryJobConfiguration.toBuilder().setQuery(returnSql).build();
             });
   }
 
-  private DataSetRequest buildEmptyDataSetRequest() {
-    return new DataSetRequest()
+  private DatasetRequest buildEmptyDatasetRequest() {
+    return new DatasetRequest()
         .conceptSetIds(new ArrayList<>())
         .cohortIds(new ArrayList<>())
         .domainValuePairs(new ArrayList<>())
@@ -478,7 +478,7 @@ public class DataSetControllerTest {
     FirecloudWorkspace fcWorkspace = new FirecloudWorkspace();
     fcWorkspace.setNamespace(ns);
     fcWorkspace.setName(name);
-    fcWorkspace.setCreatedBy(DataSetControllerTest.USER_EMAIL);
+    fcWorkspace.setCreatedBy(DatasetControllerTest.USER_EMAIL);
     fcWorkspace.setBucketName(WORKSPACE_BUCKET_NAME);
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
@@ -491,9 +491,9 @@ public class DataSetControllerTest {
     FirecloudWorkspaceAccessEntry accessLevelEntry =
         new FirecloudWorkspaceAccessEntry().accessLevel(WorkspaceAccessLevel.OWNER.toString());
     Map<String, FirecloudWorkspaceAccessEntry> userEmailToAccessEntry =
-        ImmutableMap.of(DataSetControllerTest.USER_EMAIL, accessLevelEntry);
+        ImmutableMap.of(DatasetControllerTest.USER_EMAIL, accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
-    when(fireCloudService.getWorkspaceAclAsService(ns, DataSetControllerTest.WORKSPACE_NAME))
+    when(fireCloudService.getWorkspaceAclAsService(ns, DatasetControllerTest.WORKSPACE_NAME))
         .thenReturn(workspaceAccessLevelResponse);
   }
 
@@ -545,62 +545,62 @@ public class DataSetControllerTest {
 
   @Test
   public void testAddFieldValuesFromBigQueryToPreviewListWorksWithNullValues() {
-    DataSetPreviewValueList dataSetPreviewValueList = new DataSetPreviewValueList();
-    List<DataSetPreviewValueList> valuePreviewList = ImmutableList.of(dataSetPreviewValueList);
+    DatasetPreviewValueList datasetPreviewValueList = new DatasetPreviewValueList();
+    List<DatasetPreviewValueList> valuePreviewList = ImmutableList.of(datasetPreviewValueList);
     List<FieldValue> fieldValueListRows =
         ImmutableList.of(FieldValue.of(FieldValue.Attribute.PRIMITIVE, null));
     FieldValueList fieldValueList = FieldValueList.of(fieldValueListRows);
-    dataSetController.addFieldValuesFromBigQueryToPreviewList(valuePreviewList, fieldValueList);
+    datasetController.addFieldValuesFromBigQueryToPreviewList(valuePreviewList, fieldValueList);
     assertThat(valuePreviewList.get(0).getQueryValue().get(0))
-        .isEqualTo(DataSetController.EMPTY_CELL_MARKER);
+        .isEqualTo(DatasetController.EMPTY_CELL_MARKER);
   }
 
   @Test(expected = BadRequestException.class)
   public void testGetQueryFailsWithNoCohort() {
-    DataSetRequest dataSet = buildEmptyDataSetRequest();
-    dataSet =
-        dataSet
+    DatasetRequest dataset = buildEmptyDatasetRequest();
+    dataset =
+        dataset
             .addConceptSetIdsItem(CONCEPT_SET_ONE_ID)
             .domainValuePairs(ImmutableList.of(new DomainValuePair().domain(Domain.CONDITION)));
 
-    dataSetController.generateCode(
-        workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet);
+    datasetController.generateCode(
+        workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataset);
   }
 
   @Test(expected = BadRequestException.class)
   public void testGetQueryFailsWithNoConceptSet() {
-    DataSetRequest dataSet = buildEmptyDataSetRequest();
-    dataSet =
-        dataSet
+    DatasetRequest dataset = buildEmptyDatasetRequest();
+    dataset =
+        dataset
             .addCohortIdsItem(COHORT_ONE_ID)
             .domainValuePairs(ImmutableList.of(new DomainValuePair().domain(Domain.CONDITION)));
 
-    dataSetController.generateCode(
-        workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet);
+    datasetController.generateCode(
+        workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataset);
   }
 
   @Rule public ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void testGetQueryDropsQueriesWithNoValue() {
-    final DataSetRequest dataSet =
-        buildEmptyDataSetRequest()
-            .dataSetId(1l)
+    final DatasetRequest dataset =
+        buildEmptyDatasetRequest()
+            .datasetId(1l)
             .addCohortIdsItem(COHORT_ONE_ID)
             .addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
 
     expectedException.expect(BadRequestException.class);
 
-    DataSetCodeResponse response =
-        dataSetController
+    DatasetCodeResponse response =
+        datasetController
             .generateCode(
-                workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
+                workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataset)
             .getBody();
   }
 
   @Test
-  public void createDataSetMissingArguments() {
-    DataSetRequest dataSet = buildEmptyDataSetRequest().name(null);
+  public void createDatasetMissingArguments() {
+    DatasetRequest dataset = buildEmptyDatasetRequest().name(null);
 
     List<Long> cohortIds = new ArrayList<>();
     cohortIds.add(1L);
@@ -615,45 +615,45 @@ public class DataSetControllerTest {
 
     valuePairList.add(domainValue);
 
-    dataSet.setDomainValuePairs(valuePairList);
-    dataSet.setConceptSetIds(conceptIds);
-    dataSet.setCohortIds(cohortIds);
+    dataset.setDomainValuePairs(valuePairList);
+    dataset.setConceptSetIds(conceptIds);
+    dataset.setCohortIds(cohortIds);
 
     expectedException.expect(BadRequestException.class);
     expectedException.expectMessage("Missing name");
 
-    dataSetController.createDataSet(workspace.getNamespace(), WORKSPACE_NAME, dataSet);
+    datasetController.createDataset(workspace.getNamespace(), WORKSPACE_NAME, dataset);
 
-    dataSet.setName("dataSet");
-    dataSet.setCohortIds(null);
+    dataset.setName("dataset");
+    dataset.setCohortIds(null);
 
     expectedException.expect(BadRequestException.class);
     expectedException.expectMessage("Missing cohort ids");
 
-    dataSetController.createDataSet(workspace.getNamespace(), WORKSPACE_NAME, dataSet);
+    datasetController.createDataset(workspace.getNamespace(), WORKSPACE_NAME, dataset);
 
-    dataSet.setCohortIds(cohortIds);
-    dataSet.setConceptSetIds(null);
+    dataset.setCohortIds(cohortIds);
+    dataset.setConceptSetIds(null);
 
     expectedException.expect(BadRequestException.class);
     expectedException.expectMessage("Missing concept set ids");
 
-    dataSetController.createDataSet(workspace.getNamespace(), WORKSPACE_NAME, dataSet);
+    datasetController.createDataset(workspace.getNamespace(), WORKSPACE_NAME, dataset);
 
-    dataSet.setConceptSetIds(conceptIds);
-    dataSet.setDomainValuePairs(null);
+    dataset.setConceptSetIds(conceptIds);
+    dataset.setDomainValuePairs(null);
 
     expectedException.expect(BadRequestException.class);
     expectedException.expectMessage("Missing values");
 
-    dataSetController.createDataSet(workspace.getNamespace(), WORKSPACE_NAME, dataSet);
+    datasetController.createDataset(workspace.getNamespace(), WORKSPACE_NAME, dataset);
   }
 
   @Test
   public void exportToNewNotebook() {
-    DataSetExportRequest request = setUpValidDataSetExportRequest();
+    DatasetExportRequest request = setUpValidDatasetExportRequest();
 
-    dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request).getBody();
+    datasetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request).getBody();
     verify(mockNotebooksService, never()).getNotebookContents(any(), any());
     // I tried to have this verify against the actual expected contents of the json object, but
     // java equivalence didn't handle it well.
@@ -672,17 +672,17 @@ public class DataSetControllerTest {
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     workspaceDao.save(dbWorkspace);
 
-    DataSetExportRequest request = new DataSetExportRequest();
-    dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request);
+    DatasetExportRequest request = new DatasetExportRequest();
+    datasetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request);
   }
 
   @Test
   public void exportToExistingNotebook() {
-    DataSetRequest dataSet = buildEmptyDataSetRequest();
-    dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
-    dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
+    DatasetRequest dataset = buildEmptyDatasetRequest();
+    dataset = dataset.addCohortIdsItem(COHORT_ONE_ID);
+    dataset = dataset.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
     List<DomainValuePair> domainValuePairs = mockDomainValuePair();
-    dataSet.setDomainValuePairs(domainValuePairs);
+    dataset.setDomainValuePairs(domainValuePairs);
 
     ArrayList<String> tables = new ArrayList<>();
     tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");
@@ -699,13 +699,13 @@ public class DataSetControllerTest {
                 .put("nbformat", 4)
                 .put("nbformat_minor", 2));
 
-    DataSetExportRequest request =
-        new DataSetExportRequest()
-            .dataSetRequest(dataSet)
+    DatasetExportRequest request =
+        new DatasetExportRequest()
+            .datasetRequest(dataset)
             .newNotebook(false)
             .notebookName(notebookName);
 
-    dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request).getBody();
+    datasetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request).getBody();
     verify(mockNotebooksService, times(1)).getNotebookContents(WORKSPACE_BUCKET_NAME, notebookName);
     // I tried to have this verify against the actual expected contents of the json object, but
     // java equivalence didn't handle it well.
@@ -721,7 +721,7 @@ public class DataSetControllerTest {
                 Field.of("FIELD_ONE", LegacySQLTypeName.STRING),
                 Field.of("FIELD_TWO", LegacySQLTypeName.STRING)));
     List<DomainValue> domainValues =
-        dataSetController
+        datasetController
             .getValuesFromDomain(
                 workspace.getNamespace(), WORKSPACE_NAME, Domain.CONDITION.toString())
             .getBody()
@@ -740,14 +740,14 @@ public class DataSetControllerTest {
     cdrVersion.setMicroarrayBigqueryDataset(null);
     cdrVersionDao.save(cdrVersion);
 
-    DataSetExportRequest request =
-        setUpValidDataSetExportRequest().genomicsDataType(GenomicsDataTypeEnum.MICROARRAY);
+    DatasetExportRequest request =
+        setUpValidDatasetExportRequest().genomicsDataType(GenomicsDataTypeEnum.MICROARRAY);
 
     FailedPreconditionException e =
         assertThrows(
             FailedPreconditionException.class,
             () ->
-                dataSetController.exportToNotebook(
+                datasetController.exportToNotebook(
                     workspace.getNamespace(), WORKSPACE_NAME, request));
     assertThat(e)
         .hasMessageThat()
@@ -756,8 +756,8 @@ public class DataSetControllerTest {
 
   @Test
   public void exportToNotebook_microarrayCodegen_kernelCheck() {
-    DataSetExportRequest request =
-        setUpValidDataSetExportRequest()
+    DatasetExportRequest request =
+        setUpValidDatasetExportRequest()
             .kernelType(KernelTypeEnum.R)
             .genomicsDataType(GenomicsDataTypeEnum.MICROARRAY);
 
@@ -765,19 +765,19 @@ public class DataSetControllerTest {
         assertThrows(
             BadRequestException.class,
             () ->
-                dataSetController.exportToNotebook(
+                datasetController.exportToNotebook(
                     workspace.getNamespace(), WORKSPACE_NAME, request));
     assertThat(e).hasMessageThat().contains("Genomics code generation is only supported in Python");
   }
 
   @Test
   public void exportToNotebook_microarrayCodegen_noGenomicsTool() {
-    DataSetExportRequest request =
-        setUpValidDataSetExportRequest()
+    DatasetExportRequest request =
+        setUpValidDatasetExportRequest()
             .genomicsDataType(GenomicsDataTypeEnum.MICROARRAY)
             .genomicsAnalysisTool(GenomicsAnalysisToolEnum.NONE);
 
-    dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request);
+    datasetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request);
 
     verify(mockNotebooksService, times(1))
         .saveNotebook(
@@ -795,12 +795,12 @@ public class DataSetControllerTest {
 
   @Test
   public void exportToNotebook_microarrayCodegen_plink() {
-    DataSetExportRequest request =
-        setUpValidDataSetExportRequest()
+    DatasetExportRequest request =
+        setUpValidDatasetExportRequest()
             .genomicsDataType(GenomicsDataTypeEnum.MICROARRAY)
             .genomicsAnalysisTool(GenomicsAnalysisToolEnum.PLINK);
 
-    dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request);
+    datasetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request);
 
     verify(mockNotebooksService, times(1))
         .saveNotebook(
@@ -837,12 +837,12 @@ public class DataSetControllerTest {
 
   @Test
   public void exportToNotebook_microarrayCodegen_hail() {
-    DataSetExportRequest request =
-        setUpValidDataSetExportRequest()
+    DatasetExportRequest request =
+        setUpValidDatasetExportRequest()
             .genomicsDataType(GenomicsDataTypeEnum.MICROARRAY)
             .genomicsAnalysisTool(GenomicsAnalysisToolEnum.HAIL);
 
-    dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request);
+    datasetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request);
 
     verify(mockNotebooksService, times(1))
         .saveNotebook(
@@ -861,12 +861,12 @@ public class DataSetControllerTest {
 
   @Test
   public void exportToNotebook_microarrayCodegen_noneGenomicsDataType() {
-    DataSetExportRequest request =
-        setUpValidDataSetExportRequest()
+    DatasetExportRequest request =
+        setUpValidDatasetExportRequest()
             .genomicsDataType(GenomicsDataTypeEnum.NONE)
             .genomicsAnalysisTool(GenomicsAnalysisToolEnum.HAIL);
 
-    dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request);
+    datasetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request);
 
     verify(mockNotebooksService, times(1))
         .saveNotebook(
@@ -878,12 +878,12 @@ public class DataSetControllerTest {
     assertThat(codeCells.size()).isEqualTo(1);
   }
 
-  DataSetExportRequest setUpValidDataSetExportRequest() {
-    DataSetRequest dataSet = buildEmptyDataSetRequest().name("blah");
-    dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
-    dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
+  DatasetExportRequest setUpValidDatasetExportRequest() {
+    DatasetRequest dataset = buildEmptyDatasetRequest().name("blah");
+    dataset = dataset.addCohortIdsItem(COHORT_ONE_ID);
+    dataset = dataset.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
     List<DomainValuePair> domainValuePairs = mockDomainValuePair();
-    dataSet.setDomainValuePairs(domainValuePairs);
+    dataset.setDomainValuePairs(domainValuePairs);
 
     ArrayList<String> tables = new ArrayList<>();
     tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");
@@ -891,8 +891,8 @@ public class DataSetControllerTest {
     mockLinkingTableQuery(tables);
     String notebookName = "Hello World";
 
-    return new DataSetExportRequest()
-        .dataSetRequest(dataSet)
+    return new DatasetExportRequest()
+        .datasetRequest(dataset)
         .newNotebook(true)
         .notebookName(notebookName)
         .kernelType(KernelTypeEnum.PYTHON);

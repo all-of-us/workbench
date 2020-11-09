@@ -17,7 +17,7 @@ import {
   isCohort,
   isCohortReview,
   isConceptSet,
-  isDataSet,
+  isDataset,
   isNotebook,
 } from 'app/utils/resources';
 import {WorkspaceResource} from 'generated/fetch';
@@ -76,7 +76,7 @@ const StyledResourceType = (props: {resource: WorkspaceResource}) => {
       [isCohort, () => colors.resourceCardHighlights.cohort],
       [isCohortReview, () => colors.resourceCardHighlights.cohortReview],
       [isConceptSet, () => colors.resourceCardHighlights.conceptSet],
-      [isDataSet, () => colors.resourceCardHighlights.dataSet],
+      [isDataset, () => colors.resourceCardHighlights.dataset],
       [isNotebook, () => colors.resourceCardHighlights.notebook],
     ])(resource);
   }

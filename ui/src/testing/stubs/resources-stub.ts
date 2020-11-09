@@ -5,7 +5,7 @@ import {
     Cohort,
     CohortReview,
     ConceptSet,
-    DataSet,
+    Dataset,
     FileDetail,
     ResourceType,
     WorkspaceResource,
@@ -13,7 +13,7 @@ import {
 import {CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 import {WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
-type InputResource = FileDetail | Cohort | CohortReview | ConceptSet | DataSet;
+type InputResource = FileDetail | Cohort | CohortReview | ConceptSet | Dataset;
 export function convertToResources(
   inputResources: InputResource[],
   resourceType: ResourceType,

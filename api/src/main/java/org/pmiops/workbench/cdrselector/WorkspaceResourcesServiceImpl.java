@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
-import org.pmiops.workbench.db.dao.DataSetDao;
+import org.pmiops.workbench.db.dao.DatasetDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -26,18 +26,18 @@ import org.springframework.stereotype.Service;
 public class WorkspaceResourcesServiceImpl implements WorkspaceResourcesService {
   private final CohortReviewService cohortReviewService;
   private final ConceptSetService conceptSetService;
-  private final DataSetDao dataSetDao;
+  private final DatasetDao datasetDao;
   private final WorkspaceMapper workspaceMapper;
 
   @Autowired
   public WorkspaceResourcesServiceImpl(
       CohortReviewService cohortReviewService,
       ConceptSetService conceptSetService,
-      DataSetDao dataSetDao,
+      DatasetDao datasetDao,
       WorkspaceMapper workspaceMapper) {
     this.cohortReviewService = cohortReviewService;
     this.conceptSetService = conceptSetService;
-    this.dataSetDao = dataSetDao;
+    this.datasetDao = datasetDao;
     this.workspaceMapper = workspaceMapper;
   }
 
@@ -93,7 +93,7 @@ public class WorkspaceResourcesServiceImpl implements WorkspaceResourcesService 
     }
     if (resourceTypes.contains(ResourceType.DATASET)) {
       List<DbDataset> datasets =
-          dataSetDao.findByWorkspaceIdAndInvalid(dbWorkspace.getWorkspaceId(), false);
+          datasetDao.findByWorkspaceIdAndInvalid(dbWorkspace.getWorkspaceId(), false);
       workspaceResources.addAll(
           datasets.stream()
               .map(

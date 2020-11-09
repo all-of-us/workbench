@@ -11,27 +11,27 @@ import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.DataDictionaryEntry;
-import org.pmiops.workbench.model.DataSet;
-import org.pmiops.workbench.model.DataSetPreviewRequest;
-import org.pmiops.workbench.model.DataSetRequest;
+import org.pmiops.workbench.model.Dataset;
+import org.pmiops.workbench.model.DatasetPreviewRequest;
+import org.pmiops.workbench.model.DatasetRequest;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.ResourceType;
 
-public interface DataSetService {
+public interface DatasetService {
 
-  DataSet saveDataSet(DataSetRequest dataSetRequest, Long userId);
+  Dataset saveDataset(DatasetRequest datasetRequest, Long userId);
 
-  DataSet saveDataSet(DbDataset dataset);
+  Dataset saveDataset(DbDataset dataset);
 
-  DataSet updateDataSet(DataSetRequest dataSetRequest, Long DataSetId);
+  Dataset updateDataset(DatasetRequest datasetRequest, Long DatasetId);
 
-  QueryJobConfiguration previewBigQueryJobConfig(DataSetPreviewRequest dataSetPreviewRequest);
+  QueryJobConfiguration previewBigQueryJobConfig(DatasetPreviewRequest datasetPreviewRequest);
 
-  Map<String, QueryJobConfiguration> domainToBigQueryConfig(DataSetRequest dataSet);
+  Map<String, QueryJobConfiguration> domainToBigQueryConfig(DatasetRequest dataset);
 
   List<String> generateCodeCells(
       KernelTypeEnum kernelTypeEnum,
-      String dataSetName,
+      String datasetName,
       String cdrVersionName,
       String qualifier,
       Map<String, QueryJobConfiguration> queryJobConfigurationMap);
@@ -45,20 +45,20 @@ public interface DataSetService {
 
   List<String> generateHailDemoCode(String qualifier);
 
-  DbDataset cloneDataSetToWorkspace(
-      DbDataset fromDataSet, DbWorkspace toWorkspace, Set<Long> cohortIds, Set<Long> conceptSetIds);
+  DbDataset cloneDatasetToWorkspace(
+      DbDataset fromDataset, DbWorkspace toWorkspace, Set<Long> cohortIds, Set<Long> conceptSetIds);
 
-  List<DbDataset> getDataSets(DbWorkspace workspace);
+  List<DbDataset> getDatasets(DbWorkspace workspace);
 
-  List<DbConceptSet> getConceptSetsForDataset(DbDataset dataSet);
+  List<DbConceptSet> getConceptSetsForDataset(DbDataset dataset);
 
-  List<DbCohort> getCohortsForDataset(DbDataset dataSet);
+  List<DbCohort> getCohortsForDataset(DbDataset dataset);
 
-  List<DataSet> getDataSets(ResourceType resourceType, long resourceId);
+  List<Dataset> getDatasets(ResourceType resourceType, long resourceId);
 
-  void deleteDataSet(Long dataSetId);
+  void deleteDataset(Long datasetId);
 
-  Optional<DataSet> getDbDataSet(Long dataSetId);
+  Optional<Dataset> getDbDataset(Long datasetId);
 
   void markDirty(ResourceType resourceType, long resourceId);
 

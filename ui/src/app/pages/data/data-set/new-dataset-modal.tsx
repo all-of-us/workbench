@@ -8,16 +8,16 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {TextColumn} from 'app/components/text-column';
 import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
 
-import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {datasetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {summarizeErrors} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {encodeURIComponentStrict, navigateByUrl} from 'app/utils/navigation';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {
-  DataSet,
-  DataSetExportRequest,
-  DataSetRequest,
+  Dataset,
+  DatasetExportRequest,
+  DatasetRequest,
   DomainValuePair,
   FileDetail,
   KernelTypeEnum,
@@ -27,12 +27,12 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {validate} from 'validate.js';
-import GenomicsAnalysisToolEnum = DataSetExportRequest.GenomicsAnalysisToolEnum;
-import GenomicsDataTypeEnum = DataSetExportRequest.GenomicsDataTypeEnum;
+import GenomicsAnalysisToolEnum = DatasetExportRequest.GenomicsAnalysisToolEnum;
+import GenomicsDataTypeEnum = DatasetExportRequest.GenomicsDataTypeEnum;
 
 interface Props {
   closeFunction: Function;
-  dataSet: DataSet;
+  dataset: Dataset;
   includesAllParticipants: boolean;
   prePackagedConceptSet: PrePackagedConceptSetEnum;
   selectedConceptSetIds: number[];
@@ -45,12 +45,12 @@ interface Props {
 }
 
 interface State {
-  conflictDataSetName: boolean;
+  conflictDatasetName: boolean;
   existingNotebooks: FileDetail[];
   exportToNotebook: boolean;
   kernelType: KernelTypeEnum;
   loading: boolean;
-  missingDataSetInfo: boolean;
+  missingDatasetInfo: boolean;
   name: string;
   newNotebook: boolean;
   notebookName: string;
@@ -72,16 +72,16 @@ const styles = {
   }
 };
 
-class NewDataSetModal extends React.Component<Props, State> {
+class NewDatasetModal extends React.Component<Props, State> {
   constructor(props) {
     super(props);
     this.state = {
-      conflictDataSetName: false,
+      conflictDatasetName: false,
       existingNotebooks: [],
       exportToNotebook: !props.billingLocked,
       kernelType: KernelTypeEnum.Python,
       loading: false,
-      missingDataSetInfo: false,
+      missingDatasetInfo: false,
       name: '',
       newNotebook: true,
       notebookName: '',
@@ -102,8 +102,8 @@ class NewDataSetModal extends React.Component<Props, State> {
   private async loadNotebooks() {
     try {
       const {workspaceNamespace, workspaceId} = this.props;
-      if (this.props.dataSet) {
-        this.setState({name: this.props.dataSet.name});
+      if (this.props.dataset) {
+        this.setState({name: this.props.dataset.name});
       }
       this.setState({notebooksLoading: true});
       const existingNotebooks =
@@ -116,29 +116,29 @@ class NewDataSetModal extends React.Component<Props, State> {
     }
   }
 
-  async updateDataSet() {
-    const {dataSet, workspaceNamespace, workspaceId} = this.props;
+  async updateDataset() {
+    const {dataset, workspaceNamespace, workspaceId} = this.props;
     const {name} = this.state;
-    const request: DataSetRequest = {
+    const request: DatasetRequest = {
       name: name,
-      includesAllParticipants: dataSet.includesAllParticipants,
+      includesAllParticipants: dataset.includesAllParticipants,
       conceptSetIds: this.props.selectedConceptSetIds,
       cohortIds: this.props.selectedCohortIds,
       domainValuePairs: this.props.selectedDomainValuePairs,
-      etag: dataSet.etag
+      etag: dataset.etag
     };
-    await dataSetApi().updateDataSet(workspaceNamespace, workspaceId, dataSet.id, request);
+    await datasetApi().updateDataset(workspaceNamespace, workspaceId, dataset.id, request);
   }
 
-  async saveDataSet() {
+  async saveDataset() {
 
-    const {dataSet, workspaceNamespace, workspaceId} = this.props;
+    const {dataset, workspaceNamespace, workspaceId} = this.props;
     if (!this.state.name) {
       return;
     }
-    this.setState({conflictDataSetName: false, missingDataSetInfo: false, loading: true});
+    this.setState({conflictDatasetName: false, missingDatasetInfo: false, loading: true});
     const {name} = this.state;
-    const request: DataSetRequest = {
+    const request: DatasetRequest = {
       name: name,
       description: '',
       includesAllParticipants: this.props.includesAllParticipants,
@@ -149,21 +149,21 @@ class NewDataSetModal extends React.Component<Props, State> {
     };
     try {
       // If dataset exist it is an update
-      if (this.props.dataSet) {
+      if (this.props.dataset) {
         const updateReq = {
           ...request,
-          description: dataSet.description,
-          etag: dataSet.etag
+          description: dataset.description,
+          etag: dataset.etag
         };
-        await dataSetApi().updateDataSet(workspaceNamespace, workspaceId, dataSet.id, updateReq);
+        await datasetApi().updateDataset(workspaceNamespace, workspaceId, dataset.id, updateReq);
       } else {
-        await dataSetApi().createDataSet(workspaceNamespace, workspaceId, request);
+        await datasetApi().createDataset(workspaceNamespace, workspaceId, request);
       }
       if (this.state.exportToNotebook) {
-        await dataSetApi().exportToNotebook(
+        await datasetApi().exportToNotebook(
           workspaceNamespace, workspaceId,
           {
-            dataSetRequest: request,
+            datasetRequest: request,
             kernelType: this.state.kernelType,
             notebookName: this.state.notebookName,
             newNotebook: this.state.newNotebook,
@@ -179,9 +179,9 @@ class NewDataSetModal extends React.Component<Props, State> {
       }
     } catch (e) {
       if (e.status === 409) {
-        this.setState({conflictDataSetName: true, loading: false});
+        this.setState({conflictDatasetName: true, loading: false});
       } else if (e.status === 400) {
-        this.setState({missingDataSetInfo: true, loading: false});
+        this.setState({missingDatasetInfo: true, loading: false});
       }
     }
   }
@@ -191,7 +191,7 @@ class NewDataSetModal extends React.Component<Props, State> {
   }
 
   onSaveClick() {
-    if (this.props.dataSet) {
+    if (this.props.dataset) {
       if (this.state.exportToNotebook) {
         AnalyticsTracker.DatasetBuilder.UpdateAndAnalyze(this.state.kernelType);
       } else {
@@ -205,42 +205,42 @@ class NewDataSetModal extends React.Component<Props, State> {
       }
     }
 
-    this.saveDataSet();
+    this.saveDataset();
   }
 
   async generateQuery() {
     const {workspaceNamespace, workspaceId} = this.props;
-    const dataSetRequest: DataSetRequest = {
-      name: 'dataSet',
+    const datasetRequest: DatasetRequest = {
+      name: 'dataset',
       conceptSetIds: this.props.selectedConceptSetIds,
       cohortIds: this.props.selectedCohortIds,
       domainValuePairs: this.props.selectedDomainValuePairs,
       includesAllParticipants: this.props.includesAllParticipants,
       prePackagedConceptSet: this.props.prePackagedConceptSet
     };
-    dataSetApi().generateCode(
+    datasetApi().generateCode(
       workspaceNamespace,
       workspaceId,
       KernelTypeEnum.Python.toString(),
-      dataSetRequest).then(pythonCode => {
+      datasetRequest).then(pythonCode => {
         this.setState(({queries}) => ({
           queries: queries.set(KernelTypeEnum.Python, pythonCode.code)}));
       });
-    dataSetApi().generateCode(
+    datasetApi().generateCode(
       workspaceNamespace,
       workspaceId,
       KernelTypeEnum.R.toString(),
-      dataSetRequest).then(rCode => {
+      datasetRequest).then(rCode => {
         this.setState(({queries}) => ({queries: queries.set(KernelTypeEnum.R, rCode.code)}));
       });
   }
 
   render() {
     const {
-      conflictDataSetName,
+      conflictDatasetName,
       exportToNotebook,
       loading,
-      missingDataSetInfo,
+      missingDatasetInfo,
       name,
       newNotebook,
       notebookName,
@@ -270,19 +270,19 @@ class NewDataSetModal extends React.Component<Props, State> {
       }
     });
     return <Modal loading={loading}>
-      <ModalTitle>{this.props.dataSet ? 'Update' : 'Save'} Dataset</ModalTitle>
+      <ModalTitle>{this.props.dataset ? 'Update' : 'Save'} Dataset</ModalTitle>
       <ModalBody>
         <div>
-          {conflictDataSetName &&
-          <AlertDanger>DataSet with same name exist</AlertDanger>
+          {conflictDatasetName &&
+          <AlertDanger>Dataset with same name exist</AlertDanger>
           }
-          {missingDataSetInfo &&
+          {missingDatasetInfo &&
           <AlertDanger> Data state cannot save as some information is missing</AlertDanger>
           }
           <TextInput type='text' autoFocus placeholder='Dataset Name'
                      value={name} data-test-id='data-set-name-input'
                      onChange={v => this.setState({
-                       name: v, conflictDataSetName: false
+                       name: v, conflictDatasetName: false
                      })}/>
         </div>
         <TooltipTrigger content={this.props.billingLocked && ACTION_DISABLED_INVALID_BILLING}>
@@ -404,7 +404,7 @@ class NewDataSetModal extends React.Component<Props, State> {
                   data-test-id='save-data-set'
                   disabled={errors}
                   onClick={() => this.onSaveClick()}>
-            {!this.props.dataSet ? 'Save' : 'Update' }{exportToNotebook && ' and Analyze'}
+            {!this.props.dataset ? 'Save' : 'Update' }{exportToNotebook && ' and Analyze'}
           </Button>
         </TooltipTrigger>
       </ModalFooter>
@@ -413,5 +413,5 @@ class NewDataSetModal extends React.Component<Props, State> {
 }
 
 export {
-  NewDataSetModal
+  NewDatasetModal
 };

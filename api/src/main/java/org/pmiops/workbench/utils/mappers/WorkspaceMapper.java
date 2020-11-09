@@ -9,7 +9,7 @@ import org.mapstruct.MappingTarget;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapper;
 import org.pmiops.workbench.cohorts.CohortMapper;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper;
-import org.pmiops.workbench.dataset.mapper.DataSetMapper;
+import org.pmiops.workbench.dataset.mapper.DatasetMapper;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbStorageEnums;
@@ -34,7 +34,7 @@ import org.pmiops.workbench.model.WorkspaceResponse;
       CohortReviewMapper.class,
       CommonMappers.class,
       ConceptSetMapper.class,
-      DataSetMapper.class,
+      DatasetMapper.class,
       DbStorageEnums.class,
       FirecloudMapper.class
     })
@@ -117,7 +117,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "creator", ignore = true)
   @Mapping(target = "dataAccessLevel", ignore = true)
   @Mapping(target = "dataAccessLevelEnum", ignore = true)
-  @Mapping(target = "dataSets", ignore = true)
+  @Mapping(target = "datasets", ignore = true)
   @Mapping(target = "disseminateResearchSet", ignore = true)
   @Mapping(target = "firecloudName", ignore = true)
   @Mapping(target = "firecloudUuid", ignore = true)
@@ -145,7 +145,7 @@ public interface WorkspaceMapper {
   // All workspaceResources have one object and all others are null.
   @Mapping(target = "cohortReview", ignore = true)
   @Mapping(target = "conceptSet", ignore = true)
-  @Mapping(target = "dataSet", ignore = true)
+  @Mapping(target = "dataset", ignore = true)
   @Mapping(target = "notebook", ignore = true)
   // This should be set when the resource is set
   @Mapping(target = "modifiedTime", source = "dbCohort.lastModifiedTime")
@@ -161,7 +161,7 @@ public interface WorkspaceMapper {
   // All workspaceResources have one object and all others are null.
   @Mapping(target = "cohort", ignore = true)
   @Mapping(target = "conceptSet", ignore = true)
-  @Mapping(target = "dataSet", ignore = true)
+  @Mapping(target = "dataset", ignore = true)
   @Mapping(target = "notebook", ignore = true)
   // This should be set when the resource is set
   @Mapping(target = "modifiedTime", source = "cohortReview.lastModifiedTime")
@@ -177,7 +177,7 @@ public interface WorkspaceMapper {
   // All workspaceResources have one object and all others are null.
   @Mapping(target = "cohort", ignore = true)
   @Mapping(target = "cohortReview", ignore = true)
-  @Mapping(target = "dataSet", ignore = true)
+  @Mapping(target = "dataset", ignore = true)
   @Mapping(target = "notebook", ignore = true)
   // This should be set when the resource is set
   @Mapping(target = "modifiedTime", source = "conceptSet.lastModifiedTime")
@@ -189,7 +189,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "workspaceBillingStatus", source = "dbWorkspace.billingStatus")
   @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
   @Mapping(target = "permission", source = "accessLevel")
-  @Mapping(target = "dataSet", source = "dbDataset", qualifiedByName = "dbModelToClientLight")
+  @Mapping(target = "dataset", source = "dbDataset", qualifiedByName = "dbModelToClientLight")
   // All workspaceResources have one object and all others are null.
   @Mapping(target = "cohort", ignore = true)
   @Mapping(target = "cohortReview", ignore = true)

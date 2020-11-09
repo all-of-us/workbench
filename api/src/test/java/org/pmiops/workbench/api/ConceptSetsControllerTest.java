@@ -40,8 +40,8 @@ import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.BillingConfig;
-import org.pmiops.workbench.dataset.DataSetService;
-import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
+import org.pmiops.workbench.dataset.DatasetService;
+import org.pmiops.workbench.dataset.mapper.DatasetMapperImpl;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
@@ -221,8 +221,8 @@ public class ConceptSetsControllerTest {
     CohortService.class,
     ComplianceService.class,
     ConceptBigQueryService.class,
-    DataSetMapperImpl.class,
-    DataSetService.class,
+    DatasetMapperImpl.class,
+    DatasetService.class,
     DirectoryService.class,
     FireCloudService.class,
     FirecloudMapperImpl.class,

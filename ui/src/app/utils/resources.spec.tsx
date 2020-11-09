@@ -5,7 +5,7 @@ import {
     CohortReview,
     ResourceType,
     ConceptSet,
-    DataSet,
+    Dataset,
     WorkspaceResource,
 } from 'generated/fetch';
 import {
@@ -18,7 +18,7 @@ import {
     isCohort,
     isCohortReview,
     isConceptSet,
-    isDataSet,
+    isDataset,
     isNotebook,
     toDisplay,
 } from "./resources";
@@ -40,7 +40,7 @@ const CONCEPT_SET_NAME = 'testConceptSet1';
 const CONCEPT_SET_DESCRIPTION = 'this is a concept set';
 const CONCEPT_SET_ID = 200;
 
-const DATA_SET_NAME = 'testDataSet1';
+const DATA_SET_NAME = 'testDataset1';
 const DATA_SET_DESCRIPTION = 'this is a data set';
 const DATA_SET_ID = 300;
 
@@ -69,12 +69,12 @@ const testConceptSet = {...stubResource,
         id: CONCEPT_SET_ID,
 } as ConceptSet} as WorkspaceResource;
 
-const testDataSet = {...stubResource,
-    dataSet: {
+const testDataset = {...stubResource,
+    dataset: {
     name: DATA_SET_NAME,
         description: DATA_SET_DESCRIPTION,
         id: DATA_SET_ID,
-} as DataSet} as WorkspaceResource;
+} as Dataset} as WorkspaceResource;
 
 const testNotebook = {...stubResource,
     notebook: {name: NOTEBOOK_NAME} as FileDetail
@@ -87,7 +87,7 @@ describe('resources.tsx', () => {
 
         expect(isCohortReview(testCohort)).toBeFalsy();
         expect(isConceptSet(testCohort)).toBeFalsy();
-        expect(isDataSet(testCohort)).toBeFalsy();
+        expect(isDataset(testCohort)).toBeFalsy();
         expect(isNotebook(testCohort)).toBeFalsy();
 
 
@@ -96,7 +96,7 @@ describe('resources.tsx', () => {
 
         expect(isCohort(testCohortReview)).toBeFalsy();
         expect(isConceptSet(testCohortReview)).toBeFalsy();
-        expect(isDataSet(testCohortReview)).toBeFalsy();
+        expect(isDataset(testCohortReview)).toBeFalsy();
         expect(isNotebook(testCohortReview)).toBeFalsy();
 
 
@@ -105,17 +105,17 @@ describe('resources.tsx', () => {
 
         expect(isCohort(testConceptSet)).toBeFalsy();
         expect(isCohortReview(testConceptSet)).toBeFalsy();
-        expect(isDataSet(testConceptSet)).toBeFalsy();
+        expect(isDataset(testConceptSet)).toBeFalsy();
         expect(isNotebook(testConceptSet)).toBeFalsy();
 
 
-        expect(isDataSet(testDataSet)).toBeTruthy();
-        expect(getType(testDataSet)).toEqual(ResourceType.DATASET);
+        expect(isDataset(testDataset)).toBeTruthy();
+        expect(getType(testDataset)).toEqual(ResourceType.DATASET);
 
-        expect(isCohort(testDataSet)).toBeFalsy();
-        expect(isCohortReview(testDataSet)).toBeFalsy();
-        expect(isConceptSet(testDataSet)).toBeFalsy();
-        expect(isNotebook(testDataSet)).toBeFalsy();
+        expect(isCohort(testDataset)).toBeFalsy();
+        expect(isCohortReview(testDataset)).toBeFalsy();
+        expect(isConceptSet(testDataset)).toBeFalsy();
+        expect(isNotebook(testDataset)).toBeFalsy();
 
 
         expect(isNotebook(testNotebook)).toBeTruthy();
@@ -124,7 +124,7 @@ describe('resources.tsx', () => {
         expect(isCohort(testNotebook)).toBeFalsy();
         expect(isCohortReview(testNotebook)).toBeFalsy();
         expect(isConceptSet(testNotebook)).toBeFalsy();
-        expect(isDataSet(testNotebook)).toBeFalsy();
+        expect(isDataset(testNotebook)).toBeFalsy();
     });
 
     it('should return resource type strings', () => {
@@ -141,7 +141,7 @@ describe('resources.tsx', () => {
         expect(getTypeString(testCohort)).toBe('Cohort');
         expect(getTypeString(testCohortReview)).toBe('Cohort Review');
         expect(getTypeString(testConceptSet)).toBe('Concept Set');
-        expect(getTypeString(testDataSet)).toBe('Dataset');
+        expect(getTypeString(testDataset)).toBe('Dataset');
         expect(getTypeString(testNotebook)).toBe('Notebook');
     });
 
@@ -149,7 +149,7 @@ describe('resources.tsx', () => {
         expect(getDisplayName(testCohort)).toBe(COHORT_NAME);
         expect(getDisplayName(testCohortReview)).toBe(COHORT_REVIEW_COHORT_NAME);
         expect(getDisplayName(testConceptSet)).toBe(CONCEPT_SET_NAME);
-        expect(getDisplayName(testDataSet)).toBe(DATA_SET_NAME);
+        expect(getDisplayName(testDataset)).toBe(DATA_SET_NAME);
         expect(getDisplayName(testNotebook)).toBe(NOTEBOOK_DISPLAY_NAME);
     });
 
@@ -157,7 +157,7 @@ describe('resources.tsx', () => {
         expect(getDescription(testCohort)).toBe(COHORT_DESCRIPTION);
         expect(getDescription(testCohortReview)).toBe(COHORT_REVIEW_DESCRIPTION);
         expect(getDescription(testConceptSet)).toBe(CONCEPT_SET_DESCRIPTION);
-        expect(getDescription(testDataSet)).toBe(DATA_SET_DESCRIPTION);
+        expect(getDescription(testDataset)).toBe(DATA_SET_DESCRIPTION);
         // Notebooks don't have Descriptions
         expect(getDescription(testNotebook).trim()).toBeFalsy();
     });
@@ -166,7 +166,7 @@ describe('resources.tsx', () => {
         expect(getId(testCohort)).toBe(COHORT_ID);
         expect(getId(testCohortReview)).toBe(COHORT_REVIEW_ID);
         expect(getId(testConceptSet)).toBe(CONCEPT_SET_ID);
-        expect(getId(testDataSet)).toBe(DATA_SET_ID);
+        expect(getId(testDataset)).toBe(DATA_SET_ID);
         // Notebooks don't have IDs
         expect(getId(testNotebook)).toBeFalsy();
     });
@@ -182,7 +182,7 @@ describe('resources.tsx', () => {
         expect(getResourceUrl(testCohort)).toBe(EXPECTED_COHORT_URL);
         expect(getResourceUrl(testCohortReview)).toBe(EXPECTED_COHORT_REVIEW_URL);
         expect(getResourceUrl(testConceptSet)).toBe(EXPECTED_CONCEPT_SET_URL);
-        expect(getResourceUrl(testDataSet)).toBe(EXPECTED_DATA_SET_URL);
+        expect(getResourceUrl(testDataset)).toBe(EXPECTED_DATA_SET_URL);
         expect(getResourceUrl(testNotebook)).toBe(EXPECTED_NOTEBOOK_URL);
     });
 });

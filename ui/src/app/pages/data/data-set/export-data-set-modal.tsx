@@ -7,18 +7,18 @@ import {RadioButton, Select, TextArea, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {datasetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {summarizeErrors} from 'app/utils';
 import {encodeURIComponentStrict, navigateByUrl} from 'app/utils/navigation';
 
 
 import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {DataSet, DataSetRequest, FileDetail, KernelTypeEnum} from 'generated/fetch';
+import {Dataset, DatasetRequest, FileDetail, KernelTypeEnum} from 'generated/fetch';
 
 interface Props {
   closeFunction: Function;
-  dataSet: DataSet;
+  dataset: Dataset;
   workspaceNamespace: string;
   workspaceFirecloudName: string;
 }
@@ -45,7 +45,7 @@ const styles = {
   }
 };
 
-class ExportDataSetModal extends React.Component<
+class ExportDatasetModal extends React.Component<
   Props,
   State
   > {
@@ -84,48 +84,48 @@ class ExportDataSetModal extends React.Component<
   }
 
   get datasetRequest() {
-    const {dataSet} = this.props;
+    const {dataset} = this.props;
     return {
-      dataSetId: dataSet.id,
-      name: dataSet.name,
-      includesAllParticipants: dataSet.includesAllParticipants,
-      description: dataSet.description,
+      datasetId: dataset.id,
+      name: dataset.name,
+      includesAllParticipants: dataset.includesAllParticipants,
+      description: dataset.description,
       conceptSetIds: [],
       cohortIds: [],
-      domainValuePairs: dataSet.domainValuePairs,
-      prePackagedConceptSet: dataSet.prePackagedConceptSet
-    } as DataSetRequest;
+      domainValuePairs: dataset.domainValuePairs,
+      prePackagedConceptSet: dataset.prePackagedConceptSet
+    } as DatasetRequest;
   }
 
   async generateQuery() {
     const {workspaceNamespace, workspaceFirecloudName} = this.props;
-    const dataSetRequest = this.datasetRequest;
-    dataSetApi().generateCode(
+    const datasetRequest = this.datasetRequest;
+    datasetApi().generateCode(
       workspaceNamespace,
       workspaceFirecloudName,
       KernelTypeEnum.Python.toString(),
-      dataSetRequest).then(pythonCode => {
+      datasetRequest).then(pythonCode => {
         this.setState(({queries}) => ({
           queries: queries.set(KernelTypeEnum.Python, pythonCode.code)}));
       });
-    dataSetApi().generateCode(
+    datasetApi().generateCode(
       workspaceNamespace,
       workspaceFirecloudName,
       KernelTypeEnum.R.toString(),
-      dataSetRequest).then(rCode => {
+      datasetRequest).then(rCode => {
         this.setState(({queries}) => ({queries: queries.set(KernelTypeEnum.R, rCode.code)}));
       });
   }
 
-  async exportDataSet() {
+  async exportDataset() {
     this.setState({loading: true});
     const {workspaceNamespace, workspaceFirecloudName} = this.props;
     const request = this.datasetRequest;
     try {
-      await dataSetApi().exportToNotebook(
+      await datasetApi().exportToNotebook(
         workspaceNamespace, workspaceFirecloudName,
         {
-          dataSetRequest: request,
+          datasetRequest: request,
           notebookName: this.state.notebookName,
           newNotebook: this.state.newNotebook,
           kernelType: this.state.kernelType
@@ -145,7 +145,7 @@ class ExportDataSetModal extends React.Component<
   }
 
   render() {
-    const {dataSet} = this.props;
+    const {dataset} = this.props;
     const {
       existingNotebooks,
       loading,
@@ -172,7 +172,7 @@ class ExportDataSetModal extends React.Component<
       }
     });
     return <Modal loading={loading || notebooksLoading}>
-      <ModalTitle>Export {dataSet.name} to Notebook</ModalTitle>
+      <ModalTitle>Export {dataset.name} to Notebook</ModalTitle>
       <ModalBody>
         <Button data-test-id='code-preview-button'
                 onClick={() => {
@@ -237,7 +237,7 @@ class ExportDataSetModal extends React.Component<
                   disabled={errors || loading}
                   onClick={() => {
                     AnalyticsTracker.DatasetBuilder.Export(this.state.kernelType);
-                    this.exportDataSet();
+                    this.exportDataset();
                   }}>
             Export and Open
           </Button>
@@ -247,4 +247,4 @@ class ExportDataSetModal extends React.Component<
   }
 }
 
-export {ExportDataSetModal};
+export {ExportDatasetModal};

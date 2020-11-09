@@ -7,12 +7,12 @@ import org.pmiops.workbench.db.model.DbDataset;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
-public interface DataSetDao extends CrudRepository<DbDataset, Long> {
+public interface DatasetDao extends CrudRepository<DbDataset, Long> {
   List<DbDataset> findByWorkspaceIdAndInvalid(long workspaceId, boolean invalid);
 
-  List<DbDataset> findDataSetsByCohortIds(long cohortId);
+  List<DbDataset> findDatasetsByCohortIds(long cohortId);
 
-  List<DbDataset> findDataSetsByConceptSetIds(long conceptId);
+  List<DbDataset> findDatasetsByConceptSetIds(long conceptId);
 
   List<DbDataset> findByWorkspaceId(long workspaceId);
 
@@ -25,7 +25,7 @@ public interface DataSetDao extends CrudRepository<DbDataset, Long> {
   }
 
   @Query(
-      "SELECT invalid, count(dataSetId) AS invalidCount FROM DbDataset GROUP BY invalid ORDER BY invalid")
+      "SELECT invalid, count(datasetId) AS invalidCount FROM DbDataset GROUP BY invalid ORDER BY invalid")
   List<InvalidToCountResult> getInvalidToCount();
 
   interface InvalidToCountResult {

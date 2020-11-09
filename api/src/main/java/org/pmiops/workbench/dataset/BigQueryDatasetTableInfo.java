@@ -2,14 +2,14 @@ package org.pmiops.workbench.dataset;
 
 import org.pmiops.workbench.model.Domain;
 
-public enum BigQueryDataSetTableInfo {
+public enum BigQueryDatasetTableInfo {
   CONDITION(
       Domain.CONDITION,
       "ds_condition_occurrence",
       " (condition_concept_id in (select concept_id\n"
-          + "from `${projectId}.${dataSetId}.cb_criteria` c\n"
+          + "from `${projectId}.${datasetId}.cb_criteria` c\n"
           + "join (select cast(id as string)  as id\n"
-          + "from `${projectId}.${dataSetId}.cb_criteria`\n"
+          + "from `${projectId}.${datasetId}.cb_criteria`\n"
           + "where concept_id in unnest(@conceptIds)\n"
           + "and domain_id = 'CONDITION'\n"
           + "and is_standard = 1) a\n"
@@ -17,9 +17,9 @@ public enum BigQueryDataSetTableInfo {
           + "and domain_id = 'CONDITION'\n"
           + "and is_standard = 1)\n "
           + "or condition_source_concept_id in(select concept_id\n"
-          + "from `${projectId}.${dataSetId}.cb_criteria` c\n"
+          + "from `${projectId}.${datasetId}.cb_criteria` c\n"
           + "join (select cast(id as string)  as id\n"
-          + "from `${projectId}.${dataSetId}.cb_criteria`\n"
+          + "from `${projectId}.${datasetId}.cb_criteria`\n"
           + "where concept_id in unnest(@conceptIds)\n"
           + "and domain_id = 'CONDITION'\n"
           + "and is_standard = 0) a\n"
@@ -31,9 +31,9 @@ public enum BigQueryDataSetTableInfo {
       Domain.PROCEDURE,
       "ds_procedure_occurrence",
       " (procedure_concept_id in (select concept_id\n"
-          + "from `${projectId}.${dataSetId}.cb_criteria` c\n"
+          + "from `${projectId}.${datasetId}.cb_criteria` c\n"
           + "join (select cast(id as string)  as id\n"
-          + "from `${projectId}.${dataSetId}.cb_criteria`\n"
+          + "from `${projectId}.${datasetId}.cb_criteria`\n"
           + "where concept_id in unnest(@conceptIds)\n"
           + "and domain_id = 'PROCEDURE'\n"
           + "and is_standard = 1) a\n"
@@ -41,9 +41,9 @@ public enum BigQueryDataSetTableInfo {
           + "and domain_id = 'PROCEDURE'\n"
           + "and is_standard = 1)\n "
           + "or procedure_source_concept_id in (select concept_id\n"
-          + "from `${projectId}.${dataSetId}.cb_criteria` c\n"
+          + "from `${projectId}.${datasetId}.cb_criteria` c\n"
           + "join (select cast(id as string)  as id\n"
-          + "from `${projectId}.${dataSetId}.cb_criteria`\n"
+          + "from `${projectId}.${datasetId}.cb_criteria`\n"
           + "where concept_id in unnest(@conceptIds)\n"
           + "and domain_id = 'PROCEDURE'\n"
           + "and is_standard = 0) a\n"
@@ -55,11 +55,11 @@ public enum BigQueryDataSetTableInfo {
       Domain.DRUG,
       "ds_drug_exposure",
       " drug_concept_id in (select distinct ca.descendant_id\n"
-          + "from `${projectId}.${dataSetId}.cb_criteria_ancestor` ca\n"
+          + "from `${projectId}.${datasetId}.cb_criteria_ancestor` ca\n"
           + "join (select distinct c.concept_id\n"
-          + "from `${projectId}.${dataSetId}.cb_criteria` c\n"
+          + "from `${projectId}.${datasetId}.cb_criteria` c\n"
           + "join (select cast(cr.id as string) as id\n"
-          + "from `${projectId}.${dataSetId}.cb_criteria` cr\n"
+          + "from `${projectId}.${datasetId}.cb_criteria` cr\n"
           + "where domain_id = 'DRUG'\n"
           + "and concept_id in unnest(@conceptIds)\n"
           + ") a\n"
@@ -71,9 +71,9 @@ public enum BigQueryDataSetTableInfo {
       Domain.MEASUREMENT,
       "ds_measurement",
       " measurement_concept_id in (select concept_id\n"
-          + "from `${projectId}.${dataSetId}.cb_criteria` c\n"
+          + "from `${projectId}.${datasetId}.cb_criteria` c\n"
           + "join (select cast(id as string)  as id\n"
-          + "from `${projectId}.${dataSetId}.cb_criteria`\n"
+          + "from `${projectId}.${datasetId}.cb_criteria`\n"
           + "where concept_id in unnest(@conceptIds)\n"
           + "and domain_id = 'MEASUREMENT'\n"
           + "and is_standard = 1) a\n"
@@ -98,7 +98,7 @@ public enum BigQueryDataSetTableInfo {
   private final String conceptIdIn;
   private final String conceptIdInOld;
 
-  BigQueryDataSetTableInfo(
+  BigQueryDatasetTableInfo(
       Domain domain, String tableName, String conceptIdIn, String conceptIdInOld) {
     this.domain = domain;
     this.tableName = tableName;
@@ -107,7 +107,7 @@ public enum BigQueryDataSetTableInfo {
   }
 
   public static String getTableName(Domain domain) {
-    for (BigQueryDataSetTableInfo info : values()) {
+    for (BigQueryDatasetTableInfo info : values()) {
       if (info.domain.equals(domain)) {
         return info.tableName;
       }
@@ -116,7 +116,7 @@ public enum BigQueryDataSetTableInfo {
   }
 
   public static String getConceptIdIn(Domain domain) {
-    for (BigQueryDataSetTableInfo info : values()) {
+    for (BigQueryDatasetTableInfo info : values()) {
       if (info.domain.equals(domain)) {
         return info.conceptIdIn;
       }
@@ -125,7 +125,7 @@ public enum BigQueryDataSetTableInfo {
   }
 
   public static String getConceptIdInOld(Domain domain) {
-    for (BigQueryDataSetTableInfo info : values()) {
+    for (BigQueryDatasetTableInfo info : values()) {
       if (info.domain.equals(domain)) {
         return info.conceptIdInOld;
       }

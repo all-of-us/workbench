@@ -7,7 +7,7 @@ import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 
 import {DataPageComponent} from 'app/pages/data/data-page';
-import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
+import {DatasetPageComponent} from 'app/pages/data/data-set/dataset-page';
 import {AdminBannerComponent} from './pages/admin/admin-banner';
 import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
 import {AdminUserComponent} from './pages/admin/admin-user';
@@ -183,7 +183,7 @@ const routes: Routes = [
                       },
                       {
                         path: 'data-sets',
-                        component: DataSetPageComponent,
+                        component: DatasetPageComponent,
                         data: {
                           title: 'Dataset Page',
                           breadcrumb: BreadcrumbType.Dataset,
@@ -191,8 +191,8 @@ const routes: Routes = [
                         }
                       },
                       {
-                        path: 'data-sets/:dataSetId',
-                        component: DataSetPageComponent,
+                        path: 'data-sets/:datasetId',
+                        component: DatasetPageComponent,
                         data: {
                           title: 'Edit Dataset',
                           breadcrumb: BreadcrumbType.Dataset,

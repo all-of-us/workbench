@@ -1,17 +1,17 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {DataSetReferenceModal} from 'app/components/data-set-reference-modal';
+import {DatasetReferenceModal} from 'app/components/data-set-reference-modal';
 import {RenameModal} from 'app/components/rename-modal';
 import {Action, ResourceActionsMenu} from 'app/components/resource-actions-menu';
 import {canDelete, canWrite, ResourceCard} from 'app/components/resource-card';
 import {withConfirmDeleteModal, WithConfirmDeleteModalProps} from 'app/components/with-confirm-delete-modal';
 import {withErrorModal, WithErrorModalProps} from 'app/components/with-error-modal';
 import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
-import {cohortsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
+import {cohortsApi, datasetApi} from 'app/services/swagger-fetch-clients';
 import {navigateByUrl} from 'app/utils/navigation';
 import {getDescription, getDisplayName, getId, getResourceUrl, getType} from 'app/utils/resources';
-import {DataSet, WorkspaceResource} from 'generated/fetch';
+import {Dataset, WorkspaceResource} from 'generated/fetch';
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
   resource: WorkspaceResource;
@@ -22,7 +22,7 @@ interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSp
 
 interface State {
   showRenameModal: boolean;
-  referencingDataSets: Array<DataSet>;
+  referencingDatasets: Array<Dataset>;
 }
 
 export const CohortResourceCard = fp.flow(
@@ -35,7 +35,7 @@ export const CohortResourceCard = fp.flow(
     super(props);
     this.state = {
       showRenameModal: false,
-      referencingDataSets: [],
+      referencingDatasets: [],
     };
   }
 
@@ -91,14 +91,14 @@ export const CohortResourceCard = fp.flow(
   // if not, continue with deletion
   maybeDelete() {
     const {resource} = this.props;
-    return dataSetApi().getDataSetByResourceId(
+    return datasetApi().getDatasetByResourceId(
         resource.workspaceNamespace,
         resource.workspaceFirecloudName,
         getType(resource),
         getId(resource))
-        .then(dataSetList => {
-          if (dataSetList && dataSetList.items.length > 0) {
-            this.setState({referencingDataSets: dataSetList.items});
+        .then(datasetList => {
+          if (datasetList && datasetList.items.length > 0) {
+            this.setState({referencingDatasets: datasetList.items});
           } else {
             return this.deleteCohort();
           }
@@ -166,14 +166,14 @@ export const CohortResourceCard = fp.flow(
                    oldName={getDisplayName(resource)}
                    existingNames={this.props.existingNameList}/>
       }
-      {this.state.referencingDataSets.length > 0 && <DataSetReferenceModal
+      {this.state.referencingDatasets.length > 0 && <DatasetReferenceModal
           referencedResource={resource}
-          dataSets={fp.join(', ' , this.state.referencingDataSets.map((data) => data.name))}
+          datasets={fp.join(', ' , this.state.referencingDatasets.map((data) => data.name))}
           onCancel={() => {
-            this.setState({referencingDataSets: []});
+            this.setState({referencingDatasets: []});
           }}
           deleteResource={() => {
-            this.setState({referencingDataSets: []});
+            this.setState({referencingDatasets: []});
             return this.deleteCohort();
           }}/>
       }

@@ -33,8 +33,8 @@ describe('Dataset test', () => {
 
     // Verify create successful
     const resourceCard = new DataResourceCard(page);
-    const dataSetExists = await resourceCard.cardExists(datasetName, ResourceCard.Dataset);
-    expect(dataSetExists).toBe(true);
+    const datasetExists = await resourceCard.cardExists(datasetName, ResourceCard.Dataset);
+    expect(datasetExists).toBe(true);
 
     // Rename Dataset
     const newDatasetName = makeRandomName();

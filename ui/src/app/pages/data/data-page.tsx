@@ -75,14 +75,14 @@ const descriptions = {
 
 const cohortImg = '/assets/images/cohort-diagram.svg';
 
-const dataSetImg = '/assets/images/dataset-diagram.svg';
+const datasetImg = '/assets/images/dataset-diagram.svg';
 
 const resourceTypesToFetch = [ResourceType.COHORT, ResourceType.COHORTREVIEW, ResourceType.CONCEPTSET, ResourceType.DATASET];
 
 export const DataPage = withCurrentWorkspace()(class extends React.Component<
   {workspace: WorkspaceData},
   {activeTab: Tabs, resourceList: WorkspaceResource[], isLoading: boolean,
-    creatingConceptSet: boolean, existingDataSetName: string[], existingCohortName: string[],
+    creatingConceptSet: boolean, existingDatasetName: string[], existingCohortName: string[],
     existingCohortReviewName: string[], existingConceptSetName: string[]}> {
 
   constructor(props) {
@@ -95,7 +95,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
       existingCohortName: [],
       existingCohortReviewName: [],
       existingConceptSetName: [],
-      existingDataSetName: []
+      existingDatasetName: []
     };
   }
 
@@ -122,8 +122,8 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
           .map(resource => resource.cohortReview.cohortName),
         existingConceptSetName: results.filter(resource => resource.conceptSet !== null && resource.conceptSet !== undefined)
           .map(resource => resource.conceptSet.name),
-        existingDataSetName: results.filter(resource => resource.dataSet !== null && resource.dataSet !== undefined)
-          .map(resource => resource.dataSet.name),
+        existingDatasetName: results.filter(resource => resource.dataset !== null && resource.dataset !== undefined)
+          .map(resource => resource.dataset.name),
         resourceList: results
       });
     } catch (error) {
@@ -136,8 +136,8 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
   }
 
   getExistingNameList(resource) {
-    if (resource.dataSet) {
-      return this.state.existingDataSetName;
+    if (resource.dataset) {
+      return this.state.existingDatasetName;
     } else if (resource.conceptSet) {
       return this.state.existingConceptSetName;
     } else if (resource.cohort) {
@@ -166,7 +166,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
       } else if (activeTab === Tabs.CONCEPTSETS) {
         return resource.conceptSet;
       } else if (activeTab === Tabs.DATASETS) {
-        return resource.dataSet;
+        return resource.dataset;
       }
     });
     return <React.Fragment>
@@ -211,7 +211,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
               {/*Because the container can stretch based on window size, but the height
                can't we set a max width to cap the height based on aspect ratio*/}
               <div style={{width: '100%', maxWidth: '425px', paddingTop: '1.5rem'}}>
-                <img src={dataSetImg}/>
+                <img src={datasetImg}/>
               </div>
             </CardButton>
           </TooltipTrigger>

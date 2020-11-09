@@ -123,7 +123,7 @@ public class ReviewQueryBuilder {
           + "first_mention as %s,\n"
           + "last_mention as %s,\n"
           + "value_as_number as %s\n"
-          + "from `${projectId}.${dataSetId}.%s`\n"
+          + "from `${projectId}.${datasetId}.%s`\n"
           + "where person_id = @%s\n";
   private static final String SURVEY_SQL_TEMPLATE =
       "select person_id as personId,\n"
@@ -132,22 +132,22 @@ public class ReviewQueryBuilder {
           + "survey as %s,\n"
           + "question as %s,\n"
           + "answer as %s\n"
-          + "from `${projectId}.${dataSetId}.%s`\n"
+          + "from `${projectId}.${datasetId}.%s`\n"
           + "where person_id = @%s\n";
   private static final String COUNT_TEMPLATE =
       "select count(*) as count\n"
-          + "from `${projectId}.${dataSetId}.%s`\n"
+          + "from `${projectId}.${datasetId}.%s`\n"
           + "where person_id = @%s\n";
   private static final String COUNT_SURVEY_TEMPLATE =
       "select count(*) as count\n"
-          + "from `${projectId}.${dataSetId}.%s`\n"
+          + "from `${projectId}.${datasetId}.%s`\n"
           + "where person_id = @%s\n";
   private static final String CHART_DATA_TEMPLATE =
       "select distinct a.standard_name as standardName, a.standard_vocabulary as standardVocabulary, "
           + "DATE(a.start_datetime) as startDate, a.age_at_event as ageAtEvent, rnk as rank\n"
-          + "from `${projectId}.${dataSetId}.%s` a\n"
+          + "from `${projectId}.${datasetId}.%s` a\n"
           + "left join (select standard_code, RANK() OVER(ORDER BY COUNT(*) DESC) as rnk\n"
-          + "from `${projectId}.${dataSetId}.%s`\n"
+          + "from `${projectId}.${datasetId}.%s`\n"
           + "where person_id = @%s\n"
           + "and domain = @%s\n"
           + "and standard_concept_id != 0 \n"
@@ -159,17 +159,17 @@ public class ReviewQueryBuilder {
           + "order by rank, standardName, startDate\n";
   private static final String VOCAB_DATA_TEMPLATE =
       "SELECT distinct 'Standard' as type, 'ALL_EVENTS' as domain, standard_vocabulary as vocabulary\n"
-          + "FROM `${projectId}.${dataSetId}.%1$s`\n"
+          + "FROM `${projectId}.${datasetId}.%1$s`\n"
           + "UNION ALL\n"
           + "SELECT distinct 'Standard' as type, domain, standard_vocabulary as vocabulary\n"
-          + "FROM `${projectId}.${dataSetId}.%1$s`\n"
+          + "FROM `${projectId}.${datasetId}.%1$s`\n"
           + "UNION ALL\n"
           + "SELECT distinct 'Source' as type, 'ALL_EVENTS' as domain, source_vocabulary as vocabulary\n"
-          + "FROM `${projectId}.${dataSetId}.%1$s`\n"
+          + "FROM `${projectId}.${datasetId}.%1$s`\n"
           + "where domain in ('CONDITION', 'PROCEDURE')\n"
           + "UNION ALL\n"
           + "SELECT distinct 'Source' as type, domain, source_vocabulary as vocabulary\n"
-          + "FROM `${projectId}.${dataSetId}.%1$s`\n"
+          + "FROM `${projectId}.${datasetId}.%1$s`\n"
           + "where domain in ('CONDITION', 'PROCEDURE')\n"
           + "order by type, domain, vocabulary";
   private static final String AND = "and";

@@ -6,7 +6,7 @@ import {CohortReviewResourceCard} from 'app/pages/data/cohort-review/cohort-revi
 import {CohortResourceCard} from 'app/pages/data/cohort/cohort-resource-card';
 import {ConceptSetResourceCard} from 'app/pages/data/concept/concept-set-resource-card';
 import {DatasetResourceCard} from 'app/pages/data/data-set/dataset-resource-card';
-import {isCohort, isCohortReview, isConceptSet, isDataSet, isNotebook} from 'app/utils/resources';
+import {isCohort, isCohortReview, isConceptSet, isDataset, isNotebook} from 'app/utils/resources';
 import {BillingStatus, WorkspaceResource} from 'generated/fetch';
 
 interface RenderResourceCardProps {
@@ -24,7 +24,7 @@ function renderResourceCard(props: RenderResourceCardProps) {
       [isCohort, () => <CohortResourceCard {...props}/>],
       [isCohortReview, () => <CohortReviewResourceCard {...props}/>],
       [isConceptSet, () => <ConceptSetResourceCard {...props}/>],
-      [isDataSet, () => <DatasetResourceCard {...props} disableExportToNotebook={inactiveBilling}/>],
+      [isDataset, () => <DatasetResourceCard {...props} disableExportToNotebook={inactiveBilling}/>],
       [isNotebook, () => <NotebookResourceCard {...props} disableDuplicate={inactiveBilling}/>]
   ])(resource);
 }

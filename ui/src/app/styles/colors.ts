@@ -23,7 +23,7 @@ export default {
     cohort: '#F8C954',
     cohortReview: '#A8385D',
     conceptSet: '#A27BD7',
-    dataSet: '#6CACE4',
+    dataset: '#6CACE4',
     notebook: '#8BC990'
   },
   white: '#fff',

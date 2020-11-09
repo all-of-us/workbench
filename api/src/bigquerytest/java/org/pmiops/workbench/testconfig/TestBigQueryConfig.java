@@ -33,11 +33,11 @@ public class TestBigQueryConfig {
   @Bean
   public TestWorkbenchConfig bqConfig() throws Exception {
     ObjectMapper jackson = new ObjectMapper();
-    String dataSetId = "test_" + UUID.randomUUID().toString().replaceAll("-", "_");
+    String datasetId = "test_" + UUID.randomUUID().toString().replaceAll("-", "_");
     JsonNode newJson =
         jackson.readTree(
-            "{\"bigquery\": {\"dataSetId\": \""
-                + dataSetId
+            "{\"bigquery\": {\"datasetId\": \""
+                + datasetId
                 + "\",\"projectId\": \"all-of-us-workbench-test\"}}");
     Gson gson = new Gson();
     TestWorkbenchConfig testWorkbenchConfig =

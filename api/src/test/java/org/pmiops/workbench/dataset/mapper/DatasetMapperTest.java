@@ -35,8 +35,8 @@ import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.DataDictionaryEntry;
-import org.pmiops.workbench.model.DataSet;
-import org.pmiops.workbench.model.DataSetRequest;
+import org.pmiops.workbench.model.Dataset;
+import org.pmiops.workbench.model.DatasetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
@@ -50,12 +50,12 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
-public class DataSetMapperTest {
+public class DatasetMapperTest {
 
   private DbDataset dbDataset;
   private DbDataDictionaryEntry dbDataDictionaryEntry;
 
-  @Autowired private DataSetMapper dataSetMapper;
+  @Autowired private DatasetMapper datasetMapper;
   @Autowired private ConceptSetDao mockConceptSetDao;
   @Autowired private CohortDao mockCohortDao;
   private static final Instant NOW = Instant.now();
@@ -63,7 +63,7 @@ public class DataSetMapperTest {
 
   @TestConfiguration
   @Import({
-    DataSetMapperImpl.class,
+    DatasetMapperImpl.class,
     CommonMappers.class,
     ConceptSetService.class,
     ConceptSetMapperImpl.class,
@@ -90,7 +90,7 @@ public class DataSetMapperTest {
   public void setUp() {
     dbDataset = new DbDataset();
     dbDataset.setVersion(1);
-    dbDataset.setDataSetId(101L);
+    dbDataset.setDatasetId(101L);
     dbDataset.setName("All Blue-eyed Blondes");
     dbDataset.setIncludesAllParticipants(false);
     dbDataset.setDescription("All Blue-eyed Blondes");
@@ -134,44 +134,44 @@ public class DataSetMapperTest {
 
   @Test
   public void dbModelToClientLight() {
-    final DataSet toClientDataSet = dataSetMapper.dbModelToClientLight(dbDataset);
-    assertDbModelToClientLight(toClientDataSet, dbDataset);
+    final Dataset toClientDataset = datasetMapper.dbModelToClientLight(dbDataset);
+    assertDbModelToClientLight(toClientDataset, dbDataset);
   }
 
   @Test
-  public void dbModelToClientDataSet() {
-    final DataSet toClientDataSet = dataSetMapper.dbModelToClient(dbDataset);
-    assertDbModelToClient(toClientDataSet, dbDataset);
+  public void dbModelToClientDataset() {
+    final Dataset toClientDataset = datasetMapper.dbModelToClient(dbDataset);
+    assertDbModelToClient(toClientDataset, dbDataset);
   }
 
   @Test
   public void dbModelToClientDataDictionaryEntry() {
     final DataDictionaryEntry toClientDataDictionaryEntry =
-        dataSetMapper.dbModelToClient(dbDataDictionaryEntry);
+        datasetMapper.dbModelToClient(dbDataDictionaryEntry);
     assertDbModelToClient(toClientDataDictionaryEntry, dbDataDictionaryEntry);
   }
 
   @Test
-  public void testDataSetRequestToDb() {
-    DataSetRequest request = new DataSetRequest();
+  public void testDatasetRequestToDb() {
+    DatasetRequest request = new DatasetRequest();
     request.setName("New Name");
     request.setPrePackagedConceptSet(PrePackagedConceptSetEnum.SURVEY);
-    final DbDataset toDataSet = dataSetMapper.dataSetRequestToDb(request, dbDataset, CLOCK);
-    assertThat(toDataSet.getName()).isEqualTo("New Name");
-    assertThat(toDataSet.getCohortIds()).isEqualTo(dbDataset.getCohortIds());
-    assertThat(toDataSet.getIncludesAllParticipants())
+    final DbDataset toDataset = datasetMapper.datasetRequestToDb(request, dbDataset, CLOCK);
+    assertThat(toDataset.getName()).isEqualTo("New Name");
+    assertThat(toDataset.getCohortIds()).isEqualTo(dbDataset.getCohortIds());
+    assertThat(toDataset.getIncludesAllParticipants())
         .isEqualTo(dbDataset.getIncludesAllParticipants());
-    assertThat(toDataSet.getConceptSetIds()).isEqualTo(dbDataset.getConceptSetIds());
-    assertThat(toDataSet.getValues()).isEqualTo(dbDataset.getValues());
-    assertThat(toDataSet.getPrePackagedConceptSet()).isEqualTo((short) 0);
-    assertThat(toDataSet.getInvalid()).isEqualTo(dbDataset.getInvalid());
-    assertThat(toDataSet.getDataSetId()).isEqualTo(dbDataset.getDataSetId());
-    assertThat(toDataSet.getCreationTime()).isEqualTo(dbDataset.getCreationTime());
-    assertThat(toDataSet.getCreatorId()).isEqualTo(dbDataset.getCreatorId());
+    assertThat(toDataset.getConceptSetIds()).isEqualTo(dbDataset.getConceptSetIds());
+    assertThat(toDataset.getValues()).isEqualTo(dbDataset.getValues());
+    assertThat(toDataset.getPrePackagedConceptSet()).isEqualTo((short) 0);
+    assertThat(toDataset.getInvalid()).isEqualTo(dbDataset.getInvalid());
+    assertThat(toDataset.getDatasetId()).isEqualTo(dbDataset.getDatasetId());
+    assertThat(toDataset.getCreationTime()).isEqualTo(dbDataset.getCreationTime());
+    assertThat(toDataset.getCreatorId()).isEqualTo(dbDataset.getCreatorId());
   }
 
   @Test
-  public void testDataSetRequestToDbWithNullSourceDB() {
+  public void testDatasetRequestToDbWithNullSourceDB() {
     List<Long> conceptIds = ImmutableList.of(4l, 5l, 6l);
     List<Long> cohortIds = ImmutableList.of(1l, 2l, 3l);
 
@@ -179,54 +179,54 @@ public class DataSetMapperTest {
     domainValuePair.setDomain(Domain.PERSON);
     domainValuePair.setValue("person_id");
 
-    DataSetRequest request = new DataSetRequest();
+    DatasetRequest request = new DatasetRequest();
     request.setName("New Name");
     request.setCohortIds(cohortIds);
     request.setConceptSetIds(conceptIds);
     request.setIncludesAllParticipants(false);
     request.setPrePackagedConceptSet(PrePackagedConceptSetEnum.NONE);
     request.setDomainValuePairs(ImmutableList.of(domainValuePair));
-    final DbDataset toDataSet = dataSetMapper.dataSetRequestToDb(request, dbDataset, CLOCK);
-    assertThat(toDataSet.getName()).isEqualTo("New Name");
-    assertThat(toDataSet.getCohortIds()).isEqualTo(cohortIds);
-    assertThat(toDataSet.getIncludesAllParticipants()).isFalse();
-    assertThat(toDataSet.getConceptSetIds()).isEqualTo(conceptIds);
-    assertThat(toDataSet.getPrePackagedConceptSet()).isEqualTo((short) 0);
-    assertThat(toDataSet.getValues().get(0).getDomainEnum()).isEqualTo(Domain.PERSON);
-    assertThat(toDataSet.getInvalid()).isFalse();
+    final DbDataset toDataset = datasetMapper.datasetRequestToDb(request, dbDataset, CLOCK);
+    assertThat(toDataset.getName()).isEqualTo("New Name");
+    assertThat(toDataset.getCohortIds()).isEqualTo(cohortIds);
+    assertThat(toDataset.getIncludesAllParticipants()).isFalse();
+    assertThat(toDataset.getConceptSetIds()).isEqualTo(conceptIds);
+    assertThat(toDataset.getPrePackagedConceptSet()).isEqualTo((short) 0);
+    assertThat(toDataset.getValues().get(0).getDomainEnum()).isEqualTo(Domain.PERSON);
+    assertThat(toDataset.getInvalid()).isFalse();
   }
 
-  private void assertDbModelToClient(DataSet dataSet, DbDataset dbDataset) {
+  private void assertDbModelToClient(Dataset dataset, DbDataset dbDataset) {
     assertThat(dbDataset.getCohortIds())
-        .isEqualTo(dataSet.getCohorts().stream().map(Cohort::getId).collect(Collectors.toList()));
+        .isEqualTo(dataset.getCohorts().stream().map(Cohort::getId).collect(Collectors.toList()));
     assertThat(dbDataset.getConceptSetIds())
         .isEqualTo(
-            dataSet.getConceptSets().stream().map(ConceptSet::getId).collect(Collectors.toList()));
+            dataset.getConceptSets().stream().map(ConceptSet::getId).collect(Collectors.toList()));
     assertThat(dbDataset.getValues())
         .isEqualTo(
-            dataSet.getDomainValuePairs().stream()
+            dataset.getDomainValuePairs().stream()
                 .map(
                     dvp ->
                         new DbDatasetValue(
                             DbStorageEnums.domainToStorage(dvp.getDomain()).toString(),
                             dvp.getValue()))
                 .collect(Collectors.toList()));
-    assertDbModelToClientLight(dataSet, dbDataset);
+    assertDbModelToClientLight(dataset, dbDataset);
   }
 
-  private void assertDbModelToClientLight(DataSet dataSet, DbDataset dbDataset) {
-    assertThat(dbDataset.getDataSetId()).isEqualTo(dataSet.getId());
-    assertThat(dbDataset.getVersion()).isEqualTo(Etags.toVersion(dataSet.getEtag()));
-    assertThat(dbDataset.getName()).isEqualTo(dataSet.getName());
+  private void assertDbModelToClientLight(Dataset dataset, DbDataset dbDataset) {
+    assertThat(dbDataset.getDatasetId()).isEqualTo(dataset.getId());
+    assertThat(dbDataset.getVersion()).isEqualTo(Etags.toVersion(dataset.getEtag()));
+    assertThat(dbDataset.getName()).isEqualTo(dataset.getName());
     assertThat(dbDataset.getIncludesAllParticipants())
-        .isEqualTo(dataSet.getIncludesAllParticipants());
-    assertThat(dbDataset.getDescription()).isEqualTo(dataSet.getDescription());
-    assertThat(dbDataset.getWorkspaceId()).isEqualTo(dataSet.getWorkspaceId());
+        .isEqualTo(dataset.getIncludesAllParticipants());
+    assertThat(dbDataset.getDescription()).isEqualTo(dataset.getDescription());
+    assertThat(dbDataset.getWorkspaceId()).isEqualTo(dataset.getWorkspaceId());
     assertThat(dbDataset.getLastModifiedTime().toInstant().toEpochMilli())
-        .isEqualTo(dataSet.getLastModifiedTime());
+        .isEqualTo(dataset.getLastModifiedTime());
     assertThat(dbDataset.getPrePackagedConceptSet())
         .isEqualTo(
-            DbStorageEnums.prePackagedConceptSetsToStorage(dataSet.getPrePackagedConceptSet()));
+            DbStorageEnums.prePackagedConceptSetsToStorage(dataset.getPrePackagedConceptSet()));
   }
 
   private void assertDbModelToClient(

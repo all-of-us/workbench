@@ -29,7 +29,7 @@ public class DSLinkingDaoTest {
             DbDSLinking.builder()
                 .addDenormalizedName("CONDITION_CONCEPT_ID")
                 .addOmopSql("c_occurrence.CONDITION_CONCEPT_ID")
-                .addJoinValue("from `${projectId}.${dataSetId}.condition_occurrence` c_occurrence")
+                .addJoinValue("from `${projectId}.${datasetId}.condition_occurrence` c_occurrence")
                 .addDomain("Condition")
                 .build());
     dbDSLinking2 =
@@ -38,7 +38,7 @@ public class DSLinkingDaoTest {
                 .addDenormalizedName("CONDITION_STATUS_CONCEPT_NAME")
                 .addOmopSql("c_status.concept_name as CONDITION_STATUS_CONCEPT_NAME")
                 .addJoinValue(
-                    "left join `${projectId}.${dataSetId}.concept` c_status on c_occurrence.CONDITION_STATUS_CONCEPT_ID = c_status.CONCEPT_ID")
+                    "left join `${projectId}.${datasetId}.concept` c_status on c_occurrence.CONDITION_STATUS_CONCEPT_ID = c_status.CONCEPT_ID")
                 .addDomain("Condition")
                 .build());
   }

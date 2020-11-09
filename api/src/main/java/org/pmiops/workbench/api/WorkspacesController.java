@@ -507,7 +507,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     try {
       dbWorkspace =
-          workspaceService.saveAndCloneCohortsConceptSetsAndDataSets(fromWorkspace, dbWorkspace);
+          workspaceService.saveAndCloneCohortsConceptSetsAndDatasets(fromWorkspace, dbWorkspace);
     } catch (Exception e) {
       // Tell Google to set the billing account back to the free tier if our clone fails
       workspaceService.updateWorkspaceBillingAccount(

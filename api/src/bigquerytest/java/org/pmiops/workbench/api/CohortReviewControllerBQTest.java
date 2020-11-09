@@ -37,8 +37,8 @@ import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
-import org.pmiops.workbench.dataset.DataSetService;
-import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
+import org.pmiops.workbench.dataset.DatasetService;
+import org.pmiops.workbench.dataset.mapper.DatasetMapperImpl;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -109,7 +109,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     CommonMappers.class,
     CommonMappers.class,
     ConceptSetMapperImpl.class,
-    DataSetMapperImpl.class,
+    DatasetMapperImpl.class,
     FirecloudMapperImpl.class,
     ParticipantCohortAnnotationMapperImpl.class,
     ParticipantCohortStatusMapperImpl.class,
@@ -125,7 +125,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     CohortFactory.class,
     CohortService.class,
     ConceptSetService.class,
-    DataSetService.class,
+    DatasetService.class,
     FireCloudService.class,
     FreeTierBillingService.class,
     UserRecentResourceService.class,
@@ -204,7 +204,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                         new FirecloudWorkspaceAccessEntry().accessLevel("OWNER"))));
 
     cdrVersion = new DbCdrVersion();
-    cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
+    cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.datasetId);
     cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
     cdrVersion = cdrVersionDao.save(cdrVersion);
 
