@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -17,8 +18,8 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(
-    name = "acccess_policy",
-    uniqueConstraints = { @UniqueConstraint(columnNames = "display_name")})
+    name = "access_policy",
+    uniqueConstraints = {@UniqueConstraint(columnNames = "display_name")})
 public class DbAccessPolicy implements Serializable {
 
   private long accessPolicyId;
@@ -68,11 +69,11 @@ public class DbAccessPolicy implements Serializable {
 
   // DbAccessPolicy is the owning side of the many:many relationship, and is
   // responsible for maintaining the integrity of the join table access_module_policy.
-  @ManyToMany
+  @ManyToMany(cascade = CascadeType.ALL) // FIXME!!
   @JoinTable(
       name = "access_module_policy",
-      joinColumns = @JoinColumn(referencedColumnName = "access_policy_id"),
-      inverseJoinColumns = @JoinColumn(referencedColumnName = "access_module_id"))
+      joinColumns = @JoinColumn(name = "access_policy_id"),
+      inverseJoinColumns = @JoinColumn(name = "access_module_id"))
   public Set<DbAccessModule> getAccessModules() {
     return accessModules;
   }
@@ -80,9 +81,5 @@ public class DbAccessPolicy implements Serializable {
   public void setAccessModules(Set<DbAccessModule> accessModules) {
     this.accessModules.clear();
     this.accessModules.addAll(accessModules);
-    // Update join table
-    for (DbAccessModule accessModule : accessModules) {
-      accessModule.getAccessPolicies().add(this);
-    }
   }
 }

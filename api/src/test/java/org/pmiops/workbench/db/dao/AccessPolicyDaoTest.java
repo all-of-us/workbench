@@ -58,24 +58,23 @@ public class AccessPolicyDaoTest {
     module2 = accessModuleDao.save(module2);
     assertThat(accessModuleDao.count()).isEqualTo(2);
 
-    final DbAccessPolicy policy = new DbAccessPolicy();
+    DbAccessPolicy policy = new DbAccessPolicy();
     policy.setDisplayName("Basic Access Policy");
-
-    module1.setAccessPolicies(Collections.singleton(policy));
-    module2.setAccessPolicies(Collections.singleton(policy));
-    accessModuleDao.save(ImmutableSet.of(module1, module2));
+    policy = accessPolicyDao.save(policy);
 
     policy.setAccessModules(ImmutableSet.of(module1, module2));
     assertThat(policy.getAccessModules()).hasSize(2);
 
+    policy.setAccessModules(Collections.singleton(module1));
+    assertThat(policy.getAccessModules()).hasSize(1);
 
-    final DbAccessPolicy updatedPolicy = accessPolicyDao.save(policy);
-    assertThat(updatedPolicy.getAccessModules()).hasSize(2);
+    final DbAccessPolicy updatedPolicy = accessPolicyDao.save(policy); // how to force an update?
+    assertThat(updatedPolicy.getAccessModules()).hasSize(1);
 
     module1 = accessModuleDao.findOne(module1.getAccessModuleId());
-    assertThat(module1.getAccessPolicies()).containsExactly(policy);
+    assertThat(accessPolicyDao.findAllByAccessModule(module1)).containsExactly(policy);
 
     module2 = accessModuleDao.findOne(module2.getAccessModuleId());
-    assertThat(module2.getAccessPolicies()).containsExactly(policy);
+    assertThat(accessPolicyDao.findAllByAccessModule(module2)).containsExactly(policy);
   }
 }
