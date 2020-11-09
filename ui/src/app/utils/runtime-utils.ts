@@ -17,6 +17,7 @@ import * as React from 'react';
 const {useState, useEffect} = React;
 
 export enum RuntimeStatusRequest {
+  Create = 'Create',
   Delete = 'Delete'
 }
 

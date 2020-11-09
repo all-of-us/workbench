@@ -37,13 +37,15 @@ const styles = reactStyles({
   baseHeader: {
     color: colors.primary,
     fontSize: '16px',
-    fontWeight: 700,
     lineHeight: '1rem',
     margin: 0
   },
   sectionHeader: {
     marginBottom: '12px',
     marginTop: '12px'
+  },
+  bold: {
+    fontWeight: 700,
   },
   controlSection: {
     backgroundColor: String(addOpacity(colors.white, .75)),
@@ -125,6 +127,7 @@ const presetEquals = (a: Runtime, b: Runtime): boolean => {
 };
 
 enum PanelContent {
+  Create = 'Create',
   Customize = 'Customize',
   Delete = 'Delete'
 }
@@ -143,7 +146,7 @@ export const ConfirmDelete = ({onCancel, onConfirm}) => {
         <ClrIcon style={{color: colors.warning, gridColumn: 1, gridRow: 1}} className='is-solid'
                  shape='exclamation-triangle' size='20'/>
       </div>
-      <h3 style={{...styles.baseHeader, gridColumn: 2, gridRow: 1}}>Delete your environment</h3>
+      <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 2, gridRow: 1}}>Delete your environment</h3>
       <p style={{...styles.confirmWarningText, gridColumn: 2, gridRow: 2}}>
         You’re about to delete your cloud analysis environment.
       </p>
@@ -480,6 +483,111 @@ const CostEstimator = ({
   </FlexRow>;
 };
 
+const CreatePanel = ({creatorFreeCreditsRemaining, preset, profile, setPanelContent, workspace}) => {
+  const {
+    displayName,
+    runtimeTemplate: {gceConfig = null, dataprocConfig = null}
+  } = preset;
+  const computeType = dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard;
+  const masterMachineType = computeType === ComputeType.Dataproc ? dataprocConfig.masterMachineType : gceConfig.machineType;
+  const masterMachine = findMachineByName(masterMachineType);
+  const masterDiskSize = computeType === ComputeType.Dataproc ? dataprocConfig.masterDiskSize : gceConfig.diskSize;
+  const workerMachineType = computeType === ComputeType.Dataproc ? dataprocConfig.workerMachineType : null;
+  const workerMachine = workerMachineType ? findMachineByName(workerMachineType) : null;
+  const workerDiskSize = computeType === ComputeType.Dataproc ? dataprocConfig.workerDiskSize : null;
+
+  return <div style={styles.controlSection}>
+    <CostEstimator
+        freeCreditsRemaining={creatorFreeCreditsRemaining}
+        profile={profile}
+        runtimeParameters={{
+          computeType: computeType,
+          diskSize: gceConfig ? gceConfig.diskSize : null,
+          machineType: gceConfig ? gceConfig.machineType : null,
+          dataprocConfig: dataprocConfig ? dataprocConfig : null
+        }}
+        runtimeChanged={false}
+        workspace={workspace}
+    />
+    <FlexRow style={{justifyContent: 'space-between'}}>
+      <h3 style={{...styles.sectionHeader, ...styles.bold}}>Recommended Environment for {displayName}</h3>
+      <Button
+          type='secondaryLight'
+          onClick={() => setPanelContent(PanelContent.Customize)}
+      >
+        Customize
+      </Button>
+    </FlexRow>
+    <label htmlFor='compute-resources' style={{...styles.bold, marginTop: '1rem'}}>Compute Resources</label>
+    <div id='compute-resources'>- Default: compute size of
+      <b> {masterMachine.cpu} CPUs</b>,
+      <b> {masterMachine.memory} GB memory</b>, and a
+      <b> {masterDiskSize} GB disk</b>
+    </div>
+    {computeType === ComputeType.Dataproc && <Fragment>
+      <label htmlFor='worker-configuration' style={{...styles.bold, marginTop: '1rem'}}>Worker Configuration</label>
+      <div id='worker-configuration'>- Default:
+        <b> {dataprocConfig.numberOfWorkers} worker(s)</b>
+        {!dataprocConfig.numberOfPreemptibleWorkers && <Fragment>, </Fragment>}
+        <b>
+          {
+            dataprocConfig.numberOfPreemptibleWorkers > 0 &&
+            <Fragment> and {dataprocConfig.numberOfPreemptibleWorkers}  preemptible worker(s), </Fragment>
+          }
+          each with compute size of {workerMachine.cpu} CPUs
+        </b>,
+        <b> {workerMachine.memory} GB memory</b>, and a
+        <b> {workerDiskSize} GB disk</b>
+      </div>
+    </Fragment>}
+  </div>
+};
+
+const UpdateRuntimeButton = ({
+   customOnClick = () => {},
+   runtimeExists,
+   runtimeChanged,
+   runtimeStatus,
+   selectedDiskSize,
+   selectedMachineType,
+   selectedDataprocConfig,
+   setRequestedRuntime
+}) => {
+  return <Button
+      aria-label={runtimeExists ? 'Update' : 'Create'}
+      disabled={
+        runtimeExists && (
+            !runtimeChanged
+            // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
+            // where we get 'status' from
+            || ![RuntimeStatus.Running, RuntimeStatus.Stopped].includes(runtimeStatus as RuntimeStatus))
+      }
+      onClick={() => {
+        const runtimeToRequest: Runtime = selectedDataprocConfig ? {
+          dataprocConfig: {
+            ...selectedDataprocConfig,
+            masterMachineType: selectedMachineType,
+            masterDiskSize: selectedDiskSize
+          }
+        } : {
+          gceConfig: {
+            machineType: selectedMachineType,
+            diskSize: selectedDiskSize
+          }
+        };
+
+        // If the selected runtime matches a preset, plumb through the appropriate configuration type.
+        runtimeToRequest.configurationType = fp.get(
+            'runtimeTemplate.configurationType',
+            fp.find(
+                ({runtimeTemplate}) => presetEquals(runtimeToRequest, runtimeTemplate),
+                runtimePresets)
+        ) || RuntimeConfigurationType.UserOverride;
+        setRequestedRuntime(runtimeToRequest);
+        customOnClick();
+      }}>{runtimeExists ? 'Update' : 'Create'}</Button>
+}
+
 export const RuntimePanel = fp.flow(
   withCdrVersions(),
   withCurrentWorkspace(),
@@ -499,7 +607,12 @@ export const RuntimePanel = fp.flow(
   const initialMasterMachine = findMachineByName(machineName) || defaultMachineType;
   const initialCompute = dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard;
   // TODO(RW-5591): Initialize PanelContent according to the runtime status.
-  const [panelContent, setPanelContent] = useState<PanelContent>(PanelContent.Customize);
+  const initialPanelContent = fp.cond([
+    [(s) => s === RuntimeStatus.Running || s === RuntimeStatus.Stopped, () => PanelContent.Customize],
+    [(s) => s === null || s === RuntimeStatus.Unknown, () => PanelContent.Create],
+    [() => true, () => PanelContent.Delete]
+  ])(status);
+  const [panelContent, setPanelContent] = useState<PanelContent>(initialPanelContent);
 
   const [selectedDiskSize, setSelectedDiskSize] = useState(diskSize);
   const [selectedMachine, setSelectedMachine] = useState(initialMasterMachine);
@@ -534,12 +647,38 @@ export const RuntimePanel = fp.flow(
   }
 
   return <div data-test-id='runtime-panel'>
-    <h3 style={{...styles.baseHeader, ...styles.sectionHeader}}>Cloud analysis environment</h3>
+    <h3 style={{...styles.baseHeader, ...styles.bold, ...styles.sectionHeader}}>Cloud analysis environment</h3>
     <div>
       Your analysis environment consists of an application and compute resources.
       Your cloud environment is unique to this workspace and not shared with other users.
     </div>
     {switchCase(panelContent,
+      [PanelContent.Create, () =>
+        <Fragment>
+          <CreatePanel
+              creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
+              preset={runtimePresets.generalAnalysis}
+              profile={profile}
+              setPanelContent={(value) => setPanelContent(value)}
+              workspace={workspace}
+          />
+          <FlexRow style={{justifyContent: 'flex-end', marginTop: '1rem'}}>
+            <UpdateRuntimeButton
+                customOnClick={() => {
+                  setRuntimeStatus(RuntimeStatusRequest.Create);
+                  setPanelContent(PanelContent.Customize);
+                }}
+                runtimeExists={runtimeExists}
+                runtimeChanged={runtimeChanged}
+                runtimeStatus={status}
+                selectedDiskSize={selectedDiskSize}
+                selectedMachineType={selectedMachineType}
+                selectedDataprocConfig={selectedDataprocConfig}
+                setRequestedRuntime={(value) => setRequestedRuntime(value)}
+            />
+          </FlexRow>
+        </Fragment>
+      ],
       [PanelContent.Delete, () => <ConfirmDelete
         onConfirm={async() => {
           await setRuntimeStatus(RuntimeStatusRequest.Delete);
@@ -625,38 +764,15 @@ export const RuntimePanel = fp.flow(
            aria-label='Delete Environment'
            disabled={![RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus)}
            onClick={() => setPanelContent(PanelContent.Delete)}>Delete Environment</Link>
-         <Button
-           aria-label={runtimeExists ? 'Update' : 'Create'}
-           disabled={
-             runtimeExists && (
-               !runtimeChanged
-               // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
-               // where we get 'status' from
-               || ![RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus))
-           }
-           onClick={() => {
-             const runtimeToRequest: Runtime = selectedDataprocConfig ? {
-               dataprocConfig: {
-                 ...selectedDataprocConfig,
-                 masterMachineType: selectedMachineType,
-                 masterDiskSize: selectedDiskSize
-               }
-             } : {
-               gceConfig: {
-                 machineType: selectedMachineType,
-                 diskSize: selectedDiskSize
-               }
-             };
-
-             // If the selected runtime matches a preset, plumb through the appropriate configuration type.
-             runtimeToRequest.configurationType = fp.get(
-               'runtimeTemplate.configurationType',
-               fp.find(
-                 ({runtimeTemplate}) => presetEquals(runtimeToRequest, runtimeTemplate),
-                 runtimePresets)
-             ) || RuntimeConfigurationType.UserOverride;
-             setRequestedRuntime(runtimeToRequest);
-           }}>{runtimeExists ? 'Update' : 'Create'}</Button>
+         <UpdateRuntimeButton
+           runtimeExists={runtimeExists}
+           runtimeChanged={runtimeChanged}
+           runtimeStatus={status}
+           selectedDiskSize={selectedDiskSize}
+           selectedMachineType={selectedMachineType}
+           selectedDataprocConfig={selectedDataprocConfig}
+           setRequestedRuntime={(value) => setRequestedRuntime(value)}
+         />
        </FlexRow>
      </Fragment>])}
   </div>;
