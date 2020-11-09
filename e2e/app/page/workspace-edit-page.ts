@@ -11,6 +11,7 @@ import {buildXPath} from 'app/xpath-builders';
 import {LinkText} from 'app/text-labels';
 import WorkspaceBase, {UseFreeCredits} from './workspace-base';
 import {config} from 'resources/workbench-config';
+import BaseElement from 'app/element/base-element';
 
 const faker = require('faker/locale/en_US');
 
@@ -248,6 +249,18 @@ export default class WorkspaceEditPage extends WorkspaceBase {
    */
   async getCdrVersionSelect(): Promise<Select> {
     return Select.findByName(this.page, FIELD.cdrVersionSelect.textOption);
+  }
+
+  async getCdrVersionUpgradeMessage(): Promise<string> {
+    const xpath = '//*[@data-test-id="cdr-version-upgrade"]';
+    const element = BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath));
+    return element.getTextContent();
+  }
+
+  async getCdrVersionWarningMessage(): Promise<string> {
+    const xpath = '//*[@data-test-id="old-cdr-version-warning"]';
+    const element = BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath));
+    return element.getTextContent();
   }
 
   async getBillingAccountSelect(): Promise<Select> {

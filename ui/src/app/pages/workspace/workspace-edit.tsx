@@ -1,9 +1,13 @@
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+import * as validate from 'validate.js';
+
 import {Location} from '@angular/common';
 import {Component} from '@angular/core';
 import {Button, Clickable, Link, StyledAnchorTag} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {InfoIcon} from 'app/components/icons';
+import {ClrIcon, InfoIcon} from 'app/components/icons';
 import {CheckBox, RadioButton, TextArea, TextInput} from 'app/components/inputs';
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
@@ -43,6 +47,7 @@ import {
   withUserProfile
 } from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
+import {getCdrVersion, hasDefaultCdrVersion} from 'app/utils/cdr-versions';
 import {reportError} from 'app/utils/errors';
 import {currentWorkspaceStore, navigate, nextWorkspaceWarmupStore, serverConfigStore} from 'app/utils/navigation';
 import {getBillingAccountInfo} from 'app/utils/workbench-gapi-client';
@@ -62,11 +67,8 @@ import {
   Workspace,
   WorkspaceAccessLevel
 } from 'generated/fetch';
-import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import {OverlayPanel} from 'primereact/overlaypanel';
-import * as React from 'react';
-import * as validate from 'validate.js';
 
 export const styles = reactStyles({
   categoryRow: {
@@ -169,6 +171,26 @@ export const styles = reactStyles({
     cursor: 'pointer',
     textDecoration: 'none'
   },
+  cdrVersionUpgrade: {
+    padding: '16px',
+    boxSizing: 'border-box',
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderRadius: '5px',
+    color: colors.primary,
+    fontFamily: 'Montserrat',
+    letterSpacing: 0,
+    lineHeight: '22px',
+    borderColor: colors.accent,
+    backgroundColor: colorWithWhiteness(colors.accent, 0.85),
+    maxWidth: 'fit-content',
+  },
+  warningIcon: {
+    color: colors.warning,
+    height: '20px',
+    width: '20px',
+    align: 'top',
+  },
 });
 
 const CREATE_BILLING_ACCOUNT_OPTION_VALUE = 'CREATE_BILLING_ACCOUNT_OPTION';
@@ -193,6 +215,22 @@ function getDiseaseNames(keyword) {
   });
 }
 
+interface UpgradeProps {
+  srcWorkspace: Workspace;
+  destWorkspace: Workspace;
+  cdrVersionListResponse: CdrVersionListResponse;
+}
+const CdrVersionUpgrade = (props: UpgradeProps) => {
+  const {srcWorkspace, destWorkspace, cdrVersionListResponse} = props;
+  const fromCdrVersion = <span style={{fontWeight: 'bold'}}>{getCdrVersion(srcWorkspace, cdrVersionListResponse).name}</span>;
+  const toCdrVersion = <span style={{fontWeight: 'bold'}}>{getCdrVersion(destWorkspace, cdrVersionListResponse).name}</span>;
+
+  return <div data-test-id='cdr-version-upgrade' style={styles.cdrVersionUpgrade}>
+    <div>{`You're duplicating the workspace "${srcWorkspace.name}" to upgrade from `} {fromCdrVersion} to {toCdrVersion}.</div>
+    <div>Your original workspace will be unaffected. To work with the new data, simply use the new workspace.</div>
+  </div>;
+};
+
 export interface WorkspaceEditProps {
   routeConfigData: any;
   cdrVersionListResponse: CdrVersionListResponse;
@@ -202,7 +240,6 @@ export interface WorkspaceEditProps {
     profile: Profile;
   };
 }
-
 
 export interface WorkspaceEditState {
   cdrVersionItems: Array<CdrVersion>;
@@ -794,6 +831,16 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       return options;
     }
 
+    // are we currently performing a CDR Version Upgrade?
+    // i.e. a Duplication from a workspace with an older CDR Version to the default version
+    isCdrVersionUpgrade() {
+      const {workspace: srcWorkspace} = this.props;
+      const {workspace: destWorkspace} = this.state;
+      return this.isMode(WorkspaceEditMode.Duplicate) &&
+          srcWorkspace.cdrVersionId !== destWorkspace.cdrVersionId &&
+          hasDefaultCdrVersion(destWorkspace, this.props.cdrVersionListResponse);
+    }
+
     /**
      * Validates the current workspace state. This is a pass-through to validate.js
      * which returns the standard error object if any validation errors occur.
@@ -963,6 +1010,11 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       return <FadeBox  style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
         <div style={{width: '1120px'}}>
           {loading && <SpinnerOverlay overrideStylesOverlay={styles.spinner}/>}
+          {this.isCdrVersionUpgrade() && <CdrVersionUpgrade
+              srcWorkspace={this.props.workspace}
+              destWorkspace={this.state.workspace}
+              cdrVersionListResponse={this.props.cdrVersionListResponse}
+          />}
           <WorkspaceEditSection header={this.renderHeader()} tooltip={toolTipText.header}
                                 style={{marginTop: '24px'}} largeHeader
                                 required={!this.isMode(WorkspaceEditMode.Duplicate)}>

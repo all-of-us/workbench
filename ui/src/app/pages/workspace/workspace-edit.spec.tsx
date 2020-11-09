@@ -230,6 +230,26 @@ describe('WorkspaceEdit', () => {
 
     // default CDR version, not the existing workspace's alt CDR version
     expect(cdrSelection).toBe(CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID);
+
+    const expectedUpgradeMessage1 = `You're duplicating the workspace "${altCdrWorkspace.name}" to upgrade from`;
+    const expectedUpgradeMessage2 = `${CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION} to ${CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION}.`;
+    const cdrUpgradeMessage = wrapper.find('[data-test-id="cdr-version-upgrade"]').first().text();
+    expect(cdrUpgradeMessage).toContain(expectedUpgradeMessage1);
+    expect(cdrUpgradeMessage).toContain(expectedUpgradeMessage2);
+  });
+
+  it('does not display the CDR Version upgrade message when duplicating a workspace with the latest CDR Version', async() => {
+    // the standard test workspace already has the latest CDR Version but let's make it explicit with a new const
+    const defaultCdrWorkspace = {...workspace, cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID}
+    currentWorkspaceStore.next(defaultCdrWorkspace);
+
+    routeConfigDataStore.next({mode: WorkspaceEditMode.Duplicate});
+
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    // upgrade message does not appear
+    expect(wrapper.find('[data-test-id="cdr-version-upgrade"]').exists()).toBeFalsy();
   });
 
   // regression test for RW-5132
