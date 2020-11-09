@@ -252,7 +252,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
     const {betaAccessGranted, videoOpen, accessTasksLoaded, accessTasksRemaining,
       eraCommonsError, eraCommonsLinked, eraCommonsLoading, firstVisitTraining,
       trainingCompleted, quickTour, videoId, twoFactorAuthCompleted,
-      dataUserCodeOfConductCompleted, quickTourResourceOffset
+      dataUserCodeOfConductCompleted, quickTourResourceOffset, userWorkspacesResponse
     } = this.state;
     // This calculates the limit for quickTourResources items that can be seen without scrolling. Takes the width of the parent element
     // and divides by the width of an individual resource item (276px). The default limit is 4 since the min width of the parent element
@@ -345,11 +345,11 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
                             <RecentWorkspaces />
                           </FlexColumn>
                           <FlexColumn>
-                            {this.state.userWorkspacesResponse &&
+                            {userWorkspacesResponse &&
 
                               <React.Fragment>
                                 {this.userHasWorkspaces() ?
-                                <RecentResources workspaces={this.state.userWorkspacesResponse.items}/> :
+                                <RecentResources workspaces={userWorkspacesResponse.items}/> :
 
                                 <div data-test-id='getting-started'
                                      style={{
