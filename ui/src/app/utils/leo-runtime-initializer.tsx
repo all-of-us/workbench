@@ -2,11 +2,7 @@ import {leoRuntimesApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import {isAbortError, reportError} from 'app/utils/errors';
 import {runtimePresets} from 'app/utils/runtime-presets';
-import {
-  markRuntimeOperationCompleteForWorkspace,
-  runtimeStore,
-  updateRuntimeOpsStoreForWorkspaceNamespace
-} from 'app/utils/stores';
+import {runtimeStore} from 'app/utils/stores';
 import {Runtime, RuntimeStatus} from 'generated/fetch';
 import {serverConfigStore} from './navigation';
 
@@ -196,41 +192,21 @@ export class LeoRuntimeInitializer {
     this.targetRuntime = options.targetRuntime;
   }
 
-  private async getRuntime(): Promise<Runtime> {
-    const aborter = new AbortController();
-    const promise = runtimeApi().getRuntime(this.workspaceNamespace, {signal: aborter.signal});
-    updateRuntimeOpsStoreForWorkspaceNamespace(this.workspaceNamespace, {
-      promise: promise,
-      operation: 'get',
-      aborter: aborter
-    });
-    markRuntimeOperationCompleteForWorkspace(this.workspaceNamespace);
-    return promise;
-  }
-
   private async createRuntime(): Promise<void> {
     if (this.createCount >= this.maxCreateCount) {
       throw new ExceededActionCountError(
         `Reached max runtime create count (${this.maxCreateCount})`, this.currentRuntime);
     }
-    const aborter = new AbortController();
     let runtime: Runtime;
     if (serverConfigStore.getValue().enableCustomRuntimes && this.targetRuntime) {
       runtime = this.targetRuntime;
     } else {
       runtime = {...runtimePresets.generalAnalysis.runtimeTemplate};
     }
-    const promise = runtimeApi().createRuntime(this.workspaceNamespace,
+    await runtimeApi().createRuntime(this.workspaceNamespace,
       runtime,
       {signal: this.pollAbortSignal});
-    updateRuntimeOpsStoreForWorkspaceNamespace(this.workspaceNamespace, {
-      promise: promise,
-      operation: 'create',
-      aborter: aborter
-    });
     this.createCount++;
-    await promise;
-    markRuntimeOperationCompleteForWorkspace(this.workspaceNamespace);
   }
 
   private async resumeRuntime(): Promise<void> {
@@ -238,17 +214,9 @@ export class LeoRuntimeInitializer {
       throw new ExceededActionCountError(
         `Reached max runtime resume count (${this.maxResumeCount})`, this.currentRuntime);
     }
-    const aborter = new AbortController();
-    const promise = leoRuntimesApi().startRuntime(
+    await leoRuntimesApi().startRuntime(
       this.currentRuntime.googleProject, this.currentRuntime.runtimeName, {signal: this.pollAbortSignal});
-    updateRuntimeOpsStoreForWorkspaceNamespace(this.workspaceNamespace, {
-      promise: promise,
-      operation: 'resume',
-      aborter: aborter
-    });
     this.resumeCount++;
-    await promise;
-    markRuntimeOperationCompleteForWorkspace(this.workspaceNamespace);
   }
 
   private async deleteRuntime(): Promise<void> {
@@ -256,16 +224,8 @@ export class LeoRuntimeInitializer {
       throw new ExceededActionCountError(
         `Reached max runtime delete count (${this.maxDeleteCount})`, this.currentRuntime);
     }
-    const aborter = new AbortController();
-    const promise = runtimeApi().deleteRuntime(this.workspaceNamespace, {signal: this.pollAbortSignal});
-    updateRuntimeOpsStoreForWorkspaceNamespace(this.workspaceNamespace, {
-      promise: promise,
-      operation: 'delete',
-      aborter: aborter
-    });
+    await runtimeApi().deleteRuntime(this.workspaceNamespace, {signal: this.pollAbortSignal});
     this.deleteCount++;
-    await promise;
-    markRuntimeOperationCompleteForWorkspace(this.workspaceNamespace);
   }
 
   private isRuntimeDeleted(): boolean {
@@ -345,7 +305,7 @@ export class LeoRuntimeInitializer {
     // Fetch the current runtime status, with some graceful error handling for NOT_FOUND response
     // and abort signals.
     try {
-      this.currentRuntime = await this.getRuntime();
+      this.currentRuntime = await runtimeApi().getRuntime(this.workspaceNamespace, {signal: this.pollAbortSignal});
       this.onPoll(this.currentRuntime);
     } catch (e) {
       if (isAbortError(e)) {

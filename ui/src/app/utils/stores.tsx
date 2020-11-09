@@ -32,8 +32,7 @@ interface ProfileStore {
 export const profileStore = atom<ProfileStore>({});
 
 export interface RuntimeOperation {
-  promise: Promise<any>;
-  operation: string;
+  pendingRuntime?: Runtime;
   aborter: AbortController;
 }
 
@@ -41,34 +40,34 @@ interface WorkspaceRuntimeOperationMap {
   [workspaceNamespace: string]: RuntimeOperation;
 }
 
-export interface RuntimeOpsStore {
-  opsByWorkspaceNamespace: WorkspaceRuntimeOperationMap;
-}
-
-export const runtimeOpsStore = atom<RuntimeOpsStore>({opsByWorkspaceNamespace: {}});
+export const runtimeOpsStore = atom<WorkspaceRuntimeOperationMap>({});
 
 export const updateRuntimeOpsStoreForWorkspaceNamespace = (workspaceNamespace: string, runtimeOperation: RuntimeOperation) => {
-  const opsByWorkspaceNamespace = runtimeOpsStore.get().opsByWorkspaceNamespace;
-  opsByWorkspaceNamespace[workspaceNamespace] = runtimeOperation;
-  runtimeOpsStore.set({opsByWorkspaceNamespace: opsByWorkspaceNamespace});
+  runtimeOpsStore.set({
+    ...runtimeOpsStore.get(),
+    [workspaceNamespace]: runtimeOperation
+  });
 };
 
 export const markRuntimeOperationCompleteForWorkspace = (workspaceNamespace: string) => {
-  const opsByWorkspaceNamespace = runtimeOpsStore.get().opsByWorkspaceNamespace;
-  if (!!opsByWorkspaceNamespace[workspaceNamespace]) {
-    delete opsByWorkspaceNamespace[workspaceNamespace];
-    runtimeOpsStore.set({opsByWorkspaceNamespace: opsByWorkspaceNamespace});
+  const ops = runtimeOpsStore.get();
+  if (ops[workspaceNamespace]) {
+    delete ops[workspaceNamespace];
+    runtimeOpsStore.set(ops);
   }
 };
 
 export const abortRuntimeOperationForWorkspace = (workspaceNamespace: string) => {
-  const opsByWorkspaceNamespace = runtimeOpsStore.get().opsByWorkspaceNamespace;
-  if (!!opsByWorkspaceNamespace[workspaceNamespace]) {
-    const runtimeOperation = opsByWorkspaceNamespace[workspaceNamespace];
-    runtimeOperation.aborter.abort();
-    delete opsByWorkspaceNamespace[workspaceNamespace];
-    runtimeOpsStore.set({opsByWorkspaceNamespace: opsByWorkspaceNamespace});
+  const ops = runtimeOpsStore.get();
+  if (ops[workspaceNamespace]) {
+    ops[workspaceNamespace].aborter.abort();
+    delete ops[workspaceNamespace];
+    runtimeOpsStore.set(ops);
   }
+};
+
+export const clearRuntimeOperationStore = () => {
+
 };
 
 // runtime store states: undefined(initial state) -> Runtime (user selected) <--> null (delete only - no recreate)

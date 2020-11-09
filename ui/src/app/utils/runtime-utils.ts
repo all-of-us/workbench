@@ -6,8 +6,11 @@ import {
   LeoRuntimeInitializer,
 } from 'app/utils/leo-runtime-initializer';
 import {
+  markRuntimeOperationCompleteForWorkspace,
   runtimeStore,
-  useStore
+  runtimeOpsStore,
+  updateRuntimeOpsStoreForWorkspaceNamespace,
+  useStore,
 } from 'app/utils/stores';
 import {Runtime, RuntimeStatus} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -53,6 +56,8 @@ export const useRuntimeStatus = (currentWorkspaceNamespace): [
   RuntimeStatus | undefined, (statusRequest: RuntimeStatusRequest) => Promise<void>]  => {
   const [runtimeStatus, setRuntimeStatus] = useState<RuntimeStatusRequest>();
   const {runtime} = useStore(runtimeStore);
+
+  // Ensure that a runtime gets initialized, if it hasn't already been.
   useRuntime(currentWorkspaceNamespace);
 
   useEffect(() => {
@@ -85,29 +90,47 @@ export const useRuntimeStatus = (currentWorkspaceNamespace): [
 // useCustomRuntime Hook can request a new runtime config
 // The LeoRuntimeInitializer could potentially be rolled into this code to completely manage
 // all runtime state.
-export const useCustomRuntime = (currentWorkspaceNamespace): [Runtime, (runtime: Runtime) => void] => {
+export const useCustomRuntime = (currentWorkspaceNamespace):
+    [{currentRuntime: Runtime, pendingRuntime: Runtime}, (runtime: Runtime) => void] => {
   const {runtime, workspaceNamespace} = useStore(runtimeStore);
+  const runtimeOps = useStore(runtimeOpsStore);
+  const {pendingRuntime = null} = runtimeOps[currentWorkspaceNamespace] || {};
   const [requestedRuntime, setRequestedRuntime] = useState<Runtime>();
+
+  // Ensure that a runtime gets initialized, if it hasn't already been.
   useRuntime(currentWorkspaceNamespace);
 
   useEffect(() => {
+    const aborter = new AbortController();
     const runAction = async() => {
       // Only delete if the runtime already exists.
       // TODO: It is likely more correct here to use the LeoRuntimeInitializer wait for the runtime
       // to reach a terminal status before attempting deletion.
-      if (runtime && runtime.status !== RuntimeStatus.Deleted) {
-        await runtimeApi().deleteRuntime(currentWorkspaceNamespace);
+      try {
+        if (runtime && runtime.status !== RuntimeStatus.Deleted) {
+          await runtimeApi().deleteRuntime(currentWorkspaceNamespace, {
+            signal: aborter.signal
+          });
+        }
+        await LeoRuntimeInitializer.initialize({
+          workspaceNamespace,
+          targetRuntime: requestedRuntime,
+          pollAbortSignal: aborter.signal
+        });
+      } finally {
+        markRuntimeOperationCompleteForWorkspace(currentWorkspaceNamespace);
+        setRequestedRuntime(undefined);
       }
-      await LeoRuntimeInitializer.initialize({
-        workspaceNamespace,
-        targetRuntime: requestedRuntime
-      });
     };
 
     if (requestedRuntime !== undefined && !fp.equals(requestedRuntime, runtime)) {
       runAction();
+      updateRuntimeOpsStoreForWorkspaceNamespace(currentWorkspaceNamespace, {
+        pendingRuntime: requestedRuntime,
+        aborter
+      });
     }
   }, [requestedRuntime]);
 
-  return [runtime, setRequestedRuntime];
+  return [{currentRuntime: runtime, pendingRuntime}, setRequestedRuntime];
 };
