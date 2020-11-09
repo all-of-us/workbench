@@ -41,7 +41,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
    (person_id, data_id, start_datetime, survey, question, answer)
 SELECT  a.person_id,
         a.observation_id as data_id,
-        a.observation_datetime as survey_datetime,
+        case when a.observation_datetime is null then CAST(a.observation_date AS TIMESTAMP) else a.observation_datetime end as survey_datetime,
         c.name as survey,
         d.concept_name as question,
         case when a.value_as_number is not null then CAST(a.value_as_number as STRING) else e.concept_name END as answer
@@ -76,7 +76,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
  source_concept_id, visit_type, age_at_event, NUM_MENTIONS, FIRST_MENTION, LAST_MENTION, dose, strength, route, domain)
 SELECT P.PERSON_ID,
     t.DRUG_EXPOSURE_ID AS DATA_ID,
-    t.DRUG_EXPOSURE_START_DATETIME as START_DATETIME,
+    case when t.DRUG_EXPOSURE_START_DATETIME is null then CAST(t.DRUG_EXPOSURE_START_DATE AS TIMESTAMP) else t.DRUG_EXPOSURE_START_DATETIME end as START_DATETIME,
     case when c1.CONCEPT_NAME is null then 'No matching concept' else c1.CONCEPT_NAME end as STANDARD_NAME,
     case when c1.CONCEPT_CODE is null then 'No matching concept' else c1.CONCEPT_CODE end as STANDARD_CODE,
     case when c1.VOCABULARY_ID is null then 'None' else C1.VOCABULARY_ID end AS STANDARD_VOCABULARY,
@@ -120,13 +120,13 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
  source_vocabulary, source_name, source_concept_id, age_at_event, visit_type, domain)
 SELECT P.PERSON_ID,
 	a.CONDITION_OCCURRENCE_ID AS DATA_ID,
-	a.CONDITION_START_DATETIME as START_DATETIME,
-    case when c1.CONCEPT_CODE is null then 'No matching concept' else c1.CONCEPT_CODE end as STANDARD_CODE,
-    case when C1.VOCABULARY_ID is null then 'None' else C1.VOCABULARY_ID end AS STANDARD_VOCABULARY,
+	case when a.CONDITION_START_DATETIME is null then CAST(a.CONDITION_START_DATE AS TIMESTAMP) else a.CONDITION_START_DATETIME end as START_DATETIME,
+  case when c1.CONCEPT_CODE is null then 'No matching concept' else c1.CONCEPT_CODE end as STANDARD_CODE,
+  case when C1.VOCABULARY_ID is null then 'None' else C1.VOCABULARY_ID end AS STANDARD_VOCABULARY,
 	case when c1.CONCEPT_NAME is null then 'No matching concept' else c1.CONCEPT_NAME end as STANDARD_NAME,
-    case when c1.CONCEPT_ID is null then 0 else c1.CONCEPT_ID end as STANDARD_CONCEPT_ID,
+  case when c1.CONCEPT_ID is null then 0 else c1.CONCEPT_ID end as STANDARD_CONCEPT_ID,
 	case when c2.CONCEPT_CODE is null then 'No matching concept' else c2.CONCEPT_CODE end as SOURCE_CODE,
-    case when c2.VOCABULARY_ID is null then 'None' else c2.VOCABULARY_ID end as SOURCE_VOCABULARY,
+  case when c2.VOCABULARY_ID is null then 'None' else c2.VOCABULARY_ID end as SOURCE_VOCABULARY,
 	case when c2.CONCEPT_NAME is null then 'No matching concept' else c2.CONCEPT_NAME end as SOURCE_NAME,
 	case when c2.CONCEPT_ID is null then 0 else c2.CONCEPT_ID end as SOURCE_CONCEPT_ID,
 	DATE_DIFF(a.CONDITION_START_DATE,DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), YEAR) - IF(EXTRACT(MONTH FROM DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH))*100 + EXTRACT(DAY FROM DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH)) > EXTRACT(MONTH FROM a.CONDITION_START_DATE)*100 + EXTRACT(DAY FROM a.CONDITION_START_DATE),1,0) as AGE_AT_EVENT,
@@ -149,7 +149,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
    source_concept_id, value_as_number, unit, ref_range, age_at_event, visit_type, domain)
 SELECT m.person_id,
     m.measurement_id as data_id,
-    m.measurement_datetime as start_datetime,
+    case when m.measurement_datetime is null then CAST(m.measurement_date AS TIMESTAMP) else m.measurement_datetime end as START_DATETIME,
     case when c1.CONCEPT_CODE is null then 'No matching concept' else c1.CONCEPT_CODE end as STANDARD_CODE,
     case when c1.VOCABULARY_ID is null then 'None' else c1.VOCABULARY_ID end AS STANDARD_VOCABULARY,
     case when c1.concept_name is null then 'No matching concept' else c1.concept_name end as standard_name,
@@ -186,7 +186,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
     source_concept_id, value_as_number, unit, ref_range, age_at_event, visit_type, domain)
 SELECT m.person_id,
     m.measurement_id as data_id,
-    m.measurement_datetime as start_datetime,
+    case when m.measurement_datetime is null then CAST(m.measurement_date AS TIMESTAMP) else m.measurement_datetime end as START_DATETIME,
     case when c1.CONCEPT_CODE is null then 'No matching concept' else c1.CONCEPT_CODE end as STANDARD_CODE,
     case when c1.VOCABULARY_ID is null then 'None' else c1.VOCABULARY_ID end AS STANDARD_VOCABULARY,
     case when c1.concept_name is null then 'No matching concept' else c1.concept_name end as standard_name,
@@ -220,21 +220,21 @@ echo "Inserting observation data into cb_review_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_review_all_events\`
    (person_id, data_id, start_datetime, standard_name, standard_code, standard_concept_id, standard_vocabulary, source_name,
- source_code, source_concept_id, source_vocabulary, visit_type, age_at_event, domain)
+    source_code, source_concept_id, source_vocabulary, visit_type, age_at_event, domain)
 SELECT P.PERSON_ID,
 	 t.OBSERVATION_ID AS DATA_ID,
-     t.OBSERVATION_DATETIME as START_DATETIME,
-     case when c1.CONCEPT_NAME is null then 'No matching concept' else c1.CONCEPT_NAME end as STANDARD_NAME,
-     case when c1.CONCEPT_CODE is null then 'No matching concept' else c1.CONCEPT_CODE end as STANDARD_CODE,
-     case when c1.CONCEPT_ID is null then 0 else c1.CONCEPT_ID end as STANDARD_CONCEPT_ID,
+	 case when t.OBSERVATION_DATETIME is null then CAST(t.OBSERVATION_DATE AS TIMESTAMP) else t.OBSERVATION_DATETIME end as START_DATETIME,
+   case when c1.CONCEPT_NAME is null then 'No matching concept' else c1.CONCEPT_NAME end as STANDARD_NAME,
+   case when c1.CONCEPT_CODE is null then 'No matching concept' else c1.CONCEPT_CODE end as STANDARD_CODE,
+   case when c1.CONCEPT_ID is null then 0 else c1.CONCEPT_ID end as STANDARD_CONCEPT_ID,
 	 case when C1.VOCABULARY_ID is null then 'None' else C1.VOCABULARY_ID end AS STANDARD_VOCABULARY,
-     case when c2.CONCEPT_NAME is null then 'No matching concept' else c2.CONCEPT_NAME end as SOURCE_NAME,
-     case when c2.CONCEPT_CODE is null then 'No matching concept' else c2.CONCEPT_CODE end as SOURCE_CODE,
-     case when c2.CONCEPT_ID is null then 0 else c2.CONCEPT_ID end as SOURCE_CONCEPT_ID,
-     case when c2.VOCABULARY_ID is null then 'None' else c2.VOCABULARY_ID end as SOURCE_VOCABULARY,
-     case when c3.concept_name is null then '' else c3.concept_name end as visit_type,
-     DATE_DIFF(t.OBSERVATION_DATE,DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), YEAR) - IF(EXTRACT(MONTH FROM DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH))*100 + EXTRACT(DAY FROM DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH)) > EXTRACT(MONTH FROM t.OBSERVATION_DATE)*100 + EXTRACT(DAY FROM t.OBSERVATION_DATE),1,0) as AGE_AT_EVENT,
-     'OBSERVATION' as domain
+   case when c2.CONCEPT_NAME is null then 'No matching concept' else c2.CONCEPT_NAME end as SOURCE_NAME,
+   case when c2.CONCEPT_CODE is null then 'No matching concept' else c2.CONCEPT_CODE end as SOURCE_CODE,
+   case when c2.CONCEPT_ID is null then 0 else c2.CONCEPT_ID end as SOURCE_CONCEPT_ID,
+   case when c2.VOCABULARY_ID is null then 'None' else c2.VOCABULARY_ID end as SOURCE_VOCABULARY,
+   case when c3.concept_name is null then '' else c3.concept_name end as visit_type,
+   DATE_DIFF(t.OBSERVATION_DATE,DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), YEAR) - IF(EXTRACT(MONTH FROM DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH))*100 + EXTRACT(DAY FROM DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH)) > EXTRACT(MONTH FROM t.OBSERVATION_DATE)*100 + EXTRACT(DAY FROM t.OBSERVATION_DATE),1,0) as AGE_AT_EVENT,
+   'OBSERVATION' as domain
 FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` t
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c1 on t.OBSERVATION_CONCEPT_ID = c1.CONCEPT_ID
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c2 on t.OBSERVATION_SOURCE_CONCEPT_ID = c2.CONCEPT_ID
@@ -252,7 +252,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
    source_concept_id, value_as_number, unit, age_at_event, domain, visit_type)
 SELECT P.PERSON_ID,
 	 t.MEASUREMENT_ID AS DATA_ID,
-     t.MEASUREMENT_DATETIME as START_DATETIME,
+	   case when t.MEASUREMENT_DATETIME is null then CAST(t.MEASUREMENT_DATE AS TIMESTAMP) else t.MEASUREMENT_DATETIME end as START_DATETIME,
      case when c1.CONCEPT_CODE is null then 'No matching concept' else c1.CONCEPT_CODE end as STANDARD_CODE,
      case when c1.VOCABULARY_ID is null then 'None' else c1.VOCABULARY_ID end AS STANDARD_VOCABULARY,
      case when c1.CONCEPT_NAME is null then 'No matching concept' else c1.CONCEPT_NAME end as STANDARD_NAME,
@@ -288,7 +288,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
    source_concept_id, age_at_event, visit_type, domain)
 SELECT P.PERSON_ID,
 	 a.PROCEDURE_OCCURRENCE_ID AS DATA_ID,
-     a.PROCEDURE_DATETIME as START_DATETIME,
+	   case when a.PROCEDURE_DATETIME is null then CAST(a.PROCEDURE_DATE AS TIMESTAMP) else a.PROCEDURE_DATETIME end as START_DATETIME,
      case when c1.CONCEPT_CODE is null then 'No matching concept' else c1.CONCEPT_CODE end as STANDARD_CODE,
      case when C1.VOCABULARY_ID is null then 'None' else C1.VOCABULARY_ID end AS STANDARD_VOCABULARY,
      case when c1.CONCEPT_NAME is null then 'No matching concept' else c1.CONCEPT_NAME end as STANDARD_NAME,
