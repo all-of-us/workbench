@@ -3,7 +3,8 @@ import * as React from 'react';
 
 import {DataSetReferenceModal} from 'app/components/data-set-reference-modal';
 import {RenameModal} from 'app/components/rename-modal';
-import {Action, canDelete, canWrite, ResourceCardTemplate} from 'app/components/resource-card-template';
+import {Action, ResourceActionsMenu} from 'app/components/resource-actions-menu';
+import {canDelete, canWrite, ResourceCard} from 'app/components/resource-card';
 import {withConfirmDeleteModal, WithConfirmDeleteModalProps} from 'app/components/with-confirm-delete-modal';
 import {withErrorModal, WithErrorModalProps} from 'app/components/with-error-modal';
 import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
@@ -16,6 +17,7 @@ interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSp
   resource: WorkspaceResource;
   existingNameList: string[];
   onUpdate: () => Promise<void>;
+  menuOnly: boolean;
 }
 
 interface State {
@@ -154,7 +156,7 @@ export const CohortResourceCard = fp.flow(
   }
 
   render() {
-    const {resource} = this.props;
+    const {resource, menuOnly} = this.props;
     return <React.Fragment>
       {this.state.showRenameModal &&
       <RenameModal onRename={(name, description) => this.rename(name, description)}
@@ -175,12 +177,9 @@ export const CohortResourceCard = fp.flow(
             return this.deleteCohort();
           }}/>
       }
-
-      <ResourceCardTemplate
-        actions={this.actions}
-        disabled={!canWrite(resource)}
-        resource={resource}
-      />
+      {menuOnly ?
+          <ResourceActionsMenu actions={this.actions}/> :
+          <ResourceCard resource={resource} actions={this.actions}/>}
     </React.Fragment>;
   }
 });

@@ -646,6 +646,31 @@ paths:
           description: A runtime for this user and workspace already exists.
           schema:
             "$ref": "#/definitions/EmptyResponse"
+    patch:
+      summary: Updates the configuration of a runtime
+      description: In order to update the configuration of a runtime, it must first be running or paused
+      operationId: updateRuntime
+      tags:
+      - runtime
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+        - in: body
+          name: runtime
+          schema:
+            "$ref": "#/definitions/UpdateRuntimeRequest"
+      responses:
+        202:
+          description: Runtime update request accepted
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
+        400:
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+        500:
+          description: Internal Server Error
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
     delete:
       summary: Delete a workspace runtime.
       description: 'TODO(RW-3695): updateRuntime should be added as a PATCH endpoint
@@ -830,6 +855,21 @@ paths:
           schema:
             "$ref":
               "#/definitions/WorkspaceBillingUsageResponse"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/creator-free-credits-remaining":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    get:
+      tags:
+        - workspaces
+      description: Gets the free credits remaining for the creator of a specified workspace
+      operationId: getWorkspaceCreatorFreeCreditsRemaining
+      responses:
+        200:
+          description: The free credits remaining for the creator of a workspace
+          schema:
+            "$ref":
+              "#/definitions/WorkspaceCreatorFreeCreditsRemainingResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/share":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -3986,10 +4026,6 @@ definitions:
         type: boolean
         default: false
         description: Whether user should be able to customize notebook runtime settings.
-      enableGceAsNotebookRuntimeDefault:
-        type: boolean
-        default: false
-        description: Whether the notebook runtime should default to GCE (vs Dataproc).
       enableFitbit:
         type: boolean
         default: false
@@ -4243,7 +4279,15 @@ definitions:
         type: number
         format: double
         description: amount of free tier money spent on this workspace in USD
-
+  WorkspaceCreatorFreeCreditsRemainingResponse:
+    type: object
+    required:
+    - freeCreditsRemaining
+    properties:
+      freeCreditsRemaining:
+        type: number
+        format: double
+        description: amount of free credits remaining for the workspace creator, in USD
   UserRole:
     type: object
     required:
@@ -5537,6 +5581,13 @@ definitions:
       dataprocConfig:
         description: oneOf gceConfig, dataprocConfig will be provided
         "$ref": "#/definitions/DataprocConfig"
+  UpdateRuntimeRequest:
+    type: object
+    required:
+      - runtime
+    properties:
+      runtime:
+        "$ref": "#/definitions/Runtime"
   GceConfig:
     description: Configuration for Google Compute Engine instances.
     properties:

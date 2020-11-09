@@ -44,6 +44,7 @@ import org.pmiops.workbench.model.RuntimeLocalizeRequest;
 import org.pmiops.workbench.model.RuntimeLocalizeResponse;
 import org.pmiops.workbench.model.RuntimeStatus;
 import org.pmiops.workbench.model.UpdateClusterConfigRequest;
+import org.pmiops.workbench.model.UpdateRuntimeRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.model.StorageLink;
@@ -270,6 +271,36 @@ public class RuntimeController implements RuntimeApiDelegate {
 
     leonardoNotebooksClient.createRuntime(runtime, firecloudWorkspaceName);
     return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @Override
+  public ResponseEntity<EmptyResponse> updateRuntime(
+      String workspaceNamespace, UpdateRuntimeRequest runtimeRequest) {
+    if (runtimeRequest == null || runtimeRequest.getRuntime() == null) {
+      throw new BadRequestException("Runtime cannot be empty for an update request");
+    }
+
+    if (runtimeRequest.getRuntime().getGceConfig() == null
+        && runtimeRequest.getRuntime().getDataprocConfig() == null) {
+      throw new BadRequestException("Either a GceConfig or DataprocConfig must be provided");
+    }
+
+    if (runtimeRequest.getRuntime().getGceConfig() != null
+        && runtimeRequest.getRuntime().getDataprocConfig() != null) {
+      throw new BadRequestException("Only one of GceConfig or DataprocConfig must be provided");
+    }
+
+    String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
+    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+        workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
+    workspaceService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
+
+    runtimeRequest.getRuntime().setGoogleProject(workspaceNamespace);
+    runtimeRequest.getRuntime().setRuntimeName(userProvider.get().getRuntimeName());
+
+    leonardoNotebooksClient.updateRuntime(runtimeRequest.getRuntime());
+
+    return ResponseEntity.accepted().build();
   }
 
   @Override

@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {currentWorkspaceStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
@@ -270,6 +270,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
                 }</div>
               </div>}
           {!!this.workspaceRuntimeBillingProjectId() &&
+           !serverConfigStore.getValue().enableCustomRuntimes &&
             <ResetRuntimeButton workspaceNamespace={this.workspaceRuntimeBillingProjectId()}/>}
         </div>
       </div>

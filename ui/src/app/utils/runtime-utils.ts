@@ -2,6 +2,7 @@ import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import {switchCase} from 'app/utils';
 import { withAsyncErrorHandling } from 'app/utils';
 import {
+  ExceededActionCountError,
   LeoRuntimeInitializer,
 } from 'app/utils/leo-runtime-initializer';
 import {
@@ -29,10 +30,12 @@ const useRuntime = (currentWorkspaceNamespace) => {
       () => runtimeStore.set({workspaceNamespace: null, runtime: null}),
       async() => {
         const leoRuntime = await runtimeApi().getRuntime(currentWorkspaceNamespace);
-        runtimeStore.set({
-          workspaceNamespace: currentWorkspaceNamespace,
-          runtime: leoRuntime
-        });
+        if (currentWorkspaceNamespace === runtimeStore.get().workspaceNamespace) {
+          runtimeStore.set({
+            workspaceNamespace: currentWorkspaceNamespace,
+            runtime: leoRuntime
+          });
+        }
       });
 
     if (currentWorkspaceNamespace !== runtimeStore.get().workspaceNamespace) {
@@ -42,26 +45,41 @@ const useRuntime = (currentWorkspaceNamespace) => {
   }, []);
 };
 
-// useRuntimeState hook can be used to change the state of the runtime
-// Only 'Delete' is supported at the moment
-export const useRuntimeState = (currentWorkspaceNamespace): [RuntimeStatus | undefined, (statusRequest: RuntimeStatusRequest) => void]  => {
-  const [runtimeStatus, setRuntimeState] = useState<RuntimeStatusRequest>();
+// useRuntimeStatus hook can be used to change the status of the runtime
+// Only 'Delete' is supported at the moment. This setter returns a promise which
+// resolves when any proximal fetch has completed, but does not wait for any
+// polling, which may continue asynchronously.
+export const useRuntimeStatus = (currentWorkspaceNamespace): [
+  RuntimeStatus | undefined, (statusRequest: RuntimeStatusRequest) => Promise<void>]  => {
+  const [runtimeStatus, setRuntimeStatus] = useState<RuntimeStatusRequest>();
   const {runtime} = useStore(runtimeStore);
   useRuntime(currentWorkspaceNamespace);
 
   useEffect(() => {
-    // Additional state changes can be put here
+    // Additional status changes can be put here
     if (!!runtimeStatus) {
       switchCase(runtimeStatus,
         [RuntimeStatusRequest.Delete, async() => {
-          await runtimeApi().deleteRuntime(currentWorkspaceNamespace);
-          await LeoRuntimeInitializer.initialize({workspaceNamespace: currentWorkspaceNamespace, maxCreateCount: 0});
+          try {
+            await LeoRuntimeInitializer.initialize({workspaceNamespace: currentWorkspaceNamespace, maxCreateCount: 0});
+          } catch (e) {
+            // ExceededActionCountError is expected, as we exceed our create limit of 0.
+            if (!(e instanceof ExceededActionCountError)) {
+              throw e;
+            }
+          }
         }]);
     }
 
   }, [runtimeStatus]);
 
-  return [runtime ? runtime.status : undefined, setRuntimeState];
+  const setStatusRequest = async(req) => {
+    await switchCase(req, [
+      RuntimeStatusRequest.Delete, () => runtimeApi().deleteRuntime(currentWorkspaceNamespace)
+    ]);
+    setRuntimeStatus(req);
+  };
+  return [runtime ? runtime.status : undefined, setStatusRequest];
 };
 
 // useCustomRuntime Hook can request a new runtime config
@@ -80,17 +98,10 @@ export const useCustomRuntime = (currentWorkspaceNamespace): [Runtime, (runtime:
       if (runtime && runtime.status !== RuntimeStatus.Deleted) {
         await runtimeApi().deleteRuntime(currentWorkspaceNamespace);
       }
-      const currentRuntime = await LeoRuntimeInitializer.initialize({
+      await LeoRuntimeInitializer.initialize({
         workspaceNamespace,
         targetRuntime: requestedRuntime
       });
-
-      if (currentWorkspaceNamespace === workspaceNamespace) {
-        runtimeStore.set({
-          workspaceNamespace: currentWorkspaceNamespace,
-          runtime: currentRuntime
-        });
-      }
     };
 
     if (requestedRuntime !== undefined && !fp.equals(requestedRuntime, runtime)) {

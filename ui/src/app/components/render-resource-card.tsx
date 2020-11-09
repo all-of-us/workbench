@@ -13,6 +13,7 @@ interface RenderResourceCardProps {
   resource: WorkspaceResource;
   existingNameList: string[];
   onUpdate: () => Promise<void>;
+  menuOnly: boolean;
 }
 
 function renderResourceCard(props: RenderResourceCardProps) {

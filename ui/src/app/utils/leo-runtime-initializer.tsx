@@ -21,6 +21,7 @@ let defaultInitialPollingDelay = 2000;
 export const overridePollingDelay = (d) => defaultInitialPollingDelay = d;
 
 const DEFAULT_MAX_POLLING_DELAY = 15000;
+
 // By default, we're willing to retry twice on each of the state-modifying API calls, to allow
 // for some resilience to errored-out runtimes, while avoiding situations where we end up in an
 // endless create-error-delete loop.
