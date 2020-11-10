@@ -509,10 +509,10 @@ const CreatePanel = ({creatorFreeCreditsRemaining, preset, profile, setPanelCont
         runtimeChanged={false}
         workspace={workspace}
     />
-    <FlexRow style={{justifyContent: 'space-between'}}>
+    <FlexRow style={{justifyContent: 'space-between', alignItems: 'center'}}>
       <h3 style={{...styles.sectionHeader, ...styles.bold}}>Recommended Environment for {displayName}</h3>
       <Button
-          type='secondaryLight'
+          type='secondarySmall'
           onClick={() => setPanelContent(PanelContent.Customize)}
       >
         Customize

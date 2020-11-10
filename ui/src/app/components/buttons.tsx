@@ -2,7 +2,7 @@ import {styles as cardStyles} from 'app/components/card';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {IconComponent} from 'app/icons/icon';
-import colors, {colorWithWhiteness} from 'app/styles/colors';
+import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils/index';
 import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import * as fp from 'lodash/fp';
@@ -113,6 +113,28 @@ const buttonVariants = {
       color: colorWithWhiteness(colors.dark, disabledAlpha)
     },
     hover: {color: colorWithWhiteness(colors.accent, 0.4)}
+  },
+  secondarySmall: {
+    style: {
+      ...styles.baseNew,
+      backgroundColor: 'transparent',
+      borderColor: colors.accent,
+      borderRadius: 0,
+      borderStyle: 'solid',
+      borderWidth: '1px',
+      color: colors.accent,
+      fontSize: '10.5px',
+      height: '30px',
+      padding: '0 0.5rem'
+    },
+    disabledStyle: {
+      borderColor: colorWithWhiteness(colors.dark, disabledAlpha),
+      color: colorWithWhiteness(colors.dark, disabledAlpha)
+    },
+    hover: {
+      borderColor: colorWithWhiteness(colors.accent, 0.4),
+      color: colorWithWhiteness(colors.accent, 0.4)
+    }
   },
   primaryOnDarkBackground: {
     style: {
