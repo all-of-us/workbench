@@ -31,43 +31,37 @@ interface ProfileStore {
 
 export const profileStore = atom<ProfileStore>({});
 
-export interface RuntimeOperation {
+export interface CompoundRuntimeOperation {
   pendingRuntime?: Runtime;
   aborter: AbortController;
 }
 
-interface WorkspaceRuntimeOperationMap {
-  [workspaceNamespace: string]: RuntimeOperation;
-}
+// Store tracking any compound Runtime operations per workspace. Currently, this
+// only pertains to applying a runtime configuration update via full recreate
+// (compound operation of delete -> create).
+export const compoundRuntimeOpStore = atom<{
+  [workspaceNamespace: string]: CompoundRuntimeOperation;
+}>({});
 
-export const runtimeOpsStore = atom<WorkspaceRuntimeOperationMap>({});
-
-export const updateRuntimeOpsStoreForWorkspaceNamespace = (workspaceNamespace: string, runtimeOperation: RuntimeOperation) => {
-  runtimeOpsStore.set({
-    ...runtimeOpsStore.get(),
+export const registerCompoundRuntimeOperation = (workspaceNamespace: string, runtimeOperation: CompoundRuntimeOperation) => {
+  compoundRuntimeOpStore.set({
+    ...compoundRuntimeOpStore.get(),
     [workspaceNamespace]: runtimeOperation
   });
 };
 
-export const markRuntimeOperationCompleteForWorkspace = (workspaceNamespace: string) => {
-  const ops = runtimeOpsStore.get();
+export const markCompoundRuntimeOperationCompleted = (workspaceNamespace: string) => {
+  const ops = compoundRuntimeOpStore.get();
   if (ops[workspaceNamespace]) {
     delete ops[workspaceNamespace];
-    runtimeOpsStore.set(ops);
+    compoundRuntimeOpStore.set(ops);
   }
 };
 
-export const abortRuntimeOperationForWorkspace = (workspaceNamespace: string) => {
-  const ops = runtimeOpsStore.get();
-  if (ops[workspaceNamespace]) {
-    ops[workspaceNamespace].aborter.abort();
-    delete ops[workspaceNamespace];
-    runtimeOpsStore.set(ops);
-  }
-};
-
-export const clearRuntimeOperationStore = () => {
-
+export const clearCompoundRuntimeOperations = () => {
+  const ops = compoundRuntimeOpStore.get();
+  Object.values(ops).forEach(op => op.aborter.abort());
+  compoundRuntimeOpStore.set({});
 };
 
 // runtime store states: undefined(initial state) -> Runtime (user selected) <--> null (delete only - no recreate)

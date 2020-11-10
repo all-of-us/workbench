@@ -6,11 +6,11 @@ import {
   LeoRuntimeInitializer,
 } from 'app/utils/leo-runtime-initializer';
 import {
-  markRuntimeOperationCompleteForWorkspace,
+  markCompoundRuntimeOperationCompleted,
   runtimeStore,
-  runtimeOpsStore,
-  updateRuntimeOpsStoreForWorkspaceNamespace,
-  useStore,
+  compoundRuntimeOpStore,
+  registerCompoundRuntimeOperation,
+  useStore
 } from 'app/utils/stores';
 import {Runtime, RuntimeStatus} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -48,6 +48,21 @@ const useRuntime = (currentWorkspaceNamespace) => {
   }, []);
 };
 
+export const maybeInitializeRuntime = async(workspaceNamespace: string) => {
+  if (workspaceNamespace in compoundRuntimeOpStore.get()) {
+    await new Promise((resolve) => {
+      const {unsubscribe} = compoundRuntimeOpStore.subscribe((v => {
+        if (!(workspaceNamespace in v)) {
+          unsubscribe();
+          resolve();
+        }
+      }))
+    });
+  }
+
+  await LeoRuntimeInitializer.initialize({workspaceNamespace});
+}
+
 // useRuntimeStatus hook can be used to change the status of the runtime
 // Only 'Delete' is supported at the moment. This setter returns a promise which
 // resolves when any proximal fetch has completed, but does not wait for any
@@ -80,7 +95,9 @@ export const useRuntimeStatus = (currentWorkspaceNamespace): [
 
   const setStatusRequest = async(req) => {
     await switchCase(req, [
-      RuntimeStatusRequest.Delete, () => runtimeApi().deleteRuntime(currentWorkspaceNamespace)
+      RuntimeStatusRequest.Delete, () => {
+        runtimeApi().deleteRuntime(currentWorkspaceNamespace)
+      }
     ]);
     setRuntimeStatus(req);
   };
@@ -93,7 +110,7 @@ export const useRuntimeStatus = (currentWorkspaceNamespace): [
 export const useCustomRuntime = (currentWorkspaceNamespace):
     [{currentRuntime: Runtime, pendingRuntime: Runtime}, (runtime: Runtime) => void] => {
   const {runtime, workspaceNamespace} = useStore(runtimeStore);
-  const runtimeOps = useStore(runtimeOpsStore);
+  const runtimeOps = useStore(compoundRuntimeOpStore);
   const {pendingRuntime = null} = runtimeOps[currentWorkspaceNamespace] || {};
   const [requestedRuntime, setRequestedRuntime] = useState<Runtime>();
 
@@ -118,17 +135,17 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
           pollAbortSignal: aborter.signal
         });
       } finally {
-        markRuntimeOperationCompleteForWorkspace(currentWorkspaceNamespace);
+        markCompoundRuntimeOperationCompleted(currentWorkspaceNamespace);
         setRequestedRuntime(undefined);
       }
     };
 
     if (requestedRuntime !== undefined && !fp.equals(requestedRuntime, runtime)) {
-      runAction();
-      updateRuntimeOpsStoreForWorkspaceNamespace(currentWorkspaceNamespace, {
+      registerCompoundRuntimeOperation(currentWorkspaceNamespace, {
         pendingRuntime: requestedRuntime,
         aborter
       });
+      runAction();
     }
   }, [requestedRuntime]);
 
