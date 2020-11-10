@@ -314,16 +314,6 @@ commands:
               }" \
               > ./logs/circleci_parameters.json
           when: always
-      - run:
-          name: Upload test results json to storage bucket
-          working_directory: ~/workbench/e2e/logs
-          command: |
-            NEW_JSON=circleci-build-${CIRCLE_BUILD_NUM}-${CIRCLE_NODE_INDEX}-test-results.json
-            jq -s -c '.[0] * .[1]' test-results.json circleci_parameters.json > ${NEW_JSON}
-            # Upload json to storage bucket in all-of-us-workbench-test project.
-            STORAGE_BUCKET=gs://circleci-puppeteer-test-results
-            gsutil cp ${NEW_JSON} ${STORAGE_BUCKET}
-          when: always
       - store_artifacts:
           path: e2e/logs
           destination: logs
@@ -354,6 +344,20 @@ commands:
             - ~/.cache/yarn
             - ui/node_modules
           key: v5-ui-cache-{{ .Branch }}-{{ checksum "~/workbench/ui/yarn.lock" }}
+
+  gcs-load-test-results:
+    description: "Load Puppeteer test results JSON to Google Storage bucket"
+    steps:
+      - run:
+          name: Upload test results json to storage bucket
+          working_directory: ~/workbench/e2e/logs
+          command: |
+            NEW_JSON=circleci-build-${CIRCLE_BUILD_NUM}-${CIRCLE_NODE_INDEX}-test-results.json
+            jq -s -c '.[0] * .[1]' test-results.json circleci_parameters.json > ${NEW_JSON}
+            # Upload json to storage bucket in all-of-us-workbench-test project.
+            STORAGE_BUCKET=gs://circleci-puppeteer-test-results
+            gsutil cp ${NEW_JSON} ${STORAGE_BUCKET}
+          when: always
 
 # -------------------------
 #        JOBS
@@ -650,6 +654,8 @@ workflows:
           requires:
             - api-deploy-to-test
             - ui-deploy-to-test
+          post-steps:
+            - gcs-load-test-results
 
   deploy-staging:
     jobs:
