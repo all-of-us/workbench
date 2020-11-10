@@ -582,6 +582,7 @@ export const HelpSidebar = fp.flow(
 
     displayRuntimeIcon(icon) {
       const {currentRuntimeStore} = this.props;
+      // XXX: Show the spinner while the runtime is deleted.
       const status = currentRuntimeStore && currentRuntimeStore.runtime && currentRuntimeStore.runtime.status;
 
       // We always want to show the thunderstorm icon.

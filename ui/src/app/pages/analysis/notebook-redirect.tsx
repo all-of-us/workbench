@@ -4,7 +4,10 @@ import Iframe from 'react-iframe';
 
 import {urlParamsStore} from 'app/utils/navigation';
 import {fetchAbortableRetry} from 'app/utils/retry';
+import {RuntimeStore, runtimeStore, withStore} from 'app/utils/stores';
+import {Atom} from 'app/utils/subscribable';
 
+import {maybeInitializeRuntime} from 'app/utils/runtime-utils';
 import {Button} from 'app/components/buttons';
 import {FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
@@ -21,7 +24,6 @@ import {
   withQueryParams,
   withUserProfile
 } from 'app/utils';
-import {LeoRuntimeInitializer} from 'app/utils/leo-runtime-initializer';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {environment} from 'environments/environment';
@@ -214,6 +216,7 @@ interface Props {
   workspace: WorkspaceData;
   queryParams: any;
   profileState: {profile: Profile, reload: Function, updateCache: Function};
+  runtimeStore: RuntimeStore;
 }
 
 const runtimeApiRetryTimeoutMillis = 10000;
@@ -221,10 +224,9 @@ const runtimeApiRetryAttempts = 5;
 const redirectMillis = 1000;
 
 export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(),
-  withQueryParams())(class extends React.Component<Props, State> {
+  withQueryParams(), withStore(runtimeStore, 'runtimeStore'))(class extends React.Component<Props, State> {
 
-    private pollTimer: NodeJS.Timer;
-    private redirectTimer: NodeJS.Timer;
+    private redirectTimer: NodeJS.Timeout;
     private pollAborter = new AbortController();
 
     constructor(props) {
@@ -295,17 +297,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
     }
 
     componentWillUnmount() {
-      clearTimeout(this.pollTimer);
       clearTimeout(this.redirectTimer);
-      this.pollAborter.abort();
-    }
-
-    onPoll(runtime: Runtime) {
-      if (this.isRuntimeInProgress(!!runtime ? runtime.status : null)) {
-        this.incrementProgress(Progress.Resuming);
-      } else {
-        this.incrementProgress(Progress.Initializing);
-      }
     }
 
     // check the runtime's status: if it's Running we can connect the notebook to it
@@ -313,17 +305,20 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
     private async initializeRuntimeStatusChecking(billingProjectId) {
       this.incrementProgress(Progress.Unknown);
 
-      const runtime = await LeoRuntimeInitializer.initialize({
-        workspaceNamespace: billingProjectId,
-        onPoll: (updatedRuntime) => this.onPoll(updatedRuntime),
-        pollAbortSignal: this.pollAborter.signal
-      });
-      await this.connectToRunningRuntime(runtime);
+      const {runtime} = this.props.runtimeStore;
+      if (this.isRuntimeInProgress(runtime && runtime.status)) {
+        this.incrementProgress(Progress.Resuming);
+      } else {
+        this.incrementProgress(Progress.Initializing);
+      }
+
+      await maybeInitializeRuntime(billingProjectId);
+      await this.connectToRunningRuntime();
     }
 
-    private async connectToRunningRuntime(runtime) {
+    private async connectToRunningRuntime() {
       const {namespace, id} = this.props.workspace;
-
+      const {runtime} = this.props.runtimeStore;
       this.incrementProgress(Progress.Authenticating);
       await this.initializeNotebookCookies(runtime);
 
