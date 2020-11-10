@@ -60,7 +60,7 @@ export const markCompoundRuntimeOperationCompleted = (workspaceNamespace: string
 
 export const clearCompoundRuntimeOperations = () => {
   const ops = compoundRuntimeOpStore.get();
-  Object.values(ops).forEach(op => op.aborter.abort());
+  Object.keys(ops).forEach(k => ops[k].aborter.abort());
   compoundRuntimeOpStore.set({});
 };
 
