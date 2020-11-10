@@ -168,7 +168,7 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
     }
 
     private async runRuntime(onRuntimeReady: Function): Promise<void> {
-      await maybeInitializeRuntime(this.props.urlParams.ns);
+      await maybeInitializeRuntime(this.props.urlParams.ns, this.pollAborter.signal);
       onRuntimeReady();
     }
 

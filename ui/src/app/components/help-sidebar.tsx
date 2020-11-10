@@ -41,7 +41,13 @@ import {
   serverConfigStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
-import {RuntimeStore, runtimeStore, withStore} from 'app/utils/stores';
+import {
+  CompoundRuntimeOpStore,
+  compoundRuntimeOpStore,
+  RuntimeStore,
+  runtimeStore,
+  withStore
+} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
@@ -341,6 +347,7 @@ interface Props {
   criteria: Array<Selection>;
   concept?: Array<Criteria>;
   currentRuntimeStore: RuntimeStore;
+  compoundRuntimeOpStore: CompoundRuntimeOpStore;
 }
 
 interface State {
@@ -357,6 +364,7 @@ export const HelpSidebar = fp.flow(
   withCurrentConcept(),
   withCurrentWorkspace(),
   withStore(runtimeStore, 'currentRuntimeStore'),
+  withStore(compoundRuntimeOpStore, 'compoundRuntimeOpStore'),
   withUserProfile()
 )(
   class extends React.Component<Props, State> {
@@ -581,9 +589,15 @@ export const HelpSidebar = fp.flow(
     }
 
     displayRuntimeIcon(icon) {
-      const {currentRuntimeStore} = this.props;
-      // XXX: Show the spinner while the runtime is deleted.
-      const status = currentRuntimeStore && currentRuntimeStore.runtime && currentRuntimeStore.runtime.status;
+      const {currentRuntimeStore, compoundRuntimeOpStore, workspace} = this.props;
+      let status = currentRuntimeStore && currentRuntimeStore.runtime && currentRuntimeStore.runtime.status;
+      if ((!status || status === RuntimeStatus.Deleted) &&
+          workspace.namespace in compoundRuntimeOpStore) {
+        // If a compound operation is still pending, and we're transitioning
+        // through the "Deleted" phase of the runtime, we want to keep showing
+        // an activity spinner. Avoids an awkward UX during a delete/create cycle.
+        status = RuntimeStatus.Deleting;
+      }
 
       // We always want to show the thunderstorm icon.
       // For most runtime statuses (Deleting and Unknown currently excepted), we will show a small

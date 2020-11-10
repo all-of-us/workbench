@@ -5,7 +5,6 @@ import Iframe from 'react-iframe';
 import {urlParamsStore} from 'app/utils/navigation';
 import {fetchAbortableRetry} from 'app/utils/retry';
 import {RuntimeStore, runtimeStore, withStore} from 'app/utils/stores';
-import {Atom} from 'app/utils/subscribable';
 
 import {maybeInitializeRuntime} from 'app/utils/runtime-utils';
 import {Button} from 'app/components/buttons';
@@ -292,8 +291,13 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       }));
     }
 
-    componentDidMount() {
-      this.initializeRuntimeStatusChecking(this.props.workspace.namespace);
+
+    componentDidUpdate() {
+      // Only kick off the initialization process once the runtime is loaded.
+      if (this.state.progress === Progress.Unknown &&
+          this.props.runtimeStore.runtime !== undefined) {
+        this.initializeRuntimeStatusChecking(this.props.workspace.namespace);
+      }
     }
 
     componentWillUnmount() {
@@ -312,7 +316,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
         this.incrementProgress(Progress.Initializing);
       }
 
-      await maybeInitializeRuntime(billingProjectId);
+      await maybeInitializeRuntime(billingProjectId, this.pollAborter.signal);
       await this.connectToRunningRuntime();
     }
 

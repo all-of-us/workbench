@@ -36,12 +36,14 @@ export interface CompoundRuntimeOperation {
   aborter: AbortController;
 }
 
+export interface CompoundRuntimeOpStore {
+  [workspaceNamespace: string]: CompoundRuntimeOperation;
+}
+
 // Store tracking any compound Runtime operations per workspace. Currently, this
 // only pertains to applying a runtime configuration update via full recreate
 // (compound operation of delete -> create).
-export const compoundRuntimeOpStore = atom<{
-  [workspaceNamespace: string]: CompoundRuntimeOperation;
-}>({});
+export const compoundRuntimeOpStore = atom<CompoundRuntimeOpStore>({});
 
 export const registerCompoundRuntimeOperation = (workspaceNamespace: string, runtimeOperation: CompoundRuntimeOperation) => {
   compoundRuntimeOpStore.set({

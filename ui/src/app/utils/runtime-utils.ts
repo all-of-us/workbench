@@ -48,19 +48,23 @@ const useRuntime = (currentWorkspaceNamespace) => {
   }, []);
 };
 
-export const maybeInitializeRuntime = async(workspaceNamespace: string) => {
+export const maybeInitializeRuntime = async(workspaceNamespace: string, signal: AbortSignal) => {
   if (workspaceNamespace in compoundRuntimeOpStore.get()) {
-    await new Promise((resolve) => {
+    await new Promise((resolve, reject) => {
+      signal.addEventListener('abort', reject);
       const {unsubscribe} = compoundRuntimeOpStore.subscribe((v => {
         if (!(workspaceNamespace in v)) {
           unsubscribe();
+          signal.removeEventListener('abort', reject);
           resolve();
         }
       }))
     });
   }
 
-  await LeoRuntimeInitializer.initialize({workspaceNamespace});
+  if (!signal.aborted) {
+    await LeoRuntimeInitializer.initialize({workspaceNamespace, pollAbortSignal: signal});
+  }
 }
 
 // useRuntimeStatus hook can be used to change the status of the runtime
