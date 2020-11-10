@@ -18,7 +18,11 @@ import {
   validLeonardoMachineTypes
 } from 'app/utils/machines';
 import {runtimePresets} from 'app/utils/runtime-presets';
-import {RuntimeStatusRequest, useCustomRuntime, useRuntimeStatus} from 'app/utils/runtime-utils';
+import {
+  RuntimeStatusRequest,
+  useCustomRuntime,
+  useRuntimeStatus
+} from 'app/utils/runtime-utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
 import {Dropdown} from 'primereact/dropdown';
@@ -770,27 +774,7 @@ export const RuntimePanel = fp.flow(
         || ![RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus)
       }
       onClick={() => {
-        const runtimeToRequest: Runtime = selectedDataprocConfig ? {
-          dataprocConfig: {
-            ...selectedDataprocConfig,
-            masterMachineType: selectedMachineType,
-            masterDiskSize: selectedDiskSize
-          }
-        } : {
-          gceConfig: {
-            machineType: selectedMachineType,
-            diskSize: selectedDiskSize
-          }
-        };
-
-        // If the selected runtime matches a preset, plumb through the appropriate configuration type.
-        runtimeToRequest.configurationType = fp.get(
-          'runtimeTemplate.configurationType',
-          fp.find(
-            ({runtimeTemplate}) => presetEquals(runtimeToRequest, runtimeTemplate),
-            runtimePresets)
-        ) || RuntimeConfigurationType.UserOverride;
-        setRequestedRuntime(runtimeToRequest);
+        setRequestedRuntime(createRuntimeRequest(newRuntimeConfig));
       }}>Update</Button>;
   };
 
@@ -804,145 +788,37 @@ export const RuntimePanel = fp.flow(
     </Button>;
   };
 
+  const createRuntimeRequest = (runtime: RuntimeConfig) => {
+    const runtimeRequest: Runtime = runtime.dataprocConfig ? {
+      dataprocConfig: {
+        ...runtime.dataprocConfig,
+        masterMachineType: runtime.machine.name,
+        masterDiskSize: runtime.diskSize
+      }
+    } : {
+      gceConfig: {
+        machineType: runtime.machine.name,
+        diskSize: runtime.diskSize
+      }
+    };
+
+    // If the selected runtime matches a preset, plumb through the appropriate configuration type.
+    runtimeRequest.configurationType = fp.get(
+      'runtimeTemplate.configurationType',
+      fp.find(
+        ({runtimeTemplate}) => presetEquals(runtimeRequest, runtimeTemplate),
+        runtimePresets)
+    ) || RuntimeConfigurationType.UserOverride;
+
+    return runtimeRequest;
+  };
+
   const renderCreateButton = () => {
     return <Button
       aria-label='Create'
-      disabled={
-          !runtimeChanged
-          // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
-          // where we get 'status' from
-          || ![RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus)
-      }
       onClick={() => {
-        const runtimeToRequest: Runtime = selectedDataprocConfig ? {
-          dataprocConfig: {
-            ...selectedDataprocConfig,
-            masterMachineType: selectedMachineType,
-            masterDiskSize: selectedDiskSize
-          }
-        } : {
-          gceConfig: {
-            machineType: selectedMachineType,
-            diskSize: selectedDiskSize
-          }
-        };
-
-        // If the selected runtime matches a preset, plumb through the appropriate configuration type.
-        runtimeToRequest.configurationType = fp.get(
-          'runtimeTemplate.configurationType',
-          fp.find(
-            ({runtimeTemplate}) => presetEquals(runtimeToRequest, runtimeTemplate),
-            runtimePresets)
-        ) || RuntimeConfigurationType.UserOverride;
-        setRequestedRuntime(runtimeToRequest);
+        setRequestedRuntime(createRuntimeRequest(newRuntimeConfig));
       }}>Create</Button>;
-  };
-
-  const renderControlSection = () => {
-    return <React.Fragment>
-      <div style={styles.controlSection}>
-        {/* Recommended runtime: pick from default templates or change the image. */}
-        <PopupTrigger side='bottom'
-                      closeOnClick
-                      content={
-                        <React.Fragment>
-                          {
-                            fp.flow(
-                              fp.filter(({runtimeTemplate}) => hasMicroarrayData || !runtimeTemplate.dataprocConfig),
-                              fp.toPairs,
-                              fp.map(([i, preset]) => {
-                                return <MenuItem
-                                  style={styles.presetMenuItem}
-                                  key={i}
-                                  aria-label={preset.displayName}
-                                  onClick={() => {
-                                    // renaming to avoid shadowing
-                                    const {runtimeTemplate} = preset;
-                                    const {presetDiskSize, presetMachineName, presetCompute} = fp.cond([
-                                      // Can't destructure due to shadowing.
-                                      [() => !!runtimeTemplate.gceConfig, (tmpl: Runtime) => ({
-                                        presetDiskSize: tmpl.gceConfig.diskSize,
-                                        presetMachineName: tmpl.gceConfig.machineType,
-                                        presetCompute: ComputeType.Standard
-                                      })],
-                                      [() => !!runtimeTemplate.dataprocConfig, ({dataprocConfig: {masterDiskSize, masterMachineType}}) => ({
-                                        presetDiskSize: masterDiskSize,
-                                        presetMachineName: masterMachineType,
-                                        presetCompute: ComputeType.Dataproc
-                                      })]
-                                    ])(runtimeTemplate);
-                                    const presetMachineType = fp.find(({name}) => name === presetMachineName, validLeonardoMachineTypes);
-
-                                    setSelectedDiskSize(presetDiskSize);
-                                    setSelectedMachine(presetMachineType);
-                                    setSelectedCompute(presetCompute);
-                                    setSelectedDataprocConfig(runtimeTemplate.dataprocConfig);
-                                  }}>
-                                  {preset.displayName}
-                                </MenuItem>;
-                              })
-                            )(runtimePresets)
-                          }
-                        </React.Fragment>
-                      }>
-          {/* inline-block aligns the popup menu beneath the clickable content, rather than the middle of the panel */}
-          <Clickable style={{display: 'inline-block'}} data-test-id='runtime-presets-menu'>
-            Recommended environments <ClrIcon shape='caret down'/>
-          </Clickable>
-        </PopupTrigger>
-        {/* Runtime customization: change detailed machine configuration options. */}
-        <h3 style={styles.sectionHeader}>Cloud compute profile</h3>
-        <div style={styles.formGrid}>
-          <MachineSelector
-            idPrefix='runtime'
-            selectedMachine={selectedMachine}
-            onChange={(value) => setSelectedMachine(value)}
-            machineType={machineName}
-          />
-          <DiskSizeSelector
-            idPrefix='runtime'
-            selectedDiskSize={selectedDiskSize}
-            onChange={(value) => setSelectedDiskSize(value)}
-            diskSize={diskSize}
-          />
-        </div>
-        <FlexColumn style={{marginTop: '1rem'}}>
-          <label htmlFor='runtime-compute'>Compute type</label>
-          <Dropdown id='runtime-compute'
-                    disabled={!hasMicroarrayData}
-                    style={{width: '10rem'}}
-                    options={[ComputeType.Standard, ComputeType.Dataproc]}
-                    value={selectedCompute || ComputeType.Standard}
-                    onChange={({value}) => setSelectedCompute(value)}
-          />
-          {
-            selectedCompute === ComputeType.Dataproc &&
-            <DataProcConfigSelector onChange={setSelectedDataprocConfig} dataprocConfig={selectedDataprocConfig} />
-          }
-        </FlexColumn>
-      </div>
-
-      <FlexRow style={styles.errorMessage}>
-        <ClrIcon
-          shape={'warning-standard'}
-          class={'is-solid'}
-          size={26}
-          style={{
-            color: colors.warning,
-            flex: '0 0 auto'
-          }}
-        />
-        <div style={{paddingLeft: '0.5rem'}}>
-          You've made changes that require recreating your environment to take effect.
-        </div>
-      </FlexRow>
-
-      <FlexRow style={{justifyContent: 'flex-end', marginTop: '.75rem'}}>
-        {!runtimeExists ? renderCreateButton() :
-          runtimeDiffs.map(diff => diff.differenceType).includes(RuntimeDiffState.NEEDS_DELETE) ?
-            renderNextButton() : renderUpdateButton()}
-      </FlexRow>
-    </React.Fragment>;
   };
 
   const renderConfirmSection = () => {

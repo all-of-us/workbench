@@ -206,6 +206,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
                   runtime.getGoogleProject(),
                   runtime.getRuntimeName(),
                   new LeonardoUpdateRuntimeRequest()
+                      .allowStop(true)
                       .runtimeConfig(
                           buildRuntimeConfig(
                               runtime, userProvider.get().getClusterConfigDefault())));

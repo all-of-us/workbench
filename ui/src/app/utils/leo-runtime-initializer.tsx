@@ -93,6 +93,7 @@ export interface LeoRuntimeInitializerOptions {
   maxResumeCount?: number;
   maxServerErrorCount?: number;
   targetRuntime?: Runtime;
+  resolutionCond?: (Runtime) => boolean;
 }
 
 const defaultOptions = (): Partial<LeoRuntimeInitializerOptions> => ({
@@ -104,7 +105,8 @@ const defaultOptions = (): Partial<LeoRuntimeInitializerOptions> => ({
   maxDeleteCount: DEFAULT_MAX_DELETE_COUNT,
   maxResumeCount: DEFAULT_MAX_RESUME_COUNT,
   maxServerErrorCount: DEFAULT_MAX_SERVER_ERROR_COUNT,
-  targetRuntime: DEFAULT_RUNTIME_CONFIG
+  targetRuntime: DEFAULT_RUNTIME_CONFIG,
+  resolutionCond: (runtime) => runtime.status === RuntimeStatus.Running
 });
 
 /**
@@ -128,6 +130,7 @@ export class LeoRuntimeInitializer {
   private readonly workspaceNamespace: string;
   private readonly onPoll: (Runtime?) => void;
   private readonly pollAbortSignal?: AbortSignal;
+  private readonly resolutionCond: (Runtime) => boolean;
 
   // Properties to track & control the polling loop. We use a capped exponential backoff strategy
   // and a series of "maxFoo" limits to ensure the initialization flow doesn't get out of control.
@@ -194,6 +197,7 @@ export class LeoRuntimeInitializer {
     this.maxResumeCount = options.maxResumeCount;
     this.maxServerErrorCount = options.maxServerErrorCount;
     this.targetRuntime = options.targetRuntime;
+    this.resolutionCond = options.resolutionCond;
   }
 
   private async getRuntime(): Promise<Runtime> {
@@ -268,6 +272,10 @@ export class LeoRuntimeInitializer {
     markRuntimeOperationCompleteForWorkspace(this.workspaceNamespace);
   }
 
+  private reachedResolution(): boolean {
+    return this.currentRuntime && this.resolutionCond(this.currentRuntime);
+  }
+
   private isRuntimeDeleted(): boolean {
     return this.currentRuntime && this.currentRuntime.status === RuntimeStatus.Deleted;
   }
@@ -324,6 +332,7 @@ export class LeoRuntimeInitializer {
   }
 
   private async poll() {
+
     // Overall strategy: continue polling the get-runtime endpoint, with capped exponential backoff,
     // until we either reach our goal state (a RUNNING runtime) or run up against the overall
     // timeout threshold.
@@ -372,6 +381,7 @@ export class LeoRuntimeInitializer {
       if (this.currentRuntime === null || this.isRuntimeDeleted()) {
         await this.createRuntime();
       } else if (this.isRuntimeStopped()) {
+        await this.createRuntime();
         await this.resumeRuntime();
       } else if (this.isRuntimeErrored()) {
         // If runtime is in error state, delete it so it can be re-created at the next poll loop.
@@ -379,7 +389,7 @@ export class LeoRuntimeInitializer {
           `Runtime ${this.currentRuntime.googleProject}/${this.currentRuntime.runtimeName}` +
           ` has reached an ERROR status`);
         await this.deleteRuntime();
-      } else if (this.isRuntimeRunning()) {
+      } else if (this.reachedResolution()) {
         // We've reached the goal - resolve the Promise.
         return this.resolve(this.currentRuntime);
       }
