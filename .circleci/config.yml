@@ -308,9 +308,9 @@ commands:
             echo "{ \
               \"circleBranch\": \"${CIRCLE_BRANCH}\", \
               \"circleJob\": \"${CIRCLE_JOB}\", \
-              \"circleBuild\": \"${CIRCLE_BUILD_NUM}\", \
+              \"circleBuild\": ${CIRCLE_BUILD_NUM}, \
               \"circleBuildUrl\": \"${CIRCLE_BUILD_URL}\", \
-              \"circleNodeIndex\": \"${CIRCLE_NODE_INDEX}\" \
+              \"circleNodeIndex\": ${CIRCLE_NODE_INDEX} \
               }" \
               > ./logs/circleci_parameters.json
           when: always
