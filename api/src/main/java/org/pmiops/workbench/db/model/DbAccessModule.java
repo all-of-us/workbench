@@ -1,12 +1,16 @@
 package org.pmiops.workbench.db.model;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import javax.jdo.annotations.Unique;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import org.pmiops.workbench.accessmodules.AccessModuleEvaluatorKey;
@@ -22,6 +26,7 @@ public class DbAccessModule {
   private String displayName;
   private AccessModuleType accessModuleType;
   private AccessModuleEvaluatorKey accessModuleEvaluatorKey;
+  private final Set<DbAccessPolicy> accessPolicies = new HashSet<>();
 
   public DbAccessModule() {}
 
@@ -64,6 +69,16 @@ public class DbAccessModule {
     this.accessModuleType = accessModuleType;
   }
 
+  @ManyToMany(mappedBy = "accessModules")
+  public Set<DbAccessPolicy> getAccessPolicies() {
+    return accessPolicies;
+  }
+
+  public void setAccessPolicies(Collection<DbAccessPolicy> accessPolicies) {
+    this.accessPolicies.clear();
+    this.accessPolicies.addAll(accessPolicies);
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -73,14 +88,16 @@ public class DbAccessModule {
       return false;
     }
     DbAccessModule that = (DbAccessModule) o;
-    return accessModuleId == that.accessModuleId
-        && Objects.equals(displayName, that.displayName)
-        && accessModuleType == that.accessModuleType
-        && accessModuleEvaluatorKey == that.accessModuleEvaluatorKey;
+    return accessModuleId == that.accessModuleId &&
+        Objects.equals(displayName, that.displayName) &&
+        accessModuleType == that.accessModuleType &&
+        accessModuleEvaluatorKey == that.accessModuleEvaluatorKey &&
+        Objects.equals(accessPolicies, that.accessPolicies);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(accessModuleId, displayName, accessModuleType, accessModuleEvaluatorKey);
+    return Objects.hash(accessModuleId, displayName, accessModuleType, accessModuleEvaluatorKey,
+        accessPolicies);
   }
 }
