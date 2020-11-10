@@ -17,6 +17,7 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {cdrVersionListResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {WorkspacesApiStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
+import {runtimeApi} from '../../services/swagger-fetch-clients';
 
 describe('RuntimePanel', () => {
   let props: Props;
@@ -35,18 +36,18 @@ describe('RuntimePanel', () => {
       await Promise.resolve(component); // Wait for the component to finish rendering (mount returns a promise)
       await new Promise(resolve => setImmediate(resolve)); // Wait for all outstanding requests to complete
     });
-  }
+  };
 
   beforeEach(() => {
     cdrVersionStore.next(cdrVersionListResponse);
     serverConfigStore.next({...defaultServerConfig, enableCustomRuntimes: true});
 
     runtimeApiStub = new RuntimeApiStub();
-    runtimeApiStub.runtime.dataprocConfig = null;
+    // TODO eric: why is this set to null?
     registerApiClient(RuntimeApi, runtimeApiStub);
 
     workspacesApiStub = new WorkspacesApiStub();
-    registerApiClient(WorkspacesApi, workspacesApiStub)
+    registerApiClient(WorkspacesApi, workspacesApiStub);
 
     runtimeStore.set({runtime: runtimeApiStub.runtime, workspaceNamespace: workspaceStubs[0].namespace});
     props = {
@@ -324,6 +325,7 @@ describe('RuntimePanel', () => {
     expect(memoryOptions.map(m => m.text())).toEqual(['7.2', '30', '52']);
   });
 
+  // TODO eric: rework this test to match the button changes
   it('should toggle the disabled state of the update button when the configuration changes', async() => {
     const wrapper = component();
     await handleUseEffect(wrapper);
@@ -334,7 +336,8 @@ describe('RuntimePanel', () => {
 
     wrapper.find('#runtime-cpu .p-dropdown').first().simulate('click');
     wrapper.find('.p-dropdown-item').find({'aria-label': 8}).first().simulate('click');
-    expect(updateButton().prop('disabled')).toBeFalsy();
+    expect(wrapper.find(Button).find({'aria-label': 'Update'}).exists()).toBeFalsy();
+    expect(wrapper.find(Button).find({'aria-label': 'ext'}).exists()).toBeTruthy();
 
     wrapper.find('#runtime-ram').first().find('.p-dropdown-item').first().simulate('click');
     wrapper.find('.p-dropdown-item').find({'aria-label': 4}).first().simulate('click');
@@ -359,6 +362,34 @@ describe('RuntimePanel', () => {
     wrapper.find('#runtime-compute .p-dropdown').first().simulate('click');
     wrapper.find('.p-dropdown-item').find({'aria-label': 'Standard VM'}).first().simulate('click');
     expect(updateButton().prop('disabled')).toBeTruthy();
+
+  });
+
+  it('should send a delete call if an update requires delete', async() => {
+    const wrapper = component();
+    await handleUseEffect(wrapper);
+    await waitOneTickAndUpdate(wrapper);
+
+    const spy = jest.spyOn(runtimeApi(), 'deleteRuntime');
+
+    wrapper.find('#runtime-cpu .p-dropdown').first().simulate('click');
+
+    act(() => {
+      wrapper.find('.p-dropdown-item').find({'aria-label': 8}).first().simulate('click');
+    });
+    await waitOneTickAndUpdate(wrapper);
+
+    act(() => {
+      wrapper.find(Button).find({'aria-label': 'Next'}).first().simulate('click');
+    });
+    await waitOneTickAndUpdate(wrapper);
+
+    act(() => {
+      wrapper.find(Button).find({'aria-label': 'Update'}).first().simulate('click');
+    });
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(spy).toHaveBeenCalled();
 
   });
 

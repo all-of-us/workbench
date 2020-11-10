@@ -303,22 +303,22 @@ export const useCustomRuntime = (currentWorkspaceNamespace): [Runtime, (runtime:
         const runtimeDiffTypes = getRuntimeDiffs(runtime, requestedRuntime).map(diff => diff.differenceType);
 
         if (runtimeDiffTypes.includes(RuntimeDiffState.NEEDS_DELETE)) {
-          await runtimeApi().deleteRuntime(currentWorkspaceNamespace);
+          if (runtime.status !== RuntimeStatus.Deleted) {
+            await runtimeApi().deleteRuntime(currentWorkspaceNamespace);
+          }
         } else if (runtimeDiffTypes.includes(RuntimeDiffState.CAN_UPDATE)) {
-          // TODO eric: what happens if I update on a non running non stopped runtime?
-          await runtimeApi().updateRuntime(currentWorkspaceNamespace, {runtime: requestedRuntime});
-          // if (runtime.status === RuntimeStatus.Running || runtime.status === RuntimeStatus.Stopped) {
-          // } else if (runtime.status !== RuntimeStatus.Deleted) {
-          // }
-
-          // Calling updateRuntime will not immediately set the Runtime status to not Running so the
-          // default initializer will resolve on its first call. The polling below first checks for the
-          // non Running status before initializing the default one that checks for Running status
-          await LeoRuntimeInitializer.initialize({
-            workspaceNamespace,
-            targetRuntime: requestedRuntime,
-            resolutionCond: (runtime: Runtime) => runtime.status !== RuntimeStatus.Running
-          });
+          // TODO eric: what happens if we get can update request during a non running/stopped state?
+          if (runtime.status === RuntimeStatus.Running || runtime.status === RuntimeStatus.Stopped) {
+            await runtimeApi().updateRuntime(currentWorkspaceNamespace, {runtime: requestedRuntime});
+            // Calling updateRuntime will not immediately set the Runtime status to not Running so the
+            // default initializer will resolve on its first call. The polling below first checks for the
+            // non Running status before initializing the default one that checks for Running status
+            await LeoRuntimeInitializer.initialize({
+              workspaceNamespace,
+              targetRuntime: requestedRuntime,
+              resolutionCond: (runtime: Runtime) => runtime.status !== RuntimeStatus.Running
+            });
+          }
         } else {
           // There are no differences, no extra requests needed
         }

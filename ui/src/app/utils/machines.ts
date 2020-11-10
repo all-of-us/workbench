@@ -114,8 +114,6 @@ export const machineRunningCost = ({
   workerMachineName
 }) => {
   const masterMachine = findMachineByName(masterMachineName);
-  console.log(masterMachineName);
-  console.log(masterMachine);
   const workerMachine = workerMachineName && findMachineByName(workerMachineName);
 
   const dataprocPrice = computeType === ComputeType.Dataproc
