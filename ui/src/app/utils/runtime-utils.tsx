@@ -3,14 +3,14 @@ import {switchCase} from 'app/utils';
 import { withAsyncErrorHandling } from 'app/utils';
 import {
   ExceededActionCountError,
-  LeoRuntimeInitializer,
   LeoRuntimeInitializationAbortedError,
+  LeoRuntimeInitializer,
 } from 'app/utils/leo-runtime-initializer';
 import {
-  markCompoundRuntimeOperationCompleted,
-  runtimeStore,
   compoundRuntimeOpStore,
+  markCompoundRuntimeOperationCompleted,
   registerCompoundRuntimeOperation,
+  runtimeStore,
   useStore
 } from 'app/utils/stores';
 import {Runtime, RuntimeStatus} from 'generated/fetch';
@@ -55,7 +55,7 @@ export const maybeInitializeRuntime = async(workspaceNamespace: string, signal: 
           signal.removeEventListener('abort', reject);
           resolve();
         }
-      }))
+      }));
     });
   }
 
@@ -64,7 +64,7 @@ export const maybeInitializeRuntime = async(workspaceNamespace: string, signal: 
     await LeoRuntimeInitializer.initialize({workspaceNamespace, pollAbortSignal: signal});
     console.log('awaiting initailizer');
   }
-}
+};
 
 // useRuntimeStatus hook can be used to change the status of the runtime
 // Only 'Delete' is supported at the moment. This setter returns a promise which
@@ -100,7 +100,7 @@ export const useRuntimeStatus = (currentWorkspaceNamespace): [
   const setStatusRequest = async(req) => {
     await switchCase(req, [
       RuntimeStatusRequest.Delete, () => {
-        runtimeApi().deleteRuntime(currentWorkspaceNamespace)
+        runtimeApi().deleteRuntime(currentWorkspaceNamespace);
       }
     ]);
     setRuntimeStatus(req);

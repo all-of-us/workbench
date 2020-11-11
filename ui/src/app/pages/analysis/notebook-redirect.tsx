@@ -6,7 +6,6 @@ import {urlParamsStore} from 'app/utils/navigation';
 import {fetchAbortableRetry} from 'app/utils/retry';
 import {RuntimeStore} from 'app/utils/stores';
 
-import {maybeInitializeRuntime, withRuntimeStore} from 'app/utils/runtime-utils';
 import {Button} from 'app/components/buttons';
 import {FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
@@ -24,6 +23,7 @@ import {
   withUserProfile
 } from 'app/utils';
 import {Kernels} from 'app/utils/notebook-kernels';
+import {maybeInitializeRuntime, withRuntimeStore} from 'app/utils/runtime-utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {environment} from 'environments/environment';
 import {Profile, Runtime, RuntimeStatus} from 'generated/fetch';
@@ -227,7 +227,8 @@ export const NotebookRedirect = fp.flow(
   withCurrentWorkspace(),
   withQueryParams(),
   withRuntimeStore(),
-)(class extends React.Component<Props, State> {
+)(
+  class extends React.Component<Props, State> {
 
     private redirectTimer: NodeJS.Timeout;
     private pollAborter = new AbortController();
@@ -244,8 +245,8 @@ export const NotebookRedirect = fp.flow(
 
     private isRuntimeInProgress(status: RuntimeStatus): boolean {
       return status === RuntimeStatus.Starting ||
-        status === RuntimeStatus.Stopping ||
-        status === RuntimeStatus.Stopped;
+          status === RuntimeStatus.Stopping ||
+          status === RuntimeStatus.Stopped;
     }
 
     private isCreatingNewNotebook() {
@@ -263,18 +264,18 @@ export const NotebookRedirect = fp.flow(
     private notebookUrl(runtime: Runtime, nbName: string): string {
       return encodeURI(
         environment.leoApiUrl + '/notebooks/'
-        + runtime.googleProject + '/'
-        + runtime.runtimeName + '/notebooks/' + nbName);
+          + runtime.googleProject + '/'
+          + runtime.runtimeName + '/notebooks/' + nbName);
     }
 
-    // get notebook name without file suffix
+      // get notebook name without file suffix
     private getNotebookName() {
       const {nbName} = urlParamsStore.getValue();
-      // safe whether nbName has the standard notebook suffix or not
+        // safe whether nbName has the standard notebook suffix or not
       return dropNotebookFileSuffix(decodeURIComponent(nbName));
     }
 
-    // get notebook name with file suffix
+      // get notebook name with file suffix
     private getFullNotebookName() {
       return appendNotebookFileSuffix(this.getNotebookName());
     }
@@ -297,9 +298,9 @@ export const NotebookRedirect = fp.flow(
 
 
     componentDidUpdate() {
-      // Only kick off the initialization process once the runtime is loaded.
+        // Only kick off the initialization process once the runtime is loaded.
       if (this.state.progress === Progress.Unknown &&
-          this.props.runtimeStore.runtime !== undefined) {
+            this.props.runtimeStore.runtime !== undefined) {
         this.initializeRuntimeStatusChecking(this.props.workspace.namespace);
       }
     }
@@ -308,8 +309,8 @@ export const NotebookRedirect = fp.flow(
       clearTimeout(this.redirectTimer);
     }
 
-    // check the runtime's status: if it's Running we can connect the notebook to it
-    // otherwise we need to start polling
+      // check the runtime's status: if it's Running we can connect the notebook to it
+      // otherwise we need to start polling
     private async initializeRuntimeStatusChecking(billingProjectId) {
       this.incrementProgress(Progress.Unknown);
 
@@ -333,13 +334,13 @@ export const NotebookRedirect = fp.flow(
       const notebookLocation = await this.getNotebookPathAndLocalize(runtime);
       if (this.isCreatingNewNotebook()) {
         window.history.replaceState({}, 'Notebook', 'workspaces/' + namespace
-          + '/' + id + '/notebooks/' +
-          encodeURIComponent(this.getFullNotebookName()));
+            + '/' + id + '/notebooks/' +
+            encodeURIComponent(this.getFullNotebookName()));
       }
       this.setState({leoUrl: this.notebookUrl(runtime, notebookLocation)});
       this.incrementProgress(Progress.Redirecting);
 
-      // give it a second to "redirect"
+        // give it a second to "redirect"
       this.redirectTimer = setTimeout(() => this.incrementProgress(Progress.Loaded), redirectMillis);
     }
 
@@ -351,7 +352,7 @@ export const NotebookRedirect = fp.flow(
         this.incrementProgress(Progress.Copying);
         const fullNotebookName = this.getFullNotebookName();
         const localizedNotebookDir =
-          await this.localizeNotebooks(runtime, [fullNotebookName]);
+            await this.localizeNotebooks(runtime, [fullNotebookName]);
         return `${localizedNotebookDir}/${fullNotebookName}`;
       }
     }
@@ -365,9 +366,9 @@ export const NotebookRedirect = fp.flow(
         fileContent.metadata = pyNotebookMetadata;
       }
       const localizedDir = await this.localizeNotebooks(runtime, []);
-      // Use the Jupyter Server API directly to create a new notebook. This
-      // API handles notebook name collisions and matches the behavior of
-      // clicking 'new notebook' in the Jupyter UI.
+        // Use the Jupyter Server API directly to create a new notebook. This
+        // API handles notebook name collisions and matches the behavior of
+        // clicking 'new notebook' in the Jupyter UI.
       const workspaceDir = localizedDir.replace(/^workspaces\//, '');
       const jupyterResp = await this.runtimeRetry(() => jupyterApi().putContents(
         runtime.googleProject, runtime.runtimeName, workspaceDir, this.getFullNotebookName(), {
@@ -393,51 +394,51 @@ export const NotebookRedirect = fp.flow(
       const {showErrorModal, progress, progressComplete, leoUrl} = this.state;
       const creatingNewNotebook = this.isCreatingNewNotebook();
       return <React.Fragment>
-        {progress !== Progress.Loaded ? <div style={styles.main}>
-          <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}
-               data-test-id='notebook-redirect'>
-            <h2 style={{lineHeight: 0}}>
-              {creatingNewNotebook ? 'Creating New Notebook: ' : 'Loading Notebook: '}
-              {this.getNotebookName()}
-            </h2>
-            <Button type='secondary' onClick={() => window.history.back()}>Cancel</Button>
-          </div>
-          <div style={{display: 'flex', flexDirection: 'row', marginTop: '1rem'}}>
-            {Array.from(progressCardStates, ([key, _], index) => {
-              return <ProgressCard key={index} progressState={progress} cardState={key}
-                                   creatingNewNotebook={creatingNewNotebook} progressComplete={progressComplete}/>;
-            })}
-          </div>
-          <FlexRow style={styles.reminderText}>
-            <ReminderIcon
-              style={{width: '1.75rem', height: '1.75rem', marginRight: '0.5rem'}}/>
-            <div>
-              You are prohibited from taking screenshots or attempting in any way to remove participant-level data from the workbench.
+          {progress !== Progress.Loaded ? <div style={styles.main}>
+            <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}
+                 data-test-id='notebook-redirect'>
+              <h2 style={{lineHeight: 0}}>
+                {creatingNewNotebook ? 'Creating New Notebook: ' : 'Loading Notebook: '}
+                {this.getNotebookName()}
+              </h2>
+              <Button type='secondary' onClick={() => window.history.back()}>Cancel</Button>
             </div>
-          </FlexRow>
-          <div style={{marginLeft: '2rem', ...styles.reminderText}}>
-            You are also prohibited from publishing or otherwise distributing any data or aggregate statistics corresponding to fewer than
-            20 participants unless expressly permitted by our data use policies.
-          </div>
-          <div style={{marginLeft: '2rem', ...styles.reminderText}}>
-            For more information, please see our  <a href={'/data-code-of-conduct'}>Data Use Policies.</a>
-          </div>
-        </div> : <div style={{height: '100%'}}>
-          <div style={{borderBottom: '5px solid #2691D0', width: '100%'}}/>
-          <Iframe frameBorder={0} url={leoUrl} width='100%' height='100%'/>
-        </div>}
-        {showErrorModal && <Modal>
-          <ModalTitle>
-            {creatingNewNotebook ? 'Error creating notebook.' : 'Error fetching notebook'}
-          </ModalTitle>
-          <ModalBody>
-            Please refresh and try again.
-          </ModalBody>
-          <ModalFooter>
-            <Button type='secondary' onClick={() => window.history.back()}>Go Back</Button>
-          </ModalFooter>
-        </Modal>}
-      </React.Fragment>;
+            <div style={{display: 'flex', flexDirection: 'row', marginTop: '1rem'}}>
+              {Array.from(progressCardStates, ([key, _], index) => {
+                return <ProgressCard key={index} progressState={progress} cardState={key}
+                                     creatingNewNotebook={creatingNewNotebook} progressComplete={progressComplete}/>;
+              })}
+            </div>
+            <FlexRow style={styles.reminderText}>
+              <ReminderIcon
+                style={{width: '1.75rem', height: '1.75rem', marginRight: '0.5rem'}}/>
+              <div>
+                You are prohibited from taking screenshots or attempting in any way to remove participant-level data from the workbench.
+              </div>
+            </FlexRow>
+            <div style={{marginLeft: '2rem', ...styles.reminderText}}>
+              You are also prohibited from publishing or otherwise distributing any data or aggregate statistics corresponding to fewer than
+              20 participants unless expressly permitted by our data use policies.
+            </div>
+            <div style={{marginLeft: '2rem', ...styles.reminderText}}>
+              For more information, please see our  <a href={'/data-code-of-conduct'}>Data Use Policies.</a>
+            </div>
+          </div> : <div style={{height: '100%'}}>
+            <div style={{borderBottom: '5px solid #2691D0', width: '100%'}}/>
+            <Iframe frameBorder={0} url={leoUrl} width='100%' height='100%'/>
+          </div>}
+          {showErrorModal && <Modal>
+            <ModalTitle>
+              {creatingNewNotebook ? 'Error creating notebook.' : 'Error fetching notebook'}
+            </ModalTitle>
+            <ModalBody>
+              Please refresh and try again.
+            </ModalBody>
+            <ModalFooter>
+              <Button type='secondary' onClick={() => window.history.back()}>Go Back</Button>
+            </ModalFooter>
+          </Modal>}
+        </React.Fragment>;
     }
   });
 

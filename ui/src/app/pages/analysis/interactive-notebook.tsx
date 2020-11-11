@@ -8,15 +8,15 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {EditComponentReact} from 'app/icons/edit';
 import {PlaygroundModeIcon} from 'app/icons/playground-mode-icon';
 import {ConfirmPlaygroundModeModal} from 'app/pages/analysis/confirm-playground-mode-modal';
-import {RuntimeStore, runtimeStore, withStore} from 'app/utils/stores';
-import {Atom} from 'app/utils/subscribable';
 import {NotebookInUseModal} from 'app/pages/analysis/notebook-in-use-modal';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {maybeInitializeRuntime} from 'app/utils/runtime-utils';
 import {navigate, userProfileStore} from 'app/utils/navigation';
+import {withRuntimeStore} from 'app/utils/runtime-utils';
+import {maybeInitializeRuntime} from 'app/utils/runtime-utils';
+import {RuntimeStore} from 'app/utils/stores';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
@@ -123,7 +123,7 @@ enum PreviewErrorMode {
 export const InteractiveNotebook = fp.flow(
   withUrlParams(),
   withCurrentWorkspace(),
-  withStore(runtimeStore, 'runtimeStore')
+  withRuntimeStore()
 )(
   class extends React.Component<Props, State> {
     private pollAborter = new AbortController();

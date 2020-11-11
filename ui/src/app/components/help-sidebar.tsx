@@ -41,11 +41,11 @@ import {
   serverConfigStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
+import {withRuntimeStore} from 'app/utils/runtime-utils';
 import {
   CompoundRuntimeOpStore,
   compoundRuntimeOpStore,
   RuntimeStore,
-  runtimeStore,
   withStore
 } from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -346,8 +346,8 @@ interface Props {
   workspace: WorkspaceData;
   criteria: Array<Selection>;
   concept?: Array<Criteria>;
-  currentRuntimeStore: RuntimeStore;
-  compoundRuntimeOpStore: CompoundRuntimeOpStore;
+  runtimeStore: RuntimeStore;
+  compoundRuntimeOps: CompoundRuntimeOpStore;
 }
 
 interface State {
@@ -363,8 +363,8 @@ export const HelpSidebar = fp.flow(
   withCurrentCohortCriteria(),
   withCurrentConcept(),
   withCurrentWorkspace(),
-  withStore(runtimeStore, 'currentRuntimeStore'),
-  withStore(compoundRuntimeOpStore, 'compoundRuntimeOpStore'),
+  withRuntimeStore(),
+  withStore(compoundRuntimeOpStore, 'compoundRuntimeOps'),
   withUserProfile()
 )(
   class extends React.Component<Props, State> {
@@ -589,10 +589,10 @@ export const HelpSidebar = fp.flow(
     }
 
     displayRuntimeIcon(icon) {
-      const {currentRuntimeStore, compoundRuntimeOpStore, workspace} = this.props;
-      let status = currentRuntimeStore && currentRuntimeStore.runtime && currentRuntimeStore.runtime.status;
+      const {runtimeStore, compoundRuntimeOps, workspace} = this.props;
+      let status = runtimeStore && runtimeStore.runtime && runtimeStore.runtime.status;
       if ((!status || status === RuntimeStatus.Deleted) &&
-          workspace.namespace in compoundRuntimeOpStore) {
+          workspace.namespace in compoundRuntimeOps) {
         // If a compound operation is still pending, and we're transitioning
         // through the "Deleted" phase of the runtime, we want to keep showing
         // an activity spinner. Avoids an awkward UX during a delete/create cycle.
