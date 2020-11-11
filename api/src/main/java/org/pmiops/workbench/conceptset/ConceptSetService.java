@@ -195,8 +195,7 @@ public class ConceptSetService {
 
   public List<ConceptSet> findByWorkspaceId(long workspaceId) {
     return conceptSetDao.findByWorkspaceId(workspaceId).stream()
-        .map(conceptSetMapper::dbModelToClient)
-        .map(conceptSet -> toHydratedConcepts(conceptSet))
+        .map(conceptSet -> toHydratedConcepts(conceptSetMapper.dbModelToClient(conceptSet)))
         .collect(Collectors.toList());
   }
 
