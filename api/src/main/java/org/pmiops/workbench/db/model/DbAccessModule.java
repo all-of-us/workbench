@@ -11,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import org.pmiops.workbench.accessmodules.AccessModuleEvaluatorKey;
@@ -69,7 +70,7 @@ public class DbAccessModule {
     this.accessModuleType = accessModuleType;
   }
 
-  @ManyToMany(mappedBy = "accessModules")
+  @OneToMany(mappedBy = "accessModules")
   public Set<DbAccessPolicy> getAccessPolicies() {
     return accessPolicies;
   }

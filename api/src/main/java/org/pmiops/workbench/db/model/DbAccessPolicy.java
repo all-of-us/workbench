@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -69,7 +70,7 @@ public class DbAccessPolicy implements Serializable {
 
   // DbAccessPolicy is the owning side of the many:many relationship, and is
   // responsible for maintaining the integrity of the join table access_module_policy.
-  @ManyToMany(cascade = CascadeType.ALL) // FIXME!!
+  @OneToMany(cascade = CascadeType.ALL) // FIXME!!
   @JoinTable(
       name = "access_module_policy",
       joinColumns = @JoinColumn(name = "access_policy_id"),
