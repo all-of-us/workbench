@@ -120,7 +120,11 @@ enum PreviewErrorMode {
   ERROR = 'error'
 }
 
-export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace(), withStore(runtimeStore, 'runtimeStore'))(
+export const InteractiveNotebook = fp.flow(
+  withUrlParams(),
+  withCurrentWorkspace(),
+  withStore(runtimeStore, 'runtimeStore')
+)(
   class extends React.Component<Props, State> {
     private pollAborter = new AbortController();
 

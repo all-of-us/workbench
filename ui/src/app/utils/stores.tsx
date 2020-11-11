@@ -53,10 +53,10 @@ export const registerCompoundRuntimeOperation = (workspaceNamespace: string, run
 };
 
 export const markCompoundRuntimeOperationCompleted = (workspaceNamespace: string) => {
-  const ops = compoundRuntimeOpStore.get();
-  if (ops[workspaceNamespace]) {
-    delete ops[workspaceNamespace];
-    compoundRuntimeOpStore.set(ops);
+  const {[workspaceNamespace]: op, ...otherOps} = compoundRuntimeOpStore.get();
+  if (op) {
+    op.aborter.abort();
+    compoundRuntimeOpStore.set(otherOps);
   }
 };
 

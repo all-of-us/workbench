@@ -4,9 +4,9 @@ import Iframe from 'react-iframe';
 
 import {urlParamsStore} from 'app/utils/navigation';
 import {fetchAbortableRetry} from 'app/utils/retry';
-import {RuntimeStore, runtimeStore, withStore} from 'app/utils/stores';
+import {RuntimeStore} from 'app/utils/stores';
 
-import {maybeInitializeRuntime} from 'app/utils/runtime-utils';
+import {maybeInitializeRuntime, withRuntimeStore} from 'app/utils/runtime-utils';
 import {Button} from 'app/components/buttons';
 import {FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
@@ -222,8 +222,12 @@ const runtimeApiRetryTimeoutMillis = 10000;
 const runtimeApiRetryAttempts = 5;
 const redirectMillis = 1000;
 
-export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(),
-  withQueryParams(), withStore(runtimeStore, 'runtimeStore'))(class extends React.Component<Props, State> {
+export const NotebookRedirect = fp.flow(
+  withUserProfile(),
+  withCurrentWorkspace(),
+  withQueryParams(),
+  withRuntimeStore(),
+)(class extends React.Component<Props, State> {
 
     private redirectTimer: NodeJS.Timeout;
     private pollAborter = new AbortController();

@@ -291,7 +291,7 @@ export class LeoRuntimeInitializer {
     if (this.pollAbortSignal && this.pollAbortSignal.aborted) {
       // We'll bail out early if an abort signal was triggered while waiting for the poll cycle.
       return this.reject(
-        new LeoRuntimeInitializationFailedError('Request was aborted', this.currentRuntime));
+        new LeoRuntimeInitializationAbortedError('Request was aborted', this.currentRuntime));
     }
     if (Date.now() - this.initializeStartTime > this.overallTimeout) {
       return this.reject(
@@ -344,7 +344,7 @@ export class LeoRuntimeInitializer {
     } catch (e) {
       if (isAbortError(e)) {
         return this.reject(
-          new LeoRuntimeInitializationFailedError('Abort signal received during runtime API call',
+          new LeoRuntimeInitializationAbortedError('Abort signal received during runtime API call',
           this.currentRuntime));
       } else if (e instanceof ExceededActionCountError) {
         // This is a signal that we should hard-abort the polling loop due to reaching the max
@@ -360,7 +360,9 @@ export class LeoRuntimeInitializer {
       }
     }
 
-    setTimeout(() => this.poll(), this.currentDelay);
+    setTimeout(() => {
+      this.poll();
+    }, this.currentDelay);
     // Increment capped exponential backoff for the next poll loop.
     this.currentDelay = Math.min(this.currentDelay * 1.3, this.maxDelay);
   }

@@ -7,6 +7,7 @@ import {Spinner} from 'app/components/spinners';
 import {ConfirmDelete, RuntimePanel, Props} from 'app/pages/analysis/runtime-panel';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {ComputeType} from 'app/utils/machines';
+import {clearCompoundRuntimeOperations} from 'app/utils/stores';
 import {cdrVersionStore, serverConfigStore} from 'app/utils/navigation';
 import {runtimePresets} from 'app/utils/runtime-presets';
 import {runtimeStore} from 'app/utils/stores';
@@ -57,6 +58,10 @@ describe('RuntimePanel', () => {
       },
       cdrVersionListResponse
     };
+  });
+
+  afterEach(() => {
+    act(() => clearCompoundRuntimeOperations());
   });
 
   const pickDropdownOption = async(wrapper, id, label) => {

@@ -8,8 +8,8 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import * as React from 'react';
 
 const Runtime = ({id}) => {
-  const [runtime, ] = useCustomRuntime('test')
-  const {runtimeName = ''} = runtime || {};
+  const [{currentRuntime}, ] = useCustomRuntime('test')
+  const {runtimeName = ''} = currentRuntime || {};
   return <div id={id}>{runtimeName}</div>
 }
 
