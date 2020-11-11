@@ -279,10 +279,11 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
       const {cdrVersionListResponse, searchTerms, source, workspace: {cdrVersionId}} = this.props;
       const cdrVersions = cdrVersionListResponse.items;
       this.setState({cdrVersion: cdrVersions.find(cdr => cdr.cdrVersionId === cdrVersionId)});
-      if (source === 'concept' && searchTerms !== '') {
-        this.getResults(searchTerms);
-      } else if (source === 'conceptSetDetails') {
+      if (source === 'conceptSetDetails') {
         this.setState({data: this.props.concept});
+      } else {
+        const searchString = searchTerms || '';
+        this.getResults(searchString);
       }
     }
 
