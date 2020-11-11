@@ -459,6 +459,10 @@ public final class DbStorageEnums {
               .put(PrePackagedConceptSetEnum.PERSON, (short) 1)
               .put(PrePackagedConceptSetEnum.SURVEY, (short) 2)
               .put(PrePackagedConceptSetEnum.BOTH, (short) 3)
+              .put(PrePackagedConceptSetEnum.FITBIT_ACTIVITY, (short) 4)
+              .put(PrePackagedConceptSetEnum.FITBIT_HEART_RATE_LEVEL, (short) 5)
+              .put(PrePackagedConceptSetEnum.FITBIT_HEART_RATE_SUMMARY, (short) 6)
+              .put(PrePackagedConceptSetEnum.FITBIT_INTRADAY_STEPS, (short) 7)
               .build();
 
   public static PrePackagedConceptSetEnum prePackagedConceptSetsFromStorage(Short conceptSet) {
