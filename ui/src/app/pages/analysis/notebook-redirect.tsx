@@ -268,14 +268,14 @@ export const NotebookRedirect = fp.flow(
           + runtime.runtimeName + '/notebooks/' + nbName);
     }
 
-      // get notebook name without file suffix
+    // get notebook name without file suffix
     private getNotebookName() {
       const {nbName} = urlParamsStore.getValue();
-        // safe whether nbName has the standard notebook suffix or not
+      // safe whether nbName has the standard notebook suffix or not
       return dropNotebookFileSuffix(decodeURIComponent(nbName));
     }
 
-      // get notebook name with file suffix
+    // get notebook name with file suffix
     private getFullNotebookName() {
       return appendNotebookFileSuffix(this.getNotebookName());
     }
@@ -298,7 +298,7 @@ export const NotebookRedirect = fp.flow(
 
 
     componentDidUpdate() {
-        // Only kick off the initialization process once the runtime is loaded.
+      // Only kick off the initialization process once the runtime is loaded.
       if (this.state.progress === Progress.Unknown &&
             this.props.runtimeStore.runtime !== undefined) {
         this.initializeRuntimeStatusChecking(this.props.workspace.namespace);
@@ -309,8 +309,8 @@ export const NotebookRedirect = fp.flow(
       clearTimeout(this.redirectTimer);
     }
 
-      // check the runtime's status: if it's Running we can connect the notebook to it
-      // otherwise we need to start polling
+    // check the runtime's status: if it's Running we can connect the notebook to it
+    // otherwise we need to start polling
     private async initializeRuntimeStatusChecking(billingProjectId) {
       this.incrementProgress(Progress.Unknown);
 
@@ -340,7 +340,7 @@ export const NotebookRedirect = fp.flow(
       this.setState({leoUrl: this.notebookUrl(runtime, notebookLocation)});
       this.incrementProgress(Progress.Redirecting);
 
-        // give it a second to "redirect"
+      // give it a second to "redirect"
       this.redirectTimer = setTimeout(() => this.incrementProgress(Progress.Loaded), redirectMillis);
     }
 
@@ -366,9 +366,9 @@ export const NotebookRedirect = fp.flow(
         fileContent.metadata = pyNotebookMetadata;
       }
       const localizedDir = await this.localizeNotebooks(runtime, []);
-        // Use the Jupyter Server API directly to create a new notebook. This
-        // API handles notebook name collisions and matches the behavior of
-        // clicking 'new notebook' in the Jupyter UI.
+      // Use the Jupyter Server API directly to create a new notebook. This
+      // API handles notebook name collisions and matches the behavior of
+      // clicking 'new notebook' in the Jupyter UI.
       const workspaceDir = localizedDir.replace(/^workspaces\//, '');
       const jupyterResp = await this.runtimeRetry(() => jupyterApi().putContents(
         runtime.googleProject, runtime.runtimeName, workspaceDir, this.getFullNotebookName(), {
