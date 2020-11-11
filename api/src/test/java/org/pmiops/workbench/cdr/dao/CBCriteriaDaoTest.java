@@ -218,6 +218,14 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
+  public void findCriteriaTopCounts() {
+    PageRequest page = new PageRequest(0, 10);
+    List<DbCriteria> measurements =
+        cbCriteriaDao.findCriteriaTopCounts(Domain.MEASUREMENT.toString(), page).getContent();
+    assertThat(measurements).containsExactly(measurementCriteria);
+  }
+
+  @Test
   public void findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc() {
     List<DbCriteria> actualIcd9s =
         cbCriteriaDao.findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc(

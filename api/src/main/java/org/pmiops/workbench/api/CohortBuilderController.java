@@ -130,7 +130,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       Long cdrVersionId, String domain, String term, String surveyName, Integer limit) {
     cdrVersionService.setCdrVersion(cdrVersionId);
     validateDomain(domain, surveyName);
-    validateTerm(term);
     return ResponseEntity.ok(
         cohortBuilderService.findCriteriaByDomainAndSearchTerm(domain, term, surveyName, limit));
   }

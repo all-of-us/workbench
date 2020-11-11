@@ -182,6 +182,16 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       String domain, String term, String surveyName, Integer limit) {
     PageRequest pageRequest =
         new PageRequest(0, Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT));
+    if (term == null || term.trim().isEmpty()) {
+      // return top counts
+      Page<DbCriteria> dbCriteriaPage = cbCriteriaDao.findCriteriaTopCounts(domain, pageRequest);
+      return new CriteriaListWithCountResponse()
+          .items(
+              dbCriteriaPage.getContent().stream()
+                  .map(cohortBuilderMapper::dbModelToClient)
+                  .collect(Collectors.toList()))
+          .totalCount(dbCriteriaPage.getTotalElements());
+    }
     if (Domain.fromValue(domain).equals(Domain.PHYSICAL_MEASUREMENT)) {
       Page<DbConcept> dbConcepts =
           conceptDao.findConcepts(modifyTermMatch(term), MEASUREMENT, pageRequest);
