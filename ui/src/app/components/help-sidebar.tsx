@@ -604,7 +604,7 @@ export const HelpSidebar = fp.flow(
       // overlay icon in the bottom right of the tab showing the runtime status.
       return <FlexRow style={{height: '100%', alignItems: 'center', justifyContent: 'space-around'}}>
         <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={{...icon.style, position: 'absolute'}} />
-        <FlexRow style={styles.runtimeStatusIconContainer}>
+        <FlexRow data-test-id='runtime-status-icon-container' style={styles.runtimeStatusIconContainer}>
           {(status === RuntimeStatus.Creating
           || status === RuntimeStatus.Starting
           || status === RuntimeStatus.Updating)

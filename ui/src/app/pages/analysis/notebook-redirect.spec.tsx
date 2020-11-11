@@ -77,7 +77,7 @@ describe('NotebookRedirect', () => {
     });
     currentWorkspaceStore.next(workspace);
     userProfileStore.next({profile, reload, updateCache});
-    runtimeStore.set({workspaceNamespace: workspace.namespace, runtime: undefined})
+    runtimeStore.set({workspaceNamespace: workspace.namespace, runtime: undefined});
 
     // mock timers
     jest.useFakeTimers();
