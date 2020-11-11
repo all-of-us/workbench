@@ -6,7 +6,7 @@
   },
   {
     "name": "cohort_id",
-    "type": "INT64",
+    "type": "INTEGER",
     "description": "Unique ID of this cohort in the application DB. Should be unique within each snapshot."
   },
   {
@@ -16,8 +16,8 @@
   },
   {
     "name": "creator_id",
-    "type": "INT64",
-    "description": "User ID of cohort crerator. Should be a foreign key into the user table."
+    "type": "INTEGER",
+    "description": "User ID of cohort creator. Should be a foreign key into the user table."
   },
   {
     "name": "criteria",
@@ -41,7 +41,7 @@
   },
   {
     "name": "workspace_id",
-    "type": "INT64",
+    "type": "INTEGER",
     "description": "Application workspace ID of the workspace containing this cohort. Should be a foreign\nkey into the workspace table."
   }
 ]

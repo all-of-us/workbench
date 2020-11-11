@@ -1,0 +1,17 @@
+{
+  "labels": [
+    {
+      "key": "gsuite_domain"
+    },
+    {
+      "key": "opencensus_task",
+      "description": "Opencensus task identifier"
+    }
+  ],
+  "metricKind": "GAUGE",
+  "valueType": "INT64",
+  "unit": "1",
+  "description": "Number of unique GSuite users. Each one corresponds to a Workbench username",
+  "displayName": "custom.googleapis.com/gsuite_user_count",
+  "type": "custom.googleapis.com/dummy0"
+}

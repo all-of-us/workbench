@@ -16,7 +16,7 @@
   },
   {
     "name": "institution_id",
-    "type": "INT64",
+    "type": "INTEGER",
     "description": "Unique PK for institution table in  application DB. Note that in foreign key relationships,\nthe short_name is typically used in place of this identifier."
   },
   {

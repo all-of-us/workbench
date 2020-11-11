@@ -1,0 +1,201 @@
+{
+  "displayName": "Custom Gauge Metrics [${namespace}]",
+  "gridLayout": {
+    "columns": "2",
+    "widgets": [
+      {
+        "title": "Billing Buffer Live Projects [${namespace} Env]",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"custom.googleapis.com/billing_buffer_project_count\" resource.type=\"generic_node\" resource.label.\"namespace\"=\"${namespace}\" metric.label.\"BufferEntryStatus\"!=\"ERROR\" metric.label.\"BufferEntryStatus\"!=\"GARBAGE_COLLECTED\" metric.label.\"BufferEntryStatus\"!=\"ASSIGNED\"",
+                  "aggregation": {
+                    "perSeriesAligner": "ALIGN_MEAN",
+                    "crossSeriesReducer": "REDUCE_MEAN",
+                    "groupByFields": [
+                      "metric.label.\"BufferEntryStatus\""
+                    ]
+                  }
+                },
+                "unitOverride": "1"
+              },
+              "plotType": "STACKED_BAR",
+              "legendTemplate": "Status: ${metric__labels__buffer_entry_status}",
+
+              "minAlignmentPeriod": "60s"
+            }
+          ],
+          "timeshiftDuration": "0s",
+          "yAxis": {
+            "label": "y1Axis",
+            "scale": "LINEAR"
+          },
+          "chartOptions": {
+            "mode": "COLOR"
+          }
+        }
+      },
+      {
+        "title": "Users (not disabled)",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"custom.googleapis.com/user_count_2\" resource.type=\"generic_node\" resource.label.\"namespace\"=\"${namespace}\" metric.label.\"Disabled\"=\"false\"",
+                  "aggregation": {
+                    "perSeriesAligner": "ALIGN_MEAN",
+                    "crossSeriesReducer": "REDUCE_MEAN",
+                    "groupByFields": [
+                      "metric.label.\"DataAccessLevel\""
+                    ]
+                  }
+                },
+                "unitOverride": "1"
+              },
+              "plotType": "LINE",
+              "minAlignmentPeriod": "60s"
+            }
+          ],
+          "timeshiftDuration": "0s",
+          "yAxis": {
+            "label": "y1Axis",
+            "scale": "LINEAR"
+          },
+          "chartOptions": {
+            "mode": "COLOR"
+          }
+        }
+      },
+      {
+        "title": "Workspaces",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"custom.googleapis.com/workspace_count_3\" resource.type=\"generic_node\" resource.label.\"namespace\"=\"${namespace}\" metric.label.\"ActiveStatus\"=\"ACTIVE\"",
+                  "aggregation": {
+                    "perSeriesAligner": "ALIGN_MEAN",
+                    "crossSeriesReducer": "REDUCE_MAX",
+                    "groupByFields": [
+                      "metric.label.\"ActiveStatus\"",
+                      "metric.label.\"DataAccessLevel\""
+                    ]
+                  }
+                },
+                "unitOverride": "1"
+              },
+              "plotType": "LINE",
+              "legendTemplate": "Tier: ${metric__labels__data_access_level}",
+              "minAlignmentPeriod": "60s"
+            }
+          ],
+          "timeshiftDuration": "0s",
+          "yAxis": {
+            "label": "y1Axis",
+            "scale": "LINEAR"
+          },
+          "chartOptions": {
+            "mode": "COLOR"
+          }
+        }
+      },
+      {
+        "title": "Cohorts",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"custom.googleapis.com/cohort_count_2\" resource.type=\"generic_node\" resource.label.\"namespace\"=\"${namespace}\"",
+                  "aggregation": {
+                    "perSeriesAligner": "ALIGN_MEAN",
+                    "crossSeriesReducer": "REDUCE_MEAN"
+                  }
+                },
+                "unitOverride": "1"
+              },
+              "plotType": "LINE",
+              "legendTemplate": "Cohort Count",
+              "minAlignmentPeriod": "60s"
+            }
+          ],
+          "timeshiftDuration": "0s",
+          "yAxis": {
+            "label": "y1Axis",
+            "scale": "LINEAR"
+          },
+          "chartOptions": {
+            "mode": "COLOR"
+          }
+        }
+      },
+      {
+        "title": "Cohort Reviews",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"custom.googleapis.com/cohort_review_count_2\" resource.type=\"generic_node\" resource.label.\"namespace\"=\"${namespace}\"",
+                  "aggregation": {
+                    "perSeriesAligner": "ALIGN_MEAN",
+                    "crossSeriesReducer": "REDUCE_MEAN"
+                  }
+                },
+                "unitOverride": "1"
+              },
+              "plotType": "LINE",
+              "legendTemplate": "Cohort Review Count",
+              "minAlignmentPeriod": "60s"
+            }
+          ],
+          "timeshiftDuration": "0s",
+          "yAxis": {
+            "label": "y1Axis",
+            "scale": "LINEAR"
+          },
+          "chartOptions": {
+            "mode": "COLOR"
+          }
+        }
+      },
+      {
+        "title": "GSuite User Count",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"custom.googleapis.com/gsuite_user_count\" resource.type=\"generic_node\"",
+                  "aggregation": {
+                    "perSeriesAligner": "ALIGN_MEAN",
+                    "crossSeriesReducer": "REDUCE_MAX",
+                    "groupByFields": [
+                      "metric.label.\"gsuite_domain\""
+                    ]
+                  }
+                },
+                "unitOverride": "1"
+              },
+              "plotType": "LINE",
+              "legendTemplate": "Domain: ${metric__labels__gsuite_domain}",
+              "minAlignmentPeriod": "60s"
+            }
+          ],
+          "timeshiftDuration": "0s",
+          "yAxis": {
+            "label": "y1Axis",
+            "scale": "LINEAR"
+          },
+          "chartOptions": {
+            "mode": "COLOR"
+          }
+        }
+      }
+    ]
+  }
+}

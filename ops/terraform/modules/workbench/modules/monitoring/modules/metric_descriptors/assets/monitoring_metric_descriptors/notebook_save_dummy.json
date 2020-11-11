@@ -1,0 +1,14 @@
+{
+  "labels": [
+    {
+      "key": "opencensus_task",
+      "description": "Opencensus task identifier"
+    }
+  ],
+  "metricKind": "GAUGE",
+  "valueType": "INT64",
+  "unit": "1",
+  "description": "Dummy gauge metric descriptor.",
+  "displayName": "custom.googleapis.com/${namespace}/notebook_save",
+  "type": "custom.googleapis.com/${namespace}/dummy1"
+}

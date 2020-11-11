@@ -1,0 +1,34 @@
+{
+  "displayName": "Cron Failure: Billing Project Garbage Collection",
+  "combiner": "OR",
+  "conditions": [
+    {
+      "conditionAbsent": {
+        "filter": "metric.type=\"logging.googleapis.com/user/cron_job_completion\" resource.type=\"gae_app\" metric.label.\"name\"=\"billingProjectGarbageCollection\" metric.label.\"status\"=\"204\"",
+        "duration": "10800s",
+        "trigger": {
+          "percent": 100
+        },
+        "aggregations": [
+          {
+            "alignmentPeriod": "60s",
+            "perSeriesAligner": "ALIGN_RATE",
+            "crossSeriesReducer": "REDUCE_SUM"
+          }
+        ]
+      },
+      "displayName": "billingProjectGarbageCollection Cron Signal Absent"
+    }
+  ],
+  "documentation": {
+    "content": "Find billing projects associated with deleted workspaces and transfer ownership to designated \"Garbage Collection\" Service Accounts. This legacy process works around the lack of API support for deleting these billing projects directly.\n",
+    "mimeType": "text/markdown"
+  },
+  "notificationChannels": [
+    "projects/all-of-us-rw-prod/notificationChannels/15847279805921515769"
+  ],
+  "userLabels": {
+    "type": "cron_failure"
+  },
+  "enabled": true
+}
