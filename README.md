@@ -527,9 +527,15 @@ flexible [queries](api/docs/action-audit-queries.md). Read more about its design
 implementation in this [document](api/docs/action-audit.md).
 
 ### Reporting System
-To supporrt analytics, we have a reporting pipeline that exports data to a BigQuery dataset.
+To support analytics, we have a reporting pipeline that exports data to a BigQuery dataset.
 The main source of documentation is the [design document (internal)](https://docs.google.com/document/d/1EKGApPC55X-KTHwVsv_saBQty4m-HCP2Kd5o6JHKDnQ/edit?usp=sharing).
 Some [codegen utilities](./api/reporting/schemas/REPORTING-SCHEMA-TOOLS.md) exist to assist
 with keeping types for all phases of the pipeline consistent.
 
 Queries and views of interest in the BigQuery  dataset(s) are described [here](api/reporting/queries/REPORTING-QUERIES.md).
+
+#### Teraform
+The Reporting system is also our testbench for Terraform-managed process. Notes and pointers from this
+initial project are in this [quickstart guide](ops/terraform/TERRAFORM-QUICKSTART.md).
+It's expected that we'll also use Terraform to manage monitoring and alerting configurations, log
+configs, and VPC configurations under the upcoming Multiple Tier project.

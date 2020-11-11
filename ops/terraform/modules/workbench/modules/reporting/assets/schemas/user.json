@@ -106,7 +106,7 @@
   },
   {
     "name": "free_tier_credits_limit_dollars_override",
-    "type": "FLOAT64",
+    "type": "FLOAT",
     "description": "Override value for the default free tier spending limit (USD)."
   },
   {
@@ -174,19 +174,19 @@
     "type": "STRING",
     "description": "Up to 10-digit zip code for use residence."
   },
-   {
-     "name": "institution_id",
-     "type": "INTEGER",
-     "description": "Foreign key into institution table. Each user is only affiliated\nwith a single institution."
-   },
-   {
-     "name": "institutional_role_enum",
-     "type": "STRING",
-     "description": "Description of the user's role at the institution they are\naffiliated with. Selected from a list of predefined values. If \"other\", see institutional_role_other_text\nfor custom description."
-   },
-   {
-     "name": "institutional_role_other_text",
-     "type": "STRING",
-     "description": "If the institutional_role_enum is \"other\", custom description\nof this user's role in the institution."
-   }
+  {
+    "name": "institution_id",
+    "type": "INTEGER",
+    "description": "Foreign key into institution table. Each user is only affiliated\nwith a single institution."
+  },
+  {
+    "name": "institutional_role_enum",
+    "type": "STRING",
+    "description": "Description of the user's role at the institution they are\naffiliated with. Selected from a list of predefined values. If \"other\", see institutional_role_other_text\nfor custom description."
+  },
+  {
+    "name": "institutional_role_other_text",
+    "type": "STRING",
+    "description": "If the institutional_role_enum is \"other\", custom description\nof this user's role in the institution."
+  }
 ]
