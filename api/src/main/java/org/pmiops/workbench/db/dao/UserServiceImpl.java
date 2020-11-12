@@ -26,6 +26,7 @@ import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
+import org.pmiops.workbench.compliance.MoodleBadge;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao.UserCountGaugeLabelsAndValue;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
@@ -756,11 +757,11 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       Timestamp now = new Timestamp(clock.instant().toEpochMilli());
       final Timestamp newComplianceTrainingCompletionTime;
       final Timestamp newComplianceTrainingExpirationTime;
-      Map<String, BadgeDetailsV2> userBadgesByName =
+      final Map<MoodleBadge, BadgeDetailsV2> userBadgesByName =
           complianceService.getUserBadgesByBadgeName(dbUser.getUsername());
-      if (userBadgesByName.containsKey(complianceService.getResearchEthicsTrainingField())) {
+      if (userBadgesByName.containsKey(MoodleBadge.RESEARCH_ETHICS_TRAINING)) {
         BadgeDetailsV2 complianceBadge =
-            userBadgesByName.get(complianceService.getResearchEthicsTrainingField());
+            userBadgesByName.get(MoodleBadge.RESEARCH_ETHICS_TRAINING);
         if (complianceBadge.getValid()) {
           if (dbUser.getComplianceTrainingCompletionTime() == null) {
             // The badge was previously invalid and is now valid.

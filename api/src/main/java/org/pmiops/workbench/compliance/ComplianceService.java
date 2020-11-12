@@ -2,6 +2,7 @@ package org.pmiops.workbench.compliance;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV1;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
@@ -30,11 +31,11 @@ public interface ComplianceService {
   /**
    * Get details about the Research Ethics Training and the Data Use Agreement badges for a user
    *
-   * @param email
+   * @param username
    * @return map of badge name to badge details
    * @throws ApiException
    */
-  Map<String, BadgeDetailsV2> getUserBadgesByBadgeName(String email) throws ApiException;
+  Map<MoodleBadge, BadgeDetailsV2> getUserBadgesByBadgeName(String username) throws ApiException;
 
-  String getResearchEthicsTrainingField();
+  Optional<BadgeDetailsV2> getUserBadgeDetails(String username, MoodleBadge moodleBadge) throws ApiException;
 }
