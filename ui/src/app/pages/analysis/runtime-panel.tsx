@@ -1,33 +1,47 @@
-import {Button, Clickable, MenuItem} from 'app/components/buttons';
+import {Button, Clickable, Link, MenuItem} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
-import {PopupTrigger} from 'app/components/popups';
+import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
-import colors, {addOpacity} from 'app/styles/colors';
-import {reactStyles, withCurrentWorkspace} from 'app/utils';
+import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
+import {reactStyles, switchCase, withCurrentWorkspace, withUserProfile} from 'app/utils';
 import {withCdrVersions} from 'app/utils';
-import {allMachineTypes, Machine, validLeonardoMachineTypes} from 'app/utils/machines';
+import {
+  allMachineTypes,
+  ComputeType,
+  findMachineByName,
+  Machine,
+  machineRunningCost,
+  machineRunningCostBreakdown,
+  machineStorageCost,
+  machineStorageCostBreakdown,
+  validLeonardoMachineTypes
+} from 'app/utils/machines';
 import {runtimePresets} from 'app/utils/runtime-presets';
-import {useCustomRuntime} from 'app/utils/runtime-utils';
+import {RuntimeStatusRequest, useCustomRuntime, useRuntimeStatus} from 'app/utils/runtime-utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
-
 
 import {Dropdown} from 'primereact/dropdown';
 import {InputNumber} from 'primereact/inputnumber';
 
-import { Runtime, RuntimeConfigurationType, RuntimeStatus } from 'generated';
-import { CdrVersionListResponse, DataprocConfig } from 'generated/fetch';
+import {workspacesApi} from 'app/services/swagger-fetch-clients';
+import {formatUsd} from 'app/utils/numbers';
+import {Runtime, RuntimeConfigurationType, RuntimeStatus} from 'generated/fetch';
+import {BillingAccountType, CdrVersionListResponse, DataprocConfig} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 const {useState, useEffect, Fragment} = React;
 
 const styles = reactStyles({
-  sectionHeader: {
+  baseHeader: {
     color: colors.primary,
     fontSize: '16px',
     fontWeight: 700,
     lineHeight: '1rem',
+    margin: 0
+  },
+  sectionHeader: {
     marginBottom: '12px',
     marginTop: '12px'
   },
@@ -43,7 +57,7 @@ const styles = reactStyles({
   },
   formGrid: {
     display: 'grid',
-    gridTemplateColumns: '1fr 1fr 1fr 1fr 3rem 1fr',
+    gridTemplateColumns: 'repeat(6, 1fr)',
     gridGap: '1rem',
     alignItems: 'center'
   },
@@ -55,17 +69,64 @@ const styles = reactStyles({
     backgroundColor: colors.white,
     padding: '.75rem .5rem',
     width: '2rem'
+  },
+  costPredictorWrapper: {
+    backgroundColor: colorWithWhiteness(colors.accent, 0.85),
+    // Not using shorthand here because react doesn't like it when you mix shorthand and non-shorthand,
+    // and the border color changes when the runtime does
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderColor: colorWithWhiteness(colors.dark, .5),
+    borderRadius: '5px',
+    color: colors.dark,
+    marginBottom: '.5rem',
+  },
+  costsDrawnFrom: {
+    borderLeft: `1px solid ${colorWithWhiteness(colors.dark, .5)}`,
+    padding: '.33rem .5rem'
+  },
+  deleteLink: {
+    alignSelf: 'center',
+    fontSize: '16px',
+    textTransform: 'uppercase'
+  },
+  confirmWarning: {
+    backgroundColor: colorWithWhiteness(colors.warning, .9),
+    border: `1px solid ${colors.warning}`,
+    borderRadius: '5px',
+    display: 'grid',
+    gridColumnGap: '.4rem',
+    gridRowGap: '.7rem',
+    fontSize: '14px',
+    fontWeight: 500,
+    padding: '.5rem',
+    marginTop: '1rem',
+    marginBottom: '1rem'
+  },
+  confirmWarningText: {
+    color: colors.primary,
+    margin: 0
   }
 });
 
 const defaultMachineName = 'n1-standard-4';
-const defaultMachineType = allMachineTypes.find(({name}) => name === defaultMachineName);
-const findMachineByName = machineToFind => fp.find(({name}) => name === machineToFind, allMachineTypes) || defaultMachineType;
+const defaultMachineType: Machine = findMachineByName(defaultMachineName);
 const defaultDiskSize = 50;
 
-enum ComputeType {
-  Standard = 'Standard VM',
-  Dataproc = 'Dataproc Cluster'
+// Returns true if two runtimes are equivalent in terms of the fields which are
+// affected by runtime presets.
+const presetEquals = (a: Runtime, b: Runtime): boolean => {
+  const strip = fp.flow(
+    // In the future, things like toolDockerImage and autopause may be considerations.
+    fp.pick(['gceConfig', 'dataprocConfig']),
+    // numberOfWorkerLocalSSDs is currently part of the API spec, but is not used by the panel.
+    fp.omit(['dataprocConfig.numberOfWorkerLocalSSDs']));
+  return fp.isEqual(strip(a), strip(b));
+};
+
+enum PanelContent {
+  Customize = 'Customize',
+  Delete = 'Delete'
 }
 
 export interface Props {
@@ -73,12 +134,59 @@ export interface Props {
   cdrVersionListResponse?: CdrVersionListResponse;
 }
 
+// Exported for testing only.
+export const ConfirmDelete = ({onCancel, onConfirm}) => {
+  const [deleting, setDeleting] = useState(false);
+  return <Fragment>
+    <div style={styles.confirmWarning}>
+      <div style={{display: 'flex', justifyContent: 'center'}}>
+        <ClrIcon style={{color: colors.warning, gridColumn: 1, gridRow: 1}} className='is-solid'
+                 shape='exclamation-triangle' size='20'/>
+      </div>
+      <h3 style={{...styles.baseHeader, gridColumn: 2, gridRow: 1}}>Delete your environment</h3>
+      <p style={{...styles.confirmWarningText, gridColumn: 2, gridRow: 2}}>
+        You’re about to delete your cloud analysis environment.
+      </p>
+      <p style={{...styles.confirmWarningText, gridColumn: 2, gridRow: 3}}>
+        Any in-memory state and local file modifications will be erased.&nbsp;
+        Data stored in workspace buckets is never affected by changes to your cloud&nbsp;
+        environment. You’ll still be able to view notebooks in this workspace, but&nbsp;
+        editing and running notebooks will require you to create a new cloud environment.
+      </p>
+    </div>
+    <FlexRow style={{justifyContent: 'flex-end'}}>
+      <Button
+        type='secondaryLight'
+        aria-label={'Cancel'}
+        disabled={deleting}
+        style={{marginRight: '.6rem'}}
+        onClick={() => onCancel()}>
+        Cancel
+      </Button>
+      <Button
+        aria-label={'Delete'}
+        disabled={deleting}
+        onClick={async() => {
+          setDeleting(true);
+          try {
+            await onConfirm();
+          } catch (err) {
+            setDeleting(false);
+            throw err;
+          }
+        }}>
+        Delete
+      </Button>
+    </FlexRow>
+  </Fragment>;
+};
+
 const MachineSelector = ({onChange, selectedMachine, machineType, idPrefix}) => {
   const initialMachineType = fp.find(({name}) => name === machineType, allMachineTypes) || defaultMachineType;
   const {cpu, memory} = selectedMachine || initialMachineType;
 
   return <Fragment>
-      <label htmlFor={`${idPrefix}-cpu`} style={{marginRight: '.25rem'}}>CPUs</label>
+      <label htmlFor={`${idPrefix}-cpu`}>CPUs</label>
       <Dropdown id={`${idPrefix}-cpu`}
         options={fp.flow(
           // Show all CPU options.
@@ -96,7 +204,7 @@ const MachineSelector = ({onChange, selectedMachine, machineType, idPrefix}) => 
             onChange)(validLeonardoMachineTypes)
         }
         value={cpu}/>
-      <label htmlFor={`${idPrefix}-ram`} style={{marginRight: '.25rem'}}>RAM (GB)</label>
+      <label htmlFor={`${idPrefix}-ram`}>RAM (GB)</label>
       <Dropdown id={`${idPrefix}-ram`}
         options={fp.flow(
           // Show valid memory options as constrained by the currently selected CPU.
@@ -120,7 +228,7 @@ const MachineSelector = ({onChange, selectedMachine, machineType, idPrefix}) => 
 
 const DiskSizeSelector = ({onChange, selectedDiskSize, diskSize, idPrefix}) => {
   return <Fragment>
-    <label htmlFor={`${idPrefix}-disk`} style={{marginRight: '.25rem'}}>Disk (GB)</label>
+    <label htmlFor={`${idPrefix}-disk`}>Disk (GB)</label>
     <InputNumber id={`${idPrefix}-disk`}
       showButtons
       decrementButtonClassName='p-button-secondary'
@@ -141,9 +249,17 @@ const DataProcConfigSelector = ({onChange, dataprocConfig})  => {
   } = dataprocConfig || {};
   const initialMachine = findMachineByName(workerMachineType);
   const [selectedNumWorkers, setSelectedNumWorkers] = useState<number>(numberOfWorkers);
-  const [selectedPreemtible, setUpdatedPreemptible] = useState<number>(numberOfPreemptibleWorkers);
+  const [selectedPreemtible, setSelectedPreemptible] = useState<number>(numberOfPreemptibleWorkers);
   const [selectedWorkerMachine, setSelectedWorkerMachine] = useState<Machine>(initialMachine);
   const [selectedDiskSize, setSelectedDiskSize] = useState<number>(workerDiskSize);
+
+  // If the dataprocConfig prop changes externally, reset the selectors accordingly.
+  useEffect(() => {
+    setSelectedNumWorkers(numberOfWorkers);
+    setSelectedPreemptible(numberOfPreemptibleWorkers);
+    setSelectedWorkerMachine(initialMachine);
+    setSelectedDiskSize(workerDiskSize);
+  }, [dataprocConfig]);
 
   // On unmount clear the config - the user is no longer configuring a dataproc cluster
   useEffect(() => () => onChange(null), []);
@@ -161,7 +277,7 @@ const DataProcConfigSelector = ({onChange, dataprocConfig})  => {
   return <fieldset style={{marginTop: '0.75rem'}}>
     <legend style={styles.workerConfigLabel}>Worker Config</legend>
     <div style={styles.formGrid}>
-      <label htmlFor='num-workers' style={{marginRight: '.25rem'}}>Workers</label>
+      <label htmlFor='num-workers'>Workers</label>
       <InputNumber id='num-workers'
         showButtons
         decrementButtonClassName='p-button-secondary'
@@ -170,14 +286,14 @@ const DataProcConfigSelector = ({onChange, dataprocConfig})  => {
         inputStyle={styles.inputNumber}
         onChange={({value}) => setSelectedNumWorkers(value)}
         min={2}/>
-      <label htmlFor='num-preemptible' style={{marginRight: '.25rem'}}>Preemptible</label>
+      <label htmlFor='num-preemptible'>Preemptible</label>
       <InputNumber id='num-preemptible'
         showButtons
         decrementButtonClassName='p-button-secondary'
         incrementButtonClassName='p-button-secondary'
         value={selectedPreemtible}
         inputStyle={styles.inputNumber}
-        onChange={({value}) => setUpdatedPreemptible(value)}
+        onChange={({value}) => setSelectedPreemptible(value)}
         min={0}/>
       <div style={{gridColumnEnd: 'span 2'}}/>
       {/* TODO: Do the worker nodes have the same minimum requirements as the master node?
@@ -192,25 +308,227 @@ const DataProcConfigSelector = ({onChange, dataprocConfig})  => {
   </fieldset>;
 };
 
-export const RuntimePanel = fp.flow(withCurrentWorkspace(), withCdrVersions())(({workspace, cdrVersionListResponse}) => {
-  const {namespace, cdrVersionId} = workspace;
+const PresetSelector = ({hasMicroarrayData, setSelectedDiskSize, setSelectedMachine, setSelectedCompute, setSelectedDataprocConfig}) => {
+  {/* Recommended runtime: pick from default templates or change the image. */}
+  return <PopupTrigger side='bottom'
+                closeOnClick
+                content={
+                  <React.Fragment>
+                    {
+                      fp.flow(
+                        fp.filter(({runtimeTemplate}) => hasMicroarrayData || !runtimeTemplate.dataprocConfig),
+                        fp.toPairs,
+                        fp.map(([i, preset]) => {
+                          return <MenuItem
+                                style={styles.presetMenuItem}
+                                key={i}
+                                aria-label={preset.displayName}
+                                onClick={() => {
+                                  // renaming to avoid shadowing
+                                  const {runtimeTemplate} = preset;
+                                  const {presetDiskSize, presetMachineName, presetCompute} = fp.cond([
+                                    // Can't destructure due to shadowing.
+                                    [() => !!runtimeTemplate.gceConfig, (tmpl: Runtime) => ({
+                                      presetDiskSize: tmpl.gceConfig.diskSize,
+                                      presetMachineName: tmpl.gceConfig.machineType,
+                                      presetCompute: ComputeType.Standard
+                                    })],
+                                    [() => !!runtimeTemplate.dataprocConfig, ({dataprocConfig: {masterDiskSize, masterMachineType}}) => ({
+                                      presetDiskSize: masterDiskSize,
+                                      presetMachineName: masterMachineType,
+                                      presetCompute: ComputeType.Dataproc
+                                    })]
+                                  ])(runtimeTemplate);
+                                  const presetMachineType = fp.find(({name}) => name === presetMachineName, validLeonardoMachineTypes);
+
+                                  setSelectedDiskSize(presetDiskSize);
+                                  setSelectedMachine(presetMachineType);
+                                  setSelectedCompute(presetCompute);
+                                  setSelectedDataprocConfig(runtimeTemplate.dataprocConfig);
+                                }}>
+                              {preset.displayName}
+                            </MenuItem>;
+                        })
+                      )(runtimePresets)
+                    }
+                  </React.Fragment>
+                }>
+    {/* inline-block aligns the popup menu beneath the clickable content, rather than the middle of the panel */}
+    <Clickable style={{display: 'inline-block'}} data-test-id='runtime-presets-menu'>
+      Recommended environments <ClrIcon shape='caret down'/>
+    </Clickable>
+  </PopupTrigger>;
+};
+
+const CostEstimator = ({
+  freeCreditsRemaining,
+  profile,
+  runtimeParameters,
+  runtimeChanged,
+  workspace
+}) => {
+  const wrapperStyle = runtimeChanged
+    ? {...styles.costPredictorWrapper, backgroundColor: colorWithWhiteness(colors.warning, .9), borderColor: colors.warning}
+    : styles.costPredictorWrapper;
+  const {
+    computeType,
+    diskSize,
+    machineType,
+    dataprocConfig
+  } = runtimeParameters;
+  const {
+    numberOfWorkers = 0,
+    masterMachineType = machineType,
+    masterDiskSize = diskSize,
+    workerMachineType = null,
+    workerDiskSize = null,
+    numberOfPreemptibleWorkers = 0
+  } = dataprocConfig || {};
+
+  const runningCost = machineRunningCost({
+    computeType: computeType,
+    masterDiskSize: masterDiskSize || diskSize,
+    masterMachineName: masterMachineType || machineType,
+    numberOfWorkers: numberOfWorkers,
+    numberOfPreemptibleWorkers: numberOfPreemptibleWorkers,
+    workerDiskSize: workerDiskSize,
+    workerMachineName: workerMachineType
+  });
+
+  const runningCostBreakdown = machineRunningCostBreakdown({
+    computeType: computeType,
+    masterDiskSize: masterDiskSize || diskSize,
+    masterMachineName: masterMachineType || machineType,
+    numberOfWorkers: numberOfWorkers,
+    numberOfPreemptibleWorkers: numberOfPreemptibleWorkers,
+    workerDiskSize: workerDiskSize,
+    workerMachineName: workerMachineType
+  });
+
+  const storageCost = machineStorageCost({
+    masterDiskSize: masterDiskSize || diskSize,
+    numberOfPreemptibleWorkers: numberOfPreemptibleWorkers,
+    numberOfWorkers: numberOfWorkers,
+    workerDiskSize: workerDiskSize
+  });
+
+  const storageCostBreakdown = machineStorageCostBreakdown({
+    masterDiskSize: masterDiskSize || diskSize,
+    numberOfPreemptibleWorkers: numberOfPreemptibleWorkers,
+    numberOfWorkers: numberOfWorkers,
+    workerDiskSize: workerDiskSize
+  });
+
+  return <FlexRow
+    style={wrapperStyle}
+    data-test-id='cost-estimator'
+  >
+    <FlexRow style={{minWidth: '250px', margin: '.33rem .5rem'}}>
+      <FlexColumn style={{marginRight: '1rem'}}>
+        <div style={{fontSize: '10px', fontWeight: 600}}>Cost when running</div>
+        <TooltipTrigger content={
+          <div>
+            <div>Cost Breakdown</div>
+            {runningCostBreakdown.map((lineItem, i) => <div key={i}>{lineItem}</div>)}
+          </div>
+        }>
+          <div
+              style={{fontSize: '20px', color: colors.accent}}
+              data-test-id='running-cost'
+          >
+            {formatUsd(runningCost)}/hr
+          </div>
+        </TooltipTrigger>
+      </FlexColumn>
+      <FlexColumn>
+        <div style={{fontSize: '10px', fontWeight: 600}}>Cost when paused</div>
+        <TooltipTrigger content={
+          <div>
+            <div>Cost Breakdown</div>
+            {storageCostBreakdown.map((lineItem, i) => <div key={i}>{lineItem}</div>)}
+          </div>
+        }>
+          <div
+              style={{fontSize: '20px', color: colors.accent}}
+              data-test-id='storage-cost'
+          >
+            {formatUsd(storageCost)}/hr
+          </div>
+        </TooltipTrigger>
+      </FlexColumn>
+    </FlexRow>
+    {
+      workspace.billingAccountType === BillingAccountType.FREETIER
+      && profile.username === workspace.creator
+      && <div style={styles.costsDrawnFrom}>
+        Costs will draw from your remaining {formatUsd(freeCreditsRemaining)} of free credits.
+      </div>
+    }
+    {
+      workspace.billingAccountType === BillingAccountType.FREETIER
+      && profile.username !== workspace.creator
+      && <div style={styles.costsDrawnFrom}>
+        Costs will draw from workspace creator's remaining {formatUsd(freeCreditsRemaining)} of free credits.
+      </div>
+    }
+    {
+      workspace.billingAccountType === BillingAccountType.USERPROVIDED
+      && <div style={styles.costsDrawnFrom}>
+        Costs will be charged to billing account {workspace.billingAccountName}.
+      </div>
+    }
+  </FlexRow>;
+};
+
+export const RuntimePanel = fp.flow(
+  withCdrVersions(),
+  withCurrentWorkspace(),
+  withUserProfile()
+)(({cdrVersionListResponse, workspace, profileState}) => {
+  const {namespace, id, cdrVersionId} = workspace;
+
+  const {profile} = profileState;
+
   const {hasMicroarrayData} = fp.find({cdrVersionId}, cdrVersionListResponse.items) || {hasMicroarrayData: false};
-  const [currentRuntime, setRequestedRuntime] = useCustomRuntime(namespace);
-  const {status = null, dataprocConfig = null, gceConfig = {bootDiskSize: defaultDiskSize}} = currentRuntime || {} as Partial<Runtime>;
-  const machineName = !!dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
-  const diskSize = !!dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.bootDiskSize;
-  const initialMasterMachine = findMachineByName(machineName);
+  const [{currentRuntime, pendingRuntime}, setRequestedRuntime] = useCustomRuntime(namespace);
+
+  // Prioritize the "pendingRuntime", if any. When an update is pending, we want
+  // to render the target runtime details, which  may not match the current runtime.
+  const {dataprocConfig = null, gceConfig = {diskSize: defaultDiskSize}} = pendingRuntime || currentRuntime || {} as Partial<Runtime>;
+  const [status, setRuntimeStatus] = useRuntimeStatus(namespace);
+  const diskSize = dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.diskSize;
+  const machineName = dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
+  const initialMasterMachine = findMachineByName(machineName) || defaultMachineType;
+  const initialCompute = dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard;
+  // TODO(RW-5591): Initialize PanelContent according to the runtime status.
+  const [panelContent, setPanelContent] = useState<PanelContent>(PanelContent.Customize);
+
   const [selectedDiskSize, setSelectedDiskSize] = useState(diskSize);
   const [selectedMachine, setSelectedMachine] = useState(initialMasterMachine);
-  const [runtimeConfigurationType, setRuntimeConfigurationType] = useState(null);
-  const [selectedCompute, setSelectedCompute] = useState<ComputeType>(dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard);
+  const [selectedCompute, setSelectedCompute] = useState<ComputeType>(initialCompute);
   const [selectedDataprocConfig, setSelectedDataprocConfig] = useState<DataprocConfig | null>(dataprocConfig);
 
   const selectedMachineType = selectedMachine && selectedMachine.name;
-  const runtimeExists = status && status !== RuntimeStatus.Deleted;
+  const runtimeExists = (status && status !== RuntimeStatus.Deleted) || !!pendingRuntime;
   const runtimeChanged = !fp.equals(selectedMachine, initialMasterMachine) ||
     selectedDiskSize !== diskSize ||
-    !fp.equals(selectedDataprocConfig, dataprocConfig);
+    !fp.equals(selectedDataprocConfig, dataprocConfig) ||
+    !fp.equals(selectedCompute, initialCompute);
+
+  const [creatorFreeCreditsRemaining, setCreatorFreeCreditsRemaining] = useState(0);
+  useEffect(() => {
+    const aborter = new AbortController();
+    const fetchFreeCredits = async() => {
+      const {freeCreditsRemaining} = await workspacesApi().getWorkspaceCreatorFreeCreditsRemaining(namespace, id, {signal: aborter.signal});
+      setCreatorFreeCreditsRemaining(freeCreditsRemaining);
+    };
+
+    fetchFreeCredits();
+
+    return function cleanup() {
+      aborter.abort();
+    };
+  }, []);
 
   // TODO(RW-5591): Conditionally render create runtime page if runtime null or Deleted.
   if (currentRuntime === undefined) {
@@ -218,116 +536,130 @@ export const RuntimePanel = fp.flow(withCurrentWorkspace(), withCdrVersions())((
   }
 
   return <div data-test-id='runtime-panel'>
-    <h3 style={styles.sectionHeader}>Cloud analysis environment</h3>
+    <h3 style={{...styles.baseHeader, ...styles.sectionHeader}}>Cloud analysis environment</h3>
     <div>
       Your analysis environment consists of an application and compute resources.
       Your cloud environment is unique to this workspace and not shared with other users.
     </div>
-    {/* TODO(RW-5419): Cost estimates go here. */}
-    <div style={styles.controlSection}>
-      {/* Recommended runtime: pick from default templates or change the image. */}
-      <PopupTrigger side='bottom'
-                    closeOnClick
-                    content={
-                      <React.Fragment>
-                        {
-                          fp.flow(
-                            fp.filter(['displayName', 'General Analysis']),
-                            fp.toPairs,
-                            fp.map(([i, preset]) => {
-                              return <MenuItem
-                              style={styles.presetMenuItem}
-                              key={i}
-                              onClick={() => {
-                                // renaming to avoid shadowing
-                                const {runtimeTemplate} = preset;
-                                const {presetDiskSize, presetMachineName} = fp.cond([
-                                  [() => !!runtimeTemplate.gceConfig, ({gceConfig: {bootDiskSize, machineType}}) => ({
-                                    presetDiskSize: bootDiskSize,
-                                    presetMachineName: machineType
-                                  })],
-                                  [() => !!runtimeTemplate.dataprocConfig, ({dataprocConfig: {masterDiskSize, masterMachineType}}) => ({
-                                    presetDiskSize: masterDiskSize,
-                                    presetMachineName: masterMachineType
-                                  })]
-                                ])(runtimeTemplate);
-                                const presetMachineType = fp.find(({name}) => name === presetMachineName, validLeonardoMachineTypes);
+    {switchCase(panelContent,
+      [PanelContent.Delete, () => <ConfirmDelete
+        onConfirm={async() => {
+          await setRuntimeStatus(RuntimeStatusRequest.Delete);
+          setPanelContent(PanelContent.Customize);
+        }}
+        onCancel={() => setPanelContent(PanelContent.Customize)}
+      />],
+      [PanelContent.Customize, () => <Fragment>
+        <div style={styles.controlSection}>
+          <CostEstimator
+              freeCreditsRemaining={creatorFreeCreditsRemaining}
+              profile={profile}
+              runtimeParameters={{
+                computeType: selectedCompute,
+                diskSize: selectedDiskSize,
+                machineType: selectedMachineType,
+                dataprocConfig: selectedDataprocConfig
+              }}
+              runtimeChanged={runtimeChanged}
+              workspace={workspace}
+          />
+          <PresetSelector
+              hasMicroarrayData={hasMicroarrayData}
+              setSelectedDiskSize={(disk) => setSelectedDiskSize(disk)}
+              setSelectedMachine={(machine) => setSelectedMachine(machine)}
+              setSelectedCompute={(compute) => setSelectedCompute(compute)}
+              setSelectedDataprocConfig={(dataproc) => setSelectedDataprocConfig(dataproc)}
+          />
+          {/* Runtime customization: change detailed machine configuration options. */}
+          <h3 style={styles.sectionHeader}>Cloud compute profile</h3>
+          <div style={styles.formGrid}>
+            <MachineSelector
+                idPrefix='runtime'
+                selectedMachine={selectedMachine}
+             onChange={(value) => setSelectedMachine(value)}
+             machineType={machineName}/>
+            <DiskSizeSelector
+                idPrefix='runtime'
+                selectedDiskSize={selectedDiskSize}
+                onChange={(value) => setSelectedDiskSize(value)}
+                diskSize={diskSize}/>
+         </div>
+         <FlexColumn style={{marginTop: '1rem'}}>
+           <label htmlFor='runtime-compute'>Compute type</label>
+           <Dropdown id='runtime-compute'
+                     disabled={!hasMicroarrayData}
+                     style={{width: '10rem'}}
+                     options={[ComputeType.Standard, ComputeType.Dataproc]}
+                     value={selectedCompute || ComputeType.Standard}
+                     onChange={({value}) => setSelectedCompute(value)}
+                     />
+           {
+             selectedCompute === ComputeType.Dataproc &&
+             <DataProcConfigSelector onChange={setSelectedDataprocConfig} dataprocConfig={selectedDataprocConfig} />
+           }
+         </FlexColumn>
+       </div>
+       {runtimeExists && runtimeChanged && <FlexRow
+           style={{
+             alignItems: 'center',
+             backgroundColor: colorWithWhiteness(colors.warning, .9),
+             border: `1px solid ${colors.warning}`,
+             borderRadius: '5px',
+             color: colors.dark,
+             marginTop: '.5rem',
+             padding: '.5rem 0px'
+           }}
+       >
+         <ClrIcon
+             style={{color: colors.warning, marginLeft: '.5rem'}}
+             shape={'warning-standard'}
+             size={16}
+             class={'is-solid'}
+         />
+         <div style={{marginLeft: '.5rem'}}>You've made changes that require recreating your environment to take effect.</div>
+       </FlexRow>}
+       <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
+         <Link
+           style={{...styles.deleteLink, ...(
+             [RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus) ?
+             {} : {color: colorWithWhiteness(colors.dark, .4)}
+           )}}
+           aria-label='Delete Environment'
+           disabled={![RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus)}
+           onClick={() => setPanelContent(PanelContent.Delete)}>Delete Environment</Link>
+         <Button
+           aria-label={runtimeExists ? 'Update' : 'Create'}
+           disabled={
+             runtimeExists && (
+               !runtimeChanged
+               // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
+               // where we get 'status' from
+               || ![RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus))
+           }
+           onClick={() => {
+             const runtimeToRequest: Runtime = selectedDataprocConfig ? {
+               dataprocConfig: {
+                 ...selectedDataprocConfig,
+                 masterMachineType: selectedMachineType,
+                 masterDiskSize: selectedDiskSize
+               }
+             } : {
+               gceConfig: {
+                 machineType: selectedMachineType,
+                 diskSize: selectedDiskSize
+               }
+             };
 
-                                setSelectedDiskSize(presetDiskSize);
-                                setSelectedMachine(presetMachineType);
-                                setRuntimeConfigurationType(RuntimeConfigurationType.GeneralAnalysis);
-                              }}>
-                                {preset.displayName}
-                              </MenuItem>;
-                            })
-                          )(runtimePresets)
-                        }
-                      </React.Fragment>
-                    }>
-        {/* inline-block aligns the popup menu beneath the clickable content, rather than the middle of the panel */}
-        <Clickable style={{display: 'inline-block'}} data-test-id='runtime-presets-menu'>
-          Recommended environments <ClrIcon shape='caret down'/>
-        </Clickable>
-      </PopupTrigger>
-      {/* Runtime customization: change detailed machine configuration options. */}
-      <h3 style={styles.sectionHeader}>Cloud compute profile</h3>
-      <FlexRow style={{justifyContent: 'space-between'}}>
-        <MachineSelector
-            idPrefix='runtime'
-            selectedMachine={selectedMachine}
-            onChange={(value) => {
-              setSelectedMachine(value);
-              if (value !== selectedMachine && value !== diskSize) {
-                setRuntimeConfigurationType(RuntimeConfigurationType.UserOverride);
-              }
-            }}
-            machineType={machineName}
-        />
-        <DiskSizeSelector
-            idPrefix='runtime'
-            selectedDiskSize={selectedDiskSize}
-            onChange={(value) => {
-              setSelectedDiskSize(value);
-              if (value !== selectedDiskSize && value !== diskSize) {
-                setRuntimeConfigurationType(RuntimeConfigurationType.UserOverride);
-              }
-            }}
-            diskSize={diskSize}
-        />
-      </FlexRow>
-      <FlexColumn style={{marginTop: '1rem'}}>
-        <label htmlFor='runtime-compute'>Compute type</label>
-        <Dropdown id='runtime-compute'
-                  disabled={!hasMicroarrayData}
-                  style={{width: '10rem'}}
-                  options={[ComputeType.Standard, ComputeType.Dataproc]}
-                  value={selectedCompute || ComputeType.Standard}
-                  onChange={({value}) => setSelectedCompute(value)}
-                  />
-        {
-          selectedCompute === ComputeType.Dataproc &&
-          <DataProcConfigSelector onChange={setSelectedDataprocConfig} dataprocConfig={dataprocConfig} />
-        }
-      </FlexColumn>
-    </div>
-    <FlexRow style={{justifyContent: 'flex-end', marginTop: '.75rem'}}>
-      <Button
-        aria-label={runtimeExists ? 'Update' : 'Create'}
-        disabled={
-          runtimeExists && (
-            !runtimeChanged
-            // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
-            // where we get 'status' from
-            || ![RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus))
-        }
-        onClick={() => {
-          const runtimeToRequest = selectedDataprocConfig ? {dataprocConfig: selectedDataprocConfig} : {gceConfig: {
-            machineType: selectedMachineType || machineName,
-            diskSize: selectedDiskSize || diskSize
-          }};
-          setRequestedRuntime({configurationType: runtimeConfigurationType, ...runtimeToRequest});
-        }}>{runtimeExists ? 'Update' : 'Create'}</Button>
-    </FlexRow>
+             // If the selected runtime matches a preset, plumb through the appropriate configuration type.
+             runtimeToRequest.configurationType = fp.get(
+               'runtimeTemplate.configurationType',
+               fp.find(
+                 ({runtimeTemplate}) => presetEquals(runtimeToRequest, runtimeTemplate),
+                 runtimePresets)
+             ) || RuntimeConfigurationType.UserOverride;
+             setRequestedRuntime(runtimeToRequest);
+           }}>{runtimeExists ? 'Update' : 'Create'}</Button>
+       </FlexRow>
+     </Fragment>])}
   </div>;
-
 });

@@ -108,11 +108,10 @@
     "useNewShibbolethService": true,
     "enableResearchPurposePrompt": false,
     "enableCohortBuilderV2": true,
-    "enableConceptSetSearchV2": false,
+    "enableConceptSetSearchV2": true,
     "enableReportingUploadCron": true,
     "enableCOPESurvey": true,
     "enableCustomRuntimes": false,
-    "enableGceAsNotebookRuntimeDefault": true,
     "enableFitbit": false
   },
   "actionAudit": {

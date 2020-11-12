@@ -13,6 +13,7 @@ import org.pmiops.workbench.notebooks.model.StorageLink;
  * for internal use.
  */
 public interface LeonardoNotebooksClient {
+
   /** lists all notebook runtimes as the appengine SA, to be used only for admin operations */
   List<LeonardoListRuntimeResponse> listRuntimesByProjectAsService(String googleProject);
 
@@ -27,6 +28,8 @@ public interface LeonardoNotebooksClient {
    *     with
    */
   void createRuntime(Runtime runtime, String workspaceFirecloudName) throws WorkbenchException;
+
+  void updateRuntime(Runtime runtime) throws WorkbenchException;
 
   /** Deletes a notebook runtime */
   void deleteRuntime(String googleProject, String runtimeName) throws WorkbenchException;

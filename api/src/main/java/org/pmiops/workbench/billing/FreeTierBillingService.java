@@ -66,10 +66,10 @@ public class FreeTierBillingService {
       WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao) {
     this.bigQueryService = bigQueryService;
     this.clock = clock;
-    this.userServiceAuditor = userServiceAuditor;
     this.mailService = mailService;
     this.userDao = userDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
+    this.userServiceAuditor = userServiceAuditor;
     this.workspaceDao = workspaceDao;
     this.workspaceFreeTierUsageDao = workspaceFreeTierUsageDao;
   }
@@ -347,5 +347,22 @@ public class FreeTierBillingService {
 
   public Map<Long, Double> getUserIdToTotalCost() {
     return workspaceFreeTierUsageDao.getUserIdToTotalCost();
+  }
+
+  /**
+   * Given a workspace, find the amount of free credits that the workspace creator has left.
+   *
+   * @param dbWorkspace The workspace for which to find its creator's free credits remaining
+   * @return The amount of free credits in USD the workspace creator has left, represented as a
+   *     double
+   */
+  public double getWorkspaceCreatorFreeCreditsRemaining(DbWorkspace dbWorkspace) {
+    Double creatorCachedFreeTierUsage = this.getCachedFreeTierUsage(dbWorkspace.getCreator());
+    Double creatorFreeTierDollarLimit = this.getUserFreeTierDollarLimit(dbWorkspace.getCreator());
+    double creatorFreeCreditsRemaining =
+        creatorCachedFreeTierUsage == null
+            ? creatorFreeTierDollarLimit
+            : creatorFreeTierDollarLimit - creatorCachedFreeTierUsage;
+    return Math.max(creatorFreeCreditsRemaining, 0);
   }
 }

@@ -1,25 +1,28 @@
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+
+import {DataSetReferenceModal} from 'app/components/data-set-reference-modal';
 import {RenameModal} from 'app/components/rename-modal';
-import {Action, ResourceCardTemplate} from 'app/components/resource-card-template';
+import {Action, ResourceActionsMenu} from 'app/components/resource-actions-menu';
+import {canDelete, canWrite, ResourceCard} from 'app/components/resource-card';
 import {withConfirmDeleteModal, WithConfirmDeleteModalProps} from 'app/components/with-confirm-delete-modal';
 import {withErrorModal, WithErrorModalProps} from 'app/components/with-error-modal';
 import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
-import {cohortsApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
-import {formatWorkspaceResourceDisplayDate} from 'app/utils';
+import {cohortsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
 import {navigateByUrl} from 'app/utils/navigation';
-import {toDisplay} from 'app/utils/resourceActions';
-import {ResourceType, WorkspaceResource} from 'generated/fetch';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
+import {getDescription, getDisplayName, getId, getResourceUrl, getType} from 'app/utils/resources';
+import {DataSet, WorkspaceResource} from 'generated/fetch';
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
   resource: WorkspaceResource;
   existingNameList: string[];
-  onUpdate: Function;
+  onUpdate: () => Promise<void>;
+  menuOnly: boolean;
 }
 
 interface State {
   showRenameModal: boolean;
+  referencingDataSets: Array<DataSet>;
 }
 
 export const CohortResourceCard = fp.flow(
@@ -31,35 +34,12 @@ export const CohortResourceCard = fp.flow(
   constructor(props: Props) {
     super(props);
     this.state = {
-      showRenameModal: false
+      showRenameModal: false,
+      referencingDataSets: [],
     };
   }
 
-  get resourceType(): ResourceType {
-    return ResourceType.COHORT;
-  }
-
-  get displayName(): string {
-    return this.props.resource.cohort.name;
-  }
-
-  // this is duplicated
-  get canWrite(): boolean {
-    return this.props.resource.permission === 'OWNER'
-      || this.props.resource.permission === 'WRITER';
-  }
-
-  get canDelete(): boolean {
-    return this.props.resource.permission === 'OWNER';
-  }
-
-  get resourceUrl(): string {
-    const {workspaceNamespace, workspaceFirecloudName, cohort} = this.props.resource;
-    return `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}` +
-      `/data/cohorts/build?cohortId=${cohort.id}`;
-  }
-
-  get reviewCohortUrl(): string {
+  get reviewUrlForCohort(): string {
     const {workspaceNamespace, workspaceFirecloudName, cohort} = this.props.resource;
 
     return `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}` +
@@ -67,6 +47,7 @@ export const CohortResourceCard = fp.flow(
   }
 
   get actions(): Action[] {
+    const {resource} = this.props;
     return [
       {
         icon: 'note',
@@ -74,46 +55,64 @@ export const CohortResourceCard = fp.flow(
         onClick: () => {
           this.setState({showRenameModal: true});
         },
-        disabled: !this.canWrite
+        disabled: !canWrite(resource)
       },
       {
         icon: 'copy',
         displayName: 'Duplicate',
         onClick: () => this.duplicate(),
-        disabled: !this.canWrite
+        disabled: !canWrite(resource)
       },
       {
         icon: 'pencil',
         displayName: 'Edit',
-        onClick: () => navigateByUrl(this.resourceUrl),
-        disabled: !this.canWrite
+        onClick: () => navigateByUrl(getResourceUrl(resource)),
+        disabled: !canWrite(resource)
       },
       {
         icon: 'grid-view',
         displayName: 'Review',
-        onClick: () => navigateByUrl(this.reviewCohortUrl),
-        disabled: !this.canWrite
+        onClick: () => navigateByUrl(this.reviewUrlForCohort),
+        disabled: !canWrite(resource)
       },
       {
         icon: 'trash',
         displayName: 'Delete',
         onClick: () => {
-          this.props.showConfirmDeleteModal(this.displayName,
-            this.resourceType, () => this.delete());
+          this.props.showConfirmDeleteModal(getDisplayName(resource),
+            getType(resource), () => this.maybeDelete());
         },
-        disabled: !this.canDelete
+        disabled: !canDelete(resource)
       }
     ];
   }
 
-  delete() {
+  // check if there are any referencing data sets, and pop up a modal if so;
+  // if not, continue with deletion
+  maybeDelete() {
+    const {resource} = this.props;
+    return dataSetApi().getDataSetByResourceId(
+        resource.workspaceNamespace,
+        resource.workspaceFirecloudName,
+        getType(resource),
+        getId(resource))
+        .then(dataSetList => {
+          if (dataSetList && dataSetList.items.length > 0) {
+            this.setState({referencingDataSets: dataSetList.items});
+          } else {
+            return this.deleteCohort();
+          }
+        });
+  }
+
+  deleteCohort() {
     return cohortsApi().deleteCohort(
-      this.props.resource.workspaceNamespace,
-      this.props.resource.workspaceFirecloudName,
-      this.props.resource.cohort.id)
-      .then(() => {
-        this.props.onUpdate();
-      });
+        this.props.resource.workspaceNamespace,
+        this.props.resource.workspaceFirecloudName,
+        this.props.resource.cohort.id)
+        .then(() => {
+          this.props.onUpdate();
+        });
   }
 
   duplicate() {
@@ -124,7 +123,7 @@ export const CohortResourceCard = fp.flow(
       this.props.resource.workspaceFirecloudName,
       {
         originalCohortId: this.props.resource.cohort.id,
-        newName: `Duplicate of ${this.displayName}`
+        newName: `Duplicate of ${getDisplayName(this.props.resource)}`
       }
     ).then(() => {
       this.props.onUpdate();
@@ -157,26 +156,30 @@ export const CohortResourceCard = fp.flow(
   }
 
   render() {
+    const {resource, menuOnly} = this.props;
     return <React.Fragment>
       {this.state.showRenameModal &&
       <RenameModal onRename={(name, description) => this.rename(name, description)}
-                   resourceType={this.resourceType}
+                   resourceType={getType(resource)}
                    onCancel={() => this.setState({showRenameModal: false})}
-                   oldDescription={this.props.resource.cohort.description}
-                   oldName={this.displayName}
+                   oldDescription={getDescription(resource)}
+                   oldName={getDisplayName(resource)}
                    existingNames={this.props.existingNameList}/>
       }
-
-      <ResourceCardTemplate
-        actions={this.actions}
-        disabled={!this.canWrite}
-        resourceUrl={this.resourceUrl}
-        displayName={this.displayName}
-        description={this.props.resource.cohort.description}
-        displayDate={formatWorkspaceResourceDisplayDate(this.props.resource.modifiedTime)}
-        footerText={toDisplay(this.resourceType)}
-        footerColor={colors.resourceCardHighlights.cohort}
-      />
+      {this.state.referencingDataSets.length > 0 && <DataSetReferenceModal
+          referencedResource={resource}
+          dataSets={fp.join(', ' , this.state.referencingDataSets.map((data) => data.name))}
+          onCancel={() => {
+            this.setState({referencingDataSets: []});
+          }}
+          deleteResource={() => {
+            this.setState({referencingDataSets: []});
+            return this.deleteCohort();
+          }}/>
+      }
+      {menuOnly ?
+          <ResourceActionsMenu actions={this.actions}/> :
+          <ResourceCard resource={resource} actions={this.actions}/>}
     </React.Fragment>;
   }
 });

@@ -2,6 +2,7 @@ import {NgModule} from '@angular/core';
 import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 
 import {AppRouting} from './app-routing';
+import {CanDeactivateGuard} from './guards/can-deactivate-guard.service';
 import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 
@@ -257,6 +258,7 @@ const routes: Routes = [
                       {
                         path: 'concepts',
                         component: ConceptHomepageComponent,
+                        canDeactivate: [CanDeactivateGuard],
                         data: {
                           title: 'Search Concepts',
                           breadcrumb: BreadcrumbType.SearchConcepts,

@@ -20,6 +20,8 @@ export const AccountCreationOptions = {
     {label: 'M.A.', value: Degree.MA},
     {label: 'M.B.A.', value: Degree.MBA},
     {label: 'M.E.', value: Degree.ME},
+    {label: 'M.S.W.', value: Degree.MSW},
+    {label: 'M.P.H.', value: Degree.MPH},
     {label: 'B.A.', value: Degree.BA},
     {label: 'B.S.', value: Degree.BS},
     {label: 'B.S.N.', value: Degree.BSN},

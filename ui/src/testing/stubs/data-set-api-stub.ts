@@ -6,10 +6,13 @@ import {
   DataSetExportRequest,
   DataSetPreviewRequest,
   DataSetPreviewResponse,
-  DataSetRequest, DomainValuesResponse,
+  DataSetRequest,
+  DomainValuesResponse,
   EmptyResponse,
-  KernelTypeEnum
+  KernelTypeEnum,
+  MarkDataSetRequest
 } from 'generated/fetch';
+import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
 export class DataSetApiStub extends DataSetApi {
   static stubDataSets(): DataSet[] {
@@ -29,7 +32,7 @@ export class DataSetApiStub extends DataSetApi {
   }
 
   constructor() {
-    super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
+    super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
   }
 
   generateCode(workspaceNamespace: string,
@@ -94,5 +97,9 @@ export class DataSetApiStub extends DataSetApi {
         break;
     }
     return Promise.resolve({items: domainValueItems});
+  }
+
+  async markDirty(workspaceNamespace: string, workspaceId: string, markDataSetRequest?: MarkDataSetRequest, options?: any) {
+    return true;
   }
 }

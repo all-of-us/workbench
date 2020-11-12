@@ -13,8 +13,10 @@ import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {LeoRuntimeInitializer} from 'app/utils/leo-runtime-initializer';
 import {navigate, userProfileStore} from 'app/utils/navigation';
+import {withRuntimeStore} from 'app/utils/runtime-utils';
+import {maybeInitializeRuntime} from 'app/utils/runtime-utils';
+import {RuntimeStore} from 'app/utils/stores';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
@@ -98,10 +100,10 @@ const styles = reactStyles({
 interface Props {
   workspace: WorkspaceData;
   urlParams: any;
+  runtimeStore: RuntimeStore;
 }
 
 interface State {
-  runtimeStatus: RuntimeStatus;
   html: string;
   lastLockedBy: string;
   lockExpirationTime: number;
@@ -118,15 +120,17 @@ enum PreviewErrorMode {
   ERROR = 'error'
 }
 
-export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace())(
+export const InteractiveNotebook = fp.flow(
+  withUrlParams(),
+  withRuntimeStore(),
+  withCurrentWorkspace()
+)(
   class extends React.Component<Props, State> {
-    private runRuntimeTimer: NodeJS.Timeout;
     private pollAborter = new AbortController();
 
     constructor(props) {
       super(props);
       this.state = {
-        runtimeStatus: RuntimeStatus.Unknown,
         html: '',
         lastLockedBy: '',
         lockExpirationTime: 0,
@@ -164,16 +168,11 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
     }
 
     componentWillUnmount(): void {
-      clearTimeout(this.runRuntimeTimer);
       this.pollAborter.abort();
     }
 
     private async runRuntime(onRuntimeReady: Function): Promise<void> {
-      await LeoRuntimeInitializer.initialize({
-        workspaceNamespace: this.props.urlParams.ns,
-        onPoll: (runtime) => this.setState({runtimeStatus: !!runtime ? runtime.status : null}),
-        pollAbortSignal: this.pollAborter.signal
-      });
+      await maybeInitializeRuntime(this.props.urlParams.ns, this.pollAborter.signal);
       onRuntimeReady();
     }
 
@@ -256,7 +255,8 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
     }
 
     private renderNotebookText() {
-      switch (this.state.runtimeStatus) {
+      const {status = RuntimeStatus.Unknown} = this.props.runtimeStore.runtime || {};
+      switch (status) {
         case RuntimeStatus.Starting:
         case RuntimeStatus.Stopping:
         case RuntimeStatus.Stopped:

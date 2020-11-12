@@ -564,6 +564,34 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
+  public void findCriteriaByDomainAndSearchTermEmptyTerm() {
+    DbCriteria criteria =
+        DbCriteria.builder()
+            .addCode("001")
+            .addCount(10L)
+            .addConceptId("123")
+            .addDomainId(Domain.CONDITION.toString())
+            .addGroup(Boolean.TRUE)
+            .addSelectable(Boolean.TRUE)
+            .addName("chol blah")
+            .addParentId(0)
+            .addType(CriteriaType.LOINC.toString())
+            .addAttribute(Boolean.FALSE)
+            .addStandard(true)
+            .addFullText("LP12*[CONDITION_rank1]")
+            .build();
+    cbCriteriaDao.save(criteria);
+
+    assertEquals(
+        createResponseCriteria(criteria),
+        controller
+            .findCriteriaByDomainAndSearchTerm(1L, Domain.CONDITION.name(), "", null, null)
+            .getBody()
+            .getItems()
+            .get(0));
+  }
+
+  @Test
   public void findCriteriaByDomainAndSearchTermDrugMatchesSynonyms() {
     jdbcTemplate.execute(
         "create table cb_criteria_relationship(concept_id_1 integer, concept_id_2 integer)");

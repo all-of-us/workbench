@@ -70,6 +70,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeImage;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
+import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
 import org.pmiops.workbench.model.DataprocConfig;
 import org.pmiops.workbench.model.GceConfig;
 import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
@@ -78,6 +79,7 @@ import org.pmiops.workbench.model.RuntimeConfigurationType;
 import org.pmiops.workbench.model.RuntimeLocalizeRequest;
 import org.pmiops.workbench.model.RuntimeLocalizeResponse;
 import org.pmiops.workbench.model.RuntimeStatus;
+import org.pmiops.workbench.model.UpdateRuntimeRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClientImpl;
 import org.pmiops.workbench.notebooks.NotebooksConfig;
@@ -189,6 +191,7 @@ public class RuntimeControllerTest {
 
   @Captor private ArgumentCaptor<Localize> welderReqCaptor;
   @Captor private ArgumentCaptor<LeonardoCreateRuntimeRequest> createRuntimeRequestCaptor;
+  @Captor private ArgumentCaptor<LeonardoUpdateRuntimeRequest> updateRuntimeRequestCaptor;
 
   @MockBean AdminActionHistoryDao mockAdminActionHistoryDao;
   @MockBean LeonardoRuntimeAuditor mockLeonardoRuntimeAuditor;
@@ -859,8 +862,7 @@ public class RuntimeControllerTest {
 
     runtimeController.createRuntime(
         BILLING_PROJECT_ID,
-        new Runtime()
-            .gceConfig(new GceConfig().bootDiskSize(10).diskSize(50).machineType("standard")));
+        new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard")));
 
     verify(userRuntimesApi)
         .createRuntime(
@@ -879,7 +881,6 @@ public class RuntimeControllerTest {
                     LeonardoRuntimeConfig.class)
                 .getCloudService())
         .isEqualTo(LeonardoRuntimeConfig.CloudServiceEnum.GCE);
-    assertThat(createLeonardoGceConfig.getBootDiskSize()).isEqualTo(10);
     assertThat(createLeonardoGceConfig.getDiskSize()).isEqualTo(50);
 
     assertThat(createLeonardoGceConfig.getMachineType()).isEqualTo("standard");
@@ -978,6 +979,32 @@ public class RuntimeControllerTest {
     LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
     assertThat(((Map<String, String>) createRuntimeRequest.getLabels()).get("all-of-us-config"))
         .isEqualTo("user-override");
+  }
+
+  @Test
+  public void testUpdateRuntime() throws ApiException {
+    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
+
+    runtimeController.updateRuntime(
+        BILLING_PROJECT_ID,
+        new UpdateRuntimeRequest()
+            .runtime(
+                new Runtime()
+                    .configurationType(RuntimeConfigurationType.USEROVERRIDE)
+                    .dataprocConfig(dataprocConfig)));
+    verify(userRuntimesApi)
+        .updateRuntime(
+            eq(BILLING_PROJECT_ID), eq(getRuntimeName()), updateRuntimeRequestCaptor.capture());
+
+    LeonardoMachineConfig actualRuntimeConfig =
+        (LeonardoMachineConfig) updateRuntimeRequestCaptor.getValue().getRuntimeConfig();
+    assertThat(actualRuntimeConfig.getCloudService().getValue()).isEqualTo("DATAPROC");
+    assertThat(actualRuntimeConfig.getNumberOfWorkers())
+        .isEqualTo(dataprocConfig.getNumberOfWorkers());
+    assertThat(actualRuntimeConfig.getMasterMachineType())
+        .isEqualTo(dataprocConfig.getMasterMachineType());
+    assertThat(actualRuntimeConfig.getMasterDiskSize())
+        .isEqualTo(dataprocConfig.getMasterDiskSize());
   }
 
   @Test

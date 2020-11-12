@@ -48,8 +48,6 @@ public class ConfigController implements ConfigApiDelegate {
             .enableResearchReviewPrompt(config.featureFlags.enableResearchPurposePrompt)
             .enableCOPESurvey(config.featureFlags.enableCOPESurvey)
             .enableCustomRuntimes(config.featureFlags.enableCustomRuntimes)
-            .enableGceAsNotebookRuntimeDefault(
-                config.featureFlags.enableGceAsNotebookRuntimeDefault)
             .enableFitbit(config.featureFlags.enableFitbit)
             .runtimeImages(
                 Stream.concat(

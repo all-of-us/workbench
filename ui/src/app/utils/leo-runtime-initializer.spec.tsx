@@ -12,14 +12,12 @@ import {RuntimesApi as LeoRuntimesApi} from 'notebooks-generated/fetch';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {LeoRuntimesApiStub} from 'testing/stubs/leo-runtimes-api-stub';
 import {RuntimeConfigurationType} from '../../generated/fetch';
-import {runtimeOpsStore} from "./stores";
 import {serverConfigStore} from "./navigation";
 
 let mockGetRuntime: SpyInstance;
 let mockCreateRuntime: SpyInstance;
 let mockDeleteRuntime: SpyInstance;
 let mockStartRuntime: SpyInstance;
-const mockSetRuntimeOpsStore = jest.spyOn(runtimeOpsStore, 'set');
 
 const baseRuntime: Runtime = {
   runtimeName: 'aou-rw-3',
@@ -316,39 +314,5 @@ describe('RuntimeInitializer', () => {
       expect(mockCreateRuntime).not.toHaveBeenCalled();
       expect(error.message).toMatch(/max runtime resume count/i);
     }
-  });
-
-  it('should use and clean the runtimeOpsStore for get', async() => {
-    mockGetRuntimeCalls([baseRuntime]);
-    await runInitializerAndTimers();
-    expect(mockSetRuntimeOpsStore).toHaveBeenCalled();
-    expect(runtimeOpsStore.get().opsByWorkspaceNamespace[workspaceNamespace]).toBeUndefined();
-  });
-
-  it('should use and clean the runtimeOpsStore for create', async() => {
-    mockGetRuntime.mockRejectedValueOnce(new Response(null, {status: 404}));
-    mockCreateRuntime.mockImplementationOnce(async(workspaceNamespace) => {
-      return {status: RuntimeStatus.Creating};
-    });
-    await runInitializerAndTimers();
-    expect(mockSetRuntimeOpsStore).toHaveBeenCalled();
-    expect(runtimeOpsStore.get().opsByWorkspaceNamespace[workspaceNamespace]).toBeUndefined();
-  });
-
-  it('should use and clean the runtimeOpsStore for resume', async() => {
-    mockGetRuntimeCalls([{status: RuntimeStatus.Stopped}]);
-    await runInitializerAndTimers();
-    expect(mockSetRuntimeOpsStore).toHaveBeenCalled();
-    expect(runtimeOpsStore.get().opsByWorkspaceNamespace[workspaceNamespace]).toBeUndefined();
-  });
-
-  it('should use and clean the runtimeOpsStore for delete', async() => {
-    mockGetRuntimeCalls([{status: RuntimeStatus.Error}]);
-    mockDeleteRuntime.mockImplementationOnce(async(workspaceNamespace) => {
-      return {};
-    });
-    await runInitializerAndTimers();
-    expect(mockSetRuntimeOpsStore).toHaveBeenCalled();
-    expect(runtimeOpsStore.get().opsByWorkspaceNamespace[workspaceNamespace]).toBeUndefined();
   });
 });

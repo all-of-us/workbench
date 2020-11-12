@@ -1,3 +1,8 @@
+import * as fp from 'lodash/fp';
+
+import {appendNotebookFileSuffix, dropNotebookFileSuffix} from 'app/pages/analysis/util';
+import {WorkspaceData} from 'app/utils/workspace-data';
+import {CopyRequest, EmptyResponse} from 'generated';
 import {
   CloneWorkspaceRequest,
   CloneWorkspaceResponse,
@@ -14,6 +19,7 @@ import {
   Workspace,
   WorkspaceAccessLevel,
   WorkspaceBillingUsageResponse,
+  WorkspaceCreatorFreeCreditsRemainingResponse,
   WorkspaceListResponse,
   WorkspaceResourceResponse,
   WorkspaceResourcesRequest,
@@ -22,18 +28,13 @@ import {
   WorkspacesApi,
   WorkspaceUserRolesResponse
 } from 'generated/fetch';
-
-import * as fp from 'lodash/fp';
-
-import {appendNotebookFileSuffix, dropNotebookFileSuffix} from 'app/pages/analysis/util';
-import {convertToResources} from 'app/utils/resourceActions';
-import {WorkspaceData} from 'app/utils/workspace-data';
-import {CopyRequest, EmptyResponse} from 'generated';
+import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 import {CdrVersionsStubVariables} from './cdr-versions-api-stub';
 import {cohortReviewStubs} from './cohort-review-service-stub';
 import {exampleCohortStubs} from './cohorts-api-stub';
 import {ConceptSetsApiStub} from './concept-sets-api-stub';
 import {DataSetApiStub} from './data-set-api-stub';
+import {convertToResources} from './resources-stub';
 
 export class WorkspaceStubVariables {
   static DEFAULT_WORKSPACE_NS = 'defaultNamespace';
@@ -134,7 +135,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
   newWorkspaceCount = 0;
 
   constructor(workspaces?: Workspace[], workspaceUserRoles?: UserRole[]) {
-    super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
+    super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
     this.workspaces = fp.defaultTo(workspaceStubs, workspaces);
     this.workspaceAccess = new Map<string, WorkspaceAccessLevel>();
     this.notebookList = WorkspacesApiStub.stubNotebookList();
@@ -354,15 +355,20 @@ export class WorkspacesApiStub extends WorkspacesApi {
         accessLevel: WorkspaceAccessLevel.OWNER,
         cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
       };
-      const workspaceResources = convertToResources(
-        {workspace, list: cohortReviewStubs, resourceType: ResourceType.COHORTREVIEW})
-        .concat(convertToResources(
-          {workspace, list: exampleCohortStubs, resourceType: ResourceType.COHORT}))
-        .concat(convertToResources(
-          {workspace, list: DataSetApiStub.stubDataSets(), resourceType: ResourceType.DATASET}))
-        .concat(convertToResources(
-          {workspace, list: ConceptSetsApiStub.stubConceptSets(), resourceType: ResourceType.CONCEPTSET}));
+      const workspaceResources = convertToResources(cohortReviewStubs, ResourceType.COHORTREVIEW, workspace)
+        .concat(convertToResources(exampleCohortStubs, ResourceType.COHORT, workspace))
+        .concat(convertToResources(DataSetApiStub.stubDataSets(), ResourceType.DATASET, workspace))
+        .concat(convertToResources(ConceptSetsApiStub.stubConceptSets(), ResourceType.CONCEPTSET, workspace));
       resolve(workspaceResources);
+    });
+  }
+
+  getWorkspaceCreatorFreeCreditsRemaining(
+    workspaceNamespace: string,
+    workspaceId: string
+  ): Promise<WorkspaceCreatorFreeCreditsRemainingResponse> {
+    return new Promise<WorkspaceCreatorFreeCreditsRemainingResponse>(resolve => {
+      resolve({freeCreditsRemaining: 123.4});
     });
   }
 }

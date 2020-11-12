@@ -31,44 +31,39 @@ interface ProfileStore {
 
 export const profileStore = atom<ProfileStore>({});
 
-export interface RuntimeOperation {
-  promise: Promise<any>;
-  operation: string;
+export interface CompoundRuntimeOperation {
+  pendingRuntime?: Runtime;
   aborter: AbortController;
 }
 
-interface WorkspaceRuntimeOperationMap {
-  [workspaceNamespace: string]: RuntimeOperation;
+export interface CompoundRuntimeOpStore {
+  [workspaceNamespace: string]: CompoundRuntimeOperation;
 }
 
-export interface RuntimeOpsStore {
-  opsByWorkspaceNamespace: WorkspaceRuntimeOperationMap;
-}
+// Store tracking any compound Runtime operations per workspace. Currently, this
+// only pertains to applying a runtime configuration update via full recreate
+// (compound operation of delete -> create).
+export const compoundRuntimeOpStore = atom<CompoundRuntimeOpStore>({});
 
-export const runtimeOpsStore = atom<RuntimeOpsStore>({opsByWorkspaceNamespace: {}});
-
-export const updateRuntimeOpsStoreForWorkspaceNamespace = (workspaceNamespace: string, runtimeOperation: RuntimeOperation) => {
-  const opsByWorkspaceNamespace = runtimeOpsStore.get().opsByWorkspaceNamespace;
-  opsByWorkspaceNamespace[workspaceNamespace] = runtimeOperation;
-  runtimeOpsStore.set({opsByWorkspaceNamespace: opsByWorkspaceNamespace});
+export const registerCompoundRuntimeOperation = (workspaceNamespace: string, runtimeOperation: CompoundRuntimeOperation) => {
+  compoundRuntimeOpStore.set({
+    ...compoundRuntimeOpStore.get(),
+    [workspaceNamespace]: runtimeOperation
+  });
 };
 
-export const markRuntimeOperationCompleteForWorkspace = (workspaceNamespace: string) => {
-  const opsByWorkspaceNamespace = runtimeOpsStore.get().opsByWorkspaceNamespace;
-  if (!!opsByWorkspaceNamespace[workspaceNamespace]) {
-    delete opsByWorkspaceNamespace[workspaceNamespace];
-    runtimeOpsStore.set({opsByWorkspaceNamespace: opsByWorkspaceNamespace});
+export const markCompoundRuntimeOperationCompleted = (workspaceNamespace: string) => {
+  const {[workspaceNamespace]: op, ...otherOps} = compoundRuntimeOpStore.get();
+  if (op) {
+    op.aborter.abort();
+    compoundRuntimeOpStore.set(otherOps);
   }
 };
 
-export const abortRuntimeOperationForWorkspace = (workspaceNamespace: string) => {
-  const opsByWorkspaceNamespace = runtimeOpsStore.get().opsByWorkspaceNamespace;
-  if (!!opsByWorkspaceNamespace[workspaceNamespace]) {
-    const runtimeOperation = opsByWorkspaceNamespace[workspaceNamespace];
-    runtimeOperation.aborter.abort();
-    delete opsByWorkspaceNamespace[workspaceNamespace];
-    runtimeOpsStore.set({opsByWorkspaceNamespace: opsByWorkspaceNamespace});
-  }
+export const clearCompoundRuntimeOperations = () => {
+  const ops = compoundRuntimeOpStore.get();
+  Object.keys(ops).forEach(k => ops[k].aborter.abort());
+  compoundRuntimeOpStore.set({});
 };
 
 // runtime store states: undefined(initial state) -> Runtime (user selected) <--> null (delete only - no recreate)

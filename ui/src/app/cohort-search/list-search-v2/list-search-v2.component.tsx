@@ -24,6 +24,7 @@ import {
   CdrVersion,
   CdrVersionListResponse,
   Criteria,
+  CriteriaSubType,
   CriteriaType,
   Domain
 } from 'generated/fetch';
@@ -60,6 +61,10 @@ const styles = reactStyles({
     margin: '2px 0.5rem 2px 2px',
     color: colorWithWhiteness(colors.success, -0.5),
     cursor: 'pointer'
+  },
+  disableSelectIcon: {
+    opacity: 0.4,
+    cursor: 'not-allowed'
   },
   selectedIcon: {
     marginRight: '0.4rem',
@@ -154,6 +159,12 @@ const styles = reactStyles({
   infoIcon: {
     color: colorWithWhiteness(colors.accent, 0.1),
     marginLeft: '0.25rem'
+  },
+  clearSearchIcon: {
+    color: colors.accent,
+    display: 'inline-block',
+    float: 'right',
+    marginTop: '0.25rem'
   }
 });
 
@@ -231,6 +242,7 @@ interface State {
   hoverId: string;
   ingredients: any;
   loading: boolean;
+  searching: boolean;
   searchTerms: string;
   standardOnly: boolean;
   sourceMatch: any;
@@ -255,6 +267,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
         ingredients: {},
         hoverId: undefined,
         loading: false,
+        searching: false,
         searchTerms: props.searchTerms,
         standardOnly: false,
         sourceMatch: undefined,
@@ -266,18 +279,19 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
       const {cdrVersionListResponse, searchTerms, source, workspace: {cdrVersionId}} = this.props;
       const cdrVersions = cdrVersionListResponse.items;
       this.setState({cdrVersion: cdrVersions.find(cdr => cdr.cdrVersionId === cdrVersionId)});
-      if (source === 'concept' && searchTerms !== '') {
-        this.getResults(searchTerms);
-      } else if (source === 'conceptSetDetails') {
+      if (source === 'conceptSetDetails') {
         this.setState({data: this.props.concept});
+      } else {
+        const searchString = searchTerms || '';
+        this.getResults(searchString);
       }
     }
 
     componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any) {
-      if (this.props.source === 'conceptSetDetails') {
-        if (prevProps.concept !== this.props.concept) {
-          this.setState({data: this.props.concept});
-        }
+      const {concept, source} = this.props;
+      const {searching} = this.state;
+      if (source === 'conceptSetDetails' && prevProps.concept !== concept && !searching) {
+        this.setState({data: concept});
       }
     }
 
@@ -297,10 +311,12 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
     getResults = async(value: string) => {
       let sourceMatch;
       try {
-        this.setState({data: null, error: false, loading: true, standardOnly: false});
-        const {searchContext: {domain}, workspace: {cdrVersionId}} = this.props;
-        const resp = await cohortBuilderApi().findCriteriaByDomainAndSearchTerm(+cdrVersionId, domain, value.trim());
-        const data = resp.items;
+        this.setState({data: null, error: false, loading: true, searching: true, standardOnly: false});
+        const {searchContext: {domain}, source, selectedSurvey, workspace: {cdrVersionId}} = this.props;
+        const resp = await cohortBuilderApi().findCriteriaByDomainAndSearchTerm(+cdrVersionId, domain, value.trim(), selectedSurvey);
+        const data = source !== 'criteria' && this.isSurvey
+          ? resp.items.filter(survey => survey.subtype === CriteriaSubType.QUESTION.toString())
+          : resp.items;
         if (data.length && this.checkSource) {
           sourceMatch = data.find(item => item.code.toLowerCase() === value.trim().toLowerCase() && !item.isStandard);
           if (sourceMatch) {
@@ -323,6 +339,11 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
 
     get checkSource() {
       return [Domain.CONDITION, Domain.PROCEDURE].includes(this.props.searchContext.domain);
+    }
+
+    selectIconDisabled() {
+      const {selectedIds, source} = this.props;
+      return source !== 'criteria' && selectedIds && selectedIds.length >= 1000;
     }
 
     selectItem = (row: any) => {
@@ -392,6 +413,22 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
       }
     }
 
+    get textInputPlaceholder() {
+      const {searchContext: {domain}, selectedSurvey, source} = this.props;
+      switch (source) {
+        case 'concept':
+          return `Search ${!!selectedSurvey ? selectedSurvey : domainToTitle(domain)} by code or description`;
+        case 'conceptSetDetails':
+          return `Search ${this.isSurvey ? 'across all ' : ''}${domainToTitle(domain)} by code or description`;
+        case 'criteria':
+          return `Search ${domainToTitle(domain)} by code or description`;
+      }
+    }
+
+    get isSurvey() {
+      return this.props.searchContext.domain === Domain.SURVEY;
+    }
+
     renderRow(row: any, child: boolean, elementId: string) {
       const {hoverId, ingredients} = this.state;
       const attributes = this.props.source === 'criteria' && row.hasAttributes;
@@ -403,14 +440,16 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
       const loadingIngredients = ingredients[row.id] && ingredients[row.id].loading;
       const columnStyle = child ?
         {...styles.columnBodyName, paddingLeft: '1.25rem'} : styles.columnBodyName;
+      const selectIconStyle = this.selectIconDisabled() ? {...styles.selectIcon, ...styles.disableSelectIcon} : styles.selectIcon;
       return <tr style={{height: '1.75rem'}}>
         <td style={{...columnStyle, width: '31%', textAlign: 'left', borderLeft: 0, padding: '0 0.25rem'}}>
-          {row.selectable && <div style={{...styles.selectDiv}}>
+          {row.selectable && <div style={styles.selectDiv}>
             {attributes &&
               <ClrIcon style={styles.attrIcon} shape='slider' dir='right' size='20' onClick={() => this.setAttributes(row)}/>
             }
             {selected && <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>}
-            {unselected && <ClrIcon style={styles.selectIcon} shape='plus-circle' size='16' onClick={() => this.selectItem(row)}/>}
+            {unselected && <ClrIcon style={selectIconStyle} shape='plus-circle' size='16'
+                                    onClick={() => this.selectItem(row)}/>}
             {brand && !loadingIngredients &&
               <ClrIcon style={styles.brandIcon}
                 shape={'angle ' + (open ? 'down' : 'right')} size='20'
@@ -448,19 +487,27 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
     }
 
     render() {
-      const {searchContext: {domain}} = this.props;
-      const {cdrVersion, data, error, ingredients, loading, searchTerms, standardOnly, sourceMatch, standardData, totalCount} = this.state;
+      const {concept, searchContext: {domain}, source} = this.props;
+      const {cdrVersion, data, error, ingredients, loading, searching, searchTerms, standardOnly, sourceMatch, standardData, totalCount}
+        = this.state;
       const showStandardOption = !standardOnly && !!standardData && standardData.length > 0;
       const displayData = standardOnly ? standardData : data;
       return <div style={{overflow: 'auto'}}>
+        {this.selectIconDisabled() && <div style={{color: colors.warning, fontWeight: 'bold', maxWidth: '1000px'}}>
+          NOTE: Concept Set can have only 1000 concepts. Please delete some concepts before adding more.
+        </div>}
         <div style={styles.searchContainer}>
           <div style={styles.searchBar}>
             <ClrIcon shape='search' size='18'/>
             <TextInput style={styles.searchInput}
                        value={searchTerms}
-                       placeholder={`Search ${domainToTitle(domain)} by code or description`}
+                       placeholder={this.textInputPlaceholder}
                        onChange={(e) => this.setState({searchTerms: e})}
                        onKeyPress={this.handleInput} />
+            {source === 'conceptSetDetails' && searching && <Clickable style={styles.clearSearchIcon}
+                onClick={() => this.setState({data: concept, searching: false, searchTerms: ''})}>
+              <ClrIcon size={24} shape='times-circle'/>
+            </Clickable>}
           </div>
         </div>
         <div style={{display: 'table', height: '100%', width: '100%'}}>

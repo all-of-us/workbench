@@ -81,9 +81,9 @@ const styles = reactStyles({
     color: colors.select,
     margin: '5px'
   },
-  selected: {
-    cursor: 'not-allowed',
-    opacity: 0.4
+  disableIcon: {
+    opacity: 0.4,
+    cursor: 'not-allowed'
   },
   treeNode: {
     alignItems: 'center',
@@ -233,8 +233,9 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     }
   }
 
-  get paramId() {
-    const {node: {code, conceptId, domainId, id}} = this.props;
+  paramId(crit?: Criteria) {
+    const node = crit || this.props.node;
+    const {code, conceptId, domainId, id} = node;
     return `param${!!conceptId && domainId !== Domain.SURVEY.toString() ? (conceptId + code) : id}`;
   }
 
@@ -254,7 +255,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     event.stopPropagation();
     const {node, node: {conceptId, domainId, group, parentId, subtype, value}, select, selectedIds} = this.props;
     let {node: {name}} = this.props;
-    if (!selectedIds.includes(this.paramId)) {
+    if (!selectedIds.includes(this.paramId())) {
       let attributes = [];
       if (subtype === CriteriaSubType.BP.toString()) {
         Object.keys(PREDEFINED_ATTRIBUTES).forEach(key => {
@@ -280,7 +281,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
       }
       const param = {
         ...node as Object,
-        parameterId: this.paramId,
+        parameterId: this.paramId(),
         attributes,
         name
       };
@@ -310,14 +311,19 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     if (this.props.source === 'criteria') {
       return currentCohortCriteriaStore.getValue()
         .some(crit =>
-              crit.parameterId === this.paramId ||
-              parentId.toString() === this.paramId
+              crit.parameterId === this.paramId() ||
+              parentId.toString() === this.paramId()
           );
     } else {
       return currentConceptStore.getValue()
-        .some(crit => 'param' + crit.id.toString() === this.paramId);
+        .some(crit => this.paramId(crit) === this.paramId());
     }
 
+  }
+
+  selectIconDisabled() {
+    const {selectedIds, source} = this.props;
+    return source !== 'criteria' && selectedIds && selectedIds.length >= 1000;
   }
 
   render() {
@@ -329,11 +335,13 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     const nodeChildren = domainId === Domain.PHYSICALMEASUREMENT.toString() ? node.children : children;
     const selected = serverConfigStore.getValue().enableCohortBuilderV2
       ? this.getSelectedValues()
-      : selectedIds.includes(this.paramId) ||
+      : selectedIds.includes(this.paramId()) ||
         groupSelections.includes(parentId);
     const displayName = domainId === Domain.PHYSICALMEASUREMENT.toString() && !!searchTerms
       ? highlightSearchTerm(searchTerms, name, colors.success)
       : name;
+    const selectIconStyle = this.selectIconDisabled() ? {...styles.selectIcon, ...styles.disableIcon} : styles.selectIcon;
+
     return <React.Fragment>
       <div style={{...styles.treeNode}} id={`node${id}`} onClick={() => this.toggleExpanded()}>
         {group && <button style={styles.iconButton}>
@@ -353,9 +361,9 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
                   shape='slider' dir='right' size='20'
                   onClick={(e) => this.setAttributes(e, node)}/>
               : selected
-                ? <ClrIcon style={{...styles.selectIcon, ...styles.selected}}
+                ? <ClrIcon style={{...styles.selectIcon, ...styles.disableIcon}}
                     shape='check-circle' size='20'/>
-                : <ClrIcon style={styles.selectIcon}
+                : <ClrIcon style={selectIconStyle}
                     shape='plus-circle' size='20'
                     onClick={(e) => this.select(e)}/>
             }

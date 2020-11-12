@@ -4,6 +4,7 @@ import Iframe from 'react-iframe';
 
 import {urlParamsStore} from 'app/utils/navigation';
 import {fetchAbortableRetry} from 'app/utils/retry';
+import {RuntimeStore} from 'app/utils/stores';
 
 import {Button} from 'app/components/buttons';
 import {FlexRow} from 'app/components/flex';
@@ -21,8 +22,8 @@ import {
   withQueryParams,
   withUserProfile
 } from 'app/utils';
-import {LeoRuntimeInitializer} from 'app/utils/leo-runtime-initializer';
 import {Kernels} from 'app/utils/notebook-kernels';
+import {maybeInitializeRuntime, withRuntimeStore} from 'app/utils/runtime-utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {environment} from 'environments/environment';
 import {Profile, Runtime, RuntimeStatus} from 'generated/fetch';
@@ -214,17 +215,22 @@ interface Props {
   workspace: WorkspaceData;
   queryParams: any;
   profileState: {profile: Profile, reload: Function, updateCache: Function};
+  runtimeStore: RuntimeStore;
 }
 
 const runtimeApiRetryTimeoutMillis = 10000;
 const runtimeApiRetryAttempts = 5;
 const redirectMillis = 1000;
 
-export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(),
-  withQueryParams())(class extends React.Component<Props, State> {
+export const NotebookRedirect = fp.flow(
+  withUserProfile(),
+  withCurrentWorkspace(),
+  withRuntimeStore(),
+  withQueryParams(),
+)(
+  class extends React.Component<Props, State> {
 
-    private pollTimer: NodeJS.Timer;
-    private redirectTimer: NodeJS.Timer;
+    private redirectTimer: NodeJS.Timeout;
     private pollAborter = new AbortController();
 
     constructor(props) {
@@ -239,8 +245,8 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
 
     private isRuntimeInProgress(status: RuntimeStatus): boolean {
       return status === RuntimeStatus.Starting ||
-        status === RuntimeStatus.Stopping ||
-        status === RuntimeStatus.Stopped;
+          status === RuntimeStatus.Stopping ||
+          status === RuntimeStatus.Stopped;
     }
 
     private isCreatingNewNotebook() {
@@ -258,8 +264,8 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
     private notebookUrl(runtime: Runtime, nbName: string): string {
       return encodeURI(
         environment.leoApiUrl + '/notebooks/'
-        + runtime.googleProject + '/'
-        + runtime.runtimeName + '/notebooks/' + nbName);
+          + runtime.googleProject + '/'
+          + runtime.runtimeName + '/notebooks/' + nbName);
     }
 
     // get notebook name without file suffix
@@ -290,22 +296,17 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       }));
     }
 
-    componentDidMount() {
-      this.initializeRuntimeStatusChecking(this.props.workspace.namespace);
+
+    componentDidUpdate() {
+      // Only kick off the initialization process once the runtime is loaded.
+      if (this.state.progress === Progress.Unknown &&
+            this.props.runtimeStore.runtime !== undefined) {
+        this.initializeRuntimeStatusChecking(this.props.workspace.namespace);
+      }
     }
 
     componentWillUnmount() {
-      clearTimeout(this.pollTimer);
       clearTimeout(this.redirectTimer);
-      this.pollAborter.abort();
-    }
-
-    onPoll(runtime: Runtime) {
-      if (this.isRuntimeInProgress(!!runtime ? runtime.status : null)) {
-        this.incrementProgress(Progress.Resuming);
-      } else {
-        this.incrementProgress(Progress.Initializing);
-      }
     }
 
     // check the runtime's status: if it's Running we can connect the notebook to it
@@ -313,25 +314,27 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
     private async initializeRuntimeStatusChecking(billingProjectId) {
       this.incrementProgress(Progress.Unknown);
 
-      const runtime = await LeoRuntimeInitializer.initialize({
-        workspaceNamespace: billingProjectId,
-        onPoll: (updatedRuntime) => this.onPoll(updatedRuntime),
-        pollAbortSignal: this.pollAborter.signal
-      });
+      let {runtime} = this.props.runtimeStore;
+      if (this.isRuntimeInProgress(runtime && runtime.status)) {
+        this.incrementProgress(Progress.Resuming);
+      } else {
+        this.incrementProgress(Progress.Initializing);
+      }
+
+      runtime = await maybeInitializeRuntime(billingProjectId, this.pollAborter.signal);
       await this.connectToRunningRuntime(runtime);
     }
 
-    private async connectToRunningRuntime(runtime) {
+    private async connectToRunningRuntime(runtime: Runtime) {
       const {namespace, id} = this.props.workspace;
-
       this.incrementProgress(Progress.Authenticating);
       await this.initializeNotebookCookies(runtime);
 
       const notebookLocation = await this.getNotebookPathAndLocalize(runtime);
       if (this.isCreatingNewNotebook()) {
         window.history.replaceState({}, 'Notebook', 'workspaces/' + namespace
-          + '/' + id + '/notebooks/' +
-          encodeURIComponent(this.getFullNotebookName()));
+            + '/' + id + '/notebooks/' +
+            encodeURIComponent(this.getFullNotebookName()));
       }
       this.setState({leoUrl: this.notebookUrl(runtime, notebookLocation)});
       this.incrementProgress(Progress.Redirecting);
@@ -348,7 +351,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
         this.incrementProgress(Progress.Copying);
         const fullNotebookName = this.getFullNotebookName();
         const localizedNotebookDir =
-          await this.localizeNotebooks(runtime, [fullNotebookName]);
+            await this.localizeNotebooks(runtime, [fullNotebookName]);
         return `${localizedNotebookDir}/${fullNotebookName}`;
       }
     }

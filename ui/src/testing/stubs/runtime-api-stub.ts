@@ -6,25 +6,28 @@ import {
   RuntimeLocalizeResponse,
   RuntimeStatus
 } from 'generated/fetch';
+import {stubNotImplementedError} from 'testing/stubs/stub-utils';
+
+export const defaultRuntime = () => ({
+  runtimeName: 'Runtime Name',
+  googleProject: 'Namespace',
+  status: RuntimeStatus.Running,
+  createdDate: '08/08/2018',
+  toolDockerImage: 'broadinstitute/terra-jupyter-aou:1.0.999',
+  configurationType: RuntimeConfigurationType.GeneralAnalysis,
+  dataprocConfig: {
+    masterMachineType: 'n1-standard-4',
+    masterDiskSize: 80,
+    numberOfWorkers: 0
+  }
+});
 
 export class RuntimeApiStub extends RuntimeApi {
   public runtime: Runtime;
 
   constructor() {
-    super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
-    this.runtime = {
-      runtimeName: 'Runtime Name',
-      googleProject: 'Namespace',
-      status: RuntimeStatus.Running,
-      createdDate: '08/08/2018',
-      toolDockerImage: 'broadinstitute/terra-jupyter-aou:1.0.999',
-      configurationType: RuntimeConfigurationType.GeneralAnalysis,
-      dataprocConfig: {
-        masterMachineType: 'n1-standard-4',
-        masterDiskSize: 80,
-        numberOfWorkers: 0
-      }
-    };
+    super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
+    this.runtime = defaultRuntime();
   }
 
   getRuntime(workspaceNamespace: string, options?: any): Promise<Runtime> {
@@ -33,8 +36,9 @@ export class RuntimeApiStub extends RuntimeApi {
     });
   }
 
-  createRuntime(workspaceNamespace: string, options?: any): Promise<{}> {
+  createRuntime(workspaceNamespace: string, runtime: Runtime): Promise<{}> {
     return new Promise<{}>(resolve => {
+      this.runtime = {...runtime, status: RuntimeStatus.Creating};
       resolve({});
     });
   }

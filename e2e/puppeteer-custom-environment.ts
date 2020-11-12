@@ -14,6 +14,18 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
     await super.teardown();
   }
 
+  // returns a string corresponding to the local browser's date and time in this format:
+  // 20201103_084435
+  localDateTimeString() {
+    const localTime = new Date();
+    const fakeUtcTime = new Date(localTime.getTime() - (localTime.getTimezoneOffset() * 60000));
+    return fakeUtcTime
+        .toISOString()
+        .replace(/[-:]/g,'')
+        .replace('T', '_')
+        .slice(0, 15);
+  }
+
   // Take a screenshot right after failure
   async handleTestEvent(event, state) {
     switch (event.name) {
@@ -28,7 +40,8 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
         await fs.ensureDir(screenshotDir);
         await fs.ensureDir(htmlDir);
 
-        const timestamp = new Date().getTime();
+        const timestamp = this.localDateTimeString();
+
         const screenshotFile = `${screenshotDir}/${testName}_${timestamp}.png`;
         await this.takeScreenshot(screenshotFile);
 

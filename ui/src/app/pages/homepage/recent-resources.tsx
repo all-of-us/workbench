@@ -1,118 +1,153 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {withContentRect} from 'react-measure';
 
-import {FlexRow} from 'app/components/flex';
+import {Column} from 'primereact/column';
+import {DataTable} from 'primereact/datatable';
+import {CSSProperties, useEffect, useState} from 'react';
+
+import {Clickable} from 'app/components/buttons';
 import {SmallHeader} from 'app/components/headers';
+import {renderResourceCard} from 'app/components/render-resource-card';
+import {ResourceNavigation, StyledResourceType} from 'app/components/resource-card';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {Scroll} from 'app/icons/scroll';
 import {userMetricsApi} from 'app/services/swagger-fetch-clients';
+import {formatWorkspaceResourceDisplayDate, getCdrVersion, reactStyles, withCdrVersions} from 'app/utils';
+import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
+import {getDisplayName, isNotebook} from 'app/utils/resources';
+import {
+  CdrVersionListResponse,
+  Workspace,
+  WorkspaceResource,
+  WorkspaceResourceResponse,
+  WorkspaceResponse
+} from 'generated/fetch';
 
-import {ResourceCard} from 'app/components/resource-card';
-import {NotebookResourceCard} from 'app/pages/analysis/notebook-resource-card';
-import {CohortResourceCard} from 'app/pages/data/cohort/cohort-resource-card';
-import {BillingStatus, WorkspaceResource} from 'generated/fetch';
-
-export const RecentResources = (fp.flow as any)(
-  withContentRect('client'),
-)(class extends React.Component<{
-  measureRef: React.Ref<any>,
-  contentRect: {client: {width: number}},
-  dark: boolean
-}, {
-  loading: boolean,
-  offset: number,
-  resources: WorkspaceResource[],
-  existingCohortName: string[],
-  existingConceptName: string[],
-  existingNotebookName: string[]
-}> {
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      loading: false,
-      resources: [],
-      offset: 0,
-      existingCohortName: [],
-      existingConceptName: [],
-      existingNotebookName: []};
-  }
-
-  componentDidMount() {
-    this.loadResources();
-  }
-
-  async loadResources() {
-    try {
-      this.setState({loading: true});
-      const resources = await userMetricsApi().getUserRecentResources();
-      this.setState({resources});
-    } catch (error) {
-      console.error(error);
-    } finally {
-      this.setState({loading: false});
-    }
-  }
-
-  getExistingNameList(resource) {
-    if (resource.notebook) {
-      return this.state.existingNotebookName;
-    } else if (resource.conceptSet) {
-      return this.state.existingConceptName;
-    } else if (resource.cohort) {
-      return this.state.existingCohortName;
-    }
-    return [];
-  }
-
-  createResourceCard(resource: WorkspaceResource) {
-    if (resource.notebook) {
-      return <NotebookResourceCard resource={resource}
-                                   existingNameList={this.getExistingNameList(resource)}
-                                   onUpdate={() => this.loadResources()}
-                                   disableDuplicate={resource.workspaceBillingStatus === BillingStatus.INACTIVE}
-      />;
-    } else if (resource.cohort) {
-      return <CohortResourceCard resource={resource}
-                                 existingNameList={this.getExistingNameList(resource)}
-                                 onUpdate={() => this.loadResources()}/>;
-    } else {
-      return <ResourceCard resourceCard={resource}
-                    onDuplicateResource={(duplicating) => this.setState({loading: duplicating})}
-                    onUpdate={() => this.loadResources()}
-                    existingNameList={this.getExistingNameList(resource)}
-      />;
-    }
-  }
-
-  render() {
-    const {contentRect, measureRef} = this.props;
-    const {offset, resources, loading} = this.state;
-    const limit = (contentRect.client.width - 24) / 224;
-    return (resources !== null && resources.length > 0) || loading ?
-      <React.Fragment>
-        <SmallHeader>Recently Accessed Items</SmallHeader>
-        <div ref={measureRef} style={{display: 'flex', position: 'relative', minHeight: 247}}>
-          <FlexRow style={{position: 'relative', alignItems: 'center', marginTop: '-1rem',
-            marginLeft: '-1rem', paddingLeft: '1rem', opacity: loading ? 0.5 : 1}}>
-            {resources.slice(offset, offset + limit).map((resource, i) => {
-              return <div key={i}> {this.createResourceCard(resource)} </div>;
-            })}
-            {offset > 0 && <Scroll
-              dir='left'
-              onClick={() => this.setState({offset: offset - 1})}
-              style={{position: 'absolute', left: 0, paddingBottom: '0.5rem'}}
-            />}
-            {offset + limit < resources.length && <Scroll
-              dir='right'
-              onClick={() => this.setState({offset: offset + 1})}
-              style={{position: 'absolute', right: 0, paddingBottom: '0.5rem'}}
-            />}
-          </FlexRow>
-          {loading && <SpinnerOverlay dark={this.props.dark} />}
-        </div>
-      </React.Fragment> :
-      null;
+const styles = reactStyles({
+  column: {
+    textAlign: 'left',
+  },
+  typeColumn: {
+    textAlign: 'left',
+    width: '130px',
+  },
+  menu: {
+    width: '30px',
+  },
+  navigation: {
+    fontFamily: 'Montserrat',
+    fontSize: '14px',
+    letterSpacing: 0,
+    lineHeight: '22px',
   }
 });
+
+interface NavProps {
+  workspace: Workspace;
+  resource: WorkspaceResource;
+  style?: CSSProperties;
+}
+
+const WorkspaceNavigation = (props: NavProps) => {
+  const {workspace: {name, namespace, id}, resource, style} = props;
+  const tab = isNotebook(resource) ? 'notebooks' : 'data';
+  const url = `/workspaces/${namespace}/${id}/${tab}`;
+
+  return <Clickable>
+    <a data-test-id='workspace-navigation'
+       style={style}
+       href={url}
+       onClick={e => navigateAndPreventDefaultIfNoKeysPressed(e, url)}>
+      {name}
+    </a>
+  </Clickable>;
+};
+
+interface TableData {
+  menu: JSX.Element;
+  resourceType: JSX.Element;
+  resourceName: JSX.Element;
+  workspaceName: JSX.Element;
+  formattedLastModified: string;
+  cdrVersionName: string;
+}
+
+interface Props {
+  cdrVersionListResponse: CdrVersionListResponse;
+  workspaces: WorkspaceResponse[];
+}
+
+const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
+  const [loading, setLoading] = useState(true);
+  const [resources, setResources] = useState<WorkspaceResourceResponse>();
+  const [wsMap, setWorkspaceMap] = useState<Map<string, Workspace>>();
+  const [tableData, setTableData] = useState<TableData[]>();
+
+  const loadResources = () => {
+    setLoading(true);
+    return userMetricsApi().getUserRecentResources()
+      .then(setResources)
+      .then(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    const {workspaces} = props;
+    if (workspaces) {
+      const workspaceTuples = workspaces.map(r => [r.workspace.id, r.workspace] as [string, Workspace]);
+      setWorkspaceMap(new Map(workspaceTuples));
+      loadResources();
+    }
+  }, [props.workspaces]);
+
+  const renderResourceMenu = (resource: WorkspaceResource) => {
+    return renderResourceCard({
+      resource,
+      menuOnly: true,
+      existingNameList: [],   // TODO existing bug RW-5847: does not populate names for rename modal
+      onUpdate: loadResources});
+  };
+
+  useEffect(() => {
+    const getWorkspace = (r: WorkspaceResource) => {
+      return wsMap.get(r.workspaceFirecloudName);
+    };
+
+    const getCdrVersionName = (r: WorkspaceResource) => {
+      const {cdrVersionListResponse} = props;
+      return getCdrVersion(getWorkspace(r), cdrVersionListResponse).name;
+    };
+
+    if (resources && wsMap) {
+      setTableData(resources.map(r => {
+        return {
+          menu: renderResourceMenu(r),
+          resourceType: <ResourceNavigation resource={r}><StyledResourceType resource={r}/></ResourceNavigation>,
+          resourceName: <ResourceNavigation resource={r} style={styles.navigation}>{getDisplayName(r)}</ResourceNavigation>,
+          workspaceName: <WorkspaceNavigation workspace={getWorkspace(r)} resource={r} style={styles.navigation}/>,
+          formattedLastModified: formatWorkspaceResourceDisplayDate(r.modifiedTime),
+          cdrVersionName: getCdrVersionName(r),
+        };
+      }));
+    }
+  }, [resources, wsMap]);
+
+  return (resources && wsMap && !loading) ? <React.Fragment>
+    <SmallHeader>Recently Accessed Items</SmallHeader>
+      <div data-test-id='recent-resources-table'><DataTable
+          value={tableData}
+          scrollable={true}
+          paginator={true}
+          paginatorTemplate='CurrentPageReport'
+          currentPageReportTemplate='Showing {totalRecords} most recent items'>
+        <Column field='menu' style={styles.menu}/>
+        <Column field='resourceType' header='Item type' style={styles.typeColumn}/>
+        <Column field='resourceName' header='Name' style={styles.column}/>
+        <Column field='workspaceName' header='Workspace name' style={styles.column}/>
+        <Column field='formattedLastModified' header='Last changed' style={styles.column}/>
+        <Column field='cdrVersionName' header='Dataset' style={styles.column}/>
+      </DataTable></div>
+  </React.Fragment> : <SpinnerOverlay/>;
+});
+
+export {
+  RecentResources
+};

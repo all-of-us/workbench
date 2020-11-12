@@ -206,9 +206,9 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
   }
 
   get showHeader() {
-    const {node: {domainId}} = this.props;
-    return domainId !== Domain.PHYSICALMEASUREMENT.toString()
-      && domainId !== Domain.SURVEY.toString()
+    const {node: {domainId}, source} = this.props;
+    return !(source === 'criteria' && domainId === Domain.SURVEY.toString())
+      && domainId !== Domain.PHYSICALMEASUREMENT.toString()
       && domainId !== Domain.VISIT.toString();
   }
 
@@ -219,11 +219,19 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
       : true;
   }
 
+  selectIconDisabled() {
+    const {selectedIds, source} = this.props;
+    return source !== 'criteria' && selectedIds && selectedIds.length >= 1000;
+  }
+
   render() {
     const {autocompleteSelection, back, groupSelections, node, scrollToMatch, searchTerms, select, selectedIds, selectOption, setAttributes,
       setSearchTerms} = this.props;
     const {children, error, ingredients, loading} = this.state;
     return <React.Fragment>
+      {this.selectIconDisabled() && <div style={{color: colors.warning, fontWeight: 'bold', maxWidth: '1000px'}}>
+        NOTE: Concept Set can have only 1000 concepts. Please delete some concepts before adding more.
+      </div>}
       {node.domainId !== Domain.VISIT.toString() &&
         <div style={serverConfigStore.getValue().enableCohortBuilderV2
           ? {...styles.searchBarContainer, backgroundColor: 'transparent', width: '65%'}
