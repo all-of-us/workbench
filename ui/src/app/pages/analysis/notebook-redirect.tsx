@@ -314,20 +314,19 @@ export const NotebookRedirect = fp.flow(
     private async initializeRuntimeStatusChecking(billingProjectId) {
       this.incrementProgress(Progress.Unknown);
 
-      const {runtime} = this.props.runtimeStore;
+      let {runtime} = this.props.runtimeStore;
       if (this.isRuntimeInProgress(runtime && runtime.status)) {
         this.incrementProgress(Progress.Resuming);
       } else {
         this.incrementProgress(Progress.Initializing);
       }
 
-      await maybeInitializeRuntime(billingProjectId, this.pollAborter.signal);
-      await this.connectToRunningRuntime();
+      runtime = await maybeInitializeRuntime(billingProjectId, this.pollAborter.signal);
+      await this.connectToRunningRuntime(runtime);
     }
 
-    private async connectToRunningRuntime() {
+    private async connectToRunningRuntime(runtime: Runtime) {
       const {namespace, id} = this.props.workspace;
-      const {runtime} = this.props.runtimeStore;
       this.incrementProgress(Progress.Authenticating);
       await this.initializeNotebookCookies(runtime);
 
@@ -394,51 +393,51 @@ export const NotebookRedirect = fp.flow(
       const {showErrorModal, progress, progressComplete, leoUrl} = this.state;
       const creatingNewNotebook = this.isCreatingNewNotebook();
       return <React.Fragment>
-          {progress !== Progress.Loaded ? <div style={styles.main}>
-            <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}
-                 data-test-id='notebook-redirect'>
-              <h2 style={{lineHeight: 0}}>
-                {creatingNewNotebook ? 'Creating New Notebook: ' : 'Loading Notebook: '}
-                {this.getNotebookName()}
-              </h2>
-              <Button type='secondary' onClick={() => window.history.back()}>Cancel</Button>
+        {progress !== Progress.Loaded ? <div style={styles.main}>
+          <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}
+               data-test-id='notebook-redirect'>
+            <h2 style={{lineHeight: 0}}>
+              {creatingNewNotebook ? 'Creating New Notebook: ' : 'Loading Notebook: '}
+              {this.getNotebookName()}
+            </h2>
+            <Button type='secondary' onClick={() => window.history.back()}>Cancel</Button>
+          </div>
+          <div style={{display: 'flex', flexDirection: 'row', marginTop: '1rem'}}>
+            {Array.from(progressCardStates, ([key, _], index) => {
+              return <ProgressCard key={index} progressState={progress} cardState={key}
+                                   creatingNewNotebook={creatingNewNotebook} progressComplete={progressComplete}/>;
+            })}
+          </div>
+          <FlexRow style={styles.reminderText}>
+            <ReminderIcon
+              style={{width: '1.75rem', height: '1.75rem', marginRight: '0.5rem'}}/>
+            <div>
+              You are prohibited from taking screenshots or attempting in any way to remove participant-level data from the workbench.
             </div>
-            <div style={{display: 'flex', flexDirection: 'row', marginTop: '1rem'}}>
-              {Array.from(progressCardStates, ([key, _], index) => {
-                return <ProgressCard key={index} progressState={progress} cardState={key}
-                                     creatingNewNotebook={creatingNewNotebook} progressComplete={progressComplete}/>;
-              })}
-            </div>
-            <FlexRow style={styles.reminderText}>
-              <ReminderIcon
-                style={{width: '1.75rem', height: '1.75rem', marginRight: '0.5rem'}}/>
-              <div>
-                You are prohibited from taking screenshots or attempting in any way to remove participant-level data from the workbench.
-              </div>
-            </FlexRow>
-            <div style={{marginLeft: '2rem', ...styles.reminderText}}>
-              You are also prohibited from publishing or otherwise distributing any data or aggregate statistics corresponding to fewer than
-              20 participants unless expressly permitted by our data use policies.
-            </div>
-            <div style={{marginLeft: '2rem', ...styles.reminderText}}>
-              For more information, please see our  <a href={'/data-code-of-conduct'}>Data Use Policies.</a>
-            </div>
-          </div> : <div style={{height: '100%'}}>
-            <div style={{borderBottom: '5px solid #2691D0', width: '100%'}}/>
-            <Iframe frameBorder={0} url={leoUrl} width='100%' height='100%'/>
-          </div>}
-          {showErrorModal && <Modal>
-            <ModalTitle>
-              {creatingNewNotebook ? 'Error creating notebook.' : 'Error fetching notebook'}
-            </ModalTitle>
-            <ModalBody>
-              Please refresh and try again.
-            </ModalBody>
-            <ModalFooter>
-              <Button type='secondary' onClick={() => window.history.back()}>Go Back</Button>
-            </ModalFooter>
-          </Modal>}
-        </React.Fragment>;
+          </FlexRow>
+          <div style={{marginLeft: '2rem', ...styles.reminderText}}>
+            You are also prohibited from publishing or otherwise distributing any data or aggregate statistics corresponding to fewer than
+            20 participants unless expressly permitted by our data use policies.
+          </div>
+          <div style={{marginLeft: '2rem', ...styles.reminderText}}>
+            For more information, please see our  <a href={'/data-code-of-conduct'}>Data Use Policies.</a>
+          </div>
+        </div> : <div style={{height: '100%'}}>
+          <div style={{borderBottom: '5px solid #2691D0', width: '100%'}}/>
+          <Iframe frameBorder={0} url={leoUrl} width='100%' height='100%'/>
+        </div>}
+        {showErrorModal && <Modal>
+          <ModalTitle>
+            {creatingNewNotebook ? 'Error creating notebook.' : 'Error fetching notebook'}
+          </ModalTitle>
+          <ModalBody>
+            Please refresh and try again.
+          </ModalBody>
+          <ModalFooter>
+            <Button type='secondary' onClick={() => window.history.back()}>Go Back</Button>
+          </ModalFooter>
+        </Modal>}
+      </React.Fragment>;
     }
   });
 
