@@ -8,24 +8,26 @@ import {
 } from 'generated/fetch';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
+export const defaultRuntime = () => ({
+  runtimeName: 'Runtime Name',
+  googleProject: 'Namespace',
+  status: RuntimeStatus.Running,
+  createdDate: '08/08/2018',
+  toolDockerImage: 'broadinstitute/terra-jupyter-aou:1.0.999',
+  configurationType: RuntimeConfigurationType.GeneralAnalysis,
+  dataprocConfig: {
+    masterMachineType: 'n1-standard-4',
+    masterDiskSize: 80,
+    numberOfWorkers: 0
+  }
+});
+
 export class RuntimeApiStub extends RuntimeApi {
   public runtime: Runtime;
 
   constructor() {
     super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
-    this.runtime = {
-      runtimeName: 'Runtime Name',
-      googleProject: 'Namespace',
-      status: RuntimeStatus.Running,
-      createdDate: '08/08/2018',
-      toolDockerImage: 'broadinstitute/terra-jupyter-aou:1.0.999',
-      configurationType: RuntimeConfigurationType.GeneralAnalysis,
-      dataprocConfig: {
-        masterMachineType: 'n1-standard-4',
-        masterDiskSize: 80,
-        numberOfWorkers: 0
-      }
-    };
+    this.runtime = defaultRuntime();
   }
 
   getRuntime(workspaceNamespace: string, options?: any): Promise<Runtime> {

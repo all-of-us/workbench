@@ -7,13 +7,14 @@ import {Spinner} from 'app/components/spinners';
 import {ConfirmDelete, RuntimePanel, Props} from 'app/pages/analysis/runtime-panel';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {ComputeType} from 'app/utils/machines';
+import {clearCompoundRuntimeOperations} from 'app/utils/stores';
 import {cdrVersionStore, serverConfigStore} from 'app/utils/navigation';
 import {runtimePresets} from 'app/utils/runtime-presets';
 import {runtimeStore} from 'app/utils/stores';
 import {RuntimeConfigurationType, RuntimeStatus, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
 import {RuntimeApi} from 'generated/fetch/api';
 import defaultServerConfig from 'testing/default-server-config';
-import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {handleUseEffect, waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {cdrVersionListResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {WorkspacesApiStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
@@ -26,16 +27,6 @@ describe('RuntimePanel', () => {
   const component = () => {
     return mount(<RuntimePanel {...props}/>);
   };
-
-  // Invokes react "act" in order to handle async component updates: https://reactjs.org/docs/testing-recipes.html#act
-  // This code waits for all updates to complete.
-  // There is probably a better way to handle this - but it may mean not using enzyme
-  const handleUseEffect = async (component) => {
-    await act(async () => {
-      await Promise.resolve(component); // Wait for the component to finish rendering (mount returns a promise)
-      await new Promise(resolve => setImmediate(resolve)); // Wait for all outstanding requests to complete
-    });
-  }
 
   beforeEach(() => {
     cdrVersionStore.next(cdrVersionListResponse);
@@ -57,6 +48,10 @@ describe('RuntimePanel', () => {
       },
       cdrVersionListResponse
     };
+  });
+
+  afterEach(() => {
+    act(() => clearCompoundRuntimeOperations());
   });
 
   const pickDropdownOption = async(wrapper, id, label) => {

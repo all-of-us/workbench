@@ -3,9 +3,13 @@ import {switchCase} from 'app/utils';
 import { withAsyncErrorHandling } from 'app/utils';
 import {
   ExceededActionCountError,
+  LeoRuntimeInitializationAbortedError,
   LeoRuntimeInitializer,
 } from 'app/utils/leo-runtime-initializer';
 import {
+  compoundRuntimeOpStore,
+  markCompoundRuntimeOperationCompleted,
+  registerCompoundRuntimeOperation,
   runtimeStore,
   useStore
 } from 'app/utils/stores';
@@ -29,7 +33,16 @@ const useRuntime = (currentWorkspaceNamespace) => {
     const getRuntime = withAsyncErrorHandling(
       () => runtimeStore.set({workspaceNamespace: null, runtime: null}),
       async() => {
-        const leoRuntime = await runtimeApi().getRuntime(currentWorkspaceNamespace);
+        let leoRuntime;
+        try {
+          leoRuntime = await runtimeApi().getRuntime(currentWorkspaceNamespace);
+        } catch (e) {
+          if (!(e instanceof Response && e.status === 404)) {
+            throw e;
+          }
+          // null on the runtime store indicates no existing runtime
+          leoRuntime = null;
+        }
         if (currentWorkspaceNamespace === runtimeStore.get().workspaceNamespace) {
           runtimeStore.set({
             workspaceNamespace: currentWorkspaceNamespace,
@@ -37,12 +50,25 @@ const useRuntime = (currentWorkspaceNamespace) => {
           });
         }
       });
-
-    if (currentWorkspaceNamespace !== runtimeStore.get().workspaceNamespace) {
-      runtimeStore.set({workspaceNamespace: currentWorkspaceNamespace, runtime: undefined});
-      getRuntime();
-    }
+    getRuntime();
   }, []);
+};
+
+export const maybeInitializeRuntime = async(workspaceNamespace: string, signal: AbortSignal): Promise<Runtime> => {
+  if (workspaceNamespace in compoundRuntimeOpStore.get()) {
+    await new Promise((resolve, reject) => {
+      signal.addEventListener('abort', reject);
+      const {unsubscribe} = compoundRuntimeOpStore.subscribe((v => {
+        if (!(workspaceNamespace in v)) {
+          unsubscribe();
+          signal.removeEventListener('abort', reject);
+          resolve();
+        }
+      }));
+    });
+  }
+
+  return await LeoRuntimeInitializer.initialize({workspaceNamespace, pollAbortSignal: signal});
 };
 
 // useRuntimeStatus hook can be used to change the status of the runtime
@@ -53,6 +79,8 @@ export const useRuntimeStatus = (currentWorkspaceNamespace): [
   RuntimeStatus | undefined, (statusRequest: RuntimeStatusRequest) => Promise<void>]  => {
   const [runtimeStatus, setRuntimeStatus] = useState<RuntimeStatusRequest>();
   const {runtime} = useStore(runtimeStore);
+
+  // Ensure that a runtime gets initialized, if it hasn't already been.
   useRuntime(currentWorkspaceNamespace);
 
   useEffect(() => {
@@ -64,7 +92,8 @@ export const useRuntimeStatus = (currentWorkspaceNamespace): [
             await LeoRuntimeInitializer.initialize({workspaceNamespace: currentWorkspaceNamespace, maxCreateCount: 0});
           } catch (e) {
             // ExceededActionCountError is expected, as we exceed our create limit of 0.
-            if (!(e instanceof ExceededActionCountError)) {
+            if (!(e instanceof ExceededActionCountError ||
+                  e instanceof LeoRuntimeInitializationAbortedError)) {
               throw e;
             }
           }
@@ -75,7 +104,9 @@ export const useRuntimeStatus = (currentWorkspaceNamespace): [
 
   const setStatusRequest = async(req) => {
     await switchCase(req, [
-      RuntimeStatusRequest.Delete, () => runtimeApi().deleteRuntime(currentWorkspaceNamespace)
+      RuntimeStatusRequest.Delete, () => {
+        return runtimeApi().deleteRuntime(currentWorkspaceNamespace);
+      }
     ]);
     setRuntimeStatus(req);
   };
@@ -85,29 +116,63 @@ export const useRuntimeStatus = (currentWorkspaceNamespace): [
 // useCustomRuntime Hook can request a new runtime config
 // The LeoRuntimeInitializer could potentially be rolled into this code to completely manage
 // all runtime state.
-export const useCustomRuntime = (currentWorkspaceNamespace): [Runtime, (runtime: Runtime) => void] => {
+export const useCustomRuntime = (currentWorkspaceNamespace):
+    [{currentRuntime: Runtime, pendingRuntime: Runtime}, (runtime: Runtime) => void] => {
   const {runtime, workspaceNamespace} = useStore(runtimeStore);
+  const runtimeOps = useStore(compoundRuntimeOpStore);
+  const {pendingRuntime = null} = runtimeOps[currentWorkspaceNamespace] || {};
   const [requestedRuntime, setRequestedRuntime] = useState<Runtime>();
+
+  // Ensure that a runtime gets initialized, if it hasn't already been.
   useRuntime(currentWorkspaceNamespace);
 
   useEffect(() => {
+    const aborter = new AbortController();
     const runAction = async() => {
       // Only delete if the runtime already exists.
       // TODO: It is likely more correct here to use the LeoRuntimeInitializer wait for the runtime
       // to reach a terminal status before attempting deletion.
-      if (runtime && runtime.status !== RuntimeStatus.Deleted) {
-        await runtimeApi().deleteRuntime(currentWorkspaceNamespace);
+      try {
+        if (runtime && runtime.status !== RuntimeStatus.Deleted) {
+          await runtimeApi().deleteRuntime(currentWorkspaceNamespace, {
+            signal: aborter.signal
+          });
+        }
+        await LeoRuntimeInitializer.initialize({
+          workspaceNamespace,
+          targetRuntime: requestedRuntime,
+          pollAbortSignal: aborter.signal
+        });
+      } catch (e) {
+        if (!(e instanceof LeoRuntimeInitializationAbortedError)) {
+          throw e;
+        }
+      } finally {
+        markCompoundRuntimeOperationCompleted(currentWorkspaceNamespace);
+        setRequestedRuntime(undefined);
       }
-      await LeoRuntimeInitializer.initialize({
-        workspaceNamespace,
-        targetRuntime: requestedRuntime
-      });
     };
 
     if (requestedRuntime !== undefined && !fp.equals(requestedRuntime, runtime)) {
+      registerCompoundRuntimeOperation(currentWorkspaceNamespace, {
+        pendingRuntime: requestedRuntime,
+        aborter
+      });
       runAction();
     }
   }, [requestedRuntime]);
 
-  return [runtime, setRequestedRuntime];
+  return [{currentRuntime: runtime, pendingRuntime}, setRequestedRuntime];
+};
+
+
+export const withRuntimeStore = () => WrappedComponent => {
+  return (props) => {
+    const value = useStore(runtimeStore);
+
+    // Ensure that a runtime gets initialized, if it hasn't already been.
+    useRuntime(value.workspaceNamespace);
+
+    return <WrappedComponent {...props} runtimeStore={value} />;
+  };
 };
