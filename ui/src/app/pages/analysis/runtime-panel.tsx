@@ -436,6 +436,29 @@ const CostEstimatorWrapper = ({
   </FlexRow>;
 };
 
+const WarningMessage = ({children}) => {
+  return <FlexRow
+    style={{
+      backgroundColor: colorWithWhiteness(colors.warning, .9),
+      border: `1px solid ${colors.warning}`,
+      borderRadius: '5px',
+      color: colors.dark,
+      marginTop: '.5rem',
+      padding: '.5rem 0px'
+    }}
+  >
+    <ClrIcon
+      style={{color: colors.warning, marginLeft: '.5rem'}}
+      shape={'warning-standard'}
+      size={30}
+      class={'is-solid'}
+    />
+    <div style={{paddingLeft: '0.5rem', paddingRight: '0.5rem'}}>
+      {children}
+    </div>
+  </FlexRow>;
+};
+
 const CostEstimator = ({
   runtimeParameters,
   costTextColor = colors.accent
@@ -691,34 +714,17 @@ export const RuntimePanel = fp.flow(
         </FlexRow>
       </div>
 
-      <FlexRow
-        style={{
-          backgroundColor: colorWithWhiteness(colors.warning, .9),
-          border: `1px solid ${colors.warning}`,
-          borderRadius: '5px',
-          color: colors.dark,
-          marginTop: '.5rem',
-          padding: '.5rem 0px'
-        }}
-      >
-        <ClrIcon
-          style={{color: colors.warning, marginLeft: '.5rem'}}
-          shape={'warning-standard'}
-          size={30}
-          class={'is-solid'}
-        />
-        <div style={{paddingLeft: '0.5rem', paddingRight: '0.5rem'}}>
-          <TextColumn>
-            <div>
-              You've made changes that can only take effect upon deletion and re-creation of your cloud environment.
-            </div>
-            <div style={{marginTop: '0.5rem'}}>
-              Any in-memory state and local file modifications will be erased. Data stored in workspace buckets
-              is never affected by changes to your cloud environment.
-            </div>
-          </TextColumn>
-        </div>
-      </FlexRow>
+      <WarningMessage>
+        <TextColumn>
+          <div>
+            You've made changes that can only take effect upon deletion and re-creation of your cloud environment.
+          </div>
+          <div style={{marginTop: '0.5rem'}}>
+            Any in-memory state and local file modifications will be erased. Data stored in workspace buckets
+            is never affected by changes to your cloud environment.
+          </div>
+        </TextColumn>
+      </WarningMessage>
 
       <FlexRow style={{justifyContent: 'flex-end', marginTop: '.75rem'}}>
         <Button
@@ -797,26 +803,12 @@ export const RuntimePanel = fp.flow(
            }
          </FlexColumn>
        </div>
-       {runtimeExists && runtimeChanged && <FlexRow
-           style={{
-             alignItems: 'center',
-             backgroundColor: colorWithWhiteness(colors.warning, .9),
-             border: `1px solid ${colors.warning}`,
-             borderRadius: '5px',
-             color: colors.dark,
-             marginTop: '.5rem',
-             padding: '.5rem 0px'
-           }}
-       >
-         // TODO eric: refactor warning signs
-         <ClrIcon
-             style={{color: colors.warning, marginLeft: '.5rem'}}
-             shape={'warning-standard'}
-             size={16}
-             class={'is-solid'}
-         />
-         <div style={{marginLeft: '.5rem'}}>You've made changes that require recreating your environment to take effect.....</div>
-       </FlexRow>}
+       {runtimeExists && runtimeChanged &&
+
+         <WarningMessage>
+            <div>You've made changes that require recreating your environment to take effect.....</div>
+         </WarningMessage>
+       }
        <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
          <Link
            style={{...styles.deleteLink, ...(
