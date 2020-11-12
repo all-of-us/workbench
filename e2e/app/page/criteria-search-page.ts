@@ -7,7 +7,7 @@ import ClrIconLink from 'app/element/clr-icon-link';
 import Textbox from 'app/element/textbox';
 import {waitForNumericalString, waitWhileLoading} from 'utils/waits-utils';
 import {LinkText} from 'app/text-labels';
-import {getPropValue, waitUntilChanged} from 'utils/element-utils';
+import {getPropValue} from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
 
 
@@ -118,17 +118,11 @@ export default class CriteriaSearchPage extends AuthenticatedPage {
     return new Table(this.page, '//table[@class="p-datatable"]');
   }
 
-  // DO NOT USE. This function fails in CI.
   async searchCriteria(searchWord: string): Promise<Table> {
     const resultsTable = this.getConditionSearchResultsTable();
-    const exists = await resultsTable.exists();
     const searchFilterTextbox = await Textbox.findByName(this.page, {containsText: 'by code or description'});
     await searchFilterTextbox.type(searchWord);
     await searchFilterTextbox.pressReturn();
-    if (exists) {
-      // New search triggers new request to fetch new results. Need to wait for the old table detached from DOM.
-      await waitUntilChanged(this.page, await resultsTable.asElement());
-    }
     await waitWhileLoading(this.page);
     return resultsTable;
   }
