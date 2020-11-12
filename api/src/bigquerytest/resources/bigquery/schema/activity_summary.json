@@ -1,0 +1,67 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "date",
+    "type": "DATE"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "activity_calories",
+    "type": "FLOAT"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "calories_bmr",
+    "type": "FLOAT"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "calories_out",
+    "type": "FLOAT"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "elevation",
+    "type": "FLOAT"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "fairly_active_minutes",
+    "type": "FLOAT"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "floors",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "lightly_active_minutes",
+    "type": "FLOAT"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "marginal_calories",
+    "type": "FLOAT"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "sedentary_minutes",
+    "type": "FLOAT"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "steps",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "very_active_minutes",
+    "type": "FLOAT"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "person_id",
+    "type": "INTEGER"
+  }
+]

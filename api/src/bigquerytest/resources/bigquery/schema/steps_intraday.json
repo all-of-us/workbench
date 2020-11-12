@@ -1,0 +1,17 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "datetime",
+    "type": "timestamp"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "steps",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "person_id",
+    "type": "INTEGER"
+  }
+]

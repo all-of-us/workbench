@@ -275,6 +275,10 @@ public final class DbStorageEnums {
           .put(Domain.LAB, (short) 12)
           .put(Domain.VITAL, (short) 13)
           .put(Domain.FITBIT, (short) 14)
+          .put(Domain.FITBIT_HEART_RATE_SUMMARY, (short) 15)
+          .put(Domain.FITBIT_HEART_RATE_LEVEL, (short) 16)
+          .put(Domain.FITBIT_ACTIVITY, (short) 17)
+          .put(Domain.FITBIT_INTRADAY_STEPS, (short) 18)
           .build();
 
   // A mapping from our Domain enum to OMOP domain ID values.
@@ -294,7 +298,11 @@ public final class DbStorageEnums {
           .put(Domain.ALL_EVENTS, "All Events")
           .put(Domain.LAB, "Labs")
           .put(Domain.VITAL, "Vitals")
-          .put(Domain.FITBIT, "FitBit")
+          .put(Domain.FITBIT, "Fitbit")
+          .put(Domain.FITBIT_HEART_RATE_SUMMARY, "Fitbit: Heart Rate - Zone Summary")
+          .put(Domain.FITBIT_HEART_RATE_LEVEL, "Fitbit: Heart Rate - Minute-Level")
+          .put(Domain.FITBIT_ACTIVITY, "Fitbit: Activity - Daily Summary")
+          .put(Domain.FITBIT_INTRADAY_STEPS, "Fitbit: Intraday Steps - Minute-Level")
           .build();
 
   public static Domain domainFromStorage(Short domain) {
@@ -453,6 +461,11 @@ public final class DbStorageEnums {
               .put(PrePackagedConceptSetEnum.PERSON, (short) 1)
               .put(PrePackagedConceptSetEnum.SURVEY, (short) 2)
               .put(PrePackagedConceptSetEnum.BOTH, (short) 3)
+              .put(PrePackagedConceptSetEnum.FITBIT_ACTIVITY, (short) 4)
+              .put(PrePackagedConceptSetEnum.FITBIT_HEART_RATE_LEVEL, (short) 5)
+              .put(PrePackagedConceptSetEnum.FITBIT_HEART_RATE_SUMMARY, (short) 6)
+              .put(PrePackagedConceptSetEnum.FITBIT_INTRADAY_STEPS, (short) 7)
+              .put(PrePackagedConceptSetEnum.FITBIT, (short) 8)
               .build();
 
   public static PrePackagedConceptSetEnum prePackagedConceptSetsFromStorage(Short conceptSet) {
