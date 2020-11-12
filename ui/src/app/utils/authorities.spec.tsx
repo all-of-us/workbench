@@ -10,7 +10,7 @@ const accessAuth = {...ProfileStubVariables.PROFILE_STUB, authorities: [Authorit
 const devAuth = {...ProfileStubVariables.PROFILE_STUB, authorities: [Authority.DEVELOPER]}
 const featuredWsAuth = {...ProfileStubVariables.PROFILE_STUB, authorities: [Authority.FEATUREDWORKSPACEADMIN]}
 
-describe('auth', () => {
+describe('authorities', () => {
     it('should correctly authorize INSTITUTION_ADMIN', async () => {
         expect(hasAuthorityForAction(noAuth, AuthorityGuardedAction.INSTITUTION_ADMIN)).toBeFalsy();
         expect(hasAuthorityForAction(accessAuth, AuthorityGuardedAction.INSTITUTION_ADMIN)).toBeFalsy();

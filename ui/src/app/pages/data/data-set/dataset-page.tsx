@@ -1,5 +1,7 @@
 import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
+import {Column} from 'primereact/column';
+import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
 
 import {Button, Clickable, Link, StyledAnchorTag} from 'app/components/buttons';
@@ -16,7 +18,6 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   formatDomain,
   formatDomainString,
-  getCdrVersion,
   reactStyles,
   ReactWrapperBase,
   toggleIncludes,
@@ -26,6 +27,7 @@ import {
   withUserProfile
 } from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
+import {getCdrVersion} from 'app/utils/cdr-versions';
 import {currentWorkspaceStore, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import {apiCallWithGatewayTimeoutRetries} from 'app/utils/retry';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -48,8 +50,6 @@ import {
   Profile,
   ValueSet,
 } from 'generated/fetch';
-import {Column} from 'primereact/column';
-import {DataTable} from 'primereact/datatable';
 
 export const styles = reactStyles({
   dataDictionaryHeader: {
