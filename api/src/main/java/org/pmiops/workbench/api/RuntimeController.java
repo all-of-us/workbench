@@ -300,7 +300,6 @@ public class RuntimeController implements RuntimeApiDelegate {
 
     leonardoNotebooksClient.updateRuntime(runtimeRequest.getRuntime());
 
-    // TODO eric: why does accepted throw an error?
     return ResponseEntity.ok(new EmptyResponse());
   }
 
