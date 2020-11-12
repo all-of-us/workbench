@@ -501,10 +501,10 @@ const CreatePanel = ({creatorFreeCreditsRemaining, preset, profile, setPanelCont
         freeCreditsRemaining={creatorFreeCreditsRemaining}
         profile={profile}
         runtimeParameters={{
-          computeType: computeType,
-          diskSize: gceConfig ? gceConfig.diskSize : null,
-          machineType: gceConfig ? gceConfig.machineType : null,
-          dataprocConfig: dataprocConfig ? dataprocConfig : null
+          computeType,
+          diskSize: gceConfig && gceConfig.diskSize,
+          machineType: gceConfig && gceConfig.machineType,
+          dataprocConfig: dataprocConfig
         }}
         runtimeChanged={false}
         workspace={workspace}
@@ -527,15 +527,12 @@ const CreatePanel = ({creatorFreeCreditsRemaining, preset, profile, setPanelCont
     {computeType === ComputeType.Dataproc && <Fragment>
       <label htmlFor='worker-configuration' style={{...styles.bold, marginTop: '1rem'}}>Worker Configuration</label>
       <div id='worker-configuration'>- Default:
-        <b> {dataprocConfig.numberOfWorkers} worker(s)</b>
-        {!dataprocConfig.numberOfPreemptibleWorkers && <Fragment>, </Fragment>}
-        <b>
-          {
-            dataprocConfig.numberOfPreemptibleWorkers > 0 &&
-            <Fragment> and {dataprocConfig.numberOfPreemptibleWorkers}  preemptible worker(s), </Fragment>
-          }
-          each with compute size of {workerMachine.cpu} CPUs
-        </b>,
+        <b> {dataprocConfig.numberOfWorkers} worker(s) </b>
+        {
+          dataprocConfig.numberOfPreemptibleWorkers > 0 &&
+          <b>and {dataprocConfig.numberOfPreemptibleWorkers}  preemptible worker(s) </b>
+        }
+        each with compute size of <b>{workerMachine.cpu} CPUs</b>,
         <b> {workerMachine.memory} GB memory</b>, and a
         <b> {workerDiskSize} GB disk</b>
       </div>
@@ -608,11 +605,10 @@ export const RuntimePanel = fp.flow(
   const machineName = dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
   const initialMasterMachine = findMachineByName(machineName) || defaultMachineType;
   const initialCompute = dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard;
-  // TODO(RW-5591): Initialize PanelContent according to the runtime status.
+
   const initialPanelContent = fp.cond([
-    [(s) => s === RuntimeStatus.Running || s === RuntimeStatus.Stopped, () => PanelContent.Customize],
     [(s) => s === null || s === RuntimeStatus.Unknown, () => PanelContent.Create],
-    [() => true, () => PanelContent.Delete]
+    [() => true, () => PanelContent.Customize]
   ])(status);
   const [panelContent, setPanelContent] = useState<PanelContent>(initialPanelContent);
 
@@ -659,7 +655,7 @@ export const RuntimePanel = fp.flow(
         <Fragment>
           <CreatePanel
               creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
-              preset={runtimePresets.generalAnalysis}
+              preset={runtimePresets.hailAnalysis}
               profile={profile}
               setPanelContent={(value) => setPanelContent(value)}
               workspace={workspace}
