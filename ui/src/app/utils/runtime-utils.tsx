@@ -33,7 +33,16 @@ const useRuntime = (currentWorkspaceNamespace) => {
     const getRuntime = withAsyncErrorHandling(
       () => runtimeStore.set({workspaceNamespace: null, runtime: null}),
       async() => {
-        const leoRuntime = await runtimeApi().getRuntime(currentWorkspaceNamespace);
+        let leoRuntime;
+        try {
+          leoRuntime = await runtimeApi().getRuntime(currentWorkspaceNamespace);
+        } catch (e) {
+          if (!(e instanceof Response && e.status === 404)) {
+            throw e;
+          }
+          // null on the runtime store indicates no existing runtime
+          leoRuntime = null;
+        }
         if (currentWorkspaceNamespace === runtimeStore.get().workspaceNamespace) {
           runtimeStore.set({
             workspaceNamespace: currentWorkspaceNamespace,
