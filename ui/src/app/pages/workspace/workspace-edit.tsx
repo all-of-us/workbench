@@ -7,7 +7,7 @@ import {Component} from '@angular/core';
 import {Button, Clickable, Link, StyledAnchorTag} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {ClrIcon, InfoIcon} from 'app/components/icons';
+import {InfoIcon} from 'app/components/icons';
 import {CheckBox, RadioButton, TextArea, TextInput} from 'app/components/inputs';
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
