@@ -220,7 +220,7 @@ const CdrVersionUpgrade = (props: UpgradeProps) => {
   const toCdrVersion = <span style={{fontWeight: 'bold'}}>{getCdrVersion(destWorkspace, cdrVersionListResponse).name}</span>;
 
   return <div data-test-id='cdr-version-upgrade' style={styles.cdrVersionUpgrade}>
-    <div>{`You're duplicating the workspace "${srcWorkspace.name}" to upgrade from `} {fromCdrVersion} to {toCdrVersion}.</div>
+    <div>{`You're duplicating the workspace "${srcWorkspace.name}" to upgrade from`} {fromCdrVersion} to {toCdrVersion}.</div>
     <div>Your original workspace will be unaffected. To work with the new data, simply use the new workspace.</div>
   </div>;
 };
