@@ -432,7 +432,7 @@ public class DataSetServiceTest {
         .when(dsLinkingDao)
         .findByDomainAndDenormalizedNameIn(
             StringUtils.capitalize(Domain.FITBIT_HEART_RATE_LEVEL.name().toLowerCase()),
-            ImmutableList.of("CORE_TABLE_FOR_DOMAIN", "PERSON_ID"));
+            ImmutableList.of("CORE_TABLE_FOR_DOMAIN", "PERSON_ID", "DATETIME"));
   }
 
   private void mockLinkingTableQuery(Collection<String> domainBaseTables) {
