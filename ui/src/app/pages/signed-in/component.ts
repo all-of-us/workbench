@@ -10,7 +10,7 @@ import {cdrVersionsApi} from 'app/services/swagger-fetch-clients';
 import {FooterTypeEnum} from 'app/components/footer';
 import {debouncer, hasRegisteredAccessFetch} from 'app/utils';
 import {cdrVersionStore, navigateSignOut, routeConfigDataStore} from 'app/utils/navigation';
-import {routeDataStore} from 'app/utils/stores';
+import {compoundRuntimeOpStore, routeDataStore} from 'app/utils/stores';
 import {initializeZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
 import {Profile as FetchProfile} from 'generated/fetch';
@@ -32,6 +32,14 @@ export const INACTIVITY_CONFIG = {
   LOCAL_STORAGE_KEY_LAST_ACTIVE: 'LAST_ACTIVE_TIMESTAMP_EPOCH_MS',
   MESSAGE_KEY: 'USER_ACTIVITY_DETECTED'
 };
+
+const checkOpsBeforeUnload = (e) => {
+  if (Object.keys(compoundRuntimeOpStore.get()).length > 0) {
+    // https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onbeforeunload
+    e.preventDefault();
+    e.returnValue = '';
+  }
+}
 
 @Component({
   selector: 'app-signed-in',
@@ -115,6 +123,8 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.startUserActivityTracker();
     this.startInactivityMonitoring();
+
+    window.addEventListener('beforeunload', checkOpsBeforeUnload);
   }
 
   private getInactivityElapsedMs(): number {
@@ -222,6 +232,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     for (const s of this.subscriptions) {
       s.unsubscribe();
     }
+    window.removeEventListener('beforeunload', checkOpsBeforeUnload);
   }
 
   closeInactivityModal(): void {
