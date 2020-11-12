@@ -33,12 +33,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import javax.inject.Provider;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.DSLinkingDao;
+import org.pmiops.workbench.cdr.model.DbDSLinking;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
@@ -115,7 +117,8 @@ public class DataSetServiceTest {
     ConceptSetDao.class,
     ConceptSetService.class,
     CohortQueryBuilder.class,
-    DataSetDao.class
+    DataSetDao.class,
+    DSLinkingDao.class
   })
   static class Configuration {
     @Bean
@@ -367,6 +370,69 @@ public class DataSetServiceTest {
     assertThat(result.get("PERSON").getNamedParameters()).hasSize(1);
     assertThat(result.get("PERSON").getNamedParameters().get("foo_101").getValue())
         .isEqualTo("101");
+  }
+
+  @Test
+  public void testFITBITDomainToBigQueryConfig() {
+    mockLinkingTableQuery(
+        ImmutableList.of(
+            "FROM `" + TEST_CDR_TABLE + ".heart_rate_minute_level` heart_rate_minute_level"));
+    mockDsLinkingTableForFitbit();
+    final DataSetRequest dataSetRequest =
+        new DataSetRequest()
+            .conceptSetIds(Collections.emptyList())
+            .cohortIds(Collections.emptyList())
+            .domainValuePairs(ImmutableList.of(new DomainValuePair()))
+            .name("blah")
+            .prePackagedConceptSet(PrePackagedConceptSetEnum.FITBIT_HEART_RATE_LEVEL)
+            .cohortIds(Collections.emptyList())
+            .domainValuePairs(
+                ImmutableList.of(
+                    new DomainValuePair().domain(Domain.FITBIT_HEART_RATE_LEVEL).value("PERSON_ID"),
+                    new DomainValuePair()
+                        .domain(Domain.FITBIT_HEART_RATE_LEVEL)
+                        .value("DATETIME")));
+    final Gson gson = new Gson();
+    final String cohortCriteriaJson =
+        gson.toJson(
+            new SearchRequest()
+                .includes(Collections.emptyList())
+                .excludes(Collections.emptyList())
+                .dataFilters(Collections.emptyList()),
+            SearchRequest.class);
+
+    final DbCohort dbCohort = new DbCohort();
+    dbCohort.setCriteria(cohortCriteriaJson);
+    dbCohort.setCohortId(COHORT_IDS.get(0));
+
+    doReturn(ImmutableList.of(dbCohort)).when(mockCohortDao).findAllByCohortIdIn(anyList());
+
+    final Map<String, QueryJobConfiguration> result =
+        dataSetServiceImpl.domainToBigQueryConfig(dataSetRequest);
+    assertThat(result).hasSize(1);
+    assertThat(result.get(Domain.FITBIT_HEART_RATE_LEVEL.name()).getQuery())
+        .contains("GROUP BY PERSON_ID, DATE");
+  }
+
+  private void mockDsLinkingTableForFitbit() {
+    DbDSLinking dbDSLinkingFitbit_personId = new DbDSLinking();
+    dbDSLinkingFitbit_personId.setDenormalizedName("PERSON_ID");
+    dbDSLinkingFitbit_personId.setDomain(Domain.FITBIT_HEART_RATE_LEVEL.name());
+    dbDSLinkingFitbit_personId.setOmopSql("heart_rate_minute_level.PERSON_ID\n");
+    dbDSLinkingFitbit_personId.setJoinValue(
+        "FROM `" + TEST_CDR_TABLE + ".heart_rate_minute_level` heart_rate_minute_level");
+
+    DbDSLinking dbDSLinkingFitbit_date = new DbDSLinking();
+    dbDSLinkingFitbit_date.setDenormalizedName("DATETIME");
+    dbDSLinkingFitbit_date.setDomain(Domain.FITBIT_HEART_RATE_LEVEL.name());
+    dbDSLinkingFitbit_date.setOmopSql("CAST(heart_rate_minute_level.datetime as DATE) as date");
+    dbDSLinkingFitbit_date.setJoinValue(
+        "FROM `" + TEST_CDR_TABLE + ".heart_rate_minute_level` heart_rate_minute_level");
+    doReturn(ImmutableList.of(dbDSLinkingFitbit_personId, dbDSLinkingFitbit_date))
+        .when(dsLinkingDao)
+        .findByDomainAndDenormalizedNameIn(
+            StringUtils.capitalize(Domain.FITBIT_HEART_RATE_LEVEL.name().toLowerCase()),
+            ImmutableList.of("CORE_TABLE_FOR_DOMAIN", "PERSON_ID"));
   }
 
   private void mockLinkingTableQuery(Collection<String> domainBaseTables) {
