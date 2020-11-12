@@ -125,6 +125,7 @@ public class CBCriteriaDaoTest {
                 .addHierarchy(true)
                 .addStandard(true)
                 .addCode("LP123")
+                .addSelectable(true)
                 .addFullText("001[MEASUREMENT_rank1]")
                 .build());
     raceAsian =

@@ -442,11 +442,13 @@ where count_value > 0 or source_count_value > 0"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d
 set d.all_concept_count = c.all_concept_count
-from (select c.domain_id as domain_id, COUNT(DISTINCT c.concept_id) as all_concept_count
-from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\` c
-join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d2
-on d2.domain_enum = c.domain_id and c.is_selectable = 1 and d2.domain_enum != 'PHYSICAL_MEASUREMENT'
-group by c.domain_id) c
+from (select domain_id, sum(all_concept_count) as all_concept_count
+      from (select c.domain_id as domain_id, c.is_standard, COUNT(DISTINCT c.concept_id) as all_concept_count
+              from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\` c
+              join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d2
+              on d2.domain_enum = c.domain_id and c.is_selectable = 1 and d2.domain_enum != 'PHYSICAL_MEASUREMENT'
+              group by c.domain_id, c.is_standard ) a
+      group by domain_id) c
 where d.domain_enum = c.domain_id"
 
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -572,7 +574,9 @@ FROM
     (
         SELECT ancestor_concept_id, count(*) as num_questions
         FROM \`${BQ_PROJECT}.${BQ_DATASET}.prep_concept_ancestor\`
-        WHERE ancestor_concept_id in
+        join \`${BQ_PROJECT}.${BQ_DATASET}.cb_criteria\` on concept_id = descendant_concept_id
+        WHERE subtype = 'QUESTION'
+        AND ancestor_concept_id in
             (
                 SELECT concept_id
                 FROM \`${BQ_PROJECT}.${BQ_DATASET}.cb_criteria\`
