@@ -149,8 +149,8 @@ function compareDataprocWorkerDiskSize(oldRuntime: RuntimeConfig, newRuntime: Ru
     return null;
   }
 
-  const oldDiskSize = oldRuntime.dataprocConfig.workerDiskSize;
-  const newDiskSize = newRuntime.dataprocConfig.workerDiskSize;
+  const oldDiskSize = oldRuntime.dataprocConfig.workerDiskSize || 0;
+  const newDiskSize = newRuntime.dataprocConfig.workerDiskSize || 0;
 
   return {
     desc: (newDiskSize < oldDiskSize ?  'Decrease' : 'Increase') + ' Change Worker Machine Type',
@@ -166,15 +166,15 @@ function compareDataprocNumberOfPreemptibleWorkers(oldRuntime: RuntimeConfig, ne
     return null;
   }
 
-  const oldNumWorkers = oldRuntime.dataprocConfig.numberOfPreemptibleWorkers;
-  const newNumWorkers = newRuntime.dataprocConfig.numberOfPreemptibleWorkers;
+  const oldNumWorkers = oldRuntime.dataprocConfig.numberOfPreemptibleWorkers || 0;
+  const newNumWorkers = newRuntime.dataprocConfig.numberOfPreemptibleWorkers || 0;
 
   return {
     desc: (newNumWorkers < oldNumWorkers ?  'Decrease' : 'Increase') + ' Number of Preemptible Workers',
     previous: oldNumWorkers.toString(),
     new: newNumWorkers.toString(),
     differenceType: oldNumWorkers === newNumWorkers ?
-      RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE
+      RuntimeDiffState.NO_CHANGE : RuntimeDiffState.CAN_UPDATE
   };
 }
 
@@ -183,26 +183,26 @@ function compareDataprocNumberOfWorkers(oldRuntime: RuntimeConfig, newRuntime: R
     return null;
   }
 
-  const oldNumWorkers = oldRuntime.dataprocConfig.numberOfWorkers;
-  const newNumWorkers = newRuntime.dataprocConfig.numberOfWorkers;
+  const oldNumWorkers = oldRuntime.dataprocConfig.numberOfWorkers || 0;
+  const newNumWorkers = newRuntime.dataprocConfig.numberOfWorkers || 0;
 
   return {
     desc: (newNumWorkers < oldNumWorkers ?  'Decrease' : 'Increase') + ' Number of Workers',
     previous: oldNumWorkers.toString(),
     new: newNumWorkers.toString(),
     differenceType: oldNumWorkers === newNumWorkers ?
-      RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE
+      RuntimeDiffState.NO_CHANGE : RuntimeDiffState.CAN_UPDATE
   };
 }
 
-function getRuntimeConfigDiffs(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff[] {
+export const getRuntimeConfigDiffs = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff[] => {
   const compareFns = [compareComputeTypes, compareDiskSize, compareMachineCpu,
     compareMachineMemory, compareDataprocMasterDiskSize, compareDataprocMasterMachineType,
     compareDataprocNumberOfPreemptibleWorkers, compareDataprocNumberOfWorkers,
     compareDataprocWorkerDiskSize, compareDataprocWorkerMachineType];
 
   return compareFns.map(compareFn => compareFn(oldRuntime, newRuntime)).filter(diff => diff !== null);
-}
+};
 
 function getRuntimeDiffs(oldRuntime: Runtime, newRuntime: Runtime): RuntimeDiff[] {
   return getRuntimeConfigDiffs(toRuntimeConfig(oldRuntime), toRuntimeConfig(newRuntime));

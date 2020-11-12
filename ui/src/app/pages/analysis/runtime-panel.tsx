@@ -19,6 +19,7 @@ import {
 } from 'app/utils/machines';
 import {runtimePresets} from 'app/utils/runtime-presets';
 import {
+  getRuntimeConfigDiffs,
   RuntimeStatusRequest,
   useCustomRuntime,
   useRuntimeStatus
@@ -276,7 +277,7 @@ const DataProcConfigSelector = ({onChange, dataprocConfig})  => {
   }, [dataprocConfig]);
 
   // On unmount clear the config - the user is no longer configuring a dataproc cluster
-  useEffect(() => () => onChange(null), []);
+  // useEffect(() => () => onChange(null), []);
 
   useEffect(() => {
     onChange({
@@ -340,176 +341,6 @@ interface RuntimeConfig {
   machine: Machine;
   diskSize: number;
   dataprocConfig: DataprocConfig;
-}
-
-function compareComputeTypes(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff {
-  return {
-    desc: 'Change Compute Type',
-    previous: oldRuntime.computeType,
-    new: newRuntime.computeType,
-    differenceType: oldRuntime.computeType === newRuntime.computeType ?
-      RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE
-  };
-}
-
-function compareMachineCpu(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff {
-  const oldCpu = oldRuntime.machine.cpu;
-  const newCpu = newRuntime.machine.cpu;
-
-  return {
-    desc: (newCpu < oldCpu ?  'Decrease' : 'Increase') + ' Number of CPUs',
-    previous: oldCpu.toString(),
-    new: newCpu.toString(),
-    differenceType: oldCpu === newCpu ? RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE
-  };
-}
-
-function compareMachineMemory(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff {
-  const oldMemory = oldRuntime.machine.memory;
-  const newMemory = newRuntime.machine.memory;
-
-  return {
-    desc: (newMemory < oldMemory ?  'Decrease' : 'Increase') + ' Memory',
-    previous: oldMemory.toString() + ' GB',
-    new: newMemory.toString() + ' GB',
-    differenceType: oldMemory === newMemory ? RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE
-  };
-}
-
-function compareDiskSize(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff {
-  let desc = 'Disk Size';
-  let diffType;
-
-  if (newRuntime.diskSize < oldRuntime.diskSize) {
-    desc = 'Decease ' + desc;
-    diffType = RuntimeDiffState.NEEDS_DELETE;
-  } else if (newRuntime.diskSize > oldRuntime.diskSize) {
-    desc = 'Increase ' + desc;
-    diffType = RuntimeDiffState.CAN_UPDATE;
-  } else {
-    diffType = RuntimeDiffState.NO_CHANGE;
-  }
-
-  return {
-    desc: desc,
-    previous: oldRuntime.diskSize.toString() + ' GB',
-    new: newRuntime.diskSize.toString() + ' GB',
-    differenceType: diffType
-  };
-}
-
-function compareDataprocMasterDiskSize(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff {
-  if (oldRuntime.dataprocConfig === null || newRuntime.dataprocConfig === null) {
-    return null;
-  }
-
-  let desc = 'Dataproc Master Machine Disk Size';
-  let diffType;
-
-  if (newRuntime.dataprocConfig.masterDiskSize < oldRuntime.dataprocConfig.masterDiskSize) {
-    desc = 'Decease ' + desc;
-    diffType = RuntimeDiffState.NEEDS_DELETE;
-  } else if (newRuntime.dataprocConfig.masterDiskSize > oldRuntime.dataprocConfig.masterDiskSize) {
-    desc = 'Increase ' + desc;
-    diffType = RuntimeDiffState.CAN_UPDATE;
-  } else {
-    diffType = RuntimeDiffState.NO_CHANGE;
-  }
-
-  return {
-    desc: desc,
-    previous: oldRuntime.dataprocConfig.masterDiskSize.toString() + ' GB',
-    new: newRuntime.dataprocConfig.masterDiskSize.toString() + ' GB',
-    differenceType: diffType
-  };
-}
-
-function compareDataprocMasterMachineType(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff {
-  if (oldRuntime.dataprocConfig === null || newRuntime.dataprocConfig === null) {
-    return null;
-  }
-
-  return {
-    desc: 'Change Master Machine Type',
-    previous: oldRuntime.dataprocConfig.masterMachineType,
-    new: newRuntime.dataprocConfig.masterMachineType,
-    differenceType: oldRuntime.dataprocConfig.masterMachineType === newRuntime.dataprocConfig.masterMachineType ?
-      RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE
-  };
-}
-
-function compareDataprocWorkerMachineType(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff {
-  if (oldRuntime.dataprocConfig === null || newRuntime.dataprocConfig === null) {
-    return null;
-  }
-
-  return {
-    desc: 'Change Worker Machine Type',
-    previous: oldRuntime.dataprocConfig.workerMachineType,
-    new: newRuntime.dataprocConfig.workerMachineType,
-    differenceType: oldRuntime.dataprocConfig.workerMachineType === newRuntime.dataprocConfig.workerMachineType ?
-      RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE
-  };
-}
-
-function compareDataprocWorkerDiskSize(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff {
-  if (oldRuntime.dataprocConfig === null || newRuntime.dataprocConfig === null) {
-    return null;
-  }
-
-  const oldDiskSize = oldRuntime.dataprocConfig.workerDiskSize;
-  const newDiskSize = newRuntime.dataprocConfig.workerDiskSize;
-
-  return {
-    desc: (newDiskSize < oldDiskSize ?  'Decrease' : 'Increase') + ' Change Worker Machine Type',
-    previous: oldDiskSize.toString() + ' GB',
-    new: newDiskSize.toString() + ' GB',
-    differenceType: oldDiskSize === newDiskSize ?
-      RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE
-  };
-}
-
-function compareDataprocNumberOfPreemptibleWorkers(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff {
-  if (oldRuntime.dataprocConfig === null || newRuntime.dataprocConfig === null) {
-    return null;
-  }
-
-  const oldNumWorkers = oldRuntime.dataprocConfig.numberOfPreemptibleWorkers;
-  const newNumWorkers = newRuntime.dataprocConfig.numberOfPreemptibleWorkers;
-
-  return {
-    desc: (newNumWorkers < oldNumWorkers ?  'Decrease' : 'Increase') + ' Number of Preemptible Workers',
-    previous: oldNumWorkers.toString(),
-    new: newNumWorkers.toString(),
-    differenceType: oldNumWorkers === newNumWorkers ?
-      RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE
-  };
-}
-
-function compareDataprocNumberOfWorkers(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff {
-  if (oldRuntime.dataprocConfig === null || newRuntime.dataprocConfig === null) {
-    return null;
-  }
-
-  const oldNumWorkers = oldRuntime.dataprocConfig.numberOfWorkers;
-  const newNumWorkers = newRuntime.dataprocConfig.numberOfWorkers;
-
-  return {
-    desc: (newNumWorkers < oldNumWorkers ?  'Decrease' : 'Increase') + ' Number of Workers',
-    previous: oldNumWorkers.toString(),
-    new: newNumWorkers.toString(),
-    differenceType: oldNumWorkers === newNumWorkers ?
-      RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE
-  };
-}
-
-function getRuntimeDiff(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff[] {
-  const compareFns = [compareComputeTypes, compareDiskSize, compareMachineCpu,
-    compareMachineMemory, compareDataprocMasterDiskSize, compareDataprocMasterMachineType,
-    compareDataprocNumberOfPreemptibleWorkers, compareDataprocNumberOfWorkers,
-    compareDataprocWorkerDiskSize, compareDataprocWorkerMachineType];
-
-  return compareFns.map(compareFn => compareFn(oldRuntime, newRuntime)).filter(diff => diff !== null);
 }
 
 const PresetSelector = ({hasMicroarrayData, setSelectedDiskSize, setSelectedMachine, setSelectedCompute, setSelectedDataprocConfig}) => {
@@ -722,6 +553,8 @@ export const RuntimePanel = fp.flow(
 
   const selectedMachineType = selectedMachine && selectedMachine.name;
   const runtimeExists = status && status !== RuntimeStatus.Deleted;
+  console.log(currentRuntime);
+  console.log(runtimeExists);
 
   const initialRuntimeConfig = {
     computeType: initialCompute,
@@ -737,7 +570,7 @@ export const RuntimePanel = fp.flow(
     dataprocConfig: selectedDataprocConfig
   };
 
-  const runtimeDiffs = getRuntimeDiff(initialRuntimeConfig, newRuntimeConfig);
+  const runtimeDiffs = getRuntimeConfigDiffs(initialRuntimeConfig, newRuntimeConfig);
 
   const runtimeChanged = !fp.equals(selectedMachine, initialMasterMachine) ||
     selectedDiskSize !== diskSize ||
@@ -774,6 +607,8 @@ export const RuntimePanel = fp.flow(
         || ![RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus)
       }
       onClick={() => {
+        console.log(newRuntimeConfig);
+        console.log(createRuntimeRequest(newRuntimeConfig));
         setRequestedRuntime(createRuntimeRequest(newRuntimeConfig));
       }}>Update</Button>;
   };
@@ -958,7 +793,7 @@ export const RuntimePanel = fp.flow(
                      />
            {
              selectedCompute === ComputeType.Dataproc &&
-             <DataProcConfigSelector onChange={setSelectedDataprocConfig} dataprocConfig={selectedDataprocConfig} />
+             <DataProcConfigSelector onChange={config => setSelectedDataprocConfig(config)} dataprocConfig={selectedDataprocConfig} />
            }
          </FlexColumn>
        </div>

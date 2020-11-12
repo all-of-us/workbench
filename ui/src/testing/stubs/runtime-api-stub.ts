@@ -1,4 +1,5 @@
 import {
+  DataprocConfig, GceConfig,
   Runtime,
   RuntimeApi,
   RuntimeConfigurationType,
@@ -7,6 +8,21 @@ import {
   RuntimeStatus
 } from 'generated/fetch';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
+
+export const mockGceConfig: GceConfig = {
+  diskSize: 80,
+  machineType: 'n1-standard-4'
+};
+
+export const mockDataprocConfig: DataprocConfig = {
+  masterMachineType: 'n1-standard-4',
+  masterDiskSize: 80,
+  workerDiskSize: 40,
+  workerMachineType: 'n1-standard-4',
+  numberOfWorkers: 1,
+  numberOfPreemptibleWorkers: 2,
+  numberOfWorkerLocalSSDs: 0
+};
 
 export class RuntimeApiStub extends RuntimeApi {
   public runtime: Runtime;
@@ -39,10 +55,7 @@ export class RuntimeApiStub extends RuntimeApi {
       toolDockerImage: 'broadinstitute/terra-jupyter-aou:1.0.999',
       configurationType: RuntimeConfigurationType.GeneralAnalysis,
       // TODO eric: what kind of non nullability guraantees do we have around this response?
-      gceConfig: {
-        diskSize: 80,
-        machineType: 'n1-standard-4'
-      }
+      gceConfig: mockGceConfig
     };
   }
 
