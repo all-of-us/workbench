@@ -14,7 +14,7 @@ import {compoundRuntimeOpStore, routeDataStore} from 'app/utils/stores';
 import {initializeZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
 import {Profile as FetchProfile} from 'generated/fetch';
-import Timeout = NodeJS.Timeout;
+import Timeout = number;
 
 /*
  * The user's last known active timestamp is stored in localStorage with the key of
@@ -64,9 +64,9 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   private subscriptions = [];
 
   private getUserActivityTimer: () => Timeout;
-  private inactivityInterval: Timeout;
-  private logoutTimer: Timeout;
-  private inactivityModalTimer: Timeout;
+  private inactivityInterval: number;
+  private logoutTimer: number;
+  private inactivityModalTimer: number;
 
   footerTypeEnum = FooterTypeEnum;
 

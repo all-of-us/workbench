@@ -220,7 +220,7 @@ export const SearchGroup = withCurrentWorkspace()(
   class extends React.Component<Props, State> {
     private aborter = new AbortController();
     private criteriaMenu: any;
-    private deleteTimeout: NodeJS.Timeout;
+    private deleteTimeout: number;
     private groupMenu: any;
     private mentionMenu: any;
     private temporalCriteriaMenu: any;

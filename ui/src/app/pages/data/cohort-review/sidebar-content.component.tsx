@@ -21,7 +21,6 @@ import {
   ParticipantCohortStatus,
   WorkspaceAccessLevel
 } from 'generated/fetch';
-import Timeout = NodeJS.Timeout;
 
 const styles = {
   header: {
@@ -94,7 +93,7 @@ const AnnotationItem = fp.flow(
   saving: boolean,
   error: boolean,
   success: boolean,
-  timeout: Timeout
+  timeout: number
 }> {
   constructor(props) {
     super(props);

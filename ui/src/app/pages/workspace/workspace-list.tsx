@@ -40,7 +40,7 @@ export const WorkspaceList = withUserProfile()
     errorText: string,
     firstSignIn: Date,
   }> {
-  private timer: NodeJS.Timer;
+  private timer: number;
 
   constructor(props) {
     super(props);

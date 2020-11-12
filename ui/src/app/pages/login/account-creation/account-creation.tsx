@@ -100,7 +100,7 @@ export interface AccountCreationState {
 }
 
 export class AccountCreation extends React.Component<AccountCreationProps, AccountCreationState> {
-  private usernameCheckTimeout: NodeJS.Timer;
+  private usernameCheckTimeout: number;
 
   constructor(props: AccountCreationProps) {
     super(props);

@@ -95,7 +95,7 @@ interface State {
 
 export const Homepage = withUserProfile()(class extends React.Component<Props, State> {
   private pageId = 'homepage';
-  private timer: NodeJS.Timer;
+  private timer: number;
   private quickTourResourcesDiv: HTMLDivElement;
 
   constructor(props: Props) {
