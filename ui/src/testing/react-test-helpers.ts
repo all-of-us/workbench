@@ -8,7 +8,7 @@ import {act} from 'react-dom/test-utils';
 // And fails with:
 //   ReferenceError: Zone is not defined
 export async function waitOneTickAndUpdate(wrapper: ReactWrapper) {
-  await new Promise(setImmediate).then(() => wrapper.update());
+  await act(() => new Promise(setImmediate).then(() => wrapper.update()));
 }
 
 export async function waitForFakeTimersAndUpdate(wrapper: ReactWrapper) {

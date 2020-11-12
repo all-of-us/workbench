@@ -51,7 +51,7 @@ describe('runtime-utils', () => {
     expect(runtime('1').text()).toEqual('');
     expect(runtime('2').text()).toEqual('');
 
-    await act(() => waitForFakeTimersAndUpdate(wrapper));
+    await waitForFakeTimersAndUpdate(wrapper);
     expect(runtime('1').text()).toEqual('Runtime Name');
     expect(runtime('2').text()).toEqual('Runtime Name');
   });
@@ -62,7 +62,7 @@ describe('runtime-utils', () => {
 
     const runtime = (id) => wrapper.find({id}).first();
 
-    await act(() => waitForFakeTimersAndUpdate(wrapper));
+    await waitForFakeTimersAndUpdate(wrapper);
     expect(runtime('1').text()).toEqual('Runtime Name');
     expect(runtime('2').text()).toEqual('Runtime Name');
 
@@ -73,7 +73,7 @@ describe('runtime-utils', () => {
         runtimeName: 'foo'
       }
     }));
-    await act(() => waitForFakeTimersAndUpdate(wrapper));
+    waitForFakeTimersAndUpdate(wrapper);
     expect(runtime('1').text()).toEqual('foo');
     expect(runtime('2').text()).toEqual('foo');
   });
