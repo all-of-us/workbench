@@ -647,18 +647,20 @@ export const RuntimePanel = fp.flow(
   };
 
   const createRuntimeRequest = (runtime: RuntimeConfig) => {
-    const runtimeRequest: Runtime = runtime.dataprocConfig ? {
+    console.log(runtime);
+
+    const runtimeRequest: Runtime = runtime.computeType === ComputeType.Dataproc ? {
       dataprocConfig: {
         ...runtime.dataprocConfig,
         masterMachineType: runtime.machine.name,
         masterDiskSize: runtime.diskSize
       }
-    } : {
+    } : runtime.computeType === ComputeType.Standard ? {
       gceConfig: {
         machineType: runtime.machine.name,
         diskSize: runtime.diskSize
       }
-    };
+    } : null;
 
     // If the selected runtime matches a preset, plumb through the appropriate configuration type.
     runtimeRequest.configurationType = fp.get(
@@ -668,6 +670,7 @@ export const RuntimePanel = fp.flow(
         runtimePresets)
     ) || RuntimeConfigurationType.UserOverride;
 
+    console.log(runtimeRequest);
     return runtimeRequest;
   };
 
@@ -795,7 +798,7 @@ export const RuntimePanel = fp.flow(
                      style={{width: '10rem'}}
                      options={[ComputeType.Standard, ComputeType.Dataproc]}
                      value={selectedCompute || ComputeType.Standard}
-                     onChange={({value}) => setSelectedCompute(value)}
+                     onChange={({value}) => {console.log(value); setSelectedCompute(value);}}
                      />
            {
              selectedCompute === ComputeType.Dataproc &&

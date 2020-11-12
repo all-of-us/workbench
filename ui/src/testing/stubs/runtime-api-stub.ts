@@ -79,6 +79,13 @@ export class RuntimeApiStub extends RuntimeApi {
     });
   }
 
+  updateRuntime(workspaceNamespace: string, options?: any): Promise<{}> {
+    return new Promise<{}>(resolve => {
+      this.runtime.status = RuntimeStatus.Running;
+      resolve({});
+    });
+  }
+
   localize(projectName: string, req: RuntimeLocalizeRequest,
     extraHttpRequestParams?: any): Promise<RuntimeLocalizeResponse> {
     return new Promise<RuntimeLocalizeResponse>(resolve => {

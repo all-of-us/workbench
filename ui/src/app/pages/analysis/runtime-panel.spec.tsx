@@ -5,7 +5,7 @@ import * as React from 'react';
 import {Button, Link} from 'app/components/buttons';
 import {Spinner} from 'app/components/spinners';
 import {ConfirmDelete, RuntimePanel, Props} from 'app/pages/analysis/runtime-panel';
-import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {registerApiClient, runtimeApi} from 'app/services/swagger-fetch-clients';
 import {ComputeType} from 'app/utils/machines';
 import {cdrVersionStore, serverConfigStore} from 'app/utils/navigation';
 import {runtimePresets} from 'app/utils/runtime-presets';
@@ -14,16 +14,15 @@ import {RuntimeConfigurationType, RuntimeStatus, WorkspaceAccessLevel, Workspace
 import {RuntimeApi} from 'generated/fetch/api';
 import defaultServerConfig from 'testing/default-server-config';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {cdrVersionListResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
-import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
+import {cdrVersionListResponse, CdrVersionsApiStub, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
+import {mockDataprocConfig, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {WorkspacesApiStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
-import {mockDataprocConfig} from '../../../testing/stubs/runtime-api-stub';
-import {runtimeApi} from '../../services/swagger-fetch-clients';
 
 describe('RuntimePanel', () => {
   let props: Props;
   let runtimeApiStub: RuntimeApiStub;
   let workspacesApiStub: WorkspacesApiStub;
+  let cdrVersionApiStub: CdrVersionsApiStub;
 
   const component = () => {
     return mount(<RuntimePanel {...props}/>);
@@ -44,11 +43,13 @@ describe('RuntimePanel', () => {
     serverConfigStore.next({...defaultServerConfig, enableCustomRuntimes: true});
 
     runtimeApiStub = new RuntimeApiStub();
-    // TODO eric: why is this set to null?
     registerApiClient(RuntimeApi, runtimeApiStub);
 
     workspacesApiStub = new WorkspacesApiStub();
     registerApiClient(WorkspacesApi, workspacesApiStub);
+
+    cdrVersionApiStub = new CdrVersionsApiStub();
+    registerApiClient(CdrVersionsApiStub, cdrVersionApiStub);
 
     runtimeStore.set({runtime: runtimeApiStub.runtime, workspaceNamespace: workspaceStubs[0].namespace});
     props = {
@@ -67,7 +68,7 @@ describe('RuntimePanel', () => {
 
   const pickDropdownOption = async(wrapper, id, label) => {
     act(() => { wrapper.find(id).first().simulate('click') });
-    const item = wrapper.find(`${id} .p-dropdown-item`).find({'aria-label': label}).first()
+    const item = wrapper.find(`${id} .p-dropdown-item`).find({'aria-label': label}).first();
     expect(item.exists()).toBeTruthy();
 
     act(() => { item.simulate('click') });
@@ -88,19 +89,27 @@ describe('RuntimePanel', () => {
 
   const getMainCpu = (wrapper) => getDropdownOption(wrapper, '#runtime-cpu');
   const pickMainCpu = (wrapper, cpu) => pickDropdownOption(wrapper, '#runtime-cpu', cpu);
+
   const getMainRam = (wrapper) => getDropdownOption(wrapper, '#runtime-ram');
   const pickMainRam = (wrapper, ram) => pickDropdownOption(wrapper, '#runtime-ram', ram);
+
   const getMainDiskSize = (wrapper) => getNumberInput(wrapper, '#runtime-disk');
   const pickMainDiskSize = (wrapper, diskSize) => enterNumberInput(wrapper, '#runtime-disk', diskSize);
+
   const pickComputeType = (wrapper, computeType) => pickDropdownOption(wrapper, '#runtime-compute', computeType);
+
   const getWorkerCpu = (wrapper) => getDropdownOption(wrapper, '#worker-cpu');
   const pickWorkerCpu = (wrapper, cpu) => pickDropdownOption(wrapper, '#worker-cpu', cpu);
+
   const getWorkerRam = (wrapper) => getDropdownOption(wrapper, '#worker-ram');
   const pickWorkerRam = (wrapper, ram) => pickDropdownOption(wrapper, '#worker-ram', ram);
+
   const getWorkerDiskSize = (wrapper) => getNumberInput(wrapper, '#worker-disk');
   const pickWorkerDiskSize = (wrapper, diskSize) => enterNumberInput(wrapper, '#worker-disk', diskSize);
+
   const getNumWorkers = (wrapper) => getNumberInput(wrapper, '#num-workers');
   const pickNumWorkers = (wrapper, n) => enterNumberInput(wrapper, '#num-workers', n);
+
   const pickNumPreemptibleWorkers = (wrapper, n) => enterNumberInput(wrapper, '#num-preemptible', n);
   const getNumPreemptibleWorkers = (wrapper) => getNumberInput(wrapper,'#num-preemptible');
 
@@ -108,7 +117,7 @@ describe('RuntimePanel', () => {
     act(() => { wrapper.find({'data-test-id': 'runtime-presets-menu'}).first().simulate('click') });
     act(() => {(document.querySelector(`#popup-root [aria-label="${displayName}"]`) as HTMLElement).click()});
     await waitOneTickAndUpdate(wrapper);
-  }
+  };
 
   const mustClickCreateButton = async(wrapper) => {
     const createButton = wrapper.find(Button).find({'aria-label': 'Create'}).first();
@@ -316,8 +325,10 @@ describe('RuntimePanel', () => {
     // Take the preset, make a change, then revert.
     await pickPreset(wrapper, runtimePresets.generalAnalysis);
     await pickComputeType(wrapper, ComputeType.Dataproc);
+    await waitOneTickAndUpdate(wrapper);
     await pickWorkerCpu(wrapper, 2);
     await pickComputeType(wrapper, ComputeType.Standard);
+    await waitOneTickAndUpdate(wrapper);
 
     await mustClickCreateButton(wrapper);
 
@@ -342,45 +353,6 @@ describe('RuntimePanel', () => {
     expect(memoryOptions.map(m => m.text())).toEqual(['7.2', '30', '52']);
   });
 
-  // TODO eric: rework this test to match the button changes
-  it('should toggle the disabled state of the update button when the configuration changes', async() => {
-    const wrapper = component();
-    await handleUseEffect(wrapper);
-    await waitOneTickAndUpdate(wrapper);
-
-    const updateButton = () => wrapper.find(Button).find({'aria-label': 'Update'}).first();
-    expect(updateButton().prop('disabled')).toBeTruthy();
-
-    wrapper.find('#runtime-cpu .p-dropdown').first().simulate('click');
-    wrapper.find('.p-dropdown-item').find({'aria-label': 8}).first().simulate('click');
-    expect(wrapper.find(Button).find({'aria-label': 'Update'}).exists()).toBeFalsy();
-    expect(wrapper.find(Button).find({'aria-label': 'ext'}).exists()).toBeTruthy();
-
-    wrapper.find('#runtime-ram').first().find('.p-dropdown-item').first().simulate('click');
-    wrapper.find('.p-dropdown-item').find({'aria-label': 4}).first().simulate('click');
-    expect(updateButton().prop('disabled')).toBeTruthy();
-
-    wrapper.find('#runtime-ram .p-dropdown').first().simulate('click');
-    wrapper.find('.p-dropdown-item').find({'aria-label': 26}).first().simulate('click');
-    expect(updateButton().prop('disabled')).toBeFalsy();
-
-    wrapper.find('#runtime-ram .p-dropdown').first().simulate('click');
-    wrapper.find('.p-dropdown-item').find({'aria-label': 15}).first().simulate('click');
-    expect(updateButton().prop('disabled')).toBeTruthy();
-
-    wrapper.find('#runtime-ram .p-dropdown').first().simulate('click');
-    wrapper.find('.p-dropdown-item').find({'aria-label': 15}).first().simulate('click');
-    expect(updateButton().prop('disabled')).toBeTruthy();
-
-    wrapper.find('#runtime-compute .p-dropdown').first().simulate('click');
-    wrapper.find('.p-dropdown-item').find({'aria-label': 'Dataproc Cluster'}).first().simulate('click');
-    expect(updateButton().prop('disabled')).toBeFalsy();
-
-    wrapper.find('#runtime-compute .p-dropdown').first().simulate('click');
-    wrapper.find('.p-dropdown-item').find({'aria-label': 'Standard VM'}).first().simulate('click');
-    expect(updateButton().prop('disabled')).toBeTruthy();
-  });
-
   it('should disable the Update button if there are no changes and runtime is running', async() => {
     const wrapper = component();
     await handleUseEffect(wrapper);
@@ -394,7 +366,7 @@ describe('RuntimePanel', () => {
     await handleUseEffect(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
-    pickMainDiskSize(wrapper, getMainDiskSize(wrapper) + 10);
+    await pickMainDiskSize(wrapper, getMainDiskSize(wrapper) + 10);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find(Button).find({'aria-label': 'Update'}).first().prop('disabled')).toBeFalsy();
   });
@@ -407,7 +379,7 @@ describe('RuntimePanel', () => {
     await handleUseEffect(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
-    pickNumWorkers(wrapper, getNumWorkers(wrapper) + 2);
+    await pickNumWorkers(wrapper, getNumWorkers(wrapper) + 2);
     await waitOneTickAndUpdate(wrapper);
 
     expect(wrapper.find(Button).find({'aria-label': 'Update'}).first().prop('disabled')).toBeFalsy();
@@ -421,7 +393,7 @@ describe('RuntimePanel', () => {
     await handleUseEffect(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
-    pickNumPreemptibleWorkers(wrapper, getNumPreemptibleWorkers(wrapper) + 2);
+    await pickNumPreemptibleWorkers(wrapper, getNumPreemptibleWorkers(wrapper) + 2);
     await waitOneTickAndUpdate(wrapper);
 
     expect(wrapper.find(Button).find({'aria-label': 'Update'}).first().prop('disabled')).toBeFalsy();
@@ -432,8 +404,7 @@ describe('RuntimePanel', () => {
     await handleUseEffect(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
-    pickComputeType(wrapper, ComputeType.Dataproc);
-    await waitOneTickAndUpdate(wrapper);
+    await pickComputeType(wrapper, ComputeType.Dataproc);
 
     expect(wrapper.find(Button).find({'aria-label': 'Next'}).first().prop('disabled')).toBeFalsy();
   });
@@ -443,8 +414,7 @@ describe('RuntimePanel', () => {
     await handleUseEffect(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
-    pickMainCpu(wrapper, getMainCpu(wrapper) + 4);
-    await waitOneTickAndUpdate(wrapper);
+    await pickMainCpu(wrapper, getMainCpu(wrapper) + 4);
 
     expect(wrapper.find(Button).find({'aria-label': 'Next'}).first().prop('disabled')).toBeFalsy();
   });
@@ -455,8 +425,7 @@ describe('RuntimePanel', () => {
     await waitOneTickAndUpdate(wrapper);
 
     // 15 GB -> 26 GB
-    pickMainRam(wrapper, 26);
-    await waitOneTickAndUpdate(wrapper);
+    await pickMainRam(wrapper, 26);
 
     expect(wrapper.find(Button).find({'aria-label': 'Next'}).first().prop('disabled')).toBeFalsy();
   });
@@ -466,7 +435,7 @@ describe('RuntimePanel', () => {
     await handleUseEffect(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
-    pickMainDiskSize(wrapper, getMainDiskSize(wrapper) - 5);
+    await pickMainDiskSize(wrapper, getMainDiskSize(wrapper) - 5);
     await waitOneTickAndUpdate(wrapper);
 
     expect(wrapper.find(Button).find({'aria-label': 'Next'}).first().prop('disabled')).toBeFalsy();
@@ -481,8 +450,7 @@ describe('RuntimePanel', () => {
     await waitOneTickAndUpdate(wrapper);
 
     // 4 -> 8
-    pickWorkerCpu(wrapper, 8);
-    await waitOneTickAndUpdate(wrapper);
+    await pickWorkerCpu(wrapper, 8);
 
     expect(wrapper.find(Button).find({'aria-label': 'Next'}).first().prop('disabled')).toBeFalsy();
   });
@@ -496,8 +464,7 @@ describe('RuntimePanel', () => {
     await waitOneTickAndUpdate(wrapper);
 
     // 15 -> 26
-    pickWorkerRam(wrapper, 26);
-    await waitOneTickAndUpdate(wrapper);
+    await pickWorkerRam(wrapper, 26);
 
     expect(wrapper.find(Button).find({'aria-label': 'Next'}).first().prop('disabled')).toBeFalsy();
   });
@@ -508,9 +475,7 @@ describe('RuntimePanel', () => {
 
     const wrapper = component();
     await handleUseEffect(wrapper);
-    await waitOneTickAndUpdate(wrapper);
-
-    pickWorkerDiskSize(wrapper, getWorkerDiskSize(wrapper) + 10);
+    await pickWorkerDiskSize(wrapper, getWorkerDiskSize(wrapper) + 10);
     await waitOneTickAndUpdate(wrapper);
 
     expect(wrapper.find(Button).find({'aria-label': 'Next'}).first().prop('disabled')).toBeFalsy();
@@ -524,17 +489,24 @@ describe('RuntimePanel', () => {
     await handleUseEffect(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
-    pickMainDiskSize(wrapper, 75);
-    pickMainCpu(wrapper, 8);
-    pickMainRam(wrapper, 30);
-    pickWorkerCpu(wrapper, 16);
-    pickWorkerRam(wrapper, 60);
-    pickNumPreemptibleWorkers(wrapper, 3);
-    pickNumWorkers(wrapper, 5);
-    pickWorkerDiskSize(wrapper, 100);
+    await pickMainDiskSize(wrapper, 75);
+    await pickMainCpu(wrapper, 8);
+    await pickMainRam(wrapper, 30);
+    await pickWorkerCpu(wrapper, 16);
+    await pickWorkerRam(wrapper, 60);
+    await pickNumPreemptibleWorkers(wrapper, 3);
+    await pickNumWorkers(wrapper, 5);
+    await pickWorkerDiskSize(wrapper, 100);
 
-    wrapper.find(Button).find({'aria-label': 'Next'}).first().simulate('click');
-    wrapper.find(Button).find({'aria-label': 'Cancel'}).first().simulate('click');
+    act(() => {
+      wrapper.find(Button).find({'aria-label': 'Next'}).first().simulate('click');
+    });
+    await waitOneTickAndUpdate(wrapper);
+
+    act(() => {
+      wrapper.find(Button).find({'aria-label': 'Cancel'}).first().simulate('click');
+    });
+    await waitOneTickAndUpdate(wrapper);
 
     expect(getMainDiskSize(wrapper)).toBe(75);
     expect(getMainCpu(wrapper)).toBe(8);
@@ -552,10 +524,7 @@ describe('RuntimePanel', () => {
 
     const wrapper = component();
     await handleUseEffect(wrapper);
-    await waitOneTickAndUpdate(wrapper);
-
-    pickMainDiskSize(wrapper, getMainDiskSize(wrapper) + 20);
-    await waitOneTickAndUpdate(wrapper);
+    await pickMainDiskSize(wrapper, getMainDiskSize(wrapper) + 20);
 
     expect(wrapper.find(Button).find({'aria-label': 'Update'}).first().prop('disabled')).toBeTruthy();
   });
@@ -568,10 +537,12 @@ describe('RuntimePanel', () => {
     const updateSpy = jest.spyOn(runtimeApi(), 'updateRuntime');
     const deleteSpy = jest.spyOn(runtimeApi(), 'deleteRuntime');
 
-    pickMainDiskSize(wrapper, getMainDiskSize(wrapper) + 20);
-    await waitOneTickAndUpdate(wrapper);
+    await pickMainDiskSize(wrapper, getMainDiskSize(wrapper) + 20);
 
-    wrapper.find(Button).find({'aria-label': 'Update'}).first().simulate('click');
+    act(() => {
+      wrapper.find(Button).find({'aria-label': 'Update'}).first().simulate('click');
+    });
+    await waitOneTickAndUpdate(wrapper);
 
     expect(updateSpy).toHaveBeenCalled();
     expect(deleteSpy).toHaveBeenCalledTimes(0);
