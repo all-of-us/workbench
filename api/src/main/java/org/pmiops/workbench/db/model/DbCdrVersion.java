@@ -11,6 +11,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.pmiops.workbench.model.ArchivalStatus;
+import org.pmiops.workbench.model.CdrFitBitData;
 import org.pmiops.workbench.model.DataAccessLevel;
 
 @Entity
@@ -30,6 +31,7 @@ public class DbCdrVersion {
   private String cdrDbName;
   private String elasticIndexBaseName;
   private String microarrayBigqueryDataset;
+  private Short hasFitbitData;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -168,6 +170,20 @@ public class DbCdrVersion {
     this.microarrayBigqueryDataset = microarrayBigqueryDataset;
   }
 
+  @Column(name = "has_fitbit_data")
+  public Short getHasFitbitData() {
+    return hasFitbitData == null ? 0 : hasFitbitData;
+  }
+
+  public void setHasFitbitData(Short hasFitbitData) {
+    this.hasFitbitData = hasFitbitData;
+  }
+
+  @Transient
+  public CdrFitBitData getHasFitbitDataEnum() {
+    return DbStorageEnums.cdrFitBitDataFromStorage(getHasFitbitData());
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(
@@ -182,7 +198,8 @@ public class DbCdrVersion {
         creationTime,
         numParticipants,
         cdrDbName,
-        elasticIndexBaseName);
+        elasticIndexBaseName,
+        hasFitbitData);
   }
 
   @Override
@@ -203,6 +220,7 @@ public class DbCdrVersion {
         .append(this.numParticipants, that.numParticipants)
         .append(this.cdrDbName, that.cdrDbName)
         .append(this.elasticIndexBaseName, that.elasticIndexBaseName)
+        .append(this.hasFitbitData, that.hasFitbitData)
         .build();
   }
 }

@@ -147,7 +147,7 @@
   <include file="changelog/db.changelog-136-workspace-need-researchpurpose-review.xml"/>
   <include file="changelog/db.changelog-137-sex-at-birth.xml"/>
   <include file="changelog/db.changelog-138-cdr-version-microarray-field.xml"/>
-
+  <include file="changelog/db.changelog-139-cdr-version-hasFitbit-field.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`

@@ -3641,6 +3641,12 @@ definitions:
     - unregistered
     - registered
     - protected
+  CdrFitBitData:
+    type: string
+    description: Whether CDR has FITBIT data
+    enum:
+    - true
+    - false
   RdrEntity:
     type: string
     description: Entities send to RDR
@@ -3784,6 +3790,8 @@ definitions:
         "$ref": "#/definitions/ArchivalStatus"
       hasMicroarrayData:
         type: boolean
+      hasFitbitData:
+        "$ref": "#/definitions/CdrFitBitData"
       creationTime:
         type: integer
         format: int64

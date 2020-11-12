@@ -9,6 +9,7 @@ import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
+import org.pmiops.workbench.model.CdrFitBitData;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Degree;
@@ -205,6 +206,21 @@ public final class DbStorageEnums {
 
   public static Short dataAccessLevelToStorage(DataAccessLevel level) {
     return CLIENT_TO_STORAGE_DATA_ACCESS_LEVEL.get(level);
+  }
+
+  // Cdr has Fitbit
+  private static final BiMap<CdrFitBitData, Short> CLIENT_TO_STORAGE_FITBIT =
+      ImmutableBiMap.<CdrFitBitData, Short>builder()
+          .put(CdrFitBitData.FALSE, (short) 0)
+          .put(CdrFitBitData.TRUE, (short) 1)
+          .build();
+
+  public static CdrFitBitData cdrFitBitDataFromStorage(Short level) {
+    return CLIENT_TO_STORAGE_FITBIT.inverse().get(level);
+  }
+
+  public static Short cdrFitBitDataToStorage(CdrFitBitData level) {
+    return CLIENT_TO_STORAGE_FITBIT.get(level);
   }
 
   // Degree

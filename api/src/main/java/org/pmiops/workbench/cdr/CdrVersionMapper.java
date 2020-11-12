@@ -14,6 +14,7 @@ public interface CdrVersionMapper {
 
   @Mapping(source = "microarrayBigqueryDataset", target = "hasMicroarrayData")
   @Mapping(source = "dataAccessLevelEnum", target = "dataAccessLevel")
+  @Mapping(source = "hasFitbitDataEnum", target = "hasFitbitData")
   @Mapping(source = "archivalStatusEnum", target = "archivalStatus")
   CdrVersion dbModelToClient(DbCdrVersion db);
 
