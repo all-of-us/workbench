@@ -257,12 +257,6 @@ export default class WorkspaceEditPage extends WorkspaceBase {
     return element.getTextContent();
   }
 
-  async getCdrVersionWarningMessage(): Promise<string> {
-    const xpath = '//*[@data-test-id="old-cdr-version-warning"]';
-    const element = BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath));
-    return element.getTextContent();
-  }
-
   async getBillingAccountSelect(): Promise<Select> {
     return Select.findByName(this.page, FIELD.billingAccountSelect.textOption);
   }

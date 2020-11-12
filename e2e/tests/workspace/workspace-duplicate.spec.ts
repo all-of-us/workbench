@@ -93,9 +93,6 @@ describe('Duplicate workspace', () => {
     // change CDR Version
     await workspacesPage.selectCdrVersion(config.altCdrVersionName);
 
-    expect(await workspacesPage.getCdrVersionWarningMessage())
-        .toContain('You’ve selected a version that isn’t the most recent.');
-
     const finishButton = await workspacesPage.getDuplicateWorkspaceButton();
     await finishButton.waitUntilEnabled();
     await workspacesPage.clickCreateFinishButton(finishButton);

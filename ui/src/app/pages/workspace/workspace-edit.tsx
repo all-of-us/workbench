@@ -185,12 +185,6 @@ export const styles = reactStyles({
     backgroundColor: colorWithWhiteness(colors.accent, 0.85),
     maxWidth: 'fit-content',
   },
-  warningIcon: {
-    color: colors.warning,
-    height: '20px',
-    width: '20px',
-    align: 'top',
-  },
 });
 
 const CREATE_BILLING_ACCOUNT_OPTION_VALUE = 'CREATE_BILLING_ACCOUNT_OPTION';
