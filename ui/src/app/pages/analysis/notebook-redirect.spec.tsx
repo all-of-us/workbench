@@ -1,10 +1,11 @@
 import {mount, ReactWrapper} from 'enzyme';
 import * as React from 'react';
+import Iframe from 'react-iframe';
 
 import {registerApiClient as registerApiClientNotebooks} from 'app/services/notebooks-swagger-fetch-clients';
 import {act} from 'react-dom/test-utils';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {currentWorkspaceStore, queryParamsStore, serverConfigStore, urlParamsStore, userProfileStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, queryParamsStore, serverConfigStore, urlParamsStore, userProfileStore, NavStore} from 'app/utils/navigation';
 import {runtimeStore} from 'app/utils/stores';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {RuntimeApi, RuntimeStatus, WorkspaceAccessLevel} from 'generated/fetch';
@@ -37,7 +38,7 @@ describe('NotebookRedirect', () => {
   };
 
   async function awaitTickAndTimers(wrapper: ReactWrapper) {
-    jest.runOnlyPendingTimers();
+    act(() => jest.runOnlyPendingTimers());
     await waitOneTickAndUpdate(wrapper);
   }
 
@@ -212,5 +213,38 @@ describe('NotebookRedirect', () => {
       .toBeTruthy();
     expect(currentCardText(wrapper))
       .toContain(progressStrings.get(Progress.Redirecting));
+  });
+
+  it('should navigate away after runtime transitions to deleting', async() => {
+    const navSpy = jest.fn();
+    NavStore.navigate = navSpy;
+
+    queryParamsStore.next({
+      kernelType: Kernels.R,
+      creating: false
+    });
+    runtimeStub.runtime.status = RuntimeStatus.Running;
+
+    const wrapper = await component();
+    await awaitTickAndTimers(wrapper);
+
+    // Wait for the "redirecting" timer to elapse, rendering the iframe.
+    act(() => jest.advanceTimersByTime(2000));
+    await awaitTickAndTimers(wrapper);
+
+    expect(wrapper.find(Iframe).exists()).toBeTruthy();
+    expect(navSpy).not.toHaveBeenCalled();
+
+    // Simulate transition to deleting - should navigate away.
+    act(() => {
+      runtimeStub.runtime = {...runtimeStub.runtime, status: RuntimeStatus.Deleting};
+      runtimeStore.set({
+        workspaceNamespace: workspace.namespace,
+        runtime: runtimeStub.runtime
+      });
+    });
+    await awaitTickAndTimers(wrapper);
+
+    expect(navSpy).toHaveBeenCalled();
   });
 });
