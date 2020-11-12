@@ -8,7 +8,7 @@ import {defaultRuntime, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {currentCohortCriteriaStore, currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
 import {CohortAnnotationDefinitionApi, CohortReviewApi} from 'generated/fetch';
 import defaultServerConfig from 'testing/default-server-config';
-import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {handleUseEffect, waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CohortAnnotationDefinitionServiceStub} from 'testing/stubs/cohort-annotation-definition-service-stub';
 import {CohortReviewServiceStub, cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
@@ -35,13 +35,6 @@ describe('HelpSidebar', () => {
   const component = () => {
     return mount(<HelpSidebar {...props} />, {attachTo: document.getElementById('root')});
   };
-
-  const handleUseEffect = async (component) => {
-    await act(async () => {
-      await Promise.resolve(component); // Wait for the component to finish rendering (mount returns a promise)
-      await new Promise(resolve => setImmediate(resolve)); // Wait for all outstanding requests to complete
-    });
-  }
 
   async function awaitTickAndTimers(wrapper) {
     act(() => jest.runOnlyPendingTimers());

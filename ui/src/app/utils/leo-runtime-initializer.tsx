@@ -195,7 +195,7 @@ export class LeoRuntimeInitializer {
     if (serverConfigStore.getValue().enableCustomRuntimes && this.targetRuntime) {
       runtime = this.targetRuntime;
     } else {
-      // In lazy initialization mode, this should default to:
+      // TODO(RW-5921): In lazy initialization mode, this should default to:
       // - the user's most recent UserOverride config, if any
       // - (maybe) the user's most recently selected preset, if any
       // - general analysis

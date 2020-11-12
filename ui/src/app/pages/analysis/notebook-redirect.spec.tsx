@@ -2,14 +2,14 @@ import {mount, ReactWrapper} from 'enzyme';
 import * as React from 'react';
 
 import {registerApiClient as registerApiClientNotebooks} from 'app/services/notebooks-swagger-fetch-clients';
-import { act } from 'react-dom/test-utils';
+import {act} from 'react-dom/test-utils';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, queryParamsStore, serverConfigStore, urlParamsStore, userProfileStore} from 'app/utils/navigation';
 import {runtimeStore} from 'app/utils/stores';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {RuntimeApi, RuntimeStatus, WorkspaceAccessLevel} from 'generated/fetch';
 import {RuntimesApi as LeoRuntimesApi, JupyterApi, ProxyApi} from 'notebooks-generated/fetch';
-import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {handleUseEffect, waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {JupyterApiStub} from 'testing/stubs/jupyter-api-stub';
 import {ProxyApiStub} from 'testing/stubs/proxy-api-stub';
@@ -29,13 +29,6 @@ describe('NotebookRedirect', () => {
   const updateCache = jest.fn();
 
   let runtimeStub: RuntimeApiStub;
-
-  const handleUseEffect = async (component) => {
-    await act(async () => {
-      await Promise.resolve(component); // Wait for the component to finish rendering (mount returns a promise)
-      await new Promise(resolve => setImmediate(resolve)); // Wait for all outstanding requests to complete
-    });
-  }
 
   const component = async() => {
     const c = mount(<NotebookRedirect/>);
