@@ -5,7 +5,7 @@ import {mount, ReactWrapper, ShallowWrapper} from 'enzyme';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {cdrVersionStore, currentWorkspaceStore, navigate, routeConfigDataStore, serverConfigStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {DisseminateResearchEnum, ResearchOutcomeEnum, SpecificPopulationEnum,UserApi, Workspace, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
+import {DisseminateResearchEnum, ResearchOutcomeEnum, SpecificPopulationEnum,UserApi, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {UserApiStub} from 'testing/stubs/user-api-stub';
