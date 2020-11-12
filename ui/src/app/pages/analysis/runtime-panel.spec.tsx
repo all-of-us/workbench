@@ -58,11 +58,11 @@ describe('RuntimePanel', () => {
   });
 
   const pickDropdownOption = async(wrapper, id, label) => {
-    act(() => { wrapper.find(id).first().simulate('click') });
+    wrapper.find(id).first().simulate('click')
     const item = wrapper.find(`${id} .p-dropdown-item`).find({'aria-label': label}).first()
     expect(item.exists()).toBeTruthy();
 
-    act(() => { item.simulate('click') });
+    item.simulate('click')
 
     // In some cases, picking an option may require some waiting, e.g. for
     // rerendering of RAM options based on CPU selection.
@@ -85,7 +85,7 @@ describe('RuntimePanel', () => {
   const pickNumPreemptibleWorkers = (wrapper, n) => enterNumberInput(wrapper, '#num-preemptible', n);
 
   const pickPreset = async(wrapper, {displayName}) => {
-    act(() => { wrapper.find({'data-test-id': 'runtime-presets-menu'}).first().simulate('click') });
+    wrapper.find({'data-test-id': 'runtime-presets-menu'}).first().simulate('click');
     act(() => {(document.querySelector(`#popup-root [aria-label="${displayName}"]`) as HTMLElement).click()});
     await waitOneTickAndUpdate(wrapper);
   }
@@ -103,7 +103,7 @@ describe('RuntimePanel', () => {
     expect(createButton.exists()).toBeTruthy();
     expect(createButton.prop('disabled')).toBeFalsy();
 
-    act(() => { createButton.simulate('click') });
+    createButton.simulate('click');
     await waitOneTickAndUpdate(wrapper);
   };
 
@@ -343,43 +343,32 @@ describe('RuntimePanel', () => {
     const wrapper = await component();
 
     const updateButton = () => wrapper.find(Button).find({'aria-label': 'Update'}).first();
+    // Initial state: n1-standard-4, 4 CPU 15 RAM
     expect(updateButton().prop('disabled')).toBeTruthy();
 
-    wrapper.find('#runtime-cpu .p-dropdown').first().simulate('click');
-    wrapper.find('.p-dropdown-item').find({'aria-label': 8}).first().simulate('click');
+    await pickMainCpu(wrapper, 8);
     expect(updateButton().prop('disabled')).toBeFalsy();
 
-    wrapper.find('#runtime-ram').first().find('.p-dropdown-item').first().simulate('click');
-    wrapper.find('.p-dropdown-item').find({'aria-label': 4}).first().simulate('click');
+    await pickMainCpu(wrapper, 4);
     expect(updateButton().prop('disabled')).toBeTruthy();
 
-    wrapper.find('#runtime-ram .p-dropdown').first().simulate('click');
-    wrapper.find('.p-dropdown-item').find({'aria-label': 26}).first().simulate('click');
+    await pickMainRam(wrapper, 26);
     expect(updateButton().prop('disabled')).toBeFalsy();
 
-    wrapper.find('#runtime-ram .p-dropdown').first().simulate('click');
-    wrapper.find('.p-dropdown-item').find({'aria-label': 15}).first().simulate('click');
+    await pickMainRam(wrapper, 15);
     expect(updateButton().prop('disabled')).toBeTruthy();
 
-    wrapper.find('#runtime-ram .p-dropdown').first().simulate('click');
-    wrapper.find('.p-dropdown-item').find({'aria-label': 15}).first().simulate('click');
-    expect(updateButton().prop('disabled')).toBeTruthy();
-
-    wrapper.find('#runtime-compute .p-dropdown').first().simulate('click');
-    wrapper.find('.p-dropdown-item').find({'aria-label': 'Dataproc Cluster'}).first().simulate('click');
+    await pickComputeType(wrapper, ComputeType.Dataproc);
     expect(updateButton().prop('disabled')).toBeFalsy();
 
-    wrapper.find('#runtime-compute .p-dropdown').first().simulate('click');
-    wrapper.find('.p-dropdown-item').find({'aria-label': 'Standard VM'}).first().simulate('click');
+    await pickComputeType(wrapper, ComputeType.Standard);
     expect(updateButton().prop('disabled')).toBeTruthy();
-
   });
 
   it('should add additional options when the compute type changes', async() => {
     const wrapper = await component();
 
-    wrapper.find('div[id="runtime-compute"]').first().simulate('click');
-    wrapper.find('.p-dropdown-item').find({'aria-label': 'Dataproc Cluster'}).first().simulate('click');
+    await pickComputeType(wrapper, ComputeType.Dataproc);
 
     expect(wrapper.exists('span[id="num-workers"]')).toBeTruthy();
     expect(wrapper.exists('span[id="num-preemptible"]')).toBeTruthy();
