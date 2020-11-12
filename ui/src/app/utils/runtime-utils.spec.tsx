@@ -4,7 +4,7 @@ import {useCustomRuntime} from 'app/utils/runtime-utils';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {RuntimeApi} from 'generated/fetch/api';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {handleUseEffect, waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import * as React from 'react';
 
 const Runtime = ({id}) => {
@@ -18,13 +18,6 @@ const TestComponent = () => {
     <Runtime id='1'/>
     <Runtime id='2'/>
   </div>;
-}
-
-const handleUseEffect = async (component) => {
-  await act(async () => {
-    await Promise.resolve(component);
-    await new Promise(resolve => setImmediate(resolve));
-  });
 }
 
 describe('runtime-utils', () => {
