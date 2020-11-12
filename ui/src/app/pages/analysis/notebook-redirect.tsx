@@ -225,8 +225,8 @@ const redirectMillis = 1000;
 export const NotebookRedirect = fp.flow(
   withUserProfile(),
   withCurrentWorkspace(),
-  withQueryParams(),
   withRuntimeStore(),
+  withQueryParams(),
 )(
   class extends React.Component<Props, State> {
 

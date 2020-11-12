@@ -122,8 +122,8 @@ enum PreviewErrorMode {
 
 export const InteractiveNotebook = fp.flow(
   withUrlParams(),
-  withCurrentWorkspace(),
-  withRuntimeStore()
+  withRuntimeStore(),
+  withCurrentWorkspace()
 )(
   class extends React.Component<Props, State> {
     private pollAborter = new AbortController();

@@ -59,7 +59,6 @@ export const maybeInitializeRuntime = async(workspaceNamespace: string, signal: 
     });
   }
 
-  console.log('pending OK');
   return await LeoRuntimeInitializer.initialize({workspaceNamespace, pollAbortSignal: signal});
 };
 
@@ -97,7 +96,7 @@ export const useRuntimeStatus = (currentWorkspaceNamespace): [
   const setStatusRequest = async(req) => {
     await switchCase(req, [
       RuntimeStatusRequest.Delete, () => {
-        runtimeApi().deleteRuntime(currentWorkspaceNamespace);
+        return runtimeApi().deleteRuntime(currentWorkspaceNamespace);
       }
     ]);
     setRuntimeStatus(req);
