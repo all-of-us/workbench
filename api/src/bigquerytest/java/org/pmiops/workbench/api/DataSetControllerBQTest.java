@@ -522,6 +522,27 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void testGenerateCodePrepackagedConceptSetFitBit() {
+    addFitbitInfoToDsLinkingTable();
+    String code =
+        controller
+            .generateCode(
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_NAME,
+                KernelTypeEnum.PYTHON.toString(),
+                createDataSetRequest(
+                    ImmutableList.of(),
+                    ImmutableList.of(dbCohort1),
+                    ImmutableList.of(Domain.FITBIT_HEART_RATE_LEVEL),
+                    false,
+                    PrePackagedConceptSetEnum.NONE))
+            .getBody()
+            .getCode();
+
+    assertAndExecutePythonQuery(code, 1, Domain.FITBIT_HEART_RATE_LEVEL);
+  }
+
+  @Test
   public void getValuesFromDomainActivitySummary() {
     List<DomainValue> domainValues =
         controller
@@ -677,5 +698,16 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     return s.replace(
         "`" + tableName + "`",
         String.format("`%s`", projectId + "." + dataSetId + "." + tableName));
+  }
+
+  private void addFitbitInfoToDsLinkingTable() {
+    DbDSLinking fitbitHeartRateLinking_personId = new DbDSLinking();
+    fitbitHeartRateLinking_personId.setOmopSql("heart_rate_minute_level.PERSON_ID");
+    fitbitHeartRateLinking_personId.setJoinValue(
+        "from `${projectId}.${dataSetId}.heart_rate_minute_level` heart_rate_minute_level");
+    fitbitHeartRateLinking_personId.setDomain("Fitbit_heart_rate_level");
+    fitbitHeartRateLinking_personId.setDenormalizedName("PERSON_ID");
+
+    dsLinkingDao.save(fitbitHeartRateLinking_personId);
   }
 }
