@@ -39,7 +39,7 @@ const checkOpsBeforeUnload = (e) => {
     e.preventDefault();
     e.returnValue = '';
   }
-}
+};
 
 @Component({
   selector: 'app-signed-in',
