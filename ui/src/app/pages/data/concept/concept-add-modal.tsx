@@ -11,7 +11,7 @@ import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, summarizeErrors, withCurrentWorkspace} from 'app/utils';
-import {serverConfigStore} from 'app/utils/navigation';
+import {conceptSetUpdating, serverConfigStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   ConceptSet,
@@ -44,6 +44,8 @@ const filterConcepts = (concepts: any[], domain: Domain) => {
     return concepts.filter(concept => concept.domainId.replace(' ', '').toLowerCase() === Domain[domain].toLowerCase());
   }
 };
+
+const CONCEPT_SET_CONCEPT_LIMIT = 1000;
 
 export const ConceptAddModal = withCurrentWorkspace()
 (class extends React.Component<{
@@ -96,7 +98,7 @@ export const ConceptAddModal = withCurrentWorkspace()
 
       this.setState({
         conceptSets: conceptSetsInDomain,
-        addingToExistingSet: (conceptSetsInDomain.length > 0),
+        addingToExistingSet: conceptSetsInDomain.length > 0,
         selectedConceptsInDomain: filterConcepts(this.props.selectedConcepts, this.props.activeDomainTab.domain),
         loading: false,
       });
@@ -111,8 +113,8 @@ export const ConceptAddModal = withCurrentWorkspace()
   async saveConcepts() {
     const {workspace: {namespace, id}} = this.props;
     const {onSave, activeDomainTab} = this.props;
-    const {selectedSet, addingToExistingSet, newSetDescription,
-      name, selectedConceptsInDomain} = this.state;
+    const {selectedSet, addingToExistingSet, newSetDescription, name, selectedConceptsInDomain} = this.state;
+    conceptSetUpdating.next(true);
     this.setState({saving: true});
     const conceptIds = fp.map(selected => selected.conceptId, selectedConceptsInDomain);
 
@@ -160,11 +162,19 @@ export const ConceptAddModal = withCurrentWorkspace()
     }
   }
 
+  disableSave(errors) {
+    const {addingToExistingSet, saving, selectedSet, selectedConceptsInDomain} = this.state;
+    if (serverConfigStore.getValue().enableConceptSetSearchV2 && addingToExistingSet) {
+      return selectedSet && selectedSet.criteriums &&
+          ((selectedSet.criteriums.length + selectedConceptsInDomain.length) > CONCEPT_SET_CONCEPT_LIMIT);
+    }
+    return (!addingToExistingSet && !!errors) || saving;
+  }
 
   render() {
     const {activeDomainTab, onClose} = this.props;
     const {conceptSets, loading, nameTouched, saving, addingToExistingSet,
-      newSetDescription, name, errorMessage, errorSaving, selectedConceptsInDomain} = this.state;
+      newSetDescription, name, errorMessage, errorSaving, selectedSet, selectedConceptsInDomain} = this.state;
     const errors = validate({name}, {
       name: {
         presence: {allowEmpty: false},
@@ -213,6 +223,7 @@ export const ConceptAddModal = withCurrentWorkspace()
         {addingToExistingSet ? (
             <ModalBody data-test-id='add-to-existing'>
               <select style={{marginTop: '1rem', height: '1.5rem', width: '100%'}}
+                      placeholder='Select Concept Set'
                       onChange={(e) => this.setState({selectedSet: conceptSets[e.target.value]})}>
                 {conceptSets.map((set: ConceptSet, i) =>
                     <option data-test-id='existing-set' key={i} value={i}>
@@ -241,10 +252,14 @@ export const ConceptAddModal = withCurrentWorkspace()
         {errorMessage && <AlertDanger>{errorMessage}</AlertDanger>}
         <ModalFooter>
           <Button type='secondary' onClick={onClose}>Cancel</Button>
+          <TooltipTrigger content={addingToExistingSet && <div>Cannot add more concepts to
+            <b> {selectedSet && selectedSet.name}. </b> Concept count exceeds {CONCEPT_SET_CONCEPT_LIMIT}</div>}
+            disabled={!this.disableSave(errors)}>
           <Button style={{marginLeft: '0.5rem'}}
-                  disabled={(!addingToExistingSet && !!errors) || saving}
+                  disabled={this.disableSave(errors)}
                   data-test-id='save-concept-set'
                   onClick={() => this.saveConcepts()}>Save</Button>
+          </TooltipTrigger>
         </ModalFooter>
       </ModalBody>}
       {saving && <SpinnerOverlay/>}

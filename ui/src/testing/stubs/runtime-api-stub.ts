@@ -24,39 +24,22 @@ export const mockDataprocConfig: DataprocConfig = {
   numberOfWorkerLocalSSDs: 0
 };
 
+export const defaultRuntime = () => ({
+  runtimeName: 'Runtime Name',
+  googleProject: 'Namespace',
+  status: RuntimeStatus.Running,
+  createdDate: '08/08/2018',
+  toolDockerImage: 'broadinstitute/terra-jupyter-aou:1.0.999',
+  configurationType: RuntimeConfigurationType.GeneralAnalysis,
+  gceConfig: mockGceConfig
+});
+
 export class RuntimeApiStub extends RuntimeApi {
   public runtime: Runtime;
 
   constructor() {
     super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
-    // this.runtime = {
-    //   runtimeName: 'Runtime Name',
-    //   googleProject: 'Namespace',
-    //   status: RuntimeStatus.Running,
-    //   createdDate: '08/08/2018',
-    //   toolDockerImage: 'broadinstitute/terra-jupyter-aou:1.0.999',
-    //   configurationType: RuntimeConfigurationType.GeneralAnalysis,
-    //   // TODO eric: what kind of non nullability guraantees do we have around this response?
-    //   dataprocConfig: {
-    //     masterMachineType: 'n1-standard-4',
-    //     masterDiskSize: 80,
-    //     numberOfWorkers: 0,
-    //     numberOfPreemptibleWorkers: 0,
-    //     workerDiskSize: 40,
-    //     workerMachineType: 'n1-standard-4',
-    //     numberOfWorkerLocalSSDs: 0
-    //   }
-    // };
-    this.runtime = {
-      runtimeName: 'Runtime Name',
-      googleProject: 'Namespace',
-      status: RuntimeStatus.Running,
-      createdDate: '08/08/2018',
-      toolDockerImage: 'broadinstitute/terra-jupyter-aou:1.0.999',
-      configurationType: RuntimeConfigurationType.GeneralAnalysis,
-      // TODO eric: what kind of non nullability guraantees do we have around this response?
-      gceConfig: mockGceConfig
-    };
+    this.runtime = defaultRuntime();
   }
 
   getRuntime(workspaceNamespace: string, options?: any): Promise<Runtime> {

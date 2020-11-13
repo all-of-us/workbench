@@ -14,7 +14,13 @@ import {
   withCurrentConceptSet,
   withCurrentWorkspace
 } from 'app/utils';
-import {currentConceptSetStore, currentConceptStore, NavStore, setSidebarActiveIconStore} from 'app/utils/navigation';
+import {
+  conceptSetUpdating,
+  currentConceptSetStore,
+  currentConceptStore,
+  NavStore,
+  setSidebarActiveIconStore
+} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConceptSet, Criteria, Domain, DomainCount, UpdateConceptSetRequest} from 'generated/fetch';
 
@@ -84,6 +90,7 @@ export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConce
 
     async updateConceptSet() {
       const {concept, conceptSet, workspace: {namespace, id}} = this.props;
+      conceptSetUpdating.next(true);
       this.setState({updating: true});
       // Selections that don't exist on the existing concept set are added
       const addedIds = getConceptIdsToAddOrRemove(concept, conceptSet.criteriums);
@@ -177,8 +184,7 @@ export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConce
             Close
           </Button>
         </FlexRowWrap>
-        {conceptAddModalOpen &&
-        <ConceptAddModal activeDomainTab={this.getDomainCount()}
+        {conceptAddModalOpen && <ConceptAddModal activeDomainTab={this.getDomainCount()}
                          selectedConcepts={this.props.concept}
                          onSave={(conceptSet) => this.afterConceptsSaved(conceptSet)}
                          onClose={() => this.closeConceptAddModal()}/>}

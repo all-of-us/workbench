@@ -7,13 +7,14 @@ import {Spinner} from 'app/components/spinners';
 import {ConfirmDelete, RuntimePanel, Props} from 'app/pages/analysis/runtime-panel';
 import {registerApiClient, runtimeApi} from 'app/services/swagger-fetch-clients';
 import {ComputeType} from 'app/utils/machines';
+import {clearCompoundRuntimeOperations} from 'app/utils/stores';
 import {cdrVersionStore, serverConfigStore} from 'app/utils/navigation';
 import {runtimePresets} from 'app/utils/runtime-presets';
 import {runtimeStore} from 'app/utils/stores';
 import {RuntimeConfigurationType, RuntimeStatus, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
 import {RuntimeApi} from 'generated/fetch/api';
 import defaultServerConfig from 'testing/default-server-config';
-import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {handleUseEffect, waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {cdrVersionListResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 import {mockDataprocConfig, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {WorkspacesApiStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
@@ -56,6 +57,10 @@ describe('RuntimePanel', () => {
       },
       cdrVersionListResponse
     };
+  });
+
+  afterEach(() => {
+    act(() => clearCompoundRuntimeOperations());
   });
 
   const getDropdownOption = (wrapper, id) => {

@@ -166,6 +166,11 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(
       value =
+          "select c from DbCriteria c where domainId=:domain and match(fullText, concat('+[', :domain, '_rank1]')) > 0 order by c.count desc, c.name asc")
+  Page<DbCriteria> findCriteriaTopCounts(@Param("domain") String domain, Pageable page);
+
+  @Query(
+      value =
           "select c1 "
               + "from DbCriteria c1 "
               + "where c1.domainId = :domain "

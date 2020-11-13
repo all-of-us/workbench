@@ -41,7 +41,13 @@ import {
   serverConfigStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
-import {RuntimeStore, runtimeStore, withStore} from 'app/utils/stores';
+import {withRuntimeStore} from 'app/utils/runtime-utils';
+import {
+  CompoundRuntimeOpStore,
+  compoundRuntimeOpStore,
+  RuntimeStore,
+  withStore
+} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
@@ -340,7 +346,8 @@ interface Props {
   workspace: WorkspaceData;
   criteria: Array<Selection>;
   concept?: Array<Criteria>;
-  currentRuntimeStore: RuntimeStore;
+  runtimeStore: RuntimeStore;
+  compoundRuntimeOps: CompoundRuntimeOpStore;
 }
 
 interface State {
@@ -356,7 +363,8 @@ export const HelpSidebar = fp.flow(
   withCurrentCohortCriteria(),
   withCurrentConcept(),
   withCurrentWorkspace(),
-  withStore(runtimeStore, 'currentRuntimeStore'),
+  withRuntimeStore(),
+  withStore(compoundRuntimeOpStore, 'compoundRuntimeOps'),
   withUserProfile()
 )(
   class extends React.Component<Props, State> {
@@ -581,15 +589,22 @@ export const HelpSidebar = fp.flow(
     }
 
     displayRuntimeIcon(icon) {
-      const {currentRuntimeStore} = this.props;
-      const status = currentRuntimeStore && currentRuntimeStore.runtime && currentRuntimeStore.runtime.status;
+      const {runtimeStore, compoundRuntimeOps, workspace} = this.props;
+      let status = runtimeStore && runtimeStore.runtime && runtimeStore.runtime.status;
+      if ((!status || status === RuntimeStatus.Deleted) &&
+          workspace.namespace in compoundRuntimeOps) {
+        // If a compound operation is still pending, and we're transitioning
+        // through the "Deleted" phase of the runtime, we want to keep showing
+        // an activity spinner. Avoids an awkward UX during a delete/create cycle.
+        status = RuntimeStatus.Deleting;
+      }
 
       // We always want to show the thunderstorm icon.
       // For most runtime statuses (Deleting and Unknown currently excepted), we will show a small
       // overlay icon in the bottom right of the tab showing the runtime status.
       return <FlexRow style={{height: '100%', alignItems: 'center', justifyContent: 'space-around'}}>
         <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={{...icon.style, position: 'absolute'}} />
-        <FlexRow style={styles.runtimeStatusIconContainer}>
+        <FlexRow data-test-id='runtime-status-icon-container' style={styles.runtimeStatusIconContainer}>
           {(status === RuntimeStatus.Creating
           || status === RuntimeStatus.Starting
           || status === RuntimeStatus.Updating)

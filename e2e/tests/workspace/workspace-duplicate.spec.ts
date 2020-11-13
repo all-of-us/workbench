@@ -5,7 +5,7 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import Navigation, {NavLink} from 'app/component/navigation';
 import WorkspaceCard from 'app/component/workspace-card';
 
-describe('Clone workspace', () => {
+describe('Duplicate workspace', () => {
 
   beforeEach(async () => {
     await signIn(page);
@@ -15,41 +15,41 @@ describe('Clone workspace', () => {
    * Test:
    * - Find an existing workspace. Create a new workspace if none exists.
    * - Select "Duplicate" thru the Ellipsis menu located inside the Workspace card.
-   * - Enter a new workspace name and save the clone.
-   * - Delete clone workspace.
+   * - Enter a new workspace name and save the duplicate.
+   * - Delete duplicate workspace.
    */
-    test('OWNER can clone workspace via Workspace card', async () => {
+    test('OWNER can duplicate workspace via Workspace card', async () => {
       const workspaceCard = await findOrCreateWorkspace(page);
 
       await workspaceCard.asElementHandle().hover();
       // Click on Ellipsis menu "Duplicate" option.
       await workspaceCard.selectSnowmanMenu(Option.Duplicate);
 
-      // Fill out Workspace Name should be just enough for clone successfully
+      // Fill out Workspace Name should be just enough for successful duplication
       const workspacesPage = new WorkspacesPage(page);
       await (await workspacesPage.getWorkspaceNameTextbox()).clear();
-      const cloneWorkspaceName = await workspacesPage.fillOutWorkspaceName();
+      const duplicateWorkspaceName = await workspacesPage.fillOutWorkspaceName();
 
       const finishButton = await workspacesPage.getDuplicateWorkspaceButton();
       await finishButton.waitUntilEnabled();
       await workspacesPage.clickCreateFinishButton(finishButton);
 
-      // Clone workspace Data page is loaded.
+      // Duplicate workspace Data page is loaded.
       const dataPage = new WorkspaceDataPage(page);
       await dataPage.waitForLoad();
-      expect(page.url()).toContain(cloneWorkspaceName.replace(/-/g, '')); // Remove dash from workspace name
+      expect(page.url()).toContain(duplicateWorkspaceName.replace(/-/g, '')); // Remove dash from workspace name
 
-      // Delete clone workspace via Workspace card in Your Workspaces page.
+      // Delete duplicate workspace via Workspace card in Your Workspaces page.
       await Navigation.navMenu(page, NavLink.YOUR_WORKSPACES);
       await workspacesPage.waitForLoad();
 
-      await WorkspaceCard.deleteWorkspace(page, cloneWorkspaceName);
+      await WorkspaceCard.deleteWorkspace(page, duplicateWorkspaceName);
 
       // Verify Delete action was successful.
-      expect(await WorkspaceCard.findCard(page, cloneWorkspaceName)).toBeFalsy();
+      expect(await WorkspaceCard.findCard(page, duplicateWorkspaceName)).toBeFalsy();
     });
 
-    test('OWNER can clone workspace via Workspace action menu', async () => {
+    test('OWNER can duplicate workspace via Workspace action menu', async () => {
       const workspaceCard = await findOrCreateWorkspace(page);
       await workspaceCard.clickWorkspaceName();
 
@@ -60,7 +60,7 @@ describe('Clone workspace', () => {
 
       // Fill out Workspace Name
       await (await workspacesPage.getWorkspaceNameTextbox()).clear();
-      const cloneWorkspaceName = await workspacesPage.fillOutWorkspaceName();
+      const duplicateWorkspaceName = await workspacesPage.fillOutWorkspaceName();
       // select "Share workspace with same set of collaborators radiobutton
       await workspacesPage.clickShareWithCollaboratorsCheckbox();
 
@@ -68,11 +68,11 @@ describe('Clone workspace', () => {
       await finishButton.waitUntilEnabled();
       await workspacesPage.clickCreateFinishButton(finishButton);
 
-      // Clone workspace Data page is loaded.
+      // Duplicate workspace Data page is loaded.
       await dataPage.waitForLoad();
-      expect(page.url()).toContain(cloneWorkspaceName.replace(/-/g, '')); // Remove dash from workspace name
+      expect(page.url()).toContain(duplicateWorkspaceName.replace(/-/g, '')); // Remove dash from workspace name
 
-      // Delete clone workspace via Workspace action dropdown menu.
+      // Delete duplicate workspace via Workspace action dropdown menu.
       await dataPage.deleteWorkspace();
     });
 

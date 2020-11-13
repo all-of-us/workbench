@@ -303,7 +303,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 .flatMap(cs -> cs.getConceptIds().stream())
                 .collect(Collectors.toList());
 
-    if (!domain.equals(Domain.PERSON)) {
+    if (supportsConceptSets(domain)) {
       mergedQueryParameterValues.put(
           "conceptIds", QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
       queryBuilder
@@ -325,7 +325,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
               .map(QueryAndParameters::getQuery)
               .collect(Collectors.joining(" UNION DISTINCT "));
       queryBuilder.append(
-          !domain.equals(Domain.PERSON)
+          supportsConceptSets(domain)
               ? " AND PERSON_ID in (" + unionedCohortQuery + ")"
               : " WHERE PERSON_ID in (" + unionedCohortQuery + ")");
 
@@ -588,6 +588,13 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           .append(")");
     }
 
+    if (domain == Domain.FITBIT_HEART_RATE_LEVEL || domain == Domain.FITBIT_INTRADAY_STEPS) {
+      queryBuilder.append("\nGROUP BY PERSON_ID");
+      if (valuesLinkingPair.getSelects().stream().filter(select -> select.contains("DATE")).count()
+          == 1) {
+        queryBuilder.append(", DATE");
+      }
+    }
     return buildQueryJobConfiguration(cohortParameters, queryBuilder.toString());
   }
 
@@ -613,7 +620,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   private boolean supportsConceptSets(Domain domain) {
-    return domain != Domain.PERSON;
+    return domain != Domain.PERSON
+        && domain != Domain.FITBIT_ACTIVITY
+        && domain != Domain.FITBIT_HEART_RATE_LEVEL
+        && domain != Domain.FITBIT_HEART_RATE_SUMMARY
+        && domain != Domain.FITBIT_INTRADAY_STEPS;
   }
 
   // Gather all the concept IDs from the ConceptSets provided, taking account of

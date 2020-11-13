@@ -509,10 +509,12 @@ export const RuntimePanel = fp.flow(
   const {profile} = profileState;
 
   const {hasMicroarrayData} = fp.find({cdrVersionId}, cdrVersionListResponse.items) || {hasMicroarrayData: false};
-  const [currentRuntime, setRequestedRuntime] = useCustomRuntime(namespace);
+  const [{currentRuntime, pendingRuntime}, setRequestedRuntime] = useCustomRuntime(namespace);
 
-  const {status = null, dataprocConfig = null, gceConfig = {diskSize: defaultDiskSize}} = currentRuntime || {} as Partial<Runtime>;
-  const [, setRuntimeStatus] = useRuntimeStatus(namespace);
+  // Prioritize the "pendingRuntime", if any. When an update is pending, we want
+  // to render the target runtime details, which  may not match the current runtime.
+  const {dataprocConfig = null, gceConfig = {diskSize: defaultDiskSize}} = pendingRuntime || currentRuntime || {} as Partial<Runtime>;
+  const [status, setRuntimeStatus] = useRuntimeStatus(namespace);
   const diskSize = dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.diskSize;
   const machineName = dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
   const initialMasterMachine = findMachineByName(machineName) || defaultMachineType;
@@ -525,7 +527,7 @@ export const RuntimePanel = fp.flow(
   const [selectedCompute, setSelectedCompute] = useState<ComputeType>(initialCompute);
   const [selectedDataprocConfig, setSelectedDataprocConfig] = useState<DataprocConfig | null>(dataprocConfig);
 
-  const runtimeExists = status && status !== RuntimeStatus.Deleted;
+  const runtimeExists = (status && status !== RuntimeStatus.Deleted) || !!pendingRuntime;
 
   const initialRuntimeConfig = {
     computeType: initialCompute,

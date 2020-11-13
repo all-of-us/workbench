@@ -279,10 +279,11 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
       const {cdrVersionListResponse, searchTerms, source, workspace: {cdrVersionId}} = this.props;
       const cdrVersions = cdrVersionListResponse.items;
       this.setState({cdrVersion: cdrVersions.find(cdr => cdr.cdrVersionId === cdrVersionId)});
-      if (source === 'concept' && searchTerms !== '') {
-        this.getResults(searchTerms);
-      } else if (source === 'conceptSetDetails') {
+      if (source === 'conceptSetDetails') {
         this.setState({data: this.props.concept});
+      } else {
+        const searchString = searchTerms || '';
+        this.getResults(searchString);
       }
     }
 
@@ -313,7 +314,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
         this.setState({data: null, error: false, loading: true, searching: true, standardOnly: false});
         const {searchContext: {domain}, source, selectedSurvey, workspace: {cdrVersionId}} = this.props;
         const resp = await cohortBuilderApi().findCriteriaByDomainAndSearchTerm(+cdrVersionId, domain, value.trim(), selectedSurvey);
-        const data = source !== 'criteria' && domain === Domain.SURVEY
+        const data = source !== 'criteria' && this.isSurvey
           ? resp.items.filter(survey => survey.subtype === CriteriaSubType.QUESTION.toString())
           : resp.items;
         if (data.length && this.checkSource) {
@@ -412,6 +413,22 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
       }
     }
 
+    get textInputPlaceholder() {
+      const {searchContext: {domain}, selectedSurvey, source} = this.props;
+      switch (source) {
+        case 'concept':
+          return `Search ${!!selectedSurvey ? selectedSurvey : domainToTitle(domain)} by code or description`;
+        case 'conceptSetDetails':
+          return `Search ${this.isSurvey ? 'across all ' : ''}${domainToTitle(domain)} by code or description`;
+        case 'criteria':
+          return `Search ${domainToTitle(domain)} by code or description`;
+      }
+    }
+
+    get isSurvey() {
+      return this.props.searchContext.domain === Domain.SURVEY;
+    }
+
     renderRow(row: any, child: boolean, elementId: string) {
       const {hoverId, ingredients} = this.state;
       const attributes = this.props.source === 'criteria' && row.hasAttributes;
@@ -484,7 +501,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
             <ClrIcon shape='search' size='18'/>
             <TextInput style={styles.searchInput}
                        value={searchTerms}
-                       placeholder={`Search ${domainToTitle(domain)} by code or description`}
+                       placeholder={this.textInputPlaceholder}
                        onChange={(e) => this.setState({searchTerms: e})}
                        onKeyPress={this.handleInput} />
             {source === 'conceptSetDetails' && searching && <Clickable style={styles.clearSearchIcon}
