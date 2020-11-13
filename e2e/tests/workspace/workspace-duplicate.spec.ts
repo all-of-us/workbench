@@ -133,7 +133,7 @@ describe('Duplicate workspace', () => {
     await workspacesPage.selectCdrVersion(config.defaultCdrVersionName);
 
     const upgradeMessage = await workspacesPage.getCdrVersionUpgradeMessage();
-    expect(upgradeMessage).toContain(`You're duplicating the workspace "${originalWorkspaceName}" to upgrade from`);
+    expect(upgradeMessage).toContain(originalWorkspaceName);
     expect(upgradeMessage).toContain(`${config.altCdrVersionName} to ${config.defaultCdrVersionName}.`);
 
     const finishButton = await workspacesPage.getDuplicateWorkspaceButton();
