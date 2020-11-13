@@ -11,7 +11,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.pmiops.workbench.model.ArchivalStatus;
-import org.pmiops.workbench.model.CdrFitBitData;
 import org.pmiops.workbench.model.DataAccessLevel;
 
 @Entity
