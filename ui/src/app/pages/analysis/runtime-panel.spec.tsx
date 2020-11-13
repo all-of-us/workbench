@@ -93,8 +93,10 @@ describe('RuntimePanel', () => {
     await waitOneTickAndUpdate(wrapper);
   }
 
-  const clickCustomizeButton = async(wrapper) => {
+  const mustClickCustomizeButton = async(wrapper) => {
     const customizeButton = wrapper.find(Button).find({'aria-label': 'Customize'}).first();
+    expect(customizeButton.exists()).toBeTruthy();
+
     act(() => {customizeButton.simulate('click')});
     await waitOneTickAndUpdate(wrapper);
   }
@@ -122,6 +124,19 @@ describe('RuntimePanel', () => {
     expect(!wrapper.exists(Spinner));
   });
 
+  it('should show Create panel when no runtime', async() => {
+    runtimeApiStub.runtime = null;
+    act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
+
+    const wrapper = component();
+    await handleUseEffect(wrapper);
+    await waitOneTickAndUpdate(wrapper);
+
+    const computeDefaults = wrapper.find('#compute-resources').first();
+    // defaults to generalAnalysis preset, which is a n1-standard-4 machine with a 50GB disk
+    expect(computeDefaults.text()).toEqual('- Default: compute size of 4 CPUs, 15 GB memory, and a 50 GB disk')
+  });
+
   it('should allow creation when no runtime exists with defaults', async() => {
     runtimeApiStub.runtime = null;
     act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
@@ -144,7 +159,7 @@ describe('RuntimePanel', () => {
     await handleUseEffect(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
-    await clickCustomizeButton(wrapper);
+    await mustClickCustomizeButton(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
     await pickMainCpu(wrapper, 8);
@@ -171,7 +186,7 @@ describe('RuntimePanel', () => {
     await handleUseEffect(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
-    await clickCustomizeButton(wrapper);
+    await mustClickCustomizeButton(wrapper);
 
     // master settings
     await pickMainCpu(wrapper, 2);
@@ -211,7 +226,7 @@ describe('RuntimePanel', () => {
     await handleUseEffect(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
-    await clickCustomizeButton(wrapper);
+    await mustClickCustomizeButton(wrapper);
 
     // Ensure set the form to something non-standard to start
     await pickMainCpu(wrapper, 8);
@@ -238,7 +253,7 @@ describe('RuntimePanel', () => {
     await handleUseEffect(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
-    await clickCustomizeButton(wrapper);
+    await mustClickCustomizeButton(wrapper);
 
     await pickPreset(wrapper, runtimePresets.hailAnalysis);
 
@@ -260,7 +275,7 @@ describe('RuntimePanel', () => {
     await handleUseEffect(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
-    await clickCustomizeButton(wrapper);
+    await mustClickCustomizeButton(wrapper);
 
     // Configure the form - we expect all of the changes to be overwritten by
     // the Hail preset selection.
@@ -294,7 +309,7 @@ describe('RuntimePanel', () => {
     await handleUseEffect(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
-    await clickCustomizeButton(wrapper);
+    await mustClickCustomizeButton(wrapper);
 
     // Take the preset but make a solitary modification.
     await pickPreset(wrapper, runtimePresets.hailAnalysis);
@@ -315,7 +330,7 @@ describe('RuntimePanel', () => {
     await handleUseEffect(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
-    await clickCustomizeButton(wrapper);
+    await mustClickCustomizeButton(wrapper);
 
     // Take the preset, make a change, then revert.
     await pickPreset(wrapper, runtimePresets.generalAnalysis);
