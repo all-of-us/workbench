@@ -2,7 +2,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import Iframe from 'react-iframe';
 
-import {urlParamsStore} from 'app/utils/navigation';
+import {navigate, urlParamsStore} from 'app/utils/navigation';
 import {fetchAbortableRetry} from 'app/utils/retry';
 import {RuntimeStore} from 'app/utils/stores';
 
@@ -297,11 +297,25 @@ export const NotebookRedirect = fp.flow(
     }
 
 
-    componentDidUpdate() {
+    componentDidUpdate(prevProps: Props) {
+      const {runtimeStore: {runtime}, workspace} = this.props;
+
       // Only kick off the initialization process once the runtime is loaded.
-      if (this.state.progress === Progress.Unknown &&
-            this.props.runtimeStore.runtime !== undefined) {
-        this.initializeRuntimeStatusChecking(this.props.workspace.namespace);
+      if (this.state.progress === Progress.Unknown && runtime !== undefined) {
+        this.initializeRuntimeStatusChecking(workspace.namespace);
+      }
+
+      // If we're already loaded (viewing the notebooks iframe), and the
+      // runtime transitions out of the "running" state, navigate back to
+      // the preview page as the iframe will start erroring.
+      const {status: prevStatus = null} = prevProps.runtimeStore.runtime || {};
+      const isLoaded = this.state.progress === Progress.Loaded;
+      if (isLoaded && prevStatus === RuntimeStatus.Running &&
+          runtime !== undefined && (runtime === null || runtime.status !== RuntimeStatus.Running)) {
+        navigate([
+          'workspaces', workspace.namespace, workspace.id,
+          'notebooks', 'preview', encodeURIComponent(this.getFullNotebookName())
+        ]);
       }
     }
 
@@ -351,7 +365,7 @@ export const NotebookRedirect = fp.flow(
         this.incrementProgress(Progress.Copying);
         const fullNotebookName = this.getFullNotebookName();
         const localizedNotebookDir =
-            await this.localizeNotebooks(runtime, [fullNotebookName]);
+            await this.localizeNotebooks([fullNotebookName]);
         return `${localizedNotebookDir}/${fullNotebookName}`;
       }
     }
@@ -364,7 +378,7 @@ export const NotebookRedirect = fp.flow(
       } else {
         fileContent.metadata = pyNotebookMetadata;
       }
-      const localizedDir = await this.localizeNotebooks(runtime, []);
+      const localizedDir = await this.localizeNotebooks([]);
       // Use the Jupyter Server API directly to create a new notebook. This
       // API handles notebook name collisions and matches the behavior of
       // clicking 'new notebook' in the Jupyter UI.
@@ -379,7 +393,7 @@ export const NotebookRedirect = fp.flow(
       return `${localizedDir}/${jupyterResp.name}`;
     }
 
-    private async localizeNotebooks(runtime: Runtime, notebookNames: Array<string>) {
+    private async localizeNotebooks(notebookNames: Array<string>) {
       const {workspace} = this.props;
       const resp = await this.runtimeRetry(() => runtimeApi().localize(
         workspace.namespace, {
