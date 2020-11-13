@@ -208,7 +208,7 @@ const css = `
 export const CohortSearch = withCurrentCohortSearchContext()(class extends React.Component<Props, State> {
   subscription: Subscription;
   growl: any;
-  growlTimer: number;
+  growlTimer: NodeJS.Timer;
   constructor(props: Props) {
     super(props);
     this.state = {

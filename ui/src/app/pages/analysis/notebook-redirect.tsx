@@ -230,7 +230,7 @@ export const NotebookRedirect = fp.flow(
 )(
   class extends React.Component<Props, State> {
 
-    private redirectTimer: number;
+    private redirectTimer: NodeJS.Timeout;
     private pollAborter = new AbortController();
 
     constructor(props) {

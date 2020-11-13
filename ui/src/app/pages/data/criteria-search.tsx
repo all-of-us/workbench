@@ -92,7 +92,7 @@ interface State {
 }
 export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(class extends React.Component<Props, State>  {
   growl: any;
-  growlTimer: number;
+  growlTimer: NodeJS.Timer;
   subscription: Subscription;
 
   constructor(props: Props) {

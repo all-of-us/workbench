@@ -15,6 +15,7 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {CriteriaType, Domain, Modifier, ModifierType, ResourceType, SearchGroupItem as Item, SearchRequest} from 'generated/fetch';
 import {Menu} from 'primereact/menu';
 import {OverlayPanel} from 'primereact/overlaypanel';
+import Timeout = NodeJS.Timeout;
 
 const styles = reactStyles({
   menu: {
@@ -140,7 +141,7 @@ interface State {
   loading: boolean;
   paramListOpen: boolean;
   renaming: boolean;
-  timeout: number;
+  timeout: Timeout;
 }
 
 export const SearchGroupItem = withCurrentWorkspace()(
