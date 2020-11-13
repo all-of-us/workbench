@@ -469,6 +469,7 @@ set d.all_concept_count = c.all_concept_count, d.standard_concept_count = c.stan
 FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
 WHERE vocabulary_id = 'PPI'
 AND domain_id = 'Measurement'
+AND (count_value > 0 or source_count_value > 0)
 AND concept_class_id = 'Clinical Observation') c
 where d.domain = 10"
 

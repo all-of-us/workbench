@@ -43,6 +43,25 @@ public interface ConceptDao extends CrudRepository<DbConcept, Long> {
               + "order by c.sourceCountValue desc")
   Page<DbConcept> findConcepts(String keyword, String domainId, Pageable page);
 
+  @Query(
+      value =
+          "select distinct c from DbConcept c "
+              + "where (c.countValue > 0 or c.sourceCountValue > 0) "
+              + "and matchConcept(c.conceptName, c.conceptCode, c.vocabularyId, c.synonymsStr, ?1) > 0 "
+              + "and c.domainId = 'Measurement' "
+              + "and c.vocabularyId = 'PPI' "
+              + "and c.conceptClassId = 'Clinical Observation'")
+  Page<DbConcept> findPMConcepts(String keyword, Pageable page);
+
+  @Query(
+      value =
+          "select distinct c from DbConcept c "
+              + "where (c.countValue > 0 or c.sourceCountValue > 0) "
+              + "and c.domainId = 'Measurement' "
+              + "and c.vocabularyId = 'PPI' "
+              + "and c.conceptClassId = 'Clinical Observation'")
+  Page<DbConcept> findPMConcepts(Pageable page);
+
   /**
    * Return standard or all concepts in each vocabulary for the specified domain matching the
    * specified expression, matching concept name, synonym, ID, or code.
