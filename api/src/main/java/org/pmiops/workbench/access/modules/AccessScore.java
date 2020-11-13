@@ -1,4 +1,4 @@
-package org.pmiops.workbench.access;
+package org.pmiops.workbench.access.modules;
 
 /**
  * Possible scores or error conditions for access modules. Do not assume that the ordering is

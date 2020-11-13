@@ -1,11 +1,10 @@
-package org.pmiops.workbench.access;
+package org.pmiops.workbench.access.modules;
 
 import java.util.Optional;
 import java.util.logging.Logger;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.compliance.MoodleBadge;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.monitoring.LogsBasedMetricServiceImpl;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
 
