@@ -11,7 +11,8 @@ import {renderResourceCard} from 'app/components/render-resource-card';
 import {ResourceNavigation, StyledResourceType} from 'app/components/resource-card';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {userMetricsApi} from 'app/services/swagger-fetch-clients';
-import {formatWorkspaceResourceDisplayDate, getCdrVersion, reactStyles, withCdrVersions} from 'app/utils';
+import {formatWorkspaceResourceDisplayDate, reactStyles, withCdrVersions} from 'app/utils';
+import {getCdrVersion} from 'app/utils/cdr-versions';
 import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import {getDisplayName, isNotebook} from 'app/utils/resources';
 import {

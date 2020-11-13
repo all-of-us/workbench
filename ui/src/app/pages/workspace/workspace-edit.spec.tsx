@@ -1,17 +1,18 @@
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+import {mount, ReactWrapper, ShallowWrapper} from 'enzyme';
+
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {cdrVersionStore, currentWorkspaceStore, navigate, routeConfigDataStore, serverConfigStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {mount, ReactWrapper, ShallowWrapper} from 'enzyme';
-import {DisseminateResearchEnum, ResearchOutcomeEnum,
-  SpecificPopulationEnum,UserApi, Workspace, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
+import {DisseminateResearchEnum, ResearchOutcomeEnum, SpecificPopulationEnum,UserApi, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {UserApiStub} from 'testing/stubs/user-api-stub';
 import {WorkspacesApiStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
 import {WorkspaceEdit, WorkspaceEditMode} from 'app/pages/workspace/workspace-edit';
 import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
+import {CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 
 jest.mock('app/utils/navigation', () => ({
   ...(jest.requireActual('app/utils/navigation')),
@@ -184,8 +185,6 @@ describe('WorkspaceEdit', () => {
     // Clicking the icon should collapse all the research purpose sub-categories
     wrapper.find('[data-test-id="research-purpose-button"]').first().simulate('click');
     expect(wrapper.find('[data-test-id="research-purpose-categories"]').length).toBe(0);
-
-
   });
 
   it('supports disable save button if Research Outcome is not answered', async () => {
@@ -214,6 +213,42 @@ describe('WorkspaceEdit', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(workspacesApi.workspaces.length).toEqual(numBefore + 1);
     expect(navigate).toHaveBeenCalledTimes(1);
+  });
+
+  it('defaults to upgrading the CDR Version when duplicating a workspace with an older CDR Version', async() => {
+    // init the workspace to a non-default CDR version value
+    const altCdrWorkspace = {...workspace, cdrVersionId: CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION_ID}
+    currentWorkspaceStore.next(altCdrWorkspace);
+
+    // duplication will involve a CDR version upgrade by default
+    routeConfigDataStore.next({mode: WorkspaceEditMode.Duplicate});
+
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    const cdrSelection = wrapper.find('[data-test-id="select-cdr-version"]').find('select').props().value;
+
+    // default CDR version, not the existing workspace's alt CDR version
+    expect(cdrSelection).toBe(CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID);
+
+    const expectedUpgradeMessage = `${CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION} to ${CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION}.`;
+    const cdrUpgradeMessage = wrapper.find('[data-test-id="cdr-version-upgrade"]').first().text();
+    expect(cdrUpgradeMessage).toContain(altCdrWorkspace.name);
+    expect(cdrUpgradeMessage).toContain(expectedUpgradeMessage);
+  });
+
+  it('does not display the CDR Version upgrade message when duplicating a workspace with the latest CDR Version', async() => {
+    // the standard test workspace already has the latest CDR Version but let's make it explicit with a new const
+    const defaultCdrWorkspace = {...workspace, cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID}
+    currentWorkspaceStore.next(defaultCdrWorkspace);
+
+    routeConfigDataStore.next({mode: WorkspaceEditMode.Duplicate});
+
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    // upgrade message does not appear
+    expect(wrapper.find('[data-test-id="cdr-version-upgrade"]').exists()).toBeFalsy();
   });
 
   // regression test for RW-5132

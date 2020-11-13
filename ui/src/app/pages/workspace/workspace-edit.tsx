@@ -1,3 +1,7 @@
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+import * as validate from 'validate.js';
+
 import {Location} from '@angular/common';
 import {Component} from '@angular/core';
 import {Button, Clickable, Link, StyledAnchorTag} from 'app/components/buttons';
@@ -43,6 +47,7 @@ import {
   withUserProfile
 } from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
+import {getCdrVersion, hasDefaultCdrVersion} from 'app/utils/cdr-versions';
 import {reportError} from 'app/utils/errors';
 import {currentWorkspaceStore, navigate, nextWorkspaceWarmupStore, serverConfigStore} from 'app/utils/navigation';
 import {getBillingAccountInfo} from 'app/utils/workbench-gapi-client';
@@ -62,11 +67,8 @@ import {
   Workspace,
   WorkspaceAccessLevel
 } from 'generated/fetch';
-import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import {OverlayPanel} from 'primereact/overlaypanel';
-import * as React from 'react';
-import * as validate from 'validate.js';
 
 export const styles = reactStyles({
   categoryRow: {
@@ -169,6 +171,20 @@ export const styles = reactStyles({
     cursor: 'pointer',
     textDecoration: 'none'
   },
+  cdrVersionUpgrade: {
+    padding: '16px',
+    boxSizing: 'border-box',
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderRadius: '5px',
+    color: colors.primary,
+    fontFamily: 'Montserrat',
+    letterSpacing: 0,
+    lineHeight: '22px',
+    borderColor: colors.accent,
+    backgroundColor: colorWithWhiteness(colors.accent, 0.85),
+    maxWidth: 'fit-content',
+  },
 });
 
 const CREATE_BILLING_ACCOUNT_OPTION_VALUE = 'CREATE_BILLING_ACCOUNT_OPTION';
@@ -193,6 +209,22 @@ function getDiseaseNames(keyword) {
   });
 }
 
+interface UpgradeProps {
+  srcWorkspace: Workspace;
+  destWorkspace: Workspace;
+  cdrVersionListResponse: CdrVersionListResponse;
+}
+const CdrVersionUpgrade = (props: UpgradeProps) => {
+  const {srcWorkspace, destWorkspace, cdrVersionListResponse} = props;
+  const fromCdrVersion = <span style={{fontWeight: 'bold'}}>{getCdrVersion(srcWorkspace, cdrVersionListResponse).name}</span>;
+  const toCdrVersion = <span style={{fontWeight: 'bold'}}>{getCdrVersion(destWorkspace, cdrVersionListResponse).name}</span>;
+
+  return <div data-test-id='cdr-version-upgrade' style={styles.cdrVersionUpgrade}>
+    <div>{`You're duplicating the workspace "${srcWorkspace.name}" to upgrade from`} {fromCdrVersion} to {toCdrVersion}.</div>
+    <div>Your original workspace will be unaffected. To work with the new data, simply use the new workspace.</div>
+  </div>;
+};
+
 export interface WorkspaceEditProps {
   routeConfigData: any;
   cdrVersionListResponse: CdrVersionListResponse;
@@ -202,7 +234,6 @@ export interface WorkspaceEditProps {
     profile: Profile;
   };
 }
-
 
 export interface WorkspaceEditState {
   cdrVersionItems: Array<CdrVersion>;
@@ -315,7 +346,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
      * "reviewRequested" flag, which depend on the workspace state & edit mode.
      */
     createInitialWorkspaceState(): Workspace {
-      let workspace: Workspace = this.props.workspace;
+      // copy the props into a new object so our modifications here don't affect them
+      let workspace: Workspace = {...this.props.workspace};
       if (this.isMode(WorkspaceEditMode.Create)) {
         workspace = {
           name: '',
@@ -366,13 +398,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         workspace.researchPurpose.reviewRequested = false;
       }
 
-      const selectedCdrIsLive = this.getLiveCdrVersions().some(
-        cdr => cdr.cdrVersionId === workspace.cdrVersionId);
       // We preselect the default CDR version when a new workspace is being
-      // created (via create or duplicate), but leave as-is if the selected CDR
-      // version is live.
-      if (this.isMode(WorkspaceEditMode.Create) ||
-        (this.isMode(WorkspaceEditMode.Duplicate) && !selectedCdrIsLive)) {
+      // created (via create or duplicate)
+      if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
         workspace.cdrVersionId = this.props.cdrVersionListResponse.defaultCdrVersionId;
       }
 
@@ -797,6 +825,16 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       return options;
     }
 
+    // are we currently performing a CDR Version Upgrade?
+    // i.e. a Duplication from a workspace with an older CDR Version to the default version
+    isCdrVersionUpgrade() {
+      const {workspace: srcWorkspace} = this.props;
+      const {workspace: destWorkspace} = this.state;
+      return this.isMode(WorkspaceEditMode.Duplicate) &&
+          srcWorkspace.cdrVersionId !== destWorkspace.cdrVersionId &&
+          hasDefaultCdrVersion(destWorkspace, this.props.cdrVersionListResponse);
+    }
+
     /**
      * Validates the current workspace state. This is a pass-through to validate.js
      * which returns the standard error object if any validation errors occur.
@@ -966,6 +1004,11 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       return <FadeBox  style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
         <div style={{width: '1120px'}}>
           {loading && <SpinnerOverlay overrideStylesOverlay={styles.spinner}/>}
+          {this.isCdrVersionUpgrade() && <CdrVersionUpgrade
+              srcWorkspace={this.props.workspace}
+              destWorkspace={this.state.workspace}
+              cdrVersionListResponse={this.props.cdrVersionListResponse}
+          />}
           <WorkspaceEditSection header={this.renderHeader()} tooltip={toolTipText.header}
                                 style={{marginTop: '24px'}} largeHeader
                                 required={!this.isMode(WorkspaceEditMode.Duplicate)}>
@@ -976,7 +1019,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             <TooltipTrigger
                 content='To use a different dataset version, duplicate or create a new workspace.'
                 disabled={!(this.isMode(WorkspaceEditMode.Edit))}>
-              <div style={styles.select}>
+              <div data-test-id='select-cdr-version' style={styles.select}>
                 <select style={{borderColor: 'rgb(151, 151, 151)', borderRadius: '6px',
                   height: '1.5rem', width: '12rem'}}
                   value={cdrVersionId}

@@ -16,8 +16,9 @@ import {ResetRuntimeButton} from 'app/pages/analysis/reset-runtime-button';
 import {ResearchPurpose} from 'app/pages/workspace/research-purpose';
 import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {getCdrVersion, reactStyles, ReactWrapperBase, withCdrVersions, withUrlParams, withUserProfile} from 'app/utils';
+import {reactStyles, ReactWrapperBase, withCdrVersions, withUrlParams, withUserProfile} from 'app/utils';
 import {AuthorityGuardedAction, hasAuthorityForAction} from 'app/utils/authorities';
+import {getCdrVersion} from 'app/utils/cdr-versions';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {
   BillingAccountType,
