@@ -1,7 +1,8 @@
-import {WorkspaceNavBarReact} from 'app/pages/workspace/workspace-nav-bar';
-import {cdrVersionStore, currentWorkspaceStore, NavStore, serverConfigStore, urlParamsStore} from 'app/utils/navigation';
 import {mount} from 'enzyme';
 import * as React from 'react';
+
+import {WorkspaceNavBarReact} from 'app/pages/workspace/workspace-nav-bar';
+import {cdrVersionStore, currentWorkspaceStore, NavStore, serverConfigStore, urlParamsStore} from 'app/utils/navigation';
 import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 import {cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
@@ -58,13 +59,16 @@ describe('WorkspaceNavBarComponent', () => {
 
   });
 
-  it('should display the default CDR Version', () => {
+  it('should display the default CDR Version with no new version flag or upgrade modal visible', () => {
     const wrapper = component();
     expect(wrapper.find({'data-test-id': 'cdr-version'}).first().text())
         .toEqual(CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION);
+
+    expect(wrapper.find({'data-test-id': 'new-version-flag'}).exists()).toBeFalsy();
+    expect(wrapper.find({'data-test-id': 'cdr-version-upgrade-modal'}).exists()).toBeFalsy();
   })
 
-  it('should display an alternative CDR Version', () => {
+  it('should display an alternative CDR Version with a new version flag', () => {
     const altWorkspace = workspaceDataStub;
     altWorkspace.cdrVersionId = CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION_ID;
     currentWorkspaceStore.next(altWorkspace);
@@ -72,6 +76,23 @@ describe('WorkspaceNavBarComponent', () => {
     const wrapper = component();
     expect(wrapper.find({'data-test-id': 'cdr-version'}).first().text())
         .toEqual(CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION);
+
+    expect(wrapper.find({'data-test-id': 'new-version-flag'}).exists()).toBeTruthy();
+    expect(wrapper.find({'data-test-id': 'cdr-version-upgrade-modal'}).exists()).toBeFalsy();
   })
 
+  it('clicks the new version flag which should pop up the version upgrade modal', () => {
+    const altWorkspace = workspaceDataStub;
+    altWorkspace.cdrVersionId = CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION_ID;
+    currentWorkspaceStore.next(altWorkspace);
+
+    const wrapper = component();
+
+    expect(wrapper.find({'data-test-id': 'cdr-version-upgrade-modal'}).exists()).toBeFalsy();
+
+    const flag = wrapper.find({'data-test-id': 'new-version-flag'});
+    flag.simulate('click');
+
+    expect(wrapper.find({'data-test-id': 'cdr-version-upgrade-modal'}).exists()).toBeTruthy();
+  })
 });
