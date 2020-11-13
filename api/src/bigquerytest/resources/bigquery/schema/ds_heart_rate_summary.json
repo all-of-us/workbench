@@ -1,0 +1,37 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "person_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "date",
+    "type": "DATE"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "zone_name",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "min_heart_rate",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "max_heart_rate",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "minute_in_zone",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "calorie_count",
+    "type": "FLOAT"
+  }
+]
