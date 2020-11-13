@@ -8,9 +8,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
 
-/**
- * Intermediate class for working with with Moodle-backed access module requirements.
- */
+/** Intermediate class for working with with Moodle-backed access module requirements. */
 public abstract class MoodleBadgeAccessModule implements AccessModuleService {
   private static final Logger log = Logger.getLogger(MoodleBadgeAccessModule.class.getName());
 
@@ -22,13 +20,15 @@ public abstract class MoodleBadgeAccessModule implements AccessModuleService {
 
   /**
    * Use the Moodle API to establish whether the user has access to the correct module
+   *
    * @param user
    * @return
    */
   @Override
   public AccessScore scoreUser(DbUser user) {
     try {
-      final Optional<BadgeDetailsV2> details = complianceService.getUserBadgeDetails(user.getUsername(), getBadge());
+      final Optional<BadgeDetailsV2> details =
+          complianceService.getUserBadgeDetails(user.getUsername(), getBadge());
       return details.map(this::badgeDetailsToAccessScore).orElse(AccessScore.NOT_ATTEMPTED);
     } catch (ApiException e) {
       log.warning(e.getMessage());
@@ -37,8 +37,9 @@ public abstract class MoodleBadgeAccessModule implements AccessModuleService {
   }
 
   /**
-   * A Moodle "Badge" corresponds to one trraining course, which maps to an individual
-   * AccessModule in AoU. Implementers need to return the badge name
+   * A Moodle "Badge" corresponds to one trraining course, which maps to an individual AccessModule
+   * in AoU. Implementers need to return the badge name
+   *
    * @return
    */
   public abstract MoodleBadge getBadge();

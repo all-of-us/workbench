@@ -37,5 +37,6 @@ public interface ComplianceService {
    */
   Map<MoodleBadge, BadgeDetailsV2> getUserBadgesByBadgeName(String username) throws ApiException;
 
-  Optional<BadgeDetailsV2> getUserBadgeDetails(String username, MoodleBadge moodleBadge) throws ApiException;
+  Optional<BadgeDetailsV2> getUserBadgeDetails(String username, MoodleBadge moodleBadge)
+      throws ApiException;
 }

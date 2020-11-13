@@ -4,8 +4,7 @@ import org.pmiops.workbench.db.model.DbUser;
 
 public class BetaAccessModule implements AccessModuleService {
 
-  public BetaAccessModule() {
-  }
+  public BetaAccessModule() {}
 
   @Override
   public AccessModuleKey getKey() {
@@ -14,6 +13,7 @@ public class BetaAccessModule implements AccessModuleService {
 
   /**
    * BETA Access is always pending.
+   *
    * @param user
    * @return
    */

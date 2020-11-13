@@ -6,12 +6,15 @@ import org.pmiops.workbench.access.modules.AccessModuleKey;
 import org.pmiops.workbench.access.modules.AccessModuleService;
 import org.pmiops.workbench.access.modules.AccessScore;
 import org.pmiops.workbench.db.model.DbUser;
+import org.springframework.stereotype.Service;
 
-public abstract class AccessPolicyServiceAbstractImpl implements AccessPolicyService {
+@Service
+public class AccessPolicyEvaluatorServiceImpl implements AccessPolicyEvaluatorService {
 
   private final Map<AccessModuleKey, AccessModuleService> moduleKeyAccessModuleService;
 
-  public AccessPolicyServiceAbstractImpl(Map<AccessModuleKey, AccessModuleService> moduleKeyAccessModuleService) {
+  public AccessPolicyEvaluatorServiceImpl(
+      Map<AccessModuleKey, AccessModuleService> moduleKeyAccessModuleService) {
     this.moduleKeyAccessModuleService = moduleKeyAccessModuleService;
   }
 

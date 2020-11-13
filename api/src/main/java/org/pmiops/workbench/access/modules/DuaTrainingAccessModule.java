@@ -7,8 +7,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class DuaTrainingAccessModule extends MoodleBadgeAccessModule {
 
-  public DuaTrainingAccessModule(
-      ComplianceService complianceService) {
+  public DuaTrainingAccessModule(ComplianceService complianceService) {
     super(complianceService);
   }
 

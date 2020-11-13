@@ -2,10 +2,8 @@ package org.pmiops.workbench.access.modules;
 
 import org.pmiops.workbench.db.model.DbUser;
 
-/**
- * Access Module test fake.
- */
-public abstract class FakeAccessModule implements AccessModuleService {
+/** Access Module test fake. */
+public class FakeAccessModule implements AccessModuleService {
 
   private final AccessModuleKey accessModuleKey;
   private final AccessScore constantAccessScore;

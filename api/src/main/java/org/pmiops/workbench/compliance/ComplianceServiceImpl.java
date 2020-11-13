@@ -32,7 +32,6 @@ public class ComplianceServiceImpl implements ComplianceService {
   private final Provider<WorkbenchConfig> configProvider;
   private final Provider<MoodleApi> moodleApiProvider;
 
-
   @Autowired
   public ComplianceServiceImpl(
       CloudStorageService cloudStorageService,
@@ -103,7 +102,8 @@ public class ComplianceServiceImpl implements ComplianceService {
    *     registered in Moodle.
    */
   @Override
-  public Map<MoodleBadge, BadgeDetailsV2> getUserBadgesByBadgeName(String username) throws ApiException {
+  public Map<MoodleBadge, BadgeDetailsV2> getUserBadgesByBadgeName(String username)
+      throws ApiException {
     if (!enableMoodleCalls()) {
       return new HashMap<>();
     }
@@ -129,7 +129,8 @@ public class ComplianceServiceImpl implements ComplianceService {
   }
 
   @Override
-  public Optional<BadgeDetailsV2> getUserBadgeDetails(String username, MoodleBadge moodleBadge) throws ApiException {
+  public Optional<BadgeDetailsV2> getUserBadgeDetails(String username, MoodleBadge moodleBadge)
+      throws ApiException {
     return Optional.ofNullable(getUserBadgesByBadgeName(username).get(moodleBadge));
   }
 }

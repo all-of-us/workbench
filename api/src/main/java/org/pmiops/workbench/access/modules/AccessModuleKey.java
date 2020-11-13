@@ -1,8 +1,6 @@
 package org.pmiops.workbench.access.modules;
 
-/**
- * Simple key to allow access policies to refer to individual modules.
- */
+/** Simple key to allow access policies to refer to individual modules. */
 public enum AccessModuleKey {
   DUA_TRAINING,
   RESEARCH_ETHICS_TRAINING,

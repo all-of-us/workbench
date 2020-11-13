@@ -760,8 +760,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       final Map<MoodleBadge, BadgeDetailsV2> userBadgesByName =
           complianceService.getUserBadgesByBadgeName(dbUser.getUsername());
       if (userBadgesByName.containsKey(MoodleBadge.RESEARCH_ETHICS_TRAINING)) {
-        BadgeDetailsV2 complianceBadge =
-            userBadgesByName.get(MoodleBadge.RESEARCH_ETHICS_TRAINING);
+        BadgeDetailsV2 complianceBadge = userBadgesByName.get(MoodleBadge.RESEARCH_ETHICS_TRAINING);
         if (complianceBadge.getValid()) {
           if (dbUser.getComplianceTrainingCompletionTime() == null) {
             // The badge was previously invalid and is now valid.
