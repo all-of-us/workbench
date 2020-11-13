@@ -397,8 +397,10 @@ public class CohortBuilderControllerTest {
                 .conceptCode("myTerm")
                 .standardConcept("")
                 .sourceCountValue(10L)
-                .domainId("Measurement")
-                .vocabularyId(CriteriaType.ICD9CM.toString()));
+                .vocabularyId("PPI")
+                .conceptClassId("Clinical Observation")
+                .count(10L)
+                .domainId("Measurement"));
 
     Criteria criteria =
         new Criteria()

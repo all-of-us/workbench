@@ -184,6 +184,21 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         new PageRequest(0, Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT));
     if (term == null || term.trim().isEmpty()) {
       // return top counts
+      if (Domain.fromValue(domain).equals(Domain.PHYSICAL_MEASUREMENT)) {
+        Page<DbConcept> dbConcepts = conceptDao.findPMConcepts(pageRequest);
+        List<Criteria> criteriaList =
+            dbConcepts.getContent().stream()
+                .map(
+                    c -> {
+                      boolean isStandard = STANDARD_CONCEPTS.contains(c.getStandardConcept());
+                      return cohortBuilderMapper.dbModelToClient(
+                          c, isStandard, isStandard ? c.getCountValue() : c.getSourceCountValue());
+                    })
+                .collect(Collectors.toList());
+        return new CriteriaListWithCountResponse()
+            .items(criteriaList)
+            .totalCount(dbConcepts.getTotalElements());
+      }
       if (Domain.fromValue(domain).equals(Domain.SURVEY)) {
         Long id = cbCriteriaDao.findIdByDomainAndName(domain, surveyName);
         Page<DbCriteria> dbCriteriaPage =
@@ -205,8 +220,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
           .totalCount(dbCriteriaPage.getTotalElements());
     }
     if (Domain.fromValue(domain).equals(Domain.PHYSICAL_MEASUREMENT)) {
-      Page<DbConcept> dbConcepts =
-          conceptDao.findConcepts(modifyTermMatch(term), MEASUREMENT, pageRequest);
+      Page<DbConcept> dbConcepts = conceptDao.findPMConcepts(modifyTermMatch(term), pageRequest);
       List<Criteria> criteriaList =
           dbConcepts.getContent().stream()
               .map(
