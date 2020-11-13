@@ -19,7 +19,7 @@ describe('Duplicate workspace', () => {
    * - Enter a new workspace name and save the duplicate.
    * - Delete duplicate workspace.
    */
-    test('OWNER can duplicate workspace via Workspace card', async () => {
+  test('OWNER can duplicate workspace via Workspace card', async () => {
       const workspaceCard = await findOrCreateWorkspace(page);
 
       await workspaceCard.asElementHandle().hover();
@@ -50,7 +50,7 @@ describe('Duplicate workspace', () => {
       expect(await WorkspaceCard.findCard(page, duplicateWorkspaceName)).toBeFalsy();
     });
 
-    test('OWNER can duplicate workspace via Workspace action menu', async () => {
+  test('OWNER can duplicate workspace via Workspace action menu', async () => {
       const workspaceCard = await findOrCreateWorkspace(page);
       await workspaceCard.clickWorkspaceName();
 
@@ -77,7 +77,27 @@ describe('Duplicate workspace', () => {
       await dataPage.deleteWorkspace();
     });
 
-  test('OWNER can duplicate workspace to an older CDR Version via Workspace card', async () => {
+  test('OWNER cannot duplicate workspace to an older CDR Version without consenting to restrictions', async () => {
+    const workspaceCard: WorkspaceCard = await createWorkspace(page, config.defaultCdrVersionName);
+    await workspaceCard.getWorkspaceName();
+
+    await workspaceCard.asElementHandle().hover();
+    // Click on Ellipsis menu "Duplicate" option.
+    await workspaceCard.selectSnowmanMenu(Option.Duplicate);
+
+    // Fill out Workspace Name should be just enough for successful duplication
+    const workspacesPage = new WorkspacesPage(page);
+    await (await workspacesPage.getWorkspaceNameTextbox()).clear();
+    await workspacesPage.fillOutWorkspaceName();
+
+    // change CDR Version
+    await workspacesPage.selectCdrVersion(config.altCdrVersionName);
+
+    const finishButton = await workspacesPage.getDuplicateWorkspaceButton();
+    expect(await finishButton.isCursorNotAllowed()).toBe(true);
+  });
+
+  test('OWNER can duplicate workspace to an older CDR Version after consenting to restrictions', async () => {
     const workspaceCard: WorkspaceCard = await createWorkspace(page, config.defaultCdrVersionName);
     const originalWorkspaceName = await workspaceCard.getWorkspaceName();
 
@@ -92,6 +112,9 @@ describe('Duplicate workspace', () => {
 
     // change CDR Version
     await workspacesPage.selectCdrVersion(config.altCdrVersionName);
+
+    // wait for the warning modal and consent to the required restrictions
+    await workspacesPage.consentToOldCdrRestrictions();
 
     const finishButton = await workspacesPage.getDuplicateWorkspaceButton();
     await finishButton.waitUntilEnabled();

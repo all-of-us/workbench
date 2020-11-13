@@ -36,6 +36,7 @@ export enum LinkText {
    Cancel = 'Cancel',
    Copy = 'Copy',
    Confirm = 'Confirm',
+   Continue = 'Continue',
    CreateAnotherCohort = 'Create another Cohort',
    CreateAnotherConceptSet = 'Create another Concept Set',
    CreateCohort = 'Create Cohort',

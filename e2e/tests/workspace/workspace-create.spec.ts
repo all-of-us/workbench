@@ -6,6 +6,7 @@ import Button from 'app/element/button';
 import * as testData from 'resources/data/workspace-data';
 import {makeWorkspaceName} from 'utils/str-utils';
 import {UseFreeCredits} from 'app/page/workspace-base';
+import {config} from 'resources/workbench-config';
 
 describe('Creating new workspaces', () => {
 
@@ -70,6 +71,26 @@ describe('Creating new workspaces', () => {
     await workspacesPage.clickCreateFinishButton(finishButton);
 
     await verifyWorkspaceLinkOnDataPage(newWorkspaceName);
+  });
+
+  test('User cannot create a workspace with an old CDR Version without consenting to the restrictions', async () => {
+    const workspacesPage = new WorkspacesPage(page);
+    await workspacesPage.load();
+
+    const editPage = await workspacesPage.fillOutRequiredCreationFields(makeWorkspaceName());
+
+    // select an old CDR Version
+    await editPage.selectCdrVersion(config.altCdrVersionName);
+
+    const createButton = await editPage.getCreateWorkspaceButton();
+    expect(await createButton.isCursorNotAllowed()).toBe(true);
+
+    // fill out the modal checkboxes
+    await editPage.consentToOldCdrRestrictions();
+
+    // now we can continue
+    await createButton.waitUntilEnabled();
+    await workspacesPage.clickCreateFinishButton(createButton);
   });
 
   // helper function to check visible workspace link on Data page
