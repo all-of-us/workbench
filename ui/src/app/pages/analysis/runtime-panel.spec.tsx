@@ -57,6 +57,8 @@ describe('RuntimePanel', () => {
       },
       cdrVersionListResponse
     };
+
+    jest.useFakeTimers();
   });
 
   afterEach(() => {
@@ -373,8 +375,8 @@ describe('RuntimePanel', () => {
   });
 
   it('should enable the Update button if there are updates that do not require delete and runtime is running - number of workers', async() => {
-    const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: mockDataprocConfig};
-    runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
+    const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: mockDataprocConfig, configurationType: RuntimeConfigurationType.UserOverride};
+    act(() => {runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace}); });
 
     const wrapper = component();
     await handleUseEffect(wrapper);

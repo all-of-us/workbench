@@ -341,23 +341,14 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
       // TODO: It is likely more correct here to use the LeoRuntimeInitializer wait for the runtime
       // to reach a terminal status before attempting deletion.
       try {
-        if (runtime && runtime.status !== RuntimeStatus.Deleted) {
-          await runtimeApi().deleteRuntime(currentWorkspaceNamespace, {
-            signal: aborter.signal
-          });
-        }
-        await LeoRuntimeInitializer.initialize({
-          workspaceNamespace,
-          targetRuntime: requestedRuntime,
-          pollAbortSignal: aborter.signal
-        });
-
         if (runtime) {
           const runtimeDiffTypes = getRuntimeDiffs(runtime, requestedRuntime).map(diff => diff.differenceType);
 
           if (runtimeDiffTypes.includes(RuntimeDiffState.NEEDS_DELETE)) {
             if (runtime.status !== RuntimeStatus.Deleted) {
-              await runtimeApi().deleteRuntime(currentWorkspaceNamespace);
+              await runtimeApi().deleteRuntime(currentWorkspaceNamespace, {
+                signal: aborter.signal
+              });
             }
           } else if (runtimeDiffTypes.includes(RuntimeDiffState.CAN_UPDATE)) {
             // TODO eric: what happens if we get can update request during a non running/stopped state?
@@ -369,7 +360,8 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
               await LeoRuntimeInitializer.initialize({
                 workspaceNamespace,
                 targetRuntime: requestedRuntime,
-                resolutionCond: r => r.status !== RuntimeStatus.Running
+                resolutionCond: r => r.status !== RuntimeStatus.Running,
+                pollAbortSignal: aborter.signal
               });
             }
           } else {
@@ -379,7 +371,8 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
 
         await LeoRuntimeInitializer.initialize({
           workspaceNamespace,
-          targetRuntime: requestedRuntime
+          targetRuntime: requestedRuntime,
+          pollAbortSignal: aborter.signal
         });
       } catch (e) {
         if (!(e instanceof LeoRuntimeInitializationAbortedError)) {

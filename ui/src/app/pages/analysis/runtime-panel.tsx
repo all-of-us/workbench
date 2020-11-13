@@ -543,6 +543,8 @@ export const RuntimePanel = fp.flow(
     dataprocConfig: selectedDataprocConfig
   };
 
+  console.log(initialRuntimeConfig);
+  console.log(newRuntimeConfig);
   const runtimeDiffs = getRuntimeConfigDiffs(initialRuntimeConfig, newRuntimeConfig);
   const runtimeChanged = runtimeDiffs.length > 0;
 
@@ -606,7 +608,7 @@ export const RuntimePanel = fp.flow(
       }}>
       Update
     </Button>;
-  };
+  }
 
   function renderCreateButton() {
     return <Button
@@ -616,7 +618,7 @@ export const RuntimePanel = fp.flow(
       }}>
       Create
     </Button>;
-  };
+  }
 
   function renderNextButton() {
     return <Button
@@ -626,7 +628,7 @@ export const RuntimePanel = fp.flow(
       }}>
       Next
     </Button>;
-  };
+  }
 
   const ConfirmUpdate = () => {
     return <React.Fragment>
