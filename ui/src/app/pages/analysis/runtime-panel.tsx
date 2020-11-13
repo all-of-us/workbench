@@ -420,7 +420,7 @@ const CostEstimator = ({
   } = runtimeParameters;
   const {
     numberOfWorkers = 0,
-    masterMachineType = machine,
+    masterMachineType = machine.name,
     masterDiskSize = diskSize,
     workerMachineType = null,
     workerDiskSize = null,
@@ -588,7 +588,6 @@ export const RuntimePanel = fp.flow(
         runtimePresets)
     ) || RuntimeConfigurationType.UserOverride;
 
-    console.log(runtimeRequest);
     return runtimeRequest;
   };
 
@@ -768,7 +767,7 @@ export const RuntimePanel = fp.flow(
                      style={{width: '10rem'}}
                      options={[ComputeType.Standard, ComputeType.Dataproc]}
                      value={selectedCompute || ComputeType.Standard}
-                     onChange={({value}) => {console.log(value); setSelectedCompute(value);}}
+                     onChange={({value}) => {setSelectedCompute(value); }}
                      />
            {
              selectedCompute === ComputeType.Dataproc &&
