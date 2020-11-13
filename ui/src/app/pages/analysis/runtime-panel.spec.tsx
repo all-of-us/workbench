@@ -461,6 +461,7 @@ describe('RuntimePanel', () => {
 
     // 15 -> 26
     await pickWorkerRam(wrapper, 26);
+    await waitOneTickAndUpdate(wrapper);
 
     expect(wrapper.find(Button).find({'aria-label': 'Next'}).first().prop('disabled')).toBeFalsy();
   });

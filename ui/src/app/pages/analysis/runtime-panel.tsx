@@ -590,8 +590,7 @@ export const RuntimePanel = fp.flow(
     return runtimeRequest;
   };
 
-
-  const UpdateButton = () => {
+  function renderUpdateButton() {
     return <Button
       aria-label='Update'
       disabled={
@@ -607,7 +606,7 @@ export const RuntimePanel = fp.flow(
     </Button>;
   };
 
-  function CreateButton() {
+  function renderCreateButton() {
     return <Button
       aria-label='Create'
       onClick={() => {
@@ -617,7 +616,7 @@ export const RuntimePanel = fp.flow(
     </Button>;
   };
 
-  const NextButton = () => {
+  function renderNextButton() {
     return <Button
       aria-label='Next'
       onClick={() => {
@@ -683,7 +682,7 @@ export const RuntimePanel = fp.flow(
           }}>
           Cancel
         </Button>
-        <UpdateButton/>
+        {renderUpdateButton()}
       </FlexRow>
     </React.Fragment>;
   };
@@ -788,9 +787,9 @@ export const RuntimePanel = fp.flow(
            aria-label='Delete Environment'
            disabled={![RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus)}
            onClick={() => setPanelContent(PanelContent.Delete)}>Delete Environment</Link>
-         {!runtimeExists ? <CreateButton/> :
-           runtimeDiffs.map(diff => diff.differenceType).includes(RuntimeDiffState.NEEDS_DELETE) ? <NextButton/> :
-             <UpdateButton/>}
+         {!runtimeExists ? renderCreateButton() :
+           runtimeDiffs.map(diff => diff.differenceType).includes(RuntimeDiffState.NEEDS_DELETE) ? renderNextButton() :
+             renderUpdateButton()}
        </FlexRow>
      </Fragment>],
       [PanelContent.Confirm, () => <ConfirmUpdate/>])}

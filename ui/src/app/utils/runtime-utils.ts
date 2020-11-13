@@ -116,6 +116,39 @@ function compareDataprocMasterDiskSize(oldRuntime: RuntimeConfig, newRuntime: Ru
   };
 }
 
+function compareWorkerCpu(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff {
+  if (!oldRuntime.dataprocConfig || !newRuntime.dataprocConfig) {
+    return null;
+  }
+
+  const oldCpu = findMachineByName(oldRuntime.dataprocConfig.workerMachineType).cpu;
+  const newCpu = findMachineByName(newRuntime.dataprocConfig.workerMachineType).cpu;
+
+  return {
+    desc: (newCpu < oldCpu ?  'Decrease' : 'Increase') + ' Number of CPUs',
+    previous: oldCpu.toString(),
+    new: newCpu.toString(),
+    differenceType: oldCpu === newCpu ? RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE
+  };
+}
+
+function compareWorkerMemory(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff {
+  if (!oldRuntime.dataprocConfig || !newRuntime.dataprocConfig) {
+    return null;
+  }
+
+  const oldMemory = findMachineByName(oldRuntime.dataprocConfig.workerMachineType).memory;
+  const newMemory = findMachineByName(newRuntime.dataprocConfig.workerMachineType).memory;
+
+  return {
+    desc: (newMemory < oldMemory ?  'Decrease' : 'Increase') + ' Memory',
+    previous: oldMemory.toString() + ' GB',
+    new: newMemory.toString() + ' GB',
+    differenceType: oldMemory === newMemory ? RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE
+  };
+}
+
+
 function compareDataprocWorkerDiskSize(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff {
   if (oldRuntime.dataprocConfig === null || newRuntime.dataprocConfig === null) {
     return null;
@@ -169,8 +202,8 @@ function compareDataprocNumberOfWorkers(oldRuntime: RuntimeConfig, newRuntime: R
 
 export const getRuntimeConfigDiffs = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff[] => {
   const compareFns = [compareComputeTypes, compareDiskSize, compareMachineCpu,
-    compareMachineMemory, compareDataprocMasterDiskSize, compareDataprocNumberOfPreemptibleWorkers,
-    compareDataprocNumberOfWorkers, compareDataprocWorkerDiskSize];
+    compareMachineMemory, compareDataprocMasterDiskSize, compareWorkerCpu, compareWorkerMemory,
+    compareDataprocNumberOfPreemptibleWorkers, compareDataprocNumberOfWorkers, compareDataprocWorkerDiskSize];
 
   return compareFns.map(compareFn => compareFn(oldRuntime, newRuntime))
     .filter(diff => diff !== null)
