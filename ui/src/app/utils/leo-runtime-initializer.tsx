@@ -151,7 +151,9 @@ export class LeoRuntimeInitializer {
   private set currentRuntime(nextRuntime: Runtime | null) {
     this.currentRuntimeValue = nextRuntime;
     const storeWorkspaceNamespace = runtimeStore.get().workspaceNamespace;
+    console.log(1);
     if (storeWorkspaceNamespace === this.workspaceNamespace || storeWorkspaceNamespace === undefined ) {
+      console.log(2);
       runtimeStore.set({workspaceNamespace: this.workspaceNamespace, runtime: this.currentRuntimeValue});
     }
   }
@@ -192,26 +194,20 @@ export class LeoRuntimeInitializer {
   }
 
   private async createRuntime(): Promise<void> {
-    console.log(2);
     if (this.createCount >= this.maxCreateCount) {
-      console.log(3);
       throw new ExceededActionCountError(
         `Reached max runtime create count (${this.maxCreateCount})`, this.currentRuntime);
     }
     let runtime: Runtime;
-    console.log(4);
     if (serverConfigStore.getValue().enableCustomRuntimes && this.targetRuntime) {
-      console.log(5);
       runtime = this.targetRuntime;
     } else {
-      console.log(6);
       // TODO(RW-5921): In lazy initialization mode, this should default to:
       // - the user's most recent UserOverride config, if any
       // - (maybe) the user's most recently selected preset, if any
       // - general analysis
       runtime = {...runtimePresets.generalAnalysis.runtimeTemplate};
     }
-    console.log(7);
     await runtimeApi().createRuntime(this.workspaceNamespace,
       runtime,
       {signal: this.pollAbortSignal});
@@ -219,7 +215,6 @@ export class LeoRuntimeInitializer {
   }
 
   private async resumeRuntime(): Promise<void> {
-    console.log(10);
     if (this.resumeCount >= this.maxResumeCount) {
       throw new ExceededActionCountError(
         `Reached max runtime resume count (${this.maxResumeCount})`, this.currentRuntime);

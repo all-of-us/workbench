@@ -503,7 +503,7 @@ export const RuntimePanel = fp.flow(
   withCdrVersions(),
   withCurrentWorkspace(),
   withUserProfile()
-)(({cdrVersionListResponse, workspace, profileState}) => {
+)(({cdrVersionListResponse, workspace, profileState, onUpdate}) => {
   const {namespace, id, cdrVersionId} = workspace;
 
   const {profile} = profileState;
@@ -543,8 +543,6 @@ export const RuntimePanel = fp.flow(
     dataprocConfig: selectedDataprocConfig
   };
 
-  console.log(initialRuntimeConfig);
-  console.log(newRuntimeConfig);
   const runtimeDiffs = getRuntimeConfigDiffs(initialRuntimeConfig, newRuntimeConfig);
   const runtimeChanged = runtimeDiffs.length > 0;
 
@@ -567,7 +565,6 @@ export const RuntimePanel = fp.flow(
   if (currentRuntime === undefined) {
     return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
   }
-
 
   const createRuntimeRequest = (runtime: RuntimeConfig) => {
     const runtimeRequest: Runtime = runtime.computeType === ComputeType.Dataproc ? {
@@ -605,6 +602,7 @@ export const RuntimePanel = fp.flow(
       }
       onClick={() => {
         setRequestedRuntime(createRuntimeRequest(newRuntimeConfig));
+        onUpdate();
       }}>
       Update
     </Button>;
@@ -630,7 +628,7 @@ export const RuntimePanel = fp.flow(
     </Button>;
   }
 
-  const ConfirmUpdate = () => {
+  function renderConfirmUpdate() {
     return <React.Fragment>
       <div style={styles.controlSection}>
         <h3 style={{...styles.baseHeader, ...styles.sectionHeader, marginTop: '.1rem', marginBottom: '.2rem'}}>Editing your environment</h3>
@@ -796,6 +794,6 @@ export const RuntimePanel = fp.flow(
              renderUpdateButton()}
        </FlexRow>
      </Fragment>],
-      [PanelContent.Confirm, () => <ConfirmUpdate/>])}
+      [PanelContent.Confirm, () => renderConfirmUpdate()])}
   </div>;
 });

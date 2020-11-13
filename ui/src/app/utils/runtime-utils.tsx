@@ -351,7 +351,6 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
               });
             }
           } else if (runtimeDiffTypes.includes(RuntimeDiffState.CAN_UPDATE)) {
-            // TODO eric: what happens if we get can update request during a non running/stopped state?
             if (runtime.status === RuntimeStatus.Running || runtime.status === RuntimeStatus.Stopped) {
               await runtimeApi().updateRuntime(currentWorkspaceNamespace, {runtime: requestedRuntime});
               // Calling updateRuntime will not immediately set the Runtime status to not Running so the
