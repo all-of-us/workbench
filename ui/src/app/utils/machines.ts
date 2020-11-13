@@ -107,15 +107,12 @@ export const machineStorageCostBreakdown = ({
 export const machineRunningCost = ({
   computeType,
   masterDiskSize,
-  masterMachineName,
+  masterMachine,
   numberOfWorkers = 0,
   numberOfPreemptibleWorkers = 0,
   workerDiskSize,
-  workerMachineName
+  workerMachine
 }) => {
-  const masterMachine = findMachineByName(masterMachineName);
-  const workerMachine = workerMachineName && findMachineByName(workerMachineName);
-
   const dataprocPrice = computeType === ComputeType.Dataproc
     ? fp.sum([
       dataprocSurcharge({
@@ -147,16 +144,14 @@ export const machineRunningCost = ({
 export const machineRunningCostBreakdown = ({
   computeType,
   masterDiskSize,
-  masterMachineName,
+  masterMachine,
   numberOfWorkers = 0,
   numberOfPreemptibleWorkers = 0,
   workerDiskSize,
-  workerMachineName
+  workerMachine
 }) => {
-  const masterMachine = findMachineByName(masterMachineName);
   const costs = [];
   if (computeType === ComputeType.Dataproc) {
-    const workerMachine = workerMachineName && findMachineByName(workerMachineName);
     if (workerMachine) {
       costs.push(`${formatUsd(masterMachine.price)}/hr Master VM`);
       if (numberOfWorkers > 0) {

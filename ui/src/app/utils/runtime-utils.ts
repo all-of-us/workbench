@@ -14,20 +14,20 @@ export enum RuntimeStatusRequest {
   Delete = 'Delete'
 }
 
-interface RuntimeDiff {
+export interface RuntimeDiff {
   desc: string;
   previous: string;
   new: string;
   differenceType: RuntimeDiffState;
 }
 
-enum RuntimeDiffState {
+export enum RuntimeDiffState {
   NO_CHANGE,
   CAN_UPDATE,
   NEEDS_DELETE
 }
 
-interface RuntimeConfig {
+export interface RuntimeConfig {
   computeType: ComputeType;
   machine: Machine;
   diskSize: number;
@@ -201,7 +201,9 @@ export const getRuntimeConfigDiffs = (oldRuntime: RuntimeConfig, newRuntime: Run
     compareDataprocNumberOfPreemptibleWorkers, compareDataprocNumberOfWorkers,
     compareDataprocWorkerDiskSize, compareDataprocWorkerMachineType];
 
-  return compareFns.map(compareFn => compareFn(oldRuntime, newRuntime)).filter(diff => diff !== null);
+  return compareFns.map(compareFn => compareFn(oldRuntime, newRuntime))
+    .filter(diff => diff !== null)
+    .filter(diff => diff.differenceType !== RuntimeDiffState.NO_CHANGE);
 };
 
 function getRuntimeDiffs(oldRuntime: Runtime, newRuntime: Runtime): RuntimeDiff[] {

@@ -14,7 +14,7 @@ import {RuntimeConfigurationType, RuntimeStatus, WorkspaceAccessLevel, Workspace
 import {RuntimeApi} from 'generated/fetch/api';
 import defaultServerConfig from 'testing/default-server-config';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {cdrVersionListResponse, CdrVersionsApiStub, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
+import {cdrVersionListResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 import {mockDataprocConfig, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {WorkspacesApiStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
 
@@ -22,7 +22,6 @@ describe('RuntimePanel', () => {
   let props: Props;
   let runtimeApiStub: RuntimeApiStub;
   let workspacesApiStub: WorkspacesApiStub;
-  let cdrVersionApiStub: CdrVersionsApiStub;
 
   const component = () => {
     return mount(<RuntimePanel {...props}/>);
@@ -47,9 +46,6 @@ describe('RuntimePanel', () => {
 
     workspacesApiStub = new WorkspacesApiStub();
     registerApiClient(WorkspacesApi, workspacesApiStub);
-
-    cdrVersionApiStub = new CdrVersionsApiStub();
-    registerApiClient(CdrVersionsApiStub, cdrVersionApiStub);
 
     runtimeStore.set({runtime: runtimeApiStub.runtime, workspaceNamespace: workspaceStubs[0].namespace});
     props = {
