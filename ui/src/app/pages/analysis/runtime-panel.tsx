@@ -684,7 +684,7 @@ export const RuntimePanel = fp.flow(
                       : initialPreset.runtimeTemplate.gceConfig.machineType
                 }
                 selectedDataprocConfig={initialPreset.runtimeTemplate.dataprocConfig || null}
-                setRequestedRuntime={(value) => {setRequestedRuntime(value)}}
+                setRequestedRuntime={(value) => setRequestedRuntime(value)}
             />
           </FlexRow>
         </Fragment>
@@ -782,9 +782,7 @@ export const RuntimePanel = fp.flow(
            selectedDiskSize={selectedDiskSize}
            selectedMachineType={selectedMachineType}
            selectedDataprocConfig={selectedDataprocConfig}
-           setRequestedRuntime={(value) => {
-             setRequestedRuntime(value)}
-           }
+           setRequestedRuntime={(value) => setRequestedRuntime(value)}
          />
        </FlexRow>
      </Fragment>])}
