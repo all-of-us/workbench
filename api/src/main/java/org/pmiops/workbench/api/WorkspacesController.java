@@ -25,6 +25,7 @@ import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.EmptyBufferException;
 import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdrselector.WorkspaceResourcesService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -942,6 +943,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     final DbWorkspace dbWorkspace =
         workspaceService.getRequiredWithCohorts(workspaceNamespace, workspaceId);
+    // When loading resources we are not accessing CDR tables for concept sets
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(dbWorkspace.getCdrVersion());
     WorkspaceResourceResponse workspaceResourceResponse = new WorkspaceResourceResponse();
     workspaceResourceResponse.addAll(
         workspaceResourcesService.getWorkspaceResources(
