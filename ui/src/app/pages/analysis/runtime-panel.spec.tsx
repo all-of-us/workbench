@@ -55,7 +55,8 @@ describe('RuntimePanel', () => {
         accessLevel: WorkspaceAccessLevel.WRITER,
         cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID
       },
-      cdrVersionListResponse
+      cdrVersionListResponse,
+      closePanel: () => {}
     };
   });
 

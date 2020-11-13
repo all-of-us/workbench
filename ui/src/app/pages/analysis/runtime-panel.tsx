@@ -135,6 +135,7 @@ enum PanelContent {
 export interface Props {
   workspace: WorkspaceData;
   cdrVersionListResponse?: CdrVersionListResponse;
+  closePanel: () => void;
 }
 
 // Exported for testing only.
@@ -541,7 +542,7 @@ const CreatePanel = ({creatorFreeCreditsRemaining, preset, profile, setPanelCont
 };
 
 const UpdateRuntimeButton = ({
-   customOnClick = () => {},
+   closePanel,
    runtimeExists,
    runtimeChanged,
    runtimeStatus,
@@ -583,7 +584,7 @@ const UpdateRuntimeButton = ({
             runtimePresets)
         ) || RuntimeConfigurationType.UserOverride;
         setRequestedRuntime(runtimeToRequest);
-        customOnClick();
+        closePanel();
       }}>{runtimeExists ? 'Update' : 'Create'}</Button>;
 };
 
@@ -591,7 +592,7 @@ export const RuntimePanel = fp.flow(
   withCdrVersions(),
   withCurrentWorkspace(),
   withUserProfile()
-)(({cdrVersionListResponse, workspace, profileState}) => {
+)(({cdrVersionListResponse, workspace, profileState, closePanel}) => {
   const {namespace, id, cdrVersionId} = workspace;
 
   const {profile} = profileState;
@@ -606,6 +607,8 @@ export const RuntimePanel = fp.flow(
   const initialMasterMachine = findMachineByName(machineName) || defaultMachineType;
   const initialCompute = dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard;
 
+  // We may encounter a race condition where an existing current runtime has not loaded by the time this panel renders.
+  // It's unclear how often that would actually happen.
   const initialPanelContent = fp.cond([
     [(s) => s === null || s === RuntimeStatus.Unknown, () => PanelContent.Create],
     [() => true, () => PanelContent.Customize]
@@ -639,7 +642,6 @@ export const RuntimePanel = fp.flow(
     };
   }, []);
 
-  // TODO(RW-5591): Conditionally render create runtime page if runtime null or Deleted.
   if (currentRuntime === undefined) {
     return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
   }
@@ -655,16 +657,14 @@ export const RuntimePanel = fp.flow(
         <Fragment>
           <CreatePanel
               creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
-              preset={runtimePresets.hailAnalysis}
+              preset={runtimePresets.generalAnalysis}
               profile={profile}
               setPanelContent={(value) => setPanelContent(value)}
               workspace={workspace}
           />
           <FlexRow style={{justifyContent: 'flex-end', marginTop: '1rem'}}>
             <UpdateRuntimeButton
-                customOnClick={() => {
-                  setPanelContent(PanelContent.Customize);
-                }}
+                closePanel={() => closePanel()}
                 runtimeExists={runtimeExists}
                 runtimeChanged={runtimeChanged}
                 runtimeStatus={status}
@@ -762,6 +762,7 @@ export const RuntimePanel = fp.flow(
            disabled={![RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus)}
            onClick={() => setPanelContent(PanelContent.Delete)}>Delete Environment</Link>
          <UpdateRuntimeButton
+           closePanel={() => closePanel()}
            runtimeExists={runtimeExists}
            runtimeChanged={runtimeChanged}
            runtimeStatus={status}
