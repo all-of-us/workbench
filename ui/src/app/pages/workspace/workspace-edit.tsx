@@ -400,7 +400,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
       // We preselect the default CDR version when a new workspace is being
       // created (via create or duplicate)
-      if (this.isMode(WorkspaceEditMode.Create) || (this.isMode(WorkspaceEditMode.Duplicate))) {
+      if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
         workspace.cdrVersionId = this.props.cdrVersionListResponse.defaultCdrVersionId;
       }
 
