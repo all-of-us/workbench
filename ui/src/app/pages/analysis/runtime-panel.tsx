@@ -503,7 +503,7 @@ export const RuntimePanel = fp.flow(
   withCdrVersions(),
   withCurrentWorkspace(),
   withUserProfile()
-)(({cdrVersionListResponse, workspace, profileState, onUpdate}) => {
+)(({cdrVersionListResponse, workspace, profileState, onUpdate = () => {}}) => {
   const {namespace, id, cdrVersionId} = workspace;
 
   const {profile} = profileState;

@@ -95,13 +95,16 @@ function compareDataprocMasterDiskSize(oldRuntime: RuntimeConfig, newRuntime: Ru
     return null;
   }
 
+  let oldDiskSize = oldRuntime.dataprocConfig.masterDiskSize || 0;
+  let newDiskSize = newRuntime.dataprocConfig.masterDiskSize || 0;
+
   let desc = 'Dataproc Master Machine Disk Size';
   let diffType;
 
-  if (newRuntime.dataprocConfig.masterDiskSize < oldRuntime.dataprocConfig.masterDiskSize) {
+  if (newDiskSize < oldDiskSize) {
     desc = 'Decease ' + desc;
     diffType = RuntimeDiffState.NEEDS_DELETE;
-  } else if (newRuntime.dataprocConfig.masterDiskSize > oldRuntime.dataprocConfig.masterDiskSize) {
+  } else if (newDiskSize > oldDiskSize) {
     desc = 'Increase ' + desc;
     diffType = RuntimeDiffState.CAN_UPDATE;
   } else {
@@ -110,8 +113,8 @@ function compareDataprocMasterDiskSize(oldRuntime: RuntimeConfig, newRuntime: Ru
 
   return {
     desc: desc,
-    previous: oldRuntime.dataprocConfig.masterDiskSize.toString() + ' GB',
-    new: newRuntime.dataprocConfig.masterDiskSize.toString() + ' GB',
+    previous: oldDiskSize.toString() + ' GB',
+    new: newDiskSize.toString() + ' GB',
     differenceType: diffType
   };
 }

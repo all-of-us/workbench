@@ -151,9 +151,7 @@ export class LeoRuntimeInitializer {
   private set currentRuntime(nextRuntime: Runtime | null) {
     this.currentRuntimeValue = nextRuntime;
     const storeWorkspaceNamespace = runtimeStore.get().workspaceNamespace;
-    console.log(1);
     if (storeWorkspaceNamespace === this.workspaceNamespace || storeWorkspaceNamespace === undefined ) {
-      console.log(2);
       runtimeStore.set({workspaceNamespace: this.workspaceNamespace, runtime: this.currentRuntimeValue});
     }
   }
