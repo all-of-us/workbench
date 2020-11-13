@@ -93,6 +93,12 @@ describe('RuntimePanel', () => {
     await waitOneTickAndUpdate(wrapper);
   }
 
+  const clickCustomizeButton = async(wrapper) => {
+    const customizeButton = wrapper.find(Button).find({'aria-label': 'Customize'}).first();
+    act(() => {customizeButton.simulate('click')});
+    await waitOneTickAndUpdate(wrapper);
+  }
+
   const mustClickCreateButton = async(wrapper) => {
     const createButton = wrapper.find(Button).find({'aria-label': 'Create'}).first();
     expect(createButton.exists()).toBeTruthy();
@@ -138,6 +144,9 @@ describe('RuntimePanel', () => {
     await handleUseEffect(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
+    await clickCustomizeButton(wrapper);
+    await waitOneTickAndUpdate(wrapper);
+
     await pickMainCpu(wrapper, 8);
     await pickMainRam(wrapper, 52);
     pickMainDiskSize(wrapper, 75);
@@ -161,6 +170,8 @@ describe('RuntimePanel', () => {
     const wrapper = component();
     await handleUseEffect(wrapper);
     await waitOneTickAndUpdate(wrapper);
+
+    await clickCustomizeButton(wrapper);
 
     // master settings
     await pickMainCpu(wrapper, 2);
@@ -200,6 +211,8 @@ describe('RuntimePanel', () => {
     await handleUseEffect(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
+    await clickCustomizeButton(wrapper);
+
     // Ensure set the form to something non-standard to start
     await pickMainCpu(wrapper, 8);
     pickMainDiskSize(wrapper, 75);
@@ -225,6 +238,8 @@ describe('RuntimePanel', () => {
     await handleUseEffect(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
+    await clickCustomizeButton(wrapper);
+
     await pickPreset(wrapper, runtimePresets.hailAnalysis);
 
     await mustClickCreateButton(wrapper);
@@ -244,6 +259,8 @@ describe('RuntimePanel', () => {
     const wrapper = component();
     await handleUseEffect(wrapper);
     await waitOneTickAndUpdate(wrapper);
+
+    await clickCustomizeButton(wrapper);
 
     // Configure the form - we expect all of the changes to be overwritten by
     // the Hail preset selection.
@@ -277,6 +294,8 @@ describe('RuntimePanel', () => {
     await handleUseEffect(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
+    await clickCustomizeButton(wrapper);
+
     // Take the preset but make a solitary modification.
     await pickPreset(wrapper, runtimePresets.hailAnalysis);
     pickNumPreemptibleWorkers(wrapper, 20);
@@ -295,6 +314,8 @@ describe('RuntimePanel', () => {
     const wrapper = component();
     await handleUseEffect(wrapper);
     await waitOneTickAndUpdate(wrapper);
+
+    await clickCustomizeButton(wrapper);
 
     // Take the preset, make a change, then revert.
     await pickPreset(wrapper, runtimePresets.generalAnalysis);

@@ -515,6 +515,7 @@ const CreatePanel = ({creatorFreeCreditsRemaining, preset, profile, setPanelCont
       <Button
           type='secondarySmall'
           onClick={() => setPanelContent(PanelContent.Customize)}
+          aria-label='Customize'
       >
         Customize
       </Button>
@@ -615,6 +616,8 @@ export const RuntimePanel = fp.flow(
   ])(status);
   const [panelContent, setPanelContent] = useState<PanelContent>(initialPanelContent);
 
+  const initialPreset = runtimePresets.generalAnalysis;
+
   const [selectedDiskSize, setSelectedDiskSize] = useState(diskSize);
   const [selectedMachine, setSelectedMachine] = useState(initialMasterMachine);
   const [selectedCompute, setSelectedCompute] = useState<ComputeType>(initialCompute);
@@ -657,7 +660,7 @@ export const RuntimePanel = fp.flow(
         <Fragment>
           <CreatePanel
               creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
-              preset={runtimePresets.generalAnalysis}
+              preset={initialPreset}
               profile={profile}
               setPanelContent={(value) => setPanelContent(value)}
               workspace={workspace}
@@ -668,10 +671,18 @@ export const RuntimePanel = fp.flow(
                 runtimeExists={runtimeExists}
                 runtimeChanged={runtimeChanged}
                 runtimeStatus={status}
-                selectedDiskSize={selectedDiskSize}
-                selectedMachineType={selectedMachineType}
-                selectedDataprocConfig={selectedDataprocConfig}
-                setRequestedRuntime={(value) => setRequestedRuntime(value)}
+                selectedDiskSize={
+                  initialPreset.runtimeTemplate.dataprocConfig
+                      ? initialPreset.runtimeTemplate.dataprocConfig.masterDiskSize
+                      : initialPreset.runtimeTemplate.gceConfig.diskSize
+                }
+                selectedMachineType={
+                  initialPreset.runtimeTemplate.dataprocConfig
+                      ? initialPreset.runtimeTemplate.dataprocConfig.masterMachineType
+                      : initialPreset.runtimeTemplate.gceConfig.machineType
+                }
+                selectedDataprocConfig={initialPreset.runtimeTemplate.dataprocConfig || null}
+                setRequestedRuntime={(value) => {setRequestedRuntime(value)}}
             />
           </FlexRow>
         </Fragment>
@@ -769,7 +780,9 @@ export const RuntimePanel = fp.flow(
            selectedDiskSize={selectedDiskSize}
            selectedMachineType={selectedMachineType}
            selectedDataprocConfig={selectedDataprocConfig}
-           setRequestedRuntime={(value) => setRequestedRuntime(value)}
+           setRequestedRuntime={(value) => {
+             setRequestedRuntime(value)}
+           }
          />
        </FlexRow>
      </Fragment>])}
