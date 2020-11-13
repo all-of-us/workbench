@@ -611,9 +611,11 @@ export const RuntimePanel = fp.flow(
   // We may encounter a race condition where an existing current runtime has not loaded by the time this panel renders.
   // It's unclear how often that would actually happen.
   const initialPanelContent = fp.cond([
-    [(s) => s === null || s === RuntimeStatus.Unknown, () => PanelContent.Create],
+    // currentRuntime being undefined means the first `getRuntime` has still not completed.
+    [([r, s]) => r === undefined, () => PanelContent.Customize],
+    [([r, s]) => s === null || s === RuntimeStatus.Unknown, () => PanelContent.Create],
     [() => true, () => PanelContent.Customize]
-  ])(status);
+  ])([currentRuntime, status]);
   const [panelContent, setPanelContent] = useState<PanelContent>(initialPanelContent);
 
   const initialPreset = runtimePresets.generalAnalysis;
