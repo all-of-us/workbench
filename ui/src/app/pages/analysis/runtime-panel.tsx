@@ -525,7 +525,6 @@ export const RuntimePanel = fp.flow(
   const [selectedCompute, setSelectedCompute] = useState<ComputeType>(initialCompute);
   const [selectedDataprocConfig, setSelectedDataprocConfig] = useState<DataprocConfig | null>(dataprocConfig);
 
-  const selectedMachineType = selectedMachine && selectedMachine.name;
   const runtimeExists = status && status !== RuntimeStatus.Deleted;
 
   const initialRuntimeConfig = {

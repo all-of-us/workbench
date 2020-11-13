@@ -1,6 +1,6 @@
 import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import {switchCase, withAsyncErrorHandling} from 'app/utils';
-import {ExceededActionCountError, LeoRuntimeInitializer,} from 'app/utils/leo-runtime-initializer';
+import {ExceededActionCountError, LeoRuntimeInitializer, } from 'app/utils/leo-runtime-initializer';
 import {runtimeStore, useStore} from 'app/utils/stores';
 import {DataprocConfig, Runtime, RuntimeStatus} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -289,7 +289,7 @@ export const useCustomRuntime = (currentWorkspaceNamespace): [Runtime, (runtime:
             await LeoRuntimeInitializer.initialize({
               workspaceNamespace,
               targetRuntime: requestedRuntime,
-              resolutionCond: (runtime: Runtime) => runtime.status !== RuntimeStatus.Running
+              resolutionCond: r => r.status !== RuntimeStatus.Running
             });
           }
         } else {

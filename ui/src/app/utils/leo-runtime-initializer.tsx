@@ -280,10 +280,6 @@ export class LeoRuntimeInitializer {
     return this.currentRuntime && this.currentRuntime.status === RuntimeStatus.Deleted;
   }
 
-  private isRuntimeRunning(): boolean {
-    return this.currentRuntime && this.currentRuntime.status === RuntimeStatus.Running;
-  }
-
   private isRuntimeStopped(): boolean {
     return this.currentRuntime && this.currentRuntime.status === RuntimeStatus.Stopped;
   }
