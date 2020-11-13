@@ -607,7 +607,7 @@ export const RuntimePanel = fp.flow(
     </Button>;
   };
 
-  const CreateButton = () => {
+  function CreateButton() {
     return <Button
       aria-label='Create'
       onClick={() => {

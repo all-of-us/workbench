@@ -120,7 +120,7 @@ describe('RuntimePanel', () => {
     expect(createButton.exists()).toBeTruthy();
     expect(createButton.prop('disabled')).toBeFalsy();
 
-    act(() => { createButton.simulate('click') });
+    act(() => { createButton.simulate('click'); });
     await waitOneTickAndUpdate(wrapper);
   };
 
@@ -154,7 +154,7 @@ describe('RuntimePanel', () => {
 
   it('should allow creation with GCE config', async() => {
     runtimeApiStub.runtime = null;
-    act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
+    act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}); });
 
     const wrapper = component();
     await handleUseEffect(wrapper);
@@ -162,7 +162,7 @@ describe('RuntimePanel', () => {
 
     await pickMainCpu(wrapper, 8);
     await pickMainRam(wrapper, 52);
-    pickMainDiskSize(wrapper, 75);
+    await pickMainDiskSize(wrapper, 75);
 
     await mustClickCreateButton(wrapper);
 
