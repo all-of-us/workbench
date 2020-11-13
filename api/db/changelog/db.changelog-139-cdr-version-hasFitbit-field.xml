@@ -6,8 +6,7 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
   <changeSet author="nsaxena" id="changelog-139-cdr-version-hasFitbit-field">
     <addColumn tableName="cdr_version">
-      <column name="has_fitbit_data" type="tinyint" defaultValueNumeric="0">
-      </column>
+      <column name="has_fitbit_data" type="boolean" defaultValueBoolean="false"/>
     </addColumn>
   </changeSet>
 </databaseChangeLog>

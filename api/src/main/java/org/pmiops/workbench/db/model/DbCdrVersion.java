@@ -31,7 +31,7 @@ public class DbCdrVersion {
   private String cdrDbName;
   private String elasticIndexBaseName;
   private String microarrayBigqueryDataset;
-  private Short hasFitbitData;
+  private Boolean hasFitbitData;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -171,17 +171,12 @@ public class DbCdrVersion {
   }
 
   @Column(name = "has_fitbit_data")
-  public Short getHasFitbitData() {
-    return hasFitbitData == null ? 0 : hasFitbitData;
+  public Boolean getHasFitbitData() {
+    return hasFitbitData == null ? false : hasFitbitData;
   }
 
-  public void setHasFitbitData(Short hasFitbitData) {
+  public void setHasFitbitData(Boolean hasFitbitData) {
     this.hasFitbitData = hasFitbitData;
-  }
-
-  @Transient
-  public CdrFitBitData getHasFitbitDataEnum() {
-    return DbStorageEnums.cdrFitBitDataFromStorage(getHasFitbitData());
   }
 
   @Override

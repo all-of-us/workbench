@@ -51,6 +51,6 @@
     "numParticipants": 234525,
     "cdrDbName": "cdr",
     "elasticIndexBaseName": "cdr",
-    "hasFitbitData": 1
+    "hasFitbitData": true
   }
 ]
