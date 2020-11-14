@@ -17,6 +17,17 @@ fi
 # Test that datset exists
 test=$(bq show "$BQ_PROJECT:$BQ_DATASET")
 
+# Variables to allow for check of fitbit data
+tables=$(bq --project=$BQ_PROJECT --dataset=$BQ_DATASET ls --max_results=1000)
+activity_summary=\\bactivity_summary\\b
+heart_rate_minute_level=\\bheart_rate_minute_level\\b
+heart_rate_summary=\\bheart_rate_summary\\b
+steps_intraday=\\bsteps_intraday\\b
+
+# Variables to allow for check of cope survey data
+cope_survey=$(bq show "$BQ_PROJECT:$BQ_DATASET.observation_ext")
+survey_version_concept_id=\\bsurvey_version_concept_id\\b
+
 ################################################
 # CREATE LINKING TABLE
 ################################################
@@ -219,9 +230,15 @@ VALUES
     ('QUESTION_CONCEPT_ID', 'answer.question_concept_id', ' ', 'Survey'),
     ('QUESTION', 'answer.question', ' ', 'Survey'),
     ('ANSWER_CONCEPT_ID', 'answer.answer_concept_id', ' ', 'Survey'),
-    ('ANSWER', 'answer.answer', ' ', 'Survey'),
-    ('SURVEY_VERSION_CONCEPT_ID', 'answer.survey_version_concept_id', ' ', 'Survey'),
-    ('SURVEY_VERSION_NAME', 'answer.survey_version_name', ' ', 'Survey')"
+    ('ANSWER', 'answer.answer', ' ', 'Survey')"
+
+if [[ $cope_survey =~ $survey_version_concept_id ]]; then
+  bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+  VALUES
+      ('SURVEY_VERSION_CONCEPT_ID', 'answer.survey_version_concept_id', ' ', 'Survey'),
+      ('SURVEY_VERSION_NAME', 'answer.survey_version_name', ' ', 'Survey')"
+fi
 
 echo "ds_linking - inserting visit data"
 
@@ -250,57 +267,63 @@ VALUES
     ('DISCHARGE_TO_CONCEPT_NAME', 'v_discharge.concept_name as DISCHARGE_TO_CONCEPT_NAME', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` v_discharge on visit.DISCHARGE_TO_CONCEPT_ID = v_discharge.CONCEPT_ID', 'Visit'),
     ('DISCHARGE_TO_SOURCE_VALUE', 'visit.DISCHARGE_TO_SOURCE_VALUE', 'from \`\${projectId}.\${dataSetId}.procedure_occurrence\` visit', 'Visit')"
 
-echo "ds_linking - inserting fitbit heart_rate_summary data"
+if [[ $tables =~ $heart_rate_summary ]]; then
+  echo "ds_linking - inserting fitbit heart_rate_summary data"
 
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
-VALUES
-  ('CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'from \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary'),
-  ('PERSON_ID', 'heart_rate_summary.PERSON_ID', 'from \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary'),
-  ('DATETIME', 'heart_rate_summary.DATETIME', 'from \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary'),
-  ('ZONE_NAME', 'heart_rate_summary.ZONE_NAME', 'from \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary'),
-  ('MIN_HEART_RATE', 'heart_rate_summary.MIN_HEART_RATE', 'from \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary'),
-  ('MAX_HEART_RATE', 'heart_rate_summary.MAX_HEART_RATE', 'from \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary'),
-  ('MINUTE_IN_ZONE', 'heart_rate_summary.MINUTE_IN_ZONE', 'from \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary'),
-  ('CALORIE_COUNT', 'heart_rate_summary.CALORIE_COUNT', 'from \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary')"
+  bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+  VALUES
+    ('CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'from \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary'),
+    ('PERSON_ID', 'heart_rate_summary.PERSON_ID', 'from \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary'),
+    ('DATETIME', 'heart_rate_summary.DATETIME', 'from \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary'),
+    ('ZONE_NAME', 'heart_rate_summary.ZONE_NAME', 'from \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary'),
+    ('MIN_HEART_RATE', 'heart_rate_summary.MIN_HEART_RATE', 'from \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary'),
+    ('MAX_HEART_RATE', 'heart_rate_summary.MAX_HEART_RATE', 'from \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary'),
+    ('MINUTE_IN_ZONE', 'heart_rate_summary.MINUTE_IN_ZONE', 'from \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary'),
+    ('CALORIE_COUNT', 'heart_rate_summary.CALORIE_COUNT', 'from \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary')"
+fi
 
-echo "ds_linking - inserting fitbit heart_rate_level data"
+if [[ $tables =~ $heart_rate_minute_level ]]; then
+  echo "ds_linking - inserting fitbit heart_rate_level data"
 
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
-VALUES
-  ('CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'from \`\${projectId}.\${dataSetId}.heart_rate_minute_level\` heart_rate_minute_level', 'Fitbit_heart_rate_level'),
-  ('PERSON_ID', 'heart_rate_minute_level.PERSON_ID', 'from \`\${projectId}.\${dataSetId}.heart_rate_minute_level\` heart_rate_minute_level', 'Fitbit_heart_rate_level'),
-  ('DATETIME', 'CAST(heart_rate_minute_level.datetime as DATE) as date', 'from \`\${projectId}.\${dataSetId}.heart_rate_minute_level\` heart_rate_minute_level', 'Fitbit_heart_rate_level'),
-  ('HEART_RATE_VALUE', 'AVG(heart_rate_value) avg_rate', 'from \`\${projectId}.\${dataSetId}.heart_rate_minute_level\` heart_rate_minute_level', 'Fitbit_heart_rate_level')"
+  bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+  VALUES
+    ('CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'from \`\${projectId}.\${dataSetId}.heart_rate_minute_level\` heart_rate_minute_level', 'Fitbit_heart_rate_level'),
+    ('PERSON_ID', 'heart_rate_minute_level.PERSON_ID', 'from \`\${projectId}.\${dataSetId}.heart_rate_minute_level\` heart_rate_minute_level', 'Fitbit_heart_rate_level'),
+    ('DATETIME', 'CAST(heart_rate_minute_level.datetime as DATE) as date', 'from \`\${projectId}.\${dataSetId}.heart_rate_minute_level\` heart_rate_minute_level', 'Fitbit_heart_rate_level'),
+    ('HEART_RATE_VALUE', 'AVG(heart_rate_value) avg_rate', 'from \`\${projectId}.\${dataSetId}.heart_rate_minute_level\` heart_rate_minute_level', 'Fitbit_heart_rate_level')"
+fi
 
-echo "ds_linking - inserting fitbit activity_summary data"
+if [[ $tables =~ $activity_summary ]]; then
+  echo "ds_linking - inserting fitbit activity_summary data"
 
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
-VALUES
-  ('CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
-  ('PERSON_ID', 'activity_summary.PERSON_ID', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
-  ('DATE', 'activity_summary.date', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
-  ('ACTIVITY_CALORIES', 'activity_summary.activity_calories', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
-  ('CALORIES_BMR', 'activity_summary.calories_bmr', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
-  ('CALORIES_OUT', 'activity_summary.calories_out', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
-  ('ELEVATION', 'activity_summary.elevation', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
-  ('FAIRLY_ACTIVE_MINUTES', 'activity_summary.fairly_active_minutes', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
-  ('FLOOR', 'activity_summary.floor', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
-  ('LIGHTLY_ACTIVE_MINUTES', 'activity_summary.lightly_active_minutes', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
-  ('MARGINAL_CALORIES', 'activity_summary.marginal_calories', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
-  ('SEDENTARY_MINUTES', 'activity_summary.sedentary_minutes', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
-  ('VERY_ACTIVE_MINUTES', 'activity_summary.very_active_minutes', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity')"
+  bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+  VALUES
+    ('CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
+    ('PERSON_ID', 'activity_summary.PERSON_ID', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
+    ('DATE', 'activity_summary.date', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
+    ('ACTIVITY_CALORIES', 'activity_summary.activity_calories', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
+    ('CALORIES_BMR', 'activity_summary.calories_bmr', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
+    ('CALORIES_OUT', 'activity_summary.calories_out', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
+    ('ELEVATION', 'activity_summary.elevation', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
+    ('FAIRLY_ACTIVE_MINUTES', 'activity_summary.fairly_active_minutes', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
+    ('FLOOR', 'activity_summary.floor', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
+    ('LIGHTLY_ACTIVE_MINUTES', 'activity_summary.lightly_active_minutes', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
+    ('MARGINAL_CALORIES', 'activity_summary.marginal_calories', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
+    ('SEDENTARY_MINUTES', 'activity_summary.sedentary_minutes', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
+    ('VERY_ACTIVE_MINUTES', 'activity_summary.very_active_minutes', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity')"
+fi
 
+if [[ $tables =~ $steps_intraday ]]; then
+  echo "ds_linking - inserting fitbit steps_intraday data"
 
-echo "ds_linking - inserting fitbit steps_intraday data"
-
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
-VALUES
-  ('CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'from \`\${projectId}.\${dataSetId}.steps_intraday\` steps_intraday', 'Fitbit_intraday_steps'),
-  ('PERSON_ID', 'steps_intraday.PERSON_ID', 'from \`\${projectId}.\${dataSetId}.steps_intraday\` steps_intraday', 'Fitbit_intraday_steps'),
-  ('DATETIME', 'CAST(steps_intraday.datetime as DATE) as date', 'from \`\${projectId}.\${dataSetId}.steps_intraday\` steps_intraday', 'Fitbit_intraday_steps'),
-  ('STEPS', 'SUM(CAST(steps_intraday.STEPS AS INT64)) AS sum_steps', 'from \`\${projectId}.\${dataSetId}.steps_intraday\` steps_intraday', 'Fitbit_intraday_steps')"
-
+  bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+  VALUES
+    ('CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'from \`\${projectId}.\${dataSetId}.steps_intraday\` steps_intraday', 'Fitbit_intraday_steps'),
+    ('PERSON_ID', 'steps_intraday.PERSON_ID', 'from \`\${projectId}.\${dataSetId}.steps_intraday\` steps_intraday', 'Fitbit_intraday_steps'),
+    ('DATETIME', 'CAST(steps_intraday.datetime as DATE) as date', 'from \`\${projectId}.\${dataSetId}.steps_intraday\` steps_intraday', 'Fitbit_intraday_steps'),
+    ('STEPS', 'SUM(CAST(steps_intraday.STEPS AS INT64)) AS sum_steps', 'from \`\${projectId}.\${dataSetId}.steps_intraday\` steps_intraday', 'Fitbit_intraday_steps')"
+fi
