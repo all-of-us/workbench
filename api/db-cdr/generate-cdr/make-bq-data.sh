@@ -41,6 +41,10 @@ cb_cri_attr_table_check=\\bcb_criteria_attribute\\b
 cb_cri_rel_table_check=\\bcb_criteria_relationship\\b
 cb_cri_anc_table_check=\\bcb_criteria_ancestor\\b
 
+# Variables to allow for check of cope survey data
+cope_survey=$(bq show "$BQ_PROJECT:$BQ_DATASET.observation_ext")
+survey_version_concept_id=\\bsurvey_version_concept_id\\b
+
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
 create_tables=(cb_survey_attribute cb_survey_version concept cb_criteria cb_criteria_attribute cb_criteria_relationship cb_criteria_ancestor ds_linking domain_info survey_module domain vocabulary concept_synonym cb_person cb_data_filter)
@@ -103,8 +107,16 @@ VALUES
 (1586134,'The Basics','Survey includes participant demographic information.',0,0,1),
 (43529712,'Personal Medical History','This survey includes information about past medical history, including medical conditions and approximate age of diagnosis.',0,0,4),
 (43528895,'Health Care Access & Utilization','Survey includes information about a participants access to and use of health care.',0,0,5),
-(43528698,'Family History','Survey includes information about the medical history of a participants immediate biological family members.',0,0,6),
-(1333342,'COVID-19 Participant Experience (COPE) Survey','COVID-19 Participant Experience (COPE) Survey.',0,0,7)"
+(43528698,'Family History','Survey includes information about the medical history of a participants immediate biological family members.',0,0,6)"
+
+if [[ $cope_survey =~ $survey_version_concept_id ]]; then
+  echo "Inserting survey_module"
+  bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+  "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.survey_module\`
+  (concept_id,name,description,question_count,participant_count,order_number)
+  VALUES
+  (1333342,'COVID-19 Participant Experience (COPE) Survey','COVID-19 Participant Experience (COPE) Survey.',0,0,7)"
+fi
 
 # Populate cb_person table
 echo "Inserting cb_person"
