@@ -26,12 +26,14 @@ fi
 # Test that datset exists
 test=$(bq show "$BQ_PROJECT:$BQ_DATASET")
 
+# Variables to allow for check of fitbit data
 tables=$(bq --project=$BQ_PROJECT --dataset=$BQ_DATASET ls --max_results=1000)
 activity_summary=\\bactivity_summary\\b
 heart_rate_minute_level=\\bheart_rate_minute_level\\b
 heart_rate_summary=\\bheart_rate_summary\\b
 steps_intraday=\\bsteps_intraday\\b
 
+# Variables to allow for check of cope survey data
 cope_survey=$(bq show "$BQ_PROJECT:$BQ_DATASET.observation_ext")
 survey_version_concept_id=\\bsurvey_version_concept_id\\b
 
