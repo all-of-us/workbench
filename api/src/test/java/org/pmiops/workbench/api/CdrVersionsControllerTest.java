@@ -53,6 +53,7 @@ public class CdrVersionsControllerTest {
   private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
   private DbCdrVersion defaultCdrVersion;
   private DbCdrVersion protectedCdrVersion;
+  private DbCdrVersion fitbitCdrVersion;
   private static DbUser user;
 
   @TestConfiguration
@@ -93,6 +94,7 @@ public class CdrVersionsControllerTest {
             "Test Registered CDR",
             123L,
             DataAccessLevel.REGISTERED,
+            null,
             null);
     protectedCdrVersion =
         makeCdrVersion(
@@ -101,7 +103,8 @@ public class CdrVersionsControllerTest {
             "Test Protected CDR",
             456L,
             DataAccessLevel.PROTECTED,
-            "microarray");
+            "microarray",
+            null);
   }
 
   @Test
@@ -138,6 +141,26 @@ public class CdrVersionsControllerTest {
         cdrVersionsController.getCdrVersions().getBody(), protectedCdrVersion, defaultCdrVersion);
   }
 
+  @Test
+  public void testGetCdrVersionsHasFitBit() {
+    List<CdrVersion> cdrVersions = cdrVersionsController.getCdrVersions().getBody().getItems();
+    // If not specified hasFitBitData is always false
+    assertThat(cdrVersions.stream().filter(cdr -> !cdr.getHasFitbitData()).count())
+        .isEqualTo(cdrVersions.size());
+    fitbitCdrVersion =
+        makeCdrVersion(
+            3L, true, "Test Registered FITBIT CDR", 123L, DataAccessLevel.REGISTERED, null, true);
+    cdrVersions = cdrVersionsController.getCdrVersions().getBody().getItems();
+
+    assertThat(
+            cdrVersions.stream()
+                .filter(cdr -> cdr.getName().equals("Test Registered FITBIT CDR"))
+                .findFirst()
+                .get()
+                .getHasFitbitData())
+        .isEqualTo((boolean) true);
+  }
+
   @Test(expected = ForbiddenException.class)
   public void testGetCdrVersionsUnregistered() {
     user.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
@@ -158,7 +181,8 @@ public class CdrVersionsControllerTest {
       String name,
       long creationTime,
       DataAccessLevel dataAccessLevel,
-      String microarrayDataset) {
+      String microarrayDataset,
+      Boolean hasFitbit) {
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setIsDefault(isDefault);
     cdrVersion.setBigqueryDataset("a");
@@ -171,6 +195,7 @@ public class CdrVersionsControllerTest {
     cdrVersion.setNumParticipants(123);
     cdrVersion.setReleaseNumber((short) 1);
     cdrVersion.setMicroarrayBigqueryDataset(microarrayDataset);
+    cdrVersion.setHasFitbitData(hasFitbit);
     cdrVersionDao.save(cdrVersion);
     return cdrVersion;
   }
