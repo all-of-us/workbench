@@ -37,7 +37,8 @@
     "numParticipants": 234525,
     "cdrDbName": "cdr",
     "elasticIndexBaseName": "cdr",
-    "hasFitbitData": true
+    "hasFitbitData": true,
+    "hasCopeSurveyData": true
   },
   {
     "cdrVersionId": 4,
@@ -52,6 +53,7 @@
     "numParticipants": 234525,
     "cdrDbName": "cdr",
     "elasticIndexBaseName": "cdr",
-    "hasFitbitData": true
+    "hasFitbitData": true,
+    "hasCopeSurveyData": true
   }
 ]
