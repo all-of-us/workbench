@@ -56,7 +56,7 @@ describe('RuntimePanel', () => {
         cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID
       },
       cdrVersionListResponse,
-      closePanel: () => {}
+      onUpdate: () => {}
     };
   });
 

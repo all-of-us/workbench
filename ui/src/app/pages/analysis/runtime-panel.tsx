@@ -144,7 +144,7 @@ enum PanelContent {
 export interface Props {
   workspace: WorkspaceData;
   cdrVersionListResponse?: CdrVersionListResponse;
-  closePanel: () => void;
+  onUpdate: () => void;
 }
 
 // Exported for testing only.
