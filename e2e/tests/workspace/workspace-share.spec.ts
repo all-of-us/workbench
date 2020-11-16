@@ -19,7 +19,7 @@ describe('Share workspace', () => {
   // Assume there is at least one workspace preexist
   describe('From the workspace about page', () => {
 
-    test('As OWNER, user can share a workspace', async () => {
+    xtest('As OWNER, user can share a workspace', async () => {
       
       const workspaceCard = await findOrCreateWorkspace(page);
       await workspaceCard.clickWorkspaceName();
