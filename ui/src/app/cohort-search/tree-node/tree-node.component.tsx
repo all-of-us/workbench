@@ -311,7 +311,8 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     return source === 'criteria'
       ? currentCohortCriteriaStore.getValue().some(crit =>
         crit.parameterId === this.paramId() || path.split('.').includes(crit.id.toString()))
-      : currentConceptStore.getValue().some(crit => this.paramId(crit) === this.paramId());
+      : currentConceptStore.getValue().some(crit =>
+        this.paramId(crit) === this.paramId() || path.split('.').includes(crit.id.toString()));
   }
 
   selectIconDisabled() {
