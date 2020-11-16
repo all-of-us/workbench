@@ -458,9 +458,10 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
             {loadingIngredients && <Spinner size={16}/>}
           </div>}
           <TooltipTrigger disabled={hoverId !== elementId} content={<div>{displayName}</div>}>
-            <div style={styles.nameDiv}
-              onMouseOver={(e) => this.onNameHover(e.target as HTMLDivElement, elementId)}
-              onMouseOut={() => this.setState({hoverId: undefined})}>
+            <div data-test-id='name-column-value'
+                 style={styles.nameDiv}
+                 onMouseOver={(e) => this.onNameHover(e.target as HTMLDivElement, elementId)}
+                 onMouseOut={() => this.setState({hoverId: undefined})}>
               {displayName}
             </div>
           </TooltipTrigger>
@@ -499,11 +500,12 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
         <div style={styles.searchContainer}>
           <div style={styles.searchBar}>
             <ClrIcon shape='search' size='18'/>
-            <TextInput style={styles.searchInput}
+            <TextInput data-test-id='list-search-input'
+                       style={styles.searchInput}
                        value={searchTerms}
                        placeholder={this.textInputPlaceholder}
                        onChange={(e) => this.setState({searchTerms: e})}
-                       onKeyPress={this.handleInput} />
+                       onKeyPress={this.handleInput}/>
             {source === 'conceptSetDetails' && searching && <Clickable style={styles.clearSearchIcon}
                 onClick={() => this.setState({data: concept, searching: false, searchTerms: ''})}>
               <ClrIcon size={24} shape='times-circle'/>
@@ -556,7 +558,9 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
               {tableBodyOverlayStyle}
             </style>
             <div style={{height: '15rem'}} className='tablebody'>
-              <table className='p-datatable' style={{...styles.table, ...styles.tableBody}}>
+              <table data-test-id='list-search-results-table'
+                     className='p-datatable'
+                     style={{...styles.table, ...styles.tableBody}}>
                 <tbody className='p-datatable-tbody'>
                 {displayData.map((row, index) => {
                   const open = ingredients[row.id] && ingredients[row.id].open;

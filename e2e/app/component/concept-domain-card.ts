@@ -2,7 +2,7 @@ import {Page} from 'puppeteer';
 import Button from 'app/element/button';
 import Container from 'app/container';
 import {getPropValue} from 'utils/element-utils';
-import {waitWhileLoading} from 'utils/waits-utils';
+import CriteriaSearchPage from '../page/criteria-search-page';
 
 export enum Domain {
    Conditions = 'Conditions',
@@ -27,12 +27,13 @@ export default class ConceptDomainCard extends Container {
     super(page, xpath);
   }
 
-  async clickSelectConceptButton(): Promise<void> {
+  async clickSelectConceptButton(): Promise<CriteriaSearchPage> {
     const selectConceptButton = await this.getSelectConceptButton();
     await selectConceptButton.waitUntilEnabled();
     await selectConceptButton.click();
-    await this.page.waitForXPath('//*[@data-test-id="conceptTable"]', {visible: true});
-    await waitWhileLoading(this.page);
+    const criteriaSearch = new CriteriaSearchPage(this.page);
+    await criteriaSearch.waitForLoad();
+    return criteriaSearch;
   }
 
    /**

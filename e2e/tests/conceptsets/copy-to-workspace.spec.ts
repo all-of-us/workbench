@@ -18,12 +18,19 @@ async function createConceptSet(srcWorkspaceCard: WorkspaceCard) {
   await dataPage.openConceptSetsSubtab();
 
   // Create new Concept Set
-  const conceptSetSearchPage = await dataPage.openConceptSetSearch(Domain.Procedures);
-  await conceptSetSearchPage.dataTableSelectAllRows();
-  const addButtonLabel = await conceptSetSearchPage.clickAddToSetButton();
-  // Table pagination displays 20 rows. If this changes, then update the check below.
-  expect(addButtonLabel).toBe('Add (20) to set');
-  const conceptSetName = await conceptSetSearchPage.saveConceptSet(SaveOption.CreateNewSet);
+  const {conceptSearchPage, criteriaSearch} = await dataPage.openConceptSetSearch(Domain.Procedures);
+
+  // Search by Procedure name.
+  const procedureName = 'Radiologic examination';
+  await criteriaSearch.searchCriteria(procedureName);
+
+  // Select first two rows.
+  await criteriaSearch.resultsTableSelectRow(1, 1);
+  await criteriaSearch.resultsTableSelectRow(2, 1);
+
+  await conceptSearchPage.viewAndSaveConceptSet();
+
+  const conceptSetName = await conceptSearchPage.saveConceptSet(SaveOption.CreateNewSet);
   console.log(`Created Concept Set: "${conceptSetName}"`);
   // Click on link to open Concept Set page.
   const conceptSetActionPage = new ConceptSetActionsPage(page);
@@ -42,8 +49,7 @@ describe('Copy Concept Set to another workspace', () => {
    * Test:
    * - Copy Concept Set from one workspace to another workspace when both have the same CDR Version.
    */
-  // Disabled temporarily, will fix as part of RW-5769
-  xtest('Workspace OWNER can copy Concept Set when CDR Versions match', async () => {
+  test('Workspace OWNER can copy Concept Set when CDR Versions match', async () => {
 
     // Create a source and a destination workspace with the same CDR Version.
 
@@ -89,8 +95,7 @@ describe('Copy Concept Set to another workspace', () => {
    * Test:
    * - Fail to Copy Concept Set from one workspace to another workspace when CDR Versions mismatch.
    */
-  // Disabled temporarily, will fix as part of RW-5769
-  xtest('Workspace OWNER cannot copy Concept Set when CDR Versions mismatch', async () => {
+  test('Workspace OWNER cannot copy Concept Set when CDR Versions mismatch', async () => {
 
     // Create a source and a destination workspace with differing CDR Versions.
 

@@ -241,7 +241,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
     const {cohortContext, conceptSearchTerms, selectedSurvey, source} = this.props;
     const {autocompleteSelection, groupSelections, hierarchyNode, loadingSubtree,
       treeSearchTerms, growlVisible} = this.state;
-    return <div>
+    return <div id='criteria-search-container'>`
       {loadingSubtree && <SpinnerOverlay/>}
       <div style={loadingSubtree ? styles.loadingSubTree : {height: '100%', minHeight: '15rem'}}>
         <style>{css}</style>

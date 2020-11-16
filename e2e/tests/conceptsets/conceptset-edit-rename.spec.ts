@@ -1,4 +1,4 @@
-import {Domain} from 'app/component/concept-domain-card';
+import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
 import Link from 'app/element/link';
 import ConceptSetActionsPage from 'app/page/conceptset-actions-page';
 import {SaveOption} from 'app/page/conceptset-save-modal';
@@ -21,17 +21,20 @@ describe('Editing and rename Concept Set', () => {
    * - Rename Concept Set.
    * - Delete Concept Set.
    */
-  // Disabled temporarily, will fix as part of RW-5769
-  xtest('Workspace OWNER can edit Concept Set', async () => {
+  test('Workspace OWNER can edit Concept Set', async () => {
 
     const workspaceName = await createWorkspace(page).then(card => card.clickWorkspaceName());
 
     const dataPage = new WorkspaceDataPage(page);
-    let conceptSearchPage = await dataPage.openConceptSetSearch(Domain.Procedures);
+    let {conceptSearchPage, criteriaSearch} = await dataPage.openConceptSetSearch(Domain.Procedures);
+
+    // Search by Procedure name.
+    let procedureName = 'Radiologic examination';
+    await criteriaSearch.searchCriteria(procedureName);
 
     // Select first two rows.
-    const row1 = await conceptSearchPage.dataTableSelectRow(1, 1);
-    const row2 = await conceptSearchPage.dataTableSelectRow(3, 1);
+    const row1 = await criteriaSearch.resultsTableSelectRow(1, 1);
+    const row2 = await criteriaSearch.resultsTableSelectRow(2, 1);
 
     console.log('Selected Procedures table row 1: ', row1);
     console.log('Selected Procedures table row 2: ', row2);
@@ -41,12 +44,10 @@ describe('Editing and rename Concept Set', () => {
     expect(Number.isNaN(parseInt(row2.code, 10))).toBe(false);
 
     // Verify Participant Count are numberical values
-    expect(Number.isNaN(parseInt(row1.participantCount.replace(/,/g, ''), 10))).toBe(false);
-    expect(Number.isNaN(parseInt(row2.participantCount.replace(/,/g, ''), 10))).toBe(false);
+    expect(Number.isNaN(parseInt(row1.rollUpCount.replace(/,/g, ''), 10))).toBe(false);
+    expect(Number.isNaN(parseInt(row2.rollUpCount.replace(/,/g, ''), 10))).toBe(false);
 
-    // Verify "Add to Set" dynamic button text label.
-    let addButtonLabel = await conceptSearchPage.clickAddToSetButton();
-    expect(addButtonLabel).toBe('Add (2) to set');
+    await conceptSearchPage.viewAndSaveConceptSet();
 
     // Save new Concept Set.
     const conceptSetName = await conceptSearchPage.saveConceptSet(SaveOption.CreateNewSet);
@@ -54,18 +55,20 @@ describe('Editing and rename Concept Set', () => {
 
     // Add another Concept in Procedures domain.
     const conceptSetActionsPage = new ConceptSetActionsPage(page);
-    conceptSearchPage = await conceptSetActionsPage.openConceptSearch(Domain.Procedures);
+    conceptSearchPage = await conceptSetActionsPage.openConceptSearch();
+
+    const procedures = await ConceptDomainCard.findDomainCard(page, Domain.Procedures);
+    criteriaSearch = await procedures.clickSelectConceptButton();
 
     // Search in Procedures domain
-    const searchWords = 'Screening for disorder';
-    await conceptSearchPage.searchConcepts(`"${searchWords}"`); // needs double-quotes or search fails.
+    procedureName = 'Screening procedure';
+    await criteriaSearch.searchCriteria(procedureName);
 
     // Select first row. Its name cell should match the search words.
-    const row = await conceptSearchPage.dataTableSelectRow(1, 1);
-    expect(row.name).toBe(searchWords);
+    const row = await criteriaSearch.resultsTableSelectRow();
+    expect(row.name).toBe(procedureName);
 
-    addButtonLabel = await conceptSearchPage.clickAddToSetButton();
-    expect(addButtonLabel).toBe('Add (1) to set');
+    await conceptSearchPage.viewAndSaveConceptSet();
 
     // Save to Existing Set: Only one Concept set and it is the new Concept Set created earlier in same workspace.
     const existingConceptSetName = await conceptSearchPage.saveConceptSet(SaveOption.ChooseExistingSet);

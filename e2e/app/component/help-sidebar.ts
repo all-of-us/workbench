@@ -3,7 +3,7 @@ import {ElementHandle, Page} from 'puppeteer';
 import SelectMenu from 'app/component/select-menu';
 import Container from 'app/container';
 import Button from 'app/element/button';
-import {FilterSign} from 'app/page/cohort-search-page';
+import {FilterSign} from 'app/page/criteria-search-page';
 import {LinkText} from 'app/text-labels';
 import {buildXPath} from 'app/xpath-builders';
 import {ElementType} from 'app/xpath-options';
@@ -93,6 +93,11 @@ export default class HelpSidebar extends Container {
 
   async clickSaveCriteriaButton(): Promise<void> {
     await this.clickSidebarButton(LinkText.SaveCriteria);
+    await this.waitUntilSectionHidden(SectionSelectors.SelectionList);
+  }
+
+  async clickSaveConceptSetButton(): Promise<void> {
+    await this.clickSidebarButton(LinkText.SaveConceptSet);
     await this.waitUntilSectionHidden(SectionSelectors.SelectionList);
   }
 

@@ -38,14 +38,14 @@ describe('Dataset test', () => {
     const searchPage = await group1.includeDrugs();
 
     // Search for drug hydroxychloroquine
-    const searchResultsTable = await searchPage.searchCondition('hydroxychloroquine');
+    const searchResultsTable = await searchPage.searchCriteria('hydroxychloroquine');
     // Add a drug in Result table first row. Drug name ignored.
     const nameValue = await searchResultsTable.getCellValue(1, 1);
     const addIcon = await ClrIconLink.findByName(page, {containsText: nameValue, iconShape: 'plus-circle'}, searchResultsTable);
     await addIcon.click();
 
     // Open selection list and click Save Criteria button
-    await searchPage.viewAndSaveCriteria();
+    await group1.viewAndSaveCriteria();
     await cohortBuildPage.getTotalCount();
 
     // Save new cohort.

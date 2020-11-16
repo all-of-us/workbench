@@ -1,5 +1,5 @@
 import CohortBuildPage from 'app/page/cohort-build-page';
-import {PhysicalMeasurementsCriteria} from 'app/page/cohort-search-page';
+import {PhysicalMeasurementsCriteria} from 'app/page/criteria-search-page';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
