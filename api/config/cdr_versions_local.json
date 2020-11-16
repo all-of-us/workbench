@@ -36,7 +36,8 @@
     "releaseNumber": 3,
     "numParticipants": 234525,
     "cdrDbName": "cdr",
-    "elasticIndexBaseName": "cdr"
+    "elasticIndexBaseName": "cdr",
+    "hasFitbitData": true
   },
   {
     "cdrVersionId": 4,

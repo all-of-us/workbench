@@ -2,7 +2,6 @@ import {Page} from 'puppeteer';
 import {waitForDocumentTitle, waitWhileLoading} from 'utils/waits-utils';
 import Button from 'app/element/button';
 import {LinkText} from 'app/text-labels';
-import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
 import Link from 'app/element/link';
 import AuthenticatedPage from './authenticated-page';
 import ConceptSetPage from './conceptset-page';
@@ -62,11 +61,8 @@ export default class ConceptSetActionsPage extends AuthenticatedPage {
    * Click Domain card.
    * @param {Domain} domain
    */
-  async openConceptSearch(domain: Domain): Promise<ConceptSetSearchPage> {
+  async openConceptSearch(): Promise<ConceptSetSearchPage> {
     await this.clickCreateAnotherConceptSetButton();
-
-    const procedures = await ConceptDomainCard.findDomainCard(this.page, domain);
-    await procedures.clickSelectConceptButton();
 
     const conceptSearchPage = new ConceptSetSearchPage(this.page);
     await conceptSearchPage.waitForLoad();

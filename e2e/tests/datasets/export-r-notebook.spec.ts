@@ -36,7 +36,7 @@ describe('Create Dataset', () => {
     await searchPage.addEthnicity([Ethnicity.HispanicOrLatino, Ethnicity.NotHispanicOrLatino]);
 
     // Open selection list and click Save Criteria button
-    await searchPage.viewAndSaveCriteria();
+    await group1.viewAndSaveCriteria();
 
     // Check Group 1 Count.
     const group1Count = await group1.getGroupCount();

@@ -1,5 +1,5 @@
 import HelpSidebar from 'app/component/help-sidebar';
-import {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/cohort-search-page';
+import {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/criteria-search-page';
 import DataResourceCard from 'app/component/data-resource-card';
 import Button from 'app/element/button';
 import ClrIconLink from 'app/element/clr-icon-link';
@@ -112,8 +112,7 @@ describe('User can create new Cohorts', () => {
    * Duplicate cohort.
    * Delete cohort.
    */
-  // RW-5751 Search for condition is failing in CI.
-  xtest('Add Cohort of EKG condition with modifiers', async () => {
+  test('Add Cohort of EKG condition with modifiers', async () => {
 
     const workspaceCard = await findOrCreateWorkspace(page);
     await workspaceCard.clickWorkspaceName();
@@ -137,11 +136,11 @@ describe('User can create new Cohorts', () => {
     const searchPage = await group1.includeConditions();
 
     // First, search for non-existent condition, expect returns no results.
-    const search1ResultsTable = await searchPage.searchCondition('allergist');
+    const search1ResultsTable = await searchPage.searchCriteria('allergist');
     expect(await search1ResultsTable.exists()).toBe(false);
 
     // Next, search for condition EKG
-    const search2ResultsTable = await searchPage.searchCondition('EKG');
+    const search2ResultsTable = await searchPage.searchCriteria('EKG');
     // Check cell value in column "Code" (column #2)
     const codeValue = await search2ResultsTable.getCellValue(1, 2);
     expect(Number(codeValue)).not.toBeNaN();
