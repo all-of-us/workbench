@@ -890,7 +890,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       DbDataset fromDataSet,
       DbWorkspace toWorkspace,
       Set<Long> cohortIds,
-      Set<Long> conceptSetIds) {
+      Set<Long> conceptSetIds,
+      List<Short> prePackagedConceptSets) {
     DbDataset toDataSet = new DbDataset(fromDataSet);
     toDataSet.setWorkspaceId(toWorkspace.getWorkspaceId());
     toDataSet.setCreatorId(toWorkspace.getCreator().getUserId());
@@ -899,6 +900,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
     toDataSet.setConceptSetIds(new ArrayList<>(conceptSetIds));
     toDataSet.setCohortIds(new ArrayList<>(cohortIds));
+    toDataSet.setPrePackagedConceptSet(prePackagedConceptSets);
     return dataSetDao.save(toDataSet);
   }
 
