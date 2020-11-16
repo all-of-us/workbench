@@ -1,6 +1,7 @@
 import {mount, ReactWrapper} from 'enzyme';
 import * as React from 'react';
 import Iframe from 'react-iframe';
+import {act} from 'react-dom/test-utils';
 
 import {registerApiClient as registerApiClientNotebooks} from 'app/services/notebooks-swagger-fetch-clients';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
@@ -219,11 +220,11 @@ describe('NotebookRedirect', () => {
     runtimeStub.runtime.status = RuntimeStatus.Running;
 
     const wrapper = await component();
-    await awaitTickAndTimers(wrapper);
+    await waitForFakeTimersAndUpdate(wrapper);
 
     // Wait for the "redirecting" timer to elapse, rendering the iframe.
     act(() => jest.advanceTimersByTime(2000));
-    await awaitTickAndTimers(wrapper);
+    await waitForFakeTimersAndUpdate(wrapper);
 
     expect(wrapper.find(Iframe).exists()).toBeTruthy();
     expect(navSpy).not.toHaveBeenCalled();
@@ -236,7 +237,7 @@ describe('NotebookRedirect', () => {
         runtime: runtimeStub.runtime
       });
     });
-    await awaitTickAndTimers(wrapper);
+    await waitForFakeTimersAndUpdate(wrapper);
 
     expect(navSpy).toHaveBeenCalled();
   });
