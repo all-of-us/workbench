@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="nsaxena" id="changelog-140-populate-prePackagedConcept-table">
+    <sql>
+      insert into data_set_prepackaged_concept_set (data_set_id, pre_packaged_concept_set) select data_set_id, pre_packaged_concept_set from data_set where pre_packaged_concept_set is not null;
+    </sql> 
+  </changeSet>
+</databaseChangeLog>
