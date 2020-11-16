@@ -29,12 +29,12 @@ public class UserGivenNamePropertyService implements TrackableProperty<DbUser, S
   }
 
   @Override
-  public Function<DbUser, String> getValueGetter() {
+  public Function<DbUser, String> getAccessor() {
     return DbUser::getGivenName;
   }
 
   @Override
-  public BiFunction<DbUser, String, DbUser> getValueSetter() {
+  public BiFunction<DbUser, String, DbUser> getMutator() {
     return (t, p) -> {
       t.setGivenName(p);
       return t;
@@ -54,7 +54,7 @@ public class UserGivenNamePropertyService implements TrackableProperty<DbUser, S
   }
 
   @Override
-  public Function<DbUser, DbUser> getValueCommitter() {
+  public Function<DbUser, DbUser> getCommitter() {
     return userDao::save;
   }
 }

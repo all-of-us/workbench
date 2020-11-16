@@ -8,39 +8,47 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import org.pmiops.workbench.model.Authority;
 
-// A non-Bean approach for working wiht property setters. No direct dependencies,
-// but those can be pulled in via lambda capture I think.
-public class PropertySetter<TARGET_TYPE, PROPERTY_TYPE>
+public class AbstractTrackableProperty<TARGET_TYPE, PROPERTY_TYPE>
     implements TrackableProperty<TARGET_TYPE, PROPERTY_TYPE> {
+
+  @Override
+  public PropertyModifiability getModifiability() {
+    return PropertyModifiability.USER_WRITEABLE;
+  }
 
   // TODO: am I just reimplementing Mockito now?
   private Set<Authority> requiredAuthorities = Collections.emptySet();
 
-  private BiFunction<TARGET_TYPE, PROPERTY_TYPE, Boolean> validateFunction =
+  private BiFunction<TARGET_TYPE, PROPERTY_TYPE, Boolean> validator =
       (t, p) -> true;
 
-  // todo: try this DbWorkspace dbWorkspace, FirecloudWorkspaceResponse firecloudWorkspaceResponse)
-  private Function<TARGET_TYPE, PROPERTY_TYPE> getterFunction = t -> null;
+  // todo: try this with DbWorkspace dbWorkspace, FirecloudWorkspaceResponse firecloudWorkspaceResponse)
+  private Function<TARGET_TYPE, PROPERTY_TYPE> accessor = t -> null;
 
-  private BiFunction<TARGET_TYPE, PROPERTY_TYPE, TARGET_TYPE> setterFunction =
+  private BiFunction<TARGET_TYPE, PROPERTY_TYPE, TARGET_TYPE> mutator =
       (t, p) -> t;
   private Function<TARGET_TYPE, TARGET_TYPE> committerFunction =
       t -> t;
 
-  public PropertySetter() {
-    // default ctor to allow subclassing
+  private Set<NotificationType> notificationTypes;
+
+  public AbstractTrackableProperty(Set<Authority> requiredAuthorities,
+      BiFunction<TARGET_TYPE, PROPERTY_TYPE, Boolean> validateFunction,
+      Function<TARGET_TYPE, PROPERTY_TYPE> accessor,
+      BiFunction<TARGET_TYPE, PROPERTY_TYPE, TARGET_TYPE> mutator,
+      Function<TARGET_TYPE, TARGET_TYPE> committerFunction,
+      Set<NotificationType> notificationTypes) {
+    this.requiredAuthorities = requiredAuthorities;
+    this.validator = validateFunction;
+    this.accessor = accessor;
+    this.mutator = mutator;
+    this.committerFunction = committerFunction;
+    this.notificationTypes = notificationTypes;
   }
 
-  public PropertySetter(Set<Authority> requiredAuthorities,
-      BiFunction<TARGET_TYPE, PROPERTY_TYPE, Boolean> validateFunction,
-      Function<TARGET_TYPE, PROPERTY_TYPE> getterFunction,
-      BiFunction<TARGET_TYPE, PROPERTY_TYPE, TARGET_TYPE> setterFunction,
-      Function<TARGET_TYPE, TARGET_TYPE> committerFunction) {
-    this.requiredAuthorities = requiredAuthorities;
-    this.validateFunction = validateFunction;
-    this.getterFunction = getterFunction;
-    this.setterFunction = setterFunction;
-    this.committerFunction = committerFunction;
+  @Override
+  public Set<NotificationType> getNotificationTypes() {
+    return null;
   }
 
   @Override
@@ -49,24 +57,18 @@ public class PropertySetter<TARGET_TYPE, PROPERTY_TYPE>
   }
 
   @Override
-  public Function<TARGET_TYPE, PROPERTY_TYPE> getValueGetter() {
-    return getterFunction;
+  public Function<TARGET_TYPE, PROPERTY_TYPE> getAccessor() {
+    return accessor;
   }
 
   @Override
-  public BiFunction<TARGET_TYPE, PROPERTY_TYPE, TARGET_TYPE>
-  getValueSetter() {
-    return setterFunction;
-  }
-
-  @Override
-  public Function<TARGET_TYPE, TARGET_TYPE> getValueCommitter() {
+  public Function<TARGET_TYPE, TARGET_TYPE> getCommitter() {
     return committerFunction;
   }
 
   @Override
   public boolean isValid(TARGET_TYPE target, PROPERTY_TYPE newValue) {
-    return validateFunction.apply(target, newValue);
+    return validator.apply(target, newValue);
   }
 
   @Override
@@ -76,14 +78,14 @@ public class PropertySetter<TARGET_TYPE, PROPERTY_TYPE>
   }
 
   public static <TARGET_TYPE, PROPERTY_TYPE>
-  Builder<TARGET_TYPE, PROPERTY_TYPE> builder() {
-    return new Builder<>();
+  MutableProperty.Builder<TARGET_TYPE, PROPERTY_TYPE> builder() {
+    return new MutableProperty.Builder<>();
   }
 
   public static class Builder<TARGET_TYPE, PROPERTY_TYPE> {
     public static <TARGET_TYPE, PROPERTY_TYPE>
-    Builder<TARGET_TYPE, PROPERTY_TYPE> builder() {
-      return new Builder<>();
+    MutableProperty.Builder<TARGET_TYPE, PROPERTY_TYPE> builder() {
+      return new MutableProperty.Builder<>();
     }
 
     private Set<Authority> requiredAuthorities = Collections.emptySet();
@@ -95,18 +97,18 @@ public class PropertySetter<TARGET_TYPE, PROPERTY_TYPE>
     private BiFunction<TARGET_TYPE, PROPERTY_TYPE, TARGET_TYPE> setterFunction;
     private Function<TARGET_TYPE, TARGET_TYPE> committerFunction;
 
-    public Builder<TARGET_TYPE, PROPERTY_TYPE> setRequiredAuthorities(Set<Authority> requiredAuthorities) {
+    public MutableProperty.Builder<TARGET_TYPE, PROPERTY_TYPE> setRequiredAuthorities(Set<Authority> requiredAuthorities) {
       this.requiredAuthorities = requiredAuthorities;
       return this;
     }
 
-    public Builder<TARGET_TYPE, PROPERTY_TYPE> setValidateFunction(
+    public MutableProperty.Builder<TARGET_TYPE, PROPERTY_TYPE> setValidateFunction(
         BiFunction<TARGET_TYPE, PROPERTY_TYPE, Boolean> validateFunction) {
       this.validateFunction = validateFunction;
       return this;
     }
 
-    public Builder<TARGET_TYPE, PROPERTY_TYPE> setGetterFunction(
+    public MutableProperty.Builder<TARGET_TYPE, PROPERTY_TYPE> setGetterFunction(
         Function<TARGET_TYPE, PROPERTY_TYPE> getterFunction) {
       this.getterFunction = getterFunction;
       return this;
@@ -114,13 +116,13 @@ public class PropertySetter<TARGET_TYPE, PROPERTY_TYPE>
 
     // Argument to function to set takes a target and property and returns
     // updated property.
-    public Builder<TARGET_TYPE, PROPERTY_TYPE> setSetterFunction(
+    public MutableProperty.Builder<TARGET_TYPE, PROPERTY_TYPE> setSetterFunction(
         BiFunction<TARGET_TYPE, PROPERTY_TYPE, TARGET_TYPE> setterFunction) {
       this.setterFunction = setterFunction;
       return this;
     }
 
-    public Builder<TARGET_TYPE, PROPERTY_TYPE> setCommitterFunction(
+    public MutableProperty.Builder<TARGET_TYPE, PROPERTY_TYPE> setCommitterFunction(
         Function<TARGET_TYPE, TARGET_TYPE> committerFunction) {
       this.committerFunction = committerFunction;
       return this;
@@ -130,7 +132,7 @@ public class PropertySetter<TARGET_TYPE, PROPERTY_TYPE>
     // consistency. Many Db entity class
     // setters don't do this, so this wrapper is helpful.
     // Usage: builder.setSetterWithReturn(DbUser::setFamilyName);
-    public Builder<TARGET_TYPE, PROPERTY_TYPE> setSetterFunction(
+    public MutableProperty.Builder<TARGET_TYPE, PROPERTY_TYPE> setSetterFunction(
         BiConsumer<TARGET_TYPE, PROPERTY_TYPE> setter) {
       this.setterFunction = (t, p) -> {
         setter.accept(t, p);
@@ -139,8 +141,8 @@ public class PropertySetter<TARGET_TYPE, PROPERTY_TYPE>
       return this;
     }
 
-    public PropertySetter<TARGET_TYPE, PROPERTY_TYPE> build() {
-      return new PropertySetter<>(
+    public MutableProperty<TARGET_TYPE, PROPERTY_TYPE> build() {
+      return new MutableProperty<>(
           requiredAuthorities,
           validateFunction,
           getterFunction,
@@ -148,4 +150,5 @@ public class PropertySetter<TARGET_TYPE, PROPERTY_TYPE>
           committerFunction);
     }
   }
+
 }

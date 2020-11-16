@@ -19,15 +19,15 @@ public class UserPropertyServiceImpl implements UserPropertyService {
 //  private static class StringPropSetterBuilder extends PropertySetter.Builder<DbUser, String> {};
 
   private final Provider<DbUser> agentUserProvider;
-  private final TrackablePropertyProcessorService processor;
-  private UserDao userDao;
+  private final PropertyProcessorService processor;
+  private final UserDao userDao;
   private final UserGivenNamePropertyService userGivenNamePropertyService;
   private final TrackableProperty<DbUser, String> familyNameProperty;
   private final TrackableProperty<DbUser, Boolean> isDisabledProperty;
 
   public UserPropertyServiceImpl(
       Provider<DbUser> agentUserProvider,
-      TrackablePropertyProcessorService processor,
+      PropertyProcessorService<DbUser, String> processor,
       UserDao userDao,
       UserGivenNamePropertyService userGivenNamePropertyService) {
     this.agentUserProvider = agentUserProvider;
@@ -35,17 +35,17 @@ public class UserPropertyServiceImpl implements UserPropertyService {
     this.userDao = userDao;
     this.userGivenNamePropertyService = userGivenNamePropertyService;
 
-    this.familyNameProperty = PropertySetter.<DbUser, String>builder()
+    this.familyNameProperty = MutableProperty.<DbUser, String>builder()
         .setGetterFunction(DbUser::getFamilyName)
         .setSetterFunction(DbUser::setFamilyName)
         .setCommitterFunction(userDao::save)
         .setValidateFunction(this::validateString)
         .build();
 
-    this.isDisabledProperty = PropertySetter.<DbUser, Boolean>builder()
+    this.isDisabledProperty = MutableProperty.<DbUser, Boolean>builder()
         .setGetterFunction(DbUser::getDisabled)
         .setSetterFunction(DbUser::setDisabled)
-        .setValidateFunction((t, p) -> p != null)
+        .setValidateFunction((t, prop) -> Objects.nonNull(prop))
         .setRequiredAuthorities(Collections.singleton(Authority.ACCESS_CONTROL_ADMIN))
         .build();
 

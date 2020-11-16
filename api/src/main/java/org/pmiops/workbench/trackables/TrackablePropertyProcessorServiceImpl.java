@@ -3,15 +3,14 @@ package org.pmiops.workbench.trackables;
 import java.rmi.AccessException;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 import javax.inject.Provider;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.Authority;
 import org.springframework.stereotype.Service;
 
 @Service
-public class TrackablePropertyProcessorServiceImpl implements TrackablePropertyProcessorService {
+public class TrackablePropertyProcessorServiceImpl<TARGET_T, PROPERTY_T>
+    implements PropertyProcessorService<TARGET_T, PROPERTY_T> {
 
   private final Provider<DbUser> userProvider;
 
@@ -21,11 +20,11 @@ public class TrackablePropertyProcessorServiceImpl implements TrackablePropertyP
 
   // Do the needful steps in order.
   @Override
-  public <TARGET_TYPE, PROPERTY_TYPE> TARGET_TYPE process(
-      TrackableProperty<TARGET_TYPE, PROPERTY_TYPE> propertyService,
+  public <TARGET_T, PROPERTY_T> TARGET_T process(
+      TrackableProperty<TARGET_T, PROPERTY_T> propertyService,
       DbUser agentUser,
-      TARGET_TYPE target,
-      PROPERTY_TYPE newValue) throws IllegalAccessException, AccessException {
+      TARGET_T target,
+      PROPERTY_T newValue) throws IllegalAccessException, AccessException {
 
     // validate authorities
     if (!userHasRequiredAuthorities(propertyService.getRequiredAuthorities())) {
@@ -38,13 +37,14 @@ public class TrackablePropertyProcessorServiceImpl implements TrackablePropertyP
     }
 
     // save old value for audit
-    final Optional<PROPERTY_TYPE> previousValue = Optional.ofNullable(
-        propertyService.getValueGetter().apply(target));
+    final Optional<PROPERTY_T> previousValue = Optional.ofNullable(
+        propertyService.getValue(target));
 
     // set the value
-    final TARGET_TYPE updatedTarget = propertyService.getValueSetter().apply(target, newValue);
+    final TARGET_T updatedTarget = propertyService.setNewValue(target, newValue);
 
-    final TARGET_TYPE committedTarget = propertyService.getValueCommitter().apply(updatedTarget);
+    // Commit to storage or some other external place that needs updating.
+    final TARGET_T committedTarget = propertyService.commit(updatedTarget);
 
     // audit
     propertyService.auditChange(target, previousValue, Optional.of(newValue));
