@@ -3194,7 +3194,7 @@ public class WorkspacesControllerTest {
                 workspace.getNamespace(),
                 workspace.getId(),
                 new DataSetRequest()
-                    .prePackagedConceptSet(PrePackagedConceptSetEnum.NONE)
+                    .prePackagedConceptSet(Arrays.asList(PrePackagedConceptSetEnum.NONE))
                     .addConceptSetIdsItem(conceptSet.getId())
                     .addCohortIdsItem(cohort.getId())
                     .name("dataset")
