@@ -32,7 +32,6 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -458,7 +457,7 @@ public class DataSetControllerTest {
         .cohortIds(new ArrayList<>())
         .domainValuePairs(new ArrayList<>())
         .name("blah")
-        .prePackagedConceptSet(Arrays.asList(PrePackagedConceptSetEnum.NONE));
+        .prePackagedConceptSet(ImmutableList.of(PrePackagedConceptSetEnum.NONE));
   }
 
   private void stubGetWorkspace(String ns, String name) {

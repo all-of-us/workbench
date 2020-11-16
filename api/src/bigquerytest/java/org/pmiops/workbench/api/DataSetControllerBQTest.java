@@ -373,7 +373,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     ImmutableList.of(dbCohort1),
                     ImmutableList.of(Domain.CONDITION),
                     false,
-                    Arrays.asList(PrePackagedConceptSetEnum.NONE)))
+                    ImmutableList.of(PrePackagedConceptSetEnum.NONE)))
             .getBody()
             .getCode();
     assertAndExecutePythonQuery(code, 1, Domain.CONDITION);
@@ -399,7 +399,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     ImmutableList.of(dbCohort1),
                     ImmutableList.of(Domain.CONDITION),
                     false,
-                    Arrays.asList(PrePackagedConceptSetEnum.NONE)))
+                    ImmutableList.of(PrePackagedConceptSetEnum.NONE)))
             .getBody()
             .getCode();
     assertThat(code).contains(expected);
@@ -435,7 +435,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     ImmutableList.of(dbCohort1),
                     ImmutableList.of(Domain.CONDITION, Domain.PROCEDURE),
                     false,
-                    Arrays.asList(PrePackagedConceptSetEnum.NONE)))
+                    ImmutableList.of(PrePackagedConceptSetEnum.NONE)))
             .getBody()
             .getCode();
 
@@ -455,7 +455,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     ImmutableList.of(dbCohort1, dbCohort2),
                     ImmutableList.of(Domain.CONDITION),
                     false,
-                    Arrays.asList(PrePackagedConceptSetEnum.NONE)))
+                    ImmutableList.of(PrePackagedConceptSetEnum.NONE)))
             .getBody()
             .getCode();
 
@@ -475,7 +475,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     ImmutableList.of(),
                     ImmutableList.of(Domain.CONDITION),
                     true,
-                    Arrays.asList(PrePackagedConceptSetEnum.NONE)))
+                    ImmutableList.of(PrePackagedConceptSetEnum.NONE)))
             .getBody()
             .getCode();
 
@@ -495,7 +495,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     ImmutableList.of(dbCohort1),
                     ImmutableList.of(Domain.PERSON),
                     false,
-                    Arrays.asList(PrePackagedConceptSetEnum.PERSON)))
+                    ImmutableList.of(PrePackagedConceptSetEnum.PERSON)))
             .getBody()
             .getCode();
 
@@ -515,7 +515,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     ImmutableList.of(dbCohort1),
                     ImmutableList.of(Domain.SURVEY),
                     false,
-                    Arrays.asList(PrePackagedConceptSetEnum.SURVEY)))
+                    ImmutableList.of(PrePackagedConceptSetEnum.SURVEY)))
             .getBody()
             .getCode();
 
@@ -536,7 +536,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     ImmutableList.of(dbCohort1),
                     ImmutableList.of(Domain.FITBIT_HEART_RATE_LEVEL),
                     false,
-                    Arrays.asList(PrePackagedConceptSetEnum.NONE)))
+                    ImmutableList.of(PrePackagedConceptSetEnum.NONE)))
             .getBody()
             .getCode();
 
@@ -556,7 +556,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     ImmutableList.of(dbCohort1),
                     ImmutableList.of(Domain.CONDITION),
                     false,
-                    Arrays.asList(
+                    ImmutableList.of(
                         PrePackagedConceptSetEnum.PERSON,
                         PrePackagedConceptSetEnum.FITBIT_HEART_RATE_LEVEL)))
             .getBody()
