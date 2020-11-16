@@ -2,12 +2,12 @@ import {Page} from 'puppeteer';
 import {waitForDocumentTitle, waitWhileLoading} from 'utils/waits-utils';
 import Textbox from 'app/element/textbox';
 import DataTable from 'app/component/data-table';
+import HelpSidebar from 'app/component/help-sidebar';
 import Button from 'app/element/button';
+import {LinkText} from 'app/text-labels';
 import {getPropValue, waitUntilChanged} from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
 import ConceptSetSaveModal, {SaveOption} from './conceptset-save-modal';
-import {LinkText} from '../text-labels';
-import HelpSidebar from '../component/help-sidebar';
 
 const PageTitle = 'Search Concepts';
 
