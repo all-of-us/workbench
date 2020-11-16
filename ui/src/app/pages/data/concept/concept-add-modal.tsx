@@ -41,7 +41,8 @@ const filterConcepts = (concepts: any[], domain: Domain) => {
       return concepts.filter(concept => !!concept.question);
     }
   } else {
-    return concepts.filter(concept => concept.domainId.replace(' ', '').toLowerCase() === Domain[domain].toLowerCase());
+    return serverConfigStore.getValue().enableConceptSetSearchV2 ? concepts
+      : concepts.filter(concept => concept.domainId.replace(' ', '').toLowerCase() === Domain[domain].toLowerCase());
   }
 };
 
@@ -124,7 +125,8 @@ export const ConceptAddModal = withCurrentWorkspace()
     if (name === 'Demographics') {
       this.setState({
         errorMessage: 'Name Demographics cannot be used for creating a concept set',
-        saving: false});
+        saving: false
+      });
       return;
     }
     if (addingToExistingSet) {
