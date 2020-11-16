@@ -1780,6 +1780,7 @@ public class WorkspacesControllerTest {
         Collections.singletonList(originalConceptSet.getConceptSetId()));
     originalDataSet.setCohortIds(Collections.singletonList(originalCohort.getCohortId()));
     originalDataSet.setWorkspaceId(dbWorkspace.getWorkspaceId());
+    originalDataSet.setPrePackagedConceptSetEnum(Arrays.asList(PrePackagedConceptSetEnum.NONE));
     dataSetDao.save(originalDataSet);
 
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
@@ -3194,7 +3195,7 @@ public class WorkspacesControllerTest {
                 workspace.getNamespace(),
                 workspace.getId(),
                 new DataSetRequest()
-                    .prePackagedConceptSet(PrePackagedConceptSetEnum.NONE)
+                    .prePackagedConceptSet(ImmutableList.of(PrePackagedConceptSetEnum.NONE))
                     .addConceptSetIdsItem(conceptSet.getId())
                     .addCohortIdsItem(cohort.getId())
                     .name("dataset")

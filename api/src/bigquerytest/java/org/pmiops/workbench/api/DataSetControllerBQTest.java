@@ -373,7 +373,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     ImmutableList.of(dbCohort1),
                     ImmutableList.of(Domain.CONDITION),
                     false,
-                    PrePackagedConceptSetEnum.NONE))
+                    ImmutableList.of(PrePackagedConceptSetEnum.NONE)))
             .getBody()
             .getCode();
     assertAndExecutePythonQuery(code, 1, Domain.CONDITION);
@@ -399,7 +399,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     ImmutableList.of(dbCohort1),
                     ImmutableList.of(Domain.CONDITION),
                     false,
-                    PrePackagedConceptSetEnum.NONE))
+                    ImmutableList.of(PrePackagedConceptSetEnum.NONE)))
             .getBody()
             .getCode();
     assertThat(code).contains(expected);
@@ -435,7 +435,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     ImmutableList.of(dbCohort1),
                     ImmutableList.of(Domain.CONDITION, Domain.PROCEDURE),
                     false,
-                    PrePackagedConceptSetEnum.NONE))
+                    ImmutableList.of(PrePackagedConceptSetEnum.NONE)))
             .getBody()
             .getCode();
 
@@ -455,7 +455,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     ImmutableList.of(dbCohort1, dbCohort2),
                     ImmutableList.of(Domain.CONDITION),
                     false,
-                    PrePackagedConceptSetEnum.NONE))
+                    ImmutableList.of(PrePackagedConceptSetEnum.NONE)))
             .getBody()
             .getCode();
 
@@ -475,7 +475,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     ImmutableList.of(),
                     ImmutableList.of(Domain.CONDITION),
                     true,
-                    PrePackagedConceptSetEnum.NONE))
+                    ImmutableList.of(PrePackagedConceptSetEnum.NONE)))
             .getBody()
             .getCode();
 
@@ -495,7 +495,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     ImmutableList.of(dbCohort1),
                     ImmutableList.of(Domain.PERSON),
                     false,
-                    PrePackagedConceptSetEnum.PERSON))
+                    ImmutableList.of(PrePackagedConceptSetEnum.PERSON)))
             .getBody()
             .getCode();
 
@@ -515,7 +515,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     ImmutableList.of(dbCohort1),
                     ImmutableList.of(Domain.SURVEY),
                     false,
-                    PrePackagedConceptSetEnum.SURVEY))
+                    ImmutableList.of(PrePackagedConceptSetEnum.SURVEY)))
             .getBody()
             .getCode();
 
@@ -536,11 +536,33 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     ImmutableList.of(dbCohort1),
                     ImmutableList.of(Domain.FITBIT_HEART_RATE_LEVEL),
                     false,
-                    PrePackagedConceptSetEnum.NONE))
+                    ImmutableList.of(PrePackagedConceptSetEnum.NONE)))
             .getBody()
             .getCode();
 
     assertAndExecutePythonQuery(code, 1, Domain.FITBIT_HEART_RATE_LEVEL);
+  }
+
+  @Test
+  public void testGenerateCodeTwoPrePackagedConceptSet() {
+    String code =
+        controller
+            .generateCode(
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_NAME,
+                KernelTypeEnum.PYTHON.toString(),
+                createDataSetRequest(
+                    ImmutableList.of(dbConditionConceptSet, dbProcedureConceptSet),
+                    ImmutableList.of(dbCohort1),
+                    ImmutableList.of(Domain.CONDITION),
+                    false,
+                    ImmutableList.of(
+                        PrePackagedConceptSetEnum.PERSON,
+                        PrePackagedConceptSetEnum.FITBIT_HEART_RATE_LEVEL)))
+            .getBody()
+            .getCode();
+
+    assertAndExecutePythonQuery(code, 1, Domain.CONDITION);
   }
 
   @Test
@@ -654,14 +676,14 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
       List<DbCohort> dbCohorts,
       List<Domain> domains,
       boolean allParticipants,
-      PrePackagedConceptSetEnum prePackagedConceptSetEnum) {
+      List<PrePackagedConceptSetEnum> prePackagedConceptSetEnumList) {
     return new DataSetRequest()
         .name(DATASET_NAME)
         .conceptSetIds(
             dbConceptSets.stream().map(DbConceptSet::getConceptSetId).collect(Collectors.toList()))
         .cohortIds(dbCohorts.stream().map(DbCohort::getCohortId).collect(Collectors.toList()))
         .includesAllParticipants(allParticipants)
-        .prePackagedConceptSet(prePackagedConceptSetEnum)
+        .prePackagedConceptSet(prePackagedConceptSetEnumList)
         .domainValuePairs(
             domains.stream()
                 .map(d -> new DomainValuePair().domain(d).value("person_id"))

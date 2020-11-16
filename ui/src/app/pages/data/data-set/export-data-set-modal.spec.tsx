@@ -15,7 +15,7 @@ const dataSet: DataSet = {
   cohorts: [],
   domainValuePairs: [],
   includesAllParticipants: false,
-  prePackagedConceptSet: PrePackagedConceptSetEnum.SURVEY
+  prePackagedConceptSet: Array.of(PrePackagedConceptSetEnum.SURVEY, PrePackagedConceptSetEnum.FITBITACTIVITY)
 };
 
 const createExportDataSetModal = () => {

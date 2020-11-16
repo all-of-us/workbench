@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -98,7 +99,8 @@ public class DataSetMapperTest {
     dbDataset.setInvalid(false);
     dbDataset.setWorkspaceId(1L);
     dbDataset.setPrePackagedConceptSet(
-        DbStorageEnums.prePackagedConceptSetsToStorage(PrePackagedConceptSetEnum.NONE));
+        Arrays.asList(
+            DbStorageEnums.prePackagedConceptSetsToStorage(PrePackagedConceptSetEnum.NONE)));
     dbDataset.setCohortIds(ImmutableList.of(1L));
     dbDataset.setConceptSetIds(ImmutableList.of(1L));
     dbDataset.setValues(
@@ -155,7 +157,8 @@ public class DataSetMapperTest {
   public void testDataSetRequestToDb() {
     DataSetRequest request = new DataSetRequest();
     request.setName("New Name");
-    request.setPrePackagedConceptSet(PrePackagedConceptSetEnum.SURVEY);
+    request.setPrePackagedConceptSet(
+        Arrays.asList(PrePackagedConceptSetEnum.SURVEY, PrePackagedConceptSetEnum.FITBIT_ACTIVITY));
     final DbDataset toDataSet = dataSetMapper.dataSetRequestToDb(request, dbDataset, CLOCK);
     assertThat(toDataSet.getName()).isEqualTo("New Name");
     assertThat(toDataSet.getCohortIds()).isEqualTo(dbDataset.getCohortIds());
@@ -163,7 +166,8 @@ public class DataSetMapperTest {
         .isEqualTo(dbDataset.getIncludesAllParticipants());
     assertThat(toDataSet.getConceptSetIds()).isEqualTo(dbDataset.getConceptSetIds());
     assertThat(toDataSet.getValues()).isEqualTo(dbDataset.getValues());
-    assertThat(toDataSet.getPrePackagedConceptSet()).isEqualTo((short) 0);
+    assertThat(toDataSet.getPrePackagedConceptSet().size()).isEqualTo(1);
+    assertThat(toDataSet.getPrePackagedConceptSet().get(0)).isEqualTo((short) 0);
     assertThat(toDataSet.getInvalid()).isEqualTo(dbDataset.getInvalid());
     assertThat(toDataSet.getDataSetId()).isEqualTo(dbDataset.getDataSetId());
     assertThat(toDataSet.getCreationTime()).isEqualTo(dbDataset.getCreationTime());
@@ -184,14 +188,15 @@ public class DataSetMapperTest {
     request.setCohortIds(cohortIds);
     request.setConceptSetIds(conceptIds);
     request.setIncludesAllParticipants(false);
-    request.setPrePackagedConceptSet(PrePackagedConceptSetEnum.NONE);
+    request.setPrePackagedConceptSet(ImmutableList.of(PrePackagedConceptSetEnum.NONE));
     request.setDomainValuePairs(ImmutableList.of(domainValuePair));
     final DbDataset toDataSet = dataSetMapper.dataSetRequestToDb(request, dbDataset, CLOCK);
     assertThat(toDataSet.getName()).isEqualTo("New Name");
     assertThat(toDataSet.getCohortIds()).isEqualTo(cohortIds);
     assertThat(toDataSet.getIncludesAllParticipants()).isFalse();
     assertThat(toDataSet.getConceptSetIds()).isEqualTo(conceptIds);
-    assertThat(toDataSet.getPrePackagedConceptSet()).isEqualTo((short) 0);
+    assertThat(toDataSet.getPrePackagedConceptSet().size()).isEqualTo(1);
+    assertThat(toDataSet.getPrePackagedConceptSet().get(0)).isEqualTo((short) 0);
     assertThat(toDataSet.getValues().get(0).getDomainEnum()).isEqualTo(Domain.PERSON);
     assertThat(toDataSet.getInvalid()).isFalse();
   }
@@ -226,7 +231,9 @@ public class DataSetMapperTest {
         .isEqualTo(dataSet.getLastModifiedTime());
     assertThat(dbDataset.getPrePackagedConceptSet())
         .isEqualTo(
-            DbStorageEnums.prePackagedConceptSetsToStorage(dataSet.getPrePackagedConceptSet()));
+            dataSet.getPrePackagedConceptSet().stream()
+                .map(DbStorageEnums::prePackagedConceptSetsToStorage)
+                .collect(Collectors.toList()));
   }
 
   private void assertDbModelToClient(

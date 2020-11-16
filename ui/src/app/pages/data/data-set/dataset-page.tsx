@@ -13,7 +13,11 @@ import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {CircleWithText} from 'app/icons/circleWithText';
 import {NewDataSetModal} from 'app/pages/data/data-set/new-dataset-modal';
-import {cohortsApi, conceptSetsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
+import {
+  cohortsApi,
+  conceptSetsApi,
+  dataSetApi
+} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   formatDomain,
@@ -28,7 +32,10 @@ import {
 } from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getCdrVersion} from 'app/utils/cdr-versions';
-import {currentWorkspaceStore, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
+import {
+  currentWorkspaceStore,
+  navigateAndPreventDefaultIfNoKeysPressed
+} from 'app/utils/navigation';
 import {apiCallWithGatewayTimeoutRetries} from 'app/utils/retry';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
@@ -389,13 +396,27 @@ const BoxHeader = ({step = '', header =  '', subHeader = '', style = {}, ...prop
 // Enum values are the display values.
 enum PrepackagedConceptSet {
   PERSON = 'Demographics',
-  SURVEYS = 'All Surveys'
+  SURVEYS = 'All Surveys',
+  FITIBITHEARTRATE = 'Fitbit Hear Rate',
+  FITBITHEARTACTIVITY = 'Fitbit Heart Activity',
+  FITBITHEARTRATELEVEL = 'Fitbit Heart Rate Level',
+  FITBITINTRADAYSTEPS = 'Fitbit Intra Day Steps'
 }
 
-const PREPACKAGED_DOMAINS = {
+const PREPACKAGED_SURVEY_PERSON_DOMAIN = {
   [PrepackagedConceptSet.PERSON]: Domain.PERSON,
-  [PrepackagedConceptSet.SURVEYS]: Domain.SURVEY
+  [PrepackagedConceptSet.SURVEYS]: Domain.SURVEY,
 };
+
+const PREPACKAGED_WITH_FITBIT_DOMAINS = {
+  ...PREPACKAGED_SURVEY_PERSON_DOMAIN,
+  [PrepackagedConceptSet.FITIBITHEARTRATE]: Domain.FITBITHEARTRATESUMMARY,
+  [PrepackagedConceptSet.FITBITHEARTACTIVITY]: Domain.FITBITACTIVITY,
+  [PrepackagedConceptSet.FITBITHEARTRATELEVEL]: Domain.FITBITHEARTRATELEVEL,
+  [PrepackagedConceptSet.FITBITINTRADAYSTEPS]: Domain.FITBITINTRADAYSTEPS,
+};
+
+let PREPACKAGED_DOMAINS = PREPACKAGED_SURVEY_PERSON_DOMAIN;
 
 interface DataSetPreviewInfo {
   isLoading: boolean;
@@ -470,6 +491,9 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
     async componentDidMount() {
       const {namespace, id} = this.props.workspace;
       const resourcesPromise = this.loadResources();
+      if (getCdrVersion(this.props.workspace, this.props.cdrVersionListResponse).hasFitbitData) {
+        PREPACKAGED_DOMAINS = PREPACKAGED_WITH_FITBIT_DOMAINS;
+      }
       if (!this.editing) {
         return;
       }
@@ -749,31 +773,75 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
       return tableData;
     }
 
-    apiEnumToPrePackageConceptSets(v: PrePackagedConceptSetEnum): Set<PrepackagedConceptSet> {
-      switch (v) {
-        case PrePackagedConceptSetEnum.BOTH:
-          return new Set([PrepackagedConceptSet.PERSON, PrepackagedConceptSet.SURVEYS]);
-        case PrePackagedConceptSetEnum.PERSON:
-          return new Set([PrepackagedConceptSet.PERSON]);
-        case PrePackagedConceptSetEnum.SURVEY:
-          return new Set([PrepackagedConceptSet.SURVEYS]);
-        case PrePackagedConceptSetEnum.NONE:
-        default:
-          return new Set();
-      }
+    apiEnumToPrePackageConceptSets(v: Array<PrePackagedConceptSetEnum>): Set<PrepackagedConceptSet> {
+      const re: Set<PrepackagedConceptSet> = new Set<PrepackagedConceptSet>();
+      v.map(
+        pre => {
+          switch (pre) {
+            case PrePackagedConceptSetEnum.BOTH: {
+              re.add(PrepackagedConceptSet.PERSON), re.add(PrepackagedConceptSet.SURVEYS);
+              break;
+            }
+            case PrePackagedConceptSetEnum.PERSON: {
+              re.add(PrepackagedConceptSet.PERSON);
+              break;
+            }
+            case PrePackagedConceptSetEnum.SURVEY: {
+              re.add(PrepackagedConceptSet.SURVEYS);
+              break;
+            }
+            case PrePackagedConceptSetEnum.FITBITHEARTRATESUMMARY: {
+              re.add(PrepackagedConceptSet.FITIBITHEARTRATE);
+              break;
+            }
+            case PrePackagedConceptSetEnum.FITBITHEARTRATELEVEL: {
+              re.add(PrepackagedConceptSet.FITBITHEARTRATELEVEL);
+              break;
+            }
+            case PrePackagedConceptSetEnum.FITBITINTRADAYSTEPS: {
+              re.add(PrepackagedConceptSet.FITBITINTRADAYSTEPS);
+              break;
+            }
+            case PrePackagedConceptSetEnum.FITBITACTIVITY: {
+              re.add(PrepackagedConceptSet.FITBITHEARTACTIVITY);
+              break;
+            }
+            case PrePackagedConceptSetEnum.NONE:
+            default:
+              break;
+          }
+        }
+      );
+      return re;
+
     }
 
     getPrePackagedConceptSetApiEnum() {
       const {selectedPrepackagedConceptSets} = this.state;
-      if (selectedPrepackagedConceptSets.has(PrepackagedConceptSet.PERSON) &&
-          selectedPrepackagedConceptSets.has(PrepackagedConceptSet.SURVEYS)) {
-        return PrePackagedConceptSetEnum.BOTH;
-      } else if (selectedPrepackagedConceptSets.has(PrepackagedConceptSet.SURVEYS)) {
-        return PrePackagedConceptSetEnum.SURVEY;
-      } else if (selectedPrepackagedConceptSets.has(PrepackagedConceptSet.PERSON)) {
-        return PrePackagedConceptSetEnum.PERSON;
-      }
-      return PrePackagedConceptSetEnum.NONE;
+      const selectedPrePackagedConceptSDetEnum = new Array<PrePackagedConceptSetEnum>();
+      selectedPrepackagedConceptSets.forEach(selectedPrepackagedConceptSet => {
+        switch (selectedPrepackagedConceptSet) {
+          case PrepackagedConceptSet.PERSON:
+            selectedPrePackagedConceptSDetEnum.push(PrePackagedConceptSetEnum.PERSON);
+            break;
+          case PrepackagedConceptSet.SURVEYS:
+            selectedPrePackagedConceptSDetEnum.push(PrePackagedConceptSetEnum.SURVEY);
+            break;
+          case PrepackagedConceptSet.FITBITHEARTACTIVITY:
+            selectedPrePackagedConceptSDetEnum.push(PrePackagedConceptSetEnum.FITBITACTIVITY);
+            break;
+          case PrepackagedConceptSet.FITBITINTRADAYSTEPS:
+            selectedPrePackagedConceptSDetEnum.push(PrePackagedConceptSetEnum.FITBITINTRADAYSTEPS);
+            break;
+          case PrepackagedConceptSet.FITIBITHEARTRATE:
+            selectedPrePackagedConceptSDetEnum.push(PrePackagedConceptSetEnum.FITBITHEARTRATESUMMARY);
+            break;
+          case PrepackagedConceptSet.FITBITHEARTRATELEVEL:
+            selectedPrePackagedConceptSDetEnum.push(PrePackagedConceptSetEnum.FITBITHEARTRATELEVEL);
+            break;
+        }
+      });
+      return selectedPrePackagedConceptSDetEnum;
     }
 
     async getPreviewList() {
@@ -887,11 +955,26 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
 
 
     renderPreviewDataTableSection() {
-      const filteredPreviewData =
-          this.state.previewList.get(this.state.selectedPreviewDomain);
-      return filteredPreviewData.values.length > 0 ?
-        this.renderPreviewDataTable(filteredPreviewData) :
-        this.renderPreviewDataTableSectionMessage(filteredPreviewData);
+      let selectedPreviewDomain = this.state.selectedPreviewDomain.toString();
+      // Had to do the following since typescript changes the key by removing _ therefore changing the domain string
+      // which resulted in map check from selectedPreviewDomain to give undefined result always
+      if (this.state.selectedPreviewDomain && this.state.selectedPreviewDomain.toString().startsWith('FITBIT')) {
+        switch (this.state.selectedPreviewDomain.toString()) {
+          case 'FITBITHEARTRATESUMMARY': selectedPreviewDomain = 'FITBIT_HEART_RATE_SUMMARY'; break;
+          case 'FITBITHEARTRATELEVEL': selectedPreviewDomain = 'FITBIT_HEART_RATE_LEVEL'; break;
+          case 'FITBITACTIVITY': selectedPreviewDomain = 'FITBIT_ACTIVITY'; break;
+          case 'FITBITINTRADAYSTEPS': selectedPreviewDomain = 'FITBIT_INTRADAY_STEPS'; break;
+        }
+      }
+      let filteredPreviewData;
+      this.state.previewList.forEach((map, entry) => {
+        if (entry.toString() === selectedPreviewDomain && !filteredPreviewData) {
+          filteredPreviewData = map;
+        }
+      });
+      return filteredPreviewData && filteredPreviewData.values.length > 0 ?
+          this.renderPreviewDataTable(filteredPreviewData) :
+          this.renderPreviewDataTableSectionMessage(filteredPreviewData);
     }
 
     renderPreviewDataTable(filteredPreviewData: DataSetPreviewInfo) {
@@ -983,7 +1066,21 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                     </BoxHeader>
                   <div style={{height: '9rem', overflowY: 'auto'}}>
                     <Subheader>Prepackaged Concept Sets</Subheader>
-                    {Object.keys(PrepackagedConceptSet).map((prepackaged: PrepackagedConceptSet) => {
+                    {/*If cdr does not have FITBIT data just show Survey and demographic optons*/}
+                    {!getCdrVersion(this.props.workspace, this.props.cdrVersionListResponse).hasFitbitData &&
+                    Object.keys(PrepackagedConceptSet)
+                        .filter(conceptSet => conceptSet === 'SURVEYS' || conceptSet === 'PERSON')
+                        .map((prepackaged: PrepackagedConceptSet) => {
+                          const p = PrepackagedConceptSet[prepackaged];
+                          return <ImmutableListItem name={p}
+                                                    key={prepackaged}
+                                                    checked={selectedPrepackagedConceptSets.has(p)}
+                                                    onChange={() => this.selectPrePackagedConceptSet(
+                                                      p, !selectedPrepackagedConceptSets.has(p))
+                                                    }/>;
+                        })}
+                    {getCdrVersion(this.props.workspace, this.props.cdrVersionListResponse).hasFitbitData
+                    && Object.keys(PrepackagedConceptSet).map((prepackaged: PrepackagedConceptSet) => {
                       const p = PrepackagedConceptSet[prepackaged];
                       return <ImmutableListItem name={p}
                                          key={prepackaged}
@@ -1106,7 +1203,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                                  onClick={() =>
                                    this.setState({selectedPreviewDomain: Domain[domain]})}
                                  style={stylesFunction.selectDomainForPreviewButton(selectedPreviewDomain === Domain[domain])}>
-                        <FlexRow style={{alignItems: 'center'}}>
+                        <FlexRow style={{alignItems: 'center', overflow: 'auto', wordBreak: 'break-all'}}>
                           {domain.toString()}
                           {previewRow.isLoading &&
                           <Spinner style={{marginLeft: '4px', height: '18px', width: '18px'}}/>}

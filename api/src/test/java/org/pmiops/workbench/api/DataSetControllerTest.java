@@ -457,7 +457,7 @@ public class DataSetControllerTest {
         .cohortIds(new ArrayList<>())
         .domainValuePairs(new ArrayList<>())
         .name("blah")
-        .prePackagedConceptSet(PrePackagedConceptSetEnum.NONE);
+        .prePackagedConceptSet(ImmutableList.of(PrePackagedConceptSetEnum.NONE));
   }
 
   private void stubGetWorkspace(String ns, String name) {

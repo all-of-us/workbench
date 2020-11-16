@@ -517,7 +517,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
           fromConceptSetIdToToConceptSetId.entrySet().stream()
               .filter(conceptSetId -> dataSet.getConceptSetIds().contains(conceptSetId.getKey()))
               .map(Entry::getValue)
-              .collect(Collectors.toSet()));
+              .collect(Collectors.toSet()),
+          new ArrayList<>(dataSet.getPrePackagedConceptSet()));
     }
     return to;
   }
