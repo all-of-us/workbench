@@ -307,18 +307,11 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
   }
 
   getSelectedValues() {
-    const {node: {parentId}} = this.props;
-    if (this.props.source === 'criteria') {
-      return currentCohortCriteriaStore.getValue()
-        .some(crit =>
-              crit.parameterId === this.paramId() ||
-              parentId.toString() === this.paramId()
-          );
-    } else {
-      return currentConceptStore.getValue()
-        .some(crit => this.paramId(crit) === this.paramId());
-    }
-
+    const {node: {path}, source} = this.props;
+    return source === 'criteria'
+      ? currentCohortCriteriaStore.getValue().some(crit =>
+        crit.parameterId === this.paramId() || path.split('.').includes(crit.id.toString()))
+      : currentConceptStore.getValue().some(crit => this.paramId(crit) === this.paramId());
   }
 
   selectIconDisabled() {
