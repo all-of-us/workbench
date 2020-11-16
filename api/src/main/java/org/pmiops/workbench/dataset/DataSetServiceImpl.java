@@ -410,7 +410,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   // note: ImmutableList is OK return type on private methods, but should be avoided in public
   // signatures.
   private ImmutableList<DbConceptSet> getExpandedConceptSetSelections(
-      PrePackagedConceptSetEnum prePackagedConceptSet,
+      List<PrePackagedConceptSetEnum> prePackagedConceptSet,
       List<Long> conceptSetIds,
       List<DbCohort> selectedCohorts,
       boolean includesAllParticipants,
@@ -428,19 +428,21 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
     // If pre packaged all survey concept set is selected create a temp concept set with concept ids
     // of all survey questions
-    if (CONCEPT_SETS_NEEDING_PREPACKAGED_SURVEY.contains(prePackagedConceptSet)) {
+    if (prePackagedConceptSet.contains(SURVEY)
+        || prePackagedConceptSet.contains(PrePackagedConceptSetEnum.BOTH)) {
       selectedConceptSetsBuilder.add(buildPrePackagedSurveyConceptSet());
     }
     return selectedConceptSetsBuilder.build();
   }
 
   private static boolean hasNoConcepts(
-      PrePackagedConceptSetEnum prePackagedConceptSet,
+      List<PrePackagedConceptSetEnum> prePackagedConceptSet,
       List<DomainValuePair> domainValuePairs,
       ImmutableList<DbConceptSet> initialSelectedConceptSets) {
     return initialSelectedConceptSets.isEmpty()
         && domainValuePairs.isEmpty()
-        && prePackagedConceptSet.equals(PrePackagedConceptSetEnum.NONE);
+        && prePackagedConceptSet.size() == 1
+        && prePackagedConceptSet.get(0).equals(PrePackagedConceptSetEnum.NONE);
   }
 
   @VisibleForTesting

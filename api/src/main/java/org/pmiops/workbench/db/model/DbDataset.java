@@ -36,7 +36,7 @@ public class DbDataset {
   private List<Long> conceptSetIds;
   private List<Long> cohortIds;
   private List<DbDatasetValue> values;
-  private short prePackagedConceptSet;
+  private List<Short> prePackagedConceptSet;
 
   public DbDataset() {
     setVersion(DbDataset.INITIAL_VERSION);
@@ -196,22 +196,31 @@ public class DbDataset {
     this.values = values;
   }
 
+  @ElementCollection
+  @CollectionTable(
+      name = "data_set_prepackaged_concept_set",
+      joinColumns = @JoinColumn(name = "data_set_id"))
   @Column(name = "pre_packaged_concept_set")
-  public short getPrePackagedConceptSet() {
+  public List<Short> getPrePackagedConceptSet() {
     return prePackagedConceptSet;
   }
 
-  public void setPrePackagedConceptSet(short prePackagedConceptSet) {
+  public void setPrePackagedConceptSet(List<Short> prePackagedConceptSet) {
     this.prePackagedConceptSet = prePackagedConceptSet;
   }
 
   @Transient
-  public PrePackagedConceptSetEnum getPrePackagedConceptSetEnum() {
-    return DbStorageEnums.prePackagedConceptSetsFromStorage(prePackagedConceptSet);
+  public List<PrePackagedConceptSetEnum> getPrePackagedConceptSetEnum() {
+    return prePackagedConceptSet.stream()
+        .map(DbStorageEnums::prePackagedConceptSetsFromStorage)
+        .collect(Collectors.toList());
   }
 
-  public void setPrePackagedConceptSetEnum(PrePackagedConceptSetEnum domain) {
-    this.prePackagedConceptSet = DbStorageEnums.prePackagedConceptSetsToStorage(domain);
+  public void setPrePackagedConceptSetEnum(List<PrePackagedConceptSetEnum> domain) {
+    this.prePackagedConceptSet =
+        domain.stream()
+            .map(DbStorageEnums::prePackagedConceptSetsToStorage)
+            .collect(Collectors.toList());
   }
 
   @Override
