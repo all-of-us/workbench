@@ -27,7 +27,6 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -180,7 +179,7 @@ public class DataSetServiceTest {
   private static DataSetRequest buildEmptyRequest() {
     final DataSetRequest invalidRequest = new DataSetRequest();
     invalidRequest.setDomainValuePairs(Collections.emptyList());
-    invalidRequest.setPrePackagedConceptSet(Arrays.asList(PrePackagedConceptSetEnum.NONE));
+    invalidRequest.setPrePackagedConceptSet(ImmutableList.of(PrePackagedConceptSetEnum.NONE));
     return invalidRequest;
   }
 
@@ -346,7 +345,7 @@ public class DataSetServiceTest {
             .cohortIds(Collections.emptyList())
             .domainValuePairs(ImmutableList.of(new DomainValuePair()))
             .name("blah")
-            .prePackagedConceptSet(Arrays.asList(PrePackagedConceptSetEnum.NONE))
+            .prePackagedConceptSet(ImmutableList.of(PrePackagedConceptSetEnum.NONE))
             .cohortIds(COHORT_IDS)
             .domainValuePairs(
                 ImmutableList.of(new DomainValuePair().domain(Domain.PERSON).value("PERSON_ID")));
@@ -385,7 +384,8 @@ public class DataSetServiceTest {
             .cohortIds(Collections.emptyList())
             .domainValuePairs(ImmutableList.of(new DomainValuePair()))
             .name("blah")
-            .prePackagedConceptSet(Arrays.asList(PrePackagedConceptSetEnum.FITBIT_HEART_RATE_LEVEL))
+            .prePackagedConceptSet(
+                ImmutableList.of(PrePackagedConceptSetEnum.FITBIT_HEART_RATE_LEVEL))
             .cohortIds(Collections.emptyList())
             .domainValuePairs(
                 ImmutableList.of(
