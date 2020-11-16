@@ -8,7 +8,7 @@
     "creationTime": "2019-10-21 00:00:00Z",
     "releaseNumber": 3,
     "numParticipants": 224143,
-    "cdrDbName": "r_2019q4_9"
+    "cdrDbName": "r_2019q4_10"
   },
   {
     "cdrVersionId": 2,
@@ -19,7 +19,7 @@
     "creationTime": "2020-04-16 00:00:00Z",
     "releaseNumber": 4,
     "numParticipants": 224001,
-    "cdrDbName": "r_2019q4_9"
+    "cdrDbName": "r_2019q4_10"
   },
   {
     "cdrVersionId": 3,
@@ -30,7 +30,7 @@
     "creationTime": "2019-09-30 00:00:00Z",
     "releaseNumber": 3,
     "numParticipants": 234525,
-    "cdrDbName": "synth_r_2019q4_9"
+    "cdrDbName": "synth_r_2019q4_10"
   },
   {
     "cdrVersionId": 4,
@@ -38,10 +38,10 @@
     "isDefault": true,
     "dataAccessLevel": 1,
     "bigqueryProject": "fc-aou-cdr-preprod",
-    "bigqueryDataset": "R2020Q4R1",
+    "bigqueryDataset": "R2020Q4R2",
     "creationTime": "2020-10-20 00:00:00Z",
     "releaseNumber": 5,
     "numParticipants": 315297,
-    "cdrDbName": "r_2020q4_1"
+    "cdrDbName": "r_2020q4_2"
   }
 ]

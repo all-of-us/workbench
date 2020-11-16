@@ -3788,6 +3788,8 @@ definitions:
         "$ref": "#/definitions/ArchivalStatus"
       hasMicroarrayData:
         type: boolean
+      hasFitbitData:
+        type: boolean
       creationTime:
         type: integer
         format: int64

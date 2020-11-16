@@ -3,7 +3,8 @@ import {AttrName, Domain, ModifierType, Operator} from 'generated/fetch';
 export const PROGRAM_TYPES = [
   Domain[Domain.PERSON],
   Domain[Domain.SURVEY],
-  Domain[Domain.PHYSICALMEASUREMENT]
+  Domain[Domain.PHYSICALMEASUREMENT],
+  Domain[Domain.FITBIT]
 ];
 
 export const DOMAIN_TYPES = [

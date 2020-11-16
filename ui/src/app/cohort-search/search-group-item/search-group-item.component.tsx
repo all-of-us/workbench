@@ -293,16 +293,26 @@ export const SearchGroupItem = withCurrentWorkspace()(
         : [];
     }
 
+    get itemName() {
+      const {item: {name, searchParameters, type}} = this.props;
+      if (type === Domain.FITBIT.toString()) {
+        return searchParameters[0].name;
+      } else {
+        const codeDisplay = searchParameters.length > 1 ? 'Codes' : 'Code';
+        const titleDisplay = type === Domain.PERSON.toString() ? typeToTitle(searchParameters[0].type) : domainToTitle(type);
+        return !!name ? name : `Contains ${titleDisplay} ${codeDisplay}`;
+      }
+    }
+
     render() {
       const {item: {count, modifiers, name, searchParameters, status, type}} = this.props;
       const {error, loading, paramListOpen, renaming} = this.state;
-      const codeDisplay = searchParameters.length > 1 ? 'Codes' : 'Code';
-      const titleDisplay = type === Domain.PERSON.toString() ? typeToTitle(searchParameters[0].type) : domainToTitle(type);
-      const itemName = !!name ? name : `Contains ${titleDisplay} ${codeDisplay}`;
       const showCount = !loading && status !== 'hidden' && count !== undefined;
+      const hideEdit = type === Domain.FITBIT.toString() ||
+        (searchParameters[0] && searchParameters[0].type === CriteriaType.DECEASED.toString());
       const actionItems = [
         {label: 'Edit criteria name', command: () => this.setState({renaming: true})},
-        {label: 'Edit criteria', command: () => this.launchSearch()},
+        {label: 'Edit criteria', command: () => this.launchSearch(), style: hideEdit ? {display: 'none'} : {}},
         {label: 'Suppress criteria from total count', command: () => this.suppress()},
         {label: 'Delete criteria', command: () => this.remove()},
       ];
@@ -315,7 +325,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
               <ClrIcon shape='ellipsis-vertical' />
             </Clickable>
             <span className='item-title' style={{...styles.codeText, paddingRight: '10px'}} onClick={() => this.launchSearch()}>
-              {itemName}
+              {this.itemName}
             </span>
             {status !== 'hidden' && <span style={{...styles.codeText, paddingRight: '10px'}}>|</span>}
             {loading && <span className='spinner spinner-inline'>Loading...</span>}

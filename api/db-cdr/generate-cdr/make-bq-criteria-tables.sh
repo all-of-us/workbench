@@ -5786,7 +5786,7 @@ FROM
         SELECT MIN(id) as id, CONCAT('[', LOWER(domain_id), '_rank1]') as rnk
         FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
         WHERE full_text is not null
-            and (item_count != -1 OR (item_count = -1 AND type = 'BRAND'))
+            and ( (is_selectable = 1 and est_count != -1) OR type = 'BRAND')
         GROUP BY domain_id, is_standard, type, subtype, concept_id, name
     ) y
 WHERE x.id = y.id"

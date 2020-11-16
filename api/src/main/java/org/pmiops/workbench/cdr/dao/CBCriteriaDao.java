@@ -166,7 +166,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(
       value =
-          "select c from DbCriteria c where domainId=:domain and match(fullText, concat('+[', :domain, '_rank1]')) > 0 order by c.count desc, c.name asc")
+          "select c from DbCriteria c where domainId=:domain and selectable = 1 and match(fullText, concat('+[', :domain, '_rank1]')) > 0 order by c.count desc, c.name asc")
   Page<DbCriteria> findCriteriaTopCounts(@Param("domain") String domain, Pageable page);
 
   @Query(
@@ -186,6 +186,21 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
       @Param("id") Long id,
       @Param("term") String term,
       Pageable page);
+
+  @Query(
+      value =
+          "select c1 "
+              + "from DbCriteria c1 "
+              + "where c1.domainId = :domain "
+              + "and c1.subtype = 'QUESTION' "
+              + "and c1.conceptId in ( select c.conceptId "
+              + "                      from DbCriteria c "
+              + "                     where c.domainId = :domain "
+              + "                       and match(c.fullText, concat('+[', :domain, '_rank1]')) > 0 "
+              + "                       and match(c.path, :id) > 0) "
+              + "order by c1.count desc")
+  Page<DbCriteria> findSurveyQuestionCriteriaByDomainAndIdAndFullText(
+      @Param("domain") String domain, @Param("id") Long id, Pageable page);
 
   @Query(
       value =

@@ -17,8 +17,7 @@ describe('Create Concept Sets from Domains', () => {
    * - Create new Concept Set from Conditions domain.
    * - Delete Concept Set.
    */
-  // Disabled temporarily, will fix as part of RW-5769
-  xtest('Create Concept Set from Conditions domain', async () => {
+  test('Create Concept Set from Conditions domain', async () => {
     const workspaceCard = await findOrCreateWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 
@@ -41,20 +40,19 @@ describe('Create Concept Sets from Domains', () => {
     const participantsCountInt = Number(participantsCount.replace(/,/g, ''));
     expect(participantsCountInt).toBeGreaterThan(1);
 
-    await conditionDomainCard.clickSelectConceptButton();
+    const criteriaSearch = await conditionDomainCard.clickSelectConceptButton();
 
     // Hardcode Concept Condition name and code for search and verify
     const conditionCode = '59621000';
     const conditionName = 'Essential hypertension';
 
     // Search by Code.
-    await conceptSetPage.searchConcepts(conditionCode);
-    const rowCells = await conceptSetPage.dataTableSelectRow();
-    // Verify condition name from search result
-    expect(rowCells.name).toBe(conditionName);
+    await criteriaSearch.searchCriteria(conditionCode);
+    const rowValues = await criteriaSearch.resultsTableSelectRow();
+    expect(rowValues.name).toBe(conditionName);
 
-    await conceptSetPage.clickAddToSetButton();
-
+    await conceptSetPage.viewAndSaveConceptSet();
+    
     // Save
     const conceptSetName = await conceptSetPage.saveConceptSet();
 
@@ -81,8 +79,7 @@ describe('Create Concept Sets from Domains', () => {
    * - Create new Dataset using above two Concept Sets.
    * - Delete Dataset, Concept Set.
    */
-  // Disabled temporarily, will fix as part of RW-5769
-  xtest('Create Concept Sets from Drug Exposures and Measurements domains', async () => {
+  test('Create Concept Sets from Drug Exposures and Measurements domains', async () => {
     const workspaceCard = await findOrCreateWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 
@@ -106,16 +103,17 @@ describe('Create Concept Sets from Domains', () => {
     const participantsCountInt = Number(participantsCount.replace(/,/g, ''));
     expect(participantsCountInt).toBeGreaterThan(1);
 
-    await drugDomainCard.clickSelectConceptButton();
+    const criteriaSearch = await drugDomainCard.clickSelectConceptButton();
 
     // Hardcode drug name for search
     const drugName = 'Diphenhydramine';
 
-    // Search by drug name
-    await conceptSearchPage.searchConcepts(drugName);
-    await conceptSearchPage.dataTableSelectAllRows();
+    // Search by drug name.
+    await criteriaSearch.searchCriteria(drugName);
+    const drugRowValues = await criteriaSearch.resultsTableSelectRow();
+    expect(drugRowValues.name).toBe(drugName);
 
-    await conceptSearchPage.clickAddToSetButton();
+    await conceptSearchPage.viewAndSaveConceptSet();
 
     // Save
     const conceptSet1 = await conceptSearchPage.saveConceptSet();
@@ -130,13 +128,14 @@ describe('Create Concept Sets from Domains', () => {
     await measurementsDomainCard.clickSelectConceptButton();
 
     // Hardcode Measurements name for search
-    const measurementName = 'Weight';
+    const measurementName = 'Body weight';
 
-    // Search by drug name
-    await conceptSearchPage.searchConcepts(measurementName);
-    await conceptSearchPage.dataTableSelectAllRows();
+    // Search by Measurements name.
+    await criteriaSearch.searchCriteria(measurementName);
+    const measurementRowValues = await criteriaSearch.resultsTableSelectRow();
+    expect(measurementRowValues.name).toBe(measurementName);
 
-    await conceptSearchPage.clickAddToSetButton();
+    await conceptSearchPage.viewAndSaveConceptSet();
 
     // Save
     const conceptSet2 = await conceptSearchPage.saveConceptSet();

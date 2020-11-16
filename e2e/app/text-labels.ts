@@ -68,6 +68,7 @@ export enum LinkText {
    RenameNotebook = 'Rename Notebook',
    Save = 'Save',
    SaveCohort = 'Save Cohort',
+   SaveConceptSet = 'Save Concept Set',
    SaveCriteria = 'Save Criteria',
    SeeCodePreview = 'See Code Preview',
    StayHere = 'Stay Here',

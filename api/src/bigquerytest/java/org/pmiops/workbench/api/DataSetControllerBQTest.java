@@ -188,10 +188,11 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         "ds_linking",
         "ds_survey",
         "person",
-        "activity_summary",
         "heart_rate_minute_level",
-        "heart_rate_summary",
-        "steps_intraday");
+        "ds_activity_summary",
+        "ds_heart_rate_minute_level",
+        "ds_heart_rate_summary",
+        "ds_steps_intraday");
   }
 
   @Override

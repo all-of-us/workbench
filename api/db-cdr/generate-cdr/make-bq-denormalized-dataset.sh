@@ -236,6 +236,56 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
     DISCHARGE_TO_SOURCE_VALUE       STRING
 )"
 
+echo "CREATE TABLE - ds_activity_summary"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.ds_activity_summary\`
+(
+    DATE                            DATE,
+    ACTIVITY_CALORIES               FLOAT64,
+    CALORIES_BMR                    FLOAT64,
+    CALORIES_OUT                    FLOAT64,
+    ELEVATION                       FLOAT64,
+    FAIRLY_ACTIVE_MINUTES           FLOAT64,
+    FLOORS                          INT64,
+    LIGHTLY_ACTIVE_MINUTES          FLOAT64,
+    MARGINAL_CALORIES               FLOAT64,
+    SEDENTARY_MINUTES               FLOAT64,
+    STEPS                           INT64,
+    VERY_ACTIVE_MINUTES             FLOAT64,
+    PERSON_ID                       INT64
+)"
+
+echo "CREATE TABLE - ds_heart_rate_minute_level"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.ds_heart_rate_minute_level\`
+(
+    DATETIME                        DATETIME,
+    PERSON_ID                       INT64,
+    HEART_RATE_VALUE                INT64
+)"
+
+echo "CREATE TABLE - ds_heart_rate_summary"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.ds_heart_rate_summary\`
+(
+    PERSON_ID                       INT64,
+    DATE                            DATE,
+    ZONE_NAME                       STRING,
+    MIN_HEART_RATE                  INT64,
+    MAX_HEART_RATE                  INT64,
+    MINUTE_IN_ZONE                  INT64,
+    CALORIE_COUNT                   FLOAT64
+)"
+
+echo "CREATE TABLE - ds_steps_intradayy"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.ds_steps_intraday\`
+(
+    DATETIME                        DATETIME,
+    STEPS                           NUMERIC,
+    PERSON_ID                       INT64
+)"
+
 ################################################
 # INSERT DATA
 ################################################
@@ -427,3 +477,41 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c2 on a.VISIT_TYPE_CONCEPT_ID = c2
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c3 on a.VISIT_SOURCE_CONCEPT_ID = c3.CONCEPT_ID
 left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c4 on a.ADMITTING_SOURCE_CONCEPT_ID = c4.CONCEPT_ID
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c5 on a.DISCHARGE_TO_CONCEPT_ID = c5.CONCEPT_ID"
+
+echo "ds_activity_summary - inserting data"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_activity_summary\`
+    (date, activity_calories, calories_bmr, calories_out, elevation, fairly_active_minutes, floors,
+    lightly_active_minutes, marginal_calories, sedentary_minutes, steps, very_active_minutes, person_id)
+SELECT date, activity_calories, calories_bmr, calories_out, elevation, fairly_active_minutes, floors,
+    lightly_active_minutes, marginal_calories, sedentary_minutes, steps, very_active_minutes, person_id
+FROM (SELECT *, ROW_NUMBER() OVER (PARTITION BY person_id ) AS rank
+FROM \`$BQ_PROJECT.$BQ_DATASET.activity_summary\`)
+where rank = 1"
+
+echo "ds_heart_rate_minute_level - inserting data"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_heart_rate_minute_level\`
+    (datetime, person_id, heart_rate_value)
+SELECT datetime, person_id, heart_rate_value
+FROM (SELECT *, ROW_NUMBER() OVER (PARTITION BY person_id ) AS rank
+FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_minute_level\`)
+where rank = 1"
+
+echo "ds_heart_rate_summary - inserting data"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_heart_rate_summary\`
+    (person_id, date, zone_name, min_heart_rate, max_heart_rate, minute_in_zone, calorie_count)
+SELECT person_id, date, zone_name, min_heart_rate, max_heart_rate, minute_in_zone, calorie_count
+FROM (SELECT *, ROW_NUMBER() OVER (PARTITION BY person_id ) AS rank
+FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_summary\`)
+where rank = 1"
+
+echo "ds_steps_intraday - inserting data"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_steps_intraday\`
+    (datetime, steps, person_id)
+SELECT datetime, steps, person_id
+FROM (SELECT *, ROW_NUMBER() OVER (PARTITION BY person_id ) AS rank
+FROM \`$BQ_PROJECT.$BQ_DATASET.steps_intraday\`)
+where rank = 1"

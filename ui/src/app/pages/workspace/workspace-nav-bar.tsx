@@ -1,20 +1,19 @@
 import {Component, Input} from '@angular/core';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
 
 import {Clickable} from 'app/components/buttons';
 import colors from 'app/styles/colors';
 import {
-  getCdrVersion,
   reactStyles,
   ReactWrapperBase,
   withCdrVersions,
   withCurrentWorkspace,
   withUrlParams
 } from 'app/utils';
+import {getCdrVersion} from 'app/utils/cdr-versions';
 import {NavStore} from 'app/utils/navigation';
-
 import {serverConfigStore} from 'app/utils/navigation';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
 
 const styles = reactStyles({
   container: {

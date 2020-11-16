@@ -56,13 +56,15 @@ const styles = reactStyles({
   baseHeader: {
     color: colors.primary,
     fontSize: '16px',
-    fontWeight: 700,
     lineHeight: '1rem',
     margin: 0
   },
   sectionHeader: {
     marginBottom: '12px',
     marginTop: '12px'
+  },
+  bold: {
+    fontWeight: 700,
   },
   controlSection: {
     backgroundColor: String(addOpacity(colors.white, .75)),
@@ -151,7 +153,17 @@ const presetEquals = (a: Runtime, b: Runtime): boolean => {
   return fp.isEqual(strip(a), strip(b));
 };
 
+const shouldDisableUpdateButton = (runtimeChanged: boolean, runtimeExists: boolean, runtimeStatus: RuntimeStatus): boolean => {
+  return runtimeExists && (
+    !runtimeChanged
+    // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
+    // where we get 'status' from
+    || ![RuntimeStatus.Running, RuntimeStatus.Stopped].includes(runtimeStatus as RuntimeStatus)
+  );
+};
+
 enum PanelContent {
+  Create = 'Create',
   Customize = 'Customize',
   Delete = 'Delete',
   Confirm = 'Confirm'
@@ -160,6 +172,7 @@ enum PanelContent {
 export interface Props {
   workspace: WorkspaceData;
   cdrVersionListResponse?: CdrVersionListResponse;
+  onUpdate: () => void;
 }
 
 // Exported for testing only.
@@ -171,7 +184,7 @@ export const ConfirmDelete = ({onCancel, onConfirm}) => {
         <ClrIcon style={{color: colors.warning, gridColumn: 1, gridRow: 1}} className='is-solid'
                  shape='exclamation-triangle' size='20'/>
       </div>
-      <h3 style={{...styles.baseHeader, gridColumn: 2, gridRow: 1}}>Delete your environment</h3>
+      <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 2, gridRow: 1}}>Delete your environment</h3>
       <p style={{...styles.confirmWarningText, gridColumn: 2, gridRow: 2}}>
         You’re about to delete your cloud analysis environment.
       </p>
@@ -499,6 +512,116 @@ const CostEstimator = ({
   </FlexRow>;
 };
 
+const CreatePanel = ({creatorFreeCreditsRemaining, preset, profile, setPanelContent, workspace}) => {
+  const {
+    displayName,
+    runtimeTemplate: {gceConfig = null, dataprocConfig = null}
+  } = preset;
+  const computeType = dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard;
+  const masterMachineType = computeType === ComputeType.Dataproc ? dataprocConfig.masterMachineType : gceConfig.machineType;
+  const masterMachine = findMachineByName(masterMachineType);
+  const masterDiskSize = computeType === ComputeType.Dataproc ? dataprocConfig.masterDiskSize : gceConfig.diskSize;
+  const workerMachineType = computeType === ComputeType.Dataproc ? dataprocConfig.workerMachineType : null;
+  const workerMachine = workerMachineType ? findMachineByName(workerMachineType) : null;
+  const workerDiskSize = computeType === ComputeType.Dataproc ? dataprocConfig.workerDiskSize : null;
+
+  return <div style={styles.controlSection}>
+    <CostEstimator
+        freeCreditsRemaining={creatorFreeCreditsRemaining}
+        profile={profile}
+        runtimeParameters={{
+          computeType,
+          diskSize: gceConfig && gceConfig.diskSize,
+          machineType: gceConfig && gceConfig.machineType,
+          dataprocConfig: dataprocConfig
+        }}
+        runtimeChanged={false}
+        workspace={workspace}
+    />
+    <FlexRow style={{justifyContent: 'space-between', alignItems: 'center'}}>
+      <h3 style={{...styles.sectionHeader, ...styles.bold}}>Recommended Environment for {displayName}</h3>
+      <Button
+          type='secondarySmall'
+          onClick={() => setPanelContent(PanelContent.Customize)}
+          aria-label='Customize'
+      >
+        Customize
+      </Button>
+    </FlexRow>
+    <label htmlFor='compute-resources' style={{...styles.bold, marginTop: '1rem'}}>Compute Resources</label>
+    <div id='compute-resources'>- Default: compute size of
+      <b> {masterMachine.cpu} CPUs</b>,
+      <b> {masterMachine.memory} GB memory</b>, and a
+      <b> {masterDiskSize} GB disk</b>
+    </div>
+    {computeType === ComputeType.Dataproc && <Fragment>
+      <label htmlFor='worker-configuration' style={{...styles.bold, marginTop: '1rem'}}>Worker Configuration</label>
+      <div id='worker-configuration'>- Default:
+        <b> {dataprocConfig.numberOfWorkers} worker(s) </b>
+        {
+          dataprocConfig.numberOfPreemptibleWorkers > 0 &&
+          <b>and {dataprocConfig.numberOfPreemptibleWorkers}  preemptible worker(s) </b>
+        }
+        each with compute size of <b>{workerMachine.cpu} CPUs</b>,
+        <b> {workerMachine.memory} GB memory</b>, and a
+        <b> {workerDiskSize} GB disk</b>
+      </div>
+    </Fragment>}
+  </div>;
+};
+
+const UpdateRuntimeButton = ({
+   disabled,
+   label,
+   onUpdate,
+   selectedDiskSize,
+   selectedMachineType,
+   selectedDataprocConfig,
+   setRequestedRuntime
+}) => {
+  return <Button
+      aria-label={label}
+      disabled={disabled}
+      onClick={() => {
+        const runtimeToRequest: Runtime = selectedDataprocConfig ? {
+          dataprocConfig: {
+            ...selectedDataprocConfig,
+            masterMachineType: selectedMachineType,
+            masterDiskSize: selectedDiskSize
+          }
+        } : {
+          gceConfig: {
+            machineType: selectedMachineType,
+            diskSize: selectedDiskSize
+          }
+        };
+
+        // If the selected runtime matches a preset, plumb through the appropriate configuration type.
+        runtimeToRequest.configurationType = fp.get(
+          'runtimeTemplate.configurationType',
+          fp.find(
+            ({runtimeTemplate}) => presetEquals(runtimeToRequest, runtimeTemplate),
+            runtimePresets)
+        ) || RuntimeConfigurationType.UserOverride;
+        setRequestedRuntime(runtimeToRequest);
+        onUpdate();
+      }}>{label}</Button>;
+};
+
+const UpdateButton = ({disabled, onClick}) => {
+  return <Button
+    aria-label='Update'
+    disabled={disabled}
+    onClick={() => onClick()}>
+    Update
+  </Button>;
+};
+
+<UpdateButton disabled={!runtimeChanged || ![RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus)}
+              onClick={() => {
+                setRequestedRuntime(createRuntimeRequest(newRuntimeConfig));
+                onUpdate(); }}/>
+
 export const RuntimePanel = fp.flow(
   withCdrVersions(),
   withCurrentWorkspace(),
@@ -519,8 +642,18 @@ export const RuntimePanel = fp.flow(
   const machineName = dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
   const initialMasterMachine = findMachineByName(machineName) || defaultMachineType;
   const initialCompute = dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard;
-  // TODO(RW-5591): Initialize PanelContent according to the runtime status.
-  const [panelContent, setPanelContent] = useState<PanelContent>(PanelContent.Customize);
+
+  // We may encounter a race condition where an existing current runtime has not loaded by the time this panel renders.
+  // It's unclear how often that would actually happen.
+  const initialPanelContent = fp.cond([
+    // currentRuntime being undefined means the first `getRuntime` has still not completed.
+    [([r, s]) => r === undefined, () => PanelContent.Customize],
+    [([r, s]) => s === null || s === RuntimeStatus.Unknown, () => PanelContent.Create],
+    [() => true, () => PanelContent.Customize]
+  ])([currentRuntime, status]);
+  const [panelContent, setPanelContent] = useState<PanelContent>(initialPanelContent);
+
+  const initialPreset = runtimePresets.generalAnalysis;
 
   const [selectedDiskSize, setSelectedDiskSize] = useState(diskSize);
   const [selectedMachine, setSelectedMachine] = useState(initialMasterMachine);
@@ -561,7 +694,6 @@ export const RuntimePanel = fp.flow(
     };
   }, []);
 
-  // TODO(RW-5591): Conditionally render create runtime page if runtime null or Deleted.
   if (currentRuntime === undefined) {
     return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
   }
@@ -684,19 +816,37 @@ export const RuntimePanel = fp.flow(
           }}>
           Cancel
         </Button>
+        <UpdateButton disabled={!runtimeChanged || ![RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus)}
+                      onClick={() => {
+                        setRequestedRuntime(createRuntimeRequest(newRuntimeConfig));
+                        onUpdate(); }}/>
         {renderUpdateButton()}
       </FlexRow>
     </React.Fragment>;
   }
 
   return <div data-test-id='runtime-panel'>
-    <h3 style={{...styles.baseHeader, ...styles.sectionHeader}}>Cloud analysis environment</h3>
+    <h3 style={{...styles.baseHeader, ...styles.bold, ...styles.sectionHeader}}>Cloud analysis environment</h3>
     <div>
       Your analysis environment consists of an application and compute resources.
       Your cloud environment is unique to this workspace and not shared with other users.
     </div>
 
     {switchCase(panelContent,
+      [PanelContent.Create, () =>
+        <Fragment>
+          <CreatePanel
+              creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
+              preset={initialPreset}
+              profile={profile}
+              setPanelContent={(value) => setPanelContent(value)}
+              workspace={workspace}
+          />
+          <FlexRow style={{justifyContent: 'flex-end', marginTop: '1rem'}}>
+            {renderCreateButton()}
+          </FlexRow>
+        </Fragment>
+      ],
       [PanelContent.Delete, () => <ConfirmDelete
         onConfirm={async() => {
           await setRuntimeStatus(RuntimeStatusRequest.Delete);
@@ -791,7 +941,8 @@ export const RuntimePanel = fp.flow(
            onClick={() => setPanelContent(PanelContent.Delete)}>Delete Environment</Link>
          {!runtimeExists ? renderCreateButton() :
            runtimeDiffs.map(diff => diff.differenceType).includes(RuntimeDiffState.NEEDS_DELETE) ? renderNextButton() :
-             renderUpdateButton()}
+             renderUpdateButton()
+         }
        </FlexRow>
      </Fragment>],
       [PanelContent.Confirm, () => renderConfirmUpdate()])}

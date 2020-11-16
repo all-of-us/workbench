@@ -11,7 +11,7 @@ import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {currentWorkspaceStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
 import {Domain, SearchRequest} from 'generated/fetch';
 
 function initItem(id: string, type: string) {
@@ -166,7 +166,8 @@ export class SearchGroupList extends React.Component<Props, State> {
     cohortBuilderApi().findCriteriaMenuOptions(+cdrVersionId).then(res => {
       criteriaMenuOptions[cdrVersionId] = res.items.reduce((acc, opt) => {
         const {domain, types} = opt;
-        if (PROGRAM_TYPES.includes(Domain[domain])) {
+        if (PROGRAM_TYPES.includes(Domain[domain]) &&
+          !(!serverConfigStore.getValue().enableFitbit && domain === Domain.FITBIT.toString())) {
           const option = {
             name: domainToTitle(domain),
             domain,

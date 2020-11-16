@@ -1,4 +1,10 @@
 import {ElementRef, OnChanges, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+import {BehaviorSubject} from 'rxjs/BehaviorSubject';
+import {ReplaySubject} from 'rxjs/ReplaySubject';
+const {useEffect, useState} = React;
 
 import {colorWithWhiteness} from 'app/styles/colors';
 import {
@@ -17,20 +23,10 @@ import {
 } from 'app/utils/navigation';
 import {DataAccessLevel, Domain} from 'generated';
 import {
-  CdrVersion,
-  CdrVersionListResponse,
   ConfigResponse,
   DataAccessLevel as FetchDataAccessLevel,
   Domain as FetchDomain,
-  Workspace,
 } from 'generated/fetch';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import {BehaviorSubject} from 'rxjs/BehaviorSubject';
-import {ReplaySubject} from 'rxjs/ReplaySubject';
-
-const {useEffect, useState} =  React;
 
 export const WINDOW_REF = 'window-ref';
 
@@ -581,7 +577,7 @@ export const withAsyncErrorHandling = fp.curry(
 // Takes a search string and validates for the most common MySQL use cases.
 // Checks for unbalanced (), unclosed "", trailing + or -, and breaking special characters.
 export function validateInputForMySQL(searchString: string): Array<string> {
-  const inputErrors = new Set(); // use Set to prevent duplicate messages
+  const inputErrors = new Set<string>(); // use Set to prevent duplicate messages
   let openParensCount = 0;
   let unclosedQuotes = false;
   for (let i = 0; i < searchString.length; i++) {
@@ -629,8 +625,4 @@ export function validateInputForMySQL(searchString: string): Array<string> {
     inputErrors.add('There is an unclosed " in the search string');
   }
   return Array.from(inputErrors);
-}
-
-export function getCdrVersion(workspace: Workspace, cdrs: CdrVersionListResponse): CdrVersion {
-  return cdrs.items.find(v => v.cdrVersionId === workspace.cdrVersionId);
 }

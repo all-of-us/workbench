@@ -30,6 +30,7 @@ public class DbCdrVersion {
   private String cdrDbName;
   private String elasticIndexBaseName;
   private String microarrayBigqueryDataset;
+  private Boolean hasFitbitData;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -168,6 +169,15 @@ public class DbCdrVersion {
     this.microarrayBigqueryDataset = microarrayBigqueryDataset;
   }
 
+  @Column(name = "has_fitbit_data")
+  public Boolean getHasFitbitData() {
+    return hasFitbitData == null ? false : hasFitbitData;
+  }
+
+  public void setHasFitbitData(Boolean hasFitbitData) {
+    this.hasFitbitData = hasFitbitData;
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(
@@ -182,7 +192,8 @@ public class DbCdrVersion {
         creationTime,
         numParticipants,
         cdrDbName,
-        elasticIndexBaseName);
+        elasticIndexBaseName,
+        hasFitbitData);
   }
 
   @Override
@@ -203,6 +214,7 @@ public class DbCdrVersion {
         .append(this.numParticipants, that.numParticipants)
         .append(this.cdrDbName, that.cdrDbName)
         .append(this.elasticIndexBaseName, that.elasticIndexBaseName)
+        .append(this.hasFitbitData, that.hasFitbitData)
         .build();
   }
 }

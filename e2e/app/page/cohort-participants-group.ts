@@ -2,10 +2,13 @@ import {ElementHandle, Page} from 'puppeteer';
 import {FieldSelector} from 'app/page/cohort-build-page';
 import Modal from 'app/component/modal';
 import {waitForNumericalString, waitForText, waitWhileLoading} from 'utils/waits-utils';
-import CohortSearchPage, {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/cohort-search-page';
+import CohortSearchPage from 'app/page/cohort-search-page';
+import CriteriaSearchPage, {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/criteria-search-page';
 import TieredMenu from 'app/component/tiered-menu';
 import {LinkText} from 'app/text-labels';
 import {snowmanIconXpath} from 'app/component/snowman-menu';
+import Button from '../element/button';
+import HelpSidebar from '../component/help-sidebar';
 
 enum GroupMenuOption {
    EditGroupName  = 'Edit group name',
@@ -80,7 +83,7 @@ export default class CohortParticipantsGroup {
 
   async includePhysicalMeasurement(criteriaName: PhysicalMeasurementsCriteria, value: number): Promise<string> {
     await this.clickCriteriaMenuItems(['Physical Measurements']);
-    const searchPage = new CohortSearchPage(this.page);
+    const searchPage = new CriteriaSearchPage(this.page);
     await searchPage.waitForLoad();
     return searchPage.filterPhysicalMeasurementValue(criteriaName, FilterSign.GreaterThanOrEqualTo, value);
   }
@@ -90,16 +93,16 @@ export default class CohortParticipantsGroup {
     return this.getGroupCount();
   }
 
-  async includeConditions(): Promise<CohortSearchPage> {
+  async includeConditions(): Promise<CriteriaSearchPage> {
     await this.clickCriteriaMenuItems(['Conditions']);
-    const searchPage = new CohortSearchPage(this.page);
+    const searchPage = new CriteriaSearchPage(this.page);
     await searchPage.waitForLoad();
     return searchPage;
   }
 
-  async includeDrugs(): Promise<CohortSearchPage> {
+  async includeDrugs(): Promise<CriteriaSearchPage> {
     await this.clickCriteriaMenuItems(['Drugs']);
-    const searchPage = new CohortSearchPage(this.page);
+    const searchPage = new CriteriaSearchPage(this.page);
     await searchPage.waitForLoad();
     return searchPage;
   }
@@ -124,9 +127,9 @@ export default class CohortParticipantsGroup {
     return results;
   }
 
-  async includeVisits(): Promise<CohortSearchPage> {
+  async includeVisits(): Promise<CriteriaSearchPage> {
     await this.clickCriteriaMenuItems(['Visits']);
-    const searchPage = new CohortSearchPage(this.page);
+    const searchPage = new CriteriaSearchPage(this.page);
     await searchPage.waitForLoad();
     return searchPage;
   }
@@ -145,6 +148,16 @@ export default class CohortParticipantsGroup {
   async getGroupCriteriasList(): Promise<ElementHandle[]> {
     const selector = `${this.rootXpath}//*[@data-test-id="item-list"]`;
     return this.page.$x(selector);
+  }
+
+  async viewAndSaveCriteria(): Promise<void> {
+    const finishAndReviewButton = await Button.findByName(this.page, {name: LinkText.FinishAndReview});
+    await finishAndReviewButton.waitUntilEnabled();
+    await finishAndReviewButton.click();
+
+    // Click Save Criteria button in sidebar
+    const helpSidebar = new HelpSidebar(this.page);
+    await helpSidebar.clickSaveCriteriaButton();
   }
 
 }
