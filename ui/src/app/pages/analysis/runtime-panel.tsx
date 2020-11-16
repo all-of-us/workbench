@@ -687,7 +687,7 @@ export const RuntimePanel = fp.flow(
         {renderUpdateButton()}
       </FlexRow>
     </React.Fragment>;
-  };
+  }
 
   return <div data-test-id='runtime-panel'>
     <h3 style={{...styles.baseHeader, ...styles.sectionHeader}}>Cloud analysis environment</h3>

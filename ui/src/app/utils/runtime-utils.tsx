@@ -95,8 +95,8 @@ function compareDataprocMasterDiskSize(oldRuntime: RuntimeConfig, newRuntime: Ru
     return null;
   }
 
-  let oldDiskSize = oldRuntime.dataprocConfig.masterDiskSize || 0;
-  let newDiskSize = newRuntime.dataprocConfig.masterDiskSize || 0;
+  const oldDiskSize = oldRuntime.dataprocConfig.masterDiskSize || 0;
+  const newDiskSize = newRuntime.dataprocConfig.masterDiskSize || 0;
 
   let desc = 'Dataproc Master Machine Disk Size';
   let diffType;
