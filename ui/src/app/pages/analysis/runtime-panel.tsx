@@ -126,6 +126,15 @@ const presetEquals = (a: Runtime, b: Runtime): boolean => {
   return fp.isEqual(strip(a), strip(b));
 };
 
+const shouldDisableUpdateButton = (runtimeChanged: boolean, runtimeExists: boolean, runtimeStatus: RuntimeStatus): boolean => {
+  return runtimeExists && (
+    !runtimeChanged
+    // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
+    // where we get 'status' from
+    || ![RuntimeStatus.Running, RuntimeStatus.Stopped].includes(runtimeStatus as RuntimeStatus)
+  );
+};
+
 enum PanelContent {
   Create = 'Create',
   Customize = 'Customize',
@@ -543,26 +552,17 @@ const CreatePanel = ({creatorFreeCreditsRemaining, preset, profile, setPanelCont
 };
 
 const UpdateRuntimeButton = ({
-   closePanel,
-   runtimeExists,
-   runtimeChanged,
-   runtimeStatus,
+   disabled,
+   label,
+   onUpdate,
    selectedDiskSize,
    selectedMachineType,
    selectedDataprocConfig,
    setRequestedRuntime
 }) => {
   return <Button
-      aria-label={runtimeExists ? 'Update' : 'Create'}
-      disabled={
-        runtimeExists
-        && (
-          !runtimeChanged
-          // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
-          // where we get 'status' from
-          || ![RuntimeStatus.Running, RuntimeStatus.Stopped].includes(runtimeStatus as RuntimeStatus)
-        )
-      }
+      aria-label={label}
+      disabled={disabled}
       onClick={() => {
         const runtimeToRequest: Runtime = selectedDataprocConfig ? {
           dataprocConfig: {
@@ -585,15 +585,15 @@ const UpdateRuntimeButton = ({
             runtimePresets)
         ) || RuntimeConfigurationType.UserOverride;
         setRequestedRuntime(runtimeToRequest);
-        closePanel();
-      }}>{runtimeExists ? 'Update' : 'Create'}</Button>;
+        onUpdate();
+      }}>{label}</Button>;
 };
 
 export const RuntimePanel = fp.flow(
   withCdrVersions(),
   withCurrentWorkspace(),
   withUserProfile()
-)(({cdrVersionListResponse, workspace, profileState, closePanel}) => {
+)(({cdrVersionListResponse, workspace, profileState, onUpdate}) => {
   const {namespace, id, cdrVersionId} = workspace;
 
   const {profile} = profileState;
@@ -669,10 +669,9 @@ export const RuntimePanel = fp.flow(
           />
           <FlexRow style={{justifyContent: 'flex-end', marginTop: '1rem'}}>
             <UpdateRuntimeButton
-                closePanel={() => closePanel()}
-                runtimeExists={runtimeExists}
-                runtimeChanged={runtimeChanged}
-                runtimeStatus={status}
+                disabled={shouldDisableUpdateButton(runtimeChanged, runtimeExists, status)}
+                label={runtimeExists ? 'Update' : 'Create'}
+                onUpdate={() => onUpdate()}
                 selectedDiskSize={
                   initialPreset.runtimeTemplate.dataprocConfig
                       ? initialPreset.runtimeTemplate.dataprocConfig.masterDiskSize
@@ -775,10 +774,9 @@ export const RuntimePanel = fp.flow(
            disabled={![RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus)}
            onClick={() => setPanelContent(PanelContent.Delete)}>Delete Environment</Link>
          <UpdateRuntimeButton
-           closePanel={() => closePanel()}
-           runtimeExists={runtimeExists}
-           runtimeChanged={runtimeChanged}
-           runtimeStatus={status}
+           disabled={shouldDisableUpdateButton(runtimeChanged, runtimeExists, status)}
+           label={runtimeExists ? 'Update' : 'Create'}
+           onUpdate={() => onUpdate()}
            selectedDiskSize={selectedDiskSize}
            selectedMachineType={selectedMachineType}
            selectedDataprocConfig={selectedDataprocConfig}
