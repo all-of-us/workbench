@@ -13,14 +13,7 @@ import colors from 'app/styles/colors';
 import {reactStyles, summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {conceptSetUpdating, serverConfigStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {
-  ConceptSet,
-  CreateConceptSetRequest,
-  Criteria,
-  Domain,
-  DomainCount,
-  UpdateConceptSetRequest
-} from 'generated/fetch';
+import {ConceptSet, CreateConceptSetRequest, Criteria, CriteriaType, Domain, DomainCount, UpdateConceptSetRequest} from 'generated/fetch';
 import {validate} from 'validate.js';
 
 const styles = reactStyles({
@@ -44,6 +37,29 @@ const filterConcepts = (concepts: any[], domain: Domain) => {
     return serverConfigStore.getValue().enableConceptSetSearchV2 ? concepts
       : concepts.filter(concept => concept.domainId.replace(' ', '').toLowerCase() === Domain[domain].toLowerCase());
   }
+};
+
+const filterExistingConceptSets = (conceptSets: ConceptSet[], domain: Domain) => {
+  switch (domain) {
+    case Domain.MEASUREMENT:
+      return conceptSets.filter(conceptSet => isMeasurementSet(conceptSet));
+    case Domain.PHYSICALMEASUREMENT:
+      return conceptSets.filter(conceptSet => isPhysicalMeasurementSet(conceptSet));
+    default:
+      return conceptSets.filter(conceptSet => conceptSet.domain === domain);
+  }
+};
+
+const isMeasurementSet = (conceptSet: ConceptSet) => {
+  return conceptSet.domain === Domain.MEASUREMENT
+    && conceptSet.criteriums.length > 0
+    && conceptSet.criteriums[0].type !== CriteriaType.PPI.toString();
+};
+
+const isPhysicalMeasurementSet = (conceptSet: ConceptSet) => {
+  return conceptSet.domain === Domain.MEASUREMENT
+    && conceptSet.criteriums.length > 0
+    && conceptSet.criteriums[0].type === CriteriaType.PPI.toString();
 };
 
 const CONCEPT_SET_CONCEPT_LIMIT = 1000;
@@ -92,15 +108,13 @@ export const ConceptAddModal = withCurrentWorkspace()
 
   async getExistingConceptSets() {
     try {
-      const {workspace: {namespace, id}} = this.props;
+      const {activeDomainTab: {domain}, selectedConcepts, workspace: {namespace, id}} = this.props;
       const conceptSets = await conceptSetsApi().getConceptSetsInWorkspace(namespace, id);
-      const conceptSetsInDomain = conceptSets.items
-          .filter((conceptset) => conceptset.domain === this.props.activeDomainTab.domain);
-
+      const conceptSetsInDomain = filterExistingConceptSets(conceptSets.items, domain);
       this.setState({
         conceptSets: conceptSetsInDomain,
         addingToExistingSet: conceptSetsInDomain.length > 0,
-        selectedConceptsInDomain: filterConcepts(this.props.selectedConcepts, this.props.activeDomainTab.domain),
+        selectedConceptsInDomain: filterConcepts(selectedConcepts, domain),
         loading: false,
       });
       if (conceptSetsInDomain) {
@@ -112,8 +126,7 @@ export const ConceptAddModal = withCurrentWorkspace()
   }
 
   async saveConcepts() {
-    const {workspace: {namespace, id}} = this.props;
-    const {onSave, activeDomainTab} = this.props;
+    const {activeDomainTab: {domain}, onSave, workspace: {namespace, id}} = this.props;
     const {selectedSet, addingToExistingSet, newSetDescription, name, selectedConceptsInDomain} = this.state;
     conceptSetUpdating.next(true);
     this.setState({saving: true});
@@ -146,7 +159,7 @@ export const ConceptAddModal = withCurrentWorkspace()
       const conceptSet: ConceptSet = {
         name: name,
         description: newSetDescription,
-        domain: activeDomainTab.domain
+        domain: domain === Domain.PHYSICALMEASUREMENT ? Domain.MEASUREMENT : domain
       };
       const request: CreateConceptSetRequest = {
         conceptSet: conceptSet,
