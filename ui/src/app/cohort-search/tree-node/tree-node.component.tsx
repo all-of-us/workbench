@@ -306,6 +306,11 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
        name === COPE_SURVEY_GROUP_NAME;
   }
 
+  get showCode() {
+    const {node: {code, domainId, name}} = this.props;
+    return domainId !== Domain.SURVEY.toString() && !!code && code !== name;
+  }
+
   getSelectedValues() {
     const {node: {path}, source} = this.props;
     return source === 'criteria'
@@ -362,7 +367,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
                     onClick={(e) => this.select(e)}/>
             }
           </button>}
-          {(!!code && code !== name) && <div style={styles.code}>{code}</div>}
+          {this.showCode && <div style={styles.code}>{code}</div>}
           <TooltipTrigger content={<div>{displayName}</div>} disabled={!this.state.truncated}>
             <div style={styles.name} ref={(e) => this.name = e}>
               <span data-test-id='displayName' style={searchMatch ? styles.searchMatch : {}}>{displayName}
