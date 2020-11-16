@@ -513,7 +513,6 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
         selectedDomains: this.getDomainsFromDataSet(dataSet),
         selectedPrepackagedConceptSets,
       });
-
     }
 
     async componentDidUpdate({}, prevState: State) {
@@ -957,6 +956,8 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
 
     renderPreviewDataTableSection() {
       let selectedPreviewDomain = this.state.selectedPreviewDomain.toString();
+      // Had to do the following since typescript changes the key by removing _ therefore changing the domain string
+      // which resulted in map check from selectedPreviewDomain to give undefined result always
       if (this.state.selectedPreviewDomain && this.state.selectedPreviewDomain.toString().startsWith('FITBIT')) {
         switch (this.state.selectedPreviewDomain.toString()) {
           case 'FITBITHEARTRATESUMMARY': selectedPreviewDomain = 'FITBIT_HEART_RATE_SUMMARY'; break;
@@ -965,19 +966,15 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
           case 'FITBITINTRADAYSTEPS': selectedPreviewDomain = 'FITBIT_INTRADAY_STEPS'; break;
         }
       }
-      let a;
+      let filteredPreviewData;
       this.state.previewList.forEach((map, entry) => {
-        if (entry.toString() === selectedPreviewDomain && !a) {
-          // return map && map.values.length > 0 ?
-          //     this.renderPreviewDataTable(map) :
-          //     this.renderPreviewDataTableSectionMessage(map);
-          a = map;
+        if (entry.toString() === selectedPreviewDomain && !filteredPreviewData) {
+          filteredPreviewData = map;
         }
       });
-      console.log(a);
-      return a && a.values.length > 0 ?
-          this.renderPreviewDataTable(a) :
-          this.renderPreviewDataTableSectionMessage(a);
+      return filteredPreviewData && filteredPreviewData.values.length > 0 ?
+          this.renderPreviewDataTable(filteredPreviewData) :
+          this.renderPreviewDataTableSectionMessage(filteredPreviewData);
     }
 
     renderPreviewDataTable(filteredPreviewData: DataSetPreviewInfo) {
@@ -1069,6 +1066,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                     </BoxHeader>
                   <div style={{height: '9rem', overflowY: 'auto'}}>
                     <Subheader>Prepackaged Concept Sets</Subheader>
+                    {/*If cdr does not have FITBIT data just show Survey and demographic optons*/}
                     {!getCdrVersion(this.props.workspace, this.props.cdrVersionListResponse).hasFitbitData &&
                     Object.keys(PrepackagedConceptSet)
                         .filter(conceptSet => conceptSet === 'SURVEYS' || conceptSet === 'PERSON')
@@ -1085,11 +1083,11 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                     && Object.keys(PrepackagedConceptSet).map((prepackaged: PrepackagedConceptSet) => {
                       const p = PrepackagedConceptSet[prepackaged];
                       return <ImmutableListItem name={p}
-                                                key={prepackaged}
-                                                checked={selectedPrepackagedConceptSets.has(p)}
-                                                onChange={() => this.selectPrePackagedConceptSet(
-                                                  p, !selectedPrepackagedConceptSets.has(p))
-                                                }/>;
+                                         key={prepackaged}
+                                         checked={selectedPrepackagedConceptSets.has(p)}
+                                         onChange={() => this.selectPrePackagedConceptSet(
+                                           p, !selectedPrepackagedConceptSets.has(p))
+                                         }/>;
                     })}
                     <Subheader>Workspace Concept Sets</Subheader>
                     {!loadingResources && this.state.conceptSetList.map(conceptSet =>
