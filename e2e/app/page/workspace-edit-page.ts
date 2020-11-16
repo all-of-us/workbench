@@ -12,6 +12,7 @@ import {LinkText} from 'app/text-labels';
 import WorkspaceBase, {UseFreeCredits} from './workspace-base';
 import {config} from 'resources/workbench-config';
 import BaseElement from 'app/element/base-element';
+import {makeWorkspaceName} from 'utils/str-utils';
 
 const faker = require('faker/locale/en_US');
 
@@ -355,6 +356,17 @@ export default class WorkspaceEditPage extends WorkspaceBase {
       // click checkbox expands or collapses the section, reveal hidden questions contained inside.
       await researchPurposeCheckbox.check();
     }
+  }
+
+  /**
+   * Type in new workspace name.
+   * @return {string} new workspace name
+   */
+  async fillOutWorkspaceName(): Promise<string> {
+    const newWorkspaceName = makeWorkspaceName();
+    await (await this.getWorkspaceNameTextbox()).type(newWorkspaceName);
+    await (await this.getWorkspaceNameTextbox()).pressTab();
+    return newWorkspaceName;
   }
 
   /**

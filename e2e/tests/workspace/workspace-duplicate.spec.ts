@@ -1,9 +1,9 @@
-import WorkspacesPage from 'app/page/workspaces-page';
 import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
 import {Option} from 'app/text-labels';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import Navigation, {NavLink} from 'app/component/navigation';
 import WorkspaceCard from 'app/component/workspace-card';
+import WorkspaceEditPage from 'app/page/workspace-edit-page';
 
 describe('Duplicate workspace', () => {
   beforeEach(async () => {
@@ -25,13 +25,13 @@ describe('Duplicate workspace', () => {
       await workspaceCard.selectSnowmanMenu(Option.Duplicate);
 
       // Fill out Workspace Name should be just enough for successful duplication
-      const workspacesPage = new WorkspacesPage(page);
-      await (await workspacesPage.getWorkspaceNameTextbox()).clear();
-      const duplicateWorkspaceName = await workspacesPage.fillOutWorkspaceName();
+      const workspaceEditPage = new WorkspaceEditPage(page);
+      await (await workspaceEditPage.getWorkspaceNameTextbox()).clear();
+      const duplicateWorkspaceName = await workspaceEditPage.fillOutWorkspaceName();
 
-      const finishButton = await workspacesPage.getDuplicateWorkspaceButton();
+      const finishButton = await workspaceEditPage.getDuplicateWorkspaceButton();
       await finishButton.waitUntilEnabled();
-      await workspacesPage.clickCreateFinishButton(finishButton);
+      await workspaceEditPage.clickCreateFinishButton(finishButton);
 
       // Duplicate workspace Data page is loaded.
       const dataPage = new WorkspaceDataPage(page);
@@ -40,7 +40,7 @@ describe('Duplicate workspace', () => {
 
       // Delete duplicate workspace via Workspace card in Your Workspaces page.
       await Navigation.navMenu(page, NavLink.YOUR_WORKSPACES);
-      await workspacesPage.waitForLoad();
+      await workspaceEditPage.waitForLoad();
 
       await WorkspaceCard.deleteWorkspace(page, duplicateWorkspaceName);
 
@@ -55,17 +55,17 @@ describe('Duplicate workspace', () => {
       const dataPage = new WorkspaceDataPage(page);
       await dataPage.selectWorkspaceAction(Option.Duplicate);
 
-      const workspacesPage = new WorkspacesPage(page);
+      const workspaceEditPage = new WorkspaceEditPage(page);
 
       // Fill out Workspace Name
-      await (await workspacesPage.getWorkspaceNameTextbox()).clear();
-      const duplicateWorkspaceName = await workspacesPage.fillOutWorkspaceName();
+      await (await workspaceEditPage.getWorkspaceNameTextbox()).clear();
+      const duplicateWorkspaceName = await workspaceEditPage.fillOutWorkspaceName();
       // select "Share workspace with same set of collaborators radiobutton
-      await workspacesPage.clickShareWithCollaboratorsCheckbox();
+      await workspaceEditPage.clickShareWithCollaboratorsCheckbox();
 
-      const finishButton = await workspacesPage.getDuplicateWorkspaceButton();
+      const finishButton = await workspaceEditPage.getDuplicateWorkspaceButton();
       await finishButton.waitUntilEnabled();
-      await workspacesPage.clickCreateFinishButton(finishButton);
+      await workspaceEditPage.clickCreateFinishButton(finishButton);
 
       // Duplicate workspace Data page is loaded.
       await dataPage.waitForLoad();

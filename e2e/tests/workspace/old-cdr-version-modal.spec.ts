@@ -5,6 +5,7 @@ import {Option} from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
 import {makeWorkspaceName} from 'utils/str-utils';
 import OldCdrVersionModal from 'app/page/old-cdr-version-modal';
+import WorkspaceEditPage from 'app/page/workspace-edit-page';
 
 describe('OldCdrVersion Modal restrictions', () => {
     beforeEach(async () => {
@@ -29,7 +30,7 @@ describe('OldCdrVersion Modal restrictions', () => {
 
         // now we can continue
         await createButton.waitUntilEnabled();
-        await workspacesPage.clickCreateFinishButton(createButton);
+        await editPage.clickCreateFinishButton(createButton);
     });
 
     test('OWNER cannot duplicate workspace to an older CDR Version without consenting to restrictions', async () => {
@@ -41,14 +42,14 @@ describe('OldCdrVersion Modal restrictions', () => {
         await workspaceCard.selectSnowmanMenu(Option.Duplicate);
 
         // Fill out Workspace Name should be just enough for successful duplication
-        const workspacesPage = new WorkspacesPage(page);
-        await (await workspacesPage.getWorkspaceNameTextbox()).clear();
-        await workspacesPage.fillOutWorkspaceName();
+        const workspaceEditPage = new WorkspaceEditPage(page);
+        await (await workspaceEditPage.getWorkspaceNameTextbox()).clear();
+        await workspaceEditPage.fillOutWorkspaceName();
 
         // change CDR Version
-        await workspacesPage.selectCdrVersion(config.altCdrVersionName);
+        await workspaceEditPage.selectCdrVersion(config.altCdrVersionName);
 
-        const finishButton = await workspacesPage.getDuplicateWorkspaceButton();
+        const finishButton = await workspaceEditPage.getDuplicateWorkspaceButton();
         expect(await finishButton.isCursorNotAllowed()).toBe(true);
     });
 });

@@ -1,9 +1,9 @@
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import WorkspacesPage from 'app/page/workspaces-page';
 import {Option, WorkspaceAccessLevel} from 'app/text-labels';
 import * as testData from 'resources/data/workspace-data';
 import {createWorkspace, findOrCreateWorkspace, performActions, signIn} from 'utils/test-utils';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
+import WorkspaceEditPage from 'app/page/workspace-edit-page';
 
 describe('Editing workspace via workspace card snowman menu', () => {
 
@@ -22,19 +22,19 @@ describe('Editing workspace via workspace card snowman menu', () => {
     const workspaceCard = await createWorkspace(page);
     await workspaceCard.selectSnowmanMenu(Option.Edit);
 
-    const workspacesPage = new WorkspacesPage(page);
+    const workspaceEditPage = new WorkspaceEditPage(page);
 
     // CDR Version Select is readonly. Get selected value.
-    const selectedOption = await workspacesPage.selectCdrVersion();
-    const cdrVersionSelect = await workspacesPage.getCdrVersionSelect();
+    const selectedOption = await workspaceEditPage.selectCdrVersion();
+    const cdrVersionSelect = await workspaceEditPage.getCdrVersionSelect();
     const selectedValue = await cdrVersionSelect.getOptionValue(selectedOption);
 
     // Change question #2 answer
     await performActions(page, testData.defaultAnswersResearchPurposeSummary);
 
-    const updateButton = await workspacesPage.getUpdateWorkspaceButton();
+    const updateButton = await workspaceEditPage.getUpdateWorkspaceButton();
     await updateButton.waitUntilEnabled();
-    await workspacesPage.clickCreateFinishButton(updateButton);
+    await workspaceEditPage.clickCreateFinishButton(updateButton);
 
     const dataPage = new WorkspaceDataPage(page);
     await dataPage.waitForLoad();
@@ -97,21 +97,21 @@ describe('Editing workspace via workspace card snowman menu', () => {
     const dataPage = new WorkspaceDataPage(page);
     await dataPage.openAboutPage();
     const aboutPage = new WorkspaceAboutPage(page);
-    await aboutPage.editWorkspace();  
+    await aboutPage.editWorkspace();
 
-    const workspacesPage = new WorkspacesPage(page);
+    const workspaceEditPage = new WorkspaceEditPage(page);
 
      // CDR Version Select is readonly. Get selected value.
-     const selectedOption = await workspacesPage.selectCdrVersion();
-     const cdrVersionSelect = await workspacesPage.getCdrVersionSelect();
+     const selectedOption = await workspaceEditPage.selectCdrVersion();
+     const cdrVersionSelect = await workspaceEditPage.getCdrVersionSelect();
      const selectedValue = await cdrVersionSelect.getOptionValue(selectedOption);
 
      // Change question #2 answer
      await performActions(page, testData.defaultAnswersResearchPurposeSummary);
 
-     const updateButton = await workspacesPage.getUpdateWorkspaceButton();
+     const updateButton = await workspaceEditPage.getUpdateWorkspaceButton();
      await updateButton.waitUntilEnabled();
-     await workspacesPage.clickCreateFinishButton(updateButton);
+     await workspaceEditPage.clickCreateFinishButton(updateButton);
 
      await dataPage.waitForLoad();
 
