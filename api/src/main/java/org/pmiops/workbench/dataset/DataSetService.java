@@ -46,7 +46,11 @@ public interface DataSetService {
   List<String> generateHailDemoCode(String qualifier);
 
   DbDataset cloneDataSetToWorkspace(
-      DbDataset fromDataSet, DbWorkspace toWorkspace, Set<Long> cohortIds, Set<Long> conceptSetIds);
+      DbDataset fromDataSet,
+      DbWorkspace toWorkspace,
+      Set<Long> cohortIds,
+      Set<Long> conceptSetIds,
+      List<Short> prePackagedConceptSets);
 
   List<DbDataset> getDataSets(DbWorkspace workspace);
 
