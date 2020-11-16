@@ -306,19 +306,18 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
        name === COPE_SURVEY_GROUP_NAME;
   }
 
-  getSelectedValues() {
-    const {node: {parentId}} = this.props;
-    if (this.props.source === 'criteria') {
-      return currentCohortCriteriaStore.getValue()
-        .some(crit =>
-              crit.parameterId === this.paramId() ||
-              parentId.toString() === this.paramId()
-          );
-    } else {
-      return currentConceptStore.getValue()
-        .some(crit => this.paramId(crit) === this.paramId());
-    }
+  get showCode() {
+    const {node: {code, domainId, name}} = this.props;
+    return domainId !== Domain.SURVEY.toString() && !!code && code !== name;
+  }
 
+  getSelectedValues() {
+    const {node: {path}, source} = this.props;
+    return source === 'criteria'
+      ? currentCohortCriteriaStore.getValue().some(crit =>
+        crit.parameterId === this.paramId() || path.split('.').includes(crit.id.toString()))
+      : currentConceptStore.getValue().some(crit =>
+        this.paramId(crit) === this.paramId() || path.split('.').includes(crit.id.toString()));
   }
 
   selectIconDisabled() {
@@ -368,7 +367,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
                     onClick={(e) => this.select(e)}/>
             }
           </button>}
-          {(!!code && code !== name) && <div style={styles.code}>{code}</div>}
+          {this.showCode && <div style={styles.code}>{code}</div>}
           <TooltipTrigger content={<div>{displayName}</div>} disabled={!this.state.truncated}>
             <div style={styles.name} ref={(e) => this.name = e}>
               <span data-test-id='displayName' style={searchMatch ? styles.searchMatch : {}}>{displayName}
