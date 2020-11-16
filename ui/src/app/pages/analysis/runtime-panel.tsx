@@ -614,8 +614,8 @@ export const RuntimePanel = fp.flow(
   // It's unclear how often that would actually happen.
   const initialPanelContent = fp.cond([
     // currentRuntime being undefined means the first `getRuntime` has still not completed.
-    [([r, s]) => r === undefined, () => PanelContent.Customize],
-    [([r, s]) => s === null || s === RuntimeStatus.Unknown, () => PanelContent.Create],
+    [([r, ]) => r === undefined, () => PanelContent.Customize],
+    [([r, s]) => r === null || s === RuntimeStatus.Unknown, () => PanelContent.Create],
     [() => true, () => PanelContent.Customize]
   ])([currentRuntime, status]);
   const [panelContent, setPanelContent] = useState<PanelContent>(initialPanelContent);
