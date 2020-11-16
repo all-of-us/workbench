@@ -22,7 +22,7 @@ describe('Dataset test', () => {
    * - Delete Dataset.
    */
   // RW-5751 Search for condition is failing in CI.
-  xtest('Can create Dataset with user-defined Cohorts', async () => {
+  test('Can create Dataset with user-defined Cohorts', async () => {
     const workspaceCard = await findOrCreateWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 
