@@ -27,6 +27,7 @@ export async function signIn(page: Page, userId?: string, passwd?: string): Prom
 
 /**
  * Login in new Incognito page.
+ * @param page
  * @param {string} userId
  * @param {string} passwd
  */
@@ -45,7 +46,7 @@ export async function signInAs(page: Page, userId: string, passwd: string, opts:
   const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36';
   await newPage.setUserAgent(userAgent);
   await newPage.setDefaultNavigationTimeout(90000);
-  await signIn(page, userId, passwd);
+  await signIn(newPage, userId, passwd);
   return newPage;
 }
 
