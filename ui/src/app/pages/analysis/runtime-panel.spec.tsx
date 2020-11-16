@@ -94,7 +94,7 @@ describe('RuntimePanel', () => {
     const customizeButton = wrapper.find(Button).find({'aria-label': 'Customize'}).first();
     expect(customizeButton.exists()).toBeTruthy();
 
-    act(() => {customizeButton.simulate('click')});
+    customizeButton.simulate('click');
     await waitOneTickAndUpdate(wrapper);
   }
 
@@ -124,9 +124,7 @@ describe('RuntimePanel', () => {
     runtimeApiStub.runtime = null;
     act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
 
-    const wrapper = component();
-    await handleUseEffect(wrapper);
-    await waitOneTickAndUpdate(wrapper);
+    const wrapper = await component();
 
     const computeDefaults = wrapper.find('#compute-resources').first();
     // defaults to generalAnalysis preset, which is a n1-standard-4 machine with a 50GB disk
@@ -309,7 +307,6 @@ describe('RuntimePanel', () => {
     act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
 
     const wrapper = await component();
-
     await mustClickCustomizeButton(wrapper);
 
     // Take the preset, make a change, then revert.
