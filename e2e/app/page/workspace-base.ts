@@ -265,9 +265,6 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
     */
   async editWorkspace(): Promise<void> {
     await this.selectWorkspaceAction(Option.Edit);
-    // navigate to workspace edit page
-    const newPage = await waitWhileLoading(this.page);
-    return newPage;
   }
 
 }
