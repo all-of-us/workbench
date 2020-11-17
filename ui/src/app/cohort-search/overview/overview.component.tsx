@@ -18,7 +18,8 @@ import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {isAbortError} from 'app/utils/errors';
 import {currentWorkspaceStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
-import {AgeType, Cohort, GenderOrSexType, ResourceType, TemporalTime} from 'generated/fetch';
+import {WorkspaceData} from 'app/utils/workspace-data';
+import {AgeType, Cohort, GenderOrSexType, ResourceType, TemporalTime, WorkspaceAccessLevel} from 'generated/fetch';
 
 const COHORT_TYPE = 'AoU_Discover';
 
@@ -133,6 +134,7 @@ interface Props {
   searchRequest: any;
   updateCount: any;
   updating: Function;
+  workspace: WorkspaceData;
 }
 
 interface State {
@@ -406,11 +408,18 @@ export const ListOverview = withCurrentWorkspace()(
       ];
     }
 
+    get disableActionIcons() {
+      return this.state.loading || !this.props.cohort.id;
+    }
+
+    get disableDeleteIcon() {
+      return this.disableActionIcons || this.props.workspace.accessLevel !== WorkspaceAccessLevel.OWNER;
+    }
+
     render() {
       const {cohort} = this.props;
       const {ageType, apiError, chartData, currentGraphOptions, deleting, description, existingCohorts, genderOrSexType, loading,
         name, nameTouched, refreshing, saveModalOpen, saveError, saving, stackChart, total} = this.state;
-      const disableIcon = loading || !cohort.id;
       const disableSave = loading || saving || this.definitionErrors || !total;
       const disableRefresh = ageType === currentGraphOptions.ageType && genderOrSexType === currentGraphOptions.genderOrSexType;
       const invalid = nameTouched && (!name || !name.trim());
@@ -444,13 +453,13 @@ export const ListOverview = withCurrentWorkspace()(
                 </Clickable>
               </TooltipTrigger>
               <TooltipTrigger content={<div>Delete cohort</div>}>
-                <Clickable style={{...styles.actionIcon, ...(disableIcon ? styles.disabled : {})}}
+                <Clickable style={this.disableDeleteIcon ? {...styles.actionIcon, ...styles.disabled} : styles.actionIcon}
                   onClick={() => this.setState({deleting: true})}>
                   <ClrIcon shape='trash' className='is-solid' size={30} />
                 </Clickable>
               </TooltipTrigger>
               <TooltipTrigger content={<div>Review participant level data</div>}>
-                <Clickable style={{...styles.actionIcon, ...(disableIcon ? styles.disabled : {})}}
+                <Clickable style={this.disableActionIcons ? {...styles.actionIcon, ...styles.disabled} : styles.actionIcon}
                   onClick={() => this.navigateTo('review')}>
                   <ClrIcon shape='copy' className='is-solid' size={30} />
                 </Clickable>
