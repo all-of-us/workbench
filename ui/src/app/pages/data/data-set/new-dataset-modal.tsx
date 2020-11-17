@@ -34,7 +34,7 @@ interface Props {
   closeFunction: Function;
   dataSet: DataSet;
   includesAllParticipants: boolean;
-  prePackagedConceptSet: PrePackagedConceptSetEnum;
+  prePackagedConceptSet: Array<PrePackagedConceptSetEnum>;
   selectedConceptSetIds: number[];
   selectedCohortIds: number[];
   selectedDomainValuePairs: DomainValuePair[];

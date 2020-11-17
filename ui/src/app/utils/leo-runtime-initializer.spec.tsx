@@ -11,7 +11,7 @@ import expect = jest.Expect;
 import {RuntimesApi as LeoRuntimesApi} from 'notebooks-generated/fetch';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {LeoRuntimesApiStub} from 'testing/stubs/leo-runtimes-api-stub';
-import {RuntimeConfigurationType} from '../../generated/fetch';
+import {RuntimeConfigurationType} from 'generated/fetch';
 import {serverConfigStore} from "./navigation";
 
 let mockGetRuntime: SpyInstance;

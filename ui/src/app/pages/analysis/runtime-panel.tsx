@@ -512,7 +512,7 @@ const CostEstimator = ({
   </FlexRow>;
 };
 
-const CreatePanel = ({creatorFreeCreditsRemaining, preset, profile, setPanelContent, workspace}) => {
+const CreatePanel = ({creatorFreeCreditsRemaining, preset, profile, setPanelContent, workspace, runtimeConfig}) => {
   const {
     displayName,
     runtimeTemplate: {gceConfig = null, dataprocConfig = null}
@@ -526,17 +526,11 @@ const CreatePanel = ({creatorFreeCreditsRemaining, preset, profile, setPanelCont
   const workerDiskSize = computeType === ComputeType.Dataproc ? dataprocConfig.workerDiskSize : null;
 
   return <div style={styles.controlSection}>
-    <CostEstimator
-        freeCreditsRemaining={creatorFreeCreditsRemaining}
-        profile={profile}
-        runtimeParameters={{
-          computeType,
-          diskSize: gceConfig && gceConfig.diskSize,
-          machineType: gceConfig && gceConfig.machineType,
-          dataprocConfig: dataprocConfig
-        }}
-        runtimeChanged={false}
-        workspace={workspace}
+    <CostEstimatorWrapper runtimeChanged={false}
+                          runtimeConfig={runtimeConfig}
+                          currentUser={profile.username}
+                          workspace={workspace}
+                          creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
     />
     <FlexRow style={{justifyContent: 'space-between', alignItems: 'center'}}>
       <h3 style={{...styles.sectionHeader, ...styles.bold}}>Recommended Environment for {displayName}</h3>
@@ -617,10 +611,40 @@ const UpdateButton = ({disabled, onClick}) => {
   </Button>;
 };
 
-<UpdateButton disabled={!runtimeChanged || ![RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus)}
-              onClick={() => {
-                setRequestedRuntime(createRuntimeRequest(newRuntimeConfig));
-                onUpdate(); }}/>
+const CostEstimatorWrapper = ({runtimeChanged, runtimeConfig, currentUser, workspace, creatorFreeCreditsRemaining}) => {
+  return <FlexRow
+    style={
+      runtimeChanged
+        ? {...styles.costPredictor, backgroundColor: colorWithWhiteness(colors.warning, .9), borderColor: colors.warning}
+        : styles.costPredictor
+    }
+    data-test-id='cost-estimator'
+  >
+    <div style={{minWidth: '250px', margin: '.33rem .5rem'}}>
+      <CostEstimator runtimeParameters={runtimeConfig}/>
+    </div>
+    {
+      workspace.billingAccountType === BillingAccountType.FREETIER
+      && currentUser === workspace.creator
+      && <div style={styles.costsDrawnFrom}>
+        Costs will draw from your remaining {formatUsd(creatorFreeCreditsRemaining)} of free credits.
+      </div>
+    }
+    {
+      workspace.billingAccountType === BillingAccountType.FREETIER
+      && currentUser !== workspace.creator
+      && <div style={styles.costsDrawnFrom}>
+        Costs will draw from workspace creator's remaining {formatUsd(creatorFreeCreditsRemaining)} of free credits.
+      </div>
+    }
+    {
+      workspace.billingAccountType === BillingAccountType.USERPROVIDED
+      && <div style={styles.costsDrawnFrom}>
+        Costs will be charged to billing account {workspace.billingAccountName}.
+      </div>
+    }
+  </FlexRow>;
+};
 
 export const RuntimePanel = fp.flow(
   withCdrVersions(),
@@ -647,8 +671,8 @@ export const RuntimePanel = fp.flow(
   // It's unclear how often that would actually happen.
   const initialPanelContent = fp.cond([
     // currentRuntime being undefined means the first `getRuntime` has still not completed.
-    [([r, s]) => r === undefined, () => PanelContent.Customize],
-    [([r, s]) => s === null || s === RuntimeStatus.Unknown, () => PanelContent.Create],
+    [([r, ]) => r === undefined, () => PanelContent.Customize],
+    [([r, s]) => r === null || s === RuntimeStatus.Unknown, () => PanelContent.Create],
     [() => true, () => PanelContent.Customize]
   ])([currentRuntime, status]);
   const [panelContent, setPanelContent] = useState<PanelContent>(initialPanelContent);
@@ -779,7 +803,7 @@ export const RuntimePanel = fp.flow(
           <div style={{marginRight: '1rem'}}>
             <b style={{fontSize: 10}}>New estimated cost</b>
             <div style={{...styles.costPredictor, padding: '.25rem .5rem'}}>
-              <CostEstimator runtimeParameters={newRuntimeConfig}></CostEstimator>
+              <CostEstimator runtimeParameters={newRuntimeConfig}/>
             </div>
           </div>
           <div>
@@ -841,6 +865,7 @@ export const RuntimePanel = fp.flow(
               profile={profile}
               setPanelContent={(value) => setPanelContent(value)}
               workspace={workspace}
+              runtimeConfig={newRuntimeConfig}
           />
           <FlexRow style={{justifyContent: 'flex-end', marginTop: '1rem'}}>
             {renderCreateButton()}
@@ -856,38 +881,12 @@ export const RuntimePanel = fp.flow(
       />],
       [PanelContent.Customize, () => <Fragment>
         <div style={styles.controlSection}>
-          <FlexRow
-            style={
-              runtimeChanged
-                ? {...styles.costPredictor, backgroundColor: colorWithWhiteness(colors.warning, .9), borderColor: colors.warning}
-                : styles.costPredictor
-            }
-            data-test-id='cost-estimator'
-          >
-            <div style={{minWidth: '250px', margin: '.33rem .5rem'}}>
-              <CostEstimator runtimeParameters={newRuntimeConfig}/>
-            </div>
-            {
-              workspace.billingAccountType === BillingAccountType.FREETIER
-              && profile.username === workspace.creator
-              && <div style={styles.costsDrawnFrom}>
-                Costs will draw from your remaining {formatUsd(creatorFreeCreditsRemaining)} of free credits.
-              </div>
-            }
-            {
-              workspace.billingAccountType === BillingAccountType.FREETIER
-              && profile.username !== workspace.creator
-              && <div style={styles.costsDrawnFrom}>
-                Costs will draw from workspace creator's remaining {formatUsd(creatorFreeCreditsRemaining)} of free credits.
-              </div>
-            }
-            {
-              workspace.billingAccountType === BillingAccountType.USERPROVIDED
-              && <div style={styles.costsDrawnFrom}>
-                Costs will be charged to billing account {workspace.billingAccountName}.
-              </div>
-            }
-          </FlexRow>
+          <CostEstimatorWrapper runtimeChanged={runtimeChanged}
+                                runtimeConfig={newRuntimeConfig}
+                                currentUser={profile.username}
+                                workspace={workspace}
+                                creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
+          />
 
           <PresetSelector
               hasMicroarrayData={hasMicroarrayData}

@@ -16,7 +16,7 @@ import {NewDataSetModal} from './new-dataset-modal';
 import GenomicsAnalysisToolEnum = DataSetExportRequest.GenomicsAnalysisToolEnum;
 import GenomicsDataTypeEnum = DataSetExportRequest.GenomicsDataTypeEnum;
 
-const prePackagedConceptSet = PrePackagedConceptSetEnum.NONE;
+const prePackagedConceptSet = Array.of(PrePackagedConceptSetEnum.NONE);
 const workspaceNamespace = 'workspaceNamespace';
 const workspaceId = 'workspaceId';
 
@@ -98,7 +98,7 @@ describe('NewDataSetModal', () => {
       conceptSetIds: [],
       cohortIds: [],
       domainValuePairs: [],
-      prePackagedConceptSet: PrePackagedConceptSetEnum.NONE
+      prePackagedConceptSet: Array.of(PrePackagedConceptSetEnum.NONE)
     });
     expect(exportSpy).not.toHaveBeenCalled();
   });
@@ -131,7 +131,7 @@ describe('NewDataSetModal', () => {
       conceptSetIds: [],
       cohortIds: [],
       domainValuePairs: [],
-      prePackagedConceptSet: PrePackagedConceptSetEnum.NONE
+      prePackagedConceptSet: Array.of(PrePackagedConceptSetEnum.NONE)
     };
 
     wrapper.find('[data-test-id="data-set-name-input"]')
@@ -227,7 +227,7 @@ describe('NewDataSetModal', () => {
       conceptSetIds: [],
       cohortIds: [],
       domainValuePairs: [],
-      prePackagedConceptSet: PrePackagedConceptSetEnum.NONE
+      prePackagedConceptSet: Array.of(PrePackagedConceptSetEnum.NONE)
     };
 
     wrapper.find('[data-test-id="data-set-name-input"]')

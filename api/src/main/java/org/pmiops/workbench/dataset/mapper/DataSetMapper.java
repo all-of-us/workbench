@@ -57,8 +57,8 @@ public interface DataSetMapper {
   @Mapping(target = "creationTime", ignore = true)
   @Mapping(target = "invalid", ignore = true)
   @Mapping(target = "lastModifiedTime", ignore = true)
-  @Mapping(target = "prePackagedConceptSetEnum", ignore = true)
   @Mapping(target = "values", source = "domainValuePairs")
+  @Mapping(target = "prePackagedConceptSetEnum", ignore = true)
   DbDataset dataSetRequestToDb(
       DataSetRequest dataSetRequest, @Context DbDataset dbDataSet, @Context Clock clock);
 
@@ -94,12 +94,18 @@ public interface DataSetMapper {
     }
   }
 
-  default PrePackagedConceptSetEnum prePackagedConceptSetFromStorage(Short prePackagedConceptSet) {
-    return DbStorageEnums.prePackagedConceptSetsFromStorage(prePackagedConceptSet);
+  default List<PrePackagedConceptSetEnum> prePackagedConceptSetFromStorage(
+      List<Short> prePackagedConceptSet) {
+    return prePackagedConceptSet.stream()
+        .map(DbStorageEnums::prePackagedConceptSetsFromStorage)
+        .collect(Collectors.toList());
   }
 
-  default Short toDBPrePackagedConceptSet(PrePackagedConceptSetEnum prePackagedConceptSetEnum) {
-    return DbStorageEnums.prePackagedConceptSetsToStorage(prePackagedConceptSetEnum);
+  default List<Short> toDBPrePackagedConceptSet(
+      List<PrePackagedConceptSetEnum> prePackagedConceptSetEnum) {
+    return prePackagedConceptSetEnum.stream()
+        .map(DbStorageEnums::prePackagedConceptSetsToStorage)
+        .collect(Collectors.toList());
   }
 
   default List<DbDatasetValue> toDbDomainValuePairs(List<DomainValuePair> domainValuePairs) {

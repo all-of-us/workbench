@@ -1,5 +1,5 @@
 import {mount} from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import {act} from 'react-dom/test-utils';
 import * as React from 'react';
 
 import {Button, Link} from 'app/components/buttons';
@@ -24,8 +24,10 @@ describe('RuntimePanel', () => {
   let runtimeApiStub: RuntimeApiStub;
   let workspacesApiStub: WorkspacesApiStub;
 
-  const component = () => {
-    return mount(<RuntimePanel {...props}/>);
+  const component = async() => {
+    const c = mount(<RuntimePanel {...props}/>);
+    await waitOneTickAndUpdate(c);
+    return c;
   };
 
   beforeEach(() => {
@@ -61,11 +63,11 @@ describe('RuntimePanel', () => {
   };
 
   const pickDropdownOption = async(wrapper, id, label) => {
-    act(() => { wrapper.find(id).first().simulate('click') });
-    const item = wrapper.find(`${id} .p-dropdown-item`).find({'aria-label': label}).first();
+    wrapper.find(id).first().simulate('click')
+    const item = wrapper.find(`${id} .p-dropdown-item`).find({'aria-label': label}).first()
     expect(item.exists()).toBeTruthy();
 
-    act(() => { item.simulate('click') });
+    item.simulate('click')
 
     // In some cases, picking an option may require some waiting, e.g. for
     // rerendering of RAM options based on CPU selection.
@@ -108,7 +110,7 @@ describe('RuntimePanel', () => {
   const getNumPreemptibleWorkers = (wrapper) => getNumberInput(wrapper,'#num-preemptible');
 
   const pickPreset = async(wrapper, {displayName}) => {
-    act(() => { wrapper.find({'data-test-id': 'runtime-presets-menu'}).first().simulate('click') });
+    wrapper.find({'data-test-id': 'runtime-presets-menu'}).first().simulate('click');
     act(() => {(document.querySelector(`#popup-root [aria-label="${displayName}"]`) as HTMLElement).click()});
     await waitOneTickAndUpdate(wrapper);
   };
@@ -117,7 +119,7 @@ describe('RuntimePanel', () => {
     const customizeButton = wrapper.find(Button).find({'aria-label': 'Customize'}).first();
     expect(customizeButton.exists()).toBeTruthy();
 
-    act(() => {customizeButton.simulate('click')});
+    customizeButton.simulate('click');
     await waitOneTickAndUpdate(wrapper);
   }
 
@@ -126,12 +128,12 @@ describe('RuntimePanel', () => {
     expect(createButton.exists()).toBeTruthy();
     expect(createButton.prop('disabled')).toBeFalsy();
 
-    act(() => { createButton.simulate('click'); });
+    createButton.simulate('click');
     await waitOneTickAndUpdate(wrapper);
   };
 
   it('should show loading spinner while loading', async() => {
-    const wrapper = component();
+    const wrapper = await component();
 
     // Check before ticking - stub returns the runtime asynchronously.
     expect(!wrapper.exists({'data-test-id': 'runtime-panel'}));
@@ -147,9 +149,7 @@ describe('RuntimePanel', () => {
     runtimeApiStub.runtime = null;
     act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
 
-    const wrapper = component();
-    await handleUseEffect(wrapper);
-    await waitOneTickAndUpdate(wrapper);
+    const wrapper = await component();
 
     const computeDefaults = wrapper.find('#compute-resources').first();
     // defaults to generalAnalysis preset, which is a n1-standard-4 machine with a 50GB disk
@@ -160,8 +160,7 @@ describe('RuntimePanel', () => {
     runtimeApiStub.runtime = null;
     act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
 
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    const wrapper = await component();
 
     await mustClickCreateButton(wrapper);
 
@@ -173,8 +172,7 @@ describe('RuntimePanel', () => {
     runtimeApiStub.runtime = null;
     act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}); });
 
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    const wrapper = await component();
 
     await mustClickCustomizeButton(wrapper);
     await waitOneTickAndUpdate(wrapper);
@@ -199,8 +197,7 @@ describe('RuntimePanel', () => {
     runtimeApiStub.runtime = null;
     act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
 
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    const wrapper = await component();
 
     await mustClickCustomizeButton(wrapper);
 
@@ -238,8 +235,7 @@ describe('RuntimePanel', () => {
     runtimeApiStub.runtime = null;
     act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
 
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    const wrapper = await component();
 
     await mustClickCustomizeButton(wrapper);
 
@@ -264,8 +260,7 @@ describe('RuntimePanel', () => {
     runtimeApiStub.runtime = null;
     act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
 
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    const wrapper = await component();
 
     await mustClickCustomizeButton(wrapper);
 
@@ -285,8 +280,7 @@ describe('RuntimePanel', () => {
     runtimeApiStub.runtime = null;
     act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
 
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    const wrapper = await component();
 
     await mustClickCustomizeButton(wrapper);
 
@@ -318,8 +312,7 @@ describe('RuntimePanel', () => {
     runtimeApiStub.runtime = null;
     act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
 
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    const wrapper = await component();
 
     await mustClickCustomizeButton(wrapper);
 
@@ -338,9 +331,7 @@ describe('RuntimePanel', () => {
     runtimeApiStub.runtime = null;
     act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
 
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-
+    const wrapper = await component();
     await mustClickCustomizeButton(wrapper);
 
     // Take the preset, make a change, then revert.
@@ -359,8 +350,7 @@ describe('RuntimePanel', () => {
   });
 
   it('should restrict memory options by cpu', async() => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    const wrapper = await component();
 
     wrapper.find('div[id="runtime-cpu"]').first().simulate('click');
     wrapper.find('.p-dropdown-item').find({'aria-label': 8}).first().simulate('click');
@@ -374,15 +364,13 @@ describe('RuntimePanel', () => {
   });
 
   it('should disable the Update button if there are no changes and runtime is running', async() => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    const wrapper = await component();
 
     expect(wrapper.find(Button).find({'aria-label': 'Update'}).first().prop('disabled')).toBeTruthy();
   });
 
   it('should enable the Update button if there are updates that do not require delete and runtime is running - increase disk size', async() => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    const wrapper = await component();
 
     await pickMainDiskSize(wrapper, getMainDiskSize(wrapper) + 10);
     await waitOneTickAndUpdate(wrapper);
@@ -393,8 +381,7 @@ describe('RuntimePanel', () => {
     const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: mockDataprocConfig, configurationType: RuntimeConfigurationType.UserOverride};
     act(() => {runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace}); });
 
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    const wrapper = await component();
 
     await pickNumWorkers(wrapper, getNumWorkers(wrapper) + 2);
     await waitOneTickAndUpdate(wrapper);
@@ -406,8 +393,7 @@ describe('RuntimePanel', () => {
     const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: mockDataprocConfig};
     runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
 
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    const wrapper = await component();
 
     await pickNumPreemptibleWorkers(wrapper, getNumPreemptibleWorkers(wrapper) + 2);
     await waitOneTickAndUpdate(wrapper);
@@ -416,8 +402,7 @@ describe('RuntimePanel', () => {
   });
 
   it('should render the Next button if there are updates that require delete and runtime is running - Compute Type', async() => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    const wrapper = await component();
 
     await pickComputeType(wrapper, ComputeType.Dataproc);
 
@@ -425,8 +410,7 @@ describe('RuntimePanel', () => {
   });
 
   it('should render the Next button if there are updates that require delete and runtime is running - CPU', async() => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    const wrapper = await component();
 
     await pickMainCpu(wrapper, getMainCpu(wrapper) + 4);
 
@@ -434,8 +418,7 @@ describe('RuntimePanel', () => {
   });
 
   it('should render the Next button if there are updates that require delete and runtime is running - Memory', async() => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    const wrapper = await component();
 
     // 15 GB -> 26 GB
     await pickMainRam(wrapper, 26);
@@ -444,8 +427,7 @@ describe('RuntimePanel', () => {
   });
 
   it('should render the Next button if there are updates that require delete and runtime is running - Decrease Disk', async() => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    const wrapper = await component();
 
     await pickMainDiskSize(wrapper, getMainDiskSize(wrapper) - 5);
     await waitOneTickAndUpdate(wrapper);
@@ -457,8 +439,7 @@ describe('RuntimePanel', () => {
     const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: mockDataprocConfig};
     runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
 
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    const wrapper = await component();
 
     // 4 -> 8
     await pickWorkerCpu(wrapper, 8);
@@ -470,8 +451,7 @@ describe('RuntimePanel', () => {
     const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: mockDataprocConfig};
     runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
 
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    const wrapper = await component();
 
     // 15 -> 26
     await pickWorkerRam(wrapper, 26);
@@ -484,7 +464,7 @@ describe('RuntimePanel', () => {
     const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: mockDataprocConfig};
     runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
 
-    const wrapper = component();
+    const wrapper = await component();
     await pickWorkerDiskSize(wrapper, getWorkerDiskSize(wrapper) + 10);
     await waitOneTickAndUpdate(wrapper);
 
@@ -495,8 +475,7 @@ describe('RuntimePanel', () => {
     const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: mockDataprocConfig};
     runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
 
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    const wrapper = await component();
 
     await pickMainDiskSize(wrapper, 75);
     await pickMainCpu(wrapper, 8);
@@ -531,15 +510,14 @@ describe('RuntimePanel', () => {
     const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: mockDataprocConfig, status: RuntimeStatus.Creating};
     runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
 
-    const wrapper = component();
+    const wrapper = await component();
     await pickMainDiskSize(wrapper, getMainDiskSize(wrapper) + 20);
 
     expect(wrapper.find(Button).find({'aria-label': 'Update'}).first().prop('disabled')).toBeTruthy();
   });
 
   it('should send an updateRuntime API call if runtime changes do not require a delete', async() => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    const wrapper = await component();
 
     const updateSpy = jest.spyOn(runtimeApi(), 'updateRuntime');
     const deleteSpy = jest.spyOn(runtimeApi(), 'deleteRuntime');
@@ -556,7 +534,7 @@ describe('RuntimePanel', () => {
   });
 
   it('should send a delete call if an update requires delete', async() => {
-    const wrapper = component();
+    const wrapper = await component();
     await waitOneTickAndUpdate(wrapper);
 
     const spy = jest.spyOn(runtimeApi(), 'deleteRuntime');
@@ -585,18 +563,16 @@ describe('RuntimePanel', () => {
     const runtime = {...runtimeApiStub.runtime, status: RuntimeStatus.Deleted};
     runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
 
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    const wrapper = await component();
 
     expect(wrapper.find(Button).find({'aria-label': 'Create'}).first().exists()).toBeTruthy();
   });
 
   it('should add additional options when the compute type changes', async() => {
-    const wrapper = component();
+    const wrapper = await component();
     await waitOneTickAndUpdate(wrapper);
 
-    wrapper.find('div[id="runtime-compute"]').first().simulate('click');
-    wrapper.find('.p-dropdown-item').find({'aria-label': 'Dataproc Cluster'}).first().simulate('click');
+    await pickComputeType(wrapper, ComputeType.Dataproc);
 
     expect(wrapper.exists('span[id="num-workers"]')).toBeTruthy();
     expect(wrapper.exists('span[id="num-preemptible"]')).toBeTruthy();
@@ -606,8 +582,7 @@ describe('RuntimePanel', () => {
   });
 
   it('should update the cost estimator when the compute profile changes', async() => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    const wrapper = await component();
 
     const costEstimator = () => wrapper.find('[data-test-id="cost-estimator"]');
     expect(costEstimator()).toBeTruthy();
@@ -646,8 +621,7 @@ describe('RuntimePanel', () => {
   })
 
   it('should allow runtime deletion', async() => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    const wrapper = await component();
 
     wrapper.find(Link).find({'aria-label': 'Delete Environment'}).first().simulate('click');
     expect(wrapper.find(ConfirmDelete).exists()).toBeTruthy();
@@ -662,8 +636,7 @@ describe('RuntimePanel', () => {
   });
 
   it('should allow cancelling runtime deletion', async() => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    const wrapper = await component();
 
     wrapper.find(Link).find({'aria-label': 'Delete Environment'}).first().simulate('click');
     expect(wrapper.find(ConfirmDelete).exists()).toBeTruthy();

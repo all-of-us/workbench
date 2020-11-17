@@ -13,3 +13,4 @@ const {stubPopupDimensions} = require('./src/app/components/popups');
 setupCustomValidators();
 stubPopupDimensions();
 enzyme.configure({ adapter: new Adapter() });
+window['gtag'] = () => {};

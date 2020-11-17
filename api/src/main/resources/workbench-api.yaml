@@ -3790,6 +3790,8 @@ definitions:
         type: boolean
       hasFitbitData:
         type: boolean
+      hasCopeSurveyData:
+        type: boolean
       creationTime:
         type: integer
         format: int64
@@ -4869,7 +4871,10 @@ definitions:
         default: false
         description: 'Whether to include all participants or filter by cohorts'
       prePackagedConceptSet:
-        "$ref": "#/definitions/PrePackagedConceptSetEnum"
+        type: array
+        description: 'List of pre Packaged concept set'
+        items:
+          "$ref": "#/definitions/PrePackagedConceptSetEnum"
       conceptSetIds:
         type: array
         description: 'The ids of all concept sets in the data set'
@@ -5002,7 +5007,10 @@ definitions:
         items:
           "$ref": "#/definitions/DomainValuePair"
       prePackagedConceptSet:
-        "$ref": "#/definitions/PrePackagedConceptSetEnum"
+        type: array
+        description: 'List of pre Packaged concept set'
+        items:
+          "$ref": "#/definitions/PrePackagedConceptSetEnum"
   DataSetListResponse:
     type: object
     properties:
@@ -5080,7 +5088,9 @@ definitions:
         default: false
         description: 'Whether to include all participants or filter by cohorts'
       prePackagedConceptSet:
-        "$ref": "#/definitions/PrePackagedConceptSetEnum"
+        type: array
+        items:
+          "$ref": "#/definitions/PrePackagedConceptSetEnum"
       conceptSetIds:
         type: array
         description: 'The ids of all concept sets in the data set'

@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import org.junit.Before;
@@ -51,7 +52,8 @@ public class DataSetDaoTest {
     dataset.setCohortIds(Collections.emptyList());
     dataset.setConceptSetIds(Collections.emptyList());
     dataset.setValues(Collections.emptyList());
-    dataset.setPrePackagedConceptSetEnum(PrePackagedConceptSetEnum.BOTH);
+    dataset.setPrePackagedConceptSetEnum(
+        Arrays.asList(PrePackagedConceptSetEnum.SURVEY, PrePackagedConceptSetEnum.PERSON));
     dataset.setWorkspaceId(workspaceId);
     return dataSetDao.save(dataset);
   }
