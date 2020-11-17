@@ -8,36 +8,12 @@ import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import Navigation, {NavLink} from 'app/component/navigation';
 import CdrVersionUpgradeModal from 'app/page/cdr-version-upgrade-modal';
 
-describe('Workspace tests relating to CDR Versions', () => {
-
+describe('Workspace CDR Version upgrade', () => {
     beforeEach(async () => {
         await signIn(page);
     });
 
-    test('The CDR version displays in the workspace navigation bar', async () => {
-        const workspaceCard: WorkspaceCard = await createWorkspace(page);
-        await workspaceCard.clickWorkspaceName();
-
-        const workspacePage: WorkspaceBase = new WorkspaceDataPage(page);
-        expect(await workspacePage.getCdrVersion()).toBe(config.defaultCdrVersionName)
-
-        // cleanup
-        await workspacePage.deleteWorkspace()
-    });
-
-    test('The CDR version upgrade flag appears in the workspace navigation bar for an old CDR', async () => {
-        const workspaceCard: WorkspaceCard = await createWorkspace(page, config.altCdrVersionName);
-        await workspaceCard.clickWorkspaceName();
-
-        const workspacePage: WorkspaceBase = new WorkspaceDataPage(page);
-        expect(await workspacePage.getCdrVersion()).toBe(config.altCdrVersionName)
-        expect(await workspacePage.getNewCdrVersionFlag()).toBeTruthy();
-
-        // cleanup
-        await workspacePage.deleteWorkspace()
-    });
-
-    test('Clicking the CDR version upgrade flag pops up the upgrade modal', async () => {
+   test('Clicking the CDR version upgrade flag pops up the upgrade modal', async () => {
         const workspaceCard: WorkspaceCard = await createWorkspace(page, config.altCdrVersionName);
         await workspaceCard.clickWorkspaceName();
 
