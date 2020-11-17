@@ -94,11 +94,9 @@ const CdrVersion = (props: {workspace: Workspace, cdrVersionListResponse: CdrVer
       setUserHasDismissedAlert(localStorage.getItem(localStorageKey) === USER_DISMISSED_ALERT_VALUE)
   );
 
-  // TODO reconcile these
-  // Enzyme testing with data-test-id requires a component with props
-  // puppeteer testing with data-test-id requires a rendered DOM element accessible by XPath
-
-  const NewVersionFlag = () => <div data-test-id='new-version-flag-for-e2e'><Clickable data-test-id='new-version-flag-for-UT'
+  const NewVersionFlag = () => <Clickable
+      data-test-id='new-version-flag'
+      propagateDataTestId={true}
       onClick={() => {
         localStorage.setItem(localStorageKey, USER_DISMISSED_ALERT_VALUE);
         setUserHasDismissedAlert(true);
@@ -107,7 +105,7 @@ const CdrVersion = (props: {workspace: Workspace, cdrVersionListResponse: CdrVer
     <span style={stylesFunction.cdrVersionFlagCircle(!userHasDismissedAlert)}>
       <ClrIcon shape='flag' class='is-solid'/>
     </span>
-  </Clickable></div>;
+  </Clickable>;
 
   return <FlexRow data-test-id='cdr-version' style={{textTransform: 'none'}}>
     {getCdrVersion(workspace, cdrVersionListResponse).name}
