@@ -40,15 +40,15 @@ export default class OldCdrVersionModal extends Modal {
     }
 
     async getWillUseCheckbox(): Promise<Checkbox> {
-        return Checkbox.findByName(this.page, FIELD.willUseCheckbox.textOption);
+        return Checkbox.findByName(this.page, FIELD.willUseCheckbox.textOption, this);
     }
 
     async getWillIdentifyCheckbox(): Promise<Checkbox> {
-        return Checkbox.findByName(this.page, FIELD.willIdentifyCheckbox.textOption);
+        return Checkbox.findByName(this.page, FIELD.willIdentifyCheckbox.textOption, this);
     }
 
     async getContinueButton(): Promise<Button> {
-        return Button.findByName(this.page, FIELD.continueButton.textOption);
+        return Button.findByName(this.page, FIELD.continueButton.textOption, this);
     }
 
     /**

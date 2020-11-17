@@ -22,10 +22,10 @@ export default class CdrVersionUpgradeModal extends Modal {
     }
 
     async getCancelButton(): Promise<ClrIcon> {
-        return ClrIcon.findByName(this.page, {iconShape: 'times'});
+        return ClrIcon.findByName(this.page, {iconShape: 'times'}, this);
     }
 
     async getUpgradeButton(): Promise<Button> {
-        return Button.findByName(this.page, {normalizeSpace: `Try ${config.defaultCdrVersionName}`});
+        return Button.findByName(this.page, {normalizeSpace: `Try ${config.defaultCdrVersionName}`}, this);
     }
 }
