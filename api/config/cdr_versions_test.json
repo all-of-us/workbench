@@ -36,7 +36,8 @@
     "releaseNumber": 3,
     "numParticipants": 234525,
     "cdrDbName": "synth_r_2019q4_10",
-    "hasFitbitData": true
+    "hasFitbitData": true,
+    "hasCopeSurveyData": true
   },
   {
     "cdrVersionId": 4,
@@ -50,6 +51,7 @@
     "releaseNumber": 3,
     "numParticipants": 234525,
     "cdrDbName": "synth_r_2019q4_10",
-    "hasFitbitData": true
+    "hasFitbitData": true,
+    "hasCopeSurveyData": true
   }
 ]
