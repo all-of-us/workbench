@@ -1210,6 +1210,22 @@ public class RuntimeControllerTest {
     verify(mockWorkspaceService, never()).validateActiveBilling(anyString(), anyString());
   }
 
+  @Test
+  public void startRuntime_noWorkspace() {
+    doReturn(Optional.empty())
+        .when(mockWorkspaceService)
+        .getByNamespace(WORKSPACE_NS);
+
+    assertThrows(NotFoundException.class, () -> runtimeController.startRuntime(WORKSPACE_NS));
+  }
+
+  @Test
+  public void startRuntime_success() throws ApiException {
+    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_NAME, LOGGED_IN_USER_EMAIL);
+    runtimeController.startRuntime(WORKSPACE_NS);
+    verify(userRuntimesApi).startRuntime(WORKSPACE_NS, getRuntimeName());
+  }
+
   private void createUser(String email) {
     DbUser user = new DbUser();
     user.setGivenName("first");

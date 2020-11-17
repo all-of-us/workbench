@@ -50,6 +50,10 @@ import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import {InputNumber} from 'primereact/inputnumber';
 import * as React from 'react';
+import {faSyncAlt} from "@fortawesome/free-solid-svg-icons/faSyncAlt";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faPauseCircle} from "@fortawesome/free-solid-svg-icons/faPauseCircle";
+import {faPlayCircle} from "@fortawesome/free-solid-svg-icons/faPlayCircle";
 
 const {useState, useEffect, Fragment} = React;
 
@@ -100,7 +104,7 @@ const styles = reactStyles({
     padding: '0.5rem',
     borderRadius: '0.5em'
   },
-  costPredictor: {
+  costPredictorWrapper: {
     backgroundColor: colorWithWhiteness(colors.accent, 0.85),
     // Not using shorthand here because react doesn't like it when you mix shorthand and non-shorthand,
     // and the border color changes when the runtime does
@@ -108,8 +112,7 @@ const styles = reactStyles({
     borderStyle: 'solid',
     borderColor: colorWithWhiteness(colors.dark, .5),
     borderRadius: '5px',
-    color: colors.dark,
-    marginBottom: '.5rem',
+    color: colors.dark
   },
   costsDrawnFrom: {
     borderLeft: `1px solid ${colorWithWhiteness(colors.dark, .5)}`,
@@ -390,6 +393,44 @@ const PresetSelector = ({hasMicroarrayData, setSelectedDiskSize, setSelectedMach
   </PopupTrigger>;
 };
 
+const StartStopRuntimeButton = ({workspace, containerStyle}) => {
+  const [status, setRuntimeStatus] = useRuntimeStatus(workspace.namespace);
+  const {clickable, iconShape, iconColor} = fp.cond([
+    [(s) => s === RuntimeStatus.Creating, () => ({clickable: false, iconShape: faSyncAlt, iconColor: colors.runtimeStatus.starting})],
+    [(s) => s === RuntimeStatus.Deleting, () => ({clickable: false, iconShape: faSyncAlt, iconColor: colors.runtimeStatus.stopping})],
+    [(s) => s === RuntimeStatus.Running, () => ({clickable: true, iconShape: faPauseCircle, iconColor: colors.runtimeStatus.running})],
+    [(s) => s === RuntimeStatus.Starting, () => ({clickable: false, iconShape: faSyncAlt, iconColor: colors.runtimeStatus.starting})],
+    [(s) => s === RuntimeStatus.Stopped, () => ({clickable: true, iconShape: faPlayCircle, iconColor: colors.runtimeStatus.stopped})],
+    [(s) => s === RuntimeStatus.Stopping, () => ({clickable: false, iconShape: faSyncAlt, iconColor: colors.runtimeStatus.stopping})],
+    [(s) => s === RuntimeStatus.Updating, () => ({clickable: false, iconShape: faSyncAlt, iconColor: colors.runtimeStatus.starting})]
+  ])(status);
+  const iconRotateStyle = (iconShape) => iconShape === faSyncAlt ? {animation: 'rotation 2s infinite linear'} : {};
+
+  return <FlexRow style={{
+    backgroundColor: addOpacity(colors.primary, 0.1),
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    padding: '0 1rem',
+    ...containerStyle
+  }}>
+    {/* this div should be a white circle around the icon; radius 1.6rem / 2 */}
+    <FlexRow style={{
+      width: '1.5rem',
+      height: '1.5rem',
+      backgroundColor: colors.white,
+      borderRadius: '.75rem',
+      justifyContent: 'space-around',
+      alignItems: 'center',
+      ...iconRotateStyle(iconShape)
+    }}>
+      <FontAwesomeIcon
+          icon={iconShape}
+          style={{width: '1rem', height: '1rem', color: iconColor}}
+      />
+    </FlexRow>
+  </FlexRow>
+}
+
 const CostEstimator = ({
   runtimeParameters,
   costTextColor = colors.accent
@@ -485,8 +526,8 @@ const CostInfo = ({runtimeChanged, runtimeConfig, currentUser, workspace, creato
   return <FlexRow
     style={
       runtimeChanged
-        ? {...styles.costPredictor, backgroundColor: colorWithWhiteness(colors.warning, .9), borderColor: colors.warning}
-        : styles.costPredictor
+        ? {backgroundColor: colorWithWhiteness(colors.warning, .9), borderColor: colors.warning}
+        : {}
     }
     data-test-id='cost-estimator'
   >
@@ -588,13 +629,13 @@ const ConfirmUpdatePanel = ({initialRuntimeConfig, newRuntimeConfig, onCancel, u
       <FlexRow style={{marginTop: '.5rem'}}>
         <div style={{marginRight: '1rem'}}>
           <b style={{fontSize: 10}}>New estimated cost</b>
-          <div style={{...styles.costPredictor, padding: '.25rem .5rem'}}>
+          <div style={{...styles.costPredictorWrapper, padding: '.25rem .5rem'}}>
             <CostEstimator runtimeParameters={newRuntimeConfig}/>
           </div>
         </div>
         <div>
           <b style={{fontSize: 10}}>Previous estimated cost</b>
-          <div style={{...styles.costPredictor,
+          <div style={{...styles.costPredictorWrapper,
             padding: '.25rem .5rem',
             color: 'grey',
             backgroundColor: ''}}>
@@ -666,7 +707,7 @@ export const RuntimePanel = fp.flow(
   const initialPanelContent = fp.cond([
     // currentRuntime being undefined means the first `getRuntime` has still not completed.
     [([r, ]) => r === undefined, () => PanelContent.Customize],
-    [([r, s]) => r === null || s === RuntimeStatus.Unknown, () => PanelContent.Create],
+    [([r, s]) => r === null || s === RuntimeStatus.Unknown || s === RuntimeStatus.Deleted, () => PanelContent.Create],
     [() => true, () => PanelContent.Customize]
   ])([currentRuntime, status]);
   const [panelContent, setPanelContent] = useState<PanelContent>(initialPanelContent);
@@ -811,13 +852,15 @@ export const RuntimePanel = fp.flow(
       />],
       [PanelContent.Customize, () => <Fragment>
         <div style={styles.controlSection}>
-          <CostInfo runtimeChanged={runtimeChanged}
-                                runtimeConfig={newRuntimeConfig}
-                                currentUser={profile.username}
-                                workspace={workspace}
-                                creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
-          />
-
+          <FlexRow style={styles.costPredictorWrapper}>
+            {currentRuntime && <StartStopRuntimeButton workspace={workspace} containerStyle={{borderRadius: '5px 0 0 5px'}}/>}
+            <CostInfo runtimeChanged={runtimeChanged}
+              runtimeConfig={newRuntimeConfig}
+              currentUser={profile.username}
+              workspace={workspace}
+              creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
+              />
+          </FlexRow>
           <PresetSelector
               hasMicroarrayData={hasMicroarrayData}
               setSelectedDiskSize={(disk) => setSelectedDiskSize(disk)}

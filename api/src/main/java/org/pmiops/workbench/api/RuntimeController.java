@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Provider;
 import org.json.JSONObject;
+import org.omg.CosNaming.NamingContextPackage.NotFound;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
 import org.pmiops.workbench.annotations.AuthorityRequired;
@@ -30,6 +31,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
@@ -51,6 +53,7 @@ import org.pmiops.workbench.notebooks.model.StorageLink;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -311,6 +314,32 @@ public class RuntimeController implements RuntimeApiDelegate {
 
     leonardoNotebooksClient.deleteRuntime(workspaceNamespace, userProvider.get().getRuntimeName());
     return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @Override
+  public ResponseEntity<EmptyResponse> startRuntime(String workspaceNamespace) {
+    String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
+    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+        workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
+    try {
+      leonardoNotebooksClient.startRuntime(workspaceNamespace, userProvider.get().getRuntimeName());
+      return ResponseEntity.ok(new EmptyResponse());
+    } catch(WorkbenchException e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+  }
+
+  @Override
+  public ResponseEntity<EmptyResponse> stopRuntime(String workspaceNamespace) {
+    String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
+    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+        workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
+    try {
+      leonardoNotebooksClient.stopRuntime(workspaceNamespace, userProvider.get().getRuntimeName());
+      return ResponseEntity.ok(new EmptyResponse());
+    } catch(WorkbenchException e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
   }
 
   @Override

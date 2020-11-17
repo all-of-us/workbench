@@ -50,4 +50,10 @@ public interface LeonardoNotebooksClient {
 
   /** @return true if Leonardo service is okay, false otherwise. */
   boolean getLeonardoStatus();
+
+  /** Restarts a paused runtime */
+  void startRuntime(String googleProject, String runtimeName) throws WorkbenchException;
+
+  /** Pauses a running runtime */
+  void stopRuntime(String googleProject, String runtimeName) throws WorkbenchException;
 }

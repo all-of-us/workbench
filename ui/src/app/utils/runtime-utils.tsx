@@ -11,7 +11,9 @@ import {ComputeType, findMachineByName, Machine} from './machines';
 const {useState, useEffect} = React;
 
 export enum RuntimeStatusRequest {
-  Delete = 'Delete'
+  Delete = 'Delete',
+  Start = 'Start',
+  Stop = 'Stop'
 }
 
 export interface RuntimeDiff {
@@ -252,9 +254,8 @@ export const maybeInitializeRuntime = async(workspaceNamespace: string, signal: 
 };
 
 // useRuntimeStatus hook can be used to change the status of the runtime
-// Only 'Delete' is supported at the moment. This setter returns a promise which
-// resolves when any proximal fetch has completed, but does not wait for any
-// polling, which may continue asynchronously.
+// This setter returns a promise which resolves when any proximal fetch has completed,
+// but does not wait for any polling, which may continue asynchronously.
 export const useRuntimeStatus = (currentWorkspaceNamespace): [
   RuntimeStatus | undefined, (statusRequest: RuntimeStatusRequest) => Promise<void>]  => {
   const [runtimeStatus, setRuntimeStatus] = useState<RuntimeStatusRequest>();
@@ -267,7 +268,8 @@ export const useRuntimeStatus = (currentWorkspaceNamespace): [
     // Additional status changes can be put here
     if (!!runtimeStatus) {
       switchCase(runtimeStatus,
-        [RuntimeStatusRequest.Delete, async() => {
+      [
+        RuntimeStatusRequest.Delete, async() => {
           try {
             await LeoRuntimeInitializer.initialize({workspaceNamespace: currentWorkspaceNamespace, maxCreateCount: 0});
           } catch (e) {
@@ -277,7 +279,30 @@ export const useRuntimeStatus = (currentWorkspaceNamespace): [
               throw e;
             }
           }
-        }]);
+        },
+        RuntimeStatusRequest.Start, async() => {
+          try {
+            await LeoRuntimeInitializer.initialize({workspaceNamespace: currentWorkspaceNamespace, maxCreateCount: 0});
+          } catch (e) {
+            // ExceededActionCountError is expected, as we exceed our create limit of 0.
+            if (!(e instanceof ExceededActionCountError ||
+                e instanceof LeoRuntimeInitializationAbortedError)) {
+              throw e;
+            }
+          }
+        },
+        RuntimeStatusRequest.Stop, async() => {
+          try {
+            await LeoRuntimeInitializer.initialize({workspaceNamespace: currentWorkspaceNamespace, maxCreateCount: 0});
+          } catch (e) {
+            // ExceededActionCountError is expected, as we exceed our create limit of 0.
+            if (!(e instanceof ExceededActionCountError ||
+                e instanceof LeoRuntimeInitializationAbortedError)) {
+              throw e;
+            }
+          }
+        }
+      ]);
     }
 
   }, [runtimeStatus]);
@@ -286,6 +311,12 @@ export const useRuntimeStatus = (currentWorkspaceNamespace): [
     await switchCase(req, [
       RuntimeStatusRequest.Delete, () => {
         return runtimeApi().deleteRuntime(currentWorkspaceNamespace);
+      },
+      RuntimeStatusRequest.Start, () => {
+        return runtimeApi().startRuntime(currentWorkspaceNamespace);
+      },
+      RuntimeStatusRequest.Stop, () => {
+        return runtimeApi().stopRuntime(currentWorkspaceNamespace);
       }
     ]);
     setRuntimeStatus(req);

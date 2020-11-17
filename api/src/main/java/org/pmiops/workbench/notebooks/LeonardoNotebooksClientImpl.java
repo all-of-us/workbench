@@ -15,6 +15,7 @@ import org.pmiops.workbench.db.model.DbUser.ClusterConfig;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
+import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
@@ -24,6 +25,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest.WelderRe
 import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
 import org.pmiops.workbench.model.Runtime;
@@ -298,5 +300,23 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
       return false;
     }
     return true;
+  }
+
+  @Override
+  public void startRuntime(String googleProject, String runtimeName) {
+    leonardoRetryHandler.run(
+        (context) -> {
+          runtimesApiProvider.get().startRuntime(googleProject, runtimeName);
+          return null;
+        });
+  }
+
+  @Override
+  public void stopRuntime(String googleProject, String runtimeName) {
+    leonardoRetryHandler.run(
+        (context) -> {
+          runtimesApiProvider.get().stopRuntime(googleProject, runtimeName);
+          return null;
+        });
   }
 }
