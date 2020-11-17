@@ -1,16 +1,16 @@
 import {mount, ReactWrapper} from 'enzyme';
 import * as React from 'react';
 import Iframe from 'react-iframe';
+import {act} from 'react-dom/test-utils';
 
 import {registerApiClient as registerApiClientNotebooks} from 'app/services/notebooks-swagger-fetch-clients';
-import {act} from 'react-dom/test-utils';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, queryParamsStore, serverConfigStore, urlParamsStore, userProfileStore, NavStore} from 'app/utils/navigation';
 import {runtimeStore} from 'app/utils/stores';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {RuntimeApi, RuntimeStatus, WorkspaceAccessLevel} from 'generated/fetch';
 import {RuntimesApi as LeoRuntimesApi, JupyterApi, ProxyApi} from 'notebooks-generated/fetch';
-import {handleUseEffect, waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {waitOneTickAndUpdate, waitForFakeTimersAndUpdate} from 'testing/react-test-helpers';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {JupyterApiStub} from 'testing/stubs/jupyter-api-stub';
 import {ProxyApiStub} from 'testing/stubs/proxy-api-stub';
@@ -33,14 +33,9 @@ describe('NotebookRedirect', () => {
 
   const component = async() => {
     const c = mount(<NotebookRedirect/>);
-    await handleUseEffect(c);
+    await waitOneTickAndUpdate(c);
     return c;
   };
-
-  async function awaitTickAndTimers(wrapper: ReactWrapper) {
-    act(() => jest.runOnlyPendingTimers());
-    await waitOneTickAndUpdate(wrapper);
-  }
 
   function currentCardText(wrapper: ReactWrapper) {
     return wrapper.find('[data-test-id="current-progress-card"]').first().text();
@@ -73,7 +68,6 @@ describe('NotebookRedirect', () => {
     userProfileStore.next({profile, reload, updateCache});
     runtimeStore.set({workspaceNamespace: workspace.namespace, runtime: undefined});
 
-    // mock timers
     jest.useFakeTimers();
   });
 
@@ -96,7 +90,7 @@ describe('NotebookRedirect', () => {
     runtimeStub.runtime.status = RuntimeStatus.Creating;
 
     const wrapper = await component();
-    await awaitTickAndTimers(wrapper);
+    await waitForFakeTimersAndUpdate(wrapper);
 
     expect(wrapper
       .exists(getCardSpinnerTestId(ProgressCardState.UnknownInitializingResuming)))
@@ -105,7 +99,7 @@ describe('NotebookRedirect', () => {
       .toContain(progressStrings.get(Progress.Initializing));
 
     runtimeStub.runtime.status = RuntimeStatus.Running;
-    await awaitTickAndTimers(wrapper);
+    await waitForFakeTimersAndUpdate(wrapper);
 
     expect(wrapper
       .exists(getCardSpinnerTestId(ProgressCardState.Redirecting)))
@@ -118,7 +112,7 @@ describe('NotebookRedirect', () => {
     runtimeStub.runtime.status = RuntimeStatus.Creating;
 
     const wrapper = await component();
-    await awaitTickAndTimers(wrapper);
+    await waitForFakeTimersAndUpdate(wrapper);
 
     expect(wrapper
       .exists(getCardSpinnerTestId(ProgressCardState.UnknownInitializingResuming)))
@@ -127,7 +121,7 @@ describe('NotebookRedirect', () => {
       .toContain(progressStrings.get(Progress.Initializing));
 
     runtimeStub.runtime.status = RuntimeStatus.Running;
-    await awaitTickAndTimers(wrapper);
+    await waitForFakeTimersAndUpdate(wrapper);
 
     expect(wrapper
       .exists(getCardSpinnerTestId(ProgressCardState.Redirecting)))
@@ -144,7 +138,7 @@ describe('NotebookRedirect', () => {
     runtimeStub.runtime.status = RuntimeStatus.Stopped;
 
     const wrapper = await component();
-    await awaitTickAndTimers(wrapper);
+    await waitForFakeTimersAndUpdate(wrapper);
 
     expect(wrapper
       .exists(getCardSpinnerTestId(ProgressCardState.UnknownInitializingResuming)))
@@ -153,7 +147,7 @@ describe('NotebookRedirect', () => {
       .toContain(progressStrings.get(Progress.Resuming));
 
     runtimeStub.runtime.status = RuntimeStatus.Running;
-    await awaitTickAndTimers(wrapper);
+    await waitForFakeTimersAndUpdate(wrapper);
 
     expect(wrapper
       .exists(getCardSpinnerTestId(ProgressCardState.Redirecting)))
@@ -166,7 +160,7 @@ describe('NotebookRedirect', () => {
     runtimeStub.runtime.status = RuntimeStatus.Stopped;
 
     const wrapper = await component();
-    await awaitTickAndTimers(wrapper);
+    await waitForFakeTimersAndUpdate(wrapper);
 
     expect(wrapper
       .exists(getCardSpinnerTestId(ProgressCardState.UnknownInitializingResuming)))
@@ -175,7 +169,7 @@ describe('NotebookRedirect', () => {
       .toContain(progressStrings.get(Progress.Resuming));
 
     runtimeStub.runtime.status = RuntimeStatus.Running;
-    await awaitTickAndTimers(wrapper);
+    await waitForFakeTimersAndUpdate(wrapper);
 
     expect(wrapper
       .exists(getCardSpinnerTestId(ProgressCardState.Redirecting)))
@@ -192,7 +186,7 @@ describe('NotebookRedirect', () => {
     runtimeStub.runtime.status = RuntimeStatus.Running;
 
     const wrapper = await component();
-    await awaitTickAndTimers(wrapper);
+    await waitForFakeTimersAndUpdate(wrapper);
 
     expect(wrapper
       .exists(getCardSpinnerTestId(ProgressCardState.Redirecting)))
@@ -206,7 +200,7 @@ describe('NotebookRedirect', () => {
     runtimeStub.runtime.status = RuntimeStatus.Running;
 
     const wrapper = await component();
-    await awaitTickAndTimers(wrapper);
+    await waitForFakeTimersAndUpdate(wrapper);
 
     expect(wrapper
       .exists(getCardSpinnerTestId(ProgressCardState.Redirecting)))
@@ -226,11 +220,11 @@ describe('NotebookRedirect', () => {
     runtimeStub.runtime.status = RuntimeStatus.Running;
 
     const wrapper = await component();
-    await awaitTickAndTimers(wrapper);
+    await waitForFakeTimersAndUpdate(wrapper);
 
     // Wait for the "redirecting" timer to elapse, rendering the iframe.
     act(() => jest.advanceTimersByTime(2000));
-    await awaitTickAndTimers(wrapper);
+    await waitForFakeTimersAndUpdate(wrapper);
 
     expect(wrapper.find(Iframe).exists()).toBeTruthy();
     expect(navSpy).not.toHaveBeenCalled();
@@ -243,7 +237,7 @@ describe('NotebookRedirect', () => {
         runtime: runtimeStub.runtime
       });
     });
-    await awaitTickAndTimers(wrapper);
+    await waitForFakeTimersAndUpdate(wrapper);
 
     expect(navSpy).toHaveBeenCalled();
   });

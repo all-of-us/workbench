@@ -8,7 +8,7 @@ import {defaultRuntime, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {currentCohortCriteriaStore, currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
 import {CohortAnnotationDefinitionApi, CohortReviewApi} from 'generated/fetch';
 import defaultServerConfig from 'testing/default-server-config';
-import {handleUseEffect, waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {waitForFakeTimersAndUpdate, waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CohortAnnotationDefinitionServiceStub} from 'testing/stubs/cohort-annotation-definition-service-stub';
 import {CohortReviewServiceStub, cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
@@ -32,14 +32,11 @@ describe('HelpSidebar', () => {
   let runtimeStub: RuntimeApiStub;
   let props: {};
 
-  const component = () => {
-    return mount(<HelpSidebar {...props} />, {attachTo: document.getElementById('root')});
+  const component = async() => {
+    const c = mount(<HelpSidebar {...props} />, {attachTo: document.getElementById('root')});
+    await waitOneTickAndUpdate(c);
+    return c;
   };
-
-  async function awaitTickAndTimers(wrapper) {
-    act(() => jest.runOnlyPendingTimers());
-    await waitOneTickAndUpdate(wrapper);
-  }
 
   const statusIcon = (wrapper, exists = true) => {
     const icon = wrapper.find({'data-test-id': 'runtime-status-icon-container'}).find('svg');
@@ -84,107 +81,106 @@ describe('HelpSidebar', () => {
     jest.useRealTimers();
   });
 
-  it('should render', () => {
-    const wrapper = component();
+  it('should render', async() => {
+    const wrapper = await component();
     expect(wrapper.exists()).toBeTruthy();
   });
 
-  it('should update content when helpContentKey prop changes', () => {
+  it('should update content when helpContentKey prop changes', async() => {
     props = {helpContentKey: 'data', sidebarOpen: true};
-    const wrapper = component();
+    const wrapper = await component();
     expect(wrapper.find('[data-test-id="section-title-0"]').text()).toBe(sidebarContent.data[0].title);
     wrapper.setProps({helpContentKey: 'cohortBuilder'});
     expect(wrapper.find('[data-test-id="section-title-0"]').text()).toBe(sidebarContent.cohortBuilder[0].title);
   });
 
-  it('should show a different icon and title when helpContentKey is notebookStorage', () => {
+  it('should show a different icon and title when helpContentKey is notebookStorage', async() => {
     props = {helpContentKey: 'notebookStorage', sidebarOpen: true};
-    const wrapper = component();
+    const wrapper = await component();
     expect(wrapper.find('[data-test-id="section-title-0"]').text()).toBe(sidebarContent.notebookStorage[0].title);
     expect(wrapper.find('[data-test-id="help-sidebar-icon-notebooksHelp"]').get(0).props.icon.iconName).toBe('folder-open');
   });
 
-  it('should update marginRight style when sidebarOpen prop changes', () => {
+  it('should update marginRight style when sidebarOpen prop changes', async() => {
     props = {helpContentKey: 'data', sidebarOpen: true};
-    const wrapper = component();
+    const wrapper = await component();
     expect(wrapper.find('[data-test-id="sidebar-content"]').prop('style').marginRight).toBe(0);
     wrapper.setProps({sidebarOpen: false});
     expect(wrapper.find('[data-test-id="sidebar-content"]').prop('style').marginRight).toBe('calc(-14rem - 40px)');
   });
 
-  it('should call delete method when clicked', () => {
+  it('should call delete method when clicked', async() => {
     const deleteSpy = jest.fn();
     props = {deleteFunction: deleteSpy};
-    const wrapper = component();
+    const wrapper = await component();
     wrapper.find({'data-test-id': 'workspace-menu-button'}).first().simulate('click');
     wrapper.find({'data-test-id': 'Delete-menu-item'}).first().simulate('click');
     expect(deleteSpy).toHaveBeenCalled();
   });
 
-  it('should call share method when clicked', () => {
+  it('should call share method when clicked', async() => {
     const shareSpy = jest.fn();
     props = {shareFunction: shareSpy};
-    const wrapper = component();
+    const wrapper = await component();
     wrapper.find({'data-test-id': 'workspace-menu-button'}).first().simulate('click');
     wrapper.find({'data-test-id': 'Share-menu-item'}).first().simulate('click');
     expect(shareSpy).toHaveBeenCalled();
   });
 
   it('should hide workspace icon if on critera search page', async() => {
-    const wrapper = component();
+    const wrapper = await component();
     currentCohortCriteriaStore.next([]);
-    await awaitTickAndTimers(wrapper);
+    await waitForFakeTimersAndUpdate(wrapper);
     expect(wrapper.find({'data-test-id': 'workspace-menu-button'}).length).toBe(0);
     expect(wrapper.find({'data-test-id': 'criteria-count'}).length).toBe(0);
     currentCohortCriteriaStore.next([criteria1]);
-    await awaitTickAndTimers(wrapper);
+    await waitForFakeTimersAndUpdate(wrapper);
     expect(wrapper.find({'data-test-id': 'criteria-count'}).length).toBe(1);
   });
 
   it('should update count if criteria is added', async() => {
-    const wrapper = component();
+    const wrapper = await component();
     currentCohortCriteriaStore.next([criteria1, criteria2]);
-    await awaitTickAndTimers(wrapper);
+    await waitForFakeTimersAndUpdate(wrapper);
     expect(wrapper.find({'data-test-id': 'criteria-count'}).first().props().children).toBe(2);
   });
 
-  it('should not display runtime control icon for read-only workspaces', () => {
+  it('should not display runtime control icon for read-only workspaces', async() => {
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.value,
       accessLevel: WorkspaceAccessLevel.READER
     });
-    const wrapper = component();
+    const wrapper = await component();
     expect(wrapper.find({'data-test-id': 'help-sidebar-icon-runtime'}).length).toBe(0);
   });
 
-  it('should display runtime control icon for writable workspaces', () => {
+  it('should display runtime control icon for writable workspaces', async() => {
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.value,
       accessLevel: WorkspaceAccessLevel.WRITER
     });
-    const wrapper = component();
+    const wrapper = await component();
     expect(wrapper.find({'data-test-id': 'help-sidebar-icon-runtime'}).length).toBe(1);
   });
 
   it('should display dynamic runtime status icon', async() => {
     setRuntimeStatus(RuntimeStatus.Running);
-    const wrapper = component();
-    await handleUseEffect(wrapper);
-    await awaitTickAndTimers(wrapper);
+    const wrapper = await component();
+    await waitForFakeTimersAndUpdate(wrapper);
 
     expect(statusIcon(wrapper).prop('style').color).toEqual(colors.runtimeStatus.running);
 
     act(() => setRuntimeStatus(RuntimeStatus.Deleting));
-    await awaitTickAndTimers(wrapper);
+    await waitForFakeTimersAndUpdate(wrapper);
 
     expect(statusIcon(wrapper).prop('style').color).toEqual(colors.runtimeStatus.stopping);
 
     act(() => clearRuntime());
-    await awaitTickAndTimers(wrapper);
+    await waitForFakeTimersAndUpdate(wrapper);
     statusIcon(wrapper, /* exists */ false);
 
     act(() => setRuntimeStatus(RuntimeStatus.Creating));
-    await awaitTickAndTimers(wrapper);
+    await waitForFakeTimersAndUpdate(wrapper);
     expect(statusIcon(wrapper).prop('style').color).toEqual(colors.runtimeStatus.starting);
 
   });
@@ -192,14 +188,13 @@ describe('HelpSidebar', () => {
   it('should display "stopping" UX during compound runtime op', async() => {
     setRuntimeStatus(RuntimeStatus.Running);
     registerCompoundRuntimeOperation(workspaceDataStub.namespace, {aborter: new AbortController()})
-    const wrapper = component();
-    await handleUseEffect(wrapper);
-    await awaitTickAndTimers(wrapper);
+    const wrapper = await component();
+    await waitForFakeTimersAndUpdate(wrapper);
 
     expect(statusIcon(wrapper).prop('style').color).toEqual(colors.runtimeStatus.running);
 
     act(() => clearRuntime());
-    await awaitTickAndTimers(wrapper);
+    await waitForFakeTimersAndUpdate(wrapper);
     expect(statusIcon(wrapper).prop('style').color).toEqual(colors.runtimeStatus.stopping);
   });
 });
