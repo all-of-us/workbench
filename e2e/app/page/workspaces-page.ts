@@ -11,6 +11,7 @@ import WorkspaceDataPage from './workspace-data-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
 import {config} from 'resources/workbench-config';
 import {UseFreeCredits} from './workspace-base';
+import OldCdrVersionModal from './old-cdr-version-modal';
 
 const faker = require('faker/locale/en_US');
 export const PageTitle = 'View Workspace';
@@ -85,7 +86,8 @@ export default class WorkspacesPage extends WorkspaceEditPage {
 
     // if the CDR Version is not the default, consent to the necessary restrictions
     if (cdrVersionName !== config.defaultCdrVersionName) {
-      await editPage.consentToOldCdrRestrictions();
+      const modal = new OldCdrVersionModal(page);
+      await modal.consentToOldCdrRestrictions();
     }
 
     // click CREATE WORKSPACE button

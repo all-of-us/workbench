@@ -60,10 +60,7 @@ export const LabelAlias = {
   NO_REQUEST_REVIEW: 'No, I have no concerns at this time about potential stigmatization',
   YES_REQUEST_REVIEW: 'Yes, I would like to request a review of my research purpose',
   SHARE_WITH_COLLABORATORS: 'Share workspace with the same set of collaborators', // visible when clone workspace
-  WILL_USE_OLD_CDR_VERSION: 'I will use this workspace to complete an existing study or replicate a previous study.',
-  WILL_IDENTIFY_OLD_CDR_VERSION: 'In the workspace description below, I will identify which study I am continuing or replicating.',
 };
-
 
 export const FIELD = {
   createWorkspaceButton: {
@@ -82,17 +79,6 @@ export const FIELD = {
     // Note: The CDR Version dropdown does not have a label of its own.
     // Use the nearby Workspace Name instead.
     textOption: {name: LabelAlias.WORKSPACE_NAME, type: ElementType.Select}
-  },
-  oldCdrVersionModal: {
-    willUseCheckbox: {
-      textOption: {name: LabelAlias.WILL_USE_OLD_CDR_VERSION, type: ElementType.Checkbox}
-    },
-    willIdentifyCheckbox: {
-      textOption: {name: LabelAlias.WILL_IDENTIFY_OLD_CDR_VERSION, type: ElementType.Checkbox}
-    },
-    continueButton: {
-      textOption: {name: LinkText.Continue}
-    },
   },
   billingAccountSelect: {
     textOption: {name: LabelAlias.SELECT_BILLING, type: ElementType.Select}
@@ -270,23 +256,6 @@ export default class WorkspaceEditPage extends WorkspaceBase {
     return element.getTextContent();
   }
 
-  async getOldCdrVersionModal(): Promise<BaseElement> {
-    const xpath = '//*[@data-test-id="old-cdr-version-modal"]';
-    return BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath));
-  }
-
-  async getWillUseCheckbox(): Promise<Checkbox> {
-    return Checkbox.findByName(this.page, FIELD.oldCdrVersionModal.willUseCheckbox.textOption);
-  }
-
-  async getWillIdentifyCheckbox(): Promise<Checkbox> {
-    return Checkbox.findByName(this.page, FIELD.oldCdrVersionModal.willIdentifyCheckbox.textOption);
-  }
-
-  async getOldCdrVersionContinueButton(): Promise<Button> {
-    return Button.findByName(this.page, FIELD.oldCdrVersionModal.continueButton.textOption);
-  }
-
   async getBillingAccountSelect(): Promise<Select> {
     return Select.findByName(this.page, FIELD.billingAccountSelect.textOption);
   }
@@ -362,29 +331,6 @@ export default class WorkspaceEditPage extends WorkspaceBase {
   async selectCdrVersion(value: string = config.defaultCdrVersionName): Promise<string> {
     const select = await this.getCdrVersionSelect();
     return select.selectOption(value);
-  }
-
-  /**
-   * if the CDR Version is not the default, consent to the necessary restrictions in the modal which appears
-   */
-  async consentToOldCdrRestrictions() {
-    await this.getOldCdrVersionModal()
-
-    // can't continue yet - user has not yet consented
-    const continueButton: Button = await this.getOldCdrVersionContinueButton();
-    expect(await continueButton.isCursorNotAllowed()).toBe(true);
-
-    const willUse: Checkbox = await this.getWillUseCheckbox();
-    expect(await willUse.isChecked()).toBe(false)
-    await willUse.check();
-
-    const willIdentify: Checkbox = await this.getWillIdentifyCheckbox();
-    expect(await willIdentify.isChecked()).toBe(false)
-    await willIdentify.check();
-
-    // can continue now
-    await continueButton.waitUntilEnabled();
-    await continueButton.click();
   }
 
   /**

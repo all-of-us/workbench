@@ -5,6 +5,7 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import Navigation, {NavLink} from 'app/component/navigation';
 import WorkspaceCard from 'app/component/workspace-card';
 import {config} from 'resources/workbench-config';
+import OldCdrVersionModal from '../../app/page/old-cdr-version-modal';
 
 describe('Duplicate workspace', () => {
 
@@ -114,7 +115,8 @@ describe('Duplicate workspace', () => {
     await workspacesPage.selectCdrVersion(config.altCdrVersionName);
 
     // wait for the warning modal and consent to the required restrictions
-    await workspacesPage.consentToOldCdrRestrictions();
+    const modal = new OldCdrVersionModal(page);
+    await modal.consentToOldCdrRestrictions();
 
     const finishButton = await workspacesPage.getDuplicateWorkspaceButton();
     await finishButton.waitUntilEnabled();

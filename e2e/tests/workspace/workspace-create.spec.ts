@@ -7,6 +7,7 @@ import * as testData from 'resources/data/workspace-data';
 import {makeWorkspaceName} from 'utils/str-utils';
 import {UseFreeCredits} from 'app/page/workspace-base';
 import {config} from 'resources/workbench-config';
+import OldCdrVersionModal from 'app/page/old-cdr-version-modal';
 
 describe('Creating new workspaces', () => {
 
@@ -86,7 +87,8 @@ describe('Creating new workspaces', () => {
     expect(await createButton.isCursorNotAllowed()).toBe(true);
 
     // fill out the modal checkboxes
-    await editPage.consentToOldCdrRestrictions();
+    const modal = new OldCdrVersionModal(page);
+    await modal.consentToOldCdrRestrictions();
 
     // now we can continue
     await createButton.waitUntilEnabled();
