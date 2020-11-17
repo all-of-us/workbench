@@ -35,13 +35,8 @@ export async function signIn(page: Page, userId?: string, passwd?: string): Prom
 export async function signInAs(page: Page, userId: string, passwd: string, opts: {reset?: boolean} = {}): Promise<Page> {
   const {reset = true} = opts;
   if (reset) {
-    // browser and page reset.
-    // await page.deleteCookie(...await page.cookies());
-    // await jestPuppeteer.resetPage();
     await jestPuppeteer.resetBrowser();
   }
-  // const incognitoBrowser = await browser.createIncognitoBrowserContext();
-  // const newPage = await incognitoBrowser.newPage();
   const newPage = await browser.newPage();
   const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36';
   await newPage.setUserAgent(userAgent);
