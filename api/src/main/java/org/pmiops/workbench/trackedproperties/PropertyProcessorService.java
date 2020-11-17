@@ -1,4 +1,4 @@
-package org.pmiops.workbench.trackables;
+package org.pmiops.workbench.trackedproperties;
 
 import java.rmi.AccessException;
 import org.pmiops.workbench.db.model.DbUser;
@@ -9,8 +9,8 @@ import org.pmiops.workbench.db.model.DbUser;
  * @param <PROPERTY_T>
  */
 public interface PropertyProcessorService<TARGET_T, PROPERTY_T> {
- TARGET_T process(
-     TrackableProperty<TARGET_T, PROPERTY_T> property,
+ PropertyUpdateResult<TARGET_T> update(
+     TrackedProperty<TARGET_T, PROPERTY_T> property,
       DbUser agentUser,
       TARGET_T target,
       PROPERTY_T newValue) throws IllegalAccessException, AccessException;

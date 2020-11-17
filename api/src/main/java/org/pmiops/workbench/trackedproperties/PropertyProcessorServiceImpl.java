@@ -1,4 +1,4 @@
-package org.pmiops.workbench.trackables;
+package org.pmiops.workbench.trackedproperties;
 
 import java.rmi.AccessException;
 import java.util.Optional;
@@ -20,39 +20,39 @@ public class PropertyProcessorServiceImpl<TARGET_T, PROPERTY_T>
 
   // Do the needful steps in order.
   @Override
-  public TARGET_T process(
-      TrackableProperty<TARGET_T, PROPERTY_T> propertyService,
+  public PropertyUpdateResult<TARGET_T> update(
+      TrackedProperty<TARGET_T, PROPERTY_T> property,
       DbUser agentUser,
       TARGET_T target,
-      PROPERTY_T newValue) throws IllegalAccessException, AccessException {
+      PROPERTY_T newValue) {
 
     // validate authorities
-    if (!userHasRequiredAuthorities(propertyService.getRequiredAuthorities())) {
-      throw new AccessException("forbidden");
+    if (!userHasRequiredAuthorities(property.getRequiredAuthorities())) {
+      return new PropertyUpdateResult<>(target, PropertyUpdateStatus.MISSING_REQUIRED_AUTHORITY);
     }
 
     // validate new prop
-    if (!propertyService.isValid(target, newValue)) {
-      throw new IllegalAccessException("Bad argument");
+    if (!property.isValid(target, newValue)) {
+      return new PropertyUpdateResult<>(target, PropertyUpdateStatus.BAD_ARGUMENT);
     }
 
     // save old value for audit
     final Optional<PROPERTY_T> previousValue = Optional.ofNullable(
-        propertyService.getValue(target));
+        property.getValue(target));
 
     // set the value
-    final TARGET_T updatedTarget = propertyService.setNewValue(target, newValue);
+    final TARGET_T updatedTarget = property.setNewValue(target, newValue);
 
     // Commit to storage or some other external place that needs updating.
-    final TARGET_T committedTarget = propertyService.commit(updatedTarget);
+    final TARGET_T committedTarget = property.commit(updatedTarget);
 
     // audit
-    propertyService.auditChange(target, previousValue, Optional.of(newValue));
+    property.auditChange(target, previousValue, Optional.of(newValue));
 
     // send notification
-    propertyService.notifyUser(agentUser.getContactEmail(), "We did the thing for your acct.");
+    property.notifyUser(agentUser.getContactEmail(), "We did the thing for your acct.");
 
-    return committedTarget;
+    return new PropertyUpdateResult<>(committedTarget, PropertyUpdateStatus.SUCCEEDED);
   }
 
   private boolean userHasRequiredAuthorities(Set<Authority> requiredAuthorities) {

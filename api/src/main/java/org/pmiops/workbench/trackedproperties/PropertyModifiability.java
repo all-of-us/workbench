@@ -1,4 +1,4 @@
-package org.pmiops.workbench.trackables;
+package org.pmiops.workbench.trackedproperties;
 
 public enum PropertyModifiability {
   USER_WRITEABLE,

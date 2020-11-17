@@ -1,4 +1,4 @@
-package org.pmiops.workbench.trackables;
+package org.pmiops.workbench.trackedproperties;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -13,7 +13,7 @@ import org.pmiops.workbench.model.Authority;
 // TODO(jaycarlton): make this an abstract class so that it's easier to ues for both writeable and readable
 //    properties
 public class MutableProperty<TARGET_TYPE, PROPERTY_TYPE>
-    implements TrackableProperty<TARGET_TYPE, PROPERTY_TYPE> {
+    implements TrackedProperty<TARGET_TYPE, PROPERTY_TYPE> {
 
   private final Set<Authority> requiredAuthorities;
   private final BiFunction<TARGET_TYPE, PROPERTY_TYPE, Boolean> validator;

@@ -1,13 +1,15 @@
-package org.pmiops.workbench.trackables;
+package org.pmiops.workbench.trackedproperties;
 
 import java.rmi.AccessException;
 import java.util.Collections;
 import java.util.Objects;
+import java.util.function.BiFunction;
 import javax.inject.Provider;
 import org.elasticsearch.common.Strings;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,27 +21,32 @@ public class UserPropertyServiceImpl implements UserPropertyService {
 //  private static class StringPropSetterBuilder extends PropertySetter.Builder<DbUser, String> {};
 
   private final Provider<DbUser> agentUserProvider;
-  private final PropertyProcessorService<DbUser, String> stringPropertyProcessor;
-  private final PropertyProcessorService<DbUser, Long> longPropertyProcessor;
+  private final PropertyProcessorService<DbUser, String> stringProcessor;
+  private final PropertyProcessorService<DbUser, DataAccessLevel> dataAccessLevelProcessor;
   private final PropertyProcessorService<DbUser, Boolean> booleanPropertyProcessor;
 
   private final UserDao userDao;
-  private final UserGivenNamePropertyService userGivenNamePropertyService;
-  private final TrackableProperty<DbUser, String> familyNameProperty;
-  private final TrackableProperty<DbUser, Boolean> isDisabledProperty;
+  private final UserGivenNamePropertyService userGivenNameProperty;
+  private final TrackedProperty<DbUser, String> familyNameProperty;
+  private final TrackedProperty<DbUser, Boolean> isDisabledProperty;
+  private final TrackedProperty<DbUser, DataAccessLevel> dataAccessLevelProperty;
 
   public UserPropertyServiceImpl(
       Provider<DbUser> agentUserProvider,
-      PropertyProcessorService<DbUser, String> stringPropertyProcessor,
-      PropertyProcessorService<DbUser, Long> longPropertyProcessor,
-      PropertyProcessorService<DbUser, Boolean> booleanPropertyProcessor,
+      PropertyProcessorService<DbUser, String> stringProcessor,
+      PropertyProcessorService<DbUser, DataAccessLevel> dataAccessLevelProcessor,
+      PropertyProcessorService<DbUser, Boolean> booleanProcessor,
       UserDao userDao,
-      UserGivenNamePropertyService userGivenNamePropertyService) {
+      UserGivenNamePropertyService userGivenNameProperty) {
     this.agentUserProvider = agentUserProvider;
-    this.stringPropertyProcessor = stringPropertyProcessor;
-    this.booleanPropertyProcessor = booleanPropertyProcessor;
+    this.stringProcessor = stringProcessor;
+    this.dataAccessLevelProcessor = dataAccessLevelProcessor;
+    this.booleanPropertyProcessor = booleanProcessor;
     this.userDao = userDao;
-    this.userGivenNamePropertyService = userGivenNamePropertyService;
+    this.userGivenNameProperty = userGivenNameProperty;
+
+    final BiFunction<DbUser, Boolean, Boolean> validateFunction = (t, prop) -> Objects
+        .nonNull(prop);
 
     this.familyNameProperty = MutableProperty.<DbUser, String>builder()
         .setGetterFunction(DbUser::getFamilyName)
@@ -47,27 +54,31 @@ public class UserPropertyServiceImpl implements UserPropertyService {
         .setCommitterFunction(userDao::save)
         .setValidateFunction(this::validateString)
         .build();
+    this.dataAccessLevelProperty = MutableProperty.<DbUser, DataAccessLevel>builder()
+        .setSetterFunction(DbUser::setDataAccessLevelEnum)
+        .setCommitterFunction()
+        .setRequiredAuthorities(Authority.ACCESS_CONTROL_ADMIN)
+        .setValidateFunction(validateFunction)
+    .build();
 
     this.isDisabledProperty = MutableProperty.<DbUser, Boolean>builder()
         .setGetterFunction(DbUser::getDisabled)
         .setSetterFunction(DbUser::setDisabled)
-        .setValidateFunction((t, prop) -> Objects.nonNull(prop))
+        .setValidateFunction(validateFunction)
         .setRequiredAuthorities(Collections.singleton(Authority.ACCESS_CONTROL_ADMIN))
         .build();
-    this.longPropertyProcessor = null;
   }
 
   @Override
-  public DbUser setGivenName(DbUser user, String newValue)
-      throws AccessException, IllegalAccessException {
-    return stringPropertyProcessor
-        .process(userGivenNamePropertyService, user, user, newValue);
+  public DbUser setGivenName(DbUser user, String newValue) {
+    return stringProcessor
+        .update(userGivenNameProperty, user, user, newValue);
   }
 
   @Override
   public DbUser setFamilyName(DbUser target, String newValue) {
     try {
-      return stringPropertyProcessor.process(
+      return stringProcessor.update(
           familyNameProperty,
           agentUserProvider.get(),
           target,
@@ -79,17 +90,27 @@ public class UserPropertyServiceImpl implements UserPropertyService {
   }
 
   @Override
-  public DbUser setDisabled(DbUser user, Boolean isDiisabled) {
+  public DbUser setDisabled(DbUser user, Boolean isDisabled) {
     try {
       return booleanPropertyProcessor
-          .process(isDisabledProperty, agentUserProvider.get(), user, isDiisabled);
+          .update(isDisabledProperty, agentUserProvider.get(), user, isDisabled);
     } catch (IllegalAccessException | AccessException e) {
       e.printStackTrace();
     }
     return user;
   }
 
-  private boolean validateString(DbUser targete, String value) {
+  @Override
+  public DbUser setDataAccessLevel(DbUser target, DataAccessLevel dataAccessLevel) {
+    try {
+      return dataAccessLevelProcessor.update(
+          dataAccessLevelProperty, agentUserProvider.get(), target, dataAccessLevel);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  private boolean validateString(DbUser target, String value) {
     return !Strings.isNullOrEmpty(value) && value.length() < 1024; // OR WHATEVER
   }
 }

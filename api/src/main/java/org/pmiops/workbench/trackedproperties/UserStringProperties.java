@@ -1,4 +1,4 @@
-package org.pmiops.workbench.trackables.domainobjects;
+package org.pmiops.workbench.trackedproperties;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.Collections;
@@ -8,9 +8,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.Authority;
-import org.pmiops.workbench.trackables.NotificationType;
-import org.pmiops.workbench.trackables.PropertyModifiability;
-import org.pmiops.workbench.trackables.TrackableProperty;
 import org.pmiops.workbench.utils.EmailAddressUtils;
 
 /**
@@ -18,7 +15,7 @@ import org.pmiops.workbench.utils.EmailAddressUtils;
  * multiplie properaty types.
  */
 @Deprecated
-public enum UserStringProperties implements TrackableProperty<DbUser, String> {
+public enum UserStringProperties implements TrackedProperty<DbUser, String> {
   CONTACT_EMAIL(
       "Contact Email",
       PropertyModifiability.USER_WRITEABLE,

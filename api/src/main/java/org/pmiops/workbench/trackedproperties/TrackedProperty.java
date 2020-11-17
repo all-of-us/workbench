@@ -1,4 +1,4 @@
-package org.pmiops.workbench.trackables;
+package org.pmiops.workbench.trackedproperties;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -8,7 +8,7 @@ import java.util.function.Function;
 import org.pmiops.workbench.model.Authority;
 
 
-public interface TrackableProperty<TARGET_T, PROPERTY_T> {
+public interface TrackedProperty<TARGET_T, PROPERTY_T> {
 
   PropertyModifiability getModifiability();
 
@@ -42,7 +42,8 @@ public interface TrackableProperty<TARGET_T, PROPERTY_T> {
   }
 
   default TARGET_T commit(TARGET_T uncommittedTarget) {
-    return getCommitter().apply(uncommittedTarget);
+    getCommitter().apply(uncommittedTarget);
+    return uncommittedTarget;
   }
 
   // Return true if the new value is a valid value for this target.

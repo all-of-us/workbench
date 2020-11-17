@@ -1,4 +1,4 @@
-package org.pmiops.workbench.trackables;
+package org.pmiops.workbench.trackedproperties;
 
 import com.google.common.base.Strings;
 import java.util.Optional;
@@ -11,9 +11,8 @@ import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.profile.ProfileMapper;
 import org.springframework.stereotype.Service;
 
-@Deprecated
 @Service
-public class UserGivenNamePropertyService implements TrackableProperty<DbUser, String> {
+public class UserGivenNamePropertyService implements TrackedProperty<DbUser, String> {
 
   private static final int MAX_NAME_LENGTH = 256;
   private final ProfileAuditor profileAuditor;

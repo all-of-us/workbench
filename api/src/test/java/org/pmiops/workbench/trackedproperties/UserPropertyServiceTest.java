@@ -1,10 +1,11 @@
-package org.pmiops.workbench.trackables;
+package org.pmiops.workbench.trackedproperties;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
 import java.rmi.AccessException;
+import java.time.Clock;
 import java.util.Collections;
 import javax.inject.Provider;
 import org.junit.Before;
@@ -16,6 +17,11 @@ import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.profile.AddressMapperImpl;
+import org.pmiops.workbench.profile.DemographicSurveyMapperImpl;
+import org.pmiops.workbench.profile.PageVisitMapperImpl;
+import org.pmiops.workbench.profile.ProfileMapperImpl;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -39,9 +45,17 @@ public class UserPropertyServiceTest {
 
   @TestConfiguration
   @Import({
+      AddressMapperImpl.class,
+      CommonMappers.class,
+      DemographicSurveyMapperImpl.class,
+      PageVisitMapperImpl.class,
+      ProfileMapperImpl.class,
       PropertyProcessorServiceImpl.class,
       UserGivenNamePropertyService.class,
       UserPropertyServiceImpl.class
+  })
+  @MockBean({
+      Clock.class
   })
   public static class config {
     @Bean
@@ -67,8 +81,9 @@ public class UserPropertyServiceTest {
   @Test
   public void testSetGivenName() throws IllegalAccessException, AccessException {
     final DbUser updated = userPropertyService.setGivenName(targetUser, "Fred");
-    assertThat(updated.getGivenName()).isEqualTo("Seatrix");
-    verify(mockProfileAuditor).fireUpdateAction(any(Profile.class), any(Profile.class));
+    assertThat(updated.getGivenName()).isEqualTo("Fred");
+    verify(mockProfileAuditor).fireUpdateAction(any(), any(Profile.class));
+    verify(mockProfileAuditor).fireUpdateAction(any(), any(Profile.class));
     verify(mockUserDao).save(any(DbUser.class));
   }
 }

@@ -1,12 +1,12 @@
-package org.pmiops.workbench.trackables;
+package org.pmiops.workbench.trackedproperties;
 
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import org.pmiops.workbench.model.Authority;
 
-public class ReadOnlyProperty<TARGET_TYPE, PROPERTY_TYPE> implements TrackableProperty<TARGET_TYPE, PROPERTY_TYPE>{
+public class ReadOnlyProperty<TARGET_TYPE, PROPERTY_TYPE> implements
+    TrackedProperty<TARGET_TYPE, PROPERTY_TYPE> {
 
   @Override
   public PropertyModifiability getModifiability() {
