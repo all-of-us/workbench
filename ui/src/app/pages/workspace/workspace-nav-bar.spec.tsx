@@ -61,10 +61,11 @@ describe('WorkspaceNavBarComponent', () => {
 
   it('should display the default CDR Version with no new version flag or upgrade modal visible', () => {
     const wrapper = component();
+
     expect(wrapper.find({'data-test-id': 'cdr-version'}).first().text())
         .toEqual(CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION);
 
-    expect(wrapper.find({'data-test-id': 'new-version-flag'}).exists()).toBeFalsy();
+    expect(wrapper.find({'data-test-id': 'new-version-flag-for-UT'}).exists()).toBeFalsy();
     expect(wrapper.find({'data-test-id': 'cdr-version-upgrade-modal'}).exists()).toBeFalsy();
   })
 
@@ -74,10 +75,11 @@ describe('WorkspaceNavBarComponent', () => {
     currentWorkspaceStore.next(altWorkspace);
 
     const wrapper = component();
+
     expect(wrapper.find({'data-test-id': 'cdr-version'}).first().text())
         .toEqual(CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION);
 
-    expect(wrapper.find({'data-test-id': 'new-version-flag'}).exists()).toBeTruthy();
+    expect(wrapper.find({'data-test-id': 'new-version-flag-for-UT'}).exists()).toBeTruthy();
     expect(wrapper.find({'data-test-id': 'cdr-version-upgrade-modal'}).exists()).toBeFalsy();
   })
 
@@ -90,7 +92,7 @@ describe('WorkspaceNavBarComponent', () => {
 
     expect(wrapper.find({'data-test-id': 'cdr-version-upgrade-modal'}).exists()).toBeFalsy();
 
-    const flag = wrapper.find({'data-test-id': 'new-version-flag'});
+    const flag = wrapper.find({'data-test-id': 'new-version-flag-for-UT'}).first();
     flag.simulate('click');
 
     expect(wrapper.find({'data-test-id': 'cdr-version-upgrade-modal'}).exists()).toBeTruthy();

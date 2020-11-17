@@ -94,7 +94,11 @@ const CdrVersion = (props: {workspace: Workspace, cdrVersionListResponse: CdrVer
       setUserHasDismissedAlert(localStorage.getItem(localStorageKey) === USER_DISMISSED_ALERT_VALUE)
   );
 
-  const NewVersionFlag = () => <div data-test-id='new-version-flag'><Clickable
+  // TODO reconcile these
+  // Enzyme testing with data-test-id requires a component with props
+  // puppeteer testing with data-test-id requires a rendered DOM element accessible by XPath
+
+  const NewVersionFlag = () => <div data-test-id='new-version-flag-for-e2e'><Clickable data-test-id='new-version-flag-for-UT'
       onClick={() => {
         localStorage.setItem(localStorageKey, USER_DISMISSED_ALERT_VALUE);
         setUserHasDismissedAlert(true);
