@@ -196,7 +196,7 @@ const computeStyle = ({style = {}, hover = {}, disabledStyle = {}}, {disabled}) 
 
 export const Clickable = ({as = 'div', disabled = false, onClick = null, propagateDataTestId = false, ...props}) => {
   // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
-  const childProps = propagateDataTestId ? props : fp.omit(['data-test-id'], props)
+  const childProps = propagateDataTestId ? props : fp.omit(['data-test-id'], props);
   return <Interactive
     as={as} {...childProps}
     onClick={(...args) => onClick && !disabled && onClick(...args)}
