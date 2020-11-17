@@ -9,18 +9,18 @@ import org.pmiops.workbench.model.Authority;
 import org.springframework.stereotype.Service;
 
 @Service
-public class TrackablePropertyProcessorServiceImpl<TARGET_T, PROPERTY_T>
+public class PropertyProcessorServiceImpl<TARGET_T, PROPERTY_T>
     implements PropertyProcessorService<TARGET_T, PROPERTY_T> {
 
   private final Provider<DbUser> userProvider;
 
-  public TrackablePropertyProcessorServiceImpl(Provider<DbUser> userProvider) {
+  public PropertyProcessorServiceImpl(Provider<DbUser> userProvider) {
     this.userProvider = userProvider;
   }
 
   // Do the needful steps in order.
   @Override
-  public <TARGET_T, PROPERTY_T> TARGET_T process(
+  public TARGET_T process(
       TrackableProperty<TARGET_T, PROPERTY_T> propertyService,
       DbUser agentUser,
       TARGET_T target,

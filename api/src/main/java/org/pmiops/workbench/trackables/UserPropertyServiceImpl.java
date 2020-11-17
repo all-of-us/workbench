@@ -19,7 +19,10 @@ public class UserPropertyServiceImpl implements UserPropertyService {
 //  private static class StringPropSetterBuilder extends PropertySetter.Builder<DbUser, String> {};
 
   private final Provider<DbUser> agentUserProvider;
-  private final PropertyProcessorService processor;
+  private final PropertyProcessorService<DbUser, String> stringPropertyProcessor;
+  private final PropertyProcessorService<DbUser, Long> longPropertyProcessor;
+  private final PropertyProcessorService<DbUser, Boolean> booleanPropertyProcessor;
+
   private final UserDao userDao;
   private final UserGivenNamePropertyService userGivenNamePropertyService;
   private final TrackableProperty<DbUser, String> familyNameProperty;
@@ -27,11 +30,14 @@ public class UserPropertyServiceImpl implements UserPropertyService {
 
   public UserPropertyServiceImpl(
       Provider<DbUser> agentUserProvider,
-      PropertyProcessorService<DbUser, String> processor,
+      PropertyProcessorService<DbUser, String> stringPropertyProcessor,
+      PropertyProcessorService<DbUser, Long> longPropertyProcessor,
+      PropertyProcessorService<DbUser, Boolean> booleanPropertyProcessor,
       UserDao userDao,
       UserGivenNamePropertyService userGivenNamePropertyService) {
     this.agentUserProvider = agentUserProvider;
-    this.processor = processor;
+    this.stringPropertyProcessor = stringPropertyProcessor;
+    this.booleanPropertyProcessor = booleanPropertyProcessor;
     this.userDao = userDao;
     this.userGivenNamePropertyService = userGivenNamePropertyService;
 
@@ -48,34 +54,25 @@ public class UserPropertyServiceImpl implements UserPropertyService {
         .setValidateFunction((t, prop) -> Objects.nonNull(prop))
         .setRequiredAuthorities(Collections.singleton(Authority.ACCESS_CONTROL_ADMIN))
         .build();
-
-    // Show bean and non-bean styles
-    // TODO: this map could itself be provided as a Bean, but really no other classes need these
-    //   instances of PropertySetter<>...
-//    this.labelToSetter = ImmutableMap.of(
-//        TrackedProperty.USER_GIVEN_NAME, userGivenNamePropertyService,
-//        TrackedProperty.USER_DISABLED, PropertySetter.<DbUser, String>builder()
-//        .setGetterFunction(DbUser::getFamilyName)
-//        .build());
+    this.longPropertyProcessor = null;
   }
 
   @Override
   public DbUser setGivenName(DbUser user, String newValue)
       throws AccessException, IllegalAccessException {
-    return processor.process(userGivenNamePropertyService, user, user, newValue);
+    return stringPropertyProcessor
+        .process(userGivenNamePropertyService, user, user, newValue);
   }
 
   @Override
   public DbUser setFamilyName(DbUser target, String newValue) {
     try {
-      return processor.process(
+      return stringPropertyProcessor.process(
           familyNameProperty,
-          target,
           agentUserProvider.get(),
+          target,
           newValue);
-    } catch (IllegalAccessException e) {
-      e.printStackTrace(); // FIXME
-    } catch (AccessException e) {
+    } catch (IllegalAccessException | AccessException e) {
       e.printStackTrace();
     }
     return target;
@@ -84,10 +81,9 @@ public class UserPropertyServiceImpl implements UserPropertyService {
   @Override
   public DbUser setDisabled(DbUser user, Boolean isDiisabled) {
     try {
-      return processor.process(isDisabledProperty, agentUserProvider.get(), user, isDiisabled);
-    } catch (IllegalAccessException e) {
-      e.printStackTrace();
-    } catch (AccessException e) {
+      return booleanPropertyProcessor
+          .process(isDisabledProperty, agentUserProvider.get(), user, isDiisabled);
+    } catch (IllegalAccessException | AccessException e) {
       e.printStackTrace();
     }
     return user;

@@ -13,30 +13,13 @@ import org.pmiops.workbench.model.Authority;
 // TODO(jaycarlton): make this an abstract class so that it's easier to ues for both writeable and readable
 //    properties
 public class MutableProperty<TARGET_TYPE, PROPERTY_TYPE>
-    extends AbstractTrackableProperty<TARGET_TYPE, PROPERTY_TYPE> {
+    implements TrackableProperty<TARGET_TYPE, PROPERTY_TYPE> {
 
-  @Override
-  public PropertyModifiability getModifiability() {
-    return PropertyModifiability.USER_WRITEABLE;
-  }
-
-  // TODO: am I just reimplementing Mockito now?
-  private Set<Authority> requiredAuthorities = Collections.emptySet();
-
-  private BiFunction<TARGET_TYPE, PROPERTY_TYPE, Boolean> validator =
-      (t, p) -> true;
-
-  // todo: try this with DbWorkspace dbWorkspace, FirecloudWorkspaceResponse firecloudWorkspaceResponse)
-  private Function<TARGET_TYPE, PROPERTY_TYPE> accessor = t -> null;
-
-  private BiFunction<TARGET_TYPE, PROPERTY_TYPE, TARGET_TYPE> mutator =
-      (t, p) -> t;
-  private Function<TARGET_TYPE, TARGET_TYPE> committerFunction =
-      t -> t;
-//
-//  public MutableProperty() {
-//    // default ctor to allow subclassing
-//  }
+  private final Set<Authority> requiredAuthorities;
+  private final BiFunction<TARGET_TYPE, PROPERTY_TYPE, Boolean> validator;
+  private final Function<TARGET_TYPE, PROPERTY_TYPE> accessor;
+  private final BiFunction<TARGET_TYPE, PROPERTY_TYPE, TARGET_TYPE> mutator;
+  private final Function<TARGET_TYPE, TARGET_TYPE> committerFunction;
 
   public MutableProperty(Set<Authority> requiredAuthorities,
       BiFunction<TARGET_TYPE, PROPERTY_TYPE, Boolean> validateFunction,
@@ -53,6 +36,11 @@ public class MutableProperty<TARGET_TYPE, PROPERTY_TYPE>
   @Override
   public Set<NotificationType> getNotificationTypes() {
     return null;
+  }
+
+  @Override
+  public PropertyModifiability getModifiability() {
+    return PropertyModifiability.USER_WRITEABLE;
   }
 
   @Override

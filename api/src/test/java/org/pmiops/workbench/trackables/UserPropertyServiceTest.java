@@ -39,7 +39,7 @@ public class UserPropertyServiceTest {
 
   @TestConfiguration
   @Import({
-      TrackablePropertyProcessorServiceImpl.class,
+      PropertyProcessorServiceImpl.class,
       UserGivenNamePropertyService.class,
       UserPropertyServiceImpl.class
   })
