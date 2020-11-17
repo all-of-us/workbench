@@ -13,9 +13,6 @@ import SnowmanMenu from 'app/component/snowman-menu';
 import {getPropValue} from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
 import BaseElement from 'app/element/base-element';
-import ClrIcon from 'app/element/clr-icon-link';
-import Button from 'app/element/button';
-import {config} from 'resources/workbench-config';
 
 export const UseFreeCredits = 'Use All of Us free credits';
 

@@ -6,6 +6,7 @@ import WorkspaceBase from 'app/page/workspace-base';
 import WorkspacesPage from 'app/page/workspaces-page';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import Navigation, {NavLink} from 'app/component/navigation';
+import CdrVersionUpgradeModal from 'app/page/cdr-version-upgrade-modal';
 
 describe('Workspace tests relating to CDR Versions', () => {
 
@@ -45,10 +46,11 @@ describe('Workspace tests relating to CDR Versions', () => {
         const newVersionFlag = await workspacePage.getNewCdrVersionFlag();
         await newVersionFlag.click();
 
-        await workspacePage.getCdrUpgradeModal();
+        const modal = new CdrVersionUpgradeModal(page);
+        expect(await modal.isLoaded()).toBe(true);
 
         // hit cancel
-        const cancelButton = await workspacePage.getCdrUpgradeModalCancelButton();
+        const cancelButton = await modal.getCancelButton();
         await cancelButton.click();
 
         // new version flag remains
@@ -67,9 +69,10 @@ describe('Workspace tests relating to CDR Versions', () => {
         const newVersionFlag = await workspacePage.getNewCdrVersionFlag();
         await newVersionFlag.click();
 
-        await workspacePage.getCdrUpgradeModal();
+        const modal = new CdrVersionUpgradeModal(page);
+        expect(await modal.isLoaded()).toBe(true);
 
-        const upgradeButton = await workspacePage.getCdrUpgradeButton();
+        const upgradeButton = await modal.getUpgradeButton();
         await upgradeButton.click();
 
         const duplicationPage = new WorkspaceEditPage(page);
