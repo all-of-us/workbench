@@ -111,9 +111,9 @@
     "useNewShibbolethService": true,
     "enableResearchPurposePrompt": false,
     "enableCohortBuilderV2": true,
-    "enableConceptSetSearchV2": false,
+    "enableConceptSetSearchV2": true,
     "enableReportingUploadCron": false,
-    "enableCOPESurvey": false,
+    "enableCOPESurvey": true,
     "enableCustomRuntimes": false,
     "enableFitbit": true
   },

@@ -110,7 +110,7 @@
     "enableCohortBuilderV2": true,
     "enableConceptSetSearchV2": true,
     "enableReportingUploadCron": true,
-    "enableCOPESurvey": false,
+    "enableCOPESurvey": true,
     "enableCustomRuntimes": false,
     "enableFitbit": true
   },
