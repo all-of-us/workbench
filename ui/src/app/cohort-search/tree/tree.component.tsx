@@ -63,6 +63,18 @@ const styles = reactStyles({
   }
 });
 
+const scrollbarCSS = `
+  .show-scrollbar::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 7px;
+  }
+  .show-scrollbar::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, .5);
+    box-shadow: 0 0 1px rgba(255, 255, 255, .5);
+  }
+`;
+
 interface Props {
   autocompleteSelection: any;
   back: Function;
@@ -229,6 +241,7 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
       setSearchTerms} = this.props;
     const {children, error, ingredients, loading} = this.state;
     return <React.Fragment>
+      <style>{scrollbarCSS}</style>
       {this.selectIconDisabled() && <div style={{color: colors.warning, fontWeight: 'bold', maxWidth: '1000px'}}>
         NOTE: Concept Set can have only 1000 concepts. Please delete some concepts before adding more.
       </div>}
@@ -254,7 +267,7 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
           <ClrIcon style={{color: colors.white}} className='is-solid' shape='exclamation-triangle' />
           Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation
         </div>}
-        <div style={this.showHeader ? styles.node : {...styles.node, border: 'none'}}>
+        <div style={this.showHeader ? styles.node : {...styles.node, border: 'none'}} className='show-scrollbar'>
         {!!children && children.map((child, c) => this.showNode(child) && <TreeNode key={c}
                                                             source={this.props.source}
                                                             autocompleteSelection={autocompleteSelection}
