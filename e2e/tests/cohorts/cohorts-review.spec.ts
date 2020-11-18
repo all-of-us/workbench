@@ -123,6 +123,7 @@ describe('Cohort review tests', () => {
     const annotationTextBoxName = await sidebarContent.getAnnotationsName();
     expect(annotationTextBoxName).toEqual(newAnnotationName);
 
+
     // navigate to review set page and check if the status column is displaying the review status for both participants
     await participantDetailPage.getBackToReviewSetButton().then(btn => btn.click());
     await waitWhileLoading(page);
@@ -138,6 +139,7 @@ describe('Cohort review tests', () => {
     const statusValue2 = await getPropValue<string>(statusCell2, 'textContent');
     expect(statusValue2).toEqual(participantStatus2);
     console.log(`${reviewParticipantid2}: ${statusValue2}`);
+
 
     // return to cohort review page
     await cohortReviewPage.getBackToCohortButton().then(btn => btn.clickAndWait());
