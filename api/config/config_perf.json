@@ -115,7 +115,7 @@
     "enableReportingUploadCron": false,
     "enableCOPESurvey": false,
     "enableCustomRuntimes": false,
-    "enableFitbit": false
+    "enableFitbit": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-perf",

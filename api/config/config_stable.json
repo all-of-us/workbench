@@ -112,7 +112,7 @@
     "enableReportingUploadCron": true,
     "enableCOPESurvey": false,
     "enableCustomRuntimes": false,
-    "enableFitbit": false
+    "enableFitbit": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-stable",
