@@ -60,20 +60,14 @@ public class CloudResourceManagerServiceImpl implements CloudResourceManagerServ
 
   private CloudResourceManager getCloudResourceManagerServiceWithImpersonation(DbUser user)
       throws IOException {
-    final OAuth2Credentials delegatedCreds;
-    if (configProvider.get().featureFlags.useKeylessDelegatedCredentials) {
-      delegatedCreds =
-          new DelegatedUserCredentials(
-              ServiceAccounts.getServiceAccountEmail(
-                  ADMIN_SERVICE_ACCOUNT_NAME, configProvider.get().server.projectId),
-              user.getUsername(),
-              SCOPES,
-              iamCredentialsClient,
-              httpTransport);
-    } else {
-      delegatedCreds =
-          credentialsProvider.get().createScoped(SCOPES).createDelegated(user.getUsername());
-    }
+    final OAuth2Credentials delegatedCreds =
+        new DelegatedUserCredentials(
+            ServiceAccounts.getServiceAccountEmail(
+                ADMIN_SERVICE_ACCOUNT_NAME, configProvider.get().server.projectId),
+            user.getUsername(),
+            SCOPES,
+            iamCredentialsClient,
+            httpTransport);
     delegatedCreds.refreshIfExpired();
 
     return new Builder(

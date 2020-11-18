@@ -151,23 +151,14 @@ public class FireCloudServiceImpl implements FireCloudService {
    * @return
    */
   public ApiClient getApiClientWithImpersonation(String userEmail) throws IOException {
-    final OAuth2Credentials delegatedCreds;
-    if (configProvider.get().featureFlags.useKeylessDelegatedCredentials) {
-      delegatedCreds =
-          new DelegatedUserCredentials(
-              ServiceAccounts.getServiceAccountEmail(
-                  ADMIN_SERVICE_ACCOUNT_NAME, configProvider.get().server.projectId),
-              userEmail,
-              FIRECLOUD_API_OAUTH_SCOPES,
-              iamCredentialsClient,
-              httpTransport);
-    } else {
-      delegatedCreds =
-          fcAdminCredsProvider
-              .get()
-              .createScoped(FIRECLOUD_API_OAUTH_SCOPES)
-              .createDelegated(userEmail);
-    }
+    final OAuth2Credentials delegatedCreds =
+        new DelegatedUserCredentials(
+            ServiceAccounts.getServiceAccountEmail(
+                ADMIN_SERVICE_ACCOUNT_NAME, configProvider.get().server.projectId),
+            userEmail,
+            FIRECLOUD_API_OAUTH_SCOPES,
+            iamCredentialsClient,
+            httpTransport);
     delegatedCreds.refreshIfExpired();
 
     ApiClient apiClient = FireCloudConfig.buildApiClient(configProvider.get());

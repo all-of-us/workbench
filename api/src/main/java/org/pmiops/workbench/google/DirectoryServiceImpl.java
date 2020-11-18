@@ -114,23 +114,14 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
   }
 
   private Directory getGoogleDirectoryService() {
-    final OAuth2Credentials delegatedCreds;
-    if (configProvider.get().featureFlags.useKeylessDelegatedCredentials) {
-      delegatedCreds =
-          new DelegatedUserCredentials(
-              ServiceAccounts.getServiceAccountEmail(
-                  ADMIN_SERVICE_ACCOUNT_NAME, configProvider.get().server.projectId),
-              DIRECTORY_SERVICE_USERNAME + "@" + gSuiteDomain(),
-              SCOPES,
-              iamCredentialsClient,
-              httpTransport);
-    } else {
-      delegatedCreds =
-          googleCredentialsProvider
-              .get()
-              .createScoped(SCOPES)
-              .createDelegated("directory-service@" + gSuiteDomain());
-    }
+    final OAuth2Credentials delegatedCreds =
+        new DelegatedUserCredentials(
+            ServiceAccounts.getServiceAccountEmail(
+                ADMIN_SERVICE_ACCOUNT_NAME, configProvider.get().server.projectId),
+            DIRECTORY_SERVICE_USERNAME + "@" + gSuiteDomain(),
+            SCOPES,
+            iamCredentialsClient,
+            httpTransport);
 
     return new Directory.Builder(
             httpTransport, getDefaultJsonFactory(), new HttpCredentialsAdapter(delegatedCreds))
