@@ -747,7 +747,7 @@ export const RuntimePanel = fp.flow(
     return runtimeRequest;
   };
 
-  function renderUpdateButton() {
+  const renderUpdateButton = () => {
     return <Button
       aria-label='Update'
       disabled={
@@ -762,9 +762,9 @@ export const RuntimePanel = fp.flow(
       }}>
       Update
     </Button>;
-  }
+  };
 
-  function renderCreateButton() {
+  const renderCreateButton = () => {
     return <Button
       aria-label='Create'
       onClick={() => {
@@ -772,9 +772,9 @@ export const RuntimePanel = fp.flow(
       }}>
       Create
     </Button>;
-  }
+  };
 
-  function renderNextButton() {
+  const renderNextButton = () => {
     return <Button
       aria-label='Next'
       onClick={() => {
@@ -782,9 +782,9 @@ export const RuntimePanel = fp.flow(
       }}>
       Next
     </Button>;
-  }
+  };
 
-  function renderConfirmUpdate() {
+  const renderConfirmUpdate = () => {
     return <React.Fragment>
       <div style={styles.controlSection}>
         <h3 style={{...styles.baseHeader, ...styles.sectionHeader, marginTop: '.1rem', marginBottom: '.2rem'}}>Editing your environment</h3>
@@ -926,7 +926,7 @@ export const RuntimePanel = fp.flow(
        </div>
        {runtimeExists && runtimeChanged &&
          <WarningMessage>
-            <div>You've made changes that require recreating your environment to take effect.....</div>
+            <div>You've made changes that require recreating your environment to take effect.</div>
          </WarningMessage>
        }
        <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>

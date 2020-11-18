@@ -83,7 +83,7 @@ export interface LeoRuntimeInitializerOptions {
   maxResumeCount?: number;
   maxServerErrorCount?: number;
   targetRuntime?: Runtime;
-  resolutionCond?: (Runtime) => boolean;
+  resolutionCondition?: (Runtime) => boolean;
 }
 
 const DEFAULT_OPTIONS: Partial<LeoRuntimeInitializerOptions> = {
@@ -96,7 +96,7 @@ const DEFAULT_OPTIONS: Partial<LeoRuntimeInitializerOptions> = {
   maxResumeCount: DEFAULT_MAX_RESUME_COUNT,
   maxServerErrorCount: DEFAULT_MAX_SERVER_ERROR_COUNT,
   targetRuntime: DEFAULT_RUNTIME_CONFIG,
-  resolutionCond: (runtime) => runtime.status === RuntimeStatus.Running
+  resolutionCondition: (runtime) => runtime.status === RuntimeStatus.Running
 };
 
 
@@ -121,7 +121,7 @@ export class LeoRuntimeInitializer {
   private readonly workspaceNamespace: string;
   private readonly onPoll: (Runtime?) => void;
   private readonly pollAbortSignal?: AbortSignal;
-  private readonly resolutionCond: (Runtime) => boolean;
+  private readonly resolutionCondition: (Runtime) => boolean;
 
   // Properties to track & control the polling loop. We use a capped exponential backoff strategy
   // and a series of "maxFoo" limits to ensure the initialization flow doesn't get out of control.
@@ -188,7 +188,7 @@ export class LeoRuntimeInitializer {
     this.maxResumeCount = options.maxResumeCount;
     this.maxServerErrorCount = options.maxServerErrorCount;
     this.targetRuntime = options.targetRuntime;
-    this.resolutionCond = options.resolutionCond;
+    this.resolutionCondition = options.resolutionCondition;
   }
 
   private async createRuntime(): Promise<void> {
@@ -232,7 +232,7 @@ export class LeoRuntimeInitializer {
   }
 
   private reachedResolution(): boolean {
-    return this.currentRuntime && this.resolutionCond(this.currentRuntime);
+    return this.currentRuntime && this.resolutionCondition(this.currentRuntime);
   }
 
   private isRuntimeDeleted(): boolean {

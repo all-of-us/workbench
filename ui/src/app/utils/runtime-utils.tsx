@@ -34,41 +34,41 @@ export interface RuntimeConfig {
   dataprocConfig: DataprocConfig;
 }
 
-function compareComputeTypes(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff {
+const compareComputeTypes = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff => {
   return {
-    desc: 'Change Compute Type',
+    desc: 'Change compute type',
     previous: oldRuntime.computeType,
     new: newRuntime.computeType,
     differenceType: oldRuntime.computeType === newRuntime.computeType ?
       RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE
   };
-}
+};
 
-function compareMachineCpu(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff {
+const compareMachineCpu = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff => {
   const oldCpu = oldRuntime.machine.cpu;
   const newCpu = newRuntime.machine.cpu;
 
   return {
-    desc: (newCpu < oldCpu ?  'Decrease' : 'Increase') + ' Number of CPUs',
+    desc: (newCpu < oldCpu ?  'Decrease' : 'Increase') + ' number of CPUs',
     previous: oldCpu.toString(),
     new: newCpu.toString(),
     differenceType: oldCpu === newCpu ? RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE
   };
-}
+};
 
-function compareMachineMemory(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff {
+const compareMachineMemory = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff => {
   const oldMemory = oldRuntime.machine.memory;
   const newMemory = newRuntime.machine.memory;
 
   return {
-    desc: (newMemory < oldMemory ?  'Decrease' : 'Increase') + ' Memory',
+    desc: (newMemory < oldMemory ?  'Decrease' : 'Increase') + ' memory',
     previous: oldMemory.toString() + ' GB',
     new: newMemory.toString() + ' GB',
     differenceType: oldMemory === newMemory ? RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE
   };
-}
+};
 
-function compareDiskSize(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff {
+const compareDiskSize = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff => {
   let desc = 'Disk Size';
   let diffType;
 
@@ -88,38 +88,9 @@ function compareDiskSize(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): 
     new: newRuntime.diskSize.toString() + ' GB',
     differenceType: diffType
   };
-}
+};
 
-function compareDataprocMasterDiskSize(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff {
-  if (oldRuntime.dataprocConfig === null || newRuntime.dataprocConfig === null) {
-    return null;
-  }
-
-  const oldDiskSize = oldRuntime.dataprocConfig.masterDiskSize || 0;
-  const newDiskSize = newRuntime.dataprocConfig.masterDiskSize || 0;
-
-  let desc = 'Dataproc Master Machine Disk Size';
-  let diffType;
-
-  if (newDiskSize < oldDiskSize) {
-    desc = 'Decease ' + desc;
-    diffType = RuntimeDiffState.NEEDS_DELETE;
-  } else if (newDiskSize > oldDiskSize) {
-    desc = 'Increase ' + desc;
-    diffType = RuntimeDiffState.CAN_UPDATE;
-  } else {
-    diffType = RuntimeDiffState.NO_CHANGE;
-  }
-
-  return {
-    desc: desc,
-    previous: oldDiskSize.toString() + ' GB',
-    new: newDiskSize.toString() + ' GB',
-    differenceType: diffType
-  };
-}
-
-function compareWorkerCpu(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff {
+const compareWorkerCpu = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff => {
   if (!oldRuntime.dataprocConfig || !newRuntime.dataprocConfig) {
     return null;
   }
@@ -128,14 +99,14 @@ function compareWorkerCpu(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig):
   const newCpu = findMachineByName(newRuntime.dataprocConfig.workerMachineType).cpu;
 
   return {
-    desc: (newCpu < oldCpu ?  'Decrease' : 'Increase') + ' Number of CPUs',
+    desc: (newCpu < oldCpu ?  'Decrease' : 'Increase') + ' number of CPUs',
     previous: oldCpu.toString(),
     new: newCpu.toString(),
     differenceType: oldCpu === newCpu ? RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE
   };
-}
+};
 
-function compareWorkerMemory(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff {
+const compareWorkerMemory = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff => {
   if (!oldRuntime.dataprocConfig || !newRuntime.dataprocConfig) {
     return null;
   }
@@ -144,15 +115,14 @@ function compareWorkerMemory(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfi
   const newMemory = findMachineByName(newRuntime.dataprocConfig.workerMachineType).memory;
 
   return {
-    desc: (newMemory < oldMemory ?  'Decrease' : 'Increase') + ' Memory',
+    desc: (newMemory < oldMemory ?  'Decrease' : 'Increase') + ' memory',
     previous: oldMemory.toString() + ' GB',
     new: newMemory.toString() + ' GB',
     differenceType: oldMemory === newMemory ? RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE
   };
-}
+};
 
-
-function compareDataprocWorkerDiskSize(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff {
+const compareDataprocWorkerDiskSize = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff => {
   if (oldRuntime.dataprocConfig === null || newRuntime.dataprocConfig === null) {
     return null;
   }
@@ -161,15 +131,15 @@ function compareDataprocWorkerDiskSize(oldRuntime: RuntimeConfig, newRuntime: Ru
   const newDiskSize = newRuntime.dataprocConfig.workerDiskSize || 0;
 
   return {
-    desc: (newDiskSize < oldDiskSize ?  'Decrease' : 'Increase') + ' Change Worker Machine Type',
+    desc: (newDiskSize < oldDiskSize ?  'Decrease' : 'Increase') + ' worker disk size',
     previous: oldDiskSize.toString() + ' GB',
     new: newDiskSize.toString() + ' GB',
     differenceType: oldDiskSize === newDiskSize ?
       RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE
   };
-}
+};
 
-function compareDataprocNumberOfPreemptibleWorkers(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff {
+const compareDataprocNumberOfPreemptibleWorkers = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff => {
   if (oldRuntime.dataprocConfig === null || newRuntime.dataprocConfig === null) {
     return null;
   }
@@ -178,15 +148,15 @@ function compareDataprocNumberOfPreemptibleWorkers(oldRuntime: RuntimeConfig, ne
   const newNumWorkers = newRuntime.dataprocConfig.numberOfPreemptibleWorkers || 0;
 
   return {
-    desc: (newNumWorkers < oldNumWorkers ?  'Decrease' : 'Increase') + ' Number of Preemptible Workers',
+    desc: (newNumWorkers < oldNumWorkers ?  'Decrease' : 'Increase') + ' number of preemptible workers',
     previous: oldNumWorkers.toString(),
     new: newNumWorkers.toString(),
     differenceType: oldNumWorkers === newNumWorkers ?
       RuntimeDiffState.NO_CHANGE : RuntimeDiffState.CAN_UPDATE
   };
-}
+};
 
-function compareDataprocNumberOfWorkers(oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff {
+const compareDataprocNumberOfWorkers = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff => {
   if (oldRuntime.dataprocConfig === null || newRuntime.dataprocConfig === null) {
     return null;
   }
@@ -195,29 +165,38 @@ function compareDataprocNumberOfWorkers(oldRuntime: RuntimeConfig, newRuntime: R
   const newNumWorkers = newRuntime.dataprocConfig.numberOfWorkers || 0;
 
   return {
-    desc: (newNumWorkers < oldNumWorkers ?  'Decrease' : 'Increase') + ' Number of Workers',
+    desc: (newNumWorkers < oldNumWorkers ?  'Decrease' : 'Increase') + ' number of workers',
     previous: oldNumWorkers.toString(),
     new: newNumWorkers.toString(),
     differenceType: oldNumWorkers === newNumWorkers ?
       RuntimeDiffState.NO_CHANGE : RuntimeDiffState.CAN_UPDATE
   };
-}
+};
 
-export const getRuntimeConfigDiffs = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff[] => {
-  const compareFns = [compareComputeTypes, compareDiskSize, compareMachineCpu,
-    compareMachineMemory, compareDataprocMasterDiskSize, compareWorkerCpu, compareWorkerMemory,
-    compareDataprocNumberOfPreemptibleWorkers, compareDataprocNumberOfWorkers, compareDataprocWorkerDiskSize];
-
-  return compareFns.map(compareFn => compareFn(oldRuntime, newRuntime))
+const compareDataprocConfig = (oldRuntime, newRuntime) => {
+  return [compareWorkerCpu, compareWorkerMemory, compareDataprocWorkerDiskSize,
+    compareDataprocNumberOfPreemptibleWorkers, compareDataprocNumberOfWorkers]
+    .map(compareFn => compareFn(oldRuntime, newRuntime))
     .filter(diff => diff !== null)
     .filter(diff => diff.differenceType !== RuntimeDiffState.NO_CHANGE);
 };
 
-function getRuntimeDiffs(oldRuntime: Runtime, newRuntime: Runtime): RuntimeDiff[] {
-  return getRuntimeConfigDiffs(toRuntimeConfig(oldRuntime), toRuntimeConfig(newRuntime));
-}
+const compareMachineConfig = (oldRuntime, newRuntime) => {
+  return [compareComputeTypes, compareMachineCpu, compareMachineMemory, compareDiskSize]
+    .map(compareFn => compareFn(oldRuntime, newRuntime))
+    .filter(diff => diff !== null)
+    .filter(diff => diff.differenceType !== RuntimeDiffState.NO_CHANGE);
+};
 
-function toRuntimeConfig(runtime: Runtime): RuntimeConfig {
+export const getRuntimeConfigDiffs = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff[] => {
+  return compareDataprocConfig(oldRuntime, newRuntime).concat(compareMachineConfig(oldRuntime, newRuntime));
+};
+
+const getRuntimeDiffs = (oldRuntime: Runtime, newRuntime: Runtime): RuntimeDiff[] => {
+  return getRuntimeConfigDiffs(toRuntimeConfig(oldRuntime), toRuntimeConfig(newRuntime));
+};
+
+const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
   if (runtime.gceConfig) {
     return {
       computeType: ComputeType.Standard,
@@ -233,7 +212,7 @@ function toRuntimeConfig(runtime: Runtime): RuntimeConfig {
       dataprocConfig: runtime.dataprocConfig
     };
   }
-}
+};
 
 // useRuntime hook is a simple hook to populate the runtime store.
 // This is only used by other runtime hooks
@@ -362,7 +341,7 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
               await LeoRuntimeInitializer.initialize({
                 workspaceNamespace,
                 targetRuntime: requestedRuntime,
-                resolutionCond: r => r.status !== RuntimeStatus.Running,
+                resolutionCondition: r => r.status !== RuntimeStatus.Running,
                 pollAbortSignal: aborter.signal
               });
             }
@@ -397,7 +376,6 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
 
   return [{currentRuntime: runtime, pendingRuntime}, setRequestedRuntime];
 };
-
 
 export const withRuntimeStore = () => WrappedComponent => {
   return (props) => {

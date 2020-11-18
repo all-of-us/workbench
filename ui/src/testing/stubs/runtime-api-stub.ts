@@ -9,12 +9,12 @@ import {
 } from 'generated/fetch';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
-export const mockGceConfig: GceConfig = {
+export const defaultGceConfig = (): GceConfig => ({
   diskSize: 80,
   machineType: 'n1-standard-4'
-};
+});
 
-export const mockDataprocConfig: DataprocConfig = {
+export const defaultDataprocConfig = (): DataprocConfig => ({
   masterMachineType: 'n1-standard-4',
   masterDiskSize: 80,
   workerDiskSize: 40,
@@ -22,7 +22,7 @@ export const mockDataprocConfig: DataprocConfig = {
   numberOfWorkers: 1,
   numberOfPreemptibleWorkers: 2,
   numberOfWorkerLocalSSDs: 0
-};
+});
 
 export const defaultRuntime = () => ({
   runtimeName: 'Runtime Name',
@@ -31,7 +31,7 @@ export const defaultRuntime = () => ({
   createdDate: '08/08/2018',
   toolDockerImage: 'broadinstitute/terra-jupyter-aou:1.0.999',
   configurationType: RuntimeConfigurationType.GeneralAnalysis,
-  gceConfig: mockGceConfig
+  gceConfig: defaultGceConfig()
 });
 
 export class RuntimeApiStub extends RuntimeApi {
@@ -64,6 +64,8 @@ export class RuntimeApiStub extends RuntimeApi {
 
   updateRuntime(workspaceNamespace: string, options?: any): Promise<{}> {
     return new Promise<{}>(resolve => {
+      // Setting it to Running doesn't really make sense but it reflects
+      // what is currently happening in the product.
       this.runtime.status = RuntimeStatus.Running;
       resolve({});
     });

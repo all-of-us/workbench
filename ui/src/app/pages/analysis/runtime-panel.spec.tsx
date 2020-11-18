@@ -16,7 +16,7 @@ import {RuntimeApi} from 'generated/fetch/api';
 import defaultServerConfig from 'testing/default-server-config';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {cdrVersionListResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
-import {mockDataprocConfig, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
+import {defaultDataprocConfig, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {WorkspacesApiStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
 
 describe('RuntimePanel', () => {
@@ -63,11 +63,11 @@ describe('RuntimePanel', () => {
   };
 
   const pickDropdownOption = async(wrapper, id, label) => {
-    wrapper.find(id).first().simulate('click')
-    const item = wrapper.find(`${id} .p-dropdown-item`).find({'aria-label': label}).first()
+    wrapper.find(id).first().simulate('click');
+    const item = wrapper.find(`${id} .p-dropdown-item`).find({'aria-label': label}).first();
     expect(item.exists()).toBeTruthy();
 
-    item.simulate('click')
+    item.simulate('click');
 
     // In some cases, picking an option may require some waiting, e.g. for
     // rerendering of RAM options based on CPU selection.
@@ -78,9 +78,10 @@ describe('RuntimePanel', () => {
     return wrapper.find(id).first().prop('value');
   };
 
-  const enterNumberInput = (wrapper, id, value) => {
+  const enterNumberInput = async(wrapper, id, value) => {
     // TODO: Find a way to invoke this without props.
-    act(() => { wrapper.find(id).first().prop('onChange')({value} as any)});
+    act(() => {wrapper.find(id).first().prop('onChange')({value} as any);});
+    await waitOneTickAndUpdate(wrapper);
   };
 
   const getMainCpu = (wrapper) => getDropdownOption(wrapper, '#runtime-cpu');
@@ -106,8 +107,8 @@ describe('RuntimePanel', () => {
   const getNumWorkers = (wrapper) => getNumberInput(wrapper, '#num-workers');
   const pickNumWorkers = (wrapper, n) => enterNumberInput(wrapper, '#num-workers', n);
 
+  const getNumPreemptibleWorkers = (wrapper) => getNumberInput(wrapper, '#num-preemptible');
   const pickNumPreemptibleWorkers = (wrapper, n) => enterNumberInput(wrapper, '#num-preemptible', n);
-  const getNumPreemptibleWorkers = (wrapper) => getNumberInput(wrapper,'#num-preemptible');
 
   const pickPreset = async(wrapper, {displayName}) => {
     wrapper.find({'data-test-id': 'runtime-presets-menu'}).first().simulate('click');
@@ -115,16 +116,8 @@ describe('RuntimePanel', () => {
     await waitOneTickAndUpdate(wrapper);
   };
 
-  const mustClickCustomizeButton = async(wrapper) => {
-    const customizeButton = wrapper.find(Button).find({'aria-label': 'Customize'}).first();
-    expect(customizeButton.exists()).toBeTruthy();
-
-    customizeButton.simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-  }
-
-  const mustClickCreateButton = async(wrapper) => {
-    const createButton = wrapper.find(Button).find({'aria-label': 'Create'}).first();
+  const mustClickButton = async(wrapper, label) => {
+    const createButton = wrapper.find(Button).find({'aria-label': label}).first();
     expect(createButton.exists()).toBeTruthy();
     expect(createButton.prop('disabled')).toBeFalsy();
 
@@ -162,7 +155,7 @@ describe('RuntimePanel', () => {
 
     const wrapper = await component();
 
-    await mustClickCreateButton(wrapper);
+    await mustClickButton(wrapper, 'Create');
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
     expect(runtimeApiStub.runtime.gceConfig.machineType).toEqual('n1-standard-4');
@@ -174,14 +167,13 @@ describe('RuntimePanel', () => {
 
     const wrapper = await component();
 
-    await mustClickCustomizeButton(wrapper);
-    await waitOneTickAndUpdate(wrapper);
+    await mustClickButton(wrapper, 'Customize');
 
     await pickMainCpu(wrapper, 8);
     await pickMainRam(wrapper, 52);
     await pickMainDiskSize(wrapper, 75);
 
-    await mustClickCreateButton(wrapper);
+    await mustClickButton(wrapper, 'Create');
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
     expect(runtimeApiStub.runtime.configurationType)
@@ -199,23 +191,23 @@ describe('RuntimePanel', () => {
 
     const wrapper = await component();
 
-    await mustClickCustomizeButton(wrapper);
+    await mustClickButton(wrapper, 'Customize');
 
     // master settings
     await pickMainCpu(wrapper, 2);
     await pickMainRam(wrapper, 7.5);
-    pickMainDiskSize(wrapper, 100);
+    await pickMainDiskSize(wrapper, 100);
 
     await pickComputeType(wrapper, ComputeType.Dataproc);
 
     // worker settings
     await pickWorkerCpu(wrapper, 8);
     await pickWorkerRam(wrapper, 30);
-    pickWorkerDiskSize(wrapper, 300);
-    pickNumWorkers(wrapper, 10);
-    pickNumPreemptibleWorkers(wrapper, 20);
+    await pickWorkerDiskSize(wrapper, 300);
+    await pickNumWorkers(wrapper, 10);
+    await pickNumPreemptibleWorkers(wrapper, 20);
 
-    await mustClickCreateButton(wrapper);
+    await mustClickButton(wrapper, 'Create');
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
     expect(runtimeApiStub.runtime.configurationType)
@@ -237,16 +229,16 @@ describe('RuntimePanel', () => {
 
     const wrapper = await component();
 
-    await mustClickCustomizeButton(wrapper);
+    await mustClickButton(wrapper, 'Customize');
 
     // Ensure set the form to something non-standard to start
     await pickMainCpu(wrapper, 8);
-    pickMainDiskSize(wrapper, 75);
+    await pickMainDiskSize(wrapper, 75);
     await pickComputeType(wrapper, ComputeType.Dataproc);
 
     await pickPreset(wrapper, runtimePresets.generalAnalysis);
 
-    await mustClickCreateButton(wrapper);
+    await mustClickButton(wrapper, 'Create');
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
     expect(runtimeApiStub.runtime.configurationType)
@@ -262,11 +254,11 @@ describe('RuntimePanel', () => {
 
     const wrapper = await component();
 
-    await mustClickCustomizeButton(wrapper);
+    await mustClickButton(wrapper, 'Customize');
 
     await pickPreset(wrapper, runtimePresets.hailAnalysis);
 
-    await mustClickCreateButton(wrapper);
+    await mustClickButton(wrapper, 'Create');
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
     expect(runtimeApiStub.runtime.configurationType)
@@ -282,23 +274,23 @@ describe('RuntimePanel', () => {
 
     const wrapper = await component();
 
-    await mustClickCustomizeButton(wrapper);
+    await mustClickButton(wrapper, 'Customize');
 
     // Configure the form - we expect all of the changes to be overwritten by
     // the Hail preset selection.
     await pickMainCpu(wrapper, 2);
     await pickMainRam(wrapper, 7.5);
-    pickMainDiskSize(wrapper, 100);
+    await pickMainDiskSize(wrapper, 100);
     await pickComputeType(wrapper, ComputeType.Dataproc);
     await pickWorkerCpu(wrapper, 8);
     await pickWorkerRam(wrapper, 30);
-    pickWorkerDiskSize(wrapper, 300);
-    pickNumWorkers(wrapper, 10);
-    pickNumPreemptibleWorkers(wrapper, 20);
+    await pickWorkerDiskSize(wrapper, 300);
+    await pickNumWorkers(wrapper, 10);
+    await pickNumPreemptibleWorkers(wrapper, 20);
 
     await pickPreset(wrapper, runtimePresets.hailAnalysis);
 
-    await mustClickCreateButton(wrapper);
+    await mustClickButton(wrapper, 'Create');
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
     expect(runtimeApiStub.runtime.configurationType)
@@ -314,13 +306,13 @@ describe('RuntimePanel', () => {
 
     const wrapper = await component();
 
-    await mustClickCustomizeButton(wrapper);
+    await mustClickButton(wrapper, 'Customize');
 
     // Take the preset but make a solitary modification.
     await pickPreset(wrapper, runtimePresets.hailAnalysis);
-    pickNumPreemptibleWorkers(wrapper, 20);
+    await pickNumPreemptibleWorkers(wrapper, 20);
 
-    await mustClickCreateButton(wrapper);
+    await mustClickButton(wrapper, 'Create');
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
     expect(runtimeApiStub.runtime.configurationType)
@@ -332,17 +324,15 @@ describe('RuntimePanel', () => {
     act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
 
     const wrapper = await component();
-    await mustClickCustomizeButton(wrapper);
+    await mustClickButton(wrapper, 'Customize');
 
     // Take the preset, make a change, then revert.
     await pickPreset(wrapper, runtimePresets.generalAnalysis);
     await pickComputeType(wrapper, ComputeType.Dataproc);
-    await waitOneTickAndUpdate(wrapper);
     await pickWorkerCpu(wrapper, 2);
     await pickComputeType(wrapper, ComputeType.Standard);
-    await waitOneTickAndUpdate(wrapper);
 
-    await mustClickCreateButton(wrapper);
+    await mustClickButton(wrapper, 'Create');
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
     expect(runtimeApiStub.runtime.configurationType)
@@ -373,30 +363,27 @@ describe('RuntimePanel', () => {
     const wrapper = await component();
 
     await pickMainDiskSize(wrapper, getMainDiskSize(wrapper) + 10);
-    await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find(Button).find({'aria-label': 'Update'}).first().prop('disabled')).toBeFalsy();
   });
 
   it('should enable the Update button if there are updates that do not require delete and runtime is running - number of workers', async() => {
-    const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: mockDataprocConfig, configurationType: RuntimeConfigurationType.UserOverride};
+    const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: defaultDataprocConfig(), configurationType: RuntimeConfigurationType.UserOverride};
     act(() => {runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace}); });
 
     const wrapper = await component();
 
     await pickNumWorkers(wrapper, getNumWorkers(wrapper) + 2);
-    await waitOneTickAndUpdate(wrapper);
 
     expect(wrapper.find(Button).find({'aria-label': 'Update'}).first().prop('disabled')).toBeFalsy();
   });
 
   it('should enable the Update button if there are updates that do not require delete and runtime is running - number of preemptible workers', async() => {
-    const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: mockDataprocConfig};
+    const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: defaultDataprocConfig()};
     runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
 
     const wrapper = await component();
 
     await pickNumPreemptibleWorkers(wrapper, getNumPreemptibleWorkers(wrapper) + 2);
-    await waitOneTickAndUpdate(wrapper);
 
     expect(wrapper.find(Button).find({'aria-label': 'Update'}).first().prop('disabled')).toBeFalsy();
   });
@@ -430,13 +417,12 @@ describe('RuntimePanel', () => {
     const wrapper = await component();
 
     await pickMainDiskSize(wrapper, getMainDiskSize(wrapper) - 5);
-    await waitOneTickAndUpdate(wrapper);
 
     expect(wrapper.find(Button).find({'aria-label': 'Next'}).first().prop('disabled')).toBeFalsy();
   });
 
   it('should render the Next button if there are updates that require delete and runtime is running - Worker CPU', async() => {
-    const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: mockDataprocConfig};
+    const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: defaultDataprocConfig()};
     runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
 
     const wrapper = await component();
@@ -448,31 +434,29 @@ describe('RuntimePanel', () => {
   });
 
   it('should render the Next button if there are updates that require delete and runtime is running - Worker RAM', async() => {
-    const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: mockDataprocConfig};
+    const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: defaultDataprocConfig()};
     runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
 
     const wrapper = await component();
 
     // 15 -> 26
     await pickWorkerRam(wrapper, 26);
-    await waitOneTickAndUpdate(wrapper);
 
     expect(wrapper.find(Button).find({'aria-label': 'Next'}).first().prop('disabled')).toBeFalsy();
   });
 
   it('should render the Next button if there are updates that require delete and runtime is running - Worker Disk', async() => {
-    const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: mockDataprocConfig};
+    const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: defaultDataprocConfig()};
     runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
 
     const wrapper = await component();
     await pickWorkerDiskSize(wrapper, getWorkerDiskSize(wrapper) + 10);
-    await waitOneTickAndUpdate(wrapper);
 
     expect(wrapper.find(Button).find({'aria-label': 'Next'}).first().prop('disabled')).toBeFalsy();
   });
 
-  it('hitting cancel from the Confirm panel should revert to the edit panel without losing inputs', async() => {
-    const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: mockDataprocConfig};
+  it('should retain original inputs when hitting cancel from the Confirm panel', async() => {
+    const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: defaultDataprocConfig()};
     runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
 
     const wrapper = await component();
@@ -507,7 +491,7 @@ describe('RuntimePanel', () => {
   });
 
   it('should disable Update button if Runtime is in between states', async() => {
-    const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: mockDataprocConfig, status: RuntimeStatus.Creating};
+    const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: defaultDataprocConfig(), status: RuntimeStatus.Creating};
     runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
 
     const wrapper = await component();
@@ -524,10 +508,7 @@ describe('RuntimePanel', () => {
 
     await pickMainDiskSize(wrapper, getMainDiskSize(wrapper) + 20);
 
-    act(() => {
-      wrapper.find(Button).find({'aria-label': 'Update'}).first().simulate('click');
-    });
-    await waitOneTickAndUpdate(wrapper);
+    await mustClickButton(wrapper, 'Update');
 
     expect(updateSpy).toHaveBeenCalled();
     expect(deleteSpy).toHaveBeenCalledTimes(0);
@@ -535,31 +516,18 @@ describe('RuntimePanel', () => {
 
   it('should send a delete call if an update requires delete', async() => {
     const wrapper = await component();
-    await waitOneTickAndUpdate(wrapper);
 
     const spy = jest.spyOn(runtimeApi(), 'deleteRuntime');
 
-    wrapper.find('#runtime-cpu .p-dropdown').first().simulate('click');
+    await pickMainCpu(wrapper, 8);
 
-    act(() => {
-      wrapper.find('.p-dropdown-item').find({'aria-label': 8}).first().simulate('click');
-    });
-    await waitOneTickAndUpdate(wrapper);
-
-    act(() => {
-      wrapper.find(Button).find({'aria-label': 'Next'}).first().simulate('click');
-    });
-    await waitOneTickAndUpdate(wrapper);
-
-    act(() => {
-      wrapper.find(Button).find({'aria-label': 'Update'}).first().simulate('click');
-    });
-    await waitOneTickAndUpdate(wrapper);
+    await mustClickButton(wrapper, 'Next');
+    await mustClickButton(wrapper, 'Update');
 
     expect(spy).toHaveBeenCalled();
   });
 
-  it('create button is shown if runtime is deleted', async() => {
+  it('should show create button if runtime is deleted', async() => {
     const runtime = {...runtimeApiStub.runtime, status: RuntimeStatus.Deleted};
     runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
 
@@ -570,7 +538,6 @@ describe('RuntimePanel', () => {
 
   it('should add additional options when the compute type changes', async() => {
     const wrapper = await component();
-    await waitOneTickAndUpdate(wrapper);
 
     await pickComputeType(wrapper, ComputeType.Dataproc);
 
@@ -596,7 +563,7 @@ describe('RuntimePanel', () => {
     // Change the machine to n1-standard-8 and bump the storage to 300GB. This should make the running cost 40 cents an hour and the storage cost 2 cents an hour.
     await pickMainCpu(wrapper, 8);
     await pickMainRam(wrapper, 30);
-    pickMainDiskSize(wrapper, 300);
+    await pickMainDiskSize(wrapper, 300);
     expect(runningCost().text()).toEqual('$0.40/hr');
     expect(storageCost().text()).toEqual('$0.02/hr');
 
@@ -611,14 +578,14 @@ describe('RuntimePanel', () => {
     expect(storageCost().text()).toEqual('< $0.01/hr');
 
     // Bump up all the worker values to increase the price on everything.
-    pickNumWorkers(wrapper, 4);
-    pickNumPreemptibleWorkers(wrapper, 4);
+    await pickNumWorkers(wrapper, 4);
+    await pickNumPreemptibleWorkers(wrapper, 4);
     await pickWorkerCpu(wrapper, 8);
     await pickWorkerRam(wrapper, 30);
-    pickWorkerDiskSize(wrapper, 300);
+    await pickWorkerDiskSize(wrapper, 300);
     expect(runningCost().text()).toEqual('$2.87/hr');
     expect(storageCost().text()).toEqual('$0.13/hr');
-  })
+  });
 
   it('should allow runtime deletion', async() => {
     const wrapper = await component();
@@ -626,11 +593,9 @@ describe('RuntimePanel', () => {
     wrapper.find(Link).find({'aria-label': 'Delete Environment'}).first().simulate('click');
     expect(wrapper.find(ConfirmDelete).exists()).toBeTruthy();
 
-    // Click delete
-    wrapper.find(ConfirmDelete).find({'aria-label': 'Delete'}).first().simulate('click');
+    await mustClickButton(wrapper, 'Delete');
 
     // Runtime should be deleting, and confirm page should no longer be visible.
-    await waitOneTickAndUpdate(wrapper);
     expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.Deleting);
     expect(wrapper.find(ConfirmDelete).exists()).toBeFalsy();
   });
@@ -642,7 +607,7 @@ describe('RuntimePanel', () => {
     expect(wrapper.find(ConfirmDelete).exists()).toBeTruthy();
 
     // Click cancel
-    wrapper.find(ConfirmDelete).find({'aria-label': 'Cancel'}).first().simulate('click');
+    await mustClickButton(wrapper, 'Cancel');
 
     // Runtime should still be active, and confirm page should no longer be visible.
     expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.Running);
