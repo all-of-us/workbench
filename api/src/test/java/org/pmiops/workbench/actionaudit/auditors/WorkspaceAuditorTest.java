@@ -91,7 +91,7 @@ public class WorkspaceAuditorTest {
     WorkbenchConfig workbenchConfig() {
       WorkbenchConfig workbenchConfig = new WorkbenchConfig();
       workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
-      workbenchConfig.featureFlags.enableBillingLockout = false;
+      workbenchConfig.featureFlags.enableBillingLockout = true;
       return workbenchConfig;
     }
   }

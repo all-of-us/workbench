@@ -327,10 +327,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   @Override
   public void validateActiveBilling(String workspaceNamespace, String workspaceId)
       throws ForbiddenException {
-    if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout) {
-      return;
-    }
-
     if (BillingStatus.INACTIVE.equals(
         getRequired(workspaceNamespace, workspaceId).getBillingStatus())) {
       throw new ForbiddenException(

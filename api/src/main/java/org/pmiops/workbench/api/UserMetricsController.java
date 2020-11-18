@@ -29,7 +29,6 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
-import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -279,12 +278,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
 
   private void buildFromDbWorkspace(WorkspaceResource resource, DbWorkspace dbWorkspace) {
     resource.setCdrVersionId(commonMappers.cdrVersionToId(dbWorkspace.getCdrVersion()));
-
-    if (workbenchConfigProvider.get().featureFlags.enableBillingLockout) {
-      resource.setWorkspaceBillingStatus(dbWorkspace.getBillingStatus());
-    } else {
-      resource.setWorkspaceBillingStatus(BillingStatus.ACTIVE);
-    }
+    resource.setWorkspaceBillingStatus(dbWorkspace.getBillingStatus());
   }
 
   private void buildFromFcWorkspace(

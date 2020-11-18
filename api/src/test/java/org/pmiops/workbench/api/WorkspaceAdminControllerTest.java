@@ -122,7 +122,7 @@ public class WorkspaceAdminControllerTest {
     WorkbenchConfig workbenchConfig() {
       WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
       workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
-      workbenchConfig.featureFlags.enableBillingLockout = false;
+      workbenchConfig.featureFlags.enableBillingLockout = true;
       return workbenchConfig;
     }
   }
