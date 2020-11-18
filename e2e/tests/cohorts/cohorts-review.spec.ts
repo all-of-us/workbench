@@ -9,6 +9,9 @@ import DataResourceCard from 'app/component/data-resource-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {waitForText, waitWhileLoading} from 'utils/waits-utils';
 import {getPropValue} from 'utils/element-utils';
+import SidebarContent, {ReviewStatus} from 'app/component/sidebar-content';
+import AnnotationFieldModal from 'app/component/annotation-field-modal';
+
 
 describe('Cohort review tests', () => {
 
@@ -65,21 +68,65 @@ describe('Cohort review tests', () => {
     isValidDate(cellValue);
 
     // Check table row link navigation works. Click ParticipantId link in the second row.
-    await cohortReviewPage.clickParticipantLink(2);
-
+        // const dataTablepid2 = await cohortReviewPage.getParticipantLinkId(3);
+        // console.log(dataTablepid2);
+    const dataTablepid1 = await cohortReviewPage.clickParticipantLink(2);
+    
     // Not checking anything in Participant Detail page.
     const participantDetailPage = new CohortParticipantDetailPage(page);
+    // await participantDetailPage.waitForLoad();
+    // click on the pen icon to open the participant
+     await participantDetailPage.clickPenIconHelpSideBar();
+    // confirm that the sidebar-content opened
+    
+    const sidebarContent = new SidebarContent(page);
+    const reviewParticipantid1 = await sidebarContent.getParticipantID(); 
+    console.log(reviewParticipantid1);
+    expect(dataTablepid1).toEqual(reviewParticipantid1);
+    
+    // select review status from dropdown option
+    const participantStatus1 = await sidebarContent.selectReviewStatus(ReviewStatus.Excluded);
+    console.log(participantStatus1);
+    // click on the plus-icon next to annotations
+    await sidebarContent.getAnnotationsButton().then(btn => btn.click());
+    const annotationFieldModal = new AnnotationFieldModal(page);    
+    
+    await annotationFieldModal.cancelAnnotationButton().then(btn => btn.click());
+
+    
+    await participantDetailPage.clickPenIconHelpSideBar();
+    // navigate to the next participant
+    await participantDetailPage.getGoToTheNextParticipant();
     await participantDetailPage.waitForLoad();
-    // Page navigate back.
+    // click on the pen icon to open the participant
+    const detailPageParticipantid = await participantDetailPage.getParticipantIDnum();
+    await participantDetailPage.clickPenIconHelpSideBar();
+    await waitWhileLoading(page); 
+    const reviewParticipantid2 = await sidebarContent.getParticipantID(); 
+    console.log(`reviewParticipantid2: ${reviewParticipantid2}`);
+
+    expect(detailPageParticipantid).toEqual(reviewParticipantid2);
+    const participantStatus2 = await sidebarContent.selectReviewStatus(ReviewStatus.Included);
+    console.log(participantStatus2);
+    // navigate to review set page and check if the status column is displaying the review status for both participants
     await participantDetailPage.getBackToReviewSetButton().then(btn => btn.click());
     await waitWhileLoading(page);
 
-    // Click ParticipantId link in the fifth row
-    await cohortReviewPage.clickParticipantLink(5);
-    await participantDetailPage.waitForLoad();
-    await participantDetailPage.getBackToReviewSetButton().then(btn => btn.click());
-    await waitWhileLoading(page);
 
+    // Get the status of participant1
+    const statusCell1 = await participantsTable.getCell(2, 8);
+    const statusValue1 = await getPropValue<string>(statusCell1, 'textContent');
+    console.log(statusValue1);
+    expect(statusValue1).toEqual(participantStatus1);
+
+    
+    // Get the status of participant2
+    const statusCell2 = await participantsTable.getCell(3, 8);
+    const statusValue2 = await getPropValue<string>(statusCell2, 'textContent');
+    console.log(statusValue2);
+    expect(statusValue2).toEqual(participantStatus2);
+
+    // return to cohort review page
     await cohortReviewPage.getBackToCohortButton().then(btn => btn.clickAndWait());
 
     // Land on Cohort Build page
