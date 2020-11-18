@@ -201,8 +201,8 @@ public class FireCloudServiceImplTest {
 
   @Test
   public void testCreateAllOfUsBillingProject() throws Exception {
-    workbenchConfig.featureFlags.enableVpcServicePerimeter = false;
-    workbenchConfig.firecloud.vpcServicePerimeterName = "this will be ignored";
+    final String servicePerimeter = "a-cloud-with-a-fence-around-it";
+    workbenchConfig.firecloud.vpcServicePerimeterName = servicePerimeter;
 
     service.createAllOfUsBillingProject("project-name");
 
@@ -219,23 +219,6 @@ public class FireCloudServiceImplTest {
     assertThat(request.getBillingAccount()).isEqualTo("billingAccounts/test-billing-account");
     assertThat(request.getEnableFlowLogs()).isTrue();
     assertThat(request.getHighSecurityNetwork()).isTrue();
-    assertThat(request.getServicePerimeter()).isNull();
-  }
-
-  @Test
-  public void testVpcServicePerimeterParams() throws Exception {
-    String servicePerimeter = "a-cloud-with-a-fence-around-it";
-
-    workbenchConfig.featureFlags.enableVpcServicePerimeter = true;
-    workbenchConfig.firecloud.vpcServicePerimeterName = servicePerimeter;
-
-    service.createAllOfUsBillingProject("project-name");
-
-    ArgumentCaptor<FirecloudCreateRawlsBillingProjectFullRequest> captor =
-        ArgumentCaptor.forClass(FirecloudCreateRawlsBillingProjectFullRequest.class);
-    verify(billingApi).createBillingProjectFull(captor.capture());
-    FirecloudCreateRawlsBillingProjectFullRequest request = captor.getValue();
-
     assertThat(request.getServicePerimeter()).isEqualTo(servicePerimeter);
   }
 }

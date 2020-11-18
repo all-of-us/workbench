@@ -254,12 +254,8 @@ public class FireCloudServiceImpl implements FireCloudService {
             .projectName(projectName)
             .highSecurityNetwork(true)
             .enableFlowLogs(true)
-            .privateIpGoogleAccess(true);
-
-    boolean enableVpcServicePerimeter = configProvider.get().featureFlags.enableVpcServicePerimeter;
-    if (enableVpcServicePerimeter) {
-      request.servicePerimeter(configProvider.get().firecloud.vpcServicePerimeterName);
-    }
+            .privateIpGoogleAccess(true)
+            .servicePerimeter(configProvider.get().firecloud.vpcServicePerimeterName);
 
     BillingApi billingApi = billingApiProvider.get();
     retryHandler.run(
