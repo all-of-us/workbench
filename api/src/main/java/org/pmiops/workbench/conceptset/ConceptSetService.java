@@ -9,12 +9,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.concept.ConceptService;
@@ -260,14 +260,17 @@ public class ConceptSetService {
                 conceptSet.getDomain().toString(),
                 conceptIds.stream().map(String::valueOf).collect(Collectors.toList()));
       } else {
-        for (DbConcept dbConcepts : conceptDao.findAll(conceptIds)) {
-          boolean isStandard = STANDARD_CONCEPTS.contains(dbConcepts.getStandardConcept());
-          criteriaList.add(
-              cohortBuilderMapper.dbModelToClient(
-                  dbConcepts,
-                  isStandard,
-                  isStandard ? dbConcepts.getCountValue() : dbConcepts.getSourceCountValue()));
-        }
+        criteriaList.addAll(
+            StreamSupport.stream(conceptDao.findAll(conceptIds).spliterator(), false)
+                .map(
+                    concept -> {
+                      boolean isStandard = STANDARD_CONCEPTS.contains(concept.getStandardConcept());
+                      return cohortBuilderMapper.dbModelToClient(
+                          concept,
+                          isStandard,
+                          isStandard ? concept.getCountValue() : concept.getSourceCountValue());
+                    })
+                .collect(Collectors.toList()));
       }
       return conceptSet.criteriums(criteriaList);
     }
