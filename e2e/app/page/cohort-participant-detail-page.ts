@@ -26,7 +26,6 @@ export default class CohortParticipantDetailPage extends AuthenticatedPage {
     const selector = `//*[@class="detail-header"]//span[contains(., "Participant ")]`;
     const pID = await this.extractParticipantID(selector);
     console.log(`Participant ID: ${pID}`);
-
     return pID;
   }
 
