@@ -416,6 +416,15 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
               </StyledAnchorTag>
               &nbsp;drugs by brand names outside of <AoU/>
             </div>}
+            {cohortContext.domain === Domain.SURVEY && <div>
+              Find more information about each survey in the&nbsp;
+              <StyledAnchorTag
+                  href='https://www.researchallofus.org/survey-explorer/'
+                  target='_blank'
+                  rel='noopener noreferrer'>
+                Survey Explorer
+              </StyledAnchorTag>
+            </div>}
             {this.showDataBrowserLink && <div>
               Explore Source information on the&nbsp;
               <StyledAnchorTag
