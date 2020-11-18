@@ -26,6 +26,7 @@ export default class CohortParticipantDetailPage extends AuthenticatedPage {
     const selector = `//*[@class="detail-header"]//span[contains(., "Participant ")]`;
     const pID = await this.extractParticipantID(selector);
     console.log(`Participant ID: ${pID}`);
+
     return pID;
   }
 
@@ -51,6 +52,7 @@ export default class CohortParticipantDetailPage extends AuthenticatedPage {
   }
 
   // click on pi-angle-right button to go to next participant
+
   async goToTheNextParticipant(): Promise<void> {
      const iconXpath = '//button[@title ="Go To the Next Participant"]';
     await this.page.waitForXPath(iconXpath, {visible: true}).then(icon => icon.click());
@@ -59,6 +61,7 @@ export default class CohortParticipantDetailPage extends AuthenticatedPage {
   // click on pi-angle-left button to go to prior participant
   async goToThePriorParticipant(): Promise<void> {
     const iconXpath = '//button[@title ="Go To the Prior Participant"]';
+
     await this.page.waitForXPath(iconXpath, {visible: true}).then(icon => icon.click());
   }
 
