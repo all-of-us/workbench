@@ -258,31 +258,6 @@ paths:
             - email
             - profile
 
-  /api/nih/callback:
-    post:
-      tags:
-        - Nih
-      operationId: nihCallback
-      summary: Update the user's NIH link from a JWT
-      parameters:
-        - name: jwtWrapper
-          in: body
-          description: JWT from NIH login
-          required: true
-          schema:
-            $ref: '#/definitions/JWTWrapper'
-      responses:
-        200:
-          description: OK
-          schema:
-            $ref: '#/definitions/NihStatus'
-        400:
-          description: Invalid or malformed JWT
-        401:
-          description: Unauthorized
-        500:
-          description: Internal Server Error
-
   /api/nih/status:
     get:
       tags:
@@ -912,15 +887,6 @@ definitions:
         description: stack trace
         items:
           $ref: '#/definitions/StackTraceElement'
-
-  JWTWrapper:
-    required:
-      - jwt
-    type: object
-    properties:
-      jwt:
-        type: string
-        description: the encoded/signed JWT
 
   ManagedGroupRef:
     description: a reference to a group that can be managed by users

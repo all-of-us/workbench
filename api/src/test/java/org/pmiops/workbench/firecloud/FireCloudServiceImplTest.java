@@ -1,8 +1,6 @@
 package org.pmiops.workbench.firecloud;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -19,7 +17,6 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -32,7 +29,6 @@ import org.pmiops.workbench.firecloud.api.StaticNotebooksApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsBillingProjectFullRequest;
-import org.pmiops.workbench.firecloud.model.FirecloudJWTWrapper;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudSystemStatus;
@@ -178,25 +174,6 @@ public class FireCloudServiceImplTest {
   public void testNihStatusException() throws Exception {
     when(nihApi.nihStatus()).thenThrow(new ApiException(500, "Internal Server Error"));
     service.getNihStatus();
-  }
-
-  @Test
-  public void testNihCallback() throws Exception {
-    FirecloudJWTWrapper jwt = new FirecloudJWTWrapper().jwt("asdf");
-    service.postNihCallback(jwt);
-    verify(nihApi, times(1)).nihCallback(jwt);
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void testNihCallbackBadRequest() throws Exception {
-    when(nihApi.nihCallback(any())).thenThrow(new ApiException(400, "Bad Request"));
-    service.postNihCallback(new FirecloudJWTWrapper());
-  }
-
-  @Test(expected = ServerErrorException.class)
-  public void testNihCallbackServerError() throws Exception {
-    when(nihApi.nihCallback(any())).thenThrow(new ApiException(500, "Internal Server Error"));
-    service.postNihCallback(new FirecloudJWTWrapper());
   }
 
   @Test

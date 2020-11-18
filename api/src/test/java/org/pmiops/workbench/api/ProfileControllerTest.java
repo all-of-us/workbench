@@ -54,7 +54,6 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudJWTWrapper;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
@@ -144,7 +143,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @MockBean private FireCloudService mockFireCloudService;
   @MockBean private MailService mockMailService;
   @MockBean private ProfileAuditor mockProfileAuditor;
-  @MockBean private ShibbolethService shibbolethService;
+  @MockBean private ShibbolethService mockShibbolethService;
   @MockBean private UserServiceAuditor mockUserServiceAuditor;
 
   @Autowired private InstitutionService institutionService;
@@ -953,32 +952,16 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testUpdateNihToken() {
-    config.featureFlags.useNewShibbolethService = false;
-
     NihToken nihToken = new NihToken().jwt("test");
-    FirecloudJWTWrapper firecloudJwt = new FirecloudJWTWrapper().jwt("test");
     createAccountAndDbUserWithAffiliation();
     profileController.updateNihToken(nihToken);
-    verify(mockFireCloudService).postNihCallback(eq(firecloudJwt));
+    verify(mockShibbolethService).updateShibbolethToken(eq(nihToken.getJwt()));
   }
 
   @Test(expected = ServerErrorException.class)
   public void testUpdateNihToken_serverError() {
-    config.featureFlags.useNewShibbolethService = false;
-
-    doThrow(new ServerErrorException()).when(mockFireCloudService).postNihCallback(any());
+    doThrow(new ServerErrorException()).when(mockShibbolethService).updateShibbolethToken(any());
     profileController.updateNihToken(new NihToken().jwt("test"));
-  }
-
-  @Test
-  public void testUpdateNihToken_newShibbolethService() {
-    config.featureFlags.useNewShibbolethService = true;
-
-    NihToken nihToken = new NihToken().jwt("test");
-    String jwt = "test";
-    createAccountAndDbUserWithAffiliation();
-    profileController.updateNihToken(nihToken);
-    verify(shibbolethService).updateShibbolethToken(eq(jwt));
   }
 
   @Test(expected = BadRequestException.class)

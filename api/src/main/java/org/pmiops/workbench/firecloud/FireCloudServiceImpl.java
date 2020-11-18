@@ -32,7 +32,6 @@ import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMembership;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsBillingProjectFullRequest;
-import org.pmiops.workbench.firecloud.model.FirecloudJWTWrapper;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupRef;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
@@ -495,15 +494,6 @@ public class FireCloudServiceImpl implements FireCloudService {
               throw e;
             }
           }
-        });
-  }
-
-  @Override
-  public void postNihCallback(FirecloudJWTWrapper wrapper) {
-    NihApi nihApi = nihApiProvider.get();
-    retryHandler.run(
-        (context) -> {
-          return nihApi.nihCallback(wrapper);
         });
   }
 }
