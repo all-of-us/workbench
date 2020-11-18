@@ -167,7 +167,7 @@ describe('RuntimePanel', () => {
 
     const wrapper = await component();
 
-    await mustClickCreateButton(wrapper);
+    await mustClickButton(wrapper, 'Create');
 
     // Kicks off a deletion to first clear the error status runtime.
     expect(runtimeApiStub.runtime.status).toEqual('Deleting');
