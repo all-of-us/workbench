@@ -413,7 +413,7 @@ export const ListOverview = withCurrentWorkspace()(
     }
 
     get disableDeleteIcon() {
-      return this.disableActionIcons || this.props.workspace.accessLevel !== WorkspaceAccessLevel.OWNER;
+      return this.disableActionIcons || this.props.workspace.accessLevel === WorkspaceAccessLevel.READER;
     }
 
     get disableSaveButton() {
