@@ -17,6 +17,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
+import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
@@ -74,6 +75,7 @@ public class DataSetMapperTest {
   })
   @MockBean({
     Clock.class,
+    ConceptDao.class,
     ConceptSetDao.class,
     ConceptBigQueryService.class,
     CohortBuilderService.class,
