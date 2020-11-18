@@ -590,15 +590,6 @@ const CreatePanel = ({creatorFreeCreditsRemaining, preset, profile, setPanelCont
   </div>;
 };
 
-const UpdateButton = ({disabled, onClick}) => {
-  return <Button
-    aria-label='Update'
-    disabled={disabled}
-    onClick={() => onClick()}>
-    Update
-  </Button>;
-};
-
 export const RuntimePanel = fp.flow(
   withCdrVersions(),
   withCurrentWorkspace(),
@@ -793,10 +784,6 @@ export const RuntimePanel = fp.flow(
           }}>
           Cancel
         </Button>
-        <UpdateButton disabled={!runtimeChanged || ![RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus)}
-                      onClick={() => {
-                        setRequestedRuntime(createRuntimeRequest(newRuntimeConfig));
-                        onUpdate(); }}/>
         {renderUpdateButton()}
       </FlexRow>
     </React.Fragment>;
