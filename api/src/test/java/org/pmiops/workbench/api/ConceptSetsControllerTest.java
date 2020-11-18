@@ -28,6 +28,7 @@ import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cdrselector.WorkspaceResourcesServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
+import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortCloningService;
@@ -212,6 +213,7 @@ public class ConceptSetsControllerTest {
     BillingProjectAuditor.class,
     BillingProjectBufferService.class,
     CloudStorageService.class,
+    CohortBuilderMapper.class,
     CohortBuilderService.class,
     CohortCloningService.class,
     CohortFactoryImpl.class,
