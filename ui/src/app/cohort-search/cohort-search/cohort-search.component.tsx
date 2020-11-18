@@ -6,9 +6,8 @@ import {DemographicsV2} from 'app/cohort-search/demographics/demographics-v2.com
 import {searchRequestStore} from 'app/cohort-search/search-state.service';
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {domainToTitle, generateId, typeToTitle} from 'app/cohort-search/utils';
-import {Button, Clickable, StyledAnchorTag} from 'app/components/buttons';
+import {Button} from 'app/components/buttons';
 import {FlexRowWrap} from 'app/components/flex';
-import {AoU} from 'app/components/text-wrappers';
 import {CriteriaSearch} from 'app/pages/data/criteria-search';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentCohortSearchContext} from 'app/utils';
@@ -20,30 +19,9 @@ import {
   serverConfigStore,
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
-import {environment} from 'environments/environment';
 import {Criteria, CriteriaType, Domain, TemporalMention, TemporalTime} from 'generated/fetch';
 
 const styles = reactStyles({
-  arrowIcon: {
-    height: '21px',
-    marginTop: '-0.2rem',
-    width: '18px'
-  },
-  backArrow: {
-    background: `${addOpacity(colors.accent, 0.15)}`,
-    borderRadius: '50%',
-    display: 'inline-block',
-    height: '1.5rem',
-    lineHeight: '1.6rem',
-    textAlign: 'center',
-    width: '1.5rem',
-  },
-  externalLinks: {
-    display: 'table-cell',
-    lineHeight: '0.75rem',
-    textAlign: 'right',
-    verticalAlign: 'middle'
-  },
   finishButton: {
     marginTop: '1.5rem',
     borderRadius: '5px',
@@ -87,22 +65,8 @@ const styles = reactStyles({
     padding: '0 0.5rem',
     position: 'relative',
     width: '100%'
-  },
-  titleBar: {
-    color: colors.primary,
-    display: 'table',
-    margin: '1rem 0 0.25rem',
-    width: '65%',
-    height: '1.5rem',
-  },
-  titleHeader: {
-    display: 'inline-block',
-    lineHeight: '1.5rem',
-    margin: '0 0 0 0.75rem'
   }
 });
-
-const arrowIcon = '/assets/icons/arrow-left-regular.svg';
 
 function initGroup(role: string, item: any) {
   return {
@@ -161,7 +125,6 @@ interface State {
   mode: string;
   selectedIds: Array<string>;
   selections: Array<Selection>;
-  title: string;
   treeSearchTerms: string;
 }
 
@@ -223,7 +186,6 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
       mode: 'list',
       selectedIds: [],
       selections: [],
-      title: '',
       treeSearchTerms: '',
     };
   }
@@ -245,7 +207,6 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
     } else if (domain === Domain.FITBIT) {
       this.selectFitbit();
     } else {
-      const title = domain === Domain.PERSON ? typeToTitle(type) : domainToTitle(domain);
       let {backMode, mode} = this.state;
       let hierarchyNode;
       if (this.initTree) {
@@ -258,7 +219,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
         backMode = 'tree';
         mode = 'tree';
       }
-      this.setState({backMode, hierarchyNode, mode, selectedIds, selections, title});
+      this.setState({backMode, hierarchyNode, mode, selectedIds, selections});
     }
     if (serverConfigStore.getValue().enableCohortBuilderV2) {
       currentCohortCriteriaStore.next(selections);
@@ -387,55 +348,14 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
     saveCriteria([param]);
   }
 
-  get showDataBrowserLink() {
-    return [Domain.CONDITION, Domain.PROCEDURE, Domain.MEASUREMENT, Domain.DRUG]
-    .includes(this.props.cohortContext.domain);
-  }
-
   render() {
     const {cohortContext} = this.props;
-    const {count, growlVisible, selectedIds, selections, title} = this.state;
+    const {count, growlVisible, selectedIds, selections} = this.state;
     return !!cohortContext && <FlexRowWrap style={styles.searchContainer}>
       <style>
         {css}
       </style>
       <div id='cohort-search-container' style={styles.searchContent}>
-        <Growl ref={(el) => this.growl = el} style={!growlVisible ? {...styles.growl, display: 'none'} : styles.growl}/>
-        <div style={styles.titleBar}>
-          <Clickable style={styles.backArrow} onClick={() => this.closeSearch()}>
-            <img src={arrowIcon} style={styles.arrowIcon} alt='Go back' />
-          </Clickable>
-          <h2 style={styles.titleHeader}>{title}</h2>
-          <div style={styles.externalLinks}>
-            {cohortContext.domain === Domain.DRUG && <div>
-              <StyledAnchorTag
-                  href='https://mor.nlm.nih.gov/RxNav/'
-                  target='_blank'
-                  rel='noopener noreferrer'>
-                Explore
-              </StyledAnchorTag>
-              &nbsp;drugs by brand names outside of <AoU/>
-            </div>}
-            {cohortContext.domain === Domain.SURVEY && <div>
-              Find more information about each survey in the&nbsp;
-              <StyledAnchorTag
-                  href='https://www.researchallofus.org/survey-explorer/'
-                  target='_blank'
-                  rel='noopener noreferrer'>
-                Survey Explorer
-              </StyledAnchorTag>
-            </div>}
-            {this.showDataBrowserLink && <div>
-              Explore Source information on the&nbsp;
-              <StyledAnchorTag
-                  href={environment.publicUiUrl}
-                  target='_blank'
-                  rel='noopener noreferrer'>
-                Data Browser
-              </StyledAnchorTag>
-            </div>}
-          </div>
-        </div>
         <div style={
           (cohortContext.domain === Domain.PERSON && cohortContext.type !== CriteriaType.AGE)
             ? {marginBottom: '3.5rem'}
@@ -449,7 +369,9 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
                 selectedIds={selectedIds}
                 selections={selections}/>
             </div>
-            : <CriteriaSearch cohortContext={cohortContext} source={'criteria'}/>}
+            : <CriteriaSearch backFn={() => this.closeSearch()}
+                              cohortContext={cohortContext}
+                              source={'criteria'}/>}
         </div>
       </div>
       <Button type='primary'

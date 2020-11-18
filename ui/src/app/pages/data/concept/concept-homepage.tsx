@@ -737,7 +737,7 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
                            !this.state.workspacePermissions.canWrite}/>
         </FadeBox>}
         {this.isConceptSetFlagEnable() && <React.Fragment>
-          <CriteriaSearch
+          <CriteriaSearch backFn={() => this.back()}
             cohortContext={{domain: activeDomainTab.domain, type: 'PPI', standard: this.state.standardConceptsOnly}}
             conceptSearchTerms={currentSearchString}
             source='concept' selectedSurvey={this.state.selectedSurvey}/>

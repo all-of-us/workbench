@@ -1,21 +1,46 @@
+import * as fp from 'lodash/fp';
+import {Growl} from 'primereact/growl';
+import * as React from 'react';
+import {Subscription} from 'rxjs/Subscription';
+
 import {ListSearchV2} from 'app/cohort-search/list-search-v2/list-search-v2.component';
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {CriteriaTree} from 'app/cohort-search/tree/tree.component';
+import {Clickable, StyledAnchorTag} from 'app/components/buttons';
 import {SpinnerOverlay} from 'app/components/spinners';
-import colors, {colorWithWhiteness} from 'app/styles/colors';
+import {AoU} from 'app/components/text-wrappers';
+import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {
   attributesSelectionStore,
   currentCohortCriteriaStore,
   currentConceptStore
 } from 'app/utils/navigation';
+import {environment} from 'environments/environment';
 import {Criteria, Domain} from 'generated/fetch';
-import * as fp from 'lodash/fp';
-import {Growl} from 'primereact/growl';
-import * as React from 'react';
-import {Subscription} from 'rxjs/Subscription';
+import {domainToTitle, typeToTitle} from '../../cohort-search/utils';
 
 const styles = reactStyles({
+  arrowIcon: {
+    height: '21px',
+    marginTop: '-0.2rem',
+    width: '18px'
+  },
+  backArrow: {
+    background: `${addOpacity(colors.accent, 0.15)}`,
+    borderRadius: '50%',
+    display: 'inline-block',
+    height: '1.5rem',
+    lineHeight: '1.6rem',
+    textAlign: 'center',
+    width: '1.5rem',
+  },
+  externalLinks: {
+    display: 'table-cell',
+    lineHeight: '0.75rem',
+    textAlign: 'right',
+    verticalAlign: 'middle'
+  },
   growl: {
     position: 'absolute',
     right: '0',
@@ -26,6 +51,18 @@ const styles = reactStyles({
     minHeight: '15rem',
     pointerEvents: 'none',
     opacity: 0.3
+  },
+  titleBar: {
+    color: colors.primary,
+    display: 'table',
+    margin: '1rem 0 0.25rem',
+    width: '65%',
+    height: '1.5rem',
+  },
+  titleHeader: {
+    display: 'inline-block',
+    lineHeight: '1.5rem',
+    margin: '0 0 0 0.75rem'
   }
 });
 const css = `
@@ -68,7 +105,10 @@ const css = `
   }
  `;
 
+const arrowIcon = '/assets/icons/arrow-left-regular.svg';
+
 interface Props {
+  backFn?: () => void;
   cohortContext: any;
   conceptSearchTerms?: string;
   selectedSurvey?: string;
@@ -237,12 +277,57 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
     this.setState({loadingSubtree: true, autocompleteSelection: selection});
   }
 
+  get showDataBrowserLink() {
+    return [Domain.CONDITION, Domain.PROCEDURE, Domain.MEASUREMENT, Domain.DRUG].includes(this.props.cohortContext.domain);
+  }
+
+  get domainTitle() {
+    const {cohortContext: {domain, type}} = this.props;
+    return domain === Domain.PERSON ? typeToTitle(type) : domainToTitle(domain);
+  }
+
   render() {
-    const {cohortContext, conceptSearchTerms, selectedSurvey, source} = this.props;
+    const {backFn, cohortContext, conceptSearchTerms, selectedSurvey, source} = this.props;
     const {autocompleteSelection, groupSelections, hierarchyNode, loadingSubtree,
       treeSearchTerms, growlVisible} = this.state;
     return <div id='criteria-search-container'>`
       {loadingSubtree && <SpinnerOverlay/>}
+      <Growl ref={(el) => this.growl = el} style={!growlVisible ? {...styles.growl, display: 'none'} : styles.growl}/>
+      <div style={styles.titleBar}>
+        <Clickable style={styles.backArrow} onClick={() => backFn()}>
+          <img src={arrowIcon} style={styles.arrowIcon} alt='Go back' />
+        </Clickable>
+        <h2 style={styles.titleHeader}>{this.domainTitle}</h2>
+        <div style={styles.externalLinks}>
+          {cohortContext.domain === Domain.DRUG && <div>
+            <StyledAnchorTag
+                href='https://mor.nlm.nih.gov/RxNav/'
+                target='_blank'
+                rel='noopener noreferrer'>
+              Explore
+            </StyledAnchorTag>
+            &nbsp;drugs by brand names outside of <AoU/>
+          </div>}
+          {cohortContext.domain === Domain.SURVEY && <div>
+            Find more information about each survey in the&nbsp;
+            <StyledAnchorTag
+                href='https://www.researchallofus.org/survey-explorer/'
+                target='_blank'
+                rel='noopener noreferrer'>
+              Survey Explorer
+            </StyledAnchorTag>
+          </div>}
+          {this.showDataBrowserLink && <div>
+            Explore Source information on the&nbsp;
+            <StyledAnchorTag
+                href={environment.publicUiUrl}
+                target='_blank'
+                rel='noopener noreferrer'>
+              Data Browser
+            </StyledAnchorTag>
+          </div>}
+        </div>
+      </div>
       <div style={loadingSubtree ? styles.loadingSubTree : {height: '100%', minHeight: '15rem'}}>
         <style>{css}</style>
         <Growl ref={(el) => this.growl = el}
