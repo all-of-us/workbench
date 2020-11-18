@@ -628,7 +628,7 @@ export const RuntimePanel = fp.flow(
   const [selectedDataprocConfig, setSelectedDataprocConfig] = useState<DataprocConfig | null>(dataprocConfig);
 
   const selectedMachineType = selectedMachine && selectedMachine.name;
-  const runtimeExists = (status && status !== RuntimeStatus.Deleted) || !!pendingRuntime;
+  const runtimeExists = (status && ![RuntimeStatus.Deleted, RuntimeStatus.Error].includes(status)) || !!pendingRuntime;
   const runtimeChanged = !fp.equals(selectedMachine, initialMasterMachine) ||
     selectedDiskSize !== diskSize ||
     !fp.equals(selectedDataprocConfig, dataprocConfig) ||
