@@ -262,8 +262,11 @@ public class ConceptSetService {
       } else {
         for (DbConcept dbConcepts : conceptDao.findAll(conceptIds)) {
           boolean isStandard = STANDARD_CONCEPTS.contains(dbConcepts.getStandardConcept());
-          criteriaList.add(cohortBuilderMapper.dbModelToClient(
-              dbConcepts, isStandard, isStandard ? dbConcepts.getCountValue() : dbConcepts.getSourceCountValue()));
+          criteriaList.add(
+              cohortBuilderMapper.dbModelToClient(
+                  dbConcepts,
+                  isStandard,
+                  isStandard ? dbConcepts.getCountValue() : dbConcepts.getSourceCountValue()));
         }
       }
       return conceptSet.criteriums(criteriaList);
