@@ -153,15 +153,6 @@ const presetEquals = (a: Runtime, b: Runtime): boolean => {
   return fp.isEqual(strip(a), strip(b));
 };
 
-const shouldDisableUpdateButton = (runtimeChanged: boolean, runtimeExists: boolean, runtimeStatus: RuntimeStatus): boolean => {
-  return runtimeExists && (
-    !runtimeChanged
-    // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
-    // where we get 'status' from
-    || ![RuntimeStatus.Running, RuntimeStatus.Stopped].includes(runtimeStatus as RuntimeStatus)
-  );
-};
-
 enum PanelContent {
   Create = 'Create',
   Customize = 'Customize',
@@ -512,6 +503,41 @@ const CostEstimator = ({
   </FlexRow>;
 };
 
+const CostInfo = ({runtimeChanged, runtimeConfig, currentUser, workspace, creatorFreeCreditsRemaining}) => {
+  return <FlexRow
+    style={
+      runtimeChanged
+        ? {...styles.costPredictor, backgroundColor: colorWithWhiteness(colors.warning, .9), borderColor: colors.warning}
+        : styles.costPredictor
+    }
+    data-test-id='cost-estimator'
+  >
+    <div style={{minWidth: '250px', margin: '.33rem .5rem'}}>
+      <CostEstimator runtimeParameters={runtimeConfig}/>
+    </div>
+    {
+      workspace.billingAccountType === BillingAccountType.FREETIER
+      && currentUser === workspace.creator
+      && <div style={styles.costsDrawnFrom}>
+        Costs will draw from your remaining {formatUsd(creatorFreeCreditsRemaining)} of free credits.
+      </div>
+    }
+    {
+      workspace.billingAccountType === BillingAccountType.FREETIER
+      && currentUser !== workspace.creator
+      && <div style={styles.costsDrawnFrom}>
+        Costs will draw from workspace creator's remaining {formatUsd(creatorFreeCreditsRemaining)} of free credits.
+      </div>
+    }
+    {
+      workspace.billingAccountType === BillingAccountType.USERPROVIDED
+      && <div style={styles.costsDrawnFrom}>
+        Costs will be charged to billing account {workspace.billingAccountName}.
+      </div>
+    }
+  </FlexRow>;
+};
+
 const CreatePanel = ({creatorFreeCreditsRemaining, preset, profile, setPanelContent, workspace, runtimeConfig}) => {
   const {
     displayName,
@@ -526,7 +552,7 @@ const CreatePanel = ({creatorFreeCreditsRemaining, preset, profile, setPanelCont
   const workerDiskSize = computeType === ComputeType.Dataproc ? dataprocConfig.workerDiskSize : null;
 
   return <div style={styles.controlSection}>
-    <CostEstimatorWrapper runtimeChanged={false}
+    <CostInfo runtimeChanged={false}
                           runtimeConfig={runtimeConfig}
                           currentUser={profile.username}
                           workspace={workspace}
@@ -564,44 +590,6 @@ const CreatePanel = ({creatorFreeCreditsRemaining, preset, profile, setPanelCont
   </div>;
 };
 
-const UpdateRuntimeButton = ({
-   disabled,
-   label,
-   onUpdate,
-   selectedDiskSize,
-   selectedMachineType,
-   selectedDataprocConfig,
-   setRequestedRuntime
-}) => {
-  return <Button
-      aria-label={label}
-      disabled={disabled}
-      onClick={() => {
-        const runtimeToRequest: Runtime = selectedDataprocConfig ? {
-          dataprocConfig: {
-            ...selectedDataprocConfig,
-            masterMachineType: selectedMachineType,
-            masterDiskSize: selectedDiskSize
-          }
-        } : {
-          gceConfig: {
-            machineType: selectedMachineType,
-            diskSize: selectedDiskSize
-          }
-        };
-
-        // If the selected runtime matches a preset, plumb through the appropriate configuration type.
-        runtimeToRequest.configurationType = fp.get(
-          'runtimeTemplate.configurationType',
-          fp.find(
-            ({runtimeTemplate}) => presetEquals(runtimeToRequest, runtimeTemplate),
-            runtimePresets)
-        ) || RuntimeConfigurationType.UserOverride;
-        setRequestedRuntime(runtimeToRequest);
-        onUpdate();
-      }}>{label}</Button>;
-};
-
 const UpdateButton = ({disabled, onClick}) => {
   return <Button
     aria-label='Update'
@@ -609,41 +597,6 @@ const UpdateButton = ({disabled, onClick}) => {
     onClick={() => onClick()}>
     Update
   </Button>;
-};
-
-const CostEstimatorWrapper = ({runtimeChanged, runtimeConfig, currentUser, workspace, creatorFreeCreditsRemaining}) => {
-  return <FlexRow
-    style={
-      runtimeChanged
-        ? {...styles.costPredictor, backgroundColor: colorWithWhiteness(colors.warning, .9), borderColor: colors.warning}
-        : styles.costPredictor
-    }
-    data-test-id='cost-estimator'
-  >
-    <div style={{minWidth: '250px', margin: '.33rem .5rem'}}>
-      <CostEstimator runtimeParameters={runtimeConfig}/>
-    </div>
-    {
-      workspace.billingAccountType === BillingAccountType.FREETIER
-      && currentUser === workspace.creator
-      && <div style={styles.costsDrawnFrom}>
-        Costs will draw from your remaining {formatUsd(creatorFreeCreditsRemaining)} of free credits.
-      </div>
-    }
-    {
-      workspace.billingAccountType === BillingAccountType.FREETIER
-      && currentUser !== workspace.creator
-      && <div style={styles.costsDrawnFrom}>
-        Costs will draw from workspace creator's remaining {formatUsd(creatorFreeCreditsRemaining)} of free credits.
-      </div>
-    }
-    {
-      workspace.billingAccountType === BillingAccountType.USERPROVIDED
-      && <div style={styles.costsDrawnFrom}>
-        Costs will be charged to billing account {workspace.billingAccountName}.
-      </div>
-    }
-  </FlexRow>;
 };
 
 export const RuntimePanel = fp.flow(
@@ -847,7 +800,7 @@ export const RuntimePanel = fp.flow(
         {renderUpdateButton()}
       </FlexRow>
     </React.Fragment>;
-  }
+  };
 
   return <div data-test-id='runtime-panel'>
     <h3 style={{...styles.baseHeader, ...styles.bold, ...styles.sectionHeader}}>Cloud analysis environment</h3>
@@ -881,7 +834,7 @@ export const RuntimePanel = fp.flow(
       />],
       [PanelContent.Customize, () => <Fragment>
         <div style={styles.controlSection}>
-          <CostEstimatorWrapper runtimeChanged={runtimeChanged}
+          <CostInfo runtimeChanged={runtimeChanged}
                                 runtimeConfig={newRuntimeConfig}
                                 currentUser={profile.username}
                                 workspace={workspace}

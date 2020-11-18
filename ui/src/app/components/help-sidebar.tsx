@@ -341,7 +341,7 @@ interface Props {
   profileState: any;
   setSidebarState: Function;
   shareFunction: Function;
-  
+
   sidebarOpen: boolean;
   notebookStyles: boolean;
   workspace: WorkspaceData;

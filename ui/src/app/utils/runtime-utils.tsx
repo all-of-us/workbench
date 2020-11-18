@@ -188,14 +188,6 @@ const compareMachineConfig = (oldRuntime, newRuntime) => {
     .filter(diff => diff.differenceType !== RuntimeDiffState.NO_CHANGE);
 };
 
-export const getRuntimeConfigDiffs = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff[] => {
-  return compareDataprocConfig(oldRuntime, newRuntime).concat(compareMachineConfig(oldRuntime, newRuntime));
-};
-
-const getRuntimeDiffs = (oldRuntime: Runtime, newRuntime: Runtime): RuntimeDiff[] => {
-  return getRuntimeConfigDiffs(toRuntimeConfig(oldRuntime), toRuntimeConfig(newRuntime));
-};
-
 const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
   if (runtime.gceConfig) {
     return {
@@ -212,6 +204,14 @@ const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
       dataprocConfig: runtime.dataprocConfig
     };
   }
+};
+
+export const getRuntimeConfigDiffs = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff[] => {
+  return compareDataprocConfig(oldRuntime, newRuntime).concat(compareMachineConfig(oldRuntime, newRuntime));
+};
+
+const getRuntimeDiffs = (oldRuntime: Runtime, newRuntime: Runtime): RuntimeDiff[] => {
+  return getRuntimeConfigDiffs(toRuntimeConfig(oldRuntime), toRuntimeConfig(newRuntime));
 };
 
 // useRuntime hook is a simple hook to populate the runtime store.
