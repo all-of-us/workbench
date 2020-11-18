@@ -191,6 +191,7 @@ describe('Cohort review tests', () => {
     expect(statusValue2).toEqual(participantStatus2);
     console.log(`${reviewParticipantid2}: ${statusValue2}`);
 
+
     // return to cohort review page
     await cohortReviewPage.getBackToCohortButton().then(btn => btn.clickAndWait());
 
