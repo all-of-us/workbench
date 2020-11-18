@@ -161,6 +161,18 @@ describe('RuntimePanel', () => {
     expect(runtimeApiStub.runtime.gceConfig.machineType).toEqual('n1-standard-4');
   });
 
+  it('should allow creation when runtime has error status', async() => {
+    runtimeApiStub.runtime.status = RuntimeStatus.Error;
+    act(() => { runtimeStore.set({runtime: runtimeApiStub.runtime, workspaceNamespace: workspaceStubs[0].namespace}) });
+
+    const wrapper = await component();
+
+    await mustClickCreateButton(wrapper);
+
+    // Kicks off a deletion to first clear the error status runtime.
+    expect(runtimeApiStub.runtime.status).toEqual('Deleting');
+  });
+
   it('should allow creation with GCE config', async() => {
     runtimeApiStub.runtime = null;
     act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}); });
