@@ -324,7 +324,6 @@ public class WorkspacesControllerTest {
     ConceptBigQueryService.class,
     CohortService.class,
     ConceptService.class,
-    ConceptSetService.class,
     FireCloudService.class,
     MailService.class,
     MonitoringService.class,
