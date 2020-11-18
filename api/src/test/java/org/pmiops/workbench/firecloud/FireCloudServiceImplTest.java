@@ -201,7 +201,6 @@ public class FireCloudServiceImplTest {
 
   @Test
   public void testCreateAllOfUsBillingProject() throws Exception {
-    workbenchConfig.featureFlags.enableVpcFlowLogs = false;
     workbenchConfig.featureFlags.enableVpcServicePerimeter = false;
     workbenchConfig.firecloud.vpcServicePerimeterName = "this will be ignored";
 
@@ -218,24 +217,9 @@ public class FireCloudServiceImplTest {
     // FireCloudServiceImpl always adds the "billingAccounts/" prefix to the billing account
     // from config.
     assertThat(request.getBillingAccount()).isEqualTo("billingAccounts/test-billing-account");
-    assertThat(request.getEnableFlowLogs()).isFalse();
-    assertThat(request.getHighSecurityNetwork()).isFalse();
-    assertThat(request.getServicePerimeter()).isNull();
-  }
-
-  @Test
-  public void testVpcFlowLogsParams() throws Exception {
-    workbenchConfig.featureFlags.enableVpcFlowLogs = true;
-
-    service.createAllOfUsBillingProject("project-name");
-
-    ArgumentCaptor<FirecloudCreateRawlsBillingProjectFullRequest> captor =
-        ArgumentCaptor.forClass(FirecloudCreateRawlsBillingProjectFullRequest.class);
-    verify(billingApi).createBillingProjectFull(captor.capture());
-    FirecloudCreateRawlsBillingProjectFullRequest request = captor.getValue();
-
     assertThat(request.getEnableFlowLogs()).isTrue();
     assertThat(request.getHighSecurityNetwork()).isTrue();
+    assertThat(request.getServicePerimeter()).isNull();
   }
 
   @Test

@@ -248,13 +248,12 @@ public class FireCloudServiceImpl implements FireCloudService {
               projectName, WORKSPACE_DELIMITER));
     }
 
-    boolean enableVpcFlowLogs = configProvider.get().featureFlags.enableVpcFlowLogs;
     FirecloudCreateRawlsBillingProjectFullRequest request =
         new FirecloudCreateRawlsBillingProjectFullRequest()
             .billingAccount(configProvider.get().billing.freeTierBillingAccountName())
             .projectName(projectName)
-            .highSecurityNetwork(enableVpcFlowLogs)
-            .enableFlowLogs(enableVpcFlowLogs)
+            .highSecurityNetwork(true)
+            .enableFlowLogs(true)
             .privateIpGoogleAccess(true);
 
     boolean enableVpcServicePerimeter = configProvider.get().featureFlags.enableVpcServicePerimeter;
