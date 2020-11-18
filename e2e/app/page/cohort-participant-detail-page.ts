@@ -21,11 +21,11 @@ export default class CohortParticipantDetailPage extends AuthenticatedPage {
     return true;
   }
 
-  // get the particpant ID displayed between the two pi-angle button on participant deatil page
+  // get the particpant ID displayed between the two pi-angle button on participant detail page
   async getParticipantIDnum(): Promise<string> {
     const selector = `//*[@class="detail-header"]//span[contains(., "Participant ")]`;
     const pID = await this.extractParticipantID(selector);
-    console.log(`Participant id 2: ${pID}`);
+    console.log(`Participant ID: ${pID}`);
     return pID;
   }
 
