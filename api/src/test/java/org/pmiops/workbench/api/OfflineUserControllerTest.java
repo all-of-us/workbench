@@ -90,19 +90,8 @@ public class OfflineUserControllerTest {
   }
 
   @Test
-  public void testBulkSyncTrainingStatusV1()
-      throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
-    workbenchConfig.featureFlags.enableMoodleV2Api = false;
-    // Mock out the service under test to simply return the passed user argument.
-    doAnswer(i -> i.getArgument(0)).when(userService).syncComplianceTrainingStatusV1(any(), any());
-    offlineUserController.bulkSyncComplianceTrainingStatus();
-    verify(userService, times(4)).syncComplianceTrainingStatusV1(any(), any());
-  }
-
-  @Test
   public void testBulkSyncTrainingStatusV2()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
-    workbenchConfig.featureFlags.enableMoodleV2Api = true;
     // Mock out the service under test to simply return the passed user argument.
     doAnswer(i -> i.getArgument(0)).when(userService).syncComplianceTrainingStatusV2(any(), any());
     offlineUserController.bulkSyncComplianceTrainingStatus();
@@ -110,23 +99,8 @@ public class OfflineUserControllerTest {
   }
 
   @Test(expected = ServerErrorException.class)
-  public void testBulkSyncTrainingStatusWithSingleUserErrorV1()
-      throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
-    workbenchConfig.featureFlags.enableMoodleV2Api = false;
-    doAnswer(i -> i.getArgument(0)).when(userService).syncComplianceTrainingStatusV1(any(), any());
-    doThrow(new org.pmiops.workbench.moodle.ApiException("Unknown error"))
-        .when(userService)
-        .syncComplianceTrainingStatusV1(
-            argThat(user -> user.getUsername().equals("a@fake-research-aou.org")), any());
-    offlineUserController.bulkSyncComplianceTrainingStatus();
-    // Even when a single call throws an exception, we call the service for all users.
-    verify(userService, times(4)).syncComplianceTrainingStatusV1(any(), any());
-  }
-
-  @Test(expected = ServerErrorException.class)
   public void testBulkSyncTrainingStatusWithSingleUserErrorV2()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
-    workbenchConfig.featureFlags.enableMoodleV2Api = true;
     doAnswer(i -> i.getArgument(0)).when(userService).syncComplianceTrainingStatusV2(any(), any());
     doThrow(new org.pmiops.workbench.moodle.ApiException("Unknown error"))
         .when(userService)

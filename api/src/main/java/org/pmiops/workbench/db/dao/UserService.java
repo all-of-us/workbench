@@ -83,14 +83,6 @@ public interface UserService {
 
   List<DbUser> findUsersBySearchString(String term, Sort sort);
 
-  @Deprecated
-  DbUser syncComplianceTrainingStatusV1()
-      throws org.pmiops.workbench.moodle.ApiException, NotFoundException;
-
-  @Deprecated
-  DbUser syncComplianceTrainingStatusV1(DbUser user, Agent agent)
-      throws org.pmiops.workbench.moodle.ApiException, NotFoundException;
-
   DbUser syncComplianceTrainingStatusV2()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException;
 

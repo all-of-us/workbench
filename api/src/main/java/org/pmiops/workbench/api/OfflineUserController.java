@@ -79,12 +79,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         Timestamp oldTime = user.getComplianceTrainingCompletionTime();
         DataAccessLevel oldLevel = user.getDataAccessLevelEnum();
 
-        DbUser updatedUser;
-        if (workbenchConfigProvider.get().featureFlags.enableMoodleV2Api) {
-          updatedUser = userService.syncComplianceTrainingStatusV2(user, Agent.asSystem());
-        } else {
-          updatedUser = userService.syncComplianceTrainingStatusV1(user, Agent.asSystem());
-        }
+        DbUser updatedUser = userService.syncComplianceTrainingStatusV2(user, Agent.asSystem());
 
         Timestamp newTime = updatedUser.getComplianceTrainingCompletionTime();
         DataAccessLevel newLevel = updatedUser.getDataAccessLevelEnum();

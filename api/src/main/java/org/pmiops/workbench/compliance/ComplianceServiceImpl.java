@@ -9,10 +9,8 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.api.MoodleApi;
-import org.pmiops.workbench.moodle.model.BadgeDetailsV1;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
 import org.pmiops.workbench.moodle.model.MoodleUserResponse;
-import org.pmiops.workbench.moodle.model.UserBadgeResponseV1;
 import org.pmiops.workbench.moodle.model.UserBadgeResponseV2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -70,31 +68,6 @@ public class ComplianceServiceImpl implements ComplianceService {
       return null;
     }
     return response.get(0).getId();
-  }
-
-  /**
-   * Returns the Moodle user badge for the given Moodle user ID.
-   *
-   * <p>Throws a NOT_FOUND API exception if the Moodle API call returns an error because the given
-   * Moodle user ID does not exist.
-   */
-  @Override
-  @Deprecated
-  public List<BadgeDetailsV1> getUserBadgeV1(int userMoodleId) throws ApiException {
-    if (!enableMoodleCalls()) {
-      return null;
-    }
-
-    UserBadgeResponseV1 response =
-        moodleApiProvider.get().getMoodleBadgeV1(RESPONSE_FORMAT, getToken(), userMoodleId);
-    if (response.getException() != null && response.getException().equals(MOODLE_EXCEPTION)) {
-      if (response.getErrorcode().equals(MOODLE_USER_NOT_ALLOWED_ERROR_CODE)) {
-        throw new ApiException(HttpStatus.NOT_FOUND.value(), response.getMessage());
-      } else {
-        throw new ApiException(response.getMessage());
-      }
-    }
-    return response.getBadges();
   }
 
   /**
