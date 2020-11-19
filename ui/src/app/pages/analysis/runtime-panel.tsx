@@ -672,7 +672,7 @@ export const RuntimePanel = fp.flow(
   const [selectedDataprocConfig, setSelectedDataprocConfig] = useState<DataprocConfig | null>(dataprocConfig);
 
   const runtimeExists = (status && ![RuntimeStatus.Deleted, RuntimeStatus.Error].includes(status)) || !!pendingRuntime;
-  const disableControls = !!status && ![RuntimeStatus.Deleted, RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus) || !!pendingRuntime;
+  const disableControls = runtimeExists && ![RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus);
 
   const initialRuntimeConfig = {
     computeType: initialCompute,
