@@ -6,6 +6,7 @@ import OldCdrVersionModal from 'app/page/old-cdr-version-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import Navigation, {NavLink} from 'app/component/navigation';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
+import WorkspacesPage from '../../app/page/workspaces-page';
 
 describe('Duplicate workspace, changing CDR versions', () => {
     beforeEach(async () => {
@@ -43,7 +44,8 @@ describe('Duplicate workspace, changing CDR versions', () => {
 
         // Delete duplicate workspace via Workspace card in Your Workspaces page.
         await Navigation.navMenu(page, NavLink.YOUR_WORKSPACES);
-        await workspaceEditPage.waitForLoad();
+        const workspacesPage = new WorkspacesPage(page);
+        await workspacesPage.waitForLoad();
 
         await WorkspaceCard.deleteWorkspace(page, duplicateWorkspaceName);
 
@@ -86,7 +88,8 @@ describe('Duplicate workspace, changing CDR versions', () => {
 
         // Delete duplicate workspace via Workspace card in Your Workspaces page.
         await Navigation.navMenu(page, NavLink.YOUR_WORKSPACES);
-        await workspaceEditPage.waitForLoad();
+        const workspacesPage = new WorkspacesPage(page);
+        await workspacesPage.waitForLoad();
 
         await WorkspaceCard.deleteWorkspace(page, duplicateWorkspaceName);
 
