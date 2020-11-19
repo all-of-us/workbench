@@ -301,22 +301,4 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     }
     return true;
   }
-
-  @Override
-  public void startRuntime(String googleProject, String runtimeName) {
-    leonardoRetryHandler.run(
-        (context) -> {
-          runtimesApiProvider.get().startRuntime(googleProject, runtimeName);
-          return null;
-        });
-  }
-
-  @Override
-  public void stopRuntime(String googleProject, String runtimeName) {
-    leonardoRetryHandler.run(
-        (context) -> {
-          runtimesApiProvider.get().stopRuntime(googleProject, runtimeName);
-          return null;
-        });
-  }
 }

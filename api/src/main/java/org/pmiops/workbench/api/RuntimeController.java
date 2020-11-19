@@ -317,32 +317,6 @@ public class RuntimeController implements RuntimeApiDelegate {
   }
 
   @Override
-  public ResponseEntity<EmptyResponse> startRuntime(String workspaceNamespace) {
-    String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
-        workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
-    try {
-      leonardoNotebooksClient.startRuntime(workspaceNamespace, userProvider.get().getRuntimeName());
-      return ResponseEntity.ok(new EmptyResponse());
-    } catch(WorkbenchException e) {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-    }
-  }
-
-  @Override
-  public ResponseEntity<EmptyResponse> stopRuntime(String workspaceNamespace) {
-    String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
-        workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
-    try {
-      leonardoNotebooksClient.stopRuntime(workspaceNamespace, userProvider.get().getRuntimeName());
-      return ResponseEntity.ok(new EmptyResponse());
-    } catch(WorkbenchException e) {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-    }
-  }
-
-  @Override
   public ResponseEntity<RuntimeLocalizeResponse> localize(
       String workspaceNamespace, RuntimeLocalizeRequest body) {
     DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
