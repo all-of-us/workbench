@@ -107,10 +107,10 @@ describe('Cohort review tests', () => {
     // get the participant ID on the sidebar content
     const reviewParticipantid2 = await sidebarContent.getParticipantID(); 
     console.log(`reviewParticipantid2: ${reviewParticipantid2}`);
-    //validate that the participant ID on detail page and the sidebar content match
+    // validate that the participant ID on detail page and the sidebar content match
     expect(detailPageParticipantid).toEqual(reviewParticipantid2);
 
-    //select a review status
+    // select a review status
     const participantStatus2 = await sidebarContent.selectReviewStatus(ReviewStatus.Included);
     console.log(participantStatus2);
 
