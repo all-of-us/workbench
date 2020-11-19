@@ -9,7 +9,7 @@ dependencies {
     // Genomics dependencies
     compile "org.broadinstitute:gatk:4.1.8.0"
     compile "com.github.samtools:htsjdk:2.1.1"
-    compile "com.google.guava:guava:26.0-jre"
+    compile "com.google.guava:guava:30.0-jre"
     testCompile "com.google.truth:truth:0.42"
 }
 
