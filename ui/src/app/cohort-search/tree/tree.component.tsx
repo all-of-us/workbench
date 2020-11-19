@@ -231,8 +231,8 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
   get showHeader() {
     const {node: {domainId}, source} = this.props;
     return !(source === 'criteria' && domainId === Domain.SURVEY.toString())
-        && domainId !== Domain.PHYSICALMEASUREMENT.toString()
-        && domainId !== Domain.VISIT.toString();
+      && domainId !== Domain.PHYSICALMEASUREMENT.toString()
+      && domainId !== Domain.VISIT.toString();
   }
 
   // Hides the tree node for COPE survey if enableCOPESurvey config flag is set to false
@@ -262,21 +262,18 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
         more.
       </div>}
       {node.domainId !== Domain.VISIT.toString() &&
-      <div style={serverConfigStore.getValue().enableCohortBuilderV2
+        <div style={serverConfigStore.getValue().enableCohortBuilderV2
           ? {...styles.searchBarContainer, backgroundColor: 'transparent', width: '65%'}
           : styles.searchBarContainer}>
-        <SearchBar node={node}
-                   searchTerms={searchTerms}
-                   selectOption={selectOption}
-                   setIngredients={(i) => this.setState({ingredients: i})}
-                   setInput={(v) => setSearchTerms(v)}/>
-      </div>
+          <SearchBar node={node}
+                     searchTerms={searchTerms}
+                     selectOption={selectOption}
+                     setIngredients={(i) => this.setState({ingredients: i})}
+                     setInput={(v) => setSearchTerms(v)}/>
+        </div>
       }
       {!loading && <div style={{paddingTop: this.showHeader ? '0.5rem' : 0, width: '99%'}}>
-        {this.showHeader && <div style={{
-          ...styles.treeHeader,
-          border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`
-        }}>
+        {this.showHeader && <div style={{...styles.treeHeader, border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`}}>
           {!!ingredients && <div style={styles.ingredients}>
             Ingredients in this brand: {ingredients.join(', ')}
           </div>}
@@ -284,11 +281,9 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
         </div>}
         {error && <div style={styles.error}>
           <ClrIcon style={{color: colors.white}} className='is-solid' shape='exclamation-triangle'/>
-          Sorry, the request cannot be completed. Please try again or contact Support in the left
-          hand navigation
+          Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation
         </div>}
-        <div style={this.showHeader ? styles.node : {...styles.node, border: 'none'}}
-             className='show-scrollbar'>
+        <div style={this.showHeader ? styles.node : {...styles.node, border: 'none'}} className='show-scrollbar'>
           {!!children && children.map((child, c) => this.showNode(child) && <TreeNode key={c}
                                                                                       source={this.props.source}
                                                                                       autocompleteSelection={autocompleteSelection}
