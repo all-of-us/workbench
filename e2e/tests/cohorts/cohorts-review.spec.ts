@@ -68,13 +68,12 @@ describe('Cohort review tests', () => {
     isValidDate(cellValue);
 
     // Check table row link navigation works. Click ParticipantId link in the second row.
-        // const dataTablepid2 = await cohortReviewPage.getParticipantLinkId(3);
-        // console.log(dataTablepid2);
     const dataTablepid1 = await cohortReviewPage.clickParticipantLink(2);
     
     // Not checking anything in Participant Detail page.
     const participantDetailPage = new CohortParticipantDetailPage(page);
-    // await participantDetailPage.waitForLoad();
+     await participantDetailPage.waitForLoad();
+
     // click on the pen icon to open the participant
      await participantDetailPage.clickPenIconHelpSideBar();
     // confirm that the sidebar-content opened
@@ -87,31 +86,37 @@ describe('Cohort review tests', () => {
     // select review status from dropdown option
     const participantStatus1 = await sidebarContent.selectReviewStatus(ReviewStatus.Excluded);
     console.log(participantStatus1);
-    // click on the plus-icon next to annotations
+    // click on the plus-icon next to annotations 
     await sidebarContent.getAnnotationsButton().then(btn => btn.click());
+    // the annotations modal displays
     const annotationFieldModal = new AnnotationFieldModal(page);    
-    
+    // click cancel button onthe annotation modal
     await annotationFieldModal.cancelAnnotationButton().then(btn => btn.click());
-
-    
+    // close the sidebar content 
     await participantDetailPage.clickPenIconHelpSideBar();
+
     // navigate to the next participant
     await participantDetailPage.getGoToTheNextParticipant();
     await participantDetailPage.waitForLoad();
-    // click on the pen icon to open the participant
+   
+    // get the participant ID on the detail page
     const detailPageParticipantid = await participantDetailPage.getParticipantIDnum();
+     // click on the pen icon to open the sidebar
     await participantDetailPage.clickPenIconHelpSideBar();
     await waitWhileLoading(page); 
+    // get the participant ID on the sidebar content
     const reviewParticipantid2 = await sidebarContent.getParticipantID(); 
     console.log(`reviewParticipantid2: ${reviewParticipantid2}`);
-
+    //validate that the participant ID on detail page and the sidebar content match
     expect(detailPageParticipantid).toEqual(reviewParticipantid2);
+
+    //select a review status
     const participantStatus2 = await sidebarContent.selectReviewStatus(ReviewStatus.Included);
     console.log(participantStatus2);
+
     // navigate to review set page and check if the status column is displaying the review status for both participants
     await participantDetailPage.getBackToReviewSetButton().then(btn => btn.click());
     await waitWhileLoading(page);
-
 
     // Get the status of participant1
     const statusCell1 = await participantsTable.getCell(2, 8);
@@ -119,7 +124,6 @@ describe('Cohort review tests', () => {
     console.log(statusValue1);
     expect(statusValue1).toEqual(participantStatus1);
 
-    
     // Get the status of participant2
     const statusCell2 = await participantsTable.getCell(3, 8);
     const statusValue2 = await getPropValue<string>(statusCell2, 'textContent');
