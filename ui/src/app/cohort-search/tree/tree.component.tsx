@@ -151,40 +151,40 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
     const criteriaType = domainId === Domain.DRUG.toString() ? CriteriaType.ATC.toString() : type;
     const parentId = domainId === Domain.PHYSICALMEASUREMENT.toString() ? null : id;
     cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, parentId)
-        .then(resp => {
-          if (domainId === Domain.PHYSICALMEASUREMENT.toString()) {
-            let children = [];
-            resp.items.forEach(child => {
-              child['children'] = [];
-              if (child.parentId === 0) {
-                children.push(child);
-              } else {
-                children = this.addChildToParent(child, children);
-              }
-            });
-            this.setState({children});
-          } else if (domainId === Domain.SURVEY.toString() && selectedSurvey) {
-            // Temp: This should be handle in API
-            this.updatePpiSurveys(resp, resp.items.filter(child => child.name === selectedSurvey));
-          } else if (domainId === Domain.SURVEY.toString() && this.props.source === 'conceptSetDetails') {
-            const selectedSurveyChild = resp.items.filter(child => child.id === this.props.node.parentId);
-            this.updatePpiSurveys(resp, selectedSurveyChild);
-          } else {
-            this.setState({children: resp.items});
-            if (domainId === Domain.SURVEY.toString()) {
-              const rootSurveys = ppiSurveys.getValue();
-              if (!rootSurveys[cdrVersionId]) {
-                rootSurveys[cdrVersionId] = resp.items;
-                ppiSurveys.next(rootSurveys);
-              }
+      .then(resp => {
+        if (domainId === Domain.PHYSICALMEASUREMENT.toString()) {
+          let children = [];
+          resp.items.forEach(child => {
+            child['children'] = [];
+            if (child.parentId === 0) {
+              children.push(child);
+            } else {
+              children = this.addChildToParent(child, children);
+            }
+          });
+          this.setState({children});
+        } else if (domainId === Domain.SURVEY.toString() && selectedSurvey) {
+          // Temp: This should be handle in API
+          this.updatePpiSurveys(resp, resp.items.filter(child => child.name === selectedSurvey));
+        } else if (domainId === Domain.SURVEY.toString() && this.props.source === 'conceptSetDetails') {
+          const selectedSurveyChild = resp.items.filter(child => child.id === this.props.node.parentId);
+          this.updatePpiSurveys(resp, selectedSurveyChild);
+        } else {
+          this.setState({children: resp.items});
+          if (domainId === Domain.SURVEY.toString()) {
+            const rootSurveys = ppiSurveys.getValue();
+            if (!rootSurveys[cdrVersionId]) {
+              rootSurveys[cdrVersionId] = resp.items;
+              ppiSurveys.next(rootSurveys);
             }
           }
-        })
-        .catch(error => {
-          console.error(error);
-          this.setState({error: true});
-        })
-        .finally(() => this.setState({loading: false}));
+        }
+      })
+      .catch(error => {
+        console.error(error);
+        this.setState({error: true});
+      })
+      .finally(() => this.setState({loading: false}));
   }
 
   updatePpiSurveys(resp, selectedSurveyChild) {
