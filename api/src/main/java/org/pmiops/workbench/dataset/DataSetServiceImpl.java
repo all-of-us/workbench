@@ -297,7 +297,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 .replace("${tableName}", BigQueryDataSetTableInfo.getTableName(domain)));
 
     final List<Long> conceptIds =
-        SURVEY.equals(request.getPrePackagedConceptSet())
+        Domain.SURVEY.equals(request.getDomain())
             ? conceptBigQueryService.getSurveyQuestionConceptIds()
             : conceptSetDao.findAllByConceptSetIdIn(request.getConceptSetIds()).stream()
                 .flatMap(cs -> cs.getConceptIds().stream())
