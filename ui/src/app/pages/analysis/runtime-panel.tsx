@@ -411,39 +411,14 @@ const CostEstimator = ({
   const masterMachine = findMachineByName(masterMachineType);
   const workerMachine = findMachineByName(workerMachineType);
 
-  const runningCost = machineRunningCost({
-    computeType: computeType,
-    masterDiskSize: masterDiskSize || diskSize,
-    masterMachine: masterMachine,
-    numberOfWorkers: numberOfWorkers,
-    numberOfPreemptibleWorkers: numberOfPreemptibleWorkers,
-    workerDiskSize: workerDiskSize,
-    workerMachine: workerMachine
-  });
-
-  const runningCostBreakdown = machineRunningCostBreakdown({
-    computeType: computeType,
-    masterDiskSize: masterDiskSize || diskSize,
-    masterMachine: masterMachine,
-    numberOfWorkers: numberOfWorkers,
-    numberOfPreemptibleWorkers: numberOfPreemptibleWorkers,
-    workerDiskSize: workerDiskSize,
-    workerMachine: workerMachine
-  });
-
-  const storageCost = machineStorageCost({
-    masterDiskSize: masterDiskSize || diskSize,
-    numberOfPreemptibleWorkers: numberOfPreemptibleWorkers,
-    numberOfWorkers: numberOfWorkers,
-    workerDiskSize: workerDiskSize
-  });
-
-  const storageCostBreakdown = machineStorageCostBreakdown({
-    masterDiskSize: masterDiskSize || diskSize,
-    numberOfPreemptibleWorkers: numberOfPreemptibleWorkers,
-    numberOfWorkers: numberOfWorkers,
-    workerDiskSize: workerDiskSize
-  });
+  const costConfig = {
+    computeType, masterDiskSize, masterMachine,
+    numberOfWorkers, numberOfPreemptibleWorkers, workerDiskSize, workerMachine
+  };
+  const runningCost = machineRunningCost(costConfig);
+  const runningCostBreakdown = machineRunningCostBreakdown(costConfig);
+  const storageCost = machineStorageCost(costConfig);
+  const storageCostBreakdown = machineStorageCostBreakdown(costConfig);
 
   return <FlexRow>
       <FlexColumn style={{marginRight: '1rem'}}>
