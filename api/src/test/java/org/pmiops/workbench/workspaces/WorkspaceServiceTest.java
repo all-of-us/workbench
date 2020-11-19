@@ -92,8 +92,6 @@ public class WorkspaceServiceTest {
       WorkbenchConfig workbenchConfig = new WorkbenchConfig();
       workbenchConfig.billing = new WorkbenchConfig.BillingConfig();
       workbenchConfig.billing.accountId = "free-tier-account";
-      workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
-      workbenchConfig.featureFlags.enableBillingLockout = true;
       return workbenchConfig;
     }
 
