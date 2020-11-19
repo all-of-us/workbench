@@ -18,7 +18,8 @@ import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {isAbortError} from 'app/utils/errors';
 import {currentWorkspaceStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
-import {AgeType, Cohort, GenderOrSexType, ResourceType, TemporalTime} from 'generated/fetch';
+import {WorkspaceData} from 'app/utils/workspace-data';
+import {AgeType, Cohort, GenderOrSexType, ResourceType, TemporalTime, WorkspaceAccessLevel} from 'generated/fetch';
 
 const COHORT_TYPE = 'AoU_Discover';
 
@@ -133,6 +134,7 @@ interface Props {
   searchRequest: any;
   updateCount: any;
   updating: Function;
+  workspace: WorkspaceData;
 }
 
 interface State {
@@ -406,17 +408,47 @@ export const ListOverview = withCurrentWorkspace()(
       ];
     }
 
+    get disableActionIcons() {
+      return this.state.loading || !this.props.cohort.id;
+    }
+
+    get disableDeleteIcon() {
+      return this.disableActionIcons || this.props.workspace.accessLevel === WorkspaceAccessLevel.READER;
+    }
+
+    get disableSaveButton() {
+      const {loading, saving, total} = this.state;
+      return loading || saving || this.definitionErrors || !total;
+    }
+
+    get disableModalSaveButton() {
+      const {name, saving} = this.state;
+      return this.cohortNameConflict || this.invalidNameInput || !name || saving;
+    }
+
+    get disableRefreshButton() {
+      const {ageType, currentGraphOptions, genderOrSexType} = this.state;
+      return ageType === currentGraphOptions.ageType && genderOrSexType === currentGraphOptions.genderOrSexType;
+    }
+
+    get cohortNameConflict() {
+      const {existingCohorts, name} = this.state;
+      return !!name && existingCohorts.includes(name.trim());
+    }
+
+    get invalidNameInput() {
+      const {name, nameTouched} = this.state;
+      return nameTouched && (!name || !name.trim());
+    }
+
+    get showTotalCount() {
+      return ![null, undefined].includes(this.state.total);
+    }
+
     render() {
       const {cohort} = this.props;
-      const {ageType, apiError, chartData, currentGraphOptions, deleting, description, existingCohorts, genderOrSexType, loading,
-        name, nameTouched, refreshing, saveModalOpen, saveError, saving, stackChart, total} = this.state;
-      const disableIcon = loading || !cohort.id;
-      const disableSave = loading || saving || this.definitionErrors || !total;
-      const disableRefresh = ageType === currentGraphOptions.ageType && genderOrSexType === currentGraphOptions.genderOrSexType;
-      const invalid = nameTouched && (!name || !name.trim());
-      const nameConflict = !!name && existingCohorts.includes(name.trim());
-      const saveDisabled = invalid || !name || nameConflict || saving;
-      const showTotal = total !== undefined && total !== null;
+      const {ageType, apiError, chartData, currentGraphOptions, deleting, description, genderOrSexType, loading, name, refreshing,
+        saveError, saveModalOpen, saving, stackChart, total} = this.state;
       return <React.Fragment>
         <div>
           <div style={styles.overviewHeader}>
@@ -429,14 +461,14 @@ export const ListOverview = withCurrentWorkspace()(
                 <Button type='primary'
                   style={styles.saveButton}
                   onClick={(event) => this.saveMenu.toggle(event)}
-                  disabled={disableSave}>
+                  disabled={this.disableSaveButton}>
                   Save Cohort <ClrIcon shape='caret down'/>
                 </Button>
               </React.Fragment>
               : <Button type='primary'
                 onClick={() => this.openSaveModal()}
                 style={styles.saveButton}
-                disabled={disableSave}>Create Cohort</Button>}
+                disabled={this.disableSaveButton}>Create Cohort</Button>}
               <TooltipTrigger content={<div>Export to notebook</div>}>
                 <Clickable style={{...styles.actionIcon, ...styles.disabled}}
                   onClick={() => this.navigateTo('notebook')} disabled>
@@ -444,13 +476,13 @@ export const ListOverview = withCurrentWorkspace()(
                 </Clickable>
               </TooltipTrigger>
               <TooltipTrigger content={<div>Delete cohort</div>}>
-                <Clickable style={{...styles.actionIcon, ...(disableIcon ? styles.disabled : {})}}
+                <Clickable style={this.disableDeleteIcon ? {...styles.actionIcon, ...styles.disabled} : styles.actionIcon}
                   onClick={() => this.setState({deleting: true})}>
                   <ClrIcon shape='trash' className='is-solid' size={30} />
                 </Clickable>
               </TooltipTrigger>
               <TooltipTrigger content={<div>Review participant level data</div>}>
-                <Clickable style={{...styles.actionIcon, ...(disableIcon ? styles.disabled : {})}}
+                <Clickable style={this.disableActionIcons ? {...styles.actionIcon, ...styles.disabled} : styles.actionIcon}
                   onClick={() => this.navigateTo('review')}>
                   <ClrIcon shape='copy' className='is-solid' size={30} />
                 </Clickable>
@@ -466,7 +498,7 @@ export const ListOverview = withCurrentWorkspace()(
                   <ClrIcon style={{color: '#F57600'}} shape='warning-standard' size={18} />
                 </TooltipTrigger>
               </span>
-              : loading ? <Spinner size={18} /> : <span>{showTotal && total.toLocaleString()}</span>}
+              : loading ? <Spinner size={18} /> : <span>{this.showTotalCount && total.toLocaleString()}</span>}
             </h2>
           </div>
           {apiError && !this.definitionErrors && <div style={styles.totalError}>
@@ -490,7 +522,7 @@ export const ListOverview = withCurrentWorkspace()(
                   <button style={styles.menuButton} onClick={(event) => this.ageMenu.toggle(event)}>
                     {ageTypeToText(ageType)} <ClrIcon style={{float: 'right'}} shape='caret down' size={12}/>
                   </button>
-                  <button style={disableRefresh ? {...styles.refreshButton, ...styles.disabled} : styles.refreshButton}
+                  <button style={this.disableRefreshButton ? {...styles.refreshButton, ...styles.disabled} : styles.refreshButton}
                     onClick={() => this.refreshGraphs()}>
                     REFRESH
                   </button>
@@ -527,14 +559,14 @@ export const ListOverview = withCurrentWorkspace()(
           }
         </div>
         {saveModalOpen && <Modal>
-          <ModalTitle style={invalid ? {marginBottom: 0} : {}}>Save Cohort as</ModalTitle>
+          <ModalTitle style={this.invalidNameInput ? {marginBottom: 0} : {}}>Save Cohort as</ModalTitle>
           <ModalBody style={{marginTop: '0.2rem'}}>
             {saveError && <div style={styles.error}>
               <ClrIcon className='is-solid' shape='exclamation-triangle' size={22} />
               Data cannot be saved. Please try again.
             </div>}
-            {invalid && <div style={styles.invalid}>Cohort name is required</div>}
-            {nameConflict && <div style={styles.invalid}>
+            {this.invalidNameInput && <div style={styles.invalid}>Cohort name is required</div>}
+            {this.cohortNameConflict && <div style={styles.invalid}>
               A cohort with this name already exists. Please choose a different name.
             </div>}
             <TextInput style={{marginBottom: '0.5rem'}}
@@ -555,7 +587,7 @@ export const ListOverview = withCurrentWorkspace()(
               Cancel
             </Button>
             <Button type='primary'
-              disabled={saveDisabled}
+              disabled={this.disableModalSaveButton}
               onClick={() => this.submit()}>
               {saving && <Spinner style={{marginRight: '0.25rem'}} size={18} />}
                Save
