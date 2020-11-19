@@ -404,14 +404,21 @@ const StartStopRuntimeButton = ({workspace, containerStyle}) => {
   const [status, setRuntimeStatus] = useRuntimeStatus(workspace.namespace);
 
   const rotateStyle = {animation: 'rotation 2s infinite linear'};
-  const {clickable = false, iconShape = null, styleOverrides = {}, onClick = () => {}} = fp.cond([
+  const {altText, clickable = false, iconShape = null, styleOverrides = {}, onClick = () => {}, } = fp.cond([
     [
       (s) => s === RuntimeStatus.Creating,
-      () => ({clickable: false, iconShape: 'compute-starting', styleOverrides: rotateStyle, onClick: () => {}})
+      () => ({
+        altText: "Runtime creation in progress",
+        clickable: false,
+        iconShape: 'compute-starting',
+        styleOverrides: rotateStyle,
+        onClick: () => {}
+      })
     ],
     [
       (s) => s === RuntimeStatus.Running,
       () => ({
+        altText: "Runtime running, click to pause",
         clickable: true,
         iconShape: 'compute-running',
         styleOverrides: {},
@@ -420,19 +427,38 @@ const StartStopRuntimeButton = ({workspace, containerStyle}) => {
     ],
     [
       (s) => s === RuntimeStatus.Updating,
-      () => ({clickable: false, iconShape: 'compute-starting', styleOverrides: rotateStyle, onClick: () => {}})
+      () => ({
+        altText: "Runtime update in progress",
+        clickable: false,
+        iconShape: 'compute-starting',
+        styleOverrides: rotateStyle,
+        onClick: () => {}
+      })
     ],
     [
       (s) => s === RuntimeStatus.Error,
-      () => ({clickable: false, iconShape: 'compute-error', styleOverrides: {}, onClick: () => {}})
+      () => ({
+        altText: "Runtime in error state",
+        clickable: false,
+        iconShape: 'compute-error',
+        styleOverrides: {},
+        onClick: () => {}
+      })
     ],
     [
       (s) => s === RuntimeStatus.Stopping,
-      () => ({clickable: false, iconShape: 'compute-stopping', styleOverrides: rotateStyle, onClick: () => {}})
+      () => ({
+        altText: "Runtime pause in progress",
+        clickable: false,
+        iconShape: 'compute-stopping',
+        styleOverrides: rotateStyle,
+        onClick: () => {}
+      })
     ],
     [
       (s) => s === RuntimeStatus.Stopped,
       () => ({
+        altText: "Runtime paused, click to resume",
         clickable: true,
         iconShape: 'compute-stopped',
         styleOverrides: {},
@@ -441,21 +467,53 @@ const StartStopRuntimeButton = ({workspace, containerStyle}) => {
     ],
     [
       (s) => s === RuntimeStatus.Starting,
-      () => ({clickable: false, iconShape: 'compute-starting', styleOverrides: rotateStyle, onClick: () => {}})
+      () => ({
+        altText: "Runtime resume in progress",
+        clickable: false, iconShape: 'compute-starting',
+        styleOverrides: rotateStyle,
+        onClick: () => {}
+      })
     ],
     [
       (s) => s === RuntimeStatus.Deleting,
-      () => ({clickable: false, iconShape: 'compute-stopping', styleOverrides: rotateStyle, onClick: () => {}})
+      () => ({
+        altText: "Runtime deletion in progress",
+        clickable: false,
+        iconShape: 'compute-stopping',
+        styleOverrides: rotateStyle,
+        onClick: () => {}
+      })
     ],
     [
       (s) => s === RuntimeStatus.Deleted,
-      () => ({clickable: false, iconShape: 'compute-none', styleOverrides: {}, onClick: () => {}})
+      () => ({
+        altText: "Runtime has been deleted",
+        clickable: false,
+        iconShape: 'compute-none',
+        styleOverrides: {},
+        onClick: () => {}
+      })
     ],
     [
       (s) => s === RuntimeStatus.Unknown,
-      () => ({clickable: false, iconShape: 'compute-none', styleOverrides: {}, onClick: () => {}})
+      () => ({
+        altText: "Runtime status unknown",
+        clickable: false,
+        iconShape: 'compute-none',
+        styleOverrides: {},
+        onClick: () => {}
+      })
     ],
-    [() => true, () => ({clickable: false, iconShape: 'compute-none', styleOverrides: {}, onClick: () => {}})]
+    [
+      () => true,
+      () => ({
+        altText: "No runtime found",
+        clickable: false,
+        iconShape: 'compute-none',
+        styleOverrides: {},
+        onClick: () => {}
+      })
+    ]
   ])(status);
 
   const iconSrc = `/assets/icons/${iconShape}.svg`;
@@ -467,11 +525,18 @@ const StartStopRuntimeButton = ({workspace, containerStyle}) => {
     padding: '0 1rem',
     ...containerStyle
   }}>
-    {/* TODO: actually make API changes when click, fix alt text */}
-    {clickable && <Clickable onClick={() => onClick()}>
-      <img alt={'TODO TODO TODO'} src={iconSrc} style={styleOverrides}/>
-    </Clickable>}
-    {!clickable && <img alt={'TODO TODO TODO'} src={iconSrc} style={styleOverrides}/>}
+    {/* TooltipTrigger inside the conditionals because it doesn't handle fragments well */}
+    {
+      clickable && <TooltipTrigger content={<div>{altText}</div>} side='left'>
+        <Clickable onClick={() => onClick()}>
+          <img alt={altText} src={iconSrc} style={styleOverrides}/>
+        </Clickable>
+      </TooltipTrigger>
+    }
+    {!clickable && <TooltipTrigger content={<div>{altText}</div>} side='left'>
+        <img alt={altText} src={iconSrc} style={styleOverrides}/>
+      </TooltipTrigger>
+    }
   </FlexRow>;
 };
 
