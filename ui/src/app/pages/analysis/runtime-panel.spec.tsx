@@ -363,10 +363,10 @@ describe('RuntimePanel', () => {
     expect(memoryOptions.map(m => m.text())).toEqual(['7.2', '30', '52']);
   });
 
-  it('should disable the Update button if there are no changes and runtime is running', async() => {
+  it('should disable the Next button if there are no changes and runtime is running', async() => {
     const wrapper = await component();
 
-    expect(wrapper.find(Button).find({'aria-label': 'Update'}).first().prop('disabled')).toBeTruthy();
+    expect(wrapper.find(Button).find({'aria-label': 'Next'}).first().prop('disabled')).toBeTruthy();
   });
 
   it('should warn user about reboot if there are updates that require one - increase disk size', async() => {
