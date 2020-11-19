@@ -9,7 +9,8 @@
     "module": "commonjs",
     "target": "es5",
     "types": [
-      "jest"
+      "jest",
+      "node"
     ],
     "jsx": "react"
   },
