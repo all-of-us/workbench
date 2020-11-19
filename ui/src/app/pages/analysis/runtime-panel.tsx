@@ -214,7 +214,7 @@ export const ConfirmDelete = ({onCancel, onConfirm}) => {
   </Fragment>;
 };
 
-const MachineSelector = ({onChange, selectedMachine, machineType, idPrefix}) => {
+const MachineSelector = ({onChange, selectedMachine, machineType, disabled, idPrefix}) => {
   const initialMachineType = fp.find(({name}) => name === machineType, allMachineTypes) || defaultMachineType;
   const {cpu, memory} = selectedMachine || initialMachineType;
 
@@ -236,6 +236,7 @@ const MachineSelector = ({onChange, selectedMachine, machineType, idPrefix}) => 
             fp.find({cpu: value}),
             onChange)(validLeonardoMachineTypes)
         }
+        disabled={disabled}
         value={cpu}/>
       <label htmlFor={`${idPrefix}-ram`}>RAM (GB)</label>
       <Dropdown id={`${idPrefix}-ram`}
@@ -254,16 +255,18 @@ const MachineSelector = ({onChange, selectedMachine, machineType, idPrefix}) => 
             // maybeGetMachine,
             onChange
             )(validLeonardoMachineTypes) }
+        disabled={disabled}
         value={memory}
         />
   </Fragment>;
 };
 
-const DiskSizeSelector = ({onChange, selectedDiskSize, diskSize, idPrefix}) => {
+const DiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskSize, idPrefix}) => {
   return <Fragment>
     <label htmlFor={`${idPrefix}-disk`}>Disk (GB)</label>
     <InputNumber id={`${idPrefix}-disk`}
       showButtons
+      disabled={disabled}
       decrementButtonClassName='p-button-secondary'
       incrementButtonClassName='p-button-secondary'
       value={selectedDiskSize || diskSize}
@@ -273,7 +276,7 @@ const DiskSizeSelector = ({onChange, selectedDiskSize, diskSize, idPrefix}) => {
   </Fragment>;
 };
 
-const DataProcConfigSelector = ({onChange, dataprocConfig})  => {
+const DataProcConfigSelector = ({onChange, disabled, dataprocConfig})  => {
   const {
     workerMachineType = defaultMachineName,
     workerDiskSize = 50,
@@ -310,6 +313,7 @@ const DataProcConfigSelector = ({onChange, dataprocConfig})  => {
       <label htmlFor='num-workers'>Workers</label>
       <InputNumber id='num-workers'
         showButtons
+        disabled={disabled}
         decrementButtonClassName='p-button-secondary'
         incrementButtonClassName='p-button-secondary'
         value={selectedNumWorkers}
@@ -319,6 +323,7 @@ const DataProcConfigSelector = ({onChange, dataprocConfig})  => {
       <label htmlFor='num-preemptible'>Preemptible</label>
       <InputNumber id='num-preemptible'
         showButtons
+        disabled={disabled}
         decrementButtonClassName='p-button-secondary'
         incrementButtonClassName='p-button-secondary'
         value={selectedPreemtible}
@@ -332,16 +337,25 @@ const DataProcConfigSelector = ({onChange, dataprocConfig})  => {
         machineType={workerMachineType}
         onChange={setSelectedWorkerMachine}
         selectedMachine={selectedWorkerMachine}
+        disabled={disabled}
         idPrefix='worker'/>
-      <DiskSizeSelector diskSize={workerDiskSize} onChange={setSelectedDiskSize} selectedDiskSize={selectedDiskSize} idPrefix='worker'/>
+      <DiskSizeSelector
+        diskSize={workerDiskSize}
+        onChange={setSelectedDiskSize}
+        selectedDiskSize={selectedDiskSize}
+        disabled={disabled}
+        idPrefix='worker'/>
     </div>
   </fieldset>;
 };
 
-const PresetSelector = ({hasMicroarrayData, setSelectedDiskSize, setSelectedMachine, setSelectedCompute, setSelectedDataprocConfig}) => {
-  {/* Recommended runtime: pick from default templates or change the image. */}
+// Select a recommended preset configuration.
+const PresetSelector = ({
+  hasMicroarrayData, setSelectedDiskSize, setSelectedMachine,
+  setSelectedCompute, setSelectedDataprocConfig, disabled}) => {
   return <PopupTrigger side='bottom'
                 closeOnClick
+                disabled={disabled}
                 content={
                   <React.Fragment>
                     {
@@ -384,7 +398,11 @@ const PresetSelector = ({hasMicroarrayData, setSelectedDiskSize, setSelectedMach
                   </React.Fragment>
                 }>
     {/* inline-block aligns the popup menu beneath the clickable content, rather than the middle of the panel */}
-    <Clickable style={{display: 'inline-block'}} data-test-id='runtime-presets-menu'>
+    <Clickable
+      disabled={disabled}
+      data-test-id='runtime-presets-menu'
+      style={{display: 'inline-block', ...(disabled ?
+        {color: colorWithWhiteness(colors.dark, .4)} : {})}}>
       Recommended environments <ClrIcon shape='caret down'/>
     </Clickable>
   </PopupTrigger>;
@@ -654,6 +672,7 @@ export const RuntimePanel = fp.flow(
   const [selectedDataprocConfig, setSelectedDataprocConfig] = useState<DataprocConfig | null>(dataprocConfig);
 
   const runtimeExists = (status && ![RuntimeStatus.Deleted, RuntimeStatus.Error].includes(status)) || !!pendingRuntime;
+  const disableControls = !!status && ![RuntimeStatus.Deleted, RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus) || !!pendingRuntime;
 
   const initialRuntimeConfig = {
     computeType: initialCompute,
@@ -670,7 +689,7 @@ export const RuntimePanel = fp.flow(
   };
 
   const runtimeDiffs = getRuntimeConfigDiffs(initialRuntimeConfig, newRuntimeConfig);
-  const runtimeChanged = runtimeDiffs.length > 0;
+  const runtimeChanged = runtimeExists && runtimeDiffs.length > 0;
   const needsDelete = runtimeDiffs.map(diff => diff.differenceType).includes(RuntimeDiffState.NEEDS_DELETE);
 
   const [creatorFreeCreditsRemaining, setCreatorFreeCreditsRemaining] = useState(0);
@@ -794,30 +813,33 @@ export const RuntimePanel = fp.flow(
           />
 
           <PresetSelector
-              hasMicroarrayData={hasMicroarrayData}
-              setSelectedDiskSize={(disk) => setSelectedDiskSize(disk)}
-              setSelectedMachine={(machine) => setSelectedMachine(machine)}
-              setSelectedCompute={(compute) => setSelectedCompute(compute)}
-              setSelectedDataprocConfig={(dataproc) => setSelectedDataprocConfig(dataproc)}
+            hasMicroarrayData={hasMicroarrayData}
+            disabled={disableControls}
+            setSelectedDiskSize={(disk) => setSelectedDiskSize(disk)}
+            setSelectedMachine={(machine) => setSelectedMachine(machine)}
+            setSelectedCompute={(compute) => setSelectedCompute(compute)}
+            setSelectedDataprocConfig={(dataproc) => setSelectedDataprocConfig(dataproc)}
           />
           {/* Runtime customization: change detailed machine configuration options. */}
           <h3 style={styles.sectionHeader}>Cloud compute profile</h3>
           <div style={styles.formGrid}>
             <MachineSelector
-                idPrefix='runtime'
-                selectedMachine={selectedMachine}
-             onChange={(value) => setSelectedMachine(value)}
-             machineType={machineName}/>
+              idPrefix='runtime'
+              disabled={disableControls}
+              selectedMachine={selectedMachine}
+              onChange={(value) => setSelectedMachine(value)}
+              machineType={machineName}/>
             <DiskSizeSelector
                 idPrefix='runtime'
                 selectedDiskSize={selectedDiskSize}
                 onChange={(value) => setSelectedDiskSize(value)}
+                disabled={disableControls}
                 diskSize={diskSize}/>
          </div>
          <FlexColumn style={{marginTop: '1rem'}}>
            <label htmlFor='runtime-compute'>Compute type</label>
            <Dropdown id='runtime-compute'
-                     disabled={!hasMicroarrayData}
+                     disabled={!hasMicroarrayData || disableControls}
                      style={{width: '10rem'}}
                      options={[ComputeType.Standard, ComputeType.Dataproc]}
                      value={selectedCompute || ComputeType.Standard}
@@ -825,7 +847,10 @@ export const RuntimePanel = fp.flow(
                      />
            {
              selectedCompute === ComputeType.Dataproc &&
-             <DataProcConfigSelector onChange={config => setSelectedDataprocConfig(config)} dataprocConfig={selectedDataprocConfig} />
+             <DataProcConfigSelector
+               disabled={disableControls}
+               onChange={config => setSelectedDataprocConfig(config)}
+               dataprocConfig={selectedDataprocConfig} />
            }
          </FlexColumn>
        </div>
@@ -837,11 +862,11 @@ export const RuntimePanel = fp.flow(
        <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
          <Link
            style={{...styles.deleteLink, ...(
-             [RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus) ?
-             {} : {color: colorWithWhiteness(colors.dark, .4)}
+             (disableControls || !runtimeExists) ?
+             {color: colorWithWhiteness(colors.dark, .4)} : {}
            )}}
            aria-label='Delete Environment'
-           disabled={![RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus)}
+           disabled={disableControls || !runtimeExists}
            onClick={() => setPanelContent(PanelContent.Delete)}>Delete Environment</Link>
          {!runtimeExists ? renderCreateButton() : renderNextButton()}
        </FlexRow>
