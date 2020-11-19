@@ -111,188 +111,197 @@ interface State {
 }
 
 export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept(), withCdrVersions())
-  (class extends React.Component<Props, State> {
-    constructor(props: Props) {
-      super(props);
-      this.state = {
-        autocompleteSelection: undefined,
-        children: undefined,
-        error: false,
-        ingredients: undefined,
-        loading: true,
-      };
-    }
+(class extends React.Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      autocompleteSelection: undefined,
+      children: undefined,
+      error: false,
+      ingredients: undefined,
+      loading: true,
+    };
+  }
 
-    componentDidMount(): void {
-      this.loadRootNodes();
-    }
+  componentDidMount(): void {
+    this.loadRootNodes();
+  }
 
-    componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any) {
-      const {concept, node: {domainId}, source} = this.props;
-      if (source === 'conceptSetDetails') {
-        if (prevProps.concept !== concept) {
-          const {cdrVersionId} = (currentWorkspaceStore.getValue());
-          this.setState({children: concept, loading: false});
-          if (domainId === Domain.SURVEY.toString()) {
-            const rootSurveys = ppiSurveys.getValue();
-            if (!rootSurveys[cdrVersionId]) {
-              rootSurveys[cdrVersionId] = concept;
-              ppiSurveys.next(rootSurveys);
-            }
-          }
-        }
-      }
-    }
-
-    loadRootNodes() {
-      const {node: {domainId, id, isStandard, type}, selectedSurvey} = this.props;
-      this.setState({loading: true});
-      const {cdrVersionId} = (currentWorkspaceStore.getValue());
-      const criteriaType = domainId === Domain.DRUG.toString() ? CriteriaType.ATC.toString() : type;
-      const parentId = domainId === Domain.PHYSICALMEASUREMENT.toString() ? null : id;
-      cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, parentId)
-    .then(resp => {
-      if (domainId === Domain.PHYSICALMEASUREMENT.toString()) {
-        let children = [];
-        resp.items.forEach(child => {
-          child['children'] = [];
-          if (child.parentId === 0) {
-            children.push(child);
-          } else {
-            children = this.addChildToParent(child, children);
-          }
-        });
-        this.setState({children});
-      } else if (domainId === Domain.SURVEY.toString() &&  selectedSurvey) {
-        // Temp: This should be handle in API
-        this.updatePpiSurveys(resp, resp.items.filter(child => child.name === selectedSurvey));
-      } else if (domainId === Domain.SURVEY.toString() && this.props.source === 'conceptSetDetails') {
-        const selectedSurveyChild = resp.items.filter(child => child.id === this.props.node.parentId);
-        this.updatePpiSurveys(resp, selectedSurveyChild);
-      } else {
-        this.setState({children: resp.items});
+  componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any) {
+    const {concept, node: {domainId}, source} = this.props;
+    if (source === 'conceptSetDetails') {
+      if (prevProps.concept !== concept) {
+        const {cdrVersionId} = (currentWorkspaceStore.getValue());
+        this.setState({children: concept, loading: false});
         if (domainId === Domain.SURVEY.toString()) {
           const rootSurveys = ppiSurveys.getValue();
           if (!rootSurveys[cdrVersionId]) {
-            rootSurveys[cdrVersionId] = resp.items;
+            rootSurveys[cdrVersionId] = concept;
             ppiSurveys.next(rootSurveys);
           }
         }
       }
-    })
-    .catch(error => {
-      console.error(error);
-      this.setState({error: true});
-    })
-    .finally(() => this.setState({loading: false}));
     }
+  }
 
-    updatePpiSurveys(resp, selectedSurveyChild) {
-      const {node: {domainId, isStandard, type}} = this.props;
-      const {cdrVersionId} = (currentWorkspaceStore.getValue());
-      const criteriaType = domainId === Domain.DRUG.toString() ? CriteriaType.ATC.toString() : type;
-      if (selectedSurveyChild && selectedSurveyChild.length > 0) {
-        cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, selectedSurveyChild[0].id)
+  loadRootNodes() {
+    const {node: {domainId, id, isStandard, type}, selectedSurvey} = this.props;
+    this.setState({loading: true});
+    const {cdrVersionId} = (currentWorkspaceStore.getValue());
+    const criteriaType = domainId === Domain.DRUG.toString() ? CriteriaType.ATC.toString() : type;
+    const parentId = domainId === Domain.PHYSICALMEASUREMENT.toString() ? null : id;
+    cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, parentId)
+        .then(resp => {
+          if (domainId === Domain.PHYSICALMEASUREMENT.toString()) {
+            let children = [];
+            resp.items.forEach(child => {
+              child['children'] = [];
+              if (child.parentId === 0) {
+                children.push(child);
+              } else {
+                children = this.addChildToParent(child, children);
+              }
+            });
+            this.setState({children});
+          } else if (domainId === Domain.SURVEY.toString() && selectedSurvey) {
+            // Temp: This should be handle in API
+            this.updatePpiSurveys(resp, resp.items.filter(child => child.name === selectedSurvey));
+          } else if (domainId === Domain.SURVEY.toString() && this.props.source === 'conceptSetDetails') {
+            const selectedSurveyChild = resp.items.filter(child => child.id === this.props.node.parentId);
+            this.updatePpiSurveys(resp, selectedSurveyChild);
+          } else {
+            this.setState({children: resp.items});
+            if (domainId === Domain.SURVEY.toString()) {
+              const rootSurveys = ppiSurveys.getValue();
+              if (!rootSurveys[cdrVersionId]) {
+                rootSurveys[cdrVersionId] = resp.items;
+                ppiSurveys.next(rootSurveys);
+              }
+            }
+          }
+        })
+        .catch(error => {
+          console.error(error);
+          this.setState({error: true});
+        })
+        .finally(() => this.setState({loading: false}));
+  }
+
+  updatePpiSurveys(resp, selectedSurveyChild) {
+    const {node: {domainId, isStandard, type}} = this.props;
+    const {cdrVersionId} = (currentWorkspaceStore.getValue());
+    const criteriaType = domainId === Domain.DRUG.toString() ? CriteriaType.ATC.toString() : type;
+    if (selectedSurveyChild && selectedSurveyChild.length > 0) {
+      cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, selectedSurveyChild[0].id)
           .then(surveyResponse => {
             console.log(surveyResponse.items);
             this.setState({children: surveyResponse.items});
           });
-      } else {
-        this.setState({children: resp.items});
-        if (domainId === Domain.SURVEY.toString()) {
-          const rootSurveys = ppiSurveys.getValue();
-          if (!rootSurveys[cdrVersionId]) {
-            rootSurveys[cdrVersionId] = resp.items;
-            ppiSurveys.next(rootSurveys);
-          }
+    } else {
+      this.setState({children: resp.items});
+      if (domainId === Domain.SURVEY.toString()) {
+        const rootSurveys = ppiSurveys.getValue();
+        if (!rootSurveys[cdrVersionId]) {
+          rootSurveys[cdrVersionId] = resp.items;
+          ppiSurveys.next(rootSurveys);
         }
       }
     }
+  }
 
-    addChildToParent(child, nodeList) {
-      for (const node of nodeList) {
-        if (!node.group) {
-          continue;
-        }
-        if (node.id === child.parentId) {
-          node.children.push(child);
+  addChildToParent(child, nodeList) {
+    for (const node of nodeList) {
+      if (!node.group) {
+        continue;
+      }
+      if (node.id === child.parentId) {
+        node.children.push(child);
+        return nodeList;
+      }
+      if (node.children.length) {
+        const nodeChildren = this.addChildToParent(child, node.children);
+        if (nodeChildren) {
+          node.children = nodeChildren;
           return nodeList;
         }
-        if (node.children.length) {
-          const nodeChildren = this.addChildToParent(child, node.children);
-          if (nodeChildren) {
-            node.children = nodeChildren;
-            return nodeList;
-          }
-        }
       }
     }
+  }
 
-    get showHeader() {
-      const {node: {domainId}, source} = this.props;
-      return !(source === 'criteria' && domainId === Domain.SURVEY.toString())
-      && domainId !== Domain.PHYSICALMEASUREMENT.toString()
-      && domainId !== Domain.VISIT.toString();
-    }
+  get showHeader() {
+    const {node: {domainId}, source} = this.props;
+    return !(source === 'criteria' && domainId === Domain.SURVEY.toString())
+        && domainId !== Domain.PHYSICALMEASUREMENT.toString()
+        && domainId !== Domain.VISIT.toString();
+  }
 
   // Hides the tree node for COPE survey if enableCOPESurvey config flag is set to false
-    showNode(node: Criteria) {
-      const {workspace, cdrVersionListResponse} = this.props;
-      return node.subtype === CriteriaSubType.SURVEY.toString() && node.name.includes('COPE')
-      ? getCdrVersion(workspace, cdrVersionListResponse).hasCopeSurveyData
-      : true;
-    }
+  showNode(node: Criteria) {
+    const {workspace, cdrVersionListResponse} = this.props;
+    return node.subtype === CriteriaSubType.SURVEY.toString() && node.name.includes('COPE')
+        ? getCdrVersion(workspace, cdrVersionListResponse).hasCopeSurveyData
+        : true;
+  }
 
-    selectIconDisabled() {
-      const {selectedIds, source} = this.props;
-      return source !== 'criteria' && selectedIds && selectedIds.length >= 1000;
-    }
+  selectIconDisabled() {
+    const {selectedIds, source} = this.props;
+    return source !== 'criteria' && selectedIds && selectedIds.length >= 1000;
+  }
 
-    render() {
-      const {autocompleteSelection, back, groupSelections, node, scrollToMatch, searchTerms,
-        select, selectedIds, selectOption, setAttributes, setSearchTerms} = this.props;
-      const {children, error, ingredients, loading} = this.state;
-      return <React.Fragment>
+  render() {
+    const {
+      autocompleteSelection, back, groupSelections, node, scrollToMatch, searchTerms,
+      select, selectedIds, selectOption, setAttributes, setSearchTerms
+    } = this.props;
+    const {children, error, ingredients, loading} = this.state;
+    return <React.Fragment>
       <style>{scrollbarCSS}</style>
-      {this.selectIconDisabled() && <div style={{color: colors.warning, fontWeight: 'bold', maxWidth: '1000px'}}>
-        NOTE: Concept Set can have only 1000 concepts. Please delete some concepts before adding more.
+      {this.selectIconDisabled() &&
+      <div style={{color: colors.warning, fontWeight: 'bold', maxWidth: '1000px'}}>
+        NOTE: Concept Set can have only 1000 concepts. Please delete some concepts before adding
+        more.
       </div>}
       {node.domainId !== Domain.VISIT.toString() &&
-        <div style={serverConfigStore.getValue().enableCohortBuilderV2
+      <div style={serverConfigStore.getValue().enableCohortBuilderV2
           ? {...styles.searchBarContainer, backgroundColor: 'transparent', width: '65%'}
           : styles.searchBarContainer}>
-          <SearchBar node={node}
-                     searchTerms={searchTerms}
-                     selectOption={selectOption}
-                     setIngredients={(i) => this.setState({ingredients: i})}
-                     setInput={(v) => setSearchTerms(v)}/>
-        </div>
+        <SearchBar node={node}
+                   searchTerms={searchTerms}
+                   selectOption={selectOption}
+                   setIngredients={(i) => this.setState({ingredients: i})}
+                   setInput={(v) => setSearchTerms(v)}/>
+      </div>
       }
       {!loading && <div style={{paddingTop: this.showHeader ? '0.5rem' : 0, width: '99%'}}>
-        {this.showHeader && <div style={{...styles.treeHeader, border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`}}>
+        {this.showHeader && <div style={{
+          ...styles.treeHeader,
+          border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`
+        }}>
           {!!ingredients && <div style={styles.ingredients}>
             Ingredients in this brand: {ingredients.join(', ')}
           </div>}
           <button style={styles.returnLink} onClick={() => back()}>Return to list</button>
         </div>}
         {error && <div style={styles.error}>
-          <ClrIcon style={{color: colors.white}} className='is-solid' shape='exclamation-triangle' />
-          Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation
+          <ClrIcon style={{color: colors.white}} className='is-solid' shape='exclamation-triangle'/>
+          Sorry, the request cannot be completed. Please try again or contact Support in the left
+          hand navigation
         </div>}
-        <div style={this.showHeader ? styles.node : {...styles.node, border: 'none'}} className='show-scrollbar'>
-        {!!children && children.map((child, c) => this.showNode(child) && <TreeNode key={c}
-                                                            source={this.props.source}
-                                                            autocompleteSelection={autocompleteSelection}
-                                                            groupSelections={groupSelections}
-                                                            node={child}
-                                                            scrollToMatch={scrollToMatch}
-                                                            searchTerms={searchTerms}
-                                                            select={(s) => select(s)}
-                                                            selectedIds={selectedIds}
-                                                            setAttributes={setAttributes}/>)}
+        <div style={this.showHeader ? styles.node : {...styles.node, border: 'none'}}
+             className='show-scrollbar'>
+          {!!children && children.map((child, c) => this.showNode(child) && <TreeNode key={c}
+                                                                                      source={this.props.source}
+                                                                                      autocompleteSelection={autocompleteSelection}
+                                                                                      groupSelections={groupSelections}
+                                                                                      node={child}
+                                                                                      scrollToMatch={scrollToMatch}
+                                                                                      searchTerms={searchTerms}
+                                                                                      select={(s) => select(s)}
+                                                                                      selectedIds={selectedIds}
+                                                                                      setAttributes={setAttributes}/>)}
         </div>
       </div>}
       {loading && !this.showHeader && <SpinnerOverlay/>}
     </React.Fragment>;
-    }
-  });
+  }
+});
