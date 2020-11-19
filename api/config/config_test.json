@@ -82,7 +82,6 @@
   "moodle": {
     "host": "aoudev.nnlm.gov",
     "enableMoodleBackend": true,
-    "credentialsKeyV1": "moodle-key.txt",
     "credentialsKeyV2": "moodle-key-v2.txt"
   },
   "access": {
@@ -96,16 +95,10 @@
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
-    "enableVpcFlowLogs": true,
-    "enableVpcServicePerimeter": true,
     "enableRdrExport": true,
-    "enableBillingLockout": true,
     "enableBillingUpgrade": true,
-    "useKeylessDelegatedCredentials": true,
-    "enableMoodleV2Api": true,
     "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,
-    "useNewShibbolethService": true,
     "enableResearchPurposePrompt": true,
     "enableCohortBuilderV2": true,
     "enableConceptSetSearchV2": true,

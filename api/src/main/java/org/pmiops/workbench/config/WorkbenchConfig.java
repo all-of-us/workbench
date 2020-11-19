@@ -191,7 +191,6 @@ public class WorkbenchConfig {
   public static class MoodleConfig {
     public String host;
     public boolean enableMoodleBackend;
-    @Deprecated public String credentialsKeyV1;
     public String credentialsKeyV2;
   }
 
@@ -227,35 +226,15 @@ public class WorkbenchConfig {
     // Allows a user to delete their own account. This is used for testing purposes so that
     // We can clean up after ourselves. This should never go to prod.
     public boolean unsafeAllowDeleteUser;
-    // Whether or not AoU should request Terra to create GCP projects with high-security VPC
-    // functionality and VPC flow logs enabled.
-    public boolean enableVpcFlowLogs;
-    // Whether or not AoU should request Terra to create GCP projects inside a VPC
-    // security perimeter.
-    public boolean enableVpcServicePerimeter;
     // Flag to indicate if USER/WORKSPACE data is exported to RDR
     public boolean enableRdrExport;
-    // Setting this to true will prevent users from making compute increasing operations on
-    // inactive billing workspaces
-    // See RW-3209.
-    public boolean enableBillingLockout;
     // Setting this to true will enable the use of Billing Accounts controlled by the user
     // See RW-4711.
     public boolean enableBillingUpgrade;
-    // Causes the server to use an API-based method for generating delegated user credentials,
-    // as opposed to reading service account private keys from GCS.
-    // See RW-2840.
-    public boolean useKeylessDelegatedCredentials;
-    // Flag to indicate whether to use the new Moodle badges API
-    // https://precisionmedicineinitiative.atlassian.net/browse/RW-2957
-    public boolean enableMoodleV2Api;
     // Flag to indicate whether to use the V2 Data User Code of Conduct
     public boolean enableV3DataUserCodeOfConduct;
     // Flag to indicate whether to show the Event Date modifier in cohort builder
     public boolean enableEventDateModifier;
-    // Whether the RW backend should call the new Shibboleth API service instead of the legacy
-    // Shibboleth endpoint that was part of Firecloud Orchestration.
-    public boolean useNewShibbolethService;
     // Flag to indicate whether to show Update research purpose prompt after an year of workspace
     // creation
     public boolean enableResearchPurposePrompt;
