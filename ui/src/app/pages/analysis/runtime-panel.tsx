@@ -591,6 +591,9 @@ const CreatePanel = ({creatorFreeCreditsRemaining, preset, profile, setPanelCont
 };
 
 const ConfirmUpdatePanel = ({initialRuntimeConfig, newRuntimeConfig, onCancel, updateButton}) => {
+  const runtimeDiffs = getRuntimeConfigDiffs(initialRuntimeConfig, newRuntimeConfig);
+  const needsDelete = runtimeDiffs.map(diff => diff.differenceType).includes(RuntimeDiffState.NEEDS_DELETE);
+
   return <React.Fragment>
     <div style={styles.controlSection}>
       <h3 style={{...styles.baseHeader, ...styles.sectionHeader, marginTop: '.1rem', marginBottom: '.2rem'}}>Editing your environment</h3>
@@ -598,12 +601,11 @@ const ConfirmUpdatePanel = ({initialRuntimeConfig, newRuntimeConfig, onCancel, u
         You're about to apply the following changes to your environment:
       </div>
       <ul>
-        {getRuntimeConfigDiffs(initialRuntimeConfig, newRuntimeConfig).map(diff =>
+        {runtimeDiffs.map(diff =>
           <li>
             {diff.desc} from <b>{diff.previous}</b> to <b>{diff.new}</b>
           </li>
-        )
-        }
+        )}
       </ul>
       <FlexRow style={{marginTop: '.5rem'}}>
         <div style={{marginRight: '1rem'}}>
@@ -626,13 +628,24 @@ const ConfirmUpdatePanel = ({initialRuntimeConfig, newRuntimeConfig, onCancel, u
 
     <WarningMessage>
       <TextColumn>
-        <div>
-          You've made changes that can only take effect upon deletion and re-creation of your cloud environment.
-        </div>
-        <div style={{marginTop: '0.5rem'}}>
-          Any in-memory state and local file modifications will be erased. Data stored in workspace buckets
-          is never affected by changes to your cloud environment.
-        </div>
+        {needsDelete ? <React.Fragment>
+          <div>
+            You've made changes that can only take effect upon deletion and re-creation of
+            your cloud environment.
+          </div>
+          <div style={{marginTop: '0.5rem'}}>
+            Any in-memory state and local file modifications will be erased. Data stored in
+            workspace buckets is never affected by changes to your cloud environment.
+          </div>
+        </React.Fragment> : <React.Fragment>
+          <div>
+            These changes require a reboot of your environment to take effect.
+          </div>
+          <div style={{marginTop: '0.5rem'}}>
+            Any in-memory state will be erased, but local file modifications will be preserved.
+            Data stored in workspace buckets is never affected by changes to your cloud environment.
+          </div>
+        </React.Fragment>}
       </TextColumn>
     </WarningMessage>
 
@@ -880,10 +893,7 @@ export const RuntimePanel = fp.flow(
            aria-label='Delete Environment'
            disabled={![RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus)}
            onClick={() => setPanelContent(PanelContent.Delete)}>Delete Environment</Link>
-         {!runtimeExists ? renderCreateButton() :
-           runtimeDiffs.map(diff => diff.differenceType).includes(RuntimeDiffState.NEEDS_DELETE) ? renderNextButton() :
-             renderUpdateButton()
-         }
+         {!runtimeExists ? renderCreateButton() : renderNextButton()}
        </FlexRow>
      </Fragment>],
       [PanelContent.Confirm, () => <ConfirmUpdatePanel initialRuntimeConfig={initialRuntimeConfig}

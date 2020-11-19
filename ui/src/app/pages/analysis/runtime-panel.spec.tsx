@@ -18,6 +18,7 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {cdrVersionListResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 import {defaultDataprocConfig, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {WorkspacesApiStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
+import {TextColumn} from '../../components/text-column';
 
 describe('RuntimePanel', () => {
   let props: Props;
@@ -368,69 +369,77 @@ describe('RuntimePanel', () => {
     expect(wrapper.find(Button).find({'aria-label': 'Update'}).first().prop('disabled')).toBeTruthy();
   });
 
-  it('should enable the Update button if there are updates that do not require delete and runtime is running - increase disk size', async() => {
+  it('should warn user about reboot if there are updates that require one - increase disk size', async() => {
     const wrapper = await component();
 
     await pickMainDiskSize(wrapper, getMainDiskSize(wrapper) + 10);
-    expect(wrapper.find(Button).find({'aria-label': 'Update'}).first().prop('disabled')).toBeFalsy();
+    mustClickButton(wrapper, 'Next');
+
+    expect(wrapper.find(TextColumn).text().includes('reboot')).toBeTruthy();
   });
 
-  it('should enable the Update button if there are updates that do not require delete and runtime is running - number of workers', async() => {
+  it('should warn user about reboot if there are updates that require one - number of workers', async() => {
     const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: defaultDataprocConfig(), configurationType: RuntimeConfigurationType.UserOverride};
     runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
 
     const wrapper = await component();
 
     await pickNumWorkers(wrapper, getNumWorkers(wrapper) + 2);
+    mustClickButton(wrapper, 'Next');
 
-    expect(wrapper.find(Button).find({'aria-label': 'Update'}).first().prop('disabled')).toBeFalsy();
+    expect(wrapper.find(TextColumn).text().includes('reboot')).toBeTruthy();
   });
 
-  it('should enable the Update button if there are updates that do not require delete and runtime is running - number of preemptible workers', async() => {
+  it('should warn user about reboot if there are updates that require one - number of preemptible workers', async() => {
     const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: defaultDataprocConfig()};
     runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
 
     const wrapper = await component();
 
     await pickNumPreemptibleWorkers(wrapper, getNumPreemptibleWorkers(wrapper) + 2);
+    mustClickButton(wrapper, 'Next');
 
-    expect(wrapper.find(Button).find({'aria-label': 'Update'}).first().prop('disabled')).toBeFalsy();
+    expect(wrapper.find(TextColumn).text().includes('reboot')).toBeTruthy();
   });
 
-  it('should render the Next button if there are updates that require delete and runtime is running - Compute Type', async() => {
-    const wrapper = await component();
-
-    await pickComputeType(wrapper, ComputeType.Dataproc);
-
-    expect(wrapper.find(Button).find({'aria-label': 'Next'}).first().prop('disabled')).toBeFalsy();
-  });
-
-  it('should render the Next button if there are updates that require delete and runtime is running - CPU', async() => {
+  it('should warn user about reboot if there are updates that require one - CPU', async() => {
     const wrapper = await component();
 
     await pickMainCpu(wrapper, getMainCpu(wrapper) + 4);
+    mustClickButton(wrapper, 'Next');
 
-    expect(wrapper.find(Button).find({'aria-label': 'Next'}).first().prop('disabled')).toBeFalsy();
+    expect(wrapper.find(TextColumn).text().includes('reboot')).toBeTruthy();
   });
 
-  it('should render the Next button if there are updates that require delete and runtime is running - Memory', async() => {
+  it('should warn user about reboot if there are updates that require one - Memory', async() => {
     const wrapper = await component();
 
     // 15 GB -> 26 GB
     await pickMainRam(wrapper, 26);
+    mustClickButton(wrapper, 'Next');
 
-    expect(wrapper.find(Button).find({'aria-label': 'Next'}).first().prop('disabled')).toBeFalsy();
+    expect(wrapper.find(TextColumn).text().includes('reboot')).toBeTruthy();
   });
 
-  it('should render the Next button if there are updates that require delete and runtime is running - Decrease Disk', async() => {
+  it('should warn user about deletion if there are updates that require one - Compute Type', async() => {
+    const wrapper = await component();
+
+    await pickComputeType(wrapper, ComputeType.Dataproc);
+    mustClickButton(wrapper, 'Next');
+
+    expect(wrapper.find(TextColumn).text().includes('deletion')).toBeTruthy();
+  });
+
+  it('should warn user about deletion if there are updates that require one - Decrease Disk', async() => {
     const wrapper = await component();
 
     await pickMainDiskSize(wrapper, getMainDiskSize(wrapper) - 5);
+    mustClickButton(wrapper, 'Next');
 
-    expect(wrapper.find(Button).find({'aria-label': 'Next'}).first().prop('disabled')).toBeFalsy();
+    expect(wrapper.find(TextColumn).text().includes('deletion')).toBeTruthy();
   });
 
-  it('should render the Next button if there are updates that require delete and runtime is running - Worker CPU', async() => {
+  it('should warn the user about deletion if there are updates that require one - Worker CPU', async() => {
     const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: defaultDataprocConfig()};
     runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
 
@@ -438,11 +447,12 @@ describe('RuntimePanel', () => {
 
     // 4 -> 8
     await pickWorkerCpu(wrapper, 8);
+    mustClickButton(wrapper, 'Next');
 
-    expect(wrapper.find(Button).find({'aria-label': 'Next'}).first().prop('disabled')).toBeFalsy();
+    expect(wrapper.find(TextColumn).text().includes('deletion')).toBeTruthy();
   });
 
-  it('should render the Next button if there are updates that require delete and runtime is running - Worker RAM', async() => {
+  it('should warn the user about deletion if there are updates that require one - Worker RAM', async() => {
     const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: defaultDataprocConfig()};
     runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
 
@@ -450,18 +460,20 @@ describe('RuntimePanel', () => {
 
     // 15 -> 26
     await pickWorkerRam(wrapper, 26);
+    mustClickButton(wrapper, 'Next');
 
-    expect(wrapper.find(Button).find({'aria-label': 'Next'}).first().prop('disabled')).toBeFalsy();
+    expect(wrapper.find(TextColumn).text().includes('deletion')).toBeTruthy();
   });
 
-  it('should render the Next button if there are updates that require delete and runtime is running - Worker Disk', async() => {
+  it('should warn the user about deletion if there are updates that require one - Worker Disk', async() => {
     const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: defaultDataprocConfig()};
     runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
 
     const wrapper = await component();
     await pickWorkerDiskSize(wrapper, getWorkerDiskSize(wrapper) + 10);
+    mustClickButton(wrapper, 'Next');
 
-    expect(wrapper.find(Button).find({'aria-label': 'Next'}).first().prop('disabled')).toBeFalsy();
+    expect(wrapper.find(TextColumn).text().includes('deletion')).toBeTruthy();
   });
 
   it('should retain original inputs when hitting cancel from the Confirm panel', async() => {
@@ -492,14 +504,14 @@ describe('RuntimePanel', () => {
     expect(getWorkerDiskSize(wrapper)).toBe(100);
   });
 
-  it('should disable Update button if Runtime is in between states', async() => {
+  it('should disable Next button if Runtime is in between states', async() => {
     const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: defaultDataprocConfig(), status: RuntimeStatus.Creating};
     runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
 
     const wrapper = await component();
     await pickMainDiskSize(wrapper, getMainDiskSize(wrapper) + 20);
 
-    expect(wrapper.find(Button).find({'aria-label': 'Update'}).first().prop('disabled')).toBeTruthy();
+    expect(wrapper.find(Button).find({'aria-label': 'Next'}).first().prop('disabled')).toBeTruthy();
   });
 
   it('should send an updateRuntime API call if runtime changes do not require a delete', async() => {
@@ -510,6 +522,7 @@ describe('RuntimePanel', () => {
 
     await pickMainDiskSize(wrapper, getMainDiskSize(wrapper) + 20);
 
+    await mustClickButton(wrapper, 'Next');
     await mustClickButton(wrapper, 'Update');
 
     expect(updateSpy).toHaveBeenCalled();
@@ -519,7 +532,7 @@ describe('RuntimePanel', () => {
   it('should send a delete call if an update requires delete', async() => {
     const wrapper = await component();
 
-    await pickMainCpu(wrapper, 8);
+    await pickComputeType(wrapper, ComputeType.Dataproc);
 
     await mustClickButton(wrapper, 'Next');
     await mustClickButton(wrapper, 'Update');

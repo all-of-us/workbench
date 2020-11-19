@@ -52,7 +52,7 @@ const compareMachineCpu = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig)
     desc: (newCpu < oldCpu ?  'Decrease' : 'Increase') + ' number of CPUs',
     previous: oldCpu.toString(),
     new: newCpu.toString(),
-    differenceType: oldCpu === newCpu ? RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE
+    differenceType: oldCpu === newCpu ? RuntimeDiffState.NO_CHANGE : RuntimeDiffState.CAN_UPDATE
   };
 };
 
@@ -64,7 +64,7 @@ const compareMachineMemory = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConf
     desc: (newMemory < oldMemory ?  'Decrease' : 'Increase') + ' memory',
     previous: oldMemory.toString() + ' GB',
     new: newMemory.toString() + ' GB',
-    differenceType: oldMemory === newMemory ? RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE
+    differenceType: oldMemory === newMemory ? RuntimeDiffState.NO_CHANGE : RuntimeDiffState.CAN_UPDATE
   };
 };
 
