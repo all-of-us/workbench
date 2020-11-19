@@ -112,7 +112,7 @@ const CdrVersion = (props: {workspace: Workspace, cdrVersionListResponse: CdrVer
     {!hasDefaultCdrVersion(workspace, cdrVersionListResponse) && <NewVersionFlag/>}
     {showModal && <CdrVersionUpgradeModal
         defaultCdrVersionName={getDefaultCdrVersion(cdrVersionListResponse).name}
-        onDismiss={() => setShowModal(false)}
+        onClose={() => setShowModal(false)}
         upgrade={() => NavStore.navigate(['/workspaces', namespace, id, 'duplicate'])}
     />}
   </FlexRow>;

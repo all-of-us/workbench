@@ -9,23 +9,23 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 
 interface Props {
   defaultCdrVersionName: string;
-  onDismiss: () => void;
+  onClose: () => void;
   upgrade: () => void;
 }
 
 const CdrVersionUpgradeModal = (props: Props) => {
-  const {defaultCdrVersionName, onDismiss, upgrade} = props;
-  return <Modal onRequestClose={() => onDismiss()}>
+  const {defaultCdrVersionName, onClose, upgrade} = props;
+  return <Modal onRequestClose={() => onClose()}>
         <ModalTitle data-test-id='cdr-version-upgrade-modal'><FlexRow>
             <span>{defaultCdrVersionName} is now available</span>
-            <span><Clickable onClick={() => onDismiss()}><ClrIcon
+            <span><Clickable onClick={() => onClose()}><ClrIcon
                 shape='times' size='48' style={{color: colors.accent}}/></Clickable></span>
         </FlexRow></ModalTitle>
         <ModalBody>New data releases add participants and data points. You can upgrade by making a duplicate of your
             workspace, attached to the new version. You'll still have this original workspace in case you need it.</ModalBody>
         <ModalFooter>
             <Button type='primary' onClick={() => {
-              onDismiss();
+              onClose();
               AnalyticsTracker.Workspaces.OpenDuplicatePage('Upgrade Modal');
               upgrade();
             }}>Try {defaultCdrVersionName}</Button>
