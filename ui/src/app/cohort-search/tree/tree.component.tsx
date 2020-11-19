@@ -8,9 +8,17 @@ import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, withCurrentConcept, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, withCdrVersions, withCurrentConcept, withCurrentWorkspace} from 'app/utils';
+import {getCdrVersion} from 'app/utils/cdr-versions';
 import {currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
-import {Criteria, CriteriaSubType, CriteriaType, Domain} from 'generated/fetch';
+import {WorkspaceData} from 'app/utils/workspace-data';
+import {
+  CdrVersionListResponse,
+  Criteria,
+  CriteriaSubType,
+  CriteriaType,
+  Domain
+} from 'generated/fetch';
 
 const styles = reactStyles({
   error: {
@@ -90,6 +98,8 @@ interface Props {
   setAttributes?: Function;
   setSearchTerms: Function;
   concept: Array<any>;
+  workspace: WorkspaceData;
+  cdrVersionListResponse: CdrVersionListResponse;
 }
 
 interface State {
@@ -100,46 +110,47 @@ interface State {
   loading: boolean;
 }
 
-export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept())(class extends React.Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      autocompleteSelection: undefined,
-      children: undefined,
-      error: false,
-      ingredients: undefined,
-      loading: true,
-    };
-  }
+export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept(), withCdrVersions())
+  (class extends React.Component<Props, State> {
+    constructor(props: Props) {
+      super(props);
+      this.state = {
+        autocompleteSelection: undefined,
+        children: undefined,
+        error: false,
+        ingredients: undefined,
+        loading: true,
+      };
+    }
 
-  componentDidMount(): void {
-    this.loadRootNodes();
-  }
+    componentDidMount(): void {
+      this.loadRootNodes();
+    }
 
-  componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any) {
-    const {concept, node: {domainId}, source} = this.props;
-    if (source === 'conceptSetDetails') {
-      if (prevProps.concept !== concept) {
-        const {cdrVersionId} = (currentWorkspaceStore.getValue());
-        this.setState({children: concept, loading: false});
-        if (domainId === Domain.SURVEY.toString()) {
-          const rootSurveys = ppiSurveys.getValue();
-          if (!rootSurveys[cdrVersionId]) {
-            rootSurveys[cdrVersionId] = concept;
-            ppiSurveys.next(rootSurveys);
+    componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any) {
+      const {concept, node: {domainId}, source} = this.props;
+      if (source === 'conceptSetDetails') {
+        if (prevProps.concept !== concept) {
+          const {cdrVersionId} = (currentWorkspaceStore.getValue());
+          this.setState({children: concept, loading: false});
+          if (domainId === Domain.SURVEY.toString()) {
+            const rootSurveys = ppiSurveys.getValue();
+            if (!rootSurveys[cdrVersionId]) {
+              rootSurveys[cdrVersionId] = concept;
+              ppiSurveys.next(rootSurveys);
+            }
           }
         }
       }
     }
-  }
 
-  loadRootNodes() {
-    const {node: {domainId, id, isStandard, type}, selectedSurvey} = this.props;
-    this.setState({loading: true});
-    const {cdrVersionId} = (currentWorkspaceStore.getValue());
-    const criteriaType = domainId === Domain.DRUG.toString() ? CriteriaType.ATC.toString() : type;
-    const parentId = domainId === Domain.PHYSICALMEASUREMENT.toString() ? null : id;
-    cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, parentId)
+    loadRootNodes() {
+      const {node: {domainId, id, isStandard, type}, selectedSurvey} = this.props;
+      this.setState({loading: true});
+      const {cdrVersionId} = (currentWorkspaceStore.getValue());
+      const criteriaType = domainId === Domain.DRUG.toString() ? CriteriaType.ATC.toString() : type;
+      const parentId = domainId === Domain.PHYSICALMEASUREMENT.toString() ? null : id;
+      cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, parentId)
     .then(resp => {
       if (domainId === Domain.PHYSICALMEASUREMENT.toString()) {
         let children = [];
@@ -174,73 +185,74 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
       this.setState({error: true});
     })
     .finally(() => this.setState({loading: false}));
-  }
+    }
 
-  updatePpiSurveys(resp, selectedSurveyChild) {
-    const {node: {domainId, isStandard, type}} = this.props;
-    const {cdrVersionId} = (currentWorkspaceStore.getValue());
-    const criteriaType = domainId === Domain.DRUG.toString() ? CriteriaType.ATC.toString() : type;
-    if (selectedSurveyChild && selectedSurveyChild.length > 0) {
-      cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, selectedSurveyChild[0].id)
+    updatePpiSurveys(resp, selectedSurveyChild) {
+      const {node: {domainId, isStandard, type}} = this.props;
+      const {cdrVersionId} = (currentWorkspaceStore.getValue());
+      const criteriaType = domainId === Domain.DRUG.toString() ? CriteriaType.ATC.toString() : type;
+      if (selectedSurveyChild && selectedSurveyChild.length > 0) {
+        cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, selectedSurveyChild[0].id)
           .then(surveyResponse => {
             console.log(surveyResponse.items);
             this.setState({children: surveyResponse.items});
           });
-    } else {
-      this.setState({children: resp.items});
-      if (domainId === Domain.SURVEY.toString()) {
-        const rootSurveys = ppiSurveys.getValue();
-        if (!rootSurveys[cdrVersionId]) {
-          rootSurveys[cdrVersionId] = resp.items;
-          ppiSurveys.next(rootSurveys);
+      } else {
+        this.setState({children: resp.items});
+        if (domainId === Domain.SURVEY.toString()) {
+          const rootSurveys = ppiSurveys.getValue();
+          if (!rootSurveys[cdrVersionId]) {
+            rootSurveys[cdrVersionId] = resp.items;
+            ppiSurveys.next(rootSurveys);
+          }
         }
       }
     }
-  }
 
-  addChildToParent(child, nodeList) {
-    for (const node of nodeList) {
-      if (!node.group) {
-        continue;
-      }
-      if (node.id === child.parentId) {
-        node.children.push(child);
-        return nodeList;
-      }
-      if (node.children.length) {
-        const nodeChildren = this.addChildToParent(child, node.children);
-        if (nodeChildren) {
-          node.children = nodeChildren;
+    addChildToParent(child, nodeList) {
+      for (const node of nodeList) {
+        if (!node.group) {
+          continue;
+        }
+        if (node.id === child.parentId) {
+          node.children.push(child);
           return nodeList;
         }
+        if (node.children.length) {
+          const nodeChildren = this.addChildToParent(child, node.children);
+          if (nodeChildren) {
+            node.children = nodeChildren;
+            return nodeList;
+          }
+        }
       }
     }
-  }
 
-  get showHeader() {
-    const {node: {domainId}, source} = this.props;
-    return !(source === 'criteria' && domainId === Domain.SURVEY.toString())
+    get showHeader() {
+      const {node: {domainId}, source} = this.props;
+      return !(source === 'criteria' && domainId === Domain.SURVEY.toString())
       && domainId !== Domain.PHYSICALMEASUREMENT.toString()
       && domainId !== Domain.VISIT.toString();
-  }
+    }
 
   // Hides the tree node for COPE survey if enableCOPESurvey config flag is set to false
-  showNode(node: Criteria) {
-    return node.subtype === CriteriaSubType.SURVEY.toString() && node.name.includes('COPE')
-      ? serverConfigStore.getValue().enableCOPESurvey
+    showNode(node: Criteria) {
+      const {workspace, cdrVersionListResponse} = this.props;
+      return node.subtype === CriteriaSubType.SURVEY.toString() && node.name.includes('COPE')
+      ? getCdrVersion(workspace, cdrVersionListResponse).hasCopeSurveyData
       : true;
-  }
+    }
 
-  selectIconDisabled() {
-    const {selectedIds, source} = this.props;
-    return source !== 'criteria' && selectedIds && selectedIds.length >= 1000;
-  }
+    selectIconDisabled() {
+      const {selectedIds, source} = this.props;
+      return source !== 'criteria' && selectedIds && selectedIds.length >= 1000;
+    }
 
-  render() {
-    const {autocompleteSelection, back, groupSelections, node, scrollToMatch, searchTerms, select, selectedIds, selectOption, setAttributes,
-      setSearchTerms} = this.props;
-    const {children, error, ingredients, loading} = this.state;
-    return <React.Fragment>
+    render() {
+      const {autocompleteSelection, back, groupSelections, node, scrollToMatch, searchTerms,
+        select, selectedIds, selectOption, setAttributes, setSearchTerms} = this.props;
+      const {children, error, ingredients, loading} = this.state;
+      return <React.Fragment>
       <style>{scrollbarCSS}</style>
       {this.selectIconDisabled() && <div style={{color: colors.warning, fontWeight: 'bold', maxWidth: '1000px'}}>
         NOTE: Concept Set can have only 1000 concepts. Please delete some concepts before adding more.
@@ -282,5 +294,5 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
       </div>}
       {loading && !this.showHeader && <SpinnerOverlay/>}
     </React.Fragment>;
-  }
-});
+    }
+  });
