@@ -1,8 +1,8 @@
 import {Page} from 'puppeteer';
+
 import Button from 'app/element/button';
 import {Language, LinkText, PageUrl} from 'app/text-labels';
 import WorkspaceEditPage, {FIELD as EDIT_FIELD} from 'app/page/workspace-edit-page';
-import {makeWorkspaceName} from 'utils/str-utils';
 import RadioButton from 'app/element/radiobutton';
 import {findOrCreateWorkspace} from 'utils/test-utils';
 import {waitForDocumentTitle, waitForText, waitWhileLoading} from 'utils/waits-utils';
@@ -12,6 +12,7 @@ import WorkspaceAnalysisPage from './workspace-analysis-page';
 import {config} from 'resources/workbench-config';
 import {UseFreeCredits} from './workspace-base';
 import OldCdrVersionModal from './old-cdr-version-modal';
+import AuthenticatedPage from './authenticated-page';
 
 const faker = require('faker/locale/en_US');
 export const PageTitle = 'View Workspace';
@@ -24,7 +25,7 @@ export const FieldSelector = {
   }
 };
 
-export default class WorkspacesPage extends WorkspaceEditPage {
+export default class WorkspacesPage extends AuthenticatedPage {
 
   constructor(page: Page) {
     super(page);
@@ -91,7 +92,7 @@ export default class WorkspacesPage extends WorkspaceEditPage {
     }
 
     // click CREATE WORKSPACE button
-    const createButton = await this.getCreateWorkspaceButton();
+    const createButton = await editPage.getCreateWorkspaceButton();
     await createButton.waitUntilEnabled();
     return editPage.clickCreateFinishButton(createButton);
   }
@@ -141,17 +142,6 @@ export default class WorkspacesPage extends WorkspaceEditPage {
     await editPage.requestForReviewRadiobutton(reviewRequest);
 
     return editPage;
-  }
-
-  /**
-   * Type in new workspace name.
-   * @return {string} new workspace name
-   */
-  async fillOutWorkspaceName(): Promise<string> {
-    const newWorkspaceName = makeWorkspaceName();
-    await (await this.getWorkspaceNameTextbox()).type(newWorkspaceName);
-    await (await this.getWorkspaceNameTextbox()).pressTab();
-    return newWorkspaceName;
   }
 
   /**

@@ -2,10 +2,11 @@ import {createWorkspace, signIn} from 'utils/test-utils';
 import WorkspaceCard from 'app/component/workspace-card';
 import {config} from 'resources/workbench-config';
 import {Option} from 'app/text-labels';
-import WorkspacesPage from 'app/page/workspaces-page';
 import OldCdrVersionModal from 'app/page/old-cdr-version-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import Navigation, {NavLink} from 'app/component/navigation';
+import WorkspaceEditPage from 'app/page/workspace-edit-page';
+import WorkspacesPage from 'app/page/workspaces-page';
 
 describe('Duplicate workspace, changing CDR versions', () => {
     beforeEach(async () => {
@@ -21,20 +22,20 @@ describe('Duplicate workspace, changing CDR versions', () => {
         await workspaceCard.selectSnowmanMenu(Option.Duplicate);
 
         // Fill out Workspace Name should be just enough for successful duplication
-        const workspacesPage = new WorkspacesPage(page);
-        await (await workspacesPage.getWorkspaceNameTextbox()).clear();
-        const duplicateWorkspaceName = await workspacesPage.fillOutWorkspaceName();
+        const workspaceEditPage = new WorkspaceEditPage(page);
+        await (await workspaceEditPage.getWorkspaceNameTextbox()).clear();
+        const duplicateWorkspaceName = await workspaceEditPage.fillOutWorkspaceName();
 
         // change CDR Version
-        await workspacesPage.selectCdrVersion(config.altCdrVersionName);
+        await workspaceEditPage.selectCdrVersion(config.altCdrVersionName);
 
         // wait for the warning modal and consent to the required restrictions
         const modal = new OldCdrVersionModal(page);
         await modal.consentToOldCdrRestrictions();
 
-        const finishButton = await workspacesPage.getDuplicateWorkspaceButton();
+        const finishButton = await workspaceEditPage.getDuplicateWorkspaceButton();
         await finishButton.waitUntilEnabled();
-        await workspacesPage.clickCreateFinishButton(finishButton);
+        await workspaceEditPage.clickCreateFinishButton(finishButton);
 
         // Duplicate workspace Data page is loaded.
         const dataPage = new WorkspaceDataPage(page);
@@ -43,6 +44,7 @@ describe('Duplicate workspace, changing CDR versions', () => {
 
         // Delete duplicate workspace via Workspace card in Your Workspaces page.
         await Navigation.navMenu(page, NavLink.YOUR_WORKSPACES);
+        const workspacesPage = new WorkspacesPage(page);
         await workspacesPage.waitForLoad();
 
         await WorkspaceCard.deleteWorkspace(page, duplicateWorkspaceName);
@@ -64,20 +66,20 @@ describe('Duplicate workspace, changing CDR versions', () => {
         await workspaceCard.selectSnowmanMenu(Option.Duplicate);
 
         // Fill out Workspace Name should be just enough for successful duplication
-        const workspacesPage = new WorkspacesPage(page);
-        await (await workspacesPage.getWorkspaceNameTextbox()).clear();
-        const duplicateWorkspaceName = await workspacesPage.fillOutWorkspaceName();
+        const workspaceEditPage = new WorkspaceEditPage(page);
+        await (await workspaceEditPage.getWorkspaceNameTextbox()).clear();
+        const duplicateWorkspaceName = await workspaceEditPage.fillOutWorkspaceName();
 
         // change CDR Version
-        await workspacesPage.selectCdrVersion(config.defaultCdrVersionName);
+        await workspaceEditPage.selectCdrVersion(config.defaultCdrVersionName);
 
-        const upgradeMessage = await workspacesPage.getCdrVersionUpgradeMessage();
+        const upgradeMessage = await workspaceEditPage.getCdrVersionUpgradeMessage();
         expect(upgradeMessage).toContain(originalWorkspaceName);
         expect(upgradeMessage).toContain(`${config.altCdrVersionName} to ${config.defaultCdrVersionName}.`);
 
-        const finishButton = await workspacesPage.getDuplicateWorkspaceButton();
+        const finishButton = await workspaceEditPage.getDuplicateWorkspaceButton();
         await finishButton.waitUntilEnabled();
-        await workspacesPage.clickCreateFinishButton(finishButton);
+        await workspaceEditPage.clickCreateFinishButton(finishButton);
 
         // Duplicate workspace Data page is loaded.
         const dataPage = new WorkspaceDataPage(page);
@@ -86,6 +88,7 @@ describe('Duplicate workspace, changing CDR versions', () => {
 
         // Delete duplicate workspace via Workspace card in Your Workspaces page.
         await Navigation.navMenu(page, NavLink.YOUR_WORKSPACES);
+        const workspacesPage = new WorkspacesPage(page);
         await workspacesPage.waitForLoad();
 
         await WorkspaceCard.deleteWorkspace(page, duplicateWorkspaceName);

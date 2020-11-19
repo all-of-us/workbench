@@ -6,6 +6,7 @@ import Button from 'app/element/button';
 import * as testData from 'resources/data/workspace-data';
 import {makeWorkspaceName} from 'utils/str-utils';
 import {UseFreeCredits} from 'app/page/workspace-base';
+import WorkspaceEditPage from 'app/page/workspace-edit-page';
 
 describe('Creating new workspaces', () => {
   beforeEach(async () => {
@@ -35,17 +36,19 @@ describe('Creating new workspaces', () => {
     const createNewWorkspaceButton  = await Button.findByName(page, FieldSelector.CreateNewWorkspaceButton.textOption );
     await createNewWorkspaceButton.clickAndWait();
 
+    const workspaceEditPage = new WorkspaceEditPage(page);
+
     // fill out new workspace name
-    const newWorkspaceName = await workspacesPage.fillOutWorkspaceName();
+    const newWorkspaceName = await workspaceEditPage.fillOutWorkspaceName();
 
     // select the default CDR Version
-    await workspacesPage.selectCdrVersion();
+    await workspaceEditPage.selectCdrVersion();
 
     // select Billing Account
-    await workspacesPage.selectBillingAccount(UseFreeCredits);
+    await workspaceEditPage.selectBillingAccount(UseFreeCredits);
 
     // fill out question #1 - What is the primary purpose of your project?
-    await workspacesPage.expandResearchPurposeGroup(true); // First, expand accordion: "Research purpose"
+    await workspaceEditPage.expandResearchPurposeGroup(true); // First, expand accordion: "Research purpose"
     await performActions(page, testData.defaultAnswersPrimaryPurpose);
 
     // fill out question #2 - Please provide a summary of your research purpose by responding to the questions.
@@ -64,9 +67,9 @@ describe('Creating new workspaces', () => {
     // -- No Review Required
     await performActions(page, testData.defaultAnswersRequestForReview);
 
-    const finishButton = await workspacesPage.getCreateWorkspaceButton();
+    const finishButton = await workspaceEditPage.getCreateWorkspaceButton();
     await finishButton.waitUntilEnabled();
-    await workspacesPage.clickCreateFinishButton(finishButton);
+    await workspaceEditPage.clickCreateFinishButton(finishButton);
 
     await verifyWorkspaceLinkOnDataPage(newWorkspaceName);
   });

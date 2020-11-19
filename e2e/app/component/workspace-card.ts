@@ -1,10 +1,11 @@
 import {ElementHandle, Page} from 'puppeteer';
-import {Option, WorkspaceAccessLevel} from 'app/text-labels';
 import * as fp from 'lodash/fp';
+
+import {Option, WorkspaceAccessLevel} from 'app/text-labels';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {getPropValue} from 'utils/element-utils';
-import WorkspacesPage from 'app/page/workspaces-page';
 import CardBase from './card-base';
+import WorkspaceEditPage from 'app/page/workspace-edit-page';
 
 const WorkspaceCardSelector = {
   cardRootXpath: '//*[child::*[@data-test-id="workspace-card"]]', // finds 'workspace-card' parent container node
@@ -30,7 +31,7 @@ export default class WorkspaceCard extends CardBase {
     const card = await WorkspaceCard.findCard(page, workspaceName);
     await card.selectSnowmanMenu(Option.Delete, { waitForNav: false });
     // Handle Delete Confirmation modal
-    return new WorkspacesPage(page).dismissDeleteWorkspaceModal();
+    return new WorkspaceEditPage(page).dismissDeleteWorkspaceModal();
   }
 
   /**
