@@ -5,7 +5,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.http.HttpTransport;
-import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import java.util.Arrays;
 import org.junit.Before;
@@ -25,14 +24,11 @@ import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
-import org.pmiops.workbench.firecloud.api.StaticNotebooksApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
-import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsBillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudSystemStatus;
-import org.pmiops.workbench.shibboleth.api.ShibbolethApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -51,20 +47,13 @@ public class FireCloudServiceImplTest {
 
   private static WorkbenchConfig workbenchConfig;
 
-  @MockBean private ProfileApi profileApi;
   @MockBean private BillingApi billingApi;
-
-  @MockBean(name = "workspacesApi")
-  private WorkspacesApi workspacesApi;
-
   @MockBean private GroupsApi groupsApi;
-  @MockBean private NihApi nihApi;
-  @MockBean private StatusApi statusApi;
-  @MockBean private StaticNotebooksApi staticNotebooksApi;
-  @MockBean private ShibbolethApi shibbolethApi;
-  @MockBean private ServiceAccountCredentials fireCloudCredentials;
-  @MockBean private IamCredentialsClient iamCredentialsClient;
   @MockBean private HttpTransport httpTransport;
+  @MockBean private IamCredentialsClient iamCredentialsClient;
+  @MockBean private NihApi nihApi;
+  @MockBean private ProfileApi profileApi;
+  @MockBean private StatusApi statusApi;
 
   @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 

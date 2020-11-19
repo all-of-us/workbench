@@ -10,7 +10,6 @@ import com.google.api.services.cloudresourcemanager.model.ListProjectsResponse;
 import com.google.api.services.cloudresourcemanager.model.Project;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.OAuth2Credentials;
-import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,13 +18,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import javax.inject.Provider;
-import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.DelegatedUserCredentials;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -37,7 +34,6 @@ public class CloudResourceManagerServiceImpl implements CloudResourceManagerServ
   public static final List<String> SCOPES =
       Arrays.asList(CloudResourceManagerScopes.CLOUD_PLATFORM_READ_ONLY);
 
-  private final Provider<ServiceAccountCredentials> credentialsProvider;
   private final Provider<WorkbenchConfig> configProvider;
   private final HttpTransport httpTransport;
   private final GoogleRetryHandler retryHandler;
@@ -45,13 +41,10 @@ public class CloudResourceManagerServiceImpl implements CloudResourceManagerServ
 
   @Autowired
   public CloudResourceManagerServiceImpl(
-      @Qualifier(Constants.CLOUD_RESOURCE_MANAGER_ADMIN_CREDS)
-          Provider<ServiceAccountCredentials> credentialsProvider,
       Provider<WorkbenchConfig> configProvider,
       HttpTransport httpTransport,
       GoogleRetryHandler retryHandler,
       IamCredentialsClient iamCredentialsClient) {
-    this.credentialsProvider = credentialsProvider;
     this.configProvider = configProvider;
     this.httpTransport = httpTransport;
     this.retryHandler = retryHandler;

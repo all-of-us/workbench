@@ -3,7 +3,6 @@ package org.pmiops.workbench.firecloud;
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.client.http.HttpTransport;
 import com.google.auth.oauth2.OAuth2Credentials;
-import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -16,7 +15,6 @@ import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.DelegatedUserCredentials;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -67,7 +65,6 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<StaticNotebooksApi> serviceAccountStaticNotebooksApiProvider;
   private final FirecloudRetryHandler retryHandler;
 
-  private final Provider<ServiceAccountCredentials> fcAdminCredsProvider;
   private final IamCredentialsClient iamCredentialsClient;
   private final HttpTransport httpTransport;
 
@@ -119,8 +116,6 @@ public class FireCloudServiceImpl implements FireCloudService {
       @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_STATIC_NOTEBOOKS_API)
           Provider<StaticNotebooksApi> serviceAccountStaticNotebooksApiProvider,
       FirecloudRetryHandler retryHandler,
-      @Qualifier(Constants.FIRECLOUD_ADMIN_CREDS)
-          Provider<ServiceAccountCredentials> fcAdminCredsProvider,
       IamCredentialsClient iamCredentialsClient,
       HttpTransport httpTransport) {
     this.configProvider = configProvider;
@@ -132,7 +127,6 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.serviceAccountWorkspaceApiProvider = serviceAccountWorkspaceApiProvider;
     this.statusApiProvider = statusApiProvider;
     this.retryHandler = retryHandler;
-    this.fcAdminCredsProvider = fcAdminCredsProvider;
     this.endUserStaticNotebooksApiProvider = endUserStaticNotebooksApiProvider;
     this.serviceAccountStaticNotebooksApiProvider = serviceAccountStaticNotebooksApiProvider;
     this.iamCredentialsClient = iamCredentialsClient;

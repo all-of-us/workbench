@@ -16,7 +16,6 @@ import com.google.api.services.directory.model.UserName;
 import com.google.api.services.directory.model.Users;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.OAuth2Credentials;
-import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -32,7 +31,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.inject.Provider;
-import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.DelegatedUserCredentials;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -44,7 +42,6 @@ import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -92,7 +89,6 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
               DirectoryScopes.ADMIN_DIRECTORY_USER_ALIAS_READONLY,
           DirectoryScopes.ADMIN_DIRECTORY_USER, DirectoryScopes.ADMIN_DIRECTORY_USER_READONLY);
 
-  private final Provider<ServiceAccountCredentials> googleCredentialsProvider;
   private final Provider<WorkbenchConfig> configProvider;
   private final HttpTransport httpTransport;
   private final GoogleRetryHandler retryHandler;
@@ -100,13 +96,10 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
 
   @Autowired
   public DirectoryServiceImpl(
-      @Qualifier(Constants.GSUITE_ADMIN_CREDS)
-          Provider<ServiceAccountCredentials> googleCredentialsProvider,
       Provider<WorkbenchConfig> configProvider,
       HttpTransport httpTransport,
       GoogleRetryHandler retryHandler,
       IamCredentialsClient iamCredentialsClient) {
-    this.googleCredentialsProvider = googleCredentialsProvider;
     this.configProvider = configProvider;
     this.httpTransport = httpTransport;
     this.retryHandler = retryHandler;
