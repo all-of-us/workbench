@@ -1,3 +1,4 @@
+import * as fp from 'lodash/fp';
 import {TieredMenu} from 'primereact/tieredmenu';
 import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
@@ -9,10 +10,12 @@ import {domainToTitle, generateId, typeToTitle} from 'app/cohort-search/utils';
 import {ClrIcon} from 'app/components/icons';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles} from 'app/utils';
+import {reactStyles, withCdrVersions, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
-import {Domain, SearchRequest} from 'generated/fetch';
+import {getCdrVersion} from 'app/utils/cdr-versions';
+import {currentWorkspaceStore} from 'app/utils/navigation';
+import {WorkspaceData} from 'app/utils/workspace-data';
+import {CdrVersionListResponse, Domain, SearchRequest} from 'generated/fetch';
 
 function initItem(id: string, type: string) {
   return {
@@ -120,6 +123,8 @@ interface Props {
   role: keyof SearchRequest;
   updated: number;
   updateRequest: Function;
+  workspace: WorkspaceData;
+  cdrVersionListResponse: CdrVersionListResponse;
 }
 
 interface State {
@@ -127,86 +132,88 @@ interface State {
   index: number;
   loadingMenuOptions: boolean;
 }
+const SearchGroupList = fp.flow(withCurrentWorkspace(), withCdrVersions())(
+  class extends React.Component<Props, State> {
+    private criteriaMenu: any;
+    private subscription: Subscription;
+    constructor(props: Props) {
+      super(props);
+      this.state = {
+        criteriaMenuOptions: {programTypes: [], domainTypes: []},
+        index: 0,
+        loadingMenuOptions: false
+      };
+    }
 
-export class SearchGroupList extends React.Component<Props, State> {
-  private criteriaMenu: any;
-  private subscription: Subscription;
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      criteriaMenuOptions: {programTypes: [], domainTypes: []},
-      index: 0,
-      loadingMenuOptions: false
-    };
-  }
-
-  componentDidMount(): void {
-    const {role} = this.props;
-    const {cdrVersionId} = currentWorkspaceStore.getValue();
-    this.subscription = criteriaMenuOptionsStore.subscribe(options => {
-      if (role === 'includes' && !options[cdrVersionId]) {
-        this.getMenuOptions();
-      } else if (!!options[cdrVersionId]) {
-        this.setState({criteriaMenuOptions: options[cdrVersionId]});
+    componentDidMount(): void {
+      const {role} = this.props;
+      const {cdrVersionId} = currentWorkspaceStore.getValue();
+      this.subscription = criteriaMenuOptionsStore.subscribe(options => {
+        if (role === 'includes' && !options[cdrVersionId]) {
+          this.getMenuOptions();
+        } else if (!!options[cdrVersionId]) {
+          this.setState({criteriaMenuOptions: options[cdrVersionId]});
+        }
+      });
+      if (role === 'excludes') {
+        this.subscription.add(
+          searchRequestStore.subscribe(sr => this.setState({index: sr.includes.length + 1})));
       }
-    });
-    if (role === 'excludes') {
-      this.subscription.add(searchRequestStore.subscribe(sr => this.setState({index: sr.includes.length + 1})));
     }
-  }
 
-  componentWillUnmount(): void {
-    this.subscription.unsubscribe();
-  }
+    componentWillUnmount(): void {
+      this.subscription.unsubscribe();
+    }
 
-  getMenuOptions() {
-    this.setState({loadingMenuOptions: true});
-    const {cdrVersionId} = currentWorkspaceStore.getValue();
-    const criteriaMenuOptions = criteriaMenuOptionsStore.getValue();
-    cohortBuilderApi().findCriteriaMenuOptions(+cdrVersionId).then(res => {
-      criteriaMenuOptions[cdrVersionId] = res.items.reduce((acc, opt) => {
-        const {domain, types} = opt;
-        if (PROGRAM_TYPES.includes(Domain[domain]) &&
-          !(!serverConfigStore.getValue().enableFitbit && domain === Domain.FITBIT.toString())) {
-          const option = {
-            name: domainToTitle(domain),
-            domain,
-            type: types[0].type,
-            standard: types[0].standardFlags[0].standard,
-            order: PROGRAM_TYPES.indexOf(Domain[domain])
-          };
-          if (domain === Domain[Domain.PERSON]) {
-            option['children'] = types.map(subopt => ({name: typeToTitle(subopt.type), domain, type: subopt.type}));
+    getMenuOptions() {
+      this.setState({loadingMenuOptions: true});
+      const {workspace, cdrVersionListResponse} = this.props;
+      const {cdrVersionId} = workspace;
+      const criteriaMenuOptions = criteriaMenuOptionsStore.getValue();
+      cohortBuilderApi().findCriteriaMenuOptions(+cdrVersionId).then(res => {
+        criteriaMenuOptions[cdrVersionId] = res.items.reduce((acc, opt) => {
+          const {domain, types} = opt;
+          if (PROGRAM_TYPES.includes(Domain[domain]) &&
+          !(!getCdrVersion(workspace, cdrVersionListResponse).hasFitbitData && domain === Domain.FITBIT.toString())) {
+            const option = {
+              name: domainToTitle(domain),
+              domain,
+              type: types[0].type,
+              standard: types[0].standardFlags[0].standard,
+              order: PROGRAM_TYPES.indexOf(Domain[domain])
+            };
+            if (domain === Domain[Domain.PERSON]) {
+              option['children'] = types.map(subopt => ({name: typeToTitle(subopt.type), domain, type: subopt.type}));
+            }
+            acc.programTypes.push(option);
           }
-          acc.programTypes.push(option);
-        }
-        if (DOMAIN_TYPES.includes(Domain[domain])) {
-          acc.domainTypes.push({
-            name: domainToTitle(domain),
-            domain,
-            type: types[0].type,
-            standard: types[0].standardFlags[0].standard,
-            order: DOMAIN_TYPES.indexOf(Domain[domain])});
-        }
-        return acc;
-      }, {programTypes: [], domainTypes: []});
-      criteriaMenuOptions[cdrVersionId].programTypes.sort((a, b) => a.order - b.order);
-      criteriaMenuOptions[cdrVersionId].domainTypes.sort((a, b) => a.order - b.order);
-      criteriaMenuOptionsStore.next(criteriaMenuOptions);
-      this.setState({loadingMenuOptions: false});
-    });
-  }
-
-  mapCriteriaMenuItem(domain: any, temporalGroup: number) {
-    if (!!domain.children) {
-      return {label: domain.name, items: domain.children.map((dt) => this.mapCriteriaMenuItem(dt, temporalGroup))};
+          if (DOMAIN_TYPES.includes(Domain[domain])) {
+            acc.domainTypes.push({
+              name: domainToTitle(domain),
+              domain,
+              type: types[0].type,
+              standard: types[0].standardFlags[0].standard,
+              order: DOMAIN_TYPES.indexOf(Domain[domain])});
+          }
+          return acc;
+        }, {programTypes: [], domainTypes: []});
+        criteriaMenuOptions[cdrVersionId].programTypes.sort((a, b) => a.order - b.order);
+        criteriaMenuOptions[cdrVersionId].domainTypes.sort((a, b) => a.order - b.order);
+        criteriaMenuOptionsStore.next(criteriaMenuOptions);
+        this.setState({loadingMenuOptions: false});
+      });
     }
-    return {label: domain.name, command: () => this.launchSearch(domain)};
-  }
 
-  get criteriaMenuItems() {
-    const {criteriaMenuOptions: {domainTypes, programTypes}, loadingMenuOptions} = this.state;
-    return loadingMenuOptions
+    mapCriteriaMenuItem(domain: any, temporalGroup: number) {
+      if (!!domain.children) {
+        return {label: domain.name, items: domain.children.map((dt) => this.mapCriteriaMenuItem(dt, temporalGroup))};
+      }
+      return {label: domain.name, command: () => this.launchSearch(domain)};
+    }
+
+    get criteriaMenuItems() {
+      const {criteriaMenuOptions: {domainTypes, programTypes}, loadingMenuOptions} = this.state;
+      return loadingMenuOptions
       ? [{icon: 'pi pi-spin pi-spinner'}]
       : [
         {label: 'Program Data', className: 'menuitem-header'},
@@ -215,30 +222,30 @@ export class SearchGroupList extends React.Component<Props, State> {
         {label: 'Domains', className: 'menuitem-header'},
         ...domainTypes.map((dt) => this.mapCriteriaMenuItem(dt, 0))
       ];
-  }
+    }
 
-  launchSearch(criteria: any) {
-    this.criteriaMenu.hide();
-    const {role} = this.props;
-    const {domain, type, standard} = criteria;
-    const category = `${role === 'includes' ? 'Add' : 'Excludes'} Criteria`;
+    launchSearch(criteria: any) {
+      this.criteriaMenu.hide();
+      const {role} = this.props;
+      const {domain, type, standard} = criteria;
+      const category = `${role === 'includes' ? 'Add' : 'Excludes'} Criteria`;
     // If domain is PERSON, list the type as well as the domain in the label
-    const label = domainToTitle(domain) +
+      const label = domainToTitle(domain) +
       (domain === Domain.PERSON ? ' - ' + typeToTitle(type) : '') +
       ' - Cohort Builder';
-    triggerEvent(category, 'Click', `${category} - ${label}`);
-    let context: any;
-    const itemId = generateId('items');
-    const groupId = null;
-    const item = initItem(itemId, domain);
-    context = {item, domain, type, standard, role, groupId, itemId};
-    this.props.setSearchContext(context);
-  }
+      triggerEvent(category, 'Click', `${category} - ${label}`);
+      let context: any;
+      const itemId = generateId('items');
+      const groupId = null;
+      const item = initItem(itemId, domain);
+      context = {item, domain, type, standard, role, groupId, itemId};
+      this.props.setSearchContext(context);
+    }
 
-  render() {
-    const {groups, setSearchContext, role, updated, updateRequest} = this.props;
-    const {index} = this.state;
-    return <React.Fragment>
+    render() {
+      const {groups, setSearchContext, role, updated, updateRequest} = this.props;
+      const {index} = this.state;
+      return <React.Fragment>
       <style>{css}</style>
       <div style={{display: 'flex', alignItems: 'center'}}>
         <h2 style={styles.listHeader}>
@@ -273,5 +280,9 @@ export class SearchGroupList extends React.Component<Props, State> {
         </div>
       </div>
     </React.Fragment>;
-  }
-}
+    }
+  });
+
+export {
+  SearchGroupList
+};

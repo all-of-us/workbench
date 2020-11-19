@@ -8,9 +8,17 @@ import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, withCurrentConcept, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, withCdrVersions, withCurrentConcept, withCurrentWorkspace} from 'app/utils';
+import {getCdrVersion} from 'app/utils/cdr-versions';
 import {currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
-import {Criteria, CriteriaSubType, CriteriaType, Domain} from 'generated/fetch';
+import {WorkspaceData} from 'app/utils/workspace-data';
+import {
+  CdrVersionListResponse,
+  Criteria,
+  CriteriaSubType,
+  CriteriaType,
+  Domain
+} from 'generated/fetch';
 
 const styles = reactStyles({
   error: {
@@ -90,6 +98,8 @@ interface Props {
   setAttributes?: Function;
   setSearchTerms: Function;
   concept: Array<any>;
+  workspace: WorkspaceData;
+  cdrVersionListResponse: CdrVersionListResponse;
 }
 
 interface State {
@@ -100,7 +110,8 @@ interface State {
   loading: boolean;
 }
 
-export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept())(class extends React.Component<Props, State> {
+export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept(), withCdrVersions())
+(class extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -140,40 +151,40 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
     const criteriaType = domainId === Domain.DRUG.toString() ? CriteriaType.ATC.toString() : type;
     const parentId = domainId === Domain.PHYSICALMEASUREMENT.toString() ? null : id;
     cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, parentId)
-    .then(resp => {
-      if (domainId === Domain.PHYSICALMEASUREMENT.toString()) {
-        let children = [];
-        resp.items.forEach(child => {
-          child['children'] = [];
-          if (child.parentId === 0) {
-            children.push(child);
-          } else {
-            children = this.addChildToParent(child, children);
-          }
-        });
-        this.setState({children});
-      } else if (domainId === Domain.SURVEY.toString() &&  selectedSurvey) {
-        // Temp: This should be handle in API
-        this.updatePpiSurveys(resp, resp.items.filter(child => child.name === selectedSurvey));
-      } else if (domainId === Domain.SURVEY.toString() && this.props.source === 'conceptSetDetails') {
-        const selectedSurveyChild = resp.items.filter(child => child.id === this.props.node.parentId);
-        this.updatePpiSurveys(resp, selectedSurveyChild);
-      } else {
-        this.setState({children: resp.items});
-        if (domainId === Domain.SURVEY.toString()) {
-          const rootSurveys = ppiSurveys.getValue();
-          if (!rootSurveys[cdrVersionId]) {
-            rootSurveys[cdrVersionId] = resp.items;
-            ppiSurveys.next(rootSurveys);
+      .then(resp => {
+        if (domainId === Domain.PHYSICALMEASUREMENT.toString()) {
+          let children = [];
+          resp.items.forEach(child => {
+            child['children'] = [];
+            if (child.parentId === 0) {
+              children.push(child);
+            } else {
+              children = this.addChildToParent(child, children);
+            }
+          });
+          this.setState({children});
+        } else if (domainId === Domain.SURVEY.toString() && selectedSurvey) {
+          // Temp: This should be handle in API
+          this.updatePpiSurveys(resp, resp.items.filter(child => child.name === selectedSurvey));
+        } else if (domainId === Domain.SURVEY.toString() && this.props.source === 'conceptSetDetails') {
+          const selectedSurveyChild = resp.items.filter(child => child.id === this.props.node.parentId);
+          this.updatePpiSurveys(resp, selectedSurveyChild);
+        } else {
+          this.setState({children: resp.items});
+          if (domainId === Domain.SURVEY.toString()) {
+            const rootSurveys = ppiSurveys.getValue();
+            if (!rootSurveys[cdrVersionId]) {
+              rootSurveys[cdrVersionId] = resp.items;
+              ppiSurveys.next(rootSurveys);
+            }
           }
         }
-      }
-    })
-    .catch(error => {
-      console.error(error);
-      this.setState({error: true});
-    })
-    .finally(() => this.setState({loading: false}));
+      })
+      .catch(error => {
+        console.error(error);
+        this.setState({error: true});
+      })
+      .finally(() => this.setState({loading: false}));
   }
 
   updatePpiSurveys(resp, selectedSurveyChild) {
@@ -226,9 +237,10 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
 
   // Hides the tree node for COPE survey if enableCOPESurvey config flag is set to false
   showNode(node: Criteria) {
+    const {workspace, cdrVersionListResponse} = this.props;
     return node.subtype === CriteriaSubType.SURVEY.toString() && node.name.includes('COPE')
-      ? serverConfigStore.getValue().enableCOPESurvey
-      : true;
+        ? getCdrVersion(workspace, cdrVersionListResponse).hasCopeSurveyData
+        : true;
   }
 
   selectIconDisabled() {
@@ -237,13 +249,17 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
   }
 
   render() {
-    const {autocompleteSelection, back, groupSelections, node, scrollToMatch, searchTerms, select, selectedIds, selectOption, setAttributes,
-      setSearchTerms} = this.props;
+    const {
+      autocompleteSelection, back, groupSelections, node, scrollToMatch, searchTerms,
+      select, selectedIds, selectOption, setAttributes, setSearchTerms
+    } = this.props;
     const {children, error, ingredients, loading} = this.state;
     return <React.Fragment>
       <style>{scrollbarCSS}</style>
-      {this.selectIconDisabled() && <div style={{color: colors.warning, fontWeight: 'bold', maxWidth: '1000px'}}>
-        NOTE: Concept Set can have only 1000 concepts. Please delete some concepts before adding more.
+      {this.selectIconDisabled() &&
+      <div style={{color: colors.warning, fontWeight: 'bold', maxWidth: '1000px'}}>
+        NOTE: Concept Set can have only 1000 concepts. Please delete some concepts before adding
+        more.
       </div>}
       {node.domainId !== Domain.VISIT.toString() &&
         <div style={serverConfigStore.getValue().enableCohortBuilderV2
@@ -264,20 +280,20 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
           <button style={styles.returnLink} onClick={() => back()}>Return to list</button>
         </div>}
         {error && <div style={styles.error}>
-          <ClrIcon style={{color: colors.white}} className='is-solid' shape='exclamation-triangle' />
+          <ClrIcon style={{color: colors.white}} className='is-solid' shape='exclamation-triangle'/>
           Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation
         </div>}
         <div style={this.showHeader ? styles.node : {...styles.node, border: 'none'}} className='show-scrollbar'>
-        {!!children && children.map((child, c) => this.showNode(child) && <TreeNode key={c}
-                                                            source={this.props.source}
-                                                            autocompleteSelection={autocompleteSelection}
-                                                            groupSelections={groupSelections}
-                                                            node={child}
-                                                            scrollToMatch={scrollToMatch}
-                                                            searchTerms={searchTerms}
-                                                            select={(s) => select(s)}
-                                                            selectedIds={selectedIds}
-                                                            setAttributes={setAttributes}/>)}
+          {!!children && children.map((child, c) => this.showNode(child) && <TreeNode key={c}
+                                                                                      source={this.props.source}
+                                                                                      autocompleteSelection={autocompleteSelection}
+                                                                                      groupSelections={groupSelections}
+                                                                                      node={child}
+                                                                                      scrollToMatch={scrollToMatch}
+                                                                                      searchTerms={searchTerms}
+                                                                                      select={(s) => select(s)}
+                                                                                      selectedIds={selectedIds}
+                                                                                      setAttributes={setAttributes}/>)}
         </div>
       </div>}
       {loading && !this.showHeader && <SpinnerOverlay/>}
