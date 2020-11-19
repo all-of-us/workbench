@@ -13,14 +13,7 @@ import colors from 'app/styles/colors';
 import {reactStyles, summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {conceptSetUpdating, serverConfigStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {
-  ConceptSet,
-  CreateConceptSetRequest,
-  Criteria,
-  Domain,
-  DomainCount,
-  UpdateConceptSetRequest
-} from 'generated/fetch';
+import {ConceptSet, CreateConceptSetRequest, Criteria, Domain, DomainCount, UpdateConceptSetRequest} from 'generated/fetch';
 import {validate} from 'validate.js';
 
 const styles = reactStyles({
@@ -41,7 +34,8 @@ const filterConcepts = (concepts: any[], domain: Domain) => {
       return concepts.filter(concept => !!concept.question);
     }
   } else {
-    return concepts.filter(concept => concept.domainId.replace(' ', '').toLowerCase() === Domain[domain].toLowerCase());
+    return serverConfigStore.getValue().enableConceptSetSearchV2 ? concepts
+      : concepts.filter(concept => concept.domainId.replace(' ', '').toLowerCase() === Domain[domain].toLowerCase());
   }
 };
 
@@ -91,15 +85,13 @@ export const ConceptAddModal = withCurrentWorkspace()
 
   async getExistingConceptSets() {
     try {
-      const {workspace: {namespace, id}} = this.props;
+      const {activeDomainTab: {domain}, selectedConcepts, workspace: {namespace, id}} = this.props;
       const conceptSets = await conceptSetsApi().getConceptSetsInWorkspace(namespace, id);
-      const conceptSetsInDomain = conceptSets.items
-          .filter((conceptset) => conceptset.domain === this.props.activeDomainTab.domain);
-
+      const conceptSetsInDomain = conceptSets.items.filter(conceptSet => conceptSet.domain === domain);
       this.setState({
         conceptSets: conceptSetsInDomain,
         addingToExistingSet: conceptSetsInDomain.length > 0,
-        selectedConceptsInDomain: filterConcepts(this.props.selectedConcepts, this.props.activeDomainTab.domain),
+        selectedConceptsInDomain: filterConcepts(selectedConcepts, domain),
         loading: false,
       });
       if (conceptSetsInDomain) {
@@ -111,8 +103,7 @@ export const ConceptAddModal = withCurrentWorkspace()
   }
 
   async saveConcepts() {
-    const {workspace: {namespace, id}} = this.props;
-    const {onSave, activeDomainTab} = this.props;
+    const {activeDomainTab: {domain}, onSave, workspace: {namespace, id}} = this.props;
     const {selectedSet, addingToExistingSet, newSetDescription, name, selectedConceptsInDomain} = this.state;
     conceptSetUpdating.next(true);
     this.setState({saving: true});
@@ -124,7 +115,8 @@ export const ConceptAddModal = withCurrentWorkspace()
     if (name === 'Demographics') {
       this.setState({
         errorMessage: 'Name Demographics cannot be used for creating a concept set',
-        saving: false});
+        saving: false
+      });
       return;
     }
     if (addingToExistingSet) {
@@ -133,26 +125,17 @@ export const ConceptAddModal = withCurrentWorkspace()
         addedIds: conceptIds
       };
       try {
-        const conceptSet = await conceptSetsApi().updateConceptSetConcepts(
-          namespace, id, selectedSet.id, updateConceptSetReq);
+        const conceptSet = await conceptSetsApi().updateConceptSetConcepts(namespace, id, selectedSet.id, updateConceptSetReq);
         this.setState({saving: false});
         onSave(conceptSet);
       } catch (error) {
         console.error(error);
       }
     } else {
-      const conceptSet: ConceptSet = {
-        name: name,
-        description: newSetDescription,
-        domain: activeDomainTab.domain
-      };
-      const request: CreateConceptSetRequest = {
-        conceptSet: conceptSet,
-        addedIds: conceptIds
-      };
+      const conceptSet: ConceptSet = {name, description: newSetDescription, domain};
+      const request: CreateConceptSetRequest = {conceptSet, addedIds: conceptIds};
       try {
-        const createdConceptSet =
-          await conceptSetsApi().createConceptSet(namespace, id, request);
+        const createdConceptSet = await conceptSetsApi().createConceptSet(namespace, id, request);
         this.setState({saving: false});
         onSave(createdConceptSet);
       } catch (error) {

@@ -1,6 +1,7 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
+import {domainToTitle} from 'app/cohort-search/utils';
 import {Button, Clickable} from 'app/components/buttons';
 import {FlexRow, FlexRowWrap} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
@@ -8,19 +9,8 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {ConceptAddModal} from 'app/pages/data/concept/concept-add-modal';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {
-  reactStyles,
-  withCurrentConcept,
-  withCurrentConceptSet,
-  withCurrentWorkspace
-} from 'app/utils';
-import {
-  conceptSetUpdating,
-  currentConceptSetStore,
-  currentConceptStore,
-  NavStore,
-  setSidebarActiveIconStore
-} from 'app/utils/navigation';
+import {reactStyles, withCurrentConcept, withCurrentConceptSet, withCurrentWorkspace} from 'app/utils';
+import {conceptSetUpdating, currentConceptSetStore, currentConceptStore, NavStore, setSidebarActiveIconStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConceptSet, Criteria, Domain, DomainCount, UpdateConceptSetRequest} from 'generated/fetch';
 
@@ -128,10 +118,11 @@ export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConce
     }
 
     getDomainCount() {
-      const domain: Domain = this.props.concept[0].domainId.toUpperCase() as Domain;
+      const {domainId, type} = this.props.concept[0];
+      const domain: Domain = domainId === 'Measurement' && type === 'PPI' ? Domain.PHYSICALMEASUREMENT : domainId as Domain;
       const domainCount: DomainCount = {
         domain: domain,
-        name: this.props.concept[0].domainId,
+        name: domainToTitle(domain),
         conceptCount: this.props.concept.length
       };
       return domainCount;
